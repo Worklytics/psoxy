@@ -21,3 +21,10 @@
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+
+# IntelliJ - attempting to be consistent with
+#   https://intellij-support.jetbrains.com/hc/en-us/articles/206544839-How-to-manage-projects-under-Version-Control-Systems
+# but then IntelliJ seems to generate .idea/.gitignore too, which knocks out some of the stuff that
+# mentions
+*/.idea/usage.statistics.xml
+*.iml
