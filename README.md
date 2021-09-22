@@ -8,11 +8,16 @@ individual.
 
 ## Goals
 
+### v1.0
 1. **serverless** - we strive to minimize the moving pieces required to run psoxy at scale, keeping your attack surface small and operational complexity low. Furthermore, we define infrastructure-as-code to ease setup.
-2. **multi-cloud support** - using [Spring Cloud Function](https://spring.io/projects/spring-cloud-function), we aim to provide support for the major cloud providers.
+
 3. **transparent** - psoxy's source code will be available to customers, to facilitate
 code review and white box penetration testing.
 4. **simple** - psoxy's functionality will focus on performing secure authentication with the 3rd party API and then perform minimal transformation on the response (pseudonymization, field filtering). to ease code review and auditing of its behavior.
+
+### Future
+1. **multi-cloud support** - using [Spring Cloud Function](https://spring.io/projects/spring-cloud-function), we aim to provide support for the major cloud providers.
+2. **incoming webhooks**
 
 
 ## Data Flow Diagram
@@ -23,7 +28,8 @@ The best way to illustrate how psoxy works is an illustration:
   1. apply [terraform]() module found in [`infra`](/infra)
   2. create OAuth client / generate API key in each of your desired data sources (see below)
   3. set your API keys via Secret Manager
-  4. create the Data Connection in Worklytics
+  4. create the Data Connection from Worklytics to your psoxy instance
+      - authorize Worklytics to connect to your psoxy instance and, if necessary, provide authentication credentials.
 
 ## Supported Data Sources
 Data source connectors will be marked with their stage of maturity:
