@@ -1,0 +1,30 @@
+# http://editorconfig.org/
+# GitHub respects this file to display their diffs / code reviews if in repo root
+# Seen in https://github.com/isaacs/github/issues/170 as a way to solve the 8 spaces tabs
+root = true
+
+# NOTE: exception to Google Style, which is generally 80
+[*]
+max_line_length = 100
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+end_of_line = lf
+
+# https://google.github.io/styleguide/javaguide.html
+[*.java]
+indent_style = space
+indent_size = tab
+tab_width = 4
+
+# https://google.github.io/styleguide/jsguide.html#formatting-block-indentation
+[*.{js,json}]
+indent_style = space
+indent_size = tab
+tab_width = 2
+
+# https://google.github.io/styleguide/htmlcssguide.xml#Indentation
+[*.{html,htm,hbs,css,scss,sql}]
+indent_style = space
+indent_size = tab
+tab_width = 2
