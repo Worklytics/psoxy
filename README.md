@@ -46,3 +46,17 @@ As of Sept 2021, the following sources can be connected via psoxy:
     * Meet *alpha*  
   * Slack
     * eDiscovery *alpha*
+
+## Development
+
+Can run locally via IntelliJ + maven, using run config:
+  - `psoxy [function:run...]` (located in `.idea/runConfigurations`)
+
+Or from command line:
+
+```shell
+cd java
+mvn function:run -Drun.functionTarget=co.worklytics.psoxy.HelloWorld
+```
+
+By default, that serves the function from http://lcoalhost:8080

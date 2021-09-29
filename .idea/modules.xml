@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/infra/modules/gcp/infra.iml" filepath="$PROJECT_DIR$/infra/modules/gcp/infra.iml" />
+      <module fileurl="file://$PROJECT_DIR$/java/java.iml" filepath="$PROJECT_DIR$/java/java.iml" />
     </modules>
   </component>
 </project>
