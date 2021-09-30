@@ -19,9 +19,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Optional;
 
-
 public class Route implements HttpFunction {
-
 
     /**
      * expect ONE cloud function per data connection; so connection-level settings are encoded as

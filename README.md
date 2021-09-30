@@ -1,9 +1,9 @@
 # psoxy
 A serverless, pseudonymizing proxy to sit between Worklytics and the REST API of a 3rd-party data source.
 
-Psoxy replaces PII in your organization's data with hash tokens to enable Worklytics's 
+Psoxy replaces PII in your organization's data with hash tokens to enable Worklytics's
 analysis to be performed on anonymized data which we cannot map back to any identifiable
-individual.  
+individual.
 
 
 ## Goals
@@ -39,11 +39,11 @@ Data source connectors will be marked with their stage of maturity:
 
 As of Sept 2021, the following sources can be connected via psoxy:
   * Google Workspace
-    * Calendar *alpha*  
-    * Chat *alpha*  
-    * Drive *alpha*  
-    * GMail *alpha*  
-    * Meet *alpha*  
+    * Calendar *alpha*
+    * Chat *alpha*
+    * Drive *alpha*
+    * GMail *alpha*
+    * Meet *alpha*
   * Slack
     * eDiscovery *alpha*
 
@@ -59,4 +59,15 @@ cd java
 mvn function:run -Drun.functionTarget=co.worklytics.psoxy.HelloWorld
 ```
 
-By default, that serves the function from http://lcoalhost:8080
+By default, that serves the function from http://localhost:8080.
+
+
+### GMail Example
+
+1.) create service account + key for dev use. set it as an env variable in your IDE or terminal.
+
+2.)
+
+`http://localhost:8080/gmail/v1/users/{userId}/messages`
+
+
