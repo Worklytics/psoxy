@@ -25,7 +25,7 @@ hs_err_pid*
 # ignore terraform variables / state for developers' personal development environmenst
 infra/dev-personal/terraform.tfvars
 infra/dev-personal/.terraform**
-infra/dev-personal/terraform.tfstate
+infra/dev-personal/terraform.tfstate**
 
 java/target
 
