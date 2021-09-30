@@ -14,14 +14,54 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <repositories>
+
+        <repository>
+            <id>central</id>
+            <name>Central Repository</name>
+            <url>https://repo.maven.apache.org/maven2</url>
+            <layout>default</layout>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+                <checksumPolicy>warn</checksumPolicy>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
     <dependencies>
         <!-- Required for Function primitives -->
         <dependency>
             <groupId>com.google.cloud.functions</groupId>
             <artifactId>functions-framework-api</artifactId>
             <version>1.0.4</version>
+        </dependency>
+
+        <!-- for familiarity sake, use Google HTTP / OAuth clients -->
+        <dependency>
+            <groupId>com.google.http-client</groupId>
+            <artifactId>google-http-client</artifactId>
+            <version>1.40.0</version>
+        </dependency>
+
+
+        <!-- https://github.com/googleapis/google-auth-library-java#google-auth-library-oauth2-http -->
+        <dependency>
+            <groupId>com.google.auth</groupId>
+            <artifactId>google-auth-library-oauth2-http</artifactId>
+            <version>1.1.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.20</version>
             <scope>provided</scope>
         </dependency>
+
     </dependencies>
 
     <build>
@@ -40,7 +80,8 @@
                 <artifactId>function-maven-plugin</artifactId>
                 <version>0.9.7</version>
                 <configuration>
-                    <functionTarget>co.worklytics.psoxy.HelloWorld</functionTarget>
+                    <envVarsFile>./config-examples/gmail.yaml</envVarsFile> <!-- doesn't seem to work locally; maybe just for deploy -->
+                    <functionTarget>co.worklytics.psoxy.Route</functionTarget>
                 </configuration>
             </plugin>
         </plugins>

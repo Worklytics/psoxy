@@ -18,6 +18,9 @@ hs_err_pid*
 # mentions
 */.idea/usage.statistics.xml
 *.iml
+# libraries isn't in above doc, but simply doesn't seem like what we want ...
+.idea/libraries/
+
 
 # ignore terraform variables / state for developers' personal development environmenst
 infra/dev-personal/terraform.tfvars
