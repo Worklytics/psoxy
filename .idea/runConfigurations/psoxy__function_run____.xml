@@ -23,7 +23,9 @@
         <MavenRunnerSettings>
           <option name="delegateBuildToMaven" value="false" />
           <option name="environmentProperties">
-            <map />
+            <map>
+              <entry key="TARGET_HOST" value="mail.googleapis.com" />
+            </map>
           </option>
           <option name="jreName" value="11" />
           <option name="mavenProperties">

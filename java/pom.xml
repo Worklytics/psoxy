@@ -80,8 +80,12 @@
                 <artifactId>function-maven-plugin</artifactId>
                 <version>0.9.7</version>
                 <configuration>
-                    <envVarsFile>./config-examples/gmail.yaml</envVarsFile> <!-- doesn't seem to work locally; maybe just for deploy -->
                     <functionTarget>co.worklytics.psoxy.Route</functionTarget>
+
+                    <!-- many more configuration options supported by the 'deploy' goal, not local run -->
+                    <!-- set up env vars from file; setting env vars via IntelliJ Run Config DOES work locally, but tedious -->
+                    <envVarsFile>./config-examples/gmail.yaml</envVarsFile>
+
                 </configuration>
             </plugin>
         </plugins>

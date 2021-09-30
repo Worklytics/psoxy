@@ -38,16 +38,14 @@ public class Route implements HttpFunction {
     enum ConfigProperty {
 
         //base64-encoded service account key, in lieu of application default; not for production-use!!
-        SERVICE_ACCOUNT_KEY,
+        PSOXY_DEV_SERVICE_ACCOUNT_KEY,
 
         //target API endpoint to forward request to
         TARGET_HOST,
     }
 
-
     private HttpRequestFactory requestFactory;
 
-    // Simple function to return "Hello World"
     @Override
     public void service(HttpRequest request, HttpResponse response)
             throws IOException {
@@ -103,7 +101,7 @@ public class Route implements HttpFunction {
 
         //assume that in cloud function env, this will get ours ...
         GoogleCredentials credentials =
-            getOptionalConfigProperty(ConfigProperty.SERVICE_ACCOUNT_KEY)
+            getOptionalConfigProperty(ConfigProperty.PSOXY_DEV_SERVICE_ACCOUNT_KEY)
                 .map(encoded -> Base64.getDecoder().decode(encoded.getBytes(StandardCharsets.UTF_8)))
                 .map(bytes -> new ByteArrayInputStream(bytes))
                 .map(this::quietFromStream)
