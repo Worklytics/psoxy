@@ -84,7 +84,7 @@
 
                     <!-- many more configuration options supported by the 'deploy' goal, not local run -->
                     <!-- set up env vars from file; setting env vars via IntelliJ Run Config DOES work locally, but tedious -->
-                    <envVarsFile>./config-examples/gmail.yaml</envVarsFile>
+                    <envVarsFile>./configs/gmail.yaml</envVarsFile>
 
                 </configuration>
             </plugin>

@@ -1,0 +1,15 @@
+TARGET_HOST: gmail.googleapis.com
+# no idea if format below will work ... alternative would be to reference a file in GCS or
+# something?
+PSEUDO_MASKS: >
+  '{
+    "gmail/v1/users/.*/messages/": ".messages.headers[?(@.name=~/To/i)]"
+    "gmail/v1/users/.*/messages/": ".messages.headers[?(@.name=~/From/i)]"
+    "gmail/v1/users/.*/messages/": ".messages.headers[?(@.name=~/CC/i)]"
+    "gmail/v1/users/.*/messages/": ".messages.headers[?(@.name=~/BCC/i)]"
+  }'
+REDACT_MASKS: >
+  '{
+    "gmail/v1/users/.*/messages/": ".messages.headers[?(@.name=~/Subject/i)]"
+  }'
+
