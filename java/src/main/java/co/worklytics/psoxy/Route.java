@@ -2,6 +2,7 @@ package co.worklytics.psoxy;
 
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequestFactory;
+import com.google.api.client.http.HttpStatusCodes;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.auth.http.HttpCredentialsAdapter;
@@ -25,6 +26,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Route implements HttpFunction {
+
+    //we have ~540 total in Cloud Function connection, so can have generous values here
+    final int SOURCE_API_REQUEST_CONNECT_TIMEOUT = 30;
+    final int SOURCE_API_REQUEST_READ_TIMEOUT = 300;
 
     /**
      * expect ONE cloud function per data connection; so connection-level settings are encoded as
@@ -77,11 +82,28 @@ public class Route implements HttpFunction {
 
         //TODO: what headers to forward???
 
+        //setup request
+        sourceApiRequest
+            .setThrowExceptionOnExecuteError(false)
+            .setConnectTimeout(SOURCE_API_REQUEST_CONNECT_TIMEOUT)
+            .setReadTimeout(SOURCE_API_REQUEST_READ_TIMEOUT);
+
+        //q: add exception handlers for IOExceptions / HTTP error responses, so those retries
+        // happen in proxy rather than on Worklytics-side?
+
         com.google.api.client.http.HttpResponse sourceApiResponse = sourceApiRequest.execute();
 
         // return response
         response.setStatusCode(sourceApiResponse.getStatusCode());
-        sourceApiResponse.getContent().transferTo(response.getOutputStream());
+
+        if (sourceApiResponse.getStatusCode() == HttpStatusCodes.STATUS_CODE_OK) {
+            //TODO: apply transformations
+            sourceApiResponse.getContent().transferTo(response.getOutputStream());
+        } else {
+            //write error, which shouldn't contain PII, directly
+            //TODO: could run this through DLP to be extra safe
+            sourceApiResponse.getContent().transferTo(response.getOutputStream());
+        }
     }
 
     GenericUrl buildTarget(HttpRequest request) {
