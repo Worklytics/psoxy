@@ -1,5 +1,6 @@
 package co.worklytics.psoxy;
 
+import co.worklytics.psoxy.impl.SanitizerImpl;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpStatusCodes;
@@ -12,24 +13,27 @@ import com.google.cloud.functions.HttpFunction;
 import com.google.cloud.functions.HttpRequest;
 import com.google.cloud.functions.HttpResponse;
 import com.google.common.collect.ImmutableSet;
+import com.jayway.jsonpath.Configuration;
+import com.jayway.jsonpath.JsonPath;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.java.Log;
+import org.apache.commons.codec.digest.DigestUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
+@Log
 public class Route implements HttpFunction {
 
     //we have ~540 total in Cloud Function connection, so can have generous values here
-    final int SOURCE_API_REQUEST_CONNECT_TIMEOUT = 30;
-    final int SOURCE_API_REQUEST_READ_TIMEOUT = 300;
+    final int SOURCE_API_REQUEST_CONNECT_TIMEOUT = 30_000;
+    final int SOURCE_API_REQUEST_READ_TIMEOUT = 300_000;
 
     /**
      * expect ONE cloud function per data connection; so connection-level settings are encoded as
@@ -67,9 +71,19 @@ public class Route implements HttpFunction {
         }
     }
 
+    Sanitizer sanitizer;
+
+    void initSanitizer() {
+        //TODO: pull salt from Secret Manager
+        sanitizer = new SanitizerImpl(PrebuiltSanitizerOptions.GMAIL_V1.withPseudonymizationSalt("salt"));
+    }
+
     @Override
     public void service(HttpRequest request, HttpResponse response)
             throws IOException {
+        if (sanitizer == null) {
+            initSanitizer();
+        }
 
         //is there a lifecycle to initialize request factory??
         HttpRequestFactory requestFactory = getRequestFactory(request);
@@ -77,8 +91,12 @@ public class Route implements HttpFunction {
 
         // re-write host
         //TODO: switch on method to support HEAD, etc
+        GenericUrl targetUrl = buildTarget(request);
+
+        //TODO: test URL against blacklist regex??
+
         com.google.api.client.http.HttpRequest sourceApiRequest =
-            requestFactory.buildGetRequest(buildTarget(request));
+            requestFactory.buildGetRequest(targetUrl);
 
         //TODO: what headers to forward???
 
@@ -93,18 +111,22 @@ public class Route implements HttpFunction {
 
         com.google.api.client.http.HttpResponse sourceApiResponse = sourceApiRequest.execute();
 
+
         // return response
         response.setStatusCode(sourceApiResponse.getStatusCode());
 
         if (sourceApiResponse.getStatusCode() == HttpStatusCodes.STATUS_CODE_OK) {
-            //TODO: apply transformations
-            sourceApiResponse.getContent().transferTo(response.getOutputStream());
+            String json = new String(sourceApiResponse.getContent().readAllBytes(), sourceApiResponse.getContentCharset());
+            String pseudonymized = sanitizer.sanitize(targetUrl, json);
+            new ByteArrayInputStream(pseudonymized.getBytes(StandardCharsets.UTF_8))
+                .transferTo(response.getOutputStream());
         } else {
             //write error, which shouldn't contain PII, directly
             //TODO: could run this through DLP to be extra safe
             sourceApiResponse.getContent().transferTo(response.getOutputStream());
         }
     }
+
 
     GenericUrl buildTarget(HttpRequest request) {
         String targetUri = "https://"
@@ -144,6 +166,11 @@ public class Route implements HttpFunction {
         GoogleCredentials credentials = quietGetApplicationDefault(serviceAccountUser,
             Arrays.stream(getRequiredConfigProperty(ConfigProperty.OAUTH_SCOPES).split(",")).collect(Collectors.toSet()));
         HttpCredentialsAdapter initializer = new HttpCredentialsAdapter(credentials);
+
+        //TODO: in OAuth-type use cases, where execute() may have caused token to be refreshed, how
+        // do we capture the new one?? ideally do this with listener/handler/trigger in Credential
+        // itself, if that's possible
+
 
         return transport.createRequestFactory(initializer);
     }

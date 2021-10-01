@@ -74,4 +74,8 @@ http://localhost:8080/gmail/v1/users/me/messages \
 -H 'X-Psoxy-Service-Account-User: erik@worklytics.co'
 ```
 
-
+```shell
+curl -X GET \
+http://localhost:8080/gmail/v1/users/me/messages/17c3b1911726ef3f\?format=metadata \
+-H 'X-Psoxy-Service-Account-User: erik@worklytics.co'
+```
