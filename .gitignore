@@ -26,6 +26,7 @@ hs_err_pid*
 infra/dev-personal/terraform.tfvars
 infra/dev-personal/.terraform**
 infra/dev-personal/terraform.tfstate**
+infra/dev-personal/*connector-sa-key.json
 
 java/target
 
