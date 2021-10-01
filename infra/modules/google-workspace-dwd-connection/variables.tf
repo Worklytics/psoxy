@@ -19,4 +19,9 @@ variable "description" {
   default     = ""
 }
 
+variable "apis_consumed" {
+  type        = list(string)
+  description = "APIs to be used for this connection (Eg, 'gmail.googleapis.com')"
+}
+
 

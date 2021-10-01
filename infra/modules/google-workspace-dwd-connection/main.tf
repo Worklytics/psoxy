@@ -10,8 +10,16 @@ resource "google_service_account" "connector-sa" {
   display_name = var.display_name
   description  = var.description
   project      = var.project_id
-
 }
+
+resource "google_project_service" "apis_needed" {
+  for_each = toset(var.apis_consumed)
+
+  service                    = each.key
+  project                    = var.project_id
+  disable_dependent_services = false
+}
+
 # NOTE: after apply, enable domain-wide-delegation in GCP console on the SA
 # goto: https://console.cloud.google.com/apis/credentials?organizationId=496339493825&project=eval-engin
 # NOTE: done in prod 27 Aug 2019 by erik

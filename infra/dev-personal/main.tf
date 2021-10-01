@@ -27,6 +27,10 @@ module "gmail-connector" {
   project_id                   = var.project_id
   connector_service_account_id = "psoxy-gmail-dwd"
   display_name                 = "Psoxy Connector - GMail Dev Erik"
+  apis_consumed                = [
+    "gmail.googleapis.com",
+    # TODO: probably directory too!?!?
+  ]
 
   depends_on = [
     module.psoxy-gcp
