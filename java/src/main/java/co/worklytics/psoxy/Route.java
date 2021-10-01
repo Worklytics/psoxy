@@ -10,14 +10,19 @@ import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.functions.HttpFunction;
 import com.google.cloud.functions.HttpRequest;
 import com.google.cloud.functions.HttpResponse;
+import com.google.common.collect.ImmutableSet;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class Route implements HttpFunction {
 
@@ -34,24 +39,36 @@ public class Route implements HttpFunction {
      *
      */
     enum ConfigProperty {
-
-        //base64-encoded service account key, in lieu of application default; not for production-use!!
-        PSOXY_DEV_SERVICE_ACCOUNT_KEY,
-
         //target API endpoint to forward request to
         TARGET_HOST,
+        OAUTH_SCOPES,
     }
 
-    private HttpRequestFactory requestFactory;
+    /**
+     * headers that control how Psoxy works
+     *
+     * anything passed as headers like this shouldn't have info-sec implications.
+     */
+    @RequiredArgsConstructor
+    enum ControlHeader {
+        SERVICE_ACCOUNT_USER("Service-Account-User"),
+        ;
+
+        @NonNull
+        final String httpNamePart;
+
+        public String getHttpHeader() {
+            return "X-Psoxy-" + httpNamePart;
+        }
+    }
 
     @Override
     public void service(HttpRequest request, HttpResponse response)
             throws IOException {
 
         //is there a lifecycle to initialize request factory??
-        if (requestFactory == null) {
-            requestFactory = getRequestFactory();
-        }
+        HttpRequestFactory requestFactory = getRequestFactory(request);
+        //q: what about when request factory needs to set a service account user?
 
         // re-write host
         //TODO: switch on method to support HEAD, etc
@@ -89,7 +106,7 @@ public class Route implements HttpFunction {
     }
 
     @SneakyThrows
-    HttpRequestFactory getRequestFactory() {
+    HttpRequestFactory getRequestFactory(HttpRequest request) {
         // per connection request factory, abstracts auth ..
         HttpTransport transport = new NetHttpTransport();
 
@@ -98,36 +115,57 @@ public class Route implements HttpFunction {
         // eg, OAuth2CredentialsWithRefresh.newBuilder(), etc ..
 
         //assume that in cloud function env, this will get ours ...
-        GoogleCredentials credentials =
-            getOptionalConfigProperty(ConfigProperty.PSOXY_DEV_SERVICE_ACCOUNT_KEY)
-                .map(encoded -> Base64.getDecoder().decode(encoded.getBytes(StandardCharsets.UTF_8)))
-                .map(bytes -> new ByteArrayInputStream(bytes))
-                .map(this::quietFromStream)
-                .orElseGet(this::quietGetApplicationDefault);
+        Optional<String> serviceAccountUser =
+             request.getHeaders().get(ControlHeader.SERVICE_ACCOUNT_USER.getHttpHeader())
+                 .stream().findFirst();
 
+        GoogleCredentials credentials = quietGetApplicationDefault(serviceAccountUser,
+            Arrays.stream(getRequiredConfigProperty(ConfigProperty.OAUTH_SCOPES).split(",")).collect(Collectors.toSet()));
         HttpCredentialsAdapter initializer = new HttpCredentialsAdapter(credentials);
 
         return transport.createRequestFactory(initializer);
     }
 
     /**
+     * - not needed atm, but may use in future to support non GCP-envs - although if can configure
+     * ENV_VAR, probably all equivalent1?!?
+     *
      * quiet helper to avoid try-catch
      *
-     * @param s
+     * @param encoded
+     * @param serviceAccountUser
+     * @param scopes
      * @return
      */
     @SneakyThrows
-    GoogleCredentials quietFromStream(InputStream s) {
-        return ServiceAccountCredentials.fromStream(s);
+    GoogleCredentials quietFromBase64String(String encoded, Optional<String> serviceAccountUser, Set<String> scopes) {
+        ServiceAccountCredentials credentials =
+            ServiceAccountCredentials.fromStream(new ByteArrayInputStream(
+                Base64.getDecoder().decode(encoded.getBytes(StandardCharsets.UTF_8))));
+
+        //q: does below work in environments where application default is NOT a service account??
+
+        ServiceAccountCredentials.Builder builder = credentials.toBuilder()
+            .setScopes(scopes);
+        if (serviceAccountUser.isPresent()) {
+            builder = builder.setServiceAccountUser(serviceAccountUser.get());
+        }
+        return builder.build();
     }
 
+
+
     /**
-     *quiet helper to avoid try-catch
+     * quiet helper to avoid try-catch
      *
      * @return
      */
     @SneakyThrows
-    GoogleCredentials quietGetApplicationDefault() {
-        return ServiceAccountCredentials.getApplicationDefault();
+    GoogleCredentials quietGetApplicationDefault(Optional<String> serviceAccountUser, Set<String> scopes) {
+        GoogleCredentials credentials = ServiceAccountCredentials.getApplicationDefault();
+        if (serviceAccountUser.isPresent()) {
+            credentials = credentials.createDelegated(serviceAccountUser.get());
+        }
+        return credentials.createScoped(scopes);
     }
 }

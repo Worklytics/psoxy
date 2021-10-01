@@ -25,6 +25,7 @@
           <option name="environmentProperties">
             <map>
               <entry key="GOOGLE_APPLICATION_CREDENTIALS" value="../infra/dev-personal/gmail-connector-sa-key.json" />
+              <entry key="OAUTH_SCOPES" value="https://www.googleapis.com/auth/gmail.metadata" />
               <entry key="TARGET_HOST" value="gmail.googleapis.com" />
             </map>
           </option>

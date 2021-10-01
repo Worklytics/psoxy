@@ -64,10 +64,14 @@ By default, that serves the function from http://localhost:8080.
 
 ### GMail Example
 
-1.) create service account + key for dev use. set it as an env variable in your IDE or terminal.
+1.) run `terraform init` and `terraform apply` from `infra/dev-personal` to provision environment
 
-2.)
+2.) execute the following to verify your proxy is working OK
 
-`http://localhost:8080/gmail/v1/users/{userId}/messages`
+```shell
+curl -X GET \
+http://localhost:8080/gmail/v1/users/me/messages \
+-H 'X-Psoxy-Service-Account-User: erik@worklytics.co'
+```
 
 
