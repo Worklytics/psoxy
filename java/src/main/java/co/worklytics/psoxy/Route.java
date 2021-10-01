@@ -12,18 +12,13 @@ import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.functions.HttpFunction;
 import com.google.cloud.functions.HttpRequest;
 import com.google.cloud.functions.HttpResponse;
-import com.google.common.collect.ImmutableSet;
-import com.jayway.jsonpath.Configuration;
-import com.jayway.jsonpath.JsonPath;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
-import org.apache.commons.codec.digest.DigestUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -48,9 +43,17 @@ public class Route implements HttpFunction {
      *
      */
     enum ConfigProperty {
+        SOURCE,
         //target API endpoint to forward request to
         TARGET_HOST,
         OAUTH_SCOPES,
+    }
+
+    /**
+     * see "https://cloud.google.com/functions/docs/configuring/env-var"
+     */
+    enum RuntimeEnvironmentVariables {
+        K_SERVICE,
     }
 
     /**
@@ -75,7 +78,10 @@ public class Route implements HttpFunction {
 
     void initSanitizer() {
         //TODO: pull salt from Secret Manager
-        sanitizer = new SanitizerImpl(PrebuiltSanitizerOptions.GMAIL_V1.withPseudonymizationSalt("salt"));
+        sanitizer = new SanitizerImpl(
+            PrebuiltSanitizerOptions.MAP.get(getRequiredConfigProperty(ConfigProperty.SOURCE))
+            .withPseudonymizationSalt("salt")
+        );
     }
 
     @Override
@@ -92,6 +98,8 @@ public class Route implements HttpFunction {
         // re-write host
         //TODO: switch on method to support HEAD, etc
         GenericUrl targetUrl = buildTarget(request);
+
+        log.info("Proxy invoked with target: " + targetUrl.buildRelativeUrl());
 
         //TODO: test URL against blacklist regex??
 
@@ -131,7 +139,7 @@ public class Route implements HttpFunction {
     GenericUrl buildTarget(HttpRequest request) {
         String targetUri = "https://"
             + getRequiredConfigProperty(ConfigProperty.TARGET_HOST)
-            + request.getPath()
+            + request.getPath().replace(System.getenv(RuntimeEnvironmentVariables.K_SERVICE.name()) + "/", "")
             + request.getQuery().map(s -> "?" + s).orElse("");
 
         return new GenericUrl(targetUri);
@@ -143,6 +151,10 @@ public class Route implements HttpFunction {
             throw new Error("Psoxy misconfigured. Expected value for: " + property.name());
         }
         return value;
+    }
+
+    Optional<List<String>> getHeader(HttpRequest request, ControlHeader header) {
+        return Optional.ofNullable(request.getHeaders().get(header.getHttpHeader()));
     }
 
     Optional<String> getOptionalConfigProperty(ConfigProperty property) {
@@ -160,11 +172,18 @@ public class Route implements HttpFunction {
 
         //assume that in cloud function env, this will get ours ...
         Optional<String> serviceAccountUser =
-             request.getHeaders().get(ControlHeader.SERVICE_ACCOUNT_USER.getHttpHeader())
-                 .stream().findFirst();
+            getHeader(request, ControlHeader.SERVICE_ACCOUNT_USER)
+                .map(values -> values.stream().findFirst().orElseThrow());
+
+        serviceAccountUser.ifPresentOrElse(
+            user -> log.info("Service account user: " + user),
+            () -> log.warning("we usually expect a Service Account User"));
 
         GoogleCredentials credentials = quietGetApplicationDefault(serviceAccountUser,
             Arrays.stream(getRequiredConfigProperty(ConfigProperty.OAUTH_SCOPES).split(",")).collect(Collectors.toSet()));
+
+
+
         HttpCredentialsAdapter initializer = new HttpCredentialsAdapter(credentials);
 
         //TODO: in OAuth-type use cases, where execute() may have caused token to be refreshed, how
@@ -212,9 +231,16 @@ public class Route implements HttpFunction {
     @SneakyThrows
     GoogleCredentials quietGetApplicationDefault(Optional<String> serviceAccountUser, Set<String> scopes) {
         GoogleCredentials credentials = ServiceAccountCredentials.getApplicationDefault();
+
         if (serviceAccountUser.isPresent()) {
             credentials = credentials.createDelegated(serviceAccountUser.get());
         }
-        return credentials.createScoped(scopes);
+        //TODO: above are NOT working in the serviceAccountUser mode in the cloud!?!?
+
+        credentials = credentials.createScoped(scopes);
+
+        log.info("Credentials: " + credentials.toString());
+
+        return credentials;
     }
 }

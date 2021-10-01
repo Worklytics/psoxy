@@ -12,6 +12,11 @@
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <gcpProjectId>psoxy-dev-erik</gcpProjectId>
+        <sourceApi>gmail</sourceApi>
+        <!-- serviceAccount that function will run as. For Google Workspace use cases, should be the
+         one configured as OAuth Client and authorized for your instance. -->
+        <serviceAccount>psoxy-gmail-dwd@psoxy-dev-erik.iam.gserviceaccount.com</serviceAccount>
     </properties>
 
     <repositories>
@@ -80,7 +85,7 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>RELEASE</version>
+            <version>5.8.1</version>
             <scope>test</scope>
         </dependency>
 
@@ -107,8 +112,11 @@
 
                     <!-- many more configuration options supported by the 'deploy' goal, not local run -->
                     <!-- set up env vars from file; setting env vars via IntelliJ Run Config DOES work locally, but tedious -->
-                    <envVarsFile>./configs/gmail.yaml</envVarsFile>
-
+                    <envVarsFile>./configs/${sourceApi}.yaml</envVarsFile>
+                    <projectId>${gcpProjectId}</projectId>
+                    <name>psoxy-${sourceApi}</name>
+                    <serviceAccount>${serviceAccount}</serviceAccount>
+                    <allowUnauthenticated>false</allowUnauthenticated>
                 </configuration>
             </plugin>
         </plugins>

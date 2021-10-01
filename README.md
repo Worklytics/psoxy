@@ -66,16 +66,37 @@ By default, that serves the function from http://localhost:8080.
 
 1.) run `terraform init` and `terraform apply` from `infra/dev-personal` to provision environment
 
-2.) execute the following to verify your proxy is working OK
+#### Local
+2.) run locally via IntelliJ run config
+
+3.) execute the following to verify your proxy is working OK
 
 ```shell
 curl -X GET \
 http://localhost:8080/gmail/v1/users/me/messages \
--H 'X-Psoxy-Service-Account-User: erik@worklytics.co'
+-H "X-Psoxy-Service-Account-User: erik@worklytics.co"
 ```
 
 ```shell
 curl -X GET \
 http://localhost:8080/gmail/v1/users/me/messages/17c3b1911726ef3f\?format=metadata \
--H 'X-Psoxy-Service-Account-User: erik@worklytics.co'
+-H "X-Psoxy-Service-Account-User: erik@worklytics.co"
+```
+
+#### Cloud
+2.) deploy to GCP using IntelliJ run config (setting `gcpProjectId` maven property to your project)
+
+3.) grant yourself access (probably not needed if you have primitive role in project, like Owner or
+Editor)
+```shell
+gcloud alpha functions add-iam-policy-binding psoxy-gmail --region=us-central1 --member=user:erik@worklytics.co --role=roles/cloudfunctions.invoker --project=psoxy-dev-erik
+```
+
+4.) invocation
+
+```shell
+curl -X GET \
+https://us-central1-psoxy-dev-erik.cloudfunctions.net/psoxy-gmail/gmail/v1/users/me/messages/17c3b1911726ef3f\?format=metadata \
+-H "Authorization: Bearer $(gcloud auth print-identity-token)" \
+-H "X-Psoxy-Service-Account-User: erik@worklytics.co"
 ```

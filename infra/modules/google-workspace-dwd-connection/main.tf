@@ -27,6 +27,8 @@ resource "google_project_service" "apis_needed" {
 # NOTE: side effect of enabling domain-wide-delegation is that an "OAuth 2.0 Client ID" will be
 # created for the service account and listed in GCP Console
 
+# TODO: output a local_file with these instructions, so person setting this up doesn't forget this
+
 
 # NOTE: there are several options for how to authenticate a service as the OAuth client created
 # above:

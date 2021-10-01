@@ -11,6 +11,7 @@ resource "google_project" "psoxy-project" {
 # activate required GCP service APIs
 resource "google_project_service" "gcp-infra-api" {
   for_each = toset([
+    "cloudbuild.googleapis.com",
     "cloudfunctions.googleapis.com",
     #"iam.googleapis.com", # manage IAM via terraform
     "secretmanager.googleapis.com",

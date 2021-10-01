@@ -37,6 +37,22 @@ module "gmail-connector" {
   ]
 }
 
+module "google-chat-connector" {
+  source = "../modules/google-workspace-dwd-connection"
+
+  project_id                   = var.project_id
+  connector_service_account_id = "psoxy-google-chat-dwd"
+  display_name                 = "Psoxy Connector - Google Chat Dev Erik"
+  apis_consumed                = [
+    "admin.googleapis.com",
+    # TODO: probably directory too!?!?
+  ]
+
+  depends_on = [
+    module.psoxy-gcp
+  ]
+}
+
 # setup gmail to auth using a secret
 module "gmail-connector-auth" {
   source = "../modules/gcp-sa-auth-key-secret-manager"
