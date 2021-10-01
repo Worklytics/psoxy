@@ -24,7 +24,8 @@
           <option name="delegateBuildToMaven" value="false" />
           <option name="environmentProperties">
             <map>
-              <entry key="TARGET_HOST" value="mail.googleapis.com" />
+              <entry key="GOOGLE_APPLICATION_CREDENTIALS" value="../infra/dev-personal/gmail-connector-sa-key.json" />
+              <entry key="TARGET_HOST" value="gmail.googleapis.com" />
             </map>
           </option>
           <option name="jreName" value="11" />
