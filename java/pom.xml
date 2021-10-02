@@ -121,6 +121,7 @@
                     <name>psoxy-${sourceApi}</name>
                     <serviceAccount>${serviceAccount}</serviceAccount>
                     <allowUnauthenticated>false</allowUnauthenticated>
+                    <!-- set memory to something above default (256mb)? hard to imagine it's needed -->
                     <timeout>500</timeout> <!-- max here is 540 -->
                     <!-- TODO: set secrets here, when they expose this option through maven pluging (currently beta) -->
                 </configuration>
