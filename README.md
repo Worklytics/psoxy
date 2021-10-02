@@ -100,3 +100,10 @@ https://us-central1-psoxy-dev-erik.cloudfunctions.net/psoxy-gmail/gmail/v1/users
 -H "Authorization: Bearer $(gcloud auth print-identity-token)" \
 -H "X-Psoxy-Service-Account-User: erik@worklytics.co"
 ```
+
+```shell
+curl -X GET \
+https://us-central1-psoxy-dev-erik.cloudfunctions.net/psoxy-google-chat/admin/reports/v1/activity/users/all/applications/chat \
+-H "Authorization: Bearer $(gcloud auth print-identity-token)" \
+-H "X-Psoxy-Service-Account-User: erik@worklytics.co"
+```

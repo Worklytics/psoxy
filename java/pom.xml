@@ -103,6 +103,10 @@
                   given function locally:
 
                   mvn function:run -Drun.functionTarget=your.package.yourFunction
+
+                  NOTE: intellij deploy run config doesn't work the first time. you should run the
+                  `gcloud functions deploy` cmd once interactively, and follow the prompt to confirm
+                  that you wish to block unauthenticated connections
                 -->
                 <groupId>com.google.cloud.functions</groupId>
                 <artifactId>function-maven-plugin</artifactId>
@@ -117,6 +121,8 @@
                     <name>psoxy-${sourceApi}</name>
                     <serviceAccount>${serviceAccount}</serviceAccount>
                     <allowUnauthenticated>false</allowUnauthenticated>
+                    <timeout>500</timeout> <!-- max here is 540 -->
+                    <!-- TODO: set secrets here, when they expose this option through maven pluging (currently beta) -->
                 </configuration>
             </plugin>
         </plugins>

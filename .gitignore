@@ -27,6 +27,7 @@ infra/dev-personal/terraform.tfvars
 infra/dev-personal/.terraform**
 infra/dev-personal/terraform.tfstate**
 infra/dev-personal/*connector-sa-key.json
+infra/dev-personal/TODO*
 
 java/target
 

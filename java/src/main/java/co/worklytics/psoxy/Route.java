@@ -6,8 +6,11 @@ import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpStatusCodes;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.util.Lists;
 import com.google.auth.http.HttpCredentialsAdapter;
+import com.google.auth.oauth2.ComputeEngineCredentials;
 import com.google.auth.oauth2.GoogleCredentials;
+import com.google.auth.oauth2.ImpersonatedCredentials;
 import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.functions.HttpFunction;
 import com.google.cloud.functions.HttpRequest;
@@ -47,6 +50,10 @@ public class Route implements HttpFunction {
         //target API endpoint to forward request to
         TARGET_HOST,
         OAUTH_SCOPES,
+        //this should ACTUALLY be stored in secret manager, and then exposed as env var to the
+        // cloud function
+        // see "https://cloud.google.com/functions/docs/configuring/secrets#gcloud"
+        SERVICE_ACCOUNT_KEY,
     }
 
     /**
@@ -63,6 +70,10 @@ public class Route implements HttpFunction {
      */
     @RequiredArgsConstructor
     enum ControlHeader {
+        //TODO: change this; it's a confusing misnomer in the ServiceAccountCredentials interface
+        // ServiceAccountCredentials::createDelegated does exactly the same thing, and is more correct
+        // - the service account is impersonated the user. (user's Google Workspace tenant has
+        // made a domain-wide delegation grant to the service)
         SERVICE_ACCOUNT_USER("Service-Account-User"),
         ;
 
@@ -176,8 +187,8 @@ public class Route implements HttpFunction {
                 .map(values -> values.stream().findFirst().orElseThrow());
 
         serviceAccountUser.ifPresentOrElse(
-            user -> log.info("Service account user: " + user),
-            () -> log.warning("we usually expect a Service Account User"));
+            user -> log.info("User to impersonate: " + user),
+            () -> log.warning("we usually expect a user to impersonate"));
 
         GoogleCredentials credentials = quietGetApplicationDefault(serviceAccountUser,
             Arrays.stream(getRequiredConfigProperty(ConfigProperty.OAUTH_SCOPES).split(",")).collect(Collectors.toSet()));
@@ -230,16 +241,27 @@ public class Route implements HttpFunction {
      */
     @SneakyThrows
     GoogleCredentials quietGetApplicationDefault(Optional<String> serviceAccountUser, Set<String> scopes) {
-        GoogleCredentials credentials = ServiceAccountCredentials.getApplicationDefault();
+        GoogleCredentials credentials = GoogleCredentials.getApplicationDefault();
+
+        if (!(credentials instanceof ServiceAccountCredentials)) {
+            // only ServiceAccountCredentials (created from an actual service account key) support
+            // domain-wide delegation
+            // see examples - even when access is 'global', still need to impersonate a user
+            // https://developers.google.com/admin-sdk/reports/v1/guides/delegation
+
+            //NOTE: in practice SERVICE_ACCOUNT_KEY need not belong the to same service account
+            // running the cloud function; but it could
+            String key = getRequiredConfigProperty(ConfigProperty.SERVICE_ACCOUNT_KEY);
+            credentials = ServiceAccountCredentials.fromStream(new ByteArrayInputStream(Base64.getDecoder().decode(key)));
+        }
 
         if (serviceAccountUser.isPresent()) {
+            //even though GoogleCredentials implements `createDelegated`, it's a no-op if the
+            // credential type doesn't support it.
             credentials = credentials.createDelegated(serviceAccountUser.get());
         }
-        //TODO: above are NOT working in the serviceAccountUser mode in the cloud!?!?
 
         credentials = credentials.createScoped(scopes);
-
-        log.info("Credentials: " + credentials.toString());
 
         return credentials;
     }

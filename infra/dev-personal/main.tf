@@ -53,13 +53,24 @@ module "google-chat-connector" {
   ]
 }
 
-# setup gmail to auth using a secret
+# setup gmail to auth using a secret (not specific to Cloud Function
 module "gmail-connector-auth" {
   source = "../modules/gcp-sa-auth-key-secret-manager"
 
   secret_project     = var.project_id
   service_account_id = module.gmail-connector.service_account_id
-  secret_id          = "PSOXY_GMAIL_DWD_SECRET_KEY"
+  secret_id          = "PSOXY_SERVICE_ACCOUNT_KEY_gmail"
+}
+
+
+module "gmail-access-secret" {
+  source = "../modules/gcp-secret-to-cloud-function"
+
+  secret_name           = module.gmail-connector-auth.key_secret_name
+  secret_version_name   = module.gmail-connector-auth.key_secret_version_name
+  service_account_email = module.gmail-connector.service_account_email
+  project_id            = var.project_id
+  function_name         = "psoxy-gmail"
 }
 
 
