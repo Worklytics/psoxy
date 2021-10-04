@@ -1,14 +1,5 @@
 name: CI - infra (terraform)
 
-# ported from : https://www.hashicorp.com/blog/continuous-integration-for-terraform-modules-with-github-actions/
-
-# NOTE: depends on using a GitHub secret GCP_SA_KEY, which is just the plain JSON format service account key file
-# see: https://help.github.com/en/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets
-
-# NOTE: the approach of setting GOOGLE_CREDENTIALS as env variable means that the terraform backend (gcs) and the
-# the terraform provider (Google Cloud Platform) will use the same service account. I think this is OK, bc in a sense
-# writing state and planning/applying state
-
 on:
   [push]
 
