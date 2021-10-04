@@ -3,6 +3,7 @@ package co.worklytics.psoxy.impl;
 import co.worklytics.psoxy.Sanitizer;
 import co.worklytics.test.TestUtils;
 import com.google.api.client.http.GenericUrl;
+import com.jayway.jsonpath.Configuration;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 
@@ -34,5 +35,25 @@ class SanitizerImplTest {
 
         assertFalse(sanitized.contains(jsonPart));
         assertFalse(sanitized.contains(jsonPart.replaceAll("\\s","")));
+    }
+
+    @Test
+    void emailDomains() {
+        SanitizerImpl sanitizer = new SanitizerImpl(Sanitizer.Options.builder()
+            .pseudonymization(Pair.of("\\/gmail\\/v1\\/users\\/.*?\\/messages\\/.*",
+                Arrays.asList(
+                    "$.payload.headers[?(@.name in ['To','TO','to','From','FROM','from','cc','CC','bcc','BCC'])].value"
+                )))
+            .pseudonymizationSalt("salt")
+            .build());
+
+        assertEquals("worklytics.co",
+            sanitizer.pseudonymize("alice@worklytics.co").getDomain());
+        assertEquals("worklytics.co",
+            sanitizer.pseudonymize("Alice Example <alice@worklytics.co>").getDomain());
+        assertEquals("worklytics.co",
+            sanitizer.pseudonymize("\"Alice Example\" <alice@worklytics.co>").getDomain());
+        assertEquals("worklytics.co",
+            sanitizer.pseudonymize("Alice.Example@worklytics.co").getDomain());
     }
 }

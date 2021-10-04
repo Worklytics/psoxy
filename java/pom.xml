@@ -12,6 +12,7 @@
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <jackson.version>2.12.5</jackson.version>
         <gcpProjectId>psoxy-dev-erik</gcpProjectId>
         <sourceApi>gmail</sourceApi>
         <!-- serviceAccount that function will run as. For Google Workspace use cases, should be the
@@ -79,6 +80,33 @@
             <artifactId>json-path</artifactId>
             <version>2.6.0</version>
         </dependency>
+        <!-- Jackson - JSON serialization/deserialization -->
+        <!-- trying to force Restlet to use these, rather than codehaus versions -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+
+
+        <!-- RFC 2822 validator -->
+        <!-- see https://github.com/bbottema/email-rfc2822-validator -->
+        <dependency>
+            <groupId>com.github.bbottema</groupId>
+            <artifactId>emailaddress-rfc2822</artifactId>
+            <version>1.1.3</version>
+        </dependency>
+
 
 
         <!-- support testing -->
