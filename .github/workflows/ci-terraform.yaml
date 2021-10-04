@@ -27,7 +27,7 @@ jobs:
         with:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
 
-      - name: 'Terraform - validate organization'
+      - name: 'Terraform - validate dev-personal'
         working-directory: infra/dev-personal
         run: |
           terraform init

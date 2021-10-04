@@ -30,9 +30,12 @@ jobs:
         run: |
           rm -rf ~/.m2/repository/co/worklytics/
       - name: Compile
+        working-directory: java/
         run: |
+
           mvn clean compile -T 2C -Dversions.logOutput=false -DprocessDependencies=false -DprocessDependencyManagement=false
       - name: Test
+        working-directory: java/
         run: |
           mvn post-clean test -T 2C -Dversions.logOutput=false -DprocessDependencies=false -DprocessDependencyManagement=false -Dsurefire.forkCount=2.5C -Dsurefire.reuseForks=true
 
