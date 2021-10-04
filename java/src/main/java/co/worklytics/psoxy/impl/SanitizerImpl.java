@@ -75,18 +75,24 @@ public class SanitizerImpl implements Sanitizer {
             "Value must be some basic type (eg JSON leaf, not node)");
 
         Pseudonym.PseudonymBuilder builder = Pseudonym.builder();
-        String valueToHash;
+        String canonicalValue;
         //q: this auto-detect a good idea? Or invert control and let caller specify with a header
         // or something??
         if (value instanceof String && EmailAddressValidator.isValid((String) value)) {
             String domain = EmailAddressParser.getDomain((String) value, EmailAddressCriteria.DEFAULT, true);
             builder.domain(domain);
-            valueToHash = EmailAddressParser.getLocalPart((String) value, EmailAddressCriteria.DEFAULT, true);
+
+            //NOTE: lower-case here is NOT stipulated by RFC
+            canonicalValue =
+                EmailAddressParser.getLocalPart((String) value, EmailAddressCriteria.DEFAULT, true)
+                    .toLowerCase()
+                + "@"
+                + domain.toLowerCase();
         } else {
-            valueToHash = value.toString();
+            canonicalValue = value.toString();
         }
-        if (valueToHash != null) {
-            builder.hash(DigestUtils.sha256Hex(valueToHash + options.getPseudonymizationSalt()));
+        if (canonicalValue != null) {
+            builder.hash(DigestUtils.sha256Hex(canonicalValue + options.getPseudonymizationSalt()));
         }
         return builder.build();
     }

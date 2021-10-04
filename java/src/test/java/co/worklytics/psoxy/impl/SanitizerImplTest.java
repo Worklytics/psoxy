@@ -1,25 +1,38 @@
 package co.worklytics.psoxy.impl;
 
+import co.worklytics.psoxy.Pseudonym;
 import co.worklytics.psoxy.Sanitizer;
 import co.worklytics.test.TestUtils;
 import com.google.api.client.http.GenericUrl;
 import com.jayway.jsonpath.Configuration;
 import org.apache.commons.lang3.tuple.Pair;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.Arrays;
 import static org.junit.jupiter.api.Assertions.*;
 
 class SanitizerImplTest {
 
-    @Test
-    void sanitize_poc() {
-        SanitizerImpl sanitizer = new SanitizerImpl(Sanitizer.Options.builder()
+    static final String ALICE_CANONICAL = "alice@worklytics.co";
+
+    SanitizerImpl sanitizer;
+
+    @BeforeEach
+    public void setup() {
+        sanitizer = new SanitizerImpl(Sanitizer.Options.builder()
             .pseudonymization(Pair.of("\\/gmail\\/v1\\/users\\/.*?\\/messages\\/.*",
                 Arrays.asList(
                     "$.payload.headers[?(@.name in ['To','TO','to','From','FROM','from','cc','CC','bcc','BCC'])].value"
                 )))
+            .pseudonymizationSalt("salt")
             .build());
+    }
+
+    @Test
+    void sanitize_poc() {
 
         String jsonPart = "{\n" +
             "        \"name\": \"To\",\n" +
@@ -37,23 +50,44 @@ class SanitizerImplTest {
         assertFalse(sanitized.contains(jsonPart.replaceAll("\\s","")));
     }
 
-    @Test
-    void emailDomains() {
-        SanitizerImpl sanitizer = new SanitizerImpl(Sanitizer.Options.builder()
-            .pseudonymization(Pair.of("\\/gmail\\/v1\\/users\\/.*?\\/messages\\/.*",
-                Arrays.asList(
-                    "$.payload.headers[?(@.name in ['To','TO','to','From','FROM','from','cc','CC','bcc','BCC'])].value"
-                )))
-            .pseudonymizationSalt("salt")
-            .build());
+    @ValueSource(strings = {
+        "alice@worklytics.co",
+        "Alice Example <alice@worklytics.co>",
+        "\"Alice Example\" <alice@worklytics.co>",
+        "Alice.Example@worklytics.co"
+    })
+    @ParameterizedTest
+    void emailDomains(String mailHeaderValue) {
+        assertEquals("worklytics.co", sanitizer.pseudonymize(mailHeaderValue).getDomain());
+    }
 
-        assertEquals("worklytics.co",
-            sanitizer.pseudonymize("alice@worklytics.co").getDomain());
-        assertEquals("worklytics.co",
-            sanitizer.pseudonymize("Alice Example <alice@worklytics.co>").getDomain());
-        assertEquals("worklytics.co",
-            sanitizer.pseudonymize("\"Alice Example\" <alice@worklytics.co>").getDomain());
-        assertEquals("worklytics.co",
-            sanitizer.pseudonymize("Alice.Example@worklytics.co").getDomain());
+    @ValueSource(strings = {
+        ALICE_CANONICAL,
+        "Alice Example <alice@worklytics.co>",
+        "\"Alice Different Last name\" <alice@worklytics.co>",
+        "Alice@worklytics.co",
+        "AlIcE@worklytics.co",
+    })
+    @ParameterizedTest
+    void emailCanonicalEquivalents(String mailHeaderValue) {
+        Pseudonym canonicalExample = sanitizer.pseudonymize(ALICE_CANONICAL);
+
+        assertEquals(canonicalExample.getHash(),
+            sanitizer.pseudonymize(mailHeaderValue).getHash());
+    }
+
+    @ValueSource(strings = {
+        "bob@worklytics.co",
+        "Alice Example <alice2@worklytics.co>",
+        "\"Alice Example\" <alice-a@worklytics.co>",
+        "Alice@somewhere-else.co",
+        "AlIcE.Other@worklytics.co",
+    })
+    @ParameterizedTest
+    void emailCanonicalDistinct(String mailHeaderValue) {
+        Pseudonym canonicalExample = sanitizer.pseudonymize(ALICE_CANONICAL);
+
+        assertNotEquals(canonicalExample.getHash(),
+            sanitizer.pseudonymize(mailHeaderValue).getHash());
     }
 }
