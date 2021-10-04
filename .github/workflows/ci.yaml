@@ -1,0 +1,34 @@
+name: CI - test
+
+# CI for our project as a GitHub action
+# see https://help.github.com/en/actions/language-and-framework-guides/building-and-testing-java-with-maven
+
+on:
+  push:
+    branches:
+      - '**' # should match all branches
+    tags-ignore:
+      - '**' # all tags; actually, believe this is default behavior when you specify filter for branches but not tags
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+      - name: Setup Java
+        uses: actions/setup-java@v1
+        with:
+          java-version: '11.0.12' # The JDK version to make available on the path.
+      - name: Cache Maven packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-v1-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2-v1-
+      - name: Clear our artifacts from Maven cache # q: does this work!?!?!
+        run: |
+          rm -rf ~/.m2/repository/co/worklytics/
+      - name: Compile
+        run: |
+          mvn clean compile -T 2C -Dversions.logOutput=false -DprocessDependencies=false -DprocessDependencyManagement=false
