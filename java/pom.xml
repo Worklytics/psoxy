@@ -154,6 +154,26 @@
                     <!-- TODO: set secrets here, when they expose this option through maven pluging (currently beta) -->
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M5</version>
+                <configuration>
+                    <!-- rerun failing tests twice more -->
+                    <rerunFailingTestsCount>2</rerunFailingTestsCount>
+                    <includes>
+                        <!-- defaults: **/Test*.java, **/*Test.java, **/*TestCase.java -->
+                        <include>**/*Tests.java</include>
+                        <include>**/*Test.java</include>
+                    </includes>
+                    <systemProperties>
+                        <property>
+                            <name>java.util.logging.config.file</name>
+                            <value>test-execution-logging.properties</value>
+                        </property>
+                    </systemProperties>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>
