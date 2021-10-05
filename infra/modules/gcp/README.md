@@ -17,8 +17,23 @@ environment.  See `../local-dev` for an example.
 
 ## Existing Projects
 
+We recommend using a fresh, dedicated GCP project for all the psoxy instances associated
+with a single Worklytics account.  The 'import' scenario is to accommodate use cases where
+developer can't create new GCP projects themselves.
+
 If project already exists, use Terraform import to import it as follows:
 ```shell
 
 terraform import google_project.psoxy-project {{your_project_id}}
 ```
+
+## Caveats
+
+### Hash Salt
+We automatically generate an initial hash salt for you. This is generated with a crypographically
+strong random number generator. If you want to change it, you should do so before ever using psoxy
+in production, as pseudonyms produced by psoxy will be consistent only for a given salt.
+
+Do NOT change (or rotate) the salt after it's been used to send data to Worklytics; if you do so,
+we'll be  unable to match data prior to rotation with data sent after the rotation.
+
