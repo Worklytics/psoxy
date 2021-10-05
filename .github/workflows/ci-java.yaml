@@ -32,7 +32,6 @@ jobs:
       - name: Compile
         working-directory: java/
         run: |
-
           mvn clean compile -T 2C -Dversions.logOutput=false -DprocessDependencies=false -DprocessDependencyManagement=false
       - name: Test
         working-directory: java/
