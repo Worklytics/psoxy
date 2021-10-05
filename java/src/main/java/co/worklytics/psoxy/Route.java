@@ -51,6 +51,7 @@ public class Route implements HttpFunction {
         // cloud function
         // see "https://cloud.google.com/functions/docs/configuring/secrets#gcloud"
         SERVICE_ACCOUNT_KEY,
+        PSOXY_SALT,
     }
 
     /**
@@ -85,10 +86,10 @@ public class Route implements HttpFunction {
     Sanitizer sanitizer;
 
     void initSanitizer() {
-        //TODO: pull salt from Secret Manager
         sanitizer = new SanitizerImpl(
             PrebuiltSanitizerOptions.MAP.get(getRequiredConfigProperty(ConfigProperty.SOURCE))
-            .withPseudonymizationSalt("salt")
+            .withPseudonymizationSalt(getOptionalConfigProperty(ConfigProperty.PSOXY_SALT)
+                .orElse("salt"))
         );
     }
 

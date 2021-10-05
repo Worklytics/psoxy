@@ -59,4 +59,3 @@ resource "google_secret_manager_secret_version" "initial_version" {
   secret      = google_secret_manager_secret.pseudonymization-salt.id
   secret_data = sensitive(random_password.random.result)
 }
-
