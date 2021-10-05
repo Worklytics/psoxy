@@ -79,3 +79,12 @@ resource "local_file" "gmail-connector-sa-key" {
   filename = "gmail-connector-sa-key.json"
   content_base64 = module.gmail-connector-auth.key_value
 }
+
+# grants invoker to worklytics on ALL functions in this project. this is the recommended setup, as
+# we expect this GCP project to only be used of psoxy instances to be consumed from your Worklytics
+# account; otherwise, you can grant this role on specific functions
+resource "google_project_iam_member" "grant_cloudFunctionInvoker_to_worklytics" {
+  project = var.project_id
+  member  = "serviceAccount:${var.worklytics_sa_email}"
+  role    = "roles/cloudfunctions.invoker"
+}

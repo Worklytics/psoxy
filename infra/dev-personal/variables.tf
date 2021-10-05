@@ -18,3 +18,8 @@ variable "billing_account_id" {
   type        = string
   description = "billing account ID; needed to create the project"
 }
+
+variable "worklytics_sa_email" {
+  type        = string
+  description = "service account for your organization's Worklytics account"
+}
