@@ -206,35 +206,6 @@ public class Route implements HttpFunction {
     }
 
     /**
-     * - not needed atm, but may use in future to support non GCP-envs - although if can configure
-     * ENV_VAR, probably all equivalent1?!?
-     *
-     * quiet helper to avoid try-catch
-     *
-     * @param encoded
-     * @param serviceAccountUser
-     * @param scopes
-     * @return
-     */
-    @SneakyThrows
-    GoogleCredentials quietFromBase64String(String encoded, Optional<String> serviceAccountUser, Set<String> scopes) {
-        ServiceAccountCredentials credentials =
-            ServiceAccountCredentials.fromStream(new ByteArrayInputStream(
-                Base64.getDecoder().decode(encoded.getBytes(StandardCharsets.UTF_8))));
-
-        //q: does below work in environments where application default is NOT a service account??
-
-        ServiceAccountCredentials.Builder builder = credentials.toBuilder()
-            .setScopes(scopes);
-        if (serviceAccountUser.isPresent()) {
-            builder = builder.setServiceAccountUser(serviceAccountUser.get());
-        }
-        return builder.build();
-    }
-
-
-
-    /**
      * quiet helper to avoid try-catch
      *
      * @return
