@@ -4,7 +4,6 @@ import co.worklytics.psoxy.Pseudonym;
 import co.worklytics.psoxy.Sanitizer;
 import co.worklytics.test.TestUtils;
 import com.google.api.client.http.GenericUrl;
-import com.jayway.jsonpath.Configuration;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,7 +24,11 @@ class SanitizerImplTest {
         sanitizer = new SanitizerImpl(Sanitizer.Options.builder()
             .pseudonymization(Pair.of("\\/gmail\\/v1\\/users\\/.*?\\/messages\\/.*",
                 Arrays.asList(
-                    "$.payload.headers[?(@.name in ['To','TO','to','From','FROM','from','cc','CC','bcc','BCC'])].value"
+                    "$.payload.headers[?(@.name in ['To','TO','to','From','FROM','from','cc','CC','bcc','BCC','X-Original-Sender','Delivered-To'])].value"
+                )))
+            .redaction(Pair.of("\\/gmail\\/v1\\/users\\/.*?\\/messages\\/.*",
+                Arrays.asList(
+                    "$.payload.headers[?(@.name in ['Subject', 'Received'])]"
                 )))
             .pseudonymizationSalt("salt")
             .build());
@@ -43,11 +46,16 @@ class SanitizerImplTest {
 
         //verify precondition that example actually contains something we need to pseudonymize
         assertTrue(jsonString.contains(jsonPart));
+        assertTrue(jsonString.contains("erik@worklytics.co"));
+        assertTrue(jsonString.contains("Subject"));
 
         String sanitized = sanitizer.sanitize(new GenericUrl("https://gmail.googleapis.com/gmail/v1/users/me/messages/17c3b1911726ef3f\\?format=metadata"), jsonString);
 
         assertFalse(sanitized.contains(jsonPart));
         assertFalse(sanitized.contains(jsonPart.replaceAll("\\s","")));
+        assertFalse(sanitized.contains("erik@worklytics.co"));
+        assertFalse(sanitized.contains("Subject"));
+
     }
 
     @ValueSource(strings = {

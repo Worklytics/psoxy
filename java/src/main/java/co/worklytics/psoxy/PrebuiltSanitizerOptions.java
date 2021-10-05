@@ -9,10 +9,14 @@ import java.util.Map;
 public class PrebuiltSanitizerOptions {
 
    static final Sanitizer.Options GMAIL_V1 = Sanitizer.Options.builder()
-        .pseudonymization(
-            Pair.of("\\/gmail\\/v1\\/users\\/.*?\\/messages\\/.*",
-                Arrays.asList(
-                    "$.payload.headers[?(@.name in ['To','TO','to','From','FROM','from','cc','CC','bcc','BCC'])].value")))
+         .pseudonymization(Pair.of("\\/gmail\\/v1\\/users\\/.*?\\/messages\\/.*",
+           Arrays.asList(
+               "$.payload.headers[?(@.name in ['To','TO','to','From','FROM','from','cc','CC','bcc','BCC','X-Original-Sender','Delivered-To'])].value"
+           )))
+        .redaction(Pair.of("\\/gmail\\/v1\\/users\\/.*?\\/messages\\/.*",
+           Arrays.asList(
+               "$.payload.headers[?(@.name in ['Subject', 'Received'])]"
+           )))
         .build();
 
    static final Sanitizer.Options GOOGLE_CHAT = Sanitizer.Options.builder()

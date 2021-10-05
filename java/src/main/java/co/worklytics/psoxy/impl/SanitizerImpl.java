@@ -25,6 +25,7 @@ public class SanitizerImpl implements Sanitizer {
     final Options options;
 
     List<Pair<Pattern, List<JsonPath>>> compiledPseudonymizations;
+    List<Pair<Pattern, List<JsonPath>>> compiledRedactions;
 
     Configuration jsonConfiguration;
 
@@ -36,11 +37,22 @@ public class SanitizerImpl implements Sanitizer {
             .mappingProvider(new JacksonMappingProvider());
     }
 
+    List<JsonPath> applicablePaths(List<Pair<Pattern, List<JsonPath>>> rules, String relativeUrl) {
+        return rules.stream()
+            .filter(compiled -> compiled.getKey().asMatchPredicate().test(relativeUrl))
+            .map(Pair::getValue)
+            .flatMap(List::stream)
+            .collect(Collectors.toList());
+    }
+
     @Override
     public String sanitize(GenericUrl url, String jsonResponse) {
 
         if (compiledPseudonymizations == null) {
             compiledPseudonymizations = compile(options.getPseudonymizations());
+        }
+        if (compiledRedactions == null) {
+            compiledRedactions = compile(options.getRedactions());
         }
         if (jsonConfiguration == null) {
             initConfiguration();
@@ -48,17 +60,21 @@ public class SanitizerImpl implements Sanitizer {
 
         String relativeUrl = url.buildRelativeUrl();
 
-        List<JsonPath> pseudonymizationsToApply = compiledPseudonymizations.stream()
-            .filter(compiled -> compiled.getKey().asMatchPredicate().test(relativeUrl))
-            .map(Pair::getValue)
-            .flatMap(List::stream)
-            .collect(Collectors.toList());
+        List<JsonPath> pseudonymizationsToApply =
+            applicablePaths(compiledPseudonymizations, relativeUrl);
 
-        if (pseudonymizationsToApply.isEmpty()) {
+
+        List<JsonPath> redactionsToApply = applicablePaths(compiledRedactions, relativeUrl);
+
+        if (pseudonymizationsToApply.isEmpty() && redactionsToApply.isEmpty()) {
             return jsonResponse;
         } else {
-
             Object document = jsonConfiguration.jsonProvider().parse(jsonResponse);
+
+            for (JsonPath redaction : redactionsToApply) {
+                document = redaction
+                    .map(document, (n, config) -> null, jsonConfiguration);
+            }
 
             for (JsonPath pseudonymization : pseudonymizationsToApply) {
                 document = pseudonymization
@@ -67,7 +83,6 @@ public class SanitizerImpl implements Sanitizer {
 
             return jsonConfiguration.jsonProvider().toJson(document);
         }
-
     }
 
     Pseudonym pseudonymize(Object value) {
