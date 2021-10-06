@@ -162,8 +162,6 @@ public class Route implements HttpFunction {
 
         URL url = new URL("https", getRequiredConfigProperty(ConfigProperty.TARGET_HOST), path);
 
-        UriB
-
         return new GenericUrl(url.toString());
     }
 
