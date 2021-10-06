@@ -1,5 +1,6 @@
 package co.worklytics.psoxy.impl;
 
+import co.worklytics.psoxy.Pseudonym;
 import co.worklytics.psoxy.PseudonymizedIdentity;
 import co.worklytics.psoxy.Sanitizer;
 import co.worklytics.test.TestUtils;
@@ -79,7 +80,6 @@ class SanitizerImplTest {
     @ParameterizedTest
     void emailCanonicalEquivalents(String mailHeaderValue) {
         PseudonymizedIdentity canonicalExample = sanitizer.pseudonymize(ALICE_CANONICAL);
-
         assertEquals(canonicalExample.getHash(),
             sanitizer.pseudonymize(mailHeaderValue).getHash());
     }

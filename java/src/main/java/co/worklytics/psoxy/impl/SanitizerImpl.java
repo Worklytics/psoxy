@@ -85,17 +85,17 @@ public class SanitizerImpl implements Sanitizer {
         }
     }
 
+
     PseudonymizedIdentity pseudonymize(Object value) {
         Preconditions.checkArgument(value instanceof String || value instanceof Number,
             "Value must be some basic type (eg JSON leaf, not node)");
 
         PseudonymizedIdentity.PseudonymizedIdentityBuilder builder = PseudonymizedIdentity.builder();
+
         String canonicalValue;
         //q: this auto-detect a good idea? Or invert control and let caller specify with a header
         // or something??
         if (value instanceof String && EmailAddressValidator.isValid((String) value)) {
-
-
 
             String domain = EmailAddressParser.getDomain((String) value, EmailAddressCriteria.DEFAULT, true);
             builder.domain(domain);

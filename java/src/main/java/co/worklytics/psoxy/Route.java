@@ -3,7 +3,6 @@ package co.worklytics.psoxy;
 import co.worklytics.psoxy.impl.SanitizerImpl;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequestFactory;
-import com.google.api.client.http.HttpStatusCodes;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.auth.http.HttpCredentialsAdapter;
@@ -19,9 +18,9 @@ import lombok.extern.java.Log;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.net.URL;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
@@ -53,6 +52,7 @@ public class Route implements HttpFunction {
         // cloud function
         // see "https://cloud.google.com/functions/docs/configuring/secrets#gcloud"
         SERVICE_ACCOUNT_KEY,
+        PSOXY_SALT,
     }
 
     /**
@@ -87,10 +87,10 @@ public class Route implements HttpFunction {
     Sanitizer sanitizer;
 
     void initSanitizer() {
-        //TODO: pull salt from Secret Manager
         sanitizer = new SanitizerImpl(
             PrebuiltSanitizerOptions.MAP.get(getRequiredConfigProperty(ConfigProperty.SOURCE))
-            .withPseudonymizationSalt("salt")
+            .withPseudonymizationSalt(getOptionalConfigProperty(ConfigProperty.PSOXY_SALT)
+                .orElse("salt"))
         );
     }
 
@@ -132,6 +132,7 @@ public class Route implements HttpFunction {
 
         // return response
         response.setStatusCode(sourceApiResponse.getStatusCode());
+
 
         String responseContent =
             new String(sourceApiResponse.getContent().readAllBytes(), sourceApiResponse.getContentCharset());
@@ -192,16 +193,17 @@ public class Route implements HttpFunction {
         // eg, OAuth2CredentialsWithRefresh.newBuilder(), etc ..
 
         //assume that in cloud function env, this will get ours ...
-        Optional<String> serviceAccountUser =
+        Optional<String> accountToImpersonate =
             getHeader(request, ControlHeader.USER_TO_IMPERSONATE)
                 .map(values -> values.stream().findFirst().orElseThrow());
 
-        serviceAccountUser.ifPresentOrElse(
+        accountToImpersonate.ifPresentOrElse(
             user -> log.info("User to impersonate: " + user),
             () -> log.warning("we usually expect a user to impersonate"));
 
-        GoogleCredentials credentials = quietGetApplicationDefault(serviceAccountUser,
-            Arrays.stream(getRequiredConfigProperty(ConfigProperty.OAUTH_SCOPES).split(",")).collect(Collectors.toSet()));
+        GoogleCredentials credentials = quietGetApplicationDefault(accountToImpersonate,
+            Arrays.stream(getRequiredConfigProperty(ConfigProperty.OAUTH_SCOPES).split(","))
+                .collect(Collectors.toSet()));
 
 
 
