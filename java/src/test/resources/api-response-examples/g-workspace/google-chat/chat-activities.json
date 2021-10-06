@@ -1,0 +1,477 @@
+{
+  "kind": "admin#reports#activities",
+  "etag": "\"pyxMPGZXW4_hA1GwcNiWbeXYn--fkv5AIZxO_XiD8Rk/qmuhF4ZUyWJeBKc7wK2XyJmZAIw\"",
+  "nextPageToken": "A:1633117618166607:-5714221342394249123:216932279217:C03v4gz0f",
+  "items": [
+    {
+      "kind": "admin#reports#activity",
+      "id": {
+        "time": "2021-10-01T20:55:05.259Z",
+        "uniqueQualifier": "6229622275686242274",
+        "applicationName": "chat",
+        "customerId": "C03v4gz0f"
+      },
+      "etag": "\"pyxMPGZXW4_hA1GwcNiWbeXYn--fkv5AIZxO_XiD8Rk/PSFobqOrLB71TGGSzvwbM5AJLfs\"",
+      "actor": {
+        "callerType": "USER",
+        "email": "philip@worklytics.co",
+        "profileId": "100531288453445237356"
+      },
+      "events": [
+        {
+          "type": "user_action",
+          "name": "message_posted",
+          "parameters": [
+            {
+              "name": "room_id",
+              "value": "oo3_lAAAAAE"
+            },
+            {
+              "name": "timestamp_ms",
+              "value": "1633121705259967"
+            },
+            {
+              "name": "actor",
+              "value": "philip@worklytics.co"
+            },
+            {
+              "name": "message_id",
+              "value": "xUUHCHBTbkk"
+            },
+            {
+              "name": "retention_state",
+              "value": "PERMANENT"
+            },
+            {
+              "name": "room_name",
+              "value": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "admin#reports#activity",
+      "id": {
+        "time": "2021-10-01T20:09:55.176Z",
+        "uniqueQualifier": "-3136981262679401803",
+        "applicationName": "chat",
+        "customerId": "C03v4gz0f"
+      },
+      "etag": "\"pyxMPGZXW4_hA1GwcNiWbeXYn--fkv5AIZxO_XiD8Rk/FZe2ln-5xreVb04UZChnXX4m2xI\"",
+      "actor": {
+        "callerType": "USER",
+        "email": "philip@worklytics.co",
+        "profileId": "100531288453445237356"
+      },
+      "events": [
+        {
+          "type": "user_action",
+          "name": "message_posted",
+          "parameters": [
+            {
+              "name": "room_id",
+              "value": "oo3_lAAAAAE"
+            },
+            {
+              "name": "timestamp_ms",
+              "value": "1633118995176175"
+            },
+            {
+              "name": "actor",
+              "value": "philip@worklytics.co"
+            },
+            {
+              "name": "message_id",
+              "value": "GkBc_2GZ_nw"
+            },
+            {
+              "name": "retention_state",
+              "value": "PERMANENT"
+            },
+            {
+              "name": "room_name",
+              "value": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "admin#reports#activity",
+      "id": {
+        "time": "2021-10-01T20:09:40.788Z",
+        "uniqueQualifier": "-554439247430587543",
+        "applicationName": "chat",
+        "customerId": "C03v4gz0f"
+      },
+      "etag": "\"pyxMPGZXW4_hA1GwcNiWbeXYn--fkv5AIZxO_XiD8Rk/z6558M1SWoXdwwNOzTl0BdeWr3U\"",
+      "actor": {
+        "callerType": "USER",
+        "email": "chris@worklytics.co",
+        "profileId": "100756553711302390267"
+      },
+      "events": [
+        {
+          "type": "user_action",
+          "name": "message_posted",
+          "parameters": [
+            {
+              "name": "room_id",
+              "value": "oo3_lAAAAAE"
+            },
+            {
+              "name": "timestamp_ms",
+              "value": "1633118980788831"
+            },
+            {
+              "name": "actor",
+              "value": "chris@worklytics.co"
+            },
+            {
+              "name": "message_id",
+              "value": "LI4-Vf5DwNg"
+            },
+            {
+              "name": "retention_state",
+              "value": "PERMANENT"
+            },
+            {
+              "name": "room_name",
+              "value": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "admin#reports#activity",
+      "id": {
+        "time": "2021-10-01T20:02:33.627Z",
+        "uniqueQualifier": "1992059531346612299",
+        "applicationName": "chat",
+        "customerId": "C03v4gz0f"
+      },
+      "etag": "\"pyxMPGZXW4_hA1GwcNiWbeXYn--fkv5AIZxO_XiD8Rk/DN90WnfELL586cjFK-LAe-KaofM\"",
+      "actor": {
+        "callerType": "USER",
+        "email": "chris@worklytics.co",
+        "profileId": "100756553711302390267"
+      },
+      "events": [
+        {
+          "type": "user_action",
+          "name": "message_posted",
+          "parameters": [
+            {
+              "name": "room_id",
+              "value": "oo3_lAAAAAE"
+            },
+            {
+              "name": "timestamp_ms",
+              "value": "1633118553627407"
+            },
+            {
+              "name": "actor",
+              "value": "chris@worklytics.co"
+            },
+            {
+              "name": "message_id",
+              "value": "0QmU9UeBPEI"
+            },
+            {
+              "name": "retention_state",
+              "value": "PERMANENT"
+            },
+            {
+              "name": "room_name",
+              "value": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "admin#reports#activity",
+      "id": {
+        "time": "2021-10-01T20:02:16.845Z",
+        "uniqueQualifier": "771473851286554014",
+        "applicationName": "chat",
+        "customerId": "C03v4gz0f"
+      },
+      "etag": "\"pyxMPGZXW4_hA1GwcNiWbeXYn--fkv5AIZxO_XiD8Rk/ymxq-0EL2h0NyEbCUafh6Tulk2o\"",
+      "actor": {
+        "callerType": "USER",
+        "email": "philip@worklytics.co",
+        "profileId": "100531288453445237356"
+      },
+      "events": [
+        {
+          "type": "user_action",
+          "name": "message_posted",
+          "parameters": [
+            {
+              "name": "room_id",
+              "value": "oo3_lAAAAAE"
+            },
+            {
+              "name": "timestamp_ms",
+              "value": "1633118536845295"
+            },
+            {
+              "name": "actor",
+              "value": "philip@worklytics.co"
+            },
+            {
+              "name": "message_id",
+              "value": "_GPssu_1Nnw"
+            },
+            {
+              "name": "retention_state",
+              "value": "PERMANENT"
+            },
+            {
+              "name": "room_name",
+              "value": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "admin#reports#activity",
+      "id": {
+        "time": "2021-10-01T20:02:01.803Z",
+        "uniqueQualifier": "2333366597539017751",
+        "applicationName": "chat",
+        "customerId": "C03v4gz0f"
+      },
+      "etag": "\"pyxMPGZXW4_hA1GwcNiWbeXYn--fkv5AIZxO_XiD8Rk/jwhiYyESt6vR0jpoQjHp40RkC_M\"",
+      "actor": {
+        "callerType": "USER",
+        "email": "philip@worklytics.co",
+        "profileId": "100531288453445237356"
+      },
+      "events": [
+        {
+          "type": "user_action",
+          "name": "message_posted",
+          "parameters": [
+            {
+              "name": "room_id",
+              "value": "oo3_lAAAAAE"
+            },
+            {
+              "name": "timestamp_ms",
+              "value": "1633118521803599"
+            },
+            {
+              "name": "actor",
+              "value": "philip@worklytics.co"
+            },
+            {
+              "name": "message_id",
+              "value": "-zmwP7QPihg"
+            },
+            {
+              "name": "retention_state",
+              "value": "PERMANENT"
+            },
+            {
+              "name": "room_name",
+              "value": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "admin#reports#activity",
+      "id": {
+        "time": "2021-10-01T19:47:32.438Z",
+        "uniqueQualifier": "-7411588007766974912",
+        "applicationName": "chat",
+        "customerId": "C03v4gz0f"
+      },
+      "etag": "\"pyxMPGZXW4_hA1GwcNiWbeXYn--fkv5AIZxO_XiD8Rk/piTl8c4cc2KG_bnPLXnQOUgeGhs\"",
+      "actor": {
+        "callerType": "USER",
+        "email": "chris@worklytics.co",
+        "profileId": "100756553711302390267"
+      },
+      "events": [
+        {
+          "type": "user_action",
+          "name": "message_posted",
+          "parameters": [
+            {
+              "name": "room_id",
+              "value": "oo3_lAAAAAE"
+            },
+            {
+              "name": "timestamp_ms",
+              "value": "1633117652438303"
+            },
+            {
+              "name": "actor",
+              "value": "chris@worklytics.co"
+            },
+            {
+              "name": "message_id",
+              "value": "f4wWYLxWSRg"
+            },
+            {
+              "name": "retention_state",
+              "value": "PERMANENT"
+            },
+            {
+              "name": "room_name",
+              "value": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "admin#reports#activity",
+      "id": {
+        "time": "2021-10-01T19:47:10.875Z",
+        "uniqueQualifier": "6272988668069593046",
+        "applicationName": "chat",
+        "customerId": "C03v4gz0f"
+      },
+      "etag": "\"pyxMPGZXW4_hA1GwcNiWbeXYn--fkv5AIZxO_XiD8Rk/T_v4i85MeOz7syNDaZPmxOomJqg\"",
+      "actor": {
+        "callerType": "USER",
+        "email": "chris@worklytics.co",
+        "profileId": "100756553711302390267"
+      },
+      "events": [
+        {
+          "type": "user_action",
+          "name": "message_posted",
+          "parameters": [
+            {
+              "name": "room_id",
+              "value": "oo3_lAAAAAE"
+            },
+            {
+              "name": "timestamp_ms",
+              "value": "1633117630875919"
+            },
+            {
+              "name": "actor",
+              "value": "chris@worklytics.co"
+            },
+            {
+              "name": "message_id",
+              "value": "M1IHhyYok2Y"
+            },
+            {
+              "name": "retention_state",
+              "value": "PERMANENT"
+            },
+            {
+              "name": "room_name",
+              "value": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "admin#reports#activity",
+      "id": {
+        "time": "2021-10-01T19:47:03.026Z",
+        "uniqueQualifier": "6028346073751815096",
+        "applicationName": "chat",
+        "customerId": "C03v4gz0f"
+      },
+      "etag": "\"pyxMPGZXW4_hA1GwcNiWbeXYn--fkv5AIZxO_XiD8Rk/G20KcOUMUFhz-1YN67_MQ14wLOM\"",
+      "actor": {
+        "callerType": "USER",
+        "email": "chris@worklytics.co",
+        "profileId": "100756553711302390267"
+      },
+      "events": [
+        {
+          "type": "user_action",
+          "name": "message_posted",
+          "parameters": [
+            {
+              "name": "room_id",
+              "value": "oo3_lAAAAAE"
+            },
+            {
+              "name": "timestamp_ms",
+              "value": "1633117623026943"
+            },
+            {
+              "name": "actor",
+              "value": "chris@worklytics.co"
+            },
+            {
+              "name": "message_id",
+              "value": "-1G9uX_D8vM"
+            },
+            {
+              "name": "retention_state",
+              "value": "PERMANENT"
+            },
+            {
+              "name": "room_name",
+              "value": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "admin#reports#activity",
+      "id": {
+        "time": "2021-10-01T19:46:58.166Z",
+        "uniqueQualifier": "-5714221342394249123",
+        "applicationName": "chat",
+        "customerId": "C03v4gz0f"
+      },
+      "etag": "\"pyxMPGZXW4_hA1GwcNiWbeXYn--fkv5AIZxO_XiD8Rk/YhPn1WYF_oWdpQeENhMLzUMNCp8\"",
+      "actor": {
+        "callerType": "USER",
+        "email": "chris@worklytics.co",
+        "profileId": "100756553711302390267"
+      },
+      "events": [
+        {
+          "type": "user_action",
+          "name": "message_posted",
+          "parameters": [
+            {
+              "name": "room_id",
+              "value": "oo3_lAAAAAE"
+            },
+            {
+              "name": "timestamp_ms",
+              "value": "1633117618166607"
+            },
+            {
+              "name": "actor",
+              "value": "chris@worklytics.co"
+            },
+            {
+              "name": "message_id",
+              "value": "R5tzwKtADXs"
+            },
+            {
+              "name": "retention_state",
+              "value": "PERMANENT"
+            },
+            {
+              "name": "room_name",
+              "value": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

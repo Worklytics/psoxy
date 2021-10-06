@@ -1,0 +1,3 @@
+SOURCE: gmail
+TARGET_HOST: gmail.googleapis.com
+OAUTH_SCOPES: https://www.googleapis.com/auth/gmail.metadata

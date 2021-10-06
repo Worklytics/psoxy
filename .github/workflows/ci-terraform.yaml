@@ -1,0 +1,25 @@
+name: CI - infra (terraform)
+
+on:
+  [push]
+
+jobs:
+  validate:
+    name: validate
+    runs-on: ubuntu-latest
+    env:
+      TERRAFORM_VERSION: 1.0.8
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v1
+
+      - name: 'setup Terraform'
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      - name: 'Terraform - validate dev-personal'
+        working-directory: infra/dev-personal
+        run: |
+          terraform init
+          terraform validate

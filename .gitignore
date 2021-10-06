@@ -4,20 +4,32 @@
 # Log file
 *.log
 
-# BlueJ files
-*.ctxt
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
 # Package Files #
 *.jar
 *.war
-*.nar
-*.ear
-*.zip
 *.tar.gz
-*.rar
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+
+# IntelliJ - attempting to be consistent with
+#   https://intellij-support.jetbrains.com/hc/en-us/articles/206544839-How-to-manage-projects-under-Version-Control-Systems
+# but then IntelliJ seems to generate .idea/.gitignore too, which knocks out some of the stuff that
+# mentions
+*/.idea/usage.statistics.xml
+*.iml
+# libraries isn't in above doc, but simply doesn't seem like what we want ...
+.idea/libraries/
+
+
+# ignore terraform variables / state for developers' personal development environmenst
+infra/dev-personal/terraform.tfvars
+infra/dev-personal/.terraform**
+infra/dev-personal/terraform.tfstate**
+infra/dev-personal/*connector-sa-key.json
+infra/dev-personal/TODO*
+
+java/target
+
+# macOs generated files
+.DS_Store
