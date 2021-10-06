@@ -1,5 +1,6 @@
 package co.worklytics.psoxy.impl;
 
+import co.worklytics.psoxy.PrebuiltSanitizerRules;
 import co.worklytics.psoxy.Pseudonym;
 import co.worklytics.psoxy.Sanitizer;
 import co.worklytics.test.TestUtils;
@@ -10,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.util.Arrays;
 import static org.junit.jupiter.api.Assertions.*;
 
 class SanitizerImplTest {
@@ -22,14 +22,7 @@ class SanitizerImplTest {
     @BeforeEach
     public void setup() {
         sanitizer = new SanitizerImpl(Sanitizer.Options.builder()
-            .pseudonymization(Pair.of("\\/gmail\\/v1\\/users\\/.*?\\/messages\\/.*",
-                Arrays.asList(
-                    "$.payload.headers[?(@.name in ['To','TO','to','From','FROM','from','cc','CC','bcc','BCC','X-Original-Sender','Delivered-To'])].value"
-                )))
-            .redaction(Pair.of("\\/gmail\\/v1\\/users\\/.*?\\/messages\\/.*",
-                Arrays.asList(
-                    "$.payload.headers[?(@.name in ['Subject', 'Received'])]"
-                )))
+            .rules(PrebuiltSanitizerRules.MAP.get("gmail"))
             .pseudonymizationSalt("salt")
             .build());
     }

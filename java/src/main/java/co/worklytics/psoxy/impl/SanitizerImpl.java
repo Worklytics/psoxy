@@ -49,10 +49,10 @@ public class SanitizerImpl implements Sanitizer {
     public String sanitize(GenericUrl url, String jsonResponse) {
 
         if (compiledPseudonymizations == null) {
-            compiledPseudonymizations = compile(options.getPseudonymizations());
+            compiledPseudonymizations = compile(options.getRules().getPseudonymizations());
         }
         if (compiledRedactions == null) {
-            compiledRedactions = compile(options.getRedactions());
+            compiledRedactions = compile(options.getRules().getRedactions());
         }
         if (jsonConfiguration == null) {
             initConfiguration();
@@ -118,10 +118,10 @@ public class SanitizerImpl implements Sanitizer {
 
 
 
-    private List<Pair<Pattern, List<JsonPath>>> compile(List<Pair<String, List<String>>> redactions) {
+    private List<Pair<Pattern, List<JsonPath>>> compile(List<Rules.Rule> redactions) {
         return redactions.stream()
-            .map(configured -> Pair.of(Pattern.compile(configured.getKey()),
-                                       configured.getValue().stream()
+            .map(configured -> Pair.of(Pattern.compile(configured.getRelativeUrlRegex()),
+                                       configured.getJsonPaths().stream()
                                            .map(JsonPath::compile)
                                            .collect(Collectors.toList())))
             .collect(Collectors.toList());

@@ -12,7 +12,8 @@ class PrebuiltSanitizerOptionsTest {
 
     @Test
     void google_chat() {
-        SanitizerImpl sanitizer = new SanitizerImpl(PrebuiltSanitizerOptions.GOOGLE_CHAT);
+        SanitizerImpl sanitizer = new SanitizerImpl(Sanitizer.Options.builder()
+            .rules(PrebuiltSanitizerRules.GOOGLE_CHAT).build());
 
         String jsonString = new String(TestUtils.getData("api-response-examples/g-workspace/google-chat/chat-activities.json"));
 

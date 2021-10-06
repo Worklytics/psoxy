@@ -87,8 +87,10 @@ public class Route implements HttpFunction {
     void initSanitizer() {
         //TODO: pull salt from Secret Manager
         sanitizer = new SanitizerImpl(
-            PrebuiltSanitizerOptions.MAP.get(getRequiredConfigProperty(ConfigProperty.SOURCE))
-            .withPseudonymizationSalt("salt")
+            Sanitizer.Options.builder()
+                    .rules(PrebuiltSanitizerRules.MAP.get(getRequiredConfigProperty(ConfigProperty.SOURCE)))
+                .pseudonymizationSalt("salt")
+                .build()
         );
     }
 
