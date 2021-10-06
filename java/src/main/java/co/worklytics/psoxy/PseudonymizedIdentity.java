@@ -19,18 +19,13 @@ public class PseudonymizedIdentity {
      *
      * identity is considered unique within its scope.
      *
+     * arguably, 'scope' is another tier of 'domain'
+     *
      * NOTE: `null` scope means scope is implicit from identifier's context
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     String scope;
 
-    String hash;
-
-    //q: include hash of canonical name as well (eg, in case of human name on email??) to aid
-    // later account linking?? (eg, secondary pseudonym with scope='humanName'?)
-
-    //q: include 'encrypted', optionally? eg, a value that, if passed back to proxy in URL or header
-    // will be decrypted
 
     /**
      * some sort of organizational domain, if and only if identifier has an immutable 1:1
@@ -46,6 +41,9 @@ public class PseudonymizedIdentity {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     String domain;
 
-    //q: include scope? (eg, 'email', 'slack', etc?)
-    // 'scope' is in principle another level of 'domain' that's normally implicit from context
+    String hash;
+
+    //q: include 'encrypted', optionally? eg, a value that, if passed back to proxy in URL or header
+    // will be decrypted
+
 }
