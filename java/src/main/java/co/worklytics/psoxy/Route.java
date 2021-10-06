@@ -88,10 +88,10 @@ public class Route implements HttpFunction {
 
     void initSanitizer() {
         sanitizer = new SanitizerImpl(
-            PrebuiltSanitizerOptions.MAP.get(getRequiredConfigProperty(ConfigProperty.SOURCE))
-            .withPseudonymizationSalt(getOptionalConfigProperty(ConfigProperty.PSOXY_SALT)
-                .orElse("salt"))
-        );
+            Sanitizer.Options.builder()
+                .rules(PrebuiltSanitizerRules.MAP.get(getRequiredConfigProperty(ConfigProperty.SOURCE)))
+                .pseudonymizationSalt(getOptionalConfigProperty(ConfigProperty.PSOXY_SALT).orElse("salt"))
+                .build());
     }
 
     @Override
@@ -132,7 +132,6 @@ public class Route implements HttpFunction {
 
         // return response
         response.setStatusCode(sourceApiResponse.getStatusCode());
-
 
         String responseContent =
             new String(sourceApiResponse.getContent().readAllBytes(), sourceApiResponse.getContentCharset());
@@ -183,6 +182,7 @@ public class Route implements HttpFunction {
     }
 
 
+
     @SneakyThrows
     HttpRequestFactory getRequestFactory(HttpRequest request) {
         // per connection request factory, abstracts auth ..
@@ -204,8 +204,6 @@ public class Route implements HttpFunction {
         GoogleCredentials credentials = quietGetApplicationDefault(accountToImpersonate,
             Arrays.stream(getRequiredConfigProperty(ConfigProperty.OAUTH_SCOPES).split(","))
                 .collect(Collectors.toSet()));
-
-
 
         HttpCredentialsAdapter initializer = new HttpCredentialsAdapter(credentials);
 

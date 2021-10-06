@@ -2,15 +2,15 @@ package co.worklytics.psoxy;
 
 import com.google.api.client.http.GenericUrl;
 import lombok.*;
-import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.Serializable;
 import java.util.List;
 
 public interface Sanitizer {
 
+
     /**
-     * options that control how data source API is sanitized, including support for:
+     * rules that control how data source API is sanitized, including support for:
      *   - pseudonymizing values in JSON response
      *   - redacting values in JSON response
      *
@@ -19,6 +19,44 @@ public interface Sanitizer {
      * the use case requires - but probably more complicated to develop with. Goal should be
      * to make specifying an implementation of Sanitizer.Options to be as simple as possible.
      */
+    @Builder
+    @Value
+    class Rules {
+
+        @Builder
+        @Value
+        public static class Rule {
+
+            String relativeUrlRegex;
+
+            @Singular
+            List<String> jsonPaths;
+        }
+
+        /**
+         * list of relativeUrl regex --> jsonPaths of values to pseudonymize
+         *
+         * q: do we need to support canonicalization first?
+         *     eg, "Erik Schultink <erik@worklytics.co>" --> "erik@worklytics.co" -->
+         *
+         * q: domain (organization) preservation - how??
+         */
+        @Singular
+        @Getter
+        List<Rule> pseudonymizations;
+
+        /**
+         * list relativeUrl regex --> jsonPaths of values to redact
+         *
+         * q: is a values white list better? challenge is implementing that in a good way
+         */
+        @Singular
+        @Getter
+        List<Rule> redactions;
+    }
+
+
+
     @With
     @Builder
     @Value
@@ -32,28 +70,9 @@ public interface Sanitizer {
          */
         String pseudonymizationSalt;
 
-        /**
-         * list of relativeUrl regex --> jsonPaths of values to pseudonymize
-         *
-         * q: do we need to support canonicalization first?
-         *     eg, "Erik Schultink <erik@worklytics.co>" --> "erik@worklytics.co" -->
-         *
-         * q: domain (organization) preservation - how??
-         */
-        @Singular
-        @Getter
-        List<Pair<String, List<String>>> pseudonymizations;
-
-        /**
-         * list relativeUrl regex --> jsonPaths of values to redact
-         *
-         * q: is a values white list better? challenge is implementing that in a good way
-         */
-        @Singular
-        @Getter
-        List<Pair<String, List<String>>> redactions;
 
         //q: add regexes to whitelist endpoints that we actually use??
+        Rules rules;
     }
 
     /**
