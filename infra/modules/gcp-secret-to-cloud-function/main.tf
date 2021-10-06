@@ -12,7 +12,7 @@ resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_secret"
 
 # todo needed bc as of Sept 2021, no way to expose secret via Cloud Function Maven plugin or
 # terraform
-resource "local_file" "gmail-todo" {
+resource "local_file" "todo" {
   filename = "TODO - expose secret to ${var.function_name}.md"
   content  = <<EOT
 expose the secret to the cloud function
