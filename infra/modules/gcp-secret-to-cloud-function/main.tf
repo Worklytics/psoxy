@@ -17,7 +17,7 @@ resource "local_file" "gmail-todo" {
   content  = <<EOT
 expose the secret to the cloud function
 ```shell
-  gcloud beta functions deploy psoxy-gmail \
+  gcloud beta functions deploy ${var.function_name} \
 --project ${var.project_id} \
 --runtime java11 \
 --update-secrets 'SERVICE_ACCOUNT_KEY=${var.secret_name}:${local.secret_version_number}'
