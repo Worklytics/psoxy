@@ -1,6 +1,6 @@
 package co.worklytics.psoxy.impl;
 
-import co.worklytics.psoxy.Pseudonym;
+import co.worklytics.psoxy.PseudonymizedIdentity;
 import co.worklytics.psoxy.Sanitizer;
 import com.google.api.client.http.GenericUrl;
 import com.google.common.base.Preconditions;
@@ -85,17 +85,21 @@ public class SanitizerImpl implements Sanitizer {
         }
     }
 
-    Pseudonym pseudonymize(Object value) {
+
+    PseudonymizedIdentity pseudonymize(Object value) {
         Preconditions.checkArgument(value instanceof String || value instanceof Number,
             "Value must be some basic type (eg JSON leaf, not node)");
 
-        Pseudonym.PseudonymBuilder builder = Pseudonym.builder();
+        PseudonymizedIdentity.PseudonymizedIdentityBuilder builder = PseudonymizedIdentity.builder();
+
         String canonicalValue;
         //q: this auto-detect a good idea? Or invert control and let caller specify with a header
         // or something??
         if (value instanceof String && EmailAddressValidator.isValid((String) value)) {
+
             String domain = EmailAddressParser.getDomain((String) value, EmailAddressCriteria.DEFAULT, true);
             builder.domain(domain);
+            builder.scope("email");
 
             //NOTE: lower-case here is NOT stipulated by RFC
             canonicalValue =
@@ -103,7 +107,17 @@ public class SanitizerImpl implements Sanitizer {
                     .toLowerCase()
                 + "@"
                 + domain.toLowerCase();
+
+            //q: do something with the personal name??
+            // NO --> it is not going to be reliable (except for From, will fill with whatever
+            // sender has for the person in their Contacts), and in enterprise use-cases we
+            // shouldn't need it for matching
         } else {
+            //absence of scope/domain don't mean this identifier ISN'T qualified by them. it just
+            // means they're implicit in context, perhaps implied by something at higher level
+            //so how do we fill scope in such cases?
+            // leave to orchestration layer, which knows the context??
+
             canonicalValue = value.toString();
         }
         if (canonicalValue != null) {

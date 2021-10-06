@@ -20,14 +20,6 @@ module "psoxy-gcp" {
   folder_id           = var.folder_id
 }
 
-# grants invoker to worklytics on ALL functions in this project. this is the recommended setup, as
-# we expect this GCP project to only be used of psoxy instances to be consumed from your Worklytics
-# account; otherwise, you can grant this role on specific functions
-resource "google_project_iam_member" "grant_cloudFunctionInvoker_to_worklytics" {
-  project = var.project_id
-  member  = "serviceAccount:${var.worklytics_sa_email}"
-  role    = "roles/cloudfunctions.invoker"
-}
 
 module "gmail-connector" {
   source = "../modules/google-workspace-dwd-connection"
@@ -44,7 +36,6 @@ module "gmail-connector" {
     module.psoxy-gcp
   ]
 }
-
 
 # setup gmail to auth using a secret (not specific to Cloud Function)
 module "gmail-connector-auth" {
@@ -80,6 +71,7 @@ resource "local_file" "gmail-connector-sa-key" {
   filename = "gmail-connector-sa-key.json"
   content_base64 = module.gmail-connector-auth.key_value
 }
+
 
 module "google-chat-connector" {
   source = "../modules/google-workspace-dwd-connection"
@@ -117,11 +109,21 @@ module "google-chat-access-sa-key-secret" {
 }
 
 module "google-chat-access-salt" {
-  source = "../modules/gcp-secret-to-cloud-function"
+source = "../modules/gcp-secret-to-cloud-function"
 
-  function_name         = "psoxy-google-chat"
-  project_id            = var.project_id
-  secret_name           = module.psoxy-gcp.salt_secret_name
-  secret_version_name   = module.psoxy-gcp.salt_secret_version_name
-  service_account_email = module.google-chat-connector.service_account_email
+function_name = "psoxy-google-chat"
+project_id = var.project_id
+secret_name = module.psoxy-gcp.salt_secret_name
+secret_version_name = module.psoxy-gcp.salt_secret_version_name
+service_account_email = module.google-chat-connector.service_account_email
+}
+
+
+# grants invoker to worklytics on ALL functions in this project. this is the recommended setup, as
+# we expect this GCP project to only be used of psoxy instances to be consumed from your Worklytics
+# account; otherwise, you can grant this role on specific functions
+resource "google_project_iam_member" "grant_cloudFunctionInvoker_to_worklytics" {
+  project = var.project_id
+  member  = "serviceAccount:${var.worklytics_sa_email}"
+  role    = "roles/cloudfunctions.invoker"
 }

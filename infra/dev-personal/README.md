@@ -29,7 +29,6 @@ project_id          = "psoxy-dev-erik"
 worklytics_sa_email = "worklytics-dev-local-shared@worklytics-staging.iam.gserviceaccount.com"
 ```
 
-
 Initialize your configuration (at this location in directory hierarchy):
 ```shell
 terraform init

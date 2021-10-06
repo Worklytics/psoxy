@@ -20,14 +20,33 @@ resource "google_project_service" "apis_needed" {
   disable_dependent_services = false
 }
 
-# NOTE: after apply, enable domain-wide-delegation in GCP console on the SA
-# goto: https://console.cloud.google.com/apis/credentials?organizationId=496339493825&project=eval-engin
-# NOTE: done in prod 27 Aug 2019 by erik
-# TODO: specify in terraform once https://github.com/hashicorp/terraform-provider-google/issues/1959 solved
+
+# enable domain-wide-delegation via GCP console
 # NOTE: side effect of enabling domain-wide-delegation is that an "OAuth 2.0 Client ID" will be
 # created for the service account and listed in GCP Console
+# TODO: specify the following step in in terraform once https://github.com/hashicorp/terraform-provider-google/issues/1959 solved
+resource "local_file" "todo" {
+  filename = "TODO - ${var.display_name} setup.md"
+  content  = <<EOT
+Complete the following steps via GCP console:
+  1. Visit https://console.cloud.google.com/apis/credentials?project=${var.project_id}
+  2. Find the `${var.connector_service_account_id}` service account.
+  3. Enable 'Domain-wide Delegation' and 'Save'. This provisions an 'Oauth 2.0 client' for the
+     service account. Copy the Client ID of that client.
 
-# TODO: output a local_file with these instructions, so person setting this up doesn't forget this
+Complete the following steps via the Google Workspace Admin console:
+   1. Visit https://admin.google.com/ and navigate to Security --> API Controls, then find "Manage
+      Domain Wide Delegation". Click "Add new"
+   2. Copy and paste the client ID from the prior section into the "Client ID" input in the popup.
+   3. Copy and paste the scopes for your data source (see `java/configs/`, and find the `SCOPE`
+      variable in the yaml file that matches your source) into the "Scopes" input.
+   4. Authorize it.
+
+With this, your psoxy instance should be able to authenticate with Google as `${var.connector_service_account_id}`
+and request data from Google as authorized by the OAuth scopes you granted.
+EOT
+
+}
 
 
 # NOTE: there are several options for how to authenticate a service as the OAuth client created
