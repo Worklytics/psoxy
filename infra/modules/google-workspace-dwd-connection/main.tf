@@ -21,7 +21,6 @@ resource "google_project_service" "apis_needed" {
 }
 
 
-
 # enable domain-wide-delegation via GCP console
 # NOTE: side effect of enabling domain-wide-delegation is that an "OAuth 2.0 Client ID" will be
 # created for the service account and listed in GCP Console

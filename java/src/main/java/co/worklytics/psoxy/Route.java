@@ -3,7 +3,6 @@ package co.worklytics.psoxy;
 import co.worklytics.psoxy.impl.SanitizerImpl;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequestFactory;
-import com.google.api.client.http.HttpStatusCodes;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.auth.http.HttpCredentialsAdapter;
@@ -21,6 +20,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.net.URL;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 @Log
@@ -51,6 +52,7 @@ public class Route implements HttpFunction {
         // cloud function
         // see "https://cloud.google.com/functions/docs/configuring/secrets#gcloud"
         SERVICE_ACCOUNT_KEY,
+        PSOXY_SALT,
     }
 
     /**
@@ -85,13 +87,11 @@ public class Route implements HttpFunction {
     Sanitizer sanitizer;
 
     void initSanitizer() {
-        //TODO: pull salt from Secret Manager
         sanitizer = new SanitizerImpl(
             Sanitizer.Options.builder()
-                    .rules(PrebuiltSanitizerRules.MAP.get(getRequiredConfigProperty(ConfigProperty.SOURCE)))
-                .pseudonymizationSalt("salt")
-                .build()
-        );
+                .rules(PrebuiltSanitizerRules.MAP.get(getRequiredConfigProperty(ConfigProperty.SOURCE)))
+                .pseudonymizationSalt(getOptionalConfigProperty(ConfigProperty.PSOXY_SALT).orElse("salt"))
+                .build());
     }
 
     @Override
@@ -133,26 +133,36 @@ public class Route implements HttpFunction {
         // return response
         response.setStatusCode(sourceApiResponse.getStatusCode());
 
-        if (sourceApiResponse.getStatusCode() == HttpStatusCodes.STATUS_CODE_OK) {
-            String json = new String(sourceApiResponse.getContent().readAllBytes(), sourceApiResponse.getContentCharset());
-            String pseudonymized = sanitizer.sanitize(targetUrl, json);
+        String responseContent =
+            new String(sourceApiResponse.getContent().readAllBytes(), sourceApiResponse.getContentCharset());
+        if (isSuccessFamily(sourceApiResponse.getStatusCode())) {
+            String pseudonymized = sanitizer.sanitize(targetUrl, responseContent);
             new ByteArrayInputStream(pseudonymized.getBytes(StandardCharsets.UTF_8))
                 .transferTo(response.getOutputStream());
         } else {
             //write error, which shouldn't contain PII, directly
+            log.log(Level.WARNING, "Source API Error " + responseContent);
             //TODO: could run this through DLP to be extra safe
-            sourceApiResponse.getContent().transferTo(response.getOutputStream());
+            new ByteArrayInputStream(responseContent.getBytes(StandardCharsets.UTF_8))
+                .transferTo(response.getOutputStream());
         }
     }
 
+    boolean isSuccessFamily (int statusCode) {
+        return statusCode >= 200 && statusCode < 300;
+    }
 
+
+    @SneakyThrows
     GenericUrl buildTarget(HttpRequest request) {
-        String targetUri = "https://"
-            + getRequiredConfigProperty(ConfigProperty.TARGET_HOST)
-            + request.getPath().replace(System.getenv(RuntimeEnvironmentVariables.K_SERVICE.name()) + "/", "")
+        String path =
+            request.getPath()
+                .replace(System.getenv(RuntimeEnvironmentVariables.K_SERVICE.name()) + "/", "")
             + request.getQuery().map(s -> "?" + s).orElse("");
 
-        return new GenericUrl(targetUri);
+        URL url = new URL("https", getRequiredConfigProperty(ConfigProperty.TARGET_HOST), path);
+
+        return new GenericUrl(url.toString());
     }
 
     String getRequiredConfigProperty(ConfigProperty property) {
@@ -163,13 +173,15 @@ public class Route implements HttpFunction {
         return value;
     }
 
+    Optional<String> getOptionalConfigProperty(ConfigProperty property) {
+        return Optional.ofNullable(System.getenv(property.name()));
+    }
+
     Optional<List<String>> getHeader(HttpRequest request, ControlHeader header) {
         return Optional.ofNullable(request.getHeaders().get(header.getHttpHeader()));
     }
 
-    Optional<String> getOptionalConfigProperty(ConfigProperty property) {
-        return Optional.ofNullable(System.getenv(property.name()));
-    }
+
 
     @SneakyThrows
     HttpRequestFactory getRequestFactory(HttpRequest request) {
@@ -181,18 +193,17 @@ public class Route implements HttpFunction {
         // eg, OAuth2CredentialsWithRefresh.newBuilder(), etc ..
 
         //assume that in cloud function env, this will get ours ...
-        Optional<String> serviceAccountUser =
+        Optional<String> accountToImpersonate =
             getHeader(request, ControlHeader.USER_TO_IMPERSONATE)
                 .map(values -> values.stream().findFirst().orElseThrow());
 
-        serviceAccountUser.ifPresentOrElse(
+        accountToImpersonate.ifPresentOrElse(
             user -> log.info("User to impersonate: " + user),
             () -> log.warning("we usually expect a user to impersonate"));
 
-        GoogleCredentials credentials = quietGetApplicationDefault(serviceAccountUser,
-            Arrays.stream(getRequiredConfigProperty(ConfigProperty.OAUTH_SCOPES).split(",")).collect(Collectors.toSet()));
-
-
+        GoogleCredentials credentials = quietGetApplicationDefault(accountToImpersonate,
+            Arrays.stream(getRequiredConfigProperty(ConfigProperty.OAUTH_SCOPES).split(","))
+                .collect(Collectors.toSet()));
 
         HttpCredentialsAdapter initializer = new HttpCredentialsAdapter(credentials);
 

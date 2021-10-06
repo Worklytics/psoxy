@@ -14,6 +14,7 @@ individual.
 code review and white box penetration testing.
 3. **simple** - psoxy's functionality will focus on performing secure authentication with the 3rd party API and then perform minimal transformation on the response (pseudonymization, field filtering). to ease code review and auditing of its behavior.
 
+
 ### Future
 1. **multi-cloud support** - using [Spring Cloud Function](https://spring.io/projects/spring-cloud-function), we aim to provide support for the major cloud providers.
 2. **incoming webhooks**
@@ -49,13 +50,21 @@ As of Sept 2021, the following sources can be connected via psoxy:
 ## Development
 
 Can run locally via IntelliJ + maven, using run config:
-  - `psoxy - run gmail  (located in `.idea/runConfigurations`)
+<<<<<<< HEAD
+  - `psoxy [function:run...]` (located in `.idea/runConfigurations`)
+=======
+  - `psoxy - run gmail`  (located in `.idea/runConfigurations`)
+>>>>>>> main
 
 Or from command line:
 
 ```shell
 cd java
+<<<<<<< HEAD
+mvn function:run -Drun.functionTarget=co.worklytics.psoxy.HelloWorld
+=======
 mvn function:run -Drun.functionTarget=co.worklytics.psoxy.Route
+>>>>>>> main
 ```
 
 By default, that serves the function from http://localhost:8080.

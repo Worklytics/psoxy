@@ -15,6 +15,18 @@ content
 ```terraform
 billing_account_id = "--your billing account id--"
 project_id         = "--desired project id (must be unique)--"
+folder_id           = "--numeric id of GCP folder in which to put the project--"
+environment_name    = "--helpful name to identify your environment--"
+worklytics_sa_email = "--email address of service account that personifies your Worklytics account--"
+```
+
+for example, Erik's personal env would appear as follows:
+```terraform
+billing_account_id  = "002DF4-4D356E-2123F9"
+folder_id           = "335768754038"          # our devel folder
+environment_name    = "erik"
+project_id          = "psoxy-dev-erik"
+worklytics_sa_email = "worklytics-dev-local-shared@worklytics-staging.iam.gserviceaccount.com"
 ```
 
 Initialize your configuration (at this location in directory hierarchy):
@@ -30,3 +42,4 @@ terraform apply
 
 
 Review the plan, and confirm to apply.
+

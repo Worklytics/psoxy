@@ -8,6 +8,17 @@ import java.util.List;
 
 public interface Sanitizer {
 
+
+    /**
+     * rules that control how data source API is sanitized, including support for:
+     *   - pseudonymizing values in JSON response
+     *   - redacting values in JSON response
+     *
+     * in principle, these are generic transforms and - with pseudonymization - it makes sense
+     * to support composing them. But a generic system for rules + transform chain is more than
+     * the use case requires - but probably more complicated to develop with. Goal should be
+     * to make specifying an implementation of Sanitizer.Options to be as simple as possible.
+     */
     @Builder
     @Value
     class Rules {
@@ -44,16 +55,8 @@ public interface Sanitizer {
         List<Rule> redactions;
     }
 
-    /**
-     * options that control how data source API is sanitized, including support for:
-     *   - pseudonymizing values in JSON response
-     *   - redacting values in JSON response
-     *
-     * in principle, these are generic transforms and - with pseudonymization - it makes sense
-     * to support composing them. But a generic system for rules + transform chain is more than
-     * the use case requires - but probably more complicated to develop with. Goal should be
-     * to make specifying an implementation of Sanitizer.Options to be as simple as possible.
-     */
+
+
     @With
     @Builder
     @Value
