@@ -49,7 +49,7 @@ As of Sept 2021, the following sources can be connected via psoxy:
 ## Development
 
 Can run locally via IntelliJ + maven, using run config:
-  - `psoxy - run gmail  (located in `.idea/runConfigurations`)
+  - `psoxy - run gmail`  (located in `.idea/runConfigurations`)
 
 Or from command line:
 
