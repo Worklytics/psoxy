@@ -71,7 +71,7 @@ public class Route implements HttpFunction {
         // ServiceAccountCredentials::createDelegated does exactly the same thing, and is more correct
         // - the service account is impersonated the user. (user's Google Workspace tenant has
         // made a domain-wide delegation grant to the service)
-        SERVICE_ACCOUNT_USER("Service-Account-User"),
+        USER_TO_IMPERSONATE("User-To-Impersonate"),
         ;
 
         @NonNull
@@ -180,7 +180,7 @@ public class Route implements HttpFunction {
 
         //assume that in cloud function env, this will get ours ...
         Optional<String> serviceAccountUser =
-            getHeader(request, ControlHeader.SERVICE_ACCOUNT_USER)
+            getHeader(request, ControlHeader.USER_TO_IMPERSONATE)
                 .map(values -> values.stream().findFirst().orElseThrow());
 
         serviceAccountUser.ifPresentOrElse(

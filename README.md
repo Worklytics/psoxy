@@ -98,12 +98,12 @@ gcloud alpha functions add-iam-policy-binding psoxy-gmail --region=us-central1 -
 curl -X GET \
 https://us-central1-psoxy-dev-erik.cloudfunctions.net/psoxy-gmail/gmail/v1/users/me/messages/17c3b1911726ef3f\?format=metadata \
 -H "Authorization: Bearer $(gcloud auth print-identity-token)" \
--H "X-Psoxy-Service-Account-User: erik@worklytics.co"
+-H "X-Psoxy-User-To-Impersonate: erik@worklytics.co"
 ```
 
 ```shell
 curl -X GET \
 https://us-central1-psoxy-dev-erik.cloudfunctions.net/psoxy-google-chat/admin/reports/v1/activity/users/all/applications/chat \
 -H "Authorization: Bearer $(gcloud auth print-identity-token)" \
--H "X-Psoxy-Service-Account-User: erik@worklytics.co"
+-H "X-Psoxy-User-To-Impersonate: erik@worklytics.co"
 ```
