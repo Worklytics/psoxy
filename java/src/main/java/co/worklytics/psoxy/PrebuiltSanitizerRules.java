@@ -27,8 +27,17 @@ public class PrebuiltSanitizerRules {
        )
        .build();
 
+   static final Sanitizer.Rules GDIRECTORY = Sanitizer.Rules.builder()
+       .build();
+
+    static final Sanitizer.Rules GCAL = Sanitizer.Rules.builder()
+        .build();
+
+
 
     static public final Map<String, Sanitizer.Rules> MAP = ImmutableMap.<String, Sanitizer.Rules>builder()
+        .put("gcal", GCAL)
+        .put("gdirectory", GDIRECTORY)
         .put("gmail", GMAIL_V1)
         .put("google-chat", GOOGLE_CHAT)
         .build();
