@@ -2,15 +2,16 @@ package co.worklytics.psoxy;
 
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.Builder;
-import lombok.Value;
+import lombok.*;
 
 /**
  * pseudonymized form of an account identifier
  *
  */
+@NoArgsConstructor //for jackson
+@AllArgsConstructor //for builder
 @Builder
-@Value
+@Data
 public class Pseudonym {
 
     String hash;
