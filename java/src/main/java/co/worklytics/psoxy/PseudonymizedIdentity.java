@@ -12,7 +12,14 @@ import lombok.*;
 @AllArgsConstructor //for builder
 @Builder
 @Data
-public class Pseudonym {
+public class PseudonymizedIdentity {
+
+    /**
+     * scope of the identity; eg, 'email', 'slack', etc.
+     *
+     * identity is considered unique within its scope.
+     */
+    String scope;
 
     String hash;
 

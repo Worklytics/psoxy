@@ -1,6 +1,6 @@
 package co.worklytics.psoxy.impl;
 
-import co.worklytics.psoxy.Pseudonym;
+import co.worklytics.psoxy.PseudonymizedIdentity;
 import co.worklytics.psoxy.Sanitizer;
 import co.worklytics.test.TestUtils;
 import com.google.api.client.http.GenericUrl;
@@ -78,7 +78,7 @@ class SanitizerImplTest {
     })
     @ParameterizedTest
     void emailCanonicalEquivalents(String mailHeaderValue) {
-        Pseudonym canonicalExample = sanitizer.pseudonymize(ALICE_CANONICAL);
+        PseudonymizedIdentity canonicalExample = sanitizer.pseudonymize(ALICE_CANONICAL);
 
         assertEquals(canonicalExample.getHash(),
             sanitizer.pseudonymize(mailHeaderValue).getHash());
@@ -93,7 +93,7 @@ class SanitizerImplTest {
     })
     @ParameterizedTest
     void emailCanonicalDistinct(String mailHeaderValue) {
-        Pseudonym canonicalExample = sanitizer.pseudonymize(ALICE_CANONICAL);
+        PseudonymizedIdentity canonicalExample = sanitizer.pseudonymize(ALICE_CANONICAL);
 
         assertNotEquals(canonicalExample.getHash(),
             sanitizer.pseudonymize(mailHeaderValue).getHash());

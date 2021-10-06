@@ -1,6 +1,6 @@
 package co.worklytics.psoxy.impl;
 
-import co.worklytics.psoxy.Pseudonym;
+import co.worklytics.psoxy.PseudonymizedIdentity;
 import co.worklytics.psoxy.Sanitizer;
 import com.google.api.client.http.GenericUrl;
 import com.google.common.base.Preconditions;
@@ -85,11 +85,11 @@ public class SanitizerImpl implements Sanitizer {
         }
     }
 
-    Pseudonym pseudonymize(Object value) {
+    PseudonymizedIdentity pseudonymize(Object value) {
         Preconditions.checkArgument(value instanceof String || value instanceof Number,
             "Value must be some basic type (eg JSON leaf, not node)");
 
-        Pseudonym.PseudonymBuilder builder = Pseudonym.builder();
+        PseudonymizedIdentity.PseudonymizedIdentityBuilder builder = PseudonymizedIdentity.builder();
         String canonicalValue;
         //q: this auto-detect a good idea? Or invert control and let caller specify with a header
         // or something??
