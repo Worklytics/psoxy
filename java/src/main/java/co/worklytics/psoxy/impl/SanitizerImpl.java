@@ -94,6 +94,9 @@ public class SanitizerImpl implements Sanitizer {
         //q: this auto-detect a good idea? Or invert control and let caller specify with a header
         // or something??
         if (value instanceof String && EmailAddressValidator.isValid((String) value)) {
+
+
+
             String domain = EmailAddressParser.getDomain((String) value, EmailAddressCriteria.DEFAULT, true);
             builder.domain(domain);
 
@@ -103,6 +106,11 @@ public class SanitizerImpl implements Sanitizer {
                     .toLowerCase()
                 + "@"
                 + domain.toLowerCase();
+
+            //q: do something with the personal name??
+            // NO --> it is not going to be reliable (except for From, will fill with whatever
+            // sender has for the person in their Contacts), and in enterprise use-cases we
+            // shouldn't need it for matching
         } else {
             canonicalValue = value.toString();
         }
