@@ -2,7 +2,6 @@ package co.worklytics.psoxy;
 
 import com.google.api.client.http.GenericUrl;
 import lombok.*;
-import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.Serializable;
 import java.util.List;

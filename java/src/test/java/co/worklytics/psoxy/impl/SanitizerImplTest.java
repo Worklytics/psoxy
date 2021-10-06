@@ -5,7 +5,6 @@ import co.worklytics.psoxy.Pseudonym;
 import co.worklytics.psoxy.Sanitizer;
 import co.worklytics.test.TestUtils;
 import com.google.api.client.http.GenericUrl;
-import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
