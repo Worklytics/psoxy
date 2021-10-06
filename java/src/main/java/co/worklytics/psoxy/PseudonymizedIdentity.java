@@ -18,7 +18,10 @@ public class PseudonymizedIdentity {
      * scope of the identity; eg, 'email', 'slack', etc.
      *
      * identity is considered unique within its scope.
+     *
+     * NOTE: `null` scope means scope is implicit from identifier's context
      */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     String scope;
 
     String hash;
@@ -30,10 +33,15 @@ public class PseudonymizedIdentity {
     // will be decrypted
 
     /**
-     * some sort of organizational domain. for emails, this has usual meaning; but there are more
-     * cases:
-     *   - Slack cross-account messages
-     *   - GitHub organizations
+     * some sort of organizational domain, if and only if identifier has an immutable 1:1
+     * association with the domain.
+     *
+     * eg, for emails, this has the usual mean.
+     * but GitHub identifiers, it would alway be null because github users may belong to multiple
+     * organizations; and may join/leave
+     *
+     * NOTE: `null` domain may simply imply that it's implied by the identifier's context, not
+     * that identity doesn't belong to a domain
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     String domain;

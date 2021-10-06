@@ -99,6 +99,7 @@ public class SanitizerImpl implements Sanitizer {
 
             String domain = EmailAddressParser.getDomain((String) value, EmailAddressCriteria.DEFAULT, true);
             builder.domain(domain);
+            builder.scope("email");
 
             //NOTE: lower-case here is NOT stipulated by RFC
             canonicalValue =
@@ -112,6 +113,11 @@ public class SanitizerImpl implements Sanitizer {
             // sender has for the person in their Contacts), and in enterprise use-cases we
             // shouldn't need it for matching
         } else {
+            //absence of scope/domain don't mean this identifier ISN'T qualified by them. it just
+            // means they're implicit in context, perhaps implied by something at higher level
+            //so how do we fill scope in such cases?
+            // leave to orchestration layer, which knows the context??
+
             canonicalValue = value.toString();
         }
         if (canonicalValue != null) {
