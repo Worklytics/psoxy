@@ -116,7 +116,8 @@ public class SanitizerImpl implements Sanitizer {
         if (StringUtils.isBlank((String) value)) {
             return new ArrayList<>();
         } else {
-            //q: is this safe??? do we need to consider quotes???
+            //NOTE: this does NOT seem to work for lists containing empty values (eg ",,"), which
+            // per RFC should be allowed ....
             if (EmailAddressParser.isValidAddressList((String) value, EmailAddressCriteria.DEFAULT)) {
                 InternetAddress[] addresses =
                     EmailAddressParser.extractHeaderAddresses((String) value, EmailAddressCriteria.DEFAULT, true);
@@ -140,6 +141,9 @@ public class SanitizerImpl implements Sanitizer {
         String canonicalValue;
         //q: this auto-detect a good idea? Or invert control and let caller specify with a header
         // or something??
+        //NOTE: use of EmailAddressValidator/Parser here is probably overly permissive, as there
+        // are many cases where we expect simple emails (eg, alice@worklytics.co), not all the
+        // possible variants with personal names / etc that may be allowed in email header values
         if (value instanceof String && EmailAddressValidator.isValid((String) value)) {
 
             String domain = EmailAddressParser.getDomain((String) value, EmailAddressCriteria.DEFAULT, true);

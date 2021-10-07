@@ -98,7 +98,9 @@ class SanitizerImplTest {
     @ValueSource(strings = {
         "alice@worklytics.co, bob@worklytics.co",
         "\"Alice Example\" <alice@worklytics.co>, \"Bob Example\" <bob@worklytics.co>",
-        "Alice.Example@worklytics.co,Bob@worklytics.co"
+        "Alice.Example@worklytics.co,Bob@worklytics.co",
+        // TODO: per RFC 2822, the following SHOULD work ... but indeed lib we're using fails on it
+        //"Alice.Example@worklytics.co, , Bob@worklytics.co"
     })
     @ParameterizedTest
     void pseudonymize_multivalueEmailHeaders(String headerValue) {
