@@ -18,32 +18,48 @@ public interface Sanitizer {
      * to support composing them. But a generic system for rules + transform chain is more than
      * the use case requires - but probably more complicated to develop with. Goal should be
      * to make specifying an implementation of Sanitizer.Options to be as simple as possible.
+     *
+     * q: good design?
+     *   - we now have 3 cases of value `Map`/`Transformation`
+     *
      */
     @Builder
     @Value
     class Rules {
 
+        /**
+         * a rule for matching parts of JSON API responses.
+         *
+         * match means the request URL matches `relativeUrlRegex` and the node in JSON response
+         * matches at least one of `jsonPaths`
+         */
         @Builder
         @Value
         public static class Rule {
 
+            //must match request URL
             String relativeUrlRegex;
 
+            // json nodes that match ANY of these paths will be matches
             @Singular
             List<String> jsonPaths;
         }
 
         /**
-         * list of relativeUrl regex --> jsonPaths of values to pseudonymize
+         * values in response matching any of these rules will be pseudonymized
          *
-         * q: do we need to support canonicalization first?
-         *     eg, "Erik Schultink <erik@worklytics.co>" --> "erik@worklytics.co" -->
-         *
-         * q: domain (organization) preservation - how??
          */
         @Singular
         @Getter
         List<Rule> pseudonymizations;
+
+        /**
+         * values in response matching these any of these rules will be split based on conventions
+         * for Email Headers, then pseudonymized
+         */
+        @Singular
+        @Getter
+        List<Rule> emailHeaderPseudonymizations;
 
         /**
          * list relativeUrl regex --> jsonPaths of values to redact
