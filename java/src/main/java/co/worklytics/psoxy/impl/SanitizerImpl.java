@@ -9,16 +9,23 @@ import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.java.Log;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hazlewood.connor.bottema.emailaddress.EmailAddressCriteria;
 import org.hazlewood.connor.bottema.emailaddress.EmailAddressParser;
 import org.hazlewood.connor.bottema.emailaddress.EmailAddressValidator;
 
+import javax.mail.internet.InternetAddress;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+@Log
 @RequiredArgsConstructor
 public class SanitizerImpl implements Sanitizer {
 
@@ -26,6 +33,7 @@ public class SanitizerImpl implements Sanitizer {
 
     List<Pair<Pattern, List<JsonPath>>> compiledPseudonymizations;
     List<Pair<Pattern, List<JsonPath>>> compiledRedactions;
+    List<Pair<Pattern, List<JsonPath>>> compiledEmailHeaderPseudonymizations;
 
     Configuration jsonConfiguration;
 
@@ -54,6 +62,9 @@ public class SanitizerImpl implements Sanitizer {
         if (compiledRedactions == null) {
             compiledRedactions = compile(options.getRules().getRedactions());
         }
+        if (compiledEmailHeaderPseudonymizations == null) {
+            compiledEmailHeaderPseudonymizations = compile(options.getRules().getEmailHeaderPseudonymizations());
+        }
         if (jsonConfiguration == null) {
             initConfiguration();
         }
@@ -63,10 +74,14 @@ public class SanitizerImpl implements Sanitizer {
         List<JsonPath> pseudonymizationsToApply =
             applicablePaths(compiledPseudonymizations, relativeUrl);
 
-
         List<JsonPath> redactionsToApply = applicablePaths(compiledRedactions, relativeUrl);
 
-        if (pseudonymizationsToApply.isEmpty() && redactionsToApply.isEmpty()) {
+        List<JsonPath> emailHeaderPseudonymizationsToApply =
+            applicablePaths(compiledEmailHeaderPseudonymizations, relativeUrl);
+
+
+
+        if (pseudonymizationsToApply.isEmpty() && redactionsToApply.isEmpty() && emailHeaderPseudonymizationsToApply.isEmpty()) {
             return jsonResponse;
         } else {
             Object document = jsonConfiguration.jsonProvider().parse(jsonResponse);
@@ -81,7 +96,39 @@ public class SanitizerImpl implements Sanitizer {
                     .map(document, this::pseudonymizeToJson, jsonConfiguration);
             }
 
+            for (JsonPath pseudonymization : emailHeaderPseudonymizationsToApply) {
+                document = pseudonymization
+                    .map(document, this::pseudonymizeEmailHeaderToJson, jsonConfiguration);
+            }
+
+
             return jsonConfiguration.jsonProvider().toJson(document);
+        }
+    }
+
+    List<PseudonymizedIdentity> pseudonymizeEmailHeader(Object value) {
+        if (value == null) {
+            return null;
+        }
+
+        Preconditions.checkArgument(value instanceof String,"Value must be string");
+
+        if (StringUtils.isBlank((String) value)) {
+            return new ArrayList<>();
+        } else {
+            //NOTE: this does NOT seem to work for lists containing empty values (eg ",,"), which
+            // per RFC should be allowed ....
+            if (EmailAddressParser.isValidAddressList((String) value, EmailAddressCriteria.DEFAULT)) {
+                InternetAddress[] addresses =
+                    EmailAddressParser.extractHeaderAddresses((String) value, EmailAddressCriteria.DEFAULT, true);
+                return Arrays.stream(addresses)
+                    .map(InternetAddress::getAddress)
+                    .map(this::pseudonymize)
+                    .collect(Collectors.toList());
+            } else {
+                log.log(Level.WARNING, "Valued matched by emailHeader rule is not valid address list, but not blank");
+                return null;
+            }
         }
     }
 
@@ -94,6 +141,9 @@ public class SanitizerImpl implements Sanitizer {
         String canonicalValue;
         //q: this auto-detect a good idea? Or invert control and let caller specify with a header
         // or something??
+        //NOTE: use of EmailAddressValidator/Parser here is probably overly permissive, as there
+        // are many cases where we expect simple emails (eg, alice@worklytics.co), not all the
+        // possible variants with personal names / etc that may be allowed in email header values
         if (value instanceof String && EmailAddressValidator.isValid((String) value)) {
 
             String domain = EmailAddressParser.getDomain((String) value, EmailAddressCriteria.DEFAULT, true);
@@ -128,6 +178,9 @@ public class SanitizerImpl implements Sanitizer {
         return configuration.jsonProvider().toJson(pseudonymize(value));
     }
 
+    String pseudonymizeEmailHeaderToJson(Object value, Configuration configuration) {
+        return configuration.jsonProvider().toJson(pseudonymizeEmailHeader(value));
+    }
 
     private List<Pair<Pattern, List<JsonPath>>> compile(List<Rules.Rule> rules) {
         return rules.stream()

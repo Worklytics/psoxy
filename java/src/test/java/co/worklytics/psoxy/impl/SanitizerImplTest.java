@@ -10,6 +10,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.List;
+import java.util.Objects;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class SanitizerImplTest {
@@ -47,8 +50,9 @@ class SanitizerImplTest {
         assertFalse(sanitized.contains(jsonPart.replaceAll("\\s","")));
         assertFalse(sanitized.contains("erik@worklytics.co"));
         assertFalse(sanitized.contains("Subject"));
-
     }
+
+
 
     @ValueSource(strings = {
         "alice@worklytics.co",
@@ -89,5 +93,19 @@ class SanitizerImplTest {
 
         assertNotEquals(canonicalExample.getHash(),
             sanitizer.pseudonymize(mailHeaderValue).getHash());
+    }
+
+    @ValueSource(strings = {
+        "alice@worklytics.co, bob@worklytics.co",
+        "\"Alice Example\" <alice@worklytics.co>, \"Bob Example\" <bob@worklytics.co>",
+        "Alice.Example@worklytics.co,Bob@worklytics.co",
+        // TODO: per RFC 2822, the following SHOULD work ... but indeed lib we're using fails on it
+        //"Alice.Example@worklytics.co, , Bob@worklytics.co"
+    })
+    @ParameterizedTest
+    void pseudonymize_multivalueEmailHeaders(String headerValue) {
+        List<PseudonymizedIdentity> pseudonyms = sanitizer.pseudonymizeEmailHeader(headerValue);
+        assertEquals(2, pseudonyms.size());
+        assertTrue(pseudonyms.stream().allMatch(p -> Objects.equals("worklytics.co", p.getDomain())));
     }
 }
