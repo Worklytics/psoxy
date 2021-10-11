@@ -123,7 +123,9 @@ service_account_email = module.google-chat-connector.service_account_email
 # we expect this GCP project to only be used of psoxy instances to be consumed from your Worklytics
 # account; otherwise, you can grant this role on specific functions
 resource "google_project_iam_member" "grant_cloudFunctionInvoker_to_worklytics" {
+  for_each = toset(var.worklytics_sa_emails)
+
   project = var.project_id
-  member  = "serviceAccount:${var.worklytics_sa_email}"
+  member  = "serviceAccount:${each.value}"
   role    = "roles/cloudfunctions.invoker"
 }
