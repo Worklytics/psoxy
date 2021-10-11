@@ -73,7 +73,7 @@ public class SanitizerImpl implements Sanitizer {
 
             for (JsonPath redaction : redactionsToApply) {
                 document = redaction
-                    .map(document, (n, config) -> null, jsonConfiguration);
+                    .delete(document,jsonConfiguration);
             }
 
             for (JsonPath pseudonymization : pseudonymizationsToApply) {
