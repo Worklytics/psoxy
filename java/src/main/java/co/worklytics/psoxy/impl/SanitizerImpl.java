@@ -6,6 +6,7 @@ import com.google.api.client.http.GenericUrl;
 import com.google.common.base.Preconditions;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import lombok.RequiredArgsConstructor;
@@ -42,7 +43,8 @@ public class SanitizerImpl implements Sanitizer {
         // with JsonPath.
         this.jsonConfiguration = Configuration.defaultConfiguration()
             .jsonProvider(new JacksonJsonProvider())
-            .mappingProvider(new JacksonMappingProvider());
+            .mappingProvider(new JacksonMappingProvider())
+            .setOptions(Option.SUPPRESS_EXCEPTIONS); //we specifically want to ignore PATH_NOT_FOUND cases
     }
 
     List<JsonPath> applicablePaths(List<Pair<Pattern, List<JsonPath>>> rules, String relativeUrl) {
@@ -88,7 +90,7 @@ public class SanitizerImpl implements Sanitizer {
 
             for (JsonPath redaction : redactionsToApply) {
                 document = redaction
-                    .delete(document,jsonConfiguration);
+                    .delete(document, jsonConfiguration);
             }
 
             for (JsonPath pseudonymization : pseudonymizationsToApply) {

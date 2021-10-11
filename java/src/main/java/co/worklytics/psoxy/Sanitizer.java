@@ -1,10 +1,13 @@
 package co.worklytics.psoxy;
 
 import com.google.api.client.http.GenericUrl;
+import com.jayway.jsonpath.JsonPath;
 import lombok.*;
+import lombok.extern.java.Log;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public interface Sanitizer {
 
@@ -25,6 +28,7 @@ public interface Sanitizer {
      */
     @Builder
     @Value
+    @Log
     class Rules {
 
         /**
@@ -43,6 +47,17 @@ public interface Sanitizer {
             // json nodes that match ANY of these paths will be matches
             @Singular
             List<String> jsonPaths;
+
+            public void validate() {
+                Pattern.compile(relativeUrlRegex);
+                jsonPaths.forEach(p -> {
+                    try {
+                        JsonPath.compile(p);
+                    } catch (Throwable e) {
+                        throw new Error( "JsonPath failed to compile: " + p, e);
+                    }
+                });
+            }
         }
 
         /**
@@ -69,6 +84,12 @@ public interface Sanitizer {
         @Singular
         @Getter
         List<Rule> redactions;
+
+        public void validate() {
+            redactions.forEach(Rule::validate);
+            pseudonymizations.forEach(Rule::validate);
+            emailHeaderPseudonymizations.forEach(Rule::validate);
+        }
     }
 
 

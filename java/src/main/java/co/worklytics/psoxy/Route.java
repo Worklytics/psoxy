@@ -1,6 +1,7 @@
 package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.impl.SanitizerImpl;
+import co.worklytics.psoxy.rules.google.PrebuiltSanitizerRules;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpTransport;

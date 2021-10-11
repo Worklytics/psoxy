@@ -1,6 +1,6 @@
 package co.worklytics.psoxy.impl;
 
-import co.worklytics.psoxy.PrebuiltSanitizerRules;
+import co.worklytics.psoxy.rules.google.PrebuiltSanitizerRules;
 import co.worklytics.psoxy.PseudonymizedIdentity;
 import co.worklytics.psoxy.Sanitizer;
 import co.worklytics.test.TestUtils;
