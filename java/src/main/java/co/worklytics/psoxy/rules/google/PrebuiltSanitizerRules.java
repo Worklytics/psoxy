@@ -137,7 +137,6 @@ public class PrebuiltSanitizerRules {
         )
         .redaction(Rule.builder()
             .relativeUrlRegex("\\/admin\\/reports\\/v1\\/activity\\/users\\/all\\/applications\\/meet.*")
-            .jsonPath("$.items[*].actor.email")
             .jsonPath("$.items[*].events[*].parameters[?(@.name in ['display_name'])].value")
             .build()
         )
