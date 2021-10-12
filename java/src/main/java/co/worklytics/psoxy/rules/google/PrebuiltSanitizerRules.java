@@ -10,6 +10,19 @@ import java.util.Map;
 public class PrebuiltSanitizerRules {
 
     static final Rules GCAL = Rules.builder()
+        .pseudonymization(Rule.builder()
+            .relativeUrlRegex("\\/calendar\\/v3\\/calendars\\/.*\\/events.*")
+            .jsonPath("$.items[*].creator.email")
+            .jsonPath("$.items[*].organizer.email")
+            .jsonPath("$.items[*].attendees[*].email")
+            .build())
+        .redaction(Rule.builder()
+            .relativeUrlRegex("\\/calendar\\/v3\\/calendars\\/.*\\/events.*")
+            .jsonPath("$.items[*].creator.displayName")
+            .jsonPath("$.items[*].organizer.displayName")
+            .jsonPath("$.items[*].attendees[*].displayName")
+            .jsonPath("$.items[*].extendedProperties.private")
+            .build())
         .build();
 
     static final Rules GOOGLE_CHAT = Rules.builder()

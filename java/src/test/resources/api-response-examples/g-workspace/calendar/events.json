@@ -1,0 +1,877 @@
+{
+  "kind": "calendar#events",
+  "etag": "\"p32cen2vjtn1f60g\"",
+  "summary": "asdfasdf ",
+  "updated": "2021-10-11T17:14:59.183Z",
+  "timeZone": "America/Los_Angeles",
+  "accessRole": "owner",
+  "defaultReminders": [
+    {
+      "method": "popup",
+      "minutes": 10
+    }
+  ],
+  "nextPageToken": "CigKGmpuYXRicmIzaTM3OXE0Nmd1Y21nYmtqbjVrGAEggICA_PXvoL8VGg8IABIAGJjri_PtwvMCIAEiBwgCEOjM5Bo=",
+  "items": [
+    {
+      "kind": "calendar#event",
+      "etag": "\"2857604998126000\"",
+      "id": "4ng57pimjsn4pqqpf9ggghs9c8",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=NG5nNTdwaW1qc240cHFxcGY5Z2dnaHM5YzggZXJpa0B3b3JrbHl0aWNzLmNv",
+      "created": "2015-04-11T16:17:05.000Z",
+      "updated": "2015-04-12T01:34:59.063Z",
+      "summary": "allen calls alice: accounting/tax",
+      "creator": {
+        "email": "allen.boyce@imagine.com",
+        "displayName": "allen boyce"
+      },
+      "organizer": {
+        "email": "allen.boyce@imagine.com",
+        "displayName": "allen boyce"
+      },
+      "start": {
+        "dateTime": "2015-04-13T13:00:00-07:00"
+      },
+      "end": {
+        "dateTime": "2015-04-13T13:30:00-07:00"
+      },
+      "iCalUID": "4ng57pimjsn4pqqpf9ggghs9c8@google.com",
+      "sequence": 0,
+      "attendees": [
+        {
+          "email": "alice@worklytics.co",
+          "self": true,
+          "responseStatus": "accepted"
+        }
+      ],
+      "guestsCanSeeOtherGuests": false,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"2861669907916000\"",
+      "id": "9erjlfjrm4tusemov9oavkt1ms",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=OWVyamxmanJtNHR1c2Vtb3Y5b2F2a3QxbXMgZXJpa0B3b3JrbHl0aWNzLmNv",
+      "created": "2015-05-05T14:09:13.000Z",
+      "updated": "2015-05-05T14:09:13.958Z",
+      "summary": "wework welcome brunch",
+      "creator": {
+        "email": "alice@worklytics.co",
+        "displayName": "alice example",
+        "self": true
+      },
+      "organizer": {
+        "email": "alice@worklytics.co",
+        "displayName": "alice example",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2015-05-05T07:30:00-07:00",
+        "timeZone": "UTC"
+      },
+      "end": {
+        "dateTime": "2015-05-05T08:30:00-07:00",
+        "timeZone": "UTC"
+      },
+      "iCalUID": "9erjlfjrm4tusemov9oavkt1ms@google.com",
+      "sequence": 0,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"2862697557600000\"",
+      "id": "rn7mdh1c11kq19ebeu7ec7k7d0",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=cm43bWRoMWMxMWtxMTllYmV1N2VjN2s3ZDAgZXJpa0B3b3JrbHl0aWNzLmNv",
+      "created": "2015-05-11T12:52:47.000Z",
+      "updated": "2015-05-11T12:52:58.800Z",
+      "summary": "NYC TechBreakfast:s",
+      "description": "For full details, including the address, and to RSVP see:\nhttp://www.meetup.com/NYC-TechBreakfast/events/218601094/\nNYC TechBreakfast\nInteract with your peers in a monthly morning breakfast meetup. At this monthly breakfast get-together techies, developers, designers, and entrepreneurs...",
+      "location": " 770 Broadway, 6th Floor (Entrance on 9th St). - New York, NY",
+      "creator": {
+        "email": "bob@worklytics.co",
+        "displayName": "bob boss"
+      },
+      "organizer": {
+        "email": "bob@worklytics.co",
+        "displayName": "bob boss"
+      },
+      "start": {
+        "dateTime": "2015-05-12T05:00:00-07:00"
+      },
+      "end": {
+        "dateTime": "2015-05-12T08:00:00-07:00"
+      },
+      "iCalUID": "rn7mdh1c11kq19ebeu7ec7k7d0@google.com",
+      "sequence": 0,
+      "attendees": [
+        {
+          "email": "alice@worklytics.co",
+          "self": true,
+          "responseStatus": "needsAction"
+        },
+        {
+          "email": "bob@worklytics.co",
+          "displayName": "bob boss",
+          "organizer": true,
+          "responseStatus": "accepted"
+        }
+      ],
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"2867793053206000\"",
+      "id": "_60q30c1g60o30e1i60o4ac1g60rj8gpl88rj2c1h84s34h9g60s30c1g60o30c1g6oo3ee9l6gr36gpi84p48c1g64o30c1g60o30c1g60o30c1g60o32c1g60o30c1g60s3ega464s44h9p84p30g9k6t0k6e1o74q4ad218kqj0gi4690g",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=XzYwcTMwYzFnNjBvMzBlMWk2MG80YWMxZzYwcmo4Z3BsODhyajJjMWg4NHMzNGg5ZzYwczMwYzFnNjBvMzBjMWc2b28zZWU5bDZncjM2Z3BpODRwNDhjMWc2NG8zMGMxZzYwbzMwYzFnNjBvMzBjMWc2MG8zMmMxZzYwbzMwYzFnNjBzM2VnYTQ2NHM0NGg5cDg0cDMwZzlrNnQwazZlMW83NHE0YWQyMThrcWowZ2k0NjkwZyBlcmlrQHdvcmtseXRpY3MuY28",
+      "created": "2015-06-09T20:14:06.000Z",
+      "updated": "2015-06-10T00:35:26.603Z",
+      "summary": "TriNet Analysis w/ Worklytics ",
+      "description": "** You will receive a screen share link via join.me 5 minutes prior to the call tomorrow at 1:00 pm ET **\n\nBest,\nallen\n\n",
+      "location": "Dial-In Number: (555) 555-2310 / Conference Code: 262 276 3910 #",
+      "creator": {
+        "email": "alice@worklytics.co",
+        "displayName": "alice example",
+        "self": true
+      },
+      "organizer": {
+        "email": "allen.fishbeyn@trinet.com",
+        "displayName": "allen Fishbeyn"
+      },
+      "start": {
+        "dateTime": "2015-06-10T10:00:00-07:00"
+      },
+      "end": {
+        "dateTime": "2015-06-10T11:00:00-07:00"
+      },
+      "iCalUID": "040000008200E00074C5B7101A82E0080000000060795463C2A2D001000000000000000010000000087AD18BE9A20A47AC8894E4AE50BD2A",
+      "sequence": 0,
+      "attendees": [
+        {
+          "email": "alice@worklytics.co",
+          "displayName": "alice example",
+          "self": true,
+          "responseStatus": "accepted"
+        }
+      ],
+      "guestsCanInviteOthers": false,
+      "privateCopy": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"2871704984194000\"",
+      "id": "_6ko32d9o6spjee9k6oojid9m6gqjgcpm6cqjgc1i6sojic1p",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=XzZrbzMyZDlvNnNwamVlOWs2b29qaWQ5bTZncWpnY3BtNmNxamdjMWk2c29qaWMxcCBlcmlrQHdvcmtseXRpY3MuY28",
+      "created": "2015-07-02T15:47:57.000Z",
+      "updated": "2015-07-02T15:54:52.097Z",
+      "summary": "Call to discuss Worklytics issues",
+      "description": "Dear alice : \n\nYou have been invited to attend the following 8x8 Virtual Meeting:\n\nCall to discuss Worklytics issues\nThu, Jul 2, 2015 2:30 PM  - 3:30 PM US/Pacific\nModerator: Tom Drexel\nHost: Tom Drexel\n\n \n\nTo join the meeting, use the link below:\nhttp://virtualmeeting.8x8.com/join/?id=21404838&src=ucs \n\nTo Dial In to the Meeting, you may use the phone number below:\n16502096446\n\n\nMeeting ID:   214 048 38\n\nIf the links above do not work, you may need to copy the entire link and paste it into your web browser. If the link appears on more than one line, please ensure there are no blank spaces in the link after you copy and paste it.\n\nIMPORTANT NOTICE: This 8x8 service includes a feature that allows the moderator to record the audio portion of a meeting. If you do not wish audio to be recorded, please inform the moderator upon joining the meeting. Otherwise, you automatically consent to such recordings.",
+      "creator": {
+        "email": "alice@worklytics.co",
+        "displayName": "alice example",
+        "self": true
+      },
+      "organizer": {
+        "email": "tDrexel@lagroup.com",
+        "displayName": "Tom Drexel via Virtual Meeting"
+      },
+      "start": {
+        "dateTime": "2015-07-02T14:30:00-07:00"
+      },
+      "end": {
+        "dateTime": "2015-07-02T15:30:00-07:00"
+      },
+      "iCalUID": "501587379461956458363580271909",
+      "sequence": 0,
+      "attendees": [
+        {
+          "email": "alice@worklytics.co",
+          "displayName": "alice example",
+          "self": true,
+          "responseStatus": "accepted"
+        }
+      ],
+      "guestsCanInviteOthers": false,
+      "privateCopy": true,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"2871845322426000\"",
+      "id": "hqj9f8j87bobk671uterv14qos",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=aHFqOWY4ajg3Ym9iazY3MXV0ZXJ2MTRxb3MgZXJpa0B3b3JrbHl0aWNzLmNv",
+      "created": "2015-07-02T22:54:23.000Z",
+      "updated": "2015-07-03T11:24:21.213Z",
+      "summary": "Worklytics Welcome Call: matt calls alice @ (555) 575-7878",
+      "creator": {
+        "email": "allen.boyce@imagine.com",
+        "displayName": "allen boyce"
+      },
+      "organizer": {
+        "email": "allen.boyce@imagine.com",
+        "displayName": "allen boyce"
+      },
+      "start": {
+        "dateTime": "2015-07-06T10:00:00-07:00",
+        "timeZone": "UTC"
+      },
+      "end": {
+        "dateTime": "2015-07-06T11:00:00-07:00",
+        "timeZone": "UTC"
+      },
+      "iCalUID": "hqj9f8j87bobk671uterv14qos@google.com",
+      "sequence": 0,
+      "attendees": [
+        {
+          "email": "alice@worklytics.co",
+          "self": true,
+          "responseStatus": "accepted"
+        },
+        {
+          "email": "matt.baron@imagine.com",
+          "displayName": "matt baron",
+          "responseStatus": "accepted"
+        },
+        {
+          "email": "allen.boyce@imagine.com",
+          "displayName": "allen boyce",
+          "organizer": true,
+          "responseStatus": "accepted"
+        }
+      ],
+      "hangoutLink": "https://hangouts.google.com/hangouts/_/imagine.com/worklytics?hceid=YWxleC5ib3lkQGluZGluZXJvLmNvbQ.hqj9f8j87bobk671uterv14qos",
+      "conferenceData": {
+        "entryPoints": [
+          {
+            "entryPointType": "video",
+            "uri": "https://hangouts.google.com/hangouts/_/imagine.com/worklytics?hceid=YWxleC5ib3lkQGluZGluZXJvLmNvbQ.hqj9f8j87bobk671uterv14qos",
+            "label": "worklytics"
+          }
+        ],
+        "conferenceSolution": {
+          "key": {
+            "type": "eventNamedHangout"
+          },
+          "name": "Hangouts",
+          "iconUri": "https://lh5.googleusercontent.com/proxy/9vT2XwMHPzrIcW56Ic3FX6_OSYvrjHEwOUYOmA0eMoR-_sY59k4mQMd0JnqCp8GCOmqimFKP3vSeFaIe4k5MewpEcCuK6PXlB2Z4AKTMV78OB_CJqXHrrkAO-yf5FYJsiaTBwjUP9cU0lRlP-HPC2w"
+        },
+        "conferenceId": "worklytics",
+        "signature": "AGirE/LisFavKHZ9LBpCKUHuuzhL"
+      },
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"2872375871544000\"",
+      "id": "jbiusa5kkhpo2913tchl19b5so",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=amJpdXNhNWtraHBvMjkxM3RjaGwxOWI1c28gZXJpa0B3b3JrbHl0aWNzLmNv",
+      "created": "2015-07-06T13:04:48.000Z",
+      "updated": "2015-07-06T13:05:35.772Z",
+      "summary": "call re: Trademark",
+      "creator": {
+        "email": "alice@worklytics.co",
+        "displayName": "alice example",
+        "self": true
+      },
+      "organizer": {
+        "email": "alice@worklytics.co",
+        "displayName": "alice example",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2015-07-07T11:00:00-07:00",
+        "timeZone": "UTC"
+      },
+      "end": {
+        "dateTime": "2015-07-07T12:00:00-07:00",
+        "timeZone": "UTC"
+      },
+      "iCalUID": "jbiusa5kkhpo2913tchl19b5so@google.com",
+      "sequence": 0,
+      "attendees": [
+        {
+          "email": "alice@worklytics.co",
+          "displayName": "alice example",
+          "organizer": true,
+          "self": true,
+          "responseStatus": "accepted"
+        },
+        {
+          "email": "bob@worklytics.co",
+          "displayName": "bob boss",
+          "responseStatus": "accepted"
+        }
+      ],
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"2872405674482000\"",
+      "id": "1hbtigvntr4a3qcn3cmll391u0",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=MWhidGlndm50cjRhM3FjbjNjbWxsMzkxdTAgZXJpa0B3b3JrbHl0aWNzLmNv",
+      "created": "2015-07-06T17:13:57.000Z",
+      "updated": "2015-07-06T17:13:57.241Z",
+      "summary": "accounting call",
+      "creator": {
+        "email": "alice@worklytics.co",
+        "displayName": "alice example",
+        "self": true
+      },
+      "organizer": {
+        "email": "alice@worklytics.co",
+        "displayName": "alice example",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2015-07-13T10:00:00-07:00",
+        "timeZone": "UTC"
+      },
+      "end": {
+        "dateTime": "2015-07-13T11:00:00-07:00",
+        "timeZone": "UTC"
+      },
+      "iCalUID": "1hbtigvntr4a3qcn3cmll391u0@google.com",
+      "sequence": 0,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"2872405707438000\"",
+      "id": "nfebj89i4dngk6n0mbn8o4uo0o",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=bmZlYmo4OWk0ZG5nazZuMG1ibjhvNHVvMG8gZXJpa0B3b3JrbHl0aWNzLmNv",
+      "created": "2015-07-06T17:14:13.000Z",
+      "updated": "2015-07-06T17:14:13.719Z",
+      "summary": "call accounting",
+      "creator": {
+        "email": "alice@worklytics.co",
+        "displayName": "alice example",
+        "self": true
+      },
+      "organizer": {
+        "email": "alice@worklytics.co",
+        "displayName": "alice example",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2015-07-21T10:00:00-07:00",
+        "timeZone": "UTC"
+      },
+      "end": {
+        "dateTime": "2015-07-21T11:00:00-07:00",
+        "timeZone": "UTC"
+      },
+      "iCalUID": "nfebj89i4dngk6n0mbn8o4uo0o@google.com",
+      "sequence": 0,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"2872437725412000\"",
+      "id": "n9vpf34sl3so8np8khg6l4satk",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=bjl2cGYzNHNsM3NvOG5wOGtoZzZsNHNhdGsgZXJpa0B3b3JrbHl0aWNzLmNv",
+      "created": "2015-07-06T17:23:46.000Z",
+      "updated": "2015-07-06T21:41:02.706Z",
+      "summary": "Worklytics Check-In Call: matt calls alice @ (555) 575-7878",
+      "description": "matt will call alice to go over onboarding progress.",
+      "creator": {
+        "email": "matt.baron@imagine.com",
+        "displayName": "matt baron"
+      },
+      "organizer": {
+        "email": "matt.baron@imagine.com",
+        "displayName": "matt baron"
+      },
+      "start": {
+        "dateTime": "2015-07-13T10:00:00-07:00"
+      },
+      "end": {
+        "dateTime": "2015-07-13T10:30:00-07:00"
+      },
+      "iCalUID": "n9vpf34sl3so8np8khg6l4satk@google.com",
+      "sequence": 0,
+      "attendees": [
+        {
+          "email": "alice@worklytics.co",
+          "self": true,
+          "responseStatus": "accepted"
+        },
+        {
+          "email": "allen.boyce@imagine.com",
+          "displayName": "allen boyce",
+          "responseStatus": "needsAction"
+        },
+        {
+          "email": "matt.baron@imagine.com",
+          "displayName": "matt baron",
+          "organizer": true,
+          "responseStatus": "accepted"
+        }
+      ],
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"2872551692274000\"",
+      "id": "ovt4dgjk1c05ipog5nrvvauk1g",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=b3Z0NGRnamsxYzA1aXBvZzVucnZ2YXVrMWcgZXJpa0B3b3JrbHl0aWNzLmNv",
+      "created": "2015-07-06T17:24:36.000Z",
+      "updated": "2015-07-07T13:30:46.137Z",
+      "summary": "Worklytics Completion Call: matt calls alice @ (555) 575-7878",
+      "description": "matt will call alice to finalize onboarding.",
+      "creator": {
+        "email": "matt.baron@imagine.com",
+        "displayName": "matt baron"
+      },
+      "organizer": {
+        "email": "matt.baron@imagine.com",
+        "displayName": "matt baron"
+      },
+      "start": {
+        "dateTime": "2015-07-21T10:00:00-07:00"
+      },
+      "end": {
+        "dateTime": "2015-07-21T10:30:00-07:00"
+      },
+      "iCalUID": "ovt4dgjk1c05ipog5nrvvauk1g@google.com",
+      "sequence": 0,
+      "attendees": [
+        {
+          "email": "matt.baron@imagine.com",
+          "displayName": "matt baron",
+          "organizer": true,
+          "responseStatus": "accepted"
+        },
+        {
+          "email": "alice@worklytics.co",
+          "self": true,
+          "responseStatus": "accepted"
+        },
+        {
+          "email": "allen.boyce@imagine.com",
+          "displayName": "allen boyce",
+          "responseStatus": "needsAction"
+        }
+      ],
+      "hangoutLink": "https://hangouts.google.com/hangouts/_/imagine.com/worklytics?hceid=bWljaGFlbC53YXJyZW5AaW5kaW5lcm8uY29t.ovt4dgjk1c05ipog5nrvvauk1g",
+      "conferenceData": {
+        "entryPoints": [
+          {
+            "entryPointType": "video",
+            "uri": "https://hangouts.google.com/hangouts/_/imagine.com/worklytics?hceid=bWljaGFlbC53YXJyZW5AaW5kaW5lcm8uY29t.ovt4dgjk1c05ipog5nrvvauk1g",
+            "label": "worklytics"
+          }
+        ],
+        "conferenceSolution": {
+          "key": {
+            "type": "eventNamedHangout"
+          },
+          "name": "Hangouts",
+          "iconUri": "https://lh5.googleusercontent.com/proxy/9vT2XwMHPzrIcW56Ic3FX6_OSYvrjHEwOUYOmA0eMoR-_sY59k4mQMd0JnqCp8GCOmqimFKP3vSeFaIe4k5MewpEcCuK6PXlB2Z4AKTMV78OB_CJqXHrrkAO-yf5FYJsiaTBwjUP9cU0lRlP-HPC2w"
+        },
+        "conferenceId": "worklytics",
+        "signature": "AGirE/I5NKdV7MGFLooLvsUAOe1G"
+      },
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"2872705632040000\"",
+      "id": "n1fg7l6g2hn8rb390vrqdue6r8",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=bjFmZzdsNmcyaG44cmIzOTB2cnFkdWU2cjggZXJpa0B3b3JrbHl0aWNzLmNv",
+      "created": "2015-07-08T10:53:23.000Z",
+      "updated": "2015-07-08T10:53:36.020Z",
+      "summary": "John Lorenzo in Scotland",
+      "location": "Scotland",
+      "creator": {
+        "email": "alice@worklytics.co",
+        "displayName": "alice example",
+        "self": true
+      },
+      "organizer": {
+        "email": "alice@worklytics.co",
+        "displayName": "alice example",
+        "self": true
+      },
+      "start": {
+        "date": "2015-07-22"
+      },
+      "end": {
+        "date": "2015-08-01"
+      },
+      "transparency": "transparent",
+      "iCalUID": "n1fg7l6g2hn8rb390vrqdue6r8@google.com",
+      "sequence": 0,
+      "reminders": {
+        "useDefault": false,
+        "overrides": [
+          {
+            "method": "popup",
+            "minutes": 10
+          }
+        ]
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"2873812757966000\"",
+      "id": "sntalqfohd8h15335dteib5co4",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=c250YWxxZm9oZDhoMTUzMzVkdGVpYjVjbzQgZXJpa0B3b3JrbHl0aWNzLmNv",
+      "created": "2015-04-30T21:32:16.000Z",
+      "updated": "2015-07-14T20:39:38.983Z",
+      "summary": "move-in WeWork Soho West",
+      "location": "WeWork Soho West",
+      "creator": {
+        "email": "alice@worklytics.co",
+        "displayName": "alice example",
+        "self": true
+      },
+      "organizer": {
+        "email": "bob@worklytics.co",
+        "displayName": "bob boss"
+      },
+      "start": {
+        "dateTime": "2015-05-01T08:00:00-07:00",
+        "timeZone": "UTC"
+      },
+      "end": {
+        "dateTime": "2015-05-01T09:00:00-07:00",
+        "timeZone": "UTC"
+      },
+      "iCalUID": "sntalqfohd8h15335dteib5co4@google.com",
+      "sequence": 0,
+      "attendees": [
+        {
+          "email": "alice@worklytics.co",
+          "displayName": "alice example",
+          "self": true,
+          "responseStatus": "accepted"
+        }
+      ],
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"2876071418374000\"",
+      "id": "1npqt2ih6t6k0a0a5438veado8",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=MW5wcXQyaWg2dDZrMGEwYTU0Mzh2ZWFkbzggZXJpa0B3b3JrbHl0aWNzLmNv",
+      "created": "2015-07-27T22:03:38.000Z",
+      "updated": "2015-07-27T22:21:49.187Z",
+      "summary": "Worklytics \u003c\u003e imagine Completion Call",
+      "description": "matt will call alice to finalize onboarding.",
+      "creator": {
+        "email": "matt.baron@imagine.com",
+        "displayName": "matt baron"
+      },
+      "organizer": {
+        "email": "matt.baron@imagine.com",
+        "displayName": "matt baron"
+      },
+      "start": {
+        "dateTime": "2015-07-29T11:30:00-07:00"
+      },
+      "end": {
+        "dateTime": "2015-07-29T12:00:00-07:00"
+      },
+      "iCalUID": "1npqt2ih6t6k0a0a5438veado8@google.com",
+      "sequence": 0,
+      "attendees": [
+        {
+          "email": "alice@worklytics.co",
+          "self": true,
+          "responseStatus": "accepted"
+        },
+        {
+          "email": "matt.baron@imagine.com",
+          "displayName": "matt baron",
+          "organizer": true,
+          "responseStatus": "accepted"
+        }
+      ],
+      "hangoutLink": "https://hangouts.google.com/hangouts/_/imagine.com/alice-matt-wa?hceid=bWljaGFlbC53YXJyZW5AaW5kaW5lcm8uY29t.1npqt2ih6t6k0a0a5438veado8",
+      "conferenceData": {
+        "entryPoints": [
+          {
+            "entryPointType": "video",
+            "uri": "https://hangouts.google.com/hangouts/_/imagine.com/alice-matt-wa?hceid=bWljaGFlbC53YXJyZW5AaW5kaW5lcm8uY29t.1npqt2ih6t6k0a0a5438veado8",
+            "label": "alice-matt-wa"
+          }
+        ],
+        "conferenceSolution": {
+          "key": {
+            "type": "eventNamedHangout"
+          },
+          "name": "Hangouts",
+          "iconUri": "https://lh5.googleusercontent.com/proxy/9vT2XwMHPzrIcW56Ic3FX6_OSYvrjHEwOUYOmA0eMoR-_sY59k4mQMd0JnqCp8GCOmqimFKP3vSeFaIe4k5MewpEcCuK6PXlB2Z4AKTMV78OB_CJqXHrrkAO-yf5FYJsiaTBwjUP9cU0lRlP-HPC2w"
+        },
+        "conferenceId": "alice-matt-wa",
+        "signature": "AGirE/JNjEaBAmJv/sRjDC4x4uyQ"
+      },
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"2877373796216000\"",
+      "id": "one6oqtg5q66qtusrpbkv7839o",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=b25lNm9xdGc1cTY2cXR1c3JwYmt2NzgzOW8gZXJpa0B3b3JrbHl0aWNzLmNv",
+      "created": "2015-07-08T10:54:04.000Z",
+      "updated": "2015-08-04T11:14:58.108Z",
+      "summary": "John Lorenzo OOO",
+      "creator": {
+        "email": "alice@worklytics.co",
+        "displayName": "alice example",
+        "self": true
+      },
+      "organizer": {
+        "email": "alice@worklytics.co",
+        "displayName": "alice example",
+        "self": true
+      },
+      "start": {
+        "date": "2015-08-17"
+      },
+      "end": {
+        "date": "2015-08-22"
+      },
+      "transparency": "transparent",
+      "iCalUID": "one6oqtg5q66qtusrpbkv7839o@google.com",
+      "sequence": 1,
+      "reminders": {
+        "useDefault": false,
+        "overrides": [
+          {
+            "method": "popup",
+            "minutes": 10
+          }
+        ]
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"2877373891728000\"",
+      "id": "t938cd45divrg7qvhdusg1sjbc",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=dDkzOGNkNDVkaXZyZzdxdmhkdXNnMXNqYmMgZXJpa0B3b3JrbHl0aWNzLmNv",
+      "created": "2015-07-08T10:54:33.000Z",
+      "updated": "2015-08-04T11:15:45.864Z",
+      "summary": "John Lorenzo OOO",
+      "creator": {
+        "email": "alice@worklytics.co",
+        "displayName": "alice example",
+        "self": true
+      },
+      "organizer": {
+        "email": "alice@worklytics.co",
+        "displayName": "alice example",
+        "self": true
+      },
+      "start": {
+        "date": "2015-09-07"
+      },
+      "end": {
+        "date": "2015-09-12"
+      },
+      "transparency": "transparent",
+      "iCalUID": "t938cd45divrg7qvhdusg1sjbc@google.com",
+      "sequence": 1,
+      "reminders": {
+        "useDefault": false,
+        "overrides": [
+          {
+            "method": "popup",
+            "minutes": 10
+          }
+        ]
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"2884488010798000\"",
+      "id": "f8s1bg0ffpmcmlbj1dkou4s89g",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=ZjhzMWJnMGZmcG1jbWxiajFka291NHM4OWcgZXJpa0B3b3JrbHl0aWNzLmNv",
+      "created": "2015-09-02T14:09:06.000Z",
+      "updated": "2015-09-14T15:20:05.399Z",
+      "summary": "Meeting",
+      "description": "Capital Partners",
+      "creator": {
+        "email": "pboss@gmail.com",
+        "displayName": "bob boss"
+      },
+      "organizer": {
+        "email": "pboss@gmail.com",
+        "displayName": "bob boss"
+      },
+      "start": {
+        "dateTime": "2015-09-15T11:00:00-07:00"
+      },
+      "end": {
+        "dateTime": "2015-09-15T13:00:00-07:00"
+      },
+      "iCalUID": "f8s1bg0ffpmcmlbj1dkou4s89g@google.com",
+      "sequence": 1,
+      "attendees": [
+        {
+          "email": "pboss@gmail.com",
+          "displayName": "bob boss",
+          "organizer": true,
+          "responseStatus": "accepted"
+        },
+        {
+          "email": "alice.example@gmail.com",
+          "displayName": "alice example",
+          "responseStatus": "accepted"
+        },
+        {
+          "email": "bob@worklytics.co",
+          "displayName": "bob boss",
+          "responseStatus": "needsAction"
+        },
+        {
+          "email": "alice@worklytics.co",
+          "self": true,
+          "responseStatus": "needsAction"
+        }
+      ],
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"2888100971826000\"",
+      "id": "dbf9mdcqhnvkk7rjqd80que0b4",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=ZGJmOW1kY3FobnZrazdyanFkODBxdWUwYjQgZXJpa0B3b3JrbHl0aWNzLmNv",
+      "created": "2015-09-29T19:13:16.000Z",
+      "updated": "2015-10-05T13:08:05.913Z",
+      "summary": "WeWork AdTech Demo Day",
+      "creator": {
+        "email": "alice.example@gmail.com",
+        "displayName": "alice example"
+      },
+      "organizer": {
+        "email": "alice.example@gmail.com",
+        "displayName": "alice example"
+      },
+      "start": {
+        "dateTime": "2015-10-08T15:00:00-07:00"
+      },
+      "end": {
+        "dateTime": "2015-10-08T17:20:00-07:00"
+      },
+      "transparency": "transparent",
+      "iCalUID": "dbf9mdcqhnvkk7rjqd80que0b4@google.com",
+      "sequence": 0,
+      "attendees": [
+        {
+          "email": "alice.example@gmail.com",
+          "displayName": "alice example",
+          "organizer": true,
+          "responseStatus": "tentative"
+        },
+        {
+          "email": "alice@worklytics.co",
+          "self": true,
+          "responseStatus": "needsAction"
+        }
+      ],
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"2888308747888000\"",
+      "id": "s1giach0vrgsaklc25p6f2jpc0",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=czFnaWFjaDB2cmdzYWtsYzI1cDZmMmpwYzBfMjAxNTEwMDVUMTEwMDAwWiBlcmlrQHdvcmtseXRpY3MuY28",
+      "created": "2015-10-06T17:58:53.000Z",
+      "updated": "2015-10-06T17:59:33.944Z",
+      "summary": "call John",
+      "creator": {
+        "email": "alice@worklytics.co",
+        "self": true
+      },
+      "organizer": {
+        "email": "alice@worklytics.co",
+        "self": true
+      },
+      "start": {
+        "dateTime": "2015-10-05T04:00:00-07:00",
+        "timeZone": "America/New_York"
+      },
+      "end": {
+        "dateTime": "2015-10-05T04:30:00-07:00",
+        "timeZone": "America/New_York"
+      },
+      "recurrence": [
+        "RRULE:FREQ=WEEKLY;UNTIL=20151028T110000Z;BYDAY=MO,TU,WE,TH,FR"
+      ],
+      "iCalUID": "s1giach0vrgsaklc25p6f2jpc0@google.com",
+      "sequence": 1,
+      "reminders": {
+        "useDefault": true
+      },
+      "eventType": "default"
+    }
+  ]
+}
