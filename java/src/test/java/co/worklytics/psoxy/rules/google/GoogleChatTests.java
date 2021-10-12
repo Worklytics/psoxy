@@ -1,24 +1,21 @@
 package co.worklytics.psoxy.rules.google;
 
+import co.worklytics.psoxy.Rules;
 import co.worklytics.psoxy.Sanitizer;
 import co.worklytics.psoxy.impl.SanitizerImpl;
+import co.worklytics.psoxy.rules.RulesTest;
 import co.worklytics.test.TestUtils;
 import com.google.api.client.http.GenericUrl;
+import lombok.Getter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class GoogleChatTests {
+class GoogleChatTests  extends RulesTest {
 
-    SanitizerImpl sanitizer;
-
-    @BeforeEach
-    public void setup() {
-        sanitizer = new SanitizerImpl(Sanitizer.Options.builder()
-            .rules(PrebuiltSanitizerRules.GOOGLE_CHAT)
-            .build());
-    }
+    @Getter
+    final Rules rulesUnderTest = PrebuiltSanitizerRules.GOOGLE_CHAT;
 
     @Test
     void google_chat() {

@@ -1,25 +1,19 @@
 package co.worklytics.psoxy.rules.google;
 
-import co.worklytics.psoxy.Sanitizer;
-import co.worklytics.psoxy.impl.SanitizerImpl;
+import co.worklytics.psoxy.Rules;
+import co.worklytics.psoxy.rules.RulesTest;
 import co.worklytics.test.TestUtils;
 import com.google.api.client.http.GenericUrl;
-import org.junit.jupiter.api.BeforeEach;
+import lombok.Getter;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class CalendarTests {
+class CalendarTests extends RulesTest {
 
-    SanitizerImpl sanitizer;
-
-    @BeforeEach
-    public void setup() {
-        sanitizer = new SanitizerImpl(Sanitizer.Options.builder()
-            .rules(PrebuiltSanitizerRules.GCAL)
-            .build());
-    }
+    @Getter
+    final Rules rulesUnderTest = PrebuiltSanitizerRules.GCAL;
 
     @Test
     void events() {

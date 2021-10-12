@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.impl;
 
 import co.worklytics.psoxy.PseudonymizedIdentity;
+import co.worklytics.psoxy.Rules;
 import co.worklytics.psoxy.Sanitizer;
 import com.google.api.client.http.GenericUrl;
 import com.google.common.base.Preconditions;

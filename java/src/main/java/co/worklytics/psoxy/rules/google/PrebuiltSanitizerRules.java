@@ -1,8 +1,8 @@
 package co.worklytics.psoxy.rules.google;
 
 import com.google.common.collect.ImmutableMap;
-import static co.worklytics.psoxy.Sanitizer.Rules;
-import static co.worklytics.psoxy.Sanitizer.Rules.Rule;
+import co.worklytics.psoxy.Rules;
+import static co.worklytics.psoxy.Rules.Rule;
 
 
 import java.util.Map;

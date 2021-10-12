@@ -1,26 +1,23 @@
 package co.worklytics.psoxy.rules.google;
 
+import co.worklytics.psoxy.Rules;
 import co.worklytics.psoxy.Sanitizer;
 import co.worklytics.psoxy.impl.SanitizerImpl;
+import co.worklytics.psoxy.rules.RulesTest;
 import co.worklytics.test.TestUtils;
 import com.google.api.client.http.GenericUrl;
+import lombok.Getter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class GMailTests {
+public class GMailTests extends RulesTest {
 
-    SanitizerImpl sanitizer;
 
-    @BeforeEach
-    public void setup() {
-        sanitizer = new SanitizerImpl(Sanitizer.Options.builder()
-            .rules(PrebuiltSanitizerRules.GMAIL)
-            .build());
-    }
-
+    @Getter
+    final Rules rulesUnderTest = PrebuiltSanitizerRules.GMAIL;
 
     @Test
     void sanitize() {
