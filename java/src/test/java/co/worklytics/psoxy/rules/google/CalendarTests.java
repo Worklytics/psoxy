@@ -2,7 +2,6 @@ package co.worklytics.psoxy.rules.google;
 
 import co.worklytics.psoxy.Rules;
 import co.worklytics.psoxy.rules.RulesTest;
-import co.worklytics.test.TestUtils;
 import com.google.api.client.http.GenericUrl;
 import lombok.Getter;
 import org.junit.jupiter.api.Test;
@@ -15,9 +14,12 @@ class CalendarTests extends RulesTest {
     @Getter
     final Rules rulesUnderTest = PrebuiltSanitizerRules.GCAL;
 
+    @Getter
+    final String exampleDirectoryPath = "api-response-examples/g-workspace/calendar";
+
     @Test
     void events() {
-        String jsonString = new String(TestUtils.getData("api-response-examples/g-workspace/calendar/events.json"));
+        String jsonString = asJson("events.json");
 
         //verify precondition that example actually contains something we need to pseudonymize
         assertTrue(jsonString.contains("alice@worklytics.co"));

@@ -19,9 +19,12 @@ public class DirectoryTests extends RulesTest {
     @Getter
     final Rules rulesUnderTest = PrebuiltSanitizerRules.GDIRECTORY;
 
+    @Getter
+    final String exampleDirectoryPath = "api-response-examples/g-workspace/directory";
+
     @Test
     void user() {
-        String jsonString = new String(TestUtils.getData("api-response-examples/g-workspace/directory/user.json"));
+        String jsonString = asJson("user.json");
 
         //verify precondition that example actually contains something we need to pseudonymize
         assertTrue(jsonString.contains("alice@worklytics.co"));
@@ -35,7 +38,7 @@ public class DirectoryTests extends RulesTest {
 
     @Test
     void users() {
-        String jsonString = new String(TestUtils.getData("api-response-examples/g-workspace/directory/users.json"));
+        String jsonString = asJson("users.json");
 
         //verify precondition that example actually contains something we need to pseudonymize
         assertTrue(jsonString.contains("alice@worklytics.co"));

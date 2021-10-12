@@ -19,6 +19,9 @@ public class GMailTests extends RulesTest {
     @Getter
     final Rules rulesUnderTest = PrebuiltSanitizerRules.GMAIL;
 
+    @Getter
+    final String exampleDirectoryPath = "api-response-examples/g-workspace/gmail";
+
     @Test
     void sanitize() {
 
@@ -27,7 +30,7 @@ public class GMailTests extends RulesTest {
             "        \"value\": \"ops@worklytics.co\"\n" +
             "      }";
 
-        String jsonString = new String(TestUtils.getData("api-response-examples/g-workspace/gmail/message.json"));
+        String jsonString = asJson("message.json");
 
         //verify precondition that example actually contains something we need to pseudonymize
         assertTrue(jsonString.contains(jsonPart));

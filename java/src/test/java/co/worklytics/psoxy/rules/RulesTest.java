@@ -3,8 +3,7 @@ package co.worklytics.psoxy.rules;
 import co.worklytics.psoxy.Rules;
 import co.worklytics.psoxy.Sanitizer;
 import co.worklytics.psoxy.impl.SanitizerImpl;
-import co.worklytics.psoxy.rules.google.PrebuiltSanitizerRules;
-import lombok.Getter;
+import co.worklytics.test.TestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -33,5 +32,10 @@ abstract public class RulesTest {
 
     public abstract Rules getRulesUnderTest();
 
+    public abstract String getExampleDirectoryPath();
+
+    protected String asJson(String filePathWithinExampleDirectory) {
+        return new String(TestUtils.getData(getExampleDirectoryPath() + "/" + filePathWithinExampleDirectory));
+    }
 
 }

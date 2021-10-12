@@ -15,9 +15,12 @@ public class GDriveTests extends RulesTest {
     @Getter
     final Rules rulesUnderTest = PrebuiltSanitizerRules.GDRIVE;
 
+    @Getter
+    final String exampleDirectoryPath = "api-response-examples/g-workspace/gdrive-v2";
+
     @Test
     void files() {
-        String jsonString = new String(TestUtils.getData("api-response-examples/g-workspace/gdrive-v2/files.json"));
+        String jsonString = asJson("files.json");
 
         //verify precondition that example actually contains something we need to pseudonymize
         assertTrue(jsonString.contains("Bob@worklytics.co"));
@@ -32,7 +35,7 @@ public class GDriveTests extends RulesTest {
 
     @Test
     void revisions() {
-        String jsonString = new String(TestUtils.getData("api-response-examples/g-workspace/gdrive-v2/revisions.json"));
+        String jsonString = asJson("revisions.json");
 
         //verify precondition that example actually contains something we need to pseudonymize
         assertTrue(jsonString.contains("Bob@worklytics.co"));
