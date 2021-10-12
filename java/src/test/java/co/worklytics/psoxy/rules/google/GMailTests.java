@@ -10,6 +10,9 @@ import lombok.Getter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
+import java.util.Collection;
+
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -34,16 +37,17 @@ public class GMailTests extends RulesTest {
 
         //verify precondition that example actually contains something we need to pseudonymize
         assertTrue(jsonString.contains(jsonPart));
-        assertTrue(jsonString.contains("erik@worklytics.co"));
-        assertTrue(jsonString.contains("Subject"));
+        Collection<String> PII = Arrays.asList(
+            "alice@worklytics.co"
+        );
+        assertNotSanitized(jsonString, PII);
 
         String sanitized = sanitizer.sanitize(new GenericUrl("https://gmail.googleapis.com/gmail/v1/users/me/messages/17c3b1911726ef3f\\?format=metadata"), jsonString);
-
 
         //email address should disappear
         assertFalse(sanitized.contains(jsonPart));
         assertFalse(sanitized.contains(jsonPart.replaceAll("\\s", "")));
-        assertFalse(sanitized.contains("erik@worklytics.co"));
+        assertSanitized(sanitized, PII);
 
         //redaction should remove 'Subject' header entirely; and NOT just replace it with `null`
         assertFalse(sanitized.contains("Subject"));

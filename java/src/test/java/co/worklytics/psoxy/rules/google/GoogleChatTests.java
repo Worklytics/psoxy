@@ -6,6 +6,9 @@ import com.google.api.client.http.GenericUrl;
 import lombok.Getter;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
+import java.util.Collection;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class GoogleChatTests extends RulesTest {
@@ -21,11 +24,15 @@ class GoogleChatTests extends RulesTest {
         String jsonString = asJson("chat-activities.json");
 
         //verify precondition that example actually contains something we need to pseudonymize
-        assertTrue(jsonString.contains("philip@worklytics.co"));
+        Collection<String> PII = Arrays.asList(
+            "alice@worklytics.co",
+            "charlie@worklytics.co"
+        );
+        assertNotSanitized(jsonString, PII);
 
         String sanitized =
             sanitizer.sanitize(new GenericUrl("https://admin.googleapis.com/admin/reports/v1/activity/users/all/applications/chat"), jsonString);
 
-        assertFalse(sanitized.contains("philip@worklytics.co"));
+        assertSanitized(sanitized, PII);
     }
 }

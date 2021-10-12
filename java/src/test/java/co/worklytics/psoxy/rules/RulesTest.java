@@ -7,6 +7,11 @@ import co.worklytics.test.TestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collection;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 /**
  * abstract test stuff for Rules implementations
  *
@@ -36,6 +41,16 @@ abstract public class RulesTest {
 
     protected String asJson(String filePathWithinExampleDirectory) {
         return new String(TestUtils.getData(getExampleDirectoryPath() + "/" + filePathWithinExampleDirectory));
+    }
+
+    protected void assertNotSanitized(String content, Collection<String> shouldContain) {
+        shouldContain.stream()
+            .forEach(s -> assertTrue(content.contains(s), "Unsanitized content does not contain expected string: " + s));
+    }
+
+    protected void assertSanitized(String content, Collection<String> shouldNotContain) {
+        shouldNotContain.stream()
+            .forEach(s -> assertFalse(content.contains(s), "Sanitized content still contains: " + s));
     }
 
 }

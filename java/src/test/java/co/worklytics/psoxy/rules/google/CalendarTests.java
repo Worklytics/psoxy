@@ -6,6 +6,9 @@ import com.google.api.client.http.GenericUrl;
 import lombok.Getter;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
+import java.util.Collection;
+
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -21,12 +24,14 @@ class CalendarTests extends RulesTest {
     void events() {
         String jsonString = asJson("events.json");
 
-        //verify precondition that example actually contains something we need to pseudonymize
-        assertTrue(jsonString.contains("alice@worklytics.co"));
+        Collection<String> PII = Arrays.asList(
+            "alice@worklytics.co"
+        );
+        assertNotSanitized(jsonString, PII);
 
         String sanitized =
             sanitizer.sanitize(new GenericUrl("https://calendar.googleapis.com/calendar/v3/calendars/primary/events"), jsonString);
 
-        assertFalse(sanitized.contains("alice@worklytics.co"));
+        assertSanitized(sanitized, PII);
     }
 }

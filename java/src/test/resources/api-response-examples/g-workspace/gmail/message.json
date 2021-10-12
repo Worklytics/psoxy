@@ -12,7 +12,7 @@
     "headers": [
       {
         "name": "Delivered-To",
-        "value": "erik@worklytics.co"
+        "value": "alice@worklytics.co"
       },
       {
         "name": "Received",
@@ -40,7 +40,7 @@
       },
       {
         "name": "Received",
-        "value": "from mail-sor-f69.google.com (mail-sor-f69.google.com. [209.85.220.69])        by mx.google.com with SMTPS id p11sor3805550ejn.44.2021.10.01.02.04.30        for <erik@worklytics.co>        (Google Transport Security);        Fri, 01 Oct 2021 02:04:31 -0700 (PDT)"
+        "value": "from mail-sor-f69.google.com (mail-sor-f69.google.com. [209.85.220.69])        by mx.google.com with SMTPS id p11sor3805550ejn.44.2021.10.01.02.04.30        for <alice@worklytics.co>        (Google Transport Security);        Fri, 01 Oct 2021 02:04:31 -0700 (PDT)"
       },
       {
         "name": "Received-SPF",

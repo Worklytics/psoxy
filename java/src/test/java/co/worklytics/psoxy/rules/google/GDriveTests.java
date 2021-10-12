@@ -7,6 +7,9 @@ import com.google.api.client.http.GenericUrl;
 import lombok.Getter;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
+import java.util.Collection;
+
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -26,11 +29,17 @@ public class GDriveTests extends RulesTest {
         assertTrue(jsonString.contains("Bob@worklytics.co"));
         assertTrue(jsonString.contains("alice@worklytics.co"));
 
+        Collection<String> PII = Arrays.asList(
+            "alice@worklytics.co",
+            "Bob@worklytics.co"
+        );
+        assertNotSanitized(jsonString, PII);
+
+
         String sanitized =
             sanitizer.sanitize(new GenericUrl("https://www.googleapis.com/drive/v2/files"), jsonString);
 
-        assertFalse(sanitized.contains("alice@worklytics.co"));
-        assertFalse(sanitized.contains("Bob@worklytics.co"));
+        assertSanitized(sanitized, PII);
     }
 
     @Test
@@ -38,12 +47,14 @@ public class GDriveTests extends RulesTest {
         String jsonString = asJson("revisions.json");
 
         //verify precondition that example actually contains something we need to pseudonymize
-        assertTrue(jsonString.contains("Bob@worklytics.co"));
+        Collection<String> PII = Arrays.asList(
+            "Bob@worklytics.co"
+        );
+        assertNotSanitized(jsonString, PII);
 
         String sanitized =
             sanitizer.sanitize(new GenericUrl("https://www.googleapis.com/drive/v2/files/Asdfasdfas/revisions"), jsonString);
 
-        assertFalse(sanitized.contains("Bob@worklytics.co"));
-
+        assertSanitized(sanitized, PII);
     }
 }

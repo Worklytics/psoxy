@@ -41,7 +41,7 @@ class SanitizerImplTest {
 
         //verify precondition that example actually contains something we need to pseudonymize
         assertTrue(jsonString.contains(jsonPart));
-        assertTrue(jsonString.contains("erik@worklytics.co"));
+        assertTrue(jsonString.contains("alice@worklytics.co"));
         assertTrue(jsonString.contains("Subject"));
 
         String sanitized = sanitizer.sanitize(new GenericUrl("https://gmail.googleapis.com/gmail/v1/users/me/messages/17c3b1911726ef3f\\?format=metadata"), jsonString);
@@ -50,7 +50,7 @@ class SanitizerImplTest {
         //email address should disappear
         assertFalse(sanitized.contains(jsonPart));
         assertFalse(sanitized.contains(jsonPart.replaceAll("\\s","")));
-        assertFalse(sanitized.contains("erik@worklytics.co"));
+        assertFalse(sanitized.contains("alice@worklytics.co"));
 
         //redaction should remove 'Subject' header entirely; and NOT just replace it with `null`
         assertFalse(sanitized.contains("Subject"));

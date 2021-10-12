@@ -1,17 +1,14 @@
 package co.worklytics.psoxy.rules.google;
 
 import co.worklytics.psoxy.Rules;
-import co.worklytics.psoxy.Sanitizer;
-import co.worklytics.psoxy.impl.SanitizerImpl;
 import co.worklytics.psoxy.rules.RulesTest;
-import co.worklytics.psoxy.rules.Validator;
-import co.worklytics.test.TestUtils;
 import com.google.api.client.http.GenericUrl;
 import lombok.Getter;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import java.util.Arrays;
+import java.util.Collection;
+
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DirectoryTests extends RulesTest {
@@ -29,11 +26,16 @@ public class DirectoryTests extends RulesTest {
         //verify precondition that example actually contains something we need to pseudonymize
         assertTrue(jsonString.contains("alice@worklytics.co"));
 
+        Collection<String> PII = Arrays.asList(
+            "alice@worklytics.co",
+            "alice.example@gmail.com"
+        );
+        assertNotSanitized(jsonString, PII);
+
         String sanitized =
             sanitizer.sanitize(new GenericUrl("https://admin.googleapis.com/admin/directory/v1/users/123213"), jsonString);
 
-        assertFalse(sanitized.contains("alice@worklytics.co"));
-        assertFalse(sanitized.contains("alice.example@gmail.com"));
+        assertSanitized(sanitized, PII);
     }
 
     @Test
@@ -41,14 +43,16 @@ public class DirectoryTests extends RulesTest {
         String jsonString = asJson("users.json");
 
         //verify precondition that example actually contains something we need to pseudonymize
-        assertTrue(jsonString.contains("alice@worklytics.co"));
-        assertTrue(jsonString.contains("bob@worklytics.co"));
+        Collection<String> PII = Arrays.asList(
+            "alice@worklytics.co",
+            "bob@worklytics.co",
+            "alice.example@gmail.com"
+        );
+        assertNotSanitized(jsonString, PII);
 
         String sanitized =
             sanitizer.sanitize(new GenericUrl("https://admin.googleapis.com/admin/directory/v1/users?customer=my_customer"), jsonString);
 
-        assertFalse(sanitized.contains("alice@worklytics.co"));
-        assertFalse(sanitized.contains("alice.example@gmail.com"));
-        assertFalse(sanitized.contains("bob@worklytics.co"));
+        assertSanitized(sanitized, PII);
     }
 }

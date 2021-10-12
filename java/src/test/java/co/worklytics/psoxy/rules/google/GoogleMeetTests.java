@@ -6,6 +6,9 @@ import com.google.api.client.http.GenericUrl;
 import lombok.Getter;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
+import java.util.Collection;
+
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -22,17 +25,17 @@ class GoogleMeetTests extends RulesTest {
         String jsonString = asJson("meet-activities.json");
 
         //verify precondition that example actually contains something we need to pseudonymize
-        assertTrue(jsonString.contains("alice@worklytics.co"));
-        assertTrue(jsonString.contains("john@worklytics.co"));
-        assertTrue(jsonString.contains("bob@worklytics.co"));
-        assertTrue(jsonString.contains("2611:630:924b:fd2f:ed2a:782b:e5dd:232c"));
+        Collection<String> PII = Arrays.asList(
+            "alice@worklytics.co",
+            "john@worklytics.co",
+            "bob@worklytics.co",
+            "2611:630:924b:fd2f:ed2a:782b:e5dd:232c"
+         );
+        assertNotSanitized(jsonString, PII);
 
         String sanitized =
             sanitizer.sanitize(new GenericUrl("https://admin.googleapis.com/admin/reports/v1/activity/users/all/applications/meet"), jsonString);
 
-        assertFalse(sanitized.contains("alice@worklytics.co"));
-        assertFalse(sanitized.contains("john@worklytics.co"));
-        assertFalse(sanitized.contains("bob@worklytics.co"));
-        assertFalse(sanitized.contains("2611:630:924b:fd2f:ed2a:782b:e5dd:232c"));
+        assertSanitized(sanitized, PII);
     }
 }
