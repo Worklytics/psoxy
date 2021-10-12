@@ -1,0 +1,616 @@
+{
+  "kind": "admin#reports#activities",
+  "etag": "\"g2-KWSBhdhEV1DJNuuX35hICepPpOEDe4lPvnwuxvf4/22I0qHGiWlKDAnLnkcYbM_mz2T0\"",
+  "nextPageToken": "A:1634053603289000:5470579845645479028:913471609310:C03v4gz0f",
+  "items": [
+    {
+      "kind": "admin#reports#activity",
+      "id": {
+        "time": "2021-10-12T15:46:45.286Z",
+        "uniqueQualifier": "6127585580824196360",
+        "applicationName": "meet",
+        "customerId": "C03v4gz0f"
+      },
+      "etag": "\"g2-KWSBhdhEV1DJNuuX35hICepPpOEDe4lPvnwuxvf4/PAymcrru6IH88Gbuhjp_QUb9bsM\"",
+      "actor": {
+        "callerType": "USER",
+        "email": "admin@worklytics.co",
+        "profileId": "117927411761819390794"
+      },
+      "events": [
+        {
+          "type": "call",
+          "name": "call_ended",
+          "parameters": [
+            {
+              "name": "video_send_seconds",
+              "intValue": "952"
+            },
+            {
+              "name": "location_country",
+              "value": "ES"
+            },
+            {
+              "name": "identifier_type",
+              "value": "email_address"
+            },
+            {
+              "name": "audio_send_bitrate_kbps_mean",
+              "intValue": "11"
+            },
+            {
+              "name": "video_send_packet_loss_max",
+              "intValue": "0"
+            },
+            {
+              "name": "endpoint_id",
+              "value": "boq_hlane_88QSbqq7Hl1"
+            },
+            {
+              "name": "device_type",
+              "value": "web"
+            },
+            {
+              "name": "video_send_packet_loss_mean",
+              "intValue": "0"
+            },
+            {
+              "name": "video_recv_long_side_median_pixels",
+              "intValue": "640"
+            },
+            {
+              "name": "calendar_event_id",
+              "value": "sp96thsgrtovn7gk1fvadd3c6p_20211012T153000Z"
+            },
+            {
+              "name": "screencast_send_seconds",
+              "intValue": "0"
+            },
+            {
+              "name": "video_send_fps_mean",
+              "intValue": "24"
+            },
+            {
+              "name": "audio_send_packet_loss_max",
+              "intValue": "0"
+            },
+            {
+              "name": "video_recv_short_side_median_pixels",
+              "intValue": "360"
+            },
+            {
+              "name": "video_recv_packet_loss_mean",
+              "intValue": "0"
+            },
+            {
+              "name": "network_send_jitter_msec_mean",
+              "intValue": "3"
+            },
+            {
+              "name": "audio_recv_seconds",
+              "intValue": "952"
+            },
+            {
+              "name": "network_congestion",
+              "intValue": "0"
+            },
+            {
+              "name": "network_estimated_download_kbps_mean",
+              "intValue": "1396"
+            },
+            {
+              "name": "audio_send_packet_loss_mean",
+              "intValue": "0"
+            },
+            {
+              "name": "network_transport_protocol",
+              "value": "udp"
+            },
+            {
+              "name": "duration_seconds",
+              "intValue": "952"
+            },
+            {
+              "name": "video_send_bitrate_kbps_mean",
+              "intValue": "956"
+            },
+            {
+              "name": "identifier",
+              "value": "admin@worklytics.co"
+            },
+            {
+              "name": "location_region",
+              "value": "Madrid"
+            },
+            {
+              "name": "audio_recv_packet_loss_max",
+              "intValue": "19"
+            },
+            {
+              "name": "video_recv_fps_mean",
+              "intValue": "22"
+            },
+            {
+              "name": "audio_recv_packet_loss_mean",
+              "intValue": "2"
+            },
+            {
+              "name": "network_recv_jitter_msec_max",
+              "intValue": "36"
+            },
+            {
+              "name": "organizer_email",
+              "value": "alice@worklytics.co"
+            },
+            {
+              "name": "network_recv_jitter_msec_mean",
+              "intValue": "5"
+            },
+            {
+              "name": "ip_address",
+              "value": "82.0.3.2"
+            },
+            {
+              "name": "audio_send_seconds",
+              "intValue": "952"
+            },
+            {
+              "name": "display_name",
+              "value": "Adam Jones"
+            },
+            {
+              "name": "video_recv_seconds",
+              "intValue": "952"
+            },
+            {
+              "name": "network_rtt_msec_mean",
+              "intValue": "27"
+            },
+            {
+              "name": "video_send_long_side_median_pixels",
+              "intValue": "640"
+            },
+            {
+              "name": "conference_id",
+              "value": "TV7cUIqyGqGTBAh_SmMQYKIA"
+            },
+            {
+              "name": "screencast_recv_seconds",
+              "intValue": "0"
+            },
+            {
+              "name": "product_type",
+              "value": "meet"
+            },
+            {
+              "name": "network_estimated_upload_kbps_mean",
+              "intValue": "992"
+            },
+            {
+              "name": "video_send_short_side_median_pixels",
+              "intValue": "360"
+            },
+            {
+              "name": "video_recv_packet_loss_max",
+              "intValue": "1"
+            },
+            {
+              "name": "meeting_code",
+              "value": "FPXHJKQQFH"
+            },
+            {
+              "name": "is_external",
+              "boolValue": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "admin#reports#activity",
+      "id": {
+        "time": "2021-10-12T15:46:43.999Z",
+        "uniqueQualifier": "4833836322971259269",
+        "applicationName": "meet",
+        "customerId": "C03v4gz0f"
+      },
+      "etag": "\"g2-KWSBhdhEV1DJNuuX35hICepPpOEDe4lPvnwuxvf4/bfNuMpXQEesjAyNekWjwO9Z3ohQ\"",
+      "actor": {
+        "callerType": "USER",
+        "email": "john@worklytics.co",
+        "profileId": "114349793749086722850"
+      },
+      "events": [
+        {
+          "type": "call",
+          "name": "call_ended",
+          "parameters": [
+            {
+              "name": "video_send_seconds",
+              "intValue": "937"
+            },
+            {
+              "name": "location_country",
+              "value": "US"
+            },
+            {
+              "name": "identifier_type",
+              "value": "email_address"
+            },
+            {
+              "name": "audio_send_bitrate_kbps_mean",
+              "intValue": "19"
+            },
+            {
+              "name": "video_send_packet_loss_max",
+              "intValue": "2"
+            },
+            {
+              "name": "endpoint_id",
+              "value": "boq_hlane_UPstLKLlGQW"
+            },
+            {
+              "name": "device_type",
+              "value": "web"
+            },
+            {
+              "name": "video_send_packet_loss_mean",
+              "intValue": "0"
+            },
+            {
+              "name": "video_recv_long_side_median_pixels",
+              "intValue": "1280"
+            },
+            {
+              "name": "calendar_event_id",
+              "value": "sp96thsgrtovn7gk1fvadd3c6p_20211012T153000Z"
+            },
+            {
+              "name": "screencast_send_seconds",
+              "intValue": "0"
+            },
+            {
+              "name": "video_send_fps_mean",
+              "intValue": "23"
+            },
+            {
+              "name": "audio_send_packet_loss_max",
+              "intValue": "8"
+            },
+            {
+              "name": "video_recv_short_side_median_pixels",
+              "intValue": "720"
+            },
+            {
+              "name": "video_recv_packet_loss_mean",
+              "intValue": "0"
+            },
+            {
+              "name": "network_send_jitter_msec_mean",
+              "intValue": "6"
+            },
+            {
+              "name": "audio_recv_seconds",
+              "intValue": "937"
+            },
+            {
+              "name": "network_congestion",
+              "intValue": "0"
+            },
+            {
+              "name": "network_estimated_download_kbps_mean",
+              "intValue": "1888"
+            },
+            {
+              "name": "audio_send_packet_loss_mean",
+              "intValue": "0"
+            },
+            {
+              "name": "network_transport_protocol",
+              "value": "udp"
+            },
+            {
+              "name": "duration_seconds",
+              "intValue": "930"
+            },
+            {
+              "name": "video_send_bitrate_kbps_mean",
+              "intValue": "569"
+            },
+            {
+              "name": "identifier",
+              "value": "john@worklytics.co"
+            },
+            {
+              "name": "location_region",
+              "value": "Mercer Island"
+            },
+            {
+              "name": "audio_recv_packet_loss_max",
+              "intValue": "14"
+            },
+            {
+              "name": "video_recv_fps_mean",
+              "intValue": "22"
+            },
+            {
+              "name": "audio_recv_packet_loss_mean",
+              "intValue": "2"
+            },
+            {
+              "name": "network_recv_jitter_msec_max",
+              "intValue": "27"
+            },
+            {
+              "name": "organizer_email",
+              "value": "alice@worklytics.co"
+            },
+            {
+              "name": "network_recv_jitter_msec_mean",
+              "intValue": "7"
+            },
+            {
+              "name": "ip_address",
+              "value": "2611:630:924b:fd2f:ed2a:782b:e5dd:232c"
+            },
+            {
+              "name": "audio_send_seconds",
+              "intValue": "937"
+            },
+            {
+              "name": "display_name",
+              "value": "john lorens"
+            },
+            {
+              "name": "video_recv_seconds",
+              "intValue": "937"
+            },
+            {
+              "name": "network_rtt_msec_mean",
+              "intValue": "26"
+            },
+            {
+              "name": "video_send_long_side_median_pixels",
+              "intValue": "640"
+            },
+            {
+              "name": "conference_id",
+              "value": "TV7cUIqyGqGTBAh_SmMQYKIA"
+            },
+            {
+              "name": "screencast_recv_seconds",
+              "intValue": "0"
+            },
+            {
+              "name": "product_type",
+              "value": "meet"
+            },
+            {
+              "name": "network_estimated_upload_kbps_mean",
+              "intValue": "618"
+            },
+            {
+              "name": "video_send_short_side_median_pixels",
+              "intValue": "360"
+            },
+            {
+              "name": "video_recv_packet_loss_max",
+              "intValue": "0"
+            },
+            {
+              "name": "meeting_code",
+              "value": "FPXHJKQQFH"
+            },
+            {
+              "name": "is_external",
+              "boolValue": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "admin#reports#activity",
+      "id": {
+        "time": "2021-10-12T15:46:43.289Z",
+        "uniqueQualifier": "5470579845645479028",
+        "applicationName": "meet",
+        "customerId": "C03v4gz0f"
+      },
+      "etag": "\"g2-KWSBhdhEV1DJNuuX35hICepPpOEDe4lPvnwuxvf4/FrxCL4LLjbUwKaJQMh7ovJF4V2U\"",
+      "actor": {
+        "callerType": "USER",
+        "email": "bob@worklytics.co",
+        "profileId": "100531288453445237356"
+      },
+      "events": [
+        {
+          "type": "call",
+          "name": "call_ended",
+          "parameters": [
+            {
+              "name": "video_send_seconds",
+              "intValue": "1023"
+            },
+            {
+              "name": "location_country",
+              "value": "US"
+            },
+            {
+              "name": "identifier_type",
+              "value": "email_address"
+            },
+            {
+              "name": "audio_send_bitrate_kbps_mean",
+              "intValue": "11"
+            },
+            {
+              "name": "video_send_packet_loss_max",
+              "intValue": "11"
+            },
+            {
+              "name": "endpoint_id",
+              "value": "boq_hlane_KELqowOL5qX"
+            },
+            {
+              "name": "device_type",
+              "value": "web"
+            },
+            {
+              "name": "video_send_packet_loss_mean",
+              "intValue": "5"
+            },
+            {
+              "name": "video_recv_long_side_median_pixels",
+              "intValue": "320"
+            },
+            {
+              "name": "calendar_event_id",
+              "value": "sp96thsgrtovn7gk1fvadd3c6p_20211012T153000Z"
+            },
+            {
+              "name": "screencast_send_seconds",
+              "intValue": "0"
+            },
+            {
+              "name": "video_send_fps_mean",
+              "intValue": "21"
+            },
+            {
+              "name": "audio_send_packet_loss_max",
+              "intValue": "23"
+            },
+            {
+              "name": "video_recv_short_side_median_pixels",
+              "intValue": "180"
+            },
+            {
+              "name": "video_recv_packet_loss_mean",
+              "intValue": "0"
+            },
+            {
+              "name": "network_send_jitter_msec_mean",
+              "intValue": "4"
+            },
+            {
+              "name": "audio_recv_seconds",
+              "intValue": "959"
+            },
+            {
+              "name": "network_congestion",
+              "intValue": "3"
+            },
+            {
+              "name": "network_estimated_download_kbps_mean",
+              "intValue": "629"
+            },
+            {
+              "name": "audio_send_packet_loss_mean",
+              "intValue": "7"
+            },
+            {
+              "name": "network_transport_protocol",
+              "value": "udp"
+            },
+            {
+              "name": "duration_seconds",
+              "intValue": "1024"
+            },
+            {
+              "name": "video_send_bitrate_kbps_mean",
+              "intValue": "967"
+            },
+            {
+              "name": "identifier",
+              "value": "bob@worklytics.co"
+            },
+            {
+              "name": "location_region",
+              "value": "Seattle"
+            },
+            {
+              "name": "audio_recv_packet_loss_max",
+              "intValue": "8"
+            },
+            {
+              "name": "video_recv_fps_mean",
+              "intValue": "23"
+            },
+            {
+              "name": "audio_recv_packet_loss_mean",
+              "intValue": "0"
+            },
+            {
+              "name": "network_recv_jitter_msec_max",
+              "intValue": "40"
+            },
+            {
+              "name": "organizer_email",
+              "value": "alice@worklytics.co"
+            },
+            {
+              "name": "network_recv_jitter_msec_mean",
+              "intValue": "5"
+            },
+            {
+              "name": "ip_address",
+              "value": "130.12.182.105"
+            },
+            {
+              "name": "audio_send_seconds",
+              "intValue": "1026"
+            },
+            {
+              "name": "display_name",
+              "value": "bob Arkcoll"
+            },
+            {
+              "name": "video_recv_seconds",
+              "intValue": "949"
+            },
+            {
+              "name": "network_rtt_msec_mean",
+              "intValue": "17"
+            },
+            {
+              "name": "video_send_long_side_median_pixels",
+              "intValue": "640"
+            },
+            {
+              "name": "conference_id",
+              "value": "TV7cUIqyGqGTBAh_SmMQYKIA"
+            },
+            {
+              "name": "screencast_recv_seconds",
+              "intValue": "0"
+            },
+            {
+              "name": "product_type",
+              "value": "meet"
+            },
+            {
+              "name": "network_estimated_upload_kbps_mean",
+              "intValue": "975"
+            },
+            {
+              "name": "video_send_short_side_median_pixels",
+              "intValue": "360"
+            },
+            {
+              "name": "video_recv_packet_loss_max",
+              "intValue": "0"
+            },
+            {
+              "name": "meeting_code",
+              "value": "FPXHJKQQFH"
+            },
+            {
+              "name": "is_external",
+              "boolValue": false
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

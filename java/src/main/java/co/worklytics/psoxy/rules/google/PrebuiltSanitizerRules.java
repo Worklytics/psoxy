@@ -148,6 +148,21 @@ public class PrebuiltSanitizerRules {
        )
        .build();
 
+    static final Rules GOOGLE_MEET = Rules.builder()
+        .pseudonymization(Rule.builder()
+            .relativeUrlRegex("\\/admin\\/reports\\/v1\\/activity\\/users\\/all\\/applications\\/meet.*")
+            .jsonPath("$.items[*].actor.email")
+            .jsonPath("$.items[*].events[*].parameters[?(@.name in ['ip_address', 'organizer_email', 'identifier'])].value")
+            .build()
+        )
+        .redaction(Rule.builder()
+            .relativeUrlRegex("\\/admin\\/reports\\/v1\\/activity\\/users\\/all\\/applications\\/meet.*")
+            .jsonPath("$.items[*].actor.email")
+            .jsonPath("$.items[*].events[*].parameters[?(@.name in ['display_name'])].value")
+            .build()
+        )
+        .build();
+
 
     static public final Map<String, Rules> MAP = ImmutableMap.<String, Rules>builder()
         .put("gcal", GCAL)
@@ -155,5 +170,6 @@ public class PrebuiltSanitizerRules {
         .put("gdrive", GDRIVE)
         .put("gmail", GMAIL)
         .put("google-chat", GOOGLE_CHAT)
+        .put("google-meet", GOOGLE_MEET)
         .build();
 }
