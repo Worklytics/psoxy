@@ -1,6 +1,6 @@
 package co.worklytics.psoxy.impl;
 
-import co.worklytics.psoxy.PrebuiltSanitizerRules;
+import co.worklytics.psoxy.rules.google.PrebuiltSanitizerRules;
 import co.worklytics.psoxy.PseudonymizedIdentity;
 import co.worklytics.psoxy.Sanitizer;
 import co.worklytics.test.TestUtils;
@@ -46,10 +46,15 @@ class SanitizerImplTest {
 
         String sanitized = sanitizer.sanitize(new GenericUrl("https://gmail.googleapis.com/gmail/v1/users/me/messages/17c3b1911726ef3f\\?format=metadata"), jsonString);
 
+
+        //email address should disappear
         assertFalse(sanitized.contains(jsonPart));
         assertFalse(sanitized.contains(jsonPart.replaceAll("\\s","")));
         assertFalse(sanitized.contains("erik@worklytics.co"));
+
+        //redaction should remove 'Subject' header entirely; and NOT just replace it with `null`
         assertFalse(sanitized.contains("Subject"));
+        assertFalse(sanitized.contains("null"));
     }
 
 

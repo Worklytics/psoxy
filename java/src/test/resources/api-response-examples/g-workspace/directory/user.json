@@ -1,0 +1,129 @@
+{
+  "kind": "admin#directory#user",
+  "id": "1234234331471490332349959",
+  "etag": "\"g2-KWSBhdhEV1DJNuuX35hICepPpOEDe4lPvnwuxvf4/3nm0BxOJJfOv5nDTHneimEDnNRg\"",
+  "primaryEmail": "alice@worklytics.co",
+  "name": {
+    "givenName": "alice",
+    "familyName": "example",
+    "fullName": "alice example"
+  },
+  "isAdmin": true,
+  "isDelegatedAdmin": false,
+  "lastLoginTime": "2021-10-10T14:18:21.000Z",
+  "creationTime": "2015-04-09T21:27:03.000Z",
+  "agreedToTerms": true,
+  "suspended": false,
+  "archived": false,
+  "changePasswordAtNextLogin": false,
+  "ipWhitelisted": false,
+  "emails": [
+    {
+      "address": "alice@worklytics.co",
+      "primary": true
+    },
+    {
+      "address": "alice.example@worklytics.co"
+    },
+    {
+      "address": "alice.example@worklytics.co.test-google-a.com"
+    },
+    {
+      "address": "alice@worklytics.co.test-google-a.com"
+    },
+    {
+      "address": "aexample@worklytics.co"
+    },
+    {
+      "address": "aexample@worklytics.co.test-google-a.com"
+    },
+    {
+      "address": "a@worklytics.co"
+    },
+    {
+      "address": "a@worklytics.co.test-google-a.com"
+    },
+    {
+      "address": "alise@worklytics.co"
+    },
+    {
+      "address": "alise@worklytics.co.test-google-a.com"
+    },
+    {
+      "address": "aexample@in.worklytics.co"
+    },
+    {
+      "address": "alice@in.worklytics.co"
+    },
+    {
+      "address": "alice.example@in.worklytics.co"
+    },
+    {
+      "address": "alise@in.worklytics.co"
+    },
+    {
+      "address": "a@in.worklytics.co"
+    }
+  ],
+  "relations": [
+    {
+      "value": "bob@worklytics.co",
+      "type": "manager"
+    }
+  ],
+  "organizations": [
+    {
+      "title": "CTO, President",
+      "primary": true,
+      "customType": "",
+      "department": "Engineering",
+      "description": "Employee"
+    }
+  ],
+  "posixAccounts": [
+    {
+      "username": "alice_worklytics_co",
+      "uid": "1113066348",
+      "gid": "1113066348",
+      "homeDirectory": "/home/alice_worklytics_co",
+      "systemId": "",
+      "primary": true,
+      "operatingSystemType": "linux"
+    }
+  ],
+  "sshPublicKeys": [
+    {
+      "key": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC2uQsJ6VwuARfGummbdiX+SNiRqXoAISRU4eZ17OVECGbt/wh7r86ebF0pVNyu/3TaNpxHUw/brTSMWYpW8XjKuXLck1E6XEp2KUVTyE6Fx843iMnqchGRAc82cxkHe3ZeTAIsoFb1NntT4VsYP9Yk/i1re7SuxpmxNqokfp8DOTnFJ9GVx4J/tZeI2KxiTH7OnYWT5eCre9N761qTZcrYUYI9JVmt3QnFtTMXozY9kLozI90qzQ9V07pbzXnHw+jZRUTWFYvRGQvw27a+hgf3R9XVf9oYu08jrY5iMybr8l9+kdXvnKCcHPHRa6Cw9Y1r2NEMU1k3Mm7AVWwIjJu6O4+tXvTrG56j0vW5p3UVGSmdPw0zTCvHiFwRyfFl5VLccPUIKQIKAe5FSzARdNQmBnsPYIzziEdEeE0T/BuvtBIciZbQf8z0V+BYAFFcvx10LnEvaWL2Wcv/c1KFUaYF+3D28bvHpFrKxSPqWyJM36u4au9WkLNllPqKobBGXv0= alice@embp21.lan",
+      "expirationTimeUsec": "0",
+      "fingerprint": "d4959ed0f5f943e0782f791a05eed16884643c64e11a7146660d0f18e090cfba"
+    }
+  ],
+  "aliases": [
+    "alice.example@worklytics.co",
+    "aexample@worklytics.co",
+    "a@worklytics.co",
+    "alise@worklytics.co"
+  ],
+  "nonEditableAliases": [
+    "alice.example@worklytics.co.test-google-a.com",
+    "alice@worklytics.co.test-google-a.com",
+    "aexample@worklytics.co.test-google-a.com",
+    "a@worklytics.co.test-google-a.com",
+    "alise@worklytics.co.test-google-a.com",
+    "aexample@in.worklytics.co",
+    "alice@in.worklytics.co",
+    "alice.example@in.worklytics.co",
+    "alise@in.worklytics.co",
+    "a@in.worklytics.co"
+  ],
+  "customerId": "Y03v4af07",
+  "orgUnitPath": "/Employees",
+  "isMailboxSetup": true,
+  "isEnrolledIn2Sv": true,
+  "isEnforcedIn2Sv": true,
+  "includeInGlobalAddressList": true,
+  "thumbnailPhotoUrl": "https://www.google.com/s2/photos/private/AIbEiAIAAABECIfOyJPx197AmgEiC3ZjYXJkX3Bob3RvKig3ZmY1N2MxNTM2MzMxOWMwMTM5M2I3YzlkMTM1M2Y1NGE4YzQ1ZGYwMAGihIrKzeKjEdY5GPluvo2USSDzvQ",
+  "thumbnailPhotoEtag": "\"g2-KWSBhdhEV1DJNuuX35hICepPpOEDe4lPvnwuxvf4/3qk0iF6ua9mXCIlRCQxDVmY33ec\"",
+  "recoveryEmail": "alice.example@gmail.com",
+  "recoveryPhone": "+15555755975"
+}
