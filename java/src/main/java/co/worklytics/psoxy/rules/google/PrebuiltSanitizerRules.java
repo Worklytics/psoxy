@@ -25,6 +25,7 @@ public class PrebuiltSanitizerRules {
             .build())
         .build();
 
+
     static final Rules GOOGLE_CHAT = Rules.builder()
         .pseudonymization(Rule.builder()
             .relativeUrlRegex("\\/admin\\/reports\\/v1\\/activity\\/users\\/all\\/applications\\/chat.*")
@@ -89,11 +90,50 @@ public class PrebuiltSanitizerRules {
         )
         .build();
 
+    static final Rules GDRIVE = Rules.builder()
+        //NOTE: by default, files endpoint doesn't return any PII. client must pass a fields mask
+        // that explicitly requests it; so if we could block that behavior, we could eliminate these
+        // rules
+        //NOTE: reference docs say page elements collection is named 'items', but actual API returns
+        // page collection as 'files' or 'revisions'
+        .pseudonymization(Rule.builder()
+            .relativeUrlRegex("\\/drive\\/v2\\/files.*")
+            .jsonPath("$.files[*].lastModifyingUser.emailAddress")
+            .jsonPath("$.files[*].owners[*].emailAddress")
+            .jsonPath("$.files[*].permissions[*].emailAddress")
+            .jsonPath("$.files[*].sharingUser.emailAddress")
+            .jsonPath("$.files[*].trashingUser.emailAddress")
+            .build())
+        .redaction(Rule.builder()
+            .relativeUrlRegex("\\/drive\\/v2\\/files.*")
+            .jsonPath("$.files[*].lastModifyingUser.displayName")
+            .jsonPath("$.files[*].lastModifyingUser.picture")
+            .jsonPath("$.files[*].lastModifyingUserName")
+            .jsonPath("$.files[*].owners[*].displayName")
+            .jsonPath("$.files[*].owners[*].picture")
+            .jsonPath("$.files[*].ownerNames")
+            .jsonPath("$.files[*].permissions[*].displayName")
+            .jsonPath("$.files[*].sharingUser.displayName")
+            .jsonPath("$.files[*].sharingUser.picture")
+            .jsonPath("$.files[*].trashingUser.displayName")
+            .jsonPath("$.files[*].trashingUser.picture")
+            .build())
+        .pseudonymization(Rule.builder()
+            .relativeUrlRegex("\\/drive\\/v2\\/files\\/.*?\\/revisions.*")
+            .jsonPath("$.items[*].lastModifyingUser.emailAddress")
+            .build())
+        .redaction(Rule.builder()
+            .relativeUrlRegex("\\/drive\\/v2\\/files\\/.*?\\/revisions.*")
+            .jsonPath("$.items[*].lastModifyingUser.displayName")
+            .jsonPath("$.items[*].lastModifyingUser.picture")
+            .build())
+        .build();
+
     static final Rules GMAIL = Rules.builder()
        //cases that we expect may contain a comma-separated list of values, per RFC 2822
        .emailHeaderPseudonymization(Rules.Rule.builder()
                   .relativeUrlRegex("\\/gmail\\/v1\\/users\\/.*?\\/messages\\/.*")
-                   .jsonPath("$.payload.headers[?(@.name in ['To','TO','to','From','FROM','from','cc','CC','bcc','BCC'])].value")
+                  .jsonPath("$.payload.headers[?(@.name in ['To','TO','to','From','FROM','from','cc','CC','bcc','BCC'])].value")
                .build())
        //cases that we expect to be truly single-valued, per RFC 2822
        .pseudonymization(Rules.Rule.builder()
@@ -109,14 +149,10 @@ public class PrebuiltSanitizerRules {
        .build();
 
 
-
-
-
-
-
     static public final Map<String, Rules> MAP = ImmutableMap.<String, Rules>builder()
         .put("gcal", GCAL)
         .put("gdirectory", GDIRECTORY)
+        .put("gdrive", GDRIVE)
         .put("gmail", GMAIL)
         .put("google-chat", GOOGLE_CHAT)
         .build();
