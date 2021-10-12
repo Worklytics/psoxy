@@ -7,6 +7,7 @@ import co.worklytics.test.TestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
 import java.util.Collection;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -48,9 +49,42 @@ abstract public class RulesTest {
             .forEach(s -> assertTrue(content.contains(s), "Unsanitized content does not contain expected string: " + s));
     }
 
+    @Deprecated //used pseudonymized or redacted
     protected void assertSanitized(String content, Collection<String> shouldNotContain) {
         shouldNotContain.stream()
             .forEach(s -> assertFalse(content.contains(s), "Sanitized content still contains: " + s));
+    }
+
+    protected void assertRedacted(String content, Collection<String> shouldNotContain) {
+        shouldNotContain.stream()
+            .forEach(s -> assertFalse(content.contains(s), "Sanitized content still contains: " + s));
+
+        shouldNotContain.stream()
+            .forEach(s -> {
+                assertFalse(content.contains(sanitizer.pseudonymizeToJson(s, sanitizer.getJsonConfiguration())),
+                    "Sanitized contains pseudonymized equivalent of: " + s);
+            });
+    }
+    protected void assertRedacted(String content, String... shouldNotContain) {
+        assertRedacted(content, Arrays.asList(shouldNotContain));
+    }
+
+
+    protected void assertPseudonymized(String content, Collection<String> shouldBePseudonymized) {
+        shouldBePseudonymized.stream()
+            .forEach(s -> assertFalse(content.contains(s), "Sanitized content still contains unpseudonymized: " + s));
+
+        shouldBePseudonymized.stream()
+            .forEach(s -> {
+                String doubleJsonEncodedPseudonym =
+                    sanitizer.getJsonConfiguration().jsonProvider().toJson(sanitizer.pseudonymizeToJson(s, sanitizer.getJsonConfiguration()));
+                assertTrue(content.contains(doubleJsonEncodedPseudonym),
+                    String.format("Sanitized does not contain %s, pseudonymized equivalent of %s", doubleJsonEncodedPseudonym, s));
+            });
+    }
+
+    protected void assertPseudonymized(String content, String... shouldBePseudonymized) {
+        assertPseudonymized(content, Arrays.asList(shouldBePseudonymized));
     }
 
 }

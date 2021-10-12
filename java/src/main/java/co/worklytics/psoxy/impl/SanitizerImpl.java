@@ -4,12 +4,14 @@ import co.worklytics.psoxy.PseudonymizedIdentity;
 import co.worklytics.psoxy.Rules;
 import co.worklytics.psoxy.Sanitizer;
 import com.google.api.client.http.GenericUrl;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -37,6 +39,7 @@ public class SanitizerImpl implements Sanitizer {
     List<Pair<Pattern, List<JsonPath>>> compiledRedactions;
     List<Pair<Pattern, List<JsonPath>>> compiledEmailHeaderPseudonymizations;
 
+    @Getter(onMethod_ = {@VisibleForTesting})
     Configuration jsonConfiguration;
 
     public void initConfiguration() {
@@ -135,7 +138,7 @@ public class SanitizerImpl implements Sanitizer {
         }
     }
 
-    PseudonymizedIdentity pseudonymize(Object value) {
+    public PseudonymizedIdentity pseudonymize(Object value) {
         Preconditions.checkArgument(value instanceof String || value instanceof Number,
             "Value must be some basic type (eg JSON leaf, not node)");
 
@@ -177,7 +180,8 @@ public class SanitizerImpl implements Sanitizer {
         return builder.build();
     }
 
-    String pseudonymizeToJson(Object value, Configuration configuration) {
+    @VisibleForTesting
+    public String pseudonymizeToJson(Object value, Configuration configuration) {
         return configuration.jsonProvider().toJson(pseudonymize(value));
     }
 

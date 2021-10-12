@@ -32,6 +32,6 @@ class CalendarTests extends RulesTest {
         String sanitized =
             sanitizer.sanitize(new GenericUrl("https://calendar.googleapis.com/calendar/v3/calendars/primary/events"), jsonString);
 
-        assertSanitized(sanitized, PII);
+        assertPseudonymized(sanitized, PII);
     }
 }

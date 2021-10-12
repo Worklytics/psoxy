@@ -2,7 +2,6 @@ package co.worklytics.psoxy.rules.google;
 
 import co.worklytics.psoxy.Rules;
 import co.worklytics.psoxy.rules.RulesTest;
-import co.worklytics.test.TestUtils;
 import com.google.api.client.http.GenericUrl;
 import lombok.Getter;
 import org.junit.jupiter.api.Test;
@@ -10,7 +9,6 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class GDriveTests extends RulesTest {
@@ -39,7 +37,7 @@ public class GDriveTests extends RulesTest {
         String sanitized =
             sanitizer.sanitize(new GenericUrl("https://www.googleapis.com/drive/v2/files"), jsonString);
 
-        assertSanitized(sanitized, PII);
+        assertPseudonymized(sanitized, PII);
     }
 
     @Test
@@ -55,6 +53,6 @@ public class GDriveTests extends RulesTest {
         String sanitized =
             sanitizer.sanitize(new GenericUrl("https://www.googleapis.com/drive/v2/files/Asdfasdfas/revisions"), jsonString);
 
-        assertSanitized(sanitized, PII);
+        assertPseudonymized(sanitized, PII);
     }
 }

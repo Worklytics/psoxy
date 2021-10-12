@@ -36,6 +36,6 @@ class GoogleMeetTests extends RulesTest {
         String sanitized =
             sanitizer.sanitize(new GenericUrl("https://admin.googleapis.com/admin/reports/v1/activity/users/all/applications/meet"), jsonString);
 
-        assertSanitized(sanitized, PII);
+        assertPseudonymized(sanitized, PII);
     }
 }

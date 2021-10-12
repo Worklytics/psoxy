@@ -47,10 +47,10 @@ public class GMailTests extends RulesTest {
         //email address should disappear
         assertFalse(sanitized.contains(jsonPart));
         assertFalse(sanitized.contains(jsonPart.replaceAll("\\s", "")));
-        assertSanitized(sanitized, PII);
+        assertPseudonymized(sanitized, PII);
 
         //redaction should remove 'Subject' header entirely; and NOT just replace it with `null`
-        assertFalse(sanitized.contains("Subject"));
+        assertRedacted(sanitized, "Subject");
         assertFalse(sanitized.contains("null"));
     }
 }

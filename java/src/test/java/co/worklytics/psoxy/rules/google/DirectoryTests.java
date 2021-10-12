@@ -35,7 +35,8 @@ public class DirectoryTests extends RulesTest {
         String sanitized =
             sanitizer.sanitize(new GenericUrl("https://admin.googleapis.com/admin/directory/v1/users/123213"), jsonString);
 
-        assertSanitized(sanitized, PII);
+        assertPseudonymized(sanitized, Arrays.asList("alice@worklytics.co"));
+        assertRedacted(sanitized, Arrays.asList("alice.example@gmail.com"));
     }
 
     @Test
@@ -53,6 +54,7 @@ public class DirectoryTests extends RulesTest {
         String sanitized =
             sanitizer.sanitize(new GenericUrl("https://admin.googleapis.com/admin/directory/v1/users?customer=my_customer"), jsonString);
 
-        assertSanitized(sanitized, PII);
+        assertPseudonymized(sanitized, Arrays.asList("alice@worklytics.co", "bob@worklytics.co"));
+        assertRedacted(sanitized, Arrays.asList("alice.example@gmail.com"));
     }
 }
