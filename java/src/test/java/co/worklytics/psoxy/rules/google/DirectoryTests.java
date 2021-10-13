@@ -1,7 +1,7 @@
 package co.worklytics.psoxy.rules.google;
 
 import co.worklytics.psoxy.Rules;
-import co.worklytics.psoxy.rules.RulesTest;
+import co.worklytics.psoxy.rules.RulesBaseTestCase;
 import com.google.api.client.http.GenericUrl;
 import lombok.Getter;
 import org.junit.jupiter.api.Test;
@@ -11,7 +11,7 @@ import java.util.Collection;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class DirectoryTests extends RulesTest {
+public class DirectoryTests extends RulesBaseTestCase {
 
     @Getter
     final Rules rulesUnderTest = PrebuiltSanitizerRules.GDIRECTORY;

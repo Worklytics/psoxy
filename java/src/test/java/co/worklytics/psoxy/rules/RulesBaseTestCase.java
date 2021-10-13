@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * q: better as junit Extension or something? how do to that
  *
  */
-abstract public class RulesTest {
+abstract public class RulesBaseTestCase {
 
     protected SanitizerImpl sanitizer;
 
