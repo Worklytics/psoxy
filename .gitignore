@@ -30,6 +30,7 @@ infra/dev-personal/*connector-sa-key.json
 infra/dev-personal/TODO*
 
 java/target
+java/**/target
 
 # macOs generated files
 .DS_Store
