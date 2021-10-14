@@ -10,8 +10,8 @@
         <version>${revision}</version>
     </parent>
 
-    <groupId>co.worklytics.psoxy.impl.cmd-line</groupId>
-    <artifactId>cmd-line</artifactId>
+    <groupId>co.worklytics.psoxy</groupId>
+    <artifactId>psoxy-cmd-line</artifactId>
     <packaging>jar</packaging>
 
     <build>
