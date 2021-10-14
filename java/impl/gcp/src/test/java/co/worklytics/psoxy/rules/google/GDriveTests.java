@@ -54,7 +54,7 @@ public class GDriveTests extends RulesBaseTestCase {
         assertNotSanitized(jsonString, PII);
 
         String sanitized =
-            sanitizer.sanitize(new URL("http", "www.googleapis.com", "/drive/v2/files/Asdfasdfas/revisions"), jsonString);
+            sanitizer.sanitize(new URL("http://www.googleapis.com/drive/v2/files/Asdfasdfas/revisions"), jsonString);
 
         assertPseudonymized(sanitized, PII);
     }

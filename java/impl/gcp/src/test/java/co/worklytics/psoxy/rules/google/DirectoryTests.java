@@ -55,7 +55,7 @@ public class DirectoryTests extends RulesBaseTestCase {
         assertNotSanitized(jsonString, PII);
 
         String sanitized =
-            sanitizer.sanitize(new URL("https", "admin.googleapis.com", "/admin/directory/v1/users?customer=my_customer"), jsonString);
+            sanitizer.sanitize(new URL("https://admin.googleapis.com/admin/directory/v1/users?customer=my_customer"), jsonString);
 
         assertPseudonymized(sanitized, Arrays.asList("alice@worklytics.co", "bob@worklytics.co"));
         assertRedacted(sanitized, Arrays.asList("alice.example@gmail.com"));

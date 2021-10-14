@@ -40,7 +40,7 @@ public class GMailTests extends RulesBaseTestCase {
         );
         assertNotSanitized(jsonString, PII);
 
-        String sanitized = sanitizer.sanitize(new URL("https", "gmail.googleapis.com", "/gmail/v1/users/me/messages/17c3b1911726ef3f\\?format=metadata"), jsonString);
+        String sanitized = sanitizer.sanitize(new URL("https://gmail.googleapis.com/gmail/v1/users/me/messages/17c3b1911726ef3f\\?format=metadata"), jsonString);
 
         //email address should disappear
         assertFalse(sanitized.contains(jsonPart));

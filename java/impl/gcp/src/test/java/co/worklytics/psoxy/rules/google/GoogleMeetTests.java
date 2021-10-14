@@ -33,7 +33,7 @@ class GoogleMeetTests extends RulesBaseTestCase {
         assertNotSanitized(jsonString, PII);
 
         String sanitized =
-            sanitizer.sanitize(new URL("https", "admin.googleapis.com", "/admin/reports/v1/activity/users/all/applications/meet"), jsonString);
+            sanitizer.sanitize(new URL("https://admin.googleapis.com/admin/reports/v1/activity/users/all/applications/meet"), jsonString);
 
         assertPseudonymized(sanitized, PII);
     }

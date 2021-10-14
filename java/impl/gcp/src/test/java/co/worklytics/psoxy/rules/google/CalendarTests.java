@@ -30,7 +30,7 @@ class CalendarTests extends RulesBaseTestCase {
         assertNotSanitized(jsonString, PII);
 
         String sanitized =
-            sanitizer.sanitize(new URL("http", "calendar.googleapis.com", "/calendar/v3/calendars/primary/events"), jsonString);
+            sanitizer.sanitize(new URL("http://calendar.googleapis.com/calendar/v3/calendars/primary/events"), jsonString);
 
         assertPseudonymized(sanitized, PII);
     }
