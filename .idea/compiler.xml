@@ -16,7 +16,7 @@
       <module name="cmd-line" target="11" />
       <module name="core" target="11" />
       <module name="gcp" target="11" />
-      <module name="java" target="11" />
+      <module name="root" target="11" />
     </bytecodeTargetLevel>
   </component>
 </project>
