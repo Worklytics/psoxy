@@ -44,8 +44,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>co.worklytics.psoxy.core</groupId>
-            <artifactId>core</artifactId>
+            <groupId>co.worklytics.psoxy</groupId>
+            <artifactId>psoxy-core</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
