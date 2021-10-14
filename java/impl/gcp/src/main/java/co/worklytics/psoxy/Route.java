@@ -12,8 +12,7 @@ import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.functions.HttpFunction;
 import com.google.cloud.functions.HttpRequest;
 import com.google.cloud.functions.HttpResponse;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 
@@ -63,27 +62,6 @@ public class Route implements HttpFunction {
         K_SERVICE,
     }
 
-    /**
-     * headers that control how Psoxy works
-     *
-     * anything passed as headers like this shouldn't have info-sec implications.
-     */
-    @RequiredArgsConstructor
-    enum ControlHeader {
-        //TODO: change this; it's a confusing misnomer in the ServiceAccountCredentials interface
-        // ServiceAccountCredentials::createDelegated does exactly the same thing, and is more correct
-        // - the service account is impersonated the user. (user's Google Workspace tenant has
-        // made a domain-wide delegation grant to the service)
-        USER_TO_IMPERSONATE("User-To-Impersonate"),
-        ;
-
-        @NonNull
-        final String httpNamePart;
-
-        public String getHttpHeader() {
-            return "X-Psoxy-" + httpNamePart;
-        }
-    }
 
     Sanitizer sanitizer;
 
