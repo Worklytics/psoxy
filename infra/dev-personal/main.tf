@@ -46,7 +46,14 @@ module "gmail-connector-auth" {
   secret_id          = "PSOXY_SERVICE_ACCOUNT_KEY_gmail"
 }
 
-module "gmail-access-secret" {
+# for local dev, write the key to flat file on your machine (shouldn't do this for prod configs)
+resource "local_file" "gmail-connector-sa-key" {
+  filename = "gmail-connector-sa-key.json"
+  content_base64 = module.gmail-connector-auth.key_value
+}
+
+# let your cloud function use the secret
+module "psoxy-gmail-access-gmail-connector-secret" {
   source = "../modules/gcp-secret-to-cloud-function"
 
   secret_name           = module.gmail-connector-auth.key_secret_name
@@ -56,21 +63,18 @@ module "gmail-access-secret" {
   function_name         = "psoxy-gmail"
 }
 
-module "gmail-access-salt" {
+# let your cloud function use the salt
+module "psoxy-gmail-access-salt" {
   source = "../modules/gcp-secret-to-cloud-function"
 
+  function_name         = "psoxy-gmail"
   secret_name           = module.psoxy-gcp.salt_secret_name
   secret_version_name   = module.psoxy-gcp.salt_secret_version_name
   service_account_email = module.gmail-connector.service_account_email
   project_id            = var.project_id
-  function_name         = "psoxy-gmail"
 }
 
-# enable local use case by writing key to flat file on your machine
-resource "local_file" "gmail-connector-sa-key" {
-  filename = "gmail-connector-sa-key.json"
-  content_base64 = module.gmail-connector-auth.key_value
-}
+
 
 
 module "google-chat-connector" {
@@ -109,13 +113,13 @@ module "google-chat-access-sa-key-secret" {
 }
 
 module "google-chat-access-salt" {
-source = "../modules/gcp-secret-to-cloud-function"
+  source = "../modules/gcp-secret-to-cloud-function"
 
-function_name = "psoxy-google-chat"
-project_id = var.project_id
-secret_name = module.psoxy-gcp.salt_secret_name
-secret_version_name = module.psoxy-gcp.salt_secret_version_name
-service_account_email = module.google-chat-connector.service_account_email
+  function_name = "psoxy-google-chat"
+  project_id = var.project_id
+  secret_name = module.psoxy-gcp.salt_secret_name
+  secret_version_name = module.psoxy-gcp.salt_secret_version_name
+  service_account_email = module.google-chat-connector.service_account_email
 }
 
 
