@@ -13,6 +13,8 @@ public interface Sanitizer {
     @Value
     class Options implements Serializable {
 
+        private static final long serialVersionUID = 1L;
+
         /**
          * salt used to generate pseudonyms
          *

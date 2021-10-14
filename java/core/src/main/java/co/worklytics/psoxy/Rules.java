@@ -7,6 +7,7 @@ import lombok.Singular;
 import lombok.Value;
 import lombok.extern.java.Log;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -26,7 +27,9 @@ import java.util.regex.Pattern;
 @Builder
 @Value
 @Log
-public class Rules {
+public class Rules implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     /**
      * a rule for matching parts of JSON API responses.
@@ -36,7 +39,9 @@ public class Rules {
      */
     @Builder
     @Value
-    public static class Rule {
+    public static class Rule implements Serializable {
+
+        private static final long serialVersionUID = 1L;
 
         //must match request URL
         String relativeUrlRegex;
