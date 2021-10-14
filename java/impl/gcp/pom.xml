@@ -81,41 +81,6 @@
             <artifactId>google-auth-library-oauth2-http</artifactId>
             <version>1.1.0</version>
         </dependency>
-
-
-        <!-- used to transform JSON responses -->
-        <dependency>
-            <groupId>com.jayway.jsonpath</groupId>
-            <artifactId>json-path</artifactId>
-            <version>2.6.0</version>
-        </dependency>
-        <!-- Jackson - JSON serialization/deserialization -->
-        <!-- trying to force Restlet to use these, rather than codehaus versions -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
-            <version>${dependency.jackson.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-annotations</artifactId>
-            <version>${dependency.jackson.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${dependency.jackson.version}</version>
-        </dependency>
-
-
-        <!-- RFC 2822 validator -->
-        <!-- see https://github.com/bbottema/email-rfc2822-validator -->
-        <dependency>
-            <groupId>com.github.bbottema</groupId>
-            <artifactId>emailaddress-rfc2822</artifactId>
-            <version>1.1.3</version>
-        </dependency>
-
     </dependencies>
 
     <build>
