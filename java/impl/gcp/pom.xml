@@ -58,7 +58,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.11</version>
+            <version>${dependency.apache-commons-lang3.version}</version>
         </dependency>
 
         <!-- platform stuff (eg, GCP Cloud Function support) -->

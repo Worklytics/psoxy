@@ -16,6 +16,7 @@
         <dependency.jackson.version>2.12.5</dependency.jackson.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <dependency.lombok.version>1.18.20</dependency.lombok.version>
+        <dependency.apache-commons-lang3.version>3.11</dependency.apache-commons-lang3.version>
     </properties>
 
     <modules>
