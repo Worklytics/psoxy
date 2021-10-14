@@ -4,12 +4,13 @@ import co.worklytics.psoxy.rules.google.PrebuiltSanitizerRules;
 import co.worklytics.psoxy.PseudonymizedIdentity;
 import co.worklytics.psoxy.Sanitizer;
 import co.worklytics.test.TestUtils;
-import com.google.api.client.http.GenericUrl;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.net.URL;
 import java.util.List;
 import java.util.Objects;
 
@@ -29,6 +30,7 @@ class SanitizerImplTest {
             .build());
     }
 
+    @SneakyThrows
     @Test
     void sanitize_poc() {
 
@@ -44,7 +46,7 @@ class SanitizerImplTest {
         assertTrue(jsonString.contains("alice@worklytics.co"));
         assertTrue(jsonString.contains("Subject"));
 
-        String sanitized = sanitizer.sanitize(new GenericUrl("https://gmail.googleapis.com/gmail/v1/users/me/messages/17c3b1911726ef3f\\?format=metadata"), jsonString);
+        String sanitized = sanitizer.sanitize(new URL("https", "gmail.googleapis.com", "/gmail/v1/users/me/messages/17c3b1911726ef3f\\?format=metadata"), jsonString);
 
 
         //email address should disappear

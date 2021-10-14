@@ -2,10 +2,11 @@ package co.worklytics.psoxy.rules.google;
 
 import co.worklytics.psoxy.Rules;
 import co.worklytics.psoxy.rules.RulesBaseTestCase;
-import com.google.api.client.http.GenericUrl;
 import lombok.Getter;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -19,6 +20,7 @@ public class GDriveTests extends RulesBaseTestCase {
     @Getter
     final String exampleDirectoryPath = "api-response-examples/g-workspace/gdrive-v2";
 
+    @SneakyThrows
     @Test
     void files() {
         String jsonString = asJson("files.json");
@@ -35,11 +37,12 @@ public class GDriveTests extends RulesBaseTestCase {
 
 
         String sanitized =
-            sanitizer.sanitize(new GenericUrl("https://www.googleapis.com/drive/v2/files"), jsonString);
+            sanitizer.sanitize(new URL("https", "www.googleapis.com", "/drive/v2/files"), jsonString);
 
         assertPseudonymized(sanitized, PII);
     }
 
+    @SneakyThrows
     @Test
     void revisions() {
         String jsonString = asJson("revisions.json");
@@ -51,7 +54,7 @@ public class GDriveTests extends RulesBaseTestCase {
         assertNotSanitized(jsonString, PII);
 
         String sanitized =
-            sanitizer.sanitize(new GenericUrl("https://www.googleapis.com/drive/v2/files/Asdfasdfas/revisions"), jsonString);
+            sanitizer.sanitize(new URL("http", "www.googleapis.com", "/drive/v2/files/Asdfasdfas/revisions"), jsonString);
 
         assertPseudonymized(sanitized, PII);
     }

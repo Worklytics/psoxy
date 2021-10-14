@@ -2,10 +2,11 @@ package co.worklytics.psoxy.rules.google;
 
 import co.worklytics.psoxy.Rules;
 import co.worklytics.psoxy.rules.RulesBaseTestCase;
-import com.google.api.client.http.GenericUrl;
 import lombok.Getter;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -21,6 +22,7 @@ public class GMailTests extends RulesBaseTestCase {
     @Getter
     final String exampleDirectoryPath = "api-response-examples/g-workspace/gmail";
 
+    @SneakyThrows
     @Test
     void sanitize() {
 
@@ -38,7 +40,7 @@ public class GMailTests extends RulesBaseTestCase {
         );
         assertNotSanitized(jsonString, PII);
 
-        String sanitized = sanitizer.sanitize(new GenericUrl("https://gmail.googleapis.com/gmail/v1/users/me/messages/17c3b1911726ef3f\\?format=metadata"), jsonString);
+        String sanitized = sanitizer.sanitize(new URL("https", "gmail.googleapis.com", "/gmail/v1/users/me/messages/17c3b1911726ef3f\\?format=metadata"), jsonString);
 
         //email address should disappear
         assertFalse(sanitized.contains(jsonPart));

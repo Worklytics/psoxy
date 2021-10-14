@@ -22,6 +22,7 @@ import org.hazlewood.connor.bottema.emailaddress.EmailAddressParser;
 import org.hazlewood.connor.bottema.emailaddress.EmailAddressValidator;
 
 import javax.mail.internet.InternetAddress;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -60,7 +61,7 @@ public class SanitizerImpl implements Sanitizer {
     }
 
     @Override
-    public String sanitize(GenericUrl url, String jsonResponse) {
+    public String sanitize(URL url, String jsonResponse) {
 
         if (compiledPseudonymizations == null) {
             compiledPseudonymizations = compile(options.getRules().getPseudonymizations());
@@ -75,7 +76,7 @@ public class SanitizerImpl implements Sanitizer {
             initConfiguration();
         }
 
-        String relativeUrl = url.buildRelativeUrl();
+        String relativeUrl = url.getPath() + "?" + url.getQuery();
 
         List<JsonPath> pseudonymizationsToApply =
             applicablePaths(compiledPseudonymizations, relativeUrl);

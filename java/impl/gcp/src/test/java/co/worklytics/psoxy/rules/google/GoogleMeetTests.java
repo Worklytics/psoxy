@@ -2,15 +2,13 @@ package co.worklytics.psoxy.rules.google;
 
 import co.worklytics.psoxy.Rules;
 import co.worklytics.psoxy.rules.RulesBaseTestCase;
-import com.google.api.client.http.GenericUrl;
 import lombok.Getter;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class GoogleMeetTests extends RulesBaseTestCase {
 
@@ -20,6 +18,7 @@ class GoogleMeetTests extends RulesBaseTestCase {
     @Getter
     final String exampleDirectoryPath = "api-response-examples/g-workspace/meet";
 
+    @SneakyThrows
     @Test
     void activities() {
         String jsonString = asJson("meet-activities.json");
@@ -34,7 +33,7 @@ class GoogleMeetTests extends RulesBaseTestCase {
         assertNotSanitized(jsonString, PII);
 
         String sanitized =
-            sanitizer.sanitize(new GenericUrl("https://admin.googleapis.com/admin/reports/v1/activity/users/all/applications/meet"), jsonString);
+            sanitizer.sanitize(new URL("https", "admin.googleapis.com", "/admin/reports/v1/activity/users/all/applications/meet"), jsonString);
 
         assertPseudonymized(sanitized, PII);
     }

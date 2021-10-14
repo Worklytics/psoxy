@@ -1,9 +1,9 @@
 package co.worklytics.psoxy;
 
-import com.google.api.client.http.GenericUrl;
 import lombok.*;
 
 import java.io.Serializable;
+import java.net.URL;
 
 public interface Sanitizer {
 
@@ -29,5 +29,5 @@ public interface Sanitizer {
     /**
      * sanitize jsonResponse received from url, according any options set on Sanitizer
      */
-    String sanitize(GenericUrl url, String jsonResponse);
+    String sanitize(URL url, String jsonResponse);
 }

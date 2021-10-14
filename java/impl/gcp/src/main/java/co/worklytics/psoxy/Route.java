@@ -108,14 +108,14 @@ public class Route implements HttpFunction {
 
         // re-write host
         //TODO: switch on method to support HEAD, etc
-        GenericUrl targetUrl = buildTarget(request);
+        URL targetUrl = buildTarget(request);
 
-        log.info("Proxy invoked with target: " + targetUrl.buildRelativeUrl());
+        log.info("Proxy invoked with target: " + targetUrl.getPath() + "?" + targetUrl.getQuery());
 
         //TODO: test URL against blacklist regex??
 
         com.google.api.client.http.HttpRequest sourceApiRequest =
-            requestFactory.buildGetRequest(targetUrl);
+            requestFactory.buildGetRequest(new GenericUrl(targetUrl.toString()));
 
         //TODO: what headers to forward???
 
@@ -155,16 +155,15 @@ public class Route implements HttpFunction {
 
 
     @SneakyThrows
-    GenericUrl buildTarget(HttpRequest request) {
+    URL buildTarget(HttpRequest request) {
         String path =
             request.getPath()
                 .replace(System.getenv(RuntimeEnvironmentVariables.K_SERVICE.name()) + "/", "")
             + request.getQuery().map(s -> "?" + s).orElse("");
 
-        URL url = new URL("https", getRequiredConfigProperty(ConfigProperty.TARGET_HOST), path);
-
-        return new GenericUrl(url.toString());
+        return new URL("https", getRequiredConfigProperty(ConfigProperty.TARGET_HOST), path);
     }
+
 
     String getRequiredConfigProperty(ConfigProperty property) {
         String value = System.getenv(property.name());
