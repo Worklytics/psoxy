@@ -53,7 +53,7 @@ resource "local_file" "gmail-connector-sa-key" {
 }
 
 # let your cloud function use the secret
-module "psoxy-gmail-access-gmail-connector-secret" {
+module "psoxy-gmail-access-connector-sa-key-secret" {
   source = "../modules/gcp-secret-to-cloud-function"
 
   secret_name           = module.gmail-connector-auth.key_secret_name
