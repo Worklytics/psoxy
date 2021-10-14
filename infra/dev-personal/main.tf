@@ -75,8 +75,6 @@ module "psoxy-gmail-access-salt" {
 }
 
 
-
-
 module "google-chat-connector" {
   source = "../modules/google-workspace-dwd-connection"
 
@@ -102,7 +100,7 @@ module "google-chat-connector-auth" {
 }
 
 
-module "google-chat-access-sa-key-secret" {
+module "psoxy-google-chat-access-connector-sa-key-secret" {
   source = "../modules/gcp-secret-to-cloud-function"
 
   secret_name           = module.google-chat-connector-auth.key_secret_name
@@ -112,7 +110,7 @@ module "google-chat-access-sa-key-secret" {
   function_name         = "psoxy-google-chat"
 }
 
-module "google-chat-access-salt" {
+module "psoxy-google-chat-access-salt" {
   source = "../modules/gcp-secret-to-cloud-function"
 
   function_name = "psoxy-google-chat"
