@@ -1,36 +1,37 @@
 package co.worklytics.psoxy.rules.google;
 
-import co.worklytics.psoxy.Sanitizer;
-import co.worklytics.psoxy.impl.SanitizerImpl;
-import co.worklytics.test.TestUtils;
+import co.worklytics.psoxy.Rules;
+import co.worklytics.psoxy.rules.RulesBaseTestCase;
 import com.google.api.client.http.GenericUrl;
-import org.junit.jupiter.api.BeforeEach;
+import lombok.Getter;
 import org.junit.jupiter.api.Test;
+
+import java.util.Arrays;
+import java.util.Collection;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class CalendarTests {
+class CalendarTests extends RulesBaseTestCase {
 
-    SanitizerImpl sanitizer;
+    @Getter
+    final Rules rulesUnderTest = PrebuiltSanitizerRules.GCAL;
 
-    @BeforeEach
-    public void setup() {
-        sanitizer = new SanitizerImpl(Sanitizer.Options.builder()
-            .rules(PrebuiltSanitizerRules.GCAL)
-            .build());
-    }
+    @Getter
+    final String exampleDirectoryPath = "api-response-examples/g-workspace/calendar";
 
     @Test
     void events() {
-        String jsonString = new String(TestUtils.getData("api-response-examples/g-workspace/calendar/events.json"));
+        String jsonString = asJson("events.json");
 
-        //verify precondition that example actually contains something we need to pseudonymize
-        assertTrue(jsonString.contains("alice@worklytics.co"));
+        Collection<String> PII = Arrays.asList(
+            "alice@worklytics.co"
+        );
+        assertNotSanitized(jsonString, PII);
 
         String sanitized =
             sanitizer.sanitize(new GenericUrl("https://calendar.googleapis.com/calendar/v3/calendars/primary/events"), jsonString);
 
-        assertFalse(sanitized.contains("alice@worklytics.co"));
+        assertPseudonymized(sanitized, PII);
     }
 }

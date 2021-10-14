@@ -1,0 +1,133 @@
+{
+  "kind": "drive#fileList",
+  "nextPageToken": "~!!~AI9FV7SNkFnerJkGEu8LrfR8v0gSWoS0gVAxQ_WnBpFU4snVmukKFrKhZCXreh_f1qEgEUYd63bczkm4r2yIVQ8x14AgiqGWH_K9JMss6990wt28M0l4igXL_XJAI9han-vnd9ZTfgovPZZP9kTXyUME4Q5YpReXDXvIGVFlBs7fz-3ZVqbmEn1IjeaQMMzqe3fJNBp_QCBBE1Tp2O6FBArLas-3mt3ywoqeoiuHQOGDOTcxzjxLxLiYcll3KXcqxefkhRz8rb_dX_YJFfm9FuG9VGQuZ3oViw==",
+  "incompleteSearch": false,
+  "files": [
+    {
+      "kind": "drive#file",
+      "id": "189_XJe0oafBAw01BIoFudbIvNCaIGERI_y2X1LxMCMo",
+      "name": "asdfasfrasdf",
+      "mimeType": "application/vnd.google-apps.document",
+      "starred": false,
+      "trashed": false,
+      "explicitlyTrashed": false,
+      "parents": [
+        "1w0BkIiE3ies3b0VZeJf5niK6LIG55P0j"
+      ],
+      "spaces": [
+        "drive"
+      ],
+      "version": "8",
+      "webViewLink": "https://docs.google.com/document/d/189_XJe0oafBAw01BIoFudbIvNCaIGERI_y2X1LxMCMo/edit?usp=drivesdk",
+      "iconLink": "https://drive-thirdparty.googleusercontent.com/16/type/application/vnd.google-apps.document",
+      "hasThumbnail": true,
+      "thumbnailLink": "https://docs.google.com/feeds/vt?gd=true&id=189_XJe0oafBAw01BIoFudbIvNCaIGERI_y2X1LxMCMo&v=1&s=AMedNnoAAAAAYWXK_y-e5fnM-rd4sBkk6Slri35kxaS8&sz=s220",
+      "thumbnailVersion": "1",
+      "viewedByMe": false,
+      "createdTime": "2021-10-12T15:37:18.702Z",
+      "modifiedTime": "2021-10-12T15:38:22.010Z",
+      "modifiedByMe": false,
+      "owners": [
+        {
+          "kind": "drive#user",
+          "displayName": "Bob Boss",
+          "photoLink": "https://lh3.googleusercontent.com/a-/AOh14GiS0urNnjWImm9Iyvoh-RPpC-nsTLtf6zXWegTcNA=s64",
+          "me": false,
+          "permissionId": "02185925293822571813",
+          "emailAddress": "Bob@worklytics.co"
+        }
+      ],
+      "lastModifyingUser": {
+        "kind": "drive#user",
+        "displayName": "Bob Boss",
+        "photoLink": "https://lh3.googleusercontent.com/a-/AOh14GiS0urNnjWImm9Iyvoh-RPpC-nsTLtf6zXWegTcNA=s64",
+        "me": false,
+        "permissionId": "02185925293822571813",
+        "emailAddress": "Bob@worklytics.co"
+      },
+      "shared": true,
+      "ownedByMe": false,
+      "capabilities": {
+        "canAddChildren": false,
+        "canAddMyDriveParent": false,
+        "canChangeCopyRequiresWriterPermission": false,
+        "canChangeSecurityUpdateEnabled": false,
+        "canChangeViewersCanCopyContent": false,
+        "canComment": true,
+        "canCopy": true,
+        "canDelete": false,
+        "canDownload": true,
+        "canEdit": true,
+        "canListChildren": false,
+        "canModifyContent": true,
+        "canMoveChildrenWithinDrive": false,
+        "canMoveItemIntoTeamDrive": false,
+        "canMoveItemOutOfDrive": false,
+        "canMoveItemWithinDrive": true,
+        "canReadRevisions": true,
+        "canRemoveChildren": false,
+        "canRemoveMyDriveParent": true,
+        "canRename": true,
+        "canShare": true,
+        "canTrash": false,
+        "canUntrash": false
+      },
+      "viewersCanCopyContent": true,
+      "copyRequiresWriterPermission": false,
+      "writersCanShare": true,
+      "permissions": [
+        {
+          "kind": "drive#permission",
+          "id": "00343915730182430912",
+          "type": "user",
+          "emailAddress": "John@worklytics.co",
+          "role": "writer",
+          "displayName": "John Lorens",
+          "photoLink": "https://lh3.googleusercontent.com/a-/AOh14GjhaFNvc0L4O5mPUY9wIAlyJ2GgDAqm_J6V-kmOlA=s64",
+          "deleted": false
+        },
+        {
+          "kind": "drive#permission",
+          "id": "16513690099496370655",
+          "type": "user",
+          "emailAddress": "alice@worklytics.co",
+          "role": "writer",
+          "displayName": "alice Example",
+          "photoLink": "https://lh3.googleusercontent.com/a-/AOh14GjptyENXe6NF4PK3wkDKaStrHeTKmZmJAYp4FsonvOBr7DIv8MrRamEHGw12zqrW8OJZlTMhMhUTYQRVE8gkm0prQhwB3PVlknFASStE2LnyJWYwVNQnECNGdooDK6fe46gNO08k7YUMSvbnSTSs3VAjgFpw2GFeNUs8mEQXbThwoUWkXrzmpcCna1W2Kgs9Oq2C5YErwEYz8vUYfNrQH9I8uasAqXnEP_zVVyHhoMz-dXGUPRa5k6RfSpvyxAmriLu0rqzWSY-dLvW2tz-iyDFq65cIzZPODB0XtseQ6WGfOfCLvuTX5IXIonxMzrowdGoOISoBoZ5hGKGqMeswYSCniDcJVbPRLYtlAv6MCAUiNctmT7c9ESwGdtI6X07JhSoIvhFvBAgcTRW6QniQ7qDjG2_xiUHb2PuQc3DTx34rrRXqfu32fbF8J0F-AWUiRKgoGJDmO2UTy8HlSUqkPaxbGrrs4D5L5Hxg_MQhXn1dGu0SesYPLDcd9KvdqmWXmVBm7sVhckWFvLiOjfSdP5Qd3H3DL--Mml3NIMFaDpDwob7jtMbDmE2wHLWGqI7CxxK-B_Zj7Zp2zRyRVZwG_3M-ri-VviQ7q5zwkD2Om43QU8-m5BeIsMvWToW76mXLm8KUXSvHrW9tYwwrGjLrjHZLaEvM-BoOAUIWJrVG3cFC7qvsOQsLhlWv4gBD84uf9iq_67KzJ9j3fIQiRi5EGKwOUnyMfRTcpxWbpu9qgIOjJ0QburviaqQflRVNwr6__Yiaw=s64",
+          "deleted": false
+        },
+        {
+          "kind": "drive#permission",
+          "id": "02185925293822571813",
+          "type": "user",
+          "emailAddress": "Bob@worklytics.co",
+          "role": "owner",
+          "displayName": "Bob Boss",
+          "photoLink": "https://lh3.googleusercontent.com/a-/AOh14GiS0urNnjWImm9Iyvoh-RPpC-nsTLtf6zXWegTcNA=s64",
+          "deleted": false
+        }
+      ],
+      "permissionIds": [
+        "00343915730182430912",
+        "16513690099496370655",
+        "02185925293822571813"
+      ],
+      "quotaBytesUsed": "0",
+      "isAppAuthorized": false,
+      "exportLinks": {
+        "application/rtf": "https://docs.google.com/feeds/download/documents/export/Export?id=189_XJe0oafBAw01BIoFudbIvNCaIGERI_y2X1LxMCMo&exportFormat=rtf",
+        "application/vnd.oasis.opendocument.text": "https://docs.google.com/feeds/download/documents/export/Export?id=189_XJe0oafBAw01BIoFudbIvNCaIGERI_y2X1LxMCMo&exportFormat=odt",
+        "text/html": "https://docs.google.com/feeds/download/documents/export/Export?id=189_XJe0oafBAw01BIoFudbIvNCaIGERI_y2X1LxMCMo&exportFormat=html",
+        "application/pdf": "https://docs.google.com/feeds/download/documents/export/Export?id=189_XJe0oafBAw01BIoFudbIvNCaIGERI_y2X1LxMCMo&exportFormat=pdf",
+        "application/epub+zip": "https://docs.google.com/feeds/download/documents/export/Export?id=189_XJe0oafBAw01BIoFudbIvNCaIGERI_y2X1LxMCMo&exportFormat=epub",
+        "application/zip": "https://docs.google.com/feeds/download/documents/export/Export?id=189_XJe0oafBAw01BIoFudbIvNCaIGERI_y2X1LxMCMo&exportFormat=zip",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "https://docs.google.com/feeds/download/documents/export/Export?id=189_XJe0oafBAw01BIoFudbIvNCaIGERI_y2X1LxMCMo&exportFormat=docx",
+        "text/plain": "https://docs.google.com/feeds/download/documents/export/Export?id=189_XJe0oafBAw01BIoFudbIvNCaIGERI_y2X1LxMCMo&exportFormat=txt"
+      },
+      "linkShareMetadata": {
+        "securityUpdateEligible": false,
+        "securityUpdateEnabled": true
+      }
+    }
+  ]
+}
