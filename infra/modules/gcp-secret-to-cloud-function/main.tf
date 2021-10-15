@@ -1,7 +1,6 @@
 # expose a Secret Manager secret to a Cloud function
 
 locals {
-  secret_version_number = trimprefix(var.secret_version_name, "${var.secret_name}/versions/")
   slugified_secret_name = replace(var.secret_name, "/", "-")
 }
 
@@ -15,13 +14,14 @@ resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_secret"
 resource "local_file" "todo" {
   filename = "TODO ${var.function_name} - link ${local.slugified_secret_name}.md"
   content  = <<EOT
-Run the following command to finish exposing  `${local.slugified_secret_name}` to `${var.function_name}`:
+Run the following command from functions deployment directory (containing bundled JAR or pom.xml)
+to finish exposing  `${local.slugified_secret_name}` to `${var.function_name}`:
 
 ```shell
 gcloud beta functions deploy ${var.function_name} \
     --project=${var.project_id} \
     --runtime=${var.runtime} \
-    --update-secrets 'SERVICE_ACCOUNT_KEY=${var.secret_name}:${local.secret_version_number}'
+    --update-secrets 'SERVICE_ACCOUNT_KEY=${var.secret_name}:${var.secret_version_number}'
 ```
 EOT
 }

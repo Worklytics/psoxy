@@ -13,9 +13,9 @@ variable "secret_name" {
   description = "name of the secret to expose to cloud function"
 }
 
-variable "secret_version_name" {
+variable "secret_version_number" {
   type        = string
-  description = "name of version of the secret to expose to cloud function"
+  description = "number of version of the secret to expose to cloud function"
 }
 
 variable "function_name" {

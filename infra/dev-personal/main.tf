@@ -33,7 +33,6 @@ module "psoxy-gcp" {
   ]
 }
 
-
 module "gmail-connector" {
   source = "../modules/google-workspace-dwd-connection"
 
@@ -41,8 +40,7 @@ module "gmail-connector" {
   connector_service_account_id = "psoxy-gmail-dwd"
   display_name                 = "Psoxy Connector - GMail Dev Erik"
   apis_consumed                = [
-    "gmail.googleapis.com",
-    # TODO: probably directory too!?!?
+    "gmail.googleapis.com"
   ]
 
   depends_on = [
@@ -65,31 +63,24 @@ resource "local_file" "gmail-connector-sa-key" {
   content_base64 = module.gmail-connector-auth.key_value
 }
 
-# let your cloud function use the secret
-module "psoxy-gmail-access-connector-sa-key-secret" {
-  source = "../modules/gcp-secret-to-cloud-function"
+module "psoxy-gmail" {
+  source = "../modules/gcp-psoxy-cloud-function"
 
   project_id            = var.project_id
   function_name         = "psoxy-gmail"
-  env_var_name          = "SERVICE_ACCOUNT_KEY"
-  secret_name           = module.gmail-connector-auth.key_secret_name
-  secret_version_name   = module.gmail-connector-auth.key_secret_version_name
-  service_account_email = module.gmail-connector.service_account_email
-
-}
-
-# let your cloud function use the salt
-module "psoxy-gmail-access-salt" {
-  source = "../modules/gcp-secret-to-cloud-function"
-
-  project_id            = var.project_id
-  function_name         = "psoxy-gmail"
-  env_var_name          = "PSOXY_SALT"
-  secret_name           = module.psoxy-gcp.salt_secret_name
-  secret_version_name   = module.psoxy-gcp.salt_secret_version_name
+  source_kind           = "gmail"
+  secret_bindings = {
+    PSOXY_SALT = {
+      secret_name    = module.psoxy-gcp.salt_secret_name
+      version_number = module.psoxy-gcp.salt_secret_version_number
+    },
+    SERVICE_ACCOUNT_KEY = {
+      secret_name    = module.gmail-connector-auth.key_secret_name
+      version_number = module.gmail-connector-auth.key_secret_version_number
+    }
+  }
   service_account_email = module.gmail-connector.service_account_email
 }
-
 
 module "google-chat-connector" {
   source = "../modules/google-workspace-dwd-connection"
@@ -98,8 +89,7 @@ module "google-chat-connector" {
   connector_service_account_id = "psoxy-google-chat-dwd"
   display_name                 = "Psoxy Connector - Google Chat Dev Erik"
   apis_consumed                = [
-    "admin.googleapis.com",
-    # TODO: probably directory too!?!?
+    "admin.googleapis.com"
   ]
 
   depends_on = [
@@ -115,26 +105,21 @@ module "google-chat-connector-auth" {
   secret_id          = "PSOXY_SERVICE_ACCOUNT_KEY_google-chat"
 }
 
-
-module "psoxy-google-chat-access-connector-sa-key-secret" {
-  source = "../modules/gcp-secret-to-cloud-function"
-
-  project_id            = var.project_id
-  function_name         = "psoxy-google-chat"
-  env_var_name          = "SERVICE_ACCOUNT_KEY"
-  secret_name           = module.google-chat-connector-auth.key_secret_name
-  secret_version_name   = module.google-chat-connector-auth.key_secret_version_name
-  service_account_email = module.google-chat-connector.service_account_email
-
-}
-
-module "psoxy-google-chat-access-salt" {
-  source = "../modules/gcp-secret-to-cloud-function"
+module "psoxy-google-chat" {
+  source = "../modules/gcp-psoxy-cloud-function"
 
   project_id            = var.project_id
   function_name         = "psoxy-google-chat"
-  env_var_name          = "PSOXY_SALT"
-  secret_name           = module.psoxy-gcp.salt_secret_name
-  secret_version_name   = module.psoxy-gcp.salt_secret_version_name
+  source_kind           = "google-chat"
+  secret_bindings = {
+    PSOXY_SALT = {
+      secret_name    = module.psoxy-gcp.salt_secret_name
+      version_number = module.psoxy-gcp.salt_secret_version_number
+    },
+    SERVICE_ACCOUNT_KEY = {
+      secret_name    = module.google-chat-connector-auth.key_secret_name
+      version_number = module.google-chat-connector-auth.key_secret_version_number
+    }
+  }
   service_account_email = module.google-chat-connector.service_account_email
 }
