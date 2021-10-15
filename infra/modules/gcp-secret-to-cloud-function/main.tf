@@ -18,7 +18,8 @@ resource "local_file" "todo" {
 Run the following command to finish exposing  `${local.slugified_secret_name}` to `${var.function_name}`:
 
 ```shell
-gcloud functions deploy ${var.function_name} \
+gcloud beta functions deploy ${var.function_name} \
+    --project=${var.project_id} \
     --runtime=${var.runtime} \
     --update-secrets 'SERVICE_ACCOUNT_KEY=${var.secret_name}:${local.secret_version_number}'
 ```
