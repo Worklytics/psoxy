@@ -71,9 +71,11 @@ module "psoxy-gmail-access-connector-sa-key-secret" {
 
   project_id            = var.project_id
   function_name         = "psoxy-gmail"
+  env_var_name          = "SERVICE_ACCOUNT_KEY"
   secret_name           = module.gmail-connector-auth.key_secret_name
   secret_version_name   = module.gmail-connector-auth.key_secret_version_name
   service_account_email = module.gmail-connector.service_account_email
+
 }
 
 # let your cloud function use the salt
@@ -82,6 +84,7 @@ module "psoxy-gmail-access-salt" {
 
   project_id            = var.project_id
   function_name         = "psoxy-gmail"
+  env_var_name          = "PSOXY_SALT"
   secret_name           = module.psoxy-gcp.salt_secret_name
   secret_version_name   = module.psoxy-gcp.salt_secret_version_name
   service_account_email = module.gmail-connector.service_account_email
@@ -118,6 +121,7 @@ module "psoxy-google-chat-access-connector-sa-key-secret" {
 
   project_id            = var.project_id
   function_name         = "psoxy-google-chat"
+  env_var_name          = "SERVICE_ACCOUNT_KEY"
   secret_name           = module.google-chat-connector-auth.key_secret_name
   secret_version_name   = module.google-chat-connector-auth.key_secret_version_name
   service_account_email = module.google-chat-connector.service_account_email
@@ -129,6 +133,7 @@ module "psoxy-google-chat-access-salt" {
 
   project_id            = var.project_id
   function_name         = "psoxy-google-chat"
+  env_var_name          = "PSOXY_SALT"
   secret_name           = module.psoxy-gcp.salt_secret_name
   secret_version_name   = module.psoxy-gcp.salt_secret_version_name
   service_account_email = module.google-chat-connector.service_account_email

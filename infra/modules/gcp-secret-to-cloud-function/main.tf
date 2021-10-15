@@ -13,17 +13,13 @@ resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_secret"
 
 # terraform
 resource "local_file" "todo" {
-  filename = "TODO ${var.function_name} - deploy ${local.slugified_secret_name}.md"
+  filename = "TODO ${var.function_name} - link ${local.slugified_secret_name}.md"
   content  = <<EOT
+Run the following command to finish exposing  `${local.slugified_secret_name}` to `${var.function_name}`:
 
+```shell
 gcloud functions deploy ${var.function_name} \
-    --entry-point=co.worklytics.psoxy.Route \
-    --runtime=java11 \
-    --trigger-http \
-    --source=target/deployment \
-    --project=${var.project_id} \
-    --service-account=${var.service_account_email} \
-    --env-vars-file=config.yaml \
+    --runtime=${var.runtime} \
     --update-secrets 'SERVICE_ACCOUNT_KEY=${var.secret_name}:${local.secret_version_number}'
 ```
 EOT
