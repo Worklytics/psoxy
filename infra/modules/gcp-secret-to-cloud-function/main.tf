@@ -1,5 +1,6 @@
 # expose a Secret Manager secret to a Cloud function
-
+#  NOTE: this effectively 're-deploys' the function just to add/update the secret, so in practice
+# a batch approach is preferable. see (`modules/gcp-psoxy-cloud-function')
 locals {
   slugified_secret_name = replace(var.secret_name, "/", "-")
 }
