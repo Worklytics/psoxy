@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="psoxy - run gmail" type="MavenRunConfiguration" factoryName="Maven">
+  <configuration default="false" name="gcp - gmail - run" type="MavenRunConfiguration" factoryName="Maven">
     <MavenSettings>
       <option name="myGeneralSettings">
         <MavenGeneralSettings>

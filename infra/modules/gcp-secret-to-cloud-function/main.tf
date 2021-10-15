@@ -11,17 +11,20 @@ resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_secret"
   secret_id = var.secret_name
 }
 
-# todo needed bc as of Sept 2021, no way to expose secret via Cloud Function Maven plugin or
 # terraform
 resource "local_file" "todo" {
-  filename = "TODO ${var.function_name} - expose ${local.slugified_secret_name}.md"
+  filename = "TODO ${var.function_name} - deploy ${local.slugified_secret_name}.md"
   content  = <<EOT
-expose the secret to the cloud function
-```shell
-  gcloud beta functions deploy ${var.function_name} \
---project ${var.project_id} \
---runtime java11 \
---update-secrets 'SERVICE_ACCOUNT_KEY=${var.secret_name}:${local.secret_version_number}'
+
+gcloud functions deploy ${var.function_name} \
+    --entry-point=co.worklytics.psoxy.Route \
+    --runtime=java11 \
+    --trigger-http \
+    --source=target/deployment \
+    --project=${var.project_id} \
+    --service-account=${var.service_account_email} \
+    --env-vars-file=config.yaml \
+    --update-secrets 'SERVICE_ACCOUNT_KEY=${var.secret_name}:${local.secret_version_number}'
 ```
 EOT
 }

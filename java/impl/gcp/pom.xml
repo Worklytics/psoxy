@@ -117,6 +117,8 @@
                     <!-- TODO: set secrets here, when they expose this option through maven pluging (currently beta) -->
                 </configuration>
             </plugin>
+
+            <!-- produces an 'uber' JAR, with all deps pkg'd -->
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
@@ -162,34 +164,7 @@
             </plugin>
 
 
-            <!-- GCP Function thin JAR deployment -->
-            <plugin>
-                <artifactId>maven-jar-plugin</artifactId>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <addClasspath>true</addClasspath>
-                            <classpathPrefix>libs/</classpathPrefix>
-                        </manifest>
-                    </archive>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <overWriteReleases>false</overWriteReleases>
-                            <includeScope>runtime</includeScope>
-                            <outputDirectory>${project.build.directory}/libs</outputDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+            <!-- builds deployment directory containing only 'uber' JAR for deployment as GCP cloud function -->
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
                 <executions>
@@ -204,7 +179,6 @@
                                     <directory>${project.build.directory}</directory>
                                     <includes>
                                         <include>${build.finalName}.jar</include>
-                                        <include>libs/psoxy-**</include> <!-- if we limit this to ONLY our JARs, will stuff work?? -->
                                     </includes>
                                     <filtering>false</filtering>
                                 </resource>
