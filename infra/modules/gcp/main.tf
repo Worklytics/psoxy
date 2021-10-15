@@ -1,12 +1,5 @@
 
 
-resource "google_project" "psoxy-project" {
-  name            = "Psoxy - ${var.environment_name}"
-  project_id      = var.project_id
-  folder_id       = var.folder_id
-  billing_account = var.billing_account_id
-}
-
 
 # activate required GCP service APIs
 resource "google_project_service" "gcp-infra-api" {
@@ -20,17 +13,14 @@ resource "google_project_service" "gcp-infra-api" {
   ])
 
   service                    = each.key
-  project                    = google_project.psoxy-project.project_id
+  project                    = var.project_id
   disable_dependent_services = false
 
-  depends_on = [
-    google_project.psoxy-project # don't try to setup until project exists
-  ]
 }
 
 # pseudo secret
 resource "google_secret_manager_secret" "pseudonymization-salt" {
-  project   = google_project.psoxy-project.project_id
+  project   = var.project_id
   secret_id = "PSOXY_SALT"
 
   replication {
@@ -58,4 +48,15 @@ resource "random_password" "random" {
 resource "google_secret_manager_secret_version" "initial_version" {
   secret      = google_secret_manager_secret.pseudonymization-salt.id
   secret_data = sensitive(random_password.random.result)
+}
+
+# grants invoker to these SA for ALL functions in this project. this is the recommended setup, as
+# we expect this GCP project to only be used of psoxy instances to be consumed from your Worklytics
+# account; otherwise, you can grant this role on specific functions
+resource "google_project_iam_member" "grant_cloudFunctionInvoker_to_service_accounts" {
+  for_each = toset(var.invoker_sa_emails)
+
+  project = var.project_id
+  member  = "serviceAccount:${each.value}"
+  role    = "roles/cloudfunctions.invoker"
 }
