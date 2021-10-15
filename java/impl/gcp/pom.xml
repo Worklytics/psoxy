@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>co.worklytics.psoxy.impl</groupId>
+        <artifactId>impl</artifactId>
+        <version>${revision}</version>
+    </parent>
+
+    <groupId>co.worklytics.psoxy</groupId>
+    <artifactId>psoxy-gcp</artifactId>
+    <version>${revision}</version>
+    <packaging>jar</packaging>
+
+    <properties>
+        <gcpProjectId>psoxy-dev-erik</gcpProjectId>
+        <sourceApi>gmail</sourceApi>
+        <!-- serviceAccount that function will run as. For Google Workspace use cases, should be the
+         one configured as OAuth Client and authorized for your instance. -->
+        <serviceAccount>psoxy-gmail-dwd@psoxy-dev-erik.iam.gserviceaccount.com</serviceAccount>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>central</id>
+            <name>Central Repository</name>
+            <url>https://repo.maven.apache.org/maven2</url>
+            <layout>default</layout>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+                <checksumPolicy>warn</checksumPolicy>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>co.worklytics.psoxy</groupId>
+            <artifactId>psoxy-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- framework stuff -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${dependency.lombok.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${dependency.apache-commons-lang3.version}</version>
+        </dependency>
+
+        <!-- platform stuff (eg, GCP Cloud Function support) -->
+        <dependency>
+            <groupId>com.google.cloud.functions</groupId>
+            <artifactId>functions-framework-api</artifactId>
+            <version>1.0.4</version>
+        </dependency>
+
+        <!-- Communications with source API endpoints, including transport + auth -->
+        <!-- for familiarity sake, use Google HTTP / OAuth clients -->
+        <dependency>
+            <groupId>com.google.http-client</groupId>
+            <artifactId>google-http-client</artifactId>
+            <version>1.40.0</version>
+        </dependency>
+        <!-- https://github.com/googleapis/google-auth-library-java#google-auth-library-oauth2-http -->
+        <dependency>
+            <groupId>com.google.auth</groupId>
+            <artifactId>google-auth-library-oauth2-http</artifactId>
+            <version>1.1.0</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <!--
+                  Google Cloud Functions Framework Maven plugin
+
+                  This plugin allows you to run Cloud Functions Java code
+                  locally. Use the following terminal command to run a
+                  given function locally:
+
+                  mvn function:run -Drun.functionTarget=your.package.yourFunction
+
+                  NOTE: intellij deploy run config doesn't work the first time. you should run the
+                  `gcloud functions deploy` cmd once interactively, and follow the prompt to confirm
+                  that you wish to block unauthenticated connections
+                -->
+                <groupId>com.google.cloud.functions</groupId>
+                <artifactId>function-maven-plugin</artifactId>
+                <version>0.9.7</version>
+                <configuration>
+                    <functionTarget>co.worklytics.psoxy.Route</functionTarget>
+
+                    <!-- many more configuration options supported by the 'deploy' goal, not local run -->
+                    <!-- set up env vars from file; setting env vars via IntelliJ Run Config DOES work locally, but tedious -->
+                    <envVarsFile>./configs/${sourceApi}.yaml</envVarsFile>
+                    <projectId>${gcpProjectId}</projectId>
+                    <name>psoxy-${sourceApi}</name>
+                    <serviceAccount>${serviceAccount}</serviceAccount>
+                    <allowUnauthenticated>false</allowUnauthenticated>
+                    <!-- set memory to something above default (256mb)? hard to imagine it's needed -->
+                    <timeout>500</timeout> <!-- max here is 540 -->
+                    <!-- TODO: set secrets here, when they expose this option through maven pluging (currently beta) -->
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>co.worklytics.psoxy.Route</mainClass>
+                        </manifest>
+                    </archive>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                    <appendAssemblyId>false</appendAssemblyId>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id> <!-- this is used for inheritance merges -->
+                        <phase>package</phase> <!-- bind to the packaging phase -->
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M5</version>
+                <configuration>
+                    <!-- rerun failing tests twice more -->
+                    <rerunFailingTestsCount>2</rerunFailingTestsCount>
+                    <includes>
+                        <!-- defaults: **/Test*.java, **/*Test.java, **/*TestCase.java -->
+                        <include>**/*Tests.java</include>
+                        <include>**/*Test.java</include>
+                    </includes>
+                    <systemProperties>
+                        <property>
+                            <name>java.util.logging.config.file</name>
+                            <value>test-execution-logging.properties</value>
+                        </property>
+                    </systemProperties>
+                </configuration>
+            </plugin>
+            <!-- add license plugin -->
+            <!-- use mvn goal license:aggregate-third-party-report to get report on licenses about
+                 dependencies, to facillitate eventual distribution of built JAR -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>2.0.0</version>
+            </plugin>
+        </plugins>
+    </build>
+</project>

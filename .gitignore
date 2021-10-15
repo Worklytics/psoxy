@@ -17,9 +17,10 @@ hs_err_pid*
 # but then IntelliJ seems to generate .idea/.gitignore too, which knocks out some of the stuff that
 # mentions
 */.idea/usage.statistics.xml
-*.iml
 # libraries isn't in above doc, but simply doesn't seem like what we want ...
 .idea/libraries/
+#NOTE: am NOT excluding .iml files; even for Maven-based modules; Intellij's base import of the
+# Maven modules --> IntelliJ modules doesn't result in nice hierarchy (only shows leaves)
 
 
 # ignore terraform variables / state for developers' personal development environmenst
@@ -30,6 +31,7 @@ infra/dev-personal/*connector-sa-key.json
 infra/dev-personal/TODO*
 
 java/target
+java/**/target
 
 # macOs generated files
 .DS_Store

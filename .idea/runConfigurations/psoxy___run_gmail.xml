@@ -24,7 +24,7 @@
           <option name="delegateBuildToMaven" value="false" />
           <option name="environmentProperties">
             <map>
-              <entry key="GOOGLE_APPLICATION_CREDENTIALS" value="../infra/dev-personal/gmail-connector-sa-key.json" />
+              <entry key="GOOGLE_APPLICATION_CREDENTIALS" value="../../../infra/dev-personal/gmail-connector-sa-key.json" />
               <entry key="OAUTH_SCOPES" value="https://www.googleapis.com/auth/gmail.metadata" />
               <entry key="SOURCE" value="gmail" />
               <entry key="TARGET_HOST" value="gmail.googleapis.com" />
@@ -55,7 +55,7 @@
             <map />
           </option>
           <option name="resolveToWorkspace" value="false" />
-          <option name="workingDirPath" value="$PROJECT_DIR$/java" />
+          <option name="workingDirPath" value="$PROJECT_DIR$/java/impl/gcp" />
         </MavenRunnerParameters>
       </option>
     </MavenSettings>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>co.worklytics.psoxy</groupId>
+        <artifactId>root</artifactId>
+        <version>${revision}</version>
+    </parent>
+
+    <!-- impl is all the implementations of Psoxy (cmd-line, gcp, aws, etc ...); suggestions for
+         better name welcome -->
+    <groupId>co.worklytics.psoxy.impl</groupId>
+    <artifactId>impl</artifactId>
+    <version>${revision}</version>
+    <packaging>pom</packaging>
+
+    <profiles>
+        <profile>
+            <id>gcp</id>
+            <activation>
+                <file>
+                    <exists>gcp/pom.xml</exists>
+                </file>
+            </activation>
+            <modules>
+                <module>gcp</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>cmd-line</id>
+            <activation>
+                <file>
+                    <exists>cmd-line/pom.xml</exists>
+                </file>
+            </activation>
+            <modules>
+                <module>cmd-line</module>
+            </modules>
+        </profile>
+    </profiles>
+</project>

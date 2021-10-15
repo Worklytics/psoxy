@@ -1,179 +1,67 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>co.worklytics</groupId>
-    <artifactId>psoxy</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <groupId>co.worklytics.psoxy</groupId>
+    <artifactId>root</artifactId>
+    <version>${revision}</version>
+    <packaging>pom</packaging>
 
     <properties>
+        <revision>1.0-SNAPSHOT</revision>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
+        <dependency.jackson.version>2.12.5</dependency.jackson.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jackson.version>2.12.5</jackson.version>
-        <gcpProjectId>psoxy-dev-erik</gcpProjectId>
-        <sourceApi>gmail</sourceApi>
-        <!-- serviceAccount that function will run as. For Google Workspace use cases, should be the
-         one configured as OAuth Client and authorized for your instance. -->
-        <serviceAccount>psoxy-gmail-dwd@psoxy-dev-erik.iam.gserviceaccount.com</serviceAccount>
+        <dependency.lombok.version>1.18.20</dependency.lombok.version>
+        <dependency.apache-commons-lang3.version>3.11</dependency.apache-commons-lang3.version>
     </properties>
 
-    <repositories>
+    <modules>
+        <module>core</module>
+        <module>impl</module>
+    </modules>
 
-        <repository>
-            <id>central</id>
-            <name>Central Repository</name>
-            <url>https://repo.maven.apache.org/maven2</url>
-            <layout>default</layout>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>always</updatePolicy>
-                <checksumPolicy>warn</checksumPolicy>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
+    <build>
+        <plugins>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+                <version>1.1.0</version>
+                <configuration>
+                    <outputDirectory>${project.build.directory}</outputDirectory>
+                </configuration>
+                <executions>
+                    <!-- enable flattening -->
+                    <execution>
+                        <id>flatten</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>flatten</goal>
+                        </goals>
+                    </execution>
+                    <!-- ensure proper cleanup -->
+                    <execution>
+                        <id>flatten.clean</id>
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
     <dependencies>
-        <!-- framework stuff -->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.18.20</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>3.11</version>
-        </dependency>
-
-        <!-- platform stuff (eg, GCP Cloud Function support) -->
-        <dependency>
-            <groupId>com.google.cloud.functions</groupId>
-            <artifactId>functions-framework-api</artifactId>
-            <version>1.0.4</version>
-        </dependency>
-
-        <!-- Communications with source API endpoints, including transport + auth -->
-        <!-- for familiarity sake, use Google HTTP / OAuth clients -->
-        <dependency>
-            <groupId>com.google.http-client</groupId>
-            <artifactId>google-http-client</artifactId>
-            <version>1.40.0</version>
-        </dependency>
-        <!-- https://github.com/googleapis/google-auth-library-java#google-auth-library-oauth2-http -->
-        <dependency>
-            <groupId>com.google.auth</groupId>
-            <artifactId>google-auth-library-oauth2-http</artifactId>
-            <version>1.1.0</version>
-        </dependency>
-
-
-        <!-- used to transform JSON responses -->
-        <dependency>
-            <groupId>com.jayway.jsonpath</groupId>
-            <artifactId>json-path</artifactId>
-            <version>2.6.0</version>
-        </dependency>
-        <!-- Jackson - JSON serialization/deserialization -->
-        <!-- trying to force Restlet to use these, rather than codehaus versions -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
-            <version>${jackson.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-annotations</artifactId>
-            <version>${jackson.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
-        </dependency>
-
-
-        <!-- RFC 2822 validator -->
-        <!-- see https://github.com/bbottema/email-rfc2822-validator -->
-        <dependency>
-            <groupId>com.github.bbottema</groupId>
-            <artifactId>emailaddress-rfc2822</artifactId>
-            <version>1.1.3</version>
-        </dependency>
-
-
-
-        <!-- support testing -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
             <version>5.8.1</version>
             <scope>test</scope>
         </dependency>
-
-
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <!--
-                  Google Cloud Functions Framework Maven plugin
-
-                  This plugin allows you to run Cloud Functions Java code
-                  locally. Use the following terminal command to run a
-                  given function locally:
-
-                  mvn function:run -Drun.functionTarget=your.package.yourFunction
-
-                  NOTE: intellij deploy run config doesn't work the first time. you should run the
-                  `gcloud functions deploy` cmd once interactively, and follow the prompt to confirm
-                  that you wish to block unauthenticated connections
-                -->
-                <groupId>com.google.cloud.functions</groupId>
-                <artifactId>function-maven-plugin</artifactId>
-                <version>0.9.7</version>
-                <configuration>
-                    <functionTarget>co.worklytics.psoxy.Route</functionTarget>
-
-                    <!-- many more configuration options supported by the 'deploy' goal, not local run -->
-                    <!-- set up env vars from file; setting env vars via IntelliJ Run Config DOES work locally, but tedious -->
-                    <envVarsFile>./configs/${sourceApi}.yaml</envVarsFile>
-                    <projectId>${gcpProjectId}</projectId>
-                    <name>psoxy-${sourceApi}</name>
-                    <serviceAccount>${serviceAccount}</serviceAccount>
-                    <allowUnauthenticated>false</allowUnauthenticated>
-                    <!-- set memory to something above default (256mb)? hard to imagine it's needed -->
-                    <timeout>500</timeout> <!-- max here is 540 -->
-                    <!-- TODO: set secrets here, when they expose this option through maven pluging (currently beta) -->
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.0.0-M5</version>
-                <configuration>
-                    <!-- rerun failing tests twice more -->
-                    <rerunFailingTestsCount>2</rerunFailingTestsCount>
-                    <includes>
-                        <!-- defaults: **/Test*.java, **/*Test.java, **/*TestCase.java -->
-                        <include>**/*Tests.java</include>
-                        <include>**/*Test.java</include>
-                    </includes>
-                    <systemProperties>
-                        <property>
-                            <name>java.util.logging.config.file</name>
-                            <value>test-execution-logging.properties</value>
-                        </property>
-                    </systemProperties>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 </project>
