@@ -1,0 +1,11 @@
+pseudonymizations:
+  - relativeUrlRegex: /calendar/v3/calendars/.*/events.*
+    jsonPaths:
+      - $..email
+emailHeaderPseudonymizations: []
+redactions:
+  - relativeUrlRegex: /calendar/v3/calendars/.*/events.*
+    jsonPaths:
+      - $..displayName
+      - $.items[*].extendedProperties.private
+

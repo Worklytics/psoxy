@@ -1,15 +1,10 @@
 package co.worklytics.psoxy;
 
-import com.jayway.jsonpath.JsonPath;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Singular;
-import lombok.Value;
+import lombok.*;
 import lombok.extern.java.Log;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.regex.Pattern;
 
 /**
  * rules that control how data source API is sanitized, including support for:
@@ -25,8 +20,11 @@ import java.util.regex.Pattern;
  * - we now have 3 cases of value `Map`/`Transformation`
  */
 @Builder
-@Value
 @Log
+@AllArgsConstructor //for builder
+@NoArgsConstructor //for Jackson
+@Getter
+@EqualsAndHashCode
 public class Rules implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -38,7 +36,10 @@ public class Rules implements Serializable {
      * matches at least one of `jsonPaths`
      */
     @Builder
-    @Value
+    @AllArgsConstructor //for builder
+    @NoArgsConstructor //for Jackson
+    @Getter
+    @EqualsAndHashCode
     public static class Rule implements Serializable {
 
         private static final long serialVersionUID = 1L;

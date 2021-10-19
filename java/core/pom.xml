@@ -50,6 +50,11 @@
             <artifactId>jackson-databind</artifactId>
             <version>${dependency.jackson.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-yaml</artifactId>
+            <version>${dependency.jackson.version}</version>
+        </dependency>
 
         <!-- Communications with source API endpoints, including transport + auth -->
         <!-- for familiarity sake, use Google HTTP / OAuth clients -->
