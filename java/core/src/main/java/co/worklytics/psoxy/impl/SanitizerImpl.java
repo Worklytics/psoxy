@@ -160,7 +160,7 @@ public class SanitizerImpl implements Sanitizer {
 
             String domain = EmailAddressParser.getDomain((String) value, EmailAddressCriteria.DEFAULT, true);
             builder.domain(domain);
-            scope = "email";
+            scope = PseudonymizedIdentity.EMAIL_SCOPE;
 
             //NOTE: lower-case here is NOT stipulated by RFC
             canonicalValue =
