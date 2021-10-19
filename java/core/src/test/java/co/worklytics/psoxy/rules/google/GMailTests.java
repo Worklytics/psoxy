@@ -22,10 +22,9 @@ public class GMailTests extends RulesBaseTestCase {
     @Getter
     final String exampleDirectoryPath = "api-response-examples/g-workspace/gmail";
 
-    @SneakyThrows
     @Test
-    void sanitize() {
-
+    @SneakyThrows
+    public void sanitizer() {
         String jsonPart = "{\n" +
             "        \"name\": \"To\",\n" +
             "        \"value\": \"ops@worklytics.co\"\n" +
