@@ -123,7 +123,11 @@ class SanitizerImplTest {
 
     @Test
     void hashMatchesLegacy() {
+        //value taken from legacy app
+        
         final String CANONICAL = "original";
+
+        //value taken from legacy app
         final String identityHash = "xqUOU_DGuUAw4ErZIFL4pGx3bZDrFfLU6jQC4ClhrJI";
 
         assertEquals(identityHash,
