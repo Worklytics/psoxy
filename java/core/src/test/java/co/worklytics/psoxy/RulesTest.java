@@ -48,7 +48,10 @@ public class RulesTest {
         Rules fromYaml = objectMapper.readerFor(Rules.class)
             .readValue(EXAMPLE_YAML);
 
-        assertEquals("/calendar/v3/calendars/.*/events.*", fromYaml.getPseudonymizations().get(0).getRelativeUrlRegex());
+        Pattern pattern = Pattern.compile(fromYaml.getPseudonymizations().get(0).getRelativeUrlRegex());
+
+        assertFalse(pattern.matcher("/obviously-not-the-url").matches());
+        assertTrue(pattern.matcher("/calendar/v3/calendars/primary/events/1248asdfas4532").matches());
     }
 
     @SneakyThrows
