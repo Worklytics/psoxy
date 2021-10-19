@@ -11,6 +11,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.net.URL;
+import java.security.Identity;
 import java.util.List;
 import java.util.Objects;
 
@@ -19,6 +20,8 @@ import static org.junit.jupiter.api.Assertions.*;
 class SanitizerImplTest {
 
     static final String ALICE_CANONICAL = "alice@worklytics.co";
+    static final String SCOPE = "scope";
+
 
     SanitizerImpl sanitizer;
 
@@ -26,7 +29,8 @@ class SanitizerImplTest {
     public void setup() {
         sanitizer = new SanitizerImpl(Sanitizer.Options.builder()
             .rules(PrebuiltSanitizerRules.MAP.get("gmail"))
-            .pseudonymizationSalt("salt")
+            .pseudonymizationSalt("an irrelevant per org secret")
+            .defaultScopeId("scope")
             .build());
     }
 
@@ -114,5 +118,15 @@ class SanitizerImplTest {
         List<PseudonymizedIdentity> pseudonyms = sanitizer.pseudonymizeEmailHeader(headerValue);
         assertEquals(2, pseudonyms.size());
         assertTrue(pseudonyms.stream().allMatch(p -> Objects.equals("worklytics.co", p.getDomain())));
+    }
+
+
+    @Test
+    void hashMatchesLegacy() {
+        final String CANONICAL = "original";
+        final String identityHash = "xqUOU_DGuUAw4ErZIFL4pGx3bZDrFfLU6jQC4ClhrJI";
+
+        assertEquals(identityHash,
+            sanitizer.pseudonymize(CANONICAL).getHash());
     }
 }

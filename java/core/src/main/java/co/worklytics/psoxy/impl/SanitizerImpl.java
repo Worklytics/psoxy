@@ -12,6 +12,7 @@ import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -23,8 +24,10 @@ import org.hazlewood.connor.bottema.emailaddress.EmailAddressValidator;
 
 import javax.mail.internet.InternetAddress;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
@@ -113,6 +116,8 @@ public class SanitizerImpl implements Sanitizer {
         }
     }
 
+
+
     List<PseudonymizedIdentity> pseudonymizeEmailHeader(Object value) {
         if (value == null) {
             return null;
@@ -145,7 +150,7 @@ public class SanitizerImpl implements Sanitizer {
 
         PseudonymizedIdentity.PseudonymizedIdentityBuilder builder = PseudonymizedIdentity.builder();
 
-        String canonicalValue;
+        String canonicalValue, scope;
         //q: this auto-detect a good idea? Or invert control and let caller specify with a header
         // or something??
         //NOTE: use of EmailAddressValidator/Parser here is probably overly permissive, as there
@@ -155,7 +160,7 @@ public class SanitizerImpl implements Sanitizer {
 
             String domain = EmailAddressParser.getDomain((String) value, EmailAddressCriteria.DEFAULT, true);
             builder.domain(domain);
-            builder.scope("email");
+            scope = "email";
 
             //NOTE: lower-case here is NOT stipulated by RFC
             canonicalValue =
@@ -174,9 +179,11 @@ public class SanitizerImpl implements Sanitizer {
             //so how do we fill scope in such cases?
             // leave to orchestration layer, which knows the context??
             canonicalValue = value.toString();
+            scope = options.getDefaultScopeId();
         }
         if (canonicalValue != null) {
-            builder.hash(DigestUtils.sha256Hex(canonicalValue + options.getPseudonymizationSalt()));
+            builder.scope(scope);
+            builder.hash(hash(canonicalValue, options.getPseudonymizationSalt(), scope.equals(PseudonymizedIdentity.EMAIL_SCOPE) ? "" : scope));
         }
         return builder.build();
     }
@@ -197,5 +204,33 @@ public class SanitizerImpl implements Sanitizer {
                     .map(JsonPath::compile)
                     .collect(Collectors.toList())))
             .collect(Collectors.toList());
+    }
+
+    public String hash(String... fragments) {
+        // No padding saves us the '=' character
+        // https://www.baeldung.com/java-base64-encode-and-decode#2-java-8-base64-encoding-without-padding
+        String hash = new String(
+            Base64.getEncoder()
+                .withoutPadding()
+                .encode(DigestUtils.sha256(String.join("", fragments))),
+            StandardCharsets.UTF_8);
+
+        // To avoid urlencoding issues (especially with handlebars/template rendering)
+        // while not increasing % of collisions, replace base64 non-alphanumeric characters
+        // with urlencode unreserved alternatives (plus no padding from before)
+        // See: https://handlebarsjs.com/guide/#html-escaping
+        // https://en.wikipedia.org/wiki/Base64#Base64_table
+        // https://en.wikipedia.org/wiki/Percent-encoding#Types_of_URI_characters
+        return StringUtils.replaceChars(hash, "/+", "_.");
+    }
+
+    @Override
+    public PseudonymizedIdentity pseudonymize(String value) {
+        return pseudonymize((Object)  value);
+    }
+
+    @Override
+    public PseudonymizedIdentity pseudonymize(Number value) {
+        return pseudonymize((Object) value);
     }
 }

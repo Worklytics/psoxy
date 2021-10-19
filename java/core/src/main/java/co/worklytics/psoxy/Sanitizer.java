@@ -13,7 +13,7 @@ public interface Sanitizer {
     @Value
     class Options implements Serializable {
 
-        private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 2L;
 
         /**
          * salt used to generate pseudonyms
@@ -24,12 +24,32 @@ public interface Sanitizer {
         String pseudonymizationSalt;
 
 
+        /**
+         * scope to use where logic + rules don't imply a match
+         */
+        String defaultScopeId;
+
         //q: add regexes to whitelist endpoints that we actually use??
         Rules rules;
+
+
     }
 
     /**
      * sanitize jsonResponse received from url, according any options set on Sanitizer
      */
     String sanitize(URL url, String jsonResponse);
+
+    /**
+     * @param identifier to pseudonymize
+     * @return identifier as a PseudonymizedIdentity
+     */
+    PseudonymizedIdentity pseudonymize(String identifier);
+
+    /**
+     * @param identifier to pseudonymize
+     * @return identifier as a PseudonymizedIdentity
+     */
+    PseudonymizedIdentity pseudonymize(Number identifier);
+
 }

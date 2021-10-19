@@ -1,3 +1,4 @@
 SOURCE: gcal
 TARGET_HOST: www.googleapis.com
 OAUTH_SCOPES: https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.settings.readonly
+IDENTIFIER_SCOPE_ID: gapps

@@ -70,6 +70,7 @@ public class Route implements HttpFunction {
             Sanitizer.Options.builder()
                 .rules(PrebuiltSanitizerRules.MAP.get(getRequiredConfigProperty(ConfigProperty.SOURCE)))
                 .pseudonymizationSalt(getOptionalConfigProperty(ConfigProperty.PSOXY_SALT).orElse("salt"))
+                .defaultScopeId(getRequiredConfigProperty(ConfigProperty.IDENTIFIER_SCOPE_ID))
                 .build());
     }
 
