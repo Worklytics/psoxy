@@ -22,6 +22,10 @@ public class GMailTests extends RulesBaseTestCase {
     @Getter
     final String exampleDirectoryPath = "api-response-examples/g-workspace/gmail";
 
+    @Getter
+    final String defaultScopeId = "gapps";
+
+
     @SneakyThrows
     @Test
     void sanitize() {

@@ -18,6 +18,10 @@ class GoogleChatTests extends RulesBaseTestCase {
     @Getter
     final String exampleDirectoryPath = "api-response-examples/g-workspace/google-chat";
 
+    @Getter
+    final String defaultScopeId = "gapps";
+
+
     @SneakyThrows
     @Test
     void google_chat() {

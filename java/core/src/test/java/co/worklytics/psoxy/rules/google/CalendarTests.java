@@ -19,6 +19,9 @@ class CalendarTests extends RulesBaseTestCase {
     @Getter
     final String exampleDirectoryPath = "api-response-examples/g-workspace/calendar";
 
+    @Getter
+    final String defaultScopeId = "gapps";
+
     @SneakyThrows
     @Test
     void events() {

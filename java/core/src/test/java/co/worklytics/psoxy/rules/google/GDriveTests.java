@@ -20,6 +20,10 @@ public class GDriveTests extends RulesBaseTestCase {
     @Getter
     final String exampleDirectoryPath = "api-response-examples/g-workspace/gdrive-v2";
 
+    @Getter
+    final String defaultScopeId = "gapps";
+
+
     @SneakyThrows
     @Test
     void files() {
