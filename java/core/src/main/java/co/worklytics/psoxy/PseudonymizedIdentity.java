@@ -14,6 +14,9 @@ import lombok.*;
 @Data
 public class PseudonymizedIdentity {
 
+    public static final String EMAIL_SCOPE = "email";
+
+
     /**
      * scope of the identity; eg, 'email', 'slack', etc.
      *

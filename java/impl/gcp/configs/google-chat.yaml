@@ -1,3 +1,4 @@
 SOURCE: google-chat
 TARGET_HOST: admin.googleapis.com
 OAUTH_SCOPES: https://www.googleapis.com/auth/admin.reports.audit.readonly
+IDENTIFIER_SCOPE_ID: gapps

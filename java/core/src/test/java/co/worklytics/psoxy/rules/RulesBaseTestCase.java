@@ -28,6 +28,7 @@ abstract public class RulesBaseTestCase {
     public void setup() {
         sanitizer = new SanitizerImpl(Sanitizer.Options.builder()
             .rules(getRulesUnderTest())
+            .defaultScopeId(getDefaultScopeId())
             .build());
     }
 
@@ -35,6 +36,9 @@ abstract public class RulesBaseTestCase {
     void validate() {
         Validator.validate(getRulesUnderTest());
     }
+
+
+    public abstract String getDefaultScopeId();
 
     public abstract Rules getRulesUnderTest();
 

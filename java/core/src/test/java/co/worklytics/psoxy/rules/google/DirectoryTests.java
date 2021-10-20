@@ -20,6 +20,10 @@ public class DirectoryTests extends RulesBaseTestCase {
     @Getter
     final String exampleDirectoryPath = "api-response-examples/g-workspace/directory";
 
+    @Getter
+    final String defaultScopeId = "gapps";
+
+
     @SneakyThrows
     @Test
     void user() {

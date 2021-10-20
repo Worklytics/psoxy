@@ -18,6 +18,10 @@ class GoogleMeetTests extends RulesBaseTestCase {
     @Getter
     final String exampleDirectoryPath = "api-response-examples/g-workspace/meet";
 
+    @Getter
+    final String defaultScopeId = "gapps";
+
+
     @SneakyThrows
     @Test
     void activities() {

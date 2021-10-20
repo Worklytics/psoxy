@@ -1,5 +1,6 @@
 package co.worklytics.psoxy.impl;
 
+import co.worklytics.psoxy.HashUtils;
 import co.worklytics.psoxy.PseudonymizedIdentity;
 import co.worklytics.psoxy.Rules;
 import co.worklytics.psoxy.Sanitizer;
@@ -12,6 +13,8 @@ import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -23,8 +26,10 @@ import org.hazlewood.connor.bottema.emailaddress.EmailAddressValidator;
 
 import javax.mail.internet.InternetAddress;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
@@ -42,6 +47,9 @@ public class SanitizerImpl implements Sanitizer {
 
     @Getter(onMethod_ = {@VisibleForTesting})
     Configuration jsonConfiguration;
+
+    //TODO: inject
+    HashUtils hashUtils = new HashUtils();
 
     public void initConfiguration() {
         //jackson here because it's our common JSON stack, but adds dependency beyond the one pkg'd
@@ -113,6 +121,8 @@ public class SanitizerImpl implements Sanitizer {
         }
     }
 
+
+
     List<PseudonymizedIdentity> pseudonymizeEmailHeader(Object value) {
         if (value == null) {
             return null;
@@ -145,7 +155,7 @@ public class SanitizerImpl implements Sanitizer {
 
         PseudonymizedIdentity.PseudonymizedIdentityBuilder builder = PseudonymizedIdentity.builder();
 
-        String canonicalValue;
+        String canonicalValue, scope;
         //q: this auto-detect a good idea? Or invert control and let caller specify with a header
         // or something??
         //NOTE: use of EmailAddressValidator/Parser here is probably overly permissive, as there
@@ -155,7 +165,7 @@ public class SanitizerImpl implements Sanitizer {
 
             String domain = EmailAddressParser.getDomain((String) value, EmailAddressCriteria.DEFAULT, true);
             builder.domain(domain);
-            builder.scope("email");
+            scope = PseudonymizedIdentity.EMAIL_SCOPE;
 
             //NOTE: lower-case here is NOT stipulated by RFC
             canonicalValue =
@@ -169,16 +179,20 @@ public class SanitizerImpl implements Sanitizer {
             // sender has for the person in their Contacts), and in enterprise use-cases we
             // shouldn't need it for matching
         } else {
-            //absence of scope/domain don't mean this identifier ISN'T qualified by them. it just
-            // means they're implicit in context, perhaps implied by something at higher level
-            //so how do we fill scope in such cases?
-            // leave to orchestration layer, which knows the context??
             canonicalValue = value.toString();
+            scope = options.getDefaultScopeId();
         }
         if (canonicalValue != null) {
-            builder.hash(DigestUtils.sha256Hex(canonicalValue + options.getPseudonymizationSalt()));
+            builder.scope(scope);
+            builder.hash(hashUtils.hash(canonicalValue, options.getPseudonymizationSalt(), asLegacyScope(scope)));
         }
         return builder.build();
+    }
+
+    //converts 'scope' to legacy value (eg, equivalents to original Worklytics scheme, where no scope
+    // meant 'email'
+    private String asLegacyScope(@NonNull String scope) {
+        return scope.equals(PseudonymizedIdentity.EMAIL_SCOPE) ? "" : scope;
     }
 
     @VisibleForTesting
@@ -197,5 +211,17 @@ public class SanitizerImpl implements Sanitizer {
                     .map(JsonPath::compile)
                     .collect(Collectors.toList())))
             .collect(Collectors.toList());
+    }
+
+
+
+    @Override
+    public PseudonymizedIdentity pseudonymize(String value) {
+        return pseudonymize((Object)  value);
+    }
+
+    @Override
+    public PseudonymizedIdentity pseudonymize(Number value) {
+        return pseudonymize((Object) value);
     }
 }
