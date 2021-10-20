@@ -12,6 +12,7 @@ import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
@@ -183,9 +184,15 @@ public class SanitizerImpl implements Sanitizer {
         }
         if (canonicalValue != null) {
             builder.scope(scope);
-            builder.hash(hash(canonicalValue, options.getPseudonymizationSalt(), scope.equals(PseudonymizedIdentity.EMAIL_SCOPE) ? "" : scope));
+            builder.hash(hash(canonicalValue, options.getPseudonymizationSalt(), asLegacyScope(scope)));
         }
         return builder.build();
+    }
+
+    //converts 'scope' to legacy value (eg, equivalents to original Worklytics scheme, where no scope
+    // meant 'email'
+    private String asLegacyScope(@NonNull String scope) {
+        return scope.equals(PseudonymizedIdentity.EMAIL_SCOPE) ? "" : scope;
     }
 
     @VisibleForTesting
