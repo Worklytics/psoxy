@@ -1,5 +1,6 @@
 package co.worklytics.psoxy.impl;
 
+import co.worklytics.psoxy.HashUtils;
 import co.worklytics.psoxy.PseudonymizedIdentity;
 import co.worklytics.psoxy.Rules;
 import co.worklytics.psoxy.Sanitizer;
@@ -46,6 +47,9 @@ public class SanitizerImpl implements Sanitizer {
 
     @Getter(onMethod_ = {@VisibleForTesting})
     Configuration jsonConfiguration;
+
+    //TODO: inject
+    HashUtils hashUtils = new HashUtils();
 
     public void initConfiguration() {
         //jackson here because it's our common JSON stack, but adds dependency beyond the one pkg'd
@@ -180,7 +184,7 @@ public class SanitizerImpl implements Sanitizer {
         }
         if (canonicalValue != null) {
             builder.scope(scope);
-            builder.hash(hash(canonicalValue, options.getPseudonymizationSalt(), asLegacyScope(scope)));
+            builder.hash(hashUtils.hash(canonicalValue, options.getPseudonymizationSalt(), asLegacyScope(scope)));
         }
         return builder.build();
     }
@@ -209,23 +213,7 @@ public class SanitizerImpl implements Sanitizer {
             .collect(Collectors.toList());
     }
 
-    public String hash(String... fragments) {
-        // No padding saves us the '=' character
-        // https://www.baeldung.com/java-base64-encode-and-decode#2-java-8-base64-encoding-without-padding
-        String hash = new String(
-            Base64.getEncoder()
-                .withoutPadding()
-                .encode(DigestUtils.sha256(String.join("", fragments))),
-            StandardCharsets.UTF_8);
 
-        // To avoid urlencoding issues (especially with handlebars/template rendering)
-        // while not increasing % of collisions, replace base64 non-alphanumeric characters
-        // with urlencode unreserved alternatives (plus no padding from before)
-        // See: https://handlebarsjs.com/guide/#html-escaping
-        // https://en.wikipedia.org/wiki/Base64#Base64_table
-        // https://en.wikipedia.org/wiki/Percent-encoding#Types_of_URI_characters
-        return StringUtils.replaceChars(hash, "/+", "_.");
-    }
 
     @Override
     public PseudonymizedIdentity pseudonymize(String value) {
