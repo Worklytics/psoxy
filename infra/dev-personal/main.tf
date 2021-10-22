@@ -38,7 +38,7 @@ module "gmail-connector" {
 
   project_id                   = var.project_id
   connector_service_account_id = "psoxy-gmail-dwd"
-  display_name                 = "Psoxy Connector - GMail Dev Erik"
+  display_name                 = "Psoxy Connector - GMail${var.connector_display_name_suffix}"
   apis_consumed                = [
     "gmail.googleapis.com"
   ]
@@ -69,6 +69,8 @@ module "psoxy-gmail" {
   project_id            = var.project_id
   function_name         = "psoxy-gmail"
   source_kind           = "gmail"
+  service_account_email = module.gmail-connector.service_account_email
+
   secret_bindings = {
     PSOXY_SALT = {
       secret_name    = module.psoxy-gcp.salt_secret_name
@@ -79,7 +81,6 @@ module "psoxy-gmail" {
       version_number = module.gmail-connector-auth.key_secret_version_number
     }
   }
-  service_account_email = module.gmail-connector.service_account_email
 }
 
 module "google-chat-connector" {
@@ -87,7 +88,7 @@ module "google-chat-connector" {
 
   project_id                   = var.project_id
   connector_service_account_id = "psoxy-google-chat-dwd"
-  display_name                 = "Psoxy Connector - Google Chat Dev Erik"
+  display_name                 = "Psoxy Connector - Google Chat${var.connector_display_name_suffix}"
   apis_consumed                = [
     "admin.googleapis.com"
   ]
@@ -111,7 +112,9 @@ module "psoxy-google-chat" {
   project_id            = var.project_id
   function_name         = "psoxy-google-chat"
   source_kind           = "google-chat"
-  secret_bindings = {
+  service_account_email = module.google-chat-connector.service_account_email
+
+  secret_bindings       = {
     PSOXY_SALT = {
       secret_name    = module.psoxy-gcp.salt_secret_name
       version_number = module.psoxy-gcp.salt_secret_version_number
@@ -121,5 +124,4 @@ module "psoxy-google-chat" {
       version_number = module.google-chat-connector-auth.key_secret_version_number
     }
   }
-  service_account_email = module.google-chat-connector.service_account_email
 }
