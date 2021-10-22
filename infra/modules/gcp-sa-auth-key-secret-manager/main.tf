@@ -10,7 +10,7 @@
 
 # note this requires the terraform to be run regularly
 resource "time_rotating" "sa-key-rotation" {
-  rotation_days = 60
+  rotation_days = var.rotation_days
 }
 
 resource "google_service_account_key" "key" {

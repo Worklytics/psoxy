@@ -117,6 +117,8 @@
                     <!-- TODO: set secrets here, when they expose this option through maven pluging (currently beta) -->
                 </configuration>
             </plugin>
+
+            <!-- produces an 'uber' JAR, with all deps pkg'd -->
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
@@ -160,6 +162,32 @@
                     </systemProperties>
                 </configuration>
             </plugin>
+
+            <!-- builds deployment directory containing only 'uber' JAR for deployment as GCP cloud function -->
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-resources</id>
+                        <phase>package</phase>
+                        <goals><goal>copy-resources</goal></goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/deployment</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.build.directory}</directory>
+                                    <includes>
+                                        <include>${build.finalName}.jar</include>
+                                    </includes>
+                                    <filtering>false</filtering>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+
             <!-- add license plugin -->
             <!-- use mvn goal license:aggregate-third-party-report to get report on licenses about
                  dependencies, to facillitate eventual distribution of built JAR -->
