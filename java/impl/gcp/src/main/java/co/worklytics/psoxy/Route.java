@@ -48,6 +48,7 @@ public class Route implements HttpFunction {
         //target API endpoint to forward request to
         TARGET_HOST,
         OAUTH_SCOPES,
+        IDENTIFIER_SCOPE_ID,
         //this should ACTUALLY be stored in secret manager, and then exposed as env var to the
         // cloud function
         // see "https://cloud.google.com/functions/docs/configuring/secrets#gcloud"
@@ -70,6 +71,7 @@ public class Route implements HttpFunction {
             Sanitizer.Options.builder()
                 .rules(PrebuiltSanitizerRules.MAP.get(getRequiredConfigProperty(ConfigProperty.SOURCE)))
                 .pseudonymizationSalt(getOptionalConfigProperty(ConfigProperty.PSOXY_SALT).orElse("salt"))
+                .defaultScopeId(getRequiredConfigProperty(ConfigProperty.IDENTIFIER_SCOPE_ID))
                 .build());
     }
 

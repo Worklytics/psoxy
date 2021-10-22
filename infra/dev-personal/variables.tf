@@ -23,3 +23,10 @@ variable "worklytics_sa_emails" {
   type        = list(string)
   description = "service accounts for your organization's Worklytics instances (list supported for test/dev scenarios)"
 }
+
+
+variable "connector_display_name_suffix" {
+  type        = string
+  description = "suffix to append to display_names of connector SAs; helpful to distinguish between various ones in testing/dev scenarios"
+  default     = ""
+}

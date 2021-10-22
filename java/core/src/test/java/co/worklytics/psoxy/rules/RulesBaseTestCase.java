@@ -34,6 +34,7 @@ abstract public class RulesBaseTestCase {
     public void setup() {
         sanitizer = new SanitizerImpl(Sanitizer.Options.builder()
             .rules(getRulesUnderTest())
+            .defaultScopeId(getDefaultScopeId())
             .build());
 
         //q: good way to also batch test sanitizers from yaml/json formats of rules, to ensure
@@ -68,6 +69,9 @@ abstract public class RulesBaseTestCase {
         String json = jsonMapper.writeValueAsString(getRulesUnderTest());
         return jsonMapper.readerFor(Rules.class).readValue(json);
     }
+
+    public abstract String getDefaultScopeId();
+
 
     public abstract Rules getRulesUnderTest();
 

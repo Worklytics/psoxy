@@ -1,4 +1,9 @@
 
+variable "project_id" {
+  type        = string
+  description = "ID of GCP project to which service account belongs"
+}
+
 variable "service_account_id" {
   type        = string
   description = "ID of the service account"
@@ -6,5 +11,15 @@ variable "service_account_id" {
 
 variable "key_admin_group_email" {
   type        = string
-  description = "email of Google group that should be able to create keys for SA"
+  description = "email of Google group that will create keys for SA"
+}
+
+variable "secret_project" {
+  type        = string
+  description = "ID of project in which to store SA key as secret"
+}
+
+variable "secret_id" {
+  type        = string
+  description = "ID to give secret for SA key"
 }
