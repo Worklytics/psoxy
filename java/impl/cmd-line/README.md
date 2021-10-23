@@ -15,5 +15,5 @@ Usage:  (from `java/impl/cmd-line`)
 ```shell
 mvn clean package
 
-java -jar target/psoxy-cmd-line-1.0-SNAPSHOT.jar src/test/resources/hris-example.csv
+java -jar target/psoxy-cmd-line-1.0-SNAPSHOT.jar src/test/resources/hris-example.csv > pseudonymized.csv
 ```

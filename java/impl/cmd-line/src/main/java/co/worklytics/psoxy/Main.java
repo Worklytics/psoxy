@@ -5,8 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.base.Preconditions;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.SneakyThrows;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
@@ -15,7 +14,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Main {
@@ -24,6 +22,8 @@ public class Main {
 
     static ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
     static ObjectMapper jsonMapper = new ObjectMapper();
+
+
 
     @lombok.SneakyThrows
     public static void main(String[] args) {
@@ -36,19 +36,25 @@ public class Main {
             throw new Error("No config.yaml found");
         }
 
+        File inputFile = new File(args[0]);
+
+        Preconditions.checkArgument(inputFile.exists(), "File %s does not exist", args[0]);
+
+        main(config, inputFile, System.out);
+    }
+
+    @SneakyThrows
+    public static void main(Config config, File inputFile, Appendable out) {
+
         Sanitizer sanitizer = new SanitizerImpl(Sanitizer.Options.builder()
             .defaultScopeId(config.getDefaultScopeId())
             .pseudonymizationSalt(config.getPseudonymizationSalt())
             .build());
 
-        File inputFile = new File(args[0]);
-        Preconditions.checkArgument(inputFile.exists(), "File %s does not exist", args[0]);
-
         try (FileReader in = new FileReader(inputFile)) {
             CSVParser records = CSVFormat.DEFAULT
                 .withFirstRecordAsHeader()
                 .parse(in);
-
 
             String[] header = records.getHeaderMap().entrySet().stream()
                 .sorted(Map.Entry.comparingByValue())
@@ -60,7 +66,7 @@ public class Main {
                     .forEach(columnToPseudonymize ->
                         Preconditions.checkArgument(records.getHeaderMap().containsKey(columnToPseudonymize), "Column %s to be pseudonymized not in file", columnToPseudonymize));
 
-            CSVPrinter printer = new CSVPrinter(System.out, CSVFormat.DEFAULT.withHeader(header));
+            CSVPrinter printer = new CSVPrinter(out, CSVFormat.DEFAULT.withHeader(header));
 
             records.forEach(row -> {
 
@@ -91,14 +97,4 @@ public class Main {
         }
     }
 
-    @Getter
-    @NoArgsConstructor //for Jackson
-    public static class Config {
-
-        String defaultScopeId;
-
-        Set<String> columnsToPseudonymize;
-
-        String pseudonymizationSalt;
-    }
 }
