@@ -1,4 +1,4 @@
-package co.worklytics.psoxy;
+package co.worklytics.psoxy.server;
 
 import java.util.Optional;
 

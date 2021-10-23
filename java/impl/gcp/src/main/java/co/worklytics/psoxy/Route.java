@@ -1,8 +1,9 @@
 package co.worklytics.psoxy;
 
-import co.worklytics.psoxy.impl.EnvVarsConfigService;
+import co.worklytics.psoxy.server.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.impl.SanitizerImpl;
 import co.worklytics.psoxy.rules.google.PrebuiltSanitizerRules;
+import co.worklytics.psoxy.server.ConfigService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequestFactory;
