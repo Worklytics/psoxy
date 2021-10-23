@@ -1,4 +1,4 @@
-package co.worklytics.psoxy.server;
+package co.worklytics.psoxy.gateway;
 
 import java.util.Optional;
 

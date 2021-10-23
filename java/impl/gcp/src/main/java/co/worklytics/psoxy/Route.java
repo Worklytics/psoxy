@@ -1,9 +1,11 @@
 package co.worklytics.psoxy;
 
-import co.worklytics.psoxy.server.impl.EnvVarsConfigService;
+import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.SourceAuthConfigProperty;
+import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.impl.SanitizerImpl;
 import co.worklytics.psoxy.rules.google.PrebuiltSanitizerRules;
-import co.worklytics.psoxy.server.ConfigService;
+import co.worklytics.psoxy.gateway.ConfigService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequestFactory;
@@ -33,29 +35,6 @@ public class Route implements HttpFunction {
     //we have ~540 total in Cloud Function connection, so can have generous values here
     final int SOURCE_API_REQUEST_CONNECT_TIMEOUT = 30_000;
     final int SOURCE_API_REQUEST_READ_TIMEOUT = 300_000;
-
-    /**
-     * config properties that control basic proxy behavior
-     */
-    enum ProxyConfigProperty implements ConfigService.ConfigProperty {
-        PSOXY_SALT,
-        SOURCE,
-        IDENTIFIER_SCOPE_ID,
-        //target API endpoint to forward request to
-        TARGET_HOST,
-    }
-
-    /**
-     * config properties that control how Psoxy authenticates against host
-     */
-    enum SourceAuthConfigProperty implements ConfigService.ConfigProperty {
-        OAUTH_SCOPES,
-        //this should ACTUALLY be stored in secret manager, and then exposed as env var to the
-        // cloud function
-        // see "https://cloud.google.com/functions/docs/configuring/secrets#gcloud"
-        SERVICE_ACCOUNT_KEY,
-    }
-
 
     /**
      * see "https://cloud.google.com/functions/docs/configuring/env-var"

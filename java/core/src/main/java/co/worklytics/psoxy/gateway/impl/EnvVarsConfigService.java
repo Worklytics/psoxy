@@ -1,6 +1,6 @@
-package co.worklytics.psoxy.server.impl;
+package co.worklytics.psoxy.gateway.impl;
 
-import co.worklytics.psoxy.server.ConfigService;
+import co.worklytics.psoxy.gateway.ConfigService;
 
 import java.util.Optional;
 
