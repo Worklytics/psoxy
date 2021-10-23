@@ -2,6 +2,7 @@ package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.impl.SanitizerImpl;
 import co.worklytics.psoxy.rules.google.PrebuiltSanitizerRules;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpTransport;
@@ -44,16 +45,18 @@ public class Route implements HttpFunction {
      *
      */
     enum ConfigProperty {
+        PSOXY_SALT,
+
         SOURCE,
+        IDENTIFIER_SCOPE_ID,
+
         //target API endpoint to forward request to
         TARGET_HOST,
         OAUTH_SCOPES,
-        IDENTIFIER_SCOPE_ID,
         //this should ACTUALLY be stored in secret manager, and then exposed as env var to the
         // cloud function
         // see "https://cloud.google.com/functions/docs/configuring/secrets#gcloud"
         SERVICE_ACCOUNT_KEY,
-        PSOXY_SALT,
     }
 
     /**
@@ -63,24 +66,42 @@ public class Route implements HttpFunction {
         K_SERVICE,
     }
 
+    /**
+     * default value for salt; provided just to support testing with minimal config, but in prod
+     * use should be overridden with something
+     */
+    static final String DEFAULT_SALT = "salt";
+
 
     Sanitizer sanitizer;
 
     void initSanitizer() {
+        Rules rules = PrebuiltSanitizerRules.MAP.get(getRequiredConfigProperty(ConfigProperty.SOURCE));
         sanitizer = new SanitizerImpl(
             Sanitizer.Options.builder()
-                .rules(PrebuiltSanitizerRules.MAP.get(getRequiredConfigProperty(ConfigProperty.SOURCE)))
-                .pseudonymizationSalt(getOptionalConfigProperty(ConfigProperty.PSOXY_SALT).orElse("salt"))
-                .defaultScopeId(getRequiredConfigProperty(ConfigProperty.IDENTIFIER_SCOPE_ID))
+                .rules(rules)
+                .pseudonymizationSalt(getOptionalConfigProperty(ConfigProperty.PSOXY_SALT)
+                    .orElse(DEFAULT_SALT))
+                .defaultScopeId(getOptionalConfigProperty(ConfigProperty.IDENTIFIER_SCOPE_ID)
+                    .orElse(rules.getDefaultScopeIdForSource()))
                 .build());
     }
 
     @Override
     public void service(HttpRequest request, HttpResponse response)
             throws IOException {
+
+        boolean isHealthCheck =
+            request.getHeaders().containsKey(ControlHeader.HEALTH_CHECK.getHttpHeader());
+        if (isHealthCheck) {
+            doHealthCheck(request, response);
+            return;
+        }
+
         if (sanitizer == null) {
             initSanitizer();
         }
+
 
         //is there a lifecycle to initialize request factory??
         HttpRequestFactory requestFactory = getRequestFactory(request);
@@ -126,6 +147,33 @@ public class Route implements HttpFunction {
             //TODO: could run this through DLP to be extra safe
             new ByteArrayInputStream(responseContent.getBytes(StandardCharsets.UTF_8))
                 .transferTo(response.getOutputStream());
+        }
+    }
+
+    private void doHealthCheck(HttpRequest request, HttpResponse response) {
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        HealthCheckResult healthCheckResult = HealthCheckResult.builder()
+            .configuredSource(getOptionalConfigProperty(ConfigProperty.SOURCE).orElse(null))
+            .nonDefaultSalt(getOptionalConfigProperty(ConfigProperty.PSOXY_SALT).isPresent())
+            .build();
+
+        if (healthCheckResult.passed()) {
+            response.setStatusCode(200, "Health check passed");
+        } else {
+            response.setStatusCode(HealthCheckResult.HTTP_SC_FAIL, "Health check failed");
+        }
+
+        try {
+            //TODO: get this from a constant? would add dep on some HTTP lib that has it, such as
+            // JAX-RS,
+            // Guava (https://guava.dev/releases/27.0-jre/api/docs/com/google/common/net/MediaType.html)
+            // Spring (https://docs.spring.io/spring-framework/docs/3.0.x/javadoc-api/org/springframework/http/MediaType.html)
+            response.setContentType("application/json");
+            response.getWriter().write(objectMapper.writeValueAsString(healthCheckResult));
+            response.getWriter().write("\r\n");
+        } catch (IOException e) {
+            log.log(Level.WARNING, "Failed to write health check details", e);
         }
     }
 

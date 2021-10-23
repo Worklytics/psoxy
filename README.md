@@ -79,6 +79,13 @@ By default, that serves the function from http://localhost:8080.
 
 3.) execute the following to verify your proxy is working OK
 
+Health check (verifies config, and that your client can reach proxy at all)
+```shell
+curl -iX GET \
+http://localhost:8080/ \
+-H "X-Psoxy-Health-Check: true"
+```
+
 ```shell
 curl -X GET \
 http://localhost:8080/gmail/v1/users/me/messages \
