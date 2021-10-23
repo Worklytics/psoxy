@@ -1,5 +1,6 @@
 package co.worklytics.psoxy;
 
+import co.worklytics.psoxy.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.impl.SanitizerImpl;
 import co.worklytics.psoxy.rules.google.PrebuiltSanitizerRules;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -33,31 +34,27 @@ public class Route implements HttpFunction {
     final int SOURCE_API_REQUEST_READ_TIMEOUT = 300_000;
 
     /**
-     * expect ONE cloud function per data connection; so connection-level settings are encoded as
-     * environment variables
-     *
-     * see "https://cloud.google.com/functions/docs/configuring/env-var"
-     *
-     * in production, these should NOT include secrets, which should be stored/accessed via SecretManager
-     *
-     * see "https://cloud.google.com/functions/docs/configuring/secrets"
-     *
-     *
+     * config properties that control basic proxy behavior
      */
-    enum ConfigProperty {
+    enum ProxyConfigProperty implements ConfigService.ConfigProperty {
         PSOXY_SALT,
-
         SOURCE,
         IDENTIFIER_SCOPE_ID,
-
         //target API endpoint to forward request to
         TARGET_HOST,
+    }
+
+    /**
+     * config properties that control how Psoxy authenticates against host
+     */
+    enum SourceAuthConfigProperty implements ConfigService.ConfigProperty {
         OAUTH_SCOPES,
         //this should ACTUALLY be stored in secret manager, and then exposed as env var to the
         // cloud function
         // see "https://cloud.google.com/functions/docs/configuring/secrets#gcloud"
         SERVICE_ACCOUNT_KEY,
     }
+
 
     /**
      * see "https://cloud.google.com/functions/docs/configuring/env-var"
@@ -73,16 +70,31 @@ public class Route implements HttpFunction {
     static final String DEFAULT_SALT = "salt";
 
 
+    ConfigService config;
     Sanitizer sanitizer;
 
+    ConfigService getConfig() {
+        if (config == null) {
+            /**
+             * in GCP cloud function, we should be able to configure everything via env vars; either
+             * directly or by binding them to secrets at function deployment:
+             *
+             * @see "https://cloud.google.com/functions/docs/configuring/env-var"
+             * @see "https://cloud.google.com/functions/docs/configuring/secrets"
+             */
+            config = new EnvVarsConfigService();
+        }
+        return config;
+    }
+
     void initSanitizer() {
-        Rules rules = PrebuiltSanitizerRules.MAP.get(getRequiredConfigProperty(ConfigProperty.SOURCE));
+        Rules rules = PrebuiltSanitizerRules.MAP.get(getConfig().getConfigPropertyOrError(ProxyConfigProperty.SOURCE));
         sanitizer = new SanitizerImpl(
             Sanitizer.Options.builder()
                 .rules(rules)
-                .pseudonymizationSalt(getOptionalConfigProperty(ConfigProperty.PSOXY_SALT)
+                .pseudonymizationSalt(getConfig().getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT)
                     .orElse(DEFAULT_SALT))
-                .defaultScopeId(getOptionalConfigProperty(ConfigProperty.IDENTIFIER_SCOPE_ID)
+                .defaultScopeId(getConfig().getConfigPropertyAsOptional(ProxyConfigProperty.IDENTIFIER_SCOPE_ID)
                     .orElse(rules.getDefaultScopeIdForSource()))
                 .build());
     }
@@ -154,8 +166,8 @@ public class Route implements HttpFunction {
         ObjectMapper objectMapper = new ObjectMapper();
 
         HealthCheckResult healthCheckResult = HealthCheckResult.builder()
-            .configuredSource(getOptionalConfigProperty(ConfigProperty.SOURCE).orElse(null))
-            .nonDefaultSalt(getOptionalConfigProperty(ConfigProperty.PSOXY_SALT).isPresent())
+            .configuredSource(getConfig().getConfigPropertyAsOptional(ProxyConfigProperty.SOURCE).orElse(null))
+            .nonDefaultSalt(getConfig().getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT).isPresent())
             .build();
 
         if (healthCheckResult.passed()) {
@@ -189,27 +201,12 @@ public class Route implements HttpFunction {
                 .replace(System.getenv(RuntimeEnvironmentVariables.K_SERVICE.name()) + "/", "")
             + request.getQuery().map(s -> "?" + s).orElse("");
 
-        return new URL("https", getRequiredConfigProperty(ConfigProperty.TARGET_HOST), path);
-    }
-
-
-    String getRequiredConfigProperty(ConfigProperty property) {
-        String value = System.getenv(property.name());
-        if (value == null) {
-            throw new Error("Psoxy misconfigured. Expected value for: " + property.name());
-        }
-        return value;
-    }
-
-    Optional<String> getOptionalConfigProperty(ConfigProperty property) {
-        return Optional.ofNullable(System.getenv(property.name()));
+        return new URL("https", getConfig().getConfigPropertyOrError(ProxyConfigProperty.TARGET_HOST), path);
     }
 
     Optional<List<String>> getHeader(HttpRequest request, ControlHeader header) {
         return Optional.ofNullable(request.getHeaders().get(header.getHttpHeader()));
     }
-
-
 
     @SneakyThrows
     HttpRequestFactory getRequestFactory(HttpRequest request) {
@@ -230,7 +227,7 @@ public class Route implements HttpFunction {
             () -> log.warning("we usually expect a user to impersonate"));
 
         GoogleCredentials credentials = quietGetApplicationDefault(accountToImpersonate,
-            Arrays.stream(getRequiredConfigProperty(ConfigProperty.OAUTH_SCOPES).split(","))
+            Arrays.stream(getConfig().getConfigPropertyOrError(SourceAuthConfigProperty.OAUTH_SCOPES).split(","))
                 .collect(Collectors.toSet()));
 
         HttpCredentialsAdapter initializer = new HttpCredentialsAdapter(credentials);
@@ -260,7 +257,7 @@ public class Route implements HttpFunction {
 
             //NOTE: in practice SERVICE_ACCOUNT_KEY need not belong the to same service account
             // running the cloud function; but it could
-            String key = getRequiredConfigProperty(ConfigProperty.SERVICE_ACCOUNT_KEY);
+            String key = getConfig().getConfigPropertyOrError(SourceAuthConfigProperty.SERVICE_ACCOUNT_KEY);
             credentials = ServiceAccountCredentials.fromStream(new ByteArrayInputStream(Base64.getDecoder().decode(key)));
         }
 

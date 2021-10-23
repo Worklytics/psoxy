@@ -79,7 +79,7 @@ By default, that serves the function from http://localhost:8080.
 
 3.) execute the following to verify your proxy is working OK
 
-Health check (verifies config, and that your client can reach proxy at all)
+Health check (verifies that your client can reach and invoke the proxy at all; and that is has sensible config)
 ```shell
 curl -iX GET \
 http://localhost:8080/ \
