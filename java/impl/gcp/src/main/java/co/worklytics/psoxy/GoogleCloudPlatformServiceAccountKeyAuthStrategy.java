@@ -7,6 +7,7 @@ import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import com.google.auth.Credentials;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.auth.oauth2.ServiceAccountCredentials;
+import lombok.Getter;
 import lombok.SneakyThrows;
 
 import java.io.ByteArrayInputStream;
@@ -16,7 +17,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-class GoogleApiAuthStrategy implements SourceAuthStrategy {
+class GoogleCloudPlatformServiceAccountKeyAuthStrategy implements SourceAuthStrategy {
+
+    @Getter
+    private final static String configIdentifier = "GCP_SERVICE_ACCOUNT_KEY";
 
     ConfigService config;
 

@@ -21,12 +21,17 @@ import java.util.*;
 @Log
 public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
+    @Getter
+    private final static String configIdentifier = "OAUTH_REFRESH_TOKEN";
+
     enum ConfigProperty implements ConfigService.ConfigProperty {
-        REFRESH_TOKEN,
+        REFRESH_TOKEN, //NOTE: you should configure this as a secret in Secret Manager
         REFRESH_ENDPOINT,
         CLIENT_ID,
-        CLIENT_SECRET,
+        CLIENT_SECRET, //NOTE: you should configure this as a secret in Secret Manager
     }
+
+
 
     @Override
     public Credentials getCredentials(Optional<String> userToImpersonate) {

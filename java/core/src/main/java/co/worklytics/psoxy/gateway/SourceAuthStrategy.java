@@ -37,6 +37,12 @@ import java.util.Optional;
  */
 public interface SourceAuthStrategy {
 
+    /**
+     * @return a string that can uniquely identify this SourceAuthStrategy implementation for
+     *         configuration purposes
+     */
+    String getConfigIdentifier();
+
 
     Credentials getCredentials(Optional<String> userToImpersonate);
 

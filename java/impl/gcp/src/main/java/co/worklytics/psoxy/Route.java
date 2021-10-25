@@ -53,7 +53,7 @@ public class Route implements HttpFunction {
 
     SourceAuthStrategy getSourceAuthStrategy() {
         if (sourceAuthStrategy == null) {
-            sourceAuthStrategy = new GoogleApiAuthStrategy();
+            sourceAuthStrategy = new GoogleCloudPlatformServiceAccountKeyAuthStrategy();
         }
         return sourceAuthStrategy;
     }
