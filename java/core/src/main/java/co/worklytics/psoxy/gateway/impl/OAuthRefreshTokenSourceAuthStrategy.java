@@ -22,8 +22,11 @@ import java.util.*;
 public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
     @Getter
-    private final String configIdentifier = "OAUTH_REFRESH_TOKEN";
+    private final String configIdentifier = "oauth2_refresh_token";
 
+    //q: should we put these as config properties? creates potential for inconsistent configs
+    // eg, orphaned config properties for SourceAuthStrategy not in use; missing config properties
+    //  expected by this
     enum ConfigProperty implements ConfigService.ConfigProperty {
         REFRESH_TOKEN, //NOTE: you should configure this as a secret in Secret Manager
         REFRESH_ENDPOINT,

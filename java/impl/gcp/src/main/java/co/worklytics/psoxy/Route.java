@@ -3,6 +3,7 @@ package co.worklytics.psoxy;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
+import co.worklytics.psoxy.gateway.impl.OAuthRefreshTokenSourceAuthStrategy;
 import co.worklytics.psoxy.impl.SanitizerImpl;
 import co.worklytics.psoxy.rules.google.PrebuiltSanitizerRules;
 import co.worklytics.psoxy.gateway.ConfigService;
@@ -22,10 +23,12 @@ import lombok.extern.java.Log;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.Proxy;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.net.URL;
 import java.util.logging.Level;
+import java.util.stream.Stream;
 
 @Log
 public class Route implements HttpFunction {
@@ -53,7 +56,13 @@ public class Route implements HttpFunction {
 
     SourceAuthStrategy getSourceAuthStrategy() {
         if (sourceAuthStrategy == null) {
-            sourceAuthStrategy = new GoogleCloudPlatformServiceAccountKeyAuthStrategy();
+            String identifier = getConfig().getConfigPropertyOrError(ProxyConfigProperty.SOURCE_AUTH_STRATEGY_IDENTIFIER);
+            Stream<SourceAuthStrategy> implementations = Stream.of(
+                new GoogleCloudPlatformServiceAccountKeyAuthStrategy(),
+                new OAuthRefreshTokenSourceAuthStrategy());
+            sourceAuthStrategy = implementations
+                    .filter(impl -> Objects.equals(identifier, impl.getConfigIdentifier()))
+                .findFirst().orElseThrow(() -> new Error("No SourceAuthStrategy impl matching configured identifier: " + identifier));
         }
         return sourceAuthStrategy;
     }
