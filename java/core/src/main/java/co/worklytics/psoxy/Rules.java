@@ -1,6 +1,5 @@
 package co.worklytics.psoxy;
 
-import com.jayway.jsonpath.JsonPath;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Singular;
@@ -9,7 +8,6 @@ import lombok.extern.java.Log;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.regex.Pattern;
 
 /**
  * rules that control how data source API is sanitized, including support for:
@@ -30,6 +28,15 @@ import java.util.regex.Pattern;
 public class Rules implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
+    /**
+     * scopeId to set for any identifiers parsed from source that aren't email addresses
+     *
+     * NOTE: can be overridden by config, in case you're connecting to an on-prem / private instance
+     * of the source and you don't want it's identifiers to be treated as under the default scope
+     */
+    @Getter
+    String defaultScopeIdForSource;
 
     /**
      * a rule for matching parts of JSON API responses.

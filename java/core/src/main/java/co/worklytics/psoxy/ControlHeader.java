@@ -18,6 +18,11 @@ public enum ControlHeader {
      * q: specific to Google? generalizable??
      */
     USER_TO_IMPERSONATE("User-To-Impersonate"),
+    /**
+     * this header - sent with any value - means the request is a health check, not actually
+     * intended to be forwarded to source
+     */
+    HEALTH_CHECK("Health-Check"),
     ;
 
     @NonNull
