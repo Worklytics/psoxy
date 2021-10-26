@@ -1,4 +1,5 @@
 SOURCE: google-meet
+SOURCE_AUTH_STRATEGY_IDENTIFIER: gcp_service_account_key
 TARGET_HOST: admin.googleapis.com
 OAUTH_SCOPES: https://www.googleapis.com/auth/admin.reports.audit.readonly
 IDENTIFIER_SCOPE_ID: gapps

@@ -1,28 +1,35 @@
 package co.worklytics.psoxy;
 
+import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.SourceAuthStrategy;
+import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
+import co.worklytics.psoxy.gateway.impl.OAuthRefreshTokenSourceAuthStrategy;
 import co.worklytics.psoxy.impl.SanitizerImpl;
 import co.worklytics.psoxy.rules.google.PrebuiltSanitizerRules;
+import co.worklytics.psoxy.gateway.ConfigService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.auth.Credentials;
 import com.google.auth.http.HttpCredentialsAdapter;
-import com.google.auth.oauth2.GoogleCredentials;
-import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.functions.HttpFunction;
 import com.google.cloud.functions.HttpRequest;
 import com.google.cloud.functions.HttpResponse;
 
+import com.google.common.net.MediaType;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.Proxy;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.net.URL;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Log
 public class Route implements HttpFunction {
@@ -32,55 +39,76 @@ public class Route implements HttpFunction {
     final int SOURCE_API_REQUEST_READ_TIMEOUT = 300_000;
 
     /**
-     * expect ONE cloud function per data connection; so connection-level settings are encoded as
-     * environment variables
-     *
-     * see "https://cloud.google.com/functions/docs/configuring/env-var"
-     *
-     * in production, these should NOT include secrets, which should be stored/accessed via SecretManager
-     *
-     * see "https://cloud.google.com/functions/docs/configuring/secrets"
-     *
-     *
-     */
-    enum ConfigProperty {
-        SOURCE,
-        //target API endpoint to forward request to
-        TARGET_HOST,
-        OAUTH_SCOPES,
-        IDENTIFIER_SCOPE_ID,
-        //this should ACTUALLY be stored in secret manager, and then exposed as env var to the
-        // cloud function
-        // see "https://cloud.google.com/functions/docs/configuring/secrets#gcloud"
-        SERVICE_ACCOUNT_KEY,
-        PSOXY_SALT,
-    }
-
-    /**
      * see "https://cloud.google.com/functions/docs/configuring/env-var"
      */
     enum RuntimeEnvironmentVariables {
         K_SERVICE,
     }
 
+    /**
+     * default value for salt; provided just to support testing with minimal config, but in prod
+     * use should be overridden with something
+     */
+    static final String DEFAULT_SALT = "salt";
 
+    ConfigService config;
     Sanitizer sanitizer;
+    SourceAuthStrategy sourceAuthStrategy;
+
+    SourceAuthStrategy getSourceAuthStrategy() {
+        if (sourceAuthStrategy == null) {
+            String identifier = getConfig().getConfigPropertyOrError(ProxyConfigProperty.SOURCE_AUTH_STRATEGY_IDENTIFIER);
+            Stream<SourceAuthStrategy> implementations = Stream.of(
+                new GoogleCloudPlatformServiceAccountKeyAuthStrategy(),
+                new OAuthRefreshTokenSourceAuthStrategy());
+            sourceAuthStrategy = implementations
+                    .filter(impl -> Objects.equals(identifier, impl.getConfigIdentifier()))
+                .findFirst().orElseThrow(() -> new Error("No SourceAuthStrategy impl matching configured identifier: " + identifier));
+        }
+        return sourceAuthStrategy;
+    }
+
+    ConfigService getConfig() {
+        if (config == null) {
+            /**
+             * in GCP cloud function, we should be able to configure everything via env vars; either
+             * directly or by binding them to secrets at function deployment:
+             *
+             * @see "https://cloud.google.com/functions/docs/configuring/env-var"
+             * @see "https://cloud.google.com/functions/docs/configuring/secrets"
+             */
+            config = new EnvVarsConfigService();
+        }
+        return config;
+    }
 
     void initSanitizer() {
+        Rules rules = PrebuiltSanitizerRules.MAP.get(getConfig().getConfigPropertyOrError(ProxyConfigProperty.SOURCE));
         sanitizer = new SanitizerImpl(
             Sanitizer.Options.builder()
-                .rules(PrebuiltSanitizerRules.MAP.get(getRequiredConfigProperty(ConfigProperty.SOURCE)))
-                .pseudonymizationSalt(getOptionalConfigProperty(ConfigProperty.PSOXY_SALT).orElse("salt"))
-                .defaultScopeId(getRequiredConfigProperty(ConfigProperty.IDENTIFIER_SCOPE_ID))
+                .rules(rules)
+                .pseudonymizationSalt(getConfig().getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT)
+                    .orElse(DEFAULT_SALT))
+                .defaultScopeId(getConfig().getConfigPropertyAsOptional(ProxyConfigProperty.IDENTIFIER_SCOPE_ID)
+                    .orElse(rules.getDefaultScopeIdForSource()))
                 .build());
     }
 
     @Override
     public void service(HttpRequest request, HttpResponse response)
             throws IOException {
+
+        boolean isHealthCheck =
+            request.getHeaders().containsKey(ControlHeader.HEALTH_CHECK.getHttpHeader());
+        if (isHealthCheck) {
+            doHealthCheck(request, response);
+            return;
+        }
+
         if (sanitizer == null) {
             initSanitizer();
         }
+
 
         //is there a lifecycle to initialize request factory??
         HttpRequestFactory requestFactory = getRequestFactory(request);
@@ -129,6 +157,29 @@ public class Route implements HttpFunction {
         }
     }
 
+    private void doHealthCheck(HttpRequest request, HttpResponse response) {
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        HealthCheckResult healthCheckResult = HealthCheckResult.builder()
+            .configuredSource(getConfig().getConfigPropertyAsOptional(ProxyConfigProperty.SOURCE).orElse(null))
+            .nonDefaultSalt(getConfig().getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT).isPresent())
+            .build();
+
+        if (healthCheckResult.passed()) {
+            response.setStatusCode(HealthCheckResult.HttpStatusCode.SUCCEED.getCode(), "Health check passed");
+        } else {
+            response.setStatusCode(HealthCheckResult.HttpStatusCode.FAIL.getCode(), "Health check failed");
+        }
+
+        try {
+            response.setContentType(MediaType.JSON_UTF_8.toString());
+            response.getWriter().write(objectMapper.writeValueAsString(healthCheckResult));
+            response.getWriter().write("\r\n");
+        } catch (IOException e) {
+            log.log(Level.WARNING, "Failed to write health check details", e);
+        }
+    }
+
     boolean isSuccessFamily (int statusCode) {
         return statusCode >= 200 && statusCode < 300;
     }
@@ -141,27 +192,12 @@ public class Route implements HttpFunction {
                 .replace(System.getenv(RuntimeEnvironmentVariables.K_SERVICE.name()) + "/", "")
             + request.getQuery().map(s -> "?" + s).orElse("");
 
-        return new URL("https", getRequiredConfigProperty(ConfigProperty.TARGET_HOST), path);
-    }
-
-
-    String getRequiredConfigProperty(ConfigProperty property) {
-        String value = System.getenv(property.name());
-        if (value == null) {
-            throw new Error("Psoxy misconfigured. Expected value for: " + property.name());
-        }
-        return value;
-    }
-
-    Optional<String> getOptionalConfigProperty(ConfigProperty property) {
-        return Optional.ofNullable(System.getenv(property.name()));
+        return new URL("https", getConfig().getConfigPropertyOrError(ProxyConfigProperty.TARGET_HOST), path);
     }
 
     Optional<List<String>> getHeader(HttpRequest request, ControlHeader header) {
         return Optional.ofNullable(request.getHeaders().get(header.getHttpHeader()));
     }
-
-
 
     @SneakyThrows
     HttpRequestFactory getRequestFactory(HttpRequest request) {
@@ -181,10 +217,7 @@ public class Route implements HttpFunction {
             user -> log.info("User to impersonate: " + user),
             () -> log.warning("we usually expect a user to impersonate"));
 
-        GoogleCredentials credentials = quietGetApplicationDefault(accountToImpersonate,
-            Arrays.stream(getRequiredConfigProperty(ConfigProperty.OAUTH_SCOPES).split(","))
-                .collect(Collectors.toSet()));
-
+        Credentials credentials = getSourceAuthStrategy().getCredentials(accountToImpersonate);
         HttpCredentialsAdapter initializer = new HttpCredentialsAdapter(credentials);
 
         //TODO: in OAuth-type use cases, where execute() may have caused token to be refreshed, how
@@ -195,35 +228,4 @@ public class Route implements HttpFunction {
         return transport.createRequestFactory(initializer);
     }
 
-    /**
-     * quiet helper to avoid try-catch
-     *
-     * @return
-     */
-    @SneakyThrows
-    GoogleCredentials quietGetApplicationDefault(Optional<String> serviceAccountUser, Set<String> scopes) {
-        GoogleCredentials credentials = GoogleCredentials.getApplicationDefault();
-
-        if (!(credentials instanceof ServiceAccountCredentials)) {
-            // only ServiceAccountCredentials (created from an actual service account key) support
-            // domain-wide delegation
-            // see examples - even when access is 'global', still need to impersonate a user
-            // https://developers.google.com/admin-sdk/reports/v1/guides/delegation
-
-            //NOTE: in practice SERVICE_ACCOUNT_KEY need not belong the to same service account
-            // running the cloud function; but it could
-            String key = getRequiredConfigProperty(ConfigProperty.SERVICE_ACCOUNT_KEY);
-            credentials = ServiceAccountCredentials.fromStream(new ByteArrayInputStream(Base64.getDecoder().decode(key)));
-        }
-
-        if (serviceAccountUser.isPresent()) {
-            //even though GoogleCredentials implements `createDelegated`, it's a no-op if the
-            // credential type doesn't support it.
-            credentials = credentials.createDelegated(serviceAccountUser.get());
-        }
-
-        credentials = credentials.createScoped(scopes);
-
-        return credentials;
-    }
 }

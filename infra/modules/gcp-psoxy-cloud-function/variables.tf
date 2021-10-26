@@ -5,7 +5,7 @@ variable "project_id" {
 
 variable "function_name" {
   type        = string
-  description = "name of cloud functiont"
+  description = "name of cloud function"
 }
 
 variable "source_kind" {

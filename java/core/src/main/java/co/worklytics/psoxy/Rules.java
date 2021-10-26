@@ -1,5 +1,6 @@
 package co.worklytics.psoxy;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import lombok.extern.java.Log;
 
@@ -25,32 +26,19 @@ import java.util.List;
 @NoArgsConstructor //for Jackson
 @Getter
 @EqualsAndHashCode
+@JsonInclude(JsonInclude.Include.NON_NULL) //NOTE: despite name, also affects YAML encoding
 public class Rules implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     /**
-     * a rule for matching parts of JSON API responses.
-     * <p>
-     * match means the request URL matches `relativeUrlRegex` and the node in JSON response
-     * matches at least one of `jsonPaths`
+     * scopeId to set for any identifiers parsed from source that aren't email addresses
+     *
+     * NOTE: can be overridden by config, in case you're connecting to an on-prem / private instance
+     * of the source and you don't want it's identifiers to be treated as under the default scope
      */
-    @Builder
-    @AllArgsConstructor //for builder
-    @NoArgsConstructor //for Jackson
     @Getter
-    @EqualsAndHashCode
-    public static class Rule implements Serializable {
-
-        private static final long serialVersionUID = 1L;
-
-        //must match request URL
-        String relativeUrlRegex;
-
-        // json nodes that match ANY of these paths will be matches
-        @Singular
-        List<String> jsonPaths;
-    }
+    String defaultScopeIdForSource;
 
     /**
      * values in response matching any of these rules will be pseudonymized
@@ -76,4 +64,26 @@ public class Rules implements Serializable {
     @Getter
     List<Rule> redactions;
 
+    /**
+     * a rule for matching parts of JSON API responses.
+     * <p>
+     * match means the request URL matches `relativeUrlRegex` and the node in JSON response
+     * matches at least one of `jsonPaths`
+     */
+    @Builder
+    @AllArgsConstructor //for builder
+    @NoArgsConstructor //for Jackson
+    @Getter
+    @EqualsAndHashCode
+    public static class Rule implements Serializable {
+
+        private static final long serialVersionUID = 1L;
+
+        //must match request URL
+        String relativeUrlRegex;
+
+        // json nodes that match ANY of these paths will be matches
+        @Singular
+        List<String> jsonPaths;
+    }
 }
