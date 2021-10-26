@@ -33,5 +33,8 @@ infra/dev-personal/TODO*
 java/target
 java/**/target
 
+# don't catch config.yaml, may contain secret salt
+java/impl/cmd-line/config.yaml
+
 # macOs generated files
 .DS_Store
