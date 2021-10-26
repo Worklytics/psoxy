@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 public class Main {
@@ -27,6 +28,8 @@ public class Main {
 
     @lombok.SneakyThrows
     public static void main(String[] args) {
+        Preconditions.checkArgument(args.length < 1, "No filename passed; please invoke as: java -jar target/psoxy-cmd-line-1.0-SNAPSHOT.jar fileToPseudonymize.csv");
+        Preconditions.checkArgument(args.length > 1, "Too many arguments passed; please invoke as: java -jar target/psoxy-cmd-line-1.0-SNAPSHOT.jar fileToPseudonymize.csv");
 
         File configFile = new File(DEFAULT_CONFIG_FILE);
         Config config;
@@ -40,11 +43,11 @@ public class Main {
 
         Preconditions.checkArgument(inputFile.exists(), "File %s does not exist", args[0]);
 
-        main(config, inputFile, System.out);
+        pseudonymize(config, inputFile, System.out);
     }
 
     @SneakyThrows
-    public static void main(Config config, File inputFile, Appendable out) {
+    public static void pseudonymize(Config config, File inputFile, Appendable out) {
 
         Sanitizer sanitizer = new SanitizerImpl(Sanitizer.Options.builder()
             .defaultScopeId(config.getDefaultScopeId())
@@ -56,11 +59,12 @@ public class Main {
                 .withFirstRecordAsHeader()
                 .parse(in);
 
-            String[] header = records.getHeaderMap().entrySet().stream()
-                .sorted(Map.Entry.comparingByValue())
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toList())
-                .toArray(new String[records.getHeaderMap().size()]);
+            Preconditions.checkArgument(records.getHeaderMap() != null, "Failed to parse header from file");
+
+            Map<Integer, String> invertedHeaderMap = records.getHeaderMap().entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey, (a, b) -> a, TreeMap::new));
+
+            String[] header = invertedHeaderMap.values().toArray(new String[invertedHeaderMap.size()]);
 
             config.getColumnsToPseudonymize().stream()
                     .forEach(columnToPseudonymize ->
@@ -70,23 +74,21 @@ public class Main {
 
             records.forEach(row -> {
 
-                List<Object> sanitized = records.getHeaderMap().entrySet()
+                List<Object> sanitized = invertedHeaderMap.entrySet()
                     .stream()
-                    .sorted(Map.Entry.comparingByValue())
                     .map(column -> {
-                        if (config.getColumnsToPseudonymize().contains(column.getKey())) {
+                        if (config.getColumnsToPseudonymize().contains(column.getValue())) {
                             try {
                                 //q: need extra escaping??
-                                return jsonMapper.writeValueAsString(sanitizer.pseudonymize(row.get(column.getValue())));
+                                return jsonMapper.writeValueAsString(sanitizer.pseudonymize(row.get(column.getKey())));
                             } catch (JsonProcessingException e) {
                                 throw new RuntimeException(e);
                             }
                         } else {
-                            return row.get(column.getValue());
+                            return row.get(column.getKey());
                         }
                     })
                     .collect(Collectors.toList());
-
 
                 try {
                     printer.printRecord(sanitized);

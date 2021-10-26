@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.StringWriter;
-import java.util.Arrays;
 import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -26,7 +25,7 @@ class MainTest {
         File inputFile = new File(getClass().getResource("/hris-example.csv").getFile());
 
         StringWriter s = new StringWriter();
-        Main.main(config, inputFile, s);
+        Main.pseudonymize(config, inputFile, s);
 
         assertEquals(EXPECTED, s.toString());
     }
