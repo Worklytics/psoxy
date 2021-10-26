@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 class GoogleCloudPlatformServiceAccountKeyAuthStrategy implements SourceAuthStrategy {
 
     @Getter
-    private final static String configIdentifier = "gcp_service_account_key";
+    private final String configIdentifier = "gcp_service_account_key";
 
     ConfigService config;
 
