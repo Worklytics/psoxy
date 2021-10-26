@@ -74,6 +74,15 @@ public class Route implements HttpFunction {
         return sourceAuthStrategy;
     }
 
+    /**
+     * provides option to for customers to override rules for a source with custom ones defined in a
+     * YAML file. Not really recommended, as complicates deployment (must add the file to
+     * `target/deployment` before calling the gcloud deploy cmmd), but we provide the option should
+     * advanced users want more control.
+     *
+     * @param pathToRulesFile path to rules; for testing
+     * @return rules, if defined, from file system
+     */
     @SneakyThrows
     Optional<Rules> getRulesFromFileSystem(Optional<String> pathToRulesFile) {
         File rulesFile = new File(pathToRulesFile.orElse(PATH_TO_RULES_FILES));
