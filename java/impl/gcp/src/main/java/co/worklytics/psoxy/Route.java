@@ -18,6 +18,7 @@ import com.google.cloud.functions.HttpFunction;
 import com.google.cloud.functions.HttpRequest;
 import com.google.cloud.functions.HttpResponse;
 
+import com.google.common.net.MediaType;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 
@@ -165,17 +166,13 @@ public class Route implements HttpFunction {
             .build();
 
         if (healthCheckResult.passed()) {
-            response.setStatusCode(200, "Health check passed");
+            response.setStatusCode(HealthCheckResult.HttpStatusCode.SUCCEED.getCode(), "Health check passed");
         } else {
-            response.setStatusCode(HealthCheckResult.HTTP_SC_FAIL, "Health check failed");
+            response.setStatusCode(HealthCheckResult.HttpStatusCode.FAIL.getCode(), "Health check failed");
         }
 
         try {
-            //TODO: get this from a constant? would add dep on some HTTP lib that has it, such as
-            // JAX-RS,
-            // Guava (https://guava.dev/releases/27.0-jre/api/docs/com/google/common/net/MediaType.html)
-            // Spring (https://docs.spring.io/spring-framework/docs/3.0.x/javadoc-api/org/springframework/http/MediaType.html)
-            response.setContentType("application/json");
+            response.setContentType(MediaType.JSON_UTF_8.toString());
             response.getWriter().write(objectMapper.writeValueAsString(healthCheckResult));
             response.getWriter().write("\r\n");
         } catch (IOException e) {
