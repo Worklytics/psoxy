@@ -54,6 +54,8 @@ module "gmail-connector-auth" {
 
   secret_project     = var.project_id
   service_account_id = module.gmail-connector.service_account_id
+
+  # TODO: recommend migrate this to `PSOXY_{{function_name}}_SERVICE_ACCOUNT_KEY`
   secret_id          = "PSOXY_SERVICE_ACCOUNT_KEY_gmail"
 }
 
@@ -103,6 +105,7 @@ module "google-chat-connector-auth" {
 
   secret_project     = var.project_id
   service_account_id = module.google-chat-connector.service_account_id
+  # TODO: recommend migrate this to `PSOXY_{{function_name}}_SERVICE_ACCOUNT_KEY`
   secret_id          = "PSOXY_SERVICE_ACCOUNT_KEY_google-chat"
 }
 

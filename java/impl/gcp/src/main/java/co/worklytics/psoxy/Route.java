@@ -1,8 +1,9 @@
 package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
-import co.worklytics.psoxy.gateway.SourceAuthConfigProperty;
+import co.worklytics.psoxy.gateway.SourceAuthStrategy;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
+import co.worklytics.psoxy.gateway.impl.OAuthRefreshTokenSourceAuthStrategy;
 import co.worklytics.psoxy.impl.SanitizerImpl;
 import co.worklytics.psoxy.rules.google.PrebuiltSanitizerRules;
 import co.worklytics.psoxy.gateway.ConfigService;
@@ -11,9 +12,8 @@ import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.auth.Credentials;
 import com.google.auth.http.HttpCredentialsAdapter;
-import com.google.auth.oauth2.GoogleCredentials;
-import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.functions.HttpFunction;
 import com.google.cloud.functions.HttpRequest;
 import com.google.cloud.functions.HttpResponse;
@@ -24,11 +24,12 @@ import lombok.extern.java.Log;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.Proxy;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.net.URL;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Log
 public class Route implements HttpFunction {
@@ -50,9 +51,22 @@ public class Route implements HttpFunction {
      */
     static final String DEFAULT_SALT = "salt";
 
-
     ConfigService config;
     Sanitizer sanitizer;
+    SourceAuthStrategy sourceAuthStrategy;
+
+    SourceAuthStrategy getSourceAuthStrategy() {
+        if (sourceAuthStrategy == null) {
+            String identifier = getConfig().getConfigPropertyOrError(ProxyConfigProperty.SOURCE_AUTH_STRATEGY_IDENTIFIER);
+            Stream<SourceAuthStrategy> implementations = Stream.of(
+                new GoogleCloudPlatformServiceAccountKeyAuthStrategy(),
+                new OAuthRefreshTokenSourceAuthStrategy());
+            sourceAuthStrategy = implementations
+                    .filter(impl -> Objects.equals(identifier, impl.getConfigIdentifier()))
+                .findFirst().orElseThrow(() -> new Error("No SourceAuthStrategy impl matching configured identifier: " + identifier));
+        }
+        return sourceAuthStrategy;
+    }
 
     ConfigService getConfig() {
         if (config == null) {
@@ -203,10 +217,7 @@ public class Route implements HttpFunction {
             user -> log.info("User to impersonate: " + user),
             () -> log.warning("we usually expect a user to impersonate"));
 
-        GoogleCredentials credentials = quietGetApplicationDefault(accountToImpersonate,
-            Arrays.stream(getConfig().getConfigPropertyOrError(SourceAuthConfigProperty.OAUTH_SCOPES).split(","))
-                .collect(Collectors.toSet()));
-
+        Credentials credentials = getSourceAuthStrategy().getCredentials(accountToImpersonate);
         HttpCredentialsAdapter initializer = new HttpCredentialsAdapter(credentials);
 
         //TODO: in OAuth-type use cases, where execute() may have caused token to be refreshed, how
@@ -217,35 +228,4 @@ public class Route implements HttpFunction {
         return transport.createRequestFactory(initializer);
     }
 
-    /**
-     * quiet helper to avoid try-catch
-     *
-     * @return
-     */
-    @SneakyThrows
-    GoogleCredentials quietGetApplicationDefault(Optional<String> serviceAccountUser, Set<String> scopes) {
-        GoogleCredentials credentials = GoogleCredentials.getApplicationDefault();
-
-        if (!(credentials instanceof ServiceAccountCredentials)) {
-            // only ServiceAccountCredentials (created from an actual service account key) support
-            // domain-wide delegation
-            // see examples - even when access is 'global', still need to impersonate a user
-            // https://developers.google.com/admin-sdk/reports/v1/guides/delegation
-
-            //NOTE: in practice SERVICE_ACCOUNT_KEY need not belong the to same service account
-            // running the cloud function; but it could
-            String key = getConfig().getConfigPropertyOrError(SourceAuthConfigProperty.SERVICE_ACCOUNT_KEY);
-            credentials = ServiceAccountCredentials.fromStream(new ByteArrayInputStream(Base64.getDecoder().decode(key)));
-        }
-
-        if (serviceAccountUser.isPresent()) {
-            //even though GoogleCredentials implements `createDelegated`, it's a no-op if the
-            // credential type doesn't support it.
-            credentials = credentials.createDelegated(serviceAccountUser.get());
-        }
-
-        credentials = credentials.createScoped(scopes);
-
-        return credentials;
-    }
 }

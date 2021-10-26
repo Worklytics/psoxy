@@ -1,4 +1,5 @@
 SOURCE: gmail
+SOURCE_AUTH_STRATEGY_IDENTIFIER: gcp_service_account_key
 TARGET_HOST: gmail.googleapis.com
 OAUTH_SCOPES: https://www.googleapis.com/auth/gmail.metadata
 IDENTIFIER_SCOPE_ID: gapps
