@@ -8,6 +8,7 @@ import lombok.extern.java.Log;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Set;
 
 /**
  * rules that control how data source API is sanitized, including support for:
@@ -37,6 +38,16 @@ public class Rules implements Serializable {
      */
     @Getter
     String defaultScopeIdForSource;
+
+    /**
+     * if set, proxy will block calls to any endpoints that do not match at least one of the regexes
+     * in this list (if unset, calls to all endpoints will be allowed via proxy)
+     *
+     * in effect, this allows for more granular restrictions than the source API implements
+     */
+    @Singular
+    @Getter
+    List<String> allowedEndpointRegexes;
 
     /**
      * a rule for matching parts of JSON API responses.
