@@ -20,6 +20,8 @@ Run the following gcloud command from the root of the GCP implementation of Psox
 `java/impl/gcp` within a checkout of the psoxy repo), after having run `mvn package` (you only need
 to package once, but will run a similar deployment command for each psoxy instance).
 
+
+
 ```shell
 gcloud beta functions deploy ${var.function_name} \
     --project=${var.project_id} \
@@ -31,5 +33,11 @@ gcloud beta functions deploy ${var.function_name} \
     --env-vars-file=configs/${var.source_kind}.yaml \
     --set-secrets '${join(",", local.secret_clauses)}'
 ```
+
+NOTE: if you want to customize the rule set used by Psoxy for your source, you can add a
+`rules.yaml` file into the deployment directory (`target/deployment`) before invoking the command
+above. The rules you define in the YAML file will override the ruleset specified in the codebase for
+the source.
+
 EOT
 }
