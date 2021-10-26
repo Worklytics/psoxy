@@ -25,11 +25,11 @@ import lombok.extern.java.Log;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.net.Proxy;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.net.URL;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Log
@@ -163,9 +163,15 @@ public class Route implements HttpFunction {
     private void doHealthCheck(HttpRequest request, HttpResponse response) {
         ObjectMapper objectMapper = new ObjectMapper();
 
+        Set<ConfigService.ConfigProperty> missing =
+            getSourceAuthStrategy().getRequiredConfigProperties().stream()
+                .filter(configProperty -> getConfig().getConfigPropertyAsOptional(configProperty).isEmpty())
+                .collect(Collectors.toSet());
+
         HealthCheckResult healthCheckResult = HealthCheckResult.builder()
             .configuredSource(getConfig().getConfigPropertyAsOptional(ProxyConfigProperty.SOURCE).orElse(null))
             .nonDefaultSalt(getConfig().getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT).isPresent())
+            .missingConfigProperties(missing)
             .build();
 
         if (healthCheckResult.passed()) {

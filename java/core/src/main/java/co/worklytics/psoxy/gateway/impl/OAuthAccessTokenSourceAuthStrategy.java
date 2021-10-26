@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.extern.java.Log;
 
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * source auth strategy to authenticate using a long-lived OAuth 2.0 access token to authenticate
@@ -37,5 +38,10 @@ public class OAuthAccessTokenSourceAuthStrategy implements SourceAuthStrategy {
     public Credentials getCredentials(Optional<String> userToImpersonate) {
         String token = config.getConfigPropertyOrError(ConfigProperty.ACCESS_TOKEN);
         return OAuth2Credentials.create(new AccessToken(token, null));
+    }
+
+    @Override
+    public Set<ConfigService.ConfigProperty> getRequiredConfigProperties() {
+        return Set.of(ConfigProperty.values());
     }
 }

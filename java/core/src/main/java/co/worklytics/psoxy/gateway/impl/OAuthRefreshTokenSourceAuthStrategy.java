@@ -49,6 +49,10 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         CLIENT_SECRET, //NOTE: you should configure this as a secret in Secret Manager
     }
 
+    @Override
+    public Set<ConfigService.ConfigProperty> getRequiredConfigProperties() {
+        return Set.of(ConfigProperty.values());
+    }
 
 
     @Override
