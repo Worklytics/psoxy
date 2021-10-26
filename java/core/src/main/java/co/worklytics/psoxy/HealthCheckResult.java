@@ -1,16 +1,21 @@
 package co.worklytics.psoxy;
 
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 @Data
 @Builder
 @AllArgsConstructor
 public class HealthCheckResult {
 
-    static final int HTTP_SC_FAIL = 512;
+    @RequiredArgsConstructor
+    enum HttpStatusCode {
+        SUCCEED(200),
+        FAIL(512);
+
+        @Getter
+        private final int code;
+    }
 
     String configuredSource;
 
