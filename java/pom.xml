@@ -13,10 +13,12 @@
         <revision>1.0-SNAPSHOT</revision>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
-        <dependency.jackson.version>2.12.5</dependency.jackson.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <plugins.maven-compiler.version>3.8.1</plugins.maven-compiler.version>
+        <dependency.jackson.version>2.12.5</dependency.jackson.version>
         <dependency.lombok.version>1.18.20</dependency.lombok.version>
         <dependency.apache-commons-lang3.version>3.11</dependency.apache-commons-lang3.version>
+        <dependency.dagger.version>2.39.1</dependency.dagger.version>
     </properties>
 
     <modules>
@@ -26,7 +28,29 @@
 
     <build>
         <plugins>
-
+            <!-- doesn't *seem* to be necessary, but is what's Dagger docs suggest; but even with this, the
+            Dagger-generated classes dont' seem to be seen (eg, DaggerContainer) -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <!-- force consistent version of maven-compiler-plugin; if omitted, I see in logs:
+[INFO]  maven-compiler-plugin:3.1:compile (default-compile) -->
+                <version>${plugins.maven-compiler.version}</version>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>com.google.dagger</groupId>
+                            <artifactId>dagger-compiler</artifactId>
+                            <version>${dependency.dagger.version}</version>
+                        </path>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${dependency.lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>

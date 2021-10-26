@@ -2,7 +2,6 @@ package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
-import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.gateway.impl.OAuthRefreshTokenSourceAuthStrategy;
 import co.worklytics.psoxy.impl.SanitizerImpl;
 import co.worklytics.psoxy.rules.google.PrebuiltSanitizerRules;
@@ -18,12 +17,14 @@ import com.google.cloud.functions.HttpFunction;
 import com.google.cloud.functions.HttpRequest;
 import com.google.cloud.functions.HttpResponse;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 
+import javax.inject.Inject;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.net.Proxy;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.net.URL;
@@ -50,9 +51,14 @@ public class Route implements HttpFunction {
      */
     static final String DEFAULT_SALT = "salt";
 
+    @Inject @Getter
     ConfigService config;
     Sanitizer sanitizer;
     SourceAuthStrategy sourceAuthStrategy;
+
+    @Inject
+    public Route() {
+    }
 
     SourceAuthStrategy getSourceAuthStrategy() {
         if (sourceAuthStrategy == null) {
@@ -65,20 +71,6 @@ public class Route implements HttpFunction {
                 .findFirst().orElseThrow(() -> new Error("No SourceAuthStrategy impl matching configured identifier: " + identifier));
         }
         return sourceAuthStrategy;
-    }
-
-    ConfigService getConfig() {
-        if (config == null) {
-            /**
-             * in GCP cloud function, we should be able to configure everything via env vars; either
-             * directly or by binding them to secrets at function deployment:
-             *
-             * @see "https://cloud.google.com/functions/docs/configuring/env-var"
-             * @see "https://cloud.google.com/functions/docs/configuring/secrets"
-             */
-            config = new EnvVarsConfigService();
-        }
-        return config;
     }
 
     void initSanitizer() {

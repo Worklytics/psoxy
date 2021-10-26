@@ -3,7 +3,7 @@
   <component name="CompilerConfiguration">
     <annotationProcessing>
       <profile default="true" name="Default" enabled="true" />
-      <profile name="Maven default annotation processors profile" enabled="true">
+      <profile name="Maven default annotation processors profile" enabled="true" procOnly="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
@@ -16,6 +16,7 @@
       <module name="cmd-line" target="11" />
       <module name="core" target="11" />
       <module name="gcp" target="11" />
+      <module name="impl" target="11" />
       <module name="root" target="11" />
     </bytecodeTargetLevel>
   </component>

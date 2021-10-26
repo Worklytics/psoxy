@@ -2,9 +2,10 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/java/impl/cmd-line/cmd-line.iml" filepath="$PROJECT_DIR$/java/impl/cmd-line/cmd-line.iml" />
+      <module fileurl="file://$PROJECT_DIR$/java/impl/cmd-line/cmd-line.iml" filepath="$PROJECT_DIR$/java/impl/cmd-line/cmd-line.iml" group="impl and modules" />
       <module fileurl="file://$PROJECT_DIR$/java/core/core.iml" filepath="$PROJECT_DIR$/java/core/core.iml" />
-      <module fileurl="file://$PROJECT_DIR$/java/impl/gcp/gcp.iml" filepath="$PROJECT_DIR$/java/impl/gcp/gcp.iml" />
+      <module fileurl="file://$PROJECT_DIR$/java/impl/gcp/gcp.iml" filepath="$PROJECT_DIR$/java/impl/gcp/gcp.iml" group="impl and modules" />
+      <module fileurl="file://$PROJECT_DIR$/java/impl/impl.iml" filepath="$PROJECT_DIR$/java/impl/impl.iml" group="impl and modules" />
       <module fileurl="file://$PROJECT_DIR$/infra/infra.iml" filepath="$PROJECT_DIR$/infra/infra.iml" />
       <module fileurl="file://$PROJECT_DIR$/java/root.iml" filepath="$PROJECT_DIR$/java/root.iml" />
     </modules>

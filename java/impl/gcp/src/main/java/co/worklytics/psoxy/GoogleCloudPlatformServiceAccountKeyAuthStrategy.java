@@ -10,6 +10,7 @@ import com.google.auth.oauth2.ServiceAccountCredentials;
 import lombok.Getter;
 import lombok.SneakyThrows;
 
+import javax.inject.Inject;
 import java.io.ByteArrayInputStream;
 import java.util.Arrays;
 import java.util.Base64;
@@ -20,23 +21,9 @@ import java.util.stream.Collectors;
 class GoogleCloudPlatformServiceAccountKeyAuthStrategy implements SourceAuthStrategy {
 
     @Getter
-    private final static String configIdentifier = "gcp_service_account_key";
+    private final String configIdentifier = "gcp_service_account_key";
 
-    ConfigService config;
-
-    ConfigService getConfig() {
-        if (config == null) {
-            /**
-             * in GCP cloud function, we should be able to configure everything via env vars; either
-             * directly or by binding them to secrets at function deployment:
-             *
-             * @see "https://cloud.google.com/functions/docs/configuring/env-var"
-             * @see "https://cloud.google.com/functions/docs/configuring/secrets"
-             */
-            config = new EnvVarsConfigService();
-        }
-        return config;
-    }
+    @Inject @Getter ConfigService config;
 
     @SneakyThrows
     @Override
