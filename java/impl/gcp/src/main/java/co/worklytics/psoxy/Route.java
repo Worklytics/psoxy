@@ -163,9 +163,10 @@ public class Route implements HttpFunction {
     private void doHealthCheck(HttpRequest request, HttpResponse response) {
         ObjectMapper objectMapper = new ObjectMapper();
 
-        Set<ConfigService.ConfigProperty> missing =
+        Set<String> missing =
             getSourceAuthStrategy().getRequiredConfigProperties().stream()
                 .filter(configProperty -> getConfig().getConfigPropertyAsOptional(configProperty).isEmpty())
+                .map(ConfigService.ConfigProperty::name)
                 .collect(Collectors.toSet());
 
         HealthCheckResult healthCheckResult = HealthCheckResult.builder()
