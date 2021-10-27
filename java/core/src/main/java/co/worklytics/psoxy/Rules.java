@@ -8,7 +8,6 @@ import lombok.extern.java.Log;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Set;
 
 /**
  * rules that control how data source API is sanitized, including support for:
@@ -40,10 +39,19 @@ public class Rules implements Serializable {
     String defaultScopeIdForSource;
 
     /**
-     * if set, proxy will block calls to any endpoints that do not match at least one of the regexes
-     * in this list (if unset, calls to all endpoints will be allowed via proxy)
+     * if set to non-empty list, proxy will block calls to any endpoints with relative urls that do
+     * not match at least one of the regexes in this list (if unset, calls to all endpoints will be
+     * allowed via proxy)
      *
      * in effect, this allows for more granular restrictions than the source API implements
+     *
+     * NOTE: while it's hard to write list of regexes that match ONLY relativeUrls intended to be
+     * allowed, for most REST APIs it's easy to write a list that excludes urls that are actual
+     * endpoints you intend to block (as opposed to fake urls crafted to defeat the regex)
+     *
+     * common pitfalls:
+     *   - not beginning these with `^`
+     *   - using .* wildcard for path fragments rather than [^/]?* (all chars but /, greedy)
      */
     @Singular
     @Getter

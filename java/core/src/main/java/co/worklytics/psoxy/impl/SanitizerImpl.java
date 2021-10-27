@@ -44,6 +44,7 @@ public class SanitizerImpl implements Sanitizer {
     List<Pair<Pattern, List<JsonPath>>> compiledPseudonymizations;
     List<Pair<Pattern, List<JsonPath>>> compiledRedactions;
     List<Pair<Pattern, List<JsonPath>>> compiledEmailHeaderPseudonymizations;
+    List<Pattern> compiledAllowedEndpoints;
 
     @Getter(onMethod_ = {@VisibleForTesting})
     Configuration jsonConfiguration;
@@ -69,7 +70,28 @@ public class SanitizerImpl implements Sanitizer {
     }
 
     @Override
+    public boolean isAllowed(URL url) {
+        if (options.getRules().getAllowedEndpointRegexes() == null
+             || options.getRules().getAllowedEndpointRegexes().isEmpty()) {
+            return true;
+        } else {
+            if (compiledAllowedEndpoints == null) {
+                compiledAllowedEndpoints = options.getRules().getAllowedEndpointRegexes().stream()
+                    .map(Pattern::compile)
+                    .collect(Collectors.toList());
+            }
+            String relativeUrl = relativeUrl(url);
+            return compiledAllowedEndpoints.stream().anyMatch(p -> p.matcher(relativeUrl).matches());
+        }
+    }
+
+
+    @Override
     public String sanitize(URL url, String jsonResponse) {
+        //extra check ...
+        if (!isAllowed(url)) {
+            throw new IllegalStateException("Sanitizer called to sanitize response that should not have been retrieved");
+        }
 
         if (compiledPseudonymizations == null) {
             compiledPseudonymizations = compile(options.getRules().getPseudonymizations());
@@ -84,7 +106,7 @@ public class SanitizerImpl implements Sanitizer {
             initConfiguration();
         }
 
-        String relativeUrl = url.getPath() + "?" + url.getQuery();
+        String relativeUrl = relativeUrl(url);
 
         List<JsonPath> pseudonymizationsToApply =
             applicablePaths(compiledPseudonymizations, relativeUrl);
@@ -213,8 +235,6 @@ public class SanitizerImpl implements Sanitizer {
             .collect(Collectors.toList());
     }
 
-
-
     @Override
     public PseudonymizedIdentity pseudonymize(String value) {
         return pseudonymize((Object)  value);
@@ -223,5 +243,9 @@ public class SanitizerImpl implements Sanitizer {
     @Override
     public PseudonymizedIdentity pseudonymize(Number value) {
         return pseudonymize((Object) value);
+    }
+
+    private String relativeUrl(URL url) {
+        return url.getPath() + "?" + url.getQuery();
     }
 }

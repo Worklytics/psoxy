@@ -10,8 +10,9 @@ import java.util.Map;
 public class PrebuiltSanitizerRules {
 
     static final Rules GCAL = Rules.builder()
+        .allowedEndpointRegex("^/calendar/v3/calendars/[^/]*?/events.*")
         .pseudonymization(Rule.builder()
-            .relativeUrlRegex("\\/calendar\\/v3\\/calendars\\/.*\\/events.*")
+            .relativeUrlRegex("\\/calendar\\/v3\\/calendars\\/.*?\\/events.*")
             .jsonPath("$..email")
             .build())
         .redaction(Rule.builder()
@@ -23,6 +24,7 @@ public class PrebuiltSanitizerRules {
 
 
     static final Rules GOOGLE_CHAT = Rules.builder()
+        .allowedEndpointRegex("^/admin/reports/v1/activity/users/all/applications/chat.*")
         .pseudonymization(Rule.builder()
             .relativeUrlRegex("\\/admin\\/reports\\/v1\\/activity\\/users\\/all\\/applications\\/chat.*")
             .jsonPath("$..email")
@@ -114,6 +116,7 @@ public class PrebuiltSanitizerRules {
         .build();
 
     static final Rules GMAIL = Rules.builder()
+       .allowedEndpointRegex("^/gmail/v1/users/[^/]*?/messages.*")
        //cases that we expect may contain a comma-separated list of values, per RFC 2822
        .emailHeaderPseudonymization(Rules.Rule.builder()
                   .relativeUrlRegex("\\/gmail\\/v1\\/users\\/.*?\\/messages\\/.*")
@@ -133,6 +136,7 @@ public class PrebuiltSanitizerRules {
        .build();
 
     static final Rules GOOGLE_MEET = Rules.builder()
+        .allowedEndpointRegex("^/admin/reports/v1/activity/users/all/applications/meet.*")
         .pseudonymization(Rule.builder()
             .relativeUrlRegex("\\/admin\\/reports\\/v1\\/activity\\/users\\/all\\/applications\\/meet.*")
             .jsonPath("$..email")
