@@ -36,7 +36,6 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
         "  }\n" +
         "}";
 
-
     @SneakyThrows
     @ValueSource(strings = {EXAMPLE_TOKEN_RESPONSE, EXAMPLE_TOKEN_RESPONSE_EXTRA})
     @ParameterizedTest
