@@ -5,6 +5,7 @@ import co.worklytics.psoxy.gateway.SourceAuthStrategy;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
@@ -13,7 +14,6 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.auth.Credentials;
 import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.OAuth2CredentialsWithRefresh;
-import com.google.common.collect.Maps;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.extern.java.Log;
@@ -126,6 +126,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
          * }
          */
         @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+        @JsonPropertyOrder(alphabetic = true) //for consistent tests
         @NoArgsConstructor //for jackson
         @Getter
         static class CanonicalOAuthAccessTokenResponseDto {
@@ -137,7 +138,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
             @JsonInclude(JsonInclude.Include.NON_EMPTY)
             @Getter(onMethod_ = {@JsonAnyGetter})  //magically put 'unmapped' properties back onto JSON when serialized
-            private Map<String, Object> unmapped = Maps.newHashMap();
+            private Map<String, Object> unmapped = new TreeMap<>();  //treemap, to try to make order deterministic
 
             @JsonAnySetter
             public void set(String name, Object value) {
