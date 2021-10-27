@@ -3,6 +3,7 @@ package co.worklytics.psoxy.gateway;
 import com.google.auth.Credentials;
 
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * encapsulates strategy for how to authenticate with source
@@ -46,6 +47,8 @@ public interface SourceAuthStrategy {
 
     Credentials getCredentials(Optional<String> userToImpersonate);
 
-
-    //TODO: health check component (eg, verify
+    /**
+     * @return set of any config properties that are required to be defined
+     */
+    Set<ConfigService.ConfigProperty> getRequiredConfigProperties();
 }

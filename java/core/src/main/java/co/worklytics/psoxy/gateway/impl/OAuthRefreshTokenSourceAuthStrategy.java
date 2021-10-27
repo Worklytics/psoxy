@@ -18,6 +18,21 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
 
+
+/**
+ * source auth strategy to authenticate by first using a long-lived OAuth 2.0 refresh token to
+ * retrieve a short-lived OAuth 2.0 access token, and then using that access token to authenticate
+ * against the source API.
+ *
+ * A new access token will be retrieved for every psoxy instance that spins up; as well as when the
+ * current one expires.  We'll endeavor to minimize the number of token requests by sharing this
+ * states across API requests
+ *
+ * If the source API you're connecting to offers long-lived access tokens (or does not offer refresh
+ * tokens), you may opt for the access-token only strategy:
+ * @see OAuthAccessTokenSourceAuthStrategy
+ *
+ */
 @Log
 public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
@@ -34,6 +49,10 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         CLIENT_SECRET, //NOTE: you should configure this as a secret in Secret Manager
     }
 
+    @Override
+    public Set<ConfigService.ConfigProperty> getRequiredConfigProperties() {
+        return Set.of(ConfigProperty.values());
+    }
 
 
     @Override
