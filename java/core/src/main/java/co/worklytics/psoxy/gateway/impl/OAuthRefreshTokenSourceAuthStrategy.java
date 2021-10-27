@@ -2,6 +2,9 @@ package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
@@ -10,6 +13,7 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.auth.Credentials;
 import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.OAuth2CredentialsWithRefresh;
+import com.google.common.collect.Maps;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.extern.java.Log;
@@ -130,6 +134,15 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
             String refreshToken;
             String tokenType;
             Integer expires;
+
+            @JsonInclude(JsonInclude.Include.NON_EMPTY)
+            @Getter(onMethod_ = {@JsonAnyGetter})  //magically put 'unmapped' properties back onto JSON when serialized
+            private Map<String, Object> unmapped = Maps.newHashMap();
+
+            @JsonAnySetter
+            public void set(String name, Object value) {
+                unmapped.put(name, value);
+            }
         }
     }
 
