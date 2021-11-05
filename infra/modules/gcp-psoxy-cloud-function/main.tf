@@ -16,9 +16,12 @@ locals {
 resource "local_file" "todo" {
   filename = "TODO - deploy ${var.function_name}.md"
   content  = <<EOT
-Run the following gcloud command from the root of the GCP implementation of Psoxy (eg,
-`java/impl/gcp` within a checkout of the psoxy repo), after having run `mvn package` (you only need
-to package once, but will run a similar deployment command for each psoxy instance).
+First, run `mvn package install` from `java/core/` within a checkout of the Psoxy repo.
+
+Second, package the GCP implementation: run `mvn package` from `java/impl/gcp` within a checkout of
+the psoxy repo).
+
+Third, run the following deployment command from `java/impl/gcp` folder within your checkout:
 
 ```shell
 gcloud beta functions deploy ${var.function_name} \
