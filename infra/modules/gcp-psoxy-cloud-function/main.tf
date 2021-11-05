@@ -31,5 +31,12 @@ gcloud beta functions deploy ${var.function_name} \
     --env-vars-file=configs/${var.source_kind}.yaml \
     --set-secrets '${join(",", local.secret_clauses)}'
 ```
+
+and if you want to test from your local machine:
+```shell
+export PSOXY_GCP_PROJECT=${var.project_id}
+export PSOXY_GCP_REGION=us-central1
+```
+
 EOT
 }
