@@ -3,6 +3,7 @@ package co.worklytics.psoxy;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
+import co.worklytics.psoxy.gateway.impl.OAuthAccessTokenSourceAuthStrategy;
 import co.worklytics.psoxy.gateway.impl.OAuthRefreshTokenSourceAuthStrategy;
 import co.worklytics.psoxy.impl.SanitizerImpl;
 import co.worklytics.psoxy.rules.google.PrebuiltSanitizerRules;
@@ -28,6 +29,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.net.URL;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Log
@@ -59,7 +61,9 @@ public class Route implements HttpFunction {
             String identifier = getConfig().getConfigPropertyOrError(ProxyConfigProperty.SOURCE_AUTH_STRATEGY_IDENTIFIER);
             Stream<SourceAuthStrategy> implementations = Stream.of(
                 new GoogleCloudPlatformServiceAccountKeyAuthStrategy(),
-                new OAuthRefreshTokenSourceAuthStrategy());
+                new OAuthRefreshTokenSourceAuthStrategy(),
+                new OAuthAccessTokenSourceAuthStrategy()
+            );
             sourceAuthStrategy = implementations
                     .filter(impl -> Objects.equals(identifier, impl.getConfigIdentifier()))
                 .findFirst().orElseThrow(() -> new Error("No SourceAuthStrategy impl matching configured identifier: " + identifier));
@@ -163,9 +167,16 @@ public class Route implements HttpFunction {
     private void doHealthCheck(HttpRequest request, HttpResponse response) {
         ObjectMapper objectMapper = new ObjectMapper();
 
+        Set<String> missing =
+            getSourceAuthStrategy().getRequiredConfigProperties().stream()
+                .filter(configProperty -> getConfig().getConfigPropertyAsOptional(configProperty).isEmpty())
+                .map(ConfigService.ConfigProperty::name)
+                .collect(Collectors.toSet());
+
         HealthCheckResult healthCheckResult = HealthCheckResult.builder()
             .configuredSource(getConfig().getConfigPropertyAsOptional(ProxyConfigProperty.SOURCE).orElse(null))
             .nonDefaultSalt(getConfig().getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT).isPresent())
+            .missingConfigProperties(missing)
             .build();
 
         if (healthCheckResult.passed()) {

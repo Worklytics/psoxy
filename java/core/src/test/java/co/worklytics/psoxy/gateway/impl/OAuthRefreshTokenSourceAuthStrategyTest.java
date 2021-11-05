@@ -1,8 +1,11 @@
 package co.worklytics.psoxy.gateway.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.http.HttpContent;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
@@ -12,31 +15,47 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class OAuthRefreshTokenSourceAuthStrategyTest {
 
+    public static final String EXAMPLE_TOKEN_RESPONSE =
+        "{\n" +
+        "  \"access_token\" : \"BWjcyMzY3ZDhiNmJkNTY\",\n" +
+        "  \"expires\" : 3600,\n" +
+        "  \"refresh_token\" : \"Srq2NjM5NzA2OWJjuE7c\",\n" +
+        "  \"token_type\" : \"bearer\"\n" +
+        "}";
 
-
+    public static final String EXAMPLE_TOKEN_RESPONSE_EXTRA =
+        "{\n" +
+        "  \"access_token\" : \"BWjcyMzY3ZDhiNmJkNTY\",\n" +
+        "  \"expires\" : 3600,\n" +
+        "  \"refresh_token\" : \"Srq2NjM5NzA2OWJjuE7c\",\n" +
+        "  \"token_type\" : \"bearer\",\n" +
+        "  \"something_extra\" : \"some-extra-value\",\n" +
+        "  \"something_extra_numeric\" : 12,\n" +
+        "  \"something_extra_object\" : {\n" +
+        "    \"field\" : \"value\"\n" +
+        "  }\n" +
+        "}";
 
     @SneakyThrows
-    @Test
-    public void tokenResponseJson() {
+    @ValueSource(strings = {EXAMPLE_TOKEN_RESPONSE, EXAMPLE_TOKEN_RESPONSE_EXTRA})
+    @ParameterizedTest
+    public void tokenResponseJson(String jsonEncoded) {
         OAuthRefreshTokenSourceAuthStrategy.RefreshHandlerImpl refreshHandler =
             new OAuthRefreshTokenSourceAuthStrategy.RefreshHandlerImpl();
 
         OAuthRefreshTokenSourceAuthStrategy.RefreshHandlerImpl.CanonicalOAuthAccessTokenResponseDto response = refreshHandler.objectMapper.readerFor(OAuthRefreshTokenSourceAuthStrategy.RefreshHandlerImpl.CanonicalOAuthAccessTokenResponseDto.class)
-            .readValue(EXAMPLE_TOKEN_RESPONSE);
+            .readValue(jsonEncoded);
 
         assertEquals("bearer", response.getTokenType());
         assertEquals("Srq2NjM5NzA2OWJjuE7c", response.getRefreshToken());
         assertEquals("BWjcyMzY3ZDhiNmJkNTY", response.getAccessToken());
         assertEquals(3600, response.getExpires());
+
+        //reverse
+        ObjectMapper objectMapper = new ObjectMapper();
+        assertEquals(jsonEncoded,
+            objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
     }
-
-    public static final String EXAMPLE_TOKEN_RESPONSE = "{\n" +
-        "         \"access_token\": \"BWjcyMzY3ZDhiNmJkNTY\",\n" +
-        "         \"refresh_token\": \"Srq2NjM5NzA2OWJjuE7c\",\n" +
-        "         \"token_type\": \"bearer\",\n" +
-        "         \"expires\": 3600\n" +
-        "         }";
-
 
     @SneakyThrows
     @Test
