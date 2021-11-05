@@ -61,22 +61,14 @@ As of Sept 2021, the following sources can be connected via psoxy:
 
 ## Development
 
-Can run locally via IntelliJ + maven, using run config:
-<<<<<<< HEAD
-  - `psoxy [function:run...]` (located in `.idea/runConfigurations`)
-=======
-  - `psoxy - run gmail`  (located in `.idea/runConfigurations`)
->>>>>>> main
-
+Can run locally via IntelliJ + maven, using run configs (located in `.idea/runConfigurations`):
+  - `package install core` builds the core JAR, on which implementations depend
+  - `gcp - run gmail` builds and runs a local instance for GMail
+  
 Or from command line:
-
 ```shell
-cd java
-<<<<<<< HEAD
-mvn function:run -Drun.functionTarget=co.worklytics.psoxy.HelloWorld
-=======
+cd java/impl/gcp
 mvn function:run -Drun.functionTarget=co.worklytics.psoxy.Route
->>>>>>> main
 ```
 
 By default, that serves the function from http://localhost:8080.
