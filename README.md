@@ -32,7 +32,21 @@ Orchestration continues to be performed on the Worklytics-side.
 
 ## Getting Started
 
-  1. contact support@worklytics.co to ensure your account is enabled for Psoxy
+### Prereqs
+As of Oct 2021, Psoxy is implement with Java 11 and build via Maven. Infrastructure is provisioned
+via Terraform, relying on Google Cloud cmd line tools.  You will need recent versions of all of the
+following:
+
+  - Java JDK variant at 11+
+  - [Maven 3.8+](https://maven.apache.org/docs/history.html)
+  - [Google Cloud Command Line tool](https://cloud.google.com/sdk/docs/install), configured for the
+    GCP project that will host your psoxy instance(s)
+  - [terraform](https://www.terraform.io/) optional; if you don't use this, you'll need to configure
+    your GCP project via the console/gcloud tool. Writing your own terraform config that re-uses
+    our modules will simplify things.
+
+### Setup
+  1. contact support@worklytics.co to ensure your Worklytics account is enabled for Psoxy
   2. create a [terraform](https://www.terraform.io/) configuration and apply it
      a. various modules are provided in [`infra/modules`](/infra/modules)
      b. an example is found in `dev-personal`
@@ -59,12 +73,18 @@ As of Sept 2021, the following sources can be connected via psoxy:
   * Slack
     * eDiscovery API *alpha*
 
+You can also use the command line tool to pseudonymize arbitrary CSV files (eg, exports from your
+HRIS), in a manner consistent with how a psoxy instance will pseudonymize identifiers in a target
+REST API. This is REQUIRED if you want SaaS accounts to be linked with HRIS data for analysis (eg,
+Worklytics will match email set in HRIS with email set in SaaS tool's account - so these must be
+pseudonymized using an equivalent algorithm and secret). See `java/impl/cmd-line/` for details.
+
 ## Development
 
 Can run locally via IntelliJ + maven, using run configs (located in `.idea/runConfigurations`):
   - `package install core` builds the core JAR, on which implementations depend
   - `gcp - run gmail` builds and runs a local instance for GMail
-  
+
 Or from command line:
 ```shell
 cd java/impl/gcp
@@ -134,7 +154,7 @@ resource "google_cloudfunctions_function_iam_member" "member" {
 }
 ```
 
-Either way, if this function is for prod use, please remove these grants after you're finished 
+Either way, if this function is for prod use, please remove these grants after you're finished
 testing.
 
 4.) invocation examples
