@@ -44,6 +44,7 @@ public class SanitizerImpl implements Sanitizer {
     List<Pair<Pattern, List<JsonPath>>> compiledPseudonymizations;
     List<Pair<Pattern, List<JsonPath>>> compiledRedactions;
     List<Pair<Pattern, List<JsonPath>>> compiledEmailHeaderPseudonymizations;
+    List<Pattern> compiledAllowedEndpoints;
 
     @Getter(onMethod_ = {@VisibleForTesting})
     Configuration jsonConfiguration;
@@ -60,7 +61,8 @@ public class SanitizerImpl implements Sanitizer {
             .setOptions(Option.SUPPRESS_EXCEPTIONS); //we specifically want to ignore PATH_NOT_FOUND cases
     }
 
-    List<JsonPath> applicablePaths(List<Pair<Pattern, List<JsonPath>>> rules, String relativeUrl) {
+    List<JsonPath> applicablePaths(@NonNull List<Pair<Pattern, List<JsonPath>>> rules,
+                                   @NonNull String relativeUrl) {
         return rules.stream()
             .filter(compiled -> compiled.getKey().asMatchPredicate().test(relativeUrl))
             .map(Pair::getValue)
@@ -69,7 +71,28 @@ public class SanitizerImpl implements Sanitizer {
     }
 
     @Override
-    public String sanitize(URL url, String jsonResponse) {
+    public boolean isAllowed(@NonNull URL url) {
+        if (options.getRules().getAllowedEndpointRegexes() == null
+             || options.getRules().getAllowedEndpointRegexes().isEmpty()) {
+            return true;
+        } else {
+            if (compiledAllowedEndpoints == null) {
+                compiledAllowedEndpoints = options.getRules().getAllowedEndpointRegexes().stream()
+                    .map(Pattern::compile)
+                    .collect(Collectors.toList());
+            }
+            String relativeUrl = relativeUrl(url);
+            return compiledAllowedEndpoints.stream().anyMatch(p -> p.matcher(relativeUrl).matches());
+        }
+    }
+
+
+    @Override
+    public String sanitize(@NonNull URL url, @NonNull String jsonResponse) {
+        //extra check ...
+        if (!isAllowed(url)) {
+            throw new IllegalStateException("Sanitizer called to sanitize response that should not have been retrieved");
+        }
 
         if (compiledPseudonymizations == null) {
             compiledPseudonymizations = compile(options.getRules().getPseudonymizations());
@@ -84,7 +107,7 @@ public class SanitizerImpl implements Sanitizer {
             initConfiguration();
         }
 
-        String relativeUrl = url.getPath() + "?" + url.getQuery();
+        String relativeUrl = relativeUrl(url);
 
         List<JsonPath> pseudonymizationsToApply =
             applicablePaths(compiledPseudonymizations, relativeUrl);
@@ -149,7 +172,7 @@ public class SanitizerImpl implements Sanitizer {
         }
     }
 
-    public PseudonymizedIdentity pseudonymize(Object value) {
+    public PseudonymizedIdentity pseudonymize(@NonNull Object value) {
         Preconditions.checkArgument(value instanceof String || value instanceof Number,
             "Value must be some basic type (eg JSON leaf, not node)");
 
@@ -196,11 +219,11 @@ public class SanitizerImpl implements Sanitizer {
     }
 
     @VisibleForTesting
-    public String pseudonymizeToJson(Object value, Configuration configuration) {
+    public String pseudonymizeToJson(@NonNull Object value, @NonNull Configuration configuration) {
         return configuration.jsonProvider().toJson(pseudonymize(value));
     }
 
-    String pseudonymizeEmailHeaderToJson(Object value, Configuration configuration) {
+    String pseudonymizeEmailHeaderToJson(@NonNull Object value, @NonNull Configuration configuration) {
         return configuration.jsonProvider().toJson(pseudonymizeEmailHeader(value));
     }
 
@@ -213,15 +236,17 @@ public class SanitizerImpl implements Sanitizer {
             .collect(Collectors.toList());
     }
 
-
-
     @Override
-    public PseudonymizedIdentity pseudonymize(String value) {
+    public PseudonymizedIdentity pseudonymize(@NonNull String value) {
         return pseudonymize((Object)  value);
     }
 
     @Override
-    public PseudonymizedIdentity pseudonymize(Number value) {
+    public PseudonymizedIdentity pseudonymize(@NonNull Number value) {
         return pseudonymize((Object) value);
+    }
+
+    private String relativeUrl(URL url) {
+        return url.getPath() + "?" + url.getQuery();
     }
 }

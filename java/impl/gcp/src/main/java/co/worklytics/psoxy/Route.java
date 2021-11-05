@@ -121,9 +121,13 @@ public class Route implements HttpFunction {
         //TODO: switch on method to support HEAD, etc
         URL targetUrl = buildTarget(request);
 
-        log.info("Proxy invoked with target: " + targetUrl.getPath() + "?" + targetUrl.getQuery());
-
-        //TODO: test URL against blacklist regex??
+        if (sanitizer.isAllowed(targetUrl)) {
+            log.info("Proxy invoked with target: " + targetUrl.getPath() + "?" + targetUrl.getQuery());
+        } else {
+            response.setStatusCode(403, "Endpoint forbidden by proxy rule set");
+            log.warning("Attempt to call endpoint blocked by rules: " + targetUrl);
+            return;
+        }
 
         com.google.api.client.http.HttpRequest sourceApiRequest =
             requestFactory.buildGetRequest(new GenericUrl(targetUrl.toString()));

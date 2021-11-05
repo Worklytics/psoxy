@@ -124,7 +124,7 @@ class SanitizerImplTest {
     @Test
     void hashMatchesLegacy() {
         //value taken from legacy app
-        
+
         final String CANONICAL = "original";
 
         //value taken from legacy app
@@ -132,5 +132,28 @@ class SanitizerImplTest {
 
         assertEquals(identityHash,
             sanitizer.pseudonymize(CANONICAL).getHash());
+    }
+
+    @SneakyThrows
+    @ValueSource(strings = {
+        "https://gmail.googleapis.com/gmail/v1/users/me/messages/17c3b1911726ef3f\\?format=metadata",
+        "https://gmail.googleapis.com/gmail/v1/users/me/messages",
+    })
+    @ParameterizedTest
+    void allowedEndpointRegex_allowed(String url) {
+        assertTrue(sanitizer.isAllowed(new URL(url)));
+    }
+
+    @SneakyThrows
+    @ValueSource(strings = {
+        "https://gmail.googleapis.com/gmail/v1/users/me/threads",
+        "https://gmail.googleapis.com/gmail/v1/users/me/profile",
+        "https://gmail.googleapis.com/gmail/v1/users/me/settings/forwardingAddresses",
+        "https://gmail.googleapis.com/gmail/v1/users/me/somethingPrivate/17c3b1911726ef3f\\?attemptToTrickRegex=messages",
+        "https://gmail.googleapis.com/gmail/v1/users/me/should-not-pass?anotherAttempt=https://gmail.googleapis.com/gmail/v1/users/me/messages"
+    })
+    @ParameterizedTest
+    void allowedEndpointRegex_blocked(String url) {
+        assertFalse(sanitizer.isAllowed(new URL(url)));
     }
 }
