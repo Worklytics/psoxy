@@ -128,3 +128,23 @@ module "psoxy-google-chat" {
     }
   }
 }
+
+module "slack-discovery-api-auth" {
+  source = "../modules/gcp-oauth-long-access-strategy"
+
+  project_id            = var.project_id
+  function_name         = "psoxy-slack-discovery-api"
+  source_kind           = "slack"
+  service_account_email = module.google-chat-connector.service_account_email
+
+  secret_bindings       = {
+    PSOXY_SALT = {
+      secret_name    = module.psoxy-gcp.salt_secret_name
+      version_number = module.psoxy-gcp.salt_secret_version_number
+    },
+    SERVICE_ACCOUNT_KEY = {
+      secret_name    = module.google-chat-connector-auth.key_secret_name
+      version_number = module.google-chat-connector-auth.key_secret_version_number
+    }
+  }
+}
