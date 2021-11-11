@@ -1,8 +1,11 @@
+locals {
+  secret_id = "PSOXY_ACCESS_TOKEN_${var.function_name}"
+}
 
 # secret to hold a long-lived access token
 resource "google_secret_manager_secret" "access_token" {
   project   = var.project_id
-  secret_id = "PSOXY_${var.function_name}_ACCESS_TOKEN"
+  secret_id = local.secret_id
 
   replication {
     automatic = true

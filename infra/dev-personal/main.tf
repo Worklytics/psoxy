@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     google = {
-      version = "~> 3.74.0"
+      version = "~> 4.0.0"
     }
   }
 
@@ -129,22 +129,52 @@ module "psoxy-google-chat" {
   }
 }
 
+locals {
+  # set this to no if it's the first time creating the slack function
+  slack_secret_created  = "no"
+  slack_service_account = "psoxy-slack-discovery-api@psoxy-dev-jose.iam.gserviceaccount.com"
+  slack_function_name   = "psoxy-slack-discovery-api"
+}
+
+# creates the secret, without versions. Only if local.slack_secret_created is set to "yes"
 module "slack-discovery-api-auth" {
-  source = "../modules/gcp-oauth-long-access-strategy"
+  source   = "../modules/gcp-oauth-long-access-strategy"
+
+  count = local.slack_secret_created == "yes" ? 0 : 1
+  project_id              = var.project_id
+  function_name           = local.slack_function_name
+  token_adder_user_emails = []
+}
+
+# reads the secret reference to bind it to slack connector cloud function
+module "slack-discovery-api-auth-read" {
+  source   = "../modules/gcp-oauth-long-access-strategy-read"
+
+  project_id              = var.project_id
+  function_name           = local.slack_function_name
+
+  depends_on = [
+    module.slack-discovery-api-auth.access_token_secret_name
+  ]
+}
+
+module "psoxy-slack-discovery-api" {
+  source = "../modules/gcp-psoxy-cloud-function"
 
   project_id            = var.project_id
-  function_name         = "psoxy-slack-discovery-api"
+  function_name         = local.slack_function_name
   source_kind           = "slack"
-  service_account_email = module.google-chat-connector.service_account_email
+  service_account_email   = local.slack_service_account
 
-  secret_bindings       = {
-    PSOXY_SALT = {
+  secret_bindings = {
+    PSOXY_SALT   = {
       secret_name    = module.psoxy-gcp.salt_secret_name
       version_number = module.psoxy-gcp.salt_secret_version_number
     },
-    SERVICE_ACCOUNT_KEY = {
-      secret_name    = module.google-chat-connector-auth.key_secret_name
-      version_number = module.google-chat-connector-auth.key_secret_version_number
+    ACCESS_TOKEN = {
+      secret_name    = module.slack-discovery-api-auth-read.access_token_secret_name
+      # in case of long lived tokens we want latest version always
+      version_number = "latest"
     }
   }
 }
