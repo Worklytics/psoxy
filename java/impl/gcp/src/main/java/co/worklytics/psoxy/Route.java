@@ -8,6 +8,7 @@ import co.worklytics.psoxy.gateway.impl.OAuthRefreshTokenSourceAuthStrategy;
 import co.worklytics.psoxy.impl.SanitizerImpl;
 import co.worklytics.psoxy.rules.google.PrebuiltSanitizerRules;
 import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.utils.URLUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequestFactory;
@@ -122,7 +123,7 @@ public class Route implements HttpFunction {
         URL targetUrl = buildTarget(request);
 
         if (sanitizer.isAllowed(targetUrl)) {
-            log.info("Proxy invoked with target: " + targetUrl.getPath() + "?" + targetUrl.getQuery());
+            log.info("Proxy invoked with target: " + URLUtils.relativeURL(targetUrl));
         } else {
             response.setStatusCode(403, "Endpoint forbidden by proxy rule set");
             log.warning("Attempt to call endpoint blocked by rules: " + targetUrl);

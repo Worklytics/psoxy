@@ -14,6 +14,7 @@ import java.net.URL;
 import java.security.Identity;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -136,7 +137,7 @@ class SanitizerImplTest {
 
     @SneakyThrows
     @ValueSource(strings = {
-        "https://gmail.googleapis.com/gmail/v1/users/me/messages/17c3b1911726ef3f\\?format=metadata",
+        "https://gmail.googleapis.com/gmail/v1/users/me/messages/17c3b1911726ef3f?format=metadata",
         "https://gmail.googleapis.com/gmail/v1/users/me/messages",
     })
     @ParameterizedTest

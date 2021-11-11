@@ -150,6 +150,23 @@ public class PrebuiltSanitizerRules {
         )
         .build();
 
+    static final Rules SLACK = Rules.builder()
+        .allowedEndpointRegex("^/api/discovery.conversations.list.*")
+        .allowedEndpointRegex("^/api/discovery.conversations.history.*")
+        .allowedEndpointRegex("^/api/discovery.users.list.*")
+        .pseudonymization(Rule.builder()
+            .relativeUrlRegex("\\/api\\/discovery.users.list.*")
+            .jsonPath("$.users[*].id")
+            .jsonPath("$.users[*].email")
+            .build()
+        )
+        .redaction(Rule.builder()
+            .relativeUrlRegex("\\/api\\/discovery.users.list.*")
+            .jsonPath("$.users[*][name,real_name]")
+            .jsonPath("$.users[*].profile")
+            .build()
+        )
+        .build();
 
     static public final Map<String, Rules> MAP = ImmutableMap.<String, Rules>builder()
         .put("gcal", GCAL)
@@ -158,5 +175,6 @@ public class PrebuiltSanitizerRules {
         .put("gmail", GMAIL)
         .put("google-chat", GOOGLE_CHAT)
         .put("google-meet", GOOGLE_MEET)
+        .put("slack", SLACK)
         .build();
 }
