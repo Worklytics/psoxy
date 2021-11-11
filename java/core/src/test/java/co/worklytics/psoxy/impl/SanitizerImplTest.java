@@ -1,8 +1,8 @@
 package co.worklytics.psoxy.impl;
 
-import co.worklytics.psoxy.rules.google.PrebuiltSanitizerRules;
 import co.worklytics.psoxy.PseudonymizedIdentity;
 import co.worklytics.psoxy.Sanitizer;
+import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
 import co.worklytics.test.TestUtils;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,18 +11,14 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.net.URL;
-import java.security.Identity;
 import java.util.List;
 import java.util.Objects;
-import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class SanitizerImplTest {
 
     static final String ALICE_CANONICAL = "alice@worklytics.co";
-    static final String SCOPE = "scope";
-
 
     SanitizerImpl sanitizer;
 

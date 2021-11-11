@@ -7,6 +7,9 @@ import static co.worklytics.psoxy.Rules.Rule;
 
 import java.util.Map;
 
+/**
+ * Prebuilt sanitization rules for Google tools
+ */
 public class PrebuiltSanitizerRules {
 
     static final Rules GCAL = Rules.builder()
@@ -150,31 +153,12 @@ public class PrebuiltSanitizerRules {
         )
         .build();
 
-    static final Rules SLACK = Rules.builder()
-        .allowedEndpointRegex("^/api/discovery.conversations.list.*")
-        .allowedEndpointRegex("^/api/discovery.conversations.history.*")
-        .allowedEndpointRegex("^/api/discovery.users.list.*")
-        .pseudonymization(Rule.builder()
-            .relativeUrlRegex("\\/api\\/discovery.users.list.*")
-            .jsonPath("$.users[*].id")
-            .jsonPath("$.users[*].email")
-            .build()
-        )
-        .redaction(Rule.builder()
-            .relativeUrlRegex("\\/api\\/discovery.users.list.*")
-            .jsonPath("$.users[*][name,real_name]")
-            .jsonPath("$.users[*].profile")
-            .build()
-        )
-        .build();
-
-    static public final Map<String, Rules> MAP = ImmutableMap.<String, Rules>builder()
+    static public final Map<String, Rules> GOOGLE_PREBUILT_RULES_MAP = ImmutableMap.<String, Rules>builder()
         .put("gcal", GCAL)
         .put("gdirectory", GDIRECTORY)
         .put("gdrive", GDRIVE)
         .put("gmail", GMAIL)
         .put("google-chat", GOOGLE_CHAT)
         .put("google-meet", GOOGLE_MEET)
-        .put("slack", SLACK)
         .build();
 }
