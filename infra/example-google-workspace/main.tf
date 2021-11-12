@@ -47,7 +47,7 @@ locals {
         "admin.googleapis.com"
       ]
     }
-    "google-calendar": {
+    "gcal": {
       display_name: "Google Calendar"
       apis_consumed: [
         "calendar-json.googleapis.com"
