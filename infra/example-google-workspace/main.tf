@@ -50,7 +50,7 @@ locals {
     "google-calendar": {
       display_name: "Google Calendar"
       apis_consumed: [
-        "admin.googleapis.com"
+        "calendar-json.googleapis.com"
       ]
     }
     "gmail": {
@@ -68,7 +68,7 @@ locals {
     "gdrive": {
       display_name: "Google Drive"
       apis_consumed: [
-        "admin.googleapis.com"
+        "drive.googleapis.com"
       ]
     }
     "google-meet": {
