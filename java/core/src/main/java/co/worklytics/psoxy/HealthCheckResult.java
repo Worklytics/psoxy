@@ -1,10 +1,14 @@
 package co.worklytics.psoxy;
 
-
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.*;
 
+import java.util.Set;
+
+@JsonPropertyOrder(alphabetic = true) //for consistent json format across jdks
 @Data
 @Builder
+@NoArgsConstructor //for jackson
 @AllArgsConstructor
 public class HealthCheckResult {
 
@@ -19,10 +23,15 @@ public class HealthCheckResult {
 
     String configuredSource;
 
-    boolean nonDefaultSalt;
+    Boolean nonDefaultSalt;
+
+    Set<String> missingConfigProperties;
 
     boolean passed() {
-        return nonDefaultSalt && configuredSource != null;
+        return getConfiguredSource() != null
+            && getNonDefaultSalt()
+            && getMissingConfigProperties().isEmpty();
     }
 
+    //TODO: to make this robust across versions, add a JsonAnySetter handler to catch unknown stuff?
 }

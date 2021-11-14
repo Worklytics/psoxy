@@ -20,13 +20,13 @@ environment_name    = "--helpful name to identify your environment--"
 worklytics_sa_email = "--email address of service account that personifies your Worklytics account--"
 ```
 
-for example, Erik's personal env would appear as follows:
+for example:
 ```terraform
-billing_account_id  = "002DF4-4D356E-2123F9"
-folder_id           = "335768754038"          # our devel folder
-environment_name    = "erik"
-project_id          = "psoxy-dev-erik"
-worklytics_sa_email = "worklytics-dev-local-shared@worklytics-staging.iam.gserviceaccount.com"
+billing_account_id  = "0A2AE4-1D396E-1219D9"
+folder_id           = "33576234038"
+environment_name    = "alice"
+project_id          = "psoxy-dev-alice"
+worklytics_sa_email = "worklytics-3cD92f@worklytics-eu.iam.gserviceaccount.com"
 ```
 
 Initialize your configuration (at this location in directory hierarchy):

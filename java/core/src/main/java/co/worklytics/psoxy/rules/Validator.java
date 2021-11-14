@@ -13,6 +13,11 @@ public class Validator {
         rules.getRedactions().forEach(Validator::validate);
         rules.getPseudonymizations().forEach(Validator::validate);
         rules.getEmailHeaderPseudonymizations().forEach(Validator::validate);
+
+        if(rules.getAllowedEndpointRegexes() != null) {
+            //throws PatternSyntaxExpression if doesn't compile
+            rules.getAllowedEndpointRegexes().forEach(Pattern::compile);
+        }
     }
 
     static public void validate(@NonNull Rules.Rule rule) {

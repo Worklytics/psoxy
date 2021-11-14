@@ -1,34 +1,59 @@
 # psoxy
-A serverless, pseudonymizing proxy to sit between Worklytics and the REST API of a 3rd-party data source.
+A serverless, pseudonymizing proxy to sit between Worklytics and the REST API of a 3rd-party data
+source.
 
-Psoxy replaces PII in your organization's data with hash tokens to enable Worklytics's
-analysis to be performed on anonymized data which we cannot map back to any identifiable
-individual.
+Psoxy replaces PII in your organization's data with hash tokens to enable Worklytics's analysis to
+be performed on anonymized data which we cannot map back to any identifiable individual.
 
 
 ## Goals
 
 ### v1.0
-1. **serverless** - we strive to minimize the moving pieces required to run psoxy at scale, keeping your attack surface small and operational complexity low. Furthermore, we define infrastructure-as-code to ease setup.
-2. **transparent** - psoxy's source code will be available to customers, to facilitate
-code review and white box penetration testing.
-3. **simple** - psoxy's functionality will focus on performing secure authentication with the 3rd party API and then perform minimal transformation on the response (pseudonymization, field filtering). to ease code review and auditing of its behavior.
+  1. **serverless** - we strive to minimize the moving pieces required to run psoxy at scale, keeping
+     your attack surface small and operational complexity low. Furthermore, we define
+     infrastructure-as-code to ease setup.
+  2. **transparent** - psoxy's source code will be available to customers, to facilitate code review
+     and white box penetration testing.
+  3. **simple** - psoxy's functionality will focus on performing secure authentication with the 3rd
+     party API and then perform minimal transformation on the response (pseudonymization, field
+     redcation). to ease code review and auditing of its behavior.
 
+## Data Flow
 
-### Future
-1. **multi-cloud support** - using [Spring Cloud Function](https://spring.io/projects/spring-cloud-function), we aim to provide support for the major cloud providers.
-2. **incoming webhooks**
+A Psoxy instances reside on your premises (in the cloud) and act as an intermediary between
+Worklytics and the data source you wish to connect.  In this role, the proxy performs the
+authentication necessary to connect to the data source's API and then any required transformation
+(such as pseudonymization or redaction) on the response.
 
+Orchestration continues to be performed on the Worklytics-side.
 
-## Data Flow Diagram
-The best way to illustrate how psoxy works is an illustration:
+![proxy illustration](docs/proxy-illustration.png)
+
 
 ## Getting Started
 
-  1. apply [terraform](https://www.terraform.io/) module found in [`infra`](/infra)
-  2. create OAuth client / generate API key in each of your desired data sources (see below)
-  3. set your API keys via Secret Manager
-  4. create the Data Connection from Worklytics to your psoxy instance
+### Prereqs
+As of Oct 2021, Psoxy is implement with Java 11 and build via Maven. Infrastructure is provisioned
+via Terraform, relying on Google Cloud cmd line tools.  You will need recent versions of all of the
+following:
+
+  - Java JDK variant at 11+
+  - [Maven 3.8+](https://maven.apache.org/docs/history.html)
+  - [Google Cloud Command Line tool](https://cloud.google.com/sdk/docs/install), configured for the
+    GCP project that will host your psoxy instance(s)
+  - [terraform](https://www.terraform.io/) optional; if you don't use this, you'll need to configure
+    your GCP project via the console/gcloud tool. Writing your own terraform config that re-uses
+    our modules will simplify things.
+
+### Setup
+  1. contact support@worklytics.co to ensure your Worklytics account is enabled for Psoxy
+  2. create a [terraform](https://www.terraform.io/) configuration and apply it
+     a. various modules are provided in [`infra/modules`](/infra/modules)
+     b. an example is found in `dev-personal`
+     c. contact Worklytics support if you need assistance
+  3. create OAuth client / generate API key in each of your desired data sources (see below)
+  4. set your API keys via Secret Manager (or use Terraform)
+  5. create the Data Connection from Worklytics to your psoxy instance
       - authorize Worklytics to connect to your psoxy instance and, if necessary, provide authentication credentials.
 
 ## Supported Data Sources
@@ -39,32 +64,31 @@ Data source connectors will be marked with their stage of maturity:
 
 As of Sept 2021, the following sources can be connected via psoxy:
   * Google Workspace
-    * Calendar *alpha*
-    * Chat *alpha*
-    * Drive *alpha*
-    * GMail *alpha*
-    * Meet *alpha*
+    * Calendar *beta*
+    * Chat *beta*
+    * Directory *beta*
+    * Drive *beta*
+    * GMail *beta*
+    * Meet *beta*
   * Slack
-    * eDiscovery *alpha*
+    * eDiscovery API *alpha*
+
+You can also use the command line tool to pseudonymize arbitrary CSV files (eg, exports from your
+HRIS), in a manner consistent with how a psoxy instance will pseudonymize identifiers in a target
+REST API. This is REQUIRED if you want SaaS accounts to be linked with HRIS data for analysis (eg,
+Worklytics will match email set in HRIS with email set in SaaS tool's account - so these must be
+pseudonymized using an equivalent algorithm and secret). See `java/impl/cmd-line/` for details.
 
 ## Development
 
-Can run locally via IntelliJ + maven, using run config:
-<<<<<<< HEAD
-  - `psoxy [function:run...]` (located in `.idea/runConfigurations`)
-=======
-  - `psoxy - run gmail`  (located in `.idea/runConfigurations`)
->>>>>>> main
+Can run locally via IntelliJ + maven, using run configs (located in `.idea/runConfigurations`):
+  - `package install core` builds the core JAR, on which implementations depend
+  - `gcp - run gmail` builds and runs a local instance for GMail
 
 Or from command line:
-
 ```shell
-cd java
-<<<<<<< HEAD
-mvn function:run -Drun.functionTarget=co.worklytics.psoxy.HelloWorld
-=======
+cd java/impl/gcp
 mvn function:run -Drun.functionTarget=co.worklytics.psoxy.Route
->>>>>>> main
 ```
 
 By default, that serves the function from http://localhost:8080.
@@ -87,38 +111,64 @@ http://localhost:8080/ \
 ```
 
 ```shell
-curl -X GET \
-http://localhost:8080/gmail/v1/users/me/messages \
--H "X-Psoxy-Service-Account-User: erik@worklytics.co"
+export PSOXY_USER_TO_IMPERSONATE={{--identifier of GCP user to impersonate (eg, mailbox owner, Google ID or email)--}}
 ```
 
 ```shell
 curl -X GET \
-http://localhost:8080/gmail/v1/users/me/messages/17c3b1911726ef3f\?format=metadata \
--H "X-Psoxy-Service-Account-User: erik@worklytics.co"
+http://localhost:8080/gmail/v1/users/me/messages \
+-H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)"
+```
+
+Using a message id you grab from that:
+```shell
+curl -X GET \
+http://localhost:8080/gmail/v1/users/me/messages/1743b19234726ef3f\?format=metadata \
+-H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)"
 ```
 
 #### Cloud
-2.) deploy to GCP using IntelliJ run config (setting `gcpProjectId` maven property to your project)
+
+1.) deploy to GCP using Terraform (see `infra/`). Follow steps in any TODO files it generates.
+
+2.) Set your env vars: (these should be in a TODO file generated by terraform in prev step
+```shell
+export PSOXY_GCP_PROJECT={{--GCP project id that hosts your instance--}}
+export PSOXY_GCP_REGION=us-central1 # change this to whatever the default is for you project
+```
 
 3.) grant yourself access (probably not needed if you have primitive role in project, like Owner or
 Editor)
 ```shell
-gcloud alpha functions add-iam-policy-binding psoxy-gmail --region=us-central1 --member=user:erik@worklytics.co --role=roles/cloudfunctions.invoker --project=psoxy-dev-erik
+gcloud alpha functions add-iam-policy-binding psoxy-gmail --region=$PSOXY_GCP_REGION --member=user:$(gcloud config get-value core/account) --role=roles/cloudfunctions.invoker --project=$PSOXY_PROJECT_ID
 ```
 
-4.) invocation
+alternatively, you can add Terraform resource for this to your Terraform config, and apply it again:
+```shell
+resource "google_cloudfunctions_function_iam_member" "member" {
+  project        = "YOUR_GCP_PROJECT_ID_HERE"
+  region         = "YOUR_GCP_REGION_OF_YOUR_CLOUD_FUNCTION_HERE" # eg, us-central1
+  cloud_function = "psoxy-gmail" #TODO: change if you're doing something OTHER than gmail
+  role           = "roles/cloudfunctions.invoker"
+  member         = "user:YOUR_EMAIL_HERE"
+}
+```
+
+Either way, if this function is for prod use, please remove these grants after you're finished
+testing.
+
+4.) invocation examples
 
 ```shell
 curl -X GET \
-https://us-central1-psoxy-dev-erik.cloudfunctions.net/psoxy-gmail/gmail/v1/users/me/messages/17c3b1911726ef3f\?format=metadata \
+https://$PSOXY_GCP_REGION-$PSOXY_GCP_PROJECT.cloudfunctions.net/psoxy-gmail/gmail/v1/users/me/messages/17c3b1911726ef3f\?format=metadata \
 -H "Authorization: Bearer $(gcloud auth print-identity-token)" \
--H "X-Psoxy-User-To-Impersonate: erik@worklytics.co"
+-H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)"
 ```
 
 ```shell
 curl -X GET \
-https://us-central1-psoxy-dev-erik.cloudfunctions.net/psoxy-google-chat/admin/reports/v1/activity/users/all/applications/chat \
+https://$PSOXY_GCP_REGION-$PSOXY_GCP_PROJECT.cloudfunctions.net/psoxy-google-chat/admin/reports/v1/activity/users/all/applications/chat \
 -H "Authorization: Bearer $(gcloud auth print-identity-token)" \
--H "X-Psoxy-User-To-Impersonate: erik@worklytics.co"
+-H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)"
 ```

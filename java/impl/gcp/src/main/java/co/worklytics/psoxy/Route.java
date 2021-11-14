@@ -3,6 +3,7 @@ package co.worklytics.psoxy;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
+import co.worklytics.psoxy.gateway.impl.OAuthAccessTokenSourceAuthStrategy;
 import co.worklytics.psoxy.gateway.impl.OAuthRefreshTokenSourceAuthStrategy;
 import co.worklytics.psoxy.impl.SanitizerImpl;
 import co.worklytics.psoxy.rules.Validator;
@@ -32,6 +33,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.net.URL;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Log
@@ -66,7 +68,9 @@ public class Route implements HttpFunction {
             String identifier = getConfig().getConfigPropertyOrError(ProxyConfigProperty.SOURCE_AUTH_STRATEGY_IDENTIFIER);
             Stream<SourceAuthStrategy> implementations = Stream.of(
                 new GoogleCloudPlatformServiceAccountKeyAuthStrategy(),
-                new OAuthRefreshTokenSourceAuthStrategy());
+                new OAuthRefreshTokenSourceAuthStrategy(),
+                new OAuthAccessTokenSourceAuthStrategy()
+            );
             sourceAuthStrategy = implementations
                     .filter(impl -> Objects.equals(identifier, impl.getConfigIdentifier()))
                 .findFirst().orElseThrow(() -> new Error("No SourceAuthStrategy impl matching configured identifier: " + identifier));
@@ -139,9 +143,13 @@ public class Route implements HttpFunction {
         //TODO: switch on method to support HEAD, etc
         URL targetUrl = buildTarget(request);
 
-        log.info("Proxy invoked with target: " + targetUrl.getPath() + "?" + targetUrl.getQuery());
-
-        //TODO: test URL against blacklist regex??
+        if (sanitizer.isAllowed(targetUrl)) {
+            log.info("Proxy invoked with target: " + targetUrl.getPath() + "?" + targetUrl.getQuery());
+        } else {
+            response.setStatusCode(403, "Endpoint forbidden by proxy rule set");
+            log.warning("Attempt to call endpoint blocked by rules: " + targetUrl);
+            return;
+        }
 
         com.google.api.client.http.HttpRequest sourceApiRequest =
             requestFactory.buildGetRequest(new GenericUrl(targetUrl.toString()));
@@ -181,9 +189,16 @@ public class Route implements HttpFunction {
     private void doHealthCheck(HttpRequest request, HttpResponse response) {
         ObjectMapper objectMapper = new ObjectMapper();
 
+        Set<String> missing =
+            getSourceAuthStrategy().getRequiredConfigProperties().stream()
+                .filter(configProperty -> getConfig().getConfigPropertyAsOptional(configProperty).isEmpty())
+                .map(ConfigService.ConfigProperty::name)
+                .collect(Collectors.toSet());
+
         HealthCheckResult healthCheckResult = HealthCheckResult.builder()
             .configuredSource(getConfig().getConfigPropertyAsOptional(ProxyConfigProperty.SOURCE).orElse(null))
             .nonDefaultSalt(getConfig().getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT).isPresent())
+            .missingConfigProperties(missing)
             .build();
 
         if (healthCheckResult.passed()) {

@@ -11,10 +11,7 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 
 import java.io.ByteArrayInputStream;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 class GoogleCloudPlatformServiceAccountKeyAuthStrategy implements SourceAuthStrategy {
@@ -68,4 +65,13 @@ class GoogleCloudPlatformServiceAccountKeyAuthStrategy implements SourceAuthStra
 
         return credentials;
     }
+
+    @Override
+    public Set<ConfigService.ConfigProperty> getRequiredConfigProperties() {
+        return Set.of(
+            SourceAuthConfigProperty.SERVICE_ACCOUNT_KEY,
+            SourceAuthConfigProperty.OAUTH_SCOPES
+        );
+    }
+
 }

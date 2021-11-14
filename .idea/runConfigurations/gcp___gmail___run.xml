@@ -27,6 +27,7 @@
               <entry key="GOOGLE_APPLICATION_CREDENTIALS" value="../../../infra/dev-personal/gmail-connector-sa-key.json" />
               <entry key="OAUTH_SCOPES" value="https://www.googleapis.com/auth/gmail.metadata" />
               <entry key="SOURCE" value="gmail" />
+              <entry key="SOURCE_AUTH_STRATEGY_IDENTIFIER" value="gcp_service_account_key" />
               <entry key="TARGET_HOST" value="gmail.googleapis.com" />
             </map>
           </option>

@@ -16,9 +16,12 @@ locals {
 resource "local_file" "todo" {
   filename = "TODO - deploy ${var.function_name}.md"
   content  = <<EOT
-Run the following gcloud command from the root of the GCP implementation of Psoxy (eg,
-`java/impl/gcp` within a checkout of the psoxy repo), after having run `mvn package` (you only need
-to package once, but will run a similar deployment command for each psoxy instance).
+First, run `mvn package install` from `java/core/` within a checkout of the Psoxy repo.
+
+Second, package the GCP implementation: run `mvn package` from `java/impl/gcp` within a checkout of
+the psoxy repo).
+
+Third, run the following deployment command from `java/impl/gcp` folder within your checkout:
 
 
 
@@ -34,6 +37,12 @@ gcloud beta functions deploy ${var.function_name} \
     --set-secrets '${join(",", local.secret_clauses)}'
 ```
 
+  and if you want to test from your local machine:
+```shell
+export PSOXY_GCP_PROJECT=${var.project_id}
+export PSOXY_GCP_REGION=us-central1
+```
+  
 NOTE: if you want to customize the rule set used by Psoxy for your source, you can add a
 `rules.yaml` file into the deployment directory (`target/deployment`) before invoking the command
 above. The rules you define in the YAML file will override the ruleset specified in the codebase for
