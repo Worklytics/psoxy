@@ -55,29 +55,10 @@ public class Rules implements Serializable {
      *   - not beginning these with `^`
      *   - using .* wildcard for path fragments rather than [^/]?* (all chars but /, greedy)
      */
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     @Singular
     @Getter
     List<String> allowedEndpointRegexes;
-
-    /**
-     * a rule for matching parts of JSON API responses.
-     * <p>
-     * match means the request URL matches `relativeUrlRegex` and the node in JSON response
-     * matches at least one of `jsonPaths`
-     */
-    @Builder
-    @Value
-    public static class Rule implements Serializable {
-
-        private static final long serialVersionUID = 1L;
-
-        //must match request URL
-        String relativeUrlRegex;
-
-        // json nodes that match ANY of these paths will be matches
-        @Singular
-        List<String> jsonPaths;
-    }
 
     /**
      * values in response matching any of these rules will be pseudonymized
