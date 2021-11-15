@@ -1,16 +1,15 @@
-# dev-personal
+# example-google-workspace
 
-A Terraform root module to create a personal development environment for Psoxy, with state stored to
-local filesystem. As such, it is not appropriate for scenario with multiple developers or production
-use.
-
-It can serve as guide for  how to create equivalent Terraform configurations for production use
-(with state in the cloud, encrypted GCS bucket/etc; and `.tfvars`/etc files under version control).
+A Terraform root module to provision GCP project for Psoxy, configure it, and create necessary infra
+to for connections to all supported Google Workspace sources, with state stored to local filesystem.
+As such, it is not appropriate for scenario with multiple developers. As state will contain
+sensitive information (eg, service account keys), care should be taken in production to ensure that
+the filesystem in question is secure or another Terraform backend should be used (eg, GCS bucket
+encrypted with a CMEK).
 
 ## Usage
 
-Create a file in this directory named `terraform.tfvars` to specify your personal settings, with
-content
+Create a file in this directory named `terraform.tfvars` to specify your settings:
 
 ```terraform
 billing_account_id   = "--your billing account id--"
