@@ -38,12 +38,15 @@ via Terraform, relying on Google Cloud cmd line tools.  You will need recent ver
 following:
 
   - Java JDK variant at 11+
-  - [Maven 3.8+](https://maven.apache.org/docs/history.html)
+  - [Maven 3.6+](https://maven.apache.org/docs/history.html)
   - [Google Cloud Command Line tool](https://cloud.google.com/sdk/docs/install), configured for the
     GCP project that will host your psoxy instance(s)
   - [terraform](https://www.terraform.io/) optional; if you don't use this, you'll need to configure
     your GCP project via the console/gcloud tool. Writing your own terraform config that re-uses
     our modules will simplify things.
+
+([Google Cloud Shell](https://cloud.google.com/shell/docs/how-cloud-shell-works#tools) provides all 
+of the above)
 
 ### Setup
   1. contact support@worklytics.co to ensure your Worklytics account is enabled for Psoxy
