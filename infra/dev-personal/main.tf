@@ -129,33 +129,24 @@ module "psoxy-google-chat" {
   }
 }
 
+# BEGIN SLACK
+
 locals {
-  # set this to no if it's the first time creating the slack function
-  slack_secret_created  = "no"
-  slack_service_account = "psoxy-slack-discovery-api@psoxy-dev-jose.iam.gserviceaccount.com"
   slack_function_name   = "psoxy-slack-discovery-api"
 }
 
-# creates the secret, without versions. Only if local.slack_secret_created is set to "yes"
+resource "google_service_account" "slack_connector_sa" {
+  project = var.project_id
+  account_id   = local.slack_function_name
+  display_name = "Psoxy Connector - Slack{var.connector_display_name_suffix}"
+}
+
+# creates the secret, without versions.
 module "slack-discovery-api-auth" {
   source   = "../modules/gcp-oauth-long-access-strategy"
-
-  count = local.slack_secret_created == "yes" ? 0 : 1
   project_id              = var.project_id
   function_name           = local.slack_function_name
   token_adder_user_emails = []
-}
-
-# reads the secret reference to bind it to slack connector cloud function
-module "slack-discovery-api-auth-read" {
-  source   = "../modules/gcp-oauth-long-access-strategy-read"
-
-  project_id              = var.project_id
-  function_name           = local.slack_function_name
-
-  depends_on = [
-    module.slack-discovery-api-auth.access_token_secret_name
-  ]
 }
 
 module "psoxy-slack-discovery-api" {
@@ -164,7 +155,7 @@ module "psoxy-slack-discovery-api" {
   project_id            = var.project_id
   function_name         = local.slack_function_name
   source_kind           = "slack"
-  service_account_email   = local.slack_service_account
+  service_account_email   = google_service_account.slack_connector_sa.email
 
   secret_bindings = {
     PSOXY_SALT   = {
@@ -172,7 +163,7 @@ module "psoxy-slack-discovery-api" {
       version_number = module.psoxy-gcp.salt_secret_version_number
     },
     ACCESS_TOKEN = {
-      secret_name    = module.slack-discovery-api-auth-read.access_token_secret_name
+      secret_name    = module.slack-discovery-api-auth.access_token_secret_name
       # in case of long lived tokens we want latest version always
       version_number = "latest"
     }
