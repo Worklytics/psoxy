@@ -10,7 +10,7 @@ variable "function_name" {
 
 variable "service_account_email" {
   type        = string
-  description = "email fo the service account that the cloud function will run as"
+  description = "email of the service account that the cloud function will run as"
 }
 
 variable "token_adder_user_emails" {

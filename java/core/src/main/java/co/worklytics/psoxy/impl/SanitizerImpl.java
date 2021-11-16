@@ -4,7 +4,7 @@ import co.worklytics.psoxy.HashUtils;
 import co.worklytics.psoxy.PseudonymizedIdentity;
 import co.worklytics.psoxy.Rules;
 import co.worklytics.psoxy.Sanitizer;
-import com.google.api.client.http.GenericUrl;
+import co.worklytics.psoxy.utils.URLUtils;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.jayway.jsonpath.Configuration;
@@ -13,11 +13,9 @@ import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hazlewood.connor.bottema.emailaddress.EmailAddressCriteria;
@@ -26,10 +24,8 @@ import org.hazlewood.connor.bottema.emailaddress.EmailAddressValidator;
 
 import javax.mail.internet.InternetAddress;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
@@ -81,7 +77,7 @@ public class SanitizerImpl implements Sanitizer {
                     .map(Pattern::compile)
                     .collect(Collectors.toList());
             }
-            String relativeUrl = relativeUrl(url);
+            String relativeUrl = URLUtils.relativeURL(url);
             return compiledAllowedEndpoints.stream().anyMatch(p -> p.matcher(relativeUrl).matches());
         }
     }
@@ -107,7 +103,7 @@ public class SanitizerImpl implements Sanitizer {
             initConfiguration();
         }
 
-        String relativeUrl = relativeUrl(url);
+        String relativeUrl = URLUtils.relativeURL(url);
 
         List<JsonPath> pseudonymizationsToApply =
             applicablePaths(compiledPseudonymizations, relativeUrl);
@@ -246,7 +242,4 @@ public class SanitizerImpl implements Sanitizer {
         return pseudonymize((Object) value);
     }
 
-    private String relativeUrl(URL url) {
-        return url.getPath() + "?" + url.getQuery();
-    }
 }

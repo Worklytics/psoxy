@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     google = {
-      version = "~> 3.74.0"
+      version = "~> 4.0.0"
     }
   }
 
@@ -128,6 +128,48 @@ module "psoxy-google-chat" {
     }
   }
 }
+
+# BEGIN SLACK
+
+locals {
+  slack_function_name   = "psoxy-slack-discovery-api"
+}
+
+resource "google_service_account" "slack_connector_sa" {
+  project = var.project_id
+  account_id   = local.slack_function_name
+  display_name = "Psoxy Connector - Slack{var.connector_display_name_suffix}"
+}
+
+# creates the secret, without versions.
+module "slack-discovery-api-auth" {
+  source   = "../modules/gcp-oauth-long-access-strategy"
+  project_id              = var.project_id
+  function_name           = local.slack_function_name
+  token_adder_user_emails = []
+}
+
+module "psoxy-slack-discovery-api" {
+  source = "../modules/gcp-psoxy-cloud-function"
+
+  project_id            = var.project_id
+  function_name         = local.slack_function_name
+  source_kind           = "slack"
+  service_account_email   = google_service_account.slack_connector_sa.email
+
+  secret_bindings = {
+    PSOXY_SALT   = {
+      secret_name    = module.psoxy-gcp.salt_secret_name
+      version_number = module.psoxy-gcp.salt_secret_version_number
+    },
+    ACCESS_TOKEN = {
+      secret_name    = module.slack-discovery-api-auth.access_token_secret_name
+      # in case of long lived tokens we want latest version always
+      version_number = "latest"
+    }
+  }
+}
+
 
 # current convention is that the Cloud Functions for each of these run as these SAs, but there's
 # really no need to; consider splitting (eg, one SA for each Cloud Function; one SA for the

@@ -1,0 +1,5 @@
+SOURCE: slack
+SOURCE_AUTH_STRATEGY_IDENTIFIER: oauth2_access_token
+TARGET_HOST: www.slack.com
+OAUTH_SCOPES: discovery:read
+IDENTIFIER_SCOPE_ID: slack

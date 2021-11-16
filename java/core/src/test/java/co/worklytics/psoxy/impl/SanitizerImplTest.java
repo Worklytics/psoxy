@@ -1,8 +1,8 @@
 package co.worklytics.psoxy.impl;
 
-import co.worklytics.psoxy.rules.google.PrebuiltSanitizerRules;
 import co.worklytics.psoxy.PseudonymizedIdentity;
 import co.worklytics.psoxy.Sanitizer;
+import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
 import co.worklytics.test.TestUtils;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,7 +11,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.net.URL;
-import java.security.Identity;
 import java.util.List;
 import java.util.Objects;
 
@@ -20,8 +19,6 @@ import static org.junit.jupiter.api.Assertions.*;
 class SanitizerImplTest {
 
     static final String ALICE_CANONICAL = "alice@worklytics.co";
-    static final String SCOPE = "scope";
-
 
     SanitizerImpl sanitizer;
 
@@ -136,7 +133,7 @@ class SanitizerImplTest {
 
     @SneakyThrows
     @ValueSource(strings = {
-        "https://gmail.googleapis.com/gmail/v1/users/me/messages/17c3b1911726ef3f\\?format=metadata",
+        "https://gmail.googleapis.com/gmail/v1/users/me/messages/17c3b1911726ef3f?format=metadata",
         "https://gmail.googleapis.com/gmail/v1/users/me/messages",
     })
     @ParameterizedTest
