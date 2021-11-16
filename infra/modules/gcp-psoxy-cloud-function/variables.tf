@@ -3,6 +3,12 @@ variable "project_id" {
   description = "name of the gcp project"
 }
 
+variable "region" {
+  type        = string
+  description = "region into which to deploy function"
+  default     = "us-central1"
+}
+
 variable "function_name" {
   type        = string
   description = "name of cloud function"

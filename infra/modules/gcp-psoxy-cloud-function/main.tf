@@ -16,16 +16,27 @@ locals {
 resource "local_file" "todo" {
   filename = "TODO - deploy ${var.function_name}.md"
   content  = <<EOT
-First, run `mvn package install` from `java/core/` within a checkout of the Psoxy repo.
+First, from `java/core/` within a checkout of the Psoxy repo, package the core proxy library:
 
-Second, package the GCP implementation: run `mvn package` from `java/impl/gcp` within a checkout of
-the psoxy repo).
+```shell
+cd ../../java/core
+mvn package install
+```
+
+Second, from `java/impl/gcp` within a checkout of the Psoxy repo, package an executable JAR for the
+cloud function with the following command:
+
+```shell
+cd ../../java/impl/gcp
+mvn package
+```
 
 Third, run the following deployment command from `java/impl/gcp` folder within your checkout:
 
 ```shell
-gcloud functions deploy ${var.function_name} \
+gcloud beta functions deploy ${var.function_name} \
     --project=${var.project_id} \
+    --region=${var.region} \
     --runtime=java11 \
     --entry-point=co.worklytics.psoxy.Route \
     --trigger-http \
@@ -36,11 +47,19 @@ gcloud functions deploy ${var.function_name} \
     --set-secrets '${join(",", local.secret_clauses)}'
 ```
 
-and if you want to test from your local machine:
+Finally, review the deployed Cloud function in GCP console:
+
+https://console.cloud.google.com/functions/details/${var.region}/${var.function_name}?project=${var.project_id}
+
+## Testing
+
+If you want to test from your local machine:
 ```shell
 export PSOXY_GCP_PROJECT=${var.project_id}
-export PSOXY_GCP_REGION=us-central1
+export PSOXY_GCP_REGION=${var.region}
 ```
+
+
 
 EOT
 }
