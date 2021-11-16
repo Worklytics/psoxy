@@ -24,7 +24,7 @@ the psoxy repo).
 Third, run the following deployment command from `java/impl/gcp` folder within your checkout:
 
 ```shell
-gcloud beta functions deploy ${var.function_name} \
+gcloud functions deploy ${var.function_name} \
     --project=${var.project_id} \
     --runtime=java11 \
     --entry-point=co.worklytics.psoxy.Route \
