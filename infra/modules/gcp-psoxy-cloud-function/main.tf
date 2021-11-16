@@ -29,6 +29,7 @@ gcloud beta functions deploy ${var.function_name} \
     --runtime=java11 \
     --entry-point=co.worklytics.psoxy.Route \
     --trigger-http \
+    --security-level=secure-always \
     --source=target/deployment \
     --service-account=${var.service_account_email} \
     --env-vars-file=configs/${var.source_kind}.yaml \
