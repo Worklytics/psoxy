@@ -2,8 +2,13 @@ package co.worklytics.psoxy;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.NotImplementedException;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Set;
+import java.util.regex.Pattern;
 
 @Getter
 @NoArgsConstructor //for Jackson
@@ -14,4 +19,56 @@ public class Config {
     Set<String> columnsToPseudonymize;
 
     String pseudonymizationSalt;
+
+    SecretReference pseudonymizationSaltSecret;
+
+
+    @Getter
+    @NoArgsConstructor //for Jackson
+    public static class SecretReference {
+
+        SecretService service;
+
+        String identifier;
+
+
+        static void validate(SecretReference secretReference) {
+            if (secretReference.service == SecretService.GCP) {
+                if (!secretReference.service.getIdentifierPatternAsPattern().matcher(secretReference.identifier).matches()) {
+                    throw new IllegalArgumentException("secret identifier "
+                        + secretReference.identifier
+                        + " does not match expected pattern " + secretReference.getService().getIdentifierPattern());
+                }
+            } else if (secretReference.service == null) {
+                throw new IllegalStateException("SecretReference.service cannot be null");
+            } else {
+                throw new NotImplementedException("Service " + secretReference.service + " not yet implemented");
+            }
+        }
+    }
+
+
+
+    @RequiredArgsConstructor
+    enum SecretService {
+        AWS("not implemented"),
+        AZURE("not implemented"),
+        GCP("^projects/.*?/secrets/.*/versions/.*$");
+
+        @Getter
+        @NonNull
+        final String identifierPattern;
+
+        Pattern getIdentifierPatternAsPattern() {
+            return Pattern.compile(this.identifierPattern);
+        }
+
+    }
+
+    static void validate(Config config) {
+        if (config.getPseudonymizationSaltSecret() != null) {
+
+
+        }
+    }
 }

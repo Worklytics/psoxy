@@ -17,6 +17,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <dependency.lombok.version>1.18.20</dependency.lombok.version>
         <dependency.apache-commons-lang3.version>3.11</dependency.apache-commons-lang3.version>
+        <dependency.google-cloud-bom.version>0.163.0</dependency.google-cloud-bom.version>
     </properties>
 
     <modules>
