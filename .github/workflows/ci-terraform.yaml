@@ -23,3 +23,21 @@ jobs:
         run: |
           terraform init
           terraform validate
+
+      - name: 'Terraform - validate example-google-workspace'
+        working-directory: infra/example-google-workspace
+        run: |
+          terraform init
+          terraform validate
+
+     - name: 'Terraform - validate example-gcp-simple'
+       working-directory: infra/example-gcp-simple
+       run: |
+         terraform init
+         terraform validate
+
+     - name: 'Terraform - validate example-gcp-cft'
+       working-directory: infra/example-gcp-cft
+       run: |
+         terraform init
+         terraform validate

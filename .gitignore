@@ -23,12 +23,15 @@ hs_err_pid*
 # Maven modules --> IntelliJ modules doesn't result in nice hierarchy (only shows leaves)
 
 
-# ignore terraform variables / state for developers' personal development environmenst
-infra/dev-personal/terraform.tfvars
-infra/dev-personal/.terraform**
-infra/dev-personal/terraform.tfstate**
+# ignore terraform variables / state for developers' personal development environments and other examples
+infra/*/terraform.tfvars
+infra/*/.terraform**
+infra/*/terraform.tfstate**
+infra/*/TODO*
+
+# ignore sa key file(s)
 infra/dev-personal/*connector-sa-key.json
-infra/dev-personal/TODO*
+
 
 java/target
 java/**/target
