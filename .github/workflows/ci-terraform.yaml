@@ -1,7 +1,11 @@
 name: CI - infra (terraform)
 
 on:
-  [push]
+  push:
+    branches:
+      - '**' # should match all branches
+    tags-ignore:
+      - '**' # all tags; actually, believe this is default behavior when you specify filter for branches but not tags
 
 jobs:
   validate:
