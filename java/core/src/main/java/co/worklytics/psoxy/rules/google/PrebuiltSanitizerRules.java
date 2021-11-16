@@ -7,6 +7,9 @@ import static co.worklytics.psoxy.Rules.Rule;
 
 import java.util.Map;
 
+/**
+ * Prebuilt sanitization rules for Google tools
+ */
 public class PrebuiltSanitizerRules {
 
     static final Rules GCAL = Rules.builder()
@@ -150,8 +153,7 @@ public class PrebuiltSanitizerRules {
         )
         .build();
 
-
-    static public final Map<String, Rules> MAP = ImmutableMap.<String, Rules>builder()
+    static public final Map<String, Rules> GOOGLE_PREBUILT_RULES_MAP = ImmutableMap.<String, Rules>builder()
         .put("gcal", GCAL)
         .put("gdirectory", GDIRECTORY)
         .put("gdrive", GDRIVE)

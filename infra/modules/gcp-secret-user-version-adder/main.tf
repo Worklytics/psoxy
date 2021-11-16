@@ -7,7 +7,8 @@ resource "google_secret_manager_secret_iam_member" "grant_secretVersionAdd_on_ac
   for_each = toset(var.user_emails)
 
   role      = "roles/secretmanager.secretVersionAdder"
-  secret_id = var.project_id
+  project   = var.project_id
+  secret_id = var.secret_id
   member    = "user:${each.value}"
 
   condition {
