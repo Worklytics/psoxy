@@ -1,7 +1,11 @@
 name: CI - infra (terraform)
 
 on:
-  [push]
+  push:
+    branches:
+      - '**' # should match all branches
+    tags-ignore:
+      - '**' # all tags; actually, believe this is default behavior when you specify filter for branches but not tags
 
 jobs:
   validate:
@@ -23,3 +27,21 @@ jobs:
         run: |
           terraform init
           terraform validate
+
+      - name: 'Terraform - validate example-google-workspace'
+        working-directory: infra/example-google-workspace
+        run: |
+          terraform init
+          terraform validate
+
+     - name: 'Terraform - validate example-gcp-simple'
+       working-directory: infra/example-gcp-simple
+       run: |
+         terraform init
+         terraform validate
+
+     - name: 'Terraform - validate example-gcp-cft'
+       working-directory: infra/example-gcp-cft
+       run: |
+         terraform init
+         terraform validate
