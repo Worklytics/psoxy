@@ -63,3 +63,7 @@ export PSOXY_GCP_REGION=${var.region}
 
 EOT
 }
+
+output "cloud_function_url" {
+  value = "https://${var.region}-${var.project_id}.cloudfunctions.net/${var.function_name}"
+}

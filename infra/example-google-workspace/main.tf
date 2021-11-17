@@ -54,7 +54,8 @@ locals {
         "https://www.googleapis.com/auth/admin.directory.group.member.readonly",
         "https://www.googleapis.com/auth/admin.directory.orgunit.readonly",
         "https://www.googleapis.com/auth/admin.directory.rolemanagement.readonly"
-      ]
+      ],
+      worklytics_connector_name: "Google Workspace Directory via Psoxy"
     }
     "gcal": {
       display_name: "Google Calendar"
@@ -150,4 +151,13 @@ module "psoxy-google-workspace-connector" {
       version_number = module.google-workspace-connection-auth[each.key].key_secret_version_number
     }
   }
+}
+
+module "worklytics-psoxy-connection" {
+  for_each = local.google_workspace_sources
+
+  source = "../modules/worklytics-psoxy-connection"
+
+  psoxy_endpoint_url = module.psoxy-google-workspace-connector[each.key].cloud_function_url
+  display_name       = "${each.value.display_name} via Psoxy"
 }
