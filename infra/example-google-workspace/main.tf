@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     google = {
-      version = "~> 3.74.0"
+      version = ">= 3.74, <= 4.0"
     }
   }
 
@@ -46,11 +46,24 @@ locals {
       apis_consumed: [
         "admin.googleapis.com"
       ]
+      oauth_scopes_needed: [
+        "https://www.googleapis.com/auth/admin.directory.user.readonly",
+        "https://www.googleapis.com/auth/admin.directory.user.alias.readonly",
+        "https://www.googleapis.com/auth/admin.directory.domain.readonly",
+        "https://www.googleapis.com/auth/admin.directory.group.readonly",
+        "https://www.googleapis.com/auth/admin.directory.group.member.readonly",
+        "https://www.googleapis.com/auth/admin.directory.orgunit.readonly",
+        "https://www.googleapis.com/auth/admin.directory.rolemanagement.readonly"
+      ]
     }
     "gcal": {
       display_name: "Google Calendar"
       apis_consumed: [
         "calendar-json.googleapis.com"
+      ]
+      oauth_scopes_needed: [
+        "https://www.googleapis.com/auth/calendar.readonly",
+        "https://www.googleapis.com/auth/calendar.settings.readonly"
       ]
     }
     "gmail": {
@@ -58,11 +71,17 @@ locals {
       apis_consumed: [
         "gmail.googleapis.com"
       ]
+      oauth_scopes_needed: [
+        "https://www.googleapis.com/auth/gmail.metadata"
+      ]
     }
     "google-chat": {
       display_name: "Google Chat"
       apis_consumed: [
         "admin.googleapis.com"
+      ]
+      oauth_scopes_needed: [
+        "https://www.googleapis.com/auth/admin.reports.audit.readonly"
       ]
     }
     "gdrive": {
@@ -70,11 +89,17 @@ locals {
       apis_consumed: [
         "drive.googleapis.com"
       ]
+      oauth_scopes_needed: [
+        "https://www.googleapis.com/auth/drive.metadata.readonly"
+      ]
     }
     "google-meet": {
       display_name: "Google Meet"
       apis_consumed: [
         "admin.googleapis.com"
+      ]
+      oauth_scopes_needed: [
+        "https://www.googleapis.com/auth/admin.reports.audit.readonly"
       ]
     }
   }

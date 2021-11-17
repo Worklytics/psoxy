@@ -24,4 +24,9 @@ variable "apis_consumed" {
   description = "APIs to be used for this connection (Eg, 'gmail.googleapis.com')"
 }
 
+variable "oauth_scopes_needed" {
+  type        = list(string)
+  description = "oauth scopes that connector SA must be granted"
+  default     = []
+}
 
