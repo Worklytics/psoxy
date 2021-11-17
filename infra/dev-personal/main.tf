@@ -42,6 +42,9 @@ module "gmail-connector" {
   apis_consumed                = [
     "gmail.googleapis.com"
   ]
+  oauth_scopes_needed          = [
+    "https://www.googleapis.com/auth/gmail.metadata"
+  ]
 
   depends_on = [
     module.psoxy-gcp
@@ -94,7 +97,9 @@ module "google-chat-connector" {
   apis_consumed                = [
     "admin.googleapis.com"
   ]
-
+  oauth_scopes_needed          = [
+    "https://www.googleapis.com/auth/admin.reports.audit.readonly"
+  ]
   depends_on = [
     module.psoxy-gcp
   ]
