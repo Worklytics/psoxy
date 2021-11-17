@@ -5,7 +5,6 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.NotImplementedException;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -18,8 +17,14 @@ public class Config {
 
     Set<String> columnsToPseudonymize;
 
+    /**
+     * salt to use when generating pseudonyms
+     */
     String pseudonymizationSalt;
 
+    /**
+     * identifier of secret containing value to use salt pseudonyms.
+     */
     SecretReference pseudonymizationSaltSecret;
 
 

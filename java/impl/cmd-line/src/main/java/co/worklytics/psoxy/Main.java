@@ -15,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.FileReader;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -31,8 +32,8 @@ public class Main {
 
     @lombok.SneakyThrows
     public static void main(String[] args) {
-        Preconditions.checkArgument(args.length < 1, "No filename passed; please invoke as: java -jar target/psoxy-cmd-line-1.0-SNAPSHOT.jar fileToPseudonymize.csv");
-        Preconditions.checkArgument(args.length > 1, "Too many arguments passed; please invoke as: java -jar target/psoxy-cmd-line-1.0-SNAPSHOT.jar fileToPseudonymize.csv");
+        Preconditions.checkArgument(args.length != 0, "No filename passed; please invoke as: java -jar target/psoxy-cmd-line-1.0-SNAPSHOT.jar fileToPseudonymize.csv");
+        Preconditions.checkArgument(args.length < 2, "Too many arguments passed; please invoke as: java -jar target/psoxy-cmd-line-1.0-SNAPSHOT.jar fileToPseudonymize.csv");
 
         File configFile = new File(DEFAULT_CONFIG_FILE);
         Config config;
@@ -55,17 +56,16 @@ public class Main {
         Sanitizer.Options.OptionsBuilder options = Sanitizer.Options.builder()
             .defaultScopeId(config.getDefaultScopeId());
 
-
         if (config.getPseudonymizationSaltSecret() != null) {
             try (SecretManagerServiceClient client = SecretManagerServiceClient.create()) {
                 AccessSecretVersionResponse secretVersionResponse =
                     client.accessSecretVersion(config.getPseudonymizationSaltSecret().getIdentifier());
-
                 options.pseudonymizationSalt(secretVersionResponse.getPayload().getData().toStringUtf8());
             }
         } else {
             options.pseudonymizationSalt(config.getPseudonymizationSalt());
         }
+
 
         Sanitizer sanitizer = new SanitizerImpl(options.build());
 
