@@ -1,6 +1,4 @@
-pseudonymizationSaltSecret:
-  service: GCP
-  identifier: projects/{{YOUR_PROJECT_ID}}/secrets/PSOXY_SALT/versions/1
+pseudonymizationSalt: someSalt
 defaultScopeId: gapps
 columnsToPseudonymize:
   - email

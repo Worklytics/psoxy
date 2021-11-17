@@ -7,6 +7,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.cloud.secretmanager.v1.AccessSecretVersionResponse;
 import com.google.cloud.secretmanager.v1.SecretManagerServiceClient;
 import com.google.common.base.Preconditions;
+import lombok.NonNull;
 import lombok.SneakyThrows;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -52,7 +53,9 @@ public class Main {
     }
 
     @SneakyThrows
-    public static void pseudonymize(Config config, File inputFile, Appendable out) {
+    public static void pseudonymize(@NonNull Config config,
+                                    @NonNull File inputFile,
+                                    @NonNull Appendable out) {
         Sanitizer.Options.OptionsBuilder options = Sanitizer.Options.builder()
             .defaultScopeId(config.getDefaultScopeId());
 

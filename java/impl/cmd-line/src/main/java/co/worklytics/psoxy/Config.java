@@ -1,5 +1,6 @@
 package co.worklytics.psoxy;
 
+import com.google.common.base.Preconditions;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -38,14 +39,14 @@ public class Config {
 
 
         static void validate(SecretReference secretReference) {
+            Preconditions.checkNotNull(secretReference.service, "SecretReference.service cannot be null");
+
             if (secretReference.service == SecretService.GCP) {
                 if (!secretReference.service.getIdentifierPatternAsPattern().matcher(secretReference.identifier).matches()) {
                     throw new IllegalArgumentException("secret identifier "
                         + secretReference.identifier
                         + " does not match expected pattern " + secretReference.getService().getIdentifierPattern());
                 }
-            } else if (secretReference.service == null) {
-                throw new IllegalStateException("SecretReference.service cannot be null");
             } else {
                 throw new NotImplementedException("Service " + secretReference.service + " not yet implemented");
             }
@@ -71,9 +72,10 @@ public class Config {
     }
 
     static void validate(Config config) {
-        if (config.getPseudonymizationSaltSecret() != null) {
-
-
+        if (config.getPseudonymizationSaltSecret() == null) {
+            Preconditions.checkNotNull(config.pseudonymizationSalt, "Must provide salt or reference to secret which contains it");
+        } else {
+            SecretReference.validate(config.getPseudonymizationSaltSecret());
         }
     }
 }
