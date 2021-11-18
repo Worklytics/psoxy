@@ -4,6 +4,9 @@ import co.worklytics.psoxy.Rules;
 import co.worklytics.psoxy.Sanitizer;
 import co.worklytics.psoxy.impl.SanitizerImpl;
 import co.worklytics.test.TestUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -24,12 +27,18 @@ abstract public class RulesBaseTestCase {
 
     protected SanitizerImpl sanitizer;
 
+    protected ObjectMapper jsonMapper = new ObjectMapper();
+    protected ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
+
     @BeforeEach
     public void setup() {
         sanitizer = new SanitizerImpl(Sanitizer.Options.builder()
             .rules(getRulesUnderTest())
             .defaultScopeId(getDefaultScopeId())
             .build());
+
+        //q: good way to also batch test sanitizers from yaml/json formats of rules, to ensure
+        // serialization doesn't materially change any behavior??
     }
 
     @Test
@@ -37,8 +46,32 @@ abstract public class RulesBaseTestCase {
         Validator.validate(getRulesUnderTest());
     }
 
+    @SneakyThrows
+    @Test
+    void validateYaml() {
+        Validator.validate(yamlRoundtrip(getRulesUnderTest()));
+    }
+
+    @SneakyThrows
+    @Test
+    void validateJSON() {
+        Validator.validate(jsonRoundtrip(getRulesUnderTest()));
+    }
+
+    @SneakyThrows
+    Rules yamlRoundtrip(Rules rules) {
+        String yaml = yamlMapper.writeValueAsString(getRulesUnderTest()).replace("---\n", "");
+        return yamlMapper.readerFor(Rules.class).readValue(yaml);
+    }
+
+    @SneakyThrows
+    Rules jsonRoundtrip(Rules rules) {
+        String json = jsonMapper.writeValueAsString(getRulesUnderTest());
+        return jsonMapper.readerFor(Rules.class).readValue(json);
+    }
 
     public abstract String getDefaultScopeId();
+
 
     public abstract Rules getRulesUnderTest();
 

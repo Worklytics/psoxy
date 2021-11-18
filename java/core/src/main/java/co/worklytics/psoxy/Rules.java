@@ -1,9 +1,7 @@
 package co.worklytics.psoxy;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Singular;
-import lombok.Value;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.*;
 import lombok.extern.java.Log;
 
 import java.io.Serializable;
@@ -23,8 +21,12 @@ import java.util.List;
  * - we now have 3 cases of value `Map`/`Transformation`
  */
 @Builder
-@Value
 @Log
+@AllArgsConstructor //for builder
+@NoArgsConstructor //for Jackson
+@Getter
+@EqualsAndHashCode
+@JsonInclude(JsonInclude.Include.NON_NULL) //NOTE: despite name, also affects YAML encoding
 public class Rules implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -53,29 +55,10 @@ public class Rules implements Serializable {
      *   - not beginning these with `^`
      *   - using .* wildcard for path fragments rather than [^/]?* (all chars but /, greedy)
      */
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     @Singular
     @Getter
     List<String> allowedEndpointRegexes;
-
-    /**
-     * a rule for matching parts of JSON API responses.
-     * <p>
-     * match means the request URL matches `relativeUrlRegex` and the node in JSON response
-     * matches at least one of `jsonPaths`
-     */
-    @Builder
-    @Value
-    public static class Rule implements Serializable {
-
-        private static final long serialVersionUID = 1L;
-
-        //must match request URL
-        String relativeUrlRegex;
-
-        // json nodes that match ANY of these paths will be matches
-        @Singular
-        List<String> jsonPaths;
-    }
 
     /**
      * values in response matching any of these rules will be pseudonymized
@@ -101,4 +84,26 @@ public class Rules implements Serializable {
     @Getter
     List<Rule> redactions;
 
+    /**
+     * a rule for matching parts of JSON API responses.
+     * <p>
+     * match means the request URL matches `relativeUrlRegex` and the node in JSON response
+     * matches at least one of `jsonPaths`
+     */
+    @Builder
+    @AllArgsConstructor //for builder
+    @NoArgsConstructor //for Jackson
+    @Getter
+    @EqualsAndHashCode
+    public static class Rule implements Serializable {
+
+        private static final long serialVersionUID = 1L;
+
+        //must match request URL
+        String relativeUrlRegex;
+
+        // json nodes that match ANY of these paths will be matches
+        @Singular
+        List<String> jsonPaths;
+    }
 }

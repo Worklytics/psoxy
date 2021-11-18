@@ -47,6 +47,7 @@ gcloud beta functions deploy ${var.function_name} \
     --set-secrets '${join(",", local.secret_clauses)}'
 ```
 
+
 Finally, review the deployed Cloud function in GCP console:
 
 https://console.cloud.google.com/functions/details/${var.region}/${var.function_name}?project=${var.project_id}
@@ -58,6 +59,11 @@ If you want to test from your local machine:
 export PSOXY_GCP_PROJECT=${var.project_id}
 export PSOXY_GCP_REGION=${var.region}
 ```
+
+NOTE: if you want to customize the rule set used by Psoxy for your source, you can add a
+`rules.yaml` file into the deployment directory (`target/deployment`) before invoking the command
+above. The rules you define in the YAML file will override the ruleset specified in the codebase for
+the source.
 
 
 

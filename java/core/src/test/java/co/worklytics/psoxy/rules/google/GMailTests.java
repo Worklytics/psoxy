@@ -25,11 +25,9 @@ public class GMailTests extends RulesBaseTestCase {
     @Getter
     final String defaultScopeId = "gapps";
 
-
-    @SneakyThrows
     @Test
-    void sanitize() {
-
+    @SneakyThrows
+    public void sanitizer() {
         String jsonPart = "{\n" +
             "        \"name\": \"To\",\n" +
             "        \"value\": \"ops@worklytics.co\"\n" +

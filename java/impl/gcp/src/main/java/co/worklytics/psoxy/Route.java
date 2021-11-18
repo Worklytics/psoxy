@@ -6,10 +6,13 @@ import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.gateway.impl.OAuthAccessTokenSourceAuthStrategy;
 import co.worklytics.psoxy.gateway.impl.OAuthRefreshTokenSourceAuthStrategy;
 import co.worklytics.psoxy.impl.SanitizerImpl;
-import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.rules.Validator;
 import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
+
+import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.utils.URLUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpTransport;
@@ -21,10 +24,12 @@ import com.google.cloud.functions.HttpRequest;
 import com.google.cloud.functions.HttpResponse;
 
 import com.google.common.net.MediaType;
+import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -52,10 +57,13 @@ public class Route implements HttpFunction {
      * use should be overridden with something
      */
     static final String DEFAULT_SALT = "salt";
+    static final String PATH_TO_RULES_FILES = "/rules.yaml";
 
-    ConfigService config;
+    @Getter
+    ConfigService config  = new EnvVarsConfigService();
     Sanitizer sanitizer;
     SourceAuthStrategy sourceAuthStrategy;
+    ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
 
     SourceAuthStrategy getSourceAuthStrategy() {
         if (sourceAuthStrategy == null) {
@@ -72,22 +80,37 @@ public class Route implements HttpFunction {
         return sourceAuthStrategy;
     }
 
-    ConfigService getConfig() {
-        if (config == null) {
-            /**
-             * in GCP cloud function, we should be able to configure everything via env vars; either
-             * directly or by binding them to secrets at function deployment:
-             *
-             * @see "https://cloud.google.com/functions/docs/configuring/env-var"
-             * @see "https://cloud.google.com/functions/docs/configuring/secrets"
-             */
-            config = new EnvVarsConfigService();
+    /**
+     * provides option to for customers to override rules for a source with custom ones defined in a
+     * YAML file. Not really recommended, as complicates deployment (must add the file to
+     * `target/deployment` before calling the gcloud deploy cmmd), but we provide the option should
+     * advanced users want more control.
+     *
+     * @param pathToRulesFile path to rules; for testing
+     * @return rules, if defined, from file system
+     */
+    @SneakyThrows
+    Optional<Rules> getRulesFromFileSystem(Optional<String> pathToRulesFile) {
+        File rulesFile = new File(pathToRulesFile.orElse(PATH_TO_RULES_FILES));
+        if (rulesFile.exists()) {
+            Rules rules = yamlMapper.readerFor(Rules.class).readValue(rulesFile);
+            Validator.validate(rules);
+            return Optional.of(rules);
         }
-        return config;
+        return Optional.empty();
     }
 
     void initSanitizer() {
-        Rules rules = PrebuiltSanitizerRules.MAP.get(getConfig().getConfigPropertyOrError(ProxyConfigProperty.SOURCE));
+        Optional<Rules> fileSystemRules = getRulesFromFileSystem(Optional.empty());
+        if (fileSystemRules.isPresent()) {
+            log.info("using rules from file system");
+        }
+        Rules rules = fileSystemRules.orElseGet(() -> {
+            String source = getConfig().getConfigPropertyOrError(ProxyConfigProperty.SOURCE);
+            log.info("using prebuilt rules for: " + source);
+            return PrebuiltSanitizerRules.MAP.get(source);
+        });
+
         sanitizer = new SanitizerImpl(
             Sanitizer.Options.builder()
                 .rules(rules)
