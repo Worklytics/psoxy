@@ -5,7 +5,8 @@ source.
 Psoxy replaces PII in your organization's data with hash tokens to enable Worklytics's analysis to
 be performed on anonymized data which we cannot map back to any identifiable individual.
 
-It is intended to be a simple, serverless, transparent solution to p
+It is intended to be a simple, serverless, transparent solution to provide more granular access to
+data source APIs.
   - **serverless** - we strive to minimize the moving pieces required to run psoxy at scale, keeping
      your attack surface small and operational complexity low. Furthermore, we define
      infrastructure-as-code to ease setup.
@@ -69,18 +70,18 @@ git fetch upstream
 git rebase upstream/main
 ```
 
-4. create a [terraform](https://www.terraform.io/) configuration, setting up your environment, psoxy
+3. create a [terraform](https://www.terraform.io/) configuration, setting up your environment, psoxy
    instances, and API keys/secrets for each connection
    a. various examples are provided in [`infra`](/infra/)
    b. various modules are provided in [`infra/modules`](/infra/modules); these modules will either
       perform all the necessary setup, or create TODO files explaining what you must do outside
       Terraform
-5. init and apply the Terraform configuration:
+4. init and apply the Terraform configuration:
 ```shell
 terraform init
 terraform apply
 ```
-4. follow any `TODO` instructions produced by Terraform, such as:
+5. follow any `TODO` instructions produced by Terraform, such as:
   - build and deploy JAR (built from this repo) into your environment
   - provision API keys / make OAuth grants needed by each Data Connection
   - create the Data Connection from Worklytics to your psoxy instance (Terraform can provide `TODO`
@@ -191,6 +192,12 @@ Either way, if this function is for prod use, please remove these grants after y
 testing.
 
 4.) invocation examples
+
+```shell
+https://$PSOXY_GCP_REGION-$PSOXY_GCP_PROJECT.cloudfunctions.net/psoxy-gmail/gmail/v1/users/me/messages \
+-H "Authorization: Bearer $(gcloud auth print-identity-token)" \
+-H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)"
+```
 
 ```shell
 curl -X GET \
