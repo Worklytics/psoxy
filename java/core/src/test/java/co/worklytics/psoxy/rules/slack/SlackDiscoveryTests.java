@@ -28,6 +28,7 @@ public class SlackDiscoveryTests extends RulesBaseTestCase {
 
     @SneakyThrows
     @ValueSource(strings = {
+        "https://slack.com/api/discovery.enterprise.info",
         "https://slack.com/api/discovery.conversations.list#fragment", // fragments get discarded
         "https://slack.com/api/discovery.conversations.list",
         "https://slack.com/api/discovery.conversations.list?team=X&offset=Y&only_im=true",
@@ -49,7 +50,6 @@ public class SlackDiscoveryTests extends RulesBaseTestCase {
         "https://slack.com/api/discovery-conversations-history",
         "https://slack.com/api/discovery users list",
         // all the rest of the discovery methods
-        "https://slack.com/api/discovery.enterprise.info",
         "https://slack.com/api/discovery.user.info",
         "https://slack.com/api/discovery.user.conversations",
         "https://slack.com/api/discovery.conversations.recent",
