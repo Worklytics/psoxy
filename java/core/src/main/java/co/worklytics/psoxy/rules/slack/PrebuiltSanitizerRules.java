@@ -13,6 +13,7 @@ import static co.worklytics.psoxy.Rules.Rule;
 public class PrebuiltSanitizerRules {
 
     static final Rules SLACK = Rules.builder()
+        .allowedEndpointRegex("^\\/api\\/discovery\\.enterprise\\.info(?:\\?.+)?")
         .allowedEndpointRegex("^\\/api\\/discovery\\.conversations\\.list(?:\\?.+)?")
         .allowedEndpointRegex("^\\/api\\/discovery\\.conversations\\.history(?:\\?.+)?")
         .allowedEndpointRegex("^\\/api\\/discovery\\.users\\.list(?:\\?.+)?")
