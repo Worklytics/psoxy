@@ -88,6 +88,13 @@ module "psoxy-gmail" {
   }
 }
 
+module "worklytics-psoxy-connection-gmail" {
+  source = "../modules/worklytics-psoxy-connection"
+
+  psoxy_endpoint_url = module.psoxy-gmail.cloud_function_url
+  display_name       = "GMail via Psoxy"
+}
+
 module "google-chat-connector" {
   source = "../modules/google-workspace-dwd-connection"
 
@@ -132,6 +139,13 @@ module "psoxy-google-chat" {
       version_number = module.google-chat-connector-auth.key_secret_version_number
     }
   }
+}
+
+module "worklytics-psoxy-connection-google-chat" {
+  source = "../modules/worklytics-psoxy-connection"
+
+  psoxy_endpoint_url = module.psoxy-google-chat.cloud_function_url
+  display_name       = "Google Chat via Psoxy"
 }
 
 # BEGIN SLACK

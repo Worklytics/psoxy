@@ -37,6 +37,7 @@ ${join(",", var.oauth_scopes_needed)}
 
 With this, your psoxy instance should be able to authenticate with Google as `${var.connector_service_account_id}`
 and request data from Google as authorized by the OAuth scopes you granted.
+
 EOT
 
 }
