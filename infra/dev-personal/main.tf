@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     google = {
-      version = "~> 3.74.0"
+      version = ">= 3.74, <= 4.0"
     }
   }
 
@@ -41,6 +41,9 @@ module "gmail-connector" {
   display_name                 = "Psoxy Connector - GMail${var.connector_display_name_suffix}"
   apis_consumed                = [
     "gmail.googleapis.com"
+  ]
+  oauth_scopes_needed          = [
+    "https://www.googleapis.com/auth/gmail.metadata"
   ]
 
   depends_on = [
@@ -85,6 +88,13 @@ module "psoxy-gmail" {
   }
 }
 
+module "worklytics-psoxy-connection-gmail" {
+  source = "../modules/worklytics-psoxy-connection"
+
+  psoxy_endpoint_url = module.psoxy-gmail.cloud_function_url
+  display_name       = "GMail via Psoxy"
+}
+
 module "google-chat-connector" {
   source = "../modules/google-workspace-dwd-connection"
 
@@ -94,7 +104,9 @@ module "google-chat-connector" {
   apis_consumed                = [
     "admin.googleapis.com"
   ]
-
+  oauth_scopes_needed          = [
+    "https://www.googleapis.com/auth/admin.reports.audit.readonly"
+  ]
   depends_on = [
     module.psoxy-gcp
   ]
@@ -127,4 +139,65 @@ module "psoxy-google-chat" {
       version_number = module.google-chat-connector-auth.key_secret_version_number
     }
   }
+}
+
+module "worklytics-psoxy-connection-google-chat" {
+  source = "../modules/worklytics-psoxy-connection"
+
+  psoxy_endpoint_url = module.psoxy-google-chat.cloud_function_url
+  display_name       = "Google Chat via Psoxy"
+}
+
+# BEGIN SLACK
+
+locals {
+  slack_function_name   = "psoxy-slack-discovery-api"
+}
+
+resource "google_service_account" "slack_connector_sa" {
+  project = var.project_id
+  account_id   = local.slack_function_name
+  display_name = "Psoxy Connector - Slack{var.connector_display_name_suffix}"
+}
+
+# creates the secret, without versions.
+module "slack-discovery-api-auth" {
+  source   = "../modules/gcp-oauth-long-access-strategy"
+  project_id              = var.project_id
+  function_name           = local.slack_function_name
+  token_adder_user_emails = []
+}
+
+module "psoxy-slack-discovery-api" {
+  source = "../modules/gcp-psoxy-cloud-function"
+
+  project_id            = var.project_id
+  function_name         = local.slack_function_name
+  source_kind           = "slack"
+  service_account_email   = google_service_account.slack_connector_sa.email
+
+  secret_bindings = {
+    PSOXY_SALT   = {
+      secret_name    = module.psoxy-gcp.salt_secret_name
+      version_number = module.psoxy-gcp.salt_secret_version_number
+    },
+    ACCESS_TOKEN = {
+      secret_name    = module.slack-discovery-api-auth.access_token_secret_name
+      # in case of long lived tokens we want latest version always
+      version_number = "latest"
+    }
+  }
+}
+
+
+# current convention is that the Cloud Functions for each of these run as these SAs, but there's
+# really no need to; consider splitting (eg, one SA for each Cloud Function; one SA for the
+# OAuth client)
+
+output "gmail_connector_sa_email" {
+  value = module.gmail-connector.service_account_email
+}
+
+output "google_chat_connector_sa_email" {
+  value = module.google-chat-connector.service_account_email
 }

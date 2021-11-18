@@ -3,6 +3,12 @@ variable "project_id" {
   description = "name of the gcp project"
 }
 
+variable "region" {
+  type        = string
+  description = "region into which to deploy function"
+  default     = "us-central1"
+}
+
 variable "function_name" {
   type        = string
   description = "name of cloud function"
@@ -15,7 +21,7 @@ variable "source_kind" {
 
 variable "service_account_email" {
   type        = string
-  description = "email fo the service account that the cloud function will run as"
+  description = "email of the service account that the cloud function will run as"
 }
 
 variable "secret_bindings" {

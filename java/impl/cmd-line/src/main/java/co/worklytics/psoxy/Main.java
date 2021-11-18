@@ -4,14 +4,19 @@ import co.worklytics.psoxy.impl.SanitizerImpl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.google.cloud.secretmanager.v1.AccessSecretVersionResponse;
+import com.google.cloud.secretmanager.v1.SecretManagerServiceClient;
 import com.google.common.base.Preconditions;
+import lombok.NonNull;
 import lombok.SneakyThrows;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.FileReader;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -28,13 +33,14 @@ public class Main {
 
     @lombok.SneakyThrows
     public static void main(String[] args) {
-        Preconditions.checkArgument(args.length < 1, "No filename passed; please invoke as: java -jar target/psoxy-cmd-line-1.0-SNAPSHOT.jar fileToPseudonymize.csv");
-        Preconditions.checkArgument(args.length > 1, "Too many arguments passed; please invoke as: java -jar target/psoxy-cmd-line-1.0-SNAPSHOT.jar fileToPseudonymize.csv");
+        Preconditions.checkArgument(args.length != 0, "No filename passed; please invoke as: java -jar target/psoxy-cmd-line-1.0-SNAPSHOT.jar fileToPseudonymize.csv");
+        Preconditions.checkArgument(args.length < 2, "Too many arguments passed; please invoke as: java -jar target/psoxy-cmd-line-1.0-SNAPSHOT.jar fileToPseudonymize.csv");
 
         File configFile = new File(DEFAULT_CONFIG_FILE);
         Config config;
         if (configFile.exists()) {
             config = yamlMapper.readerFor(Config.class).readValue(configFile);
+            Config.validate(config);
         } else {
             throw new Error("No config.yaml found");
         }
@@ -47,12 +53,24 @@ public class Main {
     }
 
     @SneakyThrows
-    public static void pseudonymize(Config config, File inputFile, Appendable out) {
+    public static void pseudonymize(@NonNull Config config,
+                                    @NonNull File inputFile,
+                                    @NonNull Appendable out) {
+        Sanitizer.Options.OptionsBuilder options = Sanitizer.Options.builder()
+            .defaultScopeId(config.getDefaultScopeId());
 
-        Sanitizer sanitizer = new SanitizerImpl(Sanitizer.Options.builder()
-            .defaultScopeId(config.getDefaultScopeId())
-            .pseudonymizationSalt(config.getPseudonymizationSalt())
-            .build());
+        if (config.getPseudonymizationSaltSecret() != null) {
+            try (SecretManagerServiceClient client = SecretManagerServiceClient.create()) {
+                AccessSecretVersionResponse secretVersionResponse =
+                    client.accessSecretVersion(config.getPseudonymizationSaltSecret().getIdentifier());
+                options.pseudonymizationSalt(secretVersionResponse.getPayload().getData().toStringUtf8());
+            }
+        } else {
+            options.pseudonymizationSalt(config.getPseudonymizationSalt());
+        }
+
+
+        Sanitizer sanitizer = new SanitizerImpl(options.build());
 
         try (FileReader in = new FileReader(inputFile)) {
             CSVParser records = CSVFormat.DEFAULT

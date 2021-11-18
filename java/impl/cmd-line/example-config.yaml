@@ -1,4 +1,4 @@
-pseudonymizationSalt: SOME_SALT
+pseudonymizationSalt: someSalt
 defaultScopeId: gapps
 columnsToPseudonymize:
   - email

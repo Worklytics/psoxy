@@ -8,11 +8,6 @@ variable "function_name" {
   description = "name of cloud function"
 }
 
-variable "service_account_email" {
-  type        = string
-  description = "email fo the service account that the cloud function will run as"
-}
-
 variable "token_adder_user_emails" {
   type        =  list(string)
   description = "email addresses, if any of a GCP (Google) user who will be granted short-lived permissions to populate the token value"

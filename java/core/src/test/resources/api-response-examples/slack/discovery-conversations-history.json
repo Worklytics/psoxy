@@ -1,0 +1,53 @@
+{
+  "ok": true,
+  "has_edits": true,
+  "messages": [
+    {
+      "type": "message",
+      "text": "Test message!",
+      "user": "W06CA4EAC",
+      "username": "<@U06CA4EAC|bjin>",
+      "ts": "1234561409.000002",
+      "reactions": [
+        {
+          "name": "slightly_smiling_face",
+          "users": [
+            "W0G81RDQT",
+            "W0N0ZQDED",
+            "W0R8EBMXP"
+          ],
+          "count": 3
+        },
+        {
+          "name": "tada",
+          "users": ["W0G81RDQZ"],
+          "count": 1
+        }
+      ]
+    },
+    {
+      "type": "message",
+      "text": "",
+      "files": [
+        {
+          "original_h": 194,
+          "id": "F973098398",
+          "public_url_shared": false,
+          "pretty_type": "JPEG",
+          "timestamp": 1532453547,
+          "title": "test.png",
+          "is_public": true,
+          "thumb_360_w": 259
+        }
+      ],
+      "ts": "1234561515.000007",
+      "wibblr": true,
+      "edited": {
+        "user": "W000000",
+        "ts": "38327498237.000000"
+      },
+      "attachments": []
+    }
+  ],
+  "offset": "1463084600.000000"
+}
