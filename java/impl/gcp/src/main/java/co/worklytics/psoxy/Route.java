@@ -60,7 +60,7 @@ public class Route implements HttpFunction {
     static final String PATH_TO_RULES_FILES = "/rules.yaml";
 
     @Getter
-    ConfigService config  = new EnvVarsConfigService();;
+    ConfigService config  = new EnvVarsConfigService();
     Sanitizer sanitizer;
     SourceAuthStrategy sourceAuthStrategy;
     ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());

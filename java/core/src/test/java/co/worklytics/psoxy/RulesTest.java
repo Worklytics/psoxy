@@ -54,6 +54,7 @@ public class RulesTest {
         assertTrue(pattern.matcher("/calendar/v3/calendars/primary/events/1248asdfas4532").matches());
     }
 
+    //test from file, just to make sure no encoding weirdness causing problems with regexes
     @SneakyThrows
     @Test
     public void yaml_file() {
