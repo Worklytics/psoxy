@@ -169,6 +169,7 @@ http://localhost:8080/gmail/v1/users/me/messages/1743b19234726ef3f\?format=metad
 ```shell
 export PSOXY_GCP_PROJECT={{--GCP project id that hosts your instance--}}
 export PSOXY_GCP_REGION=us-central1 # change this to whatever the default is for you project
+export PSOXY_HOST=`echo $PSOXY_GCP_REGION"-"$PSOXY_GCP_PROJECT`
 ```
 
 3.) grant yourself access (probably not needed if you have primitive role in project, like Owner or
@@ -194,21 +195,22 @@ testing.
 4.) invocation examples
 
 ```shell
-https://$PSOXY_GCP_REGION-$PSOXY_GCP_PROJECT.cloudfunctions.net/psoxy-gmail/gmail/v1/users/me/messages \
+curl -X GET \
+https://`echo $PSOXY_HOST`.cloudfunctions.net/psoxy-gmail/gmail/v1/users/me/messages \
 -H "Authorization: Bearer $(gcloud auth print-identity-token)" \
 -H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)"
 ```
 
 ```shell
 curl -X GET \
-https://$PSOXY_GCP_REGION-$PSOXY_GCP_PROJECT.cloudfunctions.net/psoxy-gmail/gmail/v1/users/me/messages/17c3b1911726ef3f\?format=metadata \
+https://`echo $PSOXY_HOST`.cloudfunctions.net/psoxy-gmail/gmail/v1/users/me/messages/17c3b1911726ef3f\?format=metadata \
 -H "Authorization: Bearer $(gcloud auth print-identity-token)" \
 -H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)"
 ```
 
 ```shell
 curl -X GET \
-https://$PSOXY_GCP_REGION-$PSOXY_GCP_PROJECT.cloudfunctions.net/psoxy-google-chat/admin/reports/v1/activity/users/all/applications/chat \
+https://`echo $PSOXY_HOST`.cloudfunctions.net/psoxy-google-chat/admin/reports/v1/activity/users/all/applications/chat \
 -H "Authorization: Bearer $(gcloud auth print-identity-token)" \
 -H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)"
 ```
