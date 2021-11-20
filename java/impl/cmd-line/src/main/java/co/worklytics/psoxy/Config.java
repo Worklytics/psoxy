@@ -7,6 +7,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.NotImplementedException;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -16,7 +17,9 @@ public class Config {
 
     String defaultScopeId;
 
-    Set<String> columnsToPseudonymize;
+    Set<String> columnsToPseudonymize = new HashSet<>();
+
+    Set<String> columnsToRedact = new HashSet<>();
 
     /**
      * salt to use when generating pseudonyms
@@ -36,7 +39,6 @@ public class Config {
         SecretService service;
 
         String identifier;
-
 
         static void validate(SecretReference secretReference) {
             Preconditions.checkNotNull(secretReference.service, "SecretReference.service cannot be null");

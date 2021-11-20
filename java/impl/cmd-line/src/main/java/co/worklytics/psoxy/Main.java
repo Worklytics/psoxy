@@ -16,10 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.FileReader;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Main {
@@ -82,20 +79,26 @@ public class Main {
             Map<Integer, String> invertedHeaderMap = records.getHeaderMap().entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey, (a, b) -> a, TreeMap::new));
 
-            String[] header = invertedHeaderMap.values().toArray(new String[invertedHeaderMap.size()]);
+            List<String> columnHeadersToInclude = invertedHeaderMap.values()
+                .stream()
+                .filter(entry -> !config.getColumnsToRedact().contains(entry))
+                .collect(Collectors.toList());
+            String[] header = columnHeadersToInclude.toArray(new String[columnHeadersToInclude.size()]);
+            CSVPrinter printer = new CSVPrinter(out, CSVFormat.DEFAULT.withHeader(header));
 
             config.getColumnsToPseudonymize().stream()
                     .forEach(columnToPseudonymize ->
                         Preconditions.checkArgument(records.getHeaderMap().containsKey(columnToPseudonymize), "Column %s to be pseudonymized not in file", columnToPseudonymize));
 
-            CSVPrinter printer = new CSVPrinter(out, CSVFormat.DEFAULT.withHeader(header));
 
             records.forEach(row -> {
 
                 List<Object> sanitized = invertedHeaderMap.entrySet()
                     .stream()
                     .map(column -> {
-                        if (config.getColumnsToPseudonymize().contains(column.getValue())) {
+                        if (config.getColumnsToRedact().contains(column.getValue())) {
+                            return null;
+                        } else if (config.getColumnsToPseudonymize().contains(column.getValue())) {
                             try {
                                 //q: need extra escaping??
                                 return jsonMapper.writeValueAsString(sanitizer.pseudonymize(row.get(column.getKey())));
@@ -106,6 +109,7 @@ public class Main {
                             return row.get(column.getKey());
                         }
                     })
+                    .filter(Objects::nonNull)
                     .collect(Collectors.toList());
 
                 try {
