@@ -95,15 +95,15 @@ public class Main {
                 List<Object> sanitized = invertedHeaderMap.entrySet()
                     .stream()
                     .map(column -> {
-                        if (config.getColumnsToPseudonymize().contains(column.getValue())) {
+                        String value = row.get(column.getKey());
+                        if (StringUtils.isNotBlank(value) && config.getColumnsToPseudonymize().contains(column.getValue())) {
                             try {
-                                //q: need extra escaping??
-                                return jsonMapper.writeValueAsString(sanitizer.pseudonymize(row.get(column.getKey())));
+                                return jsonMapper.writeValueAsString(sanitizer.pseudonymize(value));
                             } catch (JsonProcessingException e) {
                                 throw new RuntimeException(e);
                             }
                         } else {
-                            return row.get(column.getKey());
+                            return value;
                         }
                     })
                     .collect(Collectors.toList());

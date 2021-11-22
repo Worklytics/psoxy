@@ -1,4 +1,4 @@
 pseudonymizationSalt: someSalt
-defaultScopeId: gapps
+defaultScopeId: hris
 columnsToPseudonymize:
   - email
