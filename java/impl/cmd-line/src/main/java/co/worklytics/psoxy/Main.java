@@ -96,17 +96,17 @@ public class Main {
                 List<Object> sanitized = invertedHeaderMap.entrySet()
                     .stream()
                     .map(column -> {
+                        String value = row.get(column.getKey());
                         if (config.getColumnsToRedact().contains(column.getValue())) {
                             return null;
-                        } else if (config.getColumnsToPseudonymize().contains(column.getValue())) {
+                        } else if (StringUtils.isNotBlank(value) && config.getColumnsToPseudonymize().contains(column.getValue())) {
                             try {
-                                //q: need extra escaping??
-                                return jsonMapper.writeValueAsString(sanitizer.pseudonymize(row.get(column.getKey())));
+                                return jsonMapper.writeValueAsString(sanitizer.pseudonymize(value));
                             } catch (JsonProcessingException e) {
                                 throw new RuntimeException(e);
                             }
                         } else {
-                            return row.get(column.getKey());
+                            return value;
                         }
                     })
                     .filter(Objects::nonNull)

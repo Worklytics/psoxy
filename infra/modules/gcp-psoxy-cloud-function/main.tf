@@ -58,14 +58,13 @@ If you want to test from your local machine:
 ```shell
 export PSOXY_GCP_PROJECT=${var.project_id}
 export PSOXY_GCP_REGION=${var.region}
+export PSOXY_HOST=${var.region}-${var.project_id}
 ```
 
 NOTE: if you want to customize the rule set used by Psoxy for your source, you can add a
 `rules.yaml` file into the deployment directory (`target/deployment`) before invoking the command
 above. The rules you define in the YAML file will override the ruleset specified in the codebase for
 the source.
-
-
 
 EOT
 }
