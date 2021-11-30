@@ -38,11 +38,23 @@ public class GMailTests extends RulesBaseTestCase {
         //verify precondition that example actually contains something we need to pseudonymize
         assertTrue(jsonString.contains(jsonPart));
         Collection<String> PII = Arrays.asList(
-            "alice@worklytics.co"
+            "alice@worklytics.co",
+            "lois@worklytics.co",
+            "karen@worklytics.co",
+            "john@worklytics.co",
+            "mike@worklytics.co"
+        );
+        Collection<String> names = Arrays.asList(
+            "Karen Love",
+            "John Doe",
+            "Mike Smith"
         );
         assertNotSanitized(jsonString, PII);
 
         String sanitized = sanitizer.sanitize(new URL("https://gmail.googleapis.com/gmail/v1/users/me/messages/17c3b1911726ef3f\\?format=metadata"), jsonString);
+
+        // names should be dropped
+        assertRedacted(sanitized, names);
 
         //email address should disappear
         assertFalse(sanitized.contains(jsonPart));
