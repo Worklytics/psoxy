@@ -2,10 +2,15 @@ package co.worklytics.psoxy.rules.google;
 
 import com.google.common.collect.ImmutableMap;
 import co.worklytics.psoxy.Rules;
+import com.google.common.collect.Lists;
+
 import static co.worklytics.psoxy.Rules.Rule;
 
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Prebuilt sanitization rules for Google tools
@@ -143,23 +148,27 @@ public class PrebuiltSanitizerRules {
             .build())
         .build();
 
+
+    //cases that we expect may contain a comma-separated list of values, per RFC 2822
+    static final Collection<String> multiValuedEmailHeaders = Arrays.asList(
+        "from", "to", "cc", "bcc");
+
+    //cases that we expect may contain a comma-separated list of values, per RFC 2822
+    static final Collection<String> singleValuedEmailHeaders = Arrays.asList(
+        "X-Original-Sender", "Delivered-To", "Sender", "In-Reply-To");
+
+
+
     static final Rules GMAIL = Rules.builder()
        .allowedEndpointRegex("^/gmail/v1/users/[^/]*?/messages.*")
-       //cases that we expect may contain a comma-separated list of values, per RFC 2822
        .emailHeaderPseudonymization(Rules.Rule.builder()
                   .relativeUrlRegex("/gmail/v1/users/.*?/messages/.*")
-                  .jsonPath("$.payload.headers[?(@.name =~ /^from$/i)].value")
-                  .jsonPath("$.payload.headers[?(@.name =~ /^to$/i)].value")
-                  .jsonPath("$.payload.headers[?(@.name =~ /^cc$/i)].value")
-                  .jsonPath("$.payload.headers[?(@.name =~ /^bcc$/i)].value")
+                  .jsonPath("$.payload.headers[?(@.name =~ /^" + String.join("|", multiValuedEmailHeaders) + "$/i)].value")
                .build())
        //cases that we expect to be truly single-valued, per RFC 2822
        .pseudonymization(Rules.Rule.builder()
                .relativeUrlRegex("/gmail/v1/users/.*?/messages/.*")
-               .jsonPath("$.payload.headers[?(@.name =~ /^X-Original-Sender$/i)].value")
-               .jsonPath("$.payload.headers[?(@.name =~ /^Delivered-To$/i)].value")
-               .jsonPath("$.payload.headers[?(@.name =~ /^Sender$/i)].value")
-               .jsonPath("$.payload.headers[?(@.name =~ /^In-Reply-To$/i)].value")
+               .jsonPath("$.payload.headers[?(@.name =~ /^" + String.join("|", singleValuedEmailHeaders) + "$/i)].value")
            .build()
        )
        .redaction(Rules.Rule.builder()
@@ -167,6 +176,7 @@ public class PrebuiltSanitizerRules {
                .jsonPath("$.payload.headers[?(@.name =~ /^Subject$/i)]")
                .jsonPath("$.payload.headers[?(@.name =~ /^Received$/i)]")
                .jsonPath("$.payload.headers[?(@.name =~ /^Return-Path$/i)]")
+               .jsonPath("$.payload.headers[?(@.name =~ /^Recieved-SPF$/i)]")
                .build()
        )
        .build();
