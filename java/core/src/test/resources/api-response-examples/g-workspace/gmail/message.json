@@ -159,6 +159,14 @@
         "value": "ops@worklytics.co"
       },
       {
+        "name": "Cc",
+        "value": "Mike Smith <mike@worklytics.co>, lois@worklytics.co"
+      },
+      {
+        "name": "bcC",
+        "value": "Karen Love <karen@worklytics.co>, John Doe <john@worklytics.co>"
+      },
+      {
         "name": "X-Entity-ID",
         "value": "YsJclCxyaqSZ+ixRzYGkaQ=="
       },
