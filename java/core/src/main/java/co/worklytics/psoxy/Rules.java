@@ -67,6 +67,18 @@ public class Rules implements Serializable {
     @Getter
     List<Rule> pseudonymizations;
 
+
+    /**
+     * values in response matching any of these rules will be pseudonymized but original value will
+     * also be sent
+     *
+     * use case: fields that aren't PII, but need to be matched against pseudonymized data (eg, for
+     * mailing list email addresses)
+     */
+    @Singular
+    @Getter
+    List<Rule> pseudonymizationWithOriginals;
+
     /**
      * values in response matching these any of these rules will be split based on conventions
      * for Email Headers, then pseudonymized

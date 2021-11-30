@@ -127,4 +127,20 @@ abstract public class RulesBaseTestCase {
         assertPseudonymized(content, Arrays.asList(shouldBePseudonymized));
     }
 
+    protected void assertPseudonymizedWithOriginal(String content, Collection<String> shouldBePseudonymized) {
+        shouldBePseudonymized.stream()
+            .forEach(s -> {
+                String doubleJsonEncodedPseudonym =
+                    sanitizer.getJsonConfiguration().jsonProvider().toJson(sanitizer.pseudonymizeWithOriginalToJson(s, sanitizer.getJsonConfiguration()));
+                // remove wrapping
+                doubleJsonEncodedPseudonym = StringUtils.unwrap(doubleJsonEncodedPseudonym, "\"");
+                assertTrue(content.contains(doubleJsonEncodedPseudonym),
+                    String.format("Sanitized does not contain %s, pseudonymized equivalent of %s", doubleJsonEncodedPseudonym, s));
+            });
+    }
+
+    protected void assertPseudonymizedWithOriginal(String content, String... shouldBePseudonymized) {
+        assertPseudonymizedWithOriginal(content, Arrays.asList(shouldBePseudonymized));
+    }
+
 }

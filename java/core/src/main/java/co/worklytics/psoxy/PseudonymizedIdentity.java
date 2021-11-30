@@ -46,7 +46,9 @@ public class PseudonymizedIdentity {
 
     String hash;
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    String original;
+
     //q: include 'encrypted', optionally? eg, a value that, if passed back to proxy in URL or header
     // will be decrypted
-
 }

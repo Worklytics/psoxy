@@ -100,13 +100,26 @@ public class PrebuiltSanitizerRules {
         //group/groups/group members
         .redaction(
             Rule.builder()
-                .relativeUrlRegex("/admin/directory/v1/group.*")
+                .relativeUrlRegex("/admin/directory/v1/groups.*")
                 .jsonPath("$..description")
                 .build()
         )
         .pseudonymization(Rule.builder()
             .relativeUrlRegex("/admin/directory/v1/groups/.*?/members.*")
             .jsonPath("$..email")
+            .build()
+        )
+
+        //  group email/aliases aren't PII, but we need to match them against pseudonymized data,
+        //  so need p
+        .pseudonymizationWithOriginal(Rule.builder()
+            .relativeUrlRegex("/admin/directory/v1/groups.*")
+            .jsonPath("$.email")
+            .jsonPath("$.aliases[*]")
+            .jsonPath("$.nonEditableAliases[*]")
+            .jsonPath("$.groups[*].email")
+            .jsonPath("$.groups[*].aliases[*]")
+            .jsonPath("$.groups[*].nonEditableAliases[*]")
             .build()
         )
         .build();

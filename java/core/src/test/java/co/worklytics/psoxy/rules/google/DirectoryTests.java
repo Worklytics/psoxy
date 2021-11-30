@@ -80,6 +80,8 @@ public class DirectoryTests extends RulesBaseTestCase {
             sanitizer.sanitize(new URL("https://admin.googleapis.com/admin/directory/v1/groups?customer=my_customer"), jsonString);
 
         assertRedacted(sanitized, Arrays.asList("Users allowed to have access to production infrastructure."));
+
+        assertPseudonymizedWithOriginal(sanitized, "admins@aceme.com", "admins@in.aceme.com");
     }
 
     @SneakyThrows
@@ -92,6 +94,8 @@ public class DirectoryTests extends RulesBaseTestCase {
             sanitizer.sanitize(new URL("https://admin.googleapis.com/admin/directory/v1/groups/asdfas"), jsonString);
 
         assertRedacted(sanitized, Arrays.asList("Anyone sales person in our organization."));
+
+        assertPseudonymizedWithOriginal(sanitized, "sales@acme.com", "sales@in.acme.com");
     }
 
     @SneakyThrows
