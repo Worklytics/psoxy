@@ -115,6 +115,7 @@ module "google-workspace-connection" {
   connector_service_account_id = "psoxy-${each.key}-dwd"
   display_name                 = "Psoxy Connector - ${each.value.display_name}${var.connector_display_name_suffix}"
   apis_consumed                = each.value.apis_consumed
+  oauth_scopes_needed          = each.value.oauth_scopes_needed
 
   depends_on = [
     module.psoxy-gcp
