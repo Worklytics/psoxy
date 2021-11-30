@@ -47,6 +47,8 @@ gcloud beta functions deploy ${var.function_name} \
     --set-secrets '${join(",", local.secret_clauses)}'
 ```
 
+IMPORTANT: if gcloud prompts you `Allow unauthenticated invocations of new function [${var.function_name}]?`,
+be sure to choose `N`!
 
 Finally, review the deployed Cloud function in GCP console:
 
