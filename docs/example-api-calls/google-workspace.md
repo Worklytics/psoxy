@@ -29,7 +29,38 @@ TBD
 
 ### Groups
 ```shell
-TBD
+curl -X GET \
+https://`echo $PSOXY_HOST`.cloudfunctions.net/psoxy-gdirectory/admin/directory/v1/groups\?customer=my_customer \
+-H "Authorization: Bearer $(gcloud auth print-identity-token)" \
+-H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)" | jq .
+```
+
+### Group
+```shell
+export GOOGLE_GROUP_ID=`
+curl -X GET \
+https://\`echo $PSOXY_HOST\`.cloudfunctions.net/psoxy-gdirectory/admin/directory/v1/groups\?customer=my_customer \
+-H "Authorization: Bearer $(gcloud auth print-identity-token)" \
+-H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)" | jq -r '.groups[0].id'`
+
+curl -X GET \
+https://`echo $PSOXY_HOST`.cloudfunctions.net/psoxy-gdirectory/admin/directory/v1/groups/`echo $GOOGLE_GROUP_ID` \
+-H "Authorization: Bearer $(gcloud auth print-identity-token)" \
+-H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)" | jq .
+```
+
+### Group Members
+```shell
+export GOOGLE_GROUP_ID=`
+curl -X GET \
+https://\`echo $PSOXY_HOST\`.cloudfunctions.net/psoxy-gdirectory/admin/directory/v1/groups\?customer=my_customer \
+-H "Authorization: Bearer $(gcloud auth print-identity-token)" \
+-H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)" | jq -r '.groups[0].id'`
+
+curl -X GET \
+https://`echo $PSOXY_HOST`.cloudfunctions.net/psoxy-gdirectory/admin/directory/v1/groups/`echo $GOOGLE_GROUP_ID`/members \
+-H "Authorization: Bearer $(gcloud auth print-identity-token)" \
+-H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)" | jq .
 ```
 
 ### Users
@@ -44,7 +75,9 @@ TBD
 
 ### Roles
 ```shell
-TBD
+admin/directory/v1/customer/{customer}/roleassignments
+
+
 ```
 
 ## Drive
