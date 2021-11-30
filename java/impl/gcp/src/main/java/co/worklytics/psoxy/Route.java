@@ -252,8 +252,8 @@ public class Route implements HttpFunction {
                 .map(values -> values.stream().findFirst().orElseThrow());
 
         accountToImpersonate.ifPresentOrElse(
-            user -> log.info("User to impersonate: " + user),
-            () -> log.warning("we usually expect a user to impersonate"));
+            user -> log.info("Impersonating user"),
+            () -> log.warning("We usually expect a user to impersonate"));
 
         Credentials credentials = getSourceAuthStrategy().getCredentials(accountToImpersonate);
         HttpCredentialsAdapter initializer = new HttpCredentialsAdapter(credentials);

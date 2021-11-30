@@ -54,4 +54,23 @@ class ConfigTest {
         Config.validate(config);
     }
 
+    @SneakyThrows
+    @Test
+    public void columnsToRedact_default () {
+        String serialized = new String(TestUtils.getData("config/with-secret.yaml"));
+        Config config = objectMapper.readerFor(Config.class).readValue(serialized);
+        assertNotNull(config.getColumnsToRedact());
+        assertTrue(config.getColumnsToRedact().isEmpty());
+    }
+
+    @SneakyThrows
+    @Test
+    public void columnsToRedact() {
+        String serialized = new String(TestUtils.getData("config/columns-to-redact.yaml"));
+        Config config = objectMapper.readerFor(Config.class).readValue(serialized);
+        assertNotNull(config.getColumnsToRedact());
+        assertFalse(config.getColumnsToRedact().isEmpty());
+        assertTrue(config.getColumnsToRedact().contains("managerEmail"));
+    }
+
 }
