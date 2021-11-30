@@ -1,11 +1,13 @@
 package co.worklytics.psoxy.rules.google;
 
-import com.google.common.collect.ImmutableMap;
 import co.worklytics.psoxy.Rules;
-import static co.worklytics.psoxy.Rules.Rule;
-
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 
 import java.util.Map;
+import java.util.Set;
+
+import static co.worklytics.psoxy.Rules.Rule;
 
 /**
  * Prebuilt sanitization rules for Google tools
@@ -118,30 +120,37 @@ public class PrebuiltSanitizerRules {
             .build())
         .build();
 
+    static Set<String> GMAIL_HEADERS_CONTAINING_MULTIPLE_EMAILS = ImmutableSet.of(
+        "From","To","Cc","Bcc"
+    );
+    static Set<String> GMAIL_HEADERS_CONTAINING_SINGLE_EMAILS = ImmutableSet.of(
+        "X-Original-Sender","Delivered-To","Sender","In-Reply-To"
+    );
+    static Set<String> GMAIL_ALLOWED_HEADERS = ImmutableSet.<String>builder()
+        .addAll(GMAIL_HEADERS_CONTAINING_MULTIPLE_EMAILS)
+        .addAll(GMAIL_HEADERS_CONTAINING_SINGLE_EMAILS)
+        .add("Message-ID")
+        .add("Date")
+        .build();
+
     static final Rules GMAIL = Rules.builder()
        .allowedEndpointRegex("^/gmail/v1/users/[^/]*?/messages.*")
        //cases that we expect may contain a comma-separated list of values, per RFC 2822
        .emailHeaderPseudonymization(Rules.Rule.builder()
                   .relativeUrlRegex("/gmail/v1/users/.*?/messages/.*")
-                  .jsonPath("$.payload.headers[?(@.name =~ /^from$/i)].value")
-                  .jsonPath("$.payload.headers[?(@.name =~ /^to$/i)].value")
-                  .jsonPath("$.payload.headers[?(@.name =~ /^cc$/i)].value")
-                  .jsonPath("$.payload.headers[?(@.name =~ /^bcc$/i)].value")
-               .build())
+                  .jsonPath("$.payload.headers[?(@.name =~ /^(" + String.join("|", GMAIL_HEADERS_CONTAINING_MULTIPLE_EMAILS) + ")$/i)].value")
+                  .build())
        //cases that we expect to be truly single-valued, per RFC 2822
        .pseudonymization(Rules.Rule.builder()
-               .relativeUrlRegex("/gmail/v1/users/.*?/messages/.*")
-               .jsonPath("$.payload.headers[?(@.name =~ /^X-Original-Sender$/i)].value")
-               .jsonPath("$.payload.headers[?(@.name =~ /^Delivered-To$/i)].value")
-               .jsonPath("$.payload.headers[?(@.name =~ /^Sender$/i)].value")
-               .jsonPath("$.payload.headers[?(@.name =~ /^In-Reply-To$/i)].value")
-           .build()
+                  .relativeUrlRegex("/gmail/v1/users/.*?/messages/.*")
+                  .jsonPath("$.payload.headers[?(@.name =~ /^(" + String.join("|", GMAIL_HEADERS_CONTAINING_SINGLE_EMAILS) + ")$/i)].value")
+                  .build()
        )
        .redaction(Rules.Rule.builder()
                .relativeUrlRegex("/gmail/v1/users/.*?/messages/.*")
-               .jsonPath("$.payload.headers[?(@.name =~ /^Subject$/i)]")
-               .jsonPath("$.payload.headers[?(@.name =~ /^Received$/i)]")
-               .jsonPath("$.payload.headers[?(@.name =~ /^Return-Path$/i)]")
+                // this build a negative lookahead regexp for all allowed headers, so anything outside
+                // the valid headers will be redacted. Important to keep ".*$" at the end.
+               .jsonPath("$.payload.headers[?(@.name =~ /^(?!(" + String.join("|", GMAIL_ALLOWED_HEADERS) + ")).*$/i)]")
                .build()
        )
        .build();

@@ -49,12 +49,30 @@ public class GMailTests extends RulesBaseTestCase {
             "John Doe",
             "Mike Smith"
         );
+        Collection<String> someAllowedHeaders = Arrays.asList(
+            "Delivered-To",
+            "From",
+            "To",
+            "Cc",
+            "bcC" // weird pattern to check case insensitivity
+        );
+        Collection<String> someHeadersToDrop = Arrays.asList(
+            "ARC-Seal",
+            "Received-SPF",
+            "DKIM-Signature"
+        );
         assertNotSanitized(jsonString, PII);
+        assertNotSanitized(jsonString, names);
+        assertNotSanitized(jsonString, someHeadersToDrop);
+        // basically assert contains the allowed headers
+        assertNotSanitized(jsonString, someAllowedHeaders);
 
         String sanitized = sanitizer.sanitize(new URL("https://gmail.googleapis.com/gmail/v1/users/me/messages/17c3b1911726ef3f\\?format=metadata"), jsonString);
 
         // names should be dropped
         assertRedacted(sanitized, names);
+        // headers not allowed should be dropped
+        assertRedacted(sanitized, someHeadersToDrop);
 
         //email address should disappear
         assertFalse(sanitized.contains(jsonPart));
