@@ -64,4 +64,52 @@ public class DirectoryTests extends RulesBaseTestCase {
         assertPseudonymized(sanitized, Arrays.asList("alice@worklytics.co", "bob@worklytics.co"));
         assertRedacted(sanitized, Arrays.asList("alice.example@gmail.com"));
     }
+
+    @SneakyThrows
+    @Test
+    void groups() {
+        String jsonString = asJson("groups.json");
+
+        //verify precondition that example actually contains something we need to pseudonymize
+        Collection<String> PII = Arrays.asList(
+            "Users allowed to have access to production infrastructure."
+        );
+        assertNotSanitized(jsonString, PII);
+
+        String sanitized =
+            sanitizer.sanitize(new URL("https://admin.googleapis.com/admin/directory/v1/groups?customer=my_customer"), jsonString);
+
+        assertRedacted(sanitized, Arrays.asList("Users allowed to have access to production infrastructure."));
+    }
+
+    @SneakyThrows
+    @Test
+    void group() {
+        String jsonString = asJson("group.json");
+
+        assertNotSanitized(jsonString, Arrays.asList("Anyone sales person in our organization."));
+        String sanitized =
+            sanitizer.sanitize(new URL("https://admin.googleapis.com/admin/directory/v1/groups/asdfas"), jsonString);
+
+        assertRedacted(sanitized, Arrays.asList("Anyone sales person in our organization."));
+    }
+
+    @SneakyThrows
+    @Test
+    void groupMembers() {
+
+        String jsonString = asJson("group-members.json");
+
+        //verify precondition that example actually contains something we need to pseudonymize
+        Collection<String> PII = Arrays.asList(
+            "alex@acme.com",
+            "dan@acme.com"
+        );
+        assertNotSanitized(jsonString, PII);
+
+        String sanitized =
+            sanitizer.sanitize(new URL("https://admin.googleapis.com/admin/directory/v1/groups/asdfas/members"), jsonString);
+
+        assertPseudonymized(sanitized, Arrays.asList("alex@acme.com", "dan@acme.com"));
+    }
 }

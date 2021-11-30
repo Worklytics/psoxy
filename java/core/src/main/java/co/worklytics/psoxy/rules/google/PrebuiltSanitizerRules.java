@@ -97,6 +97,18 @@ public class PrebuiltSanitizerRules {
                 .jsonPath("$.sshPublicKeys[*]")
                 .build()
         )
+        //group/groups/group members
+        .redaction(
+            Rule.builder()
+                .relativeUrlRegex("/admin/directory/v1/group.*")
+                .jsonPath("$..description")
+                .build()
+        )
+        .pseudonymization(Rule.builder()
+            .relativeUrlRegex("/admin/directory/v1/groups/.*?/members.*")
+            .jsonPath("$..email")
+            .build()
+        )
         .build();
 
     static final Rules GDRIVE = Rules.builder()
