@@ -247,7 +247,7 @@ public class SanitizerImpl implements Sanitizer {
         return configuration.jsonProvider().toJson(pseudonymize(value));
     }
 
-    public String pseudonymizeWithOriginalToJson(@NonNull Object value, Configuration configuration) {
+    public String pseudonymizeWithOriginalToJson(@NonNull Object value, @NonNull Configuration configuration) {
         return configuration.jsonProvider().toJson(pseudonymize(value, true));
     }
 
