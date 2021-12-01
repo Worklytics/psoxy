@@ -27,6 +27,14 @@ TBD
 
 ## Directory
 
+### Domains
+```shell
+curl -X GET \
+https://`echo $PSOXY_HOST`.cloudfunctions.net/psoxy-gdirectory/admin/directory/v1/customer/my_customer/domains \
+-H "Authorization: Bearer $(gcloud auth print-identity-token)" \
+-H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)" | jq .
+```
+
 ### Groups
 ```shell
 curl -X GET \
