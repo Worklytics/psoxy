@@ -148,16 +148,21 @@ public class PrebuiltSanitizerRules {
             .build())
         .build();
 
-
     //cases that we expect may contain a comma-separated list of values, per RFC 2822
     static final Collection<String> multiValuedEmailHeaders = Arrays.asList(
         "from", "to", "cc", "bcc");
 
     //cases that we expect may contain a comma-separated list of values, per RFC 2822
     static final Collection<String> singleValuedEmailHeaders = Arrays.asList(
-        "X-Original-Sender", "Delivered-To", "Sender", "In-Reply-To");
+        "X-Original-Sender", "Delivered-To", "Sender");
 
-
+    static final Collection<String> usefulEmailHeaders = Arrays.asList(
+        "Date",
+        "Message-ID",
+        "In-Reply-To",
+        "Original-Message-ID",
+        "References"
+    );
 
     static final Rules GMAIL = Rules.builder()
        .allowedEndpointRegex("^/gmail/v1/users/[^/]*?/messages.*")
@@ -179,6 +184,16 @@ public class PrebuiltSanitizerRules {
                .jsonPath("$.payload.headers[?(@.name =~ /^Recieved-SPF$/i)]")
                .build()
        )
+        .redaction(Rules.Rule.builder()
+            .relativeUrlRegex("/gmail/v1/users/.*?/messages/.*")
+            //NOTE: this uses a negation of the JsonPath predicate
+            .jsonPath("$.payload.headers[?(!(@.name =~ /^" +
+                String.join("|", singleValuedEmailHeaders) +
+                String.join("|", multiValuedEmailHeaders) +
+                String.join("|", usefulEmailHeaders) +
+                "$/i))]")
+            .build()
+        )
        .build();
 
     static final Rules GOOGLE_MEET = Rules.builder()
