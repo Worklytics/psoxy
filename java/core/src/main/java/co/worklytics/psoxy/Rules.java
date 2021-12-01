@@ -1,6 +1,7 @@
 package co.worklytics.psoxy;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.*;
 import lombok.extern.java.Log;
 
@@ -26,6 +27,7 @@ import java.util.List;
 @NoArgsConstructor //for Jackson
 @Getter
 @EqualsAndHashCode
+@JsonPropertyOrder(alphabetic = true)
 @JsonInclude(JsonInclude.Include.NON_NULL) //NOTE: despite name, also affects YAML encoding
 public class Rules implements Serializable {
 
@@ -65,6 +67,7 @@ public class Rules implements Serializable {
      */
     @Singular
     @Getter
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     List<Rule> pseudonymizations;
 
 
@@ -77,6 +80,7 @@ public class Rules implements Serializable {
      */
     @Singular
     @Getter
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     List<Rule> pseudonymizationWithOriginals;
 
     /**
@@ -85,6 +89,7 @@ public class Rules implements Serializable {
      */
     @Singular
     @Getter
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     List<Rule> emailHeaderPseudonymizations;
 
     /**
@@ -94,6 +99,7 @@ public class Rules implements Serializable {
      */
     @Singular
     @Getter
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     List<Rule> redactions;
 
     /**
@@ -106,6 +112,7 @@ public class Rules implements Serializable {
     @AllArgsConstructor //for builder
     @NoArgsConstructor //for Jackson
     @Getter
+    @JsonPropertyOrder(alphabetic = true)
     @EqualsAndHashCode
     public static class Rule implements Serializable {
 
