@@ -2,13 +2,21 @@
 
 Example curl commands that you can use to validate proxy behavior against various source APIs.
 
-To use, ensure you've set env valariables
+To use, ensure you've set env variables on your machine:
 ```shell
 export PSOXY_HOST={{YOUR_GCP_REGION}}-{{YOUR_PROJECT_ID}}
 export PSOXY_USER_TO_IMPERSONATE=you@acme.com
 ```
 
 ## Calendar
+
+### Calendar
+```shell
+curl -X GET \
+https://`echo $PSOXY_HOST`.cloudfunctions.net/psoxy-gcal/calendar/v3/calendars/primary \
+-H "Authorization: Bearer $(gcloud auth print-identity-token)" \
+-H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)" | jq .
+```
 
 ### Settings
 ```shell
@@ -32,10 +40,10 @@ export CALENDAR_EVENT_ID=`
 curl -X GET \
 https://\`echo $PSOXY_HOST\`.cloudfunctions.net/psoxy-gcal/calendar/v3/calendars/primary/events \
 -H "Authorization: Bearer $(gcloud auth print-identity-token)" \
--H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)" | jq -r '.events[0].id'`
+-H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)" | jq -r '.items[0].id'`
 
 curl -X GET \
-https://`echo $PSOXY_HOST`.cloudfunctions.net/psoxy-gcal/calendar/v3/calendars/primary/events/`echo CALENDAR_EVENT_ID` \
+https://`echo $PSOXY_HOST`.cloudfunctions.net/psoxy-gcal/calendar/v3/calendars/primary/events/`echo $CALENDAR_EVENT_ID` \
 -H "Authorization: Bearer $(gcloud auth print-identity-token)" \
 -H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)" | jq .
 ```
@@ -113,7 +121,6 @@ curl -X GET \
 https://`echo $PSOXY_HOST`.cloudfunctions.net/psoxy-gdirectory/admin/directory/v1/customer/my_customer/orgunits \
 -H "Authorization: Bearer $(gcloud auth print-identity-token)" \
 -H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)" | jq .
-
 ```
 
 ### Roles
