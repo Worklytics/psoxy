@@ -15,15 +15,25 @@ import java.util.Set;
 public class PrebuiltSanitizerRules {
 
     static final Rules GCAL = Rules.builder()
+        .allowedEndpointRegex("^/calendar/v3/calendars/[^/]*?$")
         .allowedEndpointRegex("^/calendar/v3/calendars/[^/]*?/events.*")
+        .allowedEndpointRegex("^/calendar/v3/users/[^/]*?/settings.*")
         .pseudonymization(Rule.builder()
             .relativeUrlRegex("^/calendar/v3/calendars/.*/events.*")
             .jsonPath("$..email")
+            .build())
+        .pseudonymization(Rule.builder()
+            .relativeUrlRegex("^/calendar/v3/calendars/[^/]*?$")
+            .jsonPath("$.id")
             .build())
         .redaction(Rule.builder()
             .relativeUrlRegex("^/calendar/v3/calendars/.*/events.*")
             .jsonPath("$..displayName")
             .jsonPath("$.items[*].extendedProperties.private")
+            .build())
+        .redaction(Rule.builder()
+            .relativeUrlRegex("^/calendar/v3/calendars/[^/]*?$")
+            .jsonPath("$.summary")
             .build())
         .build();
 
