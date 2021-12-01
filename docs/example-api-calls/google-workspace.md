@@ -12,17 +12,32 @@ export PSOXY_USER_TO_IMPERSONATE=you@acme.com
 
 ### Settings
 ```shell
-TBD
+curl -X GET \
+https://`echo $PSOXY_HOST`.cloudfunctions.net/psoxy-gcal/calendar/v3/users/me/settings \
+-H "Authorization: Bearer $(gcloud auth print-identity-token)" \
+-H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)" | jq .
 ```
 
 ### Events
 ```shell
-TBD
+curl -X GET \
+https://`echo $PSOXY_HOST`.cloudfunctions.net/psoxy-gcal/calendar/v3/calendars/primary/events \
+-H "Authorization: Bearer $(gcloud auth print-identity-token)" \
+-H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)" | jq .
 ```
 
 ### Event
 ```shell
-TBD
+export CALENDAR_EVENT_ID=`
+curl -X GET \
+https://\`echo $PSOXY_HOST\`.cloudfunctions.net/psoxy-gcal/calendar/v3/calendars/primary/events \
+-H "Authorization: Bearer $(gcloud auth print-identity-token)" \
+-H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)" | jq -r '.events[0].id'`
+
+curl -X GET \
+https://`echo $PSOXY_HOST`.cloudfunctions.net/psoxy-gcal/calendar/v3/calendars/primary/events/`echo CALENDAR_EVENT_ID` \
+-H "Authorization: Bearer $(gcloud auth print-identity-token)" \
+-H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)" | jq .
 ```
 
 ## Directory

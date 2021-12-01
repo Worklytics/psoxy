@@ -63,8 +63,7 @@ locals {
         "calendar-json.googleapis.com"
       ]
       oauth_scopes_needed: [
-        "https://www.googleapis.com/auth/calendar.readonly",
-        "https://www.googleapis.com/auth/calendar.settings.readonly"
+        "https://www.googleapis.com/auth/calendar.readonly"
       ]
     }
     "gmail": {
