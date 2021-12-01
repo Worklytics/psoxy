@@ -8,6 +8,9 @@ export PSOXY_HOST={{YOUR_GCP_REGION}}-{{YOUR_PROJECT_ID}}
 export PSOXY_USER_TO_IMPERSONATE=you@acme.com
 ```
 
+If any call appears to fail, repeat it without the pipe to jq (eg, remove `| jq ...` portion from
+the end of the command).
+
 ## Calendar
 
 ### Calendar
@@ -175,10 +178,20 @@ https://`echo $PSOXY_HOST`.cloudfunctions.net/psoxy-gmail/gmail/v1/users/me/mess
 
 ## Google Chat
 
+NOTE: limited to 10 results, to keep it readable.
 ```shell
 curl -X GET \
-https://`echo $PSOXY_HOST`.cloudfunctions.net/psoxy-google-chat/admin/reports/v1/activity/users/all/applications/chat \
+https://`echo $PSOXY_HOST`.cloudfunctions.net/psoxy-google-chat/admin/reports/v1/activity/users/all/applications/chat\?maxResults=10 \
 -H "Authorization: Bearer $(gcloud auth print-identity-token)" \
 -H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)" | jq .
 ```
 
+## Google Meet
+
+NOTE: limited to 10 results, to keep it readable.
+```shell
+curl -X GET \
+https://`echo $PSOXY_HOST`.cloudfunctions.net/psoxy-google-meet/admin/reports/v1/activity/users/all/applications/meet\?maxResults=10 \
+-H "Authorization: Bearer $(gcloud auth print-identity-token)" \
+-H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)" | jq .
+```
