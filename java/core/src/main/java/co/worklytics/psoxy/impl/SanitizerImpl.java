@@ -27,6 +27,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -40,6 +41,7 @@ public class SanitizerImpl implements Sanitizer {
     List<Pair<Pattern, List<JsonPath>>> compiledPseudonymizations;
     List<Pair<Pattern, List<JsonPath>>> compiledRedactions;
     List<Pair<Pattern, List<JsonPath>>> compiledEmailHeaderPseudonymizations;
+    List<Pair<Pattern, List<JsonPath>>> compiledPseudonymizationsWithOriginals;
     List<Pattern> compiledAllowedEndpoints;
 
     @Getter(onMethod_ = {@VisibleForTesting})
@@ -97,7 +99,12 @@ public class SanitizerImpl implements Sanitizer {
             compiledRedactions = compile(options.getRules().getRedactions());
         }
         if (compiledEmailHeaderPseudonymizations == null) {
-            compiledEmailHeaderPseudonymizations = compile(options.getRules().getEmailHeaderPseudonymizations());
+            compiledEmailHeaderPseudonymizations =
+                compile(options.getRules().getEmailHeaderPseudonymizations());
+        }
+        if (compiledPseudonymizationsWithOriginals == null) {
+            compiledPseudonymizationsWithOriginals =
+                compile(options.getRules().getPseudonymizationWithOriginals());
         }
         if (jsonConfiguration == null) {
             initConfiguration();
@@ -113,9 +120,14 @@ public class SanitizerImpl implements Sanitizer {
         List<JsonPath> emailHeaderPseudonymizationsToApply =
             applicablePaths(compiledEmailHeaderPseudonymizations, relativeUrl);
 
+        List<JsonPath> pseudonymizationWithOriginalsToApply =
+            applicablePaths(compiledPseudonymizationsWithOriginals, relativeUrl);
 
 
-        if (pseudonymizationsToApply.isEmpty() && redactionsToApply.isEmpty() && emailHeaderPseudonymizationsToApply.isEmpty()) {
+        if (pseudonymizationsToApply.isEmpty()
+                && redactionsToApply.isEmpty()
+                && emailHeaderPseudonymizationsToApply.isEmpty()
+                && pseudonymizationWithOriginalsToApply.isEmpty()) {
             return jsonResponse;
         } else {
             Object document = jsonConfiguration.jsonProvider().parse(jsonResponse);
@@ -133,6 +145,11 @@ public class SanitizerImpl implements Sanitizer {
             for (JsonPath pseudonymization : emailHeaderPseudonymizationsToApply) {
                 document = pseudonymization
                     .map(document, this::pseudonymizeEmailHeaderToJson, jsonConfiguration);
+            }
+
+            for (JsonPath pseudonymization : pseudonymizationWithOriginalsToApply) {
+                document = pseudonymization
+                    .map(document, this::pseudonymizeWithOriginalToJson, jsonConfiguration);
             }
 
 
@@ -168,7 +185,12 @@ public class SanitizerImpl implements Sanitizer {
         }
     }
 
+
     public PseudonymizedIdentity pseudonymize(@NonNull Object value) {
+        return pseudonymize(value, false);
+    }
+
+    public PseudonymizedIdentity pseudonymize(@NonNull Object value, boolean includeOriginal) {
         Preconditions.checkArgument(value instanceof String || value instanceof Number,
             "Value must be some basic type (eg JSON leaf, not node)");
 
@@ -201,10 +223,16 @@ public class SanitizerImpl implements Sanitizer {
             canonicalValue = value.toString();
             scope = options.getDefaultScopeId();
         }
+
         if (canonicalValue != null) {
             builder.scope(scope);
             builder.hash(hashUtils.hash(canonicalValue, options.getPseudonymizationSalt(), asLegacyScope(scope)));
         }
+
+        if (includeOriginal) {
+            builder.original(Objects.toString(value));
+        }
+
         return builder.build();
     }
 
@@ -218,6 +246,11 @@ public class SanitizerImpl implements Sanitizer {
     public String pseudonymizeToJson(@NonNull Object value, @NonNull Configuration configuration) {
         return configuration.jsonProvider().toJson(pseudonymize(value));
     }
+
+    public String pseudonymizeWithOriginalToJson(@NonNull Object value, @NonNull Configuration configuration) {
+        return configuration.jsonProvider().toJson(pseudonymize(value, true));
+    }
+
 
     String pseudonymizeEmailHeaderToJson(@NonNull Object value, @NonNull Configuration configuration) {
         return configuration.jsonProvider().toJson(pseudonymizeEmailHeader(value));

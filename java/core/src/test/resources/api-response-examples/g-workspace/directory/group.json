@@ -1,0 +1,14 @@
+{
+  "kind": "admin#directory#group",
+  "id": "040ew0vw2nj5dqo",
+  "etag": "\"nqbsbhvoIENh0WbZEZYWTG7mnk2phHz4rrCEo-rHT2k/tsKIbnEt8FDaltdBUDCJZuOCSAI\"",
+  "email": "sales@acme.com",
+  "name": "Sales",
+  "directMembersCount": "5",
+  "description": "Anyone sales person in our organization.",
+  "adminCreated": false,
+  "nonEditableAliases": [
+    "sales@acme.com.test-google-a.com",
+    "sales@in.acme.com"
+  ]
+}

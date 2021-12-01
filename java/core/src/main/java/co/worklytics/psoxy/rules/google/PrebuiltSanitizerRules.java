@@ -1,13 +1,13 @@
 package co.worklytics.psoxy.rules.google;
 
 import co.worklytics.psoxy.Rules;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-
-import java.util.Map;
-import java.util.Set;
 
 import static co.worklytics.psoxy.Rules.Rule;
+
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Prebuilt sanitization rules for Google tools
@@ -15,18 +15,27 @@ import static co.worklytics.psoxy.Rules.Rule;
 public class PrebuiltSanitizerRules {
 
     static final Rules GCAL = Rules.builder()
+        .allowedEndpointRegex("^/calendar/v3/calendars/[^/]*?$")
         .allowedEndpointRegex("^/calendar/v3/calendars/[^/]*?/events.*")
+        .allowedEndpointRegex("^/calendar/v3/users/[^/]*?/settings.*")
         .pseudonymization(Rule.builder()
-            .relativeUrlRegex("/calendar/v3/calendars/.*/events.*")
+            .relativeUrlRegex("^/calendar/v3/calendars/.*/events.*")
             .jsonPath("$..email")
             .build())
+        .pseudonymization(Rule.builder()
+            .relativeUrlRegex("^/calendar/v3/calendars/[^/]*?$")
+            .jsonPath("$.id")
+            .build())
         .redaction(Rule.builder()
-            .relativeUrlRegex("/calendar/v3/calendars/.*/events.*")
+            .relativeUrlRegex("^/calendar/v3/calendars/.*/events.*")
             .jsonPath("$..displayName")
             .jsonPath("$.items[*].extendedProperties.private")
             .build())
+        .redaction(Rule.builder()
+            .relativeUrlRegex("^/calendar/v3/calendars/[^/]*?$")
+            .jsonPath("$.summary")
+            .build())
         .build();
-
 
     static final Rules GOOGLE_CHAT = Rules.builder()
         .allowedEndpointRegex("^/admin/reports/v1/activity/users/all/applications/chat.*")
@@ -39,15 +48,14 @@ public class PrebuiltSanitizerRules {
         .build();
 
     static final Rules GDIRECTORY = Rules.builder()
-
         //GENERAL stuff
         .pseudonymization(Rule.builder()
-            .relativeUrlRegex("/admin/directory/v1/users.*")
+            .relativeUrlRegex("^/admin/directory/v1/users.*")
             .jsonPath("$..primaryEmail")
             .build()
         )
         .redaction(Rule.builder()
-            .relativeUrlRegex("/admin/directory/v1/users.*")
+            .relativeUrlRegex("^/admin/directory/v1/users.*")
             .jsonPath("$..name")
             .jsonPath("$..thumbnailPhotoUrl")
             .jsonPath("$..recoveryEmail")
@@ -56,7 +64,7 @@ public class PrebuiltSanitizerRules {
         )
         // users list
         .pseudonymization(Rule.builder()
-            .relativeUrlRegex("/admin/directory/v1/users?.*")
+            .relativeUrlRegex("^/admin/directory/v1/users?.*")
             .jsonPath("$.users[*].emails[*].address")
             .jsonPath("$.users[*].externalIds[*].value")
             .jsonPath("$.users[*].aliases[*]")
@@ -71,14 +79,14 @@ public class PrebuiltSanitizerRules {
             .build()
         )
         .redaction(Rule.builder()
-            .relativeUrlRegex("/admin/directory/v1/users?.*")
+            .relativeUrlRegex("^/admin/directory/v1/users?.*")
             .jsonPath("$.users[*].posixAccounts[*].homeDirectory")
             .jsonPath("$.users[*].sshPublicKeys[*]")
             .build()
         )
         // single user
         .pseudonymization(Rule.builder()
-            .relativeUrlRegex("/admin/directory/v1/users/.*")
+            .relativeUrlRegex("^/admin/directory/v1/users/.*")
             .jsonPath("$.emails[*].address")
             .jsonPath("$.externalIds[*].value")
             .jsonPath("$.aliases[*]")
@@ -94,9 +102,40 @@ public class PrebuiltSanitizerRules {
         )
         .redaction(
             Rule.builder()
-                .relativeUrlRegex("/admin/directory/v1/users/.*")
+                .relativeUrlRegex("^/admin/directory/v1/users/.*")
                 .jsonPath("$.posixAccounts[*].homeDirectory")
                 .jsonPath("$.sshPublicKeys[*]")
+                .build()
+        )
+        //group/groups/group members
+        .redaction(
+            Rule.builder()
+                .relativeUrlRegex("^/admin/directory/v1/groups.*")
+                .jsonPath("$..description")
+                .build()
+        )
+        .pseudonymization(Rule.builder()
+            .relativeUrlRegex("^/admin/directory/v1/groups/.*?/members.*")
+            .jsonPath("$..email")
+            .build()
+        )
+
+        //  group email/aliases aren't PII, but we need to match them against pseudonymized data,
+        //  so need p
+        .pseudonymizationWithOriginal(Rule.builder()
+            .relativeUrlRegex("^/admin/directory/v1/groups.*")
+            .jsonPath("$.email")
+            .jsonPath("$.aliases[*]")
+            .jsonPath("$.nonEditableAliases[*]")
+            .jsonPath("$.groups[*].email")
+            .jsonPath("$.groups[*].aliases[*]")
+            .jsonPath("$.groups[*].nonEditableAliases[*]")
+            .build()
+        )
+        .redaction(
+            Rule.builder()
+                .relativeUrlRegex("^/admin/directory/v1/orgunits.*")
+                .jsonPath("$..description")
                 .build()
         )
         .build();
@@ -108,11 +147,11 @@ public class PrebuiltSanitizerRules {
         //NOTE: reference docs say page elements collection is named 'items', but actual API returns
         // page collection as 'files' or 'revisions'
         .pseudonymization(Rule.builder()
-            .relativeUrlRegex("/drive/v2/files.*")
+            .relativeUrlRegex("^/drive/v2/files.*")
             .jsonPath("$..emailAddress")
             .build())
         .redaction(Rule.builder()
-            .relativeUrlRegex("/drive/v2/files.*")
+            .relativeUrlRegex("^/drive/v2/files.*")
             .jsonPath("$..displayName")
             .jsonPath("$..picture")
             .jsonPath("$.files[*].lastModifyingUserName")
@@ -120,37 +159,41 @@ public class PrebuiltSanitizerRules {
             .build())
         .build();
 
-    static Set<String> GMAIL_HEADERS_CONTAINING_MULTIPLE_EMAILS = ImmutableSet.of(
+    //cases that we expect may contain a comma-separated list of values, per RFC 2822
+    static Set<String> EMAIL_HEADERS_CONTAINING_MULTIPLE_EMAILS = ImmutableSet.of(
         "From","To","Cc","Bcc"
     );
-    static Set<String> GMAIL_HEADERS_CONTAINING_SINGLE_EMAILS = ImmutableSet.of(
+
+    //cases that we expect to be truly single-valued, per RFC 2822
+    static Set<String> EMAIL_HEADERS_CONTAINING_SINGLE_EMAILS = ImmutableSet.of(
         "X-Original-Sender","Delivered-To","Sender","In-Reply-To"
     );
-    static Set<String> GMAIL_ALLOWED_HEADERS = ImmutableSet.<String>builder()
-        .addAll(GMAIL_HEADERS_CONTAINING_MULTIPLE_EMAILS)
-        .addAll(GMAIL_HEADERS_CONTAINING_SINGLE_EMAILS)
+    static Set<String> ALLOWED_EMAIL_HEADERS = ImmutableSet.<String>builder()
+        .addAll(EMAIL_HEADERS_CONTAINING_MULTIPLE_EMAILS)
+        .addAll(EMAIL_HEADERS_CONTAINING_SINGLE_EMAILS)
         .add("Message-ID")
         .add("Date")
+        .add("In-Reply-To")
+        .add("Original-Message-ID")
+        .add("References")
         .build();
 
     static final Rules GMAIL = Rules.builder()
        .allowedEndpointRegex("^/gmail/v1/users/[^/]*?/messages.*")
-       //cases that we expect may contain a comma-separated list of values, per RFC 2822
        .emailHeaderPseudonymization(Rules.Rule.builder()
-                  .relativeUrlRegex("/gmail/v1/users/.*?/messages/.*")
-                  .jsonPath("$.payload.headers[?(@.name =~ /^(" + String.join("|", GMAIL_HEADERS_CONTAINING_MULTIPLE_EMAILS) + ")$/i)].value")
+                  .relativeUrlRegex("^/gmail/v1/users/.*?/messages/.*")
+                  .jsonPath("$.payload.headers[?(@.name =~ /^(" + String.join("|", EMAIL_HEADERS_CONTAINING_MULTIPLE_EMAILS) + ")$/i)].value")
                   .build())
-       //cases that we expect to be truly single-valued, per RFC 2822
        .pseudonymization(Rules.Rule.builder()
-                  .relativeUrlRegex("/gmail/v1/users/.*?/messages/.*")
-                  .jsonPath("$.payload.headers[?(@.name =~ /^(" + String.join("|", GMAIL_HEADERS_CONTAINING_SINGLE_EMAILS) + ")$/i)].value")
+                  .relativeUrlRegex("^/gmail/v1/users/.*?/messages/.*")
+                  .jsonPath("$.payload.headers[?(@.name =~ /^(" + String.join("|", EMAIL_HEADERS_CONTAINING_SINGLE_EMAILS) + ")$/i)].value")
                   .build()
        )
        .redaction(Rules.Rule.builder()
-               .relativeUrlRegex("/gmail/v1/users/.*?/messages/.*")
-                // this build a negative lookahead regexp for all allowed headers, so anything outside
-                // the valid headers will be redacted. Important to keep ".*$" at the end.
-               .jsonPath("$.payload.headers[?(@.name =~ /^(?!(" + String.join("|", GMAIL_ALLOWED_HEADERS) + ")).*$/i)]")
+               .relativeUrlRegex("^/gmail/v1/users/.*?/messages/.*")
+                // this build a negated JsonPath predicate for all allowed headers, so anything other
+                // than expected headers will be redacted. Important to keep ".*$" at the end.
+               .jsonPath("$.payload.headers[?(!(@.name =~ /^" + String.join("|", ALLOWED_EMAIL_HEADERS) + "$/i))]")
                .build()
        )
        .build();
@@ -164,7 +207,7 @@ public class PrebuiltSanitizerRules {
             .build()
         )
         .redaction(Rule.builder()
-            .relativeUrlRegex("/admin/reports/v1/activity/users/all/applications/meet.*")
+            .relativeUrlRegex("^/admin/reports/v1/activity/users/all/applications/meet.*")
             .jsonPath("$.items[*].events[*].parameters[?(@.name in ['display_name'])].value")
             .build()
         )

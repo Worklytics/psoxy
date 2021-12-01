@@ -1,0 +1,34 @@
+{
+  "kind": "admin#directory#groups",
+  "etag": "\"nqbsbhvoIENh0WbZEZYWTG7mnk2phHz4rrCEo-rHT2k/PqVFgEPYTtXndWkD-8s5GL3AMAw\"",
+  "groups": [
+    {
+      "kind": "admin#directory#group",
+      "id": "048pi1tg2keue1m",
+      "etag": "\"nqbsbhvoIENh0WbZEZYWTG7mnk2phHz4rrCEo-rHT2k/WXpM8YPuBcFKnO55nvA8NUb5IW4\"",
+      "email": "admins@aceme.com",
+      "name": "Admins",
+      "directMembersCount": "3",
+      "description": "Users allowed to have access to production infrastructure.",
+      "adminCreated": true,
+      "nonEditableAliases": [
+        "admins@aceme.com.test-google-a.com",
+        "admins@in.aceme.com"
+      ]
+    },
+    {
+      "kind": "admin#directory#group",
+      "id": "02nusc190i90bg6",
+      "etag": "\"nqbsbhvoIENh0WbZEZYWTG7mnk2phHz4rrCEo-rHT2k/wAVM3YU5Fnlem6O6C7pXjmpsVyI\"",
+      "email": "child@aceme.com",
+      "name": "Child",
+      "directMembersCount": "1",
+      "description": "",
+      "adminCreated": true,
+      "nonEditableAliases": [
+        "child@aceme.com.test-google-a.com",
+        "child@in.aceme.com"
+      ]
+    }
+  ]
+}

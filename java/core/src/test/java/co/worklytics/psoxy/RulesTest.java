@@ -15,15 +15,14 @@ public class RulesTest {
 
     final String EXAMPLE_YAML =
         "pseudonymizations:\n" +
-        "- relativeUrlRegex: \"/calendar/v3/calendars/.*/events.*\"\n" +
-        "  jsonPaths:\n" +
-        "  - \"$..email\"\n" +
-        "emailHeaderPseudonymizations: []\n" +
-        "redactions:\n" +
-        "- relativeUrlRegex: \"/calendar/v3/calendars/.*/events.*\"\n" +
-        "  jsonPaths:\n" +
-        "  - \"$..displayName\"\n" +
-        "  - \"$.items[*].extendedProperties.private\"\n";
+            "- jsonPaths:\n" +
+            "  - \"$..email\"\n" +
+            "  relativeUrlRegex: \"/calendar/v3/calendars/.*/events.*\"\n" +
+            "redactions:\n" +
+            "- jsonPaths:\n" +
+            "  - \"$..displayName\"\n" +
+            "  - \"$.items[*].extendedProperties.private\"\n" +
+            "  relativeUrlRegex: \"/calendar/v3/calendars/.*/events.*\"\n";
 
     Rules rules = Rules.builder().pseudonymization(Rules.Rule.builder()
             .relativeUrlRegex("/calendar/v3/calendars/.*/events.*")

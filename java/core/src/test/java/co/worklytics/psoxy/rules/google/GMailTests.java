@@ -82,5 +82,7 @@ public class GMailTests extends RulesBaseTestCase {
         //redaction should remove 'Subject' header entirely; and NOT just replace it with `null`
         assertRedacted(sanitized, "Subject");
         assertFalse(sanitized.contains("null"));
+
+        assertTrue(sanitized.contains("Message-ID"));
     }
 }

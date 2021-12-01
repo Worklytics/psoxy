@@ -63,8 +63,7 @@ locals {
         "calendar-json.googleapis.com"
       ]
       oauth_scopes_needed: [
-        "https://www.googleapis.com/auth/calendar.readonly",
-        "https://www.googleapis.com/auth/calendar.settings.readonly"
+        "https://www.googleapis.com/auth/calendar.readonly"
       ]
     }
     "gmail": {
@@ -115,6 +114,7 @@ module "google-workspace-connection" {
   connector_service_account_id = "psoxy-${each.key}-dwd"
   display_name                 = "Psoxy Connector - ${each.value.display_name}${var.connector_display_name_suffix}"
   apis_consumed                = each.value.apis_consumed
+  oauth_scopes_needed          = each.value.oauth_scopes_needed
 
   depends_on = [
     module.psoxy-gcp

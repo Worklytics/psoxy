@@ -1,0 +1,51 @@
+{
+  "kind": "admin#directory#members",
+  "etag": "\"nqbsbhvoIENh0WbZEZYWTG7mnk2phHz4rrCEo-rHT2k/ysCOE3WAvIRXkR-avpG5KrLqWY8\"",
+  "members": [
+    {
+      "kind": "admin#directory#member",
+      "etag": "\"nqbsbhvoIENh0WbZEZYWTG7mnk2phHz4rrCEo-rHT2k/cClGlnUTD66mPh1UYN596quOzEo\"",
+      "id": "11792741172342342390794",
+      "email": "alex@acme.com",
+      "role": "MEMBER",
+      "type": "USER",
+      "status": "ACTIVE"
+    },
+    {
+      "kind": "admin#directory#member",
+      "etag": "\"nqbsbhvoIENh0WbZEZYWTG7mnk2phHz4rrCEo-rHT2k/msEQv4CMx2P7EiwQUAjOY6p4QWU\"",
+      "id": "1006538123423423910644",
+      "email": "dan@acme.com",
+      "role": "MEMBER",
+      "type": "USER",
+      "status": "ACTIVE"
+    },
+    {
+      "kind": "admin#directory#member",
+      "etag": "\"nqbsbhvoIENh0WbZEZYWTG7mnk2phHz4rrCEo-rHT2k/GaG-VcDm4WBDI7XDLhClnr3QXUY\"",
+      "id": "11112342342354233489959",
+      "email": "erin@acme.com",
+      "role": "OWNER",
+      "type": "USER",
+      "status": "ACTIVE"
+    },
+    {
+      "kind": "admin#directory#member",
+      "etag": "\"nqbsbhvoIENh0WbZEZYWTG7mnk2phHz4rrCEo-rHT2k/aZle5ohKQ9w1HjfzJYKkeV57qpI\"",
+      "id": "114342345234523452345850",
+      "email": "john@acme.com",
+      "role": "MEMBER",
+      "type": "USER",
+      "status": "ACTIVE"
+    },
+    {
+      "kind": "admin#directory#member",
+      "etag": "\"nqbsbhvoIENh0WbZEZYWTG7mnk2phHz4rrCEo-rHT2k/OXyW7YpfbUxYBHjHX3Br9lIQdmg\"",
+      "id": "1005323452345234623456356",
+      "email": "paul@acme.com",
+      "role": "OWNER",
+      "type": "USER",
+      "status": "ACTIVE"
+    }
+  ]
+}
