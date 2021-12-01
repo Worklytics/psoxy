@@ -1,12 +1,11 @@
 package co.worklytics.psoxy.rules.google;
 
-import com.google.common.collect.ImmutableMap;
 import co.worklytics.psoxy.Rules;
-import com.google.common.collect.Lists;
 
 import static co.worklytics.psoxy.Rules.Rule;
 
-
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
@@ -148,52 +147,46 @@ public class PrebuiltSanitizerRules {
             .build())
         .build();
 
-    //cases that we expect may contain a comma-separated list of values, per RFC 2822
-    static final Collection<String> multiValuedEmailHeaders = Arrays.asList(
-        "from", "to", "cc", "bcc");
+
+
 
     //cases that we expect may contain a comma-separated list of values, per RFC 2822
-    static final Collection<String> singleValuedEmailHeaders = Arrays.asList(
-        "X-Original-Sender", "Delivered-To", "Sender");
-
-    static final Collection<String> usefulEmailHeaders = Arrays.asList(
-        "Date",
-        "Message-ID",
-        "In-Reply-To",
-        "Original-Message-ID",
-        "References"
+    static Set<String> EMAIL_HEADERS_CONTAINING_MULTIPLE_EMAILS = ImmutableSet.of(
+        "From","To","Cc","Bcc"
     );
+
+    //cases that we expect to be truly single-valued, per RFC 2822
+    static Set<String> EMAIL_HEADERS_CONTAINING_SINGLE_EMAILS = ImmutableSet.of(
+        "X-Original-Sender","Delivered-To","Sender","In-Reply-To"
+    );
+    static Set<String> ALLOWED_EMAIL_HEADERS = ImmutableSet.<String>builder()
+        .addAll(EMAIL_HEADERS_CONTAINING_MULTIPLE_EMAILS)
+        .addAll(EMAIL_HEADERS_CONTAINING_SINGLE_EMAILS)
+        .add("Message-ID")
+        .add("Date")
+        .add("In-Reply-To")
+        .add("Original-Message-ID")
+        .add("References")
+        .build();
 
     static final Rules GMAIL = Rules.builder()
        .allowedEndpointRegex("^/gmail/v1/users/[^/]*?/messages.*")
        .emailHeaderPseudonymization(Rules.Rule.builder()
                   .relativeUrlRegex("/gmail/v1/users/.*?/messages/.*")
-                  .jsonPath("$.payload.headers[?(@.name =~ /^" + String.join("|", multiValuedEmailHeaders) + "$/i)].value")
-               .build())
-       //cases that we expect to be truly single-valued, per RFC 2822
+                  .jsonPath("$.payload.headers[?(@.name =~ /^(" + String.join("|", EMAIL_HEADERS_CONTAINING_MULTIPLE_EMAILS) + ")$/i)].value")
+                  .build())
        .pseudonymization(Rules.Rule.builder()
-               .relativeUrlRegex("/gmail/v1/users/.*?/messages/.*")
-               .jsonPath("$.payload.headers[?(@.name =~ /^" + String.join("|", singleValuedEmailHeaders) + "$/i)].value")
-           .build()
+                  .relativeUrlRegex("/gmail/v1/users/.*?/messages/.*")
+                  .jsonPath("$.payload.headers[?(@.name =~ /^(" + String.join("|", EMAIL_HEADERS_CONTAINING_SINGLE_EMAILS) + ")$/i)].value")
+                  .build()
        )
        .redaction(Rules.Rule.builder()
                .relativeUrlRegex("/gmail/v1/users/.*?/messages/.*")
-               .jsonPath("$.payload.headers[?(@.name =~ /^Subject$/i)]")
-               .jsonPath("$.payload.headers[?(@.name =~ /^Received$/i)]")
-               .jsonPath("$.payload.headers[?(@.name =~ /^Return-Path$/i)]")
-               .jsonPath("$.payload.headers[?(@.name =~ /^Recieved-SPF$/i)]")
+                // this build a negated JsonPath predicate for all allowed headers, so anything other
+                // than expected headers will be redacted. Important to keep ".*$" at the end.
+               .jsonPath("$.payload.headers[?(!(@.name =~ /^" + String.join("|", ALLOWED_EMAIL_HEADERS) + "$/i))]")
                .build()
        )
-        .redaction(Rules.Rule.builder()
-            .relativeUrlRegex("/gmail/v1/users/.*?/messages/.*")
-            //NOTE: this uses a negation of the JsonPath predicate
-            .jsonPath("$.payload.headers[?(!(@.name =~ /^" +
-                String.join("|", singleValuedEmailHeaders) +
-                String.join("|", multiValuedEmailHeaders) +
-                String.join("|", usefulEmailHeaders) +
-                "$/i))]")
-            .build()
-        )
        .build();
 
     static final Rules GOOGLE_MEET = Rules.builder()
