@@ -2,13 +2,24 @@
 
 Example curl commands that you can use to validate proxy behavior against various source APIs.
 
-To use, ensure you've set env valariables
+To use, ensure you've set env variables on your machine:
 ```shell
 export PSOXY_HOST={{YOUR_GCP_REGION}}-{{YOUR_PROJECT_ID}}
 export PSOXY_USER_TO_IMPERSONATE=you@acme.com
 ```
 
+If any call appears to fail, repeat it without the pipe to jq (eg, remove `| jq ...` portion from
+the end of the command).
+
 ## Calendar
+
+### Calendar
+```shell
+curl -X GET \
+https://`echo $PSOXY_HOST`.cloudfunctions.net/psoxy-gcal/calendar/v3/calendars/primary \
+-H "Authorization: Bearer $(gcloud auth print-identity-token)" \
+-H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)" | jq .
+```
 
 ### Settings
 ```shell
@@ -32,10 +43,10 @@ export CALENDAR_EVENT_ID=`
 curl -X GET \
 https://\`echo $PSOXY_HOST\`.cloudfunctions.net/psoxy-gcal/calendar/v3/calendars/primary/events \
 -H "Authorization: Bearer $(gcloud auth print-identity-token)" \
--H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)" | jq -r '.events[0].id'`
+-H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)" | jq -r '.items[0].id'`
 
 curl -X GET \
-https://`echo $PSOXY_HOST`.cloudfunctions.net/psoxy-gcal/calendar/v3/calendars/primary/events/`echo CALENDAR_EVENT_ID` \
+https://`echo $PSOXY_HOST`.cloudfunctions.net/psoxy-gcal/calendar/v3/calendars/primary/events/`echo $CALENDAR_EVENT_ID` \
 -H "Authorization: Bearer $(gcloud auth print-identity-token)" \
 -H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)" | jq .
 ```
@@ -113,7 +124,6 @@ curl -X GET \
 https://`echo $PSOXY_HOST`.cloudfunctions.net/psoxy-gdirectory/admin/directory/v1/customer/my_customer/orgunits \
 -H "Authorization: Bearer $(gcloud auth print-identity-token)" \
 -H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)" | jq .
-
 ```
 
 ### Roles
@@ -135,12 +145,181 @@ https://`echo $PSOXY_HOST`.cloudfunctions.net/psoxy-gdirectory/admin/directory/v
 
 ### Files
 ```shell
-TBD
+curl -X GET \
+https://`echo $PSOXY_HOST`.cloudfunctions.net/psoxy-gdrive/drive/v2/files \
+-H "Authorization: Bearer $(gcloud auth print-identity-token)" \
+-H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)" | jq .
+```
+
+```shell
+curl -X GET \
+https://`echo $PSOXY_HOST`.cloudfunctions.net/psoxy-gdrive/drive/v3/files \
+-H "Authorization: Bearer $(gcloud auth print-identity-token)" \
+-H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)" | jq .
 ```
 
 ### File
 ```shell
-TBD
+export DRIVE_FILE_ID=`
+curl -X GET \
+https://\`echo $PSOXY_HOST\`.cloudfunctions.net/psoxy-gdrive/drive/v2/files \
+-H "Authorization: Bearer $(gcloud auth print-identity-token)" \
+-H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)" | jq -r '.items[0].id'`
+
+curl -X GET \
+https://`echo $PSOXY_HOST`.cloudfunctions.net/psoxy-gdrive/drive/v2/files/`echo $DRIVE_FILE_ID` \
+-H "Authorization: Bearer $(gcloud auth print-identity-token)" \
+-H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)" | jq .
+```
+
+```shell
+export DRIVE_FILE_ID=`
+curl -X GET \
+https://\`echo $PSOXY_HOST\`.cloudfunctions.net/psoxy-gdrive/drive/v3/files \
+-H "Authorization: Bearer $(gcloud auth print-identity-token)" \
+-H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)" | jq -r '.files[0].id'`
+
+curl -X GET \
+https://`echo $PSOXY_HOST`.cloudfunctions.net/psoxy-gdrive/drive/v3/files/`echo $DRIVE_FILE_ID`\?fields=\* \
+-H "Authorization: Bearer $(gcloud auth print-identity-token)" \
+-H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)" | jq .
+```
+
+### File Revisions
+YMMV, as file at index `0` must actually be a type that supports revisions for this to return
+anything. You can play with that value until you find something that does.
+```shell
+export DRIVE_FILE_ID=`
+curl -X GET \
+https://\`echo $PSOXY_HOST\`.cloudfunctions.net/psoxy-gdrive/drive/v2/files \
+-H "Authorization: Bearer $(gcloud auth print-identity-token)" \
+-H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)" | jq -r '.items[0].id'`
+
+curl -X GET \
+https://`echo $PSOXY_HOST`.cloudfunctions.net/psoxy-gdrive/drive/v2/files/`echo $DRIVE_FILE_ID`/revisions \
+-H "Authorization: Bearer $(gcloud auth print-identity-token)" \
+-H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)" | jq .
+```
+
+```shell
+export DRIVE_FILE_ID=`
+curl -X GET \
+https://\`echo $PSOXY_HOST\`.cloudfunctions.net/psoxy-gdrive/drive/v3/files\?pageSize=2\&fields=\* \
+-H "Authorization: Bearer $(gcloud auth print-identity-token)" \
+-H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)" | jq -r '.files[0].id'`
+
+curl -X GET \
+https://`echo $PSOXY_HOST`.cloudfunctions.net/psoxy-gdrive/drive/v3/files/`echo $DRIVE_FILE_ID`/revisions\?pageSize=2\&fields=\* \
+-H "Authorization: Bearer $(gcloud auth print-identity-token)" \
+-H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)" | jq .
+```
+
+### Permissions
+
+```shell
+export DRIVE_FILE_ID=`
+curl -X GET \
+https://\`echo $PSOXY_HOST\`.cloudfunctions.net/psoxy-gdrive/drive/v2/files \
+-H "Authorization: Bearer $(gcloud auth print-identity-token)" \
+-H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)" | jq -r '.items[0].id'`
+
+curl -X GET \
+https://`echo $PSOXY_HOST`.cloudfunctions.net/psoxy-gdrive/drive/v2/files/`echo $DRIVE_FILE_ID`/permissions \
+-H "Authorization: Bearer $(gcloud auth print-identity-token)" \
+-H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)" | jq .
+```
+
+```shell
+export DRIVE_FILE_ID=`
+curl -X GET \
+https://\`echo $PSOXY_HOST\`.cloudfunctions.net/psoxy-gdrive/drive/v3/files \
+-H "Authorization: Bearer $(gcloud auth print-identity-token)" \
+-H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)" | jq -r '.files[0].id'`
+
+curl -X GET \
+https://`echo $PSOXY_HOST`.cloudfunctions.net/psoxy-gdrive/drive/v3/files/`echo $DRIVE_FILE_ID`/permissions\?fields=\* \
+-H "Authorization: Bearer $(gcloud auth print-identity-token)" \
+-H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)" | jq .
+```
+
+### Comments
+YMMV, as file at index `0` must actually be a type that has comments for this to return
+anything. You can play with that value until you find something that does.
+
+**NOTE probably blocked by OAuth metadata only scope!!**
+```shell
+export DRIVE_FILE_ID=`
+curl -X GET \
+https://\`echo $PSOXY_HOST\`.cloudfunctions.net/psoxy-gdrive/drive/v2/files \
+-H "Authorization: Bearer $(gcloud auth print-identity-token)" \
+-H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)" | jq -r '.items[0].id'`
+
+curl -X GET \
+https://`echo $PSOXY_HOST`.cloudfunctions.net/psoxy-gdrive/drive/v2/files/`echo $DRIVE_FILE_ID`/comments \
+-H "Authorization: Bearer $(gcloud auth print-identity-token)" \
+-H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)" | jq .
+```
+
+
+```shell
+export DRIVE_FILE_ID=`
+curl -X GET \
+https://\`echo $PSOXY_HOST\`.cloudfunctions.net/psoxy-gdrive/drive/v3/files \
+-H "Authorization: Bearer $(gcloud auth print-identity-token)" \
+-H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)" | jq -r '.files[0].id'`
+
+curl -X GET \
+https://`echo $PSOXY_HOST`.cloudfunctions.net/psoxy-gdrive/drive/v3/files/`echo $DRIVE_FILE_ID`/comments\?fields=\* \
+-H "Authorization: Bearer $(gcloud auth print-identity-token)" \
+-H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)" | jq .
+```
+
+
+### Comment
+
+**NOTE probably blocked by OAuth metadata only scope!!**
+
+```shell
+export DRIVE_FILE_ID=`
+curl -X GET \
+https://\`echo $PSOXY_HOST\`.cloudfunctions.net/psoxy-gdrive/drive/v2/files \
+-H "Authorization: Bearer $(gcloud auth print-identity-token)" \
+-H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)" | jq -r '.items[0].id'`
+
+export DRIVE_COMMENT_ID=`
+curl -X GET \
+https://\`echo $PSOXY_HOST\`.cloudfunctions.net/psoxy-gdrive/drive/v2/files/\`echo $DRIVE_FILE_ID\`/comments  \
+-H "Authorization: Bearer $(gcloud auth print-identity-token)" \
+-H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)" | jq -r '.items[0].id'`
+
+curl -X GET \
+https://`echo $PSOXY_HOST`.cloudfunctions.net/psoxy-gdrive/drive/v2/files/`echo $DRIVE_FILE_ID`/comments/`echo $DRIVE_COMMENT_ID` \
+-H "Authorization: Bearer $(gcloud auth print-identity-token)" \
+-H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)" | jq .
+```
+
+### Replies
+**NOTE probably blocked by OAuth metadata only scope!!**
+
+YMMV, as above, play with the index values until you find a file with comments, and a comment that
+has replies.
+```shell
+export DRIVE_FILE_ID=`
+curl -X GET \
+https://\`echo $PSOXY_HOST\`.cloudfunctions.net/psoxy-gdrive/drive/v2/files \
+-H "Authorization: Bearer $(gcloud auth print-identity-token)" \
+-H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)" | jq -r '.items[0].id'`
+
+export DRIVE_COMMENT_ID=`
+curl -X GET \
+https://\`echo $PSOXY_HOST\`.cloudfunctions.net/psoxy-gdrive/drive/v2/files/\`echo $DRIVE_FILE_ID\`/comments  \
+-H "Authorization: Bearer $(gcloud auth print-identity-token)" \
+-H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)" | jq -r '.items[0].id'`
+
+curl -X GET \
+https://`echo $PSOXY_HOST`.cloudfunctions.net/psoxy-gdrive/drive/v2/files/`echo $DRIVE_FILE_ID`/comments/`echo $DRIVE_COMMENT_ID`/replies \
+-H "Authorization: Bearer $(gcloud auth print-identity-token)" \
+-H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)" | jq .
 ```
 
 ## GMail
@@ -168,10 +347,20 @@ https://`echo $PSOXY_HOST`.cloudfunctions.net/psoxy-gmail/gmail/v1/users/me/mess
 
 ## Google Chat
 
+NOTE: limited to 10 results, to keep it readable.
 ```shell
 curl -X GET \
-https://`echo $PSOXY_HOST`.cloudfunctions.net/psoxy-google-chat/admin/reports/v1/activity/users/all/applications/chat \
+https://`echo $PSOXY_HOST`.cloudfunctions.net/psoxy-google-chat/admin/reports/v1/activity/users/all/applications/chat\?maxResults=10 \
 -H "Authorization: Bearer $(gcloud auth print-identity-token)" \
 -H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)" | jq .
 ```
 
+## Google Meet
+
+NOTE: limited to 10 results, to keep it readable.
+```shell
+curl -X GET \
+https://`echo $PSOXY_HOST`.cloudfunctions.net/psoxy-google-meet/admin/reports/v1/activity/users/all/applications/meet\?maxResults=10 \
+-H "Authorization: Bearer $(gcloud auth print-identity-token)" \
+-H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)" | jq .
+```

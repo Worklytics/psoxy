@@ -1,0 +1,121 @@
+{
+  "kind": "drive#fileList",
+  "nextPageToken": "~!!~AI9FV7RKYLXxIS3mH5SlJKXA6UhfgtuwHrRJ-iCBlGYo8VPjasdfasdfadsfasu7GSRDglcauC1YnN2zB_mJxe3WCi6r6f6Cibm1lt76bMKHrjMMJYxHxS135VqmQB3KsZU1ivehm_mbnIvggWbjdS1A==",
+  "incompleteSearch": false,
+  "files": [
+    {
+      "kind": "drive#file",
+      "id": "1mEsoPXCtiloJ1blesaiOCLXbKCvLCFxC",
+      "name": "CW69asdfasdfadsfat.pdf",
+      "mimeType": "application/pdf",
+      "starred": false,
+      "trashed": false,
+      "explicitlyTrashed": false,
+      "parents": [
+        "1CtjiFT124rmMDvyddv5IwG57Ya0dNWPH"
+      ],
+      "spaces": [
+        "drive"
+      ],
+      "version": "2",
+      "webContentLink": "https://drive.google.com/uc?id=1mEsoPXCtasdfasdfCLXbKCvLCFxC&export=download",
+      "webViewLink": "https://drive.google.com/file/d/1mEsoPXCtadsfasdfaiOCLXbKCvLCFxC/view?usp=drivesdk",
+      "iconLink": "https://drive-thirdparty.googleusercontent.com/16/type/application/pdf",
+      "hasThumbnail": true,
+      "thumbnailVersion": "1",
+      "viewedByMe": false,
+      "createdTime": "2021-12-01T16:26:10.157Z",
+      "modifiedTime": "2021-12-01T16:25:16.000Z",
+      "modifiedByMe": false,
+      "owners": [
+        {
+          "kind": "drive#user",
+          "displayName": "Paul",
+          "photoLink": "https://lh3.googleusercontent.com/a-/AOh14GiS0urNnasdfasdfadsNA=s64",
+          "me": false,
+          "permissionId": "02185925293822571813",
+          "emailAddress": "paul@worklytics.co"
+        }
+      ],
+      "lastModifyingUser": {
+        "kind": "drive#user",
+        "displayName": "Paul",
+        "photoLink": "https://lh3.googleusercontent.com/a-/AOh14GiS0urNnasdfasdffasdfasdegTcNA=s64",
+        "me": false,
+        "permissionId": "02185925293822571813",
+        "emailAddress": "paul@worklytics.co"
+      },
+      "shared": true,
+      "ownedByMe": false,
+      "capabilities": {
+        "canAcceptOwnership": false,
+        "canAddChildren": false,
+        "canAddMyDriveParent": false,
+        "canChangeCopyRequiresWriterPermission": false,
+        "canChangeSecurityUpdateEnabled": false,
+        "canChangeViewersCanCopyContent": false,
+        "canComment": true,
+        "canCopy": true,
+        "canDelete": false,
+        "canDownload": true,
+        "canEdit": true,
+        "canListChildren": false,
+        "canModifyContent": true,
+        "canMoveChildrenWithinDrive": false,
+        "canMoveItemIntoTeamDrive": false,
+        "canMoveItemOutOfDrive": false,
+        "canMoveItemWithinDrive": true,
+        "canReadRevisions": true,
+        "canRemoveChildren": false,
+        "canRemoveMyDriveParent": true,
+        "canRename": true,
+        "canShare": true,
+        "canTrash": false,
+        "canUntrash": false
+      },
+      "viewersCanCopyContent": true,
+      "copyRequiresWriterPermission": false,
+      "writersCanShare": true,
+      "permissions": [
+        {
+          "kind": "drive#permission",
+          "id": "16513690099496370655",
+          "type": "user",
+          "emailAddress": "alice@worklytics.co",
+          "role": "writer",
+          "displayName": "Alice",
+          "photoLink": "https://lh3.googleusercontent.com/a-/AOh14GiHDf_1GMtAENPbp2zaZTSzqcmY2lTLWhdrZ61eA9GLtRasdfasdfadsfXbfWVbWvc1Kb0sr3Yl5Ni6trukex-cfp5poEPYeJWdcEYSXFV56o3nlTDwDm9aSxZRmufzAlQB_VgmtS9q5xzG_7WjFrkT10d48CUl0joJzR82iK7bfZdOKIlc0Cz4yA0p8aTIfCLjztLWOo93XwTufaURJOlQDzG-JQTIqsYotJjGR2rlll44wBngKZCzQhA12UGevfASAviiOMMN8fYT_pAB2tyvQgz3m3ba7s5QtunEOb4_PzhKb1EenVlrBY7Q_ExCNuYimBgS2IokL2i5uq-_ZP8H6jTCtkZ6AzeIOD0cxaoWmyfGO4bzkZPuHRf6isbfPaahJFIMtbHUbeVXmFOEDamEakWR57ibW7XDzAqwviGeZqBmwzlEv6NYSYRTQ-GzUaXEV8TMY3Z-bWHEYPaIjVC-bG1ah7N_QEWU1kSfJUcg3UWmpRMEA6kQXmNydSeLEH8JgQvEI4vCEEwA80GELYe86-AAkBVH0-L-e-yzttu0M4hE_muqc5f0iICte0Uwa07MkQW3pE2g7vSxTa1EFkTMWAWLI7odvF4C1DEa8jxwupi9KoqoQyqqdSSMDo7wl9mhdbyMuZXn5NmDmLsEsDnBhx6o-IBjuFgRWy7xAeocQA=s64",
+          "deleted": false,
+          "pendingOwner": false
+        },
+        {
+          "kind": "drive#permission",
+          "id": "02185925293822571813",
+          "type": "user",
+          "emailAddress": "paul@worklytics.co",
+          "role": "owner",
+          "displayName": "Paul",
+          "photoLink": "https://lh3.googleusercontent.com/a-/AOh14GiS0asdfasdfegTcNA=s64",
+          "deleted": false,
+          "pendingOwner": false
+        }
+      ],
+      "permissionIds": [
+        "16513690099496370655",
+        "02185925293822571813"
+      ],
+      "originalFilename": "CW6asdfasdfadsft.pdf",
+      "fullFileExtension": "pdf",
+      "fileExtension": "pdf",
+      "md5Checksum": "2c3f517e181dd49aa9f97580d3ec1431",
+      "size": "759602",
+      "quotaBytesUsed": "759602",
+      "headRevisionId": "0B5tH2y2v-mBWTklOa1VJeHJwNUQ2dy9uMDg1d0kzV0ZUeHRjPQ",
+      "isAppAuthorized": false,
+      "linkShareMetadata": {
+        "securityUpdateEligible": false,
+        "securityUpdateEnabled": true
+      }
+    }
+  ]
+}

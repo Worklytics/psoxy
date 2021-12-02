@@ -8,6 +8,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Prebuilt sanitization rules for Google tools
@@ -37,12 +38,32 @@ public class PrebuiltSanitizerRules {
             .build())
         .build();
 
+    static final Set<String> GOOGLE_CHAT_EVENT_PARAMETERS_PII = ImmutableSet.of(
+        "actor"
+    );
+    static final Set<String> GOOGLE_CHAT_EVENT_PARAMETERS_ALLOWED = ImmutableSet.<String>builder()
+        .addAll(GOOGLE_CHAT_EVENT_PARAMETERS_PII)
+        .add("room_id", "timestamp_ms", "message_id", "room_name")
+        .build();
+
+
     static final Rules GOOGLE_CHAT = Rules.builder()
         .allowedEndpointRegex("^/admin/reports/v1/activity/users/all/applications/chat.*")
         .pseudonymization(Rule.builder()
-            .relativeUrlRegex("/admin/reports/v1/activity/users/all/applications/chat.*")
+            .relativeUrlRegex("^/admin/reports/v1/activity/users/all/applications/chat.*")
             .jsonPath("$..email")
-            .jsonPath("$.items[*].events[*].parameters[?(@.name in ['actor'])].value")
+            .jsonPath("$.items[*].events[*].parameters[?(@.name in [" +
+                GOOGLE_CHAT_EVENT_PARAMETERS_PII.stream().map(s -> "'" + s + "'").collect(Collectors.joining(",")) +
+                "])].value")
+            .build()
+        )
+        .redaction(Rules.Rule.builder()
+            .relativeUrlRegex("^/admin/reports/v1/activity/users/all/applications/chat.*")
+            // this build a negated JsonPath predicate for all allowed event parameters, so anything other
+            // than expected headers will be redacted. Important to keep ".*$" at the end.
+            .jsonPath("$.items[*].events[*].parameters[?(!(@.name =~ /^" +
+                String.join("|", GOOGLE_CHAT_EVENT_PARAMETERS_ALLOWED) +
+                "$/i))]")
             .build()
         )
         .build();
@@ -146,16 +167,42 @@ public class PrebuiltSanitizerRules {
         // rules
         //NOTE: reference docs say page elements collection is named 'items', but actual API returns
         // page collection as 'files' or 'revisions'
+        .allowedEndpointRegex("^/drive/v2/files.*")
         .pseudonymization(Rule.builder()
             .relativeUrlRegex("^/drive/v2/files.*")
             .jsonPath("$..emailAddress")
             .build())
         .redaction(Rule.builder()
             .relativeUrlRegex("^/drive/v2/files.*")
+            .jsonPath("$.name") // file display name
+            .jsonPath("$..displayName") //user display name, anywhere (confidentiality)
+            .jsonPath("$..picture") //user picture, anywhere (confidentiality)
+            .jsonPath("$.lastModifyingUserName")
+            .jsonPath("$.items[*].lastModifyingUserName")
+            .jsonPath("$.ownerNames")
+            .jsonPath("$.items[*].ownerNames")
+            .build())
+        .redaction(Rule.builder()
+            .relativeUrlRegex("^/drive/v2/files/.*?/revisions.*")
+            .jsonPath("$.originalFilename")
+            .jsonPath("$.items[*].originalFilename")
+            .build())
+        .allowedEndpointRegex("^/drive/v3/files.*")
+        .pseudonymization(Rule.builder()
+            .relativeUrlRegex("^/drive/v3/files.*")
+            .jsonPath("$..emailAddress")
+            .build())
+        .redaction(Rule.builder()
+            .relativeUrlRegex("^/drive/v3/files.*")
+            .jsonPath("$.name")
             .jsonPath("$..displayName")
-            .jsonPath("$..picture")
-            .jsonPath("$.files[*].lastModifyingUserName")
-            .jsonPath("$.files[*].ownerNames")
+            .jsonPath("$..photoLink")
+            .jsonPath("$.files[*].name")
+            .build())
+        .redaction(Rule.builder()
+            .relativeUrlRegex("^/drive/v3/files/.*?/revisions.*")
+            .jsonPath("$.originalFilename")
+            .jsonPath("$.files[*].originalFilename")
             .build())
         .build();
 
@@ -192,23 +239,44 @@ public class PrebuiltSanitizerRules {
        .redaction(Rules.Rule.builder()
                .relativeUrlRegex("^/gmail/v1/users/.*?/messages/.*")
                 // this build a negated JsonPath predicate for all allowed headers, so anything other
-                // than expected headers will be redacted. Important to keep ".*$" at the end.
+                // than expected headers will be redacted.
                .jsonPath("$.payload.headers[?(!(@.name =~ /^" + String.join("|", ALLOWED_EMAIL_HEADERS) + "$/i))]")
                .build()
        )
        .build();
+
+    static final Set<String> GOOGLE_MEET_EVENT_PARAMETERS_PII = ImmutableSet.of(
+        "organizer_email",
+        "ip_address",
+        "identifier"
+    );
+
+    static final Set<String> GOOGLE_MEET_EVENT_PARAMETERS_ALLOWED = ImmutableSet.<String>builder()
+        .addAll(GOOGLE_MEET_EVENT_PARAMETERS_PII)
+        .add("location_country", "location_region", "ip_address") //collaboration across offices / geographies / time zones
+        .add("is_external") // internal v external collaboration
+        .add("product_type", "device_type") // tool classification
+        .add("video_send_seconds", "video_recv_seconds", "screencast_send_seconds", "screencast_recv_seconds", "audio_send_seconds", "audio_recv_seconds") //actual duration inference
+        .add("calendar_event_id", "endpoint_id", "meeting_code", "conference_id") //matching to calendar events
+        .build();
 
     static final Rules GOOGLE_MEET = Rules.builder()
         .allowedEndpointRegex("^/admin/reports/v1/activity/users/all/applications/meet.*")
         .pseudonymization(Rule.builder()
             .relativeUrlRegex("/admin/reports/v1/activity/users/all/applications/meet.*")
             .jsonPath("$..email")
-            .jsonPath("$.items[*].events[*].parameters[?(@.name in ['ip_address', 'organizer_email', 'identifier'])].value")
+            .jsonPath("$.items[*].events[*].parameters[?(@.name in [" +
+                GOOGLE_MEET_EVENT_PARAMETERS_PII.stream().map(s -> "'" + s + "'").collect(Collectors.joining(",")) +
+                "])].value")
             .build()
         )
         .redaction(Rule.builder()
             .relativeUrlRegex("^/admin/reports/v1/activity/users/all/applications/meet.*")
-            .jsonPath("$.items[*].events[*].parameters[?(@.name in ['display_name'])].value")
+            // this build a negated JsonPath predicate for all allowed event parameters, so anything other
+            // than expected headers will be redacted. Important to keep ".*$" at the end.
+            .jsonPath("$.items[*].events[*].parameters[?(!(@.name =~ /^" +
+                String.join("|", GOOGLE_MEET_EVENT_PARAMETERS_ALLOWED) +
+                "$/i))]")
             .build()
         )
         .build();

@@ -86,6 +86,9 @@ abstract public class RulesBaseTestCase {
         shouldContain.stream()
             .forEach(s -> assertTrue(content.contains(s), "Unsanitized content does not contain expected string: " + s));
     }
+    protected void assertNotSanitized(String content, String... shouldContain) {
+        assertNotSanitized(content, Arrays.asList(shouldContain));
+    }
 
     @Deprecated //used pseudonymized or redacted
     protected void assertSanitized(String content, Collection<String> shouldNotContain) {
@@ -141,6 +144,13 @@ abstract public class RulesBaseTestCase {
 
     protected void assertPseudonymizedWithOriginal(String content, String... shouldBePseudonymized) {
         assertPseudonymizedWithOriginal(content, Arrays.asList(shouldBePseudonymized));
+    }
+
+    protected void assertContains(String content, String... shouldContain) {
+        Arrays.stream(shouldContain)
+            .forEach(s -> {
+                assertTrue(content.contains(s), String.format("Sanitized does not contain '%s'", s));
+            });
     }
 
 }

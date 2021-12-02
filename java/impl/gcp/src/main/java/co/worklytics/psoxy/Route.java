@@ -139,7 +139,6 @@ public class Route implements HttpFunction {
 
         //is there a lifecycle to initialize request factory??
         HttpRequestFactory requestFactory = getRequestFactory(request);
-        //q: what about when request factory needs to set a service account user?
 
         // re-write host
         //TODO: switch on method to support HEAD, etc
@@ -153,8 +152,19 @@ public class Route implements HttpFunction {
             return;
         }
 
-        com.google.api.client.http.HttpRequest sourceApiRequest =
-            requestFactory.buildGetRequest(new GenericUrl(targetUrl.toString()));
+        com.google.api.client.http.HttpRequest sourceApiRequest;
+        try {
+            sourceApiRequest =
+                requestFactory.buildGetRequest(new GenericUrl(targetUrl.toString()));
+        } catch (IOException e) {
+            response.setStatusCode(500);
+            response.getWriter().write("Failed to authorize request; review logs");
+            log.log(Level.WARNING, e.getMessage(), e);
+
+            //something like "Error getting access token for service account: 401 Unauthorized POST https://oauth2.googleapis.com/token,"
+            log.log(Level.WARNING, "Confirm oauth scopes set in config.yaml match those granted via Google Workspace Admin Console");
+            return;
+        }
 
         //TODO: what headers to forward???
 
@@ -261,7 +271,6 @@ public class Route implements HttpFunction {
         //TODO: in OAuth-type use cases, where execute() may have caused token to be refreshed, how
         // do we capture the new one?? ideally do this with listener/handler/trigger in Credential
         // itself, if that's possible
-
 
         return transport.createRequestFactory(initializer);
     }
