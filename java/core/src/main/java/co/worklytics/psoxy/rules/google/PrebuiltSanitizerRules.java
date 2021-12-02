@@ -49,6 +49,11 @@ public class PrebuiltSanitizerRules {
 
     static final Rules GDIRECTORY = Rules.builder()
         //GENERAL stuff
+        //to block: https://admin.googleapis.com/admin/directory/v1/users/{userKey}/photos/thumbnail
+        .allowedEndpointRegex("^/admin/directory/v1/(domains|groups|orgunits).*")
+        .allowedEndpointRegex("^/admin/directory/v1/users\\?.*")
+        .allowedEndpointRegex("^/admin/directory/v1/users/[^/]*")
+        .allowedEndpointRegex("^/admin/directory/v1/customer/my_customer/(roles|roleassignments|resources).*")
         .pseudonymization(Rule.builder()
             .relativeUrlRegex("^/admin/directory/v1/users.*")
             .jsonPath("$..primaryEmail")
@@ -62,6 +67,11 @@ public class PrebuiltSanitizerRules {
             .jsonPath("$..recoveryPhone")
             .build()
         )
+        .redaction(Rule.builder() //not easy to block thumbnails with a regex ...
+            .relativeUrlRegex("^/admin/directory/v1/users/.*?/thumbnail.*")
+            .jsonPath("$.primaryEmail")
+            .jsonPath("$.photoData")
+            .build())
         // users list
         .pseudonymization(Rule.builder()
             .relativeUrlRegex("^/admin/directory/v1/users?.*")

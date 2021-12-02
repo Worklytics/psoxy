@@ -107,6 +107,20 @@ https://`echo $PSOXY_HOST`.cloudfunctions.net/psoxy-gdirectory/admin/directory/v
 -H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)" | jq .
 ```
 
+Thumbnail (expect have its contents redacted)
+```shell
+export GOOGLE_USER_ID=`
+curl -X GET \
+https://\`echo $PSOXY_HOST\`.cloudfunctions.net/psoxy-gdirectory/admin/directory/v1/users\?customer=my_customer \
+-H "Authorization: Bearer $(gcloud auth print-identity-token)" \
+-H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)" | jq -r '.users[0].id'`
+
+curl -X GET \
+https://`echo $PSOXY_HOST`.cloudfunctions.net/psoxy-gdirectory/admin/directory/v1/users/`echo $GOOGLE_USER_ID`/photos/thumbnail \
+-H "Authorization: Bearer $(gcloud auth print-identity-token)" \
+-H "X-Psoxy-User-To-Impersonate: $(echo $PSOXY_USER_TO_IMPERSONATE)" | jq .
+```
+
 ### Org Units
 ```shell
 curl -X GET \
