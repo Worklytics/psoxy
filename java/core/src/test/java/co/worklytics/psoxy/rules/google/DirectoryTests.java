@@ -90,21 +90,26 @@ public class DirectoryTests extends RulesBaseTestCase {
     @SneakyThrows
     @Test
     void group() {
+        String groupEndpoint = "https://admin.googleapis.com/admin/directory/v1/groups/asdfas";
         String jsonString = asJson("group.json");
 
         assertNotSanitized(jsonString, Arrays.asList("Anyone sales person in our organization."));
         String sanitized =
-            sanitizer.sanitize(new URL("https://admin.googleapis.com/admin/directory/v1/groups/asdfas"), jsonString);
+            sanitizer.sanitize(new URL(groupEndpoint), jsonString);
 
         assertRedacted(sanitized, Arrays.asList("Anyone sales person in our organization."));
 
         assertPseudonymizedWithOriginal(sanitized, "sales@acme.com", "sales@in.acme.com");
+
+        assertUrlWithSubResourcesAllowed(groupEndpoint);
+        assertUrlWithQueryParamsAllowed(groupEndpoint);
     }
 
     @SneakyThrows
     @Test
     void groupMembers() {
 
+        String membersEndpoint = "https://admin.googleapis.com/admin/directory/v1/groups/asdfas/members";
         String jsonString = asJson("group-members.json");
 
         //verify precondition that example actually contains something we need to pseudonymize
@@ -115,9 +120,10 @@ public class DirectoryTests extends RulesBaseTestCase {
         assertNotSanitized(jsonString, PII);
 
         String sanitized =
-            sanitizer.sanitize(new URL("https://admin.googleapis.com/admin/directory/v1/groups/asdfas/members"), jsonString);
+            sanitizer.sanitize(new URL(membersEndpoint), jsonString);
 
         assertPseudonymized(sanitized, Arrays.asList("alex@acme.com", "dan@acme.com"));
+        assertUrlWithQueryParamsAllowed(membersEndpoint);
     }
 
     @SneakyThrows

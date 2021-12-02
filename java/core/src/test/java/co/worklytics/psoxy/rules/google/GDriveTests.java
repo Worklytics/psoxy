@@ -27,6 +27,7 @@ public class GDriveTests extends RulesBaseTestCase {
     @SneakyThrows
     @Test
     void files() {
+        String endpoint = "https://www.googleapis.com/drive/v2/files";
         String jsonString = asJson("files.json");
 
         //verify precondition that example actually contains something we need to pseudonymize
@@ -41,14 +42,17 @@ public class GDriveTests extends RulesBaseTestCase {
 
 
         String sanitized =
-            sanitizer.sanitize(new URL("https", "www.googleapis.com", "/drive/v2/files"), jsonString);
+            sanitizer.sanitize(new URL(endpoint), jsonString);
 
         assertPseudonymized(sanitized, PII);
+
+        assertUrlWithQueryParamsAllowed(endpoint);
     }
 
     @SneakyThrows
     @Test
     void revisions() {
+        String endpoint = "http://www.googleapis.com/drive/v2/files/Asdfasdfas/revisions";
         String jsonString = asJson("revisions.json");
 
         //verify precondition that example actually contains something we need to pseudonymize
@@ -58,8 +62,21 @@ public class GDriveTests extends RulesBaseTestCase {
         assertNotSanitized(jsonString, PII);
 
         String sanitized =
-            sanitizer.sanitize(new URL("http://www.googleapis.com/drive/v2/files/Asdfasdfas/revisions"), jsonString);
+            sanitizer.sanitize(new URL(endpoint), jsonString);
 
         assertPseudonymized(sanitized, PII);
+
+        assertUrlWithQueryParamsAllowed(endpoint);
+    }
+
+
+    @SneakyThrows
+    @Test
+    void permissions() {
+        String endpoint = "http://www.googleapis.com/drive/v2/files/Asdfasdfas/permissions";
+
+        //TODO: content test (although in theory, utilizes $..email pattern, so should be safe)
+
+        assertUrlWithQueryParamsAllowed(endpoint);
     }
 }

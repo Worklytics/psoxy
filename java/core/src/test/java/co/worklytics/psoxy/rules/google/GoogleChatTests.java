@@ -25,6 +25,7 @@ class GoogleChatTests extends RulesBaseTestCase {
     @SneakyThrows
     @Test
     void google_chat() {
+        String endpoint = "https://admin.googleapis.com/admin/reports/v1/activity/users/all/applications/chat";
         String jsonString = asJson("chat-activities.json");
 
         //verify precondition that example actually contains something we need to pseudonymize
@@ -35,8 +36,10 @@ class GoogleChatTests extends RulesBaseTestCase {
         assertNotSanitized(jsonString, PII);
 
         String sanitized =
-            sanitizer.sanitize(new URL("https://admin.googleapis.com/admin/reports/v1/activity/users/all/applications/chat"), jsonString);
+            sanitizer.sanitize(new URL(endpoint), jsonString);
 
         assertPseudonymized(sanitized, PII);
+
+        assertUrlWithQueryParamsAllowed(endpoint);
     }
 }
