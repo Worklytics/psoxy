@@ -41,5 +41,6 @@ class GoogleChatTests extends RulesBaseTestCase {
         assertPseudonymized(sanitized, PII);
 
         assertUrlWithQueryParamsAllowed(endpoint);
+        assertUrlBlocked("https://admin.googleapis.com/admin/reports/v1/activity/users/all/applications/meet");
     }
 }

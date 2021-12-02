@@ -46,6 +46,7 @@ class GoogleMeetTests extends RulesBaseTestCase {
         assertRedacted(sanitized, "Adam Jones");
 
         assertUrlWithQueryParamsAllowed(endpoint);
+        assertUrlBlocked("https://admin.googleapis.com/admin/reports/v1/activity/users/all/applications/chat");
 
     }
 }

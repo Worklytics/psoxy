@@ -180,4 +180,9 @@ abstract public class RulesBaseTestCase {
         assertTrue(sanitizer.isAllowed(new URL(url + "/asdfasdf/asdfasdf")), "multiple params blocked");
     }
 
+    @SneakyThrows
+    protected void assertUrlBlocked(String url) {
+        assertFalse(sanitizer.isAllowed(new URL(url)), "rules allowed url that should be blcoked: " + url);
+    }
+
 }
