@@ -1,0 +1,10 @@
+{
+  "kind": "admin#directory#user#photo",
+  "id": "111133314714903389959",
+  "etag": "\"nqbsbhvoIENh0WbZEZYWTG7mnk2phHz4rrCEo-rHT2k/xKtRfNwwnQqWlG-EJRuakObYa1E\"",
+  "mimeType": "image/jpeg",
+  "primaryEmail": "alice@worklytics.co",
+  "height": 96,
+  "width": 96,
+  "photoData": "asdfasdfasdfadsfadsf"
+}

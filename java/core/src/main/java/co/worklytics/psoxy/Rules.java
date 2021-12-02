@@ -21,7 +21,7 @@ import java.util.List;
  * q: good design?
  * - we now have 3 cases of value `Map`/`Transformation`
  */
-@Builder
+@Builder(toBuilder = true)
 @Log
 @AllArgsConstructor //for builder
 @NoArgsConstructor //for Jackson

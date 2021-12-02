@@ -1,6 +1,8 @@
 package co.worklytics.psoxy.rules.google;
 
 import co.worklytics.psoxy.Rules;
+import co.worklytics.psoxy.Sanitizer;
+import co.worklytics.psoxy.impl.SanitizerImpl;
 import co.worklytics.psoxy.rules.RulesBaseTestCase;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -10,6 +12,7 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DirectoryTests extends RulesBaseTestCase {
@@ -115,5 +118,36 @@ public class DirectoryTests extends RulesBaseTestCase {
             sanitizer.sanitize(new URL("https://admin.googleapis.com/admin/directory/v1/groups/asdfas/members"), jsonString);
 
         assertPseudonymized(sanitized, Arrays.asList("alex@acme.com", "dan@acme.com"));
+    }
+
+    @SneakyThrows
+    @Test
+    void thumbnails() {
+        String jsonString = asJson("thumbnail.json");
+
+        //verify precondition that example actually contains something we need to pseudonymize
+        Collection<String> PII = Arrays.asList(
+            "alice@worklytics.co"
+        );
+        assertNotSanitized(jsonString, PII);
+        assertNotSanitized(jsonString, Arrays.asList("photoData"));
+
+        URL url =
+            new URL("https://admin.googleapis.co/admin/directory/v1/users/123124/photos/thumbnail");
+
+        //block by default
+        assertThrows(IllegalStateException.class, () -> sanitizer.sanitize(url, jsonString));
+
+        Rules allowAllRoles = getRulesUnderTest().toBuilder().allowedEndpointRegex(".*").build();
+
+        this.sanitizer = new SanitizerImpl(Sanitizer.Options.builder().pseudonymizationSalt("salt")
+            .rules(allowAllRoles)
+            .defaultScopeId("gapps").build());
+        this.sanitizer.initConfiguration();
+
+        //but still redact if gets through
+        String sanitized = this.sanitizer.sanitize(url, jsonString);
+        assertRedacted(sanitized, "alice@worklytics.co");
+        assertRedacted(sanitized, "photoData");
     }
 }
