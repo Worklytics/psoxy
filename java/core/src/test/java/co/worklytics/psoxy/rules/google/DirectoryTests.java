@@ -140,13 +140,13 @@ public class DirectoryTests extends RulesBaseTestCase {
 
         Rules allowAllRoles = getRulesUnderTest().toBuilder().allowedEndpointRegex(".*").build();
 
-        SanitizerImpl allowAllSanitizer = new SanitizerImpl(Sanitizer.Options.builder().pseudonymizationSalt("salt")
+        this.sanitizer = new SanitizerImpl(Sanitizer.Options.builder().pseudonymizationSalt("salt")
             .rules(allowAllRoles)
             .defaultScopeId("gapps").build());
-        allowAllSanitizer.initConfiguration();
+        this.sanitizer.initConfiguration();
 
         //but still redact if gets through
-        String sanitized = allowAllSanitizer.sanitize(url, jsonString);
+        String sanitized = this.sanitizer.sanitize(url, jsonString);
         assertRedacted(sanitized, "alice@worklytics.co");
         assertRedacted(sanitized, "photoData");
     }
