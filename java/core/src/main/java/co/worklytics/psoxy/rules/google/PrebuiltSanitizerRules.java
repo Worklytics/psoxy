@@ -239,7 +239,7 @@ public class PrebuiltSanitizerRules {
        .redaction(Rules.Rule.builder()
                .relativeUrlRegex("^/gmail/v1/users/.*?/messages/.*")
                 // this build a negated JsonPath predicate for all allowed headers, so anything other
-                // than expected headers will be redacted. Important to keep ".*$" at the end.
+                // than expected headers will be redacted.
                .jsonPath("$.payload.headers[?(!(@.name =~ /^" + String.join("|", ALLOWED_EMAIL_HEADERS) + "$/i))]")
                .build()
        )
