@@ -119,6 +119,20 @@ public class Route implements HttpFunction {
                 .defaultScopeId(getConfig().getConfigPropertyAsOptional(ProxyConfigProperty.IDENTIFIER_SCOPE_ID)
                     .orElse(rules.getDefaultScopeIdForSource()))
                 .build());
+
+        if (isConfiguredToSkipSanitizer()) {
+            log.warning("Proxy instance configured to skip sanitizer (env var SKIP_SANITIZER=true); this should be done ONLY for testing");
+        }
+    }
+
+    boolean isConfiguredToSkipSanitizer() {
+        return config.getConfigPropertyAsOptional(ProxyConfigProperty.SKIP_SANITIZER)
+            .map(Boolean::parseBoolean).orElse(false);
+    }
+
+    boolean isRequestedToSkipSanitizer(HttpRequest request) {
+        return request.getFirstHeader(ControlHeader.SKIP_SANITIZER.getHttpHeader())
+            .map(Boolean::parseBoolean).orElse(false);
     }
 
     @Override
@@ -136,7 +150,6 @@ public class Route implements HttpFunction {
             initSanitizer();
         }
 
-
         //is there a lifecycle to initialize request factory??
         HttpRequestFactory requestFactory = getRequestFactory(request);
 
@@ -144,7 +157,9 @@ public class Route implements HttpFunction {
         //TODO: switch on method to support HEAD, etc
         URL targetUrl = buildTarget(request);
 
-        if (sanitizer.isAllowed(targetUrl)) {
+        boolean skipSanitizer = isConfiguredToSkipSanitizer() && isRequestedToSkipSanitizer(request);
+
+        if (skipSanitizer || sanitizer.isAllowed(targetUrl)) {
             log.info("Proxy invoked with target: " + URLUtils.relativeURL(targetUrl));
         } else {
             response.setStatusCode(403, "Endpoint forbidden by proxy rule set");
@@ -185,17 +200,23 @@ public class Route implements HttpFunction {
 
         String responseContent =
             new String(sourceApiResponse.getContent().readAllBytes(), sourceApiResponse.getContentCharset());
+
+        String proxyResponseContent;
         if (isSuccessFamily(sourceApiResponse.getStatusCode())) {
-            String pseudonymized = sanitizer.sanitize(targetUrl, responseContent);
-            new ByteArrayInputStream(pseudonymized.getBytes(StandardCharsets.UTF_8))
-                .transferTo(response.getOutputStream());
+            if (skipSanitizer) {
+                proxyResponseContent = responseContent;
+            }  else {
+                proxyResponseContent = sanitizer.sanitize(targetUrl, responseContent);
+            }
         } else {
             //write error, which shouldn't contain PII, directly
             log.log(Level.WARNING, "Source API Error " + responseContent);
             //TODO: could run this through DLP to be extra safe
-            new ByteArrayInputStream(responseContent.getBytes(StandardCharsets.UTF_8))
-                .transferTo(response.getOutputStream());
+            proxyResponseContent = responseContent;
         }
+
+        new ByteArrayInputStream(proxyResponseContent.getBytes(StandardCharsets.UTF_8))
+            .transferTo(response.getOutputStream());
     }
 
     private void doHealthCheck(HttpRequest request, HttpResponse response) {

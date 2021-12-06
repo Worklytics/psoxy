@@ -10,4 +10,6 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
     IDENTIFIER_SCOPE_ID,
     //target API endpoint to forward request to
     TARGET_HOST,
+    // for testing - if set, allows proxy to acced
+    SKIP_SANITIZER,
 }
