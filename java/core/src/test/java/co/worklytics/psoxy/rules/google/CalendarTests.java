@@ -24,7 +24,7 @@ class CalendarTests extends RulesBaseTestCase {
 
     @SneakyThrows
     @Test
-    void events() {
+    void events_privacy() {
         String jsonString = asJson("events.json");
 
         Collection<String> PII = Arrays.asList(
@@ -36,5 +36,20 @@ class CalendarTests extends RulesBaseTestCase {
             sanitizer.sanitize(new URL("http://calendar.googleapis.com/calendar/v3/calendars/primary/events"), jsonString);
 
         assertPseudonymized(sanitized, PII);
+    }
+
+    @SneakyThrows
+    @Test
+    void events_confidentiality() {
+        String jsonString = asJson("events.json");
+
+        assertNotSanitized(jsonString, "Call to discuss Worklytics issues");
+        assertNotSanitized(jsonString, "Dear alice :");
+
+        String sanitized =
+            sanitizer.sanitize(new URL("http://calendar.googleapis.com/calendar/v3/calendars/primary/events"), jsonString);
+
+        assertRedacted(sanitized, "Call to discuss Worklytics issues");
+        assertRedacted(sanitized, "Dear alice :");
     }
 }

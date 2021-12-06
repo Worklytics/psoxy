@@ -36,6 +36,21 @@ public class PrebuiltSanitizerRules {
             .relativeUrlRegex("^/calendar/v3/calendars/[^/]*?$")
             .jsonPath("$.summary")
             .build())
+
+        //redact description and summary from events; this is for confidentiality, not privacy; and
+        // is too restrictive for usual case as hampers several classification algorithms:
+        //   - classifying calendar event as 'OOO' vs plain block
+        //   - de-dupping calendar events with zoom meetings
+        .redaction(Rule.builder()
+            .relativeUrlRegex("^/calendar/v3/calendars/.*/events/.*")
+            .jsonPath("$.description")
+            .jsonPath("$.summary")
+            .build())
+        .redaction(Rule.builder()
+            .relativeUrlRegex("^/calendar/v3/calendars/.*/events[^/]*\\??[^/]*$")
+            .jsonPath("$.items[*].description")
+            .jsonPath("$.items[*].summary")
+            .build())
         .build();
 
     static final Set<String> GOOGLE_CHAT_EVENT_PARAMETERS_PII = ImmutableSet.of(
