@@ -176,13 +176,13 @@ abstract public class RulesBaseTestCase {
 
     @SneakyThrows
     protected void assertUrlWithSubResourcesBlocked(String url) {
-        assertTrue(sanitizer.isAllowed(new URL(url + "/dsfasdf")), "single param blocked");
-        assertTrue(sanitizer.isAllowed(new URL(url + "/asdfasdf/asdfasdf")), "multiple params blocked");
+        assertTrue(sanitizer.isAllowed(new URL(url + "/anypath")), "subpath allowed");
+        assertTrue(sanitizer.isAllowed(new URL(url + "/anypath/anysubpath")), "2 subpathes allowed");
     }
 
     @SneakyThrows
     protected void assertUrlBlocked(String url) {
-        assertFalse(sanitizer.isAllowed(new URL(url)), "rules allowed url that should be blcoked: " + url);
+        assertFalse(sanitizer.isAllowed(new URL(url)), "rules allowed url that should be blocked: " + url);
     }
 
 }
