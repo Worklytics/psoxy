@@ -3,6 +3,7 @@ package co.worklytics.psoxy.rules.google;
 import co.worklytics.psoxy.Rules;
 import co.worklytics.psoxy.Sanitizer;
 import co.worklytics.psoxy.impl.SanitizerImpl;
+import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
 import co.worklytics.psoxy.rules.RulesBaseTestCase;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -15,7 +16,7 @@ import java.util.Collection;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class DirectoryTests extends RulesBaseTestCase {
+public class DirectoryTests extends JavaRulesTestBaseCase {
 
     @Getter
     final Rules rulesUnderTest = PrebuiltSanitizerRules.GDIRECTORY;

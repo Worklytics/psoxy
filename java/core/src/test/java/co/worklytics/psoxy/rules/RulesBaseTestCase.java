@@ -59,18 +59,6 @@ abstract public class RulesBaseTestCase {
         Validator.validate(jsonRoundtrip(getRulesUnderTest()));
     }
 
-    @SneakyThrows
-    @Test
-    void validateYamlExample() {
-        String path = "/rules/" + getYamlSerializationFilepath() + ".yaml";
-
-        Rules rulesFromFilesystem = yamlMapper.readerFor(Rules.class)
-            .readValue(PrebuiltSanitizerRules.class.getResource(path));
-
-        assertEquals(
-            yamlMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rulesFromFilesystem),
-            yamlMapper.writerWithDefaultPrettyPrinter().writeValueAsString(getRulesUnderTest()));
-    }
 
 
     @SneakyThrows
@@ -85,14 +73,16 @@ abstract public class RulesBaseTestCase {
         return jsonMapper.readerFor(Rules.class).readValue(json);
     }
 
+
+
     public abstract String getDefaultScopeId();
+
+    public abstract Rules getRulesUnderTest();
 
     /**
      * eg 'google-workspace/gdrive'
      */
     public abstract String getYamlSerializationFilepath();
-
-    public abstract Rules getRulesUnderTest();
 
     public abstract String getExampleDirectoryPath();
 

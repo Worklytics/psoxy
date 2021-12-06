@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.rules.google;
 
 import co.worklytics.psoxy.Rules;
+import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
 import co.worklytics.psoxy.rules.RulesBaseTestCase;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -10,7 +11,7 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 
-class GoogleMeetTests extends RulesBaseTestCase {
+class GoogleMeetTests extends JavaRulesTestBaseCase {
 
     @Getter
     final Rules rulesUnderTest = PrebuiltSanitizerRules.GOOGLE_MEET;

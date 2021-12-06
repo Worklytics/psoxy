@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.rules.google;
 
 import co.worklytics.psoxy.Rules;
+import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
 import co.worklytics.psoxy.rules.RulesBaseTestCase;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -13,7 +14,7 @@ import java.util.Collection;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class GMailTests extends RulesBaseTestCase {
+public class GMailTests extends JavaRulesTestBaseCase {
 
 
     @Getter
