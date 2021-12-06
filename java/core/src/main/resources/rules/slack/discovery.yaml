@@ -1,0 +1,26 @@
+allowedEndpointRegexes:
+  - "^\\/api\\/discovery\\.enterprise\\.info(?:\\?.+)?"
+  - "^\\/api\\/discovery\\.conversations\\.list(?:\\?.+)?"
+  - "^\\/api\\/discovery\\.conversations\\.history(?:\\?.+)?"
+  - "^\\/api\\/discovery\\.users\\.list(?:\\?.+)?"
+pseudonymizations:
+  - jsonPaths:
+      - "$.users[*].id"
+      - "$.users[*].profile.email"
+    relativeUrlRegex: "\\/api\\/discovery\\.users\\.list(?:\\?.+)?"
+  - jsonPaths:
+      - "$.messages[*].user"
+      - "$.messages[*].reactions[*].users[*]"
+      - "$.messages[*].edited.user"
+    relativeUrlRegex: "\\/api\\/discovery\\.conversations\\.history(?:\\?.+)?"
+redactions:
+  - jsonPaths:
+      - "$.users[*]['name','real_name']"
+      - "$.users[*].profile['name','real_name','display_name','display_name_normalized','real_name_normalized','title','phone','skype','first_name','last_name']"
+    relativeUrlRegex: "\\/api\\/discovery\\.users\\.list(?:\\?.+)?"
+  - jsonPaths:
+      - "$.channels[*]['name','topic','purpose']"
+    relativeUrlRegex: "\\/api\\/discovery\\.conversations\\.list(?:\\?.+)?"
+  - jsonPaths:
+      - "$.messages[*]['text','username']"
+    relativeUrlRegex: "\\/api\\/discovery\\.conversations\\.history(?:\\?.+)?"

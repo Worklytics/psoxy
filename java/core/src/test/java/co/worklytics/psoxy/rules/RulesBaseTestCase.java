@@ -3,6 +3,7 @@ package co.worklytics.psoxy.rules;
 import co.worklytics.psoxy.Rules;
 import co.worklytics.psoxy.Sanitizer;
 import co.worklytics.psoxy.impl.SanitizerImpl;
+import co.worklytics.psoxy.rules.google.PrebuiltSanitizerRules;
 import co.worklytics.test.TestUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -14,8 +15,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * abstract test stuff for Rules implementations
@@ -60,6 +60,20 @@ abstract public class RulesBaseTestCase {
     }
 
     @SneakyThrows
+    @Test
+    void validateYamlExample() {
+        String path = "/rules/" + getYamlSerializationFilepath() + ".yaml";
+
+        Rules rulesFromFilesystem = yamlMapper.readerFor(Rules.class)
+            .readValue(PrebuiltSanitizerRules.class.getResource(path));
+
+        assertEquals(
+            yamlMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rulesFromFilesystem),
+            yamlMapper.writerWithDefaultPrettyPrinter().writeValueAsString(getRulesUnderTest()));
+    }
+
+
+    @SneakyThrows
     Rules yamlRoundtrip(Rules rules) {
         String yaml = yamlMapper.writeValueAsString(getRulesUnderTest()).replace("---\n", "");
         return yamlMapper.readerFor(Rules.class).readValue(yaml);
@@ -73,6 +87,10 @@ abstract public class RulesBaseTestCase {
 
     public abstract String getDefaultScopeId();
 
+    /**
+     * eg 'google-workspace/gdrive'
+     */
+    public abstract String getYamlSerializationFilepath();
 
     public abstract Rules getRulesUnderTest();
 

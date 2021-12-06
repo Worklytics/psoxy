@@ -22,6 +22,10 @@ class GoogleChatTests extends RulesBaseTestCase {
     final String defaultScopeId = "gapps";
 
 
+    @Getter
+    final String yamlSerializationFilepath = "google-workspace/google-chat";
+
+
     @SneakyThrows
     @Test
     void google_chat() {

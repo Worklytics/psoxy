@@ -22,6 +22,9 @@ class GoogleMeetTests extends RulesBaseTestCase {
     final String defaultScopeId = "gapps";
 
 
+    @Getter
+    final String yamlSerializationFilepath = "google-workspace/google-meet";
+
     @SneakyThrows
     @Test
     void activities() {

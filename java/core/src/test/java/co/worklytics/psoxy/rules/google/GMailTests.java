@@ -25,6 +25,9 @@ public class GMailTests extends RulesBaseTestCase {
     @Getter
     final String defaultScopeId = "gapps";
 
+    @Getter
+    final String yamlSerializationFilepath = "google-workspace/gmail";
+
     @Test
     @SneakyThrows
     public void sanitizer() {

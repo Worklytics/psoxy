@@ -1,0 +1,14 @@
+allowedEndpointRegexes:
+  - "^/gmail/v1/users/[^/]*?/messages.*"
+emailHeaderPseudonymizations:
+  - jsonPaths:
+      - "$.payload.headers[?(@.name =~ /^(From|To|Cc|Bcc)$/i)].value"
+    relativeUrlRegex: "^/gmail/v1/users/.*?/messages/.*"
+pseudonymizations:
+  - jsonPaths:
+      - "$.payload.headers[?(@.name =~ /^(X-Original-Sender|Delivered-To|Sender|In-Reply-To)$/i)].value"
+    relativeUrlRegex: "^/gmail/v1/users/.*?/messages/.*"
+redactions:
+  - jsonPaths:
+      - "$.payload.headers[?(!(@.name =~ /^From|To|Cc|Bcc|X-Original-Sender|Delivered-To|Sender|In-Reply-To|Message-ID|Date|Original-Message-ID|References$/i))]"
+    relativeUrlRegex: "^/gmail/v1/users/.*?/messages/.*"

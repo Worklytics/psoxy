@@ -23,6 +23,8 @@ public class GDriveTests extends RulesBaseTestCase {
     @Getter
     final String defaultScopeId = "gapps";
 
+    @Getter
+    final String yamlSerializationFilepath = "google-workspace/gdrive";
 
     @SneakyThrows
     @Test

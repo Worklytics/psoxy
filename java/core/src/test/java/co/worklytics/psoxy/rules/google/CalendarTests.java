@@ -22,6 +22,10 @@ class CalendarTests extends RulesBaseTestCase {
     @Getter
     final String defaultScopeId = "gapps";
 
+
+    @Getter
+    final String yamlSerializationFilepath = "google-workspace/calendar";
+
     @SneakyThrows
     @Test
     void events_privacy() {

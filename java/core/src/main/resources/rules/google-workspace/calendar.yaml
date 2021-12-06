@@ -1,0 +1,27 @@
+allowedEndpointRegexes:
+  - "^/calendar/v3/calendars/[^/]*?$"
+  - "^/calendar/v3/calendars/[^/]*?/events.*"
+  - "^/calendar/v3/users/[^/]*?/settings.*"
+pseudonymizations:
+  - jsonPaths:
+      - "$..email"
+    relativeUrlRegex: "^/calendar/v3/calendars/.*/events.*"
+  - jsonPaths:
+      - "$.id"
+    relativeUrlRegex: "^/calendar/v3/calendars/[^/]*?$"
+redactions:
+  - jsonPaths:
+      - "$..displayName"
+      - "$.items[*].extendedProperties.private"
+    relativeUrlRegex: "^/calendar/v3/calendars/.*/events.*"
+  - jsonPaths:
+      - "$.summary"
+    relativeUrlRegex: "^/calendar/v3/calendars/[^/]*?$"
+  - jsonPaths:
+      - "$.description"
+      - "$.summary"
+    relativeUrlRegex: "^/calendar/v3/calendars/.*/events/.*"
+  - jsonPaths:
+      - "$.items[*].description"
+      - "$.items[*].summary"
+    relativeUrlRegex: "^/calendar/v3/calendars/.*/events[^/]*\\??[^/]*$"

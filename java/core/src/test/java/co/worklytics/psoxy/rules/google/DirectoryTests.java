@@ -27,6 +27,10 @@ public class DirectoryTests extends RulesBaseTestCase {
     final String defaultScopeId = "gapps";
 
 
+    @Getter
+    final String yamlSerializationFilepath = "google-workspace/directory";
+
+
     @SneakyThrows
     @Test
     void user() {
