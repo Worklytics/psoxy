@@ -90,7 +90,7 @@ public class DirectoryTests extends RulesBaseTestCase {
     @SneakyThrows
     @Test
     void group() {
-        String groupEndpoint = "https://admin.googleapis.com/admin/directory/v1/groups/asdfas";
+        String groupEndpoint = "https://admin.googleapis.com/admin/directory/v1/groups/an-arbitrary-subresource";
         String jsonString = asJson("group.json");
 
         assertNotSanitized(jsonString, Arrays.asList("Anyone sales person in our organization."));
