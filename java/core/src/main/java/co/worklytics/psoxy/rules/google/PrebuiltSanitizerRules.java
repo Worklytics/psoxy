@@ -185,6 +185,12 @@ public class PrebuiltSanitizerRules {
                 .jsonPath("$..description")
                 .build()
         )
+        .redaction(
+            Rule.builder()
+                .relativeUrlRegex("^/admin/directory/v1/customer/.*/roles.*")
+                .jsonPath("$..roleDescription")
+                .build()
+        )
         .build();
 
     static final Rules GDRIVE = Rules.builder()
