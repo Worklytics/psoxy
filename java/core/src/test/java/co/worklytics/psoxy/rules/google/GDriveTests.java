@@ -52,7 +52,7 @@ public class GDriveTests extends RulesBaseTestCase {
     @SneakyThrows
     @Test
     void revisions() {
-        String endpoint = "http://www.googleapis.com/drive/v2/files/Asdfasdfas/revisions";
+        String endpoint = "http://www.googleapis.com/drive/v2/files/any-file-id/revisions";
         String jsonString = asJson("revisions.json");
 
         //verify precondition that example actually contains something we need to pseudonymize
@@ -73,7 +73,7 @@ public class GDriveTests extends RulesBaseTestCase {
     @SneakyThrows
     @Test
     void permissions() {
-        String endpoint = "http://www.googleapis.com/drive/v2/files/Asdfasdfas/permissions";
+        String endpoint = "http://www.googleapis.com/drive/v2/files/any-file-id/permissions";
 
         //TODO: content test (although in theory, utilizes $..email pattern, so should be safe)
 

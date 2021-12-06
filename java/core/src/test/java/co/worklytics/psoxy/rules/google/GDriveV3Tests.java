@@ -10,8 +10,6 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 public class GDriveV3Tests extends RulesBaseTestCase {
 
     @Getter
@@ -56,7 +54,7 @@ public class GDriveV3Tests extends RulesBaseTestCase {
         assertNotSanitized(jsonString, PII);
 
         String sanitized =
-            sanitizer.sanitize(new URL("http://www.googleapis.com/drive/v3/files/Asdfasdfas/revisions"), jsonString);
+            sanitizer.sanitize(new URL("http://www.googleapis.com/drive/v3/files/any-file-id/revisions"), jsonString);
 
         assertPseudonymized(sanitized, PII);
         assertRedacted(sanitized, "Alice", "Paul");
@@ -74,7 +72,7 @@ public class GDriveV3Tests extends RulesBaseTestCase {
         assertNotSanitized(jsonString, PII);
 
         String sanitized =
-            sanitizer.sanitize(new URL("http://www.googleapis.com/drive/v3/files/Asdfasdfas/revision/asdfasdf"), jsonString);
+            sanitizer.sanitize(new URL("http://www.googleapis.com/drive/v3/files/any-file-id/revision/any-revision-id"), jsonString);
 
         assertPseudonymized(sanitized, PII);
         assertRedacted(sanitized, "Alice", "Paul");
