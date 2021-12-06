@@ -100,16 +100,38 @@ public class Route implements HttpFunction {
         return Optional.empty();
     }
 
+    /**
+     * @return rules parsed from config, presumed to be base64-encoded YAML
+     */
+    @SneakyThrows
+    Optional<Rules> getRulesFromConfig() {
+        return getConfig().getConfigPropertyAsOptional(ProxyConfigProperty.RULES)
+            .map(base64encoded -> Base64.getDecoder().decode(base64encoded))
+            .map(yamlString -> {
+                try {
+                    return yamlMapper.readerFor(Rules.class).readValue(yamlString);
+                } catch (IOException e) {
+                    throw new IllegalStateException("Invalid rules configured", e);
+                }
+            });
+    }
+
     void initSanitizer() {
         Optional<Rules> fileSystemRules = getRulesFromFileSystem(Optional.empty());
         if (fileSystemRules.isPresent()) {
             log.info("using rules from file system");
         }
         Rules rules = fileSystemRules.orElseGet(() -> {
-            String source = getConfig().getConfigPropertyOrError(ProxyConfigProperty.SOURCE);
-            log.info("using prebuilt rules for: " + source);
-            return PrebuiltSanitizerRules.MAP.get(source);
-        });
+                Optional<Rules> configRules = getRulesFromConfig();
+                if (configRules.isPresent()) {
+                    log.info("using rules from config");
+                }
+                return configRules.orElseGet(() -> {
+                    String source = getConfig().getConfigPropertyOrError(ProxyConfigProperty.SOURCE);
+                    log.info("using prebuilt rules for: " + source);
+                    return PrebuiltSanitizerRules.MAP.get(source);
+                });
+            });
 
         sanitizer = new SanitizerImpl(
             Sanitizer.Options.builder()

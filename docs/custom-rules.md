@@ -14,7 +14,8 @@ To deploy your modified rules, either:
 
 ### Curl
 
-After deploying your rules, should
+After deploying your rules, you can test them with the the example commands found in 
+[`docs/example-api-calls/`]('example-api-calls/)
 
 ### Continuous Integration with Java
 To continuously test your rules, you should create your one private fork of the psoxy repo and write
