@@ -6,6 +6,7 @@ import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.gateway.impl.OAuthAccessTokenSourceAuthStrategy;
 import co.worklytics.psoxy.gateway.impl.OAuthRefreshTokenSourceAuthStrategy;
 import co.worklytics.psoxy.impl.SanitizerImpl;
+import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.psoxy.rules.Validator;
 import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
 
@@ -64,6 +65,7 @@ public class Route implements HttpFunction {
     Sanitizer sanitizer;
     SourceAuthStrategy sourceAuthStrategy;
     ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
+    RulesUtils rulesUtils = new RulesUtils();
 
     SourceAuthStrategy getSourceAuthStrategy() {
         if (sourceAuthStrategy == null) {
@@ -109,7 +111,9 @@ public class Route implements HttpFunction {
             .map(base64encoded -> Base64.getDecoder().decode(base64encoded))
             .map(yamlString -> {
                 try {
-                    return yamlMapper.readerFor(Rules.class).readValue(yamlString);
+                    Rules rules = yamlMapper.readerFor(Rules.class).readValue(yamlString);
+                    Validator.validate(rules);
+                    return rules;
                 } catch (IOException e) {
                     throw new IllegalStateException("Invalid rules configured", e);
                 }
@@ -182,7 +186,7 @@ public class Route implements HttpFunction {
         boolean skipSanitizer = isConfiguredToSkipSanitizer() && isRequestedToSkipSanitizer(request);
 
         if (skipSanitizer || sanitizer.isAllowed(targetUrl)) {
-            log.info("Proxy invoked with target: " + URLUtils.relativeURL(targetUrl));
+            log.info("Proxy invoked with target " + URLUtils.relativeURL(targetUrl));
         } else {
             response.setStatusCode(403, "Endpoint forbidden by proxy rule set");
             log.warning("Attempt to call endpoint blocked by rules: " + targetUrl);
@@ -229,6 +233,9 @@ public class Route implements HttpFunction {
                 proxyResponseContent = responseContent;
             }  else {
                 proxyResponseContent = sanitizer.sanitize(targetUrl, responseContent);
+                String rulesSha = rulesUtils.sha(sanitizer.getOptions().getRules());
+                response.appendHeader(ResponseHeader.RULES_SHA.getHttpHeader(), rulesSha);
+                log.info("response sanitized with rule set " + rulesSha);
             }
         } else {
             //write error, which shouldn't contain PII, directly
