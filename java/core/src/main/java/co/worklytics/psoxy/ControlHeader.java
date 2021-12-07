@@ -23,6 +23,13 @@ public enum ControlHeader {
      * intended to be forwarded to source
      */
     HEALTH_CHECK("Health-Check"),
+    /**
+     * whether to skip sanitizer (for testing purposes, to obtain unsanitized baseline to compare
+     *  with sanitized output)
+     * this is respected ONLY if env var SKIP_SANITIZER is also set:
+     * @see co.worklytics.psoxy.gateway.ProxyConfigProperty.SKIP_SANITIZER
+     */
+    SKIP_SANITIZER("Skip-Sanitizer"),
     ;
 
     @NonNull

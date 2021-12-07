@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.rules.google;
 
 import co.worklytics.psoxy.Rules;
+import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
 import co.worklytics.psoxy.rules.RulesBaseTestCase;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -10,7 +11,7 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 
-class GoogleChatTests extends RulesBaseTestCase {
+class GoogleChatTests extends JavaRulesTestBaseCase {
 
     @Getter
     final Rules rulesUnderTest = PrebuiltSanitizerRules.GOOGLE_CHAT;
@@ -20,6 +21,10 @@ class GoogleChatTests extends RulesBaseTestCase {
 
     @Getter
     final String defaultScopeId = "gapps";
+
+
+    @Getter
+    final String yamlSerializationFilepath = "google-workspace/google-chat";
 
 
     @SneakyThrows

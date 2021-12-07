@@ -69,4 +69,5 @@ public interface Sanitizer {
      */
     PseudonymizedIdentity pseudonymize(Number identifier);
 
+    Options getOptions();
 }

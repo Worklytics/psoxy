@@ -1,0 +1,11 @@
+allowedEndpointRegexes:
+  - "^/admin/reports/v1/activity/users/all/applications/meet.*"
+pseudonymizations:
+  - jsonPaths:
+      - "$..email"
+      - "$.items[*].events[*].parameters[?(@.name in ['organizer_email','ip_address','identifier'])].value"
+    relativeUrlRegex: "/admin/reports/v1/activity/users/all/applications/meet.*"
+redactions:
+  - jsonPaths:
+      - "$.items[*].events[*].parameters[?(!(@.name =~ /^organizer_email|ip_address|identifier|location_country|location_region|is_external|product_type|device_type|video_send_seconds|video_recv_seconds|screencast_send_seconds|screencast_recv_seconds|audio_send_seconds|audio_recv_seconds|calendar_event_id|endpoint_id|meeting_code|conference_id$/i))]"
+    relativeUrlRegex: "^/admin/reports/v1/activity/users/all/applications/meet.*"

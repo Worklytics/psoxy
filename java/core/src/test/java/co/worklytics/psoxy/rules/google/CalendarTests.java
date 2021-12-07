@@ -1,7 +1,7 @@
 package co.worklytics.psoxy.rules.google;
 
 import co.worklytics.psoxy.Rules;
-import co.worklytics.psoxy.rules.RulesBaseTestCase;
+import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 
-class CalendarTests extends RulesBaseTestCase {
+class CalendarTests extends JavaRulesTestBaseCase {
 
     @Getter
     final Rules rulesUnderTest = PrebuiltSanitizerRules.GCAL;
@@ -21,6 +21,10 @@ class CalendarTests extends RulesBaseTestCase {
 
     @Getter
     final String defaultScopeId = "gapps";
+
+
+    @Getter
+    final String yamlSerializationFilepath = "google-workspace/calendar";
 
     @SneakyThrows
     @Test

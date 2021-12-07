@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.rules.google;
 
 import co.worklytics.psoxy.Rules;
+import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
 import co.worklytics.psoxy.rules.RulesBaseTestCase;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -12,7 +13,7 @@ import java.util.Collection;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class GDriveV3Tests extends RulesBaseTestCase {
+public class GDriveV3Tests extends JavaRulesTestBaseCase {
 
     @Getter
     final Rules rulesUnderTest = PrebuiltSanitizerRules.GDRIVE;
@@ -22,6 +23,10 @@ public class GDriveV3Tests extends RulesBaseTestCase {
 
     @Getter
     final String defaultScopeId = "gapps";
+
+
+    @Getter
+    final String yamlSerializationFilepath = "google-workspace/gdrive";
 
 
     @SneakyThrows

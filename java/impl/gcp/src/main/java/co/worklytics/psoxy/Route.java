@@ -6,13 +6,12 @@ import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.gateway.impl.OAuthAccessTokenSourceAuthStrategy;
 import co.worklytics.psoxy.gateway.impl.OAuthRefreshTokenSourceAuthStrategy;
 import co.worklytics.psoxy.impl.SanitizerImpl;
-import co.worklytics.psoxy.rules.Validator;
+import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
 
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.utils.URLUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpTransport;
@@ -29,7 +28,6 @@ import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -63,7 +61,8 @@ public class Route implements HttpFunction {
     ConfigService config  = new EnvVarsConfigService();
     Sanitizer sanitizer;
     SourceAuthStrategy sourceAuthStrategy;
-    ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
+    RulesUtils rulesUtils = new RulesUtils();
+    ObjectMapper objectMapper = new ObjectMapper();
 
     SourceAuthStrategy getSourceAuthStrategy() {
         if (sourceAuthStrategy == null) {
@@ -80,36 +79,22 @@ public class Route implements HttpFunction {
         return sourceAuthStrategy;
     }
 
-    /**
-     * provides option to for customers to override rules for a source with custom ones defined in a
-     * YAML file. Not really recommended, as complicates deployment (must add the file to
-     * `target/deployment` before calling the gcloud deploy cmmd), but we provide the option should
-     * advanced users want more control.
-     *
-     * @param pathToRulesFile path to rules; for testing
-     * @return rules, if defined, from file system
-     */
-    @SneakyThrows
-    Optional<Rules> getRulesFromFileSystem(Optional<String> pathToRulesFile) {
-        File rulesFile = new File(pathToRulesFile.orElse(PATH_TO_RULES_FILES));
-        if (rulesFile.exists()) {
-            Rules rules = yamlMapper.readerFor(Rules.class).readValue(rulesFile);
-            Validator.validate(rules);
-            return Optional.of(rules);
-        }
-        return Optional.empty();
-    }
-
     void initSanitizer() {
-        Optional<Rules> fileSystemRules = getRulesFromFileSystem(Optional.empty());
+        Optional<Rules> fileSystemRules = rulesUtils.getRulesFromFileSystem(PATH_TO_RULES_FILES);
         if (fileSystemRules.isPresent()) {
             log.info("using rules from file system");
         }
         Rules rules = fileSystemRules.orElseGet(() -> {
-            String source = getConfig().getConfigPropertyOrError(ProxyConfigProperty.SOURCE);
-            log.info("using prebuilt rules for: " + source);
-            return PrebuiltSanitizerRules.MAP.get(source);
-        });
+                Optional<Rules> configRules = rulesUtils.getRulesFromConfig(getConfig());
+                if (configRules.isPresent()) {
+                    log.info("using rules from environment config (RULES variable parsed as base64-encoded YAML)");
+                }
+                return configRules.orElseGet(() -> {
+                    String source = getConfig().getConfigPropertyOrError(ProxyConfigProperty.SOURCE);
+                    log.info("using prebuilt rules for: " + source);
+                    return PrebuiltSanitizerRules.MAP.get(source);
+                });
+            });
 
         sanitizer = new SanitizerImpl(
             Sanitizer.Options.builder()
@@ -119,6 +104,20 @@ public class Route implements HttpFunction {
                 .defaultScopeId(getConfig().getConfigPropertyAsOptional(ProxyConfigProperty.IDENTIFIER_SCOPE_ID)
                     .orElse(rules.getDefaultScopeIdForSource()))
                 .build());
+
+        if (isDevelopmentMode()) {
+            log.warning("Proxy instance configured in development mode (env var IS_DEVELOPMENT_MODE=true)");
+        }
+    }
+
+    boolean isDevelopmentMode() {
+        return config.getConfigPropertyAsOptional(ProxyConfigProperty.IS_DEVELOPMENT_MODE)
+            .map(Boolean::parseBoolean).orElse(false);
+    }
+
+    boolean isRequestedToSkipSanitizer(HttpRequest request) {
+        return request.getFirstHeader(ControlHeader.SKIP_SANITIZER.getHttpHeader())
+            .map(Boolean::parseBoolean).orElse(false);
     }
 
     @Override
@@ -136,7 +135,6 @@ public class Route implements HttpFunction {
             initSanitizer();
         }
 
-
         //is there a lifecycle to initialize request factory??
         HttpRequestFactory requestFactory = getRequestFactory(request);
 
@@ -144,8 +142,10 @@ public class Route implements HttpFunction {
         //TODO: switch on method to support HEAD, etc
         URL targetUrl = buildTarget(request);
 
-        if (sanitizer.isAllowed(targetUrl)) {
-            log.info("Proxy invoked with target: " + URLUtils.relativeURL(targetUrl));
+        boolean skipSanitizer = isDevelopmentMode() && isRequestedToSkipSanitizer(request);
+
+        if (skipSanitizer || sanitizer.isAllowed(targetUrl)) {
+            log.info("Proxy invoked with target " + URLUtils.relativeURL(targetUrl));
         } else {
             response.setStatusCode(403, "Endpoint forbidden by proxy rule set");
             log.warning("Attempt to call endpoint blocked by rules: " + targetUrl);
@@ -185,22 +185,29 @@ public class Route implements HttpFunction {
 
         String responseContent =
             new String(sourceApiResponse.getContent().readAllBytes(), sourceApiResponse.getContentCharset());
+
+        String proxyResponseContent;
         if (isSuccessFamily(sourceApiResponse.getStatusCode())) {
-            String pseudonymized = sanitizer.sanitize(targetUrl, responseContent);
-            new ByteArrayInputStream(pseudonymized.getBytes(StandardCharsets.UTF_8))
-                .transferTo(response.getOutputStream());
+            if (skipSanitizer) {
+                proxyResponseContent = responseContent;
+            }  else {
+                proxyResponseContent = sanitizer.sanitize(targetUrl, responseContent);
+                String rulesSha = rulesUtils.sha(sanitizer.getOptions().getRules());
+                response.appendHeader(ResponseHeader.RULES_SHA.getHttpHeader(), rulesSha);
+                log.info("response sanitized with rule set " + rulesSha);
+            }
         } else {
             //write error, which shouldn't contain PII, directly
             log.log(Level.WARNING, "Source API Error " + responseContent);
             //TODO: could run this through DLP to be extra safe
-            new ByteArrayInputStream(responseContent.getBytes(StandardCharsets.UTF_8))
-                .transferTo(response.getOutputStream());
+            proxyResponseContent = responseContent;
         }
+
+        new ByteArrayInputStream(proxyResponseContent.getBytes(StandardCharsets.UTF_8))
+            .transferTo(response.getOutputStream());
     }
 
     private void doHealthCheck(HttpRequest request, HttpResponse response) {
-        ObjectMapper objectMapper = new ObjectMapper();
-
         Set<String> missing =
             getSourceAuthStrategy().getRequiredConfigProperties().stream()
                 .filter(configProperty -> getConfig().getConfigPropertyAsOptional(configProperty).isEmpty())
@@ -231,7 +238,6 @@ public class Route implements HttpFunction {
     boolean isSuccessFamily (int statusCode) {
         return statusCode >= 200 && statusCode < 300;
     }
-
 
     @SneakyThrows
     URL buildTarget(HttpRequest request) {

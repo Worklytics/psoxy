@@ -1,0 +1,34 @@
+allowedEndpointRegexes:
+  - "^/drive/v2/files.*"
+  - "^/drive/v3/files.*"
+pseudonymizations:
+  - jsonPaths:
+      - "$..emailAddress"
+    relativeUrlRegex: "^/drive/v2/files.*"
+  - jsonPaths:
+      - "$..emailAddress"
+    relativeUrlRegex: "^/drive/v3/files.*"
+redactions:
+  - jsonPaths:
+      - "$.name"
+      - "$..displayName"
+      - "$..picture"
+      - "$.lastModifyingUserName"
+      - "$.items[*].lastModifyingUserName"
+      - "$.ownerNames"
+      - "$.items[*].ownerNames"
+    relativeUrlRegex: "^/drive/v2/files.*"
+  - jsonPaths:
+      - "$.originalFilename"
+      - "$.items[*].originalFilename"
+    relativeUrlRegex: "^/drive/v2/files/.*?/revisions.*"
+  - jsonPaths:
+      - "$.name"
+      - "$..displayName"
+      - "$..photoLink"
+      - "$.files[*].name"
+    relativeUrlRegex: "^/drive/v3/files.*"
+  - jsonPaths:
+      - "$.originalFilename"
+      - "$.files[*].originalFilename"
+    relativeUrlRegex: "^/drive/v3/files/.*?/revisions.*"
