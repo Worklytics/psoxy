@@ -15,6 +15,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public abstract class JavaRulesTestBaseCase extends RulesBaseTestCase {
 
 
+    //TODO: we could avoid this if java rules serialized to YAML as part of build process or
+    // something, rather than under version control themselves; or flip so that master copy is the
+    // yaml and java ones read from file system??
     @SneakyThrows
     @Test
     void validateYamlExample() {

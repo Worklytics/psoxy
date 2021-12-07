@@ -2,7 +2,6 @@ package co.worklytics.psoxy.rules.google;
 
 import co.worklytics.psoxy.Rules;
 import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
-import co.worklytics.psoxy.rules.RulesBaseTestCase;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;

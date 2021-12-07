@@ -70,3 +70,6 @@ redactions:
   - jsonPaths:
       - "$..description"
     relativeUrlRegex: "^/admin/directory/v1/orgunits.*"
+  - jsonPaths:
+      - "$..roleDescription"
+    relativeUrlRegex: "^/admin/directory/v1/customer/.*/roles.*"
