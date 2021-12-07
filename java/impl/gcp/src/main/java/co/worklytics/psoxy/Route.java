@@ -87,7 +87,7 @@ public class Route implements HttpFunction {
         Rules rules = fileSystemRules.orElseGet(() -> {
                 Optional<Rules> configRules = rulesUtils.getRulesFromConfig(getConfig());
                 if (configRules.isPresent()) {
-                    log.info("using rules from config");
+                    log.info("using rules from environment config (RULES variable parsed as base64-encoded YAML)");
                 }
                 return configRules.orElseGet(() -> {
                     String source = getConfig().getConfigPropertyOrError(ProxyConfigProperty.SOURCE);
@@ -105,13 +105,13 @@ public class Route implements HttpFunction {
                     .orElse(rules.getDefaultScopeIdForSource()))
                 .build());
 
-        if (isConfiguredToSkipSanitizer()) {
-            log.warning("Proxy instance configured to skip sanitizer (env var SKIP_SANITIZER=true); this should be done ONLY for testing");
+        if (isDevelopmentMode()) {
+            log.warning("Proxy instance configured in development mode (env var IS_DEVELOPMENT_MODE=true)");
         }
     }
 
-    boolean isConfiguredToSkipSanitizer() {
-        return config.getConfigPropertyAsOptional(ProxyConfigProperty.SKIP_SANITIZER)
+    boolean isDevelopmentMode() {
+        return config.getConfigPropertyAsOptional(ProxyConfigProperty.IS_DEVELOPMENT_MODE)
             .map(Boolean::parseBoolean).orElse(false);
     }
 
@@ -142,7 +142,7 @@ public class Route implements HttpFunction {
         //TODO: switch on method to support HEAD, etc
         URL targetUrl = buildTarget(request);
 
-        boolean skipSanitizer = isConfiguredToSkipSanitizer() && isRequestedToSkipSanitizer(request);
+        boolean skipSanitizer = isDevelopmentMode() && isRequestedToSkipSanitizer(request);
 
         if (skipSanitizer || sanitizer.isAllowed(targetUrl)) {
             log.info("Proxy invoked with target " + URLUtils.relativeURL(targetUrl));

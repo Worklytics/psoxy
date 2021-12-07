@@ -8,8 +8,9 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
     PSOXY_SALT,
     // if set, a base64-YAML encoding of rules
     RULES,
-    // for testing - if set, allows proxy to skip sanitizer if corresponding header is sent
-    SKIP_SANITIZER, //q: better to just have a IS_TEST_ENV variable?
+    // for testing - if set, allows for behavior that should only be permitted in development context,
+    // such as to skip sanitizer if corresponding header is sent
+    IS_DEVELOPMENT_MODE,
     SOURCE,
     SOURCE_AUTH_STRATEGY_IDENTIFIER,
     //target API endpoint to forward request to

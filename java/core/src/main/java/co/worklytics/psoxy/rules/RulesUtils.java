@@ -46,6 +46,9 @@ public class RulesUtils {
 
     /**
      * @return rules parsed from config, presumed to be base64-encoded YAML
+     * @throws IllegalArgumentException if config property's value is not valid base64
+     * @throws IOException if can't parse YAML --> Java object, specifically:
+     * @see com.fasterxml.jackson.core.JsonParseException sry for the misnomer, but we leverage Jackson for both YAML and JSON
      */
     @SneakyThrows
     public Optional<Rules> getRulesFromConfig(ConfigService config) {

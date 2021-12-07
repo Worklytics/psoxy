@@ -1,6 +1,6 @@
 # Custom Rules
 
-Predefined sanitization rules are defined in java, with YAML equivalents available in [`java/core/src/main/resources/rules/`](../java/core/src/main/resources/rules). To customize these rules, you should begin with one of those
+Predefined sanitization rules are defined in Java, with YAML equivalents available in [`java/core/src/main/resources/rules/`](../java/core/src/main/resources/rules). To customize these rules, you should begin with one of those
 examples and modify it to suit your needs.
 
 ## Deployment
@@ -14,7 +14,7 @@ To deploy your modified rules, either:
 
 ### Curl
 
-After deploying your rules, you can test them with the the example commands found in 
+After deploying your rules, you can test them with the the example commands found in
 [`docs/example-api-calls/`]('example-api-calls/)
 
 ### Continuous Integration with Java
