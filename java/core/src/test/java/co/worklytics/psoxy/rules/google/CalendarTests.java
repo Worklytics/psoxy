@@ -36,11 +36,13 @@ class CalendarTests extends JavaRulesTestBaseCase {
             "alice@worklytics.co"
         );
         assertNotSanitized(jsonString, PII);
+        assertNotSanitized(jsonString, "calendar-owner@acme.com");
 
         String sanitized =
             sanitizer.sanitize(new URL("http://calendar.googleapis.com/calendar/v3/calendars/primary/events"), jsonString);
 
         assertPseudonymized(sanitized, PII);
+        assertRedacted(sanitized, "calendar-owner@acme.com");
     }
 
     @SneakyThrows

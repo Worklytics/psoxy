@@ -48,6 +48,7 @@ public class PrebuiltSanitizerRules {
             .build())
         .redaction(Rule.builder()
             .relativeUrlRegex("^/calendar/v3/calendars/.*/events[^/]*\\??[^/]*$")
+            .jsonPath("$.summary") // summary value of calendar *itself* is returned by events list endpoint
             .jsonPath("$.items[*].description")
             .jsonPath("$.items[*].summary")
             .build())
@@ -182,6 +183,12 @@ public class PrebuiltSanitizerRules {
             Rule.builder()
                 .relativeUrlRegex("^/admin/directory/v1/orgunits.*")
                 .jsonPath("$..description")
+                .build()
+        )
+        .redaction(
+            Rule.builder()
+                .relativeUrlRegex("^/admin/directory/v1/customer/.*/roles.*")
+                .jsonPath("$..roleDescription")
                 .build()
         )
         .build();

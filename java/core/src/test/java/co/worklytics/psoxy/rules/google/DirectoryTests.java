@@ -155,4 +155,17 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
         assertRedacted(sanitized, "alice@worklytics.co");
         assertRedacted(sanitized, "photoData");
     }
+
+    @SneakyThrows
+    @Test
+    public void roles() {
+        String jsonString = asJson("roles.json");
+
+        String endpoint = "https://admin.googleapis.co/admin/directory/v1/customer/my_customer/roles";
+        assertNotSanitized(jsonString, "Google Apps Administrator Seed Role");
+
+        String sanitized = this.sanitizer.sanitize(new URL(endpoint), jsonString);
+
+        assertRedacted(sanitized, "Google Apps Administrator Seed Role");
+    }
 }
