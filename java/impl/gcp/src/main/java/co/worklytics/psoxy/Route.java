@@ -7,13 +7,11 @@ import co.worklytics.psoxy.gateway.impl.OAuthAccessTokenSourceAuthStrategy;
 import co.worklytics.psoxy.gateway.impl.OAuthRefreshTokenSourceAuthStrategy;
 import co.worklytics.psoxy.impl.SanitizerImpl;
 import co.worklytics.psoxy.rules.RulesUtils;
-import co.worklytics.psoxy.rules.Validator;
 import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
 
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.utils.URLUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpTransport;
@@ -30,7 +28,6 @@ import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -64,8 +61,8 @@ public class Route implements HttpFunction {
     ConfigService config  = new EnvVarsConfigService();
     Sanitizer sanitizer;
     SourceAuthStrategy sourceAuthStrategy;
-    ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
     RulesUtils rulesUtils = new RulesUtils();
+    ObjectMapper objectMapper = new ObjectMapper();
 
     SourceAuthStrategy getSourceAuthStrategy() {
         if (sourceAuthStrategy == null) {
@@ -82,51 +79,13 @@ public class Route implements HttpFunction {
         return sourceAuthStrategy;
     }
 
-    /**
-     * provides option to for customers to override rules for a source with custom ones defined in a
-     * YAML file. Not really recommended, as complicates deployment (must add the file to
-     * `target/deployment` before calling the gcloud deploy cmmd), but we provide the option should
-     * advanced users want more control.
-     *
-     * @param pathToRulesFile path to rules; for testing
-     * @return rules, if defined, from file system
-     */
-    @SneakyThrows
-    Optional<Rules> getRulesFromFileSystem(Optional<String> pathToRulesFile) {
-        File rulesFile = new File(pathToRulesFile.orElse(PATH_TO_RULES_FILES));
-        if (rulesFile.exists()) {
-            Rules rules = yamlMapper.readerFor(Rules.class).readValue(rulesFile);
-            Validator.validate(rules);
-            return Optional.of(rules);
-        }
-        return Optional.empty();
-    }
-
-    /**
-     * @return rules parsed from config, presumed to be base64-encoded YAML
-     */
-    @SneakyThrows
-    Optional<Rules> getRulesFromConfig() {
-        return getConfig().getConfigPropertyAsOptional(ProxyConfigProperty.RULES)
-            .map(base64encoded -> Base64.getDecoder().decode(base64encoded))
-            .map(yamlString -> {
-                try {
-                    Rules rules = yamlMapper.readerFor(Rules.class).readValue(yamlString);
-                    Validator.validate(rules);
-                    return rules;
-                } catch (IOException e) {
-                    throw new IllegalStateException("Invalid rules configured", e);
-                }
-            });
-    }
-
     void initSanitizer() {
-        Optional<Rules> fileSystemRules = getRulesFromFileSystem(Optional.empty());
+        Optional<Rules> fileSystemRules = rulesUtils.getRulesFromFileSystem(PATH_TO_RULES_FILES);
         if (fileSystemRules.isPresent()) {
             log.info("using rules from file system");
         }
         Rules rules = fileSystemRules.orElseGet(() -> {
-                Optional<Rules> configRules = getRulesFromConfig();
+                Optional<Rules> configRules = rulesUtils.getRulesFromConfig(getConfig());
                 if (configRules.isPresent()) {
                     log.info("using rules from config");
                 }
@@ -249,8 +208,6 @@ public class Route implements HttpFunction {
     }
 
     private void doHealthCheck(HttpRequest request, HttpResponse response) {
-        ObjectMapper objectMapper = new ObjectMapper();
-
         Set<String> missing =
             getSourceAuthStrategy().getRequiredConfigProperties().stream()
                 .filter(configProperty -> getConfig().getConfigPropertyAsOptional(configProperty).isEmpty())
@@ -281,7 +238,6 @@ public class Route implements HttpFunction {
     boolean isSuccessFamily (int statusCode) {
         return statusCode >= 200 && statusCode < 300;
     }
-
 
     @SneakyThrows
     URL buildTarget(HttpRequest request) {
