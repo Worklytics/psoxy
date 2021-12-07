@@ -1,7 +1,7 @@
 {
   "kind": "calendar#events",
   "etag": "\"p32cen2vjtn1f60g\"",
-  "summary": "asdfasdf ",
+  "summary": "calendar-owner@acme.com",
   "updated": "2021-10-11T17:14:59.183Z",
   "timeZone": "America/Los_Angeles",
   "accessRole": "owner",
