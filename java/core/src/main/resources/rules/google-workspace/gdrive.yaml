@@ -2,14 +2,15 @@ allowedEndpointRegexes:
   - "^/drive/v2/files.*"
   - "^/drive/v3/files.*"
 pseudonymizations:
-  - jsonPaths:
+  - relativeUrlRegex: "^/drive/v2/files.*"
+    jsonPaths:
       - "$..emailAddress"
-    relativeUrlRegex: "^/drive/v2/files.*"
-  - jsonPaths:
+  - relativeUrlRegex: "^/drive/v3/files.*"
+    jsonPaths:
       - "$..emailAddress"
-    relativeUrlRegex: "^/drive/v3/files.*"
 redactions:
-  - jsonPaths:
+  - relativeUrlRegex: "^/drive/v2/files.*"
+    jsonPaths:
       - "$.name"
       - "$..displayName"
       - "$..picture"
@@ -17,18 +18,30 @@ redactions:
       - "$.items[*].lastModifyingUserName"
       - "$.ownerNames"
       - "$.items[*].ownerNames"
-    relativeUrlRegex: "^/drive/v2/files.*"
-  - jsonPaths:
+  - relativeUrlRegex: "^/drive/v2/files/.*?/revisions.*"
+    jsonPaths:
       - "$.originalFilename"
       - "$.items[*].originalFilename"
-    relativeUrlRegex: "^/drive/v2/files/.*?/revisions.*"
-  - jsonPaths:
+  - relativeUrlRegex: "^/drive/v2/files/.*?/permissions*"
+    jsonPaths:
+      - "$.name"
+      - "$.photoLink"
+      - "$.items[*].name"
+      - "$.items[*].photoLink"
+  - relativeUrlRegex: "^/drive/v3/files.*"
+    jsonPaths:
       - "$.name"
       - "$..displayName"
       - "$..photoLink"
       - "$.files[*].name"
-    relativeUrlRegex: "^/drive/v3/files.*"
-  - jsonPaths:
+  - relativeUrlRegex: "^/drive/v3/files/.*?/revisions.*"
+    jsonPaths:
       - "$.originalFilename"
       - "$.files[*].originalFilename"
-    relativeUrlRegex: "^/drive/v3/files/.*?/revisions.*"
+  - relativeUrlRegex: "^/drive/v2/files/.*?/permissions*"
+    jsonPaths:
+      - "$.displayName"
+      - "$.photoLink"
+      - "$.permissions[*].displayName"
+      - "$.permissions[*].photoLink"
+

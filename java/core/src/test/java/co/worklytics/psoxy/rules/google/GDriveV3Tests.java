@@ -84,4 +84,43 @@ public class GDriveV3Tests extends JavaRulesTestBaseCase {
         assertPseudonymized(sanitized, PII);
         assertRedacted(sanitized, "Alice", "Paul");
     }
+
+    @SneakyThrows
+    @Test
+    void permissions() {
+        String jsonString = asJson("permissions.json");
+
+        //verify precondition that example actually contains something we need to pseudonymize
+        Collection<String> PII = Arrays.asList(
+            "alice@worklytics.co"
+        );
+        assertNotSanitized(jsonString, PII);
+        assertNotSanitized(jsonString, "Alice");
+
+        String sanitized =
+            sanitizer.sanitize(new URL("http://www.googleapis.com/drive/v3/files/some-file-id/permissions"), jsonString);
+
+        assertPseudonymized(sanitized, PII);
+        assertRedacted(sanitized, "Alice");
+    }
+
+
+    @SneakyThrows
+    @Test
+    void permission() {
+        String jsonString = asJson("permission.json");
+
+        //verify precondition that example actually contains something we need to pseudonymize
+        Collection<String> PII = Arrays.asList(
+            "alice@worklytics.co"
+        );
+        assertNotSanitized(jsonString, PII);
+        assertNotSanitized(jsonString, "Alice");
+
+        String sanitized =
+            sanitizer.sanitize(new URL("http://www.googleapis.com/drive/v3/files/some-file-id/permissions/234234"), jsonString);
+
+        assertPseudonymized(sanitized, PII);
+        assertRedacted(sanitized, "Alice");
+    }
 }
