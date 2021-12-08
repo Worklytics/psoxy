@@ -219,6 +219,13 @@ public class PrebuiltSanitizerRules {
             .jsonPath("$.originalFilename")
             .jsonPath("$.items[*].originalFilename")
             .build())
+        .redaction(Rule.builder()
+            .relativeUrlRegex("^/drive/v2/files/.*?/permissions*")
+            .jsonPath("$.name") //likely duplicative with files.* case above
+            .jsonPath("$.photoLink")
+            .jsonPath("$.items[*].name")
+            .jsonPath("$.items[*].photoLink")
+            .build())
         .allowedEndpointRegex("^/drive/v3/files.*")
         .pseudonymization(Rule.builder()
             .relativeUrlRegex("^/drive/v3/files.*")
@@ -235,6 +242,13 @@ public class PrebuiltSanitizerRules {
             .relativeUrlRegex("^/drive/v3/files/.*?/revisions.*")
             .jsonPath("$.originalFilename")
             .jsonPath("$.files[*].originalFilename")
+            .build())
+        .redaction(Rule.builder()
+            .relativeUrlRegex("^/drive/v2/files/.*?/permissions*")
+            .jsonPath("$.displayName") //likely duplicative with files.* case above
+            .jsonPath("$.photoLink")
+            .jsonPath("$.permissions[*].displayName") //likely duplicative with files.* case above
+            .jsonPath("$.permissions[*].photoLink")
             .build())
         .build();
 

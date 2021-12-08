@@ -1,0 +1,11 @@
+{
+  "kind": "drive#permission",
+  "id": "16513690099496370655",
+  "type": "user",
+  "emailAddress": "alice@worklytics.co",
+  "role": "owner",
+  "displayName": "Alice",
+  "photoLink": "https://lh3.googleusercontent.com/a-/AOh14Gj5PetJN24za2TK1vX2JKPWeUJPUKA0ogfnHCh9b6fzLWRql8IEB8KYzYjD53_aGRSWGS1imxWx2MbDhxLWwqmCLWHSa_8Y_ReInjuOFpoa3VXqq-4zWVcivmPSgBeeD_gZYd59vYXf8ikJUNBsEouw8rfr0xENkQLD2BzgVVd_j30GWYnSgktPEC4VjxOZ4h20EzxkuLYMiwPXyAdcI73gy2TN181YeUobiMpzCSdiXDgVph9rxqqKGpRXuCzWxZs57jdK4R8PJOoD9LCtAaRPWgVEGBbaZyYJOFUsUMM0BybXYp8pJ3uggIJ2CUyPAg9rqbZvmVVYInHUil05qOUkKod3_PzsFr7W1avT0jfeDGQx33a-d1_l3bDROPbFe4MQyB0rTmCTI5NraHYMDRSDJHqLcjknXZqr_Zhor1T9aYNc3iAxqDyk5e5lC2fbJOQpp7l3TOywH0UAIwb0sZ0Qg9lEINj1Ql-TK7jSsTc4VupTqEqIY6vJqICNJLm7v1seb_SzmK3mAjh2xkHtIfS9phb5i1z_WwOdQRE4KqQzcFYM1NCHS-uZahabKW-uWUR8A7TiOkxG8Vqr-gsJ0j7c9Q7f8K9up7tR7z2WgUX5BKfkY_DnomlWAW23JE_Jbip9E0cW0r4frR_go81i4b2S7htKJ-qIp5OO6quXJNT0ZBKVwIzOPQ33wrkdQQLzWqrTYBQppi7Ynu8Ss6nsE7zY5eqav7d8OjwD4KoiVpH9CK0tdSFsdB7MD9tRvun9YbYKsw=s64",
+  "deleted": false,
+  "pendingOwner": false
+}

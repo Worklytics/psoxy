@@ -1,0 +1,38 @@
+{
+  "kind": "drive#permissionList",
+  "permissions": [
+    {
+      "kind": "drive#permission",
+      "id": "00343915730182430912",
+      "type": "user",
+      "emailAddress": "john@worklytics.co",
+      "role": "writer",
+      "displayName": "John Lawrence",
+      "photoLink": "https://lh3.googleusercontent.com/a-/AOh14GjhaFNvc0L4O5mPUY9wIAlyJ2GgDAqm_J6V-kmOlA=s64",
+      "deleted": false,
+      "pendingOwner": false
+    },
+    {
+      "kind": "drive#permission",
+      "id": "02185925293822571813",
+      "type": "user",
+      "emailAddress": "bob@worklytics.co",
+      "role": "writer",
+      "displayName": "Bob",
+      "photoLink": "https://lh3.googleusercontent.com/a-/AOh14GiS0urNnjWImm9Iyvoh-RPpC-nsTLtf6zXWegTcNA=s64",
+      "deleted": false,
+      "pendingOwner": false
+    },
+    {
+      "kind": "drive#permission",
+      "id": "16513690099496370655",
+      "type": "user",
+      "emailAddress": "alice@worklytics.co",
+      "role": "owner",
+      "displayName": "Alice",
+      "photoLink": "https://lh3.googleusercontent.com/a-/AOh14GjPQuv-IfXuwp4_sM20jbftQRVvZiKUOJ4TE9n3XekllSnASpiby0wQvjhPKdD-jbqz1xTkNo2xUtkp5apVwVAVS_MBwoC9BlZA9IdQH0PLchrcHcPG0cO6XIbc4NdZdsaVGmMjDczB96uWDSwOL36EBVJs4NOIZyR__fK58uew2VeIwCZHpRC-jjxXA3VJ8m8lBj1ue-hfBQAmF2zQ8QLmfa94KgrtOuAW3ibzW4eL3L9paNQYJaOpnvFGKFRwCWNJ4dFjBBusYApapPZFPUmv3K3yhdIuIh_SZonydCYv6nbRbGledr9CHCS6tDSvPZgJ8DtADGC-okhQhDC98Udoz78Sh-4Uka7R3ma9xDbjhLgS11Hzi9r66-o7WwEicQ2dgkYPGYHBTRRji52nM1drLkC5fg5yKoeULdSu37ig8R9yNRqT5EEpMrS3SaHaSP5i3z3UKRd4aGMHh3uNsAyEyGgCOsvTh52dS64rK63JzwXJo3V-ljtx8OlP8aBzw2trHDlVTRTjWM0RZI0D92Njgrp6oCEK--R00qZKrHJCTZxgMRdOrr6KwaRpatVNBGj0bJeTG_1SQ2zMpTTghlohP2h9xVw680j98hJy61750SzuYz2yiF32I9HFROKFVD9iwvsQsgKouPhIhndSxcCpoo3D1k4fDN1mW9zNXynpP0f0WbPYkJCuzzCOuRLO1vYD8FmgKXpbmEcYQt3qWVCSv0szQhf9GZTmza1yeda3RkcajB2tfNeqrbzcQ1Jbsw-E-g=s64",
+      "deleted": false,
+      "pendingOwner": false
+    }
+  ]
+}

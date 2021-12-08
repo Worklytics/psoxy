@@ -1,0 +1,49 @@
+{
+  "kind": "drive#permissionList",
+  "etag": "\"edIAXnIinS4QqqgC1pDaULRs268\"",
+  "selfLink": "https://www.googleapis.com/drive/v2/files/1dCzjG8gA3CkXkNs3qgAj8ruuDLCz-Wrwdo4CIiIBACs/permissions",
+  "items": [
+    {
+      "kind": "drive#permission",
+      "etag": "\"VRHw-GJDUtZTeKKQoMFmiGcDF7w\"",
+      "id": "00343915730182430912",
+      "selfLink": "https://www.googleapis.com/drive/v2/files/1dCzjG8gA3CkXkNs3qgAj8ruuDLCz-Wrwdo4CIiIBACs/permissions/00343915730182430912",
+      "name": "John Lawrence",
+      "emailAddress": "john@worklytics.co",
+      "domain": "worklytics.co",
+      "role": "writer",
+      "type": "user",
+      "photoLink": "https://lh3.googleusercontent.com/a-/AOh14GjhaFNvc0L4O5mPUY9wIAlyJ2GgDAqm_J6V-kmOlA=s64",
+      "deleted": false,
+      "pendingOwner": false
+    },
+    {
+      "kind": "drive#permission",
+      "etag": "\"KDYzlbvZHiUmW_TZ9cv72iZ71ms\"",
+      "id": "02185925293822571813",
+      "selfLink": "https://www.googleapis.com/drive/v2/files/1dCzjG8gA3CkXkNs3qgAj8ruuDLCz-Wrwdo4CIiIBACs/permissions/02185925293822571813",
+      "name": "Bob",
+      "emailAddress": "bob@worklytics.co",
+      "domain": "worklytics.co",
+      "role": "writer",
+      "type": "user",
+      "photoLink": "https://lh3.googleusercontent.com/a-/AOh14GiS0urNnjWImm9Iyvoh-RPpC-nsTLtf6zXWegTcNA=s64",
+      "deleted": false,
+      "pendingOwner": false
+    },
+    {
+      "kind": "drive#permission",
+      "etag": "\"enykGsg2km9T-6-AkeC7xMdMmzc\"",
+      "id": "16513690099496370655",
+      "selfLink": "https://www.googleapis.com/drive/v2/files/1dCzjG8gA3CkXkNs3qgAj8ruuDLCz-Wrwdo4CIiIBACs/permissions/16513690099496370655",
+      "name": "Alice",
+      "emailAddress": "alice@worklytics.co",
+      "domain": "worklytics.co",
+      "role": "owner",
+      "type": "user",
+      "photoLink": "https://lh3.googleusercontent.com/a-/AOh14GiltQmSMP8ofBdrwABQIs9hVLvT-Ra717cjUOYlcyPAk60GsgR0Rf1zqU9cWShQnKUn9Oiy-X7D0a5mmJ34WN5968SbZw-vhjtyPk-3dFZOMIlAb1jfl8mKemC61rVMkyALx6yij2tUbHRSq5RkYino-A--HooXRdTDgmEpiuidlMfar6Ox_S7Dc9MG_3uGwlNDQKiqja7geWuSwjmzEzW8kmmeZFhQcqgjJDr9cujB-mPsdpsS9shEUXZrkLjOOh4aDMp_noa59oNlFXSs6NKZ8xcwv7nCEqzrMAkpjAChBt5dCPIxWzNSorYitggRrmT3Fqz2pwR5x1o-BNQoJxrq2TV1HAlecJ4zWbvpjC1zGmLTxfx1J-aQvMmolScUwjtYrAF0SmSNLCeqvht39NubkYUxMDRqD7y2Ea-2WQ3-1Xvj2Q4BbnOfva3B7MVo9QD9TEgGcH7ZJ6FuIlLi4XFjmM63Vx1iCY8lZtakDB7SlWqTELPTkoEXkxoQshjnd3x54zyja2qbEVb-Yc-ryTLyA2OWCX_lBm8tucpJS_PurG5xvtUq3G5Xwv2msS8V2h8w45h_wN5tNjzF7zNONMXolpBzlCdur4TFXTs-OqDkKYHu7dVw_baog_HYnuobO-M7P_UhzJBlgEvZYwjXloZyL6PHnSYtH9R4tGZ6DZXPJVjLcdrQzhsqEpgMEp7nYLUt2F0yzvUv4bdYpDOEpwT156MgC3mwNWxrdznoQC04raJpf9_bxLUOP0Roh1EvbAWCZQ=s64",
+      "deleted": false,
+      "pendingOwner": false
+    }
+  ]
+}
