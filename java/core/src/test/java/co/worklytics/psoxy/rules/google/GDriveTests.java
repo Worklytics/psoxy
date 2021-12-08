@@ -69,7 +69,7 @@ public class GDriveTests extends JavaRulesTestBaseCase {
 
     @SneakyThrows
     @Test
-    void permissions() {
+    void file_permissions() {
         String jsonString = asJson("permissions.json");
 
         //verify precondition that example actually contains something we need to pseudonymize
@@ -89,7 +89,7 @@ public class GDriveTests extends JavaRulesTestBaseCase {
 
     @SneakyThrows
     @Test
-    void permission() {
+    void file_permission() {
         String jsonString = asJson("permission.json");
 
         //verify precondition that example actually contains something we need to pseudonymize
