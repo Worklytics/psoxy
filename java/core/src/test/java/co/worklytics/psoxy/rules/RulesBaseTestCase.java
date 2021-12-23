@@ -177,7 +177,7 @@ abstract public class RulesBaseTestCase {
     @SneakyThrows
     protected void assertUrlWithSubResourcesBlocked(String url) {
         assertTrue(sanitizer.isAllowed(new URL(url + "/anypath")), "subpath allowed");
-        assertTrue(sanitizer.isAllowed(new URL(url + "/anypath/anysubpath")), "2 subpathes allowed");
+        assertTrue(sanitizer.isAllowed(new URL(url + "/anypath/anysubpath")), "2 subpaths allowed");
     }
 
     @SneakyThrows
