@@ -1,0 +1,29 @@
+allowedEndpointRegexes:
+  - "^/calendar/v3/calendars/[^/]*?$"
+  - "^/calendar/v3/calendars/[^/]*?/events.*"
+  - "^/calendar/v3/users/[^/]*?/settings.*"
+pseudonymizations:
+  - relativeUrlRegex: "^/calendar/v3/calendars/.*/events.*"
+    jsonPaths:
+      - "$..email"
+  - relativeUrlRegex: "^/calendar/v3/calendars/[^/]*?$"
+    jsonPaths:
+      - "$.id"
+redactions:
+  - relativeUrlRegex: "^/calendar/v3/calendars/.*/events.*"
+    jsonPaths:
+      - "$..displayName"
+      - "$.items[*].extendedProperties.private"
+  - relativeUrlRegex: "^/calendar/v3/calendars/[^/]*?$"
+    jsonPaths:
+      - "$.summary"
+  - relativeUrlRegex: "^/calendar/v3/calendars/.*/events/.*"
+    jsonPaths:
+      - "$.description" # WARNING: needed for linking across sources (eg, Zoom invites we need to parse this to link with zoom data)
+      - "$.summary" # WARNING: needed for proper OOO classification
+  - relativeUrlRegex: "^/calendar/v3/calendars/.*/events[^/]*\\??[^/]*$"
+    jsonPaths:
+      - "$.summary" # calendar summary itself
+      - "$.items[*].description"  # WARNING: needed for linking across sources (eg, Zoom invites we need to parse this to link with zoom data)
+      - "$.items[*].summary" # WARNING: needed for proper OOO classification
+

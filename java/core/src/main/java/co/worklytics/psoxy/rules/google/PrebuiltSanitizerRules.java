@@ -36,6 +36,22 @@ public class PrebuiltSanitizerRules {
             .relativeUrlRegex("^/calendar/v3/calendars/[^/]*?$")
             .jsonPath("$.summary")
             .build())
+
+        //redact description and summary from events; this is for confidentiality, not privacy; and
+        // is too restrictive for usual case as hampers several classification algorithms:
+        //   - classifying calendar event as 'OOO' vs plain block
+        //   - de-dupping calendar events with zoom meetings
+        .redaction(Rule.builder()
+            .relativeUrlRegex("^/calendar/v3/calendars/.*/events/.*")
+            .jsonPath("$.description")
+            .jsonPath("$.summary")
+            .build())
+        .redaction(Rule.builder()
+            .relativeUrlRegex("^/calendar/v3/calendars/.*/events[^/]*\\??[^/]*$")
+            .jsonPath("$.summary") // summary value of calendar *itself* is returned by events list endpoint
+            .jsonPath("$.items[*].description")
+            .jsonPath("$.items[*].summary")
+            .build())
         .build();
 
     static final Set<String> GOOGLE_CHAT_EVENT_PARAMETERS_PII = ImmutableSet.of(
@@ -169,6 +185,12 @@ public class PrebuiltSanitizerRules {
                 .jsonPath("$..description")
                 .build()
         )
+        .redaction(
+            Rule.builder()
+                .relativeUrlRegex("^/admin/directory/v1/customer/.*/roles.*")
+                .jsonPath("$..roleDescription")
+                .build()
+        )
         .build();
 
     static final Rules GDRIVE = Rules.builder()
@@ -197,6 +219,13 @@ public class PrebuiltSanitizerRules {
             .jsonPath("$.originalFilename")
             .jsonPath("$.items[*].originalFilename")
             .build())
+        .redaction(Rule.builder()
+            .relativeUrlRegex("^/drive/v2/files/.*?/permissions*")
+            .jsonPath("$.name") //likely duplicative with files.* case above
+            .jsonPath("$.photoLink")
+            .jsonPath("$.items[*].name")
+            .jsonPath("$.items[*].photoLink")
+            .build())
         .allowedEndpointRegex("^/drive/v3/files.*")
         .pseudonymization(Rule.builder()
             .relativeUrlRegex("^/drive/v3/files.*")
@@ -213,6 +242,13 @@ public class PrebuiltSanitizerRules {
             .relativeUrlRegex("^/drive/v3/files/.*?/revisions.*")
             .jsonPath("$.originalFilename")
             .jsonPath("$.files[*].originalFilename")
+            .build())
+        .redaction(Rule.builder()
+            .relativeUrlRegex("^/drive/v2/files/.*?/permissions*")
+            .jsonPath("$.displayName") //likely duplicative with files.* case above
+            .jsonPath("$.photoLink")
+            .jsonPath("$.permissions[*].displayName") //likely duplicative with files.* case above
+            .jsonPath("$.permissions[*].photoLink")
             .build())
         .build();
 

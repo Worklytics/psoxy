@@ -3,6 +3,7 @@ package co.worklytics.psoxy.rules.google;
 import co.worklytics.psoxy.Rules;
 import co.worklytics.psoxy.Sanitizer;
 import co.worklytics.psoxy.impl.SanitizerImpl;
+import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
 import co.worklytics.psoxy.rules.RulesBaseTestCase;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -15,7 +16,7 @@ import java.util.Collection;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class DirectoryTests extends RulesBaseTestCase {
+public class DirectoryTests extends JavaRulesTestBaseCase {
 
     @Getter
     final Rules rulesUnderTest = PrebuiltSanitizerRules.GDIRECTORY;
@@ -25,6 +26,10 @@ public class DirectoryTests extends RulesBaseTestCase {
 
     @Getter
     final String defaultScopeId = "gapps";
+
+
+    @Getter
+    final String yamlSerializationFilepath = "google-workspace/directory";
 
 
     @SneakyThrows
@@ -155,5 +160,18 @@ public class DirectoryTests extends RulesBaseTestCase {
         String sanitized = this.sanitizer.sanitize(url, jsonString);
         assertRedacted(sanitized, "alice@worklytics.co");
         assertRedacted(sanitized, "photoData");
+    }
+
+    @SneakyThrows
+    @Test
+    public void roles() {
+        String jsonString = asJson("roles.json");
+
+        String endpoint = "https://admin.googleapis.co/admin/directory/v1/customer/my_customer/roles";
+        assertNotSanitized(jsonString, "Google Apps Administrator Seed Role");
+
+        String sanitized = this.sanitizer.sanitize(new URL(endpoint), jsonString);
+
+        assertRedacted(sanitized, "Google Apps Administrator Seed Role");
     }
 }

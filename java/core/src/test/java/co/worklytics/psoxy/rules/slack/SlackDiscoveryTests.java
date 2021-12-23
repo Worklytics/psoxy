@@ -26,6 +26,9 @@ public class SlackDiscoveryTests extends RulesBaseTestCase {
     @Getter
     final String defaultScopeId = "slack";
 
+    @Getter
+    final String yamlSerializationFilepath = "slack/discovery";
+
     @SneakyThrows
     @ValueSource(strings = {
         "https://slack.com/api/discovery.enterprise.info",

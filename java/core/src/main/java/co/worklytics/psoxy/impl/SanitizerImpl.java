@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class SanitizerImpl implements Sanitizer {
 
+    @Getter
     final Options options;
 
     List<Pair<Pattern, List<JsonPath>>> compiledPseudonymizations;

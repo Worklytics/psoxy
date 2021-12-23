@@ -3,6 +3,7 @@ package co.worklytics.psoxy.rules;
 import co.worklytics.psoxy.Rules;
 import co.worklytics.psoxy.Sanitizer;
 import co.worklytics.psoxy.impl.SanitizerImpl;
+import co.worklytics.psoxy.rules.google.PrebuiltSanitizerRules;
 import co.worklytics.test.TestUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -15,8 +16,7 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * abstract test stuff for Rules implementations
@@ -60,6 +60,8 @@ abstract public class RulesBaseTestCase {
         Validator.validate(jsonRoundtrip(getRulesUnderTest()));
     }
 
+
+
     @SneakyThrows
     Rules yamlRoundtrip(Rules rules) {
         String yaml = yamlMapper.writeValueAsString(getRulesUnderTest()).replace("---\n", "");
@@ -72,10 +74,16 @@ abstract public class RulesBaseTestCase {
         return jsonMapper.readerFor(Rules.class).readValue(json);
     }
 
+
+
     public abstract String getDefaultScopeId();
 
-
     public abstract Rules getRulesUnderTest();
+
+    /**
+     * eg 'google-workspace/gdrive'
+     */
+    public abstract String getYamlSerializationFilepath();
 
     public abstract String getExampleDirectoryPath();
 

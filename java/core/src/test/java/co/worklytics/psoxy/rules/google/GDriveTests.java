@@ -1,7 +1,7 @@
 package co.worklytics.psoxy.rules.google;
 
 import co.worklytics.psoxy.Rules;
-import co.worklytics.psoxy.rules.RulesBaseTestCase;
+import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
@@ -12,7 +12,7 @@ import java.util.Collection;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class GDriveTests extends RulesBaseTestCase {
+public class GDriveTests extends JavaRulesTestBaseCase {
 
     @Getter
     final Rules rulesUnderTest = PrebuiltSanitizerRules.GDRIVE;
@@ -23,6 +23,8 @@ public class GDriveTests extends RulesBaseTestCase {
     @Getter
     final String defaultScopeId = "gapps";
 
+    @Getter
+    final String yamlSerializationFilepath = "google-workspace/gdrive";
 
     @SneakyThrows
     @Test
@@ -69,14 +71,42 @@ public class GDriveTests extends RulesBaseTestCase {
         assertUrlWithQueryParamsAllowed(endpoint);
     }
 
+    @SneakyThrows
+    @Test
+    void file_permissions() {
+        String jsonString = asJson("permissions.json");
+
+        //verify precondition that example actually contains something we need to pseudonymize
+        Collection<String> PII = Arrays.asList(
+            "alice@worklytics.co"
+        );
+        assertNotSanitized(jsonString, PII);
+        assertNotSanitized(jsonString, "Alice");
+
+        String sanitized =
+            sanitizer.sanitize(new URL("http://www.googleapis.com/drive/v2/files/some-file-id/permissions"), jsonString);
+
+        assertPseudonymized(sanitized, PII);
+        assertRedacted(sanitized, "Alice");
+    }
+
 
     @SneakyThrows
     @Test
-    void permissions() {
-        String endpoint = "http://www.googleapis.com/drive/v2/files/any-file-id/permissions";
+    void file_permission() {
+        String jsonString = asJson("permission.json");
 
-        //TODO: content test (although in theory, utilizes $..email pattern, so should be safe)
+        //verify precondition that example actually contains something we need to pseudonymize
+        Collection<String> PII = Arrays.asList(
+            "alice@worklytics.co"
+        );
+        assertNotSanitized(jsonString, PII);
+        assertNotSanitized(jsonString, "Alice");
 
-        assertUrlWithQueryParamsAllowed(endpoint);
+        String sanitized =
+            sanitizer.sanitize(new URL("http://www.googleapis.com/drive/v2/files/some-file-id/permissions/234234"), jsonString);
+
+        assertPseudonymized(sanitized, PII);
+        assertRedacted(sanitized, "Alice");
     }
 }

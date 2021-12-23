@@ -1,7 +1,7 @@
 package co.worklytics.psoxy.rules.google;
 
 import co.worklytics.psoxy.Rules;
-import co.worklytics.psoxy.rules.RulesBaseTestCase;
+import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 
-class CalendarTests extends RulesBaseTestCase {
+class CalendarTests extends JavaRulesTestBaseCase {
 
     @Getter
     final Rules rulesUnderTest = PrebuiltSanitizerRules.GCAL;
@@ -22,15 +22,20 @@ class CalendarTests extends RulesBaseTestCase {
     @Getter
     final String defaultScopeId = "gapps";
 
+
+    @Getter
+    final String yamlSerializationFilepath = "google-workspace/calendar";
+
     @SneakyThrows
     @Test
-    void events() {
+    void events_privacy() {
         String jsonString = asJson("events.json");
 
         Collection<String> PII = Arrays.asList(
             "alice@worklytics.co"
         );
         assertNotSanitized(jsonString, PII);
+        assertNotSanitized(jsonString, "calendar-owner@acme.com");
 
         String sanitized =
             sanitizer.sanitize(new URL("http://calendar.googleapis.com/calendar/v3/calendars/primary/events"), jsonString);
@@ -38,5 +43,22 @@ class CalendarTests extends RulesBaseTestCase {
         assertPseudonymized(sanitized, PII);
 
         assertUrlWithQueryParamsAllowed("http://calendar.googleapis.com/calendar/v3/calendars/primary/events");
+
+        assertRedacted(sanitized, "calendar-owner@acme.com");
+    }
+
+    @SneakyThrows
+    @Test
+    void events_confidentiality() {
+        String jsonString = asJson("events.json");
+
+        assertNotSanitized(jsonString, "Call to discuss Worklytics issues");
+        assertNotSanitized(jsonString, "Dear alice :");
+
+        String sanitized =
+            sanitizer.sanitize(new URL("http://calendar.googleapis.com/calendar/v3/calendars/primary/events"), jsonString);
+
+        assertRedacted(sanitized, "Call to discuss Worklytics issues");
+        assertRedacted(sanitized, "Dear alice :");
     }
 }
