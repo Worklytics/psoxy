@@ -41,6 +41,9 @@ class CalendarTests extends JavaRulesTestBaseCase {
             sanitizer.sanitize(new URL("http://calendar.googleapis.com/calendar/v3/calendars/primary/events"), jsonString);
 
         assertPseudonymized(sanitized, PII);
+
+        assertUrlWithQueryParamsAllowed("http://calendar.googleapis.com/calendar/v3/calendars/primary/events");
+
         assertRedacted(sanitized, "calendar-owner@acme.com");
     }
 

@@ -29,6 +29,7 @@ class GoogleMeetTests extends JavaRulesTestBaseCase {
     @SneakyThrows
     @Test
     void activities() {
+        String endpoint = "https://admin.googleapis.com/admin/reports/v1/activity/users/all/applications/meet";
         String jsonString = asJson("meet-activities.json");
 
         //verify precondition that example actually contains something we need to pseudonymize
@@ -41,11 +42,15 @@ class GoogleMeetTests extends JavaRulesTestBaseCase {
         assertNotSanitized(jsonString, PII);
 
         String sanitized =
-            sanitizer.sanitize(new URL("https://admin.googleapis.com/admin/reports/v1/activity/users/all/applications/meet"), jsonString);
+            sanitizer.sanitize(new URL(endpoint), jsonString);
 
         assertPseudonymized(sanitized, PII);
 
         assertNotSanitized(jsonString, "Adam Jones");
         assertRedacted(sanitized, "Adam Jones");
+
+        assertUrlWithQueryParamsAllowed(endpoint);
+        assertUrlBlocked("https://admin.googleapis.com/admin/reports/v1/activity/users/all/applications/chat");
+
     }
 }

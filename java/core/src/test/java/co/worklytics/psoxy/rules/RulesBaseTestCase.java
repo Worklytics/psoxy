@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -159,6 +160,37 @@ abstract public class RulesBaseTestCase {
             .forEach(s -> {
                 assertTrue(content.contains(s), String.format("Sanitized does not contain '%s'", s));
             });
+    }
+
+    @SneakyThrows
+    protected void assertUrlWithQueryParamsAllowed(String url) {
+        assertTrue(sanitizer.isAllowed(new URL(url + "?param=value")), "single param blocked");
+        assertTrue(sanitizer.isAllowed(new URL(url + "?param=value&param2=value2")), "multiple params blocked");
+    }
+
+
+
+    @SneakyThrows
+    protected void assertUrlWithQueryParamsBlocked(String url) {
+        assertFalse(sanitizer.isAllowed(new URL(url + "?param=value")), "query param allowed");
+        assertFalse(sanitizer.isAllowed(new URL(url + "?param=value&param2=value2")), "multiple query params allowed");
+    }
+
+    @SneakyThrows
+    protected void assertUrlWithSubResourcesAllowed(String url) {
+        assertTrue(sanitizer.isAllowed(new URL(url + "/anypath")), "path blocked");
+        assertTrue(sanitizer.isAllowed(new URL(url + "/anypath/anysubpath")), "path with subpath blocked");
+    }
+
+    @SneakyThrows
+    protected void assertUrlWithSubResourcesBlocked(String url) {
+        assertTrue(sanitizer.isAllowed(new URL(url + "/anypath")), "subpath allowed");
+        assertTrue(sanitizer.isAllowed(new URL(url + "/anypath/anysubpath")), "2 subpaths allowed");
+    }
+
+    @SneakyThrows
+    protected void assertUrlBlocked(String url) {
+        assertFalse(sanitizer.isAllowed(new URL(url)), "rules allowed url that should be blocked: " + url);
     }
 
 }

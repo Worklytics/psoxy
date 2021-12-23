@@ -30,9 +30,9 @@ Orchestration continues to be performed on the Worklytics-side.
 ## Getting Started - Customers
 
 ### Prereqs
-As of Oct 2021, Psoxy is implement with Java 11 and build via Maven. Infrastructure is provisioned
-via Terraform, relying on Google Cloud cmd line tools.  You will need recent versions of all of the
-following:
+As of Oct 2021, Psoxy is implemented with Java 11 and built via Maven. Infrastructure is provisioned
+via Terraform, relying on Google Cloud command line tools.  You will need recent versions of all of
+the following:
 
 - Java 11+ JDK variant
 - [Maven 3.6+](https://maven.apache.org/docs/history.html)

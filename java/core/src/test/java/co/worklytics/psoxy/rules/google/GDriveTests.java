@@ -2,10 +2,8 @@ package co.worklytics.psoxy.rules.google;
 
 import co.worklytics.psoxy.Rules;
 import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
-import co.worklytics.psoxy.rules.RulesBaseTestCase;
 import lombok.Getter;
 import lombok.SneakyThrows;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.net.URL;
@@ -31,6 +29,7 @@ public class GDriveTests extends JavaRulesTestBaseCase {
     @SneakyThrows
     @Test
     void files() {
+        String endpoint = "https://www.googleapis.com/drive/v2/files";
         String jsonString = asJson("files.json");
 
         //verify precondition that example actually contains something we need to pseudonymize
@@ -45,14 +44,17 @@ public class GDriveTests extends JavaRulesTestBaseCase {
 
 
         String sanitized =
-            sanitizer.sanitize(new URL("https", "www.googleapis.com", "/drive/v2/files"), jsonString);
+            sanitizer.sanitize(new URL(endpoint), jsonString);
 
         assertPseudonymized(sanitized, PII);
+
+        assertUrlWithQueryParamsAllowed(endpoint);
     }
 
     @SneakyThrows
     @Test
     void revisions() {
+        String endpoint = "http://www.googleapis.com/drive/v2/files/any-file-id/revisions";
         String jsonString = asJson("revisions.json");
 
         //verify precondition that example actually contains something we need to pseudonymize
@@ -62,9 +64,11 @@ public class GDriveTests extends JavaRulesTestBaseCase {
         assertNotSanitized(jsonString, PII);
 
         String sanitized =
-            sanitizer.sanitize(new URL("http://www.googleapis.com/drive/v2/files/some-file-id/revisions"), jsonString);
+            sanitizer.sanitize(new URL(endpoint), jsonString);
 
         assertPseudonymized(sanitized, PII);
+
+        assertUrlWithQueryParamsAllowed(endpoint);
     }
 
     @SneakyThrows
