@@ -109,7 +109,7 @@ public class DirectoryTests extends RulesBaseTestCase {
     @Test
     void groupMembers() {
 
-        String membersEndpoint = "https://admin.googleapis.com/admin/directory/v1/groups/asdfas/members";
+        String membersEndpoint = "https://admin.googleapis.com/admin/directory/v1/groups/any-group-id/members";
         String jsonString = asJson("group-members.json");
 
         //verify precondition that example actually contains something we need to pseudonymize
