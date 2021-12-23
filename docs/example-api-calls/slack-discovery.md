@@ -1,6 +1,6 @@
 # API Call Examples
 
-Example curl commands that you can use to validate proxy behavior against various source APIs.
+Example `curl` commands that you can use to validate proxy behavior against various source APIs.
 
 To use, ensure you've set env variables on your machine:
 
