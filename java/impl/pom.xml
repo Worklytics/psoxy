@@ -30,6 +30,17 @@
             </modules>
         </profile>
         <profile>
+            <id>aws</id>
+            <activation>
+                <file>
+                    <exists>aws/pom.xml</exists>
+                </file>
+            </activation>
+            <modules>
+                <module>aws</module>
+            </modules>
+        </profile>
+        <profile>
             <id>cmd-line</id>
             <activation>
                 <file>
