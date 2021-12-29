@@ -8,11 +8,13 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="core" />
-        <module name="gcp" />
         <module name="cmd-line" />
+        <module name="aws" />
+        <module name="gcp" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="aws" target="11" />
       <module name="cmd-line" target="11" />
       <module name="core" target="11" />
       <module name="gcp" target="11" />
