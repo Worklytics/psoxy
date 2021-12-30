@@ -1,4 +1,4 @@
-package co.worklytics.psoxy;
+package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.SourceAuthConfigProperty;
@@ -14,7 +14,7 @@ import java.io.ByteArrayInputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
-class GoogleCloudPlatformServiceAccountKeyAuthStrategy implements SourceAuthStrategy {
+public class GoogleCloudPlatformServiceAccountKeyAuthStrategy implements SourceAuthStrategy {
 
     @Getter
     private final String configIdentifier = "gcp_service_account_key";

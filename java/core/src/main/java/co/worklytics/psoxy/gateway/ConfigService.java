@@ -13,4 +13,6 @@ public interface ConfigService {
 
     Optional<String> getConfigPropertyAsOptional(ConfigProperty property);
 
+    boolean isDevelopment();
+
 }

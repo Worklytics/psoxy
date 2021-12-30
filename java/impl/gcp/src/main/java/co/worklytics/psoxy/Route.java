@@ -1,17 +1,9 @@
 package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
-import co.worklytics.psoxy.gateway.SourceAuthStrategy;
-import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
-import co.worklytics.psoxy.gateway.impl.OAuthAccessTokenSourceAuthStrategy;
-import co.worklytics.psoxy.gateway.impl.OAuthRefreshTokenSourceAuthStrategy;
-import co.worklytics.psoxy.impl.SanitizerImpl;
-import co.worklytics.psoxy.rules.RulesUtils;
-import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
 
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.utils.URLUtils;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpTransport;
@@ -23,7 +15,6 @@ import com.google.cloud.functions.HttpRequest;
 import com.google.cloud.functions.HttpResponse;
 
 import com.google.common.net.MediaType;
-import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 
@@ -34,7 +25,6 @@ import java.util.*;
 import java.net.URL;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Log
 public class Route implements HttpFunction {
@@ -50,70 +40,7 @@ public class Route implements HttpFunction {
         K_SERVICE,
     }
 
-    /**
-     * default value for salt; provided just to support testing with minimal config, but in prod
-     * use should be overridden with something
-     */
-    static final String DEFAULT_SALT = "salt";
-    static final String PATH_TO_RULES_FILES = "/rules.yaml";
-
-    @Getter
-    ConfigService config  = new EnvVarsConfigService();
-    Sanitizer sanitizer;
-    SourceAuthStrategy sourceAuthStrategy;
-    RulesUtils rulesUtils = new RulesUtils();
-    ObjectMapper objectMapper = new ObjectMapper();
-
-    SourceAuthStrategy getSourceAuthStrategy() {
-        if (sourceAuthStrategy == null) {
-            String identifier = getConfig().getConfigPropertyOrError(ProxyConfigProperty.SOURCE_AUTH_STRATEGY_IDENTIFIER);
-            Stream<SourceAuthStrategy> implementations = Stream.of(
-                new GoogleCloudPlatformServiceAccountKeyAuthStrategy(),
-                new OAuthRefreshTokenSourceAuthStrategy(),
-                new OAuthAccessTokenSourceAuthStrategy()
-            );
-            sourceAuthStrategy = implementations
-                    .filter(impl -> Objects.equals(identifier, impl.getConfigIdentifier()))
-                .findFirst().orElseThrow(() -> new Error("No SourceAuthStrategy impl matching configured identifier: " + identifier));
-        }
-        return sourceAuthStrategy;
-    }
-
-    void initSanitizer() {
-        Optional<Rules> fileSystemRules = rulesUtils.getRulesFromFileSystem(PATH_TO_RULES_FILES);
-        if (fileSystemRules.isPresent()) {
-            log.info("using rules from file system");
-        }
-        Rules rules = fileSystemRules.orElseGet(() -> {
-                Optional<Rules> configRules = rulesUtils.getRulesFromConfig(getConfig());
-                if (configRules.isPresent()) {
-                    log.info("using rules from environment config (RULES variable parsed as base64-encoded YAML)");
-                }
-                return configRules.orElseGet(() -> {
-                    String source = getConfig().getConfigPropertyOrError(ProxyConfigProperty.SOURCE);
-                    log.info("using prebuilt rules for: " + source);
-                    return PrebuiltSanitizerRules.MAP.get(source);
-                });
-            });
-
-        sanitizer = new SanitizerImpl(
-            Sanitizer.Options.builder()
-                .rules(rules)
-                .pseudonymizationSalt(getConfig().getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT)
-                    .orElse(DEFAULT_SALT))
-                .defaultScopeId(getConfig().getConfigPropertyAsOptional(ProxyConfigProperty.IDENTIFIER_SCOPE_ID)
-                    .orElse(rules.getDefaultScopeIdForSource()))
-                .build());
-
-        if (isDevelopmentMode()) {
-            log.warning("Proxy instance configured in development mode (env var IS_DEVELOPMENT_MODE=true)");
-        }
-    }
-
-    boolean isDevelopmentMode() {
-        return config.getConfigPropertyAsOptional(ProxyConfigProperty.IS_DEVELOPMENT_MODE)
-            .map(Boolean::parseBoolean).orElse(false);
-    }
+    DependencyFactory dependencyFactory = new DependencyFactoryImpl();
 
     boolean isRequestedToSkipSanitizer(HttpRequest request) {
         return request.getFirstHeader(ControlHeader.SKIP_SANITIZER.getHttpHeader())
@@ -131,10 +58,6 @@ public class Route implements HttpFunction {
             return;
         }
 
-        if (sanitizer == null) {
-            initSanitizer();
-        }
-
         //is there a lifecycle to initialize request factory??
         HttpRequestFactory requestFactory = getRequestFactory(request);
 
@@ -142,9 +65,10 @@ public class Route implements HttpFunction {
         //TODO: switch on method to support HEAD, etc
         URL targetUrl = buildTarget(request);
 
-        boolean skipSanitizer = isDevelopmentMode() && isRequestedToSkipSanitizer(request);
+        boolean skipSanitizer = dependencyFactory.getConfig().isDevelopment() &&
+            isRequestedToSkipSanitizer(request);
 
-        if (skipSanitizer || sanitizer.isAllowed(targetUrl)) {
+        if (skipSanitizer || dependencyFactory.getSanitizer().isAllowed(targetUrl)) {
             log.info("Proxy invoked with target " + URLUtils.relativeURL(targetUrl));
         } else {
             response.setStatusCode(403, "Endpoint forbidden by proxy rule set");
@@ -191,8 +115,8 @@ public class Route implements HttpFunction {
             if (skipSanitizer) {
                 proxyResponseContent = responseContent;
             }  else {
-                proxyResponseContent = sanitizer.sanitize(targetUrl, responseContent);
-                String rulesSha = rulesUtils.sha(sanitizer.getOptions().getRules());
+                proxyResponseContent = dependencyFactory.getSanitizer().sanitize(targetUrl, responseContent);
+                String rulesSha = dependencyFactory.getRulesUtils().sha(dependencyFactory.getSanitizer().getOptions().getRules());
                 response.appendHeader(ResponseHeader.RULES_SHA.getHttpHeader(), rulesSha);
                 log.info("response sanitized with rule set " + rulesSha);
             }
@@ -209,14 +133,14 @@ public class Route implements HttpFunction {
 
     private void doHealthCheck(HttpRequest request, HttpResponse response) {
         Set<String> missing =
-            getSourceAuthStrategy().getRequiredConfigProperties().stream()
-                .filter(configProperty -> getConfig().getConfigPropertyAsOptional(configProperty).isEmpty())
+            dependencyFactory.getSourceAuthStrategy().getRequiredConfigProperties().stream()
+                .filter(configProperty -> dependencyFactory.getConfig().getConfigPropertyAsOptional(configProperty).isEmpty())
                 .map(ConfigService.ConfigProperty::name)
                 .collect(Collectors.toSet());
 
         HealthCheckResult healthCheckResult = HealthCheckResult.builder()
-            .configuredSource(getConfig().getConfigPropertyAsOptional(ProxyConfigProperty.SOURCE).orElse(null))
-            .nonDefaultSalt(getConfig().getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT).isPresent())
+            .configuredSource(dependencyFactory.getConfig().getConfigPropertyAsOptional(ProxyConfigProperty.SOURCE).orElse(null))
+            .nonDefaultSalt(dependencyFactory.getConfig().getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT).isPresent())
             .missingConfigProperties(missing)
             .build();
 
@@ -228,7 +152,7 @@ public class Route implements HttpFunction {
 
         try {
             response.setContentType(MediaType.JSON_UTF_8.toString());
-            response.getWriter().write(objectMapper.writeValueAsString(healthCheckResult));
+            response.getWriter().write(dependencyFactory.getObjectMapper().writeValueAsString(healthCheckResult));
             response.getWriter().write("\r\n");
         } catch (IOException e) {
             log.log(Level.WARNING, "Failed to write health check details", e);
@@ -246,7 +170,7 @@ public class Route implements HttpFunction {
                 .replace(System.getenv(RuntimeEnvironmentVariables.K_SERVICE.name()) + "/", "")
             + request.getQuery().map(s -> "?" + s).orElse("");
 
-        return new URL("https", getConfig().getConfigPropertyOrError(ProxyConfigProperty.TARGET_HOST), path);
+        return new URL("https", dependencyFactory.getConfig().getConfigPropertyOrError(ProxyConfigProperty.TARGET_HOST), path);
     }
 
     Optional<List<String>> getHeader(HttpRequest request, ControlHeader header) {
@@ -271,7 +195,7 @@ public class Route implements HttpFunction {
             user -> log.info("Impersonating user"),
             () -> log.warning("We usually expect a user to impersonate"));
 
-        Credentials credentials = getSourceAuthStrategy().getCredentials(accountToImpersonate);
+        Credentials credentials = dependencyFactory.getSourceAuthStrategy().getCredentials(accountToImpersonate);
         HttpCredentialsAdapter initializer = new HttpCredentialsAdapter(credentials);
 
         //TODO: in OAuth-type use cases, where execute() may have caused token to be refreshed, how
