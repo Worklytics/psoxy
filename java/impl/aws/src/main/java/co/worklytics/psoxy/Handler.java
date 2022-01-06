@@ -1,15 +1,17 @@
 package co.worklytics.psoxy;
 
-
-/**import com.amazonaws.services.lambda.runtime.Context;
- import com.amazonaws.services.lambda.runtime.RequestHandler;
- import com.amazonaws.services.lambda.runtime.LambdaLogger;
- **/
+import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.lambda.runtime.RequestHandler;
+import com.amazonaws.services.lambda.runtime.LambdaLogger;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Map;
+import lombok.*;
 
 public class Handler implements RequestHandler<Map<String,String>, String> {
 
     ObjectMapper mapper = new ObjectMapper();
 
+    @SneakyThrows
     @Override
     public String handleRequest(Map<String,String> event, Context context)
     {
