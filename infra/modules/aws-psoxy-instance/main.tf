@@ -10,15 +10,17 @@ terraform {
 
 
 # map API gateway request --> lambda function backend
-# https://kennbrodhagen.net/2015/12/02/how-to-access-http-headers-using-aws-api-gateway-and-lambda/
 resource "aws_apigatewayv2_integration" "map" {
   api_id                    = var.api_gateway.id
   integration_type          = "AWS_PROXY"
   connection_type           = "INTERNET"
 
-  integration_method        = "POST" #TODO: verify that it's also going to pass through GET??
-  #TODO: match on subpath equivalent to var.function_name
+  #TODO: match on subpath equivalent to var.function_name ?
+
+  integration_method        = "POST"
   integration_uri           = aws_lambda_function.psoxy-instance.invoke_arn
+  request_parameters        = {}
+  request_templates         = {}
 }
 
 # allow API gateway to invoke the lambda function
