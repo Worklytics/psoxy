@@ -35,15 +35,15 @@ terraform {
     }
   }
   backend "gcs" {
-    bucket = "${module.bootstrap.gcs_bucket_tfstate.value}"
+    bucket = "${module.bootstrap.gcs_bucket_tfstate}"
     prefix = "terraform_state"
-    impersonate_service_account = "${module.bootstrap.terraform_sa_email.value}"
+    impersonate_service_account = "${module.bootstrap.terraform_sa_email}"
   }
 }
 
 provider "google" {
-  project                     = "${module.bootstrap.seed_project_id.value}
-  impersonate_service_account = "${module.bootstrap.terraform_sa_email.value}"
+  project                     = "${module.bootstrap.seed_project_id}
+  impersonate_service_account = "${module.bootstrap.terraform_sa_email}"
 }
 ```
 EOT

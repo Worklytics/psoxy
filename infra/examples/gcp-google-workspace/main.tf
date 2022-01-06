@@ -23,7 +23,7 @@ resource "google_project" "psoxy-project" {
 }
 
 module "psoxy-gcp" {
-  source = "../modules/gcp"
+  source = "../../modules/gcp"
 
   project_id          = google_project.psoxy-project.project_id
   invoker_sa_emails   = var.worklytics_sa_emails
@@ -108,7 +108,7 @@ locals {
 module "google-workspace-connection" {
   for_each = local.google_workspace_sources
 
-  source = "../modules/google-workspace-dwd-connection"
+  source = "../../modules/google-workspace-dwd-connection"
 
   project_id                   = var.project_id
   connector_service_account_id = "psoxy-${each.key}-dwd"
@@ -124,7 +124,7 @@ module "google-workspace-connection" {
 module "google-workspace-connection-auth" {
   for_each = local.google_workspace_sources
 
-  source = "../modules/gcp-sa-auth-key-secret-manager"
+  source = "../../modules/gcp-sa-auth-key-secret-manager"
 
   secret_project     = var.project_id
   service_account_id = module.google-workspace-connection[each.key].service_account_id
@@ -134,7 +134,7 @@ module "google-workspace-connection-auth" {
 module "psoxy-google-workspace-connector" {
   for_each = local.google_workspace_sources
 
-  source = "../modules/gcp-psoxy-cloud-function"
+  source = "../../modules/gcp-psoxy-cloud-function"
 
   project_id            = var.project_id
   function_name         = "psoxy-${each.key}"
@@ -156,7 +156,7 @@ module "psoxy-google-workspace-connector" {
 module "worklytics-psoxy-connection" {
   for_each = local.google_workspace_sources
 
-  source = "../modules/worklytics-psoxy-connection"
+  source = "../../modules/worklytics-psoxy-connection"
 
   psoxy_endpoint_url = module.psoxy-google-workspace-connector[each.key].cloud_function_url
   display_name       = "${each.value.display_name} via Psoxy"
