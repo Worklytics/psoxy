@@ -24,10 +24,10 @@ hs_err_pid*
 
 
 # ignore terraform variables / state for developers' personal development environments and other examples
-infra/**/terraform.tfvars
-infra/**/.terraform**
-infra/*/terraform.tfstate**
-infra/*/TODO*
+infra/dev-personal/terraform.tfvars
+infra/dev-personal/.terraform**
+infra/dev-personal/terraform.tfstate**
+infra/dev-personal/TODO*
 
 # ignore sa key file(s)
 infra/dev-personal/*connector-sa-key.json
