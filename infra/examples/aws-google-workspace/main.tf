@@ -24,7 +24,6 @@ terraform {
 provider "aws" {
   region = var.aws_region
 
-  //
   assume_role {
     role_arn = var.aws_assume_role_arn
   }
@@ -87,42 +86,42 @@ locals {
         "https://www.googleapis.com/auth/calendar.readonly"
       ]
     }
-    "gmail": {
-      display_name: "GMail"
-      apis_consumed: [
-        "gmail.googleapis.com"
-      ]
-      oauth_scopes_needed: [
-        "https://www.googleapis.com/auth/gmail.metadata"
-      ]
-    }
-    "google-chat": {
-      display_name: "Google Chat"
-      apis_consumed: [
-        "admin.googleapis.com"
-      ]
-      oauth_scopes_needed: [
-        "https://www.googleapis.com/auth/admin.reports.audit.readonly"
-      ]
-    }
-    "gdrive": {
-      display_name: "Google Drive"
-      apis_consumed: [
-        "drive.googleapis.com"
-      ]
-      oauth_scopes_needed: [
-        "https://www.googleapis.com/auth/drive.metadata.readonly"
-      ]
-    }
-    "google-meet": {
-      display_name: "Google Meet"
-      apis_consumed: [
-        "admin.googleapis.com"
-      ]
-      oauth_scopes_needed: [
-        "https://www.googleapis.com/auth/admin.reports.audit.readonly"
-      ]
-    }
+#    "gmail": {
+#      display_name: "GMail"
+#      apis_consumed: [
+#        "gmail.googleapis.com"
+#      ]
+#      oauth_scopes_needed: [
+#        "https://www.googleapis.com/auth/gmail.metadata"
+#      ]
+#    }
+#    "google-chat": {
+#      display_name: "Google Chat"
+#      apis_consumed: [
+#        "admin.googleapis.com"
+#      ]
+#      oauth_scopes_needed: [
+#        "https://www.googleapis.com/auth/admin.reports.audit.readonly"
+#      ]
+#    }
+#    "gdrive": {
+#      display_name: "Google Drive"
+#      apis_consumed: [
+#        "drive.googleapis.com"
+#      ]
+#      oauth_scopes_needed: [
+#        "https://www.googleapis.com/auth/drive.metadata.readonly"
+#      ]
+#    }
+#    "google-meet": {
+#      display_name: "Google Meet"
+#      apis_consumed: [
+#        "admin.googleapis.com"
+#      ]
+#      oauth_scopes_needed: [
+#        "https://www.googleapis.com/auth/admin.reports.audit.readonly"
+#      ]
+#    }
   }
 }
 
@@ -157,9 +156,11 @@ module "psoxy-google-workspace-connector" {
 
   source = "../../modules/aws-psoxy-instance"
 
-  function_name      = "psoxy-${each.key}"
-  source_kind        = each.key
-  api_gateway        = module.psoxy-aws.api_gateway
+  function_name        = "psoxy-${each.key}"
+  source_kind          = each.key
+  api_gateway          = module.psoxy-aws.api_gateway
+  execution_role_arn   = module.psoxy-aws.execution_role_arn
+  path_to_function_zip = "../../../java/impl/aws/target/psoxy-aws-1.0-SNAPSHOT.jar"
 
   secret_bindings       = {
     PSOXY_SALT = {

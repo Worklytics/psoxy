@@ -31,3 +31,13 @@ variable "api_gateway" {
   })
   description = "API gateway behind which proxy instance should sit"
 }
+
+variable "execution_role_arn" {
+  type        = string
+  description = "arn of execution role for function"
+}
+
+variable "path_to_function_zip" {
+  type        = string
+  description = "path to lambda zip"
+}

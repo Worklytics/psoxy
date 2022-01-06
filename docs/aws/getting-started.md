@@ -17,6 +17,8 @@ mvn clean package
 
 ## Run Locally
 
+Locally, you can test function's behavior from invocation on a JSON payload (but not how the 
+API gateway will map HTTP requests to that JSON payload):
 
 https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-using-invoke.html
 

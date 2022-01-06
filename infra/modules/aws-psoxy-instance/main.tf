@@ -8,27 +8,6 @@ terraform {
   }
 }
 
-#q: what's the purpose of this exactly?
-resource "aws_iam_role" "iam_for_lambda" {
-  name = "iam_for_lambda"
-
-  assume_role_policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Action": "sts:AssumeRole",
-      "Principal": {
-        "Service": "lambda.amazonaws.com"
-      },
-      "Effect": "Allow",
-      "Sid": ""
-    }
-  ]
-}
-EOF
-}
-
 
 # map API gateway request --> lambda function backend
 # https://kennbrodhagen.net/2015/12/02/how-to-access-http-headers-using-aws-api-gateway-and-lambda/
@@ -52,13 +31,18 @@ resource "aws_lambda_permission" "lambda_permission" {
   # The /*/*/* part allows invocation from any stage, method and resource path
   # within API Gateway REST API.
   source_arn = "${var.api_gateway.arn}/*/*/*"
+
+  depends_on = [
+    aws_lambda_function.psoxy-instance
+  ]
 }
 
 resource "aws_lambda_function" "psoxy-instance" {
   function_name = var.function_name
-  role          = aws_iam_role.iam_for_lambda.arn
+  role          = var.execution_role_arn
   handler       = "co.worklytics.psoxy.Handler"
   runtime       = "java11"
+  filename      = var.path_to_function_zip
 }
 
 locals {
@@ -90,7 +74,7 @@ Third, run the following deployment command from `java/impl/aws` folder within y
 sam deploy \
     --template target/deployment
     --region ${var.region} \
-    --role-arn ${aws_iam_role.iam_for_lambda.arn} \
+    --role-arn ${var.execution_role_arn} \
 ```
 
 Finally, review the deployed function in AWS console:

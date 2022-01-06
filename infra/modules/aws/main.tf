@@ -8,6 +8,26 @@ terraform {
   }
 }
 
+# execution role for the lambdas
+resource "aws_iam_role" "iam_for_lambda" {
+  name = "iam_for_lambda"
+
+  assume_role_policy = jsonencode({
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Action": "sts:AssumeRole",
+        "Principal": {
+          "Service": "lambda.amazonaws.com"
+        },
+        "Effect": "Allow",
+        "Sid": ""
+      }
+    ]
+  })
+}
+
+
 # AWS API Gateway
 resource "aws_apigatewayv2_api" "psoxy-api" {
   name          = "psoxy-api"
@@ -19,14 +39,13 @@ resource "aws_apigatewayv2_api" "psoxy-api" {
 resource "aws_iam_role" "api-caller" {
   name = "PsoxyApiCaller"
 
+  # who can assume this role
   assume_role_policy = jsonencode({
     "Version" : "2012-10-17",
     "Statement" : [
       {
+        "Action" = "sts:AssumeRole"
         "Effect" : "Allow"
-        "Resource" : [
-          "${aws_apigatewayv2_api.psoxy-api.arn}/*/*/*"
-        ]
         "Principal" : {
           "AWS" : "arn:aws:iam::${var.caller_aws_account_id}"
         },
@@ -39,6 +58,7 @@ resource "aws_iam_role" "api-caller" {
     ]
   })
 
+  # what this role can do (invoke anything in the API gateway )
   inline_policy {
     name = "invoke"
     policy = jsonencode({
@@ -48,7 +68,7 @@ resource "aws_iam_role" "api-caller" {
           "Effect" : "Allow"
           "Action" : "execute-api:Invoke"
           "Resource" : [
-            "${aws_apigatewayv2_api.psoxy-api.arn}/*/*/*"
+            "${aws_apigatewayv2_api.psoxy-api.arn}/*/*/*",
           ]
         }
       ]
@@ -89,4 +109,8 @@ output "salt_secret_version_id" {
 
 output "api_gateway" {
   value = aws_apigatewayv2_api.psoxy-api
+}
+
+output "execution_role_arn" {
+  value = aws_iam_role.iam_for_lambda.arn
 }
