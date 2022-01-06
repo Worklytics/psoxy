@@ -26,4 +26,9 @@ public class MemoryConfigService implements ConfigService {
     public Optional<String> getConfigPropertyAsOptional(@NonNull ConfigProperty property) {
         return Optional.ofNullable(map.get(property.name()));
     }
+
+    @Override
+    public boolean isDevelopment() {
+        return true;
+    }
 }
