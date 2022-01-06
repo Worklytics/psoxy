@@ -24,8 +24,8 @@ hs_err_pid*
 
 
 # ignore terraform variables / state for developers' personal development environments and other examples
-infra/*/terraform.tfvars
-infra/*/.terraform**
+infra/**/terraform.tfvars
+infra/**/.terraform**
 infra/*/terraform.tfstate**
 infra/*/TODO*
 
