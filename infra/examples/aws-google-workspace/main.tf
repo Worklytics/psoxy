@@ -130,7 +130,7 @@ module "google-workspace-connection" {
 
   source = "../../modules/google-workspace-dwd-connection"
 
-  project_id                   = google_project.psoxy-google-connectors.id
+  project_id                   = google_project.psoxy-google-connectors.project_id
   connector_service_account_id = "psoxy-${each.key}-dwd"
   display_name                 = "Psoxy Connector - ${each.value.display_name}${var.connector_display_name_suffix}"
   apis_consumed                = each.value.apis_consumed
