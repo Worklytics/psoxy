@@ -16,7 +16,7 @@ class LambdaRequestTest {
     public void parse() {
 
         LambdaRequest request = objectMapper.readerFor(LambdaRequest.class)
-            .readValue(TestUtils.getData("request.json"));
+            .readValue(TestUtils.getData("lambda-proxy-events/generic-request.json"));
 
         assertEquals("/path/to/resource", request.getPath());
 
