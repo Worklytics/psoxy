@@ -39,6 +39,10 @@ resource "aws_lambda_permission" "lambda_permission" {
   ]
 }
 
+locals {
+  proxy_endpoint_url = "${var.api_gateway.api_endpoint}/${var.function_name}"
+}
+
 resource "aws_lambda_function" "psoxy-instance" {
   function_name    = var.function_name
   role             = var.execution_role_arn
@@ -46,13 +50,14 @@ resource "aws_lambda_function" "psoxy-instance" {
   runtime          = "java11"
   filename         = var.path_to_function_zip
   source_code_hash = filebase64sha256(var.path_to_function_zip)
-  timeout          = 55 //seconds
+  timeout          = 55 # seconds
 
+  environment {
+    variables = yamldecode(file(var.path_to_config))
+  }
 }
 
-locals {
-  proxy_endpoint_url = "${var.api_gateway.api_endpoint}/${var.function_name}"
-}
+
 
 
 resource "local_file" "todo" {

@@ -161,6 +161,7 @@ module "psoxy-google-workspace-connector" {
   api_gateway          = module.psoxy-aws.api_gateway
   execution_role_arn   = module.psoxy-aws.execution_role_arn
   path_to_function_zip = "../../../java/impl/aws/target/psoxy-aws-1.0-SNAPSHOT.jar"
+  path_to_config       = "../../../configs/${each.key}.yaml"
 
   secret_bindings       = {
     PSOXY_SALT = {

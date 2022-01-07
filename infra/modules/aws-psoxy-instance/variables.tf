@@ -41,3 +41,8 @@ variable "path_to_function_zip" {
   type        = string
   description = "path to lambda zip"
 }
+
+variable "path_to_config" {
+  type        = string
+  description = "path to config file (usually someting in ../../configs/, eg configs/gdirectory.yaml"
+}

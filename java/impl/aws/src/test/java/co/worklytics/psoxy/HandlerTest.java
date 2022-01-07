@@ -35,7 +35,7 @@ class HandlerTest {
 
         Handler handler = new Handler();
 
-        String result = handler.handleRequest(event, context);
+       // String result = handler.handleRequest(event, context);
     }
 
     Context context = new Context() {
