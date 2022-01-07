@@ -40,11 +40,14 @@ resource "aws_lambda_permission" "lambda_permission" {
 }
 
 resource "aws_lambda_function" "psoxy-instance" {
-  function_name = var.function_name
-  role          = var.execution_role_arn
-  handler       = "co.worklytics.psoxy.Handler"
-  runtime       = "java11"
-  filename      = var.path_to_function_zip
+  function_name    = var.function_name
+  role             = var.execution_role_arn
+  handler          = "co.worklytics.psoxy.Handler"
+  runtime          = "java11"
+  filename         = var.path_to_function_zip
+  source_code_hash = filebase64sha256(var.path_to_function_zip)
+  timeout          = 55 //seconds
+
 }
 
 locals {
