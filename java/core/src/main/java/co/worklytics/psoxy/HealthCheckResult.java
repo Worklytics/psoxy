@@ -13,7 +13,7 @@ import java.util.Set;
 public class HealthCheckResult {
 
     @RequiredArgsConstructor
-    enum HttpStatusCode {
+    public enum HttpStatusCode {
         SUCCEED(200),
         FAIL(512);
 
@@ -27,7 +27,7 @@ public class HealthCheckResult {
 
     Set<String> missingConfigProperties;
 
-    boolean passed() {
+    public boolean passed() {
         return getConfiguredSource() != null
             && getNonDefaultSalt()
             && getMissingConfigProperties().isEmpty();

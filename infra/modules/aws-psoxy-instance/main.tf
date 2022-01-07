@@ -73,10 +73,7 @@ mvn package
 Third, run the following deployment command from `java/impl/aws` folder within your checkout:
 
 ```shell
-sam deploy \
-    --template target/deployment
-    --region ${var.region} \
-    --role-arn ${var.execution_role_arn} \
+aws lambda update-function-code --function-name ${var.function_name} --zip-file fileb://target/psoxy-aws-1.0-SNAPSHOT.jar
 ```
 
 Finally, review the deployed function in AWS console:

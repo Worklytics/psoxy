@@ -1,28 +1,23 @@
 package co.worklytics.psoxy;
 
+import co.worklytics.psoxy.gateway.impl.AbstractRequestHandler;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
-import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.Map;
 import lombok.*;
 
-public class Handler implements RequestHandler<Map<String,String>, String> {
+public class Handler implements RequestHandler<LambdaRequest, String> {
 
     ObjectMapper mapper = new ObjectMapper();
 
+    AbstractRequestHandler<LambdaRequest> requestHandler =
+        new AbstractRequestHandler<>(new LambdaRequestAdapter());
+
     @SneakyThrows
     @Override
-    public String handleRequest(Map<String,String> event, Context context)
-    {
-        LambdaLogger logger = context.getLogger();
-        String response = new String("200 OK");
-        // log execution details
-        logger.log("ENVIRONMENT VARIABLES: " + mapper.writeValueAsString(System.getenv()));
-        logger.log("CONTEXT: " + mapper.writeValueAsString(context));
-        // process event
-        logger.log("EVENT: " + mapper.writeValueAsString(event));
-        logger.log("EVENT TYPE: " + event.getClass().toString());
-        return response;
+    public String handleRequest(LambdaRequest event, Context context) {
+        AbstractRequestHandler.Response response = requestHandler.handle(event);
+
+        return mapper.writer().writeValueAsString(response);
     }
 }
