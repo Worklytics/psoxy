@@ -60,6 +60,8 @@ public class Route implements HttpFunction {
 
     @Getter
     @Inject ConfigService config;
+    @Inject Set<SourceAuthStrategy> sourceAuthStrategies;
+
     Sanitizer sanitizer;
     SourceAuthStrategy sourceAuthStrategy;
     RulesUtils rulesUtils = new RulesUtils();
@@ -68,14 +70,11 @@ public class Route implements HttpFunction {
     SourceAuthStrategy getSourceAuthStrategy() {
         if (sourceAuthStrategy == null) {
             String identifier = getConfig().getConfigPropertyOrError(ProxyConfigProperty.SOURCE_AUTH_STRATEGY_IDENTIFIER);
-            Stream<SourceAuthStrategy> implementations = Stream.of(
-                new GoogleCloudPlatformServiceAccountKeyAuthStrategy(),
-                new OAuthRefreshTokenSourceAuthStrategy(),
-                new OAuthAccessTokenSourceAuthStrategy()
-            );
-            sourceAuthStrategy = implementations
+            sourceAuthStrategy = sourceAuthStrategies
+                    .stream()
                     .filter(impl -> Objects.equals(identifier, impl.getConfigIdentifier()))
-                .findFirst().orElseThrow(() -> new Error("No SourceAuthStrategy impl matching configured identifier: " + identifier));
+                    .findFirst()
+                    .orElseThrow(() -> new Error("No SourceAuthStrategy impl matching configured identifier: " + identifier));
         }
         return sourceAuthStrategy;
     }
