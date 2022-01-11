@@ -39,6 +39,7 @@ import java.util.*;
  *
  */
 @Log
+@NoArgsConstructor(onConstructor = @__({@Inject}))
 public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
     @Getter
@@ -75,8 +76,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
     public static class RefreshHandlerImpl implements OAuth2CredentialsWithRefresh.OAuth2RefreshHandler {
 
         @Inject ConfigService config;
-        //TODO: inject
-        ObjectMapper objectMapper = new ObjectMapper();
+        @Inject ObjectMapper objectMapper;
         //TODO: inject
         HttpRequestFactory httpRequestFactory = (new NetHttpTransport()).createRequestFactory();
 

@@ -22,12 +22,12 @@ public class GatewayModule {
     }
 
     @Provides @IntoSet
-    SourceAuthStrategy providesSourceAuthStrategy(OAuthAccessTokenSourceAuthStrategy oAuthAccessTokenSourceAuthStrategy) {
+    SourceAuthStrategy providesOAuthAccessTokenSourceAuthStrategy(OAuthAccessTokenSourceAuthStrategy oAuthAccessTokenSourceAuthStrategy) {
         return oAuthAccessTokenSourceAuthStrategy;
     }
 
     @Provides @IntoSet
-    SourceAuthStrategy providesSourceAuthStrategy(OAuthRefreshTokenSourceAuthStrategy oAuthRefreshTokenSourceAuthStrategy) {
+    SourceAuthStrategy providesOAuthRefreshTokenSourceAuthStrategy(OAuthRefreshTokenSourceAuthStrategy oAuthRefreshTokenSourceAuthStrategy) {
         return oAuthRefreshTokenSourceAuthStrategy;
     }
 

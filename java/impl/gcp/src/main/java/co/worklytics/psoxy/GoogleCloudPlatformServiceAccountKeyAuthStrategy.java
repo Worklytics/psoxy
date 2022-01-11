@@ -8,6 +8,7 @@ import com.google.auth.Credentials;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.auth.oauth2.ServiceAccountCredentials;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 
 import javax.inject.Inject;
@@ -15,6 +16,7 @@ import java.io.ByteArrayInputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@NoArgsConstructor(onConstructor = @__({@Inject}))
 class GoogleCloudPlatformServiceAccountKeyAuthStrategy implements SourceAuthStrategy {
 
     @Getter

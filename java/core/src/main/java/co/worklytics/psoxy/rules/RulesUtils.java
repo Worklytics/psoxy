@@ -5,17 +5,22 @@ import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import org.apache.commons.codec.digest.DigestUtils;
 
+import javax.inject.Inject;
+import javax.inject.Named;
 import java.io.File;
 import java.io.IOException;
 import java.util.Base64;
 import java.util.Optional;
 
+@NoArgsConstructor(onConstructor = @__({@Inject}))
 public class RulesUtils {
 
-    ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
+    @Inject @Named("ForYAML")
+    ObjectMapper yamlMapper;
 
     @SneakyThrows
     public String sha(Rules rules) {

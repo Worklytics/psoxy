@@ -1,15 +1,10 @@
 package co.worklytics.psoxy;
 
+import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
-import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
-import co.worklytics.psoxy.gateway.impl.OAuthAccessTokenSourceAuthStrategy;
-import co.worklytics.psoxy.gateway.impl.OAuthRefreshTokenSourceAuthStrategy;
-import co.worklytics.psoxy.impl.SanitizerImpl;
-import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
-
-import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.psoxy.utils.URLUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.http.GenericUrl;
@@ -21,7 +16,6 @@ import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.cloud.functions.HttpFunction;
 import com.google.cloud.functions.HttpRequest;
 import com.google.cloud.functions.HttpResponse;
-
 import com.google.common.net.MediaType;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -30,12 +24,14 @@ import lombok.extern.java.Log;
 import javax.inject.Inject;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Log
 public class Route implements HttpFunction {
@@ -62,11 +58,11 @@ public class Route implements HttpFunction {
     @Inject ConfigService config;
     @Inject Set<SourceAuthStrategy> sourceAuthStrategies;
     @Inject SanitizerFactory sanitizerFactory;
+    @Inject ObjectMapper objectMapper;
+    @Inject RulesUtils rulesUtils;
 
     Sanitizer sanitizer;
     SourceAuthStrategy sourceAuthStrategy;
-    RulesUtils rulesUtils = new RulesUtils();
-    ObjectMapper objectMapper = new ObjectMapper();
 
     SourceAuthStrategy getSourceAuthStrategy() {
         if (sourceAuthStrategy == null) {
@@ -124,6 +120,8 @@ public class Route implements HttpFunction {
     @Override
     public void service(HttpRequest request, HttpResponse response)
             throws IOException {
+
+        DaggerGcpContainer.create().injectRoute(this);
 
         boolean isHealthCheck =
             request.getHeaders().containsKey(ControlHeader.HEALTH_CHECK.getHttpHeader());

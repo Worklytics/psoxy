@@ -13,6 +13,7 @@ import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import dagger.assisted.Assisted;
+import dagger.assisted.AssistedInject;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.extern.java.Log;
@@ -35,6 +36,7 @@ import java.util.stream.Collectors;
 @Log
 public class SanitizerImpl implements Sanitizer {
 
+    @AssistedInject
     public SanitizerImpl(HashUtils hashUtils, @Assisted Options options) {
         this.options = options;
     };

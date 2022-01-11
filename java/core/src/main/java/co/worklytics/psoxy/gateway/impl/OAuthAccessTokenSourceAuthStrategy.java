@@ -6,6 +6,7 @@ import com.google.auth.Credentials;
 import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.OAuth2Credentials;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.extern.java.Log;
 
 import javax.inject.Inject;
@@ -23,6 +24,7 @@ import java.util.Set;
  *
  */
 @Log
+@NoArgsConstructor(onConstructor = @__({@Inject}))
 public class OAuthAccessTokenSourceAuthStrategy implements SourceAuthStrategy {
 
     @Getter
