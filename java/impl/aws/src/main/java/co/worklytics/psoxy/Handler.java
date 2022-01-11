@@ -1,6 +1,7 @@
 package co.worklytics.psoxy;
 
-import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.aws.AwsModule;
+import co.worklytics.psoxy.aws.LambdaRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.impl.AbstractRequestHandler;
 import com.amazonaws.services.lambda.runtime.Context;

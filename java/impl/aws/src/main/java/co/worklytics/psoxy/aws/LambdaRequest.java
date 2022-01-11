@@ -1,4 +1,4 @@
-package co.worklytics.psoxy;
+package co.worklytics.psoxy.aws;
 
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
