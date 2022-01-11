@@ -19,6 +19,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.java.Log;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
@@ -41,6 +42,8 @@ import java.util.*;
 @Log
 @NoArgsConstructor(onConstructor = @__({@Inject}))
 public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
+
+    @Inject Provider<OAuth2CredentialsWithRefresh.OAuth2RefreshHandler> refreshHandlerProvider;
 
     @Getter
     private final String configIdentifier = "oauth2_refresh_token";
@@ -67,19 +70,18 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
             //TODO: pull an AccessToken from some cached location or something? otherwise will
             // be 'null' and refreshed for every request; and/or Keep credentials themselves in
             // memory
-            .setRefreshHandler(new RefreshHandlerImpl())
+            .setRefreshHandler(refreshHandlerProvider.get())
             .build();
     }
 
 
     @Log
+    @NoArgsConstructor(onConstructor = @__({@Inject}))
     public static class RefreshHandlerImpl implements OAuth2CredentialsWithRefresh.OAuth2RefreshHandler {
 
         @Inject ConfigService config;
         @Inject ObjectMapper objectMapper;
-        //TODO: inject
-        HttpRequestFactory httpRequestFactory = (new NetHttpTransport()).createRequestFactory();
-
+        @Inject HttpRequestFactory httpRequestFactory;
 
         /**
          * implements canonical oauth flow to exchange refreshToken for accessToken
