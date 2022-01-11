@@ -51,6 +51,7 @@ resource "aws_lambda_function" "psoxy-instance" {
   filename         = var.path_to_function_zip
   source_code_hash = filebase64sha256(var.path_to_function_zip)
   timeout          = 55 # seconds
+  memory_size      = 256 # megabytes
 
   environment {
     variables = merge(
