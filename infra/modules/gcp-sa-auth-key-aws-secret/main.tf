@@ -18,11 +18,9 @@ resource "google_service_account_key" "key" {
   }
 }
 
-resource "aws_secretsmanager_secret" "service-account-key" {
-  name = var.secret_id
-}
-
-resource "aws_secretsmanager_secret_version" "service-account-key-version" {
-  secret_id     = aws_secretsmanager_secret.service-account-key.id
-  secret_string = google_service_account_key.key.private_key
+resource "aws_ssm_parameter" "value" {
+  name        = var.secret_id
+  type        = "SecureString"
+  description = "Key for gcp service account ${var.service_account_id}"
+  value       = google_service_account_key.key.private_key
 }

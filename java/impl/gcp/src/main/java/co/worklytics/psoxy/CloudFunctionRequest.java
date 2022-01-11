@@ -1,13 +1,15 @@
 package co.worklytics.psoxy;
 
-import co.worklytics.psoxy.gateway.ProxyRequestAdapter;
+import co.worklytics.psoxy.gateway.HttpEventRequest;
 import com.google.cloud.functions.HttpRequest;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 import java.util.Optional;
 
-public class CloudFunctionRequestAdapter implements ProxyRequestAdapter<HttpRequest> {
+@RequiredArgsConstructor(staticName = "of")
+public class CloudFunctionRequest implements HttpEventRequest {
 
     /**
      * see "https://cloud.google.com/functions/docs/configuring/env-var"
@@ -16,19 +18,22 @@ public class CloudFunctionRequestAdapter implements ProxyRequestAdapter<HttpRequ
         K_SERVICE,
     }
 
+    @NonNull
+    final HttpRequest request;
+
     @Override
-    public String getPath(HttpRequest request) {
+    public String getPath() {
         return request.getPath()
             .replace(System.getenv(RuntimeEnvironmentVariables.K_SERVICE.name()) + "/", "");
     }
 
     @Override
-    public Optional<String> getQuery(HttpRequest request) {
+    public Optional<String> getQuery() {
         return request.getQuery();
     }
 
     @Override
-    public Optional<List<String>> getHeader(@NonNull HttpRequest request, @NonNull String headerName) {
+    public Optional<List<String>> getHeader(@NonNull String headerName) {
         return Optional.ofNullable(request.getHeaders().get(headerName));
     }
 }

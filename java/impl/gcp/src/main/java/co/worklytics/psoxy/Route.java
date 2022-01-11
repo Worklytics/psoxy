@@ -1,10 +1,12 @@
 package co.worklytics.psoxy;
 
+import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.impl.AbstractRequestHandler;
 import com.google.cloud.functions.HttpFunction;
 import com.google.cloud.functions.HttpRequest;
 import com.google.cloud.functions.HttpResponse;
 
+import dagger.Component;
 import lombok.extern.java.Log;
 
 import java.io.ByteArrayInputStream;
@@ -14,15 +16,21 @@ import java.nio.charset.StandardCharsets;
 @Log
 public class Route implements HttpFunction {
 
-    AbstractRequestHandler<HttpRequest> requestHandler
-        = new AbstractRequestHandler(new CloudFunctionRequestAdapter());
 
+    @Component(modules = GcpModule.class)
+    interface GcpComponent {
+
+        AbstractRequestHandler requestHandler();
+    }
 
     @Override
     public void service(HttpRequest request, HttpResponse response)
             throws IOException {
 
-        AbstractRequestHandler.Response abstractResponse = requestHandler.handle(request);
+        GcpComponent graph = DaggerRoute_GcpComponent.builder().build();
+
+        HttpEventResponse abstractResponse =
+            graph.requestHandler().handle(CloudFunctionRequest.of(request));
 
         abstractResponse.getHeaders()
                 .forEach(h -> response.appendHeader(h.getKey(), h.getValue()));

@@ -11,88 +11,95 @@ import co.worklytics.psoxy.impl.SanitizerImpl;
 import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
 import co.worklytics.psoxy.rules.RulesUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.Getter;
-import lombok.extern.java.Log;
+import dagger.Module;
+import dagger.Provides;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.logging.Logger;
 import java.util.stream.Stream;
 
-/**
- * quick hack of DI, pending integration of DI framework (Dagger2) which would replace this (TBD)
- */
-@Log
-public class DependencyFactoryImpl implements DependencyFactory {
-
+//TODO: duplicated in every impl pkg, due to Dagger code generation. need to improve this
+//  - component dependencies??
+//  - better multi-module build???
+//  - migrate to Gradle??
+@Module
+public interface CoreModule {
 
     /**
      * default value for salt; provided just to support testing with minimal config, but in prod
      * use should be overridden with something
      */
     //TODO: these don't belong in this class
-    static final String DEFAULT_SALT = "salt";
-    static final String PATH_TO_RULES_FILES = "/rules.yaml";
+    String DEFAULT_SALT = "salt";
+    String PATH_TO_RULES_FILES = "/rules.yaml";
 
-    @Getter
-    ConfigService config  = new EnvVarsConfigService();
-    @Getter
-    ObjectMapper objectMapper = new ObjectMapper();
+    @Provides
+    static EnvVarsConfigService envVarsConfigService() {
+        return new EnvVarsConfigService();
+    }
 
-    @Getter
-    RulesUtils rulesUtils = new RulesUtils();
+    @Provides
+    static ObjectMapper objectMapper() {
+        return new ObjectMapper();
+    }
 
-    SourceAuthStrategy sourceAuthStrategy;
+    @Provides
+    static RulesUtils rulesUtils() {
+        return new RulesUtils();
+    }
 
-    @Override
-    public SourceAuthStrategy getSourceAuthStrategy() {
-        if (sourceAuthStrategy == null) {
-            String identifier = getConfig().getConfigPropertyOrError(ProxyConfigProperty.SOURCE_AUTH_STRATEGY_IDENTIFIER);
+    @Provides
+    static SourceAuthStrategy getSourceAuthStrategy(ConfigService config) {
+            String identifier = config.getConfigPropertyOrError(ProxyConfigProperty.SOURCE_AUTH_STRATEGY_IDENTIFIER);
             Stream<SourceAuthStrategy> implementations = Stream.of(
                 new GoogleCloudPlatformServiceAccountKeyAuthStrategy(),
                 new OAuthRefreshTokenSourceAuthStrategy(),
                 new OAuthAccessTokenSourceAuthStrategy()
             );
-            sourceAuthStrategy = implementations
+           return implementations
                 .filter(impl -> Objects.equals(identifier, impl.getConfigIdentifier()))
                 .findFirst().orElseThrow(() -> new Error("No SourceAuthStrategy impl matching configured identifier: " + identifier));
-        }
-        return sourceAuthStrategy;
     }
 
-    Sanitizer sanitizer;
+    @Provides
+    static Logger logger() {
+        return Logger.getLogger(CoreModule.class.getCanonicalName());
+    }
 
-    @Override
-    public Sanitizer getSanitizer() {
-        if (sanitizer == null) {
-            Optional<Rules> fileSystemRules = getRulesUtils().getRulesFromFileSystem(PATH_TO_RULES_FILES);
+    @Provides
+    static Sanitizer getSanitizer(Logger log, ConfigService config, RulesUtils rulesUtils) {
+            Optional<Rules> fileSystemRules = rulesUtils.getRulesFromFileSystem(PATH_TO_RULES_FILES);
             if (fileSystemRules.isPresent()) {
                 log.info("using rules from file system");
             }
             Rules rules = fileSystemRules.orElseGet(() -> {
-                Optional<Rules> configRules = getRulesUtils().getRulesFromConfig(getConfig());
+                Optional<Rules> configRules = rulesUtils.getRulesFromConfig(config);
                 if (configRules.isPresent()) {
                     log.info("using rules from environment config (RULES variable parsed as base64-encoded YAML)");
                 }
                 return configRules.orElseGet(() -> {
-                    String source = getConfig().getConfigPropertyOrError(ProxyConfigProperty.SOURCE);
+                    String source = config.getConfigPropertyOrError(ProxyConfigProperty.SOURCE);
                     log.info("using prebuilt rules for: " + source);
                     return PrebuiltSanitizerRules.MAP.get(source);
                 });
             });
 
-            sanitizer = new SanitizerImpl(
-                Sanitizer.Options.builder()
-                    .rules(rules)
-                    .pseudonymizationSalt(getConfig().getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT)
-                        .orElse(DEFAULT_SALT))
-                    .defaultScopeId(getConfig().getConfigPropertyAsOptional(ProxyConfigProperty.IDENTIFIER_SCOPE_ID)
-                        .orElse(rules.getDefaultScopeIdForSource()))
-                    .build());
+        SanitizerImpl sanitizer = new SanitizerImpl(
+            Sanitizer.Options.builder()
+                .rules(rules)
+                .pseudonymizationSalt(config.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT)
+                    .orElse(DEFAULT_SALT))
+                .defaultScopeId(config.getConfigPropertyAsOptional(ProxyConfigProperty.IDENTIFIER_SCOPE_ID)
+                    .orElse(rules.getDefaultScopeIdForSource()))
+                .build());
 
-            if (getConfig().isDevelopment()) {
+            if (config.isDevelopment()) {
                 log.warning("Proxy instance configured in development mode (env var IS_DEVELOPMENT_MODE=true)");
             }
-        }
+
         return sanitizer;
     }
+
+
 }

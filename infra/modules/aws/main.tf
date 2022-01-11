@@ -99,6 +99,13 @@ resource "aws_secretsmanager_secret_version" "initial_version" {
   secret_string = sensitive(random_password.random.result)
 }
 
+resource "aws_ssm_parameter" "salt" {
+  name        = "PSOXY_SALT"
+  type        = "SecureString"
+  description = "Salt used to build pseudonyms"
+  value       = sensitive(random_password.random.result)
+}
+
 output "salt_secret_id" {
   value = aws_secretsmanager_secret.pseudonymization-salt.id
 }

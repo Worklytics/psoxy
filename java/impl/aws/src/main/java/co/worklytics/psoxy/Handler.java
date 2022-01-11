@@ -1,19 +1,27 @@
 package co.worklytics.psoxy;
 
+import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.impl.AbstractRequestHandler;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dagger.Component;
 import lombok.*;
+import lombok.extern.java.Log;
 
 import java.util.Map;
 
+@Log
 public class Handler implements RequestHandler<Map<String, Object>, String> {
 
-    ObjectMapper mapper = new ObjectMapper();
+    @Component(modules = AwsModule.class)
+    interface AwsComponent {
 
-    AbstractRequestHandler<LambdaRequest> requestHandler =
-        new AbstractRequestHandler<>(new LambdaRequestAdapter());
+        ObjectMapper objectMapper();
+
+        AbstractRequestHandler requestHandler();
+    }
 
     //TODO: improve this
     //   - change this to directly take LambdaRequest as it's parameter type
@@ -22,12 +30,36 @@ public class Handler implements RequestHandler<Map<String, Object>, String> {
     @Override
     public String handleRequest(Map<String, Object> request, Context context) {
 
-        String raw = mapper.writeValueAsString(request);
+        //interfaces:
+        // - HttpRequestEvent --> HttpResponseEvent
 
-        LambdaRequest event = mapper.readerFor(LambdaRequest.class).readValue(raw);
+        //q: what's the component?
+        // - request handler?? but it's abstract ...
+        //    - make it bound with interface, rather than generic? --> prob best approach
+        // - objectMapper
+        //
 
-        AbstractRequestHandler.Response response = requestHandler.handle(event);
+        AwsComponent graph = DaggerHandler_AwsComponent.builder().build();
 
-        return mapper.writer().writeValueAsString(response);
+        HttpEventResponse response;
+        try {
+            String raw = graph.objectMapper().writeValueAsString(request);
+
+            LambdaRequest event = graph.objectMapper().readerFor(LambdaRequest.class).readValue(raw);
+
+            response = graph.requestHandler().handle(event);
+        } catch (Throwable e) {
+            context.getLogger().log(e.getMessage());
+            response = HttpEventResponse.builder()
+                .statusCode(500)
+                .body("Unknown error")
+                .build();
+        }
+
+        try {
+            return graph.objectMapper().writer().writeValueAsString(response);
+        } catch (Throwable e) {
+            throw  new Error(e);
+        }
     }
 }
