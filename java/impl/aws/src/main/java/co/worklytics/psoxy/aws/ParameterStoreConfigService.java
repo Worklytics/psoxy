@@ -1,7 +1,6 @@
 package co.worklytics.psoxy.aws;
 
 import co.worklytics.psoxy.gateway.ConfigService;
-import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import software.amazon.awssdk.services.ssm.SsmClient;
 
 import software.amazon.awssdk.services.ssm.model.*;
@@ -18,6 +17,8 @@ import java.util.Optional;
 public class ParameterStoreConfigService implements ConfigService {
 
     @Inject SsmClient client;
+
+    //TODO: add caching?? guava?? apache commons??
 
     @Override
     public String getConfigPropertyOrError(ConfigProperty property) {
@@ -38,11 +39,5 @@ public class ParameterStoreConfigService implements ConfigService {
         } catch (SsmException e) {
             throw new IllegalStateException("failed to get config value", e);
         }
-    }
-
-    @Override
-    public boolean isDevelopment() {
-        return this.getConfigPropertyAsOptional(ProxyConfigProperty.IS_DEVELOPMENT_MODE)
-            .map(Boolean::parseBoolean).orElse(false);
     }
 }

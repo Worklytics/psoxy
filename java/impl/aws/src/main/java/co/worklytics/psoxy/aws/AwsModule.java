@@ -4,11 +4,13 @@ package co.worklytics.psoxy.aws;
 import co.worklytics.psoxy.CoreModule;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
-import dagger.Binds;
+import co.worklytics.psoxy.gateway.impl.CompositeConfigService;
 import dagger.Module;
 import dagger.Provides;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ssm.SsmClient;
+
+import javax.inject.Singleton;
 
 @Module(
     includes = CoreModule.class
@@ -19,9 +21,19 @@ public interface AwsModule {
         REGION,
     }
 
-    @Binds ConfigService configService(EnvVarsConfigService envVarsConfigService);
+    @Provides @Singleton
+    static ConfigService configService(EnvVarsConfigService envVarsConfigService,
+                                       ParameterStoreConfigService parameterStoreConfigService) {
 
-    @Provides static SsmClient ssmClient(EnvVarsConfigService envVarsConfigService) {
+        return CompositeConfigService.builder()
+            .fallback(parameterStoreConfigService)
+            .preferred(envVarsConfigService)
+            .build();
+
+    };
+
+    @Provides
+    static SsmClient ssmClient(EnvVarsConfigService envVarsConfigService) {
         Region region = Region.of(envVarsConfigService.getConfigPropertyOrError(AwsConfig.REGION));
 
         return SsmClient.builder()
