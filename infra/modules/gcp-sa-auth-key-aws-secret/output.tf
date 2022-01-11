@@ -1,9 +1,5 @@
 output "key_secret_name" {
-  value = aws_secretsmanager_secret.service-account-key.name
-}
-
-output "key_secret_version_id" {
-  value =  aws_secretsmanager_secret_version.service-account-key-version.version_id
+  value = aws_ssm_parameter.value.name
 }
 
 output "key_value" {

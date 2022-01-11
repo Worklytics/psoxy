@@ -15,12 +15,11 @@ variable "source_kind" {
   description = "kind of source (eg, 'gmail', 'google-chat', etc)"
 }
 
-variable "secret_bindings" {
+variable "parameter_bindings" {
   type = map(object({
-    secret_name    = string
-    version_number = string
+    name    = string
   }))
-  description = "map of Secret Manager Secrets to expose to cloud function (ENV_VAR_NAME --> resource ID of secret)"
+  description = "map of System Manager Parameters to expose to function"
 }
 
 variable "api_gateway" {

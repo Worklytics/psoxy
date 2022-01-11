@@ -94,11 +94,6 @@ resource "random_password" "random" {
 # previously pseudonymized data will be inconsistent with data pseudonymized after the change.
 #
 # To be clear, possession of salt alone doesn't let someone reverse pseudonyms.
-resource "aws_secretsmanager_secret_version" "initial_version" {
-  secret_id     = aws_secretsmanager_secret.pseudonymization-salt.id
-  secret_string = sensitive(random_password.random.result)
-}
-
 resource "aws_ssm_parameter" "salt" {
   name        = "PSOXY_SALT"
   type        = "SecureString"
@@ -107,11 +102,7 @@ resource "aws_ssm_parameter" "salt" {
 }
 
 output "salt_secret_id" {
-  value = aws_secretsmanager_secret.pseudonymization-salt.id
-}
-
-output "salt_secret_version_id" {
-  value = aws_secretsmanager_secret_version.initial_version.version_id
+  value = aws_ssm_parameter.salt.id
 }
 
 output "api_gateway" {

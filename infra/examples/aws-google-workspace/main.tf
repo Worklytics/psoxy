@@ -163,14 +163,12 @@ module "psoxy-google-workspace-connector" {
   path_to_function_zip = "../../../java/impl/aws/target/psoxy-aws-1.0-SNAPSHOT.jar"
   path_to_config       = "../../../configs/${each.key}.yaml"
 
-  secret_bindings       = {
+  parameter_bindings   = {
     PSOXY_SALT = {
-      secret_name    = module.psoxy-aws.salt_secret_id
-      version_number = module.psoxy-aws.salt_secret_version_id
+      name    = module.psoxy-aws.salt_secret_id
     },
     SERVICE_ACCOUNT_KEY = {
-      secret_name    = module.google-workspace-connection-auth[each.key].key_secret_name
-      version_number = module.google-workspace-connection-auth[each.key].key_secret_version_id
+      name    = module.google-workspace-connection-auth[each.key].key_secret_name
     }
   }
 }
