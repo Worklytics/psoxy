@@ -1,6 +1,8 @@
 package co.worklytics.psoxy.aws;
 
 import co.worklytics.psoxy.gateway.ConfigService;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import software.amazon.awssdk.services.ssm.SsmClient;
 
 import software.amazon.awssdk.services.ssm.model.*;
@@ -14,6 +16,12 @@ import java.util.Optional;
  * https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html
  *
  */
+//@NoArgsConstructor(onConstructor_ = @Inject)
+// IDE accepts this, but mvn compile complains --> badly linked lombok??
+//[ERROR] /Users/erik/code/psoxy/java/impl/aws/src/main/java/co/worklytics/psoxy/aws/ParameterStoreConfigService.java:[18,20] cannot find symbol
+//[ERROR]   symbol:   method onConstructor_()
+//[ERROR]   location: @interface lombok.NoArgsConstructor
+@AllArgsConstructor
 public class ParameterStoreConfigService implements ConfigService {
 
     @Inject SsmClient client;

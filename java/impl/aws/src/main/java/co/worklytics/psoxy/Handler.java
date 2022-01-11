@@ -16,7 +16,10 @@ import java.util.Map;
 @Log
 public class Handler implements RequestHandler<Map<String, Object>, String> {
 
-    @Component(modules = AwsModule.class)
+    @Component(modules = {
+        AwsModule.class,
+        CoreModule.class,
+    })
     interface AwsComponent {
 
         ObjectMapper objectMapper();

@@ -1,7 +1,6 @@
 package co.worklytics.psoxy.aws;
 
 
-import co.worklytics.psoxy.CoreModule;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.gateway.impl.CompositeConfigService;
@@ -10,18 +9,14 @@ import dagger.Provides;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ssm.SsmClient;
 
-import javax.inject.Singleton;
-
-@Module(
-    includes = CoreModule.class
-)
+@Module
 public interface AwsModule {
 
     enum AwsConfig implements ConfigService.ConfigProperty {
         REGION,
     }
 
-    @Provides @Singleton
+    @Provides
     static ConfigService configService(EnvVarsConfigService envVarsConfigService,
                                        ParameterStoreConfigService parameterStoreConfigService) {
 
@@ -39,5 +34,11 @@ public interface AwsModule {
         return SsmClient.builder()
             .region(region)
             .build();
+    }
+
+    @Provides
+    static ParameterStoreConfigService parameterStoreConfigService(SsmClient ssmClient) {
+        return new ParameterStoreConfigService(ssmClient);
+
     }
 }
