@@ -53,7 +53,12 @@ resource "aws_lambda_function" "psoxy-instance" {
   timeout          = 55 # seconds
 
   environment {
-    variables = yamldecode(file(var.path_to_config))
+    variables = merge(
+      yamldecode(file(var.path_to_config)),
+      {
+        REGION = var.region
+      }
+    )
   }
 }
 
