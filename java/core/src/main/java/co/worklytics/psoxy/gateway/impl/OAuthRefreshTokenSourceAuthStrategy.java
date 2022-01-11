@@ -18,6 +18,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.extern.java.Log;
 
+import javax.inject.Inject;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
@@ -73,8 +74,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
     @Log
     public static class RefreshHandlerImpl implements OAuth2CredentialsWithRefresh.OAuth2RefreshHandler {
 
-        //TODO: inject
-        ConfigService config = new EnvVarsConfigService();
+        @Inject ConfigService config;
         //TODO: inject
         ObjectMapper objectMapper = new ObjectMapper();
         //TODO: inject

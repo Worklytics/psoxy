@@ -27,6 +27,7 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 
+import javax.inject.Inject;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -58,7 +59,7 @@ public class Route implements HttpFunction {
     static final String PATH_TO_RULES_FILES = "/rules.yaml";
 
     @Getter
-    ConfigService config  = new EnvVarsConfigService();
+    @Inject ConfigService config;
     Sanitizer sanitizer;
     SourceAuthStrategy sourceAuthStrategy;
     RulesUtils rulesUtils = new RulesUtils();
