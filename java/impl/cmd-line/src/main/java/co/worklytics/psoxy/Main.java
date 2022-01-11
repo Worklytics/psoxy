@@ -66,8 +66,9 @@ public class Main {
             options.pseudonymizationSalt(config.getPseudonymizationSalt());
         }
 
-
-        Sanitizer sanitizer = new SanitizerImpl(options.build());
+        // get a SanitizerFactory here
+        SanitizerFactory factory = null;
+        Sanitizer sanitizer = factory.create(options.build());
 
         try (FileReader in = new FileReader(inputFile)) {
             CSVParser records = CSVFormat.DEFAULT

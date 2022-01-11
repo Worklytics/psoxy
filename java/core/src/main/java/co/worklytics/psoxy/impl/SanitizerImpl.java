@@ -12,9 +12,9 @@ import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
+import dagger.assisted.Assisted;
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -33,8 +33,16 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Log
-@RequiredArgsConstructor
 public class SanitizerImpl implements Sanitizer {
+
+    public SanitizerImpl(HashUtils hashUtils, @Assisted Options options) {
+        this.options = options;
+    };
+
+    // for tests to compile for now
+    public SanitizerImpl(Options options) {
+        this.options = options;
+    }
 
     @Getter
     final Options options;

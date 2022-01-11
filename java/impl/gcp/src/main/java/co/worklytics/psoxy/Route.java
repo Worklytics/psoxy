@@ -61,6 +61,7 @@ public class Route implements HttpFunction {
     @Getter
     @Inject ConfigService config;
     @Inject Set<SourceAuthStrategy> sourceAuthStrategies;
+    @Inject SanitizerFactory sanitizerFactory;
 
     Sanitizer sanitizer;
     SourceAuthStrategy sourceAuthStrategy;
@@ -96,7 +97,7 @@ public class Route implements HttpFunction {
                 });
             });
 
-        sanitizer = new SanitizerImpl(
+        sanitizer = sanitizerFactory.create(
             Sanitizer.Options.builder()
                 .rules(rules)
                 .pseudonymizationSalt(getConfig().getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT)
