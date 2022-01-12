@@ -68,7 +68,7 @@ public class CommonRequestHandler {
             log.info("Proxy invoked with target " + URLUtils.relativeURL(targetUrl));
         } else {
             builder.statusCode(403);
-            log.warning("Attempt to call endpoint blocked by rules: " + targetUrl);
+            log.warning("Attempt to call endpoint blocked by rules: " + targetUrl + "; rules " + objectMapper.writeValueAsString(rules.getAllowedEndpointRegexes()));
             return builder.build();
         }
 

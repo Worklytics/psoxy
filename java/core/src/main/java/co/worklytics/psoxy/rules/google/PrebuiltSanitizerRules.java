@@ -87,10 +87,10 @@ public class PrebuiltSanitizerRules {
     static final Rules GDIRECTORY = Rules.builder()
         //GENERAL stuff
         //to block: https://admin.googleapis.com/admin/directory/v1/users/{userKey}/photos/thumbnail
-        .allowedEndpointRegex("^/admin/directory/v1/(domains|groups|orgunits).*")
+        .allowedEndpointRegex("^/admin/directory/v1/(groups|orgunits).*")
         .allowedEndpointRegex("^/admin/directory/v1/users\\?.*")
         .allowedEndpointRegex("^/admin/directory/v1/users/[^/]*")
-        .allowedEndpointRegex("^/admin/directory/v1/customer/my_customer/(roles|roleassignments|resources).*")
+        .allowedEndpointRegex("^/admin/directory/v1/customer/my_customer/(domains|roles|roleassignments|resources).*")
         .pseudonymization(Rule.builder()
             .relativeUrlRegex("^/admin/directory/v1/users.*")
             .jsonPath("$..primaryEmail")
