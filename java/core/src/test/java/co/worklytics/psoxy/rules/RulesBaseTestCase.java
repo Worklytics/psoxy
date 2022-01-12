@@ -20,6 +20,7 @@ import javax.inject.Singleton;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -154,6 +155,9 @@ abstract public class RulesBaseTestCase {
         return haystack.substring(start, end);
     }
 
+    protected void assertPseudonymized(String content, String ... shouldBePseudonymized) {
+        assertPseudonymized(content, List.of(shouldBePseudonymized));
+    }
 
     protected void assertPseudonymized(String content, Collection<String> shouldBePseudonymized) {
         shouldBePseudonymized
