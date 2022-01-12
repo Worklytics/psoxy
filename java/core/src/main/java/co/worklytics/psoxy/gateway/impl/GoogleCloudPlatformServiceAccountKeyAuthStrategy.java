@@ -3,13 +3,13 @@ package co.worklytics.psoxy.gateway.impl;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.SourceAuthConfigProperty;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
-import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import com.google.auth.Credentials;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.auth.oauth2.ServiceAccountCredentials;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.java.Log;
 
 import javax.inject.Inject;
 import java.io.ByteArrayInputStream;
@@ -17,6 +17,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 
+@Log
 @NoArgsConstructor(onConstructor_ = @Inject)
 public class GoogleCloudPlatformServiceAccountKeyAuthStrategy implements SourceAuthStrategy {
 
@@ -31,21 +32,25 @@ public class GoogleCloudPlatformServiceAccountKeyAuthStrategy implements SourceA
 
         Set<String> scopes = Arrays.stream(config.getConfigPropertyOrError(SourceAuthConfigProperty.OAUTH_SCOPES).split(","))
             .collect(Collectors.toSet());
-        GoogleCredentials credentials = GoogleCredentials.getApplicationDefault();
+        GoogleCredentials credentials;
 
-        if (!(credentials instanceof ServiceAccountCredentials)) {
-            // only ServiceAccountCredentials (created from an actual service account key) support
-            // domain-wide delegation
-            // see examples - even when access is 'global', still need to impersonate a user
-            // https://developers.google.com/admin-sdk/reports/v1/guides/delegation
+        Optional<String> key = config.getConfigPropertyAsOptional(SourceAuthConfigProperty.SERVICE_ACCOUNT_KEY);
 
-            //NOTE: in practice SERVICE_ACCOUNT_KEY need not belong the to same service account
-            // running the cloud function; but it could
-            String key = config.getConfigPropertyOrError(SourceAuthConfigProperty.SERVICE_ACCOUNT_KEY);
-            credentials = ServiceAccountCredentials.fromStream(new ByteArrayInputStream(Base64.getDecoder().decode(key)));
+        if (key.isPresent()) {
+            credentials = ServiceAccountCredentials.fromStream(new ByteArrayInputStream(Base64.getDecoder().decode(key.get())));
+        } else {
+            credentials = GoogleCredentials.getApplicationDefault();
         }
 
         if (userToImpersonate.isPresent()) {
+            if (!(credentials instanceof ServiceAccountCredentials)) {
+                // only ServiceAccountCredentials (created from an actual service account key) support
+                // domain-wide delegation
+                // see examples - even when access is 'global', still need to impersonate a user
+                // https://developers.google.com/admin-sdk/reports/v1/guides/delegation
+                log.warning("Trying to impersonate user with credentials that don't support it");
+            }
+
             //even though GoogleCredentials implements `createDelegated`, it's a no-op if the
             // credential type doesn't support it.
             credentials = credentials.createDelegated(userToImpersonate.get());
