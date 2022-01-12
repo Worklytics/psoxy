@@ -81,8 +81,8 @@ resource "aws_ssm_parameter" "salt" {
   value       = sensitive(random_password.random.result)
 }
 
-output "salt_secret_id" {
-  value = aws_ssm_parameter.salt.id
+output "salt_secret" {
+  value = aws_ssm_parameter.salt
 }
 
 output "api_gateway" {

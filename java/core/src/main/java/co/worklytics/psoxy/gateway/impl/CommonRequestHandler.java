@@ -2,6 +2,7 @@ package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.gateway.*;
+import co.worklytics.psoxy.impl.SanitizerImpl;
 import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.psoxy.utils.URLUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,13 +33,19 @@ public class CommonRequestHandler {
     final int SOURCE_API_REQUEST_READ_TIMEOUT = 300_000;
 
     @Inject ConfigService config;
-    @Inject Sanitizer sanitizer;
     @Inject RulesUtils rulesUtils;
     @Inject SourceAuthStrategy sourceAuthStrategy;
     @Inject ObjectMapper objectMapper;
+    @Inject SanitizerFactory sanitizerFactory;
+    @Inject Rules rules;
+
+    private Sanitizer sanitizer;
 
     @SneakyThrows
     public HttpEventResponse handle(HttpEventRequest request) {
+
+        //TODO: cache this?? no point in re-parsing config each time ...
+        this.sanitizer = sanitizerFactory.create(sanitizerFactory.buildOptions(config, rules));
 
         boolean isHealthCheck =
             request.getHeader(ControlHeader.HEALTH_CHECK.getHttpHeader()).isPresent();
