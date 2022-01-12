@@ -8,6 +8,8 @@ import dagger.Provides;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ssm.SsmClient;
 
+import javax.inject.Named;
+
 
 /**
  * defines how to fulfill dependencies that need platform-specific implementations for GCP platform
@@ -15,33 +17,56 @@ import software.amazon.awssdk.services.ssm.SsmClient;
 @Module
 public interface AwsModule {
 
-    enum AwsConfig implements ConfigService.ConfigProperty {
-        REGION,
+
+
+    /**
+     * see "https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html#configuration-envvars-runtimer"
+     */
+    enum RuntimeEnvironmentVariables {
+        AWS_REGION,
+        AWS_LAMBDA_FUNCTION_NAME,
     }
 
     @Provides
-    static ConfigService configService(EnvVarsConfigService envVarsConfigService,
-                                       ParameterStoreConfigService parameterStoreConfigService) {
-
-        return CompositeConfigService.builder()
-            .fallback(parameterStoreConfigService)
-            .preferred(envVarsConfigService)
-            .build();
-
-    };
-
-    @Provides
-    static SsmClient ssmClient(EnvVarsConfigService envVarsConfigService) {
-        Region region = Region.of(envVarsConfigService.getConfigPropertyOrError(AwsConfig.REGION));
-
+    static SsmClient ssmClient() {
+        Region region = Region.of(System.getenv(RuntimeEnvironmentVariables.AWS_REGION.name()));
         return SsmClient.builder()
             .region(region)
             .build();
     }
 
-    @Provides
+    //global parameters
+    @Provides @Named("Global")
     static ParameterStoreConfigService parameterStoreConfigService(SsmClient ssmClient) {
-        return new ParameterStoreConfigService(ssmClient);
+        return new ParameterStoreConfigService("", ssmClient);
+    }
 
+    //parameters scoped to function
+    @Provides
+    static ParameterStoreConfigService functionParameterStoreConfigService(SsmClient ssmClient) {
+        String namespace =
+            asParameterStoreNamespace(System.getenv(RuntimeEnvironmentVariables.AWS_LAMBDA_FUNCTION_NAME.name()));
+        return new ParameterStoreConfigService(namespace, ssmClient);
+    }
+
+    static String asParameterStoreNamespace(String functionName) {
+        return functionName.toUpperCase().replace("-", "_") + "_";
+    }
+
+    @Provides
+    static ConfigService configService(EnvVarsConfigService envVarsConfigService,
+                                       @Named("Global") ParameterStoreConfigService globalParameterStoreConfigService,
+                                       ParameterStoreConfigService functionScopedParameterStoreConfigService
+                                      ) {
+
+        CompositeConfigService parameterStoreConfigHierarchy = CompositeConfigService.builder()
+            .fallback(globalParameterStoreConfigService)
+            .preferred(functionScopedParameterStoreConfigService)
+            .build();
+
+        return CompositeConfigService.builder()
+            .fallback(parameterStoreConfigHierarchy)
+            .preferred(envVarsConfigService)
+            .build();
     }
 }

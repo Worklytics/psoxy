@@ -148,7 +148,7 @@ module "google-workspace-connection-auth" {
   source = "../../modules/gcp-sa-auth-key-aws-secret"
 
   service_account_id = module.google-workspace-connection[each.key].service_account_id
-  secret_id          = "PSOXY_${each.key}_SERVICE_ACCOUNT_KEY"
+  secret_id          = "PSOXY_${upper(each.key)}_SERVICE_ACCOUNT_KEY"
 }
 
 module "psoxy-google-workspace-connector" {
