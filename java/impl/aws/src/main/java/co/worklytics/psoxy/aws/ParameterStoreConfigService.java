@@ -18,6 +18,7 @@ import java.util.logging.Level;
  * https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html
  *
  */
+//TODO: AssistedFactory??
 //@NoArgsConstructor(onConstructor_ = @Inject)
 // IDE accepts this, but mvn compile complains --> badly linked lombok??
 //[ERROR] /Users/erik/code/psoxy/java/impl/aws/src/main/java/co/worklytics/psoxy/aws/ParameterStoreConfigService.java:[18,20] cannot find symbol
@@ -26,6 +27,9 @@ import java.util.logging.Level;
 @Log
 @AllArgsConstructor
 public class ParameterStoreConfigService implements ConfigService {
+
+
+    String namespace;
 
     @Inject SsmClient client;
 
@@ -41,7 +45,8 @@ public class ParameterStoreConfigService implements ConfigService {
     public Optional<String> getConfigPropertyAsOptional(ConfigProperty property) {
         try {
             GetParameterRequest parameterRequest = GetParameterRequest.builder()
-                .name(property.name())
+                .name(this.namespace + property.name())
+                .withDecryption(true)
                 .build();
             GetParameterResponse parameterResponse = client.getParameter(parameterRequest);
             return Optional.of(parameterResponse.parameter().value());
