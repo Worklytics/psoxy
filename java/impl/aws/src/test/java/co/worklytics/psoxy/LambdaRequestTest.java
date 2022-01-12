@@ -1,6 +1,7 @@
 package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.aws.LambdaRequest;
+import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.test.TestUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
@@ -30,14 +31,16 @@ class LambdaRequestTest {
     //test real example payload, which can be used to directly test psoxy behavior in AWS console
     // (eg, on page like https://console.aws.amazon.com/lambda/home?region=us-east-1#/functions/psoxy-gdirectory?tab=testing )
     @SneakyThrows
-    public void parseSpecific() {
-        LambdaRequest request = objectMapper.readerFor(LambdaRequest.class)
+    @Test
+    public void asEventRequest() {
+        HttpEventRequest request = (HttpEventRequest) objectMapper.readerFor(LambdaRequest.class)
             .readValue(TestUtils.getData("lambda-proxy-events/gdirectory-proxy-example.json"));
 
         assertEquals("/admin/directory/v1/customer/my_customer/domains",
             request.getPath());
 
-        assertEquals("erik@worklytics.co", request.getHeaders().get("X-Psoxy-User-To-Impersonate").get(0));
+        assertEquals("erik@worklytics.co",
+            request.getHeader("X-Psoxy-User-To-Impersonate").get().get(0));
     }
 
 }

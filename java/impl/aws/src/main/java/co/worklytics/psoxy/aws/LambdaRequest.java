@@ -48,6 +48,6 @@ public class LambdaRequest implements HttpEventRequest {
 
     @Override
     public Optional<List<String>> getHeader(String headerName) {
-        return Optional.empty();
+        return Optional.ofNullable(getHeaders().get(headerName));
     }
 }
