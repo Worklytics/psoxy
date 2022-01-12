@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 
 @NoArgsConstructor(onConstructor_ = @Inject)
 @Log
-public class AbstractRequestHandler {
+public class CommonRequestHandler {
 
     //we have ~540 total in Cloud Function connection, so can have generous values here
     final int SOURCE_API_REQUEST_CONNECT_TIMEOUT = 30_000;

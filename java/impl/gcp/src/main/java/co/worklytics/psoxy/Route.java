@@ -1,7 +1,7 @@
 package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.gateway.HttpEventResponse;
-import co.worklytics.psoxy.gateway.impl.AbstractRequestHandler;
+import co.worklytics.psoxy.gateway.impl.CommonRequestHandler;
 import com.google.cloud.functions.HttpFunction;
 import com.google.cloud.functions.HttpRequest;
 import com.google.cloud.functions.HttpResponse;
@@ -20,7 +20,7 @@ public class Route implements HttpFunction {
     @Component(modules = GcpModule.class)
     interface GcpComponent {
 
-        AbstractRequestHandler requestHandler();
+        CommonRequestHandler requestHandler();
     }
 
     @Override

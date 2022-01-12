@@ -3,9 +3,8 @@ package co.worklytics.psoxy;
 import co.worklytics.psoxy.aws.AwsModule;
 import co.worklytics.psoxy.aws.LambdaRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
-import co.worklytics.psoxy.gateway.impl.AbstractRequestHandler;
+import co.worklytics.psoxy.gateway.impl.CommonRequestHandler;
 import com.amazonaws.services.lambda.runtime.Context;
-import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dagger.Component;
 import lombok.*;
@@ -14,7 +13,7 @@ import lombok.extern.java.Log;
 import java.util.Map;
 
 @Log
-public class Handler implements RequestHandler<Map<String, Object>, String> {
+public class Handler implements com.amazonaws.services.lambda.runtime.RequestHandler<Map<String, Object>, String> {
 
     @Component(modules = {
         AwsModule.class,
@@ -24,7 +23,7 @@ public class Handler implements RequestHandler<Map<String, Object>, String> {
 
         ObjectMapper objectMapper();
 
-        AbstractRequestHandler requestHandler();
+        CommonRequestHandler requestHandler();
     }
 
     //TODO: improve this

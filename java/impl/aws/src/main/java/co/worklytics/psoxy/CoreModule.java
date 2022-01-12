@@ -35,18 +35,8 @@ public interface CoreModule {
     String PATH_TO_RULES_FILES = "/rules.yaml";
 
     @Provides
-    static EnvVarsConfigService envVarsConfigService() {
-        return new EnvVarsConfigService();
-    }
-
-    @Provides
     static ObjectMapper objectMapper() {
         return new ObjectMapper();
-    }
-
-    @Provides
-    static RulesUtils rulesUtils() {
-        return new RulesUtils();
     }
 
     @Provides
