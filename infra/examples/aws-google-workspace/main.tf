@@ -163,12 +163,8 @@ module "psoxy-google-workspace-connector" {
   path_to_config       = "../../../configs/${each.key}.yaml"
 
   parameter_bindings   = {
-    PSOXY_SALT = {
-      name    = module.psoxy-aws.salt_secret_id
-    },
-    SERVICE_ACCOUNT_KEY = {
-      name    = module.google-workspace-connection-auth[each.key].key_secret_name
-    }
+    PSOXY_SALT          = module.psoxy-aws.salt_secret
+    SERVICE_ACCOUNT_KEY = module.google-workspace-connection-auth[each.key].key_secret
   }
 }
 

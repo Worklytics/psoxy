@@ -1,5 +1,5 @@
-output "key_secret_name" {
-  value = aws_ssm_parameter.value.name
+output "key_secret" {
+  value = aws_ssm_parameter.value
 }
 
 output "key_value" {

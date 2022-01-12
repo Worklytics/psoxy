@@ -16,8 +16,11 @@ variable "source_kind" {
 }
 
 variable "parameter_bindings" {
+  # see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter#attributes-reference
   type = map(object({
     name    = string
+    arn     = string
+    version = string
   }))
   description = "map of System Manager Parameters to expose to function"
 }
