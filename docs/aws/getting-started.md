@@ -17,15 +17,30 @@ mvn clean package
 
 ## Run Locally
 
-Locally, you can test function's behavior from invocation on a JSON payload (but not how the 
+Locally, you can test function's behavior from invocation on a JSON payload (but not how the
 API gateway will map HTTP requests to that JSON payload):
 
 https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-using-invoke.html
 
+## Deploy to AWS
+
+We recommend deploying your Psoxy code into AWS using the terraform modules found in
+[`infra/modules/`](../../infra/modules/] for AWS. These modules both provision the required AWS
+infrastructure, as well as deploying the built binaries for Psoxy as lambdas in the target account.
+
+Example configurations using those modules can be found in [`infra/examples/](../../infra/examples).
+
+See [`infra/modules/aws/`](../../infra/modules/aws/) for more information.
+
 ## Run Tests
 
-## Deploy
+### AWS Console
+You can invoke your lambda directly via AWS console, at endpoint such as:
 
-```shell
-aws lambda update-function-code --function-name my-function --zip-file fileb://my-function.zip
-```
+https://console.aws.amazon.com/lambda/home?region=us-east-1#/functions/psoxy-gdirectory?tab=testing
+
+(You must be auth'd on AWS as an IAM role/user within the account that hosts the lambda in question)
+
+Example requests are in [`java/impl/aws/src/test/resources/lambda-proxy-events/`](../../java/impl/aws/src/test/resources/lambda-proxy-events/), which you can use as payloads to test via the console.
+
+
