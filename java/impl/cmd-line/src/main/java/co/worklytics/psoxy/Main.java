@@ -11,12 +11,11 @@ public class Main {
 
     private static final String DEFAULT_CONFIG_FILE = "config.yaml";
 
-
     @Component(modules = {
         PsoxyModule.class,
         CmdLineModule.class,
     })
-    interface Container  {
+    public interface Container  {
 
         @Named("ForYAML") ObjectMapper yamlMapper();
 
@@ -32,7 +31,7 @@ public class Main {
         File configFile = new File(DEFAULT_CONFIG_FILE);
 
 
-        Container container = DaggerMain_Container.build();
+        Container container = DaggerMain_Container.create();
 
         Config config;
         if (configFile.exists()) {

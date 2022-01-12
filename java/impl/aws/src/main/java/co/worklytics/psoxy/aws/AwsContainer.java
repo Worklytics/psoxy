@@ -15,8 +15,7 @@ import javax.inject.Singleton;
     PsoxyModule.class,
     SourceAuthModule.class, //move to include of PsoxyModule??
 })
-
-interface AwsContainer {
+public interface AwsContainer {
 
     Handler injectHandler(Handler handler);
 

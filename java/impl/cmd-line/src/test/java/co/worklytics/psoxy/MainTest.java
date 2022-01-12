@@ -28,7 +28,7 @@ class FileHandlerTest {
         File inputFile = new File(getClass().getResource("/hris-example.csv").getFile());
 
         StringWriter s = new StringWriter();
-        FileHandler fileHandler = DaggerMain_Container.build().fileHandler();
+        FileHandler fileHandler = DaggerMain_Container.create().fileHandler();
 
         fileHandler.pseudonymize(config, inputFile, s);
 
@@ -53,7 +53,8 @@ class FileHandlerTest {
         File inputFile = new File(getClass().getResource("/hris-example.csv").getFile());
 
         StringWriter s = new StringWriter();
-        FileHandler fileHandler = DaggerMain_Container.build().fileHandler();
+        FileHandler fileHandler = DaggerMain_Container.create().fileHandler();
+
 
         fileHandler.pseudonymize(config, inputFile, s);
 
@@ -75,7 +76,7 @@ class FileHandlerTest {
         File inputFile = new File(getClass().getResource("/hris-example-headers-w-spaces.csv").getFile());
 
         StringWriter s = new StringWriter();
-        FileHandler fileHandler = DaggerMain_Container.build().fileHandler();
+        FileHandler fileHandler = DaggerMain_Container.create().fileHandler();
         fileHandler.pseudonymize(config, inputFile, s);
 
         assertEquals(EXPECTED, s.toString());

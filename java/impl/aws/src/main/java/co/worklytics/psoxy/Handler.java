@@ -1,30 +1,26 @@
 package co.worklytics.psoxy;
 
-import co.worklytics.psoxy.aws.AwsModule;
+import co.worklytics.psoxy.aws.DaggerAwsContainer;
 import co.worklytics.psoxy.aws.LambdaRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.impl.CommonRequestHandler;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dagger.Component;
 import lombok.*;
 import lombok.extern.java.Log;
 
+import javax.inject.Inject;
 import java.util.Map;
 
 @Log
 public class Handler implements com.amazonaws.services.lambda.runtime.RequestHandler<Map<String, Object>, String> {
 
-    @Component(modules = {
-        AwsModule.class,
-        CoreModule.class,
-    })
-    interface AwsComponent {
 
-        ObjectMapper objectMapper();
+    @Inject
+    CommonRequestHandler requestHandler;
 
-        CommonRequestHandler requestHandler();
-    }
+    @Inject
+    ObjectMapper objectMapper;
 
     //TODO: improve this
     //   - change this to directly take LambdaRequest as it's parameter type
@@ -42,15 +38,15 @@ public class Handler implements com.amazonaws.services.lambda.runtime.RequestHan
         // - objectMapper
         //
 
-        AwsComponent graph = DaggerHandler_AwsComponent.builder().build();
+        DaggerAwsContainer.create().injectHandler(this);
 
         HttpEventResponse response;
         try {
-            String raw = graph.objectMapper().writeValueAsString(request);
+            String raw = objectMapper.writeValueAsString(request);
 
-            LambdaRequest event = graph.objectMapper().readerFor(LambdaRequest.class).readValue(raw);
+            LambdaRequest event = objectMapper.readerFor(LambdaRequest.class).readValue(raw);
 
-            response = graph.requestHandler().handle(event);
+            response = requestHandler.handle(event);
         } catch (Throwable e) {
             context.getLogger().log(e.getMessage());
             response = HttpEventResponse.builder()
@@ -60,7 +56,7 @@ public class Handler implements com.amazonaws.services.lambda.runtime.RequestHan
         }
 
         try {
-            return graph.objectMapper().writer().writeValueAsString(response);
+            return objectMapper.writer().writeValueAsString(response);
         } catch (Throwable e) {
             throw  new Error(e);
         }

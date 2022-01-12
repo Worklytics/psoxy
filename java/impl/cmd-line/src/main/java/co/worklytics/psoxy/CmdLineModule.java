@@ -12,8 +12,5 @@ import javax.inject.Named;
 public interface CmdLineModule {
 
     @Binds
-    ObjectMapper yamlMapper(@Named("ForYAML") ObjectMapper yamlMapper);
-
-    @Binds
     ConfigService configService(EnvVarsConfigService impl);
 }

@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.cloud.secretmanager.v1.AccessSecretVersionResponse;
 import com.google.cloud.secretmanager.v1.SecretManagerServiceClient;
 import com.google.common.base.Preconditions;
-import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import org.apache.commons.csv.CSVFormat;
@@ -22,8 +21,13 @@ import java.util.Objects;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-@NoArgsConstructor(onConstructor_ = @Inject)
+//@NoArgsConstructor(onConstructor_ = @Inject) //q: compile complaints - lombok annotation processing not reliable??
 public class FileHandler {
+
+    @Inject
+    public FileHandler() {
+
+    }
 
     @Inject ObjectMapper jsonMapper;
     @Inject SanitizerFactory sanitizerFactory;

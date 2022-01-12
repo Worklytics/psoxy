@@ -2,8 +2,7 @@ package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
-import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
-import co.worklytics.psoxy.rules.RulesUtils;
+import co.worklytics.psoxy.gateway.SourceAuthStrategy;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.api.client.http.HttpRequestFactory;
@@ -17,7 +16,8 @@ import dagger.Provides;
 
 
 import javax.inject.Named;
-import java.util.Optional;
+import java.util.Objects;
+import java.util.Set;
 import java.util.logging.Logger;
 
 /**
@@ -59,6 +59,16 @@ public class PsoxyModule {
     @Provides
     static Logger logger() {
         return Logger.getLogger(PsoxyModule.class.getCanonicalName());
+    }
+
+    @Provides
+    static SourceAuthStrategy sourceAuthStrategy(ConfigService configService, Set<SourceAuthStrategy> sourceAuthStrategies) {
+        String identifier = configService.getConfigPropertyOrError(ProxyConfigProperty.SOURCE_AUTH_STRATEGY_IDENTIFIER);
+        return sourceAuthStrategies
+            .stream()
+            .filter(impl -> Objects.equals(identifier, impl.getConfigIdentifier()))
+            .findFirst()
+            .orElseThrow(() -> new Error("No SourceAuthStrategy impl matching configured identifier: " + identifier));
     }
 
 
