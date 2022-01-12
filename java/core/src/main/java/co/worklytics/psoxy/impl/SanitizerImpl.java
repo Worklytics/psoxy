@@ -23,6 +23,7 @@ import org.hazlewood.connor.bottema.emailaddress.EmailAddressCriteria;
 import org.hazlewood.connor.bottema.emailaddress.EmailAddressParser;
 import org.hazlewood.connor.bottema.emailaddress.EmailAddressValidator;
 
+import javax.inject.Inject;
 import javax.mail.internet.InternetAddress;
 import java.net.URL;
 import java.util.ArrayList;
@@ -56,19 +57,9 @@ public class SanitizerImpl implements Sanitizer {
     List<Pattern> compiledAllowedEndpoints;
 
     @Getter(onMethod_ = {@VisibleForTesting})
-    Configuration jsonConfiguration;
+    @Inject Configuration jsonConfiguration;
 
-    //TODO: inject
-    HashUtils hashUtils = new HashUtils();
-
-    public void initConfiguration() {
-        //jackson here because it's our common JSON stack, but adds dependency beyond the one pkg'd
-        // with JsonPath.
-        this.jsonConfiguration = Configuration.defaultConfiguration()
-            .jsonProvider(new JacksonJsonProvider())
-            .mappingProvider(new JacksonMappingProvider())
-            .setOptions(Option.SUPPRESS_EXCEPTIONS); //we specifically want to ignore PATH_NOT_FOUND cases
-    }
+    @Inject HashUtils hashUtils;
 
     List<JsonPath> applicablePaths(@NonNull List<Pair<Pattern, List<JsonPath>>> rules,
                                    @NonNull String relativeUrl) {
@@ -116,9 +107,6 @@ public class SanitizerImpl implements Sanitizer {
         if (compiledPseudonymizationsWithOriginals == null) {
             compiledPseudonymizationsWithOriginals =
                 compile(options.getRules().getPseudonymizationWithOriginals());
-        }
-        if (jsonConfiguration == null) {
-            initConfiguration();
         }
 
         String relativeUrl = URLUtils.relativeURL(url);
