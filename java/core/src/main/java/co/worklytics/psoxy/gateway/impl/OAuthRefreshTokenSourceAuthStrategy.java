@@ -18,6 +18,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.extern.java.Log;
 
+import javax.inject.Inject;
+import javax.inject.Provider;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
@@ -38,10 +40,12 @@ import java.util.*;
  *
  */
 @Log
+@NoArgsConstructor(onConstructor_ = @Inject)
 public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
     @Getter
     private final String configIdentifier = "oauth2_refresh_token";
+
 
     //q: should we put these as config properties? creates potential for inconsistent configs
     // eg, orphaned config properties for SourceAuthStrategy not in use; missing config properties
@@ -52,6 +56,8 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         CLIENT_ID,
         CLIENT_SECRET, //NOTE: you should configure this as a secret in Secret Manager
     }
+
+    @Inject Provider<OAuth2CredentialsWithRefresh.OAuth2RefreshHandler> refreshHandlerProvider;
 
     @Override
     public Set<ConfigService.ConfigProperty> getRequiredConfigProperties() {
@@ -65,20 +71,19 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
             //TODO: pull an AccessToken from some cached location or something? otherwise will
             // be 'null' and refreshed for every request; and/or Keep credentials themselves in
             // memory
-            .setRefreshHandler(new RefreshHandlerImpl())
+            .setRefreshHandler(refreshHandlerProvider.get())
             .build();
     }
 
 
+
+    @NoArgsConstructor(onConstructor_ = @Inject)
     @Log
     public static class RefreshHandlerImpl implements OAuth2CredentialsWithRefresh.OAuth2RefreshHandler {
 
-        //TODO: inject
-        ConfigService config = new EnvVarsConfigService();
-        //TODO: inject
-        ObjectMapper objectMapper = new ObjectMapper();
-        //TODO: inject
-        HttpRequestFactory httpRequestFactory = (new NetHttpTransport()).createRequestFactory();
+        @Inject ConfigService config;
+        @Inject ObjectMapper objectMapper;
+        @Inject HttpRequestFactory httpRequestFactory;
 
 
         /**

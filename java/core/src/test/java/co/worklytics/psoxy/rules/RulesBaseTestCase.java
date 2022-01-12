@@ -1,17 +1,22 @@
 package co.worklytics.psoxy.rules;
 
+import co.worklytics.psoxy.PsoxyModule;
 import co.worklytics.psoxy.Rules;
 import co.worklytics.psoxy.Sanitizer;
+import co.worklytics.psoxy.SanitizerFactory;
 import co.worklytics.psoxy.impl.SanitizerImpl;
-import co.worklytics.psoxy.rules.google.PrebuiltSanitizerRules;
+import co.worklytics.test.MockModules;
 import co.worklytics.test.TestUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import dagger.Component;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
@@ -29,12 +34,33 @@ abstract public class RulesBaseTestCase {
 
     protected SanitizerImpl sanitizer;
 
-    protected ObjectMapper jsonMapper = new ObjectMapper();
-    protected ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
+    @Inject
+    protected ObjectMapper jsonMapper;
+    @Inject @Named("ForYAML")
+    protected ObjectMapper yamlMapper;
+    @Inject
+    protected SanitizerFactory sanitizerFactory;
+
+    //q: how to avoid boilerplate of this at top of every test?
+    @Singleton
+    @Component(modules = {
+        PsoxyModule.class,
+        MockModules.ForConfigService.class,
+    })
+    public interface Container {
+        void inject(RulesBaseTestCase test);
+    }
 
     @BeforeEach
     public void setup() {
-        sanitizer = new SanitizerImpl(Sanitizer.Options.builder()
+        //q: how to avoid boilerplate of this at top of every test?
+        // idea: use reflection to get test-specific container class, and call create() on that??
+        //  eg., 'DaggerRulesBaseTestCase_Container' class,
+
+        Container container = DaggerRulesBaseTestCase_Container.create();
+        container.inject(this);
+
+        sanitizer = sanitizerFactory.create(Sanitizer.Options.builder()
             .rules(getRulesUnderTest())
             .defaultScopeId(getDefaultScopeId())
             .build());

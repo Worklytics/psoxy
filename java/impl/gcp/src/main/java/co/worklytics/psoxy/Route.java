@@ -6,9 +6,9 @@ import com.google.cloud.functions.HttpFunction;
 import com.google.cloud.functions.HttpRequest;
 import com.google.cloud.functions.HttpResponse;
 
-import dagger.Component;
 import lombok.extern.java.Log;
 
+import javax.inject.Inject;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -16,21 +16,18 @@ import java.nio.charset.StandardCharsets;
 @Log
 public class Route implements HttpFunction {
 
-
-    @Component(modules = GcpModule.class)
-    interface GcpComponent {
-
-        CommonRequestHandler requestHandler();
-    }
+    @Inject
+    CommonRequestHandler requestHandler;
 
     @Override
     public void service(HttpRequest request, HttpResponse response)
             throws IOException {
 
-        GcpComponent graph = DaggerRoute_GcpComponent.builder().build();
+        //TODO: avoid rebuild graph everytime
+        DaggerGcpContainer.create().injectRoute(this);
 
         HttpEventResponse abstractResponse =
-            graph.requestHandler().handle(CloudFunctionRequest.of(request));
+            requestHandler.handle(CloudFunctionRequest.of(request));
 
         abstractResponse.getHeaders()
                 .forEach(h -> response.appendHeader(h.getKey(), h.getValue()));

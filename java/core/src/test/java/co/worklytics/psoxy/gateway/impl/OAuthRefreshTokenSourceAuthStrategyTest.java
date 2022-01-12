@@ -1,12 +1,18 @@
 package co.worklytics.psoxy.gateway.impl;
 
+import co.worklytics.psoxy.PsoxyModule;
+import co.worklytics.test.MockModules;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.http.HttpContent;
+import dagger.Component;
 import lombok.SneakyThrows;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,6 +20,24 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 class OAuthRefreshTokenSourceAuthStrategyTest {
+
+    @Inject OAuthRefreshTokenSourceAuthStrategy.RefreshHandlerImpl refreshHandler;
+
+    @Singleton
+    @Component(modules = {
+        PsoxyModule.class,
+        MockModules.ForConfigService.class,
+    })
+    public interface Container {
+        void inject(OAuthRefreshTokenSourceAuthStrategyTest test);
+    }
+
+    @BeforeEach
+    public void setup() {
+        OAuthRefreshTokenSourceAuthStrategyTest.Container container =
+            DaggerOAuthRefreshTokenSourceAuthStrategyTest_Container.create();
+        container.inject(this);
+    }
 
     public static final String EXAMPLE_TOKEN_RESPONSE =
         "{\n" +
@@ -40,8 +64,6 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
     @ValueSource(strings = {EXAMPLE_TOKEN_RESPONSE, EXAMPLE_TOKEN_RESPONSE_EXTRA})
     @ParameterizedTest
     public void tokenResponseJson(String jsonEncoded) {
-        OAuthRefreshTokenSourceAuthStrategy.RefreshHandlerImpl refreshHandler =
-            new OAuthRefreshTokenSourceAuthStrategy.RefreshHandlerImpl();
 
         OAuthRefreshTokenSourceAuthStrategy.RefreshHandlerImpl.CanonicalOAuthAccessTokenResponseDto response = refreshHandler.objectMapper.readerFor(OAuthRefreshTokenSourceAuthStrategy.RefreshHandlerImpl.CanonicalOAuthAccessTokenResponseDto.class)
             .readValue(jsonEncoded);
@@ -60,8 +82,6 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
     @SneakyThrows
     @Test
     public void tokenRequestPayload() {
-        OAuthRefreshTokenSourceAuthStrategy.RefreshHandlerImpl refreshHandler =
-            new OAuthRefreshTokenSourceAuthStrategy.RefreshHandlerImpl();
 
         Map<String, String> configValues = new HashMap<>();
         configValues.put(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID.name(), "1");

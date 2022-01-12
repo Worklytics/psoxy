@@ -9,7 +9,7 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class MainTest {
+class FileHandlerTest {
 
 
     @Test
@@ -28,7 +28,10 @@ class MainTest {
         File inputFile = new File(getClass().getResource("/hris-example.csv").getFile());
 
         StringWriter s = new StringWriter();
-        Main.pseudonymize(config, inputFile, s);
+        FileHandler fileHandler = DaggerMain_Container.build().fileHandler();
+
+        fileHandler.pseudonymize(config, inputFile, s);
+
 
         assertEquals(EXPECTED, s.toString());
     }
@@ -50,7 +53,9 @@ class MainTest {
         File inputFile = new File(getClass().getResource("/hris-example.csv").getFile());
 
         StringWriter s = new StringWriter();
-        Main.pseudonymize(config, inputFile, s);
+        FileHandler fileHandler = DaggerMain_Container.build().fileHandler();
+
+        fileHandler.pseudonymize(config, inputFile, s);
 
         assertEquals(EXPECTED, s.toString());
     }
@@ -70,7 +75,8 @@ class MainTest {
         File inputFile = new File(getClass().getResource("/hris-example-headers-w-spaces.csv").getFile());
 
         StringWriter s = new StringWriter();
-        Main.pseudonymize(config, inputFile, s);
+        FileHandler fileHandler = DaggerMain_Container.build().fileHandler();
+        fileHandler.pseudonymize(config, inputFile, s);
 
         assertEquals(EXPECTED, s.toString());
     }

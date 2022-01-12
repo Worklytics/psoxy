@@ -1,11 +1,14 @@
 package co.worklytics.psoxy;
 
+import lombok.NoArgsConstructor;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.inject.Inject;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
+@NoArgsConstructor(onConstructor_ = @Inject) // in lieu of provider
 public class HashUtils {
 
     public String hash(String... fragments) {

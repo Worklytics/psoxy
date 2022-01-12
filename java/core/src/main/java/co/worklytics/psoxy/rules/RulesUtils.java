@@ -19,7 +19,7 @@ import java.util.Optional;
 @NoArgsConstructor(onConstructor_ = @Inject)
 public class RulesUtils {
 
-    @Inject @Named("forYaml")
+    @Inject @Named("ForYAML")
     ObjectMapper yamlMapper;
 
     @SneakyThrows

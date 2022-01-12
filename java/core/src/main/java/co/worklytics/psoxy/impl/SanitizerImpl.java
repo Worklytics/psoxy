@@ -1,17 +1,13 @@
 package co.worklytics.psoxy.impl;
 
-import co.worklytics.psoxy.HashUtils;
-import co.worklytics.psoxy.PseudonymizedIdentity;
-import co.worklytics.psoxy.Rules;
-import co.worklytics.psoxy.Sanitizer;
+import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.utils.URLUtils;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
-import com.jayway.jsonpath.Option;
-import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
-import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
+import dagger.assisted.Assisted;
+import dagger.assisted.AssistedInject;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -22,18 +18,16 @@ import org.hazlewood.connor.bottema.emailaddress.EmailAddressCriteria;
 import org.hazlewood.connor.bottema.emailaddress.EmailAddressParser;
 import org.hazlewood.connor.bottema.emailaddress.EmailAddressValidator;
 
+import javax.inject.Inject;
 import javax.mail.internet.InternetAddress;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Log
-@RequiredArgsConstructor
+@RequiredArgsConstructor //for tests to compile for now
 public class SanitizerImpl implements Sanitizer {
 
     @Getter
@@ -45,20 +39,18 @@ public class SanitizerImpl implements Sanitizer {
     List<Pair<Pattern, List<JsonPath>>> compiledPseudonymizationsWithOriginals;
     List<Pattern> compiledAllowedEndpoints;
 
-    @Getter(onMethod_ = {@VisibleForTesting})
-    Configuration jsonConfiguration;
-
-    //TODO: inject
-    HashUtils hashUtils = new HashUtils();
-
-    public void initConfiguration() {
-        //jackson here because it's our common JSON stack, but adds dependency beyond the one pkg'd
-        // with JsonPath.
-        this.jsonConfiguration = Configuration.defaultConfiguration()
-            .jsonProvider(new JacksonJsonProvider())
-            .mappingProvider(new JacksonMappingProvider())
-            .setOptions(Option.SUPPRESS_EXCEPTIONS); //we specifically want to ignore PATH_NOT_FOUND cases
+    @AssistedInject
+    public SanitizerImpl(HashUtils hashUtils, @Assisted Options options) {
+        this.hashUtils = hashUtils;
+        this.options = options;
     }
+
+    @Getter(onMethod_ = {@VisibleForTesting})
+    @Inject Configuration jsonConfiguration;
+
+
+    @Inject
+    HashUtils hashUtils;
 
     List<JsonPath> applicablePaths(@NonNull List<Pair<Pattern, List<JsonPath>>> rules,
                                    @NonNull String relativeUrl) {
@@ -93,6 +85,7 @@ public class SanitizerImpl implements Sanitizer {
             throw new IllegalStateException("Sanitizer called to sanitize response that should not have been retrieved");
         }
 
+        //q: move this stuff to initialization / DI provider??
         if (compiledPseudonymizations == null) {
             compiledPseudonymizations = compile(options.getRules().getPseudonymizations());
         }
@@ -106,9 +99,6 @@ public class SanitizerImpl implements Sanitizer {
         if (compiledPseudonymizationsWithOriginals == null) {
             compiledPseudonymizationsWithOriginals =
                 compile(options.getRules().getPseudonymizationWithOriginals());
-        }
-        if (jsonConfiguration == null) {
-            initConfiguration();
         }
 
         String relativeUrl = URLUtils.relativeURL(url);

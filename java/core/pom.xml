@@ -56,10 +56,17 @@
             <artifactId>commons-lang3</artifactId>
             <version>${dependency.apache-commons-lang3.version}</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/javax.inject/javax.inject -->
         <dependency>
             <groupId>javax.inject</groupId>
             <artifactId>javax.inject</artifactId>
             <version>1</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.google.dagger/dagger -->
+        <dependency>
+            <groupId>com.google.dagger</groupId>
+            <artifactId>dagger</artifactId>
+            <version>${dependency.dagger.version}</version>
         </dependency>
         <!-- used to transform JSON responses -->
         <dependency>

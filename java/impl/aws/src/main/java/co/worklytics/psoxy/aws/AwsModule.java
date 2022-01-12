@@ -8,6 +8,10 @@ import dagger.Provides;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ssm.SsmClient;
 
+
+/**
+ * defines how to fulfill dependencies that need platform-specific implementations for GCP platform
+ */
 @Module
 public interface AwsModule {
 

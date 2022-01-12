@@ -151,10 +151,9 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
 
         Rules allowAllRoles = getRulesUnderTest().toBuilder().allowedEndpointRegex(".*").build();
 
-        this.sanitizer = new SanitizerImpl(Sanitizer.Options.builder().pseudonymizationSalt("salt")
+        this.sanitizer = this.sanitizerFactory.create(Sanitizer.Options.builder().pseudonymizationSalt("salt")
             .rules(allowAllRoles)
             .defaultScopeId("gapps").build());
-        this.sanitizer.initConfiguration();
 
         //but still redact if gets through
         String sanitized = this.sanitizer.sanitize(url, jsonString);

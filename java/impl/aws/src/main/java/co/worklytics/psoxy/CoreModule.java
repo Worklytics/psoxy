@@ -34,8 +34,7 @@ public interface CoreModule {
     String DEFAULT_SALT = "salt";
     String PATH_TO_RULES_FILES = "/rules.yaml";
 
-    @Provides
-    static ObjectMapper objectMapper() {
+    @Provides    static ObjectMapper objectMapper() {
         return new ObjectMapper();
     }
 
@@ -52,10 +51,7 @@ public interface CoreModule {
                 .findFirst().orElseThrow(() -> new Error("No SourceAuthStrategy impl matching configured identifier: " + identifier));
     }
 
-    @Provides
-    static Logger logger() {
-        return Logger.getLogger(CoreModule.class.getCanonicalName());
-    }
+
 
     @Provides
     static Sanitizer getSanitizer(Logger log, ConfigService config, RulesUtils rulesUtils) {

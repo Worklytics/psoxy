@@ -112,33 +112,14 @@
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.6.1</version>
-                <configuration>
-                    <!-- supposedly this shouldn't be necessary, but seems more reliable to explicitly reference -->
-                    <annotationProcessorPaths>
-                        <path>
-                            <groupId>com.google.dagger</groupId>
-                            <artifactId>dagger-compiler</artifactId>
-                            <version>${dependency.dagger.version}</version>
-                        </path>
-                        <path>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                            <version>${dependency.lombok.version}</version>
-                        </path>
-                    </annotationProcessorPaths>
-                </configuration>
-            </plugin>
             <!-- produces an 'uber' JAR, with all deps pkg'd -->
+
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
                     <archive>
-                        <manifest>
-                            <mainClass>co.worklytics.psoxy.Route</mainClass>
+                        <manifest> <!-- TODO: does this matter for AWS?? -->
+                            <mainClass>co.worklytics.psoxy.Handler</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>

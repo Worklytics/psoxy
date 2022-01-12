@@ -8,38 +8,28 @@ import com.google.auth.Credentials;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.auth.oauth2.ServiceAccountCredentials;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 
+import javax.inject.Inject;
 import java.io.ByteArrayInputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
+
+@NoArgsConstructor(onConstructor_ = @Inject)
 public class GoogleCloudPlatformServiceAccountKeyAuthStrategy implements SourceAuthStrategy {
 
     @Getter
     private final String configIdentifier = "gcp_service_account_key";
 
-    ConfigService config;
-
-    ConfigService getConfig() {
-        if (config == null) {
-            /**
-             * in GCP cloud function, we should be able to configure everything via env vars; either
-             * directly or by binding them to secrets at function deployment:
-             *
-             * @see "https://cloud.google.com/functions/docs/configuring/env-var"
-             * @see "https://cloud.google.com/functions/docs/configuring/secrets"
-             */
-            config = new EnvVarsConfigService();
-        }
-        return config;
-    }
+    @Inject ConfigService config;
 
     @SneakyThrows
     @Override
     public Credentials getCredentials(Optional<String> userToImpersonate) {
 
-        Set<String> scopes = Arrays.stream(getConfig().getConfigPropertyOrError(SourceAuthConfigProperty.OAUTH_SCOPES).split(","))
+        Set<String> scopes = Arrays.stream(config.getConfigPropertyOrError(SourceAuthConfigProperty.OAUTH_SCOPES).split(","))
             .collect(Collectors.toSet());
         GoogleCredentials credentials = GoogleCredentials.getApplicationDefault();
 
@@ -51,7 +41,7 @@ public class GoogleCloudPlatformServiceAccountKeyAuthStrategy implements SourceA
 
             //NOTE: in practice SERVICE_ACCOUNT_KEY need not belong the to same service account
             // running the cloud function; but it could
-            String key = getConfig().getConfigPropertyOrError(SourceAuthConfigProperty.SERVICE_ACCOUNT_KEY);
+            String key = config.getConfigPropertyOrError(SourceAuthConfigProperty.SERVICE_ACCOUNT_KEY);
             credentials = ServiceAccountCredentials.fromStream(new ByteArrayInputStream(Base64.getDecoder().decode(key)));
         }
 

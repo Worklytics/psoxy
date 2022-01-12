@@ -1,15 +1,21 @@
 package co.worklytics.psoxy.impl;
 
 import co.worklytics.psoxy.PseudonymizedIdentity;
+import co.worklytics.psoxy.PsoxyModule;
 import co.worklytics.psoxy.Sanitizer;
+import co.worklytics.psoxy.SanitizerFactory;
 import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
+import co.worklytics.test.MockModules;
 import co.worklytics.test.TestUtils;
+import dagger.Component;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.net.URL;
 import java.util.List;
 import java.util.Objects;
@@ -22,9 +28,26 @@ class SanitizerImplTest {
 
     SanitizerImpl sanitizer;
 
+
+    @Inject
+    protected SanitizerFactory sanitizerFactory;
+
+
+    @Singleton
+    @Component(modules = {
+        PsoxyModule.class,
+        MockModules.ForConfigService.class,
+    })
+    public interface Container {
+        void inject(SanitizerImplTest test);
+    }
+
     @BeforeEach
     public void setup() {
-        sanitizer = new SanitizerImpl(Sanitizer.Options.builder()
+        Container container = DaggerSanitizerImplTest_Container.create();
+        container.inject(this);
+
+        sanitizer = sanitizerFactory.create(Sanitizer.Options.builder()
             .rules(PrebuiltSanitizerRules.MAP.get("gmail"))
             .pseudonymizationSalt("an irrelevant per org secret")
             .defaultScopeId("scope")
