@@ -43,3 +43,8 @@ variable "path_to_config" {
   type        = string
   description = "path to config file (usually someting in ../../configs/, eg configs/gdirectory.yaml"
 }
+
+variable "api_caller_role_arn" {
+  type        = string
+  description = "arn of role which can be assumed to all API"
+}

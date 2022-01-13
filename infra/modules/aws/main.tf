@@ -34,12 +34,13 @@ resource "aws_iam_role" "api-caller" {
         "Effect" : "Allow"
         "Principal" : {
           "AWS" : "arn:aws:iam::${var.caller_aws_account_id}"
-        },
-        "Condition" : {
-          "StringEquals" : {
-            "sts:ExternalId" : var.caller_aws_user_id
-          }
         }
+        #TODO: add condition referencing GCP service account that will auth with Worklytics AWS account to call
+        #"Condition" : {
+        #  "StringEquals" : {
+        #    "sts:ExternalId" : var.caller_aws_user_id
+        #  }
+        #}
       }
     ]
   })
@@ -93,4 +94,8 @@ output "salt_secret" {
 
 output "api_gateway" {
   value = aws_apigatewayv2_api.psoxy-api
+}
+
+output "api_caller_role_arn" {
+  value = aws_iam_role.api-caller.arn
 }
