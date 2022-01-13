@@ -189,6 +189,48 @@ module "psoxy-slack-discovery-api" {
   }
 }
 
+# END SLACK
+
+# BEGIN ZOOM
+
+locals {
+  zoom_function_name   = "psoxy-zoom"
+}
+
+resource "google_service_account" "zoom_connector_sa" {
+  project = var.project_id
+  account_id   = local.zoom_function_name
+  display_name = "Psoxy Connector - Zoom{var.connector_display_name_suffix}"
+}
+
+# creates the secret, without versions.
+module "zoom-api-auth" {
+  source   = "../modules/gcp-oauth-long-access-strategy"
+  project_id              = var.project_id
+  function_name           = local.zoom_function_name
+  token_adder_user_emails = []
+}
+
+module "psoxy-zoom-api" {
+  source = "../modules/gcp-psoxy-cloud-function"
+
+  project_id            = var.project_id
+  function_name         = local.zoom_function_name
+  source_kind           = "zoom"
+  service_account_email   = google_service_account.zoom_connector_sa.email
+
+  secret_bindings = {
+    PSOXY_SALT   = {
+      secret_name    = module.psoxy-gcp.salt_secret_name
+      version_number = module.psoxy-gcp.salt_secret_version_number
+    },
+    ACCESS_TOKEN = {
+      secret_name    = module.zoom-api-auth.access_token_secret_name
+      # in case of long lived tokens we want latest version always
+      version_number = "latest"
+    }
+  }
+}
 
 # current convention is that the Cloud Functions for each of these run as these SAs, but there's
 # really no need to; consider splitting (eg, one SA for each Cloud Function; one SA for the

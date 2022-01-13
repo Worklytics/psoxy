@@ -42,3 +42,19 @@ Use this steps if you intend to install in just one workspace within your org.
 2. Install into *workspace*
 3. Copy the User OAuth Token and store it in the secret manager
 4. Add the access token as `PSOXY_ACCESS_TOKEN_psoxy-slack-discovery-api` secret value in the GCP Project's Secret Manager
+
+
+## Zoom Setup
+
+Zoom connector through Psoxy requires a custom managed app on the Zoom Marketplace (in development
+mode, no need to publish).
+
+1. Go to https://marketplace.zoom.us/develop/create and create an app of type JWT
+
+2. Fill information and on App Credentials generate a token with a long expiration time, for example 00:00 01/01/2030
+
+3. Copy the JWT Token, it will be used later when creating the Zoom cloud function.
+
+4. Activate the app
+
+5. Add the access token as `PSOXY_ACCESS_TOKEN_psoxy-zoom` secret value in the GCP Project's Secret Manager
