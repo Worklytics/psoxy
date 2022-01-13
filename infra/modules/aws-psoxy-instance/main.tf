@@ -15,12 +15,18 @@ resource "aws_apigatewayv2_integration" "map" {
   integration_type          = "AWS_PROXY"
   connection_type           = "INTERNET"
 
-  #TODO: match on subpath equivalent to var.function_name ?
-
   integration_method        = "POST"
   integration_uri           = aws_lambda_function.psoxy-instance.invoke_arn
   request_parameters        = {}
   request_templates         = {}
+}
+
+
+resource "aws_apigatewayv2_route" "example" {
+  api_id             = var.api_gateway.id
+  route_key          = "GET /${var.function_name}/{proxy+}"
+  authorization_type = "AWS_IAM"
+  target             = "integrations/${aws_apigatewayv2_integration.map.id}"
 }
 
 # allow API gateway to invoke the lambda function
@@ -69,7 +75,7 @@ resource "aws_lambda_function" "psoxy-instance" {
   filename         = var.path_to_function_zip
   source_code_hash = filebase64sha256(var.path_to_function_zip)
   timeout          = 55 # seconds
-  memory_size      = 256 # megabytes
+  memory_size      = 512 # megabytes
 
   environment {
     # NOTE: can use merge() to combine var map from config with additional values

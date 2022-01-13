@@ -15,6 +15,12 @@ resource "aws_apigatewayv2_api" "psoxy-api" {
   description   = "API to expose psoxy instances"
 }
 
+resource "aws_apigatewayv2_stage" "live" {
+  api_id        = aws_apigatewayv2_api.psoxy-api.id
+  name          = "live" # q: what name??
+  auto_deploy   = true
+}
+
 # role that Worklytics user will use to call the API
 resource "aws_iam_role" "api-caller" {
   name = "PsoxyApiCaller"
