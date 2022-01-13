@@ -99,12 +99,6 @@ abstract public class RulesBaseTestCase {
         assertNotSanitized(content, Arrays.asList(shouldContain));
     }
 
-    @Deprecated //used pseudonymized or redacted
-    protected void assertSanitized(String content, Collection<String> shouldNotContain) {
-        shouldNotContain.stream()
-            .forEach(s -> assertFalse(content.contains(s), "Sanitized content still contains: " + s));
-    }
-
     protected void assertRedacted(String content, Collection<String> shouldNotContain) {
         shouldNotContain.stream()
             .forEach(s -> assertFalse(content.contains(s), "Sanitized content still contains: " + s));
@@ -133,10 +127,6 @@ abstract public class RulesBaseTestCase {
                 assertTrue(content.contains(doubleJsonEncodedPseudonym),
                     String.format("Sanitized does not contain %s, pseudonymized equivalent of %s", doubleJsonEncodedPseudonym, s));
             });
-    }
-
-    protected void assertPseudonymized(String content, String... shouldBePseudonymized) {
-        assertPseudonymized(content, Arrays.asList(shouldBePseudonymized));
     }
 
     protected void assertPseudonymizedWithOriginal(String content, Collection<String> shouldBePseudonymized) {
