@@ -26,8 +26,7 @@ public class ZoomRulesTests extends RulesBaseTestCase {
     final String defaultScopeId = "zoom";
 
     @Getter
-    // TODO: CHANGE ME
-    final String yamlSerializationFilepath = "slack/discovery";
+    final String yamlSerializationFilepath = "zoom/zoom";
 
     @SneakyThrows
     @ValueSource(strings = {
