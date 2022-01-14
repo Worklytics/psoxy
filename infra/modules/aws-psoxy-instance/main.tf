@@ -142,7 +142,18 @@ mvn package
 Third, run the following deployment command from `java/impl/aws` folder within your checkout:
 
 ```shell
+aws sts assume-role --duration 180 --role-arn ${var.aws_assume_role_arn} --role-session-name deploy-lambda > temporal-credentials.json
+export AWS_ACCESS_KEY_ID=`cat temporal-credentials.json| jq -r '.Credentials.AccessKeyId'`
+export AWS_SECRET_ACCESS_KEY=`cat temporal-credentials.json| jq -r '.Credentials.SecretAccessKey'`
+export AWS_SESSION_TOKEN=`cat temporal-credentials.json| jq -r '.Credentials.SessionToken'`
+rm temporal-credentials.json
+aws sts get-caller-identity
+
 aws lambda update-function-code --function-name ${var.function_name} --zip-file fileb://target/psoxy-aws-1.0-SNAPSHOT.jar
+
+unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN
+aws sts get-caller-identity
+
 ```
 
 Finally, review the deployed function in AWS console:
@@ -154,8 +165,7 @@ TBD
 If you want to test from your local machine: (WIP, YMMV)
 ```shell
 export PSOXY_HOST=${var.api_gateway.api_endpoint}/live/${var.function_name}
-aws sts assume-role --role-arn ${var.api_caller_role_arn} --role-session-name ${var.function_name}_local_test --output json > token.json
-export AWS_ACCESS_KEY=`cat token.json | jq -r .Credentials.AccessKeyId`:`cat token.json | jq -r .Credentials.SecretAccessKey`
+aws sts assume-role --role-arn ${var.api_caller_role_arn} --role-session-name ${var.function_name}_local_test --output json > token.jsonexport AWS_ACCESS_KEY=`cat token.json | jq -r .Credentials.AccessKeyId`:`cat token.json | jq -r .Credentials.SecretAccessKey`
 curl --aws-sigv4 "aws:amz:${var.region}:apigateway" --user $AWS_ACCESS_KEY $PSOXY_HOST/admin/directory/v1/customer/my_customer/domains
 ```
 
