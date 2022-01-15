@@ -165,8 +165,14 @@ TBD
 If you want to test from your local machine: (WIP, YMMV)
 ```shell
 export PSOXY_HOST=${var.api_gateway.api_endpoint}/live/${var.function_name}
-aws sts assume-role --role-arn ${var.api_caller_role_arn} --role-session-name ${var.function_name}_local_test --output json > token.jsonexport AWS_ACCESS_KEY=`cat token.json | jq -r .Credentials.AccessKeyId`:`cat token.json | jq -r .Credentials.SecretAccessKey`
-curl --aws-sigv4 "aws:amz:${var.region}:apigateway" --user $AWS_ACCESS_KEY $PSOXY_HOST/admin/directory/v1/customer/my_customer/domains
+aws sts assume-role --role-arn ${var.api_caller_role_arn} --role-session-name ${var.function_name}_local_test --output json > token.json
+export AWS_ACCESS_KEY_ID=`cat token.json| jq -r '.Credentials.AccessKeyId'`
+export AWS_SECRET_ACCESS_KEY=`cat token.json| jq -r '.Credentials.SecretAccessKey'`
+export AWS_SESSION_TOKEN=`cat token.json| jq -r '.Credentials.SessionToken'`
+# TODO: set meaningful paths per integration
+export PSOXY_PATH=/admin/directory/v1/customer/my_customer/domains
+curl --aws-sigv4 "aws:amz:us-east-1" --user "$AWS_ACCESS_KEY_ID:$AWS_SECRET_ACCESS_KEY" $PSOXY_HOST/$PSOXY_PATH -v
+unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN
 ```
 
 NOTE: if you want to customize the rule set used by Psoxy for your source, you can add a
