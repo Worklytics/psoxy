@@ -9,3 +9,8 @@ variable "caller_aws_user_id" {
   type        = string
   description = "id of service account that will call proxy (eg, SA of your worklytics instance)"
 }
+
+variable "aws_account_id" {
+  type        = string
+  description = "account id of the organization"
+}

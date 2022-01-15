@@ -29,11 +29,6 @@ resource "aws_apigatewayv2_stage" "live" {
   }
 }
 
-resource "aws_iam_role_policy" "" {
-  policy = ""
-  role   = aws_iam_role.api-caller.id
-}
-
 # role that Worklytics user will use to call the API
 resource "aws_iam_role" "api-caller" {
   name = "PsoxyApiCaller"
@@ -54,24 +49,40 @@ resource "aws_iam_role" "api-caller" {
         #    "sts:ExternalId" : var.caller_aws_user_id
         #  }
         #}
+      },
+      # https://docs.aws.amazon.com/apigateway/latest/developerguide/permissions.html
+      {
+        "Sid": "",
+        "Effect": "Allow",
+        "Principal": {
+          "Service": "apigateway.amazonaws.com"
+        },
+        "Action": "sts:AssumeRole"
       }
     ]
   })
 
   # what this role can do (invoke anything in the API gateway )
   inline_policy {
-    name = "invoke"
+    name = "lambda-invoker"
     policy = jsonencode({
       "Version" : "2012-10-17",
       "Statement" : [
         {
           "Effect": "Allow",
           "Action": "execute-api:Invoke",
-          "Resource": "arn:aws:execute-api:*:${var.aws_account_id}:*/*/GET/*",
+          # "Resource": "arn:aws:execute-api:*:${var.aws_account_id}:*/*/GET/*",
+          "Resource": "arn:aws:execute-api:*:${var.aws_account_id}:*",
         }
       ]
     })
   }
+  managed_policy_arns = [
+    # I think this was created when creating the role from
+    # https://docs.aws.amazon.com/apigateway/latest/developerguide/permissions.html
+    "arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
+  ]
+  # not sure about this one
   inline_policy {
     name = "read-gateway"
     policy = jsonencode({
@@ -84,6 +95,23 @@ resource "aws_iam_role" "api-caller" {
           ],
           "Resource": [
             "arn:aws:apigateway:us-east-1::/apis/${var.aws_account_id}/*"
+          ]
+        }
+      ]
+    })
+  }
+  inline_policy {
+    name = "sns-list-topics"
+    policy = jsonencode({
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Resource": [
+            "*"
+          ],
+          "Action": [
+            "sns:ListTopics"
           ]
         }
       ]
