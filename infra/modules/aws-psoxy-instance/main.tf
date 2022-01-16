@@ -172,7 +172,13 @@ TBD
 
 ## Testing
 
-If you want to test from your local machine: (WIP, YMMV)
+Requests to AWS API need to be [signed](https://docs.aws.amazon.com/general/latest/gr/signing_aws_api_requests.html).
+One tool to do it easily is [awscurl](https://github.com/okigan/awscurl). Install it:
+
+```shell
+pip install awscurl
+```
+
 ```shell
 export PSOXY_HOST=${var.api_gateway.api_endpoint}/live/${var.function_name}
 aws sts assume-role --role-arn ${var.api_caller_role_arn} --role-session-name ${var.function_name}_local_test --output json > token.json
@@ -181,7 +187,10 @@ export AWS_SECRET_ACCESS_KEY=`cat token.json| jq -r '.Credentials.SecretAccessKe
 export AWS_SESSION_TOKEN=`cat token.json| jq -r '.Credentials.SessionToken'`
 # TODO: set meaningful paths per integration
 export PSOXY_PATH=/admin/directory/v1/customer/my_customer/domains
-curl --aws-sigv4 "aws:amz:us-east-1" --user "$AWS_ACCESS_KEY_ID:$AWS_SECRET_ACCESS_KEY" $PSOXY_HOST/$PSOXY_PATH -v
+
+awscurl -v -i --service execute-api --access_key $AWS_ACCESS_KEY_ID --secret_key $AWS_SECRET_ACCESS_KEY --security_token $AWS_SESSION_TOKEN $PSOXY_HOST$PSOXY_PATH
+
+rm token.json
 unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN
 ```
 
