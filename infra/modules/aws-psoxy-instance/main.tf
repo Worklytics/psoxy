@@ -65,16 +65,6 @@ resource "aws_iam_role" "iam_for_lambda" {
       }
     ]
   })
-  /* needed?
-  {
-        "Action": "sts:AssumeRole",
-        "Principal": {
-          "Service": "apigateway.amazonaws.com"
-        },
-        "Effect": "Allow",
-        "Sid": ""
-      }
-      */
 }
 
 resource "aws_lambda_function" "psoxy-instance" {
