@@ -9,8 +9,6 @@ import dagger.assisted.AssistedFactory;
 @AssistedFactory
 public interface SanitizerFactory {
 
-    String DEFAULT_SALT = "salt";
-
     SanitizerImpl create(Sanitizer.Options options);
 
     //q: right place? mapping config+rules --> Sanitizer.Options isn't implementation-specific
@@ -18,7 +16,7 @@ public interface SanitizerFactory {
         return Sanitizer.Options.builder()
             .rules(rules)
                     .pseudonymizationSalt(config.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT)
-                        .orElse(DEFAULT_SALT))
+                        .orElseThrow(() -> new Error("Must configure value for SALT to generate pseudonyms")))
             .defaultScopeId(config.getConfigPropertyAsOptional(ProxyConfigProperty.IDENTIFIER_SCOPE_ID)
                         .orElse(rules.getDefaultScopeIdForSource()))
             .build();
