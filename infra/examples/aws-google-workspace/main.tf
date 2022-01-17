@@ -44,7 +44,7 @@ module "psoxy-aws" {
 
 # holds SAs + keys needed to connect to Google Workspace APIs
 resource "google_project" "psoxy-google-connectors" {
-  name            = "Psoxy Connectors- ${var.environment_name}"
+  name            = "Psoxy Connectors - ${var.environment_name}"
   project_id      = var.gcp_project_id
   folder_id       = var.gcp_folder_id
   billing_account = var.gcp_billing_account_id
