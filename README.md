@@ -16,7 +16,7 @@ data source APIs.
      party API and then perform minimal transformation on the response (pseudonymization, field
      redcation). to ease code review and auditing of its behavior.
 
-As of Dec 2021, psoxy instances may be hosted in [Google Cloud ](docs/gcp/development.md) or 
+As of Dec 2021, psoxy instances may be hosted in [Google Cloud ](docs/gcp/development.md) or
 [AWS](docs/aws/getting-started.md).
 
 ## Data Flow
@@ -34,23 +34,23 @@ Orchestration continues to be performed on the Worklytics-side.
 
 ### Prereqs
 As of Oct 2021, Psoxy is implemented with Java 11 and built via Maven. Infrastructure is provisioned
-via Terraform, relying on Google Cloud and/or AWS command line tools .  You will need recent 
+via Terraform, relying on Google Cloud and/or AWS command line tools .  You will need recent
 versions of all of the following:
 
   - git
   - Java 11+ JDK variant
   - [Maven 3.6+](https://maven.apache.org/docs/history.html)
   - [terraform](https://www.terraform.io/) optional; if you don't use this, you'll need to configure
-    your GCP/AWS project via the web console/CLI tools. Writing your own terraform config that 
+    your GCP/AWS project via the web console/CLI tools. Writing your own terraform config that
     re-uses our modules will simplify things greatly.
 
 And, depending on your scenario, you may also need:
-  - [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) and
-    [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install-mac.html)
-    are required to host your psoxy instances in AWS.
+  - [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) is
+    required to deploy your psoxy instances in AWS.
+  - [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install-mac.html) can be used to test AWS-variant of psoxy locally.
   - [Google Cloud Command Line tool](https://cloud.google.com/sdk/docs/install) Required to host
     your psoxy instances in GCP *OR* if you plan to connect Google Workspace as a data source. It
-    should be configured for the GCP project that will host your psoxy instance(s) and/or your 
+    should be configured for the GCP project that will host your psoxy instance(s) and/or your
     connectors.
 
 [Google Cloud Shell](https://cloud.google.com/shell/docs/how-cloud-shell-works#tools) provides all
