@@ -52,9 +52,6 @@ resource "google_project" "psoxy-google-connectors" {
   billing_account = var.gcp_billing_account_id
 }
 
-
-# TODO: loop over sources to 1) provision client in data source, 2) provision proxy instance in AWS
-
 locals {
   # Google Workspace Sources; add/remove as you wish
   google_workspace_sources = {
