@@ -88,42 +88,42 @@ locals {
         "https://www.googleapis.com/auth/calendar.readonly"
       ]
     }
-#    "gmail": {
-#      display_name: "GMail"
-#      apis_consumed: [
-#        "gmail.googleapis.com"
-#      ]
-#      oauth_scopes_needed: [
-#        "https://www.googleapis.com/auth/gmail.metadata"
-#      ]
-#    }
-#    "google-chat": {
-#      display_name: "Google Chat"
-#      apis_consumed: [
-#        "admin.googleapis.com"
-#      ]
-#      oauth_scopes_needed: [
-#        "https://www.googleapis.com/auth/admin.reports.audit.readonly"
-#      ]
-#    }
-#    "gdrive": {
-#      display_name: "Google Drive"
-#      apis_consumed: [
-#        "drive.googleapis.com"
-#      ]
-#      oauth_scopes_needed: [
-#        "https://www.googleapis.com/auth/drive.metadata.readonly"
-#      ]
-#    }
-#    "google-meet": {
-#      display_name: "Google Meet"
-#      apis_consumed: [
-#        "admin.googleapis.com"
-#      ]
-#      oauth_scopes_needed: [
-#        "https://www.googleapis.com/auth/admin.reports.audit.readonly"
-#      ]
-#    }
+    "gmail": {
+      display_name: "GMail"
+      apis_consumed: [
+        "gmail.googleapis.com"
+      ]
+      oauth_scopes_needed: [
+        "https://www.googleapis.com/auth/gmail.metadata"
+      ]
+    }
+    "google-chat": {
+      display_name: "Google Chat"
+      apis_consumed: [
+        "admin.googleapis.com"
+      ]
+      oauth_scopes_needed: [
+        "https://www.googleapis.com/auth/admin.reports.audit.readonly"
+      ]
+    }
+    "gdrive": {
+      display_name: "Google Drive"
+      apis_consumed: [
+        "drive.googleapis.com"
+      ]
+      oauth_scopes_needed: [
+        "https://www.googleapis.com/auth/drive.metadata.readonly"
+      ]
+    }
+    "google-meet": {
+      display_name: "Google Meet"
+      apis_consumed: [
+        "admin.googleapis.com"
+      ]
+      oauth_scopes_needed: [
+        "https://www.googleapis.com/auth/admin.reports.audit.readonly"
+      ]
+    }
   }
 }
 
