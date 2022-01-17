@@ -23,6 +23,7 @@ class LambdaRequestTest {
         assertEquals("/path/to/resource", request.getPath());
 
         assertEquals("bar", request.getQueryParameters().get("foo").get(0));
+        assertEquals("foo=bar", request.getQuery().get());
 
         assertEquals("gzip, deflate, sdch", request.getHeaders().get("Accept-Encoding").get(0));
 
@@ -38,6 +39,8 @@ class LambdaRequestTest {
 
         assertEquals("/admin/directory/v1/customer/my_customer/domains",
             request.getPath());
+
+        assertTrue(!request.getQuery().isPresent());
 
         assertEquals("erik@worklytics.co",
             request.getHeader("X-Psoxy-User-To-Impersonate").get().get(0));

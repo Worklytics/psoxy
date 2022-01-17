@@ -5,12 +5,12 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
+import lombok.SneakyThrows;
+import org.apache.http.client.utils.URIBuilder;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 
 @NoArgsConstructor //for jackson
@@ -34,15 +34,19 @@ public class LambdaRequest implements HttpEventRequest {
 
     String body;
 
+    @SneakyThrows
     @Override
     public Optional<String> getQuery() {
-        if (this.getQueryParameters() == null) {
+        if (this.getQueryParameters() == null || this.getQueryParameters().isEmpty()) {
             return Optional.empty();
         } else {
-            String value = this.getQueryParameters().entrySet().stream()
-                .flatMap(parameter -> parameter.getValue().stream().map(v -> parameter.getKey() + "=" + v))
-                .collect(Collectors.joining("&"));
-            return Optional.ofNullable(StringUtils.trimToNull(value));
+            URIBuilder uriBuilder = new URIBuilder();
+            this.getQueryParameters().entrySet().stream()
+                    .forEach(parameter -> parameter.getValue().stream()
+                        .forEach(v -> uriBuilder.setParameter(parameter.getKey(), v)));
+
+
+            return Optional.of(uriBuilder.build().getQuery());
         }
     }
 
