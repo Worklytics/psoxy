@@ -83,9 +83,6 @@ resource "aws_lambda_function" "psoxy-instance" {
   }
 }
 
-
-// User: arn:aws:sts::874171213677:assumed-role/iam_for_lambda/psoxy-gdirectory is not authorized to perform:  on resource: arn:aws:ssm:us-east-1:874171213677:parameter/RULES because no identity-based policy allows the ssm:GetParameter action
-
 resource "aws_iam_policy" "policy" {
   name        = "${var.function_name}_ssmGetParameters"
   description = "Allow lambda function role to read SSM parameters"
