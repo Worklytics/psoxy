@@ -26,7 +26,21 @@ class LambdaRequestTest {
         assertEquals("foo=bar", request.getQuery().get());
 
         assertEquals("gzip, deflate, sdch", request.getHeaders().get("Accept-Encoding").get(0));
+    }
 
+    @SneakyThrows
+    @Test
+    public void parse_explicitStage() {
+
+        LambdaRequest request = objectMapper.readerFor(LambdaRequest.class)
+            .readValue(TestUtils.getData("lambda-proxy-events/generic-request_explicit-stage.json"));
+
+        assertEquals("/path/to/resource", request.getPath());
+
+        assertEquals("bar", request.getQueryParameters().get("foo").get(0));
+        assertEquals("foo=bar", request.getQuery().get());
+
+        assertEquals("gzip, deflate, sdch", request.getHeaders().get("Accept-Encoding").get(0));
     }
 
     //test real example payload, which can be used to directly test psoxy behavior in AWS console
