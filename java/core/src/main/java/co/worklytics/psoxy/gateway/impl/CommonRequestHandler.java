@@ -91,7 +91,7 @@ public class CommonRequestHandler {
         //setup request
         sourceApiRequest
             .setThrowExceptionOnExecuteError(false)
-            .setConnectTimeout(SOURCE_API_REQUEST_CONNECT_TIMEOUT)
+            .setConnectTimeout(SOURCE_API_REQUEST_CONNECT_TIMEOUT_MILLISECONDS)
             .setReadTimeout(SOURCE_API_REQUEST_READ_TIMEOUT);
 
         //q: add exception handlers for IOExceptions / HTTP error responses, so those retries
