@@ -22,7 +22,7 @@ variable "caller_aws_account_id" {
 
 variable "caller_aws_user_id" {
   type        = string
-  description = "id of AWS user that will call proxy (eg, SA of your worklytics instance)"
+  description = "id of AWS user that will call proxy (eg, SA of your Worklytics instance)"
 }
 
 variable "gcp_project_id" {
