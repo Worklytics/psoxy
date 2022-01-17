@@ -16,7 +16,7 @@ variable "aws_region" {
 
 variable "caller_aws_account_id" {
   type        = string
-  description = "id of worklytics AWS account from which proxy will be called"
+  description = "id of Worklytics AWS account from which proxy will be called"
   default     =  "939846301470:root"
 }
 
