@@ -41,12 +41,12 @@ resource "aws_iam_role" "api-caller" {
         "Action" = "sts:AssumeRole"
         "Effect" : "Allow"
         "Principal" : {
-          "AWS" : "arn:aws:iam::${var.caller_aws_account_id}:root"
+          "AWS" : "arn:aws:iam::${var.caller_aws_account_id}"
         }
         #TODO: add condition referencing GCP service account that will auth with Worklytics AWS account to call
         #"Condition" : {
         #  "StringEquals" : {
-        #    "sts:ExternalId" : var.caller_aws_user_id
+        #    "sts:ExternalId" : var.caller_external_user_id
         #  }
         #}
       }

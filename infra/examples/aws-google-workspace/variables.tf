@@ -1,6 +1,10 @@
 variable "aws_account_id" {
   type        = string
   description = "id of aws account in which to provision your AWS infra"
+  validation {
+    condition     = can(regex("^\\d{12}$", var.aws_account_id))
+    error_message = "The aws_account_id value should be 12-digit numeric string."
+  }
 }
 
 variable "aws_assume_role_arn" {
@@ -18,11 +22,15 @@ variable "caller_aws_account_id" {
   type        = string
   description = "id of Worklytics AWS account from which proxy will be called"
   default     =  "939846301470:root"
+  validation {
+    condition     = can(regex("^\\d{12}:\\w+$", var.caller_aws_account_id))
+    error_message = "The caller_aws_account_id value should be 12-digit numeric string."
+  }
 }
 
-variable "caller_aws_user_id" {
+variable "caller_external_user_id" {
   type        = string
-  description = "id of AWS user that will call proxy (eg, SA of your Worklytics instance)"
+  description = "id of external user that will call proxy (eg, SA of your Worklytics instance)"
 }
 
 variable "gcp_project_id" {

@@ -34,9 +34,9 @@ provider "aws" {
 
 module "psoxy-aws" {
   source = "../../modules/aws"
-  caller_aws_account_id = var.caller_aws_account_id
-  caller_aws_user_id    = var.caller_aws_user_id
-  aws_account_id        = var.aws_account_id
+  caller_aws_account_id   = var.caller_aws_account_id
+  caller_external_user_id = var.caller_external_user_id
+  aws_account_id          = var.aws_account_id
 
   providers = {
     aws = aws
