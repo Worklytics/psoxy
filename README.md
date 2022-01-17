@@ -47,7 +47,6 @@ versions of all of the following:
 And, depending on your scenario, you may also need:
   - [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) is
     required to deploy your psoxy instances in AWS.
-  - [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install-mac.html) can be used to test AWS-variant of psoxy locally.
   - [Google Cloud Command Line tool](https://cloud.google.com/sdk/docs/install) Required to host
     your psoxy instances in GCP *OR* if you plan to connect Google Workspace as a data source. It
     should be configured for the GCP project that will host your psoxy instance(s) and/or your

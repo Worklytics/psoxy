@@ -2,9 +2,14 @@
 
 ## Prereqs
 
+Required:
   - [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
-  - AWS SAM CLI ([macOS](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install-mac.html))
-  -
+
+Optional:
+  - AWS SAM CLI ([macOS](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install-mac.html)) for
+    local testing, if desired
+  - [awscurl](https://github.com/okigan/awscurl) for direct testing of deployed AWS lambda from a
+    terminal
 
 ## Build
 Maven build produces a zip file.
