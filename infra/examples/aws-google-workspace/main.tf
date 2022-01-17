@@ -34,12 +34,14 @@ provider "aws" {
 
 module "psoxy-aws" {
   source = "../../modules/aws"
-  caller_aws_account_id     = var.caller_aws_account_id
-  caller_aws_user_id = var.caller_aws_user_id
+  caller_aws_account_id = var.caller_aws_account_id
+  caller_aws_user_id    = var.caller_aws_user_id
+  aws_account_id        = var.aws_account_id
 
   providers = {
     aws = aws
   }
+
 }
 
 # holds SAs + keys needed to connect to Google Workspace APIs
