@@ -162,6 +162,7 @@ module "psoxy-google-workspace-connector" {
   path_to_function_zip = "../../../java/impl/aws/target/psoxy-aws-1.0-SNAPSHOT.jar"
   path_to_config       = "../../../configs/${each.key}.yaml"
   api_caller_role_arn  = module.psoxy-aws.api_caller_role_arn
+  aws_assume_role_arn  = var.aws_assume_role_arn
 
   parameter_bindings   = {
     PSOXY_SALT          = module.psoxy-aws.salt_secret

@@ -15,10 +15,18 @@ resource "aws_apigatewayv2_api" "psoxy-api" {
   description   = "API to expose psoxy instances"
 }
 
+resource "aws_cloudwatch_log_group" "gateway-log" {
+  name = aws_apigatewayv2_api.psoxy-api.name
+}
+
 resource "aws_apigatewayv2_stage" "live" {
   api_id        = aws_apigatewayv2_api.psoxy-api.id
   name          = "live" # q: what name??
   auto_deploy   = true
+  access_log_settings {
+    destination_arn = aws_cloudwatch_log_group.gateway-log.arn
+    format          = "$context.identity.sourceIp $context.identity.caller $context.identity.user [$context.requestTime] \"$context.httpMethod $context.resourcePath $context.protocol\" $context.status $context.responseLength $context.requestId $context.extendedRequestId"
+  }
 }
 
 # role that Worklytics user will use to call the API
@@ -47,16 +55,14 @@ resource "aws_iam_role" "api-caller" {
 
   # what this role can do (invoke anything in the API gateway )
   inline_policy {
-    name = "invoke"
+    name = "lambda-invoker"
     policy = jsonencode({
       "Version" : "2012-10-17",
       "Statement" : [
         {
-          "Effect" : "Allow"
-          "Action" : "execute-api:Invoke"
-          "Resource" : [
-            "${aws_apigatewayv2_api.psoxy-api.arn}/*/*/*",
-          ]
+          "Effect": "Allow",
+          "Action": "execute-api:Invoke",
+          "Resource": "arn:aws:execute-api:*:${var.aws_account_id}:*/*/GET/*",
         }
       ]
     })

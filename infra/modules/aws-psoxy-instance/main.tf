@@ -142,7 +142,18 @@ mvn package
 Third, run the following deployment command from `java/impl/aws` folder within your checkout:
 
 ```shell
+aws sts assume-role --duration 900 --role-arn ${var.aws_assume_role_arn} --role-session-name deploy-lambda > temporal-credentials.json
+export CALLER_ACCESS_KEY_ID=`cat temporal-credentials.json| jq -r '.Credentials.AccessKeyId'`
+export CALLER_SECRET_ACCESS_KEY=`cat temporal-credentials.json| jq -r '.Credentials.SecretAccessKey'`
+export CALLER_SESSION_TOKEN=`cat temporal-credentials.json| jq -r '.Credentials.SessionToken'`
+rm temporal-credentials.json
+aws sts get-caller-identity
+
 aws lambda update-function-code --function-name ${var.function_name} --zip-file fileb://target/psoxy-aws-1.0-SNAPSHOT.jar
+
+unset CALLER_ACCESS_KEY_ID CALLER_SECRET_ACCESS_KEY CALLER_SESSION_TOKEN
+aws sts get-caller-identity
+
 ```
 
 Finally, review the deployed function in AWS console:
@@ -151,12 +162,26 @@ TBD
 
 ## Testing
 
-If you want to test from your local machine: (WIP, YMMV)
+Requests to AWS API need to be [signed](https://docs.aws.amazon.com/general/latest/gr/signing_aws_api_requests.html).
+One tool to do it easily is [awscurl](https://github.com/okigan/awscurl). Install it:
+
+```shell
+pip install awscurl
+```
+Call the API using a role with api execution grants.
 ```shell
 export PSOXY_HOST=${var.api_gateway.api_endpoint}/live/${var.function_name}
-aws sts assume-role --role-arn ${var.api_caller_role_arn} --role-session-name ${var.function_name}_local_test --output json > token.json
-export AWS_ACCESS_KEY=`cat token.json | jq -r .Credentials.AccessKeyId`:`cat token.json | jq -r .Credentials.SecretAccessKey`
-curl --aws-sigv4 "aws:amz:${var.region}:apigateway" --user $AWS_ACCESS_KEY $PSOXY_HOST/admin/directory/v1/customer/my_customer/domains
+aws sts assume-role --role-arn ${var.api_caller_role_arn} --duration 900 --role-session-name ${var.function_name}_local_test --output json > token.json
+export CALLER_ACCESS_KEY_ID=`cat token.json| jq -r '.Credentials.AccessKeyId'`
+export CALLER_SECRET_ACCESS_KEY=`cat token.json| jq -r '.Credentials.SecretAccessKey'`
+export CALLER_SESSION_TOKEN=`cat token.json| jq -r '.Credentials.SessionToken'`
+rm token.json
+# TODO: set meaningful paths per integration
+export PSOXY_PATH=/admin/directory/v1/customer/my_customer/domains
+
+awscurl --service execute-api --access_key $CALLER_ACCESS_KEY_ID --secret_key $CALLER_SECRET_ACCESS_KEY --security_token $CALLER_SESSION_TOKEN $PSOXY_HOST$PSOXY_PATH
+# Remove env variables
+unset CALLER_ACCESS_KEY_ID CALLER_SECRET_ACCESS_KEY CALLER_SESSION_TOKEN
 ```
 
 NOTE: if you want to customize the rule set used by Psoxy for your source, you can add a

@@ -10,6 +10,11 @@ variable "function_name" {
   description = "name of function"
 }
 
+variable "aws_assume_role_arn" {
+  type        = string
+  description = "role arn"
+}
+
 variable "source_kind" {
   type        = string
   description = "kind of source (eg, 'gmail', 'google-chat', etc)"
