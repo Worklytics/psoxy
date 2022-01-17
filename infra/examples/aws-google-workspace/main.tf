@@ -73,8 +73,7 @@ locals {
         "https://www.googleapis.com/auth/admin.directory.group.member.readonly",
         "https://www.googleapis.com/auth/admin.directory.orgunit.readonly",
         "https://www.googleapis.com/auth/admin.directory.rolemanagement.readonly"
-      ],
-      worklytics_connector_name: "Google Workspace Directory via Psoxy"
+      ]
     }
     "gcal": {
       display_name: "Google Calendar"
