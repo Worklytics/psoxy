@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.ToString;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.utils.URIBuilder;
 
@@ -31,6 +32,7 @@ import java.util.Optional;
 @NoArgsConstructor //for jackson
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Getter
+@ToString
 public class LambdaRequest implements HttpEventRequest {
 
     String httpMethod;
@@ -40,15 +42,10 @@ public class LambdaRequest implements HttpEventRequest {
 
     @Override
     public String getPath() {
-        //AWS API Gateway resources can be invoked with explicit stage path component OR that
-        // component can omitted and request will be routed to the 'default' stage
-        // if stage included in path, strip it here:
-        String stagePrefix = "/" + this.getRequestContext().getStage();
-        if (StringUtils.startsWith(this.path, stagePrefix)) {
-            return this.path.replaceFirst(stagePrefix, "");
-        }
-
-        return this.path;
+        // proxy is the name of the parameter in AWS API Gateway "{proxy+}", so whatever comes here
+        // is the original path requested
+        String proxy = pathParameters.get("proxy");
+        return StringUtils.prependIfMissing(proxy,"/");
     }
 
     @JsonProperty("multiValueQueryStringParameters")
