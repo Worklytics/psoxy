@@ -48,7 +48,6 @@ resource "aws_lambda_permission" "lambda_permission" {
 
 locals {
   proxy_endpoint_url = "${var.api_gateway.api_endpoint}/${var.function_name}"
-  outdir = "manual_steps"
 }
 
 resource "aws_iam_role" "iam_for_lambda" {
@@ -118,39 +117,9 @@ resource "aws_iam_role_policy_attachment" "policy"{
   policy_arn = aws_iam_policy.policy.arn
 }
 
-resource "local_file" "test-call" {
-  filename = "${local.outdir}/test-call.sh"
-  file_permission = "755"
-  content  = <<EOT
-#!/bin/bash
-if [ -z "$PSOXY_DEV_HOME" ];
-then
-  echo "Please create variable PSOXY_DEV_HOME with the directory of the checked out project."
-  echo "export PSOXY_DEV_HOME=/path/to/psoxy-code"
-  exit -1;
-fi
-
-ROLE_ARN=$1
-TEST_URL=$2
-
-echo "Assuming role $ROLE_ARN"
-aws sts assume-role --role-arn $ROLE_ARN --duration 900 --role-session-name lambda_test --output json > token.json
-export CALLER_ACCESS_KEY_ID=`cat token.json| jq -r '.Credentials.AccessKeyId'`
-export CALLER_SECRET_ACCESS_KEY=`cat token.json| jq -r '.Credentials.SecretAccessKey'`
-export CALLER_SESSION_TOKEN=`cat token.json| jq -r '.Credentials.SessionToken'`
-rm token.json
-echo "Calling proxy..."
-echo "Request: $TEST_URL"
-echo -e "Response: \u21b4"
-awscurl --service execute-api --access_key $CALLER_ACCESS_KEY_ID --secret_key $CALLER_SECRET_ACCESS_KEY --security_token $CALLER_SESSION_TOKEN $TEST_URL
-# Remove env variables
-unset CALLER_ACCESS_KEY_ID CALLER_SECRET_ACCESS_KEY CALLER_SESSION_TOKEN
-
-EOT
-}
 
 resource "local_file" "todo" {
-  filename = "${local.outdir}/build-deploy-test-${var.function_name}.md"
+  filename = "test ${var.function_name}.md"
   content  = <<EOT
 
 ## Testing
@@ -170,7 +139,7 @@ pip install awscurl
 ### From Terminal
 
 ```shell
-./${local_file.test-call.filename} "${var.aws_assume_role_arn}" "${var.api_gateway.api_endpoint}/live/${var.function_name}/admin/directory/v1/customer/my_customer/domains"
+./tools/test-psoxy-lambda.sh "${var.aws_assume_role_arn}" "${var.api_gateway.api_endpoint}/live/${var.function_name}/admin/directory/v1/customer/my_customer/domains"
 ```
 
 NOTE: if you want to customize the rule set used by Psoxy for your source, you can add a
