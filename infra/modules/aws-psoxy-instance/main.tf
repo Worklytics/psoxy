@@ -20,7 +20,6 @@ resource "aws_apigatewayv2_integration" "map" {
   request_parameters        = {}
   request_templates         = {}
   payload_format_version    = "2.0"
-
 }
 
 
@@ -209,31 +208,36 @@ EOT
 }
 
 resource "local_file" "todo" {
-  filename = "${local.outdir}/TODO - deploy ${var.function_name}.md"
+  filename = "${local.outdir}/build-deploy-test-${var.function_name}.md"
   content  = <<EOT
-First, create an environment variable PSOXY_DEV_HOME with the directory of the checked out project.
+# Setup
+Create an environment variable PSOXY_DEV_HOME with the directory of the checked out project.
 
 ```shell
 export PSOXY_DEV_HOME=/path/to/psoxy-code
 ```
 
-Build the project:
+Some scripts are provided to ease building, deploy and testing.
+
+## Build
+
 ```shell
 ./${local_file.bundle-proxy.filename}
 ```
 
-Deploy the lambda function:
+## Deploy Lambda Function
 
 ```shell
 ./${local_file.deploy-lambda.filename} "${var.aws_assume_role_arn}" "${var.function_name}"
 ```
 
-Finally, review the deployed function in AWS console:
+Review the deployed function in AWS console:
 
 - https://console.aws.amazon.com/lambda/home?region=${var.region}#/functions/${var.function_name}?tab=monitoring
 
 ## Testing
 
+### Prereqs
 Requests to AWS API need to be [signed](https://docs.aws.amazon.com/general/latest/gr/signing_aws_api_requests.html).
 One tool to do it easily is [awscurl](https://github.com/okigan/awscurl). Install it:
 
@@ -241,7 +245,7 @@ One tool to do it easily is [awscurl](https://github.com/okigan/awscurl). Instal
 pip install awscurl
 ```
 
-Call the tester:
+### From Terminal
 
 ```shell
 ./${local_file.test-call.filename} "${var.aws_assume_role_arn}" "${var.api_gateway.api_endpoint}/live/${var.function_name}/admin/directory/v1/customer/my_customer/domains"
