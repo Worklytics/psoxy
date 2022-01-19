@@ -17,7 +17,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class APIGatewayV2HTTPEventRequestAdapter implements HttpEventRequest {
 
-    @NonNull APIGatewayV2HTTPEvent event;
+    @NonNull final APIGatewayV2HTTPEvent event;
 
     @Override
     public String getPath() {
