@@ -47,7 +47,7 @@ resource "aws_lambda_permission" "lambda_permission" {
 }
 
 locals {
-  proxy_endpoint_url = "${var.api_gateway.api_endpoint}/${var.function_name}"
+  proxy_endpoint_url = "${var.api_gateway.api_endpoint}/live/${var.function_name}"
 }
 
 resource "aws_iam_role" "iam_for_lambda" {
@@ -141,13 +141,11 @@ pip install awscurl
 From root of your checkout of the Psoxy repo:
 
 ```shell
-./tools/test-psoxy-lambda.sh "${var.aws_assume_role_arn}" "${var.api_gateway.api_endpoint}/live/${var.function_name}/admin/directory/v1/customer/my_customer/domains"
+./tools/test-psoxy-lambda.sh "${var.aws_assume_role_arn}" "${local.proxy_endpoint_url}/admin/directory/v1/customer/my_customer/domains"
 ```
 
-NOTE: if you want to customize the rule set used by Psoxy for your source, you can add a
-`rules.yaml` file into the deployment directory (`target/deployment`) before invoking the command
-above. The rules you define in the YAML file will override the ruleset specified in the codebase for
-the source.
+See `docs/example-api-calls/` for more example API calls specific to the data source to which your
+Proxy is configured to connect.
 
 EOT
 }
