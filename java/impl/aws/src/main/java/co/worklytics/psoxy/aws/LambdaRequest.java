@@ -10,9 +10,7 @@ import lombok.ToString;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.utils.URIBuilder;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 
 /**
@@ -79,7 +77,12 @@ public class LambdaRequest implements HttpEventRequest {
     }
 
     @Override
-    public Optional<List<String>> getHeader(String headerName) {
+    public Optional<String> getHeader(String headerName) {
+        return Optional.ofNullable(getHeaders().get(headerName)).flatMap( l -> l.stream().findFirst());
+    }
+
+    @Override
+    public Optional<List<String>> getMultiValueHeader(String headerName) {
         return Optional.ofNullable(getHeaders().get(headerName));
     }
 

@@ -2,10 +2,12 @@ package co.worklytics.psoxy.gateway;
 
 import lombok.Builder;
 import lombok.Singular;
+import lombok.ToString;
 import lombok.Value;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -14,12 +16,13 @@ import java.util.List;
  */
 @Value
 @Builder
+@ToString
 public class HttpEventResponse {
 
     int statusCode;
 
     @Singular
-    List<Pair<String, String>> headers;
+    Map<String,String> headers;
 
     String body;
 }

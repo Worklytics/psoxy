@@ -14,6 +14,8 @@ public interface HttpEventRequest {
 
     Optional<String> getQuery();
 
-    Optional<List<String>> getHeader(String headerName);
+    Optional<String> getHeader(String headerName);
+
+    Optional<List<String>> getMultiValueHeader(String headerName);
 
 }

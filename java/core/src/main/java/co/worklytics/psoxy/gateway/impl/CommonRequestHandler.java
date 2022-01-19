@@ -105,6 +105,9 @@ public class CommonRequestHandler {
         String responseContent =
             new String(sourceApiResponse.getContent().readAllBytes(), sourceApiResponse.getContentCharset());
 
+        //log.info(sourceApiResponse.toString());
+        //builder.header(Pair.of("Content-Type", sourceApiResponse.getContentType()));
+
         String proxyResponseContent;
         if (isSuccessFamily(sourceApiResponse.getStatusCode())) {
             if (skipSanitizer) {
@@ -112,7 +115,7 @@ public class CommonRequestHandler {
             }  else {
                 proxyResponseContent = sanitizer.sanitize(targetUrl, responseContent);
                 String rulesSha = rulesUtils.sha(sanitizer.getOptions().getRules());
-                builder.header(Pair.of(ResponseHeader.RULES_SHA.getHttpHeader(), rulesSha));
+                builder.header(ResponseHeader.RULES_SHA.getHttpHeader(), rulesSha);
                 log.info("response sanitized with rule set " + rulesSha);
             }
         } else {
@@ -138,8 +141,7 @@ public class CommonRequestHandler {
 
         //assume that in cloud function env, this will get ours ...
         Optional<String> accountToImpersonate =
-           request.getHeader(ControlHeader.USER_TO_IMPERSONATE.getHttpHeader())
-                .map(values -> values.stream().findFirst().orElseThrow());
+           request.getHeader(ControlHeader.USER_TO_IMPERSONATE.getHttpHeader());
 
         accountToImpersonate.ifPresentOrElse(
             user -> log.info("Impersonating user"),
@@ -157,7 +159,7 @@ public class CommonRequestHandler {
 
     boolean isRequestedToSkipSanitizer(HttpEventRequest request) {
         return request.getHeader( ControlHeader.SKIP_SANITIZER.getHttpHeader())
-            .map(values -> values.stream().findFirst().map(Boolean::parseBoolean).orElse(false))
+            .map(Boolean::parseBoolean)
             .orElse(false);
     }
 
@@ -183,7 +185,7 @@ public class CommonRequestHandler {
         }
 
         try {
-            responseBuilder.header(Pair.of("Content-Type", MediaType.JSON_UTF_8.toString()));
+            responseBuilder.header("Content-Type", MediaType.JSON_UTF_8.toString());
             responseBuilder.body(
                 objectMapper.writeValueAsString(healthCheckResult) + "\r\n");
         } catch (IOException e) {

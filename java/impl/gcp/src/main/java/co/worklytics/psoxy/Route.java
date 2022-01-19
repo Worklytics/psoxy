@@ -30,7 +30,7 @@ public class Route implements HttpFunction {
             requestHandler.handle(CloudFunctionRequest.of(request));
 
         abstractResponse.getHeaders()
-                .forEach(h -> response.appendHeader(h.getKey(), h.getValue()));
+                .forEach(response::appendHeader);
 
         response.setStatusCode(abstractResponse.getStatusCode());
         new ByteArrayInputStream(abstractResponse.getBody().getBytes(StandardCharsets.UTF_8))
