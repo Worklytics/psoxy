@@ -5,47 +5,28 @@
 # it work via explicit 'depends_on', but Terraform still gives 'error inconsistent plan' as its
 # original plan presumed the sha-256 of the package
 locals {
-  path_to_core_module    = "${var.path_to_psoxy_java}/core"
   path_to_impl_module    = "${var.path_to_psoxy_java}/impl/${var.implementation}"
   path_to_deployment_jar = "${local.path_to_impl_module}/target/psoxy-${var.implementation}-1.0-SNAPSHOT.jar"
 }
 
-resource "null_resource" "core_package" {
-  triggers = {
-    pom_hash = filebase64sha256("${local.path_to_core_module}/pom.xml")
-  }
 
-  provisioner "local-exec" {
-    working_dir = local.path_to_core_module
-    command     = "mvn package install"
-  }
-}
+# build psoxy bundle with external build script, via a 'data' resource.
+# NOTE: since invoked via 'data', happens during plan, rather than 'apply'; this is incorrect
+# semantics if you view the package as a 'resource', but is reasonable if you view it as just a
+# configuration value (eg, the content of a lambda function)
+# NOTE: pass deployment jar path through the script simply to make outputs of this Terraform module
+# dependenent on the build script actually running, avoiding Terraform thinking the outputs are
+# known prior to executing the build
 
-resource "null_resource" "deployment_package" {
-  triggers = {
-    pom_hash = filebase64sha256("${local.path_to_impl_module}/pom.xml")
-  }
-
-  provisioner "local-exec" {
-    working_dir = local.path_to_impl_module
-    command     = "mvn package"
-  }
-
-  # can't build implementation package to deploy until core pkg is built and installed to local mvn repo
-  depends_on = [
-    null_resource.core_package
-  ]
+data "external" "deployment_package" {
+  program     = ["${path.module}/build.sh", var.path_to_psoxy_java, var.implementation, local.path_to_deployment_jar]
 }
 
 
 output "deployment_package_hash" {
-  value = filebase64sha256(local.path_to_deployment_jar)
-
-  depends_on = [
-    null_resource.deployment_package
-  ]
+  value = filebase64sha256(data.external.deployment_package.result.path_to_deployment_jar)
 }
 
 output "path_to_deployment_jar" {
-  value = local.path_to_deployment_jar
+  value = data.external.deployment_package.result.path_to_deployment_jar
 }
