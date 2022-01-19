@@ -138,6 +138,8 @@ pip install awscurl
 
 ### From Terminal
 
+From root of your checkout of the Psoxy repo:
+
 ```shell
 ./tools/test-psoxy-lambda.sh "${var.aws_assume_role_arn}" "${var.api_gateway.api_endpoint}/live/${var.function_name}/admin/directory/v1/customer/my_customer/domains"
 ```
