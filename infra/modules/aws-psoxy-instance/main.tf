@@ -75,7 +75,7 @@ resource "aws_lambda_function" "psoxy-instance" {
   handler          = "co.worklytics.psoxy.Handler"
   runtime          = "java11"
   filename         = var.path_to_function_zip
-  source_code_hash = filebase64sha256(var.path_to_function_zip)
+  source_code_hash = var.function_zip_hash
   timeout          = 55 # seconds
   memory_size      = 512 # megabytes
 
@@ -108,7 +108,6 @@ resource "aws_iam_policy" "policy" {
 }
 
 
-
 resource "aws_iam_role_policy_attachment" "basic" {
   role       = aws_iam_role.iam_for_lambda.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
@@ -117,63 +116,6 @@ resource "aws_iam_role_policy_attachment" "basic" {
 resource "aws_iam_role_policy_attachment" "policy"{
   role       = aws_iam_role.iam_for_lambda.name
   policy_arn = aws_iam_policy.policy.arn
-}
-
-resource "local_file" "bundle-proxy" {
-  filename = "${local.outdir}/bundle.sh"
-  file_permission = "755"
-  content  = <<EOT
-#!/bin/bash
-if [ -z "$PSOXY_DEV_HOME" ];
-then
-  echo "Please create variable PSOXY_DEV_HOME with the directory of the checked out project."
-  echo "export PSOXY_DEV_HOME=/path/to/psoxy-code"
-  exit -1;
-fi
-
-# build core
-cd $PSOXY_DEV_HOME/java/core
-mvn package install
-# build aws
-cd $PSOXY_DEV_HOME/java/impl/aws
-mvn package
-
-EOT
-}
-
-resource "local_file" "deploy-lambda" {
-  filename = "${local.outdir}/deploy-lambda.sh"
-  file_permission = "755"
-  content  = <<EOT
-#!/bin/bash
-if [ -z "$PSOXY_DEV_HOME" ];
-then
-  echo "Please create variable PSOXY_DEV_HOME with the directory of the checked out project."
-  echo "export PSOXY_DEV_HOME=/path/to/psoxy-code"
-  exit -1;
-fi
-
-ROLE_ARN=$1
-FUNCTION_NAME=$2
-
-CURRENT_DIR=$(pwd)
-cd $PSOXY_DEV_HOME/java/impl/aws
-
-unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN
-echo "Assuming role $ROLE_ARN"
-aws sts assume-role --duration 900 --role-arn $ROLE_ARN --role-session-name deploy-lambda > temporal-credentials.json
-export AWS_ACCESS_KEY_ID=`cat temporal-credentials.json| jq -r '.Credentials.AccessKeyId'`
-export AWS_SECRET_ACCESS_KEY=`cat temporal-credentials.json| jq -r '.Credentials.SecretAccessKey'`
-export AWS_SESSION_TOKEN=`cat temporal-credentials.json| jq -r '.Credentials.SessionToken'`
-rm temporal-credentials.json
-echo "Updating lambda $FUNCTION_NAME..."
-aws lambda update-function-code --function-name $FUNCTION_NAME --zip-file fileb://target/psoxy-aws-1.0-SNAPSHOT.jar > deploy-output.json
-echo "Done"
-rm deploy-output.json
-unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN
-cd $CURRENT_DIR
-
-EOT
 }
 
 resource "local_file" "test-call" {
@@ -210,32 +152,12 @@ EOT
 resource "local_file" "todo" {
   filename = "${local.outdir}/build-deploy-test-${var.function_name}.md"
   content  = <<EOT
-# Setup
-Create an environment variable PSOXY_DEV_HOME with the directory of the checked out project.
 
-```shell
-export PSOXY_DEV_HOME=/path/to/psoxy-code
-```
-
-Some scripts are provided to ease building, deploy and testing.
-
-## Build
-
-```shell
-./${local_file.bundle-proxy.filename}
-```
-
-## Deploy Lambda Function
-
-```shell
-./${local_file.deploy-lambda.filename} "${var.aws_assume_role_arn}" "${var.function_name}"
-```
+## Testing
 
 Review the deployed function in AWS console:
 
 - https://console.aws.amazon.com/lambda/home?region=${var.region}#/functions/${var.function_name}?tab=monitoring
-
-## Testing
 
 ### Prereqs
 Requests to AWS API need to be [signed](https://docs.aws.amazon.com/general/latest/gr/signing_aws_api_requests.html).
