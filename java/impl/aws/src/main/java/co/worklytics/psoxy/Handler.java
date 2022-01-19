@@ -52,10 +52,10 @@ public class Handler implements com.amazonaws.services.lambda.runtime.RequestHan
             return new APIGatewayV2HTTPResponse(
                 response.getStatusCode(),
                 response.getHeaders(),
-                null,
-                null,
+                null, /* multi-valued headers */
+                null, /* cookies */
                 response.getBody(),
-                false
+                false /* isBase64Encoded */
             );
         } catch (Throwable e) {
             context.getLogger().log("Error writing response as Lambda return");
