@@ -1,0 +1,41 @@
+package co.worklytics.psoxy.aws.request;
+
+import co.worklytics.psoxy.gateway.HttpEventRequest;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
+import com.google.common.base.Splitter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.List;
+import java.util.Optional;
+
+/**
+ * Adapter for the APIGatewayV2HTTPEvent to the interface the {@link co.worklytics.psoxy.gateway.impl.CommonRequestHandler}
+ * understands
+ */
+@RequiredArgsConstructor
+public class APIGatewayV2HTTPEventRequestAdapter implements HttpEventRequest {
+
+    @NonNull final APIGatewayV2HTTPEvent event;
+
+    @Override
+    public String getPath() {
+        return StringUtils.prependIfMissing(event.getPathParameters().get("proxy"),"/");
+    }
+
+    @Override
+    public Optional<String> getQuery() {
+        return Optional.ofNullable(event.getRawQueryString());
+    }
+
+    @Override
+    public Optional<String> getHeader(String headerName) {
+        return Optional.ofNullable(event.getHeaders().get(headerName));
+    }
+
+    @Override
+    public Optional<List<String>> getMultiValueHeader(String headerName) {
+        return getHeader(headerName).map( s -> Splitter.on(',').splitToList(s));
+    }
+}

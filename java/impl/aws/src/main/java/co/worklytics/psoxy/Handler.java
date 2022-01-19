@@ -1,33 +1,29 @@
 package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.aws.DaggerAwsContainer;
-import co.worklytics.psoxy.aws.LambdaRequest;
+import co.worklytics.psoxy.aws.request.APIGatewayV2HTTPEventRequestAdapter;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.impl.CommonRequestHandler;
 import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.*;
+import lombok.SneakyThrows;
 import lombok.extern.java.Log;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import javax.inject.Inject;
-import java.util.Map;
 
 @Log
-public class Handler implements com.amazonaws.services.lambda.runtime.RequestHandler<Map<String, Object>, String> {
+public class Handler implements com.amazonaws.services.lambda.runtime.RequestHandler<APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse> {
 
 
     @Inject
     CommonRequestHandler requestHandler;
 
-    @Inject
-    ObjectMapper objectMapper;
-
-    //TODO: improve this
-    //   - change this to directly take LambdaRequest as it's parameter type
-    //   - or to take InputStream, and then parse that with jackson (AWS lambda docs implies this is supported, but doesn't work)
     @SneakyThrows
     @Override
-    public String handleRequest(Map<String, Object> request, Context context) {
+    public APIGatewayV2HTTPResponse handleRequest(APIGatewayV2HTTPEvent httpEvent, Context context) {
 
         //interfaces:
         // - HttpRequestEvent --> HttpResponseEvent
@@ -42,13 +38,10 @@ public class Handler implements com.amazonaws.services.lambda.runtime.RequestHan
 
         HttpEventResponse response;
         try {
-            String raw = objectMapper.writeValueAsString(request);
-
-            LambdaRequest event = objectMapper.readerFor(LambdaRequest.class).readValue(raw);
-
-            response = requestHandler.handle(event);
+            response = requestHandler.handle(new APIGatewayV2HTTPEventRequestAdapter(httpEvent));
         } catch (Throwable e) {
-            context.getLogger().log(e.getMessage());
+            context.getLogger().log(String.format("%s - %s", e.getClass().getName(), e.getMessage()));
+            context.getLogger().log(ExceptionUtils.getStackTrace(e));
             response = HttpEventResponse.builder()
                 .statusCode(500)
                 .body("Unknown error")
@@ -56,9 +49,18 @@ public class Handler implements com.amazonaws.services.lambda.runtime.RequestHan
         }
 
         try {
-            return objectMapper.writer().writeValueAsString(response);
+            return new APIGatewayV2HTTPResponse(
+                response.getStatusCode(),
+                response.getHeaders(),
+                null, /* multi-valued headers */
+                null, /* cookies */
+                response.getBody(),
+                false /* isBase64Encoded */
+            );
         } catch (Throwable e) {
-            throw  new Error(e);
+            context.getLogger().log("Error writing response as Lambda return");
+            throw new Error(e);
         }
     }
+
 }
