@@ -199,6 +199,8 @@ export CALLER_SECRET_ACCESS_KEY=`cat token.json| jq -r '.Credentials.SecretAcces
 export CALLER_SESSION_TOKEN=`cat token.json| jq -r '.Credentials.SessionToken'`
 rm token.json
 echo "Calling proxy..."
+echo "Request: $TEST_URL"
+echo -e "Response: \u21b4"
 awscurl --service execute-api --access_key $CALLER_ACCESS_KEY_ID --secret_key $CALLER_SECRET_ACCESS_KEY --security_token $CALLER_SESSION_TOKEN $TEST_URL
 # Remove env variables
 unset CALLER_ACCESS_KEY_ID CALLER_SECRET_ACCESS_KEY CALLER_SESSION_TOKEN
