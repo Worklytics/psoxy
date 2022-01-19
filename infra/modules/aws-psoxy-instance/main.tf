@@ -19,6 +19,8 @@ resource "aws_apigatewayv2_integration" "map" {
   integration_uri           = aws_lambda_function.psoxy-instance.invoke_arn
   request_parameters        = {}
   request_templates         = {}
+  payload_format_version    = "2.0"
+
 }
 
 
@@ -47,6 +49,7 @@ resource "aws_lambda_permission" "lambda_permission" {
 
 locals {
   proxy_endpoint_url = "${var.api_gateway.api_endpoint}/${var.function_name}"
+  outdir = "manual_steps"
 }
 
 resource "aws_iam_role" "iam_for_lambda" {
@@ -117,45 +120,115 @@ resource "aws_iam_role_policy_attachment" "policy"{
   policy_arn = aws_iam_policy.policy.arn
 }
 
-
-resource "local_file" "todo" {
-  filename = "TODO - deploy ${var.function_name}.md"
+resource "local_file" "bundle-proxy" {
+  filename = "${local.outdir}/bundle.sh"
+  file_permission = "755"
   content  = <<EOT
-First, from `java/core/` within a checkout of the Psoxy repo, package the core proxy library:
+#!/bin/bash
+if [ -z "$PSOXY_DEV_HOME" ];
+then
+  echo "Please create variable PSOXY_DEV_HOME with the directory of the checked out project."
+  echo "export PSOXY_DEV_HOME=/path/to/psoxy-code"
+  exit -1;
+fi
 
-```shell
-cd ../../java/core
+# build core
+cd $PSOXY_DEV_HOME/java/core
 mvn package install
-```
-
-Second, from `java/impl/aws` within a checkout of the Psoxy repo, package an executable JAR for the
-cloud function with the following command:
-
-```shell
-cd ../../java/impl/aws
+# build aws
+cd $PSOXY_DEV_HOME/java/impl/aws
 mvn package
-```
 
-Third, run the following deployment command from `java/impl/aws` folder within your checkout:
+EOT
+}
 
-```shell
-aws sts assume-role --duration 900 --role-arn ${var.aws_assume_role_arn} --role-session-name deploy-lambda > temporal-credentials.json
+resource "local_file" "deploy-lambda" {
+  filename = "${local.outdir}/deploy-lambda.sh"
+  file_permission = "755"
+  content  = <<EOT
+#!/bin/bash
+if [ -z "$PSOXY_DEV_HOME" ];
+then
+  echo "Please create variable PSOXY_DEV_HOME with the directory of the checked out project."
+  echo "export PSOXY_DEV_HOME=/path/to/psoxy-code"
+  exit -1;
+fi
+
+ROLE_ARN=$1
+FUNCTION_NAME=$2
+
+CURRENT_DIR=$(pwd)
+cd $PSOXY_DEV_HOME/java/impl/aws
+
+unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN
+echo "Assuming role $ROLE_ARN"
+aws sts assume-role --duration 900 --role-arn $ROLE_ARN --role-session-name deploy-lambda > temporal-credentials.json
 export AWS_ACCESS_KEY_ID=`cat temporal-credentials.json| jq -r '.Credentials.AccessKeyId'`
 export AWS_SECRET_ACCESS_KEY=`cat temporal-credentials.json| jq -r '.Credentials.SecretAccessKey'`
 export AWS_SESSION_TOKEN=`cat temporal-credentials.json| jq -r '.Credentials.SessionToken'`
 rm temporal-credentials.json
-aws sts get-caller-identity
-
-aws lambda update-function-code --function-name ${var.function_name} --zip-file fileb://target/psoxy-aws-1.0-SNAPSHOT.jar
-
+echo "Updating lambda $FUNCTION_NAME..."
+aws lambda update-function-code --function-name $FUNCTION_NAME --zip-file fileb://target/psoxy-aws-1.0-SNAPSHOT.jar > deploy-output.json
+echo "Done"
+rm deploy-output.json
 unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN
-aws sts get-caller-identity
+cd $CURRENT_DIR
 
+EOT
+}
+
+resource "local_file" "test-call" {
+  filename = "${local.outdir}/test-call.sh"
+  file_permission = "755"
+  content  = <<EOT
+#!/bin/bash
+if [ -z "$PSOXY_DEV_HOME" ];
+then
+  echo "Please create variable PSOXY_DEV_HOME with the directory of the checked out project."
+  echo "export PSOXY_DEV_HOME=/path/to/psoxy-code"
+  exit -1;
+fi
+
+ROLE_ARN=$1
+TEST_URL=$2
+
+echo "Assuming role $ROLE_ARN"
+aws sts assume-role --role-arn $ROLE_ARN --duration 900 --role-session-name lambda_test --output json > token.json
+export CALLER_ACCESS_KEY_ID=`cat token.json| jq -r '.Credentials.AccessKeyId'`
+export CALLER_SECRET_ACCESS_KEY=`cat token.json| jq -r '.Credentials.SecretAccessKey'`
+export CALLER_SESSION_TOKEN=`cat token.json| jq -r '.Credentials.SessionToken'`
+rm token.json
+echo "Calling proxy..."
+awscurl --service execute-api --access_key $CALLER_ACCESS_KEY_ID --secret_key $CALLER_SECRET_ACCESS_KEY --security_token $CALLER_SESSION_TOKEN $TEST_URL
+# Remove env variables
+unset CALLER_ACCESS_KEY_ID CALLER_SECRET_ACCESS_KEY CALLER_SESSION_TOKEN
+
+EOT
+}
+
+resource "local_file" "todo" {
+  filename = "${local.outdir}/TODO - deploy ${var.function_name}.md"
+  content  = <<EOT
+First, create an environment variable PSOXY_DEV_HOME with the directory of the checked out project.
+
+```shell
+export PSOXY_DEV_HOME=/path/to/psoxy-code
+```
+
+Build the project:
+```shell
+./${local_file.bundle-proxy.filename}
+```
+
+Deploy the lambda function:
+
+```shell
+./${local_file.deploy-lambda.filename} "${var.aws_assume_role_arn}" "${var.function_name}"
 ```
 
 Finally, review the deployed function in AWS console:
 
-TBD
+- https://console.aws.amazon.com/lambda/home?region=${var.region}#/functions/${var.function_name}?tab=monitoring
 
 ## Testing
 
@@ -165,20 +238,11 @@ One tool to do it easily is [awscurl](https://github.com/okigan/awscurl). Instal
 ```shell
 pip install awscurl
 ```
-Call the API using a role with api execution grants.
-```shell
-export PSOXY_HOST=${var.api_gateway.api_endpoint}/live/${var.function_name}
-aws sts assume-role --role-arn ${var.api_caller_role_arn} --duration 900 --role-session-name ${var.function_name}_local_test --output json > token.json
-export CALLER_ACCESS_KEY_ID=`cat token.json| jq -r '.Credentials.AccessKeyId'`
-export CALLER_SECRET_ACCESS_KEY=`cat token.json| jq -r '.Credentials.SecretAccessKey'`
-export CALLER_SESSION_TOKEN=`cat token.json| jq -r '.Credentials.SessionToken'`
-rm token.json
-# TODO: set meaningful paths per integration
-export PSOXY_PATH=/admin/directory/v1/customer/my_customer/domains
 
-awscurl --service execute-api --access_key $CALLER_ACCESS_KEY_ID --secret_key $CALLER_SECRET_ACCESS_KEY --security_token $CALLER_SESSION_TOKEN $PSOXY_HOST$PSOXY_PATH
-# Remove env variables
-unset CALLER_ACCESS_KEY_ID CALLER_SECRET_ACCESS_KEY CALLER_SESSION_TOKEN
+Call the tester:
+
+```shell
+./${local_file.test-call.filename} "${var.aws_assume_role_arn}" "${var.api_gateway.api_endpoint}/live/${var.function_name}/admin/directory/v1/customer/my_customer/domains"
 ```
 
 NOTE: if you want to customize the rule set used by Psoxy for your source, you can add a
