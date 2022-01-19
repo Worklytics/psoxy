@@ -21,6 +21,11 @@
         <!-- serviceAccount that function will run as. For Google Workspace use cases, should be the
          one configured as OAuth Client and authorized for your instance. -->
         <serviceAccount>psoxy-gmail-dwd@psoxy-dev-erik.iam.gserviceaccount.com</serviceAccount>
+
+        <!-- dependencies local to module; if want to re-use across more modules, move up to root pom -->
+        <dependency.aws-bom.version>2.17.46</dependency.aws-bom.version>
+        <dependency.aws-lambda-core.version>1.2.1</dependency.aws-lambda-core.version>
+        <dependency.aws-lambda-java-events.version>3.11.0</dependency.aws-lambda-java-events.version>
     </properties>
 
     <repositories>
@@ -45,7 +50,7 @@
             <dependency>
                 <groupId>software.amazon.awssdk</groupId>
                 <artifactId>bom</artifactId>
-                <version>2.17.46</version>
+                <version>${dependency.aws-bom.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -93,12 +98,12 @@
         <dependency> <!-- get from Java SDK v2 bom too?? -->
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-lambda-java-core</artifactId>
-            <version>1.2.1</version>
+            <version>${dependency.aws-lambda-core.version}</version>
         </dependency>
         <dependency> <!-- get from Java SDK v2 bom too?? -->
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-lambda-java-events</artifactId>
-            <version>3.11.0</version>
+            <version>${dependency.aws-lambda-java-events.version}</version>
         </dependency>
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
