@@ -21,9 +21,6 @@ public class Handler implements com.amazonaws.services.lambda.runtime.RequestHan
     @Inject
     CommonRequestHandler requestHandler;
 
-    @Inject
-    ObjectMapper objectMapper;
-
     @SneakyThrows
     @Override
     public APIGatewayV2HTTPResponse handleRequest(APIGatewayV2HTTPEvent httpEvent, Context context) {
