@@ -41,7 +41,12 @@ variable "api_gateway" {
 
 variable "path_to_function_zip" {
   type        = string
-  description = "path to lambda zip"
+  description = "path to zip archive of lambda bundle"
+}
+
+variable "function_zip_hash" {
+  type        = string
+  description = "hash of base64-encoded zipped lambda bundle"
 }
 
 variable "path_to_config" {

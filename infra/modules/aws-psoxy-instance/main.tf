@@ -119,52 +119,19 @@ resource "aws_iam_role_policy_attachment" "policy"{
 
 
 resource "local_file" "todo" {
-  filename = "TODO - deploy ${var.function_name}.md"
+  filename = "test ${var.function_name}.md"
   content  = <<EOT
-First, from `java/core/` within a checkout of the Psoxy repo, package the core proxy library:
+# Testing
 
-```shell
-cd ../../java/core
-mvn package install
-```
-
-Second, from `java/impl/aws` within a checkout of the Psoxy repo, package an executable JAR for the
-cloud function with the following command:
-
-```shell
-cd ../../java/impl/aws
-mvn package
-```
-
-Third, run the following deployment command from `java/impl/aws` folder within your checkout:
-
-```shell
-aws sts assume-role --duration 900 --role-arn ${var.aws_assume_role_arn} --role-session-name deploy-lambda > temporal-credentials.json
-export AWS_ACCESS_KEY_ID=`cat temporal-credentials.json| jq -r '.Credentials.AccessKeyId'`
-export AWS_SECRET_ACCESS_KEY=`cat temporal-credentials.json| jq -r '.Credentials.SecretAccessKey'`
-export AWS_SESSION_TOKEN=`cat temporal-credentials.json| jq -r '.Credentials.SessionToken'`
-rm temporal-credentials.json
-aws sts get-caller-identity
-
-aws lambda update-function-code --function-name ${var.function_name} --zip-file fileb://target/psoxy-aws-1.0-SNAPSHOT.jar
-
-unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN
-aws sts get-caller-identity
-
-```
-
-Finally, review the deployed function in AWS console:
-
-TBD
-
-## Testing
-
+## Prereqs
 Requests to AWS API need to be [signed](https://docs.aws.amazon.com/general/latest/gr/signing_aws_api_requests.html).
 One tool to do it easily is [awscurl](https://github.com/okigan/awscurl). Install it:
 
 ```shell
 pip install awscurl
 ```
+
+## From Terminal
 Call the API using a role with api execution grants.
 ```shell
 export PSOXY_HOST=${var.api_gateway.api_endpoint}/live/${var.function_name}

@@ -3,6 +3,7 @@
 **/.terraform**
 **/terraform.tfstate**
 **/TODO*
+**/test*
 
 # macOs generated files
 .DS_Store

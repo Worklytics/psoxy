@@ -34,6 +34,7 @@ provider "aws" {
 
 module "psoxy-aws" {
   source = "../../modules/aws"
+
   caller_aws_account_id   = var.caller_aws_account_id
   caller_external_user_id = var.caller_external_user_id
   aws_account_id          = var.aws_account_id
@@ -41,7 +42,13 @@ module "psoxy-aws" {
   providers = {
     aws = aws
   }
+}
 
+module "psoxy-package" {
+  source = "../../modules/psoxy-package"
+
+  implementation     = "aws"
+  path_to_psoxy_java = "../../../java"
 }
 
 # holds SAs + keys needed to connect to Google Workspace APIs
@@ -157,7 +164,8 @@ module "psoxy-google-workspace-connector" {
   function_name        = "psoxy-${each.key}"
   source_kind          = each.key
   api_gateway          = module.psoxy-aws.api_gateway
-  path_to_function_zip = "../../../java/impl/aws/target/psoxy-aws-1.0-SNAPSHOT.jar"
+  path_to_function_zip = module.psoxy-package.path_to_deployment_jar
+  function_zip_hash    = module.psoxy-package.deployment_package_hash
   path_to_config       = "../../../configs/${each.key}.yaml"
   api_caller_role_arn  = module.psoxy-aws.api_caller_role_arn
   aws_assume_role_arn  = var.aws_assume_role_arn
