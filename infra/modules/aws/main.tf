@@ -43,12 +43,19 @@ resource "aws_iam_role" "api-caller" {
         "Principal" : {
           "AWS" : "arn:aws:iam::${var.caller_aws_account_id}"
         }
-        #TODO: add condition referencing GCP service account that will auth with Worklytics AWS account to call
-        #"Condition" : {
-        #  "StringEquals" : {
-        #    "sts:ExternalId" : var.caller_external_user_id
-        #  }
-        #}
+      },
+      # allows service account to assume role
+      {
+        "Effect": "Allow",
+        "Principal": {
+          "Federated": "accounts.google.com"
+        },
+        "Action": "sts:AssumeRoleWithWebIdentity",
+        "Condition": {
+          "StringEquals": {
+            "accounts.google.com:aud": "${var.caller_external_user_id}"
+          }
+        }
       }
     ]
   })

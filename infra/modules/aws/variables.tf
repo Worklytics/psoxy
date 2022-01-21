@@ -20,7 +20,10 @@ variable "caller_aws_account_id" {
 #eg "780C7DE5BBF9127"
 variable "caller_external_user_id" {
   type        = string
-  description = "id of service account that will call proxy (eg, SA of your worklytics instance)"
+  description = "id of service account that will call proxy (eg, unique ID of the SA of your worklytics instance)"
+  validation {
+    condition     = can(regex("^\\d{21}$", var.caller_external_user_id))
+    error_message = "The caller_external_user_id value should be 21-digit numeric string."
+  }
 }
-
 
