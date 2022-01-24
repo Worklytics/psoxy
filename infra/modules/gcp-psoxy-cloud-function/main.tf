@@ -43,7 +43,7 @@ gcloud beta functions deploy ${var.function_name} \
     --security-level=secure-always \
     --source=target/deployment \
     --service-account=${var.service_account_email} \
-    --env-vars-file=configs/${var.source_kind}.yaml \
+    --env-vars-file=../../../configs/${var.source_kind}.yaml \
     --set-secrets '${join(",", local.secret_clauses)}'
 ```
 

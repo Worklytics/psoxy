@@ -1,5 +1,12 @@
 terraform {
   required_providers {
+    # for the infra that will host Psoxy instances
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 3.0"
+    }
+
+    # for the API connections to Google Workspace
     google = {
       version = ">= 3.74, <= 4.0"
     }
@@ -10,27 +17,46 @@ terraform {
   }
 }
 
-# NOTE: if you don't have perms to provision a GCP project in your billing account, you can have
-# someone else create one and than import it:
-#  `terraform import google_project.psoxy-project your-psoxy-project-id`
-# either way, we recommend the project be used exclusively to host psoxy instances corresponding to
-# a single worklytics account
-resource "google_project" "psoxy-project" {
-  name            = "Psoxy - ${var.environment_name}"
-  project_id      = var.project_id
-  folder_id       = var.folder_id
-  billing_account = var.billing_account_id
+# NOTE: you need to provide credentials. usual way to do this is to set env vars:
+#        AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
+# see https://registry.terraform.io/providers/hashicorp/aws/latest/docs#authentication for more
+# information as well as alternative auth approaches
+provider "aws" {
+  region = var.aws_region
+
+  assume_role {
+    role_arn = var.aws_assume_role_arn
+  }
+  allowed_account_ids = [
+    var.aws_account_id
+  ]
 }
 
-module "psoxy-gcp" {
-  source = "../modules/gcp"
+module "psoxy-aws" {
+  source = "../../modules/aws"
 
-  project_id          = google_project.psoxy-project.project_id
-  invoker_sa_emails   = var.worklytics_sa_emails
+  caller_aws_account_id   = var.caller_aws_account_id
+  caller_external_user_id = var.caller_external_user_id
+  aws_account_id          = var.aws_account_id
 
-  depends_on = [
-    google_project.psoxy-project
-  ]
+  providers = {
+    aws = aws
+  }
+}
+
+module "psoxy-package" {
+  source = "../../modules/psoxy-package"
+
+  implementation     = "aws"
+  path_to_psoxy_java = "../../../java"
+}
+
+# holds SAs + keys needed to connect to Google Workspace APIs
+resource "google_project" "psoxy-google-connectors" {
+  name            = "Psoxy Connectors - ${var.environment_name}"
+  project_id      = var.gcp_project_id
+  folder_id       = var.gcp_folder_id
+  billing_account = var.gcp_billing_account_id
 }
 
 locals {
@@ -54,8 +80,7 @@ locals {
         "https://www.googleapis.com/auth/admin.directory.group.member.readonly",
         "https://www.googleapis.com/auth/admin.directory.orgunit.readonly",
         "https://www.googleapis.com/auth/admin.directory.rolemanagement.readonly"
-      ],
-      worklytics_connector_name: "Google Workspace Directory via Psoxy"
+      ]
     }
     "gcal": {
       display_name: "Google Calendar"
@@ -108,56 +133,54 @@ locals {
 module "google-workspace-connection" {
   for_each = local.google_workspace_sources
 
-  source = "../modules/google-workspace-dwd-connection"
+  source = "../../modules/google-workspace-dwd-connection"
 
-  project_id                   = var.project_id
+  project_id                   = google_project.psoxy-google-connectors.project_id
   connector_service_account_id = "psoxy-${each.key}-dwd"
   display_name                 = "Psoxy Connector - ${each.value.display_name}${var.connector_display_name_suffix}"
   apis_consumed                = each.value.apis_consumed
   oauth_scopes_needed          = each.value.oauth_scopes_needed
 
   depends_on = [
-    module.psoxy-gcp
+    module.psoxy-aws,
+    google_project.psoxy-google-connectors
   ]
 }
 
 module "google-workspace-connection-auth" {
   for_each = local.google_workspace_sources
 
-  source = "../modules/gcp-sa-auth-key-secret-manager"
+  source = "../../modules/gcp-sa-auth-key-aws-secret"
 
-  secret_project     = var.project_id
   service_account_id = module.google-workspace-connection[each.key].service_account_id
-  secret_id          = "PSOXY_${each.key}_SERVICE_ACCOUNT_KEY"
+  secret_id          = "PSOXY_${upper(each.key)}_SERVICE_ACCOUNT_KEY"
 }
 
 module "psoxy-google-workspace-connector" {
   for_each = local.google_workspace_sources
 
-  source = "../modules/gcp-psoxy-cloud-function"
+  source = "../../modules/aws-psoxy-instance"
 
-  project_id            = var.project_id
-  function_name         = "psoxy-${each.key}"
-  source_kind           = each.key
-  service_account_email = module.google-workspace-connection[each.key].service_account_email
+  function_name        = "psoxy-${each.key}"
+  source_kind          = each.key
+  api_gateway          = module.psoxy-aws.api_gateway
+  path_to_function_zip = module.psoxy-package.path_to_deployment_jar
+  function_zip_hash    = module.psoxy-package.deployment_package_hash
+  path_to_config       = "../../../configs/${each.key}.yaml"
+  api_caller_role_arn  = module.psoxy-aws.api_caller_role_arn
+  aws_assume_role_arn  = var.aws_assume_role_arn
 
-  secret_bindings       = {
-    PSOXY_SALT = {
-      secret_name    = module.psoxy-gcp.salt_secret_name
-      version_number = module.psoxy-gcp.salt_secret_version_number
-    },
-    SERVICE_ACCOUNT_KEY = {
-      secret_name    = module.google-workspace-connection-auth[each.key].key_secret_name
-      version_number = module.google-workspace-connection-auth[each.key].key_secret_version_number
-    }
+  parameter_bindings   = {
+    PSOXY_SALT          = module.psoxy-aws.salt_secret
+    SERVICE_ACCOUNT_KEY = module.google-workspace-connection-auth[each.key].key_secret
   }
 }
 
 module "worklytics-psoxy-connection" {
   for_each = local.google_workspace_sources
 
-  source = "../modules/worklytics-psoxy-connection"
+  source = "../../modules/worklytics-psoxy-connection"
 
-  psoxy_endpoint_url = module.psoxy-google-workspace-connector[each.key].cloud_function_url
+  psoxy_endpoint_url = module.psoxy-google-workspace-connector[each.key].endpoint_url
   display_name       = "${each.value.display_name} via Psoxy"
 }

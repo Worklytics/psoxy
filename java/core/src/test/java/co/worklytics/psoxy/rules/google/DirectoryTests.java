@@ -144,17 +144,16 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
         assertNotSanitized(jsonString, Arrays.asList("photoData"));
 
         URL url =
-            new URL("https://admin.googleapis.co/admin/directory/v1/users/123124/photos/thumbnail");
+            new URL("https://admin.googleapis.com/admin/directory/v1/users/123124/photos/thumbnail");
 
         //block by default
         assertThrows(IllegalStateException.class, () -> sanitizer.sanitize(url, jsonString));
 
         Rules allowAllRoles = getRulesUnderTest().toBuilder().allowedEndpointRegex(".*").build();
 
-        this.sanitizer = new SanitizerImpl(Sanitizer.Options.builder().pseudonymizationSalt("salt")
+        this.sanitizer = this.sanitizerFactory.create(Sanitizer.Options.builder().pseudonymizationSalt("salt")
             .rules(allowAllRoles)
             .defaultScopeId("gapps").build());
-        this.sanitizer.initConfiguration();
 
         //but still redact if gets through
         String sanitized = this.sanitizer.sanitize(url, jsonString);
@@ -167,11 +166,18 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
     public void roles() {
         String jsonString = asJson("roles.json");
 
-        String endpoint = "https://admin.googleapis.co/admin/directory/v1/customer/my_customer/roles";
+        String endpoint = "https://admin.googleapis.com/admin/directory/v1/customer/my_customer/roles";
         assertNotSanitized(jsonString, "Google Apps Administrator Seed Role");
 
         String sanitized = this.sanitizer.sanitize(new URL(endpoint), jsonString);
 
         assertRedacted(sanitized, "Google Apps Administrator Seed Role");
+    }
+
+    @SneakyThrows
+    @Test
+    public void domains() {
+        String endpoint = "https://admin.googleapis.com/admin/directory/v1/customer/my_customer/domains";
+        assertUrlWithQueryParamsAllowed(endpoint);
     }
 }

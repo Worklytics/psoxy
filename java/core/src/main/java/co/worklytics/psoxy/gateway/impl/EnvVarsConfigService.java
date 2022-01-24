@@ -1,9 +1,14 @@
 package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import lombok.NoArgsConstructor;
 
+import javax.inject.Inject;
 import java.util.Optional;
 
+
+@NoArgsConstructor(onConstructor_ = @Inject)
 public class EnvVarsConfigService implements ConfigService {
 
     public String getConfigPropertyOrError(ConfigProperty property) {
@@ -17,4 +22,5 @@ public class EnvVarsConfigService implements ConfigService {
     public Optional<String> getConfigPropertyAsOptional(ConfigProperty property) {
         return Optional.ofNullable(System.getenv(property.name()));
     }
+
 }

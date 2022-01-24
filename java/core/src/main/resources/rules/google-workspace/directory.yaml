@@ -1,8 +1,8 @@
 allowedEndpointRegexes:
-  - "^/admin/directory/v1/(domains|groups|orgunits).*"
+  - "^/admin/directory/v1/(groups|orgunits).*"
   - "^/admin/directory/v1/users\\?.*"
   - "^/admin/directory/v1/users/[^/]*"
-  - "^/admin/directory/v1/customer/my_customer/(roles|roleassignments|resources).*"
+  - "^/admin/directory/v1/customer/my_customer/(domains|roles|roleassignments|resources).*"
 pseudonymizationWithOriginals:
   - jsonPaths:
       - "$.email"

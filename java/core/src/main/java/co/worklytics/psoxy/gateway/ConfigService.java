@@ -13,4 +13,9 @@ public interface ConfigService {
 
     Optional<String> getConfigPropertyAsOptional(ConfigProperty property);
 
+    default boolean isDevelopment() {
+        return this.getConfigPropertyAsOptional(ProxyConfigProperty.IS_DEVELOPMENT_MODE)
+            .map(Boolean::parseBoolean).orElse(false);
+    }
+
 }

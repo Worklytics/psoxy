@@ -1,0 +1,61 @@
+{
+  "version": "2.0",
+  "routeKey": "GET /lambda-name/{proxy+}",
+  "rawPath": "/live/lambda-name/path/to/resource",
+  "rawQueryString": "token=abc&page=2&multi=value2&multi=value1",
+  "queryStringParameters": {
+    "token": "abc",
+    "page": "2",
+    "multi": "value1,value2"
+  },
+  "headers": {
+    "accept": "application/xml",
+    "accept-encoding": "gzip, deflate",
+    "authorization": "AWS4-HMAC-SHA256 Credential=XXXXXXXXXXXXOAWH76BPW6/20220119/us-east-1/execute-api/aws4_request, SignedHeaders=host;x-amz-date;x-amz-security-token, Signature=eb391218120e774de2ee1d050bc682878b63d3a9b8d0cd7303447e6dee58aa87",
+    "content-length": "0",
+    "content-type": "application/json",
+    "host": "apiId.execute-api.us-east-1.amazonaws.com",
+    "user-agent": "python-requests/2.22.0",
+    "x-amz-content-sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "x-amz-date": "20220119T053607Z",
+    "x-amz-security-token": "very-long-security-token",
+    "x-amzn-trace-id": "Root=1-61e7a347-16c68cb059c7d0963f095686",
+    "x-forwarded-for": "73.19.103.123",
+    "x-forwarded-port": "443",
+    "x-forwarded-proto": "https",
+    "multi-header": "value1,value2"
+  },
+  "requestContext": {
+    "accountId": "123456789012",
+    "apiId": "apiId",
+    "authorizer": {
+      "iam": {
+        "accessKey": "XXXXXXXXXXXXOAWH76BPW6",
+        "accountId": "123456789012",
+        "callerId": "XXXXXXXXXXXXOAWH76BPW6:test_call",
+        "cognitoIdentity": null,
+        "principalOrgId": "aws:PrincipalOrgID",
+        "userArn": "arn:aws:sts::123456789012:assumed-role/InfraAdmin/test_call",
+        "userId": "YYYYYYYYY27OW7UDMK:test_call"
+      }
+    },
+    "domainName": "apiId.execute-api.us-east-1.amazonaws.com",
+    "domainPrefix": "apiId",
+    "http": {
+      "method": "GET",
+      "path": "/live/lambda-name/path/to/resource",
+      "protocol": "HTTP/1.1",
+      "sourceIp": "73.19.103.123",
+      "userAgent": "python-requests/2.22.0"
+    },
+    "requestId": "MLZzPiGaoAMEMfw=",
+    "routeKey": "GET /lambda-name/{proxy+}",
+    "stage": "live",
+    "time": "19/Jan/2022:05:36:07 +0000",
+    "timeEpoch": 1642570567703
+  },
+  "pathParameters": {
+    "proxy": "path/to/resource"
+  },
+  "isBase64Encoded": false
+}

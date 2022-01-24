@@ -6,8 +6,10 @@ import com.google.auth.Credentials;
 import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.OAuth2Credentials;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.extern.java.Log;
 
+import javax.inject.Inject;
 import java.util.Optional;
 import java.util.Set;
 
@@ -22,6 +24,7 @@ import java.util.Set;
  *
  */
 @Log
+@NoArgsConstructor(onConstructor_ = @Inject)
 public class OAuthAccessTokenSourceAuthStrategy implements SourceAuthStrategy {
 
     @Getter
@@ -31,8 +34,7 @@ public class OAuthAccessTokenSourceAuthStrategy implements SourceAuthStrategy {
         ACCESS_TOKEN,
     }
 
-    //TODO: inject
-    ConfigService config = new EnvVarsConfigService();
+    @Inject ConfigService config;
 
     @Override
     public Credentials getCredentials(Optional<String> userToImpersonate) {

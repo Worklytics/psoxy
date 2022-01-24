@@ -4,9 +4,12 @@ import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.psoxy.rules.Validator;
+import dagger.Component;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -16,11 +19,20 @@ import static org.mockito.Mockito.when;
 
 class RulesUtilsTest {
 
-    RulesUtils utils;
+    @Inject RulesUtils utils;
+
+    @Singleton
+    @Component(modules = {
+        PsoxyModule.class,
+    })
+    public interface Container {
+        void inject( RulesUtilsTest test);
+    }
 
     @BeforeEach
     public void setup() {
-        this.utils = new RulesUtils();
+        Container container = DaggerRulesUtilsTest_Container.create();
+        container.inject(this);
     }
 
     @Test
