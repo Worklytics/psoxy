@@ -36,7 +36,6 @@
         </processorPath>
         <module name="core" />
         <module name="cmd-line" />
-        <module name="aws" />
         <module name="gcp" />
       </profile>
     </annotationProcessing>

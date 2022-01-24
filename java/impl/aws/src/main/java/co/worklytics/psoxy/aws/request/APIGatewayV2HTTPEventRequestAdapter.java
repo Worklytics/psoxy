@@ -31,11 +31,12 @@ public class APIGatewayV2HTTPEventRequestAdapter implements HttpEventRequest {
 
     @Override
     public Optional<String> getHeader(String headerName) {
-        return Optional.ofNullable(event.getHeaders().get(headerName));
+        // Seems APIGatewayV2HTTPEvent has the headers lower-case
+        return Optional.ofNullable(event.getHeaders().get(headerName.toLowerCase()));
     }
 
     @Override
     public Optional<List<String>> getMultiValueHeader(String headerName) {
-        return getHeader(headerName).map( s -> Splitter.on(',').splitToList(s));
+        return getHeader(headerName.toLowerCase()).map( s -> Splitter.on(',').splitToList(s));
     }
 }
