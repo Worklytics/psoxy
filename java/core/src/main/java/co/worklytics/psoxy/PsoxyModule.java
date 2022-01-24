@@ -3,10 +3,13 @@ package co.worklytics.psoxy;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
+import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.gson.GsonFactory;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
@@ -16,6 +19,8 @@ import dagger.Provides;
 
 
 import javax.inject.Named;
+import javax.inject.Singleton;
+import java.time.Clock;
 import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -57,6 +62,11 @@ public class PsoxyModule {
     }
 
     @Provides
+    JsonFactory jsonFactory() {
+        return GsonFactory.getDefaultInstance();
+    }
+
+    @Provides
     static Logger logger() {
         return Logger.getLogger(PsoxyModule.class.getCanonicalName());
     }
@@ -69,6 +79,18 @@ public class PsoxyModule {
             .filter(impl -> Objects.equals(identifier, impl.getConfigIdentifier()))
             .findFirst()
             .orElseThrow(() -> new Error("No SourceAuthStrategy impl matching configured identifier: " + identifier));
+    }
+
+    @Provides
+    static OAuthRefreshTokenSourceAuthStrategy.TokenRequestPayloadBuilder tokenRequestPayloadBuilder(ConfigService configService,
+                                                                                                     Set<OAuthRefreshTokenSourceAuthStrategy.TokenRequestPayloadBuilder> payloadBuilders) {
+        String identifier =
+            configService.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.GRANT_TYPE);
+        return payloadBuilders
+            .stream()
+            .filter(impl -> Objects.equals(identifier, impl.getGrantType()))
+            .findFirst()
+            .orElseThrow(() -> new Error("No TokenRequestPayloadBuilder impl supporting oauth grant type: " + identifier));
     }
 
 

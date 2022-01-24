@@ -127,7 +127,15 @@ locals {
         "https://www.googleapis.com/auth/admin.reports.audit.readonly"
       ]
     }
-  }
+  },
+  msft_sources = {
+    "azure-ad" : {
+      display_name: "Azure Directory"
+      required_resource_access: [
+
+      ]
+    }
+  },
 }
 
 module "google-workspace-connection" {
@@ -156,6 +164,25 @@ module "google-workspace-connection-auth" {
   secret_id          = "PSOXY_${upper(each.key)}_SERVICE_ACCOUNT_KEY"
 }
 
+module "msft-connection" {
+  for_each = local.msft_sources
+
+  source = "../../modules/azuread-connection"
+  display_name             = "Psoxy Connector - ${each.value.display_name}${var.connector_display_name_suffix}"
+  required_resources       = each.value.required_resource_access
+  tenant_id                 = var.msft_tenant_id
+}
+
+module "msft-connection-auth" {
+  for_each = local.msft_sources
+
+  source = "../../modules/azuread-local-cert"
+
+  application_id       = module.msft-connection[each.key].connector.id
+  rotation_days        = 60
+  cert_expiration_days = 180
+}
+
 module "psoxy-google-workspace-connector" {
   for_each = local.google_workspace_sources
 
@@ -176,6 +203,29 @@ module "psoxy-google-workspace-connector" {
   }
 }
 
+module "psoxy-msft-connector" {
+  for_each = local.msft_sources
+
+  source = "../../modules/aws-psoxy-instance"
+
+  function_name        = "psoxy-${each.key}"
+  source_kind          = each.key
+  api_gateway          = module.psoxy-aws.api_gateway
+  path_to_function_zip = module.psoxy-package.path_to_deployment_jar
+  function_zip_hash    = module.psoxy-package.deployment_package_hash
+  path_to_config       = "../../../configs/${each.key}.yaml"
+  api_caller_role_arn  = module.psoxy-aws.api_caller_role_arn
+  aws_assume_role_arn  = var.aws_assume_role_arn
+
+  parameter_bindings   = {
+    PSOXY_SALT          = module.psoxy-aws.salt_secret
+    PRIVATE_KEY_ID      = module.msft-connection-auth[each.key].private_key_id
+    PRIVATE_KEY         = module.msft-connection-auth[each.key].private_key
+  }
+}
+
+
+
 module "worklytics-psoxy-connection" {
   for_each = local.google_workspace_sources
 
@@ -184,3 +234,4 @@ module "worklytics-psoxy-connection" {
   psoxy_endpoint_url = module.psoxy-google-workspace-connector[each.key].endpoint_url
   display_name       = "${each.value.display_name} via Psoxy"
 }
+

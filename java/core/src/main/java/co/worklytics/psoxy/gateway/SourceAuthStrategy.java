@@ -36,7 +36,7 @@ import java.util.Set;
  *           token)
  *
  */
-public interface SourceAuthStrategy {
+public interface SourceAuthStrategy extends RequiresConfiguration {
 
     /**
      * @return a string that can uniquely identify this SourceAuthStrategy implementation for
@@ -47,8 +47,4 @@ public interface SourceAuthStrategy {
 
     Credentials getCredentials(Optional<String> userToImpersonate);
 
-    /**
-     * @return set of any config properties that are required to be defined
-     */
-    Set<ConfigService.ConfigProperty> getRequiredConfigProperties();
 }

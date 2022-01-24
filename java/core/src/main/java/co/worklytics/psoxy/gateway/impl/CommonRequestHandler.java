@@ -2,7 +2,6 @@ package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.gateway.*;
-import co.worklytics.psoxy.impl.SanitizerImpl;
 import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.psoxy.utils.URLUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,7 +14,6 @@ import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.common.net.MediaType;
 import lombok.*;
 import lombok.extern.java.Log;
-import org.apache.commons.lang3.tuple.Pair;
 
 import javax.inject.Inject;
 import java.io.IOException;

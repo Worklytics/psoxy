@@ -1,0 +1,7 @@
+SOURCE: azure-ad
+
+TARGET_HOST: graph.microsoft.com
+SOURCE_AUTH_STRATEGY_IDENTIFIER: oauth2_refresh_token
+GRANT_TYPE: client_credentials
+IDENTIFIER_SCOPE_ID: azure-ad
+
