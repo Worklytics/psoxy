@@ -1,5 +1,7 @@
 package co.worklytics.psoxy;
 
+import com.google.api.client.http.HttpRequestFactory;
+import com.google.api.client.http.javanet.NetHttpTransport;
 import dagger.Module;
 import dagger.Provides;
 
@@ -25,4 +27,11 @@ public class FunctionRuntimeModule {
     static UUID randomUUID() {
         return UUID.randomUUID();
     }
+
+    @Provides
+    static HttpRequestFactory providesHttpRequestFactory() {
+        //atm, all function runtimes expected to use generic java NetHttpTransport
+        return (new NetHttpTransport()).createRequestFactory();
+    }
+
 }

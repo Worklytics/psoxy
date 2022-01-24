@@ -6,8 +6,6 @@ import co.worklytics.psoxy.gateway.SourceAuthStrategy;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.google.api.client.http.HttpRequestFactory;
-import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 import com.jayway.jsonpath.Configuration;
@@ -19,8 +17,6 @@ import dagger.Provides;
 
 
 import javax.inject.Named;
-import javax.inject.Singleton;
-import java.time.Clock;
 import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -52,13 +48,6 @@ public class PsoxyModule {
             .jsonProvider(new JacksonJsonProvider()) //TODO: DI here (share jackson with rest of app)
             .mappingProvider(new JacksonMappingProvider()) // TODO: DI here (share jackson with rest of app)
             .setOptions(Option.SUPPRESS_EXCEPTIONS); //we specifically want to ignore PATH_NOT_FOUND cases
-    }
-
-
-    //q: is this platform dependent?
-    @Provides
-    HttpRequestFactory providesHttpRequestFactory() {
-        return (new NetHttpTransport()).createRequestFactory();
     }
 
     @Provides
