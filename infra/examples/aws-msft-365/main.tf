@@ -147,6 +147,7 @@ module "private-key-aws-parameters" {
   source = "../../modules/private-key-aws-parameter"
 
   instance_id = each.key
+  
   private_key_id = module.msft-connection-auth[each.key].private_key_id
   private_key    = module.msft-connection-auth[each.key].private_key
 }

@@ -125,11 +125,8 @@ public class ClientCredentialsGrantTokenRequestPayloadBuilder
             KeyFactory keyFactory = SecurityUtils.getRsaKeyFactory();
             PrivateKey privateKey = keyFactory.generatePrivate(keySpec);
             return privateKey;
-        } catch (NoSuchAlgorithmException exception) {
-            unexpectedException = exception;
-        } catch (InvalidKeySpecException exception) {
-            unexpectedException = exception;
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException exception) {
+           throw new IOException("Unexpected exception reading PKCS data", exception);
         }
-        throw new IOException("Unexpected exception reading PKCS data", unexpectedException);
     }
 }
