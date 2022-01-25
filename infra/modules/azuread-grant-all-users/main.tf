@@ -2,6 +2,13 @@
 #  - there is no way to do another org unit / group via Terraform; if that's the configure you
 #   desire, you'll have to do that via Azure AD console OR cli
 
+terraform {
+  required_providers {
+    azuread = {
+      version = "~> 2.15.0"
+    }
+  }
+}
 
 data "azuread_application_published_app_ids" "well_known" {}
 

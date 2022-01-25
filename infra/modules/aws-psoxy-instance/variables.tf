@@ -20,14 +20,14 @@ variable "source_kind" {
   description = "kind of source (eg, 'gmail', 'google-chat', etc)"
 }
 
-variable "parameter_bindings" {
+variable "parameters" {
   # see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter#attributes-reference
-  type = map(object({
+  type = list(object({
     name    = string
     arn     = string
     version = string
   }))
-  description = "map of System Manager Parameters to expose to function"
+  description = "System Manager Parameters to expose to function"
 }
 
 variable "api_gateway" {

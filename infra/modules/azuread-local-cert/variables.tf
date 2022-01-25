@@ -17,6 +17,5 @@ variable "application_id" {
 
 variable "certificate_subject" {
   type        = string
-  description = "value for 'subject' passed to openssl when generation certificate"
-  default     = "/C=US/ST=New York/L=New York/CN=www.worklytics.co" # TODO: should be your organization!!
+  description = "value for 'subject' passed to openssl when generation certificate (eg '/C=US/ST=New York/L=New York/CN=www.worklytics.co')"
 }

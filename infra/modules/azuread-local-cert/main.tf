@@ -1,14 +1,24 @@
+# generate certificate for Azure AD application locally and deploy it to Azure AD
+# NOTE: certificate will only be temporarily written to your local file system, but out of abundance
+# of caution should:
+#  - run this only in an environment that is approved from key generation in your organization
+#  - use a secure location for your Terraform state (eg, not local file systme of your laptop)
+terraform {
+  required_providers {
+    azuread = {
+      version = "~> 2.15.0"
+    }
+  }
+}
+
 resource "time_rotating" "rotation" {
   rotation_days = var.rotation_days
 }
 
 # done with external as Terraform docs suggest
-# but still out of abundance of caution should:
-#  - run this only in an environment that is approved from key generation in your organization
-#  - use a secure location for your Terraform state (eg, not local file systme of your laptop)
+
 data "external" "certificate" {
-  working_dir = path.module
-  program     = ["local-cert.sh", var.certificate_subject, var.cert_expiration_days]
+  program     = ["${path.module}/local-cert.sh", var.certificate_subject, var.cert_expiration_days]
 }
 
 resource "random_uuid" "key-id" {
@@ -20,7 +30,7 @@ resource "azuread_application_certificate" "certificate" {
   application_object_id = var.application_id
   type                  = "AsymmetricX509Cert"
   value                 = base64decode(data.external.certificate.result.cert)
-  end_date              = timeadd(time_rotating.rotation, var.cert_expiration_days)
+  end_date              = timeadd(time_rotating.rotation.unix, var.cert_expiration_days)
 }
 
 output "private_key_id" {
@@ -28,7 +38,7 @@ output "private_key_id" {
 }
 
 output "private_key" {
-  value = data.external.certificate.result.cert
+  value = base64decode(data.external.certificate.result.cert)
 }
 
 # for 3-legged OAuth flows, which believe aren't needed in this case as we have no OIDC/sign-on

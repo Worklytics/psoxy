@@ -2,6 +2,14 @@
 #  - the connector application
 #  - granting connector access on behalf of the users in your Azure AD directory
 
+terraform {
+  required_providers {
+    azuread = {
+      version = "~> 2.15.0"
+    }
+  }
+}
+
 data "azuread_application_published_app_ids" "well_known" {}
 
 resource "azuread_service_principal" "msgraph" {

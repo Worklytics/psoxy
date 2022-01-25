@@ -51,9 +51,12 @@ And, depending on your scenario, you may also need:
     your psoxy instances in GCP *OR* if you plan to connect Google Workspace as a data source. It
     should be configured for the GCP project that will host your psoxy instance(s) and/or your
     connectors.
+  - [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) Required to connect to
+    Microsoft 365 sources.
 
-[Google Cloud Shell](https://cloud.google.com/shell/docs/how-cloud-shell-works#tools) provides all
-of the above.
+If you don't require Azure CLI / AWS CLI, [Google Cloud Shell](https://cloud.google.com/shell/docs/how-cloud-shell-works#tools)
+provides all of the above out-of-the-box, simplifies authentication/authorization for GCP
+deployments, and provides security advantages.
 
 ### Setup
 1. contact support@worklytics.co to ensure your Worklytics account is enabled for Psoxy, and to get
@@ -82,7 +85,7 @@ git rebase upstream/main
 
 3. create a [terraform](https://www.terraform.io/) configuration, setting up your environment, psoxy
    instances, and API keys/secrets for each connection
-   a. various examples are provided in [`infra`](/infra/)
+   a. various examples are provided in [`infra/examples`](/infra/examples)
    b. various modules are provided in [`infra/modules`](/infra/modules); these modules will either
       perform all the necessary setup, or create TODO files explaining what you must do outside
       Terraform
@@ -113,7 +116,7 @@ As of Sept 2021, the following sources can be connected via psoxy:
       * GMail *beta*
       * Meet *beta*
     * Slack
-        * eDiscovery API *alpha*
+        * eDiscovery API *beta*
 
 You can also use the command line tool to pseudonymize arbitrary CSV files (eg, exports from your
 HRIS), in a manner consistent with how a psoxy instance will pseudonymize identifiers in a target
