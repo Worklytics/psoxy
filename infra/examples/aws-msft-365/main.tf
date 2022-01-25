@@ -57,64 +57,34 @@ module "psoxy-package" {
 
 locals {
   # Microsoft 365 sources; add/remove as you wish
+  # See https://docs.microsoft.com/en-us/graph/permissions-reference for all the permissions available in AAD Graph API
   msft_sources = {
     "azure-ad" : {
       display_name: "Azure Directory"
-      required_resource_access: [
-        {
-          id   : "User.Read.All",
-          type : "Role"
-        },
-        {
-          id   : "Group.Read.All",
-          type : "Role"
-        }
+      required_oauth2_permission_scopes: [],  # Delegated permissions (from `az ad sp list --query "[?appDisplayName=='Microsoft Graph'].oauth2Permissions" --all`)
+      required_app_roles: [ # Application permissions (form az ad sp list --query "[?appDisplayName=='Microsoft Graph'].appRoles" --all
+        "User.Read.All",
+        "Group.Read.All"
       ]
     },
     "outlook-cal" : {
       display_name: "Outlook Calendar"
-      required_resource_access: [
-        {
-          id   : "User.Read.All",
-          type : "Role"
-        },
-        {
-          id   : "Calendars.Read",
-          type : "Role"
-        },
-        {
-          id   : "MailboxSettings.Read",
-          type : "Role"
-        },
-        {
-          id   : "OnlineMeetings.Read.All",
-          type : "Role"
-        },
-        {
-          id   : "Group.Read.All",
-          type : "Role"
-        }
+      required_oauth2_permission_scopes: [],
+      required_app_roles: [
+        "Mail.ReadBasic.All",
+        "MailboxSettings.Read",
+        "Group.Read.All",
+        "User.Read.All"
       ]
     },
     "outlook-mail-meta" : {
       display_name: "Outlook Mail"
-      required_resource_access: [
-        {
-          id   : "User.Read.All",
-          type : "Role"
-        },
-        {
-          id   : "Mail.ReadBasic.All",
-          type : "Role"
-        },
-        {
-          id   : "MailboxSettings.Read",
-          type : "Role"
-        },
-        {
-          id   : "Group.Read.All",
-          type : "Role"
-        }
+      required_oauth2_permission_scopes: [],
+      required_app_roles: [
+        "Mail.ReadBasic.All",
+        "MailboxSettings.Read",
+        "Group.Read.All",
+        "User.Read.All"
       ]
     }
   }
@@ -125,9 +95,10 @@ module "msft-connection" {
 
   source = "../../modules/azuread-connection"
 
-  display_name             = "Psoxy Connector - ${each.value.display_name}${var.connector_display_name_suffix}"
-  required_resources       = each.value.required_resource_access
-  tenant_id                 = var.msft_tenant_id
+  display_name                      = "Psoxy Connector - ${each.value.display_name}${var.connector_display_name_suffix}"
+  tenant_id                         = var.msft_tenant_id
+  required_app_roles                = each.value.required_app_roles
+  required_oauth2_permission_scopes = each.value.required_oauth2_permission_scopes
 }
 
 module "msft-connection-auth" {
@@ -147,7 +118,7 @@ module "private-key-aws-parameters" {
   source = "../../modules/private-key-aws-parameter"
 
   instance_id = each.key
-  
+
   private_key_id = module.msft-connection-auth[each.key].private_key_id
   private_key    = module.msft-connection-auth[each.key].private_key
 }

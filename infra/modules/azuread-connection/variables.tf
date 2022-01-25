@@ -14,11 +14,11 @@ variable "description" {
   default     = ""
 }
 
-variable "required_resources" {
-  type        = list(object({
-    id   = string,
-    type = string # usually 'Role', but possibly 'Scope'
-  }))
-
-  description  = "list of Azure AD OAuth2 permissions that connector requires"
+variable "required_app_roles" {
+  type        = list(string)
+  description = "list of names of Microsoft Graph App Roles required by connector"
+}
+variable "required_oauth2_permission_scopes" {
+  type        = list(string)
+  description = "list of names of Microsoft Graph OAuth2 Permissions required by connector"
 }

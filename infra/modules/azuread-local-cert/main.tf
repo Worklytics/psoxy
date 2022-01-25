@@ -30,11 +30,11 @@ resource "azuread_application_certificate" "certificate" {
 }
 
 output "private_key_id" {
-  value = base64sha256(data.external.certificate.result.cert)
+  value = base64sha256(data.external.certificate.result.key_pkcs8)
 }
 
 output "private_key" {
-  value = base64decode(data.external.certificate.result.cert)
+  value = base64decode(data.external.certificate.result.key_pkcs8)
 }
 
 # for 3-legged OAuth flows, which believe aren't needed in this case as we have no OIDC/sign-on

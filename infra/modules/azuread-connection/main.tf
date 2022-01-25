@@ -21,14 +21,25 @@ resource "azuread_application" "connector" {
   display_name                   = var.display_name
 
   required_resource_access {
-    resource_app_id =  data.azuread_application_published_app_ids.well_known.result.MicrosoftGraph
+    resource_app_id = data.azuread_application_published_app_ids.well_known.result.MicrosoftGraph
 
     dynamic "resource_access" {
-      for_each = var.required_resources
+      for_each = var.required_oauth2_permission_scopes
 
       content {
-        id   = azuread_service_principal.msgraph.oauth2_permission_scope_ids[resource_access.value.id]
-        type = resource_access.value.type # generally, will be 'Role' for most use cases
+        # this approach is consistent with what you get via `az ad sp list`, which is what MSFT docs
+        # recommend: https://docs.microsoft.com/en-us/graph/permissions-reference#retrieving-permission-ids
+        id   = azuread_service_principal.msgraph.oauth2_permission_scope_ids[resource_access.value]
+        type = "Scope"
+      }
+    }
+
+    dynamic "resource_access" {
+      for_each = var.required_app_roles
+
+      content {
+        id   = azuread_service_principal.msgraph.app_role_ids[resource_access.value]
+        type = "Role"
       }
     }
   }
