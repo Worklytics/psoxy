@@ -21,16 +21,12 @@ data "external" "certificate" {
   program     = ["${path.module}/local-cert.sh", var.certificate_subject, var.cert_expiration_days]
 }
 
-resource "random_uuid" "key-id" {
-
-}
-
 # for JWT signing
 resource "azuread_application_certificate" "certificate" {
   application_object_id = var.application_id
   type                  = "AsymmetricX509Cert"
   value                 = base64decode(data.external.certificate.result.cert)
-  end_date              = timeadd(time_rotating.rotation.unix, var.cert_expiration_days)
+  end_date              = timeadd(time_rotating.rotation.id, "${var.cert_expiration_days * 24}h")
 }
 
 output "private_key_id" {
