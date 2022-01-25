@@ -33,25 +33,15 @@ variable "caller_external_user_id" {
   description = "id of external user that will call proxy (eg, SA of your Worklytics instance)"
 }
 
-variable "gcp_project_id" {
-  type        = string
-  description = "id of GCP project that will host psoxy instance"
-}
-
 variable "environment_name" {
   type        = string
   description = "qualifier to append to name of project that will host your psoxy instance"
 }
 
-variable "gcp_folder_id" {
+variable "msft_tenant_id" {
   type        = string
-  description = "optionally, a folder into which to provision it"
-  default     = null
-}
-
-variable "gcp_billing_account_id" {
-  type        = string
-  description = "billing account ID; needed to create the project"
+  default     = ""
+  description = "ID of Microsoft tenant to connect to (req'd only if config includes MSFT connectors)"
 }
 
 variable "connector_display_name_suffix" {
@@ -60,8 +50,7 @@ variable "connector_display_name_suffix" {
   default     = ""
 }
 
-variable "msft_tenant_id" {
+variable "certificate_subject" {
   type        = string
-  default     = ""
-  description = "ID of Microsoft tenant to connect to (req'd only if config includes MSFT connectors)"
+  description = "value for 'subject' passed to openssl when generation certificate (eg '/C=US/ST=New York/L=New York/CN=www.worklytics.co')"
 }

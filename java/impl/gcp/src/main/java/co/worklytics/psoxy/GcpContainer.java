@@ -8,6 +8,7 @@ import javax.inject.Singleton;
 @Component(modules = {
     GcpModule.class,
     PsoxyModule.class,
+    FunctionRuntimeModule.class,
     ConfigRulesModule.class,
     SourceAuthModule.class, //move to include of PsoxyModule??
 })
