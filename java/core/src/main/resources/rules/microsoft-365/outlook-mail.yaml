@@ -1,11 +1,11 @@
 allowedEndpointRegexes:
   - "^/(v1.0|beta)/users/[^/]*/messages/[^/]*"
-  - "^/(v1.0|beta)/users/[^/]*/mailFolders/SentItems/.*"
+  - "^/(v1.0|beta)/users/[^/]*/mailFolders/SentItems/messages.*"
   - "^/(v1.0|beta)/users/[^/]*/mailboxSettings"
 pseudonymizations:
   - jsonPaths:
       - "$..emailAddress.address"
-    relativeUrlRegex: "^/(v1.0|beta)/users/[^/]*/mailFolders/SentItems/.*"
+    relativeUrlRegex: "^/(v1.0|beta)/users/[^/]*/mailFolders/SentItems/messages.*"
   - jsonPaths:
       - "$..emailAddress.address"
     relativeUrlRegex: "^/(v1.0|beta)/users/[^/]*/messages/[^/]*"
@@ -19,7 +19,7 @@ redactions:
       - "$..multiValueExtendedProperties"
       - "$..singleValueExtendedProperties"
       - "$..internetMessageHeaders"
-    relativeUrlRegex: "^/(v1.0|beta)/users/[^/]*/mailFolders/SentItems/.*"
+    relativeUrlRegex: "^/(v1.0|beta)/users/[^/]*/mailFolders/SentItems/messages.*"
   - jsonPaths:
       - "$..subject"
       - "$..body"

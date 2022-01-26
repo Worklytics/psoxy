@@ -78,7 +78,7 @@ public class PrebuiltSanitzerRules {
             .jsonPath("$..emailAddress.address")
             .build())
         .redaction(Rules.Rule.builder()
-            .relativeUrlRegex("^/(v1.0|beta)/users/[^/]*/mailFolders/SentItems/messasge.*")
+            .relativeUrlRegex("^/(v1.0|beta)/users/[^/]*/mailFolders/SentItems/messages.*")
             .jsonPath("$..subject")
             .jsonPath("$..body")
             .jsonPath("$..bodyPreview")
