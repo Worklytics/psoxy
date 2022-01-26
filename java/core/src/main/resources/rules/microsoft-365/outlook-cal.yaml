@@ -1,11 +1,10 @@
 allowedEndpointRegexes:
-  - "^/v1.0/users/[^/]*/events.*"
-  - "^/v1.0/users/[^/]*/calendar/events.*"
-  - "^/v1.0/users/[^/]*/mailboxSettings"
+  - "^/(v1.0|beta)/users/[^/]*/(calendars/[^/]*/)?events.*"
+  - "^/(v1.0|beta)/users/[^/]*/mailboxSettings"
 pseudonymizations:
   - jsonPaths:
       - "$..emailAddress.address"
-    relativeUrlRegex: "^/v1.0/users/*/events.*"
+    relativeUrlRegex: "^/(v1.0|beta)/users/[^/]*/(calendars/[^/]*/)?events.*"
 redactions:
   - jsonPaths:
       - "$..subject"
@@ -15,4 +14,4 @@ redactions:
       - "$..extensions"
       - "$..multiValueExtendedProperties"
       - "$..singleValueExtendedProperties"
-    relativeUrlRegex: "^/v1.0/users/*/events.*"
+    relativeUrlRegex: "^/(v1.0|beta)/users/[^/]*/(calendars/[^/]*/)?events.*"
