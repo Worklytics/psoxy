@@ -1,0 +1,19 @@
+allowedEndpointRegexes:
+  - "^/(v1.0|beta)/users/[^/]*/mailFolders/SentItems/.*"
+  - "^/(v1.0|beta)/users/[^/]*/mailboxSettings"
+pseudonymizations:
+  - jsonPaths:
+      - "$..emailAddress.address"
+    relativeUrlRegex: "^/(v1.0|beta)/users/[^/]*/mailFolders/SentItems/.*"
+redactions:
+  - jsonPaths:
+      - "$..subject"
+      - "$..body"
+      - "$..bodyPreview"
+      - "$..emailAddress.name"
+      - "$..extensions"
+      - "$..multiValueExtendedProperties"
+      - "$..singleValueExtendedProperties"
+      - "$..internetMessageHeaders"
+    relativeUrlRegex: "^/(v1.0|beta)/users/[^/]*/mailFolders/SentItems/.*"
+

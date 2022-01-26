@@ -1,0 +1,31 @@
+allowedEndpointRegexes:
+  - "^/v1.0/(groups|users)[^/]*"
+pseudonymizations:
+  - jsonPaths:
+      - "$..userPrincipalName"
+      - "$..businessPhones[*]"
+      - "$..faxNumber"
+      - "$..imAddresses[*]"
+      - "$..mail"
+      - "$..mobilePhone"
+      - "$..otherMails[*]"
+    relativeUrlRegex: "^/v1.0/users.*"
+redactions:
+  - jsonPaths:
+      - "$..displayName"
+      - "$..employeeId"
+      - "$..aboutMe"
+      - "$..mySite"
+      - "$..preferredName"
+      - "$..givenName"
+      - "$..surname"
+      - "$..mailNickname"
+      - "$..proxyAddresses"
+    relativeUrlRegex: "^/v1.0/users.*"
+  - jsonPaths:
+      - "$..owners"
+      - "$..rejectedSenders"
+      - "$..acceptedSenders"
+      - "$..members"
+      - "$..membersWithLicenseErrors"
+    relativeUrlRegex: "^/v1.0/groups.*"

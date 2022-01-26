@@ -1,0 +1,18 @@
+allowedEndpointRegexes:
+  - "^/v1.0/users/[^/]*/events.*"
+  - "^/v1.0/users/[^/]*/calendar/events.*"
+  - "^/v1.0/users/[^/]*/mailboxSettings"
+pseudonymizations:
+  - jsonPaths:
+      - "$..emailAddress.address"
+    relativeUrlRegex: "^/v1.0/users/*/events.*"
+redactions:
+  - jsonPaths:
+      - "$..subject"
+      - "$..body"
+      - "$..bodyPreview"
+      - "$..emailAddress.name"
+      - "$..extensions"
+      - "$..multiValueExtendedProperties"
+      - "$..singleValueExtendedProperties"
+    relativeUrlRegex: "^/v1.0/users/*/events.*"
