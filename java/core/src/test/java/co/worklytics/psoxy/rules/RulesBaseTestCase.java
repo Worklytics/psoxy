@@ -41,6 +41,8 @@ abstract public class RulesBaseTestCase {
     @Inject
     protected SanitizerFactory sanitizerFactory;
 
+
+
     //q: how to avoid boilerplate of this at top of every test?
     @Singleton
     @Component(modules = {
@@ -115,6 +117,11 @@ abstract public class RulesBaseTestCase {
 
     protected String asJson(String filePathWithinExampleDirectory) {
         return new String(TestUtils.getData(getExampleDirectoryPath() + "/" + filePathWithinExampleDirectory));
+    }
+
+    @SneakyThrows
+    protected String sanitize(String endpoint, String jsonResponse) {
+        return this.sanitizer.sanitize(new URL(endpoint), jsonResponse);
     }
 
     protected void assertNotSanitized(String content, Collection<String> shouldContain) {
