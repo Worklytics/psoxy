@@ -202,6 +202,12 @@ abstract public class RulesBaseTestCase {
     }
 
 
+    @SneakyThrows
+    protected void assertUrlAllowed(String url) {
+        assertTrue(sanitizer.isAllowed(new URL(url)), "api endpoint url blocked");
+    }
+
+
 
     @SneakyThrows
     protected void assertUrlWithQueryParamsBlocked(String url) {
