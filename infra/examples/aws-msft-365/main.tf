@@ -100,7 +100,7 @@ locals {
       ],
       example_calls: [
         "/beta/users",
-        "/beta/users/${data.azuread_client_config.current.object_id}/mailboxSettings"
+        "/beta/users/${data.azuread_client_config.current.object_id}/mailboxSettings",
         "/beta/users/${data.azuread_client_config.current.object_id}/mailFolders/SentItems/messages"
       ]
     }
