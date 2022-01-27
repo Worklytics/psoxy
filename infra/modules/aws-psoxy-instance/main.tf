@@ -46,10 +46,6 @@ resource "aws_lambda_permission" "lambda_permission" {
   ]
 }
 
-locals {
-  proxy_endpoint_url = "${var.api_gateway.api_endpoint}/live/${var.function_name}"
-}
-
 resource "aws_iam_role" "iam_for_lambda" {
   name = "iam_for_lambda_${var.function_name}"
 
@@ -117,6 +113,13 @@ resource "aws_iam_role_policy_attachment" "policy"{
   policy_arn = aws_iam_policy.policy.arn
 }
 
+locals {
+  proxy_endpoint_url = "${var.api_gateway.api_endpoint}/live/${var.function_name}"
+  test_commands = [for path in var.example_api_calls :
+    "./tools/test-psoxy-lambda.sh \"${var.aws_assume_role_arn}\" \"${local.proxy_endpoint_url}${path}\""
+  ]
+}
+
 
 resource "local_file" "todo" {
   filename = "test ${var.function_name}.md"
@@ -141,7 +144,7 @@ pip install awscurl
 From root of your checkout of the Psoxy repo:
 
 ```shell
-./tools/test-psoxy-lambda.sh "${var.aws_assume_role_arn}" "${local.proxy_endpoint_url}/admin/directory/v1/customer/my_customer/domains"
+${join("\n", local.test_commands)}
 ```
 
 See `docs/example-api-calls/` for more example API calls specific to the data source to which your

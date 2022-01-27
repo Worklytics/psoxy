@@ -65,6 +65,9 @@ locals {
       required_app_roles: [ # Application permissions (form az ad sp list --query "[?appDisplayName=='Microsoft Graph'].appRoles" --all
         "User.Read.All",
         "Group.Read.All"
+      ],
+      example_calls: [
+        "/v1.0/users"
       ]
     },
     "outlook-cal" : {
@@ -75,6 +78,10 @@ locals {
         "MailboxSettings.Read",
         "Group.Read.All",
         "User.Read.All"
+      ],
+      example_calls: [
+        "/v1.0/users"
+        #"/v1.0/users/me/events"
       ]
     },
     "outlook-mail-meta" : {
@@ -85,6 +92,10 @@ locals {
         "MailboxSettings.Read",
         "Group.Read.All",
         "User.Read.All"
+      ],
+      example_calls: [
+        "/v1.0/users"
+        #"/beta/users/me/mailFolders/SentItems/messages"
       ]
     }
   }
@@ -136,6 +147,7 @@ module "psoxy-msft-connector" {
   path_to_config       = "../../../configs/${each.key}.yaml"
   api_caller_role_arn  = module.psoxy-aws.api_caller_role_arn
   aws_assume_role_arn  = var.aws_assume_role_arn
+  example_api_calls    = each.value.example_calls
 
   parameters = concat(
     module.private-key-aws-parameters[each.key].parameters,
