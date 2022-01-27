@@ -126,7 +126,7 @@ public class PrebuiltSanitzerRules {
         .build());
 
 
-    public static final Map<String,? extends Rules> MSFT_PREBUILT_RULES_MAP =
+    public static final Map<String,? extends Rules> MSFT_DEFAULT_RULES_MAP =
         ImmutableMap.<String, Rules>builder()
             .put("azure-ad", DIRECTORY)
             .put("outlook-cal", OUTLOOK_CALENDAR)

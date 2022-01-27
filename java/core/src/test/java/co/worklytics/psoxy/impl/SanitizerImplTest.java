@@ -48,7 +48,7 @@ class SanitizerImplTest {
         container.inject(this);
 
         sanitizer = sanitizerFactory.create(Sanitizer.Options.builder()
-            .rules(PrebuiltSanitizerRules.MAP.get("gmail"))
+            .rules(PrebuiltSanitizerRules.DEFAULTS.get("gmail"))
             .pseudonymizationSalt("an irrelevant per org secret")
             .defaultScopeId("scope")
             .build());

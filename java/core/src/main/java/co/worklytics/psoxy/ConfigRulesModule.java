@@ -29,7 +29,7 @@ public class ConfigRulesModule {
             return configRules.orElseGet(() -> {
                 String source = config.getConfigPropertyOrError(ProxyConfigProperty.SOURCE);
                 log.info("using prebuilt rules for: " + source);
-                return PrebuiltSanitizerRules.MAP.get(source);
+                return PrebuiltSanitizerRules.DEFAULTS.get(source);
             });
         });
     }
