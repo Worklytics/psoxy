@@ -2,26 +2,28 @@ package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.gateway.*;
-import co.worklytics.psoxy.impl.SanitizerImpl;
 import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.psoxy.utils.URLUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.http.GenericUrl;
-import com.google.api.client.http.HttpContent;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.auth.Credentials;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.common.net.MediaType;
-import lombok.*;
+import lombok.NoArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.java.Log;
-import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.http.client.utils.URIBuilder;
 
 import javax.inject.Inject;
 import java.io.IOException;
 import java.net.URL;
-import java.util.*;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
@@ -40,13 +42,26 @@ public class CommonRequestHandler {
     @Inject SanitizerFactory sanitizerFactory;
     @Inject Rules rules;
 
-    private Sanitizer sanitizer;
+    private volatile Sanitizer sanitizer;
+    private final Object $writeLock = new Object[0];
+
+
+    private Sanitizer loadSanitizerRules() {
+        if (this.sanitizer == null) {
+            synchronized ($writeLock) {
+                if (this.sanitizer == null) {
+                    this.sanitizer = sanitizerFactory.create(sanitizerFactory.buildOptions(config, rules));
+                }
+            }
+        }
+        return this.sanitizer;
+    }
+
 
     @SneakyThrows
     public HttpEventResponse handle(HttpEventRequest request) {
 
-        //TODO: cache this?? no point in re-parsing config each time ...
-        this.sanitizer = sanitizerFactory.create(sanitizerFactory.buildOptions(config, rules));
+        logRequestIfAllowed(request);
 
         boolean isHealthCheck =
             request.getHeader(ControlHeader.HEALTH_CHECK.getHttpHeader()).isPresent();
@@ -54,18 +69,17 @@ public class CommonRequestHandler {
             return doHealthCheck(request);
         }
 
-        log.info(request.debug());
-
         HttpRequestFactory requestFactory = getRequestFactory(request);
 
         // re-write host
-        //TODO: switch on method to support HEAD, etc
         URL targetUrl = buildTarget(request);
         String relativeURL = URLUtils.relativeURL(targetUrl);
 
         boolean skipSanitizer = skipSanitization(request);
 
         HttpEventResponse.HttpEventResponseBuilder builder = HttpEventResponse.builder();
+
+        this.sanitizer = loadSanitizerRules();
 
         if (skipSanitization(request)) {
             log.info(String.format("Proxy invoked with target %s. Skipping sanitization.", relativeURL));
@@ -106,11 +120,11 @@ public class CommonRequestHandler {
         // return response
         builder.statusCode(sourceApiResponse.getStatusCode());
 
-        String responseContent =
-            new String(sourceApiResponse.getContent().readAllBytes(), sourceApiResponse.getContentCharset());
-
-        //log.info(sourceApiResponse.toString());
-        //builder.header(Pair.of("Content-Type", sourceApiResponse.getContentType()));
+        String responseContent = StringUtils.EMPTY;
+        // could be empty in HEAD calls
+        if (sourceApiResponse.getContent() != null) {
+            responseContent = new String(sourceApiResponse.getContent().readAllBytes(), sourceApiResponse.getContentCharset());
+        }
 
         String proxyResponseContent;
         if (isSuccessFamily(sourceApiResponse.getStatusCode())) {
@@ -128,7 +142,6 @@ public class CommonRequestHandler {
             //TODO: could run this through DLP to be extra safe
             proxyResponseContent = responseContent;
         }
-
         builder.body(proxyResponseContent);
 
         return builder.build();
@@ -177,10 +190,8 @@ public class CommonRequestHandler {
         }
     }
 
-    boolean isRequestedToSkipSanitizer(HttpEventRequest request) {
-        return request.getHeader( ControlHeader.SKIP_SANITIZER.getHttpHeader())
-            .map(Boolean::parseBoolean)
-            .orElse(false);
+    private void logRequestIfAllowed(HttpEventRequest request) {
+        logIfDevelopmentMode(() -> String.format("Request:\n%s", request.prettyPrint()));
     }
 
     private HttpEventResponse doHealthCheck(HttpEventRequest request) {
@@ -215,17 +226,24 @@ public class CommonRequestHandler {
         return responseBuilder.build();
     }
 
-    boolean isSuccessFamily (int statusCode) {
+    boolean isSuccessFamily(int statusCode) {
         return statusCode >= 200 && statusCode < 300;
     }
 
     @SneakyThrows
     public URL buildTarget(HttpEventRequest request) {
-        String path =
-            request.getPath()
-                + request.getQuery().map(s -> "?" + s).orElse("");
+        URIBuilder uriBuilder = new URIBuilder();
+        uriBuilder.setScheme("https");
+        uriBuilder.setHost(config.getConfigPropertyOrError(ProxyConfigProperty.TARGET_HOST));
+        uriBuilder.setPath(request.getPath());
+        uriBuilder.setCustomQuery(request.getQuery().orElse(""));
+        return uriBuilder.build().toURL();
+    }
 
-        return new URL("https", config.getConfigPropertyOrError(ProxyConfigProperty.TARGET_HOST), path);
+    private void logIfDevelopmentMode(Supplier<String> messageSupplier) {
+        if (config.isDevelopment()) {
+            log.info(messageSupplier.get());
+        }
     }
 
 }

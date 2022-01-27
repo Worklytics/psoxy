@@ -34,7 +34,6 @@ public class APIGatewayV2HTTPEventRequestAdapter implements HttpEventRequest {
 
     @Override
     public Optional<String> getHeader(String headerName) {
-        log.info(event.getHeaders().toString());
         // Seems APIGatewayV2HTTPEvent has the headers lower-case
         return Optional.ofNullable(event.getHeaders().get(headerName.toLowerCase()));
     }
@@ -50,10 +49,7 @@ public class APIGatewayV2HTTPEventRequestAdapter implements HttpEventRequest {
     }
 
     @Override
-    public String debug() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("headers:" + event.getHeaders().toString());
-        sb.append("params:" + event.getPathParameters().toString());
-        return sb.toString();
+    public String prettyPrint() {
+        return event.toString();
     }
 }

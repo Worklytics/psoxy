@@ -1,7 +1,5 @@
 package co.worklytics.psoxy.gateway;
 
-import com.google.api.client.http.HttpMethods;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -22,8 +20,8 @@ public interface HttpEventRequest {
 
     String getHttpMethod();
 
-    default String debug() {
-        return "";
+    default String prettyPrint() {
+        return "Not implemented";
     }
 
 }

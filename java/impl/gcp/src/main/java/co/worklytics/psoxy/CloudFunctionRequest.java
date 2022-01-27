@@ -46,6 +46,11 @@ public class CloudFunctionRequest implements HttpEventRequest {
     public String getHttpMethod() {
         return request.getMethod();
     }
+
+    @Override
+    public String prettyPrint() {
+        return request.toString();
+    }
 }
 
 
