@@ -55,6 +55,8 @@ module "psoxy-package" {
   path_to_psoxy_java = "../../../java"
 }
 
+data "azuread_client_config" "current" {}
+
 locals {
   # Microsoft 365 sources; add/remove as you wish
   # See https://docs.microsoft.com/en-us/graph/permissions-reference for all the permissions available in AAD Graph API
@@ -65,6 +67,10 @@ locals {
       required_app_roles: [ # Application permissions (form az ad sp list --query "[?appDisplayName=='Microsoft Graph'].appRoles" --all
         "User.Read.All",
         "Group.Read.All"
+      ],
+      example_calls: [
+        "/v1.0/users",
+        "/v1.0/groups"
       ]
     },
     "outlook-cal" : {
@@ -75,6 +81,12 @@ locals {
         "MailboxSettings.Read",
         "Group.Read.All",
         "User.Read.All"
+      ],
+      example_calls: [
+        "/v1.0/users",
+        # this IS the correct ID for the user terraform is running as
+        "/v1.0/users/${data.azuread_client_config.current.object_id}/events",
+        "/v1.0/users/${data.azuread_client_config.current.object_id}/mailboxSettings"
       ]
     },
     "outlook-mail-meta" : {
@@ -85,6 +97,11 @@ locals {
         "MailboxSettings.Read",
         "Group.Read.All",
         "User.Read.All"
+      ],
+      example_calls: [
+        "/beta/users",
+        "/beta/users/${data.azuread_client_config.current.object_id}/mailboxSettings",
+        "/beta/users/${data.azuread_client_config.current.object_id}/mailFolders/SentItems/messages"
       ]
     }
   }
@@ -136,6 +153,7 @@ module "psoxy-msft-connector" {
   path_to_config       = "../../../configs/${each.key}.yaml"
   api_caller_role_arn  = module.psoxy-aws.api_caller_role_arn
   aws_assume_role_arn  = var.aws_assume_role_arn
+  example_api_calls    = each.value.example_calls
 
   parameters = concat(
     module.private-key-aws-parameters[each.key].parameters,

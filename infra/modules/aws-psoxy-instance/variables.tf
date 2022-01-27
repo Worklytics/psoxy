@@ -58,3 +58,8 @@ variable "api_caller_role_arn" {
   type        = string
   description = "arn of role which can be assumed to all API"
 }
+
+variable "example_api_calls" {
+  type        = list(string)
+  description = "example endpoints that can be called via proxy"
+}
