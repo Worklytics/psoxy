@@ -1,5 +1,7 @@
 package co.worklytics.psoxy.gateway;
 
+import com.google.api.client.http.HttpMethods;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -17,5 +19,11 @@ public interface HttpEventRequest {
     Optional<String> getHeader(String headerName);
 
     Optional<List<String>> getMultiValueHeader(String headerName);
+
+    String getHttpMethod();
+
+    default String debug() {
+        return "";
+    }
 
 }

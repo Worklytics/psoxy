@@ -41,6 +41,11 @@ public class CloudFunctionRequest implements HttpEventRequest {
     public Optional<List<String>> getMultiValueHeader(String headerName) {
         return Optional.ofNullable(request.getHeaders().get(headerName));
     }
+
+    @Override
+    public String getHttpMethod() {
+        return request.getMethod();
+    }
 }
 
 

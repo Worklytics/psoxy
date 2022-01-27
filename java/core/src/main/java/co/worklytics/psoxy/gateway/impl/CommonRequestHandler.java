@@ -7,6 +7,7 @@ import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.psoxy.utils.URLUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.http.GenericUrl;
+import com.google.api.client.http.HttpContent;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
@@ -53,29 +54,32 @@ public class CommonRequestHandler {
             return doHealthCheck(request);
         }
 
+        log.info(request.debug());
+
         HttpRequestFactory requestFactory = getRequestFactory(request);
 
         // re-write host
         //TODO: switch on method to support HEAD, etc
         URL targetUrl = buildTarget(request);
+        String relativeURL = URLUtils.relativeURL(targetUrl);
 
-        boolean skipSanitizer = config.isDevelopment() &&
-            isRequestedToSkipSanitizer(request);
+        boolean skipSanitizer = skipSanitization(request);
 
         HttpEventResponse.HttpEventResponseBuilder builder = HttpEventResponse.builder();
 
-        if (skipSanitizer || sanitizer.isAllowed(targetUrl)) {
-            log.info("Proxy invoked with target " + URLUtils.relativeURL(targetUrl));
+        if (skipSanitization(request)) {
+            log.info(String.format("Proxy invoked with target %s. Skipping sanitization.", relativeURL));
+        } else if (sanitizer.isAllowed(targetUrl)) {
+            log.info(String.format("Proxy invoked with target %s. Rules allowed call.", relativeURL));
         } else {
             builder.statusCode(403);
-            log.warning("Attempt to call endpoint blocked by rules: " + targetUrl + "; rules " + objectMapper.writeValueAsString(rules.getAllowedEndpointRegexes()));
+            log.warning(String.format("Proxy invoked with target %s. Blocked call by rules %s", relativeURL, objectMapper.writeValueAsString(rules.getAllowedEndpointRegexes())));
             return builder.build();
         }
 
         com.google.api.client.http.HttpRequest sourceApiRequest;
         try {
-            sourceApiRequest =
-                requestFactory.buildGetRequest(new GenericUrl(targetUrl.toString()));
+            sourceApiRequest = requestFactory.buildRequest(request.getHttpMethod(), new GenericUrl(targetUrl), null);
         } catch (IOException e) {
             builder.statusCode(500);
             builder.body("Failed to authorize request; review logs");
@@ -155,6 +159,22 @@ public class CommonRequestHandler {
         // itself, if that's possible
 
         return transport.createRequestFactory(initializer);
+    }
+
+    /**
+     * Only allowed under development mode
+     * @param request
+     * @return
+     */
+    private boolean skipSanitization(HttpEventRequest request) {
+        if (config.isDevelopment()) {
+            // caller requested to skip
+            return request.getHeader(ControlHeader.SKIP_SANITIZER.getHttpHeader())
+                .map(Boolean::parseBoolean)
+                .orElse(false);
+        } else {
+            return false;
+        }
     }
 
     boolean isRequestedToSkipSanitizer(HttpEventRequest request) {
