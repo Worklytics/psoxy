@@ -82,7 +82,7 @@ public class SanitizerImpl implements Sanitizer {
     public String sanitize(@NonNull URL url, @NonNull String jsonResponse) {
         //extra check ...
         if (!isAllowed(url)) {
-            throw new IllegalStateException("Sanitizer called to sanitize response that should not have been retrieved: " + url.toString());
+            throw new IllegalStateException(String.format("Sanitizer called to sanitize response that should not have been retrieved: %s", url.toString()));
         }
 
         //q: move this stuff to initialization / DI provider??
