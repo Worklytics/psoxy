@@ -24,7 +24,7 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
 
     @Test
     void user() {
-        String jsonString = asJson("user.json");
+        String jsonString = asJson(exampleDirectoryPath, "user.json");
 
         String endpoint = "https://graph.microsoft.com/v1.0/users/2343adsfasdfa";
 
@@ -52,7 +52,7 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
 
     @Test
     void users() {
-        String jsonString = asJson("users.json");
+        String jsonString = asJson(exampleDirectoryPath, "users.json");
 
         String endpoint = "https://graph.microsoft.com/v1.0/users";
 
@@ -84,7 +84,7 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
     void groupMembers() {
         String endpoint = "https://graph.microsoft.com/v1.0/groups/02bd9fd6-8f93-4758-87c3-1fb73740a315/members?$count=true";
 
-        String jsonString = asJson("group-members.json");
+        String jsonString = asJson(exampleDirectoryPath, "group-members.json");
         assertNotSanitized(jsonString,
             "Adele Vance",
             "AdeleV@M365x214355.onmicrosoft.com",

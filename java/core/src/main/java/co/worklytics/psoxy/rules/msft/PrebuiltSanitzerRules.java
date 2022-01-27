@@ -9,11 +9,12 @@ public class PrebuiltSanitzerRules {
 
     static final Rules DIRECTORY =  Rules.builder()
         //GENERAL stuff
-        .allowedEndpointRegex("^/v1.0/(groups|users)?.*")
-        .allowedEndpointRegex("^/v1.0/(groups|users)/[^/]*?.*")
+        .allowedEndpointRegex("^/(v1.0|beta)/(groups|users)/?[^/]*")
+        .allowedEndpointRegex("^/(v1.0|beta)/(groups|users)\\?.*")
+        .allowedEndpointRegex("^/(v1.0|beta)/groups/[^/]*/members[^/]*")
         .redaction(Rules.Rule.builder()
             // https://docs.microsoft.com/en-us/graph/api/user-list?view=graph-rest-1.0&tabs=http
-            .relativeUrlRegex("^/v1.0/users.*")
+            .relativeUrlRegex("^/(v1.0|beta)/users.*")
             .jsonPath("$..displayName")
             .jsonPath("$..employeeId")
             .jsonPath("$..aboutMe")
@@ -29,7 +30,7 @@ public class PrebuiltSanitzerRules {
             .build())
         .pseudonymization(Rules.Rule.builder()
             // https://docs.microsoft.com/en-us/graph/api/user-list?view=graph-rest-1.0&tabs=http
-            .relativeUrlRegex("^/v1.0/users.*")
+            .relativeUrlRegex("^/(v1.0|beta)/users.*")
             .jsonPath("$..userPrincipalName")
             .jsonPath("$..imAddresses[*]")
             .jsonPath("$..mail")
@@ -37,7 +38,7 @@ public class PrebuiltSanitzerRules {
             .build()
         )
         .redaction(Rules.Rule.builder()
-            .relativeUrlRegex("^/v1.0/groups.*")
+            .relativeUrlRegex("^/(v1.0|beta)/groups.*")
             .jsonPath("$..owners")
             .jsonPath("$..rejectedSenders")
             .jsonPath("$..acceptedSenders")
@@ -45,7 +46,7 @@ public class PrebuiltSanitzerRules {
             .jsonPath("$..membersWithLicenseErrors")
             .build())
         .redaction(Rules.Rule.builder()
-            .relativeUrlRegex("^/v1.0/groups/[^/]*/members.*")
+            .relativeUrlRegex("^/(v1.0|beta)/groups/[^/]*/members.*")
             .jsonPath("$..displayName")
             .jsonPath("$..employeeId")
             .jsonPath("$..aboutMe")
@@ -60,7 +61,7 @@ public class PrebuiltSanitzerRules {
             .jsonPath("$..businessPhones[*]")
             .build())
         .pseudonymization(Rules.Rule.builder()
-            .relativeUrlRegex("^/v1.0/groups/[^/]*/members.*")
+            .relativeUrlRegex("^/(v1.0|beta)/groups/[^/]*/members.*")
             .jsonPath("$..userPrincipalName")
             .jsonPath("$..imAddresses[*]")
             .jsonPath("$..mail")
@@ -69,7 +70,7 @@ public class PrebuiltSanitzerRules {
         )
         .build();
 
-    static final Rules OUTLOOK_MAIL = Rules.builder()
+    static final Rules OUTLOOK_MAIL = DIRECTORY.compose(Rules.builder()
         .allowedEndpointRegex("^/(v1.0|beta)/users/[^/]*/messages/[^/]*")
         .allowedEndpointRegex("^/(v1.0|beta)/users/[^/]*/mailFolders/SentItems/messages.*")
         .allowedEndpointRegex("^/(v1.0|beta)/users/[^/]*/mailboxSettings")
@@ -103,9 +104,9 @@ public class PrebuiltSanitzerRules {
             .jsonPath("$..singleValueExtendedProperties")
             .jsonPath("$..internetMessageHeaders") //values that we care about generally parsed to other fields
             .build())
-        .build();
+        .build());
 
-    static final Rules OUTLOOK_CALENDAR = Rules.builder()
+    static final Rules OUTLOOK_CALENDAR = DIRECTORY.compose(Rules.builder()
         .allowedEndpointRegex("^/(v1.0|beta)/users/[^/]*/(calendars/[^/]*/)?events.*")
         .allowedEndpointRegex("^/(v1.0|beta)/users/[^/]*/mailboxSettings")
         .pseudonymization(Rules.Rule.builder()
@@ -122,7 +123,7 @@ public class PrebuiltSanitzerRules {
             .jsonPath("$..multiValueExtendedProperties")
             .jsonPath("$..singleValueExtendedProperties")
             .build())
-        .build();
+        .build());
 
 
     public static final Map<String,? extends Rules> MSFT_PREBUILT_RULES_MAP =

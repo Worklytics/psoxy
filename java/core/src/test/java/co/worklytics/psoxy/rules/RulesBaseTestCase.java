@@ -20,6 +20,7 @@ import javax.inject.Singleton;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -116,7 +117,10 @@ abstract public class RulesBaseTestCase {
     public abstract String getExampleDirectoryPath();
 
     protected String asJson(String filePathWithinExampleDirectory) {
-        return new String(TestUtils.getData(getExampleDirectoryPath() + "/" + filePathWithinExampleDirectory));
+        return asJson(getExampleDirectoryPath(), filePathWithinExampleDirectory);
+    }
+    protected String asJson(String directoryPath, String filePathWithinExampleDirectory) {
+        return new String(TestUtils.getData(directoryPath + "/" + filePathWithinExampleDirectory));
     }
 
     @SneakyThrows
@@ -152,10 +156,17 @@ abstract public class RulesBaseTestCase {
         assertRedacted(content, Arrays.asList(shouldNotContain));
     }
 
+    protected String context(String haystack, String needle) {
+        int start = Math.max(0, haystack.indexOf(needle) - 50);
+        int end = Math.min(haystack.length(), haystack.indexOf(needle) + needle.length() + 50);
+        return haystack.substring(start, end);
+    }
+
 
     protected void assertPseudonymized(String content, Collection<String> shouldBePseudonymized) {
         shouldBePseudonymized.stream()
-            .forEach(s -> assertFalse(content.contains(s), "Sanitized content still contains unpseudonymized: " + s));
+            .forEach(s ->
+                assertFalse(content.contains(s), () -> "Sanitized content still contains unpseudonymized: " + s + " at " + this.context(content, s)));
 
         shouldBePseudonymized.stream()
             .forEach(s -> {
@@ -223,8 +234,8 @@ abstract public class RulesBaseTestCase {
 
     @SneakyThrows
     protected void assertUrlWithSubResourcesBlocked(String url) {
-        assertTrue(sanitizer.isAllowed(new URL(url + "/anypath")), "subpath allowed");
-        assertTrue(sanitizer.isAllowed(new URL(url + "/anypath/anysubpath")), "2 subpaths allowed");
+        assertFalse(sanitizer.isAllowed(new URL(url + "/anypath")), "subpath allowed");
+        assertFalse(sanitizer.isAllowed(new URL(url + "/anypath/anysubpath")), "2 subpaths allowed");
     }
 
     @SneakyThrows

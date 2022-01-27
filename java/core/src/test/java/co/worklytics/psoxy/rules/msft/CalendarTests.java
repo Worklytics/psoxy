@@ -6,7 +6,7 @@ import lombok.Getter;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-public class CalendarTests extends JavaRulesTestBaseCase {
+public class CalendarTests extends DirectoryTests {
 
     @Getter
     final Rules rulesUnderTest = PrebuiltSanitzerRules.OUTLOOK_CALENDAR;
@@ -104,6 +104,6 @@ public class CalendarTests extends JavaRulesTestBaseCase {
             "/users/48d31887-5fad-4d73-a9f5-3c356e68a038/mailboxSettings";
 
         assertUrlAllowed(endpoint);
-        assertUrlWithQueryParamsBlocked(endpoint);
+        assertUrlWithSubResourcesBlocked(endpoint);
     }
 }
