@@ -141,7 +141,7 @@ pip install awscurl
 
 ### From Terminal
 
-From root of your checkout of the Psoxy repo:
+From root of your checkout of the Psoxy repo, these are some example test calls you can try (YMMV):
 
 ```shell
 ${join("\n", local.test_commands)}

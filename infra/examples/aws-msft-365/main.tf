@@ -55,6 +55,8 @@ module "psoxy-package" {
   path_to_psoxy_java = "../../../java"
 }
 
+data "azuread_client_config" "current" {}
+
 locals {
   # Microsoft 365 sources; add/remove as you wish
   # See https://docs.microsoft.com/en-us/graph/permissions-reference for all the permissions available in AAD Graph API
@@ -67,7 +69,8 @@ locals {
         "Group.Read.All"
       ],
       example_calls: [
-        "/v1.0/users"
+        "/v1.0/users",
+        "/v1.0/groups"
       ]
     },
     "outlook-cal" : {
@@ -80,8 +83,10 @@ locals {
         "User.Read.All"
       ],
       example_calls: [
-        "/v1.0/users"
-        #"/v1.0/users/me/events"
+        "/v1.0/users",
+        # this IS the correct ID for the user terraform is running as
+        "/v1.0/users/${data.azuread_client_config.current.object_id}/events",
+        "/v1.0/users/${data.azuread_client_config.current.object_id}/mailboxSettings"
       ]
     },
     "outlook-mail-meta" : {
@@ -94,8 +99,9 @@ locals {
         "User.Read.All"
       ],
       example_calls: [
-        "/v1.0/users"
-        #"/beta/users/me/mailFolders/SentItems/messages"
+        "/beta/users",
+        "/beta/users/${data.azuread_client_config.current.object_id}/mailboxSettings"
+        "/beta/users/${data.azuread_client_config.current.object_id}/mailFolders/SentItems/messages"
       ]
     }
   }
