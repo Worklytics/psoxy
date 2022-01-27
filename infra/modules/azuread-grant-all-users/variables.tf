@@ -1,14 +1,14 @@
-
-variable "required_resource_access" {
-  type        = list(object({
-    id   = string,
-    type = string # usually 'Role', but possibly 'Scope'
-  }))
-
-  description  = "list of Azure AD OAuth2 permissions that connector requires"
-}
-
 variable "application_id" {
   type        = string
   description = "object ID of the Azure AD application to authorize"
+}
+
+variable "oauth2_permission_scopes" {
+  type        = list(string)
+  description = "names of OAuth2 Permission Scopes to grant to application for Microsoft Graph"
+}
+
+variable "app_roles" {
+  type        = list(string)
+  description = "names of Application Roles to grant to application for Microsoft Graph"
 }
