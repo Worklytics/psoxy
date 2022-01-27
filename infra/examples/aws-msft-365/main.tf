@@ -89,7 +89,7 @@ locals {
         "/v1.0/users/${data.azuread_client_config.current.object_id}/mailboxSettings"
       ]
     },
-    "outlook-mail-meta" : {
+    "outlook-mail" : {
       display_name: "Outlook Mail"
       required_oauth2_permission_scopes: [],
       required_app_roles: [
