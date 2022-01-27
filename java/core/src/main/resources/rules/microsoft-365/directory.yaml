@@ -1,19 +1,20 @@
 allowedEndpointRegexes:
-  - "^/v1.0/(groups|users)?.*"
-  - "^/v1.0/(groups|users)/[^/]*?.*"
+  - "^/(v1.0|beta)/(groups|users)/?[^/]*"
+  - "^/(v1.0|beta)/(groups|users)\\?.*"
+  - "^/(v1.0|beta)/groups/[^/]*/members[^/]*"
 pseudonymizations:
   - jsonPaths:
       - "$..userPrincipalName"
       - "$..imAddresses[*]"
       - "$..mail"
       - "$..otherMails[*]"
-    relativeUrlRegex: "^/v1.0/users.*"
+    relativeUrlRegex: "^/(v1.0|beta)/users.*"
   - jsonPaths:
       - "$..userPrincipalName"
       - "$..imAddresses[*]"
       - "$..mail"
       - "$..otherMails[*]"
-    relativeUrlRegex: "^/v1.0/groups/[^/]*/members.*"
+    relativeUrlRegex: "^/(v1.0|beta)/groups/[^/]*/members.*"
 redactions:
   - jsonPaths:
       - "$..displayName"
@@ -28,14 +29,14 @@ redactions:
       - "$..faxNumber"
       - "$..mobilePhone"
       - "$..businessPhones[*]"
-    relativeUrlRegex: "^/v1.0/users.*"
+    relativeUrlRegex: "^/(v1.0|beta)/users.*"
   - jsonPaths:
       - "$..owners"
       - "$..rejectedSenders"
       - "$..acceptedSenders"
       - "$..members"
       - "$..membersWithLicenseErrors"
-    relativeUrlRegex: "^/v1.0/groups.*"
+    relativeUrlRegex: "^/(v1.0|beta)/groups.*"
   - jsonPaths:
       - "$..displayName"
       - "$..employeeId"
@@ -49,4 +50,4 @@ redactions:
       - "$..faxNumber"
       - "$..mobilePhone"
       - "$..businessPhones[*]"
-    relativeUrlRegex: "^/v1.0/groups/[^/]*/members.*"
+    relativeUrlRegex: "^/(v1.0|beta)/groups/[^/]*/members.*"
