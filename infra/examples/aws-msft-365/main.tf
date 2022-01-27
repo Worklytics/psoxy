@@ -144,3 +144,16 @@ module "psoxy-msft-connector" {
     ]
   )
 }
+
+# grant required permissions to connectors via Azure AD
+# (requires terraform configuration being applied by an Azure User with privelleges to do this; it
+#  usually requires a 'Global Administrator' for your tenant)
+module "msft_365_grants" {
+  for_each = local.msft_sources
+
+  source = "../../modules/azuread-grant-all-users"
+
+  application_id           = module.msft-connection[each.key].connector.application_id
+  oauth2_permission_scopes = each.value.required_oauth2_permission_scopes
+  app_roles                = each.value.required_app_roles
+}
