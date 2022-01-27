@@ -125,4 +125,24 @@ public class Rules implements Serializable {
         @Singular
         List<String> jsonPaths;
     }
+
+    /**
+     * build new Rules from this + another existing set
+     * @param other
+     * @return combined rule sets
+     */
+    public Rules compose(Rules other) {
+        RulesBuilder builder = this.toBuilder();
+        other.allowedEndpointRegexes.stream()
+            .forEach(builder::allowedEndpointRegex);
+        other.emailHeaderPseudonymizations.stream()
+            .forEach(builder::emailHeaderPseudonymization);
+        other.pseudonymizations.stream()
+            .forEach(builder::emailHeaderPseudonymization);
+        other.pseudonymizationWithOriginals.stream()
+            .forEach(builder::pseudonymizationWithOriginal);
+        other.redactions.stream()
+            .forEach(builder::redaction);
+        return builder.build();
+    }
 }

@@ -66,8 +66,8 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
         );
         assertNotSanitized(jsonString, PII);
 
-        String sanitized =
-            sanitizer.sanitize(new URL("https://admin.googleapis.com/admin/directory/v1/users?customer=my_customer"), jsonString);
+        String endpoint = "https://admin.googleapis.com/admin/directory/v1/users?customer=my_customer";
+        String sanitized = sanitize(endpoint, jsonString);
 
         assertPseudonymized(sanitized, Arrays.asList("alice@worklytics.co", "bob@worklytics.co"));
         assertRedacted(sanitized, Arrays.asList("alice.example@gmail.com"));
@@ -84,8 +84,7 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
         );
         assertNotSanitized(jsonString, PII);
 
-        String sanitized =
-            sanitizer.sanitize(new URL("https://admin.googleapis.com/admin/directory/v1/groups?customer=my_customer"), jsonString);
+        String sanitized = this.sanitize("https://admin.googleapis.com/admin/directory/v1/groups?customer=my_customer", jsonString);
 
         assertRedacted(sanitized, Arrays.asList("Users allowed to have access to production infrastructure."));
 
@@ -99,8 +98,7 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
         String jsonString = asJson("group.json");
 
         assertNotSanitized(jsonString, Arrays.asList("Anyone sales person in our organization."));
-        String sanitized =
-            sanitizer.sanitize(new URL(groupEndpoint), jsonString);
+        String sanitized = this.sanitize(groupEndpoint, jsonString);
 
         assertRedacted(sanitized, Arrays.asList("Anyone sales person in our organization."));
 
@@ -124,8 +122,7 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
         );
         assertNotSanitized(jsonString, PII);
 
-        String sanitized =
-            sanitizer.sanitize(new URL(membersEndpoint), jsonString);
+        String sanitized = this.sanitize(membersEndpoint, jsonString);
 
         assertPseudonymized(sanitized, Arrays.asList("alex@acme.com", "dan@acme.com"));
         assertUrlWithQueryParamsAllowed(membersEndpoint);
@@ -143,11 +140,10 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
         assertNotSanitized(jsonString, PII);
         assertNotSanitized(jsonString, Arrays.asList("photoData"));
 
-        URL url =
-            new URL("https://admin.googleapis.com/admin/directory/v1/users/123124/photos/thumbnail");
+        String endpoint = "https://admin.googleapis.com/admin/directory/v1/users/123124/photos/thumbnail";
 
         //block by default
-        assertThrows(IllegalStateException.class, () -> sanitizer.sanitize(url, jsonString));
+        assertThrows(IllegalStateException.class, () -> this.sanitize(endpoint, jsonString));
 
         Rules allowAllRoles = getRulesUnderTest().toBuilder().allowedEndpointRegex(".*").build();
 
@@ -156,7 +152,7 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
             .defaultScopeId("gapps").build());
 
         //but still redact if gets through
-        String sanitized = this.sanitizer.sanitize(url, jsonString);
+        String sanitized = this.sanitize(endpoint, jsonString);
         assertRedacted(sanitized, "alice@worklytics.co");
         assertRedacted(sanitized, "photoData");
     }
@@ -169,7 +165,7 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
         String endpoint = "https://admin.googleapis.com/admin/directory/v1/customer/my_customer/roles";
         assertNotSanitized(jsonString, "Google Apps Administrator Seed Role");
 
-        String sanitized = this.sanitizer.sanitize(new URL(endpoint), jsonString);
+        String sanitized = this.sanitize(endpoint, jsonString);
 
         assertRedacted(sanitized, "Google Apps Administrator Seed Role");
     }

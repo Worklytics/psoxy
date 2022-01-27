@@ -1,31 +1,30 @@
-package co.worklytics.psoxy.gateway.impl;
+package co.worklytics.psoxy.gateway.impl.oauth;
 
 import co.worklytics.psoxy.PsoxyModule;
+import co.worklytics.psoxy.SourceAuthModule;
 import co.worklytics.test.MockModules;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.api.client.http.HttpContent;
 import dagger.Component;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.io.ByteArrayOutputStream;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class OAuthRefreshTokenSourceAuthStrategyTest {
 
-    @Inject OAuthRefreshTokenSourceAuthStrategy.RefreshHandlerImpl refreshHandler;
+    @Inject
+    ObjectMapper objectMapper;
+
 
     @Singleton
     @Component(modules = {
         PsoxyModule.class,
+        SourceAuthModule.class,
         MockModules.ForConfigService.class,
     })
     public interface Container {
@@ -65,8 +64,8 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
     @ParameterizedTest
     public void tokenResponseJson(String jsonEncoded) {
 
-        OAuthRefreshTokenSourceAuthStrategy.RefreshHandlerImpl.CanonicalOAuthAccessTokenResponseDto response = refreshHandler.objectMapper.readerFor(OAuthRefreshTokenSourceAuthStrategy.RefreshHandlerImpl.CanonicalOAuthAccessTokenResponseDto.class)
-            .readValue(jsonEncoded);
+        CanonicalOAuthAccessTokenResponseDto response =
+            objectMapper.readerFor(CanonicalOAuthAccessTokenResponseDto.class).readValue(jsonEncoded);
 
         assertEquals("bearer", response.getTokenType());
         assertEquals("Srq2NjM5NzA2OWJjuE7c", response.getRefreshToken());
@@ -79,21 +78,5 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
             objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
     }
 
-    @SneakyThrows
-    @Test
-    public void tokenRequestPayload() {
 
-        Map<String, String> configValues = new HashMap<>();
-        configValues.put(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID.name(), "1");
-        configValues.put(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.REFRESH_TOKEN.name(), "tokenValue");
-        configValues.put(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_SECRET.name(), "secretValue");
-        refreshHandler.config = new MemoryConfigService(configValues);
-
-        HttpContent payload = refreshHandler.tokenRequestPayload();
-
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        payload.writeTo(out);
-        assertEquals("refresh_token=tokenValue&grant_type=refresh_token&client_secret=secretValue&client_id=1",
-            out.toString());
-    }
 }

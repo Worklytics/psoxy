@@ -3,10 +3,11 @@ package co.worklytics.psoxy;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
+import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.google.api.client.http.HttpRequestFactory;
-import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.gson.GsonFactory;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
@@ -49,11 +50,9 @@ public class PsoxyModule {
             .setOptions(Option.SUPPRESS_EXCEPTIONS); //we specifically want to ignore PATH_NOT_FOUND cases
     }
 
-
-    //q: is this platform dependent?
     @Provides
-    HttpRequestFactory providesHttpRequestFactory() {
-        return (new NetHttpTransport()).createRequestFactory();
+    JsonFactory jsonFactory() {
+        return GsonFactory.getDefaultInstance();
     }
 
     @Provides
@@ -69,6 +68,18 @@ public class PsoxyModule {
             .filter(impl -> Objects.equals(identifier, impl.getConfigIdentifier()))
             .findFirst()
             .orElseThrow(() -> new Error("No SourceAuthStrategy impl matching configured identifier: " + identifier));
+    }
+
+    @Provides
+    static OAuthRefreshTokenSourceAuthStrategy.TokenRequestPayloadBuilder tokenRequestPayloadBuilder(ConfigService configService,
+                                                                                                     Set<OAuthRefreshTokenSourceAuthStrategy.TokenRequestPayloadBuilder> payloadBuilders) {
+        String identifier =
+            configService.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.GRANT_TYPE);
+        return payloadBuilders
+            .stream()
+            .filter(impl -> Objects.equals(identifier, impl.getGrantType()))
+            .findFirst()
+            .orElseThrow(() -> new Error("No TokenRequestPayloadBuilder impl supporting oauth grant type: " + identifier));
     }
 
 

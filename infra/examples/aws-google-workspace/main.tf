@@ -170,11 +170,12 @@ module "psoxy-google-workspace-connector" {
   api_caller_role_arn  = module.psoxy-aws.api_caller_role_arn
   aws_assume_role_arn  = var.aws_assume_role_arn
 
-  parameter_bindings   = {
-    PSOXY_SALT          = module.psoxy-aws.salt_secret
-    SERVICE_ACCOUNT_KEY = module.google-workspace-connection-auth[each.key].key_secret
-  }
+  parameters   = [
+    module.psoxy-aws.salt_secret,
+    module.google-workspace-connection-auth[each.key].key_secret
+  ]
 }
+
 
 module "worklytics-psoxy-connection" {
   for_each = local.google_workspace_sources
@@ -184,3 +185,4 @@ module "worklytics-psoxy-connection" {
   psoxy_endpoint_url = module.psoxy-google-workspace-connector[each.key].endpoint_url
   display_name       = "${each.value.display_name} via Psoxy"
 }
+

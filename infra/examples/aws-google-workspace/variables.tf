@@ -59,3 +59,9 @@ variable "connector_display_name_suffix" {
   description = "suffix to append to display_names of connector SAs; helpful to distinguish between various ones in testing/dev scenarios"
   default     = ""
 }
+
+variable "msft_tenant_id" {
+  type        = string
+  default     = ""
+  description = "ID of Microsoft tenant to connect to (req'd only if config includes MSFT connectors)"
+}

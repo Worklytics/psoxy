@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.aws;
 
 import co.worklytics.psoxy.ConfigRulesModule;
+import co.worklytics.psoxy.FunctionRuntimeModule;
 import co.worklytics.psoxy.Handler;
 import co.worklytics.psoxy.PsoxyModule;
 import co.worklytics.psoxy.SourceAuthModule;
@@ -13,6 +14,7 @@ import javax.inject.Singleton;
     AwsModule.class,
     ConfigRulesModule.class,
     PsoxyModule.class,
+    FunctionRuntimeModule.class,
     SourceAuthModule.class, //move to include of PsoxyModule??
 })
 public interface AwsContainer {

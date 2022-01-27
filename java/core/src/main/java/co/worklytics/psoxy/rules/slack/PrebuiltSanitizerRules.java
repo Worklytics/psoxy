@@ -60,7 +60,7 @@ public class PrebuiltSanitizerRules {
         )
         .build();
 
-    static public final Map<String, Rules> SLACK_PREBUILT_RULES_MAP = ImmutableMap.<String, Rules>builder()
+    static public final Map<String, Rules> SLACK_DEFAULT_RULES_MAP = ImmutableMap.<String, Rules>builder()
         .put("slack", SLACK)
         .build();
 }
