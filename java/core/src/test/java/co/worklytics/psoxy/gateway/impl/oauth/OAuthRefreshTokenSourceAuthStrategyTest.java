@@ -73,7 +73,6 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
         assertEquals(3600, response.getExpires());
 
         //reverse
-        ObjectMapper objectMapper = new ObjectMapper();
         assertEquals(jsonEncoded,
             objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
     }
