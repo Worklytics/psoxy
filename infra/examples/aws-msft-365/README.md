@@ -18,7 +18,7 @@ running locally/interactively and our documentation will generally presume you'r
 approach.  If that doesn't suite your organization needs, the Terraform docs linked above provide
 alternatives, but this will require your own modification to the example configuration.
 
-If your target MSFT tenant (specified in `terraform.tfvars`) lacks an Azure subscriptiong (eg, is
+If your target MSFT tenant (specified in `terraform.tfvars`) lacks an Azure subscription (eg, is
 only Microsoft 365), you should auth with `az login --allow-no-subscriptions`.
 
 
