@@ -137,6 +137,15 @@ resource "aws_ssm_parameter" "client_id" {
   value  = module.msft-connection[each.key].connector.application_id
 }
 
+resource "aws_ssm_parameter" "tenant_id" {
+  for_each = local.msft_sources
+
+  name   = "PSOXY_${upper(replace(each.key, "-", "_"))}_REFRESH_ENDPOINT"
+  type   = "String"
+  value  = "https://login.windows.net/${var.msft_tenant_id}/oauth2/token"
+}
+
+
 module "private-key-aws-parameters" {
   for_each = local.msft_sources
 
