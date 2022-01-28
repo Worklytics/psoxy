@@ -123,10 +123,18 @@ module "msft-connection-auth" {
 
   source = "../../modules/azuread-local-cert"
 
-  application_id       = module.msft-connection[each.key].connector.id
-  rotation_days        = 60
-  cert_expiration_days = 180
-  certificate_subject  = var.certificate_subject
+  application_object_id = module.msft-connection[each.key].connector.id
+  rotation_days         = 60
+  cert_expiration_days  = 180
+  certificate_subject   = var.certificate_subject
+}
+
+resource "aws_ssm_parameter" "client_id" {
+  for_each = local.msft_sources
+
+  name   = "PSOXY_${upper(replace(each.key, "-", "_"))}_CLIENT_ID"
+  type   = "String"
+  value  = module.msft-connection[each.key].connector.application_id
 }
 
 module "private-key-aws-parameters" {

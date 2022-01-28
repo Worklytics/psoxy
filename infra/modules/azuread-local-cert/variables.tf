@@ -10,7 +10,7 @@ variable "cert_expiration_days" {
   description = "cert will expire in this many days"
 }
 
-variable "application_id" {
+variable "application_object_id" {
   type        = string
   description = "object ID of the Azure AD application to authenticate"
 }

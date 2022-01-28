@@ -141,9 +141,8 @@ public class CommonRequestHandler {
         Optional<String> accountToImpersonate =
            request.getHeader(ControlHeader.USER_TO_IMPERSONATE.getHttpHeader());
 
-        accountToImpersonate.ifPresentOrElse(
-            user -> log.info("Impersonating user"),
-            () -> log.warning("We usually expect a user to impersonate"));
+        accountToImpersonate.ifPresent(user -> log.info("Impersonating user"));
+        //TODO: warn here for Google Workspace connectors, which expect user??
 
         Credentials credentials = sourceAuthStrategy.getCredentials(accountToImpersonate);
         HttpCredentialsAdapter initializer = new HttpCredentialsAdapter(credentials);
