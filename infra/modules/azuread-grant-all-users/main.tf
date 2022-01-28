@@ -10,25 +10,32 @@ terraform {
   }
 }
 
-data "azuread_application_published_app_ids" "well_known" {}
+# TODO: if grant can be made fully through API, do it here; until then, TODO file is best option
 
-resource "azuread_service_principal" "msgraph" {
-  application_id = data.azuread_application_published_app_ids.well_known.result.MicrosoftGraph
-  use_existing   = true
-}
+# NOTE: using `azuread_service_principal_delegated_permission_grant` seems to NOT work for this,
+# presumably it ONLY supports oauth scopes (delegated permissions) not application roles
+# (application permissions)
+# however, even using it JUST for delegated permissions seems to create an inconsistency when user
+# manually grants the application permissions (resource seems to really create a 'delegated_permission_grant'
+# entity in Azure, which is overwritten by the user and then missing on subsequent terraform runs)
 
-resource "azuread_service_principal" "connector" {
-  application_id = var.application_id
-  use_existing   = true
-}
+resource "local_file" "todo" {
+  filename = "TODO ${var.application_name}.md"
 
-locals {
-  oauth2_permission_scope_ids = [for name in var.oauth2_permission_scopes : azuread_service_principal.msgraph.oauth2_permission_scope_ids[name]]
-  app_role_ids                = [for name in var.app_roles : azuread_service_principal.msgraph.app_role_ids[name]]
-}
+  content = <<EOT
+# Authorize ${var.application_name}
 
-resource "azuread_service_principal_delegated_permission_grant" "grant" {
-  service_principal_object_id          = azuread_service_principal.connector.object_id
-  resource_service_principal_object_id = azuread_service_principal.msgraph.object_id
-  claim_values                         = concat(local.app_role_ids, local.oauth2_permission_scope_ids)
+Visit the following page in the Azure AD console and grant the required application permissions:
+
+https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/CallAnAPI/appId/${var.application_id}/isMSAApp/
+
+If you are not a sufficiently privileged Azure AD Administrator (likely Application or Global
+Administrator), you made need assistance from an appropriately privileged member of your IT team.
+
+The required grants are:
+```
+${join("\n", concat(var.app_roles, var.oauth2_permission_scopes))}
+```
+
+EOT
 }

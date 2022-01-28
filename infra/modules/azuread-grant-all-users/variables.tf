@@ -12,3 +12,8 @@ variable "app_roles" {
   type        = list(string)
   description = "names of Application Roles to grant to application for Microsoft Graph"
 }
+
+variable "application_name" {
+  type        = string
+  description = "friendly name for application"
+}

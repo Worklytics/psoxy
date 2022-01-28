@@ -174,4 +174,5 @@ module "msft_365_grants" {
   application_id           = module.msft-connection[each.key].connector.application_id
   oauth2_permission_scopes = each.value.required_oauth2_permission_scopes
   app_roles                = each.value.required_app_roles
+  application_name         = each.key
 }
