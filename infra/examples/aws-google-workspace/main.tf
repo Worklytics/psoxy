@@ -174,6 +174,7 @@ module "psoxy-google-workspace-connector" {
     module.psoxy-aws.salt_secret,
     module.google-workspace-connection-auth[each.key].key_secret
   ]
+  example_api_calls = []
 }
 
 

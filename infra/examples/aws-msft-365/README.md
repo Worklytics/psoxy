@@ -18,6 +18,9 @@ running locally/interactively and our documentation will generally presume you'r
 approach.  If that doesn't suite your organization needs, the Terraform docs linked above provide
 alternatives, but this will require your own modification to the example configuration.
 
+If your target MSFT tenant (specified in `terraform.tfvars`) lacks an Azure subscription (eg, is
+only Microsoft 365), you should auth with `az login --allow-no-subscriptions`.
+
 
 ## Example Configuration
 
@@ -27,7 +30,7 @@ aws_account_id                = "123456789"
 aws_assume_role_arn           = "arn:aws:iam::123456789:role/InfraAdmin"
 environment_name              = "dev-aws"
 connector_display_name_suffix = " Psoxy Dev AWS - erik"
-msft_tenant_id                = "some-uuid-of-msft-tenant"
+msft_tenant_id                = "some-uuid-of-msft-tenant" # should hold your Microsoft 365 instance
 caller_aws_account_id         = "914358739851:root"
 caller_external_user_id       = "your-worklytics-service-account"
 ```

@@ -123,11 +123,28 @@ module "msft-connection-auth" {
 
   source = "../../modules/azuread-local-cert"
 
-  application_id       = module.msft-connection[each.key].connector.id
-  rotation_days        = 60
-  cert_expiration_days = 180
-  certificate_subject  = var.certificate_subject
+  application_object_id = module.msft-connection[each.key].connector.id
+  rotation_days         = 60
+  cert_expiration_days  = 180
+  certificate_subject   = var.certificate_subject
 }
+
+resource "aws_ssm_parameter" "client_id" {
+  for_each = local.msft_sources
+
+  name   = "PSOXY_${upper(replace(each.key, "-", "_"))}_CLIENT_ID"
+  type   = "String"
+  value  = module.msft-connection[each.key].connector.application_id
+}
+
+resource "aws_ssm_parameter" "tenant_id" {
+  for_each = local.msft_sources
+
+  name   = "PSOXY_${upper(replace(each.key, "-", "_"))}_REFRESH_ENDPOINT"
+  type   = "String"
+  value  = "https://login.windows.net/${var.msft_tenant_id}/oauth2/token"
+}
+
 
 module "private-key-aws-parameters" {
   for_each = local.msft_sources
@@ -174,4 +191,5 @@ module "msft_365_grants" {
   application_id           = module.msft-connection[each.key].connector.application_id
   oauth2_permission_scopes = each.value.required_oauth2_permission_scopes
   app_roles                = each.value.required_app_roles
+  application_name         = each.key
 }
