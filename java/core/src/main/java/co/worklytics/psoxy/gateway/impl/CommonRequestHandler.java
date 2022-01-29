@@ -86,6 +86,11 @@ public class CommonRequestHandler {
 
         //TODO: what headers to forward???
 
+        sourceApiRequest.setHeaders(sourceApiRequest.getHeaders()
+            //seems like Google API HTTP client has a default 'Accept' header with 'text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2' ??
+            .setAccept("application/json")  //MSFT gives weird "{"error":{"code":"InternalServerError","message":"The MIME type 'text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2' requires a '/' character between type and subtype, such as 'text/plain'."}}
+        );
+
         //setup request
         sourceApiRequest
             .setThrowExceptionOnExecuteError(false)
@@ -103,7 +108,7 @@ public class CommonRequestHandler {
         String responseContent =
             new String(sourceApiResponse.getContent().readAllBytes(), sourceApiResponse.getContentCharset());
 
-        //log.info(sourceApiResponse.toString());
+        //log.info(responseContent);
         //builder.header(Pair.of("Content-Type", sourceApiResponse.getContentType()));
 
         String proxyResponseContent;
