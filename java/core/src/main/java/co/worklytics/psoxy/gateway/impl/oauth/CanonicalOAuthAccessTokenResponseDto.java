@@ -18,7 +18,7 @@ import java.util.TreeMap;
  * "access_token": "BWjcyMzY3ZDhiNmJkNTY",
  * "refresh_token": "Srq2NjM5NzA2OWJjuE7c",
  * "token_type": "bearer",
- * "expires": 3600
+ * "expires_in": 3600
  * }
  */
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
@@ -30,7 +30,8 @@ public class CanonicalOAuthAccessTokenResponseDto {
     String accessToken;
     String refreshToken;
     String tokenType;
-    Integer expires;
+    //OAuth 2.0 https://datatracker.ietf.org/doc/html/rfc6749#section-4.4.3
+    Integer expiresIn;
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     @Getter(onMethod_ = {@JsonAnyGetter})

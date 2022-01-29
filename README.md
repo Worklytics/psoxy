@@ -53,6 +53,8 @@ And, depending on your scenario, you may also need:
     connectors.
   - [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) Required to connect to
     Microsoft 365 sources.
+  - [openssl](https://www.openssl.org/) If generating local certificates (see
+    [`infra/modules/azure-local-cert`](infra/modules/azuread-local-cert))
 
 If you don't require Azure CLI / AWS CLI, [Google Cloud Shell](https://cloud.google.com/shell/docs/how-cloud-shell-works#tools)
 provides all of the above out-of-the-box, simplifies authentication/authorization for GCP

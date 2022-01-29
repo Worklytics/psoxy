@@ -137,12 +137,14 @@ resource "aws_ssm_parameter" "client_id" {
   value  = module.msft-connection[each.key].connector.application_id
 }
 
-resource "aws_ssm_parameter" "tenant_id" {
+resource "aws_ssm_parameter" "refresh_endpoint" {
   for_each = local.msft_sources
 
-  name   = "PSOXY_${upper(replace(each.key, "-", "_"))}_REFRESH_ENDPOINT"
-  type   = "String"
-  value  = "https://login.windows.net/${var.msft_tenant_id}/oauth2/token"
+  name      = "PSOXY_${upper(replace(each.key, "-", "_"))}_REFRESH_ENDPOINT"
+  type      = "String"
+  overwrite = true
+  value     = "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
+  #value  = "https://login.windows.net/${var.msft_tenant_id}/oauth2/token"
 }
 
 

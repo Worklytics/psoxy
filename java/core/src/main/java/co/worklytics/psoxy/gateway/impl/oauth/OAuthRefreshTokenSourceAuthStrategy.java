@@ -76,9 +76,9 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
     public interface TokenRequestPayloadBuilder {
 
-        HttpContent buildPayload();
-
         String getGrantType();
+
+        HttpContent buildPayload();
     }
 
     @NoArgsConstructor(onConstructor_ = @Inject)
@@ -111,8 +111,6 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
             HttpResponse response = tokenRequest.execute();
 
-            response.getStatusCode();
-
             CanonicalOAuthAccessTokenResponseDto tokenResponse =
                 objectMapper.readerFor(CanonicalOAuthAccessTokenResponseDto.class)
                     .readValue(response.getContent());
@@ -134,8 +132,11 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         }
 
         AccessToken asAccessToken(CanonicalOAuthAccessTokenResponseDto tokenResponse) {
+            //expires_in is RECOMMENDED, not REQUIRED in response; if omitted, we're supposed to
+            // assume a default value for service OR retrieve via some other means
+            Integer expiresIn = Optional.ofNullable(tokenResponse.getExpiresIn()).orElse(3600);
             return new AccessToken(tokenResponse.getAccessToken(),
-                Date.from(Instant.now().plusSeconds(tokenResponse.getExpires())));
+                Date.from(Instant.now().plusSeconds(expiresIn)));
         }
 
     }
