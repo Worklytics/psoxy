@@ -144,7 +144,6 @@ resource "aws_ssm_parameter" "refresh_endpoint" {
   type      = "String"
   overwrite = true
   value     = "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
-  #value  = "https://login.windows.net/${var.msft_tenant_id}/oauth2/token"
 }
 
 
