@@ -34,6 +34,8 @@ resource "azuread_application_certificate" "certificate" {
 output "private_key_id" {
   # hackery to translate output of openssl fingerprint --> string of hex chars equivalent to how MSFT does
   # (eg, MSFT will compute fingerprint server-side of the certificate value posted above)
+  # "SHA1 Fingerprint=8F:0E:46:89:7A:41:AE:5E:93:8C:BA:56:FC:AA:49:6E:0F:E2:F4:2C" -->
+  #   "8F0E46897A41AE5E938CBA56FCAA496E0FE2F42C"
   value = replace(replace(data.external.certificate.result.fingerprint, "SHA1 Fingerprint=", ""), ":", "")
 }
 
