@@ -84,6 +84,10 @@ public class SanitizerImpl implements Sanitizer {
         if (!isAllowed(url)) {
             throw new IllegalStateException(String.format("Sanitizer called to sanitize response that should not have been retrieved: %s", url.toString()));
         }
+        if (StringUtils.isEmpty(jsonResponse)) {
+            // Nothing to do
+            return jsonResponse;
+        }
 
         //q: move this stuff to initialization / DI provider??
         if (compiledPseudonymizations == null) {

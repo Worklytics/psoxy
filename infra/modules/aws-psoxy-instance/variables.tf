@@ -35,6 +35,7 @@ variable "api_gateway" {
     id = string
     arn = string
     api_endpoint = string
+    execution_arn = string
   })
   description = "API gateway behind which proxy instance should sit"
 }

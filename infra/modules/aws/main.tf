@@ -17,6 +17,7 @@ resource "aws_apigatewayv2_api" "psoxy-api" {
 
 resource "aws_cloudwatch_log_group" "gateway-log" {
   name = aws_apigatewayv2_api.psoxy-api.name
+  retention_in_days = 7
 }
 
 resource "aws_apigatewayv2_stage" "live" {
@@ -70,7 +71,12 @@ resource "aws_iam_role" "api-caller" {
           "Effect": "Allow",
           "Action": "execute-api:Invoke",
           "Resource": "arn:aws:execute-api:*:${var.aws_account_id}:*/*/GET/*",
-        }
+        },
+        {
+          "Effect": "Allow",
+          "Action": "execute-api:Invoke",
+          "Resource": "arn:aws:execute-api:*:${var.aws_account_id}:*/*/HEAD/*",
+        },
       ]
     })
   }
