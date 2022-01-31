@@ -83,7 +83,8 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
     @NoArgsConstructor(onConstructor_ = @Inject)
     @Log
-    public static class TokenRefreshHandlerImpl implements OAuth2CredentialsWithRefresh.OAuth2RefreshHandler {
+    public static class TokenRefreshHandlerImpl implements OAuth2CredentialsWithRefresh.OAuth2RefreshHandler,
+            RequiresConfiguration {
 
         @Inject
         ConfigService config;
@@ -139,6 +140,15 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                 Date.from(Instant.now().plusSeconds(expiresIn)));
         }
 
+        @Override
+        public Set<ConfigService.ConfigProperty> getRequiredConfigProperties() {
+            Stream<ConfigService.ConfigProperty> propertyStream = Arrays.stream(ConfigProperty.values());
+            if (payloadBuilder instanceof RequiresConfiguration) {
+                propertyStream = Stream.concat(propertyStream,
+                    ((RequiresConfiguration) payloadBuilder).getRequiredConfigProperties().stream());
+            }
+            return propertyStream.collect(Collectors.toSet());
+        }
     }
 
 
