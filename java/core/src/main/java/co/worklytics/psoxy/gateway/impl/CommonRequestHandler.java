@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.client.utils.URIBuilder;
 
 import javax.inject.Inject;
@@ -132,9 +133,9 @@ public class CommonRequestHandler {
         }
         //log.info(responseContent);
         if (sourceApiResponse.getContentType() != null) {
-            builder.header(Pair.of("Content-Type", sourceApiResponse.getContentType()));
+            builder.header("Content-Type", sourceApiResponse.getContentType());
         }
-      
+
         String proxyResponseContent;
         if (isSuccessFamily(sourceApiResponse.getStatusCode())) {
             if (skipSanitizer) {
