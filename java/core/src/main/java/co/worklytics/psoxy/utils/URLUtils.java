@@ -8,13 +8,8 @@ import java.net.URL;
 public class URLUtils {
 
     public static String relativeURL(URL url) {
-        StringBuilder relativeUrl = new StringBuilder();
-        relativeUrl.append(url.getPath());
-        if (StringUtils.isNotBlank(url.getQuery())) {
-            relativeUrl.append("?");
-            relativeUrl.append(url.getQuery());
-        }
-        return relativeUrl.toString();
+        // The returned file portion will be the same as getPath(), plus the concatenation of the value of getQuery()
+        return url.getFile();
     }
 
     @SneakyThrows

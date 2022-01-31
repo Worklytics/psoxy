@@ -18,4 +18,10 @@ public interface HttpEventRequest {
 
     Optional<List<String>> getMultiValueHeader(String headerName);
 
+    String getHttpMethod();
+
+    default String prettyPrint() {
+        return "Not implemented";
+    }
+
 }
