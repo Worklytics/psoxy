@@ -14,6 +14,7 @@ import lombok.extern.java.Log;
 
 import javax.inject.Inject;
 import java.io.IOException;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -40,6 +41,12 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
     @Getter
     private final String configIdentifier = "oauth2_refresh_token";
+
+    /**
+     * default access token expiration to assume, if 'expires_in' value is omitted from response
+     * (which is allowed under OAuth 2.0 spec)
+     */
+    public static final Duration DEFAULT_ACCESS_TOKEN_EXPIRATION = Duration.ofHours(1);
 
 
     //q: should we put these as config properties? creates potential for inconsistent configs
@@ -135,7 +142,8 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         AccessToken asAccessToken(CanonicalOAuthAccessTokenResponseDto tokenResponse) {
             //expires_in is RECOMMENDED, not REQUIRED in response; if omitted, we're supposed to
             // assume a default value for service OR retrieve via some other means
-            Integer expiresIn = Optional.ofNullable(tokenResponse.getExpiresIn()).orElse(3600);
+            Integer expiresIn = Optional.ofNullable(tokenResponse.getExpiresIn())
+                .orElse((int) DEFAULT_ACCESS_TOKEN_EXPIRATION.toSeconds());
             return new AccessToken(tokenResponse.getAccessToken(),
                 Date.from(Instant.now().plusSeconds(expiresIn)));
         }

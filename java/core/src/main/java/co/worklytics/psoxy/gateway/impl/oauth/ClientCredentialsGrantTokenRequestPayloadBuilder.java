@@ -12,6 +12,7 @@ import com.google.common.annotations.VisibleForTesting;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
+import org.apache.commons.codec.binary.Hex;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -137,23 +138,13 @@ public class ClientCredentialsGrantTokenRequestPayloadBuilder
 
     //implements encoding X.509 certificate hash (also known as the cert's SHA-1 thumbprint) as a
     // Base64url string value, which is how MSFT wants it in their JWT assertions
+    @SneakyThrows
     @VisibleForTesting
     String encodeKeyId(String hexKey) {
-        return Base64.getUrlEncoder().encodeToString(hexStringToByteArray(hexKey));
+        //TODO: replace with java.util.HexFormat.of().parseHex(s) ... but that's only from Java 17
+        byte[] fromHex = Hex.decodeHex(hexKey);
+        return Base64.getUrlEncoder().encodeToString(fromHex);
     }
-
-    //Utility to parse HEX string --> byte[]
-    //TODO: replace with java.util.HexFormat.of().parseHex(s) ... but that's only from Java 17
-    private byte[] hexStringToByteArray(String s) {
-        int len = s.length();
-        byte[] data = new byte[len / 2];
-        for (int i = 0; i < len; i += 2) {
-            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
-                + Character.digit(s.charAt(i+1), 16));
-        }
-        return data;
-    }
-
 
     private PrivateKey getServiceAccountPrivateKey() throws IOException {
         String privateKeyPem = config.getConfigPropertyOrError(ConfigProperty.PRIVATE_KEY);
