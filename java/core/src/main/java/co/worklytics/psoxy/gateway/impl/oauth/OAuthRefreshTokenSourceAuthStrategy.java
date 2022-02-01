@@ -14,6 +14,7 @@ import lombok.extern.java.Log;
 
 import javax.inject.Inject;
 import java.io.IOException;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -40,6 +41,12 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
     @Getter
     private final String configIdentifier = "oauth2_refresh_token";
+
+    /**
+     * default access token expiration to assume, if 'expires_in' value is omitted from response
+     * (which is allowed under OAuth 2.0 spec)
+     */
+    public static final Duration DEFAULT_ACCESS_TOKEN_EXPIRATION = Duration.ofHours(1);
 
 
     //q: should we put these as config properties? creates potential for inconsistent configs
@@ -76,14 +83,15 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
     public interface TokenRequestPayloadBuilder {
 
-        HttpContent buildPayload();
-
         String getGrantType();
+
+        HttpContent buildPayload();
     }
 
     @NoArgsConstructor(onConstructor_ = @Inject)
     @Log
-    public static class TokenRefreshHandlerImpl implements OAuth2CredentialsWithRefresh.OAuth2RefreshHandler {
+    public static class TokenRefreshHandlerImpl implements OAuth2CredentialsWithRefresh.OAuth2RefreshHandler,
+            RequiresConfiguration {
 
         @Inject
         ConfigService config;
@@ -111,8 +119,6 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
             HttpResponse response = tokenRequest.execute();
 
-            response.getStatusCode();
-
             CanonicalOAuthAccessTokenResponseDto tokenResponse =
                 objectMapper.readerFor(CanonicalOAuthAccessTokenResponseDto.class)
                     .readValue(response.getContent());
@@ -134,10 +140,23 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         }
 
         AccessToken asAccessToken(CanonicalOAuthAccessTokenResponseDto tokenResponse) {
+            //expires_in is RECOMMENDED, not REQUIRED in response; if omitted, we're supposed to
+            // assume a default value for service OR retrieve via some other means
+            Integer expiresIn = Optional.ofNullable(tokenResponse.getExpiresIn())
+                .orElse((int) DEFAULT_ACCESS_TOKEN_EXPIRATION.toSeconds());
             return new AccessToken(tokenResponse.getAccessToken(),
-                Date.from(Instant.now().plusSeconds(tokenResponse.getExpires())));
+                Date.from(Instant.now().plusSeconds(expiresIn)));
         }
 
+        @Override
+        public Set<ConfigService.ConfigProperty> getRequiredConfigProperties() {
+            Stream<ConfigService.ConfigProperty> propertyStream = Arrays.stream(ConfigProperty.values());
+            if (payloadBuilder instanceof RequiresConfiguration) {
+                propertyStream = Stream.concat(propertyStream,
+                    ((RequiresConfiguration) payloadBuilder).getRequiredConfigProperties().stream());
+            }
+            return propertyStream.collect(Collectors.toSet());
+        }
     }
 
 

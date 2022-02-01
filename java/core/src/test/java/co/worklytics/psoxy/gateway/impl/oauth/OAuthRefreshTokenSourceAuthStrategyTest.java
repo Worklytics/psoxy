@@ -41,7 +41,7 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
     public static final String EXAMPLE_TOKEN_RESPONSE =
         "{\n" +
         "  \"access_token\" : \"BWjcyMzY3ZDhiNmJkNTY\",\n" +
-        "  \"expires\" : 3600,\n" +
+        "  \"expires_in\" : 3600,\n" +
         "  \"refresh_token\" : \"Srq2NjM5NzA2OWJjuE7c\",\n" +
         "  \"token_type\" : \"bearer\"\n" +
         "}";
@@ -49,7 +49,7 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
     public static final String EXAMPLE_TOKEN_RESPONSE_EXTRA =
         "{\n" +
         "  \"access_token\" : \"BWjcyMzY3ZDhiNmJkNTY\",\n" +
-        "  \"expires\" : 3600,\n" +
+        "  \"expires_in\" : 3600,\n" +
         "  \"refresh_token\" : \"Srq2NjM5NzA2OWJjuE7c\",\n" +
         "  \"token_type\" : \"bearer\",\n" +
         "  \"something_extra\" : \"some-extra-value\",\n" +
@@ -70,10 +70,9 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
         assertEquals("bearer", response.getTokenType());
         assertEquals("Srq2NjM5NzA2OWJjuE7c", response.getRefreshToken());
         assertEquals("BWjcyMzY3ZDhiNmJkNTY", response.getAccessToken());
-        assertEquals(3600, response.getExpires());
+        assertEquals(3600, response.getExpiresIn());
 
         //reverse
-        ObjectMapper objectMapper = new ObjectMapper();
         assertEquals(jsonEncoded,
             objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
     }

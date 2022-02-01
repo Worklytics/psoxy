@@ -5,21 +5,31 @@ import co.worklytics.psoxy.SourceAuthModule;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestModules;
-import com.google.api.client.http.HttpContent;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.api.client.http.*;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.util.IOUtils;
 import dagger.Component;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import java.io.ByteArrayOutputStream;
+import java.time.Clock;
+import java.util.Base64;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 class ClientCredentialsGrantTokenRequestPayloadBuilderTest {
+
+    final String clientId = "60b612e3-a3b0-45d1-a582-4876f286490a";
+    final String tokenEndpoint = "https://login.microsoftonline.com/6e4c8e9f-76cf-41d1-806e-61838b880b87/oauth2/v2.0/token";
 
     private final String EXAMPLE_PRIVATE_KEY = "-----BEGIN PRIVATE KEY-----\n" +
         "MIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDLGozRKkmG1fDg\n" +
@@ -56,6 +66,9 @@ class ClientCredentialsGrantTokenRequestPayloadBuilderTest {
     @Inject
     ClientCredentialsGrantTokenRequestPayloadBuilder payloadBuilder;
 
+    @Inject
+    ObjectMapper objectMapper;
+
     @Singleton
     @Component(modules = {
         PsoxyModule.class,
@@ -73,6 +86,13 @@ class ClientCredentialsGrantTokenRequestPayloadBuilderTest {
         ClientCredentialsGrantTokenRequestPayloadBuilderTest.Container container =
             DaggerClientCredentialsGrantTokenRequestPayloadBuilderTest_Container.create();
         container.inject(this);
+
+        when(configService.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID))
+            .thenReturn(clientId);
+        when(configService.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.REFRESH_ENDPOINT))
+            .thenReturn(tokenEndpoint);
+        when(configService.getConfigPropertyAsOptional(ClientCredentialsGrantTokenRequestPayloadBuilder.ConfigProperty.TOKEN_SCOPE))
+            .thenReturn(Optional.of("https://graph.microsoft.com/.default"));
     }
 
 
@@ -80,19 +100,94 @@ class ClientCredentialsGrantTokenRequestPayloadBuilderTest {
     @SneakyThrows
     @Test
     public void tokenRequestPayload() {
-
-        when(configService.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID))
-            .thenReturn("1");
         when(configService.getConfigPropertyOrError(ClientCredentialsGrantTokenRequestPayloadBuilder.ConfigProperty.PRIVATE_KEY))
             .thenReturn(EXAMPLE_PRIVATE_KEY);
         when(configService.getConfigPropertyOrError(ClientCredentialsGrantTokenRequestPayloadBuilder.ConfigProperty.PRIVATE_KEY_ID))
-            .thenReturn("asdfasdfa");
+            .thenReturn("F4194D924E8471C804F65E77BCF90418CEEB0DA2");
 
-        final String EXPECTED_ASSERTION = "client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&grant_type=client_credentials&client_assertion=eyJhbGciOiJSUzI1NiIsIng1dCI6ImFzZGZhc2RmYSJ9.eyJleHAiOjE2Mzk1MjY3MDAsImlhdCI6MTYzOTUyNjQwMCwiaXNzIjoiMSIsImp0aSI6Ijg4NmNkMmQxLTJhMWQtNDNlOS05MWQ0LTZhMmIxNjZkZmY5ZSIsInN1YiI6IjEifQ.AMzvW80R9x8oiDlNAFoY-xNGTJKIvcJgHnS--YltbL7X83AS_m8piicKMtELcZtO6pTNdqwzxvyG1Z9wFWeWnU3SsnZgr9XNNDqdHVaSk6R46RA8SiHNxsFXfCZUHOkCXuGcSzSSI6O4_huS5WaDVBGjBLUr8JAtZj9sNnu7vaBvUb8aho5SJmWQT9Maf41jr7wden1Auea7bApavudLpMJwgYpLMz0xlR2VKYbF7tmw6cPT4lKZyuHCz6por8vyo3B7OCT6tyKYV401sbxvy7sZTAJROHSEVPkv7ShSVK0QNBo2u3d-fNA60SHMIzzTBJ4y7NbuXAsxCkVNd-i78A&client_id=1";
+        final String EXPECTED_ASSERTION = "client_assertion=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsIng1dCI6IjlCbE5razZFY2NnRTlsNTN2UGtFR003ckRhST0ifQ.eyJhdWQiOiJodHRwczovL2xvZ2luLm1pY3Jvc29mdG9ubGluZS5jb20vNmU0YzhlOWYtNzZjZi00MWQxLTgwNmUtNjE4MzhiODgwYjg3L29hdXRoMi92Mi4wL3Rva2VuIiwiZXhwIjoxNjM5NTI2NzAwLCJpYXQiOjE2Mzk1MjY0MDAsImlzcyI6IjYwYjYxMmUzLWEzYjAtNDVkMS1hNTgyLTQ4NzZmMjg2NDkwYSIsImp0aSI6Ijg4NmNkMmQxLTJhMWQtNDNlOS05MWQ0LTZhMmIxNjZkZmY5ZSIsInN1YiI6IjYwYjYxMmUzLWEzYjAtNDVkMS1hNTgyLTQ4NzZmMjg2NDkwYSJ9.tkGyEKoTPkkn7CXR8w45himxXzlnva0JY9DH_fIfr7uu5zC5BsZmF5HuBdCgU4_rWVPHDUGQmyVyUcRkNZsO9CnHDeHzCoPvWD1FSx8hV3oTwREgjXWQka08PC5ps2wEydSZfPTemP-7AXeIayLl5cWYzS7L_KRylQjNMlrXgMhv5SvUL1lJD76JolX0ksskfBmLldmu99UrMIizREPFkWQUvLE_cX8P9C6mZGl5PB7Ku5kovZAEOrOVQbESUtTUaSdmCEdpGCJz9osvWyksoC1Drp-isKw4FAGwGG6t1BTThL45R2kx-0fQH_jCYiKwLYtedREID9GZourmF8BNdw&client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_id=60b612e3-a3b0-45d1-a582-4876f286490a&grant_type=client_credentials&scope=https%3A%2F%2Fgraph.microsoft.com%2F.default";
         HttpContent payload = payloadBuilder.buildPayload();
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         payload.writeTo(out);
         assertEquals(EXPECTED_ASSERTION, out.toString());
     }
+
+    @SneakyThrows
+    @Test
+    public void keyIdEncoding() {
+        //example from MSFT docs (https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-certificate-credentials)
+        assertEquals("hOBcHZi846VCHSJbFAs26Go9VTQ=",
+            payloadBuilder.encodeKeyId("84E05C1D98BCE3A5421D225B140B36E86A3D5534"));
+    }
+
+
+    @Disabled // around for integration testing; don't want it for usual CI
+    @SneakyThrows
+    @Test
+    public void integration() {
+        //thumbprint in console "1F79B46FB49FD94F452F518594EB4D92D3A5A230"
+        //example configured in dev "CnG3QJ3kfgjJLjIRAx02maFRekE="
+        // "xUCRLwMU99gZwhqvkan4Q7vL4+8zCCoeUIRy6WI0z9Y="
+
+        // x509 thumbprint
+        // (can get value directly out of Azure Console, or from AWS SystemParameter after tf apply)
+        final String PRIVATE_KEY_ID_FOR_INTEGRATION = "6DDCBAF21BE566331BD6E922A77B62AC0CD62C74";
+        // (can get out of AWS SystemParameter after tf apply)
+        final String PRIVATE_KEY_FOR_INTEGRATION = "-----BEGIN PRIVATE KEY-----\n" +
+            "MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCoB2fmFON+Ggb2\n" +
+            "Jzt+3BoAsZm8LW731Wh1hMtWY2u70ISddJqVtYsBZO/DqQ0Ph4+eKPEAtinYb+5m\n" +
+            "3PzPu4jgyrsCCE+iRvM7vBrM1DwRMe8zG8CNGG5ADXeDyrNE2kaYAdM/sP6QWlma\n" +
+            "hA2BENYzv+yx/iMEOeAYnDDtGiRqg18FvC9yQQUzZsymqAyMYXkTFBVbjBl3Xs9K\n" +
+            "ANKhttw4uIbHCrl9LKsV+R7ZnOX+SsNQBft++tWt8dNj+WoacTz0dMJEQFETD5gV\n" +
+            "AtEFIMS3QYuHz6U6/dHGu0EWXH2quYllaJBfdj6tSoq6Uw3gSD2AdquCGtk1YxzD\n" +
+            "QGdCnjORAgMBAAECggEBAII22wmu/m1m9iYkWTMClxQaji0KeIiPVZhdBMc53O97\n" +
+            "tInhJzsFqWe3NSfIBlsWjvHegIYwpVUZyQLmFvVVO8oY0bvNfQkhOrX8HDjH8JTS\n" +
+            "wbA1vY6adDYnOYtktnCRR0vdfjxJib2Mhwv7cgunZJhOD7wQWkqYH1ZzFGdqbvYq\n" +
+            "/vuIZXG/2IoDY6/yth2P4TWdsqpC5rm9+CrCXP/f7bQtXXs1E14Jek0WZobazwah\n" +
+            "4Nk4AlUEzZihCHjvXRSHM5T+Uk4p/U6ISU9dv02buNAbHUQzv06Wu0pgW69E7xnZ\n" +
+            "brW7VBSV2EnmfXqkbmgpYZzVX7QYmOJOsO6piiMf68ECgYEA1ueyIQIPKl9GU92+\n" +
+            "CA/tdI4qOjHJi4BTIciOhWPTOF0N7cuFMIfVWuqTSBcMP1F+S3sTLcaRNjomYZz8\n" +
+            "6KMW9nIRD7+uqRWQl1VJXfATnXqmFrzA/EzIFAaXLtGaBhgn1ul5cV8Kd0eEhTt6\n" +
+            "JA+UK79zIZJFR0BBhWxcKf2VjJ0CgYEAyCj4aNW+1nv/f3tl/Bjm8tl6vZXXhK/o\n" +
+            "42VJiO5N3fHo+KEZ6ocmcCyaoCeCusomfsCFEBGyAyW7wK6xEZD6ONF0xz3/5/E1\n" +
+            "kqUIy2+51Kcva4WiMIKDWzt0d866DCd8GcJkDY/OIDvScc0l2OA/4rRL6ybbAk6d\n" +
+            "Bzuo+n0s3oUCgYBTJjCAnvhZL6XZWylkmy0H9N2XyJ2vkQYZQy0JpVcbLr3t7Nnq\n" +
+            "rhO56przwJ8nfJN+Bu+jvXl/3r3s9L3SERAYaIf7bPHaUBKyyvfpFbOxMbxDfeK5\n" +
+            "e8fKH8atAcIza3M2rv0jBV/aSNyYZCvc+f4dcyTLr3mImO8A/a0nPgt37QKBgQCa\n" +
+            "gz4Xt4DlE72NDJYSwKpvp8DfXy+KxzyxZXwZj1Re06KzY7Gc4Q2kJFqM7VM2nFyR\n" +
+            "Fk7hs7dGRLemK3SXCeKPP+m08MB+rS5c8LdUTAAZD6JEj1k/t1Btef0Ti2sFfOmI\n" +
+            "/Q29hlhpe6Sdou7nd1z5xZKhiVIheswvTDfKfhzH/QKBgDfSN5Bg+XGv7RWxGpPs\n" +
+            "VRjx2iq/SNuRFLt6ezirwoDqKly9b2zrDJM5d8qzABsmMtTGvzbxxFcOs/UsJeJa\n" +
+            "G5V7N45KStzMeTzuT4DFTtGGJTrzrms+371Vl51Fg1xuewNcbuMjU8oaXAxlWalL\n" +
+            "m8lD1czHbMIsv1EHZj/GcCIa\n" +
+            "-----END PRIVATE KEY-----";
+
+        when(configService.getConfigPropertyOrError(ClientCredentialsGrantTokenRequestPayloadBuilder.ConfigProperty.PRIVATE_KEY))
+            .thenReturn(PRIVATE_KEY_FOR_INTEGRATION);
+        when(configService.getConfigPropertyOrError(ClientCredentialsGrantTokenRequestPayloadBuilder.ConfigProperty.PRIVATE_KEY_ID))
+            .thenReturn(PRIVATE_KEY_ID_FOR_INTEGRATION);
+
+        HttpRequestFactory requestFactory = (new NetHttpTransport()).createRequestFactory();
+
+        payloadBuilder.clock = Clock.systemUTC();
+        HttpRequest request = requestFactory.buildPostRequest(new GenericUrl(tokenEndpoint), payloadBuilder.buildPayload());
+
+        HttpResponse response = request.execute();
+        assertEquals(200, response.getStatusCode());
+
+        String content = new String(response.getContent().readAllBytes());
+        CanonicalOAuthAccessTokenResponseDto tokenResponse =
+            objectMapper.readerFor(CanonicalOAuthAccessTokenResponseDto.class)
+                .readValue(content);
+
+        assertEquals("Bearer", tokenResponse.getTokenType());
+        assertNotNull(tokenResponse.getAccessToken());
+        assertNotNull(tokenResponse.getExpiresIn());
+    }
+
+
+
+
+
 }

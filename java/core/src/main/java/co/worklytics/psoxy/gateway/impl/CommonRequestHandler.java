@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.client.utils.URIBuilder;
 
 import javax.inject.Inject;
@@ -106,6 +107,11 @@ public class CommonRequestHandler {
 
         //TODO: what headers to forward???
 
+        sourceApiRequest.setHeaders(sourceApiRequest.getHeaders()
+            //seems like Google API HTTP client has a default 'Accept' header with 'text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2' ??
+            .setAccept("application/json")  //MSFT gives weird "{"error":{"code":"InternalServerError","message":"The MIME type 'text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2' requires a '/' character between type and subtype, such as 'text/plain'."}}
+        );
+
         //setup request
         sourceApiRequest
             .setThrowExceptionOnExecuteError(false)
@@ -124,6 +130,10 @@ public class CommonRequestHandler {
         // could be empty in HEAD calls
         if (sourceApiResponse.getContent() != null) {
             responseContent = new String(sourceApiResponse.getContent().readAllBytes(), sourceApiResponse.getContentCharset());
+        }
+        //log.info(responseContent);
+        if (sourceApiResponse.getContentType() != null) {
+            builder.header("Content-Type", sourceApiResponse.getContentType());
         }
 
         String proxyResponseContent;

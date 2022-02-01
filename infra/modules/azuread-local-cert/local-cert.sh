@@ -1,6 +1,7 @@
 #!/bin/bash
 # generate keys for MSFT connectors; adapted from Worklytics node script to do this, with output
 # formatted to be consumed by Terraform via `data "external" {}`
+# example usage: ./local-cert.sh "/C=US/ST=New York/L=New York/CN=www.worklytics.co" 30
 SUBJECT=$1
 TTL=$2
 
@@ -14,8 +15,10 @@ CERT_FILE=cert_${RAND_ID}.pem
 openssl req -x509 -newkey rsa:2048 -subj "${SUBJECT}" -keyout $KEY_FILE -out $CERT_FILE -days $TTL -nodes >/dev/null 2>&1
 openssl pkcs8 -nocrypt -in $KEY_FILE  -inform PEM -topk8 -outform PEM -out $KEY_FILE_PKCS8 >/dev/null 2>&1
 
+#CERT_DER=`openssl x509 -in $CERT_FILE -outform DER | base64`
+FINGERPRINT_RESULT=`openssl x509 -in $CERT_FILE -noout -fingerprint`
 # output as JSON
-OUTPUT_JSON="{\"cert\": \"`cat $CERT_FILE | base64`\",\"key_pkcs8\": \"`cat $KEY_FILE_PKCS8 | base64`\"}"
+OUTPUT_JSON="{\"cert\": \"`cat $CERT_FILE | base64`\",\"key_pkcs8\": \"`cat $KEY_FILE_PKCS8 | base64`\",\"fingerprint\":\"${FINGERPRINT_RESULT}\"}"
 echo "$OUTPUT_JSON"
 
 # cleanup
