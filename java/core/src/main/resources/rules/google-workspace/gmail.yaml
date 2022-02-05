@@ -6,7 +6,7 @@ emailHeaderPseudonymizations:
     relativeUrlRegex: "^/gmail/v1/users/.*?/messages/.*"
 pseudonymizations:
   - jsonPaths:
-      - "$.payload.headers[?(@.name =~ /^(X-Original-Sender|Delivered-To|Sender|In-Reply-To)$/i)].value"
+      - "$.payload.headers[?(@.name =~ /^(X-Original-Sender|Delivered-To|Sender)$/i)].value"
     relativeUrlRegex: "^/gmail/v1/users/.*?/messages/.*"
 redactions:
   - jsonPaths:
