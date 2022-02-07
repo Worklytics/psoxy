@@ -40,7 +40,8 @@ output "private_key_id" {
 }
 
 output "private_key" {
-  value = base64decode(data.external.certificate.result.key_pkcs8)
+  value     = base64decode(data.external.certificate.result.key_pkcs8)
+  sensitive = true
 }
 
 # for 3-legged OAuth flows, which believe aren't needed in this case as we have no OIDC/sign-on
