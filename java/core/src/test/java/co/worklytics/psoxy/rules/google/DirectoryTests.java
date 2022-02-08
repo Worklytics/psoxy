@@ -2,16 +2,17 @@ package co.worklytics.psoxy.rules.google;
 
 import co.worklytics.psoxy.Rules;
 import co.worklytics.psoxy.Sanitizer;
-import co.worklytics.psoxy.impl.SanitizerImpl;
 import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
-import co.worklytics.psoxy.rules.RulesBaseTestCase;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -49,8 +50,8 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
         String sanitized =
             sanitizer.sanitize(new URL("https", "admin.googleapis.com", "/admin/directory/v1/users/123213"), jsonString);
 
-        assertPseudonymized(sanitized, Arrays.asList("alice@worklytics.co"));
-        assertRedacted(sanitized, Arrays.asList("alice.example@gmail.com"));
+        assertPseudonymized(sanitized, List.of("alice@worklytics.co"));
+        assertRedacted(sanitized, List.of("alice.example@gmail.com"));
     }
 
     @SneakyThrows
@@ -70,7 +71,7 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
         String sanitized = sanitize(endpoint, jsonString);
 
         assertPseudonymized(sanitized, Arrays.asList("alice@worklytics.co", "bob@worklytics.co"));
-        assertRedacted(sanitized, Arrays.asList("alice.example@gmail.com"));
+        assertRedacted(sanitized, List.of("alice.example@gmail.com"));
     }
 
     @SneakyThrows
@@ -79,14 +80,14 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
         String jsonString = asJson("groups.json");
 
         //verify precondition that example actually contains something we need to pseudonymize
-        Collection<String> PII = Arrays.asList(
+        Collection<String> PII = List.of(
             "Users allowed to have access to production infrastructure."
         );
         assertNotSanitized(jsonString, PII);
 
         String sanitized = this.sanitize("https://admin.googleapis.com/admin/directory/v1/groups?customer=my_customer", jsonString);
 
-        assertRedacted(sanitized, Arrays.asList("Users allowed to have access to production infrastructure."));
+        assertRedacted(sanitized, List.of("Users allowed to have access to production infrastructure."));
 
         assertPseudonymizedWithOriginal(sanitized, "admins@aceme.com", "admins@in.aceme.com");
     }
@@ -97,10 +98,10 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
         String groupEndpoint = "https://admin.googleapis.com/admin/directory/v1/groups/an-arbitrary-subresource";
         String jsonString = asJson("group.json");
 
-        assertNotSanitized(jsonString, Arrays.asList("Anyone sales person in our organization."));
+        assertNotSanitized(jsonString, List.of("Anyone sales person in our organization."));
         String sanitized = this.sanitize(groupEndpoint, jsonString);
 
-        assertRedacted(sanitized, Arrays.asList("Anyone sales person in our organization."));
+        assertRedacted(sanitized, List.of("Anyone sales person in our organization."));
 
         assertPseudonymizedWithOriginal(sanitized, "sales@acme.com", "sales@in.acme.com");
 
@@ -134,11 +135,11 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
         String jsonString = asJson("thumbnail.json");
 
         //verify precondition that example actually contains something we need to pseudonymize
-        Collection<String> PII = Arrays.asList(
+        Collection<String> PII = List.of(
             "alice@worklytics.co"
         );
         assertNotSanitized(jsonString, PII);
-        assertNotSanitized(jsonString, Arrays.asList("photoData"));
+        assertNotSanitized(jsonString, List.of("photoData"));
 
         String endpoint = "https://admin.googleapis.com/admin/directory/v1/users/123124/photos/thumbnail";
 
@@ -170,10 +171,19 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
         assertRedacted(sanitized, "Google Apps Administrator Seed Role");
     }
 
+
+    @ValueSource(strings = {
+        "https://admin.googleapis.com/admin/directory/v1/customer/my_customer/domains",
+        "https://admin.googleapis.com/admin/directory/v1/users?customer=my_customer&maxResults=1&pageToken=BASE64TOKEN-=%3D&viewType=admin_view",
+        "https://admin.googleapis.com/admin/directory/v1/users/some@example.com",
+        "https://admin.googleapis.com/admin/directory/v1/groups",
+        "https://admin.googleapis.com/admin/directory/v1/groups?a=b,c&b=c",
+        "https://admin.googleapis.com/admin/directory/v1/orgunits",
+        "https://admin.googleapis.com/admin/directory/v1/orgunits?a=b,c&b=c",
+    })
+    @ParameterizedTest
     @SneakyThrows
-    @Test
-    public void domains() {
-        String endpoint = "https://admin.googleapis.com/admin/directory/v1/customer/my_customer/domains";
+    public void allowedEndpoints(String endpoint) {
         assertUrlWithQueryParamsAllowed(endpoint);
     }
 }

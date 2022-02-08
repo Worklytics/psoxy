@@ -20,9 +20,9 @@ import javax.inject.Singleton;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.regex.Pattern;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * abstract test stuff for Rules implementations
@@ -93,13 +93,13 @@ abstract public class RulesBaseTestCase {
 
     @SneakyThrows
     Rules yamlRoundtrip(Rules rules) {
-        String yaml = yamlMapper.writeValueAsString(getRulesUnderTest()).replace("---\n", "");
+        String yaml = yamlMapper.writeValueAsString(rules).replace("---\n", "");
         return yamlMapper.readerFor(Rules.class).readValue(yaml);
     }
 
     @SneakyThrows
     Rules jsonRoundtrip(Rules rules) {
-        String json = jsonMapper.writeValueAsString(getRulesUnderTest());
+        String json = jsonMapper.writeValueAsString(rules);
         return jsonMapper.readerFor(Rules.class).readValue(json);
     }
 
@@ -129,7 +129,7 @@ abstract public class RulesBaseTestCase {
     }
 
     protected void assertNotSanitized(String content, Collection<String> shouldContain) {
-        shouldContain.stream()
+        shouldContain
             .forEach(s -> assertTrue(content.contains(s), "Unsanitized content does not contain expected string: " + s));
     }
     protected void assertNotSanitized(String content, String... shouldContain) {
@@ -138,19 +138,17 @@ abstract public class RulesBaseTestCase {
 
     @Deprecated //used pseudonymized or redacted
     protected void assertSanitized(String content, Collection<String> shouldNotContain) {
-        shouldNotContain.stream()
+        shouldNotContain
             .forEach(s -> assertFalse(content.contains(s), "Sanitized content still contains: " + s));
     }
 
     protected void assertRedacted(String content, Collection<String> shouldNotContain) {
-        shouldNotContain.stream()
+        shouldNotContain
             .forEach(s -> assertFalse(content.contains(s), "Sanitized content still contains: " + s));
 
-        shouldNotContain.stream()
-            .forEach(s -> {
-                assertFalse(content.contains(sanitizer.pseudonymizeToJson(s, sanitizer.getJsonConfiguration())),
-                    "Sanitized contains pseudonymized equivalent of: " + s);
-            });
+        shouldNotContain
+            .forEach(s -> assertFalse(content.contains(sanitizer.pseudonymizeToJson(s, sanitizer.getJsonConfiguration())),
+                "Sanitized contains pseudonymized equivalent of: " + s));
     }
     protected void assertRedacted(String content, String... shouldNotContain) {
         assertRedacted(content, Arrays.asList(shouldNotContain));
@@ -164,11 +162,11 @@ abstract public class RulesBaseTestCase {
 
 
     protected void assertPseudonymized(String content, Collection<String> shouldBePseudonymized) {
-        shouldBePseudonymized.stream()
+        shouldBePseudonymized
             .forEach(s ->
                 assertFalse(content.contains(s), () -> "Sanitized content still contains unpseudonymized: " + s + " at " + this.context(content, s)));
 
-        shouldBePseudonymized.stream()
+        shouldBePseudonymized
             .forEach(s -> {
                 String doubleJsonEncodedPseudonym =
                     sanitizer.getJsonConfiguration().jsonProvider().toJson(sanitizer.pseudonymizeToJson(s, sanitizer.getJsonConfiguration()));
@@ -184,7 +182,7 @@ abstract public class RulesBaseTestCase {
     }
 
     protected void assertPseudonymizedWithOriginal(String content, Collection<String> shouldBePseudonymized) {
-        shouldBePseudonymized.stream()
+        shouldBePseudonymized
             .forEach(s -> {
                 String doubleJsonEncodedPseudonym =
                     sanitizer.getJsonConfiguration().jsonProvider().toJson(sanitizer.pseudonymizeWithOriginalToJson(s, sanitizer.getJsonConfiguration()));
@@ -199,26 +197,16 @@ abstract public class RulesBaseTestCase {
         assertPseudonymizedWithOriginal(content, Arrays.asList(shouldBePseudonymized));
     }
 
-    protected void assertContains(String content, String... shouldContain) {
-        Arrays.stream(shouldContain)
-            .forEach(s -> {
-                assertTrue(content.contains(s), String.format("Sanitized does not contain '%s'", s));
-            });
-    }
-
     @SneakyThrows
     protected void assertUrlWithQueryParamsAllowed(String url) {
         assertTrue(sanitizer.isAllowed(new URL(url + "?param=value")), "single param blocked");
         assertTrue(sanitizer.isAllowed(new URL(url + "?param=value&param2=value2")), "multiple params blocked");
     }
 
-
     @SneakyThrows
     protected void assertUrlAllowed(String url) {
         assertTrue(sanitizer.isAllowed(new URL(url)), "api endpoint url blocked");
     }
-
-
 
     @SneakyThrows
     protected void assertUrlWithQueryParamsBlocked(String url) {
