@@ -10,6 +10,12 @@ variable "function_name" {
   description = "name of function"
 }
 
+variable "handler_class" {
+  type        = string
+  description = "Class to handle the request"
+  default     = "co.worklytics.psoxy.Handler"
+}
+
 variable "aws_assume_role_arn" {
   type        = string
   description = "role arn"

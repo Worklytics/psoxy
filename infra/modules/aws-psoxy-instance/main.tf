@@ -11,7 +11,7 @@ terraform {
 resource "aws_lambda_function" "psoxy-instance" {
   function_name    = var.function_name
   role             = aws_iam_role.iam_for_lambda.arn
-  handler          = "co.worklytics.psoxy.Handler"
+  handler          = var.handler_class
   runtime          = "java11"
   filename         = var.path_to_function_zip
   source_code_hash = var.function_zip_hash
