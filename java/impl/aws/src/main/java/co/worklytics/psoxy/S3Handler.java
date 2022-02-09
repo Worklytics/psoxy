@@ -1,6 +1,7 @@
 package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.aws.DaggerAwsContainer;
+import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.StorageEventRequest;
 import co.worklytics.psoxy.gateway.StorageEventResponse;
 import co.worklytics.psoxy.gateway.impl.CommonRequestHandler;
@@ -14,11 +15,13 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
+import org.apache.commons.io.input.BOMInputStream;
 
 import javax.inject.Inject;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 
 @Log
 public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestHandler<S3Event, String> {
@@ -26,11 +29,16 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
     @Inject
     CommonRequestHandler requestHandler;
 
+    @Inject
+    ConfigService configService;
+
     @SneakyThrows
     @Override
     public String handleRequest(S3Event s3Event, Context context) {
 
         DaggerAwsContainer.create().injectS3Handler(this);
+
+        boolean isBOMEncoded = Boolean.parseBoolean(configService.getConfigPropertyAsOptional(AWSConfigProperty.BOM_ENCODED).orElse("false"));
 
         String response = "200 OK";
         S3EventNotification.S3EventNotificationRecord record = s3Event.getRecords().get(0);
@@ -43,7 +51,14 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
         AmazonS3 s3Client = AmazonS3ClientBuilder.defaultClient();
         S3Object s3Object = s3Client.getObject(new GetObjectRequest(importBucket, sourceKey));
         InputStream objectData = s3Object.getObjectContent();
-        InputStreamReader reader = new InputStreamReader(objectData);
+        InputStreamReader reader = null;
+
+        if (isBOMEncoded) {
+            BOMInputStream is = new BOMInputStream(objectData);
+            reader = new InputStreamReader(is, StandardCharsets.UTF_8.name());
+        } else {
+            reader = new InputStreamReader(objectData);
+        }
 
         StorageEventRequest request = StorageEventRequest.builder()
                 .sourceBucketName(importBucket)
@@ -58,6 +73,7 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
             InputStream is = new ByteArrayInputStream(storageEventResponse.getBytes());
 
             ObjectMetadata meta = new ObjectMetadata();
+
             meta.setContentLength(storageEventResponse.getBytes().length);
             meta.setContentType(s3Object.getObjectMetadata().getContentType());
 

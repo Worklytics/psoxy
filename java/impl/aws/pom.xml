@@ -27,6 +27,7 @@
         <dependency.aws-lambda-core.version>1.2.1</dependency.aws-lambda-core.version>
         <dependency.aws-lambda-java-events.version>3.11.0</dependency.aws-lambda-java-events.version>
         <dependency.aws-s3.version>1.12.153</dependency.aws-s3.version>
+        <dependency.commons-io.version>2.11.0</dependency.commons-io.version>
 
     </properties>
 
@@ -89,6 +90,13 @@
             <artifactId>commons-lang3</artifactId>
             <version>${dependency.apache-commons-lang3.version}</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>${dependency.commons-io.version}</version>
+        </dependency>
+
 
         <!-- platform stuff (eg, AWS Lambda support) -->
         <dependency> <!-- get from Java SDK v2 bom too?? -->
