@@ -1,10 +1,6 @@
 package co.worklytics.psoxy.aws;
 
-import co.worklytics.psoxy.ConfigRulesModule;
-import co.worklytics.psoxy.FunctionRuntimeModule;
-import co.worklytics.psoxy.Handler;
-import co.worklytics.psoxy.PsoxyModule;
-import co.worklytics.psoxy.SourceAuthModule;
+import co.worklytics.psoxy.*;
 import dagger.Component;
 
 import javax.inject.Singleton;
@@ -21,4 +17,5 @@ public interface AwsContainer {
 
     Handler injectHandler(Handler handler);
 
+    S3Handler injectS3Handler(S3Handler s3Handler);
 }
