@@ -124,6 +124,9 @@ public class Rules implements Serializable {
         // json nodes that match ANY of these paths will be matches
         @Singular
         List<String> jsonPaths;
+
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        List<String> columns;
     }
 
     /**

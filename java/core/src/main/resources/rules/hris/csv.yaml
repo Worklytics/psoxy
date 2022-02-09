@@ -1,0 +1,7 @@
+pseudonymizations:
+  - columns:
+      - "email"
+    relativeUrlRegex: "/admin/reports/v1/activity/users/all/applications/meet.*"
+redactions:
+  - columns:
+      - "managerEmail"
