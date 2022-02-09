@@ -170,3 +170,11 @@ EOT
 output "endpoint_url" {
   value = local.proxy_endpoint_url
 }
+
+output "function_arn" {
+  value = aws_lambda_function.psoxy-instance.arn
+}
+
+output "iam_for_lambda" {
+  value = aws_iam_role.iam_for_lambda.arn
+}
