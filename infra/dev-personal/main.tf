@@ -42,7 +42,7 @@ locals {
     # they collaborate in GMail/GCal/Gdrive. the Directory does not contain PII of subjects external
     # to the Google Workspace, so may be directly connected in such scenarios.
     "gdirectory": {
-      deploy: 1
+      deploy: true
       display_name: "Google Directory"
       apis_consumed: [
         "admin.googleapis.com"
@@ -59,7 +59,7 @@ locals {
       worklytics_connector_name: "Google Workspace Directory via Psoxy"
     }
     "gcal": {
-      deploy: 0
+      deploy: false
       display_name: "Google Calendar"
       apis_consumed: [
         "calendar-json.googleapis.com"
@@ -69,7 +69,7 @@ locals {
       ]
     }
     "gmail": {
-      deploy: 1
+      deploy: true
       display_name: "GMail"
       apis_consumed: [
         "gmail.googleapis.com"
@@ -79,7 +79,7 @@ locals {
       ]
     }
     "google-chat": {
-      deploy: 0
+      deploy: false
       display_name: "Google Chat"
       apis_consumed: [
         "admin.googleapis.com"
@@ -89,7 +89,7 @@ locals {
       ]
     }
     "gdrive": {
-      deploy: 0
+      deploy: false
       display_name: "Google Drive"
       apis_consumed: [
         "drive.googleapis.com"
@@ -99,7 +99,7 @@ locals {
       ]
     }
     "google-meet": {
-      deploy: 0
+      deploy: false
       display_name: "Google Meet"
       apis_consumed: [
         "admin.googleapis.com"
@@ -114,7 +114,7 @@ locals {
 module "google-workspace-connection" {
   for_each = {
     for k, v in local.google_workspace_sources:
-    k => v if v.deploy == 1
+    k => v if v.deploy
   }
 
   source = "../modules/google-workspace-dwd-connection"
@@ -133,7 +133,7 @@ module "google-workspace-connection" {
 module "google-workspace-connection-auth" {
   for_each = {
   for k, v in local.google_workspace_sources:
-  k => v if v.deploy == 1
+  k => v if v.deploy
   }
   source = "../modules/gcp-sa-auth-key-secret-manager"
 
@@ -144,7 +144,7 @@ module "google-workspace-connection-auth" {
 module "psoxy-google-workspace-connector" {
   for_each = {
   for k, v in local.google_workspace_sources:
-  k => v if v.deploy == 1
+  k => v if v.deploy
   }
 
   source = "../modules/gcp-psoxy-cloud-function"
@@ -169,7 +169,7 @@ module "psoxy-google-workspace-connector" {
 module "worklytics-psoxy-connection" {
   for_each = {
   for k, v in local.google_workspace_sources:
-  k => v if v.deploy == 1
+  k => v if v.deploy
   }
 
   source = "../modules/worklytics-psoxy-connection"
@@ -178,33 +178,56 @@ module "worklytics-psoxy-connection" {
   display_name       = "${each.value.display_name} via Psoxy"
 }
 
-# BEGIN SLACK
+# BEGIN LONG ACCESS AUTH CONNECTORS
 
 locals {
-  slack_function_name   = "psoxy-slack-discovery-api"
+  oauth_long_access_connectors = {
+    slack = {
+      deploy = true
+      function_name = "psoxy-slack-discovery-api"
+      source_kind = "slack"
+    },
+    zoom = {
+      deploy = true
+      function_name = "psoxy-zoom"
+      source_kind = "zoom"
+    }
+  }
 }
 
-resource "google_service_account" "slack_connector_sa" {
+resource "google_service_account" "long_auth_connector_sa" {
+  for_each = {
+    for k, v in local.oauth_long_access_connectors:
+    k => v if v.deploy
+  }
   project = var.project_id
-  account_id   = local.slack_function_name
-  display_name = "Psoxy Connector - Slack{var.connector_display_name_suffix}"
+  account_id   = each.value.function_name
+  display_name = "Psoxy Connector - ${title(each.key)}{var.connector_display_name_suffix}"
 }
 
 # creates the secret, without versions.
-module "slack-discovery-api-auth" {
+module "connector-long-auth-block" {
+  for_each = {
+  for k, v in local.oauth_long_access_connectors:
+  k => v if v.deploy
+  }
   source   = "../modules/gcp-oauth-long-access-strategy"
   project_id              = var.project_id
-  function_name           = local.slack_function_name
+  function_name           = each.value.function_name
   token_adder_user_emails = []
 }
 
-module "psoxy-slack-discovery-api" {
+module "connector-long-auth-create-function" {
+  for_each = {
+  for k, v in local.oauth_long_access_connectors:
+  k => v if v.deploy
+  }
   source = "../modules/gcp-psoxy-cloud-function"
 
   project_id            = var.project_id
-  function_name         = local.slack_function_name
-  source_kind           = "slack"
-  service_account_email   = google_service_account.slack_connector_sa.email
+  function_name         = each.value.function_name
+  source_kind           = each.value.source_kind
+  service_account_email   = google_service_account.long_auth_connector_sa[each.key].email
 
   secret_bindings = {
     PSOXY_SALT   = {
@@ -212,52 +235,12 @@ module "psoxy-slack-discovery-api" {
       version_number = module.psoxy-gcp.salt_secret_version_number
     },
     ACCESS_TOKEN = {
-      secret_name    = module.slack-discovery-api-auth.access_token_secret_name
+      secret_name    = module.connector-long-auth-block[each.key].access_token_secret_name
       # in case of long lived tokens we want latest version always
       version_number = "latest"
     }
   }
 }
 
-# END SLACK
+# END LONG ACCESS AUTH CONNECTORS
 
-# BEGIN ZOOM
-
-locals {
-  zoom_function_name   = "psoxy-zoom"
-}
-
-resource "google_service_account" "zoom_connector_sa" {
-  project = var.project_id
-  account_id   = local.zoom_function_name
-  display_name = "Psoxy Connector - Zoom{var.connector_display_name_suffix}"
-}
-
-# creates the secret, without versions.
-module "zoom-api-auth" {
-  source   = "../modules/gcp-oauth-long-access-strategy"
-  project_id              = var.project_id
-  function_name           = local.zoom_function_name
-  token_adder_user_emails = []
-}
-
-module "psoxy-zoom-api" {
-  source = "../modules/gcp-psoxy-cloud-function"
-
-  project_id            = var.project_id
-  function_name         = local.zoom_function_name
-  source_kind           = "zoom"
-  service_account_email   = google_service_account.zoom_connector_sa.email
-
-  secret_bindings = {
-    PSOXY_SALT   = {
-      secret_name    = module.psoxy-gcp.salt_secret_name
-      version_number = module.psoxy-gcp.salt_secret_version_number
-    },
-    ACCESS_TOKEN = {
-      secret_name    = module.zoom-api-auth.access_token_secret_name
-      # in case of long lived tokens we want latest version always
-      version_number = "latest"
-    }
-  }
-}
