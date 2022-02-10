@@ -5,11 +5,6 @@ import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import dagger.Binds;
 import dagger.Module;
-import dagger.Provides;
-
-import javax.inject.Singleton;
-import java.time.Clock;
-import java.util.UUID;
 
 /**
  * defines how to fulfill dependencies that need platform-specific implementations for GCP platform
@@ -25,5 +20,4 @@ public interface GcpModule {
      * @see "https://cloud.google.com/functions/docs/configuring/secrets"
      */
     @Binds ConfigService configService(EnvVarsConfigService envVarsConfigService);
-
 }

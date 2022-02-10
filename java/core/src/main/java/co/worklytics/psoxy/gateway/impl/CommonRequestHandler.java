@@ -4,7 +4,6 @@ import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.psoxy.utils.URLUtils;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequestFactory;
@@ -12,13 +11,9 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.auth.Credentials;
 import com.google.auth.http.HttpCredentialsAdapter;
-import com.google.common.base.Preconditions;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
@@ -26,17 +21,17 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ContentType;
 
 import javax.inject.Inject;
-import java.io.*;
+import java.io.IOException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.util.*;
+import java.util.Date;
+import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
 
 @NoArgsConstructor(onConstructor_ = @Inject)
 @Log
@@ -54,6 +49,7 @@ public class CommonRequestHandler {
     @Inject SanitizerFactory sanitizerFactory;
     @Inject Rules rules;
     @Inject HealthCheckRequestHandler healthCheckRequestHandler;
+    @Inject FileHandlerStrategy fileHandlerStrategy;
 
     private volatile Sanitizer sanitizer;
     private final Object $writeLock = new Object[0];
@@ -172,75 +168,12 @@ public class CommonRequestHandler {
      */
     @SneakyThrows
     public StorageEventResponse handle(StorageEventRequest request) {
-        CSVParser records = CSVFormat.DEFAULT
-                .withFirstRecordAsHeader()
-                .parse(request.getReaderStream());
 
-        Preconditions.checkArgument(records.getHeaderMap() != null, "Failed to parse header from file");
-
-        Map<Integer, String> invertedHeaderMap = records.getHeaderMap().entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey, (a, b) -> a, TreeMap::new));
-
-        Sanitizer.Options options = sanitizer.getOptions();
-
-        Set<String> columnsToRedact = options.getRules()
-                .getRedactions()
-                .stream()
-                .map(Rules.Rule::getColumns)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toSet());
-
-        Set<String> columnsToPseudonymize = options.getRules()
-                .getPseudonymizations()
-                .stream()
-                .map(Rules.Rule::getColumns)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toSet());
-
-        String[] header = invertedHeaderMap.values()
-                .stream()
-                .filter(entry -> !columnsToRedact.contains(entry)).toArray(String[]::new);
-
-        ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
-        PrintWriter printWriter = new PrintWriter(baos);
-        CSVPrinter printer = new CSVPrinter(printWriter, CSVFormat.DEFAULT.withHeader(header));
-
-        columnsToPseudonymize
-                .forEach(columnToPseudonymize ->
-                        Preconditions.checkArgument(records.getHeaderMap().containsKey(columnToPseudonymize), "Column %s to be pseudonymized not in file", columnToPseudonymize));
-
-        records.forEach(row -> {
-            List<Object> sanitized = invertedHeaderMap.entrySet()
-                    .stream()
-                    .map(column -> {
-                        String value = row.get(column.getKey());
-                        if (columnsToRedact.contains(column.getValue())) {
-                            return null;
-                        } else if (StringUtils.isNotBlank(value) && columnsToPseudonymize.contains(column.getValue())) {
-                            try {
-                                return objectMapper.writeValueAsString(sanitizer.pseudonymize(value));
-                            } catch (JsonProcessingException e) {
-                                throw new RuntimeException(e);
-                            }
-                        } else {
-                            return value;
-                        }
-                    })
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
-
-            try {
-                printer.printRecord(sanitized);
-            } catch (Throwable e) {
-                throw new RuntimeException("Failed to write row", e);
-            }
-        });
-
-        printWriter.flush();
+        FileHandler fileHandler = fileHandlerStrategy.get(request.getSourceBucketPath());
 
         return StorageEventResponse.builder()
                 .destinationBucketName(request.getDestinationBucket())
-                .bytes(baos.toByteArray())
+                .bytes(fileHandler.handle(request.getReaderStream(), sanitizer))
                 .destinationPath(String.format("%s/%s", FORMATTER.format(Date.from(Instant.now())), request.getSourceBucketPath()))
                 .build();
     }
