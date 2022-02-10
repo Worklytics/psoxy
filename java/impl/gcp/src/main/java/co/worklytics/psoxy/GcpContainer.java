@@ -15,4 +15,6 @@ import javax.inject.Singleton;
 interface GcpContainer {
 
     Route injectRoute(Route route);
+
+    GCSFileEvent injectGCSEvent(GCSFileEvent gcsEvent);
 }
