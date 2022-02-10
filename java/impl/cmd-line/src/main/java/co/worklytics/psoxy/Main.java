@@ -19,7 +19,7 @@ public class Main {
 
         @Named("ForYAML") ObjectMapper yamlMapper();
 
-        FileHandler fileHandler();
+        Handler fileHandler();
     }
 
 
