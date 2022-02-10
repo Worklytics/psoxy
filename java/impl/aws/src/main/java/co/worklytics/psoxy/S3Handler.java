@@ -51,7 +51,7 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
         AmazonS3 s3Client = AmazonS3ClientBuilder.defaultClient();
         S3Object s3Object = s3Client.getObject(new GetObjectRequest(importBucket, sourceKey));
         InputStream objectData = s3Object.getObjectContent();
-        InputStreamReader reader = null;
+        InputStreamReader reader;
 
         if (isBOMEncoded) {
             BOMInputStream is = new BOMInputStream(objectData);

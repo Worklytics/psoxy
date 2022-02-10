@@ -165,6 +165,11 @@ public class CommonRequestHandler {
         return builder.build();
     }
 
+    /**
+     * TODO: rename? is only for CSV; do we want to support other kind of files for storage?
+     * @param request
+     * @return
+     */
     @SneakyThrows
     public StorageEventResponse handle(StorageEventRequest request) {
         CSVParser records = CSVFormat.DEFAULT
