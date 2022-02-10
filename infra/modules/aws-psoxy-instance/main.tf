@@ -19,8 +19,7 @@ resource "aws_lambda_function" "psoxy-instance" {
   memory_size      = 512 # megabytes
 
   environment {
-    # NOTE: can use merge() to combine var map from config with additional values
-    variables = yamldecode(file(var.path_to_config))
+    variables = merge(var.environment_variables, yamldecode(file(var.path_to_config)))
   }
 }
 

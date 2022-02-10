@@ -39,14 +39,14 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
         DaggerAwsContainer.create().injectS3Handler(this);
 
         boolean isBOMEncoded = Boolean.parseBoolean(configService.getConfigPropertyAsOptional(AWSConfigProperty.BOM_ENCODED).orElse("false"));
+        String destinationBucket = configService.getConfigPropertyAsOptional(AWSConfigProperty.OUTPUT_BUCKET)
+                .orElseThrow(() -> new IllegalStateException("Output bucket not found as environment variable!"));
 
         String response = "200 OK";
         S3EventNotification.S3EventNotificationRecord record = s3Event.getRecords().get(0);
 
         String importBucket = record.getS3().getBucket().getName();
         String sourceKey = record.getS3().getObject().getUrlDecodedKey();
-
-        String destinationBucket = importBucket.replace("-import", "-processed");
 
         AmazonS3 s3Client = AmazonS3ClientBuilder.defaultClient();
         S3Object s3Object = s3Client.getObject(new GetObjectRequest(importBucket, sourceKey));

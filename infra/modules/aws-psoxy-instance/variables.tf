@@ -70,3 +70,9 @@ variable "example_api_calls" {
   type        = list(string)
   description = "example endpoints that can be called via proxy"
 }
+
+variable "environment_variables" {
+  type        = map(string)
+  description = "No sensitive variables to add as an environment variable."
+  default     = {}
+}
