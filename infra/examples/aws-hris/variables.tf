@@ -21,9 +21,8 @@ variable "aws_region" {
 variable "caller_aws_account_id" {
   type        = string
   description = "id of Worklytics AWS account from which proxy will be called"
-  default     =  "939846301470:root"
   validation {
-    condition     = can(regex("^\\d{12}:\\w+$", var.caller_aws_account_id))
+    condition     = can(regex("^\\d{12}$", var.caller_aws_account_id))
     error_message = "The caller_aws_account_id value should be 12-digit numeric string."
   }
 }
@@ -38,18 +37,7 @@ variable "environment_name" {
   description = "qualifier to append to name of project that will host your psoxy instance"
 }
 
-variable "msft_tenant_id" {
-  type        = string
-  default     = ""
-  description = "ID of Microsoft tenant to connect to (req'd only if config includes MSFT connectors)"
-}
-
 variable "bucket_prefix" {
   type        = string
   description = "Prefix for buckets. Buckets will be created adding a suffix -import and -processed to this prefix"
-}
-
-variable "certificate_subject" {
-  type        = string
-  description = "value for 'subject' passed to openssl when generation certificate (eg '/C=US/ST=New York/L=New York/CN=www.worklytics.co')"
 }
