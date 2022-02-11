@@ -126,6 +126,12 @@ public class SlackDiscoveryTests extends RulesBaseTestCase {
         );
 
         assertPseudonymized(sanitized, PII);
-        assertRedacted(sanitized, "Test message!", "<@U06CA4EAC|bjin>");
+        assertRedacted(sanitized, "Test message!",
+            "<@U06CA4EAC|bjin>",
+            "text with rich block",
+            "This is likely a pun about the weather.",
+            "We're withholding a pun from you",
+            "Leg end nary a laugh, Ink.");
+
     }
 }
