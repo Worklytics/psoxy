@@ -48,6 +48,8 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
         String importBucket = record.getS3().getBucket().getName();
         String sourceKey = record.getS3().getObject().getUrlDecodedKey();
 
+        log.info(String.format("Received a request for processing %s from bucket %s. BOM flag is marked as %s", sourceKey, importBucket, isBOMEncoded));
+
         AmazonS3 s3Client = AmazonS3ClientBuilder.defaultClient();
         S3Object s3Object = s3Client.getObject(new GetObjectRequest(importBucket, sourceKey));
         InputStream objectData = s3Object.getObjectContent();
@@ -70,6 +72,8 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
         try {
             StorageEventResponse storageEventResponse = storageHandler.handle(request);
 
+            log.info("Writing to: " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationPath());
+
             InputStream is = new ByteArrayInputStream(storageEventResponse.getBytes());
 
             ObjectMetadata meta = new ObjectMetadata();
@@ -77,16 +81,18 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
             meta.setContentLength(storageEventResponse.getBytes().length);
             meta.setContentType(s3Object.getObjectMetadata().getContentType());
 
-            System.out.println("Writing to: " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationPath());
             s3Client.putObject(storageEventResponse.getDestinationBucketName(),
                     storageEventResponse.getDestinationBucketName(),
                     is,
                     meta);
 
-            System.out.println("Successfully pseudonymized " + importBucket + "/"
-                    + sourceKey + " and uploaded to " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationPath());
+            log.info(String.format("Successfully pseudonymized %s/%s and uploaded to %s/%s",
+                    importBucket,
+                    sourceKey,
+                    storageEventResponse.getDestinationBucketName(),
+                    storageEventResponse.getDestinationPath()));
         } catch(Exception e) {
-            System.err.println(e.getMessage());
+            log.severe(e.getMessage());
             System.exit(1);
         }
 
