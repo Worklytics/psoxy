@@ -112,7 +112,7 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
 
 resource "aws_iam_policy" "import_bucket_read_policy" {
   name        = "ReadFromImportBucket"
-  description = "Allow lambda function role to read SSM parameters"
+  description = "Allow lambda function role to read from import bucket"
 
   policy = jsonencode(
     {
@@ -140,7 +140,7 @@ resource "aws_iam_role_policy_attachment" "read_policy_for_import_bucket"{
 
 resource "aws_iam_policy" "processed_bucket_write_policy" {
   name        = "WriteForProcessedBucket"
-  description = "Allow lambda function role to read SSM parameters"
+  description = "Allow lambda function role to write to processed bucket"
 
   policy = jsonencode(
     {
