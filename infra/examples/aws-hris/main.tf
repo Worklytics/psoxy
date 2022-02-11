@@ -109,3 +109,59 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
 
   depends_on = [aws_lambda_permission.allow_import_bucket]
 }
+
+resource "aws_iam_policy" "import_bucket_read_policy" {
+  name        = "ReadFromImportBucket"
+  description = "Allow lambda function role to read SSM parameters"
+
+  policy = jsonencode(
+    {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Action": [
+            "s3:GetObject"
+          ],
+          "Effect": "Allow",
+          "Resource": "${aws_s3_bucket.import_bucket.arn}/*"
+        }
+      ]
+    })
+
+  depends_on = [
+    aws_s3_bucket.import_bucket
+  ]
+}
+
+resource "aws_iam_role_policy_attachment" "read_policy_for_import_bucket"{
+  role       = module.psoxy-file-handler.iam_for_lambda_name
+  policy_arn = aws_iam_policy.import_bucket_read_policy.arn
+}
+
+resource "aws_iam_policy" "processed_bucket_write_policy" {
+  name        = "WriteForProcessedBucket"
+  description = "Allow lambda function role to read SSM parameters"
+
+  policy = jsonencode(
+    {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Action": [
+            "s3:PutObject",
+          ],
+          "Effect": "Allow",
+          "Resource": "${aws_s3_bucket.processed_bucket.arn}/*"
+        }
+      ]
+    })
+
+  depends_on = [
+    aws_s3_bucket.processed_bucket
+  ]
+}
+
+resource "aws_iam_role_policy_attachment" "write_policy_for_processed_bucket"{
+  role       = module.psoxy-file-handler.iam_for_lambda_name
+  policy_arn = aws_iam_policy.processed_bucket_write_policy.arn
+}
