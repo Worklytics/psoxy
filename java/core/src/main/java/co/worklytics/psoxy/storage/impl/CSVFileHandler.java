@@ -7,6 +7,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
@@ -27,7 +28,7 @@ public class CSVFileHandler implements FileHandler {
     ObjectMapper objectMapper;
 
     @Override
-    public byte[] handle(InputStreamReader reader, Sanitizer sanitizer) throws IOException {
+    public byte[] handle(@NonNull InputStreamReader reader, @NonNull Sanitizer sanitizer) throws IOException {
         CSVParser records = CSVFormat.DEFAULT
                 .withFirstRecordAsHeader()
                 .parse(reader);

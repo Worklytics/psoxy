@@ -64,37 +64,32 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
 
         StorageEventRequest request = StorageEventRequest.builder()
                 .sourceBucketName(importBucket)
-                .sourceBucketName(sourceKey)
+                .sourceBucketPath(sourceKey)
                 .destinationBucket(destinationBucket)
                 .readerStream(reader)
                 .build();
 
-        try {
-            StorageEventResponse storageEventResponse = storageHandler.handle(request);
+        StorageEventResponse storageEventResponse = storageHandler.handle(request);
 
-            log.info("Writing to: " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationPath());
+        log.info("Writing to: " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationPath());
 
-            InputStream is = new ByteArrayInputStream(storageEventResponse.getBytes());
+        InputStream is = new ByteArrayInputStream(storageEventResponse.getBytes());
 
-            ObjectMetadata meta = new ObjectMetadata();
+        ObjectMetadata meta = new ObjectMetadata();
 
-            meta.setContentLength(storageEventResponse.getBytes().length);
-            meta.setContentType(s3Object.getObjectMetadata().getContentType());
+        meta.setContentLength(storageEventResponse.getBytes().length);
+        meta.setContentType(s3Object.getObjectMetadata().getContentType());
 
-            s3Client.putObject(storageEventResponse.getDestinationBucketName(),
-                    storageEventResponse.getDestinationBucketName(),
-                    is,
-                    meta);
+        s3Client.putObject(storageEventResponse.getDestinationBucketName(),
+                storageEventResponse.getDestinationPath(),
+                is,
+                meta);
 
-            log.info(String.format("Successfully pseudonymized %s/%s and uploaded to %s/%s",
-                    importBucket,
-                    sourceKey,
-                    storageEventResponse.getDestinationBucketName(),
-                    storageEventResponse.getDestinationPath()));
-        } catch(Exception e) {
-            log.severe(e.getMessage());
-            System.exit(1);
-        }
+        log.info(String.format("Successfully pseudonymized %s/%s and uploaded to %s/%s",
+                importBucket,
+                sourceKey,
+                storageEventResponse.getDestinationBucketName(),
+                storageEventResponse.getDestinationPath()));
 
         return response;
     }

@@ -49,6 +49,7 @@ public class StorageHandler {
     public StorageEventResponse handle(StorageEventRequest request) {
 
         FileHandler fileHandler = fileHandlerStrategy.get(request.getSourceBucketPath());
+        this.sanitizer = loadSanitizerRules();
 
         return StorageEventResponse.builder()
                 .destinationBucketName(request.getDestinationBucket())
