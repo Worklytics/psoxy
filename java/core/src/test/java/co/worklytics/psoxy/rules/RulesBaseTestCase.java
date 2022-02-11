@@ -165,6 +165,7 @@ abstract public class RulesBaseTestCase {
 
 
     protected void assertPseudonymized(String content, Collection<String> shouldBePseudonymized) {
+        System.out.println(prettyPrintJson(content));
         shouldBePseudonymized
             .forEach(s ->
                 assertFalse(content.contains(s), () -> "Sanitized content still contains unpseudonymized: " + s + " at " + this.context(content, s)));
