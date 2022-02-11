@@ -4,7 +4,7 @@ import co.worklytics.psoxy.aws.DaggerAwsContainer;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.StorageEventRequest;
 import co.worklytics.psoxy.gateway.StorageEventResponse;
-import co.worklytics.psoxy.gateway.impl.CommonRequestHandler;
+import co.worklytics.psoxy.storage.StorageHandler;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.events.S3Event;
 import com.amazonaws.services.lambda.runtime.events.models.s3.S3EventNotification;
@@ -27,7 +27,7 @@ import java.nio.charset.StandardCharsets;
 public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestHandler<S3Event, String> {
 
     @Inject
-    CommonRequestHandler requestHandler;
+    StorageHandler storageHandler;
 
     @Inject
     ConfigService configService;
@@ -68,7 +68,7 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
                 .build();
 
         try {
-            StorageEventResponse storageEventResponse = requestHandler.handle(request);
+            StorageEventResponse storageEventResponse = storageHandler.handle(request);
 
             InputStream is = new ByteArrayInputStream(storageEventResponse.getBytes());
 

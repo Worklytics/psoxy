@@ -1,12 +1,8 @@
 package co.worklytics.psoxy.aws;
 
-import co.worklytics.psoxy.FileHandler;
-import co.worklytics.psoxy.FileHandlerStrategy;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.gateway.impl.CompositeConfigService;
-import co.worklytics.psoxy.impl.CSVFileHandler;
-import co.worklytics.psoxy.impl.FileHandlerStrategyImpl;
 import dagger.Module;
 import dagger.Provides;
 import software.amazon.awssdk.regions.Region;

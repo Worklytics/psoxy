@@ -1,4 +1,4 @@
-package co.worklytics.psoxy.impl;
+package co.worklytics.psoxy.storage.impl;
 
 import co.worklytics.psoxy.PsoxyModule;
 import co.worklytics.psoxy.Rules;

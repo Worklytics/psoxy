@@ -1,4 +1,6 @@
-package co.worklytics.psoxy;
+package co.worklytics.psoxy.storage;
+
+import co.worklytics.psoxy.Sanitizer;
 
 import java.io.IOException;
 import java.io.InputStreamReader;

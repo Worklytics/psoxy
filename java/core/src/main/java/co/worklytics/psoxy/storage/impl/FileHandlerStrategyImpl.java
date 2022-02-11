@@ -1,7 +1,8 @@
-package co.worklytics.psoxy.impl;
+package co.worklytics.psoxy.storage.impl;
 
-import co.worklytics.psoxy.FileHandler;
-import co.worklytics.psoxy.FileHandlerStrategy;
+import co.worklytics.psoxy.storage.FileHandler;
+import co.worklytics.psoxy.storage.FileHandlerStrategy;
+import co.worklytics.psoxy.storage.impl.CSVFileHandler;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 

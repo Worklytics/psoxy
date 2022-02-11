@@ -25,10 +25,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.util.Date;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.logging.Level;
@@ -40,7 +36,6 @@ public class CommonRequestHandler {
     //we have ~540 total in Cloud Function connection, so can have generous values here
     private static final int SOURCE_API_REQUEST_CONNECT_TIMEOUT_MILLISECONDS = 30_000;
     private static final int SOURCE_API_REQUEST_READ_TIMEOUT = 300_000;
-    private static final DateFormat FORMATTER = new SimpleDateFormat("yyyy/MM/dd");
 
     @Inject ConfigService config;
     @Inject RulesUtils rulesUtils;
@@ -49,7 +44,6 @@ public class CommonRequestHandler {
     @Inject SanitizerFactory sanitizerFactory;
     @Inject Rules rules;
     @Inject HealthCheckRequestHandler healthCheckRequestHandler;
-    @Inject FileHandlerStrategy fileHandlerStrategy;
 
     private volatile Sanitizer sanitizer;
     private final Object $writeLock = new Object[0];
@@ -159,23 +153,6 @@ public class CommonRequestHandler {
         builder.body(proxyResponseContent);
 
         return builder.build();
-    }
-
-    /**
-     * TODO: rename? is only for CSV; do we want to support other kind of files for storage?
-     * @param request
-     * @return
-     */
-    @SneakyThrows
-    public StorageEventResponse handle(StorageEventRequest request) {
-
-        FileHandler fileHandler = fileHandlerStrategy.get(request.getSourceBucketPath());
-
-        return StorageEventResponse.builder()
-                .destinationBucketName(request.getDestinationBucket())
-                .bytes(fileHandler.handle(request.getReaderStream(), sanitizer))
-                .destinationPath(String.format("%s/%s", FORMATTER.format(Date.from(Instant.now())), request.getSourceBucketPath()))
-                .build();
     }
 
     @SneakyThrows

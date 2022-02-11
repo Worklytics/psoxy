@@ -1,6 +1,6 @@
-package co.worklytics.psoxy.impl;
+package co.worklytics.psoxy.storage.impl;
 
-import co.worklytics.psoxy.FileHandler;
+import co.worklytics.psoxy.storage.FileHandler;
 import co.worklytics.psoxy.Rules;
 import co.worklytics.psoxy.Sanitizer;
 import com.fasterxml.jackson.core.JsonProcessingException;
