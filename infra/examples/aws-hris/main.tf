@@ -51,11 +51,11 @@ locals {
 }
 
 resource "aws_s3_bucket" "import_bucket" {
-  bucket = "$(var.bucket_prefix)-import"
+  bucket = "${var.bucket_prefix}-import"
 }
 
 resource "aws_s3_bucket" "processed_bucket" {
-  bucket = "$(var.bucket_prefix)-processed"
+  bucket = "${var.bucket_prefix}-processed"
 }
 
 module "psoxy-file-handler" {
