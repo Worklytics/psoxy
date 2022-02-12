@@ -45,7 +45,7 @@ public class ParameterStoreConfigService implements ConfigService {
     public Optional<String> getConfigPropertyAsOptional(ConfigProperty property) {
         try {
             GetParameterRequest parameterRequest = GetParameterRequest.builder()
-                .name(this.namespace + property.name())
+                .name(String.join("_", this.namespace, property.name()))
                 .withDecryption(true)
                 .build();
             GetParameterResponse parameterResponse = client.getParameter(parameterRequest);

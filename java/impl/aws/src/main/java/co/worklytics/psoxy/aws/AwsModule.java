@@ -50,7 +50,7 @@ public interface AwsModule {
     }
 
     static String asParameterStoreNamespace(String functionName) {
-        return functionName.toUpperCase().replace("-", "_") + "_";
+        return functionName.toUpperCase().replace("-", "_");
     }
 
     @Provides
