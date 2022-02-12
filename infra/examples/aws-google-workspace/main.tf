@@ -216,7 +216,7 @@ resource "aws_ssm_parameter" "long-access-token-secret" {
   name        = "PSOXY_ACCESS_TOKEN_${each.value.function_name}"
   type        = "SecureString"
   description = "The long lived token for ${each.value.function_name}"
-  value       = sensitive("")
+  value       = sensitive("anything")
 }
 
 module "aws-psoxy-long-auth-connectors" {
