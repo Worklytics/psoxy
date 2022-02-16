@@ -202,7 +202,7 @@ locals {
       deploy = true
       function_name = "psoxy-zoom"
       source_kind = "zoom"
-      example_api_calls = []
+      example_api_calls = ["/v2/users"]
     }
   }
 }
