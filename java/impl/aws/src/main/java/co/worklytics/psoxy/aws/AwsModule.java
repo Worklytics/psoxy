@@ -17,8 +17,6 @@ import javax.inject.Named;
 @Module
 public interface AwsModule {
 
-
-
     /**
      * see "https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html#configuration-envvars-runtimer"
      */
@@ -38,7 +36,7 @@ public interface AwsModule {
     //global parameters
     @Provides @Named("Global")
     static ParameterStoreConfigService parameterStoreConfigService(SsmClient ssmClient) {
-        return new ParameterStoreConfigService("", ssmClient);
+        return new ParameterStoreConfigService(null, ssmClient);
     }
 
     //parameters scoped to function
