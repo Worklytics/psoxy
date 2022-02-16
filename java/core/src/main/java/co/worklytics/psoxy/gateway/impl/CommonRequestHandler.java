@@ -212,7 +212,9 @@ public class CommonRequestHandler {
         uriBuilder.setHost(config.getConfigPropertyOrError(ProxyConfigProperty.TARGET_HOST));
         // URL comes encoded, decode it prior to perform call to API origin to avoid double encoding issues
         uriBuilder.setPath(URLDecoder.decode(request.getPath(), StandardCharsets.UTF_8));
-        uriBuilder.setCustomQuery(URLDecoder.decode(request.getQuery().orElse(""), StandardCharsets.UTF_8));
+        if (request.getQuery().stream().allMatch(StringUtils::isNotBlank)) {
+            uriBuilder.setCustomQuery(URLDecoder.decode(request.getQuery().orElse(""), StandardCharsets.UTF_8));
+        }
         return uriBuilder.build().toURL();
     }
 
