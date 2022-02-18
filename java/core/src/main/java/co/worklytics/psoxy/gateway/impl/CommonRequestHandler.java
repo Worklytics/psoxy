@@ -211,8 +211,14 @@ public class CommonRequestHandler {
         uriBuilder.setScheme("https");
         uriBuilder.setHost(config.getConfigPropertyOrError(ProxyConfigProperty.TARGET_HOST));
         // URL comes encoded, decode it prior to perform call to API origin to avoid double encoding issues
+        // per documentation, both setPath & setCustomQuery:
+        // https://javadoc.io/doc/org.apache.httpcomponents/httpclient/latest/org/apache/http/client/utils/URIBuilder.html#setPath(java.lang.String)
+        // The value is expected to be unescaped and may contain non ASCII characters.
         uriBuilder.setPath(URLDecoder.decode(request.getPath(), StandardCharsets.UTF_8));
-        uriBuilder.setCustomQuery(URLDecoder.decode(request.getQuery().orElse(""), StandardCharsets.UTF_8));
+        if (StringUtils.isNotBlank(request.getQuery().orElse(null))) {
+            // if applied on empty, will append "?"
+            uriBuilder.setCustomQuery(URLDecoder.decode(request.getQuery().orElse(""), StandardCharsets.UTF_8));
+        }
         return uriBuilder.build().toURL();
     }
 
