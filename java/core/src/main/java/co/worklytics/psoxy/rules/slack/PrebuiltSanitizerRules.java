@@ -28,7 +28,11 @@ public class PrebuiltSanitizerRules {
             .relativeUrlRegex("\\/api\\/discovery\\.users\\.list(?:\\?.+)?")
             // we don't care about names
             .jsonPath("$.users[*]['name','real_name']")
-            .jsonPath("$.users[*].profile['name','real_name','display_name','display_name_normalized','real_name_normalized','title','phone','skype','first_name','last_name']")
+            // profile contains a lot of stuff. We just mainly need "email" and "team". clean it up
+            // TODO: ideally this is a whitelist
+            .jsonPath("$.users[*].profile['title','phone','skype','first_name','last_name','real_name','real_name_normalized','display_name','display_name_normalized']")
+            .jsonPath("$.users[*].profile['fields','pronouns','status_text','status_emoji','status_emoji_display_info','status_expiration','avatar_hash']")
+            .jsonPath("$.users[*].profile['image_original','is_custom_image','image_24','image_32','image_48','image_72','image_192','image_512','image_1024','status_text_canonical']")
             .build()
         )
         // conversations list
@@ -56,6 +60,8 @@ public class PrebuiltSanitizerRules {
             // we don't care about text
             // username is a variation of user, so just skip it to avoid references
             .jsonPath("$.messages[*]['text','username']")
+            .jsonPath("$.messages[*]..['text']")
+            .jsonPath("$.messages[*].attachments[*]['fallback','service_name']")
             .build()
         )
         .build();

@@ -8,6 +8,9 @@ import co.worklytics.psoxy.impl.SanitizerImpl;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonParser;
 import dagger.Component;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
@@ -223,6 +226,17 @@ abstract public class RulesBaseTestCase {
     @SneakyThrows
     protected void assertUrlBlocked(String url) {
         assertFalse(sanitizer.isAllowed(new URL(url)), "rules allowed url that should be blocked: " + url);
+    }
+
+    /**
+     * Utility method to print out formatted JSON for debug easily
+     * @param json
+     * @return
+     */
+    @SuppressWarnings("unused")
+    protected String prettyPrintJson(String json) {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        return gson.toJson(JsonParser.parseString(json));
     }
 
 }
