@@ -70,7 +70,6 @@ resource "aws_lambda_permission" "lambda_permission" {
   source_arn = "${var.api_gateway.execution_arn}/*/*/${var.function_name}/{proxy+}"
 
   depends_on = [
-
     aws_lambda_function.psoxy-instance
   ]
 }

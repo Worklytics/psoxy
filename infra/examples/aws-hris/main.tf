@@ -165,3 +165,35 @@ resource "aws_iam_role_policy_attachment" "write_policy_for_processed_bucket"{
   role       = module.psoxy-file-handler.iam_for_lambda_name
   policy_arn = aws_iam_policy.processed_bucket_write_policy.arn
 }
+
+resource "aws_iam_policy" "worklyics_bucket_access_policy" {
+  name        = "ReadAccessForWorklyics"
+  description = "Allow Worklytics to access this bucket for reading its content"
+
+  policy = jsonencode(
+    {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Action": [
+            "s3:GetObject",
+            "s3:ListBucket"
+          ],
+          "Effect": "Allow",
+          "Resource": [
+            "${aws_s3_bucket.processed_bucket.arn}",
+            "${aws_s3_bucket.processed_bucket.arn}/*"
+          ]
+        }
+      ]
+    })
+
+  depends_on = [
+    aws_s3_bucket.processed_bucket
+  ]
+}
+
+resource "aws_iam_role_policy_attachment" "worklyics_bucket_access_policy"{
+  role       = module.psoxy-aws.api_caller_role_name
+  policy_arn = aws_iam_policy.worklyics_bucket_access_policy.arn
+}
