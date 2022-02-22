@@ -26,17 +26,17 @@ Example of `hris.yaml` config file with Base64 rules:
 
 ```yaml
 SOURCE: aws-hris-import
-RULES: cHNldWRvbnltaXphdGlvbnM6CiAgLSBjb2x1bW5zOgogICAgICAtICJlbWFpbCIKICAgIHJlbGF0aXZlVXJsUmVnZXg6ICIvYWRtaW4vcmVwb3J0cy92MS9hY3Rpdml0eS91c2Vycy9hbGwvYXBwbGljYXRpb25zL21lZXQuKiIKcmVkYWN0aW9uczoKICAtIGNvbHVtbnM6CiAgICAgIC0gIm1hbmFnZXJFbWFpbCIK
+RULES: cHNldWRvbnltaXphdGlvbnM6CiAgLSBjc3ZDb2x1bW5zOgogICAgICAtICJlbWFpbCIKcmVkYWN0aW9uczoKICAtIGNzdkNvbHVtbnM6CiAgICAgIC0gIm1hbmFnZXJFbWFpbCI=
 ```
 
 In this case rules are created based on following configuration:
 
 ```yaml
 pseudonymizations:
-  - columns:
+  - csvColumns:
       - "email"
 redactions:
-  - columns:
+  - csvColumns:
       - "managerEmail"
 ```
 

@@ -43,14 +43,14 @@ public class CSVFileHandler implements FileHandler {
         Set<String> columnsToRedact = options.getRules()
                 .getRedactions()
                 .stream()
-                .map(Rules.Rule::getColumns)
+                .map(Rules.Rule::getCsvColumns)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toSet());
 
         Set<String> columnsToPseudonymize = options.getRules()
                 .getPseudonymizations()
                 .stream()
-                .map(Rules.Rule::getColumns)
+                .map(Rules.Rule::getCsvColumns)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toSet());
 

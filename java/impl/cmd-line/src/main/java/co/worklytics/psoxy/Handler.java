@@ -45,10 +45,10 @@ public class Handler {
 
         options.rules(Rules.builder()
                 .pseudonymization(Rules.Rule.builder()
-                        .columns(Lists.newArrayList(config.getColumnsToPseudonymize()))
+                        .csvColumns(Lists.newArrayList(config.getColumnsToPseudonymize()))
                         .build())
                 .redaction(Rules.Rule.builder()
-                        .columns(Lists.newArrayList(config.getColumnsToRedact()))
+                        .csvColumns(Lists.newArrayList(config.getColumnsToRedact()))
                         .build())
                 .build());
 
