@@ -52,38 +52,48 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
 
         AmazonS3 s3Client = AmazonS3ClientBuilder.defaultClient();
         S3Object s3Object = s3Client.getObject(new GetObjectRequest(importBucket, sourceKey));
-        InputStream objectData = s3Object.getObjectContent();
-        InputStreamReader reader;
+        StorageEventResponse storageEventResponse;
 
-        if (isBOMEncoded) {
-            BOMInputStream is = new BOMInputStream(objectData);
-            reader = new InputStreamReader(is, StandardCharsets.UTF_8.name());
-        } else {
-            reader = new InputStreamReader(objectData);
+        try(InputStream objectData = s3Object.getObjectContent()) {
+            InputStreamReader reader;
+
+            BOMInputStream is = null;
+            if (isBOMEncoded) {
+                is = new BOMInputStream(objectData);
+                reader = new InputStreamReader(is, StandardCharsets.UTF_8.name());
+            } else {
+                reader = new InputStreamReader(objectData);
+            }
+
+            StorageEventRequest request = StorageEventRequest.builder()
+                    .sourceBucketName(importBucket)
+                    .sourceObjectPath(sourceKey)
+                    .destinationBucket(destinationBucket)
+                    .readerStream(reader)
+                    .build();
+
+           storageEventResponse = storageHandler.handle(request);
+
+           if (isBOMEncoded) {
+               is.close();
+           }
+           reader.close();
         }
-
-        StorageEventRequest request = StorageEventRequest.builder()
-                .sourceBucketName(importBucket)
-                .sourceObjectPath(sourceKey)
-                .destinationBucket(destinationBucket)
-                .readerStream(reader)
-                .build();
-
-        StorageEventResponse storageEventResponse = storageHandler.handle(request);
 
         log.info("Writing to: " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationObjectPath());
 
-        InputStream is = new ByteArrayInputStream(storageEventResponse.getBytes());
+        try (InputStream is = new ByteArrayInputStream(storageEventResponse.getBytes())) {
 
-        ObjectMetadata meta = new ObjectMetadata();
+            ObjectMetadata meta = new ObjectMetadata();
 
-        meta.setContentLength(storageEventResponse.getBytes().length);
-        meta.setContentType(s3Object.getObjectMetadata().getContentType());
+            meta.setContentLength(storageEventResponse.getBytes().length);
+            meta.setContentType(s3Object.getObjectMetadata().getContentType());
 
-        s3Client.putObject(storageEventResponse.getDestinationBucketName(),
-                storageEventResponse.getDestinationObjectPath(),
-                is,
-                meta);
+            s3Client.putObject(storageEventResponse.getDestinationBucketName(),
+                    storageEventResponse.getDestinationObjectPath(),
+                    is,
+                    meta);
+        }
 
         log.info(String.format("Successfully pseudonymized %s/%s and uploaded to %s/%s",
                 importBucket,

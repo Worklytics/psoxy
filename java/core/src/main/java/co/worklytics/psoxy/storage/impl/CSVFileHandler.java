@@ -60,40 +60,41 @@ public class CSVFileHandler implements FileHandler {
                 .stream()
                 .filter(entry -> !columnsToRedact.contains(entry)).toArray(String[]::new);
 
-        ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
-        PrintWriter printWriter = new PrintWriter(baos);
-        CSVPrinter printer = new CSVPrinter(printWriter, CSVFormat.DEFAULT.withHeader(header));
+        try(ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
+            PrintWriter printWriter = new PrintWriter(baos);
+            CSVPrinter printer = new CSVPrinter(printWriter, CSVFormat.DEFAULT.withHeader(header))){
 
-        columnsToPseudonymize
-                .forEach(columnToPseudonymize ->
-                        Preconditions.checkArgument(records.getHeaderMap().containsKey(columnToPseudonymize), "Column %s to be pseudonymized not in file", columnToPseudonymize));
+            columnsToPseudonymize
+                    .forEach(columnToPseudonymize ->
+                            Preconditions.checkArgument(records.getHeaderMap().containsKey(columnToPseudonymize), "Column %s to be pseudonymized not in file", columnToPseudonymize));
 
-        records.forEach(row -> {
-            List<Object> sanitized = Arrays.stream(header) // only iterate on allowed headers
-                    .map(column -> {
-                        String value = row.get(column);
-                        if (columnsToPseudonymize.contains(column)) {
-                            if (StringUtils.isNotBlank(value)) {
-                                try {
-                                    return objectMapper.writeValueAsString(sanitizer.pseudonymize(value));
-                                } catch (JsonProcessingException e) {
-                                    throw new RuntimeException(e);
+            records.forEach(row -> {
+                List<Object> sanitized = Arrays.stream(header) // only iterate on allowed headers
+                        .map(column -> {
+                            String value = row.get(column);
+                            if (columnsToPseudonymize.contains(column)) {
+                                if (StringUtils.isNotBlank(value)) {
+                                    try {
+                                        return objectMapper.writeValueAsString(sanitizer.pseudonymize(value));
+                                    } catch (JsonProcessingException e) {
+                                        throw new RuntimeException(e);
+                                    }
                                 }
                             }
-                        }
-                        return value;
-                    })
-                    .collect(Collectors.toList());
+                            return value;
+                        })
+                        .collect(Collectors.toList());
 
-            try {
-                printer.printRecord(sanitized);
-            } catch (Throwable e) {
-                throw new RuntimeException("Failed to write row", e);
-            }
-        });
+                try {
+                    printer.printRecord(sanitized);
+                } catch (Throwable e) {
+                    throw new RuntimeException("Failed to write row", e);
+                }
+            });
 
-        printWriter.flush();
+            printWriter.flush();
 
-        return baos.toByteArray();
+            return baos.toByteArray();
+        }
     }
 }
