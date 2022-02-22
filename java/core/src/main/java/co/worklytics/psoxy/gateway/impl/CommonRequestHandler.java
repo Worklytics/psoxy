@@ -23,8 +23,6 @@ import org.apache.http.entity.ContentType;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.net.URL;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.logging.Level;
@@ -207,19 +205,20 @@ public class CommonRequestHandler {
 
     @SneakyThrows
     public URL buildTarget(HttpEventRequest request) {
+        // contents may come encoded. It should respect url as it comes.
+        // Construct URL directly concatenating instead of URIBuilder as it may re-encode.
         URIBuilder uriBuilder = new URIBuilder();
         uriBuilder.setScheme("https");
         uriBuilder.setHost(config.getConfigPropertyOrError(ProxyConfigProperty.TARGET_HOST));
-        // URL comes encoded, decode it prior to perform call to API origin to avoid double encoding issues
-        // per documentation, both setPath & setCustomQuery:
-        // https://javadoc.io/doc/org.apache.httpcomponents/httpclient/latest/org/apache/http/client/utils/URIBuilder.html#setPath(java.lang.String)
-        // The value is expected to be unescaped and may contain non ASCII characters.
-        uriBuilder.setPath(URLDecoder.decode(request.getPath(), StandardCharsets.UTF_8));
+        URL hostURL = uriBuilder.build().toURL();
+        String hostPlusPath =
+            StringUtils.stripEnd(hostURL.toString(),"/") + "/" +
+            StringUtils.stripStart(request.getPath(),"/");
+        String targetURLString = hostPlusPath;
         if (StringUtils.isNotBlank(request.getQuery().orElse(null))) {
-            // if applied on empty, will append "?"
-            uriBuilder.setCustomQuery(URLDecoder.decode(request.getQuery().orElse(""), StandardCharsets.UTF_8));
+            targetURLString = hostPlusPath + "?" + request.getQuery().get();
         }
-        return uriBuilder.build().toURL();
+        return new URL(targetURLString);
     }
 
     private void logIfDevelopmentMode(Supplier<String> messageSupplier) {
