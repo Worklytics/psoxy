@@ -1,15 +1,14 @@
 package co.worklytics.psoxy.storage.impl;
 
 import co.worklytics.psoxy.storage.FileHandler;
-import co.worklytics.psoxy.storage.FileHandlerStrategy;
-import co.worklytics.psoxy.storage.impl.CSVFileHandler;
+import co.worklytics.psoxy.storage.FileHandlerFactory;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
 import javax.inject.Inject;
 
 @NoArgsConstructor(onConstructor_ = @Inject)
-public class FileHandlerStrategyImpl implements FileHandlerStrategy {
+public class FileHandlerFactoryImpl implements FileHandlerFactory {
 
     @Inject
     CSVFileHandler csvFileHandler;

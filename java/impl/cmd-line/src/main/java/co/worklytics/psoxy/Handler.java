@@ -1,6 +1,6 @@
 package co.worklytics.psoxy;
 
-import co.worklytics.psoxy.storage.FileHandlerStrategy;
+import co.worklytics.psoxy.storage.FileHandlerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.util.Lists;
 import com.google.cloud.secretmanager.v1.AccessSecretVersionResponse;
@@ -23,7 +23,7 @@ public class Handler {
     @Inject ObjectMapper jsonMapper;
     @Inject SanitizerFactory sanitizerFactory;
     @Inject
-    FileHandlerStrategy fileHandlerStrategy;
+    FileHandlerFactory fileHandlerStrategy;
 
     @SneakyThrows
     public void pseudonymize(@NonNull Config config,

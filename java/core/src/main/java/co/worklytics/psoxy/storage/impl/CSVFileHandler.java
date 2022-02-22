@@ -21,6 +21,11 @@ import java.io.PrintWriter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Handles a CSV file to apply the rules pseudonymize the content.
+ * CSV should have the first row with headers and being separated with commas; content should be quoted
+ * if include commas or quotes inside.
+ */
 @NoArgsConstructor(onConstructor_ = @Inject)
 public class CSVFileHandler implements FileHandler {
 

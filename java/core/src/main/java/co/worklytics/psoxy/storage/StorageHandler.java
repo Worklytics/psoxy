@@ -23,7 +23,7 @@ public class StorageHandler {
     @Inject
     Rules rules;
     @Inject
-    FileHandlerStrategy fileHandlerStrategy;
+    FileHandlerFactory fileHandlerStrategy;
     @Inject
     SanitizerFactory sanitizerFactory;
 
