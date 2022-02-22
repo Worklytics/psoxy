@@ -1,6 +1,6 @@
 # aws-hris
 
-This example provisions psoxy as an AWS Lambda that pseudonomizies HRIS files. The source file is dropped in a *import bucket* and
+This example provisions an AWS Lambda that pseudonomizes HRIS files. The source file is dropped in a *import bucket* and
 result will appear in *processed bucket*. 
 
 ## Authentication
