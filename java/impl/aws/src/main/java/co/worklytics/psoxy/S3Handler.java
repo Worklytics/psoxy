@@ -32,6 +32,9 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
     @Inject
     ConfigService configService;
 
+    @Inject
+    AmazonS3 s3Client;
+
     @SneakyThrows
     @Override
     public String handleRequest(S3Event s3Event, Context context) {
@@ -50,7 +53,6 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
 
         log.info(String.format("Received a request for processing %s from bucket %s. BOM flag is marked as %s", sourceKey, importBucket, isBOMEncoded));
 
-        AmazonS3 s3Client = AmazonS3ClientBuilder.defaultClient();
         S3Object s3Object = s3Client.getObject(new GetObjectRequest(importBucket, sourceKey));
         StorageEventResponse storageEventResponse;
 
