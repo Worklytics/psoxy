@@ -1,6 +1,8 @@
 package co.worklytics.psoxy.storage;
 
-import co.worklytics.psoxy.*;
+import co.worklytics.psoxy.Rules;
+import co.worklytics.psoxy.Sanitizer;
+import co.worklytics.psoxy.SanitizerFactory;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.StorageEventRequest;
 import co.worklytics.psoxy.gateway.StorageEventResponse;
@@ -8,15 +10,9 @@ import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 
 import javax.inject.Inject;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.util.Date;
 
 @NoArgsConstructor(onConstructor_ = @Inject)
 public class StorageHandler {
-
-    private static final DateFormat FORMATTER = new SimpleDateFormat("yyyy/MM/dd");
 
     @Inject
     ConfigService config;
@@ -50,7 +46,7 @@ public class StorageHandler {
         return StorageEventResponse.builder()
                 .destinationBucketName(request.getDestinationBucket())
                 .bytes(fileHandler.handle(request.getReaderStream(), sanitizer))
-                .destinationObjectPath(String.format("%s/%s", FORMATTER.format(Date.from(Instant.now())), request.getSourceObjectPath()))
+                .destinationObjectPath(request.getSourceObjectPath())
                 .build();
     }
 }
