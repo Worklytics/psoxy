@@ -128,4 +128,29 @@ public class CSVFileHandlerTest {
             assertEquals(EXPECTED, new String(result));
         }
     }
+
+    @Test
+    @SneakyThrows
+    void handle_quotes() {
+        final String EXPECTED = "Employee Id,Email,Some Department\r\n" +
+                "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",\",,,\"\r\n";
+
+        Sanitizer sanitizer = sanitizerFactory.create(Sanitizer.Options.builder()
+                .rules(Rules.builder()
+                        .pseudonymization(Rules.Rule.builder()
+                                .csvColumns(Arrays.asList("Employee Id", "Email"))
+                                .build())
+                        .build())
+                .pseudonymizationSalt("salt")
+                .defaultScopeId("hris")
+                .build());
+
+        File inputFile = new File(getClass().getResource("/csv/hris-example-quotes.csv").getFile());
+
+        try (FileReader in = new FileReader(inputFile)) {
+            byte[] result  = csvFileHandler.handle(in, sanitizer);
+
+            assertEquals(EXPECTED, new String(result));
+        }
+    }
 }

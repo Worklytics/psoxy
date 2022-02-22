@@ -40,9 +40,6 @@ public class CSVFileHandler implements FileHandler {
 
         Preconditions.checkArgument(records.getHeaderMap() != null, "Failed to parse header from file");
 
-        Map<Integer, String> invertedHeaderMap = records.getHeaderMap().entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey, (a, b) -> a, TreeMap::new));
-
         Sanitizer.Options options = sanitizer.getOptions();
 
         Set<String> columnsToRedact = options.getRules()
@@ -59,7 +56,7 @@ public class CSVFileHandler implements FileHandler {
                 .flatMap(Collection::stream)
                 .collect(Collectors.toSet());
 
-        String[] header = invertedHeaderMap.values()
+        String[] header = records.getHeaderMap().keySet()
                 .stream()
                 .filter(entry -> !columnsToRedact.contains(entry)).toArray(String[]::new);
 
@@ -72,23 +69,20 @@ public class CSVFileHandler implements FileHandler {
                         Preconditions.checkArgument(records.getHeaderMap().containsKey(columnToPseudonymize), "Column %s to be pseudonymized not in file", columnToPseudonymize));
 
         records.forEach(row -> {
-            List<Object> sanitized = invertedHeaderMap.entrySet()
-                    .stream()
+            List<Object> sanitized = Arrays.stream(header) // only iterate on allowed headers
                     .map(column -> {
-                        String value = row.get(column.getKey());
-                        if (columnsToRedact.contains(column.getValue())) {
-                            return null;
-                        } else if (StringUtils.isNotBlank(value) && columnsToPseudonymize.contains(column.getValue())) {
-                            try {
-                                return objectMapper.writeValueAsString(sanitizer.pseudonymize(value));
-                            } catch (JsonProcessingException e) {
-                                throw new RuntimeException(e);
+                        String value = row.get(column);
+                        if (columnsToPseudonymize.contains(column)) {
+                            if (StringUtils.isNotBlank(value)) {
+                                try {
+                                    return objectMapper.writeValueAsString(sanitizer.pseudonymize(value));
+                                } catch (JsonProcessingException e) {
+                                    throw new RuntimeException(e);
+                                }
                             }
-                        } else {
-                            return value;
                         }
+                        return value;
                     })
-                    .filter(Objects::nonNull)
                     .collect(Collectors.toList());
 
             try {
