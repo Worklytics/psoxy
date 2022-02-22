@@ -64,14 +64,14 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
 
         StorageEventRequest request = StorageEventRequest.builder()
                 .sourceBucketName(importBucket)
-                .sourceBucketPath(sourceKey)
+                .sourceObjectPath(sourceKey)
                 .destinationBucket(destinationBucket)
                 .readerStream(reader)
                 .build();
 
         StorageEventResponse storageEventResponse = storageHandler.handle(request);
 
-        log.info("Writing to: " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationPath());
+        log.info("Writing to: " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationObjectPath());
 
         InputStream is = new ByteArrayInputStream(storageEventResponse.getBytes());
 
@@ -81,7 +81,7 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
         meta.setContentType(s3Object.getObjectMetadata().getContentType());
 
         s3Client.putObject(storageEventResponse.getDestinationBucketName(),
-                storageEventResponse.getDestinationPath(),
+                storageEventResponse.getDestinationObjectPath(),
                 is,
                 meta);
 
@@ -89,7 +89,7 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
                 importBucket,
                 sourceKey,
                 storageEventResponse.getDestinationBucketName(),
-                storageEventResponse.getDestinationPath()));
+                storageEventResponse.getDestinationObjectPath()));
 
         return response;
     }

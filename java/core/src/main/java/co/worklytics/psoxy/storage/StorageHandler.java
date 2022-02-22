@@ -44,13 +44,13 @@ public class StorageHandler {
     @SneakyThrows
     public StorageEventResponse handle(StorageEventRequest request) {
 
-        FileHandler fileHandler = fileHandlerStrategy.get(request.getSourceBucketPath());
+        FileHandler fileHandler = fileHandlerStrategy.get(request.getSourceObjectPath());
         this.sanitizer = loadSanitizerRules();
 
         return StorageEventResponse.builder()
                 .destinationBucketName(request.getDestinationBucket())
                 .bytes(fileHandler.handle(request.getReaderStream(), sanitizer))
-                .destinationPath(String.format("%s/%s", FORMATTER.format(Date.from(Instant.now())), request.getSourceBucketPath()))
+                .destinationObjectPath(String.format("%s/%s", FORMATTER.format(Date.from(Instant.now())), request.getSourceObjectPath()))
                 .build();
     }
 }
