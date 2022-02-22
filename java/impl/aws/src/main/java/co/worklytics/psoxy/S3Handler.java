@@ -45,7 +45,6 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
         String destinationBucket = configService.getConfigPropertyAsOptional(AWSConfigProperty.OUTPUT_BUCKET)
                 .orElseThrow(() -> new IllegalStateException("Output bucket not found as environment variable!"));
 
-        String response = "200 OK";
         S3EventNotification.S3EventNotificationRecord record = s3Event.getRecords().get(0);
 
         String importBucket = record.getS3().getBucket().getName();
@@ -103,6 +102,6 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
                 storageEventResponse.getDestinationBucketName(),
                 storageEventResponse.getDestinationObjectPath()));
 
-        return response;
+        return "Processed!";
     }
 }
