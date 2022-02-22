@@ -9,7 +9,6 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.events.S3Event;
 import com.amazonaws.services.lambda.runtime.events.models.s3.S3EventNotification;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
@@ -69,7 +68,7 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
             StorageEventRequest request = StorageEventRequest.builder()
                     .sourceBucketName(importBucket)
                     .sourceObjectPath(sourceKey)
-                    .destinationBucket(destinationBucket)
+                    .destinationBucketName(destinationBucket)
                     .readerStream(reader)
                     .build();
 

@@ -44,7 +44,7 @@ public class StorageHandler {
         this.sanitizer = loadSanitizerRules();
 
         return StorageEventResponse.builder()
-                .destinationBucketName(request.getDestinationBucket())
+                .destinationBucketName(request.getDestinationBucketName())
                 .bytes(fileHandler.handle(request.getReaderStream(), sanitizer))
                 .destinationObjectPath(request.getSourceObjectPath())
                 .build();

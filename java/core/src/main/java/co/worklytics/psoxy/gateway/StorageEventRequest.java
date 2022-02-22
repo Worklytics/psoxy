@@ -29,5 +29,5 @@ public class StorageEventRequest {
     /**
      * If provided, the name of the destination bucket that can be used
      */
-    String destinationBucket;
+    String destinationBucketName;
 }
