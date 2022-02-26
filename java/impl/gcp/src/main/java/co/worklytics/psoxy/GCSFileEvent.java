@@ -3,7 +3,7 @@ package co.worklytics.psoxy;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.StorageEventRequest;
 import co.worklytics.psoxy.gateway.StorageEventResponse;
-import co.worklytics.psoxy.gateway.impl.CommonRequestHandler;
+import co.worklytics.psoxy.storage.StorageHandler;
 import com.google.cloud.functions.BackgroundFunction;
 import com.google.cloud.functions.Context;
 import com.google.cloud.storage.BlobId;
@@ -22,7 +22,7 @@ import java.nio.charset.StandardCharsets;
 public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
 
     @Inject
-    CommonRequestHandler requestHandler;
+    StorageHandler storageHandler;
 
     @Inject
     ConfigService configService;
@@ -46,8 +46,9 @@ public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
             InputStream objectData = new ByteArrayInputStream(storage.readAllBytes(null));
             InputStreamReader reader;
 
+            BOMInputStream is = null;
             if (isBOMEncoded) {
-                BOMInputStream is = new BOMInputStream(objectData);
+                is = new BOMInputStream(objectData);
                 reader = new InputStreamReader(is, StandardCharsets.UTF_8.name());
             } else {
                 reader = new InputStreamReader(objectData);
@@ -56,22 +57,27 @@ public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
             StorageEventRequest request = StorageEventRequest.builder()
                     .sourceBucketName(importBucket)
                     .sourceBucketName(sourceName)
-                    .destinationBucket(destinationBucket)
+                    .destinationBucketName(destinationBucket)
                     .readerStream(reader)
                     .build();
 
-            StorageEventResponse storageEventResponse = requestHandler.handle(request);
+            StorageEventResponse storageEventResponse = storageHandler.handle(request);
+            reader.close();
 
-            InputStream is = new ByteArrayInputStream(storageEventResponse.getBytes());
+            InputStream processedStream = new ByteArrayInputStream(storageEventResponse.getBytes());
 
-            System.out.println("Writing to: " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationPath());
+            System.out.println("Writing to: " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationObjectPath());
 
-            storage.createFrom(BlobInfo.newBuilder(BlobId.of(storageEventResponse.getDestinationBucketName(), storageEventResponse.getDestinationPath()))
+            storage.createFrom(BlobInfo.newBuilder(BlobId.of(storageEventResponse.getDestinationBucketName(), storageEventResponse.getDestinationObjectPath()))
                     .setContentType(blobInfo.getContentType())
-                    .build(), is);
+                    .build(), processedStream);
 
             System.out.println("Successfully pseudonymized " + importBucket + "/"
-                    + sourceName + " and uploaded to " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationPath());
+                    + sourceName + " and uploaded to " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationObjectPath());
+
+            if (isBOMEncoded) {
+                is.close();
+            }
         }
     }
 
