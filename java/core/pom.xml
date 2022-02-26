@@ -77,7 +77,7 @@
         <dependency>
             <groupId>com.jayway.jsonpath</groupId>
             <artifactId>json-path</artifactId>
-            <version>2.6.0</version>
+            <version>${dependency.json-path.version}</version>
         </dependency>
         <!-- Jackson - JSON serialization/deserialization -->
         <!-- trying to force Restlet to use these, rather than codehaus versions -->
@@ -140,6 +140,14 @@
             <version>${dependency.mockito-junit-jupiter.version}</version>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>com.jayway.jsonpath</groupId>
+            <artifactId>json-path-assert</artifactId>
+            <version>${dependency.json-path.version}</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
 
