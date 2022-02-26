@@ -30,7 +30,7 @@ public class Validator {
     }
 
     static public void validate(@NonNull Rules.Rule rule) {
-        if (rule.getColumns() == null || rule.getColumns().isEmpty())  {
+        if (rule.getCsvColumns() == null || rule.getCsvColumns().isEmpty())  {
             Pattern.compile(rule.getRelativeUrlRegex());
             rule.getJsonPaths().forEach(p -> {
                 try {

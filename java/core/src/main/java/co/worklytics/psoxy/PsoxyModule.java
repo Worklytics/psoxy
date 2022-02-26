@@ -4,7 +4,8 @@ import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
-import co.worklytics.psoxy.impl.FileHandlerStrategyImpl;
+import co.worklytics.psoxy.storage.FileHandlerFactory;
+import co.worklytics.psoxy.storage.impl.FileHandlerFactoryImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.api.client.http.HttpContent;
@@ -19,7 +20,6 @@ import dagger.Provides;
 
 
 import javax.inject.Named;
-import javax.inject.Singleton;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -102,7 +102,7 @@ public class PsoxyModule {
     }
 
     @Provides
-    static FileHandlerStrategy fileHandler(FileHandlerStrategyImpl fileHandlerStrategy) {
+    static FileHandlerFactory fileHandler(FileHandlerFactoryImpl fileHandlerStrategy) {
         return fileHandlerStrategy;
     }
 }

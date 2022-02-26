@@ -4,12 +4,11 @@ import co.worklytics.psoxy.aws.DaggerAwsContainer;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.StorageEventRequest;
 import co.worklytics.psoxy.gateway.StorageEventResponse;
-import co.worklytics.psoxy.gateway.impl.CommonRequestHandler;
+import co.worklytics.psoxy.storage.StorageHandler;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.events.S3Event;
 import com.amazonaws.services.lambda.runtime.events.models.s3.S3EventNotification;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
@@ -27,10 +26,13 @@ import java.nio.charset.StandardCharsets;
 public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestHandler<S3Event, String> {
 
     @Inject
-    CommonRequestHandler requestHandler;
+    StorageHandler storageHandler;
 
     @Inject
     ConfigService configService;
+
+    @Inject
+    AmazonS3 s3Client;
 
     @SneakyThrows
     @Override
@@ -42,54 +44,63 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
         String destinationBucket = configService.getConfigPropertyAsOptional(AWSConfigProperty.OUTPUT_BUCKET)
                 .orElseThrow(() -> new IllegalStateException("Output bucket not found as environment variable!"));
 
-        String response = "200 OK";
         S3EventNotification.S3EventNotificationRecord record = s3Event.getRecords().get(0);
 
         String importBucket = record.getS3().getBucket().getName();
         String sourceKey = record.getS3().getObject().getUrlDecodedKey();
 
-        AmazonS3 s3Client = AmazonS3ClientBuilder.defaultClient();
-        S3Object s3Object = s3Client.getObject(new GetObjectRequest(importBucket, sourceKey));
-        InputStream objectData = s3Object.getObjectContent();
-        InputStreamReader reader;
+        log.info(String.format("Received a request for processing %s from bucket %s. BOM flag is marked as %s", sourceKey, importBucket, isBOMEncoded));
 
-        if (isBOMEncoded) {
-            BOMInputStream is = new BOMInputStream(objectData);
-            reader = new InputStreamReader(is, StandardCharsets.UTF_8.name());
-        } else {
-            reader = new InputStreamReader(objectData);
+        S3Object s3Object = s3Client.getObject(new GetObjectRequest(importBucket, sourceKey));
+        StorageEventResponse storageEventResponse;
+
+        try(InputStream objectData = s3Object.getObjectContent()) {
+            InputStreamReader reader;
+
+            BOMInputStream is = null;
+            if (isBOMEncoded) {
+                is = new BOMInputStream(objectData);
+                reader = new InputStreamReader(is, StandardCharsets.UTF_8.name());
+            } else {
+                reader = new InputStreamReader(objectData);
+            }
+
+            StorageEventRequest request = StorageEventRequest.builder()
+                    .sourceBucketName(importBucket)
+                    .sourceObjectPath(sourceKey)
+                    .destinationBucketName(destinationBucket)
+                    .readerStream(reader)
+                    .build();
+
+           storageEventResponse = storageHandler.handle(request);
+
+           if (isBOMEncoded) {
+               is.close();
+           }
+           reader.close();
         }
 
-        StorageEventRequest request = StorageEventRequest.builder()
-                .sourceBucketName(importBucket)
-                .sourceBucketName(sourceKey)
-                .destinationBucket(destinationBucket)
-                .readerStream(reader)
-                .build();
+        log.info("Writing to: " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationObjectPath());
 
-        try {
-            StorageEventResponse storageEventResponse = requestHandler.handle(request);
-
-            InputStream is = new ByteArrayInputStream(storageEventResponse.getBytes());
+        try (InputStream is = new ByteArrayInputStream(storageEventResponse.getBytes())) {
 
             ObjectMetadata meta = new ObjectMetadata();
 
             meta.setContentLength(storageEventResponse.getBytes().length);
             meta.setContentType(s3Object.getObjectMetadata().getContentType());
 
-            System.out.println("Writing to: " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationPath());
             s3Client.putObject(storageEventResponse.getDestinationBucketName(),
-                    storageEventResponse.getDestinationBucketName(),
+                    storageEventResponse.getDestinationObjectPath(),
                     is,
                     meta);
-
-            System.out.println("Successfully pseudonymized " + importBucket + "/"
-                    + sourceKey + " and uploaded to " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationPath());
-        } catch(Exception e) {
-            System.err.println(e.getMessage());
-            System.exit(1);
         }
 
-        return response;
+        log.info(String.format("Successfully pseudonymized %s/%s and uploaded to %s/%s",
+                importBucket,
+                sourceKey,
+                storageEventResponse.getDestinationBucketName(),
+                storageEventResponse.getDestinationObjectPath()));
+
+        return "Processed!";
     }
 }

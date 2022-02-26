@@ -12,6 +12,9 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -99,6 +102,12 @@ public class SlackDiscoveryTests extends RulesBaseTestCase {
 
         assertPseudonymized(sanitized, PII);
         assertRedacted(sanitized, "John Nobody", "felipe", "bob");
+
+        assertThat(sanitized, hasJsonPath("$.users[*].profile[*].team"));
+        assertThat(sanitized, hasJsonPath("$.users[*].profile[*].email"));
+        assertThat(sanitized, hasJsonPath("$.users[0].profile.keys()", hasSize(2)));
+        assertThat(sanitized, hasNoJsonPath("$.users[0].profile.keys()"), not(hasProperty("display_name")));
+
     }
 
     @SneakyThrows
@@ -126,6 +135,12 @@ public class SlackDiscoveryTests extends RulesBaseTestCase {
         );
 
         assertPseudonymized(sanitized, PII);
-        assertRedacted(sanitized, "Test message!", "<@U06CA4EAC|bjin>");
+        assertRedacted(sanitized, "Test message!",
+            "<@U06CA4EAC|bjin>",
+            "text with rich block",
+            "This is likely a pun about the weather.",
+            "We're withholding a pun from you",
+            "Leg end nary a laugh, Ink.");
+
     }
 }

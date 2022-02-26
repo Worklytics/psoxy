@@ -1,5 +1,6 @@
 package co.worklytics.psoxy;
 
+import co.worklytics.psoxy.storage.FileHandlerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.util.Lists;
 import com.google.cloud.secretmanager.v1.AccessSecretVersionResponse;
@@ -10,7 +11,6 @@ import lombok.SneakyThrows;
 import javax.inject.Inject;
 import java.io.File;
 import java.io.FileReader;
-import java.util.Collections;
 
 //@NoArgsConstructor(onConstructor_ = @Inject) //q: compile complaints - lombok annotation processing not reliable??
 public class Handler {
@@ -23,7 +23,7 @@ public class Handler {
     @Inject ObjectMapper jsonMapper;
     @Inject SanitizerFactory sanitizerFactory;
     @Inject
-    FileHandlerStrategy fileHandlerStrategy;
+    FileHandlerFactory fileHandlerStrategy;
 
     @SneakyThrows
     public void pseudonymize(@NonNull Config config,
@@ -45,10 +45,10 @@ public class Handler {
 
         options.rules(Rules.builder()
                 .pseudonymization(Rules.Rule.builder()
-                        .columns(Lists.newArrayList(config.getColumnsToPseudonymize()))
+                        .csvColumns(Lists.newArrayList(config.getColumnsToPseudonymize()))
                         .build())
                 .redaction(Rules.Rule.builder()
-                        .columns(Lists.newArrayList(config.getColumnsToRedact()))
+                        .csvColumns(Lists.newArrayList(config.getColumnsToRedact()))
                         .build())
                 .build());
 

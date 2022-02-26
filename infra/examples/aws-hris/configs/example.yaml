@@ -1,6 +1,6 @@
 pseudonymizations:
   - csvColumns:
-      - "EMPLOYEE_EMAIL"
+      - "email"
 redactions:
   - csvColumns:
-      - "MANAGEREMAIL"
+      - "managerEmail"
