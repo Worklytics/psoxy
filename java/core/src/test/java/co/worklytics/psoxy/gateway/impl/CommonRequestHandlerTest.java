@@ -48,11 +48,11 @@ class CommonRequestHandlerTest {
         return Stream.of(
             Arguments.of("/some/path", null, "https://proxyhost.com/some/path"),
             Arguments.of("/some/path", "", "https://proxyhost.com/some/path"),
-            // encoded query string
-            Arguments.of("/some/path", "token=base64%2Ftoken%3D%3D&deleted=true", "https://proxyhost.com/some/path?token=base64/token==&deleted=true"),
-            // double encoded path (some ids in zoom contain / or =)
-            // path is kept the same as it gets encoded upon creation
-            Arguments.of("/some/base64%252Fid%253D%253D/path", "pageNumber=3&value=%2526ampsymbol", "https://proxyhost.com/some/base64%252Fid%253D%253D/path?pageNumber=3&value=%2526ampsymbol")
+            // calls left as they come:
+            Arguments.of("/some/path", "token=base64%2Ftoken%3D%3D&deleted=true", "https://proxyhost.com/some/path?token=base64%2Ftoken%3D%3D&deleted=true"),
+            // double encoded path (some ids in zoom contain / or =)n
+            Arguments.of("/some/base64%2Fid%3D%3D/path", "pageNumber=3&value=%2526ampsymbol", "https://proxyhost.com/some/base64%2Fid%3D%3D/path?pageNumber=3&value=%2526ampsymbol"),
+            Arguments.of("/v2/past_meetings/%2F1%2Bs5FPqReaG4LXW4WCMDQ%3D%3D","","https://proxyhost.com/v2/past_meetings/%2F1%2Bs5FPqReaG4LXW4WCMDQ%3D%3D")
         );
     }
 

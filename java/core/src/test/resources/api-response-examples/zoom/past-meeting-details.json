@@ -1,0 +1,16 @@
+{
+  "uuid": "JbkqFkfqQ0e7+CZluSnc1g==",
+  "id": 535548971,
+  "host_id": "DYHrdpjrS3uaOf7dPkkg8w",
+  "type": 2,
+  "topic": "My Meeting",
+  "user_name": "Joe Surname",
+  "user_email": "user@example.com",
+  "start_time": "2020-04-01T07:00:30Z",
+  "end_time": "2020-04-01T07:02:01Z",
+  "duration": 2,
+  "total_minutes": 2,
+  "participants_count": 1,
+  "dept": "Engineering",
+  "source": "Zoom"
+}

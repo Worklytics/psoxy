@@ -187,3 +187,60 @@ module "worklytics-psoxy-connection" {
   display_name       = "${each.value.display_name} via Psoxy"
 }
 
+
+# BEGIN LONG ACCESS AUTH CONNECTORS
+
+locals {
+  oauth_long_access_connectors = {
+    slack = {
+      deploy = true
+      function_name = "psoxy-slack-discovery-api"
+      source_kind = "slack"
+      example_api_calls = []
+    },
+    zoom = {
+      deploy = true
+      function_name = "psoxy-zoom"
+      source_kind = "zoom"
+      example_api_calls = ["/v2/users"]
+    }
+  }
+}
+
+# Create secret (later filled by customer)
+resource "aws_ssm_parameter" "long-access-token-secret" {
+  for_each = {
+  for k, v in local.oauth_long_access_connectors:
+  k => v if v.deploy
+  }
+  name        = "PSOXY_ACCESS_TOKEN_${each.value.function_name}"
+  type        = "SecureString"
+  description = "The long lived token for ${each.value.function_name}"
+  value       = sensitive("anything")
+}
+
+module "aws-psoxy-long-auth-connectors" {
+  for_each = {
+  for k, v in local.oauth_long_access_connectors:
+  k => v if v.deploy
+  }
+
+  source = "../../modules/aws-psoxy-instance"
+
+  function_name        = each.value.function_name
+  source_kind          = each.value.source_kind
+  api_gateway          = module.psoxy-aws.api_gateway
+  path_to_function_zip = module.psoxy-package.path_to_deployment_jar
+  function_zip_hash    = module.psoxy-package.deployment_package_hash
+  path_to_config       = "../../../configs/${each.key}.yaml"
+  api_caller_role_arn  = module.psoxy-aws.api_caller_role_arn
+  aws_assume_role_arn  = var.aws_assume_role_arn
+
+  parameters   = [
+    module.psoxy-aws.salt_secret,
+    aws_ssm_parameter.long-access-token-secret[each.key].value
+  ]
+  example_api_calls = each.value.example_api_calls
+}
+
+# END LONG ACCESS AUTH CONNECTORS
