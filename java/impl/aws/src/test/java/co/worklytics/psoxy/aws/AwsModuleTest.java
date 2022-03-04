@@ -8,7 +8,6 @@ class AwsModuleTest {
 
     @Test
     void asParameterStoreNamespace() {
-
-        assertEquals("PSOXY_GDIRECTORY_", AwsModule.asParameterStoreNamespace("psoxy-gdirectory"));
+        assertEquals("PSOXY_GDIRECTORY", AwsModule.asParameterStoreNamespace("psoxy-gdirectory"));
     }
 }

@@ -40,13 +40,40 @@
           "thumb_360_w": 259
         }
       ],
+      "blocks": [
+        {
+          "type": "rich_text",
+          "block_id": "U5M",
+          "elements": [
+            {
+              "type": "rich_text_section",
+              "elements": [
+                {
+                  "type": "text",
+                  "text": "text with rich block"
+                }
+              ]
+            }
+          ]
+        }
+      ],
       "ts": "1234561515.000007",
       "wibblr": true,
       "edited": {
         "user": "W000000",
         "ts": "38327498237.000000"
       },
-      "attachments": []
+      "attachments": [
+        {
+          "service_name": "Leg end nary a laugh, Ink.",
+          "text": "This is likely a pun about the weather.",
+          "fallback": "We're withholding a pun from you",
+          "thumb_url": "https://badpuns.example.com/puns/123.png",
+          "thumb_width": 1920,
+          "thumb_height": 700,
+          "id": 1
+        }
+      ]
     }
   ],
   "offset": "1463084600.000000"

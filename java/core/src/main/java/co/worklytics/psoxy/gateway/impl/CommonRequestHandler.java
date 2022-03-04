@@ -11,22 +11,21 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.auth.Credentials;
 import com.google.auth.http.HttpCredentialsAdapter;
-import com.google.common.net.MediaType;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.entity.ContentType;
 
 import javax.inject.Inject;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Supplier;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
 
 @NoArgsConstructor(onConstructor_ = @Inject)
 @Log
@@ -42,10 +41,10 @@ public class CommonRequestHandler {
     @Inject ObjectMapper objectMapper;
     @Inject SanitizerFactory sanitizerFactory;
     @Inject Rules rules;
+    @Inject HealthCheckRequestHandler healthCheckRequestHandler;
 
     private volatile Sanitizer sanitizer;
     private final Object $writeLock = new Object[0];
-
 
     private Sanitizer loadSanitizerRules() {
         if (this.sanitizer == null) {
@@ -58,16 +57,14 @@ public class CommonRequestHandler {
         return this.sanitizer;
     }
 
-
     @SneakyThrows
     public HttpEventResponse handle(HttpEventRequest request) {
 
         logRequestIfAllowed(request);
 
-        boolean isHealthCheck =
-            request.getHeader(ControlHeader.HEALTH_CHECK.getHttpHeader()).isPresent();
-        if (isHealthCheck) {
-            return doHealthCheck(request);
+        Optional<HttpEventResponse> healthCheckResponse = healthCheckRequestHandler.handleIfHealthCheck(request);
+        if (healthCheckResponse.isPresent()) {
+            return healthCheckResponse.get();
         }
 
         HttpRequestFactory requestFactory = getRequestFactory(request);
@@ -87,7 +84,7 @@ public class CommonRequestHandler {
         } else if (sanitizer.isAllowed(targetUrl)) {
             log.info(String.format("Proxy invoked with target %s. Rules allowed call.", relativeURL));
         } else {
-            builder.statusCode(403);
+            builder.statusCode(HttpStatus.SC_FORBIDDEN);
             log.warning(String.format("Proxy invoked with target %s. Blocked call by rules %s", relativeURL, objectMapper.writeValueAsString(rules.getAllowedEndpointRegexes())));
             return builder.build();
         }
@@ -96,7 +93,7 @@ public class CommonRequestHandler {
         try {
             sourceApiRequest = requestFactory.buildRequest(request.getHttpMethod(), new GenericUrl(targetUrl), null);
         } catch (IOException e) {
-            builder.statusCode(500);
+            builder.statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
             builder.body("Failed to authorize request; review logs");
             log.log(Level.WARNING, e.getMessage(), e);
 
@@ -109,7 +106,7 @@ public class CommonRequestHandler {
 
         sourceApiRequest.setHeaders(sourceApiRequest.getHeaders()
             //seems like Google API HTTP client has a default 'Accept' header with 'text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2' ??
-            .setAccept("application/json")  //MSFT gives weird "{"error":{"code":"InternalServerError","message":"The MIME type 'text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2' requires a '/' character between type and subtype, such as 'text/plain'."}}
+            .setAccept(ContentType.APPLICATION_JSON.toString())  //MSFT gives weird "{"error":{"code":"InternalServerError","message":"The MIME type 'text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2' requires a '/' character between type and subtype, such as 'text/plain'."}}
         );
 
         //setup request
@@ -131,9 +128,8 @@ public class CommonRequestHandler {
         if (sourceApiResponse.getContent() != null) {
             responseContent = new String(sourceApiResponse.getContent().readAllBytes(), sourceApiResponse.getContentCharset());
         }
-        //log.info(responseContent);
         if (sourceApiResponse.getContentType() != null) {
-            builder.header("Content-Type", sourceApiResponse.getContentType());
+            builder.header(HttpHeaders.CONTENT_TYPE, sourceApiResponse.getContentType());
         }
 
         String proxyResponseContent;
@@ -203,50 +199,26 @@ public class CommonRequestHandler {
         logIfDevelopmentMode(() -> String.format("Request:\n%s", request.prettyPrint()));
     }
 
-    private HttpEventResponse doHealthCheck(HttpEventRequest request) {
-        Set<String> missing =
-            sourceAuthStrategy.getRequiredConfigProperties().stream()
-                .filter(configProperty -> config.getConfigPropertyAsOptional(configProperty).isEmpty())
-                .map(ConfigService.ConfigProperty::name)
-                .collect(Collectors.toSet());
-
-        HealthCheckResult healthCheckResult = HealthCheckResult.builder()
-            .configuredSource(config.getConfigPropertyAsOptional(ProxyConfigProperty.SOURCE).orElse(null))
-            .nonDefaultSalt(config.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT).isPresent())
-            .missingConfigProperties(missing)
-            .build();
-
-        HttpEventResponse.HttpEventResponseBuilder responseBuilder = HttpEventResponse.builder();
-
-        if (healthCheckResult.passed()) {
-            responseBuilder.statusCode(HealthCheckResult.HttpStatusCode.SUCCEED.getCode());
-        } else {
-            responseBuilder.statusCode(HealthCheckResult.HttpStatusCode.FAIL.getCode());
-        }
-
-        try {
-            responseBuilder.header("Content-Type", MediaType.JSON_UTF_8.toString());
-            responseBuilder.body(
-                objectMapper.writeValueAsString(healthCheckResult) + "\r\n");
-        } catch (IOException e) {
-            log.log(Level.WARNING, "Failed to write health check details", e);
-        }
-
-        return responseBuilder.build();
-    }
-
     boolean isSuccessFamily(int statusCode) {
         return statusCode >= 200 && statusCode < 300;
     }
 
     @SneakyThrows
     public URL buildTarget(HttpEventRequest request) {
+        // contents may come encoded. It should respect url as it comes.
+        // Construct URL directly concatenating instead of URIBuilder as it may re-encode.
         URIBuilder uriBuilder = new URIBuilder();
         uriBuilder.setScheme("https");
         uriBuilder.setHost(config.getConfigPropertyOrError(ProxyConfigProperty.TARGET_HOST));
-        uriBuilder.setPath(request.getPath());
-        uriBuilder.setCustomQuery(request.getQuery().orElse(""));
-        return uriBuilder.build().toURL();
+        URL hostURL = uriBuilder.build().toURL();
+        String hostPlusPath =
+            StringUtils.stripEnd(hostURL.toString(),"/") + "/" +
+            StringUtils.stripStart(request.getPath(),"/");
+        String targetURLString = hostPlusPath;
+        if (StringUtils.isNotBlank(request.getQuery().orElse(null))) {
+            targetURLString = hostPlusPath + "?" + request.getQuery().get();
+        }
+        return new URL(targetURLString);
     }
 
     private void logIfDevelopmentMode(Supplier<String> messageSupplier) {

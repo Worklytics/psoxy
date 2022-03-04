@@ -15,7 +15,7 @@ locals {
 # semantics if you view the package as a 'resource', but is reasonable if you view it as just a
 # configuration value (eg, the content of a lambda function)
 # NOTE: pass deployment jar path through the script simply to make outputs of this Terraform module
-# dependenent on the build script actually running, avoiding Terraform thinking the outputs are
+# dependent on the build script actually running, avoiding Terraform thinking the outputs are
 # known prior to executing the build
 
 data "external" "deployment_package" {

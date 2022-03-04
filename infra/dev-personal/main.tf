@@ -33,101 +33,126 @@ module "psoxy-gcp" {
   ]
 }
 
-module "gmail-connector" {
-  source = "../modules/google-workspace-dwd-connection"
-
-  project_id                   = var.project_id
-  connector_service_account_id = "psoxy-gmail-dwd"
-  display_name                 = "Psoxy Connector - GMail${var.connector_display_name_suffix}"
-  apis_consumed                = [
-    "gmail.googleapis.com"
-  ]
-  oauth_scopes_needed          = [
-    "https://www.googleapis.com/auth/gmail.metadata"
-  ]
-
-  depends_on = [
-    module.psoxy-gcp
-  ]
-}
-
-# setup gmail to auth using a secret (not specific to Cloud Function)
-module "gmail-connector-auth" {
-  source = "../modules/gcp-sa-auth-key-secret-manager"
-
-  secret_project     = var.project_id
-  service_account_id = module.gmail-connector.service_account_id
-
-  # TODO: recommend migrate this to `PSOXY_{{function_name}}_SERVICE_ACCOUNT_KEY`
-  secret_id          = "PSOXY_SERVICE_ACCOUNT_KEY_gmail"
-}
-
-# for local dev, write the key to flat file on your machine (shouldn't do this for prod configs)
-resource "local_file" "gmail-connector-sa-key" {
-  filename = "gmail-connector-sa-key.json"
-  content_base64 = module.gmail-connector-auth.key_value
-}
-
-module "psoxy-gmail" {
-  source = "../modules/gcp-psoxy-cloud-function"
-
-  project_id            = var.project_id
-  function_name         = "psoxy-gmail"
-  source_kind           = "gmail"
-  service_account_email = module.gmail-connector.service_account_email
-
-  secret_bindings = {
-    PSOXY_SALT = {
-      secret_name    = module.psoxy-gcp.salt_secret_name
-      version_number = module.psoxy-gcp.salt_secret_version_number
-    },
-    SERVICE_ACCOUNT_KEY = {
-      secret_name    = module.gmail-connector-auth.key_secret_name
-      version_number = module.gmail-connector-auth.key_secret_version_number
+locals {
+  # Google Workspace Sources; add/remove as you wish
+  google_workspace_sources = {
+    # GDirectory connections are a PRE-REQ for gmail, gdrive, and gcal connections. remove only
+    # if you plan to directly connect Directory to worklytics (without proxy). such a scenario is
+    # used for customers who care primarily about pseudonymizing PII of external subjects with whom
+    # they collaborate in GMail/GCal/Gdrive. the Directory does not contain PII of subjects external
+    # to the Google Workspace, so may be directly connected in such scenarios.
+    "gdirectory": {
+      deploy: true
+      display_name: "Google Directory"
+      apis_consumed: [
+        "admin.googleapis.com"
+      ]
+      oauth_scopes_needed: [
+        "https://www.googleapis.com/auth/admin.directory.user.readonly",
+        "https://www.googleapis.com/auth/admin.directory.user.alias.readonly",
+        "https://www.googleapis.com/auth/admin.directory.domain.readonly",
+        "https://www.googleapis.com/auth/admin.directory.group.readonly",
+        "https://www.googleapis.com/auth/admin.directory.group.member.readonly",
+        "https://www.googleapis.com/auth/admin.directory.orgunit.readonly",
+        "https://www.googleapis.com/auth/admin.directory.rolemanagement.readonly"
+      ],
+      worklytics_connector_name: "Google Workspace Directory via Psoxy"
+    }
+    "gcal": {
+      deploy: false
+      display_name: "Google Calendar"
+      apis_consumed: [
+        "calendar-json.googleapis.com"
+      ]
+      oauth_scopes_needed: [
+        "https://www.googleapis.com/auth/calendar.readonly"
+      ]
+    }
+    "gmail": {
+      deploy: true
+      display_name: "GMail"
+      apis_consumed: [
+        "gmail.googleapis.com"
+      ]
+      oauth_scopes_needed: [
+        "https://www.googleapis.com/auth/gmail.metadata"
+      ]
+    }
+    "google-chat": {
+      deploy: false
+      display_name: "Google Chat"
+      apis_consumed: [
+        "admin.googleapis.com"
+      ]
+      oauth_scopes_needed: [
+        "https://www.googleapis.com/auth/admin.reports.audit.readonly"
+      ]
+    }
+    "gdrive": {
+      deploy: false
+      display_name: "Google Drive"
+      apis_consumed: [
+        "drive.googleapis.com"
+      ]
+      oauth_scopes_needed: [
+        "https://www.googleapis.com/auth/drive.metadata.readonly"
+      ]
+    }
+    "google-meet": {
+      deploy: false
+      display_name: "Google Meet"
+      apis_consumed: [
+        "admin.googleapis.com"
+      ]
+      oauth_scopes_needed: [
+        "https://www.googleapis.com/auth/admin.reports.audit.readonly"
+      ]
     }
   }
 }
 
-module "worklytics-psoxy-connection-gmail" {
-  source = "../modules/worklytics-psoxy-connection"
+module "google-workspace-connection" {
+  for_each = {
+    for k, v in local.google_workspace_sources:
+    k => v if v.deploy
+  }
 
-  psoxy_endpoint_url = module.psoxy-gmail.cloud_function_url
-  display_name       = "GMail via Psoxy"
-}
-
-module "google-chat-connector" {
   source = "../modules/google-workspace-dwd-connection"
 
   project_id                   = var.project_id
-  connector_service_account_id = "psoxy-google-chat-dwd"
-  display_name                 = "Psoxy Connector - Google Chat${var.connector_display_name_suffix}"
-  apis_consumed                = [
-    "admin.googleapis.com"
-  ]
-  oauth_scopes_needed          = [
-    "https://www.googleapis.com/auth/admin.reports.audit.readonly"
-  ]
+  connector_service_account_id = "psoxy-${each.key}-dwd"
+  display_name                 = "Psoxy Connector - ${each.value.display_name}${var.connector_display_name_suffix}"
+  apis_consumed                = each.value.apis_consumed
+  oauth_scopes_needed          = each.value.oauth_scopes_needed
+
   depends_on = [
     module.psoxy-gcp
   ]
 }
 
-module "google-chat-connector-auth" {
+module "google-workspace-connection-auth" {
+  for_each = {
+  for k, v in local.google_workspace_sources:
+  k => v if v.deploy
+  }
   source = "../modules/gcp-sa-auth-key-secret-manager"
 
   secret_project     = var.project_id
-  service_account_id = module.google-chat-connector.service_account_id
-  # TODO: recommend migrate this to `PSOXY_{{function_name}}_SERVICE_ACCOUNT_KEY`
-  secret_id          = "PSOXY_SERVICE_ACCOUNT_KEY_google-chat"
+  service_account_id = module.google-workspace-connection[each.key].service_account_id
+  secret_id          = "PSOXY_${each.key}_SERVICE_ACCOUNT_KEY"
 }
+module "psoxy-google-workspace-connector" {
+  for_each = {
+  for k, v in local.google_workspace_sources:
+  k => v if v.deploy
+  }
 
-module "psoxy-google-chat" {
   source = "../modules/gcp-psoxy-cloud-function"
 
   project_id            = var.project_id
-  function_name         = "psoxy-google-chat"
-  source_kind           = "google-chat"
-  service_account_email = module.google-chat-connector.service_account_email
+  function_name         = "psoxy-${each.key}"
+  source_kind           = each.key
+  service_account_email = module.google-workspace-connection[each.key].service_account_email
 
   secret_bindings       = {
     PSOXY_SALT = {
@@ -135,46 +160,74 @@ module "psoxy-google-chat" {
       version_number = module.psoxy-gcp.salt_secret_version_number
     },
     SERVICE_ACCOUNT_KEY = {
-      secret_name    = module.google-chat-connector-auth.key_secret_name
-      version_number = module.google-chat-connector-auth.key_secret_version_number
+      secret_name    = module.google-workspace-connection-auth[each.key].key_secret_name
+      version_number = module.google-workspace-connection-auth[each.key].key_secret_version_number
     }
   }
 }
 
-module "worklytics-psoxy-connection-google-chat" {
+module "worklytics-psoxy-connection" {
+  for_each = {
+  for k, v in local.google_workspace_sources:
+  k => v if v.deploy
+  }
+
   source = "../modules/worklytics-psoxy-connection"
 
-  psoxy_endpoint_url = module.psoxy-google-chat.cloud_function_url
-  display_name       = "Google Chat via Psoxy"
+  psoxy_endpoint_url = module.psoxy-google-workspace-connector[each.key].cloud_function_url
+  display_name       = "${each.value.display_name} via Psoxy"
 }
 
-# BEGIN SLACK
+# BEGIN LONG ACCESS AUTH CONNECTORS
 
 locals {
-  slack_function_name   = "psoxy-slack-discovery-api"
+  oauth_long_access_connectors = {
+    slack = {
+      deploy = true
+      function_name = "psoxy-slack-discovery-api"
+      source_kind = "slack"
+    },
+    zoom = {
+      deploy = true
+      function_name = "psoxy-zoom"
+      source_kind = "zoom"
+    }
+  }
 }
 
-resource "google_service_account" "slack_connector_sa" {
+resource "google_service_account" "long_auth_connector_sa" {
+  for_each = {
+    for k, v in local.oauth_long_access_connectors:
+    k => v if v.deploy
+  }
   project = var.project_id
-  account_id   = local.slack_function_name
-  display_name = "Psoxy Connector - Slack{var.connector_display_name_suffix}"
+  account_id   = each.value.function_name
+  display_name = "Psoxy Connector - ${title(each.key)}{var.connector_display_name_suffix}"
 }
 
 # creates the secret, without versions.
-module "slack-discovery-api-auth" {
+module "connector-long-auth-block" {
+  for_each = {
+  for k, v in local.oauth_long_access_connectors:
+  k => v if v.deploy
+  }
   source   = "../modules/gcp-oauth-long-access-strategy"
   project_id              = var.project_id
-  function_name           = local.slack_function_name
+  function_name           = each.value.function_name
   token_adder_user_emails = []
 }
 
-module "psoxy-slack-discovery-api" {
+module "connector-long-auth-create-function" {
+  for_each = {
+  for k, v in local.oauth_long_access_connectors:
+  k => v if v.deploy
+  }
   source = "../modules/gcp-psoxy-cloud-function"
 
   project_id            = var.project_id
-  function_name         = local.slack_function_name
-  source_kind           = "slack"
-  service_account_email   = google_service_account.slack_connector_sa.email
+  function_name         = each.value.function_name
+  source_kind           = each.value.source_kind
+  service_account_email   = google_service_account.long_auth_connector_sa[each.key].email
 
   secret_bindings = {
     PSOXY_SALT   = {
@@ -182,22 +235,12 @@ module "psoxy-slack-discovery-api" {
       version_number = module.psoxy-gcp.salt_secret_version_number
     },
     ACCESS_TOKEN = {
-      secret_name    = module.slack-discovery-api-auth.access_token_secret_name
+      secret_name    = module.connector-long-auth-block[each.key].access_token_secret_name
       # in case of long lived tokens we want latest version always
       version_number = "latest"
     }
   }
 }
 
+# END LONG ACCESS AUTH CONNECTORS
 
-# current convention is that the Cloud Functions for each of these run as these SAs, but there's
-# really no need to; consider splitting (eg, one SA for each Cloud Function; one SA for the
-# OAuth client)
-
-output "gmail_connector_sa_email" {
-  value = module.gmail-connector.service_account_email
-}
-
-output "google_chat_connector_sa_email" {
-  value = module.google-chat-connector.service_account_email
-}

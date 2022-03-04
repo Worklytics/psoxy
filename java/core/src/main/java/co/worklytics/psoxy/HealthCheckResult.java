@@ -12,15 +12,6 @@ import java.util.Set;
 @AllArgsConstructor
 public class HealthCheckResult {
 
-    @RequiredArgsConstructor
-    public enum HttpStatusCode {
-        SUCCEED(200),
-        FAIL(512);
-
-        @Getter
-        private final int code;
-    }
-
     String configuredSource;
 
     Boolean nonDefaultSalt;

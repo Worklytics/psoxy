@@ -259,14 +259,14 @@ public class PrebuiltSanitizerRules {
 
     //cases that we expect to be truly single-valued, per RFC 2822
     static Set<String> EMAIL_HEADERS_CONTAINING_SINGLE_EMAILS = ImmutableSet.of(
-        "X-Original-Sender","Delivered-To","Sender","In-Reply-To"
+        "X-Original-Sender","Delivered-To","Sender"
     );
     static Set<String> ALLOWED_EMAIL_HEADERS = ImmutableSet.<String>builder()
         .addAll(EMAIL_HEADERS_CONTAINING_MULTIPLE_EMAILS)
         .addAll(EMAIL_HEADERS_CONTAINING_SINGLE_EMAILS)
-        .add("Message-ID")
+        .add("Message-ID") // this looks like an email address
         .add("Date")
-        .add("In-Reply-To")
+        .add("In-Reply-To") // this is a Message-ID
         .add("Original-Message-ID")
         .add("References")
         .build();

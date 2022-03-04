@@ -8,6 +8,9 @@ import co.worklytics.psoxy.impl.SanitizerImpl;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonParser;
 import dagger.Component;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
@@ -20,9 +23,10 @@ import javax.inject.Singleton;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.regex.Pattern;
+import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * abstract test stuff for Rules implementations
@@ -93,13 +97,13 @@ abstract public class RulesBaseTestCase {
 
     @SneakyThrows
     Rules yamlRoundtrip(Rules rules) {
-        String yaml = yamlMapper.writeValueAsString(getRulesUnderTest()).replace("---\n", "");
+        String yaml = yamlMapper.writeValueAsString(rules).replace("---\n", "");
         return yamlMapper.readerFor(Rules.class).readValue(yaml);
     }
 
     @SneakyThrows
     Rules jsonRoundtrip(Rules rules) {
-        String json = jsonMapper.writeValueAsString(getRulesUnderTest());
+        String json = jsonMapper.writeValueAsString(rules);
         return jsonMapper.readerFor(Rules.class).readValue(json);
     }
 
@@ -129,28 +133,20 @@ abstract public class RulesBaseTestCase {
     }
 
     protected void assertNotSanitized(String content, Collection<String> shouldContain) {
-        shouldContain.stream()
+        shouldContain
             .forEach(s -> assertTrue(content.contains(s), "Unsanitized content does not contain expected string: " + s));
     }
     protected void assertNotSanitized(String content, String... shouldContain) {
         assertNotSanitized(content, Arrays.asList(shouldContain));
     }
 
-    @Deprecated //used pseudonymized or redacted
-    protected void assertSanitized(String content, Collection<String> shouldNotContain) {
-        shouldNotContain.stream()
-            .forEach(s -> assertFalse(content.contains(s), "Sanitized content still contains: " + s));
-    }
-
     protected void assertRedacted(String content, Collection<String> shouldNotContain) {
-        shouldNotContain.stream()
+        shouldNotContain
             .forEach(s -> assertFalse(content.contains(s), "Sanitized content still contains: " + s));
 
-        shouldNotContain.stream()
-            .forEach(s -> {
-                assertFalse(content.contains(sanitizer.pseudonymizeToJson(s, sanitizer.getJsonConfiguration())),
-                    "Sanitized contains pseudonymized equivalent of: " + s);
-            });
+        shouldNotContain
+            .forEach(s -> assertFalse(content.contains(sanitizer.pseudonymizeToJson(s, sanitizer.getJsonConfiguration())),
+                "Sanitized contains pseudonymized equivalent of: " + s));
     }
     protected void assertRedacted(String content, String... shouldNotContain) {
         assertRedacted(content, Arrays.asList(shouldNotContain));
@@ -162,13 +158,16 @@ abstract public class RulesBaseTestCase {
         return haystack.substring(start, end);
     }
 
+    protected void assertPseudonymized(String content, String ... shouldBePseudonymized) {
+        assertPseudonymized(content, List.of(shouldBePseudonymized));
+    }
 
     protected void assertPseudonymized(String content, Collection<String> shouldBePseudonymized) {
-        shouldBePseudonymized.stream()
+        shouldBePseudonymized
             .forEach(s ->
                 assertFalse(content.contains(s), () -> "Sanitized content still contains unpseudonymized: " + s + " at " + this.context(content, s)));
 
-        shouldBePseudonymized.stream()
+        shouldBePseudonymized
             .forEach(s -> {
                 String doubleJsonEncodedPseudonym =
                     sanitizer.getJsonConfiguration().jsonProvider().toJson(sanitizer.pseudonymizeToJson(s, sanitizer.getJsonConfiguration()));
@@ -179,12 +178,8 @@ abstract public class RulesBaseTestCase {
             });
     }
 
-    protected void assertPseudonymized(String content, String... shouldBePseudonymized) {
-        assertPseudonymized(content, Arrays.asList(shouldBePseudonymized));
-    }
-
     protected void assertPseudonymizedWithOriginal(String content, Collection<String> shouldBePseudonymized) {
-        shouldBePseudonymized.stream()
+        shouldBePseudonymized
             .forEach(s -> {
                 String doubleJsonEncodedPseudonym =
                     sanitizer.getJsonConfiguration().jsonProvider().toJson(sanitizer.pseudonymizeWithOriginalToJson(s, sanitizer.getJsonConfiguration()));
@@ -199,26 +194,16 @@ abstract public class RulesBaseTestCase {
         assertPseudonymizedWithOriginal(content, Arrays.asList(shouldBePseudonymized));
     }
 
-    protected void assertContains(String content, String... shouldContain) {
-        Arrays.stream(shouldContain)
-            .forEach(s -> {
-                assertTrue(content.contains(s), String.format("Sanitized does not contain '%s'", s));
-            });
-    }
-
     @SneakyThrows
     protected void assertUrlWithQueryParamsAllowed(String url) {
         assertTrue(sanitizer.isAllowed(new URL(url + "?param=value")), "single param blocked");
         assertTrue(sanitizer.isAllowed(new URL(url + "?param=value&param2=value2")), "multiple params blocked");
     }
 
-
     @SneakyThrows
     protected void assertUrlAllowed(String url) {
         assertTrue(sanitizer.isAllowed(new URL(url)), "api endpoint url blocked");
     }
-
-
 
     @SneakyThrows
     protected void assertUrlWithQueryParamsBlocked(String url) {
@@ -241,6 +226,17 @@ abstract public class RulesBaseTestCase {
     @SneakyThrows
     protected void assertUrlBlocked(String url) {
         assertFalse(sanitizer.isAllowed(new URL(url)), "rules allowed url that should be blocked: " + url);
+    }
+
+    /**
+     * Utility method to print out formatted JSON for debug easily
+     * @param json
+     * @return
+     */
+    @SuppressWarnings("unused")
+    protected String prettyPrintJson(String json) {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        return gson.toJson(JsonParser.parseString(json));
     }
 
 }

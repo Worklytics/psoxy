@@ -7,7 +7,7 @@ variable "path_to_psoxy_java" {
 
 variable "implementation" {
   type        = string
-  description = "reference to implemenation to build (subdirectory of java/impl/)"
+  description = "reference to implementation to build (subdirectory of java/impl/)"
   default     = "aws"
 }
 

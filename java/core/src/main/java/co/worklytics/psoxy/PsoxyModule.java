@@ -6,6 +6,7 @@ import co.worklytics.psoxy.gateway.SourceAuthStrategy;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.google.api.client.http.HttpContent;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 import com.jayway.jsonpath.Configuration;
@@ -18,6 +19,7 @@ import dagger.Provides;
 
 import javax.inject.Named;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -73,13 +75,28 @@ public class PsoxyModule {
     @Provides
     static OAuthRefreshTokenSourceAuthStrategy.TokenRequestPayloadBuilder tokenRequestPayloadBuilder(ConfigService configService,
                                                                                                      Set<OAuthRefreshTokenSourceAuthStrategy.TokenRequestPayloadBuilder> payloadBuilders) {
-        String identifier =
-            configService.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.GRANT_TYPE);
-        return payloadBuilders
-            .stream()
-            .filter(impl -> Objects.equals(identifier, impl.getGrantType()))
-            .findFirst()
-            .orElseThrow(() -> new Error("No TokenRequestPayloadBuilder impl supporting oauth grant type: " + identifier));
+        // Final instantiation of configs are per-function. Grant type is dependent of type of auth
+        // strategy so might not exist for certain functions.
+        // If it is mis-configured will throw NPE at some point
+        Optional<String> grantTypeOptional = configService.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.GRANT_TYPE);
+        return grantTypeOptional.map(grantType -> payloadBuilders
+                .stream()
+                .filter(impl -> Objects.equals(grantType, impl.getGrantType()))
+                .findFirst()
+                .orElseThrow(() -> new Error("No TokenRequestPayloadBuilder impl supporting oauth grant type: " + grantType)))
+            // return no-op payload builder as Provides can't return null
+            .orElse(new OAuthRefreshTokenSourceAuthStrategy.TokenRequestPayloadBuilder() {
+                @Override
+                public String getGrantType() {
+                    return null;
+                }
+
+                @Override
+                public HttpContent buildPayload() {
+                    return null;
+                }
+            });
+
     }
 
 

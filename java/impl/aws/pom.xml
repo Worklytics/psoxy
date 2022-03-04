@@ -87,12 +87,6 @@
             <artifactId>commons-lang3</artifactId>
             <version>${dependency.apache-commons-lang3.version}</version>
         </dependency>
-        <!-- explicit direct dep on apache HTTP Client (psoxy-core has transitive dep on it) -->
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>${dependency.apache-httpclient.version}</version>
-        </dependency>
 
         <!-- platform stuff (eg, AWS Lambda support) -->
         <dependency> <!-- get from Java SDK v2 bom too?? -->
@@ -110,9 +104,7 @@
             <artifactId>ssm</artifactId>
         </dependency>
 
-
-
-
+        <!-- Test dependencies -->
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
