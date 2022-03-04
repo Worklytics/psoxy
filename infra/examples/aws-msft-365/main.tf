@@ -194,3 +194,13 @@ module "msft_365_grants" {
   app_roles                = each.value.required_app_roles
   application_name         = each.key
 }
+
+
+module "worklytics-psoxy-connection" {
+  for_each = local.msft_sources
+
+  source = "../../modules/worklytics-psoxy-connection"
+
+  psoxy_endpoint_url = module.psoxy-msft-connector[each.key].endpoint_url
+  display_name       = "${each.value.display_name} via Psoxy"
+}
