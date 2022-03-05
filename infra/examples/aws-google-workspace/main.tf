@@ -181,10 +181,12 @@ module "psoxy-google-workspace-connector" {
 module "worklytics-psoxy-connection" {
   for_each = local.google_workspace_sources
 
-  source = "../../modules/worklytics-psoxy-connection"
+  source = "../../modules/worklytics-psoxy-connection-aws"
 
   psoxy_endpoint_url = module.psoxy-google-workspace-connector[each.key].endpoint_url
   display_name       = "${each.value.display_name} via Psoxy"
+  aws_region         = var.aws_region
+  aws_role_arn       = var.aws_assume_role_arn
 }
 
 
