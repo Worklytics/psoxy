@@ -24,10 +24,10 @@ variable "worklytics_sa_emails" {
   description = "service accounts for your organization's Worklytics instances (list supported for test/dev scenarios)"
 }
 
-variable "connector_display_name_suffix" {
+variable "region" {
   type        = string
-  description = "suffix to append to display_names of connector SAs; helpful to distinguish between various ones in testing/dev scenarios"
-  default     = ""
+  description = "region into which to deploy function"
+  default     = "us-central1"
 }
 
 variable "bucket_prefix" {

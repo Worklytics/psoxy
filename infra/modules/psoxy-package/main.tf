@@ -30,3 +30,7 @@ output "deployment_package_hash" {
 output "path_to_deployment_jar" {
   value = data.external.deployment_package.result.path_to_deployment_jar
 }
+
+output "filename" {
+  value = "psoxy-${var.implementation}-1.0-SNAPSHOT.jar"
+}
