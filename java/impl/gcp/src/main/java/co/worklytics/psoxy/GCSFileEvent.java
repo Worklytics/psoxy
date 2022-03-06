@@ -41,9 +41,9 @@ public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
             String importBucket = gcsEvent.getBucket();
             String sourceName = gcsEvent.getName();
             Storage storage = StorageOptions.getDefaultInstance().getService();
-            BlobId sourceBlobId = BlobId.of(destinationBucket, sourceName);
+            BlobId sourceBlobId = BlobId.of(importBucket, sourceName);
             BlobInfo blobInfo = storage.get(sourceBlobId);
-            InputStream objectData = new ByteArrayInputStream(storage.readAllBytes(null));
+            InputStream objectData = new ByteArrayInputStream(storage.readAllBytes(sourceBlobId));
             InputStreamReader reader;
 
             BOMInputStream is = null;
@@ -56,7 +56,7 @@ public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
 
             StorageEventRequest request = StorageEventRequest.builder()
                     .sourceBucketName(importBucket)
-                    .sourceBucketName(sourceName)
+                    .sourceObjectPath(sourceName)
                     .destinationBucketName(destinationBucket)
                     .readerStream(reader)
                     .build();
