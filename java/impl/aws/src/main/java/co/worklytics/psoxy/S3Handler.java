@@ -40,7 +40,6 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
 
         DaggerAwsContainer.create().injectS3Handler(this);
 
-        boolean isBOMEncoded = Boolean.parseBoolean(configService.getConfigPropertyAsOptional(AWSConfigProperty.BOM_ENCODED).orElse("false"));
         String destinationBucket = configService.getConfigPropertyAsOptional(AWSConfigProperty.OUTPUT_BUCKET)
                 .orElseThrow(() -> new IllegalStateException("Output bucket not found as environment variable!"));
 
@@ -49,21 +48,14 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
         String importBucket = record.getS3().getBucket().getName();
         String sourceKey = record.getS3().getObject().getUrlDecodedKey();
 
-        log.info(String.format("Received a request for processing %s from bucket %s. BOM flag is marked as %s", sourceKey, importBucket, isBOMEncoded));
+        log.info(String.format("Received a request for processing %s from bucket %s.", sourceKey, importBucket));
 
         S3Object s3Object = s3Client.getObject(new GetObjectRequest(importBucket, sourceKey));
         StorageEventResponse storageEventResponse;
 
-        try(InputStream objectData = s3Object.getObjectContent()) {
-            InputStreamReader reader;
-
-            BOMInputStream is = null;
-            if (isBOMEncoded) {
-                is = new BOMInputStream(objectData);
-                reader = new InputStreamReader(is, StandardCharsets.UTF_8.name());
-            } else {
-                reader = new InputStreamReader(objectData);
-            }
+        try(InputStream objectData = s3Object.getObjectContent();
+        BOMInputStream is = new BOMInputStream(objectData);
+        InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
 
             StorageEventRequest request = StorageEventRequest.builder()
                     .sourceBucketName(importBucket)
@@ -73,11 +65,6 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
                     .build();
 
            storageEventResponse = storageHandler.handle(request);
-
-           if (isBOMEncoded) {
-               is.close();
-           }
-           reader.close();
         }
 
         log.info("Writing to: " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationObjectPath());
