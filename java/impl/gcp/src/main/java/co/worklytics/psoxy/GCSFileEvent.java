@@ -34,7 +34,6 @@ public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
         // See https://cloud.google.com/functions/docs/calling/storage#event_types
         if (context.eventType().equals("google.storage.object.finalize")) {
 
-            boolean isBOMEncoded = Boolean.parseBoolean(configService.getConfigPropertyAsOptional(GCPConfigProperty.BOM_ENCODED).orElse("false"));
             String destinationBucket = configService.getConfigPropertyAsOptional(GCPConfigProperty.OUTPUT_BUCKET)
                     .orElseThrow(() -> new IllegalStateException("Output bucket not found as environment variable!"));
 
@@ -43,40 +42,30 @@ public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
             Storage storage = StorageOptions.getDefaultInstance().getService();
             BlobId sourceBlobId = BlobId.of(importBucket, sourceName);
             BlobInfo blobInfo = storage.get(sourceBlobId);
-            InputStream objectData = new ByteArrayInputStream(storage.readAllBytes(sourceBlobId));
-            InputStreamReader reader;
+            try (InputStream objectData = new ByteArrayInputStream(storage.readAllBytes(sourceBlobId));
+                 BOMInputStream is = new BOMInputStream(objectData);
+                 InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
 
-            BOMInputStream is = null;
-            if (isBOMEncoded) {
-                is = new BOMInputStream(objectData);
-                reader = new InputStreamReader(is, StandardCharsets.UTF_8.name());
-            } else {
-                reader = new InputStreamReader(objectData);
-            }
+                StorageEventRequest request = StorageEventRequest.builder()
+                        .sourceBucketName(importBucket)
+                        .sourceObjectPath(sourceName)
+                        .destinationBucketName(destinationBucket)
+                        .readerStream(reader)
+                        .build();
 
-            StorageEventRequest request = StorageEventRequest.builder()
-                    .sourceBucketName(importBucket)
-                    .sourceObjectPath(sourceName)
-                    .destinationBucketName(destinationBucket)
-                    .readerStream(reader)
-                    .build();
+                StorageEventResponse storageEventResponse = storageHandler.handle(request);
 
-            StorageEventResponse storageEventResponse = storageHandler.handle(request);
-            reader.close();
+                try (InputStream processedStream = new ByteArrayInputStream(storageEventResponse.getBytes())) {
 
-            InputStream processedStream = new ByteArrayInputStream(storageEventResponse.getBytes());
+                    System.out.println("Writing to: " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationObjectPath());
 
-            System.out.println("Writing to: " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationObjectPath());
+                    storage.createFrom(BlobInfo.newBuilder(BlobId.of(storageEventResponse.getDestinationBucketName(), storageEventResponse.getDestinationObjectPath()))
+                            .setContentType(blobInfo.getContentType())
+                            .build(), processedStream);
 
-            storage.createFrom(BlobInfo.newBuilder(BlobId.of(storageEventResponse.getDestinationBucketName(), storageEventResponse.getDestinationObjectPath()))
-                    .setContentType(blobInfo.getContentType())
-                    .build(), processedStream);
-
-            System.out.println("Successfully pseudonymized " + importBucket + "/"
-                    + sourceName + " and uploaded to " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationObjectPath());
-
-            if (isBOMEncoded) {
-                is.close();
+                    System.out.println("Successfully pseudonymized " + importBucket + "/"
+                            + sourceName + " and uploaded to " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationObjectPath());
+                }
             }
         }
     }
