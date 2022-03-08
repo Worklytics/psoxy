@@ -85,7 +85,6 @@ module "psoxy-file-handler" {
   ]
 }
 
-
 resource "aws_lambda_permission" "allow_import_bucket" {
   statement_id  = "AllowExecutionFromS3Bucket"
   action        = "lambda:InvokeFunction"
