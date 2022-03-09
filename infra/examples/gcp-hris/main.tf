@@ -42,7 +42,7 @@ module "psoxy-package" {
 
 data "archive_file" "source" {
   type        = "zip"
-  source_file  = module.psoxy-package.path_to_deployment_jar
+  source_file = module.psoxy-package.path_to_deployment_jar
   output_path = "/tmp/function.zip"
 }
 
@@ -57,10 +57,10 @@ resource "google_storage_bucket" "deployment_bucket" {
 # Add source code zip to bucket
 resource "google_storage_bucket_object" "function" {
   # Append file MD5 to force bucket to be recreated
-  name   = format("${module.psoxy-package.filename}#%s", formatdate("mmss", timestamp()))
+  name         = format("${module.psoxy-package.filename}#%s", formatdate("mmss", timestamp()))
   content_type = "application/zip"
-  bucket = google_storage_bucket.deployment_bucket.name
-  source = data.archive_file.source.output_path
+  bucket       = google_storage_bucket.deployment_bucket.name
+  source       = data.archive_file.source.output_path
 }
 
 resource "google_storage_bucket" "import-bucket" {
@@ -114,7 +114,7 @@ resource "google_project_iam_custom_role" "bucket-write" {
 
 resource "google_storage_bucket_iam_member" "access_for_processed_bucket" {
   bucket = google_storage_bucket.processed-bucket.name
-  role = google_project_iam_custom_role.bucket-write.id
+  role   = google_project_iam_custom_role.bucket-write.id
   member = "serviceAccount:${google_service_account.service-account.email}"
 }
 
@@ -137,14 +137,14 @@ resource "google_cloudfunctions_function" "function" {
     }), yamldecode(file("../../../configs/hris.yaml")))
 
   secret_environment_variables {
-    key = "PSOXY_SALT"
-    secret = "PSOXY_SALT"
+    key     = "PSOXY_SALT"
+    secret  = "PSOXY_SALT"
     version = module.psoxy-gcp.salt_secret_version_number
       }
 
   event_trigger {
     event_type = "google.storage.object.finalize"
-    resource = google_storage_bucket.import-bucket.name
+    resource   = google_storage_bucket.import-bucket.name
   }
 
   depends_on    = [
