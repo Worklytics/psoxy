@@ -3,6 +3,8 @@ package co.worklytics.psoxy.aws;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.gateway.impl.CompositeConfigService;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import dagger.Module;
 import dagger.Provides;
 import software.amazon.awssdk.regions.Region;
@@ -66,5 +68,10 @@ public interface AwsModule {
             .fallback(parameterStoreConfigHierarchy)
             .preferred(envVarsConfigService)
             .build();
+    }
+
+    @Provides
+    static AmazonS3 getStorageClient() {
+        return AmazonS3ClientBuilder.defaultClient();
     }
 }

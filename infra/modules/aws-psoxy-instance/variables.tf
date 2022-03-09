@@ -11,6 +11,12 @@ variable "function_name" {
   description = "name of function"
 }
 
+variable "handler_class" {
+  type        = string
+  description = "Class to handle the request"
+  default     = "co.worklytics.psoxy.Handler"
+}
+
 variable "aws_assume_role_arn" {
   type        = string
   description = "role arn"
@@ -64,4 +70,10 @@ variable "api_caller_role_arn" {
 variable "example_api_calls" {
   type        = list(string)
   description = "example endpoints that can be called via proxy"
+}
+
+variable "environment_variables" {
+  type        = map(string)
+  description = "No sensitive variables to add as an environment variable."
+  default     = {}
 }

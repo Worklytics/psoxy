@@ -1,0 +1,6 @@
+pseudonymizations:
+  - csvColumns:
+      - "EMPLOYEE_EMAIL"
+redactions:
+  - csvColumns:
+      - "MANAGEREMAIL"

@@ -118,3 +118,7 @@ output "api_gateway" {
 output "api_caller_role_arn" {
   value = aws_iam_role.api-caller.arn
 }
+
+output "api_caller_role_name" {
+  value = aws_iam_role.api-caller.name
+}

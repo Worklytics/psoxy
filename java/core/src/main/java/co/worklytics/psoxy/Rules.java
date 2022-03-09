@@ -124,6 +124,11 @@ public class Rules implements Serializable {
         // json nodes that match ANY of these paths will be matches
         @Singular
         List<String> jsonPaths;
+
+        // Only for being used when the source is a CSV files;
+        // the name of the columns that appear in the file as part of the header
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        List<String> csvColumns;
     }
 
     /**

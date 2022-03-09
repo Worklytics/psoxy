@@ -11,7 +11,7 @@ terraform {
 resource "aws_lambda_function" "psoxy-instance" {
   function_name    = var.function_name
   role             = aws_iam_role.iam_for_lambda.arn
-  handler          = "co.worklytics.psoxy.Handler"
+  handler          = var.handler_class
   runtime          = "java11"
   filename         = var.path_to_function_zip
   source_code_hash = var.function_zip_hash
@@ -19,8 +19,7 @@ resource "aws_lambda_function" "psoxy-instance" {
   memory_size      = 512 # megabytes
 
   environment {
-    # NOTE: can use merge() to combine var map from config with additional values
-    variables = yamldecode(file(var.path_to_config))
+    variables = merge(var.environment_variables, yamldecode(file(var.path_to_config)))
   }
 }
 
@@ -71,7 +70,6 @@ resource "aws_lambda_permission" "lambda_permission" {
   source_arn = "${var.api_gateway.execution_arn}/*/*/${var.function_name}/{proxy+}"
 
   depends_on = [
-
     aws_lambda_function.psoxy-instance
   ]
 }
@@ -169,4 +167,16 @@ EOT
 
 output "endpoint_url" {
   value = local.proxy_endpoint_url
+}
+
+output "function_arn" {
+  value = aws_lambda_function.psoxy-instance.arn
+}
+
+output "iam_for_lambda_arn" {
+  value = aws_iam_role.iam_for_lambda.arn
+}
+
+output "iam_for_lambda_name" {
+  value = aws_iam_role.iam_for_lambda.name
 }
