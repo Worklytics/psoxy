@@ -92,8 +92,16 @@ resource "google_secret_manager_secret_iam_member" "salt-secret-acces-for-servic
 
 resource "google_storage_bucket_iam_member" "access_for_import_bucket" {
   bucket = google_storage_bucket.import-bucket.name
-  role = "roles/storage.objectViewer"
+  role   = "roles/storage.objectViewer"
   member = "serviceAccount:${google_service_account.service-account.email}"
+}
+
+resource "google_storage_bucket_iam_member" "grant_sa_read_on_processed_bucket" {
+  count = length(var.worklytics_sa_emails)
+
+  bucket   = google_storage_bucket.processed-bucket.name
+  member   = "serviceAccount:${var.worklytics_sa_emails[count.index]}"
+  role     = "roles/storage.objectViewer"
 }
 
 resource "google_project_iam_custom_role" "bucket-write" {
