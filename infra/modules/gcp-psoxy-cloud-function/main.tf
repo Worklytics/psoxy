@@ -44,7 +44,7 @@ gcloud beta functions deploy ${var.function_name} \
     --source=target/deployment \
     --service-account=${var.service_account_email} \
     --env-vars-file=../../../configs/${var.source_kind}.yaml \
-    --set-m '${join(",", local.secret_clauses)}'
+    --set-secrets '${join(",", local.secret_clauses)}'
 ```
 
 **IMPORTANT:** if gcloud prompts you `Allow unauthenticated invocations of new function
