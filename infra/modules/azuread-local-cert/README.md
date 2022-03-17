@@ -9,7 +9,7 @@ Prereqs:
 
 NOTE:
   - the key used for the certificate WILL be stored by Terraform in your local state. You should
-    1) run this is a secure location, 2) store your Terraform state securely
+    1) run this from a secure location, 2) store your Terraform state securely
   - this will regenerate certificates on every run. In simple scenarios, this is probably desirable,
     but may be a nuisance if it's part of a large Terraform configuration.
 
