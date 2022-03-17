@@ -39,7 +39,7 @@ caller_external_user_id       = "your-worklytics-service-account"
 ## Security
 
 This example includes generation of certificates for your Azure AD application listings.
-   - anyone in possession of those certificates to access your data with whatever permissions you
+   - anyone in possession of those certificates could access your data with whatever permissions you
      grant to the Azure AD application.
    - this example should be used with caution and only run from a location that, based on your
      org's infosec rules, can be used to generate such a certificate.
