@@ -11,7 +11,7 @@ your psoxy instance.
 
 ### Azure AD (Microsoft 365)
 Download and install the [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli).
-This example presumses you'll authenticate that via `az login`, such that the [Terraform Azure
+This example presumes you'll authenticate that via `az login`, such that the [Terraform Azure
 provider](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs) will leverage those
 credentials for authentication. This is Terraform's recommended approach for authenticating when
 running locally/interactively and our documentation will generally presume you're using this
@@ -34,4 +34,18 @@ msft_tenant_id                = "some-uuid-of-msft-tenant" # should hold your Mi
 caller_aws_account_id         = "914358739851:root"
 caller_external_user_id       = "your-worklytics-service-account"
 ```
+
+
+## Security
+
+This example includes generation of certificates for your Azure AD application listings.
+   - anyone in possession of those certificates could access your data with whatever permissions you
+     grant to the Azure AD application.
+   - this example should be used with caution and only run from a location that, based on your
+     org's infosec rules, can be used to generate such a certificate.
+   - the terraform state produced by this module should be persisted to a secure location, such as
+     an encrypted disk of a VM dedicated for this purpose OR a cloud storage service (GCS, S3 etc).
+     It is generally NOT good practice to commit such state files to a source code repository such
+     as git/github.
+
 
