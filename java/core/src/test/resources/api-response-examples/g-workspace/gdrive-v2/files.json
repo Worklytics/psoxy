@@ -6,7 +6,10 @@
     {
       "kind": "drive#file",
       "id": "189_XJe0oafBAw01BIoFudbIvNCaIGERI_y2X1LxMCMo",
-      "name": "asdfasfrasdf",
+      "name": "File Name",
+      "title": "Document Title",
+      "description": "Weekly agenda minutes",
+      "originalFilename": "Original filename",
       "mimeType": "application/vnd.google-apps.document",
       "starred": false,
       "trashed": false,

@@ -1,14 +1,14 @@
 package co.worklytics.psoxy.rules.google;
 
 import co.worklytics.psoxy.Rules;
-
-import static co.worklytics.psoxy.Rules.Rule;
-
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static co.worklytics.psoxy.Rules.Rule;
 
 /**
  * Prebuilt sanitization rules for Google tools
@@ -194,6 +194,8 @@ public class PrebuiltSanitizerRules {
         .build();
 
     static final Rules GDRIVE = Rules.builder()
+        // v2 endpoint: https://developers.google.com/drive/api/v2/reference/
+        // v3 endpoint: https://developers.google.com/drive/api/v3/reference/
         //NOTE: by default, files endpoint doesn't return any PII. client must pass a fields mask
         // that explicitly requests it; so if we could block that behavior, we could eliminate these
         // rules
@@ -206,7 +208,7 @@ public class PrebuiltSanitizerRules {
             .build())
         .redaction(Rule.builder()
             .relativeUrlRegex("^/drive/v2/files.*")
-            .jsonPath("$.name") // file display name
+            .jsonPath("$..['name','title','description','originalFilename']") // defensive about file recognition
             .jsonPath("$..displayName") //user display name, anywhere (confidentiality)
             .jsonPath("$..picture") //user picture, anywhere (confidentiality)
             .jsonPath("$.lastModifyingUserName")
@@ -233,7 +235,8 @@ public class PrebuiltSanitizerRules {
             .build())
         .redaction(Rule.builder()
             .relativeUrlRegex("^/drive/v3/files.*")
-            .jsonPath("$.name")
+            .jsonPath("$..['name','title','description','originalFilename']") // defensive about file recognition
+            .jsonPath("$.title")
             .jsonPath("$..displayName")
             .jsonPath("$..photoLink")
             .jsonPath("$.files[*].name")

@@ -38,7 +38,8 @@ public class GDriveTests extends JavaRulesTestBaseCase {
 
         Collection<String> PII = Arrays.asList(
             "alice@worklytics.co",
-            "Bob@worklytics.co"
+            "Bob@worklytics.co",
+            "John@worklytics.co"
         );
         assertNotSanitized(jsonString, PII);
 
@@ -47,6 +48,14 @@ public class GDriveTests extends JavaRulesTestBaseCase {
             sanitizer.sanitize(new URL(endpoint), jsonString);
 
         assertPseudonymized(sanitized, PII);
+        assertRedacted(sanitized, "File Name",
+            "Document Title",
+            "Weekly agenda minutes",
+            "Original filename",
+            "Bob Boss",
+            "alice Example",
+            "John Lorens"
+            );
 
         assertUrlWithQueryParamsAllowed(endpoint);
     }
