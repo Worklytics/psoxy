@@ -208,7 +208,7 @@ public class PrebuiltSanitizerRules {
             .build())
         .redaction(Rule.builder()
             .relativeUrlRegex("^/drive/v2/files.*")
-            .jsonPath("$..['name','title','description','originalFilename']") // defensive about file recognition
+            .jsonPath("$..['name','title','description','originalFilename']") // defensive about file recognition, anywhere
             .jsonPath("$..displayName") //user display name, anywhere (confidentiality)
             .jsonPath("$..picture") //user picture, anywhere (confidentiality)
             .jsonPath("$.lastModifyingUserName")
@@ -219,10 +219,10 @@ public class PrebuiltSanitizerRules {
         .redaction(Rule.builder()
             .relativeUrlRegex("^/drive/v2/files/.*?/revisions.*")
             .jsonPath("$.originalFilename")
-            .jsonPath("$.items[*].originalFilename")
+            .jsonPath("$.items[*].originalFilename") // duplicated with files.*
             .build())
         .redaction(Rule.builder()
-            .relativeUrlRegex("^/drive/v2/files/.*?/permissions*")
+            .relativeUrlRegex("^/drive/v2/files/.*?/permissions.*")
             .jsonPath("$.name") //likely duplicative with files.* case above
             .jsonPath("$.photoLink")
             .jsonPath("$.items[*].name")
@@ -235,8 +235,7 @@ public class PrebuiltSanitizerRules {
             .build())
         .redaction(Rule.builder()
             .relativeUrlRegex("^/drive/v3/files.*")
-            .jsonPath("$..['name','title','description','originalFilename']") // defensive about file recognition
-            .jsonPath("$.title")
+            .jsonPath("$..['name','title','description','originalFilename']") // defensive about file recognition, anywhere
             .jsonPath("$..displayName")
             .jsonPath("$..photoLink")
             .jsonPath("$.files[*].name")
@@ -247,7 +246,7 @@ public class PrebuiltSanitizerRules {
             .jsonPath("$.files[*].originalFilename")
             .build())
         .redaction(Rule.builder()
-            .relativeUrlRegex("^/drive/v2/files/.*?/permissions*")
+            .relativeUrlRegex("^/drive/v2/files/.*?/permissions.*")
             .jsonPath("$.displayName") //likely duplicative with files.* case above
             .jsonPath("$.photoLink")
             .jsonPath("$.permissions[*].displayName") //likely duplicative with files.* case above

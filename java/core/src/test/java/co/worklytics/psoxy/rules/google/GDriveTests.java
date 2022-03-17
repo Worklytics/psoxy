@@ -114,7 +114,6 @@ public class GDriveTests extends JavaRulesTestBaseCase {
 
         String sanitized =
             sanitizer.sanitize(new URL("http://www.googleapis.com/drive/v2/files/some-file-id/permissions/234234"), jsonString);
-
         assertPseudonymized(sanitized, PII);
         assertRedacted(sanitized, "Alice");
     }
