@@ -11,7 +11,7 @@ pseudonymizations:
 redactions:
   - relativeUrlRegex: "^/drive/v2/files.*"
     jsonPaths:
-      - "$.name"
+      - "$..['name','title','description','originalFilename']"
       - "$..displayName"
       - "$..picture"
       - "$.lastModifyingUserName"
@@ -22,7 +22,7 @@ redactions:
     jsonPaths:
       - "$.originalFilename"
       - "$.items[*].originalFilename"
-  - relativeUrlRegex: "^/drive/v2/files/.*?/permissions*"
+  - relativeUrlRegex: "^/drive/v2/files/.*?/permissions.*"
     jsonPaths:
       - "$.name"
       - "$.photoLink"
@@ -30,7 +30,7 @@ redactions:
       - "$.items[*].photoLink"
   - relativeUrlRegex: "^/drive/v3/files.*"
     jsonPaths:
-      - "$.name"
+      - "$..['name','title','description','originalFilename']"
       - "$..displayName"
       - "$..photoLink"
       - "$.files[*].name"
@@ -38,7 +38,7 @@ redactions:
     jsonPaths:
       - "$.originalFilename"
       - "$.files[*].originalFilename"
-  - relativeUrlRegex: "^/drive/v2/files/.*?/permissions*"
+  - relativeUrlRegex: "^/drive/v2/files/.*?/permissions.*"
     jsonPaths:
       - "$.displayName"
       - "$.photoLink"
