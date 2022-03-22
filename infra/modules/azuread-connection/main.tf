@@ -20,6 +20,10 @@ resource "azuread_service_principal" "msgraph" {
 resource "azuread_application" "connector" {
   display_name                   = var.display_name
 
+  feature_tags {
+    hide = true
+  }
+
   required_resource_access {
     resource_app_id = data.azuread_application_published_app_ids.well_known.result.MicrosoftGraph
 
