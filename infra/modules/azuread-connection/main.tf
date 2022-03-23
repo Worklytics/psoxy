@@ -21,7 +21,10 @@ resource "azuread_application" "connector" {
   display_name                   = var.display_name
 
   feature_tags {
-    hide = true
+    hide         = true  # don't show as 'App' to users, as there is no user-facing experience for connector
+    enterprise   = false # default; just clarify this is intentional. see https://marileeturscak.medium.com/the-difference-between-app-registrations-enterprise-applications-and-service-principals-in-azure-4f70b9a80fe5
+                         # and internal discussion https://app.asana.com/0/1201039336231823/1202001336919865/f
+    gallery      = false # default; but to clarify intent
   }
 
   required_resource_access {
