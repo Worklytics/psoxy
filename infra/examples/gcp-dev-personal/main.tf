@@ -117,7 +117,7 @@ module "google-workspace-connection" {
     k => v if v.deploy
   }
 
-  source = "../modules/google-workspace-dwd-connection"
+  source = "../../modules/google-workspace-dwd-connection"
 
   project_id                   = var.project_id
   connector_service_account_id = "psoxy-${each.key}-dwd"
@@ -135,7 +135,7 @@ module "google-workspace-connection-auth" {
   for k, v in local.google_workspace_sources:
   k => v if v.deploy
   }
-  source = "../modules/gcp-sa-auth-key-secret-manager"
+  source = "../../modules/gcp-sa-auth-key-secret-manager"
 
   secret_project     = var.project_id
   service_account_id = module.google-workspace-connection[each.key].service_account_id
@@ -147,7 +147,7 @@ module "psoxy-google-workspace-connector" {
   k => v if v.deploy
   }
 
-  source = "../modules/gcp-psoxy-cloud-function"
+  source = "../../modules/gcp-psoxy-cloud-function"
 
   project_id            = var.project_id
   function_name         = "psoxy-${each.key}"
@@ -172,7 +172,7 @@ module "worklytics-psoxy-connection" {
   k => v if v.deploy
   }
 
-  source = "../modules/worklytics-psoxy-connection"
+  source = "../../modules/worklytics-psoxy-connection"
 
   psoxy_endpoint_url = module.psoxy-google-workspace-connector[each.key].cloud_function_url
   display_name       = "${each.value.display_name} via Psoxy"
@@ -211,7 +211,7 @@ module "connector-long-auth-block" {
   for k, v in local.oauth_long_access_connectors:
   k => v if v.deploy
   }
-  source   = "../modules/gcp-oauth-long-access-strategy"
+  source   = "../../modules/gcp-oauth-long-access-strategy"
   project_id              = var.project_id
   function_name           = each.value.function_name
   token_adder_user_emails = []
@@ -222,7 +222,7 @@ module "connector-long-auth-create-function" {
   for k, v in local.oauth_long_access_connectors:
   k => v if v.deploy
   }
-  source = "../modules/gcp-psoxy-cloud-function"
+  source = "../../modules/gcp-psoxy-cloud-function"
 
   project_id            = var.project_id
   function_name         = each.value.function_name

@@ -30,7 +30,7 @@ infra/dev-personal/terraform.tfstate**
 infra/dev-personal/TODO*
 
 # ignore sa key file(s)
-infra/dev-personal/*connector-sa-key.json
+infra/examples/gcp-dev-personal/*connector-sa-key.json
 
 
 java/target
