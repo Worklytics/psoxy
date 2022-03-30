@@ -6,11 +6,18 @@ import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrateg
 import com.google.auth.Credentials;
 import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.OAuth2Credentials;
+import com.google.auth.oauth2.OAuth2CredentialsWithRefresh;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.extern.java.Log;
+import org.apache.http.client.utils.DateUtils;
 
 import javax.inject.Inject;
+import java.io.IOException;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
 import java.util.Optional;
 import java.util.Set;
 
@@ -28,6 +35,9 @@ import java.util.Set;
 @NoArgsConstructor(onConstructor_ = @Inject)
 public class OAuthAccessTokenSourceAuthStrategy implements SourceAuthStrategy {
 
+    @Inject
+    Clock clock;
+
     @Getter
     private final String configIdentifier = "oauth2_access_token";
 
@@ -38,9 +48,17 @@ public class OAuthAccessTokenSourceAuthStrategy implements SourceAuthStrategy {
     @Inject ConfigService config;
 
     @Override
-    public Credentials getCredentials(Optional<String> userToImpersonate) {
+    public Credentials getCredentials(Optional<String> userToImpersonateIgnored) {
         String token = config.getConfigPropertyOrError(ConfigProperty.ACCESS_TOKEN);
-        return OAuth2Credentials.create(new AccessToken(token, null));
+        // Some date into far future. Expiration is required
+        Instant expire = clock.instant().plus(365L, ChronoUnit.DAYS);
+        AccessToken accessToken = new AccessToken(token, Date.from(expire));
+        // OAuth2Credentials tried to refresh and fail
+        OAuth2CredentialsWithRefresh.Builder builder = OAuth2CredentialsWithRefresh.newBuilder();
+        builder.setAccessToken(accessToken);
+        // refresh does nothing, just return the same token
+        builder.setRefreshHandler(() -> accessToken);
+        return builder.build();
     }
 
     @Override

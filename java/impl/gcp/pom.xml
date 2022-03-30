@@ -21,6 +21,7 @@
         <!-- serviceAccount that function will run as. For Google Workspace use cases, should be the
          one configured as OAuth Client and authorized for your instance. -->
         <serviceAccount>psoxy-gmail-dwd@psoxy-dev-erik.iam.gserviceaccount.com</serviceAccount>
+        <dependency.google-cloud-storage.version>2.4.0</dependency.google-cloud-storage.version>
     </properties>
 
     <repositories>
@@ -71,6 +72,11 @@
             <artifactId>commons-lang3</artifactId>
             <version>${dependency.apache-commons-lang3.version}</version>
         </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>${dependency.commons-io.version}</version>
+        </dependency>
 
         <!-- platform stuff (eg, GCP Cloud Function support) -->
         <dependency>
@@ -79,6 +85,11 @@
             <version>1.0.4</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.google.cloud</groupId>
+            <artifactId>google-cloud-storage</artifactId>
+            <version>${dependency.google-cloud-storage.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.mockito</groupId>

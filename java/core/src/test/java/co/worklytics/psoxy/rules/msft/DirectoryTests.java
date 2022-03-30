@@ -68,6 +68,25 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
         assertRedacted(sanitized, "Paul Allen");
     }
 
+    // case that ACTUALLY looks like what we call ...
+    @Test
+    void users_select() {
+        String jsonString = asJson(exampleDirectoryPath, "users.json");
+
+        String endpoint = "https://graph.microsoft.com/v1.0/users?$select=preferredLanguage,isResourceAccount,mail,city,displayName,givenName,jobTitle,employeeId,accountEnabled,otherMails,businessPhones,mobilePhone,officeLocation,surname,id,state,usageLocation,userType,department&$top=50";
+
+        Collection<String> PII = Arrays.asList(
+            "john@worklytics.onmicrosoft.com",
+            "Paul Allen"
+        );
+        assertNotSanitized(jsonString, PII);
+
+        String sanitized = this.sanitize(endpoint, jsonString);
+
+        assertPseudonymized(sanitized, "john@worklytics.onmicrosoft.com");
+        assertRedacted(sanitized, "Paul Allen");
+    }
+
     @Test
     void group() {
         String endpoint = "https://graph.microsoft.com/v1.0/groups/02bd9fd6-8f93-4758-87c3-1fb73740a315";

@@ -1,7 +1,7 @@
 
 
 
-resource "local_file" "todo-google-workspace-admin-console" {
+resource "local_file" "todo-worklytics-connection" {
 filename = "TODO - connect ${var.display_name} in Worklytics .md"
 content  = <<EOT
 Complete the following steps in Worklytics AFTER you have deployed the Psoxy instance for your connection:

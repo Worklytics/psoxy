@@ -30,13 +30,15 @@ public class Validator {
     }
 
     static public void validate(@NonNull Rules.Rule rule) {
-        Pattern.compile(rule.getRelativeUrlRegex());
-        rule.getJsonPaths().forEach(p -> {
-            try {
-                JsonPath.compile(p);
-            } catch (Throwable e) {
-                throw new Error("JsonPath failed to compile: " + p, e);
-            }
-        });
+        if (rule.getCsvColumns() == null || rule.getCsvColumns().isEmpty())  {
+            Pattern.compile(rule.getRelativeUrlRegex());
+            rule.getJsonPaths().forEach(p -> {
+                try {
+                    JsonPath.compile(p);
+                } catch (Throwable e) {
+                    throw new Error("JsonPath failed to compile: " + p, e);
+                }
+            });
+        }
     }
 }

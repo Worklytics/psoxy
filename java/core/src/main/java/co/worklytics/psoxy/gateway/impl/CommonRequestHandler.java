@@ -23,8 +23,6 @@ import org.apache.http.entity.ContentType;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.net.URL;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.logging.Level;
@@ -34,8 +32,8 @@ import java.util.logging.Level;
 public class CommonRequestHandler {
 
     //we have ~540 total in Cloud Function connection, so can have generous values here
-    final int SOURCE_API_REQUEST_CONNECT_TIMEOUT_MILLISECONDS = 30_000;
-    final int SOURCE_API_REQUEST_READ_TIMEOUT = 300_000;
+    private static final int SOURCE_API_REQUEST_CONNECT_TIMEOUT_MILLISECONDS = 30_000;
+    private static final int SOURCE_API_REQUEST_READ_TIMEOUT = 300_000;
 
     @Inject ConfigService config;
     @Inject RulesUtils rulesUtils;
@@ -207,13 +205,20 @@ public class CommonRequestHandler {
 
     @SneakyThrows
     public URL buildTarget(HttpEventRequest request) {
+        // contents may come encoded. It should respect url as it comes.
+        // Construct URL directly concatenating instead of URIBuilder as it may re-encode.
         URIBuilder uriBuilder = new URIBuilder();
         uriBuilder.setScheme("https");
         uriBuilder.setHost(config.getConfigPropertyOrError(ProxyConfigProperty.TARGET_HOST));
-        // URL comes encoded, decode it prior to perform call to API origin to avoid double encoding issues
-        uriBuilder.setPath(URLDecoder.decode(request.getPath(), StandardCharsets.UTF_8));
-        uriBuilder.setCustomQuery(URLDecoder.decode(request.getQuery().orElse(""), StandardCharsets.UTF_8));
-        return uriBuilder.build().toURL();
+        URL hostURL = uriBuilder.build().toURL();
+        String hostPlusPath =
+            StringUtils.stripEnd(hostURL.toString(),"/") + "/" +
+            StringUtils.stripStart(request.getPath(),"/");
+        String targetURLString = hostPlusPath;
+        if (StringUtils.isNotBlank(request.getQuery().orElse(null))) {
+            targetURLString = hostPlusPath + "?" + request.getQuery().get();
+        }
+        return new URL(targetURLString);
     }
 
     private void logIfDevelopmentMode(Supplier<String> messageSupplier) {

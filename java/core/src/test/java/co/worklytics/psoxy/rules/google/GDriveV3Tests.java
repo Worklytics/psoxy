@@ -45,6 +45,9 @@ public class GDriveV3Tests extends JavaRulesTestBaseCase {
 
         assertPseudonymized(sanitized, PII);
         assertRedacted(sanitized, "Alice", "Paul");
+        assertRedacted(sanitized, "File Name",
+            "Alice", "Paul"
+            );
     }
 
     @SneakyThrows

@@ -6,8 +6,13 @@ import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
 import co.worklytics.psoxy.rules.RulesUtils;
 import dagger.Module;
 import dagger.Provides;
+import org.apache.commons.lang3.ObjectUtils;
 
+import javax.swing.text.html.Option;
 import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.logging.Logger;
 
 @Module
@@ -17,20 +22,19 @@ public class ConfigRulesModule {
 
     @Provides
     static Rules rules(Logger log, RulesUtils rulesUtils, ConfigService config) {
-        Optional<Rules> fileSystemRules = rulesUtils.getRulesFromFileSystem(PATH_TO_RULES_FILES);
-        if (fileSystemRules.isPresent()) {
-            log.info("using rules from file system");
-        }
-        return fileSystemRules.orElseGet(() -> {
-            Optional<Rules> configRules = rulesUtils.getRulesFromConfig(config);
-            if (configRules.isPresent()) {
-                log.info("using rules from environment config (RULES variable parsed as base64-encoded YAML)");
+
+        BiFunction<Optional<Rules>, String, Optional<Rules>> loadAndLog = (o, msg) -> {
+            if (o.isPresent()) {
+                log.info(msg);
             }
-            return configRules.orElseGet(() -> {
-                String source = config.getConfigPropertyOrError(ProxyConfigProperty.SOURCE);
-                log.info("using prebuilt rules for: " + source);
-                return PrebuiltSanitizerRules.DEFAULTS.get(source);
-            });
-        });
+            return o;
+        };
+
+        return loadAndLog.apply(rulesUtils.getRulesFromFileSystem(PATH_TO_RULES_FILES), "Rules: loaded from file system")
+            .or( () -> loadAndLog.apply(rulesUtils.getRulesFromConfig(config),"Rules: loaded from environment config (RULES variable parsed as base64-encoded YAML)"))
+            .or( () -> loadAndLog.apply(Optional.ofNullable(
+                PrebuiltSanitizerRules.DEFAULTS.get(config.getConfigPropertyOrError(ProxyConfigProperty.SOURCE))), "Rules: fallback to prebuilt rules"))
+                .orElseThrow( () -> new RuntimeException("No rules found"));
+
     }
 }

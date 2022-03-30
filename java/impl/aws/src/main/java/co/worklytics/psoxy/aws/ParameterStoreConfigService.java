@@ -4,6 +4,7 @@ import co.worklytics.psoxy.gateway.ConfigService;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.extern.java.Log;
+import org.apache.commons.lang3.StringUtils;
 import software.amazon.awssdk.services.ssm.SsmClient;
 
 import software.amazon.awssdk.services.ssm.model.*;
@@ -41,11 +42,19 @@ public class ParameterStoreConfigService implements ConfigService {
             .orElseThrow(() -> new Error("Proxy misconfigured; no value for " + property));
     }
 
+    private String parameterName(ConfigProperty property) {
+        if (StringUtils.isBlank(this.namespace)) {
+            return property.name();
+        } else {
+            return String.join("_", this.namespace, property.name());
+        }
+    }
+
     @Override
     public Optional<String> getConfigPropertyAsOptional(ConfigProperty property) {
         try {
             GetParameterRequest parameterRequest = GetParameterRequest.builder()
-                .name(this.namespace + property.name())
+                .name(parameterName(property))
                 .withDecryption(true)
                 .build();
             GetParameterResponse parameterResponse = client.getParameter(parameterRequest);
