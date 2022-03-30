@@ -77,7 +77,7 @@ resource "aws_ssm_parameter" "long-access-token-secret" {
 
   name        = "PSOXY_${upper(replace(each.key, "-", "_"))}_ACCESS_TOKEN"
   type        = "SecureString"
-  description = "Long-lived access token for the connector"
+  description = "The long lived token for ${module.aws-psoxy-long-auth-connectors[each.key].function_name}"
   value       = sensitive("")
 }
 

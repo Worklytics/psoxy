@@ -231,7 +231,7 @@ resource "aws_ssm_parameter" "long-access-token-secret" {
 
   name        = "PSOXY_${upper(replace(each.key, "-", "_"))}_ACCESS_TOKEN"
   type        = "SecureString"
-  description = "The long lived token for psoxy-${each.key}"
+  description = "The long lived token for ${module.aws-psoxy-long-auth-connectors[each.key].function_name}"
   value       = sensitive("anything")
 }
 
@@ -245,7 +245,7 @@ module "aws-psoxy-long-auth-connectors" {
   api_gateway          = module.psoxy-aws.api_gateway
   path_to_function_zip = module.psoxy-package.path_to_deployment_jar
   function_zip_hash    = module.psoxy-package.deployment_package_hash
-  path_to_config       = "../../../configs/${each.key}.yaml"
+  path_to_config       = "../../../configs/${each.value.source_kind}.yaml"
   api_caller_role_arn  = module.psoxy-aws.api_caller_role_arn
   aws_assume_role_arn  = var.aws_assume_role_arn
 
