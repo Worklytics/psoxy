@@ -34,7 +34,7 @@ module "psoxy-gcp" {
 }
 
 locals {
-  # Google Workspace Sources; add/remove as you wish
+  # Google Workspace Sources; add/remove as you wish, or toggle 'enabled' flag
   google_workspace_sources = {
     # GDirectory connections are a PRE-REQ for gmail, gdrive, and gcal connections. remove only
     # if you plan to directly connect Directory to worklytics (without proxy). such a scenario is
@@ -42,6 +42,8 @@ locals {
     # they collaborate in GMail/GCal/Gdrive. the Directory does not contain PII of subjects external
     # to the Google Workspace, so may be directly connected in such scenarios.
     "gdirectory": {
+      enabled: true,
+      source_kind: "gdirectory",
       display_name: "Google Directory"
       apis_consumed: [
         "admin.googleapis.com"
@@ -58,6 +60,8 @@ locals {
       worklytics_connector_name: "Google Workspace Directory via Psoxy"
     }
     "gcal": {
+      enabled: true,
+      source_kind: "gcal",
       display_name: "Google Calendar"
       apis_consumed: [
         "calendar-json.googleapis.com"
@@ -67,6 +71,8 @@ locals {
       ]
     }
     "gmail": {
+      enabled: true,
+      source_kind: "gmail",
       display_name: "GMail"
       apis_consumed: [
         "gmail.googleapis.com"
@@ -76,6 +82,8 @@ locals {
       ]
     }
     "google-chat": {
+      enabled: true,
+      source_kind: "google-chat",
       display_name: "Google Chat"
       apis_consumed: [
         "admin.googleapis.com"
@@ -85,6 +93,8 @@ locals {
       ]
     }
     "gdrive": {
+      enabled: true,
+      source_kind: "gdrive",
       display_name: "Google Drive"
       apis_consumed: [
         "drive.googleapis.com"
@@ -94,6 +104,8 @@ locals {
       ]
     }
     "google-meet": {
+      enabled: true,
+      source_kind: "google-meet",
       display_name: "Google Meet"
       apis_consumed: [
         "admin.googleapis.com"
@@ -103,10 +115,11 @@ locals {
       ]
     }
   }
+  enable_google_workspace_sources = { for id, spec in local.google_workspace_sources : id => spec if spec.enabled }
 }
 
 module "google-workspace-connection" {
-  for_each = local.google_workspace_sources
+  for_each = local.enabled_google_workspace_sources
 
   source = "../../modules/google-workspace-dwd-connection"
 
@@ -122,7 +135,7 @@ module "google-workspace-connection" {
 }
 
 module "google-workspace-connection-auth" {
-  for_each = local.google_workspace_sources
+  for_each = local.enabled_google_workspace_sources
 
   source = "../../modules/gcp-sa-auth-key-secret-manager"
 
@@ -132,13 +145,13 @@ module "google-workspace-connection-auth" {
 }
 
 module "psoxy-google-workspace-connector" {
-  for_each = local.google_workspace_sources
+  for_each = local.enabled_google_workspace_sources
 
   source = "../../modules/gcp-psoxy-cloud-function"
 
   project_id            = var.project_id
   function_name         = "psoxy-${each.key}"
-  source_kind           = each.key
+  source_kind           = each.value.source_kind
   service_account_email = module.google-workspace-connection[each.key].service_account_email
 
   secret_bindings       = {
@@ -154,7 +167,7 @@ module "psoxy-google-workspace-connector" {
 }
 
 module "worklytics-psoxy-connection" {
-  for_each = local.google_workspace_sources
+  for_each = local.enabled_google_workspace_sources
 
   source = "../../modules/worklytics-psoxy-connection"
 

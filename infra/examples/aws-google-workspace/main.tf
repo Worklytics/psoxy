@@ -60,7 +60,7 @@ resource "google_project" "psoxy-google-connectors" {
 }
 
 locals {
-  # Google Workspace Sources; add/remove as you wish
+  # Google Workspace Sources; add/remove as you wish, or toggle 'enabled' flag
   google_workspace_sources = {
     # GDirectory connections are a PRE-REQ for gmail, gdrive, and gcal connections. remove only
     # if you plan to directly connect Directory to worklytics (without proxy). such a scenario is
@@ -68,6 +68,8 @@ locals {
     # they collaborate in GMail/GCal/Gdrive. the Directory does not contain PII of subjects external
     # to the Google Workspace, so may be directly connected in such scenarios.
     "gdirectory": {
+      enabled: true,
+      source_kind: "gdirectory",
       display_name: "Google Directory"
       apis_consumed: [
         "admin.googleapis.com"
@@ -83,6 +85,8 @@ locals {
       ]
     }
     "gcal": {
+      enabled: true,
+      source_kind: "gcal",
       display_name: "Google Calendar"
       apis_consumed: [
         "calendar-json.googleapis.com"
@@ -92,6 +96,8 @@ locals {
       ]
     }
     "gmail": {
+      enabled: true,
+      source_kind: "gmail",
       display_name: "GMail"
       apis_consumed: [
         "gmail.googleapis.com"
@@ -101,6 +107,8 @@ locals {
       ]
     }
     "google-chat": {
+      enabled: true,
+      source_kind: "google-chat",
       display_name: "Google Chat"
       apis_consumed: [
         "admin.googleapis.com"
@@ -110,6 +118,8 @@ locals {
       ]
     }
     "gdrive": {
+      enabled: true,
+      source_kind: "gdrive",
       display_name: "Google Drive"
       apis_consumed: [
         "drive.googleapis.com"
@@ -119,6 +129,8 @@ locals {
       ]
     }
     "google-meet": {
+      enabled: true,
+      source_kind: "google-meet",
       display_name: "Google Meet"
       apis_consumed: [
         "admin.googleapis.com"
@@ -128,15 +140,16 @@ locals {
       ]
     }
   }
+  enable_google_workspace_sources = { for id, spec in local.google_workspace_sources : id => spec if spec.enabled }
 }
 
 module "google-workspace-connection" {
-  for_each = local.google_workspace_sources
+  for_each = local.enabled_google_workspace_sources
 
   source = "../../modules/google-workspace-dwd-connection"
 
   project_id                   = google_project.psoxy-google-connectors.project_id
-  connector_service_account_id = "psoxy-${each.key}-dwd"
+  connector_service_account_id = "psoxy-${each.key}"
   display_name                 = "Psoxy Connector - ${each.value.display_name}${var.connector_display_name_suffix}"
   apis_consumed                = each.value.apis_consumed
   oauth_scopes_needed          = each.value.oauth_scopes_needed
@@ -148,7 +161,7 @@ module "google-workspace-connection" {
 }
 
 module "google-workspace-connection-auth" {
-  for_each = local.google_workspace_sources
+  for_each = local.enabled_google_workspace_sources
 
   source = "../../modules/gcp-sa-auth-key-aws-secret"
 
@@ -157,7 +170,7 @@ module "google-workspace-connection-auth" {
 }
 
 module "psoxy-google-workspace-connector" {
-  for_each = local.google_workspace_sources
+  for_each = local.enabled_google_workspace_sources
 
   source = "../../modules/aws-psoxy-instance"
 
@@ -179,12 +192,12 @@ module "psoxy-google-workspace-connector" {
 
 
 module "worklytics-psoxy-connection" {
-  for_each = local.google_workspace_sources
+  for_each = local.enabled_google_workspace_sources
 
   source = "../../modules/worklytics-psoxy-connection-aws"
 
   psoxy_endpoint_url = module.psoxy-google-workspace-connector[each.key].endpoint_url
-  display_name       = "${each.value.display_name} via Psoxy"
+  display_name       = "${each.value.display_name} via Psoxy${var.connector_display_name_suffix}"
   aws_region         = var.aws_region
   aws_role_arn       = var.aws_assume_role_arn
 }
@@ -194,42 +207,38 @@ module "worklytics-psoxy-connection" {
 
 locals {
   oauth_long_access_connectors = {
-    slack = {
-      deploy = true
-      function_name = "psoxy-slack-discovery-api"
-      source_kind = "slack"
+    slack-discovery-api = {
+      enabled           = true
+      source_kind       = "slack"
       example_api_calls = []
     },
     zoom = {
-      deploy = true
-      function_name = "psoxy-zoom"
-      source_kind = "zoom"
+      enabled            = true
+      source_kind       = "zoom"
       example_api_calls = ["/v2/users"]
     }
   }
+  enable_oauth_long_access_connectors = { for id, spec in local.oauth_long_access_connectors : id => spec if spec.enabled }
+
+
 }
 
 # Create secret (later filled by customer)
 resource "aws_ssm_parameter" "long-access-token-secret" {
-  for_each = {
-  for k, v in local.oauth_long_access_connectors:
-  k => v if v.deploy
-  }
-  name        = "PSOXY_ACCESS_TOKEN_${each.value.function_name}"
+  for_each = local.enable_oauth_long_access_connectors
+
+  name        = "PSOXY_${upper(replace(each.key, "-", "_"))}_ACCESS_TOKEN"
   type        = "SecureString"
-  description = "The long lived token for ${each.value.function_name}"
+  description = "The long lived token for psoxy-${each.key}"
   value       = sensitive("anything")
 }
 
 module "aws-psoxy-long-auth-connectors" {
-  for_each = {
-  for k, v in local.oauth_long_access_connectors:
-  k => v if v.deploy
-  }
+  for_each = local.enable_oauth_long_access_connectors
 
   source = "../../modules/aws-psoxy-instance"
 
-  function_name        = each.value.function_name
+  function_name        = "psoxy-${each.key}"
   source_kind          = each.value.source_kind
   api_gateway          = module.psoxy-aws.api_gateway
   path_to_function_zip = module.psoxy-package.path_to_deployment_jar

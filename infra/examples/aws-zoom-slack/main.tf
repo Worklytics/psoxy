@@ -55,42 +55,36 @@ module "psoxy-package" {
 
 locals {
   oauth_long_access_connectors = {
-    slack = {
-      deploy = true
-      function_name = "psoxy-slack-discovery-api"
-      source_kind = "slack"
+    slack-discovery-api = {
+      enabled           = true
+      source_kind       = "slack"
       example_api_calls = []
     },
     zoom = {
-      deploy = true
-      function_name = "psoxy-zoom"
-      source_kind = "zoom"
+      enabled            = true
+      source_kind       = "zoom"
       example_api_calls = ["/v2/users"]
     }
   }
+  enabled_oauth_long_access_connectors = { for k, v in local.oauth_long_access_connectors: k => v if v.enabled}
 }
 
 # Create secret (later filled by customer)
 resource "aws_ssm_parameter" "long-access-token-secret" {
-  for_each = {
-  for k, v in local.oauth_long_access_connectors:
-  k => v if v.deploy
-  }
-  name        = "${each.value.function_name}ACCESS_TOKEN"
+  for_each    = local.enabled_oauth_long_access_connectors
+
+  name        = "PSOXY_${upper(replace(each.key, "-", "_"))}_ACCESS_TOKEN"
   type        = "SecureString"
   description = "Long-lived access token for the connector"
   value       = sensitive("")
 }
 
 module "aws-psoxy-long-auth-connectors" {
-  for_each = {
-  for k, v in local.oauth_long_access_connectors:
-  k => v if v.deploy
-  }
+  for_each    = local.enabled_oauth_long_access_connectors
 
   source = "../../modules/aws-psoxy-instance"
 
-  function_name        = each.value.function_name
+  function_name        = "psoxy-${each.key}"
   source_kind          = each.value.source_kind
   api_gateway          = module.psoxy-aws.api_gateway
   path_to_function_zip = module.psoxy-package.path_to_deployment_jar

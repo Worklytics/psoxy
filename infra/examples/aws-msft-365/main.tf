@@ -63,6 +63,7 @@ locals {
   msft_sources = {
     "azure-ad" : {
       enabled: true,
+      source_kind: "azure-ad",
       display_name: "Azure Directory"
       required_oauth2_permission_scopes: [],  # Delegated permissions (from `az ad sp list --query "[?appDisplayName=='Microsoft Graph'].oauth2Permissions" --all`)
       required_app_roles: [ # Application permissions (form az ad sp list --query "[?appDisplayName=='Microsoft Graph'].appRoles" --all
@@ -76,6 +77,7 @@ locals {
     },
     "outlook-cal" : {
       enabled: true,
+      source_kind: "outlook-calendar",
       display_name: "Outlook Calendar"
       required_oauth2_permission_scopes: [],
       required_app_roles: [
@@ -93,6 +95,7 @@ locals {
     },
     "outlook-mail" : {
       enabled: true,
+      source_kind: "outlook-mail"
       display_name: "Outlook Mail"
       required_oauth2_permission_scopes: [],
       required_app_roles: [
@@ -168,11 +171,11 @@ module "psoxy-msft-connector" {
   source = "../../modules/aws-psoxy-instance"
 
   function_name        = "psoxy-${each.key}"
-  source_kind          = each.key
+  source_kind          = each.value.source_kind
   api_gateway          = module.psoxy-aws.api_gateway
   path_to_function_zip = module.psoxy-package.path_to_deployment_jar
   function_zip_hash    = module.psoxy-package.deployment_package_hash
-  path_to_config       = "../../../configs/${each.key}.yaml"
+  path_to_config       = "../../../configs/${each.value.source_kind}.yaml"
   api_caller_role_arn  = module.psoxy-aws.api_caller_role_arn
   aws_assume_role_arn  = var.aws_assume_role_arn
   example_api_calls    = each.value.example_calls
