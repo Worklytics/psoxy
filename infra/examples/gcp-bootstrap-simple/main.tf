@@ -11,7 +11,7 @@ terraform {
 
 # see: https://registry.terraform.io/modules/terraform-google-modules/bootstrap/google/latest
 module "bootstrap" {
-  source  = "../../modules/gcp-bootstrap"
+  source = "../../modules/gcp-bootstrap"
 
   project_id            = var.project_id
   project_name          = var.project_name

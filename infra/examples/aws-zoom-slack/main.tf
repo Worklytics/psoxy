@@ -56,24 +56,24 @@ module "psoxy-package" {
 locals {
   oauth_long_access_connectors = {
     slack-discovery-api = {
-      enabled: true
-      source_kind: "slack"
-      display_name: "Slack Discovery API"
-      example_api_calls: []
+      enabled : true
+      source_kind : "slack"
+      display_name : "Slack Discovery API"
+      example_api_calls : []
     },
     zoom = {
-      enabled: true
-      source_kind: "zoom"
-      display_name: "Zoom"
-      example_api_calls: ["/v2/users"]
+      enabled : true
+      source_kind : "zoom"
+      display_name : "Zoom"
+      example_api_calls : ["/v2/users"]
     }
   }
-  enabled_oauth_long_access_connectors = { for k, v in local.oauth_long_access_connectors: k => v if v.enabled}
+  enabled_oauth_long_access_connectors = { for k, v in local.oauth_long_access_connectors : k => v if v.enabled }
 }
 
 # Create secret (later filled by customer)
 resource "aws_ssm_parameter" "long-access-token-secret" {
-  for_each    = local.enabled_oauth_long_access_connectors
+  for_each = local.enabled_oauth_long_access_connectors
 
   name        = "PSOXY_${upper(replace(each.key, "-", "_"))}_ACCESS_TOKEN"
   type        = "SecureString"
@@ -82,7 +82,7 @@ resource "aws_ssm_parameter" "long-access-token-secret" {
 }
 
 module "aws-psoxy-long-auth-connectors" {
-  for_each    = local.enabled_oauth_long_access_connectors
+  for_each = local.enabled_oauth_long_access_connectors
 
   source = "../../modules/aws-psoxy-instance"
 
@@ -95,7 +95,7 @@ module "aws-psoxy-long-auth-connectors" {
   api_caller_role_arn  = module.psoxy-aws.api_caller_role_arn
   aws_assume_role_arn  = var.aws_assume_role_arn
 
-  parameters   = [
+  parameters = [
     module.psoxy-aws.salt_secret,
     aws_ssm_parameter.long-access-token-secret[each.key]
   ]

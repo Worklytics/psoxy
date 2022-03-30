@@ -25,8 +25,8 @@ resource "google_project" "psoxy-project" {
 module "psoxy-gcp" {
   source = "../../modules/gcp"
 
-  project_id          = google_project.psoxy-project.project_id
-  invoker_sa_emails   = var.worklytics_sa_emails
+  project_id        = google_project.psoxy-project.project_id
+  invoker_sa_emails = var.worklytics_sa_emails
 
   depends_on = [
     google_project.psoxy-project
@@ -41,14 +41,14 @@ locals {
     # used for customers who care primarily about pseudonymizing PII of external subjects with whom
     # they collaborate in GMail/GCal/Gdrive. the Directory does not contain PII of subjects external
     # to the Google Workspace, so may be directly connected in such scenarios.
-    "gdirectory": {
-      enabled: true,
-      source_kind: "gdirectory",
-      display_name: "Google Directory"
-      apis_consumed: [
+    "gdirectory" : {
+      enabled : true,
+      source_kind : "gdirectory",
+      display_name : "Google Directory"
+      apis_consumed : [
         "admin.googleapis.com"
       ]
-      oauth_scopes_needed: [
+      oauth_scopes_needed : [
         "https://www.googleapis.com/auth/admin.directory.user.readonly",
         "https://www.googleapis.com/auth/admin.directory.user.alias.readonly",
         "https://www.googleapis.com/auth/admin.directory.domain.readonly",
@@ -57,60 +57,60 @@ locals {
         "https://www.googleapis.com/auth/admin.directory.orgunit.readonly",
         "https://www.googleapis.com/auth/admin.directory.rolemanagement.readonly"
       ],
-      worklytics_connector_name: "Google Workspace Directory via Psoxy"
+      worklytics_connector_name : "Google Workspace Directory via Psoxy"
     }
-    "gcal": {
-      enabled: true,
-      source_kind: "gcal",
-      display_name: "Google Calendar"
-      apis_consumed: [
+    "gcal" : {
+      enabled : true,
+      source_kind : "gcal",
+      display_name : "Google Calendar"
+      apis_consumed : [
         "calendar-json.googleapis.com"
       ]
-      oauth_scopes_needed: [
+      oauth_scopes_needed : [
         "https://www.googleapis.com/auth/calendar.readonly"
       ]
     }
-    "gmail": {
-      enabled: true,
-      source_kind: "gmail",
-      display_name: "GMail"
-      apis_consumed: [
+    "gmail" : {
+      enabled : true,
+      source_kind : "gmail",
+      display_name : "GMail"
+      apis_consumed : [
         "gmail.googleapis.com"
       ]
-      oauth_scopes_needed: [
+      oauth_scopes_needed : [
         "https://www.googleapis.com/auth/gmail.metadata"
       ]
     }
-    "google-chat": {
-      enabled: true,
-      source_kind: "google-chat",
-      display_name: "Google Chat"
-      apis_consumed: [
+    "google-chat" : {
+      enabled : true,
+      source_kind : "google-chat",
+      display_name : "Google Chat"
+      apis_consumed : [
         "admin.googleapis.com"
       ]
-      oauth_scopes_needed: [
+      oauth_scopes_needed : [
         "https://www.googleapis.com/auth/admin.reports.audit.readonly"
       ]
     }
-    "gdrive": {
-      enabled: true,
-      source_kind: "gdrive",
-      display_name: "Google Drive"
-      apis_consumed: [
+    "gdrive" : {
+      enabled : true,
+      source_kind : "gdrive",
+      display_name : "Google Drive"
+      apis_consumed : [
         "drive.googleapis.com"
       ]
-      oauth_scopes_needed: [
+      oauth_scopes_needed : [
         "https://www.googleapis.com/auth/drive.metadata.readonly"
       ]
     }
-    "google-meet": {
-      enabled: true,
-      source_kind: "google-meet",
-      display_name: "Google Meet"
-      apis_consumed: [
+    "google-meet" : {
+      enabled : true,
+      source_kind : "google-meet",
+      display_name : "Google Meet"
+      apis_consumed : [
         "admin.googleapis.com"
       ]
-      oauth_scopes_needed: [
+      oauth_scopes_needed : [
         "https://www.googleapis.com/auth/admin.reports.audit.readonly"
       ]
     }
@@ -154,7 +154,7 @@ module "psoxy-google-workspace-connector" {
   source_kind           = each.value.source_kind
   service_account_email = module.google-workspace-connection[each.key].service_account_email
 
-  secret_bindings       = {
+  secret_bindings = {
     PSOXY_SALT = {
       secret_name    = module.psoxy-gcp.salt_secret_name
       version_number = module.psoxy-gcp.salt_secret_version_number

@@ -62,31 +62,31 @@ locals {
   # See https://docs.microsoft.com/en-us/graph/permissions-reference for all the permissions available in AAD Graph API
   msft_sources = {
     "azure-ad" : {
-      enabled: true,
-      source_kind: "azure-ad",
-      display_name: "Azure Directory"
-      required_oauth2_permission_scopes: [],  # Delegated permissions (from `az ad sp list --query "[?appDisplayName=='Microsoft Graph'].oauth2Permissions" --all`)
-      required_app_roles: [ # Application permissions (form az ad sp list --query "[?appDisplayName=='Microsoft Graph'].appRoles" --all
+      enabled : true,
+      source_kind : "azure-ad",
+      display_name : "Azure Directory"
+      required_oauth2_permission_scopes : [], # Delegated permissions (from `az ad sp list --query "[?appDisplayName=='Microsoft Graph'].oauth2Permissions" --all`)
+      required_app_roles : [                  # Application permissions (form az ad sp list --query "[?appDisplayName=='Microsoft Graph'].appRoles" --all
         "User.Read.All",
         "Group.Read.All"
       ],
-      example_calls: [
+      example_calls : [
         "/v1.0/users",
         "/v1.0/groups"
       ]
     },
     "outlook-cal" : {
-      enabled: true,
-      source_kind: "outlook-calendar",
-      display_name: "Outlook Calendar"
-      required_oauth2_permission_scopes: [],
-      required_app_roles: [
+      enabled : true,
+      source_kind : "outlook-calendar",
+      display_name : "Outlook Calendar"
+      required_oauth2_permission_scopes : [],
+      required_app_roles : [
         "Mail.ReadBasic.All",
         "MailboxSettings.Read",
         "Group.Read.All",
         "User.Read.All"
       ],
-      example_calls: [
+      example_calls : [
         "/v1.0/users",
         # this IS the correct ID for the user terraform is running as
         "/v1.0/users/${data.azuread_client_config.current.object_id}/events",
@@ -94,17 +94,17 @@ locals {
       ]
     },
     "outlook-mail" : {
-      enabled: true,
-      source_kind: "outlook-mail"
-      display_name: "Outlook Mail"
-      required_oauth2_permission_scopes: [],
-      required_app_roles: [
+      enabled : true,
+      source_kind : "outlook-mail"
+      display_name : "Outlook Mail"
+      required_oauth2_permission_scopes : [],
+      required_app_roles : [
         "Mail.ReadBasic.All",
         "MailboxSettings.Read",
         "Group.Read.All",
         "User.Read.All"
       ],
-      example_calls: [
+      example_calls : [
         "/beta/users",
         "/beta/users/${data.azuread_client_config.current.object_id}/mailboxSettings",
         "/beta/users/${data.azuread_client_config.current.object_id}/mailFolders/SentItems/messages"
@@ -139,9 +139,9 @@ module "msft-connection-auth" {
 resource "aws_ssm_parameter" "client_id" {
   for_each = local.enabled_msft_sources
 
-  name   = "PSOXY_${upper(replace(each.key, "-", "_"))}_CLIENT_ID"
-  type   = "String"
-  value  = module.msft-connection[each.key].connector.application_id
+  name  = "PSOXY_${upper(replace(each.key, "-", "_"))}_CLIENT_ID"
+  type  = "String"
+  value = module.msft-connection[each.key].connector.application_id
 }
 
 resource "aws_ssm_parameter" "refresh_endpoint" {

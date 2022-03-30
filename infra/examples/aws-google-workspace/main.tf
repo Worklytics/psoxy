@@ -67,14 +67,14 @@ locals {
     # used for customers who care primarily about pseudonymizing PII of external subjects with whom
     # they collaborate in GMail/GCal/Gdrive. the Directory does not contain PII of subjects external
     # to the Google Workspace, so may be directly connected in such scenarios.
-    "gdirectory": {
-      enabled: true,
-      source_kind: "gdirectory",
-      display_name: "Google Directory"
-      apis_consumed: [
+    "gdirectory" : {
+      enabled : true,
+      source_kind : "gdirectory",
+      display_name : "Google Directory"
+      apis_consumed : [
         "admin.googleapis.com"
       ]
-      oauth_scopes_needed: [
+      oauth_scopes_needed : [
         "https://www.googleapis.com/auth/admin.directory.user.readonly",
         "https://www.googleapis.com/auth/admin.directory.user.alias.readonly",
         "https://www.googleapis.com/auth/admin.directory.domain.readonly",
@@ -84,58 +84,58 @@ locals {
         "https://www.googleapis.com/auth/admin.directory.rolemanagement.readonly"
       ]
     }
-    "gcal": {
-      enabled: true,
-      source_kind: "gcal",
-      display_name: "Google Calendar"
-      apis_consumed: [
+    "gcal" : {
+      enabled : true,
+      source_kind : "gcal",
+      display_name : "Google Calendar"
+      apis_consumed : [
         "calendar-json.googleapis.com"
       ]
-      oauth_scopes_needed: [
+      oauth_scopes_needed : [
         "https://www.googleapis.com/auth/calendar.readonly"
       ]
     }
-    "gmail": {
-      enabled: true,
-      source_kind: "gmail",
-      display_name: "GMail"
-      apis_consumed: [
+    "gmail" : {
+      enabled : true,
+      source_kind : "gmail",
+      display_name : "GMail"
+      apis_consumed : [
         "gmail.googleapis.com"
       ]
-      oauth_scopes_needed: [
+      oauth_scopes_needed : [
         "https://www.googleapis.com/auth/gmail.metadata"
       ]
     }
-    "google-chat": {
-      enabled: true,
-      source_kind: "google-chat",
-      display_name: "Google Chat"
-      apis_consumed: [
+    "google-chat" : {
+      enabled : true,
+      source_kind : "google-chat",
+      display_name : "Google Chat"
+      apis_consumed : [
         "admin.googleapis.com"
       ]
-      oauth_scopes_needed: [
+      oauth_scopes_needed : [
         "https://www.googleapis.com/auth/admin.reports.audit.readonly"
       ]
     }
-    "gdrive": {
-      enabled: true,
-      source_kind: "gdrive",
-      display_name: "Google Drive"
-      apis_consumed: [
+    "gdrive" : {
+      enabled : true,
+      source_kind : "gdrive",
+      display_name : "Google Drive"
+      apis_consumed : [
         "drive.googleapis.com"
       ]
-      oauth_scopes_needed: [
+      oauth_scopes_needed : [
         "https://www.googleapis.com/auth/drive.metadata.readonly"
       ]
     }
-    "google-meet": {
-      enabled: true,
-      source_kind: "google-meet",
-      display_name: "Google Meet"
-      apis_consumed: [
+    "google-meet" : {
+      enabled : true,
+      source_kind : "google-meet",
+      display_name : "Google Meet"
+      apis_consumed : [
         "admin.googleapis.com"
       ]
-      oauth_scopes_needed: [
+      oauth_scopes_needed : [
         "https://www.googleapis.com/auth/admin.reports.audit.readonly"
       ]
     }
@@ -183,7 +183,7 @@ module "psoxy-google-workspace-connector" {
   api_caller_role_arn  = module.psoxy-aws.api_caller_role_arn
   aws_assume_role_arn  = var.aws_assume_role_arn
 
-  parameters   = [
+  parameters = [
     module.psoxy-aws.salt_secret,
     module.google-workspace-connection-auth[each.key].key_secret
   ]
@@ -210,15 +210,15 @@ locals {
     slack-discovery-api = {
       enabled           = true
       source_kind       = "slack"
-      display_name       = "Slack Discovery API Connector"
+      display_name      = "Slack Discovery API Connector"
       example_api_calls = []
 
     },
     zoom = {
-      enabled            = true
+      enabled           = true
       source_kind       = "zoom"
       example_api_calls = ["/v2/users"]
-      display_name       = "Zoom Connector"
+      display_name      = "Zoom Connector"
     }
   }
   enabled_oauth_long_access_connectors = { for id, spec in local.oauth_long_access_connectors : id => spec if spec.enabled }
@@ -249,7 +249,7 @@ module "aws-psoxy-long-auth-connectors" {
   api_caller_role_arn  = module.psoxy-aws.api_caller_role_arn
   aws_assume_role_arn  = var.aws_assume_role_arn
 
-  parameters   = [
+  parameters = [
     module.psoxy-aws.salt_secret,
     aws_ssm_parameter.long-access-token-secret[each.key].value
   ]

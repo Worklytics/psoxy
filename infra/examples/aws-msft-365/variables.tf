@@ -21,7 +21,7 @@ variable "aws_region" {
 variable "caller_aws_account_id" {
   type        = string
   description = "id of Worklytics AWS account from which proxy will be called"
-  default     =  "939846301470:root"
+  default     = "939846301470:root"
   validation {
     condition     = can(regex("^\\d{12}:\\w+$", var.caller_aws_account_id))
     error_message = "The caller_aws_account_id value should be 12-digit numeric string."
