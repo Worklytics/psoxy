@@ -210,22 +210,24 @@ locals {
     slack-discovery-api = {
       enabled           = true
       source_kind       = "slack"
+      display_name       = "Slack Discovery API Connector"
       example_api_calls = []
+
     },
     zoom = {
       enabled            = true
       source_kind       = "zoom"
       example_api_calls = ["/v2/users"]
+      display_name       = "Zoom Connector"
     }
   }
-  enable_oauth_long_access_connectors = { for id, spec in local.oauth_long_access_connectors : id => spec if spec.enabled }
-
+  enabled_oauth_long_access_connectors = { for id, spec in local.oauth_long_access_connectors : id => spec if spec.enabled }
 
 }
 
 # Create secret (later filled by customer)
 resource "aws_ssm_parameter" "long-access-token-secret" {
-  for_each = local.enable_oauth_long_access_connectors
+  for_each = local.enabled_oauth_long_access_connectors
 
   name        = "PSOXY_${upper(replace(each.key, "-", "_"))}_ACCESS_TOKEN"
   type        = "SecureString"
@@ -234,7 +236,7 @@ resource "aws_ssm_parameter" "long-access-token-secret" {
 }
 
 module "aws-psoxy-long-auth-connectors" {
-  for_each = local.enable_oauth_long_access_connectors
+  for_each = local.enabled_oauth_long_access_connectors
 
   source = "../../modules/aws-psoxy-instance"
 
@@ -252,6 +254,17 @@ module "aws-psoxy-long-auth-connectors" {
     aws_ssm_parameter.long-access-token-secret[each.key].value
   ]
   example_api_calls = each.value.example_api_calls
+}
+
+module "worklytics-psoxy-connection" {
+  for_each = local.enabled_oauth_long_access_connectors
+
+  source = "../../modules/worklytics-psoxy-connection-aws"
+
+  psoxy_endpoint_url = module.aws-psoxy-long-auth-connectors[each.key].endpoint_url
+  display_name       = "${each.value.display_name} via Psoxy${var.connector_display_name_suffix}"
+  aws_region         = var.aws_region
+  aws_role_arn       = module.psoxy-aws.api_caller_role_arn
 }
 
 # END LONG ACCESS AUTH CONNECTORS

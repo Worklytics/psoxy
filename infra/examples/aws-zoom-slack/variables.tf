@@ -32,3 +32,9 @@ variable "caller_external_user_id" {
   type        = string
   description = "id of external user that will call proxy (eg, SA of your Worklytics instance)"
 }
+
+variable "connector_display_name_suffix" {
+  type        = string
+  description = "suffix to append to display_names of connector SAs; helpful to distinguish between various ones in testing/dev scenarios"
+  default     = ""
+}
