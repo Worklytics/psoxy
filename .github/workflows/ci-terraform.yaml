@@ -75,10 +75,4 @@ jobs:
         run: |
           terraform init
           terraform validate
-
-      - name: 'Terraform - validate examples/gcp-hris'
-        working-directory: infra/examples/gcp-hris
-        run: |
-          terraform init
-          terraform validate
           
