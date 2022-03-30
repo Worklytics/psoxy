@@ -191,7 +191,7 @@ module "psoxy-google-workspace-connector" {
 }
 
 
-module "worklytics-psoxy-connection" {
+module "worklytics-psoxy-connection-google-workspace" {
   for_each = local.enabled_google_workspace_sources
 
   source = "../../modules/worklytics-psoxy-connection-aws"
@@ -256,7 +256,7 @@ module "aws-psoxy-long-auth-connectors" {
   example_api_calls = each.value.example_api_calls
 }
 
-module "worklytics-psoxy-connection" {
+module "worklytics-psoxy-connection-oauth-long-access-connectors" {
   for_each = local.enabled_oauth_long_access_connectors
 
   source = "../../modules/worklytics-psoxy-connection-aws"
