@@ -62,6 +62,7 @@ locals {
   # See https://docs.microsoft.com/en-us/graph/permissions-reference for all the permissions available in AAD Graph API
   msft_sources = {
     "azure-ad" : {
+      enabled: true,
       display_name: "Azure Directory"
       required_oauth2_permission_scopes: [],  # Delegated permissions (from `az ad sp list --query "[?appDisplayName=='Microsoft Graph'].oauth2Permissions" --all`)
       required_app_roles: [ # Application permissions (form az ad sp list --query "[?appDisplayName=='Microsoft Graph'].appRoles" --all
@@ -74,6 +75,7 @@ locals {
       ]
     },
     "outlook-cal" : {
+      enabled: true,
       display_name: "Outlook Calendar"
       required_oauth2_permission_scopes: [],
       required_app_roles: [
@@ -90,6 +92,7 @@ locals {
       ]
     },
     "outlook-mail" : {
+      enabled: true,
       display_name: "Outlook Mail"
       required_oauth2_permission_scopes: [],
       required_app_roles: [
@@ -105,10 +108,11 @@ locals {
       ]
     }
   }
+  enabled_msft_sources = { for id, spec in local.msft_sources : id => spec if spec.enabled }
 }
 
 module "msft-connection" {
-  for_each = local.msft_sources
+  for_each = local.enabled_msft_sources
 
   source = "../../modules/azuread-connection"
 
@@ -119,7 +123,7 @@ module "msft-connection" {
 }
 
 module "msft-connection-auth" {
-  for_each = local.msft_sources
+  for_each = local.enabled_msft_sources
 
   source = "../../modules/azuread-local-cert"
 
@@ -130,7 +134,7 @@ module "msft-connection-auth" {
 }
 
 resource "aws_ssm_parameter" "client_id" {
-  for_each = local.msft_sources
+  for_each = local.enabled_msft_sources
 
   name   = "PSOXY_${upper(replace(each.key, "-", "_"))}_CLIENT_ID"
   type   = "String"
@@ -148,7 +152,7 @@ resource "aws_ssm_parameter" "refresh_endpoint" {
 
 
 module "private-key-aws-parameters" {
-  for_each = local.msft_sources
+  for_each = local.enabled_msft_sources
 
   source = "../../modules/private-key-aws-parameter"
 
@@ -159,7 +163,7 @@ module "private-key-aws-parameters" {
 }
 
 module "psoxy-msft-connector" {
-  for_each = local.msft_sources
+  for_each = local.enabled_msft_sources
 
   source = "../../modules/aws-psoxy-instance"
 
@@ -185,7 +189,7 @@ module "psoxy-msft-connector" {
 # (requires terraform configuration being applied by an Azure User with privelleges to do this; it
 #  usually requires a 'Global Administrator' for your tenant)
 module "msft_365_grants" {
-  for_each = local.msft_sources
+  for_each = local.enabled_msft_sources
 
   source = "../../modules/azuread-grant-all-users"
 
@@ -197,7 +201,7 @@ module "msft_365_grants" {
 
 
 module "worklytics-psoxy-connection" {
-  for_each = local.msft_sources
+  for_each = local.enabled_msft_sources
 
   source = "../../modules/worklytics-psoxy-connection-aws"
 
