@@ -77,7 +77,7 @@ locals {
     },
     "outlook-cal" : {
       enabled : true,
-      source_kind : "outlook-calendar",
+      source_kind : "outlook-cal",
       display_name : "Outlook Calendar"
       required_oauth2_permission_scopes : [],
       required_app_roles : [
