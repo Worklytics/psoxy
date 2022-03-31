@@ -7,13 +7,12 @@ resource "google_project" "project" {
 
 resource "google_kms_key_ring" "ring" {
   project  = var.project_id
-  location = var.kms_resource_location
   name     = "keys"
+  location = var.kms_resource_location
 }
 
 resource "google_kms_crypto_key" "terraform-state" {
   key_ring = google_kms_key_ring.ring.id
-  location = var.kms_resource_location
   name     = "terraform-state-key"
 }
 
