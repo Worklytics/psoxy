@@ -35,6 +35,10 @@ infrastructure, as well as deploying the built binaries for Psoxy as lambdas in 
 
 Example configurations using those modules can be found in [`infra/examples/](../../infra/examples).
 
+You'll ultimately provision infrastructure represented in green in the following diagram:
+
+![AWS data flow](./2022-02 Psoxy Data Flow.png)
+
 See [`infra/modules/aws/`](../../infra/modules/aws/) for more information.
 
 ## Run Tests
