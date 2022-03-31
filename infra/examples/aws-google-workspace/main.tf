@@ -140,7 +140,7 @@ locals {
       ]
     }
   }
-  enable_google_workspace_sources = { for id, spec in local.google_workspace_sources : id => spec if spec.enabled }
+  enabled_google_workspace_sources = { for id, spec in local.google_workspace_sources : id => spec if spec.enabled }
 }
 
 module "google-workspace-connection" {
