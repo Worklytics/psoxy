@@ -61,25 +61,25 @@ resource "aws_s3_bucket" "processed_bucket" {
 module "psoxy-file-handler" {
   source = "../../modules/aws-psoxy-instance"
 
-  function_name         = "psoxy-hris"
-  handler_class         = "co.worklytics.psoxy.S3Handler"
-  source_kind           = "hris"
-  api_gateway           = module.psoxy-aws.api_gateway
-  path_to_function_zip  = module.psoxy-package.path_to_deployment_jar
-  function_zip_hash     = module.psoxy-package.deployment_package_hash
-  path_to_config        = "../../../configs/hris.yaml"
-  api_caller_role_arn   = module.psoxy-aws.api_caller_role_arn
-  aws_assume_role_arn   = var.aws_assume_role_arn
-  example_api_calls     = [] #None, as this function is called through the S3 event
+  function_name        = "psoxy-hris"
+  handler_class        = "co.worklytics.psoxy.S3Handler"
+  source_kind          = "hris"
+  api_gateway          = module.psoxy-aws.api_gateway
+  path_to_function_zip = module.psoxy-package.path_to_deployment_jar
+  function_zip_hash    = module.psoxy-package.deployment_package_hash
+  path_to_config       = "../../../configs/hris.yaml"
+  api_caller_role_arn  = module.psoxy-aws.api_caller_role_arn
+  aws_assume_role_arn  = var.aws_assume_role_arn
+  example_api_calls    = [] #None, as this function is called through the S3 event
 
-  parameters            = []
+  parameters = []
 
   environment_variables = {
     INPUT_BUCKET  = aws_s3_bucket.import_bucket.bucket,
     OUTPUT_BUCKET = aws_s3_bucket.processed_bucket.bucket
   }
 
-  depends_on    = [
+  depends_on = [
     aws_s3_bucket.import_bucket,
     aws_s3_bucket.processed_bucket
   ]
@@ -92,7 +92,7 @@ resource "aws_lambda_permission" "allow_import_bucket" {
   principal     = "s3.amazonaws.com"
   source_arn    = aws_s3_bucket.import_bucket.arn
 
-  depends_on    = [
+  depends_on = [
     aws_s3_bucket.import_bucket
   ]
 }
@@ -115,24 +115,24 @@ resource "aws_iam_policy" "import_bucket_read_policy" {
 
   policy = jsonencode(
     {
-      "Version": "2012-10-17",
-      "Statement": [
+      "Version" : "2012-10-17",
+      "Statement" : [
         {
-          "Action": [
+          "Action" : [
             "s3:GetObject"
           ],
-          "Effect": "Allow",
-          "Resource": "${aws_s3_bucket.import_bucket.arn}/*"
+          "Effect" : "Allow",
+          "Resource" : "${aws_s3_bucket.import_bucket.arn}/*"
         }
       ]
-    })
+  })
 
   depends_on = [
     aws_s3_bucket.import_bucket
   ]
 }
 
-resource "aws_iam_role_policy_attachment" "read_policy_for_import_bucket"{
+resource "aws_iam_role_policy_attachment" "read_policy_for_import_bucket" {
   role       = module.psoxy-file-handler.iam_for_lambda_name
   policy_arn = aws_iam_policy.import_bucket_read_policy.arn
 }
@@ -143,24 +143,24 @@ resource "aws_iam_policy" "processed_bucket_write_policy" {
 
   policy = jsonencode(
     {
-      "Version": "2012-10-17",
-      "Statement": [
+      "Version" : "2012-10-17",
+      "Statement" : [
         {
-          "Action": [
+          "Action" : [
             "s3:PutObject",
           ],
-          "Effect": "Allow",
-          "Resource": "${aws_s3_bucket.processed_bucket.arn}/*"
+          "Effect" : "Allow",
+          "Resource" : "${aws_s3_bucket.processed_bucket.arn}/*"
         }
       ]
-    })
+  })
 
   depends_on = [
     aws_s3_bucket.processed_bucket
   ]
 }
 
-resource "aws_iam_role_policy_attachment" "write_policy_for_processed_bucket"{
+resource "aws_iam_role_policy_attachment" "write_policy_for_processed_bucket" {
   role       = module.psoxy-file-handler.iam_for_lambda_name
   policy_arn = aws_iam_policy.processed_bucket_write_policy.arn
 }
@@ -171,28 +171,28 @@ resource "aws_iam_policy" "worklyics_bucket_access_policy" {
 
   policy = jsonencode(
     {
-      "Version": "2012-10-17",
-      "Statement": [
+      "Version" : "2012-10-17",
+      "Statement" : [
         {
-          "Action": [
+          "Action" : [
             "s3:GetObject",
             "s3:ListBucket"
           ],
-          "Effect": "Allow",
-          "Resource": [
+          "Effect" : "Allow",
+          "Resource" : [
             "${aws_s3_bucket.processed_bucket.arn}",
             "${aws_s3_bucket.processed_bucket.arn}/*"
           ]
         }
       ]
-    })
+  })
 
   depends_on = [
     aws_s3_bucket.processed_bucket
   ]
 }
 
-resource "aws_iam_role_policy_attachment" "worklyics_bucket_access_policy"{
+resource "aws_iam_role_policy_attachment" "worklyics_bucket_access_policy" {
   role       = module.psoxy-aws.api_caller_role_name
   policy_arn = aws_iam_policy.worklyics_bucket_access_policy.arn
 }

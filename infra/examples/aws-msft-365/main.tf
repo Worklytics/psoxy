@@ -62,27 +62,31 @@ locals {
   # See https://docs.microsoft.com/en-us/graph/permissions-reference for all the permissions available in AAD Graph API
   msft_sources = {
     "azure-ad" : {
-      display_name: "Azure Directory"
-      required_oauth2_permission_scopes: [],  # Delegated permissions (from `az ad sp list --query "[?appDisplayName=='Microsoft Graph'].oauth2Permissions" --all`)
-      required_app_roles: [ # Application permissions (form az ad sp list --query "[?appDisplayName=='Microsoft Graph'].appRoles" --all
+      enabled : true,
+      source_kind : "azure-ad",
+      display_name : "Azure Directory"
+      required_oauth2_permission_scopes : [], # Delegated permissions (from `az ad sp list --query "[?appDisplayName=='Microsoft Graph'].oauth2Permissions" --all`)
+      required_app_roles : [                  # Application permissions (form az ad sp list --query "[?appDisplayName=='Microsoft Graph'].appRoles" --all
         "User.Read.All",
         "Group.Read.All"
       ],
-      example_calls: [
+      example_calls : [
         "/v1.0/users",
         "/v1.0/groups"
       ]
     },
     "outlook-cal" : {
-      display_name: "Outlook Calendar"
-      required_oauth2_permission_scopes: [],
-      required_app_roles: [
+      enabled : true,
+      source_kind : "outlook-cal",
+      display_name : "Outlook Calendar"
+      required_oauth2_permission_scopes : [],
+      required_app_roles : [
         "Mail.ReadBasic.All",
         "MailboxSettings.Read",
         "Group.Read.All",
         "User.Read.All"
       ],
-      example_calls: [
+      example_calls : [
         "/v1.0/users",
         # this IS the correct ID for the user terraform is running as
         "/v1.0/users/${data.azuread_client_config.current.object_id}/events",
@@ -90,25 +94,28 @@ locals {
       ]
     },
     "outlook-mail" : {
-      display_name: "Outlook Mail"
-      required_oauth2_permission_scopes: [],
-      required_app_roles: [
+      enabled : true,
+      source_kind : "outlook-mail"
+      display_name : "Outlook Mail"
+      required_oauth2_permission_scopes : [],
+      required_app_roles : [
         "Mail.ReadBasic.All",
         "MailboxSettings.Read",
         "Group.Read.All",
         "User.Read.All"
       ],
-      example_calls: [
+      example_calls : [
         "/beta/users",
         "/beta/users/${data.azuread_client_config.current.object_id}/mailboxSettings",
         "/beta/users/${data.azuread_client_config.current.object_id}/mailFolders/SentItems/messages"
       ]
     }
   }
+  enabled_msft_sources = { for id, spec in local.msft_sources : id => spec if spec.enabled }
 }
 
 module "msft-connection" {
-  for_each = local.msft_sources
+  for_each = local.enabled_msft_sources
 
   source = "../../modules/azuread-connection"
 
@@ -119,7 +126,7 @@ module "msft-connection" {
 }
 
 module "msft-connection-auth" {
-  for_each = local.msft_sources
+  for_each = local.enabled_msft_sources
 
   source = "../../modules/azuread-local-cert"
 
@@ -130,11 +137,11 @@ module "msft-connection-auth" {
 }
 
 resource "aws_ssm_parameter" "client_id" {
-  for_each = local.msft_sources
+  for_each = local.enabled_msft_sources
 
-  name   = "PSOXY_${upper(replace(each.key, "-", "_"))}_CLIENT_ID"
-  type   = "String"
-  value  = module.msft-connection[each.key].connector.application_id
+  name  = "PSOXY_${upper(replace(each.key, "-", "_"))}_CLIENT_ID"
+  type  = "String"
+  value = module.msft-connection[each.key].connector.application_id
 }
 
 resource "aws_ssm_parameter" "refresh_endpoint" {
@@ -148,7 +155,7 @@ resource "aws_ssm_parameter" "refresh_endpoint" {
 
 
 module "private-key-aws-parameters" {
-  for_each = local.msft_sources
+  for_each = local.enabled_msft_sources
 
   source = "../../modules/private-key-aws-parameter"
 
@@ -159,16 +166,16 @@ module "private-key-aws-parameters" {
 }
 
 module "psoxy-msft-connector" {
-  for_each = local.msft_sources
+  for_each = local.enabled_msft_sources
 
   source = "../../modules/aws-psoxy-instance"
 
   function_name        = "psoxy-${each.key}"
-  source_kind          = each.key
+  source_kind          = each.value.source_kind
   api_gateway          = module.psoxy-aws.api_gateway
   path_to_function_zip = module.psoxy-package.path_to_deployment_jar
   function_zip_hash    = module.psoxy-package.deployment_package_hash
-  path_to_config       = "../../../configs/${each.key}.yaml"
+  path_to_config       = "../../../configs/${each.value.source_kind}.yaml"
   api_caller_role_arn  = module.psoxy-aws.api_caller_role_arn
   aws_assume_role_arn  = var.aws_assume_role_arn
   example_api_calls    = each.value.example_calls
@@ -185,7 +192,7 @@ module "psoxy-msft-connector" {
 # (requires terraform configuration being applied by an Azure User with privelleges to do this; it
 #  usually requires a 'Global Administrator' for your tenant)
 module "msft_365_grants" {
-  for_each = local.msft_sources
+  for_each = local.enabled_msft_sources
 
   source = "../../modules/azuread-grant-all-users"
 
@@ -197,12 +204,12 @@ module "msft_365_grants" {
 
 
 module "worklytics-psoxy-connection" {
-  for_each = local.msft_sources
+  for_each = local.enabled_msft_sources
 
   source = "../../modules/worklytics-psoxy-connection-aws"
 
   psoxy_endpoint_url = module.psoxy-msft-connector[each.key].endpoint_url
-  display_name       = "${each.value.display_name} via Psoxy"
+  display_name       = "${each.value.display_name} via Psoxy${var.connector_display_name_suffix}"
   aws_region         = var.aws_region
   aws_role_arn       = module.psoxy-aws.api_caller_role_arn
 }

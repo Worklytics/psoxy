@@ -126,3 +126,8 @@ REST API. This is REQUIRED if you want SaaS accounts to be linked with HRIS data
 Worklytics will match email set in HRIS with email set in SaaS tool's account - so these must be
 pseudonymized using an equivalent algorithm and secret). See [`java/impl/cmd-line/`](/java/impl/cmd-line)
 for details.
+
+
+## Support
+
+Psoxy is maintained by Worklytics, Co. Support as well as professional services to assist with configuration and customization are available. Please contact [sales@worklytics.co](mailto:sales@worklytics.co) for more information or visit [www.worklytics.co](https://www.worklytics.co).

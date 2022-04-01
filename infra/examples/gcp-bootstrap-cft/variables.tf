@@ -1,8 +1,8 @@
 variable "org_id" {
-  type        = string
+  type = string
 }
 variable "billing_account" {
-  type        = string
+  type = string
 }
 
 variable "group_org_admins" {
@@ -21,6 +21,6 @@ variable "project_id" {
 }
 
 variable "default_region" {
-  type     = string
+  type    = string
   default = "us-central1"
 }

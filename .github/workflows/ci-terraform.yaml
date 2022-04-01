@@ -22,20 +22,14 @@ jobs:
         with:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
 
-      - name: 'Terraform - validate dev-personal'
-        working-directory: infra/dev-personal
-        run: |
-          terraform init
-          terraform validate
-
       - name: 'Terraform - validate examples/aws-google-workspace'
         working-directory: infra/examples/aws-google-workspace
         run: |
           terraform init
           terraform validate
-
-      - name: 'Terraform - validate examples/gcp-google-workspace'
-        working-directory: infra/examples/gcp-google-workspace
+          
+      - name: 'Terraform - validate examples/aws-hris'
+        working-directory: infra/examples/aws-hris
         run: |
           terraform init
           terraform validate
@@ -52,14 +46,33 @@ jobs:
           terraform init
           terraform validate
 
+      - name: 'Terraform - validate examples/gcp-bootstrap-cft'
+        working-directory: infra/examples/gcp-bootstrap-cft
+        run: |
+          terraform init
+          terraform validate
+          
+      - name: 'Terraform - validate examples/gcp-bootstrap-simple'
+        working-directory: infra/examples/gcp-bootstrap-simple
+        run: |
+          terraform init
+          terraform validate
+    
+      - name: 'Terraform - validate examples/gcp-dev-personal'
+        working-directory: infra/examples/gcp-dev-personal
+        run: |
+          terraform init
+          terraform validate
+
+      - name: 'Terraform - validate examples/gcp-google-workspace'
+        working-directory: infra/examples/gcp-google-workspace
+        run: |
+          terraform init
+          terraform validate
+          
       - name: 'Terraform - validate examples/gcp-hris'
         working-directory: infra/examples/gcp-hris
         run: |
           terraform init
           terraform validate
           
-      - name: 'Terraform - validate examples/aws-hris'
-        working-directory: infra/examples/aws-hris
-        run: |
-          terraform init
-          terraform validate

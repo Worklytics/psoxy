@@ -55,42 +55,38 @@ module "psoxy-package" {
 
 locals {
   oauth_long_access_connectors = {
-    slack = {
-      deploy = true
-      function_name = "psoxy-slack-discovery-api"
-      source_kind = "slack"
-      example_api_calls = []
+    slack-discovery-api = {
+      enabled : true
+      source_kind : "slack"
+      display_name : "Slack Discovery API"
+      example_api_calls : []
     },
     zoom = {
-      deploy = true
-      function_name = "psoxy-zoom"
-      source_kind = "zoom"
-      example_api_calls = ["/v2/users"]
+      enabled : true
+      source_kind : "zoom"
+      display_name : "Zoom"
+      example_api_calls : ["/v2/users"]
     }
   }
+  enabled_oauth_long_access_connectors = { for k, v in local.oauth_long_access_connectors : k => v if v.enabled }
 }
 
 # Create secret (later filled by customer)
 resource "aws_ssm_parameter" "long-access-token-secret" {
-  for_each = {
-  for k, v in local.oauth_long_access_connectors:
-  k => v if v.deploy
-  }
-  name        = "${each.value.function_name}ACCESS_TOKEN"
+  for_each = local.enabled_oauth_long_access_connectors
+
+  name        = "PSOXY_${upper(replace(each.key, "-", "_"))}_ACCESS_TOKEN"
   type        = "SecureString"
-  description = "Long-lived access token for the connector"
+  description = "The long lived token for `psoxy-${each.key}`"
   value       = sensitive("")
 }
 
 module "aws-psoxy-long-auth-connectors" {
-  for_each = {
-  for k, v in local.oauth_long_access_connectors:
-  k => v if v.deploy
-  }
+  for_each = local.enabled_oauth_long_access_connectors
 
   source = "../../modules/aws-psoxy-instance"
 
-  function_name        = each.value.function_name
+  function_name        = "psoxy-${each.key}"
   source_kind          = each.value.source_kind
   api_gateway          = module.psoxy-aws.api_gateway
   path_to_function_zip = module.psoxy-package.path_to_deployment_jar
@@ -99,11 +95,22 @@ module "aws-psoxy-long-auth-connectors" {
   api_caller_role_arn  = module.psoxy-aws.api_caller_role_arn
   aws_assume_role_arn  = var.aws_assume_role_arn
 
-  parameters   = [
+  parameters = [
     module.psoxy-aws.salt_secret,
     aws_ssm_parameter.long-access-token-secret[each.key]
   ]
   example_api_calls = each.value.example_api_calls
+}
+
+module "worklytics-psoxy-connection" {
+  for_each = local.enabled_oauth_long_access_connectors
+
+  source = "../../modules/worklytics-psoxy-connection-aws"
+
+  psoxy_endpoint_url = module.aws-psoxy-long-auth-connectors[each.key].endpoint_url
+  display_name       = "${each.value.display_name} via Psoxy${var.connector_display_name_suffix}"
+  aws_region         = var.aws_region
+  aws_role_arn       = module.psoxy-aws.api_caller_role_arn
 }
 
 # END LONG ACCESS AUTH CONNECTORS

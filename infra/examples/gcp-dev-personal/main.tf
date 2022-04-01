@@ -23,10 +23,10 @@ resource "google_project" "psoxy-project" {
 }
 
 module "psoxy-gcp" {
-  source = "../modules/gcp"
+  source = "../../modules/gcp"
 
-  project_id          = google_project.psoxy-project.project_id
-  invoker_sa_emails   = var.worklytics_sa_emails
+  project_id        = google_project.psoxy-project.project_id
+  invoker_sa_emails = var.worklytics_sa_emails
 
   depends_on = [
     google_project.psoxy-project
@@ -41,13 +41,13 @@ locals {
     # used for customers who care primarily about pseudonymizing PII of external subjects with whom
     # they collaborate in GMail/GCal/Gdrive. the Directory does not contain PII of subjects external
     # to the Google Workspace, so may be directly connected in such scenarios.
-    "gdirectory": {
-      deploy: true
-      display_name: "Google Directory"
-      apis_consumed: [
+    "gdirectory" : {
+      deploy : true
+      display_name : "Google Directory"
+      apis_consumed : [
         "admin.googleapis.com"
       ]
-      oauth_scopes_needed: [
+      oauth_scopes_needed : [
         "https://www.googleapis.com/auth/admin.directory.user.readonly",
         "https://www.googleapis.com/auth/admin.directory.user.alias.readonly",
         "https://www.googleapis.com/auth/admin.directory.domain.readonly",
@@ -56,55 +56,55 @@ locals {
         "https://www.googleapis.com/auth/admin.directory.orgunit.readonly",
         "https://www.googleapis.com/auth/admin.directory.rolemanagement.readonly"
       ],
-      worklytics_connector_name: "Google Workspace Directory via Psoxy"
+      worklytics_connector_name : "Google Workspace Directory via Psoxy"
     }
-    "gcal": {
-      deploy: false
-      display_name: "Google Calendar"
-      apis_consumed: [
+    "gcal" : {
+      deploy : false
+      display_name : "Google Calendar"
+      apis_consumed : [
         "calendar-json.googleapis.com"
       ]
-      oauth_scopes_needed: [
+      oauth_scopes_needed : [
         "https://www.googleapis.com/auth/calendar.readonly"
       ]
     }
-    "gmail": {
-      deploy: true
-      display_name: "GMail"
-      apis_consumed: [
+    "gmail" : {
+      deploy : true
+      display_name : "GMail"
+      apis_consumed : [
         "gmail.googleapis.com"
       ]
-      oauth_scopes_needed: [
+      oauth_scopes_needed : [
         "https://www.googleapis.com/auth/gmail.metadata"
       ]
     }
-    "google-chat": {
-      deploy: false
-      display_name: "Google Chat"
-      apis_consumed: [
+    "google-chat" : {
+      deploy : false
+      display_name : "Google Chat"
+      apis_consumed : [
         "admin.googleapis.com"
       ]
-      oauth_scopes_needed: [
+      oauth_scopes_needed : [
         "https://www.googleapis.com/auth/admin.reports.audit.readonly"
       ]
     }
-    "gdrive": {
-      deploy: false
-      display_name: "Google Drive"
-      apis_consumed: [
+    "gdrive" : {
+      deploy : false
+      display_name : "Google Drive"
+      apis_consumed : [
         "drive.googleapis.com"
       ]
-      oauth_scopes_needed: [
+      oauth_scopes_needed : [
         "https://www.googleapis.com/auth/drive.metadata.readonly"
       ]
     }
-    "google-meet": {
-      deploy: false
-      display_name: "Google Meet"
-      apis_consumed: [
+    "google-meet" : {
+      deploy : false
+      display_name : "Google Meet"
+      apis_consumed : [
         "admin.googleapis.com"
       ]
-      oauth_scopes_needed: [
+      oauth_scopes_needed : [
         "https://www.googleapis.com/auth/admin.reports.audit.readonly"
       ]
     }
@@ -113,11 +113,11 @@ locals {
 
 module "google-workspace-connection" {
   for_each = {
-    for k, v in local.google_workspace_sources:
+    for k, v in local.google_workspace_sources :
     k => v if v.deploy
   }
 
-  source = "../modules/google-workspace-dwd-connection"
+  source = "../../modules/google-workspace-dwd-connection"
 
   project_id                   = var.project_id
   connector_service_account_id = "psoxy-${each.key}-dwd"
@@ -132,10 +132,10 @@ module "google-workspace-connection" {
 
 module "google-workspace-connection-auth" {
   for_each = {
-  for k, v in local.google_workspace_sources:
-  k => v if v.deploy
+    for k, v in local.google_workspace_sources :
+    k => v if v.deploy
   }
-  source = "../modules/gcp-sa-auth-key-secret-manager"
+  source = "../../modules/gcp-sa-auth-key-secret-manager"
 
   secret_project     = var.project_id
   service_account_id = module.google-workspace-connection[each.key].service_account_id
@@ -143,18 +143,18 @@ module "google-workspace-connection-auth" {
 }
 module "psoxy-google-workspace-connector" {
   for_each = {
-  for k, v in local.google_workspace_sources:
-  k => v if v.deploy
+    for k, v in local.google_workspace_sources :
+    k => v if v.deploy
   }
 
-  source = "../modules/gcp-psoxy-cloud-function"
+  source = "../../modules/gcp-psoxy-cloud-function"
 
   project_id            = var.project_id
   function_name         = "psoxy-${each.key}"
   source_kind           = each.key
   service_account_email = module.google-workspace-connection[each.key].service_account_email
 
-  secret_bindings       = {
+  secret_bindings = {
     PSOXY_SALT = {
       secret_name    = module.psoxy-gcp.salt_secret_name
       version_number = module.psoxy-gcp.salt_secret_version_number
@@ -168,11 +168,11 @@ module "psoxy-google-workspace-connector" {
 
 module "worklytics-psoxy-connection" {
   for_each = {
-  for k, v in local.google_workspace_sources:
-  k => v if v.deploy
+    for k, v in local.google_workspace_sources :
+    k => v if v.deploy
   }
 
-  source = "../modules/worklytics-psoxy-connection"
+  source = "../../modules/worklytics-psoxy-connection"
 
   psoxy_endpoint_url = module.psoxy-google-workspace-connector[each.key].cloud_function_url
   display_name       = "${each.value.display_name} via Psoxy"
@@ -183,24 +183,24 @@ module "worklytics-psoxy-connection" {
 locals {
   oauth_long_access_connectors = {
     slack = {
-      deploy = true
+      deploy        = true
       function_name = "psoxy-slack-discovery-api"
-      source_kind = "slack"
+      source_kind   = "slack"
     },
     zoom = {
-      deploy = true
+      deploy        = true
       function_name = "psoxy-zoom"
-      source_kind = "zoom"
+      source_kind   = "zoom"
     }
   }
 }
 
 resource "google_service_account" "long_auth_connector_sa" {
   for_each = {
-    for k, v in local.oauth_long_access_connectors:
+    for k, v in local.oauth_long_access_connectors :
     k => v if v.deploy
   }
-  project = var.project_id
+  project      = var.project_id
   account_id   = each.value.function_name
   display_name = "Psoxy Connector - ${title(each.key)}{var.connector_display_name_suffix}"
 }
@@ -208,10 +208,10 @@ resource "google_service_account" "long_auth_connector_sa" {
 # creates the secret, without versions.
 module "connector-long-auth-block" {
   for_each = {
-  for k, v in local.oauth_long_access_connectors:
-  k => v if v.deploy
+    for k, v in local.oauth_long_access_connectors :
+    k => v if v.deploy
   }
-  source   = "../modules/gcp-oauth-long-access-strategy"
+  source                  = "../../modules/gcp-oauth-long-access-strategy"
   project_id              = var.project_id
   function_name           = each.value.function_name
   token_adder_user_emails = []
@@ -219,23 +219,23 @@ module "connector-long-auth-block" {
 
 module "connector-long-auth-create-function" {
   for_each = {
-  for k, v in local.oauth_long_access_connectors:
-  k => v if v.deploy
+    for k, v in local.oauth_long_access_connectors :
+    k => v if v.deploy
   }
-  source = "../modules/gcp-psoxy-cloud-function"
+  source = "../../modules/gcp-psoxy-cloud-function"
 
   project_id            = var.project_id
   function_name         = each.value.function_name
   source_kind           = each.value.source_kind
-  service_account_email   = google_service_account.long_auth_connector_sa[each.key].email
+  service_account_email = google_service_account.long_auth_connector_sa[each.key].email
 
   secret_bindings = {
-    PSOXY_SALT   = {
+    PSOXY_SALT = {
       secret_name    = module.psoxy-gcp.salt_secret_name
       version_number = module.psoxy-gcp.salt_secret_version_number
     },
     ACCESS_TOKEN = {
-      secret_name    = module.connector-long-auth-block[each.key].access_token_secret_name
+      secret_name = module.connector-long-auth-block[each.key].access_token_secret_name
       # in case of long lived tokens we want latest version always
       version_number = "latest"
     }

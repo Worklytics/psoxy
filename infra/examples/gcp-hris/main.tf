@@ -25,8 +25,8 @@ resource "google_project" "psoxy-project" {
 module "psoxy-gcp" {
   source = "../../modules/gcp"
 
-  project_id          = google_project.psoxy-project.project_id
-  invoker_sa_emails   = var.worklytics_sa_emails
+  project_id        = google_project.psoxy-project.project_id
+  invoker_sa_emails = var.worklytics_sa_emails
 
   depends_on = [
     google_project.psoxy-project
@@ -48,10 +48,10 @@ data "archive_file" "source" {
 
 # Create bucket that will host the source code
 resource "google_storage_bucket" "deployment_bucket" {
-  name            = "${var.bucket_prefix}-function"
-  location        = var.bucket_location
-  force_destroy   = true
-  project         = google_project.psoxy-project.project_id
+  name          = "${var.bucket_prefix}-function"
+  location      = var.bucket_location
+  force_destroy = true
+  project       = google_project.psoxy-project.project_id
 }
 
 # Add source code zip to bucket
@@ -64,17 +64,17 @@ resource "google_storage_bucket_object" "function" {
 }
 
 resource "google_storage_bucket" "import-bucket" {
-  name            = "${var.bucket_prefix}-import"
-  location        = var.bucket_location
-  force_destroy   = true
-  project         = google_project.psoxy-project.project_id
+  name          = "${var.bucket_prefix}-import"
+  location      = var.bucket_location
+  force_destroy = true
+  project       = google_project.psoxy-project.project_id
 }
 
 resource "google_storage_bucket" "processed-bucket" {
-  name            = "${var.bucket_prefix}-processed"
-  location        = var.bucket_location
-  force_destroy   = true
-  project         = google_project.psoxy-project.project_id
+  name          = "${var.bucket_prefix}-processed"
+  location      = var.bucket_location
+  force_destroy = true
+  project       = google_project.psoxy-project.project_id
 }
 
 resource "google_service_account" "service-account" {
@@ -99,9 +99,9 @@ resource "google_storage_bucket_iam_member" "access_for_import_bucket" {
 resource "google_storage_bucket_iam_member" "grant_sa_read_on_processed_bucket" {
   count = length(var.worklytics_sa_emails)
 
-  bucket   = google_storage_bucket.processed-bucket.name
-  member   = "serviceAccount:${var.worklytics_sa_emails[count.index]}"
-  role     = "roles/storage.objectViewer"
+  bucket = google_storage_bucket.processed-bucket.name
+  member = "serviceAccount:${var.worklytics_sa_emails[count.index]}"
+  role   = "roles/storage.objectViewer"
 }
 
 resource "google_project_iam_custom_role" "bucket-write" {
@@ -132,22 +132,22 @@ resource "google_cloudfunctions_function" "function" {
   service_account_email = google_service_account.service-account.email
 
   environment_variables = merge(tomap({
-      INPUT_BUCKET  = google_storage_bucket.import-bucket.name,
-      OUTPUT_BUCKET = google_storage_bucket.processed-bucket.name
-    }), yamldecode(file("../../../configs/hris.yaml")))
+    INPUT_BUCKET  = google_storage_bucket.import-bucket.name,
+    OUTPUT_BUCKET = google_storage_bucket.processed-bucket.name
+  }), yamldecode(file("../../../configs/hris.yaml")))
 
   secret_environment_variables {
     key     = "PSOXY_SALT"
     secret  = "PSOXY_SALT"
     version = module.psoxy-gcp.salt_secret_version_number
-      }
+  }
 
   event_trigger {
     event_type = "google.storage.object.finalize"
     resource   = google_storage_bucket.import-bucket.name
   }
 
-  depends_on    = [
+  depends_on = [
     google_storage_bucket.import-bucket,
     google_storage_bucket.processed-bucket,
     google_service_account.service-account,

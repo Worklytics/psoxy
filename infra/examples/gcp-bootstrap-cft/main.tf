@@ -24,7 +24,7 @@ module "bootstrap" {
 
 resource "local_file" "todo" {
   filename = "TODO - terraform backend.md"
-  content = <<EOT
+  content  = <<EOT
 Ensure the `terraform` block at the top of your Terraform configuration is something like following:
 
 ```terraform
