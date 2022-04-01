@@ -67,6 +67,15 @@
       "preferredLanguage": "en-US",
       "surname": "Allen",
       "userPrincipalName": "Paul@worklytics.onmicrosoft.com"
+    },
+    {
+      "businessPhones": [],
+      "jobTitle": null,
+      "mail": null,
+      "officeLocation": null,
+      "preferredLanguage": null,
+      "userPrincipalName": "no-mail-example@worklytics.onmicrosoft.com",
+      "id": "232442306-9942-4750-a708-4a1e4fe8a879"
     }
   ]
 }
