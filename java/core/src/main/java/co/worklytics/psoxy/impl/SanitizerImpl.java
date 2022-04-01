@@ -132,6 +132,11 @@ public class SanitizerImpl implements Sanitizer {
                     .delete(document, jsonConfiguration);
             }
 
+            //TODO: error handling within the map functions. any exceptions thrown within the map
+            //      function seem to be suppressed, and an empty [] left as the 'document'.
+            // ideas:
+            // jsonConfiguration.addEvaluationListeners(); -->
+
             for (JsonPath pseudonymization : pseudonymizationsToApply) {
                 document = pseudonymization
                     .map(document, this::pseudonymizeToJson, jsonConfiguration);
@@ -146,7 +151,6 @@ public class SanitizerImpl implements Sanitizer {
                 document = pseudonymization
                     .map(document, this::pseudonymizeWithOriginalToJson, jsonConfiguration);
             }
-
 
             return jsonConfiguration.jsonProvider().toJson(document);
         }
@@ -181,11 +185,15 @@ public class SanitizerImpl implements Sanitizer {
     }
 
 
-    public PseudonymizedIdentity pseudonymize(@NonNull Object value) {
+    public PseudonymizedIdentity pseudonymize(Object value) {
         return pseudonymize(value, false);
     }
 
-    public PseudonymizedIdentity pseudonymize(@NonNull Object value, boolean includeOriginal) {
+    public PseudonymizedIdentity pseudonymize(Object value, boolean includeOriginal) {
+        if (value == null) {
+            return null;
+        }
+
         Preconditions.checkArgument(value instanceof String || value instanceof Number,
             "Value must be some basic type (eg JSON leaf, not node)");
 
@@ -238,11 +246,11 @@ public class SanitizerImpl implements Sanitizer {
     }
 
     @VisibleForTesting
-    public String pseudonymizeToJson(@NonNull Object value, @NonNull Configuration configuration) {
+    public String pseudonymizeToJson(Object value, @NonNull Configuration configuration) {
         return configuration.jsonProvider().toJson(pseudonymize(value));
     }
 
-    public String pseudonymizeWithOriginalToJson(@NonNull Object value, @NonNull Configuration configuration) {
+    public String pseudonymizeWithOriginalToJson(Object value, @NonNull Configuration configuration) {
         return configuration.jsonProvider().toJson(pseudonymize(value, true));
     }
 

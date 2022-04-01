@@ -25,8 +25,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * abstract test stuff for Rules implementations
@@ -45,6 +44,8 @@ abstract public class RulesBaseTestCase {
     protected ObjectMapper yamlMapper;
     @Inject
     protected SanitizerFactory sanitizerFactory;
+    @Inject
+    protected RulesUtils rulesUtils;
 
 
 
@@ -130,6 +131,11 @@ abstract public class RulesBaseTestCase {
     @SneakyThrows
     protected String sanitize(String endpoint, String jsonResponse) {
         return this.sanitizer.sanitize(new URL(endpoint), jsonResponse);
+    }
+
+    protected void assertSha(String expectedSha) {
+        assertNotNull(expectedSha);
+        assertEquals(expectedSha, rulesUtils.sha(sanitizer.getOptions().getRules()));
     }
 
     protected void assertNotSanitized(String content, Collection<String> shouldContain) {

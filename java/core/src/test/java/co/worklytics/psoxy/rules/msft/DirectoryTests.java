@@ -3,6 +3,7 @@ package co.worklytics.psoxy.rules.msft;
 import co.worklytics.psoxy.Rules;
 import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
 import lombok.Getter;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -21,6 +22,14 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
 
     @Getter
     final String yamlSerializationFilepath = "microsoft-365/directory";
+
+    @Disabled // not reliable; seems to have different value via IntelliJ/AWS deployment and my
+    // laptop's maven, which doesn't make any sense, given that binary deployed to AWS was built via
+    // maven on my laptop - so something about Surefire/Junit runner used by maven??
+    @Test
+    void sha() {
+        this.assertSha("7869e465607b7a00b4bd75a832a9ed1f811ce7f2");
+    }
 
     @Test
     void user() {
@@ -58,15 +67,18 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
 
         Collection<String> PII = Arrays.asList(
             "john@worklytics.onmicrosoft.com",
-            "Paul Allen"
+            "Paul Allen",
+            "no-mail-example@worklytics.onmicrosoft.com"
         );
         assertNotSanitized(jsonString, PII);
 
         String sanitized = this.sanitize(endpoint, jsonString);
 
         assertPseudonymized(sanitized, "john@worklytics.onmicrosoft.com");
+        assertPseudonymized(sanitized, "no-mail-example@worklytics.onmicrosoft.com");
         assertRedacted(sanitized, "Paul Allen");
     }
+
 
     // case that ACTUALLY looks like what we call ...
     @Test
