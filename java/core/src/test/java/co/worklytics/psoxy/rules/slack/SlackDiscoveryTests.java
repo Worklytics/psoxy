@@ -12,11 +12,11 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.*;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.hasJsonPath;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.hasNoJsonPath;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class SlackDiscoveryTests extends RulesBaseTestCase {
 
@@ -40,6 +40,7 @@ public class SlackDiscoveryTests extends RulesBaseTestCase {
         "https://slack.com/api/discovery.conversations.list?team=X&offset=Y&only_im=true",
         "https://slack.com/api/discovery.conversations.history",
         "https://slack.com/api/discovery.conversations.history?channel=X&limit=10",
+        "https://slack.com/api/discovery.conversations.recent?team=X&limit=10&latest=123",
         "https://slack.com/api/discovery.users.list",
         "https://slack.com/api/discovery.users.list?limit=20&include_deleted=true",
     })
@@ -55,12 +56,11 @@ public class SlackDiscoveryTests extends RulesBaseTestCase {
         "https://slack.com/api/discovery_conversations-list",
         "https://slack.com/api/discovery-conversations-history",
         "https://slack.com/api/discovery users list",
+        "https://slack.com/api/discovery.conversation.info/",
         // all the rest of the discovery methods
         "https://slack.com/api/discovery.user.info",
         "https://slack.com/api/discovery.user.conversations",
-        "https://slack.com/api/discovery.conversations.recent",
         "https://slack.com/api/discovery.conversations.edits",
-        "https://slack.com/api/discovery.conversations.info",
         "https://slack.com/api/discovery.conversations.members",
         "https://slack.com/api/discovery.conversations.renames",
         "https://slack.com/api/discovery.conversations.reactions",
@@ -141,6 +141,39 @@ public class SlackDiscoveryTests extends RulesBaseTestCase {
             "This is likely a pun about the weather.",
             "We're withholding a pun from you",
             "Leg end nary a laugh, Ink.");
+
+    }
+
+    @SneakyThrows
+    @Test
+    void discovery_conversations_recent() {
+        String jsonString = asJson("discovery-conversations-recent.json");
+
+        String sanitized =
+            sanitizer.sanitize(new URL("https://slack.com/api/discovery.conversations.recent"), jsonString);
+
+        // nothing to redact / pseudonymize
+        assertEquals(jsonString, sanitized);
+    }
+
+    @SneakyThrows
+    @Test
+    void discovery_conversations_info() {
+        String jsonString = asJson("discovery-conversations-info.json");
+
+        String sanitized =
+            sanitizer.sanitize(new URL("https://slack.com/api/discovery.conversations.info"), jsonString);
+
+        Collection<String> PII = Arrays.asList(
+            "W0N9HDWUR"
+        );
+
+        assertPseudonymized(sanitized, PII);
+        assertRedacted(sanitized, "Collaboration about Project X",
+            "Launch date scheduled for 07/01",
+            "project-x",
+            "project X",
+            "project-y");
 
     }
 }
