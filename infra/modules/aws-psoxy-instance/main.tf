@@ -15,7 +15,7 @@ resource "aws_lambda_function" "psoxy-instance" {
   runtime          = "java11"
   filename         = var.path_to_function_zip
   source_code_hash = var.function_zip_hash
-  timeout          = 55 # seconds
+  timeout          = 55  # seconds
   memory_size      = 512 # megabytes
 
   environment {
@@ -25,21 +25,21 @@ resource "aws_lambda_function" "psoxy-instance" {
 
 # cloudwatch group per lambda function
 resource "aws_cloudwatch_log_group" "lambda-log" {
-  name = "/aws/lambda/${aws_lambda_function.psoxy-instance.function_name}"
+  name              = "/aws/lambda/${aws_lambda_function.psoxy-instance.function_name}"
   retention_in_days = 7
 }
 
 # map API gateway request --> lambda function backend
 resource "aws_apigatewayv2_integration" "map" {
-  api_id                    = var.api_gateway.id
-  integration_type          = "AWS_PROXY"
-  connection_type           = "INTERNET"
+  api_id           = var.api_gateway.id
+  integration_type = "AWS_PROXY"
+  connection_type  = "INTERNET"
 
-  integration_method        = "POST"
-  integration_uri           = aws_lambda_function.psoxy-instance.invoke_arn
-  request_parameters        = {}
-  request_templates         = {}
-  payload_format_version    = "2.0"
+  integration_method     = "POST"
+  integration_uri        = aws_lambda_function.psoxy-instance.invoke_arn
+  request_parameters     = {}
+  request_templates      = {}
+  payload_format_version = "2.0"
 }
 
 
@@ -78,15 +78,15 @@ resource "aws_iam_role" "iam_for_lambda" {
   name = "iam_for_lambda_${var.function_name}"
 
   assume_role_policy = jsonencode({
-    "Version": "2012-10-17",
-    "Statement": [
+    "Version" : "2012-10-17",
+    "Statement" : [
       {
-        "Action": "sts:AssumeRole",
-        "Principal": {
-          "Service": "lambda.amazonaws.com"
+        "Action" : "sts:AssumeRole",
+        "Principal" : {
+          "Service" : "lambda.amazonaws.com"
         },
-        "Effect": "Allow",
-        "Sid": ""
+        "Effect" : "Allow",
+        "Sid" : ""
       }
     ]
   })
@@ -97,20 +97,20 @@ resource "aws_iam_policy" "policy" {
   description = "Allow lambda function role to read SSM parameters"
 
   policy = jsonencode(
-{
-  "Version": "2012-10-17",
-  "Statement": [
     {
-      "Action": [
-        "ssm:GetParameter*"
-      ],
-      "Effect": "Allow",
-      "Resource": "*"
-      # TODO: limit to SSM parameters in question
-      # "Resource": "arn:aws:ssm:us-east-2:123456789012:parameter/prod-*"
-    }
-  ]
-})
+      "Version" : "2012-10-17",
+      "Statement" : [
+        {
+          "Action" : [
+            "ssm:GetParameter*"
+          ],
+          "Effect" : "Allow",
+          "Resource" : "*"
+          # TODO: limit to SSM parameters in question
+          # "Resource": "arn:aws:ssm:us-east-2:123456789012:parameter/prod-*"
+        }
+      ]
+  })
 
 }
 
@@ -120,7 +120,7 @@ resource "aws_iam_role_policy_attachment" "basic" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
-resource "aws_iam_role_policy_attachment" "policy"{
+resource "aws_iam_role_policy_attachment" "policy" {
   role       = aws_iam_role.iam_for_lambda.name
   policy_arn = aws_iam_policy.policy.arn
 }
