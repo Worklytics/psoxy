@@ -82,11 +82,6 @@ resource "aws_iam_role" "api-caller" {
   }
 }
 
-# pseudo secret
-resource "aws_secretsmanager_secret" "pseudonymization-salt" {
-  name = "PSOXY_SALT"
-}
-
 # not really a 'password', but 'random_string' isn't "sensitive" by terraform, so
 # is output to console
 resource "random_password" "random" {
