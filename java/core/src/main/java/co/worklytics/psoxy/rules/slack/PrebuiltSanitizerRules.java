@@ -16,6 +16,8 @@ public class PrebuiltSanitizerRules {
         .allowedEndpointRegex("^\\/api\\/discovery\\.enterprise\\.info(?:\\?.+)?")
         .allowedEndpointRegex("^\\/api\\/discovery\\.conversations\\.list(?:\\?.+)?")
         .allowedEndpointRegex("^\\/api\\/discovery\\.conversations\\.history(?:\\?.+)?")
+        .allowedEndpointRegex("^\\/api\\/discovery\\.conversations\\.recent(?:\\?.+)?")
+        .allowedEndpointRegex("^\\/api\\/discovery\\.conversations\\.info(?:\\?.+)?")
         .allowedEndpointRegex("^\\/api\\/discovery\\.users\\.list(?:\\?.+)?")
         // users
         .pseudonymization(Rule.builder()
@@ -43,6 +45,21 @@ public class PrebuiltSanitizerRules {
             // we don't care about names
             // topic and purpose contains user ids, not used at all, so just get rid of the entire content
             .jsonPath("$.channels[*]['name','topic','purpose']")
+            .build()
+        )
+        // conversations info
+        // no PII
+        // redact channel name, topic and purpose
+        .pseudonymization(Rule.builder()
+            .relativeUrlRegex("\\/api\\/discovery\\.conversations\\.info(?:\\?.+)?")
+            .jsonPath("$.info[*].creator")
+            .build()
+        )
+        .redaction(Rule.builder()
+            .relativeUrlRegex("\\/api\\/discovery\\.conversations\\.info(?:\\?.+)?")
+            // we don't care about names
+            // topic and purpose contains user ids, not used at all, so just get rid of the entire content
+            .jsonPath("$.info[*]['name','name_normalized','previous_names','topic','purpose']")
             .build()
         )
         // conversations history

@@ -28,7 +28,8 @@ Now depends on your installation approach you might need to change slightly
 ### Org wide install
 Use this step if you want to install in the whole org, across multiple workspaces.
 
-1. Add a bot scope (not really used, but Slack doesn't allow org-wide without a bot scope requested). Just add `users:read`, something that is read-only and we already have access through discovery.
+1. Add a bot scope (not really used, but Slack doesn't allow org-wide without a bot scope requested).
+   Just add `users:read`, something that is read-only and we already have access through discovery.
 2. Go to *Org Level Apps* and Opt-in in the program
 3. Go to Settings > Install App
 4. Install into *organization*
