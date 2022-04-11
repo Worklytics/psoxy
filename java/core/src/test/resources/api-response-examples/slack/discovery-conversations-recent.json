@@ -1,0 +1,16 @@
+{
+  "ok" : true,
+  "channels" : [
+    {
+      "id" : "G0QPJB83S",
+      "team" : "T0LNRARFB",
+      "ts" : "1535708862.000000"
+    },
+    {
+      "id" : "C0QPZX87W",
+      "team" : "T0LNRARFB",
+      "ts" : "1535708872.000000"
+    },
+  ],
+  "offset": "1535708886.000000"
+}

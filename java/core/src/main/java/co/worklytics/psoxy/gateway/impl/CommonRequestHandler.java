@@ -148,7 +148,7 @@ public class CommonRequestHandler {
             //TODO: could run this through DLP to be extra safe
             proxyResponseContent = responseContent;
         }
-        builder.body(proxyResponseContent);
+        builder.body(StringUtils.trimToEmpty(proxyResponseContent));
 
         return builder.build();
     }
