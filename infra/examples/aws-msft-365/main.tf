@@ -60,7 +60,7 @@ data "azuread_client_config" "current" {}
 locals {
   # this IS the correct ID for the user terraform is running as, which we assume is a user who's OK
   # to use the subject of examples. You can change it to any string you want.
-  example_msft_user_guid = data.azuread_client_config.current.object_id,
+  example_msft_user_guid = data.azuread_client_config.current.object_id
 
   # Microsoft 365 sources; add/remove as you wish
   # See https://docs.microsoft.com/en-us/graph/permissions-reference for all the permissions available in AAD Graph API
