@@ -23,6 +23,20 @@ these to local references throughout your configuration:
   - any `ref` parameter, such as `?ref=v0.1.0-beta.1`, should be removed from the module `source`
     attributes
 
+Generally, we omit `ref` parameters for simplicity - so implicitly dependencies are bound to their
+'latest' version. To pin to a specific release, such as `v0.1.0-beta.1`, append `?ref=v0.1.0-beta.1`
+to the modules `source`, such as:
+
+```terraform
+module "psoxy-aws" {
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws"
+
+  caller_aws_account_id   = var.caller_aws_account_id
+  caller_external_user_id = var.caller_external_user_id
+  aws_account_id          = var.aws_account_id
+}
+```
+
 ## Terraform State
 
 These configurations persist their state in the local file system by default.  For production use,
@@ -31,5 +45,17 @@ into your Terraform state should be handled as sensitive data. This also facilia
 administration of the resulting infrastructure (eg, multiple users can execute `terraform apply`,
 with concurrency controlled by terraform locking the remote state).
 
+Local state example:
+```terraform
+  backend "local" {
+  }
+```
 
-
+Remote state example:
+```terraform
+backend "s3" {
+  bucket = "terraform-state-bucket"
+  key    = "terraform.tfstate"
+  region = "us-east-1"
+}
+```
