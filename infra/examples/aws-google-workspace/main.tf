@@ -33,7 +33,7 @@ provider "aws" {
 }
 
 module "psoxy-aws" {
-  source = "../../modules/aws"
+  source = "github.com/worklytics/psoxy/infra/modules/aws"
 
   caller_aws_account_id   = var.caller_aws_account_id
   caller_external_user_id = var.caller_external_user_id
@@ -45,7 +45,7 @@ module "psoxy-aws" {
 }
 
 module "psoxy-package" {
-  source = "../../modules/psoxy-package"
+  source = "github.com/worklytics/psoxy/infra/modules/psoxy-package"
 
   implementation     = "aws"
   path_to_psoxy_java = "../../../java"
@@ -146,7 +146,7 @@ locals {
 module "google-workspace-connection" {
   for_each = local.enabled_google_workspace_sources
 
-  source = "../../modules/google-workspace-dwd-connection"
+  source = "github.com/worklytics/psoxy/infra/modules/google-workspace-dwd-connection"
 
   project_id                   = google_project.psoxy-google-connectors.project_id
   connector_service_account_id = "psoxy-${each.key}"
@@ -163,7 +163,7 @@ module "google-workspace-connection" {
 module "google-workspace-connection-auth" {
   for_each = local.enabled_google_workspace_sources
 
-  source = "../../modules/gcp-sa-auth-key-aws-secret"
+  source = "github.com/worklytics/psoxy/infra/modules/gcp-sa-auth-key-aws-secret"
 
   service_account_id = module.google-workspace-connection[each.key].service_account_id
   secret_id          = "PSOXY_${upper(each.key)}_SERVICE_ACCOUNT_KEY"
@@ -172,7 +172,7 @@ module "google-workspace-connection-auth" {
 module "psoxy-google-workspace-connector" {
   for_each = local.enabled_google_workspace_sources
 
-  source = "../../modules/aws-psoxy-instance"
+  source = "github.com/worklytics/psoxy/infra/modules/aws-psoxy-instance"
 
   function_name        = "psoxy-${each.key}"
   source_kind          = each.key
@@ -194,77 +194,10 @@ module "psoxy-google-workspace-connector" {
 module "worklytics-psoxy-connection-google-workspace" {
   for_each = local.enabled_google_workspace_sources
 
-  source = "../../modules/worklytics-psoxy-connection-aws"
+  source = "github.com/worklytics/psoxy/infra/modules/worklytics-psoxy-connection-aws"
 
   psoxy_endpoint_url = module.psoxy-google-workspace-connector[each.key].endpoint_url
   display_name       = "${each.value.display_name} via Psoxy${var.connector_display_name_suffix}"
   aws_region         = var.aws_region
   aws_role_arn       = var.aws_assume_role_arn
 }
-
-
-# BEGIN LONG ACCESS AUTH CONNECTORS
-
-locals {
-  oauth_long_access_connectors = {
-    slack-discovery-api = {
-      enabled           = true
-      source_kind       = "slack"
-      display_name      = "Slack Discovery API Connector"
-      example_api_calls = []
-
-    },
-    zoom = {
-      enabled           = true
-      source_kind       = "zoom"
-      example_api_calls = ["/v2/users"]
-      display_name      = "Zoom Connector"
-    }
-  }
-  enabled_oauth_long_access_connectors = { for id, spec in local.oauth_long_access_connectors : id => spec if spec.enabled }
-
-}
-
-# Create secret (later filled by customer)
-resource "aws_ssm_parameter" "long-access-token-secret" {
-  for_each = local.enabled_oauth_long_access_connectors
-
-  name        = "PSOXY_${upper(replace(each.key, "-", "_"))}_ACCESS_TOKEN"
-  type        = "SecureString"
-  description = "The long lived token for `psoxy-${each.key}`"
-  value       = sensitive("anything")
-}
-
-module "aws-psoxy-long-auth-connectors" {
-  for_each = local.enabled_oauth_long_access_connectors
-
-  source = "../../modules/aws-psoxy-instance"
-
-  function_name        = "psoxy-${each.key}"
-  source_kind          = each.value.source_kind
-  api_gateway          = module.psoxy-aws.api_gateway
-  path_to_function_zip = module.psoxy-package.path_to_deployment_jar
-  function_zip_hash    = module.psoxy-package.deployment_package_hash
-  path_to_config       = "../../../configs/${each.value.source_kind}.yaml"
-  api_caller_role_arn  = module.psoxy-aws.api_caller_role_arn
-  aws_assume_role_arn  = var.aws_assume_role_arn
-
-  parameters = [
-    module.psoxy-aws.salt_secret,
-    aws_ssm_parameter.long-access-token-secret[each.key].value
-  ]
-  example_api_calls = each.value.example_api_calls
-}
-
-module "worklytics-psoxy-connection-oauth-long-access-connectors" {
-  for_each = local.enabled_oauth_long_access_connectors
-
-  source = "../../modules/worklytics-psoxy-connection-aws"
-
-  psoxy_endpoint_url = module.aws-psoxy-long-auth-connectors[each.key].endpoint_url
-  display_name       = "${each.value.display_name} via Psoxy${var.connector_display_name_suffix}"
-  aws_region         = var.aws_region
-  aws_role_arn       = module.psoxy-aws.api_caller_role_arn
-}
-
-# END LONG ACCESS AUTH CONNECTORS
