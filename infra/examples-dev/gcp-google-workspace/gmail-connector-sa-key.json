@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "psoxy-dev-erik",
+  "private_key_id": "3b40d07bfb153f7cfd1c719bddfe58937ac6781e",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQC0xGO1qD4HCA6j\nmkY2Yf0z15wD8U9TknP9KPuBZPPkj0v4UYqPThcHPuykhRGJ+Pi7pWd8KnD36I5f\nwfilnEz6MrQP4lCu4AfuHjtKLP0uto+vMyG24fcy++r5csF+ggUl3GuCaWQsErTf\nyK/ny/uAb1dwuEH+J2SeVrPs+MYiQlC+MobuXrrnqzuWOsbnh4001vNG1Hc6XrjP\njIsNlR1pa4NfHQBOsyNMNuiLw+sf43GgnmTAKRx05LoTufDt8KEy3RpPpg209hYy\nhEdLR3BmvwTFP0XNt2J7xt/CQzbJjlD75TEIDyMPObLsEBic5Hkve781UnB5E4/6\n+UvBRcK5AgMBAAECggEAMh8YFIjjNfjmcjd3C2ItHkBEupUgrSf48DN6VPzkYTXY\nVzBozmZVHUW1wMJCxDJb6U+p+3QbIaoCPAvhAS5u65q+cX8LZwmoOT55qw4BX3/w\nJCB10yshayoNk3/dpdGwUrikuKK3Sz8elsQi/g8Bm7GDmbYFWk6a6ApbVjP+YAXy\nRofDxPFyxE2Kk6Krt8vO2VZDachd12+/h52q9F8qecolF01Hd/c3f781RM///sfe\nXEbTdp0ba1YY2q0HQmwI3nbG2yOC2vsP/4hKTT6NJIX4D17LGKX+zgI+7Q/9/a4G\nxVGBmghLzV/GwmKt/oYeeaRYsJiWoTCe3AalqfsgdwKBgQDue03NpLYyNq/XxApF\n7fS+E2SX4JMDauB2N1TD4XvEJJ8aOoNmG75JsyxAGCxwn0ngXfZzU0EqJTWZebpF\nqvBizxGHRsvkRxlSFBJ3tE/dYdehqztIQwjaOeRWpRN/G3a9vpMYrB5yo+3auNLh\npgmW+0UvyGohmZGF/oNXbiC5PwKBgQDCC8CiFsMr4EcxLBapVJauZvZbpwHX5PgW\nJ+tw9ANU0Uvd0gvS8SmznCxdApEmD96hv5JXwSFP+BPhyx4/dgmhFyBUjGhjJAdB\nesfAADh3FrIHFMNI4pi7U4eHL8igunCiE42MMKnOxr9UOLaSBOf8RvPiV1Potcaa\nxgK0crDOBwKBgQDbyAtGEBxRXpDj+qm1FL3PRrQYPEGAjsjaadfWxkF33IA8fdyH\nB95wsY2AbEbYbBR7kF0Gn52Yp74j+Ukv13++sDLpRte1Q8kUGaeDZkuMLRW6ysHR\nsOXBqETFjVDQfZELAU0zGbzdzjHwtxCyIIEKAfwbM0qMOKkiohKNStMhpQKBgQCy\nyF09ejdsT4GIXpSqgtMp8Jd/LkpWfhHNaA5WzZvcI9IAmCxot+WyJGwDbgAJz4lS\nAc11qO1mXq0C1kASPFD26PXSsGLlJSbCP7uWvR1JK9HvEEQ0/QG3ZmhyN6Zj4CMy\nUU2TIqrxZtCVaoNb2cVb/ItruQYIXKKVq2aGlz0rNQKBgQCU6fEmdm/HwyipsC8p\nB9sZCLLNjjQkUOeq9yAd+EMCKmnOBF4xHBe+tCc/s1/0mbkBOm1ygsHvAoX0bmxV\nxDiYvVSgVtk+S8HzdN8PxHS2A9qq5f38mVS4+pFo62g1vFoa5haygkSgYLE2Hj4e\nnfeGE/8pORQLabu6T/VZI4JIyw==\n-----END PRIVATE KEY-----\n",
+  "client_email": "psoxy-gmail-dwd@psoxy-dev-erik.iam.gserviceaccount.com",
+  "client_id": "101672964637139816617",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/psoxy-gmail-dwd%40psoxy-dev-erik.iam.gserviceaccount.com"
+}
