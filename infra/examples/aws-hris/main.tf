@@ -33,10 +33,6 @@ module "psoxy-aws" {
   caller_aws_account_id   = var.caller_aws_account_id
   caller_external_user_id = var.caller_external_user_id
   aws_account_id          = var.aws_account_id
-
-  providers = {
-    aws = aws
-  }
 }
 
 module "psoxy-package" {
@@ -111,8 +107,8 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
 }
 
 resource "aws_iam_policy" "input_bucket_read_policy" {
-  name        = "ReadFromImportBucket"
-  description = "Allow lambda function role to read from import bucket"
+  name        = "BucketRead_${aws_s3_bucket.input.id}"
+  description = "Allow principal to read from input bucket: ${aws_s3_bucket.input.id}"
 
   policy = jsonencode(
     {
@@ -139,8 +135,8 @@ resource "aws_iam_role_policy_attachment" "read_policy_for_import_bucket" {
 }
 
 resource "aws_iam_policy" "output_bucket_write_policy" {
-  name        = "WriteForProcessedBucket"
-  description = "Allow lambda function role to write to processed bucket"
+  name        = "BucketWrite_${aws_s3_bucket.output.id}"
+  description = "Allow principal to write to bucket: ${aws_s3_bucket.output.id}"
 
   policy = jsonencode(
     {
@@ -166,9 +162,9 @@ resource "aws_iam_role_policy_attachment" "write_policy_for_output_bucket" {
   policy_arn = aws_iam_policy.output_bucket_write_policy.arn
 }
 
-resource "aws_iam_policy" "worklytics_bucket_access_policy" {
-  name        = "ReadAccessForWorklytics"
-  description = "Allow Worklytics to access this bucket for reading its content"
+resource "aws_iam_policy" "output_bucket_read" {
+  name        = "BucketRead_${aws_s3_bucket.output.id}"
+  description = "Allow to read content from bucket: ${aws_s3_bucket.output.id}"
 
   policy = jsonencode(
     {
@@ -193,7 +189,7 @@ resource "aws_iam_policy" "worklytics_bucket_access_policy" {
   ]
 }
 
-resource "aws_iam_role_policy_attachment" "worklyics_bucket_access_policy" {
+resource "aws_iam_role_policy_attachment" "caller_bucket_access_policy" {
   role       = module.psoxy-aws.api_caller_role_name
-  policy_arn = aws_iam_policy.worklytics_bucket_access_policy.arn
+  policy_arn = aws_iam_policy.output_bucket_read.arn
 }
