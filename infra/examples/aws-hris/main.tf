@@ -52,7 +52,6 @@ resource "aws_s3_bucket" "input" {
 
 resource "aws_s3_bucket" "output" {
   bucket = "${var.bucket_prefix}-output"
-
 }
 
 module "psoxy-file-handler" {
@@ -75,11 +74,6 @@ module "psoxy-file-handler" {
     INPUT_BUCKET  = aws_s3_bucket.input.bucket,
     OUTPUT_BUCKET = aws_s3_bucket.output.bucket
   }
-
-  depends_on = [
-    aws_s3_bucket.input,
-    aws_s3_bucket.output
-  ]
 }
 
 resource "aws_lambda_permission" "allow_input_bucket" {
@@ -89,9 +83,6 @@ resource "aws_lambda_permission" "allow_input_bucket" {
   principal     = "s3.amazonaws.com"
   source_arn    = aws_s3_bucket.input.arn
 
-  depends_on = [
-    aws_s3_bucket.input
-  ]
 }
 
 
@@ -123,10 +114,6 @@ resource "aws_iam_policy" "input_bucket_read_policy" {
         }
       ]
   })
-
-  depends_on = [
-    aws_s3_bucket.input,
-  ]
 }
 
 resource "aws_iam_role_policy_attachment" "read_policy_for_import_bucket" {
@@ -151,10 +138,6 @@ resource "aws_iam_policy" "output_bucket_write_policy" {
         }
       ]
   })
-
-  depends_on = [
-    aws_s3_bucket.output
-  ]
 }
 
 resource "aws_iam_role_policy_attachment" "write_policy_for_output_bucket" {
@@ -183,10 +166,6 @@ resource "aws_iam_policy" "output_bucket_read" {
         }
       ]
   })
-
-  depends_on = [
-    aws_s3_bucket.output
-  ]
 }
 
 resource "aws_iam_role_policy_attachment" "caller_bucket_access_policy" {
