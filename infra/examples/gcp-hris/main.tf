@@ -63,18 +63,20 @@ resource "google_storage_bucket_object" "function" {
   source       = data.archive_file.source.output_path
 }
 
-resource "google_storage_bucket" "import-bucket" {
+# data input to function
+resource "google_storage_bucket" "input-bucket" {
+  project       = google_project.psoxy-project.project_id
   name          = "${var.bucket_prefix}-import"
   location      = var.bucket_location
   force_destroy = true
-  project       = google_project.psoxy-project.project_id
 }
 
-resource "google_storage_bucket" "processed-bucket" {
+# data output from function
+resource "google_storage_bucket" "output-bucket" {
+  project       = google_project.psoxy-project.project_id
   name          = "${var.bucket_prefix}-processed"
   location      = var.bucket_location
   force_destroy = true
-  project       = google_project.psoxy-project.project_id
 }
 
 resource "google_service_account" "service-account" {
@@ -91,7 +93,7 @@ resource "google_secret_manager_secret_iam_member" "salt-secret-acces-for-servic
 }
 
 resource "google_storage_bucket_iam_member" "access_for_import_bucket" {
-  bucket = google_storage_bucket.import-bucket.name
+  bucket = google_storage_bucket.input-bucket.name
   role   = "roles/storage.objectViewer"
   member = "serviceAccount:${google_service_account.service-account.email}"
 }
@@ -99,7 +101,7 @@ resource "google_storage_bucket_iam_member" "access_for_import_bucket" {
 resource "google_storage_bucket_iam_member" "grant_sa_read_on_processed_bucket" {
   count = length(var.worklytics_sa_emails)
 
-  bucket = google_storage_bucket.processed-bucket.name
+  bucket = google_storage_bucket.output-bucket.name
   member = "serviceAccount:${var.worklytics_sa_emails[count.index]}"
   role   = "roles/storage.objectViewer"
 }
@@ -113,7 +115,7 @@ resource "google_project_iam_custom_role" "bucket-write" {
 }
 
 resource "google_storage_bucket_iam_member" "access_for_processed_bucket" {
-  bucket = google_storage_bucket.processed-bucket.name
+  bucket = google_storage_bucket.output-bucket.name
   role   = google_project_iam_custom_role.bucket-write.id
   member = "serviceAccount:${google_service_account.service-account.email}"
 }
@@ -132,8 +134,8 @@ resource "google_cloudfunctions_function" "function" {
   service_account_email = google_service_account.service-account.email
 
   environment_variables = merge(tomap({
-    INPUT_BUCKET  = google_storage_bucket.import-bucket.name,
-    OUTPUT_BUCKET = google_storage_bucket.processed-bucket.name
+    INPUT_BUCKET  = google_storage_bucket.input-bucket.name,
+    OUTPUT_BUCKET = google_storage_bucket.output-bucket.name
   }), yamldecode(file("../../../configs/hris.yaml")))
 
   secret_environment_variables {
@@ -144,12 +146,12 @@ resource "google_cloudfunctions_function" "function" {
 
   event_trigger {
     event_type = "google.storage.object.finalize"
-    resource   = google_storage_bucket.import-bucket.name
+    resource   = google_storage_bucket.input-bucket.name
   }
 
   depends_on = [
-    google_storage_bucket.import-bucket,
-    google_storage_bucket.processed-bucket,
+    google_storage_bucket.input-bucket,
+    google_storage_bucket.output-bucket,
     google_service_account.service-account,
     google_secret_manager_secret_iam_member.salt-secret-acces-for-service-account
   ]
