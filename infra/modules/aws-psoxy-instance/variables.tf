@@ -38,10 +38,10 @@ variable "parameters" {
 }
 
 variable "api_gateway" {
-  type        = object({
-    id = string
-    arn = string
-    api_endpoint = string
+  type = object({
+    id            = string
+    arn           = string
+    api_endpoint  = string
     execution_arn = string
   })
   description = "API gateway behind which proxy instance should sit"

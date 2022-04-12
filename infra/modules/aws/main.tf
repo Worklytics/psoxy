@@ -16,14 +16,14 @@ resource "aws_apigatewayv2_api" "psoxy-api" {
 }
 
 resource "aws_cloudwatch_log_group" "gateway-log" {
-  name = aws_apigatewayv2_api.psoxy-api.name
+  name              = aws_apigatewayv2_api.psoxy-api.name
   retention_in_days = 7
 }
 
 resource "aws_apigatewayv2_stage" "live" {
-  api_id        = aws_apigatewayv2_api.psoxy-api.id
-  name          = "live" # q: what name??
-  auto_deploy   = true
+  api_id      = aws_apigatewayv2_api.psoxy-api.id
+  name        = "live" # q: what name??
+  auto_deploy = true
   access_log_settings {
     destination_arn = aws_cloudwatch_log_group.gateway-log.arn
     format          = "$context.identity.sourceIp $context.identity.caller $context.identity.user [$context.requestTime] \"$context.httpMethod $context.path $context.protocol\" $context.status $context.responseLength $context.requestId $context.extendedRequestId $context.error.messageString $context.integrationErrorMessage"
@@ -47,14 +47,14 @@ resource "aws_iam_role" "api-caller" {
       },
       # allows service account to assume role
       {
-        "Effect": "Allow",
-        "Principal": {
-          "Federated": "accounts.google.com"
+        "Effect" : "Allow",
+        "Principal" : {
+          "Federated" : "accounts.google.com"
         },
-        "Action": "sts:AssumeRoleWithWebIdentity",
-        "Condition": {
-          "StringEquals": {
-            "accounts.google.com:aud": var.caller_external_user_id
+        "Action" : "sts:AssumeRoleWithWebIdentity",
+        "Condition" : {
+          "StringEquals" : {
+            "accounts.google.com:aud" : var.caller_external_user_id
           }
         }
       }
@@ -68,30 +68,25 @@ resource "aws_iam_role" "api-caller" {
       "Version" : "2012-10-17",
       "Statement" : [
         {
-          "Effect": "Allow",
-          "Action": "execute-api:Invoke",
-          "Resource": "arn:aws:execute-api:*:${var.aws_account_id}:*/*/GET/*",
+          "Effect" : "Allow",
+          "Action" : "execute-api:Invoke",
+          "Resource" : "arn:aws:execute-api:*:${var.aws_account_id}:*/*/GET/*",
         },
         {
-          "Effect": "Allow",
-          "Action": "execute-api:Invoke",
-          "Resource": "arn:aws:execute-api:*:${var.aws_account_id}:*/*/HEAD/*",
+          "Effect" : "Allow",
+          "Action" : "execute-api:Invoke",
+          "Resource" : "arn:aws:execute-api:*:${var.aws_account_id}:*/*/HEAD/*",
         },
       ]
     })
   }
 }
 
-# pseudo secret
-resource "aws_secretsmanager_secret" "pseudonymization-salt" {
-  name = "PSOXY_SALT"
-}
-
 # not really a 'password', but 'random_string' isn't "sensitive" by terraform, so
 # is output to console
 resource "random_password" "random" {
-  length           = 20
-  special          = true
+  length  = 20
+  special = true
 }
 
 # initial random salt to use; if you DON'T want this in your Terraform state, create a new version
