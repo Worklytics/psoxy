@@ -50,12 +50,12 @@ locals {
 
 }
 
-resource "aws_s3_bucket" "import_bucket" {
-  bucket = "${var.bucket_prefix}-import"
+resource "aws_s3_bucket" "input" {
+  bucket = "${var.bucket_prefix}-input"
 }
 
-resource "aws_s3_bucket" "processed_bucket" {
-  bucket = "${var.bucket_prefix}-processed"
+resource "aws_s3_bucket" "output" {
+  bucket = "${var.bucket_prefix}-output"
 }
 
 module "psoxy-file-handler" {
@@ -75,41 +75,41 @@ module "psoxy-file-handler" {
   parameters = []
 
   environment_variables = {
-    INPUT_BUCKET  = aws_s3_bucket.import_bucket.bucket,
-    OUTPUT_BUCKET = aws_s3_bucket.processed_bucket.bucket
+    INPUT_BUCKET  = aws_s3_bucket.input.bucket,
+    OUTPUT_BUCKET = aws_s3_bucket.output.bucket
   }
 
   depends_on = [
-    aws_s3_bucket.import_bucket,
-    aws_s3_bucket.processed_bucket
+    aws_s3_bucket.input,
+    aws_s3_bucket.output
   ]
 }
 
-resource "aws_lambda_permission" "allow_import_bucket" {
+resource "aws_lambda_permission" "allow_input_bucket" {
   statement_id  = "AllowExecutionFromS3Bucket"
   action        = "lambda:InvokeFunction"
   function_name = module.psoxy-file-handler.function_arn
   principal     = "s3.amazonaws.com"
-  source_arn    = aws_s3_bucket.import_bucket.arn
+  source_arn    = aws_s3_bucket.input.arn
 
   depends_on = [
-    aws_s3_bucket.import_bucket
+    aws_s3_bucket.input
   ]
 }
 
 
 resource "aws_s3_bucket_notification" "bucket_notification" {
-  bucket = aws_s3_bucket.import_bucket.id
+  bucket = aws_s3_bucket.input.id
 
   lambda_function {
     lambda_function_arn = module.psoxy-file-handler.function_arn
     events              = ["s3:ObjectCreated:*"]
   }
 
-  depends_on = [aws_lambda_permission.allow_import_bucket]
+  depends_on = [aws_lambda_permission.allow_input_bucket]
 }
 
-resource "aws_iam_policy" "import_bucket_read_policy" {
+resource "aws_iam_policy" "input_bucket_read_policy" {
   name        = "ReadFromImportBucket"
   description = "Allow lambda function role to read from import bucket"
 
@@ -122,22 +122,22 @@ resource "aws_iam_policy" "import_bucket_read_policy" {
             "s3:GetObject"
           ],
           "Effect" : "Allow",
-          "Resource" : "${aws_s3_bucket.import_bucket.arn}/*"
+          "Resource" : "${aws_s3_bucket.input.arn}/*"
         }
       ]
   })
 
   depends_on = [
-    aws_s3_bucket.import_bucket
+    aws_s3_bucket.input,
   ]
 }
 
 resource "aws_iam_role_policy_attachment" "read_policy_for_import_bucket" {
   role       = module.psoxy-file-handler.iam_for_lambda_name
-  policy_arn = aws_iam_policy.import_bucket_read_policy.arn
+  policy_arn = aws_iam_policy.input_bucket_read_policy.arn
 }
 
-resource "aws_iam_policy" "processed_bucket_write_policy" {
+resource "aws_iam_policy" "output_bucket_write_policy" {
   name        = "WriteForProcessedBucket"
   description = "Allow lambda function role to write to processed bucket"
 
@@ -150,19 +150,19 @@ resource "aws_iam_policy" "processed_bucket_write_policy" {
             "s3:PutObject",
           ],
           "Effect" : "Allow",
-          "Resource" : "${aws_s3_bucket.processed_bucket.arn}/*"
+          "Resource" : "${aws_s3_bucket.output.arn}/*"
         }
       ]
   })
 
   depends_on = [
-    aws_s3_bucket.processed_bucket
+    aws_s3_bucket.output
   ]
 }
 
-resource "aws_iam_role_policy_attachment" "write_policy_for_processed_bucket" {
+resource "aws_iam_role_policy_attachment" "write_policy_for_output_bucket" {
   role       = module.psoxy-file-handler.iam_for_lambda_name
-  policy_arn = aws_iam_policy.processed_bucket_write_policy.arn
+  policy_arn = aws_iam_policy.output_bucket_write_policy.arn
 }
 
 resource "aws_iam_policy" "worklyics_bucket_access_policy" {
@@ -180,15 +180,15 @@ resource "aws_iam_policy" "worklyics_bucket_access_policy" {
           ],
           "Effect" : "Allow",
           "Resource" : [
-            "${aws_s3_bucket.processed_bucket.arn}",
-            "${aws_s3_bucket.processed_bucket.arn}/*"
+            "${aws_s3_bucket.output.arn}",
+            "${aws_s3_bucket.output.arn}/*"
           ]
         }
       ]
   })
 
   depends_on = [
-    aws_s3_bucket.processed_bucket
+    aws_s3_bucket.output
   ]
 }
 
