@@ -37,7 +37,7 @@ variable "environment_name" {
   description = "qualifier to append to name of project that will host your psoxy instance"
 }
 
-variable "bucket_prefix" {
+variable "instance_id" {
   type        = string
-  description = "Prefix for buckets. Buckets will be created adding a suffix -import and -processed to this prefix"
+  description = "Human readable reference name for this psoxy instance. Helpful for distinguishing resulting infrastructure"
 }

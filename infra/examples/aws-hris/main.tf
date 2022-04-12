@@ -47,11 +47,11 @@ locals {
 }
 
 resource "aws_s3_bucket" "input" {
-  bucket = "${var.bucket_prefix}-input"
+  bucket = "psoxy-${var.instance_id}-input"
 }
 
 resource "aws_s3_bucket" "output" {
-  bucket = "${var.bucket_prefix}-output"
+  bucket = "psoxy-${var.instance_id}-output"
 }
 
 module "psoxy-file-handler" {
