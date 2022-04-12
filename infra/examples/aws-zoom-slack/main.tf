@@ -5,11 +5,6 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 3.0"
     }
-
-    # for the API connections to Google Workspace
-    google = {
-      version = ">= 3.74, <= 4.0"
-    }
   }
 
   # if you leave this as local, you should backup/commit your TF state files
