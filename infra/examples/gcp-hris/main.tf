@@ -65,18 +65,20 @@ resource "google_storage_bucket_object" "function" {
 
 # data input to function
 resource "google_storage_bucket" "input-bucket" {
-  project       = google_project.psoxy-project.project_id
-  name          = "${var.bucket_prefix}-import"
-  location      = var.bucket_location
-  force_destroy = true
+  project                     = google_project.psoxy-project.project_id
+  name                        = "${var.bucket_prefix}-import"
+  location                    = var.bucket_location
+  force_destroy               = true
+  uniform_bucket_level_access = true
 }
 
 # data output from function
 resource "google_storage_bucket" "output-bucket" {
-  project       = google_project.psoxy-project.project_id
-  name          = "${var.bucket_prefix}-processed"
-  location      = var.bucket_location
-  force_destroy = true
+  project                     = google_project.psoxy-project.project_id
+  name                        = "${var.bucket_prefix}-processed"
+  location                    = var.bucket_location
+  force_destroy               = true
+  uniform_bucket_level_access = true
 }
 
 resource "google_service_account" "service-account" {
