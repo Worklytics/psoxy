@@ -56,6 +56,7 @@ resource "aws_s3_bucket" "input" {
 
 resource "aws_s3_bucket" "output" {
   bucket = "${var.bucket_prefix}-output"
+
 }
 
 module "psoxy-file-handler" {
@@ -165,8 +166,8 @@ resource "aws_iam_role_policy_attachment" "write_policy_for_output_bucket" {
   policy_arn = aws_iam_policy.output_bucket_write_policy.arn
 }
 
-resource "aws_iam_policy" "worklyics_bucket_access_policy" {
-  name        = "ReadAccessForWorklyics"
+resource "aws_iam_policy" "worklytics_bucket_access_policy" {
+  name        = "ReadAccessForWorklytics"
   description = "Allow Worklytics to access this bucket for reading its content"
 
   policy = jsonencode(
@@ -194,5 +195,5 @@ resource "aws_iam_policy" "worklyics_bucket_access_policy" {
 
 resource "aws_iam_role_policy_attachment" "worklyics_bucket_access_policy" {
   role       = module.psoxy-aws.api_caller_role_name
-  policy_arn = aws_iam_policy.worklyics_bucket_access_policy.arn
+  policy_arn = aws_iam_policy.worklytics_bucket_access_policy.arn
 }
