@@ -65,3 +65,10 @@ variable "msft_tenant_id" {
   default     = ""
   description = "ID of Microsoft tenant to connect to (req'd only if config includes MSFT connectors)"
 }
+
+variable "modules_repo" {
+  type = string
+  default = "github.com/worklytics/psoxy/infra/"
+  # default = "../../"
+  description = "location of the modules to use by psoxy"
+}

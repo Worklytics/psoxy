@@ -27,7 +27,7 @@ jobs:
         run: |
           terraform init
           terraform validate
-          
+
       - name: 'Terraform - validate examples/aws-hris'
         working-directory: infra/examples/aws-hris
         run: |
@@ -51,15 +51,15 @@ jobs:
         run: |
           terraform init
           terraform validate
-          
+
       - name: 'Terraform - validate examples/gcp-bootstrap-simple'
         working-directory: infra/examples/gcp-bootstrap-simple
         run: |
           terraform init
           terraform validate
-    
-      - name: 'Terraform - validate examples/gcp-dev-personal'
-        working-directory: infra/examples/gcp-dev-personal
+
+      - name: 'Terraform - validate examples-dev/gcp-google-workspace'
+        working-directory: infra/examples-dev/gcp-google-workspace
         run: |
           terraform init
           terraform validate
@@ -69,10 +69,10 @@ jobs:
         run: |
           terraform init
           terraform validate
-          
+
       - name: 'Terraform - validate examples/gcp-hris'
         working-directory: infra/examples/gcp-hris
         run: |
           terraform init
           terraform validate
-          
+

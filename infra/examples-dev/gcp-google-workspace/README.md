@@ -1,4 +1,4 @@
-# dev-personal
+# dev-personal **DEPRECATED**
 
 A Terraform root module to create a personal development environment for Psoxy, with state stored to
 local filesystem. As such, it is not appropriate for scenario with multiple developers or production

@@ -23,7 +23,7 @@ resource "google_project" "psoxy-project" {
 }
 
 module "psoxy-gcp" {
-  source = "../../modules/gcp"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp"
 
   project_id        = google_project.psoxy-project.project_id
   invoker_sa_emails = var.worklytics_sa_emails
@@ -34,7 +34,7 @@ module "psoxy-gcp" {
 }
 
 module "psoxy-package" {
-  source = "../../modules/psoxy-package"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/psoxy-package"
 
   implementation     = "gcp"
   path_to_psoxy_java = "../../../java"
