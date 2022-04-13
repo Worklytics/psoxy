@@ -5,9 +5,9 @@ to upload HRIS files in a bucket and drop the modified file from Psoxy in an out
 to read it from Worklytics.
 
 Deployment will create three buckets: one for deploying the cloud function and the ones for import/processed.
-When a file is uploaded into the `-import` bucket the cloud function is triggered and it will apply the Psoxy rules
-defined in the file. The result of that process will be dropped in the `-processed` bucket in the same path that it
-was in the original path from `-import` bucket
+When a file is uploaded into the `-input` bucket the cloud function is triggered and it will apply the Psoxy rules
+defined in the file. The result of that process will be dropped in the `-output` bucket in the same path that it
+was in the original path from `-input` bucket
 
 ## Usage
 

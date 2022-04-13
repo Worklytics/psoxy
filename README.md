@@ -28,7 +28,7 @@ authentication necessary to connect to the data source's API and then any requir
 
 Orchestration continues to be performed on the Worklytics-side.
 
-![proxy illustration](docs/proxy-illustration.png)
+![proxy illustration](docs/proxy-illustration.jpg)
 
 ## Getting Started - Customers
 

@@ -1,7 +1,7 @@
 # aws-hris
 
-This example provisions an AWS Lambda that pseudonomizes HRIS files. The source file is dropped in a *import bucket* and
-result will appear in *processed bucket*. 
+This example provisions an AWS Lambda that pseudonomizes HRIS files. The source file is dropped in a *input bucket* and
+result will appear in *output bucket*. 
 
 ## Authentication
 

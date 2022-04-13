@@ -42,10 +42,6 @@ module "psoxy-package" {
   path_to_psoxy_java = "../../../java"
 }
 
-locals {
-
-}
-
 resource "aws_s3_bucket" "input" {
   bucket = "psoxy-${var.instance_id}-input"
 }
