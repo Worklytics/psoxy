@@ -18,19 +18,20 @@ variable "aws_region" {
   description = "default region in which to provision your AWS infra"
 }
 
-variable "caller_aws_account_id" {
+variable "aws_account_with_gcp_auth" {
+  default     = "939846301470:root" # Worklytics's account to which its GCP identities are federated
   type        = string
-  description = "id of Worklytics AWS account from which proxy will be called"
-  default     = "939846301470:root"
+  description = "id of AWS account that will authenticate GCP SAs (eg has GCP OIDC configured); any user added to 'allowed_gcp_callers' must be auth'd by this AWS account"
   validation {
-    condition     = can(regex("^\\d{12}:\\w+$", var.caller_aws_account_id))
-    error_message = "The caller_aws_account_id value should be 12-digit numeric string."
+    condition     = can(regex("^\\d{12}:\\w+$", var.aws_account_with_gcp_auth))
+    error_message = "The aws_account_id value should be 12-digit numeric string, followed by ':root'."
   }
 }
 
-variable "caller_external_user_id" {
-  type        = string
-  description = "id of external user that will call proxy (eg, SA of your Worklytics instance)"
+variable "allowed_gcp_service_accounts" {
+  type        = set(string) # 21-digit numeric strings
+  description = "GCP callers that are allowed to access the proxy, if they're auth'd by the aws_account_with_gcp_oidc"
+  default     = [] # empty set means no GCP callers are allowed, so connections from Worklytics will not work
 }
 
 variable "gcp_project_id" {
@@ -41,12 +42,18 @@ variable "gcp_project_id" {
 variable "environment_name" {
   type        = string
   description = "qualifier to append to name of project that will host your psoxy instance"
+  default     = ""
 }
 
 variable "gcp_folder_id" {
   type        = string
-  description = "optionally, a folder into which to provision it"
+  description = "optionally, numeric ID of folder into which to provision it"
   default     = null
+
+  validation {
+    condition     = can(regex("^\\d{12}$", var.gcp_folder_id))
+    error_message = "The gcp_folder_id value should be 12-digit numeric string."
+  }
 }
 
 variable "gcp_billing_account_id" {
@@ -60,15 +67,8 @@ variable "connector_display_name_suffix" {
   default     = ""
 }
 
-variable "msft_tenant_id" {
+variable "path_to_java" {
   type        = string
-  default     = ""
-  description = "ID of Microsoft tenant to connect to (req'd only if config includes MSFT connectors)"
-}
-
-variable "modules_repo" {
-  type = string
-  default = "github.com/worklytics/psoxy/infra/"
-  # default = "../../"
-  description = "location of the modules to use by psoxy"
+  description = "path from root terraform configuration to psoxy's java source"
+  default     = "../../../java"
 }

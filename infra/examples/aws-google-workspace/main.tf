@@ -44,12 +44,13 @@ module "psoxy-package" {
   source = "git::https://github.com/worklytics/psoxy//infra/modules/psoxy-package"
 
   implementation     = "aws"
-  path_to_psoxy_java = "../../../java"
+  path_to_psoxy_java = var.path_to_java
 }
+
 
 # holds SAs + keys needed to connect to Google Workspace APIs
 resource "google_project" "psoxy-google-connectors" {
-  name            = "Psoxy Connectors - ${var.environment_name}"
+  name            = length(var.environment_name) > 0 ? "Psoxy Connectors - ${var.environment_name}" : "Psoxy Connectors"
   project_id      = var.gcp_project_id
   folder_id       = var.gcp_folder_id
   billing_account = var.gcp_billing_account_id
@@ -175,7 +176,7 @@ module "psoxy-google-workspace-connector" {
   api_gateway          = module.psoxy-aws.api_gateway
   path_to_function_zip = module.psoxy-package.path_to_deployment_jar
   function_zip_hash    = module.psoxy-package.deployment_package_hash
-  path_to_config       = "../../../configs/${each.key}.yaml"
+  path_to_config       = "../../../configs/${each.value.source_kind}.yaml"
   api_caller_role_arn  = module.psoxy-aws.api_caller_role_arn
   aws_assume_role_arn  = var.aws_assume_role_arn
 

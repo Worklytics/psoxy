@@ -31,7 +31,7 @@ aws_assume_role_arn           = "arn:aws:iam::123456789:role/InfraAdmin"
 environment_name              = "dev-aws"
 connector_display_name_suffix = " Psoxy Dev AWS - erik"
 msft_tenant_id                = "some-uuid-of-msft-tenant" # should hold your Microsoft 365 instance
-caller_aws_account_id         = "914358739851:root"
+caller_aws_account_id         = "939846301470:root"
 caller_external_user_id       = "your-worklytics-service-account"
 ```
 

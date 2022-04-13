@@ -12,7 +12,7 @@ terraform {
 resource "aws_apigatewayv2_api" "psoxy-api" {
   name          = "psoxy-api"
   protocol_type = "HTTP"
-  description   = "API to expose psoxy instances"
+  description   = "API to expose psoxy installowed_gcp_service_accountsances"
 }
 
 resource "aws_cloudwatch_log_group" "gateway-log" {
@@ -30,9 +30,12 @@ resource "aws_apigatewayv2_stage" "live" {
   }
 }
 
-# role that Worklytics user will use to call the API
+
+# role that Worklytics service account will use to call the API
 resource "aws_iam_role" "api-caller" {
-  name = "PsoxyApiCaller"
+  for_each = var.allowed_gcp_service_accounts
+
+  name = "PsoxyApiCaller_${each.key}"
 
   # who can assume this role
   assume_role_policy = jsonencode({
@@ -42,7 +45,7 @@ resource "aws_iam_role" "api-caller" {
         "Action" = "sts:AssumeRole"
         "Effect" : "Allow"
         "Principal" : {
-          "AWS" : "arn:aws:iam::${var.caller_aws_account_id}"
+          "AWS" : "arn:aws:iam::${var.aws_account_with_gcp_auth}"
         }
       },
       # allows service account to assume role
@@ -54,7 +57,7 @@ resource "aws_iam_role" "api-caller" {
         "Action" : "sts:AssumeRoleWithWebIdentity",
         "Condition" : {
           "StringEquals" : {
-            "accounts.google.com:aud" : var.caller_external_user_id
+            "accounts.google.com:aud" : each.key
           }
         }
       }
