@@ -47,11 +47,13 @@ locals {
 }
 
 resource "aws_s3_bucket" "input" {
-  bucket = "${var.bucket_prefix}-input"
+  bucket        = "${var.bucket_prefix}-input"
+  force_destroy = true
 }
 
 resource "aws_s3_bucket" "output" {
-  bucket = "${var.bucket_prefix}-output"
+  bucket        = "${var.bucket_prefix}-output"
+  force_destroy = true
 }
 
 module "psoxy-file-handler" {
