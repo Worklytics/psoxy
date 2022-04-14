@@ -28,7 +28,7 @@ provider "aws" {
 }
 
 module "psoxy-aws" {
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws?ref=v0.1.0-beta.1"
 
   caller_aws_account_id   = var.caller_aws_account_id
   caller_external_user_id = var.caller_external_user_id
@@ -36,28 +36,22 @@ module "psoxy-aws" {
 }
 
 module "psoxy-package" {
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/psoxy-package"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/psoxy-package?ref=v0.1.0-beta.1"
 
   implementation     = "aws"
   path_to_psoxy_java = "../../../java"
 }
 
-locals {
-
-}
-
 resource "aws_s3_bucket" "input" {
-  bucket        = "${var.bucket_prefix}-input"
-  force_destroy = true
+  bucket = "psoxy-${var.instance_id}-input"
 }
 
 resource "aws_s3_bucket" "output" {
-  bucket        = "${var.bucket_prefix}-output"
-  force_destroy = true
+  bucket = "psoxy-${var.instance_id}-output"
 }
 
 module "psoxy-file-handler" {
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-instance"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-instance?ref=v0.1.0-beta.1"
 
   function_name        = "psoxy-hris"
   handler_class        = "co.worklytics.psoxy.S3Handler"
