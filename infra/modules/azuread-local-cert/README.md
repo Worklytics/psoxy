@@ -37,7 +37,7 @@ Example:
 
 cat cert.json | jq -r .fingerprint
 
-# take the hex value, without an ':' characters as the value to pass to your terraform config
+# take the hex value, without the ':' characters as the value to pass to your terraform config
 # (or directly fill relevant CLIENT_ID value in secret manager of your target cloud)
 
 export KEY_PKCS8=`cat cert.json | jq -r .key_pkcs8 | base64 --decode`
@@ -47,6 +47,10 @@ export KEY_PKCS8=`cat cert.json | jq -r .key_pkcs8 | base64 --decode`
 cat cert.json | jq -r .key | base64 --decode > cert.pem
 
 # gives you a certificate you can upload directly to Azure AD console
+# the value you see for 'Thumbprint' in the Azure AD console should MATCH the value you set for
+# Client ID in the secret manager of your target cloud
+
+```
 
 # remember to clean up the files into which you just wrote your certificate/keys!!
 rm cert.pem
@@ -72,10 +76,10 @@ openssl req -x509 -newkey rsa:2048 -subj $SUBJECT -keyout key.pem -out cert.pem 
 openssl pkcs8 -nocrypt -in key.pem -inform PEM -topk8 -outform PEM -out key_pkcs8.pem
 
 openssl x509 -in cert.pem -noout -fingerprint
-# take the hex value, without an ':' characters as the value to pass to your terraform config
+# take the hex value, without the ':' characters as the value to pass to your terraform config
 # (or directly fill relevant CLIENT_ID value in secret manager of your target cloud)
 
-# 1. upload the cert.pem to the app in your Azure AD console
+# 1. upload the cert.pem to the app in your Azure AD console (the value it then shows for 'Thumbprint' should match the value you set for Client ID in the secret manager of your target cloud)
 # 2. set the *content* of key_pkcs8.pem as the value of the secret for your proxy's private key
 
 # clean everything up!!
