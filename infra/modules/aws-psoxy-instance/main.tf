@@ -147,6 +147,12 @@ Review the deployed function in AWS console:
 Requests to AWS API need to be [signed](https://docs.aws.amazon.com/general/latest/gr/signing_aws_api_requests.html).
 One tool to do it easily is [awscurl](https://github.com/okigan/awscurl). Install it:
 
+On MacOS via Homebrew:
+```shell
+brew install awscurl
+```
+
+Alternatively, via `pip` (python package manager):
 ```shell
 pip install awscurl
 ```
