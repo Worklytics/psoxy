@@ -50,7 +50,6 @@ cat cert.json | jq -r .key | base64 --decode > cert.pem
 # the value you see for 'Thumbprint' in the Azure AD console should MATCH the value you set for
 # Client ID in the secret manager of your target cloud
 
-```
 
 # remember to clean up the files into which you just wrote your certificate/keys!!
 rm cert.pem
