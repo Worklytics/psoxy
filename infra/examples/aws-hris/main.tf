@@ -42,18 +42,12 @@ module "psoxy-package" {
   path_to_psoxy_java = "../../../java"
 }
 
-locals {
-
-}
-
 resource "aws_s3_bucket" "input" {
-  bucket        = "${var.bucket_prefix}-input"
-  force_destroy = true
+  bucket = "psoxy-${var.instance_id}-input"
 }
 
 resource "aws_s3_bucket" "output" {
-  bucket        = "${var.bucket_prefix}-output"
-  force_destroy = true
+  bucket = "psoxy-${var.instance_id}-output"
 }
 
 module "psoxy-file-handler" {
