@@ -17,8 +17,13 @@ This results in errors from Microsoft as follows:
 }
 ```
 
-This can be solved by the following:
+This can be solved by the following via Azure CLI:
 
+```bash
+az ad sp update --id {{objectId}} --set accountEnabled=true
+```
+
+or powershell:
 ```powershell
 Set-AzureADServicePrincipal -ObjectId {{objectId}} -AccountEnabled $true
 ```
