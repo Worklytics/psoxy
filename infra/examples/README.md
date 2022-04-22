@@ -65,6 +65,6 @@ All examples in this directory and its subdirectories are provided as-is, for re
 no warranty. You should review all resulting Terraform plans carefully before applying them to your
 environment. Additionally, we strongly recommend that you make example curl requests to any proxy
 instance you deploy to verify you are satisified with the behavior of the proxy with regard to the
-transofmration of your data.
+transformation of your data.
 
 
