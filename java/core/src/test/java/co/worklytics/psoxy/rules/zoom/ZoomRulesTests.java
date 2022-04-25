@@ -116,7 +116,8 @@ public class ZoomRulesTests extends RulesBaseTestCase {
         String jsonString = asJson("meeting-details.json");
 
         Collection<String> PII = Arrays.asList(
-            "ABcdofjdogh11111" // host id
+            "ABcdofjdogh11111", // host id
+            "james@example.com" // host email
         );
         assertNotSanitized(jsonString, PII);
 
