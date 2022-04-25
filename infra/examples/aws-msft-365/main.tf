@@ -85,14 +85,14 @@ locals {
       display_name : "Outlook Calendar"
       required_oauth2_permission_scopes : [],
       required_app_roles : [
-        "Mail.ReadBasic.All",
+        "OnlineMeetings.Read.All",
+        "Calendars.Read",
         "MailboxSettings.Read",
         "Group.Read.All",
         "User.Read.All"
       ],
       example_calls : [
         "/v1.0/users",
-
         "/v1.0/users/${local.example_msft_user_guid}/events",
         "/v1.0/users/${local.example_msft_user_guid}/mailboxSettings"
       ]
