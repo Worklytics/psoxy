@@ -1,7 +1,7 @@
 # aws-hris
 
 This example provisions an AWS Lambda that pseudonomizes files uploaded into the bucket. The source file is dropped in a *input bucket* and
-result will appear in *output bucket*. 
+result will appear in *output bucket*.
 
 ## Authentication
 
