@@ -3,7 +3,7 @@ terraform {
     # for the infra that will host Psoxy instances
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 3.0"
+      version = "~> 4.11"
     }
   }
 }

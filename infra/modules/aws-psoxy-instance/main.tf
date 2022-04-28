@@ -3,7 +3,7 @@
 terraform {
   required_providers {
     aws = {
-      version = "~> 3.0"
+      version = "~> 4.11"
     }
   }
 }
@@ -29,49 +29,18 @@ resource "aws_cloudwatch_log_group" "lambda-log" {
   retention_in_days = 7
 }
 
-# map API gateway request --> lambda function backend
-resource "aws_apigatewayv2_integration" "map" {
-  api_id           = var.api_gateway.id
-  integration_type = "AWS_PROXY"
-  connection_type  = "INTERNET"
-
-  integration_method     = "POST"
-  integration_uri        = aws_lambda_function.psoxy-instance.invoke_arn
-  request_parameters     = {}
-  request_templates      = {}
-  payload_format_version = "2.0"
-}
-
-
-resource "aws_apigatewayv2_route" "get_route" {
-  api_id             = var.api_gateway.id
-  route_key          = "GET /${var.function_name}/{proxy+}"
+resource "aws_lambda_function_url" "lambda_url" {
+  function_name      = aws_lambda_function.psoxy-instance.function_name
   authorization_type = "AWS_IAM"
-  target             = "integrations/${aws_apigatewayv2_integration.map.id}"
-}
 
-resource "aws_apigatewayv2_route" "head_route" {
-  api_id             = var.api_gateway.id
-  route_key          = "HEAD /${var.function_name}/{proxy+}"
-  authorization_type = "AWS_IAM"
-  target             = "integrations/${aws_apigatewayv2_integration.map.id}"
-}
-
-# allow API gateway to invoke the lambda function
-resource "aws_lambda_permission" "lambda_permission" {
-  statement_id  = "Allow${var.function_name}Invoke"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.psoxy-instance.function_name
-  principal     = "apigateway.amazonaws.com"
-
-
-  # The /*/*/ part allows invocation from any stage, method and resource path
-  # within API Gateway REST API.
-  source_arn = "${var.api_gateway.execution_arn}/*/*/${var.function_name}/{proxy+}"
-
-  depends_on = [
-    aws_lambda_function.psoxy-instance
-  ]
+  cors {
+    allow_credentials = true
+    allow_origins     = ["*"]
+    allow_methods     = ["POST", "GET", "HEAD"]
+    allow_headers     = ["date", "keep-alive"]
+    expose_headers    = ["keep-alive", "date"]
+    max_age           = 86400
+  }
 }
 
 resource "aws_iam_role" "iam_for_lambda" {
@@ -126,7 +95,7 @@ resource "aws_iam_role_policy_attachment" "policy" {
 }
 
 locals {
-  proxy_endpoint_url = "${var.api_gateway.api_endpoint}/live/${var.function_name}"
+  proxy_endpoint_url = aws_lambda_function_url.lambda_url.function_url
   test_commands = [for path in var.example_api_calls :
     "./tools/test-psoxy-lambda.sh \"${var.aws_assume_role_arn}\" \"${local.proxy_endpoint_url}${path}\""
   ]
@@ -172,7 +141,7 @@ EOT
 }
 
 output "endpoint_url" {
-  value = local.proxy_endpoint_url
+  value = aws_lambda_function_url.lambda_url.function_url
 }
 
 output "function_arn" {
