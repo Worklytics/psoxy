@@ -74,6 +74,43 @@
           "id": 1
         }
       ]
+    },
+    {
+      "client_msg_id": "314a746d-82c0-4a05-a081-429e4c096c3f",
+      "type": "message",
+      "user": "W000000",
+      "ts": "1651249518.059679",
+      "team": "T02MT9XBJL9",
+      "user_team": "T02MT9XBJL9",
+      "source_team": "T02MT9XBJL9",
+      "user_profile": {
+        "avatar_hash": "g08564a648b3",
+        "image_72": "https://secure.gravatar.com/avatar/08564a648b3575b6be2b6ea1e2ab4370.jpg?s=72&d=https%3A%2F%2Fa.slack-edge.com%2Fdf10d%2Fimg%2Favatars%2Fava_0017-72.png",
+        "first_name": "Jose",
+        "real_name": "Jose (ENT)",
+        "display_name": "Jose (ENT)",
+        "team": "T02MT9XBJL9",
+        "name": "jose",
+        "is_restricted": false,
+        "is_ultra_restricted": false
+      },
+      "blocks": [
+        {
+          "type": "rich_text",
+          "block_id": "qWw",
+          "elements": [
+            {
+              "type": "rich_text_section",
+              "elements": [
+                {
+                  "type": "text",
+                  "text": "Some new text"
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   ],
   "offset": "1463084600.000000"

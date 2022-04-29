@@ -19,6 +19,13 @@ public class PrebuiltSanitizerRules {
         .allowedEndpointRegex("^\\/api\\/discovery\\.conversations\\.recent(?:\\?.+)?")
         .allowedEndpointRegex("^\\/api\\/discovery\\.conversations\\.info(?:\\?.+)?")
         .allowedEndpointRegex("^\\/api\\/discovery\\.users\\.list(?:\\?.+)?")
+        // enterprise info
+        .redaction(Rule.builder()
+            .relativeUrlRegex("\\/api\\/discovery\\.enterprise\\.info(?:\\?.+)?")
+            // we don't care about names
+            .jsonPath("$.teams[*]['name','description','icon']")
+            .build()
+        )
         // users
         .pseudonymization(Rule.builder()
             .relativeUrlRegex("\\/api\\/discovery\\.users\\.list(?:\\?.+)?")
@@ -78,6 +85,7 @@ public class PrebuiltSanitizerRules {
             // username is a variation of user, so just skip it to avoid references
             .jsonPath("$.messages[*]['text','username']")
             .jsonPath("$.messages[*]..['text']")
+            .jsonPath("$.messages[*].user_profile")
             .jsonPath("$.messages[*].attachments[*]['fallback','service_name']")
             .build()
         )

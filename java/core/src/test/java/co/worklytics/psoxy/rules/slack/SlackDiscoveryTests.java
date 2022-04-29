@@ -138,6 +138,9 @@ public class SlackDiscoveryTests extends RulesBaseTestCase {
         assertRedacted(sanitized, "Test message!",
             "<@U06CA4EAC|bjin>",
             "text with rich block",
+            "Some new text",
+            "Jose (ENT)",
+            "Jose",
             "This is likely a pun about the weather.",
             "We're withholding a pun from you",
             "Leg end nary a laugh, Ink.");
