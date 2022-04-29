@@ -44,6 +44,7 @@ public class PrebuiltSanitizerRules {
         .redaction(Rule.builder()
             .relativeUrlRegex("\\/v2\\/users\\/(?:[^\\/]*)\\/meetings(?:\\?.+)?")
             .jsonPath("$.meetings[*].topic")
+            .jsonPath("$.meetings[*].join_url")
             .build()
         )
         // Meeting details
