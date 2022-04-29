@@ -78,8 +78,8 @@ resource "google_storage_bucket" "output-bucket" {
 }
 
 resource "google_service_account" "service-account" {
-  account_id   = "psoxy-hris"
-  display_name = "Psoxy HRIS service account for cloud function"
+  account_id   = "psoxy-${var.source_kind}"
+  display_name = "Psoxy ${var.source_kind} service account for cloud function"
   description  = "Service account where the function is running and have permissions to read secrets"
   project      = var.project_id
 }
@@ -119,8 +119,8 @@ resource "google_storage_bucket_iam_member" "access_for_processed_bucket" {
 }
 
 resource "google_cloudfunctions_function" "function" {
-  name        = "psoxy-hris"
-  description = "Psoxy for HRIS files"
+  name        = "psoxy-${var.source_kind}"
+  description = "Psoxy for ${var.source_kind} files"
   runtime     = "java11"
   project     = google_project.psoxy-project.project_id
   region      = var.region
@@ -134,7 +134,7 @@ resource "google_cloudfunctions_function" "function" {
   environment_variables = merge(tomap({
     INPUT_BUCKET  = google_storage_bucket.input-bucket.name,
     OUTPUT_BUCKET = google_storage_bucket.output-bucket.name
-  }), yamldecode(file("../../../configs/hris.yaml")))
+  }), yamldecode(file("../../../configs/${var.source_kind}.yaml")))
 
   secret_environment_variables {
     key     = "PSOXY_SALT"

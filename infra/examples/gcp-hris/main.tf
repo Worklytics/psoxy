@@ -16,14 +16,15 @@ terraform {
 # either way, we recommend the project be used exclusively to host psoxy instances corresponding to
 # a single worklytics account
 module "psoxy-gcp-bulk" {
-  source                  = "../../modules/gcp-bulk"
+  source = "../../modules/gcp-bulk"
 
-  project_id   = var.project_id
-  environment_name = var.environment_name
-  folder_id          = var.folder_id
-  billing_account_id     = var.billing_account_id
-  worklytics_sa_emails             = var.worklytics_sa_emails
-  region             = var.region
-  bucket_prefix              = var.bucket_prefix
-  bucket_location              = var.bucket_location
+  project_id           = var.project_id
+  environment_name     = var.environment_name
+  folder_id            = var.folder_id
+  billing_account_id   = var.billing_account_id
+  worklytics_sa_emails = var.worklytics_sa_emails
+  region               = var.region
+  bucket_prefix        = var.bucket_prefix
+  bucket_location      = var.bucket_location
+  source_kind          = var.source_kind
 }

@@ -1,7 +1,7 @@
 # example-gcp-hris
 
 A Terraform root module to provision GCP project for Psoxy, configure it, and create necessary infra
-to upload HRIS files in a bucket and drop the modified file from Psoxy in an output bucket that can be used
+to upload files in a bucket and drop the modified file from Psoxy in an output bucket that can be used
 to read it from Worklytics.
 
 Deployment will create three buckets: one for deploying the cloud function and the ones for import/processed.
@@ -24,6 +24,7 @@ worklytics_sa_emails = [
 region               = "--OPTIONAL region where the cloud function will be deployed"
 bucket_prefix        = "Name of the buckets to create; a suffix will be added later as part of the deployment process"
 bucket_location      = "--OPTIONAL location where the buckets will be created"
+source_kind          = "Kind of the content to process; it should match one of the config.yaml file available"
 ```
 
 for example:
@@ -35,6 +36,7 @@ worklytics_sa_emails = [
   "worklytics-3cD92f@worklytics-eu.iam.gserviceaccount.com"
 ]
 bucket_prefix        = "alice-psoxy-dev"
+source_kind          = "hris"
 ```
 
 Initialize your configuration (at this location in directory hierarchy):

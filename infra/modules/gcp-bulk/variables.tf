@@ -40,3 +40,8 @@ variable "bucket_location" {
   description = "Location where buckets will be deployed"
   default     = "US"
 }
+
+variable "source_kind" {
+  type        = string
+  description = "Kind of the content to process"
+}
