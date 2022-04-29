@@ -28,7 +28,7 @@ provider "aws" {
 }
 
 module "psoxy-aws" {
-  source                  = "../../modules/aws-bulk"
+  source = "../../modules/aws-bulk"
 
   caller_aws_account_id   = var.caller_aws_account_id
   caller_external_user_id = var.caller_external_user_id
