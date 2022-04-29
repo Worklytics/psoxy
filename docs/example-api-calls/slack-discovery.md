@@ -46,9 +46,26 @@ export WORKSPACE_ID=`./test-psoxy.sh $OPTIONS -u $PROXY_SLACK_URL/api/discovery.
 
 Next call operate on channels belonging to a workspace. Get an arbitrary channel in variable
 ```shell
-export CHANNEL_ID=`./test-psoxy.sh $OPTIONS -u $PROXY_SLACK_URL/api/discovery.conversations.list?team=$WORKSPACE_ID\&limit=1 | jq -r '.channels[0].id'`
+# get a workspace channel
+export CHANNEL_ID=`./test-psoxy.sh $OPTIONS -u $PROXY_SLACK_URL/api/discovery.conversations.list?team=$WORKSPACE_ID\&limit=10 | jq -r '.channels[0].id'`
+# or for a DM (no workspace)
+export CHANNEL_ID=`./test-psoxy.sh $OPTIONS -u $PROXY_SLACK_URL/api/discovery.conversations.list?limit=10 | jq -r '.channels[0].id'`
 ```
 
 ```shell
 ./test-psoxy.sh $OPTIONS -u $PROXY_SLACK_URL/api/discovery.conversations.history?team=$WORKSPACE_ID\&channel=$CHANNEL_ID\&limit=10 | jq .
+# omit the workspace id if channel is a DM
+./test-psoxy.sh $OPTIONS -u $PROXY_SLACK_URL/api/discovery.conversations.history?channel=$CHANNEL_ID\&limit=10 | jq .
+```
+
+### Workspace Channel Info
+```shell
+./test-psoxy.sh $OPTIONS -u $PROXY_SLACK_URL/api/discovery.conversations.info?team=$WORKSPACE_ID\&channel=$CHANNEL_ID\&limit=1 | jq .
+# omit the workspace id if channel is a DM
+./test-psoxy.sh $OPTIONS -u $PROXY_SLACK_URL/api/discovery.conversations.info?channel=$CHANNEL_ID\&limit=1 | jq .
+```
+
+### Recent Workspace Conversations
+```shell
+./test-psoxy.sh $OPTIONS -u $PROXY_SLACK_URL/api/discovery.conversations.recent | jq .
 ```
