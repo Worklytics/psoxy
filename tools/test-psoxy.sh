@@ -1,5 +1,6 @@
 #!/bin/bash
 ECHO=false
+SANITIZATION_HEADER="X-Psoxy-Skip-Sanitizer: false"
 
 function show_help() {
     echo "-g endpoint is GCP"
@@ -7,11 +8,12 @@ function show_help() {
     echo "-r AWS role to impersonate"
     echo "-u URL to call"
     echo "-v verbose"
+    echo "-o omit sanitization rules, only works if function deployed in development mode"
     echo "-h show this help"
     exit 0
 }
 
-while getopts gahvr:u: flag
+while getopts gahvor:u: flag
 do
     case "${flag}" in
         g) GCP=true;;
@@ -19,6 +21,7 @@ do
         r) ROLE_ARN=${OPTARG};;
         v) ECHO=true;;
         u) TEST_URL=${OPTARG};;
+        o) SANITIZATION_HEADER="X-Psoxy-Skip-Sanitizer: true";;
         h) show_help;;
     esac
 done
@@ -40,7 +43,7 @@ then
   log "Calling proxy..."
   log "Request: $TEST_URL"
   log "Waiting Response:"
-  awscurl --service execute-api --access_key $CALLER_ACCESS_KEY_ID --secret_key $CALLER_SECRET_ACCESS_KEY --security_token $CALLER_SESSION_TOKEN $TEST_URL
+  awscurl -v -H "$SANITIZATION_HEADER" --service execute-api --access_key $CALLER_ACCESS_KEY_ID --secret_key $CALLER_SECRET_ACCESS_KEY --security_token $CALLER_SESSION_TOKEN $TEST_URL
   # Remove env variables
   unset CALLER_ACCESS_KEY_ID CALLER_SECRET_ACCESS_KEY CALLER_SESSION_TOKEN
 fi
@@ -52,5 +55,5 @@ then
   log "Calling proxy..."
   log "Request: $TEST_URL"
   log "Waiting Response:"
-  curl -X GET $TEST_URL -H "$CURL_AUTH_HEADER"
+  curl -X GET -H "$CURL_AUTH_HEADER" -H "$SANITIZATION_HEADER" $TEST_URL
 fi
