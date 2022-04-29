@@ -23,23 +23,34 @@ caller_external_user_id       = "your-worklytics-service-account-id"
 source_kind                   = "hris"
 ```
 
-Example of `hris.yaml` config file with Base64 rules:
+You could check more details about configuration in the [module documentation](../../modules/aws-bulk/readme.md)
 
-```yaml
-SOURCE: aws-hris-import
-RULES: cHNldWRvbnltaXphdGlvbnM6CiAgLSBjc3ZDb2x1bW5zOgogICAgICAtICJlbWFpbCIKcmVkYWN0aW9uczoKICAtIGNzdkNvbHVtbnM6CiAgICAgIC0gIm1hbmFnZXJFbWFpbCI=
+## Deployment
+
+Initialize your configuration (at this location in directory hierarchy):
+```shell
+terraform init
 ```
 
-In this case rules are created based on following configuration:
-
-```yaml
-pseudonymizations:
-  - csvColumns:
-      - "email"
-redactions:
-  - csvColumns:
-      - "managerEmail"
+Apply
+```shell
+terraform apply
 ```
 
-And then converted to Base64 as [Custom Rules] documentation explains
+Review the plan and confirm to apply.
+
+## Cleanup
+
+Execute and confirm (be careful, all the files uploaded in both input and output will be removed)
+```shell
+terraform apply -destroy
+```
+
+As default, Secret Manager Stores is marked by "soft" deleted and it will be queued to be removed in a week. In case 
+you want to create the same infra without removing it you will probably receive a conflict error. Please go to 
+the AWS console and run the following command:
+
+```shell
+aws secretsmanager delete-secret --secret-id PSOXY_SALT --force-delete-without-recovery
+```
 

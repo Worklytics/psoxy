@@ -9,7 +9,7 @@ When a file is uploaded into the `-input` bucket the cloud function is triggered
 defined in the file. The result of that process will be dropped in the `-output` bucket in the same path that it
 was in the original path from `-input` bucket
 
-## Usage
+## Configuration
 
 Create a file in this directory named `terraform.tfvars` to specify your settings:
 
@@ -39,20 +39,26 @@ bucket_prefix        = "alice-psoxy-dev"
 source_kind          = "hris"
 ```
 
-Initialize your configuration (at this location in directory hierarchy):
-```shell
-terraform init
+It is mandatory that `source_kind` matches with a configuration file provided into the platform. For example, if the 
+value is `hris` it will expect a `hris.yaml` file at some point. You could include this kind of files as part of `config` 
+folder or include it as part of the deployment files in the target folder.
+
+Example of `hris.yaml` config file with Base64 rules:
+
+```yaml
+SOURCE: hris-import
+RULES: cHNldWRvbnltaXphdGlvbnM6CiAgLSBjc3ZDb2x1bW5zOgogICAgICAtICJlbWFpbCIKcmVkYWN0aW9uczoKICAtIGNzdkNvbHVtbnM6CiAgICAgIC0gIm1hbmFnZXJFbWFpbCI=
 ```
 
-If you're using an existing GCP project rather than creating one, you'll need to import it to
-terraform first. For example:
-```shell
-terraform import google_project.psoxy-project --your-psoxy-project-id--
+In this case rules are created based on following configuration:
+
+```yaml
+pseudonymizations:
+  - csvColumns:
+      - "email"
+redactions:
+  - csvColumns:
+      - "managerEmail"
 ```
 
-Apply
-```shell
-terraform apply
-```
-
-Review the plan and confirm to apply.
+And then converted to Base64 as [Custom Rules](../../../docs/custom-rules.md) documentation explains

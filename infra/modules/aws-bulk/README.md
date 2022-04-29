@@ -10,7 +10,7 @@ Follow [`docs/aws/getting-started.md`](../../../docs/aws/getting-started.md) to 
 authenticate as a user/role which can access/create the AWS account in which you wish to provision
 your psoxy instance.
 
-## Example Configuration
+## Configuration
 
 Example `terraform.tfvars`:
 ```terraform
@@ -23,10 +23,14 @@ caller_external_user_id       = "your-worklytics-service-account-id"
 source_kind                   = "hris"
 ```
 
+It is mandatory that `source_kind` matches with a configuration file provided into the platform. For example, if the
+value is `hris` it will expect a `hris.yaml` file at some point. You could include this kind of files as part of `config`
+folder or include it as part of the deployment files in the target folder.
+
 Example of `hris.yaml` config file with Base64 rules:
 
 ```yaml
-SOURCE: aws-hris-import
+SOURCE: hris-import
 RULES: cHNldWRvbnltaXphdGlvbnM6CiAgLSBjc3ZDb2x1bW5zOgogICAgICAtICJlbWFpbCIKcmVkYWN0aW9uczoKICAtIGNzdkNvbHVtbnM6CiAgICAgIC0gIm1hbmFnZXJFbWFpbCI=
 ```
 
@@ -41,5 +45,5 @@ redactions:
       - "managerEmail"
 ```
 
-And then converted to Base64 as [Custom Rules] documentation explains
+And then converted to Base64 as [Custom Rules](../../../docs/custom-rules.md) documentation explains
 
