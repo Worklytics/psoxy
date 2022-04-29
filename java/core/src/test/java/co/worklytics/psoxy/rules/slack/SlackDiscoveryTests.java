@@ -179,4 +179,21 @@ public class SlackDiscoveryTests extends RulesBaseTestCase {
             "project-y");
 
     }
+
+    @SneakyThrows
+    @Test
+    void discovery_enterprise_info() {
+        String jsonString = asJson("discovery-enterprise-info.json");
+
+        String sanitized =
+            sanitizer.sanitize(new URL("https://slack.com/api/discovery.enterprise.info"), jsonString);
+
+        assertRedacted(sanitized, "icon", "image",
+            "DevGrid - W1",
+            "1st Workspace under Test Grid",
+            "DevGrid - W2",
+            "2nd Workspace under Test Grid",
+            "Test Grid");
+
+    }
 }

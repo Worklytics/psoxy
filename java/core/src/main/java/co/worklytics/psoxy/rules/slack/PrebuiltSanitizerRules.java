@@ -23,7 +23,8 @@ public class PrebuiltSanitizerRules {
         .redaction(Rule.builder()
             .relativeUrlRegex("\\/api\\/discovery\\.enterprise\\.info(?:\\?.+)?")
             // we don't care about names
-            .jsonPath("$.teams[*]['name','description','icon']")
+            .jsonPath("$.enterprise.teams[*]['name','description','icon','enterprise_name']")
+            .jsonPath("$.enterprise['icon','name']")
             .build()
         )
         // users
