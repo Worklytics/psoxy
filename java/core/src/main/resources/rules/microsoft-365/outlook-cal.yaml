@@ -65,4 +65,7 @@ redactions:
       - "$..extensions"
       - "$..multiValueExtendedProperties"
       - "$..singleValueExtendedProperties"
+      - "$..location.uniqueId"
+      - "$..locations[*].uniqueId"
     relativeUrlRegex: "^/(v1.0|beta)/users/[^/]*/(calendars/[^/]*/)?events.*"
+

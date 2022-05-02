@@ -1,7 +1,6 @@
 package co.worklytics.psoxy.rules.msft;
 
 import co.worklytics.psoxy.Rules;
-import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
 import lombok.Getter;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -34,7 +33,8 @@ public class CalendarTests extends DirectoryTests {
         assertRedacted(sanitized,
             "Irvin Sayers",
             "New Product Regulations Touchpoint", //subject
-            "New Product Regulations Strategy Online Touchpoint Meeting" //body
+            "New Product Regulations Strategy Online Touchpoint Meeting", //body
+            "uniqueIdValue" // location(s) uniqueID
         );
 
         assertPseudonymized(sanitized,
@@ -57,7 +57,8 @@ public class CalendarTests extends DirectoryTests {
         assertRedacted(sanitized,
             "Irvin Sayers",
             "New Product Regulations Touchpoint", //subject
-            "New Product Regulations Strategy Online Touchpoint Meeting" //body
+            "New Product Regulations Strategy Online Touchpoint Meeting", //body
+            "uniqueIdValue" // location(s) uniqueID
         );
 
         assertPseudonymized(sanitized,
@@ -80,7 +81,8 @@ public class CalendarTests extends DirectoryTests {
             "IrvinS@M365x214355.onmicrosoft.com",
             "Irvin Sayers",
             "New Product Regulations Touchpoint", //subject
-            "New Product Regulations Strategy Online Touchpoint Meeting" //body
+            "New Product Regulations Strategy Online Touchpoint Meeting", //body
+            "uniqueIdValue" // location(s) uniqueID
         );
 
         String sanitized = sanitize(endpoint, jsonResponse);
@@ -88,7 +90,8 @@ public class CalendarTests extends DirectoryTests {
         assertRedacted(sanitized,
             "Irvin Sayers",
             "New Product Regulations Touchpoint", //subject
-            "New Product Regulations Strategy Online Touchpoint Meeting" //body
+            "New Product Regulations Strategy Online Touchpoint Meeting", //body
+            "uniqueIdValue" // location(s) uniqueID
             );
 
         assertPseudonymized(sanitized,
