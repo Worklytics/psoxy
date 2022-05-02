@@ -73,13 +73,13 @@ public class CommonRequestHandler {
         URL targetUrl = buildTarget(request);
         String relativeURL = URLUtils.relativeURL(targetUrl);
 
-        boolean skipSanitizer = skipSanitization(request);
+        boolean skipSanitization = skipSanitization(request);
 
         HttpEventResponse.HttpEventResponseBuilder builder = HttpEventResponse.builder();
 
         this.sanitizer = loadSanitizerRules();
 
-        if (skipSanitization(request)) {
+        if (skipSanitization) {
             log.info(String.format("Proxy invoked with target %s. Skipping sanitization.", relativeURL));
         } else if (sanitizer.isAllowed(targetUrl)) {
             log.info(String.format("Proxy invoked with target %s. Rules allowed call.", relativeURL));
@@ -134,7 +134,7 @@ public class CommonRequestHandler {
 
         String proxyResponseContent;
         if (isSuccessFamily(sourceApiResponse.getStatusCode())) {
-            if (skipSanitizer) {
+            if (skipSanitization) {
                 proxyResponseContent = responseContent;
             }  else {
                 proxyResponseContent = sanitizer.sanitize(targetUrl, responseContent);

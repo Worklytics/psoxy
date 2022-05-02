@@ -1,46 +1,71 @@
-# API Call Examples
+# API Call Examples for Slack Discovery
 
-Example `curl` commands that you can use to validate proxy behavior against various source APIs.
-
-To use, ensure you've set env variables on your machine:
+Example commands that you can use to validate proxy behavior against the Slack Discovery APIs.
+Follow the steps and change the values to match your configuration when needed.
 
 ```shell
-export PSOXY_HOST={{YOUR_GCP_REGION}}-{{YOUR_PROJECT_ID}}
-export SLACK_DISCOVERY_BASE_URL="https://$PSOXY_HOST.cloudfunctions.net/psoxy-slack-discovery-api"
-export CURL_AUTH_HEADER="Authorization: Bearer $(gcloud auth print-identity-token)"
+export PROXY_SLACK_URL=https://YOUR_PSOXY_HOST/psoxy-slack-discovery-api
+```
+
+For GCP, use
+```shell
+export OPTIONS="-g"
+```
+
+For AWS, change the role to impersonate with one with sufficient permissions to call the proxy
+```shell
+export AWS_ROLE_ARN="arn:aws:iam::PROJECT_ID:role/ROLE_NAME"
+export OPTIONS="-a -r $AWS_ROLE_ARN"
 ```
 
 If any call appears to fail, repeat it without the pipe to jq (eg, remove `| jq ...` portion from
-the end of the command).
+the end of the command) and "-v" flag.
 
 ### Read workspaces
 ```shell
-curl -X GET $SLACK_DISCOVERY_BASE_URL/api/discovery.enterprise.info -H "$CURL_AUTH_HEADER" | jq .
+./test-psoxy.sh $OPTIONS -u $PROXY_SLACK_URL/api/discovery.enterprise.info | jq .
 ```
 
 ### Read Users in Grid
 ```shell
-curl -X GET $SLACK_DISCOVERY_BASE_URL/api/discovery.users.list?include_deleted=true -H "$CURL_AUTH_HEADER" | jq .
+./test-psoxy.sh $OPTIONS -u $PROXY_SLACK_URL/api/discovery.users.list?include_deleted=true | jq .
 ```
 
 ### Read Conversations in Workspace (any kind, public and private)
 
 Next calls operate on a workspace so get an arbitrary workspace in variable
 ```shell
-export WORKSPACE_ID=`curl -X GET $SLACK_DISCOVERY_BASE_URL/api/discovery.enterprise.info?limit=1 -H "$CURL_AUTH_HEADER" | jq -r '.enterprise.teams[0].id'`
+export WORKSPACE_ID=`./test-psoxy.sh $OPTIONS -u $PROXY_SLACK_URL/api/discovery.enterprise.info?limit=1 | jq -r '.enterprise.teams[0].id'`
 ```
 
 ```shell
-curl -X GET $SLACK_DISCOVERY_BASE_URL/api/discovery.conversations.list?team=$WORKSPACE_ID\&limit=10 -H "$CURL_AUTH_HEADER" | jq .
+./test-psoxy.sh $OPTIONS -u $PROXY_SLACK_URL/api/discovery.conversations.list?team=$WORKSPACE_ID\&limit=10 | jq .
 ```
 
 ### Read Messages in Workspace Channel
 
 Next call operate on channels belonging to a workspace. Get an arbitrary channel in variable
 ```shell
-export CHANNEL_ID=`curl -X GET $SLACK_DISCOVERY_BASE_URL/api/discovery.conversations.list?team=$WORKSPACE_ID\&limit=1 -H "$CURL_AUTH_HEADER" | jq -r '.channels[0].id'`
+# get a workspace channel
+export CHANNEL_ID=`./test-psoxy.sh $OPTIONS -u $PROXY_SLACK_URL/api/discovery.conversations.list?team=$WORKSPACE_ID\&limit=10 | jq -r '.channels[0].id'`
+# or for a DM (no workspace)
+export CHANNEL_ID=`./test-psoxy.sh $OPTIONS -u $PROXY_SLACK_URL/api/discovery.conversations.list?limit=10 | jq -r '.channels[0].id'`
 ```
 
 ```shell
-curl -X GET $SLACK_DISCOVERY_BASE_URL/api/discovery.conversations.history?team=$WORKSPACE_ID\&channel=$CHANNEL_ID\&limit=10 -H "$CURL_AUTH_HEADER" | jq .
+./test-psoxy.sh $OPTIONS -u $PROXY_SLACK_URL/api/discovery.conversations.history?team=$WORKSPACE_ID\&channel=$CHANNEL_ID\&limit=10 | jq .
+# omit the workspace id if channel is a DM
+./test-psoxy.sh $OPTIONS -u $PROXY_SLACK_URL/api/discovery.conversations.history?channel=$CHANNEL_ID\&limit=10 | jq .
+```
+
+### Workspace Channel Info
+```shell
+./test-psoxy.sh $OPTIONS -u $PROXY_SLACK_URL/api/discovery.conversations.info?team=$WORKSPACE_ID\&channel=$CHANNEL_ID\&limit=1 | jq .
+# omit the workspace id if channel is a DM
+./test-psoxy.sh $OPTIONS -u $PROXY_SLACK_URL/api/discovery.conversations.info?channel=$CHANNEL_ID\&limit=1 | jq .
+```
+
+### Recent Workspace Conversations
+```shell
+./test-psoxy.sh $OPTIONS -u $PROXY_SLACK_URL/api/discovery.conversations.recent | jq .
 ```

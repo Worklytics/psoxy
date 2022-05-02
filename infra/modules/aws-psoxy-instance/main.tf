@@ -97,7 +97,7 @@ resource "aws_iam_role_policy_attachment" "policy" {
 locals {
   proxy_endpoint_url = aws_lambda_function_url.lambda_url.function_url
   test_commands = [for path in var.example_api_calls :
-    "./tools/test-psoxy-lambda.sh \"${var.aws_assume_role_arn}\" \"${local.proxy_endpoint_url}${path}\""
+    "./tools/test-psoxy.sh -a -r \"${var.aws_assume_role_arn}\" -u \"${local.proxy_endpoint_url}${path}\""
   ]
 }
 

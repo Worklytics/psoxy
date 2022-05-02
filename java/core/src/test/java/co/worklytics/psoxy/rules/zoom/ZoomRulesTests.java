@@ -104,10 +104,9 @@ public class ZoomRulesTests extends RulesBaseTestCase {
         String sanitized =
             sanitizer.sanitize(new URL("https://api.zoom.us/v2/users/ANY_USER_ID/meetings"), jsonString);
 
-        // nothing to pseudonymize
         assertPseudonymized(sanitized, PII);
-        // topics gone
-        assertRedacted(sanitized, "Zoom Meeting", "TestMeeting", "My Meeting", "MyTestPollMeeting");
+        // topics & join_urls gone
+        assertRedacted(sanitized, "https://zoom.us", "Zoom Meeting", "TestMeeting", "My Meeting", "MyTestPollMeeting");
     }
 
     @SneakyThrows
@@ -116,7 +115,8 @@ public class ZoomRulesTests extends RulesBaseTestCase {
         String jsonString = asJson("meeting-details.json");
 
         Collection<String> PII = Arrays.asList(
-            "ABcdofjdogh11111" // host id
+            "ABcdofjdogh11111", // host id
+            "james@example.com" // host email
         );
         assertNotSanitized(jsonString, PII);
 
