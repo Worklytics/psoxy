@@ -122,6 +122,8 @@ public class PrebuiltSanitzerRules {
             .jsonPath("$..extensions")
             .jsonPath("$..multiValueExtendedProperties")
             .jsonPath("$..singleValueExtendedProperties")
+            .jsonPath("$..location.uniqueId")
+            .jsonPath("$..locations[*].uniqueId")
             .build())
         .build());
 

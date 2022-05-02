@@ -140,7 +140,7 @@ abstract public class RulesBaseTestCase {
 
     protected void assertNotSanitized(String content, Collection<String> shouldContain) {
         shouldContain
-            .forEach(s -> assertTrue(content.contains(s), "Unsanitized content does not contain expected string: " + s));
+            .forEach(s -> assertTrue(content.contains(s), String.format("Unsanitized content does not contain expected string: %s\n%s", s, prettyPrintJson(content))));
     }
     protected void assertNotSanitized(String content, String... shouldContain) {
         assertNotSanitized(content, Arrays.asList(shouldContain));
@@ -148,7 +148,7 @@ abstract public class RulesBaseTestCase {
 
     protected void assertRedacted(String content, Collection<String> shouldNotContain) {
         shouldNotContain
-            .forEach(s -> assertFalse(content.contains(s), "Sanitized content still contains: " + s));
+            .forEach(s -> assertFalse(content.contains(s), String.format("Sanitized content still contains: %s\n%s", s, prettyPrintJson(content))));
 
         shouldNotContain
             .forEach(s -> assertFalse(content.contains(sanitizer.pseudonymizeToJson(s, sanitizer.getJsonConfiguration())),
@@ -171,7 +171,7 @@ abstract public class RulesBaseTestCase {
     protected void assertPseudonymized(String content, Collection<String> shouldBePseudonymized) {
         shouldBePseudonymized
             .forEach(s ->
-                assertFalse(content.contains(s), () -> "Sanitized content still contains unpseudonymized: " + s + " at " + this.context(content, s)));
+                assertFalse(content.contains(s), () -> String.format("Sanitized content still contains unpseudonymized: %s at %s", s, this.context(content, s))));
 
         shouldBePseudonymized
             .forEach(s -> {

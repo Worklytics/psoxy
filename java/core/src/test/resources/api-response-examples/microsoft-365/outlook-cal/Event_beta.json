@@ -51,14 +51,14 @@
   "location": {
     "displayName": "Conf Room Rainier",
     "locationType": "default",
-    "uniqueId": "Conf Room Rainier",
+    "uniqueId": "Conf Room Rainie uniqueIdValue",
     "uniqueIdType": "private"
   },
   "locations": [
     {
       "displayName": "Conf Room Rainier",
       "locationType": "default",
-      "uniqueId": "",
+      "uniqueId": "Room uniqueIdValue",
       "uniqueIdType": "unknown"
     }
   ],
