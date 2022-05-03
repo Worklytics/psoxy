@@ -1,7 +1,9 @@
-# example-gcp-hris
+# gcp-hris
+
+This example provisions psoxy as an AWS lambda that connects to Microsoft 365 data sources.
 
 A Terraform root module to provision GCP project for Psoxy, configure it, and create necessary infra
-to upload HRIS files in a bucket and drop the modified file from Psoxy in an output bucket that can be used
+to upload files based on HRIS source kind in a bucket and drop the modified file from Psoxy in an output bucket that can be used
 to read it from Worklytics.
 
 Deployment will create three buckets: one for deploying the cloud function and the ones for import/processed.
@@ -25,6 +27,7 @@ worklytics_sa_emails          = [
 region               = "--OPTIONAL region where the cloud function will be deployed"
 bucket_prefix        = "Name of the buckets to create; a suffix will be added later as part of the deployment process"
 bucket_location      = "--OPTIONAL location where the buckets will be created"
+source_kind          = "hris"
 ```
 
 for example:
@@ -36,7 +39,12 @@ worklytics_sa_emails = [
   "worklytics-3cD92f@worklytics-eu.iam.gserviceaccount.com"
 ]
 bucket_prefix        = "alice-psoxy-dev"
+source_kind          = "hris"
 ```
+
+You could check more details about configuration in the [module documentation](../../modules/gcp-bulk/readme.md)
+
+## Deployment
 
 Initialize your configuration (at this location in directory hierarchy):
 ```shell
@@ -55,3 +63,11 @@ terraform apply
 ```
 
 Review the plan and confirm to apply.
+
+## Cleanup
+
+Execute and confirm (be careful, all the files uploaded in both input and output will be removed)
+```shell
+terraform apply -destroy
+```
+
