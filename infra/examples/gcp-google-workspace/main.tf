@@ -16,7 +16,7 @@ terraform {
 # either way, we recommend the project be used exclusively to host psoxy instances corresponding to
 # a single worklytics account
 resource "google_project" "psoxy-project" {
-  name            = "Psoxy - ${var.environment_name}"
+  name            = "Worklytics Psoxy${var.environment_name == null ? "" : concat(" - ", var.environment_name)}"
   project_id      = var.project_id
   billing_account = var.gcp_billing_account_id
   # org_id          = var.gcp_org_id # if project is in a GCP folder, this value is implicit and this line should be commented out
