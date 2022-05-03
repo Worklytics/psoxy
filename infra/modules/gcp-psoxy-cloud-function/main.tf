@@ -10,7 +10,7 @@ resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_secret"
 }
 
 locals {
-  secret_clauses = [for env_var_name, binding in var.secret_bindings : "${env_var_name}=${binding.secret_name}:${binding.version_number}" ]
+  secret_clauses = [for env_var_name, binding in var.secret_bindings : "${env_var_name}=${binding.secret_name}:${binding.version_number}"]
 }
 
 resource "local_file" "todo" {

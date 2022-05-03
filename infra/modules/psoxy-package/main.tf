@@ -20,7 +20,7 @@ locals {
 # known prior to executing the build
 
 data "external" "deployment_package" {
-  program     = ["${path.module}/build.sh", var.path_to_psoxy_java, var.implementation, local.path_to_deployment_jar]
+  program = ["${path.module}/build.sh", var.path_to_psoxy_java, var.implementation, local.path_to_deployment_jar]
 }
 
 

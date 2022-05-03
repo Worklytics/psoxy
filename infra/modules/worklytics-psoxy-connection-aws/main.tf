@@ -2,8 +2,8 @@
 
 
 resource "local_file" "todo-worklytics-connection" {
-filename = "TODO - connect ${var.display_name} in Worklytics .md"
-content  = <<EOT
+  filename = "TODO - connect ${var.display_name} in Worklytics .md"
+  content  = <<EOT
 Complete the following steps in Worklytics AFTER you have deployed the Psoxy instance for your connection:
   1.  Visit https://intl.worklytics.co/#integrations (or login into Worklytics, and navigate to
       Manage --> Data Connections)

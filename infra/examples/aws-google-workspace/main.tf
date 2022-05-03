@@ -49,11 +49,11 @@ module "psoxy-package" {
 
 # holds SAs + keys needed to connect to Google Workspace APIs
 resource "google_project" "psoxy-google-connectors" {
-  name            = "Worklytics Connectors${var.environment_name == null ? "" : concat(" - ", var.environment_name)}"
+  name = "Worklytics Connectors${var.environment_name == null ? "" : concat(" - ", var.environment_name)}"
 
   billing_account = var.gcp_billing_account_id
   # org_id          = var.gcp_org_id # if project is in a GCP folder, this value is implicit and this line should be commented out
-  folder_id       = var.gcp_folder_id # if project is at top-level of your GCP organization, rather than in a folder, comment this line out
+  folder_id = var.gcp_folder_id # if project is at top-level of your GCP organization, rather than in a folder, comment this line out
 }
 
 locals {
