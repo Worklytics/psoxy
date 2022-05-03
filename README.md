@@ -67,27 +67,10 @@ for some data sources, provide a more secure location than your laptop to store 
 ### Setup
 1. contact support@worklytics.co to ensure your Worklytics account is enabled for Psoxy, and to get
    the email of your Worklytics tenant's service account.
-2. OPTIONAL; create a private fork of this repo; we recommend this to allow you to commit your
+
+2. OPTIONAL; [create a private fork](docs/private-fork.md) of this repo; we recommend this to allow you to commit your
    specific configurations/changes while continuing to periodically fetch any changes from public
-   repo. See [Duplicating a Repo](https://docs.github.com/en/repositories/creating-and-managing-repositories/duplicating-a-repository),
-   for guidance. Specific commands for Psoxy repo are below
-```shell
-# set up the mirror
-git clone --bare https://github.com/Worklytics/psoxy.git
-cd psoxy
-git push --mirror https://github.com/{{YOUR_GITHUB_ORG_ID}}/psoxy-private.git
-cd ..
-rm -rf psoxy
-git clone https://github.com/{{YOUR_GITHUB_ORG_ID}}/psoxy-private.git
-
-# set the public repo as 'upstream' remote
-git remote add upstream git@github.com:worklytics/psoxy.git
-git remote set-url --push upstream DISABLE
-
-# fetch, rebase on top of your work
-git fetch upstream
-git rebase upstream/main
-```
+   repo. 
 
 3. create a [terraform](https://www.terraform.io/) configuration, setting up your environment, psoxy
    instances, and API keys/secrets for each connection
@@ -95,12 +78,29 @@ git rebase upstream/main
    b. various modules are provided in [`infra/modules`](/infra/modules); these modules will either
       perform all the necessary setup, or create TODO files explaining what you must do outside
       Terraform
-4. init and apply the Terraform configuration:
+
+4. init Terraform configuration and generate an initial plan
 ```shell
 terraform init
+terraform plan -out=tfplan.out
+```
+
+5. review the plan and ensure it matches the infrastructure you expect:
+```shell
+terraform show tfplan.out
+```
+
+Edit your Terraform configuration to modify/remove resources as needed.
+
+Use `terraform import` where needed for Terraform to re-use existing resources, rather than
+recreate them (for example, to use GCP project that already exists).
+
+6. apply your configuration
+```shell    
 terraform apply
 ```
-5. follow any `TODO` instructions produced by Terraform, such as:
+
+7. follow any `TODO` instructions produced by Terraform, such as:
   - build and deploy JAR (built from this repo) into your environment
   - provision API keys / make OAuth grants needed by each Data Connection
   - create the Data Connection from Worklytics to your psoxy instance (Terraform can provide `TODO`
