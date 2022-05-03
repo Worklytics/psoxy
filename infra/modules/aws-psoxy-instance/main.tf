@@ -155,6 +155,12 @@ brew install awscurl
 Alternatively, via `pip` (python package manager):
 ```shell
 pip install awscurl
+# Installs in $HOME/.local/bin
+# Make it available in your path
+# Add the following line to ~/.bashrc
+export PATH="$HOME/.local/bin:$PATH"
+# Then reload the config
+source ~/.bashrc
 ```
 
 ### From Terminal
@@ -162,7 +168,7 @@ pip install awscurl
 From root of your checkout of the Psoxy repo, these are some example test calls you can try (YMMV):
 
 ```shell
-${join("\n", local.test_commands)}
+${coalesce(join("\n", local.test_commands), "cd docs/example-api-calls/")}
 ```
 
 See `docs/example-api-calls/` for more example API calls specific to the data source to which your
