@@ -43,6 +43,5 @@ variable "bucket_location" {
 
 variable "source_kind" {
   type        = string
-  default     = "hris"
   description = "Kind of the content to process"
 }

@@ -1,9 +1,7 @@
-# gcp-hris
-
-This example provisions psoxy as an AWS lambda that connects to Microsoft 365 data sources.
+# example-gcp-hris
 
 A Terraform root module to provision GCP project for Psoxy, configure it, and create necessary infra
-to upload files based on HRIS source kind in a bucket and drop the modified file from Psoxy in an output bucket that can be used
+to upload files in a bucket and drop the modified file from Psoxy in an output bucket that can be used
 to read it from Worklytics.
 
 Deployment will create three buckets: one for deploying the cloud function and the ones for import/processed.
@@ -11,7 +9,7 @@ When a file is uploaded into the `-input` bucket the cloud function is triggered
 defined in the file. The result of that process will be dropped in the `-output` bucket in the same path that it
 was in the original path from `-input` bucket
 
-## Usage
+## Configuration
 
 Create a file in this directory named `terraform.tfvars` to specify your settings:
 
@@ -26,7 +24,7 @@ worklytics_sa_emails = [
 region               = "--OPTIONAL region where the cloud function will be deployed"
 bucket_prefix        = "Name of the buckets to create; a suffix will be added later as part of the deployment process"
 bucket_location      = "--OPTIONAL location where the buckets will be created"
-source_kind          = "hris"
+source_kind          = "Kind of the content to process; it should match one of the config.yaml file available"
 ```
 
 for example:
@@ -41,32 +39,26 @@ bucket_prefix        = "alice-psoxy-dev"
 source_kind          = "hris"
 ```
 
-You could check more details about configuration in the [module documentation](../../modules/gcp-bulk/readme.md)
+It is mandatory that `source_kind` matches with a configuration file provided into the platform. For example, if the 
+value is `hris` it will expect a `hris.yaml` file at some point. You could include this kind of files as part of `config` 
+folder or include it as part of the deployment files in the target folder.
 
-## Deployment
+Example of `hris.yaml` config file with Base64 rules:
 
-Initialize your configuration (at this location in directory hierarchy):
-```shell
-terraform init
+```yaml
+SOURCE: hris-import
+RULES: cHNldWRvbnltaXphdGlvbnM6CiAgLSBjc3ZDb2x1bW5zOgogICAgICAtICJlbWFpbCIKcmVkYWN0aW9uczoKICAtIGNzdkNvbHVtbnM6CiAgICAgIC0gIm1hbmFnZXJFbWFpbCI=
 ```
 
-If you're using an existing GCP project rather than creating one, you'll need to import it to
-terraform first. For example:
-```shell
-terraform import google_project.psoxy-project --your-psoxy-project-id--
+In this case rules are created based on following configuration:
+
+```yaml
+pseudonymizations:
+  - csvColumns:
+      - "email"
+redactions:
+  - csvColumns:
+      - "managerEmail"
 ```
 
-Apply
-```shell
-terraform apply
-```
-
-Review the plan and confirm to apply.
-
-## Cleanup
-
-Execute and confirm (be careful, all the files uploaded in both input and output will be removed)
-```shell
-terraform apply -destroy
-```
-
+And then converted to Base64 as [Custom Rules](../../../docs/custom-rules.md) documentation explains
