@@ -25,8 +25,8 @@ resource "google_project" "psoxy-project" {
   name            = "Worklytics Psoxy${var.environment_name == null ? "" : concat(" - ", var.environment_name)}"
   project_id      = var.gcp_project_id
   billing_account = var.gcp_billing_account_id
+  folder_id       = var.gcp_folder_id # if project is at top-level of your GCP organization, rather than in a folder, comment this line out
   # org_id          = var.org_id # if project is in a GCP folder, this value is implicit and this line should be commented out
-  folder_id = var.gcp_folder_id # if project is at top-level of your GCP organization, rather than in a folder, comment this line out
 }
 
 
