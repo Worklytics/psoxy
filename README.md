@@ -34,7 +34,7 @@ Orchestration continues to be performed on the Worklytics-side.
 
 ### Prereqs
 As of Oct 2021, Psoxy is implemented with Java 11 and built via Maven. Infrastructure is provisioned
-via Terraform, relying on Google Cloud and/or AWS command line tools .  You will need recent
+via Terraform, relying on Google Cloud and/or AWS command line tools.  You will need recent
 versions of all of the following:
 
   - git
@@ -56,9 +56,13 @@ And, depending on your scenario, you may also need:
   - [openssl](https://www.openssl.org/) If generating local certificates (see
     [`infra/modules/azure-local-cert`](infra/modules/azuread-local-cert))
 
-If you don't require Azure CLI / AWS CLI, [Google Cloud Shell](https://cloud.google.com/shell/docs/how-cloud-shell-works#tools)
-provides all of the above out-of-the-box, simplifies authentication/authorization for GCP
-deployments, and provides security advantages.
+We recommend using Cloud Shell from one of the major cloud providers, such as:
+  - [Google Cloud Shell](https://cloud.google.com/shell/) - if you're using GCP or connecting to
+    Google Workspace, this is the recommended option. It [includes the prereqs above](https://cloud.google.com/shell/docs/how-cloud-shell-works#tools) EXCEPT aws/azure CLIs.
+  - [AWS CloudShell](https://aws.amazon.com/cloudshell/) - if you're deploying to AWS.  
+
+These cloud shell environments simplify authentication and, given that you may need to manage secrets
+for some data sources, provide a more secure location than your laptop to store your Terraform state.
 
 ### Setup
 1. contact support@worklytics.co to ensure your Worklytics account is enabled for Psoxy, and to get
