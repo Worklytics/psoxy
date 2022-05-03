@@ -59,7 +59,7 @@ And, depending on your scenario, you may also need:
 We recommend using Cloud Shell from one of the major cloud providers, such as:
   - [Google Cloud Shell](https://cloud.google.com/shell/) - if you're using GCP or connecting to
     Google Workspace, this is the recommended option. It [includes the prereqs above](https://cloud.google.com/shell/docs/how-cloud-shell-works#tools) EXCEPT aws/azure CLIs.
-  - [AWS CloudShell](https://aws.amazon.com/cloudshell/) - if you're deploying to AWS.  
+  - [AWS CloudShell](https://aws.amazon.com/cloudshell/) - if you're deploying to AWS.
 
 These cloud shell environments simplify authentication and, given that you may need to manage secrets
 for some data sources, provide a more secure location than your laptop to store your Terraform state.
@@ -70,7 +70,7 @@ for some data sources, provide a more secure location than your laptop to store 
 
 2. OPTIONAL; [create a private fork](docs/private-fork.md) of this repo; we recommend this to allow you to commit your
    specific configurations/changes while continuing to periodically fetch any changes from public
-   repo. 
+   repo.
 
 3. create a [terraform](https://www.terraform.io/) configuration, setting up your environment, psoxy
    instances, and API keys/secrets for each connection
@@ -96,7 +96,7 @@ Use `terraform import` where needed for Terraform to re-use existing resources, 
 recreate them (for example, to use GCP project that already exists).
 
 6. apply your configuration
-```shell    
+```shell
 terraform apply
 ```
 
@@ -107,22 +107,22 @@ terraform apply
     file with detailed steps for each
 
 ## Supported Data Sources
-Data source connectors will be marked with their stage of maturity:
-  * *alpha* - preview, YMMV, still active development; only available to select pilot customers.
-  * *beta* - available to all customers, but still under active development and we expect bugs in some
-           environments.
-  * *general availability* - excepted to be stable and reliable.
-
-As of Sept 2021, the following sources can be connected via psoxy:
+As of May 2022, the following sources can be connected via psoxy:
     * Google Workspace
-      * Calendar *beta*
-      * Chat *beta*
-      * Directory *beta*
-      * Drive *beta*
-      * GMail *beta*
-      * Meet *beta*
+      * Calendar
+      * Chat
+      * Directory
+      * Drive
+      * GMail
+      * Meet
+    * Microsoft 365
+      * Active Directory
+      * Calendar
+      * Mail
     * Slack
-        * eDiscovery API *beta*
+        * eDiscovery API
+    * Zoom
+
 
 You can also use the command line tool to pseudonymize arbitrary CSV files (eg, exports from your
 HRIS), in a manner consistent with how a psoxy instance will pseudonymize identifiers in a target
@@ -130,6 +130,8 @@ REST API. This is REQUIRED if you want SaaS accounts to be linked with HRIS data
 Worklytics will match email set in HRIS with email set in SaaS tool's account - so these must be
 pseudonymized using an equivalent algorithm and secret). See [`java/impl/cmd-line/`](/java/impl/cmd-line)
 for details.
+
+
 
 
 ## Support
