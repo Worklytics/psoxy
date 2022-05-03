@@ -162,7 +162,7 @@ module "google-workspace-connection-auth" {
   source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-sa-auth-key-aws-secret?ref=v0.1.0-beta.1"
 
   service_account_id = module.google-workspace-connection[each.key].service_account_id
-  secret_id          = "PSOXY_${upper(each.key)}_SERVICE_ACCOUNT_KEY"
+  secret_id          = "PSOXY_${replace(upper(each.key),"-","_")}_SERVICE_ACCOUNT_KEY"
 }
 
 module "psoxy-google-workspace-connector" {
