@@ -124,7 +124,7 @@ module "google-workspace-connection" {
 
   source = "git::https://github.com/worklytics/psoxy//infra/modules/google-workspace-dwd-connection?ref=v0.1.0-beta.1"
 
-  project_id                   = var.project_id
+  project_id                   = google_project.psoxy-project.project_id
   connector_service_account_id = "psoxy-${each.key}-dwd"
   display_name                 = "Psoxy Connector - ${each.value.display_name}${var.connector_display_name_suffix}"
   apis_consumed                = each.value.apis_consumed
@@ -140,7 +140,7 @@ module "google-workspace-connection-auth" {
 
   source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-sa-auth-key-secret-manager?ref=v0.1.0-beta.1"
 
-  secret_project     = var.project_id
+  secret_project     = google_project.psoxy-project.project_id
   service_account_id = module.google-workspace-connection[each.key].service_account_id
   secret_id          = "PSOXY_${each.key}_SERVICE_ACCOUNT_KEY"
 }
@@ -150,7 +150,7 @@ module "psoxy-google-workspace-connector" {
 
   source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-cloud-function?ref=v0.1.0-beta.1"
 
-  project_id            = var.project_id
+  project_id            = google_project.psoxy-project.project_id
   function_name         = "psoxy-${each.key}"
   source_kind           = each.value.source_kind
   service_account_email = module.google-workspace-connection[each.key].service_account_email
