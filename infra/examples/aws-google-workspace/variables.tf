@@ -41,6 +41,7 @@ variable "gcp_project_id" {
 variable "environment_name" {
   type        = string
   description = "qualifier to append to name of project that will host your psoxy instance"
+  default     = null
 }
 
 variable "gcp_folder_id" {
@@ -52,23 +53,17 @@ variable "gcp_folder_id" {
 variable "gcp_billing_account_id" {
   type        = string
   description = "billing account ID; needed to create the project"
+  default     = null
+}
+
+variable "gcp_org_id" {
+  type        = string
+  description = "your GCP organization ID"
+  default     = null
 }
 
 variable "connector_display_name_suffix" {
   type        = string
   description = "suffix to append to display_names of connector SAs; helpful to distinguish between various ones in testing/dev scenarios"
   default     = ""
-}
-
-variable "msft_tenant_id" {
-  type        = string
-  default     = ""
-  description = "ID of Microsoft tenant to connect to (req'd only if config includes MSFT connectors)"
-}
-
-variable "modules_repo" {
-  type = string
-  default = "github.com/worklytics/psoxy/infra/"
-  # default = "../../"
-  description = "location of the modules to use by psoxy"
 }
