@@ -14,11 +14,12 @@ was in the original path from `-input` bucket
 Create a file in this directory named `terraform.tfvars` to specify your settings:
 
 ```terraform
-billing_account_id   = "--your billing account id--"
-project_id           = "--desired project id (must be unique)--"
-folder_id            = "--numeric id of GCP folder in which to put the project--"
-environment_name     = "--OPTIONAL helpful name to identify your environment --"
-worklytics_sa_emails = [
+gcp_project_id                = "psoxy-dev-aws-example-12314332"
+gcp_org_id                    = "123456789" # your GCP organization ID; if existing project, you can leave as empty string and see the value from `terraform plan`
+gcp_folder_id                 = "111111111111" # folder ID for the project; if existing project, you can leave as empty string and see the value from `terraform plan`
+gcp_billing_account_id        = "123456-789ABC-DEF012" # GCP billing account ID for project; if existing project, you can leave as empty string and see the value from `terraform plan`
+environment_name              = "--OPTIONAL helpful name to identify your environment --"
+worklytics_sa_emails          = [
   "--email address of service account that personifies your Worklytics account--"
 ]
 region               = "--OPTIONAL region where the cloud function will be deployed"
@@ -28,9 +29,9 @@ bucket_location      = "--OPTIONAL location where the buckets will be created"
 
 for example:
 ```terraform
-billing_account_id   = "0A2AE4-1D396E-1219D9"
-folder_id            = "33576234038"
-project_id           = "psoxy-dev-alice"
+gcp_billing_account_id   = "0A2AE4-1D396E-1219D9"
+gcp_folder_id            = "33576234038"
+gcp_project_id           = "psoxy-dev-alice"
 worklytics_sa_emails = [
   "worklytics-3cD92f@worklytics-eu.iam.gserviceaccount.com"
 ]

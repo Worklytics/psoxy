@@ -50,7 +50,7 @@ module "psoxy-package" {
 # holds SAs + keys needed to connect to Google Workspace APIs
 resource "google_project" "psoxy-google-connectors" {
   name            = "Psoxy Connectors - ${var.environment_name}"
-  project_id      = var.gcp_project_id
+
   billing_account = var.gcp_billing_account_id
   # org_id          = var.gcp_org_id # if project is in a GCP folder, this value is implicit and this line should be commented out
   folder_id       = var.gcp_folder_id # if project is at top-level of your GCP organization, rather than in a folder, comment this line out
@@ -60,7 +60,7 @@ locals {
   # Google Workspace Sources; add/remove as you wish, or toggle 'enabled' flag
   google_workspace_sources = {
     # GDirectory connections are a PRE-REQ for gmail, gdrive, and gcal connections. remove only
-    # if you plan to directly connect Directory to worklytics (without proxy). such a scenario is
+    # if you plan t  project_id      = var.gcp_project_ido directly connect Directory to worklytics (without proxy). such a scenario is
     # used for customers who care primarily about pseudonymizing PII of external subjects with whom
     # they collaborate in GMail/GCal/Gdrive. the Directory does not contain PII of subjects external
     # to the Google Workspace, so may be directly connected in such scenarios.
