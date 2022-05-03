@@ -2,7 +2,7 @@
 ECHO=false
 
 function show_help() {
-    echo "Basic call: ./test-psoxy.sh [-g|-a -r ROLE] [-i] -u https://url-to-proxy-function"
+    echo "Basic call: ./test-psoxy.sh [-g|-a -r ROLE] [-i] -u https://url-to-proxy-function/path-to-api"
     echo "-g endpoint is GCP"
     echo "-a endpoint is AWS"
     echo "-r AWS role to impersonate"
@@ -52,8 +52,6 @@ fi
 
 if [ "$GCP" = true ];
 then
-  SANITIZATION_HEADER="X-Psoxy-Skip-Sanitizer: false"
-
   log "Getting token"
   curlparams+=("-HAuthorization: Bearer $(gcloud auth print-identity-token)")
   log "Calling proxy..."
