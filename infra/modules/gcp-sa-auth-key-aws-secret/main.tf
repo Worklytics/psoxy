@@ -16,6 +16,10 @@ resource "google_service_account_key" "key" {
   keepers = {
     rotation_time = time_rotating.sa-key-rotation.rotation_rfc3339
   }
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "aws_ssm_parameter" "value" {
