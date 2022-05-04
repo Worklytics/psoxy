@@ -10,12 +10,8 @@ terraform {
 module "psoxy-gcp" {
   source = "../gcp"
 
-  project_id        = google_project.psoxy-project.project_id
+  project_id        = var.project_id
   invoker_sa_emails = var.worklytics_sa_emails
-
-  depends_on = [
-    google_project.psoxy-project
-  ]
 }
 
 module "psoxy-package" {
@@ -36,7 +32,7 @@ resource "google_storage_bucket" "deployment_bucket" {
   name          = "${var.bucket_prefix}-function"
   location      = var.bucket_location
   force_destroy = true
-  project       = google_project.psoxy-project.project_id
+  project       = var.project_id
 }
 
 # Add source code zip to bucket
@@ -50,7 +46,7 @@ resource "google_storage_bucket_object" "function" {
 
 # data input to function
 resource "google_storage_bucket" "input-bucket" {
-  project                     = google_project.psoxy-project.project_id
+  project                     = var.project_id
   name                        = "${var.bucket_prefix}-input"
   location                    = var.bucket_location
   force_destroy               = true
@@ -59,7 +55,7 @@ resource "google_storage_bucket" "input-bucket" {
 
 # data output from function
 resource "google_storage_bucket" "output-bucket" {
-  project                     = google_project.psoxy-project.project_id
+  project                     = var.project_id
   name                        = "${var.bucket_prefix}-output"
   location                    = var.bucket_location
   force_destroy               = true
@@ -95,7 +91,7 @@ resource "google_storage_bucket_iam_member" "grant_sa_read_on_processed_bucket" 
 
 resource "google_project_iam_custom_role" "bucket-write" {
   role_id     = "writeAccess"
-  project     = google_project.psoxy-project.project_id
+  project     = var.project_id
   title       = "Access for writing and update objects in bucket"
   description = "Write and update support, because storage.objectCreator role only support creation -not update"
   permissions = ["storage.objects.create", "storage.objects.delete"]
@@ -111,7 +107,7 @@ resource "google_cloudfunctions_function" "function" {
   name        = "psoxy-${var.source_kind}"
   description = "Psoxy for ${var.source_kind} files"
   runtime     = "java11"
-  project     = google_project.psoxy-project.project_id
+  project     = var.project_id
   region      = var.region
 
   available_memory_mb   = 1024
