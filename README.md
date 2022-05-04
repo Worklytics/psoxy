@@ -34,7 +34,7 @@ Orchestration continues to be performed on the Worklytics-side.
 
 ### Prereqs
 As of Oct 2021, Psoxy is implemented with Java 11 and built via Maven. Infrastructure is provisioned
-via Terraform, relying on Google Cloud and/or AWS command line tools .  You will need recent
+via Terraform, relying on Google Cloud and/or AWS command line tools.  You will need recent
 versions of all of the following:
 
   - git
@@ -56,34 +56,21 @@ And, depending on your scenario, you may also need:
   - [openssl](https://www.openssl.org/) If generating local certificates (see
     [`infra/modules/azure-local-cert`](infra/modules/azuread-local-cert))
 
-If you don't require Azure CLI / AWS CLI, [Google Cloud Shell](https://cloud.google.com/shell/docs/how-cloud-shell-works#tools)
-provides all of the above out-of-the-box, simplifies authentication/authorization for GCP
-deployments, and provides security advantages.
+We recommend using Cloud Shell from one of the major cloud providers, such as:
+  - [Google Cloud Shell](https://cloud.google.com/shell/) - if you're using GCP or connecting to
+    Google Workspace, this is the recommended option. It [includes the prereqs above](https://cloud.google.com/shell/docs/how-cloud-shell-works#tools) EXCEPT aws/azure CLIs.
+  - [AWS CloudShell](https://aws.amazon.com/cloudshell/) - if you're deploying to AWS.
+
+These cloud shell environments simplify authentication and, given that you may need to manage secrets
+for some data sources, provide a more secure location than your laptop to store your Terraform state.
 
 ### Setup
 1. contact support@worklytics.co to ensure your Worklytics account is enabled for Psoxy, and to get
    the email of your Worklytics tenant's service account.
-2. OPTIONAL; create a private fork of this repo; we recommend this to allow you to commit your
+
+2. OPTIONAL; [create a private fork](docs/private-fork.md) of this repo; we recommend this to allow you to commit your
    specific configurations/changes while continuing to periodically fetch any changes from public
-   repo. See [Duplicating a Repo](https://docs.github.com/en/repositories/creating-and-managing-repositories/duplicating-a-repository),
-   for guidance. Specific commands for Psoxy repo are below
-```shell
-# set up the mirror
-git clone --bare https://github.com/Worklytics/psoxy.git
-cd psoxy
-git push --mirror https://github.com/{{YOUR_GITHUB_ORG_ID}}/psoxy-private.git
-cd ..
-rm -rf psoxy
-git clone https://github.com/{{YOUR_GITHUB_ORG_ID}}/psoxy-private.git
-
-# set the public repo as 'upstream' remote
-git remote add upstream git@github.com:worklytics/psoxy.git
-git remote set-url --push upstream DISABLE
-
-# fetch, rebase on top of your work
-git fetch upstream
-git rebase upstream/main
-```
+   repo.
 
 3. create a [terraform](https://www.terraform.io/) configuration, setting up your environment, psoxy
    instances, and API keys/secrets for each connection
@@ -91,34 +78,51 @@ git rebase upstream/main
    b. various modules are provided in [`infra/modules`](/infra/modules); these modules will either
       perform all the necessary setup, or create TODO files explaining what you must do outside
       Terraform
-4. init and apply the Terraform configuration:
+
+4. init Terraform configuration and generate an initial plan
 ```shell
 terraform init
+terraform plan -out=tfplan.out
+```
+
+5. review the plan and ensure it matches the infrastructure you expect:
+```shell
+terraform show tfplan.out
+```
+
+Edit your Terraform configuration to modify/remove resources as needed.
+
+Use `terraform import` where needed for Terraform to re-use existing resources, rather than
+recreate them (for example, to use GCP project that already exists).
+
+6. apply your configuration
+```shell
 terraform apply
 ```
-5. follow any `TODO` instructions produced by Terraform, such as:
+
+7. follow any `TODO` instructions produced by Terraform, such as:
   - build and deploy JAR (built from this repo) into your environment
   - provision API keys / make OAuth grants needed by each Data Connection
   - create the Data Connection from Worklytics to your psoxy instance (Terraform can provide `TODO`
     file with detailed steps for each
 
 ## Supported Data Sources
-Data source connectors will be marked with their stage of maturity:
-  * *alpha* - preview, YMMV, still active development; only available to select pilot customers.
-  * *beta* - available to all customers, but still under active development and we expect bugs in some
-           environments.
-  * *general availability* - excepted to be stable and reliable.
-
-As of Sept 2021, the following sources can be connected via psoxy:
+As of May 2022, the following sources can be connected via psoxy:
     * Google Workspace
-      * Calendar *beta*
-      * Chat *beta*
-      * Directory *beta*
-      * Drive *beta*
-      * GMail *beta*
-      * Meet *beta*
+      * Calendar
+      * Chat
+      * Directory
+      * Drive
+      * GMail
+      * Meet
+    * Microsoft 365
+      * Active Directory
+      * Calendar
+      * Mail
     * Slack
-        * eDiscovery API *beta*
+        * eDiscovery API
+    * Zoom
+
 
 You can also use the command line tool to pseudonymize arbitrary CSV files (eg, exports from your
 HRIS), in a manner consistent with how a psoxy instance will pseudonymize identifiers in a target
@@ -126,6 +130,8 @@ REST API. This is REQUIRED if you want SaaS accounts to be linked with HRIS data
 Worklytics will match email set in HRIS with email set in SaaS tool's account - so these must be
 pseudonymized using an equivalent algorithm and secret). See [`java/impl/cmd-line/`](/java/impl/cmd-line)
 for details.
+
+
 
 
 ## Support
