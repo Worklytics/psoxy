@@ -37,7 +37,6 @@ module "psoxy-file-handler" {
   function_name        = "psoxy-${var.instance_id}"
   handler_class        = "co.worklytics.psoxy.S3Handler"
   source_kind          = var.source_kind
-  api_gateway          = module.psoxy-aws.api_gateway
   path_to_function_zip = module.psoxy-package.path_to_deployment_jar
   function_zip_hash    = module.psoxy-package.deployment_package_hash
   path_to_config       = "../../../configs/${var.source_kind}.yaml"

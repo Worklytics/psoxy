@@ -37,16 +37,6 @@ variable "parameters" {
   description = "System Manager Parameters to expose to function"
 }
 
-variable "api_gateway" {
-  type = object({
-    id            = string
-    arn           = string
-    api_endpoint  = string
-    execution_arn = string
-  })
-  description = "API gateway behind which proxy instance should sit"
-}
-
 variable "path_to_function_zip" {
   type        = string
   description = "path to zip archive of lambda bundle"

@@ -8,28 +8,6 @@ terraform {
   }
 }
 
-# AWS API Gateway
-resource "aws_apigatewayv2_api" "psoxy-api" {
-  name          = "psoxy-api"
-  protocol_type = "HTTP"
-  description   = "API to expose psoxy instances"
-}
-
-resource "aws_cloudwatch_log_group" "gateway-log" {
-  name              = aws_apigatewayv2_api.psoxy-api.name
-  retention_in_days = 7
-}
-
-resource "aws_apigatewayv2_stage" "live" {
-  api_id      = aws_apigatewayv2_api.psoxy-api.id
-  name        = "live" # q: what name??
-  auto_deploy = true
-  access_log_settings {
-    destination_arn = aws_cloudwatch_log_group.gateway-log.arn
-    format          = "$context.identity.sourceIp $context.identity.caller $context.identity.user [$context.requestTime] \"$context.httpMethod $context.path $context.protocol\" $context.status $context.responseLength $context.requestId $context.extendedRequestId $context.error.messageString $context.integrationErrorMessage"
-  }
-}
-
 # role that Worklytics user will use to call the API
 resource "aws_iam_role" "api-caller" {
   name = "PsoxyApiCaller"
@@ -61,7 +39,7 @@ resource "aws_iam_role" "api-caller" {
     ]
   })
 
-  # what this role can do (invoke anything in the API gateway )
+  # what this role can do
   inline_policy {
     name = "lambda-invoker"
     policy = jsonencode({
@@ -104,10 +82,6 @@ resource "aws_ssm_parameter" "salt" {
 
 output "salt_secret" {
   value = aws_ssm_parameter.salt
-}
-
-output "api_gateway" {
-  value = aws_apigatewayv2_api.psoxy-api
 }
 
 output "api_caller_role_arn" {
