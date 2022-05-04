@@ -29,6 +29,10 @@ resource "azuread_application_certificate" "certificate" {
   type                  = "AsymmetricX509Cert"
   value                 = base64decode(data.external.certificate.result.cert)
   end_date              = timeadd(time_rotating.rotation.id, "${var.cert_expiration_days * 24}h")
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 output "private_key_id" {
