@@ -76,7 +76,7 @@ resource "aws_ssm_parameter" "long-access-token-secret" {
   value       = sensitive("TODO: fill me with a real token!! (via AWS console)")
 
   ignore_changes = [
-    "value" # we expect this to be filled via Console, so don't want to overwrite it with the dummy value if changed
+    value # we expect this to be filled via Console, so don't want to overwrite it with the dummy value if changed
   ]
 }
 
