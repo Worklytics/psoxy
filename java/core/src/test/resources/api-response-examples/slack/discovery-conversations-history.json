@@ -105,6 +105,14 @@
                 {
                   "type": "text",
                   "text": "Some new text"
+                },
+                {
+                  "type": "user",
+                  "user_id": "U02DU306H0B"
+                },
+                {
+                  "type": "text",
+                  "text": "check this out!"
                 }
               ]
             }

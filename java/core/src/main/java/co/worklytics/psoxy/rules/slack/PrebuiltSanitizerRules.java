@@ -78,6 +78,7 @@ public class PrebuiltSanitizerRules {
             .jsonPath("$.messages[*].user")
             .jsonPath("$.messages[*].reactions[*].users[*]")
             .jsonPath("$.messages[*].edited.user")
+            .jsonPath("$.messages[*].blocks[*].elements[*].elements[*].user_id") // mentions in rich blocks
             .build()
         )
         .redaction(Rule.builder()

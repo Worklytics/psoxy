@@ -1,3 +1,4 @@
+---
 allowedEndpointRegexes:
   - "^\\/v2\\/users(?:\\?.+)?"
   - "^\\/v2\\/users\\/(?:[^\\/]*)\\/meetings(?:\\?.+)?"
@@ -5,9 +6,12 @@ allowedEndpointRegexes:
   - "^\\/v2\\/past_meetings\\/(?:.*)\\/instances"
   - "^\\/v2\\/past_meetings\\/(?:[^\\/]*)"
   - "^\\/v2\\/past_meetings\\/(?:.*)\\/participants(?:\\?.+)?"
-pseudonymizations:
+pseudonymizationWithOriginals:
   - jsonPaths:
       - "$.users[*].id"
+    relativeUrlRegex: "\\/v2\\/users(?:\\?.+)?"
+pseudonymizations:
+  - jsonPaths:
       - "$.users[*].email"
     relativeUrlRegex: "\\/v2\\/users(?:\\?.+)?"
   - jsonPaths:
@@ -15,10 +19,12 @@ pseudonymizations:
     relativeUrlRegex: "\\/v2\\/users\\/(?:[^\\/]*)\\/meetings(?:\\?.+)?"
   - jsonPaths:
       - "$.host_id"
+      - "$.host_email"
     relativeUrlRegex: "\\/v2\\/meetings\\/(?:[^\\/]*)(?:\\?.+)?"
   - jsonPaths:
       - "$.host_id"
       - "$.user_email"
+      - "$.host_email"
     relativeUrlRegex: "\\/v2\\/past_meetings\\/(?:[^\\/]*)"
   - jsonPaths:
       - "$.participants[*].id"
@@ -30,9 +36,11 @@ redactions:
     relativeUrlRegex: "\\/v2\\/users(?:\\?.+)?"
   - jsonPaths:
       - "$.meetings[*].topic"
+      - "$.meetings[*].join_url"
     relativeUrlRegex: "\\/v2\\/users\\/(?:[^\\/]*)\\/meetings(?:\\?.+)?"
   - jsonPaths:
       - "$.['topic','settings','agenda']"
+      - "$.['password','h323_password','pstn_password','encrypted_password']"
     relativeUrlRegex: "\\/v2\\/meetings\\/(?:[^\\/]*)(?:\\?.+)?"
   - jsonPaths:
       - "$.['user_name','topic']"
