@@ -18,7 +18,7 @@ resource "google_kms_crypto_key" "terraform-state" {
 
 resource "google_storage_bucket" "state_bucket" {
   name                        = "psoxy-terraform-state"
-  uniform_bucket_level_access = true  # good practice
+  uniform_bucket_level_access = true # good practice
   labels                      = var.bucket_labels
   location                    = var.storage_location
 
@@ -29,7 +29,7 @@ resource "google_storage_bucket" "state_bucket" {
 
 resource "local_file" "todo" {
   filename = "TODO - terraform backend.md"
-  content = <<EOT
+  content  = <<EOT
 Ensure the `terraform` block at the top of your Terraform configuration is something like following:
 ```terraform
 terraform {

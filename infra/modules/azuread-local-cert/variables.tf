@@ -1,6 +1,6 @@
 variable "rotation_days" {
   type        = number
-  default     =  60
+  default     = 60
   description = "terraform should rotate cert after this many days"
 }
 

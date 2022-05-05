@@ -21,6 +21,10 @@ resource "google_service_account_key" "key" {
   keepers = {
     rotation_time = time_rotating.sa-key-rotation.rotation_rfc3339
   }
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "google_secret_manager_secret" "service-account-key" {
@@ -35,4 +39,8 @@ resource "google_secret_manager_secret" "service-account-key" {
 resource "google_secret_manager_secret_version" "service-account-key-version" {
   secret      = google_secret_manager_secret.service-account-key.id
   secret_data = google_service_account_key.key.private_key
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }

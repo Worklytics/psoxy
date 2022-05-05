@@ -34,7 +34,6 @@ module "psoxy-aws" {
   caller_external_user_id = var.caller_external_user_id
   aws_account_id          = var.aws_account_id
   aws_assume_role_arn     = var.aws_assume_role_arn
-  environment_name        = var.environment_name
   instance_id             = var.instance_id
   source_kind             = var.source_kind
   aws_region              = var.aws_region

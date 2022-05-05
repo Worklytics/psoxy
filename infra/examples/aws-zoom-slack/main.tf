@@ -73,7 +73,13 @@ resource "aws_ssm_parameter" "long-access-token-secret" {
   name        = "PSOXY_${upper(replace(each.key, "-", "_"))}_ACCESS_TOKEN"
   type        = "SecureString"
   description = "The long lived token for `psoxy-${each.key}`"
-  value       = sensitive("")
+  value       = sensitive("TODO: fill me with a real token!! (via AWS console)")
+
+  lifecycle {
+    ignore_changes = [
+      value # we expect this to be filled via Console, so don't want to overwrite it with the dummy value if changed
+    ]
+  }
 }
 
 module "aws-psoxy-long-auth-connectors" {
