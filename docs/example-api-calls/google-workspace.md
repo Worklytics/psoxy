@@ -95,11 +95,6 @@ export GOOGLE_USER_ID=`
 ./test-psoxy.sh $OPTIONS -u $PSOXY_BASE/psoxy-gdirectory/admin/directory/v1/users/$GOOGLE_USER_ID/photos/thumbnail | jq .
 ```
 
-### Org Units
-```shell
-./test-psoxy.sh $OPTIONS -u $PSOXY_BASE/psoxy-gdirectory/admin/directory/v1/customer/my_customer/orgunits | jq .
-```
-
 ### Roles
 ```shell
 ./test-psoxy.sh $OPTIONS -u $PSOXY_BASE/psoxy-gdirectory/admin/directory/v1/customer/my_customer/roles | jq .
