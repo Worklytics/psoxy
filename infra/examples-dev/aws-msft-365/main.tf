@@ -3,7 +3,7 @@ terraform {
     # for the infra that will host Psoxy instances
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 4.11"
+      version = "~> 4.12"
     }
 
     # for API connections to Microsoft 365
