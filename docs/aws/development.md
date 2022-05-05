@@ -1,21 +1,21 @@
-# AWS - Getting Started
+# AWS - Development
 
 ## Prereqs
 
 Required:
-  - [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
+- [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
 
 Optional:
-  - AWS SAM CLI ([macOS](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install-mac.html)) for
-    local testing, if desired
-  - [awscurl](https://github.com/okigan/awscurl) for direct testing of deployed AWS lambda from a
-    terminal
+- AWS SAM CLI ([macOS](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install-mac.html)) for
+  local testing, if desired
+- [awscurl](https://github.com/okigan/awscurl) for direct testing of deployed AWS lambda from a
+  terminal
 
 ## Build
 Maven build produces a zip file.
 
-  1. Build core library
-  2. From `java/impl/aws/`:
+1. Build core library
+2. From `java/impl/aws/`:
 ```shell
 mvn clean package
 ```
@@ -40,16 +40,3 @@ You'll ultimately provision infrastructure represented in green in the following
 ![AWS data flow](./2022-02 Psoxy Data Flow.png)
 
 See [`infra/modules/aws/`](../../infra/modules/aws/) for more information.
-
-## Run Tests
-
-### AWS Console
-You can invoke your lambda directly via AWS console, at endpoint such as:
-
-https://console.aws.amazon.com/lambda/home?region=us-east-1#/functions/psoxy-gdirectory?tab=testing
-
-(You must be auth'd on AWS as an IAM role/user within the account that hosts the lambda in question)
-
-Example requests are in [`java/impl/aws/src/test/resources/lambda-proxy-events/`](../../java/impl/aws/src/test/resources/lambda-proxy-events/), which you can use as payloads to test via the console.
-
-

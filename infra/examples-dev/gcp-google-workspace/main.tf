@@ -139,7 +139,7 @@ module "google-workspace-connection-auth" {
 
   secret_project     = var.project_id
   service_account_id = module.google-workspace-connection[each.key].service_account_id
-  secret_id          = "PSOXY_${each.key}_SERVICE_ACCOUNT_KEY"
+  secret_id          = "PSOXY_${replace(upper(each.key),"-","_")}_SERVICE_ACCOUNT_KEY"
 }
 module "psoxy-google-workspace-connector" {
   for_each = {
