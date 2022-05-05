@@ -84,6 +84,20 @@
           "description": "Employee"
         }
       ],
+      "websites": [
+        {
+          "primary": true,
+          "customType": "",
+          "type": "profile",
+          "value": "https://intranet.worklytics.co/alice"
+        },
+        {
+          "primary": false,
+          "customType": "",
+          "type": "resume",
+          "value": "https://about.me/alice_example"
+        }
+      ],
       "posixAccounts": [
         {
           "username": "alice_worklytics_co",

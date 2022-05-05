@@ -129,6 +129,7 @@ public class PrebuiltSanitizerRules {
             .relativeUrlRegex("^/admin/directory/v1/users?.*")
             .jsonPath("$.users[*].posixAccounts[*].homeDirectory")
             .jsonPath("$.users[*].sshPublicKeys[*]")
+            .jsonPath("$.users[*].websites[*]")
             .build()
         )
         // single user
@@ -152,6 +153,7 @@ public class PrebuiltSanitizerRules {
                 .relativeUrlRegex("^/admin/directory/v1/users/.*")
                 .jsonPath("$.posixAccounts[*].homeDirectory")
                 .jsonPath("$.sshPublicKeys[*]")
+                .jsonPath("$.websites[*]")
                 .build()
         )
         //group/groups/group members
