@@ -15,7 +15,6 @@ import java.util.Collection;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DirectoryTests extends JavaRulesTestBaseCase {
 
@@ -38,20 +37,40 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
     void user() {
         String jsonString = asJson("user.json");
 
-        //verify precondition that example actually contains something we need to pseudonymize
-        assertTrue(jsonString.contains("alice@worklytics.co"));
-
-        Collection<String> PII = Arrays.asList(
-            "alice@worklytics.co",
-            "alice.example@gmail.com"
+        Collection<String> PIItoRedact = Arrays.asList(
+            "alice.example@gmail.com",
+            "https://intranet.worklytics.co/alice",
+            "https://about.me/alice_example",
+            "/home/alice_worklytics_co", // posix accounts
+            "ssh-rsa" // ssh keys
         );
-        assertNotSanitized(jsonString, PII);
+        // primaryEmail, emails, relations, aliases and nonEditableAliases
+        Collection<String> PIItoPseudonymize = Arrays.asList(
+            "a@in.worklytics.co",
+            "a@worklytics.co",
+            "a@worklytics.co.test-google-a.com",
+            "aexample@in.worklytics.co",
+            "aexample@worklytics.co",
+            "aexample@worklytics.co.test-google-a.com",
+            "alice.example@in.worklytics.co",
+            "alice.example@worklytics.co",
+            "alice.example@worklytics.co.test-google-a.com",
+            "alice@in.worklytics.co",
+            "alice@worklytics.co",
+            "alice@worklytics.co.test-google-a.com",
+            "alise@in.worklytics.co",
+            "alise@worklytics.co",
+            "alise@worklytics.co.test-google-a.com",
+            "bob@worklytics.co"
+        );
+        assertNotSanitized(jsonString, PIItoRedact);
+        assertNotSanitized(jsonString, PIItoPseudonymize);
 
         String sanitized =
             sanitizer.sanitize(new URL("https", "admin.googleapis.com", "/admin/directory/v1/users/123213"), jsonString);
 
-        assertPseudonymized(sanitized, List.of("alice@worklytics.co"));
-        assertRedacted(sanitized, List.of("alice.example@gmail.com"));
+        assertPseudonymized(sanitized, PIItoPseudonymize);
+        assertRedacted(sanitized, PIItoRedact);
     }
 
     @SneakyThrows
@@ -59,19 +78,41 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
     void users() {
         String jsonString = asJson("users.json");
 
-        //verify precondition that example actually contains something we need to pseudonymize
-        Collection<String> PII = Arrays.asList(
-            "alice@worklytics.co",
-            "bob@worklytics.co",
-            "alice.example@gmail.com"
+        Collection<String> PIItoRedact = Arrays.asList(
+            "alice.example@gmail.com", // recovery email
+            "https://intranet.worklytics.co/alice",
+            "https://about.me/alice_example",
+            "/home/alice_worklytics_co", // posix accounts
+            "ssh-rsa" // ssh keys
         );
-        assertNotSanitized(jsonString, PII);
+        // primaryEmail, emails, aliases and nonEditableAliases
+        Collection<String> PIItoPseudonymize = Arrays.asList(
+            "alice.example@worklytics.co.test-google-a.com",
+            "alice@worklytics.co.test-google-a.com",
+            "aexample@worklytics.co.test-google-a.com",
+            "a@worklytics.co.test-google-a.com",
+            "alise@worklytics.co.test-google-a.com",
+            "aexample@in.worklytics.co",
+            "alice@in.worklytics.co",
+            "alice.example@in.worklytics.co",
+            "alise@in.worklytics.co",
+            "a@in.worklytics.co",
+            "alice.example@worklytics.co",
+            "aexample@worklytics.co",
+            "a@worklytics.co",
+            "alise@worklytics.co",
+            "bob@worklytics.co",
+            "bob@worklytics.co.test-google-a.com",
+            "bob@in.worklytics.co"
+        );
+        assertNotSanitized(jsonString, PIItoRedact);
+        assertNotSanitized(jsonString, PIItoPseudonymize);
 
         String endpoint = "https://admin.googleapis.com/admin/directory/v1/users?customer=my_customer";
         String sanitized = sanitize(endpoint, jsonString);
 
-        assertPseudonymized(sanitized, Arrays.asList("alice@worklytics.co", "bob@worklytics.co"));
-        assertRedacted(sanitized, List.of("alice.example@gmail.com"));
+        assertPseudonymized(sanitized, PIItoPseudonymize);
+        assertRedacted(sanitized, PIItoRedact);
     }
 
     @SneakyThrows

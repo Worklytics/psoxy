@@ -59,10 +59,12 @@ redactions:
   - jsonPaths:
       - "$.users[*].posixAccounts[*].homeDirectory"
       - "$.users[*].sshPublicKeys[*]"
+      - "$.users[*].websites[*]"
     relativeUrlRegex: "^/admin/directory/v1/users?.*"
   - jsonPaths:
       - "$.posixAccounts[*].homeDirectory"
       - "$.sshPublicKeys[*]"
+      - "$.websites[*]"
     relativeUrlRegex: "^/admin/directory/v1/users/.*"
   - jsonPaths:
       - "$..description"
