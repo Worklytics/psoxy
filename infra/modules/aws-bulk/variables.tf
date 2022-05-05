@@ -32,11 +32,6 @@ variable "caller_external_user_id" {
   description = "id of external user that will call proxy (eg, SA of your Worklytics instance)"
 }
 
-variable "environment_name" {
-  type        = string
-  description = "qualifier to append to name of project that will host your psoxy instance"
-}
-
 variable "instance_id" {
   type        = string
   description = "Human readable reference name for this psoxy instance. Helpful for distinguishing resulting infrastructure"

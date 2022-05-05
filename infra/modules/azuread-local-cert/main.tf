@@ -18,7 +18,7 @@ resource "time_rotating" "rotation" {
 # done with external as Terraform docs suggest
 
 data "external" "certificate" {
-  program     = ["${path.module}/local-cert.sh", var.certificate_subject, var.cert_expiration_days]
+  program = ["${path.module}/local-cert.sh", var.certificate_subject, var.cert_expiration_days]
 }
 
 # for JWT signing

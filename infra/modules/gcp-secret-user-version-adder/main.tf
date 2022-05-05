@@ -22,7 +22,7 @@ resource "google_secret_manager_secret_iam_member" "grant_secretVersionAdd_on_ac
 
 resource "local_file" "TODO" {
   filename = "TODO - fill ${var.project_id} - ${var.secret_id} token.md"
-  content = <<EOT
+  content  = <<EOT
 Populate the token for ${var.secret_id} in GCP Secret Manager. Here are some ways to do
 it using gcloud cmd line tool. YMMV.
 

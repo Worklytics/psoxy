@@ -16,10 +16,11 @@ terraform {
 # either way, we recommend the project be used exclusively to host psoxy instances corresponding to
 # a single worklytics account
 resource "google_project" "psoxy-project" {
-  name            = "Psoxy - ${var.environment_name}"
-  project_id      = var.project_id
-  folder_id       = var.folder_id
-  billing_account = var.billing_account_id
+  name            = "Worklytics Psoxy${var.environment_name == null ? "" : concat(" - ", var.environment_name)}"
+  project_id      = var.gcp_project_id
+  billing_account = var.gcp_billing_account_id
+  folder_id       = var.gcp_folder_id # if project is at top-level of your GCP organization, rather than in a folder, comment this line out
+  # org_id          = var.gcp_org_id # if project is in a GCP folder, this value is implicit and this line should be commented out
 }
 
 module "psoxy-gcp" {
@@ -123,7 +124,7 @@ module "google-workspace-connection" {
 
   source = "git::https://github.com/worklytics/psoxy//infra/modules/google-workspace-dwd-connection?ref=v0.1.0-beta.1"
 
-  project_id                   = var.project_id
+  project_id                   = google_project.psoxy-project.project_id
   connector_service_account_id = "psoxy-${each.key}-dwd"
   display_name                 = "Psoxy Connector - ${each.value.display_name}${var.connector_display_name_suffix}"
   apis_consumed                = each.value.apis_consumed
@@ -139,7 +140,7 @@ module "google-workspace-connection-auth" {
 
   source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-sa-auth-key-secret-manager?ref=v0.1.0-beta.1"
 
-  secret_project     = var.project_id
+  secret_project     = google_project.psoxy-project.project_id
   service_account_id = module.google-workspace-connection[each.key].service_account_id
   secret_id          = "PSOXY_${replace(upper(each.key),"-","_")}_SERVICE_ACCOUNT_KEY"
 }
@@ -149,7 +150,7 @@ module "psoxy-google-workspace-connector" {
 
   source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-cloud-function?ref=v0.1.0-beta.1"
 
-  project_id            = var.project_id
+  project_id            = google_project.psoxy-project.project_id
   function_name         = "psoxy-${each.key}"
   source_kind           = each.value.source_kind
   service_account_email = module.google-workspace-connection[each.key].service_account_email

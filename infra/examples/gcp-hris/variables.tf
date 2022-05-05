@@ -1,4 +1,4 @@
-variable "project_id" {
+variable "gcp_project_id" {
   type        = string
   description = "id of GCP project that will host psoxy instance"
 }
@@ -6,17 +6,25 @@ variable "project_id" {
 variable "environment_name" {
   type        = string
   description = "qualifier to append to name of project that will host your psoxy instance"
+  default     = null
 }
 
-variable "folder_id" {
+variable "gcp_folder_id" {
   type        = string
   description = "optionally, a folder into which to provision it"
   default     = null
 }
 
-variable "billing_account_id" {
+variable "gcp_billing_account_id" {
   type        = string
   description = "billing account ID; needed to create the project"
+  default     = null
+}
+
+variable "gcp_org_id" {
+  type        = string
+  description = "your GCP organization ID"
+  default     = null
 }
 
 variable "worklytics_sa_emails" {

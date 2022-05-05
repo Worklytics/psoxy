@@ -11,6 +11,6 @@ variable "secret_id" {
 
 variable "rotation_days" {
   type        = number
-  default     =  60
+  default     = 60
   description = "rotation period for the SA key, in days"
 }
