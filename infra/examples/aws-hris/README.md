@@ -14,20 +14,12 @@ your psoxy instance.
 
 Example `terraform.tfvars`:
 ```terraform
-<<<<<<< HEAD
 aws_account_id                = "123456789" # your AWS account ID
 aws_assume_role_arn           = "arn:aws:iam::123456789:role/InfraAdmin" # sufficiently privileged role within your AWS account to provision necessary infra
 caller_aws_account_id         = "914358739851:root" # for production use, this should be Worklytics' AWS account; for testing, it can be your own
 caller_external_user_id       = "123456712345671234567" # 21-digit numeric string you should obtain from Worklytics
-=======
-aws_account_id                = "123456789"
-aws_assume_role_arn           = "arn:aws:iam::123456789:role/InfraAdmin"
-environment_name              = "dev-aws"
 instance_id                   = "hris-function"
-caller_aws_account_id         = "914358739851:root"
-caller_external_user_id       = "your-worklytics-service-account-id"
 source_kind                   = "hris"
->>>>>>> main
 ```
 
 You could check more details about configuration in the [module documentation](../../modules/aws-bulk/readme.md)
@@ -53,8 +45,8 @@ Execute and confirm (be careful, all the files uploaded in both input and output
 terraform apply -destroy
 ```
 
-As default, Secret Manager Stores is marked by "soft" deleted and it will be queued to be removed in a week. In case 
-you want to create the same infra without removing it you will probably receive a conflict error. Please go to 
+As default, Secret Manager Stores is marked by "soft" deleted and it will be queued to be removed in a week. In case
+you want to create the same infra without removing it you will probably receive a conflict error. Please go to
 the AWS console and run the following command:
 
 ```shell

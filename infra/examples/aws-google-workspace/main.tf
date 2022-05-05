@@ -60,7 +60,7 @@ locals {
   # Google Workspace Sources; add/remove as you wish, or toggle 'enabled' flag
   google_workspace_sources = {
     # GDirectory connections are a PRE-REQ for gmail, gdrive, and gcal connections. remove only
-    # if you plan t  project_id      = var.gcp_project_ido directly connect Directory to worklytics (without proxy). such a scenario is
+    # if you plan to directly connect Directory to worklytics (without proxy). such a scenario is
     # used for customers who care primarily about pseudonymizing PII of external subjects with whom
     # they collaborate in GMail/GCal/Gdrive. the Directory does not contain PII of subjects external
     # to the Google Workspace, so may be directly connected in such scenarios.
