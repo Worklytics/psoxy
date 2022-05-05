@@ -1,7 +1,7 @@
 package co.worklytics.psoxy.rules.slack;
 
 import co.worklytics.psoxy.Rules;
-import co.worklytics.psoxy.rules.RulesBaseTestCase;
+import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
@@ -18,7 +18,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class SlackDiscoveryTests extends RulesBaseTestCase {
+public class SlackDiscoveryTests extends JavaRulesTestBaseCase {
 
     @Getter
     final Rules rulesUnderTest = PrebuiltSanitizerRules.SLACK;
@@ -127,24 +127,30 @@ public class SlackDiscoveryTests extends RulesBaseTestCase {
     void discovery_conversations_history() {
         String jsonString = asJson("discovery-conversations-history.json");
 
-        String sanitized =
-            sanitizer.sanitize(new URL("https://slack.com/api/discovery.conversations.history"), jsonString);
-
-        Collection<String> PII = Arrays.asList(
-            "W06CA4EAC","W0G81RDQT","W0N0ZQDED","W0R8EBMXP","W0G81RDQZ","W000000"
+        Collection<String> PIItoPseudonymize = Arrays.asList(
+            "W06CA4EAC","W0G81RDQT","W0N0ZQDED","W0R8EBMXP","W0G81RDQZ","W000000", "U02DU306H0B"
         );
-
-        assertPseudonymized(sanitized, PII);
-        assertRedacted(sanitized, "Test message!",
+        Collection<String> dataToRedact = Arrays.asList(
+            "Test message!",
             "<@U06CA4EAC|bjin>",
             "text with rich block",
             "Some new text",
+            "check this out!",
             "Jose (ENT)",
             "Jose",
             "This is likely a pun about the weather.",
             "We're withholding a pun from you",
-            "Leg end nary a laugh, Ink.");
+            "Leg end nary a laugh, Ink."
+        );
 
+        assertNotSanitized(jsonString, PIItoPseudonymize);
+        assertNotSanitized(jsonString, dataToRedact);
+
+        String sanitized =
+            sanitizer.sanitize(new URL("https://slack.com/api/discovery.conversations.history"), jsonString);
+
+        assertPseudonymized(sanitized, PIItoPseudonymize);
+        assertRedacted(sanitized, dataToRedact);
     }
 
     @SneakyThrows
