@@ -108,20 +108,21 @@ terraform apply
 
 ## Supported Data Sources
 As of May 2022, the following sources can be connected via psoxy:
-    * Google Workspace
-      * Calendar
-      * Chat
-      * Directory
-      * Drive
-      * GMail
-      * Meet
-    * Microsoft 365
-      * Active Directory
-      * Calendar
-      * Mail
-    * Slack
-        * eDiscovery API
-    * Zoom
+
+  * Google Workspace
+    * Calendar
+    * Chat
+    * Directory
+    * Drive
+    * GMail
+    * Meet
+  * Microsoft 365
+    * Active Directory
+    * Calendar
+    * Mail
+  * Slack
+    * eDiscovery API
+  * Zoom
 
 
 You can also use the command line tool to pseudonymize arbitrary CSV files (eg, exports from your
