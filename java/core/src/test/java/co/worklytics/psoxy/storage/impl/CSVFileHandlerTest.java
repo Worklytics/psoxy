@@ -4,10 +4,15 @@ import co.worklytics.psoxy.PsoxyModule;
 import co.worklytics.psoxy.Rules;
 import co.worklytics.psoxy.Sanitizer;
 import co.worklytics.psoxy.SanitizerFactory;
+import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestModules;
+import co.worklytics.test.TestUtils;
 import dagger.Component;
 import lombok.SneakyThrows;
+import org.apache.commons.codec.binary.Base64;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -17,8 +22,12 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class CSVFileHandlerTest {
 
@@ -27,6 +36,9 @@ public class CSVFileHandlerTest {
 
     @Inject
     SanitizerFactory sanitizerFactory;
+
+    @Inject
+    RulesUtils rulesUtils;
 
     @Singleton
     @Component(modules = {
@@ -146,6 +158,61 @@ public class CSVFileHandlerTest {
                 .build());
 
         File inputFile = new File(getClass().getResource("/csv/hris-example-quotes.csv").getFile());
+
+        try (FileReader in = new FileReader(inputFile)) {
+            byte[] result  = csvFileHandler.handle(in, sanitizer);
+
+            assertEquals(EXPECTED, new String(result));
+        }
+    }
+
+    @Test
+    @SneakyThrows
+    void defaultRules() {
+
+        final String EXPECTED = "EMPLOYEE_ID,employee_EMAIL,MANAGER_id,Manager_Email,JOIN_DATE,ROLE\r\n" +
+            "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"mfsaNYuCX__xvnRz4gJp_t0zrDTC5DkuCJvMkubugsI\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"TtDWXFAQxNE8O2w7DuMtEKzTSZXERuUVLCjmd9r6KQ4\"\"}\",2021-01-01,Accounting Manager\r\n" +
+            "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"mfsaNYuCX__xvnRz4gJp_t0zrDTC5DkuCJvMkubugsI\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"TtDWXFAQxNE8O2w7DuMtEKzTSZXERuUVLCjmd9r6KQ4\"\"}\",,,2020-01-01,CEO\r\n";
+
+        ConfigService config = mock(ConfigService.class);
+        when(config.getConfigPropertyAsOptional(eq(ProxyConfigProperty.RULES)))
+            .thenReturn(Optional.of(Base64.encodeBase64String(TestUtils.getData("rules/hris/csv.yaml"))));
+
+        Rules rules = rulesUtils.getRulesFromConfig(config).orElseThrow();
+
+        Sanitizer sanitizer = sanitizerFactory.create(Sanitizer.Options.builder()
+            .rules(rules)
+            .pseudonymizationSalt("salt")
+            .defaultScopeId("hris")
+            .build());
+
+        File inputFile = new File(getClass().getResource("/csv/hris-default-rules.csv").getFile());
+
+        try (FileReader in = new FileReader(inputFile)) {
+            byte[] result  = csvFileHandler.handle(in, sanitizer);
+
+            assertEquals(EXPECTED, new String(result));
+        }
+    }
+
+
+    @Test
+    @SneakyThrows
+    void validCaseInsensitiveAndTrimRules() {
+        final String EXPECTED = "EMPLOYEE_ID,AN EMAIL,SOME DEPARTMENT\r\n" +
+            "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",Engineering\r\n";
+
+        Sanitizer sanitizer = sanitizerFactory.create(Sanitizer.Options.builder()
+            .rules(Rules.builder()
+                .pseudonymization(Rules.Rule.builder()
+                    .csvColumns(Arrays.asList("    employee_id     ", " an EMAIL "))
+                    .build())
+                .build())
+            .pseudonymizationSalt("salt")
+            .defaultScopeId("hris")
+            .build());
+
+        File inputFile = new File(getClass().getResource("/csv/hris-example-headers-w-spaces.csv").getFile());
 
         try (FileReader in = new FileReader(inputFile)) {
             byte[] result  = csvFileHandler.handle(in, sanitizer);

@@ -1,8 +1,8 @@
 package co.worklytics.psoxy.storage.impl;
 
-import co.worklytics.psoxy.storage.FileHandler;
 import co.worklytics.psoxy.Rules;
 import co.worklytics.psoxy.Sanitizer;
+import co.worklytics.psoxy.storage.FileHandler;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
@@ -36,6 +36,8 @@ public class CSVFileHandler implements FileHandler {
     public byte[] handle(@NonNull InputStreamReader reader, @NonNull Sanitizer sanitizer) throws IOException {
         CSVParser records = CSVFormat.DEFAULT
                 .withFirstRecordAsHeader()
+                .withIgnoreHeaderCase()
+                .withTrim()
                 .parse(reader);
 
         Preconditions.checkArgument(records.getHeaderMap() != null, "Failed to parse header from file");
@@ -47,29 +49,45 @@ public class CSVFileHandler implements FileHandler {
                 .stream()
                 .map(Rules.Rule::getCsvColumns)
                 .flatMap(Collection::stream)
-                .collect(Collectors.toSet());
+                .map(String::trim)
+                .collect(Collectors.toCollection(() -> new TreeSet<>(String.CASE_INSENSITIVE_ORDER)));
 
         Set<String> columnsToPseudonymize = options.getRules()
                 .getPseudonymizations()
                 .stream()
                 .map(Rules.Rule::getCsvColumns)
                 .flatMap(Collection::stream)
-                .collect(Collectors.toSet());
+                .map(String::trim)
+                .collect(Collectors.toCollection(() -> new TreeSet<>(String.CASE_INSENSITIVE_ORDER)));
 
-        String[] header = records.getHeaderMap().keySet()
+        // headers respecting insertion order
+        // when constructing the parser with ignore header case the keySet may not return values in
+        // order. header map is <key, position>, order by position first, then construct the key set
+        Set<String> headers = records.getHeaderMap()
+                .entrySet()
                 .stream()
-                .filter(entry -> !columnsToRedact.contains(entry)).toArray(String[]::new);
+                .sorted(Comparator.comparingInt(Map.Entry::getValue))
+                .filter(entry -> !columnsToRedact.contains(entry.getKey()))
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        // case-insensitive headers
+        Set<String> headersCI = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+        headersCI.addAll(headers);
+
+        // precondition, everything expected to be pseudonymized must exist in the rest of columns
+        columnsToPseudonymize
+            .forEach(columnToPseudonymize ->
+                Preconditions.checkArgument(headersCI.contains(columnToPseudonymize), "Column %s to be pseudonymized not in file", columnToPseudonymize));
+
 
         try(ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
             PrintWriter printWriter = new PrintWriter(baos);
-            CSVPrinter printer = new CSVPrinter(printWriter, CSVFormat.DEFAULT.withHeader(header))){
-
-            columnsToPseudonymize
-                    .forEach(columnToPseudonymize ->
-                            Preconditions.checkArgument(records.getHeaderMap().containsKey(columnToPseudonymize), "Column %s to be pseudonymized not in file", columnToPseudonymize));
+            CSVPrinter printer = new CSVPrinter(printWriter, CSVFormat.DEFAULT
+                .withHeader(headers.toArray(new String[0])))) {
 
             records.forEach(row -> {
-                List<Object> sanitized = Arrays.stream(header) // only iterate on allowed headers
+                List<Object> sanitized = headers.stream() // only iterate on allowed headers
                         .map(column -> {
                             String value = row.get(column);
                             if (columnsToPseudonymize.contains(column)) {
