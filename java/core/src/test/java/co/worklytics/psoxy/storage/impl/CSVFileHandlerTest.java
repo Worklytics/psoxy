@@ -199,20 +199,20 @@ public class CSVFileHandlerTest {
     @Test
     @SneakyThrows
     void validCaseInsensitiveAndTrimRules() {
-        final String EXPECTED = "EMPLOYEE_ID,EMAIL,DEPARTMENT\r\n" +
-            "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",\",,,\"\r\n";
+        final String EXPECTED = "EMPLOYEE_ID,AN EMAIL,SOME DEPARTMENT\r\n" +
+            "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",Engineering\r\n";
 
         Sanitizer sanitizer = sanitizerFactory.create(Sanitizer.Options.builder()
             .rules(Rules.builder()
                 .pseudonymization(Rules.Rule.builder()
-                    .csvColumns(Arrays.asList("    employee_id     ", " email"))
+                    .csvColumns(Arrays.asList("    employee_id     ", " an EMAIL "))
                     .build())
                 .build())
             .pseudonymizationSalt("salt")
             .defaultScopeId("hris")
             .build());
 
-        File inputFile = new File(getClass().getResource("/csv/hris-example-quotes.csv").getFile());
+        File inputFile = new File(getClass().getResource("/csv/hris-example-headers-w-spaces.csv").getFile());
 
         try (FileReader in = new FileReader(inputFile)) {
             byte[] result  = csvFileHandler.handle(in, sanitizer);
