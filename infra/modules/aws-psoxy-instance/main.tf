@@ -56,7 +56,15 @@ resource "aws_iam_role" "iam_for_lambda" {
         },
         "Effect" : "Allow",
         "Sid" : ""
-      }
+      },
+      {
+        "Action" : "sts:AssumeRole",
+        "Principal" : {
+          "AWS" : var.api_caller_role_arn
+        },
+        "Effect" : "Allow",
+        "Sid" : ""
+      },
     ]
   })
 }
@@ -92,6 +100,33 @@ resource "aws_iam_role_policy_attachment" "basic" {
 resource "aws_iam_role_policy_attachment" "policy" {
   role       = aws_iam_role.iam_for_lambda.name
   policy_arn = aws_iam_policy.policy.arn
+}
+
+resource "aws_iam_role_policy_attachment" "read_lambda_ssm_to_caller" {
+  role       = var.api_caller_role_arn_name
+  policy_arn = aws_iam_policy.policy.arn
+}
+
+resource "aws_iam_policy" "execution_lambda_to_caller" {
+  name        = "${var.function_name}_invoker"
+  description = "Allow caller role to execute the lambda directly"
+
+  policy = jsonencode(
+    {
+      "Version" : "2012-10-17",
+      "Statement" : [
+        {
+          "Action" : ["lambda:InvokeFunctionUrl"],
+          "Effect" : "Allow",
+          "Resource" : aws_lambda_function.psoxy-instance.arn
+        }
+      ]
+    })
+}
+
+resource "aws_iam_role_policy_attachment" "execution_lambda_to_caller" {
+  role       = var.api_caller_role_arn_name
+  policy_arn = aws_iam_policy.execution_lambda_to_caller.arn
 }
 
 locals {

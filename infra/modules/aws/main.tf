@@ -8,28 +8,6 @@ terraform {
   }
 }
 
-# AWS API Gateway
-resource "aws_apigatewayv2_api" "psoxy-api" {
-  name          = "psoxy-api"
-  protocol_type = "HTTP"
-  description   = "API to expose psoxy instances"
-}
-
-resource "aws_cloudwatch_log_group" "gateway-log" {
-  name              = aws_apigatewayv2_api.psoxy-api.name
-  retention_in_days = 7
-}
-
-resource "aws_apigatewayv2_stage" "live" {
-  api_id      = aws_apigatewayv2_api.psoxy-api.id
-  name        = "live" # q: what name??
-  auto_deploy = true
-  access_log_settings {
-    destination_arn = aws_cloudwatch_log_group.gateway-log.arn
-    format          = "$context.identity.sourceIp $context.identity.caller $context.identity.user [$context.requestTime] \"$context.httpMethod $context.path $context.protocol\" $context.status $context.responseLength $context.requestId $context.extendedRequestId $context.error.messageString $context.integrationErrorMessage"
-  }
-}
-
 # role that Worklytics user will use to call the API
 resource "aws_iam_role" "api-caller" {
   name = "PsoxyApiCaller"
@@ -38,6 +16,14 @@ resource "aws_iam_role" "api-caller" {
   assume_role_policy = jsonencode({
     "Version" : "2012-10-17",
     "Statement" : [
+      {
+        "Action" : "sts:AssumeRole",
+        "Principal" : {
+          "Service" : "lambda.amazonaws.com"
+        },
+        "Effect" : "Allow",
+        "Sid" : ""
+      },
       {
         "Action" = "sts:AssumeRole"
         "Effect" : "Allow"
@@ -60,27 +46,13 @@ resource "aws_iam_role" "api-caller" {
       }
     ]
   })
-
-  # what this role can do (invoke anything in the API gateway )
-  inline_policy {
-    name = "lambda-invoker"
-    policy = jsonencode({
-      "Version" : "2012-10-17",
-      "Statement" : [
-        {
-          "Effect" : "Allow",
-          "Action" : "execute-api:Invoke",
-          "Resource" : "arn:aws:execute-api:*:${var.aws_account_id}:*/*/GET/*",
-        },
-        {
-          "Effect" : "Allow",
-          "Action" : "execute-api:Invoke",
-          "Resource" : "arn:aws:execute-api:*:${var.aws_account_id}:*/*/HEAD/*",
-        },
-      ]
-    })
-  }
 }
+
+resource "aws_iam_role_policy_attachment" "invoker_lambda_execution" {
+  role       = aws_iam_role.api-caller.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
 
 # not really a 'password', but 'random_string' isn't "sensitive" by terraform, so
 # is output to console
@@ -104,10 +76,6 @@ resource "aws_ssm_parameter" "salt" {
 
 output "salt_secret" {
   value = aws_ssm_parameter.salt
-}
-
-output "api_gateway" {
-  value = aws_apigatewayv2_api.psoxy-api
 }
 
 output "api_caller_role_arn" {

@@ -89,7 +89,6 @@ module "aws-psoxy-long-auth-connectors" {
 
   function_name        = "psoxy-${each.key}"
   source_kind          = each.value.source_kind
-  api_gateway          = module.psoxy-aws.api_gateway
   path_to_function_zip = module.psoxy-package.path_to_deployment_jar
   function_zip_hash    = module.psoxy-package.deployment_package_hash
   path_to_config       = "../../../configs/${each.value.source_kind}.yaml"
