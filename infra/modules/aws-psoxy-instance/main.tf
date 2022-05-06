@@ -56,15 +56,7 @@ resource "aws_iam_role" "iam_for_lambda" {
         },
         "Effect" : "Allow",
         "Sid" : ""
-      },
-      {
-        "Action" : "sts:AssumeRole",
-        "Principal" : {
-          "AWS" : var.api_caller_role_arn
-        },
-        "Effect" : "Allow",
-        "Sid" : ""
-      },
+      }
     ]
   })
 }
@@ -109,7 +101,7 @@ resource "aws_iam_role_policy_attachment" "read_lambda_ssm_to_caller" {
 
 resource "aws_iam_policy" "execution_lambda_to_caller" {
   name        = "${var.function_name}_invoker"
-  description = "Allow caller role to execute the lambda directly"
+  description = "Allow caller role to execute the lambda url directly"
 
   policy = jsonencode(
     {
