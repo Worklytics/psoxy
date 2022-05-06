@@ -54,12 +54,12 @@ variable "path_to_config" {
 
 variable "api_caller_role_arn" {
   type        = string
-  description = "arn of role which can be assumed to all API"
+  description = "arn of role which can be assumed to call API"
 }
 
 variable "api_caller_role_arn_name" {
   type        = string
-  description = "name of arn of role which can be assumed to all API"
+  description = "name of arn of role which can be assumed to call API"
 }
 
 variable "example_api_calls" {
