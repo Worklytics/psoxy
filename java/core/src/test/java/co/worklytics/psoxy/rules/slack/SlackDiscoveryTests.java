@@ -128,7 +128,8 @@ public class SlackDiscoveryTests extends JavaRulesTestBaseCase {
         String jsonString = asJson("discovery-conversations-history.json");
 
         Collection<String> PIItoPseudonymize = Arrays.asList(
-            "W06CA4EAC","W0G81RDQT","W0N0ZQDED","W0R8EBMXP","W0G81RDQZ","W000000", "U02DU306H0B"
+            "W06CA4EAC","W0G81RDQT","W0N0ZQDED","W0R8EBMXP","W0G81RDQZ","W000000", "U02DU306H0B",
+            "REPLYUSER"
         );
         Collection<String> dataToRedact = Arrays.asList(
             "Test message!",
@@ -140,7 +141,8 @@ public class SlackDiscoveryTests extends JavaRulesTestBaseCase {
             "Jose",
             "This is likely a pun about the weather.",
             "We're withholding a pun from you",
-            "Leg end nary a laugh, Ink."
+            "Leg end nary a laugh, Ink.",
+            "Some other text"
         );
 
         assertNotSanitized(jsonString, PIItoPseudonymize);

@@ -119,6 +119,81 @@
           ]
         }
       ]
+    },
+    {
+      "type": "message",
+      "subtype": "bot_message",
+      "ts": "1651598000.000001",
+      "bot_id": "B00000001",
+      "team": "T00000001",
+      "bot_profile": {
+        "id": "B00000001",
+        "app_id": "A00000001",
+        "name": "App name",
+        "icons": {
+          "image_36": "https://avatars.slack-edge.com/YYYY-MM-DD/app_image_36.png",
+          "image_48": "https://avatars.slack-edge.com/YYYY-MM-DD/app_image_48.png",
+          "image_72": "https://avatars.slack-edge.com/YYYY-MM-DD/app_image_72.png"
+        },
+        "deleted": false,
+        "updated": 1630603699,
+        "team_id": "T00000001"
+      },
+      "thread_ts": "1651598000.000001",
+      "reply_count": 7,
+      "reply_users_count": 4,
+      "latest_reply": "1651600000.000001",
+      "reply_users": [
+        "REPLYUSER",
+        "W06CA4EAC",
+        "W0G81RDQT",
+        "W0N0ZQDED"
+      ],
+      "replies": [
+        {
+          "user": "REPLYUSER",
+          "ts": "1651598339.434889"
+        },
+        {
+          "user": "W06CA4EAC",
+          "ts": "1651598395.311239"
+        },
+        {
+          "user": "W0G81RDQT",
+          "ts": "1651598519.298169"
+        },
+        {
+          "user": "W0N0ZQDED",
+          "ts": "1651599241.015189"
+        }
+      ],
+      "is_locked": false,
+      "blocks": [
+        {
+          "type": "section",
+          "block_id": "55L5"
+        },
+        {
+          "type": "divider",
+          "block_id": "WmLUu"
+        },
+        {
+          "type": "actions",
+          "block_id": "33Plf",
+          "elements": [
+            {
+              "type": "text",
+              "text": "Some other text"
+            },
+            {
+              "type": "button",
+              "action_id": "callToAction",
+              "value": "buttonValue",
+              "url": "https://somelink.com/whatever"
+            }
+          ]
+        }
+      ]
     }
   ],
   "offset": "1463084600.000000"

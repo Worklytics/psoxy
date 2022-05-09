@@ -16,6 +16,8 @@ pseudonymizations:
   - jsonPaths:
       - "$.messages[*].user"
       - "$.messages[*].reactions[*].users[*]"
+      - "$.messages[*].replies[*].user"
+      - "$.messages[*].reply_users[*]"
       - "$.messages[*].edited.user"
       - "$.messages[*].blocks[*].elements[*].elements[*].user_id"
     relativeUrlRegex: "\\/api\\/discovery\\.conversations\\.history(?:\\?.+)?"
