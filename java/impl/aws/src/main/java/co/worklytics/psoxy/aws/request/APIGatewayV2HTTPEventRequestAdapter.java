@@ -3,7 +3,6 @@ package co.worklytics.psoxy.aws.request;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
 import com.google.common.base.Splitter;
-import com.google.common.collect.Maps;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
@@ -15,6 +14,10 @@ import java.util.Optional;
 /**
  * Adapter for the APIGatewayV2HTTPEvent to the interface the {@link co.worklytics.psoxy.gateway.impl.CommonRequestHandler}
  * understands
+ * Lambda calls use this very same adapter, but some fields differ as the nature of the service is
+ * different.
+ * https://docs.aws.amazon.com/lambda/latest/dg/urls-invocation.html#urls-payloads
+ *
  */
 @RequiredArgsConstructor
 @Log
@@ -24,7 +27,7 @@ public class APIGatewayV2HTTPEventRequestAdapter implements HttpEventRequest {
 
     @Override
     public String getPath() {
-        return StringUtils.prependIfMissing(event.getPathParameters().get("proxy"),"/");
+        return StringUtils.prependIfMissing(event.getRawPath(),"/");
     }
 
     @Override

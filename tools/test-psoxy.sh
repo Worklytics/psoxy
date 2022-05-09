@@ -45,7 +45,7 @@ then
   log "Calling proxy..."
   log "Request: $TEST_URL"
   log "Waiting Response:"
-  awscurl "${curlparams[@]}" --service execute-api --access_key $CALLER_ACCESS_KEY_ID --secret_key $CALLER_SECRET_ACCESS_KEY --security_token $CALLER_SESSION_TOKEN $TEST_URL
+  awscurl "${curlparams[@]}" --service lambda --access_key $CALLER_ACCESS_KEY_ID --secret_key $CALLER_SECRET_ACCESS_KEY --security_token $CALLER_SESSION_TOKEN $TEST_URL
   # Remove env variables
   unset CALLER_ACCESS_KEY_ID CALLER_SECRET_ACCESS_KEY CALLER_SESSION_TOKEN
 fi

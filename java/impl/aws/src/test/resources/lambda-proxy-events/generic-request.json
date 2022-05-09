@@ -1,7 +1,7 @@
 {
   "version": "2.0",
-  "routeKey": "GET /lambda-name/{proxy+}",
-  "rawPath": "/live/lambda-name/path/to/resource",
+  "routeKey": "$default",
+  "rawPath": "/path/to/resource",
   "rawQueryString": "token=abc&page=2&multi=value2&multi=value1",
   "queryStringParameters": {
     "token": "abc",
@@ -11,10 +11,8 @@
   "headers": {
     "accept": "application/xml",
     "accept-encoding": "gzip, deflate",
-    "authorization": "AWS4-HMAC-SHA256 Credential=XXXXXXXXXXXXOAWH76BPW6/20220119/us-east-1/execute-api/aws4_request, SignedHeaders=host;x-amz-date;x-amz-security-token, Signature=eb391218120e774de2ee1d050bc682878b63d3a9b8d0cd7303447e6dee58aa87",
-    "content-length": "0",
     "content-type": "application/json",
-    "host": "apiId.execute-api.us-east-1.amazonaws.com",
+    "host": "lambdaFunctionId.lambda-url.us-east-1.on.aws",
     "user-agent": "python-requests/2.22.0",
     "x-amz-content-sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "x-amz-date": "20220119T053607Z",
@@ -27,7 +25,7 @@
   },
   "requestContext": {
     "accountId": "123456789012",
-    "apiId": "apiId",
+    "apiId": "lambdaFunctionId",
     "authorizer": {
       "iam": {
         "accessKey": "XXXXXXXXXXXXOAWH76BPW6",
@@ -39,23 +37,21 @@
         "userId": "YYYYYYYYY27OW7UDMK:test_call"
       }
     },
-    "domainName": "apiId.execute-api.us-east-1.amazonaws.com",
-    "domainPrefix": "apiId",
+    "domainName": "lambdaFunctionId.lambda-url.us-east-1.on.aws",
+    "domainPrefix": "lambdaFunctionId",
     "http": {
       "method": "GET",
-      "path": "/live/lambda-name/path/to/resource",
+      "path": "/v2/users",
       "protocol": "HTTP/1.1",
-      "sourceIp": "73.19.103.123",
+      "sourceIp": "123.123.123.123",
       "userAgent": "python-requests/2.22.0"
     },
     "requestId": "MLZzPiGaoAMEMfw=",
-    "routeKey": "GET /lambda-name/{proxy+}",
-    "stage": "live",
+    "routeKey": "$default",
+    "stage": "$default",
     "time": "19/Jan/2022:05:36:07 +0000",
     "timeEpoch": 1642570567703
   },
-  "pathParameters": {
-    "proxy": "path/to/resource"
-  },
+  "pathParameters": null,
   "isBase64Encoded": false
 }
