@@ -95,7 +95,7 @@ resource "aws_iam_role_policy_attachment" "policy" {
 }
 
 resource "aws_iam_role_policy_attachment" "read_lambda_ssm_to_caller" {
-  role       = var.api_caller_role_arn_name
+  role       = var.api_caller_role_name
   policy_arn = aws_iam_policy.policy.arn
 }
 
@@ -117,7 +117,7 @@ resource "aws_iam_policy" "execution_lambda_to_caller" {
 }
 
 resource "aws_iam_role_policy_attachment" "execution_lambda_to_caller" {
-  role       = var.api_caller_role_arn_name
+  role       = var.api_caller_role_name
   policy_arn = aws_iam_policy.execution_lambda_to_caller.arn
 }
 

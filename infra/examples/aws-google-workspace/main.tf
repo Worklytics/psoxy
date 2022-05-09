@@ -177,8 +177,8 @@ module "psoxy-google-workspace-connector" {
   function_zip_hash        = module.psoxy-package.deployment_package_hash
   path_to_config           = "../../../configs/${each.key}.yaml"
   api_caller_role_arn      = module.psoxy-aws.api_caller_role_arn
-  api_caller_role_arn_name = module.psoxy-aws.api_caller_role_name
-  aws_assume_role_arn      = var.aws_assume_role_arn
+  api_caller_role_name = module.psoxy-aws.api_caller_role_name
+  aws_assume_role_arn  = var.aws_assume_role_arn
 
   parameters = [
     module.psoxy-aws.salt_secret,

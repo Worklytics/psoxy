@@ -8,20 +8,6 @@ terraform {
   }
 }
 
-module "psoxy-aws" {
-  source = "../aws"
-
-  caller_aws_account_id   = var.caller_aws_account_id
-  caller_external_user_id = var.caller_external_user_id
-  aws_account_id          = var.aws_account_id
-}
-
-module "psoxy-package" {
-  source = "../psoxy-package"
-
-  implementation     = "aws"
-  path_to_psoxy_java = "../../../java"
-}
 
 resource "aws_s3_bucket" "input" {
   bucket = "psoxy-${var.instance_id}-input"
@@ -37,11 +23,11 @@ module "psoxy-file-handler" {
   function_name        = "psoxy-${var.instance_id}"
   handler_class        = "co.worklytics.psoxy.S3Handler"
   source_kind          = var.source_kind
-  path_to_function_zip = module.psoxy-package.path_to_deployment_jar
-  function_zip_hash    = module.psoxy-package.deployment_package_hash
-  path_to_config       = "../../../configs/${var.source_kind}.yaml"
-  api_caller_role_arn  = module.psoxy-aws.api_caller_role_arn
-  api_caller_role_arn_name = module.psoxy-aws.api_caller_role_name
+  path_to_function_zip = var.path_to_function_zip
+  function_zip_hash    = var.function_zip_hash
+  path_to_config       = var.path_to_config
+  api_caller_role_arn  = var.api_caller_role_arn
+  api_caller_role_name = var.api_caller_role_arn_name
   aws_assume_role_arn  = var.aws_assume_role_arn
   example_api_calls    = [] #None, as this function is called through the S3 event
 
@@ -144,6 +130,6 @@ resource "aws_iam_policy" "output_bucket_read" {
 }
 
 resource "aws_iam_role_policy_attachment" "caller_bucket_access_policy" {
-  role       = module.psoxy-aws.api_caller_role_name
+  role       = var.api_caller_role_arn
   policy_arn = aws_iam_policy.output_bucket_read.arn
 }

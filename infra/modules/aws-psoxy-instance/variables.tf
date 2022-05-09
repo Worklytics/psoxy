@@ -57,9 +57,9 @@ variable "api_caller_role_arn" {
   description = "arn of role which can be assumed to call API"
 }
 
-variable "api_caller_role_arn_name" {
+variable "api_caller_role_name" {
   type        = string
-  description = "name of arn of role which can be assumed to call API"
+  description = "name of role which can be assumed to call API"
 }
 
 variable "example_api_calls" {
