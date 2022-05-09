@@ -77,6 +77,8 @@ public class PrebuiltSanitizerRules {
             .relativeUrlRegex("\\/api\\/discovery\\.conversations\\.history(?:\\?.+)?")
             .jsonPath("$.messages[*].user")
             .jsonPath("$.messages[*].reactions[*].users[*]")
+            .jsonPath("$.messages[*].replies[*].user")
+            .jsonPath("$.messages[*].reply_users[*]")
             .jsonPath("$.messages[*].edited.user")
             .jsonPath("$.messages[*].blocks[*].elements[*].elements[*].user_id") // mentions in rich blocks
             .build()
