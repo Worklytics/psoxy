@@ -52,7 +52,7 @@ module "psoxy-package" {
   source = "../../modules/psoxy-package"
 
   implementation     = "aws"
-  path_to_psoxy_java = "../../../java"
+  path_to_psoxy_java = "${var.psoxy_basedir}/java"
 }
 
 data "azuread_client_config" "current" {}
@@ -175,15 +175,15 @@ module "psoxy-msft-connector" {
 
   source = "../../modules/aws-psoxy-instance"
 
-  function_name        = "psoxy-${each.key}"
-  source_kind          = each.value.source_kind
-  path_to_function_zip = module.psoxy-package.path_to_deployment_jar
-  function_zip_hash    = module.psoxy-package.deployment_package_hash
-  path_to_config       = "../../../configs/${each.value.source_kind}.yaml"
-  api_caller_role_arn  = module.psoxy-aws.api_caller_role_arn
+  function_name            = "psoxy-${each.key}"
+  source_kind              = each.value.source_kind
+  path_to_function_zip     = module.psoxy-package.path_to_deployment_jar
+  function_zip_hash        = module.psoxy-package.deployment_package_hash
+  path_to_config           = "../../../configs/${each.value.source_kind}.yaml"
+  api_caller_role_arn      = module.psoxy-aws.api_caller_role_arn
   api_caller_role_arn_name = module.psoxy-aws.api_caller_role_name
-  aws_assume_role_arn  = var.aws_assume_role_arn
-  example_api_calls    = each.value.example_calls
+  aws_assume_role_arn      = var.aws_assume_role_arn
+  example_api_calls        = each.value.example_calls
 
   parameters = concat(
     module.private-key-aws-parameters[each.key].parameters,

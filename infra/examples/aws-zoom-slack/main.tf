@@ -43,7 +43,7 @@ module "psoxy-package" {
   source = "git::https://github.com/worklytics/psoxy//infra/modules/psoxy-package?ref=v0.3.0-beta.1"
 
   implementation     = "aws"
-  path_to_psoxy_java = "../../../java"
+  path_to_psoxy_java = "${var.psoxy_basedir}/java"
 }
 
 # BEGIN LONG ACCESS AUTH CONNECTORS
