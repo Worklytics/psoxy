@@ -147,6 +147,12 @@ resource "aws_ssm_parameter" "client_id" {
   name  = "PSOXY_${upper(replace(each.key, "-", "_"))}_CLIENT_ID"
   type  = "String"
   value = module.msft-connection[each.key].connector.application_id
+
+  lifecycle {
+    ignore_changes = [
+      value
+    ]
+  }
 }
 
 resource "aws_ssm_parameter" "refresh_endpoint" {
@@ -156,6 +162,12 @@ resource "aws_ssm_parameter" "refresh_endpoint" {
   type      = "String"
   overwrite = true
   value     = "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
+
+  lifecycle {
+    ignore_changes = [
+      value
+    ]
+  }
 }
 
 
