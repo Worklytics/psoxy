@@ -37,7 +37,7 @@ provider "azuread" {
 }
 
 module "psoxy-aws" {
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws?ref=v0.3.0-beta.4"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws?ref=v0.3.0-beta.5"
 
   caller_aws_account_id   = var.caller_aws_account_id
   caller_external_user_id = var.caller_external_user_id
@@ -49,7 +49,7 @@ module "psoxy-aws" {
 }
 
 module "psoxy-package" {
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/psoxy-package?ref=v0.3.0-beta.4"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/psoxy-package?ref=v0.3.0-beta.5"
 
   implementation     = "aws"
   path_to_psoxy_java = "${var.psoxy_base_dir}/java"
@@ -122,7 +122,7 @@ locals {
 module "msft-connection" {
   for_each = local.enabled_msft_sources
 
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-connection?ref=v0.3.0-beta.4"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-connection?ref=v0.3.0-beta.5"
 
   display_name                      = "Psoxy Connector - ${each.value.display_name}${var.connector_display_name_suffix}"
   tenant_id                         = var.msft_tenant_id
@@ -133,7 +133,7 @@ module "msft-connection" {
 module "msft-connection-auth" {
   for_each = local.enabled_msft_sources
 
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-local-cert?ref=v0.3.0-beta.4"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-local-cert?ref=v0.3.0-beta.5"
 
   application_object_id = module.msft-connection[each.key].connector.id
   rotation_days         = 60
@@ -147,6 +147,12 @@ resource "aws_ssm_parameter" "client_id" {
   name  = "PSOXY_${upper(replace(each.key, "-", "_"))}_CLIENT_ID"
   type  = "String"
   value = module.msft-connection[each.key].connector.application_id
+
+  lifecycle {
+    ignore_changes = [
+      value
+    ]
+  }
 }
 
 resource "aws_ssm_parameter" "refresh_endpoint" {
@@ -156,13 +162,19 @@ resource "aws_ssm_parameter" "refresh_endpoint" {
   type      = "String"
   overwrite = true
   value     = "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
+
+  lifecycle {
+    ignore_changes = [
+      value
+    ]
+  }
 }
 
 
 module "private-key-aws-parameters" {
   for_each = local.enabled_msft_sources
 
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/private-key-aws-parameter?ref=v0.3.0-beta.4"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/private-key-aws-parameter?ref=v0.3.0-beta.5"
 
   instance_id = each.key
 
@@ -173,7 +185,7 @@ module "private-key-aws-parameters" {
 module "psoxy-msft-connector" {
   for_each = local.enabled_msft_sources
 
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-instance?ref=v0.3.0-beta.4"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-instance?ref=v0.3.0-beta.5"
 
   function_name        = "psoxy-${each.key}"
   source_kind          = each.value.source_kind
@@ -198,7 +210,7 @@ module "psoxy-msft-connector" {
 module "msft_365_grants" {
   for_each = local.enabled_msft_sources
 
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-grant-all-users?ref=v0.3.0-beta.4"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-grant-all-users?ref=v0.3.0-beta.5"
 
   application_id           = module.msft-connection[each.key].connector.application_id
   oauth2_permission_scopes = each.value.required_oauth2_permission_scopes
@@ -210,7 +222,7 @@ module "msft_365_grants" {
 module "worklytics-psoxy-connection" {
   for_each = local.enabled_msft_sources
 
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=v0.3.0-beta.4"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=v0.3.0-beta.5"
 
   psoxy_endpoint_url = module.psoxy-msft-connector[each.key].endpoint_url
   display_name       = "${each.value.display_name} via Psoxy${var.connector_display_name_suffix}"

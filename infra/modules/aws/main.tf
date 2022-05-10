@@ -120,6 +120,12 @@ resource "aws_ssm_parameter" "salt" {
   type        = "SecureString"
   description = "Salt used to build pseudonyms"
   value       = sensitive(random_password.random.result)
+
+  lifecycle {
+    ignore_changes = [
+      value
+    ]
+  }
 }
 
 output "salt_secret" {
