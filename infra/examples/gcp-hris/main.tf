@@ -31,7 +31,7 @@ resource "google_project" "psoxy-project" {
 
 
 module "psoxy-gcp-bulk" {
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-bulk?ref=v0.3.0-beta.2"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-bulk?ref=v0.3.0-beta.3"
 
   project_id           = google_project.psoxy-project.project_id
   worklytics_sa_emails = var.worklytics_sa_emails

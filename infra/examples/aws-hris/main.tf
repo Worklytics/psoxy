@@ -28,7 +28,7 @@ provider "aws" {
 }
 
 module "psoxy-aws" {
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-bulk?ref=v0.3.0-beta.2"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-bulk?ref=v0.3.0-beta.3"
 
   caller_aws_account_id   = var.caller_aws_account_id
   caller_external_user_id = var.caller_external_user_id

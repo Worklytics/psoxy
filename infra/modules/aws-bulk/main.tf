@@ -9,7 +9,7 @@ terraform {
 }
 
 module "psoxy-aws" {
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws?ref=v0.3.0-beta.2"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws?ref=v0.3.0-beta.3"
 
   caller_aws_account_id   = var.caller_aws_account_id
   caller_external_user_id = var.caller_external_user_id
@@ -18,7 +18,7 @@ module "psoxy-aws" {
 
 
 module "psoxy-package" {
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/psoxy-package?ref=v0.3.0-beta.2"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/psoxy-package?ref=v0.3.0-beta.3"
 
   implementation     = "aws"
   path_to_psoxy_java = "${var.psoxy_basedir}/java"
@@ -35,7 +35,7 @@ resource "aws_s3_bucket" "output" {
 }
 
 module "psoxy-file-handler" {
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-instance?ref=v0.3.0-beta.2"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-instance?ref=v0.3.0-beta.3"
 
   function_name        = "psoxy-${var.instance_id}"
   handler_class        = "co.worklytics.psoxy.S3Handler"

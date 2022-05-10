@@ -33,7 +33,7 @@ provider "aws" {
 }
 
 module "psoxy-aws" {
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws?ref=v0.3.0-beta.2"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws?ref=v0.3.0-beta.3"
 
   caller_aws_account_id   = var.caller_aws_account_id
   caller_external_user_id = var.caller_external_user_id
@@ -41,7 +41,7 @@ module "psoxy-aws" {
 }
 
 module "psoxy-package" {
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/psoxy-package?ref=v0.3.0-beta.2"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/psoxy-package?ref=v0.3.0-beta.3"
 
   implementation     = "aws"
   path_to_psoxy_java = "${var.psoxy_basedir}/java"
@@ -143,7 +143,7 @@ locals {
 module "google-workspace-connection" {
   for_each = local.enabled_google_workspace_sources
 
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/google-workspace-dwd-connection?ref=v0.3.0-beta.2"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/google-workspace-dwd-connection?ref=v0.3.0-beta.3"
 
   project_id                   = google_project.psoxy-google-connectors.project_id
   connector_service_account_id = "psoxy-${each.key}"
@@ -160,7 +160,7 @@ module "google-workspace-connection" {
 module "google-workspace-connection-auth" {
   for_each = local.enabled_google_workspace_sources
 
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-sa-auth-key-aws-secret?ref=v0.3.0-beta.2"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-sa-auth-key-aws-secret?ref=v0.3.0-beta.3"
 
   service_account_id = module.google-workspace-connection[each.key].service_account_id
   secret_id          = "PSOXY_${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY"
@@ -169,7 +169,7 @@ module "google-workspace-connection-auth" {
 module "psoxy-google-workspace-connector" {
   for_each = local.enabled_google_workspace_sources
 
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-instance?ref=v0.3.0-beta.2"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-instance?ref=v0.3.0-beta.3"
 
   function_name        = "psoxy-${each.key}"
   source_kind          = each.key
@@ -190,7 +190,7 @@ module "psoxy-google-workspace-connector" {
 module "worklytics-psoxy-connection-google-workspace" {
   for_each = local.enabled_google_workspace_sources
 
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=v0.3.0-beta.2"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=v0.3.0-beta.3"
 
   psoxy_endpoint_url = module.psoxy-google-workspace-connector[each.key].endpoint_url
   display_name       = "${each.value.display_name} via Psoxy${var.connector_display_name_suffix}"
