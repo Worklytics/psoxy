@@ -7,6 +7,12 @@ variable "aws_account_id" {
   }
 }
 
+variable "region" {
+  type        = string
+  description = "region into which to deploy function"
+  default     = "us-east-1"
+}
+
 variable "caller_aws_account_id" {
   type        = string
   description = "id of worklytics sa"
@@ -27,8 +33,8 @@ variable "caller_external_user_id" {
   }
 }
 
-variable "path_to_psoxy_java" {
+variable "psoxy_base_dir" {
   type        = string
-  description = "relative path from working directory (from which you call this module) to java/ folder within your checkout of the Psoxy repo"
-  default     = "../../java"
+  description = "the path where your psoxy repo resides"
+  default     = "../../.."
 }

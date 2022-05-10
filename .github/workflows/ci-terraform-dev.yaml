@@ -23,11 +23,11 @@ jobs:
       - name: 'Terraform - validate examples-dev/gcp-google-workspace'
         working-directory: infra/examples-dev/gcp-google-workspace
         run: |
-          terraform init
+          terraform init -reconfigure
           terraform validate
 
       - name: 'Terraform - validate examples-dev/aws-msft-365'
         working-directory: infra/examples-dev/aws-msft-365
         run: |
-          terraform init
+          terraform init -reconfigure
           terraform validate

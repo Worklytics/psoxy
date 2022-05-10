@@ -25,10 +25,11 @@ resource "google_project" "psoxy-project" {
 
 module "psoxy-gcp" {
   source = "../../modules/gcp"
-  #source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp?ref=v0.3.0-beta.1"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp?ref=v0.3.0-beta.5"
 
   project_id        = google_project.psoxy-project.project_id
   invoker_sa_emails = var.worklytics_sa_emails
+  psoxy_base_dir    = var.psoxy_base_dir
 
   depends_on = [
     google_project.psoxy-project
@@ -123,7 +124,9 @@ locals {
 module "google-workspace-connection" {
   for_each = local.enabled_google_workspace_sources
 
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/google-workspace-dwd-connection?ref=v0.4.0-beta.1"
+  # source = "../../modules/google-workspace-dwd-connection"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/google-workspace-dwd-connection?ref=v0.3.0-beta.5"
+
 
   project_id                   = google_project.psoxy-project.project_id
   connector_service_account_id = "psoxy-${each.key}-dwd"
@@ -139,7 +142,7 @@ module "google-workspace-connection" {
 module "google-workspace-connection-auth" {
   for_each = local.enabled_google_workspace_sources
 
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-sa-auth-key-secret-manager?ref=v0.3.0-beta.1"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-sa-auth-key-secret-manager?ref=v0.3.0-beta.4"
 
   secret_project     = google_project.psoxy-project.project_id
   service_account_id = module.google-workspace-connection[each.key].service_account_id
@@ -149,15 +152,16 @@ module "google-workspace-connection-auth" {
 module "psoxy-google-workspace-connector" {
   for_each = local.enabled_google_workspace_sources
 
-  #source = "../../modules/gcp-psoxy-rest"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-rest?ref=v0.4.0-beta.1"
+  source = "../../modules/gcp-psoxy-rest"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-rest?ref=v0.3.0-beta.5"
+
 
   project_id                    = google_project.psoxy-project.project_id
-  instance_id                   = each.value.function_name
+  instance_id                   = "psoxy-${each.value.source_kind}"
   service_account_email         = module.google-workspace-connection[each.key].service_account_email
   artifacts_bucket_name         = module.psoxy-gcp.artifacts_bucket_name
   deployment_bundle_object_name = module.psoxy-gcp.deployment_bundle_object_name
-  path_to_config                = "../../config/${each.value.source_kind}.yaml"
+  path_to_config                = "${var.psoxy_base_dir}/config/${each.value.source_kind}.yaml"
   salt_secret_id                = module.psoxy-gcp.salt_secret_name
   salt_secret_version_number    = module.psoxy-gcp.salt_secret_version_number
 
@@ -173,7 +177,9 @@ module "psoxy-google-workspace-connector" {
 module "worklytics-psoxy-connection" {
   for_each = local.enabled_google_workspace_sources
 
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection?ref=v0.4.0-beta.1"
+  source = "../../modules/worklytics-psoxy-connection"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection?ref=v0.3.0-beta.5"
+
 
   psoxy_endpoint_url = module.psoxy-google-workspace-connector[each.key].cloud_function_url
   display_name       = "${each.value.display_name} via Psoxy"

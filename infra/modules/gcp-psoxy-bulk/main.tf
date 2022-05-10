@@ -6,7 +6,6 @@ terraform {
   }
 }
 
-
 # data input to function
 resource "google_storage_bucket" "input-bucket" {
   project                     = var.project_id

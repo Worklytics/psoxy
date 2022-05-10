@@ -23,13 +23,6 @@ module "psoxy_lambda" {
   parameters           = []
 }
 
-
-# cloudwatch group per lambda function
-resource "aws_cloudwatch_log_group" "lambda-log" {
-  name              = "/aws/lambda/${var.function_name}"
-  retention_in_days = 7
-}
-
 resource "aws_lambda_function_url" "lambda_url" {
   function_name      = var.function_name
   authorization_type = "AWS_IAM"
@@ -62,32 +55,34 @@ resource "aws_iam_role" "iam_for_lambda" {
   })
 }
 
-
-resource "aws_iam_role_policy_attachment" "basic" {
-  role       = aws_iam_role.iam_for_lambda.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-}
-
-resource "aws_iam_policy" "execution_lambda_to_caller" {
-  name        = "${var.function_name}_invoker"
-  description = "Allow caller role to execute the lambda url directly"
+resource "aws_iam_policy" "policy" {
+  name        = "${var.function_name}_ssmGetParameters"
+  description = "Allow lambda function role to read SSM parameters"
 
   policy = jsonencode(
     {
       "Version" : "2012-10-17",
       "Statement" : [
         {
-          "Action" : ["lambda:InvokeFunctionUrl"],
+          "Action" : [
+            "ssm:GetParameter*"
+          ],
           "Effect" : "Allow",
-          "Resource" : module.psoxy_lambda.function_arn
+          "Resource" : "arn:aws:ssm:${var.region}:${var.aws_account_id}:parameter/*"
         }
       ]
   })
 }
 
-resource "aws_iam_role_policy_attachment" "execution_lambda_to_caller" {
-  role       = var.api_caller_role_name
-  policy_arn = aws_iam_policy.execution_lambda_to_caller.arn
+
+resource "aws_iam_role_policy_attachment" "basic" {
+  role       = aws_iam_role.iam_for_lambda.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_iam_role_policy_attachment" "policy" {
+  role       = aws_iam_role.iam_for_lambda.name
+  policy_arn = aws_iam_policy.policy.arn
 }
 
 locals {
@@ -96,7 +91,6 @@ locals {
     "./tools/test-psoxy.sh -a -r \"${var.aws_assume_role_arn}\" -u \"${local.proxy_endpoint_url}${path}\""
   ]
 }
-
 
 resource "local_file" "todo" {
   filename = "test ${var.function_name}.md"

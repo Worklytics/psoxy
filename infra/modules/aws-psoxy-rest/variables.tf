@@ -1,4 +1,11 @@
-
+variable "aws_account_id" {
+  type        = string
+  description = "id of aws account in which to provision your AWS infra"
+  validation {
+    condition     = can(regex("^\\d{12}$", var.aws_account_id))
+    error_message = "The aws_account_id value should be 12-digit numeric string."
+  }
+}
 
 variable "region" {
   type        = string

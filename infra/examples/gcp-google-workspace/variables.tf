@@ -37,3 +37,10 @@ variable "connector_display_name_suffix" {
   description = "suffix to append to display_names of connector SAs; helpful to distinguish between various ones in testing/dev scenarios"
   default     = ""
 }
+
+variable "psoxy_base_dir" {
+  type        = string
+  description = "the path where your psoxy repo resides"
+  default     = "../../.."
+}
+
