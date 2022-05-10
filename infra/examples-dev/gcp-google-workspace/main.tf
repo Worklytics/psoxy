@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     google = {
-      version = ">= 3.74, <= 4.0"
+      version = ">= 4.0, <= 5.0"
     }
   }
 
@@ -147,23 +147,25 @@ module "psoxy-google-workspace-connector" {
     k => v if v.deploy
   }
 
-  source = "../../modules/gcp-psoxy-cloud-function"
+  source = "../../modules/gcp-psoxy-rest"
 
-  project_id            = var.project_id
-  function_name         = "psoxy-${each.key}"
-  source_kind           = each.key
-  service_account_email = module.google-workspace-connection[each.key].service_account_email
+  project_id                    = var.project_id
+  instance_id                   = "psoxy-${each.key}"
+  service_account_email         = module.google-workspace-connection[each.key].service_account_email
+  artifacts_bucket_name         = module.psoxy-gcp.artifacts_bucket_name
+  deployment_bundle_object_name = module.psoxy-gcp.deployment_bundle_object_name
+  path_to_config                = "../../config/${each.key}.yaml"
+  salt_secret_id                = module.psoxy-gcp.salt_secret_name
+  salt_secret_version_number    = module.psoxy-gcp.salt_secret_version_number
 
   secret_bindings = {
-    PSOXY_SALT = {
-      secret_name    = module.psoxy-gcp.salt_secret_name
-      version_number = module.psoxy-gcp.salt_secret_version_number
-    },
     SERVICE_ACCOUNT_KEY = {
       secret_name    = module.google-workspace-connection-auth[each.key].key_secret_name
       version_number = module.google-workspace-connection-auth[each.key].key_secret_version_number
     }
   }
+
+
 }
 
 module "worklytics-psoxy-connection" {
@@ -222,12 +224,16 @@ module "connector-long-auth-create-function" {
     for k, v in local.oauth_long_access_connectors :
     k => v if v.deploy
   }
-  source = "../../modules/gcp-psoxy-cloud-function"
+  source = "../../modules/gcp-psoxy-rest"
 
   project_id            = var.project_id
-  function_name         = each.value.function_name
-  source_kind           = each.value.source_kind
+  instance_id           = each.value.function_name
   service_account_email = google_service_account.long_auth_connector_sa[each.key].email
+  artifacts_bucket_name         = module.psoxy-gcp.artifacts_bucket_name
+  deployment_bundle_object_name = module.psoxy-gcp.deployment_bundle_object_name
+  path_to_config                = "../../config/${each.value.source_kind}.yaml"
+  salt_secret_id                = module.psoxy-gcp.salt_secret_name
+  salt_secret_version_number    = module.psoxy-gcp.salt_secret_version_number
 
   secret_bindings = {
     PSOXY_SALT = {
@@ -240,6 +246,7 @@ module "connector-long-auth-create-function" {
       version_number = "latest"
     }
   }
+
 }
 
 # END LONG ACCESS AUTH CONNECTORS

@@ -97,9 +97,6 @@ resource "google_cloudfunctions_function" "function" {
   }
 
   depends_on = [
-    google_storage_bucket.input-bucket,
-    google_storage_bucket.output-bucket,
-    google_service_account.service-account,
     google_secret_manager_secret_iam_member.salt-secret-access-for-service-account
   ]
 }

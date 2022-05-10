@@ -15,8 +15,8 @@ resource "aws_lambda_function" "psoxy-instance" {
   runtime          = "java11"
   filename         = var.path_to_function_zip
   source_code_hash = var.function_zip_hash
-  timeout          = 55  # seconds
-  memory_size      = 512 # megabytes
+  timeout          = var.timeout_seconds
+  memory_size      = var.memory_size_mb
 
   environment {
     variables = merge(var.environment_variables, yamldecode(file(var.path_to_config)))
@@ -83,7 +83,6 @@ resource "aws_iam_policy" "policy" {
 
 }
 
-
 resource "aws_iam_role_policy_attachment" "basic" {
   role       = aws_iam_role.iam_for_lambda.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
@@ -92,89 +91,6 @@ resource "aws_iam_role_policy_attachment" "basic" {
 resource "aws_iam_role_policy_attachment" "policy" {
   role       = aws_iam_role.iam_for_lambda.name
   policy_arn = aws_iam_policy.policy.arn
-}
-
-resource "aws_iam_role_policy_attachment" "read_lambda_ssm_to_caller" {
-  role       = var.api_caller_role_name
-  policy_arn = aws_iam_policy.policy.arn
-}
-
-resource "aws_iam_policy" "execution_lambda_to_caller" {
-  name        = "${var.function_name}_invoker"
-  description = "Allow caller role to execute the lambda url directly"
-
-  policy = jsonencode(
-    {
-      "Version" : "2012-10-17",
-      "Statement" : [
-        {
-          "Action" : ["lambda:InvokeFunctionUrl"],
-          "Effect" : "Allow",
-          "Resource" : aws_lambda_function.psoxy-instance.arn
-        }
-      ]
-    })
-}
-
-resource "aws_iam_role_policy_attachment" "execution_lambda_to_caller" {
-  role       = var.api_caller_role_name
-  policy_arn = aws_iam_policy.execution_lambda_to_caller.arn
-}
-
-locals {
-  proxy_endpoint_url = aws_lambda_function_url.lambda_url.function_url
-  test_commands = [for path in var.example_api_calls :
-    "./tools/test-psoxy.sh -a -r \"${var.aws_assume_role_arn}\" -u \"${local.proxy_endpoint_url}${path}\""
-  ]
-}
-
-
-resource "local_file" "todo" {
-  filename = "test ${var.function_name}.md"
-  content  = <<EOT
-
-## Testing
-
-Review the deployed function in AWS console:
-
-- https://console.aws.amazon.com/lambda/home?region=${var.region}#/functions/${var.function_name}?tab=monitoring
-
-### Prereqs
-Requests to AWS API need to be [signed](https://docs.aws.amazon.com/general/latest/gr/signing_aws_api_requests.html).
-One tool to do it easily is [awscurl](https://github.com/okigan/awscurl). Install it:
-
-On MacOS via Homebrew:
-```shell
-brew install awscurl
-```
-
-Alternatively, via `pip` (python package manager):
-```shell
-pip install awscurl
-# Installs in $HOME/.local/bin
-# Make it available in your path
-# Add the following line to ~/.bashrc
-export PATH="$HOME/.local/bin:$PATH"
-# Then reload the config
-source ~/.bashrc
-```
-
-### From Terminal
-
-From root of your checkout of the Psoxy repo, these are some example test calls you can try (YMMV):
-
-```shell
-${coalesce(join("\n", local.test_commands), "cd docs/example-api-calls/")}
-```
-
-See `docs/example-api-calls/` for more example API calls specific to the data source to which your
-Proxy is configured to connect.
-
-EOT
-}
-
-output "endpoint_url" {
-  value = aws_lambda_function_url.lambda_url.function_url
 }
 
 output "function_arn" {

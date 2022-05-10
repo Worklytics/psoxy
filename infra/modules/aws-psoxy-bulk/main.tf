@@ -17,32 +17,55 @@ resource "aws_s3_bucket" "output" {
   bucket = "psoxy-${var.instance_id}-output"
 }
 
-module "psoxy-file-handler" {
-  source = "../aws-psoxy-instance"
+module "psoxy_lambda" {
+  source = "../aws-psoxy-lambda"
 
-  function_name        = "psoxy-${var.instance_id}"
-  handler_class        = "co.worklytics.psoxy.S3Handler"
-  source_kind          = var.source_kind
+  function_name = "psoxy-${var.instance_id}"
+  handler_class = "co.worklytics.psoxy.S3Handler"
+  timeout_seconds = 600 # 10 minutes
+  memory_size_mb  = 512
+  path_to_config       = var.path_to_config
   path_to_function_zip = var.path_to_function_zip
   function_zip_hash    = var.function_zip_hash
-  path_to_config       = var.path_to_config
-  api_caller_role_arn  = var.api_caller_role_arn
-  api_caller_role_name = var.api_caller_role_name
-  aws_assume_role_arn  = var.aws_assume_role_arn
-  example_api_calls    = [] #None, as this function is called through the S3 event
-
+  aws_assume_role_arn = var.aws_assume_role_arn
+  source_kind = var.source_kind
   parameters = []
+}
 
-  environment_variables = {
-    INPUT_BUCKET  = aws_s3_bucket.input.bucket,
-    OUTPUT_BUCKET = aws_s3_bucket.output.bucket
+
+
+resource "aws_lambda_function" "psoxy-instance" {
+  function_name    = "psoxy-${var.instance_id}"
+  role             = var.api_caller_role_arn
+  handler          = "co.worklytics.psoxy.S3Handler"
+  runtime          = "java11"
+  filename         = var.path_to_function_zip
+  source_code_hash = var.function_zip_hash
+  timeout          = 600 # 10 minutes
+  memory_size      = 512 # megabytes
+
+  environment {
+    variables = merge(
+      {
+        INPUT_BUCKET  = aws_s3_bucket.input.bucket,
+        OUTPUT_BUCKET = aws_s3_bucket.output.bucket
+      },
+      yamldecode(file(var.path_to_config))
+    )
   }
 }
+
+# cloudwatch group per lambda function
+resource "aws_cloudwatch_log_group" "lambda-log" {
+  name              = "/aws/lambda/${aws_lambda_function.psoxy-instance.function_name}"
+  retention_in_days = 7
+}
+
 
 resource "aws_lambda_permission" "allow_input_bucket" {
   statement_id  = "AllowExecutionFromS3Bucket"
   action        = "lambda:InvokeFunction"
-  function_name = module.psoxy-file-handler.function_arn
+  function_name = aws_lambda_function.psoxy-instance.function_name
   principal     = "s3.amazonaws.com"
   source_arn    = aws_s3_bucket.input.arn
 }
@@ -51,7 +74,7 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
   bucket = aws_s3_bucket.input.id
 
   lambda_function {
-    lambda_function_arn = module.psoxy-file-handler.function_arn
+    lambda_function_arn = aws_lambda_function.psoxy-instance.arn
     events              = ["s3:ObjectCreated:*"]
   }
 
@@ -78,7 +101,7 @@ resource "aws_iam_policy" "input_bucket_read_policy" {
 }
 
 resource "aws_iam_role_policy_attachment" "read_policy_for_import_bucket" {
-  role       = module.psoxy-file-handler.iam_for_lambda_name
+  role       = module.psoxy_lambda.iam_for_lambda_name
   policy_arn = aws_iam_policy.input_bucket_read_policy.arn
 }
 
@@ -101,8 +124,10 @@ resource "aws_iam_policy" "output_bucket_write_policy" {
   })
 }
 
+
+
 resource "aws_iam_role_policy_attachment" "write_policy_for_output_bucket" {
-  role       = module.psoxy-file-handler.iam_for_lambda_name
+  role       = module.psoxy_lambda.iam_for_lambda_name
   policy_arn = aws_iam_policy.output_bucket_write_policy.arn
 }
 

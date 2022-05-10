@@ -37,22 +37,17 @@ provider "azuread" {
 }
 
 module "psoxy-aws" {
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws?ref=v0.3.0-beta.1"
+  source = "../../modules/aws"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws?ref=v0.3.0-beta.1"
 
   caller_aws_account_id   = var.caller_aws_account_id
   caller_external_user_id = var.caller_external_user_id
   aws_account_id          = var.aws_account_id
+  path_to_psoxy_java = "../../../java"
 
   providers = {
     aws = aws
   }
-}
-
-module "psoxy-package" {
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/psoxy-package?ref=v0.3.0-beta.1"
-
-  implementation     = "aws"
-  path_to_psoxy_java = "../../../java"
 }
 
 data "azuread_client_config" "current" {}
@@ -176,8 +171,8 @@ module "psoxy-msft-connector" {
 
   function_name            = "psoxy-${each.key}"
   source_kind              = each.value.source_kind
-  path_to_function_zip     = module.psoxy-package.path_to_deployment_jar
-  function_zip_hash        = module.psoxy-package.deployment_package_hash
+  path_to_function_zip     = module.psoxy-aws.path_to_deployment_jar
+  function_zip_hash        = module.psoxy-aws.deployment_package_hash
   path_to_config           = "../../../configs/${each.value.source_kind}.yaml"
   api_caller_role_arn      = module.psoxy-aws.api_caller_role_arn
   api_caller_role_arn_name = module.psoxy-aws.api_caller_role_name
