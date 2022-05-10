@@ -39,7 +39,7 @@ module "psoxy-gcp-bulk" {
   bucket_prefix        = var.bucket_prefix
   bucket_location      = var.bucket_location
   source_kind          = var.source_kind
-  psoxy_basedir        = var.psoxy_basedir
+  psoxy_base_dir       = var.psoxy_base_dir
 
   depends_on = [
     google_project.psoxy-project,

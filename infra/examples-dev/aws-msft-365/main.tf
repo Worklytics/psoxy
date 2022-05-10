@@ -52,7 +52,7 @@ module "psoxy-package" {
   source = "../../modules/psoxy-package"
 
   implementation     = "aws"
-  path_to_psoxy_java = "${var.psoxy_basedir}/java"
+  path_to_psoxy_java = "${var.psoxy_base_dir}/java"
 }
 
 data "azuread_client_config" "current" {}

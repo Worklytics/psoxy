@@ -37,5 +37,5 @@ module "psoxy-aws" {
   instance_id             = var.instance_id
   source_kind             = var.source_kind
   aws_region              = var.aws_region
-  psoxy_basedir           = var.psoxy_basedir
+  psoxy_base_dir          = var.psoxy_base_dir
 }

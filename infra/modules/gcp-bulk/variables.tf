@@ -30,7 +30,8 @@ variable "source_kind" {
   description = "Kind of the content to process"
 }
 
-variable "psoxy_basedir" {
+variable "psoxy_base_dir" {
   type        = string
   description = "the path where your psoxy repo resides"
+  default     = "../../.."
 }

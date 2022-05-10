@@ -55,7 +55,8 @@ variable "certificate_subject" {
   description = "value for 'subject' passed to openssl when generation certificate (eg '/C=US/ST=New York/L=New York/CN=www.worklytics.co')"
 }
 
-variable "psoxy_basedir" {
+variable "psoxy_base_dir" {
   type        = string
   description = "the path where your psoxy repo resides"
+  default     = "../../.."
 }

@@ -68,7 +68,8 @@ variable "connector_display_name_suffix" {
   default     = ""
 }
 
-variable "psoxy_basedir" {
+variable "psoxy_base_dir" {
   type        = string
   description = "the path where your psoxy repo resides"
+  default     = "../../.."
 }
