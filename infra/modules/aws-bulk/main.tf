@@ -9,19 +9,22 @@ terraform {
 }
 
 module "psoxy-aws" {
-  source = "../aws"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws?ref=v0.3.0-beta.1"
 
   caller_aws_account_id   = var.caller_aws_account_id
   caller_external_user_id = var.caller_external_user_id
   aws_account_id          = var.aws_account_id
 }
 
+
 module "psoxy-package" {
-  source = "../psoxy-package"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/psoxy-package?ref=v0.3.0-beta.1"
 
   implementation     = "aws"
-  path_to_psoxy_java = "../../../java"
+  path_to_psoxy_java = "${var.psoxy_basedir}/java"
 }
+
+## START HRIS MODULE
 
 resource "aws_s3_bucket" "input" {
   bucket = "psoxy-${var.instance_id}-input"
@@ -32,18 +35,18 @@ resource "aws_s3_bucket" "output" {
 }
 
 module "psoxy-file-handler" {
-  source = "../aws-psoxy-instance"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-instance?ref=v0.3.0-beta.1"
 
-  function_name        = "psoxy-${var.instance_id}"
-  handler_class        = "co.worklytics.psoxy.S3Handler"
-  source_kind          = var.source_kind
-  path_to_function_zip = module.psoxy-package.path_to_deployment_jar
-  function_zip_hash    = module.psoxy-package.deployment_package_hash
-  path_to_config       = "../../../configs/${var.source_kind}.yaml"
-  api_caller_role_arn  = module.psoxy-aws.api_caller_role_arn
+  function_name            = "psoxy-${var.instance_id}"
+  handler_class            = "co.worklytics.psoxy.S3Handler"
+  source_kind              = var.source_kind
+  path_to_function_zip     = module.psoxy-package.path_to_deployment_jar
+  function_zip_hash        = module.psoxy-package.deployment_package_hash
+  path_to_config           = "${var.psoxy_basedir}/configs/${var.source_kind}.yaml"
+  api_caller_role_arn      = module.psoxy-aws.api_caller_role_arn
   api_caller_role_arn_name = module.psoxy-aws.api_caller_role_name
-  aws_assume_role_arn  = var.aws_assume_role_arn
-  example_api_calls    = [] #None, as this function is called through the S3 event
+  aws_assume_role_arn      = var.aws_assume_role_arn
+  example_api_calls        = [] #None, as this function is called through the S3 event
 
   parameters = []
 
@@ -147,3 +150,5 @@ resource "aws_iam_role_policy_attachment" "caller_bucket_access_policy" {
   role       = module.psoxy-aws.api_caller_role_name
   policy_arn = aws_iam_policy.output_bucket_read.arn
 }
+
+## END HRIS MODULE
