@@ -138,6 +138,7 @@ locals {
     }
   }
   enabled_google_workspace_sources = { for id, spec in local.google_workspace_sources : id => spec if spec.enabled }
+  base_config_path                 = "${var.psoxy_base_dir}/configs/"
 }
 
 module "google-workspace-connection" {
@@ -175,7 +176,7 @@ module "psoxy-google-workspace-connector" {
   source_kind          = each.key
   path_to_function_zip = module.psoxy-package.path_to_deployment_jar
   function_zip_hash    = module.psoxy-package.deployment_package_hash
-  path_to_config       = "${var.psoxy_base_dir}/configs/${each.key}.yaml"
+  path_to_config       = "${local.base_config_path}/${each.key}.yaml"
   aws_assume_role_arn  = var.aws_assume_role_arn
   aws_account_id       = var.aws_account_id
 

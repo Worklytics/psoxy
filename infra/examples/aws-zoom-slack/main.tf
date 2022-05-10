@@ -64,6 +64,7 @@ locals {
     }
   }
   enabled_oauth_long_access_connectors = { for k, v in local.oauth_long_access_connectors : k => v if v.enabled }
+  base_config_path                     = "${var.psoxy_base_dir}/configs/"
 }
 
 # Create secret (later filled by customer)
@@ -91,7 +92,7 @@ module "aws-psoxy-long-auth-connectors" {
   source_kind          = each.value.source_kind
   path_to_function_zip = module.psoxy-package.path_to_deployment_jar
   function_zip_hash    = module.psoxy-package.deployment_package_hash
-  path_to_config       = "${var.psoxy_base_dir}/configs/${each.value.source_kind}.yaml"
+  path_to_config       = "${local.base_config_path}/${each.value.source_kind}.yaml"
   aws_assume_role_arn  = var.aws_assume_role_arn
   aws_account_id       = var.aws_account_id
 
