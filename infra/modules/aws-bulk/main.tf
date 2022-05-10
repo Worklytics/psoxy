@@ -27,7 +27,7 @@ module "psoxy-file-handler" {
   function_zip_hash    = var.function_zip_hash
   path_to_config       = var.path_to_config
   api_caller_role_arn  = var.api_caller_role_arn
-  api_caller_role_name = var.api_caller_role_arn_name
+  api_caller_role_name = var.api_caller_role_name
   aws_assume_role_arn  = var.aws_assume_role_arn
   example_api_calls    = [] #None, as this function is called through the S3 event
 

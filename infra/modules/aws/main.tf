@@ -79,6 +79,7 @@ module "psoxy-package" {
   source = "../psoxy-package"
 
   implementation     = "aws"
+  path_to_psoxy_java = var.path_to_psoxy_java
 }
 
 output "salt_secret" {

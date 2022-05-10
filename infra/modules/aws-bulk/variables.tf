@@ -56,7 +56,7 @@ variable "function_zip_hash" {
 
 variable "path_to_config" {
   type        = string
-  description = "path to config file (usually someting in ../../configs/, eg configs/gdirectory.yaml"
+  description = "path to config file (usually something in ../../configs/, eg configs/gdirectory.yaml"
 }
 
 variable "api_caller_role_arn" {

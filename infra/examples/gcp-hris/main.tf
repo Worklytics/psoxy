@@ -30,15 +30,29 @@ resource "google_project" "psoxy-project" {
 }
 
 
-module "psoxy-gcp-bulk" {
-  source = "../../modules/gcp-bulk"
 
-  project_id           = google_project.psoxy-project.project_id
-  worklytics_sa_emails = var.worklytics_sa_emails
-  region               = var.region
-  bucket_prefix        = var.bucket_prefix
-  bucket_location      = var.bucket_location
-  source_kind          = var.source_kind
+module "psoxy-gcp" {
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp?ref=v0.4.0-beta.1"
+
+  project_id         = var.gcp_project_id
+  invoker_sa_emails  = var.worklytics_sa_emails
+  bucket_location    = var.bucket_location
+  path_to_psoxy_java = "../../../java/"
+}
+
+
+
+module "psoxy-gcp-bulk" {
+
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-bulk?ref=v0.4.0-beta.1"
+
+  project_id                    = google_project.psoxy-project.project_id
+  worklytics_sa_emails          = var.worklytics_sa_emails
+  region                        = var.region
+  source_kind                   = var.source_kind
+  salt_secret_id                = module.psoxy-gcp.salt_secret_id
+  artifacts_bucket_name         = module.psoxy-gcp.artifacts_bucket_name
+  deployment_bundle_object_name = module.psoxy-gcp.deployment_bundle_object_name
 
   depends_on = [
     google_project.psoxy-project,
