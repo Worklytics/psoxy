@@ -179,7 +179,7 @@ module "psoxy-msft-connector" {
   source_kind              = each.value.source_kind
   path_to_function_zip     = module.psoxy-package.path_to_deployment_jar
   function_zip_hash        = module.psoxy-package.deployment_package_hash
-  path_to_config           = "../../../configs/${each.value.source_kind}.yaml"
+  path_to_config           = "${var.psoxy_base_dir}/configs/${each.value.source_kind}.yaml"
   api_caller_role_arn      = module.psoxy-aws.api_caller_role_arn
   api_caller_role_arn_name = module.psoxy-aws.api_caller_role_name
   aws_assume_role_arn      = var.aws_assume_role_arn
