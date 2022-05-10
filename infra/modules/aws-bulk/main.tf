@@ -24,7 +24,7 @@ module "psoxy-package" {
   path_to_psoxy_java = "${var.psoxy_basedir}/java"
 }
 
-## START HRIS MODULE
+## START HRIS MODULE - COPY TO YOUR MASTER main.tf
 
 resource "aws_s3_bucket" "input" {
   bucket = "psoxy-${var.instance_id}-input"
@@ -37,16 +37,15 @@ resource "aws_s3_bucket" "output" {
 module "psoxy-file-handler" {
   source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-instance?ref=v0.3.0-beta.2"
 
-  function_name            = "psoxy-${var.instance_id}"
-  handler_class            = "co.worklytics.psoxy.S3Handler"
-  source_kind              = var.source_kind
-  path_to_function_zip     = module.psoxy-package.path_to_deployment_jar
-  function_zip_hash        = module.psoxy-package.deployment_package_hash
-  path_to_config           = "${var.psoxy_basedir}/configs/${var.source_kind}.yaml"
-  api_caller_role_arn      = module.psoxy-aws.api_caller_role_arn
-  api_caller_role_arn_name = module.psoxy-aws.api_caller_role_name
-  aws_assume_role_arn      = var.aws_assume_role_arn
-  example_api_calls        = [] #None, as this function is called through the S3 event
+  function_name        = "psoxy-${var.instance_id}"
+  handler_class        = "co.worklytics.psoxy.S3Handler"
+  source_kind          = var.source_kind
+  path_to_function_zip = module.psoxy-package.path_to_deployment_jar
+  function_zip_hash    = module.psoxy-package.deployment_package_hash
+  path_to_config       = "${var.psoxy_basedir}/configs/${var.source_kind}.yaml"
+  aws_assume_role_arn  = var.aws_assume_role_arn
+  example_api_calls    = [] #None, as this function is called through the S3 event
+  aws_account_id       = var.aws_account_id
 
   parameters = []
 

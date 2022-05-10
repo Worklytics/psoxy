@@ -175,7 +175,7 @@ module "psoxy-google-workspace-connector" {
   source_kind          = each.key
   path_to_function_zip = module.psoxy-package.path_to_deployment_jar
   function_zip_hash    = module.psoxy-package.deployment_package_hash
-  path_to_config       = "../../../configs/${each.key}.yaml"
+  path_to_config       = "${var.psoxy_basedir}/configs/${each.key}.yaml"
   aws_assume_role_arn  = var.aws_assume_role_arn
   aws_account_id       = var.aws_account_id
 
