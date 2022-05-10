@@ -87,14 +87,13 @@ module "aws-psoxy-long-auth-connectors" {
 
   source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-instance?ref=v0.3.0-beta.2"
 
-  function_name            = "psoxy-${each.key}"
-  source_kind              = each.value.source_kind
-  path_to_function_zip     = module.psoxy-package.path_to_deployment_jar
-  function_zip_hash        = module.psoxy-package.deployment_package_hash
-  path_to_config           = "../../../configs/${each.value.source_kind}.yaml"
-  api_caller_role_arn      = module.psoxy-aws.api_caller_role_arn
-  api_caller_role_arn_name = module.psoxy-aws.api_caller_role_name
-  aws_assume_role_arn      = var.aws_assume_role_arn
+  function_name        = "psoxy-${each.key}"
+  source_kind          = each.value.source_kind
+  path_to_function_zip = module.psoxy-package.path_to_deployment_jar
+  function_zip_hash    = module.psoxy-package.deployment_package_hash
+  path_to_config       = "../../../configs/${each.value.source_kind}.yaml"
+  aws_assume_role_arn  = var.aws_assume_role_arn
+  aws_account_id       = var.aws_account_id
 
   parameters = [
     module.psoxy-aws.salt_secret,
