@@ -74,13 +74,10 @@ resource "aws_iam_policy" "policy" {
             "ssm:GetParameter*"
           ],
           "Effect" : "Allow",
-          "Resource" : "*"
-          # TODO: limit to SSM parameters in question
-          # "Resource": "arn:aws:ssm:us-east-2:123456789012:parameter/prod-*"
+          "Resource" : "arn:aws:ssm:${var.region}:${var.aws_account_id}:parameter/*"
         }
       ]
   })
-
 }
 
 
@@ -92,33 +89,6 @@ resource "aws_iam_role_policy_attachment" "basic" {
 resource "aws_iam_role_policy_attachment" "policy" {
   role       = aws_iam_role.iam_for_lambda.name
   policy_arn = aws_iam_policy.policy.arn
-}
-
-resource "aws_iam_role_policy_attachment" "read_lambda_ssm_to_caller" {
-  role       = var.api_caller_role_arn_name
-  policy_arn = aws_iam_policy.policy.arn
-}
-
-resource "aws_iam_policy" "execution_lambda_to_caller" {
-  name        = "${var.function_name}_invoker"
-  description = "Allow caller role to execute the lambda url directly"
-
-  policy = jsonencode(
-    {
-      "Version" : "2012-10-17",
-      "Statement" : [
-        {
-          "Action" : ["lambda:InvokeFunctionUrl"],
-          "Effect" : "Allow",
-          "Resource" : aws_lambda_function.psoxy-instance.arn
-        }
-      ]
-    })
-}
-
-resource "aws_iam_role_policy_attachment" "execution_lambda_to_caller" {
-  role       = var.api_caller_role_arn_name
-  policy_arn = aws_iam_policy.execution_lambda_to_caller.arn
 }
 
 locals {

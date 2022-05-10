@@ -42,3 +42,9 @@ variable "source_kind" {
   default     = "hris"
   description = "Kind of the content to process"
 }
+
+variable "psoxy_base_dir" {
+  type        = string
+  description = "the path where your psoxy repo resides"
+  default     = "../../.."
+}

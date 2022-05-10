@@ -7,6 +7,12 @@ variable "aws_account_id" {
   }
 }
 
+variable "region" {
+  type        = string
+  description = "region into which to deploy function"
+  default     = "us-east-1"
+}
+
 variable "caller_aws_account_id" {
   type        = string
   description = "id of worklytics sa"

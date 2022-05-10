@@ -1,4 +1,11 @@
-
+variable "aws_account_id" {
+  type        = string
+  description = "id of aws account in which to provision your AWS infra"
+  validation {
+    condition     = can(regex("^\\d{12}$", var.aws_account_id))
+    error_message = "The aws_account_id value should be 12-digit numeric string."
+  }
+}
 
 variable "region" {
   type        = string
@@ -50,16 +57,6 @@ variable "function_zip_hash" {
 variable "path_to_config" {
   type        = string
   description = "path to config file (usually someting in ../../configs/, eg configs/gdirectory.yaml"
-}
-
-variable "api_caller_role_arn" {
-  type        = string
-  description = "arn of role which can be assumed to call API"
-}
-
-variable "api_caller_role_arn_name" {
-  type        = string
-  description = "name of arn of role which can be assumed to call API"
 }
 
 variable "example_api_calls" {

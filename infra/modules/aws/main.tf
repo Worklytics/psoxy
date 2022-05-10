@@ -48,9 +48,57 @@ resource "aws_iam_role" "api-caller" {
   })
 }
 
+# Allow caller to read parameters required by lambdas
+resource "aws_iam_policy" "read_parameters_policy" {
+  name        = "ssmGetParameters"
+  description = "Allow lambda function role to read SSM parameters"
+
+  policy = jsonencode(
+    {
+      "Version" : "2012-10-17",
+      "Statement" : [
+        {
+          "Action" : [
+            "ssm:GetParameter*"
+          ],
+          "Effect" : "Allow",
+          "Resource" : "arn:aws:ssm:${var.region}:${var.aws_account_id}:parameter/*"
+        }
+      ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "read_parameters_policy_attach" {
+  role       = aws_iam_role.api-caller.name
+  policy_arn = aws_iam_policy.read_parameters_policy.arn
+}
+
+
+resource "aws_iam_policy" "execution_lambda_to_caller" {
+  name        = "ExecutePsoxyLambdas"
+  description = "Allow caller role to execute the lambda url directly"
+
+  policy = jsonencode(
+    {
+      "Version" : "2012-10-17",
+      "Statement" : [
+        {
+          "Action" : ["lambda:InvokeFunctionUrl"],
+          "Effect" : "Allow",
+          "Resource" : "arn:aws:lambda:${var.region}:${var.aws_account_id}:function:psoxy-*"
+        }
+      ]
+  })
+}
+
 resource "aws_iam_role_policy_attachment" "invoker_lambda_execution" {
   role       = aws_iam_role.api-caller.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_iam_role_policy_attachment" "invoker_url_lambda_execution" {
+  role       = aws_iam_role.api-caller.name
+  policy_arn = aws_iam_policy.execution_lambda_to_caller.arn
 }
 
 
