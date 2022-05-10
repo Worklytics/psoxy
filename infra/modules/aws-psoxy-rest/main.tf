@@ -11,7 +11,7 @@ terraform {
 module "psoxy_lambda" {
   source = "../aws-psoxy-lambda"
 
-  function_name       = var.function_name
+  function_name        = var.function_name
   handler_class        = "co.worklytics.psoxy.Handler"
   path_to_function_zip = var.path_to_function_zip
   function_zip_hash    = var.function_zip_hash
@@ -82,7 +82,7 @@ resource "aws_iam_policy" "execution_lambda_to_caller" {
           "Resource" : module.psoxy_lambda.function_arn
         }
       ]
-    })
+  })
 }
 
 resource "aws_iam_role_policy_attachment" "execution_lambda_to_caller" {

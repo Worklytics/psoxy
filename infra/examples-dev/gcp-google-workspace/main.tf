@@ -16,7 +16,7 @@ terraform {
 # either way, we recommend the project be used exclusively to host psoxy instances corresponding to
 # a single worklytics account
 resource "google_project" "psoxy-project" {
-  name            = "Psoxy%{ if var.environment_name != "" } - ${var.environment_name}%{ endif }"
+  name            = "Psoxy%{if var.environment_name != ""} - ${var.environment_name}%{endif}"
   project_id      = var.project_id
   folder_id       = var.folder_id
   billing_account = var.billing_account_id
@@ -139,7 +139,7 @@ module "google-workspace-connection-auth" {
 
   secret_project     = var.project_id
   service_account_id = module.google-workspace-connection[each.key].service_account_id
-  secret_id          = "PSOXY_${replace(upper(each.key),"-","_")}_SERVICE_ACCOUNT_KEY"
+  secret_id          = "PSOXY_${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY"
 }
 module "psoxy-google-workspace-connector" {
   for_each = {
@@ -226,9 +226,9 @@ module "connector-long-auth-create-function" {
   }
   source = "../../modules/gcp-psoxy-rest"
 
-  project_id            = var.project_id
-  instance_id           = each.value.function_name
-  service_account_email = google_service_account.long_auth_connector_sa[each.key].email
+  project_id                    = var.project_id
+  instance_id                   = each.value.function_name
+  service_account_email         = google_service_account.long_auth_connector_sa[each.key].email
   artifacts_bucket_name         = module.psoxy-gcp.artifacts_bucket_name
   deployment_bundle_object_name = module.psoxy-gcp.deployment_bundle_object_name
   path_to_config                = "../../config/${each.value.source_kind}.yaml"

@@ -36,7 +36,7 @@ EOT
 locals {
   secret_bindings = merge({
     PSOXY_SALT = {
-      secret_name = var.salt_secret_id
+      secret_name    = var.salt_secret_id
       secret_version = "latest"
     }
   }, var.secret_bindings)
@@ -69,7 +69,7 @@ resource "google_cloudfunctions_function" "function" {
     }
   }
 
-  trigger_http          = true
+  trigger_http = true
 }
 
 output "cloud_function_url" {
