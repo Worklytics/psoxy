@@ -4,11 +4,11 @@ import co.worklytics.psoxy.gateway.ConfigService;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.ssm.SsmClient;
 import software.amazon.awssdk.services.ssm.model.GetParameterRequest;
@@ -53,6 +53,8 @@ public class ParameterStoreConfigService implements ConfigService {
     private final Object $writeLock = new Object[0];
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
+    private final String NEGATIVE_VALUE = "##NO_VALUE##";
+
     private LoadingCache<String, String> getCache() {
         if (this.cache == null) {
             synchronized ($writeLock) {
@@ -68,8 +70,13 @@ public class ParameterStoreConfigService implements ConfigService {
                                     .name(key)
                                     .withDecryption(true)
                                     .build();
-                                GetParameterResponse parameterResponse = client.getParameter(parameterRequest);
-                                return parameterResponse.parameter().value();
+                                try {
+                                    GetParameterResponse parameterResponse = client.getParameter(parameterRequest);
+                                    return parameterResponse.parameter().value();
+                                } catch (ParameterNotFoundException | ParameterVersionNotFoundException nfe) {
+                                    // does not exist, that could be OK depending on case.
+                                    return NEGATIVE_VALUE;
+                                }
                             }
                         });
                     // https://github.com/google/guava/wiki/CachesExplained#when-does-cleanup-happen
@@ -101,22 +108,28 @@ public class ParameterStoreConfigService implements ConfigService {
 
     @Override
     public Optional<String> getConfigPropertyAsOptional(ConfigProperty property) {
+        String paramName = null;
         try {
-            return Optional.of(getCache().get(parameterName(property)));
+            paramName = parameterName(property);
+            String value = getCache().get(paramName);
+            if (NEGATIVE_VALUE.equals(value)) {
+                log.log(Level.WARNING, String.format("Parameter not found %s", paramName));
+                return Optional.empty();
+            } else {
+                return Optional.of(value);
+            }
         } catch (ExecutionException ee) {
             Throwable cause = ee.getCause();
-            if (ExceptionUtils.hasCause(cause, ParameterNotFoundException.class) ||
-                ExceptionUtils.hasCause(cause, ParameterVersionNotFoundException.class)) {
-                log.log(Level.WARNING, "Parameter not found", cause);
-                return Optional.empty();
-            }
             if (cause instanceof AwsServiceException) {
                 AwsServiceException ase = (AwsServiceException) cause;
                 if (ase.isThrottlingException()) {
-                    log.log(Level.SEVERE, "throttling issues, rate limit reached most likely despite retries", ase);
+                    log.log(Level.SEVERE, String.format("Throttling issues for key %s, rate limit reached most likely despite retries", paramName), ase);
                 }
             }
-            throw new IllegalStateException("failed to get config value: " + cause.getMessage(), cause);
+            throw new IllegalStateException(String.format("failed to get config value: %s", paramName), cause);
+        } catch (UncheckedExecutionException uee) {
+            // unchecked?
+            throw new IllegalStateException(String.format("failed to get config value: %s", paramName), uee.getCause());
         }
     }
 
