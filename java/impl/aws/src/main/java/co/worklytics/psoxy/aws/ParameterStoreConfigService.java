@@ -66,11 +66,11 @@ public class ParameterStoreConfigService implements ConfigService {
                         .build(new CacheLoader<>() {
                             @Override
                             public String load(String key) throws AwsServiceException {
-                                GetParameterRequest parameterRequest = GetParameterRequest.builder()
+                                try {
+                                    GetParameterRequest parameterRequest = GetParameterRequest.builder()
                                     .name(key)
                                     .withDecryption(true)
                                     .build();
-                                try {
                                     GetParameterResponse parameterResponse = client.getParameter(parameterRequest);
                                     return parameterResponse.parameter().value();
                                 } catch (ParameterNotFoundException | ParameterVersionNotFoundException nfe) {
@@ -79,13 +79,6 @@ public class ParameterStoreConfigService implements ConfigService {
                                 }
                             }
                         });
-                    // https://github.com/google/guava/wiki/CachesExplained#when-does-cleanup-happen
-                    // cache is mostly read, rare writes. We want this as much up-to-date as possible
-                    // to avoid stale credentials
-                    scheduler.schedule( () -> {
-                        log.info(this.cache.stats().toString());
-                        this.cache.cleanUp();
-                    }, TTL.getSeconds(), TimeUnit.SECONDS);
                 }
             }
         }
@@ -113,7 +106,8 @@ public class ParameterStoreConfigService implements ConfigService {
             paramName = parameterName(property);
             String value = getCache().get(paramName);
             if (NEGATIVE_VALUE.equals(value)) {
-                log.log(Level.WARNING, String.format("Parameter not found %s", paramName));
+                // Optional is common, do not log, just for testing/debugging purposes
+                // log.log(Level.WARNING, String.format("Parameter not found %s", paramName));
                 return Optional.empty();
             } else {
                 return Optional.of(value);

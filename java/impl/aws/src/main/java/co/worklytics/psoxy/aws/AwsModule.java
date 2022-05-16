@@ -14,6 +14,7 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ssm.SsmClient;
 
 import javax.inject.Named;
+import javax.inject.Singleton;
 import java.time.Duration;
 
 
@@ -47,19 +48,19 @@ public interface AwsModule {
     }
 
     //global parameters
-    @Provides @Named("Global")
+    @Provides @Named("Global") @Singleton
     static ParameterStoreConfigService parameterStoreConfigService(SsmClient ssmClient) {
         // Global don't change that often, use longer TTL
         return new ParameterStoreConfigService(null, Duration.ofMinutes(20), ssmClient);
     }
 
     //parameters scoped to function
-    @Provides
+    @Provides @Singleton
     static ParameterStoreConfigService functionParameterStoreConfigService(SsmClient ssmClient) {
         String namespace =
             asParameterStoreNamespace(System.getenv(RuntimeEnvironmentVariables.AWS_LAMBDA_FUNCTION_NAME.name()));
         // Namespaced params may change often (refresh tokens), use shorter TTL
-        return new ParameterStoreConfigService(namespace, Duration.ofMinutes(3), ssmClient);
+        return new ParameterStoreConfigService(namespace, Duration.ofMinutes(5), ssmClient);
     }
 
     static String asParameterStoreNamespace(String functionName) {
