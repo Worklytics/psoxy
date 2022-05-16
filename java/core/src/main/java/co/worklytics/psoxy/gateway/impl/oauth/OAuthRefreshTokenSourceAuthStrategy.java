@@ -102,6 +102,10 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         @Inject
         OAuthRefreshTokenSourceAuthStrategy.TokenRequestPayloadBuilder payloadBuilder;
 
+        private final Duration TOKEN_REFRESH_THRESHOLD = Duration.ofMinutes(1L);
+
+        private AccessToken previousToken = null;
+
         /**
          * implements canonical oauth flow to exchange refreshToken for accessToken
          *
@@ -111,6 +115,10 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
          */
         @Override
         public AccessToken refreshAccessToken() throws IOException {
+            if (isPreviousTokenValid(this.previousToken)) {
+                log.info("Reused TOKEN!");
+                return this.previousToken;
+            }
             String refreshEndpoint =
                 config.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.REFRESH_ENDPOINT);
 
@@ -136,8 +144,11 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                     }
                 });
 
+            log.info("Generated TOKEN!");
+
             return asAccessToken(tokenResponse);
         }
+
 
         AccessToken asAccessToken(CanonicalOAuthAccessTokenResponseDto tokenResponse) {
             //expires_in is RECOMMENDED, not REQUIRED in response; if omitted, we're supposed to
@@ -146,6 +157,13 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                 .orElse((int) DEFAULT_ACCESS_TOKEN_EXPIRATION.toSeconds());
             return new AccessToken(tokenResponse.getAccessToken(),
                 Date.from(Instant.now().plusSeconds(expiresIn)));
+        }
+
+        private boolean isPreviousTokenValid(AccessToken accessToken) {
+            if (accessToken == null) {
+                return false;
+            }
+            return accessToken.getExpirationTime().toInstant().isBefore(Instant.now().minus(TOKEN_REFRESH_THRESHOLD));
         }
 
         @Override
