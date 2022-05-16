@@ -1,16 +1,28 @@
 package co.worklytics.psoxy.aws;
 
 import co.worklytics.psoxy.gateway.ConfigService;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.ssm.SsmClient;
-
-import software.amazon.awssdk.services.ssm.model.*;
+import software.amazon.awssdk.services.ssm.model.GetParameterRequest;
+import software.amazon.awssdk.services.ssm.model.GetParameterResponse;
+import software.amazon.awssdk.services.ssm.model.ParameterNotFoundException;
+import software.amazon.awssdk.services.ssm.model.ParameterVersionNotFoundException;
 
 import javax.inject.Inject;
+import java.time.Duration;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 /**
@@ -26,15 +38,52 @@ import java.util.logging.Level;
 //[ERROR]   symbol:   method onConstructor_()
 //[ERROR]   location: @interface lombok.NoArgsConstructo
 @Log
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class ParameterStoreConfigService implements ConfigService {
 
+    final String namespace;
 
-    String namespace;
+    final Duration TTL;
 
-    @Inject SsmClient client;
+    @Inject
+    @NonNull
+    SsmClient client;
 
-    //TODO: add caching?? guava?? apache commons??
+    private volatile LoadingCache<String, String> cache;
+    private final Object $writeLock = new Object[0];
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
+    private LoadingCache<String, String> getCache() {
+        if (this.cache == null) {
+            synchronized ($writeLock) {
+                if (this.cache == null) {
+                    this.cache = CacheBuilder.newBuilder()
+                        .maximumSize(100)
+                        .expireAfterWrite(TTL.getSeconds(), TimeUnit.SECONDS)
+                        .recordStats()
+                        .build(new CacheLoader<>() {
+                            @Override
+                            public String load(String key) throws AwsServiceException {
+                                GetParameterRequest parameterRequest = GetParameterRequest.builder()
+                                    .name(key)
+                                    .withDecryption(true)
+                                    .build();
+                                GetParameterResponse parameterResponse = client.getParameter(parameterRequest);
+                                return parameterResponse.parameter().value();
+                            }
+                        });
+                    // https://github.com/google/guava/wiki/CachesExplained#when-does-cleanup-happen
+                    // cache is mostly read, rare writes. We want this as much up-to-date as possible
+                    // to avoid stale credentials
+                    scheduler.schedule( () -> {
+                        log.info(this.cache.stats().toString());
+                        this.cache.cleanUp();
+                    }, TTL.getSeconds(), TimeUnit.SECONDS);
+                }
+            }
+        }
+        return cache;
+    }
 
     @Override
     public String getConfigPropertyOrError(ConfigProperty property) {
@@ -53,17 +102,22 @@ public class ParameterStoreConfigService implements ConfigService {
     @Override
     public Optional<String> getConfigPropertyAsOptional(ConfigProperty property) {
         try {
-            GetParameterRequest parameterRequest = GetParameterRequest.builder()
-                .name(parameterName(property))
-                .withDecryption(true)
-                .build();
-            GetParameterResponse parameterResponse = client.getParameter(parameterRequest);
-            return Optional.of(parameterResponse.parameter().value());
-        } catch (ParameterNotFoundException | ParameterVersionNotFoundException e) {
-            return Optional.empty();
-        } catch (SsmException e) {
-            log.log(Level.SEVERE, "failed to get config value", e);
-            throw new IllegalStateException("failed to get config value: " + e.getMessage(), e);
+            return Optional.of(getCache().get(parameterName(property)));
+        } catch (ExecutionException ee) {
+            Throwable cause = ee.getCause();
+            if (ExceptionUtils.hasCause(cause, ParameterNotFoundException.class) ||
+                ExceptionUtils.hasCause(cause, ParameterVersionNotFoundException.class)) {
+                log.log(Level.WARNING, "Parameter not found", cause);
+                return Optional.empty();
+            }
+            if (cause instanceof AwsServiceException) {
+                AwsServiceException ase = (AwsServiceException) cause;
+                if (ase.isThrottlingException()) {
+                    log.log(Level.SEVERE, "throttling issues, rate limit reached most likely despite retries", ase);
+                }
+            }
+            throw new IllegalStateException("failed to get config value: " + cause.getMessage(), cause);
         }
     }
+
 }
