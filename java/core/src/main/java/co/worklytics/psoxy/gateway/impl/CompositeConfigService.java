@@ -40,8 +40,6 @@ public class CompositeConfigService implements ConfigService {
 
     @Override
     public Optional<String> getConfigPropertyAsOptional(ConfigProperty property) {
-        return preferred.getConfigPropertyAsOptional(property)
-            .map(v -> Optional.of(v))
-            .orElseGet(() -> fallback.getConfigPropertyAsOptional(property));
+        return preferred.getConfigPropertyAsOptional(property).or(() -> fallback.getConfigPropertyAsOptional(property));
     }
 }
