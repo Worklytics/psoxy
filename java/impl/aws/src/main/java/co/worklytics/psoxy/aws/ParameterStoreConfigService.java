@@ -41,7 +41,7 @@ public class ParameterStoreConfigService implements ConfigService {
 
     final String namespace;
 
-    final Duration TTL;
+    final Duration defaultTtl;
 
     @Inject
     @NonNull
@@ -58,7 +58,7 @@ public class ParameterStoreConfigService implements ConfigService {
                 if (this.cache == null) {
                     this.cache = CacheBuilder.newBuilder()
                         .maximumSize(100)
-                        .expireAfterWrite(TTL.getSeconds(), TimeUnit.SECONDS)
+                        .expireAfterWrite(defaultTtl.getSeconds(), TimeUnit.SECONDS)
                         .recordStats()
                         .build(new CacheLoader<>() {
                             @Override
