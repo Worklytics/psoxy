@@ -148,7 +148,8 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
             log.info("Generated TOKEN!");
 
-            return asAccessToken(tokenResponse);
+            this.previousToken = asAccessToken(tokenResponse);
+            return this.previousToken;
         }
 
 
