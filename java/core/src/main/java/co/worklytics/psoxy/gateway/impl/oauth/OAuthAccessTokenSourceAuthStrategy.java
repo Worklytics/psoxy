@@ -2,18 +2,14 @@ package co.worklytics.psoxy.gateway.impl.oauth;
 
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
-import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 import com.google.auth.Credentials;
 import com.google.auth.oauth2.AccessToken;
-import com.google.auth.oauth2.OAuth2Credentials;
 import com.google.auth.oauth2.OAuth2CredentialsWithRefresh;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.extern.java.Log;
-import org.apache.http.client.utils.DateUtils;
 
 import javax.inject.Inject;
-import java.io.IOException;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
