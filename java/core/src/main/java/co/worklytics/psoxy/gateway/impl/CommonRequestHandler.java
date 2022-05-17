@@ -85,6 +85,7 @@ public class CommonRequestHandler {
             log.info(String.format("Proxy invoked with target %s. Rules allowed call.", relativeURL));
         } else {
             builder.statusCode(HttpStatus.SC_FORBIDDEN);
+            builder.header(ResponseHeader.RULES_REJECTION.getHttpHeader(), Boolean.TRUE.toString());
             log.warning(String.format("Proxy invoked with target %s. Blocked call by rules %s", relativeURL, objectMapper.writeValueAsString(rules.getAllowedEndpointRegexes())));
             return builder.build();
         }
@@ -96,7 +97,6 @@ public class CommonRequestHandler {
             builder.statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
             builder.body("Failed to authorize request; review logs");
             log.log(Level.WARNING, e.getMessage(), e);
-
             //something like "Error getting access token for service account: 401 Unauthorized POST https://oauth2.googleapis.com/token,"
             log.log(Level.WARNING, "Confirm oauth scopes set in config.yaml match those granted in data source");
             return builder.build();
