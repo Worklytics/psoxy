@@ -4,14 +4,19 @@ import co.worklytics.psoxy.PsoxyModule;
 import co.worklytics.psoxy.SourceAuthModule;
 import co.worklytics.test.MockModules;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.auth.oauth2.AccessToken;
 import dagger.Component;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.sql.Date;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -19,7 +24,6 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
 
     @Inject
     ObjectMapper objectMapper;
-
 
     @Singleton
     @Component(modules = {
@@ -77,5 +81,32 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
             objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
     }
 
+    @Test
+    public void testCachedTokenNeedsRefreshWhenNull() {
+        OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl tokenRefreshHandler = new OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl();
+        assertFalse(tokenRefreshHandler.isCurrentTokenValid(null, Instant.now()));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = { 1, 3_600_000})
+    public void testCachedTokenDoesntNeedRefreshIfNotExpired(int millis) {
+        OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl tokenRefreshHandler = new OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl();
+        Instant fixed = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+        Instant expiration = fixed.plus(tokenRefreshHandler.TOKEN_REFRESH_THRESHOLD).plusMillis(millis);
+
+        AccessToken token = new AccessToken("any-token", Date.from(expiration));
+        assertTrue(tokenRefreshHandler.isCurrentTokenValid(token, fixed));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = { -3_600_000, -1, 0})
+    public void testCachedTokenNeedsRefreshIfExpiredOrCloseTo(int millis) {
+        OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl tokenRefreshHandler = new OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl();
+        Instant fixed = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+        Instant expiration = fixed.plus(tokenRefreshHandler.TOKEN_REFRESH_THRESHOLD).plusMillis(millis);
+
+        AccessToken token = new AccessToken("any-token", Date.from(expiration));
+        assertFalse(tokenRefreshHandler.isCurrentTokenValid(token, fixed));
+    }
 
 }
