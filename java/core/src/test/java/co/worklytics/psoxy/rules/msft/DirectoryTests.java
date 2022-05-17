@@ -12,7 +12,7 @@ import java.util.Collection;
 public class DirectoryTests extends JavaRulesTestBaseCase {
 
     @Getter
-    final Rules rulesUnderTest = PrebuiltSanitzerRules.DIRECTORY;
+    final Rules rulesUnderTest = PrebuiltSanitizerRules.DIRECTORY;
 
     @Getter
     final String exampleDirectoryPath = "api-response-examples/microsoft-365/directory";

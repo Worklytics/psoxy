@@ -5,7 +5,7 @@ import com.google.common.collect.ImmutableMap;
 
 import java.util.Map;
 
-public class PrebuiltSanitzerRules {
+public class PrebuiltSanitizerRules {
 
     static final Rules DIRECTORY =  Rules.builder()
         //GENERAL stuff
