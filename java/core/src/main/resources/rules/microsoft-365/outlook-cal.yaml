@@ -1,3 +1,4 @@
+---
 allowedEndpointRegexes:
   - "^/(v1.0|beta)/(groups|users)/?[^/]*"
   - "^/(v1.0|beta)/(groups|users)\\?.*"
@@ -5,13 +6,6 @@ allowedEndpointRegexes:
   - "^/(v1.0|beta)/users/[^/]*/(calendars/[^/]*/)?events.*"
   - "^/(v1.0|beta)/users/[^/]*/mailboxSettings"
   - "^/beta/users/[^/]*/calendar/calendarView(?)[^/]*"
-emailHeaderPseudonymizations:
-  - jsonPaths:
-      - "$..emailAddress.address"
-    relativeUrlRegex: "^/(v1.0|beta)/users/[^/]*/calendar/calendarView(?)[^/]*"
-  - jsonPaths:
-      - "$..emailAddress.address"
-    relativeUrlRegex: "^/(v1.0|beta)/users/[^/]*/(calendars/[^/]*/)?events.*"
 pseudonymizations:
   - jsonPaths:
       - "$..userPrincipalName"
@@ -25,6 +19,12 @@ pseudonymizations:
       - "$..mail"
       - "$..otherMails[*]"
     relativeUrlRegex: "^/(v1.0|beta)/groups/[^/]*/members.*"
+  - jsonPaths:
+      - "$..emailAddress.address"
+    relativeUrlRegex: "^/(v1.0|beta)/users/[^/]*/calendar/calendarView(?)[^/]*"
+  - jsonPaths:
+      - "$..emailAddress.address"
+    relativeUrlRegex: "^/(v1.0|beta)/users/[^/]*/(calendars/[^/]*/)?events.*"
 redactions:
   - jsonPaths:
       - "$..displayName"
