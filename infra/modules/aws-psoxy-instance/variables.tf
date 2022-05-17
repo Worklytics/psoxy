@@ -73,6 +73,6 @@ variable "example_api_calls" {
 
 variable "environment_variables" {
   type        = map(string)
-  description = "No sensitive variables to add as an environment variable."
+  description = "Non-sensitive variables to add as an environment variable."
   default     = {}
 }
