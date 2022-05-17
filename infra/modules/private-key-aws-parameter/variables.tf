@@ -12,9 +12,3 @@ variable "private_key" {
   type        = string
   description = "value of the key"
 }
-
-variable "user_managed_value" {
-  type        = bool
-  description = "whether value is managed by user or not"
-  default     = false
-}
