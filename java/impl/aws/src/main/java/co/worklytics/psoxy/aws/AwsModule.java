@@ -47,14 +47,16 @@ public interface AwsModule {
             .build();
     }
 
-    //global parameters
+    // global parameters
+    // singleton to be reused in lambda container
     @Provides @Named("Global") @Singleton
     static ParameterStoreConfigService parameterStoreConfigService(SsmClient ssmClient) {
         // Global don't change that often, use longer TTL
         return new ParameterStoreConfigService(null, Duration.ofMinutes(20), ssmClient);
     }
 
-    //parameters scoped to function
+    // parameters scoped to function
+    // singleton to be reused in lambda container
     @Provides @Singleton
     static ParameterStoreConfigService functionParameterStoreConfigService(SsmClient ssmClient) {
         String namespace =

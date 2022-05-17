@@ -20,8 +20,6 @@ import javax.inject.Inject;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
@@ -51,7 +49,6 @@ public class ParameterStoreConfigService implements ConfigService {
 
     private volatile LoadingCache<String, String> cache;
     private final Object $writeLock = new Object[0];
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
     private final String NEGATIVE_VALUE = "##NO_VALUE##";
 
@@ -105,6 +102,8 @@ public class ParameterStoreConfigService implements ConfigService {
         try {
             paramName = parameterName(property);
             String value = getCache().get(paramName);
+            // useful for debugging to check if cache works as expected
+            // log.info(getCache().stats().toString());
             if (NEGATIVE_VALUE.equals(value)) {
                 // Optional is common, do not log, just for testing/debugging purposes
                 // log.log(Level.WARNING, String.format("Parameter not found %s", paramName));
