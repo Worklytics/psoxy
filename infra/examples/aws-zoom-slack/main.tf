@@ -95,6 +95,8 @@ module "aws-psoxy-long-auth-connectors" {
   path_to_config       = "${local.base_config_path}/${each.value.source_kind}.yaml"
   aws_assume_role_arn  = var.aws_assume_role_arn
   aws_account_id       = var.aws_account_id
+  # from next version
+  #path_to_repo_root    = var.proxy_base_dir
 
   parameters = [
     module.psoxy-aws.salt_secret,

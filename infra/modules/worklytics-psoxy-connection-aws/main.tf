@@ -8,7 +8,7 @@ Complete the following steps in Worklytics AFTER you have deployed the Psoxy ins
   1.  Visit https://intl.worklytics.co/#integrations (or login into Worklytics, and navigate to
       Manage --> Data Connections)
   2.  Find the connector named "${var.display_name}", click "Add new connection"
-  3.  Copy and paste `${var.psoxy_endpoint_url}/` as the value for "Psoxy Base URL".
+  3.  Copy and paste `${var.psoxy_endpoint_url}` as the value for "Psoxy Base URL".
   4.  Copy and paste `${var.aws_role_arn}` as the value for "AWS Psoxy Role ARN".
   5.  Copy and paste `${var.aws_region}` as the value for "AWS Psoxy Region".
   6.  Review any additional settings that connector supports, adjusting values as you see fit, then

@@ -44,6 +44,12 @@ variable "parameters" {
   description = "System Manager Parameters to expose to function"
 }
 
+variable "path_to_repo_root" {
+  type        = string
+  description = "path root of your checkout; ideally absolute"
+}
+
+
 variable "path_to_function_zip" {
   type        = string
   description = "path to zip archive of lambda bundle"
@@ -59,6 +65,7 @@ variable "path_to_config" {
   description = "path to config file (usually someting in ../../configs/, eg configs/gdirectory.yaml"
 }
 
+
 variable "example_api_calls" {
   type        = list(string)
   description = "example endpoints that can be called via proxy"
@@ -66,6 +73,6 @@ variable "example_api_calls" {
 
 variable "environment_variables" {
   type        = map(string)
-  description = "No sensitive variables to add as an environment variable."
+  description = "Non-sensitive variables to add as an environment variable."
   default     = {}
 }
