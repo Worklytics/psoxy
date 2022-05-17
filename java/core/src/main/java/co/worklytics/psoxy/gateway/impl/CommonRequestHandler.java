@@ -98,7 +98,7 @@ public class CommonRequestHandler {
             log.log(Level.WARNING, e.getMessage(), e);
 
             //something like "Error getting access token for service account: 401 Unauthorized POST https://oauth2.googleapis.com/token,"
-            log.log(Level.WARNING, "Confirm oauth scopes set in config.yaml match those granted via Google Workspace Admin Console");
+            log.log(Level.WARNING, "Confirm oauth scopes set in config.yaml match those granted in data source");
             return builder.build();
         }
 
