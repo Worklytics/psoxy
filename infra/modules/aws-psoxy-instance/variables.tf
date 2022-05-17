@@ -44,6 +44,12 @@ variable "parameters" {
   description = "System Manager Parameters to expose to function"
 }
 
+variable "path_to_repo_root" {
+  type        = string
+  description = "path root of your checkout; ideally absolute"
+}
+
+
 variable "path_to_function_zip" {
   type        = string
   description = "path to zip archive of lambda bundle"
@@ -58,6 +64,7 @@ variable "path_to_config" {
   type        = string
   description = "path to config file (usually someting in ../../configs/, eg configs/gdirectory.yaml"
 }
+
 
 variable "example_api_calls" {
   type        = list(string)

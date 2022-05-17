@@ -95,7 +95,7 @@ locals {
   # lamba_url has trailing /, but our example_api_calls already have preceding /
   proxy_endpoint_url = substr(aws_lambda_function_url.lambda_url.function_url, 0, -1)
   test_commands = [for path in var.example_api_calls :
-    "./tools/test-psoxy.sh -a -r \"${var.aws_assume_role_arn}\" -u \"${local.proxy_endpoint_url}${path}\""
+    "${var.path_to_repo_root}/tools/test-psoxy.sh -a -r \"${var.aws_assume_role_arn}\" -u \"${local.proxy_endpoint_url}${path}\""
   ]
 }
 

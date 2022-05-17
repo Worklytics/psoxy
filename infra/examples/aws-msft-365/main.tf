@@ -195,6 +195,9 @@ module "psoxy-msft-connector" {
   aws_assume_role_arn  = var.aws_assume_role_arn
   example_api_calls    = each.value.example_calls
   aws_account_id       = var.aws_account_id
+  # from next version
+  #path_to_repo_root    = var.proxy_base_dir
+
 
   parameters = concat(
     module.private-key-aws-parameters[each.key].parameters,
