@@ -106,7 +106,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         @VisibleForTesting
         protected final Duration TOKEN_REFRESH_THRESHOLD = Duration.ofMinutes(1L);
 
-        private AccessToken previousToken = null;
+        private AccessToken currentToken = null;
 
         /**
          * implements canonical oauth flow to exchange refreshToken for accessToken
@@ -117,9 +117,8 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
          */
         @Override
         public AccessToken refreshAccessToken() throws IOException {
-            if (isPreviousTokenValid(this.previousToken, Instant.now())) {
-                log.info("Reused TOKEN!");
-                return this.previousToken;
+            if (isCurrentTokenValid(this.currentToken, Instant.now())) {
+                return this.currentToken;
             }
             String refreshEndpoint =
                 config.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.REFRESH_ENDPOINT);
@@ -146,10 +145,8 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                     }
                 });
 
-            log.info("Generated TOKEN!");
-
-            this.previousToken = asAccessToken(tokenResponse);
-            return this.previousToken;
+            this.currentToken = asAccessToken(tokenResponse);
+            return this.currentToken;
         }
 
 
@@ -163,7 +160,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         }
 
         @VisibleForTesting
-        protected boolean isPreviousTokenValid(AccessToken accessToken, Instant now) {
+        protected boolean isCurrentTokenValid(AccessToken accessToken, Instant now) {
             if (accessToken == null) {
                 return false;
             }

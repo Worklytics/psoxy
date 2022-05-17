@@ -84,7 +84,7 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
     @Test
     public void testCachedTokenNeedsRefreshWhenNull() {
         OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl tokenRefreshHandler = new OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl();
-        assertFalse(tokenRefreshHandler.isPreviousTokenValid(null, Instant.now()));
+        assertFalse(tokenRefreshHandler.isCurrentTokenValid(null, Instant.now()));
     }
 
     @ParameterizedTest
@@ -95,7 +95,7 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
         Instant expiration = fixed.plus(tokenRefreshHandler.TOKEN_REFRESH_THRESHOLD).plusMillis(millis);
 
         AccessToken token = new AccessToken("any-token", Date.from(expiration));
-        assertTrue(tokenRefreshHandler.isPreviousTokenValid(token, fixed));
+        assertTrue(tokenRefreshHandler.isCurrentTokenValid(token, fixed));
     }
 
     @ParameterizedTest
@@ -106,7 +106,7 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
         Instant expiration = fixed.plus(tokenRefreshHandler.TOKEN_REFRESH_THRESHOLD).plusMillis(millis);
 
         AccessToken token = new AccessToken("any-token", Date.from(expiration));
-        assertFalse(tokenRefreshHandler.isPreviousTokenValid(token, fixed));
+        assertFalse(tokenRefreshHandler.isCurrentTokenValid(token, fixed));
     }
 
 }
