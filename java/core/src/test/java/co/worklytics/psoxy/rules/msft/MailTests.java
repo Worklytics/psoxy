@@ -9,7 +9,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 public class MailTests extends JavaRulesTestBaseCase {
 
     @Getter
-    final Rules rulesUnderTest = PrebuiltSanitzerRules.OUTLOOK_MAIL;
+    final Rules rulesUnderTest = PrebuiltSanitizerRules.OUTLOOK_MAIL;
 
     @Getter
     final String exampleDirectoryPath = "api-response-examples/microsoft-365/outlook-mail";

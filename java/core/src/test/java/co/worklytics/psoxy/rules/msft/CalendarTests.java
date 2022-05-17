@@ -8,7 +8,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 public class CalendarTests extends DirectoryTests {
 
     @Getter
-    final Rules rulesUnderTest = PrebuiltSanitzerRules.OUTLOOK_CALENDAR;
+    final Rules rulesUnderTest = PrebuiltSanitizerRules.OUTLOOK_CALENDAR;
 
     @Getter
     final String exampleDirectoryPath = "api-response-examples/microsoft-365/outlook-cal";
