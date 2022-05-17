@@ -8,6 +8,7 @@ import com.google.api.client.http.*;
 import com.google.auth.Credentials;
 import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.OAuth2CredentialsWithRefresh;
+import com.google.common.annotations.VisibleForTesting;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.extern.java.Log;
@@ -102,7 +103,8 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         @Inject
         OAuthRefreshTokenSourceAuthStrategy.TokenRequestPayloadBuilder payloadBuilder;
 
-        private final Duration TOKEN_REFRESH_THRESHOLD = Duration.ofMinutes(1L);
+        @VisibleForTesting
+        protected final Duration TOKEN_REFRESH_THRESHOLD = Duration.ofMinutes(1L);
 
         private AccessToken previousToken = null;
 
@@ -115,7 +117,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
          */
         @Override
         public AccessToken refreshAccessToken() throws IOException {
-            if (isPreviousTokenValid(this.previousToken)) {
+            if (isPreviousTokenValid(this.previousToken, Instant.now())) {
                 log.info("Reused TOKEN!");
                 return this.previousToken;
             }
@@ -159,11 +161,14 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                 Date.from(Instant.now().plusSeconds(expiresIn)));
         }
 
-        private boolean isPreviousTokenValid(AccessToken accessToken) {
+        @VisibleForTesting
+        protected boolean isPreviousTokenValid(AccessToken accessToken, Instant now) {
             if (accessToken == null) {
                 return false;
             }
-            return accessToken.getExpirationTime().toInstant().isBefore(Instant.now().minus(TOKEN_REFRESH_THRESHOLD));
+            Instant expiresAt = accessToken.getExpirationTime().toInstant();
+            Instant minimumValid = expiresAt.minus(TOKEN_REFRESH_THRESHOLD);
+            return now.isBefore(minimumValid);
         }
 
         @Override
