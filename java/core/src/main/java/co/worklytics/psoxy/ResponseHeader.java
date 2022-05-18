@@ -16,7 +16,7 @@ public enum ResponseHeader {
      *
      */
     RULES_SHA("Rules-SHA"),
-    RULES_REJECTION("Rules-Rejection");
+    ERROR("Error");
 
     @NonNull
     final String httpNamePart;

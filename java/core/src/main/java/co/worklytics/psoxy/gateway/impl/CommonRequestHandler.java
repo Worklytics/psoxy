@@ -67,8 +67,6 @@ public class CommonRequestHandler {
             return healthCheckResponse.get();
         }
 
-        HttpRequestFactory requestFactory = getRequestFactory(request);
-
         // re-write host
         URL targetUrl = buildTarget(request);
         String relativeURL = URLUtils.relativeURL(targetUrl);
@@ -79,23 +77,26 @@ public class CommonRequestHandler {
 
         this.sanitizer = loadSanitizerRules();
 
+        String callLog = String.format("%s %s", request.getHttpMethod(), relativeURL);
         if (skipSanitization) {
-            log.info(String.format("Proxy invoked with target %s. Skipping sanitization.", relativeURL));
+            log.info(String.format("%s. Skipping sanitization.", callLog));
         } else if (sanitizer.isAllowed(targetUrl)) {
-            log.info(String.format("Proxy invoked with target %s. Rules allowed call.", relativeURL));
+            log.info(String.format("%s. Rules allowed call.", callLog));
         } else {
             builder.statusCode(HttpStatus.SC_FORBIDDEN);
-            builder.header(ResponseHeader.RULES_REJECTION.getHttpHeader(), Boolean.TRUE.toString());
-            log.warning(String.format("Proxy invoked with target %s. Blocked call by rules %s", relativeURL, objectMapper.writeValueAsString(rules.getAllowedEndpointRegexes())));
+            builder.header(ResponseHeader.ERROR.getHttpHeader(), ErrorCauses.BLOCKED_BY_RULES.name());
+            log.warning(String.format("%s. Blocked call by rules %s", callLog, objectMapper.writeValueAsString(rules.getAllowedEndpointRegexes())));
             return builder.build();
         }
 
         com.google.api.client.http.HttpRequest sourceApiRequest;
         try {
+            HttpRequestFactory requestFactory = getRequestFactory(request);
             sourceApiRequest = requestFactory.buildRequest(request.getHttpMethod(), new GenericUrl(targetUrl), null);
         } catch (IOException e) {
             builder.statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
             builder.body("Failed to authorize request; review logs");
+            builder.header(ResponseHeader.ERROR.getHttpHeader(), ErrorCauses.CONNECTION_SETUP.name());
             log.log(Level.WARNING, e.getMessage(), e);
             //something like "Error getting access token for service account: 401 Unauthorized POST https://oauth2.googleapis.com/token,"
             log.log(Level.WARNING, "Confirm oauth scopes set in config.yaml match those granted in data source");
@@ -146,6 +147,7 @@ public class CommonRequestHandler {
             //write error, which shouldn't contain PII, directly
             log.log(Level.WARNING, "Source API Error " + responseContent);
             //TODO: could run this through DLP to be extra safe
+            builder.header(ResponseHeader.ERROR.getHttpHeader(), ErrorCauses.API_ERROR.name());
             proxyResponseContent = responseContent;
         }
         builder.body(StringUtils.trimToEmpty(proxyResponseContent));
