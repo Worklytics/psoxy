@@ -39,8 +39,9 @@ module "psoxy-aws" {
 
 
 module "psoxy-hris" {
-  #source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-bulk?ref=v0.3.0-beta.5"
   source = "../../modules/aws-psoxy-bulk"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-bulk?ref=v0.3.0-beta.5"
+
 
   caller_aws_account_id   = var.caller_aws_account_id
   caller_external_user_id = var.caller_external_user_id
@@ -54,4 +55,5 @@ module "psoxy-hris" {
   path_to_config          = "${var.psoxy_base_dir}/configs/hris.yaml"
   api_caller_role_arn     = module.psoxy-aws.api_caller_role_arn
   api_caller_role_name    = module.psoxy-aws.api_caller_role_name
+  psoxy_base_dir          = var.psoxy_base_dir
 }

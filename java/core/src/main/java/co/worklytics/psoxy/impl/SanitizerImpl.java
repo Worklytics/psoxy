@@ -163,7 +163,7 @@ public class SanitizerImpl implements Sanitizer {
             return null;
         }
 
-        Preconditions.checkArgument(value instanceof String,"Value must be string");
+        Preconditions.checkArgument(value instanceof String, "Value must be string");
 
         if (StringUtils.isBlank((String) value)) {
             return new ArrayList<>();

@@ -141,6 +141,12 @@ resource "aws_ssm_parameter" "client_id" {
   name  = "PSOXY_${upper(replace(each.key, "-", "_"))}_CLIENT_ID"
   type  = "String"
   value = module.msft-connection[each.key].connector.application_id
+
+  lifecycle {
+    ignore_changes = [
+      value
+    ]
+  }
 }
 
 resource "aws_ssm_parameter" "refresh_endpoint" {
@@ -150,6 +156,12 @@ resource "aws_ssm_parameter" "refresh_endpoint" {
   type      = "String"
   overwrite = true
   value     = "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
+
+  lifecycle {
+    ignore_changes = [
+      value
+    ]
+  }
 }
 
 
@@ -175,10 +187,10 @@ module "psoxy-msft-connector" {
   path_to_function_zip = module.psoxy-aws.path_to_deployment_jar
   function_zip_hash    = module.psoxy-aws.deployment_package_hash
   api_caller_role_arn  = module.psoxy-aws.api_caller_role_arn
-  api_caller_role_name = module.psoxy-aws.api_caller_role_name
   aws_assume_role_arn  = var.aws_assume_role_arn
   example_api_calls    = each.value.example_calls
   aws_account_id       = var.aws_account_id
+  path_to_repo_root    = var.psoxy_base_dir
 
   parameters = concat(
     module.private-key-aws-parameters[each.key].parameters,

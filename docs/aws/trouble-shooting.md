@@ -39,3 +39,39 @@ https://discuss.hashicorp.com/t/using-credential-created-by-aws-sso-for-terrafor
 Options:
   - execute terraform via [AWS Cloud Shell](cloud-shell.md)
   - use a script such as [aws-mfa](https://github.com/broamski/aws-mfa) to get short-lived key+secret for your user.
+
+## Logs via Cloud Watch
+
+### via Web Console
+
+  1. Log into AWS web console
+  2. navigate to the AWS account that hosts your proxy instance (you may need to assume a
+     role in that account)
+  3. then the region in that account in which your proxy instance is deployed.
+     (default `us-east-1`)
+  4. then search or navigate to the `AWS Lambda`s feature, and find the specific one you
+     wish to debug
+  5. find the tabs for `Monitoring` then within that, `Logging`, then click "go to Cloud Watch"
+
+
+### via CLI
+
+Unless your AWS CLI is auth'd as a user who can review logs, first auth it for such a role.
+
+You can do this with a new profile, or setting env variables as follows:
+
+```shell
+export $(printf "AWS_ACCESS_KEY_ID=%s AWS_SECRET_ACCESS_KEY=%s AWS_SESSION_TOKEN=%s" \
+$(aws sts assume-role \
+--role-arn arn:aws:iam::123456789012:role/MyAssumedRole \
+--role-session-name MySessionName \
+--query "Credentials.[AccessKeyId,SecretAccessKey,SessionToken]" \
+--output text))
+````
+
+Then, you can do a series of commands as follows:
+```shell
+aws logs describe-log-streams --log-group-name /aws/lambda/psoxy-azure-ad
+aws logs get-log events --log-group-name /aws/lambda/psoxy-azure-ad --log-stream-name [VALUE_FROM_LAST_COMMAND]
+```
+

@@ -57,6 +57,5 @@ variable "certificate_subject" {
 
 variable "psoxy_base_dir" {
   type        = string
-  description = "the path where your psoxy repo resides"
-  default     = "../../.."
+  description = "the path where your psoxy repo resides. Preferably a full path, /home/user/repos/, avoid tilde (~) shortcut to $HOME"
 }

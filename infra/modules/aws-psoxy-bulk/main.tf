@@ -13,6 +13,70 @@ resource "aws_s3_bucket" "input" {
   bucket = "psoxy-${var.instance_id}-input"
 }
 
+/*
+ * USE CASE: By default config as is works. But customer attached own rules to bucket, that seems to
+ * supersede default, so this piece needs to be added to the bucket policies too.
+
+locals {
+  // this should come as variable, but being optional not done for now
+  hris_lambda_execution_role_arn = "arn:aws:iam::${var.aws_account_id}:role/iam_for_lambda_psoxy-hris"
+  read_policy_json = jsonencode({
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Sid": "GrantLambdaAccessToInputBucket",
+        "Action": [
+          "s3:GetObject"
+        ],
+        "Effect": "Allow",
+        "Resource": [
+          "${aws_s3_bucket.input.arn}/*"
+        ],
+        "Principal": {
+          "AWS": [
+            "${local.hris_lambda_execution_role_arn}"
+          ]
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_s3_bucket_policy" "read_policy_to_execution_role" {
+  bucket = aws_s3_bucket.input
+  policy = local.read_policy_json
+}
+
+*/
+
+resource "aws_iam_policy" "read_policy_to_execution_role" {
+  name        = "BucketRead_${aws_s3_bucket.input.id}"
+  description = "Allow principal to read from input bucket: ${aws_s3_bucket.input.id}"
+
+  policy = jsonencode(
+    {
+      "Version" : "2012-10-17",
+      "Statement" : [
+        {
+          "Sid" : "GrantLambdaAccessToInputBucket",
+          "Action" : [
+            "s3:GetObject"
+          ],
+          "Effect" : "Allow",
+          "Resource" : [
+            "${aws_s3_bucket.input.arn}/*"
+          ],
+          "Principal" : {
+            "AWS" : [
+              "${local.hris_lambda_execution_role_arn}"
+            ]
+          }
+        }
+      ]
+  })
+}
+
+
 resource "aws_s3_bucket" "output" {
   bucket = "psoxy-${var.instance_id}-output"
 }

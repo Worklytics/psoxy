@@ -56,6 +56,7 @@ module "psoxy-gcp-bulk" {
   deployment_bundle_object_name = module.psoxy-gcp.deployment_bundle_object_name
   path_to_config                = "${var.psoxy_base_dir}/config/${var.source_kind}.yaml"
   salt_secret_version_number    = module.psoxy-gcp.salt_secret_version_number
+  psoxy_base_dir                = var.psoxy_base_dir
 
   depends_on = [
     google_project.psoxy-project,

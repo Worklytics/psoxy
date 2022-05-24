@@ -68,3 +68,9 @@ variable "api_caller_role_name" {
   type        = string
   description = "name of role which can be assumed to call API"
 }
+
+variable "psoxy_base_dir" {
+  type        = string
+  description = "the path where your psoxy repo resides"
+  default     = "../../.."
+}

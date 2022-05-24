@@ -44,6 +44,12 @@ variable "parameters" {
   description = "System Manager Parameters to expose to function"
 }
 
+variable "path_to_repo_root" {
+  type        = string
+  description = "the path where your psoxy repo resides"
+  default     = "../../.."
+}
+
 variable "path_to_function_zip" {
   type        = string
   description = "path to zip archive of lambda bundle"
@@ -64,11 +70,6 @@ variable "api_caller_role_arn" {
   description = "arn of role which can be assumed to call API"
 }
 
-variable "api_caller_role_name" {
-  type        = string
-  description = "name of role which can be assumed to call API"
-}
-
 variable "example_api_calls" {
   type        = list(string)
   description = "example endpoints that can be called via proxy"
@@ -76,6 +77,6 @@ variable "example_api_calls" {
 
 variable "environment_variables" {
   type        = map(string)
-  description = "No sensitive variables to add as an environment variable."
+  description = "Non-sensitive variables to add as an environment variable."
   default     = {}
 }

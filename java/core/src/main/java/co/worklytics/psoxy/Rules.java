@@ -143,7 +143,7 @@ public class Rules implements Serializable {
         other.emailHeaderPseudonymizations.stream()
             .forEach(builder::emailHeaderPseudonymization);
         other.pseudonymizations.stream()
-            .forEach(builder::emailHeaderPseudonymization);
+            .forEach(builder::pseudonymization);
         other.pseudonymizationWithOriginals.stream()
             .forEach(builder::pseudonymizationWithOriginal);
         other.redactions.stream()

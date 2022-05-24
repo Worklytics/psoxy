@@ -1,13 +1,11 @@
+---
 allowedEndpointRegexes:
   - "^/(v1.0|beta)/(groups|users)/?[^/]*"
   - "^/(v1.0|beta)/(groups|users)\\?.*"
   - "^/(v1.0|beta)/groups/[^/]*/members[^/]*"
   - "^/(v1.0|beta)/users/[^/]*/(calendars/[^/]*/)?events.*"
   - "^/(v1.0|beta)/users/[^/]*/mailboxSettings"
-emailHeaderPseudonymizations:
-  - jsonPaths:
-      - "$..emailAddress.address"
-    relativeUrlRegex: "^/(v1.0|beta)/users/[^/]*/(calendars/[^/]*/)?events.*"
+  - "^/beta/users/[^/]*/calendar/calendarView(?)[^/]*"
 pseudonymizations:
   - jsonPaths:
       - "$..userPrincipalName"
@@ -21,6 +19,12 @@ pseudonymizations:
       - "$..mail"
       - "$..otherMails[*]"
     relativeUrlRegex: "^/(v1.0|beta)/groups/[^/]*/members.*"
+  - jsonPaths:
+      - "$..emailAddress.address"
+    relativeUrlRegex: "^/(v1.0|beta)/users/[^/]*/calendar/calendarView(?)[^/]*"
+  - jsonPaths:
+      - "$..emailAddress.address"
+    relativeUrlRegex: "^/(v1.0|beta)/users/[^/]*/(calendars/[^/]*/)?events.*"
 redactions:
   - jsonPaths:
       - "$..displayName"
@@ -67,5 +71,17 @@ redactions:
       - "$..singleValueExtendedProperties"
       - "$..location.uniqueId"
       - "$..locations[*].uniqueId"
+    relativeUrlRegex: "^/(v1.0|beta)/users/[^/]*/calendar/calendarView(?)[^/]*"
+  - jsonPaths:
+      - "$..subject"
+      - "$..body"
+      - "$..bodyPreview"
+      - "$..emailAddress.name"
+      - "$..extensions"
+      - "$..multiValueExtendedProperties"
+      - "$..singleValueExtendedProperties"
+      - "$..location.uniqueId"
+      - "$..locations[*].uniqueId"
     relativeUrlRegex: "^/(v1.0|beta)/users/[^/]*/(calendars/[^/]*/)?events.*"
+
 

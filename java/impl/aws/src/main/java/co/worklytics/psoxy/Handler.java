@@ -1,5 +1,6 @@
 package co.worklytics.psoxy;
 
+import co.worklytics.psoxy.aws.AwsContainer;
 import co.worklytics.psoxy.aws.DaggerAwsContainer;
 import co.worklytics.psoxy.aws.request.APIGatewayV2HTTPEventRequestAdapter;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
@@ -11,14 +12,20 @@ import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
-import javax.inject.Inject;
-
 @Log
 public class Handler implements com.amazonaws.services.lambda.runtime.RequestHandler<APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse> {
 
+    /**
+     * Static initialization allows reuse in containers
+     * {@link https://aws.amazon.com/premiumsupport/knowledge-center/lambda-improve-java-function-performance/}
+     */
+    static AwsContainer awsContainer;
+    static CommonRequestHandler requestHandler;
 
-    @Inject
-    CommonRequestHandler requestHandler;
+    static {
+        awsContainer = DaggerAwsContainer.create();
+        requestHandler = awsContainer.createHandler();
+    }
 
     @SneakyThrows
     @Override
@@ -32,8 +39,6 @@ public class Handler implements com.amazonaws.services.lambda.runtime.RequestHan
         //    - make it bound with interface, rather than generic? --> prob best approach
         // - objectMapper
         //
-
-        DaggerAwsContainer.create().injectHandler(this);
 
         HttpEventResponse response;
         try {
