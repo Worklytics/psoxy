@@ -15,8 +15,10 @@ pseudonymizations:
     relativeUrlRegex: "\\/api\\/discovery\\.conversations\\.info(?:\\?.+)?"
   - jsonPaths:
       - "$.messages[*].user"
+      - "$.messages[*].files[*].user"
       - "$.messages[*].reactions[*].users[*]"
       - "$.messages[*].replies[*].user"
+      - "$.messages[*].replies[*].parent_user_id"
       - "$.messages[*].reply_users[*]"
       - "$.messages[*].edited.user"
       - "$.messages[*].blocks[*].elements[*].elements[*].user_id"
@@ -42,5 +44,6 @@ redactions:
       - "$.messages[*]['text','username']"
       - "$.messages[*]..['text']"
       - "$.messages[*].user_profile"
-      - "$.messages[*].attachments[*]['fallback','service_name']"
+      - "$.messages[*].attachments[*]['fallback','service_name', 'thumb_url','thumb_width','thumb_height']"
+      - "$.messages[*].files[*]['thumb_url','thumb_width','thumb_height', 'thumb_tiny']"
     relativeUrlRegex: "\\/api\\/discovery\\.conversations\\.history(?:\\?.+)?"
