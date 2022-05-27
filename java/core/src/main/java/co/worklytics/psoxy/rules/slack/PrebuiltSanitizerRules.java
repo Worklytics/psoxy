@@ -89,12 +89,12 @@ public class PrebuiltSanitizerRules {
                     .relativeUrlRegex("\\/api\\/discovery\\.conversations\\.history(?:\\?.+)?")
                     // we don't care about text
                     // username is a variation of user, so just skip it to avoid references
-                    .jsonPath("$.messages[*]['text','username']")
+                    .jsonPath("$.messages[*]['text','username','permalink']")
                     .jsonPath("$.messages[*]..['text']")
                     .jsonPath("$.messages[*].user_profile")
                     // Thumbnails name or url may reveal content
                     .jsonPath("$.messages[*].attachments[*]['fallback','service_name', 'thumb_url','thumb_width','thumb_height']")
-                    .jsonPath("$.messages[*].files[*]['thumb_url','thumb_width','thumb_height', 'thumb_tiny']")
+                    .jsonPath("$.messages[*].files[*]['thumb_url','thumb_width','thumb_height','thumb_tiny']")
                     .build()
             )
             .build();

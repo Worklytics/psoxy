@@ -144,7 +144,8 @@ public class SlackDiscoveryTests extends JavaRulesTestBaseCase {
                 "We're withholding a pun from you",
                 "Leg end nary a laugh, Ink.",
                 "Some other text",
-                "https://badpuns.example.com/puns/123.png"
+                "https://badpuns.example.com/puns/123.png",
+                "permalink value"
         );
 
         assertNotSanitized(jsonString, PIItoPseudonymize);
