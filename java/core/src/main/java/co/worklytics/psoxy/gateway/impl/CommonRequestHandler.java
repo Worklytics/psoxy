@@ -9,11 +9,10 @@ import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.auth.Credentials;
-import com.google.auth.http.HttpCredentialsAdapter;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
@@ -21,11 +20,14 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ContentType;
 
 import javax.inject.Inject;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.logging.Level;
+import java.util.zip.GZIPOutputStream;
 
 @NoArgsConstructor(onConstructor_ = @Inject)
 @Log
@@ -119,7 +121,11 @@ public class CommonRequestHandler {
         //q: add exception handlers for IOExceptions / HTTP error responses, so those retries
         // happen in proxy rather than on Worklytics-side?
 
+        logIfDevelopmentMode(() -> sourceApiRequest.toString());
+
         com.google.api.client.http.HttpResponse sourceApiResponse = sourceApiRequest.execute();
+
+        logIfDevelopmentMode(() -> sourceApiResponse.toString());
 
         // return response
         builder.statusCode(sourceApiResponse.getStatusCode());
@@ -150,7 +156,16 @@ public class CommonRequestHandler {
             builder.header(ResponseHeader.ERROR.getHttpHeader(), ErrorCauses.API_ERROR.name());
             proxyResponseContent = responseContent;
         }
-        builder.body(StringUtils.trimToEmpty(proxyResponseContent));
+
+        String body = StringUtils.trimToEmpty(proxyResponseContent);
+        if (StringUtils.isNotBlank(body) && shouldCompress(request)) {
+            Optional<String> compressedBody = compressBody(body);
+            if (compressedBody.isPresent()) {
+                builder.header("content-encoding", "gzip");
+                body = compressedBody.get();
+            }
+        }
+        builder.body(body);
 
         return builder.build();
     }
@@ -170,7 +185,8 @@ public class CommonRequestHandler {
 
         accountToImpersonate.ifPresent(user -> log.info("Impersonating user"));
         //TODO: warn here for Google Workspace connectors, which expect user??
-
+        return transport.createRequestFactory();
+        /*
         Credentials credentials = sourceAuthStrategy.getCredentials(accountToImpersonate);
         HttpCredentialsAdapter initializer = new HttpCredentialsAdapter(credentials);
 
@@ -179,6 +195,8 @@ public class CommonRequestHandler {
         // itself, if that's possible
 
         return transport.createRequestFactory(initializer);
+
+         */
     }
 
     /**
@@ -221,6 +239,29 @@ public class CommonRequestHandler {
             targetURLString = hostPlusPath + "?" + request.getQuery().get();
         }
         return new URL(targetURLString);
+    }
+
+    private static final int DEFAULT_SIZE = 512;
+
+    private boolean shouldCompress(HttpEventRequest request) {
+        return request.getHeader("accept-encoding").orElse("none").contains("gzip");
+    }
+
+    /**
+     * Compresses content as binary base64
+     * @param body
+     * @return
+     */
+    Optional<String> compressBody(String body) {
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream(DEFAULT_SIZE)) {
+            try (GZIPOutputStream output = new GZIPOutputStream(bos)) {
+                output.write(body.getBytes(StandardCharsets.UTF_8.name()));
+            }
+            return Optional.ofNullable(Base64.encodeBase64String(bos.toByteArray()));
+        } catch (IOException e) {
+            // do nothing, send uncompressed
+            return Optional.empty();
+        }
     }
 
     private void logIfDevelopmentMode(Supplier<String> messageSupplier) {
