@@ -257,6 +257,7 @@ public class CommonRequestHandler {
             try (GZIPOutputStream output = new GZIPOutputStream(bos)) {
                 output.write(body.getBytes(StandardCharsets.UTF_8.name()));
             }
+            // TODO: the base64 thing is AWS specific, need to convert this into a strategy
             return Optional.ofNullable(Base64.encodeBase64String(bos.toByteArray()));
         } catch (IOException e) {
             // do nothing, send uncompressed

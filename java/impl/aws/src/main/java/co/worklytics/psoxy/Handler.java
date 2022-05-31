@@ -53,13 +53,14 @@ public class Handler implements com.amazonaws.services.lambda.runtime.RequestHan
         }
 
         try {
+            boolean base64 = response.getHeaders().containsKey("content-encoding");
             return new APIGatewayV2HTTPResponse(
                 response.getStatusCode(),
                 response.getHeaders(),
                 null, /* multi-valued headers */
                 null, /* cookies */
                 response.getBody(),
-                false /* isBase64Encoded */
+                base64 /* isBase64Encoded */
             );
         } catch (Throwable e) {
             context.getLogger().log("Error writing response as Lambda return");
