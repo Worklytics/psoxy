@@ -9,6 +9,8 @@ import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.auth.Credentials;
+import com.google.auth.http.HttpCredentialsAdapter;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
@@ -185,8 +187,7 @@ public class CommonRequestHandler {
 
         accountToImpersonate.ifPresent(user -> log.info("Impersonating user"));
         //TODO: warn here for Google Workspace connectors, which expect user??
-        return transport.createRequestFactory();
-        /*
+
         Credentials credentials = sourceAuthStrategy.getCredentials(accountToImpersonate);
         HttpCredentialsAdapter initializer = new HttpCredentialsAdapter(credentials);
 
@@ -195,8 +196,6 @@ public class CommonRequestHandler {
         // itself, if that's possible
 
         return transport.createRequestFactory(initializer);
-
-         */
     }
 
     /**
