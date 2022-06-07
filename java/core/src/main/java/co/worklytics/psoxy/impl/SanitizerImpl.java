@@ -122,7 +122,7 @@ public class SanitizerImpl implements Sanitizer {
     String transform(@NonNull URL url, @NonNull String jsonResponse) {
         if (compiledEndpointRules == null) {
             compiledEndpointRules = options.getRules2().getEndpoints().stream()
-                .map(endpoint -> Pair.of(Pattern.compile(endpoint.getPathRegex()), endpoint))
+                .map(endpoint -> Pair.of(Pattern.compile(endpoint.getPathRegex(), CASE_INSENSITIVE), endpoint))
                 .collect(Collectors.toList());
         }
 
