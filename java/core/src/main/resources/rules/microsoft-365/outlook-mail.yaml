@@ -1,6 +1,6 @@
 allowAllEndpoints: false
 endpoints:
-  - pathRegex: "^/(v1.0|beta)/users[/^]*"
+  - pathRegex: "^/(v1.0|beta)/users/?[^/]*"
     transforms:
       - method: "redact"
         jsonPaths:
@@ -22,7 +22,7 @@ endpoints:
           - "$..imAddresses[*]"
           - "$..mail"
           - "$..otherMails[*]"
-  - pathRegex: "^/(v1.0|beta)/groups[^/]*"
+  - pathRegex: "^/(v1.0|beta)/groups/?[^/]*"
     transforms:
       - method: "redact"
         jsonPaths:
