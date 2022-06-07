@@ -40,7 +40,8 @@ public class CommonRequestHandler {
     @Inject SourceAuthStrategy sourceAuthStrategy;
     @Inject ObjectMapper objectMapper;
     @Inject SanitizerFactory sanitizerFactory;
-    @Inject Rules rules;
+    @Inject
+    Rules1 rules1;
     @Inject HealthCheckRequestHandler healthCheckRequestHandler;
 
     private volatile Sanitizer sanitizer;
@@ -50,7 +51,7 @@ public class CommonRequestHandler {
         if (this.sanitizer == null) {
             synchronized ($writeLock) {
                 if (this.sanitizer == null) {
-                    this.sanitizer = sanitizerFactory.create(sanitizerFactory.buildOptions(config, rules));
+                    this.sanitizer = sanitizerFactory.create(sanitizerFactory.buildOptions(config, rules1));
                 }
             }
         }
@@ -85,7 +86,7 @@ public class CommonRequestHandler {
         } else {
             builder.statusCode(HttpStatus.SC_FORBIDDEN);
             builder.header(ResponseHeader.ERROR.getHttpHeader(), ErrorCauses.BLOCKED_BY_RULES.name());
-            log.warning(String.format("%s. Blocked call by rules %s", callLog, objectMapper.writeValueAsString(rules.getAllowedEndpointRegexes())));
+            log.warning(String.format("%s. Blocked call by rules %s", callLog, objectMapper.writeValueAsString(rules1.getAllowedEndpointRegexes())));
             return builder.build();
         }
 

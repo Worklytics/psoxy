@@ -12,7 +12,7 @@ public interface SanitizerFactory {
     SanitizerImpl create(Sanitizer.Options options);
 
     //q: right place? mapping config+rules --> Sanitizer.Options isn't implementation-specific
-    default Sanitizer.Options buildOptions(ConfigService config, Rules rules) {
+    default Sanitizer.Options buildOptions(ConfigService config, Rules1 rules) {
         return Sanitizer.Options.builder()
             .rules(rules)
                     .pseudonymizationSalt(config.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT)

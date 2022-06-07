@@ -1,6 +1,6 @@
 package co.worklytics.psoxy.storage.impl;
 
-import co.worklytics.psoxy.Rules;
+import co.worklytics.psoxy.Rules1;
 import co.worklytics.psoxy.Sanitizer;
 import co.worklytics.psoxy.storage.FileHandler;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -47,7 +47,7 @@ public class CSVFileHandler implements FileHandler {
         Set<String> columnsToRedact = options.getRules()
                 .getRedactions()
                 .stream()
-                .map(Rules.Rule::getCsvColumns)
+                .map(Rules1.Rule::getCsvColumns)
                 .flatMap(Collection::stream)
                 .map(String::trim)
                 .collect(Collectors.toCollection(() -> new TreeSet<>(String.CASE_INSENSITIVE_ORDER)));
@@ -55,7 +55,7 @@ public class CSVFileHandler implements FileHandler {
         Set<String> columnsToPseudonymize = options.getRules()
                 .getPseudonymizations()
                 .stream()
-                .map(Rules.Rule::getCsvColumns)
+                .map(Rules1.Rule::getCsvColumns)
                 .flatMap(Collection::stream)
                 .map(String::trim)
                 .collect(Collectors.toCollection(() -> new TreeSet<>(String.CASE_INSENSITIVE_ORDER)));

@@ -1,6 +1,6 @@
 package co.worklytics.psoxy.rules.msft;
 
-import co.worklytics.psoxy.Rules;
+import co.worklytics.psoxy.Rules1;
 import lombok.Getter;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -8,7 +8,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 public class CalendarTests extends DirectoryTests {
 
     @Getter
-    final Rules rulesUnderTest = PrebuiltSanitizerRules.OUTLOOK_CALENDAR;
+    final Rules1 rulesUnderTest = PrebuiltSanitizerRules.OUTLOOK_CALENDAR;
 
     @Getter
     final String exampleDirectoryPath = "api-response-examples/microsoft-365/outlook-cal";

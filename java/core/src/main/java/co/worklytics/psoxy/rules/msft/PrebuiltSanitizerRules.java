@@ -1,18 +1,18 @@
 package co.worklytics.psoxy.rules.msft;
 
-import co.worklytics.psoxy.Rules;
+import co.worklytics.psoxy.Rules1;
 import com.google.common.collect.ImmutableMap;
 
 import java.util.Map;
 
 public class PrebuiltSanitizerRules {
 
-    static final Rules DIRECTORY =  Rules.builder()
+    static final Rules1 DIRECTORY =  Rules1.builder()
         //GENERAL stuff
         .allowedEndpointRegex("^/(v1.0|beta)/(groups|users)/?[^/]*")
         .allowedEndpointRegex("^/(v1.0|beta)/(groups|users)\\?.*")
         .allowedEndpointRegex("^/(v1.0|beta)/groups/[^/]*/members[^/]*")
-        .redaction(Rules.Rule.builder()
+        .redaction(Rules1.Rule.builder()
             // https://docs.microsoft.com/en-us/graph/api/user-list?view=graph-rest-1.0&tabs=http
             .relativeUrlRegex("^/(v1.0|beta)/users.*")
             .jsonPath("$..displayName")
@@ -28,7 +28,7 @@ public class PrebuiltSanitizerRules {
             .jsonPath("$..mobilePhone")
             .jsonPath("$..businessPhones[*]")
             .build())
-        .pseudonymization(Rules.Rule.builder()
+        .pseudonymization(Rules1.Rule.builder()
             // https://docs.microsoft.com/en-us/graph/api/user-list?view=graph-rest-1.0&tabs=http
             .relativeUrlRegex("^/(v1.0|beta)/users.*")
             .jsonPath("$..userPrincipalName")
@@ -37,7 +37,7 @@ public class PrebuiltSanitizerRules {
             .jsonPath("$..otherMails[*]")
             .build()
         )
-        .redaction(Rules.Rule.builder()
+        .redaction(Rules1.Rule.builder()
             .relativeUrlRegex("^/(v1.0|beta)/groups.*")
             .jsonPath("$..owners")
             .jsonPath("$..rejectedSenders")
@@ -45,7 +45,7 @@ public class PrebuiltSanitizerRules {
             .jsonPath("$..members")
             .jsonPath("$..membersWithLicenseErrors")
             .build())
-        .redaction(Rules.Rule.builder()
+        .redaction(Rules1.Rule.builder()
             .relativeUrlRegex("^/(v1.0|beta)/groups/[^/]*/members.*")
             .jsonPath("$..displayName")
             .jsonPath("$..employeeId")
@@ -60,7 +60,7 @@ public class PrebuiltSanitizerRules {
             .jsonPath("$..mobilePhone")
             .jsonPath("$..businessPhones[*]")
             .build())
-        .pseudonymization(Rules.Rule.builder()
+        .pseudonymization(Rules1.Rule.builder()
             .relativeUrlRegex("^/(v1.0|beta)/groups/[^/]*/members.*")
             .jsonPath("$..userPrincipalName")
             .jsonPath("$..imAddresses[*]")
@@ -70,15 +70,15 @@ public class PrebuiltSanitizerRules {
         )
         .build();
 
-    static final Rules OUTLOOK_MAIL = DIRECTORY.compose(Rules.builder()
+    static final Rules1 OUTLOOK_MAIL = DIRECTORY.compose(Rules1.builder()
         .allowedEndpointRegex("^/(v1.0|beta)/users/[^/]*/messages/[^/]*")
         .allowedEndpointRegex("^/(v1.0|beta)/users/[^/]*/mailFolders(/SentItems|\\('SentItems'\\))/messages.*")
         .allowedEndpointRegex("^/(v1.0|beta)/users/[^/]*/mailboxSettings")
-        .pseudonymization(Rules.Rule.builder()
+        .pseudonymization(Rules1.Rule.builder()
             .relativeUrlRegex("^/(v1.0|beta)/users/[^/]*/mailFolders(/SentItems|\\('SentItems'\\))/messages.*")
             .jsonPath("$..emailAddress.address")
             .build())
-        .redaction(Rules.Rule.builder()
+        .redaction(Rules1.Rule.builder()
             .relativeUrlRegex("^/(v1.0|beta)/users/[^/]*/mailFolders(/SentItems|\\('SentItems'\\))/messages.*")
             .jsonPath("$..subject")
             .jsonPath("$..body")
@@ -89,11 +89,11 @@ public class PrebuiltSanitizerRules {
             .jsonPath("$..singleValueExtendedProperties")
             .jsonPath("$..internetMessageHeaders") //values that we care about generally parsed to other fields
             .build())
-        .pseudonymization(Rules.Rule.builder()
+        .pseudonymization(Rules1.Rule.builder()
             .relativeUrlRegex("^/(v1.0|beta)/users/[^/]*/messages/[^/]*")
             .jsonPath("$..emailAddress.address")
             .build())
-        .redaction(Rules.Rule.builder()
+        .redaction(Rules1.Rule.builder()
             .relativeUrlRegex("^/(v1.0|beta)/users/[^/]*/messages/[^/]*")
             .jsonPath("$..subject")
             .jsonPath("$..body")
@@ -106,15 +106,15 @@ public class PrebuiltSanitizerRules {
             .build())
         .build());
 
-    static final Rules OUTLOOK_CALENDAR = DIRECTORY.compose(Rules.builder()
+    static final Rules1 OUTLOOK_CALENDAR = DIRECTORY.compose(Rules1.builder()
         .allowedEndpointRegex("^/(v1.0|beta)/users/[^/]*/(calendars/[^/]*/)?events.*")
         .allowedEndpointRegex("^/(v1.0|beta)/users/[^/]*/mailboxSettings")
         .allowedEndpointRegex("^/beta/users/[^/]*/calendar/calendarView(?)[^/]*")
-        .pseudonymization(Rules.Rule.builder()
+        .pseudonymization(Rules1.Rule.builder()
             .relativeUrlRegex("^/(v1.0|beta)/users/[^/]*/calendar/calendarView(?)[^/]*")
             .jsonPath("$..emailAddress.address")
             .build())
-        .redaction(Rules.Rule.builder()
+        .redaction(Rules1.Rule.builder()
             .relativeUrlRegex("^/(v1.0|beta)/users/[^/]*/calendar/calendarView(?)[^/]*")
             .jsonPath("$..subject")
             .jsonPath("$..body")
@@ -127,11 +127,11 @@ public class PrebuiltSanitizerRules {
             .jsonPath("$..locations[*].uniqueId")
             .jsonPath("$..onlineMeeting.joinUrl") //sometimes contain access codes
             .build())
-        .pseudonymization(Rules.Rule.builder()
+        .pseudonymization(Rules1.Rule.builder()
             .relativeUrlRegex("^/(v1.0|beta)/users/[^/]*/(calendars/[^/]*/)?events.*")
             .jsonPath("$..emailAddress.address")
             .build())
-        .redaction(Rules.Rule.builder()
+        .redaction(Rules1.Rule.builder()
             .relativeUrlRegex("^/(v1.0|beta)/users/[^/]*/(calendars/[^/]*/)?events.*")
             .jsonPath("$..subject")
             .jsonPath("$..body")
@@ -147,8 +147,8 @@ public class PrebuiltSanitizerRules {
         .build());
 
 
-    public static final Map<String,? extends Rules> MSFT_DEFAULT_RULES_MAP =
-        ImmutableMap.<String, Rules>builder()
+    public static final Map<String,? extends Rules1> MSFT_DEFAULT_RULES_MAP =
+        ImmutableMap.<String, Rules1>builder()
             .put("azure-ad", DIRECTORY)
             .put("outlook-cal", OUTLOOK_CALENDAR)
             .put("outlook-mail", OUTLOOK_MAIL)

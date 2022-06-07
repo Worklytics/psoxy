@@ -29,7 +29,7 @@ public interface Sanitizer {
         String defaultScopeId;
 
         //q: add regexes to whitelist endpoints that we actually use??
-        Rules rules;
+        Rules1 rules;
 
         Rules2 rules2;
     }

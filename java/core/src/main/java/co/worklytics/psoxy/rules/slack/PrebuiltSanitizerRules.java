@@ -1,18 +1,18 @@
 package co.worklytics.psoxy.rules.slack;
 
-import co.worklytics.psoxy.Rules;
+import co.worklytics.psoxy.Rules1;
 import com.google.common.collect.ImmutableMap;
 
 import java.util.Map;
 
-import static co.worklytics.psoxy.Rules.Rule;
+import static co.worklytics.psoxy.Rules1.Rule;
 
 /**
  * Prebuilt sanitization rules for Slack Discovery API responses
  */
 public class PrebuiltSanitizerRules {
 
-    static final Rules SLACK = Rules.builder()
+    static final Rules1 SLACK = Rules1.builder()
         .allowedEndpointRegex("^\\/api\\/discovery\\.enterprise\\.info(?:\\?.+)?")
         .allowedEndpointRegex("^\\/api\\/discovery\\.conversations\\.list(?:\\?.+)?")
         .allowedEndpointRegex("^\\/api\\/discovery\\.conversations\\.history(?:\\?.+)?")
@@ -95,7 +95,7 @@ public class PrebuiltSanitizerRules {
         )
         .build();
 
-    static public final Map<String, Rules> SLACK_DEFAULT_RULES_MAP = ImmutableMap.<String, Rules>builder()
+    static public final Map<String, Rules1> SLACK_DEFAULT_RULES_MAP = ImmutableMap.<String, Rules1>builder()
         .put("slack", SLACK)
         .build();
 }

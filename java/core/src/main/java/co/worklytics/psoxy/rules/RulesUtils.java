@@ -1,10 +1,9 @@
 package co.worklytics.psoxy.rules;
 
-import co.worklytics.psoxy.Rules;
+import co.worklytics.psoxy.Rules1;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -23,7 +22,7 @@ public class RulesUtils {
     ObjectMapper yamlMapper;
 
     @SneakyThrows
-    public String sha(Rules rules) {
+    public String sha(Rules1 rules) {
         return DigestUtils.sha1Hex(yamlMapper.writeValueAsString(rules));
     }
 
@@ -38,10 +37,10 @@ public class RulesUtils {
      * @return rules, if defined, from file system
      */
     @SneakyThrows
-    public Optional<Rules> getRulesFromFileSystem(String pathToRulesFile) {
+    public Optional<Rules1> getRulesFromFileSystem(String pathToRulesFile) {
         File rulesFile = new File(pathToRulesFile);
         if (rulesFile.exists()) {
-            Rules rules = yamlMapper.readerFor(Rules.class).readValue(rulesFile);
+            Rules1 rules = yamlMapper.readerFor(Rules1.class).readValue(rulesFile);
             Validator.validate(rules);
             return Optional.of(rules);
         }
@@ -56,12 +55,12 @@ public class RulesUtils {
      * @see com.fasterxml.jackson.core.JsonParseException sry for the misnomer, but we leverage Jackson for both YAML and JSON
      */
     @SneakyThrows
-    public Optional<Rules> getRulesFromConfig(ConfigService config) {
+    public Optional<Rules1> getRulesFromConfig(ConfigService config) {
         return config.getConfigPropertyAsOptional(ProxyConfigProperty.RULES)
             .map(base64encoded -> Base64.getDecoder().decode(base64encoded))
             .map(yamlString -> {
                 try {
-                    Rules rules = yamlMapper.readerFor(Rules.class).readValue(yamlString);
+                    Rules1 rules = yamlMapper.readerFor(Rules1.class).readValue(yamlString);
                     Validator.validate(rules);
                     return rules;
                 } catch (IOException e) {

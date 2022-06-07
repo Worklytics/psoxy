@@ -1,6 +1,6 @@
 package co.worklytics.psoxy.rules;
 
-import co.worklytics.psoxy.Rules;
+import co.worklytics.psoxy.Rules1;
 import co.worklytics.psoxy.Rules2;
 import com.jayway.jsonpath.JsonPath;
 import lombok.NonNull;
@@ -12,15 +12,15 @@ import java.util.regex.Pattern;
 public class Validator {
 
 
-    static public void validate(@NonNull Rules rules) {
-        validate(rules.getRedactions());
-        validate(rules.getPseudonymizations());
-        validate(rules.getEmailHeaderPseudonymizations());
-        validate(rules.getPseudonymizationWithOriginals());
+    static public void validate(@NonNull Rules1 rules1) {
+        validate(rules1.getRedactions());
+        validate(rules1.getPseudonymizations());
+        validate(rules1.getEmailHeaderPseudonymizations());
+        validate(rules1.getPseudonymizationWithOriginals());
 
-        if(rules.getAllowedEndpointRegexes() != null) {
+        if(rules1.getAllowedEndpointRegexes() != null) {
             //throws PatternSyntaxExpression if doesn't compile
-            rules.getAllowedEndpointRegexes().forEach(Pattern::compile);
+            rules1.getAllowedEndpointRegexes().forEach(Pattern::compile);
         }
     }
 
@@ -47,13 +47,13 @@ public class Validator {
     }
 
 
-    static void validate(@Nullable List<Rules.Rule> rules) {
+    static void validate(@Nullable List<Rules1.Rule> rules) {
         if (rules != null) {
             rules.forEach(Validator::validate);
         }
     }
 
-    static public void validate(@NonNull Rules.Rule rule) {
+    static public void validate(@NonNull Rules1.Rule rule) {
         if (rule.getCsvColumns() == null || rule.getCsvColumns().isEmpty())  {
             Pattern.compile(rule.getRelativeUrlRegex());
             rule.getJsonPaths().forEach(p -> {

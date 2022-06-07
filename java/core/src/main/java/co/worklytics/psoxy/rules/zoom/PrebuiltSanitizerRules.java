@@ -1,18 +1,18 @@
 package co.worklytics.psoxy.rules.zoom;
 
-import co.worklytics.psoxy.Rules;
+import co.worklytics.psoxy.Rules1;
 import com.google.common.collect.ImmutableMap;
 
 import java.util.Map;
 
-import static co.worklytics.psoxy.Rules.Rule;
+import static co.worklytics.psoxy.Rules1.Rule;
 
 /**
  * Prebuilt sanitization rules for Zoom API responses
  */
 public class PrebuiltSanitizerRules {
 
-    static final Rules ZOOM = Rules.builder()
+    static final Rules1 ZOOM = Rules1.builder()
         // List users
         // https://marketplace.zoom.us/docs/api-reference/zoom-api/users/users
         .allowedEndpointRegex("^\\/v2\\/users(?:\\?.+)?")
@@ -98,7 +98,7 @@ public class PrebuiltSanitizerRules {
         )
         .build();
 
-    static public final Map<String, Rules> ZOOM_PREBUILT_RULES_MAP = ImmutableMap.<String, Rules>builder()
+    static public final Map<String, Rules1> ZOOM_PREBUILT_RULES_MAP = ImmutableMap.<String, Rules1>builder()
         .put("zoom", ZOOM)
         .build();
 }

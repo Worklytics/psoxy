@@ -1,6 +1,6 @@
 package co.worklytics.psoxy.storage;
 
-import co.worklytics.psoxy.Rules;
+import co.worklytics.psoxy.Rules1;
 import co.worklytics.psoxy.Sanitizer;
 import co.worklytics.psoxy.SanitizerFactory;
 import co.worklytics.psoxy.gateway.ConfigService;
@@ -17,7 +17,7 @@ public class StorageHandler {
     @Inject
     ConfigService config;
     @Inject
-    Rules rules;
+    Rules1 rules1;
     @Inject
     FileHandlerFactory fileHandlerStrategy;
     @Inject
@@ -30,7 +30,7 @@ public class StorageHandler {
         if (this.sanitizer == null) {
             synchronized ($writeLock) {
                 if (this.sanitizer == null) {
-                    this.sanitizer = sanitizerFactory.create(sanitizerFactory.buildOptions(config, rules));
+                    this.sanitizer = sanitizerFactory.create(sanitizerFactory.buildOptions(config, rules1));
                 }
             }
         }

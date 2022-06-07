@@ -1,6 +1,6 @@
 package co.worklytics.psoxy.rules.zoom;
 
-import co.worklytics.psoxy.Rules;
+import co.worklytics.psoxy.Rules1;
 import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ZoomRulesTests extends JavaRulesTestBaseCase {
 
     @Getter
-    final Rules rulesUnderTest = PrebuiltSanitizerRules.ZOOM;
+    final Rules1 rulesUnderTest = PrebuiltSanitizerRules.ZOOM;
 
     @Getter
     final String exampleDirectoryPath = "api-response-examples/zoom";

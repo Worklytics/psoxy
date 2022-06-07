@@ -1,6 +1,6 @@
 package co.worklytics.psoxy.rules;
 
-import co.worklytics.psoxy.Rules;
+import co.worklytics.psoxy.Rules1;
 import co.worklytics.psoxy.Rules2;
 import co.worklytics.psoxy.rules.google.PrebuiltSanitizerRules;
 import lombok.SneakyThrows;
@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * base test case for rules written in java (although also expected to have yaml-encoded equivalent
  * in repo under `src/main/resources/rules/`)
  */
-public abstract class JavaRulesTestBaseCase extends RulesBaseTestCase {
+public abstract class JavaRulesTestBaseCase extends Rules1BaseTestCase {
 
 
     //TODO: we could avoid this if java rules serialized to YAML as part of build process or
@@ -24,7 +24,7 @@ public abstract class JavaRulesTestBaseCase extends RulesBaseTestCase {
     void validateYamlExample() {
         String path = "/rules/" + getYamlSerializationFilepath() + ".yaml";
 
-        Rules2 rulesFromFilesystem = yamlMapper.readerFor(Rules.class)
+        Rules2 rulesFromFilesystem = yamlMapper.readerFor(Rules1.class)
             .readValue(PrebuiltSanitizerRules.class.getResource(path));
 
         assertEquals(

@@ -1,6 +1,6 @@
 package co.worklytics.test;
 
-import co.worklytics.psoxy.Rules;
+import co.worklytics.psoxy.Rules1;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
 import dagger.Module;
@@ -24,8 +24,8 @@ public class MockModules {
     @Module
     public interface ForRules {
         @Provides @Singleton
-        static Rules rules() {
-            return mock(Rules.class);
+        static Rules1 rules() {
+            return mock(Rules1.class);
         }
     }
 

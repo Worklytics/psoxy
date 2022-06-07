@@ -29,7 +29,7 @@ import java.util.List;
 @EqualsAndHashCode
 @JsonPropertyOrder(alphabetic = true)
 @JsonInclude(JsonInclude.Include.NON_NULL) //NOTE: despite name, also affects YAML encoding
-public class Rules implements Serializable {
+public class Rules1 implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -136,7 +136,7 @@ public class Rules implements Serializable {
      * @param other
      * @return combined rule sets
      */
-    public Rules compose(Rules other) {
+    public Rules1 compose(Rules1 other) {
         RulesBuilder builder = this.toBuilder();
         other.allowedEndpointRegexes.stream()
             .forEach(builder::allowedEndpointRegex);

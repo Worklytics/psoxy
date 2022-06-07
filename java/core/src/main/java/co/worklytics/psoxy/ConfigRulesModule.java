@@ -6,13 +6,9 @@ import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
 import co.worklytics.psoxy.rules.RulesUtils;
 import dagger.Module;
 import dagger.Provides;
-import org.apache.commons.lang3.ObjectUtils;
 
-import javax.swing.text.html.Option;
 import java.util.Optional;
 import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.logging.Logger;
 
 @Module
@@ -21,9 +17,9 @@ public class ConfigRulesModule {
     public static final String PATH_TO_RULES_FILES = "/rules.yaml";
 
     @Provides
-    static Rules rules(Logger log, RulesUtils rulesUtils, ConfigService config) {
+    static Rules1 rules(Logger log, RulesUtils rulesUtils, ConfigService config) {
 
-        BiFunction<Optional<Rules>, String, Optional<Rules>> loadAndLog = (o, msg) -> {
+        BiFunction<Optional<Rules1>, String, Optional<Rules1>> loadAndLog = (o, msg) -> {
             if (o.isPresent()) {
                 log.info(msg);
             }

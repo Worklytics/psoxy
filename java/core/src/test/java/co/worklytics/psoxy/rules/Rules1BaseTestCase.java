@@ -1,7 +1,7 @@
 package co.worklytics.psoxy.rules;
 
 import co.worklytics.psoxy.PsoxyModule;
-import co.worklytics.psoxy.Rules;
+import co.worklytics.psoxy.Rules1;
 import co.worklytics.psoxy.Sanitizer;
 import co.worklytics.psoxy.SanitizerFactory;
 import co.worklytics.psoxy.impl.SanitizerImpl;
@@ -34,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * q: better as junit Extension or something? how do to that
  *
  */
-abstract public class RulesBaseTestCase {
+abstract public class Rules1BaseTestCase {
 
     protected SanitizerImpl sanitizer;
 
@@ -56,7 +56,7 @@ abstract public class RulesBaseTestCase {
         MockModules.ForConfigService.class,
     })
     public interface Container {
-        void inject(RulesBaseTestCase test);
+        void inject(Rules1BaseTestCase test);
     }
 
     @BeforeEach
@@ -97,22 +97,22 @@ abstract public class RulesBaseTestCase {
 
 
     @SneakyThrows
-    Rules yamlRoundtrip(Rules rules) {
+    Rules1 yamlRoundtrip(Rules1 rules) {
         String yaml = yamlMapper.writeValueAsString(rules).replace("---\n", "");
-        return yamlMapper.readerFor(Rules.class).readValue(yaml);
+        return yamlMapper.readerFor(Rules1.class).readValue(yaml);
     }
 
     @SneakyThrows
-    Rules jsonRoundtrip(Rules rules) {
+    Rules1 jsonRoundtrip(Rules1 rules) {
         String json = jsonMapper.writeValueAsString(rules);
-        return jsonMapper.readerFor(Rules.class).readValue(json);
+        return jsonMapper.readerFor(Rules1.class).readValue(json);
     }
 
 
 
     public abstract String getDefaultScopeId();
 
-    public abstract Rules getRulesUnderTest();
+    public abstract Rules1 getRulesUnderTest();
 
     /**
      * eg 'google-workspace/gdrive'

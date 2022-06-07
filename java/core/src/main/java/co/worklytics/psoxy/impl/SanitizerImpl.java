@@ -340,7 +340,7 @@ public class SanitizerImpl implements Sanitizer {
         return configuration.jsonProvider().toJson(pseudonymizeEmailHeader(value));
     }
 
-    private List<Pair<Pattern, List<JsonPath>>> compile(List<Rules.Rule> rules) {
+    private List<Pair<Pattern, List<JsonPath>>> compile(List<Rules1.Rule> rules) {
         return rules.stream()
             .map(configured -> Pair.of(Pattern.compile(configured.getRelativeUrlRegex()),
                 configured.getJsonPaths().stream()

@@ -43,11 +43,11 @@ public class Handler {
             options.pseudonymizationSalt(config.getPseudonymizationSalt());
         }
 
-        options.rules(Rules.builder()
-                .pseudonymization(Rules.Rule.builder()
+        options.rules(Rules1.builder()
+                .pseudonymization(Rules1.Rule.builder()
                         .csvColumns(Lists.newArrayList(config.getColumnsToPseudonymize()))
                         .build())
-                .redaction(Rules.Rule.builder()
+                .redaction(Rules1.Rule.builder()
                         .csvColumns(Lists.newArrayList(config.getColumnsToRedact()))
                         .build())
                 .build());

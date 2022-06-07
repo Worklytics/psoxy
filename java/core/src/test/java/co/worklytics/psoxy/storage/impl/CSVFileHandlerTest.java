@@ -1,7 +1,7 @@
 package co.worklytics.psoxy.storage.impl;
 
 import co.worklytics.psoxy.PsoxyModule;
-import co.worklytics.psoxy.Rules;
+import co.worklytics.psoxy.Rules1;
 import co.worklytics.psoxy.Sanitizer;
 import co.worklytics.psoxy.SanitizerFactory;
 import co.worklytics.psoxy.gateway.ConfigService;
@@ -67,8 +67,8 @@ public class CSVFileHandlerTest {
                 "4,,Engineering,2020-01-06\r\n"; //blank ID
 
         Sanitizer sanitizer = sanitizerFactory.create(Sanitizer.Options.builder()
-                .rules(Rules.builder()
-                        .pseudonymization(Rules.Rule.builder()
+                .rules(Rules1.builder()
+                        .pseudonymization(Rules1.Rule.builder()
                                 .csvColumns(Collections.singletonList("EMPLOYEE_EMAIL"))
                                 .build())
                         .build())
@@ -95,11 +95,11 @@ public class CSVFileHandlerTest {
                 "4,,2020-01-06\r\n"; //blank ID
 
         Sanitizer sanitizer = sanitizerFactory.create(Sanitizer.Options.builder()
-                .rules(Rules.builder()
-                        .pseudonymization(Rules.Rule.builder()
+                .rules(Rules1.builder()
+                        .pseudonymization(Rules1.Rule.builder()
                                 .csvColumns(Collections.singletonList("EMPLOYEE_EMAIL"))
                                 .build())
-                        .redaction(Rules.Rule.builder()
+                        .redaction(Rules1.Rule.builder()
                                 .csvColumns(Collections.singletonList("DEPARTMENT"))
                                 .build())
                         .build())
@@ -123,8 +123,8 @@ public class CSVFileHandlerTest {
                 "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",Engineering\r\n";
 
         Sanitizer sanitizer = sanitizerFactory.create(Sanitizer.Options.builder()
-                .rules(Rules.builder()
-                        .pseudonymization(Rules.Rule.builder()
+                .rules(Rules1.builder()
+                        .pseudonymization(Rules1.Rule.builder()
                                 .csvColumns(Arrays.asList("EMPLOYEE_ID", "AN EMAIL"))
                                 .build())
                         .build())
@@ -148,8 +148,8 @@ public class CSVFileHandlerTest {
                 "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",\",,,\"\r\n";
 
         Sanitizer sanitizer = sanitizerFactory.create(Sanitizer.Options.builder()
-                .rules(Rules.builder()
-                        .pseudonymization(Rules.Rule.builder()
+                .rules(Rules1.builder()
+                        .pseudonymization(Rules1.Rule.builder()
                                 .csvColumns(Arrays.asList("EMPLOYEE_ID", "EMAIL"))
                                 .build())
                         .build())
@@ -178,7 +178,7 @@ public class CSVFileHandlerTest {
         when(config.getConfigPropertyAsOptional(eq(ProxyConfigProperty.RULES)))
             .thenReturn(Optional.of(Base64.encodeBase64String(TestUtils.getData("rules/hris/csv.yaml"))));
 
-        Rules rules = rulesUtils.getRulesFromConfig(config).orElseThrow();
+        Rules1 rules = rulesUtils.getRulesFromConfig(config).orElseThrow();
 
         Sanitizer sanitizer = sanitizerFactory.create(Sanitizer.Options.builder()
             .rules(rules)
@@ -203,8 +203,8 @@ public class CSVFileHandlerTest {
             "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",Engineering\r\n";
 
         Sanitizer sanitizer = sanitizerFactory.create(Sanitizer.Options.builder()
-            .rules(Rules.builder()
-                .pseudonymization(Rules.Rule.builder()
+            .rules(Rules1.builder()
+                .pseudonymization(Rules1.Rule.builder()
                     .csvColumns(Arrays.asList("    employee_id     ", " an EMAIL "))
                     .build())
                 .build())

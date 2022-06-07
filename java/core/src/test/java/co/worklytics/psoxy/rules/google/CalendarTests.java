@@ -1,6 +1,6 @@
 package co.worklytics.psoxy.rules.google;
 
-import co.worklytics.psoxy.Rules;
+import co.worklytics.psoxy.Rules1;
 import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -14,7 +14,7 @@ import java.util.Collection;
 class CalendarTests extends JavaRulesTestBaseCase {
 
     @Getter
-    final Rules rulesUnderTest = PrebuiltSanitizerRules.GCAL;
+    final Rules1 rulesUnderTest = PrebuiltSanitizerRules.GCAL;
 
     @Getter
     final String exampleDirectoryPath = "api-response-examples/g-workspace/calendar";
