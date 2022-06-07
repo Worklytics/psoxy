@@ -23,7 +23,7 @@ public class RulesUtils {
     ObjectMapper yamlMapper;
 
     @SneakyThrows
-    public String sha(Rules rules) {
+    public String sha(RuleSet rules) {
         return DigestUtils.sha1Hex(yamlMapper.writeValueAsString(rules));
     }
 
@@ -38,7 +38,7 @@ public class RulesUtils {
      * @return rules, if defined, from file system
      */
     @SneakyThrows
-    public Optional<Rules> getRulesFromFileSystem(String pathToRulesFile) {
+    public Optional<RuleSet> getRulesFromFileSystem(String pathToRulesFile) {
         File rulesFile = new File(pathToRulesFile);
         if (rulesFile.exists()) {
             try {
@@ -66,7 +66,7 @@ public class RulesUtils {
      * @see com.fasterxml.jackson.core.JsonParseException sry for the misnomer, but we leverage Jackson for both YAML and JSON
      */
     @SneakyThrows
-    public Optional<Rules> getRulesFromConfig(ConfigService config) {
+    public Optional<RuleSet> getRulesFromConfig(ConfigService config) {
         return config.getConfigPropertyAsOptional(ProxyConfigProperty.RULES)
             .map(base64encoded -> Base64.getDecoder().decode(base64encoded))
             .map(yamlString -> {

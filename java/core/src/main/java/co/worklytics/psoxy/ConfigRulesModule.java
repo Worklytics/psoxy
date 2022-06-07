@@ -3,7 +3,7 @@ package co.worklytics.psoxy;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
-import co.worklytics.psoxy.rules.Rules;
+import co.worklytics.psoxy.rules.RuleSet;
 import co.worklytics.psoxy.rules.RulesUtils;
 import dagger.Module;
 import dagger.Provides;
@@ -18,9 +18,9 @@ public class ConfigRulesModule {
     public static final String PATH_TO_RULES_FILES = "/rules.yaml";
 
     @Provides
-    static Rules rules(Logger log, RulesUtils rulesUtils, ConfigService config) {
+    static RuleSet rules(Logger log, RulesUtils rulesUtils, ConfigService config) {
 
-        BiFunction<Optional<Rules>, String, Optional<Rules>> loadAndLog = (o, msg) -> {
+        BiFunction<Optional<RuleSet>, String, Optional<RuleSet>> loadAndLog = (o, msg) -> {
             if (o.isPresent()) {
                 log.info(msg);
             }

@@ -1,7 +1,7 @@
 package co.worklytics.psoxy;
 
 
-import co.worklytics.psoxy.rules.Rules;
+import co.worklytics.psoxy.rules.RuleSet;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
@@ -23,7 +23,7 @@ import java.util.List;
 @EqualsAndHashCode
 @JsonPropertyOrder(alphabetic = true)
 @JsonInclude(JsonInclude.Include.NON_NULL) //NOTE: despite name, also affects YAML encoding
-public class Rules2 implements Rules, Serializable {
+public class Rules2 implements RuleSet, Serializable {
 
 
     private static final long serialVersionUID = 1L;
@@ -42,6 +42,17 @@ public class Rules2 implements Rules, Serializable {
 
     @Builder.Default
     Boolean allowAllEndpoints = false;
+
+    /**
+     * add endpoints from other ruleset to this one
+     * @param endpointsToAdd to be added
+     * @return new ruleset based on this one, but with added endpoints
+     */
+    public Rules2 withAdditionalEndpoints(List<Endpoint> endpointsToAdd) {
+        Rules2Builder builder = this.toBuilder();
+        endpointsToAdd.forEach(builder::endpoint);
+        return builder.build();
+    }
 
 
     @JsonPropertyOrder(alphabetic = true)

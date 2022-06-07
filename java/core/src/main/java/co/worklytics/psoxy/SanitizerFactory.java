@@ -4,7 +4,7 @@ import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.impl.SanitizerImpl;
 
-import co.worklytics.psoxy.rules.Rules;
+import co.worklytics.psoxy.rules.RuleSet;
 import dagger.assisted.AssistedFactory;
 
 @AssistedFactory
@@ -13,7 +13,7 @@ public interface SanitizerFactory {
     SanitizerImpl create(Sanitizer.Options options);
 
     //q: right place? mapping config+rules --> Sanitizer.Options isn't implementation-specific
-    default Sanitizer.Options buildOptions(ConfigService config, Rules rules) {
+    default Sanitizer.Options buildOptions(ConfigService config, RuleSet rules) {
         Sanitizer.Options.OptionsBuilder builder = Sanitizer.Options.builder()
             .pseudonymizationSalt(config.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT)
                 .orElseThrow(() -> new Error("Must configure value for SALT to generate pseudonyms")))
