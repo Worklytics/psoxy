@@ -2,6 +2,7 @@ package co.worklytics.psoxy.rules.msft;
 
 import co.worklytics.psoxy.rules.Rules2;
 import co.worklytics.psoxy.rules.RuleSet;
+import co.worklytics.psoxy.rules.Transform;
 import com.google.common.collect.ImmutableMap;
 
 import java.util.Map;
@@ -11,7 +12,7 @@ public class PrebuiltSanitizerRules {
     static final Rules2 DIRECTORY = Rules2.builder()
         .endpoint(Rules2.Endpoint.builder()
             .pathRegex("^/(v1.0|beta)/users/?[^/]*")
-            .transform(Rules2.Redact.builder()
+            .transform(Transform.Redact.builder()
                 .jsonPath("$..displayName")
                 .jsonPath("$..employeeId")
                 .jsonPath("$..aboutMe")
@@ -25,7 +26,7 @@ public class PrebuiltSanitizerRules {
                 .jsonPath("$..mobilePhone")
                 .jsonPath("$..businessPhones[*]")
                 .build())
-            .transform(Rules2.Pseudonymize.builder()
+            .transform(Transform.Pseudonymize.builder()
                 .jsonPath("$..userPrincipalName")
                 .jsonPath("$..imAddresses[*]")
                 .jsonPath("$..mail")
@@ -34,7 +35,7 @@ public class PrebuiltSanitizerRules {
             .build())
         .endpoint(Rules2.Endpoint.builder()
             .pathRegex("^/(v1.0|beta)/groups/?[^/]*")
-            .transform(Rules2.Redact.builder()
+            .transform(Transform.Redact.builder()
                 .jsonPath("$..owners")
                 .jsonPath("$..rejectedSenders")
                 .jsonPath("$..acceptedSenders")
@@ -44,7 +45,7 @@ public class PrebuiltSanitizerRules {
             .build())
         .endpoint(Rules2.Endpoint.builder()
             .pathRegex("^/(v1.0|beta)/groups/[^/]*/members.*")
-            .transform(Rules2.Redact.builder()
+            .transform(Transform.Redact.builder()
                 .jsonPath("$..displayName")
                 .jsonPath("$..employeeId")
                 .jsonPath("$..aboutMe")
@@ -58,7 +59,7 @@ public class PrebuiltSanitizerRules {
                 .jsonPath("$..mobilePhone")
                 .jsonPath("$..businessPhones[*]")
                 .build())
-            .transform(Rules2.Pseudonymize.builder()
+            .transform(Transform.Pseudonymize.builder()
                 .jsonPath("$..userPrincipalName")
                 .jsonPath("$..imAddresses[*]")
                 .jsonPath("$..mail")
@@ -73,7 +74,7 @@ public class PrebuiltSanitizerRules {
             .build(),
         Rules2.Endpoint.builder()
             .pathRegex("^/(v1.0|beta)/users/[^/]*/messages/[^/]*")
-            .transform(Rules2.Redact.builder()
+            .transform(Transform.Redact.builder()
                 .jsonPath("$..subject")
                 .jsonPath("$..body")
                 .jsonPath("$..bodyPreview")
@@ -84,14 +85,14 @@ public class PrebuiltSanitizerRules {
                 .jsonPath("$..internetMessageHeaders") //values that we care about generally parsed to other fields
                 .build()
             )
-            .transform(Rules2.Pseudonymize.builder()
+            .transform(Transform.Pseudonymize.builder()
                 .jsonPath("$..emailAddress.address")
                 .build()
             )
             .build(),
         Rules2.Endpoint.builder()
             .pathRegex("^/(v1.0|beta)/users/[^/]*/mailFolders(/SentItems|\\('SentItems'\\))/messages.*")
-            .transform(Rules2.Redact.builder()
+            .transform(Transform.Redact.builder()
                 .jsonPath("$..subject")
                 .jsonPath("$..body")
                 .jsonPath("$..bodyPreview")
@@ -101,7 +102,7 @@ public class PrebuiltSanitizerRules {
                 .jsonPath("$..singleValueExtendedProperties")
                 .jsonPath("$..internetMessageHeaders") //values that we care about generally parsed to other fields
                 .build())
-            .transform(Rules2.Pseudonymize.builder()
+            .transform(Transform.Pseudonymize.builder()
                 .jsonPath("$..emailAddress.address")
                 .build())
             .build()
@@ -113,7 +114,7 @@ public class PrebuiltSanitizerRules {
             .build(),
         Rules2.Endpoint.builder()
             .pathRegex("^/(v1.0|beta)/users/[^/]*/(calendars/[^/]*/)?events.*")
-            .transform(Rules2.Redact.builder()
+            .transform(Transform.Redact.builder()
                 .jsonPath("$..subject")
                 .jsonPath("$..body")
                 .jsonPath("$..bodyPreview")
@@ -125,13 +126,13 @@ public class PrebuiltSanitizerRules {
                 .jsonPath("$..locations[*].uniqueId")
                 .jsonPath("$..onlineMeeting.joinUrl") //sometimes contain access codes
                 .build())
-            .transform(Rules2.Pseudonymize.builder()
+            .transform(Transform.Pseudonymize.builder()
                 .jsonPath("$..emailAddress.address")
                 .build())
             .build(),
         Rules2.Endpoint.builder()
             .pathRegex("^/(v1.0|beta)/users/[^/]*/calendar/calendarView(?)[^/]*")
-            .transform(Rules2.Redact.builder()
+            .transform(Transform.Redact.builder()
                 .jsonPath("$..subject")
                 .jsonPath("$..body")
                 .jsonPath("$..bodyPreview")
@@ -143,7 +144,7 @@ public class PrebuiltSanitizerRules {
                 .jsonPath("$..locations[*].uniqueId")
                 .jsonPath("$..onlineMeeting.joinUrl") //sometimes contain access codes
                 .build())
-            .transform(Rules2.Pseudonymize.builder()
+            .transform(Transform.Pseudonymize.builder()
                 .jsonPath("$..emailAddress.address")
                 .build())
             .build()

@@ -32,7 +32,7 @@ public class Validator {
         }
     }
 
-    static void validate(@Nullable Rules2.Transform transform) {
+    static void validate(@Nullable Transform transform) {
         if (transform != null) {
             transform.getJsonPaths().forEach(p -> {
                 try {

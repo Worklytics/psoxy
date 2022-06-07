@@ -3,6 +3,7 @@ package co.worklytics.psoxy.rules.google;
 import co.worklytics.psoxy.rules.Rules1;
 import co.worklytics.psoxy.rules.Rules2;
 import co.worklytics.psoxy.rules.RuleSet;
+import co.worklytics.psoxy.rules.Transform;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
@@ -20,13 +21,13 @@ public class PrebuiltSanitizerRules {
     static final Rules2 GCAL_2 = Rules2.builder()
         .endpoint(Rules2.Endpoint.builder()
             .pathRegex("^/calendar/v3/calendars/[^/]*?$")
-            .transform(Rules2.Redact.ofPaths("$.summary"))
-            .transform(Rules2.Pseudonymize.ofPaths("$.id"))
+            .transform(Transform.Redact.ofPaths("$.summary"))
+            .transform(Transform.Pseudonymize.ofPaths("$.id"))
             .build())
         .endpoint(Rules2.Endpoint.builder()
              .pathRegex("^/calendar/v3/calendars/[^/]*?/events[^/]*")
-            .transform(Rules2.Pseudonymize.ofPaths("$..email"))
-            .transform(Rules2.Redact.ofPaths(
+            .transform(Transform.Pseudonymize.ofPaths("$..email"))
+            .transform(Transform.Redact.ofPaths(
                 "$..displayName",
                 "$.description",
                 "$.summary",
@@ -37,12 +38,12 @@ public class PrebuiltSanitizerRules {
             .build())
         .endpoint( Rules2.Endpoint.builder()
             .pathRegex("^/calendar/v3/calendars/[^/]*?/events/.*")
-            .transform(Rules2.Redact.ofPaths(
+            .transform(Transform.Redact.ofPaths(
                 "$..displayName",
                 "$.description",
                 "$.summary"
             ))
-            .transform(Rules2.Pseudonymize.ofPaths("$..email"))
+            .transform(Transform.Pseudonymize.ofPaths("$..email"))
             .build())
         .endpoint(Rules2.Endpoint.builder()
             .pathRegex("^/calendar/v3/users/[^/]*?/settings.*")

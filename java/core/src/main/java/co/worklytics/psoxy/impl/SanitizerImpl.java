@@ -3,6 +3,7 @@ package co.worklytics.psoxy.impl;
 import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.rules.Rules1;
 import co.worklytics.psoxy.rules.Rules2;
+import co.worklytics.psoxy.rules.Transform;
 import co.worklytics.psoxy.utils.URLUtils;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
@@ -46,7 +47,7 @@ public class SanitizerImpl implements Sanitizer {
 
 
     List<Pair<Pattern, Rules2.Endpoint>> compiledEndpointRules;
-    Map<Rules2.Transform, List<JsonPath>> compiledTransforms = new HashMap<>();
+    Map<Transform, List<JsonPath>> compiledTransforms = new HashMap<>();
 
     @AssistedInject
     public SanitizerImpl(HashUtils hashUtils, @Assisted Options options) {
@@ -135,7 +136,7 @@ public class SanitizerImpl implements Sanitizer {
 
             Object document = jsonConfiguration.jsonProvider().parse(jsonResponse);
 
-            for (Rules2.Transform transform : match.getValue().getTransforms()) {
+            for (Transform transform : match.getValue().getTransforms()) {
                 document = applyTransform(transform, document);
             }
             return jsonConfiguration.jsonProvider().toJson(document);
@@ -143,26 +144,26 @@ public class SanitizerImpl implements Sanitizer {
     }
 
 
-    Object applyTransform(Rules2.Transform transform, Object document ) {
+    Object applyTransform(Transform transform, Object document ) {
         List<JsonPath> paths = compiledTransforms.computeIfAbsent(transform,
             t -> t.getJsonPaths().stream()
                 .map(JsonPath::compile)
                 .collect(Collectors.toList()));
 
-        if (transform instanceof Rules2.Redact) {
+        if (transform instanceof Transform.Redact) {
             for (JsonPath path : paths) {
                 document = path.delete(document, jsonConfiguration);
             }
-        } else if (transform instanceof Rules2.Pseudonymize) {
+        } else if (transform instanceof Transform.Pseudonymize) {
 
             //curry the defaultScopeId from the transform into the pseudonymization method
             MapFunction f =
-                ((Rules2.Pseudonymize) transform).getIncludeOriginal() ? this::pseudonymizeWithOriginalToJson : this::pseudonymizeToJson;
+                ((Transform.Pseudonymize) transform).getIncludeOriginal() ? this::pseudonymizeWithOriginalToJson : this::pseudonymizeToJson;
             for (JsonPath path : paths) {
                 document = path.map(document, f, jsonConfiguration);
             }
 
-        } else if (transform instanceof Rules2.PseudonymizeEmailHeader) {
+        } else if (transform instanceof Transform.PseudonymizeEmailHeader) {
             for (JsonPath path : paths) {
                 document = path.map(document, this::pseudonymizeEmailHeaderToJson, jsonConfiguration);
             }
