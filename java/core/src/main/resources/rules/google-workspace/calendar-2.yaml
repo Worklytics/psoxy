@@ -22,13 +22,13 @@ endpoints:
           - "$.items[*].summary" # WARNING: needed for proper OOO classification
   - pathRegex: "^/calendar/v3/calendars/[^/]*?/events/.*"
     transforms:
+      - method: "redact"
+        jsonPaths:
+            - "$..displayName"
+            - "$.description" # WARNING: needed for linking across sources (eg, Zoom invites we need to parse this to link with zoom data)
+            - "$.summary" # WARNING: needed for proper OOO classification
       - method: "pseudonymize"
         jsonPaths:
           - "$..email"
-      - method: "redact"
-        jsonPaths:
-          - "$..displayName"
-          - "$.description" # WARNING: needed for linking across sources (eg, Zoom invites we need to parse this to link with zoom data)
-          - "$.summary" # WARNING: needed for proper OOO classification
   - pathRegex: "^/calendar/v3/users/[^/]*?/settings.*"
 

@@ -19,13 +19,13 @@ public class PrebuiltSanitizerRules {
     static final Rules2 GCAL_2 = Rules2.builder()
         .endpoint(Rules2.Endpoint.builder()
             .pathRegex("^/calendar/v3/calendars/[^/]*?$")
-            .transform(Rules2.Redaction.ofPaths("$.summary"))
-            .transform(Rules2.Pseudonymization.ofPaths("$.id"))
+            .transform(Rules2.Redact.ofPaths("$.summary"))
+            .transform(Rules2.Pseudonymize.ofPaths("$.id"))
             .build())
         .endpoint(Rules2.Endpoint.builder()
              .pathRegex("^/calendar/v3/calendars/[^/]*?/events[^/]*")
-            .transform(Rules2.Pseudonymization.ofPaths("$..email"))
-            .transform(Rules2.Redaction.ofPaths(
+            .transform(Rules2.Pseudonymize.ofPaths("$..email"))
+            .transform(Rules2.Redact.ofPaths(
                 "$..displayName",
                 "$.description",
                 "$.summary",
@@ -36,12 +36,12 @@ public class PrebuiltSanitizerRules {
             .build())
         .endpoint( Rules2.Endpoint.builder()
             .pathRegex("^/calendar/v3/calendars/[^/]*?/events/.*")
-            .transform(Rules2.Redaction.ofPaths(
+            .transform(Rules2.Redact.ofPaths(
                 "$..displayName",
                 "$.description",
                 "$.summary"
             ))
-            .transform(Rules2.Pseudonymization.ofPaths("$..email"))
+            .transform(Rules2.Pseudonymize.ofPaths("$..email"))
             .build())
         .endpoint(Rules2.Endpoint.builder()
             .pathRegex("^/calendar/v3/users/[^/]*?/settings.*")

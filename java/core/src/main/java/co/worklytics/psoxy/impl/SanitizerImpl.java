@@ -145,20 +145,20 @@ public class SanitizerImpl implements Sanitizer {
                 .map(JsonPath::compile)
                 .collect(Collectors.toList()));
 
-        if (transform instanceof Rules2.Redaction) {
+        if (transform instanceof Rules2.Redact) {
             for (JsonPath path : paths) {
                 document = path.delete(document, jsonConfiguration);
             }
-        } else if (transform instanceof Rules2.Pseudonymization) {
+        } else if (transform instanceof Rules2.Pseudonymize) {
 
             //curry the defaultScopeId from the transform into the pseudonymization method
             MapFunction f =
-                ((Rules2.Pseudonymization) transform).getIncludeOriginal() ? this::pseudonymizeWithOriginalToJson : this::pseudonymizeToJson;
+                ((Rules2.Pseudonymize) transform).getIncludeOriginal() ? this::pseudonymizeWithOriginalToJson : this::pseudonymizeToJson;
             for (JsonPath path : paths) {
                 document = path.map(document, f, jsonConfiguration);
             }
 
-        } else if (transform instanceof Rules2.EmailHeaderPseudonymization) {
+        } else if (transform instanceof Rules2.PseudonymizeEmailHeader) {
             for (JsonPath path : paths) {
                 document = path.map(document, this::pseudonymizeEmailHeaderToJson, jsonConfiguration);
             }

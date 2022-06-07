@@ -30,6 +30,7 @@ public abstract class JavaRules2TestBaseCase extends Rules2BaseTestCase {
         assertEquals(
             yamlMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rulesFromFilesystem),
             yamlMapper.writerWithDefaultPrettyPrinter().writeValueAsString(getRulesUnderTest()));
+
     }
 
 }
