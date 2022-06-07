@@ -3,6 +3,7 @@ package co.worklytics.psoxy.impl;
 import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
 import co.worklytics.psoxy.rules.Rules1;
+import co.worklytics.psoxy.rules.Transform;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestUtils;
 import dagger.Component;
@@ -174,4 +175,22 @@ class SanitizerImplTest {
     void allowedEndpointRegex_blocked(String url) {
         assertFalse(sanitizer.isAllowed(new URL(url)));
     }
+
+    @SneakyThrows
+    @ValueSource(strings = {
+        "pwd=1234asAf",
+        " pwd=1234asAf  ",
+        "https://asdf.google.com/asdf/?pwd=1234asAf",
+        "https://asdf.google.com/asdf/?pwd=1234asAf&pwd=14324",
+        "https://asdf.google.com/asdf/?asdf=2134&pwd=1234asAf&"
+    })
+    @ParameterizedTest
+    void redactRegexMatches(String source) {
+        Transform.RedactRegexMatches transform = Transform.RedactRegexMatches.builder().regex("pwd=[^&]*").build();
+
+        assertTrue(source.contains("pwd=1234asAf"));
+        String redacted = (String) sanitizer.getRedactRegexMatches(transform).map(source, sanitizer.jsonConfiguration);
+        assertFalse(redacted.contains("pwd=1234asAf"));
+    }
+
 }

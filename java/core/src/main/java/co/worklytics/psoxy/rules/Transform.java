@@ -63,6 +63,16 @@ public abstract class Transform {
     @NoArgsConstructor //for jackson
     @SuperBuilder
     @Getter
+    @EqualsAndHashCode(callSuper = true)
+    public static class RedactRegexMatches extends Transform {
+
+        String regex;
+
+    }
+
+    @NoArgsConstructor //for jackson
+    @SuperBuilder
+    @Getter
     public static class PseudonymizeEmailHeader extends Transform {
 
         public static PseudonymizeEmailHeader ofPaths(String... jsonPaths) {

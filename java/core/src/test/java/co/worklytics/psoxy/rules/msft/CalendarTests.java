@@ -2,6 +2,7 @@ package co.worklytics.psoxy.rules.msft;
 
 import co.worklytics.psoxy.rules.Rules2;
 import lombok.Getter;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -137,5 +138,22 @@ public class CalendarTests extends DirectoryTests {
 
         assertUrlAllowed(endpoint);
         assertUrlWithSubResourcesBlocked(endpoint);
+    }
+
+
+    @Test
+    public void calendarView_zoomUrls() {
+        String endpoint = "https://graph.microsoft.com/" + "beta" +
+            "/users/48d31887-5fad-4d73-a9f5-3c356e68a038/calendar/calendarView";
+
+        String jsonResponse = asJson("CalendarView_beta_wZoomUrls.json");
+
+        assertNotSanitized(jsonResponse,
+            "https://acme.zoom.us/j/12354234234?pwd=123123&from=addon"
+        );
+
+        String sanitized = sanitize(endpoint, jsonResponse);
+
+        assertRedacted(sanitized, "pwd=123123");
     }
 }

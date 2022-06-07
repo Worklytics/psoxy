@@ -167,12 +167,30 @@ public class SanitizerImpl implements Sanitizer {
             for (JsonPath path : paths) {
                 document = path.map(document, this::pseudonymizeEmailHeaderToJson, jsonConfiguration);
             }
+        } else if (transform instanceof Transform.RedactRegexMatches) {
+            MapFunction f = getRedactRegexMatches((Transform.RedactRegexMatches) transform);
+            for (JsonPath path : paths) {
+                document = path.map(document, f, jsonConfiguration);
+            }
         } else {
             throw new IllegalArgumentException("Unknown transform type: " + transform.getClass().getName());
         }
         return document;
     }
 
+
+    MapFunction getRedactRegexMatches(Transform.RedactRegexMatches transform) {
+       Pattern p = Pattern.compile(transform.getRegex());
+       return (s, jsonConfiguration) -> {
+           if (! (s instanceof String)) {
+               return s;
+           } else if (StringUtils.isBlank((String) s)) {
+               return s;
+           } else {
+               return p.matcher((String) s).replaceAll( "");
+           }
+       };
+    }
 
 
     String legacyTransform(@NonNull URL url, @NonNull String jsonResponse) {        //q: move this stuff to initialization / DI provider??
