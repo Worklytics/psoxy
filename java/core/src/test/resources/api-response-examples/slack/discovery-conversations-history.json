@@ -23,7 +23,8 @@
           "users": ["W0G81RDQZ"],
           "count": 1
         }
-      ]
+      ],
+      "permalink" : "permalink value"
     },
     {
       "type": "message",
@@ -164,7 +165,8 @@
         },
         {
           "user": "W0N0ZQDED",
-          "ts": "1651599241.015189"
+          "ts": "1651599241.015189",
+          "parent_user_id": "some parent user"
         }
       ],
       "is_locked": false,

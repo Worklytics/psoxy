@@ -29,6 +29,8 @@ import java.util.logging.Level;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static java.util.regex.Pattern.CASE_INSENSITIVE;
+
 @Log
 @RequiredArgsConstructor //for tests to compile for now
 public class SanitizerImpl implements Sanitizer {
@@ -77,7 +79,7 @@ public class SanitizerImpl implements Sanitizer {
             } else {
                 if (compiledAllowedEndpoints == null) {
                     compiledAllowedEndpoints = options.getRules().getAllowedEndpointRegexes().stream()
-                        .map(Pattern::compile)
+                        .map(regex -> Pattern.compile(regex, CASE_INSENSITIVE))
                         .collect(Collectors.toList());
                 }
                 String relativeUrl = URLUtils.relativeURL(url);
@@ -87,7 +89,7 @@ public class SanitizerImpl implements Sanitizer {
             if (compiledAllowedEndpoints == null) {
                 compiledAllowedEndpoints = options.getRules2().getEndpoints().stream()
                     .map(Rules2.Endpoint::getPathRegex)
-                    .map(Pattern::compile)
+                    .map(regex -> Pattern.compile(regex, CASE_INSENSITIVE))
                     .collect(Collectors.toList());
             }
             String relativeUrl = URLUtils.relativeURL(url);
@@ -344,7 +346,7 @@ public class SanitizerImpl implements Sanitizer {
 
     private List<Pair<Pattern, List<JsonPath>>> compile(List<Rules1.Rule> rules) {
         return rules.stream()
-            .map(configured -> Pair.of(Pattern.compile(configured.getRelativeUrlRegex()),
+            .map(configured -> Pair.of(Pattern.compile(configured.getRelativeUrlRegex(), CASE_INSENSITIVE),
                 configured.getJsonPaths().stream()
                     .map(JsonPath::compile)
                     .collect(Collectors.toList())))
