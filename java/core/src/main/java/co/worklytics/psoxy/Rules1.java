@@ -1,5 +1,6 @@
 package co.worklytics.psoxy;
 
+import co.worklytics.psoxy.rules.Rules;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.*;
@@ -29,7 +30,7 @@ import java.util.List;
 @EqualsAndHashCode
 @JsonPropertyOrder(alphabetic = true)
 @JsonInclude(JsonInclude.Include.NON_NULL) //NOTE: despite name, also affects YAML encoding
-public class Rules1 implements Serializable {
+public class Rules1 implements Rules, Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -137,7 +138,7 @@ public class Rules1 implements Serializable {
      * @return combined rule sets
      */
     public Rules1 compose(Rules1 other) {
-        RulesBuilder builder = this.toBuilder();
+        Rules1Builder builder = this.toBuilder();
         other.allowedEndpointRegexes.stream()
             .forEach(builder::allowedEndpointRegex);
         other.emailHeaderPseudonymizations.stream()

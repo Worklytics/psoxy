@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.rules;
 
 import co.worklytics.psoxy.Rules1;
+import co.worklytics.psoxy.Rules2;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,7 +23,7 @@ public class RulesUtils {
     ObjectMapper yamlMapper;
 
     @SneakyThrows
-    public String sha(Rules1 rules) {
+    public String sha(Rules rules) {
         return DigestUtils.sha1Hex(yamlMapper.writeValueAsString(rules));
     }
 
@@ -37,12 +38,22 @@ public class RulesUtils {
      * @return rules, if defined, from file system
      */
     @SneakyThrows
-    public Optional<Rules1> getRulesFromFileSystem(String pathToRulesFile) {
+    public Optional<Rules> getRulesFromFileSystem(String pathToRulesFile) {
         File rulesFile = new File(pathToRulesFile);
         if (rulesFile.exists()) {
-            Rules1 rules = yamlMapper.readerFor(Rules1.class).readValue(rulesFile);
-            Validator.validate(rules);
-            return Optional.of(rules);
+            try {
+                Rules1 rules = yamlMapper.readerFor(Rules1.class).readValue(rulesFile);
+                Validator.validate(rules);
+                return Optional.of(rules);
+            } catch (IOException e) {
+                try {
+                    Rules2 rules = yamlMapper.readerFor(Rules2.class).readValue(rulesFile);
+                    Validator.validate(rules);
+                    return Optional.of(rules);
+                } catch (IOException ex) {
+                    throw new IllegalStateException("Invalid rules configured", e);
+                }
+            }
         }
         return Optional.empty();
     }
@@ -55,7 +66,7 @@ public class RulesUtils {
      * @see com.fasterxml.jackson.core.JsonParseException sry for the misnomer, but we leverage Jackson for both YAML and JSON
      */
     @SneakyThrows
-    public Optional<Rules1> getRulesFromConfig(ConfigService config) {
+    public Optional<Rules> getRulesFromConfig(ConfigService config) {
         return config.getConfigPropertyAsOptional(ProxyConfigProperty.RULES)
             .map(base64encoded -> Base64.getDecoder().decode(base64encoded))
             .map(yamlString -> {
@@ -64,7 +75,13 @@ public class RulesUtils {
                     Validator.validate(rules);
                     return rules;
                 } catch (IOException e) {
-                    throw new IllegalStateException("Invalid rules configured", e);
+                    try {
+                        Rules2 rules = yamlMapper.readerFor(Rules2.class).readValue(yamlString);
+                        Validator.validate(rules);
+                        return rules;
+                    } catch (IOException ex) {
+                        throw new IllegalStateException("Invalid rules configured", e);
+                    }
                 }
             });
     }

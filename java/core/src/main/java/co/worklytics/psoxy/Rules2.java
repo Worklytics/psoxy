@@ -1,6 +1,7 @@
 package co.worklytics.psoxy;
 
 
+import co.worklytics.psoxy.rules.Rules;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
@@ -9,6 +10,7 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.java.Log;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -21,7 +23,19 @@ import java.util.List;
 @EqualsAndHashCode
 @JsonPropertyOrder(alphabetic = true)
 @JsonInclude(JsonInclude.Include.NON_NULL) //NOTE: despite name, also affects YAML encoding
-public class Rules2 {
+public class Rules2 implements Rules, Serializable {
+
+
+    private static final long serialVersionUID = 1L;
+
+    /**
+     * scopeId to set for any identifiers parsed from source that aren't email addresses
+     *
+     * NOTE: can be overridden by config, in case you're connecting to an on-prem / private instance
+     * of the source and you don't want it's identifiers to be treated as under the default scope
+     */
+    @Getter
+    String defaultScopeIdForSource;
 
     @Singular
     List<Endpoint> endpoints;
