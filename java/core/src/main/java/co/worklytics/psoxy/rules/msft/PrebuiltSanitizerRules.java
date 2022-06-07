@@ -125,6 +125,7 @@ public class PrebuiltSanitizerRules {
             .jsonPath("$..singleValueExtendedProperties")
             .jsonPath("$..location.uniqueId")
             .jsonPath("$..locations[*].uniqueId")
+            .jsonPath("$..onlineMeeting.joinUrl") //sometimes contain access codes
             .build())
         .pseudonymization(Rules.Rule.builder()
             .relativeUrlRegex("^/(v1.0|beta)/users/[^/]*/(calendars/[^/]*/)?events.*")
@@ -141,6 +142,7 @@ public class PrebuiltSanitizerRules {
             .jsonPath("$..singleValueExtendedProperties")
             .jsonPath("$..location.uniqueId")
             .jsonPath("$..locations[*].uniqueId")
+            .jsonPath("$..onlineMeeting.joinUrl") //sometimes contain access codes
             .build())
         .build());
 

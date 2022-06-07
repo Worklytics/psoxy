@@ -31,7 +31,7 @@ public interface Sanitizer {
         //q: add regexes to whitelist endpoints that we actually use??
         Rules rules;
 
-
+        Rules2 rules2;
     }
 
     /**

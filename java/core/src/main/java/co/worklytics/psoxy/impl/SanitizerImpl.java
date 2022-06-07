@@ -6,6 +6,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.MapFunction;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
 import lombok.Getter;
@@ -39,6 +40,10 @@ public class SanitizerImpl implements Sanitizer {
     List<Pair<Pattern, List<JsonPath>>> compiledPseudonymizationsWithOriginals;
     List<Pattern> compiledAllowedEndpoints;
 
+
+    List<Pair<Pattern, Rules2.Endpoint>> compiledEndpointRules;
+    Map<Rules2.Transform, List<JsonPath>> compiledTransforms = new HashMap<>();
+
     @AssistedInject
     public SanitizerImpl(HashUtils hashUtils, @Assisted Options options) {
         this.hashUtils = hashUtils;
@@ -63,17 +68,30 @@ public class SanitizerImpl implements Sanitizer {
 
     @Override
     public boolean isAllowed(@NonNull URL url) {
-        if (options.getRules().getAllowedEndpointRegexes() == null
-             || options.getRules().getAllowedEndpointRegexes().isEmpty()) {
-            return true;
+        if (options.getRules2() == null) {
+            if (options.getRules().getAllowedEndpointRegexes() == null
+                || options.getRules().getAllowedEndpointRegexes().isEmpty()) {
+                return true;
+            } else {
+                if (compiledAllowedEndpoints == null) {
+                    compiledAllowedEndpoints = options.getRules().getAllowedEndpointRegexes().stream()
+                        .map(Pattern::compile)
+                        .collect(Collectors.toList());
+                }
+                String relativeUrl = URLUtils.relativeURL(url);
+                return compiledAllowedEndpoints.stream().anyMatch(p -> p.matcher(relativeUrl).matches());
+            }
         } else {
             if (compiledAllowedEndpoints == null) {
-                compiledAllowedEndpoints = options.getRules().getAllowedEndpointRegexes().stream()
+                compiledAllowedEndpoints = options.getRules2().getEndpoints().stream()
+                    .map(Rules2.Endpoint::getPathRegex)
                     .map(Pattern::compile)
                     .collect(Collectors.toList());
             }
             String relativeUrl = URLUtils.relativeURL(url);
-            return compiledAllowedEndpoints.stream().anyMatch(p -> p.matcher(relativeUrl).matches());
+
+            return options.getRules2().getAllowAllEndpoints() ||
+                compiledAllowedEndpoints.stream().anyMatch(p -> p.matcher(relativeUrl).matches());
         }
     }
 
@@ -89,7 +107,70 @@ public class SanitizerImpl implements Sanitizer {
             return jsonResponse;
         }
 
-        //q: move this stuff to initialization / DI provider??
+        if (getOptions().getRules2() == null) {
+            return legacyTransform(url, jsonResponse);
+        } else {
+            return transform(url, jsonResponse);
+        }
+    }
+
+
+    String transform(@NonNull URL url, @NonNull String jsonResponse) {
+        if (compiledEndpointRules == null) {
+            compiledEndpointRules = options.getRules2().getEndpoints().stream()
+                .map(endpoint -> Pair.of(Pattern.compile(endpoint.getPathRegex()), endpoint))
+                .collect(Collectors.toList());
+        }
+
+        String relativeUrl = URLUtils.relativeURL(url);
+        Optional<Pair<Pattern, Rules2.Endpoint>> matchingEndpoint = compiledEndpointRules.stream()
+            .filter(compiledEndpoint -> compiledEndpoint.getKey().asMatchPredicate().test(relativeUrl))
+            .findFirst();
+
+        return matchingEndpoint.map(match -> {
+
+            Object document = jsonConfiguration.jsonProvider().parse(jsonResponse);
+
+            for (Rules2.Transform transform : match.getValue().getTransforms()) {
+                document = applyTransform(transform, document);
+            }
+            return jsonConfiguration.jsonProvider().toJson(document);
+        }).orElse(jsonResponse);
+    }
+
+
+    Object applyTransform(Rules2.Transform transform, Object document ) {
+        List<JsonPath> paths = compiledTransforms.computeIfAbsent(transform,
+            t -> t.getJsonPaths().stream()
+                .map(JsonPath::compile)
+                .collect(Collectors.toList()));
+
+        if (transform instanceof Rules2.Redaction) {
+            for (JsonPath path : paths) {
+                document = path.delete(document, jsonConfiguration);
+            }
+        } else if (transform instanceof Rules2.Pseudonymization) {
+
+            //curry the defaultScopeId from the transform into the pseudonymization method
+            MapFunction f =
+                ((Rules2.Pseudonymization) transform).getIncludeOriginal() ? this::pseudonymizeWithOriginalToJson : this::pseudonymizeToJson;
+            for (JsonPath path : paths) {
+                document = path.map(document, f, jsonConfiguration);
+            }
+
+        } else if (transform instanceof Rules2.EmailHeaderPseudonymization) {
+            for (JsonPath path : paths) {
+                document = path.map(document, this::pseudonymizeEmailHeaderToJson, jsonConfiguration);
+            }
+        } else {
+            throw new IllegalArgumentException("Unknown transform type: " + transform.getClass().getName());
+        }
+        return document;
+    }
+
+
+
+    String legacyTransform(@NonNull URL url, @NonNull String jsonResponse) {        //q: move this stuff to initialization / DI provider??
         if (compiledPseudonymizations == null) {
             compiledPseudonymizations = compile(options.getRules().getPseudonymizations());
         }
@@ -120,9 +201,9 @@ public class SanitizerImpl implements Sanitizer {
 
 
         if (pseudonymizationsToApply.isEmpty()
-                && redactionsToApply.isEmpty()
-                && emailHeaderPseudonymizationsToApply.isEmpty()
-                && pseudonymizationWithOriginalsToApply.isEmpty()) {
+            && redactionsToApply.isEmpty()
+            && emailHeaderPseudonymizationsToApply.isEmpty()
+            && pseudonymizationWithOriginalsToApply.isEmpty()) {
             return jsonResponse;
         } else {
             Object document = jsonConfiguration.jsonProvider().parse(jsonResponse);
