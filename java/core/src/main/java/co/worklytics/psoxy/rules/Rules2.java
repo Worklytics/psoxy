@@ -73,8 +73,9 @@ public class Rules2 implements RuleSet, Serializable {
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "method")
     @JsonSubTypes({
         @JsonSubTypes.Type(value = Redact.class, name = "redact"),
-        @JsonSubTypes.Type(value = Pseudonymize.class, name = "pseudonymize") }
-    )
+        @JsonSubTypes.Type(value = Pseudonymize.class, name = "pseudonymize"),
+        @JsonSubTypes.Type(value = PseudonymizeEmailHeader.class, name = "pseudonymizeEmailHeader"),
+    })
     @SuperBuilder
     @AllArgsConstructor //for builder
     @NoArgsConstructor //for Jackson
