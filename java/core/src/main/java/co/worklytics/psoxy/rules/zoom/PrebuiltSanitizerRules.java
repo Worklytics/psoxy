@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.rules.zoom;
 
 import co.worklytics.psoxy.Rules1;
+import co.worklytics.psoxy.rules.RuleSet;
 import com.google.common.collect.ImmutableMap;
 
 import java.util.Map;
@@ -98,7 +99,7 @@ public class PrebuiltSanitizerRules {
         )
         .build();
 
-    static public final Map<String, Rules1> ZOOM_PREBUILT_RULES_MAP = ImmutableMap.<String, Rules1>builder()
+    static public final Map<String, RuleSet> ZOOM_PREBUILT_RULES_MAP = ImmutableMap.<String, RuleSet>builder()
         .put("zoom", ZOOM)
         .build();
 }

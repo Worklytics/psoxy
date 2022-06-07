@@ -2,6 +2,7 @@ package co.worklytics.psoxy.rules.google;
 
 import co.worklytics.psoxy.Rules1;
 import co.worklytics.psoxy.Rules2;
+import co.worklytics.psoxy.rules.RuleSet;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
@@ -365,7 +366,7 @@ public class PrebuiltSanitizerRules {
         )
         .build();
 
-    static public final Map<String, Rules1> GOOGLE_DEFAULT_RULES_MAP = ImmutableMap.<String, Rules1>builder()
+    static public final Map<String, RuleSet> GOOGLE_DEFAULT_RULES_MAP = ImmutableMap.<String, Rules1>builder()
         .put("gcal", GCAL)
         .put("gdirectory", GDIRECTORY)
         .put("gdrive", GDRIVE)

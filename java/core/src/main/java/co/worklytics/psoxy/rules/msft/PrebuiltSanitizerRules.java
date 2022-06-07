@@ -1,11 +1,17 @@
 package co.worklytics.psoxy.rules.msft;
 
 import co.worklytics.psoxy.Rules1;
+import co.worklytics.psoxy.Rules2;
+import co.worklytics.psoxy.rules.RuleSet;
 import com.google.common.collect.ImmutableMap;
 
 import java.util.Map;
 
 public class PrebuiltSanitizerRules {
+
+    static final Rules2 DIRECTORY_2 = Rules2.builder()
+
+
 
     static final Rules1 DIRECTORY =  Rules1.builder()
         //GENERAL stuff
@@ -147,8 +153,8 @@ public class PrebuiltSanitizerRules {
         .build());
 
 
-    public static final Map<String,? extends Rules1> MSFT_DEFAULT_RULES_MAP =
-        ImmutableMap.<String, Rules1>builder()
+    public static final Map<String, RuleSet> MSFT_DEFAULT_RULES_MAP =
+        ImmutableMap.<String, RuleSet>builder()
             .put("azure-ad", DIRECTORY)
             .put("outlook-cal", OUTLOOK_CALENDAR)
             .put("outlook-mail", OUTLOOK_MAIL)

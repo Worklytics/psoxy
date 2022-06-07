@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.rules.slack;
 
 import co.worklytics.psoxy.Rules1;
+import co.worklytics.psoxy.rules.RuleSet;
 import com.google.common.collect.ImmutableMap;
 
 import java.util.Map;
@@ -95,7 +96,7 @@ public class PrebuiltSanitizerRules {
         )
         .build();
 
-    static public final Map<String, Rules1> SLACK_DEFAULT_RULES_MAP = ImmutableMap.<String, Rules1>builder()
+    static public final Map<String, RuleSet> SLACK_DEFAULT_RULES_MAP = ImmutableMap.<String, RuleSet>builder()
         .put("slack", SLACK)
         .build();
 }

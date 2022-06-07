@@ -1,9 +1,6 @@
 package co.worklytics.psoxy.impl;
 
-import co.worklytics.psoxy.PseudonymizedIdentity;
-import co.worklytics.psoxy.PsoxyModule;
-import co.worklytics.psoxy.Sanitizer;
-import co.worklytics.psoxy.SanitizerFactory;
+import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestUtils;
@@ -48,7 +45,7 @@ class SanitizerImplTest {
         container.inject(this);
 
         sanitizer = sanitizerFactory.create(Sanitizer.Options.builder()
-            .rules(PrebuiltSanitizerRules.DEFAULTS.get("gmail"))
+            .rules((Rules1) PrebuiltSanitizerRules.DEFAULTS.get("gmail"))
             .pseudonymizationSalt("an irrelevant per org secret")
             .defaultScopeId("scope")
             .build());
