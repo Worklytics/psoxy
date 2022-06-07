@@ -11,7 +11,6 @@ import org.apache.commons.codec.digest.DigestUtils;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.io.File;
 import java.io.IOException;
 import java.util.Base64;
 import java.util.Optional;
@@ -26,38 +25,6 @@ public class RulesUtils {
     public String sha(RuleSet rules) {
         return DigestUtils.sha1Hex(yamlMapper.writeValueAsString(rules));
     }
-
-
-    /**
-     * provides option to for customers to override rules for a source with custom ones defined in a
-     * YAML file. Not really recommended, as complicates deployment (must add the file to
-     * `target/deployment` before calling the gcloud deploy cmmd), but we provide the option should
-     * advanced users want more control.
-     *
-     * @param pathToRulesFile path to rules file
-     * @return rules, if defined, from file system
-     */
-    @SneakyThrows
-    public Optional<RuleSet> getRulesFromFileSystem(String pathToRulesFile) {
-        File rulesFile = new File(pathToRulesFile);
-        if (rulesFile.exists()) {
-            try {
-                Rules1 rules = yamlMapper.readerFor(Rules1.class).readValue(rulesFile);
-                Validator.validate(rules);
-                return Optional.of(rules);
-            } catch (IOException e) {
-                try {
-                    Rules2 rules = yamlMapper.readerFor(Rules2.class).readValue(rulesFile);
-                    Validator.validate(rules);
-                    return Optional.of(rules);
-                } catch (IOException ex) {
-                    throw new IllegalStateException("Invalid rules configured", e);
-                }
-            }
-        }
-        return Optional.empty();
-    }
-
 
     /**
      * @return rules parsed from config, presumed to be base64-encoded YAML
