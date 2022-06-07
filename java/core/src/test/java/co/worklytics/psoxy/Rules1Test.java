@@ -1,5 +1,6 @@
 package co.worklytics.psoxy;
 
+import co.worklytics.psoxy.rules.Rules1;
 import co.worklytics.test.TestUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;

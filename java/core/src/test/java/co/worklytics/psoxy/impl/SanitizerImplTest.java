@@ -2,6 +2,7 @@ package co.worklytics.psoxy.impl;
 
 import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
+import co.worklytics.psoxy.rules.Rules1;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestUtils;
 import dagger.Component;

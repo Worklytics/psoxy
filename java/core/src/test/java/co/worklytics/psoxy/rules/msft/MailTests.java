@@ -1,6 +1,6 @@
 package co.worklytics.psoxy.rules.msft;
 
-import co.worklytics.psoxy.Rules2;
+import co.worklytics.psoxy.rules.Rules2;
 import co.worklytics.psoxy.rules.JavaRules2TestBaseCase;
 import lombok.Getter;
 import org.junit.jupiter.params.ParameterizedTest;

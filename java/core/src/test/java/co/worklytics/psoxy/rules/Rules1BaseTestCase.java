@@ -1,7 +1,6 @@
 package co.worklytics.psoxy.rules;
 
 import co.worklytics.psoxy.PsoxyModule;
-import co.worklytics.psoxy.Rules1;
 import co.worklytics.psoxy.Sanitizer;
 import co.worklytics.psoxy.SanitizerFactory;
 import co.worklytics.psoxy.impl.SanitizerImpl;

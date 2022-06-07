@@ -1,12 +1,12 @@
 package co.worklytics.psoxy.rules.zoom;
 
-import co.worklytics.psoxy.Rules1;
+import co.worklytics.psoxy.rules.Rules1;
 import co.worklytics.psoxy.rules.RuleSet;
 import com.google.common.collect.ImmutableMap;
 
 import java.util.Map;
 
-import static co.worklytics.psoxy.Rules1.Rule;
+import static co.worklytics.psoxy.rules.Rules1.Rule;
 
 /**
  * Prebuilt sanitization rules for Zoom API responses

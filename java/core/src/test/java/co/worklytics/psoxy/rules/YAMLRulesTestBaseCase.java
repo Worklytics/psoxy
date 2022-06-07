@@ -1,6 +1,5 @@
 package co.worklytics.psoxy.rules;
 
-import co.worklytics.psoxy.Rules1;
 import co.worklytics.psoxy.rules.google.PrebuiltSanitizerRules;
 import lombok.SneakyThrows;
 

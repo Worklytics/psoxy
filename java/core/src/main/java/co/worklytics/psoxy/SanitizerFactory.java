@@ -5,6 +5,8 @@ import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.impl.SanitizerImpl;
 
 import co.worklytics.psoxy.rules.RuleSet;
+import co.worklytics.psoxy.rules.Rules1;
+import co.worklytics.psoxy.rules.Rules2;
 import dagger.assisted.AssistedFactory;
 
 @AssistedFactory

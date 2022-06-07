@@ -1,7 +1,5 @@
 package co.worklytics.psoxy.rules;
 
-import co.worklytics.psoxy.Rules1;
-import co.worklytics.psoxy.Rules2;
 import com.jayway.jsonpath.JsonPath;
 import lombok.NonNull;
 

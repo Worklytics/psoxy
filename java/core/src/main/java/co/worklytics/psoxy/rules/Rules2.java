@@ -1,7 +1,6 @@
-package co.worklytics.psoxy;
+package co.worklytics.psoxy.rules;
 
 
-import co.worklytics.psoxy.rules.RuleSet;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSubTypes;

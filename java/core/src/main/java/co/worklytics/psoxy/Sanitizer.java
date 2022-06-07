@@ -1,5 +1,7 @@
 package co.worklytics.psoxy;
 
+import co.worklytics.psoxy.rules.Rules1;
+import co.worklytics.psoxy.rules.Rules2;
 import lombok.*;
 
 import java.io.Serializable;

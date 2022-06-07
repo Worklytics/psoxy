@@ -1,5 +1,6 @@
 package co.worklytics.psoxy;
 
+import co.worklytics.psoxy.rules.Rules1;
 import co.worklytics.psoxy.storage.FileHandlerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.util.Lists;

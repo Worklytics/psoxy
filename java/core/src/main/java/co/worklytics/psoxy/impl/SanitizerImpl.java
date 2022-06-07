@@ -1,6 +1,8 @@
 package co.worklytics.psoxy.impl;
 
 import co.worklytics.psoxy.*;
+import co.worklytics.psoxy.rules.Rules1;
+import co.worklytics.psoxy.rules.Rules2;
 import co.worklytics.psoxy.utils.URLUtils;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;

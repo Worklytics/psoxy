@@ -1,7 +1,7 @@
 package co.worklytics.psoxy.rules.google;
 
-import co.worklytics.psoxy.Rules1;
-import co.worklytics.psoxy.Rules2;
+import co.worklytics.psoxy.rules.Rules1;
+import co.worklytics.psoxy.rules.Rules2;
 import co.worklytics.psoxy.rules.RuleSet;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static co.worklytics.psoxy.Rules1.Rule;
+import static co.worklytics.psoxy.rules.Rules1.Rule;
 
 /**
  * Prebuilt sanitization rules for Google tools

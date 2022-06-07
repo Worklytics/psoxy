@@ -1,6 +1,5 @@
 package co.worklytics.psoxy.rules;
 
-import co.worklytics.psoxy.Rules1;
 import org.junit.jupiter.api.Test;
 
 import java.util.regex.PatternSyntaxException;

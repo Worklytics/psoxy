@@ -1,6 +1,5 @@
 package co.worklytics.psoxy.rules;
 
-import co.worklytics.psoxy.Rules1;
 import com.google.common.collect.ImmutableMap;
 
 import java.util.Map;
