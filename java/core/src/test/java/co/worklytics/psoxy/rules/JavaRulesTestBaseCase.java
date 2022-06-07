@@ -24,7 +24,7 @@ public abstract class JavaRulesTestBaseCase extends Rules1BaseTestCase {
     void validateYamlExample() {
         String path = "/rules/" + getYamlSerializationFilepath() + ".yaml";
 
-        Rules2 rulesFromFilesystem = yamlMapper.readerFor(Rules1.class)
+        Rules1 rulesFromFilesystem = yamlMapper.readerFor(Rules1.class)
             .readValue(PrebuiltSanitizerRules.class.getResource(path));
 
         assertEquals(

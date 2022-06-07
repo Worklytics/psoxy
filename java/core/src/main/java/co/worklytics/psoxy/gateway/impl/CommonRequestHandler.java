@@ -2,6 +2,7 @@ package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.gateway.*;
+import co.worklytics.psoxy.rules.RuleSet;
 import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.psoxy.utils.URLUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -41,7 +42,7 @@ public class CommonRequestHandler {
     @Inject ObjectMapper objectMapper;
     @Inject SanitizerFactory sanitizerFactory;
     @Inject
-    Rules1 rules1;
+    RuleSet rules;
     @Inject HealthCheckRequestHandler healthCheckRequestHandler;
 
     private volatile Sanitizer sanitizer;
@@ -51,7 +52,7 @@ public class CommonRequestHandler {
         if (this.sanitizer == null) {
             synchronized ($writeLock) {
                 if (this.sanitizer == null) {
-                    this.sanitizer = sanitizerFactory.create(sanitizerFactory.buildOptions(config, rules1));
+                    this.sanitizer = sanitizerFactory.create(sanitizerFactory.buildOptions(config, rules));
                 }
             }
         }
@@ -86,7 +87,7 @@ public class CommonRequestHandler {
         } else {
             builder.statusCode(HttpStatus.SC_FORBIDDEN);
             builder.header(ResponseHeader.ERROR.getHttpHeader(), ErrorCauses.BLOCKED_BY_RULES.name());
-            log.warning(String.format("%s. Blocked call by rules %s", callLog, objectMapper.writeValueAsString(rules1.getAllowedEndpointRegexes())));
+            log.warning(String.format("%s. Blocked call by rules %s", callLog, objectMapper.writeValueAsString(rules)));
             return builder.build();
         }
 

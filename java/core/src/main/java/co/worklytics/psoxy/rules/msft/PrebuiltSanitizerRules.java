@@ -10,7 +10,7 @@ public class PrebuiltSanitizerRules {
 
     static final Rules2 DIRECTORY = Rules2.builder()
         .endpoint(Rules2.Endpoint.builder()
-            .pathRegex("^/(v1.0|beta)/users.*")
+            .pathRegex("^/(v1.0|beta)/users/?[^/]*")
             .transform(Rules2.Redact.builder()
                 .jsonPath("$..displayName")
                 .jsonPath("$..employeeId")
@@ -33,7 +33,7 @@ public class PrebuiltSanitizerRules {
                 .build())
             .build())
         .endpoint(Rules2.Endpoint.builder()
-            .pathRegex("^/(v1.0|beta)/groups[^/]*")
+            .pathRegex("^/(v1.0|beta)/groups/?[^/]*")
             .transform(Rules2.Redact.builder()
                 .jsonPath("$..owners")
                 .jsonPath("$..rejectedSenders")
