@@ -65,7 +65,7 @@ abstract public class Rules1BaseTestCase {
         // idea: use reflection to get test-specific container class, and call create() on that??
         //  eg., 'DaggerRulesBaseTestCase_Container' class,
 
-        Container container = DaggerRulesBaseTestCase_Container.create();
+        Container container = DaggerRules1BaseTestCase_Container.create();
         container.inject(this);
 
         sanitizer = sanitizerFactory.create(Sanitizer.Options.builder()

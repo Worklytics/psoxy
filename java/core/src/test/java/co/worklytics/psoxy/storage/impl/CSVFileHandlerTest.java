@@ -178,7 +178,7 @@ public class CSVFileHandlerTest {
         when(config.getConfigPropertyAsOptional(eq(ProxyConfigProperty.RULES)))
             .thenReturn(Optional.of(Base64.encodeBase64String(TestUtils.getData("rules/hris/csv.yaml"))));
 
-        Rules1 rules = rulesUtils.getRulesFromConfig(config).orElseThrow();
+        Rules1 rules = (Rules1) rulesUtils.getRulesFromConfig(config).orElseThrow();
 
         Sanitizer sanitizer = sanitizerFactory.create(Sanitizer.Options.builder()
             .rules(rules)

@@ -366,8 +366,8 @@ public class PrebuiltSanitizerRules {
         )
         .build();
 
-    static public final Map<String, RuleSet> GOOGLE_DEFAULT_RULES_MAP = ImmutableMap.<String, Rules1>builder()
-        .put("gcal", GCAL)
+    static public final Map<String, RuleSet> GOOGLE_DEFAULT_RULES_MAP = ImmutableMap.<String, RuleSet>builder()
+        .put("gcal", GCAL_2)
         .put("gdirectory", GDIRECTORY)
         .put("gdrive", GDRIVE)
         .put("gmail", GMAIL)

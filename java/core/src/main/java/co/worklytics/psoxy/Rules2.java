@@ -48,9 +48,9 @@ public class Rules2 implements RuleSet, Serializable {
      * @param endpointsToAdd to be added
      * @return new ruleset based on this one, but with added endpoints
      */
-    public Rules2 withAdditionalEndpoints(List<Endpoint> endpointsToAdd) {
+    public Rules2 withAdditionalEndpoints(Endpoint... endpointsToAdd) {
         Rules2Builder builder = this.toBuilder();
-        endpointsToAdd.forEach(builder::endpoint);
+        Arrays.stream(endpointsToAdd).forEach(builder::endpoint);
         return builder.build();
     }
 

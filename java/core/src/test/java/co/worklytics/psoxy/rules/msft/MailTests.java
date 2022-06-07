@@ -1,15 +1,17 @@
 package co.worklytics.psoxy.rules.msft;
 
 import co.worklytics.psoxy.Rules1;
+import co.worklytics.psoxy.Rules2;
+import co.worklytics.psoxy.rules.JavaRules2TestBaseCase;
 import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
 import lombok.Getter;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-public class MailTests extends JavaRulesTestBaseCase {
+public class MailTests extends JavaRules2TestBaseCase {
 
     @Getter
-    final Rules1 rulesUnderTest = PrebuiltSanitizerRules.OUTLOOK_MAIL;
+    final Rules2 rulesUnderTest = PrebuiltSanitizerRules.OUTLOOK_MAIL;
 
     @Getter
     final String exampleDirectoryPath = "api-response-examples/microsoft-365/outlook-mail";
