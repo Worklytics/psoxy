@@ -50,46 +50,6 @@ public class PrebuiltSanitizerRules {
             .build())
         .build();
 
-
-    static final Rules1 GCAL = Rules1.builder()
-        .allowedEndpointRegex("^/calendar/v3/calendars/[^/]*?$")
-        .allowedEndpointRegex("^/calendar/v3/calendars/[^/]*?/events.*")
-        .allowedEndpointRegex("^/calendar/v3/users/[^/]*?/settings.*")
-        .pseudonymization(Rule.builder()
-            .relativeUrlRegex("^/calendar/v3/calendars/.*/events.*")
-            .jsonPath("$..email")
-            .build())
-        .pseudonymization(Rule.builder()
-            .relativeUrlRegex("^/calendar/v3/calendars/[^/]*?$")
-            .jsonPath("$.id")
-            .build())
-        .redaction(Rule.builder()
-            .relativeUrlRegex("^/calendar/v3/calendars/.*/events.*")
-            .jsonPath("$..displayName")
-            .jsonPath("$.items[*].extendedProperties.private")
-            .build())
-        .redaction(Rule.builder()
-            .relativeUrlRegex("^/calendar/v3/calendars/[^/]*?$")
-            .jsonPath("$.summary")
-            .build())
-
-        //redact description and summary from events; this is for confidentiality, not privacy; and
-        // is too restrictive for usual case as hampers several classification algorithms:
-        //   - classifying calendar event as 'OOO' vs plain block
-        //   - de-dupping calendar events with zoom meetings
-        .redaction(Rule.builder()
-            .relativeUrlRegex("^/calendar/v3/calendars/.*/events/.*")
-            .jsonPath("$.description")
-            .jsonPath("$.summary")
-            .build())
-        .redaction(Rule.builder()
-            .relativeUrlRegex("^/calendar/v3/calendars/.*/events[^/]*\\??[^/]*$")
-            .jsonPath("$.summary") // summary value of calendar *itself* is returned by events list endpoint
-            .jsonPath("$.items[*].description")
-            .jsonPath("$.items[*].summary")
-            .build())
-        .build();
-
     static final Set<String> GOOGLE_CHAT_EVENT_PARAMETERS_PII = ImmutableSet.of(
         "actor"
     );
