@@ -12,6 +12,7 @@ import java.util.List;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "method")
 @JsonSubTypes({
     @JsonSubTypes.Type(value = Transform.Redact.class, name = "redact"),
+    @JsonSubTypes.Type(value = Transform.RedactRegexMatches.class, name = "redactRegexMatches"),
     @JsonSubTypes.Type(value = Transform.Pseudonymize.class, name = "pseudonymize"),
     @JsonSubTypes.Type(value = Transform.PseudonymizeEmailHeader.class, name = "pseudonymizeEmailHeader"),
 })

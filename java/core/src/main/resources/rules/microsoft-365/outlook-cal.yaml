@@ -1,7 +1,8 @@
+allowAllEndpoints: false
 endpoints:
   - pathRegex: "^/(v1.0|beta)/users/?[^/]*"
     transforms:
-      - method: "redact"
+      - !<redact>
         jsonPaths:
           - "$..displayName"
           - "$..employeeId"
@@ -15,7 +16,7 @@ endpoints:
           - "$..faxNumber"
           - "$..mobilePhone"
           - "$..businessPhones[*]"
-      - method: "pseudonymize"
+      - !<pseudonymize>
         jsonPaths:
           - "$..userPrincipalName"
           - "$..imAddresses[*]"
@@ -23,7 +24,7 @@ endpoints:
           - "$..otherMails[*]"
   - pathRegex: "^/(v1.0|beta)/groups/?[^/]*"
     transforms:
-      - method: "redact"
+      - !<redact>
         jsonPaths:
           - "$..owners"
           - "$..rejectedSenders"
@@ -32,7 +33,7 @@ endpoints:
           - "$..membersWithLicenseErrors"
   - pathRegex: "^/(v1.0|beta)/groups/[^/]*/members.*"
     transforms:
-      - method: "redact"
+      - !<redact>
         jsonPaths:
           - "$..displayName"
           - "$..employeeId"
@@ -46,7 +47,7 @@ endpoints:
           - "$..faxNumber"
           - "$..mobilePhone"
           - "$..businessPhones[*]"
-      - method: "pseudonymize"
+      - !<pseudonymize>
         jsonPaths:
           - "$..userPrincipalName"
           - "$..imAddresses[*]"
@@ -55,7 +56,7 @@ endpoints:
   - pathRegex: "^/(v1.0|beta)/users/[^/]*/mailboxSettings"
   - pathRegex: "^/(v1.0|beta)/users/[^/]*/(calendars/[^/]*/)?events.*"
     transforms:
-      - method: "redact"
+      - !<redact>
         jsonPaths:
           - "$..subject"
           - "$..body"
@@ -64,15 +65,19 @@ endpoints:
           - "$..extensions"
           - "$..multiValueExtendedProperties"
           - "$..singleValueExtendedProperties"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress.address"
+      - !<redactRegexMatches>
+        jsonPaths:
           - "$..location.uniqueId"
           - "$..locations[*].uniqueId"
           - "$..onlineMeeting.joinUrl"
-      - method: "pseudonymize"
-        jsonPaths:
-          - "$..emailAddress.address"
+          - "$..onlineMeetingUrl"
+        regex: "pwd=[^&]*"
   - pathRegex: "^/(v1.0|beta)/users/[^/]*/calendar/calendarView(?)[^/]*"
     transforms:
-      - method: "redact"
+      - !<redact>
         jsonPaths:
           - "$..subject"
           - "$..body"
@@ -81,9 +86,13 @@ endpoints:
           - "$..extensions"
           - "$..multiValueExtendedProperties"
           - "$..singleValueExtendedProperties"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress.address"
+      - !<redactRegexMatches>
+        jsonPaths:
           - "$..location.uniqueId"
           - "$..locations[*].uniqueId"
           - "$..onlineMeeting.joinUrl"
-      - method: "pseudonymize"
-        jsonPaths:
-          - "$..emailAddress.address"
+          - "$..onlineMeetingUrl"
+        regex: "pwd=[^&]*"

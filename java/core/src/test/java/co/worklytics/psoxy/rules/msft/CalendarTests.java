@@ -34,8 +34,7 @@ public class CalendarTests extends DirectoryTests {
         assertRedacted(sanitized,
             "Irvin Sayers",
             "New Product Regulations Touchpoint", //subject
-            "New Product Regulations Strategy Online Touchpoint Meeting", //body
-            "uniqueIdValue" // location(s) uniqueID
+            "New Product Regulations Strategy Online Touchpoint Meeting" //body
         );
 
         assertPseudonymized(sanitized,
@@ -58,8 +57,7 @@ public class CalendarTests extends DirectoryTests {
         assertRedacted(sanitized,
             "Irvin Sayers",
             "New Product Regulations Touchpoint", //subject
-            "New Product Regulations Strategy Online Touchpoint Meeting", //body
-            "uniqueIdValue" // location(s) uniqueID
+            "New Product Regulations Strategy Online Touchpoint Meeting" //body
         );
 
         assertPseudonymized(sanitized,
@@ -86,8 +84,7 @@ public class CalendarTests extends DirectoryTests {
         assertRedacted(sanitized,
             "Irvin Sayers",
             "New Product Regulations Touchpoint", //subject
-            "New Product Regulations Strategy Online Touchpoint Meeting", //body
-            "uniqueIdValue" // location(s) uniqueID
+            "New Product Regulations Strategy Online Touchpoint Meeting" //body
         );
 
         assertPseudonymized(sanitized,
@@ -111,8 +108,7 @@ public class CalendarTests extends DirectoryTests {
             "IrvinS@M365x214355.onmicrosoft.com",
             "Irvin Sayers",
             "New Product Regulations Touchpoint", //subject
-            "New Product Regulations Strategy Online Touchpoint Meeting", //body
-            "uniqueIdValue" // location(s) uniqueID
+            "New Product Regulations Strategy Online Touchpoint Meeting" //body
         );
 
         String sanitized = sanitize(endpoint, jsonResponse);
@@ -120,8 +116,7 @@ public class CalendarTests extends DirectoryTests {
         assertRedacted(sanitized,
             "Irvin Sayers",
             "New Product Regulations Touchpoint", //subject
-            "New Product Regulations Strategy Online Touchpoint Meeting", //body
-            "uniqueIdValue" // location(s) uniqueID
+            "New Product Regulations Strategy Online Touchpoint Meeting" //body
             );
 
         assertPseudonymized(sanitized,
