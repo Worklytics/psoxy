@@ -74,7 +74,8 @@ endpoints:
           - "$..locations[*].uniqueId"
           - "$..onlineMeeting.joinUrl"
           - "$..onlineMeetingUrl"
-        redeaction: "pwd=[^&]*"
+        redactions:
+          - "(?i)pwd=[^&]*"
   - pathRegex: "^/(v1.0|beta)/users/[^/]*/calendar/calendarView(?)[^/]*"
     transforms:
       - !<redact>
@@ -95,4 +96,5 @@ endpoints:
           - "$..locations[*].uniqueId"
           - "$..onlineMeeting.joinUrl"
           - "$..onlineMeetingUrl"
-        regex: "pwd=[^&]*"
+        redactions:
+          - "(?i)pwd=[^&]*"

@@ -17,7 +17,7 @@ import java.util.Set;
     @JsonSubTypes.Type(value = Transform.Pseudonymize.class, name = "pseudonymize"),
     @JsonSubTypes.Type(value = Transform.PseudonymizeEmailHeader.class, name = "pseudonymizeEmailHeader"),
 })
-@SuperBuilder
+@SuperBuilder(toBuilder = true)
 @AllArgsConstructor //for builder
 @NoArgsConstructor //for Jackson
 @Getter
@@ -63,7 +63,7 @@ public abstract class Transform {
     }
 
     @NoArgsConstructor //for jackson
-    @SuperBuilder
+    @SuperBuilder(toBuilder = true)
     @Getter
     @ToString
     @EqualsAndHashCode(callSuper = true)

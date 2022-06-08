@@ -3,6 +3,7 @@ package co.worklytics.psoxy.rules.msft;
 import co.worklytics.psoxy.rules.Rules2;
 import co.worklytics.psoxy.rules.RuleSet;
 import co.worklytics.psoxy.rules.Transform;
+import co.worklytics.psoxy.rules.zoom.ZoomTransforms;
 import com.google.common.collect.ImmutableMap;
 
 import java.util.Map;
@@ -126,8 +127,7 @@ public class PrebuiltSanitizerRules {
             .transform(Transform.Pseudonymize.builder()
                 .jsonPath("$..emailAddress.address")
                 .build())
-            .transform(Transform.RedactRegexMatches.builder()
-                .redaction("pwd=[^&]*")
+            .transform(ZoomTransforms.SANITIZE_JOIN_URL.toBuilder()
                 .jsonPath("$..location.uniqueId")
                 .jsonPath("$..locations[*].uniqueId")
                 .jsonPath("$..onlineMeeting.joinUrl")
@@ -148,8 +148,7 @@ public class PrebuiltSanitizerRules {
             .transform(Transform.Pseudonymize.builder()
                 .jsonPath("$..emailAddress.address")
                 .build())
-            .transform(Transform.RedactRegexMatches.builder()
-                .redaction("pwd=[^&]*")
+            .transform(ZoomTransforms.SANITIZE_JOIN_URL.toBuilder()
                 .jsonPath("$..location.uniqueId")
                 .jsonPath("$..locations[*].uniqueId")
                 .jsonPath("$..onlineMeeting.joinUrl")

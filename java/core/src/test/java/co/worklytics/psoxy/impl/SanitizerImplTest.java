@@ -8,6 +8,7 @@ import co.worklytics.test.MockModules;
 import co.worklytics.test.TestUtils;
 import dagger.Component;
 import lombok.SneakyThrows;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -182,15 +183,17 @@ class SanitizerImplTest {
         " pwd=1234asAf  ",
         "https://asdf.google.com/asdf/?pwd=1234asAf",
         "https://asdf.google.com/asdf/?pwd=1234asAf&pwd=14324",
-        "https://asdf.google.com/asdf/?asdf=2134&pwd=1234asAf&"
+        "https://asdf.google.com/asdf/?asdf=2134&pwd=1234asAf&",
+        "https://asdf.google.com/asdf/?asdf=2134&PWD=1234asAf&",
+        "https://asdf.google.com/asdf/?asdf=2134&Pwd=1234asAf&"
     })
     @ParameterizedTest
     void redactRegexMatches(String source) {
-        Transform.RedactRegexMatches transform = Transform.RedactRegexMatches.builder().redaction("pwd=[^&]*").build();
+        Transform.RedactRegexMatches transform = Transform.RedactRegexMatches.builder().redaction("(?i)pwd=[^&]*").build();
 
-        assertTrue(source.contains("pwd=1234asAf"));
+        assertTrue(StringUtils.containsIgnoreCase(source, "pwd=1234asAf"));
         String redacted = (String) sanitizer.getRedactRegexMatches(transform).map(source, sanitizer.jsonConfiguration);
-        assertFalse(redacted.contains("pwd=1234asAf"));
+        assertFalse(StringUtils.containsIgnoreCase(redacted, "pwd=1234asAf"));
     }
 
 }
