@@ -180,14 +180,19 @@ public class SanitizerImpl implements Sanitizer {
 
 
     MapFunction getRedactRegexMatches(Transform.RedactRegexMatches transform) {
-       Pattern p = Pattern.compile(transform.getRegex());
+       List<Pattern> patterns = transform.getRedactions().stream().map(Pattern::compile).collect(Collectors.toList());
        return (s, jsonConfiguration) -> {
-           if (! (s instanceof String)) {
-               return s;
+           if (!(s instanceof String)) {
+               log.warning("value matched by " + transform + " not of type String");
+               return null;
            } else if (StringUtils.isBlank((String) s)) {
                return s;
            } else {
-               return p.matcher((String) s).replaceAll( "");
+               String result = (String) s;
+               for (Pattern p : patterns) {
+                   result = p.matcher(result).replaceAll("");
+               }
+               return result;
            }
        };
     }

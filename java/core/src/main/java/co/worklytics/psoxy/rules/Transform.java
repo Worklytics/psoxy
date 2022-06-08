@@ -8,6 +8,7 @@ import lombok.experimental.SuperBuilder;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "method")
 @JsonSubTypes({
@@ -64,12 +65,17 @@ public abstract class Transform {
     @NoArgsConstructor //for jackson
     @SuperBuilder
     @Getter
+    @ToString
     @EqualsAndHashCode(callSuper = true)
     public static class RedactRegexMatches extends Transform {
 
-        String regex;
-
+        /**
+         * redaction content matching ANY of these regexes
+         */
+        @Singular
+        List<String> redactions;
     }
+
 
     @NoArgsConstructor //for jackson
     @SuperBuilder

@@ -186,7 +186,7 @@ class SanitizerImplTest {
     })
     @ParameterizedTest
     void redactRegexMatches(String source) {
-        Transform.RedactRegexMatches transform = Transform.RedactRegexMatches.builder().regex("pwd=[^&]*").build();
+        Transform.RedactRegexMatches transform = Transform.RedactRegexMatches.builder().redaction("pwd=[^&]*").build();
 
         assertTrue(source.contains("pwd=1234asAf"));
         String redacted = (String) sanitizer.getRedactRegexMatches(transform).map(source, sanitizer.jsonConfiguration);
