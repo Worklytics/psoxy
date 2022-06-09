@@ -1,6 +1,5 @@
 package co.worklytics.psoxy.rules;
 
-import co.worklytics.psoxy.Rules;
 import co.worklytics.psoxy.rules.google.PrebuiltSanitizerRules;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
@@ -23,12 +22,15 @@ public abstract class JavaRulesTestBaseCase extends RulesBaseTestCase {
     void validateYamlExample() {
         String path = "/rules/" + getYamlSerializationFilepath() + ".yaml";
 
-        Rules rulesFromFilesystem = yamlMapper.readerFor(Rules.class)
+
+        RuleSet rulesFromFilesystem = yamlMapper.readerFor(getRulesUnderTest().getClass())
             .readValue(PrebuiltSanitizerRules.class.getResource(path));
+
 
         assertEquals(
             yamlMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rulesFromFilesystem),
             yamlMapper.writerWithDefaultPrettyPrinter().writeValueAsString(getRulesUnderTest()));
+
     }
 
 }

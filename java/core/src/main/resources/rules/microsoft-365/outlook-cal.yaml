@@ -1,87 +1,100 @@
----
-allowedEndpointRegexes:
-  - "^/(v1.0|beta)/(groups|users)/?[^/]*"
-  - "^/(v1.0|beta)/(groups|users)\\?.*"
-  - "^/(v1.0|beta)/groups/[^/]*/members[^/]*"
-  - "^/(v1.0|beta)/users/[^/]*/(calendars/[^/]*/)?events.*"
-  - "^/(v1.0|beta)/users/[^/]*/mailboxSettings"
-  - "^/beta/users/[^/]*/calendar/calendarView(?)[^/]*"
-pseudonymizations:
-  - jsonPaths:
-      - "$..userPrincipalName"
-      - "$..imAddresses[*]"
-      - "$..mail"
-      - "$..otherMails[*]"
-    relativeUrlRegex: "^/(v1.0|beta)/users.*"
-  - jsonPaths:
-      - "$..userPrincipalName"
-      - "$..imAddresses[*]"
-      - "$..mail"
-      - "$..otherMails[*]"
-    relativeUrlRegex: "^/(v1.0|beta)/groups/[^/]*/members.*"
-  - jsonPaths:
-      - "$..emailAddress.address"
-    relativeUrlRegex: "^/(v1.0|beta)/users/[^/]*/calendar/calendarView(?)[^/]*"
-  - jsonPaths:
-      - "$..emailAddress.address"
-    relativeUrlRegex: "^/(v1.0|beta)/users/[^/]*/(calendars/[^/]*/)?events.*"
-redactions:
-  - jsonPaths:
-      - "$..displayName"
-      - "$..employeeId"
-      - "$..aboutMe"
-      - "$..mySite"
-      - "$..preferredName"
-      - "$..givenName"
-      - "$..surname"
-      - "$..mailNickname"
-      - "$..proxyAddresses"
-      - "$..faxNumber"
-      - "$..mobilePhone"
-      - "$..businessPhones[*]"
-    relativeUrlRegex: "^/(v1.0|beta)/users.*"
-  - jsonPaths:
-      - "$..owners"
-      - "$..rejectedSenders"
-      - "$..acceptedSenders"
-      - "$..members"
-      - "$..membersWithLicenseErrors"
-    relativeUrlRegex: "^/(v1.0|beta)/groups.*"
-  - jsonPaths:
-      - "$..displayName"
-      - "$..employeeId"
-      - "$..aboutMe"
-      - "$..mySite"
-      - "$..preferredName"
-      - "$..givenName"
-      - "$..surname"
-      - "$..mailNickname"
-      - "$..proxyAddresses"
-      - "$..faxNumber"
-      - "$..mobilePhone"
-      - "$..businessPhones[*]"
-    relativeUrlRegex: "^/(v1.0|beta)/groups/[^/]*/members.*"
-  - jsonPaths:
-      - "$..subject"
-      - "$..body"
-      - "$..bodyPreview"
-      - "$..emailAddress.name"
-      - "$..extensions"
-      - "$..multiValueExtendedProperties"
-      - "$..singleValueExtendedProperties"
-      - "$..location.uniqueId"
-      - "$..locations[*].uniqueId"
-    relativeUrlRegex: "^/(v1.0|beta)/users/[^/]*/calendar/calendarView(?)[^/]*"
-  - jsonPaths:
-      - "$..subject"
-      - "$..body"
-      - "$..bodyPreview"
-      - "$..emailAddress.name"
-      - "$..extensions"
-      - "$..multiValueExtendedProperties"
-      - "$..singleValueExtendedProperties"
-      - "$..location.uniqueId"
-      - "$..locations[*].uniqueId"
-    relativeUrlRegex: "^/(v1.0|beta)/users/[^/]*/(calendars/[^/]*/)?events.*"
-
-
+allowAllEndpoints: false
+endpoints:
+  - pathRegex: "^/(v1.0|beta)/users/?[^/]*"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..displayName"
+          - "$..employeeId"
+          - "$..aboutMe"
+          - "$..mySite"
+          - "$..preferredName"
+          - "$..givenName"
+          - "$..surname"
+          - "$..mailNickname"
+          - "$..proxyAddresses"
+          - "$..faxNumber"
+          - "$..mobilePhone"
+          - "$..businessPhones[*]"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..userPrincipalName"
+          - "$..imAddresses[*]"
+          - "$..mail"
+          - "$..otherMails[*]"
+  - pathRegex: "^/(v1.0|beta)/groups/?[^/]*"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..owners"
+          - "$..rejectedSenders"
+          - "$..acceptedSenders"
+          - "$..members"
+          - "$..membersWithLicenseErrors"
+  - pathRegex: "^/(v1.0|beta)/groups/[^/]*/members.*"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..displayName"
+          - "$..employeeId"
+          - "$..aboutMe"
+          - "$..mySite"
+          - "$..preferredName"
+          - "$..givenName"
+          - "$..surname"
+          - "$..mailNickname"
+          - "$..proxyAddresses"
+          - "$..faxNumber"
+          - "$..mobilePhone"
+          - "$..businessPhones[*]"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..userPrincipalName"
+          - "$..imAddresses[*]"
+          - "$..mail"
+          - "$..otherMails[*]"
+  - pathRegex: "^/(v1.0|beta)/users/[^/]*/mailboxSettings"
+  - pathRegex: "^/(v1.0|beta)/users/[^/]*/(calendars/[^/]*/)?events.*"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..subject"
+          - "$..body"
+          - "$..bodyPreview"
+          - "$..emailAddress.name"
+          - "$..extensions"
+          - "$..multiValueExtendedProperties"
+          - "$..singleValueExtendedProperties"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress.address"
+      - !<redactRegexMatches>
+        jsonPaths:
+          - "$..location.uniqueId"
+          - "$..locations[*].uniqueId"
+          - "$..onlineMeeting.joinUrl"
+          - "$..onlineMeetingUrl"
+        redactions:
+          - "(?i)pwd=[^&]*"
+  - pathRegex: "^/(v1.0|beta)/users/[^/]*/calendar/calendarView(?)[^/]*"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..subject"
+          - "$..body"
+          - "$..bodyPreview"
+          - "$..emailAddress.name"
+          - "$..extensions"
+          - "$..multiValueExtendedProperties"
+          - "$..singleValueExtendedProperties"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress.address"
+      - !<redactRegexMatches>
+        jsonPaths:
+          - "$..location.uniqueId"
+          - "$..locations[*].uniqueId"
+          - "$..onlineMeeting.joinUrl"
+          - "$..onlineMeetingUrl"
+        redactions:
+          - "(?i)pwd=[^&]*"

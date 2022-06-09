@@ -1,6 +1,5 @@
 package co.worklytics.psoxy.rules;
 
-import co.worklytics.psoxy.Rules;
 import com.jayway.jsonpath.JsonPath;
 import lombok.NonNull;
 
@@ -10,26 +9,52 @@ import java.util.regex.Pattern;
 
 public class Validator {
 
-
-    static public void validate(@NonNull Rules rules) {
-        validate(rules.getRedactions());
-        validate(rules.getPseudonymizations());
-        validate(rules.getEmailHeaderPseudonymizations());
-        validate(rules.getPseudonymizationWithOriginals());
-
-        if(rules.getAllowedEndpointRegexes() != null) {
-            //throws PatternSyntaxExpression if doesn't compile
-            rules.getAllowedEndpointRegexes().forEach(Pattern::compile);
+    static public void validate(@NonNull RuleSet rules) {
+        if (rules instanceof Rules1) {
+            validate((Rules1) rules);
+        } else if (rules instanceof Rules2) {
+            validate((Rules2) rules );
         }
     }
 
-    static void validate(@Nullable List<Rules.Rule> rules) {
+    static public void validate(@NonNull Rules1 rules1) {
+        validate(rules1.getRedactions());
+        validate(rules1.getPseudonymizations());
+        validate(rules1.getEmailHeaderPseudonymizations());
+        validate(rules1.getPseudonymizationWithOriginals());
+
+        if(rules1.getAllowedEndpointRegexes() != null) {
+            //throws PatternSyntaxExpression if doesn't compile
+            rules1.getAllowedEndpointRegexes().forEach(Pattern::compile);
+        }
+    }
+
+    static public void validate(@NonNull Rules2 rules) {
+        rules.getEndpoints().forEach(Validator::validate);
+    }
+    static void validate(@NonNull Rules2.Endpoint endpoint) {
+        Pattern.compile(endpoint.getPathRegex());
+        endpoint.getTransforms().forEach(Validator::validate);
+    }
+
+    static void validate(@NonNull Transform transform) {
+        transform.getJsonPaths().forEach(p -> {
+            try {
+                JsonPath.compile(p);
+            } catch (Throwable e) {
+                throw new Error("JsonPath failed to compile: " + p, e);
+            }
+        });
+    }
+
+
+    static void validate(@Nullable List<Rules1.Rule> rules) {
         if (rules != null) {
             rules.forEach(Validator::validate);
         }
     }
 
-    static public void validate(@NonNull Rules.Rule rule) {
+    static public void validate(@NonNull Rules1.Rule rule) {
         if (rule.getCsvColumns() == null || rule.getCsvColumns().isEmpty())  {
             Pattern.compile(rule.getRelativeUrlRegex());
             rule.getJsonPaths().forEach(p -> {

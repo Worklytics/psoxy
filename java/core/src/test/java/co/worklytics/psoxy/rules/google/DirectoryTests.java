@@ -1,8 +1,8 @@
 package co.worklytics.psoxy.rules.google;
 
-import co.worklytics.psoxy.Rules;
-import co.worklytics.psoxy.Sanitizer;
 import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
+import co.worklytics.psoxy.rules.Rules1;
+import co.worklytics.psoxy.Sanitizer;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class DirectoryTests extends JavaRulesTestBaseCase {
 
     @Getter
-    final Rules rulesUnderTest = PrebuiltSanitizerRules.GDIRECTORY;
+    final Rules1 rulesUnderTest = PrebuiltSanitizerRules.GDIRECTORY;
 
     @Getter
     final String exampleDirectoryPath = "api-response-examples/g-workspace/directory";
@@ -187,7 +187,7 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
         //block by default
         assertThrows(IllegalStateException.class, () -> this.sanitize(endpoint, jsonString));
 
-        Rules allowAllRoles = getRulesUnderTest().toBuilder().allowedEndpointRegex(".*").build();
+        Rules1 allowAllRoles = getRulesUnderTest().toBuilder().allowedEndpointRegex(".*").build();
 
         this.sanitizer = this.sanitizerFactory.create(Sanitizer.Options.builder().pseudonymizationSalt("salt")
             .rules(allowAllRoles)

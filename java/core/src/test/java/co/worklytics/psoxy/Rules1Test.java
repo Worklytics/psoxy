@@ -1,5 +1,6 @@
 package co.worklytics.psoxy;
 
+import co.worklytics.psoxy.rules.Rules1;
 import co.worklytics.test.TestUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -10,7 +11,7 @@ import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class RulesTest {
+public class Rules1Test {
 
 
     final String EXAMPLE_YAML =
@@ -24,11 +25,11 @@ public class RulesTest {
             "  - \"$.items[*].extendedProperties.private\"\n" +
             "  relativeUrlRegex: \"/calendar/v3/calendars/.*/events.*\"\n";
 
-    Rules rules = Rules.builder().pseudonymization(Rules.Rule.builder()
+    Rules1 rules = Rules1.builder().pseudonymization(Rules1.Rule.builder()
             .relativeUrlRegex("/calendar/v3/calendars/.*/events.*")
             .jsonPath("$..email")
             .build())
-        .redaction(Rules.Rule.builder()
+        .redaction(Rules1.Rule.builder()
             .relativeUrlRegex("/calendar/v3/calendars/.*/events.*")
             .jsonPath("$..displayName")
             .jsonPath("$.items[*].extendedProperties.private")
@@ -44,7 +45,7 @@ public class RulesTest {
         assertEquals("---\n" + EXAMPLE_YAML, //q: why does it add this prefix??
             objectMapper.writeValueAsString(rules));
 
-        Rules fromYaml = objectMapper.readerFor(Rules.class)
+        Rules1 fromYaml = objectMapper.readerFor(Rules1.class)
             .readValue(EXAMPLE_YAML);
 
         Pattern pattern = Pattern.compile(fromYaml.getPseudonymizations().get(0).getRelativeUrlRegex());
@@ -61,7 +62,7 @@ public class RulesTest {
 
         ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
 
-        Rules fromYaml = objectMapper.readerFor(Rules.class)
+        Rules1 fromYaml = objectMapper.readerFor(Rules1.class)
             .readValue(data);
 
         Pattern pattern = Pattern.compile(fromYaml.getPseudonymizations().get(0).getRelativeUrlRegex());

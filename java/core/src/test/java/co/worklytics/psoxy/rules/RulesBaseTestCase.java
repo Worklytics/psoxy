@@ -1,9 +1,6 @@
 package co.worklytics.psoxy.rules;
 
-import co.worklytics.psoxy.PsoxyModule;
-import co.worklytics.psoxy.Rules;
-import co.worklytics.psoxy.Sanitizer;
-import co.worklytics.psoxy.SanitizerFactory;
+import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.impl.SanitizerImpl;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestUtils;
@@ -97,22 +94,22 @@ abstract public class RulesBaseTestCase {
 
 
     @SneakyThrows
-    Rules yamlRoundtrip(Rules rules) {
+    RuleSet yamlRoundtrip(RuleSet rules) {
         String yaml = yamlMapper.writeValueAsString(rules).replace("---\n", "");
-        return yamlMapper.readerFor(Rules.class).readValue(yaml);
+        return yamlMapper.readerFor(rules.getClass()).readValue(yaml);
     }
 
     @SneakyThrows
-    Rules jsonRoundtrip(Rules rules) {
+    RuleSet jsonRoundtrip(RuleSet rules) {
         String json = jsonMapper.writeValueAsString(rules);
-        return jsonMapper.readerFor(Rules.class).readValue(json);
+        return jsonMapper.readerFor(rules.getClass()).readValue(json);
     }
 
 
 
     public abstract String getDefaultScopeId();
 
-    public abstract Rules getRulesUnderTest();
+    public abstract RuleSet getRulesUnderTest();
 
     /**
      * eg 'google-workspace/gdrive'

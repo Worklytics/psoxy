@@ -1,14 +1,14 @@
 package co.worklytics.psoxy.impl;
 
-import co.worklytics.psoxy.PseudonymizedIdentity;
-import co.worklytics.psoxy.PsoxyModule;
-import co.worklytics.psoxy.Sanitizer;
-import co.worklytics.psoxy.SanitizerFactory;
+import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
+import co.worklytics.psoxy.rules.Transform;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestUtils;
+import com.jayway.jsonpath.JsonPath;
 import dagger.Component;
 import lombok.SneakyThrows;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -176,4 +176,51 @@ class SanitizerImplTest {
     void allowedEndpointRegex_blocked(String url) {
         assertFalse(sanitizer.isAllowed(new URL(url)));
     }
+
+    @SneakyThrows
+    @ValueSource(strings = {
+        "pwd=1234asAf",
+        " pwd=1234asAf  ",
+        "https://asdf.google.com/asdf/?pwd=1234asAf",
+        "https://asdf.google.com/asdf/?pwd=1234asAf&pwd=14324",
+        "https://asdf.google.com/asdf/?asdf=2134&pwd=1234asAf&",
+        "https://asdf.google.com/asdf/?asdf=2134&PWD=1234asAf&",
+        "https://asdf.google.com/asdf/?asdf=2134&Pwd=1234asAf&"
+    })
+    @ParameterizedTest
+    void redactRegexMatches(String source) {
+        Transform.RedactRegexMatches transform = Transform.RedactRegexMatches.builder().redaction("(?i)pwd=[^&]*").build();
+
+        assertTrue(StringUtils.containsIgnoreCase(source, "pwd=1234asAf"));
+        String redacted = (String) sanitizer.getRedactRegexMatches(transform).map(source, sanitizer.jsonConfiguration);
+        assertFalse(StringUtils.containsIgnoreCase(redacted, "pwd=1234asAf"));
+    }
+
+    @SneakyThrows
+    @ValueSource(strings = {
+        "\"https://asdf.google.com/asdf/?asdf=2134&Pwd=1234asAf&\"", //url as JSON string
+        "\"J8H8eavweUcd321==\"", //base64-encoded value as a JSON-string
+        "{\"uuid\":\"J8H8eavweUcd321==\",\"start_time\":\"2019-08-16T19:00:00Z\"}", //JSON object with nested URL encoded
+    })
+    @ParameterizedTest
+    void preservesRoundTrip(String value) {
+        Object document = sanitizer.getJsonConfiguration().jsonProvider().parse(value);
+        assertEquals(value,
+                sanitizer.getJsonConfiguration().jsonProvider().toJson(document), "value not preserved roundtrip");
+    }
+
+    @SneakyThrows
+    @ValueSource(strings = {
+        "{\"uuid\":\"J8H8eavweUcd321==\",\"start_time\":\"2019-08-16T19:00:00Z\"}", //JSON object with nested URL encoded
+        "[{\"uuid\":\"J8H8eavweUcd321==\",\"start_time\":\"2019-08-16T19:00:00Z\"}]", //JSON object with nested URL encoded
+    })
+    @ParameterizedTest
+    void preservesRoundTrip_afterNoop(String value) {
+        Object document = sanitizer.getJsonConfiguration().jsonProvider().parse(value);
+        JsonPath.compile("$.uuid")
+            .map(document, (i, c) -> i, sanitizer.getJsonConfiguration());
+        assertEquals(value,
+            sanitizer.getJsonConfiguration().jsonProvider().toJson(document), "value not preserved roundtrip");
+    }
+
 }
