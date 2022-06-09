@@ -73,13 +73,14 @@ public class SanitizerImpl implements Sanitizer {
 
     @Override
     public boolean isAllowed(@NonNull URL url) {
-        if (options.getRules2() == null) {
-            if (options.getRules().getAllowedEndpointRegexes() == null
-                || options.getRules().getAllowedEndpointRegexes().isEmpty()) {
+        if (options.getRules() instanceof Rules1) {
+            Rules1 rules1 = (Rules1) options.getRules();
+            if (rules1.getAllowedEndpointRegexes() == null
+                || rules1.getAllowedEndpointRegexes().isEmpty()) {
                 return true;
             } else {
                 if (compiledAllowedEndpoints == null) {
-                    compiledAllowedEndpoints = options.getRules().getAllowedEndpointRegexes().stream()
+                    compiledAllowedEndpoints = rules1.getAllowedEndpointRegexes().stream()
                         .map(regex -> Pattern.compile(regex, CASE_INSENSITIVE))
                         .collect(Collectors.toList());
                 }
@@ -88,14 +89,14 @@ public class SanitizerImpl implements Sanitizer {
             }
         } else {
             if (compiledAllowedEndpoints == null) {
-                compiledAllowedEndpoints = options.getRules2().getEndpoints().stream()
+                compiledAllowedEndpoints = ((Rules2) options.getRules()).getEndpoints().stream()
                     .map(Rules2.Endpoint::getPathRegex)
                     .map(regex -> Pattern.compile(regex, CASE_INSENSITIVE))
                     .collect(Collectors.toList());
             }
             String relativeUrl = URLUtils.relativeURL(url);
 
-            return options.getRules2().getAllowAllEndpoints() ||
+            return ((Rules2) options.getRules()).getAllowAllEndpoints() ||
                 compiledAllowedEndpoints.stream().anyMatch(p -> p.matcher(relativeUrl).matches());
         }
     }
@@ -112,7 +113,7 @@ public class SanitizerImpl implements Sanitizer {
             return jsonResponse;
         }
 
-        if (getOptions().getRules2() == null) {
+        if (getOptions().getRules() instanceof Rules1) {
             return legacyTransform(url, jsonResponse);
         } else {
             return transform(url, jsonResponse);
@@ -122,7 +123,7 @@ public class SanitizerImpl implements Sanitizer {
 
     String transform(@NonNull URL url, @NonNull String jsonResponse) {
         if (compiledEndpointRules == null) {
-            compiledEndpointRules = options.getRules2().getEndpoints().stream()
+            compiledEndpointRules = ((Rules2) options.getRules()).getEndpoints().stream()
                 .map(endpoint -> Pair.of(Pattern.compile(endpoint.getPathRegex(), CASE_INSENSITIVE), endpoint))
                 .collect(Collectors.toList());
         }
@@ -137,7 +138,7 @@ public class SanitizerImpl implements Sanitizer {
             Object document = jsonConfiguration.jsonProvider().parse(jsonResponse);
 
             for (Transform transform : match.getValue().getTransforms()) {
-                document = applyTransform(transform, document);
+                applyTransform(transform, document);
             }
             return jsonConfiguration.jsonProvider().toJson(document);
         }).orElse(jsonResponse);
@@ -152,7 +153,7 @@ public class SanitizerImpl implements Sanitizer {
 
         if (transform instanceof Transform.Redact) {
             for (JsonPath path : paths) {
-                document = path.delete(document, jsonConfiguration);
+                path.delete(document, jsonConfiguration);
             }
         } else if (transform instanceof Transform.Pseudonymize) {
 
@@ -160,17 +161,17 @@ public class SanitizerImpl implements Sanitizer {
             MapFunction f =
                 ((Transform.Pseudonymize) transform).getIncludeOriginal() ? this::pseudonymizeWithOriginalToJson : this::pseudonymizeToJson;
             for (JsonPath path : paths) {
-                document = path.map(document, f, jsonConfiguration);
+                path.map(document, f, jsonConfiguration);
             }
 
         } else if (transform instanceof Transform.PseudonymizeEmailHeader) {
             for (JsonPath path : paths) {
-                document = path.map(document, this::pseudonymizeEmailHeaderToJson, jsonConfiguration);
+                path.map(document, this::pseudonymizeEmailHeaderToJson, jsonConfiguration);
             }
         } else if (transform instanceof Transform.RedactRegexMatches) {
             MapFunction f = getRedactRegexMatches((Transform.RedactRegexMatches) transform);
             for (JsonPath path : paths) {
-                document = path.map(document, f, jsonConfiguration);
+                path.map(document, f, jsonConfiguration);
             }
         } else {
             throw new IllegalArgumentException("Unknown transform type: " + transform.getClass().getName());
@@ -200,18 +201,18 @@ public class SanitizerImpl implements Sanitizer {
 
     String legacyTransform(@NonNull URL url, @NonNull String jsonResponse) {        //q: move this stuff to initialization / DI provider??
         if (compiledPseudonymizations == null) {
-            compiledPseudonymizations = compile(options.getRules().getPseudonymizations());
+            compiledPseudonymizations = compile(((Rules1) options.getRules()).getPseudonymizations());
         }
         if (compiledRedactions == null) {
-            compiledRedactions = compile(options.getRules().getRedactions());
+            compiledRedactions = compile(((Rules1) options.getRules()).getRedactions());
         }
         if (compiledEmailHeaderPseudonymizations == null) {
             compiledEmailHeaderPseudonymizations =
-                compile(options.getRules().getEmailHeaderPseudonymizations());
+                compile(((Rules1) options.getRules()).getEmailHeaderPseudonymizations());
         }
         if (compiledPseudonymizationsWithOriginals == null) {
             compiledPseudonymizationsWithOriginals =
-                compile(options.getRules().getPseudonymizationWithOriginals());
+                compile(((Rules1) options.getRules()).getPseudonymizationWithOriginals());
         }
 
         String relativeUrl = URLUtils.relativeURL(url);
@@ -237,7 +238,7 @@ public class SanitizerImpl implements Sanitizer {
             Object document = jsonConfiguration.jsonProvider().parse(jsonResponse);
 
             for (JsonPath redaction : redactionsToApply) {
-                document = redaction
+                redaction
                     .delete(document, jsonConfiguration);
             }
 
@@ -247,17 +248,17 @@ public class SanitizerImpl implements Sanitizer {
             // jsonConfiguration.addEvaluationListeners(); -->
 
             for (JsonPath pseudonymization : pseudonymizationsToApply) {
-                document = pseudonymization
+               pseudonymization
                     .map(document, this::pseudonymizeToJson, jsonConfiguration);
             }
 
             for (JsonPath pseudonymization : emailHeaderPseudonymizationsToApply) {
-                document = pseudonymization
+                pseudonymization
                     .map(document, this::pseudonymizeEmailHeaderToJson, jsonConfiguration);
             }
 
             for (JsonPath pseudonymization : pseudonymizationWithOriginalsToApply) {
-                document = pseudonymization
+                pseudonymization
                     .map(document, this::pseudonymizeWithOriginalToJson, jsonConfiguration);
             }
 

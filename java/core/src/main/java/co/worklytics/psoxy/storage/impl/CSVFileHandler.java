@@ -44,7 +44,7 @@ public class CSVFileHandler implements FileHandler {
 
         Sanitizer.Options options = sanitizer.getOptions();
 
-        Set<String> columnsToRedact = options.getRules()
+        Set<String> columnsToRedact = ((Rules1) options.getRules())
                 .getRedactions()
                 .stream()
                 .map(Rules1.Rule::getCsvColumns)
@@ -52,7 +52,7 @@ public class CSVFileHandler implements FileHandler {
                 .map(String::trim)
                 .collect(Collectors.toCollection(() -> new TreeSet<>(String.CASE_INSENSITIVE_ORDER)));
 
-        Set<String> columnsToPseudonymize = options.getRules()
+        Set<String> columnsToPseudonymize = ((Rules1) options.getRules())
                 .getPseudonymizations()
                 .stream()
                 .map(Rules1.Rule::getCsvColumns)

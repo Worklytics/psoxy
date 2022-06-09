@@ -31,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * q: better as junit Extension or something? how do to that
  *
  */
-abstract public class Rules2BaseTestCase {
+abstract public class RulesBaseTestCase {
 
     protected SanitizerImpl sanitizer;
 
@@ -53,7 +53,7 @@ abstract public class Rules2BaseTestCase {
         MockModules.ForConfigService.class,
     })
     public interface Container {
-        void inject(Rules2BaseTestCase test);
+        void inject(RulesBaseTestCase test);
     }
 
     @BeforeEach
@@ -62,11 +62,11 @@ abstract public class Rules2BaseTestCase {
         // idea: use reflection to get test-specific container class, and call create() on that??
         //  eg., 'DaggerRulesBaseTestCase_Container' class,
 
-        Container container = DaggerRules2BaseTestCase_Container.create();
+        Container container = DaggerRulesBaseTestCase_Container.create();
         container.inject(this);
 
         sanitizer = sanitizerFactory.create(Sanitizer.Options.builder()
-            .rules2(getRulesUnderTest())
+            .rules(getRulesUnderTest())
             .defaultScopeId(getDefaultScopeId())
             .build());
 
@@ -94,22 +94,22 @@ abstract public class Rules2BaseTestCase {
 
 
     @SneakyThrows
-    Rules2 yamlRoundtrip(Rules2 rules) {
+    RuleSet yamlRoundtrip(RuleSet rules) {
         String yaml = yamlMapper.writeValueAsString(rules).replace("---\n", "");
-        return yamlMapper.readerFor(Rules2.class).readValue(yaml);
+        return yamlMapper.readerFor(rules.getClass()).readValue(yaml);
     }
 
     @SneakyThrows
-    Rules2 jsonRoundtrip(Rules2 rules) {
+    RuleSet jsonRoundtrip(RuleSet rules) {
         String json = jsonMapper.writeValueAsString(rules);
-        return jsonMapper.readerFor(Rules2.class).readValue(json);
+        return jsonMapper.readerFor(rules.getClass()).readValue(json);
     }
 
 
 
     public abstract String getDefaultScopeId();
 
-    public abstract Rules2 getRulesUnderTest();
+    public abstract RuleSet getRulesUnderTest();
 
     /**
      * eg 'google-workspace/gdrive'
