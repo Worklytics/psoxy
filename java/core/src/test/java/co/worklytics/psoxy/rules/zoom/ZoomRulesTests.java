@@ -142,7 +142,7 @@ public class ZoomRulesTests extends JavaRulesTestBaseCase {
             sanitizer.sanitize(new URL("https://api.zoom.us/v2/past_meetings/MEETING_ID/instances"), jsonString);
 
         // no rules here
-        assertEquals(jsonString, prettyPrintJson(sanitized));
+        assertJsonEquals(jsonString, sanitized);
     }
 
     @SneakyThrows
