@@ -44,6 +44,9 @@ public class ZoomRulesTests extends JavaRulesTestBaseCase {
         "https://api.zoom.us/v2/past_meetings/MEETING_ID/participants?page_size=20&next_page_token=TOKEN",
         "https://api.zoom.us/v2/meetings/MEETING_ID",
         "https://api.zoom.us/v2/meetings/MEETING_ID?occurence_id=OCCURRENCE_ID&show_previous_occurrences=false",
+        "https://api.zoom.us/v2/report/users/{userId}/meetings",
+        "https://api.zoom.us/v2/report/meetings/{meetingId}",
+        "https://api.zoom.us/v2/report/meetings/{meetingId}/participants",
 
     })
     @ParameterizedTest
@@ -67,10 +70,7 @@ public class ZoomRulesTests extends JavaRulesTestBaseCase {
         "https://api.zoom.us/v2/groups",
         "https://api.zoom.us/v2/groups/{groupId}/admins",
         "https://api.zoom.us/v2/metrics/webinars",
-        //reports API - can consider opening this, would be useful
-        "https://api.zoom.us/v2/report/users/{userId}/meetings",
-        "https://api.zoom.us/v2/report/meetings/{meetingId}",
-        "https://api.zoom.us/v2/report/meetings/{meetingId}/participants",
+
     })
     @ParameterizedTest
     void allowedEndpointRegex_blocked(String url) {
@@ -184,4 +184,52 @@ public class ZoomRulesTests extends JavaRulesTestBaseCase {
         assertRedacted(sanitized, "Joe Surname", "Bob S. Smith");
     }
 
+    @SneakyThrows
+    @Test
+    void report_user_meetings() {
+        String jsonString = asJson("report-user-meetings.json");
+
+        Collection<String> PII = Arrays.asList(
+            "jchill@example.com"
+        );
+        assertNotSanitized(jsonString, PII);
+
+        String sanitized = sanitize("https://api.zoom.us/v2/report/users/123123/meetings", jsonString);
+
+        assertPseudonymized(sanitized, PII);
+
+        assertRedacted(sanitized, "My Meeting", "Jill Chill");
+    }
+
+    @SneakyThrows
+    @Test
+    void report_meeting_details() {
+        String jsonString = asJson("report-meeting-details.json");
+        Collection<String> PII = Arrays.asList(
+            "jchill@example.com"
+        );
+        assertNotSanitized(jsonString, PII);
+
+        String sanitized = sanitize("https://api.zoom.us/v2/report/meetings/12321314", jsonString);
+
+        assertPseudonymized(sanitized, PII);
+
+        assertRedacted(sanitized, "My Meeting", "Jill Chill");
+    }
+
+    @SneakyThrows
+    @Test
+    void report_meeting_participants() {
+        String jsonString = asJson("report-meeting-participants.json");
+        Collection<String> PII = Arrays.asList(
+            "jchill@example.com"
+        );
+        assertNotSanitized(jsonString, PII);
+
+        String sanitized = sanitize("https://api.zoom.us/v2/report/meetings/12321314/participants", jsonString);
+
+        assertPseudonymized(sanitized, PII);
+
+        assertRedacted(sanitized, "example name", "example registrant id");
+    }
 }

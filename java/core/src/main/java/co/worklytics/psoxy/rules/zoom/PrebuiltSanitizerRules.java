@@ -14,26 +14,7 @@ import static co.worklytics.psoxy.rules.Rules1.Rule;
  */
 public class PrebuiltSanitizerRules {
 
-    static final Rules2 ZOOM = Rules2.builder()
-        // List users
-        // https://marketplace.zoom.us/docs/api-reference/zoom-api/users/users
-        .endpoint(Rules2.Endpoint.builder()
-            .pathRegex("\\/v2\\/users(?:\\?.+)?")
-            .transform(Transform.Pseudonymize.builder()
-                .jsonPath("$.users[*].email")
-                .build()
-            )
-            .transform(Transform.Pseudonymize.builder()
-                .includeOriginal(true)// the original id is needed to iterate meetings by user
-                .jsonPath("$.users[*].id")
-                .build()
-            )
-            .transform(Transform.Redact.builder()
-                // we don't care about names, profile pic, employee_unique_id (when SSO info)
-                .jsonPath("$.users[*]['first_name','last_name','pic_url','employee_unique_id']")
-                .build()
-            )
-            .build())
+    static final Rules2 MEETINGS_ENDPOINTS = Rules2.builder()
         // Users' meetings
         // https://marketplace.zoom.us/docs/api-reference/zoom-api/meetings/meetings
         .endpoint(Rules2.Endpoint.builder()
@@ -93,10 +74,87 @@ public class PrebuiltSanitizerRules {
             )
             .transform(Transform.Redact.builder()
                 // we don't care about user's name
-                .jsonPath("$.participants[*].name")
+                .jsonPath("$.participants[*].['name','registrant_id']")
                 .build())
             .build())
         .build();
+
+
+    static final Rules2 REPORT_ENDPOINTS = Rules2.builder()
+        // List meetings
+        // https://marketplace.zoom.us/docs/api-reference/zoom-api/methods#operation/reportMeetings
+        .endpoint(Rules2.Endpoint.builder()
+            .pathRegex("^\\/v2\\/report/users\\/(?:.*)\\/meetings")
+            .transform(Transform.Pseudonymize.builder()
+                .jsonPath("$..host_id")
+                .jsonPath("$..user_email")
+                .jsonPath("$..host_email")
+                .build()
+            )
+            .transform(Transform.Redact.builder()
+                // we don't care about user's name
+                .jsonPath("$..['user_name','topic']")
+                .build())
+            .build())
+        // Past meeting details
+        // https://marketplace.zoom.us/docs/api-reference/zoom-api/methods#operation/reportMeetingDetails
+        .endpoint(Rules2.Endpoint.builder()
+            .pathRegex("^\\/v2\\/report/meetings\\/(?:[^\\/]*)")
+            .transform(Transform.Pseudonymize.builder()
+                .jsonPath("$.host_id")
+                .jsonPath("$.user_email")
+                .jsonPath("$.host_email")
+                .build()
+            )
+            .transform(Transform.Redact.builder()
+    // we don't care about user's name
+                .jsonPath("$.['user_name','topic']")
+                .build())
+        .build())
+        // Past meeting participants
+        // https://marketplace.zoom.us/docs/api-reference/zoom-api/methods#operation/reportMeetingParticipants
+        .endpoint(Rules2.Endpoint.builder()
+            .pathRegex("^\\/v2\\/report/meetings\\/(?:.*)\\/participants(?:\\?.+)?")
+            .transform(Transform.Pseudonymize.builder()
+                .jsonPath("$.participants[*].id")
+                .jsonPath("$.participants[*].user_email")
+                .build()
+            )
+            .transform(Transform.Redact.builder()
+    // we don't care about user's name
+                .jsonPath("$.participants[*].['name','registrant_id']")
+                .build())
+        .build())
+        .build();
+
+
+
+
+    static final Rules2 USERS_ENDPOINTS = Rules2.builder()
+        // List users
+        // https://marketplace.zoom.us/docs/api-reference/zoom-api/users/users
+        .endpoint(Rules2.Endpoint.builder()
+            .pathRegex("\\/v2\\/users(?:\\?.+)?")
+            .transform(Transform.Pseudonymize.builder()
+                .jsonPath("$.users[*].email")
+                .build()
+            )
+            .transform(Transform.Pseudonymize.builder()
+                .includeOriginal(true)// the original id is needed to iterate meetings by user
+                .jsonPath("$.users[*].id")
+                .build()
+            )
+            .transform(Transform.Redact.builder()
+                // we don't care about names, profile pic, employee_unique_id (when SSO info)
+                .jsonPath("$.users[*]['first_name','last_name','pic_url','employee_unique_id']")
+                .build()
+            )
+            .build())
+        .build();
+
+    static final Rules2 ZOOM = USERS_ENDPOINTS
+        .withAdditionalEndpoints(MEETINGS_ENDPOINTS.getEndpoints())
+        .withAdditionalEndpoints(REPORT_ENDPOINTS.getEndpoints());
 
 
     static public final Map<String, RuleSet> ZOOM_PREBUILT_RULES_MAP = ImmutableMap.<String, RuleSet>builder()

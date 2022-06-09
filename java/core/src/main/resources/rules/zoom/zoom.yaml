@@ -52,3 +52,32 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$.participants[*].name"
+  - pathRegex: "^\\/v2\\/report/users\\/(?:.*)\\/meetings"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..host_id"
+          - "$..user_email"
+          - "$..host_email"
+      - !<redact>
+        jsonPaths:
+          - "$..['user_name','topic']"
+  - pathRegex: "^\\/v2\\/report/meetings\\/(?:[^\\/]*)"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.host_id"
+          - "$.user_email"
+          - "$.host_email"
+      - !<redact>
+        jsonPaths:
+          - "$.['user_name','topic']"
+  - pathRegex: "^\\/v2\\/report/meetings\\/(?:.*)\\/participants(?:\\?.+)?"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.participants[*].id"
+          - "$.participants[*].user_email"
+      - !<redact>
+        jsonPaths:
+          - "$.participants[*].name"

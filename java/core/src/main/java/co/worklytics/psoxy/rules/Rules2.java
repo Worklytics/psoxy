@@ -9,6 +9,7 @@ import lombok.extern.java.Log;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 @Builder(toBuilder = true)
@@ -50,6 +51,13 @@ public class Rules2 implements RuleSet, Serializable {
         Arrays.stream(endpointsToAdd).forEach(builder::endpoint);
         return builder.build();
     }
+
+    public Rules2 withAdditionalEndpoints(List<Endpoint>endpointsToAdd) {
+        Rules2Builder builder = this.toBuilder();
+        endpointsToAdd.forEach(builder::endpoint);
+        return builder.build();
+    }
+
 
     @JsonPropertyOrder(alphabetic = true)
     @Builder
