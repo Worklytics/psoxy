@@ -1,7 +1,7 @@
 package co.worklytics.psoxy.rules.zoom;
 
-import co.worklytics.psoxy.rules.Rules1;
-import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
+import co.worklytics.psoxy.rules.JavaRules2TestBaseCase;
+import co.worklytics.psoxy.rules.Rules2;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
@@ -14,10 +14,10 @@ import java.util.Collection;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ZoomRulesTests extends JavaRulesTestBaseCase {
+public class ZoomRulesTests extends JavaRules2TestBaseCase {
 
     @Getter
-    final Rules1 rulesUnderTest = PrebuiltSanitizerRules.ZOOM;
+    final Rules2 rulesUnderTest = PrebuiltSanitizerRules.ZOOM;
 
     @Getter
     final String exampleDirectoryPath = "api-response-examples/zoom";
@@ -44,9 +44,7 @@ public class ZoomRulesTests extends JavaRulesTestBaseCase {
         "https://api.zoom.us/v2/past_meetings/MEETING_ID/participants?page_size=20&next_page_token=TOKEN",
         "https://api.zoom.us/v2/meetings/MEETING_ID",
         "https://api.zoom.us/v2/meetings/MEETING_ID?occurence_id=OCCURRENCE_ID&show_previous_occurrences=false",
-        "https://api.zoom.us/v2/report/users/{userId}/meetings",
-        "https://api.zoom.us/v2/report/meetings/{meetingId}",
-        "https://api.zoom.us/v2/report/meetings/{meetingId}/participants",
+
     })
     @ParameterizedTest
     void allowedEndpointRegex_allowed(String url) {
@@ -69,6 +67,10 @@ public class ZoomRulesTests extends JavaRulesTestBaseCase {
         "https://api.zoom.us/v2/groups",
         "https://api.zoom.us/v2/groups/{groupId}/admins",
         "https://api.zoom.us/v2/metrics/webinars",
+        //reports API - can consider opening this, would be useful
+        "https://api.zoom.us/v2/report/users/{userId}/meetings",
+        "https://api.zoom.us/v2/report/meetings/{meetingId}",
+        "https://api.zoom.us/v2/report/meetings/{meetingId}/participants",
     })
     @ParameterizedTest
     void allowedEndpointRegex_blocked(String url) {
@@ -140,7 +142,7 @@ public class ZoomRulesTests extends JavaRulesTestBaseCase {
             sanitizer.sanitize(new URL("https://api.zoom.us/v2/past_meetings/MEETING_ID/instances"), jsonString);
 
         // no rules here
-        assertEquals(jsonString, sanitized);
+        assertEquals(jsonString, prettyPrintJson(sanitized));
     }
 
     @SneakyThrows
