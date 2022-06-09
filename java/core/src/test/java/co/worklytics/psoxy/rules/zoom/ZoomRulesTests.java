@@ -44,6 +44,9 @@ public class ZoomRulesTests extends JavaRulesTestBaseCase {
         "https://api.zoom.us/v2/past_meetings/MEETING_ID/participants?page_size=20&next_page_token=TOKEN",
         "https://api.zoom.us/v2/meetings/MEETING_ID",
         "https://api.zoom.us/v2/meetings/MEETING_ID?occurence_id=OCCURRENCE_ID&show_previous_occurrences=false",
+        "https://api.zoom.us/v2/report/users/{userId}/meetings",
+        "https://api.zoom.us/v2/report/meetings/{meetingId}",
+        "https://api.zoom.us/v2/report/meetings/{meetingId}/participants",
     })
     @ParameterizedTest
     void allowedEndpointRegex_allowed(String url) {
