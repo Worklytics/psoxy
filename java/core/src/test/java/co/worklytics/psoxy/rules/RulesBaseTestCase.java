@@ -5,9 +5,6 @@ import co.worklytics.psoxy.impl.SanitizerImpl;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonParser;
 import dagger.Component;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
@@ -233,13 +230,36 @@ abstract public class RulesBaseTestCase {
 
     /**
      * Utility method to print out formatted JSON for debug easily
+     *
+     *
+     *
+     *
      * @param json
      * @return
      */
+    @SneakyThrows
     @SuppressWarnings("unused")
     protected String prettyPrintJson(String json) {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        return gson.toJson(JsonParser.parseString(json));
+
+        return jsonMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonMapper.readerFor(Object.class).readValue(json));
+
+        //NOTE: Gson seems to URL-encode embedded strings!?!?!
+        //  eg "64123avdfsMVA==" --> "64123avdfsMVA\u0030\0030"
+        // Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        // return gson.toJson(JsonParser.parseString(json));
+    }
+
+    /**
+     * asserts equivalence of two strings after round-trips through Jackson, so any failure is more
+     * readable than comparing non-pretty JSON, and any differences in original formatting (rather
+     * than actual JSON structure/content) are ignored. eg, expected/actual can have different
+     * "pretty" formatting, or one may not have "pretty" formatting at all.
+     *
+     * @param expected output value of test
+     * @param actual output value of test
+     */
+    protected void assertJsonEquals(String expected, String actual) {
+        assertEquals(prettyPrintJson(expected), prettyPrintJson(actual));
     }
 
 }

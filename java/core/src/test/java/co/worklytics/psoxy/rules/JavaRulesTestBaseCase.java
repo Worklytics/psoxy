@@ -26,7 +26,6 @@ public abstract class JavaRulesTestBaseCase extends RulesBaseTestCase {
         RuleSet rulesFromFilesystem = yamlMapper.readerFor(getRulesUnderTest().getClass())
             .readValue(PrebuiltSanitizerRules.class.getResource(path));
 
-
         assertEquals(
             yamlMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rulesFromFilesystem),
             yamlMapper.writerWithDefaultPrettyPrinter().writeValueAsString(getRulesUnderTest()));
