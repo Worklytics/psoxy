@@ -52,7 +52,7 @@ public class Rules2 implements RuleSet, Serializable {
         return builder.build();
     }
 
-    public Rules2 withAdditionalEndpoints(List<Endpoint>endpointsToAdd) {
+    public Rules2 withAdditionalEndpoints(List<Endpoint> endpointsToAdd) {
         Rules2Builder builder = this.toBuilder();
         endpointsToAdd.forEach(builder::endpoint);
         return builder.build();
