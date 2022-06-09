@@ -32,23 +32,19 @@ public class Validator {
     static public void validate(@NonNull Rules2 rules) {
         rules.getEndpoints().forEach(Validator::validate);
     }
-    static void validate(@Nullable Rules2.Endpoint endpoint) {
-        if (endpoint != null) {
-            Pattern.compile(endpoint.getPathRegex());
-            endpoint.getTransforms().forEach(Validator::validate);
-        }
+    static void validate(@NonNull Rules2.Endpoint endpoint) {
+        Pattern.compile(endpoint.getPathRegex());
+        endpoint.getTransforms().forEach(Validator::validate);
     }
 
-    static void validate(@Nullable Transform transform) {
-        if (transform != null) {
-            transform.getJsonPaths().forEach(p -> {
-                try {
-                    JsonPath.compile(p);
-                } catch (Throwable e) {
-                    throw new Error("JsonPath failed to compile: " + p, e);
-                }
-            });
-        }
+    static void validate(@NonNull Transform transform) {
+        transform.getJsonPaths().forEach(p -> {
+            try {
+                JsonPath.compile(p);
+            } catch (Throwable e) {
+                throw new Error("JsonPath failed to compile: " + p, e);
+            }
+        });
     }
 
 
