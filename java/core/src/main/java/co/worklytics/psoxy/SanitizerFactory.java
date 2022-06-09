@@ -22,11 +22,8 @@ public interface SanitizerFactory {
             .defaultScopeId(config.getConfigPropertyAsOptional(ProxyConfigProperty.IDENTIFIER_SCOPE_ID)
                 .orElse(rules.getDefaultScopeIdForSource()));
 
-        if (rules instanceof Rules1) {
-            builder.rules((Rules1) rules);
-        } else {
-            builder.rules2((Rules2) rules);
-        }
+        builder.rules(rules);
+
         return builder.build();
     }
 

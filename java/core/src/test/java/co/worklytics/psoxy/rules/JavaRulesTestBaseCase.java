@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * base test case for rules written in java (although also expected to have yaml-encoded equivalent
  * in repo under `src/main/resources/rules/`)
  */
-public abstract class JavaRulesTestBaseCase extends Rules1BaseTestCase {
+public abstract class JavaRulesTestBaseCase extends RulesBaseTestCase {
 
 
     //TODO: we could avoid this if java rules serialized to YAML as part of build process or
@@ -22,12 +22,15 @@ public abstract class JavaRulesTestBaseCase extends Rules1BaseTestCase {
     void validateYamlExample() {
         String path = "/rules/" + getYamlSerializationFilepath() + ".yaml";
 
-        Rules1 rulesFromFilesystem = yamlMapper.readerFor(Rules1.class)
+
+        RuleSet rulesFromFilesystem = yamlMapper.readerFor(getRulesUnderTest().getClass())
             .readValue(PrebuiltSanitizerRules.class.getResource(path));
+
 
         assertEquals(
             yamlMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rulesFromFilesystem),
             yamlMapper.writerWithDefaultPrettyPrinter().writeValueAsString(getRulesUnderTest()));
+
     }
 
 }

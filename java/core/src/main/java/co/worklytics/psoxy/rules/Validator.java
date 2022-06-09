@@ -9,6 +9,13 @@ import java.util.regex.Pattern;
 
 public class Validator {
 
+    static public void validate(@NonNull RuleSet rules) {
+        if (rules instanceof Rules1) {
+            validate((Rules1) rules);
+        } else if (rules instanceof Rules2) {
+            validate((Rules2) rules );
+        }
+    }
 
     static public void validate(@NonNull Rules1 rules1) {
         validate(rules1.getRedactions());

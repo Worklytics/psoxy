@@ -6,7 +6,7 @@ import lombok.SneakyThrows;
 /**
  * base test case for rules defined in YAML
  */
-public abstract class YAMLRulesTestBaseCase extends Rules1BaseTestCase {
+public abstract class YAMLRulesTestBaseCase extends RulesBaseTestCase {
 
 
     @SneakyThrows

@@ -2,7 +2,7 @@
 package co.worklytics.psoxy.rules.google;
 
 import co.worklytics.psoxy.rules.Rules2;
-import co.worklytics.psoxy.rules.JavaRules2TestBaseCase;
+import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
@@ -12,7 +12,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 
-class Calendar2Tests extends JavaRules2TestBaseCase {
+class Calendar2Tests extends JavaRulesTestBaseCase {
 
     @Getter
     final Rules2 rulesUnderTest = PrebuiltSanitizerRules.GCAL_2;

@@ -1,7 +1,7 @@
 package co.worklytics.psoxy.rules.msft;
 
 import co.worklytics.psoxy.rules.Rules2;
-import co.worklytics.psoxy.rules.JavaRules2TestBaseCase;
+import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
 import lombok.Getter;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.Collection;
 
-public class DirectoryTests extends JavaRules2TestBaseCase {
+public class DirectoryTests extends JavaRulesTestBaseCase {
 
     @Getter
     final Rules2 rulesUnderTest = PrebuiltSanitizerRules.DIRECTORY;
