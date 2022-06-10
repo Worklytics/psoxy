@@ -123,36 +123,40 @@ public class CommonRequestHandler {
 
         com.google.api.client.http.HttpResponse sourceApiResponse = sourceApiRequest.execute();
 
-        // return response
-        builder.statusCode(sourceApiResponse.getStatusCode());
+        try {
+            // return response
+            builder.statusCode(sourceApiResponse.getStatusCode());
 
-        String responseContent = StringUtils.EMPTY;
-        // could be empty in HEAD calls
-        if (sourceApiResponse.getContent() != null) {
-            responseContent = new String(sourceApiResponse.getContent().readAllBytes(), sourceApiResponse.getContentCharset());
-        }
-        if (sourceApiResponse.getContentType() != null) {
-            builder.header(HttpHeaders.CONTENT_TYPE, sourceApiResponse.getContentType());
-        }
-
-        String proxyResponseContent;
-        if (isSuccessFamily(sourceApiResponse.getStatusCode())) {
-            if (skipSanitization) {
-                proxyResponseContent = responseContent;
-            }  else {
-                proxyResponseContent = sanitizer.sanitize(targetUrl, responseContent);
-                String rulesSha = rulesUtils.sha(sanitizer.getOptions().getRules());
-                builder.header(ResponseHeader.RULES_SHA.getHttpHeader(), rulesSha);
-                log.info("response sanitized with rule set " + rulesSha);
+            String responseContent = StringUtils.EMPTY;
+            // could be empty in HEAD calls
+            if (sourceApiResponse.getContent() != null) {
+                responseContent = new String(sourceApiResponse.getContent().readAllBytes(), sourceApiResponse.getContentCharset());
             }
-        } else {
-            //write error, which shouldn't contain PII, directly
-            log.log(Level.WARNING, "Source API Error " + responseContent);
-            //TODO: could run this through DLP to be extra safe
-            builder.header(ResponseHeader.ERROR.getHttpHeader(), ErrorCauses.API_ERROR.name());
-            proxyResponseContent = responseContent;
+            if (sourceApiResponse.getContentType() != null) {
+                builder.header(HttpHeaders.CONTENT_TYPE, sourceApiResponse.getContentType());
+            }
+
+            String proxyResponseContent;
+            if (isSuccessFamily(sourceApiResponse.getStatusCode())) {
+                if (skipSanitization) {
+                    proxyResponseContent = responseContent;
+                } else {
+                    proxyResponseContent = sanitizer.sanitize(targetUrl, responseContent);
+                    String rulesSha = rulesUtils.sha(sanitizer.getOptions().getRules());
+                    builder.header(ResponseHeader.RULES_SHA.getHttpHeader(), rulesSha);
+                    log.info("response sanitized with rule set " + rulesSha);
+                }
+            } else {
+                //write error, which shouldn't contain PII, directly
+                log.log(Level.WARNING, "Source API Error " + responseContent);
+                //TODO: could run this through DLP to be extra safe
+                builder.header(ResponseHeader.ERROR.getHttpHeader(), ErrorCauses.API_ERROR.name());
+                proxyResponseContent = responseContent;
+            }
+            builder.body(StringUtils.trimToEmpty(proxyResponseContent));
+        } finally {
+            sourceApiResponse.disconnect();
         }
-        builder.body(StringUtils.trimToEmpty(proxyResponseContent));
 
         return builder.build();
     }
