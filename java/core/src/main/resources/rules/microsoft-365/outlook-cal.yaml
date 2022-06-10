@@ -1,3 +1,4 @@
+---
 allowAllEndpoints: false
 endpoints:
   - pathRegex: "^/(v1.0|beta)/users/?[^/]*"
@@ -74,19 +75,31 @@ endpoints:
           - "$..locations[*].uniqueId"
           - "$..onlineMeeting.joinUrl"
           - "$..onlineMeetingUrl"
+          - "$..body"
         redactions:
           - "(?i)pwd=[^&]*"
+      - !<filterTokenByRegex>
+        jsonPaths:
+          - "$..body"
+        delimiter: "\\s+"
+        filters:
+          - "https://[^.]+\\.zoom\\.us/.*"
   - pathRegex: "^/(v1.0|beta)/users/[^/]*/calendar/calendarView(?)[^/]*"
     transforms:
       - !<redact>
         jsonPaths:
           - "$..subject"
-          - "$..body"
           - "$..bodyPreview"
           - "$..emailAddress.name"
           - "$..extensions"
           - "$..multiValueExtendedProperties"
           - "$..singleValueExtendedProperties"
+      - !<filterTokenByRegex>
+        jsonPaths:
+          - "$..body"
+        delimiter: "\\s+"
+        filters:
+          - "https://[^.]+\\.zoom\\.us/.*"
       - !<pseudonymize>
         jsonPaths:
           - "$..emailAddress.address"
@@ -96,5 +109,6 @@ endpoints:
           - "$..locations[*].uniqueId"
           - "$..onlineMeeting.joinUrl"
           - "$..onlineMeetingUrl"
+          - "$..body"
         redactions:
           - "(?i)pwd=[^&]*"
