@@ -133,11 +133,13 @@ public class SanitizerImpl implements Sanitizer {
     }
 
     synchronized List<Pair<Pattern, Rules2.Endpoint>> getEndpointRules() {
-        if (compiledEndpointRules == null){
+        if (compiledEndpointRules == null) {
             synchronized ($writeLock) {
-                compiledEndpointRules = ((Rules2) options.getRules()).getEndpoints().stream()
-                    .map(endpoint -> Pair.of(Pattern.compile(endpoint.getPathRegex(), CASE_INSENSITIVE), endpoint))
-                    .collect(Collectors.toList());
+                if (compiledEndpointRules == null) {
+                    compiledEndpointRules = ((Rules2) options.getRules()).getEndpoints().stream()
+                        .map(endpoint -> Pair.of(Pattern.compile(endpoint.getPathRegex(), CASE_INSENSITIVE), endpoint))
+                        .collect(Collectors.toList());
+                }
             }
         }
         return compiledEndpointRules;
@@ -393,7 +395,9 @@ public class SanitizerImpl implements Sanitizer {
     List<Pair<Pattern, List<JsonPath>>>  getCompiledPseudonymizations() {
         if (compiledPseudonymizations == null) {
             synchronized ($writeLock){
-                compiledPseudonymizations = compile(((Rules1) options.getRules()).getPseudonymizations());
+                if (compiledPseudonymizations == null) {
+                    compiledPseudonymizations = compile(((Rules1) options.getRules()).getPseudonymizations());
+                }
             }
         }
         return compiledPseudonymizations;
@@ -401,8 +405,10 @@ public class SanitizerImpl implements Sanitizer {
     List<Pair<Pattern, List<JsonPath>>>  getCompiledPseudonymizationsWithOriginals() {
         if (compiledPseudonymizationsWithOriginals == null) {
             synchronized ($writeLock){
-                compiledPseudonymizationsWithOriginals =
-                    compile(((Rules1) options.getRules()).getPseudonymizationWithOriginals());
+                if (compiledPseudonymizationsWithOriginals == null) {
+                    compiledPseudonymizationsWithOriginals =
+                        compile(((Rules1) options.getRules()).getPseudonymizationWithOriginals());
+                }
             }
         }
         return compiledPseudonymizationsWithOriginals;
@@ -410,7 +416,9 @@ public class SanitizerImpl implements Sanitizer {
     List<Pair<Pattern, List<JsonPath>>>  getCompiledRedactions() {
         if (compiledRedactions == null) {
             synchronized ($writeLock){
-                compiledRedactions = compile(((Rules1) options.getRules()).getRedactions());
+                if (compiledRedactions == null) {
+                    compiledRedactions = compile(((Rules1) options.getRules()).getRedactions());
+                }
             }
         }
         return compiledRedactions;
@@ -419,7 +427,9 @@ public class SanitizerImpl implements Sanitizer {
     List<Pair<Pattern, List<JsonPath>>>  getCompiledEmailHeaderPseudonymizations() {
         if (compiledEmailHeaderPseudonymizations == null) {
             synchronized ($writeLock){
-                compiledEmailHeaderPseudonymizations = compile(((Rules1) options.getRules()).getEmailHeaderPseudonymizations());
+                if (compiledEmailHeaderPseudonymizations == null) {
+                    compiledEmailHeaderPseudonymizations = compile(((Rules1) options.getRules()).getEmailHeaderPseudonymizations());
+                }
             }
         }
         return compiledEmailHeaderPseudonymizations;
