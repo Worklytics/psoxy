@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.impl;
 
 import co.worklytics.psoxy.*;
+import co.worklytics.psoxy.rules.RuleSet;
 import co.worklytics.psoxy.rules.Rules1;
 import co.worklytics.psoxy.rules.Rules2;
 import co.worklytics.psoxy.rules.Transform;
@@ -26,6 +27,7 @@ import javax.inject.Inject;
 import javax.mail.internet.InternetAddress;
 import java.net.URL;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -39,15 +41,19 @@ public class SanitizerImpl implements Sanitizer {
     @Getter
     final Options options;
 
+    //NOTE: JsonPath seems to be threadsafe
+    //  - https://github.com/json-path/JsonPath/issues/384
+    //  - https://github.com/json-path/JsonPath/issues/187 (earlier issue fixing stuff that wasn't thread-safe)
+
     List<Pair<Pattern, List<JsonPath>>> compiledPseudonymizations;
     List<Pair<Pattern, List<JsonPath>>> compiledRedactions;
     List<Pair<Pattern, List<JsonPath>>> compiledEmailHeaderPseudonymizations;
     List<Pair<Pattern, List<JsonPath>>> compiledPseudonymizationsWithOriginals;
     List<Pattern> compiledAllowedEndpoints;
 
-
+    private final Object $writeLock = new Object[0];
     List<Pair<Pattern, Rules2.Endpoint>> compiledEndpointRules;
-    Map<Transform, List<JsonPath>> compiledTransforms = new HashMap<>();
+    Map<Transform, List<JsonPath>> compiledTransforms = new ConcurrentHashMap<>();
 
     @AssistedInject
     public SanitizerImpl(HashUtils hashUtils, @Assisted Options options) {
@@ -71,33 +77,39 @@ public class SanitizerImpl implements Sanitizer {
             .collect(Collectors.toList());
     }
 
-    @Override
-    public boolean isAllowed(@NonNull URL url) {
-        if (options.getRules() instanceof Rules1) {
-            Rules1 rules1 = (Rules1) options.getRules();
-            if (rules1.getAllowedEndpointRegexes() == null
-                || rules1.getAllowedEndpointRegexes().isEmpty()) {
-                return true;
-            } else {
-                if (compiledAllowedEndpoints == null) {
-                    compiledAllowedEndpoints = rules1.getAllowedEndpointRegexes().stream()
+    List<Pattern> getCompiledAllowedEndpoints() {
+        if (compiledAllowedEndpoints == null) {
+            synchronized ($writeLock) {
+                if (options.getRules() instanceof Rules2) {
+                    compiledAllowedEndpoints = ((Rules2) options.getRules()).getEndpoints().stream()
+                        .map(Rules2.Endpoint::getPathRegex)
+                        .map(regex -> Pattern.compile(regex, CASE_INSENSITIVE))
+                        .collect(Collectors.toList());
+                } else {
+                    compiledAllowedEndpoints = ((Rules1) options.getRules()).getAllowedEndpointRegexes().stream()
                         .map(regex -> Pattern.compile(regex, CASE_INSENSITIVE))
                         .collect(Collectors.toList());
                 }
-                String relativeUrl = URLUtils.relativeURL(url);
-                return compiledAllowedEndpoints.stream().anyMatch(p -> p.matcher(relativeUrl).matches());
             }
-        } else {
-            if (compiledAllowedEndpoints == null) {
-                compiledAllowedEndpoints = ((Rules2) options.getRules()).getEndpoints().stream()
-                    .map(Rules2.Endpoint::getPathRegex)
-                    .map(regex -> Pattern.compile(regex, CASE_INSENSITIVE))
-                    .collect(Collectors.toList());
-            }
-            String relativeUrl = URLUtils.relativeURL(url);
+        }
+        return compiledAllowedEndpoints;
+    }
 
-            return ((Rules2) options.getRules()).getAllowAllEndpoints() ||
-                compiledAllowedEndpoints.stream().anyMatch(p -> p.matcher(relativeUrl).matches());
+
+
+    @Override
+    public boolean isAllowed(@NonNull URL url) {
+        String relativeUrl = URLUtils.relativeURL(url);
+        return isAllowAll(options.getRules())
+            || getCompiledAllowedEndpoints().stream().anyMatch(p -> p.matcher(relativeUrl).matches());
+    }
+
+    boolean isAllowAll(RuleSet rules) {
+        if (rules instanceof Rules1) {
+            Rules1 rules1 = (Rules1) rules;
+            return (rules1.getAllowedEndpointRegexes() == null|| rules1.getAllowedEndpointRegexes().isEmpty());
+        } else {
+            return ((Rules2) rules).getAllowAllEndpoints();
         }
     }
 
@@ -120,16 +132,23 @@ public class SanitizerImpl implements Sanitizer {
         }
     }
 
+    synchronized List<Pair<Pattern, Rules2.Endpoint>> getEndpointRules() {
+        if (compiledEndpointRules == null) {
+            synchronized ($writeLock) {
+                if (compiledEndpointRules == null) {
+                    compiledEndpointRules = ((Rules2) options.getRules()).getEndpoints().stream()
+                        .map(endpoint -> Pair.of(Pattern.compile(endpoint.getPathRegex(), CASE_INSENSITIVE), endpoint))
+                        .collect(Collectors.toList());
+                }
+            }
+        }
+        return compiledEndpointRules;
+    }
+
 
     String transform(@NonNull URL url, @NonNull String jsonResponse) {
-        if (compiledEndpointRules == null) {
-            compiledEndpointRules = ((Rules2) options.getRules()).getEndpoints().stream()
-                .map(endpoint -> Pair.of(Pattern.compile(endpoint.getPathRegex(), CASE_INSENSITIVE), endpoint))
-                .collect(Collectors.toList());
-        }
-
         String relativeUrl = URLUtils.relativeURL(url);
-        Optional<Pair<Pattern, Rules2.Endpoint>> matchingEndpoint = compiledEndpointRules.stream()
+        Optional<Pair<Pattern, Rules2.Endpoint>> matchingEndpoint = getEndpointRules().stream()
             .filter(compiledEndpoint -> compiledEndpoint.getKey().asMatchPredicate().test(relativeUrl))
             .findFirst();
 
@@ -200,34 +219,19 @@ public class SanitizerImpl implements Sanitizer {
 
 
     String legacyTransform(@NonNull URL url, @NonNull String jsonResponse) {        //q: move this stuff to initialization / DI provider??
-        if (compiledPseudonymizations == null) {
-            compiledPseudonymizations = compile(((Rules1) options.getRules()).getPseudonymizations());
-        }
-        if (compiledRedactions == null) {
-            compiledRedactions = compile(((Rules1) options.getRules()).getRedactions());
-        }
-        if (compiledEmailHeaderPseudonymizations == null) {
-            compiledEmailHeaderPseudonymizations =
-                compile(((Rules1) options.getRules()).getEmailHeaderPseudonymizations());
-        }
-        if (compiledPseudonymizationsWithOriginals == null) {
-            compiledPseudonymizationsWithOriginals =
-                compile(((Rules1) options.getRules()).getPseudonymizationWithOriginals());
-        }
-
         String relativeUrl = URLUtils.relativeURL(url);
 
         List<JsonPath> pseudonymizationsToApply =
-            applicablePaths(compiledPseudonymizations, relativeUrl);
+            applicablePaths(getCompiledPseudonymizations(), relativeUrl);
 
-        List<JsonPath> redactionsToApply = applicablePaths(compiledRedactions, relativeUrl);
+        List<JsonPath> redactionsToApply =
+            applicablePaths(getCompiledRedactions(), relativeUrl);
 
         List<JsonPath> emailHeaderPseudonymizationsToApply =
-            applicablePaths(compiledEmailHeaderPseudonymizations, relativeUrl);
+            applicablePaths(getCompiledEmailHeaderPseudonymizations(), relativeUrl);
 
         List<JsonPath> pseudonymizationWithOriginalsToApply =
-            applicablePaths(compiledPseudonymizationsWithOriginals, relativeUrl);
-
+            applicablePaths(getCompiledPseudonymizationsWithOriginals(), relativeUrl);
 
         if (pseudonymizationsToApply.isEmpty()
             && redactionsToApply.isEmpty()
@@ -388,4 +392,46 @@ public class SanitizerImpl implements Sanitizer {
         return pseudonymize((Object) value);
     }
 
+    List<Pair<Pattern, List<JsonPath>>>  getCompiledPseudonymizations() {
+        if (compiledPseudonymizations == null) {
+            synchronized ($writeLock){
+                if (compiledPseudonymizations == null) {
+                    compiledPseudonymizations = compile(((Rules1) options.getRules()).getPseudonymizations());
+                }
+            }
+        }
+        return compiledPseudonymizations;
+    }
+    List<Pair<Pattern, List<JsonPath>>>  getCompiledPseudonymizationsWithOriginals() {
+        if (compiledPseudonymizationsWithOriginals == null) {
+            synchronized ($writeLock){
+                if (compiledPseudonymizationsWithOriginals == null) {
+                    compiledPseudonymizationsWithOriginals =
+                        compile(((Rules1) options.getRules()).getPseudonymizationWithOriginals());
+                }
+            }
+        }
+        return compiledPseudonymizationsWithOriginals;
+    }
+    List<Pair<Pattern, List<JsonPath>>>  getCompiledRedactions() {
+        if (compiledRedactions == null) {
+            synchronized ($writeLock){
+                if (compiledRedactions == null) {
+                    compiledRedactions = compile(((Rules1) options.getRules()).getRedactions());
+                }
+            }
+        }
+        return compiledRedactions;
+    }
+
+    List<Pair<Pattern, List<JsonPath>>>  getCompiledEmailHeaderPseudonymizations() {
+        if (compiledEmailHeaderPseudonymizations == null) {
+            synchronized ($writeLock){
+                if (compiledEmailHeaderPseudonymizations == null) {
+                    compiledEmailHeaderPseudonymizations = compile(((Rules1) options.getRules()).getEmailHeaderPseudonymizations());
+                }
+            }
+        }
+        return compiledEmailHeaderPseudonymizations;
+    }
 }
