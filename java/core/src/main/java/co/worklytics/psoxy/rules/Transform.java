@@ -16,6 +16,7 @@ import java.util.Set;
     @JsonSubTypes.Type(value = Transform.RedactRegexMatches.class, name = "redactRegexMatches"),
     @JsonSubTypes.Type(value = Transform.Pseudonymize.class, name = "pseudonymize"),
     @JsonSubTypes.Type(value = Transform.PseudonymizeEmailHeader.class, name = "pseudonymizeEmailHeader"),
+    @JsonSubTypes.Type(value = Transform.FilterTokenByRegex.class, name = "filterTokenByRegex"),
 })
 @SuperBuilder(toBuilder = true)
 @AllArgsConstructor //for builder
@@ -75,6 +76,31 @@ public abstract class Transform {
         @Singular
         List<String> redactions;
     }
+
+    /**
+     * transform to tokenize String field by delimiter (if provided), then return any matches against
+     * filter regex
+     */
+    @NoArgsConstructor //for jackson
+    @SuperBuilder(toBuilder = true)
+    @Getter
+    @ToString
+    @EqualsAndHashCode(callSuper = true)
+    public static class FilterTokenByRegex extends Transform {
+
+        /**
+         * token delimiter, if any (if null, token is the whole string)
+         */
+        @Builder.Default
+        String delimiter = "\\s+";
+
+        /**
+         * redact content EXCEPT tokens matching at least one of these regexes
+         */
+        @Singular
+        List<String> filters;
+    }
+
 
 
     @NoArgsConstructor //for jackson

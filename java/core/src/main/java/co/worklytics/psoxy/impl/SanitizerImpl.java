@@ -10,6 +10,7 @@ import com.google.common.base.Preconditions;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.MapFunction;
+import com.jayway.jsonpath.Predicate;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
 import lombok.Getter;
@@ -27,8 +28,10 @@ import javax.mail.internet.InternetAddress;
 import java.net.URL;
 import java.util.*;
 import java.util.logging.Level;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.regex.Pattern.CASE_INSENSITIVE;
 
@@ -155,26 +158,24 @@ public class SanitizerImpl implements Sanitizer {
             for (JsonPath path : paths) {
                 path.delete(document, jsonConfiguration);
             }
-        } else if (transform instanceof Transform.Pseudonymize) {
-
-            //curry the defaultScopeId from the transform into the pseudonymization method
-            MapFunction f =
-                ((Transform.Pseudonymize) transform).getIncludeOriginal() ? this::pseudonymizeWithOriginalToJson : this::pseudonymizeToJson;
-            for (JsonPath path : paths) {
-                path.map(document, f, jsonConfiguration);
-            }
-
-        } else if (transform instanceof Transform.PseudonymizeEmailHeader) {
-            for (JsonPath path : paths) {
-                path.map(document, this::pseudonymizeEmailHeaderToJson, jsonConfiguration);
-            }
-        } else if (transform instanceof Transform.RedactRegexMatches) {
-            MapFunction f = getRedactRegexMatches((Transform.RedactRegexMatches) transform);
-            for (JsonPath path : paths) {
-                path.map(document, f, jsonConfiguration);
-            }
         } else {
-            throw new IllegalArgumentException("Unknown transform type: " + transform.getClass().getName());
+            MapFunction f;
+            if (transform instanceof Transform.Pseudonymize) {
+                //curry the defaultScopeId from the transform into the pseudonymization method
+                f =
+                    ((Transform.Pseudonymize) transform).getIncludeOriginal() ? this::pseudonymizeWithOriginalToJson : this::pseudonymizeToJson;
+            } else if (transform instanceof Transform.PseudonymizeEmailHeader) {
+                f = this::pseudonymizeEmailHeaderToJson;
+            } else if (transform instanceof Transform.RedactRegexMatches) {
+                f = getRedactRegexMatches((Transform.RedactRegexMatches) transform);
+            } else if (transform instanceof Transform.FilterTokenByRegex) {
+                f = getFilterTokenByRegex((Transform.FilterTokenByRegex) transform);
+            } else {
+                throw new IllegalArgumentException("Unknown transform type: " + transform.getClass().getName());
+            }
+            for (JsonPath path : paths) {
+                path.map(document, f, jsonConfiguration);
+            }
         }
         return document;
     }
@@ -197,6 +198,33 @@ public class SanitizerImpl implements Sanitizer {
            }
        };
     }
+
+    MapFunction getFilterTokenByRegex(Transform.FilterTokenByRegex transform) {
+        List<java.util.function.Predicate<String>> patterns =
+            transform.getFilters().stream().map(Pattern::compile)
+            .map(Pattern::asMatchPredicate)
+            .collect(Collectors.toList());
+
+        return (s, jsonConfiguration) -> {
+            if (!(s instanceof String)) {
+                log.warning("value matched by " + transform + " not of type String");
+                return null;
+            } else if (StringUtils.isBlank((String) s)) {
+                return s;
+            } else {
+                String result = (String) s;
+                Stream<String> stream = Optional.ofNullable(transform.getDelimiter())
+                    .map(delimiter -> Arrays.stream(result.split(delimiter)))
+                    .orElse(Stream.of(result));
+
+                return StringUtils.trimToNull(stream
+                    .filter(token -> patterns.stream().anyMatch(p -> p.test(token)))
+                    .collect(Collectors.joining(" ")));
+            }
+        };
+    }
+
+
 
 
     String legacyTransform(@NonNull URL url, @NonNull String jsonResponse) {        //q: move this stuff to initialization / DI provider??
