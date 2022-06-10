@@ -26,6 +26,7 @@ import javax.inject.Inject;
 import javax.mail.internet.InternetAddress;
 import java.net.URL;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -45,9 +46,9 @@ public class SanitizerImpl implements Sanitizer {
     List<Pair<Pattern, List<JsonPath>>> compiledPseudonymizationsWithOriginals;
     List<Pattern> compiledAllowedEndpoints;
 
-
+    private final Object $writeLock = new Object[0];
     List<Pair<Pattern, Rules2.Endpoint>> compiledEndpointRules;
-    Map<Transform, List<JsonPath>> compiledTransforms = new HashMap<>();
+    Map<Transform, List<JsonPath>> compiledTransforms = new ConcurrentHashMap<>();
 
     @AssistedInject
     public SanitizerImpl(HashUtils hashUtils, @Assisted Options options) {
@@ -120,16 +121,21 @@ public class SanitizerImpl implements Sanitizer {
         }
     }
 
+    synchronized List<Pair<Pattern, Rules2.Endpoint>> getEndpointRules() {
+        if (compiledEndpointRules == null){
+            synchronized ($writeLock) {
+                compiledEndpointRules = ((Rules2) options.getRules()).getEndpoints().stream()
+                    .map(endpoint -> Pair.of(Pattern.compile(endpoint.getPathRegex(), CASE_INSENSITIVE), endpoint))
+                    .collect(Collectors.toList());
+            }
+        }
+        return compiledEndpointRules;
+    }
+
 
     String transform(@NonNull URL url, @NonNull String jsonResponse) {
-        if (compiledEndpointRules == null) {
-            compiledEndpointRules = ((Rules2) options.getRules()).getEndpoints().stream()
-                .map(endpoint -> Pair.of(Pattern.compile(endpoint.getPathRegex(), CASE_INSENSITIVE), endpoint))
-                .collect(Collectors.toList());
-        }
-
         String relativeUrl = URLUtils.relativeURL(url);
-        Optional<Pair<Pattern, Rules2.Endpoint>> matchingEndpoint = compiledEndpointRules.stream()
+        Optional<Pair<Pattern, Rules2.Endpoint>> matchingEndpoint = getEndpointRules().stream()
             .filter(compiledEndpoint -> compiledEndpoint.getKey().asMatchPredicate().test(relativeUrl))
             .findFirst();
 
