@@ -41,6 +41,10 @@ public class SanitizerImpl implements Sanitizer {
     @Getter
     final Options options;
 
+    //NOTE: JsonPath seems to be threadsafe
+    //  - https://github.com/json-path/JsonPath/issues/384
+    //  - https://github.com/json-path/JsonPath/issues/187 (earlier issue fixing stuff that wasn't thread-safe)
+
     List<Pair<Pattern, List<JsonPath>>> compiledPseudonymizations;
     List<Pair<Pattern, List<JsonPath>>> compiledRedactions;
     List<Pair<Pattern, List<JsonPath>>> compiledEmailHeaderPseudonymizations;
@@ -406,7 +410,7 @@ public class SanitizerImpl implements Sanitizer {
     List<Pair<Pattern, List<JsonPath>>>  getCompiledRedactions() {
         if (compiledRedactions == null) {
             synchronized ($writeLock){
-                compiledRedactions= compile(((Rules1) options.getRules()).getRedactions());
+                compiledRedactions = compile(((Rules1) options.getRules()).getRedactions());
             }
         }
         return compiledRedactions;
