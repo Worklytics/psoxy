@@ -154,11 +154,10 @@ public class CommonRequestHandler {
                 proxyResponseContent = responseContent;
             }
             builder.body(StringUtils.trimToEmpty(proxyResponseContent));
+            return builder.build();
         } finally {
             sourceApiResponse.disconnect();
         }
-
-        return builder.build();
     }
 
     @SneakyThrows
