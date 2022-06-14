@@ -1,34 +1,54 @@
+---
+allowAllEndpoints: false
 endpoints:
   - pathRegex: "^/calendar/v3/calendars/[^/]*?$"
     transforms:
-      - method: "redact"
+      - !<redact>
         jsonPaths:
-        - "$.summary"
-      - method: "pseudonymize"
+          - "$.summary"
+      - !<pseudonymize>
         jsonPaths:
-        - "$.id"
+          - "$.id"
   - pathRegex: "^/calendar/v3/calendars/[^/]*?/events[^/]*"
     transforms:
-      - method: "pseudonymize"
+      - !<pseudonymize>
         jsonPaths:
-        - "$..email"
-      - method: "redact"
+          - "$..email"
+      - !<redact>
         jsonPaths:
           - "$..displayName"
-          - "$.description" # calendar description?
-          - "$.summary" # calendar summary
+          - "$.summary"
           - "$.items[*].extendedProperties.private"
-          - "$.items[*].description"  # WARNING: needed for linking across sources (eg, Zoom invites we need to parse this to link with zoom data)
-          - "$.items[*].summary" # WARNING: needed for proper OOO classification
+          - "$.items[*].summary"
+      - !<filterTokenByRegex>
+        jsonPaths:
+          - "$.items[*].description"
+        delimiter: "\\s+"
+        filters:
+          - "https://[^.]+\\.zoom\\.us/.*"
+      - !<redactRegexMatches>
+        jsonPaths:
+          - "$.items[*].description"
+        redactions:
+          - "(?i)pwd=[^&]*"
   - pathRegex: "^/calendar/v3/calendars/[^/]*?/events/.*"
     transforms:
-      - method: "redact"
+      - !<redact>
         jsonPaths:
-            - "$..displayName"
-            - "$.description" # WARNING: needed for linking across sources (eg, Zoom invites we need to parse this to link with zoom data)
-            - "$.summary" # WARNING: needed for proper OOO classification
-      - method: "pseudonymize"
+          - "$..displayName"
+          - "$.summary"
+      - !<filterTokenByRegex>
+        jsonPaths:
+          - "$.description"
+        delimiter: "\\s+"
+        filters:
+          - "https://[^.]+\\.zoom\\.us/.*"
+      - !<redactRegexMatches>
+        jsonPaths:
+          - "$.description"
+        redactions:
+          - "(?i)pwd=[^&]*"
+      - !<pseudonymize>
         jsonPaths:
           - "$..email"
   - pathRegex: "^/calendar/v3/users/[^/]*?/settings.*"
-

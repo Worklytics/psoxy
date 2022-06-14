@@ -196,6 +196,52 @@ class SanitizerImplTest {
         assertFalse(StringUtils.containsIgnoreCase(redacted, "pwd=1234asAf"));
     }
 
+
+    @SneakyThrows
+    @ValueSource(strings = {
+        "https://acme.zoom.us/12312345?pwd=1234asAf asdfasdf",
+        " https://acme.zoom.us/12312345?pwd=1234asAf  ",
+        "come to my zoom meeting! https://acme.zoom.us/12312345?pwd=1234asAf",
+        "come to my zoom meeting! \r\n https://acme.zoom.us/12312345?pwd=1234asAf",
+        "come to my zoom meeting! \r\nhttps://acme.zoom.us/12312345?pwd=1234asAf\r\n",
+        "come to my zoom meeting! \r\n this is the url: https://acme.zoom.us/12312345?pwd=1234asAf",
+        "come to my zoom meeting! \r\n this is the url: https://acme.zoom.us/12312345?pwd=1234asAf\r\nthat was the url",
+        "https://acme.zoom.us/12312345?pwd=1234asAf"
+    })
+    @ParameterizedTest
+    void filterTokensByRegex(String source) {
+        Transform.FilterTokenByRegex transform = Transform.FilterTokenByRegex.builder()
+            .filter("https://[^.]+\\.zoom\\.us/.*").build();
+
+        String redacted = (String) sanitizer.getFilterTokenByRegex(transform).map(source, sanitizer.jsonConfiguration);
+
+        assertEquals("https://acme.zoom.us/12312345?pwd=1234asAf", redacted);
+    }
+
+    @SneakyThrows
+    @ValueSource(strings = {
+        "",
+        " https://acme.meet.us/12312345?pwd=1234asAf  ",
+        "come to my zoom meeting! https://acme.meet.us/12312345?pwd=1234asAf",
+        "come to my zoom meeting! \r\n https://acme.meet.us/12312345?pwd=1234asAf",
+        "come to my zoom meeting! \r\nhttps://zoom.us/12312345?pwd=1234asAf\r\n",
+        "come to my zoom meeting! \r\n this is the url: https://acme.asdfasd.zoom.us/12312345?pwd=1234asAf",
+        "come to my zoom meeting! \r\n this is the url: https://acme/zoom.us/12312345?pwd=1234asAf\r\nthat was the url",
+        "https://acme/zoom.us/12312345?pwd=1234asAf",
+        "  ",
+        "\r\n",
+    })
+    @ParameterizedTest
+    void filterTokensByRegex_rejects(String source) {
+        Transform.FilterTokenByRegex transform = Transform.FilterTokenByRegex.builder()
+            .filter("https://[^.]+\\.zoom\\.us/.*").build();
+
+        String redacted = (String) sanitizer.getFilterTokenByRegex(transform)
+            .map(source, sanitizer.jsonConfiguration);
+
+        assertTrue(StringUtils.isBlank(redacted));
+    }
+
     @SneakyThrows
     @ValueSource(strings = {
         "\"https://asdf.google.com/asdf/?asdf=2134&Pwd=1234asAf&\"", //url as JSON string

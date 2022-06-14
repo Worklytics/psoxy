@@ -4,6 +4,7 @@ import co.worklytics.psoxy.rules.Rules1;
 import co.worklytics.psoxy.rules.Rules2;
 import co.worklytics.psoxy.rules.RuleSet;
 import co.worklytics.psoxy.rules.Transform;
+import co.worklytics.psoxy.rules.zoom.ZoomTransforms;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
@@ -29,20 +30,29 @@ public class PrebuiltSanitizerRules {
             .transform(Transform.Pseudonymize.ofPaths("$..email"))
             .transform(Transform.Redact.ofPaths(
                 "$..displayName",
-                "$.description",
                 "$.summary",
                 "$.items[*].extendedProperties.private",
-                "$.items[*].description",
                 "$.items[*].summary"
             ))
+            .transform(ZoomTransforms.FILTER_CONTENT_EXCEPT_ZOOM_URL.toBuilder()
+                .jsonPath("$.items[*].description")
+                .build())
+            .transform(ZoomTransforms.SANITIZE_JOIN_URL.toBuilder()
+                .jsonPath("$.items[*].description")
+                .build())
             .build())
         .endpoint( Rules2.Endpoint.builder()
             .pathRegex("^/calendar/v3/calendars/[^/]*?/events/.*")
             .transform(Transform.Redact.ofPaths(
                 "$..displayName",
-                "$.description",
                 "$.summary"
             ))
+            .transform(ZoomTransforms.FILTER_CONTENT_EXCEPT_ZOOM_URL.toBuilder()
+                .jsonPath("$.description")
+                .build())
+            .transform(ZoomTransforms.SANITIZE_JOIN_URL.toBuilder()
+                .jsonPath("$.description")
+                .build())
             .transform(Transform.Pseudonymize.ofPaths("$..email"))
             .build())
         .endpoint(Rules2.Endpoint.builder()
