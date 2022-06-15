@@ -113,8 +113,6 @@ public class PrebuiltSanitizerRules {
     static final Rules2.Endpoint EVENT_TRANSFORMS = Rules2.Endpoint.builder()
         .transform(Transform.Redact.builder()
             .jsonPath("$..subject")
-            .jsonPath("$..body")
-            .jsonPath("$..bodyPreview")
             .jsonPath("$..emailAddress.name")
             .jsonPath("$..extensions")
             .jsonPath("$..multiValueExtendedProperties")

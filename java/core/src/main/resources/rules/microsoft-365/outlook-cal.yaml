@@ -60,8 +60,6 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$..subject"
-          - "$..body"
-          - "$..bodyPreview"
           - "$..emailAddress.name"
           - "$..extensions"
           - "$..multiValueExtendedProperties"
@@ -95,8 +93,6 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$..subject"
-          - "$..body"
-          - "$..bodyPreview"
           - "$..emailAddress.name"
           - "$..extensions"
           - "$..multiValueExtendedProperties"

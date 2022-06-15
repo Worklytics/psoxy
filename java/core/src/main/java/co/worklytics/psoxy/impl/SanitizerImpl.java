@@ -202,7 +202,9 @@ public class SanitizerImpl implements Sanitizer {
        List<Pattern> patterns = transform.getRedactions().stream().map(Pattern::compile).collect(Collectors.toList());
        return (s, jsonConfiguration) -> {
            if (!(s instanceof String)) {
-               log.warning("value matched by " + transform + " not of type String");
+               if (s != null) {
+                   log.warning("value matched by " + transform + " not of type String");
+               }
                return null;
            } else if (StringUtils.isBlank((String) s)) {
                return s;
@@ -224,7 +226,9 @@ public class SanitizerImpl implements Sanitizer {
 
         return (s, jsonConfiguration) -> {
             if (!(s instanceof String)) {
-                log.warning("value matched by " + transform + " not of type String");
+                if (s != null) {
+                    log.warning("value matched by " + transform + " not of type String");
+                }
                 return null;
             } else if (StringUtils.isBlank((String) s)) {
                 return s;
