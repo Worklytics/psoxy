@@ -60,7 +60,7 @@ public class Rules2 implements RuleSet, Serializable {
 
 
     @JsonPropertyOrder(alphabetic = true)
-    @Builder
+    @Builder(toBuilder = true)
     @AllArgsConstructor //for builder
     @NoArgsConstructor //for Jackson
     @Getter

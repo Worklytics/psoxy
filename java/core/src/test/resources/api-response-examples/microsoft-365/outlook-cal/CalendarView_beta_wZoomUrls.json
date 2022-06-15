@@ -51,17 +51,18 @@
         "timeZone": "UTC"
       },
       "location": {
-        "displayName": "Private Zoom Room",
+        "displayName": "Private Zoom Room \"https://acme.zoom.us/j/12354234234?pwd=123123&from=addon\"",
         "locationType": "default",
         "uniqueId": "https://acme.zoom.us/j/12354234234?pwd=123123&from=addon",
         "uniqueIdType": "private"
       },
       "locations": [
         {
-          "displayName": "Private Zoom Room",
+          "displayName": "Private Zoom Room \"https://acme.zoom.us/j/12354234234?pwd=123123&from=addon\"",
           "locationType": "default",
           "uniqueId": "https://acme.zoom.us/j/12354234234?pwd=123123&from=addon",
-          "uniqueIdType": "unknown"
+          "uniqueIdType": "unknown",
+          "locationUri": "https://acme.zoom.us/j/12354234234?pwd=123123&from=addon"
         }
       ],
       "recurrence": null,
