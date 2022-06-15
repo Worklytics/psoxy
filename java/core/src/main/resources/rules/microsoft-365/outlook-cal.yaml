@@ -73,14 +73,20 @@ endpoints:
         jsonPaths:
           - "$..location.uniqueId"
           - "$..locations[*].uniqueId"
+          - "$..location.displayName"
+          - "$..locations[*].displayName"
+          - "$..location.locationUri"
+          - "$..locations[*].locationUri"
           - "$..onlineMeeting.joinUrl"
           - "$..onlineMeetingUrl"
-          - "$..body"
+          - "$..body.content"
+          - "$..bodyPreview"
         redactions:
           - "(?i)pwd=[^&]*"
       - !<filterTokenByRegex>
         jsonPaths:
-          - "$..body"
+          - "$..body.content"
+          - "$..bodyPreview"
         delimiter: "\\s+"
         filters:
           - "https://[^.]+\\.zoom\\.us/.*"
@@ -89,17 +95,12 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$..subject"
+          - "$..body"
           - "$..bodyPreview"
           - "$..emailAddress.name"
           - "$..extensions"
           - "$..multiValueExtendedProperties"
           - "$..singleValueExtendedProperties"
-      - !<filterTokenByRegex>
-        jsonPaths:
-          - "$..body"
-        delimiter: "\\s+"
-        filters:
-          - "https://[^.]+\\.zoom\\.us/.*"
       - !<pseudonymize>
         jsonPaths:
           - "$..emailAddress.address"
@@ -107,8 +108,20 @@ endpoints:
         jsonPaths:
           - "$..location.uniqueId"
           - "$..locations[*].uniqueId"
+          - "$..location.displayName"
+          - "$..locations[*].displayName"
+          - "$..location.locationUri"
+          - "$..locations[*].locationUri"
           - "$..onlineMeeting.joinUrl"
           - "$..onlineMeetingUrl"
-          - "$..body"
+          - "$..body.content"
+          - "$..bodyPreview"
         redactions:
           - "(?i)pwd=[^&]*"
+      - !<filterTokenByRegex>
+        jsonPaths:
+          - "$..body.content"
+          - "$..bodyPreview"
+        delimiter: "\\s+"
+        filters:
+          - "https://[^.]+\\.zoom\\.us/.*"
