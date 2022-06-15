@@ -4,6 +4,9 @@ package co.worklytics.psoxy.gateway;
  * config properties that control basic proxy behavior
  */
 public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
+    PSOXY_ENCRYPTION_KEY,
+
+    @Deprecated //removed from v0.4
     IDENTIFIER_SCOPE_ID,
     PSOXY_SALT,
     // if set, a base64-YAML encoding of rules
@@ -15,4 +18,5 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
     SOURCE_AUTH_STRATEGY_IDENTIFIER,
     //target API endpoint to forward request to
     TARGET_HOST,
+    ;
 }
