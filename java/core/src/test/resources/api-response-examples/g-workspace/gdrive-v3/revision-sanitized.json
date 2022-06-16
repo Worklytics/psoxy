@@ -1,0 +1,19 @@
+{
+  "kind": "drive#revision",
+  "id": "0B5tH2y2v-mBWTklOa1VJeHJwNUQ2dy9uMDg1d0kzV0ZUeHRjPQ",
+  "mimeType": "application/pdf",
+  "modifiedTime": "2021-12-01T16:25:16.000Z",
+  "keepForever": true,
+  "published": false,
+  "lastModifyingUser": {
+    "kind": "drive#user",
+    "displayName": "Paul",
+    "photoLink": "https://lh3.googleusercontent.com/a-/AOh14GiS0urNnjWImm9Iyvoh-RPpC-nsTLtf6zXWegTcNA=s64",
+    "me": false,
+    "permissionId": "02185925293822571813",
+    "emailAddress": "paul@worklytics.co"
+  },
+  "originalFilename": "asdfasdfasdft.pdf",
+  "md5Checksum": "2c3f517e181dd49aa9f97580d3ec1431",
+  "size": "759602"
+}

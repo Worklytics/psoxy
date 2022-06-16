@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -116,5 +117,14 @@ public class GDriveTests extends JavaRulesTestBaseCase {
             sanitizer.sanitize(new URL("http://www.googleapis.com/drive/v2/files/some-file-id/permissions/234234"), jsonString);
         assertPseudonymized(sanitized, PII);
         assertRedacted(sanitized, "Alice");
+    }
+
+    public Stream<InvocationExample> getExamples() {
+        return Stream.of(
+            InvocationExample.of("https://www.googleapis.com/drive/v2/files", "files.json"),
+            InvocationExample.of("http://www.googleapis.com/drive/v2/files/some-file-id/permissions/234234", "permission.json"),
+            InvocationExample.of("http://www.googleapis.com/drive/v2/files/some-file-id/permissions", "permissions.json"),
+            InvocationExample.of("http://www.googleapis.com/drive/v2/files/any-file-id/revisions", "revisions.json")
+        );
     }
 }

@@ -4,9 +4,11 @@ import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.impl.SanitizerImpl;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestUtils;
+import com.fasterxml.jackson.core.util.DefaultIndenter;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dagger.Component;
-import lombok.SneakyThrows;
+import lombok.*;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,9 +17,8 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -40,6 +41,18 @@ abstract public class RulesBaseTestCase {
     protected SanitizerFactory sanitizerFactory;
     @Inject
     protected RulesUtils rulesUtils;
+
+    @AllArgsConstructor(staticName = "of")
+    @Value
+    @Builder
+    public static class InvocationExample {
+
+        @NonNull
+        String requestUrl;
+
+        @NonNull
+        String plainExampleFile;
+    }
 
 
 
@@ -88,6 +101,24 @@ abstract public class RulesBaseTestCase {
         Validator.validate(jsonRoundtrip(getRulesUnderTest()));
     }
 
+    @SneakyThrows
+    @Test
+    void testExamples() {
+        getExamples()
+            .forEach(example -> {
+                String sanitized =
+                    sanitize(example.getRequestUrl(), new String(TestUtils.getData(getExampleDirectoryPath() + "/" + example.getPlainExampleFile())));
+
+                String sanitizedFileName =
+                    example.getPlainExampleFile().replace(".json", "-sanitized.json");
+
+                String expected = StringUtils.trim(new String(TestUtils.getData(getExampleDirectoryPath() + "/" + sanitizedFileName)));
+
+                assertEquals(expected,
+                    StringUtils.trim(prettyPrintJson(sanitized)), sanitizedFileName + " does not match output");
+            });
+    }
+
 
 
     @SneakyThrows
@@ -114,6 +145,10 @@ abstract public class RulesBaseTestCase {
     public abstract String getYamlSerializationFilepath();
 
     public abstract String getExampleDirectoryPath();
+
+    public Stream<InvocationExample> getExamples() {
+        return Stream.empty();
+    }
 
     protected String asJson(String filePathWithinExampleDirectory) {
         return asJson(getExampleDirectoryPath(), filePathWithinExampleDirectory);
@@ -241,7 +276,15 @@ abstract public class RulesBaseTestCase {
     @SuppressWarnings("unused")
     protected String prettyPrintJson(String json) {
 
-        return jsonMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonMapper.readerFor(Object.class).readValue(json));
+        DefaultPrettyPrinter printer = new DefaultPrettyPrinter()
+            .withoutSpacesInObjectEntries();
+        printer.indentArraysWith(DefaultIndenter.SYSTEM_LINEFEED_INSTANCE);
+
+
+        return jsonMapper
+            .writer()
+            .with(printer)
+            .writeValueAsString(jsonMapper.readerFor(Object.class).readValue(json));
 
         //NOTE: Gson seems to URL-encode embedded strings!?!?!
         //  eg "64123avdfsMVA==" --> "64123avdfsMVA\u0030\0030"
