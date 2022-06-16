@@ -45,6 +45,7 @@ public class ZoomRulesTests extends JavaRulesTestBaseCase {
         "https://api.zoom.us/v2/meetings/MEETING_ID",
         "https://api.zoom.us/v2/meetings/MEETING_ID?occurence_id=OCCURRENCE_ID&show_previous_occurrences=false",
         "https://api.zoom.us/v2/report/users/{userId}/meetings",
+        "https://api.zoom.us/v2/report/users/myuserid/meetings?from=2022-05-16&to=2022-05-31&type=pastJoined&page_size=1",
         "https://api.zoom.us/v2/report/meetings/{meetingId}",
         "https://api.zoom.us/v2/report/meetings/{meetingId}/participants",
 

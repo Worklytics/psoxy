@@ -47,7 +47,7 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$.participants[*].['name','registrant_id']"
-  - pathRegex: "^/v2/report/users/(?:.*)/meetings"
+  - pathRegex: "^/v2/report/users/(?:.*)/meetings(?:\\?.+)?"
     transforms:
       - !<pseudonymize>
         jsonPaths:

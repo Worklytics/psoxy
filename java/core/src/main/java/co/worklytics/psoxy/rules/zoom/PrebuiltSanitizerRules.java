@@ -78,7 +78,7 @@ public class PrebuiltSanitizerRules {
         // List meetings
         // https://marketplace.zoom.us/docs/api-reference/zoom-api/methods#operation/reportMeetings
         .endpoint(Rules2.Endpoint.builder()
-            .pathRegex("^/v2/report/users/(?:.*)/meetings")
+            .pathRegex("^/v2/report/users/(?:.*)/meetings(?:\\?.+)?")
             .transform(Transform.Pseudonymize.builder()
                 .jsonPath("$.meetings[*]['host_id','user_email','host_email']")
                 .build()
