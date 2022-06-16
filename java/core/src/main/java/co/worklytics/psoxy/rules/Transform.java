@@ -123,8 +123,9 @@ public abstract class Transform {
         @Builder.Default
         Boolean includeOriginal = false;
 
-        //TODO: support this somehow ...
-        //String defaultScopeId;
+        @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+        @Builder.Default
+        Boolean includeEncrypted = false;
 
         public static Pseudonymize ofPaths(String... jsonPaths) {
             return Pseudonymize.builder().jsonPaths(Arrays.asList(jsonPaths)).build();

@@ -1,11 +1,13 @@
 package co.worklytics.psoxy.impl;
 
 import co.worklytics.psoxy.*;
+import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
 import co.worklytics.psoxy.rules.Transform;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestUtils;
 import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.MapFunction;
 import dagger.Component;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
@@ -20,6 +22,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.Objects;
 
+import static co.worklytics.test.TestModules.withMockEncryptionKey;
 import static org.junit.jupiter.api.Assertions.*;
 
 class SanitizerImplTest {
@@ -31,6 +34,9 @@ class SanitizerImplTest {
 
     @Inject
     protected SanitizerFactory sanitizerFactory;
+
+    @Inject
+    ConfigService config;
 
 
     @Singleton
@@ -52,6 +58,8 @@ class SanitizerImplTest {
             .pseudonymizationSalt("an irrelevant per org secret")
             .defaultScopeId("scope")
             .build());
+
+        withMockEncryptionKey(config);
     }
 
     @SneakyThrows
@@ -267,6 +275,15 @@ class SanitizerImplTest {
             .map(document, (i, c) -> i, sanitizer.getJsonConfiguration());
         assertEquals(value,
             sanitizer.getJsonConfiguration().jsonProvider().toJson(document), "value not preserved roundtrip");
+    }
+
+
+    @Test
+    void encrypt() {
+        MapFunction f = sanitizer.getPseudonymize(Transform.Pseudonymize.builder().includeEncrypted(true).build());
+
+        assertEquals("PseudonymizedIdentity(scope=scope, domain=null, hash=Htt5DmAnE8xaCjfYnLm83_xR8.hhEJE2f_bkFP2yljg, original=null, encrypted=sw9vAV54tPmrDzobqfIwGg==:T_4OKxbfCRNQH2dxB7qx7w==)",
+            f.map("asfa", sanitizer.getJsonConfiguration()));
     }
 
 }

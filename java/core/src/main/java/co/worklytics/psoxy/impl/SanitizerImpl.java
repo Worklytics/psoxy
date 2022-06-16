@@ -69,6 +69,9 @@ public class SanitizerImpl implements Sanitizer {
     @Inject
     HashUtils hashUtils;
 
+    @Inject
+    EncryptionStrategy encryptionStrategy;
+
     List<JsonPath> applicablePaths(@NonNull List<Pair<Pattern, List<JsonPath>>> rules,
                                    @NonNull String relativeUrl) {
         return rules.stream()
@@ -179,8 +182,7 @@ public class SanitizerImpl implements Sanitizer {
             MapFunction f;
             if (transform instanceof Transform.Pseudonymize) {
                 //curry the defaultScopeId from the transform into the pseudonymization method
-                f =
-                    ((Transform.Pseudonymize) transform).getIncludeOriginal() ? this::pseudonymizeWithOriginalToJson : this::pseudonymizeToJson;
+                f = getPseudonymize((Transform.Pseudonymize) transform);
             } else if (transform instanceof Transform.PseudonymizeEmailHeader) {
                 f = this::pseudonymizeEmailHeaderToJson;
             } else if (transform instanceof Transform.RedactRegexMatches) {
@@ -327,6 +329,18 @@ public class SanitizerImpl implements Sanitizer {
 
     public PseudonymizedIdentity pseudonymize(Object value) {
         return pseudonymize(value, false);
+    }
+
+    public MapFunction getPseudonymize(Transform.Pseudonymize transformOptions) {
+        return (Object s, Configuration configuration) -> {
+            PseudonymizedIdentity pseudonymizedIdentity = pseudonymize(s, transformOptions.getIncludeOriginal());
+
+            if (transformOptions.getIncludeEncrypted() && s != null) {
+                Preconditions.checkArgument(s instanceof String, "encryption only supported for string values");
+                pseudonymizedIdentity.setEncrypted(encryptionStrategy.encrypt((String) s));
+            }
+            return pseudonymizedIdentity;
+        };
     }
 
     public PseudonymizedIdentity pseudonymize(Object value, boolean includeOriginal) {

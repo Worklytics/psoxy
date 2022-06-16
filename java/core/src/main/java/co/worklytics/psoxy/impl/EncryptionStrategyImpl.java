@@ -4,6 +4,7 @@ import co.worklytics.psoxy.EncryptionStrategy;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import com.google.common.base.Preconditions;
+import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 
 import javax.crypto.Cipher;
@@ -13,6 +14,7 @@ import javax.inject.Inject;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
+@NoArgsConstructor(onConstructor_ = @Inject)
 public class EncryptionStrategyImpl implements EncryptionStrategy {
 
     @Inject
