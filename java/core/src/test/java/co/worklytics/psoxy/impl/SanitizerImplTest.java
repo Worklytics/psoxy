@@ -279,10 +279,18 @@ class SanitizerImplTest {
 
 
     @Test
-    void encrypt() {
+    void pseudonymizeWithEncrypt() {
         MapFunction f = sanitizer.getPseudonymize(Transform.Pseudonymize.builder().includeEncrypted(true).build());
 
         assertEquals("PseudonymizedIdentity(scope=scope, domain=null, hash=Htt5DmAnE8xaCjfYnLm83_xR8.hhEJE2f_bkFP2yljg, original=null, encrypted=sw9vAV54tPmrDzobqfIwGg==:T_4OKxbfCRNQH2dxB7qx7w==)",
+            f.map("asfa", sanitizer.getJsonConfiguration()));
+    }
+
+    @Test
+    void encrypt() {
+        MapFunction f = sanitizer.getEncrypt(Transform.Encrypt.defaults());
+
+        assertEquals("sw9vAV54tPmrDzobqfIwGg==:T_4OKxbfCRNQH2dxB7qx7w==",
             f.map("asfa", sanitizer.getJsonConfiguration()));
     }
 

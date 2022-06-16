@@ -189,6 +189,8 @@ public class SanitizerImpl implements Sanitizer {
                 f = getRedactRegexMatches((Transform.RedactRegexMatches) transform);
             } else if (transform instanceof Transform.FilterTokenByRegex) {
                 f = getFilterTokenByRegex((Transform.FilterTokenByRegex) transform);
+            } else if (transform instanceof Transform.Encrypt) {
+                f = getEncrypt((Transform.Encrypt) transform);
             } else {
                 throw new IllegalArgumentException("Unknown transform type: " + transform.getClass().getName());
             }
@@ -340,6 +342,21 @@ public class SanitizerImpl implements Sanitizer {
                 pseudonymizedIdentity.setEncrypted(encryptionStrategy.encrypt((String) s));
             }
             return pseudonymizedIdentity;
+        };
+    }
+
+    public MapFunction getEncrypt(Transform.Encrypt  transformOptions) {
+        return (Object s, Configuration configuration) -> {
+
+            if (s == null) {
+                return null;
+            }
+            Preconditions.checkArgument(s instanceof String, "encryption only supported for string values");
+
+            //q: can we support numeric ids with this? concern that they would overflow bounds
+            // expected by clients
+
+            return encryptionStrategy.encrypt((String) s);
         };
     }
 

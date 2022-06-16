@@ -131,4 +131,14 @@ public abstract class Transform {
             return Pseudonymize.builder().jsonPaths(Arrays.asList(jsonPaths)).build();
         }
     }
+
+    @SuperBuilder
+    @NoArgsConstructor //for Jackson
+    @Getter
+    public static class Encrypt extends Transform {
+
+        public static Encrypt defaults() {
+            return Encrypt.builder().build();
+        }
+    }
 }
