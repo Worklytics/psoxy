@@ -1,0 +1,14 @@
+{
+  "uuid":"JbkqFkfqQ0e7+CZluSnc1g==",
+  "id":535548971,
+  "host_id":"{\"scope\":\"zoom\",\"hash\":\"_Ms2sL_LQNH4Lne5PqWTeBKiWxerW0IzgN28h.ffg68\"}",
+  "type":2,
+  "user_email":"{\"scope\":\"email\",\"domain\":\"example.com\",\"hash\":\"pI0r.5pSwt1uzQ9_7dfTQAYaazHZkYJAkYKTe0KxhjM\"}",
+  "start_time":"2020-04-01T07:00:30Z",
+  "end_time":"2020-04-01T07:02:01Z",
+  "duration":2,
+  "total_minutes":2,
+  "participants_count":1,
+  "dept":"Engineering",
+  "source":"Zoom"
+}
