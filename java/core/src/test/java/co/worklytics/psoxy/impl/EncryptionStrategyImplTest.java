@@ -49,6 +49,6 @@ class EncryptionStrategyImplTest {
         // (eg, our key-generation isn't random and nothing has any randomized state persisted
         //  somehow between tests)
         assertEquals("blah",
-            encryptionStrategy.decrypt("bEtPK4lKBIt2IHXYqagJfw==:6URnvTx3sRoRlyySsTjSVA=="));
+            encryptionStrategy.decrypt("bEtPK4lKBIt2IHXYqagJfw:6URnvTx3sRoRlyySsTjSVA"));
     }
 }

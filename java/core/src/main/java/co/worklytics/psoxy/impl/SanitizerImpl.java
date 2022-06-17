@@ -341,7 +341,7 @@ public class SanitizerImpl implements Sanitizer {
                 Preconditions.checkArgument(s instanceof String, "encryption only supported for string values");
                 pseudonymizedIdentity.setEncrypted(encryptionStrategy.encrypt((String) s));
             }
-            return pseudonymizedIdentity;
+            return configuration.jsonProvider().toJson(pseudonymizedIdentity);
         };
     }
 

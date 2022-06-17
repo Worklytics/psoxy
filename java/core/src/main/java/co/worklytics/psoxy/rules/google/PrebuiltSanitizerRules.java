@@ -26,7 +26,7 @@ public class PrebuiltSanitizerRules {
             .transform(Transform.Pseudonymize.ofPaths("$.id"))
             .build())
         .endpoint(Rules2.Endpoint.builder()
-             .pathRegex("^/calendar/v3/calendars/[^/]*?/events[^/]*")
+            .pathRegex("^/calendar/v3/calendars/[^/]*?/events[^/]*")
             .transform(Transform.Pseudonymize.ofPaths("$..email"))
             .transform(Transform.Redact.ofPaths(
                 "$..displayName",
