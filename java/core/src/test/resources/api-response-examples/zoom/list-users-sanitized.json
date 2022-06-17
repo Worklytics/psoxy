@@ -1,0 +1,24 @@
+{
+  "page_count":1,
+  "page_number":1,
+  "page_size":30,
+  "total_records":1,
+  "users":[
+    {
+      "id":"{\"scope\":\"zoom\",\"hash\":\"ZOPLM4doMzcRkn5mKz63MrQApQc.e4CHTv5z8dPxYVk\",\"original\":\"z8yAAAAA8bbbQ\"}",
+      "email":"{\"scope\":\"email\",\"domain\":\"example.com\",\"hash\":\"Oyl8_kWC39yrNSWNGUSM7xylJREQ62Dj6OynAkyY2Ro\"}",
+      "type":2,
+      "pmi":111111111,
+      "timezone":"America/Los_Angeles",
+      "verified":1,
+      "dept":"",
+      "created_at":"2018-11-15T01:10:08Z",
+      "last_login_time":"2019-09-13T21:08:52Z",
+      "last_client_version":"4.4.55383.0716(android)",
+      "im_group_ids":[
+        "GroupName"
+      ],
+      "status":"active"
+    }
+  ]
+}

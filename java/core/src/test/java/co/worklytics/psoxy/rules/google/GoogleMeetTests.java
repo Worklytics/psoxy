@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.stream.Stream;
 
 class GoogleMeetTests extends JavaRulesTestBaseCase {
 
@@ -50,6 +51,11 @@ class GoogleMeetTests extends JavaRulesTestBaseCase {
 
         assertUrlWithQueryParamsAllowed(endpoint);
         assertUrlBlocked("https://admin.googleapis.com/admin/reports/v1/activity/users/all/applications/chat");
+    }
 
+    public Stream<InvocationExample> getExamples() {
+        return Stream.of(
+            InvocationExample.of("https://admin.googleapis.com/admin/reports/v1/activity/users/all/applications/meet", "meet-activities.json")
+        );
     }
 }
