@@ -340,13 +340,14 @@ public class SanitizerImpl implements Sanitizer {
 
             if (transformOptions.getIncludeEncrypted() && s != null) {
                 Preconditions.checkArgument(s instanceof String, "encryption only supported for string values");
-                pseudonymizedIdentity.setEncrypted(pseudonymizationStrategy.getPseudonymWithKey((String) s, Function.identity()));
+                Function<String, String> canonicalization = duckTypesAsEmails(s) ? this::emailCanonicalization : Function.identity();
+                pseudonymizedIdentity.setEncrypted(pseudonymizationStrategy.getPseudonymWithKey((String) s, canonicalization));
             }
             return configuration.jsonProvider().toJson(pseudonymizedIdentity);
         };
     }
 
-    public MapFunction getEncrypt(Transform.Encrypt  transformOptions) {
+    public MapFunction getEncrypt(Transform.Encrypt transformOptions) {
         return (Object s, Configuration configuration) -> {
 
             if (s == null) {
@@ -357,8 +358,20 @@ public class SanitizerImpl implements Sanitizer {
             //q: can we support numeric ids with this? concern that they would overflow bounds
             // expected by clients
 
-            return pseudonymizationStrategy.getPseudonymWithKey((String) s, Function.identity());
+            Function<String, String> canonicalization = duckTypesAsEmails(s) ? this::emailCanonicalization : Function.identity();
+            return pseudonymizationStrategy.getPseudonymWithKey((String) s, canonicalization);
         };
+    }
+
+    String emailCanonicalization(String original) {
+        String domain = EmailAddressParser.getDomain(original, EmailAddressCriteria.DEFAULT, true);
+
+        //NOTE: lower-case here is NOT stipulated by RFC
+        return  EmailAddressParser.getLocalPart(original, EmailAddressCriteria.DEFAULT, true)
+            .toLowerCase()
+            + "@"
+            + domain.toLowerCase();
+
     }
 
     public PseudonymizedIdentity pseudonymize(Object value, boolean includeOriginal) {
@@ -377,18 +390,13 @@ public class SanitizerImpl implements Sanitizer {
         //NOTE: use of EmailAddressValidator/Parser here is probably overly permissive, as there
         // are many cases where we expect simple emails (eg, alice@worklytics.co), not all the
         // possible variants with personal names / etc that may be allowed in email header values
-        if (value instanceof String && EmailAddressValidator.isValid((String) value)) {
+        if (duckTypesAsEmails(value)) {
 
             String domain = EmailAddressParser.getDomain((String) value, EmailAddressCriteria.DEFAULT, true);
             builder.domain(domain);
             scope = PseudonymizedIdentity.EMAIL_SCOPE;
 
-            //NOTE: lower-case here is NOT stipulated by RFC
-            canonicalValue =
-                EmailAddressParser.getLocalPart((String) value, EmailAddressCriteria.DEFAULT, true)
-                    .toLowerCase()
-                + "@"
-                + domain.toLowerCase();
+            canonicalValue = emailCanonicalization((String) value);
 
             //q: do something with the personal name??
             // NO --> it is not going to be reliable (except for From, will fill with whatever
@@ -409,6 +417,10 @@ public class SanitizerImpl implements Sanitizer {
         }
 
         return builder.build();
+    }
+
+    boolean duckTypesAsEmails(Object value) {
+        return value instanceof String && EmailAddressValidator.isValid((String) value);
     }
 
     //converts 'scope' to legacy value (eg, equivalents to original Worklytics scheme, where no scope
