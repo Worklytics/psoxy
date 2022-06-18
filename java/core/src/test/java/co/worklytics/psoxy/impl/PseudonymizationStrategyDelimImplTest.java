@@ -5,6 +5,8 @@ import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.function.Function;
+
 import static co.worklytics.test.TestModules.withMockEncryptionKey;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -27,11 +29,11 @@ class PseudonymizationStrategyDelimImplTest {
     @Test
     void roundtrip() {
 
-        String encrypted = encryptionStrategy.getPseudonymWithKey("blah");
+        String encrypted = encryptionStrategy.getPseudonymWithKey("blah", Function.identity());
         assertNotEquals("blah", encrypted);
 
         //something else shouldn't match
-        String encrypted2 = encryptionStrategy.getPseudonymWithKey("blah2");
+        String encrypted2 = encryptionStrategy.getPseudonymWithKey("blah2", Function.identity());
         assertNotEquals(encrypted2, encrypted);
 
         String decrypted = encryptionStrategy.getIdentifier(encrypted);

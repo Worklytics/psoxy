@@ -28,6 +28,7 @@ import javax.mail.internet.InternetAddress;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -339,7 +340,7 @@ public class SanitizerImpl implements Sanitizer {
 
             if (transformOptions.getIncludeEncrypted() && s != null) {
                 Preconditions.checkArgument(s instanceof String, "encryption only supported for string values");
-                pseudonymizedIdentity.setEncrypted(pseudonymizationStrategy.getPseudonymWithKey((String) s));
+                pseudonymizedIdentity.setEncrypted(pseudonymizationStrategy.getPseudonymWithKey((String) s, Function.identity()));
             }
             return configuration.jsonProvider().toJson(pseudonymizedIdentity);
         };
@@ -356,7 +357,7 @@ public class SanitizerImpl implements Sanitizer {
             //q: can we support numeric ids with this? concern that they would overflow bounds
             // expected by clients
 
-            return pseudonymizationStrategy.getPseudonymWithKey((String) s);
+            return pseudonymizationStrategy.getPseudonymWithKey((String) s, Function.identity());
         };
     }
 

@@ -15,6 +15,7 @@ import javax.inject.Inject;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.function.Function;
 
 @NoArgsConstructor(onConstructor_ = @Inject)
 public class PseudonymizationStrategyImpl implements PseudonymizationStrategy {
@@ -24,13 +25,11 @@ public class PseudonymizationStrategyImpl implements PseudonymizationStrategy {
     SecretKeySpec encryptionKey;
 
     static final int CIPHER_BLOCK_SIZE_BYTES = 16; //128-bits; AES uses 128-bit blocks, regardless of key-length
-    static final int ONE_WAY_PSEUDONYM_SIZE_BYTES = 32; //SHA-256
+    static final int PSEUDONYM_SIZE_BYTES = 32; //SHA-256
 
     //base64url-encoding without padding
     Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
     Base64.Decoder decoder = Base64.getUrlDecoder();
-
-
 
     @SneakyThrows
     Cipher getCipherInstance() {
@@ -38,20 +37,22 @@ public class PseudonymizationStrategyImpl implements PseudonymizationStrategy {
     }
 
 
+    //32-bytes
     @Override
-    public String getPseudonym(String identifier) {
+    public String getPseudonym(String identifier, Function<String, String> canonicalization) {
         //pass in a canonicalization function? if not, this won't match for the canonically-equivalent
         // identifier in different formats (eg, cased/etc)
 
-        return encoder.encodeToString(DigestUtils.sha256(identifier + getSalt()));
+        return encoder.encodeToString(DigestUtils.sha256(canonicalization.apply(identifier) + getSalt()));
     }
 
+    //64-bytes
     @SneakyThrows
     @Override
-    public String getPseudonymWithKey(@NonNull String identifier) {
+    public String getPseudonymWithKey(@NonNull String identifier, Function<String, String> canonicalization) {
         Cipher cipher = getCipherInstance();
 
-        byte[] hash = decoder.decode(getPseudonym(identifier).getBytes());
+        byte[] hash = decoder.decode(getPseudonym(identifier, canonicalization).getBytes());
 
         //fundamental insight here: conventional encryption would generate a random IV; but this
         // would mean that repeated encryption of the same plaintext would yield different results.
@@ -62,7 +63,6 @@ public class PseudonymizationStrategyImpl implements PseudonymizationStrategy {
         // to which it refers absent some other data that we can reasonably expect to be secret
         // (eg, a lookup table mapping the identifiers to PII; or secret used to encrypt the PII).
         IvParameterSpec ivParameter = new IvParameterSpec(extractIv(hash));
-
 
         cipher.init(Cipher.ENCRYPT_MODE, getEncryptionKey(), ivParameter);
         byte[] ciphertext = cipher.doFinal(identifier.getBytes(StandardCharsets.UTF_8));
@@ -88,7 +88,7 @@ public class PseudonymizationStrategyImpl implements PseudonymizationStrategy {
 
         byte[] decoded = decoder.decode(reversiblePseudonym);
         byte[] iv = extractIv(decoded);
-        byte[] cryptoText = Arrays.copyOfRange(decoded, ONE_WAY_PSEUDONYM_SIZE_BYTES, decoded.length);
+        byte[] cryptoText = Arrays.copyOfRange(decoded, PSEUDONYM_SIZE_BYTES, decoded.length);
 
         Cipher cipher = getCipherInstance();
         cipher.init(Cipher.DECRYPT_MODE, getEncryptionKey(), new IvParameterSpec(iv));
@@ -105,6 +105,7 @@ public class PseudonymizationStrategyImpl implements PseudonymizationStrategy {
     SecretKeySpec getEncryptionKey() {
         if (encryptionKey == null) {
             //q: validate key length? we expect 256-bit (32 bytes)
+            //for flexibility, use password-based encryption key?
             String keyFromConfig = config.getConfigPropertyOrError(ProxyConfigProperty.PSOXY_ENCRYPTION_KEY);
             encryptionKey = new SecretKeySpec(Base64.getDecoder().decode(keyFromConfig), "AES");
         }

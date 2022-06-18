@@ -16,6 +16,7 @@ import javax.inject.Inject;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.function.Function;
 
 /**
  * impl of EncryptionStrategy, using delimiters to split hash + cryptotext
@@ -43,16 +44,16 @@ public class PseudonymizationStrategyDelimImpl implements PseudonymizationStrate
 
 
     @Override
-    public String getPseudonym(String identifier) {
-        return encoder.encodeToString(DigestUtils.sha256(identifier + getSalt()));
+    public String getPseudonym(String identifier, Function<String, String> canonicalization) {
+        return encoder.encodeToString(DigestUtils.sha256(canonicalization.apply(identifier) + getSalt()));
     }
 
     @SneakyThrows
     @Override
-    public String getPseudonymWithKey(@NonNull String identifier) {
+    public String getPseudonymWithKey(@NonNull String identifier, Function<String, String> canonicalization) {
         Cipher cipher = getCipherInstance();
 
-        byte[] hash = decoder.decode(getPseudonym(identifier).getBytes());
+        byte[] hash = decoder.decode(getPseudonym(identifier, canonicalization).getBytes());
         cipher.init(Cipher.ENCRYPT_MODE, getEncryptionKey(),
             new IvParameterSpec(extractIv(hash)));
         byte[] ciphertext = cipher.doFinal(identifier.getBytes(StandardCharsets.UTF_8));
