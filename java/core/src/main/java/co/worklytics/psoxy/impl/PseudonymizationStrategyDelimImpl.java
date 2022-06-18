@@ -1,6 +1,6 @@
 package co.worklytics.psoxy.impl;
 
-import co.worklytics.psoxy.EncryptionStrategy;
+import co.worklytics.psoxy.PseudonymizationStrategy;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import com.google.common.base.Preconditions;
@@ -21,7 +21,7 @@ import java.util.Base64;
  * impl of EncryptionStrategy, using delimiters to split hash + cryptotext
  */
 @NoArgsConstructor(onConstructor_ = @Inject)
-public class EncryptionStrategyDelimImpl implements EncryptionStrategy {
+public class PseudonymizationStrategyDelimImpl implements PseudonymizationStrategy {
 
     @Inject
     ConfigService config;
@@ -42,14 +42,20 @@ public class EncryptionStrategyDelimImpl implements EncryptionStrategy {
     }
 
 
+    @Override
+    public String getPseudonym(String identifier) {
+        return encoder.encodeToString(DigestUtils.sha256(identifier + getSalt()));
+    }
+
     @SneakyThrows
     @Override
-    public String encrypt(@NonNull String plaintext) {
+    public String getPseudonymWithKey(@NonNull String identifier) {
         Cipher cipher = getCipherInstance();
-        byte[] hash = DigestUtils.sha256(plaintext + getSalt());
+
+        byte[] hash = decoder.decode(getPseudonym(identifier).getBytes());
         cipher.init(Cipher.ENCRYPT_MODE, getEncryptionKey(),
             new IvParameterSpec(extractIv(hash)));
-        byte[] ciphertext = cipher.doFinal(plaintext.getBytes(StandardCharsets.UTF_8));
+        byte[] ciphertext = cipher.doFinal(identifier.getBytes(StandardCharsets.UTF_8));
         return encoder.encodeToString(hash) + IV_DELIMITER
             + encoder.encodeToString(ciphertext);
     }
@@ -60,9 +66,9 @@ public class EncryptionStrategyDelimImpl implements EncryptionStrategy {
 
     @SneakyThrows
     @Override
-    public String decrypt(@NonNull String encodedCiphertext) {
-        String[] parts = encodedCiphertext.split(IV_DELIMITER);
-        Preconditions.checkArgument(parts.length == 2, "Invalid ciphertext: %s", encodedCiphertext);
+    public String getIdentifier(@NonNull String reversiblePseudonym) {
+        String[] parts = reversiblePseudonym.split(IV_DELIMITER);
+        Preconditions.checkArgument(parts.length == 2, "Invalid ciphertext: %s", reversiblePseudonym);
         byte[] iv = extractIv(decoder.decode(parts[0]));
         byte[] cryptoText = decoder.decode(parts[1]);
 

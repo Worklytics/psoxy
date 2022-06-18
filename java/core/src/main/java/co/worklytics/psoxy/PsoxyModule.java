@@ -4,7 +4,7 @@ import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
-import co.worklytics.psoxy.impl.EncryptionStrategyImpl;
+import co.worklytics.psoxy.impl.PseudonymizationStrategyImpl;
 import co.worklytics.psoxy.storage.FileHandlerFactory;
 import co.worklytics.psoxy.storage.impl.FileHandlerFactoryImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -108,7 +108,7 @@ public class PsoxyModule {
     }
 
     @Provides
-    static EncryptionStrategy encryptionStrategy(EncryptionStrategyImpl impl) {
+    static PseudonymizationStrategy encryptionStrategy(PseudonymizationStrategyImpl impl) {
         return impl;
     }
 

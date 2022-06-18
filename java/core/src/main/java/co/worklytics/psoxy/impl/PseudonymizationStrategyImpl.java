@@ -1,10 +1,8 @@
 package co.worklytics.psoxy.impl;
 
-import co.worklytics.psoxy.EncryptionStrategy;
-import co.worklytics.psoxy.HashUtils;
+import co.worklytics.psoxy.PseudonymizationStrategy;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
-import com.google.common.base.Preconditions;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.SneakyThrows;
@@ -19,7 +17,7 @@ import java.util.Arrays;
 import java.util.Base64;
 
 @NoArgsConstructor(onConstructor_ = @Inject)
-public class EncryptionStrategyImpl implements EncryptionStrategy {
+public class PseudonymizationStrategyImpl implements PseudonymizationStrategy {
 
     @Inject
     ConfigService config;
@@ -40,17 +38,20 @@ public class EncryptionStrategyImpl implements EncryptionStrategy {
     }
 
 
-    @SneakyThrows
     @Override
-    public String encrypt(@NonNull String plaintext) {
-        Cipher cipher = getCipherInstance();
-
+    public String getPseudonym(String identifier) {
         //pass in a canonicalization function? if not, this won't match for the canonically-equivalent
         // identifier in different formats (eg, cased/etc)
 
-        // this is really the 'pseudonym' for the plaintext
-        byte[] hash = DigestUtils.sha256(plaintext + getSalt());
+        return encoder.encodeToString(DigestUtils.sha256(identifier + getSalt()));
+    }
 
+    @SneakyThrows
+    @Override
+    public String getPseudonymWithKey(@NonNull String identifier) {
+        Cipher cipher = getCipherInstance();
+
+        byte[] hash = decoder.decode(getPseudonym(identifier).getBytes());
 
         //fundamental insight here: conventional encryption would generate a random IV; but this
         // would mean that repeated encryption of the same plaintext would yield different results.
@@ -64,7 +65,7 @@ public class EncryptionStrategyImpl implements EncryptionStrategy {
 
 
         cipher.init(Cipher.ENCRYPT_MODE, getEncryptionKey(), ivParameter);
-        byte[] ciphertext = cipher.doFinal(plaintext.getBytes(StandardCharsets.UTF_8));
+        byte[] ciphertext = cipher.doFinal(identifier.getBytes(StandardCharsets.UTF_8));
 
         return encoder.encodeToString(arrayConcat(hash, ciphertext));
     }
@@ -83,9 +84,9 @@ public class EncryptionStrategyImpl implements EncryptionStrategy {
 
     @SneakyThrows
     @Override
-    public String decrypt(@NonNull String encodedCiphertext) {
+    public String getIdentifier(@NonNull String reversiblePseudonym) {
 
-        byte[] decoded = decoder.decode(encodedCiphertext);
+        byte[] decoded = decoder.decode(reversiblePseudonym);
         byte[] iv = extractIv(decoded);
         byte[] cryptoText = Arrays.copyOfRange(decoded, ONE_WAY_PSEUDONYM_SIZE_BYTES, decoded.length);
 

@@ -10,14 +10,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.Mockito.mock;
 
-class EncryptionStrategyDelimImplTest {
+class PseudonymizationStrategyDelimImplTest {
 
-    EncryptionStrategyDelimImpl encryptionStrategy;
+    PseudonymizationStrategyDelimImpl encryptionStrategy;
 
     @SneakyThrows
     @BeforeEach
     void setUp() {
-        encryptionStrategy = new EncryptionStrategyDelimImpl();
+        encryptionStrategy = new PseudonymizationStrategyDelimImpl();
 
         encryptionStrategy.config = mock(ConfigService.class);
         withMockEncryptionKey(encryptionStrategy.config);
@@ -27,14 +27,14 @@ class EncryptionStrategyDelimImplTest {
     @Test
     void roundtrip() {
 
-        String encrypted = encryptionStrategy.encrypt("blah");
+        String encrypted = encryptionStrategy.getPseudonymWithKey("blah");
         assertNotEquals("blah", encrypted);
 
         //something else shouldn't match
-        String encrypted2 = encryptionStrategy.encrypt("blah2");
+        String encrypted2 = encryptionStrategy.getPseudonymWithKey("blah2");
         assertNotEquals(encrypted2, encrypted);
 
-        String decrypted = encryptionStrategy.decrypt(encrypted);
+        String decrypted = encryptionStrategy.getIdentifier(encrypted);
         assertEquals("blah", decrypted);
     }
 
@@ -45,6 +45,6 @@ class EncryptionStrategyDelimImplTest {
         //  somehow between tests)
 
         assertEquals("blah",
-            encryptionStrategy.decrypt("NHXWS5CZDysDs3ETExXiMZxM2DfffirkjgmA64R9hCc:px2zWz7DreFvh8fEg1GkGA"));
+            encryptionStrategy.getIdentifier("NHXWS5CZDysDs3ETExXiMZxM2DfffirkjgmA64R9hCc:px2zWz7DreFvh8fEg1GkGA"));
     }
 }

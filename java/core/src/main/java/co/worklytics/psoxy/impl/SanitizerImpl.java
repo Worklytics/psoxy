@@ -70,7 +70,7 @@ public class SanitizerImpl implements Sanitizer {
     HashUtils hashUtils;
 
     @Inject
-    EncryptionStrategy encryptionStrategy;
+    PseudonymizationStrategy pseudonymizationStrategy;
 
     List<JsonPath> applicablePaths(@NonNull List<Pair<Pattern, List<JsonPath>>> rules,
                                    @NonNull String relativeUrl) {
@@ -339,7 +339,7 @@ public class SanitizerImpl implements Sanitizer {
 
             if (transformOptions.getIncludeEncrypted() && s != null) {
                 Preconditions.checkArgument(s instanceof String, "encryption only supported for string values");
-                pseudonymizedIdentity.setEncrypted(encryptionStrategy.encrypt((String) s));
+                pseudonymizedIdentity.setEncrypted(pseudonymizationStrategy.getPseudonymWithKey((String) s));
             }
             return configuration.jsonProvider().toJson(pseudonymizedIdentity);
         };
@@ -356,7 +356,7 @@ public class SanitizerImpl implements Sanitizer {
             //q: can we support numeric ids with this? concern that they would overflow bounds
             // expected by clients
 
-            return encryptionStrategy.encrypt((String) s);
+            return pseudonymizationStrategy.getPseudonymWithKey((String) s);
         };
     }
 
