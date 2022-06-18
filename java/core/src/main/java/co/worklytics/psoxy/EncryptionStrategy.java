@@ -1,5 +1,13 @@
 package co.worklytics.psoxy;
 
+/**
+ *
+ * rename? this is really giving 'reversible' pseudonyms
+ *
+ *
+ *
+ *
+ */
 public interface EncryptionStrategy {
 
     /**

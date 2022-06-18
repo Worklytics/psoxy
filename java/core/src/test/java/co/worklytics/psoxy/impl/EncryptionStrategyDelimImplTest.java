@@ -10,14 +10,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.Mockito.mock;
 
-class EncryptionStrategyImplTest {
+class EncryptionStrategyDelimImplTest {
 
-    EncryptionStrategyImpl encryptionStrategy;
+    EncryptionStrategyDelimImpl encryptionStrategy;
 
     @SneakyThrows
     @BeforeEach
     void setUp() {
-        encryptionStrategy = new EncryptionStrategyImpl();
+        encryptionStrategy = new EncryptionStrategyDelimImpl();
 
         encryptionStrategy.config = mock(ConfigService.class);
         withMockEncryptionKey(encryptionStrategy.config);
@@ -45,6 +45,6 @@ class EncryptionStrategyImplTest {
         //  somehow between tests)
 
         assertEquals("blah",
-            encryptionStrategy.decrypt("NHXWS5CZDysDs3ETExXiMZxM2DfffirkjgmA64R9hCenHbNbPsOt4W-Hx8SDUaQY"));
+            encryptionStrategy.decrypt("NHXWS5CZDysDs3ETExXiMZxM2DfffirkjgmA64R9hCc:px2zWz7DreFvh8fEg1GkGA"));
     }
 }
