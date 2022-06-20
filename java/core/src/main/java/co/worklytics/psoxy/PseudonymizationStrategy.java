@@ -16,13 +16,14 @@ public interface PseudonymizationStrategy {
 
     /**
      * @param identifier       to pseudonymize
-     * @param canonicalization
+     * @param canonicalization used to consistently pseudonymize identifiers that are 'canonically
+     *                         equivalent'; not byte-wise equal, but are intended to reference
+     *                         the same entity - differences are formatting
      * @return base64-url-encoding of pseudonym + key for reversing that pseudonym
      * NOTE: ability to reverse may depend on state of this implementation, eg, secrets that
      * it holds, passage of time, etc.
-     * eg, may not reverse beyond a window because of key rotation/etc.
      */
-    String getPseudonymWithKey(String identifier, Function<String, String> canonicalization);
+    String getKeyedPseudonym(String identifier, Function<String, String> canonicalization);
 
     /**
      *

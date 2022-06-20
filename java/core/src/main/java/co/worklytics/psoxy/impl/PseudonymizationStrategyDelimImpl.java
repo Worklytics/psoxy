@@ -50,7 +50,7 @@ public class PseudonymizationStrategyDelimImpl implements PseudonymizationStrate
 
     @SneakyThrows
     @Override
-    public String getPseudonymWithKey(@NonNull String identifier, Function<String, String> canonicalization) {
+    public String getKeyedPseudonym(@NonNull String identifier, Function<String, String> canonicalization) {
         Cipher cipher = getCipherInstance();
 
         byte[] hash = decoder.decode(getPseudonym(identifier, canonicalization).getBytes());

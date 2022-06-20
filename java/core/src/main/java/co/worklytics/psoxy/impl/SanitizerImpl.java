@@ -341,7 +341,7 @@ public class SanitizerImpl implements Sanitizer {
             if (transformOptions.getIncludeEncrypted() && s != null) {
                 Preconditions.checkArgument(s instanceof String, "encryption only supported for string values");
                 Function<String, String> canonicalization = duckTypesAsEmails(s) ? this::emailCanonicalization : Function.identity();
-                pseudonymizedIdentity.setEncrypted(pseudonymizationStrategy.getPseudonymWithKey((String) s, canonicalization));
+                pseudonymizedIdentity.setEncrypted(pseudonymizationStrategy.getKeyedPseudonym((String) s, canonicalization));
             }
             return configuration.jsonProvider().toJson(pseudonymizedIdentity);
         };
@@ -359,7 +359,7 @@ public class SanitizerImpl implements Sanitizer {
             // expected by clients
 
             Function<String, String> canonicalization = duckTypesAsEmails(s) ? this::emailCanonicalization : Function.identity();
-            return pseudonymizationStrategy.getPseudonymWithKey((String) s, canonicalization);
+            return pseudonymizationStrategy.getKeyedPseudonym((String) s, canonicalization);
         };
     }
 

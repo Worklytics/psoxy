@@ -29,11 +29,11 @@ class PseudonymizationStrategyImplTest {
     @Test
     void roundtrip() {
 
-        String pseudonym = pseudonymizationStrategy.getPseudonymWithKey("blah", Function.identity());
+        String pseudonym = pseudonymizationStrategy.getKeyedPseudonym("blah", Function.identity());
         assertNotEquals("blah", pseudonym);
 
         //something else shouldn't match
-        String pseudonym2 = pseudonymizationStrategy.getPseudonymWithKey("blah2", Function.identity());
+        String pseudonym2 = pseudonymizationStrategy.getKeyedPseudonym("blah2", Function.identity());
         assertNotEquals(pseudonym2, pseudonym);
 
         String decrypted = pseudonymizationStrategy.getIdentifier(pseudonym);

@@ -29,11 +29,11 @@ class PseudonymizationStrategyDelimImplTest {
     @Test
     void roundtrip() {
 
-        String encrypted = encryptionStrategy.getPseudonymWithKey("blah", Function.identity());
+        String encrypted = encryptionStrategy.getKeyedPseudonym("blah", Function.identity());
         assertNotEquals("blah", encrypted);
 
         //something else shouldn't match
-        String encrypted2 = encryptionStrategy.getPseudonymWithKey("blah2", Function.identity());
+        String encrypted2 = encryptionStrategy.getKeyedPseudonym("blah2", Function.identity());
         assertNotEquals(encrypted2, encrypted);
 
         String decrypted = encryptionStrategy.getIdentifier(encrypted);
