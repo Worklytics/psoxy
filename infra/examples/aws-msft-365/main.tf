@@ -195,6 +195,11 @@ module "psoxy-msft-connector" {
   aws_assume_role_arn  = var.aws_assume_role_arn
   example_api_calls    = each.value.example_calls
   aws_account_id       = var.aws_account_id
+  environment_vars     = {
+    NEW_RELIC_ACCOUNT_ID             = var.new_relic_account_id
+    NEW_RELIC_PRIMARY_APPLICATION_ID = var.new_relic_account_id
+    NEW_RELIC_TRUSTED_ACCOUNT_ID     = var.new_relic_account_id
+  }
   # from next version
   #path_to_repo_root    = var.proxy_base_dir
 

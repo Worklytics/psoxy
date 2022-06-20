@@ -55,3 +55,9 @@ variable "psoxy_base_dir" {
   description = "the path where your psoxy repo resides. Preferably a full path, /home/user/repos/, avoid tilde (~) shortcut to $HOME"
   default     = "../../.."
 }
+
+variable "new_relic_account_id" {
+  type        = string
+  description = "ID of New Relic account for distributed tracing"
+  default     = null
+}

@@ -12,6 +12,10 @@ import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
+import io.opentracing.util.GlobalTracer;
+import com.newrelic.opentracing.aws.LambdaTracing;
+import com.newrelic.opentracing.LambdaTracer;
+
 @Log
 public class Handler implements com.amazonaws.services.lambda.runtime.RequestHandler<APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse> {
 
@@ -25,12 +29,20 @@ public class Handler implements com.amazonaws.services.lambda.runtime.RequestHan
     static {
         awsContainer = DaggerAwsContainer.create();
         requestHandler = awsContainer.createHandler();
+
+        //TODO: move into DI??
+        // Register the New Relic OpenTracing LambdaTracer as the Global Tracer
+        GlobalTracer.registerIfAbsent(LambdaTracer.INSTANCE);
     }
 
     @SneakyThrows
     @Override
     public APIGatewayV2HTTPResponse handleRequest(APIGatewayV2HTTPEvent httpEvent, Context context) {
+        return LambdaTracing.instrument(httpEvent, context, this::actualHandleRequest);
+    }
 
+
+    public APIGatewayV2HTTPResponse actualHandleRequest(APIGatewayV2HTTPEvent httpEvent, Context context) {
         //interfaces:
         // - HttpRequestEvent --> HttpResponseEvent
 
