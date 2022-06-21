@@ -6,6 +6,8 @@ import co.worklytics.psoxy.rules.Rules1;
 import co.worklytics.psoxy.rules.Rules2;
 import co.worklytics.psoxy.rules.Transform;
 import co.worklytics.psoxy.utils.URLUtils;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.jayway.jsonpath.Configuration;
@@ -68,6 +70,9 @@ public class SanitizerImpl implements Sanitizer {
 
     @Inject
     HashUtils hashUtils;
+
+    @Inject
+    ObjectMapper objectMapper;
 
     List<JsonPath> applicablePaths(@NonNull List<Pair<Pattern, List<JsonPath>>> rules,
                                    @NonNull String relativeUrl) {
@@ -160,7 +165,13 @@ public class SanitizerImpl implements Sanitizer {
             for (Transform transform : match.getValue().getTransforms()) {
                 applyTransform(transform, document);
             }
-            return jsonConfiguration.jsonProvider().toJson(document);
+            try {
+                return objectMapper.writer().writeValueAsString(document);
+            } catch (JsonProcessingException e) {
+                log.log(Level.WARNING, "Failed to write output with Jackson", e);
+                return jsonConfiguration.jsonProvider().toJson(document);
+            }
+
         }).orElse(jsonResponse);
     }
 
