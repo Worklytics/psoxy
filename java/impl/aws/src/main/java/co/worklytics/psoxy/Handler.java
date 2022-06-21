@@ -49,7 +49,7 @@ public class Handler implements com.amazonaws.services.lambda.runtime.RequestHan
             response = HttpEventResponse.builder()
                 .statusCode(500)
                 .header(ResponseHeader.ERROR.getHttpHeader(), "Unknown error")
-                .body("Unknown error")
+                .body("Unknown error: " + e.getClass().getName())
                 .build();
         }
 
