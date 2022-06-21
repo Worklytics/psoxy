@@ -11,6 +11,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.stream.Stream;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.hasJsonPath;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.hasNoJsonPath;
@@ -206,5 +207,17 @@ public class SlackDiscoveryTests extends JavaRulesTestBaseCase {
                 "2nd Workspace under Test Grid",
                 "Test Grid");
 
+    }
+
+    @Override
+    public Stream<InvocationExample> getExamples() {
+        return Stream.of(
+            InvocationExample.of("https://slack.com/api/discovery.enterprise.info", "discovery-enterprise-info.json"),
+            InvocationExample.of("https://slack.com/api/discovery.conversations.info", "discovery-conversations-info.json"),
+            InvocationExample.of("https://slack.com/api/discovery.conversations.recent", "discovery-conversations-recent.json"),
+            InvocationExample.of("https://slack.com/api/discovery.conversations.history", "discovery-conversations-history.json"),
+            InvocationExample.of("https://slack.com/api/discovery.users.list", "discovery-users-list.json"),
+            InvocationExample.of("https://slack.com/api/discovery.conversations.list", "discovery-conversations-list.json")
+        );
     }
 }

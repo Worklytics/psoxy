@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -94,5 +95,11 @@ public class GMailTests extends JavaRulesTestBaseCase {
         //need paging, etc to work ...
         String messagesEndpoint = "https://gmail.googleapis.com/gmail/v1/users/me/messages";
         assertUrlWithQueryParamsAllowed(messagesEndpoint);
+    }
+
+    public Stream<InvocationExample> getExamples() {
+        return Stream.of(
+            InvocationExample.of("https://gmail.googleapis.com/gmail/v1/users/me/messages/sdfgsdfg", "message.json")
+        );
     }
 }

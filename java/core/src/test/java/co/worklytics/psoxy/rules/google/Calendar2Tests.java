@@ -10,6 +10,8 @@ import org.junit.jupiter.api.Test;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Stream;
 
 
 class Calendar2Tests extends JavaRulesTestBaseCase {
@@ -61,5 +63,12 @@ class Calendar2Tests extends JavaRulesTestBaseCase {
 
         assertRedacted(sanitized, "Call to discuss Worklytics issues");
         assertRedacted(sanitized, "Dear alice :");
+    }
+
+    @Override
+    public Stream<InvocationExample> getExamples() {
+        return Stream.of(
+                InvocationExample.of("http://calendar.googleapis.com/calendar/v3/calendars/primary/events", "events.json")
+            );
     }
 }

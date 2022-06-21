@@ -263,8 +263,10 @@ class SanitizerImplTest {
     @ParameterizedTest
     void preservesRoundTrip_afterNoop(String value) {
         Object document = sanitizer.getJsonConfiguration().jsonProvider().parse(value);
-        JsonPath.compile("$.uuid")
-            .map(document, (i, c) -> i, sanitizer.getJsonConfiguration());
+
+        JsonPath.compile("$..uuid")
+                .map(document, (i, c) -> i, sanitizer.getJsonConfiguration());
+
         assertEquals(value,
             sanitizer.getJsonConfiguration().jsonProvider().toJson(document), "value not preserved roundtrip");
     }
