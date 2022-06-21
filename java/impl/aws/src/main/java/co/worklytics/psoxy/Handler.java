@@ -54,7 +54,10 @@ public class Handler implements com.amazonaws.services.lambda.runtime.RequestHan
         }
 
         try {
+            //NOTE: AWS seems to give 502 Bad Gateway errors without explanation or any info
+            // in the lambda logs if this is malformed somehow (Eg, missing statusCode)
             return APIGatewayV2HTTPResponse.builder()
+                .withStatusCode(response.getStatusCode())
                 .withHeaders(response.getHeaders())
                 .withBody(response.getBody())
                 .withIsBase64Encoded(false)
