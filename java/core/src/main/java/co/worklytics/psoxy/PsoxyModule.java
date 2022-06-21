@@ -53,7 +53,7 @@ public class PsoxyModule {
         return Configuration.defaultConfiguration()
             .jsonProvider(jacksonJsonProvider)
             .mappingProvider(jacksonMappingProvider)
-            .setOptions(Option.SUPPRESS_EXCEPTIONS); //we specifically want to ignore PATH_NOT_FOUND cases
+            ;//.setOptions(Option.SUPPRESS_EXCEPTIONS); //we specifically want to ignore PATH_NOT_FOUND cases
     }
 
     @Provides

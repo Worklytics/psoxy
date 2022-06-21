@@ -6,6 +6,7 @@ import co.worklytics.psoxy.rules.Transform;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestUtils;
 import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.PathNotFoundException;
 import dagger.Component;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
@@ -263,8 +264,10 @@ class SanitizerImplTest {
     @ParameterizedTest
     void preservesRoundTrip_afterNoop(String value) {
         Object document = sanitizer.getJsonConfiguration().jsonProvider().parse(value);
-        JsonPath.compile("$.uuid")
-            .map(document, (i, c) -> i, sanitizer.getJsonConfiguration());
+
+        JsonPath.compile("$..uuid")
+                .map(document, (i, c) -> i, sanitizer.getJsonConfiguration());
+
         assertEquals(value,
             sanitizer.getJsonConfiguration().jsonProvider().toJson(document), "value not preserved roundtrip");
     }
