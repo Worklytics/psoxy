@@ -48,6 +48,7 @@ public class Handler implements com.amazonaws.services.lambda.runtime.RequestHan
             context.getLogger().log(ExceptionUtils.getStackTrace(e));
             response = HttpEventResponse.builder()
                 .statusCode(500)
+                .header(ResponseHeader.ERROR.getHttpHeader(), "Unknown error")
                 .body("Unknown error")
                 .build();
         }
