@@ -160,6 +160,7 @@ public class SanitizerImpl implements Sanitizer {
             for (Transform transform : match.getValue().getTransforms()) {
                 applyTransform(transform, document);
             }
+
             return jsonConfiguration.jsonProvider().toJson(document);
         }).orElse(jsonResponse);
     }
@@ -173,7 +174,11 @@ public class SanitizerImpl implements Sanitizer {
 
         if (transform instanceof Transform.Redact) {
             for (JsonPath path : paths) {
-                path.delete(document, jsonConfiguration);
+                try {
+                    path.delete(document, jsonConfiguration);
+                } catch (com.jayway.jsonpath.PathNotFoundException e) {
+                    //expected if rule doesn't apply
+                }
             }
         } else {
             MapFunction f;
@@ -191,7 +196,11 @@ public class SanitizerImpl implements Sanitizer {
                 throw new IllegalArgumentException("Unknown transform type: " + transform.getClass().getName());
             }
             for (JsonPath path : paths) {
-                path.map(document, f, jsonConfiguration);
+                try {
+                    path.map(document, f, jsonConfiguration);
+                } catch (com.jayway.jsonpath.PathNotFoundException e) {
+                    //expected if rule doesn't apply
+                }
             }
         }
         return document;
@@ -272,8 +281,12 @@ public class SanitizerImpl implements Sanitizer {
             Object document = jsonConfiguration.jsonProvider().parse(jsonResponse);
 
             for (JsonPath redaction : redactionsToApply) {
-                redaction
-                    .delete(document, jsonConfiguration);
+                try {
+                    redaction
+                        .delete(document, jsonConfiguration);
+                } catch (com.jayway.jsonpath.PathNotFoundException e) {
+                    //expected if rule doesn't apply
+                }
             }
 
             //TODO: error handling within the map functions. any exceptions thrown within the map
@@ -282,18 +295,30 @@ public class SanitizerImpl implements Sanitizer {
             // jsonConfiguration.addEvaluationListeners(); -->
 
             for (JsonPath pseudonymization : pseudonymizationsToApply) {
-               pseudonymization
-                    .map(document, this::pseudonymizeToJson, jsonConfiguration);
+               try {
+                   pseudonymization
+                       .map(document, this::pseudonymizeToJson, jsonConfiguration);
+               } catch (com.jayway.jsonpath.PathNotFoundException e) {
+                  //expected if rule doesn't apply
+               }
             }
 
             for (JsonPath pseudonymization : emailHeaderPseudonymizationsToApply) {
-                pseudonymization
-                    .map(document, this::pseudonymizeEmailHeaderToJson, jsonConfiguration);
+                try {
+                    pseudonymization
+                        .map(document, this::pseudonymizeEmailHeaderToJson, jsonConfiguration);
+                } catch (com.jayway.jsonpath.PathNotFoundException e) {
+                    //expected if rule doesn't apply
+                }
             }
 
             for (JsonPath pseudonymization : pseudonymizationWithOriginalsToApply) {
-                pseudonymization
-                    .map(document, this::pseudonymizeWithOriginalToJson, jsonConfiguration);
+                try {
+                    pseudonymization
+                        .map(document, this::pseudonymizeWithOriginalToJson, jsonConfiguration);
+                } catch (com.jayway.jsonpath.PathNotFoundException e) {
+                    //expected if rule doesn't apply
+                }
             }
 
             return jsonConfiguration.jsonProvider().toJson(document);
