@@ -17,7 +17,7 @@ public class Handler implements com.amazonaws.services.lambda.runtime.RequestHan
 
     /**
      * Static initialization allows reuse in containers
-     * {@link https://aws.amazon.com/premiumsupport/knowledge-center/lambda-improve-java-function-performance/}
+     * {@link "https://aws.amazon.com/premiumsupport/knowledge-center/lambda-improve-java-function-performance/"}
      */
     static AwsContainer awsContainer;
     static CommonRequestHandler requestHandler;
@@ -53,14 +53,11 @@ public class Handler implements com.amazonaws.services.lambda.runtime.RequestHan
         }
 
         try {
-            return new APIGatewayV2HTTPResponse(
-                response.getStatusCode(),
-                response.getHeaders(),
-                null, /* multi-valued headers */
-                null, /* cookies */
-                response.getBody(),
-                false /* isBase64Encoded */
-            );
+            return APIGatewayV2HTTPResponse.builder()
+                .withHeaders(response.getHeaders())
+                .withBody(response.getBody())
+                .withIsBase64Encoded(false)
+                .build();
         } catch (Throwable e) {
             context.getLogger().log("Error writing response as Lambda return");
             throw new Error(e);
