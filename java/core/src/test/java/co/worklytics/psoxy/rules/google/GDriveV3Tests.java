@@ -1,7 +1,7 @@
 package co.worklytics.psoxy.rules.google;
 
-import co.worklytics.psoxy.Rules;
 import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
+import co.worklytics.psoxy.rules.Rules1;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
@@ -14,7 +14,7 @@ import java.util.Collection;
 public class GDriveV3Tests extends JavaRulesTestBaseCase {
 
     @Getter
-    final Rules rulesUnderTest = PrebuiltSanitizerRules.GDRIVE;
+    final Rules1 rulesUnderTest = PrebuiltSanitizerRules.GDRIVE;
 
     @Getter
     final String exampleDirectoryPath = "api-response-examples/g-workspace/gdrive-v3";

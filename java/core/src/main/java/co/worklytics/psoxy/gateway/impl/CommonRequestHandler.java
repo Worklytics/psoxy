@@ -2,6 +2,7 @@ package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.gateway.*;
+import co.worklytics.psoxy.rules.RuleSet;
 import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.psoxy.utils.URLUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,7 +15,6 @@ import com.google.auth.http.HttpCredentialsAdapter;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
@@ -22,14 +22,11 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ContentType;
 
 import javax.inject.Inject;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.logging.Level;
-import java.util.zip.GZIPOutputStream;
 
 @NoArgsConstructor(onConstructor_ = @Inject)
 @Log
@@ -44,7 +41,8 @@ public class CommonRequestHandler {
     @Inject SourceAuthStrategy sourceAuthStrategy;
     @Inject ObjectMapper objectMapper;
     @Inject SanitizerFactory sanitizerFactory;
-    @Inject Rules rules;
+    @Inject
+    RuleSet rules;
     @Inject HealthCheckRequestHandler healthCheckRequestHandler;
 
     private volatile Sanitizer sanitizer;
@@ -89,7 +87,7 @@ public class CommonRequestHandler {
         } else {
             builder.statusCode(HttpStatus.SC_FORBIDDEN);
             builder.header(ResponseHeader.ERROR.getHttpHeader(), ErrorCauses.BLOCKED_BY_RULES.name());
-            log.warning(String.format("%s. Blocked call by rules %s", callLog, objectMapper.writeValueAsString(rules.getAllowedEndpointRegexes())));
+            log.warning(String.format("%s. Blocked call by rules %s", callLog, objectMapper.writeValueAsString(rules)));
             return builder.build();
         }
 
@@ -131,45 +129,41 @@ public class CommonRequestHandler {
 
         // return response
         builder.statusCode(sourceApiResponse.getStatusCode());
+        try {
+            // return response
+            builder.statusCode(sourceApiResponse.getStatusCode());
 
-        String responseContent = StringUtils.EMPTY;
-        // could be empty in HEAD calls
-        if (sourceApiResponse.getContent() != null) {
-            responseContent = new String(sourceApiResponse.getContent().readAllBytes(), sourceApiResponse.getContentCharset());
-        }
-        if (sourceApiResponse.getContentType() != null) {
-            builder.header(HttpHeaders.CONTENT_TYPE, sourceApiResponse.getContentType());
-        }
+            String responseContent = StringUtils.EMPTY;
+            // could be empty in HEAD calls
+            if (sourceApiResponse.getContent() != null) {
+                responseContent = new String(sourceApiResponse.getContent().readAllBytes(), sourceApiResponse.getContentCharset());
+            }
+            if (sourceApiResponse.getContentType() != null) {
+                builder.header(HttpHeaders.CONTENT_TYPE, sourceApiResponse.getContentType());
+            }
 
-        String proxyResponseContent;
-        if (isSuccessFamily(sourceApiResponse.getStatusCode())) {
-            if (skipSanitization) {
+            String proxyResponseContent;
+            if (isSuccessFamily(sourceApiResponse.getStatusCode())) {
+                if (skipSanitization) {
+                    proxyResponseContent = responseContent;
+                } else {
+                    proxyResponseContent = sanitizer.sanitize(targetUrl, responseContent);
+                    String rulesSha = rulesUtils.sha(sanitizer.getOptions().getRules());
+                    builder.header(ResponseHeader.RULES_SHA.getHttpHeader(), rulesSha);
+                    log.info("response sanitized with rule set " + rulesSha);
+                }
+            } else {
+                //write error, which shouldn't contain PII, directly
+                log.log(Level.WARNING, "Source API Error " + responseContent);
+                //TODO: could run this through DLP to be extra safe
+                builder.header(ResponseHeader.ERROR.getHttpHeader(), ErrorCauses.API_ERROR.name());
                 proxyResponseContent = responseContent;
-            }  else {
-                proxyResponseContent = sanitizer.sanitize(targetUrl, responseContent);
-                String rulesSha = rulesUtils.sha(sanitizer.getOptions().getRules());
-                builder.header(ResponseHeader.RULES_SHA.getHttpHeader(), rulesSha);
-                log.info("response sanitized with rule set " + rulesSha);
             }
-        } else {
-            //write error, which shouldn't contain PII, directly
-            log.log(Level.WARNING, "Source API Error " + responseContent);
-            //TODO: could run this through DLP to be extra safe
-            builder.header(ResponseHeader.ERROR.getHttpHeader(), ErrorCauses.API_ERROR.name());
-            proxyResponseContent = responseContent;
+            builder.body(StringUtils.trimToEmpty(proxyResponseContent));
+            return builder.build();
+        } finally {
+            sourceApiResponse.disconnect();
         }
-
-        String body = StringUtils.trimToEmpty(proxyResponseContent);
-        if (StringUtils.isNotBlank(body) && shouldCompress(request)) {
-            Optional<String> compressedBody = compressBody(body);
-            if (compressedBody.isPresent()) {
-                builder.header("content-encoding", "gzip");
-                body = compressedBody.get();
-            }
-        }
-        builder.body(body);
-
-        return builder.build();
     }
 
     @SneakyThrows
@@ -238,30 +232,6 @@ public class CommonRequestHandler {
             targetURLString = hostPlusPath + "?" + request.getQuery().get();
         }
         return new URL(targetURLString);
-    }
-
-    private static final int DEFAULT_SIZE = 512;
-
-    private boolean shouldCompress(HttpEventRequest request) {
-        return request.getHeader("accept-encoding").orElse("none").contains("gzip");
-    }
-
-    /**
-     * Compresses content as binary base64
-     * @param body
-     * @return
-     */
-    Optional<String> compressBody(String body) {
-        try (ByteArrayOutputStream bos = new ByteArrayOutputStream(DEFAULT_SIZE)) {
-            try (GZIPOutputStream output = new GZIPOutputStream(bos)) {
-                output.write(body.getBytes(StandardCharsets.UTF_8.name()));
-            }
-            // TODO: the base64 thing is AWS specific, need to convert this into a strategy
-            return Optional.ofNullable(Base64.encodeBase64String(bos.toByteArray()));
-        } catch (IOException e) {
-            // do nothing, send uncompressed
-            return Optional.empty();
-        }
     }
 
     private void logIfDevelopmentMode(Supplier<String> messageSupplier) {

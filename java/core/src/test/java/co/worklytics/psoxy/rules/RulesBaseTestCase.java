@@ -1,16 +1,10 @@
 package co.worklytics.psoxy.rules;
 
-import co.worklytics.psoxy.PsoxyModule;
-import co.worklytics.psoxy.Rules;
-import co.worklytics.psoxy.Sanitizer;
-import co.worklytics.psoxy.SanitizerFactory;
+import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.impl.SanitizerImpl;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonParser;
 import dagger.Component;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
@@ -97,22 +91,22 @@ abstract public class RulesBaseTestCase {
 
 
     @SneakyThrows
-    Rules yamlRoundtrip(Rules rules) {
+    RuleSet yamlRoundtrip(RuleSet rules) {
         String yaml = yamlMapper.writeValueAsString(rules).replace("---\n", "");
-        return yamlMapper.readerFor(Rules.class).readValue(yaml);
+        return yamlMapper.readerFor(rules.getClass()).readValue(yaml);
     }
 
     @SneakyThrows
-    Rules jsonRoundtrip(Rules rules) {
+    RuleSet jsonRoundtrip(RuleSet rules) {
         String json = jsonMapper.writeValueAsString(rules);
-        return jsonMapper.readerFor(Rules.class).readValue(json);
+        return jsonMapper.readerFor(rules.getClass()).readValue(json);
     }
 
 
 
     public abstract String getDefaultScopeId();
 
-    public abstract Rules getRulesUnderTest();
+    public abstract RuleSet getRulesUnderTest();
 
     /**
      * eg 'google-workspace/gdrive'
@@ -236,13 +230,36 @@ abstract public class RulesBaseTestCase {
 
     /**
      * Utility method to print out formatted JSON for debug easily
+     *
+     *
+     *
+     *
      * @param json
      * @return
      */
+    @SneakyThrows
     @SuppressWarnings("unused")
     protected String prettyPrintJson(String json) {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        return gson.toJson(JsonParser.parseString(json));
+
+        return jsonMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonMapper.readerFor(Object.class).readValue(json));
+
+        //NOTE: Gson seems to URL-encode embedded strings!?!?!
+        //  eg "64123avdfsMVA==" --> "64123avdfsMVA\u0030\0030"
+        // Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        // return gson.toJson(JsonParser.parseString(json));
+    }
+
+    /**
+     * asserts equivalence of two strings after round-trips through Jackson, so any failure is more
+     * readable than comparing non-pretty JSON, and any differences in original formatting (rather
+     * than actual JSON structure/content) are ignored. eg, expected/actual can have different
+     * "pretty" formatting, or one may not have "pretty" formatting at all.
+     *
+     * @param expected output value of test
+     * @param actual output value of test
+     */
+    protected void assertJsonEquals(String expected, String actual) {
+        assertEquals(prettyPrintJson(expected), prettyPrintJson(actual));
     }
 
 }

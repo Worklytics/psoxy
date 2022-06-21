@@ -1,18 +1,19 @@
 package co.worklytics.psoxy.rules.slack;
 
-import co.worklytics.psoxy.Rules;
+import co.worklytics.psoxy.rules.Rules1;
+import co.worklytics.psoxy.rules.RuleSet;
 import com.google.common.collect.ImmutableMap;
 
 import java.util.Map;
 
-import static co.worklytics.psoxy.Rules.Rule;
+import static co.worklytics.psoxy.rules.Rules1.Rule;
 
 /**
  * Prebuilt sanitization rules for Slack Discovery API responses
  */
 public class PrebuiltSanitizerRules {
 
-    static final Rules SLACK = Rules.builder()
+    static final Rules1 SLACK = Rules1.builder()
         .allowedEndpointRegex("^\\/api\\/discovery\\.enterprise\\.info(?:\\?.+)?")
         .allowedEndpointRegex("^\\/api\\/discovery\\.conversations\\.list(?:\\?.+)?")
         .allowedEndpointRegex("^\\/api\\/discovery\\.conversations\\.history(?:\\?.+)?")
@@ -76,8 +77,10 @@ public class PrebuiltSanitizerRules {
         .pseudonymization(Rule.builder()
             .relativeUrlRegex("\\/api\\/discovery\\.conversations\\.history(?:\\?.+)?")
             .jsonPath("$.messages[*].user")
+            .jsonPath("$.messages[*].files[*].user")
             .jsonPath("$.messages[*].reactions[*].users[*]")
             .jsonPath("$.messages[*].replies[*].user")
+            .jsonPath("$.messages[*].replies[*].parent_user_id")
             .jsonPath("$.messages[*].reply_users[*]")
             .jsonPath("$.messages[*].edited.user")
             .jsonPath("$.messages[*].blocks[*].elements[*].elements[*].user_id") // mentions in rich blocks
@@ -87,15 +90,17 @@ public class PrebuiltSanitizerRules {
             .relativeUrlRegex("\\/api\\/discovery\\.conversations\\.history(?:\\?.+)?")
             // we don't care about text
             // username is a variation of user, so just skip it to avoid references
-            .jsonPath("$.messages[*]['text','username']")
+            .jsonPath("$.messages[*]['text','username','permalink']")
             .jsonPath("$.messages[*]..['text']")
             .jsonPath("$.messages[*].user_profile")
-            .jsonPath("$.messages[*].attachments[*]['fallback','service_name']")
+            // Thumbnails name or url may reveal content
+            .jsonPath("$.messages[*].attachments[*]['fallback','service_name', 'thumb_url','thumb_width','thumb_height']")
+            .jsonPath("$.messages[*].files[*]['thumb_url','thumb_width','thumb_height','thumb_tiny']")
             .build()
         )
         .build();
 
-    static public final Map<String, Rules> SLACK_DEFAULT_RULES_MAP = ImmutableMap.<String, Rules>builder()
+    static public final Map<String, RuleSet> SLACK_DEFAULT_RULES_MAP = ImmutableMap.<String, RuleSet>builder()
         .put("slack", SLACK)
         .build();
 }

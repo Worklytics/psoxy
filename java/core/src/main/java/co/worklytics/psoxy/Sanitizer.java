@@ -1,5 +1,6 @@
 package co.worklytics.psoxy;
 
+import co.worklytics.psoxy.rules.RuleSet;
 import lombok.*;
 
 import java.io.Serializable;
@@ -12,7 +13,7 @@ public interface Sanitizer {
     @Value
     class Options implements Serializable {
 
-        private static final long serialVersionUID = 2L;
+        private static final long serialVersionUID = 3L;
 
         /**
          * salt used to generate pseudonyms
@@ -22,16 +23,12 @@ public interface Sanitizer {
          */
         String pseudonymizationSalt;
 
-
         /**
          * scope to use where logic + rules don't imply a match
          */
         String defaultScopeId;
 
-        //q: add regexes to whitelist endpoints that we actually use??
-        Rules rules;
-
-
+        RuleSet rules;
     }
 
     /**
