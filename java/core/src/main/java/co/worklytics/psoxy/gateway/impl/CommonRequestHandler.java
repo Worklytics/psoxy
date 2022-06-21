@@ -2,6 +2,7 @@ package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.gateway.*;
+import co.worklytics.psoxy.rules.RuleSet;
 import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.psoxy.utils.URLUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -40,7 +41,8 @@ public class CommonRequestHandler {
     @Inject SourceAuthStrategy sourceAuthStrategy;
     @Inject ObjectMapper objectMapper;
     @Inject SanitizerFactory sanitizerFactory;
-    @Inject Rules rules;
+    @Inject
+    RuleSet rules;
     @Inject HealthCheckRequestHandler healthCheckRequestHandler;
 
     private volatile Sanitizer sanitizer;
@@ -85,7 +87,7 @@ public class CommonRequestHandler {
         } else {
             builder.statusCode(HttpStatus.SC_FORBIDDEN);
             builder.header(ResponseHeader.ERROR.getHttpHeader(), ErrorCauses.BLOCKED_BY_RULES.name());
-            log.warning(String.format("%s. Blocked call by rules %s", callLog, objectMapper.writeValueAsString(rules.getAllowedEndpointRegexes())));
+            log.warning(String.format("%s. Blocked call by rules %s", callLog, objectMapper.writeValueAsString(rules)));
             return builder.build();
         }
 
@@ -121,38 +123,41 @@ public class CommonRequestHandler {
 
         com.google.api.client.http.HttpResponse sourceApiResponse = sourceApiRequest.execute();
 
-        // return response
-        builder.statusCode(sourceApiResponse.getStatusCode());
+        try {
+            // return response
+            builder.statusCode(sourceApiResponse.getStatusCode());
 
-        String responseContent = StringUtils.EMPTY;
-        // could be empty in HEAD calls
-        if (sourceApiResponse.getContent() != null) {
-            responseContent = new String(sourceApiResponse.getContent().readAllBytes(), sourceApiResponse.getContentCharset());
-        }
-        if (sourceApiResponse.getContentType() != null) {
-            builder.header(HttpHeaders.CONTENT_TYPE, sourceApiResponse.getContentType());
-        }
-
-        String proxyResponseContent;
-        if (isSuccessFamily(sourceApiResponse.getStatusCode())) {
-            if (skipSanitization) {
-                proxyResponseContent = responseContent;
-            }  else {
-                proxyResponseContent = sanitizer.sanitize(targetUrl, responseContent);
-                String rulesSha = rulesUtils.sha(sanitizer.getOptions().getRules());
-                builder.header(ResponseHeader.RULES_SHA.getHttpHeader(), rulesSha);
-                log.info("response sanitized with rule set " + rulesSha);
+            String responseContent = StringUtils.EMPTY;
+            // could be empty in HEAD calls
+            if (sourceApiResponse.getContent() != null) {
+                responseContent = new String(sourceApiResponse.getContent().readAllBytes(), sourceApiResponse.getContentCharset());
             }
-        } else {
-            //write error, which shouldn't contain PII, directly
-            log.log(Level.WARNING, "Source API Error " + responseContent);
-            //TODO: could run this through DLP to be extra safe
-            builder.header(ResponseHeader.ERROR.getHttpHeader(), ErrorCauses.API_ERROR.name());
-            proxyResponseContent = responseContent;
-        }
-        builder.body(StringUtils.trimToEmpty(proxyResponseContent));
+            if (sourceApiResponse.getContentType() != null) {
+                builder.header(HttpHeaders.CONTENT_TYPE, sourceApiResponse.getContentType());
+            }
 
-        return builder.build();
+            String proxyResponseContent;
+            if (isSuccessFamily(sourceApiResponse.getStatusCode())) {
+                if (skipSanitization) {
+                    proxyResponseContent = responseContent;
+                } else {
+                    proxyResponseContent = sanitizer.sanitize(targetUrl, responseContent);
+                    String rulesSha = rulesUtils.sha(sanitizer.getOptions().getRules());
+                    builder.header(ResponseHeader.RULES_SHA.getHttpHeader(), rulesSha);
+                    log.info("response sanitized with rule set " + rulesSha);
+                }
+            } else {
+                //write error, which shouldn't contain PII, directly
+                log.log(Level.WARNING, "Source API Error " + responseContent);
+                //TODO: could run this through DLP to be extra safe
+                builder.header(ResponseHeader.ERROR.getHttpHeader(), ErrorCauses.API_ERROR.name());
+                proxyResponseContent = responseContent;
+            }
+            builder.body(StringUtils.trimToEmpty(proxyResponseContent));
+            return builder.build();
+        } finally {
+            sourceApiResponse.disconnect();
+        }
     }
 
     @SneakyThrows

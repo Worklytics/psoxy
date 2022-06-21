@@ -1,8 +1,7 @@
 package co.worklytics.psoxy.rules.google;
 
-import co.worklytics.psoxy.Rules;
 import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
-import co.worklytics.psoxy.rules.RulesBaseTestCase;
+import co.worklytics.psoxy.rules.Rules1;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
@@ -10,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -18,7 +18,7 @@ public class GMailTests extends JavaRulesTestBaseCase {
 
 
     @Getter
-    final Rules rulesUnderTest = PrebuiltSanitizerRules.GMAIL;
+    final Rules1 rulesUnderTest = PrebuiltSanitizerRules.GMAIL;
 
     @Getter
     final String exampleDirectoryPath = "api-response-examples/g-workspace/gmail";
@@ -95,5 +95,11 @@ public class GMailTests extends JavaRulesTestBaseCase {
         //need paging, etc to work ...
         String messagesEndpoint = "https://gmail.googleapis.com/gmail/v1/users/me/messages";
         assertUrlWithQueryParamsAllowed(messagesEndpoint);
+    }
+
+    public Stream<InvocationExample> getExamples() {
+        return Stream.of(
+            InvocationExample.of("https://gmail.googleapis.com/gmail/v1/users/me/messages/sdfgsdfg", "message.json")
+        );
     }
 }

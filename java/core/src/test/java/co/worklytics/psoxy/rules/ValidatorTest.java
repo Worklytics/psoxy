@@ -1,6 +1,5 @@
 package co.worklytics.psoxy.rules;
 
-import co.worklytics.psoxy.Rules;
 import org.junit.jupiter.api.Test;
 
 import java.util.regex.PatternSyntaxException;
@@ -12,13 +11,13 @@ class ValidatorTest {
     @Test
     void allowedEndpointRegex() {
 
-        Rules shouldPass = Rules.builder()
+        Rules1 shouldPass = Rules1.builder()
             .allowedEndpointRegex("/admin/reports/v1/activity/users/all/applications/chat.*")
             .build();
 
         Validator.validate(shouldPass);
 
-        Rules shouldFail = Rules.builder()
+        Rules1 shouldFail = Rules1.builder()
             .allowedEndpointRegex("[") //not actually that easy to write an invalid pattern ...
             .build();
 

@@ -1,7 +1,7 @@
 package co.worklytics.psoxy.rules.google;
 
-import co.worklytics.psoxy.Rules;
 import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
+import co.worklytics.psoxy.rules.Rules1;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
@@ -9,12 +9,13 @@ import org.junit.jupiter.api.Test;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.stream.Stream;
 
 
 public class GDriveV3Tests extends JavaRulesTestBaseCase {
 
     @Getter
-    final Rules rulesUnderTest = PrebuiltSanitizerRules.GDRIVE;
+    final Rules1 rulesUnderTest = PrebuiltSanitizerRules.GDRIVE;
 
     @Getter
     final String exampleDirectoryPath = "api-response-examples/g-workspace/gdrive-v3";
@@ -123,5 +124,14 @@ public class GDriveV3Tests extends JavaRulesTestBaseCase {
 
         assertPseudonymized(sanitized, PII);
         assertRedacted(sanitized, "Alice");
+    }
+
+    public Stream<InvocationExample> getExamples() {
+        return Stream.of(
+            InvocationExample.of("https://www.googleapis.com/drive/v3/files", "files.json"),
+            InvocationExample.of("http://www.googleapis.com/drive/v3/files/some-file-id/permissions/234234", "permission.json"),
+            InvocationExample.of("http://www.googleapis.com/drive/v3/files/some-file-id/permissions", "permissions.json"),
+            InvocationExample.of("http://www.googleapis.com/drive/v3/files/any-file-id/revisions", "revisions.json")
+        );
     }
 }

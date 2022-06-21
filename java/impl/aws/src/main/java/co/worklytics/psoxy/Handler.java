@@ -17,7 +17,7 @@ public class Handler implements com.amazonaws.services.lambda.runtime.RequestHan
 
     /**
      * Static initialization allows reuse in containers
-     * {@link https://aws.amazon.com/premiumsupport/knowledge-center/lambda-improve-java-function-performance/}
+     * {@link "https://aws.amazon.com/premiumsupport/knowledge-center/lambda-improve-java-function-performance/"}
      */
     static AwsContainer awsContainer;
     static CommonRequestHandler requestHandler;
@@ -48,19 +48,20 @@ public class Handler implements com.amazonaws.services.lambda.runtime.RequestHan
             context.getLogger().log(ExceptionUtils.getStackTrace(e));
             response = HttpEventResponse.builder()
                 .statusCode(500)
-                .body("Unknown error")
+                .header(ResponseHeader.ERROR.getHttpHeader(), "Unknown error")
+                .body("Unknown error: " + e.getClass().getName())
                 .build();
         }
 
         try {
-            return new APIGatewayV2HTTPResponse(
-                response.getStatusCode(),
-                response.getHeaders(),
-                null, /* multi-valued headers */
-                null, /* cookies */
-                response.getBody(),
-                false /* isBase64Encoded */
-            );
+            //NOTE: AWS seems to give 502 Bad Gateway errors without explanation or any info
+            // in the lambda logs if this is malformed somehow (Eg, missing statusCode)
+            return APIGatewayV2HTTPResponse.builder()
+                .withStatusCode(response.getStatusCode())
+                .withHeaders(response.getHeaders())
+                .withBody(response.getBody())
+                .withIsBase64Encoded(false)
+                .build();
         } catch (Throwable e) {
             context.getLogger().log("Error writing response as Lambda return");
             throw new Error(e);

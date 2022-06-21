@@ -1,50 +1,74 @@
 ---
-allowedEndpointRegexes:
-  - "^\\/v2\\/users(?:\\?.+)?"
-  - "^\\/v2\\/users\\/(?:[^\\/]*)\\/meetings(?:\\?.+)?"
-  - "^\\/v2\\/meetings\\/(?:[^\\/]*)(?:\\?.+)?"
-  - "^\\/v2\\/past_meetings\\/(?:.*)\\/instances"
-  - "^\\/v2\\/past_meetings\\/(?:[^\\/]*)"
-  - "^\\/v2\\/past_meetings\\/(?:.*)\\/participants(?:\\?.+)?"
-pseudonymizationWithOriginals:
-  - jsonPaths:
-      - "$.users[*].id"
-    relativeUrlRegex: "\\/v2\\/users(?:\\?.+)?"
-pseudonymizations:
-  - jsonPaths:
-      - "$.users[*].email"
-    relativeUrlRegex: "\\/v2\\/users(?:\\?.+)?"
-  - jsonPaths:
-      - "$.meetings[*].host_id"
-    relativeUrlRegex: "\\/v2\\/users\\/(?:[^\\/]*)\\/meetings(?:\\?.+)?"
-  - jsonPaths:
-      - "$.host_id"
-      - "$.host_email"
-    relativeUrlRegex: "\\/v2\\/meetings\\/(?:[^\\/]*)(?:\\?.+)?"
-  - jsonPaths:
-      - "$.host_id"
-      - "$.user_email"
-      - "$.host_email"
-    relativeUrlRegex: "\\/v2\\/past_meetings\\/(?:[^\\/]*)"
-  - jsonPaths:
-      - "$.participants[*].id"
-      - "$.participants[*].user_email"
-    relativeUrlRegex: "\\/v2\\/past_meetings\\/(?:.*)\\/participants(?:\\?.+)?"
-redactions:
-  - jsonPaths:
-      - "$.users[*]['first_name','last_name','pic_url','employee_unique_id']"
-    relativeUrlRegex: "\\/v2\\/users(?:\\?.+)?"
-  - jsonPaths:
-      - "$.meetings[*].topic"
-      - "$.meetings[*].join_url"
-    relativeUrlRegex: "\\/v2\\/users\\/(?:[^\\/]*)\\/meetings(?:\\?.+)?"
-  - jsonPaths:
-      - "$.['topic','settings','agenda']"
-      - "$.['password','h323_password','pstn_password','encrypted_password']"
-    relativeUrlRegex: "\\/v2\\/meetings\\/(?:[^\\/]*)(?:\\?.+)?"
-  - jsonPaths:
-      - "$.['user_name','topic']"
-    relativeUrlRegex: "\\/v2\\/past_meetings\\/(?:[^\\/]*)"
-  - jsonPaths:
-      - "$.participants[*].name"
-    relativeUrlRegex: "\\/v2\\/past_meetings\\/(?:.*)\\/participants(?:\\?.+)?"
+allowAllEndpoints: false
+endpoints:
+  - pathRegex: "/v2/users(?:\\?.+)?"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.users[*].email"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.users[*].id"
+        includeOriginal: true
+      - !<redact>
+        jsonPaths:
+          - "$.users[*]['first_name','last_name','pic_url','employee_unique_id']"
+  - pathRegex: "^/v2/users/(?:[^/]*)/meetings(?:\\?.+)?"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.meetings[*].['host_id','host_email']"
+      - !<redact>
+        jsonPaths:
+          - "$.meetings[*]['topic','join_url']"
+  - pathRegex: "^/v2/meetings/(?:[^/]*)(?:\\?.+)?"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.['host_id','host_email']"
+      - !<redact>
+        jsonPaths:
+          - "$.['topic','settings','agenda','custom_keys']"
+          - "$.['password','h323_password','pstn_password','encrypted_password']"
+  - pathRegex: "^/v2/past_meetings/(?:.*)/instances"
+  - pathRegex: "^/v2/past_meetings/(?:[^\\/]*)"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.['host_id','user_email','host_email']"
+      - !<redact>
+        jsonPaths:
+          - "$.['user_name','topic']"
+  - pathRegex: "^/v2/past_meetings/(?:.*)/participants(?:\\?.+)?"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.participants[*].['id','user_email']"
+      - !<redact>
+        jsonPaths:
+          - "$.participants[*].['name','registrant_id']"
+  - pathRegex: "^/v2/report/users/(?:.*)/meetings(?:\\?.+)?"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.meetings[*]['host_id','user_email','host_email']"
+      - !<redact>
+        jsonPaths:
+          - "$.meetings[*]['user_name','topic','custom_keys','tracking_fields']"
+  - pathRegex: "^/v2/report/meetings/(?:[^/]*)"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.['host_id','user_email','host_email']"
+      - !<redact>
+        jsonPaths:
+          - "$.['user_name','topic','custom_keys','tracking_fields']"
+  - pathRegex: "^/v2/report/meetings/(?:.*)/participants(?:\\?.+)?"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.participants[*].id"
+          - "$.participants[*].user_email"
+      - !<redact>
+        jsonPaths:
+          - "$.participants[*].['name','registrant_id']"
