@@ -71,9 +71,6 @@ public class SanitizerImpl implements Sanitizer {
     @Inject
     HashUtils hashUtils;
 
-    @Inject
-    ObjectMapper objectMapper;
-
     List<JsonPath> applicablePaths(@NonNull List<Pair<Pattern, List<JsonPath>>> rules,
                                    @NonNull String relativeUrl) {
         return rules.stream()
@@ -165,13 +162,8 @@ public class SanitizerImpl implements Sanitizer {
             for (Transform transform : match.getValue().getTransforms()) {
                 applyTransform(transform, document);
             }
-            try {
-                return objectMapper.writer().writeValueAsString(document);
-            } catch (JsonProcessingException e) {
-                log.log(Level.WARNING, "Failed to write output with Jackson", e);
-                return jsonConfiguration.jsonProvider().toJson(document);
-            }
 
+            return jsonConfiguration.jsonProvider().toJson(document);
         }).orElse(jsonResponse);
     }
 
