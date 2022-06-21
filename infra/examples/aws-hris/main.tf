@@ -28,8 +28,8 @@ provider "aws" {
 }
 
 module "psoxy-aws" {
-  #source = "git::https://github.com/worklytics/psoxy//infra/modules/aws?ref=v0.4.0-beta.1"
-  source = "../../modules/aws"
+  # source = "../../modules/aws"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws?ref=v0.4.0-rc"
 
   caller_aws_account_id   = var.caller_aws_account_id
   caller_external_user_id = var.caller_external_user_id
@@ -39,8 +39,8 @@ module "psoxy-aws" {
 
 
 module "psoxy-hris" {
-  source = "../../modules/aws-psoxy-bulk"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-bulk?ref=v0.3.0-beta.5"
+  # source = "../../modules/aws-psoxy-bulk"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-bulk?ref=v0.4.0-rc"
 
 
   caller_aws_account_id   = var.caller_aws_account_id

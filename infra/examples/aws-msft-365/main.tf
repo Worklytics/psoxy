@@ -38,7 +38,7 @@ provider "azuread" {
 
 module "psoxy-aws" {
   source = "../../modules/aws"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws?ref=v0.3.0-beta.5"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws?ref=v0.4.0-rc"
 
   caller_aws_account_id   = var.caller_aws_account_id
   caller_external_user_id = var.caller_external_user_id
@@ -118,7 +118,7 @@ module "msft-connection" {
   for_each = local.enabled_msft_sources
 
   source = "../../modules/azuread-connection"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-connection?ref=v0.3.0-beta.5"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-connection?ref=v0.4.0-rc"
 
   display_name                      = "Psoxy Connector - ${each.value.display_name}${var.connector_display_name_suffix}"
   tenant_id                         = var.msft_tenant_id
@@ -129,8 +129,8 @@ module "msft-connection" {
 module "msft-connection-auth" {
   for_each = local.enabled_msft_sources
 
-  source = "../../modules/azuread-local-cert"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-local-cert?ref=v0.3.0-beta.5"
+  # source = "../../modules/azuread-local-cert"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-local-cert?ref=v0.4.0-rc"
 
   application_object_id = module.msft-connection[each.key].connector.id
   rotation_days         = 60
@@ -171,8 +171,8 @@ resource "aws_ssm_parameter" "refresh_endpoint" {
 module "private-key-aws-parameters" {
   for_each = local.enabled_msft_sources
 
-  source = "../../modules/private-key-aws-parameter"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/private-key-aws-parameter?ref=v0.3.0-beta.5"
+  # source = "../../modules/private-key-aws-parameter"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/private-key-aws-parameter?ref=v0.4.0-rc"
 
   instance_id = each.key
 
@@ -183,8 +183,8 @@ module "private-key-aws-parameters" {
 module "psoxy-msft-connector" {
   for_each = local.enabled_msft_sources
 
-  source = "../../modules/aws-psoxy-rest"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-instance?ref=v0.3.0-beta.5"
+  # source = "../../modules/aws-psoxy-rest"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-instance?ref=v0.4.0-rc"
 
   function_name        = "psoxy-${each.key}"
   source_kind          = each.value.source_kind
@@ -214,7 +214,7 @@ module "msft_365_grants" {
   for_each = local.enabled_msft_sources
 
   source = "../../modules/azuread-grant-all-users"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-grant-all-users?ref=v0.3.0-beta.5"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-grant-all-users?ref=v0.4.0-rc"
 
   application_id           = module.msft-connection[each.key].connector.application_id
   oauth2_permission_scopes = each.value.required_oauth2_permission_scopes
@@ -227,7 +227,7 @@ module "worklytics-psoxy-connection" {
   for_each = local.enabled_msft_sources
 
   source = "../../modules/worklytics-psoxy-connection-aws"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=v0.3.0-beta.5"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=v0.4.0-rc"
 
   psoxy_endpoint_url = module.psoxy-msft-connector[each.key].endpoint_url
   display_name       = "${each.value.display_name} via Psoxy${var.connector_display_name_suffix}"

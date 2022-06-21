@@ -28,8 +28,8 @@ provider "aws" {
 }
 
 module "psoxy-aws" {
-  source = "../../modules/aws"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws?ref=v0.3.0-beta.5"
+  # source = "../../modules/aws"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws?ref=v0.4.0-rc"
 
 
   caller_aws_account_id   = var.caller_aws_account_id
@@ -85,8 +85,8 @@ variable "proxy_base_dir" {
 module "aws-psoxy-long-auth-connectors" {
   for_each = local.enabled_oauth_long_access_connectors
 
-  source = "../../modules/aws-psoxy-rest"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-instance?ref=v0.3.0-beta.5"
+  # source = "../../modules/aws-psoxy-rest"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-instance?ref=v0.4.0-rc"
 
 
   function_name        = "psoxy-${each.key}"
@@ -112,8 +112,8 @@ module "aws-psoxy-long-auth-connectors" {
 module "worklytics-psoxy-connection" {
   for_each = local.enabled_oauth_long_access_connectors
 
-  source = "../../modules/worklytics-psoxy-connection-aws"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=v0.3.0-beta.5"
+  # source = "../../modules/worklytics-psoxy-connection-aws"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=v0.4.0-rc"
 
   psoxy_endpoint_url = module.aws-psoxy-long-auth-connectors[each.key].endpoint_url
   display_name       = "${each.value.display_name} via Psoxy${var.connector_display_name_suffix}"

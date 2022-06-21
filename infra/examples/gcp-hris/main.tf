@@ -32,8 +32,8 @@ resource "google_project" "psoxy-project" {
 
 
 module "psoxy-gcp" {
-  source = "../../modules/gcp"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp?ref=v0.4.0-beta.1"
+  # source = "../../modules/gcp"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp?ref=v0.4.0-rc"
 
   project_id         = var.gcp_project_id
   invoker_sa_emails  = var.worklytics_sa_emails
@@ -44,8 +44,8 @@ module "psoxy-gcp" {
 
 
 module "psoxy-gcp-bulk" {
-  source = "../../modules/gcp-psoxy-bulk"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-bulk?ref=v0.3.0-beta.5"
+  # source = "../../modules/gcp-psoxy-bulk"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-bulk?ref=v0.4.0-rc"
 
   project_id                    = google_project.psoxy-project.project_id
   worklytics_sa_emails          = var.worklytics_sa_emails
