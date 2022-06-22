@@ -106,8 +106,9 @@ abstract public class RulesBaseTestCase {
     void testExamples() {
         getExamples()
             .forEach(example -> {
-                String sanitized =
-                    sanitize(example.getRequestUrl(), new String(TestUtils.getData(getExampleDirectoryPath() + "/" + example.getPlainExampleFile())));
+                String original =
+                    new String(TestUtils.getData(getExampleDirectoryPath() + "/" + example.getPlainExampleFile()));
+                String sanitized = sanitize(example.getRequestUrl(), original);
 
                 String sanitizedFileName =
                     example.getPlainExampleFile().replace(".json", "-sanitized.json");
