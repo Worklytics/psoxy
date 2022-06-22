@@ -198,5 +198,5 @@ module "worklytics-psoxy-connection-google-workspace" {
   psoxy_endpoint_url = module.psoxy-google-workspace-connector[each.key].endpoint_url
   display_name       = "${each.value.display_name} via Psoxy${var.connector_display_name_suffix}"
   aws_region         = var.aws_region
-  aws_role_arn       = var.aws_assume_role_arn
+  aws_role_arn       = module.psoxy-aws.api_caller_role_arn
 }
