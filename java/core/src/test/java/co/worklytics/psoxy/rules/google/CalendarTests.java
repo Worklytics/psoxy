@@ -10,14 +10,13 @@ import org.junit.jupiter.api.Test;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import java.util.stream.Stream;
 
 
-class Calendar2Tests extends JavaRulesTestBaseCase {
+class CalendarTests extends JavaRulesTestBaseCase {
 
     @Getter
-    final Rules2 rulesUnderTest = PrebuiltSanitizerRules.GCAL_2;
+    final Rules2 rulesUnderTest = PrebuiltSanitizerRules.GCAL;
 
     @Getter
     final String exampleDirectoryPath = "api-response-examples/g-workspace/calendar";
@@ -27,7 +26,7 @@ class Calendar2Tests extends JavaRulesTestBaseCase {
 
 
     @Getter
-    final String yamlSerializationFilepath = "google-workspace/calendar-2";
+    final String yamlSerializationFilepath = "google-workspace/calendar";
 
     @SneakyThrows
     @Test

@@ -1,29 +1,54 @@
-allowedEndpointRegexes:
-  - "^/calendar/v3/calendars/[^/]*?$"
-  - "^/calendar/v3/calendars/[^/]*?/events.*"
-  - "^/calendar/v3/users/[^/]*?/settings.*"
-pseudonymizations:
-  - relativeUrlRegex: "^/calendar/v3/calendars/.*/events.*"
-    jsonPaths:
-      - "$..email"
-  - relativeUrlRegex: "^/calendar/v3/calendars/[^/]*?$"
-    jsonPaths:
-      - "$.id"
-redactions:
-  - relativeUrlRegex: "^/calendar/v3/calendars/.*/events.*"
-    jsonPaths:
-      - "$..displayName"
-      - "$.items[*].extendedProperties.private"
-  - relativeUrlRegex: "^/calendar/v3/calendars/[^/]*?$"
-    jsonPaths:
-      - "$.summary"
-  - relativeUrlRegex: "^/calendar/v3/calendars/.*/events/.*"
-    jsonPaths:
-      - "$.description" # WARNING: needed for linking across sources (eg, Zoom invites we need to parse this to link with zoom data)
-      - "$.summary" # WARNING: needed for proper OOO classification
-  - relativeUrlRegex: "^/calendar/v3/calendars/.*/events[^/]*\\??[^/]*$"
-    jsonPaths:
-      - "$.summary" # calendar summary itself
-      - "$.items[*].description"  # WARNING: needed for linking across sources (eg, Zoom invites we need to parse this to link with zoom data)
-      - "$.items[*].summary" # WARNING: needed for proper OOO classification
-
+---
+allowAllEndpoints: false
+endpoints:
+  - pathRegex: "^/calendar/v3/calendars/[^/]*?$"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$.summary"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.id"
+  - pathRegex: "^/calendar/v3/calendars/[^/]*?/events[^/]*"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..email"
+      - !<redact>
+        jsonPaths:
+          - "$..displayName"
+          - "$.summary"
+          - "$.items[*].extendedProperties.private"
+          - "$.items[*].summary"
+      - !<filterTokenByRegex>
+        jsonPaths:
+          - "$.items[*].description"
+        delimiter: "\\s+"
+        filters:
+          - "https://[^.]+\\.zoom\\.us/.*"
+      - !<redactRegexMatches>
+        jsonPaths:
+          - "$.items[*].description"
+        redactions:
+          - "(?i)pwd=[^&]*"
+  - pathRegex: "^/calendar/v3/calendars/[^/]*?/events/.*"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..displayName"
+          - "$.summary"
+      - !<filterTokenByRegex>
+        jsonPaths:
+          - "$.description"
+        delimiter: "\\s+"
+        filters:
+          - "https://[^.]+\\.zoom\\.us/.*"
+      - !<redactRegexMatches>
+        jsonPaths:
+          - "$.description"
+        redactions:
+          - "(?i)pwd=[^&]*"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..email"
+  - pathRegex: "^/calendar/v3/users/[^/]*?/settings.*"

@@ -19,7 +19,7 @@ import static co.worklytics.psoxy.rules.Rules1.Rule;
  */
 public class PrebuiltSanitizerRules {
 
-    static final Rules2 GCAL_2 = Rules2.builder()
+    static final Rules2 GCAL = Rules2.builder()
         .endpoint(Rules2.Endpoint.builder()
             .pathRegex("^/calendar/v3/calendars/[^/]*?$")
             .transform(Transform.Redact.ofPaths("$.summary"))
@@ -338,7 +338,7 @@ public class PrebuiltSanitizerRules {
         .build();
 
     static public final Map<String, RuleSet> GOOGLE_DEFAULT_RULES_MAP = ImmutableMap.<String, RuleSet>builder()
-        .put("gcal", GCAL_2)
+        .put("gcal", GCAL)
         .put("gdirectory", GDIRECTORY)
         .put("gdrive", GDRIVE)
         .put("gmail", GMAIL)
