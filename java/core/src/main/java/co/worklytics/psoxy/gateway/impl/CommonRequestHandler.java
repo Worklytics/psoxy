@@ -179,14 +179,15 @@ public class CommonRequestHandler {
         //TODO: warn here for Google Workspace connectors, which expect user??
 
         Credentials credentials = sourceAuthStrategy.getCredentials(accountToImpersonate);
-        HttpCredentialsAdapter addCredentials = new HttpCredentialsAdapter(credentials);
+        HttpCredentialsAdapter initializeWithCredentials = new HttpCredentialsAdapter(credentials);
 
         //TODO: in OAuth-type use cases, where execute() may have caused token to be refreshed, how
         // do we capture the new one?? ideally do this with listener/handler/trigger in Credential
         // itself, if that's possible
 
-        ComposedHttpRequestInitializer initializer = ComposedHttpRequestInitializer.of(addCredentials,
-            new GzipedContentHttpRequestInitializer("Psoxy"));
+        ComposedHttpRequestInitializer initializer =
+            ComposedHttpRequestInitializer.of(initializeWithCredentials,
+                new GzipedContentHttpRequestInitializer("Psoxy"));
 
         return transport.createRequestFactory(initializer);
     }
