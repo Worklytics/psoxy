@@ -150,5 +150,7 @@ public class CalendarTests extends DirectoryTests {
         String sanitized = sanitize(endpoint, jsonResponse);
 
         assertRedacted(sanitized, "pwd=123123");
+
+        assertNotSanitized(sanitized, "https://acme.zoom.us/j/12354234234");
     }
 }

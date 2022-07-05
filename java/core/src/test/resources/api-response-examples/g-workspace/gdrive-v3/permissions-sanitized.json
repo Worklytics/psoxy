@@ -1,0 +1,32 @@
+{
+  "kind":"drive#permissionList",
+  "permissions":[
+    {
+      "kind":"drive#permission",
+      "id":"00343915730182430912",
+      "type":"user",
+      "emailAddress":"{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"2Qm4dzz05nEf8JDiIJUE7zcfM82seWNtb9w0wVkRF5Y\"}",
+      "role":"writer",
+      "deleted":false,
+      "pendingOwner":false
+    },
+    {
+      "kind":"drive#permission",
+      "id":"02185925293822571813",
+      "type":"user",
+      "emailAddress":"{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"4ejOMXOmbQO_V7hY0Puos924riETBcAxmwLewzgpX48\"}",
+      "role":"writer",
+      "deleted":false,
+      "pendingOwner":false
+    },
+    {
+      "kind":"drive#permission",
+      "id":"16513690099496370655",
+      "type":"user",
+      "emailAddress":"{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"1nOUZ6C0aR7HtY1l3rbtEQwknX6sdfaWxYMsdwYDlS0\"}",
+      "role":"owner",
+      "deleted":false,
+      "pendingOwner":false
+    }
+  ]
+}

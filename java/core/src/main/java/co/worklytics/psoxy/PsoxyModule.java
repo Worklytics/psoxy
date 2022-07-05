@@ -21,6 +21,7 @@ import dagger.Provides;
 
 
 import javax.inject.Named;
+import javax.inject.Singleton;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -34,7 +35,7 @@ import java.util.logging.Logger;
 public class PsoxyModule {
 
 
-    @Provides
+    @Provides @Singleton //should be thread-safe
     ObjectMapper providesObjectMapper() {
         return new ObjectMapper();
     }
@@ -46,13 +47,23 @@ public class PsoxyModule {
     }
 
     @Provides
-    Configuration providesJSONConfiguration() {
+    Configuration providesJSONConfiguration(JacksonJsonProvider jacksonJsonProvider,
+                                            JacksonMappingProvider jacksonMappingProvider) {
         //jackson here because it's our common JSON stack, but adds dependency beyond the one pkg'd
         // with JsonPath.
         return Configuration.defaultConfiguration()
-            .jsonProvider(new JacksonJsonProvider()) //TODO: DI here (share jackson with rest of app)
-            .mappingProvider(new JacksonMappingProvider()) // TODO: DI here (share jackson with rest of app)
-            .setOptions(Option.SUPPRESS_EXCEPTIONS); //we specifically want to ignore PATH_NOT_FOUND cases
+            .jsonProvider(jacksonJsonProvider)
+            .mappingProvider(jacksonMappingProvider);
+    }
+
+    @Provides
+    JacksonJsonProvider jacksonJsonProvider(ObjectMapper objectMapper) {
+        return new JacksonJsonProvider(objectMapper);
+    }
+
+    @Provides
+    JacksonMappingProvider jacksonMappingProvider(ObjectMapper objectMapper) {
+        return new JacksonMappingProvider(objectMapper);
     }
 
     @Provides

@@ -8,13 +8,15 @@ function show_help() {
     echo "-r AWS role to impersonate"
     echo "-i user to impersonate, needed for certain connectors"
     echo "-u URL to call"
+    echo "-z add gzip compression header"
+    echo "-n disable gzip compression header"
     echo "-v verbose"
     echo "-s skip sanitization rules, only works if function deployed in development mode"
     echo "-h show this help"
     exit 0
 }
 
-while getopts gahvsr:u:i: flag
+while getopts gahvsnzr:u:i: flag
 do
     case "${flag}" in
         g) GCP=true;;
@@ -24,6 +26,8 @@ do
         u) TEST_URL=${OPTARG};;
         s) curlparams+=("-HX-Psoxy-Skip-Sanitizer: true");;
         i) curlparams+=("-HX-Psoxy-User-To-Impersonate: ${OPTARG}");;
+        z) curlparams+=("-Haccept-encoding: gzip");;
+        n) curlparams+=("-Haccept-encoding: none");;
         h) show_help;;
     esac
 done

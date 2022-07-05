@@ -1,26 +1,12 @@
 package co.worklytics.psoxy;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
-import dagger.Component;
 
-import javax.inject.Named;
 import java.io.File;
 
 public class Main {
 
     private static final String DEFAULT_CONFIG_FILE = "config.yaml";
-
-    @Component(modules = {
-        PsoxyModule.class,
-        CmdLineModule.class,
-    })
-    public interface Container  {
-
-        @Named("ForYAML") ObjectMapper yamlMapper();
-
-        Handler fileHandler();
-    }
 
 
     @lombok.SneakyThrows
@@ -31,7 +17,7 @@ public class Main {
         File configFile = new File(DEFAULT_CONFIG_FILE);
 
 
-        Container container = DaggerMain_Container.create();
+        CmdLineContainer container = DaggerCmdLineContainer.create();
 
         Config config;
         if (configFile.exists()) {

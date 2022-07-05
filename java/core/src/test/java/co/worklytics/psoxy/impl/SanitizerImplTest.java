@@ -6,6 +6,7 @@ import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
 import co.worklytics.psoxy.rules.Transform;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.MapFunction;
 import dagger.Component;
@@ -261,6 +262,10 @@ class SanitizerImplTest {
         Object document = sanitizer.getJsonConfiguration().jsonProvider().parse(value);
         assertEquals(value,
                 sanitizer.getJsonConfiguration().jsonProvider().toJson(document), "value not preserved roundtrip");
+
+        //matches default JSON serialization
+        assertEquals(value,
+            ((new ObjectMapper()).writer().writeValueAsString(document)));
     }
 
     @SneakyThrows
@@ -271,10 +276,16 @@ class SanitizerImplTest {
     @ParameterizedTest
     void preservesRoundTrip_afterNoop(String value) {
         Object document = sanitizer.getJsonConfiguration().jsonProvider().parse(value);
-        JsonPath.compile("$.uuid")
-            .map(document, (i, c) -> i, sanitizer.getJsonConfiguration());
+
+        JsonPath.compile("$..uuid")
+                .map(document, (i, c) -> i, sanitizer.getJsonConfiguration());
+
         assertEquals(value,
             sanitizer.getJsonConfiguration().jsonProvider().toJson(document), "value not preserved roundtrip");
+
+        //matches default JSON serialization
+        assertEquals(value,
+            ((new ObjectMapper()).writer().writeValueAsString(document)));
     }
 
 

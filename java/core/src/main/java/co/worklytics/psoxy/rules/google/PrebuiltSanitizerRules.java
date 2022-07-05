@@ -250,7 +250,7 @@ public class PrebuiltSanitizerRules {
             .build())
         .redaction(Rule.builder()
             .relativeUrlRegex("^/drive/v3/files/.*?/revisions.*")
-            .jsonPath("$.originalFilename")
+            .jsonPath("$..originalFilename")
             .jsonPath("$.files[*].originalFilename")
             .build())
         .redaction(Rule.builder()

@@ -11,6 +11,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -45,6 +46,7 @@ public class ZoomRulesTests extends JavaRulesTestBaseCase {
         "https://api.zoom.us/v2/meetings/MEETING_ID",
         "https://api.zoom.us/v2/meetings/MEETING_ID?occurence_id=OCCURRENCE_ID&show_previous_occurrences=false",
         "https://api.zoom.us/v2/report/users/{userId}/meetings",
+        "https://api.zoom.us/v2/report/users/myuserid/meetings?from=2022-05-16&to=2022-05-31&type=pastJoined&page_size=1",
         "https://api.zoom.us/v2/report/meetings/{meetingId}",
         "https://api.zoom.us/v2/report/meetings/{meetingId}/participants",
 
@@ -232,4 +234,23 @@ public class ZoomRulesTests extends JavaRulesTestBaseCase {
 
         assertRedacted(sanitized, "example name", "example registrant id");
     }
+
+
+
+    @Override
+    public Stream<InvocationExample> getExamples() {
+        return Stream.of(
+            InvocationExample.of("https://api.zoom.us/v2/users/USER_ID/meetings", "list-user-meetings.json"),
+            InvocationExample.of("https://api.zoom.us/v2/users", "list-users.json"),
+            InvocationExample.of("https://api.zoom.us/v2/meetings/MEETING_ID", "meeting-details.json"),
+            InvocationExample.of("https://api.zoom.us/v2/past_meetings/MEETING_ID", "past-meeting-details.json"),
+            InvocationExample.of("https://api.zoom.us/v2/past_meetings/MEETING_ID/instances", "past-meeting-instances.json"),
+            InvocationExample.of("https://api.zoom.us/v2/past_meetings/MEETING_ID/participants", "past-meeting-participants.json"),
+
+            InvocationExample.of("https://api.zoom.us/v2/report/users/{userId}/meetings", "report-user-meetings.json"),
+            InvocationExample.of("https://api.zoom.us/v2/report/meetings/{meetingId}", "report-meeting-details.json"),
+            InvocationExample.of("https://api.zoom.us/v2/report/meetings/{meetingId}/participants", "report-meeting-participants.json")
+        );
+    }
+
 }

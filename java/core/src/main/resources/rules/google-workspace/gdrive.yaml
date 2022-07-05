@@ -36,7 +36,7 @@ redactions:
       - "$.files[*].name"
   - relativeUrlRegex: "^/drive/v3/files/.*?/revisions.*"
     jsonPaths:
-      - "$.originalFilename"
+      - "$..originalFilename"
       - "$.files[*].originalFilename"
   - relativeUrlRegex: "^/drive/v2/files/.*?/permissions.*"
     jsonPaths:
