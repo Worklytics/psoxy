@@ -1,4 +1,4 @@
-package co.worklytics.psoxy;
+package com.avaulta.gateway.pseudonyms;
 
 import java.util.function.Function;
 

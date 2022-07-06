@@ -1,13 +1,10 @@
-package co.worklytics.psoxy.impl;
-
-import co.worklytics.psoxy.gateway.ConfigService;
+package com.avaulta.gateway.pseudonyms.impl;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.function.Function;
 
-import static co.worklytics.test.TestModules.withMockEncryptionKey;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.Mockito.mock;
@@ -19,10 +16,7 @@ class PseudonymizationStrategyDelimImplTest {
     @SneakyThrows
     @BeforeEach
     void setUp() {
-        encryptionStrategy = new PseudonymizationStrategyDelimImpl();
-
-        encryptionStrategy.config = mock(ConfigService.class);
-        withMockEncryptionKey(encryptionStrategy.config);
+        encryptionStrategy = new PseudonymizationStrategyDelimImpl("salt", TestUtils.testKey());
     }
 
 

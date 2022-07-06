@@ -4,24 +4,27 @@ import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
-import co.worklytics.psoxy.impl.PseudonymizationStrategyImpl;
 import co.worklytics.psoxy.storage.FileHandlerFactory;
 import co.worklytics.psoxy.storage.impl.FileHandlerFactoryImpl;
+
+import com.avaulta.gateway.pseudonyms.PseudonymizationStrategy;
+import com.avaulta.gateway.pseudonyms.impl.PseudonymizationStrategyImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.api.client.http.HttpContent;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 import com.jayway.jsonpath.Configuration;
-import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import dagger.Module;
 import dagger.Provides;
 
 
+import javax.crypto.spec.SecretKeySpec;
 import javax.inject.Named;
 import javax.inject.Singleton;
+import java.util.Base64;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -118,9 +121,14 @@ public class PsoxyModule {
         return fileHandlerStrategy;
     }
 
-    @Provides
-    static PseudonymizationStrategy encryptionStrategy(PseudonymizationStrategyImpl impl) {
-        return impl;
-    }
+    @Provides @Singleton
+    PseudonymizationStrategy pseudonymizationStrategy(ConfigService config) {
 
+        String salt = config.getConfigPropertyOrError(ProxyConfigProperty.PSOXY_SALT);
+
+        String keyFromConfig = config.getConfigPropertyOrError(ProxyConfigProperty.PSOXY_ENCRYPTION_KEY);
+        SecretKeySpec key = new SecretKeySpec(Base64.getDecoder().decode(keyFromConfig), "AES");
+
+        return new PseudonymizationStrategyImpl(salt, key);
+    }
 }
