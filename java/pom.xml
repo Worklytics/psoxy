@@ -28,7 +28,7 @@
     </properties>
 
     <modules>
-        <module>gateway</module>
+        <module>gateway-core</module>
         <module>core</module>
         <module>impl</module>
     </modules>
