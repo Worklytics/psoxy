@@ -106,6 +106,30 @@ terraform apply
   - create the Data Connection from Worklytics to your psoxy instance (Terraform can provide `TODO`
     file with detailed steps for each
 
+## Releases
+
+### v0.4 - rc
+The `main` branch is current at 0.4.
+
+Current status is **release-candidate**; breaking changes to java are anticipated, but we recommend new test deployments use this version to get latest Terraform module structure.
+
+Features:
+  - **transiently reversible pseudonyms** - rules may
+  - **endpoint-based rules, including sub-endpoints** - fully move to 'Rules 2.0', dropping support for 'Rules 1.0' format; and allow 'Rules 2.0' to be recursive (endpoints having endpoints
+
+Breaking changes:
+  - drop support for 'Rules 1.0' format
+  - default pseudonym format will have hashes based only on canonical identifier + salt, not considering the 'scope' in which the identifier
+   appears; and will be base64-urlencoded plain strings, rather than nested JSON.
+
+
+### v0.3 - beta
+
+This is the current recommended release for all existing deployments OR
+any new deployment for production use.
+ - a `v0.3` branch is available on GitHub; this will get fixes/non-breaking changes as they're available.
+ - tagged releases will be provided for anyone who wants a fixed version; latest is `v0.3.0-beta.6`
+
 ## Supported Data Sources
 As of May 2022, the following sources can be connected via psoxy:
 
