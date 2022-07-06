@@ -17,7 +17,9 @@ public class MockModules {
     public interface ForConfigService {
         @Provides @Singleton
         static ConfigService configService() {
-            return mock(ConfigService.class);
+            ConfigService mock = mock(ConfigService.class);
+            TestModules.withMockEncryptionKey(mock);
+            return mock;
         }
     }
 
