@@ -1,7 +1,12 @@
 package co.worklytics.psoxy;
 
+import co.worklytics.test.TestModules;
+import dagger.Component;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.io.File;
 import java.io.StringWriter;
 import java.util.Collections;
@@ -9,8 +14,27 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class HandlerTest {
+public class HandlerTest {
 
+
+    @Singleton
+    @Component(modules = {
+        PsoxyModule.class,
+        TestModules.ForConfigService.class,
+    })
+    public interface Container {
+        void inject(HandlerTest test);
+    }
+
+
+    @Inject
+    Handler handler;
+
+    @BeforeEach
+    public void setup() {
+        Container container = DaggerHandlerTest_Container.create();
+        container.inject(this);
+    }
 
     @Test
     void main() {
@@ -28,9 +52,7 @@ class HandlerTest {
         File inputFile = new File(getClass().getResource("/hris-example.csv").getFile());
 
         StringWriter s = new StringWriter();
-        Handler fileHandler = DaggerCmdLineContainer.create().fileHandler();
-
-        fileHandler.pseudonymize(config, inputFile, s);
+        handler.pseudonymize(config, inputFile, s);
 
 
         assertEquals(EXPECTED, s.toString());
@@ -53,10 +75,7 @@ class HandlerTest {
         File inputFile = new File(getClass().getResource("/hris-example.csv").getFile());
 
         StringWriter s = new StringWriter();
-        Handler fileHandler = DaggerCmdLineContainer.create().fileHandler();
-
-
-        fileHandler.pseudonymize(config, inputFile, s);
+        handler.pseudonymize(config, inputFile, s);
 
         assertEquals(EXPECTED, s.toString());
     }
@@ -74,8 +93,7 @@ class HandlerTest {
         File inputFile = new File(getClass().getResource("/hris-example-headers-w-spaces.csv").getFile());
 
         StringWriter s = new StringWriter();
-        Handler fileHandler = DaggerCmdLineContainer.create().fileHandler();
-        fileHandler.pseudonymize(config, inputFile, s);
+        handler.pseudonymize(config, inputFile, s);
 
         assertEquals(EXPECTED, s.toString());
     }
