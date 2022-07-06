@@ -114,7 +114,7 @@ The `main` branch is current at 0.4.
 Current status is **release-candidate**; breaking changes to java are anticipated, but we recommend new test deployments use this version to get latest Terraform module structure.
 
 Features:
-  - **transiently reversible pseudonyms** - rules may
+  - **transiently reversible pseudonyms** - rules to support returning  'transiently' reversible pseudonyms client, which can be encrypted using key available to psoxy instances (and expected to rotate, such that reversible only until it is rotated).
   - **endpoint-based rules, including sub-endpoints** - fully move to 'Rules 2.0', dropping support for 'Rules 1.0' format; and allow 'Rules 2.0' to be recursive (endpoints having endpoints
 
 Breaking changes:
