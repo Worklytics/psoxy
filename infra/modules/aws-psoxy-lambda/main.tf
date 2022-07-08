@@ -101,10 +101,10 @@ output "function_name" {
   value = aws_lambda_function.psoxy-instance.function_name
 }
 
-output "iam_for_lambda_arn" {
+output "iam_role_for_lambda_arn" {
   value = aws_iam_role.iam_for_lambda.arn
 }
 
-output "iam_for_lambda_name" {
+output "iam_role_for_lambda_name" {
   value = aws_iam_role.iam_for_lambda.name
 }

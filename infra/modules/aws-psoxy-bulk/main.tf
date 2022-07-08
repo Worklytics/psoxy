@@ -8,6 +8,26 @@ terraform {
   }
 }
 
+module "psoxy_lambda" {
+  source = "../aws-psoxy-lambda"
+
+  function_name        = "psoxy-${var.instance_id}"
+  handler_class        = "co.worklytics.psoxy.S3Handler"
+  timeout_seconds      = 600 # 10 minutes
+  memory_size_mb       = 512
+  path_to_config       = var.path_to_config
+  path_to_function_zip = var.path_to_function_zip
+  function_zip_hash    = var.function_zip_hash
+  aws_assume_role_arn  = var.aws_assume_role_arn
+  source_kind          = var.source_kind
+  parameters           = []
+  environment_variables =       {
+    INPUT_BUCKET  = aws_s3_bucket.input.bucket,
+    OUTPUT_BUCKET = aws_s3_bucket.output.bucket
+  }
+}
+
+
 
 resource "aws_s3_bucket" "input" {
   bucket = "psoxy-${var.instance_id}-input"
@@ -16,10 +36,11 @@ resource "aws_s3_bucket" "input" {
 /*
  * USE CASE: By default config as is works. But customer attached own rules to bucket, that seems to
  * supersede default, so this piece needs to be added to the bucket policies too.
+ *
+ * TODO: add optional variable of extra statements to add to bucket policy, array_merge policy
+ *       statements to support customer adding more stuff
  */
 locals {
-  // this should come as variable, but being optional not done for now
-  hris_lambda_execution_role_arn = "arn:aws:iam::${var.aws_account_id}:role/iam_for_lambda_psoxy-hris"
   read_policy_json = jsonencode({
     "Version" : "2012-10-17",
     "Statement" : [
@@ -34,7 +55,7 @@ locals {
         ],
         "Principal": {
           "AWS": [
-            "${local.hris_lambda_execution_role_arn}"
+            "${module.psoxy_lambda.iam_role_for_lambda_arn}"
           ]
         }
       }
@@ -67,7 +88,7 @@ resource "aws_iam_policy" "read_policy_to_execution_role" {
           ],
           "Principal" : {
             "AWS" : [
-              "${local.hris_lambda_execution_role_arn}"
+              "${module.psoxy_lambda.iam_role_for_lambda_arn}"
             ]
           }
         }
@@ -80,24 +101,6 @@ resource "aws_s3_bucket" "output" {
   bucket = "psoxy-${var.instance_id}-output"
 }
 
-module "psoxy_lambda" {
-  source = "../aws-psoxy-lambda"
-
-  function_name        = "psoxy-${var.instance_id}"
-  handler_class        = "co.worklytics.psoxy.S3Handler"
-  timeout_seconds      = 600 # 10 minutes
-  memory_size_mb       = 512
-  path_to_config       = var.path_to_config
-  path_to_function_zip = var.path_to_function_zip
-  function_zip_hash    = var.function_zip_hash
-  aws_assume_role_arn  = var.aws_assume_role_arn
-  source_kind          = var.source_kind
-  parameters           = []
-  environment_variables =       {
-    INPUT_BUCKET  = aws_s3_bucket.input.bucket,
-    OUTPUT_BUCKET = aws_s3_bucket.output.bucket
-  }
-}
 
 # cloudwatch group per lambda function
 resource "aws_cloudwatch_log_group" "lambda-log" {
@@ -145,7 +148,7 @@ resource "aws_iam_policy" "input_bucket_read_policy" {
 }
 
 resource "aws_iam_role_policy_attachment" "read_policy_for_import_bucket" {
-  role       = module.psoxy_lambda.iam_for_lambda_name
+  role       = module.psoxy_lambda.iam_role_for_lambda_name
   policy_arn = aws_iam_policy.input_bucket_read_policy.arn
 }
 
@@ -171,7 +174,7 @@ resource "aws_iam_policy" "output_bucket_write_policy" {
 
 
 resource "aws_iam_role_policy_attachment" "write_policy_for_output_bucket" {
-  role       = module.psoxy_lambda.iam_for_lambda_name
+  role       = module.psoxy_lambda.iam_role_for_lambda_name
   policy_arn = aws_iam_policy.output_bucket_write_policy.arn
 }
 
