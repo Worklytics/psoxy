@@ -41,33 +41,35 @@ resource "aws_s3_bucket" "input" {
  *       statements to support customer adding more stuff
  */
 locals {
-  read_policy_json = jsonencode({
-    "Version" : "2012-10-17",
-    "Statement" : [
-      {
-        "Sid" : "GrantLambdaAccessToInputBucket",
-        "Action" : [
-          "s3:GetObject"
-        ],
-        "Effect" : "Allow",
-        "Resource" : [
-          "${aws_s3_bucket.input.arn}/*"
-        ],
-        "Principal" : {
-          "AWS" : [
-            "${module.psoxy_lambda.iam_role_for_lambda_arn}"
-          ]
-        }
+  minimum_bucket_policy_statements = [
+    {
+      "Sid" : "GrantLambdaAccessToInputBucket",
+      "Action" : [
+        "s3:GetObject"
+      ],
+      "Effect" : "Allow",
+      "Resource" : [
+        "${aws_s3_bucket.input.arn}/*"
+      ],
+      "Principal" : {
+        "AWS" : [
+          "${module.psoxy_lambda.iam_role_for_lambda_arn}"
+        ]
       }
-    ]
-  })
+    }
+  ]
 }
 
 resource "aws_s3_bucket_policy" "read_policy_to_execution_role" {
   bucket = aws_s3_bucket.input
-  policy = local.read_policy_json
+  policy = jsonencode({
+    "Version" : "2012-10-17",
+    "Statement" : concat(
+      local.minimum_bucket_policy_statements,
+      var.additional_bucket_policy_statements
+    )
+  })
 }
-
 
 resource "aws_iam_policy" "read_policy_to_execution_role" {
   name        = "BucketRead_${aws_s3_bucket.input.id}"

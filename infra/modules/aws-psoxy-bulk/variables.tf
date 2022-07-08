@@ -74,3 +74,13 @@ variable "psoxy_base_dir" {
   description = "the path where your psoxy repo resides"
   default     = "../../.."
 }
+
+variable "additional_bucket_policy_statements" {
+  type = list(object({
+    Effect   = string
+    Action   = list(string)
+    Resource = list(string)
+  }))
+  description = "Additional bucket policy statements to add to the bucket."
+  default     = []
+}
