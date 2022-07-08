@@ -27,56 +27,8 @@ module "psoxy_lambda" {
   }
 }
 
-
-
 resource "aws_s3_bucket" "input" {
   bucket = "psoxy-${var.instance_id}-input"
-}
-
-/*
- * USE CASE: By default config as is works. But customer attached own rules to bucket, that seems to
- * supersede default, so this piece needs to be added to the bucket policies too.
- *
- * TODO: add optional variable of extra statements to add to bucket policy, array_merge policy
- *       statements to support customer adding more stuff
- */
-locals {
-  input_bucket_minimum_policy_statements = [
-    {
-      "Sid" : "GrantLambdaAccessToInputBucket",
-      "Action" : [
-        "s3:GetObject"
-      ],
-      "Effect" : "Allow",
-      "Resource" : [
-        "${aws_s3_bucket.input.arn}/*"
-      ],
-      "Principal" : {
-        "AWS" : [
-          "${module.psoxy_lambda.iam_role_for_lambda_arn}"
-        ]
-      }
-    }
-  ]
-}
-
-# q: is this the right approach? this is a *bucket policy*, not an *IAM policy*
-#      https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_policy
-#      https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy4
-#  and https://aws.amazon.com/blogs/security/iam-policies-and-bucket-policies-and-acls-oh-my-controlling-access-to-s3-resources/
-# guess is that we should use an IAM policy not bucket policy, because we do for everything else
-# and it will avoid customers stepping on our policies with any changes they make through the
-# IAM console to the bucket policy (buckets only have single bucket_policy, but can attach multiple
-# IAM policies to a bucket, afaik)
-resource "aws_s3_bucket_policy" "read_policy_to_execution_role" {
-  bucket = aws_s3_bucket.input
-  policy = jsonencode({
-    "Version" : "2012-10-17",
-    "Statement" : concat(
-      local.input_bucket_minimum_policy_statements,
-      var.additional_input_bucket_policy_statements
-    )
-  })
 }
 
 resource "aws_iam_policy" "read_policy_to_execution_role" {
