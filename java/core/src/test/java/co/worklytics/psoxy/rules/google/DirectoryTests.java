@@ -5,7 +5,6 @@ import co.worklytics.psoxy.rules.Rules1;
 import co.worklytics.psoxy.Sanitizer;
 import lombok.Getter;
 import lombok.SneakyThrows;
-import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -191,7 +190,7 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
 
         Rules1 allowAllRoles = getRulesUnderTest().toBuilder().allowedEndpointRegex(".*").build();
 
-        this.sanitizer = this.sanitizerFactory.create(Sanitizer.Options.builder().pseudonymizationSalt("salt")
+        this.sanitizer = this.sanitizerFactory.create(Sanitizer.ConfigurationOptions.builder().pseudonymizationSalt("salt")
             .rules(allowAllRoles)
             .defaultScopeId("gapps").build());
 

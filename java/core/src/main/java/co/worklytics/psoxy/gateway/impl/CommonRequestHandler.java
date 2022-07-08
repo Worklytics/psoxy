@@ -2,6 +2,7 @@ package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.gateway.*;
+import co.worklytics.psoxy.impl.PseudonymImplementation;
 import co.worklytics.psoxy.rules.RuleSet;
 import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.psoxy.utils.ComposedHttpRequestInitializer;
@@ -14,6 +15,7 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.auth.Credentials;
 import com.google.auth.http.HttpCredentialsAdapter;
+import com.google.common.annotations.VisibleForTesting;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
@@ -148,8 +150,9 @@ public class CommonRequestHandler {
                 if (skipSanitization) {
                     proxyResponseContent = responseContent;
                 } else {
-                    proxyResponseContent = sanitizer.sanitize(targetUrl, responseContent);
-                    String rulesSha = rulesUtils.sha(sanitizer.getOptions().getRules());
+                    Sanitizer.Options options = parseOptionsFromRequest(request);
+                    proxyResponseContent = sanitizer.sanitize(targetUrl, responseContent, options);
+                    String rulesSha = rulesUtils.sha(sanitizer.getConfigurationOptions().getRules());
                     builder.header(ResponseHeader.RULES_SHA.getHttpHeader(), rulesSha);
                     log.info("response sanitized with rule set " + rulesSha);
                 }
@@ -165,6 +168,16 @@ public class CommonRequestHandler {
         } finally {
             sourceApiResponse.disconnect();
         }
+    }
+
+    @VisibleForTesting
+    Sanitizer.Options parseOptionsFromRequest(HttpEventRequest request) {
+        Sanitizer.Options.OptionsBuilder optionsBuilder =
+            Sanitizer.Options.defaults().toBuilder();
+        request.getHeader(ControlHeader.PSEUDONYM_IMPLEMENTATION.getHttpHeader())
+            .map(PseudonymImplementation::parseHttpHeaderValue)
+            .ifPresent(optionsBuilder::pseudonymImplementation);
+        return optionsBuilder.build();
     }
 
     @SneakyThrows

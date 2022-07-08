@@ -75,7 +75,7 @@ abstract public class RulesBaseTestCase {
         Container container = DaggerRulesBaseTestCase_Container.create();
         container.inject(this);
 
-        sanitizer = sanitizerFactory.create(Sanitizer.Options.builder()
+        sanitizer = sanitizerFactory.create(Sanitizer.ConfigurationOptions.builder()
             .rules(getRulesUnderTest())
             .defaultScopeId(getDefaultScopeId())
             .build());
@@ -165,7 +165,7 @@ abstract public class RulesBaseTestCase {
 
     protected void assertSha(String expectedSha) {
         assertNotNull(expectedSha);
-        assertEquals(expectedSha, rulesUtils.sha(sanitizer.getOptions().getRules()));
+        assertEquals(expectedSha, rulesUtils.sha(sanitizer.getConfigurationOptions().getRules()));
     }
 
     protected void assertNotSanitized(String content, Collection<String> shouldContain) {

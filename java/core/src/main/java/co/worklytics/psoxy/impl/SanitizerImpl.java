@@ -42,7 +42,7 @@ import static java.util.regex.Pattern.CASE_INSENSITIVE;
 public class SanitizerImpl implements Sanitizer {
 
     @Getter
-    final Options options;
+    final ConfigurationOptions configurationOptions;
 
     //NOTE: JsonPath seems to be threadsafe
     //  - https://github.com/json-path/JsonPath/issues/384
@@ -59,13 +59,16 @@ public class SanitizerImpl implements Sanitizer {
     Map<Transform, List<JsonPath>> compiledTransforms = new ConcurrentHashMap<>();
 
     @AssistedInject
-    public SanitizerImpl(HashUtils hashUtils, @Assisted Options options) {
+    public SanitizerImpl(HashUtils hashUtils, @Assisted ConfigurationOptions configurationOptions) {
         this.hashUtils = hashUtils;
-        this.options = options;
+        this.configurationOptions = configurationOptions;
     }
 
     @Getter(onMethod_ = {@VisibleForTesting})
     @Inject Configuration jsonConfiguration;
+
+
+    PseudonymImplementation pseudonymImplementation = PseudonymImplementation.DEFAULT;
 
 
     @Inject
@@ -86,13 +89,13 @@ public class SanitizerImpl implements Sanitizer {
     List<Pattern> getCompiledAllowedEndpoints() {
         if (compiledAllowedEndpoints == null) {
             synchronized ($writeLock) {
-                if (options.getRules() instanceof Rules2) {
-                    compiledAllowedEndpoints = ((Rules2) options.getRules()).getEndpoints().stream()
+                if (configurationOptions.getRules() instanceof Rules2) {
+                    compiledAllowedEndpoints = ((Rules2) configurationOptions.getRules()).getEndpoints().stream()
                         .map(Rules2.Endpoint::getPathRegex)
                         .map(regex -> Pattern.compile(regex, CASE_INSENSITIVE))
                         .collect(Collectors.toList());
                 } else {
-                    compiledAllowedEndpoints = ((Rules1) options.getRules()).getAllowedEndpointRegexes().stream()
+                    compiledAllowedEndpoints = ((Rules1) configurationOptions.getRules()).getAllowedEndpointRegexes().stream()
                         .map(regex -> Pattern.compile(regex, CASE_INSENSITIVE))
                         .collect(Collectors.toList());
                 }
@@ -106,8 +109,13 @@ public class SanitizerImpl implements Sanitizer {
     @Override
     public boolean isAllowed(@NonNull URL url) {
         String relativeUrl = URLUtils.relativeURL(url);
-        return isAllowAll(options.getRules())
+        return isAllowAll(configurationOptions.getRules())
             || getCompiledAllowedEndpoints().stream().anyMatch(p -> p.matcher(relativeUrl).matches());
+    }
+
+    @Override
+    public String sanitize(URL url, String jsonResponse) {
+        return sanitize(url, jsonResponse, Options.defaults());
     }
 
     boolean isAllowAll(RuleSet rules) {
@@ -121,7 +129,7 @@ public class SanitizerImpl implements Sanitizer {
 
 
     @Override
-    public String sanitize(@NonNull URL url, @NonNull String jsonResponse) {
+    public String sanitize(@NonNull URL url, @NonNull String jsonResponse, Options options) {
         //extra check ...
         if (!isAllowed(url)) {
             throw new IllegalStateException(String.format("Sanitizer called to sanitize response that should not have been retrieved: %s", url.toString()));
@@ -131,7 +139,7 @@ public class SanitizerImpl implements Sanitizer {
             return jsonResponse;
         }
 
-        if (getOptions().getRules() instanceof Rules1) {
+        if (getConfigurationOptions().getRules() instanceof Rules1) {
             return legacyTransform(url, jsonResponse);
         } else {
             return transform(url, jsonResponse);
@@ -142,7 +150,7 @@ public class SanitizerImpl implements Sanitizer {
         if (compiledEndpointRules == null) {
             synchronized ($writeLock) {
                 if (compiledEndpointRules == null) {
-                    compiledEndpointRules = ((Rules2) options.getRules()).getEndpoints().stream()
+                    compiledEndpointRules = ((Rules2) configurationOptions.getRules()).getEndpoints().stream()
                         .map(endpoint -> Pair.of(Pattern.compile(endpoint.getPathRegex(), CASE_INSENSITIVE), endpoint))
                         .collect(Collectors.toList());
                 }
@@ -420,26 +428,31 @@ public class SanitizerImpl implements Sanitizer {
         //NOTE: use of EmailAddressValidator/Parser here is probably overly permissive, as there
         // are many cases where we expect simple emails (eg, alice@worklytics.co), not all the
         // possible variants with personal names / etc that may be allowed in email header values
-        if (duckTypesAsEmails(value)) {
 
+        Function<String, String> canonicalization;
+
+        if (duckTypesAsEmails(value)) {
+            canonicalization = this::emailCanonicalization;
             String domain = EmailAddressParser.getDomain((String) value, EmailAddressCriteria.DEFAULT, true);
             builder.domain(domain);
             scope = PseudonymizedIdentity.EMAIL_SCOPE;
-
-            canonicalValue = emailCanonicalization((String) value);
-
             //q: do something with the personal name??
             // NO --> it is not going to be reliable (except for From, will fill with whatever
             // sender has for the person in their Contacts), and in enterprise use-cases we
             // shouldn't need it for matching
         } else {
-            canonicalValue = value.toString();
-            scope = options.getDefaultScopeId();
+            canonicalization = Function.identity();
+            scope = configurationOptions.getDefaultScopeId();
         }
 
-        if (canonicalValue != null) {
-            builder.scope(scope);
-            builder.hash(hashUtils.hash(canonicalValue, options.getPseudonymizationSalt(), asLegacyScope(scope)));
+        builder.scope(scope);
+        if (pseudonymImplementation == PseudonymImplementation.DEFAULT) {
+           builder.hash(hashUtils.hash(canonicalization.apply(value.toString()),
+               configurationOptions.getPseudonymizationSalt(), asLegacyScope(scope)));
+        } else if (pseudonymImplementation == PseudonymImplementation.LEGACY) {
+           pseudonymizationStrategy.getKeyedPseudonym(value.toString(), canonicalization);
+        } else {
+            throw new RuntimeException("Unsupported pseudonym implementation: " + pseudonymImplementation);
         }
 
         if (includeOriginal) {
@@ -496,7 +509,7 @@ public class SanitizerImpl implements Sanitizer {
         if (compiledPseudonymizations == null) {
             synchronized ($writeLock){
                 if (compiledPseudonymizations == null) {
-                    compiledPseudonymizations = compile(((Rules1) options.getRules()).getPseudonymizations());
+                    compiledPseudonymizations = compile(((Rules1) configurationOptions.getRules()).getPseudonymizations());
                 }
             }
         }
@@ -507,7 +520,7 @@ public class SanitizerImpl implements Sanitizer {
             synchronized ($writeLock){
                 if (compiledPseudonymizationsWithOriginals == null) {
                     compiledPseudonymizationsWithOriginals =
-                        compile(((Rules1) options.getRules()).getPseudonymizationWithOriginals());
+                        compile(((Rules1) configurationOptions.getRules()).getPseudonymizationWithOriginals());
                 }
             }
         }
@@ -517,7 +530,7 @@ public class SanitizerImpl implements Sanitizer {
         if (compiledRedactions == null) {
             synchronized ($writeLock){
                 if (compiledRedactions == null) {
-                    compiledRedactions = compile(((Rules1) options.getRules()).getRedactions());
+                    compiledRedactions = compile(((Rules1) configurationOptions.getRules()).getRedactions());
                 }
             }
         }
@@ -528,7 +541,7 @@ public class SanitizerImpl implements Sanitizer {
         if (compiledEmailHeaderPseudonymizations == null) {
             synchronized ($writeLock){
                 if (compiledEmailHeaderPseudonymizations == null) {
-                    compiledEmailHeaderPseudonymizations = compile(((Rules1) options.getRules()).getEmailHeaderPseudonymizations());
+                    compiledEmailHeaderPseudonymizations = compile(((Rules1) configurationOptions.getRules()).getEmailHeaderPseudonymizations());
                 }
             }
         }

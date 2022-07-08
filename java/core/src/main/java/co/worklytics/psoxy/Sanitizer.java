@@ -1,5 +1,6 @@
 package co.worklytics.psoxy;
 
+import co.worklytics.psoxy.impl.PseudonymImplementation;
 import co.worklytics.psoxy.rules.RuleSet;
 import lombok.*;
 
@@ -8,10 +9,13 @@ import java.net.URL;
 
 public interface Sanitizer {
 
+    /**
+     * immutable sanitizer options
+     */
     @With
     @Builder
     @Value
-    class Options implements Serializable {
+    class ConfigurationOptions implements Serializable {
 
         private static final long serialVersionUID = 3L;
 
@@ -29,6 +33,24 @@ public interface Sanitizer {
         String defaultScopeId;
 
         RuleSet rules;
+    }
+
+
+    /**
+     * options for a specific sanitization operation
+     *  (may differ for subsequent invocations of the Sanitizer)
+     */
+    @With
+    @Builder(toBuilder = true)
+    @Value
+    class Options implements Serializable {
+
+        @Builder.Default
+        PseudonymImplementation pseudonymImplementation = PseudonymImplementation.DEFAULT;
+
+        public static Options defaults() {
+            return Options.builder().build();
+        }
     }
 
     /**
@@ -49,10 +71,18 @@ public interface Sanitizer {
      */
     boolean isAllowed(URL url);
 
+
     /**
      * sanitize jsonResponse received from url, according any options set on Sanitizer
      */
     String sanitize(URL url, String jsonResponse);
+
+    /**
+     * sanitize jsonResponse received from url, according any options set on Sanitizer
+     */
+    String sanitize(URL url, String jsonResponse, Options options);
+
+
 
     /**
      * @param identifier to pseudonymize
@@ -66,5 +96,5 @@ public interface Sanitizer {
      */
     PseudonymizedIdentity pseudonymize(Number identifier);
 
-    Options getOptions();
+    ConfigurationOptions getConfigurationOptions();
 }

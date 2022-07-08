@@ -54,7 +54,7 @@ class SanitizerImplTest {
         Container container = DaggerSanitizerImplTest_Container.create();
         container.inject(this);
 
-        sanitizer = sanitizerFactory.create(Sanitizer.Options.builder()
+        sanitizer = sanitizerFactory.create(Sanitizer.ConfigurationOptions.builder()
             .rules(PrebuiltSanitizerRules.DEFAULTS.get("gmail"))
             .pseudonymizationSalt("an irrelevant per org secret")
             .defaultScopeId("scope")
