@@ -16,7 +16,7 @@ resource "aws_s3_bucket" "input" {
 /*
  * USE CASE: By default config as is works. But customer attached own rules to bucket, that seems to
  * supersede default, so this piece needs to be added to the bucket policies too.
-
+ */
 locals {
   // this should come as variable, but being optional not done for now
   hris_lambda_execution_role_arn = "arn:aws:iam::${var.aws_account_id}:role/iam_for_lambda_psoxy-hris"
@@ -47,7 +47,6 @@ resource "aws_s3_bucket_policy" "read_policy_to_execution_role" {
   policy = local.read_policy_json
 }
 
-*/
 
 resource "aws_iam_policy" "read_policy_to_execution_role" {
   name        = "BucketRead_${aws_s3_bucket.input.id}"
@@ -94,34 +93,15 @@ module "psoxy_lambda" {
   aws_assume_role_arn  = var.aws_assume_role_arn
   source_kind          = var.source_kind
   parameters           = []
-}
-
-
-
-resource "aws_lambda_function" "psoxy-instance" {
-  function_name    = "psoxy-${var.instance_id}"
-  role             = var.api_caller_role_arn
-  handler          = "co.worklytics.psoxy.S3Handler"
-  runtime          = "java11"
-  filename         = var.path_to_function_zip
-  source_code_hash = var.function_zip_hash
-  timeout          = 600 # 10 minutes
-  memory_size      = 512 # megabytes
-
-  environment {
-    variables = merge(
-      {
-        INPUT_BUCKET  = aws_s3_bucket.input.bucket,
-        OUTPUT_BUCKET = aws_s3_bucket.output.bucket
-      },
-      yamldecode(file(var.path_to_config))
-    )
+  environment_variables =       {
+    INPUT_BUCKET  = aws_s3_bucket.input.bucket,
+    OUTPUT_BUCKET = aws_s3_bucket.output.bucket
   }
 }
 
 # cloudwatch group per lambda function
 resource "aws_cloudwatch_log_group" "lambda-log" {
-  name              = "/aws/lambda/${aws_lambda_function.psoxy-instance.function_name}"
+  name              = "/aws/lambda/${module.psoxy_lambda.function_name}"
   retention_in_days = 7
 }
 
@@ -129,7 +109,7 @@ resource "aws_cloudwatch_log_group" "lambda-log" {
 resource "aws_lambda_permission" "allow_input_bucket" {
   statement_id  = "AllowExecutionFromS3Bucket"
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.psoxy-instance.function_name
+  function_name = module.psoxy_lambda.function_name
   principal     = "s3.amazonaws.com"
   source_arn    = aws_s3_bucket.input.arn
 }
@@ -138,7 +118,7 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
   bucket = aws_s3_bucket.input.id
 
   lambda_function {
-    lambda_function_arn = aws_lambda_function.psoxy-instance.arn
+    lambda_function_arn = module.psoxy_lambda.function_arn
     events              = ["s3:ObjectCreated:*"]
   }
 

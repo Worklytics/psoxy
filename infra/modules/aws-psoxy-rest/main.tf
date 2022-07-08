@@ -37,54 +37,6 @@ resource "aws_lambda_function_url" "lambda_url" {
   }
 }
 
-resource "aws_iam_role" "iam_for_lambda" {
-  name = "iam_for_lambda_${var.function_name}"
-
-  assume_role_policy = jsonencode({
-    "Version" : "2012-10-17",
-    "Statement" : [
-      {
-        "Action" : "sts:AssumeRole",
-        "Principal" : {
-          "Service" : "lambda.amazonaws.com"
-        },
-        "Effect" : "Allow",
-        "Sid" : ""
-      }
-    ]
-  })
-}
-
-resource "aws_iam_policy" "policy" {
-  name        = "${var.function_name}_ssmGetParameters"
-  description = "Allow lambda function role to read SSM parameters"
-
-  policy = jsonencode(
-    {
-      "Version" : "2012-10-17",
-      "Statement" : [
-        {
-          "Action" : [
-            "ssm:GetParameter*"
-          ],
-          "Effect" : "Allow",
-          "Resource" : "arn:aws:ssm:${var.region}:${var.aws_account_id}:parameter/*"
-        }
-      ]
-  })
-}
-
-
-resource "aws_iam_role_policy_attachment" "basic" {
-  role       = aws_iam_role.iam_for_lambda.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-}
-
-resource "aws_iam_role_policy_attachment" "policy" {
-  role       = aws_iam_role.iam_for_lambda.name
-  policy_arn = aws_iam_policy.policy.arn
-}
-
 locals {
   # lamba_url has trailing /, but our example_api_calls already have preceding /
   proxy_endpoint_url = substr(aws_lambda_function_url.lambda_url.function_url, 0, -1)
@@ -146,9 +98,9 @@ output "function_arn" {
 }
 
 output "iam_for_lambda_arn" {
-  value = aws_iam_role.iam_for_lambda.arn
+  value = module.psoxy_lambda.iam_for_lambda_arn
 }
 
 output "iam_for_lambda_name" {
-  value = aws_iam_role.iam_for_lambda.name
+  value = module.psoxy_lambda.iam_for_lambda_name
 }
