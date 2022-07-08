@@ -98,7 +98,7 @@ module "aws-psoxy-long-auth-connectors" {
   api_caller_role_arn  = module.psoxy-aws.api_caller_role_arn
   source_kind          = each.value.source_kind
   # from next version
-  path_to_repo_root    = var.proxy_base_dir
+  path_to_repo_root = var.proxy_base_dir
 
 
   parameters = [

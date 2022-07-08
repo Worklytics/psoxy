@@ -21,7 +21,7 @@ module "psoxy_lambda" {
   aws_assume_role_arn  = var.aws_assume_role_arn
   source_kind          = var.source_kind
   parameters           = []
-  environment_variables =       {
+  environment_variables = {
     INPUT_BUCKET  = aws_s3_bucket.input.bucket,
     OUTPUT_BUCKET = aws_s3_bucket.output.bucket
   }
@@ -45,16 +45,16 @@ locals {
     "Version" : "2012-10-17",
     "Statement" : [
       {
-        "Sid": "GrantLambdaAccessToInputBucket",
-        "Action": [
+        "Sid" : "GrantLambdaAccessToInputBucket",
+        "Action" : [
           "s3:GetObject"
         ],
-        "Effect": "Allow",
-        "Resource": [
+        "Effect" : "Allow",
+        "Resource" : [
           "${aws_s3_bucket.input.arn}/*"
         ],
-        "Principal": {
-          "AWS": [
+        "Principal" : {
+          "AWS" : [
             "${module.psoxy_lambda.iam_role_for_lambda_arn}"
           ]
         }

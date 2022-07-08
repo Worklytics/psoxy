@@ -35,10 +35,10 @@ module "psoxy-gcp" {
   # source = "../../modules/gcp"
   source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp?ref=v0.4.0-rc"
 
-  project_id         = var.gcp_project_id
-  invoker_sa_emails  = var.worklytics_sa_emails
-  bucket_location    = var.bucket_location
-  psoxy_base_dir     = var.psoxy_base_dir
+  project_id        = var.gcp_project_id
+  invoker_sa_emails = var.worklytics_sa_emails
+  bucket_location   = var.bucket_location
+  psoxy_base_dir    = var.psoxy_base_dir
 }
 
 

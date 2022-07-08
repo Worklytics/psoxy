@@ -195,7 +195,7 @@ module "psoxy-msft-connector" {
   example_api_calls    = each.value.example_calls
   aws_account_id       = var.aws_account_id
   path_to_repo_root    = var.psoxy_base_dir
-  api_caller_role_arn   = module.psoxy-aws.api_caller_role_arn
+  api_caller_role_arn  = module.psoxy-aws.api_caller_role_arn
 
 
   parameters = concat(
