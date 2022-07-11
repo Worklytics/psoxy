@@ -33,3 +33,8 @@ variable "caller_external_user_id" {
   }
 }
 
+variable "psoxy_base_dir" {
+  type        = string
+  description = "the path where your psoxy repo resides"
+  default     = "../../.."
+}

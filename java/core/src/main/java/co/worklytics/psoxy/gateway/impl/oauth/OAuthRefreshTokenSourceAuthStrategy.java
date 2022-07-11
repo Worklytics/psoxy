@@ -8,6 +8,7 @@ import com.google.api.client.http.*;
 import com.google.auth.Credentials;
 import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.OAuth2CredentialsWithRefresh;
+import com.google.common.annotations.VisibleForTesting;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.extern.java.Log;
@@ -102,6 +103,11 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         @Inject
         OAuthRefreshTokenSourceAuthStrategy.TokenRequestPayloadBuilder payloadBuilder;
 
+        @VisibleForTesting
+        protected final Duration TOKEN_REFRESH_THRESHOLD = Duration.ofMinutes(1L);
+
+        private AccessToken currentToken = null;
+
         /**
          * implements canonical oauth flow to exchange refreshToken for accessToken
          *
@@ -111,6 +117,9 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
          */
         @Override
         public AccessToken refreshAccessToken() throws IOException {
+            if (isCurrentTokenValid(this.currentToken, Instant.now())) {
+                return this.currentToken;
+            }
             String refreshEndpoint =
                 config.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.REFRESH_ENDPOINT);
 
@@ -136,8 +145,10 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                     }
                 });
 
-            return asAccessToken(tokenResponse);
+            this.currentToken = asAccessToken(tokenResponse);
+            return this.currentToken;
         }
+
 
         AccessToken asAccessToken(CanonicalOAuthAccessTokenResponseDto tokenResponse) {
             //expires_in is RECOMMENDED, not REQUIRED in response; if omitted, we're supposed to
@@ -146,6 +157,16 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                 .orElse((int) DEFAULT_ACCESS_TOKEN_EXPIRATION.toSeconds());
             return new AccessToken(tokenResponse.getAccessToken(),
                 Date.from(Instant.now().plusSeconds(expiresIn)));
+        }
+
+        @VisibleForTesting
+        protected boolean isCurrentTokenValid(AccessToken accessToken, Instant now) {
+            if (accessToken == null) {
+                return false;
+            }
+            Instant expiresAt = accessToken.getExpirationTime().toInstant();
+            Instant minimumValid = expiresAt.minus(TOKEN_REFRESH_THRESHOLD);
+            return now.isBefore(minimumValid);
         }
 
         @Override

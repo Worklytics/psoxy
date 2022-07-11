@@ -1,8 +1,7 @@
 package co.worklytics.psoxy.rules.google;
 
-import co.worklytics.psoxy.Rules;
 import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
-import co.worklytics.psoxy.rules.RulesBaseTestCase;
+import co.worklytics.psoxy.rules.Rules1;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
@@ -10,11 +9,12 @@ import org.junit.jupiter.api.Test;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.stream.Stream;
 
 class GoogleMeetTests extends JavaRulesTestBaseCase {
 
     @Getter
-    final Rules rulesUnderTest = PrebuiltSanitizerRules.GOOGLE_MEET;
+    final Rules1 rulesUnderTest = PrebuiltSanitizerRules.GOOGLE_MEET;
 
     @Getter
     final String exampleDirectoryPath = "api-response-examples/g-workspace/meet";
@@ -51,6 +51,11 @@ class GoogleMeetTests extends JavaRulesTestBaseCase {
 
         assertUrlWithQueryParamsAllowed(endpoint);
         assertUrlBlocked("https://admin.googleapis.com/admin/reports/v1/activity/users/all/applications/chat");
+    }
 
+    public Stream<InvocationExample> getExamples() {
+        return Stream.of(
+            InvocationExample.of("https://admin.googleapis.com/admin/reports/v1/activity/users/all/applications/meet", "meet-activities.json")
+        );
     }
 }

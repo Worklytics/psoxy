@@ -1,6 +1,10 @@
 package co.worklytics.psoxy.rules.google;
 
-import co.worklytics.psoxy.Rules;
+import co.worklytics.psoxy.rules.Rules1;
+import co.worklytics.psoxy.rules.Rules2;
+import co.worklytics.psoxy.rules.RuleSet;
+import co.worklytics.psoxy.rules.Transform;
+import co.worklytics.psoxy.rules.zoom.ZoomTransforms;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
@@ -8,49 +12,51 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static co.worklytics.psoxy.Rules.Rule;
+import static co.worklytics.psoxy.rules.Rules1.Rule;
 
 /**
  * Prebuilt sanitization rules for Google tools
  */
 public class PrebuiltSanitizerRules {
 
-    static final Rules GCAL = Rules.builder()
-        .allowedEndpointRegex("^/calendar/v3/calendars/[^/]*?$")
-        .allowedEndpointRegex("^/calendar/v3/calendars/[^/]*?/events.*")
-        .allowedEndpointRegex("^/calendar/v3/users/[^/]*?/settings.*")
-        .pseudonymization(Rule.builder()
-            .relativeUrlRegex("^/calendar/v3/calendars/.*/events.*")
-            .jsonPath("$..email")
+    static final Rules2 GCAL_2 = Rules2.builder()
+        .endpoint(Rules2.Endpoint.builder()
+            .pathRegex("^/calendar/v3/calendars/[^/]*?$")
+            .transform(Transform.Redact.ofPaths("$.summary"))
+            .transform(Transform.Pseudonymize.ofPaths("$.id"))
             .build())
-        .pseudonymization(Rule.builder()
-            .relativeUrlRegex("^/calendar/v3/calendars/[^/]*?$")
-            .jsonPath("$.id")
+        .endpoint(Rules2.Endpoint.builder()
+             .pathRegex("^/calendar/v3/calendars/[^/]*?/events[^/]*")
+            .transform(Transform.Pseudonymize.ofPaths("$..email"))
+            .transform(Transform.Redact.ofPaths(
+                "$..displayName",
+                "$.summary",
+                "$.items[*].extendedProperties.private",
+                "$.items[*].summary"
+            ))
+            .transform(ZoomTransforms.FILTER_CONTENT_EXCEPT_ZOOM_URL.toBuilder()
+                .jsonPath("$.items[*].description")
+                .build())
+            .transform(ZoomTransforms.SANITIZE_JOIN_URL.toBuilder()
+                .jsonPath("$.items[*].description")
+                .build())
             .build())
-        .redaction(Rule.builder()
-            .relativeUrlRegex("^/calendar/v3/calendars/.*/events.*")
-            .jsonPath("$..displayName")
-            .jsonPath("$.items[*].extendedProperties.private")
+        .endpoint( Rules2.Endpoint.builder()
+            .pathRegex("^/calendar/v3/calendars/[^/]*?/events/.*")
+            .transform(Transform.Redact.ofPaths(
+                "$..displayName",
+                "$.summary"
+            ))
+            .transform(ZoomTransforms.FILTER_CONTENT_EXCEPT_ZOOM_URL.toBuilder()
+                .jsonPath("$.description")
+                .build())
+            .transform(ZoomTransforms.SANITIZE_JOIN_URL.toBuilder()
+                .jsonPath("$.description")
+                .build())
+            .transform(Transform.Pseudonymize.ofPaths("$..email"))
             .build())
-        .redaction(Rule.builder()
-            .relativeUrlRegex("^/calendar/v3/calendars/[^/]*?$")
-            .jsonPath("$.summary")
-            .build())
-
-        //redact description and summary from events; this is for confidentiality, not privacy; and
-        // is too restrictive for usual case as hampers several classification algorithms:
-        //   - classifying calendar event as 'OOO' vs plain block
-        //   - de-dupping calendar events with zoom meetings
-        .redaction(Rule.builder()
-            .relativeUrlRegex("^/calendar/v3/calendars/.*/events/.*")
-            .jsonPath("$.description")
-            .jsonPath("$.summary")
-            .build())
-        .redaction(Rule.builder()
-            .relativeUrlRegex("^/calendar/v3/calendars/.*/events[^/]*\\??[^/]*$")
-            .jsonPath("$.summary") // summary value of calendar *itself* is returned by events list endpoint
-            .jsonPath("$.items[*].description")
-            .jsonPath("$.items[*].summary")
+        .endpoint(Rules2.Endpoint.builder()
+            .pathRegex("^/calendar/v3/users/[^/]*?/settings.*")
             .build())
         .build();
 
@@ -63,7 +69,7 @@ public class PrebuiltSanitizerRules {
         .build();
 
 
-    static final Rules GOOGLE_CHAT = Rules.builder()
+    static final Rules1 GOOGLE_CHAT = Rules1.builder()
         .allowedEndpointRegex("^/admin/reports/v1/activity/users/all/applications/chat.*")
         .pseudonymization(Rule.builder()
             .relativeUrlRegex("^/admin/reports/v1/activity/users/all/applications/chat.*")
@@ -73,7 +79,7 @@ public class PrebuiltSanitizerRules {
                 "])].value")
             .build()
         )
-        .redaction(Rules.Rule.builder()
+        .redaction(Rules1.Rule.builder()
             .relativeUrlRegex("^/admin/reports/v1/activity/users/all/applications/chat.*")
             // this build a negated JsonPath predicate for all allowed event parameters, so anything other
             // than expected headers will be redacted. Important to keep ".*$" at the end.
@@ -84,7 +90,7 @@ public class PrebuiltSanitizerRules {
         )
         .build();
 
-    static final Rules GDIRECTORY = Rules.builder()
+    static final Rules1 GDIRECTORY = Rules1.builder()
         //GENERAL stuff
         //to block: https://admin.googleapis.com/admin/directory/v1/users/{userKey}/photos/thumbnail
         .allowedEndpointRegex("^/admin/directory/v1/(groups|orgunits).*")
@@ -195,7 +201,7 @@ public class PrebuiltSanitizerRules {
         )
         .build();
 
-    static final Rules GDRIVE = Rules.builder()
+    static final Rules1 GDRIVE = Rules1.builder()
         // v2 endpoint: https://developers.google.com/drive/api/v2/reference/
         // v3 endpoint: https://developers.google.com/drive/api/v3/reference/
         //NOTE: by default, files endpoint doesn't return any PII. client must pass a fields mask
@@ -244,7 +250,7 @@ public class PrebuiltSanitizerRules {
             .build())
         .redaction(Rule.builder()
             .relativeUrlRegex("^/drive/v3/files/.*?/revisions.*")
-            .jsonPath("$.originalFilename")
+            .jsonPath("$..originalFilename")
             .jsonPath("$.files[*].originalFilename")
             .build())
         .redaction(Rule.builder()
@@ -275,18 +281,18 @@ public class PrebuiltSanitizerRules {
         .add("References")
         .build();
 
-    static final Rules GMAIL = Rules.builder()
+    static final Rules1 GMAIL = Rules1.builder()
        .allowedEndpointRegex("^/gmail/v1/users/[^/]*?/messages.*")
-       .emailHeaderPseudonymization(Rules.Rule.builder()
+       .emailHeaderPseudonymization(Rules1.Rule.builder()
                   .relativeUrlRegex("^/gmail/v1/users/.*?/messages/.*")
                   .jsonPath("$.payload.headers[?(@.name =~ /^(" + String.join("|", EMAIL_HEADERS_CONTAINING_MULTIPLE_EMAILS) + ")$/i)].value")
                   .build())
-       .pseudonymization(Rules.Rule.builder()
+       .pseudonymization(Rules1.Rule.builder()
                   .relativeUrlRegex("^/gmail/v1/users/.*?/messages/.*")
                   .jsonPath("$.payload.headers[?(@.name =~ /^(" + String.join("|", EMAIL_HEADERS_CONTAINING_SINGLE_EMAILS) + ")$/i)].value")
                   .build()
        )
-       .redaction(Rules.Rule.builder()
+       .redaction(Rules1.Rule.builder()
                .relativeUrlRegex("^/gmail/v1/users/.*?/messages/.*")
                 // this build a negated JsonPath predicate for all allowed headers, so anything other
                 // than expected headers will be redacted.
@@ -310,7 +316,7 @@ public class PrebuiltSanitizerRules {
         .add("calendar_event_id", "endpoint_id", "meeting_code", "conference_id") //matching to calendar events
         .build();
 
-    static final Rules GOOGLE_MEET = Rules.builder()
+    static final Rules1 GOOGLE_MEET = Rules1.builder()
         .allowedEndpointRegex("^/admin/reports/v1/activity/users/all/applications/meet.*")
         .pseudonymization(Rule.builder()
             .relativeUrlRegex("/admin/reports/v1/activity/users/all/applications/meet.*")
@@ -331,8 +337,8 @@ public class PrebuiltSanitizerRules {
         )
         .build();
 
-    static public final Map<String, Rules> GOOGLE_DEFAULT_RULES_MAP = ImmutableMap.<String, Rules>builder()
-        .put("gcal", GCAL)
+    static public final Map<String, RuleSet> GOOGLE_DEFAULT_RULES_MAP = ImmutableMap.<String, RuleSet>builder()
+        .put("gcal", GCAL_2)
         .put("gdirectory", GDIRECTORY)
         .put("gdrive", GDRIVE)
         .put("gmail", GMAIL)

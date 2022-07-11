@@ -1,0 +1,38 @@
+{
+  "ok":true,
+  "offset":"T2B5NCQZO",
+  "info":[
+    {
+      "id":"C0TDTJLN4",
+      "created":1532393077,
+      "is_archived":false,
+      "is_general":false,
+      "unlinked":0,
+      "creator":"{\"scope\":\"slack\",\"hash\":\".RGSsbkQODd74HOTPLzzQTF3KD2Mg.ahqNxbhz52g1g\"}",
+      "is_moved":0,
+      "is_shared":true,
+      "is_global_shared":false,
+      "is_org_default":false,
+      "is_org_mandatory":false,
+      "is_org_shared":true,
+      "is_private":false,
+      "is_mpim":false,
+      "is_dm":false,
+      "is_deleted":false,
+      "member_count":52,
+      "retention":{
+        "type":"custom",
+        "duration":"360"
+      },
+      "shared":{
+        "shared_team_ids":[
+          "T02NFGBSH"
+        ],
+        "connected_team_ids":[
+          "T1BCMSY04"
+        ],
+        "internal_team_ids":[ ]
+      }
+    }
+  ]
+}

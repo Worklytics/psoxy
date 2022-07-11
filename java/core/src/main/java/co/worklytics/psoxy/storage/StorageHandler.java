@@ -1,11 +1,11 @@
 package co.worklytics.psoxy.storage;
 
-import co.worklytics.psoxy.Rules;
 import co.worklytics.psoxy.Sanitizer;
 import co.worklytics.psoxy.SanitizerFactory;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.StorageEventRequest;
 import co.worklytics.psoxy.gateway.StorageEventResponse;
+import co.worklytics.psoxy.rules.RuleSet;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 
@@ -17,7 +17,7 @@ public class StorageHandler {
     @Inject
     ConfigService config;
     @Inject
-    Rules rules;
+    RuleSet rules;
     @Inject
     FileHandlerFactory fileHandlerStrategy;
     @Inject

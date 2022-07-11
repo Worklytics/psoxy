@@ -2,7 +2,10 @@ package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.gateway.*;
+import co.worklytics.psoxy.rules.RuleSet;
 import co.worklytics.psoxy.rules.RulesUtils;
+import co.worklytics.psoxy.utils.ComposedHttpRequestInitializer;
+import co.worklytics.psoxy.utils.GzipedContentHttpRequestInitializer;
 import co.worklytics.psoxy.utils.URLUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.http.GenericUrl;
@@ -40,7 +43,8 @@ public class CommonRequestHandler {
     @Inject SourceAuthStrategy sourceAuthStrategy;
     @Inject ObjectMapper objectMapper;
     @Inject SanitizerFactory sanitizerFactory;
-    @Inject Rules rules;
+    @Inject
+    RuleSet rules;
     @Inject HealthCheckRequestHandler healthCheckRequestHandler;
 
     private volatile Sanitizer sanitizer;
@@ -67,8 +71,6 @@ public class CommonRequestHandler {
             return healthCheckResponse.get();
         }
 
-        HttpRequestFactory requestFactory = getRequestFactory(request);
-
         // re-write host
         URL targetUrl = buildTarget(request);
         String relativeURL = URLUtils.relativeURL(targetUrl);
@@ -79,31 +81,33 @@ public class CommonRequestHandler {
 
         this.sanitizer = loadSanitizerRules();
 
+        String callLog = String.format("%s %s", request.getHttpMethod(), relativeURL);
         if (skipSanitization) {
-            log.info(String.format("Proxy invoked with target %s. Skipping sanitization.", relativeURL));
+            log.info(String.format("%s. Skipping sanitization.", callLog));
         } else if (sanitizer.isAllowed(targetUrl)) {
-            log.info(String.format("Proxy invoked with target %s. Rules allowed call.", relativeURL));
+            log.info(String.format("%s. Rules allowed call.", callLog));
         } else {
             builder.statusCode(HttpStatus.SC_FORBIDDEN);
-            log.warning(String.format("Proxy invoked with target %s. Blocked call by rules %s", relativeURL, objectMapper.writeValueAsString(rules.getAllowedEndpointRegexes())));
+            builder.header(ResponseHeader.ERROR.getHttpHeader(), ErrorCauses.BLOCKED_BY_RULES.name());
+            log.warning(String.format("%s. Blocked call by rules %s", callLog, objectMapper.writeValueAsString(rules)));
             return builder.build();
         }
 
         com.google.api.client.http.HttpRequest sourceApiRequest;
         try {
+            HttpRequestFactory requestFactory = getRequestFactory(request);
             sourceApiRequest = requestFactory.buildRequest(request.getHttpMethod(), new GenericUrl(targetUrl), null);
         } catch (IOException e) {
             builder.statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
             builder.body("Failed to authorize request; review logs");
+            builder.header(ResponseHeader.ERROR.getHttpHeader(), ErrorCauses.CONNECTION_SETUP.name());
             log.log(Level.WARNING, e.getMessage(), e);
-
             //something like "Error getting access token for service account: 401 Unauthorized POST https://oauth2.googleapis.com/token,"
-            log.log(Level.WARNING, "Confirm oauth scopes set in config.yaml match those granted via Google Workspace Admin Console");
+            log.log(Level.WARNING, "Confirm oauth scopes set in config.yaml match those granted in data source");
             return builder.build();
         }
 
         //TODO: what headers to forward???
-
         sourceApiRequest.setHeaders(sourceApiRequest.getHeaders()
             //seems like Google API HTTP client has a default 'Accept' header with 'text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2' ??
             .setAccept(ContentType.APPLICATION_JSON.toString())  //MSFT gives weird "{"error":{"code":"InternalServerError","message":"The MIME type 'text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2' requires a '/' character between type and subtype, such as 'text/plain'."}}
@@ -118,39 +122,49 @@ public class CommonRequestHandler {
         //q: add exception handlers for IOExceptions / HTTP error responses, so those retries
         // happen in proxy rather than on Worklytics-side?
 
+        logIfDevelopmentMode(() -> sourceApiRequest.toString());
+
         com.google.api.client.http.HttpResponse sourceApiResponse = sourceApiRequest.execute();
+
+        logIfDevelopmentMode(() -> sourceApiResponse.toString());
 
         // return response
         builder.statusCode(sourceApiResponse.getStatusCode());
+        try {
+            // return response
+            builder.statusCode(sourceApiResponse.getStatusCode());
 
-        String responseContent = StringUtils.EMPTY;
-        // could be empty in HEAD calls
-        if (sourceApiResponse.getContent() != null) {
-            responseContent = new String(sourceApiResponse.getContent().readAllBytes(), sourceApiResponse.getContentCharset());
-        }
-        if (sourceApiResponse.getContentType() != null) {
-            builder.header(HttpHeaders.CONTENT_TYPE, sourceApiResponse.getContentType());
-        }
-
-        String proxyResponseContent;
-        if (isSuccessFamily(sourceApiResponse.getStatusCode())) {
-            if (skipSanitization) {
-                proxyResponseContent = responseContent;
-            }  else {
-                proxyResponseContent = sanitizer.sanitize(targetUrl, responseContent);
-                String rulesSha = rulesUtils.sha(sanitizer.getOptions().getRules());
-                builder.header(ResponseHeader.RULES_SHA.getHttpHeader(), rulesSha);
-                log.info("response sanitized with rule set " + rulesSha);
+            String responseContent = StringUtils.EMPTY;
+            // could be empty in HEAD calls
+            if (sourceApiResponse.getContent() != null) {
+                responseContent = new String(sourceApiResponse.getContent().readAllBytes(), sourceApiResponse.getContentCharset());
             }
-        } else {
-            //write error, which shouldn't contain PII, directly
-            log.log(Level.WARNING, "Source API Error " + responseContent);
-            //TODO: could run this through DLP to be extra safe
-            proxyResponseContent = responseContent;
-        }
-        builder.body(StringUtils.trimToEmpty(proxyResponseContent));
+            if (sourceApiResponse.getContentType() != null) {
+                builder.header(HttpHeaders.CONTENT_TYPE, sourceApiResponse.getContentType());
+            }
 
-        return builder.build();
+            String proxyResponseContent;
+            if (isSuccessFamily(sourceApiResponse.getStatusCode())) {
+                if (skipSanitization) {
+                    proxyResponseContent = responseContent;
+                } else {
+                    proxyResponseContent = sanitizer.sanitize(targetUrl, responseContent);
+                    String rulesSha = rulesUtils.sha(sanitizer.getOptions().getRules());
+                    builder.header(ResponseHeader.RULES_SHA.getHttpHeader(), rulesSha);
+                    log.info("response sanitized with rule set " + rulesSha);
+                }
+            } else {
+                //write error, which shouldn't contain PII, directly
+                log.log(Level.WARNING, "Source API Error " + responseContent);
+                //TODO: could run this through DLP to be extra safe
+                builder.header(ResponseHeader.ERROR.getHttpHeader(), ErrorCauses.API_ERROR.name());
+                proxyResponseContent = responseContent;
+            }
+            builder.body(StringUtils.trimToEmpty(proxyResponseContent));
+            return builder.build();
+        } finally {
+            sourceApiResponse.disconnect();
+        }
     }
 
     @SneakyThrows
@@ -166,15 +180,20 @@ public class CommonRequestHandler {
         Optional<String> accountToImpersonate =
            request.getHeader(ControlHeader.USER_TO_IMPERSONATE.getHttpHeader());
 
+
         accountToImpersonate.ifPresent(user -> log.info("Impersonating user"));
         //TODO: warn here for Google Workspace connectors, which expect user??
 
         Credentials credentials = sourceAuthStrategy.getCredentials(accountToImpersonate);
-        HttpCredentialsAdapter initializer = new HttpCredentialsAdapter(credentials);
+        HttpCredentialsAdapter initializeWithCredentials = new HttpCredentialsAdapter(credentials);
 
         //TODO: in OAuth-type use cases, where execute() may have caused token to be refreshed, how
         // do we capture the new one?? ideally do this with listener/handler/trigger in Credential
         // itself, if that's possible
+
+        ComposedHttpRequestInitializer initializer =
+            ComposedHttpRequestInitializer.of(initializeWithCredentials,
+                new GzipedContentHttpRequestInitializer("Psoxy"));
 
         return transport.createRequestFactory(initializer);
     }

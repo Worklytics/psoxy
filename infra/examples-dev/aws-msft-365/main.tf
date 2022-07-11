@@ -42,17 +42,11 @@ module "psoxy-aws" {
   caller_aws_account_id   = var.caller_aws_account_id
   caller_external_user_id = var.caller_external_user_id
   aws_account_id          = var.aws_account_id
+  psoxy_base_dir          = var.psoxy_base_dir
 
   providers = {
     aws = aws
   }
-}
-
-module "psoxy-package" {
-  source = "../../modules/psoxy-package"
-
-  implementation     = "aws"
-  path_to_psoxy_java = "${var.psoxy_base_dir}/java"
 }
 
 data "azuread_client_config" "current" {}
@@ -147,6 +141,12 @@ resource "aws_ssm_parameter" "client_id" {
   name  = "PSOXY_${upper(replace(each.key, "-", "_"))}_CLIENT_ID"
   type  = "String"
   value = module.msft-connection[each.key].connector.application_id
+
+  lifecycle {
+    ignore_changes = [
+      value
+    ]
+  }
 }
 
 resource "aws_ssm_parameter" "refresh_endpoint" {
@@ -156,6 +156,12 @@ resource "aws_ssm_parameter" "refresh_endpoint" {
   type      = "String"
   overwrite = true
   value     = "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
+
+  lifecycle {
+    ignore_changes = [
+      value
+    ]
+  }
 }
 
 
@@ -173,16 +179,18 @@ module "private-key-aws-parameters" {
 module "psoxy-msft-connector" {
   for_each = local.enabled_msft_sources
 
-  source = "../../modules/aws-psoxy-instance"
+  source = "../../modules/aws-psoxy-rest"
 
   function_name        = "psoxy-${each.key}"
   source_kind          = each.value.source_kind
-  path_to_function_zip = module.psoxy-package.path_to_deployment_jar
-  function_zip_hash    = module.psoxy-package.deployment_package_hash
   path_to_config       = "${var.psoxy_base_dir}/configs/${each.value.source_kind}.yaml"
+  path_to_function_zip = module.psoxy-aws.path_to_deployment_jar
+  function_zip_hash    = module.psoxy-aws.deployment_package_hash
+  api_caller_role_arn  = module.psoxy-aws.api_caller_role_arn
   aws_assume_role_arn  = var.aws_assume_role_arn
   example_api_calls    = each.value.example_calls
   aws_account_id       = var.aws_account_id
+  path_to_repo_root    = var.psoxy_base_dir
 
   parameters = concat(
     module.private-key-aws-parameters[each.key].parameters,

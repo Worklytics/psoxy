@@ -1,6 +1,6 @@
 package co.worklytics.psoxy.rules.msft;
 
-import co.worklytics.psoxy.Rules;
+import co.worklytics.psoxy.rules.Rules2;
 import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
 import lombok.Getter;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -9,7 +9,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 public class MailTests extends JavaRulesTestBaseCase {
 
     @Getter
-    final Rules rulesUnderTest = PrebuiltSanitzerRules.OUTLOOK_MAIL;
+    final Rules2 rulesUnderTest = PrebuiltSanitizerRules.OUTLOOK_MAIL;
 
     @Getter
     final String exampleDirectoryPath = "api-response-examples/microsoft-365/outlook-mail";
@@ -90,5 +90,25 @@ public class MailTests extends JavaRulesTestBaseCase {
         assertUrlAllowed(endpoint);
         assertUrlWithQueryParamsBlocked(endpoint);
     }
-}
+
+    @ParameterizedTest
+    @ValueSource(strings = {"v1.0", "beta"})
+    public void mailboxPaging(String apiVersion) {
+        String endpoint = "https://graph.microsoft.com/" + apiVersion +
+            "/users/4ea7fc01-0264-4e84-b85e-9e49fba4de97/mailFolders('SentItems')/messages?$filter=SentDateTime+gt+2019-12-30T00%3a00%3a00Z+and+SentDateTime+lt+2022-05-16T00%3a00%3a00Z&%24top=10&$skip=10";
+        assertUrlAllowed(endpoint);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"v1.0", "beta"})
+    public void inboxBlocked(String apiVersion) {
+        String pagingEndpoint = "https://graph.microsoft.com/" + apiVersion +
+            "/users/4ea7fc01-0264-4e84-b85e-9e49fba4de97/mailFolders('Inbox')/messages?$filter=SentDateTime+gt+2019-12-30T00%3a00%3a00Z+and+SentDateTime+lt+2022-05-16T00%3a00%3a00Z&%24top=10&$skip=10";
+        assertUrlBlocked(pagingEndpoint);
+
+        String endpoint = "https://graph.microsoft.com/" + apiVersion +
+            "/users/4ea7fc01-0264-4e84-b85e-9e49fba4de97/mailFolders/Inbox/messages?$filter=SentDateTime+gt+2019-12-30T00%3a00%3a00Z+and+SentDateTime+lt+2022-05-16T00%3a00%3a00Z&%24top=10&$skip=10";
+        assertUrlBlocked(endpoint);
+    }
+  }
 

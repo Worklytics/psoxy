@@ -1,6 +1,6 @@
 package co.worklytics.psoxy.rules.msft;
 
-import co.worklytics.psoxy.Rules;
+import co.worklytics.psoxy.rules.Rules2;
 import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
 import lombok.Getter;
 import org.junit.jupiter.api.Disabled;
@@ -12,7 +12,7 @@ import java.util.Collection;
 public class DirectoryTests extends JavaRulesTestBaseCase {
 
     @Getter
-    final Rules rulesUnderTest = PrebuiltSanitzerRules.DIRECTORY;
+    final Rules2 rulesUnderTest = PrebuiltSanitizerRules.DIRECTORY;
 
     @Getter
     final String exampleDirectoryPath = "api-response-examples/microsoft-365/directory";
