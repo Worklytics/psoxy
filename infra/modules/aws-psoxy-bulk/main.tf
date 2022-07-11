@@ -31,6 +31,13 @@ resource "aws_s3_bucket" "input" {
   bucket = "psoxy-${var.instance_id}-input"
 }
 
+resource "aws_s3_bucket_public_access_block" "input-block-public-access" {
+  bucket = aws_s3_bucket.input.bucket
+
+  block_public_acls   = true
+  block_public_policy = true
+}
+
 resource "aws_iam_policy" "read_policy_to_execution_role" {
   name        = "BucketRead_${aws_s3_bucket.input.id}"
   description = "Allow principal to read from input bucket: ${aws_s3_bucket.input.id}"
@@ -63,6 +70,12 @@ resource "aws_s3_bucket" "output" {
   bucket = "psoxy-${var.instance_id}-output"
 }
 
+resource "aws_s3_bucket_public_access_block" "input-block-public-access" {
+  bucket = aws_s3_bucket.output.bucket
+
+  block_public_acls   = true
+  block_public_policy = true
+}
 
 # cloudwatch group per lambda function
 resource "aws_cloudwatch_log_group" "lambda-log" {
