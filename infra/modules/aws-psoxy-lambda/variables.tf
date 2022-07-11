@@ -69,3 +69,9 @@ variable "timeout_seconds" {
   description = "lambda timeout in seconds"
   default     = 55
 }
+
+variable "log_retention_in_days" {
+  type        = number
+  description = "number of days to retain logs in CloudWatch for this psoxy instance"
+  default     = 7
+}
