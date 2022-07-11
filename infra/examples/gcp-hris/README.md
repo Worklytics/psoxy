@@ -42,7 +42,7 @@ bucket_prefix        = "alice-psoxy-dev"
 source_kind          = "hris"
 ```
 
-You could check more details about configuration in the [module documentation](../../modules/gcp-bulk/readme.md)
+You could check more details about configuration in the [module documentation](../../modules/gcp-psoxy-bulk/readme.md)
 
 ## Deployment
 

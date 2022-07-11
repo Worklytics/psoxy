@@ -46,9 +46,9 @@ variable "parameters" {
 
 variable "path_to_repo_root" {
   type        = string
-  description = "path root of your checkout; ideally absolute"
+  description = "the path where your psoxy repo resides"
+  default     = "../../.."
 }
-
 
 variable "path_to_function_zip" {
   type        = string
@@ -65,6 +65,10 @@ variable "path_to_config" {
   description = "path to config file (usually someting in ../../configs/, eg configs/gdirectory.yaml"
 }
 
+variable "api_caller_role_arn" {
+  type        = string
+  description = "arn of role which can be assumed to call API"
+}
 
 variable "example_api_calls" {
   type        = list(string)

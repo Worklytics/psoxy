@@ -128,6 +128,14 @@ resource "aws_ssm_parameter" "salt" {
   }
 }
 
+
+module "psoxy-package" {
+  source = "../psoxy-package"
+
+  implementation     = "aws"
+  path_to_psoxy_java = "${var.psoxy_base_dir}/java"
+}
+
 output "salt_secret" {
   value = aws_ssm_parameter.salt
 }
@@ -138,4 +146,16 @@ output "api_caller_role_arn" {
 
 output "api_caller_role_name" {
   value = aws_iam_role.api-caller.name
+}
+
+output "deployment_package_hash" {
+  value = module.psoxy-package.deployment_package_hash
+}
+
+output "path_to_deployment_jar" {
+  value = module.psoxy-package.path_to_deployment_jar
+}
+
+output "filename" {
+  value = module.psoxy-package.filename
 }
