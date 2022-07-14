@@ -70,7 +70,7 @@ resource "aws_s3_bucket" "output" {
   bucket = "psoxy-${var.instance_id}-output"
 }
 
-resource "aws_s3_bucket_public_access_block" "input-block-public-access" {
+resource "aws_s3_bucket_public_access_block" "output-block-public-access" {
   bucket = aws_s3_bucket.output.bucket
 
   block_public_acls   = true
