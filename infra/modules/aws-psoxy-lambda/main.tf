@@ -11,10 +11,11 @@ terraform {
 resource "aws_lambda_function" "psoxy-instance" {
   function_name    = var.function_name
   role             = aws_iam_role.iam_for_lambda.arn
-  handler          = var.handler_class
+  architectures    = ["arm64"] # 20% cheaper per ms exec time than x86_64
   runtime          = "java11"
   filename         = var.path_to_function_zip
   source_code_hash = var.function_zip_hash
+  handler          = var.handler_class
   timeout          = var.timeout_seconds
   memory_size      = var.memory_size_mb
 
