@@ -13,6 +13,12 @@ variable "region" {
   default     = "us-east-1"
 }
 
+variable "psoxy_base_dir" {
+  type        = string
+  description = "the path where your psoxy repo resides"
+  default     = "../../.."
+}
+
 variable "caller_aws_account_id" {
   type        = string
   description = "id of worklytics sa"
@@ -33,8 +39,4 @@ variable "caller_external_user_id" {
   }
 }
 
-variable "psoxy_base_dir" {
-  type        = string
-  description = "the path where your psoxy repo resides"
-  default     = "../../.."
-}
+

@@ -18,11 +18,10 @@ resource "aws_iam_role" "api-caller" {
     "Statement" : [
       {
         "Action" : "sts:AssumeRole",
+        "Effect" : "Allow",
         "Principal" : {
           "Service" : "lambda.amazonaws.com"
         },
-        "Effect" : "Allow",
-        "Sid" : ""
       },
       {
         "Action" = "sts:AssumeRole"
@@ -33,11 +32,11 @@ resource "aws_iam_role" "api-caller" {
       },
       # allows service account to assume role
       {
+        "Action" : "sts:AssumeRoleWithWebIdentity",
         "Effect" : "Allow",
         "Principal" : {
           "Federated" : "accounts.google.com"
         },
-        "Action" : "sts:AssumeRoleWithWebIdentity",
         "Condition" : {
           "StringEquals" : {
             "accounts.google.com:aud" : var.caller_external_user_id
