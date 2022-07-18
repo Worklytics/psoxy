@@ -36,10 +36,10 @@ module "psoxy-aws" {
   # source = "../../modules/aws" # to bind with local
   source = "git::https://github.com/worklytics/psoxy//infra/modules/aws?ref=v0.4.0-rc"
 
-  caller_aws_account_id   = var.caller_aws_account_id
-  caller_external_user_id = var.caller_external_user_id
-  aws_account_id          = var.aws_account_id
-  psoxy_base_dir          = var.psoxy_base_dir
+  aws_account_id                 = var.aws_account_id
+  psoxy_base_dir                 = var.psoxy_base_dir
+  caller_aws_arns                = var.caller_aws_arns
+  caller_gcp_service_account_ids = var.caller_gcp_service_account_ids
 }
 
 # holds SAs + keys needed to connect to Google Workspace APIs
