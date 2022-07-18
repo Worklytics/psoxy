@@ -22,10 +22,10 @@ variable "psoxy_base_dir" {
 variable "caller_gcp_service_account_ids" {
   type        = list(string)
   description = "ids of GCP service accounts allowed to send requests to the proxy (eg, unique ID of the SA of your Worklytics instance)"
-  default     =  []
+  default     = []
 
   validation {
-    condition     = alltrue([
+    condition = alltrue([
       for i in var.caller_gcp_service_account_ids : (length(regexall("^\\d{21}$", i)) > 0)
     ])
     error_message = "The values of caller_gcp_service_account_ids should be 21-digit numeric strings."
@@ -35,7 +35,7 @@ variable "caller_gcp_service_account_ids" {
 variable "caller_aws_arns" {
   type        = list(string)
   description = "ARNs of AWS accounts allowed to send requests to the proxy (eg, arn:aws:iam::914358739851:root)"
-  default     =  []
+  default     = []
 
   validation {
     condition = alltrue([
