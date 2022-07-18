@@ -37,13 +37,13 @@ provider "azuread" {
 }
 
 module "psoxy-aws" {
-  source = "../../modules/aws"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws?ref=v0.4.0-rc"
+  # source = "../../modules/aws"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws?ref=v0.4.0-rc"
 
-  caller_aws_account_id   = var.caller_aws_account_id
-  caller_external_user_id = var.caller_external_user_id
-  aws_account_id          = var.aws_account_id
-  psoxy_base_dir          = var.psoxy_base_dir
+  aws_account_id                 = var.aws_account_id
+  psoxy_base_dir                 = var.psoxy_base_dir
+  caller_aws_arns                = var.caller_aws_arns
+  caller_gcp_service_account_ids = var.caller_gcp_service_account_ids
 
   providers = {
     aws = aws
@@ -117,8 +117,8 @@ locals {
 module "msft-connection" {
   for_each = local.enabled_msft_sources
 
-  source = "../../modules/azuread-connection"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-connection?ref=v0.4.0-rc"
+  # source = "../../modules/azuread-connection"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-connection?ref=v0.4.0-rc"
 
   display_name                      = "Psoxy Connector - ${each.value.display_name}${var.connector_display_name_suffix}"
   tenant_id                         = var.msft_tenant_id

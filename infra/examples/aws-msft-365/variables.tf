@@ -18,21 +18,31 @@ variable "aws_region" {
   description = "default region in which to provision your AWS infra"
 }
 
-variable "caller_aws_account_id" {
-  type        = string
-  description = "id of Worklytics AWS account from which proxy will be called (default: 939846301470:root)"
-  default     = "939846301470:root"
+variable "caller_gcp_service_account_ids" {
+  type        = list(string)
+  description = "ids of GCP service accounts allowed to send requests to the proxy (eg, unique ID of the SA of your Worklytics instance)"
+  default     = []
+
   validation {
-    condition     = can(regex("^\\d{12}:\\w+$", var.caller_aws_account_id))
-    error_message = "The caller_aws_account_id value should be 12 digits, followed by ':root'."
+    condition = alltrue([
+      for i in var.caller_gcp_service_account_ids : (length(regexall("^\\d{21}$", i)) > 0)
+    ])
+    error_message = "The values of caller_gcp_service_account_ids should be 21-digit numeric strings."
   }
 }
 
-variable "caller_external_user_id" {
-  type        = string
-  description = "id of external user that will call proxy (eg, OAuth Client ID of the service account of your Worklytics tenant)"
-}
+variable "caller_aws_arns" {
+  type        = list(string)
+  description = "ARNs of AWS accounts allowed to send requests to the proxy (eg, arn:aws:iam::914358739851:root)"
+  default     = []
 
+  validation {
+    condition = alltrue([
+      for i in var.caller_aws_arns : (length(regexall("^arn:aws:iam::\\d{12}:\\w+$", i)) > 0)
+    ])
+    error_message = "The values of caller_aws_arns should be AWS Resource Names, something like 'arn:aws:iam::914358739851:root'."
+  }
+}
 variable "msft_tenant_id" {
   type        = string
   default     = ""
