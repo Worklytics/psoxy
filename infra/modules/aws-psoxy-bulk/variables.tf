@@ -18,20 +18,6 @@ variable "aws_region" {
   description = "default region in which to provision your AWS infra"
 }
 
-variable "caller_aws_account_id" {
-  type        = string
-  description = "id of Worklytics AWS account from which proxy will be called"
-  validation {
-    condition     = can(regex("^\\d{12}:\\w+$", var.caller_aws_account_id))
-    error_message = "The caller_aws_account_id value should be 12-digit numeric string following by the role used. Example: 914358739851:root."
-  }
-}
-
-variable "caller_external_user_id" {
-  type        = string
-  description = "id of external user that will call proxy (eg, SA of your Worklytics instance)"
-}
-
 variable "instance_id" {
   type        = string
   description = "Human readable reference name for this psoxy instance. Helpful for distinguishing resulting infrastructure"
@@ -42,7 +28,6 @@ variable "source_kind" {
   default     = "hris"
   description = "Kind of the content to process"
 }
-
 
 variable "path_to_function_zip" {
   type        = string
