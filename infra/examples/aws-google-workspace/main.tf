@@ -281,3 +281,21 @@ module "worklytics-psoxy-connection" {
 }
 
 # END LONG ACCESS AUTH CONNECTORS
+
+
+module "psoxy-hris" {
+  # source = "../../modules/aws-psoxy-bulk"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-bulk?ref=v0.4.0-rc"
+
+  aws_account_id          = var.aws_account_id
+  aws_assume_role_arn     = var.aws_assume_role_arn
+  instance_id             = "hris"
+  source_kind             = "hris"
+  aws_region              = var.aws_region
+  path_to_function_zip    = module.psoxy-aws.path_to_deployment_jar
+  function_zip_hash       = module.psoxy-aws.deployment_package_hash
+  path_to_config          = "${var.psoxy_base_dir}configs/hris.yaml"
+  api_caller_role_arn     = module.psoxy-aws.api_caller_role_arn
+  api_caller_role_name    = module.psoxy-aws.api_caller_role_name
+  psoxy_base_dir          = var.psoxy_base_dir
+}
