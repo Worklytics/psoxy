@@ -40,12 +40,6 @@ jobs:
           terraform init -reconfigure
           terraform validate
 
-      - name: 'Terraform - validate examples/aws-zoom-slack'
-        working-directory: infra/examples/aws-zoom-slack
-        run: |
-          terraform init -reconfigure
-          terraform validate
-
       - name: 'Terraform - validate examples/gcp-bootstrap-cft'
         working-directory: infra/examples/gcp-bootstrap-cft
         run: |
