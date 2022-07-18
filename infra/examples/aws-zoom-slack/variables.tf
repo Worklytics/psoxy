@@ -42,5 +42,10 @@ variable "connector_display_name_suffix" {
 variable "psoxy_base_dir" {
   type        = string
   description = "the path where your psoxy repo resides. Preferably a full path, /home/user/repos/, avoid tilde (~) shortcut to $HOME"
-  default     = "../../.."
+  default     = "../../../"
+
+  validation {
+    condition     = can(regex(".*\\/$", var.psoxy_base_dir))
+    error_message = "The psoxy_base_dir value should end with a slash."
+  }
 }
