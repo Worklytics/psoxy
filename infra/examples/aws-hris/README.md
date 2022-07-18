@@ -22,7 +22,7 @@ instance_id                   = "hris-function"
 source_kind                   = "hris"
 ```
 
-You could check more details about configuration in the [module documentation](../../modules/aws-bulk/readme.md)
+You could check more details about configuration in the [module documentation](../../modules/aws-psoxy-bulk/readme.md)
 
 ## Deployment
 

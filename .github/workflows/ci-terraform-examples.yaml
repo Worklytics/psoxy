@@ -1,11 +1,11 @@
-name: CI - infra (terraform)
+name: CI - Terraform Examples
 
 on:
   push:
-    branches:
-      - '**' # should match all branches
-    tags-ignore:
-      - '**' # all tags; actually, believe this is default behavior when you specify filter for branches but not tags
+    branches-ignore:
+      - '**' # only run these on mainline (so we know if stable for reslse)
+    tags:
+      - '**' # all tags; ensure any explicit release is internally consistent
 
 jobs:
   validate:
@@ -66,18 +66,6 @@ jobs:
 
       - name: 'Terraform - validate examples/gcp-hris'
         working-directory: infra/examples/gcp-hris
-        run: |
-          terraform init -reconfigure
-          terraform validate
-
-      - name: 'Terraform - validate examples-dev/gcp-google-workspace'
-        working-directory: infra/examples-dev/gcp-google-workspace
-        run: |
-          terraform init -reconfigure
-          terraform validate
-
-      - name: 'Terraform - validate examples-dev/aws-msft-365'
-        working-directory: infra/examples-dev/aws-msft-365
         run: |
           terraform init -reconfigure
           terraform validate

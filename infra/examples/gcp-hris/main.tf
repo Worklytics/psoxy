@@ -30,16 +30,33 @@ resource "google_project" "psoxy-project" {
 }
 
 
-module "psoxy-gcp-bulk" {
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-bulk?ref=v0.3.0-beta.5"
 
-  project_id           = google_project.psoxy-project.project_id
-  worklytics_sa_emails = var.worklytics_sa_emails
-  region               = var.region
-  bucket_prefix        = var.bucket_prefix
-  bucket_location      = var.bucket_location
-  source_kind          = var.source_kind
-  psoxy_base_dir       = var.psoxy_base_dir
+module "psoxy-gcp" {
+  # source = "../../modules/gcp"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp?ref=v0.4.0-rc"
+
+  project_id        = var.gcp_project_id
+  invoker_sa_emails = var.worklytics_sa_emails
+  bucket_location   = var.bucket_location
+  psoxy_base_dir    = var.psoxy_base_dir
+}
+
+
+
+module "psoxy-gcp-bulk" {
+  # source = "../../modules/gcp-psoxy-bulk"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-bulk?ref=v0.4.0-rc"
+
+  project_id                    = google_project.psoxy-project.project_id
+  worklytics_sa_emails          = var.worklytics_sa_emails
+  region                        = var.region
+  source_kind                   = var.source_kind
+  salt_secret_id                = module.psoxy-gcp.salt_secret_name
+  artifacts_bucket_name         = module.psoxy-gcp.artifacts_bucket_name
+  deployment_bundle_object_name = module.psoxy-gcp.deployment_bundle_object_name
+  path_to_config                = "${var.psoxy_base_dir}/config/${var.source_kind}.yaml"
+  salt_secret_version_number    = module.psoxy-gcp.salt_secret_version_number
+  psoxy_base_dir                = var.psoxy_base_dir
 
   depends_on = [
     google_project.psoxy-project,

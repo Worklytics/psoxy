@@ -43,8 +43,34 @@ variable "source_kind" {
   description = "Kind of the content to process"
 }
 
+
+variable "path_to_function_zip" {
+  type        = string
+  description = "path to zip archive of lambda bundle"
+}
+
+variable "function_zip_hash" {
+  type        = string
+  description = "hash of base64-encoded zipped lambda bundle"
+}
+
+variable "path_to_config" {
+  type        = string
+  description = "path to config file (usually something in ../../configs/, eg configs/gdirectory.yaml"
+}
+
+variable "api_caller_role_arn" {
+  type        = string
+  description = "arn of role which can be assumed to call API"
+}
+
+variable "api_caller_role_name" {
+  type        = string
+  description = "name of role which can be assumed to call API"
+}
+
 variable "psoxy_base_dir" {
   type        = string
-  description = "the path where your psoxy repo resides. Preferably a full path, /home/user/repos/, avoid tilde (~) shortcut to $HOME"
+  description = "the path where your psoxy repo resides"
   default     = "../../.."
 }

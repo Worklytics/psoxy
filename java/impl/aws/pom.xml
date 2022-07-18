@@ -26,7 +26,7 @@
         <dependency.aws-bom.version>2.17.46</dependency.aws-bom.version>
         <dependency.aws-lambda-core.version>1.2.1</dependency.aws-lambda-core.version>
         <dependency.aws-lambda-java-events.version>3.11.0</dependency.aws-lambda-java-events.version>
-        <dependency.aws-s3.version>1.12.153</dependency.aws-s3.version>
+        <dependency.aws-s3.version>1.12.261</dependency.aws-s3.version>
 
     </properties>
 

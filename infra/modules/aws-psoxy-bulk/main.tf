@@ -8,63 +8,35 @@ terraform {
   }
 }
 
-module "psoxy-aws" {
-  source = "../aws"
+module "psoxy_lambda" {
+  source = "../aws-psoxy-lambda"
 
-  caller_aws_account_id   = var.caller_aws_account_id
-  caller_external_user_id = var.caller_external_user_id
-  aws_account_id          = var.aws_account_id
+  function_name        = "psoxy-${var.instance_id}"
+  handler_class        = "co.worklytics.psoxy.S3Handler"
+  timeout_seconds      = 600 # 10 minutes
+  memory_size_mb       = 512
+  path_to_config       = var.path_to_config
+  path_to_function_zip = var.path_to_function_zip
+  function_zip_hash    = var.function_zip_hash
+  aws_assume_role_arn  = var.aws_assume_role_arn
+  source_kind          = var.source_kind
+  parameters           = []
+  environment_variables = {
+    INPUT_BUCKET  = aws_s3_bucket.input.bucket,
+    OUTPUT_BUCKET = aws_s3_bucket.output.bucket
+  }
 }
-
-
-module "psoxy-package" {
-  source = "../psoxy-package"
-
-  implementation     = "aws"
-  path_to_psoxy_java = "${var.psoxy_base_dir}/java"
-}
-
-## START HRIS MODULE - COPY TO YOUR MASTER main.tf
 
 resource "aws_s3_bucket" "input" {
   bucket = "psoxy-${var.instance_id}-input"
 }
 
-/*
- * USE CASE: By default config as is works. But customer attached own rules to bucket, that seems to
- * supersede default, so this piece needs to be added to the bucket policies too.
+resource "aws_s3_bucket_public_access_block" "input-block-public-access" {
+  bucket = aws_s3_bucket.input.bucket
 
-locals {
-  // this should come as variable, but being optional not done for now
-  hris_lambda_execution_role_arn = "arn:aws:iam::${var.aws_account_id}:role/iam_for_lambda_psoxy-hris"
-  read_policy_json = jsonencode({
-    "Version" : "2012-10-17",
-    "Statement" : [
-      {
-        "Sid": "GrantLambdaAccessToInputBucket",
-        "Action": [
-          "s3:GetObject"
-        ],
-        "Effect": "Allow",
-        "Resource": [
-          "${aws_s3_bucket.input.arn}/*"
-        ],
-        "Principal": {
-          "AWS": [
-            "${local.hris_lambda_execution_role_arn}"
-          ]
-        }
-      }
-    ]
-  })
+  block_public_acls   = true
+  block_public_policy = true
 }
-
-resource "aws_s3_bucket_policy" "read_policy_to_execution_role" {
-  bucket = aws_s3_bucket.input
-  policy = local.read_policy_json
-}
-
-*/
 
 resource "aws_iam_policy" "read_policy_to_execution_role" {
   name        = "BucketRead_${aws_s3_bucket.input.id}"
@@ -85,7 +57,7 @@ resource "aws_iam_policy" "read_policy_to_execution_role" {
           ],
           "Principal" : {
             "AWS" : [
-              "${local.hris_lambda_execution_role_arn}"
+              "${module.psoxy_lambda.iam_role_for_lambda_arn}"
             ]
           }
         }
@@ -98,31 +70,17 @@ resource "aws_s3_bucket" "output" {
   bucket = "psoxy-${var.instance_id}-output"
 }
 
-module "psoxy-file-handler" {
-  source = "../aws-psoxy-instance"
+resource "aws_s3_bucket_public_access_block" "output-block-public-access" {
+  bucket = aws_s3_bucket.output.bucket
 
-  function_name        = "psoxy-${var.instance_id}"
-  handler_class        = "co.worklytics.psoxy.S3Handler"
-  source_kind          = var.source_kind
-  path_to_function_zip = module.psoxy-package.path_to_deployment_jar
-  function_zip_hash    = module.psoxy-package.deployment_package_hash
-  path_to_config       = "${var.psoxy_base_dir}/configs/${var.source_kind}.yaml"
-  aws_assume_role_arn  = var.aws_assume_role_arn
-  example_api_calls    = [] #None, as this function is called through the S3 event
-  aws_account_id       = var.aws_account_id
-
-  parameters = []
-
-  environment_variables = {
-    INPUT_BUCKET  = aws_s3_bucket.input.bucket,
-    OUTPUT_BUCKET = aws_s3_bucket.output.bucket
-  }
+  block_public_acls   = true
+  block_public_policy = true
 }
 
 resource "aws_lambda_permission" "allow_input_bucket" {
   statement_id  = "AllowExecutionFromS3Bucket"
   action        = "lambda:InvokeFunction"
-  function_name = module.psoxy-file-handler.function_arn
+  function_name = module.psoxy_lambda.function_name
   principal     = "s3.amazonaws.com"
   source_arn    = aws_s3_bucket.input.arn
 }
@@ -131,7 +89,7 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
   bucket = aws_s3_bucket.input.id
 
   lambda_function {
-    lambda_function_arn = module.psoxy-file-handler.function_arn
+    lambda_function_arn = module.psoxy_lambda.function_arn
     events              = ["s3:ObjectCreated:*"]
   }
 
@@ -158,7 +116,7 @@ resource "aws_iam_policy" "input_bucket_read_policy" {
 }
 
 resource "aws_iam_role_policy_attachment" "read_policy_for_import_bucket" {
-  role       = module.psoxy-file-handler.iam_for_lambda_name
+  role       = module.psoxy_lambda.iam_role_for_lambda_name
   policy_arn = aws_iam_policy.input_bucket_read_policy.arn
 }
 
@@ -182,7 +140,7 @@ resource "aws_iam_policy" "output_bucket_write_policy" {
 }
 
 resource "aws_iam_role_policy_attachment" "write_policy_for_output_bucket" {
-  role       = module.psoxy-file-handler.iam_for_lambda_name
+  role       = module.psoxy_lambda.iam_role_for_lambda_name
   policy_arn = aws_iam_policy.output_bucket_write_policy.arn
 }
 
@@ -210,8 +168,6 @@ resource "aws_iam_policy" "output_bucket_read" {
 }
 
 resource "aws_iam_role_policy_attachment" "caller_bucket_access_policy" {
-  role       = module.psoxy-aws.api_caller_role_name
+  role       = var.api_caller_role_arn
   policy_arn = aws_iam_policy.output_bucket_read.arn
 }
-
-## END HRIS MODULE

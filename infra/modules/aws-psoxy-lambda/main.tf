@@ -11,12 +11,13 @@ terraform {
 resource "aws_lambda_function" "psoxy-instance" {
   function_name    = var.function_name
   role             = aws_iam_role.iam_for_lambda.arn
-  handler          = var.handler_class
+  architectures    = ["arm64"] # 20% cheaper per ms exec time than x86_64
   runtime          = "java11"
   filename         = var.path_to_function_zip
   source_code_hash = var.function_zip_hash
-  timeout          = 55  # seconds
-  memory_size      = 512 # megabytes
+  handler          = var.handler_class
+  timeout          = var.timeout_seconds
+  memory_size      = var.memory_size_mb
 
   environment {
     variables = merge(var.environment_variables, yamldecode(file(var.path_to_config)))
@@ -26,7 +27,7 @@ resource "aws_lambda_function" "psoxy-instance" {
 # cloudwatch group per lambda function
 resource "aws_cloudwatch_log_group" "lambda-log" {
   name              = "/aws/lambda/${aws_lambda_function.psoxy-instance.function_name}"
-  retention_in_days = 7
+  retention_in_days = var.log_retention_in_days
 }
 
 resource "aws_lambda_function_url" "lambda_url" {
@@ -74,12 +75,14 @@ resource "aws_iam_policy" "policy" {
             "ssm:GetParameter*"
           ],
           "Effect" : "Allow",
-          "Resource" : "arn:aws:ssm:${var.region}:${var.aws_account_id}:parameter/*"
+          "Resource" : "*"
+          # TODO: limit to SSM parameters in question
+          # "Resource": "arn:aws:ssm:us-east-2:123456789012:parameter/prod-*"
         }
       ]
   })
-}
 
+}
 
 resource "aws_iam_role_policy_attachment" "basic" {
   role       = aws_iam_role.iam_for_lambda.name
@@ -91,71 +94,18 @@ resource "aws_iam_role_policy_attachment" "policy" {
   policy_arn = aws_iam_policy.policy.arn
 }
 
-locals {
-  # lamba_url has trailing /, but our example_api_calls already have preceding /
-  proxy_endpoint_url = substr(aws_lambda_function_url.lambda_url.function_url, 0, -1)
-  test_commands = [for path in var.example_api_calls :
-    "${var.path_to_repo_root}/tools/test-psoxy.sh -a -r \"${var.aws_assume_role_arn}\" -u \"${local.proxy_endpoint_url}${path}\""
-  ]
-}
-
-
-resource "local_file" "todo" {
-  filename = "test ${var.function_name}.md"
-  content  = <<EOT
-
-## Testing
-
-Review the deployed function in AWS console:
-
-- https://console.aws.amazon.com/lambda/home?region=${var.region}#/functions/${var.function_name}?tab=monitoring
-
-### Prereqs
-Requests to AWS API need to be [signed](https://docs.aws.amazon.com/general/latest/gr/signing_aws_api_requests.html).
-One tool to do it easily is [awscurl](https://github.com/okigan/awscurl). Install it:
-
-On MacOS via Homebrew:
-```shell
-brew install awscurl
-```
-
-Alternatively, via `pip` (python package manager):
-```shell
-pip install awscurl
-# Installs in $HOME/.local/bin
-# Make it available in your path
-# Add the following line to ~/.bashrc
-export PATH="$HOME/.local/bin:$PATH"
-# Then reload the config
-source ~/.bashrc
-```
-
-### From Terminal
-
-From root of your checkout of the Psoxy repo, these are some example test calls you can try (YMMV):
-
-```shell
-${coalesce(join("\n", local.test_commands), "cd docs/example-api-calls/")}
-```
-
-See `docs/example-api-calls/` for more example API calls specific to the data source to which your
-Proxy is configured to connect.
-
-EOT
-}
-
-output "endpoint_url" {
-  value = aws_lambda_function_url.lambda_url.function_url
-}
-
 output "function_arn" {
   value = aws_lambda_function.psoxy-instance.arn
 }
 
-output "iam_for_lambda_arn" {
+output "function_name" {
+  value = aws_lambda_function.psoxy-instance.function_name
+}
+
+output "iam_role_for_lambda_arn" {
   value = aws_iam_role.iam_for_lambda.arn
 }
 
-output "iam_for_lambda_name" {
+output "iam_role_for_lambda_name" {
   value = aws_iam_role.iam_for_lambda.name
 }

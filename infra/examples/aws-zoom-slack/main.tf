@@ -28,22 +28,18 @@ provider "aws" {
 }
 
 module "psoxy-aws" {
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws?ref=v0.3.0-beta.5"
+  # source = "../../modules/aws"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws?ref=v0.4.0-rc"
+
 
   caller_aws_account_id   = var.caller_aws_account_id
   caller_external_user_id = var.caller_external_user_id
   aws_account_id          = var.aws_account_id
+  psoxy_base_dir          = var.psoxy_base_dir
 
   providers = {
     aws = aws
   }
-}
-
-module "psoxy-package" {
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/psoxy-package?ref=v0.3.0-beta.5"
-
-  implementation     = "aws"
-  path_to_psoxy_java = "${var.psoxy_base_dir}/java"
 }
 
 # BEGIN LONG ACCESS AUTH CONNECTORS
@@ -83,32 +79,41 @@ resource "aws_ssm_parameter" "long-access-token-secret" {
   }
 }
 
+variable "proxy_base_dir" {
+  default = ""
+}
 module "aws-psoxy-long-auth-connectors" {
   for_each = local.enabled_oauth_long_access_connectors
 
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-instance?ref=v0.3.0-beta.5"
+  # source = "../../modules/aws-psoxy-rest"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-instance?ref=v0.4.0-rc"
+
 
   function_name        = "psoxy-${each.key}"
-  source_kind          = each.value.source_kind
-  path_to_function_zip = module.psoxy-package.path_to_deployment_jar
-  function_zip_hash    = module.psoxy-package.deployment_package_hash
+  path_to_function_zip = module.psoxy-aws.path_to_deployment_jar
+  function_zip_hash    = module.psoxy-aws.deployment_package_hash
   path_to_config       = "${local.base_config_path}/${each.value.source_kind}.yaml"
   aws_assume_role_arn  = var.aws_assume_role_arn
   aws_account_id       = var.aws_account_id
+  api_caller_role_arn  = module.psoxy-aws.api_caller_role_arn
+  source_kind          = each.value.source_kind
   # from next version
-  #path_to_repo_root    = var.proxy_base_dir
+  path_to_repo_root = var.proxy_base_dir
+
 
   parameters = [
     module.psoxy-aws.salt_secret,
     aws_ssm_parameter.long-access-token-secret[each.key]
   ]
   example_api_calls = each.value.example_api_calls
+
 }
 
 module "worklytics-psoxy-connection" {
   for_each = local.enabled_oauth_long_access_connectors
 
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=v0.3.0-beta.5"
+  # source = "../../modules/worklytics-psoxy-connection-aws"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=v0.4.0-rc"
 
   psoxy_endpoint_url = module.aws-psoxy-long-auth-connectors[each.key].endpoint_url
   display_name       = "${each.value.display_name} via Psoxy${var.connector_display_name_suffix}"

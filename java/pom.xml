@@ -24,7 +24,7 @@
         <dependency.google-http-client.version>1.41.0</dependency.google-http-client.version>
         <dependency.google-auth-library-oauth2-http.version>1.2.2</dependency.google-auth-library-oauth2-http.version>
         <dependency.mockito-junit-jupiter.version>4.2.0</dependency.mockito-junit-jupiter.version>
-        <dependency.json-path.version>2.6.0</dependency.json-path.version>
+        <dependency.json-path.version>2.7.0</dependency.json-path.version>
     </properties>
 
     <modules>

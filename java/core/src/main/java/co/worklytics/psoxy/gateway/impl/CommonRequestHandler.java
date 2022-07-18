@@ -4,6 +4,8 @@ import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.rules.RuleSet;
 import co.worklytics.psoxy.rules.RulesUtils;
+import co.worklytics.psoxy.utils.ComposedHttpRequestInitializer;
+import co.worklytics.psoxy.utils.GzipedContentHttpRequestInitializer;
 import co.worklytics.psoxy.utils.URLUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.http.GenericUrl;
@@ -106,7 +108,6 @@ public class CommonRequestHandler {
         }
 
         //TODO: what headers to forward???
-
         sourceApiRequest.setHeaders(sourceApiRequest.getHeaders()
             //seems like Google API HTTP client has a default 'Accept' header with 'text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2' ??
             .setAccept(ContentType.APPLICATION_JSON.toString())  //MSFT gives weird "{"error":{"code":"InternalServerError","message":"The MIME type 'text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2' requires a '/' character between type and subtype, such as 'text/plain'."}}
@@ -121,8 +122,14 @@ public class CommonRequestHandler {
         //q: add exception handlers for IOExceptions / HTTP error responses, so those retries
         // happen in proxy rather than on Worklytics-side?
 
+        logIfDevelopmentMode(() -> sourceApiRequest.toString());
+
         com.google.api.client.http.HttpResponse sourceApiResponse = sourceApiRequest.execute();
 
+        logIfDevelopmentMode(() -> sourceApiResponse.toString());
+
+        // return response
+        builder.statusCode(sourceApiResponse.getStatusCode());
         try {
             // return response
             builder.statusCode(sourceApiResponse.getStatusCode());
@@ -173,15 +180,20 @@ public class CommonRequestHandler {
         Optional<String> accountToImpersonate =
            request.getHeader(ControlHeader.USER_TO_IMPERSONATE.getHttpHeader());
 
+
         accountToImpersonate.ifPresent(user -> log.info("Impersonating user"));
         //TODO: warn here for Google Workspace connectors, which expect user??
 
         Credentials credentials = sourceAuthStrategy.getCredentials(accountToImpersonate);
-        HttpCredentialsAdapter initializer = new HttpCredentialsAdapter(credentials);
+        HttpCredentialsAdapter initializeWithCredentials = new HttpCredentialsAdapter(credentials);
 
         //TODO: in OAuth-type use cases, where execute() may have caused token to be refreshed, how
         // do we capture the new one?? ideally do this with listener/handler/trigger in Credential
         // itself, if that's possible
+
+        ComposedHttpRequestInitializer initializer =
+            ComposedHttpRequestInitializer.of(initializeWithCredentials,
+                new GzipedContentHttpRequestInitializer("Psoxy"));
 
         return transport.createRequestFactory(initializer);
     }
