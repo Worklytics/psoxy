@@ -30,3 +30,13 @@ variable "connector_display_name_suffix" {
   description = "suffix to append to display_names of connector SAs; helpful to distinguish between various ones in testing/dev scenarios"
   default     = ""
 }
+
+variable "psoxy_base_dir" {
+  type        = string
+  description = "the path where your psoxy repo resides. Preferably a full path, /home/user/repos/, avoid tilde (~) shortcut to $HOME"
+
+  validation {
+    condition     = can(regex(".*\\/$", var.psoxy_base_dir))
+    error_message = "The psoxy_base_dir value should end with a slash."
+  }
+}

@@ -8,6 +8,38 @@ terraform {
   }
 }
 
+
+locals {
+
+  aws_caller_statements = [
+    for arn in var.caller_aws_arns :
+    {
+      Action : "sts:AssumeRole"
+      Effect : "Allow"
+      Principal : {
+        "AWS" : arn
+      }
+    }
+  ]
+
+  gcp_service_account_caller_statements = [
+    for id in var.caller_gcp_service_account_ids :
+    {
+      Action : "sts:AssumeRoleWithWebIdentity",
+      Effect : "Allow",
+      Principal : {
+        "Federated" : "accounts.google.com"
+      },
+      Condition : {
+        "StringEquals" : {
+          "accounts.google.com:aud" : id
+        }
+      }
+    }
+  ]
+}
+
+
 # role that Worklytics user will use to call the API
 resource "aws_iam_role" "api-caller" {
   name = "PsoxyApiCaller"
@@ -15,35 +47,20 @@ resource "aws_iam_role" "api-caller" {
   # who can assume this role
   assume_role_policy = jsonencode({
     "Version" : "2012-10-17",
-    "Statement" : [
-      {
-        "Action" : "sts:AssumeRole",
-        "Effect" : "Allow",
-        "Principal" : {
-          "Service" : "lambda.amazonaws.com"
+    "Statement" : concat(
+      [
+        {
+          Sid : "" # default value; if omit, Terraform seems change back to `null` in subsequent applies
+          Action : "sts:AssumeRole",
+          Effect : "Allow",
+          Principal : {
+            "Service" : "lambda.amazonaws.com"
+          },
         },
-      },
-      {
-        "Action" = "sts:AssumeRole"
-        "Effect" : "Allow"
-        "Principal" : {
-          "AWS" : "arn:aws:iam::${var.caller_aws_account_id}"
-        }
-      },
-      # allows service account to assume role
-      {
-        "Action" : "sts:AssumeRoleWithWebIdentity",
-        "Effect" : "Allow",
-        "Principal" : {
-          "Federated" : "accounts.google.com"
-        },
-        "Condition" : {
-          "StringEquals" : {
-            "accounts.google.com:aud" : var.caller_external_user_id
-          }
-        }
-      }
-    ]
+      ],
+      local.aws_caller_statements,
+      local.gcp_service_account_caller_statements
+    )
   })
 }
 

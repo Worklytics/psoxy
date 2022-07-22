@@ -39,10 +39,10 @@ provider "azuread" {
 module "psoxy-aws" {
   source = "../../modules/aws"
 
-  caller_aws_account_id   = var.caller_aws_account_id
-  caller_external_user_id = var.caller_external_user_id
-  aws_account_id          = var.aws_account_id
-  psoxy_base_dir          = var.psoxy_base_dir
+  aws_account_id                 = var.aws_account_id
+  psoxy_base_dir                 = var.psoxy_base_dir
+  caller_aws_arns                = var.caller_aws_arns
+  caller_gcp_service_account_ids = var.caller_gcp_service_account_ids
 
   providers = {
     aws = aws

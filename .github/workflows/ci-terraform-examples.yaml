@@ -28,20 +28,8 @@ jobs:
           terraform init -reconfigure
           terraform validate
 
-      - name: 'Terraform - validate examples/aws-hris'
-        working-directory: infra/examples/aws-hris
-        run: |
-          terraform init -reconfigure
-          terraform validate
-
       - name: 'Terraform - validate examples/aws-msft-365'
         working-directory: infra/examples/aws-msft-365
-        run: |
-          terraform init -reconfigure
-          terraform validate
-
-      - name: 'Terraform - validate examples/aws-zoom-slack'
-        working-directory: infra/examples/aws-zoom-slack
         run: |
           terraform init -reconfigure
           terraform validate
