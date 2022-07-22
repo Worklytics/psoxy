@@ -1,0 +1,12 @@
+---
+allowAllEndpoints: false
+endpoints:
+  - pathRegex: "^/api/1.0/users/?[^/]*"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..name"
+          - "$..photo"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..email"

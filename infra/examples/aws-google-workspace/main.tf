@@ -209,19 +209,39 @@ module "worklytics-psoxy-connection-google-workspace" {
 
 locals {
   oauth_long_access_connectors = {
+    asana =  {
+      enabled : true,
+      source_kind : "asana",
+      display_name : "Asana"
+      example_api_calls : [
+        "/api/1.0/teams",
+        "/api/1.0/projects"
+      ]
+      external_token_todo : <<EOT
+  1. Create a [Service Account User + token](https://asana.com/guide/help/premium/service-accounts)
+     or a sufficiently [Personal Access Token]() for a sufficiently privileged user (who can see all
+     the workspaces/teams/projects/tasks you wish to import to Worklytics via this connection).
+EOT
+    }
     slack-discovery-api = {
       enabled : true
       source_kind : "slack"
       display_name : "Slack Discovery API"
       example_api_calls : []
-      external_token_todo : null
+      external_token_todo : <<EOT
+  1. Create an app in your Slack organization.
+  2. Send a request to Slack support to enable discovery:read scope for that app.
+  3. Generate a token for the app. (TODO: which type?)
+EOT
     },
     zoom = {
       enabled : true
       source_kind : "zoom"
       display_name : "Zoom"
       example_api_calls : ["/v2/users"]
-      external_token_todo : null
+      external_token_todo :  <<EOT
+TODO: document which type of Zoom app needed, how to get the long-lived token.
+EOT
     }
   }
   enabled_oauth_long_access_connectors       = { for k, v in local.oauth_long_access_connectors : k => v if v.enabled }
