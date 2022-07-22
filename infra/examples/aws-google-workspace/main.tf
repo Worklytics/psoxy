@@ -214,16 +214,18 @@ locals {
       source_kind : "slack"
       display_name : "Slack Discovery API"
       example_api_calls : []
+      external_token_todo : null
     },
     zoom = {
       enabled : true
       source_kind : "zoom"
       display_name : "Zoom"
       example_api_calls : ["/v2/users"]
+      external_token_todo : null
     }
   }
-  enabled_oauth_long_access_connectors = { for k, v in local.oauth_long_access_connectors : k => v if v.enabled }
-  base_config_path                     = "${var.psoxy_base_dir}configs/"
+  enabled_oauth_long_access_connectors       = { for k, v in local.oauth_long_access_connectors : k => v if v.enabled }
+  enabled_oauth_long_access_connectors_todos = { for k, v in local.oauth_long_access_connectors : k => v if v.enabled && v.external_token_todo }
 }
 
 # Create secret (later filled by customer)
@@ -268,6 +270,17 @@ module "aws-psoxy-long-auth-connectors" {
 
 }
 
+module "source_token_external_todo" {
+  for_each = local.enabled_oauth_long_access_connectors_todos
+
+  source = "../../modules/source-token-external-todo"
+
+  source_id                         = each.key
+  host_cloud                        = "aws"
+  connector_specific_external_steps = each.value.external_token_todo
+  token_secret_id                   = aws_ssm_parameter.long-access-token-secret[each.key].name
+}
+
 module "worklytics-psoxy-connection" {
   for_each = local.enabled_oauth_long_access_connectors
 
@@ -287,15 +300,15 @@ module "psoxy-hris" {
   # source = "../../modules/aws-psoxy-bulk"
   source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-bulk?ref=v0.4.0-rc"
 
-  aws_account_id          = var.aws_account_id
-  aws_assume_role_arn     = var.aws_assume_role_arn
-  instance_id             = "hris"
-  source_kind             = "hris"
-  aws_region              = var.aws_region
-  path_to_function_zip    = module.psoxy-aws.path_to_deployment_jar
-  function_zip_hash       = module.psoxy-aws.deployment_package_hash
-  path_to_config          = "${var.psoxy_base_dir}configs/hris.yaml"
-  api_caller_role_arn     = module.psoxy-aws.api_caller_role_arn
-  api_caller_role_name    = module.psoxy-aws.api_caller_role_name
-  psoxy_base_dir          = var.psoxy_base_dir
+  aws_account_id       = var.aws_account_id
+  aws_assume_role_arn  = var.aws_assume_role_arn
+  instance_id          = "hris"
+  source_kind          = "hris"
+  aws_region           = var.aws_region
+  path_to_function_zip = module.psoxy-aws.path_to_deployment_jar
+  function_zip_hash    = module.psoxy-aws.deployment_package_hash
+  path_to_config       = "${var.psoxy_base_dir}configs/hris.yaml"
+  api_caller_role_arn  = module.psoxy-aws.api_caller_role_arn
+  api_caller_role_name = module.psoxy-aws.api_caller_role_name
+  psoxy_base_dir       = var.psoxy_base_dir
 }
