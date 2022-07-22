@@ -1,13 +1,16 @@
-[
-  {
-    "gid":"12345",
-    "resource_type":"user",
-    "email":"{\"scope\":\"email\",\"domain\":\"example.com\",\"hash\":\"e_xeGdBtXUAYxRh.u2wBe57WK_OqPGm6S2K8w7QL2Zc\"}",
-    "workspaces":[
-      {
-        "gid":"12345",
-        "resource_type":"workspace"
-      }
-    ]
-  }
-]
+{
+  "data":[
+    {
+      "gid":"12345",
+      "resource_type":"user",
+      "email":"{\"scope\":\"email\",\"domain\":\"example.com\",\"hash\":\"e_xeGdBtXUAYxRh.u2wBe57WK_OqPGm6S2K8w7QL2Zc\"}",
+      "workspaces":[
+        {
+          "gid":"12345",
+          "resource_type":"workspace",
+          "name":"My Company Workspace"
+        }
+      ]
+    }
+  ]
+}

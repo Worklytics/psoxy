@@ -1,12 +1,55 @@
 ---
 allowAllEndpoints: false
 endpoints:
-  - pathRegex: "^/api/1.0/users/?[^/]*"
+  - pathRegex: "^/api/1.0/workspaces$"
+  - pathRegex: "^/api/1.0/users[?]?[^/]*"
     transforms:
       - !<redact>
         jsonPaths:
-          - "$..name"
-          - "$..photo"
+          - "$.data[*].name"
+          - "$.data[*].photo"
       - !<pseudonymize>
         jsonPaths:
-          - "$..email"
+          - "$.data[*].email"
+  - pathRegex: "^/api/1.0/workspaces/[^/]*/teams?[^/]*"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$.data[*]..name"
+          - "$.data[*].description"
+          - "$.data[*].html_description"
+  - pathRegex: "^/api/1.0/teams/[^/]*/projects?[^/]*"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$.data[*].current_status"
+          - "$.data[*].current_status_update"
+          - "$.data[*].custom_field_settings[*].custom_field.created_by"
+          - "$.data[*].custom_field_settings[*].custom_field.description"
+          - "$.data[*].name"
+          - "$.data[*].notes"
+          - "$.data[*].html_notes"
+          - "$.data[*].created_by"
+          - "$.data[*].completed_by"
+          - "$..name"
+  - pathRegex: "^/api/1.0/projects/[^/]*/tasks?[^/]*"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$.data[*].external"
+          - "$.data[*].html_notes"
+          - "$.data[*].notes"
+          - "$.data[*]..name"
+          - "$.data[*].custom_fields[*].description"
+  - pathRegex: "^/api/1.0/tasks/[^/]*/stories?[^/]*"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$.data[*]..name"
+          - "$.data[*].html_text"
+          - "$.data[*].text"
+          - "$.data[*].new_text_value"
+          - "$.data[*].old_text_value"
+          - "$.data[*].new_name"
+          - "$.data[*].old_name"
+          - "$.data[*].previews"
