@@ -295,24 +295,21 @@ public class PrebuiltSanitizerRules {
         .add("References")
         .build();
 
-    static final Rules1 GMAIL = Rules1.builder()
-       .allowedEndpointRegex("^/gmail/v1/users/[^/]*?/messages.*")
-       .emailHeaderPseudonymization(Rules1.Rule.builder()
-                  .relativeUrlRegex("^/gmail/v1/users/.*?/messages/.*")
-                  .jsonPath("$.payload.headers[?(@.name =~ /^(" + String.join("|", EMAIL_HEADERS_CONTAINING_MULTIPLE_EMAILS) + ")$/i)].value")
-                  .build())
-       .pseudonymization(Rules1.Rule.builder()
-                  .relativeUrlRegex("^/gmail/v1/users/.*?/messages/.*")
-                  .jsonPath("$.payload.headers[?(@.name =~ /^(" + String.join("|", EMAIL_HEADERS_CONTAINING_SINGLE_EMAILS) + ")$/i)].value")
-                  .build()
-       )
-       .redaction(Rules1.Rule.builder()
-               .relativeUrlRegex("^/gmail/v1/users/.*?/messages/.*")
+    static final RuleSet GMAIL = Rules2.builder()
+        .endpoint(Rules2.Endpoint.builder()
+            .pathRegex("^/gmail/v1/users/[^/]*/messages[/]?.*?$")
+            .transform(Transform.PseudonymizeEmailHeader.builder()
+                .jsonPath("$.payload.headers[?(@.name =~ /^(" + String.join("|", EMAIL_HEADERS_CONTAINING_MULTIPLE_EMAILS) + ")$/i)].value")
+                .build())
+            .transform(Transform.Pseudonymize.builder()
+                .jsonPath("$.payload.headers[?(@.name =~ /^(" + String.join("|", EMAIL_HEADERS_CONTAINING_SINGLE_EMAILS) + ")$/i)].value")
+                .build())
+            .transform(Transform.Redact.builder()
                 // this build a negated JsonPath predicate for all allowed headers, so anything other
                 // than expected headers will be redacted.
-               .jsonPath("$.payload.headers[?(!(@.name =~ /^" + String.join("|", ALLOWED_EMAIL_HEADERS) + "$/i))]")
-               .build()
-       )
+                .jsonPath("$.payload.headers[?(!(@.name =~ /^" + String.join("|", ALLOWED_EMAIL_HEADERS) + "$/i))]")
+                .build())
+            .build())
        .build();
 
     static final Set<String> GOOGLE_MEET_EVENT_PARAMETERS_PII = ImmutableSet.of(
