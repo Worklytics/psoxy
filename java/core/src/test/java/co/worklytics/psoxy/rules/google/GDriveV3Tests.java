@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.rules.google;
 
 import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
+import co.worklytics.psoxy.rules.RuleSet;
 import co.worklytics.psoxy.rules.Rules1;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -15,7 +16,7 @@ import java.util.stream.Stream;
 public class GDriveV3Tests extends JavaRulesTestBaseCase {
 
     @Getter
-    final Rules1 rulesUnderTest = PrebuiltSanitizerRules.GDRIVE;
+    final RuleSet rulesUnderTest = PrebuiltSanitizerRules.GDRIVE;
 
     @Getter
     final String exampleDirectoryPath = "api-response-examples/g-workspace/gdrive-v3";
@@ -81,7 +82,7 @@ public class GDriveV3Tests extends JavaRulesTestBaseCase {
         assertNotSanitized(jsonString, PII);
 
         String sanitized =
-            sanitizer.sanitize(new URL("http://www.googleapis.com/drive/v3/files/any-file-id/revision/any-revision-id"), jsonString);
+            sanitizer.sanitize(new URL("http://www.googleapis.com/drive/v3/files/any-file-id/revisions/any-revision-id"), jsonString);
 
         assertPseudonymized(sanitized, PII);
         assertRedacted(sanitized, "Alice", "Paul");
