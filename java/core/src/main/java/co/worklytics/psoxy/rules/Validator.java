@@ -1,5 +1,6 @@
 package co.worklytics.psoxy.rules;
 
+import com.google.common.base.Preconditions;
 import com.jayway.jsonpath.JsonPath;
 import lombok.NonNull;
 
@@ -10,23 +11,16 @@ import java.util.regex.Pattern;
 public class Validator {
 
     static public void validate(@NonNull RuleSet rules) {
-        if (rules instanceof Rules1) {
-            validate((Rules1) rules);
+        if (rules instanceof CsvRules) {
+            validate((CsvRules) rules);
         } else if (rules instanceof Rules2) {
             validate((Rules2) rules );
         }
     }
 
-    static public void validate(@NonNull Rules1 rules1) {
-        validate(rules1.getRedactions());
-        validate(rules1.getPseudonymizations());
-        validate(rules1.getEmailHeaderPseudonymizations());
-        validate(rules1.getPseudonymizationWithOriginals());
-
-        if(rules1.getAllowedEndpointRegexes() != null) {
-            //throws PatternSyntaxExpression if doesn't compile
-            rules1.getAllowedEndpointRegexes().forEach(Pattern::compile);
-        }
+    static public void validate(@NonNull CsvRules rules) {
+        Preconditions.checkNotNull(rules.getColumnsToPseudonymize());
+        Preconditions.checkNotNull(rules.getColumnsToRedact());
     }
 
     static public void validate(@NonNull Rules2 rules) {
@@ -47,23 +41,4 @@ public class Validator {
         });
     }
 
-
-    static void validate(@Nullable List<Rules1.Rule> rules) {
-        if (rules != null) {
-            rules.forEach(Validator::validate);
-        }
-    }
-
-    static public void validate(@NonNull Rules1.Rule rule) {
-        if (rule.getCsvColumns() == null || rule.getCsvColumns().isEmpty())  {
-            Pattern.compile(rule.getRelativeUrlRegex());
-            rule.getJsonPaths().forEach(p -> {
-                try {
-                    JsonPath.compile(p);
-                } catch (Throwable e) {
-                    throw new Error("JsonPath failed to compile: " + p, e);
-                }
-            });
-        }
-    }
 }

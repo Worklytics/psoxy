@@ -12,8 +12,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static co.worklytics.psoxy.rules.Rules1.Rule;
-
 /**
  * Prebuilt sanitization rules for Google tools
  */

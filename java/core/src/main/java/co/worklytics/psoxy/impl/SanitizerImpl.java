@@ -2,7 +2,6 @@ package co.worklytics.psoxy.impl;
 
 import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.rules.RuleSet;
-import co.worklytics.psoxy.rules.Rules1;
 import co.worklytics.psoxy.rules.Rules2;
 import co.worklytics.psoxy.rules.Transform;
 import co.worklytics.psoxy.utils.URLUtils;
@@ -87,9 +86,7 @@ public class SanitizerImpl implements Sanitizer {
                         .map(regex -> Pattern.compile(regex, CASE_INSENSITIVE))
                         .collect(Collectors.toList());
                 } else {
-                    compiledAllowedEndpoints = ((Rules1) options.getRules()).getAllowedEndpointRegexes().stream()
-                        .map(regex -> Pattern.compile(regex, CASE_INSENSITIVE))
-                        .collect(Collectors.toList());
+                    throw new IllegalStateException("Rules must be of type Rules2");
                 }
             }
         }
@@ -106,12 +103,8 @@ public class SanitizerImpl implements Sanitizer {
     }
 
     boolean isAllowAll(RuleSet rules) {
-        if (rules instanceof Rules1) {
-            Rules1 rules1 = (Rules1) rules;
-            return (rules1.getAllowedEndpointRegexes() == null|| rules1.getAllowedEndpointRegexes().isEmpty());
-        } else {
-            return ((Rules2) rules).getAllowAllEndpoints();
-        }
+        Preconditions.checkArgument(rules instanceof Rules2, "Rules must be Rules2");
+        return ((Rules2) rules).getAllowAllEndpoints();
     }
 
 
@@ -126,11 +119,7 @@ public class SanitizerImpl implements Sanitizer {
             return jsonResponse;
         }
 
-        if (getOptions().getRules() instanceof Rules1) {
-            return legacyTransform(url, jsonResponse);
-        } else {
-            return transform(url, jsonResponse);
-        }
+        return transform(url, jsonResponse);
     }
 
     synchronized List<Pair<Pattern, Rules2.Endpoint>> getEndpointRules() {
@@ -255,78 +244,6 @@ public class SanitizerImpl implements Sanitizer {
     }
 
 
-
-
-    String legacyTransform(@NonNull URL url, @NonNull String jsonResponse) {        //q: move this stuff to initialization / DI provider??
-        String relativeUrl = URLUtils.relativeURL(url);
-
-        List<JsonPath> pseudonymizationsToApply =
-            applicablePaths(getCompiledPseudonymizations(), relativeUrl);
-
-        List<JsonPath> redactionsToApply =
-            applicablePaths(getCompiledRedactions(), relativeUrl);
-
-        List<JsonPath> emailHeaderPseudonymizationsToApply =
-            applicablePaths(getCompiledEmailHeaderPseudonymizations(), relativeUrl);
-
-        List<JsonPath> pseudonymizationWithOriginalsToApply =
-            applicablePaths(getCompiledPseudonymizationsWithOriginals(), relativeUrl);
-
-        if (pseudonymizationsToApply.isEmpty()
-            && redactionsToApply.isEmpty()
-            && emailHeaderPseudonymizationsToApply.isEmpty()
-            && pseudonymizationWithOriginalsToApply.isEmpty()) {
-            return jsonResponse;
-        } else {
-            Object document = jsonConfiguration.jsonProvider().parse(jsonResponse);
-
-            for (JsonPath redaction : redactionsToApply) {
-                try {
-                    redaction
-                        .delete(document, jsonConfiguration);
-                } catch (com.jayway.jsonpath.PathNotFoundException e) {
-                    //expected if rule doesn't apply
-                }
-            }
-
-            //TODO: error handling within the map functions. any exceptions thrown within the map
-            //      function seem to be suppressed, and an empty [] left as the 'document'.
-            // ideas:
-            // jsonConfiguration.addEvaluationListeners(); -->
-
-            for (JsonPath pseudonymization : pseudonymizationsToApply) {
-               try {
-                   pseudonymization
-                       .map(document, this::pseudonymizeToJson, jsonConfiguration);
-               } catch (com.jayway.jsonpath.PathNotFoundException e) {
-                  //expected if rule doesn't apply
-               }
-            }
-
-            for (JsonPath pseudonymization : emailHeaderPseudonymizationsToApply) {
-                try {
-                    pseudonymization
-                        .map(document, this::pseudonymizeEmailHeaderToJson, jsonConfiguration);
-                } catch (com.jayway.jsonpath.PathNotFoundException e) {
-                    //expected if rule doesn't apply
-                }
-            }
-
-            for (JsonPath pseudonymization : pseudonymizationWithOriginalsToApply) {
-                try {
-                    pseudonymization
-                        .map(document, this::pseudonymizeWithOriginalToJson, jsonConfiguration);
-                } catch (com.jayway.jsonpath.PathNotFoundException e) {
-                    //expected if rule doesn't apply
-                }
-            }
-
-            return jsonConfiguration.jsonProvider().toJson(document);
-        }
-    }
-
-
-
     List<PseudonymizedIdentity> pseudonymizeEmailHeader(Object value) {
         if (value == null) {
             return null;
@@ -427,16 +344,6 @@ public class SanitizerImpl implements Sanitizer {
     String pseudonymizeEmailHeaderToJson(@NonNull Object value, @NonNull Configuration configuration) {
         return configuration.jsonProvider().toJson(pseudonymizeEmailHeader(value));
     }
-
-    private List<Pair<Pattern, List<JsonPath>>> compile(List<Rules1.Rule> rules) {
-        return rules.stream()
-            .map(configured -> Pair.of(Pattern.compile(configured.getRelativeUrlRegex(), CASE_INSENSITIVE),
-                configured.getJsonPaths().stream()
-                    .map(JsonPath::compile)
-                    .collect(Collectors.toList())))
-            .collect(Collectors.toList());
-    }
-
     @Override
     public PseudonymizedIdentity pseudonymize(@NonNull String value) {
         return pseudonymize((Object)  value);
@@ -447,46 +354,4 @@ public class SanitizerImpl implements Sanitizer {
         return pseudonymize((Object) value);
     }
 
-    List<Pair<Pattern, List<JsonPath>>>  getCompiledPseudonymizations() {
-        if (compiledPseudonymizations == null) {
-            synchronized ($writeLock){
-                if (compiledPseudonymizations == null) {
-                    compiledPseudonymizations = compile(((Rules1) options.getRules()).getPseudonymizations());
-                }
-            }
-        }
-        return compiledPseudonymizations;
-    }
-    List<Pair<Pattern, List<JsonPath>>>  getCompiledPseudonymizationsWithOriginals() {
-        if (compiledPseudonymizationsWithOriginals == null) {
-            synchronized ($writeLock){
-                if (compiledPseudonymizationsWithOriginals == null) {
-                    compiledPseudonymizationsWithOriginals =
-                        compile(((Rules1) options.getRules()).getPseudonymizationWithOriginals());
-                }
-            }
-        }
-        return compiledPseudonymizationsWithOriginals;
-    }
-    List<Pair<Pattern, List<JsonPath>>>  getCompiledRedactions() {
-        if (compiledRedactions == null) {
-            synchronized ($writeLock){
-                if (compiledRedactions == null) {
-                    compiledRedactions = compile(((Rules1) options.getRules()).getRedactions());
-                }
-            }
-        }
-        return compiledRedactions;
-    }
-
-    List<Pair<Pattern, List<JsonPath>>>  getCompiledEmailHeaderPseudonymizations() {
-        if (compiledEmailHeaderPseudonymizations == null) {
-            synchronized ($writeLock){
-                if (compiledEmailHeaderPseudonymizations == null) {
-                    compiledEmailHeaderPseudonymizations = compile(((Rules1) options.getRules()).getEmailHeaderPseudonymizations());
-                }
-            }
-        }
-        return compiledEmailHeaderPseudonymizations;
-    }
 }

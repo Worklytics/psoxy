@@ -1,15 +1,15 @@
 package co.worklytics.psoxy.storage.impl;
 
 import co.worklytics.psoxy.PsoxyModule;
-import co.worklytics.psoxy.rules.Rules1;
+import co.worklytics.psoxy.rules.*;
 import co.worklytics.psoxy.Sanitizer;
 import co.worklytics.psoxy.SanitizerFactory;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
-import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestModules;
 import co.worklytics.test.TestUtils;
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import dagger.Component;
 import lombok.SneakyThrows;
 import org.apache.commons.codec.binary.Base64;
@@ -20,8 +20,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.File;
 import java.io.FileReader;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -67,14 +65,17 @@ public class CSVFileHandlerTest {
                 "4,,Engineering,2020-01-06\r\n"; //blank ID
 
         Sanitizer sanitizer = sanitizerFactory.create(Sanitizer.Options.builder()
-                .rules(Rules1.builder()
-                        .pseudonymization(Rules1.Rule.builder()
-                                .csvColumns(Collections.singletonList("EMPLOYEE_EMAIL"))
-                                .build())
-                        .build())
+                .rules(CsvRules.builder()
+                    .columnToPseudonymize("EMPLOYEE_EMAIL")
+                    .build())
                 .pseudonymizationSalt("salt")
                 .defaultScopeId("hris")
                 .build());
+
+        String s = (new YAMLMapper()).writeValueAsString(CsvRules.builder()
+            .columnToPseudonymize("EMPLOYEE_EMAIL")
+            .build());
+
 
         File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
 
@@ -95,14 +96,10 @@ public class CSVFileHandlerTest {
                 "4,,2020-01-06\r\n"; //blank ID
 
         Sanitizer sanitizer = sanitizerFactory.create(Sanitizer.Options.builder()
-                .rules(Rules1.builder()
-                        .pseudonymization(Rules1.Rule.builder()
-                                .csvColumns(Collections.singletonList("EMPLOYEE_EMAIL"))
-                                .build())
-                        .redaction(Rules1.Rule.builder()
-                                .csvColumns(Collections.singletonList("DEPARTMENT"))
-                                .build())
-                        .build())
+                .rules(CsvRules.builder()
+                    .columnToPseudonymize("EMPLOYEE_EMAIL")
+                    .columnToRedact("DEPARTMENT")
+                    .build())
                 .pseudonymizationSalt("salt")
                 .defaultScopeId("hris")
                 .build());
@@ -123,11 +120,10 @@ public class CSVFileHandlerTest {
                 "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",Engineering\r\n";
 
         Sanitizer sanitizer = sanitizerFactory.create(Sanitizer.Options.builder()
-                .rules(Rules1.builder()
-                        .pseudonymization(Rules1.Rule.builder()
-                                .csvColumns(Arrays.asList("EMPLOYEE_ID", "AN EMAIL"))
-                                .build())
-                        .build())
+            .rules(CsvRules.builder()
+                .columnToPseudonymize("EMPLOYEE_ID")
+                .columnToPseudonymize("AN EMAIL")
+                .build())
                 .pseudonymizationSalt("salt")
                 .defaultScopeId("hris")
                 .build());
@@ -148,11 +144,10 @@ public class CSVFileHandlerTest {
                 "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",\",,,\"\r\n";
 
         Sanitizer sanitizer = sanitizerFactory.create(Sanitizer.Options.builder()
-                .rules(Rules1.builder()
-                        .pseudonymization(Rules1.Rule.builder()
-                                .csvColumns(Arrays.asList("EMPLOYEE_ID", "EMAIL"))
-                                .build())
-                        .build())
+            .rules(CsvRules.builder()
+                .columnToPseudonymize("EMPLOYEE_ID")
+                .columnToPseudonymize("EMAIL")
+                .build())
                 .pseudonymizationSalt("salt")
                 .defaultScopeId("hris")
                 .build());
@@ -178,7 +173,7 @@ public class CSVFileHandlerTest {
         when(config.getConfigPropertyAsOptional(eq(ProxyConfigProperty.RULES)))
             .thenReturn(Optional.of(Base64.encodeBase64String(TestUtils.getData("rules/hris/csv.yaml"))));
 
-        Rules1 rules = (Rules1) rulesUtils.getRulesFromConfig(config).orElseThrow();
+        RuleSet rules = rulesUtils.getRulesFromConfig(config).orElseThrow();
 
         Sanitizer sanitizer = sanitizerFactory.create(Sanitizer.Options.builder()
             .rules(rules)
@@ -203,10 +198,9 @@ public class CSVFileHandlerTest {
             "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",Engineering\r\n";
 
         Sanitizer sanitizer = sanitizerFactory.create(Sanitizer.Options.builder()
-            .rules(Rules1.builder()
-                .pseudonymization(Rules1.Rule.builder()
-                    .csvColumns(Arrays.asList("    employee_id     ", " an EMAIL "))
-                    .build())
+            .rules(CsvRules.builder()
+                .columnToPseudonymize("    employee_id     ")
+                .columnToPseudonymize(" an EMAIL ")
                 .build())
             .pseudonymizationSalt("salt")
             .defaultScopeId("hris")
