@@ -1,0 +1,18 @@
+{
+  "data": [
+    {
+      "gid": "12345",
+      "resource_type": "team",
+      "name": "Marketing",
+      "description": "All developers should be members of this team.",
+      "html_description": "<body><em>All</em> developers should be members of this team.</body>",
+      "organization": {
+        "gid": "12345",
+        "resource_type": "workspace",
+        "name": "My Company Workspace"
+      },
+      "permalink_url": "https://app.asana.com/0/resource/123456789/list",
+      "visibility": "secret"
+    }
+  ]
+}

@@ -131,8 +131,9 @@ any new deployment for production use.
  - tagged releases will be provided for anyone who wants a fixed version; latest is `v0.3.0-beta.6`
 
 ## Supported Data Sources
-As of May 2022, the following sources can be connected via psoxy:
+As of May 2022, the following sources can be connected to Worklytics via psoxy:
 
+  * Asana
   * Google Workspace
     * Calendar
     * Chat
