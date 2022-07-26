@@ -215,64 +215,35 @@ public class PrebuiltSanitizerRules {
         //    .build())
         .build();
 
-    static final Rules1 GDRIVE = Rules1.builder()
-        // v2 endpoint: https://developers.google.com/drive/api/v2/reference/
-        // v3 endpoint: https://developers.google.com/drive/api/v3/reference/
-        //NOTE: by default, files endpoint doesn't return any PII. client must pass a fields mask
-        // that explicitly requests it; so if we could block that behavior, we could eliminate these
-        // rules
-        //NOTE: reference docs say page elements collection is named 'items', but actual API returns
-        // page collection as 'files' or 'revisions'
-        .allowedEndpointRegex("^/drive/v2/files.*")
-        .pseudonymization(Rule.builder()
-            .relativeUrlRegex("^/drive/v2/files.*")
+    public static co.worklytics.psoxy.rules.Rules2.Endpoint GDRIVE_ENDPOINT_RULES = Rules2.Endpoint.builder()
+        .transform(Transform.Pseudonymize.builder()
             .jsonPath("$..emailAddress")
             .build())
-        .redaction(Rule.builder()
-            .relativeUrlRegex("^/drive/v2/files.*")
-            .jsonPath("$..['name','title','description','originalFilename']") // defensive about file recognition, anywhere
+        .transform(Transform.Redact.builder()
+            .jsonPath("$..name")
+            .jsonPath("$..photoLink")
+            .jsonPath("$..title")
+            .jsonPath("$..description")
+            .jsonPath("$..originalFilename") // defensive about file recognition, anywhere
             .jsonPath("$..displayName") //user display name, anywhere (confidentiality)
             .jsonPath("$..picture") //user picture, anywhere (confidentiality)
-            .jsonPath("$.lastModifyingUserName")
-            .jsonPath("$.items[*].lastModifyingUserName")
-            .jsonPath("$.ownerNames")
-            .jsonPath("$.items[*].ownerNames")
+            .jsonPath("$..lastModifyingUserName")
+            .jsonPath("$..ownerNames")
             .build())
-        .redaction(Rule.builder()
-            .relativeUrlRegex("^/drive/v2/files/.*?/revisions.*")
-            .jsonPath("$.originalFilename")
-            .jsonPath("$.items[*].originalFilename") // duplicated with files.*
+        .build();
+
+
+    static final RuleSet GDRIVE = Rules2.builder()
+        // v2 endpoint: https://developers.google.com/drive/api/v2/reference/
+        // v3 endpoint: https://developers.google.com/drive/api/v3/reference/
+        .endpoint(GDRIVE_ENDPOINT_RULES.toBuilder()
+            .pathRegex("^/drive/v[2,3]/files[/]?[^/]*")
             .build())
-        .redaction(Rule.builder()
-            .relativeUrlRegex("^/drive/v2/files/.*?/permissions.*")
-            .jsonPath("$.name") //likely duplicative with files.* case above
-            .jsonPath("$.photoLink")
-            .jsonPath("$.items[*].name")
-            .jsonPath("$.items[*].photoLink")
+        .endpoint(GDRIVE_ENDPOINT_RULES.toBuilder()
+            .pathRegex("^/drive/v[2,3]/files/[^/]*/revisions[/]?[^/]*")
             .build())
-        .allowedEndpointRegex("^/drive/v3/files.*")
-        .pseudonymization(Rule.builder()
-            .relativeUrlRegex("^/drive/v3/files.*")
-            .jsonPath("$..emailAddress")
-            .build())
-        .redaction(Rule.builder()
-            .relativeUrlRegex("^/drive/v3/files.*")
-            .jsonPath("$..['name','title','description','originalFilename']") // defensive about file recognition, anywhere
-            .jsonPath("$..displayName")
-            .jsonPath("$..photoLink")
-            .jsonPath("$.files[*].name")
-            .build())
-        .redaction(Rule.builder()
-            .relativeUrlRegex("^/drive/v3/files/.*?/revisions.*")
-            .jsonPath("$..originalFilename")
-            .jsonPath("$.files[*].originalFilename")
-            .build())
-        .redaction(Rule.builder()
-            .relativeUrlRegex("^/drive/v2/files/.*?/permissions.*")
-            .jsonPath("$.displayName") //likely duplicative with files.* case above
-            .jsonPath("$.photoLink")
-            .jsonPath("$.permissions[*].displayName") //likely duplicative with files.* case above
-            .jsonPath("$.permissions[*].photoLink")
+        .endpoint(GDRIVE_ENDPOINT_RULES.toBuilder()
+            .pathRegex("^/drive/v[2,3]/files/[^/]*/permissions.*")
             .build())
         .build();
 

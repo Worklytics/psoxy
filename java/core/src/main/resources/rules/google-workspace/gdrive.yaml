@@ -1,47 +1,50 @@
-allowedEndpointRegexes:
-  - "^/drive/v2/files.*"
-  - "^/drive/v3/files.*"
-pseudonymizations:
-  - relativeUrlRegex: "^/drive/v2/files.*"
-    jsonPaths:
-      - "$..emailAddress"
-  - relativeUrlRegex: "^/drive/v3/files.*"
-    jsonPaths:
-      - "$..emailAddress"
-redactions:
-  - relativeUrlRegex: "^/drive/v2/files.*"
-    jsonPaths:
-      - "$..['name','title','description','originalFilename']"
-      - "$..displayName"
-      - "$..picture"
-      - "$.lastModifyingUserName"
-      - "$.items[*].lastModifyingUserName"
-      - "$.ownerNames"
-      - "$.items[*].ownerNames"
-  - relativeUrlRegex: "^/drive/v2/files/.*?/revisions.*"
-    jsonPaths:
-      - "$.originalFilename"
-      - "$.items[*].originalFilename"
-  - relativeUrlRegex: "^/drive/v2/files/.*?/permissions.*"
-    jsonPaths:
-      - "$.name"
-      - "$.photoLink"
-      - "$.items[*].name"
-      - "$.items[*].photoLink"
-  - relativeUrlRegex: "^/drive/v3/files.*"
-    jsonPaths:
-      - "$..['name','title','description','originalFilename']"
-      - "$..displayName"
-      - "$..photoLink"
-      - "$.files[*].name"
-  - relativeUrlRegex: "^/drive/v3/files/.*?/revisions.*"
-    jsonPaths:
-      - "$..originalFilename"
-      - "$.files[*].originalFilename"
-  - relativeUrlRegex: "^/drive/v2/files/.*?/permissions.*"
-    jsonPaths:
-      - "$.displayName"
-      - "$.photoLink"
-      - "$.permissions[*].displayName"
-      - "$.permissions[*].photoLink"
-
+allowAllEndpoints: false
+endpoints:
+  - pathRegex: "^/drive/v[2,3]/files[/]?[^/]*"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+      - !<redact>
+        jsonPaths:
+          - "$..name"
+          - "$..photoLink"
+          - "$..title"
+          - "$..description"
+          - "$..originalFilename"
+          - "$..displayName"
+          - "$..picture"
+          - "$..lastModifyingUserName"
+          - "$..ownerNames"
+  - pathRegex: "^/drive/v[2,3]/files/[^/]*/revisions[/]?[^/]*"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+      - !<redact>
+        jsonPaths:
+          - "$..name"
+          - "$..photoLink"
+          - "$..title"
+          - "$..description"
+          - "$..originalFilename"
+          - "$..displayName"
+          - "$..picture"
+          - "$..lastModifyingUserName"
+          - "$..ownerNames"
+  - pathRegex: "^/drive/v[2,3]/files/[^/]*/permissions.*"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+      - !<redact>
+        jsonPaths:
+          - "$..name"
+          - "$..photoLink"
+          - "$..title"
+          - "$..description"
+          - "$..originalFilename"
+          - "$..displayName"
+          - "$..picture"
+          - "$..lastModifyingUserName"
+          - "$..ownerNames"
