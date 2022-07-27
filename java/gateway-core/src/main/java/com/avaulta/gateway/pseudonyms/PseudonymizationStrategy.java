@@ -1,7 +1,6 @@
 package com.avaulta.gateway.pseudonyms;
 
 import java.util.function.Function;
-import java.util.regex.Pattern;
 
 /**
  *
@@ -35,10 +34,10 @@ public interface PseudonymizationStrategy {
 
     /**
      * returns string after reversing all keyed pseudonyms created with this
-     * PseudonymizationStrategy that it contains
+     * PseudonymizationStrategy that it contains (if any)
      *
      * @param containsKeyedPseudonyms string that may contain keyed pseudonyms
-     * @return string with all keyed pseudonyms it contains reversed to originals
+     * @return string with all keyed pseudonyms it contains, if any, reversed to originals
      */
-    String reverseAllContainedKeyedPseudonym(String containsKeyedPseudonyms);
+    String reverseAllContainedKeyedPseudonyms(String containsKeyedPseudonyms);
 }

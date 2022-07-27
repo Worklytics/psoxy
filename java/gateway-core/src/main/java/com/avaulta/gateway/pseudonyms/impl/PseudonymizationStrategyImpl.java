@@ -121,7 +121,7 @@ public class PseudonymizationStrategyImpl implements PseudonymizationStrategy {
 
 
     @Override
-    public String reverseAllContainedKeyedPseudonym(String containsKeyedPseudonyms) {
+    public String reverseAllContainedKeyedPseudonyms(String containsKeyedPseudonyms) {
         return KEYED_PSEUDONYM_PATTERN.matcher(containsKeyedPseudonyms).replaceAll(m -> {
             String keyedPseudonym = m.group();
             //q: if this fails, just return 'm.group()' as-is?? to consider possibility that pattern matched

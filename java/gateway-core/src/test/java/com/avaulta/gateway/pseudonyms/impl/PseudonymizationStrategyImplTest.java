@@ -117,7 +117,7 @@ class PseudonymizationStrategyImplTest {
         String original = "blah";
         String pseudonym = pseudonymizationStrategy.getKeyedPseudonym("blah", Function.identity());
 
-        String r = pseudonymizationStrategy.reverseAllContainedKeyedPseudonym(String.format(template, pseudonym, pseudonym));
+        String r = pseudonymizationStrategy.reverseAllContainedKeyedPseudonyms(String.format(template, pseudonym, pseudonym));
 
         assertEquals(String.format(template, original, original), r);
     }
