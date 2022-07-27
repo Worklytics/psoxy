@@ -15,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 
 @RequiredArgsConstructor
 public class PseudonymizationStrategyImpl implements PseudonymizationStrategy {
@@ -24,8 +25,26 @@ public class PseudonymizationStrategyImpl implements PseudonymizationStrategy {
     @Getter
     final SecretKeySpec encryptionKey;
 
+    /**
+     * URL-safe prefix to put in front of reversible pseudonyms
+     *
+     * q: make configurable, to support compatibility with various REST-API clients??
+     *
+     * alternatives:
+     *   - prefix + suffix to make stronger
+     *
+     */
+    static final String PREFIX = "p~";
+
     static final int CIPHER_BLOCK_SIZE_BYTES = 16; //128-bits; AES uses 128-bit blocks, regardless of key-length
     static final int PSEUDONYM_SIZE_BYTES = 32; //SHA-256
+
+    //length of base64-url-encoded IV + ciphertext
+    static final int KEYED_PSEUDONYM_LENGTH_WITHOUT_PREFIX = 43;
+
+    static final Pattern KEYED_PSEUDONYM_PATTERN =
+        //Pattern.compile("p\\~[a-zA-Z0-9_-]{43}"); //not clear to me why this doesn't work
+        Pattern.compile("p\\~[a-zA-Z0-9_-]{" + KEYED_PSEUDONYM_LENGTH_WITHOUT_PREFIX + ",}");
 
     //base64url-encoding without padding
     Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
@@ -69,7 +88,7 @@ public class PseudonymizationStrategyImpl implements PseudonymizationStrategy {
         cipher.init(Cipher.ENCRYPT_MODE, getEncryptionKey(), ivParameter);
         byte[] ciphertext = cipher.doFinal(identifier.getBytes(StandardCharsets.UTF_8));
 
-        return encoder.encodeToString(arrayConcat(hash, ciphertext));
+        return PREFIX + encoder.encodeToString(arrayConcat(hash, ciphertext));
     }
 
     //q: is there not a lib method for this??
@@ -88,7 +107,7 @@ public class PseudonymizationStrategyImpl implements PseudonymizationStrategy {
     @Override
     public String getIdentifier(@NonNull String reversiblePseudonym) {
 
-        byte[] decoded = decoder.decode(reversiblePseudonym);
+        byte[] decoded = decoder.decode(reversiblePseudonym.substring(PREFIX.length()));
         byte[] iv = extractIv(decoded);
         byte[] cryptoText = Arrays.copyOfRange(decoded, PSEUDONYM_SIZE_BYTES, decoded.length);
 
@@ -97,6 +116,18 @@ public class PseudonymizationStrategyImpl implements PseudonymizationStrategy {
 
         byte[] plain = cipher.doFinal(cryptoText);
         return new String(plain, StandardCharsets.UTF_8);
+    }
+
+
+
+    @Override
+    public String reverseAllContainedKeyedPseudonym(String containsKeyedPseudonyms) {
+        return KEYED_PSEUDONYM_PATTERN.matcher(containsKeyedPseudonyms).replaceAll(m -> {
+            String keyedPseudonym = m.group();
+            //q: if this fails, just return 'm.group()' as-is?? to consider possibility that pattern matched
+            // something it shouldn't
+            return getIdentifier(keyedPseudonym);
+        });
     }
 
 }

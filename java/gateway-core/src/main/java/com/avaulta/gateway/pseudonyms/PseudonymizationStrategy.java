@@ -1,6 +1,7 @@
 package com.avaulta.gateway.pseudonyms;
 
 import java.util.function.Function;
+import java.util.regex.Pattern;
 
 /**
  *
@@ -27,8 +28,17 @@ public interface PseudonymizationStrategy {
 
     /**
      *
-     * @param reversiblePseudonym base64-url-encoded ciphertext
+     * @param keyedPseudonym base64-url-encoded ciphertext, if it was created with this PseudonymizationStrategy
      * @return plaintext that was originally passed to this EncryptionStrategy
      */
-    String getIdentifier(String reversiblePseudonym);
+    String getIdentifier(String keyedPseudonym);
+
+    /**
+     * returns string after reversing all keyed pseudonyms created with this
+     * PseudonymizationStrategy that it contains
+     *
+     * @param containsKeyedPseudonyms string that may contain keyed pseudonyms
+     * @return string with all keyed pseudonyms it contains reversed to originals
+     */
+    String reverseAllContainedKeyedPseudonym(String containsKeyedPseudonyms);
 }
