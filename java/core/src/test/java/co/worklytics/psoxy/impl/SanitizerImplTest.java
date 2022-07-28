@@ -293,7 +293,7 @@ class SanitizerImplTest {
     void pseudonymizeWithReversalKey() {
         MapFunction f = sanitizer.getPseudonymize(Transform.Pseudonymize.builder().includeEncrypted(true).build());
 
-        assertEquals("{\"scope\":\"scope\",\"hash\":\"Htt5DmAnE8xaCjfYnLm83_xR8.hhEJE2f_bkFP2yljg\",\"encrypted\":\"_5CTUYeehnbw1MzsCfDUmC5iJJiH_qjxNqZL6L0dRReTk6oDD-Zn1CedTQtthhQA\"}",
+        assertEquals("{\"scope\":\"scope\",\"hash\":\"Htt5DmAnE8xaCjfYnLm83_xR8.hhEJE2f_bkFP2yljg\",\"encrypted\":\"p~_5CTUYeehnbw1MzsCfDUmC5iJJiH_qjxNqZL6L0dRReTk6oDD-Zn1CedTQtthhQA\"}",
             f.map("asfa", sanitizer.getJsonConfiguration()));
     }
 
@@ -301,7 +301,7 @@ class SanitizerImplTest {
     void reversiblePseudonym() {
         MapFunction f = sanitizer.getEncrypt(Transform.Encrypt.defaults());
 
-        assertEquals("_5CTUYeehnbw1MzsCfDUmC5iJJiH_qjxNqZL6L0dRReTk6oDD-Zn1CedTQtthhQA",
+        assertEquals("p~_5CTUYeehnbw1MzsCfDUmC5iJJiH_qjxNqZL6L0dRReTk6oDD-Zn1CedTQtthhQA",
             f.map("asfa", sanitizer.getJsonConfiguration()));
 
         String lcase = (String) f.map("erik@engetc.com", sanitizer.getJsonConfiguration());
