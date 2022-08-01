@@ -52,6 +52,8 @@ resource "google_project" "psoxy-google-connectors" {
 }
 
 locals {
+  base_config_path          = "${var.psoxy_base_dir}configs/"
+
   # Google Workspace Sources; add/remove as you wish, or toggle 'enabled' flag
   google_workspace_sources = {
     # GDirectory connections are a PRE-REQ for gmail, gdrive, and gcal connections. remove only
@@ -133,7 +135,7 @@ locals {
     }
   }
   enabled_google_workspace_sources = { for id, spec in local.google_workspace_sources : id => spec if spec.enabled }
-  base_config_path                 = "${var.psoxy_base_dir}/configs/"
+
 }
 
 module "google-workspace-connection" {
@@ -240,12 +242,11 @@ EOT
       source_kind : "zoom"
       display_name : "Zoom"
       example_api_calls : ["/v2/users"]
-    }
-    external_token_todo :  <<EOT
+      external_token_todo :  <<EOT
 TODO: document which type of Zoom app needed, how to get the long-lived token.
 EOT
+    }
   }
-  base_config_path                           = "${var.psoxy_base_dir}configs/"
   enabled_oauth_long_access_connectors       = { for k, v in local.oauth_long_access_connectors : k => v if v.enabled }
   enabled_oauth_long_access_connectors_todos = { for k, v in local.oauth_long_access_connectors : k => v if v.enabled && v.external_token_todo != null }
 }
@@ -292,8 +293,6 @@ module "aws-psoxy-long-auth-connectors" {
 
 }
 
-<<<<<<< HEAD
-=======
 module "source_token_external_todo" {
   for_each = local.enabled_oauth_long_access_connectors_todos
 
@@ -305,7 +304,6 @@ module "source_token_external_todo" {
   token_secret_id                   = aws_ssm_parameter.long-access-token-secret[each.key].name
 }
 
->>>>>>> main
 module "worklytics-psoxy-connection" {
   for_each = local.enabled_oauth_long_access_connectors
 
@@ -325,7 +323,6 @@ module "psoxy-hris" {
   # source = "../../modules/aws-psoxy-bulk"
   source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-bulk?ref=v0.4.0-rc"
 
-<<<<<<< HEAD
   aws_account_id          = var.aws_account_id
   aws_assume_role_arn     = var.aws_assume_role_arn
   instance_id             = "hris"
@@ -337,17 +334,4 @@ module "psoxy-hris" {
   api_caller_role_arn     = module.psoxy-aws.api_caller_role_arn
   api_caller_role_name    = module.psoxy-aws.api_caller_role_name
   psoxy_base_dir          = var.psoxy_base_dir
-=======
-  aws_account_id       = var.aws_account_id
-  aws_assume_role_arn  = var.aws_assume_role_arn
-  instance_id          = "hris"
-  source_kind          = "hris"
-  aws_region           = var.aws_region
-  path_to_function_zip = module.psoxy-aws.path_to_deployment_jar
-  function_zip_hash    = module.psoxy-aws.deployment_package_hash
-  path_to_config       = "${var.psoxy_base_dir}configs/hris.yaml"
-  api_caller_role_arn  = module.psoxy-aws.api_caller_role_arn
-  api_caller_role_name = module.psoxy-aws.api_caller_role_name
-  psoxy_base_dir       = var.psoxy_base_dir
->>>>>>> main
 }
