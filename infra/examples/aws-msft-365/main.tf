@@ -184,7 +184,7 @@ module "psoxy-msft-connector" {
   for_each = local.enabled_msft_sources
 
   # source = "../../modules/aws-psoxy-rest"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-instance?ref=v0.4.0-rc"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-rest?ref=v0.4.0-rc"
 
   function_name        = "psoxy-${each.key}"
   source_kind          = each.value.source_kind
@@ -277,7 +277,7 @@ module "aws-psoxy-long-auth-connectors" {
   for_each = local.enabled_oauth_long_access_connectors
 
   # source = "../../modules/aws-psoxy-rest"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-instance?ref=v0.4.0-rc"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-rest?ref=v0.4.0-rc"
 
 
   function_name        = "psoxy-${each.key}"
@@ -315,7 +315,7 @@ module "worklytics-psoxy-connection" {
 
 module "psoxy-hris" {
   # source = "../../modules/aws-psoxy-bulk"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-bulk?ref=v0.4.0-rc"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-bulk?ref=v0.4.0-rc"
 
   aws_account_id       = var.aws_account_id
   aws_assume_role_arn  = var.aws_assume_role_arn
