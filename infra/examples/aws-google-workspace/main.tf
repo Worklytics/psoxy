@@ -8,7 +8,7 @@ terraform {
 
     # for the API connections to Google Workspace
     google = {
-      version = ">= 3.74, <= 4.0"
+      version = ">= 3.74, <= 5.0"
     }
   }
 
@@ -44,7 +44,7 @@ module "psoxy-aws" {
 
 # holds SAs + keys needed to connect to Google Workspace APIs
 resource "google_project" "psoxy-google-connectors" {
-  name            = "Worklytics Connectors%{if var.environment_name != ""} - ${var.environment_name}%{endif}"
+  name            = "Worklytics Connect%{if var.environment_name != ""} - ${var.environment_name}%{endif}"
   project_id      = var.gcp_project_id
   billing_account = var.gcp_billing_account_id
   folder_id       = var.gcp_folder_id # if project is at top-level of your GCP organization, rather than in a folder, comment this line out
