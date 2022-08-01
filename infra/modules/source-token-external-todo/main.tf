@@ -34,7 +34,7 @@ aws ssm put-parameter \
 GCP example:
 (passing `-` as `--data-file` will let you paste you token value to `stdin`)
 ```shell
-gcloud secrets versions add ${var.secret_id} --project=YOUR_PROJECT_ID --data-file=-
+gcloud secrets versions add ${var.token_secret_id} --project=YOUR_PROJECT_ID --data-file=-
 ```
 
 EOT

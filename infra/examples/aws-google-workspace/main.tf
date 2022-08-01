@@ -233,7 +233,7 @@ EOT
   2. Send a request to Slack support to enable discovery:read scope for that app.
   3. Generate a token for the app. (TODO: which type?)
 EOT
-    },
+    }
     zoom = {
       enabled : true
       source_kind : "zoom"
@@ -245,7 +245,7 @@ EOT
     }
   }
   enabled_oauth_long_access_connectors       = { for k, v in local.oauth_long_access_connectors : k => v if v.enabled }
-  enabled_oauth_long_access_connectors_todos = { for k, v in local.oauth_long_access_connectors : k => v if v.enabled && v.external_token_todo }
+  enabled_oauth_long_access_connectors_todos = { for k, v in local.oauth_long_access_connectors : k => v if v.enabled && v.external_token_todo != null }
 }
 
 # Create secret (later filled by customer)
