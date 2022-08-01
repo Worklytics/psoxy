@@ -1,6 +1,15 @@
 # deployment for a single Psoxy instance in GCP project that has be initialized for Psoxy.
 # project itself may hold MULTIPLE psoxy instances
 
+terraform {
+  required_providers {
+    google = {
+      version = "~> 4.12"
+    }
+  }
+}
+
+
 resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_secret" {
   for_each = var.secret_bindings
 
@@ -63,9 +72,10 @@ resource "google_cloudfunctions_function" "function" {
     for_each = local.secret_bindings
 
     content {
-      key     = secret_environment_variables.key
-      secret  = secret_environment_variables.value.secret_name
-      version = secret_environment_variables.value.secret_version
+      key        = secret_environment_variables.key
+      project_id = var.project_id
+      secret     = secret_environment_variables.value.secret_name
+      version    = secret_environment_variables.value.secret_version
     }
   }
 
