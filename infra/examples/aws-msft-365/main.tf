@@ -56,6 +56,7 @@ locals {
   # this IS the correct ID for the user terraform is running as, which we assume is a user who's OK
   # to use the subject of examples. You can change it to any string you want.
   example_msft_user_guid = data.azuread_client_config.current.object_id
+  base_config_path       = "${var.psoxy_base_dir}configs/"
 
   # Microsoft 365 sources; add/remove as you wish
   # See https://docs.microsoft.com/en-us/graph/permissions-reference for all the permissions available in AAD Graph API
@@ -111,7 +112,6 @@ locals {
     }
   }
   enabled_msft_sources = { for id, spec in local.msft_sources : id => spec if spec.enabled }
-  base_config_path     = "${var.psoxy_base_dir}configs/"
 }
 
 module "msft-connection" {
@@ -254,7 +254,6 @@ locals {
     }
   }
   enabled_oauth_long_access_connectors = { for k, v in local.oauth_long_access_connectors : k => v if v.enabled }
-  base_config_path                     = "${var.psoxy_base_dir}configs/"
 }
 
 # Create secret (later filled by customer)
@@ -299,7 +298,7 @@ module "aws-psoxy-long-auth-connectors" {
 
 }
 
-module "worklytics-psoxy-connection" {
+module "worklytics-psoxy-connection-oauth-long-access" {
   for_each = local.enabled_oauth_long_access_connectors
 
   # source = "../../modules/worklytics-psoxy-connection-aws"
