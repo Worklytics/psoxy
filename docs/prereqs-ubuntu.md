@@ -38,6 +38,7 @@ or, if you need to manage multiple Terraform versions, use `tfenv`:
 ```shell
 git clone https://github.com/tfutils/tfenv.git ~/.tfenv
 mkdir ~/bin
+sudo apt install unzip
 ln -s ~/.tfenv/bin/* ~/bin/
 tfenv install
 tfenv use latest
