@@ -293,7 +293,8 @@ module "aws-psoxy-long-auth-connectors" {
 module "source_token_external_todo" {
   for_each = local.enabled_oauth_long_access_connectors_todos
 
-  source = "../../modules/source-token-external-todo"
+  #source = "../../modules/source-token-external-todo"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/source-token-external-todo?ref=v0.4.0-rc"
 
   source_id                         = each.key
   host_cloud                        = "aws"

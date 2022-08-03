@@ -56,10 +56,15 @@ And, depending on your scenario, you may also need:
   - [openssl](https://www.openssl.org/) If generating local certificates (see
     [`infra/modules/azure-local-cert`](infra/modules/azuread-local-cert))
 
-We recommend using Cloud Shell from one of the major cloud providers, such as:
+We recommend using VM/Cloud Shell from one of the major cloud providers, such as:
   - [Google Cloud Shell](https://cloud.google.com/shell/) - if you're using GCP or connecting to
     Google Workspace, this is the recommended option. It [includes the prereqs above](https://cloud.google.com/shell/docs/how-cloud-shell-works#tools) EXCEPT aws/azure CLIs.
-  - [AWS CloudShell](https://aws.amazon.com/cloudshell/) - if you're deploying to AWS.
+  - ~~[AWS CloudShell](https://aws.amazon.com/cloudshell/)~~ as of August 2022, psoxy requires more
+    disk space than AWS CloudShell supports (1GB).  Hence this is no longer an option, but we hope
+    it will be possible in the future.
+  - AWS EC2 - if you're deploying to AWS, cloning this repo to an EC2 instance may simplify the
+    required authentication of your AWS CLI.  As of August 2022, we don't have full docs on support
+    for this.
 
 These cloud shell environments simplify authentication and, given that you may need to manage secrets
 for some data sources, provide a more secure location than your laptop to store your Terraform state.
