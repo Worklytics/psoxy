@@ -216,7 +216,7 @@ module "worklytics-psoxy-connection-google-workspace" {
 
 locals {
   oauth_long_access_connectors = {
-    asana =  {
+    asana = {
       enabled : false,
       source_kind : "asana",
       display_name : "Asana"
@@ -246,7 +246,7 @@ EOT
       source_kind : "zoom"
       display_name : "Zoom"
       example_api_calls : ["/v2/users"]
-      external_token_todo :  <<EOT
+      external_token_todo : <<EOT
 TODO: document which type of Zoom app needed, how to get the long-lived token.
 EOT
     }
