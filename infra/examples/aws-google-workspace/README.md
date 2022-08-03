@@ -19,3 +19,4 @@ gcp_folder_id                 = "111111111111" # folder ID for the project; if e
 gcp_billing_account_id        = "123456-789ABC-DEF012" # GCP billing account ID for project; if existing project, you can leave as empty string and see the value from `terraform plan`
 ```
 
+

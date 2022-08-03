@@ -49,6 +49,16 @@ resource "google_project" "psoxy-google-connectors" {
   billing_account = var.gcp_billing_account_id
   folder_id       = var.gcp_folder_id # if project is at top-level of your GCP organization, rather than in a folder, comment this line out
   # org_id          = var.gcp_org_id # if project is in a GCP folder, this value is implicit and this line should be commented out
+
+  # NOTE: these are provide because OFTEN customers have pre-existing GCP project; if such, there's
+  # usually no need to specify folder_id/org_id/billing_account and have changes applied
+  lifecycle {
+    ignore_changes = [
+      org_id,
+      folder_id,
+      billing_account,
+    ]
+  }
 }
 
 locals {
