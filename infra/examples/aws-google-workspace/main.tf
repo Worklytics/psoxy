@@ -109,7 +109,7 @@ locals {
       ]
     }
     "google-chat" : {
-      enabled : true,
+      enabled : false,
       source_kind : "google-chat",
       display_name : "Google Chat"
       apis_consumed : [
@@ -120,7 +120,7 @@ locals {
       ]
     }
     "gdrive" : {
-      enabled : true,
+      enabled : false,
       source_kind : "gdrive",
       display_name : "Google Drive"
       apis_consumed : [
@@ -131,7 +131,7 @@ locals {
       ]
     }
     "google-meet" : {
-      enabled : true,
+      enabled : false,
       source_kind : "google-meet",
       display_name : "Google Meet"
       apis_consumed : [
@@ -151,8 +151,6 @@ module "google-workspace-connection" {
 
   # source = "../../modules/google-workspace-dwd-connection"
   source = "git::https://github.com/worklytics/psoxy//infra/modules/google-workspace-dwd-connection?ref=v0.4.0-rc"
-
-
 
   project_id                   = google_project.psoxy-google-connectors.project_id
   connector_service_account_id = "psoxy-${each.key}"
@@ -207,7 +205,6 @@ module "worklytics-psoxy-connection-google-workspace" {
   # source = "../../modules/worklytics-psoxy-connection-aws"
   source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=v0.4.0-rc"
 
-
   psoxy_endpoint_url = module.psoxy-google-workspace-connector[each.key].endpoint_url
   display_name       = "${each.value.display_name} via Psoxy${var.connector_display_name_suffix}"
   aws_region         = var.aws_region
@@ -220,7 +217,7 @@ module "worklytics-psoxy-connection-google-workspace" {
 locals {
   oauth_long_access_connectors = {
     asana =  {
-      enabled : true,
+      enabled : false,
       source_kind : "asana",
       display_name : "Asana"
       example_api_calls : [
@@ -234,7 +231,7 @@ locals {
 EOT
     }
     slack-discovery-api = {
-      enabled : true
+      enabled : false
       source_kind : "slack"
       display_name : "Slack Discovery API"
       example_api_calls : []
@@ -245,7 +242,7 @@ EOT
 EOT
     }
     zoom = {
-      enabled : true
+      enabled : false
       source_kind : "zoom"
       display_name : "Zoom"
       example_api_calls : ["/v2/users"]
