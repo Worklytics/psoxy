@@ -49,6 +49,16 @@ resource "google_project" "psoxy-google-connectors" {
   billing_account = var.gcp_billing_account_id
   folder_id       = var.gcp_folder_id # if project is at top-level of your GCP organization, rather than in a folder, comment this line out
   # org_id          = var.gcp_org_id # if project is in a GCP folder, this value is implicit and this line should be commented out
+
+  # NOTE: these are provide because OFTEN customers have pre-existing GCP project; if such, there's
+  # usually no need to specify folder_id/org_id/billing_account and have changes applied
+  lifecycle {
+    ignore_changes = [
+      org_id,
+      folder_id,
+      billing_account,
+    ]
+  }
 }
 
 locals {
@@ -99,7 +109,7 @@ locals {
       ]
     }
     "google-chat" : {
-      enabled : true,
+      enabled : false,
       source_kind : "google-chat",
       display_name : "Google Chat"
       apis_consumed : [
@@ -110,7 +120,7 @@ locals {
       ]
     }
     "gdrive" : {
-      enabled : true,
+      enabled : false,
       source_kind : "gdrive",
       display_name : "Google Drive"
       apis_consumed : [
@@ -121,7 +131,7 @@ locals {
       ]
     }
     "google-meet" : {
-      enabled : true,
+      enabled : false,
       source_kind : "google-meet",
       display_name : "Google Meet"
       apis_consumed : [
@@ -141,8 +151,6 @@ module "google-workspace-connection" {
 
   # source = "../../modules/google-workspace-dwd-connection"
   source = "git::https://github.com/worklytics/psoxy//infra/modules/google-workspace-dwd-connection?ref=v0.4.0-rc"
-
-
 
   project_id                   = google_project.psoxy-google-connectors.project_id
   connector_service_account_id = "psoxy-${each.key}"
@@ -197,7 +205,6 @@ module "worklytics-psoxy-connection-google-workspace" {
   # source = "../../modules/worklytics-psoxy-connection-aws"
   source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=v0.4.0-rc"
 
-
   psoxy_endpoint_url = module.psoxy-google-workspace-connector[each.key].endpoint_url
   display_name       = "${each.value.display_name} via Psoxy${var.connector_display_name_suffix}"
   aws_region         = var.aws_region
@@ -209,8 +216,8 @@ module "worklytics-psoxy-connection-google-workspace" {
 
 locals {
   oauth_long_access_connectors = {
-    asana =  {
-      enabled : true,
+    asana = {
+      enabled : false,
       source_kind : "asana",
       display_name : "Asana"
       example_api_calls : [
@@ -224,7 +231,7 @@ locals {
 EOT
     }
     slack-discovery-api = {
-      enabled : true
+      enabled : false
       source_kind : "slack"
       display_name : "Slack Discovery API"
       example_api_calls : []
@@ -235,11 +242,11 @@ EOT
 EOT
     }
     zoom = {
-      enabled : true
+      enabled : false
       source_kind : "zoom"
       display_name : "Zoom"
       example_api_calls : ["/v2/users"]
-      external_token_todo :  <<EOT
+      external_token_todo : <<EOT
 TODO: document which type of Zoom app needed, how to get the long-lived token.
 EOT
     }
