@@ -1,6 +1,7 @@
 # Psoxy Prereq Install
 
-These shell command examples presume Ubuntu; you may need to translate to your *nix variant.
+These shell command examples presume Ubuntu; you may need to translate to your *nix variant. If you
+starting with a fairly rich environment, many of these tools may already be on your machine.
 
 1. install dependencies
 
@@ -40,7 +41,7 @@ tfenv use latest
 sudo apt install awscli
 ```
 
-5. if you want to test an AWS deployment, install AWS Curl
+5. if you want to test an AWS deployment, install AWS Curl (which requires `python` 3.6+ and `pip`)
 
 ```shell
 # check python version; please ensure it's at least 3.6+

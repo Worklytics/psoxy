@@ -63,7 +63,11 @@ And, depending on your scenario, you may also need:
      allow you to commit your specific configurations/changes while continuing to periodically fetch
      any changes from public  repo.
 
-  2. Pick the location from which you will provision the psoxy instance. Some suggestions:
+  2. Choose the cloud platform your'll deploy to, and follow its guide:
+       - [AWS](docs/aws/getting-started.md)
+       - [Google Cloud platform]
+
+  3. Pick the location from which you will provision the psoxy instance. Some suggestions:
 
      - [Google Cloud Shell](https://cloud.google.com/shell/) - if you're using GCP or connecting to
        Google Workspace, this is a recommended option. It [includes the prereqs above](https://cloud.google.com/shell/docs/how-cloud-shell-works#tools) EXCEPT aws/azure CLIs.
@@ -71,7 +75,7 @@ And, depending on your scenario, you may also need:
        for Ubuntu variants of Linux, and specific authentication help for:
             - [EC2](docs/aws/getting-started.md)
 
-  3. clone the repo
+ 3. clone the repo
 ```shell
 git clone https://github.com/Worklytics/psoxy.git
 ```
