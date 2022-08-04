@@ -24,7 +24,7 @@ module "psoxy_lambda" {
 }
 
 resource "aws_lambda_function_url" "lambda_url" {
-  function_name      = module.psoxy_lambda.function_name
+  function_name      =  var.function_name # woudld 'module.psoxy_lambda.function_name' avoid explicit dependency??
   authorization_type = "AWS_IAM"
 
   cors {
