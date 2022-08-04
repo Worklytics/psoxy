@@ -447,11 +447,12 @@ public class SanitizerImpl implements Sanitizer {
         }
 
         builder.scope(scope);
-        if (pseudonymImplementation == PseudonymImplementation.DEFAULT) {
+        if (pseudonymImplementation == PseudonymImplementation.LEGACY) {
            builder.hash(hashUtils.hash(canonicalization.apply(value.toString()),
                configurationOptions.getPseudonymizationSalt(), asLegacyScope(scope)));
-        } else if (pseudonymImplementation == PseudonymImplementation.LEGACY) {
-           pseudonymizationStrategy.getKeyedPseudonym(value.toString(), canonicalization);
+        } else if (pseudonymImplementation ==  PseudonymImplementation.DEFAULT) {
+           builder.hash(pseudonymizationStrategy.getPseudonym(value.toString(), canonicalization));
+           builder.encrypted(pseudonymizationStrategy.getKeyedPseudonym(value.toString(), canonicalization));
         } else {
             throw new RuntimeException("Unsupported pseudonym implementation: " + pseudonymImplementation);
         }

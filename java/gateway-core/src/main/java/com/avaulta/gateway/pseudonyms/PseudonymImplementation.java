@@ -6,7 +6,8 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public enum PseudonymImplementation {
-    //current
+
+    //not based on scope; base64-url encoded
     DEFAULT("v0.4"),
     //includes 'scope'
     LEGACY("v0.3"),
