@@ -24,7 +24,7 @@ module "psoxy_lambda" {
 }
 
 resource "aws_lambda_function_url" "lambda_url" {
-  function_name      = var.function_name
+  function_name      = module.psoxy_lambda.function_name
   authorization_type = "AWS_IAM"
 
   cors {
@@ -35,6 +35,10 @@ resource "aws_lambda_function_url" "lambda_url" {
     expose_headers    = ["keep-alive", "date"]
     max_age           = 86400
   }
+
+  depends_on = [
+    module.psoxy_lambda.function_name
+  ]
 }
 
 locals {
