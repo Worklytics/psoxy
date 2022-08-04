@@ -1,6 +1,6 @@
 package co.worklytics.psoxy;
 
-import co.worklytics.psoxy.impl.PseudonymImplementation;
+import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import co.worklytics.psoxy.rules.RuleSet;
 import lombok.*;
 

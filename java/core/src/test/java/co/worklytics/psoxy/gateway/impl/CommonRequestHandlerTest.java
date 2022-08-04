@@ -5,7 +5,7 @@ import co.worklytics.psoxy.PsoxyModule;
 import co.worklytics.psoxy.Sanitizer;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
-import co.worklytics.psoxy.impl.PseudonymImplementation;
+import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import co.worklytics.test.MockModules;
 import dagger.Component;
 import lombok.SneakyThrows;

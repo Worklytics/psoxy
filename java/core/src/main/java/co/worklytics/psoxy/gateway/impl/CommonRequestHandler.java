@@ -2,7 +2,7 @@ package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.gateway.*;
-import co.worklytics.psoxy.impl.PseudonymImplementation;
+import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import co.worklytics.psoxy.rules.RuleSet;
 import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.psoxy.utils.ComposedHttpRequestInitializer;

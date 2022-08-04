@@ -6,6 +6,7 @@ import co.worklytics.psoxy.rules.Rules1;
 import co.worklytics.psoxy.rules.Rules2;
 import co.worklytics.psoxy.rules.Transform;
 import co.worklytics.psoxy.utils.URLUtils;
+import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.PseudonymizationStrategy;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;

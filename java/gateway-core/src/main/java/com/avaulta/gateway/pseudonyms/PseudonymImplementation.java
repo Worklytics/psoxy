@@ -1,4 +1,4 @@
-package co.worklytics.psoxy.impl;
+package com.avaulta.gateway.pseudonyms;
 
 import lombok.Getter;
 import lombok.NonNull;
