@@ -171,8 +171,6 @@ pseudonymized using an equivalent algorithm and secret). See [`java/impl/cmd-lin
 for details.
 
 
-
-
 ## Support
 
 Psoxy is maintained by Worklytics, Co. Support as well as professional services to assist with

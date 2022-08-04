@@ -1,5 +1,9 @@
 # AWS - Getting Started with Cloud Shell
 
+**YMMV; we've found that as of Aug 2022, this is not a great option as people will often hit AWS's
+1GB limit for cloudshell. In such a scenario, use your local machine, or a VM/container elsewhere
+ in AWS**
+
 1. clone the repo
 ```shell
 git clone https://github.com/Worklytics/psoxy.git
@@ -16,7 +20,7 @@ sudo yum -y install pip
 pip install awscurl
 
 
-# GCloud SDK (if using Google Workspace datasources)
+# GCloud SDK (if using Google Workspace data sources)
 # The next line updates PATH for the Google Cloud SDK.
 if [ -f '/home/cloudshell-user/google-cloud-sdk/path.bash.inc' ]; then . '/home/cloudshell-user/google-cloud-sdk/path.bash.inc'; fi
 
@@ -40,7 +44,7 @@ tfenv use latest
 curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-384.0.0-linux-x86_64.tar.gz
 tar -xvf google-cloud-cli-384.0.0-linux-x86_64.tar.gz
 sudo ./google-cloud-sdk/install.sh
-rm google-cloud-cli-384.0.0-linux-x86_64.tar.gz 
+rm google-cloud-cli-384.0.0-linux-x86_64.tar.gz
 ```
 
 6. if using Microsoft 365 data sources, install Azure CLI and authenticate.
@@ -48,5 +52,4 @@ rm google-cloud-cli-384.0.0-linux-x86_64.tar.gz
 https://docs.microsoft.com/en-us/cli/azure/install-azure-cli
 
 
-
-You should now be ready for the general instructions in the [README.md](../README.md).
+You should now be ready for the general instructions in the [README.md](../../README.md).
