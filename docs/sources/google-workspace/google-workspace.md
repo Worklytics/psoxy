@@ -1,6 +1,6 @@
 # Google Workspace
 
-Google Workspace sources can be setup via terraform, using modules found in our GitHub repo.  These
+Google Workspace sources can be setup via Terraform, using modules found in our GitHub repo.  These
 are included in the examples found in `[infra/examples/](../../infra/examples).
 
 ##
