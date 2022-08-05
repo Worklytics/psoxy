@@ -67,7 +67,7 @@ locals {
     # GDirectory connections are a PRE-REQ for gmail, gdrive, and gcal connections. remove only
     # if you plan to directly connect Directory to worklytics (without proxy). such a scenario is
     # used for customers who care primarily about pseudonymizing PII of external subjects with whom
-    # they collaborate in GMail/GCal/Gdrive. the Directory does not contain PII of subjects external
+    # they collaborate in GMail/GCal/GDrive. the Directory does not contain PII of subjects external
     # to the Google Workspace, so may be directly connected in such scenarios.
     "gdirectory" : {
       enabled : true,
@@ -85,6 +85,14 @@ locals {
         "https://www.googleapis.com/auth/admin.directory.orgunit.readonly",
         "https://www.googleapis.com/auth/admin.directory.rolemanagement.readonly"
       ]
+      example_api_calls: [
+        "/admin/directory/v1/users/me",
+        "/admin/directory/v1/users",
+        "/admin/directory/v1/groups?customer=my_customer",
+        "/admin/directory/v1/customer/my_customer/domains",
+        "/admin/directory/v1/customer/my_customer/roles",
+        "/admin/directory/v1/customer/my_customer/rolesassignments"
+      ]
     }
     "gcal" : {
       enabled : true,
@@ -95,6 +103,11 @@ locals {
       ]
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/calendar.readonly"
+      ],
+      example_api_calls: [
+        "/calendar/v3/calendars/primary",
+        "/calendar/v3/users/me/settings",
+        "/calendar/v3/calendars/primary/events"
       ]
     }
     "gmail" : {
@@ -106,6 +119,9 @@ locals {
       ]
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/gmail.metadata"
+      ],
+      example_api_calls: [
+        "/gmail/v1/users/me/messages"
       ]
     }
     "google-chat" : {
@@ -117,6 +133,9 @@ locals {
       ]
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/admin.reports.audit.readonly"
+      ],
+      example_api_calls: [
+        "/admin/reports/v1/activity/users/all/applications/chat"
       ]
     }
     "gdrive" : {
@@ -128,6 +147,10 @@ locals {
       ]
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/drive.metadata.readonly"
+      ],
+      example_api_calls: [
+        "/drive/v2/files",
+        "/drive/v3/files"
       ]
     }
     "google-meet" : {
@@ -139,6 +162,9 @@ locals {
       ]
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/admin.reports.audit.readonly"
+      ]
+      example_api_calls: [
+        "/admin/reports/v1/activity/users/all/applications/meet"
       ]
     }
   }
