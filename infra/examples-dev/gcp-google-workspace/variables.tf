@@ -40,3 +40,8 @@ variable "psoxy_base_dir" {
     error_message = "The psoxy_base_dir value should end with a slash."
   }
 }
+
+variable "google_workspace_example_user" {
+  type        = string
+  description = "user to impersonate for Google Workspace API calls (null for none)"
+}
