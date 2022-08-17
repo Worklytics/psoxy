@@ -37,7 +37,7 @@ resource "aws_lambda_function_url" "lambda_url" {
   }
 
   depends_on = [
-    module.psoxy_lambda.function_name
+    module.psoxy_lambda
   ]
 }
 
