@@ -75,6 +75,12 @@ variable "example_api_calls" {
   description = "example endpoints that can be called via proxy"
 }
 
+variable "example_api_calls_user_to_impersonate" {
+  type        = string
+  description = "if example endpoints require impersonation of a specific user, use this id"
+  default     = null
+}
+
 variable "environment_variables" {
   type        = map(string)
   description = "Non-sensitive variables to add as an environment variable."

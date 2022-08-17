@@ -223,7 +223,7 @@ module "psoxy-google-workspace-connector" {
   path_to_repo_root    = var.psoxy_base_dir
   # from next version of aws-psoxy-rest module:
   # example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
-  example_api_calls    = each.value.example_api_calls
+  example_api_calls = each.value.example_api_calls
 
   parameters = [
     module.psoxy-aws.salt_secret,
