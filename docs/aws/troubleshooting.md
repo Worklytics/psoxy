@@ -1,6 +1,23 @@
-# AWS Trouble Shooting
+# AWS Troubleshooting
 
 Tips and tricks for using AWS as to host the proxy.
+
+## Who are you?
+
+```shell
+# figure out how your AWS CLI is authenticated
+# (NOTE: this is also the only AWS API cmd that will work regardless of your IAM setup; asking AWS
+# who it believes you are doesn't require any permissions)
+aws sts get-caller-identity
+
+# figure out if the identity you're authenticated as can assume target role
+aws sts assume-role \
+--role-arn arn:aws:iam::123456789012:role/InfraAdmin \
+--role-session-name TestSession \
+--output json
+```
+
+If above doesn't happen seem to work as expected, some ideas in the next section may help.
 
 ## Your AWS Organization uses SSO via Okta or some similar provider
 
