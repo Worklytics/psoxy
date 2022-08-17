@@ -36,6 +36,14 @@ whatever the path to it is in your terraform configuration, which you can get fr
 `terraform plan` output. `provider-resource-id` is a little trickier, and you might need to find
 the format required by finding the Terraform docs for the resource type on the web.
 
+NOTE: resources in plan with brackets/quotes will need these escaped with a backslash for use in
+bash commands.
+
+eg
+```shell
+terraform import module.psoxy-msft-connector\[\"outlook-cal\"\].aws_lambda_function_url.lambda_url psoxy-outlook-cal
+```
+
 
 
 

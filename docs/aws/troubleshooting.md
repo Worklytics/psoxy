@@ -117,7 +117,8 @@ Error: error creating Lambda Function URL (psoxy-outlook-mail): ResourceConflict
 Your Terraform state is inconsistent. Run something like the following, adapted for your connector:
 
 ```shell
-terraform import module.psoxy-msft-connector\[\"outlook-mail\"\].aws_lambda_function_url.lambda_url
+terraform import module.psoxy-msft-connector\[\"outlook-mail\"\].aws_lambda_function_url.lambda_url psoxy-outlook-mail
+```
 ```
 
 NOTE: you likely need to change `outlook-mail` if your error is with a different data source. The
