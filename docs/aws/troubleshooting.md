@@ -119,7 +119,6 @@ Your Terraform state is inconsistent. Run something like the following, adapted 
 ```shell
 terraform import module.psoxy-msft-connector\[\"outlook-mail\"\].aws_lambda_function_url.lambda_url psoxy-outlook-mail
 ```
-```
 
 NOTE: you likely need to change `outlook-mail` if your error is with a different data source. The
 `\` chars are needed to escape the double-quotes/brackets in your bash command.
