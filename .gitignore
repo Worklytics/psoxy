@@ -22,16 +22,8 @@ hs_err_pid*
 #NOTE: am NOT excluding .iml files; even for Maven-based modules; Intellij's base import of the
 # Maven modules --> IntelliJ modules doesn't result in nice hierarchy (only shows leaves)
 
-
-# ignore terraform variables / state for developers' personal development environments and other examples
-infra/dev-personal/terraform.tfvars
-infra/dev-personal/.terraform**
-infra/dev-personal/terraform.tfstate**
-infra/dev-personal/TODO*
-
 # ignore sa key file(s)
 infra/**connector-sa-key.json
-
 
 java/target
 java/**/target

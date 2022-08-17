@@ -1,0 +1,9 @@
+# ignore terraform variables / state for developers' personal development environments and other examples
+terraform.tfvars
+.terraform**
+terraform.tfstate**
+TODO*
+test*
+
+# macOs generated files
+.DS_Store
