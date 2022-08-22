@@ -115,7 +115,7 @@ recreate them (for example, to use GCP project that already exists).
 terraform apply
 ```
 
-  10. follow any `TODO` instructions produced by Terraform, such as:
+  9. follow any `TODO` instructions produced by Terraform, such as:
      - build and deploy JAR (built from this repo) into your environment
      - provision API keys / make OAuth grants needed by each Data Connection
      - create the Data Connection from Worklytics to your psoxy instance (Terraform can provide
