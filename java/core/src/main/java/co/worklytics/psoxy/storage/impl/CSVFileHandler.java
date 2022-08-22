@@ -42,9 +42,9 @@ public class CSVFileHandler implements FileHandler {
 
         Preconditions.checkArgument(records.getHeaderMap() != null, "Failed to parse header from file");
 
-        Sanitizer.Options options = sanitizer.getOptions();
+        Sanitizer.ConfigurationOptions configurationOptions = sanitizer.getConfigurationOptions();
 
-        Set<String> columnsToRedact = ((Rules1) options.getRules())
+        Set<String> columnsToRedact = ((Rules1) configurationOptions.getRules())
                 .getRedactions()
                 .stream()
                 .map(Rules1.Rule::getCsvColumns)
@@ -52,7 +52,7 @@ public class CSVFileHandler implements FileHandler {
                 .map(String::trim)
                 .collect(Collectors.toCollection(() -> new TreeSet<>(String.CASE_INSENSITIVE_ORDER)));
 
-        Set<String> columnsToPseudonymize = ((Rules1) options.getRules())
+        Set<String> columnsToPseudonymize = ((Rules1) configurationOptions.getRules())
                 .getPseudonymizations()
                 .stream()
                 .map(Rules1.Rule::getCsvColumns)

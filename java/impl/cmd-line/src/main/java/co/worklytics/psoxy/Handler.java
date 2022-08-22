@@ -30,7 +30,7 @@ public class Handler {
     public void pseudonymize(@NonNull Config config,
                              @NonNull File inputFile,
                              @NonNull Appendable out) {
-        Sanitizer.Options.OptionsBuilder options = Sanitizer.Options.builder()
+        Sanitizer.ConfigurationOptions.ConfigurationOptionsBuilder options = Sanitizer.ConfigurationOptions.builder()
             .defaultScopeId(config.getDefaultScopeId());
 
         if (config.getPseudonymizationSaltSecret() != null) {

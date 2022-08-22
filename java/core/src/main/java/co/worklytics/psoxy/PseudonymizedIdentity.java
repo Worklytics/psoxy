@@ -25,7 +25,10 @@ public class PseudonymizedIdentity {
      * arguably, 'scope' is another tier of 'domain'
      *
      * NOTE: `null` scope means scope is implicit from identifier's context
+     *
+     * @deprecated stop sending this. consumers should infer scopes based on context
      */
+    @Deprecated //will be removed in v0.4; infer from context
     @JsonInclude(JsonInclude.Include.NON_NULL)
     String scope;
 
@@ -49,6 +52,10 @@ public class PseudonymizedIdentity {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     String original;
 
-    //q: include 'encrypted', optionally? eg, a value that, if passed back to proxy in URL or header
-    // will be decrypted
+    /**
+     * a value that, if passed back to proxy in request will be decrypted to obtain the original
+     * before forwarding request to source API.
+     */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    String encrypted;
 }

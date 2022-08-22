@@ -6,6 +6,8 @@ import co.worklytics.psoxy.rules.Rules1;
 import co.worklytics.psoxy.rules.Rules2;
 import co.worklytics.psoxy.rules.Transform;
 import co.worklytics.psoxy.utils.URLUtils;
+import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
+import com.avaulta.gateway.pseudonyms.PseudonymizationStrategy;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.jayway.jsonpath.Configuration;
@@ -28,6 +30,7 @@ import javax.mail.internet.InternetAddress;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -40,7 +43,7 @@ import static java.util.regex.Pattern.CASE_INSENSITIVE;
 public class SanitizerImpl implements Sanitizer {
 
     @Getter
-    final Options options;
+    final ConfigurationOptions configurationOptions;
 
     //NOTE: JsonPath seems to be threadsafe
     //  - https://github.com/json-path/JsonPath/issues/384
@@ -57,17 +60,19 @@ public class SanitizerImpl implements Sanitizer {
     Map<Transform, List<JsonPath>> compiledTransforms = new ConcurrentHashMap<>();
 
     @AssistedInject
-    public SanitizerImpl(HashUtils hashUtils, @Assisted Options options) {
+    public SanitizerImpl(HashUtils hashUtils, @Assisted ConfigurationOptions configurationOptions) {
         this.hashUtils = hashUtils;
-        this.options = options;
+        this.configurationOptions = configurationOptions;
     }
 
     @Getter(onMethod_ = {@VisibleForTesting})
     @Inject Configuration jsonConfiguration;
 
-
     @Inject
     HashUtils hashUtils;
+
+    @Inject
+    PseudonymizationStrategy pseudonymizationStrategy;
 
     List<JsonPath> applicablePaths(@NonNull List<Pair<Pattern, List<JsonPath>>> rules,
                                    @NonNull String relativeUrl) {
@@ -81,13 +86,13 @@ public class SanitizerImpl implements Sanitizer {
     List<Pattern> getCompiledAllowedEndpoints() {
         if (compiledAllowedEndpoints == null) {
             synchronized ($writeLock) {
-                if (options.getRules() instanceof Rules2) {
-                    compiledAllowedEndpoints = ((Rules2) options.getRules()).getEndpoints().stream()
+                if (configurationOptions.getRules() instanceof Rules2) {
+                    compiledAllowedEndpoints = ((Rules2) configurationOptions.getRules()).getEndpoints().stream()
                         .map(Rules2.Endpoint::getPathRegex)
                         .map(regex -> Pattern.compile(regex, CASE_INSENSITIVE))
                         .collect(Collectors.toList());
                 } else {
-                    compiledAllowedEndpoints = ((Rules1) options.getRules()).getAllowedEndpointRegexes().stream()
+                    compiledAllowedEndpoints = ((Rules1) configurationOptions.getRules()).getAllowedEndpointRegexes().stream()
                         .map(regex -> Pattern.compile(regex, CASE_INSENSITIVE))
                         .collect(Collectors.toList());
                 }
@@ -101,8 +106,25 @@ public class SanitizerImpl implements Sanitizer {
     @Override
     public boolean isAllowed(@NonNull URL url) {
         String relativeUrl = URLUtils.relativeURL(url);
-        return isAllowAll(options.getRules())
+        return isAllowAll(configurationOptions.getRules())
             || getCompiledAllowedEndpoints().stream().anyMatch(p -> p.matcher(relativeUrl).matches());
+    }
+
+    @Override
+    public String sanitize(URL url, String jsonResponse) {        //extra check ...
+        if (!isAllowed(url)) {
+            throw new IllegalStateException(String.format("Sanitizer called to sanitize response that should not have been retrieved: %s", url.toString()));
+        }
+        if (StringUtils.isEmpty(jsonResponse)) {
+            // Nothing to do
+            return jsonResponse;
+        }
+
+        if (getConfigurationOptions().getRules() instanceof Rules1) {
+            return legacyTransform(url, jsonResponse);
+        } else {
+            return transform(url, jsonResponse);
+        }
     }
 
     boolean isAllowAll(RuleSet rules) {
@@ -114,30 +136,11 @@ public class SanitizerImpl implements Sanitizer {
         }
     }
 
-
-    @Override
-    public String sanitize(@NonNull URL url, @NonNull String jsonResponse) {
-        //extra check ...
-        if (!isAllowed(url)) {
-            throw new IllegalStateException(String.format("Sanitizer called to sanitize response that should not have been retrieved: %s", url.toString()));
-        }
-        if (StringUtils.isEmpty(jsonResponse)) {
-            // Nothing to do
-            return jsonResponse;
-        }
-
-        if (getOptions().getRules() instanceof Rules1) {
-            return legacyTransform(url, jsonResponse);
-        } else {
-            return transform(url, jsonResponse);
-        }
-    }
-
     synchronized List<Pair<Pattern, Rules2.Endpoint>> getEndpointRules() {
         if (compiledEndpointRules == null) {
             synchronized ($writeLock) {
                 if (compiledEndpointRules == null) {
-                    compiledEndpointRules = ((Rules2) options.getRules()).getEndpoints().stream()
+                    compiledEndpointRules = ((Rules2) configurationOptions.getRules()).getEndpoints().stream()
                         .map(endpoint -> Pair.of(Pattern.compile(endpoint.getPathRegex(), CASE_INSENSITIVE), endpoint))
                         .collect(Collectors.toList());
                 }
@@ -184,14 +187,15 @@ public class SanitizerImpl implements Sanitizer {
             MapFunction f;
             if (transform instanceof Transform.Pseudonymize) {
                 //curry the defaultScopeId from the transform into the pseudonymization method
-                f =
-                    ((Transform.Pseudonymize) transform).getIncludeOriginal() ? this::pseudonymizeWithOriginalToJson : this::pseudonymizeToJson;
+                f = getPseudonymize((Transform.Pseudonymize) transform);
             } else if (transform instanceof Transform.PseudonymizeEmailHeader) {
                 f = this::pseudonymizeEmailHeaderToJson;
             } else if (transform instanceof Transform.RedactRegexMatches) {
                 f = getRedactRegexMatches((Transform.RedactRegexMatches) transform);
             } else if (transform instanceof Transform.FilterTokenByRegex) {
                 f = getFilterTokenByRegex((Transform.FilterTokenByRegex) transform);
+            } else if (transform instanceof Transform.Encrypt) {
+                f = getEncrypt((Transform.Encrypt) transform);
             } else {
                 throw new IllegalArgumentException("Unknown transform type: " + transform.getClass().getName());
             }
@@ -355,10 +359,50 @@ public class SanitizerImpl implements Sanitizer {
 
 
     public PseudonymizedIdentity pseudonymize(Object value) {
-        return pseudonymize(value, false);
+        return pseudonymize(value, Transform.Pseudonymize.builder().build());
     }
 
-    public PseudonymizedIdentity pseudonymize(Object value, boolean includeOriginal) {
+    public MapFunction getPseudonymize(Transform.Pseudonymize transformOptions) {
+        return (Object s, Configuration configuration) -> {
+            PseudonymizedIdentity pseudonymizedIdentity = pseudonymize(s, transformOptions);
+
+            if (transformOptions.getIncludeEncrypted() && s != null) {
+                Preconditions.checkArgument(s instanceof String, "encryption only supported for string values");
+                Function<String, String> canonicalization = duckTypesAsEmails(s) ? this::emailCanonicalization : Function.identity();
+                pseudonymizedIdentity.setEncrypted(pseudonymizationStrategy.getKeyedPseudonym((String) s, canonicalization));
+            }
+            return configuration.jsonProvider().toJson(pseudonymizedIdentity);
+        };
+    }
+
+    public MapFunction getEncrypt(Transform.Encrypt transformOptions) {
+        return (Object s, Configuration configuration) -> {
+
+            if (s == null) {
+                return null;
+            }
+            Preconditions.checkArgument(s instanceof String, "encryption only supported for string values");
+
+            //q: can we support numeric ids with this? concern that they would overflow bounds
+            // expected by clients
+
+            Function<String, String> canonicalization = duckTypesAsEmails(s) ? this::emailCanonicalization : Function.identity();
+            return pseudonymizationStrategy.getKeyedPseudonym((String) s, canonicalization);
+        };
+    }
+
+    String emailCanonicalization(String original) {
+        String domain = EmailAddressParser.getDomain(original, EmailAddressCriteria.DEFAULT, true);
+
+        //NOTE: lower-case here is NOT stipulated by RFC
+        return  EmailAddressParser.getLocalPart(original, EmailAddressCriteria.DEFAULT, true)
+            .toLowerCase()
+            + "@"
+            + domain.toLowerCase();
+
+    }
+
+    public PseudonymizedIdentity pseudonymize(Object value, Transform.Pseudonymize transformOptions) {
         if (value == null) {
             return null;
         }
@@ -368,44 +412,53 @@ public class SanitizerImpl implements Sanitizer {
 
         PseudonymizedIdentity.PseudonymizedIdentityBuilder builder = PseudonymizedIdentity.builder();
 
-        String canonicalValue, scope;
+        String scope;
         //q: this auto-detect a good idea? Or invert control and let caller specify with a header
         // or something??
         //NOTE: use of EmailAddressValidator/Parser here is probably overly permissive, as there
         // are many cases where we expect simple emails (eg, alice@worklytics.co), not all the
         // possible variants with personal names / etc that may be allowed in email header values
-        if (value instanceof String && EmailAddressValidator.isValid((String) value)) {
 
+        Function<String, String> canonicalization;
+
+        if (duckTypesAsEmails(value)) {
+            canonicalization = this::emailCanonicalization;
             String domain = EmailAddressParser.getDomain((String) value, EmailAddressCriteria.DEFAULT, true);
             builder.domain(domain);
             scope = PseudonymizedIdentity.EMAIL_SCOPE;
-
-            //NOTE: lower-case here is NOT stipulated by RFC
-            canonicalValue =
-                EmailAddressParser.getLocalPart((String) value, EmailAddressCriteria.DEFAULT, true)
-                    .toLowerCase()
-                + "@"
-                + domain.toLowerCase();
-
             //q: do something with the personal name??
             // NO --> it is not going to be reliable (except for From, will fill with whatever
             // sender has for the person in their Contacts), and in enterprise use-cases we
             // shouldn't need it for matching
         } else {
-            canonicalValue = value.toString();
-            scope = options.getDefaultScopeId();
+            canonicalization = Function.identity();
+            scope = configurationOptions.getDefaultScopeId();
         }
 
-        if (canonicalValue != null) {
-            builder.scope(scope);
-            builder.hash(hashUtils.hash(canonicalValue, options.getPseudonymizationSalt(), asLegacyScope(scope)));
+        builder.scope(scope);
+        if (getConfigurationOptions().getPseudonymImplementation() == PseudonymImplementation.LEGACY) {
+           builder.hash(hashUtils.hash(canonicalization.apply(value.toString()),
+               configurationOptions.getPseudonymizationSalt(), asLegacyScope(scope)));
+        } else if (getConfigurationOptions().getPseudonymImplementation() == PseudonymImplementation.DEFAULT) {
+           builder.hash(pseudonymizationStrategy.getPseudonym(value.toString(), canonicalization));
+
+        } else {
+            throw new RuntimeException("Unsupported pseudonym implementation: " + getConfigurationOptions().getPseudonymImplementation());
         }
 
-        if (includeOriginal) {
+        if (transformOptions.getIncludeEncrypted()) {
+            builder.encrypted(pseudonymizationStrategy.getKeyedPseudonym(value.toString(), canonicalization));
+        }
+
+        if (transformOptions.getIncludeOriginal()) {
             builder.original(Objects.toString(value));
         }
 
         return builder.build();
+    }
+
+    boolean duckTypesAsEmails(Object value) {
+        return value instanceof String && EmailAddressValidator.isValid((String) value);
     }
 
     //converts 'scope' to legacy value (eg, equivalents to original Worklytics scheme, where no scope
@@ -420,7 +473,7 @@ public class SanitizerImpl implements Sanitizer {
     }
 
     public String pseudonymizeWithOriginalToJson(Object value, @NonNull Configuration configuration) {
-        return configuration.jsonProvider().toJson(pseudonymize(value, true));
+        return configuration.jsonProvider().toJson(pseudonymize(value, Transform.Pseudonymize.builder().includeOriginal(true).build()));
     }
 
 
@@ -451,7 +504,7 @@ public class SanitizerImpl implements Sanitizer {
         if (compiledPseudonymizations == null) {
             synchronized ($writeLock){
                 if (compiledPseudonymizations == null) {
-                    compiledPseudonymizations = compile(((Rules1) options.getRules()).getPseudonymizations());
+                    compiledPseudonymizations = compile(((Rules1) configurationOptions.getRules()).getPseudonymizations());
                 }
             }
         }
@@ -462,7 +515,7 @@ public class SanitizerImpl implements Sanitizer {
             synchronized ($writeLock){
                 if (compiledPseudonymizationsWithOriginals == null) {
                     compiledPseudonymizationsWithOriginals =
-                        compile(((Rules1) options.getRules()).getPseudonymizationWithOriginals());
+                        compile(((Rules1) configurationOptions.getRules()).getPseudonymizationWithOriginals());
                 }
             }
         }
@@ -472,7 +525,7 @@ public class SanitizerImpl implements Sanitizer {
         if (compiledRedactions == null) {
             synchronized ($writeLock){
                 if (compiledRedactions == null) {
-                    compiledRedactions = compile(((Rules1) options.getRules()).getRedactions());
+                    compiledRedactions = compile(((Rules1) configurationOptions.getRules()).getRedactions());
                 }
             }
         }
@@ -483,7 +536,7 @@ public class SanitizerImpl implements Sanitizer {
         if (compiledEmailHeaderPseudonymizations == null) {
             synchronized ($writeLock){
                 if (compiledEmailHeaderPseudonymizations == null) {
-                    compiledEmailHeaderPseudonymizations = compile(((Rules1) options.getRules()).getEmailHeaderPseudonymizations());
+                    compiledEmailHeaderPseudonymizations = compile(((Rules1) configurationOptions.getRules()).getEmailHeaderPseudonymizations());
                 }
             }
         }

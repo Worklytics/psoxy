@@ -4,9 +4,9 @@ import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
 import co.worklytics.psoxy.rules.RuleSet;
 import co.worklytics.psoxy.rules.Rules1;
 import co.worklytics.psoxy.Sanitizer;
+import co.worklytics.psoxy.rules.Rules2;
 import lombok.Getter;
 import lombok.SneakyThrows;
-import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -191,6 +191,10 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
 
         //block by default
         assertThrows(IllegalStateException.class, () -> this.sanitize(endpoint, jsonString));
+
+        //NOTE: used to have test that thumbnail data redacted EVEN if request allowed through, but
+        // with Rules2 format this doesn't make sense; rules are based on the matched endpoint, so
+        // if no rules ALLOW thumbnails, by definition no rules will REDACT its content either
     }
 
     @SneakyThrows

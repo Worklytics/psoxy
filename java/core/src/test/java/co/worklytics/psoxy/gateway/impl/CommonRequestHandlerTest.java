@@ -1,12 +1,16 @@
 package co.worklytics.psoxy.gateway.impl;
 
+import co.worklytics.psoxy.ControlHeader;
 import co.worklytics.psoxy.PsoxyModule;
+import co.worklytics.psoxy.Sanitizer;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import co.worklytics.test.MockModules;
 import dagger.Component;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -20,6 +24,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 class CommonRequestHandlerTest {
@@ -91,5 +96,24 @@ class CommonRequestHandlerTest {
         URL url = handler.buildTarget(request);
 
         assertEquals(expectedProxyCallUrl, url.toString(), "URLs should match");
+    }
+
+    @Test
+    void parseOptionsFromRequest() {
+        //verify precondition that defaults != LEGACY
+        assertEquals(
+            PseudonymImplementation.DEFAULT,
+            Sanitizer.ConfigurationOptions.builder().build().getPseudonymImplementation());
+
+        //prep mock request
+        HttpEventRequest request = mock(HttpEventRequest.class);
+        when(request.getHeader(ControlHeader.PSEUDONYM_IMPLEMENTATION.getHttpHeader()))
+            .thenReturn(Optional.of(PseudonymImplementation.LEGACY.getHttpHeaderValue()));
+
+        //test parsing options from request
+        Optional<PseudonymImplementation> impl = handler.parsePseudonymImplementation(request);
+
+        //verify options were parsed correctly
+        assertEquals(PseudonymImplementation.LEGACY, impl.get());
     }
 }

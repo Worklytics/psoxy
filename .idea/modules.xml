@@ -5,9 +5,10 @@
       <module fileurl="file://$PROJECT_DIR$/java/impl/aws/aws.iml" filepath="$PROJECT_DIR$/java/impl/aws/aws.iml" group="impl and modules" />
       <module fileurl="file://$PROJECT_DIR$/java/impl/cmd-line/cmd-line.iml" filepath="$PROJECT_DIR$/java/impl/cmd-line/cmd-line.iml" group="impl and modules" />
       <module fileurl="file://$PROJECT_DIR$/java/core/core.iml" filepath="$PROJECT_DIR$/java/core/core.iml" />
-      <module fileurl="file://$PROJECT_DIR$/java/impl/gcp/gcp.iml" filepath="$PROJECT_DIR$/java/impl/gcp/gcp.iml" group="impl and modules" />
+      <module fileurl="file://$PROJECT_DIR$/java/gateway-core/gateway-core.iml" filepath="$PROJECT_DIR$/java/gateway-core/gateway-core.iml" />
       <module fileurl="file://$PROJECT_DIR$/java/impl/impl.iml" filepath="$PROJECT_DIR$/java/impl/impl.iml" group="impl and modules" />
       <module fileurl="file://$PROJECT_DIR$/infra/infra.iml" filepath="$PROJECT_DIR$/infra/infra.iml" />
+      <module fileurl="file://$PROJECT_DIR$/java/impl/gcp/psoxy-gcp.iml" filepath="$PROJECT_DIR$/java/impl/gcp/psoxy-gcp.iml" group="impl and modules" />
       <module fileurl="file://$PROJECT_DIR$/java/root.iml" filepath="$PROJECT_DIR$/java/root.iml" />
     </modules>
   </component>

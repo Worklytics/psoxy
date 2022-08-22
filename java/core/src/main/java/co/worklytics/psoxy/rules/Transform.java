@@ -119,15 +119,34 @@ public abstract class Transform {
     @Getter
     public static class Pseudonymize extends Transform {
 
+        /**
+         * use if still need original, but also want its pseudonym to be able to match against
+         * pseudonymized fields
+         *
+         * use case: group mailing lists; if they're attendees to an event, the email in that
+         * context will be pseudonymized; so when we pull list of groups, we need pseudonyms to
+         * match against those, but can also get the original for use in UX/reports, as it's not PII
+         */
         @JsonInclude(JsonInclude.Include.NON_DEFAULT)
         @Builder.Default
         Boolean includeOriginal = false;
 
-        //TODO: support this somehow ...
-        //String defaultScopeId;
+        @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+        @Builder.Default
+        Boolean includeEncrypted = false;
 
         public static Pseudonymize ofPaths(String... jsonPaths) {
             return Pseudonymize.builder().jsonPaths(Arrays.asList(jsonPaths)).build();
+        }
+    }
+
+    @SuperBuilder
+    @NoArgsConstructor //for Jackson
+    @Getter
+    public static class Encrypt extends Transform {
+
+        public static Encrypt defaults() {
+            return Encrypt.builder().build();
         }
     }
 }

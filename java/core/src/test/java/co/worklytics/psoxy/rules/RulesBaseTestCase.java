@@ -4,6 +4,7 @@ import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.impl.SanitizerImpl;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestUtils;
+import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -75,9 +76,11 @@ abstract public class RulesBaseTestCase {
         Container container = DaggerRulesBaseTestCase_Container.create();
         container.inject(this);
 
-        sanitizer = sanitizerFactory.create(Sanitizer.Options.builder()
+        sanitizer = sanitizerFactory.create(Sanitizer.ConfigurationOptions.builder()
             .rules(getRulesUnderTest())
             .defaultScopeId(getDefaultScopeId())
+            //TODO: existing test cases presume this
+            .pseudonymImplementation(PseudonymImplementation.LEGACY)
             .build());
 
         //q: good way to also batch test sanitizers from yaml/json formats of rules, to ensure
@@ -165,7 +168,7 @@ abstract public class RulesBaseTestCase {
 
     protected void assertSha(String expectedSha) {
         assertNotNull(expectedSha);
-        assertEquals(expectedSha, rulesUtils.sha(sanitizer.getOptions().getRules()));
+        assertEquals(expectedSha, rulesUtils.sha(sanitizer.getConfigurationOptions().getRules()));
     }
 
     protected void assertNotSanitized(String content, Collection<String> shouldContain) {
