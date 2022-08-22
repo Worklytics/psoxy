@@ -18,19 +18,30 @@ variable "aws_region" {
   description = "default region in which to provision your AWS infra"
 }
 
-variable "caller_aws_account_id" {
-  type        = string
-  description = "id of Worklytics AWS account from which proxy will be called"
-  default     = "939846301470:root"
+variable "caller_gcp_service_account_ids" {
+  type        = list(string)
+  description = "ids of GCP service accounts allowed to send requests to the proxy (eg, unique ID of the SA of your Worklytics instance)"
+  default     = []
+
   validation {
-    condition     = can(regex("^\\d{12}:\\w+$", var.caller_aws_account_id))
-    error_message = "The caller_aws_account_id value should be 12-digit numeric string."
+    condition = alltrue([
+      for i in var.caller_gcp_service_account_ids : (length(regexall("^\\d{21}$", i)) > 0)
+    ])
+    error_message = "The values of caller_gcp_service_account_ids should be 21-digit numeric strings."
   }
 }
 
-variable "caller_external_user_id" {
-  type        = string
-  description = "id of external user that will call proxy (eg, SA of your Worklytics instance)"
+variable "caller_aws_arns" {
+  type        = list(string)
+  description = "ARNs of AWS accounts allowed to send requests to the proxy (eg, arn:aws:iam::914358739851:root)"
+  default     = []
+
+  validation {
+    condition = alltrue([
+      for i in var.caller_aws_arns : (length(regexall("^arn:aws:iam::\\d{12}:\\w+$", i)) > 0)
+    ])
+    error_message = "The values of caller_aws_arns should be AWS Resource Names, something like 'arn:aws:iam::914358739851:root'."
+  }
 }
 
 variable "gcp_project_id" {
@@ -41,7 +52,7 @@ variable "gcp_project_id" {
 variable "environment_name" {
   type        = string
   description = "qualifier to append to name of project that will host your psoxy instance"
-  default     = null
+  default     = ""
 }
 
 variable "gcp_folder_id" {
@@ -71,5 +82,10 @@ variable "connector_display_name_suffix" {
 variable "psoxy_base_dir" {
   type        = string
   description = "the path where your psoxy repo resides. Preferably a full path, /home/user/repos/, avoid tilde (~) shortcut to $HOME"
-  default     = "../../.."
+  default     = "../../../"
+
+  validation {
+    condition     = can(regex(".*\\/$", var.psoxy_base_dir))
+    error_message = "The psoxy_base_dir value should end with a slash."
+  }
 }

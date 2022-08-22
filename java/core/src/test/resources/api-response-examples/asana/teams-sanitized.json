@@ -1,0 +1,14 @@
+{
+  "data":[
+    {
+      "gid":"12345",
+      "resource_type":"team",
+      "organization":{
+        "gid":"12345",
+        "resource_type":"workspace"
+      },
+      "permalink_url":"https://app.asana.com/0/resource/123456789/list",
+      "visibility":"secret"
+    }
+  ]
+}

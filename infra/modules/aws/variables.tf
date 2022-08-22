@@ -13,23 +13,36 @@ variable "region" {
   default     = "us-east-1"
 }
 
-variable "caller_aws_account_id" {
+variable "psoxy_base_dir" {
   type        = string
-  description = "id of worklytics sa"
-  default     = "914358739851"
+  description = "the path where your psoxy repo resides"
+  default     = "../../.."
+}
+
+variable "caller_gcp_service_account_ids" {
+  type        = list(string)
+  description = "ids of GCP service accounts allowed to send requests to the proxy (eg, unique ID of the SA of your Worklytics instance)"
+  default     = []
+
   validation {
-    condition     = can(regex("^\\d{12}:\\w+$", var.caller_aws_account_id))
-    error_message = "The aws_account_id value should be 12-digit numeric string, followed by ':root'."
+    condition = alltrue([
+      for i in var.caller_gcp_service_account_ids : (length(regexall("^\\d{21}$", i)) > 0)
+    ])
+    error_message = "The values of caller_gcp_service_account_ids should be 21-digit numeric strings."
   }
 }
 
-#eg "780C7DE5BBF9127"
-variable "caller_external_user_id" {
-  type        = string
-  description = "id of service account that will call proxy (eg, unique ID of the SA of your Worklytics instance)"
+variable "caller_aws_arns" {
+  type        = list(string)
+  description = "ARNs of AWS accounts allowed to send requests to the proxy (eg, arn:aws:iam::914358739851:root)"
+  default     = []
+
   validation {
-    condition     = can(regex("^\\d{21}$", var.caller_external_user_id))
-    error_message = "The caller_external_user_id value should be 21-digit numeric string."
+    condition = alltrue([
+      for i in var.caller_aws_arns : (length(regexall("^arn:aws:iam::\\d{12}:\\w+$", i)) > 0)
+    ])
+    error_message = "The values of caller_aws_arns should be AWS Resource Names, something like 'arn:aws:iam::914358739851:root'."
   }
 }
+
 
