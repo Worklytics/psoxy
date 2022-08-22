@@ -37,6 +37,12 @@ variable "deployment_bundle_object_name" {
   description = "Name of the object containing the deployment bundle"
 }
 
+variable "path_to_repo_root" {
+  type        = string
+  description = "the path where your psoxy repo resides"
+  default     = "../../.."
+}
+
 variable "path_to_config" {
   type        = string
   description = "path to config file (usually something in ../../configs/, eg configs/gdirectory.yaml"
@@ -50,4 +56,16 @@ variable "salt_secret_id" {
 variable "salt_secret_version_number" {
   type        = string
   description = "Version number of the secret used to salt pseudonyms"
+}
+
+variable "example_api_calls" {
+  type        = list(string)
+  description = "example endpoints that can be called via proxy"
+  default     = []
+}
+
+variable "example_api_calls_user_to_impersonate" {
+  type        = string
+  description = "if example endpoints require impersonation of a specific user, use this id"
+  default     = null
 }

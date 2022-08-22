@@ -1,17 +1,3 @@
-# Compiled class file
-*.class
-
-# Log file
-*.log
-
-# Package Files #
-*.jar
-*.war
-*.tar.gz
-
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
-
 # IntelliJ - attempting to be consistent with
 #   https://intellij-support.jetbrains.com/hc/en-us/articles/206544839-How-to-manage-projects-under-Version-Control-Systems
 # but then IntelliJ seems to generate .idea/.gitignore too, which knocks out some of the stuff that
@@ -22,22 +8,8 @@ hs_err_pid*
 #NOTE: am NOT excluding .iml files; even for Maven-based modules; Intellij's base import of the
 # Maven modules --> IntelliJ modules doesn't result in nice hierarchy (only shows leaves)
 
-
-# ignore terraform variables / state for developers' personal development environments and other examples
-infra/dev-personal/terraform.tfvars
-infra/dev-personal/.terraform**
-infra/dev-personal/terraform.tfstate**
-infra/dev-personal/TODO*
-
-# ignore sa key file(s)
-infra/**connector-sa-key.json
-
-
-java/target
-java/**/target
-
-# don't catch config.yaml, may contain secret salt
-java/impl/cmd-line/config.yaml
-
 # macOs generated files
 .DS_Store
+
+# Log files
+*.log

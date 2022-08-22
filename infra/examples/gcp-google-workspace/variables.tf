@@ -49,3 +49,7 @@ variable "psoxy_base_dir" {
   }
 }
 
+variable "google_workspace_example_user" {
+  type        = string
+  description = "user to impersonate for Google Workspace API calls (null for none)"
+}

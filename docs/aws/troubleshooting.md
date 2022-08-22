@@ -1,6 +1,23 @@
-# AWS Trouble Shooting
+# AWS Troubleshooting
 
 Tips and tricks for using AWS as to host the proxy.
+
+## Who are you?
+
+```shell
+# figure out how your AWS CLI is authenticated
+# (NOTE: this is also the only AWS API cmd that will work regardless of your IAM setup; asking AWS
+# who it believes you are doesn't require any permissions)
+aws sts get-caller-identity
+
+# figure out if the identity you're authenticated as can assume target role
+aws sts assume-role \
+--role-arn arn:aws:iam::123456789012:role/InfraAdmin \
+--role-session-name TestSession \
+--output json
+```
+
+If above doesn't happen seem to work as expected, some ideas in the next section may help.
 
 ## Your AWS Organization uses SSO via Okta or some similar provider
 
@@ -10,6 +27,7 @@ Options:
 
 ```shell
 ls ~/.aws/cli/cached/
+
 
 ...
 
@@ -74,4 +92,34 @@ Then, you can do a series of commands as follows:
 aws logs describe-log-streams --log-group-name /aws/lambda/psoxy-azure-ad
 aws logs get-log events --log-group-name /aws/lambda/psoxy-azure-ad --log-stream-name [VALUE_FROM_LAST_COMMAND]
 ```
+
+## Errors in Terraform apply
+
+### error creating Lambda Function URL
+
+Something like the following:
+```
+Error: error creating Lambda Function URL (psoxy-outlook-mail): ResourceConflictException: Failed to create function url config for [functionArn = arn:aws:lambda:us-east-1:123456789012:function:psoxy-outlook-mail]. Error message:  FunctionUrlConfig exists for this Lambda function
+│ {
+│   RespMetadata: {
+│     StatusCode: 409,
+│     RequestID: "dfb1452c-df84-4231-946f-b97deb695ca9"
+│   },
+│   Message_: "Failed to create function url config for [functionArn = arn:aws:lambda:us-east-1:123456789012:function:psoxy-outlook-mail]. Error message:  FunctionUrlConfig exists for this Lambda function",
+│   Type: "User"
+│ }
+│
+│   with module.psoxy-msft-connector["outlook-mail"].aws_lambda_function_url.lambda_url,
+│   on ../../modules/aws-psoxy-rest/main.tf line 26, in resource "aws_lambda_function_url" "lambda_url":
+│   26: resource "aws_lambda_function_url" "lambda_url" {
+```
+
+Your Terraform state is inconsistent. Run something like the following, adapted for your connector:
+
+```shell
+terraform import module.psoxy-msft-connector\[\"outlook-mail\"\].aws_lambda_function_url.lambda_url psoxy-outlook-mail
+```
+
+NOTE: you likely need to change `outlook-mail` if your error is with a different data source. The
+`\` chars are needed to escape the double-quotes/brackets in your bash command.
 
