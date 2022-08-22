@@ -60,3 +60,36 @@ resource "google_project_iam_member" "grant_cloudFunctionInvoker_to_service_acco
   member  = "serviceAccount:${each.value}"
   role    = "roles/cloudfunctions.invoker"
 }
+
+module "psoxy-package" {
+  source = "../psoxy-package"
+
+  implementation     = "gcp"
+  path_to_psoxy_java = "${var.psoxy_base_dir}java"
+
+}
+
+data "archive_file" "source" {
+  type        = "zip"
+  source_file = module.psoxy-package.path_to_deployment_jar
+  output_path = "/tmp/function.zip"
+}
+
+# Create bucket that will host the source code
+resource "google_storage_bucket" "artifacts" {
+  project       = var.project_id
+  name          = "${var.project_id}-psoxy-artifacts-bucket"
+  location      = var.bucket_location
+  force_destroy = true
+}
+
+# Add source code zip to bucket
+resource "google_storage_bucket_object" "function" {
+  # Append file MD5 to force bucket to be recreated
+  name         = format("${module.psoxy-package.filename}#%s", formatdate("mmss", timestamp()))
+  content_type = "application/zip"
+  bucket       = google_storage_bucket.artifacts.name
+  source       = data.archive_file.source.output_path
+}
+
+

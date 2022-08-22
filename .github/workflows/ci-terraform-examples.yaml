@@ -1,0 +1,59 @@
+name: CI - Terraform Examples
+
+on:
+  push:
+    branches-ignore:
+      - '**' # only run these on mainline (so we know if stable for reslse)
+    tags:
+      - '**' # all tags; ensure any explicit release is internally consistent
+
+jobs:
+  validate:
+    name: validate
+    runs-on: ubuntu-latest
+    env:
+      TERRAFORM_VERSION: 1.0.8
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v1
+
+      - name: 'setup Terraform'
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      - name: 'Terraform - validate examples/aws-google-workspace'
+        working-directory: infra/examples/aws-google-workspace
+        run: |
+          terraform init -reconfigure
+          terraform validate
+
+      - name: 'Terraform - validate examples/aws-msft-365'
+        working-directory: infra/examples/aws-msft-365
+        run: |
+          terraform init -reconfigure
+          terraform validate
+
+      - name: 'Terraform - validate examples/gcp-bootstrap-cft'
+        working-directory: infra/examples/gcp-bootstrap-cft
+        run: |
+          terraform init -reconfigure
+          terraform validate
+
+      - name: 'Terraform - validate examples/gcp-bootstrap-simple'
+        working-directory: infra/examples/gcp-bootstrap-simple
+        run: |
+          terraform init -reconfigure
+          terraform validate
+
+      - name: 'Terraform - validate examples/gcp-google-workspace'
+        working-directory: infra/examples/gcp-google-workspace
+        run: |
+          terraform init -reconfigure
+          terraform validate
+
+      - name: 'Terraform - validate examples/gcp-hris'
+        working-directory: infra/examples/gcp-hris
+        run: |
+          terraform init -reconfigure
+          terraform validate

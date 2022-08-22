@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.rules.slack;
 
 import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
+import co.worklytics.psoxy.rules.RuleSet;
 import co.worklytics.psoxy.rules.Rules1;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -22,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class SlackDiscoveryTests extends JavaRulesTestBaseCase {
 
     @Getter
-    final Rules1 rulesUnderTest = PrebuiltSanitizerRules.SLACK;
+    final RuleSet rulesUnderTest = PrebuiltSanitizerRules.SLACK;
 
     @Getter
     final String exampleDirectoryPath = "api-response-examples/slack";
@@ -168,7 +169,7 @@ public class SlackDiscoveryTests extends JavaRulesTestBaseCase {
                 sanitizer.sanitize(new URL("https://slack.com/api/discovery.conversations.recent"), jsonString);
 
         // nothing to redact / pseudonymize
-        assertEquals(jsonString, sanitized);
+        assertJsonEquals(jsonString, sanitized);
     }
 
     @SneakyThrows

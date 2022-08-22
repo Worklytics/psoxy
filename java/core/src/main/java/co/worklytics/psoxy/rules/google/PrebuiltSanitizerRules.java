@@ -19,7 +19,7 @@ import static co.worklytics.psoxy.rules.Rules1.Rule;
  */
 public class PrebuiltSanitizerRules {
 
-    static final Rules2 GCAL_2 = Rules2.builder()
+    static final Rules2 GCAL = Rules2.builder()
         .endpoint(Rules2.Endpoint.builder()
             .pathRegex("^/calendar/v3/calendars/[^/]*?$")
             .transform(Transform.Redact.ofPaths("$.summary"))
@@ -69,196 +69,181 @@ public class PrebuiltSanitizerRules {
         .build();
 
 
-    static final Rules1 GOOGLE_CHAT = Rules1.builder()
-        .allowedEndpointRegex("^/admin/reports/v1/activity/users/all/applications/chat.*")
-        .pseudonymization(Rule.builder()
-            .relativeUrlRegex("^/admin/reports/v1/activity/users/all/applications/chat.*")
-            .jsonPath("$..email")
-            .jsonPath("$.items[*].events[*].parameters[?(@.name in [" +
-                GOOGLE_CHAT_EVENT_PARAMETERS_PII.stream().map(s -> "'" + s + "'").collect(Collectors.joining(",")) +
-                "])].value")
-            .build()
-        )
-        .redaction(Rules1.Rule.builder()
-            .relativeUrlRegex("^/admin/reports/v1/activity/users/all/applications/chat.*")
-            // this build a negated JsonPath predicate for all allowed event parameters, so anything other
-            // than expected headers will be redacted. Important to keep ".*$" at the end.
-            .jsonPath("$.items[*].events[*].parameters[?(!(@.name =~ /^" +
-                String.join("|", GOOGLE_CHAT_EVENT_PARAMETERS_ALLOWED) +
-                "$/i))]")
-            .build()
-        )
+    static final RuleSet GOOGLE_CHAT = Rules2.builder()
+        .endpoint(Rules2.Endpoint.builder()
+            .pathRegex("^/admin/reports/v1/activity/users/all/applications/chat.*$")
+            .transform(Transform.Pseudonymize.builder()
+                .jsonPath("$..email")
+                .jsonPath("$.items[*].events[*].parameters[?(@.name in [" +
+                    GOOGLE_CHAT_EVENT_PARAMETERS_PII.stream().map(s -> "'" + s + "'").collect(Collectors.joining(",")) +
+                    "])].value")
+                .build())
+            .transform(Transform.Redact.builder()
+                .jsonPath("$.items[*].events[*].parameters[?(!(@.name =~ /^" +
+                    String.join("|", GOOGLE_CHAT_EVENT_PARAMETERS_ALLOWED) +
+                    "$/i))]")
+                .build())
+            .build())
         .build();
 
-    static final Rules1 GDIRECTORY = Rules1.builder()
-        //GENERAL stuff
-        //to block: https://admin.googleapis.com/admin/directory/v1/users/{userKey}/photos/thumbnail
-        .allowedEndpointRegex("^/admin/directory/v1/(groups|orgunits).*")
-        .allowedEndpointRegex("^/admin/directory/v1/users\\?.*")
-        .allowedEndpointRegex("^/admin/directory/v1/users/[^/]*")
-        .allowedEndpointRegex("^/admin/directory/v1/customer/my_customer/(domains|roles|roleassignments|resources).*")
-        .pseudonymization(Rule.builder()
-            .relativeUrlRegex("^/admin/directory/v1/users.*")
-            .jsonPath("$..primaryEmail")
-            .build()
-        )
-        .redaction(Rule.builder()
-            .relativeUrlRegex("^/admin/directory/v1/users.*")
-            .jsonPath("$..name")
-            .jsonPath("$..thumbnailPhotoUrl")
-            .jsonPath("$..recoveryEmail")
-            .jsonPath("$..recoveryPhone")
-            .build()
-        )
-        .redaction(Rule.builder() //not easy to block thumbnails with a regex ...
-            .relativeUrlRegex("^/admin/directory/v1/users/.*?/thumbnail.*")
-            .jsonPath("$.primaryEmail")
-            .jsonPath("$.photoData")
+    static final Rules2 GDIRECTORY = Rules2.builder()
+        .endpoint(Rules2.Endpoint.builder()
+            .pathRegex("^/admin/directory/v1/customer/[^/]*/domains.*")
             .build())
-        // users list
-        .pseudonymization(Rule.builder()
-            .relativeUrlRegex("^/admin/directory/v1/users?.*")
-            .jsonPath("$.users[*].emails[*].address")
-            .jsonPath("$.users[*].externalIds[*].value")
-            .jsonPath("$.users[*].aliases[*]")
-            .jsonPath("$.users[*].nonEditableAliases[*]")
-            .jsonPath("$.users[*].ims[*].im")
-            .jsonPath("$.users[*].phones[*].value")
-            .jsonPath("$.users[*].posixAccounts[*].accountId")
-            .jsonPath("$.users[*].posixAccounts[*].uid")
-            .jsonPath("$.users[*].posixAccounts[*].username")
-            .jsonPath("$.users[*].locations[*].deskCode")
-            .jsonPath("$.users[*].relations[*].value")
-            .build()
-        )
-        .redaction(Rule.builder()
-            .relativeUrlRegex("^/admin/directory/v1/users?.*")
-            .jsonPath("$.users[*].posixAccounts[*].homeDirectory")
-            .jsonPath("$.users[*].sshPublicKeys[*]")
-            .jsonPath("$.users[*].websites[*]")
-            .build()
-        )
-        // single user
-        .pseudonymization(Rule.builder()
-            .relativeUrlRegex("^/admin/directory/v1/users/.*")
-            .jsonPath("$.emails[*].address")
-            .jsonPath("$.externalIds[*].value")
-            .jsonPath("$.aliases[*]")
-            .jsonPath("$.nonEditableAliases[*]")
-            .jsonPath("$.ims[*].im")
-            .jsonPath("$.phones[*].value")
-            .jsonPath("$.posixAccounts[*].accountId")
-            .jsonPath("$.posixAccounts[*].uid")
-            .jsonPath("$.posixAccounts[*].username")
-            .jsonPath("$.locations[*].deskCode")
-            .jsonPath("$.relations[*].value")
-            .build()
-        )
-        .redaction(
-            Rule.builder()
-                .relativeUrlRegex("^/admin/directory/v1/users/.*")
+        //list users
+        .endpoint(Rules2.Endpoint.builder()
+            .pathRegex("^/admin/directory/v1/users\\?.*$")
+            .transform(Transform.Pseudonymize.builder()
+                .jsonPath("$.users[*].primaryEmail")
+                .jsonPath("$.users[*].emails[*].address")
+                .jsonPath("$.users[*].externalIds[*].value")
+                .jsonPath("$.users[*].aliases[*]")
+                .jsonPath("$.users[*].nonEditableAliases[*]")
+                .jsonPath("$.users[*].ims[*].im")
+                .jsonPath("$.users[*].phones[*].value")
+                .jsonPath("$.users[*].posixAccounts[*].accountId")
+                .jsonPath("$.users[*].posixAccounts[*].uid")
+                .jsonPath("$.users[*].posixAccounts[*].username")
+                .jsonPath("$.users[*].locations[*].deskCode")
+                .jsonPath("$.users[*].relations[*].value")
+                .build())
+            .transform(Transform.Redact.builder()
+                .jsonPath("$.users[*].name")
+                .jsonPath("$.users[*].thumbnailPhotoUrl")
+                .jsonPath("$.users[*].recoveryEmail")
+                .jsonPath("$.users[*].recoveryPhone")
+                .jsonPath("$.users[*].posixAccounts[*].homeDirectory")
+                .jsonPath("$.users[*].sshPublicKeys[*]")
+                .jsonPath("$.users[*].websites[*]")
+                .build())
+            .build())
+        //single user
+        .endpoint(Rules2.Endpoint.builder()
+            .pathRegex("^/admin/directory/v1/users/[^/]*$")
+            .transform(Transform.Pseudonymize.builder()
+                .jsonPath("$.primaryEmail")
+
+                .jsonPath("$.emails[*].address")
+                .jsonPath("$.aliases[*]")
+                .jsonPath("$.nonEditableAliases[*]")
+                .jsonPath("$.ims[*].im")
+                .jsonPath("$.externalIds[*].value")
+                .jsonPath("$.phones[*].value")
+                .jsonPath("$.posixAccounts[*].accountId")
+                .jsonPath("$.posixAccounts[*].uid")
+                .jsonPath("$.posixAccounts[*].username")
+                .jsonPath("$.locations[*].deskCode")
+                .jsonPath("$.relations[*].value")
+                .build())
+            .transform(Transform.Redact.builder()
+                .jsonPath("$.name")
+                .jsonPath("$.thumbnailPhotoUrl")
+                .jsonPath("$.recoveryEmail")
+                .jsonPath("$.recoveryPhone")
                 .jsonPath("$.posixAccounts[*].homeDirectory")
                 .jsonPath("$.sshPublicKeys[*]")
                 .jsonPath("$.websites[*]")
+                .build())
+            .build())
+        //list groups
+        .endpoint(Rules2.Endpoint.builder()
+            .pathRegex("^/admin/directory/v1/groups(\\?)?[^/]*$")
+            .transform(Transform.Pseudonymize.builder()
+                .includeOriginal(true)
+                .jsonPath("$..email")
+                .jsonPath("$..aliases[*]")
+                .jsonPath("$..nonEditableAliases[*]")
                 .build()
-        )
-        //group/groups/group members
-        .redaction(
-            Rule.builder()
-                .relativeUrlRegex("^/admin/directory/v1/groups.*")
+            )
+            .transform(Transform.Redact.builder()
+                 .jsonPath("$..description")
+                .build())
+            .build())
+        //single group
+        .endpoint(Rules2.Endpoint.builder()
+            .pathRegex("^/admin/directory/v1/groups/[^/]*$")
+            .transform(Transform.Pseudonymize.builder()
+                .includeOriginal(true)
+                .jsonPath("$..email")
+                .jsonPath("$..aliases[*]")
+                .jsonPath("$..nonEditableAliases[*]")
+                .build()
+            )
+            .transform(Transform.Redact.builder()
                 .jsonPath("$..description")
-                .build()
-        )
-        .pseudonymization(Rule.builder()
-            .relativeUrlRegex("^/admin/directory/v1/groups/.*?/members.*")
-            .jsonPath("$..email")
-            .build()
-        )
+                .build())
+            .build())
+        //list group members
+        .endpoint(Rules2.Endpoint.builder()
+            .pathRegex("^/admin/directory/v1/groups/[^/]*/members[^/]*$")
+            .transform(Transform.Pseudonymize.builder()
+                .jsonPath("$..email")
+                .jsonPath("$..aliases[*]")
+                .jsonPath("$..nonEditableAliases[*]")
+                .build())
+            .build())
+        //list org units
+        .endpoint(Rules2.Endpoint.builder()
+            .pathRegex("^/admin/directory/v1/orgunits\\?.*")
+            .transform(Transform.Redact.builder()
+                .jsonPath("$..description")
+                .build())
+            .build())
+        //get org unit
+        .endpoint(Rules2.Endpoint.builder()
+            .pathRegex("^/admin/directory/v1/orgunits/[^/]*")
+            .transform(Transform.Redact.builder()
+                .jsonPath("$..description")
+                .build())
+            .build())
 
-        //  group email/aliases aren't PII, but we need to match them against pseudonymized data,
-        //  so need p
-        .pseudonymizationWithOriginal(Rule.builder()
-            .relativeUrlRegex("^/admin/directory/v1/groups.*")
-            .jsonPath("$.email")
-            .jsonPath("$.aliases[*]")
-            .jsonPath("$.nonEditableAliases[*]")
-            .jsonPath("$.groups[*].email")
-            .jsonPath("$.groups[*].aliases[*]")
-            .jsonPath("$.groups[*].nonEditableAliases[*]")
-            .build()
-        )
-        .redaction(
-            Rule.builder()
-                .relativeUrlRegex("^/admin/directory/v1/orgunits.*")
-                .jsonPath("$..description")
-                .build()
-        )
-        .redaction(
-            Rule.builder()
-                .relativeUrlRegex("^/admin/directory/v1/customer/.*/roles.*")
+        .endpoint(Rules2.Endpoint.builder()
+            .pathRegex("^/admin/directory/v1/customer/[^/]*/roles[^/]*")
+            .transform(Transform.Redact.builder()
                 .jsonPath("$..roleDescription")
-                .build()
-        )
+                .build())
+            .build())
+        .endpoint(Rules2.Endpoint.builder()
+            .pathRegex("^/admin/directory/v1/customer/[^/]*/roles/[^/]*")
+            .transform(Transform.Redact.builder()
+                .jsonPath("$..roleDescription")
+                .build())
+            .build())
+        //TODO: roles/roleassignments/resources
+        //.endpoint(Rules2.Endpoint.builder()
+        //    .pathRegex("^/admin/directory/v1/customer/my_customer/(roles|roleassignments|resources).*")
+        //    .build())
         .build();
 
-    static final Rules1 GDRIVE = Rules1.builder()
-        // v2 endpoint: https://developers.google.com/drive/api/v2/reference/
-        // v3 endpoint: https://developers.google.com/drive/api/v3/reference/
-        //NOTE: by default, files endpoint doesn't return any PII. client must pass a fields mask
-        // that explicitly requests it; so if we could block that behavior, we could eliminate these
-        // rules
-        //NOTE: reference docs say page elements collection is named 'items', but actual API returns
-        // page collection as 'files' or 'revisions'
-        .allowedEndpointRegex("^/drive/v2/files.*")
-        .pseudonymization(Rule.builder()
-            .relativeUrlRegex("^/drive/v2/files.*")
+    public static co.worklytics.psoxy.rules.Rules2.Endpoint GDRIVE_ENDPOINT_RULES = Rules2.Endpoint.builder()
+        .transform(Transform.Pseudonymize.builder()
             .jsonPath("$..emailAddress")
             .build())
-        .redaction(Rule.builder()
-            .relativeUrlRegex("^/drive/v2/files.*")
-            .jsonPath("$..['name','title','description','originalFilename']") // defensive about file recognition, anywhere
+        .transform(Transform.Redact.builder()
+            .jsonPath("$..name")
+            .jsonPath("$..photoLink")
+            .jsonPath("$..title")
+            .jsonPath("$..description")
+            .jsonPath("$..originalFilename") // defensive about file recognition, anywhere
             .jsonPath("$..displayName") //user display name, anywhere (confidentiality)
             .jsonPath("$..picture") //user picture, anywhere (confidentiality)
-            .jsonPath("$.lastModifyingUserName")
-            .jsonPath("$.items[*].lastModifyingUserName")
-            .jsonPath("$.ownerNames")
-            .jsonPath("$.items[*].ownerNames")
+            .jsonPath("$..lastModifyingUserName")
+            .jsonPath("$..ownerNames")
             .build())
-        .redaction(Rule.builder()
-            .relativeUrlRegex("^/drive/v2/files/.*?/revisions.*")
-            .jsonPath("$.originalFilename")
-            .jsonPath("$.items[*].originalFilename") // duplicated with files.*
+        .build();
+
+
+    static final RuleSet GDRIVE = Rules2.builder()
+        // v2 endpoint: https://developers.google.com/drive/api/v2/reference/
+        // v3 endpoint: https://developers.google.com/drive/api/v3/reference/
+        .endpoint(GDRIVE_ENDPOINT_RULES.toBuilder()
+            .pathRegex("^/drive/v[2,3]/files[/]?[^/]*")
             .build())
-        .redaction(Rule.builder()
-            .relativeUrlRegex("^/drive/v2/files/.*?/permissions.*")
-            .jsonPath("$.name") //likely duplicative with files.* case above
-            .jsonPath("$.photoLink")
-            .jsonPath("$.items[*].name")
-            .jsonPath("$.items[*].photoLink")
+        .endpoint(GDRIVE_ENDPOINT_RULES.toBuilder()
+            .pathRegex("^/drive/v[2,3]/files/[^/]*/revisions[/]?[^/]*")
             .build())
-        .allowedEndpointRegex("^/drive/v3/files.*")
-        .pseudonymization(Rule.builder()
-            .relativeUrlRegex("^/drive/v3/files.*")
-            .jsonPath("$..emailAddress")
-            .build())
-        .redaction(Rule.builder()
-            .relativeUrlRegex("^/drive/v3/files.*")
-            .jsonPath("$..['name','title','description','originalFilename']") // defensive about file recognition, anywhere
-            .jsonPath("$..displayName")
-            .jsonPath("$..photoLink")
-            .jsonPath("$.files[*].name")
-            .build())
-        .redaction(Rule.builder()
-            .relativeUrlRegex("^/drive/v3/files/.*?/revisions.*")
-            .jsonPath("$..originalFilename")
-            .jsonPath("$.files[*].originalFilename")
-            .build())
-        .redaction(Rule.builder()
-            .relativeUrlRegex("^/drive/v2/files/.*?/permissions.*")
-            .jsonPath("$.displayName") //likely duplicative with files.* case above
-            .jsonPath("$.photoLink")
-            .jsonPath("$.permissions[*].displayName") //likely duplicative with files.* case above
-            .jsonPath("$.permissions[*].photoLink")
+        .endpoint(GDRIVE_ENDPOINT_RULES.toBuilder()
+            .pathRegex("^/drive/v[2,3]/files/[^/]*/permissions.*")
             .build())
         .build();
 
@@ -281,24 +266,21 @@ public class PrebuiltSanitizerRules {
         .add("References")
         .build();
 
-    static final Rules1 GMAIL = Rules1.builder()
-       .allowedEndpointRegex("^/gmail/v1/users/[^/]*?/messages.*")
-       .emailHeaderPseudonymization(Rules1.Rule.builder()
-                  .relativeUrlRegex("^/gmail/v1/users/.*?/messages/.*")
-                  .jsonPath("$.payload.headers[?(@.name =~ /^(" + String.join("|", EMAIL_HEADERS_CONTAINING_MULTIPLE_EMAILS) + ")$/i)].value")
-                  .build())
-       .pseudonymization(Rules1.Rule.builder()
-                  .relativeUrlRegex("^/gmail/v1/users/.*?/messages/.*")
-                  .jsonPath("$.payload.headers[?(@.name =~ /^(" + String.join("|", EMAIL_HEADERS_CONTAINING_SINGLE_EMAILS) + ")$/i)].value")
-                  .build()
-       )
-       .redaction(Rules1.Rule.builder()
-               .relativeUrlRegex("^/gmail/v1/users/.*?/messages/.*")
+    static final RuleSet GMAIL = Rules2.builder()
+        .endpoint(Rules2.Endpoint.builder()
+            .pathRegex("^/gmail/v1/users/[^/]*/messages[/]?.*?$")
+            .transform(Transform.PseudonymizeEmailHeader.builder()
+                .jsonPath("$.payload.headers[?(@.name =~ /^(" + String.join("|", EMAIL_HEADERS_CONTAINING_MULTIPLE_EMAILS) + ")$/i)].value")
+                .build())
+            .transform(Transform.Pseudonymize.builder()
+                .jsonPath("$.payload.headers[?(@.name =~ /^(" + String.join("|", EMAIL_HEADERS_CONTAINING_SINGLE_EMAILS) + ")$/i)].value")
+                .build())
+            .transform(Transform.Redact.builder()
                 // this build a negated JsonPath predicate for all allowed headers, so anything other
                 // than expected headers will be redacted.
-               .jsonPath("$.payload.headers[?(!(@.name =~ /^" + String.join("|", ALLOWED_EMAIL_HEADERS) + "$/i))]")
-               .build()
-       )
+                .jsonPath("$.payload.headers[?(!(@.name =~ /^" + String.join("|", ALLOWED_EMAIL_HEADERS) + "$/i))]")
+                .build())
+            .build())
        .build();
 
     static final Set<String> GOOGLE_MEET_EVENT_PARAMETERS_PII = ImmutableSet.of(
@@ -316,29 +298,27 @@ public class PrebuiltSanitizerRules {
         .add("calendar_event_id", "endpoint_id", "meeting_code", "conference_id") //matching to calendar events
         .build();
 
-    static final Rules1 GOOGLE_MEET = Rules1.builder()
-        .allowedEndpointRegex("^/admin/reports/v1/activity/users/all/applications/meet.*")
-        .pseudonymization(Rule.builder()
-            .relativeUrlRegex("/admin/reports/v1/activity/users/all/applications/meet.*")
-            .jsonPath("$..email")
-            .jsonPath("$.items[*].events[*].parameters[?(@.name in [" +
-                GOOGLE_MEET_EVENT_PARAMETERS_PII.stream().map(s -> "'" + s + "'").collect(Collectors.joining(",")) +
-                "])].value")
-            .build()
-        )
-        .redaction(Rule.builder()
-            .relativeUrlRegex("^/admin/reports/v1/activity/users/all/applications/meet.*")
-            // this build a negated JsonPath predicate for all allowed event parameters, so anything other
-            // than expected headers will be redacted. Important to keep ".*$" at the end.
-            .jsonPath("$.items[*].events[*].parameters[?(!(@.name =~ /^" +
-                String.join("|", GOOGLE_MEET_EVENT_PARAMETERS_ALLOWED) +
-                "$/i))]")
-            .build()
-        )
+    static final RuleSet GOOGLE_MEET = Rules2.builder()
+        .endpoint(Rules2.Endpoint.builder()
+            .pathRegex("^/admin/reports/v1/activity/users/all/applications/meet.*")
+            .transform(Transform.Pseudonymize.builder()
+                .jsonPath("$..email")
+                .jsonPath("$.items[*].events[*].parameters[?(@.name in [" +
+                    GOOGLE_MEET_EVENT_PARAMETERS_PII.stream().map(s -> "'" + s + "'").collect(Collectors.joining(",")) +
+                    "])].value")
+                .build())
+            .transform(Transform.Redact.builder()
+                // this build a negated JsonPath predicate for all allowed event parameters, so anything other
+                // than expected headers will be redacted. Important to keep ".*$" at the end.
+                .jsonPath("$.items[*].events[*].parameters[?(!(@.name =~ /^" +
+                    String.join("|", GOOGLE_MEET_EVENT_PARAMETERS_ALLOWED) +
+                    "$/i))]")
+                .build())
+            .build())
         .build();
 
     static public final Map<String, RuleSet> GOOGLE_DEFAULT_RULES_MAP = ImmutableMap.<String, RuleSet>builder()
-        .put("gcal", GCAL_2)
+        .put("gcal", GCAL)
         .put("gdirectory", GDIRECTORY)
         .put("gdrive", GDRIVE)
         .put("gmail", GMAIL)

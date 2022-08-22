@@ -1,8 +1,10 @@
 package co.worklytics.psoxy.rules.google;
 
 import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
+import co.worklytics.psoxy.rules.RuleSet;
 import co.worklytics.psoxy.rules.Rules1;
 import co.worklytics.psoxy.Sanitizer;
+import co.worklytics.psoxy.rules.Rules2;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
@@ -13,14 +15,17 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DirectoryTests extends JavaRulesTestBaseCase {
 
     @Getter
-    final Rules1 rulesUnderTest = PrebuiltSanitizerRules.GDIRECTORY;
+    final RuleSet rulesUnderTest = PrebuiltSanitizerRules.GDIRECTORY;
 
     @Getter
     final String exampleDirectoryPath = "api-response-examples/g-workspace/directory";
@@ -147,7 +152,6 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
 
         assertPseudonymizedWithOriginal(sanitized, "sales@acme.com", "sales@in.acme.com");
 
-        assertUrlWithSubResourcesAllowed(groupEndpoint);
         assertUrlWithQueryParamsAllowed(groupEndpoint);
     }
 
@@ -188,7 +192,9 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
         //block by default
         assertThrows(IllegalStateException.class, () -> this.sanitize(endpoint, jsonString));
 
-        Rules1 allowAllRoles = getRulesUnderTest().toBuilder().allowedEndpointRegex(".*").build();
+        Rules2 allowAllRoles = ((Rules2) getRulesUnderTest()).toBuilder()
+            .allowAllEndpoints(true)
+            .build();
 
         this.sanitizer = this.sanitizerFactory.create(Sanitizer.ConfigurationOptions.builder().pseudonymizationSalt("salt")
             .rules(allowAllRoles)
@@ -198,6 +204,7 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
         String sanitized = this.sanitize(endpoint, jsonString);
         assertRedacted(sanitized, "alice@worklytics.co");
         assertRedacted(sanitized, "photoData");
+
     }
 
     @SneakyThrows

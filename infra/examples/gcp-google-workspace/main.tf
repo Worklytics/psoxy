@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     google = {
-      version = ">= 3.74, <= 4.0"
+      version = "~> 4.12"
     }
   }
 
@@ -24,10 +24,12 @@ resource "google_project" "psoxy-project" {
 }
 
 module "psoxy-gcp" {
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp?ref=v0.3.0-beta.5"
+  # source = "../../modules/gcp"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp?ref=v0.4.0-rc"
 
   project_id        = google_project.psoxy-project.project_id
   invoker_sa_emails = var.worklytics_sa_emails
+  psoxy_base_dir    = var.psoxy_base_dir
 
   depends_on = [
     google_project.psoxy-project
@@ -57,8 +59,17 @@ locals {
         "https://www.googleapis.com/auth/admin.directory.group.member.readonly",
         "https://www.googleapis.com/auth/admin.directory.orgunit.readonly",
         "https://www.googleapis.com/auth/admin.directory.rolemanagement.readonly"
-      ],
+      ]
       worklytics_connector_name : "Google Workspace Directory via Psoxy"
+      example_api_calls : [
+        "/admin/directory/v1/users/me",
+        "/admin/directory/v1/users?customer=my_customer",
+        "/admin/directory/v1/groups?customer=my_customer",
+        "/admin/directory/v1/customer/my_customer/domains",
+        "/admin/directory/v1/customer/my_customer/roles",
+        "/admin/directory/v1/customer/my_customer/rolesassignments"
+      ]
+      example_api_calls_user_to_impersonate : var.google_workspace_example_user
     }
     "gcal" : {
       enabled : true,
@@ -70,6 +81,12 @@ locals {
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/calendar.readonly"
       ]
+      example_api_calls : [
+        "/calendar/v3/calendars/primary",
+        "/calendar/v3/users/me/settings",
+        "/calendar/v3/calendars/primary/events"
+      ]
+      example_api_calls_user_to_impersonate : var.google_workspace_example_user
     }
     "gmail" : {
       enabled : true,
@@ -81,6 +98,10 @@ locals {
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/gmail.metadata"
       ]
+      example_api_calls : [
+        "/gmail/v1/users/me/messages"
+      ]
+      example_api_calls_user_to_impersonate : var.google_workspace_example_user
     }
     "google-chat" : {
       enabled : true,
@@ -92,6 +113,10 @@ locals {
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/admin.reports.audit.readonly"
       ]
+      example_api_calls : [
+        "/admin/reports/v1/activity/users/all/applications/chat"
+      ]
+      example_api_calls_user_to_impersonate : var.google_workspace_example_user
     }
     "gdrive" : {
       enabled : true,
@@ -103,6 +128,11 @@ locals {
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/drive.metadata.readonly"
       ]
+      example_api_calls : [
+        "/drive/v2/files",
+        "/drive/v3/files"
+      ]
+      example_api_calls_user_to_impersonate : var.google_workspace_example_user
     }
     "google-meet" : {
       enabled : true,
@@ -114,6 +144,10 @@ locals {
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/admin.reports.audit.readonly"
       ]
+      example_api_calls : [
+        "/admin/reports/v1/activity/users/all/applications/meet"
+      ]
+      example_api_calls_user_to_impersonate : var.google_workspace_example_user
     }
   }
   enabled_google_workspace_sources = { for id, spec in local.google_workspace_sources : id => spec if spec.enabled }
@@ -122,7 +156,9 @@ locals {
 module "google-workspace-connection" {
   for_each = local.enabled_google_workspace_sources
 
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/google-workspace-dwd-connection?ref=v0.3.0-beta.5"
+  # source = "../../modules/google-workspace-dwd-connection"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/google-workspace-dwd-connection?ref=v0.4.0-rc"
+
 
   project_id                   = google_project.psoxy-project.project_id
   connector_service_account_id = "psoxy-${each.key}-dwd"
@@ -138,7 +174,8 @@ module "google-workspace-connection" {
 module "google-workspace-connection-auth" {
   for_each = local.enabled_google_workspace_sources
 
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-sa-auth-key-secret-manager?ref=v0.3.0-beta.5"
+  # source = "../../modules/gcp-sa-auth-key-secret-manager"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-sa-auth-key-secret-manager?ref=v0.4.0-rc"
 
   secret_project     = google_project.psoxy-project.project_id
   service_account_id = module.google-workspace-connection[each.key].service_account_id
@@ -148,29 +185,37 @@ module "google-workspace-connection-auth" {
 module "psoxy-google-workspace-connector" {
   for_each = local.enabled_google_workspace_sources
 
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-cloud-function?ref=v0.3.0-beta.5"
+  source = "../../modules/gcp-psoxy-rest"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-rest?ref=v0.4.0-rc"
 
-  project_id            = google_project.psoxy-project.project_id
-  function_name         = "psoxy-${each.key}"
-  source_kind           = each.value.source_kind
-  service_account_email = module.google-workspace-connection[each.key].service_account_email
+  project_id                    = google_project.psoxy-project.project_id
+  instance_id                   = "psoxy-${each.value.source_kind}"
+  service_account_email         = module.google-workspace-connection[each.key].service_account_email
+  artifacts_bucket_name         = module.psoxy-gcp.artifacts_bucket_name
+  deployment_bundle_object_name = module.psoxy-gcp.deployment_bundle_object_name
+  path_to_config                = "${var.psoxy_base_dir}/config/${each.value.source_kind}.yaml"
+  # from next version
+  # path_to_repo_root             = var.psoxy_base_dir
+  # example_api_calls                     = each.value.example_api_calls
+  # example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
+
+  salt_secret_id             = module.psoxy-gcp.salt_secret_name
+  salt_secret_version_number = module.psoxy-gcp.salt_secret_version_number
 
   secret_bindings = {
-    PSOXY_SALT = {
-      secret_name    = module.psoxy-gcp.salt_secret_name
-      version_number = module.psoxy-gcp.salt_secret_version_number
-    },
     SERVICE_ACCOUNT_KEY = {
       secret_name    = module.google-workspace-connection-auth[each.key].key_secret_name
       version_number = module.google-workspace-connection-auth[each.key].key_secret_version_number
     }
   }
+
 }
 
 module "worklytics-psoxy-connection" {
   for_each = local.enabled_google_workspace_sources
 
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection?ref=v0.3.0-beta.5"
+  # source = "../../modules/worklytics-psoxy-connection"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection?ref=v0.4.0-rc"
 
   psoxy_endpoint_url = module.psoxy-google-workspace-connector[each.key].cloud_function_url
   display_name       = "${each.value.display_name} via Psoxy"
