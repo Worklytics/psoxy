@@ -4,6 +4,7 @@ import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.impl.SanitizerImpl;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestUtils;
+import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -78,6 +79,8 @@ abstract public class RulesBaseTestCase {
         sanitizer = sanitizerFactory.create(Sanitizer.ConfigurationOptions.builder()
             .rules(getRulesUnderTest())
             .defaultScopeId(getDefaultScopeId())
+            //TODO: existing test cases presume this
+            .pseudonymImplementation(PseudonymImplementation.LEGACY)
             .build());
 
         //q: good way to also batch test sanitizers from yaml/json formats of rules, to ensure

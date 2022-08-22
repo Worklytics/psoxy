@@ -103,7 +103,7 @@ class CommonRequestHandlerTest {
         //verify precondition that defaults != LEGACY
         assertEquals(
             PseudonymImplementation.DEFAULT,
-            Sanitizer.Options.defaults().getPseudonymImplementation());
+            Sanitizer.ConfigurationOptions.builder().build().getPseudonymImplementation());
 
         //prep mock request
         HttpEventRequest request = mock(HttpEventRequest.class);
@@ -111,11 +111,9 @@ class CommonRequestHandlerTest {
             .thenReturn(Optional.of(PseudonymImplementation.LEGACY.getHttpHeaderValue()));
 
         //test parsing options from request
-        Sanitizer.Options options = handler.parseOptionsFromRequest(request);
+        Optional<PseudonymImplementation> impl = handler.parsePseudonymImplementation(request);
 
         //verify options were parsed correctly
-        assertEquals(
-            PseudonymImplementation.LEGACY,
-            options.getPseudonymImplementation());
+        assertEquals(PseudonymImplementation.LEGACY, impl.get());
     }
 }

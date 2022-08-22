@@ -152,8 +152,13 @@ public class CommonRequestHandler {
                 if (skipSanitization) {
                     proxyResponseContent = responseContent;
                 } else {
-                    Sanitizer.Options options = parseOptionsFromRequest(request);
-                    proxyResponseContent = sanitizer.sanitize(targetUrl, responseContent, options);
+                    Optional<PseudonymImplementation> pseudonymImplementation = parsePseudonymImplementation(request);
+                    if (pseudonymImplementation.isPresent()) {
+                        sanitizer = sanitizerFactory.create(sanitizerFactory.buildOptions(config, rules)
+                            .withPseudonymImplementation(pseudonymImplementation.get()));
+                    }
+
+                    proxyResponseContent = sanitizer.sanitize(targetUrl, responseContent);
                     String rulesSha = rulesUtils.sha(sanitizer.getConfigurationOptions().getRules());
                     builder.header(ResponseHeader.RULES_SHA.getHttpHeader(), rulesSha);
                     log.info("response sanitized with rule set " + rulesSha);
@@ -173,13 +178,9 @@ public class CommonRequestHandler {
     }
 
     @VisibleForTesting
-    Sanitizer.Options parseOptionsFromRequest(HttpEventRequest request) {
-        Sanitizer.Options.OptionsBuilder optionsBuilder =
-            Sanitizer.Options.defaults().toBuilder();
-        request.getHeader(ControlHeader.PSEUDONYM_IMPLEMENTATION.getHttpHeader())
-            .map(PseudonymImplementation::parseHttpHeaderValue)
-            .ifPresent(optionsBuilder::pseudonymImplementation);
-        return optionsBuilder.build();
+    Optional<PseudonymImplementation> parsePseudonymImplementation(HttpEventRequest request) {
+        return request.getHeader(ControlHeader.PSEUDONYM_IMPLEMENTATION.getHttpHeader())
+            .map(PseudonymImplementation::parseHttpHeaderValue);
     }
 
     @SneakyThrows

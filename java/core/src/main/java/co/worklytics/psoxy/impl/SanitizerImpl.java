@@ -68,10 +68,6 @@ public class SanitizerImpl implements Sanitizer {
     @Getter(onMethod_ = {@VisibleForTesting})
     @Inject Configuration jsonConfiguration;
 
-
-    PseudonymImplementation pseudonymImplementation = PseudonymImplementation.DEFAULT;
-
-
     @Inject
     HashUtils hashUtils;
 
@@ -115,23 +111,7 @@ public class SanitizerImpl implements Sanitizer {
     }
 
     @Override
-    public String sanitize(URL url, String jsonResponse) {
-        return sanitize(url, jsonResponse, Options.defaults());
-    }
-
-    boolean isAllowAll(RuleSet rules) {
-        if (rules instanceof Rules1) {
-            Rules1 rules1 = (Rules1) rules;
-            return (rules1.getAllowedEndpointRegexes() == null|| rules1.getAllowedEndpointRegexes().isEmpty());
-        } else {
-            return ((Rules2) rules).getAllowAllEndpoints();
-        }
-    }
-
-
-    @Override
-    public String sanitize(@NonNull URL url, @NonNull String jsonResponse, Options options) {
-        //extra check ...
+    public String sanitize(URL url, String jsonResponse) {        //extra check ...
         if (!isAllowed(url)) {
             throw new IllegalStateException(String.format("Sanitizer called to sanitize response that should not have been retrieved: %s", url.toString()));
         }
@@ -144,6 +124,15 @@ public class SanitizerImpl implements Sanitizer {
             return legacyTransform(url, jsonResponse);
         } else {
             return transform(url, jsonResponse);
+        }
+    }
+
+    boolean isAllowAll(RuleSet rules) {
+        if (rules instanceof Rules1) {
+            Rules1 rules1 = (Rules1) rules;
+            return (rules1.getAllowedEndpointRegexes() == null|| rules1.getAllowedEndpointRegexes().isEmpty());
+        } else {
+            return ((Rules2) rules).getAllowAllEndpoints();
         }
     }
 
@@ -370,12 +359,12 @@ public class SanitizerImpl implements Sanitizer {
 
 
     public PseudonymizedIdentity pseudonymize(Object value) {
-        return pseudonymize(value, false);
+        return pseudonymize(value, Transform.Pseudonymize.builder().build());
     }
 
     public MapFunction getPseudonymize(Transform.Pseudonymize transformOptions) {
         return (Object s, Configuration configuration) -> {
-            PseudonymizedIdentity pseudonymizedIdentity = pseudonymize(s, transformOptions.getIncludeOriginal());
+            PseudonymizedIdentity pseudonymizedIdentity = pseudonymize(s, transformOptions);
 
             if (transformOptions.getIncludeEncrypted() && s != null) {
                 Preconditions.checkArgument(s instanceof String, "encryption only supported for string values");
@@ -413,7 +402,7 @@ public class SanitizerImpl implements Sanitizer {
 
     }
 
-    public PseudonymizedIdentity pseudonymize(Object value, boolean includeOriginal) {
+    public PseudonymizedIdentity pseudonymize(Object value, Transform.Pseudonymize transformOptions) {
         if (value == null) {
             return null;
         }
@@ -423,7 +412,7 @@ public class SanitizerImpl implements Sanitizer {
 
         PseudonymizedIdentity.PseudonymizedIdentityBuilder builder = PseudonymizedIdentity.builder();
 
-        String canonicalValue, scope;
+        String scope;
         //q: this auto-detect a good idea? Or invert control and let caller specify with a header
         // or something??
         //NOTE: use of EmailAddressValidator/Parser here is probably overly permissive, as there
@@ -447,17 +436,21 @@ public class SanitizerImpl implements Sanitizer {
         }
 
         builder.scope(scope);
-        if (pseudonymImplementation == PseudonymImplementation.LEGACY) {
+        if (getConfigurationOptions().getPseudonymImplementation() == PseudonymImplementation.LEGACY) {
            builder.hash(hashUtils.hash(canonicalization.apply(value.toString()),
                configurationOptions.getPseudonymizationSalt(), asLegacyScope(scope)));
-        } else if (pseudonymImplementation ==  PseudonymImplementation.DEFAULT) {
+        } else if (getConfigurationOptions().getPseudonymImplementation() == PseudonymImplementation.DEFAULT) {
            builder.hash(pseudonymizationStrategy.getPseudonym(value.toString(), canonicalization));
-           builder.encrypted(pseudonymizationStrategy.getKeyedPseudonym(value.toString(), canonicalization));
+
         } else {
-            throw new RuntimeException("Unsupported pseudonym implementation: " + pseudonymImplementation);
+            throw new RuntimeException("Unsupported pseudonym implementation: " + getConfigurationOptions().getPseudonymImplementation());
         }
 
-        if (includeOriginal) {
+        if (transformOptions.getIncludeEncrypted()) {
+            builder.encrypted(pseudonymizationStrategy.getKeyedPseudonym(value.toString(), canonicalization));
+        }
+
+        if (transformOptions.getIncludeOriginal()) {
             builder.original(Objects.toString(value));
         }
 
@@ -480,7 +473,7 @@ public class SanitizerImpl implements Sanitizer {
     }
 
     public String pseudonymizeWithOriginalToJson(Object value, @NonNull Configuration configuration) {
-        return configuration.jsonProvider().toJson(pseudonymize(value, true));
+        return configuration.jsonProvider().toJson(pseudonymize(value, Transform.Pseudonymize.builder().includeOriginal(true).build()));
     }
 
 

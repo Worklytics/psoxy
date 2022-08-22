@@ -17,7 +17,7 @@ public interface Sanitizer {
     @Value
     class ConfigurationOptions implements Serializable {
 
-        private static final long serialVersionUID = 3L;
+        private static final long serialVersionUID = 4L;
 
         /**
          * salt used to generate pseudonyms
@@ -30,27 +30,13 @@ public interface Sanitizer {
         /**
          * scope to use where logic + rules don't imply a match
          */
+        @Deprecated
         String defaultScopeId;
 
         RuleSet rules;
-    }
-
-
-    /**
-     * options for a specific sanitization operation
-     *  (may differ for subsequent invocations of the Sanitizer)
-     */
-    @With
-    @Builder(toBuilder = true)
-    @Value
-    class Options implements Serializable {
 
         @Builder.Default
         PseudonymImplementation pseudonymImplementation = PseudonymImplementation.DEFAULT;
-
-        public static Options defaults() {
-            return Options.builder().build();
-        }
     }
 
     /**
@@ -76,11 +62,6 @@ public interface Sanitizer {
      * sanitize jsonResponse received from url, according any options set on Sanitizer
      */
     String sanitize(URL url, String jsonResponse);
-
-    /**
-     * sanitize jsonResponse received from url, according any options set on Sanitizer
-     */
-    String sanitize(URL url, String jsonResponse, Options options);
 
 
 

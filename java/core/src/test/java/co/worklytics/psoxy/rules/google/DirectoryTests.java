@@ -192,19 +192,9 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
         //block by default
         assertThrows(IllegalStateException.class, () -> this.sanitize(endpoint, jsonString));
 
-        Rules2 allowAllRoles = ((Rules2) getRulesUnderTest()).toBuilder()
-            .allowAllEndpoints(true)
-            .build();
-
-        this.sanitizer = this.sanitizerFactory.create(Sanitizer.ConfigurationOptions.builder().pseudonymizationSalt("salt")
-            .rules(allowAllRoles)
-            .defaultScopeId("gapps").build());
-
-        //but still redact if gets through
-        String sanitized = this.sanitize(endpoint, jsonString);
-        assertRedacted(sanitized, "alice@worklytics.co");
-        assertRedacted(sanitized, "photoData");
-
+        //NOTE: used to have test that thumbnail data redacted EVEN if request allowed through, but
+        // with Rules2 format this doesn't make sense; rules are based on the matched endpoint, so
+        // if no rules ALLOW thumbnails, by definition no rules will REDACT its content either
     }
 
     @SneakyThrows

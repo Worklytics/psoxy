@@ -10,6 +10,7 @@ import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestModules;
 import co.worklytics.test.TestUtils;
+import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import dagger.Component;
 import lombok.SneakyThrows;
 import org.apache.commons.codec.binary.Base64;
@@ -74,6 +75,7 @@ public class CSVFileHandlerTest {
                         .build())
                 .pseudonymizationSalt("salt")
                 .defaultScopeId("hris")
+                .pseudonymImplementation(PseudonymImplementation.LEGACY)
                 .build());
 
         File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
@@ -104,6 +106,7 @@ public class CSVFileHandlerTest {
                                 .build())
                         .build())
                 .pseudonymizationSalt("salt")
+                .pseudonymImplementation(PseudonymImplementation.LEGACY)
                 .defaultScopeId("hris")
                 .build());
 
@@ -130,6 +133,7 @@ public class CSVFileHandlerTest {
                         .build())
                 .pseudonymizationSalt("salt")
                 .defaultScopeId("hris")
+                .pseudonymImplementation(PseudonymImplementation.LEGACY)
                 .build());
 
         File inputFile = new File(getClass().getResource("/csv/hris-example-headers-w-spaces.csv").getFile());
@@ -154,6 +158,7 @@ public class CSVFileHandlerTest {
                                 .build())
                         .build())
                 .pseudonymizationSalt("salt")
+                .pseudonymImplementation(PseudonymImplementation.LEGACY)
                 .defaultScopeId("hris")
                 .build());
 
@@ -184,6 +189,7 @@ public class CSVFileHandlerTest {
             .rules(rules)
             .pseudonymizationSalt("salt")
             .defaultScopeId("hris")
+            .pseudonymImplementation(PseudonymImplementation.LEGACY)
             .build());
 
         File inputFile = new File(getClass().getResource("/csv/hris-default-rules.csv").getFile());
@@ -210,6 +216,7 @@ public class CSVFileHandlerTest {
                 .build())
             .pseudonymizationSalt("salt")
             .defaultScopeId("hris")
+            .pseudonymImplementation(PseudonymImplementation.LEGACY)
             .build());
 
         File inputFile = new File(getClass().getResource("/csv/hris-example-headers-w-spaces.csv").getFile());

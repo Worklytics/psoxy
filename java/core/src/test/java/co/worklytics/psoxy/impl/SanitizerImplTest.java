@@ -6,6 +6,7 @@ import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
 import co.worklytics.psoxy.rules.Transform;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestUtils;
+import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.MapFunction;
@@ -58,6 +59,7 @@ class SanitizerImplTest {
             .rules(PrebuiltSanitizerRules.DEFAULTS.get("gmail"))
             .pseudonymizationSalt("an irrelevant per org secret")
             .defaultScopeId("scope")
+            .pseudonymImplementation(PseudonymImplementation.LEGACY)
             .build());
 
         withMockEncryptionKey(config);
