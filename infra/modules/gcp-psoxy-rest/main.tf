@@ -18,29 +18,6 @@ resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_secret"
   secret_id = each.value.secret_name
 }
 
-resource "local_file" "review" {
-  filename = "review ${google_cloudfunctions_function.function.name}.md"
-  content  = <<EOT
-Review the deployed Cloud function in GCP console:
-
-https://console.cloud.google.com/functions/details/${var.region}/${google_cloudfunctions_function.function.name}?project=${var.project_id}
-
-## Testing
-
-If you want to test from your local machine:
-```shell
-export PSOXY_GCP_PROJECT=${var.project_id}
-export PSOXY_GCP_REGION=${var.region}
-export PSOXY_HOST=${var.region}-${var.project_id}
-```
-
-NOTE: if you want to customize the rule set used by Psoxy for your source, you can add a
-`rules.yaml` file into the deployment directory (`target/deployment`) before invoking the command
-above. The rules you define in the YAML file will override the ruleset specified in the codebase for
-the source.
-
-EOT
-}
 
 locals {
   secret_bindings = merge({
@@ -82,6 +59,37 @@ resource "google_cloudfunctions_function" "function" {
   trigger_http = true
 }
 
+locals {
+  proxy_endpoint_url  = "https://${var.region}-${var.project_id}.cloudfunctions.net/${google_cloudfunctions_function.function.name}"
+  impersonation_param = var.example_api_calls_user_to_impersonate == null ? "" : " -i \"${var.example_api_calls_user_to_impersonate}\""
+  test_commands = [for path in var.example_api_calls :
+    "${var.path_to_repo_root}tools/test-psoxy.sh -g -u \"${local.proxy_endpoint_url}${path}\"${local.impersonation_param}"
+  ]
+}
+
+
+resource "local_file" "review" {
+  filename = "test ${google_cloudfunctions_function.function.name}.md"
+  content  = <<EOT
+Review the deployed Cloud function in GCP console:
+
+https://console.cloud.google.com/functions/details/${var.region}/${google_cloudfunctions_function.function.name}?project=${var.project_id}
+
+## Testing
+
+From root of your checkout of the Psoxy repo, these are some example test calls you can try (YMMV):
+
+```shell
+${coalesce(join("\n", local.test_commands), "cd docs/example-api-calls/")}
+```
+
+See `docs/example-api-calls/` for more example API calls specific to the data source to which your
+Proxy is configured to connect.
+
+EOT
+}
+
+
 output "cloud_function_url" {
-  value = "https://${var.region}-${var.project_id}.cloudfunctions.net/${google_cloudfunctions_function.function.name}"
+  value = local.proxy_endpoint_url
 }

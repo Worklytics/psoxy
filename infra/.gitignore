@@ -1,0 +1,7 @@
+
+# ignore sa key file(s)
+**connector-sa-key.json
+
+# PEM files used in local cert generation; don't want to commit them
+**.pem
+

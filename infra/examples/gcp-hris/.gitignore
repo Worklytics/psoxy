@@ -1,0 +1,11 @@
+# ignore terraform variables / state for developers' personal development environments and other examples
+# NOTE: for prod use, you likely want to remove this file and commit these
+terraform.tfvars
+.terraform**
+TODO*
+test*
+
+
+# Terraform state - NOTE: for prod use, recommend you use a secure backend, such as S3/GCS for
+# terraform state - not storing state on local disk / repo
+terraform.tfstate**

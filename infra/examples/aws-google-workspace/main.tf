@@ -85,14 +85,15 @@ locals {
         "https://www.googleapis.com/auth/admin.directory.orgunit.readonly",
         "https://www.googleapis.com/auth/admin.directory.rolemanagement.readonly"
       ]
-      example_api_calls: [
+      example_api_calls : [
         "/admin/directory/v1/users/me",
-        "/admin/directory/v1/users",
+        "/admin/directory/v1/users?customer=my_customer",
         "/admin/directory/v1/groups?customer=my_customer",
         "/admin/directory/v1/customer/my_customer/domains",
         "/admin/directory/v1/customer/my_customer/roles",
         "/admin/directory/v1/customer/my_customer/rolesassignments"
       ]
+      example_api_calls_user_to_impersonate : var.google_workspace_example_user
     }
     "gcal" : {
       enabled : true,
@@ -104,11 +105,12 @@ locals {
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/calendar.readonly"
       ],
-      example_api_calls: [
+      example_api_calls : [
         "/calendar/v3/calendars/primary",
         "/calendar/v3/users/me/settings",
         "/calendar/v3/calendars/primary/events"
       ]
+      example_api_calls_user_to_impersonate : var.google_workspace_example_user
     }
     "gmail" : {
       enabled : true,
@@ -120,9 +122,10 @@ locals {
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/gmail.metadata"
       ],
-      example_api_calls: [
+      example_api_calls : [
         "/gmail/v1/users/me/messages"
       ]
+      example_api_calls_user_to_impersonate : var.google_workspace_example_user
     }
     "google-chat" : {
       enabled : false,
@@ -133,10 +136,11 @@ locals {
       ]
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/admin.reports.audit.readonly"
-      ],
-      example_api_calls: [
+      ]
+      example_api_calls : [
         "/admin/reports/v1/activity/users/all/applications/chat"
       ]
+      example_api_calls_user_to_impersonate : var.google_workspace_example_user
     }
     "gdrive" : {
       enabled : false,
@@ -148,10 +152,11 @@ locals {
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/drive.metadata.readonly"
       ],
-      example_api_calls: [
+      example_api_calls : [
         "/drive/v2/files",
         "/drive/v3/files"
-      ]
+      ],
+      example_api_calls_user_to_impersonate : var.google_workspace_example_user
     }
     "google-meet" : {
       enabled : false,
@@ -163,9 +168,10 @@ locals {
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/admin.reports.audit.readonly"
       ]
-      example_api_calls: [
+      example_api_calls : [
         "/admin/reports/v1/activity/users/all/applications/meet"
       ]
+      example_api_calls_user_to_impersonate : var.google_workspace_example_user
     }
   }
   enabled_google_workspace_sources = { for id, spec in local.google_workspace_sources : id => spec if spec.enabled }
@@ -213,10 +219,11 @@ module "psoxy-google-workspace-connector" {
   path_to_config       = "${local.base_config_path}/${each.key}.yaml"
   api_caller_role_arn  = module.psoxy-aws.api_caller_role_arn
   aws_assume_role_arn  = var.aws_assume_role_arn
-  example_api_calls    = []
   aws_account_id       = var.aws_account_id
-  # from next version
-  #path_to_repo_root    = var.proxy_base_dir
+  path_to_repo_root    = var.psoxy_base_dir
+  # from next version of aws-psoxy-rest module:
+  # example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
+  example_api_calls = each.value.example_api_calls
 
   parameters = [
     module.psoxy-aws.salt_secret,
@@ -313,13 +320,16 @@ module "aws-psoxy-long-auth-connectors" {
   api_caller_role_arn  = module.psoxy-aws.api_caller_role_arn
   source_kind          = each.value.source_kind
   path_to_repo_root    = var.psoxy_base_dir
+  example_api_calls    = each.value.example_api_calls
 
+  # from next version of aws-psoxy-rest module:
+  # example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
 
   parameters = [
     module.psoxy-aws.salt_secret,
     aws_ssm_parameter.long-access-token-secret[each.key]
   ]
-  example_api_calls = each.value.example_api_calls
+
 
 }
 

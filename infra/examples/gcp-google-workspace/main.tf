@@ -59,8 +59,17 @@ locals {
         "https://www.googleapis.com/auth/admin.directory.group.member.readonly",
         "https://www.googleapis.com/auth/admin.directory.orgunit.readonly",
         "https://www.googleapis.com/auth/admin.directory.rolemanagement.readonly"
-      ],
+      ]
       worklytics_connector_name : "Google Workspace Directory via Psoxy"
+      example_api_calls : [
+        "/admin/directory/v1/users/me",
+        "/admin/directory/v1/users?customer=my_customer",
+        "/admin/directory/v1/groups?customer=my_customer",
+        "/admin/directory/v1/customer/my_customer/domains",
+        "/admin/directory/v1/customer/my_customer/roles",
+        "/admin/directory/v1/customer/my_customer/rolesassignments"
+      ]
+      example_api_calls_user_to_impersonate : var.google_workspace_example_user
     }
     "gcal" : {
       enabled : true,
@@ -72,6 +81,12 @@ locals {
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/calendar.readonly"
       ]
+      example_api_calls : [
+        "/calendar/v3/calendars/primary",
+        "/calendar/v3/users/me/settings",
+        "/calendar/v3/calendars/primary/events"
+      ]
+      example_api_calls_user_to_impersonate : var.google_workspace_example_user
     }
     "gmail" : {
       enabled : true,
@@ -83,6 +98,10 @@ locals {
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/gmail.metadata"
       ]
+      example_api_calls : [
+        "/gmail/v1/users/me/messages"
+      ]
+      example_api_calls_user_to_impersonate : var.google_workspace_example_user
     }
     "google-chat" : {
       enabled : true,
@@ -94,6 +113,10 @@ locals {
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/admin.reports.audit.readonly"
       ]
+      example_api_calls : [
+        "/admin/reports/v1/activity/users/all/applications/chat"
+      ]
+      example_api_calls_user_to_impersonate : var.google_workspace_example_user
     }
     "gdrive" : {
       enabled : true,
@@ -105,6 +128,11 @@ locals {
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/drive.metadata.readonly"
       ]
+      example_api_calls : [
+        "/drive/v2/files",
+        "/drive/v3/files"
+      ]
+      example_api_calls_user_to_impersonate : var.google_workspace_example_user
     }
     "google-meet" : {
       enabled : true,
@@ -116,6 +144,10 @@ locals {
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/admin.reports.audit.readonly"
       ]
+      example_api_calls : [
+        "/admin/reports/v1/activity/users/all/applications/meet"
+      ]
+      example_api_calls_user_to_impersonate : var.google_workspace_example_user
     }
   }
   enabled_google_workspace_sources = { for id, spec in local.google_workspace_sources : id => spec if spec.enabled }
@@ -153,8 +185,8 @@ module "google-workspace-connection-auth" {
 module "psoxy-google-workspace-connector" {
   for_each = local.enabled_google_workspace_sources
 
-  # source = "../../modules/gcp-psoxy-rest"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-rest?ref=v0.4.0-rc"
+  source = "../../modules/gcp-psoxy-rest"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-rest?ref=v0.4.0-rc"
 
   project_id                    = google_project.psoxy-project.project_id
   instance_id                   = "psoxy-${each.value.source_kind}"
@@ -162,8 +194,13 @@ module "psoxy-google-workspace-connector" {
   artifacts_bucket_name         = module.psoxy-gcp.artifacts_bucket_name
   deployment_bundle_object_name = module.psoxy-gcp.deployment_bundle_object_name
   path_to_config                = "${var.psoxy_base_dir}/config/${each.value.source_kind}.yaml"
-  salt_secret_id                = module.psoxy-gcp.salt_secret_name
-  salt_secret_version_number    = module.psoxy-gcp.salt_secret_version_number
+  # from next version
+  # path_to_repo_root             = var.psoxy_base_dir
+  # example_api_calls                     = each.value.example_api_calls
+  # example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
+
+  salt_secret_id             = module.psoxy-gcp.salt_secret_name
+  salt_secret_version_number = module.psoxy-gcp.salt_secret_version_number
 
   secret_bindings = {
     SERVICE_ACCOUNT_KEY = {
