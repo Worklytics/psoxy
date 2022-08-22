@@ -100,7 +100,7 @@ terraform init
 terraform plan -out=tfplan.out
 ```
 
-  8. review the plan and ensure it matches the infrastructure you expect:
+  7. review the plan and ensure it matches the infrastructure you expect:
 ```shell
 terraform show tfplan.out
 ```
