@@ -3,7 +3,6 @@ package com.avaulta.gateway.pseudonyms;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
-import lombok.Data;
 import lombok.Value;
 
 /**
@@ -28,13 +27,17 @@ public class Pseudonym {
     String domain;
 
     /**
-     * deterministically encrypted; based on configuration, may be reversible for some period
+     * potentially reversible form of this pseudonym; if passed back to PseudonymizationStrategy
+     * instance that created it, that instance may, based on its configuration(rules) be able to
+     * reverse it and use it as a request parameter for some period
      *
-     * NOTE: should not be expected to be cryptographically secure; while difficult to reverse
+     * (in effect, it's deterministically encrypted, based on configuration; but should not be
+     * expected to be cryptographically secure encryption - we make no such claim, although in
+     * practice strive to implement it as such)
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    @JsonProperty("e")
-    byte[] encrypted;
+    @JsonProperty("r")
+    byte[] reversible;
 
     /**
      * SHA-256 hash of canonicalized identifier

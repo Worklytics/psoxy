@@ -39,7 +39,7 @@ public class Base64UrlWithoutPaddingPseudonymEncoderTest {
         String original = "blah";
         String pseudonym =
             pseudonymEncoder.encode(Pseudonym.builder()
-                .encrypted(pseudonymizationStrategy.getKeyedPseudonym("blah", Function.identity())).build());
+                .reversible(pseudonymizationStrategy.getKeyedPseudonym("blah", Function.identity())).build());
 
         String r = pseudonymEncoder.decodeAndReverseAllContainedKeyedPseudonyms(String.format(template, pseudonym, pseudonym),
             pseudonymizationStrategy);

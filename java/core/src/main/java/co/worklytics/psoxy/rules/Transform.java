@@ -8,7 +8,6 @@ import lombok.experimental.SuperBuilder;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "method")
 @JsonSubTypes({
@@ -131,9 +130,12 @@ public abstract class Transform {
         @Builder.Default
         Boolean includeOriginal = false;
 
+        /**
+         * whether to include reversible form of pseudonymized value in output
+         */
         @JsonInclude(JsonInclude.Include.NON_DEFAULT)
         @Builder.Default
-        Boolean includeEncrypted = false;
+        Boolean includeReversible = false;
 
         public static Pseudonymize ofPaths(String... jsonPaths) {
             return Pseudonymize.builder().jsonPaths(Arrays.asList(jsonPaths)).build();

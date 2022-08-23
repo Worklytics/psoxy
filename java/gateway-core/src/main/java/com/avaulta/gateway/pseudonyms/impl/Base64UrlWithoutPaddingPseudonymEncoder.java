@@ -40,10 +40,10 @@ public class Base64UrlWithoutPaddingPseudonymEncoder implements PseudonymEncoder
     @Override
     public String encode(Pseudonym pseudonym) {
         String encoded;
-        if (pseudonym.getEncrypted() == null) {
+        if (pseudonym.getReversible() == null) {
             encoded = encoder.encodeToString(pseudonym.getHash());
         } else {
-            encoded = PREFIX + encoder.encodeToString(pseudonym.getEncrypted());
+            encoded = PREFIX + encoder.encodeToString(pseudonym.getReversible());
         }
         if (pseudonym.getDomain() != null) {
             //q: url-encode DOMAIN_SEPARATOR?
@@ -66,7 +66,7 @@ public class Base64UrlWithoutPaddingPseudonymEncoder implements PseudonymEncoder
 
         if (encodedPseudonym.startsWith(PREFIX)) {
             byte[] decoded = decoder.decode(encodedPseudonym.substring(PREFIX.length()));
-            builder.encrypted(decoded);
+            builder.reversible(decoded);
             builder.hash(Arrays.copyOfRange(decoded, 0, Pseudonym.HASH_SIZE_BYTES));
         } else {
             builder.hash(decoder.decode(encodedPseudonym));
@@ -81,7 +81,7 @@ public class Base64UrlWithoutPaddingPseudonymEncoder implements PseudonymEncoder
             String keyedPseudonym = m.group();
             //q: if this fails, just return 'm.group()' as-is?? to consider possibility that pattern matched
             // something it shouldn't
-            return reidentifier.getIdentifier(this.decode(keyedPseudonym).getEncrypted());
+            return reidentifier.getIdentifier(this.decode(keyedPseudonym).getReversible());
         });
     }
 

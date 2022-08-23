@@ -370,12 +370,12 @@ public class SanitizerImpl implements Sanitizer {
         return (Object s, Configuration configuration) -> {
             PseudonymizedIdentity pseudonymizedIdentity = pseudonymize(s, transformOptions);
 
-            if (transformOptions.getIncludeEncrypted() && s != null) {
+            if (transformOptions.getIncludeReversible() && s != null) {
                 Preconditions.checkArgument(s instanceof String, "encryption only supported for string values");
                 Function<String, String> canonicalization = duckTypesAsEmails(s) ? this::emailCanonicalization : Function.identity();
-                pseudonymizedIdentity.setEncrypted(
+                pseudonymizedIdentity.setReversible(
                     pseudonymEncoder.encode(Pseudonym.builder()
-                        .encrypted(pseudonymizationStrategy.getKeyedPseudonym((String) s, canonicalization))
+                        .reversible(pseudonymizationStrategy.getKeyedPseudonym((String) s, canonicalization))
                         .build()));
             }
             return configuration.jsonProvider().toJson(pseudonymizedIdentity);
@@ -404,7 +404,7 @@ public class SanitizerImpl implements Sanitizer {
 
             return pseudonymEncoder.encode(
                 Pseudonym.builder()
-                    .encrypted(pseudonymizationStrategy.getKeyedPseudonym((String) s, canonicalization))
+                    .reversible(pseudonymizationStrategy.getKeyedPseudonym((String) s, canonicalization))
                     .domain(domain)
                     .build());
         };
@@ -469,10 +469,10 @@ public class SanitizerImpl implements Sanitizer {
             throw new RuntimeException("Unsupported pseudonym implementation: " + getConfigurationOptions().getPseudonymImplementation());
         }
 
-        if (transformOptions.getIncludeEncrypted()) {
-            builder.encrypted(pseudonymEncoder.encode(
+        if (transformOptions.getIncludeReversible()) {
+            builder.reversible(pseudonymEncoder.encode(
                 Pseudonym.builder()
-                    .encrypted(pseudonymizationStrategy.getKeyedPseudonym(value.toString(), canonicalization))
+                    .reversible(pseudonymizationStrategy.getKeyedPseudonym(value.toString(), canonicalization))
                     .domain(domain)
                     .build()));
         }

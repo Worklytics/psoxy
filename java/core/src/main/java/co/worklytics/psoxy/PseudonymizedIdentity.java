@@ -57,6 +57,6 @@ public class PseudonymizedIdentity {
      * before forwarding request to source API.
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    String encrypted;
+    String reversible;
 
 }
