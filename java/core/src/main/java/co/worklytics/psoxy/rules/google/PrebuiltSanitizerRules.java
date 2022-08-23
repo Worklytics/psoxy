@@ -1,5 +1,6 @@
 package co.worklytics.psoxy.rules.google;
 
+import co.worklytics.psoxy.ConfigRulesModule;
 import co.worklytics.psoxy.rules.Rules2;
 import co.worklytics.psoxy.rules.RuleSet;
 import co.worklytics.psoxy.rules.Transform;
@@ -340,6 +341,7 @@ public class PrebuiltSanitizerRules {
     static public final Map<String, RuleSet> GOOGLE_DEFAULT_RULES_MAP = ImmutableMap.<String, RuleSet>builder()
         .put("gcal", GCAL)
         .put("gdirectory", GDIRECTORY)
+        .put("gdirectory" + ConfigRulesModule.NO_APP_IDS_SUFFIX, GDIRECTORY_WITHOUT_GOOGLE_IDS)
         .put("gdrive", GDRIVE)
         .put("gmail", GMAIL)
         .put("google-chat", GOOGLE_CHAT)
