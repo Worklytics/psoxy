@@ -7,7 +7,9 @@ import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrateg
 import co.worklytics.psoxy.storage.FileHandlerFactory;
 import co.worklytics.psoxy.storage.impl.FileHandlerFactoryImpl;
 
+import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.PseudonymizationStrategy;
+import com.avaulta.gateway.pseudonyms.impl.Base64UrlWithoutPaddingPseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.impl.PseudonymizationStrategyImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -22,6 +24,7 @@ import dagger.Provides;
 
 
 import javax.crypto.spec.SecretKeySpec;
+import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.util.Base64;
@@ -130,5 +133,10 @@ public class PsoxyModule {
         SecretKeySpec key = new SecretKeySpec(Base64.getDecoder().decode(keyFromConfig), "AES");
 
         return new PseudonymizationStrategyImpl(salt, key);
+    }
+
+    @Provides @Singleton
+    PseudonymEncoder pseudonymEncoder() {
+        return new Base64UrlWithoutPaddingPseudonymEncoder();
     }
 }

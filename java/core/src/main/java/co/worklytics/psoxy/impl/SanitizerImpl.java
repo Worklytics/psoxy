@@ -6,6 +6,8 @@ import co.worklytics.psoxy.rules.Rules1;
 import co.worklytics.psoxy.rules.Rules2;
 import co.worklytics.psoxy.rules.Transform;
 import co.worklytics.psoxy.utils.URLUtils;
+import com.avaulta.gateway.pseudonyms.Pseudonym;
+import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.PseudonymizationStrategy;
 import com.google.common.annotations.VisibleForTesting;
@@ -73,6 +75,8 @@ public class SanitizerImpl implements Sanitizer {
 
     @Inject
     PseudonymizationStrategy pseudonymizationStrategy;
+    @Inject
+    PseudonymEncoder pseudonymEncoder;
 
     List<JsonPath> applicablePaths(@NonNull List<Pair<Pattern, List<JsonPath>>> rules,
                                    @NonNull String relativeUrl) {
@@ -369,7 +373,10 @@ public class SanitizerImpl implements Sanitizer {
             if (transformOptions.getIncludeEncrypted() && s != null) {
                 Preconditions.checkArgument(s instanceof String, "encryption only supported for string values");
                 Function<String, String> canonicalization = duckTypesAsEmails(s) ? this::emailCanonicalization : Function.identity();
-                pseudonymizedIdentity.setEncrypted(pseudonymizationStrategy.getKeyedPseudonym((String) s, canonicalization));
+                pseudonymizedIdentity.setEncrypted(
+                    pseudonymEncoder.encode(Pseudonym.builder()
+                        .encrypted(pseudonymizationStrategy.getKeyedPseudonym((String) s, canonicalization))
+                        .build()));
             }
             return configuration.jsonProvider().toJson(pseudonymizedIdentity);
         };
@@ -386,8 +393,20 @@ public class SanitizerImpl implements Sanitizer {
             //q: can we support numeric ids with this? concern that they would overflow bounds
             // expected by clients
 
-            Function<String, String> canonicalization = duckTypesAsEmails(s) ? this::emailCanonicalization : Function.identity();
-            return pseudonymizationStrategy.getKeyedPseudonym((String) s, canonicalization);
+
+
+            Function<String, String> canonicalization = Function.identity();
+            String domain = null;
+            if (duckTypesAsEmails(s)) {
+                canonicalization = this::emailCanonicalization;
+                domain = EmailAddressParser.getDomain((String) s, EmailAddressCriteria.DEFAULT, true);
+            }
+
+            return pseudonymEncoder.encode(
+                Pseudonym.builder()
+                    .encrypted(pseudonymizationStrategy.getKeyedPseudonym((String) s, canonicalization))
+                    .domain(domain)
+                    .build());
         };
     }
 
@@ -420,10 +439,10 @@ public class SanitizerImpl implements Sanitizer {
         // possible variants with personal names / etc that may be allowed in email header values
 
         Function<String, String> canonicalization;
-
+        String domain = null;
         if (duckTypesAsEmails(value)) {
             canonicalization = this::emailCanonicalization;
-            String domain = EmailAddressParser.getDomain((String) value, EmailAddressCriteria.DEFAULT, true);
+            domain = EmailAddressParser.getDomain((String) value, EmailAddressCriteria.DEFAULT, true);
             builder.domain(domain);
             scope = PseudonymizedIdentity.EMAIL_SCOPE;
             //q: do something with the personal name??
@@ -440,14 +459,22 @@ public class SanitizerImpl implements Sanitizer {
            builder.hash(hashUtils.hash(canonicalization.apply(value.toString()),
                configurationOptions.getPseudonymizationSalt(), asLegacyScope(scope)));
         } else if (getConfigurationOptions().getPseudonymImplementation() == PseudonymImplementation.DEFAULT) {
-           builder.hash(pseudonymizationStrategy.getPseudonym(value.toString(), canonicalization));
+
+           builder.hash(pseudonymEncoder.encode(
+               Pseudonym.builder()
+                   .hash(pseudonymizationStrategy.getPseudonym(value.toString(), canonicalization))
+                   .build()));
 
         } else {
             throw new RuntimeException("Unsupported pseudonym implementation: " + getConfigurationOptions().getPseudonymImplementation());
         }
 
         if (transformOptions.getIncludeEncrypted()) {
-            builder.encrypted(pseudonymizationStrategy.getKeyedPseudonym(value.toString(), canonicalization));
+            builder.encrypted(pseudonymEncoder.encode(
+                Pseudonym.builder()
+                    .encrypted(pseudonymizationStrategy.getKeyedPseudonym(value.toString(), canonicalization))
+                    .domain(domain)
+                    .build()));
         }
 
         if (transformOptions.getIncludeOriginal()) {

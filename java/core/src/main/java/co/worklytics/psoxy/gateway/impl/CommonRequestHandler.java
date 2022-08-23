@@ -2,6 +2,7 @@ package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.gateway.*;
+import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import co.worklytics.psoxy.rules.RuleSet;
 import co.worklytics.psoxy.rules.RulesUtils;
@@ -50,6 +51,7 @@ public class CommonRequestHandler {
     RuleSet rules;
     @Inject HealthCheckRequestHandler healthCheckRequestHandler;
     @Inject PseudonymizationStrategy pseudonymizationStrategy;
+    @Inject PseudonymEncoder pseudonymEncoder;
 
     private volatile Sanitizer sanitizer;
     private final Object $writeLock = new Object[0];
@@ -200,7 +202,8 @@ public class CommonRequestHandler {
         accountToImpersonate.ifPresent(user -> log.info("Impersonating user"));
         //TODO: warn here for Google Workspace connectors, which expect user??
 
-        accountToImpersonate = accountToImpersonate.map(pseudonymizationStrategy::reverseAllContainedKeyedPseudonyms);
+        accountToImpersonate = accountToImpersonate
+            .map(s -> pseudonymEncoder.decodeAndReverseAllContainedKeyedPseudonyms(s, pseudonymizationStrategy));
 
         Credentials credentials = sourceAuthStrategy.getCredentials(accountToImpersonate);
         HttpCredentialsAdapter initializeWithCredentials = new HttpCredentialsAdapter(credentials);
@@ -257,7 +260,7 @@ public class CommonRequestHandler {
         }
 
         //TODO: configurable behavior?
-        targetURLString = pseudonymizationStrategy.reverseAllContainedKeyedPseudonyms(targetURLString);
+        targetURLString = pseudonymEncoder.decodeAndReverseAllContainedKeyedPseudonyms(targetURLString, pseudonymizationStrategy);
 
         return new URL(targetURLString);
     }

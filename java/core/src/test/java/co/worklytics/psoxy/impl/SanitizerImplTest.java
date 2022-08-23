@@ -312,7 +312,6 @@ class SanitizerImplTest {
         assertNotEquals(lcase, ucaseFirst);
         //but hashes the same
         assertEquals(lcase.substring(0, 32), ucaseFirst.substring(0, 32));
-
     }
 
 }
