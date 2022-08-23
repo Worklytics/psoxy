@@ -20,6 +20,10 @@ class PseudonymizationStrategyImplTest {
 
     PseudonymizationStrategyImpl pseudonymizationStrategy;
 
+    //base64url-encoding without padding
+    Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
+    Base64.Decoder decoder = Base64.getUrlDecoder();
+
     @SneakyThrows
     @BeforeEach
     void setUp() {
@@ -30,11 +34,11 @@ class PseudonymizationStrategyImplTest {
     @Test
     void roundtrip() {
 
-        String pseudonym = pseudonymizationStrategy.getKeyedPseudonym("blah", Function.identity());
-        assertNotEquals("blah", pseudonym);
+        byte[] pseudonym = pseudonymizationStrategy.getKeyedPseudonym("blah", Function.identity());
+        assertNotEquals("blah".getBytes(), pseudonym);
 
         //something else shouldn't match
-        String pseudonym2 = pseudonymizationStrategy.getKeyedPseudonym("blah2", Function.identity());
+        byte[] pseudonym2 = pseudonymizationStrategy.getKeyedPseudonym("blah2", Function.identity());
         assertNotEquals(pseudonym2, pseudonym);
 
         String decrypted = pseudonymizationStrategy.getIdentifier(pseudonym);
@@ -48,21 +52,17 @@ class PseudonymizationStrategyImplTest {
         //  somehow between tests)
 
         assertEquals("blah",
-            pseudonymizationStrategy.getIdentifier(PseudonymizationStrategyImpl.PREFIX + "NHXWS5CZDysDs3ETExXiMZxM2DfffirkjgmA64R9hCenHbNbPsOt4W-Hx8SDUaQY"));
+            pseudonymizationStrategy.getIdentifier(decoder.decode("NHXWS5CZDysDs3ETExXiMZxM2DfffirkjgmA64R9hCenHbNbPsOt4W-Hx8SDUaQY")));
     }
 
 
     @Test
     void pseudonymAsKeyPrefix() {
 
-        String keyed = pseudonymizationStrategy.getKeyedPseudonym("blah", Function.identity());
-        String pseudonym = pseudonymizationStrategy.getPseudonym("blah", Function.identity());
+        byte[] keyed = pseudonymizationStrategy.getKeyedPseudonym("blah", Function.identity());
+        byte[] pseudonym = pseudonymizationStrategy.getPseudonym("blah", Function.identity());
 
-
-        byte[] keyedBytes = Base64.getUrlDecoder().decode(keyed.substring(PseudonymizationStrategyImpl.PREFIX.length()));
-        byte[] pseudonymBytes = Base64.getUrlDecoder().decode(pseudonym);
-
-        assertTrue(Arrays.equals(Arrays.copyOfRange(keyedBytes, 0, pseudonymBytes.length), pseudonymBytes),
+        assertTrue(Arrays.equals(Arrays.copyOfRange(keyed, 0, pseudonym.length), pseudonym),
             "pseudonym is prefix of keyed");
     }
 
@@ -71,9 +71,8 @@ class PseudonymizationStrategyImplTest {
     void keyedPseudonym_sizes() {
         Random random = new Random();
         IntStream.generate(() -> random.nextInt(1000000000)).limit(100).forEach(i -> {
-            String pseudonym = pseudonymizationStrategy.getKeyedPseudonym("blah" + i, Function.identity());
+            String pseudonym = new String(encoder.encode(pseudonymizationStrategy.getKeyedPseudonym("blah" + i, Function.identity())));
             assertEquals(
-                PseudonymizationStrategyImpl.PREFIX.length() +
                     PseudonymizationStrategyImpl.PSEUDONYM_SIZE_BYTES * 2, //hash + ciphertext + prefix
                 pseudonym.length());
         });
@@ -89,37 +88,15 @@ class PseudonymizationStrategyImplTest {
         IntStream.range(0, randomSamples).forEach(i -> {
             //use a random UUID, to give original of typical length
             String original = UUID.randomUUID().toString();
-            String pseudonym = pseudonymizationStrategy.getPseudonym(original, Function.identity());
+            byte[] pseudonym = pseudonymizationStrategy.getPseudonym(original, Function.identity());
 
             //43 bytes when base64-encoded without padding
-            assertEquals(PseudonymizationStrategyImpl.KEYED_PSEUDONYM_LENGTH_WITHOUT_PREFIX, pseudonym.length());
+            assertEquals(43, new String(encoder.encode(pseudonym)).length());
 
             //32 bytes unencoded
-            assertEquals(PseudonymizationStrategyImpl.PSEUDONYM_SIZE_BYTES,
-                Base64.getUrlDecoder().decode(pseudonym).length);
+            assertEquals(PseudonymizationStrategyImpl.PSEUDONYM_SIZE_BYTES, pseudonym.length);
         });
     }
 
-
-    @ParameterizedTest
-    @ValueSource(strings = {
-        "https://api.acme.com/v1/accounts/%s",
-        "https://api.acme.com/v1/accounts/%s/calendar",
-        "https://api.acme.com/v1/accounts/%s/calendar?param=blah&param2=blah2",
-        "https://api.acme.com/v1/accounts?id=%s",
-        "https://api.acme.com/v1/accounts/%s?id=%s", //doubles
-        "https://api.acme.com/v1/accounts/%s?id=p~12adsfasdfasdf31",  //something else with prefix
-        "https://api.acme.com/v1/accounts/p~12adsfasdfasdf31?id=%s", //something else with prefix, before actual value
-        "https://api.acme.com/v1/accounts",
-        "",
-    })
-    void reverseAll(String template) {
-        String original = "blah";
-        String pseudonym = pseudonymizationStrategy.getKeyedPseudonym("blah", Function.identity());
-
-        String r = pseudonymizationStrategy.reverseAllContainedKeyedPseudonyms(String.format(template, pseudonym, pseudonym));
-
-        assertEquals(String.format(template, original, original), r);
-    }
 
 }

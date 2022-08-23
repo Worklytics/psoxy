@@ -12,7 +12,7 @@ public interface PseudonymizationStrategy {
      * @param canonicalization
      * @return base64-url-encoded pseudonym (persistent/consistent pseudonym)
      */
-    String getPseudonym(String identifier, Function<String, String> canonicalization);
+    byte[] getPseudonym(String identifier, Function<String, String> canonicalization);
 
     /**
      * @param identifier       to pseudonymize
@@ -23,21 +23,14 @@ public interface PseudonymizationStrategy {
      * NOTE: ability to reverse may depend on state of this implementation, eg, secrets that
      * it holds, passage of time, etc.
      */
-    String getKeyedPseudonym(String identifier, Function<String, String> canonicalization);
+    byte[] getKeyedPseudonym(String identifier, Function<String, String> canonicalization);
 
     /**
      *
-     * @param keyedPseudonym base64-url-encoded ciphertext, if it was created with this PseudonymizationStrategy
+     * @param keyedPseudonym ciphertext, if it was created with this PseudonymizationStrategy
      * @return plaintext that was originally passed to this EncryptionStrategy
      */
-    String getIdentifier(String keyedPseudonym);
+    String getIdentifier(byte[] decodedKeyedPseudonym);
 
-    /**
-     * returns string after reversing all keyed pseudonyms created with this
-     * PseudonymizationStrategy that it contains (if any)
-     *
-     * @param containsKeyedPseudonyms string that may contain keyed pseudonyms
-     * @return string with all keyed pseudonyms it contains, if any, reversed to originals
-     */
-    String reverseAllContainedKeyedPseudonyms(String containsKeyedPseudonyms);
+
 }

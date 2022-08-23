@@ -1,3 +1,4 @@
+
 <?xml version="1.0" encoding="UTF-8"?>
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -93,7 +94,6 @@
             <version>${dependency.json-path.version}</version>
         </dependency>
         <!-- Jackson - JSON serialization/deserialization -->
-        <!-- trying to force Restlet to use these, rather than codehaus versions -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
