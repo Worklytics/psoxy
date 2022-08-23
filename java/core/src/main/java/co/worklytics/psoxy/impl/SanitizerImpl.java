@@ -169,19 +169,7 @@ public class SanitizerImpl implements Sanitizer {
                 }
             }
         } else {
-            MapFunction f;
-            if (transform instanceof Transform.Pseudonymize) {
-                //curry the defaultScopeId from the transform into the pseudonymization method
-                f = getPseudonymize((Transform.Pseudonymize) transform);
-            } else if (transform instanceof Transform.PseudonymizeEmailHeader) {
-                f = this::pseudonymizeEmailHeaderToJson;
-            } else if (transform instanceof Transform.RedactRegexMatches) {
-                f = getRedactRegexMatches((Transform.RedactRegexMatches) transform);
-            } else if (transform instanceof Transform.FilterTokenByRegex) {
-                f = getFilterTokenByRegex((Transform.FilterTokenByRegex) transform);
-            } else {
-                throw new IllegalArgumentException("Unknown transform type: " + transform.getClass().getName());
-            }
+            MapFunction f = getTransformImpl(transform);
             for (JsonPath path : paths) {
                 try {
                     path.map(document, f, jsonConfiguration);
@@ -191,6 +179,24 @@ public class SanitizerImpl implements Sanitizer {
             }
         }
         return document;
+    }
+
+    @VisibleForTesting
+    public MapFunction getTransformImpl(Transform transform) {
+        MapFunction f;
+        if (transform instanceof Transform.Pseudonymize) {
+            //curry the defaultScopeId from the transform into the pseudonymization method
+            f = getPseudonymize((Transform.Pseudonymize) transform);
+        } else if (transform instanceof Transform.PseudonymizeEmailHeader) {
+            f = this::pseudonymizeEmailHeaderToJson;
+        } else if (transform instanceof Transform.RedactRegexMatches) {
+            f = getRedactRegexMatches((Transform.RedactRegexMatches) transform);
+        } else if (transform instanceof Transform.FilterTokenByRegex) {
+            f = getFilterTokenByRegex((Transform.FilterTokenByRegex) transform);
+        } else {
+            throw new IllegalArgumentException("Unknown transform type: " + transform.getClass().getName());
+        }
+        return f;
     }
 
 
@@ -395,5 +401,6 @@ public class SanitizerImpl implements Sanitizer {
     public PseudonymizedIdentity pseudonymize(@NonNull Number value) {
         return pseudonymize((Object) value);
     }
+
 
 }

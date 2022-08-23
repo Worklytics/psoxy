@@ -17,10 +17,6 @@ endpoints:
           - "$.users[*].posixAccounts[*].username"
           - "$.users[*].locations[*].deskCode"
           - "$.users[*].relations[*].value"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$.users[*].id"
-        includeReversible: true
       - !<redact>
         jsonPaths:
           - "$.users[*].name"
@@ -30,6 +26,10 @@ endpoints:
           - "$.users[*].posixAccounts[*].homeDirectory"
           - "$.users[*].sshPublicKeys[*]"
           - "$.users[*].websites[*]"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.users[*].id"
+        includeReversible: true
   - pathRegex: "^/admin/directory/v1/users/[^/]*$"
     transforms:
       - !<pseudonymize>
@@ -55,6 +55,10 @@ endpoints:
           - "$.posixAccounts[*].homeDirectory"
           - "$.sshPublicKeys[*]"
           - "$.websites[*]"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.id"
+        includeReversible: true
   - pathRegex: "^/admin/directory/v1/groups(\\?)?[^/]*$"
     transforms:
       - !<pseudonymize>
@@ -81,13 +85,13 @@ endpoints:
     transforms:
       - !<pseudonymize>
         jsonPaths:
-          - "$..id"
-        includeReversible: true
-      - !<pseudonymize>
-        jsonPaths:
           - "$..email"
           - "$..aliases[*]"
           - "$..nonEditableAliases[*]"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.members[*].id"
+        includeReversible: true
   - pathRegex: "^/admin/directory/v1/orgunits\\?.*"
     transforms:
       - !<redact>

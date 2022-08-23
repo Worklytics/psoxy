@@ -7,10 +7,7 @@ import lombok.*;
 import lombok.extern.java.Log;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 @Builder(toBuilder = true)
 @Log
@@ -58,6 +55,20 @@ public class Rules2 implements RuleSet, Serializable {
         return builder.build();
     }
 
+    public Rules2 withTransformByEndpoint(String pathRegex, Transform transform) {
+        Optional<Endpoint> matchedEndpoint = getEndpoints().stream()
+            .filter(endpoint -> endpoint.getPathRegex().equals(pathRegex))
+            .findFirst();
+
+        Endpoint endpoint = matchedEndpoint
+            .orElseThrow(() -> new IllegalArgumentException("No endpoint found for pathRegex: " + pathRegex));
+
+        endpoint.transforms = new ArrayList<>(endpoint.getTransforms());
+        endpoint.transforms.add(transform);
+
+        return this;
+    }
+
 
     @JsonPropertyOrder(alphabetic = true)
     @Builder(toBuilder = true)
@@ -76,6 +87,8 @@ public class Rules2 implements RuleSet, Serializable {
 
     //TODO: fix YAML serialization with something like
     // https://stackoverflow.com/questions/55878770/how-to-use-jsonsubtypes-for-polymorphic-type-handling-with-jackson-yaml-mapper
+
+
 
 
 }

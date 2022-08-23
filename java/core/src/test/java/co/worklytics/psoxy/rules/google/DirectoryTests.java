@@ -25,6 +25,8 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
     @Getter
     final String exampleDirectoryPath = "api-response-examples/g-workspace/directory";
 
+
+
     @Getter
     final String defaultScopeId = "gapps";
 
@@ -229,4 +231,5 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
             InvocationExample.of("https://admin.googleapis.com/admin/directory/v1/users?customer=my_customer&maxResults=1&pageToken=BASE64TOKEN-=%3D&viewType=admin_view", "users.json")
         );
     }
+
 }

@@ -8,6 +8,7 @@ import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.MapFunction;
 import dagger.Component;
 import lombok.*;
 import org.apache.commons.lang3.StringUtils;
@@ -42,6 +43,18 @@ abstract public class RulesBaseTestCase {
     protected SanitizerFactory sanitizerFactory;
     @Inject
     protected RulesUtils rulesUtils;
+
+    @Getter @Setter
+    RulesTestSpec testSpec = RulesTestSpec.builder().build();
+
+    @Builder
+    public static class RulesTestSpec {
+
+        String sanitizedExamplesDirectoryPath;
+        Optional<String> getSanitizedExamplesDirectoryPath() {
+            return Optional.ofNullable(this.sanitizedExamplesDirectoryPath);
+        }
+    }
 
     @AllArgsConstructor(staticName = "of")
     @Value
@@ -116,7 +129,7 @@ abstract public class RulesBaseTestCase {
                 String sanitizedFileName =
                     example.getPlainExampleFile().replace(".json", "-sanitized.json");
 
-                String expected = StringUtils.trim(new String(TestUtils.getData(getExampleDirectoryPath() + "/" + sanitizedFileName)));
+                String expected = StringUtils.trim(new String(TestUtils.getData(testSpec.getSanitizedExamplesDirectoryPath().orElse(getExampleDirectoryPath()) + "/" + sanitizedFileName)));
 
                 assertEquals(expected,
                     StringUtils.trim(prettyPrintJson(sanitized)), sanitizedFileName + " does not match output");
@@ -149,6 +162,8 @@ abstract public class RulesBaseTestCase {
     public abstract String getYamlSerializationFilepath();
 
     public abstract String getExampleDirectoryPath();
+
+
 
     public Stream<InvocationExample> getExamples() {
         return Stream.empty();
@@ -214,6 +229,22 @@ abstract public class RulesBaseTestCase {
                 doubleJsonEncodedPseudonym = StringUtils.unwrap(doubleJsonEncodedPseudonym, "\"");
                 assertTrue(content.contains(doubleJsonEncodedPseudonym),
                     String.format("Sanitized does not contain %s, pseudonymized equivalent of %s", doubleJsonEncodedPseudonym, s));
+            });
+    }
+
+    protected void assertTransformed(String content, Collection<String> shouldBeTransformed, Transform transform) {
+        shouldBeTransformed
+            .forEach(s ->
+                assertFalse(content.contains(s), () -> String.format("Sanitized content still contains unpseudonymized: %s at %s", s, this.context(content, s))));
+
+        shouldBeTransformed
+            .forEach(s -> {
+                MapFunction f = sanitizer.getTransformImpl(transform);
+
+                String expected = sanitizer.getJsonConfiguration().jsonProvider().toJson(f.map(s, sanitizer.getJsonConfiguration()));
+
+                assertTrue(content.contains(expected),
+                    String.format("Sanitized does not contain %s, transformed equivalent of %s", expected, s));
             });
     }
 

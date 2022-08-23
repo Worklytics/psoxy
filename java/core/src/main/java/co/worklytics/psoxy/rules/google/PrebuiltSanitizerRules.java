@@ -1,6 +1,5 @@
 package co.worklytics.psoxy.rules.google;
 
-import co.worklytics.psoxy.rules.Rules1;
 import co.worklytics.psoxy.rules.Rules2;
 import co.worklytics.psoxy.rules.RuleSet;
 import co.worklytics.psoxy.rules.Transform;
@@ -84,13 +83,19 @@ public class PrebuiltSanitizerRules {
             .build())
         .build();
 
+
+    static final String GDIRECTORY_ENDPOINT_REGEX_USERS ="^/admin/directory/v1/users\\?.*$";
+    static final String GDIRECTORY_ENDPOINT_REGEX_USER = "^/admin/directory/v1/users/[^/]*$";
+    static final String GDIRECTORY_ENDPOINT_REGEX_MEMBERS = "^/admin/directory/v1/groups/[^/]*/members[^/]*$";
+
+
     static final Rules2 GDIRECTORY = Rules2.builder()
         .endpoint(Rules2.Endpoint.builder()
             .pathRegex("^/admin/directory/v1/customer/[^/]*/domains.*")
             .build())
         //list users
         .endpoint(Rules2.Endpoint.builder()
-            .pathRegex("^/admin/directory/v1/users\\?.*$")
+            .pathRegex(GDIRECTORY_ENDPOINT_REGEX_USERS)
             .transform(Transform.Pseudonymize.builder()
                 .jsonPath("$.users[*].primaryEmail")
                 .jsonPath("$.users[*].emails[*].address")
@@ -117,7 +122,7 @@ public class PrebuiltSanitizerRules {
             .build())
         //single user
         .endpoint(Rules2.Endpoint.builder()
-            .pathRegex("^/admin/directory/v1/users/[^/]*$")
+            .pathRegex(GDIRECTORY_ENDPOINT_REGEX_USER)
             .transform(Transform.Pseudonymize.builder()
                 .jsonPath("$.primaryEmail")
 
@@ -173,7 +178,7 @@ public class PrebuiltSanitizerRules {
             .build())
         //list group members
         .endpoint(Rules2.Endpoint.builder()
-            .pathRegex("^/admin/directory/v1/groups/[^/]*/members[^/]*$")
+            .pathRegex(GDIRECTORY_ENDPOINT_REGEX_MEMBERS)
             .transform(Transform.Pseudonymize.builder()
                 .jsonPath("$..email")
                 .jsonPath("$..aliases[*]")
@@ -212,6 +217,23 @@ public class PrebuiltSanitizerRules {
         //    .pathRegex("^/admin/directory/v1/customer/my_customer/(roles|roleassignments|resources).*")
         //    .build())
         .build();
+
+    public static final Rules2 GDIRECTORY_WITHOUT_GOOGLE_IDS = GDIRECTORY.toBuilder().build()
+        .withTransformByEndpoint(GDIRECTORY_ENDPOINT_REGEX_USER,
+            Transform.Pseudonymize.builder()
+                .jsonPath("$.id")
+                .includeReversible(true)
+                .build())
+        .withTransformByEndpoint(GDIRECTORY_ENDPOINT_REGEX_USERS,
+            Transform.Pseudonymize.builder()
+                .jsonPath("$.users[*].id")
+                .includeReversible(true)
+                .build())
+        .withTransformByEndpoint(GDIRECTORY_ENDPOINT_REGEX_MEMBERS,
+            Transform.Pseudonymize.builder()
+                .jsonPath("$.members[*].id")
+                .includeReversible(true)
+                .build());
 
     public static co.worklytics.psoxy.rules.Rules2.Endpoint GDRIVE_ENDPOINT_RULES = Rules2.Endpoint.builder()
         .transform(Transform.Pseudonymize.builder()
