@@ -2,9 +2,6 @@ package co.worklytics.psoxy.rules.google;
 
 import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
 import co.worklytics.psoxy.rules.RuleSet;
-import co.worklytics.psoxy.rules.Rules1;
-import co.worklytics.psoxy.Sanitizer;
-import co.worklytics.psoxy.rules.Rules2;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
@@ -15,8 +12,6 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
