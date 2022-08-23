@@ -25,8 +25,11 @@ public class Base64UrlWithoutPaddingPseudonymEncoderTest {
     @BeforeEach
     void setUp() {
         deterministicPseudonymStrategy = new Sha256DeterministicPseudonymStrategy("salt");
-        pseudonymizationStrategy = new AESCBCReversiblePseudonymStrategy(
-            deterministicPseudonymStrategy, TestUtils.testKey());
+        pseudonymizationStrategy = AESReversiblePseudonymStrategy.builder()
+            .cipherSuite(AESReversiblePseudonymStrategy.CBC)
+            .key(TestUtils.testKey())
+            .deterministicPseudonymStrategy(deterministicPseudonymStrategy)
+            .build();
   }
 
     @ParameterizedTest

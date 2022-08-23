@@ -2,6 +2,7 @@ package com.avaulta.gateway.pseudonyms.impl;
 
 import com.avaulta.gateway.pseudonyms.DeterministicPseudonymStrategy;
 import com.avaulta.gateway.pseudonyms.Pseudonym;
+import com.avaulta.gateway.pseudonyms.ReversiblePseudonymStrategy;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Random;
-import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
@@ -18,7 +18,7 @@ import static org.mockito.Mockito.mock;
 
 class AESCBCReversiblePseudonymStrategyTest {
 
-    AESCBCReversiblePseudonymStrategy pseudonymizationStrategy;
+    ReversiblePseudonymStrategy pseudonymizationStrategy;
     DeterministicPseudonymStrategy deterministicPseudonymStrategy;
 
     //base64url-encoding without padding
@@ -29,24 +29,13 @@ class AESCBCReversiblePseudonymStrategyTest {
     @BeforeEach
     void setUp() {
         deterministicPseudonymStrategy = new Sha256DeterministicPseudonymStrategy("salt");
-        pseudonymizationStrategy = new AESCBCReversiblePseudonymStrategy(deterministicPseudonymStrategy, TestUtils.testKey());
+        pseudonymizationStrategy =
+            AESReversiblePseudonymStrategy.builder()
+                .cipherSuite(AESReversiblePseudonymStrategy.CBC)
+                .deterministicPseudonymStrategy(deterministicPseudonymStrategy)
+                .key(TestUtils.testKey())
+                .build();
     }
-
-
-    @Test
-    void roundtrip() {
-
-        byte[] pseudonym = pseudonymizationStrategy.getReversiblePseudonym("blah", Function.identity());
-        assertNotEquals("blah".getBytes(), pseudonym);
-
-        //something else shouldn't match
-        byte[] pseudonym2 = pseudonymizationStrategy.getReversiblePseudonym("blah2", Function.identity());
-        assertNotEquals(pseudonym2, pseudonym);
-
-        String decrypted = pseudonymizationStrategy.getIdentifier(pseudonym);
-        assertEquals("blah", decrypted);
-    }
-
     @Test
     void reverse() {
         //given 'secret' and 'salt' the same, should be able to decrypt
@@ -56,18 +45,6 @@ class AESCBCReversiblePseudonymStrategyTest {
         assertEquals("blah",
             pseudonymizationStrategy.getIdentifier(decoder.decode("NHXWS5CZDysDs3ETExXiMZxM2DfffirkjgmA64R9hCenHbNbPsOt4W-Hx8SDUaQY")));
     }
-
-
-    @Test
-    void pseudonymAsKeyPrefix() {
-
-        byte[] keyed = pseudonymizationStrategy.getReversiblePseudonym("blah", Function.identity());
-        byte[] pseudonym = deterministicPseudonymStrategy.getPseudonym("blah", Function.identity());
-
-        assertTrue(Arrays.equals(Arrays.copyOfRange(keyed, 0, pseudonym.length), pseudonym),
-            "pseudonym is prefix of keyed");
-    }
-
 
     @Test
     void keyedPseudonym_sizes() {

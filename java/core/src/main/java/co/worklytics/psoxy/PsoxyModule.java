@@ -10,7 +10,7 @@ import co.worklytics.psoxy.storage.impl.FileHandlerFactoryImpl;
 import com.avaulta.gateway.pseudonyms.DeterministicPseudonymStrategy;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.ReversiblePseudonymStrategy;
-import com.avaulta.gateway.pseudonyms.impl.AESCBCReversiblePseudonymStrategy;
+import com.avaulta.gateway.pseudonyms.impl.AESReversiblePseudonymStrategy;
 import com.avaulta.gateway.pseudonyms.impl.Base64UrlWithoutPaddingPseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.impl.Sha256DeterministicPseudonymStrategy;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -137,7 +137,11 @@ public class PsoxyModule {
         String keyFromConfig = config.getConfigPropertyOrError(ProxyConfigProperty.PSOXY_ENCRYPTION_KEY);
         SecretKeySpec key = new SecretKeySpec(Base64.getDecoder().decode(keyFromConfig), "AES");
 
-        return new AESCBCReversiblePseudonymStrategy(deterministicPseudonymStrategy, key);
+        return AESReversiblePseudonymStrategy.builder()
+            .cipherSuite(AESReversiblePseudonymStrategy.CBC)
+            .key(key)
+            .deterministicPseudonymStrategy(deterministicPseudonymStrategy)
+            .build();
     }
 
     @Provides @Singleton
