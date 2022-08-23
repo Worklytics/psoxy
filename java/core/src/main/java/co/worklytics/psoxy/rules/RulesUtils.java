@@ -36,7 +36,7 @@ public class RulesUtils {
             .map(base64encoded -> Base64.getDecoder().decode(base64encoded))
             .map(yamlString -> {
                 try {
-                    Rules1 rules = yamlMapper.readerFor(Rules1.class).readValue(yamlString);
+                    CsvRules rules = yamlMapper.readerFor(CsvRules.class).readValue(yamlString);
                     Validator.validate(rules);
                     return rules;
                 } catch (IOException e) {

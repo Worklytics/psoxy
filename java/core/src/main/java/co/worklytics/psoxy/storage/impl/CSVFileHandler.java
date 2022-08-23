@@ -1,6 +1,6 @@
 package co.worklytics.psoxy.storage.impl;
 
-import co.worklytics.psoxy.rules.Rules1;
+import co.worklytics.psoxy.rules.CsvRules;
 import co.worklytics.psoxy.Sanitizer;
 import co.worklytics.psoxy.storage.FileHandler;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -44,21 +44,17 @@ public class CSVFileHandler implements FileHandler {
 
         Sanitizer.Options options = sanitizer.getOptions();
 
-        Set<String> columnsToRedact = ((Rules1) options.getRules())
-                .getRedactions()
-                .stream()
-                .map(Rules1.Rule::getCsvColumns)
-                .flatMap(Collection::stream)
-                .map(String::trim)
-                .collect(Collectors.toCollection(() -> new TreeSet<>(String.CASE_INSENSITIVE_ORDER)));
+        Set<String> columnsToRedact = ((CsvRules) options.getRules())
+            .getColumnsToRedact()
+            .stream()
+            .map(String::trim)
+            .collect(Collectors.toCollection(() -> new TreeSet<>(String.CASE_INSENSITIVE_ORDER)));
 
-        Set<String> columnsToPseudonymize = ((Rules1) options.getRules())
-                .getPseudonymizations()
-                .stream()
-                .map(Rules1.Rule::getCsvColumns)
-                .flatMap(Collection::stream)
-                .map(String::trim)
-                .collect(Collectors.toCollection(() -> new TreeSet<>(String.CASE_INSENSITIVE_ORDER)));
+        Set<String> columnsToPseudonymize = ((CsvRules) options.getRules())
+            .getColumnsToPseudonymize()
+            .stream()
+            .map(String::trim)
+            .collect(Collectors.toCollection(() -> new TreeSet<>(String.CASE_INSENSITIVE_ORDER)));
 
         // headers respecting insertion order
         // when constructing the parser with ignore header case the keySet may not return values in
