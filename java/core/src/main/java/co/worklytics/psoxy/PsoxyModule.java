@@ -7,10 +7,12 @@ import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrateg
 import co.worklytics.psoxy.storage.FileHandlerFactory;
 import co.worklytics.psoxy.storage.impl.FileHandlerFactoryImpl;
 
+import com.avaulta.gateway.pseudonyms.DeterministicPseudonymStrategy;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
-import com.avaulta.gateway.pseudonyms.PseudonymizationStrategy;
+import com.avaulta.gateway.pseudonyms.ReversiblePseudonymStrategy;
+import com.avaulta.gateway.pseudonyms.impl.AESCBCReversiblePseudonymStrategy;
 import com.avaulta.gateway.pseudonyms.impl.Base64UrlWithoutPaddingPseudonymEncoder;
-import com.avaulta.gateway.pseudonyms.impl.AESCBCPseudonymizationStrategy;
+import com.avaulta.gateway.pseudonyms.impl.Sha256DeterministicPseudonymStrategy;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.api.client.http.HttpContent;
@@ -122,16 +124,20 @@ public class PsoxyModule {
     static FileHandlerFactory fileHandler(FileHandlerFactoryImpl fileHandlerStrategy) {
         return fileHandlerStrategy;
     }
+    @Provides @Singleton
+    DeterministicPseudonymStrategy deterministicPseudonymStrategy(ConfigService config)  {
+        String salt = config.getConfigPropertyOrError(ProxyConfigProperty.PSOXY_SALT);
+        return new Sha256DeterministicPseudonymStrategy(salt);
+    }
 
     @Provides @Singleton
-    PseudonymizationStrategy pseudonymizationStrategy(ConfigService config) {
-
-        String salt = config.getConfigPropertyOrError(ProxyConfigProperty.PSOXY_SALT);
+    ReversiblePseudonymStrategy pseudonymizationStrategy(ConfigService config,
+                                                         DeterministicPseudonymStrategy deterministicPseudonymStrategy) {
 
         String keyFromConfig = config.getConfigPropertyOrError(ProxyConfigProperty.PSOXY_ENCRYPTION_KEY);
         SecretKeySpec key = new SecretKeySpec(Base64.getDecoder().decode(keyFromConfig), "AES");
 
-        return new AESCBCPseudonymizationStrategy(salt, key);
+        return new AESCBCReversiblePseudonymStrategy(deterministicPseudonymStrategy, key);
     }
 
     @Provides @Singleton

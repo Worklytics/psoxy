@@ -1,6 +1,8 @@
 package com.avaulta.gateway.pseudonyms.impl;
 
+import com.avaulta.gateway.pseudonyms.DeterministicPseudonymStrategy;
 import com.avaulta.gateway.pseudonyms.Pseudonym;
+import com.avaulta.gateway.pseudonyms.ReversiblePseudonymStrategy;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -15,13 +17,17 @@ public class Base64UrlWithoutPaddingPseudonymEncoderTest {
 
     Base64UrlWithoutPaddingPseudonymEncoder pseudonymEncoder = new Base64UrlWithoutPaddingPseudonymEncoder();
 
-    AESCBCPseudonymizationStrategy pseudonymizationStrategy;
+    ReversiblePseudonymStrategy pseudonymizationStrategy;
+
+    DeterministicPseudonymStrategy deterministicPseudonymStrategy;
 
     @SneakyThrows
     @BeforeEach
     void setUp() {
-        pseudonymizationStrategy = new AESCBCPseudonymizationStrategy("salt", TestUtils.testKey());
-    }
+        deterministicPseudonymStrategy = new Sha256DeterministicPseudonymStrategy("salt");
+        pseudonymizationStrategy = new AESCBCReversiblePseudonymStrategy(
+            deterministicPseudonymStrategy, TestUtils.testKey());
+  }
 
     @ParameterizedTest
     @ValueSource(strings = {
@@ -39,7 +45,7 @@ public class Base64UrlWithoutPaddingPseudonymEncoderTest {
         String original = "blah";
         String pseudonym =
             pseudonymEncoder.encode(Pseudonym.builder()
-                .reversible(pseudonymizationStrategy.getKeyedPseudonym("blah", Function.identity())).build());
+                .reversible(pseudonymizationStrategy.getReversiblePseudonym("blah", Function.identity())).build());
 
         String r = pseudonymEncoder.decodeAndReverseAllContainedKeyedPseudonyms(String.format(template, pseudonym, pseudonym),
             pseudonymizationStrategy);

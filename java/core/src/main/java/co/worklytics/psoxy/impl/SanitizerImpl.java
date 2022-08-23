@@ -6,10 +6,7 @@ import co.worklytics.psoxy.rules.Rules1;
 import co.worklytics.psoxy.rules.Rules2;
 import co.worklytics.psoxy.rules.Transform;
 import co.worklytics.psoxy.utils.URLUtils;
-import com.avaulta.gateway.pseudonyms.Pseudonym;
-import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
-import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
-import com.avaulta.gateway.pseudonyms.PseudonymizationStrategy;
+import com.avaulta.gateway.pseudonyms.*;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.jayway.jsonpath.Configuration;
@@ -74,7 +71,9 @@ public class SanitizerImpl implements Sanitizer {
     HashUtils hashUtils;
 
     @Inject
-    PseudonymizationStrategy pseudonymizationStrategy;
+    ReversiblePseudonymStrategy reversiblePseudonymStrategy;
+    @Inject
+    DeterministicPseudonymStrategy deterministicPseudonymStrategy;
     @Inject
     PseudonymEncoder pseudonymEncoder;
 
@@ -375,7 +374,7 @@ public class SanitizerImpl implements Sanitizer {
                 Function<String, String> canonicalization = duckTypesAsEmails(s) ? this::emailCanonicalization : Function.identity();
                 pseudonymizedIdentity.setReversible(
                     pseudonymEncoder.encode(Pseudonym.builder()
-                        .reversible(pseudonymizationStrategy.getKeyedPseudonym((String) s, canonicalization))
+                        .reversible(reversiblePseudonymStrategy.getReversiblePseudonym((String) s, canonicalization))
                         .build()));
             }
             return configuration.jsonProvider().toJson(pseudonymizedIdentity);
@@ -404,7 +403,7 @@ public class SanitizerImpl implements Sanitizer {
 
             return pseudonymEncoder.encode(
                 Pseudonym.builder()
-                    .reversible(pseudonymizationStrategy.getKeyedPseudonym((String) s, canonicalization))
+                    .reversible(reversiblePseudonymStrategy.getReversiblePseudonym((String) s, canonicalization))
                     .domain(domain)
                     .build());
         };
@@ -462,7 +461,7 @@ public class SanitizerImpl implements Sanitizer {
 
            builder.hash(pseudonymEncoder.encode(
                Pseudonym.builder()
-                   .hash(pseudonymizationStrategy.getPseudonym(value.toString(), canonicalization))
+                   .hash(deterministicPseudonymStrategy.getPseudonym(value.toString(), canonicalization))
                    .build()));
 
         } else {
@@ -472,7 +471,7 @@ public class SanitizerImpl implements Sanitizer {
         if (transformOptions.getIncludeReversible()) {
             builder.reversible(pseudonymEncoder.encode(
                 Pseudonym.builder()
-                    .reversible(pseudonymizationStrategy.getKeyedPseudonym(value.toString(), canonicalization))
+                    .reversible(reversiblePseudonymStrategy.getReversiblePseudonym(value.toString(), canonicalization))
                     .domain(domain)
                     .build()));
         }

@@ -5,14 +5,8 @@ import java.util.function.Function;
 /**
  *
  */
-public interface PseudonymizationStrategy {
+public interface ReversiblePseudonymStrategy {
 
-    /**
-     * @param identifier       to pseudonymize
-     * @param canonicalization
-     * @return base64-url-encoded pseudonym (persistent/consistent pseudonym)
-     */
-    byte[] getPseudonym(String identifier, Function<String, String> canonicalization);
 
     /**
      * @param identifier       to pseudonymize
@@ -23,14 +17,14 @@ public interface PseudonymizationStrategy {
      * NOTE: ability to reverse may depend on state of this implementation, eg, secrets that
      * it holds, passage of time, etc.
      */
-    byte[] getKeyedPseudonym(String identifier, Function<String, String> canonicalization);
+    byte[] getReversiblePseudonym(String identifier, Function<String, String> canonicalization);
 
     /**
      *
-     * @param keyedPseudonym ciphertext, if it was created with this PseudonymizationStrategy
+     * @param reversiblePseudonym ciphertext, if it was created with this PseudonymizationStrategy
      * @return plaintext that was originally passed to this EncryptionStrategy
      */
-    String getIdentifier(byte[] decodedKeyedPseudonym);
+    String getIdentifier(byte[] reversiblePseudonym);
 
 
 }

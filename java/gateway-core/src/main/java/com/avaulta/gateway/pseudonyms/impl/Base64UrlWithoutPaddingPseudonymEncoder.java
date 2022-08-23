@@ -2,7 +2,7 @@ package com.avaulta.gateway.pseudonyms.impl;
 
 import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
-import com.avaulta.gateway.pseudonyms.PseudonymizationStrategy;
+import com.avaulta.gateway.pseudonyms.ReversiblePseudonymStrategy;
 
 import java.util.Arrays;
 import java.util.Base64;
@@ -76,7 +76,7 @@ public class Base64UrlWithoutPaddingPseudonymEncoder implements PseudonymEncoder
     }
 
     @Override
-    public String decodeAndReverseAllContainedKeyedPseudonyms(String containsKeyedPseudonyms, PseudonymizationStrategy reidentifier) {
+    public String decodeAndReverseAllContainedKeyedPseudonyms(String containsKeyedPseudonyms, ReversiblePseudonymStrategy reidentifier) {
         return KEYED_PSEUDONYM_PATTERN.matcher(containsKeyedPseudonyms).replaceAll(m -> {
             String keyedPseudonym = m.group();
             //q: if this fails, just return 'm.group()' as-is?? to consider possibility that pattern matched

@@ -9,7 +9,7 @@ import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.psoxy.utils.ComposedHttpRequestInitializer;
 import co.worklytics.psoxy.utils.GzipedContentHttpRequestInitializer;
 import co.worklytics.psoxy.utils.URLUtils;
-import com.avaulta.gateway.pseudonyms.PseudonymizationStrategy;
+import com.avaulta.gateway.pseudonyms.ReversiblePseudonymStrategy;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequestFactory;
@@ -50,7 +50,8 @@ public class CommonRequestHandler {
     @Inject
     RuleSet rules;
     @Inject HealthCheckRequestHandler healthCheckRequestHandler;
-    @Inject PseudonymizationStrategy pseudonymizationStrategy;
+    @Inject
+    ReversiblePseudonymStrategy reversiblePseudonymStrategy;
     @Inject PseudonymEncoder pseudonymEncoder;
 
     private volatile Sanitizer sanitizer;
@@ -203,7 +204,7 @@ public class CommonRequestHandler {
         //TODO: warn here for Google Workspace connectors, which expect user??
 
         accountToImpersonate = accountToImpersonate
-            .map(s -> pseudonymEncoder.decodeAndReverseAllContainedKeyedPseudonyms(s, pseudonymizationStrategy));
+            .map(s -> pseudonymEncoder.decodeAndReverseAllContainedKeyedPseudonyms(s, reversiblePseudonymStrategy));
 
         Credentials credentials = sourceAuthStrategy.getCredentials(accountToImpersonate);
         HttpCredentialsAdapter initializeWithCredentials = new HttpCredentialsAdapter(credentials);
@@ -260,7 +261,7 @@ public class CommonRequestHandler {
         }
 
         //TODO: configurable behavior?
-        targetURLString = pseudonymEncoder.decodeAndReverseAllContainedKeyedPseudonyms(targetURLString, pseudonymizationStrategy);
+        targetURLString = pseudonymEncoder.decodeAndReverseAllContainedKeyedPseudonyms(targetURLString, reversiblePseudonymStrategy);
 
         return new URL(targetURLString);
     }

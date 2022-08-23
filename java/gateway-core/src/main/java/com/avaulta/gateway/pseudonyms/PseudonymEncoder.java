@@ -1,7 +1,5 @@
 package com.avaulta.gateway.pseudonyms;
 
-import java.util.function.Function;
-
 public interface PseudonymEncoder {
 
 
@@ -17,5 +15,5 @@ public interface PseudonymEncoder {
      * @param reidentifier             function to reverse keyed pseudonym
      * @return string with all keyed pseudonyms it contains, if any, reversed to originals
      */
-    String decodeAndReverseAllContainedKeyedPseudonyms(String containsKeyedPseudonyms, PseudonymizationStrategy reidentifier);
+    String decodeAndReverseAllContainedKeyedPseudonyms(String containsKeyedPseudonyms, ReversiblePseudonymStrategy reidentifier);
 }

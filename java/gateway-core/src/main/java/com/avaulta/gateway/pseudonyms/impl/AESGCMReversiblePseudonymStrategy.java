@@ -1,12 +1,11 @@
 package com.avaulta.gateway.pseudonyms.impl;
 
-import com.avaulta.gateway.pseudonyms.Pseudonym;
-import com.avaulta.gateway.pseudonyms.PseudonymizationStrategy;
+import com.avaulta.gateway.pseudonyms.DeterministicPseudonymStrategy;
+import com.avaulta.gateway.pseudonyms.ReversiblePseudonymStrategy;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import org.apache.commons.codec.digest.DigestUtils;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.GCMParameterSpec;
@@ -34,10 +33,12 @@ import java.util.function.Function;
  *     such as https://github.com/codahale/aes-gcm-siv
  */
 @RequiredArgsConstructor
-public class AESGCMPseudonymizationStrategy implements PseudonymizationStrategy {
+public class AESGCMReversiblePseudonymStrategy implements ReversiblePseudonymStrategy {
+
 
     @Getter
-    final String salt;
+    final DeterministicPseudonymStrategy deterministicPseudonymStrategy;
+
     @Getter
     final SecretKeySpec encryptionKey;
 
@@ -50,25 +51,13 @@ public class AESGCMPseudonymizationStrategy implements PseudonymizationStrategy 
         return Cipher.getInstance("AES/GCM/NoPadding");
     }
 
-
-    //32-bytes
-    @Override
-    public byte[] getPseudonym(String identifier, Function<String, String> canonicalization) {
-        //pass in a canonicalization function? if not, this won't match for the canonically-equivalent
-        // identifier in different formats (eg, cased/etc)
-
-        // if pseudonyms too long, could cut this to MD5 (save 16 bytes) or SHA1 (save 12 bytes)
-        // for our implementation, that should still be good enough
-        return DigestUtils.sha256(canonicalization.apply(identifier) + getSalt());
-    }
-
     //64-bytes
     @SneakyThrows
     @Override
-    public byte[] getKeyedPseudonym(@NonNull String identifier, Function<String, String> canonicalization) {
+    public byte[] getReversiblePseudonym(@NonNull String identifier, Function<String, String> canonicalization) {
         Cipher cipher = getCipherInstance();
 
-        byte[] hash = getPseudonym(identifier, canonicalization);
+        byte[] hash = deterministicPseudonymStrategy.getPseudonym(identifier, canonicalization);
 
         //fundamental insight here: conventional encryption would generate a random IV; but this
         // would mean that repeated encryption of the same plaintext would yield different results.
@@ -95,17 +84,16 @@ public class AESGCMPseudonymizationStrategy implements PseudonymizationStrategy 
         return result;
     }
 
-    byte[] extractIv(byte[] hash) {
-       return Arrays.copyOfRange(hash, 0, GCM_IV_LENGTH);
-        //return Arrays.copyOfRange(hash, 0, CIPHER_BLOCK_SIZE_BYTES);
+    byte[] extractIv(byte[] reversiblePseudonym) {
+       return Arrays.copyOfRange(reversiblePseudonym, 0, GCM_IV_LENGTH);
     }
 
     @SneakyThrows
     @Override
-    public String getIdentifier(@NonNull byte[] decodedReversiblePseudonym) {
+    public String getIdentifier(@NonNull byte[] reversiblePseudonym) {
 
-        byte[] iv = extractIv(decodedReversiblePseudonym);
-        byte[] cryptoText = Arrays.copyOfRange(decodedReversiblePseudonym, Pseudonym.HASH_SIZE_BYTES, decodedReversiblePseudonym.length);
+        byte[] iv = extractIv(reversiblePseudonym);
+        byte[] cryptoText = Arrays.copyOfRange(reversiblePseudonym, deterministicPseudonymStrategy.getPseudonymLength(), reversiblePseudonym.length);
 
         Cipher cipher = getCipherInstance();
 
