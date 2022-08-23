@@ -1,15 +1,11 @@
 package co.worklytics.psoxy.rules.slack;
 
-import co.worklytics.psoxy.rules.Rules1;
 import co.worklytics.psoxy.rules.RuleSet;
 import co.worklytics.psoxy.rules.Rules2;
 import co.worklytics.psoxy.rules.Transform;
 import com.google.common.collect.ImmutableMap;
 
 import java.util.Map;
-
-import static co.worklytics.psoxy.rules.Rules1.Rule;
-
 /**
  * Prebuilt sanitization rules for Slack Discovery API responses
  */

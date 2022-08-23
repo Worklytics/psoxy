@@ -1,8 +1,7 @@
 package co.worklytics.psoxy;
 
-import co.worklytics.psoxy.rules.Rules1;
+import co.worklytics.psoxy.rules.CsvRules;
 import co.worklytics.psoxy.storage.FileHandlerFactory;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.util.Lists;
 import com.google.cloud.secretmanager.v1.AccessSecretVersionResponse;
 import com.google.cloud.secretmanager.v1.SecretManagerServiceClient;
@@ -21,7 +20,6 @@ public class Handler {
 
     }
 
-    @Inject ObjectMapper jsonMapper;
     @Inject SanitizerFactory sanitizerFactory;
     @Inject
     FileHandlerFactory fileHandlerStrategy;
@@ -44,14 +42,12 @@ public class Handler {
             options.pseudonymizationSalt(config.getPseudonymizationSalt());
         }
 
-        options.rules(Rules1.builder()
-                .pseudonymization(Rules1.Rule.builder()
-                        .csvColumns(Lists.newArrayList(config.getColumnsToPseudonymize()))
-                        .build())
-                .redaction(Rules1.Rule.builder()
-                        .csvColumns(Lists.newArrayList(config.getColumnsToRedact()))
-                        .build())
-                .build());
+        CsvRules rules = CsvRules.builder()
+                .columnsToPseudonymize(Lists.newArrayList(config.getColumnsToPseudonymize()))
+                .columnsToRedact(Lists.newArrayList(config.getColumnsToRedact()))
+                .build();
+
+        options.rules(rules);
 
         Sanitizer sanitizer = sanitizerFactory.create(options.build());
 

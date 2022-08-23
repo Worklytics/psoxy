@@ -7,8 +7,6 @@ import com.google.common.collect.ImmutableMap;
 
 import java.util.Map;
 
-import static co.worklytics.psoxy.rules.Rules1.Rule;
-
 /**
  * Prebuilt sanitization rules for Zoom API responses
  */
