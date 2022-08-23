@@ -3,6 +3,7 @@ package co.worklytics.psoxy.rules;
 import com.google.common.base.Preconditions;
 import com.jayway.jsonpath.JsonPath;
 import lombok.NonNull;
+import org.apache.commons.lang3.NotImplementedException;
 
 import javax.annotation.Nullable;
 import java.util.List;
