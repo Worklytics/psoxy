@@ -15,6 +15,8 @@ public class Validator {
             validate((CsvRules) rules);
         } else if (rules instanceof Rules2) {
             validate((Rules2) rules );
+        } else {
+          throw new NotImplementedException("Set not supported!");
         }
     }
 
