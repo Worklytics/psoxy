@@ -14,6 +14,10 @@ import lombok.Value;
 @Builder(toBuilder = true)
 public class Pseudonym {
 
+    //TODO: really a property of the hash alg
+    public static final int HASH_SIZE_BYTES = 32; //SHA-256
+
+
     /**
      * a 'domain' for the identifier, which may be returned plain or may itself be tokenized
      *
@@ -25,13 +29,15 @@ public class Pseudonym {
 
     /**
      * deterministically encrypted; based on configuration, may be reversible for some period
+     *
+     * NOTE: should not be expected to be cryptographically secure; while difficult to reverse
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonProperty("e")
     byte[] encrypted;
 
     /**
-     * cryptographic hash of canonicalized identifier
+     * SHA-256 hash of canonicalized identifier
      */
     @JsonProperty("h")
     byte[] hash;

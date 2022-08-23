@@ -1,5 +1,6 @@
 package com.avaulta.gateway.pseudonyms.impl;
 
+import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.pseudonyms.PseudonymizationStrategy;
 import lombok.Getter;
 import lombok.NonNull;
@@ -7,33 +8,46 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.apache.commons.codec.digest.DigestUtils;
 
-
 import javax.crypto.Cipher;
-import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.function.Function;
 
-//q: is this AES-SIV? https://www.rfc-editor.org/rfc/rfc5297
-//q: better to use a proper impl of AES-SIV?
-//  such as https://github.com/codahale/aes-gcm-siv
 
+/**
+ * AESGCM-based implementation of PseudonymizationStrategy
+ *
+ * pros v AES-CBC strategy:
+ *   - in theory, stronger encryption
+ *
+ * cons v AES-CBC strategy:
+ *   - longer output
+ *   - output of nondeterministic length for deterministic input
+ *   - repeated IV more of a concern; but bc we're using deterministic IV based on hash of original
+ *     plaintext,
+ *
+ * closer than AESCBCPseudonymizationStragety  to AESSIV
+ * see: https://www.rfc-editor.org/rfc/rfc5297
+ * q: better to use a proper impl of AES-SIV?
+ *     such as https://github.com/codahale/aes-gcm-siv
+ */
 @RequiredArgsConstructor
-public class PseudonymizationStrategyImpl implements PseudonymizationStrategy {
+public class AESGCMPseudonymizationStrategy implements PseudonymizationStrategy {
 
     @Getter
     final String salt;
     @Getter
     final SecretKeySpec encryptionKey;
 
-
+    static final int GCM_IV_LENGTH = 12;
+    static final int GCM_TAG_LENGTH = 16;
     static final int CIPHER_BLOCK_SIZE_BYTES = 16; //128-bits; AES uses 128-bit blocks, regardless of key-length
-    static final int PSEUDONYM_SIZE_BYTES = 32; //SHA-256
 
     @SneakyThrows
     Cipher getCipherInstance() {
-        return Cipher.getInstance("AES/CBC/PKCS5Padding");
+        return Cipher.getInstance("AES/GCM/NoPadding");
     }
 
 
@@ -64,9 +78,10 @@ public class PseudonymizationStrategyImpl implements PseudonymizationStrategy {
         // that individual using some identifier that cannot be used to identify the natural person
         // to which it refers absent some other data that we can reasonably expect to be secret
         // (eg, a lookup table mapping the identifiers to PII; or secret used to encrypt the PII).
-        IvParameterSpec ivParameter = new IvParameterSpec(extractIv(hash));
 
-        cipher.init(Cipher.ENCRYPT_MODE, getEncryptionKey(), ivParameter);
+        GCMParameterSpec gcmParameterSpec = new GCMParameterSpec(GCM_TAG_LENGTH * 8, extractIv(hash));
+
+        cipher.init(Cipher.ENCRYPT_MODE, getEncryptionKey(), gcmParameterSpec);
         byte[] ciphertext = cipher.doFinal(identifier.getBytes(StandardCharsets.UTF_8));
 
         return arrayConcat(hash, ciphertext);
@@ -81,7 +96,8 @@ public class PseudonymizationStrategyImpl implements PseudonymizationStrategy {
     }
 
     byte[] extractIv(byte[] hash) {
-        return Arrays.copyOfRange(hash, 0, CIPHER_BLOCK_SIZE_BYTES);
+       return Arrays.copyOfRange(hash, 0, GCM_IV_LENGTH);
+        //return Arrays.copyOfRange(hash, 0, CIPHER_BLOCK_SIZE_BYTES);
     }
 
     @SneakyThrows
@@ -89,10 +105,11 @@ public class PseudonymizationStrategyImpl implements PseudonymizationStrategy {
     public String getIdentifier(@NonNull byte[] decodedReversiblePseudonym) {
 
         byte[] iv = extractIv(decodedReversiblePseudonym);
-        byte[] cryptoText = Arrays.copyOfRange(decodedReversiblePseudonym, PSEUDONYM_SIZE_BYTES, decodedReversiblePseudonym.length);
+        byte[] cryptoText = Arrays.copyOfRange(decodedReversiblePseudonym, Pseudonym.HASH_SIZE_BYTES, decodedReversiblePseudonym.length);
 
         Cipher cipher = getCipherInstance();
-        cipher.init(Cipher.DECRYPT_MODE, getEncryptionKey(), new IvParameterSpec(iv));
+
+        cipher.init(Cipher.DECRYPT_MODE, getEncryptionKey(), new GCMParameterSpec(GCM_TAG_LENGTH * 8, iv));
 
         byte[] plain = cipher.doFinal(cryptoText);
         return new String(plain, StandardCharsets.UTF_8);

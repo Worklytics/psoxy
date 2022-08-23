@@ -10,7 +10,7 @@ import co.worklytics.psoxy.storage.impl.FileHandlerFactoryImpl;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.PseudonymizationStrategy;
 import com.avaulta.gateway.pseudonyms.impl.Base64UrlWithoutPaddingPseudonymEncoder;
-import com.avaulta.gateway.pseudonyms.impl.PseudonymizationStrategyImpl;
+import com.avaulta.gateway.pseudonyms.impl.AESCBCPseudonymizationStrategy;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.api.client.http.HttpContent;
@@ -24,7 +24,6 @@ import dagger.Provides;
 
 
 import javax.crypto.spec.SecretKeySpec;
-import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.util.Base64;
@@ -132,7 +131,7 @@ public class PsoxyModule {
         String keyFromConfig = config.getConfigPropertyOrError(ProxyConfigProperty.PSOXY_ENCRYPTION_KEY);
         SecretKeySpec key = new SecretKeySpec(Base64.getDecoder().decode(keyFromConfig), "AES");
 
-        return new PseudonymizationStrategyImpl(salt, key);
+        return new AESCBCPseudonymizationStrategy(salt, key);
     }
 
     @Provides @Singleton

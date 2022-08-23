@@ -1,10 +1,9 @@
 package com.avaulta.gateway.pseudonyms.impl;
 
+import com.avaulta.gateway.pseudonyms.Pseudonym;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.Arrays;
 import java.util.Base64;
@@ -16,9 +15,9 @@ import java.util.stream.IntStream;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
-class PseudonymizationStrategyImplTest {
+class AESCBCPseudonymizationStrategyTest {
 
-    PseudonymizationStrategyImpl pseudonymizationStrategy;
+    AESCBCPseudonymizationStrategy pseudonymizationStrategy;
 
     //base64url-encoding without padding
     Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
@@ -27,7 +26,7 @@ class PseudonymizationStrategyImplTest {
     @SneakyThrows
     @BeforeEach
     void setUp() {
-        pseudonymizationStrategy = new PseudonymizationStrategyImpl("salt", TestUtils.testKey());
+        pseudonymizationStrategy = new AESCBCPseudonymizationStrategy("salt", TestUtils.testKey());
     }
 
 
@@ -73,7 +72,7 @@ class PseudonymizationStrategyImplTest {
         IntStream.generate(() -> random.nextInt(1000000000)).limit(100).forEach(i -> {
             String pseudonym = new String(encoder.encode(pseudonymizationStrategy.getKeyedPseudonym("blah" + i, Function.identity())));
             assertEquals(
-                    PseudonymizationStrategyImpl.PSEUDONYM_SIZE_BYTES * 2, //hash + ciphertext + prefix
+                    Pseudonym.HASH_SIZE_BYTES + 32, //hash + ciphertext
                 pseudonym.length());
         });
     }
@@ -94,7 +93,7 @@ class PseudonymizationStrategyImplTest {
             assertEquals(43, new String(encoder.encode(pseudonym)).length());
 
             //32 bytes unencoded
-            assertEquals(PseudonymizationStrategyImpl.PSEUDONYM_SIZE_BYTES, pseudonym.length);
+            assertEquals(Pseudonym.HASH_SIZE_BYTES, pseudonym.length);
         });
     }
 

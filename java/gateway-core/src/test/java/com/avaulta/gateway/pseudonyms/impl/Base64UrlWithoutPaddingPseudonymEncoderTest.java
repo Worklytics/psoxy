@@ -15,12 +15,12 @@ public class Base64UrlWithoutPaddingPseudonymEncoderTest {
 
     Base64UrlWithoutPaddingPseudonymEncoder pseudonymEncoder = new Base64UrlWithoutPaddingPseudonymEncoder();
 
-    PseudonymizationStrategyImpl pseudonymizationStrategy;
+    AESCBCPseudonymizationStrategy pseudonymizationStrategy;
 
     @SneakyThrows
     @BeforeEach
     void setUp() {
-        pseudonymizationStrategy = new PseudonymizationStrategyImpl("salt", TestUtils.testKey());
+        pseudonymizationStrategy = new AESCBCPseudonymizationStrategy("salt", TestUtils.testKey());
     }
 
     @ParameterizedTest

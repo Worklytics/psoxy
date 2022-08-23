@@ -4,10 +4,11 @@ import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.PseudonymizationStrategy;
 
+import java.util.Arrays;
 import java.util.Base64;
-import java.util.function.Function;
 import java.util.regex.Pattern;
 
+//NOTE: coupled to fixed-length hash function
 public class Base64UrlWithoutPaddingPseudonymEncoder implements PseudonymEncoder {
 
 
@@ -64,7 +65,9 @@ public class Base64UrlWithoutPaddingPseudonymEncoder implements PseudonymEncoder
         }
 
         if (encodedPseudonym.startsWith(PREFIX)) {
-            builder.encrypted(decoder.decode(encodedPseudonym.substring(PREFIX.length())));
+            byte[] decoded = decoder.decode(encodedPseudonym.substring(PREFIX.length()));
+            builder.encrypted(decoded);
+            builder.hash(Arrays.copyOfRange(decoded, 0, Pseudonym.HASH_SIZE_BYTES));
         } else {
             builder.hash(decoder.decode(encodedPseudonym));
         }
