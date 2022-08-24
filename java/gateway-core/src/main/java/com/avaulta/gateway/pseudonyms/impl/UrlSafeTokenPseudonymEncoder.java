@@ -3,13 +3,13 @@ package com.avaulta.gateway.pseudonyms.impl;
 import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.ReversiblePseudonymStrategy;
+import org.apache.commons.lang3.RegExUtils;
 
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.regex.Pattern;
 
 //NOTE: coupled to fixed-length hash function
-public class Base64UrlWithoutPaddingPseudonymEncoder implements PseudonymEncoder {
+public class UrlSafeTokenPseudonymEncoder implements PseudonymEncoder {
 
 
 
@@ -25,7 +25,7 @@ public class Base64UrlWithoutPaddingPseudonymEncoder implements PseudonymEncoder
     static final String PREFIX = "p~";
 
     //length of base64-url-encoded IV + ciphertext
-    static final int KEYED_PSEUDONYM_LENGTH_WITHOUT_PREFIX = 43;
+    static final int REVERSIBLE_PSEUDONYM_LENGTH_WITHOUT_PREFIX = 43;
     private static final String DOMAIN_SEPARATOR = "@";
 
 
@@ -33,9 +33,9 @@ public class Base64UrlWithoutPaddingPseudonymEncoder implements PseudonymEncoder
     Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
     Base64.Decoder decoder = Base64.getUrlDecoder();
 
-    static final Pattern KEYED_PSEUDONYM_PATTERN =
+    static final Pattern REVERSIBLE_PSEUDONYM_PATTERN =
         //Pattern.compile("p\\~[a-zA-Z0-9_-]{43}"); //not clear to me why this doesn't work
-        Pattern.compile("p\\~[a-zA-Z0-9_-]{" + KEYED_PSEUDONYM_LENGTH_WITHOUT_PREFIX + ",}");
+        Pattern.compile(Pattern.quote(PREFIX) + "[a-zA-Z0-9_-]{" + REVERSIBLE_PSEUDONYM_LENGTH_WITHOUT_PREFIX + ",}");
 
     @Override
     public String encode(Pseudonym pseudonym) {
@@ -67,7 +67,6 @@ public class Base64UrlWithoutPaddingPseudonymEncoder implements PseudonymEncoder
         if (encodedPseudonym.startsWith(PREFIX)) {
             byte[] decoded = decoder.decode(encodedPseudonym.substring(PREFIX.length()));
             builder.reversible(decoded);
-            builder.hash(Arrays.copyOfRange(decoded, 0, Pseudonym.HASH_SIZE_BYTES));
         } else {
             builder.hash(decoder.decode(encodedPseudonym));
         }
@@ -77,7 +76,7 @@ public class Base64UrlWithoutPaddingPseudonymEncoder implements PseudonymEncoder
 
     @Override
     public String decodeAndReverseAllContainedKeyedPseudonyms(String containsKeyedPseudonyms, ReversiblePseudonymStrategy reidentifier) {
-        return KEYED_PSEUDONYM_PATTERN.matcher(containsKeyedPseudonyms).replaceAll(m -> {
+        return REVERSIBLE_PSEUDONYM_PATTERN.matcher(containsKeyedPseudonyms).replaceAll(m -> {
             String keyedPseudonym = m.group();
             //q: if this fails, just return 'm.group()' as-is?? to consider possibility that pattern matched
             // something it shouldn't

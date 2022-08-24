@@ -5,17 +5,19 @@ import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.pseudonyms.ReversiblePseudonymStrategy;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.function.Function;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class Base64UrlWithoutPaddingPseudonymEncoderTest {
+public class UrlSafeTokenPseudonymEncoderTest {
 
 
-    Base64UrlWithoutPaddingPseudonymEncoder pseudonymEncoder = new Base64UrlWithoutPaddingPseudonymEncoder();
+    UrlSafeTokenPseudonymEncoder pseudonymEncoder = new UrlSafeTokenPseudonymEncoder();
 
     ReversiblePseudonymStrategy pseudonymizationStrategy;
 
@@ -30,7 +32,26 @@ public class Base64UrlWithoutPaddingPseudonymEncoderTest {
             .key(TestUtils.testKey())
             .deterministicPseudonymStrategy(deterministicPseudonymStrategy)
             .build();
-  }
+    }
+
+    @Test
+    void roundtrip() {
+        String expected = "p~nVPSMYD7ZO_ptGIMJ65TAFo5_vVVQQ2af5Bfg7bW0Jq9JIOXfBWhts_zA5Ns0r4m";
+        String original = "blah";
+        Pseudonym pseudonym = Pseudonym.builder()
+            .reversible(pseudonymizationStrategy.getReversiblePseudonym(original, Function.identity()))
+            .build();
+
+        String encoded = pseudonymEncoder.encode(pseudonym);
+
+        assertEquals(expected, encoded);
+        assertArrayEquals(deterministicPseudonymStrategy.getPseudonym(original, Function.identity()), pseudonym.getHash());
+
+
+        Pseudonym decoded = pseudonymEncoder.decode(encoded);
+        assertArrayEquals(decoded.getHash(), pseudonym.getHash());
+        assertArrayEquals(decoded.getReversible(), pseudonym.getReversible());
+    }
 
     @ParameterizedTest
     @ValueSource(strings = {
@@ -46,11 +67,11 @@ public class Base64UrlWithoutPaddingPseudonymEncoderTest {
     })
     void reverseAll(String template) {
         String original = "blah";
-        String pseudonym =
+        String encodedPseudonym =
             pseudonymEncoder.encode(Pseudonym.builder()
-                .reversible(pseudonymizationStrategy.getReversiblePseudonym("blah", Function.identity())).build());
+                .reversible(pseudonymizationStrategy.getReversiblePseudonym(original, Function.identity())).build());
 
-        String r = pseudonymEncoder.decodeAndReverseAllContainedKeyedPseudonyms(String.format(template, pseudonym, pseudonym),
+        String r = pseudonymEncoder.decodeAndReverseAllContainedKeyedPseudonyms(String.format(template, encodedPseudonym, encodedPseudonym),
             pseudonymizationStrategy);
 
         assertEquals(String.format(template, original, original), r);
