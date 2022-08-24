@@ -22,11 +22,18 @@ import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import dagger.Module;
 import dagger.Provides;
+import lombok.extern.java.Log;
 
 
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.inject.Named;
 import javax.inject.Singleton;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
 import java.util.Base64;
 import java.util.Objects;
 import java.util.Optional;
@@ -37,6 +44,7 @@ import java.util.logging.Logger;
  * provides implementations for platform-independent dependencies of 'core' module
  *
  */
+@Log
 @Module
 public class PsoxyModule {
 
@@ -133,12 +141,18 @@ public class PsoxyModule {
     ReversibleTokenizationStrategy pseudonymizationStrategy(ConfigService config,
                                                             DeterministicTokenizationStrategy deterministicTokenizationStrategy) {
 
-        String keyFromConfig = config.getConfigPropertyOrError(ProxyConfigProperty.PSOXY_ENCRYPTION_KEY);
-        SecretKeySpec key = new SecretKeySpec(Base64.getDecoder().decode(keyFromConfig), "AES");
+        String salt = config.getConfigPropertyOrError(ProxyConfigProperty.PSOXY_SALT);
+        Optional<SecretKeySpec> keyFromConfig = config.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_ENCRYPTION_KEY)
+            .map(passkey -> AESReversibleTokenizationStrategy.aesKeyFromPassword(passkey, salt));
+        //q: do we need to support actual fully AES keys?
+
+        if (!keyFromConfig.isPresent()) {
+            log.warning("No value for PSOXY_ENCRYPTION_KEY; any transforms depending on it will fail!");
+        }
 
         return AESReversibleTokenizationStrategy.builder()
             .cipherSuite(AESReversibleTokenizationStrategy.CBC)
-            .key(key)
+            .key(keyFromConfig.orElse(null)) //null disables it, which is OK if transforms depending on this aren't used
             .deterministicTokenizationStrategy(deterministicTokenizationStrategy)
             .build();
     }

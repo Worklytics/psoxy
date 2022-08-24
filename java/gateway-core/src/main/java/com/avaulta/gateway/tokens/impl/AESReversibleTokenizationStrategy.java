@@ -5,11 +5,17 @@ import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
 import lombok.*;
 
 import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
+import java.security.NoSuchAlgorithmException;
 import java.security.spec.AlgorithmParameterSpec;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
 import java.util.Arrays;
 import java.util.function.Function;
 
@@ -44,6 +50,14 @@ public class AESReversibleTokenizationStrategy implements ReversibleTokenization
         Function<byte[], AlgorithmParameterSpec> getParameterSpecGenerator();
     }
 
+    @SneakyThrows
+    public static SecretKeySpec aesKeyFromPassword(String password, String salt) {
+        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+        KeySpec spec = new PBEKeySpec(password.toCharArray(), salt.getBytes(), 65536, 256);
+        SecretKey tmp = factory.generateSecret(spec);
+        return new SecretKeySpec(tmp.getEncoded(), "AES");
+    }
+
 
     @Builder
     @Value
@@ -71,6 +85,10 @@ public class AESReversibleTokenizationStrategy implements ReversibleTokenization
     @SneakyThrows
     @Override
     public byte[] getReversibleToken(@NonNull String identifier, Function<String, String> canonicalization) {
+        if (getKey() == null) {
+            throw new IllegalStateException("No key set on AESReversibleTokenizationStrategy");
+        }
+
         Cipher cipher = getCipherInstance();
 
         byte[] deterministicPseudonym = deterministicTokenizationStrategy.getToken(identifier, canonicalization);
@@ -92,6 +110,9 @@ public class AESReversibleTokenizationStrategy implements ReversibleTokenization
     @SneakyThrows
     @Override
     public String getOriginalDatum(@NonNull byte[] reversibleToken) {
+        if (getKey() == null) {
+            throw new IllegalStateException("No key set on AESReversibleTokenizationStrategy");
+        }
 
         byte[] cryptoText = Arrays.copyOfRange(reversibleToken, deterministicTokenizationStrategy.getTokenLength(), reversibleToken.length);
 
