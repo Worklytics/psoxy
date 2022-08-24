@@ -133,13 +133,13 @@ abstract public class RulesBaseTestCase {
                     new String(TestUtils.getData(getExampleDirectoryPath() + "/" + example.getPlainExampleFile()));
                 String sanitized = sanitize(example.getRequestUrl(), original);
 
-                String sanitizedFileName =
-                    example.getPlainExampleFile().replace(".json", "-sanitized.json");
+                String sanitizedFilepath = testSpec.getSanitizedExamplesDirectoryPath()
+                    .orElse(getExampleDirectoryPath() + "/sanitized") + "/" + example.getPlainExampleFile();
 
-                String expected = StringUtils.trim(new String(TestUtils.getData(testSpec.getSanitizedExamplesDirectoryPath().orElse(getExampleDirectoryPath()) + "/" + sanitizedFileName)));
+                String expected = StringUtils.trim(new String(TestUtils.getData(sanitizedFilepath )));
 
                 assertEquals(expected,
-                    StringUtils.trim(prettyPrintJson(sanitized)), sanitizedFileName + " does not match output");
+                    StringUtils.trim(prettyPrintJson(sanitized)), sanitizedFilepath + " does not match output");
             });
     }
 

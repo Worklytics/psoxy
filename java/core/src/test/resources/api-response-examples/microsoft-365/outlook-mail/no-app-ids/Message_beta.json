@@ -1,0 +1,58 @@
+{
+  "@odata.context": "https://graph.microsoft.com/beta/$metadata#users('48d31887-5fad-4d73-a9f5-3c356e68a038')/messages/$entity",
+  "@odata.etag": "W/\"CQAAABYAAAAiIsqMbYjsT5e/T7KzowPTAAQSDE1C\"",
+  "id": "AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OABGAAAAAAAiQ8W967B7TKBjgx9rVEURBwAiIsqMbYjsT5e-T7KzowPTAAAAAAEJAAAiIsqMbYjsT5e-T7KzowPTAAQSfAIWAAA=",
+  "createdDateTime": "2021-12-02T17:05:15Z",
+  "lastModifiedDateTime": "2021-12-02T17:10:19Z",
+  "changeKey": "CQAAABYAAAAiIsqMbYjsT5e/T7KzowPTAAQSDE1C",
+  "categories": [],
+  "receivedDateTime": "2021-12-02T17:05:17Z",
+  "sentDateTime": "2021-12-02T17:05:16Z",
+  "hasAttachments": false,
+  "internetMessageId": "<odspmicro-ReceivedShareActivity-83e408a0-3090-c000-a223-5c9cdb31eb2d-1e2b7fad-8afe-4902-9581-8c96a7047b6a-1e40858e-44e6-41d3-b8f3-ee9a29536577@RD00155DF87062>",
+  "subject": "Megan Bowen shared \"Pricing Guidelines for XT1000\" with you.",
+  "bodyPreview": "Megan Bowen shared a file with youHere's the document that Megan Bowen shared with you.        Pricing Guidelines for XT1000        This link will work for anyone.Open        Privacy Statement",
+  "importance": "normal",
+  "parentFolderId": "AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OAAuAAAAAAAiQ8W967B7TKBjgx9rVEURAQAiIsqMbYjsT5e-T7KzowPTAAAAAAEJAAA=",
+  "conversationId": "AAQkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OAAQABSf9W_i_01LsCsz0w-efyw=",
+  "conversationIndex": "AQHX557HFJ/1b6L7TUuwKzPTD95/LA==",
+  "isDeliveryReceiptRequested": false,
+  "isReadReceiptRequested": false,
+  "isRead": true,
+  "isDraft": false,
+  "webLink": "https://outlook.office365.com/owa/?ItemID=AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OABGAAAAAAAiQ8W967B7TKBjgx9rVEURBwAiIsqMbYjsT5e%2FT7KzowPTAAAAAAEJAAAiIsqMbYjsT5e%2FT7KzowPTAAQSfAIWAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
+  "inferenceClassification": "focused",
+  "unsubscribeData": [],
+  "unsubscribeEnabled": false,
+  "body": {
+    "contentType": "html",
+    "content": "<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"></head><body bgcolor=\"#f2f2f2\" style=\"margin:0; padding:0\"><style type=\"text/css\"><!--@font-face{font-family:\"Segoe UI\";font-weight:100;font-style:normal}@font-face{font-family:\"Segoe UI\";font-weight:300;font-style:normal}@font-face{font-family:\"Segoe UI\";font-weight:400;font-style:normal}@font-face{font-family:\"Segoe UI\";font-weight:600;font-style:normal}@media only screen and (max-width: 640px) {body{background-color:#ffffff}div.grey-bg-container{background-color:#ffffff}}@media only screen and (min-width: 640px) {.CommentMention-TextRow-rightColumn{width:52px!important}}.u-largeOnly{display:none!important}@media only screen and (min-width: 640px) {.u-smallOnly{display:none!important}.u-largeOnly{display:block!important}}@media only screen and (min-width: 640px) {.Sharing-main{padding:40px!important}}@media only screen and (max-width: 640px) {.NotificationHeader-icon{width:36px!important}.NotificationHeader-title{padding-left:28px!important;padding-right:28px!important}.NotificationHeader-title-text{font-size:20px!important;line-height:28px!important}}--></style><div align=\"center\" style=\"padding:32px 8px\"><table role=\"presentation\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"width:100%; margin:0 auto; max-width:640px; border:1px solid #c8c8c8; border-radius:8px; overflow:hidden; background-color:#ffffff\"><colgroup><col width=\"16\" style=\"width:2.5%\"><col width=\"608\" style=\"width:95%\"><col width=\"16\" style=\"width:2.5%\"></colgroup><tbody><tr><td colspan=\"3\" align=\"middle\" style=\"padding-top:36px; padding-right:36px; padding-left:36px\"><img width=\"40\" height=\"auto\" data-outlook-trace=\"F:0|T:1\" src=\"cid:d5ef2ab0-0c94-4a2d-94e9-670fe470fa94\" style=\"display:block\"> </td></tr><tr><td colspan=\"3\" align=\"center\" style=\"padding-top:20px; padding-right:36px; padding-left:36px; padding-bottom:36px\"><p style=\"color:#323130; font-size:24px; font-weight:600; line-height:32px; margin:0; max-width:400px; padding:0; text-align:center\">Megan Bowen shared a file with you </p></td></tr><tr><td colspan=\"3\" style=\"background-color:#f8f8f8; border-top:1px solid #dedede; padding:40px 20px 28px; text-align:center\"><p style=\"font-size:16px; color:#323130; margin:0px\">Here's the document that Megan Bowen shared with you. </p></td></tr><tr><td colspan=\"3\" align=\"center\" style=\"background-color:#f8f8f8\"><a href=\"https://m365x214355-my.sharepoint.com:443/:w:/g/personal/meganb_m365x214355_onmicrosoft_com/EYAHfdLZm3dNgY2Np1JTrGYBSSUIYDJsiSyvws3g45YiNA?e=4%3acj2D1V&amp;at=9\" aria-label=\"Pricing Guidelines for XT1000\" style=\"display:inline-block; text-decoration:none; color:#323130\"><table role=\"presentation\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" align=\"center\" style=\"width:100%; text-align:center; background:#ffffff\"><tbody><tr><td style=\"border-top:1px solid #d2d2d2; border-left:1px solid #d2d2d2; border-bottom:1px solid #d2d2d2; background:#ffffff; padding:20px 4px 20px 20px\"><img alt=\"icon\" height=\"auto\" width=\"32\" data-outlook-trace=\"F:0|T:1\" src=\"cid:826afddf-e309-4562-af79-c4c2992bf44c\" style=\"display:block; width:32px\"> </td><td style=\"border-top:1px solid #d2d2d2; border-bottom:1px solid #d2d2d2; border-right:1px solid #d2d2d2; background-color:#ffffff; font-size:16px; word-break:break-all; text-align:left; padding:20px 20px 20px 4px\">Pricing Guidelines for XT1000 </td></tr></tbody></table></a></td></tr><tr><td colspan=\"3\" align=\"center\" style=\"text-align:center; background-color:#f8f8f8\"><div style=\"display:inline-block\"><table role=\"presentation\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" align=\"center\" style=\"width:auto; height:20px\"><tbody><tr><td align=\"center\" style=\"height:20px; padding:24px 4px 20px 0px\"><img width=\"20\" height=\"20\" alt=\"permission globe icon\" data-outlook-trace=\"F:0|T:1\" src=\"cid:8c203475-8980-4c22-b253-2754b9fec7cf\"> </td><td style=\"font-size:12px; padding:20px 0px 20px; color:#323130\">This link will work for anyone. </td></tr></tbody></table></div></td></tr><tr><td colspan=\"3\" style=\"padding:0px 0px 32px 0px; height:40px; background-color:#f8f8f8; text-align:center; border-top:none; border-bottom:none\"><a href=\"https://m365x214355-my.sharepoint.com:443/:w:/g/personal/meganb_m365x214355_onmicrosoft_com/EYAHfdLZm3dNgY2Np1JTrGYBSSUIYDJsiSyvws3g45YiNA?e=4%3acj2D1V&amp;at=9\" style=\"background-color:#0078d4; border-color:#0078d4; border-radius:2px; border-style:solid; color:#ffffff; display:inline-block; font-size:16px; text-decoration:none; text-align:center; line-height:40px; width:168px\">Open </a></td></tr></tbody></table><table role=\"presentation\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"width:100%; margin:0 auto; max-width:640px; overflow:hidden\"><colgroup><col width=\"64\" style=\"width:10%\"><col width=\"256\" style=\"width:40%\"><col width=\"135\" style=\"width:21.09375%\"><col width=\"175\" style=\"width:27.34375%\"></colgroup><tbody><tr><td valign=\"top\" colspan=\"2\" style=\"vertical-align:top; height:18px; padding:16px\"><img width=\"84\" height=\"18\" alt=\"Microsoft logo\" data-outlook-trace=\"F:0|T:1\" src=\"cid:f44dd4b5-9176-4f81-aa71-76b067529a1a\" style=\"display:block\"> </td><td colspan=\"2\" style=\"font-size:12px; height:18px; line-height:18px; width:50%; color:#605e5c; text-align:right; padding:16px\"><span style=\"display:inline-block\"><a href=\"https://northcentralusr-notifyp.svc.ms:443/api/v2/tracking/method/Click?mi=joVAHuZE00G48-6aKVNldw&amp;tc=PrivacyStatement&amp;cs=f97d4ae4336b3342c9a937ee3f36e84e&amp;ru=https%3a%2f%2fprivacy.microsoft.com%2fprivacystatement%5c\" style=\"padding:0; margin:0; color:#605e5c\">Privacy Statement </a></span></td></tr></tbody></table></div><img aria-hidden=\"true\" role=\"presentation\" height=\"1\" width=\"1\" src=\"https://northcentralusr-notifyp.svc.ms:443/api/v2/tracking/method/View?mi=joVAHuZE00G48-6aKVNldw\"> </body></html>"
+  },
+  "sender": {
+    "emailAddress": {
+      "name": "Megan Bowen",
+      "address": "MeganB@M365x214355.onmicrosoft.com"
+    }
+  },
+  "from": {
+    "emailAddress": {
+      "name": "Megan Bowen",
+      "address": "MeganB@M365x214355.onmicrosoft.com"
+    }
+  },
+  "toRecipients": [
+    {
+      "emailAddress": {
+        "name": "Alex Wilber",
+        "address": "AlexW@M365x214355.onmicrosoft.com"
+      }
+    }
+  ],
+  "ccRecipients": [],
+  "bccRecipients": [],
+  "replyTo": [],
+  "mentionsPreview": null,
+  "flag": {
+    "flagStatus": "notFlagged"
+  }
+}
