@@ -11,7 +11,7 @@ import com.avaulta.gateway.pseudonyms.DeterministicPseudonymStrategy;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.ReversiblePseudonymStrategy;
 import com.avaulta.gateway.pseudonyms.impl.AESReversiblePseudonymStrategy;
-import com.avaulta.gateway.pseudonyms.impl.Base64UrlWithoutPaddingPseudonymEncoder;
+import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.impl.Sha256DeterministicPseudonymStrategy;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -145,7 +145,8 @@ public class PsoxyModule {
     }
 
     @Provides @Singleton
-    PseudonymEncoder pseudonymEncoder() {
-        return new Base64UrlWithoutPaddingPseudonymEncoder();
+    UrlSafeTokenPseudonymEncoder urlSafeTokenPseudonymEncoder() {
+        return new UrlSafeTokenPseudonymEncoder();
     }
+
 }

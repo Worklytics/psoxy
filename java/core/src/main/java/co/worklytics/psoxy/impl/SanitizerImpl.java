@@ -1,11 +1,12 @@
 package co.worklytics.psoxy.impl;
 
 import co.worklytics.psoxy.*;
-import co.worklytics.psoxy.rules.RuleSet;
 import co.worklytics.psoxy.rules.Rules2;
 import co.worklytics.psoxy.rules.Transform;
 import co.worklytics.psoxy.utils.URLUtils;
 import com.avaulta.gateway.pseudonyms.*;
+import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
+import com.avaulta.gateway.pseudonyms.impl.JsonPseudonymEncoder;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.jayway.jsonpath.Configuration;
@@ -70,16 +71,7 @@ public class SanitizerImpl implements Sanitizer {
     @Inject
     DeterministicPseudonymStrategy deterministicPseudonymStrategy;
     @Inject
-    PseudonymEncoder pseudonymEncoder;
-
-    List<JsonPath> applicablePaths(@NonNull List<Pair<Pattern, List<JsonPath>>> rules,
-                                   @NonNull String relativeUrl) {
-        return rules.stream()
-            .filter(compiled -> compiled.getKey().asMatchPredicate().test(relativeUrl))
-            .map(Pair::getValue)
-            .flatMap(List::stream)
-            .collect(Collectors.toList());
-    }
+    UrlSafeTokenPseudonymEncoder urlSafePseudonymEncoder;
 
     List<Pattern> getCompiledAllowedEndpoints() {
         if (compiledAllowedEndpoints == null) {
@@ -274,7 +266,6 @@ public class SanitizerImpl implements Sanitizer {
         }
     }
 
-
     public PseudonymizedIdentity pseudonymize(Object value) {
         return pseudonymize(value, Transform.Pseudonymize.builder().build());
     }
@@ -282,16 +273,15 @@ public class SanitizerImpl implements Sanitizer {
     public MapFunction getPseudonymize(Transform.Pseudonymize transformOptions) {
         return (Object s, Configuration configuration) -> {
             PseudonymizedIdentity pseudonymizedIdentity = pseudonymize(s, transformOptions);
-
-            if (transformOptions.getIncludeReversible() && s != null) {
-                Preconditions.checkArgument(s instanceof String, "encryption only supported for string values");
-                Function<String, String> canonicalization = duckTypesAsEmails(s) ? this::emailCanonicalization : Function.identity();
-                pseudonymizedIdentity.setReversible(
-                    pseudonymEncoder.encode(Pseudonym.builder()
-                        .reversible(reversiblePseudonymStrategy.getReversiblePseudonym((String) s, canonicalization))
-                        .build()));
+            if (transformOptions.getEncoding() == PseudonymEncoder.Implementations.JSON) {
+                return configuration.jsonProvider().toJson(pseudonymizedIdentity);
+            } else if (transformOptions.getEncoding() == PseudonymEncoder.Implementations.URL_SAFE_TOKEN) {
+                //TODO: exploits that this was already encoded with UrlSafeTokenPseudonymEncoder
+                return pseudonymizedIdentity.getReversible();
+            } else {
+                throw new RuntimeException("Unsupported pseudonym implementation: " + getConfigurationOptions().getPseudonymImplementation());
             }
-            return configuration.jsonProvider().toJson(pseudonymizedIdentity);
+
         };
     }
 
@@ -345,7 +335,7 @@ public class SanitizerImpl implements Sanitizer {
                configurationOptions.getPseudonymizationSalt(), asLegacyScope(scope)));
         } else if (getConfigurationOptions().getPseudonymImplementation() == PseudonymImplementation.DEFAULT) {
 
-           builder.hash(pseudonymEncoder.encode(
+           builder.hash(urlSafePseudonymEncoder.encode(
                Pseudonym.builder()
                    .hash(deterministicPseudonymStrategy.getPseudonym(value.toString(), canonicalization))
                    .build()));
@@ -355,7 +345,7 @@ public class SanitizerImpl implements Sanitizer {
         }
 
         if (transformOptions.getIncludeReversible()) {
-            builder.reversible(pseudonymEncoder.encode(
+            builder.reversible(urlSafePseudonymEncoder.encode(
                 Pseudonym.builder()
                     .reversible(reversiblePseudonymStrategy.getReversiblePseudonym(value.toString(), canonicalization))
                     .domain(domain)

@@ -1,6 +1,5 @@
 package co.worklytics.psoxy;
 
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
@@ -58,5 +57,4 @@ public class PseudonymizedIdentity {
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     String reversible;
-
 }

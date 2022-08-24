@@ -1,5 +1,7 @@
 package co.worklytics.psoxy.rules;
 
+import com.avaulta.gateway.pseudonyms.Pseudonym;
+import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -178,6 +180,13 @@ public abstract class Transform {
         @Builder.Default
         Boolean includeReversible = false;
 
+        /**
+         * how to encode to the resulting pseudonym
+         */
+        @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+        @Builder.Default
+        PseudonymEncoder.Implementations encoding = PseudonymEncoder.Implementations.JSON;
+
         public static Pseudonymize ofPaths(String... jsonPaths) {
             return Pseudonymize.builder().jsonPaths(Arrays.asList(jsonPaths)).build();
         }
@@ -190,9 +199,12 @@ public abstract class Transform {
                 .fields(new ArrayList<>(this.fields))
                 .build();
         }
+
+
     }
 
 
     //TODO: can we implement abstract portion of this somehow??
     public abstract Transform clone();
+
 }

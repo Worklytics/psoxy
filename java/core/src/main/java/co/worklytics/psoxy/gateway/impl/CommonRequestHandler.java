@@ -10,6 +10,7 @@ import co.worklytics.psoxy.utils.ComposedHttpRequestInitializer;
 import co.worklytics.psoxy.utils.GzipedContentHttpRequestInitializer;
 import co.worklytics.psoxy.utils.URLUtils;
 import com.avaulta.gateway.pseudonyms.ReversiblePseudonymStrategy;
+import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequestFactory;
@@ -52,7 +53,7 @@ public class CommonRequestHandler {
     @Inject HealthCheckRequestHandler healthCheckRequestHandler;
     @Inject
     ReversiblePseudonymStrategy reversiblePseudonymStrategy;
-    @Inject PseudonymEncoder pseudonymEncoder;
+    @Inject UrlSafeTokenPseudonymEncoder pseudonymEncoder;
 
     private volatile Sanitizer sanitizer;
     private final Object $writeLock = new Object[0];

@@ -3,8 +3,6 @@ package com.avaulta.gateway.pseudonyms.impl;
 import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.ReversiblePseudonymStrategy;
-import org.apache.commons.lang3.RegExUtils;
-
 import java.util.Base64;
 import java.util.regex.Pattern;
 
@@ -74,8 +72,16 @@ public class UrlSafeTokenPseudonymEncoder implements PseudonymEncoder {
         return builder.build();
     }
 
-    @Override
-    public String decodeAndReverseAllContainedKeyedPseudonyms(String containsKeyedPseudonyms, ReversiblePseudonymStrategy reidentifier) {
+    /**
+     * returns string after reversing all keyed pseudonyms created with this
+     * PseudonymizationStrategy that it contains (if any)
+     *
+     * @param containsKeyedPseudonyms string that may contain keyed pseudonyms
+     * @param reidentifier             function to reverse keyed pseudonym
+     * @return string with all keyed pseudonyms it contains, if any, reversed to originals
+     */
+    public String decodeAndReverseAllContainedKeyedPseudonyms(String containsKeyedPseudonyms,
+                                                              ReversiblePseudonymStrategy reidentifier) {
         return REVERSIBLE_PSEUDONYM_PATTERN.matcher(containsKeyedPseudonyms).replaceAll(m -> {
             String keyedPseudonym = m.group();
             //q: if this fails, just return 'm.group()' as-is?? to consider possibility that pattern matched

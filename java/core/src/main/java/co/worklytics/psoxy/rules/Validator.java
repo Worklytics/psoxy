@@ -1,5 +1,6 @@
 package co.worklytics.psoxy.rules;
 
+import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.google.common.base.Preconditions;
 import com.jayway.jsonpath.JsonPath;
 import lombok.NonNull;
@@ -15,9 +16,9 @@ public class Validator {
         if (rules instanceof CsvRules) {
             validate((CsvRules) rules);
         } else if (rules instanceof Rules2) {
-            validate((Rules2) rules );
+            validate((Rules2) rules);
         } else {
-          throw new NotImplementedException("Set not supported!");
+          throw new NotImplementedException("Set not supported: " + rules.getClass().getSimpleName());
         }
     }
 
@@ -42,6 +43,13 @@ public class Validator {
                 throw new Error("JsonPath failed to compile: " + p, e);
             }
         });
+
+        if (transform instanceof Transform.Pseudonymize) {
+            if (((Transform.Pseudonymize) transform).getEncoding() == PseudonymEncoder.Implementations.URL_SAFE_TOKEN
+                && ((Transform.Pseudonymize) transform).getIncludeOriginal()) {
+                throw new Error("cannot serialize output of Pseudonymize to URL_SAFE_TOKEN if including original");
+            }
+        }
     }
 
 }

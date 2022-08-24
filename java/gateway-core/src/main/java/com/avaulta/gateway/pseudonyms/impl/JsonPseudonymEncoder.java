@@ -24,11 +24,5 @@ public class JsonPseudonymEncoder implements PseudonymEncoder {
     public Pseudonym decode(String pseudonym) {
         return objectMapper.readerFor(Pseudonym.class).readValue(pseudonym);
     }
-
-    @Override
-    public String decodeAndReverseAllContainedKeyedPseudonyms(String containsKeyedPseudonyms, ReversiblePseudonymStrategy reidentifier) {
-        //q: can we support this? very tricky regex to search for nested, possibly escaped, json strings
-        throw new NotImplementedException();
-    }
 }
 
