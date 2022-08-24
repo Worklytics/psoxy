@@ -1,4 +1,5 @@
 {
+  "@odata.context":"https://graph.microsoft.com/beta/$metadata#users('48d31887-5fad-4d73-a9f5-3c356e68a038')/events/$entity",
   "@odata.etag":"W/\"IiLKjG2I7E+Xv0+ys6MD0wAEDgUUPw==\"",
   "id":"AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OABGAAAAAAAiQ8W967B7TKBjgx9rVEURBwAiIsqMbYjsT5e-T7KzowPTAAAAAAENAAAiIsqMbYjsT5e-T7KzowPTAAAa_WKzAAA=",
   "createdDateTime":"2017-09-08T06:00:28.8891194Z",
@@ -8,7 +9,7 @@
   "transactionId":null,
   "originalStartTimeZone":"UTC",
   "originalEndTimeZone":"UTC",
-  "iCalUId":"040000008200E00074C5B7101A82E008000000005AFEAAB16728D30100000000000000001000000074AE946A36A51F4193FBB4912FCA5C46",
+  "uid":"040000008200E00074C5B7101A82E008000000005AFEAAB16728D30100000000000000001000000074AE946A36A51F4193FBB4912FCA5C46",
   "reminderMinutesBeforeStart":15,
   "isReminderOn":true,
   "hasAttachments":false,
@@ -108,5 +109,7 @@
       "address":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"b1t6Po2UV5Q_31fdQ_31OFxhADvhBvOcNv7bj1MPrAI\"}"
     }
   },
-  "onlineMeeting":null
+  "onlineMeeting":null,
+  "calendar@odata.associationLink":"https://graph.microsoft.com/beta/users('48d31887-5fad-4d73-a9f5-3c356e68a038')/calendars('AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OAAuAAAAAAAiQ8W967B7TKBjgx9rVEURAQAiIsqMbYjsT5e-T7KzowPTAAAAAAENAAA=')/$ref",
+  "calendar@odata.navigationLink":"https://graph.microsoft.com/beta/users('48d31887-5fad-4d73-a9f5-3c356e68a038')/calendars('AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OAAuAAAAAAAiQ8W967B7TKBjgx9rVEURAQAiIsqMbYjsT5e-T7KzowPTAAAAAAENAAA=')"
 }

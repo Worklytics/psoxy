@@ -1,7 +1,9 @@
 package co.worklytics.psoxy.rules.msft;
 
 import co.worklytics.psoxy.rules.Rules2;
+import com.google.common.collect.Streams;
 import lombok.Getter;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -23,6 +25,15 @@ public class CalendarTests extends DirectoryTests {
 
     @Getter
     final String yamlSerializationFilepath = "microsoft-365/outlook-cal";
+
+
+    @BeforeEach
+    public void setTestSpec() {
+        this.setTestSpec(RulesTestSpec.builder()
+            .yamlSerializationFilePath("google-workspace/directory_no-app-ids")
+            .sanitizedExamplesDirectoryPath("api-response-examples/microsoft-365/outlook-cal/sanitized")
+            .build());
+    }
 
 
     @ParameterizedTest
@@ -160,6 +171,19 @@ public class CalendarTests extends DirectoryTests {
 
     @Override // rather than copy directory examples
     public Stream<InvocationExample> getExamples() {
-        return Stream.empty();
+        return Stream.of(
+            InvocationExample.of("https://graph.microsoft.com/beta/users/48d31887-5fad-4d73-a9f5-3c356e68a038/calendar/calendarView",
+                "CalendarView_beta.json"),
+            //InvocationExample.of("https://graph.microsoft.com/v1.0/users/48d31887-5fad-4d73-a9f5-3c356e68a038/calendar/calendarView",
+            //    "CalendarView_v1.0.json"),
+            InvocationExample.of("https://graph.microsoft.com/beta/users/48d31887-5fad-4d73-a9f5-3c356e68a038/events",
+                "Events_beta.json"),
+            InvocationExample.of("https://graph.microsoft.com/v1.0/users/48d31887-5fad-4d73-a9f5-3c356e68a038/events",
+                "Events_v1.0.json"),
+            InvocationExample.of("https://graph.microsoft.com/beta/users/48d31887-5fad-4d73-a9f5-3c356e68a038/events/asdfasdfas",
+                "Event_beta.json"),
+            InvocationExample.of("https://graph.microsoft.com/v1.0/users/48d31887-5fad-4d73-a9f5-3c356e68a038/events/asdfasdf",
+                "Event_v1.0.json")
+            );
     }
 }

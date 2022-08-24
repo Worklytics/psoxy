@@ -14,6 +14,7 @@ public class PrebuiltSanitizerRules {
 
     static final Transform.Tokenize TOKENIZE_ODATA_LINKS = Transform.Tokenize.builder()
         .jsonPath("$.['@odata.nextLink', '@odata.prevLink']")
+        .regex("^https://graph.microsoft.com/(.*)$")
         .build();
     static final Transform REDACT_ODATA_CONTEXT = Transform.Redact.builder()
         .jsonPath("$.['@odata.context']")
@@ -185,15 +186,13 @@ public class PrebuiltSanitizerRules {
             .build()
     );
 
-
-
     static final Transform REDACT_CALENDAR_ODATA_LINKS =
         Transform.Redact.builder()
             .jsonPath("$..['calendar@odata.associationLink', 'calendar@odata.navigationLink']")
             .build();
 
-
     static final Rules2 OUTLOOK_CALENDAR_NO_APP_IDS = OUTLOOK_CALENDAR
+        .withTransformByEndpoint(OUTLOOK_MAIL_PATH_REGEX_MAILBOX_SETTINGS, REDACT_ODATA_CONTEXT)
         .withTransformByEndpoint(OUTLOOK_CALENDAR_PATH_REGEX_EVENTS, TOKENIZE_ODATA_LINKS,
             REDACT_ODATA_CONTEXT,
             REDACT_CALENDAR_ODATA_LINKS)

@@ -1,4 +1,5 @@
 {
+  "@odata.context":"https://graph.microsoft.com/beta/$metadata#users('48d31887-5fad-4d73-a9f5-3c356e68a038')/events",
   "value":[
     {
       "@odata.etag":"W/\"IiLKjG2I7E+Xv0+ys6MD0wAEDgUUPw==\"",
@@ -110,7 +111,9 @@
           "address":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"b1t6Po2UV5Q_31fdQ_31OFxhADvhBvOcNv7bj1MPrAI\"}"
         }
       },
-      "onlineMeeting":null
+      "onlineMeeting":null,
+      "calendar@odata.associationLink":"https://graph.microsoft.com/beta/users('48d31887-5fad-4d73-a9f5-3c356e68a038')/calendars('AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OABGAAAAAAAiQ8W967B7TKBjgx9rVEURBwAiIsqMbYjsT5e-T7KzowPTAAAAAAEGAAAiIsqMbYjsT5e-T7KzowPTAAABuC35AAA=')/$ref",
+      "calendar@odata.navigationLink":"https://graph.microsoft.com/beta/users('48d31887-5fad-4d73-a9f5-3c356e68a038')/calendars('AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OABGAAAAAAAiQ8W967B7TKBjgx9rVEURBwAiIsqMbYjsT5e-T7KzowPTAAAAAAEGAAAiIsqMbYjsT5e-T7KzowPTAAABuC35AAA=')"
     },
     {
       "@odata.etag":"W/\"IiLKjG2I7E+Xv0+ys6MD0wAD/jHlvA==\"",
@@ -221,7 +224,9 @@
           "address":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"b1t6Po2UV5Q_31fdQ_31OFxhADvhBvOcNv7bj1MPrAI\"}"
         }
       },
-      "onlineMeeting":null
+      "onlineMeeting":null,
+      "calendar@odata.associationLink":"https://graph.microsoft.com/beta/users('48d31887-5fad-4d73-a9f5-3c356e68a038')/calendars('AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OABGAAAAAAAiQ8W967B7TKBjgx9rVEURBwAiIsqMbYjsT5e-T7KzowPTAAAAAAEGAAAiIsqMbYjsT5e-T7KzowPTAAABuC35AAA=')/$ref",
+      "calendar@odata.navigationLink":"https://graph.microsoft.com/beta/users('48d31887-5fad-4d73-a9f5-3c356e68a038')/calendars('AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OABGAAAAAAAiQ8W967B7TKBjgx9rVEURBwAiIsqMbYjsT5e-T7KzowPTAAAAAAEGAAAiIsqMbYjsT5e-T7KzowPTAAABuC35AAA=')"
     },
     {
       "@odata.etag":"W/\"IiLKjG2I7E+Xv0+ys6MD0wAEHja7TQ==\"",
@@ -332,7 +337,9 @@
           "address":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"b1t6Po2UV5Q_31fdQ_31OFxhADvhBvOcNv7bj1MPrAI\"}"
         }
       },
-      "onlineMeeting":null
+      "onlineMeeting":null,
+      "calendar@odata.associationLink":"https://graph.microsoft.com/beta/users('48d31887-5fad-4d73-a9f5-3c356e68a038')/calendars('AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OABGAAAAAAAiQ8W967B7TKBjgx9rVEURBwAiIsqMbYjsT5e-T7KzowPTAAAAAAEGAAAiIsqMbYjsT5e-T7KzowPTAAABuC35AAA=')/$ref",
+      "calendar@odata.navigationLink":"https://graph.microsoft.com/beta/users('48d31887-5fad-4d73-a9f5-3c356e68a038')/calendars('AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OABGAAAAAAAiQ8W967B7TKBjgx9rVEURBwAiIsqMbYjsT5e-T7KzowPTAAAAAAEGAAAiIsqMbYjsT5e-T7KzowPTAAABuC35AAA=')"
     },
     {
       "@odata.etag":"W/\"IiLKjG2I7E+Xv0+ys6MD0wAEDgUURA==\"",
@@ -443,7 +450,9 @@
           "address":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"OCGp667Apf269dEx0x1gBLrxYyQP.nu4GENorzKW5M8\"}"
         }
       },
-      "onlineMeeting":null
+      "onlineMeeting":null,
+      "calendar@odata.associationLink":"https://graph.microsoft.com/beta/users('48d31887-5fad-4d73-a9f5-3c356e68a038')/calendars('AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OABGAAAAAAAiQ8W967B7TKBjgx9rVEURBwAiIsqMbYjsT5e-T7KzowPTAAAAAAEGAAAiIsqMbYjsT5e-T7KzowPTAAABuC35AAA=')/$ref",
+      "calendar@odata.navigationLink":"https://graph.microsoft.com/beta/users('48d31887-5fad-4d73-a9f5-3c356e68a038')/calendars('AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OABGAAAAAAAiQ8W967B7TKBjgx9rVEURBwAiIsqMbYjsT5e-T7KzowPTAAAAAAEGAAAiIsqMbYjsT5e-T7KzowPTAAABuC35AAA=')"
     },
     {
       "@odata.etag":"W/\"IiLKjG2I7E+Xv0+ys6MD0wAEG08Glg==\"",
@@ -554,7 +563,9 @@
           "address":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"OCGp667Apf269dEx0x1gBLrxYyQP.nu4GENorzKW5M8\"}"
         }
       },
-      "onlineMeeting":null
+      "onlineMeeting":null,
+      "calendar@odata.associationLink":"https://graph.microsoft.com/beta/users('48d31887-5fad-4d73-a9f5-3c356e68a038')/calendars('AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OABGAAAAAAAiQ8W967B7TKBjgx9rVEURBwAiIsqMbYjsT5e-T7KzowPTAAAAAAEGAAAiIsqMbYjsT5e-T7KzowPTAAABuC35AAA=')/$ref",
+      "calendar@odata.navigationLink":"https://graph.microsoft.com/beta/users('48d31887-5fad-4d73-a9f5-3c356e68a038')/calendars('AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OABGAAAAAAAiQ8W967B7TKBjgx9rVEURBwAiIsqMbYjsT5e-T7KzowPTAAAAAAEGAAAiIsqMbYjsT5e-T7KzowPTAAABuC35AAA=')"
     },
     {
       "@odata.etag":"W/\"IiLKjG2I7E+Xv0+ys6MD0wAEGZG+ng==\"",
@@ -665,7 +676,9 @@
           "address":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"OCGp667Apf269dEx0x1gBLrxYyQP.nu4GENorzKW5M8\"}"
         }
       },
-      "onlineMeeting":null
+      "onlineMeeting":null,
+      "calendar@odata.associationLink":"https://graph.microsoft.com/beta/users('48d31887-5fad-4d73-a9f5-3c356e68a038')/calendars('AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OABGAAAAAAAiQ8W967B7TKBjgx9rVEURBwAiIsqMbYjsT5e-T7KzowPTAAAAAAEGAAAiIsqMbYjsT5e-T7KzowPTAAABuC35AAA=')/$ref",
+      "calendar@odata.navigationLink":"https://graph.microsoft.com/beta/users('48d31887-5fad-4d73-a9f5-3c356e68a038')/calendars('AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OABGAAAAAAAiQ8W967B7TKBjgx9rVEURBwAiIsqMbYjsT5e-T7KzowPTAAAAAAEGAAAiIsqMbYjsT5e-T7KzowPTAAABuC35AAA=')"
     },
     {
       "@odata.etag":"W/\"IiLKjG2I7E+Xv0+ys6MD0wAEFyBHXg==\"",
@@ -776,7 +789,9 @@
           "address":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"OCGp667Apf269dEx0x1gBLrxYyQP.nu4GENorzKW5M8\"}"
         }
       },
-      "onlineMeeting":null
+      "onlineMeeting":null,
+      "calendar@odata.associationLink":"https://graph.microsoft.com/beta/users('48d31887-5fad-4d73-a9f5-3c356e68a038')/calendars('AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OABGAAAAAAAiQ8W967B7TKBjgx9rVEURBwAiIsqMbYjsT5e-T7KzowPTAAAAAAEGAAAiIsqMbYjsT5e-T7KzowPTAAABuC35AAA=')/$ref",
+      "calendar@odata.navigationLink":"https://graph.microsoft.com/beta/users('48d31887-5fad-4d73-a9f5-3c356e68a038')/calendars('AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OABGAAAAAAAiQ8W967B7TKBjgx9rVEURBwAiIsqMbYjsT5e-T7KzowPTAAAAAAEGAAAiIsqMbYjsT5e-T7KzowPTAAABuC35AAA=')"
     },
     {
       "@odata.etag":"W/\"IiLKjG2I7E+Xv0+ys6MD0wAEG08Gmw==\"",
@@ -887,7 +902,9 @@
           "address":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"OCGp667Apf269dEx0x1gBLrxYyQP.nu4GENorzKW5M8\"}"
         }
       },
-      "onlineMeeting":null
+      "onlineMeeting":null,
+      "calendar@odata.associationLink":"https://graph.microsoft.com/beta/users('48d31887-5fad-4d73-a9f5-3c356e68a038')/calendars('AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OABGAAAAAAAiQ8W967B7TKBjgx9rVEURBwAiIsqMbYjsT5e-T7KzowPTAAAAAAEGAAAiIsqMbYjsT5e-T7KzowPTAAABuC35AAA=')/$ref",
+      "calendar@odata.navigationLink":"https://graph.microsoft.com/beta/users('48d31887-5fad-4d73-a9f5-3c356e68a038')/calendars('AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OABGAAAAAAAiQ8W967B7TKBjgx9rVEURBwAiIsqMbYjsT5e-T7KzowPTAAAAAAEGAAAiIsqMbYjsT5e-T7KzowPTAAABuC35AAA=')"
     },
     {
       "@odata.etag":"W/\"IiLKjG2I7E+Xv0+ys6MD0wADW1wcFA==\"",
@@ -1018,7 +1035,9 @@
           "address":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"0apSnpkWH_FQbFZfHXz5lJ_r2ueVi9cGLvVi5MqNpJk\"}"
         }
       },
-      "onlineMeeting":null
+      "onlineMeeting":null,
+      "calendar@odata.associationLink":"https://graph.microsoft.com/beta/users('48d31887-5fad-4d73-a9f5-3c356e68a038')/calendars('AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OABGAAAAAAAiQ8W967B7TKBjgx9rVEURBwAiIsqMbYjsT5e-T7KzowPTAAAAAAEGAAAiIsqMbYjsT5e-T7KzowPTAAABuC35AAA=')/$ref",
+      "calendar@odata.navigationLink":"https://graph.microsoft.com/beta/users('48d31887-5fad-4d73-a9f5-3c356e68a038')/calendars('AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OABGAAAAAAAiQ8W967B7TKBjgx9rVEURBwAiIsqMbYjsT5e-T7KzowPTAAAAAAEGAAAiIsqMbYjsT5e-T7KzowPTAAABuC35AAA=')"
     },
     {
       "@odata.etag":"W/\"IiLKjG2I7E+Xv0+ys6MD0wADW1wcFg==\"",
@@ -1149,8 +1168,10 @@
           "address":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"0apSnpkWH_FQbFZfHXz5lJ_r2ueVi9cGLvVi5MqNpJk\"}"
         }
       },
-      "onlineMeeting":null
+      "onlineMeeting":null,
+      "calendar@odata.associationLink":"https://graph.microsoft.com/beta/users('48d31887-5fad-4d73-a9f5-3c356e68a038')/calendars('AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OABGAAAAAAAiQ8W967B7TKBjgx9rVEURBwAiIsqMbYjsT5e-T7KzowPTAAAAAAEGAAAiIsqMbYjsT5e-T7KzowPTAAABuC35AAA=')/$ref",
+      "calendar@odata.navigationLink":"https://graph.microsoft.com/beta/users('48d31887-5fad-4d73-a9f5-3c356e68a038')/calendars('AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OABGAAAAAAAiQ8W967B7TKBjgx9rVEURBwAiIsqMbYjsT5e-T7KzowPTAAAAAAEGAAAiIsqMbYjsT5e-T7KzowPTAAABuC35AAA=')"
     }
   ],
-  "@odata.nextLink":"https://graph.microsoft.com/p~wWDFciM06d0m3Ed-rhQRwovaI4Ntjk48ohQ_pq2_A8IGZleiaTyx_eJtYc849j4zaG4D7J9nqHQfcS0VuGtRijTNB3P1LHe0bfL5Cajgc-RocgKavrk9r2LtmoFsBgYgmyi-nbKBt-4ZUMmYW3JMnA"
+  "@odata.nextLink":"https://graph.microsoft.com/beta/users/48d31887-5fad-4d73-a9f5-3c356e68a038/events?%24top=10&%24skip=10"
 }
