@@ -16,6 +16,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Base64;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.mockito.Mockito.mock;
@@ -46,12 +47,14 @@ public class TestModules {
     }
 
 
+    //TODO: probably better to just inject filled AESReversibleEncryptionStrategy, rather than
+    // mocking ConfigService sufficiently such that regular provider can build one
     @SneakyThrows
     public static void withMockEncryptionKey(ConfigService config) {
 
-        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
-        KeySpec spec = new PBEKeySpec("secret".toCharArray(), "salt".getBytes(), 65536, 256);
-        SecretKey tmp = factory.generateSecret(spec);
+        //SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+        //KeySpec spec = new PBEKeySpec("secret".toCharArray(), "salt".getBytes(), 65536, 256);
+        //SecretKey tmp = factory.generateSecret(spec);
 
 
         //32-char (256-bit) encoded key
@@ -65,9 +68,11 @@ public class TestModules {
         //       try X trailing values for decryption??
         //    -- randomly generate salt in proxy, pass around in headers???
 
-        String key = new String(Base64.getEncoder().encode(tmp.getEncoded()));
+        //String key = new String(Base64.getEncoder().encode(tmp.getEncoded()));
 
-        when(config.getConfigPropertyOrError(ProxyConfigProperty.PSOXY_ENCRYPTION_KEY))
-            .thenReturn(key);
+        when(config.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_ENCRYPTION_KEY))
+            .thenReturn(Optional.of("secret"));
+        when(config.getConfigPropertyOrError(ProxyConfigProperty.PSOXY_SALT))
+            .thenReturn("salt");
     }
 }

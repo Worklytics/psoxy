@@ -1,8 +1,6 @@
 package co.worklytics.psoxy.rules.google;
 
 import co.worklytics.psoxy.rules.RuleSet;
-import co.worklytics.psoxy.rules.Transform;
-import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;

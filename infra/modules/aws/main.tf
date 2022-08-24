@@ -148,7 +148,7 @@ resource "aws_ssm_parameter" "salt" {
 # not really a 'password', but 'random_string' isn't "sensitive" by terraform, so
 # is output to console
 resource "random_password" "encryption_key" {
-  length  = 50
+  length  = 32 //256-bits
   special = true
 }
 

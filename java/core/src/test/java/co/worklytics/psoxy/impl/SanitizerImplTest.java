@@ -304,7 +304,7 @@ class SanitizerImplTest {
     void pseudonymizeWithReversalKey() {
         MapFunction f = sanitizer.getPseudonymize(Transform.Pseudonymize.builder().includeReversible(true).build());
 
-        assertEquals("{\"scope\":\"scope\",\"hash\":\"Htt5DmAnE8xaCjfYnLm83_xR8.hhEJE2f_bkFP2yljg\",\"reversible\":\"p~_5CTUYeehnbw1MzsCfDUmC5iJJiH_qjxNqZL6L0dRReTk6oDD-Zn1CedTQtthhQA\"}",
+        assertEquals("{\"scope\":\"scope\",\"hash\":\"Htt5DmAnE8xaCjfYnLm83_xR8.hhEJE2f_bkFP2yljg\",\"reversible\":\"p~Z7Bnl_VVOwSmfP9kuT0_Ub-5ic4cCVI4wCHArL1hU0MzTTbTCc7BcR53imT1qZgI\"}",
             f.map("asfa", sanitizer.getJsonConfiguration()));
     }
 
