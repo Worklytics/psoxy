@@ -7,6 +7,9 @@ set -e
 TERRAFORM_CONFIG_PATH=`pwd`
 LOG_FILE=${TERRAFORM_CONFIG_PATH}/psoxy-package.`date +%Y%m%d'T'%H%M%S`.log
 
+cd $1/gateway-core
+mvn package install > ${LOG_FILE} 2>&1
+
 cd $1/core
 mvn package install > ${LOG_FILE} 2>&1
 
