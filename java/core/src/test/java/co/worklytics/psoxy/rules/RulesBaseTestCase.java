@@ -54,6 +54,12 @@ abstract public class RulesBaseTestCase {
         Optional<String> getSanitizedExamplesDirectoryPath() {
             return Optional.ofNullable(this.sanitizedExamplesDirectoryPath);
         }
+
+        String yamlSerializationFilePath;
+
+        Optional<String> getYamlSerializationFilePath() {
+            return Optional.ofNullable(this.yamlSerializationFilePath);
+        }
     }
 
     @AllArgsConstructor(staticName = "of")

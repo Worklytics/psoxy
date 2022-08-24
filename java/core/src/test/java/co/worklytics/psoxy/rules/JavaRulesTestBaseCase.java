@@ -20,7 +20,8 @@ public abstract class JavaRulesTestBaseCase extends RulesBaseTestCase {
     @SneakyThrows
     @Test
     void validateYamlExample() {
-        String path = "/rules/" + getYamlSerializationFilepath() + ".yaml";
+        String path = "/rules/" + getTestSpec().getYamlSerializationFilePath()
+            .orElse(getYamlSerializationFilepath()) + ".yaml";
 
 
         RuleSet rulesFromFilesystem = yamlMapper.readerFor(getRulesUnderTest().getClass())

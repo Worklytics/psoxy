@@ -17,10 +17,6 @@ endpoints:
           - "$.users[*].posixAccounts[*].username"
           - "$.users[*].locations[*].deskCode"
           - "$.users[*].relations[*].value"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$.users[*].id"
-        includeReversible: true
       - !<redact>
         jsonPaths:
           - "$.users[*].name"
@@ -79,10 +75,6 @@ endpoints:
           - "$..description"
   - pathRegex: "^/admin/directory/v1/groups/[^/]*/members[^/]*$"
     transforms:
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..id"
-        includeReversible: true
       - !<pseudonymize>
         jsonPaths:
           - "$..email"

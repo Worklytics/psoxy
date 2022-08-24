@@ -1,0 +1,10 @@
+{
+  "@odata.context":"https://graph.microsoft.com/v1.0/$metadata#users/$entity",
+  "businessPhones":[ ],
+  "jobTitle":"Auditor",
+  "mail":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\".tbhph3DloGSd5l9e9TeFqmEboAqU8o6BdigmHZOmxI\"}",
+  "officeLocation":"12/1110",
+  "preferredLanguage":"en-US",
+  "userPrincipalName":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\".tbhph3DloGSd5l9e9TeFqmEboAqU8o6BdigmHZOmxI\"}",
+  "id":"{\"scope\":\"azure-ad\",\"hash\":\"J0_C7jfy9KhwcfmhAjVNQOnzUnYaE3Kovzt2FAkc2W0\",\"reversible\":\"p~UNvDOYJ6lF3CPx6ktJ9JEAcqUlPaOifiSK8YdxBZdXZgoRUNLfZ88mW2sQqnyJ4Q1nEwwuEscQvsBEVfGuOfyDyhX28_BnNQhubifDM6-3g\"}"
+}

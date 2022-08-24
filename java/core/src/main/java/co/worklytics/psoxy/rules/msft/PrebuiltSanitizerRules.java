@@ -10,9 +10,11 @@ import java.util.Map;
 
 public class PrebuiltSanitizerRules {
 
+    static final String DIRECTORY_REGEX_USERS = "^/(v1.0|beta)/users/?[^/]*";
+    static final String DIRECTORY_REGEX_GROUP_MEMBERS = "^/(v1.0|beta)/groups/[^/]*/members.*";
     static final Rules2 DIRECTORY = Rules2.builder()
         .endpoint(Rules2.Endpoint.builder()
-            .pathRegex("^/(v1.0|beta)/users/?[^/]*")
+            .pathRegex(DIRECTORY_REGEX_USERS)
             .transform(Transform.Redact.builder()
                 .jsonPath("$..displayName")
                 .jsonPath("$..employeeId")
@@ -45,7 +47,7 @@ public class PrebuiltSanitizerRules {
                 .build())
             .build())
         .endpoint(Rules2.Endpoint.builder()
-            .pathRegex("^/(v1.0|beta)/groups/[^/]*/members.*")
+            .pathRegex(DIRECTORY_REGEX_GROUP_MEMBERS)
             .transform(Transform.Redact.builder()
                 .jsonPath("$..displayName")
                 .jsonPath("$..employeeId")
@@ -68,6 +70,18 @@ public class PrebuiltSanitizerRules {
                 .build())
             .build())
         .build();
+
+    static final Rules2 DIRECTORY_NO_MSFT_IDS = DIRECTORY
+        .withTransformByEndpoint(DIRECTORY_REGEX_USERS, Transform.Pseudonymize.builder()
+            .includeReversible(true)
+            .jsonPath("$..id")
+            .build())
+        .withTransformByEndpoint(DIRECTORY_REGEX_GROUP_MEMBERS, Transform.Pseudonymize.builder()
+            .includeReversible(true)
+            .jsonPath("$..id")
+            .build());
+
+
 
     static final Rules2 OUTLOOK_MAIL = DIRECTORY.withAdditionalEndpoints(
         Rules2.Endpoint.builder()

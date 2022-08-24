@@ -8,6 +8,7 @@ import lombok.extern.java.Log;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Builder(toBuilder = true)
 @Log
@@ -56,7 +57,8 @@ public class Rules2 implements RuleSet, Serializable {
     }
 
     public Rules2 withTransformByEndpoint(String pathRegex, Transform transform) {
-        Optional<Endpoint> matchedEndpoint = getEndpoints().stream()
+        Rules2 clone = this.clone();
+        Optional<Endpoint> matchedEndpoint = clone.getEndpoints().stream()
             .filter(endpoint -> endpoint.getPathRegex().equals(pathRegex))
             .findFirst();
 
@@ -64,9 +66,18 @@ public class Rules2 implements RuleSet, Serializable {
             .orElseThrow(() -> new IllegalArgumentException("No endpoint found for pathRegex: " + pathRegex));
 
         endpoint.transforms = new ArrayList<>(endpoint.getTransforms());
+
         endpoint.transforms.add(transform);
 
-        return this;
+        return clone;
+    }
+
+    public Rules2 clone() {
+        Rules2 clone = this.toBuilder()
+            .clearEndpoints()
+            .endpoints(this.endpoints.stream().map(Endpoint::clone).collect(Collectors.toList()))
+            .build();
+        return clone;
     }
 
 
@@ -82,6 +93,14 @@ public class Rules2 implements RuleSet, Serializable {
         @JsonInclude(value=JsonInclude.Include.NON_EMPTY)
         @Singular
         List<Transform> transforms = new ArrayList<>();
+
+        @Override
+        public Endpoint clone() {
+            return this.toBuilder()
+                .clearTransforms()
+                .transforms(this.transforms.stream().map(Transform::clone).collect(Collectors.toList()))
+                .build();
+        }
     }
 
 

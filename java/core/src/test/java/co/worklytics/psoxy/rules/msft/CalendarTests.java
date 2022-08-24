@@ -6,6 +6,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.stream.Stream;
+
+//TODO: fix this re-use via inheritance; makes tests brittle; we should inject this rule set into
+// the directory tests, or something like that
 public class CalendarTests extends DirectoryTests {
 
     @Getter
@@ -152,5 +156,10 @@ public class CalendarTests extends DirectoryTests {
         assertRedacted(sanitized, "pwd=123123");
 
         assertNotSanitized(sanitized, "https://acme.zoom.us/j/12354234234");
+    }
+
+    @Override // rather than copy directory examples
+    public Stream<InvocationExample> getExamples() {
+        return Stream.empty();
     }
 }

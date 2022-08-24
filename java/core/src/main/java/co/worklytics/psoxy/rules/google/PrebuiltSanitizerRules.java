@@ -219,7 +219,7 @@ public class PrebuiltSanitizerRules {
         //    .build())
         .build();
 
-    public static final Rules2 GDIRECTORY_WITHOUT_GOOGLE_IDS = GDIRECTORY.toBuilder().build()
+    public static final Rules2 GDIRECTORY_WITHOUT_GOOGLE_IDS = GDIRECTORY
         .withTransformByEndpoint(GDIRECTORY_ENDPOINT_REGEX_USER,
             Transform.Pseudonymize.builder()
                 .jsonPath("$.id")

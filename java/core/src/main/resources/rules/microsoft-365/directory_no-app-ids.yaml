@@ -1,0 +1,63 @@
+allowAllEndpoints: false
+endpoints:
+  - pathRegex: "^/(v1.0|beta)/users/?[^/]*"
+    transforms:
+      - method: "redact"
+        jsonPaths:
+          - "$..displayName"
+          - "$..employeeId"
+          - "$..aboutMe"
+          - "$..mySite"
+          - "$..preferredName"
+          - "$..givenName"
+          - "$..surname"
+          - "$..mailNickname"
+          - "$..proxyAddresses"
+          - "$..faxNumber"
+          - "$..mobilePhone"
+          - "$..businessPhones[*]"
+      - method: "pseudonymize"
+        jsonPaths:
+          - "$..userPrincipalName"
+          - "$..imAddresses[*]"
+          - "$..mail"
+          - "$..otherMails[*]"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..id"
+        includeReversible: true
+  - pathRegex: "^/(v1.0|beta)/groups/?[^/]*"
+    transforms:
+      - method: "redact"
+        jsonPaths:
+          - "$..owners"
+          - "$..rejectedSenders"
+          - "$..acceptedSenders"
+          - "$..members"
+          - "$..membersWithLicenseErrors"
+  - pathRegex: "^/(v1.0|beta)/groups/[^/]*/members.*"
+    transforms:
+      - method: "redact"
+        jsonPaths:
+          - "$..displayName"
+          - "$..employeeId"
+          - "$..aboutMe"
+          - "$..mySite"
+          - "$..preferredName"
+          - "$..givenName"
+          - "$..surname"
+          - "$..mailNickname"
+          - "$..proxyAddresses"
+          - "$..faxNumber"
+          - "$..mobilePhone"
+          - "$..businessPhones[*]"
+      - method: "pseudonymize"
+        jsonPaths:
+          - "$..userPrincipalName"
+          - "$..imAddresses[*]"
+          - "$..mail"
+          - "$..otherMails[*]"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..id"
+        includeReversible: true

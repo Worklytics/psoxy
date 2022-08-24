@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -52,13 +53,22 @@ public abstract class Transform {
     List<String> fields;
 
     @NoArgsConstructor //for jackson
-    @SuperBuilder
+    @SuperBuilder(toBuilder = true)
     @Getter
     @EqualsAndHashCode(callSuper = true)
     public static class Redact extends Transform {
 
         public static Redact ofPaths(String... jsonPaths) {
             return Redact.builder().jsonPaths(Arrays.asList(jsonPaths)).build();
+        }
+
+        public Redact clone() {
+            return this.toBuilder()
+                .clearJsonPaths()
+                .jsonPaths(new ArrayList<>(this.jsonPaths))
+                .clearFields()
+                .fields(new ArrayList<>(this.fields))
+                .build();
         }
     }
 
@@ -74,6 +84,17 @@ public abstract class Transform {
          */
         @Singular
         List<String> redactions;
+
+        public RedactRegexMatches clone() {
+            return this.toBuilder()
+                .clearJsonPaths()
+                .jsonPaths(new ArrayList<>(this.jsonPaths))
+                .clearFields()
+                .fields(new ArrayList<>(this.fields))
+                .clearRedactions()
+                .redactions(new ArrayList<>(this.redactions))
+                .build();
+        }
     }
 
     /**
@@ -98,21 +119,41 @@ public abstract class Transform {
          */
         @Singular
         List<String> filters;
+
+        public FilterTokenByRegex clone() {
+            return this.toBuilder()
+                .clearJsonPaths()
+                .jsonPaths(new ArrayList<>(this.jsonPaths))
+                .clearFields()
+                .fields(new ArrayList<>(this.fields))
+                .clearFilters()
+                .filters(new ArrayList<>(this.filters))
+                .build();
+        }
     }
 
 
 
     @NoArgsConstructor //for jackson
-    @SuperBuilder
+    @SuperBuilder(toBuilder = true)
     @Getter
     public static class PseudonymizeEmailHeader extends Transform {
 
         public static PseudonymizeEmailHeader ofPaths(String... jsonPaths) {
             return PseudonymizeEmailHeader.builder().jsonPaths(Arrays.asList(jsonPaths)).build();
         }
+
+        public PseudonymizeEmailHeader clone() {
+            return this.toBuilder()
+                .clearJsonPaths()
+                .jsonPaths(new ArrayList<>(this.jsonPaths))
+                .clearFields()
+                .fields(new ArrayList<>(this.fields))
+                .build();
+        }
     }
 
-    @SuperBuilder
+    @SuperBuilder(toBuilder = true)
     @AllArgsConstructor //for builder
     @NoArgsConstructor //for Jackson
     @Getter
@@ -140,6 +181,18 @@ public abstract class Transform {
         public static Pseudonymize ofPaths(String... jsonPaths) {
             return Pseudonymize.builder().jsonPaths(Arrays.asList(jsonPaths)).build();
         }
+
+        public Pseudonymize clone() {
+            return this.toBuilder()
+                .clearJsonPaths()
+                .jsonPaths(new ArrayList<>(this.jsonPaths))
+                .clearFields()
+                .fields(new ArrayList<>(this.fields))
+                .build();
+        }
     }
 
+
+    //TODO: can we implement abstract portion of this somehow??
+    public abstract Transform clone();
 }
