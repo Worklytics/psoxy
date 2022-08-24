@@ -91,6 +91,13 @@ ${coalesce(join("\n", local.test_commands), "cd docs/example-api-calls/")}
 See `docs/example-api-calls/` for more example API calls specific to the data source to which your
 Proxy is configured to connect.
 
+Feel free to try the above calls, and reference to the source's API docs for other parameters /
+endpoints to experiment with. If you spot any additional fields you believe should be
+redacted/pseudonymized, feel free to modify the rules in your local repo and re-deploy OR configure
+a RULES variable in the source.
+
+Contact support@worklytics.co for assistance modifying the rules as needed.
+
 EOT
 }
 
