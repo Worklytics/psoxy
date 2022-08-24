@@ -30,7 +30,7 @@ public class CalendarTests extends DirectoryTests {
     @BeforeEach
     public void setTestSpec() {
         this.setTestSpec(RulesTestSpec.builder()
-            .yamlSerializationFilePath("google-workspace/directory_no-app-ids")
+            .yamlSerializationFilePath("microsoft-365/outlook-cal")
             .sanitizedExamplesDirectoryPath("api-response-examples/microsoft-365/outlook-cal/sanitized")
             .build());
     }

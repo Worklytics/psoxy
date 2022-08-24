@@ -60,7 +60,7 @@ endpoints:
     transforms:
       - !<redact>
         jsonPaths:
-          - "$.['\\@odata\\.context']"
+          - "$.['@odata.context']"
   - pathRegex: "^/(v1.0|beta)/users/[^/]*/(calendars/[^/]*/)?events.*"
     transforms:
       - !<redact>
@@ -101,7 +101,7 @@ endpoints:
         regex: "^https://graph.microsoft.com/(.*)$"
       - !<redact>
         jsonPaths:
-          - "$.['\\@odata\\.context']"
+          - "$.['@odata.context']"
       - !<redact>
         jsonPaths:
           - "$..['calendar@odata.associationLink', 'calendar@odata.navigationLink']"
@@ -145,7 +145,7 @@ endpoints:
         regex: "^https://graph.microsoft.com/(.*)$"
       - !<redact>
         jsonPaths:
-          - "$.['\\@odata\\.context']"
+          - "$.['@odata.context']"
       - !<redact>
         jsonPaths:
           - "$..['calendar@odata.associationLink', 'calendar@odata.navigationLink']"
