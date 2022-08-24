@@ -41,7 +41,7 @@ public class UrlSafeTokenPseudonymEncoderTest {
         String expected = "p~nVPSMYD7ZO_ptGIMJ65TAFo5_vVVQQ2af5Bfg7bW0Jq9JIOXfBWhts_zA5Ns0r4m";
         String original = "blah";
         Pseudonym pseudonym = Pseudonym.builder()
-            .reversible(pseudonymizationStrategy.getReversiblePseudonym(original, Function.identity()))
+            .reversible(pseudonymizationStrategy.getReversibleToken(original, Function.identity()))
             .build();
 
         String encoded = pseudonymEncoder.encode(pseudonym);
@@ -71,7 +71,7 @@ public class UrlSafeTokenPseudonymEncoderTest {
         String original = "blah";
         String encodedPseudonym =
             pseudonymEncoder.encode(Pseudonym.builder()
-                .reversible(pseudonymizationStrategy.getReversiblePseudonym(original, Function.identity())).build());
+                .reversible(pseudonymizationStrategy.getReversibleToken(original, Function.identity())).build());
 
         String r = pseudonymEncoder.decodeAndReverseAllContainedKeyedPseudonyms(String.format(template, encodedPseudonym, encodedPseudonym),
             pseudonymizationStrategy);

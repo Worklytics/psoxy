@@ -7,6 +7,8 @@ import co.worklytics.psoxy.rules.Transform;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestUtils;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
+import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
+import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.MapFunction;
@@ -36,6 +38,13 @@ class SanitizerImplTest {
 
     @Inject
     protected SanitizerFactory sanitizerFactory;
+
+    @Inject
+    protected ReversibleTokenizationStrategy reversibleTokenizationStrategy;
+
+    @Inject
+    protected UrlSafeTokenPseudonymEncoder pseudonymEncoder;
+
 
     @Inject
     ConfigService config;
@@ -309,6 +318,32 @@ class SanitizerImplTest {
         assertNotEquals(lcase, ucaseFirst);
         //but hashes the same
         assertEquals(lcase.substring(0, 32), ucaseFirst.substring(0, 32));
+    }
+
+
+    @Test
+    void tokenize() {
+        String original = "blah";
+        MapFunction f = sanitizer.getTokenize(Transform.Tokenize.builder().build());
+        String r =  (String) f.map(original, sanitizer.getJsonConfiguration());
+
+        assertArrayEquals(reversibleTokenizationStrategy.getReversibleToken(original),
+            pseudonymEncoder.decode(r).getReversible());
+    }
+
+    @Test
+    void tokenize_regex() {
+        String path = "v1.0/$metadata#users('48d31887-5fad-4d73-a9f5-3c356e68a038')/calendars('AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OABGAAAAAAAiQ8W967B7TKBjgx9rVEURBwAiIsqMbYjsT5e-T7KzowPTAAAAAAEGAAAiIsqMbYjsT5e-T7KzowPTAAABuC35AAA%3D')/events";
+        String host = "https://graph.microsoft.com/";
+        MapFunction f = sanitizer.getTokenize(Transform.Tokenize.builder()
+                .regex("^https://graph.microsoft.com/(.*)$")
+                .build());
+        String r = (String) f.map(host+path, sanitizer.getJsonConfiguration());
+
+
+        assertNotEquals(host + path, r);
+        assertEquals(host + path,
+            pseudonymEncoder.decodeAndReverseAllContainedKeyedPseudonyms(r, reversibleTokenizationStrategy));
     }
 
 }

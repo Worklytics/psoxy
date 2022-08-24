@@ -70,7 +70,7 @@ public class AESReversibleTokenizationStrategy implements ReversibleTokenization
     //64-bytes
     @SneakyThrows
     @Override
-    public byte[] getReversiblePseudonym(@NonNull String identifier, Function<String, String> canonicalization) {
+    public byte[] getReversibleToken(@NonNull String identifier, Function<String, String> canonicalization) {
         Cipher cipher = getCipherInstance();
 
         byte[] deterministicPseudonym = deterministicTokenizationStrategy.getToken(identifier, canonicalization);
@@ -91,13 +91,13 @@ public class AESReversibleTokenizationStrategy implements ReversibleTokenization
 
     @SneakyThrows
     @Override
-    public String getIdentifier(@NonNull byte[] reversiblePseudonym) {
+    public String getOriginalDatum(@NonNull byte[] reversibleToken) {
 
-        byte[] cryptoText = Arrays.copyOfRange(reversiblePseudonym, deterministicTokenizationStrategy.getTokenLength(), reversiblePseudonym.length);
+        byte[] cryptoText = Arrays.copyOfRange(reversibleToken, deterministicTokenizationStrategy.getTokenLength(), reversibleToken.length);
 
         Cipher cipher = getCipherInstance();
 
-        cipher.init(Cipher.DECRYPT_MODE, getKey(), cipherSuite.getParameterSpecGenerator().apply(reversiblePseudonym));
+        cipher.init(Cipher.DECRYPT_MODE, getKey(), cipherSuite.getParameterSpecGenerator().apply(reversibleToken));
 
         byte[] plain = cipher.doFinal(cryptoText);
         return new String(plain, StandardCharsets.UTF_8);

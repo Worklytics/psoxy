@@ -49,21 +49,21 @@ class AESReversibleTokenizationStrategyTest {
     @ParameterizedTest
     void roundtrip(ReversibleTokenizationStrategy reversibleTokenizationStrategy) {
 
-        byte[] pseudonym = reversibleTokenizationStrategy.getReversiblePseudonym("blah", Function.identity());
+        byte[] pseudonym = reversibleTokenizationStrategy.getReversibleToken("blah", Function.identity());
         assertNotEquals("blah".getBytes(), pseudonym);
 
         //something else shouldn't match
-        byte[] pseudonym2 = reversibleTokenizationStrategy.getReversiblePseudonym("blah2", Function.identity());
+        byte[] pseudonym2 = reversibleTokenizationStrategy.getReversibleToken("blah2", Function.identity());
         assertNotEquals(pseudonym2, pseudonym);
 
-        String decrypted = reversibleTokenizationStrategy.getIdentifier(pseudonym);
+        String decrypted = reversibleTokenizationStrategy.getOriginalDatum(pseudonym);
         assertEquals("blah", decrypted);
     }
     @MethodSource("getStrategies")
     @ParameterizedTest
     void pseudonymAsKeyPrefix(ReversibleTokenizationStrategy reversibleTokenizationStrategy) {
 
-        byte[] keyed = reversibleTokenizationStrategy.getReversiblePseudonym("blah", Function.identity());
+        byte[] keyed = reversibleTokenizationStrategy.getReversibleToken("blah", Function.identity());
         byte[] pseudonym = deterministicTokenizationStrategy.getToken("blah", Function.identity());
 
         assertTrue(Arrays.equals(Arrays.copyOfRange(keyed, 0, pseudonym.length), pseudonym),

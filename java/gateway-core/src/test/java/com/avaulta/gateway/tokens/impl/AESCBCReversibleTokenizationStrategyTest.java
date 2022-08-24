@@ -43,14 +43,14 @@ class AESCBCReversibleTokenizationStrategyTest {
         //  somehow between tests)
 
         assertEquals("blah",
-            pseudonymizationStrategy.getIdentifier(decoder.decode("NHXWS5CZDysDs3ETExXiMZxM2DfffirkjgmA64R9hCenHbNbPsOt4W-Hx8SDUaQY")));
+            pseudonymizationStrategy.getOriginalDatum(decoder.decode("NHXWS5CZDysDs3ETExXiMZxM2DfffirkjgmA64R9hCenHbNbPsOt4W-Hx8SDUaQY")));
     }
 
     @Test
     void keyedPseudonym_sizes() {
         Random random = new Random();
         IntStream.generate(() -> random.nextInt(1000000000)).limit(100).forEach(i -> {
-            String pseudonym = new String(encoder.encode(pseudonymizationStrategy.getReversiblePseudonym("blah" + i, Function.identity())));
+            String pseudonym = new String(encoder.encode(pseudonymizationStrategy.getReversibleToken("blah" + i, Function.identity())));
             assertEquals(
                     Pseudonym.HASH_SIZE_BYTES + 32, //hash + ciphertext
                 pseudonym.length());

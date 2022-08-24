@@ -56,7 +56,7 @@ public class Rules2 implements RuleSet, Serializable {
         return builder.build();
     }
 
-    public Rules2 withTransformByEndpoint(String pathRegex, Transform transform) {
+    public Rules2 withTransformByEndpoint(String pathRegex, Transform... transforms) {
         Rules2 clone = this.clone();
         Optional<Endpoint> matchedEndpoint = clone.getEndpoints().stream()
             .filter(endpoint -> endpoint.getPathRegex().equals(pathRegex))
@@ -67,7 +67,7 @@ public class Rules2 implements RuleSet, Serializable {
 
         endpoint.transforms = new ArrayList<>(endpoint.getTransforms());
 
-        endpoint.transforms.add(transform);
+        Arrays.stream(transforms).forEach(endpoint.transforms::add);
 
         return clone;
     }

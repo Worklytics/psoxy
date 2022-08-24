@@ -32,6 +32,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.logging.Level;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -186,6 +187,8 @@ public class SanitizerImpl implements Sanitizer {
             f = getRedactRegexMatches((Transform.RedactRegexMatches) transform);
         } else if (transform instanceof Transform.FilterTokenByRegex) {
             f = getFilterTokenByRegex((Transform.FilterTokenByRegex) transform);
+        } else if (transform instanceof Transform.Tokenize) {
+            f = getTokenize((Transform.Tokenize) transform);
         } else {
             throw new IllegalArgumentException("Unknown transform type: " + transform.getClass().getName());
         }
@@ -236,6 +239,39 @@ public class SanitizerImpl implements Sanitizer {
                 return StringUtils.trimToNull(stream
                     .filter(token -> patterns.stream().anyMatch(p -> p.test(token)))
                     .collect(Collectors.joining(" ")));
+            }
+        };
+    }
+
+    MapFunction getTokenize(Transform.Tokenize transform) {
+        Optional<Pattern> pattern = Optional.ofNullable(transform.getRegex()).map(Pattern::compile);
+        return (s, jsonConfiguration) -> {
+            if (!(s instanceof String)) {
+                if (s != null) {
+                    log.warning("value matched by " + transform + " not of type String");
+                }
+                return null;
+            } else if (StringUtils.isBlank((String) s)) {
+                return s;
+            } else {
+                String toTokenize = (String) s;
+                Optional<Matcher> matcher = pattern
+                    .map(p -> p.matcher(toTokenize));
+                if (matcher.isPresent()) {
+                    if (matcher.get().matches()) {
+                        String token = urlSafePseudonymEncoder.encode(Pseudonym.builder()
+                            .reversible(reversibleTokenizationStrategy.getReversibleToken(matcher.get().group(1)))
+                            .build());
+                        return toTokenize.replace(matcher.get().group(1), token);
+                    } else {
+                        return s;
+                    }
+                } else {
+                    String token = urlSafePseudonymEncoder.encode(Pseudonym.builder()
+                        .reversible(reversibleTokenizationStrategy.getReversibleToken(toTokenize))
+                        .build());
+                    return token;
+                }
             }
         };
     }
@@ -348,7 +384,7 @@ public class SanitizerImpl implements Sanitizer {
         if (transformOptions.getIncludeReversible()) {
             builder.reversible(urlSafePseudonymEncoder.encode(
                 Pseudonym.builder()
-                    .reversible(reversibleTokenizationStrategy.getReversiblePseudonym(value.toString(), canonicalization))
+                    .reversible(reversibleTokenizationStrategy.getReversibleToken(value.toString(), canonicalization))
                     .domain(domain)
                     .build()));
         }

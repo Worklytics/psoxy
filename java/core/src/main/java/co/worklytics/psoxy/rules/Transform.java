@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -19,6 +20,7 @@ import java.util.List;
     @JsonSubTypes.Type(value = Transform.Pseudonymize.class, name = "pseudonymize"),
     @JsonSubTypes.Type(value = Transform.PseudonymizeEmailHeader.class, name = "pseudonymizeEmailHeader"),
     @JsonSubTypes.Type(value = Transform.FilterTokenByRegex.class, name = "filterTokenByRegex"),
+    @JsonSubTypes.Type(value = Transform.Tokenize.class, name = "tokenize"),
 })
 @SuperBuilder(toBuilder = true)
 @AllArgsConstructor //for builder
@@ -199,8 +201,36 @@ public abstract class Transform {
                 .fields(new ArrayList<>(this.fields))
                 .build();
         }
+    }
 
+    @SuperBuilder(toBuilder = true)
+    @AllArgsConstructor //for builder
+    @NoArgsConstructor //for Jackson
+    @Getter
+    public static class Tokenize extends Transform {
 
+        /**
+         * if provided, only group within matched by this regex will be tokenized
+         *
+         * example usage: .regex("^https://graph.microsoft.com/(.*)$") will tokenize the path
+         * of a MSFT graph URL (prev/next links in paged endpoints), which may be useful if path
+         * might contain PII or something like that
+         *
+         * HUGE CAVEAT: as of Aug 2022, reversing encapsulated tokens BACK to their original values
+         * will work if and only if token is bounded by non-base64-urlencoded character
+         */
+        @Nullable
+        String regex;
+
+        //NOTE: always format to URL-safe
+        public Tokenize clone()  {
+            return this.toBuilder()
+                .clearJsonPaths()
+                .jsonPaths(new ArrayList<>(this.jsonPaths))
+                .clearFields()
+                .fields(new ArrayList<>(this.fields))
+                .build();
+        }
     }
 
 

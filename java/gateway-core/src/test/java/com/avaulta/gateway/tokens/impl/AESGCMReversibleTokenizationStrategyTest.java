@@ -44,13 +44,13 @@ class AESGCMReversibleTokenizationStrategyTest {
        // String s = new String(encoder.encode(pseudonymizationStrategy.getKeyedPseudonym("blah",Function.identity())));
 
         assertEquals("blah",
-            pseudonymizationStrategy.getIdentifier(decoder.decode("nVPSMYD7ZO_ptGIMJ65TAFo5_vVVQQ2af5Bfg7bW0JpFszshi2nfr3BovVcPFYct2qRdcA")));
+            pseudonymizationStrategy.getOriginalDatum(decoder.decode("nVPSMYD7ZO_ptGIMJ65TAFo5_vVVQQ2af5Bfg7bW0JpFszshi2nfr3BovVcPFYct2qRdcA")));
     }
     @Test
     void keyedPseudonym_sizes() {
         Random random = new Random();
         IntStream.generate(() -> random.nextInt(1000000000)).limit(100).forEach(i -> {
-            String pseudonym = new String(encoder.encode(pseudonymizationStrategy.getReversiblePseudonym("blah" + i, Function.identity())));
+            String pseudonym = new String(encoder.encode(pseudonymizationStrategy.getReversibleToken("blah" + i, Function.identity())));
             assertTrue(
                 //q: why variable length for constant length input?
                 // seem to range from 79 --> 82 bytes

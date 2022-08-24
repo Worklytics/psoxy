@@ -5,6 +5,7 @@ import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
 
 import java.util.Base64;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 //NOTE: coupled to fixed-length hash function
@@ -85,9 +86,14 @@ public class UrlSafeTokenPseudonymEncoder implements PseudonymEncoder {
                                                               ReversibleTokenizationStrategy reidentifier) {
         return REVERSIBLE_PSEUDONYM_PATTERN.matcher(containsKeyedPseudonyms).replaceAll(m -> {
             String keyedPseudonym = m.group();
+
             //q: if this fails, just return 'm.group()' as-is?? to consider possibility that pattern matched
             // something it shouldn't
-            return reidentifier.getIdentifier(this.decode(keyedPseudonym).getReversible());
+            String original = reidentifier.getOriginalDatum(this.decode(keyedPseudonym).getReversible());
+
+            //quote replacement, otherwise Matcher seems to treat it is a regex with potential
+            // backreferences or something like that
+            return Matcher.quoteReplacement(original);
         });
     }
 
