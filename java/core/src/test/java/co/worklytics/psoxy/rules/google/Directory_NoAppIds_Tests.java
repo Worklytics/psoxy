@@ -2,6 +2,7 @@ package co.worklytics.psoxy.rules.google;
 
 import co.worklytics.psoxy.rules.RuleSet;
 import co.worklytics.psoxy.rules.Transform;
+import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,7 +40,7 @@ public class Directory_NoAppIds_Tests extends DirectoryTests {
         String sanitized =
             sanitizer.sanitize(new URL("https", "admin.googleapis.com", "/admin/directory/v1/users/123213"), jsonString);
 
-        assertTransformed(sanitized, PIItoPseudonymize, Transform.Pseudonymize.builder().includeReversible(true).build());
+        assertReversibleUrlTokenized(sanitized, PIItoPseudonymize);
     }
 
     @SneakyThrows
@@ -56,7 +57,7 @@ public class Directory_NoAppIds_Tests extends DirectoryTests {
         String endpoint = "https://admin.googleapis.com/admin/directory/v1/users?customer=my_customer";
         String sanitized = sanitize(endpoint, jsonString);
 
-        assertTransformed(sanitized, PIItoPseudonymize, Transform.Pseudonymize.builder().includeReversible(true).build());
+        assertReversibleUrlTokenized(sanitized, PIItoPseudonymize);
     }
 
     @SneakyThrows

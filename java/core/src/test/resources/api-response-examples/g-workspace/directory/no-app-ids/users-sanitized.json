@@ -4,7 +4,7 @@
   "users":[
     {
       "kind":"admin#directory#user",
-      "id":"{\"scope\":\"gapps\",\"hash\":\"wjUHe6OJkIDPrYUL6RuTbep4GVgCh88oZAr8jR0sZcY\",\"reversible\":\"p~M6pb3cqeluoyiPdkFcP4YRvdqQIpAwa59EwGkvbD5QenJnnFNwcRdSZkUHZ75f-93vTRe5UAE758uX3HbXK-FA\"}",
+      "id":"p~M6pb3cqeluoyiPdkFcP4YRvdqQIpAwa59EwGkvbD5QenJnnFNwcRdSZkUHZ75f-93vTRe5UAE758uX3HbXK-FA",
       "etag":"\"g2-KWSBhdhEV1DJNuuX35hICepPpOEDe4lPvnwuxvf4/3nm0BxOJJfOv5nDTHneimEDnNRg\"",
       "primaryEmail":"{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"1nOUZ6C0aR7HtY1l3rbtEQwknX6sdfaWxYMsdwYDlS0\"}",
       "isAdmin":true,
@@ -119,7 +119,7 @@
     },
     {
       "kind":"admin#directory#user",
-      "id":"{\"scope\":\"gapps\",\"hash\":\"GHuF6tcIRogazhhRZeHTECrYhO1nQq7BFggh20FOz3U\",\"reversible\":\"p~KBZoY4NcqOdwc9zkkaJXIJCPWGAIVUM2YYDobgUwto8KEssa979-XI85pW7ln0Gb\"}",
+      "id":"p~KBZoY4NcqOdwc9zkkaJXIJCPWGAIVUM2YYDobgUwto8KEssa979-XI85pW7ln0Gb",
       "etag":"\"g2-KWSBhdhEV1DJNuuX35hICepPpOEDe4lPvnwuxvf4/MW5lZemqM7i3B82DXmbR3pne-KM\"",
       "primaryEmail":"{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"4ejOMXOmbQO_V7hY0Puos924riETBcAxmwLewzgpX48\"}",
       "isAdmin":true,

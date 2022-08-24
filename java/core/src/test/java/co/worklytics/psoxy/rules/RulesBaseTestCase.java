@@ -4,6 +4,7 @@ import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.impl.SanitizerImpl;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestUtils;
+import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
@@ -238,10 +239,17 @@ abstract public class RulesBaseTestCase {
             });
     }
 
+    protected void assertReversibleUrlTokenized(String content, Collection<String> shouldBeTransformed) {
+        assertTransformed(content, shouldBeTransformed, Transform.Pseudonymize.builder()
+            .includeReversible(true)
+            .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
+            .build());
+    }
+
     protected void assertTransformed(String content, Collection<String> shouldBeTransformed, Transform transform) {
         shouldBeTransformed
             .forEach(s ->
-                assertFalse(content.contains(s), () -> String.format("Sanitized content still contains unpseudonymized: %s at %s", s, this.context(content, s))));
+                assertFalse(content.contains(s), () -> String.format("Sanitized content still contains untransformed: %s at %s", s, this.context(content, s))));
 
         shouldBeTransformed
             .forEach(s -> {

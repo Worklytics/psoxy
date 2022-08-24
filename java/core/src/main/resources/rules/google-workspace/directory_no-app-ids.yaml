@@ -17,6 +17,7 @@ endpoints:
           - "$.users[*].posixAccounts[*].username"
           - "$.users[*].locations[*].deskCode"
           - "$.users[*].relations[*].value"
+        encoding: "JSON"
       - !<redact>
         jsonPaths:
           - "$.users[*].name"
@@ -30,6 +31,7 @@ endpoints:
         jsonPaths:
           - "$.users[*].id"
         includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
   - pathRegex: "^/admin/directory/v1/users/[^/]*$"
     transforms:
       - !<pseudonymize>
@@ -46,6 +48,7 @@ endpoints:
           - "$.posixAccounts[*].username"
           - "$.locations[*].deskCode"
           - "$.relations[*].value"
+        encoding: "JSON"
       - !<redact>
         jsonPaths:
           - "$.name"
@@ -59,6 +62,7 @@ endpoints:
         jsonPaths:
           - "$.id"
         includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
   - pathRegex: "^/admin/directory/v1/groups(\\?)?[^/]*$"
     transforms:
       - !<pseudonymize>
@@ -67,6 +71,7 @@ endpoints:
           - "$..aliases[*]"
           - "$..nonEditableAliases[*]"
         includeOriginal: true
+        encoding: "JSON"
       - !<redact>
         jsonPaths:
           - "$..description"
@@ -78,6 +83,7 @@ endpoints:
           - "$..aliases[*]"
           - "$..nonEditableAliases[*]"
         includeOriginal: true
+        encoding: "JSON"
       - !<redact>
         jsonPaths:
           - "$..description"
@@ -88,10 +94,11 @@ endpoints:
           - "$..email"
           - "$..aliases[*]"
           - "$..nonEditableAliases[*]"
+        encoding: "JSON"
       - !<pseudonymize>
         jsonPaths:
           - "$.members[*].id"
-        includeReversible: true
+        encoding: "JSON"
   - pathRegex: "^/admin/directory/v1/orgunits\\?.*"
     transforms:
       - !<redact>

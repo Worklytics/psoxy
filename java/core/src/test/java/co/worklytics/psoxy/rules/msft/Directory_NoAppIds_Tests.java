@@ -35,7 +35,7 @@ public class Directory_NoAppIds_Tests extends DirectoryTests {
 
         String sanitized = this.sanitize(endpoint, jsonString);
 
-        assertTransformed(sanitized, PII, Transform.Pseudonymize.builder().includeReversible(true).build());
+        assertReversibleUrlTokenized(sanitized, PII);
     }
 
     @Test
@@ -57,7 +57,7 @@ public class Directory_NoAppIds_Tests extends DirectoryTests {
 
         String sanitized = this.sanitize(endpoint, jsonString);
 
-        assertTransformed(sanitized, PII, Transform.Pseudonymize.builder().includeReversible(true).build());
+        assertReversibleUrlTokenized(sanitized, PII);
     }
 
     @Test
@@ -77,6 +77,6 @@ public class Directory_NoAppIds_Tests extends DirectoryTests {
 
         String sanitized = this.sanitize(endpoint, jsonString);
 
-        assertTransformed(sanitized, PII, Transform.Pseudonymize.builder().includeReversible(true).build());
+        assertPseudonymized(sanitized, PII);
     }
 }

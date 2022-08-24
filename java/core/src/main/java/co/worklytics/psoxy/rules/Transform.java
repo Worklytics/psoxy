@@ -183,7 +183,7 @@ public abstract class Transform {
         /**
          * how to encode to the resulting pseudonym
          */
-        @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+        @JsonInclude(JsonInclude.Include.NON_DEFAULT) //doesn't work for enums ...
         @Builder.Default
         PseudonymEncoder.Implementations encoding = PseudonymEncoder.Implementations.JSON;
 

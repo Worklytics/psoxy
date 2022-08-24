@@ -4,6 +4,7 @@ import co.worklytics.psoxy.rules.Rules2;
 import co.worklytics.psoxy.rules.RuleSet;
 import co.worklytics.psoxy.rules.Transform;
 import co.worklytics.psoxy.rules.zoom.ZoomTransforms;
+import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.google.common.collect.ImmutableMap;
 
 import java.util.Map;
@@ -74,10 +75,10 @@ public class PrebuiltSanitizerRules {
     static final Rules2 DIRECTORY_NO_MSFT_IDS = DIRECTORY
         .withTransformByEndpoint(DIRECTORY_REGEX_USERS, Transform.Pseudonymize.builder()
             .includeReversible(true)
+            .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
             .jsonPath("$..id")
             .build())
         .withTransformByEndpoint(DIRECTORY_REGEX_GROUP_MEMBERS, Transform.Pseudonymize.builder()
-            .includeReversible(true)
             .jsonPath("$..id")
             .build());
 

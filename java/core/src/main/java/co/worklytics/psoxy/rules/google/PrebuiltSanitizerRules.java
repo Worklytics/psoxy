@@ -5,6 +5,7 @@ import co.worklytics.psoxy.rules.Rules2;
 import co.worklytics.psoxy.rules.RuleSet;
 import co.worklytics.psoxy.rules.Transform;
 import co.worklytics.psoxy.rules.zoom.ZoomTransforms;
+import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
@@ -224,16 +225,17 @@ public class PrebuiltSanitizerRules {
             Transform.Pseudonymize.builder()
                 .jsonPath("$.id")
                 .includeReversible(true)
+                .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
                 .build())
         .withTransformByEndpoint(GDIRECTORY_ENDPOINT_REGEX_USERS,
             Transform.Pseudonymize.builder()
                 .jsonPath("$.users[*].id")
                 .includeReversible(true)
+                .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
                 .build())
         .withTransformByEndpoint(GDIRECTORY_ENDPOINT_REGEX_MEMBERS,
             Transform.Pseudonymize.builder()
                 .jsonPath("$.members[*].id")
-                .includeReversible(true)
                 .build());
 
     public static co.worklytics.psoxy.rules.Rules2.Endpoint GDRIVE_ENDPOINT_RULES = Rules2.Endpoint.builder()

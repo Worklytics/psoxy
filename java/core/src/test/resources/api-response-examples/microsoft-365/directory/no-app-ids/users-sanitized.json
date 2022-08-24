@@ -2,7 +2,7 @@
   "@odata.context":"https://graph.microsoft.com/v1.0/$metadata#users",
   "value":[
     {
-      "id":"{\"scope\":\"azure-ad\",\"hash\":\"wi1gC8mRNWrRNZwUimQwwbNP.K4LsFXbM.MVW8sxU6E\",\"reversible\":\"p~1lNyOdIEjgUqRVi1S5SBgPPR8qHrQ0lXFkLyIMfG2GsZPqrqDKd8I7vFfeffgbPYxDKhYMloF1OZbwcL3Did0rM75yVg9rSBwlbATOEy2Vs\"}",
+      "id":"p~1lNyOdIEjgUqRVi1S5SBgPPR8qHrQ0lXFkLyIMfG2GsZPqrqDKd8I7vFfeffgbPYxDKhYMloF1OZbwcL3Did0rM75yVg9rSBwlbATOEy2Vs",
       "businessPhones":[ ],
       "jobTitle":null,
       "mail":"{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"q13PonzfNpUWmyGUYmClKKmAFrkH_BjdABY74ccirMk\"}",
@@ -11,7 +11,7 @@
       "userPrincipalName":"{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"q13PonzfNpUWmyGUYmClKKmAFrkH_BjdABY74ccirMk\"}"
     },
     {
-      "id":"{\"scope\":\"azure-ad\",\"hash\":\"LiJb.ARnRq28mWRHlForzfDucaSRql_MCi1ofRfJzWg\",\"reversible\":\"p~08h5l5DL2Fu0FfldcN6HIz9JAtUqIT-sicKxoMpr_38s1B6pxNpVOW6V5orVNBvQ7Jjvdm4t7wUKcaFUUcCWt2H2Vnl8MqABfSRMZqsrL2U\"}",
+      "id":"p~08h5l5DL2Fu0FfldcN6HIz9JAtUqIT-sicKxoMpr_38s1B6pxNpVOW6V5orVNBvQ7Jjvdm4t7wUKcaFUUcCWt2H2Vnl8MqABfSRMZqsrL2U",
       "businessPhones":[ ],
       "jobTitle":null,
       "mail":"{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"YbwNv0Jw8i7kKLWaqhEIMC5Se6pPeE4kIBf2st3rm9c\"}",
@@ -20,7 +20,7 @@
       "userPrincipalName":"{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"YbwNv0Jw8i7kKLWaqhEIMC5Se6pPeE4kIBf2st3rm9c\"}"
     },
     {
-      "id":"{\"scope\":\"azure-ad\",\"hash\":\"Qnf9KfhBS2X9800Fccc0XV43UssVGg1FyI0qMnbxlRI\",\"reversible\":\"p~aTeoKGPL911jInVL-XikRix55bvZuG5RlzEL-PyOY0dHRw8auOA7t-lxk9EeDUKaJU7B8GUoR8aLHSQmyRPskpWZ7bSicjzDOsGUUdgZmt4\"}",
+      "id":"p~aTeoKGPL911jInVL-XikRix55bvZuG5RlzEL-PyOY0dHRw8auOA7t-lxk9EeDUKaJU7B8GUoR8aLHSQmyRPskpWZ7bSicjzDOsGUUdgZmt4",
       "businessPhones":[ ],
       "jobTitle":null,
       "mail":"{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"yRNnmnw83TqOPzYGRAEQavMUIWzFFtw350OZkB1kQrk\"}",
@@ -29,7 +29,7 @@
       "userPrincipalName":"{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"yRNnmnw83TqOPzYGRAEQavMUIWzFFtw350OZkB1kQrk\"}"
     },
     {
-      "id":"{\"scope\":\"azure-ad\",\"hash\":\"cT7EZPg_yGzlrofKJGizatyyWgytRjBtqgKfWRFObLI\",\"reversible\":\"p~SbmTmozdBJgFHOEXEDMCuYWoX1BrkApdnbeEknezGYQ71pVypMq0hZiqF9jiToX1442sP9ab4G8wjCK2MCpsWlqXbVePLF5pSgCJ6uY94-I\"}",
+      "id":"p~SbmTmozdBJgFHOEXEDMCuYWoX1BrkApdnbeEknezGYQ71pVypMq0hZiqF9jiToX1442sP9ab4G8wjCK2MCpsWlqXbVePLF5pSgCJ6uY94-I",
       "businessPhones":[ ],
       "jobTitle":null,
       "mail":"{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"8wfO0E2lPfP4s.Kdl80rQxSLgKoyCH5VsTHCln70YgI\"}",
@@ -38,7 +38,7 @@
       "userPrincipalName":"{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"8wfO0E2lPfP4s.Kdl80rQxSLgKoyCH5VsTHCln70YgI\"}"
     },
     {
-      "id":"{\"scope\":\"azure-ad\",\"hash\":\".3jWTWfzM_LnR_xcBNHj7FiAKOTHfED_ZRfEQV0xaog\",\"reversible\":\"p~EkSf744Gy5SrhdhPs6DCuNDSLikADnTw5lzjhd4yq0cm1YycWuMwWgL29ockKMNVrq3_DqofADe9zPS3xAXnNMW071B4bIPRUmcgjToQOWE\"}",
+      "id":"p~EkSf744Gy5SrhdhPs6DCuNDSLikADnTw5lzjhd4yq0cm1YycWuMwWgL29ockKMNVrq3_DqofADe9zPS3xAXnNMW071B4bIPRUmcgjToQOWE",
       "businessPhones":[ ],
       "jobTitle":null,
       "mail":"{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"ZFmgYXeeM9Vr385OqSDur7FU59uw8MpRF74uYg7kMxQ\"}",
@@ -53,7 +53,7 @@
       "officeLocation":null,
       "preferredLanguage":null,
       "userPrincipalName":"{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"mbQYAaLx.FMtyO1ax80fwVazndo4PZoqtcAqSvqXTV0\"}",
-      "id":"{\"scope\":\"azure-ad\",\"hash\":\"hZe4R6PeCSDn7OlmErcY3ogoH9DPV8p.tVVnhyg9_Aw\",\"reversible\":\"p~9NWBT2r9QY7-1k1J4M94la7a4URg6RVA0XNLJHrWW1Ef9GXWpNi21NzBiEEmK_o5vPCutFAWQn_LRCNLFUmI96iyzzszyQC1R3Jbe7rgcQQ\"}"
+      "id":"p~9NWBT2r9QY7-1k1J4M94la7a4URg6RVA0XNLJHrWW1Ef9GXWpNi21NzBiEEmK_o5vPCutFAWQn_LRCNLFUmI96iyzzszyQC1R3Jbe7rgcQQ"
     }
   ]
 }

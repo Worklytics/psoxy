@@ -2,7 +2,7 @@ allowAllEndpoints: false
 endpoints:
   - pathRegex: "^/(v1.0|beta)/users/?[^/]*"
     transforms:
-      - method: "redact"
+      - !<redact>
         jsonPaths:
           - "$..displayName"
           - "$..employeeId"
@@ -16,19 +16,21 @@ endpoints:
           - "$..faxNumber"
           - "$..mobilePhone"
           - "$..businessPhones[*]"
-      - method: "pseudonymize"
+      - !<pseudonymize>
         jsonPaths:
           - "$..userPrincipalName"
           - "$..imAddresses[*]"
           - "$..mail"
           - "$..otherMails[*]"
+        encoding: "JSON"
       - !<pseudonymize>
         jsonPaths:
           - "$..id"
         includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
   - pathRegex: "^/(v1.0|beta)/groups/?[^/]*"
     transforms:
-      - method: "redact"
+      - !<redact>
         jsonPaths:
           - "$..owners"
           - "$..rejectedSenders"
@@ -37,7 +39,7 @@ endpoints:
           - "$..membersWithLicenseErrors"
   - pathRegex: "^/(v1.0|beta)/groups/[^/]*/members.*"
     transforms:
-      - method: "redact"
+      - !<redact>
         jsonPaths:
           - "$..displayName"
           - "$..employeeId"
@@ -51,13 +53,15 @@ endpoints:
           - "$..faxNumber"
           - "$..mobilePhone"
           - "$..businessPhones[*]"
-      - method: "pseudonymize"
+      - !<pseudonymize>
         jsonPaths:
           - "$..userPrincipalName"
           - "$..imAddresses[*]"
           - "$..mail"
           - "$..otherMails[*]"
+        encoding: "JSON"
       - !<pseudonymize>
         jsonPaths:
           - "$..id"
-        includeReversible: true
+        encoding: "JSON"
+
