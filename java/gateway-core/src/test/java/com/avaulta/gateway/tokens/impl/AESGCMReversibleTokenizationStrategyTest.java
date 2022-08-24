@@ -1,8 +1,9 @@
-package com.avaulta.gateway.pseudonyms.impl;
+package com.avaulta.gateway.tokens.impl;
 
-import com.avaulta.gateway.pseudonyms.DeterministicPseudonymStrategy;
+import com.avaulta.gateway.pseudonyms.impl.TestUtils;
+import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
 import com.avaulta.gateway.pseudonyms.Pseudonym;
-import com.avaulta.gateway.pseudonyms.ReversiblePseudonymStrategy;
+import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,10 +15,10 @@ import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class AESGCMReversiblePseudonymizationStrategyTest {
+class AESGCMReversibleTokenizationStrategyTest {
 
-    ReversiblePseudonymStrategy pseudonymizationStrategy;
-    DeterministicPseudonymStrategy deterministicPseudonymStrategy;
+    ReversibleTokenizationStrategy pseudonymizationStrategy;
+    DeterministicTokenizationStrategy deterministicTokenizationStrategy;
 
     //base64url-encoding without padding
     Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
@@ -26,11 +27,11 @@ class AESGCMReversiblePseudonymizationStrategyTest {
     @SneakyThrows
     @BeforeEach
     void setUp() {
-        deterministicPseudonymStrategy = new Sha256DeterministicPseudonymStrategy("salt");
+        deterministicTokenizationStrategy = new Sha256DeterministicTokenizationStrategy("salt");
         pseudonymizationStrategy =
-            AESReversiblePseudonymStrategy.builder()
-                .cipherSuite(AESReversiblePseudonymStrategy.GCM)
-                .deterministicPseudonymStrategy(deterministicPseudonymStrategy)
+            AESReversibleTokenizationStrategy.builder()
+                .cipherSuite(AESReversibleTokenizationStrategy.GCM)
+                .deterministicTokenizationStrategy(deterministicTokenizationStrategy)
                 .key(TestUtils.testKey())
                 .build();
     }

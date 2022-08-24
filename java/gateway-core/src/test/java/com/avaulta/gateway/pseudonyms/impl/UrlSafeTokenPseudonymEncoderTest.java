@@ -1,8 +1,10 @@
 package com.avaulta.gateway.pseudonyms.impl;
 
-import com.avaulta.gateway.pseudonyms.DeterministicPseudonymStrategy;
+import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
 import com.avaulta.gateway.pseudonyms.Pseudonym;
-import com.avaulta.gateway.pseudonyms.ReversiblePseudonymStrategy;
+import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
+import com.avaulta.gateway.tokens.impl.AESReversibleTokenizationStrategy;
+import com.avaulta.gateway.tokens.impl.Sha256DeterministicTokenizationStrategy;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,18 +21,18 @@ public class UrlSafeTokenPseudonymEncoderTest {
 
     UrlSafeTokenPseudonymEncoder pseudonymEncoder = new UrlSafeTokenPseudonymEncoder();
 
-    ReversiblePseudonymStrategy pseudonymizationStrategy;
+    ReversibleTokenizationStrategy pseudonymizationStrategy;
 
-    DeterministicPseudonymStrategy deterministicPseudonymStrategy;
+    DeterministicTokenizationStrategy deterministicTokenizationStrategy;
 
     @SneakyThrows
     @BeforeEach
     void setUp() {
-        deterministicPseudonymStrategy = new Sha256DeterministicPseudonymStrategy("salt");
-        pseudonymizationStrategy = AESReversiblePseudonymStrategy.builder()
-            .cipherSuite(AESReversiblePseudonymStrategy.CBC)
+        deterministicTokenizationStrategy = new Sha256DeterministicTokenizationStrategy("salt");
+        pseudonymizationStrategy = AESReversibleTokenizationStrategy.builder()
+            .cipherSuite(AESReversibleTokenizationStrategy.CBC)
             .key(TestUtils.testKey())
-            .deterministicPseudonymStrategy(deterministicPseudonymStrategy)
+            .deterministicTokenizationStrategy(deterministicTokenizationStrategy)
             .build();
     }
 
@@ -45,7 +47,7 @@ public class UrlSafeTokenPseudonymEncoderTest {
         String encoded = pseudonymEncoder.encode(pseudonym);
 
         assertEquals(expected, encoded);
-        assertArrayEquals(deterministicPseudonymStrategy.getPseudonym(original, Function.identity()), pseudonym.getHash());
+        assertArrayEquals(deterministicTokenizationStrategy.getToken(original, Function.identity()), pseudonym.getHash());
 
 
         Pseudonym decoded = pseudonymEncoder.decode(encoded);

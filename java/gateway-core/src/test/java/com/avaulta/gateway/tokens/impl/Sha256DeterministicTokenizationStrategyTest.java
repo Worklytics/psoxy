@@ -1,7 +1,7 @@
-package com.avaulta.gateway.pseudonyms.impl;
+package com.avaulta.gateway.tokens.impl;
 
-import com.avaulta.gateway.pseudonyms.DeterministicPseudonymStrategy;
-import com.avaulta.gateway.pseudonyms.Pseudonym;
+import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
+import com.avaulta.gateway.tokens.impl.Sha256DeterministicTokenizationStrategy;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,8 +13,8 @@ import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class Sha256DeterministicPseudonymStrategyTest{
-    DeterministicPseudonymStrategy deterministicPseudonymStrategy;
+public class Sha256DeterministicTokenizationStrategyTest {
+    DeterministicTokenizationStrategy deterministicTokenizationStrategy;
 
     //base64url-encoding without padding
     Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
@@ -23,7 +23,7 @@ public class Sha256DeterministicPseudonymStrategyTest{
     @SneakyThrows
     @BeforeEach
     void setUp() {
-        deterministicPseudonymStrategy = new Sha256DeterministicPseudonymStrategy("salt");
+        deterministicTokenizationStrategy = new Sha256DeterministicTokenizationStrategy("salt");
     }
 
     @Test
@@ -35,13 +35,13 @@ public class Sha256DeterministicPseudonymStrategyTest{
         IntStream.range(0, randomSamples).forEach(i -> {
             //use a random UUID, to give original of typical length
             String original = UUID.randomUUID().toString();
-            byte[] pseudonym = deterministicPseudonymStrategy.getPseudonym(original, Function.identity());
+            byte[] pseudonym = deterministicTokenizationStrategy.getToken(original, Function.identity());
 
             //43 bytes when base64-encoded without padding
             assertEquals(43, new String(encoder.encode(pseudonym)).length());
 
             //32 bytes unencoded
-            assertEquals(deterministicPseudonymStrategy.getPseudonymLength(), pseudonym.length);
+            assertEquals(deterministicTokenizationStrategy.getTokenLength(), pseudonym.length);
         });
     }
 }

@@ -1,7 +1,7 @@
-package com.avaulta.gateway.pseudonyms.impl;
+package com.avaulta.gateway.tokens.impl;
 
-import com.avaulta.gateway.pseudonyms.DeterministicPseudonymStrategy;
-import com.avaulta.gateway.pseudonyms.ReversiblePseudonymStrategy;
+import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
+import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
 import lombok.*;
 
 import javax.crypto.Cipher;
@@ -15,7 +15,7 @@ import java.util.function.Function;
 
 @Builder
 @RequiredArgsConstructor
-public class AESReversiblePseudonymStrategy implements ReversiblePseudonymStrategy {
+public class AESReversibleTokenizationStrategy implements ReversibleTokenizationStrategy {
 
 
     private static final int GCM_IV_LENGTH = 12;
@@ -57,7 +57,7 @@ public class AESReversiblePseudonymStrategy implements ReversiblePseudonymStrate
     final CipherSuite cipherSuite;
 
     @Getter
-    final DeterministicPseudonymStrategy deterministicPseudonymStrategy;
+    final DeterministicTokenizationStrategy deterministicTokenizationStrategy;
 
     @Getter
     final SecretKeySpec key;
@@ -73,7 +73,7 @@ public class AESReversiblePseudonymStrategy implements ReversiblePseudonymStrate
     public byte[] getReversiblePseudonym(@NonNull String identifier, Function<String, String> canonicalization) {
         Cipher cipher = getCipherInstance();
 
-        byte[] deterministicPseudonym = deterministicPseudonymStrategy.getPseudonym(identifier, canonicalization);
+        byte[] deterministicPseudonym = deterministicTokenizationStrategy.getToken(identifier, canonicalization);
 
         cipher.init(Cipher.ENCRYPT_MODE, getKey(), cipherSuite.getParameterSpecGenerator().apply(deterministicPseudonym));
         byte[] ciphertext = cipher.doFinal(identifier.getBytes(StandardCharsets.UTF_8));
@@ -93,7 +93,7 @@ public class AESReversiblePseudonymStrategy implements ReversiblePseudonymStrate
     @Override
     public String getIdentifier(@NonNull byte[] reversiblePseudonym) {
 
-        byte[] cryptoText = Arrays.copyOfRange(reversiblePseudonym, deterministicPseudonymStrategy.getPseudonymLength(), reversiblePseudonym.length);
+        byte[] cryptoText = Arrays.copyOfRange(reversiblePseudonym, deterministicTokenizationStrategy.getTokenLength(), reversiblePseudonym.length);
 
         Cipher cipher = getCipherInstance();
 

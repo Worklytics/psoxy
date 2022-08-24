@@ -1,13 +1,13 @@
-package com.avaulta.gateway.pseudonyms.impl;
+package com.avaulta.gateway.tokens.impl;
 
-import com.avaulta.gateway.pseudonyms.DeterministicPseudonymStrategy;
+import com.avaulta.gateway.pseudonyms.impl.TestUtils;
+import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
 import com.avaulta.gateway.pseudonyms.Pseudonym;
-import com.avaulta.gateway.pseudonyms.ReversiblePseudonymStrategy;
+import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.Random;
 import java.util.function.Function;
@@ -16,10 +16,10 @@ import java.util.stream.IntStream;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
-class AESCBCReversiblePseudonymStrategyTest {
+class AESCBCReversibleTokenizationStrategyTest {
 
-    ReversiblePseudonymStrategy pseudonymizationStrategy;
-    DeterministicPseudonymStrategy deterministicPseudonymStrategy;
+    ReversibleTokenizationStrategy pseudonymizationStrategy;
+    DeterministicTokenizationStrategy deterministicTokenizationStrategy;
 
     //base64url-encoding without padding
     Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
@@ -28,11 +28,11 @@ class AESCBCReversiblePseudonymStrategyTest {
     @SneakyThrows
     @BeforeEach
     void setUp() {
-        deterministicPseudonymStrategy = new Sha256DeterministicPseudonymStrategy("salt");
+        deterministicTokenizationStrategy = new Sha256DeterministicTokenizationStrategy("salt");
         pseudonymizationStrategy =
-            AESReversiblePseudonymStrategy.builder()
-                .cipherSuite(AESReversiblePseudonymStrategy.CBC)
-                .deterministicPseudonymStrategy(deterministicPseudonymStrategy)
+            AESReversibleTokenizationStrategy.builder()
+                .cipherSuite(AESReversibleTokenizationStrategy.CBC)
+                .deterministicTokenizationStrategy(deterministicTokenizationStrategy)
                 .key(TestUtils.testKey())
                 .build();
     }

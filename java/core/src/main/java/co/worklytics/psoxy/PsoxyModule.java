@@ -7,12 +7,11 @@ import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrateg
 import co.worklytics.psoxy.storage.FileHandlerFactory;
 import co.worklytics.psoxy.storage.impl.FileHandlerFactoryImpl;
 
-import com.avaulta.gateway.pseudonyms.DeterministicPseudonymStrategy;
-import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
-import com.avaulta.gateway.pseudonyms.ReversiblePseudonymStrategy;
-import com.avaulta.gateway.pseudonyms.impl.AESReversiblePseudonymStrategy;
+import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
+import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
+import com.avaulta.gateway.tokens.impl.AESReversibleTokenizationStrategy;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
-import com.avaulta.gateway.pseudonyms.impl.Sha256DeterministicPseudonymStrategy;
+import com.avaulta.gateway.tokens.impl.Sha256DeterministicTokenizationStrategy;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.api.client.http.HttpContent;
@@ -125,22 +124,22 @@ public class PsoxyModule {
         return fileHandlerStrategy;
     }
     @Provides @Singleton
-    DeterministicPseudonymStrategy deterministicPseudonymStrategy(ConfigService config)  {
+    DeterministicTokenizationStrategy deterministicPseudonymStrategy(ConfigService config)  {
         String salt = config.getConfigPropertyOrError(ProxyConfigProperty.PSOXY_SALT);
-        return new Sha256DeterministicPseudonymStrategy(salt);
+        return new Sha256DeterministicTokenizationStrategy(salt);
     }
 
     @Provides @Singleton
-    ReversiblePseudonymStrategy pseudonymizationStrategy(ConfigService config,
-                                                         DeterministicPseudonymStrategy deterministicPseudonymStrategy) {
+    ReversibleTokenizationStrategy pseudonymizationStrategy(ConfigService config,
+                                                            DeterministicTokenizationStrategy deterministicTokenizationStrategy) {
 
         String keyFromConfig = config.getConfigPropertyOrError(ProxyConfigProperty.PSOXY_ENCRYPTION_KEY);
         SecretKeySpec key = new SecretKeySpec(Base64.getDecoder().decode(keyFromConfig), "AES");
 
-        return AESReversiblePseudonymStrategy.builder()
-            .cipherSuite(AESReversiblePseudonymStrategy.CBC)
+        return AESReversibleTokenizationStrategy.builder()
+            .cipherSuite(AESReversibleTokenizationStrategy.CBC)
             .key(key)
-            .deterministicPseudonymStrategy(deterministicPseudonymStrategy)
+            .deterministicTokenizationStrategy(deterministicTokenizationStrategy)
             .build();
     }
 

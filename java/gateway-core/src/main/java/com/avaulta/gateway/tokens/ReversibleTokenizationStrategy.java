@@ -1,11 +1,11 @@
-package com.avaulta.gateway.pseudonyms;
+package com.avaulta.gateway.tokens;
 
 import java.util.function.Function;
 
 /**
  *
  */
-public interface ReversiblePseudonymStrategy {
+public interface ReversibleTokenizationStrategy {
 
 
     /**

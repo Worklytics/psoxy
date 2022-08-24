@@ -2,14 +2,13 @@ package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.gateway.*;
-import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import co.worklytics.psoxy.rules.RuleSet;
 import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.psoxy.utils.ComposedHttpRequestInitializer;
 import co.worklytics.psoxy.utils.GzipedContentHttpRequestInitializer;
 import co.worklytics.psoxy.utils.URLUtils;
-import com.avaulta.gateway.pseudonyms.ReversiblePseudonymStrategy;
+import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.http.GenericUrl;
@@ -52,7 +51,7 @@ public class CommonRequestHandler {
     RuleSet rules;
     @Inject HealthCheckRequestHandler healthCheckRequestHandler;
     @Inject
-    ReversiblePseudonymStrategy reversiblePseudonymStrategy;
+    ReversibleTokenizationStrategy reversibleTokenizationStrategy;
     @Inject UrlSafeTokenPseudonymEncoder pseudonymEncoder;
 
     private volatile Sanitizer sanitizer;
@@ -205,7 +204,7 @@ public class CommonRequestHandler {
         //TODO: warn here for Google Workspace connectors, which expect user??
 
         accountToImpersonate = accountToImpersonate
-            .map(s -> pseudonymEncoder.decodeAndReverseAllContainedKeyedPseudonyms(s, reversiblePseudonymStrategy));
+            .map(s -> pseudonymEncoder.decodeAndReverseAllContainedKeyedPseudonyms(s, reversibleTokenizationStrategy));
 
         Credentials credentials = sourceAuthStrategy.getCredentials(accountToImpersonate);
         HttpCredentialsAdapter initializeWithCredentials = new HttpCredentialsAdapter(credentials);
@@ -262,7 +261,7 @@ public class CommonRequestHandler {
         }
 
         //TODO: configurable behavior?
-        targetURLString = pseudonymEncoder.decodeAndReverseAllContainedKeyedPseudonyms(targetURLString, reversiblePseudonymStrategy);
+        targetURLString = pseudonymEncoder.decodeAndReverseAllContainedKeyedPseudonyms(targetURLString, reversibleTokenizationStrategy);
 
         return new URL(targetURLString);
     }

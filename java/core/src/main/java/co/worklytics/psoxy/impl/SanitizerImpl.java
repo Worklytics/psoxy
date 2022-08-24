@@ -6,7 +6,8 @@ import co.worklytics.psoxy.rules.Transform;
 import co.worklytics.psoxy.utils.URLUtils;
 import com.avaulta.gateway.pseudonyms.*;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
-import com.avaulta.gateway.pseudonyms.impl.JsonPseudonymEncoder;
+import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
+import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.jayway.jsonpath.Configuration;
@@ -67,9 +68,9 @@ public class SanitizerImpl implements Sanitizer {
     HashUtils hashUtils;
 
     @Inject
-    ReversiblePseudonymStrategy reversiblePseudonymStrategy;
+    ReversibleTokenizationStrategy reversibleTokenizationStrategy;
     @Inject
-    DeterministicPseudonymStrategy deterministicPseudonymStrategy;
+    DeterministicTokenizationStrategy deterministicTokenizationStrategy;
     @Inject
     UrlSafeTokenPseudonymEncoder urlSafePseudonymEncoder;
 
@@ -337,7 +338,7 @@ public class SanitizerImpl implements Sanitizer {
 
            builder.hash(urlSafePseudonymEncoder.encode(
                Pseudonym.builder()
-                   .hash(deterministicPseudonymStrategy.getPseudonym(value.toString(), canonicalization))
+                   .hash(deterministicTokenizationStrategy.getToken(value.toString(), canonicalization))
                    .build()));
 
         } else {
@@ -347,7 +348,7 @@ public class SanitizerImpl implements Sanitizer {
         if (transformOptions.getIncludeReversible()) {
             builder.reversible(urlSafePseudonymEncoder.encode(
                 Pseudonym.builder()
-                    .reversible(reversiblePseudonymStrategy.getReversiblePseudonym(value.toString(), canonicalization))
+                    .reversible(reversibleTokenizationStrategy.getReversiblePseudonym(value.toString(), canonicalization))
                     .domain(domain)
                     .build()));
         }

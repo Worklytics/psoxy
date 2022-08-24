@@ -1,6 +1,6 @@
-package com.avaulta.gateway.pseudonyms.impl;
+package com.avaulta.gateway.tokens.impl;
 
-import com.avaulta.gateway.pseudonyms.DeterministicPseudonymStrategy;
+import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -9,7 +9,7 @@ import java.util.function.Function;
 
 
 @RequiredArgsConstructor
-public class Sha256DeterministicPseudonymStrategy implements DeterministicPseudonymStrategy {
+public class Sha256DeterministicTokenizationStrategy implements DeterministicTokenizationStrategy {
 
 
     public static final int HASH_SIZE_BYTES = 32; //SHA-256
@@ -18,12 +18,12 @@ public class Sha256DeterministicPseudonymStrategy implements DeterministicPseudo
     final String salt;
 
     @Override
-    public int getPseudonymLength() {
+    public int getTokenLength() {
         return HASH_SIZE_BYTES;
     }
 
     @Override
-    public byte[] getPseudonym(String identifier, Function<String, String> canonicalization) {
+    public byte[] getToken(String identifier, Function<String, String> canonicalization) {
         //pass in a canonicalization function? if not, this won't match for the canonically-equivalent
         // identifier in different formats (eg, cased/etc)
 
