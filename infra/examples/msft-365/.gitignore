@@ -1,7 +1,7 @@
 # ignore terraform variables / state for developers' personal development environments and other examples
 # NOTE: for prod use, you likely want to remove this file and commit these
 terraform.tfvars
-.terraform**
+.terraform/**
 TODO*
 test*
 
