@@ -10,6 +10,22 @@ terraform {
   }
 }
 
+module "worklytics_connector_specs" {
+  source = "../../modules/worklytics-connector-specs"
+
+  enabled_connectors = [
+    "gdirectory",
+    "gcal",
+    "gmail",
+    "google-meet",
+    "google-chat",
+    "asana",
+    "slack-discovery-api",
+    "zoom",
+  ]
+  google_workspace_example_user = var.google_workspace_example_user
+}
+
 # NOTE: if you don't have perms to provision a GCP project in your billing account, you can have
 # someone else create one and than import it:
 #  `terraform import google_project.psoxy-project your-psoxy-project-id`
@@ -25,7 +41,7 @@ resource "google_project" "psoxy-project" {
 
 module "psoxy-gcp" {
   # source = "../../modules/gcp"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp?ref=v0.4.0-rc"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp?ref=v0.4.1"
 
   project_id        = google_project.psoxy-project.project_id
   invoker_sa_emails = var.worklytics_sa_emails
@@ -36,128 +52,12 @@ module "psoxy-gcp" {
   ]
 }
 
-locals {
-  # Google Workspace Sources; add/remove as you wish, or toggle 'enabled' flag
-  google_workspace_sources = {
-    # GDirectory connections are a PRE-REQ for gmail, gdrive, and gcal connections. remove only
-    # if you plan to directly connect Directory to worklytics (without proxy). such a scenario is
-    # used for customers who care primarily about pseudonymizing PII of external subjects with whom
-    # they collaborate in GMail/GCal/Gdrive. the Directory does not contain PII of subjects external
-    # to the Google Workspace, so may be directly connected in such scenarios.
-    "gdirectory" : {
-      enabled : true,
-      source_kind : "gdirectory",
-      display_name : "Google Directory"
-      apis_consumed : [
-        "admin.googleapis.com"
-      ]
-      oauth_scopes_needed : [
-        "https://www.googleapis.com/auth/admin.directory.user.readonly",
-        "https://www.googleapis.com/auth/admin.directory.user.alias.readonly",
-        "https://www.googleapis.com/auth/admin.directory.domain.readonly",
-        "https://www.googleapis.com/auth/admin.directory.group.readonly",
-        "https://www.googleapis.com/auth/admin.directory.group.member.readonly",
-        "https://www.googleapis.com/auth/admin.directory.orgunit.readonly",
-        "https://www.googleapis.com/auth/admin.directory.rolemanagement.readonly"
-      ]
-      worklytics_connector_name : "Google Workspace Directory via Psoxy"
-      example_api_calls : [
-        "/admin/directory/v1/users/me",
-        "/admin/directory/v1/users?customer=my_customer",
-        "/admin/directory/v1/groups?customer=my_customer",
-        "/admin/directory/v1/customer/my_customer/domains",
-        "/admin/directory/v1/customer/my_customer/roles",
-        "/admin/directory/v1/customer/my_customer/rolesassignments"
-      ]
-      example_api_calls_user_to_impersonate : var.google_workspace_example_user
-    }
-    "gcal" : {
-      enabled : true,
-      source_kind : "gcal",
-      display_name : "Google Calendar"
-      apis_consumed : [
-        "calendar-json.googleapis.com"
-      ]
-      oauth_scopes_needed : [
-        "https://www.googleapis.com/auth/calendar.readonly"
-      ]
-      example_api_calls : [
-        "/calendar/v3/calendars/primary",
-        "/calendar/v3/users/me/settings",
-        "/calendar/v3/calendars/primary/events"
-      ]
-      example_api_calls_user_to_impersonate : var.google_workspace_example_user
-    }
-    "gmail" : {
-      enabled : true,
-      source_kind : "gmail",
-      display_name : "GMail"
-      apis_consumed : [
-        "gmail.googleapis.com"
-      ]
-      oauth_scopes_needed : [
-        "https://www.googleapis.com/auth/gmail.metadata"
-      ]
-      example_api_calls : [
-        "/gmail/v1/users/me/messages"
-      ]
-      example_api_calls_user_to_impersonate : var.google_workspace_example_user
-    }
-    "google-chat" : {
-      enabled : true,
-      source_kind : "google-chat",
-      display_name : "Google Chat"
-      apis_consumed : [
-        "admin.googleapis.com"
-      ]
-      oauth_scopes_needed : [
-        "https://www.googleapis.com/auth/admin.reports.audit.readonly"
-      ]
-      example_api_calls : [
-        "/admin/reports/v1/activity/users/all/applications/chat"
-      ]
-      example_api_calls_user_to_impersonate : var.google_workspace_example_user
-    }
-    "gdrive" : {
-      enabled : true,
-      source_kind : "gdrive",
-      display_name : "Google Drive"
-      apis_consumed : [
-        "drive.googleapis.com"
-      ]
-      oauth_scopes_needed : [
-        "https://www.googleapis.com/auth/drive.metadata.readonly"
-      ]
-      example_api_calls : [
-        "/drive/v2/files",
-        "/drive/v3/files"
-      ]
-      example_api_calls_user_to_impersonate : var.google_workspace_example_user
-    }
-    "google-meet" : {
-      enabled : true,
-      source_kind : "google-meet",
-      display_name : "Google Meet"
-      apis_consumed : [
-        "admin.googleapis.com"
-      ]
-      oauth_scopes_needed : [
-        "https://www.googleapis.com/auth/admin.reports.audit.readonly"
-      ]
-      example_api_calls : [
-        "/admin/reports/v1/activity/users/all/applications/meet"
-      ]
-      example_api_calls_user_to_impersonate : var.google_workspace_example_user
-    }
-  }
-  enabled_google_workspace_sources = { for id, spec in local.google_workspace_sources : id => spec if spec.enabled }
-}
 
 module "google-workspace-connection" {
-  for_each = local.enabled_google_workspace_sources
+  for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
 
   # source = "../../modules/google-workspace-dwd-connection"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/google-workspace-dwd-connection?ref=v0.4.0-rc"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/google-workspace-dwd-connection?ref=v0.4.1"
 
 
   project_id                   = google_project.psoxy-project.project_id
@@ -172,10 +72,10 @@ module "google-workspace-connection" {
 }
 
 module "google-workspace-connection-auth" {
-  for_each = local.enabled_google_workspace_sources
+  for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
 
   # source = "../../modules/gcp-sa-auth-key-secret-manager"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-sa-auth-key-secret-manager?ref=v0.4.0-rc"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-sa-auth-key-secret-manager?ref=v0.4.1"
 
   secret_project     = google_project.psoxy-project.project_id
   service_account_id = module.google-workspace-connection[each.key].service_account_id
@@ -183,21 +83,20 @@ module "google-workspace-connection-auth" {
 }
 
 module "psoxy-google-workspace-connector" {
-  for_each = local.enabled_google_workspace_sources
+  for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
 
-  source = "../../modules/gcp-psoxy-rest"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-rest?ref=v0.4.0-rc"
+  # source = "../../modules/gcp-psoxy-rest"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-rest?ref=v0.4.1"
 
-  project_id                    = google_project.psoxy-project.project_id
-  instance_id                   = "psoxy-${each.value.source_kind}"
-  service_account_email         = module.google-workspace-connection[each.key].service_account_email
-  artifacts_bucket_name         = module.psoxy-gcp.artifacts_bucket_name
-  deployment_bundle_object_name = module.psoxy-gcp.deployment_bundle_object_name
-  path_to_config                = "${var.psoxy_base_dir}/config/${each.value.source_kind}.yaml"
-  # from next version
-  # path_to_repo_root             = var.psoxy_base_dir
-  # example_api_calls                     = each.value.example_api_calls
-  # example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
+  project_id                            = google_project.psoxy-project.project_id
+  instance_id                           = "psoxy-${each.value.source_kind}"
+  service_account_email                 = module.google-workspace-connection[each.key].service_account_email
+  artifacts_bucket_name                 = module.psoxy-gcp.artifacts_bucket_name
+  deployment_bundle_object_name         = module.psoxy-gcp.deployment_bundle_object_name
+  path_to_config                        = "${var.psoxy_base_dir}/config/${each.value.source_kind}.yaml"
+  path_to_repo_root                     = var.psoxy_base_dir
+  example_api_calls                     = each.value.example_api_calls
+  example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
 
   salt_secret_id             = module.psoxy-gcp.salt_secret_name
   salt_secret_version_number = module.psoxy-gcp.salt_secret_version_number
@@ -212,10 +111,10 @@ module "psoxy-google-workspace-connector" {
 }
 
 module "worklytics-psoxy-connection" {
-  for_each = local.enabled_google_workspace_sources
+  for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
 
   # source = "../../modules/worklytics-psoxy-connection"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection?ref=v0.4.0-rc"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection?ref=v0.4.1"
 
   psoxy_endpoint_url = module.psoxy-google-workspace-connector[each.key].cloud_function_url
   display_name       = "${each.value.display_name} via Psoxy"
