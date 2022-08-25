@@ -19,70 +19,31 @@ provider "azuread" {
 
 data "azuread_client_config" "current" {}
 
-locals {
+module "worklytics_connector_specs" {
+  source = "../../modules/worklytics-connector-specs"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connector-specs?ref=v0.4.1"
+
+  enabled_connectors = [
+    "azure-ad",
+    "outlook-cal",
+    "outlook-mail",
+    "asana",
+    "slack-discovery-api",
+    "zoom",
+  ]
+
   # this IS the correct ID for the user terraform is running as, which we assume is a user who's OK
   # to use the subject of examples. You can change it to any string you want.
   example_msft_user_guid = data.azuread_client_config.current.object_id
+}
+
+locals {
   base_config_path       = "${var.psoxy_base_dir}configs/"
 
-  # Microsoft 365 sources; add/remove as you wish
-  # See https://docs.microsoft.com/en-us/graph/permissions-reference for all the permissions available in AAD Graph API
-  msft_sources = {
-    "azure-ad" : {
-      enabled : true,
-      source_kind : "azure-ad",
-      display_name : "Azure Directory"
-      required_oauth2_permission_scopes : [], # Delegated permissions (from `az ad sp list --query "[?appDisplayName=='Microsoft Graph'].oauth2Permissions" --all`)
-      required_app_roles : [                  # Application permissions (form az ad sp list --query "[?appDisplayName=='Microsoft Graph'].appRoles" --all
-        "User.Read.All",
-        "Group.Read.All"
-      ],
-      example_calls : [
-        "/v1.0/users",
-        "/v1.0/groups"
-      ]
-    },
-    "outlook-cal" : {
-      enabled : true,
-      source_kind : "outlook-cal",
-      display_name : "Outlook Calendar"
-      required_oauth2_permission_scopes : [],
-      required_app_roles : [
-        "OnlineMeetings.Read.All",
-        "Calendars.Read",
-        "MailboxSettings.Read",
-        "Group.Read.All",
-        "User.Read.All"
-      ],
-      example_calls : [
-        "/v1.0/users",
-        "/v1.0/users/${local.example_msft_user_guid}/events",
-        "/v1.0/users/${local.example_msft_user_guid}/mailboxSettings"
-      ]
-    },
-    "outlook-mail" : {
-      enabled : true,
-      source_kind : "outlook-mail"
-      display_name : "Outlook Mail"
-      required_oauth2_permission_scopes : [],
-      required_app_roles : [
-        "Mail.ReadBasic.All",
-        "MailboxSettings.Read",
-        "Group.Read.All",
-        "User.Read.All"
-      ],
-      example_calls : [
-        "/beta/users",
-        "/beta/users/${local.example_msft_user_guid}/mailboxSettings",
-        "/beta/users/${local.example_msft_user_guid}/mailFolders/SentItems/messages"
-      ]
-    }
-  }
-  enabled_msft_sources = { for id, spec in local.msft_sources : id => spec if spec.enabled }
 }
 
 module "msft-connection" {
-  for_each = local.enabled_msft_sources
+  for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
   # source = "../../modules/azuread-connection"
   source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-connection?ref=v0.4.1"
@@ -97,7 +58,7 @@ module "msft-connection" {
 # if you don't want Terraform to generate certificate for you on your local machine, comment this
 # out
 module "msft-connection-auth" {
-  for_each = local.enabled_msft_sources
+  for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
   # source = "../../modules/azuread-local-cert"
   source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-local-cert?ref=v0.4.1"
@@ -111,7 +72,7 @@ module "msft-connection-auth" {
 
 
 resource "local_file" "configure_client_id" {
-  for_each = local.enabled_msft_sources
+  for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
   filename = "TODO - SENSITIVE - setup ${each.key} secrets in AWS.md"
   content  = <<EOT
@@ -135,7 +96,7 @@ EOT
 # NOTE: you can comment this out, but then will have to figure out how to do this on your own
 # outside of Terraform (eg, navigate the Azure AD console and find the apps in question)
 module "msft_365_grants" {
-  for_each = local.enabled_msft_sources
+  for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
   # source = "../../modules/azuread-grant-all-users"
   source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-grant-all-users?ref=v0.4.1"
