@@ -41,8 +41,8 @@ locals {
 }
 
 module "worklytics_connector_specs" {
-  source = "../../modules/worklytics-connector-specs"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connector-specs?ref=v0.4.1"
+  # source = "../../modules/worklytics-connector-specs"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connector-specs?ref=v0.4.1"
 
   enabled_connectors = [
     "azure-ad",
@@ -79,7 +79,8 @@ data "azuread_client_config" "current" {}
 module "msft-connection" {
   for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
-  # source = "../../modules/azuread-connection"
+
+  #source = "../../modules/azuread-connection"
   source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-connection?ref=v0.4.1"
 
   display_name                      = "Psoxy Connector - ${each.value.display_name}${var.connector_display_name_suffix}"
