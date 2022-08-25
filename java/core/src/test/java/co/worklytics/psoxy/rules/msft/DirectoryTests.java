@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.stream.Stream;
 
 public class DirectoryTests extends JavaRulesTestBaseCase {
 
@@ -22,14 +23,6 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
 
     @Getter
     final String yamlSerializationFilepath = "microsoft-365/directory";
-
-    @Disabled // not reliable; seems to have different value via IntelliJ/AWS deployment and my
-    // laptop's maven, which doesn't make any sense, given that binary deployed to AWS was built via
-    // maven on my laptop - so something about Surefire/Junit runner used by maven??
-    @Test
-    void sha() {
-        this.assertSha("7869e465607b7a00b4bd75a832a9ed1f811ce7f2");
-    }
 
     @Test
     void user() {
@@ -140,5 +133,14 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
             "PattiF@M365x214355.onmicrosoft.com"
             );
 
+    }
+
+
+    public Stream<InvocationExample> getExamples() {
+        return Stream.of(
+            InvocationExample.of("https://graph.microsoft.com/v1.0/groups/02bd9fd6-8f93-4758-87c3-1fb73740a315/members?$count=true", "group-members.json"),
+            InvocationExample.of("https://graph.microsoft.com/v1.0/users/12398123012312", "user.json"),
+            InvocationExample.of("https://graph.microsoft.com/v1.0/users", "users.json")
+        );
     }
 }

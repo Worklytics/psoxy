@@ -42,19 +42,20 @@ public class CSVFileHandler implements FileHandler {
 
         Preconditions.checkArgument(records.getHeaderMap() != null, "Failed to parse header from file");
 
-        Sanitizer.Options options = sanitizer.getOptions();
+        Sanitizer.ConfigurationOptions configurationOptions = sanitizer.getConfigurationOptions();
 
-        Set<String> columnsToRedact = ((CsvRules) options.getRules())
+        Set<String> columnsToRedact = ((CsvRules) configurationOptions.getRules())
             .getColumnsToRedact()
             .stream()
             .map(String::trim)
             .collect(Collectors.toCollection(() -> new TreeSet<>(String.CASE_INSENSITIVE_ORDER)));
 
-        Set<String> columnsToPseudonymize = ((CsvRules) options.getRules())
+        Set<String> columnsToPseudonymize = ((CsvRules) configurationOptions.getRules())
             .getColumnsToPseudonymize()
             .stream()
             .map(String::trim)
             .collect(Collectors.toCollection(() -> new TreeSet<>(String.CASE_INSENSITIVE_ORDER)));
+
 
         // headers respecting insertion order
         // when constructing the parser with ignore header case the keySet may not return values in

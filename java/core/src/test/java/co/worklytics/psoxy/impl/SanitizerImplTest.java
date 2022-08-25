@@ -1,12 +1,17 @@
 package co.worklytics.psoxy.impl;
 
 import co.worklytics.psoxy.*;
+import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
 import co.worklytics.psoxy.rules.Transform;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestUtils;
+import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
+import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
+import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.MapFunction;
 import dagger.Component;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
@@ -21,6 +26,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.Objects;
 
+import static co.worklytics.test.TestModules.withMockEncryptionKey;
 import static org.junit.jupiter.api.Assertions.*;
 
 class SanitizerImplTest {
@@ -32,6 +38,16 @@ class SanitizerImplTest {
 
     @Inject
     protected SanitizerFactory sanitizerFactory;
+
+    @Inject
+    protected ReversibleTokenizationStrategy reversibleTokenizationStrategy;
+
+    @Inject
+    protected UrlSafeTokenPseudonymEncoder pseudonymEncoder;
+
+
+    @Inject
+    ConfigService config;
 
 
     @Singleton
@@ -48,11 +64,14 @@ class SanitizerImplTest {
         Container container = DaggerSanitizerImplTest_Container.create();
         container.inject(this);
 
-        sanitizer = sanitizerFactory.create(Sanitizer.Options.builder()
+        sanitizer = sanitizerFactory.create(Sanitizer.ConfigurationOptions.builder()
             .rules(PrebuiltSanitizerRules.DEFAULTS.get("gmail"))
             .pseudonymizationSalt("an irrelevant per org secret")
             .defaultScopeId("scope")
+            .pseudonymImplementation(PseudonymImplementation.LEGACY)
             .build());
+
+        withMockEncryptionKey(config);
     }
 
     @SneakyThrows
@@ -278,6 +297,53 @@ class SanitizerImplTest {
         //matches default JSON serialization
         assertEquals(value,
             ((new ObjectMapper()).writer().writeValueAsString(document)));
+    }
+
+
+    @Test
+    void pseudonymizeWithReversalKey() {
+        MapFunction f = sanitizer.getPseudonymize(Transform.Pseudonymize.builder().includeReversible(true).build());
+
+        assertEquals("{\"scope\":\"scope\",\"hash\":\"Htt5DmAnE8xaCjfYnLm83_xR8.hhEJE2f_bkFP2yljg\",\"reversible\":\"p~Z7Bnl_VVOwSmfP9kuT0_Ub-5ic4cCVI4wCHArL1hU0MzTTbTCc7BcR53imT1qZgI\"}",
+            f.map("asfa", sanitizer.getJsonConfiguration()));
+    }
+
+    @Test
+    void reversiblePseudonym() {
+        MapFunction f = sanitizer.getPseudonymize(Transform.Pseudonymize.builder().includeReversible(true).build());
+
+        String lcase = (String) f.map("erik@engetc.com", sanitizer.getJsonConfiguration());
+        String ucaseFirst = (String) f.map("Erik@engetc.com", sanitizer.getJsonConfiguration());
+
+        assertNotEquals(lcase, ucaseFirst);
+        //but hashes the same
+        assertEquals(lcase.substring(0, 32), ucaseFirst.substring(0, 32));
+    }
+
+
+    @Test
+    void tokenize() {
+        String original = "blah";
+        MapFunction f = sanitizer.getTokenize(Transform.Tokenize.builder().build());
+        String r =  (String) f.map(original, sanitizer.getJsonConfiguration());
+
+        assertArrayEquals(reversibleTokenizationStrategy.getReversibleToken(original),
+            pseudonymEncoder.decode(r).getReversible());
+    }
+
+    @Test
+    void tokenize_regex() {
+        String path = "v1.0/$metadata#users('48d31887-5fad-4d73-a9f5-3c356e68a038')/calendars('AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OABGAAAAAAAiQ8W967B7TKBjgx9rVEURBwAiIsqMbYjsT5e-T7KzowPTAAAAAAEGAAAiIsqMbYjsT5e-T7KzowPTAAABuC35AAA%3D')/events";
+        String host = "https://graph.microsoft.com/";
+        MapFunction f = sanitizer.getTokenize(Transform.Tokenize.builder()
+                .regex("^https://graph.microsoft.com/(.*)$")
+                .build());
+        String r = (String) f.map(host+path, sanitizer.getJsonConfiguration());
+
+
+        assertNotEquals(host + path, r);
+        assertEquals(host + path,
+            pseudonymEncoder.decodeAndReverseAllContainedKeyedPseudonyms(r, reversibleTokenizationStrategy));
     }
 
 }

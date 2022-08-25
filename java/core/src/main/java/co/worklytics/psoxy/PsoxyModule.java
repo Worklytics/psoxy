@@ -6,21 +6,35 @@ import co.worklytics.psoxy.gateway.SourceAuthStrategy;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 import co.worklytics.psoxy.storage.FileHandlerFactory;
 import co.worklytics.psoxy.storage.impl.FileHandlerFactoryImpl;
+
+import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
+import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
+import com.avaulta.gateway.tokens.impl.AESReversibleTokenizationStrategy;
+import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
+import com.avaulta.gateway.tokens.impl.Sha256DeterministicTokenizationStrategy;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.api.client.http.HttpContent;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 import com.jayway.jsonpath.Configuration;
-import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import dagger.Module;
 import dagger.Provides;
+import lombok.extern.java.Log;
 
 
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.spec.SecretKeySpec;
 import javax.inject.Named;
 import javax.inject.Singleton;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
+import java.util.Base64;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -30,6 +44,7 @@ import java.util.logging.Logger;
  * provides implementations for platform-independent dependencies of 'core' module
  *
  */
+@Log
 @Module
 public class PsoxyModule {
 
@@ -116,4 +131,35 @@ public class PsoxyModule {
     static FileHandlerFactory fileHandler(FileHandlerFactoryImpl fileHandlerStrategy) {
         return fileHandlerStrategy;
     }
+    @Provides @Singleton
+    DeterministicTokenizationStrategy deterministicPseudonymStrategy(ConfigService config)  {
+        String salt = config.getConfigPropertyOrError(ProxyConfigProperty.PSOXY_SALT);
+        return new Sha256DeterministicTokenizationStrategy(salt);
+    }
+
+    @Provides @Singleton
+    ReversibleTokenizationStrategy pseudonymizationStrategy(ConfigService config,
+                                                            DeterministicTokenizationStrategy deterministicTokenizationStrategy) {
+
+        String salt = config.getConfigPropertyOrError(ProxyConfigProperty.PSOXY_SALT);
+        Optional<SecretKeySpec> keyFromConfig = config.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_ENCRYPTION_KEY)
+            .map(passkey -> AESReversibleTokenizationStrategy.aesKeyFromPassword(passkey, salt));
+        //q: do we need to support actual fully AES keys?
+
+        if (!keyFromConfig.isPresent()) {
+            log.warning("No value for PSOXY_ENCRYPTION_KEY; any transforms depending on it will fail!");
+        }
+
+        return AESReversibleTokenizationStrategy.builder()
+            .cipherSuite(AESReversibleTokenizationStrategy.CBC)
+            .key(keyFromConfig.orElse(null)) //null disables it, which is OK if transforms depending on this aren't used
+            .deterministicTokenizationStrategy(deterministicTokenizationStrategy)
+            .build();
+    }
+
+    @Provides @Singleton
+    UrlSafeTokenPseudonymEncoder urlSafeTokenPseudonymEncoder() {
+        return new UrlSafeTokenPseudonymEncoder();
+    }
+
 }

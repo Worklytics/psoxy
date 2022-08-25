@@ -48,7 +48,48 @@ resource "random_password" "random" {
 resource "google_secret_manager_secret_version" "initial_version" {
   secret      = google_secret_manager_secret.pseudonymization-salt.id
   secret_data = sensitive(random_password.random.result)
+
+  # if customer changes value outside TF, don't overwrite
+  lifecycle {
+    ignore_changes = [
+      secret_data
+    ]
+  }
 }
+
+
+resource "google_secret_manager_secret" "pseudonymization-key" {
+  project   = var.project_id
+  secret_id = "PSOXY_ENCRYPTION_KEY"
+
+  replication {
+    automatic = true
+  }
+
+  depends_on = [
+    google_project_service.gcp-infra-api
+  ]
+}
+
+resource "random_password" "pseudonymization-key" {
+  length  = 32
+  special = true
+}
+
+resource "google_secret_manager_secret_version" "initial_version" {
+  secret      = google_secret_manager_secret.pseudonymization-key.id
+  secret_data = sensitive(random_password.pseudonymization-key.result)
+
+
+  # if customer changes value outside TF, don't overwrite
+  lifecycle {
+    ignore_changes = [
+      secret_data
+    ]
+  }
+}
+
+
 
 # grants invoker to these SA for ALL functions in this project. this is the recommended setup, as
 # we expect this GCP project to only be used of psoxy instances to be consumed from your Worklytics

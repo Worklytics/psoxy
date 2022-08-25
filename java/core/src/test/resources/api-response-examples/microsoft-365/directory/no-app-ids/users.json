@@ -1,0 +1,59 @@
+{
+  "@odata.context":"https://graph.microsoft.com/v1.0/$metadata#users",
+  "value":[
+    {
+      "id":"p~bFDzUA6DcTb6Jc4bDJ4UDkZwq_lK0Ob5TJA0h6E_6UmQ_EQgmQCK_TdrApUV5q-PZaA9i28Oitm-X6bYa8iwQSNV1qzposKfzSfm7JN860o",
+      "businessPhones":[ ],
+      "jobTitle":null,
+      "mail":"{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"q13PonzfNpUWmyGUYmClKKmAFrkH_BjdABY74ccirMk\"}",
+      "officeLocation":null,
+      "preferredLanguage":"en-US",
+      "userPrincipalName":"{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"q13PonzfNpUWmyGUYmClKKmAFrkH_BjdABY74ccirMk\"}"
+    },
+    {
+      "id":"p~olwC_FZa24BttFSG87T2U-fJybmzdHj6SMc7LxV4zOm0oLvgEDHxSVdAUvflsZfNPyGZt4MDy8hyxOZP9VHyJpfDnlVva0m1ElQ-WrRUjxM",
+      "businessPhones":[ ],
+      "jobTitle":null,
+      "mail":"{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"YbwNv0Jw8i7kKLWaqhEIMC5Se6pPeE4kIBf2st3rm9c\"}",
+      "officeLocation":null,
+      "preferredLanguage":null,
+      "userPrincipalName":"{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"YbwNv0Jw8i7kKLWaqhEIMC5Se6pPeE4kIBf2st3rm9c\"}"
+    },
+    {
+      "id":"p~CBRYQdohf24wt2ERzO_2CUZ1D7HWgla01CtX9RnFgko9_YX4INCm3pJZDkOYr_wJHHXNWuFYA5yKMQ0GOunQ_yECslrs_0kt_P_0uAUlKes",
+      "businessPhones":[ ],
+      "jobTitle":null,
+      "mail":"{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"yRNnmnw83TqOPzYGRAEQavMUIWzFFtw350OZkB1kQrk\"}",
+      "officeLocation":null,
+      "preferredLanguage":"en-US",
+      "userPrincipalName":"{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"yRNnmnw83TqOPzYGRAEQavMUIWzFFtw350OZkB1kQrk\"}"
+    },
+    {
+      "id":"p~11O1eqpq2vEzigY-HlCb5svil7cXxmuDhaMTaj86mLDZA43zB4KsiYB6d56uPZYidcBB96tOU2AfhbhLQbbhqAvLsaPaOgMj64f71eMQHc0",
+      "businessPhones":[ ],
+      "jobTitle":null,
+      "mail":"{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"8wfO0E2lPfP4s.Kdl80rQxSLgKoyCH5VsTHCln70YgI\"}",
+      "officeLocation":null,
+      "preferredLanguage":"es-ES",
+      "userPrincipalName":"{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"8wfO0E2lPfP4s.Kdl80rQxSLgKoyCH5VsTHCln70YgI\"}"
+    },
+    {
+      "id":"p~kOTAg44Qv8HSvYWG7niJEq_fPTSFm1vHKYfVhmrS221C1HOmCt8kkL376bc8842blh7-oAvtkYr2dK5dFhDDaMs_TWiVje9MvvyyZE6JI7E",
+      "businessPhones":[ ],
+      "jobTitle":null,
+      "mail":"{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"ZFmgYXeeM9Vr385OqSDur7FU59uw8MpRF74uYg7kMxQ\"}",
+      "officeLocation":null,
+      "preferredLanguage":"en-US",
+      "userPrincipalName":"{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"ZFmgYXeeM9Vr385OqSDur7FU59uw8MpRF74uYg7kMxQ\"}"
+    },
+    {
+      "businessPhones":[ ],
+      "jobTitle":null,
+      "mail":"null",
+      "officeLocation":null,
+      "preferredLanguage":null,
+      "userPrincipalName":"{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"mbQYAaLx.FMtyO1ax80fwVazndo4PZoqtcAqSvqXTV0\"}",
+      "id":"p~xU2vGhAEBHegciOlP1Oz2bRY1_OkAY-GO2VY7FGQU5tc-5pDPeQYr4dh1Xrkbl1dmx1pyWCN8R3C-tWSXv_7DNDELLFYYHtX6FiIDjdLDaw"
+    }
+  ]
+}

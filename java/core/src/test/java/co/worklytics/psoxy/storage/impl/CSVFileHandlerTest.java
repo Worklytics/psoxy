@@ -9,6 +9,7 @@ import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestModules;
 import co.worklytics.test.TestUtils;
+import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import dagger.Component;
 import lombok.SneakyThrows;
@@ -64,12 +65,14 @@ public class CSVFileHandlerTest {
                 "3,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"workltycis.co\"\",\"\"hash\"\":\"\"BlQB8Vk0VwdbdWTGAzBF.ote1357Ajr0fFcgFf72kdk\"\"}\",Engineering,2020-01-06\r\n" +
                 "4,,Engineering,2020-01-06\r\n"; //blank ID
 
-        Sanitizer sanitizer = sanitizerFactory.create(Sanitizer.Options.builder()
+
+        Sanitizer sanitizer = sanitizerFactory.create(Sanitizer.ConfigurationOptions.builder()
                 .rules(CsvRules.builder()
                     .columnToPseudonymize("EMPLOYEE_EMAIL")
                     .build())
                 .pseudonymizationSalt("salt")
                 .defaultScopeId("hris")
+                .pseudonymImplementation(PseudonymImplementation.LEGACY)
                 .build());
 
         String s = (new YAMLMapper()).writeValueAsString(CsvRules.builder()
@@ -95,12 +98,14 @@ public class CSVFileHandlerTest {
                 "3,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"workltycis.co\"\",\"\"hash\"\":\"\"BlQB8Vk0VwdbdWTGAzBF.ote1357Ajr0fFcgFf72kdk\"\"}\",2020-01-06\r\n" +
                 "4,,2020-01-06\r\n"; //blank ID
 
-        Sanitizer sanitizer = sanitizerFactory.create(Sanitizer.Options.builder()
+
+        Sanitizer sanitizer = sanitizerFactory.create(Sanitizer.ConfigurationOptions.builder()
                 .rules(CsvRules.builder()
                     .columnToPseudonymize("EMPLOYEE_EMAIL")
                     .columnToRedact("DEPARTMENT")
                     .build())
                 .pseudonymizationSalt("salt")
+                .pseudonymImplementation(PseudonymImplementation.LEGACY)
                 .defaultScopeId("hris")
                 .build());
 
@@ -119,13 +124,14 @@ public class CSVFileHandlerTest {
         final String EXPECTED = "EMPLOYEE_ID,AN EMAIL,SOME DEPARTMENT\r\n" +
                 "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",Engineering\r\n";
 
-        Sanitizer sanitizer = sanitizerFactory.create(Sanitizer.Options.builder()
+
+        Sanitizer sanitizer = sanitizerFactory.create(Sanitizer.ConfigurationOptions.builder()
             .rules(CsvRules.builder()
                 .columnToPseudonymize("EMPLOYEE_ID")
-                .columnToPseudonymize("AN EMAIL")
-                .build())
+                .columnToPseudonymize("AN EMAIL").build())
                 .pseudonymizationSalt("salt")
                 .defaultScopeId("hris")
+                .pseudonymImplementation(PseudonymImplementation.LEGACY)
                 .build());
 
         File inputFile = new File(getClass().getResource("/csv/hris-example-headers-w-spaces.csv").getFile());
@@ -143,12 +149,14 @@ public class CSVFileHandlerTest {
         final String EXPECTED = "EMPLOYEE_ID,EMAIL,DEPARTMENT\r\n" +
                 "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",\",,,\"\r\n";
 
-        Sanitizer sanitizer = sanitizerFactory.create(Sanitizer.Options.builder()
-            .rules(CsvRules.builder()
+
+        Sanitizer sanitizer = sanitizerFactory.create(Sanitizer.ConfigurationOptions.builder()
+                .rules(CsvRules.builder()
                 .columnToPseudonymize("EMPLOYEE_ID")
                 .columnToPseudonymize("EMAIL")
                 .build())
                 .pseudonymizationSalt("salt")
+                .pseudonymImplementation(PseudonymImplementation.LEGACY)
                 .defaultScopeId("hris")
                 .build());
 
@@ -175,10 +183,11 @@ public class CSVFileHandlerTest {
 
         RuleSet rules = rulesUtils.getRulesFromConfig(config).orElseThrow();
 
-        Sanitizer sanitizer = sanitizerFactory.create(Sanitizer.Options.builder()
+        Sanitizer sanitizer = sanitizerFactory.create(Sanitizer.ConfigurationOptions.builder()
             .rules(rules)
             .pseudonymizationSalt("salt")
             .defaultScopeId("hris")
+            .pseudonymImplementation(PseudonymImplementation.LEGACY)
             .build());
 
         File inputFile = new File(getClass().getResource("/csv/hris-default-rules.csv").getFile());
@@ -197,13 +206,14 @@ public class CSVFileHandlerTest {
         final String EXPECTED = "EMPLOYEE_ID,AN EMAIL,SOME DEPARTMENT\r\n" +
             "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",Engineering\r\n";
 
-        Sanitizer sanitizer = sanitizerFactory.create(Sanitizer.Options.builder()
+        Sanitizer sanitizer = sanitizerFactory.create(Sanitizer.ConfigurationOptions.builder()
             .rules(CsvRules.builder()
                 .columnToPseudonymize("    employee_id     ")
                 .columnToPseudonymize(" an EMAIL ")
                 .build())
             .pseudonymizationSalt("salt")
             .defaultScopeId("hris")
+            .pseudonymImplementation(PseudonymImplementation.LEGACY)
             .build());
 
         File inputFile = new File(getClass().getResource("/csv/hris-example-headers-w-spaces.csv").getFile());

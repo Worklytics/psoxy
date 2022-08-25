@@ -1,0 +1,121 @@
+allowAllEndpoints: false
+endpoints:
+  - pathRegex: "^/admin/directory/v1/customer/[^/]*/domains.*"
+  - pathRegex: "^/admin/directory/v1/users\\?.*$"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.users[*].primaryEmail"
+          - "$.users[*].emails[*].address"
+          - "$.users[*].externalIds[*].value"
+          - "$.users[*].aliases[*]"
+          - "$.users[*].nonEditableAliases[*]"
+          - "$.users[*].ims[*].im"
+          - "$.users[*].phones[*].value"
+          - "$.users[*].posixAccounts[*].accountId"
+          - "$.users[*].posixAccounts[*].uid"
+          - "$.users[*].posixAccounts[*].username"
+          - "$.users[*].locations[*].deskCode"
+          - "$.users[*].relations[*].value"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$.users[*].name"
+          - "$.users[*].thumbnailPhotoUrl"
+          - "$.users[*].recoveryEmail"
+          - "$.users[*].recoveryPhone"
+          - "$.users[*].posixAccounts[*].homeDirectory"
+          - "$.users[*].sshPublicKeys[*]"
+          - "$.users[*].websites[*]"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.users[*].id"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
+  - pathRegex: "^/admin/directory/v1/users/[^/]*$"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.primaryEmail"
+          - "$.emails[*].address"
+          - "$.aliases[*]"
+          - "$.nonEditableAliases[*]"
+          - "$.ims[*].im"
+          - "$.externalIds[*].value"
+          - "$.phones[*].value"
+          - "$.posixAccounts[*].accountId"
+          - "$.posixAccounts[*].uid"
+          - "$.posixAccounts[*].username"
+          - "$.locations[*].deskCode"
+          - "$.relations[*].value"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$.name"
+          - "$.thumbnailPhotoUrl"
+          - "$.recoveryEmail"
+          - "$.recoveryPhone"
+          - "$.posixAccounts[*].homeDirectory"
+          - "$.sshPublicKeys[*]"
+          - "$.websites[*]"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.id"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
+  - pathRegex: "^/admin/directory/v1/groups(\\?)?[^/]*$"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..email"
+          - "$..aliases[*]"
+          - "$..nonEditableAliases[*]"
+        includeOriginal: true
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$..description"
+  - pathRegex: "^/admin/directory/v1/groups/[^/]*$"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..email"
+          - "$..aliases[*]"
+          - "$..nonEditableAliases[*]"
+        includeOriginal: true
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$..description"
+  - pathRegex: "^/admin/directory/v1/groups/[^/]*/members[^/]*$"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..email"
+          - "$..aliases[*]"
+          - "$..nonEditableAliases[*]"
+        encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.members[*].id"
+        encoding: "JSON"
+  - pathRegex: "^/admin/directory/v1/orgunits\\?.*"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..description"
+  - pathRegex: "^/admin/directory/v1/orgunits/[^/]*"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..description"
+  - pathRegex: "^/admin/directory/v1/customer/[^/]*/roles[^/]*"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..roleDescription"
+  - pathRegex: "^/admin/directory/v1/customer/[^/]*/roles/[^/]*"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..roleDescription"

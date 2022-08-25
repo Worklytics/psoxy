@@ -1,0 +1,151 @@
+---
+allowAllEndpoints: false
+endpoints:
+  - pathRegex: "^/(v1.0|beta)/users/?[^/]*"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..displayName"
+          - "$..employeeId"
+          - "$..aboutMe"
+          - "$..mySite"
+          - "$..preferredName"
+          - "$..givenName"
+          - "$..surname"
+          - "$..mailNickname"
+          - "$..proxyAddresses"
+          - "$..faxNumber"
+          - "$..mobilePhone"
+          - "$..businessPhones[*]"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..userPrincipalName"
+          - "$..imAddresses[*]"
+          - "$..mail"
+          - "$..otherMails[*]"
+        encoding: "JSON"
+  - pathRegex: "^/(v1.0|beta)/groups/?[^/]*"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..owners"
+          - "$..rejectedSenders"
+          - "$..acceptedSenders"
+          - "$..members"
+          - "$..membersWithLicenseErrors"
+  - pathRegex: "^/(v1.0|beta)/groups/[^/]*/members.*"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..displayName"
+          - "$..employeeId"
+          - "$..aboutMe"
+          - "$..mySite"
+          - "$..preferredName"
+          - "$..givenName"
+          - "$..surname"
+          - "$..mailNickname"
+          - "$..proxyAddresses"
+          - "$..faxNumber"
+          - "$..mobilePhone"
+          - "$..businessPhones[*]"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..userPrincipalName"
+          - "$..imAddresses[*]"
+          - "$..mail"
+          - "$..otherMails[*]"
+        encoding: "JSON"
+  - pathRegex: "^/(v1.0|beta)/users/[^/]*/mailboxSettings"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$.['@odata.context']"
+  - pathRegex: "^/(v1.0|beta)/users/[^/]*/(calendars/[^/]*/)?events.*"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..subject"
+          - "$..emailAddress.name"
+          - "$..extensions"
+          - "$..multiValueExtendedProperties"
+          - "$..singleValueExtendedProperties"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress.address"
+        encoding: "JSON"
+      - !<redactRegexMatches>
+        jsonPaths:
+          - "$..location.uniqueId"
+          - "$..locations[*].uniqueId"
+          - "$..location.displayName"
+          - "$..locations[*].displayName"
+          - "$..location.locationUri"
+          - "$..locations[*].locationUri"
+          - "$..onlineMeeting.joinUrl"
+          - "$..onlineMeetingUrl"
+          - "$..body.content"
+          - "$..bodyPreview"
+        redactions:
+          - "(?i)pwd=[^&]*"
+      - !<filterTokenByRegex>
+        jsonPaths:
+          - "$..body.content"
+          - "$..bodyPreview"
+        delimiter: "\\s+"
+        filters:
+          - "https://[^.]+\\.zoom\\.us/.*"
+      - !<tokenize>
+        jsonPaths:
+          - "$.['@odata.nextLink', '@odata.prevLink']"
+        regex: "^https://graph.microsoft.com/(.*)$"
+      - !<redact>
+        jsonPaths:
+          - "$.['@odata.context']"
+      - !<redact>
+        jsonPaths:
+          - "$..['calendar@odata.associationLink', 'calendar@odata.navigationLink']"
+  - pathRegex: "^/(v1.0|beta)/users/[^/]*/calendar/calendarView(?)[^/]*"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..subject"
+          - "$..emailAddress.name"
+          - "$..extensions"
+          - "$..multiValueExtendedProperties"
+          - "$..singleValueExtendedProperties"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress.address"
+        encoding: "JSON"
+      - !<redactRegexMatches>
+        jsonPaths:
+          - "$..location.uniqueId"
+          - "$..locations[*].uniqueId"
+          - "$..location.displayName"
+          - "$..locations[*].displayName"
+          - "$..location.locationUri"
+          - "$..locations[*].locationUri"
+          - "$..onlineMeeting.joinUrl"
+          - "$..onlineMeetingUrl"
+          - "$..body.content"
+          - "$..bodyPreview"
+        redactions:
+          - "(?i)pwd=[^&]*"
+      - !<filterTokenByRegex>
+        jsonPaths:
+          - "$..body.content"
+          - "$..bodyPreview"
+        delimiter: "\\s+"
+        filters:
+          - "https://[^.]+\\.zoom\\.us/.*"
+      - !<tokenize>
+        jsonPaths:
+          - "$.['@odata.nextLink', '@odata.prevLink']"
+        regex: "^https://graph.microsoft.com/(.*)$"
+      - !<redact>
+        jsonPaths:
+          - "$.['@odata.context']"
+      - !<redact>
+        jsonPaths:
+          - "$..['calendar@odata.associationLink', 'calendar@odata.navigationLink']"

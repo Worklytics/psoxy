@@ -1,11 +1,17 @@
 package co.worklytics.psoxy.rules.msft;
 
 import co.worklytics.psoxy.rules.Rules2;
+import com.google.common.collect.Streams;
 import lombok.Getter;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.stream.Stream;
+
+//TODO: fix this re-use via inheritance; makes tests brittle; we should inject this rule set into
+// the directory tests, or something like that
 public class CalendarTests extends DirectoryTests {
 
     @Getter
@@ -19,6 +25,15 @@ public class CalendarTests extends DirectoryTests {
 
     @Getter
     final String yamlSerializationFilepath = "microsoft-365/outlook-cal";
+
+
+    @BeforeEach
+    public void setTestSpec() {
+        this.setTestSpec(RulesTestSpec.builder()
+            .yamlSerializationFilePath("microsoft-365/outlook-cal")
+            .sanitizedExamplesDirectoryPath("api-response-examples/microsoft-365/outlook-cal/sanitized")
+            .build());
+    }
 
 
     @ParameterizedTest
@@ -152,5 +167,23 @@ public class CalendarTests extends DirectoryTests {
         assertRedacted(sanitized, "pwd=123123");
 
         assertNotSanitized(sanitized, "https://acme.zoom.us/j/12354234234");
+    }
+
+    @Override // rather than copy directory examples
+    public Stream<InvocationExample> getExamples() {
+        return Stream.of(
+            InvocationExample.of("https://graph.microsoft.com/beta/users/48d31887-5fad-4d73-a9f5-3c356e68a038/calendar/calendarView",
+                "CalendarView_beta.json"),
+            //InvocationExample.of("https://graph.microsoft.com/v1.0/users/48d31887-5fad-4d73-a9f5-3c356e68a038/calendar/calendarView",
+            //    "CalendarView_v1.0.json"),
+            InvocationExample.of("https://graph.microsoft.com/beta/users/48d31887-5fad-4d73-a9f5-3c356e68a038/events",
+                "Events_beta.json"),
+            InvocationExample.of("https://graph.microsoft.com/v1.0/users/48d31887-5fad-4d73-a9f5-3c356e68a038/events",
+                "Events_v1.0.json"),
+            InvocationExample.of("https://graph.microsoft.com/beta/users/48d31887-5fad-4d73-a9f5-3c356e68a038/events/asdfasdfas",
+                "Event_beta.json"),
+            InvocationExample.of("https://graph.microsoft.com/v1.0/users/48d31887-5fad-4d73-a9f5-3c356e68a038/events/asdfasdf",
+                "Event_v1.0.json")
+            );
     }
 }

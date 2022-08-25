@@ -4,9 +4,12 @@ import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.impl.SanitizerImpl;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestUtils;
+import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
+import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.MapFunction;
 import dagger.Component;
 import lombok.*;
 import org.apache.commons.lang3.StringUtils;
@@ -42,6 +45,24 @@ abstract public class RulesBaseTestCase {
     @Inject
     protected RulesUtils rulesUtils;
 
+    @Getter @Setter
+    RulesTestSpec testSpec = RulesTestSpec.builder().build();
+
+    @Builder
+    public static class RulesTestSpec {
+
+        String sanitizedExamplesDirectoryPath;
+        Optional<String> getSanitizedExamplesDirectoryPath() {
+            return Optional.ofNullable(this.sanitizedExamplesDirectoryPath);
+        }
+
+        String yamlSerializationFilePath;
+
+        Optional<String> getYamlSerializationFilePath() {
+            return Optional.ofNullable(this.yamlSerializationFilePath);
+        }
+    }
+
     @AllArgsConstructor(staticName = "of")
     @Value
     @Builder
@@ -75,9 +96,11 @@ abstract public class RulesBaseTestCase {
         Container container = DaggerRulesBaseTestCase_Container.create();
         container.inject(this);
 
-        sanitizer = sanitizerFactory.create(Sanitizer.Options.builder()
+        sanitizer = sanitizerFactory.create(Sanitizer.ConfigurationOptions.builder()
             .rules(getRulesUnderTest())
             .defaultScopeId(getDefaultScopeId())
+            //TODO: existing test cases presume this
+            .pseudonymImplementation(PseudonymImplementation.LEGACY)
             .build());
 
         //q: good way to also batch test sanitizers from yaml/json formats of rules, to ensure
@@ -110,13 +133,13 @@ abstract public class RulesBaseTestCase {
                     new String(TestUtils.getData(getExampleDirectoryPath() + "/" + example.getPlainExampleFile()));
                 String sanitized = sanitize(example.getRequestUrl(), original);
 
-                String sanitizedFileName =
-                    example.getPlainExampleFile().replace(".json", "-sanitized.json");
+                String sanitizedFilepath = testSpec.getSanitizedExamplesDirectoryPath()
+                    .orElse(getExampleDirectoryPath() + "/sanitized") + "/" + example.getPlainExampleFile();
 
-                String expected = StringUtils.trim(new String(TestUtils.getData(getExampleDirectoryPath() + "/" + sanitizedFileName)));
+                String expected = StringUtils.trim(new String(TestUtils.getData(sanitizedFilepath )));
 
                 assertEquals(expected,
-                    StringUtils.trim(prettyPrintJson(sanitized)), sanitizedFileName + " does not match output");
+                    StringUtils.trim(prettyPrintJson(sanitized)), sanitizedFilepath + " does not match output");
             });
     }
 
@@ -147,6 +170,8 @@ abstract public class RulesBaseTestCase {
 
     public abstract String getExampleDirectoryPath();
 
+
+
     public Stream<InvocationExample> getExamples() {
         return Stream.empty();
     }
@@ -165,7 +190,7 @@ abstract public class RulesBaseTestCase {
 
     protected void assertSha(String expectedSha) {
         assertNotNull(expectedSha);
-        assertEquals(expectedSha, rulesUtils.sha(sanitizer.getOptions().getRules()));
+        assertEquals(expectedSha, rulesUtils.sha(sanitizer.getConfigurationOptions().getRules()));
     }
 
     protected void assertNotSanitized(String content, Collection<String> shouldContain) {
@@ -211,6 +236,29 @@ abstract public class RulesBaseTestCase {
                 doubleJsonEncodedPseudonym = StringUtils.unwrap(doubleJsonEncodedPseudonym, "\"");
                 assertTrue(content.contains(doubleJsonEncodedPseudonym),
                     String.format("Sanitized does not contain %s, pseudonymized equivalent of %s", doubleJsonEncodedPseudonym, s));
+            });
+    }
+
+    protected void assertReversibleUrlTokenized(String content, Collection<String> shouldBeTransformed) {
+        assertTransformed(content, shouldBeTransformed, Transform.Pseudonymize.builder()
+            .includeReversible(true)
+            .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
+            .build());
+    }
+
+    protected void assertTransformed(String content, Collection<String> shouldBeTransformed, Transform transform) {
+        shouldBeTransformed
+            .forEach(s ->
+                assertFalse(content.contains(s), () -> String.format("Sanitized content still contains untransformed: %s at %s", s, this.context(content, s))));
+
+        shouldBeTransformed
+            .forEach(s -> {
+                MapFunction f = sanitizer.getTransformImpl(transform);
+
+                String expected = sanitizer.getJsonConfiguration().jsonProvider().toJson(f.map(s, sanitizer.getJsonConfiguration()));
+
+                assertTrue(content.contains(expected),
+                    String.format("Sanitized does not contain %s, transformed equivalent of %s", expected, s));
             });
     }
 
