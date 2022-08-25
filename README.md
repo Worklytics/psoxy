@@ -128,17 +128,14 @@ terraform apply
 
 ## Releases
 
-### v0.4 - rc
+### v0.4.1 - beta
 The `main` branch is current at 0.4.
-
-Current status is **release-candidate**; breaking changes to java are anticipated, but we recommend
-new test deployments use this version to get latest Terraform module structure.
 
 Features:
   - **transiently reversible pseudonyms** - rules to support returning  'transiently' reversible
     pseudonyms client, which can be encrypted using key available to psoxy instances (and expected
     to rotate, such that reversible only until it is rotated).
-  - **endpoint-based rules, including sub-endpoints** - fully move to 'Rules 2.0', dropping support
+  - **endpoint-based rules** - fully move to 'Rules 2.0', dropping support
     for 'Rules 1.0' format; and allow 'Rules 2.0' to be recursive (endpoints having endpoints
 
 Breaking changes:
@@ -149,7 +146,7 @@ Breaking changes:
 
 ### v0.3 - beta
 
-This is the current recommended release for all existing deployments OR
+This is the previous recommended release for all existing deployments OR
 any new deployment for production use.
  - a `v0.3` branch is available on GitHub; this will get fixes/non-breaking changes as they're
    available.
