@@ -36,6 +36,28 @@ provider "azuread" {
   tenant_id = var.msft_tenant_id
 }
 
+locals {
+  base_config_path = "${var.psoxy_base_dir}configs/"
+}
+
+module "worklytics_connector_specs" {
+  source = "../../modules/worklytics-connector-specs"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connector-specs?ref=v0.4.1"
+
+  enabled_connectors = [
+    "azure-ad",
+    "outlook-cal",
+    "outlook-mail",
+    "asana",
+    "slack-discovery-api",
+    "zoom",
+  ]
+
+  # this IS the correct ID for the user terraform is running as, which we assume is a user who's OK
+  # to use the subject of examples. You can change it to any string you want.
+  example_msft_user_guid = data.azuread_client_config.current.object_id
+}
+
 module "psoxy-aws" {
   # source = "../../modules/aws"
   source = "git::https://github.com/worklytics/psoxy//infra/modules/aws?ref=v0.4.1"
@@ -52,70 +74,10 @@ module "psoxy-aws" {
 
 data "azuread_client_config" "current" {}
 
-locals {
-  # this IS the correct ID for the user terraform is running as, which we assume is a user who's OK
-  # to use the subject of examples. You can change it to any string you want.
-  example_msft_user_guid = data.azuread_client_config.current.object_id
-  base_config_path       = "${var.psoxy_base_dir}configs/"
 
-  # Microsoft 365 sources; add/remove as you wish
-  # See https://docs.microsoft.com/en-us/graph/permissions-reference for all the permissions available in AAD Graph API
-  msft_sources = {
-    "azure-ad" : {
-      enabled : true,
-      source_kind : "azure-ad",
-      display_name : "Azure Directory"
-      required_oauth2_permission_scopes : [], # Delegated permissions (from `az ad sp list --query "[?appDisplayName=='Microsoft Graph'].oauth2Permissions" --all`)
-      required_app_roles : [                  # Application permissions (form az ad sp list --query "[?appDisplayName=='Microsoft Graph'].appRoles" --all
-        "User.Read.All",
-        "Group.Read.All"
-      ],
-      example_calls : [
-        "/v1.0/users",
-        "/v1.0/groups"
-      ]
-    },
-    "outlook-cal" : {
-      enabled : true,
-      source_kind : "outlook-cal",
-      display_name : "Outlook Calendar"
-      required_oauth2_permission_scopes : [],
-      required_app_roles : [
-        "OnlineMeetings.Read.All",
-        "Calendars.Read",
-        "MailboxSettings.Read",
-        "Group.Read.All",
-        "User.Read.All"
-      ],
-      example_calls : [
-        "/v1.0/users",
-        "/v1.0/users/${local.example_msft_user_guid}/events",
-        "/v1.0/users/${local.example_msft_user_guid}/mailboxSettings"
-      ]
-    },
-    "outlook-mail" : {
-      enabled : true,
-      source_kind : "outlook-mail"
-      display_name : "Outlook Mail"
-      required_oauth2_permission_scopes : [],
-      required_app_roles : [
-        "Mail.ReadBasic.All",
-        "MailboxSettings.Read",
-        "Group.Read.All",
-        "User.Read.All"
-      ],
-      example_calls : [
-        "/beta/users",
-        "/beta/users/${local.example_msft_user_guid}/mailboxSettings",
-        "/beta/users/${local.example_msft_user_guid}/mailFolders/SentItems/messages"
-      ]
-    }
-  }
-  enabled_msft_sources = { for id, spec in local.msft_sources : id => spec if spec.enabled }
-}
 
 module "msft-connection" {
-  for_each = local.enabled_msft_sources
+  for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
   # source = "../../modules/azuread-connection"
   source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-connection?ref=v0.4.1"
@@ -127,7 +89,7 @@ module "msft-connection" {
 }
 
 module "msft-connection-auth" {
-  for_each = local.enabled_msft_sources
+  for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
   # source = "../../modules/azuread-local-cert"
   source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-local-cert?ref=v0.4.1"
@@ -139,7 +101,7 @@ module "msft-connection-auth" {
 }
 
 resource "aws_ssm_parameter" "client_id" {
-  for_each = local.enabled_msft_sources
+  for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
   name  = "PSOXY_${upper(replace(each.key, "-", "_"))}_CLIENT_ID"
   type  = "String"
@@ -153,7 +115,7 @@ resource "aws_ssm_parameter" "client_id" {
 }
 
 resource "aws_ssm_parameter" "refresh_endpoint" {
-  for_each = local.msft_sources
+  for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
   name      = "PSOXY_${upper(replace(each.key, "-", "_"))}_REFRESH_ENDPOINT"
   type      = "String"
@@ -169,7 +131,7 @@ resource "aws_ssm_parameter" "refresh_endpoint" {
 
 
 module "private-key-aws-parameters" {
-  for_each = local.enabled_msft_sources
+  for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
   # source = "../../modules/private-key-aws-parameter"
   source = "git::https://github.com/worklytics/psoxy//infra/modules/private-key-aws-parameter?ref=v0.4.1"
@@ -181,7 +143,7 @@ module "private-key-aws-parameters" {
 }
 
 module "psoxy-msft-connector" {
-  for_each = local.enabled_msft_sources
+  for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
   # source = "../../modules/aws-psoxy-rest"
   source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-rest?ref=v0.4.1"
@@ -211,7 +173,7 @@ module "psoxy-msft-connector" {
 # (requires terraform configuration being applied by an Azure User with privelleges to do this; it
 #  usually requires a 'Global Administrator' for your tenant)
 module "msft_365_grants" {
-  for_each = local.enabled_msft_sources
+  for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
   # source = "../../modules/azuread-grant-all-users"
   source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-grant-all-users?ref=v0.4.1"
@@ -224,7 +186,7 @@ module "msft_365_grants" {
 
 
 module "worklytics-psoxy-connection" {
-  for_each = local.enabled_msft_sources
+  for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
   # source = "../../modules/worklytics-psoxy-connection-aws"
   source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=v0.4.1"
@@ -239,84 +201,12 @@ module "worklytics-psoxy-connection" {
 # BEGIN LONG ACCESS AUTH CONNECTORS
 
 locals {
-  oauth_long_access_connectors = {
-    asana = {
-      enabled : false,
-      source_kind : "asana",
-      display_name : "Asana"
-      example_api_calls : [
-        "/api/1.0/teams",
-        "/api/1.0/projects"
-      ]
-      external_token_todo : <<EOT
-  1. Create a [Service Account User + token](https://asana.com/guide/help/premium/service-accounts)
-     or a sufficiently [Personal Access Token]() for a sufficiently privileged user (who can see all
-     the workspaces/teams/projects/tasks you wish to import to Worklytics via this connection).
-EOT
-    }
-    slack-discovery-api = {
-      enabled : false
-      source_kind : "slack"
-      display_name : "Slack Discovery API"
-      example_api_calls : []
-      external_token_todo : <<EOT
-## Slack Discovery Setup
-
-For enabling Slack Discovery with the Psoxy you must first setup an app on your Slack Enterprise
-instance.
-  1. Go to https://api.slack.com/apps and create an app, select name a development workspace
-  2. Take note of your App ID and contact your Slack rep and ask them to enable `discovery:read` scope for the app.
-
-If they also enable `discovery:write` then delete it for safety, the app just needs read access.
-
-3. Generate the following URL replacing the placeholders for *YOUR_CLIENT_ID* and *YOUR_APP_SECRET* and save it for later
-
-`https://api.slack.com/api/oauth.v2.access?client_id=YOUR_CLIENT_ID&client_secret=YOUR_APP_SECRET`
-
-4. Go to OAuth & Permissions > Redirect URLs and add the previous URL there
-
-The next step depends on your installation approach you might need to change slightly
-
-### Org wide install
-Use this step if you want to install in the whole org, across multiple workspaces.
-
-  1. Add a bot scope (not really used, but Slack doesn't allow org-wide without a bot scope requested).
-     Just add `users:read`, something that is read-only and we already have access through discovery.
-  2. Go to *Org Level Apps* and Opt-in to the program
-  3. Go to Settings > Install App
-  4. Install into *organization*
-  5. Copy the User OAuth Token
-  6. If you are implementing the Proxy, then add the access token as `PSOXY_ACCESS_TOKEN_psoxy-slack-discovery-api` secret value in the Secret Manager for the Proxy
-  Otherwise, share the token with the AWS/GCP administrator completing the implementation.
-
-### Workspace install
-Use this steps if you intend to install in just one workspace within your org.
-
-  1. Go to Settings > Install App
-  2. Install into *workspace*
-  3. Copy the User OAuth Token and store it in the secret manager (or share with the administrator completing the implementation)
-  4. Add the access token as `PSOXY_ACCESS_TOKEN_psoxy-slack-discovery-api` secret value in the GCP Project's Secret Manager
-EOT
-    }
-    zoom = {
-      enabled : true
-      source_kind : "zoom"
-      display_name : "Zoom"
-      example_api_calls : [
-        "/v2/users"
-      ]
-      external_token_todo : <<EOT
-TODO: Zoom install instructions
-EOT
-    }
-  }
-  enabled_oauth_long_access_connectors = { for k, v in local.oauth_long_access_connectors : k => v if v.enabled }
-  enabled_oauth_long_access_connectors_todos = { for k, v in local.oauth_long_access_connectors : k => v if v.enabled && v.external_token_todo != null }
+  enabled_oauth_long_access_connectors_todos = { for k, v in module.worklytics_connector_specs.enabled_oauth_long_access_connectors : k => v if v.external_token_todo != null }
 }
 
 # Create secret (later filled by customer)
 resource "aws_ssm_parameter" "long-access-token-secret" {
-  for_each = local.enabled_oauth_long_access_connectors
+  for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
 
   name        = "PSOXY_${upper(replace(each.key, "-", "_"))}_ACCESS_TOKEN"
   type        = "SecureString"
@@ -331,7 +221,7 @@ resource "aws_ssm_parameter" "long-access-token-secret" {
 }
 
 module "aws-psoxy-long-auth-connectors" {
-  for_each = local.enabled_oauth_long_access_connectors
+  for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
 
   # source = "../../modules/aws-psoxy-rest"
   source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-rest?ref=v0.4.1"
@@ -357,7 +247,7 @@ module "aws-psoxy-long-auth-connectors" {
 }
 
 module "worklytics-psoxy-connection-oauth-long-access" {
-  for_each = local.enabled_oauth_long_access_connectors
+  for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
 
   # source = "../../modules/worklytics-psoxy-connection-aws"
   source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=v0.4.1"

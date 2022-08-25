@@ -32,6 +32,29 @@ provider "aws" {
   ]
 }
 
+
+locals {
+  base_config_path = "${var.psoxy_base_dir}/configs/"
+}
+
+module "worklytics_connector_specs" {
+  source = "../../modules/worklytics-connector-specs"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connector-specs?ref=v0.4.1"
+
+  enabled_connectors = [
+    "gdirectory",
+    "gcal",
+    "gmail",
+    "gdrive",
+    "google-chat",
+    "google-meet",
+    "asana",
+    "slack-discovery-api",
+    "zoom",
+  ]
+  google_workspace_example_user = var.google_workspace_example_user
+}
+
 module "psoxy-aws" {
   # source = "../../modules/aws" # to bind with local
   source = "git::https://github.com/worklytics/psoxy//infra/modules/aws?ref=v0.4.1"
@@ -61,125 +84,9 @@ resource "google_project" "psoxy-google-connectors" {
   }
 }
 
-locals {
-  # Google Workspace Sources; add/remove as you wish, or toggle 'enabled' flag
-  google_workspace_sources = {
-    # GDirectory connections are a PRE-REQ for gmail, gdrive, and gcal connections. remove only
-    # if you plan to directly connect Directory to worklytics (without proxy). such a scenario is
-    # used for customers who care primarily about pseudonymizing PII of external subjects with whom
-    # they collaborate in GMail/GCal/GDrive. the Directory does not contain PII of subjects external
-    # to the Google Workspace, so may be directly connected in such scenarios.
-    "gdirectory" : {
-      enabled : true,
-      source_kind : "gdirectory",
-      display_name : "Google Directory"
-      apis_consumed : [
-        "admin.googleapis.com"
-      ]
-      oauth_scopes_needed : [
-        "https://www.googleapis.com/auth/admin.directory.user.readonly",
-        "https://www.googleapis.com/auth/admin.directory.user.alias.readonly",
-        "https://www.googleapis.com/auth/admin.directory.domain.readonly",
-        "https://www.googleapis.com/auth/admin.directory.group.readonly",
-        "https://www.googleapis.com/auth/admin.directory.group.member.readonly",
-        "https://www.googleapis.com/auth/admin.directory.orgunit.readonly",
-        "https://www.googleapis.com/auth/admin.directory.rolemanagement.readonly"
-      ]
-      example_api_calls : [
-        "/admin/directory/v1/users/me",
-        "/admin/directory/v1/users?customer=my_customer",
-        "/admin/directory/v1/groups?customer=my_customer",
-        "/admin/directory/v1/customer/my_customer/domains",
-        "/admin/directory/v1/customer/my_customer/roles",
-        "/admin/directory/v1/customer/my_customer/rolesassignments"
-      ]
-      example_api_calls_user_to_impersonate : var.google_workspace_example_user
-    }
-    "gcal" : {
-      enabled : true,
-      source_kind : "gcal",
-      display_name : "Google Calendar"
-      apis_consumed : [
-        "calendar-json.googleapis.com"
-      ]
-      oauth_scopes_needed : [
-        "https://www.googleapis.com/auth/calendar.readonly"
-      ],
-      example_api_calls : [
-        "/calendar/v3/calendars/primary",
-        "/calendar/v3/users/me/settings",
-        "/calendar/v3/calendars/primary/events"
-      ]
-      example_api_calls_user_to_impersonate : var.google_workspace_example_user
-    }
-    "gmail" : {
-      enabled : true,
-      source_kind : "gmail",
-      display_name : "GMail"
-      apis_consumed : [
-        "gmail.googleapis.com"
-      ]
-      oauth_scopes_needed : [
-        "https://www.googleapis.com/auth/gmail.metadata"
-      ],
-      example_api_calls : [
-        "/gmail/v1/users/me/messages"
-      ]
-      example_api_calls_user_to_impersonate : var.google_workspace_example_user
-    }
-    "google-chat" : {
-      enabled : false,
-      source_kind : "google-chat",
-      display_name : "Google Chat"
-      apis_consumed : [
-        "admin.googleapis.com"
-      ]
-      oauth_scopes_needed : [
-        "https://www.googleapis.com/auth/admin.reports.audit.readonly"
-      ]
-      example_api_calls : [
-        "/admin/reports/v1/activity/users/all/applications/chat"
-      ]
-      example_api_calls_user_to_impersonate : var.google_workspace_example_user
-    }
-    "gdrive" : {
-      enabled : false,
-      source_kind : "gdrive",
-      display_name : "Google Drive"
-      apis_consumed : [
-        "drive.googleapis.com"
-      ]
-      oauth_scopes_needed : [
-        "https://www.googleapis.com/auth/drive.metadata.readonly"
-      ],
-      example_api_calls : [
-        "/drive/v2/files",
-        "/drive/v3/files"
-      ],
-      example_api_calls_user_to_impersonate : var.google_workspace_example_user
-    }
-    "google-meet" : {
-      enabled : false,
-      source_kind : "google-meet",
-      display_name : "Google Meet"
-      apis_consumed : [
-        "admin.googleapis.com"
-      ]
-      oauth_scopes_needed : [
-        "https://www.googleapis.com/auth/admin.reports.audit.readonly"
-      ]
-      example_api_calls : [
-        "/admin/reports/v1/activity/users/all/applications/meet"
-      ]
-      example_api_calls_user_to_impersonate : var.google_workspace_example_user
-    }
-  }
-  enabled_google_workspace_sources = { for id, spec in local.google_workspace_sources : id => spec if spec.enabled }
-  base_config_path                 = "${var.psoxy_base_dir}/configs/"
-}
 
 module "google-workspace-connection" {
-  for_each = local.enabled_google_workspace_sources
+  for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
 
   # source = "../../modules/google-workspace-dwd-connection"
   source = "git::https://github.com/worklytics/psoxy//infra/modules/google-workspace-dwd-connection?ref=v0.4.1"
@@ -197,7 +104,7 @@ module "google-workspace-connection" {
 }
 
 module "google-workspace-connection-auth" {
-  for_each = local.enabled_google_workspace_sources
+  for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
 
   # source = "../../modules/gcp-sa-auth-key-aws-secret"
   source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-sa-auth-key-aws-secret?ref=v0.4.1"
@@ -207,23 +114,22 @@ module "google-workspace-connection-auth" {
 }
 
 module "psoxy-google-workspace-connector" {
-  for_each = local.enabled_google_workspace_sources
+  for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
 
   # source = "../../modules/aws-psoxy-rest"
   source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-rest?ref=v0.4.1"
 
-  function_name        = "psoxy-${each.key}"
-  source_kind          = each.key
-  path_to_function_zip = module.psoxy-aws.path_to_deployment_jar
-  function_zip_hash    = module.psoxy-aws.deployment_package_hash
-  path_to_config       = "${local.base_config_path}/${each.key}.yaml"
-  api_caller_role_arn  = module.psoxy-aws.api_caller_role_arn
-  aws_assume_role_arn  = var.aws_assume_role_arn
-  aws_account_id       = var.aws_account_id
-  path_to_repo_root    = var.psoxy_base_dir
-  # from next version of aws-psoxy-rest module:
-  # example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
-  example_api_calls = each.value.example_api_calls
+  function_name                         = "psoxy-${each.key}"
+  source_kind                           = each.key
+  path_to_function_zip                  = module.psoxy-aws.path_to_deployment_jar
+  function_zip_hash                     = module.psoxy-aws.deployment_package_hash
+  path_to_config                        = "${local.base_config_path}/${each.key}.yaml"
+  api_caller_role_arn                   = module.psoxy-aws.api_caller_role_arn
+  aws_assume_role_arn                   = var.aws_assume_role_arn
+  aws_account_id                        = var.aws_account_id
+  path_to_repo_root                     = var.psoxy_base_dir
+  example_api_calls                     = each.value.example_api_calls
+  example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
 
   parameters = [
     module.psoxy-aws.salt_secret,
@@ -233,7 +139,7 @@ module "psoxy-google-workspace-connector" {
 
 
 module "worklytics-psoxy-connection-google-workspace" {
-  for_each = local.enabled_google_workspace_sources
+  for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
 
   # source = "../../modules/worklytics-psoxy-connection-aws"
   source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=v0.4.1"
@@ -248,82 +154,12 @@ module "worklytics-psoxy-connection-google-workspace" {
 # BEGIN LONG ACCESS AUTH CONNECTORS
 
 locals {
-  oauth_long_access_connectors = {
-    asana = {
-      enabled : false,
-      source_kind : "asana",
-      display_name : "Asana"
-      example_api_calls : [
-        "/api/1.0/teams",
-        "/api/1.0/projects"
-      ]
-      external_token_todo : <<EOT
-  1. Create a [Service Account User + token](https://asana.com/guide/help/premium/service-accounts)
-     or a sufficiently [Personal Access Token]() for a sufficiently privileged user (who can see all
-     the workspaces/teams/projects/tasks you wish to import to Worklytics via this connection).
-EOT
-    }
-    slack-discovery-api = {
-      enabled : false
-      source_kind : "slack"
-      display_name : "Slack Discovery API"
-      example_api_calls : []
-      external_token_todo : <<EOT
-## Slack Discovery Setup
-
-For enabling Slack Discovery with the Psoxy you must first setup an app on your Slack Enterprise
-instance.
-  1. Go to https://api.slack.com/apps and create an app, select name a development workspace
-  2. Take note of your App ID and contact your Slack rep and ask them to enable `discovery:read` scope for the app.
-
-If they also enable `discovery:write` then delete it for safety, the app just needs read access.
-
-3. Generate the following URL replacing the placeholders for *YOUR_CLIENT_ID* and *YOUR_APP_SECRET* and save it for later
-
-`https://api.slack.com/api/oauth.v2.access?client_id=YOUR_CLIENT_ID&client_secret=YOUR_APP_SECRET`
-
-4. Go to OAuth & Permissions > Redirect URLs and add the previous URL there
-
-The next step depends on your installation approach you might need to change slightly
-
-### Org wide install
-Use this step if you want to install in the whole org, across multiple workspaces.
-
-  1. Add a bot scope (not really used, but Slack doesn't allow org-wide without a bot scope requested).
-     Just add `users:read`, something that is read-only and we already have access through discovery.
-  2. Go to *Org Level Apps* and Opt-in to the program
-  3. Go to Settings > Install App
-  4. Install into *organization*
-  5. Copy the User OAuth Token
-  6. If you are implementing the Proxy, then add the access token as `PSOXY_ACCESS_TOKEN_psoxy-slack-discovery-api` secret value in the Secret Manager for the Proxy
-  Otherwise, share the token with the AWS/GCP administrator completing the implementation.
-
-### Workspace install
-Use this steps if you intend to install in just one workspace within your org.
-
-  1. Go to Settings > Install App
-  2. Install into *workspace*
-  3. Copy the User OAuth Token and store it in the secret manager (or share with the administrator completing the implementation)
-  4. Add the access token as `PSOXY_ACCESS_TOKEN_psoxy-slack-discovery-api` secret value in the GCP Project's Secret Manager
-EOT
-    }
-    zoom = {
-      enabled : false
-      source_kind : "zoom"
-      display_name : "Zoom"
-      example_api_calls : ["/v2/users"]
-      external_token_todo : <<EOT
-TODO: document which type of Zoom app needed, how to get the long-lived token.
-EOT
-    }
-  }
-  enabled_oauth_long_access_connectors       = { for k, v in local.oauth_long_access_connectors : k => v if v.enabled }
-  enabled_oauth_long_access_connectors_todos = { for k, v in local.oauth_long_access_connectors : k => v if v.enabled && v.external_token_todo != null }
+  enabled_oauth_long_access_connectors_todos = { for k, v in module.worklytics_connector_specs.enabled_oauth_long_access_connectors : k => v if v.external_token_todo != null }
 }
 
 # Create secret (later filled by customer)
 resource "aws_ssm_parameter" "long-access-token-secret" {
-  for_each = local.enabled_oauth_long_access_connectors
+  for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
 
   name        = "PSOXY_${upper(replace(each.key, "-", "_"))}_ACCESS_TOKEN"
   type        = "SecureString"
@@ -338,7 +174,7 @@ resource "aws_ssm_parameter" "long-access-token-secret" {
 }
 
 module "aws-psoxy-long-auth-connectors" {
-  for_each = local.enabled_oauth_long_access_connectors
+  for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
 
   # source = "../../modules/aws-psoxy-rest"
   source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-rest?ref=v0.4.1"
@@ -376,7 +212,7 @@ module "source_token_external_todo" {
 }
 
 module "worklytics-psoxy-connection" {
-  for_each = local.enabled_oauth_long_access_connectors
+  for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
 
   # source = "../../modules/worklytics-psoxy-connection-aws"
   source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=v0.4.1"
