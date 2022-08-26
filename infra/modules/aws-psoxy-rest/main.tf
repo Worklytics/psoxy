@@ -24,7 +24,7 @@ module "psoxy_lambda" {
 }
 
 resource "aws_lambda_function_url" "lambda_url" {
-  function_name      = var.function_name # woudld 'module.psoxy_lambda.function_name' avoid explicit dependency??
+  function_name      = var.function_name # would 'module.psoxy_lambda.function_name' avoid explicit dependency??
   authorization_type = "AWS_IAM"
 
   cors {
@@ -46,7 +46,7 @@ locals {
   proxy_endpoint_url  = substr(aws_lambda_function_url.lambda_url.function_url, 0, length(aws_lambda_function_url.lambda_url.function_url) - 1)
   impersonation_param = var.example_api_calls_user_to_impersonate == null ? "" : " -i \"${var.example_api_calls_user_to_impersonate}\""
   test_commands = [for path in var.example_api_calls :
-    "${var.path_to_repo_root}tools/test-psoxy.sh -a -r \"${var.aws_assume_role_arn}\" -u \"${local.proxy_endpoint_url}${path}\"${local.impersonation_param}"
+    "node ${var.path_to_repo_root}tools/test-psoxy.sh -r \"${var.aws_assume_role_arn}\" -u \"${local.proxy_endpoint_url}${path}\"${local.impersonation_param}"
   ]
 }
 
@@ -62,23 +62,12 @@ Review the deployed function in AWS console:
 
 ### Prereqs
 Requests to AWS API need to be [signed](https://docs.aws.amazon.com/general/latest/gr/signing_aws_api_requests.html).
-One tool to do it easily is [awscurl](https://github.com/okigan/awscurl). Install it:
+Our Node.js based testing tool does it, but the machine running the testing script must have
+the appropriate AWS credentials (you can use [aws-mfa](https://github.com/broamski/aws-mfa) or any
+similar tool).
 
-On MacOS via Homebrew:
-```shell
-brew install awscurl
-```
-
-Alternatively, via `pip` (python package manager):
-```shell
-pip install awscurl
-# Installs in $HOME/.local/bin
-# Make it available in your path
-# Add the following line to ~/.bashrc
-export PATH="$HOME/.local/bin:$PATH"
-# Then reload the config
-source ~/.bashrc
-```
+- [Node.js] >= v16
+- [npm] >= v8
 
 ### From Terminal
 
@@ -90,6 +79,9 @@ ${coalesce(join("\n", local.test_commands), "cd docs/example-api-calls/")}
 
 See `docs/example-api-calls/` for more example API calls specific to the data source to which your
 Proxy is configured to connect.
+
+[Node.js]: https://nodejs.org/en/
+[npm]: https://www.npmjs.com
 
 EOT
 }
