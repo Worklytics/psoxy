@@ -13,3 +13,6 @@
 
 # Log files
 *.log
+
+tools/node_modules
+tools/package-lock.json
