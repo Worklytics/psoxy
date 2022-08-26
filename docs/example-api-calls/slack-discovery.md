@@ -1,71 +1,74 @@
 # API Call Examples for Slack Discovery
 
-Example commands that you can use to validate proxy behavior against the Slack Discovery APIs.
+Example commands (*) that you can use to validate proxy behavior against the Slack Discovery APIs.
 Follow the steps and change the values to match your configuration when needed.
 
+For GCP, you can use the `-i` flag to impersonate the desired user identity option when running the testing tool. Example:
+
 ```shell
-export PROXY_SLACK_URL=https://YOUR_PSOXY_HOST/psoxy-slack-discovery-api
+node tools/test-psoxy.js -u [your_psoxy_url]/psoxy-gcal/calendar/v3/calendars/primary -i you@acme.com
 ```
 
-For GCP, use
+For AWS, change the role to impersonate with one with sufficient permissions to call the proxy (`-r` flag). Example:
+
 ```shell
-export OPTIONS="-g"
+node tools/test-psoxy.js -u [your_psoxy_url]/psoxy-gcal/calendar/v3/calendars/primary -r arn:aws:iam::PROJECT_ID:role/ROLE_NAME
 ```
 
-For AWS, change the role to impersonate with one with sufficient permissions to call the proxy
-```shell
-export AWS_ROLE_ARN="arn:aws:iam::PROJECT_ID:role/ROLE_NAME"
-export OPTIONS="-a -r $AWS_ROLE_ARN"
-```
+If any call appears to fail, repeat it using the `-v` flag.
 
-If any call appears to fail, repeat it without the pipe to jq (eg, remove `| jq ...` portion from
-the end of the command) and "-v" flag.
+(*) All commands assume that you are at the root path of the Psoxy project.
 
 ### Read workspaces
 ```shell
-./test-psoxy.sh $OPTIONS -u $PROXY_SLACK_URL/api/discovery.enterprise.info | jq .
+node tools/test-psoxy.js -u [your_psoxy_url]/api/discovery.enterprise.info
 ```
 
 ### Read Users in Grid
 ```shell
-./test-psoxy.sh $OPTIONS -u $PROXY_SLACK_URL/api/discovery.users.list?include_deleted=true | jq .
+node tools/test-psoxy.js -u [your_psoxy_url]/api/discovery.users.list?include_deleted=true
 ```
 
 ### Read Conversations in Workspace (any kind, public and private)
 
-Next calls operate on a workspace so get an arbitrary workspace in variable
+1. Get a workspace ID (accessor path in response `.enterprise.teams[0].id`):
 ```shell
-export WORKSPACE_ID=`./test-psoxy.sh $OPTIONS -u $PROXY_SLACK_URL/api/discovery.enterprise.info?limit=1 | jq -r '.enterprise.teams[0].id'`
+node tools/test-psoxy.js -u [your_psoxy_url]/api/discovery.enterprise.info?limit=1
 ```
-
+2. Get conversation details of that workspace (replace `workspace_id` with the corresponding value):
 ```shell
-./test-psoxy.sh $OPTIONS -u $PROXY_SLACK_URL/api/discovery.conversations.list?team=$WORKSPACE_ID\&limit=10 | jq .
+node tools/test-psoxy.js -u [your_psoxy_url]/api/discovery.conversations.list?team=[workspace_id]&limit=10
 ```
 
 ### Read Messages in Workspace Channel
 
-Next call operate on channels belonging to a workspace. Get an arbitrary channel in variable
+1. Get a channel ID (accessor path in response `.channels[0].id`):
 ```shell
-# get a workspace channel
-export CHANNEL_ID=`./test-psoxy.sh $OPTIONS -u $PROXY_SLACK_URL/api/discovery.conversations.list?team=$WORKSPACE_ID\&limit=10 | jq -r '.channels[0].id'`
-# or for a DM (no workspace)
-export CHANNEL_ID=`./test-psoxy.sh $OPTIONS -u $PROXY_SLACK_URL/api/discovery.conversations.list?limit=10 | jq -r '.channels[0].id'`
+node tools/test-psoxy.js -u [your_psoxy_url]/api/discovery.conversations.list?team=[workspace_id]&limit=10
 ```
-
+2. Get DM information (no workspace):
 ```shell
-./test-psoxy.sh $OPTIONS -u $PROXY_SLACK_URL/api/discovery.conversations.history?team=$WORKSPACE_ID\&channel=$CHANNEL_ID\&limit=10 | jq .
-# omit the workspace id if channel is a DM
-./test-psoxy.sh $OPTIONS -u $PROXY_SLACK_URL/api/discovery.conversations.history?channel=$CHANNEL_ID\&limit=10 | jq .
+node tools/test-psoxy.js -u [your_psoxy_url]/api/discovery.conversations.list?limit=10
+```
+3. Read messages for workspace channel:1
+```shell
+node tools/test-psoxy.js -u [your_psoxy_url]/api/discovery.conversations.history?team=[workspace_id]&channel=[channel_id]&limit=10
+```
+4. Omit the workspace ID if channel is a DM
+```shell
+1node tools/test-psoxy.js -u [your_psoxy_url]/api/discovery.conversations.history?channel=[channel_id]&limit=10
 ```
 
 ### Workspace Channel Info
 ```shell
-./test-psoxy.sh $OPTIONS -u $PROXY_SLACK_URL/api/discovery.conversations.info?team=$WORKSPACE_ID\&channel=$CHANNEL_ID\&limit=1 | jq .
-# omit the workspace id if channel is a DM
-./test-psoxy.sh $OPTIONS -u $PROXY_SLACK_URL/api/discovery.conversations.info?channel=$CHANNEL_ID\&limit=1 | jq .
+node tools/test-psoxy.js -u [your_psoxy_url]/api/discovery.conversations.info?team=[workspace_id]&channel=[channel_id]&limit=1
+```
+Omit the workspace ID if channel is a DM
+```shell
+node tools/test-psoxy.js -u [your_psoxy_url]/api/discovery.conversations.info?channel=[channel_id]&limit=1
 ```
 
 ### Recent Workspace Conversations
 ```shell
-./test-psoxy.sh $OPTIONS -u $PROXY_SLACK_URL/api/discovery.conversations.recent | jq .
+node tools/test-psoxy.js -u [your_psoxy_url]/api/discovery.conversations.recent
 ```

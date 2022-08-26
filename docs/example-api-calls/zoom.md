@@ -1,63 +1,52 @@
 # API Call Examples for Zoom
 
-Example commands that you can use to validate proxy behavior against the Zoom APIs.
+Example commands (*) that you can use to validate proxy behavior against the Zoom APIs.
 Follow the steps and change the values to match your configuration when needed.
 
+For GCP, you can use the `-i` flag to impersonate the desired user identity option when running the testing tool. Example:
+
 ```shell
-export PROXY_ZOOM_URL=https://YOUR_PSOXY_HOST/psoxy-zoom
+node tools/test-psoxy.js -u [your_psoxy_url]/psoxy-gcal/calendar/v3/calendars/primary -i you@acme.com
 ```
 
-For GCP, use
+For AWS, change the role to impersonate with one with sufficient permissions to call the proxy (`-r` flag). Example:
+
 ```shell
-export OPTIONS="-g"
+node tools/test-psoxy.js -u [your_psoxy_url]/psoxy-gcal/calendar/v3/calendars/primary -r arn:aws:iam::PROJECT_ID:role/ROLE_NAME
 ```
 
-For AWS, change the role to impersonate with one with sufficient permissions to call the proxy
-```shell
-export AWS_ROLE_ARN="arn:aws:iam::PROJECT_ID:role/ROLE_NAME"
-export OPTIONS="-a -r $AWS_ROLE_ARN"
-```
+If any call appears to fail, repeat it using the `-v` flag.
 
-If any call appears to fail, repeat it without the pipe to jq (eg, remove `| jq ...` portion from
-the end of the command) and "-v" flag.
+(*) All commands assume that you are at the root path of the Psoxy project.
 
 ### List users
 ```shell
-./test-psoxy.sh $OPTIONS -u $PROXY_ZOOM_URL/v2/users | jq .
+node tools/test-psoxy.js -u [your_psoxy_url]/v2/users
 ```
-Now pull out a user id, and add it as env variable. Next calls are bound to a single user.
-```shell
-export ZOOM_USER_ID=$(./test-psoxy.sh $OPTIONS -u $PROXY_ZOOM_URL/v2/users | jq -r .users[0].id | jq -r .original)
-```
-
+Now pull out a user id (`[zoom_user_id]`). Next call is bound to a single user:
 ### List user meetings
 ```shell
-./test-psoxy.sh $OPTIONS -u $PROXY_ZOOM_URL/v2/users/$ZOOM_USER_ID/meetings
+node tools/test-psoxy.js -u [your_psoxy_url]/v2/users/[zoom_user_id]/meetings
 ```
 
 ## Meetings
-First pull out a meeting id, and add it as env variable
-
-```shell
-export MEETING_ID=$(./test-psoxy.sh $OPTIONS -u $PROXY_ZOOM_URL/v2/users/$ZOOM_USER_ID/meetings | jq -r .meetings[0].id)
-```
-
+First pull out a meeting id (`[zoom_meeting_id]`):
 ### List past meeting details
 ```shell
-./test-psoxy.sh $OPTIONS -u $PROXY_ZOOM_URL/v2/past_meetings/$MEETING_ID
+node tools/test-psoxy.js -u [your_psoxy_url]/v2/past_meetings/[zoom_meeting_id]
 ```
 
 ### List past meeting instances
 ```shell
-./test-psoxy.sh $OPTIONS -u $PROXY_ZOOM_URL/v2/past_meetings/$MEETING_ID/instances
+node tools/test-psoxy.js -u [your_psoxy_url]/v2/past_meetings/[zoom_meeting_id]/instances
 ```
 
 ### List past meeting participants
 ```shell
-./test-psoxy.sh $OPTIONS -u $PROXY_ZOOM_URL/v2/past_meetings/$MEETING_ID/participants
+node tools/test-psoxy.js -u [your_psoxy_url]/v2/past_meetings/[zoom_meeting_id]/participants
 ```
 
 ### Get meeting details
 ```shell
-./test-psoxy.sh $OPTIONS -u $PROXY_ZOOM_URL/v2/meetings/$MEETING_ID
+node tools/test-psoxy.js -u [your_psoxy_url]/v2/meetings/[zoom_meeting_id]
 ```
