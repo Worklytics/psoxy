@@ -47,7 +47,7 @@ locals {
   proxy_endpoint_url  = substr(aws_lambda_function_url.lambda_url.function_url, 0, length(aws_lambda_function_url.lambda_url.function_url) - 1)
   impersonation_param = var.example_api_calls_user_to_impersonate == null ? "" : " -i \"${var.example_api_calls_user_to_impersonate}\""
   test_commands = [for path in var.example_api_calls :
-    "${var.path_to_repo_root}tools/test-psoxy.sh -a -r \"${var.aws_assume_role_arn}\" -u \"${local.proxy_endpoint_url}${path}\"${local.impersonation_param}"
+    "node ${var.path_to_repo_root}tools/psoxy-test/cli.js -r \"${var.aws_assume_role_arn}\" -u \"${local.proxy_endpoint_url}${path}\"${local.impersonation_param}"
   ]
 }
 
@@ -63,23 +63,12 @@ Review the deployed function in AWS console:
 
 ### Prereqs
 Requests to AWS API need to be [signed](https://docs.aws.amazon.com/general/latest/gr/signing_aws_api_requests.html).
-One tool to do it easily is [awscurl](https://github.com/okigan/awscurl). Install it:
+Our Node.js based testing tool does it, but the machine running the testing script must have
+the appropriate AWS credentials (you can use [aws-mfa](https://github.com/broamski/aws-mfa) or any
+similar tool).
 
-On MacOS via Homebrew:
-```shell
-brew install awscurl
-```
-
-Alternatively, via `pip` (python package manager):
-```shell
-pip install awscurl
-# Installs in $HOME/.local/bin
-# Make it available in your path
-# Add the following line to ~/.bashrc
-export PATH="$HOME/.local/bin:$PATH"
-# Then reload the config
-source ~/.bashrc
-```
+- [Node.js] >= v16
+- [npm] >= v8
 
 ### From Terminal
 
