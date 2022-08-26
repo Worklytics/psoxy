@@ -6,7 +6,7 @@
   "description": "Worklytics Psoxy testing tool",
   "main": "psoxy-testing.js",
   "scripts": {
-    "test": "ava"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
