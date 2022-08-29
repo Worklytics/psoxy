@@ -24,6 +24,11 @@ endpoints:
           - "$..mail"
           - "$..otherMails[*]"
         encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..id"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
   - pathRegex: "^/(v1.0|beta)/groups/?[^/]*"
     transforms:
       - !<redact>
@@ -55,6 +60,10 @@ endpoints:
           - "$..imAddresses[*]"
           - "$..mail"
           - "$..otherMails[*]"
+        encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..id"
         encoding: "JSON"
   - pathRegex: "^/(v1.0|beta)/users/[^/]*/mailboxSettings"
     transforms:
