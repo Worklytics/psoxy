@@ -46,6 +46,13 @@ public class PseudonymizedIdentity {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     String domain;
 
+    /**
+     * base64-url-encoded-without-padding SHA-256 hash of canonical form of the identifier, without
+     * domain (or scope)
+     *
+     * NOTE: in legacy mode, this is base64-encoded SHA-256 hash INCLUDING scope
+     *
+     */
     String hash;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -54,6 +61,8 @@ public class PseudonymizedIdentity {
     /**
      * a value that, if passed back to proxy in request will be decrypted to obtain the original
      * before forwarding request to source API.
+     *
+     * q: in practice, will be base64-url-encoded-without-padding - specify this in interface?
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     String reversible;
