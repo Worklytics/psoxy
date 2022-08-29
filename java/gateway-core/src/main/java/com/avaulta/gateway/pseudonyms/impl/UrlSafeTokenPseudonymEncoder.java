@@ -74,6 +74,11 @@ public class UrlSafeTokenPseudonymEncoder implements PseudonymEncoder {
         return builder.build();
     }
 
+    @Override
+    public boolean canBeDecoded(String possiblePseudonym) {
+        return possiblePseudonym != null && possiblePseudonym.startsWith(PREFIX);
+    }
+
     /**
      * returns string after reversing all keyed pseudonyms created with this
      * PseudonymizationStrategy that it contains (if any)
