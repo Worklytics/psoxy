@@ -3,16 +3,10 @@
 Example commands (*) that you can use to validate proxy behavior against the Slack Discovery APIs.
 Follow the steps and change the values to match your configuration when needed.
 
-For GCP, you can use the `-i` flag to impersonate the desired user identity option when running the testing tool. Example:
+For AWS, change the role to assume with one with sufficient permissions to call the proxy (`-r` flag). Example:
 
 ```shell
-node tools/test-psoxy.js -u [your_psoxy_url]/psoxy-gcal/calendar/v3/calendars/primary -i you@acme.com
-```
-
-For AWS, change the role to impersonate with one with sufficient permissions to call the proxy (`-r` flag). Example:
-
-```shell
-node tools/test-psoxy.js -u [your_psoxy_url]/psoxy-gcal/calendar/v3/calendars/primary -r arn:aws:iam::PROJECT_ID:role/ROLE_NAME
+node tools/test-psoxy.js -u [your_psoxy_url]/api/discovery.enterprise.info -r arn:aws:iam::PROJECT_ID:role/ROLE_NAME
 ```
 
 If any call appears to fail, repeat it using the `-v` flag.
@@ -56,7 +50,7 @@ node tools/test-psoxy.js -u [your_psoxy_url]/api/discovery.conversations.history
 ```
 4. Omit the workspace ID if channel is a DM
 ```shell
-1node tools/test-psoxy.js -u [your_psoxy_url]/api/discovery.conversations.history?channel=[channel_id]&limit=10
+node tools/test-psoxy.js -u [your_psoxy_url]/api/discovery.conversations.history?channel=[channel_id]&limit=10
 ```
 
 ### Workspace Channel Info

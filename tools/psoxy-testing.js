@@ -65,6 +65,8 @@ const theme = {
 
     if (response.status === 200) {
       console.log(`Result: ${theme.success('OK')}`);
+      const data = await response.json();
+      console.log(JSON.stringify(data, undefined, 4));
     } else {
       console.warn(`Result: ${theme.warning(response.statusText)}`);
       console.warn(`Status: ${theme.warning(response.status)}`);
