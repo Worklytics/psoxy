@@ -5,6 +5,7 @@ import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.SneakyThrows;
 import org.apache.commons.codec.digest.DigestUtils;
 
@@ -49,7 +50,7 @@ public class RulesUtils {
     }
 
     @VisibleForTesting
-    RuleSet parse(String yamlString) {
+    RuleSet parse(@NonNull String yamlString) {
         try {
             CsvRules rules = yamlMapper.readerFor(CsvRules.class).readValue(yamlString);
             Validator.validate(rules);
