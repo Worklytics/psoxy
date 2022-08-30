@@ -145,6 +145,28 @@ resource "aws_ssm_parameter" "salt" {
 }
 
 
+# not really a 'password', but 'random_string' isn't "sensitive" by terraform, so
+# is output to console
+resource "random_password" "encryption_key" {
+  length  = 32 //256-bits
+  special = true
+}
+
+resource "aws_ssm_parameter" "encryption_key" {
+  name        = "PSOXY_ENCRYPTION_KEY"
+  type        = "SecureString"
+  description = "secret used to generate reversible pseudonyms, if any; rotate to render all existing ones irreversible"
+  value       = sensitive(random_password.random.result)
+
+  lifecycle {
+    ignore_changes = [
+      value
+    ]
+  }
+}
+
+
+
 module "psoxy-package" {
   source = "../psoxy-package"
 

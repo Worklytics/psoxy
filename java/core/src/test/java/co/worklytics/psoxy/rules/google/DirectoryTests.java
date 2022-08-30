@@ -2,11 +2,8 @@ package co.worklytics.psoxy.rules.google;
 
 import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
 import co.worklytics.psoxy.rules.RuleSet;
-import co.worklytics.psoxy.rules.Rules1;
-import co.worklytics.psoxy.Sanitizer;
 import lombok.Getter;
 import lombok.SneakyThrows;
-import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -15,8 +12,6 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -29,6 +24,8 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
 
     @Getter
     final String exampleDirectoryPath = "api-response-examples/g-workspace/directory";
+
+
 
     @Getter
     final String defaultScopeId = "gapps";
@@ -191,6 +188,10 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
 
         //block by default
         assertThrows(IllegalStateException.class, () -> this.sanitize(endpoint, jsonString));
+
+        //NOTE: used to have test that thumbnail data redacted EVEN if request allowed through, but
+        // with Rules2 format this doesn't make sense; rules are based on the matched endpoint, so
+        // if no rules ALLOW thumbnails, by definition no rules will REDACT its content either
     }
 
     @SneakyThrows
@@ -230,4 +231,5 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
             InvocationExample.of("https://admin.googleapis.com/admin/directory/v1/users?customer=my_customer&maxResults=1&pageToken=BASE64TOKEN-=%3D&viewType=admin_view", "users.json")
         );
     }
+
 }

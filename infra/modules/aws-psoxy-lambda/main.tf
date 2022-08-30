@@ -20,7 +20,10 @@ resource "aws_lambda_function" "psoxy-instance" {
   memory_size      = var.memory_size_mb
 
   environment {
-    variables = merge(var.environment_variables, yamldecode(file(var.path_to_config)))
+    variables = merge(
+      yamldecode(file(var.path_to_config)),
+      var.environment_variables
+    )
   }
 }
 
@@ -28,20 +31,6 @@ resource "aws_lambda_function" "psoxy-instance" {
 resource "aws_cloudwatch_log_group" "lambda-log" {
   name              = "/aws/lambda/${aws_lambda_function.psoxy-instance.function_name}"
   retention_in_days = var.log_retention_in_days
-}
-
-resource "aws_lambda_function_url" "lambda_url" {
-  function_name      = aws_lambda_function.psoxy-instance.function_name
-  authorization_type = "AWS_IAM"
-
-  cors {
-    allow_credentials = true
-    allow_origins     = ["*"]
-    allow_methods     = ["POST", "GET", "HEAD"]
-    allow_headers     = ["date", "keep-alive"]
-    expose_headers    = ["keep-alive", "date"]
-    max_age           = 86400
-  }
 }
 
 resource "aws_iam_role" "iam_for_lambda" {

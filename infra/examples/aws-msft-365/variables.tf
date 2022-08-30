@@ -70,3 +70,9 @@ variable "psoxy_base_dir" {
     error_message = "The psoxy_base_dir value should end with a slash."
   }
 }
+
+variable "pseudonymize_app_ids" {
+  type        = string
+  description = "if set, will set value of PSEUDONYMIZE_APP_IDS environment variable to this value for all sources"
+  default     = false
+}

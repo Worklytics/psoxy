@@ -8,6 +8,10 @@ terraform {
   }
 }
 
+resource "random_string" "bucket_suffix" {
+  length      = 8
+}
+
 module "psoxy_lambda" {
   source = "../aws-psoxy-lambda"
 
@@ -21,14 +25,17 @@ module "psoxy_lambda" {
   aws_assume_role_arn  = var.aws_assume_role_arn
   source_kind          = var.source_kind
   parameters           = []
-  environment_variables = {
-    INPUT_BUCKET  = aws_s3_bucket.input.bucket,
-    OUTPUT_BUCKET = aws_s3_bucket.output.bucket
-  }
+  environment_variables = merge(
+    var.environment_variables,
+    {
+      INPUT_BUCKET  = aws_s3_bucket.input.bucket,
+      OUTPUT_BUCKET = aws_s3_bucket.output.bucket
+    }
+  )
 }
 
 resource "aws_s3_bucket" "input" {
-  bucket = "psoxy-${var.instance_id}-input"
+  bucket = "psoxy-${var.instance_id}-${random_string.bucket_suffix}-input"
 }
 
 resource "aws_s3_bucket_public_access_block" "input-block-public-access" {
@@ -67,7 +74,7 @@ resource "aws_iam_policy" "read_policy_to_execution_role" {
 
 
 resource "aws_s3_bucket" "output" {
-  bucket = "psoxy-${var.instance_id}-output"
+  bucket = "psoxy-${var.instance_id}-${random_string.bucket_suffix}-output"
 }
 
 resource "aws_s3_bucket_public_access_block" "output-block-public-access" {

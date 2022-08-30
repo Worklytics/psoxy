@@ -28,6 +28,7 @@
     </properties>
 
     <modules>
+        <module>gateway-core</module>
         <module>core</module>
         <module>impl</module>
     </modules>

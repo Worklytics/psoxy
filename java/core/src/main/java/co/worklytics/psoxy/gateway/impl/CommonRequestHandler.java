@@ -2,11 +2,14 @@ package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.gateway.*;
+import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import co.worklytics.psoxy.rules.RuleSet;
 import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.psoxy.utils.ComposedHttpRequestInitializer;
 import co.worklytics.psoxy.utils.GzipedContentHttpRequestInitializer;
 import co.worklytics.psoxy.utils.URLUtils;
+import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
+import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequestFactory;
@@ -14,6 +17,7 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.auth.Credentials;
 import com.google.auth.http.HttpCredentialsAdapter;
+import com.google.common.annotations.VisibleForTesting;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
@@ -46,6 +50,9 @@ public class CommonRequestHandler {
     @Inject
     RuleSet rules;
     @Inject HealthCheckRequestHandler healthCheckRequestHandler;
+    @Inject
+    ReversibleTokenizationStrategy reversibleTokenizationStrategy;
+    @Inject UrlSafeTokenPseudonymEncoder pseudonymEncoder;
 
     private volatile Sanitizer sanitizer;
     private final Object $writeLock = new Object[0];
@@ -148,8 +155,14 @@ public class CommonRequestHandler {
                 if (skipSanitization) {
                     proxyResponseContent = responseContent;
                 } else {
+                    Optional<PseudonymImplementation> pseudonymImplementation = parsePseudonymImplementation(request);
+                    if (pseudonymImplementation.isPresent()) {
+                        sanitizer = sanitizerFactory.create(sanitizerFactory.buildOptions(config, rules)
+                            .withPseudonymImplementation(pseudonymImplementation.get()));
+                    }
+
                     proxyResponseContent = sanitizer.sanitize(targetUrl, responseContent);
-                    String rulesSha = rulesUtils.sha(sanitizer.getOptions().getRules());
+                    String rulesSha = rulesUtils.sha(sanitizer.getConfigurationOptions().getRules());
                     builder.header(ResponseHeader.RULES_SHA.getHttpHeader(), rulesSha);
                     log.info("response sanitized with rule set " + rulesSha);
                 }
@@ -165,6 +178,12 @@ public class CommonRequestHandler {
         } finally {
             sourceApiResponse.disconnect();
         }
+    }
+
+    @VisibleForTesting
+    Optional<PseudonymImplementation> parsePseudonymImplementation(HttpEventRequest request) {
+        return request.getHeader(ControlHeader.PSEUDONYM_IMPLEMENTATION.getHttpHeader())
+            .map(PseudonymImplementation::parseHttpHeaderValue);
     }
 
     @SneakyThrows
@@ -183,6 +202,9 @@ public class CommonRequestHandler {
 
         accountToImpersonate.ifPresent(user -> log.info("Impersonating user"));
         //TODO: warn here for Google Workspace connectors, which expect user??
+
+        accountToImpersonate = accountToImpersonate
+            .map(s -> pseudonymEncoder.decodeAndReverseAllContainedKeyedPseudonyms(s, reversibleTokenizationStrategy));
 
         Credentials credentials = sourceAuthStrategy.getCredentials(accountToImpersonate);
         HttpCredentialsAdapter initializeWithCredentials = new HttpCredentialsAdapter(credentials);
@@ -237,6 +259,10 @@ public class CommonRequestHandler {
         if (StringUtils.isNotBlank(request.getQuery().orElse(null))) {
             targetURLString = hostPlusPath + "?" + request.getQuery().get();
         }
+
+        //TODO: configurable behavior?
+        targetURLString = pseudonymEncoder.decodeAndReverseAllContainedKeyedPseudonyms(targetURLString, reversibleTokenizationStrategy);
+
         return new URL(targetURLString);
     }
 

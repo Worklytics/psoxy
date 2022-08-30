@@ -36,6 +36,17 @@ provider "azuread" {
   tenant_id = var.msft_tenant_id
 }
 
+module "worklytics_connector_specs" {
+  source = "../../modules/worklytics-connector-specs"
+
+  enabled_connectors = [
+    "asana",
+    "azure-ad",
+    "outlook-cal",
+    "outlook-mail",
+  ]
+}
+
 module "psoxy-aws" {
   source = "../../modules/aws"
 
@@ -58,63 +69,10 @@ locals {
 
   # Microsoft 365 sources; add/remove as you wish
   # See https://docs.microsoft.com/en-us/graph/permissions-reference for all the permissions available in AAD Graph API
-  msft_sources = {
-    "azure-ad" : {
-      enabled : true,
-      source_kind : "azure-ad",
-      display_name : "Azure Directory"
-      required_oauth2_permission_scopes : [], # Delegated permissions (from `az ad sp list --query "[?appDisplayName=='Microsoft Graph'].oauth2Permissions" --all`)
-      required_app_roles : [                  # Application permissions (form az ad sp list --query "[?appDisplayName=='Microsoft Graph'].appRoles" --all
-        "User.Read.All",
-        "Group.Read.All"
-      ],
-      example_calls : [
-        "/v1.0/users",
-        "/v1.0/groups"
-      ]
-    },
-    "outlook-cal" : {
-      enabled : true,
-      source_kind : "outlook-cal",
-      display_name : "Outlook Calendar"
-      required_oauth2_permission_scopes : [],
-      required_app_roles : [
-        "OnlineMeetings.Read.All",
-        "Calendars.Read",
-        "MailboxSettings.Read",
-        "Group.Read.All",
-        "User.Read.All"
-      ],
-      example_calls : [
-        "/v1.0/users",
-
-        "/v1.0/users/${local.example_msft_user_guid}/events",
-        "/v1.0/users/${local.example_msft_user_guid}/mailboxSettings"
-      ]
-    },
-    "outlook-mail" : {
-      enabled : true,
-      source_kind : "outlook-mail"
-      display_name : "Outlook Mail"
-      required_oauth2_permission_scopes : [],
-      required_app_roles : [
-        "Mail.ReadBasic.All",
-        "MailboxSettings.Read",
-        "Group.Read.All",
-        "User.Read.All"
-      ],
-      example_calls : [
-        "/beta/users",
-        "/beta/users/${local.example_msft_user_guid}/mailboxSettings",
-        "/beta/users/${local.example_msft_user_guid}/mailFolders/SentItems/messages"
-      ]
-    }
-  }
-  enabled_msft_sources = { for id, spec in local.msft_sources : id => spec if spec.enabled }
 }
 
 module "msft-connection" {
-  for_each = local.enabled_msft_sources
+  for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
   source = "../../modules/azuread-connection"
 
@@ -125,7 +83,7 @@ module "msft-connection" {
 }
 
 module "msft-connection-auth" {
-  for_each = local.enabled_msft_sources
+  for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
   source = "../../modules/azuread-local-cert"
 
@@ -136,7 +94,7 @@ module "msft-connection-auth" {
 }
 
 resource "aws_ssm_parameter" "client_id" {
-  for_each = local.enabled_msft_sources
+  for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
   name  = "PSOXY_${upper(replace(each.key, "-", "_"))}_CLIENT_ID"
   type  = "String"
@@ -150,7 +108,7 @@ resource "aws_ssm_parameter" "client_id" {
 }
 
 resource "aws_ssm_parameter" "refresh_endpoint" {
-  for_each = local.msft_sources
+  for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
   name      = "PSOXY_${upper(replace(each.key, "-", "_"))}_REFRESH_ENDPOINT"
   type      = "String"
@@ -166,7 +124,7 @@ resource "aws_ssm_parameter" "refresh_endpoint" {
 
 
 module "private-key-aws-parameters" {
-  for_each = local.enabled_msft_sources
+  for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
   source = "../../modules/private-key-aws-parameter"
 
@@ -177,20 +135,24 @@ module "private-key-aws-parameters" {
 }
 
 module "psoxy-msft-connector" {
-  for_each = local.enabled_msft_sources
+  for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
   source = "../../modules/aws-psoxy-rest"
 
-  function_name        = "psoxy-${each.key}"
-  source_kind          = each.value.source_kind
-  path_to_config       = "${var.psoxy_base_dir}/configs/${each.value.source_kind}.yaml"
-  path_to_function_zip = module.psoxy-aws.path_to_deployment_jar
-  function_zip_hash    = module.psoxy-aws.deployment_package_hash
-  api_caller_role_arn  = module.psoxy-aws.api_caller_role_arn
-  aws_assume_role_arn  = var.aws_assume_role_arn
-  example_api_calls    = each.value.example_calls
-  aws_account_id       = var.aws_account_id
-  path_to_repo_root    = var.psoxy_base_dir
+  function_name         = "psoxy-${each.key}"
+  source_kind           = each.value.source_kind
+  path_to_config        = "${var.psoxy_base_dir}/configs/${each.value.source_kind}.yaml"
+  path_to_function_zip  = module.psoxy-aws.path_to_deployment_jar
+  function_zip_hash     = module.psoxy-aws.deployment_package_hash
+  api_caller_role_arn   = module.psoxy-aws.api_caller_role_arn
+  aws_assume_role_arn   = var.aws_assume_role_arn
+  example_api_calls     = each.value.example_calls
+  aws_account_id        = var.aws_account_id
+  path_to_repo_root     = var.psoxy_base_dir
+  environment_variables = {
+    PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
+    IS_DEVELOPMENT_MODE  = "true"
+  }
 
   parameters = concat(
     module.private-key-aws-parameters[each.key].parameters,
@@ -204,7 +166,7 @@ module "psoxy-msft-connector" {
 # (requires terraform configuration being applied by an Azure User with privelleges to do this; it
 #  usually requires a 'Global Administrator' for your tenant)
 module "msft_365_grants" {
-  for_each = local.enabled_msft_sources
+  for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
   source = "../../modules/azuread-grant-all-users"
 
@@ -216,7 +178,7 @@ module "msft_365_grants" {
 
 
 module "worklytics-psoxy-connection" {
-  for_each = local.enabled_msft_sources
+  for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
   source = "../../modules/worklytics-psoxy-connection-aws"
 
@@ -225,3 +187,83 @@ module "worklytics-psoxy-connection" {
   aws_region         = var.aws_region
   aws_role_arn       = module.psoxy-aws.api_caller_role_arn
 }
+
+
+# BEGIN LONG ACCESS AUTH CONNECTORS
+locals {
+  base_config_path                           = "${var.psoxy_base_dir}configs"
+  enabled_oauth_long_access_connectors_todos = { for k, v in module.worklytics_connector_specs.enabled_oauth_long_access_connectors : k => v if v.external_token_todo != null }
+}
+
+# Create secret (later filled by customer)
+resource "aws_ssm_parameter" "long-access-token-secret" {
+  for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
+
+  name        = "PSOXY_${upper(replace(each.key, "-", "_"))}_ACCESS_TOKEN"
+  type        = "SecureString"
+  description = "The long lived token for `psoxy-${each.key}`"
+  value       = sensitive("TODO: fill me with a real token!! (via AWS console)")
+
+  lifecycle {
+    ignore_changes = [
+      value # we expect this to be filled via Console, so don't want to overwrite it with the dummy value if changed
+    ]
+  }
+}
+
+module "aws-psoxy-long-auth-connectors" {
+  for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
+
+  source = "../../modules/aws-psoxy-rest"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-rest?ref=v0.4.1"
+
+
+  function_name                         = "psoxy-${each.key}"
+  path_to_function_zip                  = module.psoxy-aws.path_to_deployment_jar
+  function_zip_hash                     = module.psoxy-aws.deployment_package_hash
+  path_to_config                        = "${local.base_config_path}/${each.value.source_kind}.yaml"
+  aws_assume_role_arn                   = var.aws_assume_role_arn
+  aws_account_id                        = var.aws_account_id
+  api_caller_role_arn                   = module.psoxy-aws.api_caller_role_arn
+  source_kind                           = each.value.source_kind
+  path_to_repo_root                     = var.psoxy_base_dir
+  example_api_calls                     = each.value.example_api_calls
+  example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
+  environment_variables                 = {
+    PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
+    IS_DEVELOPMENT_MODE  = "true"
+  }
+
+  parameters = [
+    module.psoxy-aws.salt_secret,
+    aws_ssm_parameter.long-access-token-secret[each.key]
+  ]
+
+
+}
+
+module "source_token_external_todo" {
+  for_each = local.enabled_oauth_long_access_connectors_todos
+
+  source = "../../modules/source-token-external-todo"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/source-token-external-todo?ref=v0.4.1"
+
+  source_id                         = each.key
+  host_cloud                        = "aws"
+  connector_specific_external_steps = each.value.external_token_todo
+  token_secret_id                   = aws_ssm_parameter.long-access-token-secret[each.key].name
+}
+
+module "worklytics-psoxy-connection-oauth-long-access" {
+  for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
+
+  source = "../../modules/worklytics-psoxy-connection-aws"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=v0.4.1"
+
+  psoxy_endpoint_url = module.aws-psoxy-long-auth-connectors[each.key].endpoint_url
+  display_name       = "${each.value.display_name} via Psoxy${var.connector_display_name_suffix}"
+  aws_region         = var.aws_region
+  aws_role_arn       = module.psoxy-aws.api_caller_role_arn
+}
+
+# END LONG ACCESS AUTH CONNECTORS

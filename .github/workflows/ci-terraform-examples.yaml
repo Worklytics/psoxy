@@ -57,3 +57,9 @@ jobs:
         run: |
           terraform init -reconfigure
           terraform validate
+
+      - name: 'Terraform - validate examples/msft-365'
+        working-directory: infra/examples/msft-365
+        run: |
+          terraform init -reconfigure
+          terraform validate

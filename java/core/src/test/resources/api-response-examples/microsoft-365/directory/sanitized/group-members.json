@@ -1,0 +1,195 @@
+{
+  "@odata.context":"https://graph.microsoft.com/v1.0/$metadata#directoryObjects",
+  "value":[
+    {
+      "@odata.type":"#microsoft.graph.user",
+      "id":"87d349ed-44d7-43e1-9a83-5f2406dee5bd",
+      "businessPhones":[ ],
+      "jobTitle":"Product Marketing Manager",
+      "mail":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"qP__mvDO0hqQt8wyZLsFcbV0Hql4fEK8M330.f5EfUc\"}",
+      "officeLocation":"18/2111",
+      "preferredLanguage":"en-US",
+      "userPrincipalName":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"qP__mvDO0hqQt8wyZLsFcbV0Hql4fEK8M330.f5EfUc\"}"
+    },
+    {
+      "@odata.type":"#microsoft.graph.user",
+      "id":"626cbf8c-5dde-46b0-8385-9e40d64736fe",
+      "businessPhones":[ ],
+      "jobTitle":"CVP Engineering",
+      "mail":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"GHuufL.ojHOp0lp_B2lN557G9wq8eXDqMz5QhUQy8Vo\"}",
+      "officeLocation":"23/2102",
+      "preferredLanguage":"en-US",
+      "userPrincipalName":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"GHuufL.ojHOp0lp_B2lN557G9wq8eXDqMz5QhUQy8Vo\"}"
+    },
+    {
+      "@odata.type":"#microsoft.graph.user",
+      "id":"40079818-3808-4585-903b-02605f061225",
+      "businessPhones":[ ],
+      "jobTitle":"President",
+      "mail":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\".mBUaJxXM8QhNMJDIMfy22TX2mZp0p9LljciT.yNZD8\"}",
+      "officeLocation":"15/1102",
+      "preferredLanguage":"en-US",
+      "userPrincipalName":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\".mBUaJxXM8QhNMJDIMfy22TX2mZp0p9LljciT.yNZD8\"}"
+    },
+    {
+      "@odata.type":"#microsoft.graph.user",
+      "id":"074e56ea-0b50-4461-89e5-c67ae14a2c0b",
+      "businessPhones":[ ],
+      "jobTitle":"CVP Research & Development",
+      "mail":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"8_MGROcayBE1pEkfofJz4nIY48sVEIMNg_Nmx0GjDgE\"}",
+      "officeLocation":"23/3101",
+      "preferredLanguage":"en-US",
+      "userPrincipalName":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"8_MGROcayBE1pEkfofJz4nIY48sVEIMNg_Nmx0GjDgE\"}"
+    },
+    {
+      "@odata.type":"#microsoft.graph.user",
+      "id":"16cfe710-1625-4806-9990-91b8f0afee35",
+      "businessPhones":[ ],
+      "jobTitle":"Attorney",
+      "mail":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"hSgRV1g0VibmTl74vsh92NAwbB3NbI1yyHuSFoPpUWQ\"}",
+      "officeLocation":"14/1102",
+      "preferredLanguage":"en-US",
+      "userPrincipalName":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"hSgRV1g0VibmTl74vsh92NAwbB3NbI1yyHuSFoPpUWQ\"}"
+    },
+    {
+      "@odata.type":"#microsoft.graph.user",
+      "id":"089a6bb8-e8cb-492c-aa41-c078aa0b5120",
+      "businessPhones":[ ],
+      "jobTitle":"CVP Operations",
+      "mail":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"vEUbY3ZwSrThJdXUyZkN2MFxv9g1flExUt2IbHOZsdo\"}",
+      "officeLocation":"36/2121",
+      "preferredLanguage":"en-US",
+      "userPrincipalName":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"vEUbY3ZwSrThJdXUyZkN2MFxv9g1flExUt2IbHOZsdo\"}"
+    },
+    {
+      "@odata.type":"#microsoft.graph.user",
+      "id":"2804bc07-1e1f-4938-9085-ce6d756a32d2",
+      "businessPhones":[ ],
+      "jobTitle":"Budget Analyst",
+      "mail":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"xgNOPohgQPshrr622pZGp6ioXZjoKmqVD5PNOdglcM0\"}",
+      "officeLocation":"97/2302",
+      "preferredLanguage":"en-US",
+      "userPrincipalName":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"xgNOPohgQPshrr622pZGp6ioXZjoKmqVD5PNOdglcM0\"}"
+    },
+    {
+      "@odata.type":"#microsoft.graph.user",
+      "id":"b66ecf79-a093-4d51-86e0-efcc4531f37a",
+      "businessPhones":[ ],
+      "jobTitle":"Sr. VP Sales & Marketing",
+      "mail":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"koQM9aogcvXs3Caqx7vTGxx.H0.GVhIXeq0EpvJKoQE\"}",
+      "officeLocation":"131/2105",
+      "preferredLanguage":"en-US",
+      "userPrincipalName":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"koQM9aogcvXs3Caqx7vTGxx.H0.GVhIXeq0EpvJKoQE\"}"
+    },
+    {
+      "@odata.type":"#microsoft.graph.user",
+      "id":"8b209ac8-08ff-4ef1-896d-3b9fde0bbf04",
+      "businessPhones":[ ],
+      "jobTitle":"Paralegal",
+      "mail":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"7oDV73CPLJ7RGaC3ozYZMLJ5Judp3vMkpvr7eKL6Zjw\"}",
+      "officeLocation":"20/1109",
+      "preferredLanguage":"en-US",
+      "userPrincipalName":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"7oDV73CPLJ7RGaC3ozYZMLJ5Judp3vMkpvr7eKL6Zjw\"}"
+    },
+    {
+      "@odata.type":"#microsoft.graph.user",
+      "id":"4782e723-f4f4-4af3-a76e-25e3bab0d896",
+      "businessPhones":[ ],
+      "jobTitle":"Marketing Assistant",
+      "mail":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"JprtKL_SStBpL1MyKy5Y2MPKjjwjUPwRqwUblqaVLHU\"}",
+      "officeLocation":"131/1104",
+      "preferredLanguage":"en-US",
+      "userPrincipalName":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"JprtKL_SStBpL1MyKy5Y2MPKjjwjUPwRqwUblqaVLHU\"}"
+    },
+    {
+      "@odata.type":"#microsoft.graph.user",
+      "id":"08fa38e4-cbfa-4488-94ed-c834da6539df",
+      "businessPhones":[ ],
+      "jobTitle":"VP Marketing",
+      "mail":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"cX3dwn15IJq3LIRVUixSQcnUVgBvTxlgyW2QQEmr51A\"}",
+      "officeLocation":"131/2103",
+      "preferredLanguage":"en-US",
+      "userPrincipalName":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"cX3dwn15IJq3LIRVUixSQcnUVgBvTxlgyW2QQEmr51A\"}"
+    },
+    {
+      "@odata.type":"#microsoft.graph.user",
+      "id":"24fcbca3-c3e2-48bf-9ffc-c7f81b81483d",
+      "businessPhones":[ ],
+      "jobTitle":"CVP Finance",
+      "mail":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"v7XoQEQR5jHujvbMVTu.ONfHg5kQebQS.09hQgeG2.c\"}",
+      "officeLocation":"14/1108",
+      "preferredLanguage":"en-US",
+      "userPrincipalName":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"v7XoQEQR5jHujvbMVTu.ONfHg5kQebQS.09hQgeG2.c\"}"
+    },
+    {
+      "@odata.type":"#microsoft.graph.user",
+      "id":"2ed03dfd-01d8-4005-a9ef-fa8ee546dc6c",
+      "businessPhones":[ ],
+      "jobTitle":"Product Manager",
+      "mail":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"X1YqKbq8JhW08.GcwyJfoQ4RRu_1jk8VnQRWxfiK5zU\"}",
+      "officeLocation":"20/2107",
+      "preferredLanguage":"en-US",
+      "userPrincipalName":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"X1YqKbq8JhW08.GcwyJfoQ4RRu_1jk8VnQRWxfiK5zU\"}"
+    },
+    {
+      "@odata.type":"#microsoft.graph.user",
+      "id":"df043ff1-49d5-414e-86a4-0c7f239c36cf",
+      "businessPhones":[ ],
+      "jobTitle":"CVP Legal",
+      "mail":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"bXD3n1oYwINcV_ebyS0_ihKU8494fQaxacFfyOTEq38\"}",
+      "officeLocation":"19/2109",
+      "preferredLanguage":"en-US",
+      "userPrincipalName":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"bXD3n1oYwINcV_ebyS0_ihKU8494fQaxacFfyOTEq38\"}"
+    },
+    {
+      "@odata.type":"#microsoft.graph.user",
+      "id":"ec63c778-24e1-4240-bea3-d12a167d5232",
+      "businessPhones":[ ],
+      "jobTitle":"Accountant II",
+      "mail":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"nzYvP8.K8eVJV8O05a6X52ZYBFLnws0U1GJioAUCEJw\"}",
+      "officeLocation":"98/2202",
+      "preferredLanguage":"en-US",
+      "userPrincipalName":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"nzYvP8.K8eVJV8O05a6X52ZYBFLnws0U1GJioAUCEJw\"}"
+    },
+    {
+      "@odata.type":"#microsoft.graph.user",
+      "id":"48d31887-5fad-4d73-a9f5-3c356e68a038",
+      "businessPhones":[ ],
+      "jobTitle":"Auditor",
+      "mail":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\".tbhph3DloGSd5l9e9TeFqmEboAqU8o6BdigmHZOmxI\"}",
+      "officeLocation":"12/1110",
+      "preferredLanguage":"en-US",
+      "userPrincipalName":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\".tbhph3DloGSd5l9e9TeFqmEboAqU8o6BdigmHZOmxI\"}"
+    },
+    {
+      "@odata.type":"#microsoft.graph.user",
+      "id":"e8a02cc7-df4d-4778-956d-784cc9506e5a",
+      "businessPhones":[ ],
+      "jobTitle":"Product Manager",
+      "mail":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"OMcmNn3CaBfLLsEC7Rpg9.73GwGzt0juWIsVxuvSUEA\"}",
+      "officeLocation":"20/1104",
+      "preferredLanguage":"en-US",
+      "userPrincipalName":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"OMcmNn3CaBfLLsEC7Rpg9.73GwGzt0juWIsVxuvSUEA\"}"
+    },
+    {
+      "@odata.type":"#microsoft.graph.user",
+      "id":"c8913c86-ceea-4d39-b1ea-f63a5b675166",
+      "businessPhones":[ ],
+      "jobTitle":"Marketing Assistant",
+      "mail":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"JWEZpRrH_G.j4eq012zFqGaI7HenFpKONxn1hk3Epms\"}",
+      "officeLocation":"18/1106",
+      "preferredLanguage":"en-US",
+      "userPrincipalName":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"JWEZpRrH_G.j4eq012zFqGaI7HenFpKONxn1hk3Epms\"}"
+    },
+    {
+      "@odata.type":"#microsoft.graph.user",
+      "id":"e3d0513b-449e-4198-ba6f-bd97ae7cae85",
+      "businessPhones":[ ],
+      "jobTitle":"Web Marketing Manager",
+      "mail":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"46QtmKB695MeGG0s3FFPLcjgSIr6W7uoHBTyXBXBQDg\"}",
+      "officeLocation":"20/1101",
+      "preferredLanguage":"en-US",
+      "userPrincipalName":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"46QtmKB695MeGG0s3FFPLcjgSIr6W7uoHBTyXBXBQDg\"}"
+    }
+  ]
+}

@@ -11,20 +11,21 @@ terraform {
 module "psoxy_lambda" {
   source = "../aws-psoxy-lambda"
 
-  function_name        = var.function_name
-  handler_class        = "co.worklytics.psoxy.Handler"
-  path_to_function_zip = var.path_to_function_zip
-  function_zip_hash    = var.function_zip_hash
-  memory_size_mb       = 512
-  timeout_seconds      = 55
-  aws_assume_role_arn  = var.aws_assume_role_arn
-  path_to_config       = var.path_to_config
-  source_kind          = var.source_kind
-  parameters           = []
+  function_name         = var.function_name
+  handler_class         = "co.worklytics.psoxy.Handler"
+  path_to_function_zip  = var.path_to_function_zip
+  function_zip_hash     = var.function_zip_hash
+  memory_size_mb        = 512
+  timeout_seconds       = 55
+  aws_assume_role_arn   = var.aws_assume_role_arn
+  path_to_config        = var.path_to_config
+  source_kind           = var.source_kind
+  parameters            = []
+  environment_variables = var.environment_variables
 }
 
 resource "aws_lambda_function_url" "lambda_url" {
-  function_name      = var.function_name # would 'module.psoxy_lambda.function_name' avoid explicit dependency??
+  function_name      = var.function_name # woudld 'module.psoxy_lambda.function_name' avoid explicit dependency??
   authorization_type = "AWS_IAM"
 
   cors {
@@ -79,6 +80,13 @@ ${coalesce(join("\n", local.test_commands), "cd docs/example-api-calls/")}
 
 See `docs/example-api-calls/` for more example API calls specific to the data source to which your
 Proxy is configured to connect.
+
+Feel free to try the above calls, and reference to the source's API docs for other parameters /
+endpoints to experiment with. If you spot any additional fields you believe should be
+redacted/pseudonymized, feel free to modify the rules in your local repo and re-deploy OR configure
+a RULES variable in the source.
+
+Contact support@worklytics.co for assistance modifying the rules as needed.
 
 [Node.js]: https://nodejs.org/en/
 [npm]: https://www.npmjs.com

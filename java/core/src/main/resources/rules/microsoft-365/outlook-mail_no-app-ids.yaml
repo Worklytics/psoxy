@@ -1,0 +1,118 @@
+---
+allowAllEndpoints: false
+endpoints:
+  - pathRegex: "^/(v1.0|beta)/users/?[^/]*"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..displayName"
+          - "$..employeeId"
+          - "$..aboutMe"
+          - "$..mySite"
+          - "$..preferredName"
+          - "$..givenName"
+          - "$..surname"
+          - "$..mailNickname"
+          - "$..proxyAddresses"
+          - "$..faxNumber"
+          - "$..mobilePhone"
+          - "$..businessPhones[*]"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..userPrincipalName"
+          - "$..imAddresses[*]"
+          - "$..mail"
+          - "$..otherMails[*]"
+        encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..id"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
+  - pathRegex: "^/(v1.0|beta)/groups/?[^/]*"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..owners"
+          - "$..rejectedSenders"
+          - "$..acceptedSenders"
+          - "$..members"
+          - "$..membersWithLicenseErrors"
+  - pathRegex: "^/(v1.0|beta)/groups/[^/]*/members.*"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..displayName"
+          - "$..employeeId"
+          - "$..aboutMe"
+          - "$..mySite"
+          - "$..preferredName"
+          - "$..givenName"
+          - "$..surname"
+          - "$..mailNickname"
+          - "$..proxyAddresses"
+          - "$..faxNumber"
+          - "$..mobilePhone"
+          - "$..businessPhones[*]"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..userPrincipalName"
+          - "$..imAddresses[*]"
+          - "$..mail"
+          - "$..otherMails[*]"
+        encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..id"
+        encoding: "JSON"
+  - pathRegex: "^/(v1.0|beta)/users/[^/]*/mailboxSettings"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$.['@odata.context']"
+  - pathRegex: "^/(v1.0|beta)/users/[^/]*/messages/[^/]*"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..subject"
+          - "$..body"
+          - "$..bodyPreview"
+          - "$..emailAddress.name"
+          - "$..extensions"
+          - "$..multiValueExtendedProperties"
+          - "$..singleValueExtendedProperties"
+          - "$..internetMessageHeaders"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress.address"
+        encoding: "JSON"
+      - !<tokenize>
+        jsonPaths:
+          - "$.['@odata.nextLink', '@odata.prevLink']"
+        regex: "^https://graph.microsoft.com/(.*)$"
+      - !<redact>
+        jsonPaths:
+          - "$.['@odata.context']"
+  - pathRegex: "^/(v1.0|beta)/users/[^/]*/mailFolders(/SentItems|\\('SentItems'\\))/messages.*"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..subject"
+          - "$..body"
+          - "$..bodyPreview"
+          - "$..emailAddress.name"
+          - "$..extensions"
+          - "$..multiValueExtendedProperties"
+          - "$..singleValueExtendedProperties"
+          - "$..internetMessageHeaders"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress.address"
+        encoding: "JSON"
+      - !<tokenize>
+        jsonPaths:
+          - "$.['@odata.nextLink', '@odata.prevLink']"
+        regex: "^https://graph.microsoft.com/(.*)$"
+      - !<redact>
+        jsonPaths:
+          - "$.['@odata.context']"

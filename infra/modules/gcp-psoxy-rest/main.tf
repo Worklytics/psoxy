@@ -43,7 +43,10 @@ resource "google_cloudfunctions_function" "function" {
   entry_point           = "co.worklytics.psoxy.Route"
   service_account_email = var.service_account_email
 
-  environment_variables = tomap(yamldecode(file(var.path_to_config)))
+  environment_variables = merge(
+    tomap(yamldecode(file(var.path_to_config))),
+    var.environment_variables
+  )
 
   dynamic "secret_environment_variables" {
     for_each = local.secret_bindings

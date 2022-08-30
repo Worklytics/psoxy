@@ -1,14 +1,16 @@
 package co.worklytics.psoxy.rules;
 
+import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "method")
 @JsonSubTypes({
@@ -17,6 +19,7 @@ import java.util.Set;
     @JsonSubTypes.Type(value = Transform.Pseudonymize.class, name = "pseudonymize"),
     @JsonSubTypes.Type(value = Transform.PseudonymizeEmailHeader.class, name = "pseudonymizeEmailHeader"),
     @JsonSubTypes.Type(value = Transform.FilterTokenByRegex.class, name = "filterTokenByRegex"),
+    @JsonSubTypes.Type(value = Transform.Tokenize.class, name = "tokenize"),
 })
 @SuperBuilder(toBuilder = true)
 @AllArgsConstructor //for builder
@@ -53,13 +56,22 @@ public abstract class Transform {
     List<String> fields;
 
     @NoArgsConstructor //for jackson
-    @SuperBuilder
+    @SuperBuilder(toBuilder = true)
     @Getter
     @EqualsAndHashCode(callSuper = true)
     public static class Redact extends Transform {
 
         public static Redact ofPaths(String... jsonPaths) {
             return Redact.builder().jsonPaths(Arrays.asList(jsonPaths)).build();
+        }
+
+        public Redact clone() {
+            return this.toBuilder()
+                .clearJsonPaths()
+                .jsonPaths(new ArrayList<>(this.jsonPaths))
+                .clearFields()
+                .fields(new ArrayList<>(this.fields))
+                .build();
         }
     }
 
@@ -75,6 +87,17 @@ public abstract class Transform {
          */
         @Singular
         List<String> redactions;
+
+        public RedactRegexMatches clone() {
+            return this.toBuilder()
+                .clearJsonPaths()
+                .jsonPaths(new ArrayList<>(this.jsonPaths))
+                .clearFields()
+                .fields(new ArrayList<>(this.fields))
+                .clearRedactions()
+                .redactions(new ArrayList<>(this.redactions))
+                .build();
+        }
     }
 
     /**
@@ -99,35 +122,118 @@ public abstract class Transform {
          */
         @Singular
         List<String> filters;
+
+        public FilterTokenByRegex clone() {
+            return this.toBuilder()
+                .clearJsonPaths()
+                .jsonPaths(new ArrayList<>(this.jsonPaths))
+                .clearFields()
+                .fields(new ArrayList<>(this.fields))
+                .clearFilters()
+                .filters(new ArrayList<>(this.filters))
+                .build();
+        }
     }
 
 
 
     @NoArgsConstructor //for jackson
-    @SuperBuilder
+    @SuperBuilder(toBuilder = true)
     @Getter
     public static class PseudonymizeEmailHeader extends Transform {
 
         public static PseudonymizeEmailHeader ofPaths(String... jsonPaths) {
             return PseudonymizeEmailHeader.builder().jsonPaths(Arrays.asList(jsonPaths)).build();
         }
+
+        public PseudonymizeEmailHeader clone() {
+            return this.toBuilder()
+                .clearJsonPaths()
+                .jsonPaths(new ArrayList<>(this.jsonPaths))
+                .clearFields()
+                .fields(new ArrayList<>(this.fields))
+                .build();
+        }
     }
 
-    @SuperBuilder
+    @SuperBuilder(toBuilder = true)
     @AllArgsConstructor //for builder
     @NoArgsConstructor //for Jackson
     @Getter
     public static class Pseudonymize extends Transform {
 
+        /**
+         * use if still need original, but also want its pseudonym to be able to match against
+         * pseudonymized fields
+         *
+         * use case: group mailing lists; if they're attendees to an event, the email in that
+         * context will be pseudonymized; so when we pull list of groups, we need pseudonyms to
+         * match against those, but can also get the original for use in UX/reports, as it's not PII
+         */
         @JsonInclude(JsonInclude.Include.NON_DEFAULT)
         @Builder.Default
         Boolean includeOriginal = false;
 
-        //TODO: support this somehow ...
-        //String defaultScopeId;
+        /**
+         * whether to include reversible form of pseudonymized value in output
+         */
+        @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+        @Builder.Default
+        Boolean includeReversible = false;
+
+        /**
+         * how to encode to the resulting pseudonym
+         */
+        @JsonInclude(JsonInclude.Include.NON_DEFAULT) //doesn't work for enums ...
+        @Builder.Default
+        PseudonymEncoder.Implementations encoding = PseudonymEncoder.Implementations.JSON;
 
         public static Pseudonymize ofPaths(String... jsonPaths) {
             return Pseudonymize.builder().jsonPaths(Arrays.asList(jsonPaths)).build();
         }
+
+        public Pseudonymize clone() {
+            return this.toBuilder()
+                .clearJsonPaths()
+                .jsonPaths(new ArrayList<>(this.jsonPaths))
+                .clearFields()
+                .fields(new ArrayList<>(this.fields))
+                .build();
+        }
     }
+
+    @SuperBuilder(toBuilder = true)
+    @AllArgsConstructor //for builder
+    @NoArgsConstructor //for Jackson
+    @Getter
+    public static class Tokenize extends Transform {
+
+        /**
+         * if provided, only group within matched by this regex will be tokenized
+         *
+         * example usage: .regex("^https://graph.microsoft.com/(.*)$") will tokenize the path
+         * of a MSFT graph URL (prev/next links in paged endpoints), which may be useful if path
+         * might contain PII or something like that
+         *
+         * HUGE CAVEAT: as of Aug 2022, reversing encapsulated tokens BACK to their original values
+         * will work if and only if token is bounded by non-base64-urlencoded character
+         */
+        @Nullable
+        String regex;
+
+        //NOTE: always format to URL-safe
+        public Tokenize clone()  {
+            return this.toBuilder()
+                .clearJsonPaths()
+                .jsonPaths(new ArrayList<>(this.jsonPaths))
+                .clearFields()
+                .fields(new ArrayList<>(this.fields))
+                .build();
+        }
+    }
+
+
+    //TODO: can we implement abstract portion of this somehow??
+    public abstract Transform clone();
+
 }

@@ -1,5 +1,6 @@
 package co.worklytics.psoxy;
 
+import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import co.worklytics.psoxy.rules.RuleSet;
 import lombok.*;
 
@@ -8,12 +9,15 @@ import java.net.URL;
 
 public interface Sanitizer {
 
+    /**
+     * immutable sanitizer options
+     */
     @With
     @Builder
     @Value
-    class Options implements Serializable {
+    class ConfigurationOptions implements Serializable {
 
-        private static final long serialVersionUID = 3L;
+        private static final long serialVersionUID = 4L;
 
         /**
          * salt used to generate pseudonyms
@@ -26,9 +30,13 @@ public interface Sanitizer {
         /**
          * scope to use where logic + rules don't imply a match
          */
+        @Deprecated
         String defaultScopeId;
 
         RuleSet rules;
+
+        @Builder.Default
+        PseudonymImplementation pseudonymImplementation = PseudonymImplementation.DEFAULT;
     }
 
     /**
@@ -49,10 +57,13 @@ public interface Sanitizer {
      */
     boolean isAllowed(URL url);
 
+
     /**
      * sanitize jsonResponse received from url, according any options set on Sanitizer
      */
     String sanitize(URL url, String jsonResponse);
+
+
 
     /**
      * @param identifier to pseudonymize
@@ -66,5 +77,5 @@ public interface Sanitizer {
      */
     PseudonymizedIdentity pseudonymize(Number identifier);
 
-    Options getOptions();
+    ConfigurationOptions getConfigurationOptions();
 }

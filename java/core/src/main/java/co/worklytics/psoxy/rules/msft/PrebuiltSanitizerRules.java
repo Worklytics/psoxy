@@ -1,18 +1,32 @@
 package co.worklytics.psoxy.rules.msft;
 
+import co.worklytics.psoxy.ConfigRulesModule;
 import co.worklytics.psoxy.rules.Rules2;
 import co.worklytics.psoxy.rules.RuleSet;
 import co.worklytics.psoxy.rules.Transform;
 import co.worklytics.psoxy.rules.zoom.ZoomTransforms;
+import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.google.common.collect.ImmutableMap;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 public class PrebuiltSanitizerRules {
 
+    static final Transform.Tokenize TOKENIZE_ODATA_LINKS = Transform.Tokenize.builder()
+        .jsonPath("$.['@odata.nextLink', '@odata.prevLink']")
+        .regex("^https://graph.microsoft.com/(.*)$")
+        .build();
+    static final Transform REDACT_ODATA_CONTEXT = Transform.Redact.builder()
+        .jsonPath("$.['@odata.context']")
+        .build();
+
+    static final String DIRECTORY_REGEX_USERS = "^/(v1.0|beta)/users/?[^/]*";
+    static final String DIRECTORY_REGEX_GROUP_MEMBERS = "^/(v1.0|beta)/groups/[^/]*/members.*";
     static final Rules2 DIRECTORY = Rules2.builder()
         .endpoint(Rules2.Endpoint.builder()
-            .pathRegex("^/(v1.0|beta)/users/?[^/]*")
+            .pathRegex(DIRECTORY_REGEX_USERS)
             .transform(Transform.Redact.builder()
                 .jsonPath("$..displayName")
                 .jsonPath("$..employeeId")
@@ -45,7 +59,7 @@ public class PrebuiltSanitizerRules {
                 .build())
             .build())
         .endpoint(Rules2.Endpoint.builder()
-            .pathRegex("^/(v1.0|beta)/groups/[^/]*/members.*")
+            .pathRegex(DIRECTORY_REGEX_GROUP_MEMBERS)
             .transform(Transform.Redact.builder()
                 .jsonPath("$..displayName")
                 .jsonPath("$..employeeId")
@@ -69,12 +83,28 @@ public class PrebuiltSanitizerRules {
             .build())
         .build();
 
-    static final Rules2 OUTLOOK_MAIL = DIRECTORY.withAdditionalEndpoints(
+    static final Rules2 DIRECTORY_NO_MSFT_IDS = DIRECTORY
+        .withTransformByEndpoint(DIRECTORY_REGEX_USERS, Transform.Pseudonymize.builder()
+            .includeReversible(true)
+            .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
+            .jsonPath("$..id")
+            .build())
+        .withTransformByEndpoint(DIRECTORY_REGEX_GROUP_MEMBERS, Transform.Pseudonymize.builder()
+            .jsonPath("$..id")
+            .build());
+
+
+
+    static final String OUTLOOK_PATH_REGEX_MAILBOX_SETTINGS = "^/(v1.0|beta)/users/[^/]*/mailboxSettings";
+    static final String OUTLOOK_MAIL_PATH_REGEX_MESSAGES = "^/(v1.0|beta)/users/[^/]*/messages/[^/]*";
+    static final String OUTLOOK_MAIL_PATH_REGEX_SENT_MESSAGES = "^/(v1.0|beta)/users/[^/]*/mailFolders(/SentItems|\\('SentItems'\\))/messages.*";
+
+    static final List<Rules2.Endpoint> OUTLOOK_MAIL_ENDPOINTS = Arrays.asList(
         Rules2.Endpoint.builder()
-            .pathRegex("^/(v1.0|beta)/users/[^/]*/mailboxSettings")
+            .pathRegex(OUTLOOK_PATH_REGEX_MAILBOX_SETTINGS)
             .build(),
         Rules2.Endpoint.builder()
-            .pathRegex("^/(v1.0|beta)/users/[^/]*/messages/[^/]*")
+            .pathRegex(OUTLOOK_MAIL_PATH_REGEX_MESSAGES)
             .transform(Transform.Redact.builder()
                 .jsonPath("$..subject")
                 .jsonPath("$..body")
@@ -92,7 +122,7 @@ public class PrebuiltSanitizerRules {
             )
             .build(),
         Rules2.Endpoint.builder()
-            .pathRegex("^/(v1.0|beta)/users/[^/]*/mailFolders(/SentItems|\\('SentItems'\\))/messages.*")
+            .pathRegex(OUTLOOK_MAIL_PATH_REGEX_SENT_MESSAGES)
             .transform(Transform.Redact.builder()
                 .jsonPath("$..subject")
                 .jsonPath("$..body")
@@ -108,6 +138,14 @@ public class PrebuiltSanitizerRules {
                 .build())
             .build()
     );
+
+    static final Rules2 OUTLOOK_MAIL = DIRECTORY.withAdditionalEndpoints(OUTLOOK_MAIL_ENDPOINTS);
+
+    static final Rules2 OUTLOOK_MAIL_NO_APP_IDS = DIRECTORY_NO_MSFT_IDS
+        .withAdditionalEndpoints(OUTLOOK_MAIL_ENDPOINTS)
+        .withTransformByEndpoint(OUTLOOK_MAIL_PATH_REGEX_MESSAGES, TOKENIZE_ODATA_LINKS, REDACT_ODATA_CONTEXT)
+        .withTransformByEndpoint(OUTLOOK_MAIL_PATH_REGEX_SENT_MESSAGES, TOKENIZE_ODATA_LINKS, REDACT_ODATA_CONTEXT)
+        .withTransformByEndpoint(OUTLOOK_PATH_REGEX_MAILBOX_SETTINGS, REDACT_ODATA_CONTEXT);
 
     //transforms to apply to endpoints that return Event or Event collection
     static final Rules2.Endpoint EVENT_TRANSFORMS = Rules2.Endpoint.builder()
@@ -140,24 +178,49 @@ public class PrebuiltSanitizerRules {
         .build();
 
 
-    static final Rules2 OUTLOOK_CALENDAR = DIRECTORY.withAdditionalEndpoints(
+    static final String OUTLOOK_CALENDAR_PATH_REGEX_EVENTS = "^/(v1.0|beta)/users/[^/]*/(calendars/[^/]*/)?events.*";
+    static final String OUTLOOK_CALENDAR_PATH_REGEX_CALENDAR_VIEW = "^/(v1.0|beta)/users/[^/]*/calendar/calendarView(?)[^/]*";
+
+    static final List<Rules2.Endpoint> OUTLOOK_CALENDAR_ENDPOINTS = Arrays.asList(
         Rules2.Endpoint.builder()
-            .pathRegex("^/(v1.0|beta)/users/[^/]*/mailboxSettings")
+            .pathRegex(OUTLOOK_PATH_REGEX_MAILBOX_SETTINGS)
             .build(),
         EVENT_TRANSFORMS.toBuilder()
-            .pathRegex("^/(v1.0|beta)/users/[^/]*/(calendars/[^/]*/)?events.*")
+            .pathRegex(OUTLOOK_CALENDAR_PATH_REGEX_EVENTS)
             .build(),
         EVENT_TRANSFORMS.toBuilder()
-            .pathRegex("^/(v1.0|beta)/users/[^/]*/calendar/calendarView(?)[^/]*")
+            .pathRegex(OUTLOOK_CALENDAR_PATH_REGEX_CALENDAR_VIEW)
             .build()
     );
+
+    static final Rules2 OUTLOOK_CALENDAR = DIRECTORY.withAdditionalEndpoints(OUTLOOK_CALENDAR_ENDPOINTS);
+
+    static final Transform REDACT_CALENDAR_ODATA_LINKS =
+        Transform.Redact.builder()
+            .jsonPath("$..['calendar@odata.associationLink', 'calendar@odata.navigationLink']")
+            .build();
+
+    static final Rules2 OUTLOOK_CALENDAR_NO_APP_IDS =
+        DIRECTORY_NO_MSFT_IDS
+            .withAdditionalEndpoints(OUTLOOK_CALENDAR_ENDPOINTS)
+        .withTransformByEndpoint(OUTLOOK_PATH_REGEX_MAILBOX_SETTINGS, REDACT_ODATA_CONTEXT)
+        .withTransformByEndpoint(OUTLOOK_CALENDAR_PATH_REGEX_EVENTS, TOKENIZE_ODATA_LINKS,
+            REDACT_ODATA_CONTEXT,
+            REDACT_CALENDAR_ODATA_LINKS)
+        .withTransformByEndpoint(OUTLOOK_CALENDAR_PATH_REGEX_CALENDAR_VIEW, TOKENIZE_ODATA_LINKS,
+            REDACT_ODATA_CONTEXT,
+            REDACT_CALENDAR_ODATA_LINKS);
+
 
 
 
     public static final Map<String, RuleSet> MSFT_DEFAULT_RULES_MAP =
         ImmutableMap.<String, RuleSet>builder()
             .put("azure-ad", DIRECTORY)
+            .put("azure-ad" + ConfigRulesModule.NO_APP_IDS_SUFFIX, DIRECTORY_NO_MSFT_IDS)
             .put("outlook-cal", OUTLOOK_CALENDAR)
+            .put("outlook-cal" + ConfigRulesModule.NO_APP_IDS_SUFFIX, OUTLOOK_CALENDAR_NO_APP_IDS)
             .put("outlook-mail", OUTLOOK_MAIL)
+            .put("outlook-mail" + ConfigRulesModule.NO_APP_IDS_SUFFIX, OUTLOOK_MAIL_NO_APP_IDS)
             .build();
 }
