@@ -44,7 +44,7 @@ resource "google_cloudfunctions_function" "function" {
   service_account_email = var.service_account_email
 
   environment_variables = merge(
-    tomap(yamldecode(file(var.path_to_config)),
+    tomap(yamldecode(file(var.path_to_config))),
     var.environment_variables
   )
 
