@@ -48,34 +48,6 @@ resource "aws_s3_bucket_public_access_block" "input-block-public-access" {
   block_public_policy = true
 }
 
-resource "aws_iam_policy" "read_policy_to_execution_role" {
-  name        = "BucketRead_${aws_s3_bucket.input.id}"
-  description = "Allow principal to read from input bucket: ${aws_s3_bucket.input.id}"
-
-  policy = jsonencode(
-    {
-      "Version" : "2012-10-17",
-      "Statement" : [
-        {
-          "Sid" : "GrantLambdaAccessToInputBucket",
-          "Action" : [
-            "s3:GetObject"
-          ],
-          "Effect" : "Allow",
-          "Resource" : [
-            "${aws_s3_bucket.input.arn}/*"
-          ],
-          "Principal" : {
-            "AWS" : [
-              "${module.psoxy_lambda.iam_role_for_lambda_arn}"
-            ]
-          }
-        }
-      ]
-  })
-}
-
-
 resource "aws_s3_bucket" "output" {
   bucket = "psoxy-${var.instance_id}-${random_string.bucket_suffix.id}-output"
 }
@@ -106,8 +78,10 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
   depends_on = [aws_lambda_permission.allow_input_bucket]
 }
 
-resource "aws_iam_policy" "input_bucket_read_policy" {
-  name        = "BucketRead_${aws_s3_bucket.input.id}"
+
+# the lambda function needs to get single objects from the input bucket
+resource "aws_iam_policy" "input_bucket_getObject_policy" {
+  name        = "BucketGetObject_${aws_s3_bucket.input.id}"
   description = "Allow principal to read from input bucket: ${aws_s3_bucket.input.id}"
 
   policy = jsonencode(
@@ -127,9 +101,10 @@ resource "aws_iam_policy" "input_bucket_read_policy" {
 
 resource "aws_iam_role_policy_attachment" "read_policy_for_import_bucket" {
   role       = module.psoxy_lambda.iam_role_for_lambda_name
-  policy_arn = aws_iam_policy.input_bucket_read_policy.arn
+  policy_arn = aws_iam_policy.input_bucket_getObject_policy.arn
 }
 
+# proxy's lamba needs to WRITE to the output bucket
 resource "aws_iam_policy" "output_bucket_write_policy" {
   name        = "BucketWrite_${aws_s3_bucket.output.id}"
   description = "Allow principal to write to bucket: ${aws_s3_bucket.output.id}"
@@ -154,6 +129,7 @@ resource "aws_iam_role_policy_attachment" "write_policy_for_output_bucket" {
   policy_arn = aws_iam_policy.output_bucket_write_policy.arn
 }
 
+# proxy caller (data consumer) needs to read (both get and list objects) from the output bucket
 resource "aws_iam_policy" "output_bucket_read" {
   name        = "BucketRead_${aws_s3_bucket.output.id}"
   description = "Allow to read content from bucket: ${aws_s3_bucket.output.id}"
@@ -178,6 +154,6 @@ resource "aws_iam_policy" "output_bucket_read" {
 }
 
 resource "aws_iam_role_policy_attachment" "caller_bucket_access_policy" {
-  role       = var.api_caller_role_arn
+  role       = var.api_caller_role_name
   policy_arn = aws_iam_policy.output_bucket_read.arn
 }
