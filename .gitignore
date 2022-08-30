@@ -14,5 +14,5 @@
 # Log files
 *.log
 
-tools/node_modules
-tools/package-lock.json
+tools/psoxy-test/node_modules
+tools/psoxy-test/package-lock.json

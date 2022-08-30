@@ -1,10 +1,10 @@
 {
-  "name": "psoxy-testing",
+  "name": "psoxy-test",
   "version": "0.4.1",
   "private": "true",
   "type": "module",
   "description": "Worklytics Psoxy testing tool",
-  "main": "psoxy-testing.js",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
