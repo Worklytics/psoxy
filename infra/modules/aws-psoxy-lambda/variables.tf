@@ -54,7 +54,7 @@ variable "path_to_config" {
 
 variable "environment_variables" {
   type        = map(string)
-  description = "No sensitive variables to add as an environment variable."
+  description = "Non-sensitive values to add to functions environment variables; NOTE: will override anything in `path_to_config`"
   default     = {}
 }
 
