@@ -27,8 +27,7 @@ public class JsonPseudonymEncoder implements PseudonymEncoder {
     @Override
     public boolean canBeDecoded(String possiblePseudonym) {
         //not guaranteed, but good enough check in practice
-        return StringUtils.isNotBlank(possiblePseudonym)
-                && StringUtils.trimToEmpty(possiblePseudonym).startsWith("{");
+        return StringUtils.trimToEmpty(possiblePseudonym).startsWith("{");
     }
 }
 
