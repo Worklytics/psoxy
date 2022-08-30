@@ -10,6 +10,8 @@ terraform {
 
 resource "random_string" "bucket_suffix" {
   length  = 8
+  lower   = true
+  upper   = false
   special = false
 }
 

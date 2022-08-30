@@ -21,6 +21,12 @@ variable "aws_region" {
 variable "instance_id" {
   type        = string
   description = "Human readable reference name for this psoxy instance. Helpful for distinguishing resulting infrastructure"
+
+  # enforce max length to avoid bucket names that are too long
+  validation {
+    condition     = length(var.instance_id) < 41
+    error_message = "The instance_id must be at most 40 characters"
+  }
 }
 
 variable "source_kind" {
