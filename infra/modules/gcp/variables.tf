@@ -19,3 +19,9 @@ variable "psoxy_base_dir" {
   description = "the path where your psoxy repo resides"
   default     = "../../.."
 }
+
+variable "psoxy_version" {
+  type        = string
+  description = "version of psoxy to deploy"
+  default     = "0.4.2"
+}

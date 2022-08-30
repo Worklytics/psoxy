@@ -228,7 +228,7 @@ module "worklytics-psoxy-connection" {
 
 module "psoxy-hris" {
   # source = "../../modules/aws-psoxy-bulk"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-bulk?ref=v0.4.1"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-bulk?ref=v0.4.2"
 
   aws_account_id       = var.aws_account_id
   aws_assume_role_arn  = var.aws_assume_role_arn

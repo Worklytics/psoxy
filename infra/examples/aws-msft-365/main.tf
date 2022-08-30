@@ -71,10 +71,11 @@ module "worklytics_connector_specs" {
 
 module "psoxy-aws" {
   # source = "../../modules/aws"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws?ref=v0.4.1"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws?ref=v0.4.2"
 
   aws_account_id                 = var.aws_account_id
   psoxy_base_dir                 = var.psoxy_base_dir
+  psoxy_version                  = "0.4.2"
   caller_aws_arns                = var.caller_aws_arns
   caller_gcp_service_account_ids = var.caller_gcp_service_account_ids
 
@@ -293,7 +294,7 @@ module "psoxy-bulk" {
   for_each = local.bulk_sources
 
   # source = "../../modules/aws-psoxy-bulk"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-bulk?ref=v0.4.1"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-bulk?ref=v0.4.2"
 
   aws_account_id       = var.aws_account_id
   aws_assume_role_arn  = var.aws_assume_role_arn

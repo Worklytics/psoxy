@@ -5,7 +5,7 @@
 # it work via explicit 'depends_on', but Terraform still gives 'error inconsistent plan' as its
 # original plan presumed the sha-256 of the package
 locals {
-  filename               = "psoxy-${var.implementation}-1.0-SNAPSHOT.jar"
+  filename               = "psoxy-${var.implementation}-${var.psoxy_version}-SNAPSHOT.jar"
   path_to_impl_module    = "${var.path_to_psoxy_java}/impl/${var.implementation}"
   path_to_deployment_jar = "${local.path_to_impl_module}/target/${local.filename}"
 }
