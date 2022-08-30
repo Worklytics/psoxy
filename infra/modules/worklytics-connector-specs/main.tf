@@ -171,6 +171,7 @@ EOT
       external_token_todo : <<EOT
 ## Slack Discovery Setup
 
+
 For enabling Slack Discovery with the Psoxy you must first setup an app on your Slack Enterprise
 instance.
   1. Go to https://api.slack.com/apps and create an app, select name a development workspace
@@ -204,7 +205,6 @@ Use this steps if you intend to install in just one workspace within your org.
   1. Go to Settings > Install App
   2. Install into *workspace*
   3. Copy the User OAuth Token and store it in the secret manager (or share with the administrator completing the implementation)
-  4. Add the access token as `PSOXY_ACCESS_TOKEN_psoxy-slack-discovery-api` secret value in the GCP Project's Secret Manager
 EOT
     }
     zoom = {
@@ -213,7 +213,18 @@ EOT
       example_api_calls : ["/v2/users"]
       example_api_calls_user_to_impersonate : null
       external_token_todo : <<EOT
-TODO: document which type of Zoom app needed, how to get the long-lived token.
+## Zoom Setup
+
+Zoom connector through Psoxy requires a custom managed app on the Zoom Marketplace (in development
+mode, no need to publish).
+
+1. Go to https://marketplace.zoom.us/develop/create and create an app of type JWT
+
+2. Fill information and on App Credentials generate a token with a long expiration time, for example 00:00 01/01/2030
+
+3. Copy the JWT Token, it will be used later when creating the Zoom cloud function.
+
+4. Activate the app
 EOT
     }
   }

@@ -49,3 +49,9 @@ variable "psoxy_base_dir" {
   description = "the path where your psoxy repo resides. Preferably a full path, /home/user/repos/, avoid tilde (~) shortcut to $HOME"
   default     = "../../.."
 }
+
+variable "environment_variables" {
+  type        = map(string)
+  description = "Non-sensitive values to add to functions environment variables; NOTE: will override anything in `path_to_config`"
+  default     = {}
+}

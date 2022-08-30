@@ -25,10 +25,13 @@ module "psoxy_lambda" {
   aws_assume_role_arn  = var.aws_assume_role_arn
   source_kind          = var.source_kind
   parameters           = []
-  environment_variables = {
-    INPUT_BUCKET  = aws_s3_bucket.input.bucket,
-    OUTPUT_BUCKET = aws_s3_bucket.output.bucket
-  }
+  environment_variables = merge(
+    var.environment_variables,
+    {
+      INPUT_BUCKET  = aws_s3_bucket.input.bucket,
+      OUTPUT_BUCKET = aws_s3_bucket.output.bucket
+    }
+  )
 }
 
 resource "aws_s3_bucket" "input" {

@@ -158,19 +158,21 @@ module "psoxy-msft-connector" {
   for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
   # source = "../../modules/aws-psoxy-rest"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-rest?ref=v0.4.1"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-rest?ref=v0.4.2"
 
-  function_name        = "psoxy-${each.key}"
-  source_kind          = each.value.source_kind
-  path_to_function_zip = module.psoxy-aws.path_to_deployment_jar
-  function_zip_hash    = module.psoxy-aws.deployment_package_hash
-  path_to_config       = "${local.base_config_path}/${each.value.source_kind}.yaml"
-  aws_assume_role_arn  = var.aws_assume_role_arn
-  example_api_calls    = each.value.example_calls
-  aws_account_id       = var.aws_account_id
-  path_to_repo_root    = var.psoxy_base_dir
-  api_caller_role_arn  = module.psoxy-aws.api_caller_role_arn
-
+  function_name         = "psoxy-${each.key}"
+  source_kind           = each.value.source_kind
+  path_to_function_zip  = module.psoxy-aws.path_to_deployment_jar
+  function_zip_hash     = module.psoxy-aws.deployment_package_hash
+  path_to_config        = "${local.base_config_path}/${each.value.source_kind}.yaml"
+  aws_assume_role_arn   = var.aws_assume_role_arn
+  example_api_calls     = each.value.example_calls
+  aws_account_id        = var.aws_account_id
+  path_to_repo_root     = var.psoxy_base_dir
+  api_caller_role_arn   = module.psoxy-aws.api_caller_role_arn
+  environment_variables = {
+    PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
+  }
 
   parameters = concat(
     module.private-key-aws-parameters[each.key].parameters,
@@ -236,7 +238,7 @@ module "aws-psoxy-long-auth-connectors" {
   for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
 
   # source = "../../modules/aws-psoxy-rest"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-rest?ref=v0.4.1"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-rest?ref=v0.4.2"
 
 
   function_name                         = "psoxy-${each.key}"
@@ -250,6 +252,9 @@ module "aws-psoxy-long-auth-connectors" {
   path_to_repo_root                     = var.psoxy_base_dir
   example_api_calls                     = each.value.example_api_calls
   example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
+  environment_variables                 = {
+    PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
+  }
 
 
   parameters = [
