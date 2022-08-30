@@ -9,7 +9,7 @@ terraform {
 }
 
 resource "random_string" "bucket_suffix" {
-  length      = 8
+  length = 8
 }
 
 module "psoxy_lambda" {

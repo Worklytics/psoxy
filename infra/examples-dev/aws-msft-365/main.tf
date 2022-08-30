@@ -42,9 +42,9 @@ locals {
     "hris" = {
       source_kind = "hris"
     },
-#    "qualtrics" = {
-#      source_kind = "qualtrics"
-#    },
+    #    "qualtrics" = {
+    #      source_kind = "qualtrics"
+    #    },
   }
 }
 
