@@ -3,6 +3,7 @@ package co.worklytics.psoxy.rules;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.annotations.VisibleForTesting;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -32,23 +33,36 @@ public class RulesUtils {
      */
     @SneakyThrows
     public Optional<RuleSet> getRulesFromConfig(ConfigService config) {
-        return config.getConfigPropertyAsOptional(ProxyConfigProperty.RULES)
-            .map(base64encoded -> Base64.getDecoder().decode(base64encoded))
-            .map(yamlString -> {
-                try {
-                    CsvRules rules = yamlMapper.readerFor(CsvRules.class).readValue(yamlString);
-                    Validator.validate(rules);
-                    return rules;
-                } catch (IOException e) {
-                    try {
-                        Rules2 rules = yamlMapper.readerFor(Rules2.class).readValue(yamlString);
-                        Validator.validate(rules);
-                        return rules;
-                    } catch (IOException ex) {
-                        throw new IllegalStateException("Invalid rules configured", e);
-                    }
-                }
-            });
+        Optional<String> configuredRules = config.getConfigPropertyAsOptional(ProxyConfigProperty.RULES);
+
+        if (configuredRules.isPresent()) {
+            String yamlEncodedRules;
+            try {
+                yamlEncodedRules = new String(Base64.getDecoder().decode(configuredRules.get()));
+            } catch (IllegalArgumentException e) {
+                yamlEncodedRules = configuredRules.get();
+            }
+            return Optional.of(parse(yamlEncodedRules));
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    @VisibleForTesting
+    RuleSet parse(String yamlString) {
+        try {
+            CsvRules rules = yamlMapper.readerFor(CsvRules.class).readValue(yamlString);
+            Validator.validate(rules);
+            return rules;
+        } catch (IOException e) {
+            try {
+                Rules2 rules = yamlMapper.readerFor(Rules2.class).readValue(yamlString);
+                Validator.validate(rules);
+                return rules;
+            } catch (IOException ex) {
+                throw new IllegalStateException("Invalid rules configured", ex);
+            }
+        }
     }
 
 }
