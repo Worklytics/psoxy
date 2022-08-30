@@ -151,6 +151,7 @@ module "psoxy-msft-connector" {
   path_to_repo_root     = var.psoxy_base_dir
   environment_variables = {
     PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
+    IS_DEVELOPMENT_MODE  = "true"
   }
 
   parameters = concat(
@@ -230,6 +231,7 @@ module "aws-psoxy-long-auth-connectors" {
   example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
   environment_variables                 = {
     PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
+    IS_DEVELOPMENT_MODE  = "true"
   }
 
   parameters = [
