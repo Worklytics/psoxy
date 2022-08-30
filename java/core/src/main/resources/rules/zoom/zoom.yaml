@@ -9,7 +9,8 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$.users[*].id"
-        includeOriginal: true
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
           - "$.users[*]['first_name','last_name','pic_url','employee_unique_id']"

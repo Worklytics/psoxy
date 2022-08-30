@@ -3,6 +3,7 @@ package co.worklytics.psoxy.rules.zoom;
 import co.worklytics.psoxy.rules.RuleSet;
 import co.worklytics.psoxy.rules.Rules2;
 import co.worklytics.psoxy.rules.Transform;
+import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.google.common.collect.ImmutableMap;
 
 import java.util.Map;
@@ -128,8 +129,9 @@ public class PrebuiltSanitizerRules {
                 .build()
             )
             .transform(Transform.Pseudonymize.builder()
-                .includeOriginal(true)// the original id is needed to iterate meetings by user
+                .includeReversible(true) // need to reverse when requesting meetings by user to iterate
                 .jsonPath("$.users[*].id")
+                .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
                 .build()
             )
             .transform(Transform.Redact.builder()
