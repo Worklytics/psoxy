@@ -1,9 +1,16 @@
-# ignore terraform variables / state for developers' personal development environments and other examples
+# this .gitignore is to avoid committing various Terraform files to repo for examples/
+# when you copy example for actual use, you should delete this .gitignore file and
+# commit these to your repo
+
+# ignore terraform variables / state for examples
+# NOTE: for prod use, you likely want to remove this f
 terraform.tfvars
-.terraform**
+
+# Terraform state - NOTE: for prod use, recommend you use a secure backend, such as S3/GCS for
+# terraform state - not storing state on local disk / repo
 terraform.tfstate**
+
+.terraform.lock.hcl
+.terraform/**
 TODO*
 test*
-
-# macOs generated files
-.DS_Store

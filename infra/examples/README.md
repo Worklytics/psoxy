@@ -3,11 +3,18 @@
 This directory provides various examples of creation of Proxy instances to support various platforms
 and data sources.
 
-Before adapting one of these examples for your use-case, we recommend that you create a private fork
-of this repository, as described in [../../README.md#Setup](README.md#Setup).
+We recommend you choose the best one for your use case, copy it, and modify it as needed:
+```shell
+cp -r aws-msft-365 acme-com
+```
 
-Then you should modify (or delete) the `.gitignore` file in this directory, so that configuration
-files specific to your Terraform configuration (such as `terraform.tfvars`, `.terraform/`, and, if
+Delete the `.gitignore` file, so state/etc can be committed to git if you desire:
+
+```shell
+rm acme-com/.gitignore
+```
+
+Files specific to your Terraform configuration (such as `terraform.tfvars`, `.terraform/`, and, if
 you opt for [local state](https://www.terraform.io/language/settings/backends/local), your
 `terraform.tfstate*` files) will be under version control.
 
