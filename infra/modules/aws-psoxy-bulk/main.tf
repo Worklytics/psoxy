@@ -35,7 +35,7 @@ module "psoxy_lambda" {
 }
 
 resource "aws_s3_bucket" "input" {
-  bucket = "psoxy-${var.instance_id}-${random_string.bucket_suffix}-input"
+  bucket = "psoxy-${var.instance_id}-${random_string.bucket_suffix.id}-input"
 }
 
 resource "aws_s3_bucket_public_access_block" "input-block-public-access" {
@@ -74,7 +74,7 @@ resource "aws_iam_policy" "read_policy_to_execution_role" {
 
 
 resource "aws_s3_bucket" "output" {
-  bucket = "psoxy-${var.instance_id}-${random_string.bucket_suffix}-output"
+  bucket = "psoxy-${var.instance_id}-${random_string.bucket_suffix.id}-output"
 }
 
 resource "aws_s3_bucket_public_access_block" "output-block-public-access" {
