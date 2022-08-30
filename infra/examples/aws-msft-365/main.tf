@@ -38,6 +38,17 @@ provider "azuread" {
 
 locals {
   base_config_path = "${var.psoxy_base_dir}configs/"
+  bulk_sources = {
+    "hris" = {
+      source_kind = "hris"
+    },
+    "qualtrics" = {
+      source_kind = "qualtrics"
+    },
+    "badge" = {
+      source_kind = "badge"
+    }
+  }
 }
 
 module "worklytics_connector_specs" {
@@ -274,17 +285,7 @@ module "source_token_external_todo" {
 # END LONG ACCESS AUTH CONNECTORS
 
 module "psoxy-bulk" {
-  for_each = {
-    "hris" = {
-      source_kind = "hris"
-    },
-    "qualtrics" = {
-      source_kind = "qualtrics"
-    },
-    "badge" = {
-      source_kind = "badge"
-    }
-  }
+  for_each = local.bulk_sources
 
   # source = "../../modules/aws-psoxy-bulk"
   source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-bulk?ref=v0.4.1"
