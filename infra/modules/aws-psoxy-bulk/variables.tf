@@ -25,7 +25,7 @@ variable "instance_id" {
   # enforce max length to avoid bucket names that are too long
   validation {
     condition     = length(var.instance_id) < 41
-    error_message = "The instance_id must be at most 40 characters"
+    error_message = "The instance_id must be at most 40 characters."
   }
 }
 
