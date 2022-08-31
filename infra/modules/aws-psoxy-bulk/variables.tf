@@ -29,10 +29,12 @@ variable "instance_id" {
   }
 }
 
+# NOTE: currently unused; but perhaps we'll have default rules by source_kind in the future,
+# so leaving it in
 variable "source_kind" {
   type        = string
   default     = "hris"
-  description = "DEPRECATED; Kind of the content to process"
+  description = "kind of source of the content to process"
 }
 
 variable "path_to_function_zip" {
