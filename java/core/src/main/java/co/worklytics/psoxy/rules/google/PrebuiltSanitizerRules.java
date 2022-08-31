@@ -32,14 +32,14 @@ public class PrebuiltSanitizerRules {
                 "$.summary",
                 "$.items[*].extendedProperties.private",
                 "$.items[*].summary",
-                "$.items[*].entryPoints[*]['accessCode','password','passcode','pin']"
+                "$.items[*].conferenceData.entryPoints[*]['accessCode','password','passcode','pin']"
             ))
             .transform(ZoomTransforms.FILTER_CONTENT_EXCEPT_ZOOM_URL.toBuilder()
                 .jsonPath("$.items[*].description")
                 .build())
             .transform(ZoomTransforms.SANITIZE_JOIN_URL.toBuilder()
                 .jsonPath("$.items[*].description")
-                .jsonPath("$.items[*].entryPoints[*].uri")
+                .jsonPath("$.items[*].conferenceData.entryPoints[*].uri")
                 .build())
             .build())
         .endpoint( Rules2.Endpoint.builder()
@@ -47,14 +47,14 @@ public class PrebuiltSanitizerRules {
             .transform(Transform.Redact.ofPaths(
                 "$..displayName",
                 "$.summary",
-                "$.entryPoints[*]['accessCode','password','passcode','pin']"
+                "$.conferenceData.entryPoints[*]['accessCode','password','passcode','pin']"
             ))
             .transform(ZoomTransforms.FILTER_CONTENT_EXCEPT_ZOOM_URL.toBuilder()
                 .jsonPath("$.description")
                 .build())
             .transform(ZoomTransforms.SANITIZE_JOIN_URL.toBuilder()
                 .jsonPath("$.description")
-                .jsonPath("$.entryPoints[*].uri")
+                .jsonPath("$.conferenceData.entryPoints[*].uri")
                 .build())
             .transform(Transform.Pseudonymize.ofPaths("$..email"))
             .build())

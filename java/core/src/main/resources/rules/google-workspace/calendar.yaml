@@ -22,7 +22,7 @@ endpoints:
           - "$.summary"
           - "$.items[*].extendedProperties.private"
           - "$.items[*].summary"
-          - "$.items[*].entryPoints[*]['accessCode','password','passcode','pin']"
+          - "$.items[*].conferenceData.entryPoints[*]['accessCode','password','passcode','pin']"
       - !<filterTokenByRegex>
         jsonPaths:
           - "$.items[*].description"
@@ -32,7 +32,7 @@ endpoints:
       - !<redactRegexMatches>
         jsonPaths:
           - "$.items[*].description"
-          - "$.items[*].entryPoints[*].uri"
+          - "$.items[*].conferenceData.entryPoints[*].uri"
         redactions:
           - "(?i)pwd=[^&]*"
   - pathRegex: "^/calendar/v3/calendars/[^/]*?/events/.*"
@@ -41,7 +41,7 @@ endpoints:
         jsonPaths:
           - "$..displayName"
           - "$.summary"
-          - "$.entryPoints[*]['accessCode','password','passcode','pin']"
+          - "$.conferenceData.entryPoints[*]['accessCode','password','passcode','pin']"
       - !<filterTokenByRegex>
         jsonPaths:
           - "$.description"
@@ -51,7 +51,7 @@ endpoints:
       - !<redactRegexMatches>
         jsonPaths:
           - "$.description"
-          - "$.entryPoints[*].uri"
+          - "$.conferenceData.entryPoints[*].uri"
         redactions:
           - "(?i)pwd=[^&]*"
       - !<pseudonymize>

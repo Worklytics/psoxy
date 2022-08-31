@@ -67,7 +67,9 @@ class CalendarTests extends JavaRulesTestBaseCase {
     @Override
     public Stream<InvocationExample> getExamples() {
         return Stream.of(
-                InvocationExample.of("http://calendar.googleapis.com/calendar/v3/calendars/primary/events", "events.json")
-            );
+                InvocationExample.of("http://calendar.googleapis.com/calendar/v3/calendars/primary/events", "events.json"),
+                InvocationExample.of("http://calendar.googleapis.com/calendar/v3/calendars/primary/events/1234324", "event.json")
+
+        );
     }
 }

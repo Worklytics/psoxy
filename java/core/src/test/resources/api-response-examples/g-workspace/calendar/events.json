@@ -266,7 +266,11 @@
           {
             "entryPointType": "video",
             "uri": "https://hangouts.google.com/hangouts/_/imagine.com/worklytics?hceid=YWxleC5ib3lkQGluZGluZXJvLmNvbQ.hqj9f8j87bobk671uterv14qos",
-            "label": "worklytics"
+            "label": "worklytics",
+            "passcode": "should-be-redacted",
+            "password": "should-be-redacted",
+            "accessCode": "should-be-redacted",
+            "pin": "should-be-redacted"
           }
         ],
         "conferenceSolution": {
