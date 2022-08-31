@@ -23,7 +23,7 @@ locals {
   secret_bindings = merge({
     PSOXY_SALT = {
       secret_name    = var.salt_secret_id
-      secret_version = "latest"
+      version_number = var.salt_secret_version_number
     }
   }, var.secret_bindings)
 
@@ -50,12 +50,13 @@ resource "google_cloudfunctions_function" "function" {
 
   dynamic "secret_environment_variables" {
     for_each = local.secret_bindings
+    iterator = secret_environment_variable
 
     content {
-      key        = secret_environment_variables.key
+      key        = secret_environment_variable.key
       project_id = var.project_id
-      secret     = secret_environment_variables.value.secret_name
-      version    = secret_environment_variables.value.secret_version
+      secret     = secret_environment_variable.value.secret_name
+      version    = secret_environment_variable.value.version_number
     }
   }
 

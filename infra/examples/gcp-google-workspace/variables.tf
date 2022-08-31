@@ -47,9 +47,19 @@ variable "psoxy_base_dir" {
     condition     = can(regex(".*\\/$", var.psoxy_base_dir))
     error_message = "The psoxy_base_dir value should end with a slash."
   }
+  validation {
+    condition     = can(regex("^[^~].*$", var.psoxy_base_dir))
+    error_message = "The psoxy_base_dir value should be absolute path (not start with ~)."
+  }
 }
 
 variable "google_workspace_example_user" {
   type        = string
   description = "user to impersonate for Google Workspace API calls (null for none)"
+}
+
+variable "gcp_region" {
+  type        = string
+  description = "region in which to provision GCP resources, if applicable"
+  default     = "us-central1"
 }

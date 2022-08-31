@@ -147,6 +147,62 @@ module "worklytics-psoxy-connection" {
   display_name       = "${each.value.display_name} via Psoxy"
 }
 
+# BEGIN LONG ACCESS AUTH CONNECTORS
+
+resource "google_service_account" "long_auth_connector_sa" {
+  for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
+
+  project      = var.gcp_project_id
+  account_id   = "psoxy-${each.key}"
+  display_name = "${title(each.key)}{var.connector_display_name_suffix} via Psoxy"
+}
+
+# creates the secret, without versions.
+module "connector-long-auth-block" {
+  for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
+
+  # source                  = "../../modules/gcp-oauth-long-access-strategy"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-oauth-long-access-strategy?ref=v0.4.3"
+
+
+  project_id              = var.gcp_project_id
+  function_name           = "psoxy-${each.key}"
+  token_adder_user_emails = []
+}
+
+module "connector-long-auth-create-function" {
+  for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
+
+  # source = "../../modules/gcp-psoxy-rest"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-rest?ref=v0.4.3"
+
+
+  project_id                    = var.gcp_project_id
+  instance_id                   = "psoxy-${each.key}"
+  service_account_email         = google_service_account.long_auth_connector_sa[each.key].email
+  artifacts_bucket_name         = module.psoxy-gcp.artifacts_bucket_name
+  deployment_bundle_object_name = module.psoxy-gcp.deployment_bundle_object_name
+  path_to_config                = "${local.base_config_path}${each.value.source_kind}.yaml"
+  path_to_repo_root             = var.psoxy_base_dir
+  salt_secret_id                = module.psoxy-gcp.salt_secret_name
+  salt_secret_version_number    = module.psoxy-gcp.salt_secret_version_number
+
+  secret_bindings = {
+    PSOXY_SALT = {
+      secret_name    = module.psoxy-gcp.salt_secret_name
+      version_number = module.psoxy-gcp.salt_secret_version_number
+    },
+    ACCESS_TOKEN = {
+      secret_name = module.connector-long-auth-block[each.key].access_token_secret_name
+      # in case of long lived tokens we want latest version always
+      version_number = "latest"
+    }
+  }
+
+}
+
+# END LONG ACCESS AUTH CONNECTORS
+
 
 module "psoxy-gcp-bulk" {
   for_each = local.bulk_sources
@@ -156,7 +212,7 @@ module "psoxy-gcp-bulk" {
 
   project_id                    = google_project.psoxy-project.project_id
   worklytics_sa_emails          = var.worklytics_sa_emails
-  region                        = var.region
+  region                        = var.gcp_region
   source_kind                   = each.value.source_kind
   salt_secret_id                = module.psoxy-gcp.salt_secret_name
   artifacts_bucket_name         = module.psoxy-gcp.artifacts_bucket_name

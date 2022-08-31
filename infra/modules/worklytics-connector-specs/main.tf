@@ -122,7 +122,6 @@ locals {
       ],
       example_calls : [
         "/v1.0/users",
-
         "/v1.0/users/${var.example_msft_user_guid}/events",
         "/v1.0/users/${var.example_msft_user_guid}/mailboxSettings"
       ]
