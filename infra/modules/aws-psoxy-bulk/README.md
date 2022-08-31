@@ -23,27 +23,26 @@ caller_external_user_id       = "your-worklytics-service-account-id"
 source_kind                   = "hris"
 ```
 
-It is mandatory that `source_kind` matches with a configuration file provided into the platform. For example, if the
-value is `hris` it will expect a `hris.yaml` file at some point. You could include this kind of files as part of `config`
-folder or include it as part of the deployment files in the target folder.
+It is mandatory that `source_kind` matches with a configuration file provided into the platform.
+For example, if the  value is `hris` it will expect a `hris.yaml` file located in `configs/`
+directory at the root of your checkout.
 
-Example of `hris.yaml` config file with Base64 rules:
-
+To create this configuration:
+  1. Create a file named `rules.yaml`.
+  2. File it with YAML rules, consisting of lists of columns to redact and pseudonymize. For example:
+```yaml
+columnsToRedact:
+- "SOMETHING_SENSITIVE"
+columnsToPseudonymize:
+- "EMPLOYEE_ID"
+- "EMPLOYEE_EMAIL"
+- "MANAGER_ID"
+- "MANAGER_EMAIL"
+```
+  3. Base 64 encode it `cat rules.yaml | base64`
+  4. Use value from (3) as the value of `RULES` in `hris.yaml` file, structure shown below:
 ```yaml
 SOURCE: hris-import
-RULES: cHNldWRvbnltaXphdGlvbnM6CiAgLSBjc3ZDb2x1bW5zOgogICAgICAtICJlbWFpbCIKcmVkYWN0aW9uczoKICAtIGNzdkNvbHVtbnM6CiAgICAgIC0gIm1hbmFnZXJFbWFpbCI=
+RULES: aW5mb2Fkc0BzdW4uY29tLmJ1aWxkLmJ1aWxkLmNvbQ==
 ```
-
-In this case rules are created based on following configuration:
-
-```yaml
-pseudonymizations:
-  - csvColumns:
-      - "email"
-redactions:
-  - csvColumns:
-      - "managerEmail"
-```
-
-And then converted to Base64 as [Custom Rules](../../../docs/custom-rules.md) documentation explains
 
