@@ -54,7 +54,7 @@
 
         <dependency>
             <groupId>com.avaulta.gateway</groupId>
-            <artifactId>gateway-core</artifactId>
+            <artifactId>gateway-core${artifactSuffix}</artifactId>
             <version>${project.version}</version>
         </dependency>
 

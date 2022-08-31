@@ -25,5 +25,10 @@ public interface PseudonymEncoder {
 
     Pseudonym decode(String pseudonym);
 
+    /**
+     * @param possiblePseudonym
+     * @return whether possiblePseudonym can be decoded with this PseudonymEncoder
+     */
+    boolean canBeDecoded(String possiblePseudonym);
 
 }

@@ -131,7 +131,7 @@ terraform apply
 
 ## Releases
 
-### v0.4.1 - beta
+### [v0.4.1](https://github.com/Worklytics/psoxy/releases/tag/v0.4.1)
 The `main` branch is current at 0.4.
 
 Features:
@@ -139,7 +139,7 @@ Features:
     pseudonyms client, which can be encrypted using key available to psoxy instances (and expected
     to rotate, such that reversible only until it is rotated).
   - **endpoint-based rules** - fully move to 'Rules 2.0', dropping support
-    for 'Rules 1.0' format; and allow 'Rules 2.0' to be recursive (endpoints having endpoints
+    for 'Rules 1.0' format
 
 Breaking changes:
   - drop support for 'Rules 1.0' format

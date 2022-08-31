@@ -7,6 +7,7 @@ import com.google.common.annotations.VisibleForTesting;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.SneakyThrows;
+import lombok.extern.java.Log;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import javax.inject.Inject;
@@ -15,6 +16,7 @@ import java.io.IOException;
 import java.util.Base64;
 import java.util.Optional;
 
+@Log
 @NoArgsConstructor(onConstructor_ = @Inject)
 public class RulesUtils {
 
@@ -40,6 +42,7 @@ public class RulesUtils {
             String yamlEncodedRules;
             try {
                 yamlEncodedRules = new String(Base64.getDecoder().decode(configuredRules.get()));
+                log.info("RULES configured as base64-encoded YAML");
             } catch (IllegalArgumentException e) {
                 yamlEncodedRules = configuredRules.get();
             }
@@ -54,11 +57,13 @@ public class RulesUtils {
         try {
             CsvRules rules = yamlMapper.readerFor(CsvRules.class).readValue(yamlString);
             Validator.validate(rules);
+            log.info("Rules parsed as CsvRules");
             return rules;
         } catch (IOException e) {
             try {
                 Rules2 rules = yamlMapper.readerFor(Rules2.class).readValue(yamlString);
                 Validator.validate(rules);
+                log.info("Rules parsed as Rules2");
                 return rules;
             } catch (IOException ex) {
                 throw new IllegalStateException("Invalid rules configured", ex);

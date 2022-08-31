@@ -10,7 +10,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <revision>1.0-SNAPSHOT</revision>
+        <revision>0.4.2-SNAPSHOT</revision>
         <dependency.jackson.version>2.12.5</dependency.jackson.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <dependency.lombok.version>1.18.22</dependency.lombok.version>

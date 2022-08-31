@@ -107,7 +107,7 @@ module "psoxy-package" {
 
   implementation     = "gcp"
   path_to_psoxy_java = "${var.psoxy_base_dir}java"
-
+  psoxy_version      = var.psoxy_version
 }
 
 data "archive_file" "source" {

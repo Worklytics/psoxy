@@ -172,6 +172,7 @@ module "psoxy-package" {
 
   implementation     = "aws"
   path_to_psoxy_java = "${var.psoxy_base_dir}java"
+  psoxy_version      = var.psoxy_version
 }
 
 output "salt_secret" {

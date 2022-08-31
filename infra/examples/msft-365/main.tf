@@ -38,7 +38,7 @@ module "worklytics_connector_specs" {
 }
 
 locals {
-  base_config_path       = "${var.psoxy_base_dir}configs/"
+  base_config_path = "${var.psoxy_base_dir}configs/"
 
 }
 

@@ -36,6 +36,18 @@ provider "azuread" {
   tenant_id = var.msft_tenant_id
 }
 
+locals {
+  base_config_path = "${var.psoxy_base_dir}configs"
+  bulk_sources = {
+    "hris" = {
+      source_kind = "hris"
+    },
+    #    "qualtrics" = {
+    #      source_kind = "qualtrics"
+    #    },
+  }
+}
+
 module "worklytics_connector_specs" {
   source = "../../modules/worklytics-connector-specs"
 
@@ -191,7 +203,6 @@ module "worklytics-psoxy-connection" {
 
 # BEGIN LONG ACCESS AUTH CONNECTORS
 locals {
-  base_config_path                           = "${var.psoxy_base_dir}configs"
   enabled_oauth_long_access_connectors_todos = { for k, v in module.worklytics_connector_specs.enabled_oauth_long_access_connectors : k => v if v.external_token_todo != null }
 }
 
@@ -267,3 +278,23 @@ module "worklytics-psoxy-connection-oauth-long-access" {
 }
 
 # END LONG ACCESS AUTH CONNECTORS
+
+
+module "psoxy-bulk" {
+  for_each = local.bulk_sources
+
+  source = "../../modules/aws-psoxy-bulk"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-bulk?ref=v0.4.1"
+
+  aws_account_id       = var.aws_account_id
+  aws_assume_role_arn  = var.aws_assume_role_arn
+  instance_id          = each.key
+  source_kind          = each.value.source_kind
+  aws_region           = var.aws_region
+  path_to_function_zip = module.psoxy-aws.path_to_deployment_jar
+  function_zip_hash    = module.psoxy-aws.deployment_package_hash
+  path_to_config       = "${var.psoxy_base_dir}configs/${each.value.source_kind}.yaml"
+  api_caller_role_arn  = module.psoxy-aws.api_caller_role_arn
+  api_caller_role_name = module.psoxy-aws.api_caller_role_name
+  psoxy_base_dir       = var.psoxy_base_dir
+}
