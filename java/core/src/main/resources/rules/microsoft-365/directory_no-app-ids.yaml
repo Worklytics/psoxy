@@ -1,3 +1,4 @@
+---
 allowAllEndpoints: false
 endpoints:
   - pathRegex: "^/(v1.0|beta)/users/?[^/]*"
@@ -5,7 +6,6 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$..displayName"
-          - "$..employeeId"
           - "$..aboutMe"
           - "$..mySite"
           - "$..preferredName"
@@ -13,15 +13,26 @@ endpoints:
           - "$..surname"
           - "$..mailNickname"
           - "$..proxyAddresses"
+          - "$..responsibilities"
+          - "$..skills"
           - "$..faxNumber"
           - "$..mobilePhone"
           - "$..businessPhones[*]"
+          - "$..onPremisesExtensionAttributes"
+          - "$..onPremisesSecurityIdentifier"
+          - "$..securityIdentifier"
       - !<pseudonymize>
         jsonPaths:
+          - "$..employeeId"
           - "$..userPrincipalName"
           - "$..imAddresses[*]"
           - "$..mail"
           - "$..otherMails[*]"
+          - "$..onPremisesSamAccountName"
+          - "$..onPremisesUserPrincipalName"
+          - "$..onPremisesDistinguishedName"
+          - "$..onPremisesImmutableId"
+          - "$..identities[*].issuerAssignedId"
         encoding: "JSON"
       - !<pseudonymize>
         jsonPaths:
@@ -64,4 +75,3 @@ endpoints:
         jsonPaths:
           - "$..id"
         encoding: "JSON"
-

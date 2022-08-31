@@ -1,11 +1,11 @@
+---
 allowAllEndpoints: false
 endpoints:
   - pathRegex: "^/(v1.0|beta)/users/?[^/]*"
     transforms:
-      - method: "redact"
+      - !<redact>
         jsonPaths:
           - "$..displayName"
-          - "$..employeeId"
           - "$..aboutMe"
           - "$..mySite"
           - "$..preferredName"
@@ -13,18 +13,30 @@ endpoints:
           - "$..surname"
           - "$..mailNickname"
           - "$..proxyAddresses"
+          - "$..responsibilities"
+          - "$..skills"
           - "$..faxNumber"
           - "$..mobilePhone"
           - "$..businessPhones[*]"
-      - method: "pseudonymize"
+          - "$..onPremisesExtensionAttributes"
+          - "$..onPremisesSecurityIdentifier"
+          - "$..securityIdentifier"
+      - !<pseudonymize>
         jsonPaths:
+          - "$..employeeId"
           - "$..userPrincipalName"
           - "$..imAddresses[*]"
           - "$..mail"
           - "$..otherMails[*]"
+          - "$..onPremisesSamAccountName"
+          - "$..onPremisesUserPrincipalName"
+          - "$..onPremisesDistinguishedName"
+          - "$..onPremisesImmutableId"
+          - "$..identities[*].issuerAssignedId"
+        encoding: "JSON"
   - pathRegex: "^/(v1.0|beta)/groups/?[^/]*"
     transforms:
-      - method: "redact"
+      - !<redact>
         jsonPaths:
           - "$..owners"
           - "$..rejectedSenders"
@@ -33,7 +45,7 @@ endpoints:
           - "$..membersWithLicenseErrors"
   - pathRegex: "^/(v1.0|beta)/groups/[^/]*/members.*"
     transforms:
-      - method: "redact"
+      - !<redact>
         jsonPaths:
           - "$..displayName"
           - "$..employeeId"
@@ -47,16 +59,17 @@ endpoints:
           - "$..faxNumber"
           - "$..mobilePhone"
           - "$..businessPhones[*]"
-      - method: "pseudonymize"
+      - !<pseudonymize>
         jsonPaths:
           - "$..userPrincipalName"
           - "$..imAddresses[*]"
           - "$..mail"
           - "$..otherMails[*]"
+        encoding: "JSON"
   - pathRegex: "^/(v1.0|beta)/users/[^/]*/mailboxSettings"
   - pathRegex: "^/(v1.0|beta)/users/[^/]*/messages/[^/]*"
     transforms:
-      - method: "redact"
+      - !<redact>
         jsonPaths:
           - "$..subject"
           - "$..body"
@@ -66,12 +79,13 @@ endpoints:
           - "$..multiValueExtendedProperties"
           - "$..singleValueExtendedProperties"
           - "$..internetMessageHeaders"
-      - method: "pseudonymize"
+      - !<pseudonymize>
         jsonPaths:
           - "$..emailAddress.address"
+        encoding: "JSON"
   - pathRegex: "^/(v1.0|beta)/users/[^/]*/mailFolders(/SentItems|\\('SentItems'\\))/messages.*"
     transforms:
-      - method: "redact"
+      - !<redact>
         jsonPaths:
           - "$..subject"
           - "$..body"
@@ -81,6 +95,7 @@ endpoints:
           - "$..multiValueExtendedProperties"
           - "$..singleValueExtendedProperties"
           - "$..internetMessageHeaders"
-      - method: "pseudonymize"
+      - !<pseudonymize>
         jsonPaths:
           - "$..emailAddress.address"
+        encoding: "JSON"
