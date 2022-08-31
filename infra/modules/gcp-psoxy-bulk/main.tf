@@ -51,18 +51,11 @@ resource "google_storage_bucket_iam_member" "grant_sa_read_on_processed_bucket" 
   role   = "roles/storage.objectViewer"
 }
 
-# TODO: revisit if custom role is a good idea; this triggers security events for some orgs
-resource "google_project_iam_custom_role" "bucket-write" {
-  project     = var.project_id
-  role_id     = "writeAccess"
-  title       = "Access for writing and update objects in bucket"
-  description = "Write and update support, because storage.objectCreator role only support creation -not update"
-  permissions = ["storage.objects.create", "storage.objects.delete"]
-}
+
 
 resource "google_storage_bucket_iam_member" "access_for_processed_bucket" {
   bucket = google_storage_bucket.output-bucket.name
-  role   = google_project_iam_custom_role.bucket-write.id
+  role   = var.bucket_write_role_id
   member = "serviceAccount:${google_service_account.service-account.email}"
 }
 

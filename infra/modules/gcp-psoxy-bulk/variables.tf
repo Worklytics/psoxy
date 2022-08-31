@@ -56,3 +56,8 @@ variable "environment_variables" {
   description = "Non-sensitive values to add to functions environment variables; NOTE: will override anything in `path_to_config`"
   default     = {}
 }
+
+variable "bucket_write_role_id" {
+  type        = string
+  description = "The id of role to grant on bucket to enable writes"
+}

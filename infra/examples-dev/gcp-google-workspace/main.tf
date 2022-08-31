@@ -68,6 +68,7 @@ module "psoxy-gcp" {
   project_id        = google_project.psoxy-project.project_id
   invoker_sa_emails = var.worklytics_sa_emails
   psoxy_base_dir    = var.psoxy_base_dir
+  bucket_location   = var.gcp_region
 
   depends_on = [
     google_project.psoxy-project
@@ -201,6 +202,7 @@ module "psoxy-gcp-bulk" {
   deployment_bundle_object_name = module.psoxy-gcp.deployment_bundle_object_name
   salt_secret_version_number    = module.psoxy-gcp.salt_secret_version_number
   psoxy_base_dir                = var.psoxy_base_dir
+  bucket_write_role_id          = module.psoxy-gcp.bucket_write_role_id
 
   depends_on = [
     google_project.psoxy-project,
