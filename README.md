@@ -131,7 +131,7 @@ terraform apply
 
 ## Releases
 
-### [v0.4.1](https://github.com/Worklytics/psoxy/releases/tag/v0.4.1)
+### [v0.4.2](https://github.com/Worklytics/psoxy/releases/tag/v0.4.2)
 The `main` branch is current at 0.4.
 
 Features:
@@ -149,8 +149,7 @@ Breaking changes:
 
 ### v0.3 - beta
 
-This is the previous recommended release for all existing deployments OR
-any new deployment for production use.
+This is the previous recommended release
  - a `v0.3` branch is available on GitHub; this will get fixes/non-breaking changes as they're
    available.
  - tagged releases will be provided for anyone who wants a fixed version; latest is `v0.3.0-beta.6`
