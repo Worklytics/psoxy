@@ -31,26 +31,30 @@ public class PrebuiltSanitizerRules {
                 "$..displayName",
                 "$.summary",
                 "$.items[*].extendedProperties.private",
-                "$.items[*].summary"
+                "$.items[*].summary",
+                "$.items[*].entryPoints[*]['accessCode','password','passcode','pin']"
             ))
             .transform(ZoomTransforms.FILTER_CONTENT_EXCEPT_ZOOM_URL.toBuilder()
                 .jsonPath("$.items[*].description")
                 .build())
             .transform(ZoomTransforms.SANITIZE_JOIN_URL.toBuilder()
                 .jsonPath("$.items[*].description")
+                .jsonPath("$.items[*].entryPoints[*].uri")
                 .build())
             .build())
         .endpoint( Rules2.Endpoint.builder()
             .pathRegex("^/calendar/v3/calendars/[^/]*?/events/.*")
             .transform(Transform.Redact.ofPaths(
                 "$..displayName",
-                "$.summary"
+                "$.summary",
+                "$.entryPoints[*]['accessCode','password','passcode','pin']"
             ))
             .transform(ZoomTransforms.FILTER_CONTENT_EXCEPT_ZOOM_URL.toBuilder()
                 .jsonPath("$.description")
                 .build())
             .transform(ZoomTransforms.SANITIZE_JOIN_URL.toBuilder()
                 .jsonPath("$.description")
+                .jsonPath("$.entryPoints[*].uri")
                 .build())
             .transform(Transform.Pseudonymize.ofPaths("$..email"))
             .build())

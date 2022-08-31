@@ -9,17 +9,20 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$.id"
+        encoding: "JSON"
   - pathRegex: "^/calendar/v3/calendars/[^/]*?/events[^/]*"
     transforms:
       - !<pseudonymize>
         jsonPaths:
           - "$..email"
+        encoding: "JSON"
       - !<redact>
         jsonPaths:
           - "$..displayName"
           - "$.summary"
           - "$.items[*].extendedProperties.private"
           - "$.items[*].summary"
+          - "$.items[*].entryPoints[*]['accessCode','password','passcode','pin']"
       - !<filterTokenByRegex>
         jsonPaths:
           - "$.items[*].description"
@@ -29,6 +32,7 @@ endpoints:
       - !<redactRegexMatches>
         jsonPaths:
           - "$.items[*].description"
+          - "$.items[*].entryPoints[*].uri"
         redactions:
           - "(?i)pwd=[^&]*"
   - pathRegex: "^/calendar/v3/calendars/[^/]*?/events/.*"
@@ -37,6 +41,7 @@ endpoints:
         jsonPaths:
           - "$..displayName"
           - "$.summary"
+          - "$.entryPoints[*]['accessCode','password','passcode','pin']"
       - !<filterTokenByRegex>
         jsonPaths:
           - "$.description"
@@ -46,9 +51,11 @@ endpoints:
       - !<redactRegexMatches>
         jsonPaths:
           - "$.description"
+          - "$.entryPoints[*].uri"
         redactions:
           - "(?i)pwd=[^&]*"
       - !<pseudonymize>
         jsonPaths:
           - "$..email"
+        encoding: "JSON"
   - pathRegex: "^/calendar/v3/users/[^/]*?/settings.*"
