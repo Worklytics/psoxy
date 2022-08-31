@@ -10,6 +10,32 @@ terraform {
   }
 }
 
+locals {
+  base_config_path = "${var.psoxy_base_dir}/configs/"
+  bulk_sources = {
+    "hris" = {
+      source_kind = "hris"
+      rules = {
+        columnsToRedact = []
+        columnsToPseudonymize = [
+          "email",
+          "employee_id"
+        ]
+      }
+    },
+    "qualtrics" = {
+      source_kind = "qualtrics"
+      rules = {
+        columnsToRedact = []
+        columnsToPseudonymize = [
+          "email",
+          "employee_id"
+        ]
+      }
+    }
+  }
+}
+
 module "worklytics_connector_specs" {
   source = "../../modules/worklytics-connector-specs"
 
@@ -94,7 +120,7 @@ module "psoxy-google-workspace-connector" {
   service_account_email                 = module.google-workspace-connection[each.key].service_account_email
   artifacts_bucket_name                 = module.psoxy-gcp.artifacts_bucket_name
   deployment_bundle_object_name         = module.psoxy-gcp.deployment_bundle_object_name
-  path_to_config                        = "${var.psoxy_base_dir}/config/${each.value.source_kind}.yaml"
+  path_to_config                        = "${local.base_config_path}${each.value.source_kind}.yaml"
   path_to_repo_root                     = var.psoxy_base_dir
   example_api_calls                     = each.value.example_api_calls
   example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
@@ -119,4 +145,26 @@ module "worklytics-psoxy-connection" {
 
   psoxy_endpoint_url = module.psoxy-google-workspace-connector[each.key].cloud_function_url
   display_name       = "${each.value.display_name} via Psoxy"
+}
+
+
+module "psoxy-gcp-bulk" {
+  for_each = local.bulk_sources
+
+  # source = "../../modules/gcp-psoxy-bulk"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-bulk?ref=v0.4.3"
+
+  project_id                    = google_project.psoxy-project.project_id
+  worklytics_sa_emails          = var.worklytics_sa_emails
+  region                        = var.region
+  source_kind                   = each.value.source_kind
+  salt_secret_id                = module.psoxy-gcp.salt_secret_name
+  artifacts_bucket_name         = module.psoxy-gcp.artifacts_bucket_name
+  deployment_bundle_object_name = module.psoxy-gcp.deployment_bundle_object_name
+  salt_secret_version_number    = module.psoxy-gcp.salt_secret_version_number
+  psoxy_base_dir                = var.psoxy_base_dir
+
+  depends_on = [
+    google_project.psoxy-project,
+  ]
 }
