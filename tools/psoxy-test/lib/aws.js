@@ -51,8 +51,8 @@ async function fetchAWS(options = {}, credentials = {}) {
 
   const headers = {
     ...signed.headers,
-    "-Haccept-encoding": options.gzip ? "gzip" : "none",
-    "-HX-Psoxy-Skip-Sanitizer": options.skip.toString(),
+    "Accept-encoding": options.gzip ? "gzip" : "none",
+    "X-Psoxy-Skip-Sanitizer": options.skip.toString(),
   };
   console.log("Waiting response...");
 

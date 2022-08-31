@@ -1,3 +1,5 @@
+import fetch from 'node-fetch';
+
 /**
  * Helper: check url deploy type
  *
@@ -23,9 +25,9 @@ async function test(options = {}) {
   }
 
   const headers = {
-    "-Haccept-encoding": options.gzip ? "gzip" : "none",
-    "-HX-Psoxy-Skip-Sanitizer": options.skip.toString(),
-    "-HAuthorization": `Bearer ${options.token}`,
+    "Accept-encoding": options.gzip ? "gzip" : "none",
+    "X-Psoxy-Skip-Sanitizer": options.skip.toString(),
+    "Authorization": `Bearer ${options.token}`,
   };
 
   console.log("Calling psoxy...");
