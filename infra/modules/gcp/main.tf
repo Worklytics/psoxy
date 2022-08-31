@@ -27,6 +27,12 @@ resource "google_secret_manager_secret" "pseudonymization-salt" {
     automatic = true
   }
 
+  lifecycle {
+    ignore_changes = [
+      labels
+    ]
+  }
+
   depends_on = [
     google_project_service.gcp-infra-api
   ]
@@ -64,6 +70,12 @@ resource "google_secret_manager_secret" "pseudonymization-key" {
 
   replication {
     automatic = true
+  }
+
+  lifecycle {
+    ignore_changes = [
+      labels
+    ]
   }
 
   depends_on = [
@@ -122,6 +134,12 @@ resource "google_storage_bucket" "artifacts" {
   name          = "${var.project_id}-psoxy-artifacts-bucket"
   location      = var.bucket_location
   force_destroy = true
+
+  lifecycle {
+    ignore_changes = [
+      labels
+    ]
+  }
 }
 
 # Add source code zip to bucket

@@ -60,6 +60,12 @@ resource "google_cloudfunctions_function" "function" {
   }
 
   trigger_http = true
+
+  lifecycle {
+    ignore_changes = [
+      labels
+    ]
+  }
 }
 
 locals {

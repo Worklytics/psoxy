@@ -37,6 +37,12 @@ module "psoxy_lambda" {
 
 resource "aws_s3_bucket" "input" {
   bucket = "psoxy-${var.instance_id}-${random_string.bucket_suffix.id}-input"
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "input" {
@@ -60,6 +66,12 @@ resource "aws_s3_bucket_public_access_block" "input-block-public-access" {
 
 resource "aws_s3_bucket" "output" {
   bucket = "psoxy-${var.instance_id}-${random_string.bucket_suffix.id}-output"
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "output" {
@@ -119,6 +131,12 @@ resource "aws_iam_policy" "input_bucket_getObject_policy" {
         }
       ]
   })
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "read_policy_for_import_bucket" {
@@ -144,6 +162,12 @@ resource "aws_iam_policy" "output_bucket_write_policy" {
         }
       ]
   })
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "write_policy_for_output_bucket" {
@@ -173,6 +197,12 @@ resource "aws_iam_policy" "output_bucket_read" {
         }
       ]
   })
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "caller_bucket_access_policy" {
@@ -186,4 +216,10 @@ resource "aws_ssm_parameter" "rules" {
   type           = "String"
   description    = "Rules for transformation of files. NOTE: any 'RULES' env var will override this value"
   insecure_value = yamlencode(var.rules) # NOTE: insecure_value just means shown in Terraform output
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
 }
