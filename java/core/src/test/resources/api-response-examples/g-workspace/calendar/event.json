@@ -1,0 +1,73 @@
+{
+  "kind": "calendar#event",
+  "etag": "\"2871845322426000\"",
+  "id": "hqj9f8j87bobk671uterv14qos",
+  "status": "confirmed",
+  "htmlLink": "https://www.google.com/calendar/event?eid=aHFqOWY4ajg3Ym9iazY3MXV0ZXJ2MTRxb3MgZXJpa0B3b3JrbHl0aWNzLmNv",
+  "created": "2015-07-02T22:54:23.000Z",
+  "updated": "2015-07-03T11:24:21.213Z",
+  "summary": "Worklytics Welcome Call: matt calls alice @ (555) 575-7878",
+  "creator": {
+    "email": "allen.boyce@imagine.com",
+    "displayName": "allen boyce"
+  },
+  "organizer": {
+    "email": "allen.boyce@imagine.com",
+    "displayName": "allen boyce"
+  },
+  "start": {
+    "dateTime": "2015-07-06T10:00:00-07:00",
+    "timeZone": "UTC"
+  },
+  "end": {
+    "dateTime": "2015-07-06T11:00:00-07:00",
+    "timeZone": "UTC"
+  },
+  "iCalUID": "hqj9f8j87bobk671uterv14qos@google.com",
+  "sequence": 0,
+  "attendees": [
+    {
+      "email": "alice@worklytics.co",
+      "self": true,
+      "responseStatus": "accepted"
+    },
+    {
+      "email": "matt.baron@imagine.com",
+      "displayName": "matt baron",
+      "responseStatus": "accepted"
+    },
+    {
+      "email": "allen.boyce@imagine.com",
+      "displayName": "allen boyce",
+      "organizer": true,
+      "responseStatus": "accepted"
+    }
+  ],
+  "hangoutLink": "https://hangouts.google.com/hangouts/_/imagine.com/worklytics?hceid=YWxleC5ib3lkQGluZGluZXJvLmNvbQ.hqj9f8j87bobk671uterv14qos",
+  "conferenceData": {
+    "entryPoints": [
+      {
+        "entryPointType": "video",
+        "uri": "https://us02web.zoom.us/j/8162342346717?pwd=K3B234234FlGdz09",
+        "label": "worklytics",
+        "passcode": "should-be-redacted",
+        "password": "should-be-redacted",
+        "accessCode": "should-be-redacted",
+        "pin": "should-be-redacted"
+      }
+    ],
+    "conferenceSolution": {
+      "key": {
+        "type": "eventNamedHangout"
+      },
+      "name": "Hangouts",
+      "iconUri": "https://lh5.googleusercontent.com/proxy/9vT2XwMHPzrIcW56Ic3FX6_OSYvrjHEwOUYOmA0eMoR-_sY59k4mQMd0JnqCp8GCOmqimFKP3vSeFaIe4k5MewpEcCuK6PXlB2Z4AKTMV78OB_CJqXHrrkAO-yf5FYJsiaTBwjUP9cU0lRlP-HPC2w"
+    },
+    "conferenceId": "worklytics",
+    "signature": "AGirE/LisFavKHZ9LBpCKUHuuzhL"
+  },
+  "reminders": {
+    "useDefault": true
+  },
+  "eventType": "default"
+}
