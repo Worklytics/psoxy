@@ -42,6 +42,7 @@ variable "deployment_bundle_object_name" {
 variable "path_to_config" {
   type        = string
   description = "path to config file (usually something in ../../configs/, eg configs/gdirectory.yaml"
+  default     = null
 }
 
 variable "psoxy_base_dir" {

@@ -46,6 +46,7 @@ variable "path_to_repo_root" {
 variable "path_to_config" {
   type        = string
   description = "path to config file (usually something in ../../configs/, eg configs/gdirectory.yaml"
+  default     = null
 }
 
 variable "salt_secret_id" {
