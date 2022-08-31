@@ -28,8 +28,6 @@ public class ConfigRulesModule {
             return o;
         };
 
-
-
         return loadAndLog.apply(rulesUtils.getRulesFromConfig(config),"Rules: loaded from environment config (RULES variable parsed as base64-encoded YAML)")
             .or( () -> loadAndLog.apply(getDefaults(log, config), "Rules: fallback to prebuilt rules"))
                 .orElseThrow( () -> new RuntimeException("No rules found"));
@@ -47,6 +45,8 @@ public class ConfigRulesModule {
 
         RuleSet regularDefaults = PrebuiltSanitizerRules.DEFAULTS.get(source);
 
+        //ok to fallback to regular rules, bc for many sources the 'NO_APP_IDS' variant doesn't
+        // really matter
         return Optional.ofNullable(PrebuiltSanitizerRules.DEFAULTS.getOrDefault(source + rulesIdSuffix, regularDefaults));
     }
 }
