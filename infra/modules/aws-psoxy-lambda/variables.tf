@@ -24,7 +24,8 @@ variable "aws_assume_role_arn" {
 
 variable "source_kind" {
   type        = string
-  description = "kind of source (eg, 'gmail', 'google-chat', etc)"
+  description = "DEPRECATED; kind of source (eg, 'gmail', 'google-chat', etc)"
+  default     = null
 }
 
 variable "parameters" {
@@ -50,6 +51,7 @@ variable "function_zip_hash" {
 variable "path_to_config" {
   type        = string
   description = "path to config file (usually someting in ../../configs/, eg configs/gdirectory.yaml"
+  default     = null
 }
 
 variable "environment_variables" {

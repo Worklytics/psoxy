@@ -18,16 +18,14 @@ resource "random_string" "bucket_suffix" {
 module "psoxy_lambda" {
   source = "../aws-psoxy-lambda"
 
-  function_name         = "psoxy-${var.instance_id}"
-  handler_class         = "co.worklytics.psoxy.S3Handler"
-  timeout_seconds       = 600 # 10 minutes
-  memory_size_mb        = 512
-  path_to_config        = var.path_to_config
-  path_to_function_zip  = var.path_to_function_zip
-  function_zip_hash     = var.function_zip_hash
-  aws_assume_role_arn   = var.aws_assume_role_arn
-  source_kind           = var.source_kind
-  parameters            = []
+  function_name        = "psoxy-${var.instance_id}"
+  handler_class        = "co.worklytics.psoxy.S3Handler"
+  timeout_seconds      = 600 # 10 minutes
+  memory_size_mb       = 512
+  path_to_function_zip = var.path_to_function_zip
+  function_zip_hash    = var.function_zip_hash
+  aws_assume_role_arn  = var.aws_assume_role_arn
+  parameters           = []
   environment_variables = merge(
     var.environment_variables,
     {
@@ -46,7 +44,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "input" {
 
   rule {
     apply_server_side_encryption_by_default {
-      sse_algorithm     = "aws:kms"
+      sse_algorithm = "aws:kms"
     }
   }
 }
@@ -69,7 +67,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "output" {
 
   rule {
     apply_server_side_encryption_by_default {
-      sse_algorithm     = "aws:kms"
+      sse_algorithm = "aws:kms"
     }
   }
 }
@@ -180,4 +178,12 @@ resource "aws_iam_policy" "output_bucket_read" {
 resource "aws_iam_role_policy_attachment" "caller_bucket_access_policy" {
   role       = var.api_caller_role_name
   policy_arn = aws_iam_policy.output_bucket_read.arn
+}
+
+
+resource "aws_ssm_parameter" "rules" {
+  name           = "PSOXY_${upper(replace(var.instance_id, "-", "_"))}_RULES"
+  type           = "String"
+  description    = "Rules for transformation of files. NOTE: any 'RULES' env var will override this value"
+  insecure_value = yamlencode(var.rules) # NOTE: insecure_value just means shown in Terraform output
 }
