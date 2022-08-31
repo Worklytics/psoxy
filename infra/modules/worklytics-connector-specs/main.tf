@@ -166,7 +166,12 @@ EOT
     slack-discovery-api = {
       source_kind : "slack"
       display_name : "Slack Discovery API"
-      example_api_calls : []
+      example_api_calls : [
+        "/api/discovery.enterprise.info",
+        "/api/discovery.conversations.list",
+        "/api/discovery.conversations.history?channel={CHANNEL_ID}&limit=10",
+        "/api/discovery.users.list",
+      ]
       example_api_calls_user_to_impersonate : null
       external_token_todo : <<EOT
 ## Slack Discovery Setup
@@ -210,7 +215,16 @@ EOT
     zoom = {
       source_kind : "zoom"
       display_name : "Zoom"
-      example_api_calls : ["/v2/users"]
+      example_api_calls : [
+        "/v2/users",
+        "/v2/users/{USER_ID}/meetings",
+        "/v2/past_meetings/{MEETING_ID}",
+        "/v2/past_meetings/{MEETING_ID}/instances",
+        "/v2/past_meetings/{MEETING_ID}/participants",
+        "/v2/report/users/{userId}/meetings",
+        "/v2/report/meetings/{meetingId}",
+        "/v2/report/meetings/{meetingId}/participants"
+      ]
       example_api_calls_user_to_impersonate : null
       external_token_todo : <<EOT
 ## Zoom Setup
