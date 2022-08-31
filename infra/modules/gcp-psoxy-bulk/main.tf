@@ -82,7 +82,7 @@ resource "google_cloudfunctions_function" "function" {
   environment_variables = merge(tomap({
     INPUT_BUCKET  = google_storage_bucket.input-bucket.name,
     OUTPUT_BUCKET = google_storage_bucket.output-bucket.name
-  }),
+    }),
     yamldecode(file(var.path_to_config)),
     var.environment_variables
   )

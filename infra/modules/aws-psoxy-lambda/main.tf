@@ -21,7 +21,7 @@ resource "aws_lambda_function" "psoxy-instance" {
 
   environment {
     variables = merge(
-      yamldecode(file(var.path_to_config)),
+      var.path_to_config == null ? {} : yamldecode(file(var.path_to_config)),
       var.environment_variables
     )
   }

@@ -22,9 +22,12 @@ variable "aws_assume_role_arn" {
   description = "role arn"
 }
 
+# NOTE: currently unused; but perhaps we'll have default rules by source_kind in the future,
+# so leaving it in
 variable "source_kind" {
   type        = string
   description = "kind of source (eg, 'gmail', 'google-chat', etc)"
+  default     = null
 }
 
 variable "parameters" {
@@ -50,6 +53,7 @@ variable "function_zip_hash" {
 variable "path_to_config" {
   type        = string
   description = "path to config file (usually someting in ../../configs/, eg configs/gdirectory.yaml"
+  default     = null
 }
 
 variable "environment_variables" {
