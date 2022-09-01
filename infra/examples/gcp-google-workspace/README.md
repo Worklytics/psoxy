@@ -51,3 +51,8 @@ terraform apply
 
 Review the plan and confirm to apply.
 
+## Notes
+
+Deployment will create:
+  - one GCS bucket for staging artifacts
+  - two GCS buckets per 'bulk' connector (eg, sanitizer to process flat files); one for input fils, and one for output
