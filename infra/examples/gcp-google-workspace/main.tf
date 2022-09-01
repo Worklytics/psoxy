@@ -28,7 +28,7 @@ locals {
       rules = {
         columnsToRedact = []
         columnsToPseudonymize = [
-          "email",
+          "employee_email",
           "employee_id"
         ]
       }
@@ -156,7 +156,7 @@ resource "google_service_account" "long_auth_connector_sa" {
   for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
 
   project      = google_project.psoxy-project.project_id
-  account_id   = "psoxy-${each.key}"
+  account_id   = "psoxy-${substr(each.key, 0, 24)}"
   display_name = "${title(each.key)}{var.connector_display_name_suffix} via Psoxy"
 }
 

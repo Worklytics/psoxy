@@ -18,7 +18,7 @@ locals {
       rules = {
         columnsToRedact = []
         columnsToPseudonymize = [
-          "email",
+          "employee_email",
           "employee_id"
         ]
       }
@@ -28,7 +28,7 @@ locals {
       rules = {
         columnsToRedact = []
         columnsToPseudonymize = [
-          "email",
+          "employee_email",
           "employee_id"
         ]
       }
