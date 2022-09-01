@@ -25,6 +25,12 @@ resource "google_storage_bucket" "input-bucket" {
   location                    = var.region
   force_destroy               = true
   uniform_bucket_level_access = true
+
+  lifecycle {
+    ignore_changes = [
+      labels
+    ]
+  }
 }
 
 # data output from function
@@ -34,6 +40,12 @@ resource "google_storage_bucket" "output-bucket" {
   location                    = var.region
   force_destroy               = true
   uniform_bucket_level_access = true
+
+  lifecycle {
+    ignore_changes = [
+      labels
+    ]
+  }
 }
 
 resource "google_service_account" "service-account" {
@@ -41,6 +53,12 @@ resource "google_service_account" "service-account" {
   display_name = "Service account for cloud function ${local.function_name}"
   description  = "Service account where the function is running"
   project      = var.project_id
+
+  lifecycle {
+    ignore_changes = [
+      labels
+    ]
+  }
 }
 
 resource "google_storage_bucket_iam_member" "access_for_import_bucket" {
@@ -56,6 +74,7 @@ resource "google_storage_bucket_iam_member" "grant_sa_read_on_processed_bucket" 
   member = "serviceAccount:${var.worklytics_sa_emails[count.index]}"
   role   = "roles/storage.objectViewer"
 }
+
 
 resource "google_storage_bucket_iam_member" "access_for_processed_bucket" {
   bucket = google_storage_bucket.output-bucket.name
@@ -118,6 +137,13 @@ resource "google_cloudfunctions_function" "function" {
   event_trigger {
     event_type = "google.storage.object.finalize"
     resource   = google_storage_bucket.input-bucket.name
+  }
+
+
+  lifecycle {
+    ignore_changes = [
+      labels
+    ]
   }
 
   depends_on = [

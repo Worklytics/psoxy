@@ -10,6 +10,7 @@ resource "aws_ssm_parameter" "private-key" {
 
   lifecycle {
     ignore_changes = [
+      tags,
       value
     ]
   }
@@ -23,6 +24,7 @@ resource "aws_ssm_parameter" "private-key-id" {
 
   lifecycle {
     ignore_changes = [
+      tags,
       value
     ]
   }

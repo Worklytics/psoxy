@@ -28,16 +28,25 @@ public class ConfigRulesModule {
             return o;
         };
 
+        return loadAndLog.apply(rulesUtils.getRulesFromConfig(config), "Rules: loaded from environment config (RULES variable parsed as base64-encoded YAML)")
+            .or( () -> loadAndLog.apply(getDefaults(log, config), "Rules: fallback to prebuilt rules"))
+                .orElseThrow( () -> new RuntimeException("No rules found"));
+
+    }
+
+    static Optional<RuleSet> getDefaults(Logger log, ConfigService config) {
         boolean pseudonymizeAppIds =
             config.getConfigPropertyAsOptional(ProxyConfigProperty.PSEUDONYMIZE_APP_IDS)
                 .map(Boolean::parseBoolean).orElse(false);
 
-        String rulesIdSuffix = pseudonymizeAppIds ? "_no-app-ids" : "";
+        String source = config.getConfigPropertyOrError(ProxyConfigProperty.SOURCE);
 
-        return loadAndLog.apply(rulesUtils.getRulesFromConfig(config),"Rules: loaded from environment config (RULES variable parsed as base64-encoded YAML)")
-            .or( () -> loadAndLog.apply(Optional.ofNullable(
-                PrebuiltSanitizerRules.DEFAULTS.get(config.getConfigPropertyOrError(ProxyConfigProperty.SOURCE) + rulesIdSuffix)), "Rules: fallback to prebuilt rules"))
-                .orElseThrow( () -> new RuntimeException("No rules found"));
+        String rulesIdSuffix = pseudonymizeAppIds ? NO_APP_IDS_SUFFIX : "";
 
+        RuleSet regularDefaults = PrebuiltSanitizerRules.DEFAULTS.get(source);
+
+        //ok to fallback to regular rules, bc for many sources the 'NO_APP_IDS' variant doesn't
+        // really matter
+        return Optional.ofNullable(PrebuiltSanitizerRules.DEFAULTS.getOrDefault(source + rulesIdSuffix, regularDefaults));
     }
 }

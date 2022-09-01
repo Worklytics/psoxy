@@ -6,7 +6,6 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$..displayName"
-          - "$..employeeId"
           - "$..aboutMe"
           - "$..mySite"
           - "$..preferredName"
@@ -14,15 +13,27 @@ endpoints:
           - "$..surname"
           - "$..mailNickname"
           - "$..proxyAddresses"
+          - "$..responsibilities"
+          - "$..skills"
           - "$..faxNumber"
           - "$..mobilePhone"
           - "$..businessPhones[*]"
+          - "$..onPremisesExtensionAttributes"
+          - "$..onPremisesSecurityIdentifier"
+          - "$..securityIdentifier"
       - !<pseudonymize>
         jsonPaths:
+          - "$..employeeId"
           - "$..userPrincipalName"
           - "$..imAddresses[*]"
           - "$..mail"
           - "$..otherMails[*]"
+          - "$..onPremisesSamAccountName"
+          - "$..onPremisesUserPrincipalName"
+          - "$..onPremisesDistinguishedName"
+          - "$..onPremisesImmutableId"
+          - "$..identities[*].issuerAssignedId"
+        encoding: "JSON"
   - pathRegex: "^/(v1.0|beta)/groups/?[^/]*"
     transforms:
       - !<redact>
@@ -54,6 +65,7 @@ endpoints:
           - "$..imAddresses[*]"
           - "$..mail"
           - "$..otherMails[*]"
+        encoding: "JSON"
   - pathRegex: "^/(v1.0|beta)/users/[^/]*/mailboxSettings"
   - pathRegex: "^/(v1.0|beta)/users/[^/]*/(calendars/[^/]*/)?events.*"
     transforms:
@@ -67,6 +79,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..emailAddress.address"
+        encoding: "JSON"
       - !<redactRegexMatches>
         jsonPaths:
           - "$..location.uniqueId"
@@ -100,6 +113,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..emailAddress.address"
+        encoding: "JSON"
       - !<redactRegexMatches>
         jsonPaths:
           - "$..location.uniqueId"

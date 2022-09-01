@@ -58,6 +58,12 @@ resource "google_cloudfunctions_function" "function" {
   }
 
   trigger_http = true
+  
+  lifecycle {
+    ignore_changes = [
+      labels
+    ]
+  }
 
   depends_on = [
     google_secret_manager_secret_iam_member.grant_sa_accessor_on_secret

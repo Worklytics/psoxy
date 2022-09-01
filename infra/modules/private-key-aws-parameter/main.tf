@@ -7,6 +7,12 @@ resource "aws_ssm_parameter" "private-key" {
   type        = "SecureString"
   description = "Value of private key"
   value       = var.private_key
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
 }
 
 resource "aws_ssm_parameter" "private-key-id" {
@@ -14,6 +20,12 @@ resource "aws_ssm_parameter" "private-key-id" {
   type        = "SecureString" # probably not necessary
   description = "ID of private key"
   value       = var.private_key_id
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
 }
 
 output "parameters" {
