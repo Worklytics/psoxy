@@ -49,16 +49,10 @@ resource "google_storage_bucket" "output-bucket" {
 }
 
 resource "google_service_account" "service-account" {
-  account_id   = local.function_name
-  display_name = "Service account for cloud function ${local.function_name}"
-  description  = "Service account where the function is running"
   project      = var.project_id
-
-  lifecycle {
-    ignore_changes = [
-      labels
-    ]
-  }
+  account_id   = local.function_name
+  display_name = "Psoxy Connector - ${var.source_kind}"
+  description  = "${local.function_name} runs as this service account"
 }
 
 resource "google_storage_bucket_iam_member" "access_for_import_bucket" {
