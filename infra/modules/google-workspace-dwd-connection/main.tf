@@ -10,6 +10,12 @@ resource "google_service_account" "connector-sa" {
   display_name = var.display_name
   description  = var.description
   project      = var.project_id
+
+  lifecycle {
+    ignore_changes = [
+      labels
+    ]
+  }
 }
 
 resource "google_project_service" "apis_needed" {

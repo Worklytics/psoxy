@@ -27,4 +27,10 @@ resource "aws_ssm_parameter" "value" {
   type        = "SecureString"
   description = "Key for gcp service account ${var.service_account_id}"
   value       = google_service_account_key.key.private_key
+
+  lifecycle {
+    ignore_changes = [
+      tags,
+    ]
+  }
 }
