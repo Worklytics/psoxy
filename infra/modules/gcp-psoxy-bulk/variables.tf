@@ -30,7 +30,7 @@ variable "salt_secret_version_number" {
 
   validation {
     condition     = can(regex("^([0-9]+)|latest$", var.salt_secret_version_number))
-    error_message = "Version number must be a number or 'latest'"
+    error_message = "Version number must be a number or 'latest'."
   }
 }
 
