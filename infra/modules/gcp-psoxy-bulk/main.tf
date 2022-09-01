@@ -7,7 +7,7 @@ terraform {
 }
 
 locals {
-  function_name = "psoxy-${var.source_kind}"
+  function_name = "psoxy-${substr(var.source_kind, 0, 24)}"
 }
 
 resource "random_string" "bucket_id_part" {
