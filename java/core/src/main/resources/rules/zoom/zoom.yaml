@@ -6,6 +6,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$.users[*].email"
+        encoding: "JSON"
       - !<pseudonymize>
         jsonPaths:
           - "$.users[*].id"
@@ -19,6 +20,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$.meetings[*].['host_id','host_email']"
+        encoding: "JSON"
       - !<redact>
         jsonPaths:
           - "$.meetings[*]['topic','join_url']"
@@ -27,6 +29,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$.['host_id','host_email']"
+        encoding: "JSON"
       - !<redact>
         jsonPaths:
           - "$.['topic','settings','agenda','custom_keys']"
@@ -37,6 +40,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$.['host_id','user_email','host_email']"
+        encoding: "JSON"
       - !<redact>
         jsonPaths:
           - "$.['user_name','topic']"
@@ -45,6 +49,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$.participants[*].['id','user_email']"
+        encoding: "JSON"
       - !<redact>
         jsonPaths:
           - "$.participants[*].['name','registrant_id']"
@@ -53,6 +58,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$.meetings[*]['host_id','user_email','host_email']"
+        encoding: "JSON"
       - !<redact>
         jsonPaths:
           - "$.meetings[*]['user_name','topic','custom_keys','tracking_fields']"
@@ -61,6 +67,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$.['host_id','user_email','host_email']"
+        encoding: "JSON"
       - !<redact>
         jsonPaths:
           - "$.['user_name','topic','custom_keys','tracking_fields']"
@@ -68,8 +75,8 @@ endpoints:
     transforms:
       - !<pseudonymize>
         jsonPaths:
-          - "$.participants[*].id"
-          - "$.participants[*].user_email"
+          - "$.participants[*].['id','user_email','user_id']"
+        encoding: "JSON"
       - !<redact>
         jsonPaths:
           - "$.participants[*].['name','registrant_id']"
