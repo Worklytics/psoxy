@@ -28,7 +28,7 @@ public class ConfigRulesModule {
             return o;
         };
 
-        return loadAndLog.apply(rulesUtils.getRulesFromConfig(config),"Rules: loaded from environment config (RULES variable parsed as base64-encoded YAML)")
+        return loadAndLog.apply(rulesUtils.getRulesFromConfig(config), "Rules: loaded from environment config (RULES variable parsed as base64-encoded YAML)")
             .or( () -> loadAndLog.apply(getDefaults(log, config), "Rules: fallback to prebuilt rules"))
                 .orElseThrow( () -> new RuntimeException("No rules found"));
 
