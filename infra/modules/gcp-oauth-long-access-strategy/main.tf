@@ -1,5 +1,5 @@
 locals {
-  secret_id = "PSOXY_ACCESS_TOKEN_${var.function_name}"
+  secret_id = "${upper(replace(var.function_name, "-", "_"))}_ACCESS_TOKEN"
 }
 
 # secret to hold a long-lived access token

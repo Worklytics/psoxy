@@ -9,30 +9,27 @@ terraform {
   }
 }
 
-
-resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_secret" {
-  for_each = var.secret_bindings
-
-  member    = "serviceAccount:${var.service_account_email}"
-  role      = "roles/secretmanager.secretAccessor"
-  secret_id = each.value.secret_name
-}
-
-
 locals {
   secret_bindings = merge({
     PSOXY_SALT = {
-      secret_name    = var.salt_secret_id
-      secret_version = "latest"
+      secret_id      = var.salt_secret_id
+      version_number = var.salt_secret_version_number
     }
   }, var.secret_bindings)
-
 }
 
+resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_secret" {
+  for_each = local.secret_bindings
+
+  project   = var.project_id
+  secret_id = each.value.secret_id
+  member    = "serviceAccount:${var.service_account_email}"
+  role      = "roles/secretmanager.secretAccessor"
+}
 
 resource "google_cloudfunctions_function" "function" {
-  name        = "psoxy-${var.instance_id}"
-  description = "Psoxy for ${var.instance_id} files"
+  name        = var.instance_id
+  description = "Psoxy Connector - ${var.source_kind}"
   runtime     = "java11"
   project     = var.project_id
   region      = var.region
@@ -44,18 +41,19 @@ resource "google_cloudfunctions_function" "function" {
   service_account_email = var.service_account_email
 
   environment_variables = merge(
-    tomap(yamldecode(file(var.path_to_config))),
+    var.path_to_config == null ? {} : yamldecode(file(var.path_to_config)),
     var.environment_variables
   )
 
   dynamic "secret_environment_variables" {
     for_each = local.secret_bindings
+    iterator = secret_environment_variable
 
     content {
-      key        = secret_environment_variables.key
+      key        = secret_environment_variable.key
       project_id = var.project_id
-      secret     = secret_environment_variables.value.secret_name
-      version    = secret_environment_variables.value.secret_version
+      secret     = secret_environment_variable.value.secret_id
+      version    = secret_environment_variable.value.version_number
     }
   }
 
@@ -66,6 +64,10 @@ resource "google_cloudfunctions_function" "function" {
       labels
     ]
   }
+
+  depends_on = [
+    google_secret_manager_secret_iam_member.grant_sa_accessor_on_secret
+  ]
 }
 
 locals {

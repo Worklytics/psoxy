@@ -1,4 +1,4 @@
-variable "project_id" {
+variable "gcp_project_id" {
   type        = string
   description = "id of GCP project that will host psoxy instance"
 }
@@ -6,24 +6,31 @@ variable "project_id" {
 variable "environment_name" {
   type        = string
   description = "qualifier to append to name of project that will host your psoxy instance"
+  default     = null
 }
 
-variable "folder_id" {
+variable "gcp_folder_id" {
   type        = string
   description = "optionally, a folder into which to provision it"
   default     = null
 }
 
-variable "billing_account_id" {
+variable "gcp_billing_account_id" {
   type        = string
   description = "billing account ID; needed to create the project"
+  default     = null
+}
+
+variable "gcp_org_id" {
+  type        = string
+  description = "your GCP organization ID"
+  default     = null
 }
 
 variable "worklytics_sa_emails" {
   type        = list(string)
   description = "service accounts for your organization's Worklytics instances (list supported for test/dev scenarios)"
 }
-
 
 variable "connector_display_name_suffix" {
   type        = string
@@ -33,15 +40,26 @@ variable "connector_display_name_suffix" {
 
 variable "psoxy_base_dir" {
   type        = string
-  description = "the path where your psoxy repo resides. Preferably a full path, /home/user/repos/, avoid tilde (~) shortcut to $HOME"
+  description = "the path where your psoxy repo resides"
+  default     = "../../../"
 
   validation {
     condition     = can(regex(".*\\/$", var.psoxy_base_dir))
     error_message = "The psoxy_base_dir value should end with a slash."
+  }
+  validation {
+    condition     = can(regex("^[^~].*$", var.psoxy_base_dir))
+    error_message = "The psoxy_base_dir value should be absolute path (not start with ~)."
   }
 }
 
 variable "google_workspace_example_user" {
   type        = string
   description = "user to impersonate for Google Workspace API calls (null for none)"
+}
+
+variable "gcp_region" {
+  type        = string
+  description = "region in which to provision GCP resources, if applicable"
+  default     = "us-central1"
 }

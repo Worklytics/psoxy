@@ -31,3 +31,10 @@ The solution is to enable APIs via the Cloud Console, specifically:
 
   * IAM API
   * Cloud Resource Manager API
+
+## GCP Terraform State Inconsistencies
+
+If some resources seem to not be properly provisioned, try `terraform taint` or `terraform state rm`,
+to force re-creation.  Use `terrafrom state list | grep` to search for specific resource ids.
+
+

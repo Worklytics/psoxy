@@ -50,6 +50,10 @@ variable "psoxy_base_dir" {
     condition     = can(regex(".*\\/$", var.psoxy_base_dir))
     error_message = "The psoxy_base_dir value should end with a slash."
   }
+  validation {
+    condition     = can(regex("^[^~].*$", var.psoxy_base_dir))
+    error_message = "The psoxy_base_dir value should be absolute path (not start with ~)."
+  }
 }
 
 variable "caller_gcp_service_account_ids" {

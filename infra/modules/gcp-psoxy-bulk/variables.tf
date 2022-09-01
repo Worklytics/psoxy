@@ -27,7 +27,22 @@ variable "salt_secret_id" {
 variable "salt_secret_version_number" {
   type        = string
   description = "Version number of the secret used to salt pseudonyms"
+
+  validation {
+    condition     = can(regex("^([0-9]+)|latest$", var.salt_secret_version_number))
+    error_message = "Version number must be a number or 'latest'."
+  }
 }
+
+variable "secret_bindings" {
+  type = map(object({
+    secret_id      = string # NOT the full resource ID; just the secret_id within GCP project
+    version_number = string # could be 'latest'
+  }))
+  description = "map of Secret Manager Secrets to expose to cloud function by ENV_VAR_NAME"
+  default     = {}
+}
+
 
 variable "artifacts_bucket_name" {
   type        = string
@@ -42,6 +57,7 @@ variable "deployment_bundle_object_name" {
 variable "path_to_config" {
   type        = string
   description = "path to config file (usually something in ../../configs/, eg configs/gdirectory.yaml"
+  default     = null
 }
 
 variable "psoxy_base_dir" {
@@ -54,4 +70,9 @@ variable "environment_variables" {
   type        = map(string)
   description = "Non-sensitive values to add to functions environment variables; NOTE: will override anything in `path_to_config`"
   default     = {}
+}
+
+variable "bucket_write_role_id" {
+  type        = string
+  description = "The id of role to grant on bucket to enable writes"
 }

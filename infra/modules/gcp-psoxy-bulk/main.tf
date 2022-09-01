@@ -6,10 +6,22 @@ terraform {
   }
 }
 
+locals {
+  function_name = "psoxy-${substr(var.source_kind, 0, 24)}"
+}
+
+resource "random_string" "bucket_id_part" {
+  length  = 8
+  special = false
+  lower   = true
+  upper   = false
+  numeric = true
+}
+
 # data input to function
 resource "google_storage_bucket" "input-bucket" {
   project                     = var.project_id
-  name                        = "psoxy-${var.source_kind}-input"
+  name                        = "${local.function_name}-${random_string.bucket_id_part.id}-input"
   location                    = var.region
   force_destroy               = true
   uniform_bucket_level_access = true
@@ -24,7 +36,7 @@ resource "google_storage_bucket" "input-bucket" {
 # data output from function
 resource "google_storage_bucket" "output-bucket" {
   project                     = var.project_id
-  name                        = "psoxy-${var.source_kind}-output"
+  name                        = "${local.function_name}-${random_string.bucket_id_part.id}-output"
   location                    = var.region
   force_destroy               = true
   uniform_bucket_level_access = true
@@ -37,22 +49,10 @@ resource "google_storage_bucket" "output-bucket" {
 }
 
 resource "google_service_account" "service-account" {
-  account_id   = "psoxy-${var.source_kind}"
-  display_name = "Psoxy ${var.source_kind} service account for cloud function"
-  description  = "Service account where the function is running and have permissions to read secrets"
   project      = var.project_id
-
-  lifecycle {
-    ignore_changes = [
-      labels
-    ]
-  }
-}
-
-resource "google_secret_manager_secret_iam_member" "salt-secret-access-for-service-account" {
-  member    = "serviceAccount:${google_service_account.service-account.email}"
-  role      = "roles/secretmanager.secretAccessor"
-  secret_id = var.salt_secret_id
+  account_id   = local.function_name
+  display_name = "Psoxy Connector - ${var.source_kind}"
+  description  = "${local.function_name} runs as this service account"
 }
 
 resource "google_storage_bucket_iam_member" "access_for_import_bucket" {
@@ -69,30 +69,34 @@ resource "google_storage_bucket_iam_member" "grant_sa_read_on_processed_bucket" 
   role   = "roles/storage.objectViewer"
 }
 
-# TODO: revisit if custom role is a good idea; this triggers security events for some orgs
-resource "google_project_iam_custom_role" "bucket-write" {
-  project     = var.project_id
-  role_id     = "writeAccess"
-  title       = "Access for writing and update objects in bucket"
-  description = "Write and update support, because storage.objectCreator role only support creation -not update"
-  permissions = ["storage.objects.create", "storage.objects.delete"]
-
-  lifecycle {
-    ignore_changes = [
-      labels
-    ]
-  }
-}
 
 resource "google_storage_bucket_iam_member" "access_for_processed_bucket" {
   bucket = google_storage_bucket.output-bucket.name
-  role   = google_project_iam_custom_role.bucket-write.id
+  role   = var.bucket_write_role_id
   member = "serviceAccount:${google_service_account.service-account.email}"
 }
 
+locals {
+  secret_bindings = merge({
+    PSOXY_SALT = {
+      secret_id      = var.salt_secret_id
+      version_number = var.salt_secret_version_number
+    }
+  }, var.secret_bindings)
+}
+
+resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_secret" {
+  for_each = local.secret_bindings
+
+  project   = var.project_id
+  secret_id = each.value.secret_id
+  member    = "serviceAccount:${google_service_account.service-account.email}"
+  role      = "roles/secretmanager.secretAccessor"
+}
+
 resource "google_cloudfunctions_function" "function" {
-  name        = "psoxy-${var.source_kind}"
-  description = "Psoxy for ${var.source_kind} files"
+  name        = local.function_name
+  description = "Psoxy instance to process ${var.source_kind} files"
   runtime     = "java11"
   project     = var.project_id
   region      = var.region
@@ -107,15 +111,22 @@ resource "google_cloudfunctions_function" "function" {
     INPUT_BUCKET  = google_storage_bucket.input-bucket.name,
     OUTPUT_BUCKET = google_storage_bucket.output-bucket.name
     }),
-    yamldecode(file(var.path_to_config)),
+    var.path_to_config == null ? {} : yamldecode(file(var.path_to_config)),
     var.environment_variables
   )
 
-  secret_environment_variables {
-    key     = "PSOXY_SALT"
-    secret  = var.salt_secret_id
-    version = var.salt_secret_version_number
+  dynamic "secret_environment_variables" {
+    for_each = local.secret_bindings
+    iterator = secret_environment_variable
+
+    content {
+      key        = secret_environment_variable.key
+      project_id = var.project_id
+      secret     = secret_environment_variable.value.secret_id
+      version    = secret_environment_variable.value.version_number
+    }
   }
+
 
   event_trigger {
     event_type = "google.storage.object.finalize"
@@ -130,6 +141,6 @@ resource "google_cloudfunctions_function" "function" {
   }
 
   depends_on = [
-    google_secret_manager_secret_iam_member.salt-secret-access-for-service-account
+    google_secret_manager_secret_iam_member.grant_sa_accessor_on_secret
   ]
 }

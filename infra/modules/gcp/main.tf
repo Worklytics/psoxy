@@ -151,4 +151,31 @@ resource "google_storage_bucket_object" "function" {
   source       = data.archive_file.source.output_path
 }
 
+# TODO: revisit if custom role is a good idea; this triggers security events for some orgs
+resource "google_project_iam_custom_role" "bucket-write" {
+  project     = var.project_id
+  role_id     = "writeAccess"
+  title       = "Access for writing and update objects in bucket"
+  description = "Write and update support, because storage.objectCreator role only support creation - not update"
+  permissions = ["storage.objects.create", "storage.objects.delete"]
+}
 
+output "salt_secret_id" {
+  value = google_secret_manager_secret.pseudonymization-salt.secret_id
+}
+
+output "salt_secret_version_number" {
+  value = trimprefix(google_secret_manager_secret_version.initial_version.name, "${google_secret_manager_secret.pseudonymization-salt.name}/versions/")
+}
+
+output "artifacts_bucket_name" {
+  value = google_storage_bucket.artifacts.name
+}
+
+output "deployment_bundle_object_name" {
+  value = google_storage_bucket_object.function.name
+}
+
+output "bucket_write_role_id" {
+  value = google_project_iam_custom_role.bucket-write.id
+}

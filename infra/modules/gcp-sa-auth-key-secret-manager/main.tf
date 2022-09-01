@@ -34,6 +34,12 @@ resource "google_secret_manager_secret" "service-account-key" {
   replication {
     automatic = true
   }
+
+  lifecycle {
+    ignore_changes = [
+      labels
+    ]
+  }
 }
 
 resource "google_secret_manager_secret_version" "service-account-key-version" {
