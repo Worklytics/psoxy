@@ -62,6 +62,12 @@ resource "aws_iam_role" "api-caller" {
       local.gcp_service_account_caller_statements
     )
   })
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
 }
 
 # Allow caller to read parameters required by lambdas
@@ -82,6 +88,12 @@ resource "aws_iam_policy" "read_parameters_policy" {
         }
       ]
   })
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "read_parameters_policy_attach" {
@@ -105,6 +117,12 @@ resource "aws_iam_policy" "execution_lambda_to_caller" {
         }
       ]
   })
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "invoker_lambda_execution" {
@@ -139,6 +157,7 @@ resource "aws_ssm_parameter" "salt" {
 
   lifecycle {
     ignore_changes = [
+      tags,
       value
     ]
   }
@@ -160,6 +179,7 @@ resource "aws_ssm_parameter" "encryption_key" {
 
   lifecycle {
     ignore_changes = [
+      tags,
       value
     ]
   }

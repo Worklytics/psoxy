@@ -133,6 +133,7 @@ resource "aws_ssm_parameter" "client_id" {
 
   lifecycle {
     ignore_changes = [
+      tags,
       value
     ]
   }
@@ -148,6 +149,7 @@ resource "aws_ssm_parameter" "refresh_endpoint" {
 
   lifecycle {
     ignore_changes = [
+      tags,
       value
     ]
   }

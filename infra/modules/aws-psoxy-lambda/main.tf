@@ -25,12 +25,24 @@ resource "aws_lambda_function" "psoxy-instance" {
       var.environment_variables
     )
   }
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
 }
 
 # cloudwatch group per lambda function
 resource "aws_cloudwatch_log_group" "lambda-log" {
   name              = "/aws/lambda/${aws_lambda_function.psoxy-instance.function_name}"
   retention_in_days = var.log_retention_in_days
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
 }
 
 resource "aws_iam_role" "iam_for_lambda" {
@@ -49,6 +61,12 @@ resource "aws_iam_role" "iam_for_lambda" {
       }
     ]
   })
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
 }
 
 resource "aws_iam_policy" "policy" {
@@ -71,6 +89,11 @@ resource "aws_iam_policy" "policy" {
       ]
   })
 
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "basic" {
