@@ -11,7 +11,7 @@ locals {
 }
 
 resource "random_string" "bucket_id_part" {
-  length   = 8
+  length  = 8
   special = false
   lower   = true
   upper   = false
@@ -85,7 +85,7 @@ resource "google_storage_bucket_iam_member" "access_for_processed_bucket" {
 locals {
   secret_bindings = merge({
     PSOXY_SALT = {
-      secret_id    = var.salt_secret_id
+      secret_id      = var.salt_secret_id
       version_number = var.salt_secret_version_number
     }
   }, var.secret_bindings)

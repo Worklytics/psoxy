@@ -36,11 +36,11 @@ variable "salt_secret_version_number" {
 
 variable "secret_bindings" {
   type = map(object({
-    secret_id    = string   # NOT the full resource ID; just the secret_id within GCP project
+    secret_id      = string # NOT the full resource ID; just the secret_id within GCP project
     version_number = string # could be 'latest'
   }))
   description = "map of Secret Manager Secrets to expose to cloud function by ENV_VAR_NAME"
-  default = {}
+  default     = {}
 }
 
 

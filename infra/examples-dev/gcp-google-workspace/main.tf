@@ -61,9 +61,9 @@ module "worklytics_connector_specs" {
 resource "google_project" "psoxy-project" {
   name            = "Psoxy%{if var.environment_name != ""} - ${var.environment_name}%{endif}"
   project_id      = var.gcp_project_id
+  billing_account = var.gcp_billing_account_id
   folder_id       = var.gcp_folder_id # if project is at top-level of your GCP organization, rather than in a folder, comment this line out
   # org_id          = var.gcp_org_id # if project is in a GCP folder, this value is implicit and this line should be commented out
-  billing_account = var.gcp_billing_account_id
 }
 
 module "psoxy-gcp" {
@@ -126,7 +126,7 @@ module "psoxy-google-workspace-connector" {
 
   secret_bindings = {
     SERVICE_ACCOUNT_KEY = {
-      secret_id    = module.google-workspace-connection-auth[each.key].key_secret_id
+      secret_id      = module.google-workspace-connection-auth[each.key].key_secret_id
       version_number = module.google-workspace-connection-auth[each.key].key_secret_version_number
     }
   }

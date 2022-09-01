@@ -12,7 +12,7 @@ terraform {
 locals {
   secret_bindings = merge({
     PSOXY_SALT = {
-      secret_id    = var.salt_secret_id
+      secret_id      = var.salt_secret_id
       version_number = var.salt_secret_version_number
     }
   }, var.secret_bindings)
@@ -58,7 +58,7 @@ resource "google_cloudfunctions_function" "function" {
   }
 
   trigger_http = true
-  
+
   lifecycle {
     ignore_changes = [
       labels
