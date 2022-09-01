@@ -49,15 +49,15 @@ async function fetchAWS(options = {}, credentials = {}) {
     }
   );
 
-  if (options.impersonate) {
-    headers['X-Psoxy-User-To-Impersonate'] = options.impersonate;
-  }
-
   const headers = {
     ...signed.headers,
     'Accept-encoding': options.gzip ? 'gzip' : 'none',
     'X-Psoxy-Skip-Sanitizer': options.skip.toString(),
   };
+  if (options.impersonate) {
+    headers['X-Psoxy-User-To-Impersonate'] = options.impersonate;
+  }
+
   console.log('Waiting response...');
 
   if (options.verbose) {
