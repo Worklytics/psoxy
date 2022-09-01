@@ -142,7 +142,22 @@ resource "google_project_iam_custom_role" "bucket-write" {
   permissions = ["storage.objects.create", "storage.objects.delete"]
 }
 
+output "salt_secret_id" {
+  value = google_secret_manager_secret.pseudonymization-salt.secret_id
+}
+
+output "salt_secret_version_number" {
+  value = trimprefix(google_secret_manager_secret_version.initial_version.name, "${google_secret_manager_secret.pseudonymization-salt.name}/versions/")
+}
+
+output "artifacts_bucket_name" {
+  value = google_storage_bucket.artifacts.name
+}
+
+output "deployment_bundle_object_name" {
+  value = google_storage_bucket_object.function.name
+}
 
 output "bucket_write_role_id" {
-  value = google_project_iam_custom_role.bucket-write.role_id
+  value = google_project_iam_custom_role.bucket-write.id
 }

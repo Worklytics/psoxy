@@ -27,7 +27,22 @@ variable "salt_secret_id" {
 variable "salt_secret_version_number" {
   type        = string
   description = "Version number of the secret used to salt pseudonyms"
+
+  validation {
+    condition     = can(regex("^([0-9]+)|latest$", var.salt_secret_version_number))
+    error_message = "Version number must be a number or 'latest'"
+  }
 }
+
+variable "secret_bindings" {
+  type = map(object({
+    secret_id    = string   # NOT the full resource ID; just the secret_id within GCP project
+    version_number = string # could be 'latest'
+  }))
+  description = "map of Secret Manager Secrets to expose to cloud function by ENV_VAR_NAME"
+  default = {}
+}
+
 
 variable "artifacts_bucket_name" {
   type        = string

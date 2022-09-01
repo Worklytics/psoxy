@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     google = {
-      version = ">= 4.0, <= 5.0"
+      version = "~> 4.12"
     }
   }
 
@@ -40,12 +40,15 @@ module "worklytics_connector_specs" {
   source = "../../modules/worklytics-connector-specs"
 
   enabled_connectors = [
-    "asana",
     "gdirectory",
     "gcal",
+    "gdrive",
     "gmail",
     "google-meet",
     "google-chat",
+    "asana",
+    "slack-discovery-api",
+    "zoom",
   ]
   google_workspace_example_user = var.google_workspace_example_user
 }
@@ -58,7 +61,8 @@ module "worklytics_connector_specs" {
 resource "google_project" "psoxy-project" {
   name            = "Psoxy%{if var.environment_name != ""} - ${var.environment_name}%{endif}"
   project_id      = var.gcp_project_id
-  folder_id       = var.gcp_folder_id
+  folder_id       = var.gcp_folder_id # if project is at top-level of your GCP organization, rather than in a folder, comment this line out
+  # org_id          = var.gcp_org_id # if project is in a GCP folder, this value is implicit and this line should be commented out
   billing_account = var.gcp_billing_account_id
 }
 
@@ -68,16 +72,11 @@ module "psoxy-gcp" {
   project_id        = google_project.psoxy-project.project_id
   invoker_sa_emails = var.worklytics_sa_emails
   psoxy_base_dir    = var.psoxy_base_dir
+  psoxy_version     = "0.4.2"
   bucket_location   = var.gcp_region
 
   depends_on = [
     google_project.psoxy-project
-  ]
-}
-
-locals {
-  enabled_connectors = [
-    "asana"
   ]
 }
 
@@ -86,8 +85,8 @@ module "google-workspace-connection" {
 
   source = "../../modules/google-workspace-dwd-connection"
 
-  project_id                   = var.gcp_project_id
-  connector_service_account_id = "psoxy-${each.key}-dwd"
+  project_id                   = google_project.psoxy-project.project_id
+  connector_service_account_id = "psoxy-${each.key}"
   display_name                 = "Psoxy Connector - ${each.value.display_name}${var.connector_display_name_suffix}"
   apis_consumed                = each.value.apis_consumed
   oauth_scopes_needed          = each.value.oauth_scopes_needed
@@ -102,7 +101,7 @@ module "google-workspace-connection-auth" {
 
   source = "../../modules/gcp-sa-auth-key-secret-manager"
 
-  secret_project     = var.gcp_project_id
+  secret_project     = google_project.psoxy-project.project_id
   service_account_id = module.google-workspace-connection[each.key].service_account_id
   secret_id          = "PSOXY_${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY"
 }
@@ -112,20 +111,22 @@ module "psoxy-google-workspace-connector" {
 
   source = "../../modules/gcp-psoxy-rest"
 
-  project_id                            = var.gcp_project_id
+  project_id                            = google_project.psoxy-project.project_id
+  source_kind                           = each.value.source_kind
   instance_id                           = "psoxy-${each.key}"
   service_account_email                 = module.google-workspace-connection[each.key].service_account_email
   artifacts_bucket_name                 = module.psoxy-gcp.artifacts_bucket_name
   deployment_bundle_object_name         = module.psoxy-gcp.deployment_bundle_object_name
-  path_to_config                        = "${local.base_config_path}${each.key}.yaml"
-  salt_secret_id                        = module.psoxy-gcp.salt_secret_name
+  path_to_config                        = "${local.base_config_path}${each.value.source_kind}.yaml"
+  path_to_repo_root                     = var.psoxy_base_dir
+  salt_secret_id                        = module.psoxy-gcp.salt_secret_id
   salt_secret_version_number            = module.psoxy-gcp.salt_secret_version_number
   example_api_calls                     = each.value.example_api_calls
   example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
 
   secret_bindings = {
     SERVICE_ACCOUNT_KEY = {
-      secret_name    = module.google-workspace-connection-auth[each.key].key_secret_name
+      secret_id    = module.google-workspace-connection-auth[each.key].key_secret_id
       version_number = module.google-workspace-connection-auth[each.key].key_secret_version_number
     }
   }
@@ -146,9 +147,9 @@ module "worklytics-psoxy-connection" {
 resource "google_service_account" "long_auth_connector_sa" {
   for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
 
-  project      = var.gcp_project_id
-  account_id   = "psoxy-${each.key}"
-  display_name = "Psoxy Connector - ${title(each.key)}{var.connector_display_name_suffix}"
+  project      = google_project.psoxy-project.project_id
+  account_id   = "psoxy-${substr(each.key, 0, 24)}"
+  display_name = "Psoxy Connector - ${title(each.key)}${var.connector_display_name_suffix}"
 }
 
 # creates the secret, without versions.
@@ -156,7 +157,7 @@ module "connector-long-auth-block" {
   for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
 
   source                  = "../../modules/gcp-oauth-long-access-strategy"
-  project_id              = var.gcp_project_id
+  project_id              = google_project.psoxy-project.project_id
   function_name           = "psoxy-${each.key}"
   token_adder_user_emails = []
 }
@@ -166,19 +167,20 @@ module "connector-long-auth-create-function" {
 
   source = "../../modules/gcp-psoxy-rest"
 
-  project_id                    = var.gcp_project_id
+  project_id                    = google_project.psoxy-project.project_id
+  source_kind                   = each.value.source_kind
   instance_id                   = "psoxy-${each.key}"
   service_account_email         = google_service_account.long_auth_connector_sa[each.key].email
   artifacts_bucket_name         = module.psoxy-gcp.artifacts_bucket_name
   deployment_bundle_object_name = module.psoxy-gcp.deployment_bundle_object_name
   path_to_config                = "${local.base_config_path}${each.value.source_kind}.yaml"
   path_to_repo_root             = var.psoxy_base_dir
-  salt_secret_id                = module.psoxy-gcp.salt_secret_name
+  salt_secret_id                = module.psoxy-gcp.salt_secret_id
   salt_secret_version_number    = module.psoxy-gcp.salt_secret_version_number
 
   secret_bindings = {
     ACCESS_TOKEN = {
-      secret_name = module.connector-long-auth-block[each.key].access_token_secret_name
+      secret_id = module.connector-long-auth-block[each.key].access_token_secret_id
       # in case of long lived tokens we want latest version always
       version_number = "latest"
     }
@@ -197,7 +199,7 @@ module "psoxy-gcp-bulk" {
   worklytics_sa_emails          = var.worklytics_sa_emails
   region                        = var.gcp_region
   source_kind                   = each.value.source_kind
-  salt_secret_id                = module.psoxy-gcp.salt_secret_name
+  salt_secret_id                = module.psoxy-gcp.salt_secret_id
   artifacts_bucket_name         = module.psoxy-gcp.artifacts_bucket_name
   deployment_bundle_object_name = module.psoxy-gcp.deployment_bundle_object_name
   salt_secret_version_number    = module.psoxy-gcp.salt_secret_version_number

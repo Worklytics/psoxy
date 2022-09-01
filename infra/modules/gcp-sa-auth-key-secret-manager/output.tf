@@ -2,6 +2,10 @@ output "key_secret_name" {
   value = google_secret_manager_secret.service-account-key.name
 }
 
+output "key_secret_id" {
+  value = google_secret_manager_secret.service-account-key.secret_id
+}
+
 output "key_secret_version_name" {
   value = google_secret_manager_secret_version.service-account-key-version.name
 }

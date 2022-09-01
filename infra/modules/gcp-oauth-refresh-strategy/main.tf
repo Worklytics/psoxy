@@ -1,7 +1,7 @@
 
 resource "google_secret_manager_secret" "client_secret" {
   project   = var.project_id
-  secret_id = "PSOXY_${var.function_name}_CLIENT_SECRET"
+  secret_id = "${upper(replace(var.function_name, "-", "_"))}_CLIENT_SECRET"
 
   replication {
     automatic = true
@@ -10,7 +10,7 @@ resource "google_secret_manager_secret" "client_secret" {
 
 resource "google_secret_manager_secret" "refresh_token" {
   project   = var.project_id
-  secret_id = "PSOXY_${var.function_name}_REFRESH_TOKEN"
+  secret_id = "${upper(replace(var.function_name, "-", "_"))}_REFRESH_TOKEN"
 
   replication {
     automatic = true
