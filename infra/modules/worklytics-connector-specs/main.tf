@@ -29,7 +29,7 @@ locals {
         "/admin/directory/v1/customer/my_customer/rolesassignments"
       ]
       example_api_calls_user_to_impersonate : var.google_workspace_example_user
-    }
+    },
     "gcal" : {
       source_kind : "gcal",
       display_name : "Google Calendar"
@@ -45,7 +45,7 @@ locals {
         "/calendar/v3/calendars/primary/events"
       ]
       example_api_calls_user_to_impersonate : var.google_workspace_example_user
-    }
+    },
     "gmail" : {
       source_kind : "gmail",
       display_name : "GMail"
@@ -59,7 +59,7 @@ locals {
         "/gmail/v1/users/me/messages"
       ]
       example_api_calls_user_to_impersonate : var.google_workspace_example_user
-    }
+    },
     "google-chat" : {
       source_kind : "google-chat",
       display_name : "Google Chat"
@@ -73,7 +73,21 @@ locals {
         "/admin/reports/v1/activity/users/all/applications/chat"
       ]
       example_api_calls_user_to_impersonate : var.google_workspace_example_user
-    }
+    },
+    "google-meet" : {
+      source_kind : "google-meet",
+      display_name : "Google Meet"
+      apis_consumed : [
+        "admin.googleapis.com"
+      ]
+      oauth_scopes_needed : [
+        "https://www.googleapis.com/auth/admin.reports.audit.readonly"
+      ]
+      example_api_calls : [
+        "/admin/reports/v1/activity/users/all/applications/meet"
+      ]
+      example_api_calls_user_to_impersonate : var.google_workspace_example_user
+    },
     "gdrive" : {
       source_kind : "gdrive",
       display_name : "Google Drive"
