@@ -73,7 +73,7 @@ module "psoxy-gcp" {
   project_id        = google_project.psoxy-project.project_id
   invoker_sa_emails = var.worklytics_sa_emails
   psoxy_base_dir    = var.psoxy_base_dir
-  psoxy_version     = "0.4.2"
+  psoxy_version     = "0.4.3"
   bucket_location   = var.gcp_region
 
 
