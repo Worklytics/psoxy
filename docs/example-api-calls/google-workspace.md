@@ -107,13 +107,18 @@ node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gdirectory/admin/director
 ## Drive
 
 ### Files
+
+API v2
 ```shell
 node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gdrive/drive/v2/files
 ```
 
+API v3 (*)
 ```shell
 node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gdrive/drive/v3/files
 ```
+
+(*) Notice that only the "version" part of the URL changes, and all subsequent calls should work for `v2` and also `v3`.
 
 ### File
 1. Get the file ID (accessor path in response `.files[0].id`:
@@ -123,7 +128,7 @@ node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gdrive/drive/v2/files
 
 2. Get file details (replace [drive_file_id] with the corresponding value):
 ```shell
-node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gdrive/drive/v3/files/[drive_file_id]?fields=*
+node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gdrive/drive/v2/files/[drive_file_id]?fields=*
 ```
 
 ### File Revisions
