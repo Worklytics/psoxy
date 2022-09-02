@@ -59,6 +59,23 @@ async function saveRequestResultToFile(url, data) {
     JSON.stringify(data, undefined, 4));
 };
 
+/**
+ * Get common HTTP requests for Psoxy requests.
+ * 
+ * @param {Object} options - see `../index.js`
+ */
+function getCommonHTTPHeaders(options = {}) {
+  const headers = {
+    'Accept-encoding': options.gzip ? 'gzip' : 'none',
+    'X-Psoxy-Skip-Sanitizer': options.skip?.toString() || 'false',
+  }
+  if (options.impersonate) {
+    headers['X-Psoxy-User-To-Impersonate'] = options.impersonate;
+  }
+  return headers;
+}
+
 export {
   saveRequestResultToFile,
+  getCommonHTTPHeaders,
 };
