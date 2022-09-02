@@ -14,8 +14,7 @@ const RESPONSES_DIR = '/responses';
  * @param {string} filename 
  * @param {string} data 
  */
-async function saveToFile(dirname, filename, data) {
-  dirname = path.join(__dirname, dirname || '');
+async function saveToFile(dirname = __dirname, filename, data) {
   let dirExists = false;
   
   try {
@@ -49,17 +48,17 @@ function getFileNameFromURL(url, timestamp = true, extension = '.json') {
  * Helper to save URL responses to a file. 
  * File names follow this format:
  * `/responses/[psoxy-function]-[api-path]-[ISO8601 timestamp].json`, example:
- * `responses/psoxy-gcal-calendar-v3-calendars-primary-2022-09-02T10:15:00.000Z.json`
+ * `/responses/psoxy-gcal-calendar-v3-calendars-primary-2022-09-02T10:15:00.000Z.json`
  * 
  * @param {URL} url 
  * @param {Object} data 
  */
 async function saveRequestResultToFile(url, data) {
   const filename = getFileNameFromURL(url);
-  return saveToFile(RESPONSES_DIR, filename, 
+  return saveToFile(path.resolve(__dirname, '..') + RESPONSES_DIR, filename, 
     JSON.stringify(data, undefined, 4));
 };
 
-export default {
-  saveRequestResultToFile: saveRequestResultToFile,
+export {
+  saveRequestResultToFile,
 };
