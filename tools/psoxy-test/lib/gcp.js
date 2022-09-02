@@ -1,4 +1,5 @@
 import fetch from 'node-fetch';
+import { getCommonHTTPHeaders } from './utils.js';
 
 /**
  * Helper: check url deploy type
@@ -25,14 +26,9 @@ async function test(options = {}) {
   }
 
   const headers = {
-    'Accept-encoding': options.gzip ? 'gzip' : 'none',
-    'X-Psoxy-Skip-Sanitizer': options.skip.toString(),
+    ...getCommonHTTPHeaders(options),
     Authorization: `Bearer ${options.token}`,
   };
-
-  if (options.impersonate) {
-    headers['X-Psoxy-User-To-Impersonate'] = options.impersonate;
-  }
 
   console.log('Calling psoxy...');
   console.log(`Request: ${options.url}`);

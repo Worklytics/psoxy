@@ -1,6 +1,7 @@
 import { execSync } from 'child_process';
 import aws4 from 'aws4';
 import fetch from 'node-fetch';
+import { getCommonHTTPHeaders } from './utils.js';
 
 /**
  * Call AWS cli to get temporary security credentials.
@@ -50,13 +51,9 @@ async function fetchAWS(options = {}, credentials = {}) {
   );
 
   const headers = {
+    ...getCommonHTTPHeaders(options),
     ...signed.headers,
-    'Accept-encoding': options.gzip ? 'gzip' : 'none',
-    'X-Psoxy-Skip-Sanitizer': options.skip.toString(),
   };
-  if (options.impersonate) {
-    headers['X-Psoxy-User-To-Impersonate'] = options.impersonate;
-  }
 
   console.log('Waiting response...');
 
