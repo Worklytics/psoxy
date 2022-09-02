@@ -31,6 +31,7 @@ const theme = {
     .option('-t, --token <token>', 'Authorization token for GCP')
     .option('-v, --verbose', 'Verbose output', false)
     .option('-z, --gzip', 'Add gzip compression header', false)
+    .option('-f, --file', 'Save test results to file', false)
     .configureOutput({
       wirteOut: undefined,
       writeErr: undefined,

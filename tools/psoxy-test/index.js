@@ -1,5 +1,6 @@
 import aws from './lib/aws.js';
 import gcp from './lib/gcp.js';
+import { saveRequestResultToFile } from './lib/utils.js';
 
 /**
  * @typedef {Object} PsoxyResponse
@@ -20,6 +21,7 @@ import gcp from './lib/gcp.js';
  * @param {boolean} options.skip - Whether to skip or not sanitization rules (only in DEV mode)
  * @param {boolean} options.gzip - Add Gzip compression headers
  * @param {boolean} options.verbose - Verbose ouput (default to console)
+ * @param {boolean} options.file - Whether to save successful responses to a file (responses/[api-path]-[ISO8601 timestamp].json)
  * @return {PsoxyResponse}
  */
 export default async function (options = {}) {
@@ -48,6 +50,7 @@ export default async function (options = {}) {
 
   try {
     const response = await test(options);
+    
     if (response.status === 200) {
       const data = await response.json();
 
@@ -55,6 +58,16 @@ export default async function (options = {}) {
         status: response.status,
         data: data,
       };
+
+      if (options.file) {
+        try {
+          await saveRequestResultToFile(url, data);
+          console.log('Results saved to file');
+        } catch (err) {
+          console.error('Unable to save results', err);
+        }        
+      }
+
     } else {
       const psoxyError = response.headers.get('x-psoxy-error');
 
