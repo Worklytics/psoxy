@@ -224,4 +224,39 @@ public class CSVFileHandlerTest {
             assertEquals(EXPECTED, new String(result));
         }
     }
+
+
+    @SneakyThrows
+    @Test
+    void acmeExample() {
+        final String EXPECTED = "StartDate,EndDate,Status,Progress,Finished,RecordedDate,ResponseId,LocationLatitude,LocationLongitude,Q1,Participant Email,Participant Unique Identifier,Q_DataPolicyViolations,Rating\r\n" +
+            "Start Date,End Date,Response Type,Progress,Finished,Recorded Date,Response ID,Location Latitude,Location Longitude,What is the meaning of life?,\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"qejD3BfohzeqJbqCcGMI2O0T-fn_KB24RjUbb8pjXHs\"\"}\",\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"ilQfXaLbu3b3sKjKeOzt83Uy92Yy3shc_dlq1ro60cU\"\"}\",Q_DataPolicyViolations,Rating\r\n" +
+            "\"{\"\"ImportId\"\":\"\"startDate\"\",\"\"timeZone\"\":\"\"America/Los_Angeles\"\"}\",\"{\"\"ImportId\"\":\"\"endDate\"\",\"\"timeZone\"\":\"\"America/Los_Angeles\"\"}\",\"{\"\"ImportId\"\":\"\"status\"\"}\",\"{\"\"ImportId\"\":\"\"progress\"\"}\",\"{\"\"ImportId\"\":\"\"finished\"\"}\",\"{\"\"ImportId\"\":\"\"recordedDate\"\",\"\"timeZone\"\":\"\"America/Los_Angeles\"\"}\",\"{\"\"ImportId\"\":\"\"_recordId\"\"}\",\"{\"\"ImportId\"\":\"\"locationLatitude\"\"}\",\"{\"\"ImportId\"\":\"\"locationLongitude\"\"}\",\"{\"\"ImportId\"\":\"\"QID1\"\"}\",\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"jw7v7rBpw41HFGKAH8Jp8yI2QlgO7ZYVerCJkco51Ic\"\"}\",\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"aM2l7o6Vm5Z1bRaYm_tjBfIolutVG-1k8s89UsME6LA\"\"}\",\"{\"\"ImportId\"\":\"\"Q_DataPolicyViolations\"\"}\",\"{\"\"ImportId\"\":\"\"Rating\"\"}\"\r\n" +
+            "9/1/22 7:50,9/1/22 7:51,32,100,1,9/1/22 7:51,R_1ie8z2GwkwzKG3h,,,3,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"acme.COM\"\",\"\"hash\"\":\"\"PM3Oh15cS2rBp-kjSrOCpQvYFe8Wo3qLj1o5F3fuefI\"\"}\",\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"5NL5SaQBwE6c0L1BDjHW-BtBOXQVH8RYwY0tGGw3khk\"\"}\",,5\r\n";
+
+
+        Sanitizer sanitizer = sanitizerFactory.create(Sanitizer.ConfigurationOptions.builder()
+            .rules(CsvRules.builder()
+                .columnToPseudonymize("Participant Email")
+                .columnToPseudonymize("Participant Unique Identifier")
+                .columnToRedact("Participant Name")
+                .columnToRedact("IPAddress")
+                .columnToRedact("DeviceIdentifier")
+                .columnToRedact("Duration (in seconds)")
+                .columnToRedact("Last Metadata Update Timestamp")
+                .columnToRedact("Start Date")
+                .build())
+            .pseudonymizationSalt("salt")
+            .defaultScopeId("hris")
+            .pseudonymImplementation(PseudonymImplementation.DEFAULT)
+            .build());
+
+        File inputFile = new File(getClass().getResource("/csv/example_acme_20220901.csv").getFile());
+
+        try (FileReader in = new FileReader(inputFile)) {
+            byte[] result  = csvFileHandler.handle(in, sanitizer);
+
+            assertEquals(EXPECTED, new String(result));
+        }
+    }
 }
