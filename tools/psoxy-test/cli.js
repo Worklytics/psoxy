@@ -32,8 +32,7 @@ const theme = {
     .option('-v, --verbose', 'Verbose output', false)
     .option('-z, --gzip', 'Add gzip compression header', false)
     .configureOutput({
-      wirteOut: undefined,
-      writeErr: undefined,
+      outputError: (str, write) => write(theme.error(str)),
     });
 
   program.addHelpText(
