@@ -21,7 +21,7 @@ import { saveRequestResultToFile } from './lib/utils.js';
  * @param {boolean} options.skip - Whether to skip or not sanitization rules (only in DEV mode)
  * @param {boolean} options.gzip - Add Gzip compression headers
  * @param {boolean} options.verbose - Verbose ouput (default to console)
- * @param {boolean} options.file - Whether to save successful responses to a file (responses/[api-path]-[ISO8601 timestamp].json)
+ * @param {boolean} options.saveToFile - Whether to save successful responses to a file (responses/[api-path]-[ISO8601 timestamp].json)
  * @return {PsoxyResponse}
  */
 export default async function (options = {}) {
@@ -59,7 +59,7 @@ export default async function (options = {}) {
         data: data,
       };
 
-      if (options.file) {
+      if (options.saveToFile) {
         try {
           await saveRequestResultToFile(url, data);
           console.log('Results saved to file');
