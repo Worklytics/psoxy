@@ -20,9 +20,11 @@ endpoints:
         jsonPaths:
           - "$..displayName"
           - "$.summary"
-          - "$.items[*].extendedProperties.private"
+          - "$.items[*].extendedProperties"
           - "$.items[*].summary"
+          - "$.items[*].conferenceData.notes"
           - "$.items[*].conferenceData.entryPoints[*]['accessCode','password','passcode','pin']"
+          - "$..meetingCreatedBy"
       - !<filterTokenByRegex>
         jsonPaths:
           - "$.items[*].description"
@@ -32,6 +34,7 @@ endpoints:
       - !<redactRegexMatches>
         jsonPaths:
           - "$.items[*].description"
+          - "$.items[*].location"
           - "$.items[*].conferenceData.entryPoints[*].uri"
         redactions:
           - "(?i)pwd=[^&]*"
@@ -41,7 +44,10 @@ endpoints:
         jsonPaths:
           - "$..displayName"
           - "$.summary"
+          - "$.extendedProperties"
           - "$.conferenceData.entryPoints[*]['accessCode','password','passcode','pin']"
+          - "$.conferenceData.notes"
+          - "$..meetingCreatedBy"
       - !<filterTokenByRegex>
         jsonPaths:
           - "$.description"
@@ -52,6 +58,7 @@ endpoints:
         jsonPaths:
           - "$.description"
           - "$.conferenceData.entryPoints[*].uri"
+          - "$.location"
         redactions:
           - "(?i)pwd=[^&]*"
       - !<pseudonymize>
