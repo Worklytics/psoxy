@@ -33,8 +33,7 @@ const theme = {
     .option('-z, --gzip', 'Add gzip compression header', false)
     .option('-f, --file', 'Save test results to file', false)
     .configureOutput({
-      wirteOut: undefined,
-      writeErr: undefined,
+      outputError: (str, write) => write(theme.error(str)),
     });
 
   program.addHelpText(
