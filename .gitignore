@@ -16,3 +16,5 @@
 
 tools/psoxy-test/node_modules
 tools/psoxy-test/package-lock.json
+tools/psoxy-test/responses
+tools/psoxy-test/.env
