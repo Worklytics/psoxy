@@ -1,7 +1,9 @@
-import { execSync } from 'child_process';
-import aws4 from 'aws4';
-import fetch from 'node-fetch';
-import { getCommonHTTPHeaders } from './utils.js';
+import { 
+  fetch,
+  getCommonHTTPHeaders, 
+  signAWSRequestURL, 
+  executeCommand 
+} from './utils.js';
 
 /**
  * Call AWS cli to get temporary security credentials.
@@ -17,54 +19,7 @@ function assumeRole(role) {
   console.log(`Assuming role ${role}`);
   // one-liner for simplicity
   const command = `aws sts assume-role --role-arn ${role} --duration 900 --role-session-name lambda_test`;
-  const result = execSync(command).toString();
-  return JSON.parse(result);
-}
-
-/**
- * Fetch AWS endpoint
- *
- * @param {Object} options - see `../index.js`
- * @param {Object} credentials
- * @returns {Promise}
- */
-async function fetchAWS(options = {}, credentials = {}) {
-  const awsURL = new URL(options.url);
-  console.log('Calling psoxy...');
-  console.log(`Request: ${options.url}`);
-
-  // aws4 is not able to parse a full URL:
-  // https://[id].lambda-url.us-east-1.on.aws/
-  // the result is missing `service` and `region` which are mandatory
-  const signed = aws4.sign(
-    {
-      host: awsURL.host,
-      path: awsURL.pathname,
-      service: 'lambda',
-      region: awsURL.host.split('.')[2],
-    },
-    {
-      accessKeyId: credentials?.Credentials.AccessKeyId,
-      secretAccessKey: credentials?.Credentials.SecretAccessKey,
-      sessionToken: credentials?.Credentials.SessionToken,
-    }
-  );
-
-  const headers = {
-    ...getCommonHTTPHeaders(options),
-    ...signed.headers,
-  };
-
-  console.log('Waiting response...');
-
-  if (options.verbose) {
-    console.log('Options:');
-    console.log(options);
-    console.log('Request headers:');
-    console.log(headers);
-  }
-
-  return await fetch(options.url, { headers: headers });
+  return JSON.parse(executeCommand(command));
 }
 
 /**
@@ -73,7 +28,7 @@ async function fetchAWS(options = {}, credentials = {}) {
  * @param {String|URL} url
  * @return {boolean}
  */
-function isAWS(url) {
+function isValidURL(url) {
   if (typeof url === 'string') {
     url = new URL(url);
   }
@@ -83,18 +38,41 @@ function isAWS(url) {
 /**
  * Psoxy test
  *
- * @param {Object} options
+ * @param {Object} options - see `../index.js`
  * @returns {Promise}
  */
-async function test(options = {}) {
+async function call(options = {}) {
   if (!options.role) {
     throw new Error('Role is a required option for AWS');
   }
+
+  const url = new URL(options.url);
+ 
+  console.log(`Assuming role ${options.role}`);
   const credentials = assumeRole(options.role);
-  return await fetchAWS(options, credentials);
+  
+  console.log(`Signing request: ${options.url}`);
+  const signed = signAWSRequestURL(url, credentials);
+
+  const headers = {
+    ...getCommonHTTPHeaders(options),
+    ...signed.headers,
+  };
+
+  console.log('Calling psoxy...');
+  console.log('Waiting response...');
+
+  if (options.verbose) {
+    console.log('Options:');
+    console.log(options);
+    console.log('Request headers:');
+    console.log(headers);
+  }
+
+  return await fetch(url.toString(), { headers: headers });
 }
 
 export default {
-  isAWS: isAWS,
-  test: test,
+  isValidURL: isValidURL,
+  call: call,
 };
