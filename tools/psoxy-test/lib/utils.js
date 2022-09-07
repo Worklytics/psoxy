@@ -1,6 +1,9 @@
-import { promises as fs } from 'fs';
-import path from 'path';
+import { execSync } from 'child_process';
 import { fileURLToPath } from 'url';
+import { promises as fs } from 'fs';
+import aws4 from 'aws4';
+import fetch from 'node-fetch';
+import path from 'path';
 
 // Since we're using ESM modules, we need to make `__dirname` available 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -75,7 +78,66 @@ function getCommonHTTPHeaders(options = {}) {
   return headers;
 }
 
+/**
+ * Simple wrapper around `node-fetch` to ease testing.
+ * 
+ * @param {URL} url 
+ * @param {Object} options 
+ * @return {Object}
+ */
+async function fetchWrapper(url, options) {
+  const response = await fetch(url, options);
+  const result = {
+    status: response.status,
+  };
+  
+  if (response.status === 200) {
+    result.data = await response.json();
+  } else {
+    result.error = response.headers.get('x-psoxy-error') || response.statusText;
+  }
+
+  return result;
+}
+
+/**
+ * Simple wrapper around `aws4` (*) to ease testing.
+ * 
+ * (*) aws4 is not able to parse a full URL:
+ * https://[id].lambda-url.us-east-1.on.aws/
+ * the result is missing `service` and `region` which are mandatory
+ * 
+ * @param {URL} url 
+ * @param {Object} credentials 
+ * @return {Object}
+ */
+function signAWSRequestURL(url, credentials) {
+  return aws4.sign({
+    host: url.host,
+    path: url.pathname,
+    service: 'lambda',
+    region: url.host.split('.')[2],
+  },
+  {
+    accessKeyId: credentials?.Credentials.AccessKeyId,
+    secretAccessKey: credentials?.Credentials.SecretAccessKey,
+    sessionToken: credentials?.Credentials.SessionToken,
+  });
+}
+
+/**
+ * Simple wrapper around node's `execSync` to ease testing.
+ * @param {string} command 
+ * @return {string}
+ */
+function executeCommand(command) {
+  return execSync(command).toString();
+}
+
 export {
-  saveRequestResultToFile,
+  executeCommand,
+  fetchWrapper as fetch,
   getCommonHTTPHeaders,
+  saveRequestResultToFile,
+  signAWSRequestURL,
 };
