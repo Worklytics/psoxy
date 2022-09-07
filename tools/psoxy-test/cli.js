@@ -50,6 +50,6 @@ const theme = {
     console.error(`${theme.error(result.error)}`);
   } else {
     console.log(`${theme.success('OK')}`);
-    console.log(JSON.stringify(result.response.data, undefined, 4));
+    console.log(JSON.stringify(result.data, undefined, 4));
   }
 })();
