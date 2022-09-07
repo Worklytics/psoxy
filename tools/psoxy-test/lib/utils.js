@@ -4,6 +4,7 @@ import { promises as fs } from 'fs';
 import aws4 from 'aws4';
 import fetch from 'node-fetch';
 import path from 'path';
+import _ from 'lodash';
 
 // Since we're using ESM modules, we need to make `__dirname` available 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -112,9 +113,12 @@ async function fetchWrapper(url, options) {
  * @return {Object}
  */
 function signAWSRequestURL(url, credentials) {
+  // According to aws4 docs, search params should be part of the "path"
+  const params = url.searchParams.toString();
+
   return aws4.sign({
     host: url.host,
-    path: url.pathname,
+    path: url.pathname + (params !== '' ? `?${params}` : '') ,
     service: 'lambda',
     region: url.host.split('.')[2],
   },
@@ -127,11 +131,47 @@ function signAWSRequestURL(url, credentials) {
 
 /**
  * Simple wrapper around node's `execSync` to ease testing.
+ * 
  * @param {string} command 
  * @return {string}
  */
 function executeCommand(command) {
   return execSync(command).toString();
+}
+
+/**
+ * Transform endpoint's path and params based on previous calls responses
+ * 
+ * @param {Object} spec - see `../data-sources/spec.js`
+ * @param {Object} res - data source API response
+ * @returns 
+ */
+function transformSpecWithResponse(spec = {}, res = {}) {
+  (spec?.endpoints || [])
+    .filter(endpoint => endpoint.refs !== undefined)
+    .forEach(endpoint => {
+      endpoint.refs.forEach(ref => {
+        const target = spec.endpoints
+          .find(endpoint => endpoint.name === ref.name);
+
+        if (target && ref.accessor) {
+          const valueReplacement = _.get(res, ref.accessor);
+          
+          if (valueReplacement) {
+            // 2 possible replacements: path or param
+            if (ref.pathReplacement) {
+              target.path = target.path
+                .replace(ref.pathReplacement, valueReplacement);
+            }
+
+            if (ref.paramReplacement) {
+              target.params[ref.paramReplacement] = valueReplacement;
+            }
+          }
+        }
+      });
+    });
+  return spec;
 }
 
 export {
@@ -140,4 +180,5 @@ export {
   getCommonHTTPHeaders,
   saveRequestResultToFile,
   signAWSRequestURL,
+  transformSpecWithResponse,
 };
