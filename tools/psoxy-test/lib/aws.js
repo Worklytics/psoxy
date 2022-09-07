@@ -16,7 +16,6 @@ import {
  * @returns {Object} AWS credentials for role
  */
 function assumeRole(role) {
-  console.log(`Assuming role ${role}`);
   // one-liner for simplicity
   const command = `aws sts assume-role --role-arn ${role} --duration 900 --role-session-name lambda_test`;
   return JSON.parse(executeCommand(command));
@@ -51,7 +50,7 @@ async function call(options = {}) {
   console.log(`Assuming role ${options.role}`);
   const credentials = assumeRole(options.role);
   
-  console.log(`Signing request: ${options.url}`);
+  console.log('Signing request');
   const signed = signAWSRequestURL(url, credentials);
 
   const headers = {
@@ -59,8 +58,7 @@ async function call(options = {}) {
     ...signed.headers,
   };
 
-  console.log('Calling psoxy...');
-  console.log('Waiting response...');
+  console.log('Calling psoxy and waiting response...');
 
   if (options.verbose) {
     console.log('Options:');
