@@ -9,7 +9,10 @@
     "test": "ava",
     "test:gcal": "node data-sources/runner.js gcal",
     "test:gdrive": "node data-sources/runner.js gdrive",
-    "test:slack-discovery-api": "node data-sources/slack-discovery-api.js"
+    "test:google-chat": "node data-sources/runner.js google-chat",
+    "test:google-meet": "node data-sources/runner.js google-meet",
+    "test:slack-discovery-api": "node data-sources/runner.js slack-discovery-api",
+    "test:zoom": "node data-sources/runner.js zoom"
   },
   "repository": {
     "type": "git",

@@ -5,7 +5,7 @@ import spec from './spec.js';
 import { transformSpecWithResponse } from '../lib/utils.js';
 dotenv.config();
 
-const base = process.env.PSOXY_URL_GDRIVE//process.env.PSOXY_URL;
+const base = process.env.PSOXY_URL;
 const options = {
   role: process.env.PSOXY_ROLE,
   token: process.env.PSOXY_TOKEN,

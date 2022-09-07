@@ -118,7 +118,27 @@ export default {
       {
         name: 'File Comment Replies',
         path: '/drive/v2/files/[file_id]/comments/[comment_id]/replies',
+      },
+    ],
+  },
+  'google-chat': {
+    name: 'Google Chat',
+    endpoints: [
+      {
+        name: 'Messages',
+        path: '/admin/reports/v1/activity/users/all/applications/chat',
+        params: { maxResults: 10 },
       }
+    ],
+  },
+  'google-meet': {
+    name: 'Google Meet',
+    endpoints: [
+      {
+        name: 'Messages',
+        path: '/admin/reports/v1/activity/users/all/applications/meet',
+        params: { maxResults: 10 },
+      },
     ],
   },
   'slack-discovery-api': {
@@ -194,4 +214,13 @@ export default {
       },
     ],
   },
+  zoom: {
+    name: 'Zoom',
+    endpoints: [
+      {
+        name: 'Users',
+        path: '/v2/users',
+      },
+    ]
+  }
 };
