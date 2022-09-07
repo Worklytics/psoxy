@@ -6,7 +6,10 @@
   "description": "Worklytics Psoxy testing tool",
   "main": "index.js",
   "scripts": {
-    "test": "ava"
+    "test": "ava",
+    "test:gcal": "node data-sources/runner.js gcal",
+    "test:gdrive": "node data-sources/runner.js gdrive",
+    "test:slack-discovery-api": "node data-sources/slack-discovery-api.js"
   },
   "repository": {
     "type": "git",
@@ -32,7 +35,7 @@
   },
   "ava": {
     "files": [
-      "test/**/*"
+      "test/**/*.test.js"
     ],
     "nodeArguments": ["--loader=testdouble"]
   }
