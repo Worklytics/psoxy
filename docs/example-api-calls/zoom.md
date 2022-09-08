@@ -17,14 +17,14 @@ If any call appears to fail, repeat it using the `-v` flag.
 ```shell
 node tools/psoxy-test/cli.js -u [your_psoxy_url]/v2/users
 ```
-Now pull out a user id (`[zoom_user_id]`). Next call is bound to a single user:
+Now pull out a user id (`[zoom_user_id]`, accessor path in response `.users[0].id`). Next call is bound to a single user:
 ### List user meetings
 ```shell
 node tools/psoxy-test/cli.js -u [your_psoxy_url]/v2/users/[zoom_user_id]/meetings
 ```
 
 ## Meetings
-First pull out a meeting id (`[zoom_meeting_id]`):
+First pull out a meeting id (`[zoom_meeting_id]`, accessor path in response `.meetings[0].id`):
 ### List past meeting details
 ```shell
 node tools/psoxy-test/cli.js -u [your_psoxy_url]/v2/past_meetings/[zoom_meeting_id]
