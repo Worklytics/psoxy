@@ -2,9 +2,11 @@ package co.worklytics.psoxy.aws.request;
 
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
+import com.google.api.client.util.IOUtils;
 import com.google.common.base.Splitter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
 
@@ -17,17 +19,17 @@ import java.util.Optional;
  * Lambda calls use this very same adapter, but some fields differ as the nature of the service is
  * different.
  * https://docs.aws.amazon.com/lambda/latest/dg/urls-invocation.html#urls-payloads
- *
  */
 @RequiredArgsConstructor
 @Log
 public class APIGatewayV2HTTPEventRequestAdapter implements HttpEventRequest {
 
-    @NonNull final APIGatewayV2HTTPEvent event;
+    @NonNull
+    final APIGatewayV2HTTPEvent event;
 
     @Override
     public String getPath() {
-        return StringUtils.prependIfMissing(event.getRawPath(),"/");
+        return StringUtils.prependIfMissing(event.getRawPath(), "/");
     }
 
     @Override
@@ -43,12 +45,18 @@ public class APIGatewayV2HTTPEventRequestAdapter implements HttpEventRequest {
 
     @Override
     public Optional<List<String>> getMultiValueHeader(String headerName) {
-        return getHeader(headerName.toLowerCase()).map( s -> Splitter.on(',').splitToList(s));
+        return getHeader(headerName.toLowerCase()).map(s -> Splitter.on(',').splitToList(s));
     }
 
     @Override
     public String getHttpMethod() {
         return event.getRequestContext().getHttp().getMethod();
+    }
+
+    @Override
+    @SneakyThrows
+    public byte[] getBody() {
+        return StringUtils.isNotBlank(event.getBody()) ? event.getBody().getBytes() : null;
     }
 
     @Override
