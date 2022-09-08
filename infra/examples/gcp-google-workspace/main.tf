@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     google = {
-      version = "~> 4.12"
+      version = "~> 4.35"
     }
   }
 
@@ -12,11 +12,11 @@ terraform {
 
 locals {
   base_config_path = "${var.psoxy_base_dir}/configs/"
-  bulk_sources = {
+  bulk_sources     = {
     "hris" = {
       source_kind = "hris"
-      rules = {
-        columnsToRedact = []
+      rules       = {
+        columnsToRedact       = []
         columnsToPseudonymize = [
           "email",
           "employee_id"
@@ -25,8 +25,8 @@ locals {
     },
     "qualtrics" = {
       source_kind = "qualtrics"
-      rules = {
-        columnsToRedact = []
+      rules       = {
+        columnsToRedact       = []
         columnsToPseudonymize = [
           "employee_email",
           "employee_id"
@@ -41,13 +41,13 @@ module "worklytics_connector_specs" {
 
   enabled_connectors = [
     #"gdirectory",
-#    "gcal",
-#    "gdrive",
-#    "gmail",
-#    "google-meet",
-#    "google-chat",
-#    "asana",
-#    "slack-discovery-api",
+    #    "gcal",
+    #    "gdrive",
+    #    "gmail",
+    #    "google-meet",
+    #    "google-chat",
+    #    "asana",
+    #    "slack-discovery-api",
     #"zoom",
     "dropbox-business"
   ]
@@ -63,13 +63,14 @@ resource "google_project" "psoxy-project" {
   name            = "Psoxy%{if var.environment_name != ""} - ${var.environment_name}%{endif}"
   project_id      = var.gcp_project_id
   billing_account = var.gcp_billing_account_id
-  folder_id       = var.gcp_folder_id # if project is at top-level of your GCP organization, rather than in a folder, comment this line out
+  folder_id       = var.gcp_folder_id
+  # if project is at top-level of your GCP organization, rather than in a folder, comment this line out
   # org_id          = var.gcp_org_id # if project is in a GCP folder, this value is implicit and this line should be commented out
 }
 
 module "psoxy-gcp" {
-  # source = "../../modules/gcp"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp?ref=v0.4.3"
+  source = "../../modules/gcp"
+  #source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp?ref=v0.4.3"
 
   project_id        = google_project.psoxy-project.project_id
   invoker_sa_emails = var.worklytics_sa_emails
@@ -116,8 +117,8 @@ module "google-workspace-connection-auth" {
 module "psoxy-google-workspace-connector" {
   for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
 
-  # source = "../../modules/gcp-psoxy-rest"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-rest?ref=v0.4.3"
+  source = "../../modules/gcp-psoxy-rest"
+  #source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-rest?ref=v0.4.3"
 
   project_id                            = google_project.psoxy-project.project_id
   instance_id                           = "psoxy-${each.key}"
@@ -131,6 +132,9 @@ module "psoxy-google-workspace-connector" {
 
   salt_secret_id             = module.psoxy-gcp.salt_secret_id
   salt_secret_version_number = module.psoxy-gcp.salt_secret_version_number
+
+  encryption_key_secret_id             = module.psoxy-gcp.encryption_key_secret_id
+  encryption_key_secret_version_number = module.psoxy-gcp.encryption_key_secret_version_number
 
   secret_bindings = {
     SERVICE_ACCOUNT_KEY = {
@@ -174,27 +178,86 @@ module "connector-long-auth-block" {
   token_adder_user_emails = []
 }
 
+resource "google_service_account" "long_refresh_connector_sa" {
+  for_each = module.worklytics_connector_specs.enabled_oauth_long_refreshToken_connectors
+
+  project      = google_project.psoxy-project.project_id
+  account_id   = "psoxy-${substr(each.key, 0, 24)}"
+  display_name = "${title(each.key)}{var.connector_display_name_suffix} via Psoxy"
+}
+
+module "connector-long-refresh-auth-block" {
+  for_each = module.worklytics_connector_specs.enabled_oauth_long_refreshToken_connectors
+
+  source = "../../modules/gcp-oauth-refresh-strategy"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-oauth-long-access-strategy?ref=v0.4.3"
+
+
+  project_id              = google_project.psoxy-project.project_id
+  function_name           = "psoxy-${each.key}"
+  token_adder_user_emails = []
+  service_account_email   = google_service_account.long_refresh_connector_sa[each.key].email
+}
+
 module "connector-long-auth-create-function" {
   for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
 
-  # source = "../../modules/gcp-psoxy-rest"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-rest?ref=v0.4.3"
+  source = "../../modules/gcp-psoxy-rest"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-rest?ref=v0.4.3"
 
 
-  project_id                    = google_project.psoxy-project.project_id
-  instance_id                   = "psoxy-${each.key}"
-  service_account_email         = google_service_account.long_auth_connector_sa[each.key].email
-  artifacts_bucket_name         = module.psoxy-gcp.artifacts_bucket_name
-  deployment_bundle_object_name = module.psoxy-gcp.deployment_bundle_object_name
-  path_to_config                = "${local.base_config_path}${each.value.source_kind}.yaml"
-  path_to_repo_root             = var.psoxy_base_dir
-  salt_secret_id                = module.psoxy-gcp.salt_secret_id
-  salt_secret_version_number    = module.psoxy-gcp.salt_secret_version_number
+  project_id                           = google_project.psoxy-project.project_id
+  instance_id                          = "psoxy-${each.key}"
+  service_account_email                = google_service_account.long_auth_connector_sa[each.key].email
+  artifacts_bucket_name                = module.psoxy-gcp.artifacts_bucket_name
+  deployment_bundle_object_name        = module.psoxy-gcp.deployment_bundle_object_name
+  path_to_config                       = "${local.base_config_path}${each.value.source_kind}.yaml"
+  path_to_repo_root                    = var.psoxy_base_dir
+  salt_secret_id                       = module.psoxy-gcp.salt_secret_id
+  salt_secret_version_number           = module.psoxy-gcp.salt_secret_version_number
+  encryption_key_secret_id             = module.psoxy-gcp.encryption_key_secret_id
+  encryption_key_secret_version_number = module.psoxy-gcp.encryption_key_secret_version_number
 
   secret_bindings = {
     ACCESS_TOKEN = {
-      secret_id = module.connector-long-auth-block[each.key].access_token_secret_id
+      secret_id      = module.connector-long-auth-block[each.key].access_token_secret_id
       # in case of long lived tokens we want latest version always
+      version_number = "latest"
+    }
+  }
+
+}
+
+module "connector-long-refresh-auth-create-function" {
+  for_each = module.worklytics_connector_specs.enabled_oauth_long_refreshToken_connectors
+
+  source = "../../modules/gcp-psoxy-rest"
+  #source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-rest?ref=v0.4.3"
+
+
+  project_id                           = google_project.psoxy-project.project_id
+  instance_id                          = "psoxy-${each.key}"
+  service_account_email                = google_service_account.long_refresh_connector_sa[each.key].email
+  artifacts_bucket_name                = module.psoxy-gcp.artifacts_bucket_name
+  deployment_bundle_object_name        = module.psoxy-gcp.deployment_bundle_object_name
+  path_to_config                       = "${local.base_config_path}${each.value.source_kind}.yaml"
+  path_to_repo_root                    = var.psoxy_base_dir
+  salt_secret_id                       = module.psoxy-gcp.salt_secret_id
+  salt_secret_version_number           = module.psoxy-gcp.salt_secret_version_number
+  encryption_key_secret_id             = module.psoxy-gcp.encryption_key_secret_id
+  encryption_key_secret_version_number = module.psoxy-gcp.encryption_key_secret_version_number
+
+  secret_bindings = {
+    CLIENT_ID = {
+      secret_id      = module.connector-long-refresh-auth-block[each.key].client_id_secret_id
+      version_number = "latest"
+    }
+    CLIENT_SECRET = {
+      secret_id      = module.connector-long-refresh-auth-block[each.key].client_secret_secret_id
+      version_number = "latest"
+    }
+    REFRESH_TOKEN = {
+      secret_id      = module.connector-long-refresh-auth-block[each.key].refresh_token_secret_id
       version_number = "latest"
     }
   }

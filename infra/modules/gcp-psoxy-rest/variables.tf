@@ -64,6 +64,20 @@ variable "salt_secret_version_number" {
   }
 }
 
+variable "encryption_key_secret_id" {
+  type        = string
+  description = "Id of the secret used to encryption key"
+}
+
+variable "encryption_key_secret_version_number" {
+  type        = string
+  description = "Version number of the secret used for the encryption key"
+  validation {
+    condition     = can(regex("^([0-9]+)|latest$", var.encryption_key_secret_version_number))
+    error_message = "Version number must be a number or 'latest'."
+  }
+}
+
 variable "example_api_calls" {
   type        = list(string)
   description = "example endpoints that can be called via proxy"
@@ -87,4 +101,3 @@ variable "source_kind" {
   description = "kind of source to which you're connecting"
   default     = "unknown"
 }
-

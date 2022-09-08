@@ -14,6 +14,10 @@ locals {
     PSOXY_SALT = {
       secret_id      = var.salt_secret_id
       version_number = var.salt_secret_version_number
+    },
+    PSOXY_ENCRYPTION_KEY = {
+      secret_id      = var.salt_secret_id
+      version_number = var.salt_secret_version_number
     }
   }, var.secret_bindings)
 }
