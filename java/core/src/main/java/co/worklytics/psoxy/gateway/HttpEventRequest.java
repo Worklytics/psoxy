@@ -20,6 +20,8 @@ public interface HttpEventRequest {
 
     String getHttpMethod();
 
+    byte[] getBody();
+
     default String prettyPrint() {
         return "Not implemented";
     }

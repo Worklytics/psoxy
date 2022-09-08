@@ -90,6 +90,11 @@ class CommonRequestHandlerTest {
             public String getHttpMethod() {
                 return "GET";
             }
+
+            @Override
+            public byte[] getBody() {
+                return null;
+            }
         };
         when(handler.config.getConfigPropertyOrError(eq(ProxyConfigProperty.TARGET_HOST))).thenReturn("proxyhost.com");
 

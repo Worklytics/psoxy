@@ -11,9 +11,7 @@ import co.worklytics.psoxy.utils.URLUtils;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.api.client.http.GenericUrl;
-import com.google.api.client.http.HttpRequestFactory;
-import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.*;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.auth.Credentials;
 import com.google.auth.http.HttpCredentialsAdapter;
@@ -103,7 +101,16 @@ public class CommonRequestHandler {
         com.google.api.client.http.HttpRequest sourceApiRequest;
         try {
             HttpRequestFactory requestFactory = getRequestFactory(request);
-            sourceApiRequest = requestFactory.buildRequest(request.getHttpMethod(), new GenericUrl(targetUrl), null);
+
+            HttpContent content = null;
+
+            if (request.getBody() != null) {
+                String contentType = request.getHeader("content-type")
+                        .orElse("application/json");
+                content = new ByteArrayContent(contentType, request.getBody());
+            }
+
+            sourceApiRequest = requestFactory.buildRequest(request.getHttpMethod(), new GenericUrl(targetUrl), content);
         } catch (IOException e) {
             builder.statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
             builder.body("Failed to authorize request; review logs");
