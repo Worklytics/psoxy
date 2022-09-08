@@ -34,16 +34,6 @@ variable "source_kind" {
   description = "kind of source (eg, 'gmail', 'google-chat', etc)"
 }
 
-variable "parameters" {
-  # see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter#attributes-reference
-  type = list(object({
-    name    = string
-    arn     = string
-    version = string
-  }))
-  description = "System Manager Parameters to expose to function"
-}
-
 variable "path_to_repo_root" {
   type        = string
   description = "the path where your psoxy repo resides"

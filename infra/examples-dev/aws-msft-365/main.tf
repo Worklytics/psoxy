@@ -3,7 +3,7 @@ terraform {
     # for the infra that will host Psoxy instances
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 4.12"
+      version = "~> 4.29"
     }
 
     # for API connections to Microsoft 365
@@ -38,11 +38,11 @@ provider "azuread" {
 
 locals {
   base_config_path = "${var.psoxy_base_dir}configs"
-  bulk_sources = {
+  bulk_sources     = {
     "hris" = {
       source_kind = "hris"
-      rules = {
-        columnsToRedact = []
+      rules       = {
+        columnsToRedact       = []
         columnsToPseudonymize = [
           "email",
           "employee_id"
@@ -58,8 +58,8 @@ module "worklytics_connector_specs" {
   enabled_connectors = [
     "asana",
     "azure-ad",
-    "outlook-cal",
-    "outlook-mail",
+    "asana",
+    "dropbox-business"
   ]
 }
 
@@ -123,6 +123,7 @@ resource "aws_ssm_parameter" "client_id" {
   }
 }
 
+
 resource "aws_ssm_parameter" "refresh_endpoint" {
   for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
@@ -137,7 +138,6 @@ resource "aws_ssm_parameter" "refresh_endpoint" {
     ]
   }
 }
-
 
 module "private-key-aws-parameters" {
   for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
@@ -155,27 +155,20 @@ module "psoxy-msft-connector" {
 
   source = "../../modules/aws-psoxy-rest"
 
-  function_name        = "psoxy-${each.key}"
-  source_kind          = each.value.source_kind
-  path_to_config       = "${var.psoxy_base_dir}/configs/${each.value.source_kind}.yaml"
-  path_to_function_zip = module.psoxy-aws.path_to_deployment_jar
-  function_zip_hash    = module.psoxy-aws.deployment_package_hash
-  api_caller_role_arn  = module.psoxy-aws.api_caller_role_arn
-  aws_assume_role_arn  = var.aws_assume_role_arn
-  example_api_calls    = each.value.example_calls
-  aws_account_id       = var.aws_account_id
-  path_to_repo_root    = var.psoxy_base_dir
+  function_name         = "psoxy-${each.key}"
+  source_kind           = each.value.source_kind
+  path_to_config        = "${var.psoxy_base_dir}/configs/${each.value.source_kind}.yaml"
+  path_to_function_zip  = module.psoxy-aws.path_to_deployment_jar
+  function_zip_hash     = module.psoxy-aws.deployment_package_hash
+  api_caller_role_arn   = module.psoxy-aws.api_caller_role_arn
+  aws_assume_role_arn   = var.aws_assume_role_arn
+  example_api_calls     = each.value.example_calls
+  aws_account_id        = var.aws_account_id
+  path_to_repo_root     = var.psoxy_base_dir
   environment_variables = {
     PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
     IS_DEVELOPMENT_MODE  = "true"
   }
-
-  parameters = concat(
-    module.private-key-aws-parameters[each.key].parameters,
-    [
-      module.psoxy-aws.salt_secret,
-    ]
-  )
 }
 
 # grant required permissions to connectors via Azure AD
@@ -207,7 +200,45 @@ module "worklytics-psoxy-connection" {
 
 # BEGIN LONG ACCESS AUTH CONNECTORS
 locals {
-  enabled_oauth_long_access_connectors_todos = { for k, v in module.worklytics_connector_specs.enabled_oauth_long_access_connectors : k => v if v.external_token_todo != null }
+  long_access_token_connectors = [
+  for key, value in module.worklytics_connector_specs.enabled_oauth_long_access_connectors : {
+    key                                   = key
+    source_kind                           = value.source_kind
+    example_api_calls                     = value.example_api_calls
+    example_api_calls_user_to_impersonate = value.example_api_calls_user_to_impersonate
+    display_name                          = value.display_name
+    external_token_todo                   = value.external_token_todo
+  }
+  ]
+  long_refresh_token_connectors = [
+  for key, value in module.worklytics_connector_specs.enabled_oauth_long_refreshToken_connectors : {
+    key                                   = key
+    source_kind                           = value.source_kind
+    example_api_calls                     = value.example_api_calls
+    example_api_calls_user_to_impersonate = ""
+    display_name                          = value.display_name
+    external_token_todo                   = value.external_token_todo
+  }
+  ]
+  access_token_secret_parameters = [
+  for key, value in aws_ssm_parameter.long-access-token-secret : {
+    key     = key
+    name    = value.name
+    arn     = value.arn
+    version = value.version
+  }
+  ]
+  refresh_token_secret_parameters = [
+  for key in keys(tomap(module.aws-oauth-refresh-strategy)) : {
+    key     = key
+    name    = module.aws-oauth-refresh-strategy[key].refresh_token.name
+    arn     = module.aws-oauth-refresh-strategy[key].refresh_token.arn
+    version = module.aws-oauth-refresh-strategy[key].refresh_token.version
+  }
+  ]
+  long_token_connectors                      = {for x in concat(local.long_access_token_connectors, local.long_refresh_token_connectors) : x.key => x}
+  enabled_oauth_long_access_connectors_todos = {for k, v in local.long_token_connectors : k => v if v.external_token_todo != null}
+  long_tokens_ssm_parameters                 = {for x in concat(local.access_token_secret_parameters, local.refresh_token_secret_parameters) : x.key => x}
 }
 
 # Create secret (later filled by customer)
@@ -226,8 +257,17 @@ resource "aws_ssm_parameter" "long-access-token-secret" {
   }
 }
 
+module "aws-oauth-refresh-strategy" {
+  for_each = module.worklytics_connector_specs.enabled_oauth_long_refreshToken_connectors
+
+  source = "../../modules/aws-oauth-refresh-strategy"
+
+  connector_id = each.key
+  refresh_token_endpoint = module.worklytics_connector_specs.enabled_oauth_long_refreshToken_connectors[each.key].token_endpoint
+}
+
 module "aws-psoxy-long-auth-connectors" {
-  for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
+  for_each = local.long_token_connectors
 
   source = "../../modules/aws-psoxy-rest"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-rest?ref=v0.4.1"
@@ -244,16 +284,10 @@ module "aws-psoxy-long-auth-connectors" {
   path_to_repo_root                     = var.psoxy_base_dir
   example_api_calls                     = each.value.example_api_calls
   example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
-  environment_variables = {
+  environment_variables                 = {
     PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
     IS_DEVELOPMENT_MODE  = "true"
   }
-
-  parameters = [
-    module.psoxy-aws.salt_secret,
-    aws_ssm_parameter.long-access-token-secret[each.key]
-  ]
-
 
 }
 
@@ -266,11 +300,11 @@ module "source_token_external_todo" {
   source_id                         = each.key
   host_cloud                        = "aws"
   connector_specific_external_steps = each.value.external_token_todo
-  token_secret_id                   = aws_ssm_parameter.long-access-token-secret[each.key].name
+  token_secret_id                   = local.long_tokens_ssm_parameters[each.key].name
 }
 
 module "worklytics-psoxy-connection-oauth-long-access" {
-  for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
+  for_each = local.long_token_connectors
 
   source = "../../modules/worklytics-psoxy-connection-aws"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=v0.4.1"
@@ -282,7 +316,6 @@ module "worklytics-psoxy-connection-oauth-long-access" {
 }
 
 # END LONG ACCESS AUTH CONNECTORS
-
 
 module "psoxy-bulk" {
   for_each = local.bulk_sources
