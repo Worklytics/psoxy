@@ -51,7 +51,7 @@ public class CloudFunctionRequest implements HttpEventRequest {
     @Override
     @SneakyThrows
     public byte[] getBody() {
-        return request.getInputStream() == null ? request.getInputStream().readAllBytes() : null;
+        return request.getInputStream() != null ? request.getInputStream().readAllBytes() : null;
     }
 
     @Override
