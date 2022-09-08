@@ -22,6 +22,8 @@ public class CloudFunctionRequest implements HttpEventRequest {
     @NonNull
     final HttpRequest request;
 
+    private byte[] body;
+
     @Override
     public String getPath() {
         return request.getPath()
@@ -51,7 +53,11 @@ public class CloudFunctionRequest implements HttpEventRequest {
     @Override
     @SneakyThrows
     public byte[] getBody() {
-        return request.getInputStream() != null ? request.getInputStream().readAllBytes() : null;
+        if (body == null) {
+            body = request.getInputStream() != null ? request.getInputStream().readAllBytes() : null;
+        }
+
+        return body;
     }
 
     @Override
