@@ -40,15 +40,16 @@ module "worklytics_connector_specs" {
   source = "../../modules/worklytics-connector-specs"
 
   enabled_connectors = [
-    "gdirectory",
-    "gcal",
-    "gdrive",
-    "gmail",
-    "google-meet",
-    "google-chat",
-    "asana",
-    "slack-discovery-api",
-    "zoom",
+    #"gdirectory",
+#    "gcal",
+#    "gdrive",
+#    "gmail",
+#    "google-meet",
+#    "google-chat",
+#    "asana",
+#    "slack-discovery-api",
+    #"zoom",
+    "dropbox-business"
   ]
   google_workspace_example_user = var.google_workspace_example_user
 }
@@ -192,7 +193,7 @@ module "connector-long-auth-create-function" {
 
   secret_bindings = {
     ACCESS_TOKEN = {
-      secret_name = module.connector-long-auth-block[each.key].access_token_secret_id
+      secret_id = module.connector-long-auth-block[each.key].access_token_secret_id
       # in case of long lived tokens we want latest version always
       version_number = "latest"
     }
