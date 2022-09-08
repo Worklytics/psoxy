@@ -3,7 +3,7 @@ terraform {
     # for the infra that will host Psoxy instances
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 4.29"
+      version = "~> 4.12"
     }
 
     # for API connections to Microsoft 365
@@ -58,6 +58,8 @@ module "worklytics_connector_specs" {
   enabled_connectors = [
     "asana",
     "azure-ad",
+    "outlook-cal",
+    "outlook-mail",
     "asana",
     "dropbox-business"
   ]

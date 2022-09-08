@@ -67,12 +67,12 @@ module "worklytics_connector_specs" {
   #source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connector-specs?ref=v0.4.3"
 
   enabled_connectors = [
-    #"azure-ad",
-    #"outlook-cal",
-    #"outlook-mail",
-    #"asana",
-    #"slack-discovery-api",
-    #"zoom",
+    "azure-ad",
+    "outlook-cal",
+    "outlook-mail",
+    "asana",
+    "slack-discovery-api",
+    "zoom",
     "dropbox-business"
   ]
 
@@ -293,7 +293,7 @@ module "aws-psoxy-long-auth-connectors" {
   for_each = local.long_token_connectors
 
   source = "../../modules/aws-psoxy-rest"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-rest?ref=v0.4.3"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-rest?ref=v0.4.4"
 
 
   function_name                         = "psoxy-${each.key}"
