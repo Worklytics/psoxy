@@ -255,6 +255,67 @@ mode, no need to publish).
 EOT
     }
   }
+  oauth_long_refreshToken_connectors = {
+    dropbox-business = {
+      source_kind : "dropbox-business",
+      display_name : "Dropbox Business"
+      example_api_calls : [
+        "/2/team/members/list_v2",
+        "/2/team/groups/list",
+        "/2/team_log/get_events",
+      ]
+      token_endpoint: "https://api.dropboxapi.com/oauth2/token"
+      external_token_todo : <<EOT
+Dropbox connector through Psoxy requires a Dropbox Application created in Dropbox Console. The application
+does not require to be public, and it needs to have the following scopes to support
+all the operations for the connector:
+
+- files.metadata.read: for file listing and revision
+- members.read: member listing
+- events.read: event listing
+- groups.read: group listing
+
+1. Go to https://www.dropbox.com/apps and Build an App
+2. Then go https://www.dropbox.com/developers to enter in `App Console` to configure your app
+3. Now you are in the app, go to `Permissions` and mark all the scopes described before. NOTE: Probably
+   you the UI will mark you more required permissions automatically (like *account_info_read*.) Just mark the ones
+   described and the UI will ask you to include the ones it requires.
+4. On settings, you could access to `App key` and `App secret`. You can create an access token here, but with limited
+   expiration. We need to create a long-lived token, so edit the following URL with your `App key` and paste it into the
+   browser:
+
+   `https://www.dropbox.com/oauth2/authorize?client_id=<APP_KEY>&token_access_type=offline&response_type=code`
+
+   That will return an `Authorization Code` that you have to paste.
+   **NOTE** This `Authorization Code` if for a one single use; if expired or used you will need to get it again pasting
+   the
+   URL in the browser.
+5. Now, replace the values in following URL and run it from command line in your terminal. Replace `Authorization Code`
+   , `App key`
+   and `App secret` in the placeholders:
+
+   `curl https://api.dropbox.com/oauth2/token -d code=<AUTHORIZATION_CODE> -d grant_type=authorization_code -u <APP_KEY>:<APP_SECRET>`
+6. After running that command, if successful you will see a [JSON response](https://www.dropbox.com/developers/documentation/http/documentation#oauth2-authorize) like this:
+
+```json
+{
+  "access_token": "some short live access token",
+  "token_type": "bearer",
+  "expires_in": 14399,
+  "refresh_token": "some long live token we are going to use",
+  "scope": "account_info.read events.read files.metadata.read groups.read members.read team_data.governance.read team_data.governance.write team_data.member",
+  "uid": "",
+  "team_id": "some team id"
+}
+```
+7. Finally set following variables:
+  - `PSOXY_dropbox_business_REFRESH_TOKEN` secret variable with value of `refresh_token` received in previous response
+  - `PSOXY_dropbox_business_CLIENT_ID` with `App key` value.
+  - `PSOXY_dropbox_business_CLIENT_SECRET` with `App secret` value.
+
+EOT
+    }
+  }
 }
 
 output "enabled_google_workspace_connectors" {
@@ -269,4 +330,6 @@ output "enabled_oauth_long_access_connectors" {
   value = { for k, v in local.oauth_long_access_connectors : k => v if contains(var.enabled_connectors, k) }
 }
 
-
+output "enabled_oauth_long_refreshToken_connectors" {
+  value = { for k, v in local.oauth_long_refreshToken_connectors : k => v if contains(var.enabled_connectors, k) }
+}
