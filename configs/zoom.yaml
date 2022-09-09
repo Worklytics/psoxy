@@ -3,5 +3,5 @@ SOURCE_AUTH_STRATEGY_IDENTIFIER: oauth2_refresh_token
 TARGET_HOST: api.zoom.us
 OAUTH_SCOPES:
 IDENTIFIER_SCOPE_ID: zoom
-GRANT_TYPE: application_credentials
+GRANT_TYPE: account_credentials
 REFRESH_ENDPOINT: https://zoom.us/oauth/token
