@@ -12,11 +12,11 @@ terraform {
 
 locals {
   base_config_path = "${var.psoxy_base_dir}/configs/"
-  bulk_sources = {
+  bulk_sources     = {
     "hris" = {
       source_kind = "hris"
-      rules = {
-        columnsToRedact = []
+      rules       = {
+        columnsToRedact       = []
         columnsToPseudonymize = [
           "employee_email",
           "employee_id"
@@ -25,8 +25,8 @@ locals {
     },
     "qualtrics" = {
       source_kind = "qualtrics"
-      rules = {
-        columnsToRedact = []
+      rules       = {
+        columnsToRedact       = []
         columnsToPseudonymize = [
           "employee_email",
           "employee_id"
@@ -62,7 +62,8 @@ resource "google_project" "psoxy-project" {
   name            = "Psoxy%{if var.environment_name != ""} - ${var.environment_name}%{endif}"
   project_id      = var.gcp_project_id
   billing_account = var.gcp_billing_account_id
-  folder_id       = var.gcp_folder_id # if project is at top-level of your GCP organization, rather than in a folder, comment this line out
+  folder_id       = var.gcp_folder_id
+  # if project is at top-level of your GCP organization, rather than in a folder, comment this line out
   # org_id          = var.gcp_org_id # if project is in a GCP folder, this value is implicit and this line should be commented out
 }
 
@@ -123,6 +124,8 @@ module "psoxy-google-workspace-connector" {
   salt_secret_version_number            = module.psoxy-gcp.salt_secret_version_number
   example_api_calls                     = each.value.example_api_calls
   example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
+  encryption_key_secret_id              = module.psoxy-gcp.encryption_key_secret_id
+  encryption_key_secret_version_number  = module.psoxy-gcp.encryption_key_secret_version_number
 
   secret_bindings = {
     SERVICE_ACCOUNT_KEY = {
@@ -178,9 +181,12 @@ module "connector-long-auth-create-function" {
   salt_secret_id                = module.psoxy-gcp.salt_secret_id
   salt_secret_version_number    = module.psoxy-gcp.salt_secret_version_number
 
+  encryption_key_secret_id             = module.psoxy-gcp.encryption_key_secret_id
+  encryption_key_secret_version_number = module.psoxy-gcp.encryption_key_secret_version_number
+
   secret_bindings = {
     ACCESS_TOKEN = {
-      secret_id = module.connector-long-auth-block[each.key].access_token_secret_id
+      secret_id      = module.connector-long-auth-block[each.key].access_token_secret_id
       # in case of long lived tokens we want latest version always
       version_number = "latest"
     }
