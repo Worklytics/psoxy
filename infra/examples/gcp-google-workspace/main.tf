@@ -40,15 +40,15 @@ module "worklytics_connector_specs" {
   source = "../../modules/worklytics-connector-specs"
 
   enabled_connectors = [
-    #"gdirectory",
-    #    "gcal",
-    #    "gdrive",
-    #    "gmail",
-    #    "google-meet",
-    #    "google-chat",
-    #    "asana",
-    #    "slack-discovery-api",
-    #"zoom",
+    "gdirectory",
+    "gcal",
+    "gdrive",
+    "gmail",
+    "google-meet",
+    "google-chat",
+    "asana",
+    "slack-discovery-api",
+    "zoom",
     "dropbox-business"
   ]
   google_workspace_example_user = var.google_workspace_example_user
