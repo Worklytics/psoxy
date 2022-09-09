@@ -168,6 +168,9 @@ locals {
         "/api/1.0/workspaces/{ANY_WORKSPACE_ID}/projects",
         "/api/1.0/projects/{ANY_PROJECT_ID}/tasks",
         "/api/1.0/tasks/{ANY_TASK_ID}/stories",
+      ],
+      secured_variables : [
+        "ACCESS_TOKEN",
       ]
       example_api_calls_user_to_impersonate : null
       external_token_todo : <<EOT
@@ -184,6 +187,9 @@ EOT
         "/api/discovery.conversations.list",
         "/api/discovery.conversations.history?channel={CHANNEL_ID}&limit=10",
         "/api/discovery.users.list",
+      ],
+      secured_variables : [
+        "ACCESS_TOKEN",
       ]
       example_api_calls_user_to_impersonate : null
       external_token_todo : <<EOT
@@ -237,7 +243,12 @@ EOT
         "/v2/report/users/{userId}/meetings",
         "/v2/report/meetings/{meetingId}",
         "/v2/report/meetings/{meetingId}/participants"
-      ]
+      ],
+      secured_variables : [
+        "CLIENT_SECRET",
+        "CLIENT_ID",
+        "ACCOUNT_ID"
+      ],
       example_api_calls_user_to_impersonate : null
       external_token_todo : <<EOT
 ## Zoom Setup
@@ -245,13 +256,26 @@ EOT
 Zoom connector through Psoxy requires a custom managed app on the Zoom Marketplace (in development
 mode, no need to publish).
 
-1. Go to https://marketplace.zoom.us/develop/create and create an app of type JWT
+1. Go to https://marketplace.zoom.us/develop/create and create an app of type "Server to Server OAuth"
 
-2. Fill information and on App Credentials generate a token with a long expiration time, for example 00:00 01/01/2030
+2. After creation it will show the App Credentials. Share them with the AWS/GCP administrator, the
+following secret values must be filled in the Secret Manager for the Proxy with the appropriate values:
+- `PSOXY_ZOOM_CLIENT_ID`
+- `PSOXY_ZOOM_ACCOUNT_ID`
+- `PSOXY_ZOOM_CLIENT_SECRET`
+Anytime the *client secret* is regenerated it needs to be updated in the Proxy too.
 
-3. Copy the JWT Token, it will be used later when creating the Zoom cloud function.
+3. Fill the information section
 
-4. Activate the app
+4. Fill the scopes section, enabling the following:
+- Users / View all user information /user:read:admin
+  - To be able to gather information about the zoom users
+- Meetings / View all user meetings /meeting:read:admin
+  - Allows us to list all user meeting
+- Report / View report data /report:read:admin
+  - Last 6 months view for user meetings
+
+5. Activate the app
 EOT
     }
   }
