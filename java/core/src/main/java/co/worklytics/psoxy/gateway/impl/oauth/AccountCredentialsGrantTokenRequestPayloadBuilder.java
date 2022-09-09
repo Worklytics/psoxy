@@ -60,10 +60,9 @@ public class AccountCredentialsGrantTokenRequestPayloadBuilder implements OAuthR
     public void addHeaders(HttpHeaders httpHeaders) {
         String clientId = config.getConfigPropertyOrError(ConfigProperty.CLIENT_ID);
         String clientSecret = config.getConfigPropertyOrError(ConfigProperty.CLIENT_SECRET);
-        String bearerToken = Base64.getEncoder()
-            .withoutPadding()
+        String token = Base64.getEncoder()
             .encodeToString(String.join(":", clientId, clientSecret).getBytes(StandardCharsets.UTF_8));
-        httpHeaders.setAuthorization("Bearer " + bearerToken);
+        httpHeaders.setAuthorization("Basic " + token);
     }
 
 }
