@@ -171,7 +171,8 @@ locals {
       ],
       secured_variables : [
         "ACCESS_TOKEN",
-      ]
+      ],
+      reserved_concurrent_executions : null
       example_api_calls_user_to_impersonate : null
       external_token_todo : <<EOT
   1. Create a [Service Account User + token](https://asana.com/guide/help/premium/service-accounts)
@@ -191,6 +192,7 @@ EOT
       secured_variables : [
         "ACCESS_TOKEN",
       ]
+      reserved_concurrent_executions : null
       example_api_calls_user_to_impersonate : null
       external_token_todo : <<EOT
 ## Slack Discovery Setup
@@ -249,6 +251,7 @@ EOT
         "CLIENT_ID",
         "ACCOUNT_ID"
       ],
+      reserved_concurrent_executions : 1
       example_api_calls_user_to_impersonate : null
       external_token_todo : <<EOT
 ## Zoom Setup

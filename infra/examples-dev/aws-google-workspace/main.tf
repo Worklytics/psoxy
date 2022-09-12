@@ -173,7 +173,7 @@ module "worklytics-psoxy-connection-google-workspace" {
 }
 
 
-# BEGIN LONG ACCESS AUTH CONNECTORS
+# BEGIN AUTH CONNECTORS
 
 locals {
   enabled_oauth_long_access_connectors_todos = { for k, v in module.worklytics_connector_specs.enabled_oauth_long_access_connectors : k => v if v.external_token_todo != null }
@@ -189,7 +189,8 @@ locals {
 }
 
 
-# Create secret (later filled by customer)
+# Create secure parameters (later filled by customer)
+# Can be later passed on to a module and store in other vault if needed
 resource "aws_ssm_parameter" "long-access-secrets" {
   for_each = { for entry in local.secrets_to_create : "${entry.connector_name}.${entry.secret_name}" => entry }
 
@@ -224,17 +225,17 @@ module "aws-psoxy-long-auth-connectors" {
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-rest?ref=v0.4.3"
 
 
-  function_name        = "psoxy-${each.key}"
-  path_to_function_zip = module.psoxy-aws.path_to_deployment_jar
-  function_zip_hash    = module.psoxy-aws.deployment_package_hash
-  path_to_config       = "${local.base_config_path}/${each.value.source_kind}.yaml"
-  aws_assume_role_arn  = var.aws_assume_role_arn
-  aws_account_id       = var.aws_account_id
-  api_caller_role_arn  = module.psoxy-aws.api_caller_role_arn
-  source_kind          = each.value.source_kind
-  path_to_repo_root    = var.psoxy_base_dir
-  example_api_calls    = each.value.example_api_calls
-
+  function_name                  = "psoxy-${each.key}"
+  path_to_function_zip           = module.psoxy-aws.path_to_deployment_jar
+  function_zip_hash              = module.psoxy-aws.deployment_package_hash
+  path_to_config                 = "${local.base_config_path}/${each.value.source_kind}.yaml"
+  aws_assume_role_arn            = var.aws_assume_role_arn
+  aws_account_id                 = var.aws_account_id
+  api_caller_role_arn            = module.psoxy-aws.api_caller_role_arn
+  source_kind                    = each.value.source_kind
+  path_to_repo_root              = var.psoxy_base_dir
+  example_api_calls              = each.value.example_api_calls
+  reserved_concurrent_executions = each.value.reserved_concurrent_executions
   parameters = [
     module.psoxy-aws.salt_secret,
     # aws_ssm_parameter.long-access-secrets[each.key]
