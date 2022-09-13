@@ -18,7 +18,7 @@ resource "aws_lambda_function" "psoxy-instance" {
   handler                        = var.handler_class
   timeout                        = var.timeout_seconds
   memory_size                    = var.memory_size_mb
-  reserved_concurrent_executions = var.reserved_concurrent_executions
+  reserved_concurrent_executions = coalesce(var.reserved_concurrent_executions, -1)
 
   environment {
     variables = merge(
