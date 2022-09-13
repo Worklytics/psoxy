@@ -226,26 +226,49 @@ module "worklytics-psoxy-connection" {
 }
 
 
-# BEGIN LONG ACCESS AUTH CONNECTORS
+# BEGIN AUTH CONNECTORS
 
 locals {
   enabled_oauth_long_access_connectors_todos = { for k, v in module.worklytics_connector_specs.enabled_oauth_long_access_connectors : k => v if v.external_token_todo != null }
+
+  secrets_to_create = distinct(flatten([
+    for k, v in module.worklytics_connector_specs.enabled_oauth_long_access_connectors : [
+      for secret_name in v.secured_variables : {
+        connector_name = k
+        secret_name    = secret_name
+      }
+    ]
+  ]))
 }
 
-# Create secret (later filled by customer)
-resource "aws_ssm_parameter" "long-access-token-secret" {
-  for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
 
-  name        = "PSOXY_${upper(replace(each.key, "-", "_"))}_ACCESS_TOKEN"
+# Create secure parameters (later filled by customer)
+# Can be later passed on to a module and store in other vault if needed
+resource "aws_ssm_parameter" "long-access-secrets" {
+  for_each = { for entry in local.secrets_to_create : "${entry.connector_name}.${entry.secret_name}" => entry }
+
+  name        = "PSOXY_${upper(replace(each.value.connector_name, "-", "_"))}_${upper(each.value.secret_name)}"
   type        = "SecureString"
-  description = "The long lived token for `psoxy-${each.key}`"
-  value       = sensitive("TODO: fill me with a real token!! (via AWS console)")
+  description = "Stores the value of ${upper(each.value.secret_name)} for `psoxy-${each.value.connector_name}`"
+  value       = sensitive("TODO: fill me with the proper value for ${upper(each.value.secret_name)}!! (via AWS console)")
 
   lifecycle {
     ignore_changes = [
       value # we expect this to be filled via Console, so don't want to overwrite it with the dummy value if changed
     ]
   }
+}
+
+module "source_token_external_todo" {
+  for_each = local.enabled_oauth_long_access_connectors_todos
+
+  # source = "../../modules/source-token-external-todo"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/source-token-external-todo?ref=v0.4.3"
+
+  source_id                         = each.key
+  host_cloud                        = "aws"
+  connector_specific_external_steps = each.value.external_token_todo
+  token_secret_id                   = aws_ssm_parameter.long-access-secrets["${each.key}.${each.value.secured_variables[0]}"].name
 }
 
 module "aws-psoxy-long-auth-connectors" {
@@ -255,29 +278,24 @@ module "aws-psoxy-long-auth-connectors" {
   source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-rest?ref=v0.4.3"
 
 
-  function_name                         = "psoxy-${each.key}"
-  path_to_function_zip                  = module.psoxy-aws.path_to_deployment_jar
-  function_zip_hash                     = module.psoxy-aws.deployment_package_hash
-  path_to_config                        = "${local.base_config_path}/${each.value.source_kind}.yaml"
-  aws_assume_role_arn                   = var.aws_assume_role_arn
-  aws_account_id                        = var.aws_account_id
-  api_caller_role_arn                   = module.psoxy-aws.api_caller_role_arn
-  source_kind                           = each.value.source_kind
-  path_to_repo_root                     = var.psoxy_base_dir
-  example_api_calls                     = each.value.example_api_calls
-  example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
-  environment_variables = {
-    PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
-  }
-
-
+  function_name                  = "psoxy-${each.key}"
+  path_to_function_zip           = module.psoxy-aws.path_to_deployment_jar
+  function_zip_hash              = module.psoxy-aws.deployment_package_hash
+  path_to_config                 = "${local.base_config_path}/${each.value.source_kind}.yaml"
+  aws_assume_role_arn            = var.aws_assume_role_arn
+  aws_account_id                 = var.aws_account_id
+  api_caller_role_arn            = module.psoxy-aws.api_caller_role_arn
+  source_kind                    = each.value.source_kind
+  path_to_repo_root              = var.psoxy_base_dir
+  example_api_calls              = each.value.example_api_calls
+  reserved_concurrent_executions = each.value.reserved_concurrent_executions
   parameters = [
     module.psoxy-aws.salt_secret,
-    aws_ssm_parameter.long-access-token-secret[each.key]
+    # aws_ssm_parameter.long-access-secrets[each.key]
   ]
 }
 
-module "worklytics-psoxy-connection-oauth-long-access" {
+module "worklytics-psoxy-connection" {
   for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
 
   # source = "../../modules/worklytics-psoxy-connection-aws"
@@ -289,18 +307,6 @@ module "worklytics-psoxy-connection-oauth-long-access" {
   aws_role_arn       = module.psoxy-aws.api_caller_role_arn
 }
 
-
-module "source_token_external_todo" {
-  for_each = local.enabled_oauth_long_access_connectors_todos
-
-  #source = "../../modules/source-token-external-todo"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/source-token-external-todo?ref=v0.4.3"
-
-  source_id                         = each.key
-  host_cloud                        = "aws"
-  connector_specific_external_steps = each.value.external_token_todo
-  token_secret_id                   = aws_ssm_parameter.long-access-token-secret[each.key].name
-}
 # END LONG ACCESS AUTH CONNECTORS
 
 module "psoxy-bulk" {
