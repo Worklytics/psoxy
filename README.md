@@ -131,8 +131,14 @@ terraform apply
 
 ## Releases
 
-### [v0.4.3](https://github.com/Worklytics/psoxy/releases/tag/v0.4.3)
+### [v0.4.4](https://github.com/Worklytics/psoxy/releases/tag/v0.4.4)
 The `main` branch is current at 0.4.
+
+Features:
+- Zoom connector now is built against Server-to-server OAuth apps, removing the use of the JWT application (will be deprecated in June 2023).
+
+
+### [v0.4.3](https://github.com/Worklytics/psoxy/releases/tag/v0.4.3)
 
 Features:
   - **transiently reversible pseudonyms** - rules to support returning  'transiently' reversible
