@@ -32,7 +32,7 @@ public class AccountCredentialsGrantTokenRequestPayloadBuilder implements OAuthR
 
     @Override
     public Set<ConfigService.ConfigProperty> getRequiredConfigProperties() {
-        return Set.of(ConfigProperty.ACCOUNT_ID);
+        return Set.of(ConfigProperty.ACCOUNT_ID, ConfigProperty.CLIENT_ID, ConfigProperty.CLIENT_SECRET);
     }
 
     public enum ConfigProperty implements ConfigService.ConfigProperty {
