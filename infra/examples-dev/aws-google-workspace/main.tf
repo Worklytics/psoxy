@@ -175,24 +175,10 @@ module "worklytics-psoxy-connection-google-workspace" {
 
 # BEGIN AUTH CONNECTORS
 
-locals {
-  enabled_oauth_long_access_connectors_todos = { for k, v in module.worklytics_connector_specs.enabled_oauth_long_access_connectors : k => v if v.external_token_todo != null }
-
-  secrets_to_create = distinct(flatten([
-    for k, v in module.worklytics_connector_specs.enabled_oauth_long_access_connectors : [
-      for secret_name in v.secured_variables : {
-        connector_name = k
-        secret_name    = secret_name
-      }
-    ]
-  ]))
-}
-
-
 # Create secure parameters (later filled by customer)
 # Can be later passed on to a module and store in other vault if needed
 resource "aws_ssm_parameter" "long-access-secrets" {
-  for_each = { for entry in local.secrets_to_create : "${entry.connector_name}.${entry.secret_name}" => entry }
+  for_each = { for entry in module.worklytics_connector_specs.enabled_oauth_secrets_to_create : "${entry.connector_name}.${entry.secret_name}" => entry }
 
   name        = "PSOXY_${upper(replace(each.value.connector_name, "-", "_"))}_${upper(each.value.secret_name)}"
   type        = "SecureString"
@@ -207,7 +193,7 @@ resource "aws_ssm_parameter" "long-access-secrets" {
 }
 
 module "source_token_external_todo" {
-  for_each = local.enabled_oauth_long_access_connectors_todos
+  for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors_todos
 
   source = "../../modules/source-token-external-todo"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/source-token-external-todo?ref=v0.4.4"
