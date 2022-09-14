@@ -26,11 +26,11 @@ import java.util.stream.Stream;
  * source auth strategy to authenticate using a short-lived OAuth 2.0 access token which must be
  * periodically refreshed.
  *   Options for refresh method are configured by
- *
+ * <p>
  * A new access token will be retrieved for every psoxy instance that spins up; as well as when the
  * current one expires.  We'll endeavor to minimize the number of token requests by sharing this
  * states across API requests
- *
+ * <p>
  * If the source API you're connecting to offers long-lived access tokens (or does not offer refresh
  * tokens), you may opt for the access-token only strategy:
  * @see OAuthAccessTokenSourceAuthStrategy
@@ -87,6 +87,12 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         String getGrantType();
 
         HttpContent buildPayload();
+
+        /**
+         * Add any headers to the request if needed, by default, does nothing
+         * @param httpHeaders the request headers to modify
+         */
+        default void addHeaders(HttpHeaders httpHeaders) {}
     }
 
     @NoArgsConstructor(onConstructor_ = @Inject)
@@ -125,6 +131,9 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
             HttpRequest tokenRequest = httpRequestFactory
                 .buildPostRequest(new GenericUrl(refreshEndpoint), payloadBuilder.buildPayload());
+
+            // modify any header if needed
+            payloadBuilder.addHeaders(tokenRequest.getHeaders());
 
             HttpResponse response = tokenRequest.execute();
 
