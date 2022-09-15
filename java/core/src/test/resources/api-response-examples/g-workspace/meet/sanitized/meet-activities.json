@@ -31,6 +31,10 @@
               "value":"ES"
             },
             {
+              "name":"identifier_type",
+              "value":"email_address"
+            },
+            {
               "name":"endpoint_id",
               "value":"boq_hlane_88QSbqq7Hl1"
             },
@@ -126,6 +130,10 @@
               "value":"US"
             },
             {
+              "name":"identifier_type",
+              "value":"email_address"
+            },
+            {
               "name":"endpoint_id",
               "value":"boq_hlane_UPstLKLlGQW"
             },
@@ -219,6 +227,10 @@
             {
               "name":"location_country",
               "value":"US"
+            },
+            {
+              "name":"identifier_type",
+              "value":"email_address"
             },
             {
               "name":"endpoint_id",

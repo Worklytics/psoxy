@@ -51,6 +51,8 @@ class GoogleMeetTests extends JavaRulesTestBaseCase {
 
         assertUrlWithQueryParamsAllowed(endpoint);
         assertUrlBlocked("https://admin.googleapis.com/admin/reports/v1/activity/users/all/applications/chat");
+
+        assertNotSanitized(sanitized, "identifier_type");
     }
 
     public Stream<InvocationExample> getExamples() {

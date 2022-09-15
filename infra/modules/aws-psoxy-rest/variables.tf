@@ -24,6 +24,12 @@ variable "handler_class" {
   default     = "co.worklytics.psoxy.Handler"
 }
 
+variable "reserved_concurrent_executions" {
+  type        = number
+  description = "Max number of concurrent instances for the function"
+  default     = null # meaning no reserved concurrency
+}
+
 variable "aws_assume_role_arn" {
   type        = string
   description = "role arn"
