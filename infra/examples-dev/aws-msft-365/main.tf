@@ -56,10 +56,10 @@ module "worklytics_connector_specs" {
   source = "../../modules/worklytics-connector-specs"
 
   enabled_connectors = [
-   # "asana",
-   # "azure-ad",
-   # "outlook-cal",
-   # "outlook-mail",
+    "asana",
+    "azure-ad",
+    "outlook-cal",
+    "outlook-mail",
     "dropbox-business"
   ]
 }
