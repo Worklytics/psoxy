@@ -196,26 +196,17 @@ EOT
       example_api_calls_user_to_impersonate : null
       external_token_todo : <<EOT
 ## Slack Discovery Setup
-
-
 For enabling Slack Discovery with the Psoxy you must first setup an app on your Slack Enterprise
 instance.
   1. Go to https://api.slack.com/apps and create an app, select name a development workspace
   2. Take note of your App ID and contact your Slack rep and ask them to enable `discovery:read` scope for the app.
-
 If they also enable `discovery:write` then delete it for safety, the app just needs read access.
-
 3. Generate the following URL replacing the placeholders for *YOUR_CLIENT_ID* and *YOUR_APP_SECRET* and save it for later
-
 `https://api.slack.com/api/oauth.v2.access?client_id=YOUR_CLIENT_ID&client_secret=YOUR_APP_SECRET`
-
 4. Go to OAuth & Permissions > Redirect URLs and add the previous URL there
-
 The next step depends on your installation approach you might need to change slightly
-
 ### Org wide install
 Use this step if you want to install in the whole org, across multiple workspaces.
-
   1. Add a bot scope (not really used, but Slack doesn't allow org-wide without a bot scope requested).
      Just add `users:read`, something that is read-only and we already have access through discovery.
   2. Go to *Org Level Apps* and Opt-in to the program
@@ -224,10 +215,8 @@ Use this step if you want to install in the whole org, across multiple workspace
   5. Copy the User OAuth Token
   6. If you are implementing the Proxy, then add the access token as `PSOXY_ACCESS_TOKEN_psoxy-slack-discovery-api` secret value in the Secret Manager for the Proxy
   Otherwise, share the token with the AWS/GCP administrator completing the implementation.
-
 ### Workspace install
 Use this steps if you intend to install in just one workspace within your org.
-
   1. Go to Settings > Install App
   2. Install into *workspace*
   3. Copy the User OAuth Token and store it in the secret manager (or share with the administrator completing the implementation)
@@ -255,21 +244,16 @@ EOT
       example_api_calls_user_to_impersonate : null
       external_token_todo : <<EOT
 ## Zoom Setup
-
 Zoom connector through Psoxy requires a custom managed app on the Zoom Marketplace (in development
 mode, no need to publish).
-
 1. Go to https://marketplace.zoom.us/develop/create and create an app of type "Server to Server OAuth"
-
 2. After creation it will show the App Credentials. Share them with the AWS/GCP administrator, the
 following secret values must be filled in the Secret Manager for the Proxy with the appropriate values:
 - `PSOXY_ZOOM_CLIENT_ID`
 - `PSOXY_ZOOM_ACCOUNT_ID`
 - `PSOXY_ZOOM_CLIENT_SECRET`
 Anytime the *client secret* is regenerated it needs to be updated in the Proxy too.
-
 3. Fill the information section
-
 4. Fill the scopes section, enabling the following:
 - Users / View all user information /user:read:admin
   - To be able to gather information about the zoom users
@@ -277,12 +261,9 @@ Anytime the *client secret* is regenerated it needs to be updated in the Proxy t
   - Allows us to list all user meeting
 - Report / View report data /report:read:admin
   - Last 6 months view for user meetings
-
 5. Activate the app
 EOT
-    }
-  }
-  oauth_long_refreshToken_connectors = {
+    },
     dropbox-business = {
       source_kind : "dropbox-business",
       display_name : "Dropbox Business"
@@ -296,7 +277,9 @@ EOT
         "CLIENT_ID",
         "CLIENT_SECRET"
       ],
-      token_endpoint: "https://api.dropboxapi.com/oauth2/token"
+      token_endpoint: "https://api.dropboxapi.com/oauth2/token",
+      reserved_concurrent_executions : null
+      example_api_calls_user_to_impersonate : null
       external_token_todo : <<EOT
 Dropbox connector through Psoxy requires a Dropbox Application created in Dropbox Console. The application
 does not require to be public, and it needs to have the following scopes to support
@@ -353,22 +336,22 @@ EOT
 # computed values filtered by enabled connectors
 locals {
   enabled_google_workspace_connectors = {
-    for k, v in local.google_workspace_sources : k => v if contains(var.enabled_connectors, k)
+  for k, v in local.google_workspace_sources : k => v if contains(var.enabled_connectors, k)
   }
   enabled_msft_365_connectors = {
-    for k, v in local.msft_365_connectors : k => v if contains(var.enabled_connectors, k)
+  for k, v in local.msft_365_connectors : k => v if contains(var.enabled_connectors, k)
   }
   enabled_oauth_long_access_connectors = { for k, v in local.oauth_long_access_connectors : k => v if contains(var.enabled_connectors, k) }
 
-  enabled_oauth_long_access_connectors_todos = { for k, v in local.oauth_long_access_connectors : k => v if v.external_token_todo != null }
+  enabled_oauth_long_access_connectors_todos = { for k, v in local.enabled_oauth_long_access_connectors : k => v if v.external_token_todo != null }
   # list of pair of [(conn1, secret1), (conn1, secret2), ... (connN, secretM)]
   enabled_oauth_secrets_to_create = distinct(flatten([
-    for k, v in local.enabled_oauth_long_access_connectors : [
-      for secret_name in v.secured_variables : {
-        connector_name = k
-        secret_name    = secret_name
-      }
-    ]
+  for k, v in local.enabled_oauth_long_access_connectors : [
+  for secret_name in v.secured_variables : {
+    connector_name = k
+    secret_name    = secret_name
+  }
+  ]
   ]))
 }
 
