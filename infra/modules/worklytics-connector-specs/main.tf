@@ -112,8 +112,10 @@ locals {
       enabled : true,
       source_kind : "azure-ad",
       display_name : "Azure Directory"
-      required_oauth2_permission_scopes : [], # Delegated permissions (from `az ad sp list --query "[?appDisplayName=='Microsoft Graph'].oauth2Permissions" --all`)
-      required_app_roles : [                  # Application permissions (form az ad sp list --query "[?appDisplayName=='Microsoft Graph'].appRoles" --all
+      required_oauth2_permission_scopes : [],
+      # Delegated permissions (from `az ad sp list --query "[?appDisplayName=='Microsoft Graph'].oauth2Permissions" --all`)
+      required_app_roles : [
+        # Application permissions (form az ad sp list --query "[?appDisplayName=='Microsoft Graph'].appRoles" --all
         "User.Read.All",
         "Group.Read.All"
       ],
@@ -277,7 +279,7 @@ EOT
         "CLIENT_ID",
         "CLIENT_SECRET"
       ],
-      token_endpoint: "https://api.dropboxapi.com/oauth2/token",
+      token_endpoint : "https://api.dropboxapi.com/oauth2/token",
       reserved_concurrent_executions : null
       example_api_calls_user_to_impersonate : null
       external_token_todo : <<EOT
@@ -341,11 +343,11 @@ locals {
   enabled_msft_365_connectors = {
   for k, v in local.msft_365_connectors : k => v if contains(var.enabled_connectors, k)
   }
-  enabled_oauth_long_access_connectors = { for k, v in local.oauth_long_access_connectors : k => v if contains(var.enabled_connectors, k) }
+  enabled_oauth_long_access_connectors = {for k, v in local.oauth_long_access_connectors : k => v if contains(var.enabled_connectors, k)}
 
-  enabled_oauth_long_access_connectors_todos = { for k, v in local.enabled_oauth_long_access_connectors : k => v if v.external_token_todo != null }
+  enabled_oauth_long_access_connectors_todos = {for k, v in local.enabled_oauth_long_access_connectors : k => v if v.external_token_todo != null}
   # list of pair of [(conn1, secret1), (conn1, secret2), ... (connN, secretM)]
-  enabled_oauth_secrets_to_create = distinct(flatten([
+  enabled_oauth_secrets_to_create            = distinct(flatten([
   for k, v in local.enabled_oauth_long_access_connectors : [
   for secret_name in v.secured_variables : {
     connector_name = k
