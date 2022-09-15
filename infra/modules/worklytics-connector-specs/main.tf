@@ -290,7 +290,12 @@ EOT
         "/2/team/members/list_v2",
         "/2/team/groups/list",
         "/2/team_log/get_events",
-      ]
+      ],
+      secured_variables : [
+        "REFRESH_TOKEN",
+        "CLIENT_ID",
+        "CLIENT_SECRET"
+      ],
       token_endpoint: "https://api.dropboxapi.com/oauth2/token"
       external_token_todo : <<EOT
 Dropbox connector through Psoxy requires a Dropbox Application created in Dropbox Console. The application
