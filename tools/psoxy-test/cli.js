@@ -23,15 +23,14 @@ const theme = {
     .option('-f, --force <type>', 'Force deploy type: AWS or GCP')
     .option('-i, --impersonate <user>', 'User to impersonate, needed for certain connectors')
     .option('-r, --role <arn>', 'AWS role to assume, use its ARN')
-    .option(
-      '-s, --skip',
+    .option('-s, --save-to-file', 'Save test results to file', false)
+    .option('--skip', 
       'Skip sanitization rules, only works if function deployed in development mode',
       false
     )
     .option('-t, --token <token>', 'Authorization token for GCP')
     .option('-v, --verbose', 'Verbose output', false)
     .option('-z, --gzip', 'Add gzip compression header', false)
-    .option('--save-to-file', 'Save test results to file', false)
     .configureOutput({
       outputError: (str, write) => write(theme.error(str)),
     });
