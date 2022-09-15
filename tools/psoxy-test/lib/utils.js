@@ -70,7 +70,7 @@ async function saveRequestResultToFile(url, data) {
  */
 function getCommonHTTPHeaders(options = {}) {
   const headers = {
-    'Accept-encoding': options.gzip ? 'gzip' : 'none',
+    'Accept-Encoding': options.gzip ? 'gzip' : '*',
     'X-Psoxy-Skip-Sanitizer': options.skip?.toString() || 'false',
   }
   if (options.impersonate) {
