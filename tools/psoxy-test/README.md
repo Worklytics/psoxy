@@ -27,7 +27,7 @@ As you can see, the differences are:
 For GCP, every call must include the `-t` option, which is the identity token used for authentication (*). 
 Google Calendar example:
 ```shell
-node cli.js -u https://us-central1-acme.cloudfunctions.net/psoxy-gcal/calendar/v3/calendars/primary -t <IDENTITY_TOKEN> -i user@acme.com
+node cli.js -u https://us-central1-acme.cloudfunctions.net/calendar/v3/calendars/primary -t <IDENTITY_TOKEN> -i user@acme.com
 ```
 Zoom example:
 ```shell
@@ -37,36 +37,24 @@ node cli.js -u https://us-central1-acme.cloudfunctions.net/v2/users -t <IDENTITY
 (*) You can obtain it by running `gcloud auth print-identity-token` (using Google Cloud SDK)
 
 ## Testing all endpoints for a given data source
-We also provide some npm scripts that allow you to test all the endpoints for a given data source. These scripts rely on the same Node.js module that runs the CLI script described above, but instead of providing the options via CLI, you have to create a `.env` file with the following contents:
+
+The `-d, --data-source` option of our CLI script allows you to test all the endpoints for a given data source (available data sources are listed in the script's help: `-h` option). 
+The only difference with the previous examples is that the `-u, --url` option has to be the URL of the deploy **without** the corresponding API path of the data source:
+
 ```shell
-# For AWS deploys
-PSOXY_URL=<url>
-PSOXY_ROLE=<role ARN>
-PSOXY_IMPERSONATE=<user email> # only for Google Workspace data sources
-PSOXY_SAVE_TO_FILE=true
-PSOXY_VERBOSE=true
+# Zoom example for AWS deploys, instead of:
+# node cli.js -u https://acme.lambda-url.us-east-1.on.aws/v2/users -r <role>
+# use:
+node cli.js -u https://acme.lambda-url.us-east-1.on.aws -r <ROLE> -d zoom
 ```
 ```shell
-# For GCP deploys
-PSOXY_URL=<url>
-PSOXY_TOKEN=<identity token>
-PSOXY_IMPERSONATE=<user email> # only for Google Workspace data sources
-PSOXY_SAVE_TO_FILE=true
-PSOXY_VERBOSE=true
+# Zoom example for GCP deploys, instead of:
+# node cli.js -u https://us-central1-acme.cloudfunctions.net/v2/users -t <ROLE>
+# use:
+node cli.js -u https://acme.lambda-url.us-east-1.on.aws -t <IDENTITY_TOKEN> -d zoom
 ```
-Then, depending on the data connection you want to test, run any of the following:
-```shell
-npm run test:gcal
-npm run test:gdrive
-npm run test:google-chat
-npm run test:google-meet
-npm run test:slack-discovery-api
-npm run test:zoom
-```
-**Notes**
-- The API endpoints these scripts call are described in `/data-sources/spec.js` and `../docs/example-api-calls`
-- The `PSOXY_SAVE_TO_FILE=true` variable will store the result of each call in a JSON file named after the API endpoint they called + the timestamp; for example, a call to call to Google Calendar: `https://[psoxy_url]/calendar/v3/calendars/primary`, will result in a file under `calendar-v3-calendars-primary-[ISO8601].json` (under the `/responses` folder).
-- The `PSOXY_VERBOSE=true` will output the HTTP headers used to make the requests in the console.
+
+Notice how the URL changes, and any other option the Psoxy may need doesn't.
 
 [AWS]: https://aws.amazon.com
 [GCP]: https://cloud.google.com/
