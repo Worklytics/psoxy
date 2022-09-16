@@ -10,6 +10,10 @@ locals {
   function_name = "psoxy-${substr(var.source_kind, 0, 24)}"
 }
 
+data "google_project" "project" {
+  project_id = var.project_id
+}
+
 resource "random_string" "bucket_id_part" {
   length  = 8
   special = false
@@ -121,7 +125,7 @@ resource "google_cloudfunctions_function" "function" {
 
     content {
       key        = secret_environment_variable.key
-      project_id = var.project_id
+      project_id = data.google_project.project.number
       secret     = secret_environment_variable.value.secret_id
       version    = secret_environment_variable.value.version_number
     }

@@ -18,6 +18,10 @@ locals {
   }, var.secret_bindings)
 }
 
+data "google_project" "project" {
+  project_id = var.project_id
+}
+
 resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_secret" {
   for_each = local.secret_bindings
 
@@ -51,7 +55,7 @@ resource "google_cloudfunctions_function" "function" {
 
     content {
       key        = secret_environment_variable.key
-      project_id = var.project_id
+      project_id = data.google_project.project.number
       secret     = secret_environment_variable.value.secret_id
       version    = secret_environment_variable.value.version_number
     }
