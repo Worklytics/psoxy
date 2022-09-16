@@ -25,7 +25,7 @@ variable "caller_gcp_service_account_ids" {
 
   validation {
     condition = alltrue([
-    for i in var.caller_gcp_service_account_ids : (length(regexall("^\\d{21}$", i)) > 0)
+      for i in var.caller_gcp_service_account_ids : (length(regexall("^\\d{21}$", i)) > 0)
     ])
     error_message = "The values of caller_gcp_service_account_ids should be 21-digit numeric strings."
   }
@@ -38,26 +38,45 @@ variable "caller_aws_arns" {
 
   validation {
     condition = alltrue([
-    for i in var.caller_aws_arns : (length(regexall("^arn:aws:iam::\\d{12}:\\w+$", i)) > 0)
+      for i in var.caller_aws_arns : (length(regexall("^arn:aws:iam::\\d{12}:\\w+$", i)) > 0)
     ])
     error_message = "The values of caller_aws_arns should be AWS Resource Names, something like 'arn:aws:iam::914358739851:root'."
   }
 }
-variable "msft_tenant_id" {
+
+variable "gcp_project_id" {
   type        = string
+  description = "id of GCP project that will host psoxy instance"
+}
+
+variable "environment_name" {
+  type        = string
+  description = "qualifier to append to name of project that will host your psoxy instance"
   default     = ""
-  description = "ID of Microsoft tenant to connect to (req'd only if config includes MSFT connectors)"
+}
+
+variable "gcp_folder_id" {
+  type        = string
+  description = "optionally, a folder into which to provision it"
+  default     = null
+}
+
+variable "gcp_billing_account_id" {
+  type        = string
+  description = "billing account ID; needed to create the project"
+  default     = null
+}
+
+variable "gcp_org_id" {
+  type        = string
+  description = "your GCP organization ID"
+  default     = null
 }
 
 variable "connector_display_name_suffix" {
   type        = string
   description = "suffix to append to display_names of connector SAs; helpful to distinguish between various ones in testing/dev scenarios"
   default     = ""
-}
-
-variable "certificate_subject" {
-  type        = string
-  description = "value for 'subject' passed to openssl when generation certificate (eg '/C=US/ST=New York/L=New York/CN=www.worklytics.co')"
 }
 
 variable "psoxy_base_dir" {
@@ -71,8 +90,7 @@ variable "psoxy_base_dir" {
   }
 }
 
-variable "pseudonymize_app_ids" {
+variable "google_workspace_example_user" {
   type        = string
-  description = "if set, will set value of PSEUDONYMIZE_APP_IDS environment variable to this value for all sources"
-  default     = false
+  description = "user to impersonate for Google Workspace API calls (null for none)"
 }

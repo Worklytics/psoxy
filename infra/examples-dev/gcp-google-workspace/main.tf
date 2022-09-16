@@ -73,7 +73,7 @@ module "psoxy-gcp" {
   project_id        = google_project.psoxy-project.project_id
   invoker_sa_emails = var.worklytics_sa_emails
   psoxy_base_dir    = var.psoxy_base_dir
-  psoxy_version     = "0.4.3"
+  psoxy_version     = "0.4.4"
   bucket_location   = var.gcp_region
 
   depends_on = [
@@ -199,7 +199,7 @@ module "psoxy-gcp-bulk" {
   for_each = local.bulk_sources
 
   source = "../../modules/gcp-psoxy-bulk"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-bulk?ref=v0.4.3"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-bulk?ref=v0.4.4"
 
   project_id                    = google_project.psoxy-project.project_id
   worklytics_sa_emails          = var.worklytics_sa_emails

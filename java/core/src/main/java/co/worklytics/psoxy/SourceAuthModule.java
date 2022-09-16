@@ -2,12 +2,8 @@ package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
 import co.worklytics.psoxy.gateway.impl.GoogleCloudPlatformServiceAccountKeyAuthStrategy;
-import co.worklytics.psoxy.gateway.impl.oauth.ClientCredentialsGrantTokenRequestPayloadBuilder;
-import co.worklytics.psoxy.gateway.impl.oauth.OAuthAccessTokenSourceAuthStrategy;
-import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
-import co.worklytics.psoxy.gateway.impl.oauth.RefreshTokenPayloadBuilder;
+import co.worklytics.psoxy.gateway.impl.oauth.*;
 import com.google.auth.oauth2.OAuth2CredentialsWithRefresh;
-import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoSet;
@@ -50,4 +46,10 @@ public class SourceAuthModule {
     OAuthRefreshTokenSourceAuthStrategy.TokenRequestPayloadBuilder clientCredentialsGrantTokenRequestPayloadBuilder(ClientCredentialsGrantTokenRequestPayloadBuilder refreshTokenPayloadBuilder) {
         return refreshTokenPayloadBuilder;
     }
+
+    @Provides @IntoSet
+    OAuthRefreshTokenSourceAuthStrategy.TokenRequestPayloadBuilder accountCredentialsGrantTokenRequestPayloadBuilder(AccountCredentialsGrantTokenRequestPayloadBuilder refreshTokenPayloadBuilder) {
+        return refreshTokenPayloadBuilder;
+    }
+
 }

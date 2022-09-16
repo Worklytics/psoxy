@@ -22,6 +22,12 @@ variable "aws_assume_role_arn" {
   description = "role arn"
 }
 
+variable "reserved_concurrent_executions" {
+  type        = number
+  description = "Max number of concurrent instances for the function"
+  default     = -1
+}
+
 # NOTE: currently unused; but perhaps we'll have default rules by source_kind in the future,
 # so leaving it in
 variable "source_kind" {
