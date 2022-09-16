@@ -35,6 +35,7 @@ caller_gcp_service_account_ids = [
   "123456712345671234567" # 21-digit numeric string you should obtain from Worklytics
 ]
 msft_tenant_id                = "some-uuid-of-msft-tenant" # should hold your Microsoft 365 instance
+psoxy_base_dir                = "/home/user/psoxy/" # use absolute path to your local psoxy repo
 ```
 
 

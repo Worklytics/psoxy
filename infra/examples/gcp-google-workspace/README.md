@@ -20,6 +20,7 @@ environment_name     = "--OPTIONAL helpful name to identify your environment --"
 worklytics_sa_emails = [
   "--email address of service account that personifies your Worklytics account--"
 ]
+psoxy_base_dir                = "/home/user/psoxy/" # use absolute path to your local psoxy repo****
 ```
 
 for example:
@@ -31,6 +32,7 @@ gcp_billing_account_id        = "0A2AE4-1D396E-1219D9" # GCP billing account ID 
 worklytics_sa_emails = [
   "worklytics-3cD92f@worklytics-eu.iam.gserviceaccount.com"
 ]
+psoxy_base_dir                = "/home/user/psoxy/" # use absolute path to your local psoxy repo
 ```
 
 Initialize your configuration (at this location in directory hierarchy):

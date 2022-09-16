@@ -41,7 +41,6 @@ variable "connector_display_name_suffix" {
 variable "psoxy_base_dir" {
   type        = string
   description = "the path where your psoxy repo resides"
-  default     = "../../../"
 
   validation {
     condition     = can(regex(".*\\/$", var.psoxy_base_dir))
