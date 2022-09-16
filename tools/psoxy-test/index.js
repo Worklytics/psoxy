@@ -88,5 +88,9 @@ export default async function (options = {}) {
     console.log(result.data);
   }
 
+  if (options.verbose) {
+    console.log(`Response headers:\n ${result.headers}`);
+  }
+
   return result;
 }

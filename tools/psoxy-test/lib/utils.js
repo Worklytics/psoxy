@@ -88,8 +88,13 @@ function getCommonHTTPHeaders(options = {}) {
  */
 async function fetchWrapper(url, options) {
   const response = await fetch(url, options);
+
+  const responseHeaders = {};
+  response.headers.forEach((key, value) => responseHeaders[key] = value);
+
   const result = {
     status: response.status,
+    headers: JSON.stringify(responseHeaders, undefined, 2),
   };
   
   if (response.status === 200) {
