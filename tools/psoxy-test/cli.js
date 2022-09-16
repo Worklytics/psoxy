@@ -1,16 +1,12 @@
 #!/usr/bin/env node
 import { createRequire } from 'module';
-import { Command } from 'commander';
+import { Command, Option } from 'commander';
 import chalk from 'chalk';
 import psoxyTest from './index.js';
+import { callDataSourceEndpoints } from './data-sources/runner.js';
 
 const require = createRequire(import.meta.url);
 const { name, version, description } = require('./package.json');
-
-const theme = {
-  error: chalk.bold.red,
-  success: chalk.green,
-};
 
 (async function () {
   const program = new Command();
@@ -31,8 +27,13 @@ const theme = {
     .option('-t, --token <token>', 'Authorization token for GCP')
     .option('-v, --verbose', 'Verbose output', false)
     .option('-z, --gzip', 'Add gzip compression header', false)
+    .addOption(new Option('-d, --data-source <name>', 
+      'Data source to test all available endpoints').choices([
+        'gcal', 'gdrive', 'google-chat', 'google-meet', 'slack-discovery-api',
+        'zoom'
+      ]))
     .configureOutput({
-      outputError: (str, write) => write(theme.error(str)),
+      outputError: (str, write) => write(chalk.bold.red(str)),
     });
 
   program.addHelpText(
@@ -43,12 +44,9 @@ const theme = {
   program.parse(process.argv);
   const options = program.opts();
 
-  const result = await psoxyTest(options);
-
-  if (result.error) {
-    console.error(`${theme.error(result.error)}`);
+  if (options.dataSource) {
+    await callDataSourceEndpoints(options);
   } else {
-    console.log(`${theme.success('OK')}`);
-    console.log(JSON.stringify(result.data, undefined, 4));
+    await psoxyTest(options);
   }
 })();
