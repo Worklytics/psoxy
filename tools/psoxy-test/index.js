@@ -1,3 +1,4 @@
+import chalk from 'chalk';
 import aws from './lib/aws.js';
 import gcp from './lib/gcp.js';
 import { saveRequestResultToFile } from './lib/utils.js';
@@ -55,9 +56,9 @@ export default async function (options = {}) {
       if (options.saveToFile) {
         try {
           await saveRequestResultToFile(url, result.data);
-          console.log('Results saved to file');
+          console.log(chalk.green('Results saved to file'));
         } catch (err) {
-          console.error('Unable to save results', err);
+          console.error(chalk.red('Unable to save results to file'), err);
         }        
       }
 
@@ -77,6 +78,14 @@ export default async function (options = {}) {
     }
   } catch (err) {
     result.error = err.message;
+  }
+
+  if (result?.error) {
+    console.error(chalk.bold.red(`${result.status}: ERROR`));
+    console.error(chalk.bold.red(result.error));
+  } else if (result.status === 200) {
+    console.log(chalk.bold.green(`${result.status}: OK`));
+    console.log(result.data);
   }
 
   return result;
