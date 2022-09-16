@@ -60,6 +60,7 @@ module "worklytics_connector_specs" {
     "azure-ad",
     "outlook-cal",
     "outlook-mail",
+    "slack-discovery-api",
     "dropbox-business"
   ]
 }
