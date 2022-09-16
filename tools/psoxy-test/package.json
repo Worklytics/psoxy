@@ -6,13 +6,7 @@
   "description": "Worklytics Psoxy testing tool",
   "main": "index.js",
   "scripts": {
-    "test": "ava",
-    "test:gcal": "node data-sources/runner.js gcal",
-    "test:gdrive": "node data-sources/runner.js gdrive",
-    "test:google-chat": "node data-sources/runner.js google-chat",
-    "test:google-meet": "node data-sources/runner.js google-meet",
-    "test:slack-discovery-api": "node data-sources/runner.js slack-discovery-api",
-    "test:zoom": "node data-sources/runner.js zoom"
+    "test": "ava"
   },
   "repository": {
     "type": "git",
@@ -28,7 +22,6 @@
     "aws4": "^1.11.0",
     "chalk": "^5.0.1",
     "commander": "^9.4.0",
-    "dotenv": "^16.0.2",
     "lodash": "^4.17.21",
     "node-fetch": "^3.2.10"
   },
@@ -40,6 +33,8 @@
     "files": [
       "test/**/*.test.js"
     ],
-    "nodeArguments": ["--loader=testdouble"]
+    "nodeArguments": [
+      "--loader=testdouble"
+    ]
   }
 }
