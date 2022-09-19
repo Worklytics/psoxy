@@ -35,11 +35,11 @@ provider "aws" {
 
 locals {
   base_config_path = "${var.psoxy_base_dir}/configs/"
-  bulk_sources = {
+  bulk_sources     = {
     "hris" = {
       source_kind = "hris"
-      rules = {
-        columnsToRedact = []
+      rules       = {
+        columnsToRedact       = []
         columnsToPseudonymize = [
           "email",
           "employee_id"
@@ -48,8 +48,8 @@ locals {
     },
     "qualtrics" = {
       source_kind = "qualtrics"
-      rules = {
-        columnsToRedact = []
+      rules       = {
+        columnsToRedact       = []
         columnsToPseudonymize = [
           "email",
           "employee_id"
@@ -89,10 +89,11 @@ module "psoxy-aws" {
 
 # holds SAs + keys needed to connect to Google Workspace APIs
 resource "google_project" "psoxy-google-connectors" {
-  name            = "Worklytics Connect%{if var.environment_name != ""} - ${var.environment_name}%{endif}"
+  name            = "Psoxy%{if var.environment_name != ""} - ${var.environment_name}%{endif}"
   project_id      = var.gcp_project_id
   billing_account = var.gcp_billing_account_id
-  folder_id       = var.gcp_folder_id # if project is at top-level of your GCP organization, rather than in a folder, comment this line out
+  folder_id       = var.gcp_folder_id
+  # if project is at top-level of your GCP organization, rather than in a folder, comment this line out
   # org_id          = var.gcp_org_id # if project is in a GCP folder, this value is implicit and this line should be commented out
 
   # NOTE: these are provide because OFTEN customers have pre-existing GCP project; if such, there's
@@ -178,7 +179,7 @@ module "worklytics-psoxy-connection-google-workspace" {
 # Create secure parameters (later filled by customer)
 # Can be later passed on to a module and store in other vault if needed
 resource "aws_ssm_parameter" "long-access-secrets" {
-  for_each = { for entry in module.worklytics_connector_specs.enabled_oauth_secrets_to_create : "${entry.connector_name}.${entry.secret_name}" => entry }
+  for_each = {for entry in module.worklytics_connector_specs.enabled_oauth_secrets_to_create : "${entry.connector_name}.${entry.secret_name}" => entry}
 
   name        = "PSOXY_${upper(replace(each.value.connector_name, "-", "_"))}_${upper(each.value.secret_name)}"
   type        = "SecureString"
@@ -222,7 +223,7 @@ module "aws-psoxy-long-auth-connectors" {
   path_to_repo_root              = var.psoxy_base_dir
   example_api_calls              = each.value.example_api_calls
   reserved_concurrent_executions = each.value.reserved_concurrent_executions
-  parameters = [
+  parameters                     = [
     module.psoxy-aws.salt_secret,
     # aws_ssm_parameter.long-access-secrets[each.key]
   ]
