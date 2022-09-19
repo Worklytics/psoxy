@@ -2,7 +2,6 @@ package co.worklytics.psoxy.aws.request;
 
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
-import com.google.api.client.util.IOUtils;
 import com.google.common.base.Splitter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
