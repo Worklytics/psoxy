@@ -54,11 +54,20 @@ variable "psoxy_base_dir" {
 
 variable "google_workspace_example_user" {
   type        = string
-  description = "user to impersonate for Google Workspace API calls (null for none)"
+  description = "User to impersonate for Google Workspace API calls (null for none)"
 }
 
 variable "gcp_region" {
   type        = string
-  description = "region in which to provision GCP resources, if applicable"
+  description = "Region in which to provision GCP resources, if applicable"
   default     = "us-central1"
+}
+
+variable "replica_regions" {
+  type        = list(string)
+  description = "List of regions in which to replicate secrets."
+  default     = [
+    "us-central1",
+    "us-west1",
+  ]
 }
