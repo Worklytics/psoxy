@@ -47,4 +47,13 @@ public class CsvRules implements RuleSet {
     @NonNull
     Map<String, String> columnsToRename = new HashMap<>();
 
+
+    /**
+     * if provided, only columns explicitly listed here will be included in output
+     *  (inverse of columnsToRedact)
+     *
+     * use case: if you don't control source, and want to ensure that some unexpected column that
+     * later appears in source doesn't get included in output.
+     */
+    List<String> columnsToInclude;
 }

@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -47,11 +46,15 @@ public class CSVFileHandler implements FileHandler {
 
         Sanitizer.ConfigurationOptions configurationOptions = sanitizer.getConfigurationOptions();
 
-        Set<String> columnsToRedact = trimIntoSet(((CsvRules) configurationOptions.getRules())
-            .getColumnsToRedact());
+        CsvRules rules = (CsvRules) configurationOptions.getRules();
 
-        Set<String> columnsToPseudonymize = trimIntoSet(((CsvRules) configurationOptions.getRules())
-            .getColumnsToPseudonymize());
+        Set<String> columnsToRedact = asSetWithCaseInsensitiveComparator(rules.getColumnsToRedact());
+
+        Set<String> columnsToPseudonymize = asSetWithCaseInsensitiveComparator(rules.getColumnsToPseudonymize());
+
+        Optional<Set<String>> columnsToInclude =
+            Optional.ofNullable(rules.getColumnsToInclude())
+                .map(this::asSetWithCaseInsensitiveComparator);
 
         final Map<String, String> columnsToRename = ((CsvRules) configurationOptions.getRules())
             .getColumnsToRename()
@@ -70,6 +73,7 @@ public class CSVFileHandler implements FileHandler {
                 .stream()
                 .sorted(Comparator.comparingInt(Map.Entry::getValue))
                 .filter(entry -> !columnsToRedact.contains(entry.getKey()))
+                .filter(entry -> columnsToInclude.map(includeSet -> includeSet.contains(entry.getKey())).orElse(true))
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
 
@@ -135,7 +139,7 @@ public class CSVFileHandler implements FileHandler {
     }
 
 
-    Set<String> trimIntoSet(Collection<String> set) {
+    Set<String> asSetWithCaseInsensitiveComparator(Collection<String> set) {
         return set.stream()
             .map(String::trim)
             .collect(Collectors.toCollection(() -> new TreeSet<>(String.CASE_INSENSITIVE_ORDER)));
