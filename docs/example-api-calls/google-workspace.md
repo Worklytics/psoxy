@@ -1,235 +1,209 @@
 # API Call Examples for Google Workspace
 
-Example commands that you can use to validate proxy behavior against the Google Workspace APIs.
+Example commands (*) that you can use to validate proxy behavior against the Google Workspace APIs.
 Follow the steps and change the values to match your configuration when needed.
 
-To use, ensure you've set env variables on your machine:
+You can use the `-i` flag to impersonate the desired user identity option when running the testing tool. Example:
+
 ```shell
-# no slash at the end, and no function or lambda, just the base url of the deployment
-export PSOXY_BASE=https://YOUR_PSOXY_HOST
-export PSOXY_USER_TO_IMPERSONATE=you@acme.com
+node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gcal/calendar/v3/calendars/primary -i you@acme.com
 ```
 
-For GCP, use
+For AWS, change the role to assume with one with sufficient permissions to call the proxy (`-r` flag). Example:
+
 ```shell
-export OPTIONS="-g -i $PSOXY_USER_TO_IMPERSONATE"
+node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gcal/calendar/v3/calendars/primary -r arn:aws:iam::PROJECT_ID:role/ROLE_NAME
 ```
 
-For AWS, change the role to impersonate with one with sufficient permissions to call the proxy
-```shell
-export AWS_ROLE_ARN="arn:aws:iam::PROJECT_ID:role/ROLE_NAME"
-export OPTIONS="-a -r $AWS_ROLE_ARN -i $PSOXY_USER_TO_IMPERSONATE"
-```
+If any call appears to fail, repeat it using the `-v` flag.
 
-If any call appears to fail, repeat it without the pipe to jq (eg, remove `| jq ...` portion from
-the end of the command) and "-v" flag.
-
-## Calendar
+(*) All commands assume that you are at the root path of the Psoxy project.
 
 ### Calendar
 ```shell
-./test-psoxy.sh $OPTIONS -u $PSOXY_BASE/psoxy-gcal/calendar/v3/calendars/primary | jq .
+node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gcal/calendar/v3/calendars/primary
 ```
 
 ### Settings
 ```shell
-./test-psoxy.sh $OPTIONS -u $PSOXY_BASE/psoxy-gcal/calendar/v3/users/me/settings | jq .
+node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gcal/calendar/v3/users/me/settings
 ```
 
 ### Events
 ```shell
-./test-psoxy.sh $OPTIONS -u $PSOXY_BASE/psoxy-gcal/calendar/v3/calendars/primary/events | jq .
+node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gcal/calendar/v3/calendars/primary/events
 ```
 
 ### Event
+1. Get the calendar event ID (accessor path in response `.items[0].id`):
 ```shell
-export CALENDAR_EVENT_ID=`./test-psoxy.sh $OPTIONS -u $PSOXY_BASE/psoxy-gcal/calendar/v3/calendars/primary/events | jq -r '.items[0].id'`
+node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gcal/calendar/v3/calendars/primary/events
+```
 
-./test-psoxy.sh $OPTIONS -u $PSOXY_BASE/psoxy-gcal/calendar/v3/calendars/primary/events/$CALENDAR_EVENT_ID | jq .
+2. Get event information (replace `calendar_event_id` with the corresponding value):
+```
+node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gcal/calendar/v3/calendars/primary/events/[calendar_event_id]
 ```
 
 ## Directory
 
 ### Domains
 ```shell
-./test-psoxy.sh $OPTIONS -u $PSOXY_BASE/psoxy-gdirectory/admin/directory/v1/customer/my_customer/domains | jq .
+node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gdirectory/admin/directory/v1/customer/my_customer/domains
 ```
 
 ### Groups
 ```shell
-./test-psoxy.sh $OPTIONS -u $PSOXY_BASE/psoxy-gdirectory/admin/directory/v1/groups\?customer=my_customer | jq .
+node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gdirectory/admin/directory/v1/groups?customer=my_customer
 ```
 
 ### Group
-```shell
-export GOOGLE_GROUP_ID=`./test-psoxy.sh $OPTIONS -u $PSOXY_BASE/psoxy-gdirectory/admin/directory/v1/groups\?customer=my_customer | jq -r '.groups[0].id'`
 
-./test-psoxy.sh $OPTIONS -u $PSOXY_BASE/psoxy-gdirectory/admin/directory/v1/groups/$GOOGLE_GROUP_ID | jq .
+1. Get the group ID (accessor path in response `.groups[0].id`):
+```shell
+node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gdirectory/admin/directory/v1/groups?customer=my_customer
+```
+
+2. Get group information (replace `google_group_id` with the corresponding value):
+```shell
+node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gdirectory/admin/directory/v1/groups/[google_group_id]
 ```
 
 ### Group Members
 ```shell
-export GOOGLE_GROUP_ID=`
-./test-psoxy.sh $OPTIONS -u $PSOXY_BASE/psoxy-gdirectory/admin/directory/v1/groups\?customer=my_customer | jq -r '.groups[0].id'`
-
-./test-psoxy.sh $OPTIONS -u $PSOXY_BASE/psoxy-gdirectory/admin/directory/v1/groups/$GOOGLE_GROUP_ID/members | jq .
+node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gdirectory/admin/directory/v1/groups/[google_group_id]/members
 ```
 
 ### Users
 ```shell
-./test-psoxy.sh $OPTIONS -u $PSOXY_BASE/psoxy-gdirectory/admin/directory/v1/users\?customer=my_customer | jq .
+node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gdirectory/admin/directory/v1/users?customer=my_customer
+```
+1. Get the user ID (accessor path in response `.users[0].id`):
+```shell
+node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gdirectory/admin/directory/v1/users?customer=my_customer
 ```
 
+2. Get user information (replace [google_user_id] with the corresponding value):
 ```shell
-export GOOGLE_USER_ID=`
-./test-psoxy.sh $OPTIONS -u $PSOXY_BASE/psoxy-gdirectory/admin/directory/v1/users\?customer=my_customer | jq -r '.users[0].id'`
-
-./test-psoxy.sh $OPTIONS -u $PSOXY_BASE/psoxy-gdirectory/admin/directory/v1/users/$GOOGLE_USER_ID | jq .
+node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gdirectory/admin/directory/v1/users/[google_user_id]
 ```
 
-Thumbnail (expect have its contents redacted)
+3. Thumbnail (expect have its contents redacted; replace [google_user_id] with the corresponding value):
 ```shell
-export GOOGLE_USER_ID=`
-./test-psoxy.sh $OPTIONS -u $PSOXY_BASE/psoxy-gdirectory/admin/directory/v1/users\?customer=my_customer | jq -r '.users[0].id'`
-
-./test-psoxy.sh $OPTIONS -u $PSOXY_BASE/psoxy-gdirectory/admin/directory/v1/users/$GOOGLE_USER_ID/photos/thumbnail | jq .
+node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gdirectory/admin/directory/v1/users/[google_user_id]/photos/thumbnail
 ```
 
 ### Roles
 ```shell
-./test-psoxy.sh $OPTIONS -u $PSOXY_BASE/psoxy-gdirectory/admin/directory/v1/customer/my_customer/roles | jq .
+node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gdirectory/admin/directory/v1/customer/my_customer/roles
 ```
 
 ```shell
-./test-psoxy.sh $OPTIONS -u $PSOXY_BASE/psoxy-gdirectory/admin/directory/v1/customer/my_customer/roleassignments | jq .
+node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gdirectory/admin/directory/v1/customer/my_customer/roleassignments
 ```
 
 ## Drive
 
 ### Files
 ```shell
-./test-psoxy.sh $OPTIONS -u $PSOXY_BASE/psoxy-gdrive/drive/v2/files | jq .
+node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gdrive/drive/v2/files
 ```
 
 ```shell
-./test-psoxy.sh $OPTIONS -u $PSOXY_BASE/psoxy-gdrive/drive/v3/files | jq .
+node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gdrive/drive/v3/files
 ```
 
 ### File
+1. Get the file ID (accessor path in response `.files[0].id`:
 ```shell
-export DRIVE_FILE_ID=`./test-psoxy.sh $OPTIONS -u $PSOXY_BASE/psoxy-gdrive/drive/v2/files | jq -r '.items[0].id'`
-
-./test-psoxy.sh $OPTIONS -u $PSOXY_BASE/psoxy-gdrive/drive/v2/files/$DRIVE_FILE_ID | jq .
+node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gdrive/drive/v2/files
 ```
 
+2. Get file details (replace [drive_file_id] with the corresponding value): 
 ```shell
-export DRIVE_FILE_ID=`./test-psoxy.sh $OPTIONS -u $PSOXY_BASE/psoxy-gdrive/drive/v3/files | jq -r '.files[0].id'`
-
-./test-psoxy.sh $OPTIONS -u $PSOXY_BASE/psoxy-gdrive/drive/v3/files/$DRIVE_FILE_ID\?fields=\* | jq .
+node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gdrive/drive/v3/files/[drive_file_id]?fields=*
 ```
 
 ### File Revisions
 YMMV, as file at index `0` must actually be a type that supports revisions for this to return
-anything. You can play with that value until you find something that does.
+anything. You can play with different file IDs until you find something that does.
 ```shell
-export DRIVE_FILE_ID=`
-./test-psoxy.sh $OPTIONS -u $PSOXY_BASE/psoxy-gdrive/drive/v2/files | jq -r '.items[0].id'`
-
-./test-psoxy.sh $OPTIONS -u $PSOXY_BASE/psoxy-gdrive/drive/v2/files/$DRIVE_FILE_ID/revisions | jq .
+node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gdrive/drive/v2/files/[drive_file_id]/revisions
 ```
 
 ```shell
-export DRIVE_FILE_ID=`
-./test-psoxy.sh $OPTIONS -u $PSOXY_BASE/psoxy-gdrive/drive/v3/files\?pageSize=2\&fields=\* | jq -r '.files[0].id'`
-
-./test-psoxy.sh $OPTIONS -u $PSOXY_BASE/psoxy-gdrive/drive/v3/files/$DRIVE_FILE_ID/revisions\?pageSize=2\&fields=\* | jq .
+node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gdrive/drive/v2/files/[drive_file_id]/revisions?pageSize=2&fields=*
 ```
 
 ### Permissions
 
 ```shell
-export DRIVE_FILE_ID=`
-./test-psoxy.sh $OPTIONS -u $PSOXY_BASE/psoxy-gdrive/drive/v2/files | jq -r '.items[0].id'`
-
-./test-psoxy.sh $OPTIONS -u $PSOXY_BASE/psoxy-gdrive/drive/v2/files/$DRIVE_FILE_ID/permissions | jq .
+node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gdrive/drive/v2/files/[drive_file_id]/permissions
 ```
 
 ```shell
-export DRIVE_FILE_ID=`
-./test-psoxy.sh $OPTIONS -u $PSOXY_BASE/psoxy-gdrive/drive/v3/files | jq -r '.files[0].id'`
-
-./test-psoxy.sh $OPTIONS -u $PSOXY_BASE/psoxy-gdrive/drive/v3/files/$DRIVE_FILE_ID/permissions\?fields=\* | jq .
+node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gdrive/drive/v2/files/[drive_file_id]/permissions?fields=*
 ```
 
 ### Comments
 YMMV, as file at index `0` must actually be a type that has comments for this to return
-anything. You can play with that value until you find something that does.
+anything. You can play with different file IDs until you find something that does.
 
 **NOTE probably blocked by OAuth metadata only scope!!**
 ```shell
-export DRIVE_FILE_ID=`
-./test-psoxy.sh $OPTIONS -u $PSOXY_BASE/psoxy-gdrive/drive/v2/files | jq -r '.items[0].id'`
-
-./test-psoxy.sh $OPTIONS -u $PSOXY_BASE/psoxy-gdrive/drive/v2/files/$DRIVE_FILE_ID/comments | jq .
+node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gdrive/drive/v2/files/[drive_file_id]/comments
 ```
-
 
 ```shell
-export DRIVE_FILE_ID=`
-./test-psoxy.sh $OPTIONS -u $PSOXY_BASE/psoxy-gdrive/drive/v3/files | jq -r '.files[0].id'`
-
-./test-psoxy.sh $OPTIONS -u $PSOXY_BASE/psoxy-gdrive/drive/v3/files/$DRIVE_FILE_ID/comments\?fields=\* | jq .
+node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gdrive/drive/v2/files/[drive_file_id]/comments?fields=*
 ```
-
 
 ### Comment
 
 **NOTE probably blocked by OAuth metadata only scope!!**
 
+1. Get file comment ID (accessor path in response `.items[0].id`):
 ```shell
-export DRIVE_FILE_ID=`./test-psoxy.sh $OPTIONS -u $PSOXY_BASE/psoxy-gdrive/drive/v2/files | jq -r '.items[0].id'`
+node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gdrive/drive/v2/files/[drive_file_id]/comments
+```
 
-export DRIVE_COMMENT_ID=`./test-psoxy.sh $OPTIONS -u $PSOXY_BASE/psoxy-gdrive/drive/v2/files/\`echo $DRIVE_FILE_ID\`/comments  | jq -r '.items[0].id'`
-
-./test-psoxy.sh $OPTIONS -u $PSOXY_BASE/psoxy-gdrive/drive/v2/files/$DRIVE_FILE_ID/comments/`echo $DRIVE_COMMENT_ID` | jq .
+2. Get file comment details (replace `file_comment_id` with the corresponding value):
+```shell
+node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gdrive/drive/v2/files/[drive_file_id]/comments/[file_comment_id]
 ```
 
 ### Replies
 **NOTE probably blocked by OAuth metadata only scope!!**
 
-YMMV, as above, play with the index values until you find a file with comments, and a comment that
+YMMV, as above, play with the file comment ID value until you find a file with comments, and a comment that
 has replies.
+
 ```shell
-export DRIVE_FILE_ID=`./test-psoxy.sh $OPTIONS -u $PSOXY_BASE/psoxy-gdrive/drive/v2/files | jq -r '.items[0].id'`
-
-export DRIVE_COMMENT_ID=`./test-psoxy.sh $OPTIONS -u $PSOXY_BASE/psoxy-gdrive/drive/v2/files/\`echo $DRIVE_FILE_ID\`/comments  | jq -r '.items[0].id'`
-
-./test-psoxy.sh $OPTIONS -u $PSOXY_BASE/psoxy-gdrive/drive/v2/files/$DRIVE_FILE_ID/comments/`echo $DRIVE_COMMENT_ID`/replies | jq .
+node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gdrive/drive/v2/files/[drive_file_id]/comments/[file_comment_id]/replies
 ```
 
 ## GMail
 
 ### Messages
 ```shell
-./test-psoxy.sh $OPTIONS -u $PSOXY_BASE/psoxy-gmail/gmail/v1/users/me/messages | jq .
+node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gmail/gmail/v1/users/me/messages
 ```
 
 ### Message
 ```shell
-export GMAIL_MESSAGE_ID=`./test-psoxy.sh $OPTIONS -u $PSOXY_BASE/psoxy-gmail/gmail/v1/users/me/messages | jq -r '.messages[0].id'`
-./test-psoxy.sh $OPTIONS -u $PSOXY_BASE/psoxy-gmail/gmail/v1/users/me/messages/`echo $GMAIL_MESSAGE_ID`\?format=metadata | jq .
+node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gmail/gmail/v1/users/me/messages/[gmail_message_id]?format=metadata
 ```
 
 ## Google Chat
 
 NOTE: limited to 10 results, to keep it readable.
 ```shell
-./test-psoxy.sh $OPTIONS -u $PSOXY_BASE/psoxy-google-chat/admin/reports/v1/activity/users/all/applications/chat\?maxResults=10 | jq .
+node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-google-chat/admin/reports/v1/activity/users/all/applications/chat?maxResults=10
 ```
 
 ## Google Meet
 
 NOTE: limited to 10 results, to keep it readable.
 ```shell
-./test-psoxy.sh $OPTIONS -u $PSOXY_BASE/psoxy-google-meet/admin/reports/v1/activity/users/all/applications/meet\?maxResults=10 | jq .
+node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-google-chat/admin/reports/v1/activity/users/all/applications/meet?maxResults=10
 ```
