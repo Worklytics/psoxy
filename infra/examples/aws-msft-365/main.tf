@@ -213,7 +213,7 @@ module "msft_365_grants" {
 }
 
 
-module "worklytics-psoxy-connection" {
+module "worklytics-psoxy-connection-msft-365" {
   for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
   # source = "../../modules/worklytics-psoxy-connection-aws"
