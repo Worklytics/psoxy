@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -33,6 +34,7 @@ public class CSVFileHandler implements FileHandler {
     @Inject
     ObjectMapper objectMapper;
 
+
     @Override
     public byte[] handle(@NonNull InputStreamReader reader, @NonNull Sanitizer sanitizer) throws IOException {
         CSVParser records = CSVFormat.DEFAULT
@@ -45,18 +47,20 @@ public class CSVFileHandler implements FileHandler {
 
         Sanitizer.ConfigurationOptions configurationOptions = sanitizer.getConfigurationOptions();
 
-        Set<String> columnsToRedact = ((CsvRules) configurationOptions.getRules())
-            .getColumnsToRedact()
-            .stream()
-            .map(String::trim)
-            .collect(Collectors.toCollection(() -> new TreeSet<>(String.CASE_INSENSITIVE_ORDER)));
+        Set<String> columnsToRedact = trimIntoSet(((CsvRules) configurationOptions.getRules())
+            .getColumnsToRedact());
 
-        Set<String> columnsToPseudonymize = ((CsvRules) configurationOptions.getRules())
-            .getColumnsToPseudonymize()
-            .stream()
-            .map(String::trim)
-            .collect(Collectors.toCollection(() -> new TreeSet<>(String.CASE_INSENSITIVE_ORDER)));
+        Set<String> columnsToPseudonymize = trimIntoSet(((CsvRules) configurationOptions.getRules())
+            .getColumnsToPseudonymize());
 
+        final Map<String, String> columnsToRename = ((CsvRules) configurationOptions.getRules())
+            .getColumnsToRename()
+            .entrySet().stream()
+            .collect(Collectors.toMap(
+                entry -> entry.getKey().trim(),
+                entry -> entry.getValue().trim(),
+                (a, b) -> a,
+                () -> new TreeMap<>(String.CASE_INSENSITIVE_ORDER)));
 
         // headers respecting insertion order
         // when constructing the parser with ignore header case the keySet may not return values in
@@ -74,24 +78,31 @@ public class CSVFileHandler implements FileHandler {
         headersCI.addAll(headers);
 
         // precondition, everything expected to be pseudonymized must exist in the rest of columns
-        Sets.SetView<String> missingColumns = Sets.difference(columnsToPseudonymize, headersCI);
-        if (!missingColumns.isEmpty()) {
+        Set<String> outputColumnsCI = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+        outputColumnsCI.addAll(applyReplacements(headersCI, columnsToRename));
+        Sets.SetView<String> missingColumnsToPseudonymize =
+            Sets.difference(columnsToPseudonymize, outputColumnsCI);
+        if (!missingColumnsToPseudonymize.isEmpty()) {
             throw new IllegalArgumentException(String.format("Columns to pseudonymize (%s) missing from set found in file (%s)",
-                String.join("\",\"", missingColumns),
-                String.join("\",\"", headers)));
+                "\"" + String.join("\",\"", missingColumnsToPseudonymize) + "\"",
+                "\"" + String.join("\",\"", headersCI) + "\""));
         }
 
 
         try(ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
             PrintWriter printWriter = new PrintWriter(baos);
             CSVPrinter printer = new CSVPrinter(printWriter, CSVFormat.DEFAULT
-                .withHeader(headers.toArray(new String[0])))) {
+                .withHeader(applyReplacements(headers, columnsToRename).toArray(new String[0])))
+            ) {
 
             records.forEach(row -> {
                 List<Object> sanitized = headers.stream() // only iterate on allowed headers
                         .map(column -> {
                             String value = row.get(column);
-                            if (columnsToPseudonymize.contains(column)) {
+
+                            String outputColumnName = columnsToRename.getOrDefault(column, column);
+
+                            if (columnsToPseudonymize.contains(outputColumnName)) {
                                 if (StringUtils.isNotBlank(value)) {
                                     try {
                                         return objectMapper.writeValueAsString(sanitizer.pseudonymize(value));
@@ -116,4 +127,18 @@ public class CSVFileHandler implements FileHandler {
             return baos.toByteArray();
         }
     }
+
+    List<String> applyReplacements(Collection<String> original, final Map<String, String> replacements) {
+        return original.stream()
+            .map(value -> replacements.getOrDefault(value, value))
+            .collect(Collectors.toList());
+    }
+
+
+    Set<String> trimIntoSet(Collection<String> set) {
+        return set.stream()
+            .map(String::trim)
+            .collect(Collectors.toCollection(() -> new TreeSet<>(String.CASE_INSENSITIVE_ORDER)));
+    }
+
 }
