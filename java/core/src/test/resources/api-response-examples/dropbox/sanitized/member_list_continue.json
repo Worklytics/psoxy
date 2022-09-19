@@ -1,0 +1,42 @@
+{
+  "cursor":"ZtkX9_EHj3x7PMkVuFIhwKYXEpwpLwyxp9vMKomUhllil9q7eWiAu",
+  "has_more":true,
+  "members":[
+    {
+      "profile":{
+        "account_id":"{\"scope\":\"dropbox\",\"hash\":\"YxQH_b5.aEzCpS9xQGbSiaFPuNc_XJ9IaJLfqE3A22Q\"}",
+        "email":"{\"scope\":\"email\",\"domain\":\"seagull.com\",\"hash\":\"m4d3GCVSrLT98phnF6MJZbBgUm5NJdwBjs5PpoWF5O4\"}",
+        "email_verified":false,
+        "external_id":"244423",
+        "groups":[
+          "g:e2db7665347abcd600000000001a2b3c"
+        ],
+        "joined_on":"2015-05-12T15:50:38Z",
+        "member_folder_id":"20",
+        "membership_type":{
+          ".tag":"full"
+        },
+        "name":{ },
+        "secondary_emails":[
+          {
+            "email":"{\"scope\":\"email\",\"domain\":\"strawberry.com\",\"hash\":\"Y68Y9TmJ.GYx.DBz7X0bUUx9.HUZqxB8PXnxtci1PS8\"}",
+            "is_verified":false
+          },
+          {
+            "email":"{\"scope\":\"email\",\"domain\":\"orange.com\",\"hash\":\"nWtwXo87ceOVpZ04h.6kdyApLJuPLcMqit2_eeOgH.g\"}",
+            "is_verified":true
+          }
+        ],
+        "status":{
+          ".tag":"active"
+        },
+        "team_member_id":"dbmid:FDFSVF-DFSDF"
+      },
+      "roles":[
+        {
+          "role_id":"pid_dbtmr:3456"
+        }
+      ]
+    }
+  ]
+}

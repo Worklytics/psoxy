@@ -4,6 +4,7 @@ import co.worklytics.psoxy.gateway.HttpEventRequest;
 import com.google.cloud.functions.HttpRequest;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 
 import java.util.List;
 import java.util.Optional;
@@ -48,9 +49,13 @@ public class CloudFunctionRequest implements HttpEventRequest {
     }
 
     @Override
+    @SneakyThrows
+    public byte[] getBody() {
+        return request.getInputStream() == null ? request.getInputStream().readAllBytes() : null;
+    }
+
+    @Override
     public String prettyPrint() {
         return request.toString();
     }
 }
-
-
