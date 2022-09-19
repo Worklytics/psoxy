@@ -294,9 +294,8 @@ all the operations for the connector:
 
 1. Go to https://www.dropbox.com/apps and Build an App
 2. Then go https://www.dropbox.com/developers to enter in `App Console` to configure your app
-3. Now you are in the app, go to `Permissions` and mark all the scopes described before. NOTE: Probably
-   you the UI will mark you more required permissions automatically (like *account_info_read*.) Just mark the ones
-   described and the UI will ask you to include the ones it requires.
+3. Now you are in the app, go to `Permissions` and mark all the scopes described before. NOTE: Probably in the UI will mark you more required permissions automatically (like *account_info_read*.) Just mark the ones
+   described and the UI will ask you to include required.
 4. On settings, you could access to `App key` and `App secret`. You can create an access token here, but with limited
    expiration. We need to create a long-lived token, so edit the following URL with your `App key` and paste it into the
    browser:
@@ -325,7 +324,7 @@ all the operations for the connector:
   "team_id": "some team id"
 }
 ```
-7. Finally set following variables:
+7. Finally set following variables in AWS System Manager parameters store / GCP Cloud Secrets (if default implementation):
   - `PSOXY_dropbox_business_REFRESH_TOKEN` secret variable with value of `refresh_token` received in previous response
   - `PSOXY_dropbox_business_CLIENT_ID` with `App key` value.
   - `PSOXY_dropbox_business_CLIENT_SECRET` with `App secret` value.
@@ -345,7 +344,7 @@ locals {
   }
   enabled_oauth_long_access_connectors = {for k, v in local.oauth_long_access_connectors : k => v if contains(var.enabled_connectors, k)}
 
-  enabled_oauth_long_access_connectors_todos = { for k, v in local.enabled_oauth_long_access_connectors : k => v if v.external_token_todo != null }
+  enabled_oauth_long_access_connectors_todos = {for k, v in local.enabled_oauth_long_access_connectors : k => v if v.external_token_todo != null}
   # list of pair of [(conn1, secret1), (conn1, secret2), ... (connN, secretM)]
   enabled_oauth_secrets_to_create            = distinct(flatten([
   for k, v in local.enabled_oauth_long_access_connectors : [
