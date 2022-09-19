@@ -6,6 +6,7 @@ import co.worklytics.psoxy.storage.FileHandler;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import org.apache.commons.csv.CSVFormat;
@@ -73,9 +74,12 @@ public class CSVFileHandler implements FileHandler {
         headersCI.addAll(headers);
 
         // precondition, everything expected to be pseudonymized must exist in the rest of columns
-        columnsToPseudonymize
-            .forEach(columnToPseudonymize ->
-                Preconditions.checkArgument(headersCI.contains(columnToPseudonymize), "Column %s to be pseudonymized not in file", columnToPseudonymize));
+        Sets.SetView<String> missingColumns = Sets.difference(columnsToPseudonymize, headersCI);
+        if (!missingColumns.isEmpty()) {
+            throw new IllegalArgumentException(String.format("Columns to pseudonymize (%s) missing from set found in file (%s)",
+                String.join("\",\"", missingColumns),
+                String.join("\",\"", headers)));
+        }
 
 
         try(ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
