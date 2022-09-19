@@ -86,20 +86,35 @@ locals {
 resource "local_file" "review" {
   filename = "test ${google_cloudfunctions_function.function.name}.md"
   content  = <<EOT
+## Testing
+
 Review the deployed Cloud function in GCP console:
 
 https://console.cloud.google.com/functions/details/${var.region}/${google_cloudfunctions_function.function.name}?project=${var.project_id}
 
-## Testing
+### Make "test calls" using our Psoxy testing tool
 
 From root of your checkout of the Psoxy repo, these are some example test calls you can try (YMMV):
+
+Based on your configuration, these are some example test calls you can try using our Node.js-based Psoxy testing tool (YMMV):
 
 ```shell
 ${coalesce(join("\n", local.test_commands), "cd docs/example-api-calls/")}
 ```
 
+To be able to run the commands above you need Node.js (>=16) and npm (v >=8) installed. Please, check
+the documentation of our Psoxy testing tool (`tools/psoxy-test/README.md`) for a detailed description
+of all the different options.
+
 See `docs/example-api-calls/` for more example API calls specific to the data source to which your
 Proxy is configured to connect.
+
+Feel free to try the above calls, and reference to the source's API docs for other parameters /
+endpoints to experiment with. If you spot any additional fields you believe should be
+redacted/pseudonymized, feel free to modify the rules in your local repo and re-deploy OR configure
+a RULES variable in the source.
+
+Contact support@worklytics.co for assistance modifying the rules as needed.
 
 EOT
 }

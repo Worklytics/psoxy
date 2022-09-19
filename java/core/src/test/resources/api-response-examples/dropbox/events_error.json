@@ -1,0 +1,10 @@
+{
+  "error": {
+    ".tag": "account_id_not_found"
+  },
+  "error_summary": "account_id_not_found/...",
+  "user_message": {
+    "locale": "en",
+    "text": "Your team has used all of its data transport API calls for the month. Your monthly limit will reset on the 1st day of every month. If you'd like to move to a plan with unlimited API calls, please contact sales."
+  }
+}

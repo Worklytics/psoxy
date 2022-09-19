@@ -48,7 +48,7 @@ locals {
   proxy_endpoint_url  = substr(aws_lambda_function_url.lambda_url.function_url, 0, length(aws_lambda_function_url.lambda_url.function_url) - 1)
   impersonation_param = var.example_api_calls_user_to_impersonate == null ? "" : " -i \"${var.example_api_calls_user_to_impersonate}\""
   test_commands = [for path in var.example_api_calls :
-    "${var.path_to_repo_root}tools/test-psoxy.sh -a -r \"${var.aws_assume_role_arn}\" -u \"${local.proxy_endpoint_url}${path}\"${local.impersonation_param}"
+    "node ${var.path_to_repo_root}tools/psoxy-test/cli.js -r \"${var.aws_assume_role_arn}\" -u \"${local.proxy_endpoint_url}${path}\"${local.impersonation_param}"
   ]
 }
 
@@ -62,33 +62,17 @@ Review the deployed function in AWS console:
 
 - https://console.aws.amazon.com/lambda/home?region=${var.region}#/functions/${var.function_name}?tab=monitoring
 
-### Prereqs
-Requests to AWS API need to be [signed](https://docs.aws.amazon.com/general/latest/gr/signing_aws_api_requests.html).
-One tool to do it easily is [awscurl](https://github.com/okigan/awscurl). Install it:
+### Make "test calls" using our Psoxy testing tool
 
-On MacOS via Homebrew:
-```shell
-brew install awscurl
-```
-
-Alternatively, via `pip` (python package manager):
-```shell
-pip install awscurl
-# Installs in $HOME/.local/bin
-# Make it available in your path
-# Add the following line to ~/.bashrc
-export PATH="$HOME/.local/bin:$PATH"
-# Then reload the config
-source ~/.bashrc
-```
-
-### From Terminal
-
-From root of your checkout of the Psoxy repo, these are some example test calls you can try (YMMV):
+Based on your configuration, these are some example test calls you can try using our Node.js-based Psoxy testing tool (YMMV):
 
 ```shell
 ${coalesce(join("\n", local.test_commands), "cd docs/example-api-calls/")}
 ```
+
+To be able to run the commands above you need Node.js (>=16) and npm (v >=8) installed. Please, check
+the documentation of our Psoxy testing tool (`/tools/psoxy-test/README.md`) for a detailed description
+of all the different options.
 
 See `docs/example-api-calls/` for more example API calls specific to the data source to which your
 Proxy is configured to connect.
