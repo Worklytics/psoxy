@@ -1,5 +1,7 @@
+import chalk from 'chalk';
 import aws from './lib/aws.js';
 import gcp from './lib/gcp.js';
+import { saveRequestResultToFile } from './lib/utils.js';
 
 /**
  * @typedef {Object} PsoxyResponse
@@ -20,10 +22,11 @@ import gcp from './lib/gcp.js';
  * @param {boolean} options.skip - Whether to skip or not sanitization rules (only in DEV mode)
  * @param {boolean} options.gzip - Add Gzip compression headers
  * @param {boolean} options.verbose - Verbose ouput (default to console)
+ * @param {boolean} options.saveToFile - Whether to save successful responses to a file (responses/[api-path]-[ISO8601 timestamp].json)
  * @return {PsoxyResponse}
  */
 export default async function (options = {}) {
-  const result = {};
+  let result = {};
   let url;
 
   try {
@@ -33,52 +36,60 @@ export default async function (options = {}) {
     return result;
   }
 
-  const isAWS = aws.isAWS(url);
-  const isGCP = gcp.isGCP(url);
-  let test;
+  const isAWS = aws.isValidURL(url);
+  const isGCP = gcp.isValidURL(url);
+  let psoxyCall;
 
   if (options.force && ['aws', 'gcp'].includes(options.force.toLowerCase())) {
-    test = options.force === 'aws' ? aws.test : gcp.test;
+    psoxyCall = options.force === 'aws' ? aws.call : gcp.call;
   } else if (!isAWS && !isGCP) {
     result.error = `"${options.url}" doesn't seem to be a valid endpoint: AWS or GCP`;
     return result;
   } else {
-    test = isAWS ? aws.test : gcp.test;
+    psoxyCall = isAWS ? aws.call : gcp.call;
   }
 
   try {
-    const response = await test(options);
-    if (response.status === 200) {
-      const data = await response.json();
+    result = await psoxyCall(options);
+    
+    if (result.status === 200) {
+      if (options.saveToFile) {
+        try {
+          await saveRequestResultToFile(url, result.data);
+          console.log(chalk.green('Results saved to file'));
+        } catch (err) {
+          console.error(chalk.red('Unable to save results to file'), err);
+        }        
+      }
 
-      result.response = {
-        status: response.status,
-        data: data,
-      };
     } else {
-      const psoxyError = response.headers.get('x-psoxy-error');
-
-      if (psoxyError) {
-        switch (psoxyError) {
-          case 'BLOCKED_BY_RULES':
-            result.error = 'Blocked by rules error: make sure URL path is correct';
-            break;
-          case 'CONNECTION_SETUP':
-            result.error =
-              'Connection setup error: make sure the data source is properly configured';
-            break;
-          case 'API_ERROR':
-            result.error = 'API error: call to data source failed';
-            break;
-          default:
-            result.error = psoxyError;
-        }
-      } else {
-        result.error = response.statusText;
+      switch (result.error) {
+        case 'BLOCKED_BY_RULES':
+          result.error = 'Blocked by rules error: make sure URL path is correct';
+          break;
+        case 'CONNECTION_SETUP':
+          result.error =
+            'Connection setup error: make sure the data source is properly configured';
+          break;
+        case 'API_ERROR':
+          result.error = 'API error: call to data source failed';
+          break;
       }
     }
   } catch (err) {
     result.error = err.message;
+  }
+
+  if (result?.error) {
+    console.error(chalk.bold.red(`${result.status}: ERROR`));
+    console.error(chalk.bold.red(result.error));
+  } else if (result.status === 200) {
+    console.log(chalk.bold.green(`${result.status}: OK`));
+    console.log(result.data);
+  }
+
+  if (options.verbose) {
+    console.log(`Response headers:\n ${result.headers}`);
   }
 
   return result;

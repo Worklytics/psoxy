@@ -62,22 +62,17 @@ Review the deployed function in AWS console:
 
 - https://console.aws.amazon.com/lambda/home?region=${var.region}#/functions/${var.function_name}?tab=monitoring
 
-### Prereqs
-Requests to AWS API need to be [signed](https://docs.aws.amazon.com/general/latest/gr/signing_aws_api_requests.html).
-Our Node.js based testing tool does it, but the machine running the testing script must have
-the appropriate AWS credentials (you can use [aws-mfa](https://github.com/broamski/aws-mfa) or any
-similar tool).
+### Make "test calls" using our Psoxy testing tool
 
-- [Node.js] >= v16
-- [npm] >= v8
-
-### From Terminal
-
-From root of your checkout of the Psoxy repo, these are some example test calls you can try (YMMV):
+Based on your configuration, these are some example test calls you can try using our Node.js-based Psoxy testing tool (YMMV):
 
 ```shell
 ${coalesce(join("\n", local.test_commands), "cd docs/example-api-calls/")}
 ```
+
+To be able to run the commands above you need Node.js (>=16) and npm (v >=8) installed. Please, check
+the documentation of our Psoxy testing tool (`/tools/psoxy-test/README.md`) for a detailed description
+of all the different options.
 
 See `docs/example-api-calls/` for more example API calls specific to the data source to which your
 Proxy is configured to connect.

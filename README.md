@@ -46,8 +46,7 @@ versions of all of the following:
 
 And, depending on your scenario, you may also need:
   - [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) is
-    required to deploy your psoxy instances in AWS; Node.js v16+ and npm v8+, to be able to
-    test your proxy instances locally.
+    required to deploy your psoxy instances in AWS.
   - [Google Cloud Command Line tool](https://cloud.google.com/sdk/docs/install) Required to host
     your psoxy instances in GCP *OR* if you plan to connect Google Workspace as a data source. It
     should be configured for the GCP project that will host your psoxy instance(s) and/or your
@@ -56,7 +55,7 @@ And, depending on your scenario, you may also need:
     Microsoft 365 sources.
   - [openssl](https://www.openssl.org/) If generating local certificates (see
     [`infra/modules/azure-local-cert`](infra/modules/azuread-local-cert))
-
+  - Node.js v16+ and npm v8+, to be able to test your proxy instances locally (see `tools/psoxy-test/README.md`).
 ### Setup
 
   1. Choose the cloud platform you'll deploy to, and follow its guide:

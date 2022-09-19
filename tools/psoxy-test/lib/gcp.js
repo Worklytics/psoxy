@@ -1,4 +1,4 @@
-import fetch from 'node-fetch';
+import { getCommonHTTPHeaders, fetch } from './utils.js';
 
 /**
  * Helper: check url deploy type
@@ -6,7 +6,7 @@ import fetch from 'node-fetch';
  * @param {String|URL} url
  * @return {boolean}
  */
-function isGCP(url) {
+function isValidURL(url) {
   if (typeof url === 'string') {
     url = new URL(url);
   }
@@ -19,20 +19,15 @@ function isGCP(url) {
  * @param {Object} options - see `../index.js`
  * @returns {Promise}
  */
-async function test(options = {}) {
+async function call(options = {}) {
   if (!options.token) {
     throw new Error('Authorization token is required for GCP endpoints');
   }
 
   const headers = {
-    'Accept-encoding': options.gzip ? 'gzip' : 'none',
-    'X-Psoxy-Skip-Sanitizer': options.skip.toString(),
+    ...getCommonHTTPHeaders(options),
     Authorization: `Bearer ${options.token}`,
   };
-
-  if (options.impersonate) {
-    headers['X-Psoxy-User-To-Impersonate'] = options.impersonate;
-  }
 
   console.log('Calling psoxy...');
   console.log(`Request: ${options.url}`);
@@ -49,6 +44,6 @@ async function test(options = {}) {
 }
 
 export default {
-  isGCP: isGCP,
-  test: test,
+  isValidURL: isValidURL,
+  call: call,
 };
