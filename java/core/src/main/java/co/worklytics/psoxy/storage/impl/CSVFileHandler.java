@@ -9,6 +9,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import lombok.extern.java.Log;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
@@ -27,6 +28,7 @@ import java.util.stream.Collectors;
  * CSV should have the first row with headers and being separated with commas; content should be quoted
  * if include commas or quotes inside.
  */
+@Log
 @NoArgsConstructor(onConstructor_ = @Inject)
 public class CSVFileHandler implements FileHandler {
 
@@ -81,13 +83,16 @@ public class CSVFileHandler implements FileHandler {
         Set<String> headersCI = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
         headersCI.addAll(headers);
 
-        // precondition, everything expected to be pseudonymized must exist in the rest of columns
+        // check if there are columns that are configured to be pseudonymized but are not present in
+        // the file
+        // NOTE: used to error, but now just logs. use case is if someone is trying to be defensive
+        // by pseudonymizing IF column should happen to exist
         Set<String> outputColumnsCI = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
         outputColumnsCI.addAll(applyReplacements(headersCI, columnsToRename));
         Sets.SetView<String> missingColumnsToPseudonymize =
             Sets.difference(columnsToPseudonymize, outputColumnsCI);
         if (!missingColumnsToPseudonymize.isEmpty()) {
-            throw new IllegalArgumentException(String.format("Columns to pseudonymize (%s) missing from set found in file (%s)",
+            log.info(String.format("Columns to pseudonymize (%s) missing from set found in file (%s)",
                 "\"" + String.join("\",\"", missingColumnsToPseudonymize) + "\"",
                 "\"" + String.join("\",\"", headersCI) + "\""));
         }
