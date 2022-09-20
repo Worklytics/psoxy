@@ -214,8 +214,7 @@ Use this step if you want to install in the whole org, across multiple workspace
   2. Go to *Org Level Apps* and Opt-in to the program
   3. Go to Settings > Install App
   4. Install into *organization*
-  5. Copy the User OAuth Token
-  6. If you are implementing the Proxy, then add the access token as `PSOXY_ACCESS_TOKEN_psoxy-slack-discovery-api` secret value in the Secret Manager for the Proxy
+  5. Copy the User OAuth Token and store it in secret manager.
   Otherwise, share the token with the AWS/GCP administrator completing the implementation.
 ### Workspace install
 Use this steps if you intend to install in just one workspace within your org.

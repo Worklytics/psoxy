@@ -19,49 +19,58 @@ import java.util.stream.Collectors;
 public class PrebuiltSanitizerRules {
 
     static final Rules2 GCAL = Rules2.builder()
-            .endpoint(Rules2.Endpoint.builder()
-                    .pathRegex("^/calendar/v3/calendars/[^/]*?$")
-                    .transform(Transform.Redact.ofPaths("$.summary"))
-                    .transform(Transform.Pseudonymize.ofPaths("$.id"))
-                    .build())
-            .endpoint(Rules2.Endpoint.builder()
-                    .pathRegex("^/calendar/v3/calendars/[^/]*?/events[^/]*")
-                    .transform(Transform.Pseudonymize.ofPaths("$..email"))
-                    .transform(Transform.Redact.ofPaths(
-                            "$..displayName",
-                            "$.summary",
-                            "$.items[*].extendedProperties.private",
-                            "$.items[*].summary",
-                            "$.items[*].conferenceData.entryPoints[*]['accessCode','password','passcode','pin']"
-                    ))
-                    .transform(ZoomTransforms.FILTER_CONTENT_EXCEPT_ZOOM_URL.toBuilder()
-                            .jsonPath("$.items[*].description")
-                            .build())
-                    .transform(ZoomTransforms.SANITIZE_JOIN_URL.toBuilder()
-                            .jsonPath("$.items[*].description")
-                            .jsonPath("$.items[*].conferenceData.entryPoints[*].uri")
-                            .build())
-                    .build())
-            .endpoint(Rules2.Endpoint.builder()
-                    .pathRegex("^/calendar/v3/calendars/[^/]*?/events/.*")
-                    .transform(Transform.Redact.ofPaths(
-                            "$..displayName",
-                            "$.summary",
-                            "$.conferenceData.entryPoints[*]['accessCode','password','passcode','pin']"
-                    ))
-                    .transform(ZoomTransforms.FILTER_CONTENT_EXCEPT_ZOOM_URL.toBuilder()
-                            .jsonPath("$.description")
-                            .build())
-                    .transform(ZoomTransforms.SANITIZE_JOIN_URL.toBuilder()
-                            .jsonPath("$.description")
-                            .jsonPath("$.conferenceData.entryPoints[*].uri")
-                            .build())
-                    .transform(Transform.Pseudonymize.ofPaths("$..email"))
-                    .build())
-            .endpoint(Rules2.Endpoint.builder()
-                    .pathRegex("^/calendar/v3/users/[^/]*?/settings.*")
-                    .build())
-            .build();
+        .endpoint(Rules2.Endpoint.builder()
+            .pathRegex("^/calendar/v3/calendars/[^/]*?$")
+            .transform(Transform.Redact.ofPaths("$.summary"))
+            .transform(Transform.Pseudonymize.ofPaths("$.id"))
+            .build())
+        .endpoint(Rules2.Endpoint.builder()
+            .pathRegex("^/calendar/v3/calendars/[^/]*?/events[^/]*")
+            .transform(Transform.Pseudonymize.ofPaths("$..email"))
+            .transform(Transform.Redact.ofPaths(
+                "$..displayName",
+                "$.summary",
+                "$.items[*].extendedProperties", // overly conservative, but we just don't know what's here
+                "$.items[*].summary",
+                "$.items[*].conferenceData.notes",
+                "$.items[*].conferenceData.entryPoints[*]['accessCode','password','passcode','pin']",
+                "$..meetingCreatedBy" // not documented; seen for one customer; would be better to pseudonymize, if has reliable schema
+            ))
+            .transform(ZoomTransforms.FILTER_CONTENT_EXCEPT_ZOOM_URL.toBuilder()
+                .jsonPath("$.items[*].description")
+                .build())
+            .transform(ZoomTransforms.SANITIZE_JOIN_URL.toBuilder()
+                .jsonPath("$.items[*].description")
+                .jsonPath("$.items[*].location") // sometimes ppl put meeting url here
+                .jsonPath("$.items[*].conferenceData.entryPoints[*].uri")
+                .build())
+            .build())
+        .endpoint( Rules2.Endpoint.builder()
+            .pathRegex("^/calendar/v3/calendars/[^/]*?/events/.*")
+            .transform(Transform.Redact.ofPaths(
+                "$..displayName",
+                "$.summary",
+                "$.extendedProperties", // overly conservative, but we just don't know what's here
+                "$.conferenceData.entryPoints[*]['accessCode','password','passcode','pin']",
+                "$.conferenceData.notes",
+                "$..meetingCreatedBy" //not documented, but seen for one customer; would be better to pseudonymize, if has reliable schema
+            ))
+            .transform(ZoomTransforms.FILTER_CONTENT_EXCEPT_ZOOM_URL.toBuilder()
+                .jsonPath("$.description")
+                .build())
+            .transform(ZoomTransforms.SANITIZE_JOIN_URL.toBuilder()
+                .jsonPath("$.description")
+                .jsonPath("$.conferenceData.entryPoints[*].uri")
+                .jsonPath("$.location") // sometimes ppl put meeting url here
+                .build())
+            .transform(Transform.Pseudonymize.builder()
+                .jsonPath("$..email")
+                .build())
+            .build())
+        .endpoint(Rules2.Endpoint.builder()
+            .pathRegex("^/calendar/v3/users/[^/]*?/settings.*")
+            .build())
+        .build();
 
     static final Set<String> GOOGLE_CHAT_EVENT_PARAMETERS_PII = ImmutableSet.of(
             "actor"
