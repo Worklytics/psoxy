@@ -32,11 +32,19 @@ resource "google_secret_manager_secret" "service-account-key" {
   secret_id = var.secret_id
 
   replication {
-    automatic = true
+    user_managed {
+      dynamic "replicas" {
+        for_each = var.replica_regions
+        content {
+          location = replicas.value
+        }
+      }
+    }
   }
 
   lifecycle {
     ignore_changes = [
+      replication, # for backwards compatibility; replication can't be changed after secrets created
       labels
     ]
   }
