@@ -201,15 +201,16 @@ public class PrebuiltSanitizerRules {
                             .build())
                     .build())
             //list org units
+            // https://developers.google.com/admin-sdk/directory/reference/rest/v1/orgunits/list
             .endpoint(Rules2.Endpoint.builder()
-                    .pathRegex("^/admin/directory/v1/orgunits\\?.*")
+                    .pathRegex("^/admin/directory/v1/customer/[^/]*/orgunits\\?.*")
                     .transform(Transform.Redact.builder()
                             .jsonPath("$..description")
                             .build())
                     .build())
             //get org unit
             .endpoint(Rules2.Endpoint.builder()
-                    .pathRegex("^/admin/directory/v1/orgunits/[^/]*")
+                    .pathRegex("^/admin/directory/v1/customer/[^/]*/orgunits/[^/]*")
                     .transform(Transform.Redact.builder()
                             .jsonPath("$..description")
                             .build())
