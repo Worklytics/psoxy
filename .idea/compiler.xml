@@ -37,8 +37,8 @@
         <module name="core" />
         <module name="cmd-line" />
         <module name="gateway-core" />
-        <module name="psoxy-gcp" />
         <module name="aws" />
+        <module name="gcp" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -48,7 +48,6 @@
       <module name="gateway-core" target="11" />
       <module name="gcp" target="11" />
       <module name="impl" target="11" />
-      <module name="psoxy-gcp" target="11" />
       <module name="root" target="11" />
     </bytecodeTargetLevel>
   </component>

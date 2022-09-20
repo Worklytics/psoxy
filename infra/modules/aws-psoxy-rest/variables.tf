@@ -24,6 +24,12 @@ variable "handler_class" {
   default     = "co.worklytics.psoxy.Handler"
 }
 
+variable "reserved_concurrent_executions" {
+  type        = number
+  description = "Max number of concurrent instances for the function"
+  default     = null # meaning no reserved concurrency
+}
+
 variable "aws_assume_role_arn" {
   type        = string
   description = "role arn"
@@ -32,16 +38,6 @@ variable "aws_assume_role_arn" {
 variable "source_kind" {
   type        = string
   description = "kind of source (eg, 'gmail', 'google-chat', etc)"
-}
-
-variable "parameters" {
-  # see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter#attributes-reference
-  type = list(object({
-    name    = string
-    arn     = string
-    version = string
-  }))
-  description = "System Manager Parameters to expose to function"
 }
 
 variable "path_to_repo_root" {

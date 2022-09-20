@@ -43,14 +43,10 @@ versions of all of the following:
   - [terraform](https://www.terraform.io/) optional; if you don't use this, you'll need to configure
     your GCP/AWS project via the web console/CLI tools. Writing your own terraform config that
     re-uses our modules will simplify things greatly.
-  - [jq](https://stedolan.github.io/jq/) optional, used for testing.
 
 And, depending on your scenario, you may also need:
   - [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) is
-    required to deploy your psoxy instances in AWS; and for testing AWS deployments locally:
-    - [python 3.6+](https://www.python.org/)
-    - [pip](https://pypi.org/project/pip/) - usually included with Python
-    - [awscurl](https://github.com/okigan/awscurl) - installed via pip
+    required to deploy your psoxy instances in AWS.
   - [Google Cloud Command Line tool](https://cloud.google.com/sdk/docs/install) Required to host
     your psoxy instances in GCP *OR* if you plan to connect Google Workspace as a data source. It
     should be configured for the GCP project that will host your psoxy instance(s) and/or your
@@ -59,7 +55,7 @@ And, depending on your scenario, you may also need:
     Microsoft 365 sources.
   - [openssl](https://www.openssl.org/) If generating local certificates (see
     [`infra/modules/azure-local-cert`](infra/modules/azuread-local-cert))
-
+  - Node.js v16+ and npm v8+, to be able to test your proxy instances locally (see `tools/psoxy-test/README.md`).
 ### Setup
 
   1. Choose the cloud platform you'll deploy to, and follow its guide:
@@ -118,7 +114,7 @@ recreate them (for example, to use GCP project that already exists).
 terraform apply
 ```
 
-  9. follow any `TODO` instructions produced by Terraform, such as:
+  10. follow any `TODO` instructions produced by Terraform, such as:
      - build and deploy JAR (built from this repo) into your environment
      - provision API keys / make OAuth grants needed by each Data Connection
      - create the Data Connection from Worklytics to your psoxy instance (Terraform can provide
@@ -131,8 +127,14 @@ terraform apply
 
 ## Releases
 
-### [v0.4.3](https://github.com/Worklytics/psoxy/releases/tag/v0.4.3)
+### [v0.4.4](https://github.com/Worklytics/psoxy/releases/tag/v0.4.4)
 The `main` branch is current at 0.4.
+
+Features:
+- Zoom connector now is built against Server-to-server OAuth apps, removing the use of the JWT application (will be deprecated in June 2023).
+
+
+### [v0.4.3](https://github.com/Worklytics/psoxy/releases/tag/v0.4.3)
 
 Features:
   - **transiently reversible pseudonyms** - rules to support returning  'transiently' reversible

@@ -1,0 +1,40 @@
+{
+  "name": "psoxy-test",
+  "version": "0.4.3",
+  "private": "true",
+  "type": "module",
+  "description": "Worklytics Psoxy testing tool",
+  "main": "index.js",
+  "scripts": {
+    "test": "ava"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Worklytics/psoxy.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Worklytics/psoxy/issues"
+  },
+  "homepage": "https://github.com/Worklytics/psoxy#readme",
+  "dependencies": {
+    "aws4": "^1.11.0",
+    "chalk": "^5.0.1",
+    "commander": "^9.4.0",
+    "lodash": "^4.17.21",
+    "node-fetch": "^3.2.10"
+  },
+  "devDependencies": {
+    "ava": "^4.3.3",
+    "testdouble": "^3.16.6"
+  },
+  "ava": {
+    "files": [
+      "test/**/*.test.js"
+    ],
+    "nodeArguments": [
+      "--loader=testdouble"
+    ]
+  }
+}
