@@ -23,3 +23,12 @@ variable "secret_id" {
   type        = string
   description = "ID to give secret for SA key"
 }
+
+variable "replica_regions" {
+  type        = list(string)
+  description = "List of regions to replicate the secret to"
+  default     = [
+    "us-east1",
+    "us-west1",
+  ]
+}

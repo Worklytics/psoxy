@@ -19,3 +19,12 @@ variable "rotation_days" {
   default     = 60
   description = "rotation period for the SA key, in days"
 }
+
+variable "replica_regions" {
+  type        = list(string)
+  description = "List of regions to replicate the secret to"
+  default     = [
+    "us-east1",
+    "us-west1",
+  ]
+}

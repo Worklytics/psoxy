@@ -63,3 +63,12 @@ variable "gcp_region" {
   description = "region in which to provision GCP resources, if applicable"
   default     = "us-central1"
 }
+
+variable "replica_regions" {
+  type        = list(string)
+  description = "List of regions in which to replicate secrets."
+  default     = [
+    "us-central1",
+    "us-west1",
+  ]
+}

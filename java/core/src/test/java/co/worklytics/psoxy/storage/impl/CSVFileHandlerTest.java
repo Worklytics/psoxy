@@ -11,6 +11,8 @@ import co.worklytics.test.TestModules;
 import co.worklytics.test.TestUtils;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import dagger.Component;
 import lombok.SneakyThrows;
 import org.apache.commons.codec.binary.Base64;
@@ -225,6 +227,33 @@ public class CSVFileHandlerTest {
         }
     }
 
+    @Test
+    @SneakyThrows
+    void handle_rename() {
+        final String EXPECTED = "EMPLOYEE_ID,EMPLOYEE_EMAIL,DEPARTMENT\r\n" +
+            "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",\",,,\"\r\n";
+
+
+        Sanitizer sanitizer = sanitizerFactory.create(Sanitizer.ConfigurationOptions.builder()
+            .rules(CsvRules.builder()
+                .columnToPseudonymize("EMPLOYEE_ID")
+                .columnToPseudonymize("EMPLOYEE_EMAIL")
+                .columnsToRename(ImmutableMap.of("EMAIL", "EMPLOYEE_EMAIL"))
+                .build())
+            .pseudonymizationSalt("salt")
+            .pseudonymImplementation(PseudonymImplementation.LEGACY)
+            .defaultScopeId("hris")
+            .build());
+
+        File inputFile = new File(getClass().getResource("/csv/hris-example-quotes.csv").getFile());
+
+        try (FileReader in = new FileReader(inputFile)) {
+            byte[] result  = csvFileHandler.handle(in, sanitizer);
+
+            assertEquals(EXPECTED, new String(result));
+        }
+    }
+
 
     @SneakyThrows
     @Test
@@ -233,7 +262,6 @@ public class CSVFileHandlerTest {
             "Start Date,End Date,Response Type,Progress,Finished,Recorded Date,Response ID,Location Latitude,Location Longitude,What is the meaning of life?,\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"qejD3BfohzeqJbqCcGMI2O0T-fn_KB24RjUbb8pjXHs\"\"}\",\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"ilQfXaLbu3b3sKjKeOzt83Uy92Yy3shc_dlq1ro60cU\"\"}\",Q_DataPolicyViolations,Rating\r\n" +
             "\"{\"\"ImportId\"\":\"\"startDate\"\",\"\"timeZone\"\":\"\"America/Los_Angeles\"\"}\",\"{\"\"ImportId\"\":\"\"endDate\"\",\"\"timeZone\"\":\"\"America/Los_Angeles\"\"}\",\"{\"\"ImportId\"\":\"\"status\"\"}\",\"{\"\"ImportId\"\":\"\"progress\"\"}\",\"{\"\"ImportId\"\":\"\"finished\"\"}\",\"{\"\"ImportId\"\":\"\"recordedDate\"\",\"\"timeZone\"\":\"\"America/Los_Angeles\"\"}\",\"{\"\"ImportId\"\":\"\"_recordId\"\"}\",\"{\"\"ImportId\"\":\"\"locationLatitude\"\"}\",\"{\"\"ImportId\"\":\"\"locationLongitude\"\"}\",\"{\"\"ImportId\"\":\"\"QID1\"\"}\",\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"jw7v7rBpw41HFGKAH8Jp8yI2QlgO7ZYVerCJkco51Ic\"\"}\",\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"aM2l7o6Vm5Z1bRaYm_tjBfIolutVG-1k8s89UsME6LA\"\"}\",\"{\"\"ImportId\"\":\"\"Q_DataPolicyViolations\"\"}\",\"{\"\"ImportId\"\":\"\"Rating\"\"}\"\r\n" +
             "9/1/22 7:50,9/1/22 7:51,32,100,1,9/1/22 7:51,R_1ie8z2GwkwzKG3h,,,3,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"acme.COM\"\",\"\"hash\"\":\"\"PM3Oh15cS2rBp-kjSrOCpQvYFe8Wo3qLj1o5F3fuefI\"\"}\",\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"5NL5SaQBwE6c0L1BDjHW-BtBOXQVH8RYwY0tGGw3khk\"\"}\",,5\r\n";
-
 
         Sanitizer sanitizer = sanitizerFactory.create(Sanitizer.ConfigurationOptions.builder()
             .rules(CsvRules.builder()
@@ -253,10 +281,38 @@ public class CSVFileHandlerTest {
 
         File inputFile = new File(getClass().getResource("/csv/example_acme_20220901.csv").getFile());
 
+
         try (FileReader in = new FileReader(inputFile)) {
             byte[] result  = csvFileHandler.handle(in, sanitizer);
 
             assertEquals(EXPECTED, new String(result));
         }
+    }
+
+    @Test
+    @SneakyThrows
+    void handle_inclusion() {
+        final String EXPECTED = "EMPLOYEE_ID\r\n" +
+            "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM\"\"}\"\r\n";
+
+        Sanitizer sanitizer = sanitizerFactory.create(Sanitizer.ConfigurationOptions.builder()
+            .rules(CsvRules.builder()
+                .columnToPseudonymize("EMPLOYEE_ID")
+                .columnsToInclude(Lists.newArrayList("EMPLOYEE_ID"))
+                .build())
+            .pseudonymizationSalt("salt")
+            .pseudonymImplementation(PseudonymImplementation.LEGACY)
+            .defaultScopeId("hris")
+            .build());
+
+        File inputFile = new File(getClass().getResource("/csv/hris-example-quotes.csv").getFile());
+
+
+        try (FileReader in = new FileReader(inputFile)) {
+            byte[] result  = csvFileHandler.handle(in, sanitizer);
+
+            assertEquals(EXPECTED, new String(result));
+        }
+
     }
 }
