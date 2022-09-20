@@ -6,8 +6,7 @@ import lombok.*;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Builder(toBuilder = true)
 @Log
@@ -38,4 +37,23 @@ public class CsvRules implements RuleSet {
     @Deprecated
     @Getter
     String defaultScopeIdForSource;
+
+    /**
+     * columns to rename
+     *
+     * NOTE: renames, if any, are applied BEFORE pseudonymization
+     */
+    @Builder.Default
+    @NonNull
+    Map<String, String> columnsToRename = new HashMap<>();
+
+
+    /**
+     * if provided, only columns explicitly listed here will be included in output
+     *  (inverse of columnsToRedact)
+     *
+     * use case: if you don't control source, and want to ensure that some unexpected column that
+     * later appears in source doesn't get included in output.
+     */
+    List<String> columnsToInclude;
 }

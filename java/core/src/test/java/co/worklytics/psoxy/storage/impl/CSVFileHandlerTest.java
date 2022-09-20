@@ -11,6 +11,8 @@ import co.worklytics.test.TestModules;
 import co.worklytics.test.TestUtils;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import dagger.Component;
 import lombok.SneakyThrows;
 import org.apache.commons.codec.binary.Base64;
@@ -217,6 +219,61 @@ public class CSVFileHandlerTest {
             .build());
 
         File inputFile = new File(getClass().getResource("/csv/hris-example-headers-w-spaces.csv").getFile());
+
+        try (FileReader in = new FileReader(inputFile)) {
+            byte[] result  = csvFileHandler.handle(in, sanitizer);
+
+            assertEquals(EXPECTED, new String(result));
+        }
+    }
+
+
+
+    @Test
+    @SneakyThrows
+    void handle_rename() {
+        final String EXPECTED = "EMPLOYEE_ID,EMPLOYEE_EMAIL,DEPARTMENT\r\n" +
+            "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",\",,,\"\r\n";
+
+
+        Sanitizer sanitizer = sanitizerFactory.create(Sanitizer.ConfigurationOptions.builder()
+            .rules(CsvRules.builder()
+                .columnToPseudonymize("EMPLOYEE_ID")
+                .columnToPseudonymize("EMPLOYEE_EMAIL")
+                .columnsToRename(ImmutableMap.of("EMAIL", "EMPLOYEE_EMAIL"))
+                .build())
+            .pseudonymizationSalt("salt")
+            .pseudonymImplementation(PseudonymImplementation.LEGACY)
+            .defaultScopeId("hris")
+            .build());
+
+        File inputFile = new File(getClass().getResource("/csv/hris-example-quotes.csv").getFile());
+
+        try (FileReader in = new FileReader(inputFile)) {
+            byte[] result  = csvFileHandler.handle(in, sanitizer);
+
+            assertEquals(EXPECTED, new String(result));
+        }
+    }
+
+    @Test
+    @SneakyThrows
+    void handle_inclusion() {
+        final String EXPECTED = "EMPLOYEE_ID\r\n" +
+            "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM\"\"}\"\r\n";
+
+
+        Sanitizer sanitizer = sanitizerFactory.create(Sanitizer.ConfigurationOptions.builder()
+            .rules(CsvRules.builder()
+                .columnToPseudonymize("EMPLOYEE_ID")
+                .columnsToInclude(Lists.newArrayList("EMPLOYEE_ID"))
+                .build())
+            .pseudonymizationSalt("salt")
+            .pseudonymImplementation(PseudonymImplementation.LEGACY)
+            .defaultScopeId("hris")
+            .build());
+
+        File inputFile = new File(getClass().getResource("/csv/hris-example-quotes.csv").getFile());
 
         try (FileReader in = new FileReader(inputFile)) {
             byte[] result  = csvFileHandler.handle(in, sanitizer);
