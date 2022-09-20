@@ -7,7 +7,7 @@ import co.worklytics.psoxy.rules.Transform;
 public class PrebuiltSanitizerRules {
 
     static final Rules2.Endpoint WORKSPACES = Rules2.Endpoint.builder()
-        .pathRegex("^/api/1.0/workspaces$")
+        .pathRegex("^/api/1.0/workspaces[?]?[^/]*$")
         //no redaction/pseudonymization
         // current UX for Asana connector lets users specify workspace by name, so can't redact it;
         // and we don't expect Workspace names to be sensitive or PII.
