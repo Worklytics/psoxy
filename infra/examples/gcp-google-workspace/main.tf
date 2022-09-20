@@ -16,10 +16,13 @@ locals {
     "hris" = {
       source_kind = "hris"
       rules = {
-        columnsToRedact = []
+        columnsToRedact = [
+        ]
         columnsToPseudonymize = [
-          "email",
-          "employee_id"
+          "employee_email",
+          "employee_id",
+          "manager_id",
+          "manager_email",
         ]
       }
     },
@@ -28,7 +31,6 @@ locals {
       rules = {
         columnsToRedact = []
         columnsToPseudonymize = [
-          "employee_email",
           "employee_id"
         ]
       }
