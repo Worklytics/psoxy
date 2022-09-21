@@ -48,22 +48,20 @@ node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gcal/calendar/v3/calendar
 ## Directory
 
 ### Domains
-Replace `[customer_id]` with your Google Workspace account ID, see: https://developers.google.com/admin-sdk/directory/reference/rest/v1/domains/get
-
 ```shell
-node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gdirectory/admin/directory/v1/customer/[customer_id]/domains
+node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gdirectory/admin/directory/v1/customer/my_customer/domains
 ```
 
 ### Groups
 ```shell
-node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gdirectory/admin/directory/v1/groups?customer=[customer_id]
+node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gdirectory/admin/directory/v1/groups?customer=my_customer
 ```
 
 ### Group
 
 1. Get the group ID (accessor path in response `.groups[0].id`):
 ```shell
-node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gdirectory/admin/directory/v1/groups?customer=[customer_id]
+node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gdirectory/admin/directory/v1/groups?customer=my_customer
 ```
 
 2. Get group information (replace `google_group_id` with the corresponding value):
@@ -78,11 +76,11 @@ node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gdirectory/admin/director
 
 ### Users
 ```shell
-node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gdirectory/admin/directory/v1/users?customer=[customer_id]
+node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gdirectory/admin/directory/v1/users?customer=my_customer
 ```
 1. Get the user ID (accessor path in response `.users[0].id`):
 ```shell
-node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gdirectory/admin/directory/v1/users?customer=[customer_id]
+node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gdirectory/admin/directory/v1/users?customer=my_customer
 ```
 
 2. Get user information (replace [google_user_id] with the corresponding value):
@@ -97,11 +95,11 @@ node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gdirectory/admin/director
 
 ### Roles
 ```shell
-node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gdirectory/admin/directory/v1/customer/[customer_id]/roles
+node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gdirectory/admin/directory/v1/customer/my_customer/roles
 ```
 
 ```shell
-node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gdirectory/admin/directory/v1/customer/[customer_id]/roleassignments
+node tools/psoxy-test/cli.js -u [your_psoxy_url]/psoxy-gdirectory/admin/directory/v1/customer/my_customer/roleassignments
 ```
 
 ## Drive
