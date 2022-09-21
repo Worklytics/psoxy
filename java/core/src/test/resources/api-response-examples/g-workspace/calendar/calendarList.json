@@ -1,0 +1,160 @@
+{
+  "kind": "calendar#calendarList",
+  "etag": "\"p338abvtmvujfk0g\"",
+  "nextSyncToken": "CNCl_7b_pvoCEhJlcmlrQHdvcmtseXRpY3MuY28=",
+  "items": [
+    {
+      "kind": "calendar#calendarListEntry",
+      "etag": "\"1541799526249000\"",
+      "id": "alice@acme.com",
+      "summary": "alice@acme.com",
+      "timeZone": "America/Los_Angeles",
+      "colorId": "8",
+      "backgroundColor": "#16a765",
+      "foregroundColor": "#000000",
+      "selected": true,
+      "accessRole": "owner",
+      "defaultReminders": [
+        {
+          "method": "popup",
+          "minutes": 10
+        }
+      ],
+      "notificationSettings": {
+        "notifications": [
+          {
+            "type": "eventCreation",
+            "method": "email"
+          },
+          {
+            "type": "eventChange",
+            "method": "email"
+          },
+          {
+            "type": "eventCancellation",
+            "method": "email"
+          },
+          {
+            "type": "eventResponse",
+            "method": "email"
+          }
+        ]
+      },
+      "primary": true,
+      "conferenceProperties": {
+        "allowedConferenceSolutionTypes": [
+          "hangoutsMeet"
+        ]
+      }
+    },
+    {
+      "kind": "calendar#calendarListEntry",
+      "etag": "\"1541799526249000\"",
+      "id": "en.usa#holiday@group.v.calendar.google.com",
+      "summary": "Holidays in United States",
+      "description": "Holidays and Observances in United States",
+      "timeZone": "America/Los_Angeles",
+      "summaryOverride": "Holidays in United States",
+      "colorId": "11",
+      "backgroundColor": "#fbe983",
+      "foregroundColor": "#000000",
+      "accessRole": "reader",
+      "defaultReminders": [],
+      "conferenceProperties": {
+        "allowedConferenceSolutionTypes": [
+          "hangoutsMeet"
+        ]
+      }
+    },
+    {
+      "kind": "calendar#calendarListEntry",
+      "etag": "\"1639589485357000\"",
+      "id": "alice@gmail.com",
+      "summary": "Alice (personal)",
+      "timeZone": "America/Los_Angeles",
+      "summaryOverride": "Alice (personal)",
+      "colorId": "16",
+      "backgroundColor": "#4986e7",
+      "foregroundColor": "#000000",
+      "selected": true,
+      "accessRole": "writer",
+      "defaultReminders": [],
+      "conferenceProperties": {
+        "allowedConferenceSolutionTypes": [
+          "hangoutsMeet"
+        ]
+      }
+    },
+    {
+      "kind": "calendar#calendarListEntry",
+      "etag": "\"1639589486168000\"",
+      "id": "c_0hv90a5kcraqtisjaf1rju5nic@group.calendar.google.com",
+      "summary": "Group Calendar Example",
+      "timeZone": "America/New_York",
+      "colorId": "23",
+      "backgroundColor": "#cd74e6",
+      "foregroundColor": "#000000",
+      "selected": true,
+      "accessRole": "owner",
+      "defaultReminders": [],
+      "conferenceProperties": {
+        "allowedConferenceSolutionTypes": [
+          "hangoutsMeet"
+        ]
+      }
+    },
+    {
+      "kind": "calendar#calendarListEntry",
+      "etag": "\"1639589488947000\"",
+      "id": "dala@acme.com",
+      "summary": "dala@acme.com",
+      "timeZone": "America/Los_Angeles",
+      "colorId": "20",
+      "backgroundColor": "#cabdbf",
+      "foregroundColor": "#000000",
+      "selected": true,
+      "accessRole": "owner",
+      "defaultReminders": [],
+      "conferenceProperties": {
+        "allowedConferenceSolutionTypes": [
+          "hangoutsMeet"
+        ]
+      }
+    },
+    {
+      "kind": "calendar#calendarListEntry",
+      "etag": "\"1658269473142000\"",
+      "id": "charles@acme.com",
+      "summary": "charles@acme.com",
+      "timeZone": "Europe/Madrid",
+      "colorId": "19",
+      "backgroundColor": "#c2c2c2",
+      "foregroundColor": "#000000",
+      "accessRole": "owner",
+      "defaultReminders": [],
+      "conferenceProperties": {
+        "allowedConferenceSolutionTypes": [
+          "hangoutsMeet"
+        ]
+      }
+    },
+    {
+      "kind": "calendar#calendarListEntry",
+      "etag": "\"1660779857672000\"",
+      "id": "bob@acme.com",
+      "summary": "Transferred from bob@acme.com",
+      "timeZone": "America/Los_Angeles",
+      "colorId": "12",
+      "backgroundColor": "#fad165",
+      "foregroundColor": "#000000",
+      "selected": true,
+      "accessRole": "owner",
+      "defaultReminders": [],
+      "conferenceProperties": {
+        "allowedConferenceSolutionTypes": [
+          "hangoutsMeet"
+        ]
+      }
+    }
+  ]
+}

@@ -66,3 +66,17 @@ endpoints:
           - "$..email"
         encoding: "JSON"
   - pathRegex: "^/calendar/v3/users/[^/]*?/settings.*"
+  - pathRegex: "^/calendar/v3/users/[^/]*?/calendarList[^/]*$"
+    transforms:
+      - !<filterTokenByRegex>
+        jsonPaths:
+          - "$.items[*].summaryOverride"
+          - "$.items[*].summary"
+        delimiter: "\\s+"
+        filters:
+          - "Transferred"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.items[*].id"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"

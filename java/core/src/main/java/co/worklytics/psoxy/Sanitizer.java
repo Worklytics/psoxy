@@ -6,6 +6,8 @@ import lombok.*;
 
 import java.io.Serializable;
 import java.net.URL;
+import java.util.Optional;
+import java.util.Set;
 
 public interface Sanitizer {
 
@@ -37,6 +39,13 @@ public interface Sanitizer {
 
         @Builder.Default
         PseudonymImplementation pseudonymImplementation = PseudonymImplementation.DEFAULT;
+
+
+        /**
+         * if set, sanitizer should only include domains in this list in response (domains not in
+         * this list should be hashed)
+         */
+        Optional<Set<String>> domainsToInclude;
     }
 
     /**
