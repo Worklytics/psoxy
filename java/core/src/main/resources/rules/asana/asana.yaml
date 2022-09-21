@@ -1,7 +1,7 @@
 ---
 allowAllEndpoints: false
 endpoints:
-  - pathRegex: "^/api/1.0/workspaces$"
+  - pathRegex: "^/api/1.0/workspaces[?]?[^/]*$"
   - pathRegex: "^/api/1.0/users[?]?[^/]*"
     transforms:
       - !<redact>
@@ -11,6 +11,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$.data[*].email"
+        encoding: "JSON"
   - pathRegex: "^/api/1.0/workspaces/[^/]*/teams?[^/]*"
     transforms:
       - !<redact>

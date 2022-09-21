@@ -165,10 +165,10 @@ locals {
       source_kind : "asana",
       display_name : "Asana"
       example_api_calls : [
-        "/api/1.0/users",
         "/api/1.0/workspaces",
-        "/api/1.0/workspaces/{ANY_WORKSPACE_ID}/projects",
-        "/api/1.0/projects/{ANY_PROJECT_ID}/tasks",
+        "/api/1.0/users?workspaceId={ANY_WORKSPACE_ID}&limit=10",
+        "/api/1.0/workspaces/{ANY_WORKSPACE_ID}/projects?limit=20",
+        "/api/1.0/projects/{ANY_PROJECT_ID}/tasks?limit=20",
         "/api/1.0/tasks/{ANY_TASK_ID}/stories",
       ],
       secured_variables : [

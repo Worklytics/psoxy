@@ -39,6 +39,7 @@ public class AsanaTests extends JavaRulesTestBaseCase {
 
         String endpoint = "https://app.asana.com/api/1.0/workspaces";
         assertUrlAllowed(endpoint);
+        assertUrlWithQueryParamsAllowed(endpoint);
         //nothing sanitized from this for now
     }
 
@@ -64,6 +65,9 @@ public class AsanaTests extends JavaRulesTestBaseCase {
             "Greg Sanchez",
             "https://..." //photo url placeholders
         );
+
+        //ensure we allow paging of users, and passing workspaceId
+        assertUrlWithQueryParamsAllowed(endpoint);
     }
 
     @Test
@@ -105,6 +109,8 @@ public class AsanaTests extends JavaRulesTestBaseCase {
             "The project is moving forward",
             "Status Update"
         );
+
+        assertUrlWithQueryParamsAllowed(endpoint);
     }
 
     @Test
