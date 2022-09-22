@@ -11,6 +11,7 @@ import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableSet;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.MapFunction;
 import dagger.Component;
@@ -354,11 +355,16 @@ class SanitizerImplTest {
         "alice@acme.com,HASH,v46z63x8plttB_GFx_6FSFM5iQQ-1VrRH6l1LVF5xy4",
         "alice@acme.com,REDACT,redacted.domain",
         "alice@Acme.com,HASH,v46z63x8plttB_GFx_6FSFM5iQQ-1VrRH6l1LVF5xy4", //cannicalized hash
+        "alice@exception.com,REDACT,exception.com",
+        "alice@exception.com,HASH,exception.com",
+        "alice@Exception.com,HASH,Exception.com", //case-insensitive and case-preserving
     })
     @ParameterizedTest
     public void domains(String email, String config, String expectedDomain) {
         SanitizerImpl testSanitizer = sanitizerFactory.create(
-            sanitizer.getConfigurationOptions().withEmailDomainPolicy(EmailDomainPolicy.parseOrDefault(config))
+            sanitizer.getConfigurationOptions()
+                .withEmailDomainPolicyExceptions(ImmutableSet.of("exception.com"))
+                .withEmailDomainPolicy(EmailDomainPolicy.parseOrDefault(config))
         );
         assertEquals(expectedDomain, testSanitizer.extractSanitizedDomain(email));
     }
