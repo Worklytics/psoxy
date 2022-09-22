@@ -27,10 +27,9 @@ public enum EmailDomainPolicy {
      * emails that are pseudonymized (hashed) will also have their domain pseudonymized (hashed)
      * eg, default behavior of "alice@acme.com" is to be pseudonymized is:
      *  alice@acme.com --> p~2bd806c97f0e00af1a1fc3328fa763a9269723c8db8fac4f93af71db186d6e90@acme.com
-     * but if this 'PSEUDONYMIZE_EMAIL_DOMAINS' is set to 'true', then will be:
+     * but with this policy, will be:
      *  alice@acme.com --> p~2bd806c97f0e00af1a1fc3328fa763a9269723c8db8fac4f93af71db186d6e90@de083c85bb85e370845a988ff97661e7b19bb20dcce0d13584e524bf957279fa
-     * see 'PSEUDONYMIZE_EMAIL_DOMAINS_EXCEPTIONS' to define a list of domains to exclude from this
-     */
+     **/
     HASH,
 
     REDACT,
