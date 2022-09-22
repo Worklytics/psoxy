@@ -93,3 +93,15 @@ variable "google_workspace_example_user" {
   type        = string
   description = "user to impersonate for Google Workspace API calls (null for none)"
 }
+
+variable "email_domain_policy" {
+  type        = string
+  description = "Policy to use when sanitizing email domains. one of PRESERVE, REDACT, or HASH. see EmailDomainPolicy java enum for details."
+  default     = null
+}
+
+variable "email_domain_policy_exceptions" {
+  type        = list(string)
+  description = "List of domains which will be excepted from the email_domain_policy."
+  default     = null
+}

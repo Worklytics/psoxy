@@ -253,8 +253,10 @@ module "aws-psoxy-long-auth-connectors" {
   example_api_calls                     = each.value.example_api_calls
   example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
   environment_variables                 = {
-    PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
-    IS_DEVELOPMENT_MODE  = "true"
+    PSEUDONYMIZE_APP_IDS           = tostring(var.pseudonymize_app_ids)
+    IS_DEVELOPMENT_MODE            = "true"
+    EMAIL_DOMAIN_POLICY            = var.email_domain_policy
+    EMAIL_DOMAIN_POLICY_EXCEPTIONS = var.email_domain_policy_exceptions
   }
 }
 
@@ -290,4 +292,9 @@ module "psoxy-bulk" {
   api_caller_role_name = module.psoxy-aws.api_caller_role_name
   psoxy_base_dir       = var.psoxy_base_dir
   rules                = each.value.rules
+
+  environment_variables = {
+    EMAIL_DOMAIN_POLICY            = var.email_domain_policy
+    EMAIL_DOMAIN_POLICY_EXCEPTIONS = var.email_domain_policy_exceptions
+  }
 }
