@@ -1,11 +1,14 @@
 package co.worklytics.psoxy;
 
+import com.avaulta.gateway.pseudonyms.EmailDomainPolicy;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import co.worklytics.psoxy.rules.RuleSet;
 import lombok.*;
 
 import java.io.Serializable;
 import java.net.URL;
+import java.util.Optional;
+import java.util.Set;
 
 public interface Sanitizer {
 
@@ -35,9 +38,31 @@ public interface Sanitizer {
 
         RuleSet rules;
 
+        @NonNull
         @Builder.Default
         PseudonymImplementation pseudonymImplementation = PseudonymImplementation.DEFAULT;
+
+        @NonNull
+        @Builder.Default
+        EmailDomainPolicy emailDomainPolicy = EmailDomainPolicy.PRESERVE;
+
+        /**
+         * if set, sanitizer should PRESERVE domains matching any of this list
+         */
+        Set<String> emailDomainPolicyExceptions;
+
+        public Optional<Set<String>> getEmailDomainPolicyExceptions() {
+            return Optional.ofNullable(emailDomainPolicyExceptions);
+        }
     }
+
+    /**
+     * when domains are redacted from email addresses, rather than preserved or pseudonymized, this
+     * placeholder is used to preserver format (.domain is a legal TLD per RFC, but does not exist
+     * as of 2022-09)
+     */
+    String REDACTED_DOMAIN = "redacted.domain";
+
 
     /**
      * @param url to test

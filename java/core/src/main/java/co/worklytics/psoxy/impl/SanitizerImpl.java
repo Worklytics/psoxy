@@ -75,6 +75,9 @@ public class SanitizerImpl implements Sanitizer {
     @Inject
     UrlSafeTokenPseudonymEncoder urlSafePseudonymEncoder;
 
+    Base64.Encoder urlSafeStringEncoder = Base64.getUrlEncoder().withoutPadding();
+
+
     List<Pattern> getCompiledAllowedEndpoints() {
         if (compiledAllowedEndpoints == null) {
             synchronized ($writeLock) {
@@ -333,6 +336,10 @@ public class SanitizerImpl implements Sanitizer {
 
     }
 
+    public static String emailDomainCanonicalization(String original) {
+        return original.trim().toLowerCase();
+    }
+
     public PseudonymizedIdentity pseudonymize(Object value, Transform.Pseudonymize transformOptions) {
         if (value == null) {
             return null;
@@ -354,13 +361,14 @@ public class SanitizerImpl implements Sanitizer {
         String domain = null;
         if (duckTypesAsEmails(value)) {
             canonicalization = this::emailCanonicalization;
-            domain = EmailAddressParser.getDomain((String) value, EmailAddressCriteria.DEFAULT, true);
-            builder.domain(domain);
+
             scope = PseudonymizedIdentity.EMAIL_SCOPE;
             //q: do something with the personal name??
             // NO --> it is not going to be reliable (except for From, will fill with whatever
             // sender has for the person in their Contacts), and in enterprise use-cases we
             // shouldn't need it for matching
+            domain = extractSanitizedDomain((String) value);
+            builder.domain(domain);
         } else {
             canonicalization = Function.identity();
             scope = configurationOptions.getDefaultScopeId();
@@ -394,6 +402,36 @@ public class SanitizerImpl implements Sanitizer {
         }
 
         return builder.build();
+    }
+
+    private Set<String> emailDomainPolicyExceptions() {
+        return getConfigurationOptions().getEmailDomainPolicyExceptions().orElse(Collections.emptySet());
+    }
+
+    /**
+     * extracts domain from email, sanitized according to this Sanitizer's configuration
+     *
+     * @param email
+     * @return
+     */
+    @VisibleForTesting
+    String extractSanitizedDomain(String email) {
+        String domain = EmailAddressParser.getDomain(email, EmailAddressCriteria.DEFAULT, true);
+
+        if (!emailDomainPolicyExceptions().contains(emailDomainCanonicalization(domain))) {
+            if (getConfigurationOptions().getEmailDomainPolicy() == EmailDomainPolicy.REDACT) {
+                domain = Sanitizer.REDACTED_DOMAIN;
+            } else if (getConfigurationOptions().getEmailDomainPolicy() == EmailDomainPolicy.HASH) {
+                domain = urlSafeEncode(
+                    deterministicTokenizationStrategy.getToken(domain, SanitizerImpl::emailDomainCanonicalization)
+                );
+            }
+        }
+        return domain;
+    }
+
+    String urlSafeEncode(byte[] bytes) {
+        return new String(urlSafeStringEncoder.encode(bytes));
     }
 
     boolean duckTypesAsEmails(Object value) {

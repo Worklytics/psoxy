@@ -5,7 +5,14 @@ import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.impl.SanitizerImpl;
 
 import co.worklytics.psoxy.rules.RuleSet;
+import com.avaulta.gateway.pseudonyms.EmailDomainPolicy;
+import com.google.common.base.Enums;
 import dagger.assisted.AssistedFactory;
+import org.apache.commons.lang3.EnumUtils;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 @AssistedFactory
 public interface SanitizerFactory {
@@ -21,6 +28,19 @@ public interface SanitizerFactory {
                 .orElse(rules.getDefaultScopeIdForSource()));
 
         builder.rules(rules);
+
+        config.getConfigPropertyAsOptional(ProxyConfigProperty.EMAIL_DOMAIN_POLICY)
+            .map(EmailDomainPolicy::parseOrDefault)
+            .ifPresent(builder::emailDomainPolicy);
+
+        builder.emailDomainPolicyExceptions(
+            config.getConfigPropertyAsOptional(ProxyConfigProperty.EMAIL_DOMAIN_POLICY_EXCEPTIONS)
+            .map(s -> Arrays.stream(s.split(","))
+                .filter(StringUtils::isNotBlank)
+                .map(SanitizerImpl::emailDomainCanonicalization)
+                .collect(Collectors.toSet()))
+            .orElse(null)
+        );
 
         return builder.build();
     }
