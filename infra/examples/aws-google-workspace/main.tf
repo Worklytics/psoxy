@@ -155,6 +155,11 @@ module "psoxy-google-workspace-connector" {
   example_api_calls                     = each.value.example_api_calls
   example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
 
+  environment_variables = {
+    EMAIL_DOMAIN_POLICY            = var.email_domain_policy
+    EMAIL_DOMAIN_POLICY_EXCEPTIONS = var.email_domain_policy_exceptions
+  }
+
   parameters = [
     module.psoxy-aws.salt_secret,
     module.google-workspace-connection-auth[each.key].key_secret
@@ -224,6 +229,12 @@ module "aws-psoxy-long-auth-connectors" {
   path_to_repo_root              = var.psoxy_base_dir
   example_api_calls              = each.value.example_api_calls
   reserved_concurrent_executions = each.value.reserved_concurrent_executions
+
+  environment_variables = {
+    EMAIL_DOMAIN_POLICY            = var.email_domain_policy
+    EMAIL_DOMAIN_POLICY_EXCEPTIONS = var.email_domain_policy_exceptions
+  }
+
   parameters = [
     module.psoxy-aws.salt_secret,
     # aws_ssm_parameter.long-access-secrets[each.key]
@@ -262,4 +273,9 @@ module "psoxy-bulk" {
   api_caller_role_name = module.psoxy-aws.api_caller_role_name
   psoxy_base_dir       = var.psoxy_base_dir
   rules                = each.value.rules
+
+  environment_variables = {
+    EMAIL_DOMAIN_POLICY            = var.email_domain_policy
+    EMAIL_DOMAIN_POLICY_EXCEPTIONS = var.email_domain_policy_exceptions
+  }
 }

@@ -124,6 +124,11 @@ module "psoxy-google-workspace-connector" {
   example_api_calls                     = each.value.example_api_calls
   example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
 
+  environment_variables = {
+    EMAIL_DOMAIN_POLICY            = var.email_domain_policy
+    EMAIL_DOMAIN_POLICY_EXCEPTIONS = var.email_domain_policy_exceptions
+  }
+
   secret_bindings = {
     SERVICE_ACCOUNT_KEY = {
       secret_id      = module.google-workspace-connection-auth[each.key].key_secret_id
@@ -178,6 +183,11 @@ module "connector-long-auth-create-function" {
   salt_secret_id                = module.psoxy-gcp.salt_secret_id
   salt_secret_version_number    = module.psoxy-gcp.salt_secret_version_number
 
+  environment_variables = {
+    EMAIL_DOMAIN_POLICY            = var.email_domain_policy
+    EMAIL_DOMAIN_POLICY_EXCEPTIONS = var.email_domain_policy_exceptions
+  }
+
   secret_bindings = {
     ACCESS_TOKEN = {
       secret_id = module.connector-long-auth-block[each.key].access_token_secret_id
@@ -205,6 +215,11 @@ module "psoxy-gcp-bulk" {
   salt_secret_version_number    = module.psoxy-gcp.salt_secret_version_number
   psoxy_base_dir                = var.psoxy_base_dir
   bucket_write_role_id          = module.psoxy-gcp.bucket_write_role_id
+
+  environment_variables = {
+    EMAIL_DOMAIN_POLICY            = var.email_domain_policy
+    EMAIL_DOMAIN_POLICY_EXCEPTIONS = var.email_domain_policy_exceptions
+  }
 
   depends_on = [
     google_project.psoxy-project,
