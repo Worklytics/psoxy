@@ -13,8 +13,7 @@ import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.ssm.SsmClient;
 import software.amazon.awssdk.services.ssm.model.GetParameterRequest;
 import software.amazon.awssdk.services.ssm.model.GetParameterResponse;
-import software.amazon.awssdk.services.ssm.model.ParameterNotFoundException;
-import software.amazon.awssdk.services.ssm.model.ParameterVersionNotFoundException;
+import software.amazon.awssdk.services.ssm.model.SsmException;
 
 import javax.inject.Inject;
 import java.time.Duration;
@@ -70,7 +69,7 @@ public class ParameterStoreConfigService implements ConfigService {
                                     .build();
                                     GetParameterResponse parameterResponse = client.getParameter(parameterRequest);
                                     return parameterResponse.parameter().value();
-                                } catch (ParameterNotFoundException | ParameterVersionNotFoundException nfe) {
+                                } catch (SsmException ignore) {
                                     // does not exist, that could be OK depending on case.
                                     return NEGATIVE_VALUE;
                                 }
