@@ -1,3 +1,4 @@
+---
 allowAllEndpoints: false
 endpoints:
   - pathRegex: "^/api/discovery\\.enterprise\\.info(?:\\?.+)?"
@@ -12,6 +13,8 @@ endpoints:
         jsonPaths:
           - "$.users[*].id"
           - "$.users[*].profile.email"
+          - "$.users[*].profile.guest_invited_by"
+        encoding: "JSON"
       - !<redact>
         jsonPaths:
           - "$.users[*]['name','real_name']"
@@ -28,6 +31,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$.info[*].creator"
+        encoding: "JSON"
       - !<redact>
         jsonPaths:
           - "$.info[*]['name','name_normalized','previous_names','topic','purpose']"
@@ -43,6 +47,7 @@ endpoints:
           - "$.messages[*].reply_users[*]"
           - "$.messages[*].edited.user"
           - "$.messages[*].blocks[*].elements[*].elements[*].user_id"
+        encoding: "JSON"
       - !<redact>
         jsonPaths:
           - "$.messages[*]['text','username','permalink']"
