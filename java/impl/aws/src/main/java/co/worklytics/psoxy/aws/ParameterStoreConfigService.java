@@ -11,9 +11,7 @@ import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.ssm.SsmClient;
-import software.amazon.awssdk.services.ssm.model.GetParameterRequest;
-import software.amazon.awssdk.services.ssm.model.GetParameterResponse;
-import software.amazon.awssdk.services.ssm.model.SsmException;
+import software.amazon.awssdk.services.ssm.model.*;
 
 import javax.inject.Inject;
 import java.time.Duration;
@@ -79,6 +77,25 @@ public class ParameterStoreConfigService implements ConfigService {
             }
         }
         return cache;
+    }
+
+    @Override
+    public boolean supportsWriting() {
+        return true;
+    }
+
+    @Override
+    public void putConfigProperty(ConfigProperty property, String value) {
+        try {
+            PutParameterRequest parameterRequest = PutParameterRequest.builder()
+                .name(property.name())
+                .value(value)
+                .build();
+            PutParameterResponse parameterResponse = client.putParameter(parameterRequest);
+            getCache().invalidate(property.name());
+        } catch (SsmException ignore) {
+            // TODO: CHECK
+        }
     }
 
     @Override

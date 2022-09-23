@@ -12,9 +12,12 @@ import com.google.common.annotations.VisibleForTesting;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.extern.java.Log;
+import org.apache.commons.lang3.SerializationException;
+import org.apache.commons.lang3.SerializationUtils;
 
 import javax.inject.Inject;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
@@ -43,6 +46,9 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
     @Getter
     private final String configIdentifier = "oauth2_refresh_token";
 
+    @Inject
+    ConfigService config;
+
     /**
      * default access token expiration to assume, if 'expires_in' value is omitted from response
      * (which is allowed under OAuth 2.0 spec)
@@ -57,6 +63,8 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         REFRESH_ENDPOINT,
         CLIENT_ID,
         GRANT_TYPE,
+        SHARED_TOKEN,
+        WRITABLE_ACCESS_TOKEN,
     }
 
     @Inject OAuth2CredentialsWithRefresh.OAuth2RefreshHandler refreshHandler;
@@ -74,10 +82,25 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
     @Override
     public Credentials getCredentials(Optional<String> userToImpersonate) {
+        boolean usesSharedToken = config.getConfigPropertyAsOptional(ConfigProperty.SHARED_TOKEN).map(Boolean::parseBoolean).orElse(false);
+
+        AccessToken accessToken = null;
+        if (usesSharedToken) {
+            String accessTokenSerialized = config.getConfigPropertyAsOptional(ConfigProperty.WRITABLE_ACCESS_TOKEN).orElse(null);
+            if (accessTokenSerialized != null) {
+                try {
+                    accessToken = SerializationUtils.deserialize(accessTokenSerialized.getBytes(StandardCharsets.UTF_8));
+                } catch (SerializationException se) {
+                    accessToken = null;
+                }
+            }
+        }
+
         return OAuth2CredentialsWithRefresh.newBuilder()
             //TODO: pull an AccessToken from some cached location or something? otherwise will
             // be 'null' and refreshed for every request; and/or Keep credentials themselves in
             // memory
+            .setAccessToken(accessToken)
             .setRefreshHandler(refreshHandler)
             .build();
     }
@@ -85,6 +108,10 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
     public interface TokenRequestPayloadBuilder {
 
         String getGrantType();
+
+        default boolean useSharedToken() {
+            return false;
+        }
 
         HttpContent buildPayload();
 
@@ -126,6 +153,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
             if (isCurrentTokenValid(this.currentToken, Instant.now())) {
                 return this.currentToken;
             }
+
             String refreshEndpoint =
                 config.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.REFRESH_ENDPOINT);
 
@@ -155,6 +183,8 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                 });
 
             this.currentToken = asAccessToken(tokenResponse);
+            byte[] accessTokenSerialized = SerializationUtils.serialize(this.currentToken);
+            config.putConfigProperty(ConfigProperty.WRITABLE_ACCESS_TOKEN, new String(accessTokenSerialized, StandardCharsets.UTF_8));
             return this.currentToken;
         }
 
