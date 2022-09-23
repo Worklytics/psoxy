@@ -48,6 +48,18 @@ endpoints:
           - "$..acceptedSenders"
           - "$..members"
           - "$..membersWithLicenseErrors"
+          - "$..proxyAddresses"
+          - "$..mailNickname"
+          - "$..description"
+          - "$..resourceBehaviorOptions"
+          - "$..resourceProvisioningOptions"
+          - "$..onPremisesSecurityIdentifier"
+          - "$..onPremisesProvisioningErrors"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..mail"
+        includeOriginal: true
+        encoding: "JSON"
   - pathRegex: "^/(v1.0|beta)/groups/[^/]*/members.*"
     transforms:
       - !<redact>
