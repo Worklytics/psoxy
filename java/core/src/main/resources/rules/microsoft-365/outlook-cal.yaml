@@ -76,6 +76,10 @@ endpoints:
           - "$..extensions"
           - "$..multiValueExtendedProperties"
           - "$..singleValueExtendedProperties"
+          - "$..location.coordinates"
+          - "$..locations[*].coordinates"
+          - "$..location.address"
+          - "$..locations[*].address"
       - !<pseudonymize>
         jsonPaths:
           - "$..emailAddress.address"
@@ -110,6 +114,10 @@ endpoints:
           - "$..extensions"
           - "$..multiValueExtendedProperties"
           - "$..singleValueExtendedProperties"
+          - "$..location.coordinates"
+          - "$..locations[*].coordinates"
+          - "$..location.address"
+          - "$..locations[*].address"
       - !<pseudonymize>
         jsonPaths:
           - "$..emailAddress.address"
