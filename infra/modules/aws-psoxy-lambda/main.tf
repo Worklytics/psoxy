@@ -70,7 +70,25 @@ resource "aws_iam_role" "iam_for_lambda" {
   }
 }
 
-resource "aws_iam_policy" "policy" {
+# "PSOXY_${upper(replace(each.value.connector_name, "-", "_"))}_${upper(each.value.secret_name)}"
+data "aws_ssm_parameters_by_path" "psoxy_parameters" {
+  path            = "/"
+  with_decryption = false # we just want the arns, not the values
+}
+
+locals {
+  prefix          = "PSOXY_${upper(replace(var.source_kind, "-", "_"))}_"
+  prefix_writable = "PSOXY_${upper(replace(var.source_kind, "-", "_"))}_WRITABLE"
+
+  filtered_function_read_arns  = [for arn in data.aws_ssm_parameters_by_path.psoxy_parameters.arns : arn if length(regexall(local.prefix, arn)) > 0]
+  filtered_function_write_arns = [for arn in data.aws_ssm_parameters_by_path.psoxy_parameters.arns : arn if length(regexall(local.prefix_writable, arn)) > 0]
+
+  function_read_arns  = concat(local.filtered_function_read_arns, var.parameters)
+  function_write_arns = local.filtered_function_write_arns
+}
+
+resource "aws_iam_policy" "read_policy" {
+  count       = length(local.function_read_arns) > 0 ? 1 : 0
   name        = "${var.function_name}_ssmGetParameters"
   description = "Allow lambda function role to read SSM parameters"
 
@@ -83,7 +101,36 @@ resource "aws_iam_policy" "policy" {
             "ssm:GetParameter*"
           ],
           "Effect" : "Allow",
-          "Resource" : "*"
+          "Resource" : local.function_read_arns
+          # TODO: limit to SSM parameters in question
+          # "Resource": "arn:aws:ssm:us-east-2:123456789012:parameter/prod-*"
+        }
+      ]
+  })
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
+}
+
+# policy fails if empty, so need to use count
+resource "aws_iam_policy" "write_policy" {
+  count       = length(local.function_write_arns) > 0 ? 1 : 0
+  name        = "${var.function_name}_ssmPutParameters"
+  description = "Allow lambda function role to update SSM parameters"
+
+  policy = jsonencode(
+    {
+      "Version" : "2012-10-17",
+      "Statement" : [
+        {
+          "Action" : [
+            "ssm:PutParameter*"
+          ],
+          "Effect" : "Allow",
+          "Resource" : local.function_write_arns
           # TODO: limit to SSM parameters in question
           # "Resource": "arn:aws:ssm:us-east-2:123456789012:parameter/prod-*"
         }
@@ -102,10 +149,18 @@ resource "aws_iam_role_policy_attachment" "basic" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
-resource "aws_iam_role_policy_attachment" "policy" {
+resource "aws_iam_role_policy_attachment" "attach_read_policy" {
+  count      = length(local.function_read_arns) > 0 ? 1 : 0
   role       = aws_iam_role.iam_for_lambda.name
-  policy_arn = aws_iam_policy.policy.arn
+  policy_arn = aws_iam_policy.read_policy[0].arn
 }
+
+resource "aws_iam_role_policy_attachment" "attach_write_policy" {
+  count      = length(local.function_write_arns) > 0 ? 1 : 0
+  role       = aws_iam_role.iam_for_lambda.name
+  policy_arn = aws_iam_policy.write_policy[0].arn
+}
+
 
 output "function_arn" {
   value = aws_lambda_function.psoxy-instance.arn

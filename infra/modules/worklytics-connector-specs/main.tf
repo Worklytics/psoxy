@@ -239,7 +239,8 @@ EOT
       secured_variables : [
         "CLIENT_SECRET",
         "CLIENT_ID",
-        "ACCOUNT_ID"
+        "ACCOUNT_ID",
+        "WRITABLE_ACCESS_TOKEN"
       ],
       reserved_concurrent_executions : 1
       example_api_calls_user_to_impersonate : null
@@ -336,22 +337,22 @@ EOT
 # computed values filtered by enabled connectors
 locals {
   enabled_google_workspace_connectors = {
-  for k, v in local.google_workspace_sources : k => v if contains(var.enabled_connectors, k)
+    for k, v in local.google_workspace_sources : k => v if contains(var.enabled_connectors, k)
   }
   enabled_msft_365_connectors = {
-  for k, v in local.msft_365_connectors : k => v if contains(var.enabled_connectors, k)
+    for k, v in local.msft_365_connectors : k => v if contains(var.enabled_connectors, k)
   }
-  enabled_oauth_long_access_connectors = {for k, v in local.oauth_long_access_connectors : k => v if contains(var.enabled_connectors, k)}
+  enabled_oauth_long_access_connectors = { for k, v in local.oauth_long_access_connectors : k => v if contains(var.enabled_connectors, k) }
 
-  enabled_oauth_long_access_connectors_todos = {for k, v in local.enabled_oauth_long_access_connectors : k => v if v.external_token_todo != null}
+  enabled_oauth_long_access_connectors_todos = { for k, v in local.enabled_oauth_long_access_connectors : k => v if v.external_token_todo != null }
   # list of pair of [(conn1, secret1), (conn1, secret2), ... (connN, secretM)]
-  enabled_oauth_secrets_to_create            = distinct(flatten([
-  for k, v in local.enabled_oauth_long_access_connectors : [
-  for secret_name in v.secured_variables : {
-    connector_name = k
-    secret_name    = secret_name
-  }
-  ]
+  enabled_oauth_secrets_to_create = distinct(flatten([
+    for k, v in local.enabled_oauth_long_access_connectors : [
+      for secret_name in v.secured_variables : {
+        connector_name = k
+        secret_name    = secret_name
+      }
+    ]
   ]))
 }
 

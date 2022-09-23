@@ -35,11 +35,11 @@ provider "aws" {
 
 locals {
   base_config_path = "${var.psoxy_base_dir}/configs/"
-  bulk_sources     = {
+  bulk_sources = {
     "hris" = {
       source_kind = "hris"
-      rules       = {
-        columnsToRedact       = []
+      rules = {
+        columnsToRedact = []
         columnsToPseudonymize = [
           "email",
           "employee_id"
@@ -48,8 +48,8 @@ locals {
     },
     "qualtrics" = {
       source_kind = "qualtrics"
-      rules       = {
-        columnsToRedact       = []
+      rules = {
+        columnsToRedact = []
         columnsToPseudonymize = [
           "email",
           "employee_id"
@@ -143,7 +143,7 @@ module "psoxy-google-workspace-connector" {
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-rest?ref=v0.4.4"
 
   function_name                         = "psoxy-${each.key}"
-  source_kind                           = each.key
+  source_kind                           = each.value.source_kind
   path_to_function_zip                  = module.psoxy-aws.path_to_deployment_jar
   function_zip_hash                     = module.psoxy-aws.deployment_package_hash
   path_to_config                        = "${local.base_config_path}/${each.key}.yaml"
@@ -154,10 +154,7 @@ module "psoxy-google-workspace-connector" {
   example_api_calls                     = each.value.example_api_calls
   example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
 
-  parameters = [
-    module.psoxy-aws.salt_secret,
-    module.google-workspace-connection-auth[each.key].key_secret
-  ]
+  parameters = module.psoxy-aws.general_parameters_arns
 }
 
 
@@ -179,7 +176,7 @@ module "worklytics-psoxy-connection-google-workspace" {
 # Create secure parameters (later filled by customer)
 # Can be later passed on to a module and store in other vault if needed
 resource "aws_ssm_parameter" "long-access-secrets" {
-  for_each = {for entry in module.worklytics_connector_specs.enabled_oauth_secrets_to_create : "${entry.connector_name}.${entry.secret_name}" => entry}
+  for_each = { for entry in module.worklytics_connector_specs.enabled_oauth_secrets_to_create : "${entry.connector_name}.${entry.secret_name}" => entry }
 
   name        = "PSOXY_${upper(replace(each.value.connector_name, "-", "_"))}_${upper(each.value.secret_name)}"
   type        = "SecureString"
@@ -223,10 +220,7 @@ module "aws-psoxy-long-auth-connectors" {
   path_to_repo_root              = var.psoxy_base_dir
   example_api_calls              = each.value.example_api_calls
   reserved_concurrent_executions = each.value.reserved_concurrent_executions
-  parameters                     = [
-    module.psoxy-aws.salt_secret,
-    # aws_ssm_parameter.long-access-secrets[each.key]
-  ]
+  parameters                     = module.psoxy-aws.general_parameters_arns
 }
 
 module "worklytics-psoxy-connection" {

@@ -21,7 +21,7 @@ module "psoxy_lambda" {
   aws_assume_role_arn            = var.aws_assume_role_arn
   path_to_config                 = var.path_to_config
   source_kind                    = var.source_kind
-  parameters                     = []
+  parameters                     = var.parameters
   environment_variables          = var.environment_variables
 }
 

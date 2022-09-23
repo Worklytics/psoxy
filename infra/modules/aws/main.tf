@@ -195,8 +195,8 @@ module "psoxy-package" {
   psoxy_version      = var.psoxy_version
 }
 
-output "salt_secret" {
-  value = aws_ssm_parameter.salt
+output "general_parameters_arns" {
+  value = [aws_ssm_parameter.salt.arn, aws_ssm_parameter.encryption_key.arn]
 }
 
 output "api_caller_role_arn" {

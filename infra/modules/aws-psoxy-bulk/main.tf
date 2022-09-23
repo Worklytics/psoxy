@@ -22,6 +22,7 @@ module "psoxy_lambda" {
   handler_class        = "co.worklytics.psoxy.S3Handler"
   timeout_seconds      = 600 # 10 minutes
   memory_size_mb       = 512
+  source_kind          = var.source_kind
   path_to_function_zip = var.path_to_function_zip
   function_zip_hash    = var.function_zip_hash
   aws_assume_role_arn  = var.aws_assume_role_arn

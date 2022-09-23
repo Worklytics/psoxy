@@ -83,14 +83,10 @@ variable "environment_variables" {
   default     = {}
 }
 
-# TODO: values passed around but used yet. Intended use is to grant access only to those listed here
+# TODO: values passed around but not used yet. Intended use is to grant access only to those listed here
 # TODO (cont): Right now lambdas have read grants to all ssm parameters
 variable "parameters" {
   # see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter#attributes-reference
-  type = list(object({
-    name    = string
-    arn     = string
-    version = string
-  }))
-  description = "System Manager Parameters to expose to function"
+  type        = list(string)
+  description = "System Manager Parameters ARNS to expose to function"
 }

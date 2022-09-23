@@ -33,17 +33,11 @@ variable "reserved_concurrent_executions" {
 variable "source_kind" {
   type        = string
   description = "kind of source (eg, 'gmail', 'google-chat', etc)"
-  default     = null
 }
 
 variable "parameters" {
-  # see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter#attributes-reference
-  type = list(object({
-    name    = string
-    arn     = string
-    version = string
-  }))
-  description = "System Manager Parameters to expose to function"
+  type        = list(string)
+  description = "System Manager Parameters ARNS to expose to function"
 }
 
 variable "path_to_function_zip" {
