@@ -127,7 +127,7 @@ resource "aws_iam_policy" "write_policy" {
       "Statement" : [
         {
           "Action" : [
-            "ssm:PutParameter*"
+            "ssm:PutParameter"
           ],
           "Effect" : "Allow",
           "Resource" : local.function_write_arns
