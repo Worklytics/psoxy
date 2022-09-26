@@ -8,8 +8,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class CompositeConfigServiceTest {
 
@@ -82,5 +81,24 @@ class CompositeConfigServiceTest {
             test.getConfigPropertyAsOptional(Properties.DEFINED_IN_BOTH).get());
 
         assertFalse(test.getConfigPropertyAsOptional(Properties.DEFINED_IN_NEITHER).isPresent());
+    }
+
+    @Test
+    void putConfigProperty() {
+        ConfigService supportsWriting = mock(ConfigService.class);
+        when(supportsWriting.supportsWriting()).thenReturn(true);
+        ConfigService doesNotSupportWriting = mock(ConfigService.class);
+        when(doesNotSupportWriting.supportsWriting()).thenReturn(false);
+
+        CompositeConfigService configService = CompositeConfigService.builder()
+            .preferred(doesNotSupportWriting)
+            .fallback(supportsWriting)
+            .build();
+
+        ConfigService.ConfigProperty anyProperty = Properties.DEFINED_IN_NEITHER;
+        String anyValue = "any-value";
+        configService.putConfigProperty(anyProperty, anyValue);
+        verify(doesNotSupportWriting, never()).putConfigProperty(eq(anyProperty), anyString());
+        verify(supportsWriting, atMostOnce()).putConfigProperty(eq(anyProperty), eq(anyValue));
     }
 }

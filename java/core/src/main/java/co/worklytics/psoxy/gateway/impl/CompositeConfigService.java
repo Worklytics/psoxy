@@ -36,8 +36,9 @@ public class CompositeConfigService implements ConfigService {
     public void putConfigProperty(ConfigProperty property, String value) {
         if (preferred.supportsWriting()) {
             preferred.putConfigProperty(property, value);
-        } else if (fallback.supportsWriting()) {
-            fallback.supportsWriting();
+        }
+        if (fallback.supportsWriting()) {
+            fallback.putConfigProperty(property, value);
         }
     }
 

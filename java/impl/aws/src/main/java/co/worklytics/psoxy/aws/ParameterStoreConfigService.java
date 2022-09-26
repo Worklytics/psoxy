@@ -86,15 +86,17 @@ public class ParameterStoreConfigService implements ConfigService {
 
     @Override
     public void putConfigProperty(ConfigProperty property, String value) {
+        String key = parameterName(property);
         try {
             PutParameterRequest parameterRequest = PutParameterRequest.builder()
-                .name(property.name())
+                .name(key)
                 .value(value)
                 .build();
             PutParameterResponse parameterResponse = client.putParameter(parameterRequest);
-            getCache().invalidate(property.name());
-        } catch (SsmException ignore) {
-            // TODO: CHECK
+            getCache().invalidate(key);
+            log.info(String.format("Property: %s, stored version %d", key, parameterResponse.version()));
+        } catch (SsmException e) {
+            log.log(Level.SEVERE, "Could not store property " + key, e);
         }
     }
 
