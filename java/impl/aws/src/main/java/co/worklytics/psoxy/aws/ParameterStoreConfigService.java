@@ -88,12 +88,15 @@ public class ParameterStoreConfigService implements ConfigService {
     public void putConfigProperty(ConfigProperty property, String value) {
         String key = parameterName(property);
         try {
+            // first in the local cache so other threads get the most recent
+            getCache().put(key, value);
             PutParameterRequest parameterRequest = PutParameterRequest.builder()
                 .name(key)
                 .value(value)
+                // if property exists, which should always be created first, this flags needs to be set
+                .overwrite(true)
                 .build();
             PutParameterResponse parameterResponse = client.putParameter(parameterRequest);
-            getCache().invalidate(key);
             log.info(String.format("Property: %s, stored version %d", key, parameterResponse.version()));
         } catch (SsmException e) {
             log.log(Level.SEVERE, "Could not store property " + key, e);

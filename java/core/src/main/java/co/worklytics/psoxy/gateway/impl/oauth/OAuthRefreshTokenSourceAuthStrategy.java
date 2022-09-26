@@ -15,8 +15,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.java.Log;
-import org.apache.commons.lang3.SerializationException;
-import org.apache.commons.lang3.SerializationUtils;
 
 import javax.inject.Inject;
 import java.io.IOException;
@@ -86,25 +84,10 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
     @Override
     public Credentials getCredentials(Optional<String> userToImpersonate) {
-        boolean usesSharedToken = config.getConfigPropertyAsOptional(ConfigProperty.SHARED_TOKEN).map(Boolean::parseBoolean).orElse(false);
-
-        AccessToken accessToken = null;
-        if (usesSharedToken) {
-            String accessTokenSerialized = config.getConfigPropertyAsOptional(ConfigProperty.WRITABLE_ACCESS_TOKEN).orElse(null);
-            if (accessTokenSerialized != null) {
-                try {
-                    accessToken = SerializationUtils.deserialize(accessTokenSerialized.getBytes(StandardCharsets.UTF_8));
-                } catch (SerializationException se) {
-                    accessToken = null;
-                }
-            }
-        }
-
         return OAuth2CredentialsWithRefresh.newBuilder()
             //TODO: pull an AccessToken from some cached location or something? otherwise will
             // be 'null' and refreshed for every request; and/or Keep credentials themselves in
             // memory
-            .setAccessToken(accessToken)
             .setRefreshHandler(refreshHandler)
             .build();
     }
@@ -155,36 +138,29 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         @Override
         public AccessToken refreshAccessToken() throws IOException {
             CanonicalOAuthAccessTokenResponseDto tokenResponse;
-            boolean isCurrentTokenValid = isCurrentTokenValid(this.currentToken, Instant.now());
 
-            if (payloadBuilder.useSharedToken()) {
-                // let's check if latest in store is newer than what we have locally cached
-                Optional<AccessToken> sharedAccessToken = getSharedAccessToken();
-                if (sharedAccessToken.isPresent() && this.currentToken != null) {
-                    if (sharedAccessToken.get().getExpirationTime().after(this.currentToken.getExpirationTime())) {
-                        // other instance refreshed, use that
-                        this.currentToken = sharedAccessToken.get();
-                        return this.currentToken;
-                    }
-                } else if (isCurrentTokenValid) {
-                    // what we have should be good
-                    return this.currentToken;
+            Optional<AccessToken> sharedAccessToken = getSharedAccessTokenIfAvailable();
+            if (this.currentToken == null) {
+                this.currentToken = sharedAccessToken.orElse(null);
+            }
+
+            if (sharedAccessToken.isPresent()) {
+                // we have a token, but shared token is newer. Other instance refreshed, so use it
+                if (sharedAccessToken.get().getExpirationTime().after(this.currentToken.getExpirationTime())) {
+                    this.currentToken = sharedAccessToken.get();
                 }
-                // refresh case
-                tokenResponse = exchangeRefreshTokenForAccessToken();
-                this.currentToken = asAccessToken(tokenResponse);
-                storeSharedAccessToken(this.currentToken);
-                return this.currentToken;
-            } else {
-                if (isCurrentTokenValid(this.currentToken, Instant.now())) {
-                    return this.currentToken;
-                }
-                // usual case, exchange token always
-                tokenResponse = exchangeRefreshTokenForAccessToken();
-                this.currentToken = asAccessToken(tokenResponse);
+            }
+
+            if (isCurrentTokenValid(this.currentToken, Instant.now())) {
                 return this.currentToken;
             }
+
+            tokenResponse = exchangeRefreshTokenForAccessToken();
+            this.currentToken = asAccessToken(tokenResponse);
+            storeSharedAccessTokenIfNeeded(this.currentToken);
+            return this.currentToken;
         }
+
 
         private CanonicalOAuthAccessTokenResponseDto exchangeRefreshTokenForAccessToken() throws IOException {
             String refreshEndpoint =
@@ -248,31 +224,36 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         }
 
 
-        private Optional<AccessToken> getSharedAccessToken() {
-            Preconditions.checkState(payloadBuilder.useSharedToken(), "Shared token not supported");
-            Optional<String> jsonToken = config.getConfigPropertyAsOptional(ConfigProperty.WRITABLE_ACCESS_TOKEN);
-            if (jsonToken.isEmpty()) {
-                return Optional.empty();
-            } else {
-                try {
-                    AccessTokenDto accessTokenDto = objectMapper.readerFor(AccessTokenDto.class).readValue(jsonToken.get().getBytes(StandardCharsets.UTF_8));
-                    return Optional.ofNullable(accessTokenDto).map(AccessTokenDto::asAccessToken);
-                } catch (IOException e) {
-                    log.log(Level.SEVERE, "Could not parse contents of token into an object", e);
+        private Optional<AccessToken> getSharedAccessTokenIfAvailable() {
+            if (payloadBuilder.useSharedToken()) {
+                Preconditions.checkState(payloadBuilder.useSharedToken(), "Shared token not supported");
+                Optional<String> jsonToken = config.getConfigPropertyAsOptional(ConfigProperty.WRITABLE_ACCESS_TOKEN);
+                if (jsonToken.isEmpty()) {
                     return Optional.empty();
+                } else {
+                    try {
+                        AccessTokenDto accessTokenDto = objectMapper.readerFor(AccessTokenDto.class).readValue(jsonToken.get().getBytes(StandardCharsets.UTF_8));
+                        return Optional.ofNullable(accessTokenDto).map(AccessTokenDto::asAccessToken);
+                    } catch (IOException e) {
+                        log.log(Level.SEVERE, "Could not parse contents of token into an object", e);
+                        return Optional.empty();
+                    }
                 }
+            } else {
+                return Optional.empty();
             }
         }
 
-        private void storeSharedAccessToken(@NonNull AccessToken accessToken) {
-            Preconditions.checkState(payloadBuilder.useSharedToken(), "Shared token not supported");
-            try {
-                config.putConfigProperty(ConfigProperty.WRITABLE_ACCESS_TOKEN,
-                    objectMapper.writerFor(AccessTokenDto.class)
-                        .writeValueAsString(AccessTokenDto.toAccessTokenDto(accessToken)));
-                log.log(Level.INFO, "New token stored in config");
-            } catch (JsonProcessingException e) {
-                log.log(Level.SEVERE, "Could not write token into JSON", e);
+        private void storeSharedAccessTokenIfNeeded(@NonNull AccessToken accessToken) {
+            if (payloadBuilder.useSharedToken()) {
+                try {
+                    config.putConfigProperty(ConfigProperty.WRITABLE_ACCESS_TOKEN,
+                        objectMapper.writerFor(AccessTokenDto.class)
+                            .writeValueAsString(AccessTokenDto.toAccessTokenDto(accessToken)));
+                    log.log(Level.INFO, "New token stored in config");
+                } catch (JsonProcessingException e) {
+                    log.log(Level.SEVERE, "Could not write token into JSON", e);
+                }
             }
         }
     }
