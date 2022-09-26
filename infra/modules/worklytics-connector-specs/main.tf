@@ -242,7 +242,7 @@ EOT
         "ACCOUNT_ID",
         "WRITABLE_ACCESS_TOKEN"
       ],
-      reserved_concurrent_executions : 1
+      reserved_concurrent_executions : null # 1
       example_api_calls_user_to_impersonate : null
       external_token_todo : <<EOT
 ## Zoom Setup
