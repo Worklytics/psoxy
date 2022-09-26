@@ -154,11 +154,8 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
          */
         @Override
         public AccessToken refreshAccessToken() throws IOException {
-            if (isCurrentTokenValid(this.currentToken, Instant.now())) {
-                return this.currentToken;
-            }
-
             CanonicalOAuthAccessTokenResponseDto tokenResponse;
+            boolean isCurrentTokenValid = isCurrentTokenValid(this.currentToken, Instant.now());
 
             if (payloadBuilder.useSharedToken()) {
                 // let's check if latest in store is newer than what we have locally cached
@@ -169,6 +166,9 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                         this.currentToken = sharedAccessToken.get();
                         return this.currentToken;
                     }
+                } else if (isCurrentTokenValid) {
+                    // what we have should be good
+                    return this.currentToken;
                 }
                 // refresh case
                 tokenResponse = exchangeRefreshTokenForAccessToken();
@@ -176,6 +176,9 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                 storeSharedAccessToken(this.currentToken);
                 return this.currentToken;
             } else {
+                if (isCurrentTokenValid(this.currentToken, Instant.now())) {
+                    return this.currentToken;
+                }
                 // usual case, exchange token always
                 tokenResponse = exchangeRefreshTokenForAccessToken();
                 this.currentToken = asAccessToken(tokenResponse);
@@ -252,7 +255,8 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                 return Optional.empty();
             } else {
                 try {
-                    return Optional.ofNullable(objectMapper.readerFor(AccessToken.class).readValue(jsonToken.get().getBytes(StandardCharsets.UTF_8)));
+                    AccessTokenDto accessTokenDto = objectMapper.readerFor(AccessTokenDto.class).readValue(jsonToken.get().getBytes(StandardCharsets.UTF_8));
+                    return Optional.ofNullable(accessTokenDto).map(AccessTokenDto::asAccessToken);
                 } catch (IOException e) {
                     log.log(Level.SEVERE, "Could not parse contents of token into an object", e);
                     return Optional.empty();
@@ -263,7 +267,9 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         private void storeSharedAccessToken(@NonNull AccessToken accessToken) {
             Preconditions.checkState(payloadBuilder.useSharedToken(), "Shared token not supported");
             try {
-                config.putConfigProperty(ConfigProperty.WRITABLE_ACCESS_TOKEN, objectMapper.writerFor(AccessToken.class).writeValueAsString(accessToken));
+                config.putConfigProperty(ConfigProperty.WRITABLE_ACCESS_TOKEN,
+                    objectMapper.writerFor(AccessTokenDto.class)
+                        .writeValueAsString(AccessTokenDto.toAccessTokenDto(accessToken)));
                 log.log(Level.INFO, "New token stored in config");
             } catch (JsonProcessingException e) {
                 log.log(Level.SEVERE, "Could not write token into JSON", e);
