@@ -19,6 +19,7 @@ import lombok.extern.java.Log;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
@@ -121,6 +122,8 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         HttpRequestFactory httpRequestFactory;
         @Inject
         OAuthRefreshTokenSourceAuthStrategy.TokenRequestPayloadBuilder payloadBuilder;
+        @Inject
+        Clock clock;
 
         @VisibleForTesting
         protected final Duration TOKEN_REFRESH_THRESHOLD = Duration.ofMinutes(1L);
@@ -150,7 +153,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                 }
             }
 
-            if (isCurrentTokenValid(this.currentToken, Instant.now())) {
+            if (isCurrentTokenValid(this.currentToken, clock.instant())) {
                 return this.currentToken;
             }
 
@@ -199,7 +202,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
             Integer expiresIn = Optional.ofNullable(tokenResponse.getExpiresIn())
                 .orElse((int) DEFAULT_ACCESS_TOKEN_EXPIRATION.toSeconds());
             return new AccessToken(tokenResponse.getAccessToken(),
-                Date.from(Instant.now().plusSeconds(expiresIn)));
+                Date.from(clock.instant().plusSeconds(expiresIn)));
         }
 
         @VisibleForTesting
@@ -222,8 +225,8 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
             return propertyStream.collect(Collectors.toSet());
         }
 
-
-        private Optional<AccessToken> getSharedAccessTokenIfAvailable() {
+        @VisibleForTesting
+        Optional<AccessToken> getSharedAccessTokenIfAvailable() {
             if (payloadBuilder.useSharedToken()) {
                 Preconditions.checkState(payloadBuilder.useSharedToken(), "Shared token not supported");
                 Optional<String> jsonToken = config.getConfigPropertyAsOptional(ConfigProperty.ACCESS_TOKEN);
@@ -243,7 +246,8 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
             }
         }
 
-        private void storeSharedAccessTokenIfNeeded(@NonNull AccessToken accessToken) {
+        @VisibleForTesting
+        void storeSharedAccessTokenIfNeeded(@NonNull AccessToken accessToken) {
             if (payloadBuilder.useSharedToken()) {
                 try {
                     config.putConfigProperty(ConfigProperty.ACCESS_TOKEN,
@@ -251,7 +255,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                             .writeValueAsString(AccessTokenDto.toAccessTokenDto(accessToken)));
                     log.log(Level.INFO, "New token stored in config");
                 } catch (JsonProcessingException e) {
-                    log.log(Level.SEVERE, "Could not write token into JSON", e);
+                    log.log(Level.SEVERE, "Could not serialize token into JSON", e);
                 }
             }
         }

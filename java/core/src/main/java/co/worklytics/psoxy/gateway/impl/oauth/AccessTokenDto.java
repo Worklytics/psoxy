@@ -1,9 +1,9 @@
 package co.worklytics.psoxy.gateway.impl.oauth;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.auth.oauth2.AccessToken;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.Value;
 
 import java.util.Date;
 import java.util.Optional;
@@ -13,12 +13,15 @@ import java.util.Optional;
  * Used for storage of the token in JSON. Google's is immutable and can't easily configure
  * Jackson to do it.
  */
-@NoArgsConstructor //for jackson
-@AllArgsConstructor
-@Getter
+@Value
 public class AccessTokenDto {
-    private String token;
-    private Long expirationDate;
+    @JsonCreator
+    public AccessTokenDto(@JsonProperty("token") String token, @JsonProperty("expirationDate") long expirationDate) {
+        this.token = token;
+        this.expirationDate = expirationDate;
+    }
+    String token;
+    Long expirationDate;
 
     public AccessToken asAccessToken() {
         return new AccessToken(token, Optional.ofNullable(expirationDate).map(Date::new).orElse(null));
