@@ -172,7 +172,7 @@ locals {
         "/api/1.0/tasks/{ANY_TASK_ID}/stories",
       ],
       secured_variables : [
-        "ACCESS_TOKEN",
+        { name : "ACCESS_TOKEN", writable : false },
       ],
       reserved_concurrent_executions : null
       example_api_calls_user_to_impersonate : null
@@ -192,7 +192,7 @@ EOT
         "/api/discovery.users.list",
       ],
       secured_variables : [
-        "ACCESS_TOKEN",
+        { name : "ACCESS_TOKEN", writable : false },
       ]
       reserved_concurrent_executions : null
       example_api_calls_user_to_impersonate : null
@@ -237,10 +237,10 @@ EOT
         "/v2/report/meetings/{meetingId}/participants"
       ],
       secured_variables : [
-        "CLIENT_SECRET",
-        "CLIENT_ID",
-        "ACCOUNT_ID",
-        "WRITABLE_ACCESS_TOKEN"
+        { name : "CLIENT_SECRET", writable : false },
+        { name : "CLIENT_ID", writable : false },
+        { name : "ACCOUNT_ID", writable : false },
+        { name : "ACCESS_TOKEN", writable : true },
       ],
       reserved_concurrent_executions : null # 1
       example_api_calls_user_to_impersonate : null
@@ -275,9 +275,9 @@ EOT
         "/2/team_log/get_events",
       ],
       secured_variables : [
-        "REFRESH_TOKEN",
-        "CLIENT_ID",
-        "CLIENT_SECRET"
+        { name : "REFRESH_TOKEN", writable : false },
+        { name : "CLIENT_ID", writable : false },
+        { name : "CLIENT_SECRET", writable : false },
       ],
       token_endpoint : "https://api.dropboxapi.com/oauth2/token",
       reserved_concurrent_executions : null
@@ -348,9 +348,9 @@ locals {
   # list of pair of [(conn1, secret1), (conn1, secret2), ... (connN, secretM)]
   enabled_oauth_secrets_to_create = distinct(flatten([
     for k, v in local.enabled_oauth_long_access_connectors : [
-      for secret_name in v.secured_variables : {
+      for secret_var in v.secured_variables : {
         connector_name = k
-        secret_name    = secret_name
+        secret_name    = secret_var.name
       }
     ]
   ]))

@@ -35,11 +35,6 @@ variable "source_kind" {
   description = "kind of source (eg, 'gmail', 'google-chat', etc)"
 }
 
-variable "parameters" {
-  type        = list(string)
-  description = "System Manager Parameters ARNS to expose to function"
-}
-
 variable "path_to_function_zip" {
   type        = string
   description = "path to zip archive of lambda bundle"
@@ -78,4 +73,19 @@ variable "log_retention_in_days" {
   type        = number
   description = "number of days to retain logs in CloudWatch for this psoxy instance"
   default     = 7
+}
+
+variable "global_parameters" {
+  # see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter#attributes-reference
+  type        = list(string)
+  description = "System Manager Parameters ARNS to expose to function, expected to contain global shared parameters, like salt or encryption keys"
+}
+
+variable "function_parameters" {
+  type = list(object({
+    name     = string
+    writable = bool
+  }))
+  description = "Parameter names and expected grant to create for function"
+  default     = []
 }

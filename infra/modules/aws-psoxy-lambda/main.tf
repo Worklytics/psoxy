@@ -77,14 +77,25 @@ data "aws_ssm_parameters_by_path" "psoxy_parameters" {
 }
 
 locals {
-  prefix          = "PSOXY_${upper(replace(var.source_kind, "-", "_"))}_"
-  prefix_writable = "PSOXY_${upper(replace(var.source_kind, "-", "_"))}_WRITABLE"
+  prefix = "PSOXY_${upper(replace(var.source_kind, "-", "_"))}_"
 
-  filtered_function_read_arns  = [for arn in data.aws_ssm_parameters_by_path.psoxy_parameters.arns : arn if length(regexall(local.prefix, arn)) > 0]
-  filtered_function_write_arns = [for arn in data.aws_ssm_parameters_by_path.psoxy_parameters.arns : arn if length(regexall(local.prefix_writable, arn)) > 0]
+  # Read grant to any param that belongs to the function (identified by param prefix)
+  # Can't use same approach as for write, because some params are not defined in connector specs,
+  # but later in certain modules, f.e. SERVICE_ACCOUNT_KEY or HRIS_RULES
+  filtered_function_read_arns = [
+    for arn in data.aws_ssm_parameters_by_path.psoxy_parameters.arns : arn if length(regexall(local.prefix, arn)) > 0
+  ]
 
-  function_read_arns  = concat(local.filtered_function_read_arns, var.parameters)
+  # Write grant to any writeable param specified in the connector definition
+  filtered_function_write_arns = distinct(flatten([
+    for p in var.function_parameters : [
+      for arn in data.aws_ssm_parameters_by_path.psoxy_parameters.arns :
+      arn if endswith(arn, join("", [local.prefix, p.name])) && p.writable
+    ]
+  ]))
+
   function_write_arns = local.filtered_function_write_arns
+  function_read_arns  = concat(local.filtered_function_read_arns, var.global_parameters)
 }
 
 resource "aws_iam_policy" "read_policy" {
@@ -102,8 +113,6 @@ resource "aws_iam_policy" "read_policy" {
           ],
           "Effect" : "Allow",
           "Resource" : local.function_read_arns
-          # TODO: limit to SSM parameters in question
-          # "Resource": "arn:aws:ssm:us-east-2:123456789012:parameter/prod-*"
         }
       ]
   })
@@ -131,8 +140,6 @@ resource "aws_iam_policy" "write_policy" {
           ],
           "Effect" : "Allow",
           "Resource" : local.function_write_arns
-          # TODO: limit to SSM parameters in question
-          # "Resource": "arn:aws:ssm:us-east-2:123456789012:parameter/prod-*"
         }
       ]
   })

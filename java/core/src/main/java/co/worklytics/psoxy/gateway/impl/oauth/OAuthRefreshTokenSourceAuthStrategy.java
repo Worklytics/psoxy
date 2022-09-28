@@ -65,8 +65,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         REFRESH_ENDPOINT,
         CLIENT_ID,
         GRANT_TYPE,
-        SHARED_TOKEN,
-        WRITABLE_ACCESS_TOKEN,
+        ACCESS_TOKEN,
     }
 
     @Inject OAuth2CredentialsWithRefresh.OAuth2RefreshHandler refreshHandler;
@@ -227,7 +226,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         private Optional<AccessToken> getSharedAccessTokenIfAvailable() {
             if (payloadBuilder.useSharedToken()) {
                 Preconditions.checkState(payloadBuilder.useSharedToken(), "Shared token not supported");
-                Optional<String> jsonToken = config.getConfigPropertyAsOptional(ConfigProperty.WRITABLE_ACCESS_TOKEN);
+                Optional<String> jsonToken = config.getConfigPropertyAsOptional(ConfigProperty.ACCESS_TOKEN);
                 if (jsonToken.isEmpty()) {
                     return Optional.empty();
                 } else {
@@ -247,7 +246,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         private void storeSharedAccessTokenIfNeeded(@NonNull AccessToken accessToken) {
             if (payloadBuilder.useSharedToken()) {
                 try {
-                    config.putConfigProperty(ConfigProperty.WRITABLE_ACCESS_TOKEN,
+                    config.putConfigProperty(ConfigProperty.ACCESS_TOKEN,
                         objectMapper.writerFor(AccessTokenDto.class)
                             .writeValueAsString(AccessTokenDto.toAccessTokenDto(accessToken)));
                     log.log(Level.INFO, "New token stored in config");

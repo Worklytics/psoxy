@@ -153,8 +153,7 @@ module "psoxy-google-workspace-connector" {
   path_to_repo_root                     = var.psoxy_base_dir
   example_api_calls                     = each.value.example_api_calls
   example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
-
-  parameters = module.psoxy-aws.general_parameters_arns
+  global_parameters                     = module.psoxy-aws.global_parameters_arns
 }
 
 
@@ -199,7 +198,7 @@ module "source_token_external_todo" {
   source_id                         = each.key
   host_cloud                        = "aws"
   connector_specific_external_steps = each.value.external_token_todo
-  token_secret_id                   = aws_ssm_parameter.long-access-secrets["${each.key}.${each.value.secured_variables[0]}"].name
+  token_secret_id                   = aws_ssm_parameter.long-access-secrets["${each.key}.${each.value.secured_variables[0].name}"].name
 }
 
 module "aws-psoxy-long-auth-connectors" {
@@ -220,7 +219,8 @@ module "aws-psoxy-long-auth-connectors" {
   path_to_repo_root              = var.psoxy_base_dir
   example_api_calls              = each.value.example_api_calls
   reserved_concurrent_executions = each.value.reserved_concurrent_executions
-  parameters                     = module.psoxy-aws.general_parameters_arns
+  global_parameters              = module.psoxy-aws.global_parameters_arns
+  function_parameters            = each.value.secured_variables
 }
 
 module "worklytics-psoxy-connection" {

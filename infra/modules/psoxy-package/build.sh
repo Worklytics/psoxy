@@ -9,6 +9,12 @@ LOG_FILE=${TERRAFORM_CONFIG_PATH}/psoxy-package.`date +%Y%m%d'T'%H%M%S`.log
 
 FOLDERS=("gateway-core" "core" "impl/$2")
 
+
+# output back to Terraform
+OUTPUT_JSON="{\"path_to_deployment_jar\": \"$3\"}"
+echo "$OUTPUT_JSON"
+exit
+
 touch ${LOG_FILE}
 
 cd $1
