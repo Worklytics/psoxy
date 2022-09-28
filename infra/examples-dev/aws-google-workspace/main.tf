@@ -87,6 +87,12 @@ module "psoxy-aws" {
   caller_gcp_service_account_ids = var.caller_gcp_service_account_ids
 }
 
+module "secrets" {
+  source = "../../modules/aws-ssm-secrets"
+
+  secrets = module.psoxy-aws.secrets
+}
+
 # holds SAs + keys needed to connect to Google Workspace APIs
 resource "google_project" "psoxy-google-connectors" {
   name            = "Psoxy%{if var.environment_name != ""} - ${var.environment_name}%{endif}"

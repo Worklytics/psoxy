@@ -97,6 +97,13 @@ module "psoxy-aws" {
   }
 }
 
+module "secrets" {
+  # source = "../../modules/aws-ssm-secrets"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-ssm-secrets?ref=v0.4.4"
+
+  secrets = module.psoxy-aws.secrets
+}
+
 data "azuread_client_config" "current" {}
 
 

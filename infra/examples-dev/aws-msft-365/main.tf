@@ -78,6 +78,12 @@ module "psoxy-aws" {
   }
 }
 
+module "secrets" {
+  source = "../../modules/aws-ssm-secrets"
+
+  secrets = module.psoxy-aws.secrets
+}
+
 data "azuread_client_config" "current" {}
 
 locals {
