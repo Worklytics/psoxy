@@ -77,6 +77,8 @@ module "worklytics_connector_specs" {
     "zoom",
   ]
 
+  msft_tenant_id = var.msft_tenant_id
+
   # this IS the correct ID for the user terraform is running as, which we assume is a user who's OK
   # to use the subject of examples. You can change it to any string you want.
   example_msft_user_guid = data.azuread_client_config.current.object_id
@@ -126,37 +128,6 @@ module "msft-connection-auth" {
   certificate_subject   = var.certificate_subject
 }
 
-resource "aws_ssm_parameter" "client_id" {
-  for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
-
-  name  = "PSOXY_${upper(replace(each.key, "-", "_"))}_CLIENT_ID"
-  type  = "String"
-  value = module.msft-connection[each.key].connector.application_id
-
-  lifecycle {
-    ignore_changes = [
-      tags,
-      value
-    ]
-  }
-}
-
-resource "aws_ssm_parameter" "refresh_endpoint" {
-  for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
-
-  name      = "PSOXY_${upper(replace(each.key, "-", "_"))}_REFRESH_ENDPOINT"
-  type      = "String"
-  overwrite = true
-  value     = "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
-
-  lifecycle {
-    ignore_changes = [
-      tags,
-      value
-    ]
-  }
-}
-
 
 module "private-key-aws-parameters" {
   for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
@@ -187,6 +158,8 @@ module "psoxy-msft-connector" {
   path_to_repo_root    = var.psoxy_base_dir
   api_caller_role_arn  = module.psoxy-aws.api_caller_role_arn
   environment_variables = {
+    CLIENT_ID            = module.msft-connection[each.key].connector.application_id
+    REFRESH_ENDPOINT     = module.worklytics_connector_specs.msft_365_refresh_endpoint
     PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
   }
 
