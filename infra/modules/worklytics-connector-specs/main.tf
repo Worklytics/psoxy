@@ -374,3 +374,7 @@ output "enabled_oauth_long_access_connectors_todos" {
 output "enabled_oauth_secrets_to_create" {
   value = local.enabled_oauth_secrets_to_create
 }
+
+output "msft_token_refresh_endpoint" {
+  value = "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
+}

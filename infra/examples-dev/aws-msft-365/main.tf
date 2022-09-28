@@ -55,6 +55,8 @@ locals {
 module "worklytics_connector_specs" {
   source = "../../modules/worklytics-connector-specs"
 
+  msft_tenant_id = var.msft_tenant_id
+
   enabled_connectors = [
     "asana",
     "azure-ad",
@@ -141,7 +143,7 @@ module "psoxy-msft-connector" {
   environment_variables = {
     IS_DEVELOPMENT_MODE  = "true"
     CLIENT_ID            = module.msft-connection[each.key].connector.application_id
-    REFRESH_ENDPOINT     = "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
+    REFRESH_ENDPOINT     = module.worklytics_connector_specs.msft_token_refresh_endpoint
     PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
   }
 }
