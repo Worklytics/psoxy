@@ -255,4 +255,6 @@ module "psoxy-bulk" {
   api_caller_role_name = module.psoxy-aws.api_caller_role_name
   psoxy_base_dir       = var.psoxy_base_dir
   rules                = each.value.rules
+  global_parameters    = module.psoxy-aws.global_parameters_arns
+
 }

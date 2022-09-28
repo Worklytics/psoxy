@@ -26,7 +26,7 @@ module "psoxy_lambda" {
   path_to_function_zip = var.path_to_function_zip
   function_zip_hash    = var.function_zip_hash
   aws_assume_role_arn  = var.aws_assume_role_arn
-  global_parameters    = []
+  global_parameters    = var.global_parameters
   environment_variables = merge(
     var.environment_variables,
     {
