@@ -67,8 +67,11 @@ public class ParameterStoreConfigService implements ConfigService {
                                     .build();
                                     GetParameterResponse parameterResponse = client.getParameter(parameterRequest);
                                     return parameterResponse.parameter().value();
-                                } catch (SsmException ignore) {
+                                } catch (ParameterNotFoundException | ParameterVersionNotFoundException ignore) {
                                     // does not exist, that could be OK depending on case.
+                                    return NEGATIVE_VALUE;
+                                } catch (SsmException ignore) {
+                                    log.log(Level.SEVERE, "failure reading param", ignore);
                                     return NEGATIVE_VALUE;
                                 }
                             }
