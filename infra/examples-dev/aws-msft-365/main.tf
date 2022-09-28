@@ -171,6 +171,7 @@ module "psoxy-msft-connector" {
     PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
     IS_DEVELOPMENT_MODE  = "true"
   }
+  global_parameters = module.psoxy-aws.global_parameters_arns
 }
 
 # grant required permissions to connectors via Azure AD
@@ -231,7 +232,7 @@ module "source_token_external_todo" {
   source_id                         = each.key
   host_cloud                        = "aws"
   connector_specific_external_steps = each.value.external_token_todo
-  token_secret_id                   = aws_ssm_parameter.long-access-secrets["${each.key}.${each.value.secured_variables[0]}"].name
+  token_secret_id                   = aws_ssm_parameter.long-access-secrets["${each.key}.${each.value.secured_variables[0].name}"].name
 }
 
 module "aws-psoxy-long-auth-connectors" {
@@ -256,6 +257,9 @@ module "aws-psoxy-long-auth-connectors" {
     PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
     IS_DEVELOPMENT_MODE  = "true"
   }
+  reserved_concurrent_executions = each.value.reserved_concurrent_executions
+  global_parameters              = module.psoxy-aws.global_parameters_arns
+  function_parameters            = each.value.secured_variables
 }
 
 module "worklytics-psoxy-connection-oauth-long-access" {
