@@ -227,7 +227,7 @@ module "source_token_external_todo" {
   for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors_todos
 
   source = "../../modules/source-token-external-todo"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/source-token-external-todo?ref=v0.4.5-jrc"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/source-token-external-todo?ref=v0.4.5"
 
   source_id                         = each.key
   host_cloud                        = "aws"
@@ -281,7 +281,7 @@ module "psoxy-bulk" {
   for_each = local.bulk_sources
 
   source = "../../modules/aws-psoxy-bulk"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-bulk?ref=v0.4.5-jrc"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-bulk?ref=v0.4.5"
 
   aws_account_id       = var.aws_account_id
   aws_assume_role_arn  = var.aws_assume_role_arn

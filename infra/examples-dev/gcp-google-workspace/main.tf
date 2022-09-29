@@ -193,7 +193,7 @@ module "psoxy-gcp-bulk" {
   for_each = local.bulk_sources
 
   source = "../../modules/gcp-psoxy-bulk"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-bulk?ref=v0.4.5-jrc"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-bulk?ref=v0.4.5"
 
   project_id                    = google_project.psoxy-project.project_id
   worklytics_sa_emails          = var.worklytics_sa_emails
