@@ -22,7 +22,7 @@ module "psoxy_lambda" {
   path_to_config                 = var.path_to_config
   source_kind                    = var.source_kind
   function_parameters            = var.function_parameters
-  global_parameters              = var.global_parameters
+  global_parameter_arns          = var.global_parameter_arns
   environment_variables          = var.environment_variables
 }
 

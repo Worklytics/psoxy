@@ -171,7 +171,7 @@ module "psoxy-msft-connector" {
     PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
     IS_DEVELOPMENT_MODE  = "true"
   }
-  global_parameters = module.psoxy-aws.global_parameters_arns
+  global_parameter_arns = module.psoxy-aws.global_parameters_arns
 }
 
 # grant required permissions to connectors via Azure AD
@@ -258,7 +258,7 @@ module "aws-psoxy-long-auth-connectors" {
     IS_DEVELOPMENT_MODE  = "true"
   }
   reserved_concurrent_executions = each.value.reserved_concurrent_executions
-  global_parameters              = module.psoxy-aws.global_parameters_arns
+  global_parameter_arns          = module.psoxy-aws.global_parameters_arns
   function_parameters            = each.value.secured_variables
 }
 

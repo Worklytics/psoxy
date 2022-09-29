@@ -95,7 +95,7 @@ locals {
   ]))
 
   function_write_arns = local.filtered_function_write_arns
-  function_read_arns  = concat(local.filtered_function_read_arns, var.global_parameters)
+  function_read_arns  = concat(local.filtered_function_read_arns, var.global_parameter_arns)
 }
 
 resource "aws_iam_policy" "read_policy" {

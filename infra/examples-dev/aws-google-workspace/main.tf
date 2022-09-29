@@ -153,7 +153,7 @@ module "psoxy-google-workspace-connector" {
   path_to_repo_root                     = var.psoxy_base_dir
   example_api_calls                     = each.value.example_api_calls
   example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
-  global_parameters                     = module.psoxy-aws.global_parameters_arns
+  global_parameter_arns                 = module.psoxy-aws.global_parameters_arns
 }
 
 
@@ -219,7 +219,7 @@ module "aws-psoxy-long-auth-connectors" {
   path_to_repo_root              = var.psoxy_base_dir
   example_api_calls              = each.value.example_api_calls
   reserved_concurrent_executions = each.value.reserved_concurrent_executions
-  global_parameters              = module.psoxy-aws.global_parameters_arns
+  global_parameter_arns          = module.psoxy-aws.global_parameters_arns
   function_parameters            = each.value.secured_variables
 }
 
@@ -244,17 +244,17 @@ module "psoxy-bulk" {
   source = "../../modules/aws-psoxy-bulk"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-bulk?ref=v0.4.4"
 
-  aws_account_id       = var.aws_account_id
-  aws_assume_role_arn  = var.aws_assume_role_arn
-  instance_id          = each.key
-  source_kind          = each.value.source_kind
-  aws_region           = var.aws_region
-  path_to_function_zip = module.psoxy-aws.path_to_deployment_jar
-  function_zip_hash    = module.psoxy-aws.deployment_package_hash
-  api_caller_role_arn  = module.psoxy-aws.api_caller_role_arn
-  api_caller_role_name = module.psoxy-aws.api_caller_role_name
-  psoxy_base_dir       = var.psoxy_base_dir
-  rules                = each.value.rules
-  global_parameters    = module.psoxy-aws.global_parameters_arns
+  aws_account_id        = var.aws_account_id
+  aws_assume_role_arn   = var.aws_assume_role_arn
+  instance_id           = each.key
+  source_kind           = each.value.source_kind
+  aws_region            = var.aws_region
+  path_to_function_zip  = module.psoxy-aws.path_to_deployment_jar
+  function_zip_hash     = module.psoxy-aws.deployment_package_hash
+  api_caller_role_arn   = module.psoxy-aws.api_caller_role_arn
+  api_caller_role_name  = module.psoxy-aws.api_caller_role_name
+  psoxy_base_dir        = var.psoxy_base_dir
+  rules                 = each.value.rules
+  global_parameter_arns = module.psoxy-aws.global_parameters_arns
 
 }
