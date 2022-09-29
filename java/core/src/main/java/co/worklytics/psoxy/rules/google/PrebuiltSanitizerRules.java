@@ -70,6 +70,14 @@ public class PrebuiltSanitizerRules {
         .endpoint(Rules2.Endpoint.builder()
             .pathRegex("^/calendar/v3/users/[^/]*?/settings.*")
             .build())
+        //calendarList needed to analyze historical calendars
+        .endpoint(Rules2.Endpoint.builder()
+            .pathRegex("^/calendar/v3/users/[^/]*?/calendarList[^/]*$")
+            .transform(Transform.FilterTokenByRegex.builder().jsonPath("$.items[*].summaryOverride")
+                .jsonPath("$.items[*].summary")
+                .filter("Transferred").build())
+            .transform(Transform.Pseudonymize.builder().jsonPath("$.items[*].id").includeReversible(true).encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN).build())
+            .build())
         .build();
 
     static final Set<String> GOOGLE_CHAT_EVENT_PARAMETERS_PII = ImmutableSet.of(
