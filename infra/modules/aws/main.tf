@@ -183,7 +183,7 @@ output "secrets" {
 }
 
 output "salt_secret" {
-  value = aws_ssm_parameter.salt
+  value = sensitive(random_password.random.result)
 }
 
 output "api_caller_role_arn" {

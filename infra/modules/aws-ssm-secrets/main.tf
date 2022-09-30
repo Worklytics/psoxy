@@ -24,6 +24,6 @@ resource "aws_ssm_parameter" "secret" {
 # secrets-store interface
 # q: is to ALSO pass in some notion of access? except very different per implementation
 output "secret_ids" {
-  value = { for k in var.secrets : k => aws_ssm_parameter.secret[k].id }
+  value = { for k, v in var.secrets : k => aws_ssm_parameter.secret[k].id }
 }
 

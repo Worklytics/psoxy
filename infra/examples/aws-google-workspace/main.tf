@@ -80,8 +80,8 @@ module "worklytics_connector_specs" {
 }
 
 module "psoxy-aws" {
-  # source = "../../modules/aws" # to bind with local
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws?ref=v0.4.4"
+  source = "../../modules/aws" # to bind with local
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws?ref=v0.4.4"
 
   aws_account_id                 = var.aws_account_id
   psoxy_base_dir                 = var.psoxy_base_dir
@@ -90,8 +90,8 @@ module "psoxy-aws" {
 }
 
 module "secrets" {
-  # source = "../../modules/aws-ssm-secrets"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-ssm-secrets?ref=v0.4.4"
+  source = "../../modules/aws-ssm-secrets"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-ssm-secrets?ref=v0.4.4"
 
   secrets = module.psoxy-aws.secrets
 }

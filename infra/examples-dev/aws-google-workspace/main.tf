@@ -135,11 +135,24 @@ module "google-workspace-connection" {
 module "google-workspace-connection-auth" {
   for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
 
-  source = "../../modules/gcp-sa-auth-key-aws-secret"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-sa-auth-key-aws-secret?ref=v0.4.4"
+  source = "../../modules/gcp-sa-auth-key"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-sa-auth-key?ref=v0.4.4"
 
   service_account_id = module.google-workspace-connection[each.key].service_account_id
-  secret_id          = "PSOXY_${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY"
+}
+
+module "sa-key-secrets" {
+  for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
+
+  source = "../../modules/aws-ssm-secrets"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-ssm-secrets?ref=v0.4.4"
+  # other possibly implementations:
+  # source = "../../modules/hashicorp-vault-secrets"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/hashicorp-vault-secrets?ref=v0.4.4"
+
+  secrets = {
+    "PSOXY_${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY" : module.google-workspace-connection-auth[each.key].key_value
+  }
 }
 
 module "psoxy-google-workspace-connector" {
