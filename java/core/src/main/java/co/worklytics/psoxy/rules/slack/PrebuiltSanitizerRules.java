@@ -25,6 +25,7 @@ public class PrebuiltSanitizerRules {
             .transform(Transform.Pseudonymize.builder()
                 .jsonPath("$.users[*].id")
                 .jsonPath("$.users[*].profile.email")
+                .jsonPath("$.users[*].profile.guest_invited_by")
                 .build())
             .transform(Transform.Redact.builder()
                 // we don't care about names

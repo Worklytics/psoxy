@@ -83,7 +83,7 @@ public abstract class Transform {
     public static class RedactRegexMatches extends Transform {
 
         /**
-         * redaction content matching ANY of these regexes
+         * redact content matching ANY of these regexes
          */
         @Singular
         List<String> redactions;
