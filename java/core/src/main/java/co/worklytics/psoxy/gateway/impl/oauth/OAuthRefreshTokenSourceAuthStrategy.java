@@ -10,7 +10,6 @@ import com.google.auth.Credentials;
 import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.OAuth2CredentialsWithRefresh;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -141,7 +140,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         public AccessToken refreshAccessToken() throws IOException {
             CanonicalOAuthAccessTokenResponseDto tokenResponse;
 
-            Optional<AccessToken> sharedAccessToken = getSharedAccessTokenIfAvailable();
+            Optional<AccessToken> sharedAccessToken = getSharedAccessTokenIfSupported();
             if (this.currentToken == null) {
                 this.currentToken = sharedAccessToken.orElse(null);
             }
@@ -159,7 +158,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
             tokenResponse = exchangeRefreshTokenForAccessToken();
             this.currentToken = asAccessToken(tokenResponse);
-            storeSharedAccessTokenIfNeeded(this.currentToken);
+            storeSharedAccessTokenIfSupported(this.currentToken);
             return this.currentToken;
         }
 
@@ -226,9 +225,8 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         }
 
         @VisibleForTesting
-        Optional<AccessToken> getSharedAccessTokenIfAvailable() {
+        Optional<AccessToken> getSharedAccessTokenIfSupported() {
             if (payloadBuilder.useSharedToken()) {
-                Preconditions.checkState(payloadBuilder.useSharedToken(), "Shared token not supported");
                 Optional<String> jsonToken = config.getConfigPropertyAsOptional(ConfigProperty.ACCESS_TOKEN);
                 if (jsonToken.isEmpty()) {
                     return Optional.empty();
@@ -247,7 +245,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         }
 
         @VisibleForTesting
-        void storeSharedAccessTokenIfNeeded(@NonNull AccessToken accessToken) {
+        void storeSharedAccessTokenIfSupported(@NonNull AccessToken accessToken) {
             if (payloadBuilder.useSharedToken()) {
                 try {
                     config.putConfigProperty(ConfigProperty.ACCESS_TOKEN,

@@ -128,7 +128,7 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
 
         AccessToken token = new AccessToken("my-token", Date.from(anyTime.plus(10_000L, ChronoUnit.MILLIS)));
 
-        tokenRefreshHandler.storeSharedAccessTokenIfNeeded(token);
+        tokenRefreshHandler.storeSharedAccessTokenIfSupported(token);
 
         verify(tokenRefreshHandler.config, times(1)).putConfigProperty(eq(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.ACCESS_TOKEN),
             eq("{\"token\":\"my-token\",\"expirationDate\":1639526410000}"));
@@ -144,7 +144,7 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
         tokenRefreshHandler.payloadBuilder = mock(OAuthRefreshTokenSourceAuthStrategy.TokenRequestPayloadBuilder.class);
         when(tokenRefreshHandler.payloadBuilder.useSharedToken()).thenReturn(true);
 
-        Optional<AccessToken> accessToken = tokenRefreshHandler.getSharedAccessTokenIfAvailable();
+        Optional<AccessToken> accessToken = tokenRefreshHandler.getSharedAccessTokenIfSupported();
         assertTrue(accessToken.isPresent());
         assertEquals("my-token", accessToken.get().getTokenValue());
         assertEquals(1639526410000L, accessToken.get().getExpirationTime().getTime());

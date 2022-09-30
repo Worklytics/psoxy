@@ -71,7 +71,8 @@ public class ParameterStoreConfigService implements ConfigService {
                                     // does not exist, that could be OK depending on case.
                                     return NEGATIVE_VALUE;
                                 } catch (SsmException ignore) {
-                                    log.log(Level.SEVERE, "failure reading param", ignore);
+                                    // very likely the policy doesn't allow reading this parameter
+                                    // OK in those cases
                                     return NEGATIVE_VALUE;
                                 }
                             }
