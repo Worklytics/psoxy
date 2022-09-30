@@ -17,6 +17,16 @@ public class MemoryConfigService implements ConfigService {
     final Map<String, String> map;
 
     @Override
+    public boolean supportsWriting() {
+        return true;
+    }
+
+    @Override
+    public void putConfigProperty(ConfigProperty property, String value) {
+        map.put(property.name(), value);
+    }
+
+    @Override
     public String getConfigPropertyOrError(@NonNull ConfigProperty property) {
        return getConfigPropertyAsOptional(property)
            .orElseThrow(() ->  new Error("No property in config: " + property.name()));

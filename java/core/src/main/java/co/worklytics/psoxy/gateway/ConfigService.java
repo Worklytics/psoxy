@@ -9,6 +9,12 @@ public interface ConfigService {
         String name();
     }
 
+    default boolean supportsWriting() {
+        return false;
+    }
+
+    void putConfigProperty(ConfigProperty property, String value);
+
     String getConfigPropertyOrError(ConfigProperty property);
 
     Optional<String> getConfigPropertyAsOptional(ConfigProperty property);

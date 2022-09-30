@@ -32,18 +32,24 @@ public class AccountCredentialsGrantTokenRequestPayloadBuilder implements OAuthR
 
     @Override
     public Set<ConfigService.ConfigProperty> getRequiredConfigProperties() {
-        return Set.of(ConfigProperty.ACCOUNT_ID, ConfigProperty.CLIENT_ID, ConfigProperty.CLIENT_SECRET);
+        return Set.of(ConfigProperty.ACCOUNT_ID, ConfigProperty.CLIENT_ID, ConfigProperty.CLIENT_SECRET, ConfigProperty.ACCESS_TOKEN);
     }
 
     public enum ConfigProperty implements ConfigService.ConfigProperty {
         ACCOUNT_ID, //NOTE: you should configure this as a secret in Secret Manager
         CLIENT_ID,  //NOTE: you should configure this as a secret in Secret Manager
-        CLIENT_SECRET //NOTE: you should configure this as a secret in Secret Manager
+        CLIENT_SECRET, //NOTE: you should configure this as a secret in Secret Manager
+        ACCESS_TOKEN //NOTE: you should configure this as a secret in Secret Manager
     }
 
     @Override
     public String getGrantType() {
         return "account_credentials";
+    }
+
+    @Override
+    public boolean useSharedToken() {
+        return true;
     }
 
     @Override

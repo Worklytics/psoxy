@@ -18,14 +18,15 @@ resource "random_string" "bucket_suffix" {
 module "psoxy_lambda" {
   source = "../aws-psoxy-lambda"
 
-  function_name        = "psoxy-${var.instance_id}"
-  handler_class        = "co.worklytics.psoxy.S3Handler"
-  timeout_seconds      = 600 # 10 minutes
-  memory_size_mb       = 512
-  path_to_function_zip = var.path_to_function_zip
-  function_zip_hash    = var.function_zip_hash
-  aws_assume_role_arn  = var.aws_assume_role_arn
-  parameters           = []
+  function_name         = "psoxy-${var.instance_id}"
+  handler_class         = "co.worklytics.psoxy.S3Handler"
+  timeout_seconds       = 600 # 10 minutes
+  memory_size_mb        = 512
+  source_kind           = var.source_kind
+  path_to_function_zip  = var.path_to_function_zip
+  function_zip_hash     = var.function_zip_hash
+  aws_assume_role_arn   = var.aws_assume_role_arn
+  global_parameter_arns = var.global_parameter_arns
   environment_variables = merge(
     var.environment_variables,
     {

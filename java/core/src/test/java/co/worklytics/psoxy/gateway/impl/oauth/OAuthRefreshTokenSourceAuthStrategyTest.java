@@ -2,6 +2,7 @@ package co.worklytics.psoxy.gateway.impl.oauth;
 
 import co.worklytics.psoxy.PsoxyModule;
 import co.worklytics.psoxy.SourceAuthModule;
+import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.test.MockModules;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.auth.oauth2.AccessToken;
@@ -15,10 +16,14 @@ import org.junit.jupiter.params.provider.ValueSource;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.sql.Date;
+import java.time.Clock;
 import java.time.Instant;
+import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class OAuthRefreshTokenSourceAuthStrategyTest {
 
@@ -29,10 +34,11 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
     @Component(modules = {
         PsoxyModule.class,
         SourceAuthModule.class,
-        MockModules.ForConfigService.class,
+        MockModules.ForConfigService.class
     })
     public interface Container {
         void inject(OAuthRefreshTokenSourceAuthStrategyTest test);
+
     }
 
     @BeforeEach
@@ -109,4 +115,38 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
         assertFalse(tokenRefreshHandler.isCurrentTokenValid(token, fixed));
     }
 
+    @Test
+    public void serializesAccessTokenDTO() {
+        OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl tokenRefreshHandler = new OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl();
+        tokenRefreshHandler.objectMapper = objectMapper;
+        tokenRefreshHandler.config = mock(ConfigService.class);
+        tokenRefreshHandler.payloadBuilder = mock(OAuthRefreshTokenSourceAuthStrategy.TokenRequestPayloadBuilder.class);
+        when(tokenRefreshHandler.payloadBuilder.useSharedToken()).thenReturn(true);
+        Instant anyTime = Instant.parse("2021-12-15T00:00:00Z");
+        tokenRefreshHandler.clock = Clock.fixed(anyTime, ZoneOffset.UTC);
+
+
+        AccessToken token = new AccessToken("my-token", Date.from(anyTime.plus(10_000L, ChronoUnit.MILLIS)));
+
+        tokenRefreshHandler.storeSharedAccessTokenIfSupported(token);
+
+        verify(tokenRefreshHandler.config, times(1)).putConfigProperty(eq(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.ACCESS_TOKEN),
+            eq("{\"token\":\"my-token\",\"expirationDate\":1639526410000}"));
+    }
+
+    @Test
+    public void deserializesAccessTokenDTO() {
+        OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl tokenRefreshHandler = new OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl();
+        tokenRefreshHandler.objectMapper = objectMapper;
+        tokenRefreshHandler.config = mock(ConfigService.class);
+        when(tokenRefreshHandler.config.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.ACCESS_TOKEN)).thenReturn(Optional.of("{\"token\":\"my-token\",\"expirationDate\":1639526410000}"));
+
+        tokenRefreshHandler.payloadBuilder = mock(OAuthRefreshTokenSourceAuthStrategy.TokenRequestPayloadBuilder.class);
+        when(tokenRefreshHandler.payloadBuilder.useSharedToken()).thenReturn(true);
+
+        Optional<AccessToken> accessToken = tokenRefreshHandler.getSharedAccessTokenIfSupported();
+        assertTrue(accessToken.isPresent());
+        assertEquals("my-token", accessToken.get().getTokenValue());
+        assertEquals(1639526410000L, accessToken.get().getExpirationTime().getTime());
+    }
 }
