@@ -99,11 +99,26 @@ module "google-workspace-connection" {
 module "google-workspace-connection-auth" {
   for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
 
-  source = "../../modules/gcp-sa-auth-key-secret-manager"
+  source = "../../modules/gcp-sa-auth-key"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-sa-auth-key?ref=v0.4.4"
+
+  service_account_id = module.google-workspace-connection[each.key].service_account_id
+}
+
+module "google-workspace-key-secrets" {
+
+  for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
+
+  source = "../../modules/gcp-secrets"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-secrets?ref=v0.4.4"
 
   secret_project     = google_project.psoxy-project.project_id
-  service_account_id = module.google-workspace-connection[each.key].service_account_id
-  secret_id          = "PSOXY_${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY"
+  secrets = {
+    "PSOXY_${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY" : {
+      value        = module.google-workspace-connection-auth[each.key].key_value
+      description  = "Auth key for ${each.key} service account"
+    }
+  }
 }
 
 module "psoxy-google-workspace-connector" {
