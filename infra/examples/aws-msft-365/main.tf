@@ -159,7 +159,7 @@ module "psoxy-msft-connector" {
   api_caller_role_arn  = module.psoxy-aws.api_caller_role_arn
   environment_variables = {
     CLIENT_ID            = module.msft-connection[each.key].connector.application_id
-    REFRESH_ENDPOINT     = module.worklytics_connector_specs.msft_365_refresh_endpoint
+    REFRESH_ENDPOINT     = module.worklytics_connector_specs.msft_token_refresh_endpoint
     PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
   }
   global_parameter_arns = module.psoxy-aws.global_parameters_arns
