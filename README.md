@@ -40,7 +40,7 @@ versions of all of the following:
   - git
   - Java 11+ JDK variant
   - [Maven 3.6+](https://maven.apache.org/docs/history.html)
-  - [terraform](https://www.terraform.io/) optional; if you don't use this, you'll need to configure
+  - [terraform 1.3.x+](https://www.terraform.io/) optional; if you don't use this, you'll need to configure
     your GCP/AWS project via the web console/CLI tools. Writing your own terraform config that
     re-uses our modules will simplify things greatly.
 
