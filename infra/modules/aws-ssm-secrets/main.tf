@@ -27,3 +27,6 @@ output "secret_ids" {
   value = { for k, v in var.secrets : k => aws_ssm_parameter.secret[k].id }
 }
 
+output "secret_arns" {
+  value = [ for k, v in var.secrets : aws_ssm_parameter.secret[k].arn ]
+}

@@ -87,7 +87,7 @@ module "psoxy-aws" {
   caller_gcp_service_account_ids = var.caller_gcp_service_account_ids
 }
 
-module "secrets" {
+module "global-secrets" {
   source = "../../modules/aws-ssm-secrets"
 
   secrets = module.psoxy-aws.secrets
@@ -172,7 +172,13 @@ module "psoxy-google-workspace-connector" {
   path_to_repo_root                     = var.psoxy_base_dir
   example_api_calls                     = each.value.example_api_calls
   example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
-  global_parameter_arns                 = module.psoxy-aws.global_parameters_arns
+  global_parameter_arns                 = module.global-secrets.secret_arns
+  function_parameters                   = [
+    {
+      name     = module.sa-key-secrets[each.key].secret_ids["PSOXY_${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY"]
+      writable = false
+    }
+  ]
 }
 
 
@@ -238,7 +244,7 @@ module "aws-psoxy-long-auth-connectors" {
   path_to_repo_root              = var.psoxy_base_dir
   example_api_calls              = each.value.example_api_calls
   reserved_concurrent_executions = each.value.reserved_concurrent_executions
-  global_parameter_arns          = module.psoxy-aws.global_parameters_arns
+  global_parameter_arns          = module.global-secrets.secret_arns
   function_parameters            = each.value.secured_variables
 }
 
@@ -274,5 +280,5 @@ module "psoxy-bulk" {
   api_caller_role_name  = module.psoxy-aws.api_caller_role_name
   psoxy_base_dir        = var.psoxy_base_dir
   rules                 = each.value.rules
-  global_parameter_arns = module.psoxy-aws.global_parameters_arns
+  global_parameter_arns = module.global-secrets.secret_arns
 }

@@ -154,22 +154,26 @@ module "psoxy-msft-connector" {
   # source = "../../modules/aws-psoxy-rest"
   source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-rest?ref=v0.4.5"
 
-  function_name        = "psoxy-${each.key}"
-  source_kind          = each.value.source_kind
-  path_to_function_zip = module.psoxy-aws.path_to_deployment_jar
-  function_zip_hash    = module.psoxy-aws.deployment_package_hash
-  path_to_config       = "${local.base_config_path}/${each.value.source_kind}.yaml"
-  aws_assume_role_arn  = var.aws_assume_role_arn
-  example_api_calls    = each.value.example_calls
-  aws_account_id       = var.aws_account_id
-  path_to_repo_root    = var.psoxy_base_dir
-  api_caller_role_arn  = module.psoxy-aws.api_caller_role_arn
+  function_name         = "psoxy-${each.key}"
+  source_kind           = each.value.source_kind
+  path_to_function_zip  = module.psoxy-aws.path_to_deployment_jar
+  function_zip_hash     = module.psoxy-aws.deployment_package_hash
+  path_to_config        = "${local.base_config_path}/${each.value.source_kind}.yaml"
+  aws_assume_role_arn   = var.aws_assume_role_arn
+  example_api_calls     = each.value.example_calls
+  aws_account_id        = var.aws_account_id
+  path_to_repo_root     = var.psoxy_base_dir
+  api_caller_role_arn   = module.psoxy-aws.api_caller_role_arn
+  global_parameter_arns = module.global-secrets.secret_arns
+  local_parameter_arns  = [{
+
+  }]
+
   environment_variables = {
     CLIENT_ID            = module.msft-connection[each.key].connector.application_id
     REFRESH_ENDPOINT     = module.worklytics_connector_specs.msft_365_refresh_endpoint
     PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
   }
-  global_parameter_arns = module.psoxy-aws.global_parameters_arns
 }
 
 # grant required permissions to connectors via Azure AD
@@ -250,6 +254,8 @@ module "aws-psoxy-long-auth-connectors" {
   example_api_calls              = each.value.example_api_calls
   reserved_concurrent_executions = each.value.reserved_concurrent_executions
   global_parameter_arns          = module.psoxy-aws.global_parameters_arns
+  local_parameter_arns           = [
+  ]
 }
 
 module "worklytics-psoxy-connection" {

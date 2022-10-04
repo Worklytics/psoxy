@@ -77,7 +77,8 @@ data "aws_ssm_parameters_by_path" "psoxy_parameters" {
 }
 
 locals {
-  prefix = "PSOXY_${upper(replace(var.source_kind, "-", "_"))}_"
+  # TODO : revisit; this is exploiting convention
+  prefix = "${upper(replace(var.function_name, "-", "_"))}_"
 
   # Read grant to any param that belongs to the function (identified by param prefix)
   # Can't use same approach as for write, because some params are not defined in connector specs,

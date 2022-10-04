@@ -80,9 +80,8 @@ module "worklytics_connector_specs" {
 }
 
 module "psoxy-aws" {
-  # source = "../../modules/aws" # to bind with local
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws?ref=v0.4.5"
-
+  source = "../../modules/aws" # to bind with local
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws?ref=v0.4.6"
 
   aws_account_id                 = var.aws_account_id
   psoxy_base_dir                 = var.psoxy_base_dir
@@ -90,9 +89,10 @@ module "psoxy-aws" {
   caller_gcp_service_account_ids = var.caller_gcp_service_account_ids
 }
 
-module "secrets" {
+# secrets shared across all instances
+module "global-secrets" {
   source = "../../modules/aws-ssm-secrets"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-ssm-secrets?ref=v0.4.4"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-ssm-secrets?ref=v0.4.6"
 
   secrets = module.psoxy-aws.secrets
 }
@@ -138,11 +138,24 @@ module "google-workspace-connection" {
 module "google-workspace-connection-auth" {
   for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
 
-  # source = "../../modules/gcp-sa-auth-key-aws-secret"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-sa-auth-key-aws-secret?ref=v0.4.5"
+  source = "../../modules/gcp-sa-auth-key"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-sa-auth-key?ref=v0.4.4"
 
   service_account_id = module.google-workspace-connection[each.key].service_account_id
-  secret_id          = "PSOXY_${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY"
+}
+
+module "sa-key-secrets" {
+  for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
+
+  source = "../../modules/aws-ssm-secrets"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-ssm-secrets?ref=v0.4.4"
+  # other possibly implementations:
+  # source = "../../modules/hashicorp-vault-secrets"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/hashicorp-vault-secrets?ref=v0.4.4"
+
+  secrets = {
+    "PSOXY_${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY" : module.google-workspace-connection-auth[each.key].key_value
+  }
 }
 
 module "psoxy-google-workspace-connector" {
@@ -162,7 +175,13 @@ module "psoxy-google-workspace-connector" {
   path_to_repo_root                     = var.psoxy_base_dir
   example_api_calls                     = each.value.example_api_calls
   example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
-  global_parameter_arns                 = module.psoxy-aws.global_parameters_arns
+  global_parameter_arns                 = module.global-secrets.secret_arns
+  function_parameters                   = [
+    {
+      name     = module.sa-key-secrets[each.key].secret_ids["PSOXY_${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY"]
+      writable = false
+    }
+  ]
 }
 
 
@@ -227,7 +246,7 @@ module "aws-psoxy-long-auth-connectors" {
   path_to_repo_root              = var.psoxy_base_dir
   example_api_calls              = each.value.example_api_calls
   reserved_concurrent_executions = each.value.reserved_concurrent_executions
-  global_parameter_arns          = module.psoxy-aws.global_parameters_arns
+  global_parameter_arns          = module.global-secrets.secret_arns
   function_parameters            = each.value.secured_variables
 }
 
@@ -263,5 +282,5 @@ module "psoxy-bulk" {
   api_caller_role_name  = module.psoxy-aws.api_caller_role_name
   psoxy_base_dir        = var.psoxy_base_dir
   rules                 = each.value.rules
-  global_parameter_arns = module.psoxy-aws.global_parameters_arns
+  global_parameter_arns = module.global-secrets.secret_arns
 }
