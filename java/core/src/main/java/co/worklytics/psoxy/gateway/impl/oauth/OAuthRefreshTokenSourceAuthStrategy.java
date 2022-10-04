@@ -3,6 +3,7 @@ package co.worklytics.psoxy.gateway.impl.oauth;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.RequiresConfiguration;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.http.*;
 import com.google.auth.Credentials;
@@ -11,13 +12,17 @@ import com.google.auth.oauth2.OAuth2CredentialsWithRefresh;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.extern.java.Log;
 
 import javax.inject.Inject;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -43,6 +48,9 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
     @Getter
     private final String configIdentifier = "oauth2_refresh_token";
 
+    @Inject
+    ConfigService config;
+
     /**
      * default access token expiration to assume, if 'expires_in' value is omitted from response
      * (which is allowed under OAuth 2.0 spec)
@@ -57,6 +65,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         REFRESH_ENDPOINT,
         CLIENT_ID,
         GRANT_TYPE,
+        ACCESS_TOKEN,
     }
 
     @Inject OAuth2CredentialsWithRefresh.OAuth2RefreshHandler refreshHandler;
@@ -86,6 +95,10 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
         String getGrantType();
 
+        default boolean useSharedToken() {
+            return false;
+        }
+
         HttpContent buildPayload();
 
         /**
@@ -108,6 +121,8 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         HttpRequestFactory httpRequestFactory;
         @Inject
         OAuthRefreshTokenSourceAuthStrategy.TokenRequestPayloadBuilder payloadBuilder;
+        @Inject
+        Clock clock;
 
         @VisibleForTesting
         protected final Duration TOKEN_REFRESH_THRESHOLD = Duration.ofMinutes(1L);
@@ -123,11 +138,34 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
          */
         @Override
         public AccessToken refreshAccessToken() throws IOException {
-            if (isCurrentTokenValid(this.currentToken, Instant.now())) {
+            CanonicalOAuthAccessTokenResponseDto tokenResponse;
+
+            Optional<AccessToken> sharedAccessToken = getSharedAccessTokenIfSupported();
+            if (this.currentToken == null) {
+                this.currentToken = sharedAccessToken.orElse(null);
+            }
+
+            if (sharedAccessToken.isPresent()) {
+                // we have a token, but shared token is newer. Other instance refreshed, so use it
+                if (sharedAccessToken.get().getExpirationTime().after(this.currentToken.getExpirationTime())) {
+                    this.currentToken = sharedAccessToken.get();
+                }
+            }
+
+            if (isCurrentTokenValid(this.currentToken, clock.instant())) {
                 return this.currentToken;
             }
+
+            tokenResponse = exchangeRefreshTokenForAccessToken();
+            this.currentToken = asAccessToken(tokenResponse);
+            storeSharedAccessTokenIfSupported(this.currentToken);
+            return this.currentToken;
+        }
+
+
+        private CanonicalOAuthAccessTokenResponseDto exchangeRefreshTokenForAccessToken() throws IOException {
             String refreshEndpoint =
-                config.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.REFRESH_ENDPOINT);
+                config.getConfigPropertyOrError(ConfigProperty.REFRESH_ENDPOINT);
 
             HttpRequest tokenRequest = httpRequestFactory
                 .buildPostRequest(new GenericUrl(refreshEndpoint), payloadBuilder.buildPayload());
@@ -136,7 +174,6 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
             payloadBuilder.addHeaders(tokenRequest.getHeaders());
 
             HttpResponse response = tokenRequest.execute();
-
             CanonicalOAuthAccessTokenResponseDto tokenResponse =
                 objectMapper.readerFor(CanonicalOAuthAccessTokenResponseDto.class)
                     .readValue(response.getContent());
@@ -154,8 +191,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                     }
                 });
 
-            this.currentToken = asAccessToken(tokenResponse);
-            return this.currentToken;
+            return tokenResponse;
         }
 
 
@@ -165,7 +201,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
             Integer expiresIn = Optional.ofNullable(tokenResponse.getExpiresIn())
                 .orElse((int) DEFAULT_ACCESS_TOKEN_EXPIRATION.toSeconds());
             return new AccessToken(tokenResponse.getAccessToken(),
-                Date.from(Instant.now().plusSeconds(expiresIn)));
+                Date.from(clock.instant().plusSeconds(expiresIn)));
         }
 
         @VisibleForTesting
@@ -186,6 +222,40 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                     ((RequiresConfiguration) payloadBuilder).getRequiredConfigProperties().stream());
             }
             return propertyStream.collect(Collectors.toSet());
+        }
+
+        @VisibleForTesting
+        Optional<AccessToken> getSharedAccessTokenIfSupported() {
+            if (payloadBuilder.useSharedToken()) {
+                Optional<String> jsonToken = config.getConfigPropertyAsOptional(ConfigProperty.ACCESS_TOKEN);
+                if (jsonToken.isEmpty()) {
+                    return Optional.empty();
+                } else {
+                    try {
+                        AccessTokenDto accessTokenDto = objectMapper.readerFor(AccessTokenDto.class).readValue(jsonToken.get().getBytes(StandardCharsets.UTF_8));
+                        return Optional.ofNullable(accessTokenDto).map(AccessTokenDto::asAccessToken);
+                    } catch (IOException e) {
+                        log.log(Level.SEVERE, "Could not parse contents of token into an object", e);
+                        return Optional.empty();
+                    }
+                }
+            } else {
+                return Optional.empty();
+            }
+        }
+
+        @VisibleForTesting
+        void storeSharedAccessTokenIfSupported(@NonNull AccessToken accessToken) {
+            if (payloadBuilder.useSharedToken()) {
+                try {
+                    config.putConfigProperty(ConfigProperty.ACCESS_TOKEN,
+                        objectMapper.writerFor(AccessTokenDto.class)
+                            .writeValueAsString(AccessTokenDto.toAccessTokenDto(accessToken)));
+                    log.log(Level.INFO, "New token stored in config");
+                } catch (JsonProcessingException e) {
+                    log.log(Level.SEVERE, "Could not serialize token into JSON", e);
+                }
+            }
         }
     }
 

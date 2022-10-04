@@ -11,10 +11,7 @@ import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.ssm.SsmClient;
-import software.amazon.awssdk.services.ssm.model.GetParameterRequest;
-import software.amazon.awssdk.services.ssm.model.GetParameterResponse;
-import software.amazon.awssdk.services.ssm.model.ParameterNotFoundException;
-import software.amazon.awssdk.services.ssm.model.ParameterVersionNotFoundException;
+import software.amazon.awssdk.services.ssm.model.*;
 
 import javax.inject.Inject;
 import java.time.Duration;
@@ -70,8 +67,12 @@ public class ParameterStoreConfigService implements ConfigService {
                                     .build();
                                     GetParameterResponse parameterResponse = client.getParameter(parameterRequest);
                                     return parameterResponse.parameter().value();
-                                } catch (ParameterNotFoundException | ParameterVersionNotFoundException nfe) {
+                                } catch (ParameterNotFoundException | ParameterVersionNotFoundException ignore) {
                                     // does not exist, that could be OK depending on case.
+                                    return NEGATIVE_VALUE;
+                                } catch (SsmException ignore) {
+                                    // very likely the policy doesn't allow reading this parameter
+                                    // OK in those cases
                                     return NEGATIVE_VALUE;
                                 }
                             }
@@ -80,6 +81,30 @@ public class ParameterStoreConfigService implements ConfigService {
             }
         }
         return cache;
+    }
+
+    @Override
+    public boolean supportsWriting() {
+        return true;
+    }
+
+    @Override
+    public void putConfigProperty(ConfigProperty property, String value) {
+        String key = parameterName(property);
+        try {
+            // first in the local cache so other threads get the most recent
+            getCache().put(key, value);
+            PutParameterRequest parameterRequest = PutParameterRequest.builder()
+                .name(key)
+                .value(value)
+                // if property exists, which should always be created first, this flags needs to be set
+                .overwrite(true)
+                .build();
+            PutParameterResponse parameterResponse = client.putParameter(parameterRequest);
+            log.info(String.format("Property: %s, stored version %d", key, parameterResponse.version()));
+        } catch (SsmException e) {
+            log.log(Level.SEVERE, "Could not store property " + key, e);
+        }
     }
 
     @Override

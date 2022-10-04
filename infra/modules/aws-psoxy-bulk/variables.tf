@@ -86,3 +86,10 @@ variable "rules" {
     columnsToPseudonymize = []
   }
 }
+
+variable "global_parameter_arns" {
+  # see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter#attributes-reference
+  type        = list(string)
+  description = "System Manager Parameters ARNS to expose to function, expected to contain global shared parameters, like salt or encryption keys"
+  default     = []
+}

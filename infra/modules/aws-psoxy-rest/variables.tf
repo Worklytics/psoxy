@@ -82,3 +82,19 @@ variable "environment_variables" {
   description = "Non-sensitive values to add to functions environment variables; NOTE: will override anything in `path_to_config`"
   default     = {}
 }
+
+variable "global_parameter_arns" {
+  # see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter#attributes-reference
+  type        = list(string)
+  description = "System Manager Parameters ARNS to expose to function, expected to contain global shared parameters, like salt or encryption keys"
+  default     = []
+}
+
+variable "function_parameters" {
+  type = list(object({
+    name     = string
+    writable = bool
+  }))
+  description = "Parameter names and expected grant to create for function"
+  default     = []
+}

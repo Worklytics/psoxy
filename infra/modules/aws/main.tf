@@ -182,10 +182,6 @@ output "secrets" {
   }
 }
 
-output "salt_secret" {
-  value = sensitive(random_password.random.result)
-}
-
 output "api_caller_role_arn" {
   value = aws_iam_role.api-caller.arn
 }

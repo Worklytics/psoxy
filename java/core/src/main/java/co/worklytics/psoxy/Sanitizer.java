@@ -37,6 +37,7 @@ public interface Sanitizer {
 
         @Builder.Default
         PseudonymImplementation pseudonymImplementation = PseudonymImplementation.DEFAULT;
+
     }
 
     /**

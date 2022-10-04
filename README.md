@@ -127,8 +127,15 @@ terraform apply
 
 ## Releases
 
-### [v0.4.4](https://github.com/Worklytics/psoxy/releases/tag/v0.4.4)
+### [v0.4.5](https://github.com/Worklytics/psoxy/releases/tag/v0.4.5)
 The `main` branch is current at 0.4.
+
+Features:
+- Store and share short-lived OAuth access token across AWS lambda instances for Zoom Server-to-server OAuth connector.
+- AWS secured parameters. New set of policies limiting access to just the subset of parameters used by the lambda function.
+
+
+### [v0.4.4](https://github.com/Worklytics/psoxy/releases/tag/v0.4.4)
 
 Features:
 - Zoom connector now is built against Server-to-server OAuth apps, removing the use of the JWT application (will be deprecated in June 2023).

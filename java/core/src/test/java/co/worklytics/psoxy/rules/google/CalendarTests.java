@@ -64,12 +64,19 @@ class CalendarTests extends JavaRulesTestBaseCase {
         assertRedacted(sanitized, "Dear alice :");
     }
 
+    @SneakyThrows
+    @Test
+    void calendarList() {
+        assertUrlWithSubResourcesBlocked("https://www.googleapis.com/calendar/v3/users/me/calendarList");
+        assertUrlWithQueryParamsAllowed("https://www.googleapis.com/calendar/v3/users/me/calendarList");
+    }
+
     @Override
     public Stream<InvocationExample> getExamples() {
         return Stream.of(
                 InvocationExample.of("http://calendar.googleapis.com/calendar/v3/calendars/primary/events", "events.json"),
-                InvocationExample.of("http://calendar.googleapis.com/calendar/v3/calendars/primary/events/1234324", "event.json")
-
+                InvocationExample.of("http://calendar.googleapis.com/calendar/v3/calendars/primary/events/1234324", "event.json"),
+                InvocationExample.of("https://www.googleapis.com/calendar/v3/users/me/calendarList", "calendarList.json")
         );
     }
 }
