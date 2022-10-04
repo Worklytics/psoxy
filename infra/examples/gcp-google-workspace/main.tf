@@ -75,9 +75,7 @@ module "psoxy-gcp" {
   project_id        = google_project.psoxy-project.project_id
   invoker_sa_emails = var.worklytics_sa_emails
   psoxy_base_dir    = var.psoxy_base_dir
-  psoxy_version     = "0.4.5-jrc"
   bucket_location   = var.gcp_region
-
 
   depends_on = [
     google_project.psoxy-project
@@ -90,7 +88,6 @@ module "google-workspace-connection" {
 
   # source = "../../modules/google-workspace-dwd-connection"
   source = "git::https://github.com/worklytics/psoxy//infra/modules/google-workspace-dwd-connection?ref=v0.4.5"
-
 
   project_id                   = google_project.psoxy-project.project_id
   connector_service_account_id = "psoxy-${each.key}-dwd"

@@ -90,7 +90,6 @@ module "psoxy-aws" {
 
   aws_account_id                 = var.aws_account_id
   psoxy_base_dir                 = var.psoxy_base_dir
-  psoxy_version                  = "0.4.5-jrc"
   caller_aws_arns                = var.caller_aws_arns
   caller_gcp_service_account_ids = var.caller_gcp_service_account_ids
 
