@@ -59,7 +59,6 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..mail"
-        includeOriginal: true
         encoding: "JSON"
   - pathRegex: "^/(v1.0|beta)/groups/[^/]*/members.*"
     transforms:
