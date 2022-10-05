@@ -119,8 +119,6 @@ abstract public class RulesBaseTestCase {
         Validator.validate(yamlRoundtrip(getRulesUnderTest()));
     }
 
-    //TODO: fix for everything
-    @Disabled //doesn't pass for Dropbox
     @SneakyThrows
     @Test
     void yamlLength() {
