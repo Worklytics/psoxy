@@ -14,6 +14,7 @@ import dagger.Component;
 import lombok.*;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
@@ -116,6 +117,15 @@ abstract public class RulesBaseTestCase {
     @Test
     void validateYaml() {
         Validator.validate(yamlRoundtrip(getRulesUnderTest()));
+    }
+
+    //TODO: fix for everything
+    @Disabled //doesn't pass for Dropbox
+    @SneakyThrows
+    @Test
+    void yamlLength() {
+        int rulesLengthInChars = yamlMapper.writeValueAsString(getRulesUnderTest()).length();
+        assertTrue(rulesLengthInChars < 4096, "YAML rules " + rulesLengthInChars + " chars long; want < 4096 chars to fit as AWS SSM param");
     }
 
     @SneakyThrows
