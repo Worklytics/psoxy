@@ -204,8 +204,7 @@ public class PrebuiltSanitizerRules {
         .build();
 
 
-    static final String OUTLOOK_CALENDAR_PATH_REGEX_EVENTS = "^/(v1.0|beta)/users/[^/]*/(calendars/[^/]*/)?events.*";
-    static final String OUTLOOK_CALENDAR_PATH_REGEX_CALENDAR_VIEW = "^/(v1.0|beta)/users/[^/]*/calendar/calendarView(?)[^/]*";
+    static final String OUTLOOK_CALENDAR_PATH_REGEX_EVENTS = "^/(v1.0|beta)/users/[^/]*/(((calendars/[^/]*/)?events.*)|(calendar/calendarView(?)[^/]*))";
 
     static final List<Rules2.Endpoint> OUTLOOK_CALENDAR_ENDPOINTS = Arrays.asList(
         Rules2.Endpoint.builder()
@@ -213,9 +212,6 @@ public class PrebuiltSanitizerRules {
             .build(),
         EVENT_TRANSFORMS.toBuilder()
             .pathRegex(OUTLOOK_CALENDAR_PATH_REGEX_EVENTS)
-            .build(),
-        EVENT_TRANSFORMS.toBuilder()
-            .pathRegex(OUTLOOK_CALENDAR_PATH_REGEX_CALENDAR_VIEW)
             .build()
     );
 
@@ -232,12 +228,7 @@ public class PrebuiltSanitizerRules {
         .withTransformByEndpoint(OUTLOOK_PATH_REGEX_MAILBOX_SETTINGS, REDACT_ODATA_CONTEXT)
         .withTransformByEndpoint(OUTLOOK_CALENDAR_PATH_REGEX_EVENTS, TOKENIZE_ODATA_LINKS,
             REDACT_ODATA_CONTEXT,
-            REDACT_CALENDAR_ODATA_LINKS)
-        .withTransformByEndpoint(OUTLOOK_CALENDAR_PATH_REGEX_CALENDAR_VIEW, TOKENIZE_ODATA_LINKS,
-            REDACT_ODATA_CONTEXT,
             REDACT_CALENDAR_ODATA_LINKS);
-
-
 
 
     public static final Map<String, RuleSet> MSFT_DEFAULT_RULES_MAP =
