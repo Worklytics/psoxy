@@ -193,13 +193,14 @@ resource "aws_ssm_parameter" "long-access-secrets" {
 module "source_token_external_todo" {
   for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors_todos
 
-  # source = "../../modules/source-token-external-todo"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/source-token-external-todo?ref=v0.4.5"
+  source = "../../modules/source-token-external-todo"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/source-token-external-todo?ref=v0.4.5"
 
   source_id                         = each.key
   host_cloud                        = "aws"
   connector_specific_external_steps = each.value.external_token_todo
   token_secret_id                   = aws_ssm_parameter.long-access-secrets["${each.key}.${each.value.secured_variables[0].name}"].name
+  todo_step                         = 1
 }
 
 module "aws-psoxy-long-auth-connectors" {
@@ -221,7 +222,7 @@ module "aws-psoxy-long-auth-connectors" {
   reserved_concurrent_executions = each.value.reserved_concurrent_executions
   global_parameter_arns          = module.psoxy-aws.global_parameters_arns
   function_parameters            = each.value.secured_variables
-  todo_step                      = 2
+  todo_step                      = module.source_token_external_todo[each.key].next_todo_step
 }
 
 module "worklytics-psoxy-connection" {
@@ -235,7 +236,7 @@ module "worklytics-psoxy-connection" {
   display_name       = "${each.value.display_name} via Psoxy${var.connector_display_name_suffix}"
   aws_region         = var.aws_region
   aws_role_arn       = module.psoxy-aws.api_caller_role_arn
-  todo_step          = module.aws-psoxy-long-auth-connectors[each.key].last_todo_step + 1
+  todo_step          = module.aws-psoxy-long-auth-connectors[each.key].next_todo_step
 }
 
 # END LONG ACCESS AUTH CONNECTORS
