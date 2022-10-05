@@ -53,6 +53,7 @@ endpoints:
           - "$..description"
           - "$..resourceBehaviorOptions"
           - "$..resourceProvisioningOptions"
+          - "$..onPremisesSamAccountName"
           - "$..onPremisesSecurityIdentifier"
           - "$..onPremisesProvisioningErrors"
       - !<pseudonymize>

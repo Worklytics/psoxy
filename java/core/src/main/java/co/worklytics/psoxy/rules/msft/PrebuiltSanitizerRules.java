@@ -71,6 +71,7 @@ public class PrebuiltSanitizerRules {
                 .jsonPath("$..description") // q: include for Project use case?
                 .jsonPath("$..resourceBehaviorOptions")
                 .jsonPath("$..resourceProvisioningOptions")
+                .jsonPath("$..onPremisesSamAccountName")
                 .jsonPath("$..onPremisesSecurityIdentifier")
                 .jsonPath("$..onPremisesProvisioningErrors")
                 .build())
