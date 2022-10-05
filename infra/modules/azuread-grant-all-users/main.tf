@@ -19,8 +19,12 @@ terraform {
 # manually grants the application permissions (resource seems to really create a 'delegated_permission_grant'
 # entity in Azure, which is overwritten by the user and then missing on subsequent terraform runs)
 
+locals {
+  instance_id = coalesce(var.psoxy_instance_id, var.application_name)
+}
+
 resource "local_file" "todo" {
-  filename = "TODO ${var.application_name}.md"
+  filename = "TODO ${var.todo_step} - setup ${local.instance_id}.md"
 
   content = <<EOT
 # Authorize ${var.application_name}
@@ -38,4 +42,8 @@ ${join("\n", concat(var.app_roles, var.oauth2_permission_scopes))}
 ```
 
 EOT
+}
+
+output "next_todo_step" {
+  value = var.todo_step + 1
 }

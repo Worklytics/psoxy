@@ -84,7 +84,7 @@ locals {
 
 
 resource "local_file" "review" {
-  filename = "test ${google_cloudfunctions_function.function.name}.md"
+  filename = "TODO ${var.todo_step} - test ${google_cloudfunctions_function.function.name}.md"
   content  = <<EOT
 ## Testing
 
@@ -122,4 +122,8 @@ EOT
 
 output "cloud_function_url" {
   value = local.proxy_endpoint_url
+}
+
+output "next_todo_step" {
+  value = var.todo_step + 1
 }

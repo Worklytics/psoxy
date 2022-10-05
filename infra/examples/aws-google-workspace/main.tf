@@ -205,8 +205,8 @@ module "source_token_external_todo" {
 module "aws-psoxy-long-auth-connectors" {
   for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
 
-  # source = "../../modules/aws-psoxy-rest"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-rest?ref=v0.4.5"
+  source = "../../modules/aws-psoxy-rest"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-rest?ref=v0.4.5"
 
   function_name                  = "psoxy-${each.key}"
   path_to_function_zip           = module.psoxy-aws.path_to_deployment_jar
@@ -221,18 +221,21 @@ module "aws-psoxy-long-auth-connectors" {
   reserved_concurrent_executions = each.value.reserved_concurrent_executions
   global_parameter_arns          = module.psoxy-aws.global_parameters_arns
   function_parameters            = each.value.secured_variables
+  todo_step                      = 2
 }
 
 module "worklytics-psoxy-connection" {
   for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
 
-  # source = "../../modules/worklytics-psoxy-connection-aws"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=v0.4.5"
+  source = "../../modules/worklytics-psoxy-connection-aws"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=v0.4.5"
 
+  psoxy_instance_id  = each.key
   psoxy_endpoint_url = module.aws-psoxy-long-auth-connectors[each.key].endpoint_url
   display_name       = "${each.value.display_name} via Psoxy${var.connector_display_name_suffix}"
   aws_region         = var.aws_region
   aws_role_arn       = module.psoxy-aws.api_caller_role_arn
+  todo_step          = module.aws-psoxy-long-auth-connectors[each.key].last_todo_step + 1
 }
 
 # END LONG ACCESS AUTH CONNECTORS

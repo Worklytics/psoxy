@@ -98,3 +98,9 @@ variable "function_parameters" {
   description = "Parameter names and expected grant to create for function"
   default     = []
 }
+
+variable "todo_step" {
+  type        = number
+  description = "of all todos, where does this one logically fall in sequence"
+  default     = 2
+}

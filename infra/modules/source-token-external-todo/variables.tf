@@ -23,3 +23,9 @@ variable "token_secret_id" {
   type        = string
   description = "The ID of the secret containing the token secret"
 }
+
+variable "todo_step" {
+  type        = number
+  description = "of all todos, where does this one logically fall in sequence"
+  default     = 1
+}

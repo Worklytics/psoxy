@@ -6,7 +6,7 @@
 
 
 resource "local_file" "source_connection_instructions" {
-  filename = "TODO - ${var.source_id}.md"
+  filename = "TODO ${var.todo_step} - ${var.source_id}.md"
   content  = <<EOT
 # TODO - Create User-Managed Token for ${var.source_id}
 
@@ -38,4 +38,8 @@ gcloud secrets versions add ${var.token_secret_id} --project=YOUR_PROJECT_ID --d
 ```
 
 EOT
+}
+
+output "next_todo_step" {
+  value = var.todo_step + 1
 }
