@@ -67,7 +67,7 @@ variable "gcp_region" {
 variable "replica_regions" {
   type        = list(string)
   description = "List of regions in which to replicate secrets."
-  default     = [
+  default = [
     "us-central1",
     "us-west1",
   ]
