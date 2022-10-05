@@ -1,0 +1,90 @@
+---
+allowAllEndpoints: false
+endpoints:
+  - pathRegex: "^/(v1.0|beta)/users/?[^/]*"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..displayName"
+          - "$..aboutMe"
+          - "$..mySite"
+          - "$..preferredName"
+          - "$..givenName"
+          - "$..surname"
+          - "$..mailNickname"
+          - "$..proxyAddresses"
+          - "$..responsibilities"
+          - "$..skills"
+          - "$..faxNumber"
+          - "$..mobilePhone"
+          - "$..businessPhones[*]"
+          - "$..onPremisesExtensionAttributes"
+          - "$..onPremisesSecurityIdentifier"
+          - "$..securityIdentifier"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..employeeId"
+          - "$..userPrincipalName"
+          - "$..imAddresses[*]"
+          - "$..mail"
+          - "$..otherMails[*]"
+          - "$..onPremisesSamAccountName"
+          - "$..onPremisesUserPrincipalName"
+          - "$..onPremisesDistinguishedName"
+          - "$..onPremisesImmutableId"
+          - "$..identities[*].issuerAssignedId"
+        encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..id"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
+  - pathRegex: "^/(v1.0|beta)/groups/?[^/]*"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..owners"
+          - "$..rejectedSenders"
+          - "$..acceptedSenders"
+          - "$..members"
+          - "$..membersWithLicenseErrors"
+          - "$..proxyAddresses"
+          - "$..mailNickname"
+          - "$..description"
+          - "$..resourceBehaviorOptions"
+          - "$..resourceProvisioningOptions"
+          - "$..onPremisesSamAccountName"
+          - "$..onPremisesSecurityIdentifier"
+          - "$..onPremisesProvisioningErrors"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..mail"
+        includeOriginal: true
+        encoding: "JSON"
+  - pathRegex: "^/(v1.0|beta)/groups/[^/]*/members.*"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..displayName"
+          - "$..employeeId"
+          - "$..aboutMe"
+          - "$..mySite"
+          - "$..preferredName"
+          - "$..givenName"
+          - "$..surname"
+          - "$..mailNickname"
+          - "$..proxyAddresses"
+          - "$..faxNumber"
+          - "$..mobilePhone"
+          - "$..businessPhones[*]"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..userPrincipalName"
+          - "$..imAddresses[*]"
+          - "$..mail"
+          - "$..otherMails[*]"
+        encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..id"
+        encoding: "JSON"
