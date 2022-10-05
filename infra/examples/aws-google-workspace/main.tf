@@ -112,14 +112,16 @@ resource "google_project" "psoxy-google-connectors" {
 module "google-workspace-connection" {
   for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
 
-  # source = "../../modules/google-workspace-dwd-connection"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/google-workspace-dwd-connection?ref=v0.4.5"
+  source = "../../modules/google-workspace-dwd-connection"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/google-workspace-dwd-connection?ref=v0.4.5"
+
 
   project_id                   = google_project.psoxy-google-connectors.project_id
   connector_service_account_id = "psoxy-${each.key}"
   display_name                 = "Psoxy Connector - ${each.value.display_name}${var.connector_display_name_suffix}"
   apis_consumed                = each.value.apis_consumed
   oauth_scopes_needed          = each.value.oauth_scopes_needed
+  todo_step                    = 1
 
   depends_on = [
     module.psoxy-aws,
@@ -140,8 +142,8 @@ module "google-workspace-connection-auth" {
 module "psoxy-google-workspace-connector" {
   for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
 
-  # source = "../../modules/aws-psoxy-rest"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-rest?ref=v0.4.5"
+  source = "../../modules/aws-psoxy-rest"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-rest?ref=v0.4.5"
 
   function_name                         = "psoxy-${each.key}"
   source_kind                           = each.key
@@ -155,19 +157,22 @@ module "psoxy-google-workspace-connector" {
   example_api_calls                     = each.value.example_api_calls
   example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
   global_parameter_arns                 = module.psoxy-aws.global_parameters_arns
+  todo_step                             = module.google-workspace-connection[each.key].next_todo_step
 }
 
 
 module "worklytics-psoxy-connection-google-workspace" {
   for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
 
-  # source = "../../modules/worklytics-psoxy-connection-aws"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=v0.4.5"
+  source = "../../modules/worklytics-psoxy-connection-aws"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=v0.4.5"
 
+  psoxy_instance_id  = each.key
   psoxy_endpoint_url = module.psoxy-google-workspace-connector[each.key].endpoint_url
   display_name       = "${each.value.display_name} via Psoxy${var.connector_display_name_suffix}"
   aws_region         = var.aws_region
   aws_role_arn       = module.psoxy-aws.api_caller_role_arn
+  todo_step          = module.psoxy-google-workspace-connector[each.key].next_todo_step
 }
 
 
