@@ -16,41 +16,29 @@ public class PrebuiltSanitizerRules {
     static private final String DROPBOX = "dropbox";
 
     // https://www.dropbox.com/developers/documentation/http/teams#team_log-get_events
-    static final Rules2 EVENT_LIST = Events("^/2/team_log/get_events$");
-
     // https://www.dropbox.com/developers/documentation/http/teams#team_log-get_events-continue
-    static final Rules2 EVENT_LIST_CONTINUE = Events("^/2/team_log/get_events/continue$");
+    static final Rules2 EVENT_LIST = Events("^/2/team_log/get_events(/continue)?$");
 
     // https://www.dropbox.com/developers/documentation/http/documentation#files-list_folder
-    static final Rules2 FILE_LIST = Metadata("^/2/files/list_folder$");
-
     // https://www.dropbox.com/developers/documentation/http/documentation#files-list_folder-continue
-    static final Rules2 FILE_LIST_CONTINUE = Metadata("^/2/files/list_folder/continue$");
+    static final Rules2 FILE_LIST = Metadata("^/2/files/list_folder(/continue)?$");
 
     // https://www.dropbox.com/developers/documentation/http/documentation#files-list_revisions
     static final Rules2 FILE_REVISIONS = Metadata("^/2/files/list_revisions$");
 
     // https://www.dropbox.com/developers/documentation/http/teams#team-groups-members-list
-    static final Rules2 GROUP_LIST_ENDPOINT = MemberProfile("^/2/team/groups/members/list$");
-
     // https://www.dropbox.com/developers/documentation/http/teams#team-groups-members-list-continue
-    static final Rules2 GROUP_LIST_CONTINUE_ENDPOINT = MemberProfile("^/2/team/groups/members/list/continue$");
+    static final Rules2 GROUP_LIST_ENDPOINT = MemberProfile("^/2/team/groups/members/list(/continue)?$");
 
     // https://www.dropbox.com/developers/documentation/http/teams#team-members-list
-    static final Rules2 MEMBER_LIST_ENDPOINT = MemberProfile("^/2/team/members/list_v2$");
-
     // https://www.dropbox.com/developers/documentation/http/teams#team-members-list-continue
-    static final Rules2 MEMBER_LIST_CONTINUE_ENDPOINT = MemberProfile("^/2/team/members/list/continue_v2$");
+    static final Rules2 MEMBER_LIST_ENDPOINT = MemberProfile("^/2/team/members/list(/continue)?_v2$");
 
     static final Rules2 DROPBOX_ENDPOINTS = EVENT_LIST
-            .withAdditionalEndpoints(EVENT_LIST_CONTINUE.getEndpoints())
             .withAdditionalEndpoints(FILE_LIST.getEndpoints())
-            .withAdditionalEndpoints(FILE_LIST_CONTINUE.getEndpoints())
             .withAdditionalEndpoints(FILE_REVISIONS.getEndpoints())
             .withAdditionalEndpoints(GROUP_LIST_ENDPOINT.getEndpoints())
-            .withAdditionalEndpoints(GROUP_LIST_CONTINUE_ENDPOINT.getEndpoints())
-            .withAdditionalEndpoints(MEMBER_LIST_ENDPOINT.getEndpoints())
-            .withAdditionalEndpoints(MEMBER_LIST_CONTINUE_ENDPOINT.getEndpoints());
+            .withAdditionalEndpoints(MEMBER_LIST_ENDPOINT.getEndpoints());
 
     static public final Map<String, RuleSet> DROPBOX_PREBUILT_RULES_MAP = ImmutableMap.<String, RuleSet>builder()
             .put(DROPBOX_BUSINESS, DROPBOX_ENDPOINTS)
