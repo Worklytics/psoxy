@@ -76,38 +76,24 @@ data "aws_arn" "lambda" {
   arn = aws_lambda_function.psoxy-instance.arn
 }
 
-
 # q: creates implicit dependency on parameters being created, which may not be case in first run??
-
-# TODO: this for 'writable' case requires TWO applies to show up. Eg, on first run, the ACCESS_TOKEN
-# params aren't there, so not visible via 'data'; and not added to write.
-# "PSOXY_${upper(replace(each.value.connector_name, "-", "_"))}_${upper(each.value.secret_name)}"
-data "aws_ssm_parameters_by_path" "psoxy_parameters" {
-  path            = "/"
-  with_decryption = false # we just want the arns, not the values
-}
 
 locals {
   prefix = "PSOXY_${upper(replace(var.source_kind, "-", "_"))}_"
 
   param_arn_prefix = "arn:aws:ssm:${data.aws_arn.lambda.region}:${data.aws_arn.lambda.account}:parameter/${local.prefix}"
 
-
-  # Write grant to any writeable param specified in the connector definition
-  filtered_function_write_arns = distinct(flatten([
-    for p in var.function_parameters : [
-      for arn in data.aws_ssm_parameters_by_path.psoxy_parameters.arns :
-      arn if endswith(arn, join("", [local.prefix, p.name])) && p.writable
-    ]
-  ]))
-
-  function_write_arns = local.filtered_function_write_arns
+  function_write_arns = [
+    "${local.param_arn_prefix}*" # wildcard to match all params corresponding to this function
+  ],
   function_read_arns  = concat(
-    ["${local.param_arn_prefix}*"], # wildcard to match all params corresponding to this function
+    [
+      "${local.param_arn_prefix}*" # wildcard to match all params corresponding to this function
+    ],
     var.global_parameter_arns
   )
 
-  write_statements =  length(local.function_write_arns) < 1 ? [] : [{
+  write_statements =  [{
     Action   = [
       "ssm:PutParameter"
     ]
