@@ -29,6 +29,7 @@ const { name, version, description } = require('./package.json');
     .option('-z, --gzip', 'Add gzip compression header', false)
     .addOption(new Option('-d, --data-source <name>', 
       'Data source to test all available endpoints').choices([
+        'asana',
         'gcal', 
         'gdrive', 
         'gdirectory',

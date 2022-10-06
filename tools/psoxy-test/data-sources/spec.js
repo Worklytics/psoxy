@@ -1,4 +1,58 @@
 export default {
+  asana: {
+    name: 'Asana',
+    endpoints: [
+      {
+        name: 'Workspaces',
+        path: '/api/1.0/workspaces',
+        refs: [
+          {
+            name: 'Workspace Users',
+            accessor: 'data[0].gid',
+            paramReplacement: 'workspace',
+          },
+          {
+            name: 'Workspace Projects',
+            accessor: 'data[0].gid',
+            pathReplacement: 'workspace_id',
+          },
+        ],
+      },
+      {
+        name: 'Workspace Users',
+        path: '/api/1.0/users',
+        params: { workspace: null, limit: 10 },
+      },
+      {
+        name: 'Workspace Projects',
+        path: '/api/1.0/workspaces/[workspace_id]/projects',
+        param: { limit: 10 },
+        refs: [
+          {
+            name: 'Project Tasks',
+            accessor: 'data[0].gid',
+            pathReplacement: '[project_id]',
+          },
+        ],
+      },
+      {
+        name: 'Project Tasks',
+        path: '/api/1.0/projects/[project_id]/tasks',
+        param: { limit: 10 },
+        refs: [
+          {
+            name: 'Task Stories',
+            accessor: 'data[0].gid',
+            pathReplacement: '[task_id]',
+          },
+        ],
+      },
+      {
+        name: 'Task Stories',
+        path: '/api/1.0/tasks/[task_id]/stories',
+      },
+    ],
+  },
   gcal: {
     name: 'Google Calendar',
     endpoints: [
@@ -199,14 +253,14 @@ export default {
             name: 'Message Details',
             accessor: 'messages[0].id',
             pathReplacement: '[message_id]',
-          }
-        ]
-      }, 
+          },
+        ],
+      },
       {
         name: 'Message Details',
         path: '/gmail/v1/users/me/messages/[message_id]',
-        params: {format: 'metadata'},
-      }
+        params: { format: 'metadata' },
+      },
     ],
   },
   'google-chat': {
