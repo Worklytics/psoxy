@@ -12,10 +12,10 @@ terraform {
 
 locals {
   base_config_path = "${var.psoxy_base_dir}/configs/"
-  bulk_sources = {
+  bulk_sources     = {
     "hris" = {
       source_kind = "hris"
-      rules = {
+      rules       = {
         columnsToRedact = [
         ]
         columnsToPseudonymize = [
@@ -28,8 +28,8 @@ locals {
     },
     "qualtrics" = {
       source_kind = "qualtrics"
-      rules = {
-        columnsToRedact = []
+      rules       = {
+        columnsToRedact       = []
         columnsToPseudonymize = [
           "employee_id"
         ]
@@ -64,7 +64,8 @@ resource "google_project" "psoxy-project" {
   name            = "Psoxy%{if var.environment_name != ""} - ${var.environment_name}%{endif}"
   project_id      = var.gcp_project_id
   billing_account = var.gcp_billing_account_id
-  folder_id       = var.gcp_folder_id # if project is at top-level of your GCP organization, rather than in a folder, comment this line out
+  folder_id       = var.gcp_folder_id
+  # if project is at top-level of your GCP organization, rather than in a folder, comment this line out
   # org_id          = var.gcp_org_id # if project is in a GCP folder, this value is implicit and this line should be commented out
 }
 
@@ -194,7 +195,7 @@ module "connector-long-auth-create-function" {
 
   secret_bindings = {
     ACCESS_TOKEN = {
-      secret_name = module.connector-long-auth-block[each.key].access_token_secret_id
+      secret_name    = module.connector-long-auth-block[each.key].access_token_secret_id
       # in case of long lived tokens we want latest version always
       version_number = "latest"
     }
@@ -221,6 +222,11 @@ module "psoxy-gcp-bulk" {
   salt_secret_version_number    = module.psoxy-gcp.salt_secret_version_number
   psoxy_base_dir                = var.psoxy_base_dir
   bucket_write_role_id          = module.psoxy-gcp.bucket_write_role_id
+
+  environment_variables = {
+    SOURCE = each.value.source_kind
+    RULES  = yamlencode(each.value.rules)
+  }
 
   depends_on = [
     google_project.psoxy-project,
