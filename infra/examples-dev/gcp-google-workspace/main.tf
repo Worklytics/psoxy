@@ -46,9 +46,9 @@ module "worklytics_connector_specs" {
     "gmail",
     "google-meet",
     "google-chat",
-    #"asana",
-    #"slack-discovery-api",
-    #"zoom",
+    "asana",
+    "slack-discovery-api",
+    "zoom",
   ]
   google_workspace_example_user = var.google_workspace_example_user
 }
