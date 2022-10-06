@@ -169,6 +169,7 @@ module "connector-long-auth-create-function" {
   for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
 
   source = "../../modules/gcp-psoxy-rest"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-rest?ref=v0.4.5"
 
   project_id                    = google_project.psoxy-project.project_id
   source_kind                   = each.value.source_kind

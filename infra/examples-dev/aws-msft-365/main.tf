@@ -67,8 +67,8 @@ locals {
 data "azuread_client_config" "current" {}
 
 module "worklytics_connector_specs" {
-  # source = "../../modules/worklytics-connector-specs"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connector-specs?ref=v0.4.5"
+  source = "../../modules/worklytics-connector-specs"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connector-specs?ref=v0.4.5"
 
   enabled_connectors = [
     "azure-ad",
@@ -168,7 +168,7 @@ module "psoxy-msft-connector" {
   example_api_calls     = each.value.example_calls
   aws_account_id        = var.aws_account_id
   path_to_repo_root     = var.psoxy_base_dir
-  todo_step             = module.msft_365_grants.next_todo_step
+  todo_step             = module.msft_365_grants[each.key].next_todo_step
   global_parameter_arns = module.psoxy-aws.global_parameters_arns
 
   environment_variables = {
@@ -271,8 +271,8 @@ module "worklytics-psoxy-connection-oauth-long-access" {
 module "psoxy-bulk" {
   for_each = local.bulk_sources
 
-  # source = "../../modules/aws-psoxy-bulk"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-bulk?ref=v0.4.5"
+  source = "../../modules/aws-psoxy-bulk"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-bulk?ref=v0.4.5"
 
   aws_account_id        = var.aws_account_id
   aws_assume_role_arn   = var.aws_assume_role_arn

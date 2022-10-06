@@ -211,7 +211,7 @@ module "connector-long-auth-create-function" {
 
   secret_bindings = {
     ACCESS_TOKEN = {
-      secret_name = module.connector-long-auth-block[each.key].access_token_secret_id
+      secret_id = module.connector-long-auth-block[each.key].access_token_secret_id
       # in case of long lived tokens we want latest version always
       version_number = "latest"
     }

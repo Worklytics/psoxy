@@ -168,7 +168,7 @@ module "psoxy-msft-connector" {
   example_api_calls     = each.value.example_calls
   aws_account_id        = var.aws_account_id
   path_to_repo_root     = var.psoxy_base_dir
-  todo_step             = module.msft_365_grants.next_todo_step
+  todo_step             = module.msft_365_grants[each.key].next_todo_step
   global_parameter_arns = module.psoxy-aws.global_parameters_arns
 
   environment_variables = {
