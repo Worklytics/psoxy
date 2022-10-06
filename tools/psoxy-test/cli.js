@@ -32,6 +32,7 @@ const { name, version, description } = require('./package.json');
         'gcal', 
         'gdrive', 
         'gdirectory',
+        'gmail',
         'google-chat', 
         'google-meet', 
         'slack-discovery-api',

@@ -188,6 +188,27 @@ export default {
       },
     ],
   },
+  gmail: {
+    name: 'GMail',
+    endpoints: [
+      {
+        name: 'Messages',
+        path: '/gmail/v1/users/me/messages',
+        refs: [
+          {
+            name: 'Message Details',
+            accessor: 'messages[0].id',
+            pathReplacement: '[message_id]',
+          }
+        ]
+      }, 
+      {
+        name: 'Message Details',
+        path: '/gmail/v1/users/me/messages/[message_id]',
+        params: {format: 'metadata'},
+      }
+    ],
+  },
   'google-chat': {
     name: 'Google Chat',
     endpoints: [
