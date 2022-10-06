@@ -27,6 +27,73 @@ export default {
       },
     ],
   },
+  gdirectory: {
+    name: 'Google Directory',
+    endpoints: [
+      {
+        name: 'Domains',
+        path: '/admin/directory/v1/customer/my_customer/domains',
+      },
+      {
+        name: 'Groups',
+        path: '/admin/directory/v1/groups',
+        params: { customer: 'my_customer' },
+        refs: [
+          {
+            name: 'Group',
+            accessor: 'groups[0].id',
+            pathReplacement: '[group_id]',
+          },
+          {
+            name: 'Group Members',
+            accessor: 'groups[0].id',
+            pathReplacement: '[group_id]',
+          },
+        ],
+      },
+      {
+        name: 'Group',
+        path: '/admin/directory/v1/groups/[group_id]',
+      },
+      {
+        name: 'Group Members',
+        path: '/admin/directory/v1/groups/[group_id]/members',
+      },
+      {
+        name: 'Users',
+        path: '/admin/directory/v1/users',
+        param: { customer: 'my_customer' },
+        refs: [
+          {
+            name: 'User Details',
+            accessor: 'users[0].id',
+            pathReplacement: '[user_id]',
+          },
+          {
+            name: 'User Thumbnail',
+            accessor: 'users[0].id',
+            pathReplacement: '[user_id]',
+          },
+        ],
+      },
+      {
+        name: 'User Details',
+        path: '/admin/directory/v1/users/[user_id]',
+      },
+      {
+        name: 'User Thumbnail',
+        path: '/admin/directory/v1/users/[user_id]/photos/thumbnail',
+      },
+      {
+        name: 'Roles',
+        path: '/admin/directory/v1/customer/my_customer/roles',
+      },
+      {
+        name: 'Role Assingments',
+        path: '/admin/directory/v1/customer/my_customer/roleassignments',
+      },
+    ],
+  },
   gdrive: {
     name: 'Google Drive',
     endpoints: [
@@ -128,7 +195,7 @@ export default {
         name: 'Messages',
         path: '/admin/reports/v1/activity/users/all/applications/chat',
         params: { maxResults: 10 },
-      }
+      },
     ],
   },
   'google-meet': {
@@ -221,6 +288,6 @@ export default {
         name: 'Users',
         path: '/v2/users',
       },
-    ]
-  }
+    ],
+  },
 };

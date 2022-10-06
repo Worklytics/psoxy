@@ -29,7 +29,12 @@ const { name, version, description } = require('./package.json');
     .option('-z, --gzip', 'Add gzip compression header', false)
     .addOption(new Option('-d, --data-source <name>', 
       'Data source to test all available endpoints').choices([
-        'gcal', 'gdrive', 'google-chat', 'google-meet', 'slack-discovery-api',
+        'gcal', 
+        'gdrive', 
+        'gdirectory',
+        'google-chat', 
+        'google-meet', 
+        'slack-discovery-api',
         'zoom'
       ]))
     .configureOutput({
