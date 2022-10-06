@@ -12,11 +12,11 @@ terraform {
 
 locals {
   base_config_path = "${var.psoxy_base_dir}/configs/"
-  bulk_sources = {
+  bulk_sources     = {
     "hris" = {
       source_kind = "hris"
-      rules = {
-        columnsToRedact = []
+      rules       = {
+        columnsToRedact       = []
         columnsToPseudonymize = [
           "employee_email",
           "employee_id"
@@ -25,8 +25,8 @@ locals {
     },
     "qualtrics" = {
       source_kind = "qualtrics"
-      rules = {
-        columnsToRedact = []
+      rules       = {
+        columnsToRedact       = []
         columnsToPseudonymize = [
           "employee_email",
           "employee_id"
@@ -185,7 +185,7 @@ module "connector-long-auth-create-function" {
 
   secret_bindings = {
     ACCESS_TOKEN = {
-      secret_id = module.connector-long-auth-block[each.key].access_token_secret_id
+      secret_id      = module.connector-long-auth-block[each.key].access_token_secret_id
       # in case of long lived tokens we want latest version always
       version_number = "latest"
     }
@@ -221,6 +221,11 @@ module "psoxy-gcp-bulk" {
   salt_secret_version_number    = module.psoxy-gcp.salt_secret_version_number
   psoxy_base_dir                = var.psoxy_base_dir
   bucket_write_role_id          = module.psoxy-gcp.bucket_write_role_id
+
+  environment_variables = {
+    SOURCE = each.value.source_kind
+    RULES  = yamlencode(each.value.rules)
+  }
 
   depends_on = [
     google_project.psoxy-project,
