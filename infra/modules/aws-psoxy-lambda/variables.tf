@@ -86,6 +86,6 @@ variable "function_parameters" {
     name     = string
     writable = bool
   }))
-  description = "Parameter names and expected grant to create for function"
+  description = "IGNORED; Parameter names and expected grant to create for function"
   default     = []
 }
