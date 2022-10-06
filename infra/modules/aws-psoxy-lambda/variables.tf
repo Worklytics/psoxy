@@ -81,6 +81,7 @@ variable "global_parameter_arns" {
   description = "System Manager Parameters ARNS to expose to function, expected to contain global shared parameters, like salt or encryption keys"
 }
 
+# remove after v0.4.x
 variable "function_parameters" {
   type = list(object({
     name     = string

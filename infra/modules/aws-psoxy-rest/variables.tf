@@ -90,6 +90,7 @@ variable "global_parameter_arns" {
   default     = []
 }
 
+# remove after v0.4.x
 variable "function_parameters" {
   type = list(object({
     name     = string
