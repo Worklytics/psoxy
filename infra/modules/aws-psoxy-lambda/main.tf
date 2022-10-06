@@ -70,22 +70,20 @@ resource "aws_iam_role" "iam_for_lambda" {
   }
 }
 
-# q: makes policy dynamic, so actual statements don't appear in `terraform plan`?
-# TODO: param_arn_prefix without relying something that itself is provisioned by terraform ...
-data "aws_arn" "lambda" {
-  arn = aws_lambda_function.psoxy-instance.arn
-}
-
-# q: creates implicit dependency on parameters being created, which may not be case in first run??
+# NOTE: these are known at plan time, allowing all the locals below to also be known at plan time
+#   (if you take region from lambda/role, terraform plan shows the IAM policy as 'Known after apply')
+data "aws_region" "current" {}
+data "aws_caller_identity" "current" {}
 
 locals {
   prefix = "PSOXY_${upper(replace(var.source_kind, "-", "_"))}_"
 
-  param_arn_prefix = "arn:aws:ssm:${data.aws_arn.lambda.region}:${data.aws_arn.lambda.account}:parameter/${local.prefix}"
+  param_arn_prefix = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/${local.prefix}"
 
   function_write_arns = [
     "${local.param_arn_prefix}*" # wildcard to match all params corresponding to this function
-  ],
+  ]
+
   function_read_arns  = concat(
     [
       "${local.param_arn_prefix}*" # wildcard to match all params corresponding to this function
