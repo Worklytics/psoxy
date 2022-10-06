@@ -60,10 +60,11 @@ module "worklytics_connector_specs" {
   enabled_connectors = [
     "asana",
     "azure-ad",
+    "dropbox-business",
     "outlook-cal",
     "outlook-mail",
     "slack-discovery-api",
-    "dropbox-business"
+    "zoom"
   ]
 }
 

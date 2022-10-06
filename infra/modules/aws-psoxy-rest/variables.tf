@@ -90,11 +90,12 @@ variable "global_parameter_arns" {
   default     = []
 }
 
+# remove after v0.4.x
 variable "function_parameters" {
   type = list(object({
     name     = string
     writable = bool
   }))
-  description = "Parameter names and expected grant to create for function"
+  description = "IGNORED; Parameter names and expected grant to create for function"
   default     = []
 }

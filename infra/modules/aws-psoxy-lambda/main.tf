@@ -70,52 +70,59 @@ resource "aws_iam_role" "iam_for_lambda" {
   }
 }
 
-# "PSOXY_${upper(replace(each.value.connector_name, "-", "_"))}_${upper(each.value.secret_name)}"
-data "aws_ssm_parameters_by_path" "psoxy_parameters" {
-  path            = "/"
-  with_decryption = false # we just want the arns, not the values
-}
+# NOTE: these are known at plan time, allowing all the locals below to also be known at plan time
+#   (if you take region from lambda/role, terraform plan shows the IAM policy as 'Known after apply')
+data "aws_region" "current" {}
+data "aws_caller_identity" "current" {}
 
 locals {
   prefix = "PSOXY_${upper(replace(var.source_kind, "-", "_"))}_"
 
-  # Read grant to any param that belongs to the function (identified by param prefix)
-  # Can't use same approach as for write, because some params are not defined in connector specs,
-  # but later in certain modules, f.e. SERVICE_ACCOUNT_KEY or HRIS_RULES
-  filtered_function_read_arns = [
-    for arn in data.aws_ssm_parameters_by_path.psoxy_parameters.arns : arn if length(regexall(local.prefix, arn)) > 0
+  param_arn_prefix = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/${local.prefix}"
+
+  function_write_arns = [
+    "${local.param_arn_prefix}*" # wildcard to match all params corresponding to this function
   ]
 
-  # Write grant to any writeable param specified in the connector definition
-  filtered_function_write_arns = distinct(flatten([
-    for p in var.function_parameters : [
-      for arn in data.aws_ssm_parameters_by_path.psoxy_parameters.arns :
-      arn if endswith(arn, join("", [local.prefix, p.name])) && p.writable
-    ]
-  ]))
+  function_read_arns  = concat(
+    [
+      "${local.param_arn_prefix}*" # wildcard to match all params corresponding to this function
+    ],
+    var.global_parameter_arns
+  )
 
-  function_write_arns = local.filtered_function_write_arns
-  function_read_arns  = concat(local.filtered_function_read_arns, var.global_parameter_arns)
+  write_statements =  [{
+    Action   = [
+      "ssm:PutParameter"
+    ]
+    Effect   = "Allow"
+    Resource = local.function_write_arns
+  }]
+
+  read_statements = [{
+    Action = [
+      "ssm:GetParameter*"
+    ]
+    Effect   = "Allow"
+    Resource =  local.function_read_arns
+  }]
+
+  policy_statements = concat(
+    local.read_statements,
+    local.write_statements
+  )
 }
 
-resource "aws_iam_policy" "read_policy" {
-  count       = length(local.function_read_arns) > 0 ? 1 : 0
-  name        = "${var.function_name}_ssmGetParameters"
-  description = "Allow lambda function role to read SSM parameters"
+resource "aws_iam_policy" "ssm_param_policy" {
+  name        = "${var.function_name}_ssmParameters"
+  description = "Allow SSM parameter access needed by ${var.function_name}"
 
   policy = jsonencode(
     {
       "Version" : "2012-10-17",
-      "Statement" : [
-        {
-          "Action" : [
-            "ssm:GetParameter*"
-          ],
-          "Effect" : "Allow",
-          "Resource" : local.function_read_arns
-        }
-      ]
-  })
+      "Statement" : local.policy_statements
+    }
+  )
 
   lifecycle {
     ignore_changes = [
@@ -124,48 +131,15 @@ resource "aws_iam_policy" "read_policy" {
   }
 }
 
-# policy fails if empty, so need to use count
-resource "aws_iam_policy" "write_policy" {
-  count       = length(local.function_write_arns) > 0 ? 1 : 0
-  name        = "${var.function_name}_ssmPutParameters"
-  description = "Allow lambda function role to update SSM parameters"
-
-  policy = jsonencode(
-    {
-      "Version" : "2012-10-17",
-      "Statement" : [
-        {
-          "Action" : [
-            "ssm:PutParameter"
-          ],
-          "Effect" : "Allow",
-          "Resource" : local.function_write_arns
-        }
-      ]
-  })
-
-  lifecycle {
-    ignore_changes = [
-      tags
-    ]
-  }
-}
 
 resource "aws_iam_role_policy_attachment" "basic" {
   role       = aws_iam_role.iam_for_lambda.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
-resource "aws_iam_role_policy_attachment" "attach_read_policy" {
-  count      = length(local.function_read_arns) > 0 ? 1 : 0
+resource "aws_iam_role_policy_attachment" "attach_policy" {
   role       = aws_iam_role.iam_for_lambda.name
-  policy_arn = aws_iam_policy.read_policy[0].arn
-}
-
-resource "aws_iam_role_policy_attachment" "attach_write_policy" {
-  count      = length(local.function_write_arns) > 0 ? 1 : 0
-  role       = aws_iam_role.iam_for_lambda.name
-  policy_arn = aws_iam_policy.write_policy[0].arn
+  policy_arn = aws_iam_policy.ssm_param_policy.arn
 }
 
 
