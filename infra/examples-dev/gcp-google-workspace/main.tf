@@ -191,15 +191,16 @@ module "connector-long-auth-create-function" {
   }
 }
 
-module "worklytics-psoxy-connection" {
+module "worklytics-psoxy-connection-long-auth" {
   for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
 
   source = "../../modules/worklytics-psoxy-connection"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=v0.4.5"
 
   psoxy_instance_id  = each.key
-  psoxy_endpoint_url = module.psoxy-google-workspace-connector[each.key].cloud_function_url
-  display_name       = "${title(each.key)}${var.connector_display_name_suffix} via Psoxy"
-  todo_step          = module.psoxy-google-workspace-connector[each.key].next_todo_step
+  psoxy_endpoint_url = module.connector-long-auth-create-function[each.key].cloud_function_url
+  display_name       = "${each.value.display_name} via Psoxy${var.connector_display_name_suffix}"
+  todo_step          = module.connector-long-auth-create-function[each.key].next_todo_step
 }
 
 # END LONG ACCESS AUTH CONNECTORS

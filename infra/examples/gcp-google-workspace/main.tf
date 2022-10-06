@@ -219,7 +219,7 @@ module "connector-long-auth-create-function" {
 
 }
 
-module "worklytics-psoxy-connection" {
+module "worklytics-psoxy-connection-long-auth" {
   for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
 
   source = "../../modules/worklytics-psoxy-connection"
