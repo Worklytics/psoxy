@@ -37,7 +37,7 @@ provider "azuread" {
 }
 
 locals {
-  base_config_path = "${var.psoxy_base_dir}configs"
+  base_config_path = "${var.psoxy_base_dir}configs/"
   bulk_sources = {
     "hris" = {
       source_kind = "hris"
@@ -233,7 +233,7 @@ module "aws-psoxy-long-auth-connectors" {
   function_name                         = "psoxy-${each.key}"
   path_to_function_zip                  = module.psoxy-aws.path_to_deployment_jar
   function_zip_hash                     = module.psoxy-aws.deployment_package_hash
-  path_to_config                        = "${local.base_config_path}/${each.value.source_kind}.yaml"
+  path_to_config                        = "${local.base_config_path}${each.value.source_kind}.yaml"
   aws_assume_role_arn                   = var.aws_assume_role_arn
   aws_account_id                        = var.aws_account_id
   api_caller_role_arn                   = module.psoxy-aws.api_caller_role_arn
