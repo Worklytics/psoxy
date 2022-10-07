@@ -24,7 +24,10 @@ As you can see, the differences are:
 (*) Requests to AWS API need to be [signed], so you must ensure that the machine running these scripts have the appropriate AWS credentials for the role you've selected.
 
 ## GCP
-For GCP, every call must include the `-t` option, which is the identity token used for authentication (*). 
+For GCP, every call needs an "identity token" (`-t, --token` option in the examples below) for the account 
+that has access to the Cloud Platform (*). If you omit the token, the script will try to get it automatically,
+so you must [authorize gcloud first].
+
 Google Calendar example:
 ```shell
 node cli.js -u https://us-central1-acme.cloudfunctions.net/calendar/v3/calendars/primary -t <IDENTITY_TOKEN> -i user@acme.com
@@ -33,8 +36,12 @@ Zoom example:
 ```shell
 node cli.js -u https://us-central1-acme.cloudfunctions.net/v2/users -t <IDENTITY_TOKEN>
 ```
+Outlook Calendar example (token option omitted):
+```shell
+node cli.js -u https://us-central1-acme.cloudfunctions.net/outlook-cal/v1.0/users
+```
 
-(*) You can obtain it by running `gcloud auth print-identity-token` (using Google Cloud SDK)
+(*) You can obtain it by running `gcloud auth print-identity-token` (using [Google Cloud SDK])
 
 ## Testing all endpoints for a given data source
 
@@ -42,16 +49,18 @@ The `-d, --data-source` option of our CLI script allows you to test all the endp
 The only difference with the previous examples is that the `-u, --url` option has to be the URL of the deploy **without** the corresponding API path of the data source:
 
 ```shell
-# Zoom example for AWS deploys, instead of:
+# Zoom example for AWS deploys, instead of running a single call:
 # node cli.js -u https://acme.lambda-url.us-east-1.on.aws/v2/users -r <role>
-# use:
+# use this command to run multiple calls:
 node cli.js -u https://acme.lambda-url.us-east-1.on.aws -r <ROLE> -d zoom
 ```
 ```shell
-# Zoom example for GCP deploys, instead of:
+# Zoom example for GCP deploys, instead of running a single call:
 # node cli.js -u https://us-central1-acme.cloudfunctions.net/v2/users -t <ROLE>
-# use:
-node cli.js -u https://acme.lambda-url.us-east-1.on.aws -t <IDENTITY_TOKEN> -d zoom
+# use this command to run multiple calls:
+node cli.js -u https://us-central1-acme.cloudfunctions.net -t <IDENTITY_TOKEN> -d zoom
+# or simply:
+node cli.js -u https://us-central1-acme.cloudfunctions.net -d zoom
 ```
 
 Notice how the URL changes, and any other option the Psoxy may need doesn't.
@@ -64,3 +73,5 @@ Notice how the URL changes, and any other option the Psoxy may need doesn't.
 [Google Calendar]: https://developers.google.com/calendar/api
 [Zoom]: https://zoom.us
 [Zoom API endpoint]: https://marketplace.zoom.us/docs/api-reference/zoom-api/methods/#operation/users
+[Google Cloud SDK]: https://cloud.google.com/sdk/gcloud/reference/auth/print-identity-token
+[authorize gcloud first]: https://cloud.google.com/sdk/gcloud/reference/auth/login
