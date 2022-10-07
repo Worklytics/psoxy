@@ -1,3 +1,8 @@
+variable "psoxy_instance_id" {
+  type        = string
+  description = "friendly unique-id for Psoxy instance"
+}
+
 variable "psoxy_endpoint_url" {
   type        = string
   description = "url of endpoint which hosts Psoxy instance"
@@ -18,4 +23,8 @@ variable "aws_region" {
   description = "AWS region in which proxy lambda is deployed"
 }
 
-
+variable "todo_step" {
+  type        = number
+  description = "of all todos, where does this one logically fall in sequence"
+  default     = 3
+}

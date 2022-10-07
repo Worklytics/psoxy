@@ -30,3 +30,9 @@ variable "oauth_scopes_needed" {
   default     = []
 }
 
+variable "todo_step" {
+  type        = number
+  description = "of all todos, where does this one logically fall in sequence"
+  default     = 1
+}
+

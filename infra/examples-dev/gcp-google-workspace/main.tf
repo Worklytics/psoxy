@@ -89,6 +89,7 @@ module "google-workspace-connection" {
   display_name                 = "Psoxy Connector - ${each.value.display_name}${var.connector_display_name_suffix}"
   apis_consumed                = each.value.apis_consumed
   oauth_scopes_needed          = each.value.oauth_scopes_needed
+  todo_step                    = 1
 
   depends_on = [
     module.psoxy-gcp
@@ -122,6 +123,7 @@ module "psoxy-google-workspace-connector" {
   salt_secret_version_number            = module.psoxy-gcp.salt_secret_version_number
   example_api_calls                     = each.value.example_api_calls
   example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
+  todo_step                             = module.google-workspace-connection[each.key].next_todo_step
 
   secret_bindings = {
     SERVICE_ACCOUNT_KEY = {
@@ -137,8 +139,10 @@ module "worklytics-psoxy-connection" {
 
   source = "../../modules/worklytics-psoxy-connection"
 
+  psoxy_instance_id  = each.key
   psoxy_endpoint_url = module.psoxy-google-workspace-connector[each.key].cloud_function_url
   display_name       = "${title(each.key)}${var.connector_display_name_suffix} via Psoxy"
+  todo_step          = module.psoxy-google-workspace-connector[each.key].next_todo_step
 }
 
 # BEGIN LONG ACCESS AUTH CONNECTORS
@@ -165,6 +169,7 @@ module "connector-long-auth-create-function" {
   for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
 
   source = "../../modules/gcp-psoxy-rest"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-rest?ref=v0.4.5"
 
   project_id                    = google_project.psoxy-project.project_id
   source_kind                   = each.value.source_kind
@@ -176,6 +181,7 @@ module "connector-long-auth-create-function" {
   path_to_repo_root             = var.psoxy_base_dir
   salt_secret_id                = module.psoxy-gcp.salt_secret_id
   salt_secret_version_number    = module.psoxy-gcp.salt_secret_version_number
+  todo_step                     = 1
 
   secret_bindings = {
     ACCESS_TOKEN = {
@@ -184,7 +190,18 @@ module "connector-long-auth-create-function" {
       version_number = "latest"
     }
   }
+}
 
+module "worklytics-psoxy-connection-long-auth" {
+  for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
+
+  source = "../../modules/worklytics-psoxy-connection"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=v0.4.5"
+
+  psoxy_instance_id  = each.key
+  psoxy_endpoint_url = module.connector-long-auth-create-function[each.key].cloud_function_url
+  display_name       = "${each.value.display_name} via Psoxy${var.connector_display_name_suffix}"
+  todo_step          = module.connector-long-auth-create-function[each.key].next_todo_step
 }
 
 # END LONG ACCESS AUTH CONNECTORS

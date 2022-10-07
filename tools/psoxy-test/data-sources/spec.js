@@ -1,4 +1,71 @@
 export default {
+  asana: {
+    name: 'Asana',
+    endpoints: [
+      {
+        name: 'Workspaces',
+        path: '/api/1.0/workspaces',
+        refs: [
+          {
+            name: 'Workspace Users',
+            accessor: 'data[0].gid',
+            paramReplacement: 'workspace',
+          },
+          {
+            name: 'Workspace Projects',
+            accessor: 'data[0].gid',
+            pathReplacement: 'workspace_id',
+          },
+        ],
+      },
+      {
+        name: 'Workspace Users',
+        path: '/api/1.0/users',
+        params: { workspace: null, limit: 10 },
+      },
+      {
+        name: 'Workspace Projects',
+        path: '/api/1.0/workspaces/[workspace_id]/projects',
+        param: { limit: 10 },
+        refs: [
+          {
+            name: 'Project Tasks',
+            accessor: 'data[0].gid',
+            pathReplacement: '[project_id]',
+          },
+        ],
+      },
+      {
+        name: 'Project Tasks',
+        path: '/api/1.0/projects/[project_id]/tasks',
+        param: { limit: 10 },
+        refs: [
+          {
+            name: 'Task Stories',
+            accessor: 'data[0].gid',
+            pathReplacement: '[task_id]',
+          },
+        ],
+      },
+      {
+        name: 'Task Stories',
+        path: '/api/1.0/tasks/[task_id]/stories',
+      },
+    ],
+  },
+  'azure-ad': {
+    name: 'Azure Directory',
+    endpoints: [
+      {
+        name: 'Users',
+        path: '/v1.0/users',
+      },
+      {
+        name: 'Groups',
+        path: '/v1.0/groups',
+      },
+    ],
+  },
   gcal: {
     name: 'Google Calendar',
     endpoints: [
@@ -24,6 +91,73 @@ export default {
       {
         name: 'Event',
         path: '/calendar/v3/calendars/primary/events/[event_id]',
+      },
+    ],
+  },
+  gdirectory: {
+    name: 'Google Directory',
+    endpoints: [
+      {
+        name: 'Domains',
+        path: '/admin/directory/v1/customer/my_customer/domains',
+      },
+      {
+        name: 'Groups',
+        path: '/admin/directory/v1/groups',
+        params: { customer: 'my_customer' },
+        refs: [
+          {
+            name: 'Group',
+            accessor: 'groups[0].id',
+            pathReplacement: '[group_id]',
+          },
+          {
+            name: 'Group Members',
+            accessor: 'groups[0].id',
+            pathReplacement: '[group_id]',
+          },
+        ],
+      },
+      {
+        name: 'Group',
+        path: '/admin/directory/v1/groups/[group_id]',
+      },
+      {
+        name: 'Group Members',
+        path: '/admin/directory/v1/groups/[group_id]/members',
+      },
+      {
+        name: 'Users',
+        path: '/admin/directory/v1/users',
+        param: { customer: 'my_customer' },
+        refs: [
+          {
+            name: 'User Details',
+            accessor: 'users[0].id',
+            pathReplacement: '[user_id]',
+          },
+          {
+            name: 'User Thumbnail',
+            accessor: 'users[0].id',
+            pathReplacement: '[user_id]',
+          },
+        ],
+      },
+      {
+        name: 'User Details',
+        path: '/admin/directory/v1/users/[user_id]',
+      },
+      {
+        name: 'User Thumbnail',
+        path: '/admin/directory/v1/users/[user_id]/photos/thumbnail',
+      },
+      {
+        name: 'Roles',
+        path: '/admin/directory/v1/customer/my_customer/roles',
+      },
+      {
+        name: 'Role Assingments',
+        path: '/admin/directory/v1/customer/my_customer/roleassignments',
       },
     ],
   },
@@ -121,6 +255,27 @@ export default {
       },
     ],
   },
+  gmail: {
+    name: 'GMail',
+    endpoints: [
+      {
+        name: 'Messages',
+        path: '/gmail/v1/users/me/messages',
+        refs: [
+          {
+            name: 'Message Details',
+            accessor: 'messages[0].id',
+            pathReplacement: '[message_id]',
+          },
+        ],
+      },
+      {
+        name: 'Message Details',
+        path: '/gmail/v1/users/me/messages/[message_id]',
+        params: { format: 'metadata' },
+      },
+    ],
+  },
   'google-chat': {
     name: 'Google Chat',
     endpoints: [
@@ -128,7 +283,7 @@ export default {
         name: 'Messages',
         path: '/admin/reports/v1/activity/users/all/applications/chat',
         params: { maxResults: 10 },
-      }
+      },
     ],
   },
   'google-meet': {
@@ -138,6 +293,55 @@ export default {
         name: 'Messages',
         path: '/admin/reports/v1/activity/users/all/applications/meet',
         params: { maxResults: 10 },
+      },
+    ],
+  },
+  'outlook-cal': {
+    name: 'Outlook Calendar',
+    endpoints: [
+      {
+        name: 'Users',
+        path: '/v1.0/users',
+        refs: [
+          {
+            name: 'Events',
+            accessor: 'value[0].id',
+            pathReplacement: '[user_id]',
+          },
+        ],
+      },
+      {
+        name: 'Events',
+        path: '/v1.0/users/[user_id]/events',
+      },
+    ],
+  },
+  'outlook-mail': {
+    name: 'Outlook Mail',
+    endpoints: [
+      {
+        name: 'Users',
+        path: '/beta/users',
+        refs: [
+          {
+            name: 'Mailbox Settings',
+            accessor: 'value[0].id',
+            pathReplacement: '[user_id]',
+          },
+          {
+            name: 'Messages Sent',
+            accessor: 'value[0].id',
+            pathReplacement: '[user_id]',
+          },
+        ],
+      },
+      {
+        name: 'Mailbox Settings',
+        path: '/beta/users/[user_id]/mailboxSettings',
+      },
+      {
+        name: 'Messages Sent',
+        path: '/beta/users/[user_id]/mailFolders/SentItems/messages',
       },
     ],
   },
@@ -221,6 +425,6 @@ export default {
         name: 'Users',
         path: '/v2/users',
       },
-    ]
-  }
+    ],
+  },
 };
