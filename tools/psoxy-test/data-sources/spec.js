@@ -53,6 +53,19 @@ export default {
       },
     ],
   },
+  'azure-ad': {
+    name: 'Azure Directory',
+    endpoints: [
+      {
+        name: 'Users',
+        path: '/v1.0/users',
+      },
+      {
+        name: 'Groups',
+        path: '/v1.0/groups',
+      },
+    ],
+  },
   gcal: {
     name: 'Google Calendar',
     endpoints: [
@@ -280,6 +293,55 @@ export default {
         name: 'Messages',
         path: '/admin/reports/v1/activity/users/all/applications/meet',
         params: { maxResults: 10 },
+      },
+    ],
+  },
+  'outlook-cal': {
+    name: 'Outlook Calendar',
+    endpoints: [
+      {
+        name: 'Users',
+        path: '/v1.0/users',
+        refs: [
+          {
+            name: 'Events',
+            accessor: 'value[0].id',
+            pathReplacement: '[user_id]',
+          },
+        ],
+      },
+      {
+        name: 'Events',
+        path: '/v1.0/users/[user_id]/events',
+      },
+    ],
+  },
+  'outlook-mail': {
+    name: 'Outlook Mail',
+    endpoints: [
+      {
+        name: 'Users',
+        path: '/beta/users',
+        refs: [
+          {
+            name: 'Mailbox Settings',
+            accessor: 'value[0].id',
+            pathReplacement: '[user_id]',
+          },
+          {
+            name: 'Messages Sent',
+            accessor: 'value[0].id',
+            pathReplacement: '[user_id]',
+          },
+        ],
+      },
+      {
+        name: 'Mailbox Settings',
+        path: '/beta/users/[user_id]/mailboxSettings',
+      },
+      {
+        name: 'Messages Sent',
+        path: '/beta/users/[user_id]/mailFolders/SentItems/messages',
       },
     ],
   },

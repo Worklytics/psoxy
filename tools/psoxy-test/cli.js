@@ -30,6 +30,7 @@ const { name, version, description } = require('./package.json');
     .addOption(new Option('-d, --data-source <name>', 
       'Data source to test all available endpoints').choices([
         'asana',
+        'azure-ad',
         'gcal', 
         'gdrive', 
         'gdirectory',
@@ -37,6 +38,8 @@ const { name, version, description } = require('./package.json');
         'google-chat', 
         'google-meet', 
         'slack-discovery-api',
+        'outlook-cal',
+        'outlook-mail',
         'zoom'
       ]))
     .configureOutput({
