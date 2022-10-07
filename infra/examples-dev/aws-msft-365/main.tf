@@ -71,11 +71,11 @@ module "worklytics_connector_specs" {
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connector-specs?ref=v0.4.5"
 
   enabled_connectors = [
+    "asana",
     "azure-ad",
     "dropbox-business",
     "outlook-cal",
     "outlook-mail",
-    "asana",
     "slack-discovery-api",
     "zoom"
   ]

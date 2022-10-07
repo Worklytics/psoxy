@@ -26,5 +26,5 @@ variable "application_name" {
 variable "todo_step" {
   type        = number
   description = "of all todos, where does this one logically fall in sequence"
-  default     = 2
+  default     = 1
 }
