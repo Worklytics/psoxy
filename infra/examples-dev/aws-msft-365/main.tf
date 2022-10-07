@@ -72,11 +72,12 @@ module "worklytics_connector_specs" {
 
   enabled_connectors = [
     "azure-ad",
+    "dropbox-business",
     "outlook-cal",
     "outlook-mail",
     "asana",
     "slack-discovery-api",
-    "zoom",
+    "zoom"
   ]
 
   msft_tenant_id = var.msft_tenant_id

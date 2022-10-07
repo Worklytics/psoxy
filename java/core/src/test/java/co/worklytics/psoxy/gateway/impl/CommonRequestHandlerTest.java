@@ -4,9 +4,16 @@ import co.worklytics.psoxy.ControlHeader;
 import co.worklytics.psoxy.PsoxyModule;
 import co.worklytics.psoxy.Sanitizer;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
+import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
-import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import co.worklytics.test.MockModules;
+import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
+import com.google.api.client.http.*;
+import com.google.api.client.json.Json;
+import com.google.api.client.testing.http.HttpTesting;
+import com.google.api.client.testing.http.MockHttpTransport;
+import com.google.api.client.testing.http.MockLowLevelHttpRequest;
+import com.google.api.client.testing.http.MockLowLevelHttpResponse;
 import dagger.Component;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,12 +24,16 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.io.IOException;
 import java.net.URL;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -119,6 +130,58 @@ class CommonRequestHandlerTest {
         Optional<PseudonymImplementation> impl = handler.parsePseudonymImplementation(request);
 
         //verify options were parsed correctly
-        assertEquals(PseudonymImplementation.LEGACY, impl.get());
+        assertEquals(PseudonymImplementation.LEGACY, impl.orElseThrow());
+    }
+
+    @Test
+    void testHeadersPassThrough() throws IOException {
+        HttpEventResponse.HttpEventResponseBuilder responseBuilder = HttpEventResponse.builder();
+
+        HttpTransport transport = new MockHttpTransport() {
+            @Override
+            public LowLevelHttpRequest buildRequest(String method, String url) throws IOException {
+                return new MockLowLevelHttpRequest() {
+                    @Override
+                    public LowLevelHttpResponse execute() throws IOException {
+                        MockLowLevelHttpResponse response = new MockLowLevelHttpResponse();
+                        response.addHeader(org.apache.http.HttpHeaders.CACHE_CONTROL, "no-cache, no-store, max-age=0, must-revalidate");
+                        response.addHeader(org.apache.http.HttpHeaders.ETAG, "37060cd8c28437060cd8c284");
+                        response.addHeader(org.apache.http.HttpHeaders.EXPIRES, "Sat, 04 Dec 2020 16:00:00 GMT");
+                        response.addHeader(org.apache.http.HttpHeaders.LAST_MODIFIED, "Mon, 15 Nov 2019 12:00:00 GMT");
+                        response.addHeader(org.apache.http.HttpHeaders.RETRY_AFTER, "15");
+                        response.addHeader(org.apache.http.HttpHeaders.CONNECTION, "close");
+                        response.addHeader("Set-Cookie", "SESSIONID=XYZ; Max-Age=3600; Version=1");
+                        response.addHeader("X-RateLimit-Category", "ABC");
+                        response.addHeader("X-RateLimit-Remaining", "25600");
+                        response.addHeader("X-CustomStuff", "value123");
+                        response.setStatusCode(200);
+                        response.setContentType(Json.MEDIA_TYPE);
+                        response.setContent("OK");
+                        return response;
+                    }
+                };
+            }
+        };
+        HttpRequest request = transport.createRequestFactory().buildGetRequest(HttpTesting.SIMPLE_GENERIC_URL);
+        HttpResponse response = request.execute();
+
+        handler.passThroughHeaders(responseBuilder, response);
+
+        HttpEventResponse httpEventResponse = responseBuilder.build();
+
+        Map<String, String> headersMap = httpEventResponse.getHeaders();
+
+        Set<String> UNEXPECTED_HEADERS = CommonRequestHandler.normalizeHeaders(
+            Set.of("Set-Cookie", org.apache.http.HttpHeaders.CONNECTION, "X-CustomStuff"));
+
+        // 7 headers + content-type
+        assertEquals(8, headersMap.size());
+        assertTrue(headersMap.keySet().stream().noneMatch(UNEXPECTED_HEADERS::contains));
+
+        assertEquals("no-cache, no-store, max-age=0, must-revalidate", headersMap.get(CommonRequestHandler.normalizeHeader(org.apache.http.HttpHeaders.CACHE_CONTROL)));
+        assertEquals("25600", headersMap.get(CommonRequestHandler.normalizeHeader("X-RateLimit-Remaining")));
+        assertEquals("ABC", headersMap.get(CommonRequestHandler.normalizeHeader("X-RateLimit-Category")));
+        assertEquals("15", headersMap.get(CommonRequestHandler.normalizeHeader(org.apache.http.HttpHeaders.RETRY_AFTER)));
+        assertEquals(Json.MEDIA_TYPE, headersMap.get(CommonRequestHandler.normalizeHeader(org.apache.http.HttpHeaders.CONTENT_TYPE)));
     }
 }
