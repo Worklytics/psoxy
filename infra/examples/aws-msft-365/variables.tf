@@ -25,7 +25,7 @@ variable "caller_gcp_service_account_ids" {
 
   validation {
     condition = alltrue([
-    for i in var.caller_gcp_service_account_ids : (length(regexall("^\\d{21}$", i)) > 0)
+      for i in var.caller_gcp_service_account_ids : (length(regexall("^\\d{21}$", i)) > 0)
     ])
     error_message = "The values of caller_gcp_service_account_ids should be 21-digit numeric strings."
   }
@@ -38,7 +38,7 @@ variable "caller_aws_arns" {
 
   validation {
     condition = alltrue([
-    for i in var.caller_aws_arns : (length(regexall("^arn:aws:iam::\\d{12}:\\w+$", i)) > 0)
+      for i in var.caller_aws_arns : (length(regexall("^arn:aws:iam::\\d{12}:\\w+$", i)) > 0)
     ])
     error_message = "The values of caller_aws_arns should be AWS Resource Names, something like 'arn:aws:iam::914358739851:root'."
   }
