@@ -1,6 +1,7 @@
 import chalk from 'chalk';
 import aws from './lib/aws.js';
 import gcp from './lib/gcp.js';
+import { inspect }  from 'util';
 import { saveRequestResultToFile } from './lib/utils.js';
 
 /**
@@ -33,6 +34,7 @@ export default async function (options = {}) {
     url = new URL(options.url);
   } catch (err) {
     result.error = `"${options.url}" is not a valid URL`;
+    console.error(chalk.bold(result.error));
     return result;
   }
 
@@ -85,7 +87,7 @@ export default async function (options = {}) {
     console.error(chalk.bold.red(result.error));
   } else if (result.status === 200) {
     console.log(chalk.bold.green(`${result.status}: OK`));
-    console.log(result.data);
+    console.log(inspect(result.data, {depth: null, colors: true}));
   }
 
   if (options.verbose) {
