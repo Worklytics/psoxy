@@ -169,7 +169,7 @@ module "connector-long-auth-create-function" {
   for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
 
   source = "../../modules/gcp-psoxy-rest"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-rest?ref=v0.4.5"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-rest?ref=v0.4.6"
 
   project_id                    = google_project.psoxy-project.project_id
   source_kind                   = each.value.source_kind
@@ -196,7 +196,7 @@ module "worklytics-psoxy-connection-long-auth" {
   for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
 
   source = "../../modules/worklytics-psoxy-connection"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=v0.4.5"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=v0.4.6"
 
   psoxy_instance_id  = each.key
   psoxy_endpoint_url = module.connector-long-auth-create-function[each.key].cloud_function_url
@@ -209,7 +209,7 @@ module "psoxy-gcp-bulk" {
   for_each = local.bulk_sources
 
   source = "../../modules/gcp-psoxy-bulk"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-bulk?ref=v0.4.5"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-bulk?ref=v0.4.6"
 
   project_id                    = google_project.psoxy-project.project_id
   worklytics_sa_emails          = var.worklytics_sa_emails

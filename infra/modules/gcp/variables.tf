@@ -23,5 +23,5 @@ variable "psoxy_base_dir" {
 variable "psoxy_version" {
   type        = string
   description = "version of psoxy to deploy"
-  default     = "0.4.5"
+  default     = "0.4.6"
 }
