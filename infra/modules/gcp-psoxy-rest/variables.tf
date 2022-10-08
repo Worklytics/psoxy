@@ -88,3 +88,9 @@ variable "source_kind" {
   default     = "unknown"
 }
 
+
+variable "todo_step" {
+  type        = number
+  description = "of all todos, where does this one logically fall in sequence"
+  default     = 1
+}

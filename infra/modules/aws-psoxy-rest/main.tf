@@ -54,10 +54,10 @@ locals {
 }
 
 resource "local_file" "todo" {
-  filename = "test ${var.function_name}.md"
+  filename = "TODO ${var.todo_step} - test ${var.function_name}.md"
   content  = <<EOT
 
-## Testing
+## Testing ${var.function_name}
 
 Review the deployed function in AWS console:
 
@@ -94,4 +94,8 @@ output "endpoint_url" {
 
 output "function_arn" {
   value = module.psoxy_lambda.function_arn
+}
+
+output "next_todo_step" {
+  value = var.todo_step + 1
 }

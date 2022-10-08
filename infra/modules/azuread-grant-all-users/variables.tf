@@ -1,3 +1,8 @@
+variable "psoxy_instance_id" {
+  type        = string
+  description = "friendly unique-id for Psoxy instance"
+}
+
 variable "application_id" {
   type        = string
   description = "object ID of the Azure AD application to authorize"
@@ -16,4 +21,10 @@ variable "app_roles" {
 variable "application_name" {
   type        = string
   description = "friendly name for application"
+}
+
+variable "todo_step" {
+  type        = number
+  description = "of all todos, where does this one logically fall in sequence"
+  default     = 1
 }

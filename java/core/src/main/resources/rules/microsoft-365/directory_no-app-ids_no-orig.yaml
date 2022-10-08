@@ -59,7 +59,6 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..mail"
-        includeOriginal: true
         encoding: "JSON"
   - pathRegex: "^/(v1.0|beta)/groups/[^/]*/members.*"
     transforms:
@@ -88,54 +87,3 @@ endpoints:
         jsonPaths:
           - "$..id"
         encoding: "JSON"
-  - pathRegex: "^/(v1.0|beta)/users/[^/]*/mailboxSettings"
-    transforms:
-      - !<redact>
-        jsonPaths:
-          - "$.['@odata.context']"
-  - pathRegex: "^/(v1.0|beta)/users/[^/]*/messages/[^/]*"
-    transforms:
-      - !<redact>
-        jsonPaths:
-          - "$..subject"
-          - "$..body"
-          - "$..bodyPreview"
-          - "$..emailAddress.name"
-          - "$..extensions"
-          - "$..multiValueExtendedProperties"
-          - "$..singleValueExtendedProperties"
-          - "$..internetMessageHeaders"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..emailAddress.address"
-        encoding: "JSON"
-      - !<tokenize>
-        jsonPaths:
-          - "$.['@odata.nextLink', '@odata.prevLink']"
-        regex: "^https://graph.microsoft.com/(.*)$"
-      - !<redact>
-        jsonPaths:
-          - "$.['@odata.context']"
-  - pathRegex: "^/(v1.0|beta)/users/[^/]*/mailFolders(/SentItems|\\('SentItems'\\))/messages.*"
-    transforms:
-      - !<redact>
-        jsonPaths:
-          - "$..subject"
-          - "$..body"
-          - "$..bodyPreview"
-          - "$..emailAddress.name"
-          - "$..extensions"
-          - "$..multiValueExtendedProperties"
-          - "$..singleValueExtendedProperties"
-          - "$..internetMessageHeaders"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..emailAddress.address"
-        encoding: "JSON"
-      - !<tokenize>
-        jsonPaths:
-          - "$.['@odata.nextLink', '@odata.prevLink']"
-        regex: "^https://graph.microsoft.com/(.*)$"
-      - !<redact>
-        jsonPaths:
-          - "$.['@odata.context']"

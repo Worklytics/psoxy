@@ -2,20 +2,23 @@ package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.gateway.*;
-import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import co.worklytics.psoxy.rules.RuleSet;
 import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.psoxy.utils.ComposedHttpRequestInitializer;
 import co.worklytics.psoxy.utils.GzipedContentHttpRequestInitializer;
 import co.worklytics.psoxy.utils.URLUtils;
-import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
+import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
+import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.http.*;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.auth.Credentials;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
@@ -28,9 +31,13 @@ import org.apache.http.entity.ContentType;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Locale;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
 import java.util.logging.Level;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @NoArgsConstructor(onConstructor_ = @Inject)
 @Log
@@ -51,6 +58,41 @@ public class CommonRequestHandler {
     @Inject
     ReversibleTokenizationStrategy reversibleTokenizationStrategy;
     @Inject UrlSafeTokenPseudonymEncoder pseudonymEncoder;
+
+    /**
+     * Basic headers to pass: content, caching, retries. Can be expanded by connection later.
+     * Matches literally on headers.
+     * @see #passThroughHeaders(HttpEventResponse.HttpEventResponseBuilder, HttpResponse)
+     * @see <a href="https://flaviocopes.com/http-response-headers/"></a>
+     * @see <a href="https://developer.mozilla.org/en-US/docs/Glossary/Response_header"></a>
+     */
+    public static Set<String> DEFAULT_HEADERS_PASS_THROUGH = normalizeHeaders(Set.of(
+        HttpHeaders.CONTENT_TYPE,
+        HttpHeaders.CACHE_CONTROL,
+        HttpHeaders.ETAG,
+        HttpHeaders.EXPIRES,
+        HttpHeaders.LAST_MODIFIED,
+        HttpHeaders.RETRY_AFTER
+    ));
+
+    /**
+     * Patters to look for in headers to pass through
+     *
+     * @see #passThroughHeaders(HttpEventResponse.HttpEventResponseBuilder, HttpResponse)
+     */
+    public Set<Pattern> RE_MATCH_HEADERS_PASS_THROUGH = ImmutableSet.of(
+        Pattern.compile(normalizeHeader("X-RateLimit.*"))
+    );
+
+    /**
+     * <a href="https://www.rfc-editor.org/rfc/rfc7230#section-3.2.2">rfc7230</a>
+     * "... A recipient MAY combine multiple header fields with the same field
+     *    name into one "field-name: field-value" pair, without changing the
+     *    semantics of the message, by appending each subsequent field value to
+     *    the combined field value in order, separated by a comma."
+     */
+    private static final Joiner HEADER_JOINER = Joiner.on(",");
+
 
     private volatile Sanitizer sanitizer;
     private final Object $writeLock = new Object[0];
@@ -136,14 +178,15 @@ public class CommonRequestHandler {
         //q: add exception handlers for IOExceptions / HTTP error responses, so those retries
         // happen in proxy rather than on Worklytics-side?
 
-        logIfDevelopmentMode(() -> sourceApiRequest.toString());
+        logIfDevelopmentMode(sourceApiRequest::toString);
 
         com.google.api.client.http.HttpResponse sourceApiResponse = sourceApiRequest.execute();
 
-        logIfDevelopmentMode(() -> sourceApiResponse.toString());
+        logIfDevelopmentMode(sourceApiResponse::toString);
 
         // return response
         builder.statusCode(sourceApiResponse.getStatusCode());
+
         try {
             // return response
             builder.statusCode(sourceApiResponse.getStatusCode());
@@ -153,9 +196,8 @@ public class CommonRequestHandler {
             if (sourceApiResponse.getContent() != null) {
                 responseContent = new String(sourceApiResponse.getContent().readAllBytes(), sourceApiResponse.getContentCharset());
             }
-            if (sourceApiResponse.getContentType() != null) {
-                builder.header(HttpHeaders.CONTENT_TYPE, sourceApiResponse.getContentType());
-            }
+
+            passThroughHeaders(builder, sourceApiResponse);
 
             String proxyResponseContent;
             if (isSuccessFamily(sourceApiResponse.getStatusCode())) {
@@ -191,6 +233,43 @@ public class CommonRequestHandler {
     Optional<PseudonymImplementation> parsePseudonymImplementation(HttpEventRequest request) {
         return request.getHeader(ControlHeader.PSEUDONYM_IMPLEMENTATION.getHttpHeader())
             .map(PseudonymImplementation::parseHttpHeaderValue);
+    }
+
+    /**
+     * side effects: modifies the responseBuilder, adding the headers to pass through
+     * @param responseBuilder - the proxy response being built
+     * @param response - the original response from the upstream API
+     */
+    @VisibleForTesting
+    void passThroughHeaders(HttpEventResponse.HttpEventResponseBuilder responseBuilder, com.google.api.client.http.HttpResponse response) {
+        Set<String> availableHeaders = normalizeHeaders(response.getHeaders().keySet());
+
+        Sets.intersection(availableHeaders, DEFAULT_HEADERS_PASS_THROUGH).forEach(
+            h -> responseBuilder.header(h, HEADER_JOINER.join(response.getHeaders().getHeaderStringValues(h)))
+        );
+
+        for (String availableHeader : availableHeaders) {
+            if (RE_MATCH_HEADERS_PASS_THROUGH.stream().anyMatch(re -> re.matcher(availableHeader).matches())) {
+                responseBuilder.header(availableHeader, HEADER_JOINER.join(response.getHeaders().getHeaderStringValues(availableHeader)));
+            }
+        }
+
+        if (response.getContentType() != null) {
+            responseBuilder.header(normalizeHeader(HttpHeaders.CONTENT_TYPE), response.getContentType());
+        }
+    }
+
+    @VisibleForTesting
+    static String normalizeHeader(String header) {
+        return header.toLowerCase(Locale.US);
+    }
+    /**
+     * @param headers header set
+     * @return new set with headers normalized for comparisons
+     */
+    @VisibleForTesting
+    static Set<String> normalizeHeaders(Set<String> headers) {
+        return headers.stream().map(CommonRequestHandler::normalizeHeader).collect(Collectors.toUnmodifiableSet());
     }
 
     @SneakyThrows

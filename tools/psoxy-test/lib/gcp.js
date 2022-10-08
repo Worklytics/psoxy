@@ -1,4 +1,4 @@
-import { getCommonHTTPHeaders, fetch } from './utils.js';
+import { getCommonHTTPHeaders, fetch, executeCommand } from './utils.js';
 
 /**
  * Helper: check url deploy type
@@ -14,6 +14,20 @@ function isValidURL(url) {
 }
 
 /**
+ * Get identity token for current gcloud account.
+ * 
+ * Refs: 
+ * - https://cloud.google.com/sdk/gcloud/reference/auth/login
+ * - https://cloud.google.com/sdk/gcloud/reference/auth/print-identity-token
+ * 
+ * @returns {String} identity token
+ */
+function getIdentityToken() {
+  const command = 'gcloud auth print-identity-token';
+  return executeCommand(command).trim();
+}
+
+/**
  * Psoxy test
  *
  * @param {Object} options - see `../index.js`
@@ -21,7 +35,7 @@ function isValidURL(url) {
  */
 async function call(options = {}) {
   if (!options.token) {
-    throw new Error('Authorization token is required for GCP endpoints');
+    options.token = getIdentityToken();
   }
 
   const headers = {
@@ -45,5 +59,6 @@ async function call(options = {}) {
 
 export default {
   isValidURL: isValidURL,
+  getIdentityToken: getIdentityToken,
   call: call,
 };

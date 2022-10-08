@@ -21,7 +21,7 @@ data "azuread_client_config" "current" {}
 
 module "worklytics_connector_specs" {
   # source = "../../modules/worklytics-connector-specs"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connector-specs?ref=v0.4.5"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connector-specs?ref=v0.4.6"
 
   enabled_connectors = [
     "azure-ad",
@@ -46,7 +46,7 @@ module "msft-connection" {
   for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
   # source = "../../modules/azuread-connection"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-connection?ref=v0.4.5"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-connection?ref=v0.4.6"
 
   display_name                      = "Psoxy Connector - ${each.value.display_name}${var.connector_display_name_suffix}"
   tenant_id                         = var.msft_tenant_id
@@ -61,7 +61,7 @@ module "msft-connection-auth" {
   for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
   # source = "../../modules/azuread-local-cert"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-local-cert?ref=v0.4.5"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-local-cert?ref=v0.4.6"
 
   application_object_id = module.msft-connection[each.key].connector.id
   rotation_days         = 60
@@ -74,7 +74,9 @@ module "msft-connection-auth" {
 resource "local_file" "configure_client_id" {
   for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
-  filename = "TODO - SENSITIVE - setup ${each.key} secrets in AWS.md"
+
+  # TODO: CLIENT_ID, REFRESH_ENDPOINT better as env variables
+  filename = "TODO 1 - setup ${each.key} secrets in AWS (SENSITIVE).md"
   content  = <<EOT
 
   1. Set `PSOXY_${upper(replace(each.key, "-", "_"))}_CLIENT_ID` as an AWS SSM Parameter to value
@@ -99,10 +101,12 @@ module "msft_365_grants" {
   for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
   # source = "../../modules/azuread-grant-all-users"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-grant-all-users?ref=v0.4.5"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-grant-all-users?ref=v0.4.6"
 
+  psoxy_instance_id        = each.key
   application_id           = module.msft-connection[each.key].connector.application_id
   oauth2_permission_scopes = each.value.required_oauth2_permission_scopes
   app_roles                = each.value.required_app_roles
   application_name         = each.key
+  todo_step                = 2
 }
