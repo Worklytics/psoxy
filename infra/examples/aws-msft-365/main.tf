@@ -228,7 +228,7 @@ module "aws-psoxy-long-auth-connectors" {
   for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
 
   # source = "../../modules/aws-psoxy-rest"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-rest?ref=v0.4.1"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-rest?ref=v0.4.6"
 
   function_name                         = "psoxy-${each.key}"
   path_to_function_zip                  = module.psoxy-aws.path_to_deployment_jar
@@ -256,7 +256,7 @@ module "worklytics-psoxy-connection-oauth-long-access" {
   for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
 
   # source = "../../modules/worklytics-psoxy-connection-aws"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=v0.4.1"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=v0.4.6"
 
   psoxy_instance_id  = each.key
   psoxy_endpoint_url = module.aws-psoxy-long-auth-connectors[each.key].endpoint_url
