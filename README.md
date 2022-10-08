@@ -56,6 +56,7 @@ And, depending on your scenario, you may also need:
   - [openssl](https://www.openssl.org/) If generating local certificates (see
     [`infra/modules/azure-local-cert`](infra/modules/azuread-local-cert))
   - Node.js v16+ and npm v8+, to be able to test your proxy instances locally (see `tools/psoxy-test/README.md`).
+
 ### Setup
 
   1. Choose the cloud platform you'll deploy to, and follow its guide:
@@ -127,6 +128,8 @@ terraform apply
 
 ## Releases
 
+### [v0.4.6](https://github.com/Worklytics/psoxy/releases/tag/v0.4.6)
+
 ### [v0.4.5](https://github.com/Worklytics/psoxy/releases/tag/v0.4.5)
 The `main` branch is current at 0.4.
 
@@ -156,15 +159,9 @@ Breaking changes:
     considering the 'scope' in which the identifier appears; and will be base64-urlencoded plain
     strings, rather than nested JSON.
 
-### v0.3 - beta
-
-This is the previous recommended release
- - a `v0.3` branch is available on GitHub; this will get fixes/non-breaking changes as they're
-   available.
- - tagged releases will be provided for anyone who wants a fixed version; latest is `v0.3.0-beta.6`
 
 ## Supported Data Sources
-As of May 2022, the following sources can be connected to Worklytics via psoxy:
+As of September 2022, the following sources can be connected to Worklytics via psoxy:
 
   * Asana
   * Google Workspace
