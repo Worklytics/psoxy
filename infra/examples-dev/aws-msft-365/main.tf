@@ -67,7 +67,7 @@ locals {
 data "azuread_client_config" "current" {}
 
 module "worklytics_connector_specs" {
-  source = "../../modules/worklytics-connector-specs"
+  source = "../../modules/worklytics-connecqtor-specs"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connector-specs?ref=v0.4.6"
 
   enabled_connectors = [
@@ -101,21 +101,15 @@ module "psoxy-aws" {
   }
 }
 
-module "secrets" {
+module "global_secrets" {
   source = "../../modules/aws-ssm-secrets"
 
   secrets = module.psoxy-aws.secrets
 }
 
-data "azuread_client_config" "current" {}
-
-locals {
-  # this IS the correct ID for the user terraform is running as, which we assume is a user who's OK
-  # to use the subject of examples. You can change it to any string you want.
-  example_msft_user_guid = data.azuread_client_config.current.object_id
-
-  # Microsoft 365 sources; add/remove as you wish
-  # See https://docs.microsoft.com/en-us/graph/permissions-reference for all the permissions available in AAD Graph API
+moved {
+  from = module.psoxy-aws.aws_ssm_parameter.salt
+  to   = module.global_secrets.aws_ssm_parameter.secret["PSOXY_SALT"]
 }
 
 module "msft-connection" {
@@ -187,7 +181,7 @@ module "psoxy-msft-connector" {
   aws_account_id        = var.aws_account_id
   path_to_repo_root     = var.psoxy_base_dir
   todo_step             = module.msft_365_grants[each.key].next_todo_step
-  global_parameter_arns = module.secrets.secret_arns
+  global_parameter_arns = module.global_secrets.secret_arns
 
   environment_variables = {
     IS_DEVELOPMENT_MODE  = "true"
@@ -261,7 +255,7 @@ module "aws-psoxy-long-auth-connectors" {
   example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
   todo_step                             = module.source_token_external_todo[each.key].next_todo_step
   reserved_concurrent_executions        = each.value.reserved_concurrent_executions
-  global_parameter_arns                 = module.psoxy-aws.global_parameters_arns
+  global_parameter_arns                 = module.global_secrets.secret_arns
   function_parameters                   = each.value.secured_variables
 
   environment_variables = {
@@ -303,5 +297,5 @@ module "psoxy-bulk" {
   api_caller_role_name  = module.psoxy-aws.api_caller_role_name
   psoxy_base_dir        = var.psoxy_base_dir
   rules                 = each.value.rules
-  global_parameter_arns = module.psoxy-aws.global_parameters_arns
+  global_parameter_arns = module.global_secrets.secret_arns
 }

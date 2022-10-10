@@ -80,13 +80,18 @@ module "worklytics_connector_specs" {
 }
 
 module "psoxy-aws" {
-  # source = "../../modules/aws" # to bind with local
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws?ref=v0.4.6"
+  source = "../../modules/aws" # to bind with local
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws?ref=v0.4.6"
 
   aws_account_id                 = var.aws_account_id
   psoxy_base_dir                 = var.psoxy_base_dir
   caller_aws_arns                = var.caller_aws_arns
   caller_gcp_service_account_ids = var.caller_gcp_service_account_ids
+}
+
+moved {
+  from = module.psoxy-aws.aws_ssm_parameter.salt
+  to   = module.global-secrets.aws_ssm_parameter.secret["PSOXY_SALT"]
 }
 
 # secrets shared across all instances
