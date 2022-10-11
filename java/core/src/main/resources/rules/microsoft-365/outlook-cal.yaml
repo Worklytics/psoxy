@@ -51,6 +51,7 @@ endpoints:
           - "$..onPremisesSamAccountName"
           - "$..onPremisesSecurityIdentifier"
           - "$..onPremisesProvisioningErrors"
+          - "$..securityIdentifier"
       - !<pseudonymize>
         jsonPaths:
           - "$..mail"
@@ -72,6 +73,7 @@ endpoints:
           - "$..faxNumber"
           - "$..mobilePhone"
           - "$..businessPhones[*]"
+          - "$..securityIdentifier"
       - !<pseudonymize>
         jsonPaths:
           - "$..userPrincipalName"
