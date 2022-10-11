@@ -121,7 +121,9 @@ locals {
       ],
       example_calls : [
         "/v1.0/users",
-        "/v1.0/groups"
+        "/v1.0/users/${var.example_msft_user_guid}",
+        "/v1.0/groups",
+        "/v1.0/groups/{group-id}/members"
       ]
     },
     "outlook-cal" : {
@@ -139,7 +141,10 @@ locals {
       example_calls : [
         "/v1.0/users",
         "/v1.0/users/${var.example_msft_user_guid}/events",
-        "/v1.0/users/${var.example_msft_user_guid}/mailboxSettings"
+        "/v1.0/users/${var.example_msft_user_guid}/calendarView?startDateTime=2022-10-01T00:00:00Z&endDateTime=${timestamp()}",
+        "/v1.0/users/${var.example_msft_user_guid}/mailboxSettings",
+        "/v1.0/groups",
+        "/v1.0/groups/{group-id}/members"
       ]
     },
     "outlook-mail" : {
@@ -156,7 +161,9 @@ locals {
       example_calls : [
         "/beta/users",
         "/beta/users/${var.example_msft_user_guid}/mailboxSettings",
-        "/beta/users/${var.example_msft_user_guid}/mailFolders/SentItems/messages"
+        "/beta/users/${var.example_msft_user_guid}/mailFolders/SentItems/messages",
+        "/v1.0/groups",
+        "/v1.0/groups/{group-id}/members"
       ]
     }
   }
