@@ -34,54 +34,16 @@ endpoints:
           - "$..onPremisesImmutableId"
           - "$..identities[*].issuerAssignedId"
         encoding: "JSON"
-  - pathRegex: "^/(v1.0|beta)/groups/?[^/]*"
-    transforms:
-      - !<redact>
-        jsonPaths:
-          - "$..owners"
-          - "$..rejectedSenders"
-          - "$..acceptedSenders"
-          - "$..members"
-          - "$..membersWithLicenseErrors"
-          - "$..proxyAddresses"
-          - "$..mailNickname"
-          - "$..description"
-          - "$..resourceBehaviorOptions"
-          - "$..resourceProvisioningOptions"
-          - "$..onPremisesSamAccountName"
-          - "$..onPremisesSecurityIdentifier"
-          - "$..onPremisesProvisioningErrors"
-          - "$..securityIdentifier"
       - !<pseudonymize>
         jsonPaths:
-          - "$..mail"
-        includeOriginal: true
-        encoding: "JSON"
-  - pathRegex: "^/(v1.0|beta)/groups/[^/]*/members.*"
-    transforms:
-      - !<redact>
-        jsonPaths:
-          - "$..displayName"
-          - "$..employeeId"
-          - "$..aboutMe"
-          - "$..mySite"
-          - "$..preferredName"
-          - "$..givenName"
-          - "$..surname"
-          - "$..mailNickname"
-          - "$..proxyAddresses"
-          - "$..faxNumber"
-          - "$..mobilePhone"
-          - "$..businessPhones[*]"
-          - "$..securityIdentifier"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..userPrincipalName"
-          - "$..imAddresses[*]"
-          - "$..mail"
-          - "$..otherMails[*]"
-        encoding: "JSON"
+          - "$..id"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
   - pathRegex: "^/(v1.0|beta)/users/[^/]*/mailboxSettings"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$.['@odata.context']"
   - pathRegex: "^/(v1.0|beta)/users/[^/]*/messages/[^/]*"
     transforms:
       - !<redact>
@@ -98,6 +60,13 @@ endpoints:
         jsonPaths:
           - "$..emailAddress.address"
         encoding: "JSON"
+      - !<tokenize>
+        jsonPaths:
+          - "$.['@odata.nextLink', '@odata.prevLink']"
+        regex: "^https://graph.microsoft.com/(.*)$"
+      - !<redact>
+        jsonPaths:
+          - "$.['@odata.context']"
   - pathRegex: "^/(v1.0|beta)/users/[^/]*/mailFolders(/SentItems|\\('SentItems'\\))/messages.*"
     transforms:
       - !<redact>
@@ -114,3 +83,10 @@ endpoints:
         jsonPaths:
           - "$..emailAddress.address"
         encoding: "JSON"
+      - !<tokenize>
+        jsonPaths:
+          - "$.['@odata.nextLink', '@odata.prevLink']"
+        regex: "^https://graph.microsoft.com/(.*)$"
+      - !<redact>
+        jsonPaths:
+          - "$.['@odata.context']"
