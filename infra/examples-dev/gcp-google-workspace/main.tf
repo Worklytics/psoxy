@@ -175,6 +175,16 @@ module "connector-long-auth-block" {
   token_adder_user_emails = []
 }
 
+module "long-auth-token-secret-fill-instructions" {
+  for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
+
+  source = "../../modules/gcp-secret-fill-md"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-secret-fill-md?ref=v0.4.6"
+
+  project_id = google_project.psoxy-project.project_id
+  secret_id  = module.connector-long-auth-block[each.key].access_token_secret_id
+}
+
 module "source_token_external_todo" {
   for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors_todos
 
@@ -182,10 +192,12 @@ module "source_token_external_todo" {
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/source-token-external-todo?ref=v0.4.6"
 
   source_id                         = each.key
-  host_cloud                        = "gcp"
   connector_specific_external_steps = each.value.external_token_todo
-  token_secret_id                   = module.connector-long-auth-block[each.key].access_token_secret_id
   todo_step                         = 1
+
+  additional_steps = [
+    module.long-auth-token-secret-fill-instructions[each.key].todo_markdown
+  ]
 }
 
 module "connector-long-auth-create-function" {
