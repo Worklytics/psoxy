@@ -18,8 +18,10 @@ locals {
       rules       = {
         columnsToRedact       = []
         columnsToPseudonymize = [
+          "employee_id",
           "employee_email",
-          "employee_id"
+          "manager_id",
+          "manager_email",
         ]
       }
     },
@@ -28,8 +30,8 @@ locals {
       rules       = {
         columnsToRedact       = []
         columnsToPseudonymize = [
-          "employee_email",
-          "employee_id"
+          "employee_id",
+          "employee_email", # if exists
         ]
       }
     }
@@ -38,6 +40,7 @@ locals {
 
 module "worklytics_connector_specs" {
   source = "../../modules/worklytics-connector-specs"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connector-specs?ref=v0.4.6"
 
   enabled_connectors = [
     "gdirectory",
@@ -68,6 +71,7 @@ resource "google_project" "psoxy-project" {
 
 module "psoxy-gcp" {
   source = "../../modules/gcp"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp?ref=v0.4.6"
 
   project_id        = google_project.psoxy-project.project_id
   invoker_sa_emails = var.worklytics_sa_emails
@@ -83,6 +87,7 @@ module "google-workspace-connection" {
   for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
 
   source = "../../modules/google-workspace-dwd-connection"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/google-workspace-dwd-connection?ref=v0.4.6"
 
   project_id                   = google_project.psoxy-project.project_id
   connector_service_account_id = "psoxy-${substr(each.key, 0, 24)}"
@@ -100,6 +105,7 @@ module "google-workspace-connection-auth" {
   for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
 
   source = "../../modules/gcp-sa-auth-key-secret-manager"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-sa-auth-key-secret-manager?ref=v0.4.6"
 
   secret_project     = google_project.psoxy-project.project_id
   service_account_id = module.google-workspace-connection[each.key].service_account_id
@@ -110,6 +116,7 @@ module "psoxy-google-workspace-connector" {
   for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
 
   source = "../../modules/gcp-psoxy-rest"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-rest?ref=v0.4.6"
 
   project_id                            = google_project.psoxy-project.project_id
   source_kind                           = each.value.source_kind
@@ -126,18 +133,19 @@ module "psoxy-google-workspace-connector" {
   todo_step                             = module.google-workspace-connection[each.key].next_todo_step
 
   secret_bindings = {
+    # as SERVICE_ACCOUNT_KEY rotated by Terraform, reasonable to bind as env variable
     SERVICE_ACCOUNT_KEY = {
       secret_id      = module.google-workspace-connection-auth[each.key].key_secret_id
       version_number = module.google-workspace-connection-auth[each.key].key_secret_version_number
     }
   }
-
 }
 
 module "worklytics-psoxy-connection" {
   for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
 
   source = "../../modules/worklytics-psoxy-connection"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection?ref=v0.4.6"
 
   psoxy_instance_id  = each.key
   psoxy_endpoint_url = module.psoxy-google-workspace-connector[each.key].cloud_function_url
@@ -152,17 +160,32 @@ resource "google_service_account" "long_auth_connector_sa" {
 
   project      = google_project.psoxy-project.project_id
   account_id   = "psoxy-${substr(each.key, 0, 24)}"
-  display_name = "Psoxy Connector - ${title(each.key)}${var.connector_display_name_suffix}"
+  display_name = "${title(each.key)}{var.connector_display_name_suffix} via Psoxy"
 }
 
 # creates the secret, without versions.
 module "connector-long-auth-block" {
   for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
 
-  source                  = "../../modules/gcp-oauth-long-access-strategy"
+  source = "../../modules/gcp-oauth-long-access-strategy"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-oauth-long-access-strategy?ref=v0.4.6"
+
   project_id              = google_project.psoxy-project.project_id
   function_name           = "psoxy-${each.key}"
   token_adder_user_emails = []
+}
+
+module "source_token_external_todo" {
+  for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors_todos
+
+  source = "../../modules/source-token-external-todo"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/source-token-external-todo?ref=v0.4.6"
+
+  source_id                         = each.key
+  host_cloud                        = "gcp"
+  connector_specific_external_steps = each.value.external_token_todo
+  token_secret_id                   = module.connector-long-auth-block[each.key].access_token_secret_id
+  todo_step                         = 1
 }
 
 module "connector-long-auth-create-function" {
@@ -181,15 +204,17 @@ module "connector-long-auth-create-function" {
   path_to_repo_root             = var.psoxy_base_dir
   salt_secret_id                = module.psoxy-gcp.salt_secret_id
   salt_secret_version_number    = module.psoxy-gcp.salt_secret_version_number
-  todo_step                     = 1
+  todo_step                     = module.source_token_external_todo[each.key].next_todo_step
 
-  secret_bindings = {
-    ACCESS_TOKEN = {
-      secret_id      = module.connector-long-auth-block[each.key].access_token_secret_id
-      # in case of long lived tokens we want latest version always
-      version_number = "latest"
-    }
-  }
+  # NOTE: ACCESS_TOKEN, ENCRYPTION_KEY not passed via secret_bindings (which would get bound as
+  # env vars at function start-up) because
+  #   - to be bound as env vars, secrets must already exist or function fails to start (w/o any
+  #     error visible to Terraform other than timeout); ACCESS_TOKEN may need to be created manually
+  #     so may not be defined at time of provisioning, and ENCRYPTION_KEY is optional
+  #   - both ACCESS_TOKEN, ENCRYPTION_KEY may be subject to rotation outside of terraform; no easy
+  #     way for users to force function restart, and env vars won't reload value of a secret until
+  #     function restarts. Better to let app-code load these values from Secret Manager, cache with
+  #     a TTL, and periodically refresh or refresh on auth errors.
 }
 
 module "worklytics-psoxy-connection-long-auth" {
@@ -203,8 +228,9 @@ module "worklytics-psoxy-connection-long-auth" {
   display_name       = "${each.value.display_name} via Psoxy${var.connector_display_name_suffix}"
   todo_step          = module.connector-long-auth-create-function[each.key].next_todo_step
 }
-
 # END LONG ACCESS AUTH CONNECTORS
+
+# BEGIN BULK CONNECTORS
 module "psoxy-gcp-bulk" {
   for_each = local.bulk_sources
 
