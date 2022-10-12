@@ -33,8 +33,8 @@ public class UrlSafeTokenPseudonymEncoder implements PseudonymEncoder {
     Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
     Base64.Decoder decoder = Base64.getUrlDecoder();
 
-    static final Pattern REVERSIBLE_PSEUDONYM_PATTERN =
-        //Pattern.compile("p\\~[a-zA-Z0-9_-]{43}"); //not clear to me why this doesn't work
+    public static final Pattern REVERSIBLE_PSEUDONYM_PATTERN =
+        //Pattern.compile("p\\~[a-zA-Z0-9_-]{43,}"); //not clear to me why this doesn't work
         Pattern.compile(Pattern.quote(PREFIX) + "[a-zA-Z0-9_-]{" + REVERSIBLE_PSEUDONYM_LENGTH_WITHOUT_PREFIX + ",}");
 
     @Override
