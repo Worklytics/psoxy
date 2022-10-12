@@ -27,6 +27,7 @@ public class PrebuiltSanitizerRules {
 
     static final Rules2.Endpoint DIRECTORY_USERS = Rules2.Endpoint.builder()
         .pathRegex(DIRECTORY_REGEX_USERS)
+        .allowedQueryParams(List.of("$top","$select","$skiptoken","$orderBy","$count"))
         .transform(Transform.Redact.builder()
             .jsonPath("$..displayName")
             .jsonPath("$..aboutMe")
@@ -85,6 +86,7 @@ public class PrebuiltSanitizerRules {
 
     static final Rules2.Endpoint DIRECTORY_GROUP_MEMBERS = Rules2.Endpoint.builder()
         .pathRegex(DIRECTORY_REGEX_GROUP_MEMBERS)
+        .allowedQueryParams(List.of("$top","$select","$skiptoken","$orderBy","$count"))
         .transform(Transform.Redact.builder()
             .jsonPath("$..displayName")
             .jsonPath("$..employeeId")

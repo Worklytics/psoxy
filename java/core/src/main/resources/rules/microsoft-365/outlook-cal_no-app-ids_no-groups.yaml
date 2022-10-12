@@ -1,7 +1,13 @@
 ---
 allowAllEndpoints: false
 endpoints:
-  - pathRegex: "^/(v1.0|beta)/users/?[^/]*"
+  - allowedQueryParams:
+      - "$top"
+      - "$select"
+      - "$skiptoken"
+      - "$orderBy"
+      - "$count"
+    pathRegex: "^/(v1.0|beta)/users/?[^/]*"
     transforms:
       - !<redact>
         jsonPaths:
