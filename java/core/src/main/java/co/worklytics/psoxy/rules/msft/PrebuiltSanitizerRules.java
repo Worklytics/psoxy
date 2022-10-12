@@ -22,7 +22,7 @@ public class PrebuiltSanitizerRules {
         .jsonPath("$.['@odata.context']")
         .build();
 
-    static final String DIRECTORY_REGEX_USERS = "^/(v1.0|beta)/users(/p~[a-zA-Z0-9_-]+?)?[^/]*";
+    static final String DIRECTORY_REGEX_USERS = "^/(v1.0|beta)/users/?[^/]*";
     static final String DIRECTORY_REGEX_USERS_BY_PSEUDO = "^/(v1.0|beta)/users(/p~[a-zA-Z0-9_-]+?)?[^/]*";
     static final String DIRECTORY_REGEX_GROUP_MEMBERS = "^/(v1.0|beta)/groups/[^/]*/members.*";
 
@@ -113,7 +113,7 @@ public class PrebuiltSanitizerRules {
         .endpoint(DIRECTORY_GROUPS)
         .endpoint(DIRECTORY_GROUP_MEMBERS)
         .build()
-        .withTransformByEndpoint(DIRECTORY_REGEX_USERS, Transform.Pseudonymize.builder()
+        .withTransformByEndpoint(DIRECTORY_REGEX_USERS_BY_PSEUDO, Transform.Pseudonymize.builder()
             .includeReversible(true)
             .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
             .jsonPath("$..id")
@@ -123,7 +123,7 @@ public class PrebuiltSanitizerRules {
             .build());
 
     static final Rules2 DIRECTORY_NO_MSFT_IDS_NO_GROUPS = DIRECTORY_NO_GROUPS
-        .withTransformByEndpoint(DIRECTORY_REGEX_USERS, Transform.Pseudonymize.builder()
+        .withTransformByEndpoint(DIRECTORY_REGEX_USERS_BY_PSEUDO, Transform.Pseudonymize.builder()
             .includeReversible(true)
             .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
             .jsonPath("$..id")
