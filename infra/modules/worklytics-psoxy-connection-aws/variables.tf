@@ -1,6 +1,7 @@
 variable "psoxy_instance_id" {
   type        = string
   description = "friendly unique-id for Psoxy instance"
+  default     = null
 }
 
 variable "psoxy_endpoint_url" {
