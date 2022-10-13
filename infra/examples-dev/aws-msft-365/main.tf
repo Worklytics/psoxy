@@ -71,13 +71,13 @@ module "worklytics_connector_specs" {
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connector-specs?ref=v0.4.6"
 
   enabled_connectors = [
-    "asana",
-    "azure-ad",
+   // "asana",
+   // "azure-ad",
     "dropbox-business",
-    "outlook-cal",
-    "outlook-mail",
-    "slack-discovery-api",
-    "zoom"
+   // "outlook-cal",
+   // "outlook-mail",
+   // "slack-discovery-api",
+    //"zoom"
   ]
 
   msft_tenant_id = var.msft_tenant_id
@@ -247,10 +247,13 @@ module "aws-psoxy-long-auth-connectors" {
   global_parameter_arns                 = module.psoxy-aws.global_parameters_arns
   function_parameters                   = each.value.secured_variables
 
-  environment_variables = {
-    PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
-    IS_DEVELOPMENT_MODE  = "true"
-  }
+
+  environment_variables = merge(each.value.environment_variables,
+    {
+  PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
+  IS_DEVELOPMENT_MODE  = "true"
+    }
+  )
 }
 
 module "worklytics-psoxy-connection-oauth-long-access" {
