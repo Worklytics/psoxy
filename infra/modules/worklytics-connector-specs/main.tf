@@ -332,9 +332,9 @@ all the operations for the connector:
 }
 ```
 7. Finally set following variables in AWS System Manager parameters store / GCP Cloud Secrets (if default implementation):
-  - `PSOXY_dropbox_business_REFRESH_TOKEN` secret variable with value of `refresh_token` received in previous response
-  - `PSOXY_dropbox_business_CLIENT_ID` with `App key` value.
-  - `PSOXY_dropbox_business_CLIENT_SECRET` with `App secret` value.
+  - `PSOXY_DROPBOX_BUSINESS_REFRESH_TOKEN` secret variable with value of `refresh_token` received in previous response
+  - `PSOXY_DROPBOX_BUSINESS_CLIENT_ID` with `App key` value.
+  - `PSOXY_DROPBOX_BUSINESS_CLIENT_SECRET` with `App secret` value.
 
 EOT
     }

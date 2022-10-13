@@ -23,7 +23,7 @@ resource "google_project_service" "apis_needed" {
 
 # enable domain-wide-delegation via Google Workspace Admin console
 resource "local_file" "todo-google-workspace-admin-console" {
-  filename = "TODO - ${var.display_name} setup.md"
+  filename = "TODO ${var.todo_step} - setup ${var.display_name}.md"
   content  = <<EOT
 Complete the following steps via the Google Workspace Admin console:
    1. Visit https://admin.google.com/ and navigate to Security --> API Controls, then find "Manage

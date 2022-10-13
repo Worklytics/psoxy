@@ -90,7 +90,7 @@ resource "local_file" "review" {
 
 Review the deployed Cloud function in GCP console:
 
-https://console.cloud.google.com/functions/details/${var.region}/${google_cloudfunctions_function.function.name}?project=${var.project_id}
+[Function in GCP Console](https://console.cloud.google.com/functions/details/${var.region}/${google_cloudfunctions_function.function.name}?project=${var.project_id})
 
 ### Make "test calls" using our Psoxy testing tool
 
@@ -102,17 +102,18 @@ Based on your configuration, these are some example test calls you can try using
 ${coalesce(join("\n", local.test_commands), "cd docs/example-api-calls/")}
 ```
 
-To be able to run the commands above you need Node.js (>=16) and npm (v >=8) installed. Please, check
-the documentation of our Psoxy testing tool (`tools/psoxy-test/README.md`) for a detailed description
+To be able to run the commands above you need:
+   1. install Node.js (>=16) and npm (v >=8) installed
+   2. run `npm install` in the `${var.path_to_repo_root}tools/psoxy-test/`
+
+Review the [documentation of our Psoxy testing tool](${var.path_to_repo_root}tools/psoxy-test/README.md) for a detailed description
 of all the different options.
 
-See `docs/example-api-calls/` for more example API calls specific to the data source to which your
-Proxy is configured to connect.
-
 Feel free to try the above calls, and reference to the source's API docs for other parameters /
-endpoints to experiment with. If you spot any additional fields you believe should be
-redacted/pseudonymized, feel free to modify the rules in your local repo and re-deploy OR configure
-a RULES variable in the source.
+endpoints to experiment with.
+
+If you spot any additional fields you believe should be redacted/pseudonymized, feel free to modify
+[customize the rules](${var.path_to_repo_root}docs/gcp/custom-rules.md).
 
 Contact support@worklytics.co for assistance modifying the rules as needed.
 
