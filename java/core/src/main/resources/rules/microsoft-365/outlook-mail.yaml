@@ -82,6 +82,11 @@ endpoints:
           - "$..otherMails[*]"
         encoding: "JSON"
   - pathRegex: "^/(v1.0|beta)/users/[^/]*/mailboxSettings"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..internalReplyMessage"
+          - "$..externalReplyMessage"
   - pathRegex: "^/(v1.0|beta)/users/[^/]*/messages/[^/]*"
     transforms:
       - !<redact>

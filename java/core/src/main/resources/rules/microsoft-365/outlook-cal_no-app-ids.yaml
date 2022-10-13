@@ -94,6 +94,10 @@ endpoints:
     transforms:
       - !<redact>
         jsonPaths:
+          - "$..internalReplyMessage"
+          - "$..externalReplyMessage"
+      - !<redact>
+        jsonPaths:
           - "$.['@odata.context']"
   - pathRegex: "^/(v1.0|beta)/users/[^/]*/(((calendars/[^/]*/)?events.*)|(calendar/calendarView(?)[^/]*))"
     transforms:
