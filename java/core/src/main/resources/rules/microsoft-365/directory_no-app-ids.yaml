@@ -2,6 +2,12 @@
 allowAllEndpoints: false
 endpoints:
   - pathRegex: "^/(v1.0|beta)/users/?[^/]*"
+    allowedQueryParams:
+     - "$top"
+     - "$select"
+     - "$skiptoken"
+     - "$orderBy"
+     - "$count"
     transforms:
       - !<redact>
         jsonPaths:
@@ -63,6 +69,12 @@ endpoints:
         includeOriginal: true
         encoding: "JSON"
   - pathRegex: "^/(v1.0|beta)/groups/[^/]*/members.*"
+    allowedQueryParams:
+      - "$top"
+      - "$select"
+      - "$skiptoken"
+      - "$orderBy"
+      - "$count"
     transforms:
       - !<redact>
         jsonPaths:
