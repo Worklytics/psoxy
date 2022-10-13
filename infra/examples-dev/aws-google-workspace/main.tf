@@ -35,11 +35,11 @@ provider "aws" {
 
 locals {
   base_config_path = "${var.psoxy_base_dir}/configs/"
-  bulk_sources = {
+  bulk_sources     = {
     "hris" = {
       source_kind = "hris"
-      rules = {
-        columnsToRedact = []
+      rules       = {
+        columnsToRedact       = []
         columnsToPseudonymize = [
           "email",
           "employee_id"
@@ -48,8 +48,8 @@ locals {
     },
     "qualtrics" = {
       source_kind = "qualtrics"
-      rules = {
-        columnsToRedact = []
+      rules       = {
+        columnsToRedact       = []
         columnsToPseudonymize = [
           "email",
           "employee_id"
@@ -179,7 +179,7 @@ module "worklytics-psoxy-connection-google-workspace" {
 # Create secure parameters (later filled by customer)
 # Can be later passed on to a module and store in other vault if needed
 resource "aws_ssm_parameter" "long-access-secrets" {
-  for_each = { for entry in module.worklytics_connector_specs.enabled_oauth_secrets_to_create : "${entry.connector_name}.${entry.secret_name}" => entry }
+  for_each = {for entry in module.worklytics_connector_specs.enabled_oauth_secrets_to_create : "${entry.connector_name}.${entry.secret_name}" => entry}
 
   name        = "PSOXY_${upper(replace(each.value.connector_name, "-", "_"))}_${upper(each.value.secret_name)}"
   type        = "SecureString"
@@ -227,6 +227,13 @@ module "aws-psoxy-long-auth-connectors" {
   global_parameter_arns          = module.psoxy-aws.global_parameters_arns
   function_parameters            = each.value.secured_variables
   todo_step                      = module.source_token_external_todo[each.key].next_todo_step
+
+  environment_variables = merge(each.value.environment_variables,
+    {
+      PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
+      IS_DEVELOPMENT_MODE  = "true"
+    }
+  )
 }
 
 module "worklytics-psoxy-connection" {
