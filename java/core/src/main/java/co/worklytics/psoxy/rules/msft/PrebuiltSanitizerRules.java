@@ -23,12 +23,11 @@ public class PrebuiltSanitizerRules {
         .build();
 
     static final String DIRECTORY_REGEX_USERS = "^/(v1.0|beta)/users/?[^/]*";
+    static final String DIRECTORY_REGEX_USERS_BY_PSEUDO = "^/(v1.0|beta)/users(/p~[a-zA-Z0-9_-]+?)?[^/]*";
     static final String DIRECTORY_REGEX_GROUP_MEMBERS = "^/(v1.0|beta)/groups/[^/]*/members.*";
 
-    static final Rules2.Endpoint DIRECTORY_USERS = Rules2.Endpoint.builder()
-        .pathRegex(DIRECTORY_REGEX_USERS)
-        .allowedQueryParams(List.of("$top","$select","$skiptoken","$orderBy","$count"))
-        .transform(Transform.Redact.builder()
+    static final List<Transform> USER_TRANSFORMS = Arrays.asList(
+        Transform.Redact.builder()
             .jsonPath("$..displayName")
             .jsonPath("$..aboutMe")
             .jsonPath("$..mySite")
@@ -45,8 +44,8 @@ public class PrebuiltSanitizerRules {
             .jsonPath("$..onPremisesExtensionAttributes")
             .jsonPath("$..onPremisesSecurityIdentifier")
             .jsonPath("$..securityIdentifier")
-            .build())
-        .transform(Transform.Pseudonymize.builder()
+            .build(),
+        Transform.Pseudonymize.builder()
             .jsonPath("$..employeeId")
             .jsonPath("$..userPrincipalName")
             .jsonPath("$..imAddresses[*]")
@@ -57,7 +56,18 @@ public class PrebuiltSanitizerRules {
             .jsonPath("$..onPremisesDistinguishedName")
             .jsonPath("$..onPremisesImmutableId")
             .jsonPath("$..identities[*].issuerAssignedId")
-            .build())
+            .build()
+
+    );
+    static final Rules2.Endpoint DIRECTORY_USERS = Rules2.Endpoint.builder()
+        .pathRegex(DIRECTORY_REGEX_USERS)
+        .allowedQueryParams(List.of("$top","$select","$skiptoken","$orderBy","$count"))
+        .transforms(USER_TRANSFORMS)
+        .build();
+
+    static final Rules2.Endpoint DIRECTORY_USERS_NO_APP_IDS = Rules2.Endpoint.builder()
+        .pathRegex(DIRECTORY_REGEX_USERS_BY_PSEUDO)
+        .transforms(USER_TRANSFORMS)
         .build();
 
     static final Rules2.Endpoint DIRECTORY_GROUPS = Rules2.Endpoint.builder()
@@ -87,27 +97,7 @@ public class PrebuiltSanitizerRules {
     static final Rules2.Endpoint DIRECTORY_GROUP_MEMBERS = Rules2.Endpoint.builder()
         .pathRegex(DIRECTORY_REGEX_GROUP_MEMBERS)
         .allowedQueryParams(List.of("$top","$select","$skiptoken","$orderBy","$count"))
-        .transform(Transform.Redact.builder()
-            .jsonPath("$..displayName")
-            .jsonPath("$..employeeId")
-            .jsonPath("$..aboutMe")
-            .jsonPath("$..mySite")
-            .jsonPath("$..preferredName")
-            .jsonPath("$..givenName")
-            .jsonPath("$..surname")
-            .jsonPath("$..mailNickname") //get the actual mail
-            .jsonPath("$..proxyAddresses")
-            .jsonPath("$..faxNumber")
-            .jsonPath("$..mobilePhone")
-            .jsonPath("$..businessPhones[*]")
-            .jsonPath("$..securityIdentifier")
-            .build())
-        .transform(Transform.Pseudonymize.builder()
-            .jsonPath("$..userPrincipalName")
-            .jsonPath("$..imAddresses[*]")
-            .jsonPath("$..mail")
-            .jsonPath("$..otherMails[*]")
-            .build())
+        .transforms(USER_TRANSFORMS)
         .build();
 
     static final Rules2 DIRECTORY = Rules2.builder()
@@ -117,11 +107,15 @@ public class PrebuiltSanitizerRules {
         .build();
 
     static final Rules2 DIRECTORY_NO_GROUPS = Rules2.builder()
-        .endpoint(DIRECTORY_USERS)
+        .endpoint(DIRECTORY_USERS_NO_APP_IDS)
         .build();
 
-    static final Rules2 DIRECTORY_NO_MSFT_IDS = DIRECTORY
-        .withTransformByEndpoint(DIRECTORY_REGEX_USERS, Transform.Pseudonymize.builder()
+    static final Rules2 DIRECTORY_NO_MSFT_IDS = Rules2.builder()
+        .endpoint(DIRECTORY_USERS_NO_APP_IDS)
+        .endpoint(DIRECTORY_GROUPS)
+        .endpoint(DIRECTORY_GROUP_MEMBERS)
+        .build()
+        .withTransformByEndpoint(DIRECTORY_REGEX_USERS_BY_PSEUDO, Transform.Pseudonymize.builder()
             .includeReversible(true)
             .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
             .jsonPath("$..id")
@@ -131,7 +125,7 @@ public class PrebuiltSanitizerRules {
             .build());
 
     static final Rules2 DIRECTORY_NO_MSFT_IDS_NO_GROUPS = DIRECTORY_NO_GROUPS
-        .withTransformByEndpoint(DIRECTORY_REGEX_USERS, Transform.Pseudonymize.builder()
+        .withTransformByEndpoint(DIRECTORY_REGEX_USERS_BY_PSEUDO, Transform.Pseudonymize.builder()
             .includeReversible(true)
             .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
             .jsonPath("$..id")
