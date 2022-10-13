@@ -82,10 +82,24 @@ public class MailTests extends JavaRulesTestBaseCase {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"v1.0", "beta"})
+    @ValueSource(strings = {"v1.0"})
     public void mailboxSettings(String apiVersion) {
         String endpoint = "https://graph.microsoft.com/" + apiVersion +
             "/users/48d31887-5fad-4d73-a9f5-3c356e68a038/mailboxSettings";
+
+        String jsonResponse = asJson("MailboxSettings_" + apiVersion + ".json");
+
+        assertNotSanitized(jsonResponse,
+            "should be redacted 1",
+            "should be redacted 2"
+        );
+
+        String sanitized = sanitize(endpoint, jsonResponse);
+
+        assertRedacted(sanitized,
+            "should be redacted 1",
+            "should be redacted 2"
+        );
 
         assertUrlAllowed(endpoint);
         assertUrlWithQueryParamsBlocked(endpoint);

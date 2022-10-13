@@ -1,7 +1,13 @@
 ---
 allowAllEndpoints: false
 endpoints:
-  - pathRegex: "^/(v1.0|beta)/users/?[^/]*"
+  - allowedQueryParams:
+      - "$top"
+      - "$select"
+      - "$skiptoken"
+      - "$orderBy"
+      - "$count"
+    pathRegex: "^/(v1.0|beta)/users/?[^/]*"
     transforms:
       - !<redact>
         jsonPaths:
@@ -43,8 +49,6 @@ endpoints:
     transforms:
       - !<redact>
         jsonPaths:
-          - "$..displayName"
-          - "$..securityIdentifier                              "
           - "$..owners"
           - "$..rejectedSenders"
           - "$..acceptedSenders"
@@ -58,16 +62,22 @@ endpoints:
           - "$..onPremisesSamAccountName"
           - "$..onPremisesSecurityIdentifier"
           - "$..onPremisesProvisioningErrors"
+          - "$..securityIdentifier"
       - !<pseudonymize>
         jsonPaths:
           - "$..mail"
         encoding: "JSON"
-  - pathRegex: "^/(v1.0|beta)/groups/[^/]*/members.*"
+  - allowedQueryParams:
+      - "$top"
+      - "$select"
+      - "$skiptoken"
+      - "$orderBy"
+      - "$count"
+    pathRegex: "^/(v1.0|beta)/groups/[^/]*/members.*"
     transforms:
       - !<redact>
         jsonPaths:
           - "$..displayName"
-          - "$..securityIdentifier"
           - "$..employeeId"
           - "$..aboutMe"
           - "$..mySite"
@@ -79,6 +89,7 @@ endpoints:
           - "$..faxNumber"
           - "$..mobilePhone"
           - "$..businessPhones[*]"
+          - "$..securityIdentifier"
       - !<pseudonymize>
         jsonPaths:
           - "$..userPrincipalName"

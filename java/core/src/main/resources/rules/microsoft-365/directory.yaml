@@ -1,7 +1,13 @@
 ---
 allowAllEndpoints: false
 endpoints:
-  - pathRegex: "^/(v1.0|beta)/users/?[^/]*"
+  - allowedQueryParams:
+      - "$top"
+      - "$select"
+      - "$skiptoken"
+      - "$orderBy"
+      - "$count"
+    pathRegex: "^/(v1.0|beta)/users/?[^/]*"
     transforms:
       - !<redact>
         jsonPaths:
@@ -57,7 +63,13 @@ endpoints:
           - "$..mail"
         includeOriginal: true
         encoding: "JSON"
-  - pathRegex: "^/(v1.0|beta)/groups/[^/]*/members.*"
+  - allowedQueryParams:
+      - "$top"
+      - "$select"
+      - "$skiptoken"
+      - "$orderBy"
+      - "$count"
+    pathRegex: "^/(v1.0|beta)/groups/[^/]*/members.*"
     transforms:
       - !<redact>
         jsonPaths:

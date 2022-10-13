@@ -61,6 +61,7 @@ public class PrebuiltSanitizerRules {
     );
     static final Rules2.Endpoint DIRECTORY_USERS = Rules2.Endpoint.builder()
         .pathRegex(DIRECTORY_REGEX_USERS)
+        .allowedQueryParams(List.of("$top","$select","$skiptoken","$orderBy","$count"))
         .transforms(USER_TRANSFORMS)
         .build();
 
@@ -95,6 +96,7 @@ public class PrebuiltSanitizerRules {
 
     static final Rules2.Endpoint DIRECTORY_GROUP_MEMBERS = Rules2.Endpoint.builder()
         .pathRegex(DIRECTORY_REGEX_GROUP_MEMBERS)
+        .allowedQueryParams(List.of("$top","$select","$skiptoken","$orderBy","$count"))
         .transforms(USER_TRANSFORMS)
         .build();
 
@@ -136,6 +138,10 @@ public class PrebuiltSanitizerRules {
     static final List<Rules2.Endpoint> OUTLOOK_MAIL_ENDPOINTS = Arrays.asList(
         Rules2.Endpoint.builder()
             .pathRegex(OUTLOOK_PATH_REGEX_MAILBOX_SETTINGS)
+            .transform(Transform.Redact.builder()
+                .jsonPath("$..internalReplyMessage")
+                .jsonPath("$..externalReplyMessage")
+                .build())
             .build(),
         Rules2.Endpoint.builder()
             .pathRegex(OUTLOOK_MAIL_PATH_REGEX_MESSAGES)
@@ -228,6 +234,10 @@ public class PrebuiltSanitizerRules {
     static final List<Rules2.Endpoint> OUTLOOK_CALENDAR_ENDPOINTS = Arrays.asList(
         Rules2.Endpoint.builder()
             .pathRegex(OUTLOOK_PATH_REGEX_MAILBOX_SETTINGS)
+            .transform(Transform.Redact.builder()
+                .jsonPath("$..internalReplyMessage")
+                .jsonPath("$..externalReplyMessage")
+                .build())
             .build(),
         EVENT_TRANSFORMS.toBuilder()
             .pathRegex(OUTLOOK_CALENDAR_PATH_REGEX_EVENTS)
