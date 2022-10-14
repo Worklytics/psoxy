@@ -36,35 +36,55 @@ test('Psoxy call: works as expected', async t => {
   // Fake assume role and AWS request signing
   const roleArn = 'arn:aws:iam::[accountId]:role/[roleName]';
   const command = `aws sts assume-role --role-arn ${roleArn} --duration 900 --role-session-name lambda_test`
+  const options = {
+    url: LAMBDA_URL,
+    role: roleArn,
+  };
   const credentials = {
     Credentials: {
       AccessKeyId: 'foo',
       SecretAccessKey: 'bar',
       SessionToken: 'baz',
+    }
+  };
+  const signedRequest = {
+    headers: {
+      Host: 'aws-host',
+      'X-Amz-Security-Token': 'token',
+      'X-Amz-Date': '20221014T172512Z',
+      Authorization: 'AWS4-HMAC-SHA256 ...'
     },
-  };
-  const options = {
-    url: LAMBDA_URL,
-    role: roleArn,
-  };
+    host: 'aws-host',
+    path: '/foo',
+    region: 'us-east-1',
+    service: 'lambda',
+  }
   
+  // notice that `executeCommand` will return credentials wrapped and as 
+  // String; in contrast to `assumeRole` that will parse and unwrap
   td.when(utils.executeCommand(command))
     .thenReturn(JSON.stringify(credentials));
 
-  td.when(utils.signAWSRequestURL(td.matchers.isA(URL), credentials))
-    .thenReturn({ }); // Dummy headers
+  // sign request using credentials
+  td.when(utils.signAWSRequestURL(td.matchers.isA(URL), 
+    credentials.Credentials))
+    .thenReturn(signedRequest);
 
   // Pathless URL: result should contain error
-  td.when(utils.fetch(options.url, td.matchers.contains({headers: {}})))
-    .thenReturn({status: 500, error: 'BLOCKED_BY_RULES'});
+  td.when(utils.request(td.matchers.isA(URL), 
+    td.matchers.contains(signedRequest.headers))).thenReturn({
+      status: 500, 
+      error: 'BLOCKED_BY_RULES',
+    });
 
   let result = await aws.call(options);
   t.is(result.error, 'BLOCKED_BY_RULES');
 
   // Valid URL
   options.url+= '/api/path';
-  td.when(utils.fetch(options.url, td.matchers.contains({headers: {}})))
-    .thenReturn({ status: 200 });
+  td.when(utils.request(td.matchers.isA(URL), 
+    td.matchers.contains(signedRequest.headers)))
+      .thenReturn({ status: 200 });
 
   result = await aws.call(options);
   t.is(result.status, 200);
