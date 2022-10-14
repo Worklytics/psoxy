@@ -8,8 +8,8 @@
   "automaticRepliesSetting": {
     "status": "disabled",
     "externalAudience": "all",
-    "internalReplyMessage": "should be redacted 1",
-    "externalReplyMessage": "should be redacted 2",
+    "internalReplyMessage": "",
+    "externalReplyMessage": "",
     "scheduledStartDateTime": {
       "dateTime": "2022-01-26T18:00:00.0000000",
       "timeZone": "UTC"

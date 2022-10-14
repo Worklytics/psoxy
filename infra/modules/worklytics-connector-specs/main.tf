@@ -121,7 +121,9 @@ locals {
       ],
       example_calls : [
         "/v1.0/users",
-        "/v1.0/groups"
+        "/v1.0/users/${var.example_msft_user_guid}",
+        "/v1.0/groups",
+        "/v1.0/groups/{group-id}/members"
       ]
     },
     "outlook-cal" : {
@@ -139,7 +141,10 @@ locals {
       example_calls : [
         "/v1.0/users",
         "/v1.0/users/${var.example_msft_user_guid}/events",
-        "/v1.0/users/${var.example_msft_user_guid}/mailboxSettings"
+        "/v1.0/users/${var.example_msft_user_guid}/calendarView?startDateTime=2022-10-01T00:00:00Z&endDateTime=${timestamp()}",
+        "/v1.0/users/${var.example_msft_user_guid}/mailboxSettings",
+        "/v1.0/groups",
+        "/v1.0/groups/{group-id}/members"
       ]
     },
     "outlook-mail" : {
@@ -156,7 +161,9 @@ locals {
       example_calls : [
         "/beta/users",
         "/beta/users/${var.example_msft_user_guid}/mailboxSettings",
-        "/beta/users/${var.example_msft_user_guid}/mailFolders/SentItems/messages"
+        "/beta/users/${var.example_msft_user_guid}/mailFolders/SentItems/messages",
+        "/v1.0/groups",
+        "/v1.0/groups/{group-id}/members"
       ]
     }
   }
@@ -279,7 +286,9 @@ EOT
         { name : "CLIENT_ID", writable : false },
         { name : "CLIENT_SECRET", writable : false },
       ],
-      token_endpoint : "https://api.dropboxapi.com/oauth2/token",
+      environment_variables : {
+        REFRESH_ENDPOINT : "https://api.dropboxapi.com/oauth2/token"
+      }
       reserved_concurrent_executions : null
       example_api_calls_user_to_impersonate : null
       external_token_todo : <<EOT
@@ -337,22 +346,22 @@ EOT
 # computed values filtered by enabled connectors
 locals {
   enabled_google_workspace_connectors = {
-    for k, v in local.google_workspace_sources : k => v if contains(var.enabled_connectors, k)
+  for k, v in local.google_workspace_sources : k => v if contains(var.enabled_connectors, k)
   }
   enabled_msft_365_connectors = {
-    for k, v in local.msft_365_connectors : k => v if contains(var.enabled_connectors, k)
+  for k, v in local.msft_365_connectors : k => v if contains(var.enabled_connectors, k)
   }
-  enabled_oauth_long_access_connectors = { for k, v in local.oauth_long_access_connectors : k => v if contains(var.enabled_connectors, k) }
+  enabled_oauth_long_access_connectors = {for k, v in local.oauth_long_access_connectors : k => v if contains(var.enabled_connectors, k)}
 
-  enabled_oauth_long_access_connectors_todos = { for k, v in local.enabled_oauth_long_access_connectors : k => v if v.external_token_todo != null }
+  enabled_oauth_long_access_connectors_todos = {for k, v in local.enabled_oauth_long_access_connectors : k => v if v.external_token_todo != null}
   # list of pair of [(conn1, secret1), (conn1, secret2), ... (connN, secretM)]
-  enabled_oauth_secrets_to_create = distinct(flatten([
-    for k, v in local.enabled_oauth_long_access_connectors : [
-      for secret_var in v.secured_variables : {
-        connector_name = k
-        secret_name    = secret_var.name
-      }
-    ]
+  enabled_oauth_secrets_to_create            = distinct(flatten([
+  for k, v in local.enabled_oauth_long_access_connectors : [
+  for secret_var in v.secured_variables : {
+    connector_name = k
+    secret_name    = secret_var.name
+  }
+  ]
   ]))
 }
 

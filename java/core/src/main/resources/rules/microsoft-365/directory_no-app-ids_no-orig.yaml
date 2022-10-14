@@ -43,6 +43,8 @@ endpoints:
     transforms:
       - !<redact>
         jsonPaths:
+          - "$..displayName"
+          - "$..securityIdentifier                              "
           - "$..owners"
           - "$..rejectedSenders"
           - "$..acceptedSenders"
@@ -65,6 +67,7 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$..displayName"
+          - "$..securityIdentifier"
           - "$..employeeId"
           - "$..aboutMe"
           - "$..mySite"

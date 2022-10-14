@@ -56,6 +56,7 @@ endpoints:
           - "$..onPremisesSamAccountName"
           - "$..onPremisesSecurityIdentifier"
           - "$..onPremisesProvisioningErrors"
+          - "$..securityIdentifier"
       - !<pseudonymize>
         jsonPaths:
           - "$..mail"
@@ -77,6 +78,7 @@ endpoints:
           - "$..faxNumber"
           - "$..mobilePhone"
           - "$..businessPhones[*]"
+          - "$..securityIdentifier"
       - !<pseudonymize>
         jsonPaths:
           - "$..userPrincipalName"
@@ -90,6 +92,10 @@ endpoints:
         encoding: "JSON"
   - pathRegex: "^/(v1.0|beta)/users/[^/]*/mailboxSettings"
     transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..internalReplyMessage"
+          - "$..externalReplyMessage"
       - !<redact>
         jsonPaths:
           - "$.['@odata.context']"

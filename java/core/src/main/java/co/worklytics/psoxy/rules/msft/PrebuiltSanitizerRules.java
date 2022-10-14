@@ -24,42 +24,43 @@ public class PrebuiltSanitizerRules {
 
     static final String DIRECTORY_REGEX_USERS = "^/(v1.0|beta)/users/?[^/]*";
     static final String DIRECTORY_REGEX_GROUP_MEMBERS = "^/(v1.0|beta)/groups/[^/]*/members.*";
-    static final Rules2 DIRECTORY = Rules2.builder()
-        .endpoint(Rules2.Endpoint.builder()
-            .pathRegex(DIRECTORY_REGEX_USERS)
-            .transform(Transform.Redact.builder()
-                .jsonPath("$..displayName")
-                .jsonPath("$..aboutMe")
-                .jsonPath("$..mySite")
-                .jsonPath("$..preferredName")
-                .jsonPath("$..givenName")
-                .jsonPath("$..surname")
-                .jsonPath("$..mailNickname") //get the actual mail
-                .jsonPath("$..proxyAddresses")
-                .jsonPath("$..responsibilities")
-                .jsonPath("$..skills")
-                .jsonPath("$..faxNumber")
-                .jsonPath("$..mobilePhone")
-                .jsonPath("$..businessPhones[*]")
-                .jsonPath("$..onPremisesExtensionAttributes")
-                .jsonPath("$..onPremisesSecurityIdentifier")
-                .jsonPath("$..securityIdentifier")
-                .build())
-            .transform(Transform.Pseudonymize.builder()
-                .jsonPath("$..employeeId")
-                .jsonPath("$..userPrincipalName")
-                .jsonPath("$..imAddresses[*]")
-                .jsonPath("$..mail")
-                .jsonPath("$..otherMails[*]")
-                .jsonPath("$..onPremisesSamAccountName")
-                .jsonPath("$..onPremisesUserPrincipalName")
-                .jsonPath("$..onPremisesDistinguishedName")
-                .jsonPath("$..onPremisesImmutableId")
-                .jsonPath("$..identities[*].issuerAssignedId")
-                .build())
+
+    static final Rules2.Endpoint DIRECTORY_USERS = Rules2.Endpoint.builder()
+        .pathRegex(DIRECTORY_REGEX_USERS)
+        .transform(Transform.Redact.builder()
+            .jsonPath("$..displayName")
+            .jsonPath("$..aboutMe")
+            .jsonPath("$..mySite")
+            .jsonPath("$..preferredName")
+            .jsonPath("$..givenName")
+            .jsonPath("$..surname")
+            .jsonPath("$..mailNickname") //get the actual mail
+            .jsonPath("$..proxyAddresses")
+            .jsonPath("$..responsibilities")
+            .jsonPath("$..skills")
+            .jsonPath("$..faxNumber")
+            .jsonPath("$..mobilePhone")
+            .jsonPath("$..businessPhones[*]")
+            .jsonPath("$..onPremisesExtensionAttributes")
+            .jsonPath("$..onPremisesSecurityIdentifier")
+            .jsonPath("$..securityIdentifier")
             .build())
-        .endpoint(Rules2.Endpoint.builder()
-            .pathRegex("^/(v1.0|beta)/groups/?[^/]*")
+        .transform(Transform.Pseudonymize.builder()
+            .jsonPath("$..employeeId")
+            .jsonPath("$..userPrincipalName")
+            .jsonPath("$..imAddresses[*]")
+            .jsonPath("$..mail")
+            .jsonPath("$..otherMails[*]")
+            .jsonPath("$..onPremisesSamAccountName")
+            .jsonPath("$..onPremisesUserPrincipalName")
+            .jsonPath("$..onPremisesDistinguishedName")
+            .jsonPath("$..onPremisesImmutableId")
+            .jsonPath("$..identities[*].issuerAssignedId")
+            .build())
+        .build();
+
+    static final Rules2.Endpoint DIRECTORY_GROUPS = Rules2.Endpoint.builder()
+        .pathRegex("^/(v1.0|beta)/groups/?[^/]*")
             .transform(Transform.Redact.builder()
                 .jsonPath("$..owners")
                 .jsonPath("$..rejectedSenders")
@@ -74,35 +75,47 @@ public class PrebuiltSanitizerRules {
                 .jsonPath("$..onPremisesSamAccountName")
                 .jsonPath("$..onPremisesSecurityIdentifier")
                 .jsonPath("$..onPremisesProvisioningErrors")
+                .jsonPath("$..securityIdentifier")
                 .build())
-            .transform(Transform.Pseudonymize.builder()
+        .transform(Transform.Pseudonymize.builder()
                 .includeOriginal(true)
                 .jsonPath("$..mail")
                 .build())
+        .build();
+
+    static final Rules2.Endpoint DIRECTORY_GROUP_MEMBERS = Rules2.Endpoint.builder()
+        .pathRegex(DIRECTORY_REGEX_GROUP_MEMBERS)
+        .transform(Transform.Redact.builder()
+            .jsonPath("$..displayName")
+            .jsonPath("$..employeeId")
+            .jsonPath("$..aboutMe")
+            .jsonPath("$..mySite")
+            .jsonPath("$..preferredName")
+            .jsonPath("$..givenName")
+            .jsonPath("$..surname")
+            .jsonPath("$..mailNickname") //get the actual mail
+            .jsonPath("$..proxyAddresses")
+            .jsonPath("$..faxNumber")
+            .jsonPath("$..mobilePhone")
+            .jsonPath("$..businessPhones[*]")
+            .jsonPath("$..securityIdentifier")
             .build())
-        .endpoint(Rules2.Endpoint.builder()
-            .pathRegex(DIRECTORY_REGEX_GROUP_MEMBERS)
-            .transform(Transform.Redact.builder()
-                .jsonPath("$..displayName")
-                .jsonPath("$..employeeId")
-                .jsonPath("$..aboutMe")
-                .jsonPath("$..mySite")
-                .jsonPath("$..preferredName")
-                .jsonPath("$..givenName")
-                .jsonPath("$..surname")
-                .jsonPath("$..mailNickname") //get the actual mail
-                .jsonPath("$..proxyAddresses")
-                .jsonPath("$..faxNumber")
-                .jsonPath("$..mobilePhone")
-                .jsonPath("$..businessPhones[*]")
-                .build())
-            .transform(Transform.Pseudonymize.builder()
-                .jsonPath("$..userPrincipalName")
-                .jsonPath("$..imAddresses[*]")
-                .jsonPath("$..mail")
-                .jsonPath("$..otherMails[*]")
-                .build())
+        .transform(Transform.Pseudonymize.builder()
+            .jsonPath("$..userPrincipalName")
+            .jsonPath("$..imAddresses[*]")
+            .jsonPath("$..mail")
+            .jsonPath("$..otherMails[*]")
             .build())
+        .build();
+
+    static final Rules2 DIRECTORY = Rules2.builder()
+        .endpoint(DIRECTORY_USERS)
+        .endpoint(DIRECTORY_GROUPS)
+        .endpoint(DIRECTORY_GROUP_MEMBERS)
+        .build();
+
+    static final Rules2 DIRECTORY_NO_GROUPS = Rules2.builder()
+        .endpoint(DIRECTORY_USERS)
         .build();
 
     static final Rules2 DIRECTORY_NO_MSFT_IDS = DIRECTORY
@@ -115,7 +128,12 @@ public class PrebuiltSanitizerRules {
             .jsonPath("$..id")
             .build());
 
-
+    static final Rules2 DIRECTORY_NO_MSFT_IDS_NO_GROUPS = DIRECTORY_NO_GROUPS
+        .withTransformByEndpoint(DIRECTORY_REGEX_USERS, Transform.Pseudonymize.builder()
+            .includeReversible(true)
+            .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
+            .jsonPath("$..id")
+            .build());
 
     static final String OUTLOOK_PATH_REGEX_MAILBOX_SETTINGS = "^/(v1.0|beta)/users/[^/]*/mailboxSettings";
     static final String OUTLOOK_MAIL_PATH_REGEX_MESSAGES = "^/(v1.0|beta)/users/[^/]*/messages/[^/]*";
@@ -124,6 +142,10 @@ public class PrebuiltSanitizerRules {
     static final List<Rules2.Endpoint> OUTLOOK_MAIL_ENDPOINTS = Arrays.asList(
         Rules2.Endpoint.builder()
             .pathRegex(OUTLOOK_PATH_REGEX_MAILBOX_SETTINGS)
+            .transform(Transform.Redact.builder()
+                .jsonPath("$..internalReplyMessage")
+                .jsonPath("$..externalReplyMessage")
+                .build())
             .build(),
         Rules2.Endpoint.builder()
             .pathRegex(OUTLOOK_MAIL_PATH_REGEX_MESSAGES)
@@ -169,6 +191,13 @@ public class PrebuiltSanitizerRules {
         .withTransformByEndpoint(OUTLOOK_MAIL_PATH_REGEX_SENT_MESSAGES, TOKENIZE_ODATA_LINKS, REDACT_ODATA_CONTEXT)
         .withTransformByEndpoint(OUTLOOK_PATH_REGEX_MAILBOX_SETTINGS, REDACT_ODATA_CONTEXT);
 
+    static final Rules2 OUTLOOK_MAIL_NO_APP_IDS_NO_GROUPS = DIRECTORY_NO_MSFT_IDS_NO_GROUPS
+        .withAdditionalEndpoints(OUTLOOK_MAIL_ENDPOINTS)
+        .withTransformByEndpoint(OUTLOOK_MAIL_PATH_REGEX_MESSAGES, TOKENIZE_ODATA_LINKS, REDACT_ODATA_CONTEXT)
+        .withTransformByEndpoint(OUTLOOK_MAIL_PATH_REGEX_SENT_MESSAGES, TOKENIZE_ODATA_LINKS, REDACT_ODATA_CONTEXT)
+        .withTransformByEndpoint(OUTLOOK_PATH_REGEX_MAILBOX_SETTINGS, REDACT_ODATA_CONTEXT);
+
+
     //transforms to apply to endpoints that return Event or Event collection
     static final Rules2.Endpoint EVENT_TRANSFORMS = Rules2.Endpoint.builder()
         .transform(Transform.Redact.builder()
@@ -209,6 +238,10 @@ public class PrebuiltSanitizerRules {
     static final List<Rules2.Endpoint> OUTLOOK_CALENDAR_ENDPOINTS = Arrays.asList(
         Rules2.Endpoint.builder()
             .pathRegex(OUTLOOK_PATH_REGEX_MAILBOX_SETTINGS)
+            .transform(Transform.Redact.builder()
+                .jsonPath("$..internalReplyMessage")
+                .jsonPath("$..externalReplyMessage")
+                .build())
             .build(),
         EVENT_TRANSFORMS.toBuilder()
             .pathRegex(OUTLOOK_CALENDAR_PATH_REGEX_EVENTS)
@@ -225,6 +258,13 @@ public class PrebuiltSanitizerRules {
     static final Rules2 OUTLOOK_CALENDAR_NO_APP_IDS =
         DIRECTORY_NO_MSFT_IDS
             .withAdditionalEndpoints(OUTLOOK_CALENDAR_ENDPOINTS)
+            .withTransformByEndpoint(OUTLOOK_PATH_REGEX_MAILBOX_SETTINGS, REDACT_ODATA_CONTEXT)
+            .withTransformByEndpoint(OUTLOOK_CALENDAR_PATH_REGEX_EVENTS, TOKENIZE_ODATA_LINKS,
+                 REDACT_ODATA_CONTEXT,
+                  REDACT_CALENDAR_ODATA_LINKS);
+
+    static final Rules2 OUTLOOK_CALENDAR_NO_APP_IDS_NO_GROUPS = DIRECTORY_NO_MSFT_IDS_NO_GROUPS
+        .withAdditionalEndpoints(OUTLOOK_CALENDAR_ENDPOINTS)
         .withTransformByEndpoint(OUTLOOK_PATH_REGEX_MAILBOX_SETTINGS, REDACT_ODATA_CONTEXT)
         .withTransformByEndpoint(OUTLOOK_CALENDAR_PATH_REGEX_EVENTS, TOKENIZE_ODATA_LINKS,
             REDACT_ODATA_CONTEXT,
@@ -237,7 +277,9 @@ public class PrebuiltSanitizerRules {
             .put("azure-ad" + ConfigRulesModule.NO_APP_IDS_SUFFIX, DIRECTORY_NO_MSFT_IDS)
             .put("outlook-cal", OUTLOOK_CALENDAR)
             .put("outlook-cal" + ConfigRulesModule.NO_APP_IDS_SUFFIX, OUTLOOK_CALENDAR_NO_APP_IDS)
+            .put("outlook-cal" + ConfigRulesModule.NO_APP_IDS_SUFFIX + "-no-groups", OUTLOOK_CALENDAR_NO_APP_IDS_NO_GROUPS)
             .put("outlook-mail", OUTLOOK_MAIL)
             .put("outlook-mail" + ConfigRulesModule.NO_APP_IDS_SUFFIX, OUTLOOK_MAIL_NO_APP_IDS)
+            .put("outlook-mail" + ConfigRulesModule.NO_APP_IDS_SUFFIX + "-no-groups", OUTLOOK_MAIL_NO_APP_IDS_NO_GROUPS)
             .build();
 }

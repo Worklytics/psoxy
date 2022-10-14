@@ -63,6 +63,17 @@ export default {
       {
         name: 'Groups',
         path: '/v1.0/groups',
+        refs: [
+          {
+            name: 'Group Members',
+            accessor: 'value[0].id',
+            pathReplacement: '[group_id]',
+          },
+        ],
+      },
+      {
+        name: 'Group Members',
+        path: '/v1.0/groups/[group_id]/members',
       },
     ],
   },
@@ -314,6 +325,21 @@ export default {
         name: 'Events',
         path: '/v1.0/users/[user_id]/events',
       },
+      {
+        name: 'Groups',
+        path: '/beta/groups',
+        refs: [
+          {
+            name: 'Group Members',
+            accessor: 'value[0].id',
+            pathReplacement: '[group_id]',
+          },
+        ],
+      },
+      {
+        name: 'Group Members',
+        path: '/beta/groups/[group_id]/members',
+      },
     ],
   },
   'outlook-mail': {
@@ -336,13 +362,28 @@ export default {
         ],
       },
       {
+        name: 'Groups',
+        path: '/beta/groups',
+        refs: [
+          {
+            name: 'Group Members',
+            accessor: 'value[0].id',
+            pathReplacement: '[group_id]',
+          },
+        ],
+      },
+      {
+        name: 'Group Members',
+        path: '/beta/groups/[group_id]/members',
+      },
+      {
         name: 'Mailbox Settings',
         path: '/beta/users/[user_id]/mailboxSettings',
       },
       {
         name: 'Messages Sent',
         path: '/beta/users/[user_id]/mailFolders/SentItems/messages',
-      },
+      }
     ],
   },
   'slack-discovery-api': {
