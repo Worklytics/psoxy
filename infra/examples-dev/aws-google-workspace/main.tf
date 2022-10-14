@@ -227,6 +227,13 @@ module "aws-psoxy-long-auth-connectors" {
   global_parameter_arns          = module.psoxy-aws.global_parameters_arns
   function_parameters            = each.value.secured_variables
   todo_step                      = module.source_token_external_todo[each.key].next_todo_step
+
+  environment_variables = merge(each.value.environment_variables,
+    {
+      PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
+      IS_DEVELOPMENT_MODE  = "true"
+    }
+  )
 }
 
 module "worklytics-psoxy-connection" {
