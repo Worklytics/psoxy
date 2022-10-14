@@ -46,14 +46,15 @@ export default async function (options = {}) {
     psoxyCall = options.force === 'aws' ? aws.call : gcp.call;
   } else if (!isAWS && !isGCP) {
     result.error = `"${options.url}" doesn't seem to be a valid endpoint: AWS or GCP`;
+    console.error(chalk.bold(result.error));
     return result;
   } else {
     psoxyCall = isAWS ? aws.call : gcp.call;
   }
-
+  
   try {
     result = await psoxyCall(options);
-    
+
     if (result.status === 200) {
       if (options.saveToFile) {
         try {
@@ -90,8 +91,9 @@ export default async function (options = {}) {
     console.log(inspect(result.data, {depth: null, colors: true}));
   }
 
-  if (options.verbose) {
-    console.log(`Response headers:\n ${result.headers}`);
+  if (options.verbose && result.headers) {
+    console.log(`Response headers:\n 
+      ${inspect(result.headers, {depth: null, colors: true})}`);
   }
 
   return result;
