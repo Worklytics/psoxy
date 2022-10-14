@@ -12,11 +12,11 @@ terraform {
 
 locals {
   base_config_path = "${var.psoxy_base_dir}/configs/"
-  bulk_sources     = {
+  bulk_sources = {
     "hris" = {
       source_kind = "hris"
-      rules       = {
-        columnsToRedact       = []
+      rules = {
+        columnsToRedact = []
         columnsToPseudonymize = [
           "employee_email",
           "employee_id"
@@ -25,8 +25,8 @@ locals {
     },
     "qualtrics" = {
       source_kind = "qualtrics"
-      rules       = {
-        columnsToRedact       = []
+      rules = {
+        columnsToRedact = []
         columnsToPseudonymize = [
           "employee_email",
           "employee_id"
@@ -185,7 +185,7 @@ module "connector-long-auth-create-function" {
 
   secret_bindings = {
     ACCESS_TOKEN = {
-      secret_id      = module.connector-long-auth-block[each.key].access_token_secret_id
+      secret_id = module.connector-long-auth-block[each.key].access_token_secret_id
       # in case of long lived tokens we want latest version always
       version_number = "latest"
     }
