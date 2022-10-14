@@ -71,13 +71,13 @@ module "worklytics_connector_specs" {
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connector-specs?ref=v0.4.6"
 
   enabled_connectors = [
-    // "asana",
-    // "azure-ad",
+     "asana",
+     "azure-ad",
     "dropbox-business",
-    // "outlook-cal",
-    // "outlook-mail",
-    // "slack-discovery-api",
-    //"zoom"
+     "outlook-cal",
+     "outlook-mail",
+     "slack-discovery-api",
+    "zoom"
   ]
 
   msft_tenant_id = var.msft_tenant_id
