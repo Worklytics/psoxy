@@ -67,7 +67,7 @@ locals {
 data "azuread_client_config" "current" {}
 
 module "worklytics_connector_specs" {
-  source = "../../modules/worklytics-connecqtor-specs"
+  source = "../../modules/worklytics-connector-specs"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connector-specs?ref=v0.4.6"
 
   enabled_connectors = [
