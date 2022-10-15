@@ -69,8 +69,8 @@ resource "google_project" "psoxy-project" {
 }
 
 module "psoxy-gcp" {
-  # source = "../../modules/gcp"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp?ref=v0.4.6"
+  source = "../../modules/gcp"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp?ref=v0.4.6"
 
   project_id        = google_project.psoxy-project.project_id
   invoker_sa_emails = var.worklytics_sa_emails

@@ -89,13 +89,20 @@ module "psoxy-aws" {
   caller_gcp_service_account_ids = var.caller_gcp_service_account_ids
 }
 
+# v0.4.6 --> 0.4.7
 moved {
   from = module.psoxy-aws.aws_ssm_parameter.salt
-  to   = module.global-secrets.aws_ssm_parameter.secret["PSOXY_SALT"]
+  to   = module.global_secrets.aws_ssm_parameter.secret["PSOXY_SALT"]
+}
+
+# v0.4.6 --> 0.4.7
+moved {
+  from = module.psoxy-aws.aws_ssm_parameter.encryption_key
+  to   = module.global_secrets.aws_ssm_parameter.secret["PSOXY_ENCRYPTION_KEY"]
 }
 
 # secrets shared across all instances
-module "global-secrets" {
+module "global_secrets" {
   source = "../../modules/aws-ssm-secrets"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-ssm-secrets?ref=v0.4.6"
 
@@ -182,7 +189,7 @@ module "psoxy-google-workspace-connector" {
   path_to_repo_root                     = var.psoxy_base_dir
   example_api_calls                     = each.value.example_api_calls
   example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
-  global_parameter_arns                 = module.global-secrets.secret_arns
+  global_parameter_arns                 = module.global_secrets.secret_arns
   todo_step                             = module.google-workspace-connection[each.key].next_todo_step
 }
 
@@ -251,7 +258,7 @@ module "aws-psoxy-long-auth-connectors" {
   path_to_repo_root              = var.psoxy_base_dir
   example_api_calls              = each.value.example_api_calls
   reserved_concurrent_executions = each.value.reserved_concurrent_executions
-  global_parameter_arns          = module.global-secrets.secret_arns
+  global_parameter_arns          = module.global_secrets.secret_arns
   function_parameters            = each.value.secured_variables
   todo_step                      = module.source_token_external_todo[each.key].next_todo_step
 }
@@ -290,5 +297,5 @@ module "psoxy-bulk" {
   api_caller_role_name  = module.psoxy-aws.api_caller_role_name
   psoxy_base_dir        = var.psoxy_base_dir
   rules                 = each.value.rules
-  global_parameter_arns = module.global-secrets.secret_arns
+  global_parameter_arns = module.global_secrets.secret_arns
 }

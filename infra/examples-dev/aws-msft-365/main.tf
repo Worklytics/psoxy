@@ -107,10 +107,19 @@ module "global_secrets" {
   secrets = module.psoxy-aws.secrets
 }
 
+# v0.4.6 --> 0.4.7
 moved {
   from = module.psoxy-aws.aws_ssm_parameter.salt
   to   = module.global_secrets.aws_ssm_parameter.secret["PSOXY_SALT"]
 }
+
+# v0.4.6 --> 0.4.7
+moved {
+  from = module.psoxy-aws.aws_ssm_parameter.encryption_key
+  to   = module.global_secrets.aws_ssm_parameter.secret["PSOXY_ENCRYPTION_KEY"]
+}
+
+
 
 module "msft-connection" {
   for_each = module.worklytics_connector_specs.enabled_msft_365_connectors

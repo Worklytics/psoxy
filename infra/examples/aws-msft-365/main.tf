@@ -100,12 +100,25 @@ module "psoxy-aws" {
   }
 }
 
-module "secrets" {
+module "global_secrets" {
   # source = "../../modules/aws-ssm-secrets"
   source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-ssm-secrets?ref=v0.4.6"
 
   secrets = module.psoxy-aws.secrets
 }
+
+# v0.4.6 --> 0.4.7
+moved {
+  from = module.psoxy-aws.aws_ssm_parameter.salt
+  to   = module.global_secrets.aws_ssm_parameter.secret["PSOXY_SALT"]
+}
+
+# v0.4.6 --> 0.4.7
+moved {
+  from = module.psoxy-aws.aws_ssm_parameter.encryption_key
+  to   = module.global_secrets.aws_ssm_parameter.secret["PSOXY_ENCRYPTION_KEY"]
+}
+
 
 data "azuread_client_config" "current" {}
 
@@ -181,7 +194,7 @@ module "psoxy-msft-connector" {
   aws_account_id        = var.aws_account_id
   path_to_repo_root     = var.psoxy_base_dir
   todo_step             = module.msft_365_grants[each.key].next_todo_step
-  global_parameter_arns = module.global-secrets.secret_arns
+  global_parameter_arns = module.global_secrets.secret_arns
 
   environment_variables = {
     IS_DEVELOPMENT_MODE  = "false"
