@@ -178,15 +178,12 @@ resource "google_service_account" "long_auth_connector_sa" {
   display_name = "${title(each.key)}{var.connector_display_name_suffix} via Psoxy"
 }
 
-
-
 # creates the secret, without versions.
 module "connector-long-auth-block" {
   for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
 
   # source                  = "../../modules/gcp-oauth-long-access-strategy"
   source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-oauth-long-access-strategy?ref=v0.4.6"
-
 
   project_id              = google_project.psoxy-project.project_id
   function_name           = "psoxy-${each.key}"
@@ -211,7 +208,6 @@ module "connector-long-auth-create-function" {
 
   # source = "../../modules/gcp-psoxy-rest"
   source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-rest?ref=v0.4.6"
-
 
   project_id                    = google_project.psoxy-project.project_id
   instance_id                   = "psoxy-${each.key}"
