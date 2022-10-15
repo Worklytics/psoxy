@@ -20,6 +20,7 @@ locals {
         "https://www.googleapis.com/auth/admin.directory.orgunit.readonly",
         "https://www.googleapis.com/auth/admin.directory.rolemanagement.readonly"
       ]
+      environment_variables : {}
       example_api_calls : [
         "/admin/directory/v1/users/me",
         "/admin/directory/v1/users?customer=my_customer",
@@ -39,6 +40,7 @@ locals {
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/calendar.readonly"
       ],
+      environment_variables : {}
       example_api_calls : [
         "/calendar/v3/calendars/primary",
         "/calendar/v3/users/me/settings",
@@ -55,6 +57,7 @@ locals {
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/gmail.metadata"
       ],
+      environment_variables : {},
       example_api_calls : [
         "/gmail/v1/users/me/messages"
       ]
@@ -69,6 +72,7 @@ locals {
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/admin.reports.audit.readonly"
       ]
+      environment_variables : {}
       example_api_calls : [
         "/admin/reports/v1/activity/users/all/applications/chat"
       ]
@@ -97,6 +101,7 @@ locals {
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/drive.metadata.readonly"
       ],
+      environment_variables : {}
       example_api_calls : [
         "/drive/v2/files",
         "/drive/v3/files"
@@ -118,7 +123,8 @@ locals {
         # Application permissions (form az ad sp list --query "[?appDisplayName=='Microsoft Graph'].appRoles" --all
         "User.Read.All",
         "Group.Read.All"
-      ],
+      ]
+      environment_variables : {}
       example_calls : [
         "/v1.0/users",
         "/v1.0/users/${var.example_msft_user_guid}",
@@ -138,6 +144,7 @@ locals {
         "Group.Read.All",
         "User.Read.All"
       ],
+      environment_variables : {}
       example_calls : [
         "/v1.0/users",
         "/v1.0/users/${var.example_msft_user_guid}/events",
@@ -158,6 +165,7 @@ locals {
         "Group.Read.All",
         "User.Read.All"
       ],
+      environment_variables : {}
       example_calls : [
         "/beta/users",
         "/beta/users/${var.example_msft_user_guid}/mailboxSettings",
@@ -171,6 +179,12 @@ locals {
     asana = {
       source_kind : "asana",
       display_name : "Asana"
+      environment_variables : {}
+      secured_variables : [
+        { name : "ACCESS_TOKEN", writable : false },
+      ],
+      reserved_concurrent_executions : null
+      example_api_calls_user_to_impersonate : null
       example_api_calls : [
         "/api/1.0/workspaces",
         "/api/1.0/users?workspace={ANY_WORKSPACE_ID}&limit=10",
@@ -178,11 +192,6 @@ locals {
         "/api/1.0/projects/{ANY_PROJECT_ID}/tasks?limit=20",
         "/api/1.0/tasks/{ANY_TASK_ID}/stories",
       ],
-      secured_variables : [
-        { name : "ACCESS_TOKEN", writable : false },
-      ],
-      reserved_concurrent_executions : null
-      example_api_calls_user_to_impersonate : null
       external_token_todo : <<EOT
   1. Create a [Service Account User + token](https://asana.com/guide/help/premium/service-accounts)
      or a sufficiently [Personal Access Token]() for a sufficiently privileged user (who can see all
@@ -192,17 +201,19 @@ EOT
     slack-discovery-api = {
       source_kind : "slack"
       display_name : "Slack Discovery API"
-      example_api_calls : [
-        "/api/discovery.enterprise.info",
-        "/api/discovery.conversations.list",
-        "/api/discovery.conversations.history?channel={CHANNEL_ID}&limit=10",
-        "/api/discovery.users.list",
-      ],
+      environment_variables : {}
+
       secured_variables : [
         { name : "ACCESS_TOKEN", writable : false },
       ]
       reserved_concurrent_executions : null
       example_api_calls_user_to_impersonate : null
+      example_api_calls : [
+        "/api/discovery.enterprise.info",
+        "/api/discovery.conversations.list",
+        "/api/discovery.conversations.history?channel={CHANNEL_ID}&limit=10",
+        "/api/discovery.users.list",
+      ]
       external_token_todo : <<EOT
 ## Slack Discovery Setup
 For enabling Slack Discovery with the Psoxy you must first setup an app on your Slack Enterprise
@@ -233,6 +244,16 @@ EOT
     zoom = {
       source_kind : "zoom"
       display_name : "Zoom"
+
+      environment_variables : {}
+      secured_variables : [
+        { name : "CLIENT_SECRET", writable : false },
+        { name : "CLIENT_ID", writable : false },
+        { name : "ACCOUNT_ID", writable : false },
+        { name : "ACCESS_TOKEN", writable : true },
+      ],
+      reserved_concurrent_executions : null # 1
+      example_api_calls_user_to_impersonate : null
       example_api_calls : [
         "/v2/users",
         "/v2/users/{USER_ID}/meetings",
@@ -243,14 +264,6 @@ EOT
         "/v2/report/meetings/{meetingId}",
         "/v2/report/meetings/{meetingId}/participants"
       ],
-      secured_variables : [
-        { name : "CLIENT_SECRET", writable : false },
-        { name : "CLIENT_ID", writable : false },
-        { name : "ACCOUNT_ID", writable : false },
-        { name : "ACCESS_TOKEN", writable : true },
-      ],
-      reserved_concurrent_executions : null # 1
-      example_api_calls_user_to_impersonate : null
       external_token_todo : <<EOT
 ## Zoom Setup
 Zoom connector through Psoxy requires a custom managed app on the Zoom Marketplace (in development
