@@ -5,7 +5,8 @@
   "host_id": "ABcdofjdogh11111",
   "host_email": "james@example.com",
   "id": 1234555466,
-  "join_url": "https://zoom.us/j/1234555466",
+  "join_url": "https://zoom.us/j/1234555466?pwd=1234567890",
+
   "settings": {
     "alternative_hosts": "example@example.com",
     "approval_type": 2,
