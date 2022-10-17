@@ -110,7 +110,7 @@ async function requestWrapper(url, headers) {
         };
 
         if (res.statusCode !== 200) {
-          result.error = res.headers['x-psoxy-error'] || response.statusText;
+          result.error = res.headers['x-psoxy-error'] || res.statusMessage;
           resolve(result);
         } else {
           let responseData = '';
