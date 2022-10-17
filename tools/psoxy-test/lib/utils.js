@@ -9,8 +9,6 @@ import _ from 'lodash';
 // Since we're using ESM modules, we need to make `__dirname` available
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-const RESPONSES_DIR = '/responses';
-
 /**
  * Save data to file.
  *
@@ -51,16 +49,22 @@ function getFileNameFromURL(url, timestamp = true, extension = '.json') {
 /**
  * Helper to save URL responses to a file.
  * File names follow this format:
- * `/responses/[psoxy-function]-[api-path]-[ISO8601 timestamp].json`, example:
- * `/responses/psoxy-gcal-calendar-v3-calendars-primary-2022-09-02T10:15:00.000Z.json`
+ * `[psoxy-function]-[api-path]-[ISO8601 timestamp].json`, example:
+ * `psoxy-gcal-calendar-v3-calendars-primary-2022-09-02T10:15:00.000Z.json`
  *
  * @param {URL} url
  * @param {Object} data
  */
-async function saveRequestResultToFile(url, data) {
+async function saveRequestResultToFile(url, data, log = false) {
   const filename = getFileNameFromURL(url);
+  const dirname = path.resolve(__dirname, '..');
+
+  if (log) {
+    console.log(`Saving results to ${dirname}/${filename}`);
+  }
+
   return saveToFile(
-    path.resolve(__dirname, '..') + RESPONSES_DIR,
+    path.resolve(__dirname, '..'),
     filename,
     JSON.stringify(data, undefined, 4)
   );

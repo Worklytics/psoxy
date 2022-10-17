@@ -54,15 +54,6 @@ export default async function (options = {}) {
   
   try {
     result = await psoxyCall(options);
-
-    if (result.status === 200 && options.saveToFile) {
-      try {
-        await saveRequestResultToFile(url, result.data);
-        console.log(chalk.green('Results saved to file'));
-      } catch (err) {
-        console.error(chalk.red('Unable to save results to file'), err);
-      }        
-    }
   } catch (err) {
     result.error = err.message;
   }
@@ -104,6 +95,16 @@ export default async function (options = {}) {
   if (options.verbose && result.headers) {
     console.log(`Response headers:\n 
       ${inspect(result.headers, {depth: null, colors: true})}`);
+  }
+
+
+  if (result.status === 200 && options.saveToFile) {
+    try {
+      await saveRequestResultToFile(url, result.data, 
+        options.verbose || false);
+    } catch (err) {
+      console.error(chalk.red('Unable to save results to file'), err);
+    }        
   }
 
   return result;
