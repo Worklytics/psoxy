@@ -42,7 +42,8 @@ locals {
 
 # role that Worklytics user will use to call the API
 resource "aws_iam_role" "api-caller" {
-  name = "PsoxyApiCaller"
+  name        = "PsoxyCaller"
+  description = "role for AWS principals that may invoke the psoxy instance or read an instance's output"
 
   # who can assume this role
   assume_role_policy = jsonencode({
