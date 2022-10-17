@@ -142,8 +142,8 @@ module "psoxy-google-workspace-connector" {
 
   secret_bindings = {
     SERVICE_ACCOUNT_KEY = {
-      secret_id      = module.google-workspace-connection-auth[each.key].key_secret_id
-      version_number = module.google-workspace-connection-auth[each.key].key_secret_version_number
+      secret_id      = module.google-workspace-key-secrets[each.key].secret_ids["PSOXY_${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY"].secret_id
+      version_number = "latest"
     }
   }
 

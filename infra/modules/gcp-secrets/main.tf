@@ -31,7 +31,7 @@ resource "google_secret_manager_secret" "secret" {
 resource "google_secret_manager_secret_version" "version" {
   for_each   = var.secrets
 
-  secret      = google_secret_manager_secret[each.key].id
+  secret      = google_secret_manager_secret.secret[each.key].id
   secret_data = each.value
 
   lifecycle {
@@ -41,6 +41,6 @@ resource "google_secret_manager_secret_version" "version" {
 
 # for use in explicit IAM policy grants
 output "secret_ids" {
-  value = { for k, v in var.secrets : k => google_secret_manager_secret[k].id }
+  value = { for k, v in var.secrets : k => google_secret_manager_secret.secret[k].id }
 }
 
