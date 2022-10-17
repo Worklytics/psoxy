@@ -55,40 +55,50 @@ export default async function (options = {}) {
   try {
     result = await psoxyCall(options);
 
-    if (result.status === 200) {
-      if (options.saveToFile) {
-        try {
-          await saveRequestResultToFile(url, result.data);
-          console.log(chalk.green('Results saved to file'));
-        } catch (err) {
-          console.error(chalk.red('Unable to save results to file'), err);
-        }        
-      }
-
-    } else {
-      switch (result.error) {
-        case 'BLOCKED_BY_RULES':
-          result.error = 'Blocked by rules error: make sure URL path is correct';
-          break;
-        case 'CONNECTION_SETUP':
-          result.error =
-            'Connection setup error: make sure the data source is properly configured';
-          break;
-        case 'API_ERROR':
-          result.error = 'API error: call to data source failed';
-          break;
-      }
+    if (result.status === 200 && options.saveToFile) {
+      try {
+        await saveRequestResultToFile(url, result.data);
+        console.log(chalk.green('Results saved to file'));
+      } catch (err) {
+        console.error(chalk.red('Unable to save results to file'), err);
+      }        
     }
   } catch (err) {
     result.error = err.message;
   }
 
-  if (result?.error) {
-    console.error(chalk.bold.red(`${result.status}: ERROR`));
-    console.error(chalk.bold.red(result.error));
-  } else if (result.status === 200) {
+  if (result.status === 200) {
     console.log(chalk.bold.green(`${result.status}: OK`));
     console.log(inspect(result.data, {depth: null, colors: true}));
+  } else {
+
+    if (result.headers) {
+      const psoxyError = result.headers['x-psoxy-error'];
+      // Give more details for WKS errors and try to catch "per deploy" specific
+      // errors: although headers are shown in "verbose mode", let's make sure
+      // we highlight the main error cause
+      if (psoxyError) {
+        switch (psoxyError) {
+          case 'BLOCKED_BY_RULES':
+            result.error = 'Blocked by rules error: make sure URL path is correct';
+            break;
+          case 'CONNECTION_SETUP':
+            result.error =
+              'Connection setup error: make sure the data source is properly configured';
+            break;
+          case 'API_ERROR':
+            result.error = 'API error: call to data source failed';
+            break;
+        }
+      } else if (result.headers['x-amzn-errortype']) {
+        result.error += `: AWS ${result.headers['x-amzn-errortype']}`;
+      } else if (result.headers['www-authenticate']) {
+        result.error += `: GCP ${result.headers['www-authenticate']}`
+      }
+    }
+
+    console.error(chalk.bold.red(`${result.status}: ERROR`));
+    console.error(chalk.bold.red(result.error));
   }
 
   if (options.verbose && result.headers) {
