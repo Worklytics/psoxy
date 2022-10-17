@@ -87,8 +87,8 @@ module "worklytics_connector_specs" {
 }
 
 module "psoxy-aws" {
-  # source = "../../modules/aws"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws?ref=v0.4.6"
+  source = "../../modules/aws"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws?ref=v0.4.6"
 
   aws_account_id                 = var.aws_account_id
   psoxy_base_dir                 = var.psoxy_base_dir
@@ -101,8 +101,8 @@ module "psoxy-aws" {
 }
 
 module "global_secrets" {
-  # source = "../../modules/aws-ssm-secrets"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-ssm-secrets?ref=v0.4.6"
+  source = "../../modules/aws-ssm-secrets"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-ssm-secrets?ref=v0.4.6"
 
   secrets = module.psoxy-aws.secrets
 }
@@ -118,10 +118,6 @@ moved {
   from = module.psoxy-aws.aws_ssm_parameter.encryption_key
   to   = module.global_secrets.aws_ssm_parameter.secret["PSOXY_ENCRYPTION_KEY"]
 }
-
-
-data "azuread_client_config" "current" {}
-
 
 module "msft-connection" {
   for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
@@ -268,7 +264,7 @@ module "aws-psoxy-long-auth-connectors" {
   example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
   todo_step                             = module.source_token_external_todo[each.key].next_todo_step
   reserved_concurrent_executions        = each.value.reserved_concurrent_executions
-  global_parameter_arns                 = module.secrets.global_parameters_arns
+  global_parameter_arns                 = module.global_secrets.secret_arns
   function_parameters                   = each.value.secured_variables
 
   environment_variables = {
@@ -310,5 +306,5 @@ module "psoxy-bulk" {
   api_caller_role_name  = module.psoxy-aws.api_caller_role_name
   psoxy_base_dir        = var.psoxy_base_dir
   rules                 = each.value.rules
-  global_parameter_arns = module.psoxy-aws.global_parameters_arns
+  global_parameter_arns = module.global_secrets.secret_arns
 }
