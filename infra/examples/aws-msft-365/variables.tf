@@ -99,8 +99,8 @@ variable "custom_bulk_connectors" {
   description = "specs of custom bulk connectors to create"
 
   default = {
-    #    "qualtrics" = {
-    #      source_kind = "qualtrics"
+    #    "custom-survey" = {
+    #      source_kind = "survey"
     #      rules       = {
     #        columnsToRedact       = []
     #        columnsToPseudonymize = [
