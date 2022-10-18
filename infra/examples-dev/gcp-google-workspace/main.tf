@@ -119,11 +119,11 @@ module "google-workspace-key-secrets" {
   source = "../../modules/gcp-secrets"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-secrets?ref=v0.4.4"
 
-  secret_project     = google_project.psoxy-project.project_id
+  secret_project = google_project.psoxy-project.project_id
   secrets = {
     "PSOXY_${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY" : {
-      value        = module.google-workspace-connection-auth[each.key].key_value
-      description  = "Auth key for ${each.key} service account"
+      value       = module.google-workspace-connection-auth[each.key].key_value
+      description = "Auth key for ${each.key} service account"
     }
   }
 }

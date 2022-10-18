@@ -11,7 +11,7 @@ variable "secrets" {
 variable "replica_regions" {
   type        = list(string)
   description = "List of regions to replicate the secret to"
-  default     = [
+  default = [
     "us-east1",
     "us-west1",
   ]

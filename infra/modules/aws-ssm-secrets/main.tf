@@ -4,7 +4,7 @@
 #  but is this good Terraform style? clearly in AWS case, this module doesn't do much ...
 
 resource "aws_ssm_parameter" "secret" {
-  for_each   = var.secrets
+  for_each = var.secrets
 
   name        = each.key
   type        = "SecureString"
@@ -28,5 +28,5 @@ output "secret_ids" {
 }
 
 output "secret_arns" {
-  value = [ for k, v in var.secrets : aws_ssm_parameter.secret[k].arn ]
+  value = [for k, v in var.secrets : aws_ssm_parameter.secret[k].arn]
 }

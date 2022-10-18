@@ -355,22 +355,22 @@ EOT
     }
   }
 
-  bulk_connectors =  {
+  bulk_connectors = {
     "hris" = {
       source_kind = "hris"
-      rules       = {
-        columnsToRedact       = []
+      rules = {
+        columnsToRedact = []
         columnsToPseudonymize = [
-          "employee_id", # primary key
+          "employee_id",    # primary key
           "employee_email", # for matching
-          "manager_id" # should match to employee_id
+          "manager_id"      # should match to employee_id
         ]
       }
     }
     "qualtrics" = {
       source_kind = "qualtrics"
-      rules       = {
-        columnsToRedact       = []
+      rules = {
+        columnsToRedact = []
         columnsToPseudonymize = [
           "employee_id", # primary key
           # "employee_email", # if exists
@@ -383,23 +383,23 @@ EOT
 # computed values filtered by enabled connectors
 locals {
   enabled_google_workspace_connectors = {
-  for k, v in local.google_workspace_sources : k => v if contains(var.enabled_connectors, k)
+    for k, v in local.google_workspace_sources : k => v if contains(var.enabled_connectors, k)
   }
   enabled_msft_365_connectors = {
-  for k, v in local.msft_365_connectors : k => v if contains(var.enabled_connectors, k)
+    for k, v in local.msft_365_connectors : k => v if contains(var.enabled_connectors, k)
   }
-  enabled_oauth_long_access_connectors = {for k, v in local.oauth_long_access_connectors : k => v if contains(var.enabled_connectors, k)}
+  enabled_oauth_long_access_connectors = { for k, v in local.oauth_long_access_connectors : k => v if contains(var.enabled_connectors, k) }
 
-  enabled_oauth_long_access_connectors_todos = {for k, v in local.enabled_oauth_long_access_connectors : k => v if v.external_token_todo != null}
+  enabled_oauth_long_access_connectors_todos = { for k, v in local.enabled_oauth_long_access_connectors : k => v if v.external_token_todo != null }
   # list of pair of [(conn1, secret1), (conn1, secret2), ... (connN, secretM)]
 
-  enabled_oauth_secrets_to_create            = distinct(flatten([
-  for k, v in local.enabled_oauth_long_access_connectors : [
-  for secret_var in v.secured_variables : {
-    connector_name = k
-    secret_name    = secret_var.name
-  }
-  ]
+  enabled_oauth_secrets_to_create = distinct(flatten([
+    for k, v in local.enabled_oauth_long_access_connectors : [
+      for secret_var in v.secured_variables : {
+        connector_name = k
+        secret_name    = secret_var.name
+      }
+    ]
   ]))
 
   enabled_bulk_connectors = {

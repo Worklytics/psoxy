@@ -86,15 +86,15 @@ locals {
     "${local.param_arn_prefix}*" # wildcard to match all params corresponding to this function
   ]
 
-  function_read_arns  = concat(
+  function_read_arns = concat(
     [
       "${local.param_arn_prefix}*" # wildcard to match all params corresponding to this function
     ],
     var.global_parameter_arns
   )
 
-  write_statements =  [{
-    Action   = [
+  write_statements = [{
+    Action = [
       "ssm:PutParameter"
     ]
     Effect   = "Allow"
@@ -106,7 +106,7 @@ locals {
       "ssm:GetParameter*"
     ]
     Effect   = "Allow"
-    Resource =  local.function_read_arns
+    Resource = local.function_read_arns
   }]
 
   policy_statements = concat(
