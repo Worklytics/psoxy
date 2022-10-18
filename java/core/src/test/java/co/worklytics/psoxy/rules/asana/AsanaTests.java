@@ -35,7 +35,7 @@ public class AsanaTests extends JavaRulesTestBaseCase {
 
     @Test
     void workspaces() {
-       //String jsonString = asJson(exampleDirectoryPath, "users.json");
+        //String jsonString = asJson(exampleDirectoryPath, "users.json");
 
         String endpoint = "https://app.asana.com/api/1.0/workspaces";
         assertUrlAllowed(endpoint);
@@ -52,18 +52,13 @@ public class AsanaTests extends JavaRulesTestBaseCase {
 
         String endpoint = "https://app.asana.com/api/1.0/users";
 
-        Collection<String> PII = Arrays.asList(
-            "gsanchez@example.com",
-            "Greg Sanchez"
-        );
+        Collection<String> PII = Arrays.asList("gsanchez@example.com", "Greg Sanchez");
         assertNotSanitized(jsonString, PII);
 
         String sanitized = this.sanitize(endpoint, jsonString);
 
         assertPseudonymized(sanitized, "gsanchez@example.com");
-        assertRedacted(sanitized,
-            "Greg Sanchez",
-            "https://..." //photo url placeholders
+        assertRedacted(sanitized, "Greg Sanchez", "https://..." //photo url placeholders
         );
 
         //ensure we allow paging of users, and passing workspaceId
@@ -78,10 +73,7 @@ public class AsanaTests extends JavaRulesTestBaseCase {
 
         String sanitized = this.sanitize(endpoint, jsonString);
 
-        assertRedacted(sanitized,
-            "developers should be members of this team.",
-            "Marketing"
-        );
+        assertRedacted(sanitized, "developers should be members of this team.", "Marketing");
         assertUrlWithQueryParamsAllowed(endpoint);
         assertUrlWithSubResourcesBlocked(endpoint);
     }
@@ -93,22 +85,12 @@ public class AsanaTests extends JavaRulesTestBaseCase {
 
         String endpoint = "https://app.asana.com/api/1.0/teams/123123/projects";
 
-        Collection<String> PII = Arrays.asList(
-            "Greg Sanchez"
-        );
+        Collection<String> PII = Arrays.asList("Greg Sanchez");
         assertNotSanitized(jsonString, PII);
 
         String sanitized = this.sanitize(endpoint, jsonString);
 
-        assertRedacted(sanitized,
-            "Greg Sanchez",
-            "gsanchez@example.com",
-            "Marketing",
-            "Stuff to buy",
-            "These are things we need to purchase",
-            "The project is moving forward",
-            "Status Update"
-        );
+        assertRedacted(sanitized, "Greg Sanchez", "gsanchez@example.com", "Marketing", "Stuff to buy", "These are things we need to purchase", "The project is moving forward", "Status Update");
 
         assertUrlWithQueryParamsAllowed(endpoint);
     }
@@ -117,23 +99,14 @@ public class AsanaTests extends JavaRulesTestBaseCase {
     void tasks() {
         String jsonString = asJson(exampleDirectoryPath, "tasks.json");
 
-        String endpoint = "https://app.asana.com/api/1.0/projects/123123/tasks";
+        String endpoint = "https://app.asana.com/api/1.0/tasks?project=fake";
 
-        Collection<String> PII = Arrays.asList(
-            "Greg Sanchez"
-        );
+        Collection<String> PII = Arrays.asList("Greg Sanchez");
         assertNotSanitized(jsonString, PII);
 
         String sanitized = this.sanitize(endpoint, jsonString);
 
-        assertRedacted(sanitized,
-            "A blob of information",
-            "likes the stuff from Humboldt",
-            "Greg Sanchez",
-            "gsanchez@example.com",
-            "Marketing",
-            "Stuff to buy"
-        );
+        assertRedacted(sanitized, "A blob of information", "likes the stuff from Humboldt", "Greg Sanchez", "gsanchez@example.com", "Marketing", "Stuff to buy");
     }
 
     @Test
@@ -142,43 +115,33 @@ public class AsanaTests extends JavaRulesTestBaseCase {
 
         String endpoint = "https://app.asana.com/api/1.0/tasks/123123/stories";
 
-        Collection<String> PII = Arrays.asList(
-            "Greg Sanchez"
-        );
+        Collection<String> PII = Arrays.asList("Greg Sanchez");
         assertNotSanitized(jsonString, PII);
 
         String sanitized = this.sanitize(endpoint, jsonString);
 
-        assertRedacted(sanitized,
-            "Greg Sanchez",
-            "gsanchez@example.com",
-            "Marketing",
-            "Stuff to buy",
-            "This was the Old Text",
-            "This is the New Text",
-            "This is the New Name",
-            "This was the Old Name",
-            "Great! I like this idea.",
-            "This was the Old Text",
-            "This is a comment."
-        );
+        assertRedacted(sanitized, "Greg Sanchez", "gsanchez@example.com", "Marketing", "Stuff to buy", "This was the Old Text", "This is the New Text", "This is the New Name", "This was the Old Name", "Great! I like this idea.", "This was the Old Text", "This is a comment.");
     }
-
 
 
     @Override
     public Stream<InvocationExample> getExamples() {
-        return Stream.of(
-            InvocationExample.of("https://app.asana.com/api/1.0/users", "users.json"),
+        return Stream.of(InvocationExample.of("https://app.asana.com/api/1.0/users", "users.json"),
 
-            InvocationExample.of("https://app.asana.com/api/1.0/workspaces/123/teams", "teams.json"),
+                InvocationExample.of("https://app.asana.com/api/1.0/workspaces/123/teams", "teams.json"),
 
-            InvocationExample.of("https://app.asana.com/api/1.0/teams/123123/projects", "projects.json"),
+                InvocationExample.of("https://app.asana.com/api/1.0/teams/123123/projects", "projects.json"),
 
-            InvocationExample.of("https://app.asana.com/api/1.0/projects/123123/tasks", "tasks.json"),
+                InvocationExample.of("https://app.asana.com/api/1.0/tasks?projectGuid=123123", "tasks.json"),
+                InvocationExample.of("https://app.asana.com/api/1.0/tasks/123123?opt_fields=fake", "task.json"),
+                InvocationExample.of("https://app.asana.com/api/1.0/tasks/123123", "task.json"),
 
-            InvocationExample.of("https://app.asana.com/api/1.0/tasks/123123/stories", "stories.json")
-        );
+                InvocationExample.of("https://app.asana.com/api/1.0/tasks/123123/stories", "stories.json"),
+                InvocationExample.of("https://app.asana.com/api/1.0/tasks/123123/stories?opt_fields=fake", "stories.json"),
+
+                InvocationExample.of("https://app.asana.com/api/1.0/tasks/123123/subtasks", "tasks.json"),
+                InvocationExample.of("https://app.asana.com/api/1.0/tasks/123123/subtasks?opt_fields=fake", "tasks.json"),
+
+                InvocationExample.of("https://app.asana.com/api/1.0/workspaces/123/tasks/search?opt_fields=fake", "tasks.json"));
     }
-
 }

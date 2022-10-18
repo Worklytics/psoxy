@@ -10,6 +10,7 @@ endpoints:
           - "$.data[*].photo"
       - !<pseudonymize>
         jsonPaths:
+          - "$.data[*].gid"
           - "$.data[*].email"
         encoding: "JSON"
   - pathRegex: "^/api/1.0/workspaces/[^/]*/teams?[^/]*"
@@ -33,7 +34,7 @@ endpoints:
           - "$.data[*].created_by"
           - "$.data[*].completed_by"
           - "$..name"
-  - pathRegex: "^/api/1.0/projects/[^/]*/tasks?[^/]*"
+  - pathRegex: "^/api/1.0/tasks[?][^/]*"
     transforms:
       - !<redact>
         jsonPaths:
@@ -42,6 +43,35 @@ endpoints:
           - "$.data[*].notes"
           - "$.data[*]..name"
           - "$.data[*].custom_fields[*].description"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.data[*].completed_by.gid"
+          - "$.data[*].hearts[*].user.gid"
+          - "$.data[*].likes[*].user.gid"
+          - "$.data[*].assignee.gid"
+          - "$.data[*].custom_fields[*].created_by.gid"
+          - "$.data[*].custom_fields[*].people_value[*].gid"
+          - "$.data[*].followers[*].gid"
+          - "$.data[*]..email"
+  - pathRegex: "^/api/1.0/tasks/[^/]*(\\?)?[^/]*"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$.data.external"
+          - "$.data.html_notes"
+          - "$.data.notes"
+          - "$.data..name"
+          - "$.data.custom_fields[*].description"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.data.completed_by.gid"
+          - "$.data.hearts[*].user.gid"
+          - "$.data.likes[*].user.gid"
+          - "$.data.assignee.gid"
+          - "$.data.custom_fields[*].created_by.gid"
+          - "$.data.custom_fields[*].people_value[*].gid"
+          - "$.data.followers[*].gid"
+          - "$.data..email"
   - pathRegex: "^/api/1.0/tasks/[^/]*/stories?[^/]*"
     transforms:
       - !<redact>
@@ -54,3 +84,50 @@ endpoints:
           - "$.data[*].new_name"
           - "$.data[*].old_name"
           - "$.data[*].previews"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.data[*].assignee.gid"
+          - "$.data[*].created_by.gid"
+          - "$.data[*].follower.gid"
+          - "$.data[*].hearts[*].user.gid"
+          - "$.data[*].likes[*].user.gid"
+          - "$.data[*].story.created_by.gid"
+          - "$.data[*]..email"
+  - pathRegex: "^/api/1.0/tasks/[^/]*/subtasks?[^/]*"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$.data[*].external"
+          - "$.data[*].html_notes"
+          - "$.data[*].notes"
+          - "$.data[*]..name"
+          - "$.data[*].custom_fields[*].description"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.data[*].completed_by.gid"
+          - "$.data[*].hearts[*].user.gid"
+          - "$.data[*].likes[*].user.gid"
+          - "$.data[*].assignee.gid"
+          - "$.data[*].custom_fields[*].created_by.gid"
+          - "$.data[*].custom_fields[*].people_value[*].gid"
+          - "$.data[*].followers[*].gid"
+          - "$.data[*]..email"
+  - pathRegex: "^/api/1.0/workspaces/[^/]*/tasks/search?[^/]*"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$.data[*].external"
+          - "$.data[*].html_notes"
+          - "$.data[*].notes"
+          - "$.data[*]..name"
+          - "$.data[*].custom_fields[*].description"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.data[*].completed_by.gid"
+          - "$.data[*].hearts[*].user.gid"
+          - "$.data[*].likes[*].user.gid"
+          - "$.data[*].assignee.gid"
+          - "$.data[*].custom_fields[*].created_by.gid"
+          - "$.data[*].custom_fields[*].people_value[*].gid"
+          - "$.data[*].followers[*].gid"
+          - "$.data[*]..email"
