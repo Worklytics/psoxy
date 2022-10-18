@@ -84,12 +84,37 @@ module "google-workspace-key-secrets" {
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-secrets?ref=v0.4.4"
 
   secret_project = google_project.psoxy-project.project_id
-  secrets        = {
+  secrets = {
     "PSOXY_${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY" : {
       value       = module.google-workspace-connection-auth[each.key].key_value
       description = "Auth key for ${each.key} service account"
     }
   }
+}
+
+moved {
+  from = module.google-workspace-connection-auth["gdirectory"].google_secret_manager_secret.service-account-key
+  to   = module.google-workspace-key-secrets["gdirectory"].google_secret_manager_secret.secret["PSOXY_GDIRECTORY_SERVICE_ACCOUNT_KEY"]
+}
+moved {
+  from = module.google-workspace-connection-auth["gcal"].google_secret_manager_secret.service-account-key
+  to   = module.google-workspace-key-secrets["gcal"].google_secret_manager_secret.secret["PSOXY_GCAL_SERVICE_ACCOUNT_KEY"]
+}
+moved {
+  from = module.google-workspace-connection-auth["gmail"].google_secret_manager_secret.service-account-key
+  to   = module.google-workspace-key-secrets["gmail"].google_secret_manager_secret.secret["PSOXY_GMAIL_SERVICE_ACCOUNT_KEY"]
+}
+moved {
+  from = module.google-workspace-connection-auth["gdrive"].google_secret_manager_secret.service-account-key
+  to   = module.google-workspace-key-secrets["gdrive"].google_secret_manager_secret.secret["PSOXY_GDRIVE_SERVICE_ACCOUNT_KEY"]
+}
+moved {
+  from = module.google-workspace-connection-auth["google-chat"].google_secret_manager_secret.service-account-key
+  to   = module.google-workspace-key-secrets["google-chat"].google_secret_manager_secret.secret["PSOXY_GOOGLE_CHAT_SERVICE_ACCOUNT_KEY"]
+}
+moved {
+  from = module.google-workspace-connection-auth["google-meet"].google_secret_manager_secret.service-account-key
+  to   = module.google-workspace-key-secrets["google-meet"].google_secret_manager_secret.secret["PSOXY_GOOGLE_MEET_SERVICE_ACCOUNT_KEY"]
 }
 
 module "psoxy-google-workspace-connector" {
@@ -111,6 +136,10 @@ module "psoxy-google-workspace-connector" {
   example_api_calls                     = each.value.example_api_calls
   example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
   todo_step                             = module.google-workspace-connection[each.key].next_todo_step
+
+  environment_variables = {
+    IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
+  }
 
   secret_bindings = {
     # as SERVICE_ACCOUNT_KEY rotated by Terraform, reasonable to bind as env variable
@@ -198,6 +227,9 @@ module "connector-long-auth-create-function" {
   salt_secret_version_number    = module.psoxy-gcp.salt_secret_version_number
   todo_step                     = module.source_token_external_todo[each.key].next_todo_step
 
+  environment_variables = {
+    IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
+  }
   # NOTE: ACCESS_TOKEN, ENCRYPTION_KEY not passed via secret_bindings (which would get bound as
   # env vars at function start-up) because
   #   - to be bound as env vars, secrets must already exist or function fails to start (w/o any
@@ -242,8 +274,9 @@ module "psoxy-gcp-bulk" {
   bucket_write_role_id          = module.psoxy-gcp.bucket_write_role_id
 
   environment_variables = {
-    SOURCE = each.value.source_kind
-    RULES  = yamlencode(each.value.rules)
+    SOURCE              = each.value.source_kind
+    RULES               = yamlencode(each.value.rules)
+    IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
   }
 
   depends_on = [

@@ -110,3 +110,9 @@ variable "custom_bulk_connectors" {
     #    }
   }
 }
+
+variable "non_production_connectors" {
+  type        = list(string)
+  description = "connector ids in this list will be in development mode (not for production use"
+  default     = []
+}

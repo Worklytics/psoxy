@@ -160,7 +160,7 @@ module "psoxy-msft-connector" {
   global_parameter_arns = module.global_secrets.secret_arns
 
   environment_variables = {
-    IS_DEVELOPMENT_MODE  = "false"
+    IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
     CLIENT_ID            = module.msft-connection[each.key].connector.application_id
     REFRESH_ENDPOINT     = module.worklytics_connector_specs.msft_token_refresh_endpoint
     PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
@@ -253,7 +253,7 @@ module "aws-psoxy-long-auth-connectors" {
 
   environment_variables = {
     PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
-    # IS_DEVELOPMENT_MODE  = "false"
+    IS_DEVELOPMENT_MODE  = contains(var.non_production_connectors, each.key)
   }
 }
 
@@ -275,7 +275,7 @@ module "worklytics-psoxy-connection-oauth-long-access" {
 
 module "psoxy-bulk" {
   for_each = merge(module.worklytics_connector_specs.enabled_bulk_connectors,
-  var.custom_bulk_connectors)
+    var.custom_bulk_connectors)
 
   # source = "../../modules/aws-psoxy-bulk"
   source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-bulk?ref=v0.4.6"
@@ -292,4 +292,7 @@ module "psoxy-bulk" {
   psoxy_base_dir        = var.psoxy_base_dir
   rules                 = each.value.rules
   global_parameter_arns = module.global_secrets.secret_arns
+  environment_variables = {
+    IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
+  }
 }

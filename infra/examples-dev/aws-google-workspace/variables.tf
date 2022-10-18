@@ -82,7 +82,6 @@ variable "connector_display_name_suffix" {
 variable "psoxy_base_dir" {
   type        = string
   description = "the path where your psoxy repo resides. Preferably a full path, /home/user/repos/, avoid tilde (~) shortcut to $HOME"
-  default     = "../../../"
 
   validation {
     condition     = can(regex(".*\\/$", var.psoxy_base_dir))
@@ -93,4 +92,49 @@ variable "psoxy_base_dir" {
 variable "google_workspace_example_user" {
   type        = string
   description = "user to impersonate for Google Workspace API calls (null for none)"
+}
+
+variable "enabled_connectors" {
+  type        = list(string)
+  description = "list of ids of connectors to enabled; see modules/worklytics-connector-specs"
+
+  default = [
+    "asana",
+    "gdirectory",
+    "gcal",
+    "gmail",
+    "gdrive",
+    "google-chat",
+    "google-meet",
+    "hris",
+    "slack-discovery-api",
+    "zoom",
+  ]
+}
+
+variable "custom_bulk_connectors" {
+  type = map(object({
+    source_kind = string
+    rules       = map(list(string))
+  }))
+  description = "specs of custom bulk connectors to create"
+
+  default = {
+    #    "custom-survey" = {
+    #      source_kind = "survey"
+    #      rules       = {
+    #        columnsToRedact       = []
+    #        columnsToPseudonymize = [
+    #          "employee_id", # primary key
+    #          # "employee_email", # if exists
+    #        ]
+    #      }
+    #    }
+  }
+}
+
+variable "non_production_connectors" {
+  type        = list(string)
+  description = "connector ids in this list will be in development mode (not for production use"
+  default     = []
 }

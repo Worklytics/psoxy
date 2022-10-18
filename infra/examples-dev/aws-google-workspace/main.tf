@@ -33,48 +33,15 @@ provider "aws" {
 }
 
 
-
 locals {
   base_config_path = "${var.psoxy_base_dir}/configs/"
-  bulk_sources = {
-    "hris" = {
-      source_kind = "hris"
-      rules = {
-        columnsToRedact = []
-        columnsToPseudonymize = [
-          "email",
-          "employee_id"
-        ]
-      }
-    },
-    "qualtrics" = {
-      source_kind = "qualtrics"
-      rules = {
-        columnsToRedact = []
-        columnsToPseudonymize = [
-          "email",
-          "employee_id"
-        ]
-      }
-    }
-  }
 }
 
 module "worklytics_connector_specs" {
   source = "../../modules/worklytics-connector-specs"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connector-specs?ref=v0.4.6"
 
-  enabled_connectors = [
-    "gdirectory",
-    "gcal",
-    "gmail",
-    "gdrive",
-    "google-chat",
-    "google-meet",
-    "asana",
-    "slack-discovery-api",
-    "zoom",
-  ]
+  enabled_connectors            = var.enabled_connectors
   google_workspace_example_user = var.google_workspace_example_user
 }
 
@@ -86,12 +53,6 @@ module "psoxy-aws" {
   psoxy_base_dir                 = var.psoxy_base_dir
   caller_aws_arns                = var.caller_aws_arns
   caller_gcp_service_account_ids = var.caller_gcp_service_account_ids
-}
-
-module "global_secrets" {
-  source = "../../modules/aws-ssm-secrets"
-
-  secrets = module.psoxy-aws.secrets
 }
 
 # v0.4.6 --> 0.4.7
@@ -106,13 +67,20 @@ moved {
   to   = module.global_secrets.aws_ssm_parameter.secret["PSOXY_ENCRYPTION_KEY"]
 }
 
+# secrets shared across all instances
+module "global_secrets" {
+  source = "../../modules/aws-ssm-secrets"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-ssm-secrets?ref=v0.4.6"
+
+  secrets = module.psoxy-aws.secrets
+}
+
 # holds SAs + keys needed to connect to Google Workspace APIs
 resource "google_project" "psoxy-google-connectors" {
-  name            = "Psoxy%{if var.environment_name != ""} - ${var.environment_name}%{endif}"
+  name            = "Worklytics Connect%{if var.environment_name != ""} - ${var.environment_name}%{endif}"
   project_id      = var.gcp_project_id
   billing_account = var.gcp_billing_account_id
-  folder_id       = var.gcp_folder_id
-  # if project is at top-level of your GCP organization, rather than in a folder, comment this line out
+  folder_id       = var.gcp_folder_id # if project is at top-level of your GCP organization, rather than in a folder, comment this line out
   # org_id          = var.gcp_org_id # if project is in a GCP folder, this value is implicit and this line should be commented out
 
   # NOTE: these are provide because OFTEN customers have pre-existing GCP project; if such, there's
@@ -132,6 +100,7 @@ module "google-workspace-connection" {
 
   source = "../../modules/google-workspace-dwd-connection"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/google-workspace-dwd-connection?ref=v0.4.6"
+
 
   project_id                   = google_project.psoxy-google-connectors.project_id
   connector_service_account_id = "psoxy-${each.key}"
@@ -159,7 +128,10 @@ module "sa-key-secrets" {
   for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
 
   source = "../../modules/aws-ssm-secrets"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-ssm-secrets?ref=v0.4.6"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-ssm-secrets?ref=v0.4.4"
+  # other possibly implementations:
+  # source = "../../modules/hashicorp-vault-secrets"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/hashicorp-vault-secrets?ref=v0.4.4"
 
   secrets = {
     "PSOXY_${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY" : module.google-workspace-connection-auth[each.key].key_value
@@ -173,7 +145,7 @@ module "psoxy-google-workspace-connector" {
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-rest?ref=v0.4.6"
 
   function_name                         = "psoxy-${each.key}"
-  source_kind                           = each.value.source_kind
+  source_kind                           = each.key
   path_to_function_zip                  = module.psoxy-aws.path_to_deployment_jar
   function_zip_hash                     = module.psoxy-aws.deployment_package_hash
   path_to_config                        = "${local.base_config_path}/${each.key}.yaml"
@@ -185,6 +157,10 @@ module "psoxy-google-workspace-connector" {
   example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
   global_parameter_arns                 = module.global_secrets.secret_arns
   todo_step                             = module.google-workspace-connection[each.key].next_todo_step
+
+  environment_variables = {
+    IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
+  }
 }
 
 
@@ -257,7 +233,6 @@ module "aws-psoxy-long-auth-connectors" {
   source = "../../modules/aws-psoxy-rest"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-rest?ref=v0.4.6"
 
-
   function_name                  = "psoxy-${each.key}"
   path_to_function_zip           = module.psoxy-aws.path_to_deployment_jar
   function_zip_hash              = module.psoxy-aws.deployment_package_hash
@@ -273,12 +248,9 @@ module "aws-psoxy-long-auth-connectors" {
   function_parameters            = each.value.secured_variables
   todo_step                      = module.source_token_external_todo[each.key].next_todo_step
 
-  environment_variables = merge(each.value.environment_variables,
-    {
-      PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
-      IS_DEVELOPMENT_MODE  = "true"
-    }
-  )
+  environment_variables = {
+    IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
+  }
 }
 
 module "worklytics-psoxy-connection" {
@@ -298,7 +270,8 @@ module "worklytics-psoxy-connection" {
 # END LONG ACCESS AUTH CONNECTORS
 
 module "psoxy-bulk" {
-  for_each = local.bulk_sources
+  for_each = merge(module.worklytics_connector_specs.enabled_bulk_connectors,
+  var.custom_bulk_connectors)
 
   source = "../../modules/aws-psoxy-bulk"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-bulk?ref=v0.4.6"
@@ -315,4 +288,7 @@ module "psoxy-bulk" {
   psoxy_base_dir        = var.psoxy_base_dir
   rules                 = each.value.rules
   global_parameter_arns = module.global_secrets.secret_arns
+  environment_variables = {
+    IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
+  }
 }

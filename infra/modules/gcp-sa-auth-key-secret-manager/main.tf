@@ -40,6 +40,11 @@ module "gcp-secrets" {
   }
 }
 
+moved {
+  from = google_secret_manager_secret.service-account-key
+  to   = module.gcp-secrets.google_secret_manager_secret[var.secret_id]
+}
+
 output "key_secret_id" {
   value = module.gcp-secrets.secret_ids[var.secret_id]
 }

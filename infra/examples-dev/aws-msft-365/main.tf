@@ -38,30 +38,6 @@ provider "azuread" {
 
 locals {
   base_config_path = "${var.psoxy_base_dir}configs/"
-  bulk_sources = {
-    "hris" = {
-      source_kind = "hris"
-      rules = {
-        columnsToRedact = [
-        ]
-        columnsToPseudonymize = [
-          "employee_email",
-          "employee_id",
-          "manager_id",
-          "manager_email",
-        ]
-      }
-    },
-    "qualtrics" = {
-      source_kind = "qualtrics"
-      rules = {
-        columnsToRedact = []
-        columnsToPseudonymize = [
-          "employee_id"
-        ]
-      }
-    }
-  }
 }
 
 data "azuread_client_config" "current" {}
@@ -70,18 +46,8 @@ module "worklytics_connector_specs" {
   source = "../../modules/worklytics-connector-specs"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connector-specs?ref=v0.4.6"
 
-  enabled_connectors = [
-    "asana",
-    "azure-ad",
-    "dropbox-business",
-    "outlook-cal",
-    "outlook-mail",
-    "slack-discovery-api",
-    "zoom"
-  ]
-
-  msft_tenant_id = var.msft_tenant_id
-
+  enabled_connectors = var.enabled_connectors
+  msft_tenant_id     = var.msft_tenant_id
   # this IS the correct ID for the user terraform is running as, which we assume is a user who's OK
   # to use the subject of examples. You can change it to any string you want.
   example_msft_user_guid = data.azuread_client_config.current.object_id
@@ -103,6 +69,7 @@ module "psoxy-aws" {
 
 module "global_secrets" {
   source = "../../modules/aws-ssm-secrets"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-ssm-secrets?ref=v0.4.6"
 
   secrets = module.psoxy-aws.secrets
 }
@@ -119,13 +86,11 @@ moved {
   to   = module.global_secrets.aws_ssm_parameter.secret["PSOXY_ENCRYPTION_KEY"]
 }
 
-
-
 module "msft-connection" {
   for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
   source = "../../modules/azuread-connection"
-  #source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-connection?ref=v0.4.6"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-connection?ref=v0.4.6"
 
   display_name                      = "Psoxy Connector - ${each.value.display_name}${var.connector_display_name_suffix}"
   tenant_id                         = var.msft_tenant_id
@@ -157,6 +122,8 @@ module "private-key-aws-parameters" {
   private_key    = module.msft-connection-auth[each.key].private_key
 }
 
+
+
 # grant required permissions to connectors via Azure AD
 # (requires terraform configuration being applied by an Azure User with privelleges to do this; it
 #  usually requires a 'Global Administrator' for your tenant)
@@ -164,6 +131,7 @@ module "msft_365_grants" {
   for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
   source = "../../modules/azuread-grant-all-users"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-grant-all-users?ref=v0.4.6"
 
   psoxy_instance_id        = each.key
   application_id           = module.msft-connection[each.key].connector.application_id
@@ -172,7 +140,6 @@ module "msft_365_grants" {
   application_name         = each.key
   todo_step                = 1
 }
-
 module "psoxy-msft-connector" {
   for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
@@ -193,7 +160,7 @@ module "psoxy-msft-connector" {
   global_parameter_arns = module.global_secrets.secret_arns
 
   environment_variables = {
-    IS_DEVELOPMENT_MODE  = "true"
+    IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
     CLIENT_ID            = module.msft-connection[each.key].connector.application_id
     REFRESH_ENDPOINT     = module.worklytics_connector_specs.msft_token_refresh_endpoint
     PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
@@ -284,12 +251,10 @@ module "aws-psoxy-long-auth-connectors" {
   global_parameter_arns                 = module.global_secrets.secret_arns
   function_parameters                   = each.value.secured_variables
 
-  environment_variables = merge(each.value.environment_variables,
-    {
-      PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
-      IS_DEVELOPMENT_MODE  = "true"
-    }
-  )
+  environment_variables = {
+    PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
+    IS_DEVELOPMENT_MODE  = contains(var.non_production_connectors, each.key)
+  }
 }
 
 module "worklytics-psoxy-connection-oauth-long-access" {
@@ -309,7 +274,8 @@ module "worklytics-psoxy-connection-oauth-long-access" {
 # END LONG ACCESS AUTH CONNECTORS
 
 module "psoxy-bulk" {
-  for_each = local.bulk_sources
+  for_each = merge(module.worklytics_connector_specs.enabled_bulk_connectors,
+    var.custom_bulk_connectors)
 
   source = "../../modules/aws-psoxy-bulk"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-bulk?ref=v0.4.6"
@@ -326,4 +292,7 @@ module "psoxy-bulk" {
   psoxy_base_dir        = var.psoxy_base_dir
   rules                 = each.value.rules
   global_parameter_arns = module.global_secrets.secret_arns
+  environment_variables = {
+    IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
+  }
 }
