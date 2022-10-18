@@ -30,7 +30,7 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
     void user() {
         String jsonString = asJson(exampleDirectoryPath, "user.json");
 
-        String endpoint = "https://graph.microsoft.com/v1.0/users/2343adsfasdfa";
+        String endpoint = "https://graph.microsoft.com/v1.0/users/p~2343adsfasdfa";
 
         Collection<String> PII = Arrays.asList(
             "MeganB@M365x214355.onmicrosoft.com",
