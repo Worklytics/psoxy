@@ -70,3 +70,18 @@ variable "psoxy_base_dir" {
     error_message = "The psoxy_base_dir value should end with a slash."
   }
 }
+
+
+variable "enabled_connectors" {
+  type        = list(string)
+  description = "list of ids of connectors to enabled; see modules/worklytics-connector-specs"
+
+  default = [
+    "azure-ad",
+    "outlook-cal",
+    "outlook-mail",
+    "asana",
+    "slack-discovery-api",
+    "zoom",
+  ]
+}

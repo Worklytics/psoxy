@@ -8,12 +8,7 @@ To deploy your modified rules, set `RULES` environment variable of your cloud fu
    contents  (eg, `cat java/core/src/main/resources/rules/google-workspace/gmail.yaml | base64`);
    restart all instances of the function, or wait for them to be restarted.
 
-## Testing
-
-### Curl
-
-After deploying your rules, you can test them with the the example commands found in
-[`docs/example-api-calls/`]('example-api-calls/)
+Alternatively, you may create a GCP Secret Manager secret prefixed by your function name in all caps, with suffix `_RULES`. (eg, `PSOXY_GCAL_RULES`).
 
 ### Continuous Integration with Java
 To continuously test your rules, you should create your one private fork of the psoxy repo and write

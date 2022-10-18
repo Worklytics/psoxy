@@ -347,11 +347,35 @@ all the operations for the connector:
 }
 ```
 7. Finally set following variables in AWS System Manager parameters store / GCP Cloud Secrets (if default implementation):
-  - `PSOXY_dropbox_business_REFRESH_TOKEN` secret variable with value of `refresh_token` received in previous response
-  - `PSOXY_dropbox_business_CLIENT_ID` with `App key` value.
-  - `PSOXY_dropbox_business_CLIENT_SECRET` with `App secret` value.
+  - `PSOXY_DROPBOX_BUSINESS_REFRESH_TOKEN` secret variable with value of `refresh_token` received in previous response
+  - `PSOXY_DROPBOX_BUSINESS_CLIENT_ID` with `App key` value.
+  - `PSOXY_DROPBOX_BUSINESS_CLIENT_SECRET` with `App secret` value.
 
 EOT
+    }
+  }
+
+  bulk_connectors =  {
+    "hris" = {
+      source_kind = "hris"
+      rules       = {
+        columnsToRedact       = []
+        columnsToPseudonymize = [
+          "employee_id", # primary key
+          "employee_email", # for matching
+          "manager_id" # should match to employee_id
+        ]
+      }
+    }
+    "qualtrics" = {
+      source_kind = "qualtrics"
+      rules       = {
+        columnsToRedact       = []
+        columnsToPseudonymize = [
+          "employee_id", # primary key
+          # "employee_email", # if exists
+        ]
+      }
     }
   }
 }
@@ -368,6 +392,7 @@ locals {
 
   enabled_oauth_long_access_connectors_todos = {for k, v in local.enabled_oauth_long_access_connectors : k => v if v.external_token_todo != null}
   # list of pair of [(conn1, secret1), (conn1, secret2), ... (connN, secretM)]
+
   enabled_oauth_secrets_to_create            = distinct(flatten([
   for k, v in local.enabled_oauth_long_access_connectors : [
   for secret_var in v.secured_variables : {
@@ -376,6 +401,10 @@ locals {
   }
   ]
   ]))
+
+  enabled_bulk_connectors = {
+    for k, v in local.bulk_connectors : k => v if contains(var.enabled_connectors, k)
+  }
 }
 
 output "enabled_google_workspace_connectors" {
@@ -401,3 +430,8 @@ output "enabled_oauth_secrets_to_create" {
 output "msft_token_refresh_endpoint" {
   value = "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
 }
+
+output "enabled_bulk_connectors" {
+  value = local.enabled_bulk_connectors
+}
+

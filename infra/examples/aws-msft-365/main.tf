@@ -38,49 +38,16 @@ provider "azuread" {
 
 locals {
   base_config_path = "${var.psoxy_base_dir}configs/"
-  bulk_sources = {
-    "hris" = {
-      source_kind = "hris"
-      rules = {
-        columnsToRedact = [
-        ]
-        columnsToPseudonymize = [
-          "employee_email",
-          "employee_id",
-          "manager_id",
-          "manager_email",
-        ]
-      }
-    },
-    "qualtrics" = {
-      source_kind = "qualtrics"
-      rules = {
-        columnsToRedact = []
-        columnsToPseudonymize = [
-          "employee_id"
-        ]
-      }
-    }
-  }
 }
 
 data "azuread_client_config" "current" {}
 
 module "worklytics_connector_specs" {
-  # source = "../../modules/worklytics-connector-specs"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connector-specs?ref=v0.4.6"
+  source = "../../modules/worklytics-connector-specs"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connector-specs?ref=v0.4.6"
 
-  enabled_connectors = [
-    "azure-ad",
-    "outlook-cal",
-    "outlook-mail",
-    "asana",
-    "slack-discovery-api",
-    "zoom",
-  ]
-
-  msft_tenant_id = var.msft_tenant_id
-
+  enabled_connectors     = var.enabled_connectors
+  msft_tenant_id         = var.msft_tenant_id
   # this IS the correct ID for the user terraform is running as, which we assume is a user who's OK
   # to use the subject of examples. You can change it to any string you want.
   example_msft_user_guid = data.azuread_client_config.current.object_id
@@ -214,9 +181,16 @@ module "worklytics-psoxy-connection-msft-365" {
   todo_step          = module.psoxy-msft-connector[each.key].next_todo_step
 }
 
-# BEGIN AUTH CONNECTORS
+# BEGIN LONG ACCESS AUTH CONNECTORS
 # Create secure parameters (later filled by customer)
 # Can be later passed on to a module and store in other vault if needed
+locals {
+  long_access_parameters = { for entry in module.worklytics_connector_specs.enabled_oauth_secrets_to_create : "${entry.connector_name}.${entry.secret_name}" => entry }
+  long_access_parameters_by_connector = { for k, spec in module.worklytics_connector_specs.enabled_oauth_long_access_connectors :
+  k => [ for secret in spec.secured_variables : "${k}.${secret.name}"]
+  }
+}
+
 resource "aws_ssm_parameter" "long-access-secrets" {
   for_each = { for entry in module.worklytics_connector_specs.enabled_oauth_secrets_to_create : "${entry.connector_name}.${entry.secret_name}" => entry }
 
@@ -232,17 +206,27 @@ resource "aws_ssm_parameter" "long-access-secrets" {
   }
 }
 
+module "parameter-fill-instructions" {
+  for_each = local.long_access_parameters
+
+  source = "../../modules/aws-ssm-fill-md"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-secret-fill-md?ref=v0.4.6"
+
+  region         = var.aws_region
+  parameter_name = aws_ssm_parameter.long-access-secrets[each.key].name
+}
+
 module "source_token_external_todo" {
   for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors_todos
 
-  # source = "../../modules/source-token-external-todo"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/source-token-external-todo?ref=v0.4.6"
+  source = "../../modules/source-token-external-todo"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/source-token-external-todo?ref=v0.4.6"
 
   source_id                         = each.key
-  host_cloud                        = "aws"
   connector_specific_external_steps = each.value.external_token_todo
-  token_secret_id                   = aws_ssm_parameter.long-access-secrets["${each.key}.${each.value.secured_variables[0].name}"].name
   todo_step                         = 1
+
+  additional_steps = [ for parameter_ref in local.long_access_parameters_by_connector[each.key] : module.parameter-fill-instructions[parameter_ref].todo_markdown ]
 }
 
 module "aws-psoxy-long-auth-connectors" {
@@ -290,7 +274,8 @@ module "worklytics-psoxy-connection-oauth-long-access" {
 # END LONG ACCESS AUTH CONNECTORS
 
 module "psoxy-bulk" {
-  for_each = local.bulk_sources
+  for_each = merge(module.worklytics_connector_specs.enabled_bulk_connectors,
+    var.custom_bulk_connectors)
 
   # source = "../../modules/aws-psoxy-bulk"
   source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-bulk?ref=v0.4.6"

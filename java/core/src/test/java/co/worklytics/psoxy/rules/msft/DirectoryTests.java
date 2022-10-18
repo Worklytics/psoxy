@@ -5,6 +5,8 @@ import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
 import lombok.Getter;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -28,7 +30,7 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
     void user() {
         String jsonString = asJson(exampleDirectoryPath, "user.json");
 
-        String endpoint = "https://graph.microsoft.com/v1.0/users/2343adsfasdfa";
+        String endpoint = "https://graph.microsoft.com/v1.0/users/p~2343adsfasdfa";
 
         Collection<String> PII = Arrays.asList(
             "MeganB@M365x214355.onmicrosoft.com",
@@ -74,11 +76,13 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
 
 
     // case that ACTUALLY looks like what we call ...
-    @Test
-    void users_select() {
+    @ValueSource(strings = {
+        "https://graph.microsoft.com/v1.0/users?$select=preferredLanguage,isResourceAccount,mail,city,displayName,givenName,jobTitle,employeeId,accountEnabled,otherMails,businessPhones,mobilePhone,officeLocation,surname,id,state,usageLocation,userType,department&$top=50",
+        "https://graph.microsoft.com/v1.0/users?$select=preferredLanguage,isResourceAccount,mail,city,displayName,givenName,jobTitle,employeeId,accountEnabled,otherMails,businessPhones,mobilePhone,officeLocation,surname,id,state,usageLocation,userType,department&$top=50&$skiptoken=234234",
+    })
+    @ParameterizedTest
+    void users_select(String endpoint) {
         String jsonString = asJson(exampleDirectoryPath, "users.json");
-
-        String endpoint = "https://graph.microsoft.com/v1.0/users?$select=preferredLanguage,isResourceAccount,mail,city,displayName,givenName,jobTitle,employeeId,accountEnabled,otherMails,businessPhones,mobilePhone,officeLocation,surname,id,state,usageLocation,userType,department&$top=50";
 
         Collection<String> PII = Arrays.asList(
             "john@worklytics.onmicrosoft.com",
@@ -90,6 +94,13 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
 
         assertPseudonymized(sanitized, "john@worklytics.onmicrosoft.com");
         assertRedacted(sanitized, "Paul Allen");
+    }
+
+
+    @Test
+    void users_filter() {
+        String endpoint = "https://graph.microsoft.com/v1.0/users?$filter=accountEnabled eq true";
+        assertUrlBlocked(endpoint);
     }
 
     @Test

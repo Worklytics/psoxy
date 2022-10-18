@@ -27,6 +27,8 @@ public abstract class JavaRulesTestBaseCase extends RulesBaseTestCase {
         RuleSet rulesFromFilesystem = yamlMapper.readerFor(getRulesUnderTest().getClass())
             .readValue(PrebuiltSanitizerRules.class.getResource(path));
 
+        //NOTE: this is testing equivalence of file-system rules after round-trip; not necessarily
+        // that current file-system rules are byte-wise equivalent
         assertEquals(
             yamlMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rulesFromFilesystem),
             yamlMapper.writerWithDefaultPrettyPrinter().writeValueAsString(getRulesUnderTest()));

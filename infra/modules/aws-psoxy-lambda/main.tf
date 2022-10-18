@@ -47,7 +47,8 @@ resource "aws_cloudwatch_log_group" "lambda-log" {
 }
 
 resource "aws_iam_role" "iam_for_lambda" {
-  name = "iam_for_lambda_${var.function_name}"
+  name        = "PsoxyExec_${var.function_name}"
+  description = "execution role for psoxy instance"
 
   assume_role_policy = jsonencode({
     "Version" : "2012-10-17",

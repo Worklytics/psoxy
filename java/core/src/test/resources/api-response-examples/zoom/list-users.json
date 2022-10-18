@@ -11,6 +11,7 @@
       "email": "example@example.com",
       "type": 2,
       "pmi": 111111111,
+      "phone_number": "+1 555-555-5555",
       "timezone": "America/Los_Angeles",
       "verified": 1,
       "dept": "",

@@ -119,11 +119,15 @@ abstract public class RulesBaseTestCase {
         Validator.validate(yamlRoundtrip(getRulesUnderTest()));
     }
 
+    // regular param --> 4096
+    // advanced param --> 8000
+    int CHAR_LIMIT = 8000;
+
     @SneakyThrows
     @Test
     void yamlLength() {
         int rulesLengthInChars = yamlMapper.writeValueAsString(getRulesUnderTest()).length();
-        assertTrue(rulesLengthInChars < 4096, "YAML rules " + rulesLengthInChars + " chars long; want < 4096 chars to fit as AWS SSM param");
+        assertTrue(rulesLengthInChars < CHAR_LIMIT, "YAML rules " + rulesLengthInChars + " chars long; want < " + CHAR_LIMIT + " chars to fit as AWS SSM param");
     }
 
     @SneakyThrows

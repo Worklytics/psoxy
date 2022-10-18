@@ -23,14 +23,7 @@ module "worklytics_connector_specs" {
   # source = "../../modules/worklytics-connector-specs"
   source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connector-specs?ref=v0.4.6"
 
-  enabled_connectors = [
-    "azure-ad",
-    "outlook-cal",
-    "outlook-mail",
-    "asana",
-    "slack-discovery-api",
-    "zoom",
-  ]
+  enabled_connectors = var.enabled_connectors
 
   # this IS the correct ID for the user terraform is running as, which we assume is a user who's OK
   # to use the subject of examples. You can change it to any string you want.
