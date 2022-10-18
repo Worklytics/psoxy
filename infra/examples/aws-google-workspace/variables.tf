@@ -106,7 +106,30 @@ variable "enabled_connectors" {
     "gdrive",
     "google-chat",
     "google-meet",
+    "hris",
     "slack-discovery-api",
     "zoom",
   ]
 }
+
+variable "custom_bulk_connectors" {
+  type        = map(object({
+    source_kind = string
+    rules       = map(list(string))
+  }))
+  description = "specs of custom bulk connectors to create"
+
+  default = {
+    #    "qualtrics" = {
+    #      source_kind = "qualtrics"
+    #      rules       = {
+    #        columnsToRedact       = []
+    #        columnsToPseudonymize = [
+    #          "employee_id", # primary key
+    #          # "employee_email", # if exists
+    #        ]
+    #      }
+    #    }
+  }
+}
+

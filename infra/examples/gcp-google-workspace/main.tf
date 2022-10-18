@@ -12,30 +12,6 @@ terraform {
 
 locals {
   base_config_path = "${var.psoxy_base_dir}/configs/"
-  bulk_sources     = {
-    "hris" = {
-      source_kind = "hris"
-      rules       = {
-        columnsToRedact       = []
-        columnsToPseudonymize = [
-          "employee_id",
-          "employee_email",
-          "manager_id",
-          "manager_email",
-        ]
-      }
-    },
-    "qualtrics" = {
-      source_kind = "qualtrics"
-      rules       = {
-        columnsToRedact       = []
-        columnsToPseudonymize = [
-          "employee_id",
-          "employee_email", # if exists
-        ]
-      }
-    }
-  }
 }
 
 module "worklytics_connector_specs" {
@@ -234,7 +210,8 @@ module "worklytics-psoxy-connection-long-auth" {
 
 # BEGIN BULK CONNECTORS
 module "psoxy-gcp-bulk" {
-  for_each = local.bulk_sources
+  for_each = merge(module.worklytics_connector_specs.enabled_bulk_connectors,
+    var.custom_bulk_connectors)
 
   # source = "../../modules/gcp-psoxy-bulk"
   source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-bulk?ref=v0.4.6"
