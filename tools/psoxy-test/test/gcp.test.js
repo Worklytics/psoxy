@@ -28,13 +28,15 @@ test('Psoxy Call: get identity token when option missing', async t => {
     url: new URL(GCP_URL),
   }
 
-  const command = 'gcloud auth print-identity-token';
-  td.when(utils.executeCommand(command)).thenReturn('foo');
-  td.when(utils.fetch(options.url, td.matchers.contains({headers: {}})))
-    .thenReturn({status: 200});
+  const COMMAND = 'gcloud auth print-identity-token';
+  const TOKEN = 'foo';
+  td.when(utils.executeCommand(COMMAND)).thenReturn(TOKEN);
+  td.when(utils.request(options.url, td.matchers.contains({
+    Authorization: `Bearer ${TOKEN}`
+  }))).thenReturn({status: 200});
 
   const result = await gcp.call(options);
   t.is(result.status, 200);
 
-  td.verify(utils.executeCommand(command));
+  td.verify(utils.executeCommand(COMMAND));
 });
