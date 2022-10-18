@@ -12,47 +12,13 @@ terraform {
 
 locals {
   base_config_path = "${var.psoxy_base_dir}/configs/"
-  bulk_sources = {
-    "hris" = {
-      source_kind = "hris"
-      rules = {
-        columnsToRedact = []
-        columnsToPseudonymize = [
-          "employee_id",
-          "employee_email",
-          "manager_id",
-          "manager_email",
-        ]
-      }
-    },
-    "qualtrics" = {
-      source_kind = "qualtrics"
-      rules = {
-        columnsToRedact = []
-        columnsToPseudonymize = [
-          "employee_id",
-          "employee_email", # if exists
-        ]
-      }
-    }
-  }
 }
 
 module "worklytics_connector_specs" {
   source = "../../modules/worklytics-connector-specs"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connector-specs?ref=v0.4.6"
 
-  enabled_connectors = [
-    "gdirectory",
-    "gcal",
-    "gdrive",
-    "gmail",
-    "google-meet",
-    "google-chat",
-    "asana",
-    "slack-discovery-api",
-    "zoom",
-  ]
+  enabled_connectors            = var.enabled_connectors
   google_workspace_example_user = var.google_workspace_example_user
 }
 
@@ -104,11 +70,11 @@ module "google-workspace-connection" {
 module "google-workspace-connection-auth" {
   for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
 
-
   source = "../../modules/gcp-sa-auth-key-secret-manager"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-sa-auth-key-secret-manager?ref=v0.4.6"
 
-
+  secret_project     = google_project.psoxy-project.project_id
+  secret_id          = "PSOXY_${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY"
   service_account_id = module.google-workspace-connection[each.key].service_account_id
 }
 
@@ -127,6 +93,8 @@ module "google-workspace-key-secrets" {
     }
   }
 }
+
+
 
 module "psoxy-google-workspace-connector" {
   for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
@@ -151,8 +119,8 @@ module "psoxy-google-workspace-connector" {
   secret_bindings = {
     # as SERVICE_ACCOUNT_KEY rotated by Terraform, reasonable to bind as env variable
     SERVICE_ACCOUNT_KEY = {
-      secret_id      = module.google-workspace-key-secrets[each.key].secret_ids["PSOXY_${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY"].secret_id
-      version_number = "latest"
+      secret_id      = module.google-workspace-connection-auth[each.key].key_secret_id
+      version_number = module.google-workspace-connection-auth[each.key].key_secret_version_number
     }
   }
 }
@@ -194,8 +162,8 @@ module "connector-long-auth-block" {
 module "long-auth-token-secret-fill-instructions" {
   for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
 
-  source = "../../modules/gcp-secret-fill-md"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-secret-fill-md?ref=v0.4.6"
+  # source = "../../modules/gcp-secret-fill-md"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-secret-fill-md?ref=v0.4.6"
 
   project_id = google_project.psoxy-project.project_id
   secret_id  = module.connector-long-auth-block[each.key].access_token_secret_id
@@ -204,8 +172,8 @@ module "long-auth-token-secret-fill-instructions" {
 module "source_token_external_todo" {
   for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors_todos
 
-  source = "../../modules/source-token-external-todo"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/source-token-external-todo?ref=v0.4.6"
+  # source = "../../modules/source-token-external-todo"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/source-token-external-todo?ref=v0.4.6"
 
   source_id                         = each.key
   connector_specific_external_steps = each.value.external_token_todo
@@ -249,7 +217,7 @@ module "worklytics-psoxy-connection-long-auth" {
   for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
 
   source = "../../modules/worklytics-psoxy-connection"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=v0.4.6"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection?ref=v0.4.6"
 
   psoxy_instance_id  = each.key
   psoxy_endpoint_url = module.connector-long-auth-create-function[each.key].cloud_function_url
@@ -260,7 +228,8 @@ module "worklytics-psoxy-connection-long-auth" {
 
 # BEGIN BULK CONNECTORS
 module "psoxy-gcp-bulk" {
-  for_each = local.bulk_sources
+  for_each = merge(module.worklytics_connector_specs.enabled_bulk_connectors,
+  var.custom_bulk_connectors)
 
   source = "../../modules/gcp-psoxy-bulk"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-bulk?ref=v0.4.6"
