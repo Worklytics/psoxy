@@ -1,5 +1,5 @@
 import { 
-  fetch,
+  request,
   getCommonHTTPHeaders, 
   signAWSRequestURL, 
   executeCommand 
@@ -18,7 +18,7 @@ import {
 function assumeRole(role) {
   // one-liner for simplicity
   const command = `aws sts assume-role --role-arn ${role} --duration 900 --role-session-name lambda_test`;
-  return JSON.parse(executeCommand(command));
+  return JSON.parse(executeCommand(command)).Credentials;
 }
 
 /**
@@ -44,15 +44,13 @@ async function call(options = {}) {
   if (!options.role) {
     throw new Error('Role is a required option for AWS');
   }
-
-  const url = new URL(options.url);
  
   console.log(`Assuming role ${options.role}`);
   const credentials = assumeRole(options.role);
   
   console.log('Signing request');
+  const url = new URL(options.url);
   const signed = signAWSRequestURL(url, credentials);
-
   const headers = {
     ...getCommonHTTPHeaders(options),
     ...signed.headers,
@@ -61,13 +59,11 @@ async function call(options = {}) {
   console.log('Calling psoxy and waiting response...');
 
   if (options.verbose) {
-    console.log('Options:');
-    console.log(options);
-    console.log('Request headers:');
-    console.log(headers);
+    console.log('Request options:', options);
+    console.log('Request headers:', headers);
   }
 
-  return await fetch(url.toString(), { headers: headers });
+  return await request(url, headers);
 }
 
 export default {
