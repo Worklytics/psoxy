@@ -36,6 +36,14 @@ module "gcp-secrets" {
   replica_regions = var.replica_regions
 
   secrets = {
-    var.secret_id : google_service_account_key.key.private_key
+    var.secret_id = google_service_account_key.key.private_key
   }
+}
+
+output "key_secret_id" {
+  value = module.gcp-secrets.secret_ids[var.secret_id]
+}
+
+output "key_value" {
+  value = google_service_account_key.key.private_key
 }
