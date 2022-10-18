@@ -112,3 +112,22 @@ endpoints:
           - "$.data[*].custom_fields[*].people_value[*].gid"
           - "$.data[*].followers[*].gid"
           - "$.data[*]..email"
+  - pathRegex: "^/api/1.0/workspaces/[^/]*/tasks/search?[^/]*"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$.data[*].external"
+          - "$.data[*].html_notes"
+          - "$.data[*].notes"
+          - "$.data[*]..name"
+          - "$.data[*].custom_fields[*].description"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.data[*].completed_by.gid"
+          - "$.data[*].hearts[*].user.gid"
+          - "$.data[*].likes[*].user.gid"
+          - "$.data[*].assignee.gid"
+          - "$.data[*].custom_fields[*].created_by.gid"
+          - "$.data[*].custom_fields[*].people_value[*].gid"
+          - "$.data[*].followers[*].gid"
+          - "$.data[*]..email"

@@ -58,6 +58,11 @@ public class PrebuiltSanitizerRules {
             .transforms(getTaskTransforms(true))
             .build();
 
+    static final Rules2.Endpoint WORKSPACE_TASKS_SEARCH = Rules2.Endpoint.builder()
+            .pathRegex("^/api/1.0/workspaces/[^/]*/tasks/search?[^/]*")
+            .transforms(getTaskTransforms(true))
+            .build();
+
     static final Rules2.Endpoint TASK = Rules2.Endpoint.builder()
             .pathRegex("^/api/1.0/tasks/[^/]*(\\?)?[^/]*")
             .transforms(getTaskTransforms(false))
@@ -101,6 +106,7 @@ public class PrebuiltSanitizerRules {
             .endpoint(TASK)
             .endpoint(TASK_STORIES)
             .endpoint(TASK_SUBTASKS)
+            .endpoint(WORKSPACE_TASKS_SEARCH)
             .build();
 
     private static Collection<Transform> getTaskTransforms(boolean isList) {

@@ -140,6 +140,8 @@ public class AsanaTests extends JavaRulesTestBaseCase {
                 InvocationExample.of("https://app.asana.com/api/1.0/tasks/123123/stories?opt_fields=fake", "stories.json"),
 
                 InvocationExample.of("https://app.asana.com/api/1.0/tasks/123123/subtasks", "tasks.json"),
-                InvocationExample.of("https://app.asana.com/api/1.0/tasks/123123/subtasks?opt_fields=fake", "tasks.json"));
+                InvocationExample.of("https://app.asana.com/api/1.0/tasks/123123/subtasks?opt_fields=fake", "tasks.json"),
+
+                InvocationExample.of("https://app.asana.com/api/1.0/workspaces/123/tasks/search?opt_fields=fake", "tasks.json"));
     }
 }
