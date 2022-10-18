@@ -35,47 +35,13 @@ provider "aws" {
 
 locals {
   base_config_path = "${var.psoxy_base_dir}/configs/"
-  bulk_sources = {
-    "hris" = {
-      source_kind = "hris"
-      rules = {
-        columnsToRedact = [
-        ]
-        columnsToPseudonymize = [
-          "employee_email",
-          "employee_id",
-          "manager_id",
-          "manager_email",
-        ]
-      }
-    },
-    "qualtrics" = {
-      source_kind = "qualtrics"
-      rules = {
-        columnsToRedact = []
-        columnsToPseudonymize = [
-          "employee_id"
-        ]
-      }
-    }
-  }
 }
 
 module "worklytics_connector_specs" {
-  # source = "../../modules/worklytics-connector-specs"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connector-specs?ref=v0.4.6"
+  source = "../../modules/worklytics-connector-specs"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connector-specs?ref=v0.4.6"
 
-  enabled_connectors = [
-    "gdirectory",
-    "gcal",
-    "gmail",
-    "gdrive",
-    "google-chat",
-    "google-meet",
-    "asana",
-    "slack-discovery-api",
-    "zoom",
-  ]
+  enabled_connectors            = var.enabled_connectors
   google_workspace_example_user = var.google_workspace_example_user
 }
 
@@ -262,9 +228,9 @@ module "worklytics-psoxy-connection" {
 
 # END LONG ACCESS AUTH CONNECTORS
 
-
 module "psoxy-bulk" {
-  for_each = local.bulk_sources
+  for_each = merge(module.worklytics_connector_specs.enabled_bulk_connectors,
+    var.custom_bulk_connectors)
 
   # source = "../../modules/aws-psoxy-bulk"
   source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-bulk?ref=v0.4.6"

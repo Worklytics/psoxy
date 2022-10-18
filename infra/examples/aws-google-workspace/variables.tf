@@ -93,3 +93,43 @@ variable "google_workspace_example_user" {
   type        = string
   description = "user to impersonate for Google Workspace API calls (null for none)"
 }
+
+variable "enabled_connectors" {
+  type        = list(string)
+  description = "list of ids of connectors to enabled; see modules/worklytics-connector-specs"
+
+  default = [
+    "asana",
+    "gdirectory",
+    "gcal",
+    "gmail",
+    "gdrive",
+    "google-chat",
+    "google-meet",
+    "hris",
+    "slack-discovery-api",
+    "zoom",
+  ]
+}
+
+variable "custom_bulk_connectors" {
+  type        = map(object({
+    source_kind = string
+    rules       = map(list(string))
+  }))
+  description = "specs of custom bulk connectors to create"
+
+  default = {
+    #    "custom-survey" = {
+    #      source_kind = "survey"
+    #      rules       = {
+    #        columnsToRedact       = []
+    #        columnsToPseudonymize = [
+    #          "employee_id", # primary key
+    #          # "employee_email", # if exists
+    #        ]
+    #      }
+    #    }
+  }
+}
+
