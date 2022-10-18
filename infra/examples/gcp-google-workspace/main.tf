@@ -70,11 +70,9 @@ module "google-workspace-connection" {
 module "google-workspace-connection-auth" {
   for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
 
-  source = "../../modules/gcp-sa-auth-key-secret-manager"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-sa-auth-key-secret-manager?ref=v0.4.6"
+  source = "../../modules/gcp-sa-auth-key"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-sa-auth-key?ref=v0.4.6"
 
-  secret_project     = google_project.psoxy-project.project_id
-  secret_id          = "PSOXY_${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY"
   service_account_id = module.google-workspace-connection[each.key].service_account_id
 }
 
@@ -93,8 +91,6 @@ module "google-workspace-key-secrets" {
     }
   }
 }
-
-
 
 module "psoxy-google-workspace-connector" {
   for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
@@ -119,8 +115,8 @@ module "psoxy-google-workspace-connector" {
   secret_bindings = {
     # as SERVICE_ACCOUNT_KEY rotated by Terraform, reasonable to bind as env variable
     SERVICE_ACCOUNT_KEY = {
-      secret_id      = module.google-workspace-connection-auth[each.key].key_secret_id
-      version_number = module.google-workspace-connection-auth[each.key].key_secret_version_number
+      secret_id      = module.google-workspace-key-secrets[each.key].secret_ids["PSOXY_${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY"]
+      version_number = module.google-workspace-key-secrets[each.key].secret_version_numbers["PSOXY_${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY"]
     }
   }
 }
