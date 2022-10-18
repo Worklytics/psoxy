@@ -1,4 +1,4 @@
-import { getCommonHTTPHeaders, fetch, executeCommand } from './utils.js';
+import { getCommonHTTPHeaders, request, executeCommand } from './utils.js';
 
 /**
  * Helper: check url deploy type
@@ -48,13 +48,11 @@ async function call(options = {}) {
   console.log('Waiting response...');
 
   if (options.verbose) {
-    console.log('Options:');
-    console.log(options);
-    console.log('Request headers:');
-    console.log(headers);
+    console.log('Request options:', options);
+    console.log('Request headers:', headers);
   }
 
-  return await fetch(options.url, { headers: headers });
+  return await request(options.url, headers);
 }
 
 export default {
