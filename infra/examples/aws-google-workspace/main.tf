@@ -206,7 +206,7 @@ module "parameter-fill-instructions" {
   for_each = local.long_access_parameters
 
   # source = "../../modules/aws-ssm-fill-md"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-secret-fill-md?ref=v0.4.7"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-ssm-fill-md?ref=v0.4.7"
 
   region         = var.aws_region
   parameter_name = aws_ssm_parameter.long-access-secrets[each.key].name
