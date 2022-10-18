@@ -10,7 +10,7 @@ jobs:
     name: validate
     runs-on: ubuntu-latest
     env:
-      TERRAFORM_VERSION: 1.0.8
+      TERRAFORM_VERSION: 1.3.2
     steps:
       - name: Check out code
         uses: actions/checkout@v1
@@ -19,7 +19,7 @@ jobs:
         uses: hashicorp/setup-terraform@v1
         with:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
-          
+
       - name: 'Terraform - validate examples-dev/gcp-google-workspace'
         working-directory: infra/examples-dev/gcp-google-workspace
         run: |

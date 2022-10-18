@@ -113,7 +113,7 @@ variable "enabled_connectors" {
 }
 
 variable "custom_bulk_connectors" {
-  type        = map(object({
+  type = map(object({
     source_kind = string
     rules       = map(list(string))
   }))

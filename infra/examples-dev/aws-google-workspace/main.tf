@@ -33,6 +33,7 @@ provider "aws" {
 }
 
 
+
 locals {
   base_config_path = "${var.psoxy_base_dir}/configs/"
   bulk_sources = {
@@ -87,6 +88,24 @@ module "psoxy-aws" {
   caller_gcp_service_account_ids = var.caller_gcp_service_account_ids
 }
 
+module "global_secrets" {
+  source = "../../modules/aws-ssm-secrets"
+
+  secrets = module.psoxy-aws.secrets
+}
+
+# v0.4.6 --> 0.4.7
+moved {
+  from = module.psoxy-aws.aws_ssm_parameter.salt
+  to   = module.global_secrets.aws_ssm_parameter.secret["PSOXY_SALT"]
+}
+
+# v0.4.6 --> 0.4.7
+moved {
+  from = module.psoxy-aws.aws_ssm_parameter.encryption_key
+  to   = module.global_secrets.aws_ssm_parameter.secret["PSOXY_ENCRYPTION_KEY"]
+}
+
 # holds SAs + keys needed to connect to Google Workspace APIs
 resource "google_project" "psoxy-google-connectors" {
   name            = "Psoxy%{if var.environment_name != ""} - ${var.environment_name}%{endif}"
@@ -130,11 +149,21 @@ module "google-workspace-connection" {
 module "google-workspace-connection-auth" {
   for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
 
-  source = "../../modules/gcp-sa-auth-key-aws-secret"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-sa-auth-key-aws-secret?ref=v0.4.6"
+  source = "../../modules/gcp-sa-auth-key"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-sa-auth-key?ref=v0.4.6"
 
   service_account_id = module.google-workspace-connection[each.key].service_account_id
-  secret_id          = "PSOXY_${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY"
+}
+
+module "sa-key-secrets" {
+  for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
+
+  source = "../../modules/aws-ssm-secrets"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-ssm-secrets?ref=v0.4.6"
+
+  secrets = {
+    "PSOXY_${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY" : module.google-workspace-connection-auth[each.key].key_value
+  }
 }
 
 module "psoxy-google-workspace-connector" {
@@ -154,7 +183,7 @@ module "psoxy-google-workspace-connector" {
   path_to_repo_root                     = var.psoxy_base_dir
   example_api_calls                     = each.value.example_api_calls
   example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
-  global_parameter_arns                 = module.psoxy-aws.global_parameters_arns
+  global_parameter_arns                 = module.global_secrets.secret_arns
   todo_step                             = module.google-workspace-connection[each.key].next_todo_step
 }
 
@@ -180,7 +209,7 @@ module "worklytics-psoxy-connection-google-workspace" {
 locals {
   long_access_parameters = { for entry in module.worklytics_connector_specs.enabled_oauth_secrets_to_create : "${entry.connector_name}.${entry.secret_name}" => entry }
   long_access_parameters_by_connector = { for k, spec in module.worklytics_connector_specs.enabled_oauth_long_access_connectors :
-  k => [ for secret in spec.secured_variables : "${k}.${secret.name}"]
+    k => [for secret in spec.secured_variables : "${k}.${secret.name}"]
   }
 }
 
@@ -219,7 +248,7 @@ module "source_token_external_todo" {
   connector_specific_external_steps = each.value.external_token_todo
   todo_step                         = 1
 
-  additional_steps = [ for parameter_ref in local.long_access_parameters_by_connector[each.key] : module.parameter-fill-instructions[parameter_ref].todo_markdown ]
+  additional_steps = [for parameter_ref in local.long_access_parameters_by_connector[each.key] : module.parameter-fill-instructions[parameter_ref].todo_markdown]
 }
 
 module "aws-psoxy-long-auth-connectors" {
@@ -240,7 +269,7 @@ module "aws-psoxy-long-auth-connectors" {
   path_to_repo_root              = var.psoxy_base_dir
   example_api_calls              = each.value.example_api_calls
   reserved_concurrent_executions = each.value.reserved_concurrent_executions
-  global_parameter_arns          = module.psoxy-aws.global_parameters_arns
+  global_parameter_arns          = module.global_secrets.secret_arns
   function_parameters            = each.value.secured_variables
   todo_step                      = module.source_token_external_todo[each.key].next_todo_step
 
@@ -268,7 +297,6 @@ module "worklytics-psoxy-connection" {
 
 # END LONG ACCESS AUTH CONNECTORS
 
-
 module "psoxy-bulk" {
   for_each = local.bulk_sources
 
@@ -286,6 +314,5 @@ module "psoxy-bulk" {
   api_caller_role_name  = module.psoxy-aws.api_caller_role_name
   psoxy_base_dir        = var.psoxy_base_dir
   rules                 = each.value.rules
-  global_parameter_arns = module.psoxy-aws.global_parameters_arns
-
+  global_parameter_arns = module.global_secrets.secret_arns
 }

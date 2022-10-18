@@ -101,6 +101,26 @@ module "psoxy-aws" {
   }
 }
 
+module "global_secrets" {
+  source = "../../modules/aws-ssm-secrets"
+
+  secrets = module.psoxy-aws.secrets
+}
+
+# v0.4.6 --> 0.4.7
+moved {
+  from = module.psoxy-aws.aws_ssm_parameter.salt
+  to   = module.global_secrets.aws_ssm_parameter.secret["PSOXY_SALT"]
+}
+
+# v0.4.6 --> 0.4.7
+moved {
+  from = module.psoxy-aws.aws_ssm_parameter.encryption_key
+  to   = module.global_secrets.aws_ssm_parameter.secret["PSOXY_ENCRYPTION_KEY"]
+}
+
+
+
 module "msft-connection" {
   for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
@@ -170,7 +190,7 @@ module "psoxy-msft-connector" {
   aws_account_id        = var.aws_account_id
   path_to_repo_root     = var.psoxy_base_dir
   todo_step             = module.msft_365_grants[each.key].next_todo_step
-  global_parameter_arns = module.psoxy-aws.global_parameters_arns
+  global_parameter_arns = module.global_secrets.secret_arns
 
   environment_variables = {
     IS_DEVELOPMENT_MODE  = "true"
@@ -200,7 +220,7 @@ module "worklytics-psoxy-connection-msft-365" {
 locals {
   long_access_parameters = { for entry in module.worklytics_connector_specs.enabled_oauth_secrets_to_create : "${entry.connector_name}.${entry.secret_name}" => entry }
   long_access_parameters_by_connector = { for k, spec in module.worklytics_connector_specs.enabled_oauth_long_access_connectors :
-  k => [ for secret in spec.secured_variables : "${k}.${secret.name}"]
+    k => [for secret in spec.secured_variables : "${k}.${secret.name}"]
   }
 }
 
@@ -239,7 +259,7 @@ module "source_token_external_todo" {
   connector_specific_external_steps = each.value.external_token_todo
   todo_step                         = 1
 
-  additional_steps = [ for parameter_ref in local.long_access_parameters_by_connector[each.key] : module.parameter-fill-instructions[parameter_ref].todo_markdown ]
+  additional_steps = [for parameter_ref in local.long_access_parameters_by_connector[each.key] : module.parameter-fill-instructions[parameter_ref].todo_markdown]
 }
 
 module "aws-psoxy-long-auth-connectors" {
@@ -261,7 +281,7 @@ module "aws-psoxy-long-auth-connectors" {
   example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
   todo_step                             = module.source_token_external_todo[each.key].next_todo_step
   reserved_concurrent_executions        = each.value.reserved_concurrent_executions
-  global_parameter_arns                 = module.psoxy-aws.global_parameters_arns
+  global_parameter_arns                 = module.global_secrets.secret_arns
   function_parameters                   = each.value.secured_variables
 
   environment_variables = merge(each.value.environment_variables,
@@ -305,5 +325,5 @@ module "psoxy-bulk" {
   api_caller_role_name  = module.psoxy-aws.api_caller_role_name
   psoxy_base_dir        = var.psoxy_base_dir
   rules                 = each.value.rules
-  global_parameter_arns = module.psoxy-aws.global_parameters_arns
+  global_parameter_arns = module.global_secrets.secret_arns
 }

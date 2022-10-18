@@ -36,8 +36,8 @@ resource "google_project" "psoxy-project" {
 }
 
 module "psoxy-gcp" {
-  # source = "../../modules/gcp"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp?ref=v0.4.6"
+  source = "../../modules/gcp"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp?ref=v0.4.6"
 
   project_id        = google_project.psoxy-project.project_id
   invoker_sa_emails = var.worklytics_sa_emails
@@ -70,12 +70,26 @@ module "google-workspace-connection" {
 module "google-workspace-connection-auth" {
   for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
 
-  # source = "../../modules/gcp-sa-auth-key-secret-manager"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-sa-auth-key-secret-manager?ref=v0.4.6"
+  source = "../../modules/gcp-sa-auth-key"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-sa-auth-key?ref=v0.4.6"
 
-  secret_project     = google_project.psoxy-project.project_id
   service_account_id = module.google-workspace-connection[each.key].service_account_id
-  secret_id          = "PSOXY_${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY"
+}
+
+module "google-workspace-key-secrets" {
+
+  for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
+
+  source = "../../modules/gcp-secrets"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-secrets?ref=v0.4.4"
+
+  secret_project = google_project.psoxy-project.project_id
+  secrets = {
+    "PSOXY_${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY" : {
+      value       = module.google-workspace-connection-auth[each.key].key_value
+      description = "Auth key for ${each.key} service account"
+    }
+  }
 }
 
 module "psoxy-google-workspace-connector" {
@@ -101,8 +115,8 @@ module "psoxy-google-workspace-connector" {
   secret_bindings = {
     # as SERVICE_ACCOUNT_KEY rotated by Terraform, reasonable to bind as env variable
     SERVICE_ACCOUNT_KEY = {
-      secret_id      = module.google-workspace-connection-auth[each.key].key_secret_id
-      version_number = module.google-workspace-connection-auth[each.key].key_secret_version_number
+      secret_id      = module.google-workspace-key-secrets[each.key].secret_ids["PSOXY_${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY"]
+      version_number = module.google-workspace-key-secrets[each.key].secret_version_numbers["PSOXY_${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY"]
     }
   }
 }
@@ -211,7 +225,7 @@ module "worklytics-psoxy-connection-long-auth" {
 # BEGIN BULK CONNECTORS
 module "psoxy-gcp-bulk" {
   for_each = merge(module.worklytics_connector_specs.enabled_bulk_connectors,
-    var.custom_bulk_connectors)
+  var.custom_bulk_connectors)
 
   # source = "../../modules/gcp-psoxy-bulk"
   source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-bulk?ref=v0.4.6"

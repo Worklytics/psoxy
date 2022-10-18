@@ -150,19 +150,6 @@ resource "random_password" "random" {
 # previously pseudonymized data will be inconsistent with data pseudonymized after the change.
 #
 # To be clear, possession of salt alone doesn't let someone reverse pseudonyms.
-resource "aws_ssm_parameter" "salt" {
-  name        = "PSOXY_SALT"
-  type        = "SecureString"
-  description = "Salt used to build pseudonyms"
-  value       = sensitive(random_password.random.result)
-
-  lifecycle {
-    ignore_changes = [
-      tags,
-      value
-    ]
-  }
-}
 
 
 # not really a 'password', but 'random_string' isn't "sensitive" by terraform, so
@@ -172,19 +159,6 @@ resource "random_password" "encryption_key" {
   special = true
 }
 
-resource "aws_ssm_parameter" "encryption_key" {
-  name        = "PSOXY_ENCRYPTION_KEY"
-  type        = "SecureString"
-  description = "secret used to generate reversible pseudonyms, if any; rotate to render all existing ones irreversible"
-  value       = sensitive(random_password.random.result)
-
-  lifecycle {
-    ignore_changes = [
-      tags,
-      value
-    ]
-  }
-}
 
 
 
@@ -196,8 +170,17 @@ module "psoxy-package" {
   psoxy_version      = var.psoxy_version
 }
 
-output "global_parameters_arns" {
-  value = [aws_ssm_parameter.salt.arn, aws_ssm_parameter.encryption_key.arn]
+output "secrets" {
+  value = {
+    PSOXY_ENCRYPTION_KEY = {
+      value       = sensitive(random_password.encryption_key.result),
+      description = "secret used to generate reversible pseudonyms, if any; rotate to render all existing ones irreversible"
+    },
+    PSOXY_SALT = {
+      value       = sensitive(random_password.random.result),
+      description = "Salt used to build pseudonyms."
+    }
+  }
 }
 
 output "api_caller_role_arn" {

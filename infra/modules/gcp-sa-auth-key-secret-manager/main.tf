@@ -1,5 +1,7 @@
+# DEPRECATED - use composition of gcp-sa-auth-key + gcp-secrets
 # infra to support authentication of a service as a Google Workspace connector using a service
 # account key
+
 
 # this is only one approach to authentication; others may be more appropriate to your use-case.
 
@@ -27,34 +29,25 @@ resource "google_service_account_key" "key" {
   }
 }
 
-resource "google_secret_manager_secret" "service-account-key" {
-  project   = var.secret_project
-  secret_id = var.secret_id
+module "gcp-secrets" {
+  source = "../gcp-secrets"
 
-  replication {
-    user_managed {
-      dynamic "replicas" {
-        for_each = var.replica_regions
-        content {
-          location = replicas.value
-        }
-      }
-    }
-  }
+  secret_project  = var.secret_project
+  replica_regions = var.replica_regions
 
-  lifecycle {
-    ignore_changes = [
-      replication, # for backwards compatibility; replication can't be changed after secrets created
-      labels
-    ]
+  secrets = {
+    "${var.secret_id}" = google_service_account_key.key.private_key
   }
 }
 
-resource "google_secret_manager_secret_version" "service-account-key-version" {
-  secret      = google_secret_manager_secret.service-account-key.id
-  secret_data = google_service_account_key.key.private_key
+output "key_secret_id" {
+  value = module.gcp-secrets.secret_ids[var.secret_id]
+}
 
-  lifecycle {
-    create_before_destroy = true
-  }
+output "key_secret_version_number" {
+  value = module.gcp-secrets.secret_version_numbers[var.secret_id]
+}
+
+output "key_value" {
+  value = google_service_account_key.key.private_key
 }

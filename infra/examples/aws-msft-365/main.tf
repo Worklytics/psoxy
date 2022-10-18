@@ -46,16 +46,16 @@ module "worklytics_connector_specs" {
   source = "../../modules/worklytics-connector-specs"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connector-specs?ref=v0.4.6"
 
-  enabled_connectors     = var.enabled_connectors
-  msft_tenant_id         = var.msft_tenant_id
+  enabled_connectors = var.enabled_connectors
+  msft_tenant_id     = var.msft_tenant_id
   # this IS the correct ID for the user terraform is running as, which we assume is a user who's OK
   # to use the subject of examples. You can change it to any string you want.
   example_msft_user_guid = data.azuread_client_config.current.object_id
 }
 
 module "psoxy-aws" {
-  # source = "../../modules/aws"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws?ref=v0.4.6"
+  source = "../../modules/aws"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws?ref=v0.4.6"
 
   aws_account_id                 = var.aws_account_id
   psoxy_base_dir                 = var.psoxy_base_dir
@@ -65,6 +65,25 @@ module "psoxy-aws" {
   providers = {
     aws = aws
   }
+}
+
+module "global_secrets" {
+  source = "../../modules/aws-ssm-secrets"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-ssm-secrets?ref=v0.4.6"
+
+  secrets = module.psoxy-aws.secrets
+}
+
+# v0.4.6 --> 0.4.7
+moved {
+  from = module.psoxy-aws.aws_ssm_parameter.salt
+  to   = module.global_secrets.aws_ssm_parameter.secret["PSOXY_SALT"]
+}
+
+# v0.4.6 --> 0.4.7
+moved {
+  from = module.psoxy-aws.aws_ssm_parameter.encryption_key
+  to   = module.global_secrets.aws_ssm_parameter.secret["PSOXY_ENCRYPTION_KEY"]
 }
 
 module "msft-connection" {
@@ -103,6 +122,8 @@ module "private-key-aws-parameters" {
   private_key    = module.msft-connection-auth[each.key].private_key
 }
 
+
+
 # grant required permissions to connectors via Azure AD
 # (requires terraform configuration being applied by an Azure User with privelleges to do this; it
 #  usually requires a 'Global Administrator' for your tenant)
@@ -136,7 +157,7 @@ module "psoxy-msft-connector" {
   aws_account_id        = var.aws_account_id
   path_to_repo_root     = var.psoxy_base_dir
   todo_step             = module.msft_365_grants[each.key].next_todo_step
-  global_parameter_arns = module.psoxy-aws.global_parameters_arns
+  global_parameter_arns = module.global_secrets.secret_arns
 
   environment_variables = {
     IS_DEVELOPMENT_MODE  = "false"
@@ -166,7 +187,7 @@ module "worklytics-psoxy-connection-msft-365" {
 locals {
   long_access_parameters = { for entry in module.worklytics_connector_specs.enabled_oauth_secrets_to_create : "${entry.connector_name}.${entry.secret_name}" => entry }
   long_access_parameters_by_connector = { for k, spec in module.worklytics_connector_specs.enabled_oauth_long_access_connectors :
-  k => [ for secret in spec.secured_variables : "${k}.${secret.name}"]
+    k => [for secret in spec.secured_variables : "${k}.${secret.name}"]
   }
 }
 
@@ -205,7 +226,7 @@ module "source_token_external_todo" {
   connector_specific_external_steps = each.value.external_token_todo
   todo_step                         = 1
 
-  additional_steps = [ for parameter_ref in local.long_access_parameters_by_connector[each.key] : module.parameter-fill-instructions[parameter_ref].todo_markdown ]
+  additional_steps = [for parameter_ref in local.long_access_parameters_by_connector[each.key] : module.parameter-fill-instructions[parameter_ref].todo_markdown]
 }
 
 module "aws-psoxy-long-auth-connectors" {
@@ -227,7 +248,7 @@ module "aws-psoxy-long-auth-connectors" {
   example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
   todo_step                             = module.source_token_external_todo[each.key].next_todo_step
   reserved_concurrent_executions        = each.value.reserved_concurrent_executions
-  global_parameter_arns                 = module.psoxy-aws.global_parameters_arns
+  global_parameter_arns                 = module.global_secrets.secret_arns
   function_parameters                   = each.value.secured_variables
 
   environment_variables = {
@@ -254,7 +275,7 @@ module "worklytics-psoxy-connection-oauth-long-access" {
 
 module "psoxy-bulk" {
   for_each = merge(module.worklytics_connector_specs.enabled_bulk_connectors,
-    var.custom_bulk_connectors)
+  var.custom_bulk_connectors)
 
   # source = "../../modules/aws-psoxy-bulk"
   source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-bulk?ref=v0.4.6"
@@ -270,5 +291,5 @@ module "psoxy-bulk" {
   api_caller_role_name  = module.psoxy-aws.api_caller_role_name
   psoxy_base_dir        = var.psoxy_base_dir
   rules                 = each.value.rules
-  global_parameter_arns = module.psoxy-aws.global_parameters_arns
+  global_parameter_arns = module.global_secrets.secret_arns
 }
