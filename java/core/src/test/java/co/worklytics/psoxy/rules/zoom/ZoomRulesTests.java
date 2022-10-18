@@ -86,7 +86,8 @@ public class ZoomRulesTests extends JavaRulesTestBaseCase {
 
         //verify precondition that example actually contains something we need to pseudonymize
         Collection<String> PII = Arrays.asList(
-            "example@example.com"
+            "example@example.com",
+            "+1 555-555-5555"
         );
         assertNotSanitized(jsonString, PII);
 
@@ -113,7 +114,10 @@ public class ZoomRulesTests extends JavaRulesTestBaseCase {
 
         assertPseudonymized(sanitized, PII);
         // topics & join_urls gone
-        assertRedacted(sanitized, "https://zoom.us", "Zoom Meeting", "TestMeeting", "My Meeting", "MyTestPollMeeting");
+        assertRedacted(sanitized, "https://zoom.us", "Zoom Meeting", "TestMeeting", "My Meeting", "MyTestPollMeeting",
+            "?pwd=1234567890",
+            "SHOULD BE REDACTED"
+            );
     }
 
     @SneakyThrows
@@ -132,7 +136,8 @@ public class ZoomRulesTests extends JavaRulesTestBaseCase {
 
         assertPseudonymized(sanitized, PII);
 
-        assertRedacted(sanitized, "example@example.com", "API overview", "My API Test");
+        assertRedacted(sanitized, "example@example.com", "API overview", "My API Test",             "?pwd=1234567890",
+            "SHOULD BE REDACTED");
     }
 
     @SneakyThrows
@@ -163,7 +168,8 @@ public class ZoomRulesTests extends JavaRulesTestBaseCase {
 
         assertPseudonymized(sanitized, PII);
 
-        assertRedacted(sanitized, "Joe Surname", "My Meeting");
+        assertRedacted(sanitized, "Joe Surname", "My Meeting",            "?pwd=1234567890",
+            "SHOULD BE REDACTED");
     }
 
     @SneakyThrows

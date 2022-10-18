@@ -12,11 +12,11 @@ terraform {
 
 locals {
   base_config_path = "${var.psoxy_base_dir}/configs/"
-  bulk_sources     = {
+  bulk_sources = {
     "hris" = {
       source_kind = "hris"
-      rules       = {
-        columnsToRedact       = []
+      rules = {
+        columnsToRedact = []
         columnsToPseudonymize = [
           "employee_id",
           "employee_email",
@@ -27,8 +27,8 @@ locals {
     },
     "qualtrics" = {
       source_kind = "qualtrics"
-      rules       = {
-        columnsToRedact       = []
+      rules = {
+        columnsToRedact = []
         columnsToPseudonymize = [
           "employee_id",
           "employee_email", # if exists

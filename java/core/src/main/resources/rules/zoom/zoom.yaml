@@ -6,6 +6,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$.users[*].email"
+          - "$.users[*].phone_number"
         encoding: "JSON"
       - !<pseudonymize>
         jsonPaths:
@@ -23,7 +24,7 @@ endpoints:
         encoding: "JSON"
       - !<redact>
         jsonPaths:
-          - "$.meetings[*]['topic','join_url']"
+          - "$.meetings[*]['topic','join_url','start_url','agenda']"
   - pathRegex: "^/v2/meetings/(?:[^/]*)(?:\\?.+)?"
     transforms:
       - !<pseudonymize>
@@ -33,7 +34,7 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$.['topic','settings','agenda','custom_keys']"
-          - "$.['password','h323_password','pstn_password','encrypted_password']"
+          - "$.['password','h323_password','pstn_password','encrypted_password','join_url','start_url']"
   - pathRegex: "^/v2/past_meetings/(?:.*)/instances"
   - pathRegex: "^/v2/past_meetings/(?:[^\\/]*)"
     transforms:
@@ -43,7 +44,7 @@ endpoints:
         encoding: "JSON"
       - !<redact>
         jsonPaths:
-          - "$.['user_name','topic']"
+          - "$.['user_name','topic','agenda']"
   - pathRegex: "^/v2/past_meetings/(?:.*)/participants(?:\\?.+)?"
     transforms:
       - !<pseudonymize>

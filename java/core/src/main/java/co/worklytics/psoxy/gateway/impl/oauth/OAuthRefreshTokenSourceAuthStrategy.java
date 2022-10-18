@@ -72,7 +72,11 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
     @Override
     public Set<ConfigService.ConfigProperty> getRequiredConfigProperties() {
-        Stream<ConfigService.ConfigProperty> propertyStream = Arrays.stream(ConfigProperty.values());
+        Stream<ConfigService.ConfigProperty> propertyStream = Stream.of(ConfigProperty.REFRESH_ENDPOINT,
+                // ACCESS_TOKEN is optional
+                ConfigProperty.GRANT_TYPE,
+                ConfigProperty.CLIENT_ID);
+
         if (refreshHandler instanceof RequiresConfiguration) {
             propertyStream = Stream.concat(propertyStream,
                 ((RequiresConfiguration) refreshHandler).getRequiredConfigProperties().stream());
@@ -216,7 +220,11 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
         @Override
         public Set<ConfigService.ConfigProperty> getRequiredConfigProperties() {
-            Stream<ConfigService.ConfigProperty> propertyStream = Arrays.stream(ConfigProperty.values());
+            Stream<ConfigService.ConfigProperty> propertyStream = Stream.of(ConfigProperty.REFRESH_ENDPOINT,
+                    // ACCESS_TOKEN is optional
+                    ConfigProperty.GRANT_TYPE,
+                    ConfigProperty.CLIENT_ID);
+
             if (payloadBuilder instanceof RequiresConfiguration) {
                 propertyStream = Stream.concat(propertyStream,
                     ((RequiresConfiguration) payloadBuilder).getRequiredConfigProperties().stream());
