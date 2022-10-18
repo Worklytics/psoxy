@@ -7,7 +7,7 @@
     "completed":false,
     "completed_at":"2012-02-22T02:06:58.147Z",
     "completed_by":{
-      "gid":"12345",
+      "gid":"{\"scope\":\"asana\",\"hash\":\"qspPhKOOLuFUBz1_ZKi5N75VXBnwVjYwv9pilOk6TPI\"}",
       "resource_type":"user"
     },
     "created_at":"2012-02-22T02:06:58.147Z",
@@ -25,28 +25,23 @@
     ],
     "due_at":"2019-09-15T02:06:58.147Z",
     "due_on":"2019-09-15",
-    "external":{
-      "data":"A blob of information",
-      "gid":"my_gid"
-    },
     "hearted":true,
     "hearts":[
       {
         "gid":"12345",
         "user":{
-          "gid":"12345",
+          "gid":"{\"scope\":\"asana\",\"hash\":\"qspPhKOOLuFUBz1_ZKi5N75VXBnwVjYwv9pilOk6TPI\"}",
           "resource_type":"user"
         }
       }
     ],
-    "html_notes":"<body>Mittens <em>really</em> likes the stuff from Humboldt.</body>",
     "is_rendered_as_separator":false,
     "liked":true,
     "likes":[
       {
         "gid":"12345",
         "user":{
-          "gid":"12345",
+          "gid":"{\"scope\":\"asana\",\"hash\":\"qspPhKOOLuFUBz1_ZKi5N75VXBnwVjYwv9pilOk6TPI\"}",
           "resource_type":"user"
         }
       }
@@ -64,8 +59,6 @@
       }
     ],
     "modified_at":"2012-02-22T02:06:58.147Z",
-    "name":"Buy catnip",
-    "notes":"Mittens really likes the stuff from Humboldt.",
     "num_hearts":5,
     "num_likes":5,
     "num_subtasks":3,
@@ -73,7 +66,7 @@
     "start_at":"2019-09-14T02:06:58.147Z",
     "start_on":"2019-09-14",
     "assignee":{
-      "gid":"12345",
+      "gid":"{\"scope\":\"asana\",\"hash\":\"qspPhKOOLuFUBz1_ZKi5N75VXBnwVjYwv9pilOk6TPI\"}",
       "resource_type":"user"
     },
     "assignee_section":{
@@ -85,7 +78,7 @@
         "gid":"12345",
         "resource_type":"custom_field",
         "created_by":{
-          "gid":"12345",
+          "gid":"{\"scope\":\"asana\",\"hash\":\"qspPhKOOLuFUBz1_ZKi5N75VXBnwVjYwv9pilOk6TPI\"}",
           "resource_type":"user"
         },
         "currency_code":"EUR",
@@ -95,7 +88,6 @@
           "date":"2024-08-23",
           "date_time":"2024-08-23T22:00:00.000Z"
         },
-        "description":"Development team priority",
         "display_value":"blue",
         "enabled":true,
         "enum_options":[
@@ -126,7 +118,7 @@
         "number_value":5.2,
         "people_value":[
           {
-            "gid":"12345",
+            "gid":"{\"scope\":\"asana\",\"hash\":\"qspPhKOOLuFUBz1_ZKi5N75VXBnwVjYwv9pilOk6TPI\"}",
             "resource_type":"user"
           }
         ],
@@ -138,7 +130,7 @@
     ],
     "followers":[
       {
-        "gid":"12345",
+        "gid":"{\"scope\":\"asana\",\"hash\":\"qspPhKOOLuFUBz1_ZKi5N75VXBnwVjYwv9pilOk6TPI\"}",
         "resource_type":"user"
       }
     ],

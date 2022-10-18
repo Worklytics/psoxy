@@ -9,17 +9,6 @@ import java.util.Collection;
 import java.util.List;
 
 public class PrebuiltSanitizerRules {
-    private static final Collection<Transform> TASK_TRANSFORMS = Lists.newArrayList(
-            Transform.Redact.builder()
-                    .jsonPath("$.data[*].external") //avoid random data
-                    .jsonPath("$.data[*].html_notes")
-                    .jsonPath("$.data[*].notes")
-                    .jsonPath("$.data[*]..name") //just all names, really
-                    .jsonPath("$.data[*].custom_fields[*].description")
-                    .build(),
-            Transform.Pseudonymize.builder()
-                    .jsonPath("$.data[*]..email")
-                    .build());
     static final Rules2.Endpoint WORKSPACES = Rules2.Endpoint.builder()
             .pathRegex("^/api/1.0/workspaces[?]?[^/]*$")
             //no redaction/pseudonymization
@@ -34,6 +23,7 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$.data[*].photo")
                     .build())
             .transform(Transform.Pseudonymize.builder()
+                    .jsonPath("$.data[*].gid")
                     .jsonPath("$.data[*].email")
                     .build())
             .build();
@@ -65,12 +55,12 @@ public class PrebuiltSanitizerRules {
 
     static final Rules2.Endpoint LIST_TASKS = Rules2.Endpoint.builder()
             .pathRegex("^/api/1.0/tasks[?][^/]*")
-            .transforms(TASK_TRANSFORMS)
+            .transforms(getTaskTransforms(true))
             .build();
 
     static final Rules2.Endpoint TASK = Rules2.Endpoint.builder()
             .pathRegex("^/api/1.0/tasks/[^/]*(\\?)?[^/]*")
-            .transforms(TASK_TRANSFORMS)
+            .transforms(getTaskTransforms(false))
             .build();
 
     static final Rules2.Endpoint TASK_STORIES = Rules2.Endpoint.builder()
@@ -87,13 +77,19 @@ public class PrebuiltSanitizerRules {
                     //TODO: story.text ever sensitive? seems like it can sometime contain important story-type context
                     .build())
             .transform(Transform.Pseudonymize.builder()
+                    .jsonPath("$.data[*].assignee.gid")
+                    .jsonPath("$.data[*].created_by.gid")
+                    .jsonPath("$.data[*].follower.gid")
+                    .jsonPath("$.data[*].hearts[*].user.gid")
+                    .jsonPath("$.data[*].likes[*].user.gid")
+                    .jsonPath("$.data[*].story.created_by.gid")
                     .jsonPath("$.data[*]..email")
                     .build())
             .build();
 
     static final Rules2.Endpoint TASK_SUBTASKS = Rules2.Endpoint.builder()
             .pathRegex("^/api/1.0/tasks/[^/]*/subtasks?[^/]*")
-            .transforms(TASK_TRANSFORMS)
+            .transforms(getTaskTransforms(true))
             .build();
 
     public static final RuleSet ASANA = Rules2.builder()
@@ -106,4 +102,26 @@ public class PrebuiltSanitizerRules {
             .endpoint(TASK_STORIES)
             .endpoint(TASK_SUBTASKS)
             .build();
+
+    private static Collection<Transform> getTaskTransforms(boolean isList) {
+        String multipleExpression = isList ? "[*]" : "";
+        return Lists.newArrayList(
+                Transform.Redact.builder()
+                        .jsonPath(String.format("$.data%s.external", multipleExpression)) //avoid random data
+                        .jsonPath(String.format("$.data%s.html_notes", multipleExpression))
+                        .jsonPath(String.format("$.data%s.notes", multipleExpression))
+                        .jsonPath(String.format("$.data%s..name", multipleExpression)) //just all names, really
+                        .jsonPath(String.format("$.data%s.custom_fields[*].description", multipleExpression))
+                        .build(),
+                Transform.Pseudonymize.builder()
+                        .jsonPath(String.format("$.data%s.completed_by.gid", multipleExpression))
+                        .jsonPath(String.format("$.data%s.hearts[*].user.gid", multipleExpression))
+                        .jsonPath(String.format("$.data%s.likes[*].user.gid", multipleExpression))
+                        .jsonPath(String.format("$.data%s.assignee.gid", multipleExpression))
+                        .jsonPath(String.format("$.data%s.custom_fields[*].created_by.gid", multipleExpression))
+                        .jsonPath(String.format("$.data%s.custom_fields[*].people_value[*].gid", multipleExpression))
+                        .jsonPath(String.format("$.data%s.followers[*].gid", multipleExpression))
+                        .jsonPath(String.format("$.data%s..email", multipleExpression))
+                        .build());
+    }
 }
