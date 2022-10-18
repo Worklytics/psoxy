@@ -65,17 +65,7 @@ module "worklytics_connector_specs" {
   # source = "../../modules/worklytics-connector-specs"
   source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connector-specs?ref=v0.4.6"
 
-  enabled_connectors = [
-    "gdirectory",
-    "gcal",
-    "gmail",
-    "gdrive",
-    "google-chat",
-    "google-meet",
-    "asana",
-    "slack-discovery-api",
-    "zoom",
-  ]
+  enabled_connectors            = var.enabled_connectors
   google_workspace_example_user = var.google_workspace_example_user
 }
 

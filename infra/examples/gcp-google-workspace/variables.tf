@@ -71,3 +71,20 @@ variable "replica_regions" {
     "us-west1",
   ]
 }
+
+variable "enabled_connectors" {
+  type        = list(string)
+  description = "list of ids of connectors to enabled; see modules/worklytics-connector-specs"
+
+  default = [
+    "asana",
+    "gdirectory",
+    "gcal",
+    "gmail",
+    "gdrive",
+    "google-chat",
+    "google-meet",
+    "slack-discovery-api",
+    "zoom",
+  ]
+}

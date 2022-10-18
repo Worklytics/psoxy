@@ -6,9 +6,9 @@ terraform {
       version = "~> 4.12"
     }
 
-    # for API connections to Microsoft 365
-    azuread = {
-      version = "~> 2.0"
+    # for the API connections to Google Workspace
+    google = {
+      version = ">= 3.74, <= 5.0"
     }
   }
 
@@ -32,12 +32,9 @@ provider "aws" {
   ]
 }
 
-provider "azuread" {
-  tenant_id = var.msft_tenant_id
-}
 
 locals {
-  base_config_path = "${var.psoxy_base_dir}configs/"
+  base_config_path = "${var.psoxy_base_dir}/configs/"
   bulk_sources = {
     "hris" = {
       source_kind = "hris"
@@ -64,125 +61,120 @@ locals {
   }
 }
 
-data "azuread_client_config" "current" {}
-
 module "worklytics_connector_specs" {
   # source = "../../modules/worklytics-connector-specs"
   source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connector-specs?ref=v0.4.6"
 
-  enabled_connectors     = var.enabled_connectors
-  msft_tenant_id         = var.msft_tenant_id
-  # this IS the correct ID for the user terraform is running as, which we assume is a user who's OK
-  # to use the subject of examples. You can change it to any string you want.
-  example_msft_user_guid = data.azuread_client_config.current.object_id
+  enabled_connectors = [
+    "gdirectory",
+    "gcal",
+    "gmail",
+    "gdrive",
+    "google-chat",
+    "google-meet",
+    "asana",
+    "slack-discovery-api",
+    "zoom",
+  ]
+  google_workspace_example_user = var.google_workspace_example_user
 }
 
 module "psoxy-aws" {
-  # source = "../../modules/aws"
+  # source = "../../modules/aws" # to bind with local
   source = "git::https://github.com/worklytics/psoxy//infra/modules/aws?ref=v0.4.6"
 
   aws_account_id                 = var.aws_account_id
   psoxy_base_dir                 = var.psoxy_base_dir
   caller_aws_arns                = var.caller_aws_arns
   caller_gcp_service_account_ids = var.caller_gcp_service_account_ids
+}
 
-  providers = {
-    aws = aws
+# holds SAs + keys needed to connect to Google Workspace APIs
+resource "google_project" "psoxy-google-connectors" {
+  name            = "Worklytics Connect%{if var.environment_name != ""} - ${var.environment_name}%{endif}"
+  project_id      = var.gcp_project_id
+  billing_account = var.gcp_billing_account_id
+  folder_id       = var.gcp_folder_id # if project is at top-level of your GCP organization, rather than in a folder, comment this line out
+  # org_id          = var.gcp_org_id # if project is in a GCP folder, this value is implicit and this line should be commented out
+
+  # NOTE: these are provide because OFTEN customers have pre-existing GCP project; if such, there's
+  # usually no need to specify folder_id/org_id/billing_account and have changes applied
+  lifecycle {
+    ignore_changes = [
+      org_id,
+      folder_id,
+      billing_account,
+    ]
   }
 }
 
-module "msft-connection" {
-  for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
-  #source = "../../modules/azuread-connection"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-connection?ref=v0.4.6"
+module "google-workspace-connection" {
+  for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
 
-  display_name                      = "Psoxy Connector - ${each.value.display_name}${var.connector_display_name_suffix}"
-  tenant_id                         = var.msft_tenant_id
-  required_app_roles                = each.value.required_app_roles
-  required_oauth2_permission_scopes = each.value.required_oauth2_permission_scopes
+  # source = "../../modules/google-workspace-dwd-connection"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/google-workspace-dwd-connection?ref=v0.4.6"
+
+
+  project_id                   = google_project.psoxy-google-connectors.project_id
+  connector_service_account_id = "psoxy-${each.key}"
+  display_name                 = "Psoxy Connector - ${each.value.display_name}${var.connector_display_name_suffix}"
+  apis_consumed                = each.value.apis_consumed
+  oauth_scopes_needed          = each.value.oauth_scopes_needed
+  todo_step                    = 1
+
+  depends_on = [
+    module.psoxy-aws,
+    google_project.psoxy-google-connectors
+  ]
 }
 
-module "msft-connection-auth" {
-  for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
+module "google-workspace-connection-auth" {
+  for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
 
-  # source = "../../modules/azuread-local-cert"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-local-cert?ref=v0.4.6"
+  # source = "../../modules/gcp-sa-auth-key-aws-secret"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-sa-auth-key-aws-secret?ref=v0.4.6"
 
-  application_object_id = module.msft-connection[each.key].connector.id
-  rotation_days         = 60
-  cert_expiration_days  = 180
-  certificate_subject   = var.certificate_subject
+  service_account_id = module.google-workspace-connection[each.key].service_account_id
+  secret_id          = "PSOXY_${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY"
 }
 
-module "private-key-aws-parameters" {
-  for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
-
-  # source = "../../modules/private-key-aws-parameter"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/private-key-aws-parameter?ref=v0.4.6"
-
-  instance_id = each.key
-
-  private_key_id = module.msft-connection-auth[each.key].private_key_id
-  private_key    = module.msft-connection-auth[each.key].private_key
-}
-
-# grant required permissions to connectors via Azure AD
-# (requires terraform configuration being applied by an Azure User with privelleges to do this; it
-#  usually requires a 'Global Administrator' for your tenant)
-module "msft_365_grants" {
-  for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
-
-  # source = "../../modules/azuread-grant-all-users"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-grant-all-users?ref=v0.4.6"
-
-  psoxy_instance_id        = each.key
-  application_id           = module.msft-connection[each.key].connector.application_id
-  oauth2_permission_scopes = each.value.required_oauth2_permission_scopes
-  app_roles                = each.value.required_app_roles
-  application_name         = each.key
-  todo_step                = 1
-}
-module "psoxy-msft-connector" {
-  for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
+module "psoxy-google-workspace-connector" {
+  for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
 
   # source = "../../modules/aws-psoxy-rest"
   source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-rest?ref=v0.4.6"
 
-  function_name         = "psoxy-${each.key}"
-  source_kind           = each.value.source_kind
-  path_to_config        = "${var.psoxy_base_dir}/configs/${each.value.source_kind}.yaml"
-  path_to_function_zip  = module.psoxy-aws.path_to_deployment_jar
-  function_zip_hash     = module.psoxy-aws.deployment_package_hash
-  api_caller_role_arn   = module.psoxy-aws.api_caller_role_arn
-  aws_assume_role_arn   = var.aws_assume_role_arn
-  example_api_calls     = each.value.example_calls
-  aws_account_id        = var.aws_account_id
-  path_to_repo_root     = var.psoxy_base_dir
-  todo_step             = module.msft_365_grants[each.key].next_todo_step
-  global_parameter_arns = module.psoxy-aws.global_parameters_arns
-
-  environment_variables = {
-    IS_DEVELOPMENT_MODE  = "false"
-    CLIENT_ID            = module.msft-connection[each.key].connector.application_id
-    REFRESH_ENDPOINT     = module.worklytics_connector_specs.msft_token_refresh_endpoint
-    PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
-  }
+  function_name                         = "psoxy-${each.key}"
+  source_kind                           = each.key
+  path_to_function_zip                  = module.psoxy-aws.path_to_deployment_jar
+  function_zip_hash                     = module.psoxy-aws.deployment_package_hash
+  path_to_config                        = "${local.base_config_path}/${each.key}.yaml"
+  api_caller_role_arn                   = module.psoxy-aws.api_caller_role_arn
+  aws_assume_role_arn                   = var.aws_assume_role_arn
+  aws_account_id                        = var.aws_account_id
+  path_to_repo_root                     = var.psoxy_base_dir
+  example_api_calls                     = each.value.example_api_calls
+  example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
+  global_parameter_arns                 = module.psoxy-aws.global_parameters_arns
+  todo_step                             = module.google-workspace-connection[each.key].next_todo_step
 }
 
-module "worklytics-psoxy-connection-msft-365" {
-  for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
+
+module "worklytics-psoxy-connection-google-workspace" {
+  for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
 
   # source = "../../modules/worklytics-psoxy-connection-aws"
   source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=v0.4.6"
 
   psoxy_instance_id  = each.key
-  psoxy_endpoint_url = module.psoxy-msft-connector[each.key].endpoint_url
+  psoxy_endpoint_url = module.psoxy-google-workspace-connector[each.key].endpoint_url
   display_name       = "${each.value.display_name} via Psoxy${var.connector_display_name_suffix}"
   aws_region         = var.aws_region
   aws_role_arn       = module.psoxy-aws.api_caller_role_arn
-  todo_step          = module.psoxy-msft-connector[each.key].next_todo_step
+  todo_step          = module.psoxy-google-workspace-connector[each.key].next_todo_step
 }
+
 
 # BEGIN LONG ACCESS AUTH CONNECTORS
 # Create secure parameters (later filled by customer)
@@ -238,29 +230,23 @@ module "aws-psoxy-long-auth-connectors" {
   # source = "../../modules/aws-psoxy-rest"
   source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-rest?ref=v0.4.6"
 
-  function_name                         = "psoxy-${each.key}"
-  path_to_function_zip                  = module.psoxy-aws.path_to_deployment_jar
-  function_zip_hash                     = module.psoxy-aws.deployment_package_hash
-  path_to_config                        = "${local.base_config_path}${each.value.source_kind}.yaml"
-  aws_assume_role_arn                   = var.aws_assume_role_arn
-  aws_account_id                        = var.aws_account_id
-  api_caller_role_arn                   = module.psoxy-aws.api_caller_role_arn
-  source_kind                           = each.value.source_kind
-  path_to_repo_root                     = var.psoxy_base_dir
-  example_api_calls                     = each.value.example_api_calls
-  example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
-  todo_step                             = module.source_token_external_todo[each.key].next_todo_step
-  reserved_concurrent_executions        = each.value.reserved_concurrent_executions
-  global_parameter_arns                 = module.psoxy-aws.global_parameters_arns
-  function_parameters                   = each.value.secured_variables
-
-  environment_variables = {
-    PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
-    # IS_DEVELOPMENT_MODE  = "false"
-  }
+  function_name                  = "psoxy-${each.key}"
+  path_to_function_zip           = module.psoxy-aws.path_to_deployment_jar
+  function_zip_hash              = module.psoxy-aws.deployment_package_hash
+  path_to_config                 = "${local.base_config_path}/${each.value.source_kind}.yaml"
+  aws_assume_role_arn            = var.aws_assume_role_arn
+  aws_account_id                 = var.aws_account_id
+  api_caller_role_arn            = module.psoxy-aws.api_caller_role_arn
+  source_kind                    = each.value.source_kind
+  path_to_repo_root              = var.psoxy_base_dir
+  example_api_calls              = each.value.example_api_calls
+  reserved_concurrent_executions = each.value.reserved_concurrent_executions
+  global_parameter_arns          = module.psoxy-aws.global_parameters_arns
+  function_parameters            = each.value.secured_variables
+  todo_step                      = module.source_token_external_todo[each.key].next_todo_step
 }
 
-module "worklytics-psoxy-connection-oauth-long-access" {
+module "worklytics-psoxy-connection" {
   for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
 
   # source = "../../modules/worklytics-psoxy-connection-aws"
@@ -275,6 +261,7 @@ module "worklytics-psoxy-connection-oauth-long-access" {
 }
 
 # END LONG ACCESS AUTH CONNECTORS
+
 
 module "psoxy-bulk" {
   for_each = local.bulk_sources

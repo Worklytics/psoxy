@@ -93,3 +93,20 @@ variable "google_workspace_example_user" {
   type        = string
   description = "user to impersonate for Google Workspace API calls (null for none)"
 }
+
+variable "enabled_connectors" {
+  type        = list(string)
+  description = "list of ids of connectors to enabled; see modules/worklytics-connector-specs"
+
+  default = [
+    "asana",
+    "gdirectory",
+    "gcal",
+    "gmail",
+    "gdrive",
+    "google-chat",
+    "google-meet",
+    "slack-discovery-api",
+    "zoom",
+  ]
+}
