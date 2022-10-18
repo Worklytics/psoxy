@@ -33,7 +33,7 @@ endpoints:
           - "$.data[*].created_by"
           - "$.data[*].completed_by"
           - "$..name"
-  - pathRegex: "^/api/1.0/projects/[^/]*/tasks?[^/]*"
+  - pathRegex: "^/api/1.0/tasks[?][^/]*"
     transforms:
       - !<redact>
         jsonPaths:
@@ -42,6 +42,21 @@ endpoints:
           - "$.data[*].notes"
           - "$.data[*]..name"
           - "$.data[*].custom_fields[*].description"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.data[*]..email"
+  - pathRegex: "^/api/1.0/tasks/[^/]*(\\?)?[^/]*"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$.data[*].external"
+          - "$.data[*].html_notes"
+          - "$.data[*].notes"
+          - "$.data[*]..name"
+          - "$.data[*].custom_fields[*].description"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.data[*]..email"
   - pathRegex: "^/api/1.0/tasks/[^/]*/stories?[^/]*"
     transforms:
       - !<redact>
@@ -54,3 +69,18 @@ endpoints:
           - "$.data[*].new_name"
           - "$.data[*].old_name"
           - "$.data[*].previews"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.data[*]..email"
+  - pathRegex: "^/api/1.0/tasks/[^/]*/subtasks?[^/]*"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$.data[*].external"
+          - "$.data[*].html_notes"
+          - "$.data[*].notes"
+          - "$.data[*]..name"
+          - "$.data[*].custom_fields[*].description"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.data[*]..email"
