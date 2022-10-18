@@ -67,6 +67,7 @@ public class PrebuiltSanitizerRules {
 
     static final Rules2.Endpoint DIRECTORY_USERS_NO_APP_IDS = Rules2.Endpoint.builder()
         .pathRegex(DIRECTORY_REGEX_USERS_BY_PSEUDO)
+        .allowedQueryParams(List.of("$top","$select","$skiptoken","$orderBy","$count"))
         .transforms(USER_TRANSFORMS)
         .build();
 
