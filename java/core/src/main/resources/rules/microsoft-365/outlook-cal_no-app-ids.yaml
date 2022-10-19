@@ -1,7 +1,13 @@
 ---
 allowAllEndpoints: false
 endpoints:
-  - pathRegex: "^/(v1.0|beta)/users/?[^/]*"
+  - pathRegex: "^/(v1.0|beta)/users(/p~[a-zA-Z0-9_-]+?)?[^/]*"
+    allowedQueryParams:
+      - "$top"
+      - "$select"
+      - "$skiptoken"
+      - "$orderBy"
+      - "$count"
     transforms:
       - !<redact>
         jsonPaths:
@@ -63,11 +69,16 @@ endpoints:
         includeOriginal: true
         encoding: "JSON"
   - pathRegex: "^/(v1.0|beta)/groups/[^/]*/members.*"
+    allowedQueryParams:
+      - "$top"
+      - "$select"
+      - "$skiptoken"
+      - "$orderBy"
+      - "$count"
     transforms:
       - !<redact>
         jsonPaths:
           - "$..displayName"
-          - "$..employeeId"
           - "$..aboutMe"
           - "$..mySite"
           - "$..preferredName"
@@ -75,16 +86,26 @@ endpoints:
           - "$..surname"
           - "$..mailNickname"
           - "$..proxyAddresses"
+          - "$..responsibilities"
+          - "$..skills"
           - "$..faxNumber"
           - "$..mobilePhone"
           - "$..businessPhones[*]"
+          - "$..onPremisesExtensionAttributes"
+          - "$..onPremisesSecurityIdentifier"
           - "$..securityIdentifier"
       - !<pseudonymize>
         jsonPaths:
+          - "$..employeeId"
           - "$..userPrincipalName"
           - "$..imAddresses[*]"
           - "$..mail"
           - "$..otherMails[*]"
+          - "$..onPremisesSamAccountName"
+          - "$..onPremisesUserPrincipalName"
+          - "$..onPremisesDistinguishedName"
+          - "$..onPremisesImmutableId"
+          - "$..identities[*].issuerAssignedId"
         encoding: "JSON"
       - !<pseudonymize>
         jsonPaths:

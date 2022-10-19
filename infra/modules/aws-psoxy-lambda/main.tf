@@ -47,7 +47,8 @@ resource "aws_cloudwatch_log_group" "lambda-log" {
 }
 
 resource "aws_iam_role" "iam_for_lambda" {
-  name = "iam_for_lambda_${var.function_name}"
+  name        = "PsoxyExec_${var.function_name}"
+  description = "execution role for psoxy instance"
 
   assume_role_policy = jsonencode({
     "Version" : "2012-10-17",
@@ -76,7 +77,8 @@ data "aws_region" "current" {}
 data "aws_caller_identity" "current" {}
 
 locals {
-  prefix = "PSOXY_${upper(replace(var.source_kind, "-", "_"))}_"
+  # TODO : revisit; this is exploiting convention
+  prefix = "${upper(replace(var.function_name, "-", "_"))}_"
 
   param_arn_prefix = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/${local.prefix}"
 
@@ -84,15 +86,15 @@ locals {
     "${local.param_arn_prefix}*" # wildcard to match all params corresponding to this function
   ]
 
-  function_read_arns  = concat(
+  function_read_arns = concat(
     [
       "${local.param_arn_prefix}*" # wildcard to match all params corresponding to this function
     ],
     var.global_parameter_arns
   )
 
-  write_statements =  [{
-    Action   = [
+  write_statements = [{
+    Action = [
       "ssm:PutParameter"
     ]
     Effect   = "Allow"
@@ -104,7 +106,7 @@ locals {
       "ssm:GetParameter*"
     ]
     Effect   = "Allow"
-    Resource =  local.function_read_arns
+    Resource = local.function_read_arns
   }]
 
   policy_statements = concat(

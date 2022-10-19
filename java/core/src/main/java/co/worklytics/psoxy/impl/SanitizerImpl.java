@@ -50,7 +50,7 @@ public class SanitizerImpl implements Sanitizer {
     //  - https://github.com/json-path/JsonPath/issues/384
     //  - https://github.com/json-path/JsonPath/issues/187 (earlier issue fixing stuff that wasn't thread-safe)
 
-    List<Pattern> compiledAllowedEndpoints;
+    Map<Rules2.Endpoint, Pattern> compiledAllowedEndpoints;
 
     private final Object $writeLock = new Object[0];
     List<Pair<Pattern, Rules2.Endpoint>> compiledEndpointRules;
@@ -75,14 +75,13 @@ public class SanitizerImpl implements Sanitizer {
     @Inject
     UrlSafeTokenPseudonymEncoder urlSafePseudonymEncoder;
 
-    List<Pattern> getCompiledAllowedEndpoints() {
+    Map<Rules2.Endpoint, Pattern> getCompiledAllowedEndpoints() {
         if (compiledAllowedEndpoints == null) {
             synchronized ($writeLock) {
                 if (configurationOptions.getRules() instanceof Rules2) {
                     compiledAllowedEndpoints = ((Rules2) configurationOptions.getRules()).getEndpoints().stream()
-                        .map(Rules2.Endpoint::getPathRegex)
-                        .map(regex -> Pattern.compile(regex, CASE_INSENSITIVE))
-                        .collect(Collectors.toList());
+                        .collect(Collectors.toMap(Function.identity(),
+                            endpoint -> Pattern.compile(endpoint.getPathRegex(), CASE_INSENSITIVE)));
                 } else {
                     throw new IllegalStateException("Rules must be of type Rules2");
                 }
@@ -96,8 +95,18 @@ public class SanitizerImpl implements Sanitizer {
     @Override
     public boolean isAllowed(@NonNull URL url) {
         String relativeUrl = URLUtils.relativeURL(url);
-        return ((Rules2) configurationOptions.getRules()).getAllowAllEndpoints()
-            || getCompiledAllowedEndpoints().stream().anyMatch(p -> p.matcher(relativeUrl).matches());
+
+        Rules2 rules = ((Rules2) configurationOptions.getRules());
+
+        if (rules.getAllowAllEndpoints()) {
+            return true;
+        } else {
+            return getCompiledAllowedEndpoints().entrySet().stream()
+                .filter(entry -> entry.getValue().matcher(relativeUrl).matches())
+                .filter(entry -> entry.getKey().getAllowedQueryParamsOptional()
+                    .map(allowedParams -> allowedParams.containsAll(URLUtils.queryParamNames(url))).orElse(true))
+                .findAny().isPresent();
+        }
     }
 
 

@@ -20,6 +20,7 @@ locals {
         "https://www.googleapis.com/auth/admin.directory.orgunit.readonly",
         "https://www.googleapis.com/auth/admin.directory.rolemanagement.readonly"
       ]
+      environment_variables : {}
       example_api_calls : [
         "/admin/directory/v1/users/me",
         "/admin/directory/v1/users?customer=my_customer",
@@ -39,6 +40,7 @@ locals {
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/calendar.readonly"
       ],
+      environment_variables : {}
       example_api_calls : [
         "/calendar/v3/calendars/primary",
         "/calendar/v3/users/me/settings",
@@ -55,6 +57,7 @@ locals {
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/gmail.metadata"
       ],
+      environment_variables : {},
       example_api_calls : [
         "/gmail/v1/users/me/messages"
       ]
@@ -69,6 +72,7 @@ locals {
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/admin.reports.audit.readonly"
       ]
+      environment_variables : {}
       example_api_calls : [
         "/admin/reports/v1/activity/users/all/applications/chat"
       ]
@@ -97,6 +101,7 @@ locals {
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/drive.metadata.readonly"
       ],
+      environment_variables : {}
       example_api_calls : [
         "/drive/v2/files",
         "/drive/v3/files"
@@ -118,7 +123,8 @@ locals {
         # Application permissions (form az ad sp list --query "[?appDisplayName=='Microsoft Graph'].appRoles" --all
         "User.Read.All",
         "Group.Read.All"
-      ],
+      ]
+      environment_variables : {}
       example_calls : [
         "/v1.0/users",
         "/v1.0/users/${var.example_msft_user_guid}",
@@ -138,6 +144,7 @@ locals {
         "Group.Read.All",
         "User.Read.All"
       ],
+      environment_variables : {}
       example_calls : [
         "/v1.0/users",
         "/v1.0/users/${var.example_msft_user_guid}/events",
@@ -158,6 +165,7 @@ locals {
         "Group.Read.All",
         "User.Read.All"
       ],
+      environment_variables : {}
       example_calls : [
         "/beta/users",
         "/beta/users/${var.example_msft_user_guid}/mailboxSettings",
@@ -171,6 +179,12 @@ locals {
     asana = {
       source_kind : "asana",
       display_name : "Asana"
+      environment_variables : {}
+      secured_variables : [
+        { name : "ACCESS_TOKEN", writable : false },
+      ],
+      reserved_concurrent_executions : null
+      example_api_calls_user_to_impersonate : null
       example_api_calls : [
         "/api/1.0/users?workspace={ANY_WORKSPACE_GID}&limit=10",
         "/api/1.0/workspaces/{ANY_WORKSPACE_GID}/teams&limit=10",
@@ -182,9 +196,6 @@ locals {
       secured_variables : [
         { name : "ACCESS_TOKEN", writable : false },
       ],
-      environment_variables : {},
-      reserved_concurrent_executions : null
-      example_api_calls_user_to_impersonate : null
       external_token_todo : <<EOT
   1. Create a [Service Account User + token](https://asana.com/guide/help/premium/service-accounts)
      or a sufficiently [Personal Access Token]() for a sufficiently privileged user (who can see all
@@ -194,17 +205,18 @@ EOT
     slack-discovery-api = {
       source_kind : "slack"
       display_name : "Slack Discovery API"
-      example_api_calls : [
-        "/api/discovery.enterprise.info",
-        "/api/discovery.conversations.list",
-        "/api/discovery.conversations.history?channel={CHANNEL_ID}&limit=10",
-        "/api/discovery.users.list",
-      ],
+      environment_variables : {}
       secured_variables : [
         { name : "ACCESS_TOKEN", writable : false },
       ]
       reserved_concurrent_executions : null
       example_api_calls_user_to_impersonate : null
+      example_api_calls : [
+        "/api/discovery.enterprise.info",
+        "/api/discovery.conversations.list",
+        "/api/discovery.conversations.history?channel={CHANNEL_ID}&limit=10",
+        "/api/discovery.users.list",
+      ]
       external_token_todo : <<EOT
 ## Slack Discovery Setup
 For enabling Slack Discovery with the Psoxy you must first setup an app on your Slack Enterprise
@@ -235,6 +247,16 @@ EOT
     zoom = {
       source_kind : "zoom"
       display_name : "Zoom"
+
+      environment_variables : {}
+      secured_variables : [
+        { name : "CLIENT_SECRET", writable : false },
+        { name : "CLIENT_ID", writable : false },
+        { name : "ACCOUNT_ID", writable : false },
+        { name : "ACCESS_TOKEN", writable : true },
+      ],
+      reserved_concurrent_executions : null # 1
+      example_api_calls_user_to_impersonate : null
       example_api_calls : [
         "/v2/users",
         "/v2/users/{USER_ID}/meetings",
@@ -245,14 +267,6 @@ EOT
         "/v2/report/meetings/{meetingId}",
         "/v2/report/meetings/{meetingId}/participants"
       ],
-      secured_variables : [
-        { name : "CLIENT_SECRET", writable : false },
-        { name : "CLIENT_ID", writable : false },
-        { name : "ACCOUNT_ID", writable : false },
-        { name : "ACCESS_TOKEN", writable : true },
-      ],
-      reserved_concurrent_executions : null # 1
-      example_api_calls_user_to_impersonate : null
       external_token_todo : <<EOT
 ## Zoom Setup
 Zoom connector through Psoxy requires a custom managed app on the Zoom Marketplace (in development
@@ -278,11 +292,6 @@ EOT
     dropbox-business = {
       source_kind : "dropbox-business",
       display_name : "Dropbox Business"
-      example_api_calls : [
-        "/2/team/members/list_v2",
-        "/2/team/groups/list",
-        "/2/team_log/get_events",
-      ],
       secured_variables : [
         { name : "REFRESH_TOKEN", writable : false },
         { name : "CLIENT_ID", writable : false },
@@ -293,6 +302,11 @@ EOT
       }
       reserved_concurrent_executions : null
       example_api_calls_user_to_impersonate : null
+      example_api_calls : [
+        "/2/team/members/list_v2",
+        "/2/team/groups/list",
+        "/2/team_log/get_events",
+      ],
       external_token_todo : <<EOT
 Dropbox connector through Psoxy requires a Dropbox Application created in Dropbox Console. The application
 does not require to be public, and it needs to have the following scopes to support
@@ -336,11 +350,35 @@ all the operations for the connector:
 }
 ```
 7. Finally set following variables in AWS System Manager parameters store / GCP Cloud Secrets (if default implementation):
-  - `PSOXY_dropbox_business_REFRESH_TOKEN` secret variable with value of `refresh_token` received in previous response
-  - `PSOXY_dropbox_business_CLIENT_ID` with `App key` value.
-  - `PSOXY_dropbox_business_CLIENT_SECRET` with `App secret` value.
+  - `PSOXY_DROPBOX_BUSINESS_REFRESH_TOKEN` secret variable with value of `refresh_token` received in previous response
+  - `PSOXY_DROPBOX_BUSINESS_CLIENT_ID` with `App key` value.
+  - `PSOXY_DROPBOX_BUSINESS_CLIENT_SECRET` with `App secret` value.
 
 EOT
+    }
+  }
+
+  bulk_connectors = {
+    "hris" = {
+      source_kind = "hris"
+      rules = {
+        columnsToRedact = []
+        columnsToPseudonymize = [
+          "employee_id",    # primary key
+          "employee_email", # for matching
+          "manager_id"      # should match to employee_id
+        ]
+      }
+    }
+    "qualtrics" = {
+      source_kind = "qualtrics"
+      rules = {
+        columnsToRedact = []
+        columnsToPseudonymize = [
+          "employee_id", # primary key
+          # "employee_email", # if exists
+        ]
+      }
     }
   }
 }
@@ -348,23 +386,28 @@ EOT
 # computed values filtered by enabled connectors
 locals {
   enabled_google_workspace_connectors = {
-  for k, v in local.google_workspace_sources : k => v if contains(var.enabled_connectors, k)
+    for k, v in local.google_workspace_sources : k => v if contains(var.enabled_connectors, k)
   }
   enabled_msft_365_connectors = {
-  for k, v in local.msft_365_connectors : k => v if contains(var.enabled_connectors, k)
+    for k, v in local.msft_365_connectors : k => v if contains(var.enabled_connectors, k)
   }
-  enabled_oauth_long_access_connectors = {for k, v in local.oauth_long_access_connectors : k => v if contains(var.enabled_connectors, k)}
+  enabled_oauth_long_access_connectors = { for k, v in local.oauth_long_access_connectors : k => v if contains(var.enabled_connectors, k) }
 
-  enabled_oauth_long_access_connectors_todos = {for k, v in local.enabled_oauth_long_access_connectors : k => v if v.external_token_todo != null}
+  enabled_oauth_long_access_connectors_todos = { for k, v in local.enabled_oauth_long_access_connectors : k => v if v.external_token_todo != null }
   # list of pair of [(conn1, secret1), (conn1, secret2), ... (connN, secretM)]
-  enabled_oauth_secrets_to_create            = distinct(flatten([
-  for k, v in local.enabled_oauth_long_access_connectors : [
-  for secret_var in v.secured_variables : {
-    connector_name = k
-    secret_name    = secret_var.name
-  }
-  ]
+
+  enabled_oauth_secrets_to_create = distinct(flatten([
+    for k, v in local.enabled_oauth_long_access_connectors : [
+      for secret_var in v.secured_variables : {
+        connector_name = k
+        secret_name    = secret_var.name
+      }
+    ]
   ]))
+
+  enabled_bulk_connectors = {
+    for k, v in local.bulk_connectors : k => v if contains(var.enabled_connectors, k)
+  }
 }
 
 output "enabled_google_workspace_connectors" {
@@ -390,3 +433,8 @@ output "enabled_oauth_secrets_to_create" {
 output "msft_token_refresh_endpoint" {
   value = "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
 }
+
+output "enabled_bulk_connectors" {
+  value = local.enabled_bulk_connectors
+}
+

@@ -2,8 +2,13 @@ package co.worklytics.psoxy.utils;
 
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
 
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class URLUtils {
 
@@ -17,4 +22,9 @@ public class URLUtils {
         return relativeURL(new URL(urlAsString));
     }
 
+    public static List<String> queryParamNames(URL url) {
+        return URLEncodedUtils.parse(url.getQuery(), Charset.defaultCharset()).stream()
+            .map(NameValuePair::getName)
+            .collect(Collectors.toList());
+    }
 }

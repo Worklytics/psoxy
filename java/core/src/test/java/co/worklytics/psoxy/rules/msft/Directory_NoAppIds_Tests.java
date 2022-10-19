@@ -5,9 +5,12 @@ import co.worklytics.psoxy.rules.Transform;
 import lombok.Getter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.stream.Stream;
 
 public class Directory_NoAppIds_Tests extends DirectoryTests {
 
@@ -22,11 +25,50 @@ public class Directory_NoAppIds_Tests extends DirectoryTests {
                 .build());
     }
 
+    @ValueSource(strings = {
+        "alice@acme.com",
+        "4ea7fc01-0264-4e84-b85e-9e49fba4de97",
+    })
+    @ParameterizedTest
+    void users_byId(String id) {
+        String endpoint = "https://graph.microsoft.com/v1.0/users/" + id;
+        assertUrlBlocked(endpoint);
+    }
+
+    @Override
+    @Test
+    void user() {
+        String jsonString = asJson(exampleDirectoryPath, "user.json");
+
+        String endpoint = "https://graph.microsoft.com/v1.0/users/p~2343adsfasdfa";
+
+        Collection<String> PII = Arrays.asList(
+            "MeganB@M365x214355.onmicrosoft.com",
+            "Megan",
+            "Bowen",
+            "Megan Bowen",
+            "+1 412 555 0109"
+        );
+        assertNotSanitized(jsonString, PII);
+
+        String sanitized = this.sanitize(endpoint, jsonString);
+
+        assertPseudonymized(sanitized, "MeganB@M365x214355.onmicrosoft.com");
+        assertRedacted(sanitized,
+            "Megan",
+            "Bowen",
+            "Megan Bowen",
+            "+1 412 555 0109"
+        );
+
+        assertUrlWithSubResourcesBlocked(endpoint);
+    }
+
     @Test
     void user_noAppIds() {
         String jsonString = asJson(exampleDirectoryPath, "user.json");
 
-        String endpoint = "https://graph.microsoft.com/v1.0/users/2343adsfasdfa";
+        String endpoint = "https://graph.microsoft.com/v1.0/users/p~2343adsfasdfa";
 
         Collection<String> PII = Arrays.asList(
             "48d31887-5fad-4d73-a9f5-3c356e68a038"
@@ -37,6 +79,8 @@ public class Directory_NoAppIds_Tests extends DirectoryTests {
 
         assertReversibleUrlTokenized(sanitized, PII);
     }
+
+
 
     @Test
     void users_noAppIds() {
@@ -78,5 +122,14 @@ public class Directory_NoAppIds_Tests extends DirectoryTests {
         String sanitized = this.sanitize(endpoint, jsonString);
 
         assertPseudonymized(sanitized, PII);
+    }
+
+    @Override
+    public Stream<InvocationExample> getExamples() {
+        return Stream.of(
+            InvocationExample.of("https://graph.microsoft.com/v1.0/groups/02bd9fd6-8f93-4758-87c3-1fb73740a315/members?$count=true", "group-members.json"),
+            InvocationExample.of("https://graph.microsoft.com/v1.0/users/p~12398123012312", "user.json"),
+            InvocationExample.of("https://graph.microsoft.com/v1.0/users", "users.json")
+        );
     }
 }

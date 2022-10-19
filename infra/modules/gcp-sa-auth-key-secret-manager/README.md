@@ -1,4 +1,5 @@
-# gcp-sa-auth-key-secret-manager
+# DEPRECATED** gcp-sa-auth-key-secret-manager
+DEPRECATED : use `gcp-secrets` and compose with `gcp-sa-auth-key`
 
 This terraform module provisions a service account key for a target service account and saves it as
 a secret in Secret Manager.
