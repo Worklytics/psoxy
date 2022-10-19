@@ -82,6 +82,7 @@ variable "enabled_connectors" {
 
   default = [
     "azure-ad",
+    "dropbox-business",
     "outlook-cal",
     "outlook-mail",
     "asana",
