@@ -211,7 +211,7 @@ locals {
 }
 
 resource "aws_iam_role_policy_attachment" "caller_bucket_access_policy" {
-  for_each   = toset([ for r in local.accessor_role_names: r if r != null])
+  for_each   = toset([ for r in local.accessor_role_names : r if r != null])
 
   role       = each.key
   policy_arn = aws_iam_policy.output_bucket_read.arn
@@ -231,3 +231,12 @@ resource "aws_ssm_parameter" "rules" {
   }
 }
 
+# to facilitate composition of ingestion pipeline
+output "input_bucket" {
+  value = aws_s3_bucket.output.bucket
+}
+
+# to facilitate composition of output pipeline
+output "output_bucket" {
+  value = aws_s3_bucket.output.bucket
+}
