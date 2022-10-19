@@ -132,7 +132,10 @@ module "sa-key-secrets" {
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/hashicorp-vault-secrets?ref=v0.4.4"
 
   secrets = {
-    "PSOXY_${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY" : module.google-workspace-connection-auth[each.key].key_value
+    "PSOXY_${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY" : {
+      value       = module.google-workspace-connection-auth[each.key].key_value
+      description = "GCP service account key for ${each.key} connector"
+    }
   }
 }
 
