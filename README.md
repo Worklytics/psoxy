@@ -128,10 +128,11 @@ terraform apply
 
 ## Releases
 
+### [v0.4.7](https://github.com/Worklytics/psoxy/releases/tag/v0.4.7)
+
 ### [v0.4.6](https://github.com/Worklytics/psoxy/releases/tag/v0.4.6)
 
 ### [v0.4.5](https://github.com/Worklytics/psoxy/releases/tag/v0.4.5)
-The `main` branch is current at 0.4.
 
 Features:
 - Store and share short-lived OAuth access token across AWS lambda instances for Zoom Server-to-server OAuth connector.
