@@ -186,11 +186,15 @@ locals {
       reserved_concurrent_executions : null
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
-        "/api/1.0/workspaces",
-        "/api/1.0/users?workspace={ANY_WORKSPACE_ID}&limit=10",
-        "/api/1.0/workspaces/{ANY_WORKSPACE_ID}/projects?limit=20",
-        "/api/1.0/projects/{ANY_PROJECT_ID}/tasks?limit=20",
-        "/api/1.0/tasks/{ANY_TASK_ID}/stories",
+        "/api/1.0/users?workspace={ANY_WORKSPACE_GID}&limit=10",
+        "/api/1.0/workspaces/{ANY_WORKSPACE_GID}/teams&limit=10",
+        "/api/1.0/teams/{ANY_TEAM_GID}/projects?limit=20",
+        "/api/1.0/tasks?project={ANY_PROJECT_GID}",
+        "/api/1.0/tasks/{ANY_TASK_GID}",
+        "/api/1.0/tasks/{ANY_TASK_GID}/stories",
+      ],
+      secured_variables : [
+        { name : "ACCESS_TOKEN", writable : false },
       ],
       external_token_todo : <<EOT
   1. Create a [Service Account User + token](https://asana.com/guide/help/premium/service-accounts)
@@ -202,7 +206,6 @@ EOT
       source_kind : "slack"
       display_name : "Slack Discovery API"
       environment_variables : {}
-
       secured_variables : [
         { name : "ACCESS_TOKEN", writable : false },
       ]
@@ -289,11 +292,6 @@ EOT
     dropbox-business = {
       source_kind : "dropbox-business",
       display_name : "Dropbox Business"
-      example_api_calls : [
-        "/2/team/members/list_v2",
-        "/2/team/groups/list",
-        "/2/team_log/get_events",
-      ],
       secured_variables : [
         { name : "REFRESH_TOKEN", writable : false },
         { name : "CLIENT_ID", writable : false },
@@ -304,6 +302,11 @@ EOT
       }
       reserved_concurrent_executions : null
       example_api_calls_user_to_impersonate : null
+      example_api_calls : [
+        "/2/team/members/list_v2",
+        "/2/team/groups/list",
+        "/2/team_log/get_events",
+      ],
       external_token_todo : <<EOT
 Dropbox connector through Psoxy requires a Dropbox Application created in Dropbox Console. The application
 does not require to be public, and it needs to have the following scopes to support
