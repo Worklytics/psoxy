@@ -18,7 +18,6 @@ module "psoxy_lambda" {
   memory_size_mb                 = 512
   timeout_seconds                = 55
   reserved_concurrent_executions = var.reserved_concurrent_executions
-  aws_assume_role_arn            = var.aws_assume_role_arn
   path_to_config                 = var.path_to_config
   source_kind                    = var.source_kind
   function_parameters            = var.function_parameters
