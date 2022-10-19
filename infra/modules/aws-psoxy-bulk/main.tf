@@ -206,8 +206,14 @@ resource "aws_iam_policy" "output_bucket_read" {
   }
 }
 
+locals {
+  accessor_role_names = concat([var.api_caller_role_name], var.output_accessor_role_names)
+}
+
 resource "aws_iam_role_policy_attachment" "caller_bucket_access_policy" {
-  role       = var.api_caller_role_name
+  for_each   = toset([ for r in local.accessor_role_names: r if r != null])
+
+  role       = each.key
   policy_arn = aws_iam_policy.output_bucket_read.arn
 }
 
@@ -224,3 +230,4 @@ resource "aws_ssm_parameter" "rules" {
     ]
   }
 }
+

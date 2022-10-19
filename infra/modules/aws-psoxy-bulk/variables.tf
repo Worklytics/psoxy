@@ -55,12 +55,19 @@ variable "path_to_config" {
 
 variable "api_caller_role_arn" {
   type        = string
-  description = "arn of role which can be assumed to call API"
+  description = "DEPRECATED; arn of role which can be assumed to call API"
+  default     = null
 }
 
 variable "api_caller_role_name" {
   type        = string
-  description = "name of role which can be assumed to call API"
+  description = "DEPRECATED; name of role which can be assumed to call API"
+  default     = null
+}
+
+variable "output_accessor_role_names" {
+  type        = list(string)
+  description = "list of names of AWS IAM Roles which should be able to access the output bucket"
 }
 
 variable "psoxy_base_dir" {
