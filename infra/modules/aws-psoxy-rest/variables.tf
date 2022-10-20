@@ -32,7 +32,7 @@ variable "reserved_concurrent_executions" {
 
 variable "aws_assume_role_arn" {
   type        = string
-  description = "role arn"
+  description = "arn of role used to test the lambda"
 }
 
 variable "source_kind" {

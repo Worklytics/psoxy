@@ -6,7 +6,20 @@ provider, rather than a generic solution or something that takes the provider as
 
 Please review the `README.md` within each provider's module for pre-reqs and usage details.
 
-## Slack Discovery Setup
+## Directory Structure
+
+  - `examples/` - example configurations to be adapted by customers
+  - `examples-dev/` - example configurations to be adapted by developers
+  - `modules/` - modules to be re-used primarily by other modules or if customers need very custom configurations
+  - `modules-examples/` - psoxy configurations that have been 'modularized', to enable use by
+    customers via a minimal root configuration (see `examples/`) OR as part of their larger
+    Terraform configuration (presumably covering infra beyond psoxy). If you need more control than
+    what variables of these  modules expose, you can copy one of these modules, use it as a root
+    terraform configuration, and directly modify how it invokes modules.
+
+## Per Connector Setup
+
+### Slack Discovery Setup
 
 For enabling Slack Discovery with the Psoxy you must first setup an app on your Slack Enterprise
 instance.
@@ -25,7 +38,7 @@ instance.
 
 The next step depends on your installation approach you might need to change slightly
 
-### Org wide install
+#### Org wide install
 
 Use this step if you want to install in the whole org, across multiple workspaces.
 
@@ -39,7 +52,7 @@ Use this step if you want to install in the whole org, across multiple workspace
    value in the Secret Manager for the Proxy
    Otherwise, share the token with the AWS/GCP administrator completing the implementation.
 
-### Workspace install
+#### Workspace install
 
 Use this steps if you intend to install in just one workspace within your org.
 
@@ -50,7 +63,7 @@ Use this steps if you intend to install in just one workspace within your org.
 4. Add the access token as `PSOXY_ACCESS_TOKEN_psoxy-slack-discovery-api` secret value in the GCP Project's Secret
    Manager
 
-## Zoom Setup
+### Zoom Setup
 
 Zoom connector through Psoxy requires a custom managed app on the Zoom Marketplace (in development
 mode, no need to publish).
@@ -77,7 +90,7 @@ mode, no need to publish).
 
 5. Activate the app
 
-## Dropbox Setup
+### Dropbox Setup
 
 Dropbox connector through Psoxy requires a Dropbox Application created in Dropbox Console. The application
 does not require to be public, and it needs to have the following scopes to support

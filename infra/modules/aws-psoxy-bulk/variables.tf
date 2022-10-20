@@ -9,7 +9,7 @@ variable "aws_account_id" {
 
 variable "aws_assume_role_arn" {
   type        = string
-  description = "arn of role Terraform should assume when provisioning your infra"
+  description = "arn of role used to test the lambda"
 }
 
 variable "aws_region" {
