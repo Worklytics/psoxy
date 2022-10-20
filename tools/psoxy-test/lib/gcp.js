@@ -52,7 +52,10 @@ async function call(options = {}) {
     console.log('Request headers:', headers);
   }
 
-  return await request(options.url, headers);
+  const url = new URL(options.url);
+  const method = options.method || resolveHTTPMethod(url.pathname);
+
+  return await request(url, method, headers);
 }
 
 export default {
