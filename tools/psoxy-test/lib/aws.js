@@ -47,7 +47,13 @@ async function call(options = {}) {
   }
  
   console.log(`Assuming role ${options.role}`);
-  const credentials = assumeRole(options.role);
+  let credentials;
+  try {
+    credentials = assumeRole(options.role);
+  } catch (err) {
+    throw new Error(`Unable to assume ${options.role}: ${err}`);
+  }
+  
   
   console.log('Signing request');
 

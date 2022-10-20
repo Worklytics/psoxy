@@ -124,8 +124,8 @@ async function requestWrapper(url, method = 'GET', headers) {
           res.on('end', () => {
             try {
               result.data = JSON.parse(responseData);
-            } catch (e) {
-              console.log('Error parsing JSON response');
+            } catch (err) {
+              console.log(`Error parsing JSON response: ${err}`);
               result.data = responseData;
             }
             resolve(result);
@@ -135,7 +135,7 @@ async function requestWrapper(url, method = 'GET', headers) {
     );
     req.on('error', (err) => {
       // resolve promise to not force caller to "catch"; `status` is not the
-      // right key, but callers expect this a result object with these keys
+      // right key, but callers expect a result object with these keys
       resolve({ status: err.code, error: err.message });
     });
     req.end();
