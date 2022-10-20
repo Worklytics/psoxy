@@ -5,6 +5,11 @@ RED='\033[0;31m'
 BLUE='\33[0;34m'
 NC='\033[0m' # No Color
 
+if [ -f terraform.tfvars ]; then
+    printf "${RED}Nothing to initialize. File terraform.tfvars already exists!${NC}\n"
+    exit 1 # error
+fi
+
 cp terraform.tfvars.example terraform.tfvars
 
 # append root of checkout automatically
