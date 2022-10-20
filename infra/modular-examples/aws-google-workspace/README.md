@@ -1,4 +1,4 @@
-# AWS
+# aws-google-workspace
 
 Module for deploying Worklytics Psoxy on AWS for Google Workspace-based organization.
 
