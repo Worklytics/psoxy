@@ -1,0 +1,20 @@
+aws_account_id                = "123123123123" # your AWS account ID here
+aws_assume_role_arn           = "arn:aws:iam::123123123123:role/InfraAdmin" # role in that AWS account ID to assume
+msft_tenant_id                = "" # your Microsoft tenant ID here
+enabled_connectors = [
+  "asana",
+  "dropbox-business",
+  "outlook-calendar",
+  "outlook-mail",
+  "hris",
+  "slack-discovery-api",
+  "zoom",
+]
+non_production_connectors = [
+  # use to mark any of the above as 'non-production' (NOTE: allows test calls that may expose PII)
+]
+caller_aws_arns = [
+]
+caller_gcp_service_account_ids = [
+  # "123456712345671234567" # 21-digits, get this from Worklytics once prod-ready
+]
