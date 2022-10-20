@@ -18,6 +18,16 @@ variable "aws_region" {
   description = "default region in which to provision your AWS infra"
 }
 
+variable "psoxy_base_dir" {
+  type        = string
+  description = "the path where your psoxy repo resides. Preferably a full path, /home/user/repos/, avoid tilde (~) shortcut to $HOME"
+
+  validation {
+    condition     = can(regex(".*\\/$", var.psoxy_base_dir))
+    error_message = "The psoxy_base_dir value should end with a slash."
+  }
+}
+
 variable "caller_gcp_service_account_ids" {
   type        = list(string)
   description = "ids of GCP service accounts allowed to send requests to the proxy (eg, unique ID of the SA of your Worklytics instance)"
@@ -44,33 +54,10 @@ variable "caller_aws_arns" {
   }
 }
 
-variable "gcp_project_id" {
-  type        = string
-  description = "id of GCP project that will host psoxy instance"
-}
-
 variable "environment_name" {
   type        = string
   description = "qualifier to append to name of project that will host your psoxy instance"
   default     = ""
-}
-
-variable "gcp_folder_id" {
-  type        = string
-  description = "optionally, a folder into which to provision it"
-  default     = null
-}
-
-variable "gcp_billing_account_id" {
-  type        = string
-  description = "billing account ID; needed to create the project"
-  default     = null
-}
-
-variable "gcp_org_id" {
-  type        = string
-  description = "your GCP organization ID"
-  default     = null
 }
 
 variable "connector_display_name_suffix" {
@@ -79,20 +66,7 @@ variable "connector_display_name_suffix" {
   default     = ""
 }
 
-variable "psoxy_base_dir" {
-  type        = string
-  description = "the path where your psoxy repo resides. Preferably a full path, /home/user/repos/, avoid tilde (~) shortcut to $HOME"
 
-  validation {
-    condition     = can(regex(".*\\/$", var.psoxy_base_dir))
-    error_message = "The psoxy_base_dir value should end with a slash."
-  }
-}
-
-variable "google_workspace_example_user" {
-  type        = string
-  description = "user to impersonate for Google Workspace API calls (null for none)"
-}
 
 variable "enabled_connectors" {
   type        = list(string)
@@ -110,6 +84,12 @@ variable "enabled_connectors" {
     "slack-discovery-api",
     "zoom",
   ]
+}
+
+variable "non_production_connectors" {
+  type        = list(string)
+  description = "connector ids in this list will be in development mode (not for production use"
+  default     = []
 }
 
 variable "custom_bulk_connectors" {
@@ -133,8 +113,31 @@ variable "custom_bulk_connectors" {
   }
 }
 
-variable "non_production_connectors" {
-  type        = list(string)
-  description = "connector ids in this list will be in development mode (not for production use"
-  default     = []
+variable "gcp_project_id" {
+  type        = string
+  description = "id of GCP project that will host psoxy instance"
+}
+
+variable "gcp_org_id" {
+  type        = string
+  description = "your GCP organization ID"
+  default     = null
+}
+
+variable "gcp_folder_id" {
+  type        = string
+  description = "optionally, a folder into which to provision it"
+  default     = null
+}
+
+variable "gcp_billing_account_id" {
+  type        = string
+  description = "billing account ID; needed to create the project"
+  default     = null
+}
+
+
+variable "google_workspace_example_user" {
+  type        = string
+  description = "user to impersonate for Google Workspace API calls (null for none)"
 }
