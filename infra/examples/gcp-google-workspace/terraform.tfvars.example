@@ -1,0 +1,35 @@
+gcp_project_id                = "psoxy-acme-example"
+gcp_org_id                    = "123123123123"
+gcp_folder_id                 = "123123123123"
+gcp_billing_account_id        = "123456-ABCDEFG-ABCDEFG"
+google_workspace_example_user = "example@acme.com"
+# gcp_region                    = "us-central1"
+# replica regions = ["us-central1", "us-east1", "us-west1"]
+enabled_connectors = [
+  "asana",
+  "gcal",
+  "gdirectory",
+  "gdrive",
+  "gmail",
+  "google-meet",
+  "google-chat",
+  "hris",
+  "slack-discovery-api",
+  "zoom",
+]
+non_production_connectors = [] # use to mark any of the above as 'non-production' (NOTE: allows test calls that may expose PII)
+custom_bulk_connectors = {
+    #    "custom-survey" = {
+    #      source_kind = "survey"
+    #      rules       = {
+    #        columnsToRedact       = []
+    #        columnsToPseudonymize = [
+    #          "employee_id", # primary key
+    #          # "employee_email", # if exists
+    #        ]
+    #      }
+    #    }
+}
+worklytics_sa_emails = [
+   # get value from worklytics
+]

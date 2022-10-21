@@ -9,7 +9,7 @@ variable "aws_account_id" {
 
 variable "aws_assume_role_arn" {
   type        = string
-  description = "arn of role Terraform should assume when provisioning your infra"
+  description = "arn of role Terraform should assume when provisioning your infra (and making test calls)"
 }
 
 variable "aws_region" {
@@ -43,21 +43,22 @@ variable "caller_aws_arns" {
     error_message = "The values of caller_aws_arns should be AWS Resource Names, something like 'arn:aws:iam::914358739851:root'."
   }
 }
-variable "msft_tenant_id" {
+
+variable "gcp_project_id" {
   type        = string
+  description = "id of GCP project that will host psoxy instance"
+}
+
+variable "environment_name" {
+  type        = string
+  description = "qualifier to append to name of project that will host your psoxy instance"
   default     = ""
-  description = "ID of Microsoft tenant to connect to (req'd only if config includes MSFT connectors)"
 }
 
 variable "connector_display_name_suffix" {
   type        = string
   description = "suffix to append to display_names of connector SAs; helpful to distinguish between various ones in testing/dev scenarios"
   default     = ""
-}
-
-variable "certificate_subject" {
-  type        = string
-  description = "value for 'subject' passed to openssl when generation certificate (eg '/C=US/ST=New York/L=New York/CN=www.worklytics.co')"
 }
 
 variable "psoxy_base_dir" {
@@ -70,10 +71,9 @@ variable "psoxy_base_dir" {
   }
 }
 
-variable "pseudonymize_app_ids" {
+variable "google_workspace_example_user" {
   type        = string
-  description = "if set, will set value of PSEUDONYMIZE_APP_IDS environment variable to this value for all sources"
-  default     = false
+  description = "user to impersonate for Google Workspace API calls (null for none)"
 }
 
 variable "enabled_connectors" {
@@ -81,10 +81,13 @@ variable "enabled_connectors" {
   description = "list of ids of connectors to enabled; see modules/worklytics-connector-specs"
 
   default = [
-    "azure-ad",
-    "outlook-cal",
-    "outlook-mail",
     "asana",
+    "gdirectory",
+    "gcal",
+    "gmail",
+    "gdrive",
+    "google-chat",
+    "google-meet",
     "hris",
     "slack-discovery-api",
     "zoom",

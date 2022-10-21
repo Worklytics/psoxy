@@ -1,8 +1,8 @@
-# AWS + Microsoft 365
+# aws-msft-365
 
 This example provisions psoxy as an AWS lambda that connects to Microsoft 365 data sources.
 
-## Getting Started
+## Authentication
 
 ### AWS
 Follow [`docs/aws/getting-started.md`](../../../docs/aws/getting-started.md) to setup AWS CLI to
@@ -19,12 +19,24 @@ approach.  If that doesn't suite your organization needs, the Terraform docs lin
 alternatives, but this will require your own modification to the example configuration.
 
 If your target MSFT tenant (specified in `terraform.tfvars`) lacks an Azure subscription (eg, is
-only Microsoft 365), you should auth with `az login --allow-no-subscriptions`. (or run `./az-auth)
+only Microsoft 365), you should auth with `az login --allow-no-subscriptions`.
 
-###
 
-We recommend you make a copy of this directory and customize it for your org. Run `./init` to get
-started.
+## Example Configuration
+
+Example `terraform.tfvars`:
+```terraform
+aws_account_id                = "123456789" # your AWS account ID
+aws_assume_role_arn           = "arn:aws:iam::123456789:role/InfraAdmin" # sufficiently privileged role within your AWS account to provision necessary infra
+caller_aws_arns = [
+  "arn:aws:iam::914358739851:root" # for production use, this should be Worklytics' AWS account; for testing, it can be your own AWS account
+]
+caller_gcp_service_account_ids = [
+  "123456712345671234567" # 21-digit numeric string you should obtain from Worklytics
+]
+msft_tenant_id                = "some-uuid-of-msft-tenant" # should hold your Microsoft 365 instance
+psoxy_base_dir                = "/home/user/psoxy/" # use absolute path to your local psoxy repo
+```
 
 
 ## Security

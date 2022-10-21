@@ -1,23 +1,18 @@
-# AWS
+# AWS + Google Workspace
 
-Example Terraform configuration for deploying psoxy in AWS and connecting to Google Workspace sources
+Example Terraform configuration for deploying psoxy in AWS and connecting to Google Workspace sources.
 
-Example `terraform.tfvars`:
-```terraform
-aws_account_id                = "123456789" # your AWS account ID
-aws_assume_role_arn           = "arn:aws:iam::123456789:role/InfraAdmin" # sufficiently privileged role within your AWS account to provision necessary infra
-caller_aws_arns = [
-  "arn:aws:iam::914358739851:root" # for production use, this should be Worklytics' AWS account; for testing, it can be your own AWS account
-]
-caller_gcp_service_account_ids = [
-  "123456712345671234567" # 21-digit numeric string you should obtain from Worklytics
-]
+See [../modules/aws-google-workspace] for generic bits encapsulated as a module.  What's in this
+configuration itself is the stuff that we expect needs to be customized on per-org basis.
 
-gcp_project_id                = "psoxy-dev-aws-example-12314332"
-gcp_org_id                    = "123456789" # your GCP organization ID; if existing project, you can leave as empty string and see the value from `terraform plan`
-gcp_folder_id                 = "111111111111" # folder ID for the project; if existing project, you can leave as empty string and see the value from `terraform plan`
-gcp_billing_account_id        = "123456-789ABC-DEF012" # GCP billing account ID for project; if existing project, you can leave as empty string and see the value from `terraform plan`
-psoxy_base_dir                = "/home/user/psoxy/" # use absolute path to your local psoxy repo
-```
+## Getting Started
+
+We recommend you make a copy of this directory and customize it for your org. Run `./init` to get
+started.
+
+### AWS
+Follow [`docs/aws/getting-started.md`](../../../docs/aws/getting-started.md) to setup AWS CLI to
+authenticate as a user/role which can access/create the AWS account in which you wish to provision
+your psoxy instance.
 
 

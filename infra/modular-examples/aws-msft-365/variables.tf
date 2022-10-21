@@ -43,22 +43,6 @@ variable "caller_aws_arns" {
     error_message = "The values of caller_aws_arns should be AWS Resource Names, something like 'arn:aws:iam::914358739851:root'."
   }
 }
-variable "msft_tenant_id" {
-  type        = string
-  default     = ""
-  description = "ID of Microsoft tenant to connect to (req'd only if config includes MSFT connectors)"
-}
-
-variable "connector_display_name_suffix" {
-  type        = string
-  description = "suffix to append to display_names of connector SAs; helpful to distinguish between various ones in testing/dev scenarios"
-  default     = ""
-}
-
-variable "certificate_subject" {
-  type        = string
-  description = "value for 'subject' passed to openssl when generation certificate (eg '/C=US/ST=New York/L=New York/CN=www.worklytics.co')"
-}
 
 variable "psoxy_base_dir" {
   type        = string
@@ -70,10 +54,10 @@ variable "psoxy_base_dir" {
   }
 }
 
-variable "pseudonymize_app_ids" {
+variable "connector_display_name_suffix" {
   type        = string
-  description = "if set, will set value of PSEUDONYMIZE_APP_IDS environment variable to this value for all sources"
-  default     = false
+  description = "suffix to append to display_names of connector SAs; helpful to distinguish between various ones in testing/dev scenarios"
+  default     = ""
 }
 
 variable "enabled_connectors" {
@@ -82,6 +66,7 @@ variable "enabled_connectors" {
 
   default = [
     "azure-ad",
+    "dropbox-business",
     "outlook-cal",
     "outlook-mail",
     "asana",
@@ -89,6 +74,12 @@ variable "enabled_connectors" {
     "slack-discovery-api",
     "zoom",
   ]
+}
+
+variable "non_production_connectors" {
+  type        = list(string)
+  description = "connector ids in this list will be in development mode (not for production use"
+  default     = []
 }
 
 variable "custom_bulk_connectors" {
@@ -112,8 +103,21 @@ variable "custom_bulk_connectors" {
   }
 }
 
-variable "non_production_connectors" {
-  type        = list(string)
-  description = "connector ids in this list will be in development mode (not for production use"
-  default     = []
+variable "msft_tenant_id" {
+  type        = string
+  default     = ""
+  description = "ID of Microsoft tenant to connect to (req'd only if config includes MSFT connectors)"
 }
+
+variable "certificate_subject" {
+  type        = string
+  description = "value for 'subject' passed to openssl when generation certificate (eg '/C=US/ST=New York/L=New York/CN=www.worklytics.co')"
+}
+
+variable "pseudonymize_app_ids" {
+  type        = string
+  description = "if set, will set value of PSEUDONYMIZE_APP_IDS environment variable to this value for all sources"
+  default     = false
+}
+
+
