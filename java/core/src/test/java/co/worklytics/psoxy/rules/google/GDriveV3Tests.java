@@ -42,7 +42,7 @@ public class GDriveV3Tests extends JavaRulesTestBaseCase {
 
 
         String sanitized =
-            sanitizer.sanitize(new URL("https", "www.googleapis.com", "/drive/v3/files"), jsonString);
+            sanitizer.sanitize("GET", new URL("https", "www.googleapis.com", "/drive/v3/files"), jsonString);
 
         assertPseudonymized(sanitized, PII);
         assertRedacted(sanitized, "Alice", "Paul");
@@ -63,7 +63,7 @@ public class GDriveV3Tests extends JavaRulesTestBaseCase {
         assertNotSanitized(jsonString, PII);
 
         String sanitized =
-            sanitizer.sanitize(new URL("http://www.googleapis.com/drive/v3/files/any-file-id/revisions"), jsonString);
+            sanitizer.sanitize("GET", new URL("http://www.googleapis.com/drive/v3/files/any-file-id/revisions"), jsonString);
 
         assertPseudonymized(sanitized, PII);
         assertRedacted(sanitized, "Alice", "Paul");
@@ -81,7 +81,7 @@ public class GDriveV3Tests extends JavaRulesTestBaseCase {
         assertNotSanitized(jsonString, PII);
 
         String sanitized =
-            sanitizer.sanitize(new URL("http://www.googleapis.com/drive/v3/files/any-file-id/revisions/any-revision-id"), jsonString);
+            sanitizer.sanitize("GET", new URL("http://www.googleapis.com/drive/v3/files/any-file-id/revisions/any-revision-id"), jsonString);
 
         assertPseudonymized(sanitized, PII);
         assertRedacted(sanitized, "Alice", "Paul");
@@ -100,7 +100,7 @@ public class GDriveV3Tests extends JavaRulesTestBaseCase {
         assertNotSanitized(jsonString, "Alice");
 
         String sanitized =
-            sanitizer.sanitize(new URL("http://www.googleapis.com/drive/v3/files/some-file-id/permissions"), jsonString);
+            sanitizer.sanitize("GET", new URL("http://www.googleapis.com/drive/v3/files/some-file-id/permissions"), jsonString);
 
         assertPseudonymized(sanitized, PII);
         assertRedacted(sanitized, "Alice");
@@ -120,7 +120,7 @@ public class GDriveV3Tests extends JavaRulesTestBaseCase {
         assertNotSanitized(jsonString, "Alice");
 
         String sanitized =
-            sanitizer.sanitize(new URL("http://www.googleapis.com/drive/v3/files/some-file-id/permissions/234234"), jsonString);
+            sanitizer.sanitize("GET", new URL("http://www.googleapis.com/drive/v3/files/some-file-id/permissions/234234"), jsonString);
 
         assertPseudonymized(sanitized, PII);
         assertRedacted(sanitized, "Alice");

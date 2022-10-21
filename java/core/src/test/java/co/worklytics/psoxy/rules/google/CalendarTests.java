@@ -40,7 +40,7 @@ class CalendarTests extends JavaRulesTestBaseCase {
         assertNotSanitized(jsonString, "calendar-owner@acme.com");
 
         String sanitized =
-            sanitizer.sanitize(new URL("http://calendar.googleapis.com/calendar/v3/calendars/primary/events"), jsonString);
+            sanitizer.sanitize("GET", new URL("http://calendar.googleapis.com/calendar/v3/calendars/primary/events"), jsonString);
 
         assertPseudonymized(sanitized, PII);
 
@@ -58,7 +58,7 @@ class CalendarTests extends JavaRulesTestBaseCase {
         assertNotSanitized(jsonString, "Dear alice :");
 
         String sanitized =
-            sanitizer.sanitize(new URL("http://calendar.googleapis.com/calendar/v3/calendars/primary/events"), jsonString);
+            sanitizer.sanitize("GET", new URL("http://calendar.googleapis.com/calendar/v3/calendars/primary/events"), jsonString);
 
         assertRedacted(sanitized, "Call to discuss Worklytics issues");
         assertRedacted(sanitized, "Dear alice :");

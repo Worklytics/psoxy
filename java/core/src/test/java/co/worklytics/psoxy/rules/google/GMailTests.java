@@ -71,7 +71,7 @@ public class GMailTests extends JavaRulesTestBaseCase {
         // basically assert contains the allowed headers
         assertNotSanitized(jsonString, someAllowedHeaders);
 
-        String sanitized = sanitizer.sanitize(new URL("https://gmail.googleapis.com/gmail/v1/users/me/messages/17c3b1911726ef3f?format=metadata"), jsonString);
+        String sanitized = sanitizer.sanitize("GET", new URL("https://gmail.googleapis.com/gmail/v1/users/me/messages/17c3b1911726ef3f?format=metadata"), jsonString);
 
         // names should be dropped
         assertRedacted(sanitized, names);

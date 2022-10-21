@@ -103,6 +103,18 @@ public class Rules2 implements RuleSet, Serializable {
             return Optional.ofNullable(allowedQueryParams);
         }
 
+
+        //if provided, only http methods in this list will be allowed
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        List<String> allowedMethods;
+
+        @JsonIgnore
+        public Optional<List<String>> getAllowedMethods() {
+            return Optional.ofNullable(allowedMethods);
+        }
+
+
+
         @JsonInclude(value=JsonInclude.Include.NON_EMPTY)
         @Singular
         List<Transform> transforms = new ArrayList<>();

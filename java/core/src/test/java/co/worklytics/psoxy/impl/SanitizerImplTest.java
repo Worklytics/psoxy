@@ -3,6 +3,7 @@ package co.worklytics.psoxy.impl;
 import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
+import co.worklytics.psoxy.rules.Rules2;
 import co.worklytics.psoxy.rules.Transform;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestUtils;
@@ -23,6 +24,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.net.URL;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -90,7 +92,7 @@ class SanitizerImplTest {
         assertTrue(jsonString.contains("alice@worklytics.co"));
         assertTrue(jsonString.contains("Subject"));
 
-        String sanitized = sanitizer.sanitize(new URL("https", "gmail.googleapis.com", "/gmail/v1/users/me/messages/17c3b1911726ef3f\\?format=metadata"), jsonString);
+        String sanitized = sanitizer.sanitize("GET", new URL("https", "gmail.googleapis.com", "/gmail/v1/users/me/messages/17c3b1911726ef3f\\?format=metadata"), jsonString);
 
 
         //email address should disappear
@@ -181,7 +183,7 @@ class SanitizerImplTest {
     })
     @ParameterizedTest
     void allowedEndpointRegex_allowed(String url) {
-        assertTrue(sanitizer.isAllowed(new URL(url)));
+        assertTrue(sanitizer.isAllowed("GET", new URL(url)));
     }
 
     @SneakyThrows
@@ -194,7 +196,7 @@ class SanitizerImplTest {
     })
     @ParameterizedTest
     void allowedEndpointRegex_blocked(String url) {
-        assertFalse(sanitizer.isAllowed(new URL(url)));
+        assertFalse(sanitizer.isAllowed("GET", new URL(url)));
     }
 
     @SneakyThrows
@@ -346,4 +348,31 @@ class SanitizerImplTest {
             pseudonymEncoder.decodeAndReverseAllContainedKeyedPseudonyms(r, reversibleTokenizationStrategy));
     }
 
+
+    @SneakyThrows
+    @ValueSource(strings = { "GET", "POST", "PUT", "PATCH" })
+    @ParameterizedTest
+    void allHttpMethodsAllowed(String httpMethod) {
+        final URL EXAMPLE_URL = new URL("https://gmail.googleapis.com/gmail/v1/users/me/messages");
+        assertTrue(sanitizer.isAllowed(httpMethod, EXAMPLE_URL));
+    }
+
+    @SneakyThrows
+    @ValueSource(strings = {"POST", "PUT", "PATCH", "DELETE"})
+    @ParameterizedTest
+    void httpMethods_onlyGetAllowed(String notGet) {
+        final URL EXAMPLE_URL = new URL("https://gmail.googleapis.com/gmail/v1/users/me/messages");
+        SanitizerImpl strictSanitizer = sanitizerFactory.create(Sanitizer.ConfigurationOptions.builder()
+            .rules(Rules2.builder()
+                .endpoint(Rules2.Endpoint.builder()
+                    .allowedMethods(Collections.singletonList("GET"))
+                    .pathRegex("^/gmail/v1/users/[^/]*/messages[/]?.*?$")
+                    .build())
+                .build())
+            .build()
+        );
+
+        assertTrue(strictSanitizer.isAllowed("GET", EXAMPLE_URL));
+        assertFalse(strictSanitizer.isAllowed(notGet, EXAMPLE_URL));
+    }
 }
