@@ -31,7 +31,7 @@ module "psoxy_lambda" {
     var.environment_variables,
     {
       INPUT_BUCKET  = aws_s3_bucket.input.bucket,
-      OUTPUT_BUCKET = aws_s3_bucket.output.bucket
+      OUTPUT_BUCKET = aws_s3_bucket.sanitized.bucket,
     }
   )
 }
@@ -65,18 +65,24 @@ resource "aws_s3_bucket_public_access_block" "input-block-public-access" {
   ignore_public_acls      = true
 }
 
-resource "aws_s3_bucket" "output" {
-  bucket = "psoxy-${var.instance_id}-${random_string.bucket_suffix.id}-output"
+resource "aws_s3_bucket" "sanitized" {
+  bucket = "psoxy-${var.instance_id}-${random_string.bucket_suffix.id}-sanitized"
 
   lifecycle {
     ignore_changes = [
+      bucket, # due to rename
       tags
     ]
   }
 }
 
-resource "aws_s3_bucket_server_side_encryption_configuration" "output" {
-  bucket = aws_s3_bucket.output.bucket
+moved {
+  from = aws_s3_bucket.output
+  to   = aws_s3_bucket.sanitized
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "sanitized" {
+  bucket = aws_s3_bucket.sanitized.bucket
 
   rule {
     apply_server_side_encryption_by_default {
@@ -85,13 +91,23 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "output" {
   }
 }
 
-resource "aws_s3_bucket_public_access_block" "output-block-public-access" {
-  bucket = aws_s3_bucket.output.bucket
+moved {
+  from = aws_s3_bucket_server_side_encryption_configuration.output
+  to   = aws_s3_bucket_server_side_encryption_configuration.sanitized
+}
+
+resource "aws_s3_bucket_public_access_block" "sanitized" {
+  bucket = aws_s3_bucket.sanitized.bucket
 
   block_public_acls       = true
   block_public_policy     = true
   restrict_public_buckets = true
   ignore_public_acls      = true
+}
+
+moved {
+  from = aws_s3_bucket_public_access_block.output-block-public-access
+  to   = aws_s3_bucket_public_access_block.sanitized
 }
 
 resource "aws_lambda_permission" "allow_input_bucket" {
@@ -146,9 +162,9 @@ resource "aws_iam_role_policy_attachment" "read_policy_for_import_bucket" {
 }
 
 # proxy's lamba needs to WRITE to the output bucket
-resource "aws_iam_policy" "output_bucket_write_policy" {
-  name        = "BucketWrite_${aws_s3_bucket.output.id}"
-  description = "Allow principal to write to bucket: ${aws_s3_bucket.output.id}"
+resource "aws_iam_policy" "sanitized_bucket_write_policy" {
+  name        = "BucketWrite_${aws_s3_bucket.sanitized.id}"
+  description = "Allow principal to write to bucket: ${aws_s3_bucket.sanitized.id}"
 
   policy = jsonencode(
     {
@@ -159,7 +175,7 @@ resource "aws_iam_policy" "output_bucket_write_policy" {
             "s3:PutObject",
           ],
           "Effect" : "Allow",
-          "Resource" : "${aws_s3_bucket.output.arn}/*"
+          "Resource" : "${aws_s3_bucket.sanitized.arn}/*"
         }
       ]
   })
@@ -171,15 +187,25 @@ resource "aws_iam_policy" "output_bucket_write_policy" {
   }
 }
 
-resource "aws_iam_role_policy_attachment" "write_policy_for_output_bucket" {
+moved {
+  from = aws_iam_policy.output_bucket_write_policy
+  to   = aws_iam_policy.sanitized_bucket_write_policy
+}
+
+resource "aws_iam_role_policy_attachment" "write_policy_for_sanitized_bucket" {
   role       = module.psoxy_lambda.iam_role_for_lambda_name
-  policy_arn = aws_iam_policy.output_bucket_write_policy.arn
+  policy_arn = aws_iam_policy.sanitized_bucket_write_policy.arn
+}
+
+moved {
+  from = aws_iam_role_policy_attachment.write_policy_for_output_bucket
+  to   = aws_iam_role_policy_attachment.write_policy_for_sanitized_bucket
 }
 
 # proxy caller (data consumer) needs to read (both get and list objects) from the output bucket
-resource "aws_iam_policy" "output_bucket_read" {
-  name        = "BucketRead_${aws_s3_bucket.output.id}"
-  description = "Allow to read content from bucket: ${aws_s3_bucket.output.id}"
+resource "aws_iam_policy" "sanitized_bucket_read" {
+  name        = "BucketRead_${aws_s3_bucket.sanitized.id}"
+  description = "Allow to read content from bucket: ${aws_s3_bucket.sanitized.id}"
 
   policy = jsonencode(
     {
@@ -192,8 +218,8 @@ resource "aws_iam_policy" "output_bucket_read" {
           ],
           "Effect" : "Allow",
           "Resource" : [
-            "${aws_s3_bucket.output.arn}",
-            "${aws_s3_bucket.output.arn}/*"
+            "${aws_s3_bucket.sanitized.arn}",
+            "${aws_s3_bucket.sanitized.arn}/*"
           ]
         }
       ]
@@ -206,15 +232,20 @@ resource "aws_iam_policy" "output_bucket_read" {
   }
 }
 
-locals {
-  accessor_role_names = concat([var.api_caller_role_name], var.output_accessor_role_names)
+moved {
+  from = aws_iam_policy.output_bucket_read
+  to   = aws_iam_policy.sanitized_bucket_read
 }
 
-resource "aws_iam_role_policy_attachment" "caller_bucket_access_policy" {
+locals {
+  accessor_role_names = concat([var.api_caller_role_name], var.santized_accessor_role_names)
+}
+
+resource "aws_iam_role_policy_attachment" "reader_policy_to_accessor_role" {
   for_each   = toset([ for r in local.accessor_role_names : r if r != null])
 
   role       = each.key
-  policy_arn = aws_iam_policy.output_bucket_read.arn
+  policy_arn = aws_iam_policy.sanitized_bucket_read.arn
 }
 
 
@@ -233,10 +264,10 @@ resource "aws_ssm_parameter" "rules" {
 
 # to facilitate composition of ingestion pipeline
 output "input_bucket" {
-  value = aws_s3_bucket.output.bucket
+  value = aws_s3_bucket.sanitized.bucket
 }
 
 # to facilitate composition of output pipeline
-output "output_bucket" {
-  value = aws_s3_bucket.output.bucket
+output "sanitized_bucket" {
+  value = aws_s3_bucket.sanitized.bucket
 }

@@ -65,9 +65,9 @@ variable "api_caller_role_name" {
   default     = null
 }
 
-variable "output_accessor_role_names" {
+variable "santized_accessor_role_names" {
   type        = list(string)
-  description = "list of names of AWS IAM Roles which should be able to access the output bucket"
+  description = "list of names of AWS IAM Roles which should be able to access the sanitized (output) bucket"
 }
 
 variable "psoxy_base_dir" {
