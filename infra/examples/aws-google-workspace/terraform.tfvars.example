@@ -7,6 +7,7 @@ gcp_billing_account_id        = "123456-ABCDEFG-ABCDEFG"
 google_workspace_example_user = "example@acme.com"
 enabled_connectors = [
   "asana",
+  "dropbox-business",
   "gcal",
   "gdirectory",
   "gdrive",
@@ -19,8 +20,7 @@ enabled_connectors = [
 ]
 non_production_connectors = [] # use to mark any of the above as 'non-production' (NOTE: allows test calls that may expose PII)
 caller_aws_arns = [
-  # "arn:aws:iam::914358739851:root" # for production use, this should be Worklytics' AWS account; for testing, it can be your own AWS account or left blank if your user
 ]
 caller_gcp_service_account_ids = [
-  # "123456712345671234567" #21-digits
+  # "123456712345671234567" # 21-digits; get this from Worklytics once prod-ready
 ]
