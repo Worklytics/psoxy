@@ -17,9 +17,10 @@ variable "handler_class" {
   default     = "co.worklytics.psoxy.Handler"
 }
 
+# TODO: remove after 0.4.x
 variable "aws_assume_role_arn" {
   type        = string
-  description = "role arn"
+  description = "IGNORED; unused role arn"
 }
 
 variable "reserved_concurrent_executions" {
@@ -81,7 +82,7 @@ variable "global_parameter_arns" {
   description = "System Manager Parameters ARNS to expose to psoxy instance, expected to contain global shared parameters, like salt or encryption keys"
 }
 
-# remove after v0.4.x
+# TODO: remove after v0.4.x
 variable "function_parameters" {
   type = list(object({
     name     = string

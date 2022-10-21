@@ -65,7 +65,7 @@ variable "api_caller_role_name" {
   default     = null
 }
 
-variable "santized_accessor_role_names" {
+variable "sanitized_accessor_role_names" {
   type        = list(string)
   description = "list of names of AWS IAM Roles which should be able to access the sanitized (output) bucket"
 }

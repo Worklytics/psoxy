@@ -238,7 +238,7 @@ moved {
 }
 
 locals {
-  accessor_role_names = concat([var.api_caller_role_name], var.santized_accessor_role_names)
+  accessor_role_names = concat([var.api_caller_role_name], var.sanitized_accessor_role_names)
 }
 
 resource "aws_iam_role_policy_attachment" "reader_policy_to_accessor_role" {
