@@ -21,6 +21,7 @@ variable "handler_class" {
 variable "aws_assume_role_arn" {
   type        = string
   description = "IGNORED; unused role arn"
+  default     = null
 }
 
 variable "reserved_concurrent_executions" {
@@ -34,6 +35,7 @@ variable "reserved_concurrent_executions" {
 variable "source_kind" {
   type        = string
   description = "kind of source (eg, 'gmail', 'google-chat', etc)"
+  default     = null
 }
 
 variable "path_to_function_zip" {
