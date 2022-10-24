@@ -23,8 +23,18 @@ public class ColumnarRules implements RuleSet {
 
     private static final long serialVersionUID = 1L;
 
+    // in theory, `\t` should also work ...
     @Builder.Default
     protected Character delimiter = ',';
+
+    /**
+     * columns to duplicate
+     */
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    @Builder.Default
+    @NonNull
+    protected Map<String, String> columnsToDuplicate = new HashMap<>();
+
 
     //if we encode these as URL_SAFE_TOKEN, but not reversible then encoder won'd prefix with 'p~'
     // and then not easy to tell difference bw pseudonym and the original  employee_id value (but maybe we don't care ...)    @Builder.Default

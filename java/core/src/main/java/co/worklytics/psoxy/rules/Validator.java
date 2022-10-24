@@ -6,6 +6,7 @@ import com.jayway.jsonpath.JsonPath;
 import lombok.NonNull;
 import org.apache.commons.lang3.NotImplementedException;
 
+import java.util.Collections;
 import java.util.regex.Pattern;
 
 public class Validator {
@@ -23,6 +24,13 @@ public class Validator {
     static public void validate(@NonNull CsvRules rules) {
         Preconditions.checkNotNull(rules.getColumnsToPseudonymize());
         Preconditions.checkNotNull(rules.getColumnsToRedact());
+
+        //check for nonsensical rules
+        Preconditions.checkArgument(Collections.disjoint(rules.getColumnsToRedact(), rules.getColumnsToDuplicate().values()),
+            "Redacting column produced through duplication is non-sensical");
+
+
+        //columns to pseudonymize should NOT contain any value
     }
 
     static public void validate(@NonNull Rules2 rules) {
