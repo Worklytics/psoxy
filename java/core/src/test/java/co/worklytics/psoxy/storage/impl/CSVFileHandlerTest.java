@@ -10,6 +10,7 @@ import co.worklytics.test.MockModules;
 import co.worklytics.test.TestModules;
 import co.worklytics.test.TestUtils;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
+import com.avaulta.gateway.rules.ColumnarRules;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -77,7 +78,7 @@ public class CSVFileHandlerTest {
                 .pseudonymImplementation(PseudonymImplementation.LEGACY)
                 .build());
 
-        String s = (new YAMLMapper()).writeValueAsString(CsvRules.builder()
+        String s = (new YAMLMapper()).writeValueAsString(ColumnarRules.builder()
             .columnToPseudonymize("EMPLOYEE_EMAIL")
             .build());
 

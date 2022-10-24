@@ -6,8 +6,6 @@ import com.jayway.jsonpath.JsonPath;
 import lombok.NonNull;
 import org.apache.commons.lang3.NotImplementedException;
 
-import javax.annotation.Nullable;
-import java.util.List;
 import java.util.regex.Pattern;
 
 public class Validator {

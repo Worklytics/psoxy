@@ -1,6 +1,6 @@
 package co.worklytics.psoxy.storage.impl;
 
-import co.worklytics.psoxy.rules.CsvRules;
+import com.avaulta.gateway.rules.ColumnarRules;
 import co.worklytics.psoxy.Sanitizer;
 import co.worklytics.psoxy.storage.FileHandler;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -38,7 +38,14 @@ public class CSVFileHandler implements FileHandler {
 
     @Override
     public byte[] handle(@NonNull InputStreamReader reader, @NonNull Sanitizer sanitizer) throws IOException {
-        CSVParser records = CSVFormat.DEFAULT
+
+        Sanitizer.ConfigurationOptions configurationOptions = sanitizer.getConfigurationOptions();
+
+        ColumnarRules rules = (ColumnarRules) configurationOptions.getRules();
+
+        CSVParser records = CSVFormat
+                .DEFAULT
+                .withDelimiter(rules.getDelimiter())
                 .withFirstRecordAsHeader()
                 .withIgnoreHeaderCase()
                 .withTrim()
@@ -46,9 +53,7 @@ public class CSVFileHandler implements FileHandler {
 
         Preconditions.checkArgument(records.getHeaderMap() != null, "Failed to parse header from file");
 
-        Sanitizer.ConfigurationOptions configurationOptions = sanitizer.getConfigurationOptions();
 
-        CsvRules rules = (CsvRules) configurationOptions.getRules();
 
         Set<String> columnsToRedact = asSetWithCaseInsensitiveComparator(rules.getColumnsToRedact());
 
@@ -58,7 +63,7 @@ public class CSVFileHandler implements FileHandler {
             Optional.ofNullable(rules.getColumnsToInclude())
                 .map(this::asSetWithCaseInsensitiveComparator);
 
-        final Map<String, String> columnsToRename = ((CsvRules) configurationOptions.getRules())
+        final Map<String, String> columnsToRename = ((ColumnarRules) configurationOptions.getRules())
             .getColumnsToRename()
             .entrySet().stream()
             .collect(Collectors.toMap(
