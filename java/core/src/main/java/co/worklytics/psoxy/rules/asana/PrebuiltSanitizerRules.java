@@ -4,13 +4,50 @@ import co.worklytics.psoxy.rules.RuleSet;
 import co.worklytics.psoxy.rules.Rules2;
 import co.worklytics.psoxy.rules.Transform;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Streams;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class PrebuiltSanitizerRules {
+
+    private static final List<String> commonAllowedQueryParameters = Lists.newArrayList(
+            "limit",
+            "offset",
+            "opt_pretty",
+            "opt_fields"
+    );
+
+    private static final List<String> taskAllowedQueryParameters = Streams.concat(commonAllowedQueryParameters.stream(),
+                    Lists.newArrayList(
+                            "assignee",
+                            "project",
+                            "section",
+                            "workspace",
+                            "completed_since",
+                            "modified_since").stream())
+            .collect(Collectors.toList());
+
+    private static final List<String> teamsAllowedQueryParameters = Streams.concat(commonAllowedQueryParameters.stream(),
+                    Lists.newArrayList("archived").stream())
+            .collect(Collectors.toList());
+
+    private static final List<String> usersAllowedQueryParameters = Streams.concat(commonAllowedQueryParameters.stream(),
+                    Lists.newArrayList("workspace", "team").stream())
+            .collect(Collectors.toList());
+
+    private static final List<String> searchTaskByWorkspaceAllowedQueryParameters = Lists.newArrayList(
+            "limit",
+            "modified_at.after",
+            "modified_at.before",
+            "is_subtask",
+            "sort_ascending"
+    );
+
     static final Rules2.Endpoint WORKSPACES = Rules2.Endpoint.builder()
             .pathRegex("^/api/1.0/workspaces[?]?[^/]*$")
+            .allowedQueryParams(commonAllowedQueryParameters)
             //no redaction/pseudonymization
             // current UX for Asana connector lets users specify workspace by name, so can't redact it;
             // and we don't expect Workspace names to be sensitive or PII.
@@ -18,6 +55,7 @@ public class PrebuiltSanitizerRules {
 
     static final Rules2.Endpoint USERS = Rules2.Endpoint.builder()
             .pathRegex("^/api/1.0/users[?]?[^/]*")
+            .allowedQueryParams(usersAllowedQueryParameters)
             .transform(Transform.Redact.builder()
                     .jsonPath("$.data[*].name")
                     .jsonPath("$.data[*].photo")
@@ -26,13 +64,14 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$.data[*].email")
                     .build())
             .transform(Transform.Pseudonymize.builder()
-                .includeReversible(true)
-                .jsonPath("$.data[*].gid")
-                .build())
+                    .includeReversible(true)
+                    .jsonPath("$.data[*].gid")
+                    .build())
             .build();
 
     static final Rules2.Endpoint TEAMS = Rules2.Endpoint.builder()
             .pathRegex("^/api/1.0/workspaces/[^/]*/teams?[^/]*")
+            .allowedQueryParams(commonAllowedQueryParameters)
             .transform(Transform.Redact.builder()
                     .jsonPath("$.data[*]..name")
                     .jsonPath("$.data[*].description")
@@ -42,6 +81,7 @@ public class PrebuiltSanitizerRules {
 
     static final Rules2.Endpoint TEAM_PROJECTS = Rules2.Endpoint.builder()
             .pathRegex("^/api/1.0/teams/[^/]*/projects?[^/]*")
+            .allowedQueryParams(teamsAllowedQueryParameters)
             .transform(Transform.Redact.builder()
                     .jsonPath("$.data[*].current_status")
                     .jsonPath("$.data[*].current_status_update")
@@ -58,21 +98,25 @@ public class PrebuiltSanitizerRules {
 
     static final Rules2.Endpoint LIST_TASKS = Rules2.Endpoint.builder()
             .pathRegex("^/api/1.0/tasks[?][^/]*")
+            .allowedQueryParams(taskAllowedQueryParameters)
             .transforms(getTaskTransforms(true))
             .build();
 
     static final Rules2.Endpoint WORKSPACE_TASKS_SEARCH = Rules2.Endpoint.builder()
             .pathRegex("^/api/1.0/workspaces/[^/]*/tasks/search?[^/]*")
+            .allowedQueryParams(searchTaskByWorkspaceAllowedQueryParameters)
             .transforms(getTaskTransforms(true))
             .build();
 
     static final Rules2.Endpoint TASK = Rules2.Endpoint.builder()
             .pathRegex("^/api/1.0/tasks/[^/]*(\\?)?[^/]*")
+            .allowedQueryParams(taskAllowedQueryParameters)
             .transforms(getTaskTransforms(false))
             .build();
 
     static final Rules2.Endpoint TASK_STORIES = Rules2.Endpoint.builder()
             .pathRegex("^/api/1.0/tasks/[^/]*/stories?[^/]*")
+            .allowedQueryParams(commonAllowedQueryParameters)
             .transform(Transform.Redact.builder()
                     .jsonPath("$.data[*]..name") //just all names, really
                     .jsonPath("$.data[*].html_text")
@@ -97,6 +141,7 @@ public class PrebuiltSanitizerRules {
 
     static final Rules2.Endpoint TASK_SUBTASKS = Rules2.Endpoint.builder()
             .pathRegex("^/api/1.0/tasks/[^/]*/subtasks?[^/]*")
+            .allowedQueryParams(taskAllowedQueryParameters)
             .transforms(getTaskTransforms(true))
             .build();
 
