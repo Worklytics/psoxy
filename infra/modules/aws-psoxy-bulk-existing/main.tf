@@ -35,7 +35,7 @@ module "psoxy_lambda" {
 
 resource "aws_s3_bucket" "sanitized" {
   # note: this ends up with a long UTC time-stamp + random number appended to it to form the bucket name
-  bucket_prefix = "psoxy-${var.instance_id}_sanitized_"
+  bucket_prefix = "psoxy-${var.instance_id}-sanitized-"
 
   lifecycle {
     ignore_changes = [
