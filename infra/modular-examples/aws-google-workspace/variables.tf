@@ -94,10 +94,23 @@ variable "enabled_connectors" {
   ]
 }
 
+variable "non_production_connectors" {
+  type        = list(string)
+  description = "connector ids in this list will be in development mode (not for production use"
+  default     = []
+}
+
 variable "custom_bulk_connectors" {
   type = map(object({
     source_kind = string
-    rules       = map(list(string))
+    rules       = object({
+      pseudonymFormat       = string
+      columnsToRedact       = list(string)
+      columnsToInclude      = list(string)
+      columnsToPseudonymize = list(string)
+      columnsToDuplicate    = map(string)
+      columnsToRename       = map(string)
+    })
   }))
   description = "specs of custom bulk connectors to create"
 
@@ -115,8 +128,44 @@ variable "custom_bulk_connectors" {
   }
 }
 
-variable "non_production_connectors" {
-  type        = list(string)
-  description = "connector ids in this list will be in development mode (not for production use"
-  default     = []
+variable "lookup_table_builders" {
+  type = map(object({
+    input_connector_id            = string
+    sanitized_accessor_role_names = list(string)
+    rules                         = object({
+      pseudonymFormat       = string
+      columnsToRedact       = list(string)
+      columnsToInclude      = list(string)
+      columnsToPseudonymize = list(string)
+      columnsToDuplicate    = map(string)
+      columnsToRename       = map(string)
+    })
+  }))
+  default = {
+    #    "lookup-hris" = {
+    #      input_connector_id = "hris",
+    #      sanitized_accessor_role_names = [
+    #        # ADD LIST OF NAMES OF YOUR AWS ROLES WHICH CAN READ LOOKUP TABLE
+    #      ],
+    #      rules       = {
+    #        pseudonym_format = "URL_SAFE_TOKEN"
+    #        columnsToRedact       = [
+    #          "employee_email",
+    #          "manager_id",
+    #          "manager_email",
+    #        ]
+    #        columnsToPseudonymize = [
+    #          "employee_id", # primary key
+    #        ]
+    #        columnsToDuplicate   = {
+    #          "employee_id" = "employee_id_orig"
+    #        }
+    #        columnsToRename      = {}
+    #        columnsToInclude     = null
+    #      }
+    #
+    #    }
+  }
 }
+
+
