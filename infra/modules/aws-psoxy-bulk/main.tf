@@ -263,7 +263,7 @@ resource "aws_ssm_parameter" "rules" {
 
 # to facilitate composition of ingestion pipeline
 output "input_bucket" {
-  value = aws_s3_bucket.sanitized.bucket
+  value = aws_s3_bucket.input.bucket
 }
 
 # to facilitate composition of output pipeline
