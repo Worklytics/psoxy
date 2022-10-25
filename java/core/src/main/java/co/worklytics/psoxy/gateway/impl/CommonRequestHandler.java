@@ -210,7 +210,7 @@ public class CommonRequestHandler {
                             .withPseudonymImplementation(pseudonymImplementation.get()));
                     }
 
-                    proxyResponseContent = sanitizer.sanitize("GET", targetUrl, responseContent);
+                    proxyResponseContent = sanitizer.sanitize(request.getHttpMethod(), targetUrl, responseContent);
                     String rulesSha = rulesUtils.sha(sanitizer.getConfigurationOptions().getRules());
                     builder.header(ResponseHeader.RULES_SHA.getHttpHeader(), rulesSha);
                     log.info("response sanitized with rule set " + rulesSha);
