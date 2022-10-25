@@ -84,13 +84,24 @@ variable "environment_variables" {
 
 variable "rules" {
   type = object({
+    # TODO: various fields supported by proxy, but if make explicit in Terraform variables validate
+    # will break existing invocations of this module
+
+    # pseudonymFormat       = string
     columnsToRedact       = list(string)
+    # columnsToInclude      = list(string)
     columnsToPseudonymize = list(string)
+    # columnsToDuplicate    = map(string)
+    # columnsToRename       = map(string)
   })
   description = "Rules to apply to a columnar flat file during transformation"
   default = {
+    # pseudonymFormat       = "URL_SAFE_TOKEN"
     columnsToRedact       = []
+    # columnsToInclude      = null
     columnsToPseudonymize = []
+    # columnsToDuplicate    = {}
+    # columnsToRename       = {}
   }
 }
 

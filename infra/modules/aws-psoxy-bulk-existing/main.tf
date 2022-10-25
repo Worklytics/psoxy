@@ -1,3 +1,7 @@
+# creates a Bulk processing instance of Psoxy, with existing S3 bucket as the input
+# TODO: highly duplicative with regular `aws-psoxy-bulk` case, and could likely be unified in future
+# version
+
 terraform {
   required_providers {
     # for the infra that will host Psoxy instances
@@ -6,13 +10,6 @@ terraform {
       version = "~> 4.29"
     }
   }
-}
-
-resource "random_string" "bucket_suffix" {
-  length  = 8
-  lower   = true
-  upper   = false
-  special = false
 }
 
 module "psoxy_lambda" {
@@ -37,11 +34,11 @@ module "psoxy_lambda" {
 
 
 resource "aws_s3_bucket" "sanitized" {
-  bucket = "psoxy-${var.instance_id}-${random_string.bucket_suffix.id}-sanitized"
+  # note: this ends up with a long UTC time-stamp + random number appended to it to form the bucket name
+  bucket_prefix = "psoxy-${var.instance_id}_sanitized_"
 
   lifecycle {
     ignore_changes = [
-      bucket, # due to rename
       tags
     ]
   }
@@ -94,7 +91,7 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
 
 # the lambda function needs to get single objects from the input bucket
 resource "aws_iam_policy" "input_bucket_getObject_policy" {
-  name        = "BucketGetObject_${data.aws_s3_bucket.input.id}"
+  name        = "BucketGetObject_${data.aws_s3_bucket.input.id}_${module.psoxy_lambda.function_name}"
   description = "Allow principal to read from input bucket: ${data.aws_s3_bucket.input.id}"
 
   policy = jsonencode(
@@ -123,7 +120,7 @@ resource "aws_iam_role_policy_attachment" "read_policy_for_import_bucket" {
   policy_arn = aws_iam_policy.input_bucket_getObject_policy.arn
 }
 
-# proxy's lamba needs to WRITE to the output bucket
+# proxy's lambda needs to WRITE to the output bucket
 resource "aws_iam_policy" "sanitized_bucket_write_policy" {
   name        = "BucketWrite_${aws_s3_bucket.sanitized.id}"
   description = "Allow principal to write to bucket: ${aws_s3_bucket.sanitized.id}"
