@@ -66,3 +66,8 @@ module "psoxy-aws-google-workspace" {
     google_project.psoxy-google-connectors
   ]
 }
+
+# if you generated these, you may want them to import back into your data warehouse
+output "lookup_tables" {
+  value = module.psoxy-aws-google-workspace.lookup_tables
+}

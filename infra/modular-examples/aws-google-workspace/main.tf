@@ -271,5 +271,9 @@ module "psoxy_lookup_tables_builders" {
   environment_variables = {
     IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
   }
+}
 
+
+output "lookup_tables" {
+  value = { for k,v in var.lookup_table_builders : k => module.psoxy_lookup_tables_builders[k].output_bucket }
 }

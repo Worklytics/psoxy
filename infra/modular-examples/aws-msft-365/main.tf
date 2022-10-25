@@ -291,3 +291,7 @@ module "psoxy_lookup_tables_builders" {
   }
 
 }
+
+output "lookup_tables" {
+  value = { for k,v in var.lookup_table_builders : k => module.psoxy_lookup_tables_builders[k].output_bucket }
+}

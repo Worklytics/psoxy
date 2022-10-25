@@ -55,6 +55,11 @@ module "psoxy-aws-msft-365" {
   pseudonymize_app_ids           = var.pseudonymize_app_ids
 }
 
+# if you generated these, you may want them to import back into your data warehouse
+output "lookup_tables" {
+  value = module.psoxy-aws-msft-365.lookup_tables
+}
+
 moved {
   from = module.worklytics_connector_specs
   to   = module.psoxy-aws-msft-365.module.worklytics_connector_specs
