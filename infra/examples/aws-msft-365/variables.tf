@@ -140,7 +140,7 @@ variable "lookup_table_builders" {
     })
   }))
   default = {
-    #    "lookup-hris" = {
+    #    "hris-lookup" = {
     #      input_connector_id = "hris",
     #      sanitized_accessor_role_names = [
     #        # ADD LIST OF NAMES OF YOUR AWS ROLES WHICH CAN READ LOOKUP TABLE
