@@ -249,10 +249,10 @@ module "aws-psoxy-long-auth-connectors" {
   global_parameter_arns                 = module.global_secrets.secret_arns
   function_parameters                   = each.value.secured_variables
 
-  environment_variables = {
+  environment_variables =  merge(each.value.environment_variables,{
     PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
     IS_DEVELOPMENT_MODE  = contains(var.non_production_connectors, each.key)
-  }
+  })
 }
 
 module "worklytics-psoxy-connection-oauth-long-access" {
