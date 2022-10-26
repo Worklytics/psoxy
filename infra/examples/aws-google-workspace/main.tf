@@ -159,9 +159,10 @@ module "psoxy-google-workspace-connector" {
   global_parameter_arns                 = module.global_secrets.secret_arns
   todo_step                             = module.google-workspace-connection[each.key].next_todo_step
 
-  environment_variables = {
+  environment_variables =  merge(each.value.environment_variables,
+    {
     IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
-  }
+  })
 }
 
 
