@@ -1,8 +1,13 @@
 import chalk from 'chalk';
 import aws from './lib/aws.js';
 import gcp from './lib/gcp.js';
-import { inspect }  from 'util';
-import { saveRequestResultToFile } from './lib/utils.js';
+import getLogger from './lib/logger.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { saveToFile, getFileNameFromURL } from './lib/utils.js';
+
+// Since we're using ESM modules, we need to make `__dirname` available
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 /**
  * @typedef {Object} PsoxyResponse
@@ -24,18 +29,18 @@ import { saveRequestResultToFile } from './lib/utils.js';
  * @param {boolean} options.gzip - Add Gzip compression headers
  * @param {boolean} options.verbose - Verbose ouput (default to console)
  * @param {boolean} options.saveToFile - Whether to save successful responses to a file (responses/[api-path]-[ISO8601 timestamp].json)
+ * @param {string} options.method - HTTP request method
  * @return {PsoxyResponse}
  */
 export default async function (options = {}) {
+  const logger = getLogger(options.verbose);
   let result = {};
   let url;
-
+  
   try {
     url = new URL(options.url);
-  } catch (err) {
-    result.error = `"${options.url}" is not a valid URL`;
-    console.error(chalk.bold(result.error));
-    return result;
+  } catch (error) {
+    throw new Error(`"${error.input}" is not a valid URL`, { cause: error });
   }
 
   const isAWS = aws.isValidURL(url);
@@ -45,23 +50,29 @@ export default async function (options = {}) {
   if (options.force && ['aws', 'gcp'].includes(options.force.toLowerCase())) {
     psoxyCall = options.force === 'aws' ? aws.call : gcp.call;
   } else if (!isAWS && !isGCP) {
-    result.error = `"${options.url}" doesn't seem to be a valid endpoint: AWS or GCP`;
-    console.error(chalk.bold(result.error));
-    return result;
+    const message = `"${options.url}" doesn't seem to be a valid endpoint: AWS or GCP`;
+    const tip = 'Use "-f" option if you\'re certain it\'s a valid deploy';
+    throw new Error(`${message}\n${tip}`);
   } else {
     psoxyCall = isAWS ? aws.call : gcp.call;
   }
   
-  try {
-    result = await psoxyCall(options);
-  } catch (err) {
-    result.error = err.message;
-  }
+  result = await psoxyCall(options);
 
   if (result.status === 200) {
-    console.log(chalk.bold.green(`OK: ${result.status}`));
-    console.log(inspect(result.data, {depth: null, colors: true}));
+    logger.success(`Call result: ${result.status}`, { additional: result.data });
+
+    if (options.saveToFile) {
+      const filename = getFileNameFromURL(url);
+      await saveToFile(__dirname, filename, JSON.stringify(result.data, undefined, 2));
+      logger.success(`Results saved to: ${__dirname}/${filename}`);
+    } else {
+      // Response potentially long, let's remind to check logs for complete results
+      logger.success(`Check out run log to see complete results: ${__dirname}/run.log`);
+    }
+
   } else {
+    let errorMessage = result.statusMessage || 'Unknown';
 
     if (result.headers) {
       const psoxyError = result.headers['x-psoxy-error'];
@@ -71,45 +82,27 @@ export default async function (options = {}) {
       if (psoxyError) {
         switch (psoxyError) {
           case 'BLOCKED_BY_RULES':
-            result.error = 'Blocked by rules error: make sure URL path is correct';
+            errorMessage = 'Blocked by rules error: make sure URL path is correct';
             break;
           case 'CONNECTION_SETUP':
-            result.error =
+            errorMessage =
               'Connection setup error: make sure the data source is properly configured';
             break;
           case 'API_ERROR':
-            result.error = 'API error: call to data source failed';
+            errorMessage = 'API error: call to data source failed';
             break;
         }
       } else if (result.headers['x-amzn-errortype']) {
-        result.error += `: AWS ${result.headers['x-amzn-errortype']}`;
+        errorMessage += `: AWS ${result.headers['x-amzn-errortype']}`;
       } else if (result.headers['www-authenticate']) {
-        result.error += `: GCP ${result.headers['www-authenticate']}`
+        errorMessage += `: GCP ${result.headers['www-authenticate']}`
       }
     }
 
-    let errorHeader = 'ERROR';
-    if (result.status) {
-      errorHeader += `: ${result.status}`;
-    }
-    console.error(chalk.bold.red(errorHeader));
-    console.error(chalk.bold.red(result.error));
+    logger.error(errorMessage);    
   }
 
-  if (options.verbose && result.headers) {
-    console.log(`Response headers:\n 
-      ${inspect(result.headers, {depth: null, colors: true})}`);
-  }
-
-
-  if (result.status === 200 && options.saveToFile) {
-    try {
-      await saveRequestResultToFile(url, result.data, 
-        options.verbose || false);
-    } catch (err) {
-      console.error(chalk.red('Unable to save results to file'), err);
-    }        
-  }
+  logger.verbose('Response headers:', { additional: result.headers });
 
   return result;
 }

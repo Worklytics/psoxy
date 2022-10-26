@@ -5,12 +5,13 @@ import {
   executeCommand, 
   resolveHTTPMethod
 } from './utils.js';
+import getLogger from './logger.js';
 
 /**
  * Call AWS cli to get temporary security credentials.
  *
  * Refs:
- * - https://docs.aws.amazon.com/cli/latest/reference/sts/assume-role.html
+ * - https://awscli.amazonaws.com/v2/documentation/api/latest/reference/sts/assume-role.html
  * - https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html#identifiers-arns
  *
  * @param {String} role AWS IAM ARN format
@@ -42,35 +43,33 @@ function isValidURL(url) {
  * @returns {Promise}
  */
 async function call(options = {}) {
+  const logger = getLogger(options.verbose);
+
   if (!options.role) {
     throw new Error('Role is a required option for AWS');
   }
  
-  console.log(`Assuming role ${options.role}`);
+  logger.verbose(`Assuming role ${options.role}`);
   let credentials;
   try {
     credentials = assumeRole(options.role);
-  } catch (err) {
-    throw new Error(`Unable to assume ${options.role}: ${err}`);
+  } catch (error) {
+    throw new Error(`Unable to assume ${options.role}`, { cause: error });
   }
   
-  
-  console.log('Signing request');
-
   const url = new URL(options.url);
   const method = options.method || resolveHTTPMethod(url.pathname);
+  
+  logger.verbose('Signing request');
   const signed = signAWSRequestURL(url, method, credentials);
   const headers = {
     ...getCommonHTTPHeaders(options),
     ...signed.headers,
   };
 
-  console.log('Calling psoxy and waiting response...');
-
-  if (options.verbose) {
-    console.log('Request options:', options);
-    console.log('Request headers:', headers);
-  }
+  logger.info(`Calling Psoxy and waiting response: ${options.url.toString()}`);
+  logger.verbose('Request Options:', { additional: options });
+  logger.verbose('Request Headers: ', { additional: headers })
 
   return await request(url, method, headers);
 }

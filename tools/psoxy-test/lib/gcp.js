@@ -1,4 +1,5 @@
 import { getCommonHTTPHeaders, request, executeCommand, resolveHTTPMethod } from './utils.js';
+import getLogger from './logger.js';
 
 /**
  * Helper: check url deploy type
@@ -34,7 +35,9 @@ function getIdentityToken() {
  * @returns {Promise}
  */
 async function call(options = {}) {
+  const logger = getLogger(options.verbose);
   if (!options.token) {
+    logger.verbose('Getting Google Cloud identity token')
     options.token = getIdentityToken();
   }
 
@@ -43,14 +46,9 @@ async function call(options = {}) {
     Authorization: `Bearer ${options.token}`,
   };
 
-  console.log('Calling psoxy...');
-  console.log(`Request: ${options.url}`);
-  console.log('Waiting response...');
-
-  if (options.verbose) {
-    console.log('Request options:', options);
-    console.log('Request headers:', headers);
-  }
+  logger.info(`Calling Psoxy and waiting response: ${options.url}`);
+  logger.verbose('Request Options:', { additional: options });
+  logger.verbose('Request Headers:', { additional: headers })
 
   const url = new URL(options.url);
   const method = options.method || resolveHTTPMethod(url.pathname);
