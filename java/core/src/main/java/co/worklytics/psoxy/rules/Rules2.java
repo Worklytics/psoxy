@@ -106,10 +106,10 @@ public class Rules2 implements RuleSet, Serializable {
 
         //if provided, only http methods in this list will be allowed
         @JsonInclude(JsonInclude.Include.NON_NULL)
-        List<String> allowedMethods;
+        Set<String> allowedMethods;
 
         @JsonIgnore
-        public Optional<List<String>> getAllowedMethods() {
+        public Optional<Set<String>> getAllowedMethods() {
             return Optional.ofNullable(allowedMethods);
         }
 

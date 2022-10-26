@@ -365,7 +365,7 @@ class SanitizerImplTest {
         SanitizerImpl strictSanitizer = sanitizerFactory.create(Sanitizer.ConfigurationOptions.builder()
             .rules(Rules2.builder()
                 .endpoint(Rules2.Endpoint.builder()
-                    .allowedMethods(Collections.singletonList("GET"))
+                    .allowedMethods(Collections.singleton("GET"))
                     .pathRegex("^/gmail/v1/users/[^/]*/messages[/]?.*?$")
                     .build())
                 .build())
