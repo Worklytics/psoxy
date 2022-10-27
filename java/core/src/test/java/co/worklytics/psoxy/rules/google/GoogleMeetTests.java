@@ -42,7 +42,7 @@ class GoogleMeetTests extends JavaRulesTestBaseCase {
         assertNotSanitized(jsonString, PII);
 
         String sanitized =
-            sanitizer.sanitize(new URL(endpoint), jsonString);
+            sanitizer.sanitize("GET", new URL(endpoint), jsonString);
 
         assertPseudonymized(sanitized, PII);
 

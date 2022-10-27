@@ -41,6 +41,7 @@ public interface Sanitizer {
     }
 
     /**
+     * @param httpMethod to test
      * @param url to test
      * @return whether url is even allowed to be called via proxy, given Sanitizer rule set
      *
@@ -56,13 +57,13 @@ public interface Sanitizer {
      *        pseudonymization/redaction (eg, pseudonymize(jsonPAths, content); redact(jsonPaths, content))
      *        - just invariably that's quite coupled, per above
      */
-    boolean isAllowed(URL url);
+    boolean isAllowed(String httpMethod, URL url);
 
 
     /**
      * sanitize jsonResponse received from url, according any options set on Sanitizer
      */
-    String sanitize(URL url, String jsonResponse);
+    String sanitize(String httpMethod, URL url, String jsonResponse);
 
 
 

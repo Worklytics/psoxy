@@ -46,7 +46,7 @@ public class GDriveTests extends JavaRulesTestBaseCase {
 
 
         String sanitized =
-            sanitizer.sanitize(new URL(endpoint), jsonString);
+            sanitizer.sanitize("GET", new URL(endpoint), jsonString);
 
         assertPseudonymized(sanitized, PII);
         assertRedacted(sanitized, "File Name",
@@ -74,7 +74,7 @@ public class GDriveTests extends JavaRulesTestBaseCase {
         assertNotSanitized(jsonString, PII);
 
         String sanitized =
-            sanitizer.sanitize(new URL(endpoint), jsonString);
+            sanitizer.sanitize("GET", new URL(endpoint), jsonString);
 
         assertPseudonymized(sanitized, PII);
 
@@ -94,7 +94,7 @@ public class GDriveTests extends JavaRulesTestBaseCase {
         assertNotSanitized(jsonString, "Alice");
 
         String sanitized =
-            sanitizer.sanitize(new URL("http://www.googleapis.com/drive/v2/files/some-file-id/permissions"), jsonString);
+            sanitizer.sanitize("GET", new URL("http://www.googleapis.com/drive/v2/files/some-file-id/permissions"), jsonString);
 
         assertPseudonymized(sanitized, PII);
         assertRedacted(sanitized, "Alice");
@@ -114,7 +114,7 @@ public class GDriveTests extends JavaRulesTestBaseCase {
         assertNotSanitized(jsonString, "Alice");
 
         String sanitized =
-            sanitizer.sanitize(new URL("http://www.googleapis.com/drive/v2/files/some-file-id/permissions/234234"), jsonString);
+            sanitizer.sanitize("GET", new URL("http://www.googleapis.com/drive/v2/files/some-file-id/permissions/234234"), jsonString);
         assertPseudonymized(sanitized, PII);
         assertRedacted(sanitized, "Alice");
     }

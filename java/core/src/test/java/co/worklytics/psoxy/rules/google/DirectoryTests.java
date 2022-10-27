@@ -70,7 +70,7 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
         assertNotSanitized(jsonString, PIItoPseudonymize);
 
         String sanitized =
-            sanitizer.sanitize(new URL("https", "admin.googleapis.com", "/admin/directory/v1/users/123213"), jsonString);
+            sanitizer.sanitize("GET", new URL("https", "admin.googleapis.com", "/admin/directory/v1/users/123213"), jsonString);
 
         assertPseudonymized(sanitized, PIItoPseudonymize);
         assertRedacted(sanitized, PIItoRedact);

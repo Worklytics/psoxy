@@ -1,4 +1,5 @@
-import { getCommonHTTPHeaders, request, executeCommand } from './utils.js';
+import { getCommonHTTPHeaders, request, executeCommand, resolveHTTPMethod } from './utils.js';
+import getLogger from './logger.js';
 
 /**
  * Helper: check url deploy type
@@ -15,11 +16,11 @@ function isValidURL(url) {
 
 /**
  * Get identity token for current gcloud account.
- * 
- * Refs: 
+ *
+ * Refs:
  * - https://cloud.google.com/sdk/gcloud/reference/auth/login
  * - https://cloud.google.com/sdk/gcloud/reference/auth/print-identity-token
- * 
+ *
  * @returns {String} identity token
  */
 function getIdentityToken() {
@@ -34,7 +35,9 @@ function getIdentityToken() {
  * @returns {Promise}
  */
 async function call(options = {}) {
+  const logger = getLogger(options.verbose);
   if (!options.token) {
+    logger.verbose('Getting Google Cloud identity token')
     options.token = getIdentityToken();
   }
 
@@ -43,16 +46,14 @@ async function call(options = {}) {
     Authorization: `Bearer ${options.token}`,
   };
 
-  console.log('Calling psoxy...');
-  console.log(`Request: ${options.url}`);
-  console.log('Waiting response...');
+  logger.info(`Calling Psoxy and waiting response: ${options.url}`);
+  logger.verbose('Request Options:', { additional: options });
+  logger.verbose('Request Headers:', { additional: headers })
 
-  if (options.verbose) {
-    console.log('Request options:', options);
-    console.log('Request headers:', headers);
-  }
+  const url = new URL(options.url);
+  const method = options.method || resolveHTTPMethod(url.pathname);
 
-  return await request(options.url, headers);
+  return await request(url, method, headers);
 }
 
 export default {

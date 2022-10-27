@@ -53,7 +53,7 @@ public class ZoomRulesTests extends JavaRulesTestBaseCase {
     })
     @ParameterizedTest
     void allowedEndpointRegex_allowed(String url) {
-        assertTrue(sanitizer.isAllowed(new URL(url)), url + " should be allowed");
+        assertTrue(sanitizer.isAllowed("GET", new URL(url)), url + " should be allowed");
     }
 
     @SneakyThrows
@@ -76,7 +76,7 @@ public class ZoomRulesTests extends JavaRulesTestBaseCase {
     })
     @ParameterizedTest
     void allowedEndpointRegex_blocked(String url) {
-        assertFalse(sanitizer.isAllowed(new URL(url)), url + " should be blocked");
+        assertFalse(sanitizer.isAllowed("GET", new URL(url)), url + " should be blocked");
     }
 
     @SneakyThrows
@@ -92,7 +92,7 @@ public class ZoomRulesTests extends JavaRulesTestBaseCase {
         assertNotSanitized(jsonString, PII);
 
         String sanitized =
-            sanitizer.sanitize(new URL("https://api.zoom.us/v2/users"), jsonString);
+            sanitizer.sanitize("GET", new URL("https://api.zoom.us/v2/users"), jsonString);
 
         assertPseudonymized(sanitized, PII);
         assertRedacted(sanitized, "Taylor", "Kim", "https://example.com/photo.jpg");
@@ -110,7 +110,7 @@ public class ZoomRulesTests extends JavaRulesTestBaseCase {
         assertNotSanitized(jsonString, PII);
 
         String sanitized =
-            sanitizer.sanitize(new URL("https://api.zoom.us/v2/users/ANY_USER_ID/meetings"), jsonString);
+            sanitizer.sanitize("GET", new URL("https://api.zoom.us/v2/users/ANY_USER_ID/meetings"), jsonString);
 
         assertPseudonymized(sanitized, PII);
         // topics & join_urls gone
@@ -132,7 +132,7 @@ public class ZoomRulesTests extends JavaRulesTestBaseCase {
         assertNotSanitized(jsonString, PII);
 
         String sanitized =
-            sanitizer.sanitize(new URL("https://api.zoom.us/v2/meetings/MEETING_ID?show_previous_occurrences=false"), jsonString);
+            sanitizer.sanitize("GET", new URL("https://api.zoom.us/v2/meetings/MEETING_ID?show_previous_occurrences=false"), jsonString);
 
         assertPseudonymized(sanitized, PII);
 
@@ -146,7 +146,7 @@ public class ZoomRulesTests extends JavaRulesTestBaseCase {
         String jsonString = asJson("past-meeting-instances.json");
 
         String sanitized =
-            sanitizer.sanitize(new URL("https://api.zoom.us/v2/past_meetings/MEETING_ID/instances"), jsonString);
+            sanitizer.sanitize("GET", new URL("https://api.zoom.us/v2/past_meetings/MEETING_ID/instances"), jsonString);
 
         // no rules here
         assertJsonEquals(jsonString, sanitized);
@@ -164,7 +164,7 @@ public class ZoomRulesTests extends JavaRulesTestBaseCase {
         assertNotSanitized(jsonString, PII);
 
         String sanitized =
-            sanitizer.sanitize(new URL("https://api.zoom.us/v2/past_meetings/MEETING_ID"), jsonString);
+            sanitizer.sanitize("GET", new URL("https://api.zoom.us/v2/past_meetings/MEETING_ID"), jsonString);
 
         assertPseudonymized(sanitized, PII);
 
@@ -185,7 +185,7 @@ public class ZoomRulesTests extends JavaRulesTestBaseCase {
         assertNotSanitized(jsonString, PII);
 
         String sanitized =
-            sanitizer.sanitize(new URL("https://api.zoom.us/v2/past_meetings/MEETING_ID/participants"), jsonString);
+            sanitizer.sanitize("GET", new URL("https://api.zoom.us/v2/past_meetings/MEETING_ID/participants"), jsonString);
 
         assertPseudonymized(sanitized, PII);
 
