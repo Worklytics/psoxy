@@ -17,6 +17,13 @@ variable "handler_class" {
   default     = "co.worklytics.psoxy.Handler"
 }
 
+# TODO: remove after 0.4.x
+variable "aws_assume_role_arn" {
+  type        = string
+  description = "IGNORED; unused role arn"
+  default     = null
+}
+
 variable "reserved_concurrent_executions" {
   type        = number
   description = "Max number of concurrent instances for the function"
@@ -28,6 +35,7 @@ variable "reserved_concurrent_executions" {
 variable "source_kind" {
   type        = string
   description = "kind of source (eg, 'gmail', 'google-chat', etc)"
+  default     = null
 }
 
 variable "path_to_function_zip" {
@@ -76,7 +84,7 @@ variable "global_parameter_arns" {
   description = "System Manager Parameters ARNS to expose to psoxy instance, expected to contain global shared parameters, like salt or encryption keys"
 }
 
-# remove after v0.4.x
+# TODO: remove after v0.4.x
 variable "function_parameters" {
   type = list(object({
     name     = string

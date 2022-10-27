@@ -259,10 +259,39 @@ module "psoxy-bulk" {
   function_zip_hash     = module.psoxy-aws.deployment_package_hash
   api_caller_role_arn   = module.psoxy-aws.api_caller_role_arn
   api_caller_role_name  = module.psoxy-aws.api_caller_role_name
+  sanitized_accessor_role_names = [
+    module.psoxy-aws.api_caller_role_name
+  ]
   psoxy_base_dir        = var.psoxy_base_dir
   rules                 = each.value.rules
   global_parameter_arns = module.global_secrets.secret_arns
   environment_variables = {
     IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
   }
+}
+
+module "psoxy_lookup_tables_builders" {
+  for_each = var.lookup_table_builders
+
+  source = "../../modules/aws-psoxy-bulk-existing"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-bulk?ref=v0.4.7"
+
+  input_bucket                  = module.psoxy-bulk[each.value.input_connector_id].input_bucket
+  aws_account_id                = var.aws_account_id
+  instance_id                   = each.key
+  aws_region                    = var.aws_region
+  path_to_function_zip          = module.psoxy-aws.path_to_deployment_jar
+  function_zip_hash             = module.psoxy-aws.deployment_package_hash
+  psoxy_base_dir                = var.psoxy_base_dir
+  rules                         = each.value.rules
+  global_parameter_arns         = module.global_secrets.secret_arns
+  sanitized_accessor_role_names = each.value.sanitized_accessor_role_names
+  environment_variables = {
+    IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
+  }
+
+}
+
+output "lookup_tables" {
+  value = { for k,v in var.lookup_table_builders : k => module.psoxy_lookup_tables_builders[k].output_bucket }
 }

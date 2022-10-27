@@ -58,10 +58,16 @@ module "psoxy-aws-google-workspace" {
   enabled_connectors             = var.enabled_connectors
   non_production_connectors      = var.non_production_connectors
   custom_bulk_connectors         = var.custom_bulk_connectors
+  lookup_table_builders          = var.lookup_table_builders
   gcp_project_id                 = google_project.psoxy-google-connectors.project_id
   google_workspace_example_user  = var.google_workspace_example_user
 
   depends_on = [
     google_project.psoxy-google-connectors
   ]
+}
+
+# if you generated these, you may want them to import back into your data warehouse
+output "lookup_tables" {
+  value = module.psoxy-aws-google-workspace.lookup_tables
 }

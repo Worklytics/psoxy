@@ -85,7 +85,14 @@ variable "non_production_connectors" {
 variable "custom_bulk_connectors" {
   type = map(object({
     source_kind = string
-    rules       = map(list(string))
+    rules       = object({
+      pseudonymFormat       = string
+      columnsToRedact       = list(string)
+      columnsToInclude      = list(string)
+      columnsToPseudonymize = list(string)
+      columnsToDuplicate    = map(string)
+      columnsToRename       = map(string)
+    })
   }))
   description = "specs of custom bulk connectors to create"
 
@@ -99,6 +106,46 @@ variable "custom_bulk_connectors" {
     #          # "employee_email", # if exists
     #        ]
     #      }
+    #    }
+  }
+}
+
+variable "lookup_table_builders" {
+  type = map(object({
+    input_connector_id            = string
+    sanitized_accessor_role_names = list(string)
+    rules                         = object({
+      pseudonymFormat       = string
+      columnsToRedact       = list(string)
+      columnsToInclude      = list(string)
+      columnsToPseudonymize = list(string)
+      columnsToDuplicate    = map(string)
+      columnsToRename       = map(string)
+    })
+  }))
+  default = {
+    #    "lookup-hris" = {
+    #      input_connector_id = "hris",
+    #      sanitized_accessor_role_names = [
+    #        # ADD LIST OF NAMES OF YOUR AWS ROLES WHICH CAN READ LOOKUP TABLE
+    #      ],
+    #      rules       = {
+    #        pseudonym_format = "URL_SAFE_TOKEN"
+    #        columnsToRedact       = [
+    #          "employee_email",
+    #          "manager_id",
+    #          "manager_email",
+    #        ]
+    #        columnsToPseudonymize = [
+    #          "employee_id", # primary key
+    #        ]
+    #        columnsToDuplicate   = {
+    #          "employee_id" = "employee_id_orig"
+    #        }
+    #        columnsToRename      = {}
+    #        columnsToInclude     = null
+    #      }
+    #
     #    }
   }
 }
@@ -119,5 +166,6 @@ variable "pseudonymize_app_ids" {
   description = "if set, will set value of PSEUDONYMIZE_APP_IDS environment variable to this value for all sources"
   default     = false
 }
+
 
 

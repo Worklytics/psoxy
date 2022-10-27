@@ -7,11 +7,6 @@ variable "aws_account_id" {
   }
 }
 
-variable "aws_assume_role_arn" {
-  type        = string
-  description = "arn of role used to test the lambda"
-}
-
 variable "aws_region" {
   type        = string
   default     = "us-east-1"
@@ -29,12 +24,9 @@ variable "instance_id" {
   }
 }
 
-# NOTE: currently unused; but perhaps we'll have default rules by source_kind in the future,
-# so leaving it in
-variable "source_kind" {
+variable "input_bucket" {
   type        = string
-  default     = "hris"
-  description = "kind of source of the content to process"
+  description = "name S3 input bucket"
 }
 
 variable "path_to_function_zip" {
@@ -45,24 +37,6 @@ variable "path_to_function_zip" {
 variable "function_zip_hash" {
   type        = string
   description = "hash of base64-encoded zipped lambda bundle"
-}
-
-variable "path_to_config" {
-  type        = string
-  description = "path to config file (usually something in ../../configs/, eg configs/gdirectory.yaml"
-  default     = null
-}
-
-variable "api_caller_role_arn" {
-  type        = string
-  description = "DEPRECATED; arn of role which can be assumed to call API"
-  default     = null
-}
-
-variable "api_caller_role_name" {
-  type        = string
-  description = "DEPRECATED; name of role which can be assumed to call API"
-  default     = null
 }
 
 variable "sanitized_accessor_role_names" {
@@ -84,24 +58,21 @@ variable "environment_variables" {
 
 variable "rules" {
   type = object({
-    # TODO: various fields supported by proxy, but if make explicit in Terraform variables validate
-    # will break existing invocations of this module
-
-    # pseudonymFormat       = string
+    pseudonymFormat       = string
     columnsToRedact       = list(string)
-    # columnsToInclude      = list(string)
+    columnsToInclude      = list(string)
     columnsToPseudonymize = list(string)
-    # columnsToDuplicate    = map(string)
-    # columnsToRename       = map(string)
+    columnsToDuplicate    = map(string)
+    columnsToRename       = map(string)
   })
   description = "Rules to apply to a columnar flat file during transformation"
   default = {
-    # pseudonymFormat       = "URL_SAFE_TOKEN"
+    pseudonymFormat       = "URL_SAFE_TOKEN"
     columnsToRedact       = []
-    # columnsToInclude      = null
+    columnsToInclude      = null
     columnsToPseudonymize = []
-    # columnsToDuplicate    = {}
-    # columnsToRename       = {}
+    columnsToDuplicate    = {}
+    columnsToRename       = {}
   }
 }
 
