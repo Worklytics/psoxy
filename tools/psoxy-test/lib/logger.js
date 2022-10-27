@@ -1,0 +1,49 @@
+import { createLogger, format, transports, addColors } from 'winston';
+
+const config = {
+  levels: {
+    error: 0,
+    success: 1,
+    info: 2,
+    verbose: 3,
+  }, 
+  colors: {
+    error: 'bold red',
+    success: 'bold green',
+    info: 'bold blue',
+    verbose: 'white',
+  },
+}
+
+export default function getLogger(verbose = false) {
+  addColors(config.colors);
+
+  return createLogger({
+    level: 'verbose',
+    levels: config.levels,
+    transports: [
+      new transports.Console({
+        level: verbose ? 'verbose' : 'info',
+        format: format.combine(
+          format.colorize(),
+          format.errors({ stack: true }),
+          format.printf((info) => {
+            let message = `${info.level}: ${info.message}`;
+            if (info.additional) {
+              message += `\n ${JSON.stringify(info.additional, undefined, 2)}`
+            }
+            return message;
+          }),
+        )
+      }),
+      new transports.File({ 
+        filename: 'run.log', 
+        level: 'verbose', // log everything
+        format: format.combine(
+          format.timestamp(),
+          format.simple()
+        )
+      }),
+    ]
+  });
+}

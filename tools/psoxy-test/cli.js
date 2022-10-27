@@ -4,6 +4,7 @@ import { Command, Option } from 'commander';
 import chalk from 'chalk';
 import psoxyTest from './index.js';
 import { callDataSourceEndpoints } from './data-sources/runner.js';
+import getLogger from './lib/logger.js';
 
 const require = createRequire(import.meta.url);
 const { name, version, description } = require('./package.json');
@@ -31,6 +32,7 @@ const { name, version, description } = require('./package.json');
       'Data source to test all available endpoints').choices([
         'asana',
         'azure-ad',
+        'dropbox-business',
         'gcal', 
         'gdrive', 
         'gdirectory',
@@ -42,21 +44,34 @@ const { name, version, description } = require('./package.json');
         'outlook-mail',
         'zoom'
       ]))
+    .addOption(new Option('-m, --method <HTTP method>', 
+      'HTTP method used when calling URL', 'GET').choices(['GET', 'POST']))
     .configureOutput({
       outputError: (str, write) => write(chalk.bold.red(str)),
     });
 
   program.addHelpText(
     'after',
-    `Example call: ${name} -u https://url-to-psoxy-function/path-to-api`
+    `Example calls: 
+      AWS: node cli.js -u https://url-to-psoxy-function/path-to-api -r arn:aws:iam::id:myRole
+      GCP: node cli.js -u https://url-to-psoxy-function/path-to-api -t foo
+    `
   );
 
   program.parse(process.argv);
   const options = program.opts();
+  const logger = getLogger(options.verbose);
 
-  if (options.dataSource) {
-    await callDataSourceEndpoints(options);
-  } else {
-    await psoxyTest(options);
+  let result;
+  try {
+    if (options.dataSource) {
+      result = await callDataSourceEndpoints(options);
+    } else {
+      result = await psoxyTest(options);
+    }
+  } catch (error) {
+    logger.error(error.message);
+    process.exitCode = 1;
   }
+  return result;
 })();
