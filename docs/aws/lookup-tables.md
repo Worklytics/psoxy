@@ -11,7 +11,7 @@ In our various examples (see [`infra/examples`](../../infra/examples)), we provi
 variable will generate another version of your HRIS data (aside from the one exposed to Worklytics)
 which you can then import back to your data warehouse.
 
-The S3 bucket in which this table, if any, will be output will be shown as a Terraform output. eg
+The S3 bucket in which this table, if any, will be shown as a Terraform output. eg
 
 ```shell
 Outputs:
