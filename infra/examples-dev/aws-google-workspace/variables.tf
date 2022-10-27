@@ -153,7 +153,7 @@ variable "lookup_table_builders" {
     #          "employee_id" = "employee_id_orig"
     #        }
     #        columnsToRename      = {}
-    #        columnsToInclude     = null
+    #        columnsToInclude     = null # if any,  only columns defined here will be part of the output
     #      }
     #
     #    }
