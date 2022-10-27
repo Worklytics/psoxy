@@ -8,5 +8,7 @@ AWS User authorized to assume that Role, and configure Terraform AWS provider to
 Your AWS User should use MFA. To manage this with CLI, you can use a script such as [aws-mfa](https://github.com/broamski/aws-mfa)
 to get short-lived key+secret for your user.
 
+For example usage, see: [modular-examples/aws-msft-365/main.tf](../../modular-examples/aws-msft-365/main.tf)
+
 
 
