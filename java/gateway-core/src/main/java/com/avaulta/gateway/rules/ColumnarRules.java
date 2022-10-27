@@ -37,7 +37,7 @@ public class ColumnarRules implements RuleSet {
 
 
     //if we encode these as URL_SAFE_TOKEN, but not reversible then encoder won'd prefix with 'p~'
-    // and then not easy to tell difference bw pseudonym and the original  employee_id value (but maybe we don't care ...)    @Builder.Default
+    // and then not easy to tell difference bw pseudonym and the original  employee_id value (but maybe we don't care ...)
     @Builder.Default
     protected PseudonymEncoder.Implementations pseudonymFormat = PseudonymEncoder.Implementations.JSON;
 
