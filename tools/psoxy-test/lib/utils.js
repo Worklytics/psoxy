@@ -5,6 +5,7 @@ import aws4 from 'aws4';
 import https from 'https';
 import path from 'path';
 import _ from 'lodash';
+import spec from '../data-sources/spec.js';
 
 // Since we're using ESM modules, we need to make `__dirname` available
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -90,11 +91,12 @@ function getCommonHTTPHeaders(options = {}) {
  * Wrapper for requests using Node.js HTTP interfaces: focused on 
  * Psoxy use-case (*)
  * 
- * @param {Object} headers
  * @param {String|URL} url
+ * @param {Object} headers
+ * @param {String} method 
  * @return {Object}
  */
-async function requestWrapper(url, headers) {
+async function requestWrapper(url, method = 'GET', headers) {
   url = typeof url === 'string' ? new URL(url) : url;
   const params = url.searchParams.toString();
 
@@ -104,7 +106,7 @@ async function requestWrapper(url, headers) {
         hostname: url.host,
         port: 443,
         path: url.pathname + (params !== '' ? `?${params}` : ''),
-        method: 'GET',
+        method: method,
         headers: headers,
       },
       (res) => {
@@ -122,8 +124,8 @@ async function requestWrapper(url, headers) {
           res.on('end', () => {
             try {
               result.data = JSON.parse(responseData);
-            } catch (e) {
-              console.log('Error parsing JSON response');
+            } catch (err) {
+              console.log(`Error parsing JSON response: ${err}`);
               result.data = responseData;
             }
             resolve(result);
@@ -133,7 +135,7 @@ async function requestWrapper(url, headers) {
     );
     req.on('error', (err) => {
       // resolve promise to not force caller to "catch"; `status` is not the
-      // right key, but callers expect this a result object with these keys
+      // right key, but callers expect a result object with these keys
       resolve({ status: err.code, error: err.message });
     });
     req.end();
@@ -148,10 +150,11 @@ async function requestWrapper(url, headers) {
  * the result is missing `service` and `region` which are mandatory
  *
  * @param {URL} url
+ * @param {String} method
  * @param {Object} credentials
  * @return {Object}
  */
-function signAWSRequestURL(url, credentials) {
+function signAWSRequestURL(url, method = 'GET', credentials) {
   // According to aws4 docs, search params should be part of the "path"
   const params = url.searchParams.toString();
 
@@ -161,6 +164,7 @@ function signAWSRequestURL(url, credentials) {
       path: url.pathname + (params !== '' ? `?${params}` : ''),
       service: 'lambda',
       region: url.host.split('.')[2],
+      method: method,
     },
     {
       accessKeyId: credentials?.AccessKeyId,
@@ -213,11 +217,25 @@ function transformSpecWithResponse(spec = {}, res = {}) {
   return spec;
 }
 
+/**
+ * Resolve HTTP method based on known API paths (defined in spec module)
+ * 
+ * @param {string} path - path to inspect
+ * @returns {string}
+ */
+function resolveHTTPMethod(path = '') {
+  const endpointMatch = Object.values(spec)
+    .reduce((acc, value) => acc.concat(value.endpoints), [])
+    .find(endpoint => endpoint.path === path);
+  return endpointMatch?.method || 'GET';
+}
+
 export {
   executeCommand,
   getCommonHTTPHeaders,
   requestWrapper as request,
   saveRequestResultToFile,
   signAWSRequestURL,
+  resolveHTTPMethod,
   transformSpecWithResponse,
 };

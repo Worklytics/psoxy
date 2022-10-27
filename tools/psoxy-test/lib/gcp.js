@@ -1,4 +1,4 @@
-import { getCommonHTTPHeaders, request, executeCommand } from './utils.js';
+import { getCommonHTTPHeaders, request, executeCommand, resolveHTTPMethod } from './utils.js';
 
 /**
  * Helper: check url deploy type
@@ -15,11 +15,11 @@ function isValidURL(url) {
 
 /**
  * Get identity token for current gcloud account.
- * 
- * Refs: 
+ *
+ * Refs:
  * - https://cloud.google.com/sdk/gcloud/reference/auth/login
  * - https://cloud.google.com/sdk/gcloud/reference/auth/print-identity-token
- * 
+ *
  * @returns {String} identity token
  */
 function getIdentityToken() {
@@ -52,7 +52,10 @@ async function call(options = {}) {
     console.log('Request headers:', headers);
   }
 
-  return await request(options.url, headers);
+  const url = new URL(options.url);
+  const method = options.method || resolveHTTPMethod(url.pathname);
+
+  return await request(url, method, headers);
 }
 
 export default {

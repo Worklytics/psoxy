@@ -31,6 +31,7 @@ const { name, version, description } = require('./package.json');
       'Data source to test all available endpoints').choices([
         'asana',
         'azure-ad',
+        'dropbox-business',
         'gcal', 
         'gdrive', 
         'gdirectory',
@@ -42,6 +43,8 @@ const { name, version, description } = require('./package.json');
         'outlook-mail',
         'zoom'
       ]))
+    .addOption(new Option('-m, --method <HTTP method>', 
+      'HTTP method used when calling URL', 'GET').choices(['GET', 'POST']))
     .configureOutput({
       outputError: (str, write) => write(chalk.bold.red(str)),
     });
