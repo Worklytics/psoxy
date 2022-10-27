@@ -93,7 +93,7 @@ public class SanitizerImpl implements Sanitizer {
 
 
     @Override
-    public boolean isAllowed(@NonNull URL url) {
+    public boolean isAllowed(@NonNull String httpMethod, @NonNull URL url) {
         String relativeUrl = URLUtils.relativeURL(url);
 
         Rules2 rules = ((Rules2) configurationOptions.getRules());
@@ -103,6 +103,10 @@ public class SanitizerImpl implements Sanitizer {
         } else {
             return getCompiledAllowedEndpoints().entrySet().stream()
                 .filter(entry -> entry.getValue().matcher(relativeUrl).matches())
+                .filter(entry -> entry.getKey().getAllowedMethods()
+                    .map(methods -> methods.stream().map(String::toUpperCase).collect(Collectors.toList())
+                            .contains(httpMethod.toUpperCase()))
+                    .orElse(true))
                 .filter(entry -> entry.getKey().getAllowedQueryParamsOptional()
                     .map(allowedParams -> allowedParams.containsAll(URLUtils.queryParamNames(url))).orElse(true))
                 .findAny().isPresent();
@@ -111,8 +115,8 @@ public class SanitizerImpl implements Sanitizer {
 
 
     @Override
-    public String sanitize(URL url, String jsonResponse) {        //extra check ...
-        if (!isAllowed(url)) {
+    public String sanitize(String httpMethod, URL url, String jsonResponse) {        //extra check ...
+        if (!isAllowed(httpMethod, url)) {
             throw new IllegalStateException(String.format("Sanitizer called to sanitize response that should not have been retrieved: %s", url.toString()));
         }
         if (StringUtils.isEmpty(jsonResponse)) {
