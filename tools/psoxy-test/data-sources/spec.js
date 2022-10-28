@@ -77,6 +77,26 @@ export default {
       },
     ],
   },
+  'dropbox-business': {
+    name: 'Dropbox Business',
+    endpoints: [
+      {
+        name: 'Team Members',
+        path: '/2/team/members/list_v2',
+        method: 'POST',
+      },
+      {
+        name: 'Groups on a Team',
+        path: '/2/team/groups/list',
+        method: 'POST',
+      },
+      {
+        name: 'Team events',
+        path: '/2/team_log/get_events',
+        method: 'POST',
+      }
+    ],
+  },
   gcal: {
     name: 'Google Calendar',
     endpoints: [

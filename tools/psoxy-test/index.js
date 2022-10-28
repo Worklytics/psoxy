@@ -59,7 +59,7 @@ export default async function (options = {}) {
   }
 
   if (result.status === 200) {
-    console.log(chalk.bold.green(`${result.status}: OK`));
+    console.log(chalk.bold.green(`OK: ${result.status}`));
     console.log(inspect(result.data, {depth: null, colors: true}));
   } else {
 
@@ -88,7 +88,11 @@ export default async function (options = {}) {
       }
     }
 
-    console.error(chalk.bold.red(`${result.status}: ERROR`));
+    let errorHeader = 'ERROR';
+    if (result.status) {
+      errorHeader += `: ${result.status}`;
+    }
+    console.error(chalk.bold.red(errorHeader));
     console.error(chalk.bold.red(result.error));
   }
 

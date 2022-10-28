@@ -2,7 +2,8 @@ import {
   request,
   getCommonHTTPHeaders, 
   signAWSRequestURL, 
-  executeCommand 
+  executeCommand, 
+  resolveHTTPMethod
 } from './utils.js';
 
 /**
@@ -46,11 +47,19 @@ async function call(options = {}) {
   }
  
   console.log(`Assuming role ${options.role}`);
-  const credentials = assumeRole(options.role);
+  let credentials;
+  try {
+    credentials = assumeRole(options.role);
+  } catch (err) {
+    throw new Error(`Unable to assume ${options.role}: ${err}`);
+  }
+  
   
   console.log('Signing request');
+
   const url = new URL(options.url);
-  const signed = signAWSRequestURL(url, credentials);
+  const method = options.method || resolveHTTPMethod(url.pathname);
+  const signed = signAWSRequestURL(url, method, credentials);
   const headers = {
     ...getCommonHTTPHeaders(options),
     ...signed.headers,
@@ -63,7 +72,7 @@ async function call(options = {}) {
     console.log('Request headers:', headers);
   }
 
-  return await request(url, headers);
+  return await request(url, method, headers);
 }
 
 export default {
