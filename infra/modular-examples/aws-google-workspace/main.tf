@@ -256,7 +256,7 @@ module "psoxy_lookup_tables_builders" {
   for_each = var.lookup_table_builders
 
   source = "../../modules/aws-psoxy-bulk-existing"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-bulk?ref=v0.4.7"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-existing?ref=v0.4.7"
 
   input_bucket                  = module.psoxy-bulk[each.value.input_connector_id].input_bucket
   aws_account_id                = var.aws_account_id
