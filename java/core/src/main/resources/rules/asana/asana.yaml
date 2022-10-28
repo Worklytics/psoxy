@@ -5,13 +5,11 @@ endpoints:
     allowedQueryParams:
       - "limit"
       - "offset"
-      - "opt_pretty"
       - "opt_fields"
   - pathRegex: "^/api/1.0/users[?]?[^/]*"
     allowedQueryParams:
       - "limit"
       - "offset"
-      - "opt_pretty"
       - "opt_fields"
       - "workspace"
       - "team"
@@ -33,7 +31,6 @@ endpoints:
     allowedQueryParams:
       - "limit"
       - "offset"
-      - "opt_pretty"
       - "opt_fields"
     transforms:
       - !<redact>
@@ -45,7 +42,6 @@ endpoints:
     allowedQueryParams:
       - "limit"
       - "offset"
-      - "opt_pretty"
       - "opt_fields"
       - "archived"
     transforms:
@@ -65,12 +61,8 @@ endpoints:
     allowedQueryParams:
       - "limit"
       - "offset"
-      - "opt_pretty"
       - "opt_fields"
-      - "assignee"
       - "project"
-      - "section"
-      - "workspace"
       - "completed_since"
       - "modified_since"
     transforms:
@@ -96,12 +88,8 @@ endpoints:
     allowedQueryParams:
       - "limit"
       - "offset"
-      - "opt_pretty"
       - "opt_fields"
-      - "assignee"
       - "project"
-      - "section"
-      - "workspace"
       - "completed_since"
       - "modified_since"
     transforms:
@@ -127,7 +115,6 @@ endpoints:
     allowedQueryParams:
       - "limit"
       - "offset"
-      - "opt_pretty"
       - "opt_fields"
     transforms:
       - !<redact>
@@ -154,12 +141,8 @@ endpoints:
     allowedQueryParams:
       - "limit"
       - "offset"
-      - "opt_pretty"
       - "opt_fields"
-      - "assignee"
       - "project"
-      - "section"
-      - "workspace"
       - "completed_since"
       - "modified_since"
     transforms:

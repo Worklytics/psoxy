@@ -15,16 +15,11 @@ public class PrebuiltSanitizerRules {
     private static final List<String> commonAllowedQueryParameters = Lists.newArrayList(
             "limit",
             "offset",
-            "opt_pretty",
             "opt_fields"
     );
 
     private static final List<String> taskAllowedQueryParameters = Streams.concat(commonAllowedQueryParameters.stream(),
-                    Lists.newArrayList(
-                            "assignee",
-                            "project",
-                            "section",
-                            "workspace",
+                    Lists.newArrayList("project",
                             "completed_since",
                             "modified_since").stream())
             .collect(Collectors.toList());
