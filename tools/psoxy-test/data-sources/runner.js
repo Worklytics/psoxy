@@ -1,4 +1,4 @@
-import psoxyTest from '../index.js';
+import psoxyTestCall from '../psoxy-test-call.js';
 import chalk from 'chalk';
 import spec from './spec.js';
 import { transformSpecWithResponse } from '../lib/utils.js';
@@ -7,7 +7,7 @@ import getLogger from '../lib/logger.js';
 /**
  * Run multiple psoxy test calls depending on options.dataSource spec
  *
- * @param {Object} options - see `../index.js`
+ * @param {Object} options - see `../psoxy-test-call.js`
  * @returns {Object}
  */
 async function callDataSourceEndpoints(options) {
@@ -33,7 +33,7 @@ async function callDataSourceEndpoints(options) {
     const url = options.url + endpoint.path + paramsString;
     logger.info(`${chalk.blue(dataSourceSpec.name)}, ${endpoint.name} endpoint -> ${endpoint.path}${paramsString}`);
 
-    const result = await psoxyTest({
+    const result = await psoxyTestCall({
       ...options,
       url: url,
     });
