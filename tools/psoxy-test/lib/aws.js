@@ -95,7 +95,12 @@ function createS3Client(role, region = 'us-east-1') {
     region: region,
   }
   if (role) {
-    const credentials = assumeRole(role);
+    let credentials;
+    try {
+      credentials = assumeRole(role);
+    } catch (error) {
+      throw new Error(`Unable to assume ${role}`, { cause: error });
+    }
 
     options.credentials = {
       // AWS CLI command will return credentials with 1st letter upper-case.
