@@ -47,7 +47,7 @@ public class SlackDiscoveryTests extends JavaRulesTestBaseCase {
     })
     @ParameterizedTest
     void allowedEndpointRegex_allowed(String url) {
-        assertTrue(sanitizer.isAllowed(new URL(url)), url + " should be allowed");
+        assertTrue(sanitizer.isAllowed("GET", new URL(url)), url + " should be allowed");
     }
 
     @SneakyThrows
@@ -82,7 +82,7 @@ public class SlackDiscoveryTests extends JavaRulesTestBaseCase {
     })
     @ParameterizedTest
     void allowedEndpointRegex_blocked(String url) {
-        assertFalse(sanitizer.isAllowed(new URL(url)), url + " should be blocked");
+        assertFalse(sanitizer.isAllowed("GET", new URL(url)), url + " should be blocked");
     }
 
     @SneakyThrows
@@ -99,7 +99,7 @@ public class SlackDiscoveryTests extends JavaRulesTestBaseCase {
         assertNotSanitized(jsonString, PII);
 
         String sanitized =
-                sanitizer.sanitize(new URL("https://slack.com/api/discovery.users.list"), jsonString);
+                sanitizer.sanitize("GET", new URL("https://slack.com/api/discovery.users.list"), jsonString);
 
         assertPseudonymized(sanitized, PII);
         assertRedacted(sanitized, "John Nobody", "felipe", "bob");
@@ -117,7 +117,7 @@ public class SlackDiscoveryTests extends JavaRulesTestBaseCase {
         String jsonString = asJson("discovery-conversations-list.json");
 
         String sanitized =
-                sanitizer.sanitize(new URL("https://slack.com/api/discovery.conversations.list"), jsonString);
+                sanitizer.sanitize("GET", new URL("https://slack.com/api/discovery.conversations.list"), jsonString);
 
         // nothing to pseudonymize
         assertRedacted(sanitized, "This is the topic", "mpdm-primary-owner--first.person--second.person");
@@ -153,7 +153,7 @@ public class SlackDiscoveryTests extends JavaRulesTestBaseCase {
         assertNotSanitized(jsonString, dataToRedact);
 
         String sanitized =
-                sanitizer.sanitize(new URL("https://slack.com/api/discovery.conversations.history"), jsonString);
+                sanitizer.sanitize("GET", new URL("https://slack.com/api/discovery.conversations.history"), jsonString);
 
         assertPseudonymized(sanitized, PIItoPseudonymize);
         assertRedacted(sanitized, dataToRedact);
@@ -165,7 +165,7 @@ public class SlackDiscoveryTests extends JavaRulesTestBaseCase {
         String jsonString = asJson("discovery-conversations-recent.json");
 
         String sanitized =
-                sanitizer.sanitize(new URL("https://slack.com/api/discovery.conversations.recent"), jsonString);
+                sanitizer.sanitize("GET", new URL("https://slack.com/api/discovery.conversations.recent"), jsonString);
 
         // nothing to redact / pseudonymize
         assertJsonEquals(jsonString, sanitized);
@@ -177,7 +177,7 @@ public class SlackDiscoveryTests extends JavaRulesTestBaseCase {
         String jsonString = asJson("discovery-conversations-info.json");
 
         String sanitized =
-                sanitizer.sanitize(new URL("https://slack.com/api/discovery.conversations.info"), jsonString);
+                sanitizer.sanitize("GET", new URL("https://slack.com/api/discovery.conversations.info"), jsonString);
 
         Collection<String> PII = Arrays.asList(
                 "W0N9HDWUR"
@@ -198,7 +198,7 @@ public class SlackDiscoveryTests extends JavaRulesTestBaseCase {
         String jsonString = asJson("discovery-enterprise-info.json");
 
         String sanitized =
-                sanitizer.sanitize(new URL("https://slack.com/api/discovery.enterprise.info"), jsonString);
+                sanitizer.sanitize("GET", new URL("https://slack.com/api/discovery.enterprise.info"), jsonString);
 
         assertRedacted(sanitized, "icon", "image",
                 "DevGrid - W1",

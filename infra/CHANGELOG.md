@@ -1,10 +1,9 @@
 
 # Change Log
 
-## [Unreleased]
+## v0.4.8
 
-Upgrade instructions:
-  - secret storage split out of platform modules (aws/gcp); move existing
-    secrets as follows:
-
-`terraform state mv [SOURCE] [DEST]`
+  - v0.4.8 introduces simplified examples, with a single cloud module dependency. if your Terraform
+    configuration is based on an example from an earlier version, and you wish to migrate to this
+    new structure, append contents of `migration-v0.4.8.tf` to your `main.tf` and apply it. You can
+    revert this change after one successful apply.

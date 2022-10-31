@@ -24,8 +24,12 @@ is available from Worklytics. Please contact [sales@worklytics.co](mailto:sales@
 ## Dependencies
 
 These example configurations reference Psoxy-provided Terraform modules as dependencies via their
-remote addresses hosted in GitHub. If you prefer to modify any of these modules, you can convert
-these to local references throughout your configuration:
+remote addresses hosted in GitHub. Remote modules allows you to update Terraform modules without
+updating your entire git clone to the remote, which is particularly useful if you're using a fork or
+are copying these examples into your own Terraform repo/configuration.
+
+If you prefer to modify any of these modules, you can convert these to local references throughout
+your configuration:
   - replacing `git::https://github.com/worklytics/psoxy//infra/modules` with `../../modules`
   - any `ref` parameter, such as `?ref=v0.1.0-beta.1`, should be removed from the module `source`
     attributes
@@ -36,7 +40,7 @@ to the modules `source`, such as:
 
 ```terraform
 module "psoxy-aws" {
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/aws?ref=v0.1.0-beta.1"
 
   caller_aws_account_id   = var.caller_aws_account_id
   caller_external_user_id = var.caller_external_user_id

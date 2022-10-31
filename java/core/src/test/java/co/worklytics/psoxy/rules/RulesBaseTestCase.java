@@ -14,7 +14,6 @@ import dagger.Component;
 import lombok.*;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
@@ -197,7 +196,7 @@ abstract public class RulesBaseTestCase {
 
     @SneakyThrows
     protected String sanitize(String endpoint, String jsonResponse) {
-        return this.sanitizer.sanitize(new URL(endpoint), jsonResponse);
+        return this.sanitizer.sanitize("GET", new URL(endpoint), jsonResponse);
     }
 
     protected void assertSha(String expectedSha) {
@@ -292,36 +291,36 @@ abstract public class RulesBaseTestCase {
 
     @SneakyThrows
     protected void assertUrlWithQueryParamsAllowed(String url) {
-        assertTrue(sanitizer.isAllowed(new URL(url + "?param=value")), "single param blocked");
-        assertTrue(sanitizer.isAllowed(new URL(url + "?param=value&param2=value2")), "multiple params blocked");
+        assertTrue(sanitizer.isAllowed("GET", new URL(url + "?param=value")), "single param blocked");
+        assertTrue(sanitizer.isAllowed("GET", new URL(url + "?param=value&param2=value2")), "multiple params blocked");
     }
 
     @SneakyThrows
     protected void assertUrlAllowed(String url) {
-        assertTrue(sanitizer.isAllowed(new URL(url)), "api endpoint url blocked");
+        assertTrue(sanitizer.isAllowed("GET", new URL(url)), "api endpoint url blocked");
     }
 
     @SneakyThrows
     protected void assertUrlWithQueryParamsBlocked(String url) {
-        assertFalse(sanitizer.isAllowed(new URL(url + "?param=value")), "query param allowed");
-        assertFalse(sanitizer.isAllowed(new URL(url + "?param=value&param2=value2")), "multiple query params allowed");
+        assertFalse(sanitizer.isAllowed("GET", new URL(url + "?param=value")), "query param allowed");
+        assertFalse(sanitizer.isAllowed("GET", new URL(url + "?param=value&param2=value2")), "multiple query params allowed");
     }
 
     @SneakyThrows
     protected void assertUrlWithSubResourcesAllowed(String url) {
-        assertTrue(sanitizer.isAllowed(new URL(url + "/anypath")), "path blocked");
-        assertTrue(sanitizer.isAllowed(new URL(url + "/anypath/anysubpath")), "path with subpath blocked");
+        assertTrue(sanitizer.isAllowed("GET", new URL(url + "/anypath")), "path blocked");
+        assertTrue(sanitizer.isAllowed("GET", new URL(url + "/anypath/anysubpath")), "path with subpath blocked");
     }
 
     @SneakyThrows
     protected void assertUrlWithSubResourcesBlocked(String url) {
-        assertFalse(sanitizer.isAllowed(new URL(url + "/anypath")), "subpath allowed");
-        assertFalse(sanitizer.isAllowed(new URL(url + "/anypath/anysubpath")), "2 subpaths allowed");
+        assertFalse(sanitizer.isAllowed("GET", new URL(url + "/anypath")), "subpath allowed");
+        assertFalse(sanitizer.isAllowed("GET", new URL(url + "/anypath/anysubpath")), "2 subpaths allowed");
     }
 
     @SneakyThrows
     protected void assertUrlBlocked(String url) {
-        assertFalse(sanitizer.isAllowed(new URL(url)), "rules allowed url that should be blocked: " + url);
+        assertFalse(sanitizer.isAllowed("GET", new URL(url)), "rules allowed url that should be blocked: " + url);
     }
 
     /**

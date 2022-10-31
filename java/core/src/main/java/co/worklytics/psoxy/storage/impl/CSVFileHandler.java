@@ -1,12 +1,18 @@
 package co.worklytics.psoxy.storage.impl;
 
-import co.worklytics.psoxy.rules.CsvRules;
+import co.worklytics.psoxy.PseudonymizedIdentity;
+import com.avaulta.gateway.pseudonyms.Pseudonym;
+import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
+import com.avaulta.gateway.pseudonyms.impl.JsonPseudonymEncoder;
+import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
+import com.avaulta.gateway.rules.ColumnarRules;
 import co.worklytics.psoxy.Sanitizer;
 import co.worklytics.psoxy.storage.FileHandler;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
+import com.google.common.collect.Streams;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.java.Log;
@@ -21,7 +27,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Handles a CSV file to apply the rules pseudonymize the content.
@@ -38,17 +46,20 @@ public class CSVFileHandler implements FileHandler {
 
     @Override
     public byte[] handle(@NonNull InputStreamReader reader, @NonNull Sanitizer sanitizer) throws IOException {
-        CSVParser records = CSVFormat.DEFAULT
+
+        Sanitizer.ConfigurationOptions configurationOptions = sanitizer.getConfigurationOptions();
+
+        ColumnarRules rules = (ColumnarRules) configurationOptions.getRules();
+
+        CSVParser records = CSVFormat
+                .DEFAULT
+                .withDelimiter(rules.getDelimiter())
                 .withFirstRecordAsHeader()
                 .withIgnoreHeaderCase()
                 .withTrim()
                 .parse(reader);
 
         Preconditions.checkArgument(records.getHeaderMap() != null, "Failed to parse header from file");
-
-        Sanitizer.ConfigurationOptions configurationOptions = sanitizer.getConfigurationOptions();
-
-        CsvRules rules = (CsvRules) configurationOptions.getRules();
 
         Set<String> columnsToRedact = asSetWithCaseInsensitiveComparator(rules.getColumnsToRedact());
 
@@ -58,7 +69,7 @@ public class CSVFileHandler implements FileHandler {
             Optional.ofNullable(rules.getColumnsToInclude())
                 .map(this::asSetWithCaseInsensitiveComparator);
 
-        final Map<String, String> columnsToRename = ((CsvRules) configurationOptions.getRules())
+        final Map<String, String> columnsToRename = ((ColumnarRules) configurationOptions.getRules())
             .getColumnsToRename()
             .entrySet().stream()
             .collect(Collectors.toMap(
@@ -66,6 +77,16 @@ public class CSVFileHandler implements FileHandler {
                 entry -> entry.getValue().trim(),
                 (a, b) -> a,
                 () -> new TreeMap<>(String.CASE_INSENSITIVE_ORDER)));
+
+        final Map<String, String> columnsToDuplicate = ((ColumnarRules) configurationOptions.getRules())
+            .getColumnsToDuplicate()
+            .entrySet().stream()
+            .collect(Collectors.toMap(
+                entry -> entry.getKey().trim(),
+                entry -> entry.getValue().trim(),
+                (a, b) -> a,
+                () -> new TreeMap<>(String.CASE_INSENSITIVE_ORDER)));
+
 
         // headers respecting insertion order
         // when constructing the parser with ignore header case the keySet may not return values in
@@ -98,34 +119,56 @@ public class CSVFileHandler implements FileHandler {
         }
 
 
+        List<String> columnNamesForOutputFile = Streams.concat(
+            applyReplacements(headers, columnsToRename).stream(),
+            columnsToDuplicate.values().stream())
+            .collect(Collectors.toList());
+
+
+        BiFunction<String, String, String> applyPseudonymizationIfAny = (outputColumnName, value) -> {
+            if (columnsToPseudonymize.contains(outputColumnName)) {
+                if (StringUtils.isNotBlank(value)) {
+                    try {
+                        PseudonymizedIdentity identity = sanitizer.pseudonymize(value);
+
+                        if (identity == null) {
+                            return null;
+                        } else if (rules.getPseudonymFormat() == PseudonymEncoder.Implementations.URL_SAFE_TOKEN) {
+                            return identity.getHash();
+                        } else {
+                            //JSON
+                            return objectMapper.writeValueAsString(identity);
+                        }
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+            return value;
+        };
+
+
         try(ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
             PrintWriter printWriter = new PrintWriter(baos);
             CSVPrinter printer = new CSVPrinter(printWriter, CSVFormat.DEFAULT
-                .withHeader(applyReplacements(headers, columnsToRename).toArray(new String[0])))
+                .withHeader(columnNamesForOutputFile.toArray(new String[0])))
             ) {
 
             records.forEach(row -> {
-                List<Object> sanitized = headers.stream() // only iterate on allowed headers
-                        .map(column -> {
-                            String value = row.get(column);
+                Stream<Object> sanitized =
+                        headers.stream() // only iterate on allowed headers
+                        .map(column ->
+                                applyPseudonymizationIfAny.apply(
+                                    columnsToRename.getOrDefault(column, column),
+                                    row.get(column))
+                        );
 
-                            String outputColumnName = columnsToRename.getOrDefault(column, column);
-
-                            if (columnsToPseudonymize.contains(outputColumnName)) {
-                                if (StringUtils.isNotBlank(value)) {
-                                    try {
-                                        return objectMapper.writeValueAsString(sanitizer.pseudonymize(value));
-                                    } catch (JsonProcessingException e) {
-                                        throw new RuntimeException(e);
-                                    }
-                                }
-                            }
-                            return value;
-                        })
-                        .collect(Collectors.toList());
+                sanitized = Streams.concat(sanitized, columnsToDuplicate.entrySet().stream()
+                    .map(entry ->
+                        applyPseudonymizationIfAny.apply(entry.getValue(), row.get(entry.getKey()))));
 
                 try {
-                    printer.printRecord(sanitized);
+                    printer.printRecord(sanitized.collect(Collectors.toList()));
                 } catch (Throwable e) {
                     throw new RuntimeException("Failed to write row", e);
                 }
@@ -136,6 +179,7 @@ public class CSVFileHandler implements FileHandler {
             return baos.toByteArray();
         }
     }
+
 
     List<String> applyReplacements(Collection<String> original, final Map<String, String> replacements) {
         return original.stream()
