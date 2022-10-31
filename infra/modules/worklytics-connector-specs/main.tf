@@ -186,6 +186,7 @@ locals {
       reserved_concurrent_executions : null
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
+        "/api/1.0/workspaces",
         "/api/1.0/users?workspace={ANY_WORKSPACE_GID}&limit=10",
         "/api/1.0/workspaces/{ANY_WORKSPACE_GID}/teams&limit=10",
         "/api/1.0/teams/{ANY_TEAM_GID}/projects?limit=20",

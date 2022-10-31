@@ -71,3 +71,4 @@ module "psoxy-aws-google-workspace" {
 output "lookup_tables" {
   value = module.psoxy-aws-google-workspace.lookup_tables
 }
+

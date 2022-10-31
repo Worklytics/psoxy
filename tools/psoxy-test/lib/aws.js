@@ -1,8 +1,8 @@
-import { 
+import {
   request,
-  getCommonHTTPHeaders, 
-  signAWSRequestURL, 
-  executeCommand, 
+  getCommonHTTPHeaders,
+  signAWSRequestURL,
+  executeCommand,
   resolveHTTPMethod
 } from './utils.js';
 import getLogger from './logger.js';
@@ -48,7 +48,7 @@ async function call(options = {}) {
   if (!options.role) {
     throw new Error('Role is a required option for AWS');
   }
- 
+
   logger.verbose(`Assuming role ${options.role}`);
   let credentials;
   try {
@@ -56,11 +56,12 @@ async function call(options = {}) {
   } catch (error) {
     throw new Error(`Unable to assume ${options.role}`, { cause: error });
   }
-  
+
   const url = new URL(options.url);
   const method = options.method || resolveHTTPMethod(url.pathname);
-  
+
   logger.verbose('Signing request');
+
   const signed = signAWSRequestURL(url, method, credentials);
   const headers = {
     ...getCommonHTTPHeaders(options),
