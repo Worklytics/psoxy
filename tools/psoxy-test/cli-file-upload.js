@@ -6,15 +6,19 @@ import psoxyTestFileUpload from './psoxy-test-file-upload.js';
 import getLogger from './lib/logger.js';
 
 const require = createRequire(import.meta.url);
-const { name, version, description } = require('./package.json');
+const { version } = require('./package.json');
 
 (async function () {
   const program = new Command();
 
   program
-    .name(name)
+    .name('cli-file-upload.js')
     .version(version)
-    .description(description)
+    .description(`
+      Psoxy Test: Bulk instance
+      Upload a CSV file containing some PII to an S3 bucket associated to a Psoxy Bulk instance,
+      and get the processed file back with PII removed.
+    `)
     .requiredOption('-i, --input <bucketName>', 'Input bucket\'s name')
     .requiredOption('-f, --file <path/to/file>', 'Path of the file to be processed')
     .requiredOption('-o, --output <bucketName>', 'Output bucket\'s name')
@@ -33,6 +37,7 @@ const { name, version, description } = require('./package.json');
 
   program.parse(process.argv);
   const options = program.opts();
+  const logger = getLogger(options.verbose);
 
   let result;
   try {

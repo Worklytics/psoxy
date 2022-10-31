@@ -13,9 +13,9 @@ const { name, version, description } = require('./package.json');
   const program = new Command();
 
   program
-    .name(name)
+    .name('cli-call.js')
     .version(version)
-    .description(description)
+    .description('Test a Worklytics Psoxy instance via HTTP calls')
     .requiredOption('-u, --url <url>', 'URL to call')
     .option('-f, --force <type>', 'Force deploy type: AWS or GCP')
     .option('-i, --impersonate <user>', 'User to impersonate, needed for certain connectors')
