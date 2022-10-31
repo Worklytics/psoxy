@@ -3,6 +3,7 @@ import { createRequire } from 'module';
 import { Command, Option } from 'commander';
 import chalk from 'chalk';
 import psoxyTestFileUpload from './psoxy-test-file-upload.js';
+import getLogger from './lib/logger.js';
 
 const require = createRequire(import.meta.url);
 const { name, version, description } = require('./package.json');
@@ -20,6 +21,7 @@ const { name, version, description } = require('./package.json');
     .requiredOption('-r, --role <arn>', 'AWS role to assume, use its ARN')
     .requiredOption('-re, --region <region>', 'AWS region of the buckets (input/output)', 
       'us-east-1')
+    .option('-v, --verbose', 'Verbose output', false)
     .configureOutput({
       outputError: (str, write) => write(chalk.bold.red(str)),
     });
@@ -32,5 +34,12 @@ const { name, version, description } = require('./package.json');
   program.parse(process.argv);
   const options = program.opts();
 
-  return await psoxyTestFileUpload(options);
+  let result;
+  try {
+    result = await psoxyTestFileUpload(options);
+  } catch (error) {
+    logger.error(error.message);
+    process.exitCode = 1;
+  }
+  return result;
 })();
