@@ -116,9 +116,10 @@ module "psoxy-google-workspace-connector" {
   global_parameter_arns                 = module.global_secrets.secret_arns
   todo_step                             = module.google-workspace-connection[each.key].next_todo_step
 
-  environment_variables = {
-    IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
-  }
+  environment_variables =  merge(each.value.environment_variables,
+    {
+      IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
+    })
 }
 
 
@@ -206,9 +207,10 @@ module "aws-psoxy-long-auth-connectors" {
   function_parameters            = each.value.secured_variables
   todo_step                      = module.source_token_external_todo[each.key].next_todo_step
 
-  environment_variables = {
-    IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
-  }
+  environment_variables =  merge(each.value.environment_variables,
+    {
+      IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
+    })
 }
 
 module "worklytics-psoxy-connection" {

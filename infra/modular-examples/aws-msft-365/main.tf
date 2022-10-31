@@ -129,12 +129,13 @@ module "psoxy-msft-connector" {
   todo_step             = module.msft_365_grants[each.key].next_todo_step
   global_parameter_arns = module.global_secrets.secret_arns
 
-  environment_variables = {
-    IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
-    CLIENT_ID            = module.msft-connection[each.key].connector.application_id
-    REFRESH_ENDPOINT     = module.worklytics_connector_specs.msft_token_refresh_endpoint
-    PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
-  }
+  environment_variables =  merge(each.value.environment_variables,
+    {
+      IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
+      CLIENT_ID            = module.msft-connection[each.key].connector.application_id
+      REFRESH_ENDPOINT     = module.worklytics_connector_specs.msft_token_refresh_endpoint
+      PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
+    })
 }
 
 module "worklytics-psoxy-connection-msft-365" {
@@ -221,10 +222,11 @@ module "aws-psoxy-long-auth-connectors" {
   global_parameter_arns                 = module.global_secrets.secret_arns
   function_parameters                   = each.value.secured_variables
 
-  environment_variables = {
-    PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
-    IS_DEVELOPMENT_MODE  = contains(var.non_production_connectors, each.key)
-  }
+  environment_variables =  merge(each.value.environment_variables,
+    {
+      PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
+      IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
+    })
 }
 
 module "worklytics-psoxy-connection-oauth-long-access" {
