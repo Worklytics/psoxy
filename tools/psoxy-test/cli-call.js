@@ -2,7 +2,7 @@
 import { createRequire } from 'module';
 import { Command, Option } from 'commander';
 import chalk from 'chalk';
-import psoxyTest from './index.js';
+import psoxyTestCall from './psoxy-test-call.js';
 import { callDataSourceEndpoints } from './data-sources/runner.js';
 import getLogger from './lib/logger.js';
 
@@ -53,8 +53,8 @@ const { name, version, description } = require('./package.json');
   program.addHelpText(
     'after',
     `Example calls: 
-      AWS: node cli.js -u https://url-to-psoxy-function/path-to-api -r arn:aws:iam::id:myRole
-      GCP: node cli.js -u https://url-to-psoxy-function/path-to-api -t foo
+      AWS: node cli-call.js -u https://url-to-psoxy-function/path-to-api -r arn:aws:iam::id:myRole
+      GCP: node cli-call.js -u https://url-to-psoxy-function/path-to-api -t foo
     `
   );
 
@@ -67,7 +67,7 @@ const { name, version, description } = require('./package.json');
     if (options.dataSource) {
       result = await callDataSourceEndpoints(options);
     } else {
-      result = await psoxyTest(options);
+      result = await psoxyTestCall(options);
     }
   } catch (error) {
     logger.error(error.message);

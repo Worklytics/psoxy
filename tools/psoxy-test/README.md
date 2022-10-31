@@ -4,18 +4,18 @@ Node.js testing tool for Worklytics Psoxy.
 
 This folder contains Node.js scripts to help you test your Worklytics Psoxy deploy. The requirements to be able to run the scripts are [Node.js] (version >=16) and [npm] (version >=8). First of all, install the npm dependencies: `npm i`.
 
-The primary tool is a command line interface (CLI) script that allows you to execute single "test calls" to your Worklytics Psoxy instance.  Check all the available options by running `node cli.js -h`. Those options may vary depending on whether you've deployed the Worklytics Psoxy to Amazon Web Services ([AWS]) or Google Cloud Platform ([GCP]).
+The primary tool is a command line interface (CLI) script that allows you to execute "test calls" to your Worklytics Psoxy instance. Check all the available options by running `node cli-call.js -h`. Those options may vary depending on whether you've deployed the Worklytics Psoxy to Amazon Web Services ([AWS]) or Google Cloud Platform ([GCP]).
 
 ## AWS
 Assuming that you've successfully deployed the Psoxy to AWS, and you've configured [Google Calendar] as data source, let's see an example:
 ```shell
-node cli.js -u https://acme.lambda-url.us-east-1.on.aws/calendar/v3/calendars/primary -r arn:aws:iam::310635719553:role/PsoxyApiCaller -i user@acme.com
+node cli-call.js -u https://acme.lambda-url.us-east-1.on.aws/calendar/v3/calendars/primary -r arn:aws:iam::310635719553:role/PsoxyApiCaller -i user@acme.com
 ```
 The `-r` option is mandatory for AWS deploys, and identifies the Amazon Resource Name (ARN) of the "role" that will be assumed (*) to be able to execute the call. The `-u` option is the URL you want to test. In this case, the URL's path matches a Google Calendar API endpoint (access the primary calendar of the currently logged-in user). The `-i` option identifies the user "to impersonate"; this option is only relevant for Google Workspace data sources.
 
 Another example for [Zoom]:
 ```shell
-node cli.js -u https://acme.lambda-url.us-east-1.on.aws/v2/users -r arn:aws:iam::310635719553:role/PsoxyApiCaller
+node cli-call.js -u https://acme.lambda-url.us-east-1.on.aws/v2/users -r arn:aws:iam::310635719553:role/PsoxyApiCaller
 ```
 As you can see, the differences are:
 1. As this is not a Google Workspace data source, you don't need the `-i` option.
@@ -30,15 +30,15 @@ so you must [authorize gcloud first].
 
 Google Calendar example:
 ```shell
-node cli.js -u https://us-central1-acme.cloudfunctions.net/calendar/v3/calendars/primary -t <IDENTITY_TOKEN> -i user@acme.com
+node cli-call.js -u https://us-central1-acme.cloudfunctions.net/calendar/v3/calendars/primary -t <IDENTITY_TOKEN> -i user@acme.com
 ```
 Zoom example:
 ```shell
-node cli.js -u https://us-central1-acme.cloudfunctions.net/v2/users -t <IDENTITY_TOKEN>
+node cli-call.js -u https://us-central1-acme.cloudfunctions.net/v2/users -t <IDENTITY_TOKEN>
 ```
 Outlook Calendar example (token option omitted):
 ```shell
-node cli.js -u https://us-central1-acme.cloudfunctions.net/outlook-cal/v1.0/users
+node cli-call.js -u https://us-central1-acme.cloudfunctions.net/outlook-cal/v1.0/users
 ```
 
 (*) You can obtain it by running `gcloud auth print-identity-token` (using [Google Cloud SDK])
@@ -50,17 +50,17 @@ The only difference with the previous examples is that the `-u, --url` option ha
 
 ```shell
 # Zoom example for AWS deploys, instead of running a single call:
-# node cli.js -u https://acme.lambda-url.us-east-1.on.aws/v2/users -r <role>
+# node cli-call.js -u https://acme.lambda-url.us-east-1.on.aws/v2/users -r <role>
 # use this command to run multiple calls:
-node cli.js -u https://acme.lambda-url.us-east-1.on.aws -r <ROLE> -d zoom
+node cli-call.js -u https://acme.lambda-url.us-east-1.on.aws -r <ROLE> -d zoom
 ```
 ```shell
 # Zoom example for GCP deploys, instead of running a single call:
-# node cli.js -u https://us-central1-acme.cloudfunctions.net/v2/users -t <ROLE>
+# node cli-call.js -u https://us-central1-acme.cloudfunctions.net/v2/users -t <ROLE>
 # use this command to run multiple calls:
-node cli.js -u https://us-central1-acme.cloudfunctions.net -t <IDENTITY_TOKEN> -d zoom
+node cli-call.js -u https://us-central1-acme.cloudfunctions.net -t <IDENTITY_TOKEN> -d zoom
 # or simply:
-node cli.js -u https://us-central1-acme.cloudfunctions.net -d zoom
+node cli-call.js -u https://us-central1-acme.cloudfunctions.net -d zoom
 ```
 
 Notice how the URL changes, and any other option the Psoxy may need doesn't.
