@@ -12,7 +12,9 @@ import {
   ListBucketsCommand,
   ListObjectsV2Command
 } from '@aws-sdk/client-s3';
+import fs from 'fs';
 import getLogger from './logger.js';
+import path from 'path';
 
 /**
  * Call AWS cli to get temporary security credentials.
@@ -136,13 +138,17 @@ async function listObjects(bucket, options) {
  * Ref: https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/classes/putobjectcommand.html
  * Reqs: "s3:PutObject" permissions
  * 
- * @param {*} bucket 
- * @param {*} file 
+ * @param {string} bucket 
+ * @param {string} file - path to file
+ * @param {object} options
+ * @param {S3Client} client
  * @returns 
  */
-async function upload(bucket, file, options) {
-  const client = createS3Client(options.role, options.region);
-
+async function upload(bucket, file, options, client) {
+  if (!client) {
+    client = createS3Client(options.role, options.region);  
+  }
+  
   const uploadParams = {
     Bucket: bucket,
     Key: path.basename(file),
@@ -165,11 +171,15 @@ async function upload(bucket, file, options) {
  *  
  * @param {string} bucket 
  * @param {string} filename 
+ * @param {object} options
+ * @param {S3Client} client
  * @returns {Promise} resolves with contents of file
  */
-async function download(bucket, filename, options) {
-  const client = createS3Client(options.role, options.region);
-
+async function download(bucket, filename, options, client) {
+  if (!client) {
+    client = createS3Client(options.role, options.region);  
+  }
+  
   // Create a helper function to convert a ReadableStream to a string.
   const streamToString = (stream) =>
     new Promise((resolve, reject) => {
@@ -181,7 +191,7 @@ async function download(bucket, filename, options) {
 
   let data;
   let attempts = 0;
-  const MAX_ATTEMPTS = 10;
+  const MAX_ATTEMPTS = 60;
   while (data === undefined && attempts < MAX_ATTEMPTS) {
     try {
       data = await client.send(new GetObjectCommand({
@@ -211,6 +221,7 @@ async function download(bucket, filename, options) {
 
 export default {  
   call,
+  createS3Client,
   download,
   isValidURL,
   listBuckets,
