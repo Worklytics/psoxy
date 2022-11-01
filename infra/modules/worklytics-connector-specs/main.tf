@@ -22,12 +22,11 @@ locals {
       ]
       environment_variables : {}
       example_api_calls : [
-        "/admin/directory/v1/users/me",
-        "/admin/directory/v1/users?customer=my_customer",
-        "/admin/directory/v1/groups?customer=my_customer",
+        "/admin/directory/v1/users?customer=my_customer&maxResults=10",
+        "/admin/directory/v1/groups?customer=my_customer&maxResults=10",
         "/admin/directory/v1/customer/my_customer/domains",
-        "/admin/directory/v1/customer/my_customer/roles",
-        "/admin/directory/v1/customer/my_customer/rolesassignments"
+        "/admin/directory/v1/customer/my_customer/roles?maxResults=10",
+        "/admin/directory/v1/customer/my_customer/rolesassignments?maxResults=10"
       ]
       example_api_calls_user_to_impersonate : var.google_workspace_example_user
     },
@@ -44,7 +43,7 @@ locals {
       example_api_calls : [
         "/calendar/v3/calendars/primary",
         "/calendar/v3/users/me/settings",
-        "/calendar/v3/calendars/primary/events"
+        "/calendar/v3/calendars/primary/events?maxResults=10"
       ]
       example_api_calls_user_to_impersonate : var.google_workspace_example_user
     },
@@ -59,7 +58,7 @@ locals {
       ],
       environment_variables : {},
       example_api_calls : [
-        "/gmail/v1/users/me/messages"
+        "/gmail/v1/users/me/messages?maxResults=10"
       ]
       example_api_calls_user_to_impersonate : var.google_workspace_example_user
     },
@@ -74,7 +73,7 @@ locals {
       ]
       environment_variables : {}
       example_api_calls : [
-        "/admin/reports/v1/activity/users/all/applications/chat"
+        "/admin/reports/v1/activity/users/all/applications/chat?maxResults=10"
       ]
       example_api_calls_user_to_impersonate : var.google_workspace_example_user
     },
@@ -88,7 +87,7 @@ locals {
         "https://www.googleapis.com/auth/admin.reports.audit.readonly"
       ]
       example_api_calls : [
-        "/admin/reports/v1/activity/users/all/applications/meet"
+        "/admin/reports/v1/activity/users/all/applications/meet?maxResults=10"
       ]
       example_api_calls_user_to_impersonate : var.google_workspace_example_user
     },
