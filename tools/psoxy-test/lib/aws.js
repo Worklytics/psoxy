@@ -12,6 +12,11 @@ import {
   ListBucketsCommand,
   ListObjectsV2Command
 } from '@aws-sdk/client-s3';
+import { 
+  CloudWatchLogsClient, 
+  DescribeLogStreamsCommand,
+  GetLogEventsCommand,
+} from '@aws-sdk/client-cloudwatch-logs';
 import fs from 'fs';
 import getLogger from './logger.js';
 import path from 'path';
@@ -114,6 +119,84 @@ function createS3Client(role, region = 'us-east-1') {
 
   return new S3Client(options);
 }
+
+/**
+ * Create CloudWatchLogs client with appropriate credentials
+ * 
+ * @param {string} role 
+ * @param {string} region 
+ * @returns {CloudWatchLogsClient}
+ */
+function createCloudWatchClient(role, region = 'us-east-1') {
+  const options = {
+    region: region,
+  }
+  if (role) {
+    let credentials;
+    try {
+      credentials = assumeRole(role);
+    } catch (error) {
+      throw new Error(`Unable to assume ${role}`, { cause: error });
+    }
+
+    options.credentials = {
+      // AWS CLI command will return credentials with 1st letter upper-case.
+      // However, S3 client expects different capitalization
+      ...Object.keys(credentials).reduce((memo, key) => {
+        memo[key.charAt(0).toLowerCase() + key.slice(1)] = credentials[key];
+        return memo;
+      }, {}),
+    }
+  }
+
+ return new CloudWatchLogsClient(options);
+}
+
+/**
+ * Get log streams for `options.logGroupName` (sort by last event time, limit 10)
+ * 
+ * @param {object} options 
+ * @param {string} options.logGroupName
+ * @param {string} options.role
+ * @param {string} options.region
+ * @param {CloudWatchLogsClient} client 
+ * @returns 
+ */
+async function getLogStreams(options, client) {
+  if (!client) {
+    client = createCloudWatchClient(options.role, options.region);
+  }
+
+  return await client.send(new DescribeLogStreamsCommand({
+    descending: true,
+    logGroupName: options.logGroupName,
+    orderBy: 'LastEventTime',
+    limit: 10,
+  }));
+}
+
+/**
+ * Get log events for `options.logStreamName`
+ * 
+ * @param {object} options 
+ * @param {string} options.logGroupName
+ * @param {string} options.logStreamName
+ * @param {string} options.role
+ * @param {string} options.region
+ * @param {CloudWatchLogsClient} client 
+ * @returns 
+ */
+async function getLogEvents(options, client) {
+  if (!client) {
+    client = createCloudWatchClient(options.role, options.region);
+  }
+
+  return await client.send(new GetLogEventsCommand({
+    logGroupName: options.logGroupName,
+    logStreamName: options.logStreamName,
+  }));
+}
+
 
 /**
  * Only for testing: List all available buckets
@@ -226,8 +309,11 @@ async function download(bucket, filename, options, client) {
 
 export default {  
   call,
+  createCloudWatchClient,
   createS3Client,
   download,
+  getLogEvents,
+  getLogStreams,  
   isValidURL,
   listBuckets,
   listObjects,
