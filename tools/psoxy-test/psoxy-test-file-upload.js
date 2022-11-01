@@ -23,7 +23,9 @@ export default async function (options = {}) {
   const logger = getLogger(options.verbose);
   const filename = path.basename(options.file);
   
-  logger.verbose(`Assuming role ${options.role}`);
+  if (options.role) {
+    logger.verbose(`Assuming role ${options.role}`);
+  }
   let client = aws.createS3Client(options.role, options.region);
 
   logger.info(`Uploading ${filename} to input bucket: ${options.input}`);

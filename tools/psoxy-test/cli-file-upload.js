@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { createRequire } from 'module';
-import { Command, Option } from 'commander';
+import { Command } from 'commander';
 import chalk from 'chalk';
 import psoxyTestFileUpload from './psoxy-test-file-upload.js';
 import getLogger from './lib/logger.js';
