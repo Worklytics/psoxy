@@ -128,9 +128,24 @@ terraform apply
 
 ## Releases
 
+### [v0.4.8](https://github.com/Worklytics/psoxy/releases/tag/v0.4.8)
+
+
 ### [v0.4.7](https://github.com/Worklytics/psoxy/releases/tag/v0.4.7)
 
+Features:
+ - rules can limit allowed query parameters
+ - modules support decoupling secret storage
+
+Fixes:
+ - numerous misc rule fixes
+
 ### [v0.4.6](https://github.com/Worklytics/psoxy/releases/tag/v0.4.6)
+
+Features:
+ - pass through headers
+ - more concise parameter policies
+ - testing tool improvements (npm/node-based)
 
 ### [v0.4.5](https://github.com/Worklytics/psoxy/releases/tag/v0.4.5)
 
