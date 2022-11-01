@@ -86,6 +86,7 @@ locals {
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/admin.reports.audit.readonly"
       ]
+      environment_variables : {}
       example_api_calls : [
         "/admin/reports/v1/activity/users/all/applications/meet?maxResults=10"
       ]
