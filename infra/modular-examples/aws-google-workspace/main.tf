@@ -116,9 +116,10 @@ module "psoxy-google-workspace-connector" {
   global_parameter_arns                 = module.global_secrets.secret_arns
   todo_step                             = module.google-workspace-connection[each.key].next_todo_step
 
-  environment_variables = {
-    IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
-  }
+  environment_variables =  merge(each.value.environment_variables,
+    {
+      IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
+    })
 }
 
 
@@ -206,9 +207,10 @@ module "aws-psoxy-long-auth-connectors" {
   function_parameters            = each.value.secured_variables
   todo_step                      = module.source_token_external_todo[each.key].next_todo_step
 
-  environment_variables = {
-    IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
-  }
+  environment_variables =  merge(each.value.environment_variables,
+    {
+      IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
+    })
 }
 
 module "worklytics-psoxy-connection" {
@@ -256,7 +258,7 @@ module "psoxy_lookup_tables_builders" {
   for_each = var.lookup_table_builders
 
   source = "../../modules/aws-psoxy-bulk-existing"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-bulk?ref=v0.4.7"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-existing?ref=v0.4.7"
 
   input_bucket                  = module.psoxy-bulk[each.value.input_connector_id].input_bucket
   aws_account_id                = var.aws_account_id
