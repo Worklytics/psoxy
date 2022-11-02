@@ -24,6 +24,54 @@ test('isValidURL URL', (t) => {
   );
 });
 
+// Helper class for AWS errors
+class AWSError extends Error {
+  constructor(message, code) {
+    super(message);
+    this.Code = code;
+  }
+}
+
+test('Psoxy Bulk: download retries on 404', async (t) => {
+  const aws = t.context.subject;
+  const options = {
+    attempts: 3,
+    delay: 1, // timeout, make test to not wait
+  }
+
+  // Stub S3 client, always return 404 alike error
+  const fakeS3Client = td.object({
+    send: function() {}
+  });
+  td.when(fakeS3Client.send(td.matchers.anything()))
+    .thenThrow(new AWSError('404 error', 'NoSuchKey'));
+
+  await t.throwsAsync(
+    async () => aws.download('foo', '/path/to/file', options, fakeS3Client),
+    { instanceOf: Error }
+  );
+
+  // Verify as many download attempts as passed in options
+  td.verify(fakeS3Client.send(td.matchers.anything()), 
+    { times: options.attemtps });
+});
+
+test('Psoxy Bulk: no retries on unknown S3 error', async (t) => {
+  const aws = t.context.subject;
+  // Stub S3 client, always return unknown error
+  const fakeS3Client = td.object({
+    send: function() {}
+  });
+  td.when(fakeS3Client.send(td.matchers.anything()))
+    .thenThrow(new AWSError('500 error', 'Unknown'));
+
+  // We get AWSError directly
+  await t.throwsAsync(
+    async () => aws.download('foo', '/path/to/file', {}, fakeS3Client),
+    { instanceOf: AWSError }
+  );
+});
+
 test('Psoxy call: missing role throws error', async (t) => {
   const aws = t.context.subject;
   await t.throwsAsync(
@@ -43,11 +91,9 @@ test('Psoxy call: works as expected', async (t) => {
   const utils = t.context.utils;
 
   // Fake assume role and AWS request signing
-  const roleArn = 'arn:aws:iam::[accountId]:role/[roleName]';
-  const command = `aws sts assume-role --role-arn ${roleArn} --duration 900 --role-session-name lambda_test`;
   const options = {
     url: LAMBDA_URL,
-    role: roleArn,
+    role: 'arn:aws:iam::[accountId]:role/[roleName]',
     method: 'GET',
   };
   const credentials = {
@@ -72,7 +118,8 @@ test('Psoxy call: works as expected', async (t) => {
 
   // notice that `executeCommand` will return credentials wrapped and as
   // String; in contrast to `assumeRole` that will parse and unwrap
-  td.when(utils.executeCommand(command)).thenReturn(JSON.stringify(credentials));
+  td.when(utils.executeCommand(td.matchers.contains('aws sts assume-role')))
+    .thenReturn(JSON.stringify(credentials));
 
   // sign request using credentials
   td.when(
@@ -92,11 +139,13 @@ test('Psoxy call: works as expected', async (t) => {
     )
   ).thenReturn({
     status: 500,
-    error: 'BLOCKED_BY_RULES',
+    headers: {
+      'x-psoxy-error': 'BLOCKED_BY_RULES'
+    }
   });
 
   let result = await aws.call(options);
-  t.is(result.error, 'BLOCKED_BY_RULES');
+  t.is(result.headers['x-psoxy-error'], 'BLOCKED_BY_RULES');
 
   // Valid URL
   options.url += '/api/path';

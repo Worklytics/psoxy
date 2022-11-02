@@ -260,6 +260,10 @@ async function upload(bucket, file, options, client) {
  * @param {string} bucket 
  * @param {string} filename 
  * @param {object} options
+ * @param {string} options.role
+ * @param {string} options.region
+ * @param {number} options.delay - ms to wait between retries
+ * @param {number} options.attempts - max number of download attempts
  * @param {S3Client} client
  * @returns {Promise} resolves with contents of file
  */
@@ -267,20 +271,12 @@ async function download(bucket, filename, options, client) {
   if (!client) {
     client = createS3Client(options.role, options.region);  
   }
-  
-  // Create a helper function to convert a ReadableStream to a string.
-  const streamToString = (stream) =>
-    new Promise((resolve, reject) => {
-      const chunks = [];
-      stream.on('data', (chunk) => chunks.push(chunk));
-      stream.on('error', reject);
-      stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
-    });
 
   let data;
   let attempts = 0;
-  const MAX_ATTEMPTS = 60;
-  while (data === undefined && attempts < MAX_ATTEMPTS) {
+  const MAX_ATTEMPTS = options.attempts || 60;
+  const DELAY = options.delay || 1000;
+  while (data === undefined && attempts <= MAX_ATTEMPTS) {
     try {
       data = await client.send(new GetObjectCommand({
         Bucket: bucket,
@@ -296,15 +292,14 @@ async function download(bucket, filename, options, client) {
     // Wait 1' before retry; in theory, only if this is the first operation 
     // after Psoxy deployment, we'd need a max of 60' until it processes the 
     // file and puts it in the output bucket
-    clearTimeout(await new Promise(resolve => 
-      setTimeout(resolve, 1000)));    
+    clearTimeout(await new Promise(resolve => setTimeout(resolve, DELAY)));    
   }
 
   if (data === undefined) {
     throw new Error(`${filename} not found after ${attempts} attempts`);
   }
   
-  return streamToString(data.Body);
+  return data.Body.transformToString();
 }
 
 export default {  
