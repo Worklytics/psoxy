@@ -1,8 +1,8 @@
-import { 
+import {
   request,
-  getCommonHTTPHeaders, 
-  signAWSRequestURL, 
-  executeCommand, 
+  getCommonHTTPHeaders,
+  signAWSRequestURL,
+  executeCommand,
   resolveHTTPMethod
 } from './utils.js';
 import {
@@ -62,7 +62,7 @@ async function call(options = {}) {
   if (!options.role) {
     throw new Error('Role is a required option for AWS');
   }
- 
+
   logger.verbose(`Assuming role ${options.role}`);
   let credentials;
   try {
@@ -70,11 +70,12 @@ async function call(options = {}) {
   } catch (error) {
     throw new Error(`Unable to assume ${options.role}`, { cause: error });
   }
-  
+
   const url = new URL(options.url);
   const method = options.method || resolveHTTPMethod(url.pathname);
-  
+
   logger.verbose('Signing request');
+
   const signed = signAWSRequestURL(url, method, credentials);
   const headers = {
     ...getCommonHTTPHeaders(options),
@@ -184,7 +185,7 @@ async function getLogStreams(options, client) {
  * @param {string} options.role
  * @param {string} options.region
  * @param {CloudWatchLogsClient} client 
- * @returns 
+ * @returns {Promise}
  */
 async function getLogEvents(options, client) {
   if (!client) {
@@ -197,6 +198,37 @@ async function getLogEvents(options, client) {
   }));
 }
 
+/**
+ * Parse CloudWatch log events and return a simpler format focused on
+ * our use-case: display results via shell
+ * 
+ * Refs: 
+ * - Command output: https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-cloudwatch-logs/interfaces/getlogeventscommandoutput.html
+ * - Events format: https://docs.aws.amazon.com/AmazonCloudWatchLogs/latest/APIReference/API_GetLogEvents.html#API_GetLogEvents_ResponseSyntax
+ * 
+ * @param {Array} logEvents 
+ * @returns {Array}
+ */
+function parseLogEvents(logEvents) {
+  if (!Array.isArray(logEvents) || logEvents.length === 0) {
+    return [];
+  }
+  const LOG_LEVELS = ['SEVERE', 'WARNING'];
+  return logEvents.map(event => {
+    const result = {
+      timestamp: new Date(event.timestamp).toISOString(),
+      message: event.message,
+    }
+
+    const level = LOG_LEVELS.find(level => event.message.startsWith(level));
+    if (typeof level !== 'undefined') {
+      result.message = result.message.replace(`${level}:`, '');
+      result.level = level;
+    }
+
+    return result;    
+  });
+}
 
 /**
  * Only for testing: List all available buckets
@@ -260,6 +292,10 @@ async function upload(bucket, file, options, client) {
  * @param {string} bucket 
  * @param {string} filename 
  * @param {object} options
+ * @param {string} options.role
+ * @param {string} options.region
+ * @param {number} options.delay - ms to wait between retries
+ * @param {number} options.attempts - max number of download attempts
  * @param {S3Client} client
  * @returns {Promise} resolves with contents of file
  */
@@ -267,20 +303,12 @@ async function download(bucket, filename, options, client) {
   if (!client) {
     client = createS3Client(options.role, options.region);  
   }
-  
-  // Create a helper function to convert a ReadableStream to a string.
-  const streamToString = (stream) =>
-    new Promise((resolve, reject) => {
-      const chunks = [];
-      stream.on('data', (chunk) => chunks.push(chunk));
-      stream.on('error', reject);
-      stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
-    });
 
   let data;
   let attempts = 0;
-  const MAX_ATTEMPTS = 60;
-  while (data === undefined && attempts < MAX_ATTEMPTS) {
+  const MAX_ATTEMPTS = options.attempts || 60;
+  const DELAY = options.delay || 1000;
+  while (data === undefined && attempts <= MAX_ATTEMPTS) {
     try {
       data = await client.send(new GetObjectCommand({
         Bucket: bucket,
@@ -296,15 +324,14 @@ async function download(bucket, filename, options, client) {
     // Wait 1' before retry; in theory, only if this is the first operation 
     // after Psoxy deployment, we'd need a max of 60' until it processes the 
     // file and puts it in the output bucket
-    clearTimeout(await new Promise(resolve => 
-      setTimeout(resolve, 1000)));    
+    clearTimeout(await new Promise(resolve => setTimeout(resolve, DELAY)));    
   }
 
   if (data === undefined) {
     throw new Error(`${filename} not found after ${attempts} attempts`);
   }
   
-  return streamToString(data.Body);
+  return data.Body.transformToString();
 }
 
 export default {  
@@ -317,6 +344,7 @@ export default {
   isValidURL,
   listBuckets,
   listObjects,
+  parseLogEvents,
   upload,
 }
 

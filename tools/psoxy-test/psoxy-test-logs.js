@@ -1,3 +1,4 @@
+import chalk from 'chalk';
 import aws from './lib/aws.js';
 import getLogger from './lib/logger.js';
 
@@ -46,12 +47,23 @@ export default async function (options = {}) {
     );
 
     if (logEventsResult['$metadata'].httpStatusCode !== 200) {
-      throw new Error(`Unable to get log events for stream ${logEventsResult}`, {
-        additional: logEventsResult,
-      });
+      throw new Error(`Unable to get log events for stream ${logEventsResult}`, 
+        { additional: logEventsResult });
     }
 
-    logger.success(JSON.stringify(logEventsResult, undefined, 2));
+    const events = aws.parseLogEvents(logEventsResult.events);
+    if (events.length === 0) {
+      logger.info(`No events were found in stream ${logStreamName}`);
+    } else {      
+      logger.success(`Displaying logs for stream ${logStreamName}`);
+      events.forEach(event => {
+        let messagePrefix = `${chalk.blue(event.timestamp)}\n`;
+        if (event.level) {
+          messagePrefix += `${chalk.bold.red(event.level)}: `;
+        }
+        logger.entry(`${messagePrefix}${event.message}`);
+      });
+    }
   }
 
   return logEventsResult || logStreamsResult;

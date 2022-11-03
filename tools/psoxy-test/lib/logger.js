@@ -5,12 +5,14 @@ const config = {
     error: 0,
     success: 1,
     info: 2,
-    verbose: 3,
+    entry: 3,
+    verbose: 4,
   }, 
   colors: {
     error: 'bold red',
     success: 'bold green',
     info: 'bold blue',
+    entry: 'white',
     verbose: 'white',
   },
 }
@@ -23,7 +25,7 @@ export default function getLogger(verbose = false) {
     levels: config.levels,
     transports: [
       new transports.Console({
-        level: verbose ? 'verbose' : 'info',
+        level: verbose ? 'verbose' : 'entry',
         format: format.combine(
           format.colorize(),
           format.errors({ stack: true }),
