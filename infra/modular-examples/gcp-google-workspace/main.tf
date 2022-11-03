@@ -116,9 +116,11 @@ module "psoxy-google-workspace-connector" {
   example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
   todo_step                             = module.google-workspace-connection[each.key].next_todo_step
 
-  environment_variables = {
-    IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
-  }
+  environment_variables =  merge(each.value.environment_variables,
+    {
+      IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
+    }
+  )
 
   secret_bindings = {
     # as SERVICE_ACCOUNT_KEY rotated by Terraform, reasonable to bind as env variable
@@ -206,9 +208,13 @@ module "connector-long-auth-function" {
   salt_secret_version_number    = module.psoxy-gcp.salt_secret_version_number
   todo_step                     = module.source_token_external_todo[each.key].next_todo_step
 
-  environment_variables = {
-    IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
-  }
+  environment_variables =  merge(each.value.environment_variables,
+    {
+      IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
+    }
+  )
+
+
   # NOTE: ACCESS_TOKEN, ENCRYPTION_KEY not passed via secret_bindings (which would get bound as
   # env vars at function start-up) because
   #   - to be bound as env vars, secrets must already exist or function fails to start (w/o any
