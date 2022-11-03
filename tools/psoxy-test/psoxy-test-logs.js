@@ -57,7 +57,7 @@ export default async function (options = {}) {
     } else {      
       logger.success(`Displaying logs for stream ${logStreamName}`);
       events.forEach(event => {
-        let messagePrefix = `${event.timestamp}\n`;
+        let messagePrefix = `${chalk.blue(event.timestamp)}\n`;
         if (event.level) {
           messagePrefix += `${chalk.bold.red(event.level)}: `;
         }
