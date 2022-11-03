@@ -10,8 +10,12 @@ endpoints:
           - "$.data[*].photo"
       - !<pseudonymize>
         jsonPaths:
-          - "$.data[*].gid"
           - "$.data[*].email"
+        encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.data[*].gid"
+        includeReversible: true
         encoding: "JSON"
   - pathRegex: "^/api/1.0/workspaces/[^/]*/teams?[^/]*"
     transforms:
@@ -53,6 +57,7 @@ endpoints:
           - "$.data[*].custom_fields[*].people_value[*].gid"
           - "$.data[*].followers[*].gid"
           - "$.data[*]..email"
+        encoding: "JSON"
   - pathRegex: "^/api/1.0/tasks/[^/]*(\\?)?[^/]*"
     transforms:
       - !<redact>
@@ -72,6 +77,7 @@ endpoints:
           - "$.data.custom_fields[*].people_value[*].gid"
           - "$.data.followers[*].gid"
           - "$.data..email"
+        encoding: "JSON"
   - pathRegex: "^/api/1.0/tasks/[^/]*/stories?[^/]*"
     transforms:
       - !<redact>
@@ -93,6 +99,7 @@ endpoints:
           - "$.data[*].likes[*].user.gid"
           - "$.data[*].story.created_by.gid"
           - "$.data[*]..email"
+        encoding: "JSON"
   - pathRegex: "^/api/1.0/tasks/[^/]*/subtasks?[^/]*"
     transforms:
       - !<redact>
@@ -112,6 +119,7 @@ endpoints:
           - "$.data[*].custom_fields[*].people_value[*].gid"
           - "$.data[*].followers[*].gid"
           - "$.data[*]..email"
+        encoding: "JSON"
   - pathRegex: "^/api/1.0/workspaces/[^/]*/tasks/search?[^/]*"
     transforms:
       - !<redact>
@@ -131,3 +139,4 @@ endpoints:
           - "$.data[*].custom_fields[*].people_value[*].gid"
           - "$.data[*].followers[*].gid"
           - "$.data[*]..email"
+        encoding: "JSON"

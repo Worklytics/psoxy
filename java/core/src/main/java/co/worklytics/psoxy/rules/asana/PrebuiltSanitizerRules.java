@@ -23,9 +23,12 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$.data[*].photo")
                     .build())
             .transform(Transform.Pseudonymize.builder()
-                    .jsonPath("$.data[*].gid")
                     .jsonPath("$.data[*].email")
                     .build())
+            .transform(Transform.Pseudonymize.builder()
+                .includeReversible(true)
+                .jsonPath("$.data[*].gid")
+                .build())
             .build();
 
     static final Rules2.Endpoint TEAMS = Rules2.Endpoint.builder()

@@ -64,13 +64,13 @@ function getCommonHTTPHeaders(options = {}) {
 }
 
 /**
- * Wrapper for requests using Node.js HTTP interfaces: focused on 
+ * Wrapper for requests using Node.js HTTP interfaces: focused on
  * Psoxy use-case (*)
- * 
+ *
  * @param {String|URL} url
  * @param {Object} headers
- * @param {String} method 
- * @return {Object}
+ * @param {String} method
+ * @return {Promise}
  */
 async function requestWrapper(url, method = 'GET', headers) {
   url = typeof url === 'string' ? new URL(url) : url;
@@ -194,7 +194,7 @@ function transformSpecWithResponse(spec = {}, res = {}) {
 
 /**
  * Resolve HTTP method based on known API paths (defined in spec module)
- * 
+ *
  * @param {string} path - path to inspect
  * @returns {string}
  */

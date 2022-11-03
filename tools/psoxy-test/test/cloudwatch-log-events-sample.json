@@ -1,0 +1,112 @@
+{
+  "$metadata": {
+    "httpStatusCode": 200,
+    "requestId": "ce4eb895-a0c6-408c-b4e8-cd98fead393f",
+    "attempts": 1,
+    "totalRetryDelay": 0
+  },
+  "events": [
+    {
+      "ingestionTime": 1667221702239,
+      "message": "START RequestId: fbfdeb36-b72c-49f1-aa5d-04321f20abab Version: $LATEST\n",
+      "timestamp": 1667221701802
+    },
+    {
+      "ingestionTime": 1667221711719,
+      "message": "SEVERE: Failed to load class \"org.slf4j.impl.StaticLoggerBinder\".\n",
+      "timestamp": 1667221702693
+    },
+    {
+      "ingestionTime": 1667221711719,
+      "message": "SLF4J: Defaulting to no-operation (NOP) logger implementation\n",
+      "timestamp": 1667221702693
+    },
+    {
+      "ingestionTime": 1667221711719,
+      "message": "SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.\n",
+      "timestamp": 1667221702693
+    },
+    {
+      "ingestionTime": 1667221724037,
+      "message": "Oct 31, 2022 1:08:34 PM co.worklytics.psoxy.rules.RulesUtils parse\n",
+      "timestamp": 1667221715013
+    },
+    {
+      "ingestionTime": 1667221724037,
+      "message": "INFO: Rules parsed as CsvRules\n",
+      "timestamp": 1667221715013
+    },
+    {
+      "ingestionTime": 1667221724037,
+      "message": "Oct 31, 2022 1:08:35 PM co.worklytics.psoxy.ConfigRulesModule lambda$rules$0\n",
+      "timestamp": 1667221715014
+    },
+    {
+      "ingestionTime": 1667221724037,
+      "message": "INFO: Rules: loaded from environment config (RULES variable parsed as base64-encoded YAML)\n",
+      "timestamp": 1667221715014
+    },
+    {
+      "ingestionTime": 1667221724037,
+      "message": "Oct 31, 2022 1:08:37 PM co.worklytics.psoxy.S3Handler handleRequest\n",
+      "timestamp": 1667221717894
+    },
+    {
+      "ingestionTime": 1667221724037,
+      "message": "INFO: Received a request for processing hris-example-002.csv from bucket psoxy-hris-y28nljpd-input.\n",
+      "timestamp": 1667221717894
+    },
+    {
+      "ingestionTime": 1667221724037,
+      "message": "Oct 31, 2022 1:08:40 PM co.worklytics.psoxy.storage.impl.CSVFileHandler handle\n",
+      "timestamp": 1667221720156
+    },
+    {
+      "ingestionTime": 1667221724037,
+      "message": "INFO: Columns to pseudonymize (\"manager_id\") missing from set found in file (\"DEPARTMENT\",\"EFFECTIVE_ISOWEEK\",\"EMPLOYEE_EMAIL\",\"EMPLOYEE_ID\")\n",
+      "timestamp": 1667221720156
+    },
+    {
+      "ingestionTime": 1667221724037,
+      "message": "Oct 31, 2022 1:08:40 PM co.worklytics.psoxy.S3Handler handleRequest\n",
+      "timestamp": 1667221720895
+    },
+    {
+      "ingestionTime": 1667221724037,
+      "message": "INFO: Writing to: psoxy-hris-y28nljpd-output/hris-example-002.csv\n",
+      "timestamp": 1667221720895
+    },
+    {
+      "ingestionTime": 1667221724037,
+      "message": "Oct 31, 2022 1:08:41 PM com.amazonaws.util.Base64 warn\n",
+      "timestamp": 1667221721271
+    },
+    {
+      "ingestionTime": 1667221724037,
+      "message": "WARNING: JAXB is unavailable. Will fallback to SDK implementation which may be less performant.If you are using Java 9+, you will need to include javax.xml.bind:jaxb-api as a dependency.\n",
+      "timestamp": 1667221721271
+    },
+    {
+      "ingestionTime": 1667221724037,
+      "message": "Oct 31, 2022 1:08:41 PM co.worklytics.psoxy.S3Handler handleRequest\n",
+      "timestamp": 1667221721274
+    },
+    {
+      "ingestionTime": 1667221724037,
+      "message": "INFO: Successfully pseudonymized psoxy-hris-y28nljpd-input/hris-example-002.csv and uploaded to psoxy-hris-y28nljpd-output/hris-example-002.csv\n",
+      "timestamp": 1667221721274
+    },
+    {
+      "ingestionTime": 1667221724037,
+      "message": "END RequestId: fbfdeb36-b72c-49f1-aa5d-04321f20abab\n",
+      "timestamp": 1667221721277
+    },
+    {
+      "ingestionTime": 1667221724037,
+      "message": "REPORT RequestId: fbfdeb36-b72c-49f1-aa5d-04321f20abab\tDuration: 19475.46 ms\tBilled Duration: 19476 ms\tMemory Size: 512 MB\tMax Memory Used: 185 MB\tInit Duration: 454.38 ms\t\n",
+      "timestamp": 1667221721277
+    }
+  ],
+  "nextBackwardToken": "b/37180286361347005865858251093152167573766497950301093888/s",
+  "nextForwardToken": "f/37180286795654018607242136800912267938410310719010373647/s"
+}

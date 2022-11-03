@@ -36,7 +36,7 @@ export default async function (options = {}) {
   const logger = getLogger(options.verbose);
   let result = {};
   let url;
-  
+
   try {
     url = new URL(options.url);
   } catch (error) {
@@ -56,7 +56,7 @@ export default async function (options = {}) {
   } else {
     psoxyCall = isAWS ? aws.call : gcp.call;
   }
-  
+
   result = await psoxyCall(options);
 
   if (result.status === 200) {
@@ -70,7 +70,6 @@ export default async function (options = {}) {
       // Response potentially long, let's remind to check logs for complete results
       logger.success(`Check out run log to see complete results: ${__dirname}/run.log`);
     }
-
   } else {
     let errorMessage = result.statusMessage || 'Unknown';
 
@@ -99,10 +98,18 @@ export default async function (options = {}) {
       }
     }
 
-    logger.error(errorMessage);    
+    let errorHeader = 'ERROR';
+    if (result.status) {
+      errorHeader += `: ${result.status}`;
+    }
+    console.error(chalk.bold.red(errorHeader));
+    console.error(chalk.bold.red(result.error));
   }
 
-  logger.verbose('Response headers:', { additional: result.headers });
+  if (options.verbose && result.headers) {
+    console.log(`Response headers:\n
+      ${inspect(result.headers, {depth: null, colors: true})}`);
+  }
 
   return result;
 }
