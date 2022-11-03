@@ -116,7 +116,7 @@ module "psoxy-google-workspace-connector" {
   example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
   todo_step                             = module.google-workspace-connection[each.key].next_todo_step
 
-  environment_variables =  merge(each.value.environment_variables,
+  environment_variables =  merge(try(each.value.environment_variables, {}),
     {
       IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
     }
@@ -208,7 +208,7 @@ module "connector-long-auth-function" {
   salt_secret_version_number    = module.psoxy-gcp.salt_secret_version_number
   todo_step                     = module.source_token_external_todo[each.key].next_todo_step
 
-  environment_variables =  merge(each.value.environment_variables,
+  environment_variables =  merge(try(each.value.environment_variables, {}),
     {
       IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
     }
