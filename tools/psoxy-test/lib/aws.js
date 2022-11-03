@@ -184,7 +184,7 @@ async function getLogStreams(options, client) {
  * @param {string} options.role
  * @param {string} options.region
  * @param {CloudWatchLogsClient} client 
- * @returns 
+ * @returns {Promise}
  */
 async function getLogEvents(options, client) {
   if (!client) {
@@ -197,6 +197,37 @@ async function getLogEvents(options, client) {
   }));
 }
 
+/**
+ * Parse CloudWatch log events and return a simpler format focused on
+ * our use-case: display results via shell
+ * 
+ * Refs: 
+ * - Command output: https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-cloudwatch-logs/interfaces/getlogeventscommandoutput.html
+ * - Events format: https://docs.aws.amazon.com/AmazonCloudWatchLogs/latest/APIReference/API_GetLogEvents.html#API_GetLogEvents_ResponseSyntax
+ * 
+ * @param {Array} logEvents 
+ * @returns {Array}
+ */
+function parseLogEvents(logEvents) {
+  if (!Array.isArray(logEvents) || logEvents.length === 0) {
+    return [];
+  }
+  const LOG_LEVELS = ['SEVERE', 'WARNING'];
+  return logEvents.map(event => {
+    const result = {
+      timestamp: new Date(event.timestamp).toISOString(),
+      message: event.message,
+    }
+
+    const level = LOG_LEVELS.find(level => event.message.startsWith(level));
+    if (typeof level !== 'undefined') {
+      result.message = result.message.replace(`${level}:`, '');
+      result.level = level;
+    }
+
+    return result;    
+  });
+}
 
 /**
  * Only for testing: List all available buckets
@@ -312,6 +343,7 @@ export default {
   isValidURL,
   listBuckets,
   listObjects,
+  parseLogEvents,
   upload,
 }
 
