@@ -40,11 +40,12 @@ versions of all of the following:
   - git
   - Java 11+ JDK variant
   - [Maven 3.6+](https://maven.apache.org/docs/history.html)
-  - [terraform 1.3.x+](https://www.terraform.io/) optional; if you don't use this, you'll need to configure
-    your GCP/AWS project via the web console/CLI tools. Writing your own terraform config that
-    re-uses our modules will simplify things greatly.
+  - [terraform 1.3.x+](https://www.terraform.io/) optional; if you don't use this, you'll need to
+    configure your GCP/AWS project via the web console/CLI tools. Adapting one of our
+    [terraform examples](infra/examples) or writing your own config that re-uses our
+    [modules](infra/modules) will simplify things greatly.
 
-And, depending on your scenario, you may also need:
+Depending on your scenario, you may also need:
   - [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) is
     required to deploy your psoxy instances in AWS.
   - [Google Cloud Command Line tool](https://cloud.google.com/sdk/docs/install) Required to host
@@ -55,7 +56,8 @@ And, depending on your scenario, you may also need:
     Microsoft 365 sources.
   - [openssl](https://www.openssl.org/) If generating local certificates (see
     [`infra/modules/azure-local-cert`](infra/modules/azuread-local-cert))
-  - Node.js v16+ and npm v8+, to be able to test your proxy instances locally (see `tools/psoxy-test/README.md`).
+  - [Node.js v16+](https://nodejs.org/en/) and [npm v8+](https://www.npmjs.com/package/npm), to be
+    able to test your proxy instances locally (see `tools/psoxy-test/README.md`).
 
 ### Setup
 
