@@ -70,7 +70,7 @@ function getCommonHTTPHeaders(options = {}) {
  * @param {String|URL} url
  * @param {Object} headers
  * @param {String} method
- * @return {Object}
+ * @return {Promise}
  */
 async function requestWrapper(url, method = 'GET', headers) {
   url = typeof url === 'string' ? new URL(url) : url;
