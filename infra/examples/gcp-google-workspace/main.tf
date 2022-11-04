@@ -25,7 +25,7 @@ resource "google_project" "psoxy-project" {
 
 module "psoxy-gcp-google-workspace" {
   # source = "../../modular-examples/gcp-google-workspace"
-  source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-google-workspace?ref=v0.4.8"
+  source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/gcp-google-workspace?ref=v0.4.8"
 
   gcp_project_id                 = google_project.psoxy-project.project_id
   environment_name               = var.environment_name
