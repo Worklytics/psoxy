@@ -11,8 +11,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 /**
  * @typedef {Object} PsoxyResponse
- * @property {string} error - Error message if any
+ * @property {string} statusMessage - Error message if any
  * @property {number} status - HTTP request status code
+ * @property {Object} headers - HTTP response headers
  * @property {Object} data - HTTP request body (JSON)
  */
 
@@ -27,7 +28,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
  * @param {string} options.role - AWS role to assume when calling the Psoxy (ARN format)
  * @param {boolean} options.skip - Whether to skip or not sanitization rules (only in DEV mode)
  * @param {boolean} options.gzip - Add Gzip compression headers
- * @param {boolean} options.verbose - Verbose ouput (default to console)
+ * @param {boolean} options.verbose - Verbose ouput
  * @param {boolean} options.saveToFile - Whether to save successful responses to a file (responses/[api-path]-[ISO8601 timestamp].json)
  * @param {string} options.method - HTTP request method
  * @return {PsoxyResponse}
@@ -96,19 +97,14 @@ export default async function (options = {}) {
       } else if (result.headers['www-authenticate']) {
         errorMessage += `: GCP ${result.headers['www-authenticate']}`
       }
+      
+      logger.verbose(`Response headers:\n ${JSON.stringify(result.headers, null, 2)}`);
     }
 
-    let errorHeader = 'ERROR';
-    if (result.status) {
-      errorHeader += `: ${result.status}`;
+    logger.error(`${chalk.bold.red(result.status)}\n${chalk.bold.red(errorMessage)}`);
+    if ([500, 502].includes(result.status)) {
+      logger.info('This looks like an internal error in the Proxy; please review the logs.')
     }
-    console.error(chalk.bold.red(errorHeader));
-    console.error(chalk.bold.red(result.error));
-  }
-
-  if (options.verbose && result.headers) {
-    console.log(`Response headers:\n
-      ${inspect(result.headers, {depth: null, colors: true})}`);
   }
 
   return result;
