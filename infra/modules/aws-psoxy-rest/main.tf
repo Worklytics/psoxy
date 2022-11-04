@@ -71,7 +71,7 @@ ${coalesce(join("\n", local.test_commands), "cd docs/example-api-calls/")}
 ```
 
 To be able to run the commands above you need Node.js (>=16) and npm (v >=8) installed. Please, check
-the documentation of our Psoxy testing tool ([`/tools/psoxy-test/README.md`](https://github.com/Worklytics/psoxy/blob/v0.4.7/tools/psoxy-test/README.md)) for a detailed description
+the documentation of our Psoxy testing tool ([`/tools/psoxy-test/README.md`](https://github.com/Worklytics/psoxy/blob/v0.4.8/tools/psoxy-test/README.md)) for a detailed description
 of all the different options.
 
 Feel free to try the above calls, and reference to the source's API docs for other parameters /
