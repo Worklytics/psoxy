@@ -40,7 +40,7 @@ terraform init
 If you're using an existing GCP project rather than creating one, you'll need to import it to
 terraform first. For example:
 ```shell
-terraform import google_project.psoxy-project --your-psoxy-project-id--
+terraform import google_project.psoxy-google-connectors --your-psoxy-project-id--
 ```
 
 Apply
