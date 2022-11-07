@@ -39,7 +39,7 @@ public class AsanaTests extends JavaRulesTestBaseCase {
 
         String endpoint = "https://app.asana.com/api/1.0/workspaces";
         assertUrlAllowed(endpoint);
-        assertUrlWithQueryParamsAllowed(endpoint);
+        assertUrlWithQueryParamsBlocked(endpoint);
         //nothing sanitized from this for now
     }
 
@@ -50,7 +50,7 @@ public class AsanaTests extends JavaRulesTestBaseCase {
         //no single-user case
         assertUrlBlocked("https://app.asana.com/api/1.0/users/123123");
 
-        String endpoint = "https://app.asana.com/api/1.0/users";
+        String endpoint = "https://app.asana.com/api/1.0/users?workspace=1234";
 
         Collection<String> PII = Arrays.asList("gsanchez@example.com", "Greg Sanchez");
         assertNotSanitized(jsonString, PII);
@@ -62,7 +62,7 @@ public class AsanaTests extends JavaRulesTestBaseCase {
         );
 
         //ensure we allow paging of users, and passing workspaceId
-        assertUrlWithQueryParamsAllowed(endpoint);
+        assertUrlWithQueryParamsBlocked("https://app.asana.com/api/1.0/users");
     }
 
     @Test
@@ -74,7 +74,7 @@ public class AsanaTests extends JavaRulesTestBaseCase {
         String sanitized = this.sanitize(endpoint, jsonString);
 
         assertRedacted(sanitized, "developers should be members of this team.", "Marketing");
-        assertUrlWithQueryParamsAllowed(endpoint);
+        assertUrlWithQueryParamsBlocked(endpoint);
         assertUrlWithSubResourcesBlocked(endpoint);
     }
 
@@ -92,7 +92,7 @@ public class AsanaTests extends JavaRulesTestBaseCase {
 
         assertRedacted(sanitized, "Greg Sanchez", "gsanchez@example.com", "Marketing", "Stuff to buy", "These are things we need to purchase", "The project is moving forward", "Status Update");
 
-        assertUrlWithQueryParamsAllowed(endpoint);
+        assertUrlWithQueryParamsBlocked(endpoint);
     }
 
     @Test
@@ -132,7 +132,7 @@ public class AsanaTests extends JavaRulesTestBaseCase {
 
                 InvocationExample.of("https://app.asana.com/api/1.0/teams/123123/projects", "projects.json"),
 
-                InvocationExample.of("https://app.asana.com/api/1.0/tasks?projectGuid=123123", "tasks.json"),
+                InvocationExample.of("https://app.asana.com/api/1.0/tasks?project=123123", "tasks.json"),
                 InvocationExample.of("https://app.asana.com/api/1.0/tasks/123123?opt_fields=fake", "task.json"),
                 InvocationExample.of("https://app.asana.com/api/1.0/tasks/123123", "task.json"),
 
@@ -142,6 +142,6 @@ public class AsanaTests extends JavaRulesTestBaseCase {
                 InvocationExample.of("https://app.asana.com/api/1.0/tasks/123123/subtasks", "tasks.json"),
                 InvocationExample.of("https://app.asana.com/api/1.0/tasks/123123/subtasks?opt_fields=fake", "tasks.json"),
 
-                InvocationExample.of("https://app.asana.com/api/1.0/workspaces/123/tasks/search?opt_fields=fake", "tasks.json"));
+                InvocationExample.of("https://app.asana.com/api/1.0/workspaces/123/tasks/search?modified_at.after=fake", "tasks.json"));
     }
 }

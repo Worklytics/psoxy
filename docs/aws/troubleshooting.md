@@ -123,3 +123,24 @@ terraform import module.psoxy-msft-connector\[\"outlook-mail\"\].aws_lambda_func
 NOTE: you likely need to change `outlook-mail` if your error is with a different data source. The
 `\` chars are needed to escape the double-quotes/brackets in your bash command.
 
+## Permissions Errors
+
+### error reading SSM Parameters
+
+Something like the following:
+```
+Error loading class co.worklytics.psoxy.Handler: missing config. no value for PSOXY_SALT: java.lang.Error
+java.lang.Error: missing config. no value for PSOXY_SALT
+```
+
+Check:
+  - the SSM parameter exists in the AWS account
+  - the execution role for the lambda has an attached IAM policy that allows the SSM parameter to 
+    be read
+
+Our Terraform examples should provide both of the above for you, but worth double-checking.
+
+If those are present, yet the error persists, it's possible that you have some org-level security
+constraint/policy preventing SSM parameters from being used / read. For example, you have a 
+"default deny" policy set for SSM GET/etc.  In such a case, you need to add the execute roles for
+each lambda as exceptions to such policies.
