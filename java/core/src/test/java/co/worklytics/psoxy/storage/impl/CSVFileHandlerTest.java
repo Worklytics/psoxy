@@ -9,7 +9,9 @@ import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestModules;
 import co.worklytics.test.TestUtils;
+import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
+import com.avaulta.gateway.rules.ColumnarRules;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -23,6 +25,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.File;
 import java.io.FileReader;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -77,7 +80,7 @@ public class CSVFileHandlerTest {
                 .pseudonymImplementation(PseudonymImplementation.LEGACY)
                 .build());
 
-        String s = (new YAMLMapper()).writeValueAsString(CsvRules.builder()
+        String s = (new YAMLMapper()).writeValueAsString(ColumnarRules.builder()
             .columnToPseudonymize("EMPLOYEE_EMAIL")
             .build());
 
@@ -246,6 +249,38 @@ public class CSVFileHandlerTest {
             .build());
 
         File inputFile = new File(getClass().getResource("/csv/hris-example-quotes.csv").getFile());
+
+        try (FileReader in = new FileReader(inputFile)) {
+            byte[] result  = csvFileHandler.handle(in, sanitizer);
+
+            assertEquals(EXPECTED, new String(result));
+        }
+    }
+
+    @Test
+    @SneakyThrows
+    void handle_duplicates() {
+        //this is a lookup-table use case (for customers to use in own data warehouse)
+        final String EXPECTED = "EMPLOYEE_ID,DEPARTMENT,EMPLOYEE_ID_ORIG\r\n" +
+            "SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM,Engineering,1\r\n" +
+            "mfsaNYuCX__xvnRz4gJp_t0zrDTC5DkuCJvMkubugsI,Sales,2\r\n" +
+            "\".ZdDGUuOMK.Oy7_PJ3pf9SYX12.3tKPdLHfYbjVGcGk\",Engineering,3\r\n" +
+            "\".fs1T64Micz8SkbILrABgEv4kSg.tFhvhP35HGSLdOo\",Engineering,4\r\n";
+
+        Sanitizer sanitizer = sanitizerFactory.create(Sanitizer.ConfigurationOptions.builder()
+            .rules(CsvRules.builder()
+                .pseudonymFormat(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
+                .columnToPseudonymize("EMPLOYEE_ID")
+                .columnToRedact("EMPLOYEE_EMAIL")
+                .columnToRedact("EFFECTIVE_ISOWEEK")
+                .columnsToDuplicate(Map.of("EMPLOYEE_ID", "EMPLOYEE_ID_ORIG"))
+                .build())
+            .pseudonymizationSalt("salt")
+            .pseudonymImplementation(PseudonymImplementation.LEGACY)
+            .defaultScopeId("hris")
+            .build());
+
+        File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
 
         try (FileReader in = new FileReader(inputFile)) {
             byte[] result  = csvFileHandler.handle(in, sanitizer);

@@ -9,7 +9,7 @@ variable "aws_account_id" {
 
 variable "aws_assume_role_arn" {
   type        = string
-  description = "arn of role Terraform should assume when provisioning your infra"
+  description = "arn of role used to test the lambda"
 }
 
 variable "aws_region" {
@@ -55,12 +55,19 @@ variable "path_to_config" {
 
 variable "api_caller_role_arn" {
   type        = string
-  description = "arn of role which can be assumed to call API"
+  description = "DEPRECATED; arn of role which can be assumed to call API"
+  default     = null
 }
 
 variable "api_caller_role_name" {
   type        = string
-  description = "name of role which can be assumed to call API"
+  description = "DEPRECATED; name of role which can be assumed to call API"
+  default     = null
+}
+
+variable "sanitized_accessor_role_names" {
+  type        = list(string)
+  description = "list of names of AWS IAM Roles which should be able to access the sanitized (output) bucket"
 }
 
 variable "psoxy_base_dir" {
@@ -77,13 +84,24 @@ variable "environment_variables" {
 
 variable "rules" {
   type = object({
+    # TODO: various fields supported by proxy, but if make explicit in Terraform variables validate
+    # will break existing invocations of this module
+
+    # pseudonymFormat       = string
     columnsToRedact       = list(string)
+    # columnsToInclude      = list(string)
     columnsToPseudonymize = list(string)
+    # columnsToDuplicate    = map(string)
+    # columnsToRename       = map(string)
   })
   description = "Rules to apply to a columnar flat file during transformation"
   default = {
+    # pseudonymFormat       = "URL_SAFE_TOKEN"
     columnsToRedact       = []
+    # columnsToInclude      = null
     columnsToPseudonymize = []
+    # columnsToDuplicate    = {}
+    # columnsToRename       = {}
   }
 }
 

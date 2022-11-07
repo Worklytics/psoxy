@@ -111,6 +111,7 @@ export default {
       {
         name: 'Events',
         path: '/calendar/v3/calendars/primary/events',
+        params: { maxResults: 10 },
         refs: [
           {
             name: 'Event',
@@ -135,7 +136,7 @@ export default {
       {
         name: 'Groups',
         path: '/admin/directory/v1/groups',
-        params: { customer: 'my_customer' },
+        params: { customer: 'my_customer', maxResults: 10 },
         refs: [
           {
             name: 'Group',
@@ -160,7 +161,7 @@ export default {
       {
         name: 'Users',
         path: '/admin/directory/v1/users',
-        param: { customer: 'my_customer' },
+        params: { customer: 'my_customer' },
         refs: [
           {
             name: 'User Details',
@@ -185,10 +186,12 @@ export default {
       {
         name: 'Roles',
         path: '/admin/directory/v1/customer/my_customer/roles',
+        params: { maxResults: 10 },
       },
       {
         name: 'Role Assingments',
         path: '/admin/directory/v1/customer/my_customer/roleassignments',
+        params: { maxResults: 10 },
       },
     ],
   },
@@ -292,6 +295,7 @@ export default {
       {
         name: 'Messages',
         path: '/gmail/v1/users/me/messages',
+        params: { maxResults: 10 },
         refs: [
           {
             name: 'Message Details',

@@ -1,19 +1,21 @@
-import psoxyTest from '../index.js';
+import psoxyTestCall from '../psoxy-test-call.js';
 import chalk from 'chalk';
 import spec from './spec.js';
 import { transformSpecWithResponse } from '../lib/utils.js';
+import getLogger from '../lib/logger.js';
 
 /**
  * Run multiple psoxy test calls depending on options.dataSource spec
  *
- * @param {Object} options - see `../index.js`
+ * @param {Object} options - see `../psoxy-test-call.js`
  * @returns {Object}
  */
 async function callDataSourceEndpoints(options) {
+  const logger = getLogger(options.verbose);
+
   const dataSourceSpec = spec[options.dataSource];
   if (!dataSourceSpec) {
-    console.error(chalk.bold.red('Unknown data source'));
-    return;
+    throw new Error(`Unknown data source: ${options.dataSource}`);
   }
 
   const results = {};
@@ -29,11 +31,9 @@ async function callDataSourceEndpoints(options) {
     }
 
     const url = options.url + endpoint.path + paramsString;
-    console.log(`
-      ${chalk.blue(dataSourceSpec.name)}, fetching ${chalk.blue(endpoint.name)}: ${url}
-    `);
+    logger.info(`${chalk.blue(dataSourceSpec.name)}, ${endpoint.name} endpoint -> ${endpoint.path}${paramsString}`);
 
-    const result = await psoxyTest({
+    const result = await psoxyTestCall({
       ...options,
       url: url,
     });

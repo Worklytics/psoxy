@@ -41,6 +41,10 @@ public class UrlSafeTokenPseudonymEncoder implements PseudonymEncoder {
     public String encode(Pseudonym pseudonym) {
         String encoded;
         if (pseudonym.getReversible() == null) {
+            //q : add a prefix here, that would let use distinguish between native IDs and tokenized
+            // ones?
+            // potential uses 1) migration, 2) worklytics-side assertion of pseudonymization,
+            // 3) avoid double-pseudonymization? (but does it matter?)
             encoded = encoder.encodeToString(pseudonym.getHash());
         } else {
             encoded = PREFIX + encoder.encodeToString(pseudonym.getReversible());
@@ -68,6 +72,7 @@ public class UrlSafeTokenPseudonymEncoder implements PseudonymEncoder {
             byte[] decoded = decoder.decode(encodedPseudonym.substring(PREFIX.length()));
             builder.reversible(decoded);
         } else {
+            //legacy case - ever used/needed?
             builder.hash(decoder.decode(encodedPseudonym));
         }
 

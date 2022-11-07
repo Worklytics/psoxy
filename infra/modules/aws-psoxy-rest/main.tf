@@ -18,7 +18,6 @@ module "psoxy_lambda" {
   memory_size_mb                 = 512
   timeout_seconds                = 55
   reserved_concurrent_executions = var.reserved_concurrent_executions
-  aws_assume_role_arn            = var.aws_assume_role_arn
   path_to_config                 = var.path_to_config
   source_kind                    = var.source_kind
   function_parameters            = var.function_parameters
@@ -49,7 +48,7 @@ locals {
   proxy_endpoint_url  = substr(aws_lambda_function_url.lambda_url.function_url, 0, length(aws_lambda_function_url.lambda_url.function_url) - 1)
   impersonation_param = var.example_api_calls_user_to_impersonate == null ? "" : " -i \"${var.example_api_calls_user_to_impersonate}\""
   test_commands = [for path in var.example_api_calls :
-    "node ${var.path_to_repo_root}tools/psoxy-test/cli.js -r \"${var.aws_assume_role_arn}\" -u \"${local.proxy_endpoint_url}${path}\"${local.impersonation_param}"
+    "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js -r \"${var.aws_assume_role_arn}\" -u \"${local.proxy_endpoint_url}${path}\"${local.impersonation_param}"
   ]
 }
 
@@ -72,7 +71,7 @@ ${coalesce(join("\n", local.test_commands), "cd docs/example-api-calls/")}
 ```
 
 To be able to run the commands above you need Node.js (>=16) and npm (v >=8) installed. Please, check
-the documentation of our Psoxy testing tool ([`/tools/psoxy-test/README.md`](https://github.com/Worklytics/psoxy/blob/v0.4.7/tools/psoxy-test/README.md)) for a detailed description
+the documentation of our Psoxy testing tool ([`/tools/psoxy-test/README.md`](https://github.com/Worklytics/psoxy/blob/v0.4.8/tools/psoxy-test/README.md)) for a detailed description
 of all the different options.
 
 Feel free to try the above calls, and reference to the source's API docs for other parameters /

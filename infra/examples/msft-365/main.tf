@@ -21,7 +21,7 @@ data "azuread_client_config" "current" {}
 
 module "worklytics_connector_specs" {
   # source = "../../modules/worklytics-connector-specs"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connector-specs?ref=v0.4.7"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connector-specs?ref=v0.4.8"
 
   enabled_connectors = var.enabled_connectors
 
@@ -39,7 +39,7 @@ module "msft-connection" {
   for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
   # source = "../../modules/azuread-connection"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-connection?ref=v0.4.7"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-connection?ref=v0.4.8"
 
   display_name                      = "Psoxy Connector - ${each.value.display_name}${var.connector_display_name_suffix}"
   tenant_id                         = var.msft_tenant_id
@@ -54,7 +54,7 @@ module "msft-connection-auth" {
   for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
   # source = "../../modules/azuread-local-cert"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-local-cert?ref=v0.4.7"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-local-cert?ref=v0.4.8"
 
   application_object_id = module.msft-connection[each.key].connector.id
   rotation_days         = 60
@@ -94,7 +94,7 @@ module "msft_365_grants" {
   for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
   # source = "../../modules/azuread-grant-all-users"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-grant-all-users?ref=v0.4.7"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-grant-all-users?ref=v0.4.8"
 
   psoxy_instance_id        = each.key
   application_id           = module.msft-connection[each.key].connector.application_id

@@ -1,59 +1,18 @@
 package co.worklytics.psoxy.rules;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import lombok.*;
-import lombok.extern.java.Log;
-import org.apache.commons.lang3.tuple.Pair;
+import com.avaulta.gateway.rules.ColumnarRules;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
-import java.util.*;
 
-@Builder(toBuilder = true)
-@Log
 @AllArgsConstructor //for builder
-@NoArgsConstructor //for Jackson
-@Getter
-@EqualsAndHashCode
-@JsonPropertyOrder(alphabetic = true)
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class CsvRules implements RuleSet {
+//@NoArgsConstructor //for Jackson
+@SuperBuilder
+public class CsvRules extends ColumnarRules implements RuleSet {
 
-    private static final long serialVersionUID = 1L;
-
-    @NonNull
-    @Singular(value = "columnToPseudonymize")
-    List<String> columnsToPseudonymize = new ArrayList<>();
-
-    @NonNull
-    @Singular(value = "columnToRedact")
-    List<String> columnsToRedact = new ArrayList<>();
-
-    /**
-     * scopeId to set for any identifiers parsed from source that aren't email addresses
-     *
-     * NOTE: can be overridden by config, in case you're connecting to an on-prem / private instance
-     * of the source and you don't want it's identifiers to be treated as under the default scope
-     */
-    @Deprecated
-    @Getter
-    String defaultScopeIdForSource;
-
-    /**
-     * columns to rename
-     *
-     * NOTE: renames, if any, are applied BEFORE pseudonymization
-     */
-    @Builder.Default
-    @NonNull
-    Map<String, String> columnsToRename = new HashMap<>();
-
-
-    /**
-     * if provided, only columns explicitly listed here will be included in output
-     *  (inverse of columnsToRedact)
-     *
-     * use case: if you don't control source, and want to ensure that some unexpected column that
-     * later appears in source doesn't get included in output.
-     */
-    List<String> columnsToInclude;
+    @Override
+    public String getDefaultScopeIdForSource() {
+        return null;
+    }
 }

@@ -7,7 +7,6 @@ import path from 'path';
 import _ from 'lodash';
 import spec from '../data-sources/spec.js';
 
-// Since we're using ESM modules, we need to make `__dirname` available
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 /**
@@ -33,8 +32,9 @@ async function saveToFile(dirname = __dirname, filename, data) {
 }
 
 /**
- * Get a file name from a URL object; default: replaces `/` by `-`
- *
+ * Get a file name from a URL object; default: replaces `/` by `-`, example:
+ * `[psoxy-function]-[api-path]-[ISO8601 timestamp].json`
+ * `psoxy-gcal-calendar-v3-calendars-primary-2022-09-02T10:15:00.000Z.json`
  * @param {URL} url
  * @param {boolean} timestamp
  * @param {string} extension
@@ -45,30 +45,6 @@ function getFileNameFromURL(url, timestamp = true, extension = '.json') {
   const pathPart = url.pathname.substring(1).replaceAll('/', '-');
   const timestampPart = timestamp ? `-${new Date().toISOString()}` : '';
   return pathPart + timestampPart + extension;
-}
-
-/**
- * Helper to save URL responses to a file.
- * File names follow this format:
- * `[psoxy-function]-[api-path]-[ISO8601 timestamp].json`, example:
- * `psoxy-gcal-calendar-v3-calendars-primary-2022-09-02T10:15:00.000Z.json`
- *
- * @param {URL} url
- * @param {Object} data
- */
-async function saveRequestResultToFile(url, data, log = false) {
-  const filename = getFileNameFromURL(url);
-  const dirname = path.resolve(__dirname, '..');
-
-  if (log) {
-    console.log(`Saving results to ${dirname}/${filename}`);
-  }
-
-  return saveToFile(
-    path.resolve(__dirname, '..'),
-    filename,
-    JSON.stringify(data, undefined, 4)
-  );
 }
 
 /**
@@ -88,13 +64,13 @@ function getCommonHTTPHeaders(options = {}) {
 }
 
 /**
- * Wrapper for requests using Node.js HTTP interfaces: focused on 
+ * Wrapper for requests using Node.js HTTP interfaces: focused on
  * Psoxy use-case (*)
- * 
+ *
  * @param {String|URL} url
  * @param {Object} headers
- * @param {String} method 
- * @return {Object}
+ * @param {String} method
+ * @return {Promise}
  */
 async function requestWrapper(url, method = 'GET', headers) {
   url = typeof url === 'string' ? new URL(url) : url;
@@ -112,11 +88,11 @@ async function requestWrapper(url, method = 'GET', headers) {
       (res) => {
         const result = {
           status: res.statusCode,
+          statusMessage: res.statusMessage,
           headers: res.headers,
         };
 
         if (res.statusCode !== 200) {
-          result.error = res.statusMessage;
           resolve(result);
         } else {
           let responseData = '';
@@ -124,9 +100,8 @@ async function requestWrapper(url, method = 'GET', headers) {
           res.on('end', () => {
             try {
               result.data = JSON.parse(responseData);
-            } catch (err) {
-              console.log(`Error parsing JSON response: ${err}`);
-              result.data = responseData;
+            } catch (error) {
+              throw new Error('Error parsing JSON response', { cause: error });
             }
             resolve(result);
           });
@@ -136,7 +111,7 @@ async function requestWrapper(url, method = 'GET', headers) {
     req.on('error', (err) => {
       // resolve promise to not force caller to "catch"; `status` is not the
       // right key, but callers expect a result object with these keys
-      resolve({ status: err.code, error: err.message });
+      resolve({ status: err.code, statusMessage: err.message });
     });
     req.end();
   });
@@ -219,7 +194,7 @@ function transformSpecWithResponse(spec = {}, res = {}) {
 
 /**
  * Resolve HTTP method based on known API paths (defined in spec module)
- * 
+ *
  * @param {string} path - path to inspect
  * @returns {string}
  */
@@ -233,8 +208,9 @@ function resolveHTTPMethod(path = '') {
 export {
   executeCommand,
   getCommonHTTPHeaders,
+  getFileNameFromURL,
   requestWrapper as request,
-  saveRequestResultToFile,
+  saveToFile,
   signAWSRequestURL,
   resolveHTTPMethod,
   transformSpecWithResponse,

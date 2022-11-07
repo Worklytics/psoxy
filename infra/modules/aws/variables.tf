@@ -21,7 +21,7 @@ variable "psoxy_base_dir" {
 
 variable "caller_gcp_service_account_ids" {
   type        = list(string)
-  description = "ids of GCP service accounts allowed to send requests to the proxy (eg, unique ID of the SA of your Worklytics instance)"
+  description = "ids of GCP OAuth Clients (service accounts) allowed to send requests to the proxy (eg, unique ID of the SA of your Worklytics instance)"
   default     = []
 
   validation {
@@ -34,21 +34,21 @@ variable "caller_gcp_service_account_ids" {
 
 variable "caller_aws_arns" {
   type        = list(string)
-  description = "ARNs of AWS accounts allowed to send requests to the proxy (eg, arn:aws:iam::914358739851:root)"
+  description = "ARNs of AWS accounts allowed to send requests to the proxy (eg, arn:aws:iam::123123123123:root)"
   default     = []
 
   validation {
     condition = alltrue([
       for i in var.caller_aws_arns : (length(regexall("^arn:aws:iam::\\d{12}:\\w+$", i)) > 0)
     ])
-    error_message = "The values of caller_aws_arns should be AWS Resource Names, something like 'arn:aws:iam::914358739851:root'."
+    error_message = "The values of caller_aws_arns should be AWS Resource Names, something like 'arn:aws:iam::123123123123:root'."
   }
 }
 
 variable "psoxy_version" {
   type        = string
   description = "version of psoxy to deploy"
-  default     = "0.4.7"
+  default     = "0.4.8"
 }
 
 

@@ -2,6 +2,7 @@ package co.worklytics.psoxy.rules;
 
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import com.avaulta.gateway.rules.ColumnarRules;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.NoArgsConstructor;
@@ -57,7 +58,7 @@ public class RulesUtils {
         try {
             CsvRules rules = yamlMapper.readerFor(CsvRules.class).readValue(yamlString);
             Validator.validate(rules);
-            log.info("Rules parsed as CsvRules");
+            log.info("Rules parsed as ColumnarRules");
             return rules;
         } catch (IOException e) {
             try {

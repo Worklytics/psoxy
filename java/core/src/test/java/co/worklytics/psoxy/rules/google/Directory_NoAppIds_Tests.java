@@ -36,7 +36,7 @@ public class Directory_NoAppIds_Tests extends DirectoryTests {
         assertNotSanitized(jsonString, PIItoPseudonymize);
 
         String sanitized =
-            sanitizer.sanitize(new URL("https", "admin.googleapis.com", "/admin/directory/v1/users/123213"), jsonString);
+            sanitizer.sanitize("GET", new URL("https", "admin.googleapis.com", "/admin/directory/v1/users/123213"), jsonString);
 
         assertReversibleUrlTokenized(sanitized, PIItoPseudonymize);
     }

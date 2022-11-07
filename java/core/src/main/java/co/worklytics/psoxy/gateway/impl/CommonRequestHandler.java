@@ -131,7 +131,7 @@ public class CommonRequestHandler {
         String callLog = String.format("%s %s", request.getHttpMethod(), relativeURL);
         if (skipSanitization) {
             log.info(String.format("%s. Skipping sanitization.", callLog));
-        } else if (sanitizer.isAllowed(targetUrl)) {
+        } else if (sanitizer.isAllowed(request.getHttpMethod(), targetUrl)) {
             log.info(String.format("%s. Rules allowed call.", callLog));
         } else {
             builder.statusCode(HttpStatus.SC_FORBIDDEN);
@@ -155,7 +155,7 @@ public class CommonRequestHandler {
             sourceApiRequest = requestFactory.buildRequest(request.getHttpMethod(), new GenericUrl(targetUrl), content);
         } catch (IOException e) {
             builder.statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
-            builder.body("Failed to authorize request; review logs");
+            builder.body("Failed to parse request; review logs");
             builder.header(ResponseHeader.ERROR.getHttpHeader(), ErrorCauses.CONNECTION_SETUP.name());
             log.log(Level.WARNING, e.getMessage(), e);
             //something like "Error getting access token for service account: 401 Unauthorized POST https://oauth2.googleapis.com/token,"
@@ -210,7 +210,7 @@ public class CommonRequestHandler {
                             .withPseudonymImplementation(pseudonymImplementation.get()));
                     }
 
-                    proxyResponseContent = sanitizer.sanitize(targetUrl, responseContent);
+                    proxyResponseContent = sanitizer.sanitize(request.getHttpMethod(), targetUrl, responseContent);
                     String rulesSha = rulesUtils.sha(sanitizer.getConfigurationOptions().getRules());
                     builder.header(ResponseHeader.RULES_SHA.getHttpHeader(), rulesSha);
                     log.info("response sanitized with rule set " + rulesSha);
