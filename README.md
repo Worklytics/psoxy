@@ -132,6 +132,11 @@ terraform apply
 
 ### [v0.4.8](https://github.com/Worklytics/psoxy/releases/tag/v0.4.8)
 
+Features:
+ - modular examples, simplifying usage/upgrades
+ - tools to support for testing `bulk` cases, quick review of logs
+ - lookup table builder examples 
+ - restricting HTTP methods in rules 
 
 ### [v0.4.7](https://github.com/Worklytics/psoxy/releases/tag/v0.4.7)
 
