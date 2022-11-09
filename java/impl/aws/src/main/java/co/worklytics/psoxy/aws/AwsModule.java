@@ -4,12 +4,9 @@ import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.impl.CompositeConfigService;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
-<<<<<<< HEAD
 import co.worklytics.psoxy.gateway.impl.*;
-=======
 import co.worklytics.psoxy.gateway.impl.VaultConfigService;
 import co.worklytics.psoxy.gateway.impl.VaultConfigServiceFactory;
->>>>>>> 4933ad6d (wip of java changes to support using Vault as secret store)
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import dagger.Module;
