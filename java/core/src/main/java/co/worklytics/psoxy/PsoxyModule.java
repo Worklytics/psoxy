@@ -3,6 +3,8 @@ package co.worklytics.psoxy;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
+import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
+import co.worklytics.psoxy.gateway.impl.VaultConfigService;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 import co.worklytics.psoxy.storage.FileHandlerFactory;
 import co.worklytics.psoxy.storage.impl.FileHandlerFactoryImpl;
@@ -11,6 +13,9 @@ import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
 import com.avaulta.gateway.tokens.impl.AESReversibleTokenizationStrategy;
 import com.avaulta.gateway.tokens.impl.Sha256DeterministicTokenizationStrategy;
+import com.bettercloud.vault.Vault;
+import com.bettercloud.vault.VaultConfig;
+import com.bettercloud.vault.VaultException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.api.client.http.HttpContent;
@@ -21,7 +26,9 @@ import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import dagger.Module;
 import dagger.Provides;
+import lombok.SneakyThrows;
 import lombok.extern.java.Log;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.crypto.spec.SecretKeySpec;
 import javax.inject.Named;
@@ -152,5 +159,27 @@ public class PsoxyModule {
     UrlSafeTokenPseudonymEncoder urlSafeTokenPseudonymEncoder() {
         return new UrlSafeTokenPseudonymEncoder();
     }
+
+    @SneakyThrows
+    @Provides @Singleton
+    Vault vault(EnvVarsConfigService envVarsConfigService) {
+        VaultConfig vaultConfig =
+            new VaultConfig()
+                .address(envVarsConfigService.getConfigPropertyOrError(VaultConfigService.VaultConfigProperty.VAULT_ADDR))
+               .token(envVarsConfigService.getConfigPropertyOrError(VaultConfigService.VaultConfigProperty.VAULT_TOKEN));
+
+        envVarsConfigService.getConfigPropertyAsOptional(VaultConfigService.VaultConfigProperty.VAULT_NAMESPACE)
+            .filter(StringUtils::isNotBlank)  //don't bother tossing error here, assume meant no namespace
+            .ifPresent(ns -> {
+                try {
+                    vaultConfig.nameSpace(ns);
+                } catch (VaultException e) {
+                    throw new Error("Error setting Vault namespace", e);
+                }
+            });
+
+        return new Vault(vaultConfig.build());
+    }
+
 
 }

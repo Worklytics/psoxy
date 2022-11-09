@@ -1,12 +1,16 @@
 package co.worklytics.psoxy.gateway;
 
+import java.io.Serializable;
 import java.util.Optional;
 
 public interface ConfigService {
 
-    interface ConfigProperty {
+    interface ConfigProperty extends Serializable {
 
         String name();
+
+        // shared? (across multiple instances?)
+        // local? (per-instance secrets)
     }
 
     default boolean supportsWriting() {

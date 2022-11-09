@@ -1,9 +1,15 @@
 package co.worklytics.psoxy.aws;
 
 import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.impl.CompositeConfigService;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
+<<<<<<< HEAD
 import co.worklytics.psoxy.gateway.impl.*;
+=======
+import co.worklytics.psoxy.gateway.impl.VaultConfigService;
+import co.worklytics.psoxy.gateway.impl.VaultConfigServiceFactory;
+>>>>>>> 4933ad6d (wip of java changes to support using Vault as secret store)
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import dagger.Module;
@@ -72,18 +78,53 @@ public interface AwsModule {
     @Provides
     static ConfigService configService(EnvVarsConfigService envVarsConfigService,
                                        @Named("Global") ParameterStoreConfigService globalParameterStoreConfigService,
-                                       ParameterStoreConfigService functionScopedParameterStoreConfigService
+                                       ParameterStoreConfigService functionScopedParameterStoreConfigService,
+                                       VaultConfigServiceFactory vaultConfigServiceFactory
                                       ) {
+
         Duration sharedTtl = Duration.ofMinutes(20);
         Duration connectorTtl = Duration.ofMinutes(5);
         CompositeConfigService parameterStoreConfigHierarchy = CompositeConfigService.builder()
-            .fallback(new CachingConfigServiceDecorator(globalParameterStoreConfigService, sharedTtl))
             .preferred(new CachingConfigServiceDecorator(functionScopedParameterStoreConfigService, connectorTtl))
+            .fallback(new CachingConfigServiceDecorator(globalParameterStoreConfigService, sharedTtl))
             .build();
 
+        //TODO: use a factory/provider for ParameterStoreConfigService, and get path-relative instances
+        // in the same way? or add path to ConfigService interface?
+        String sharedPath
+            = envVarsConfigService
+                .getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_SHARED_CONFIG)
+                .orElse("");
+        String connectorPath
+            = envVarsConfigService
+                .getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_CONNECTOR_CONFIG)
+                .orElse("");
+
+        ConfigService remoteConfigService;
+
+
+        if (vaultConfigServiceFactory.isVaultConfigured(envVarsConfigService)) {
+
+            VaultConfigService sharedVault = vaultConfigServiceFactory.create(sharedPath);
+            VaultConfigService connectorVault = vaultConfigServiceFactory.create(connectorPath);
+
+            CompositeConfigService vaultConfigService = CompositeConfigService.builder()
+                .preferred(new CachingConfigServiceDecorator(connectorVault, connectorTtl))
+                .fallback(new CachingConfigServiceDecorator(sharedVault, sharedTtl))
+                .build();
+
+            remoteConfigService = CompositeConfigService.builder()
+                .preferred(vaultConfigService)
+                //fallback to parameter store, if not defined in Vault
+                .fallback(parameterStoreConfigHierarchy)
+                .build();
+        } else {
+            remoteConfigService = parameterStoreConfigHierarchy;
+        }
+
         return CompositeConfigService.builder()
-            .fallback(parameterStoreConfigHierarchy)
-            .preferred(envVarsConfigService)
+            .preferred(envVarsConfigService) //prefer env vars over remote
+            .fallback(remoteConfigService)
             .build();
     }
 
