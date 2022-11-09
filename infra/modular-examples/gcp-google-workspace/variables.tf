@@ -34,6 +34,12 @@ variable "psoxy_base_dir" {
   }
 }
 
+variable "general_environment_variables" {
+  type        = map(string)
+  description = "environment variables to add for all connectors"
+  default     = {}
+}
+
 variable "gcp_region" {
   type        = string
   description = "Region in which to provision GCP resources, if applicable"

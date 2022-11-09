@@ -71,10 +71,12 @@ variable "psoxy_base_dir" {
   }
 }
 
-variable "google_workspace_example_user" {
-  type        = string
-  description = "user to impersonate for Google Workspace API calls (null for none)"
+variable "general_environment_variables" {
+  type        = map(string)
+  description = "environment variables to add for all connectors"
+  default     = {}
 }
+
 
 variable "enabled_connectors" {
   type        = list(string)
@@ -168,4 +170,7 @@ variable "lookup_table_builders" {
   }
 }
 
-
+variable "google_workspace_example_user" {
+  type        = string
+  description = "user to impersonate for Google Workspace API calls (null for none)"
+}
