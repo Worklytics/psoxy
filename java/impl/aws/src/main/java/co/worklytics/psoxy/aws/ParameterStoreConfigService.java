@@ -1,10 +1,6 @@
 package co.worklytics.psoxy.aws;
 
 import co.worklytics.psoxy.gateway.ConfigService;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-import com.google.common.util.concurrent.UncheckedExecutionException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
@@ -14,10 +10,7 @@ import software.amazon.awssdk.services.ssm.SsmClient;
 import software.amazon.awssdk.services.ssm.model.*;
 
 import javax.inject.Inject;
-import java.time.Duration;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 /**
@@ -38,50 +31,10 @@ public class ParameterStoreConfigService implements ConfigService {
 
     final String namespace;
 
-    final Duration defaultTtl;
-
     @Inject
     @NonNull
     SsmClient client;
 
-    private volatile LoadingCache<String, String> cache;
-    private final Object $writeLock = new Object[0];
-
-    private final String NEGATIVE_VALUE = "##NO_VALUE##";
-
-    private LoadingCache<String, String> getCache() {
-        if (this.cache == null) {
-            synchronized ($writeLock) {
-                if (this.cache == null) {
-                    this.cache = CacheBuilder.newBuilder()
-                        .maximumSize(100)
-                        .expireAfterWrite(defaultTtl.getSeconds(), TimeUnit.SECONDS)
-                        .recordStats()
-                        .build(new CacheLoader<>() {
-                            @Override
-                            public String load(String key) throws AwsServiceException {
-                                try {
-                                    GetParameterRequest parameterRequest = GetParameterRequest.builder()
-                                    .name(key)
-                                    .withDecryption(true)
-                                    .build();
-                                    GetParameterResponse parameterResponse = client.getParameter(parameterRequest);
-                                    return parameterResponse.parameter().value();
-                                } catch (ParameterNotFoundException | ParameterVersionNotFoundException ignore) {
-                                    // does not exist, that could be OK depending on case.
-                                    return NEGATIVE_VALUE;
-                                } catch (SsmException ignore) {
-                                    // very likely the policy doesn't allow reading this parameter
-                                    // OK in those cases
-                                    return NEGATIVE_VALUE;
-                                }
-                            }
-                        });
-                }
-            }
-        }
-        return cache;
-    }
 
     @Override
     public boolean supportsWriting() {
@@ -92,8 +45,6 @@ public class ParameterStoreConfigService implements ConfigService {
     public void putConfigProperty(ConfigProperty property, String value) {
         String key = parameterName(property);
         try {
-            // first in the local cache so other threads get the most recent
-            getCache().put(key, value);
             PutParameterRequest parameterRequest = PutParameterRequest.builder()
                 .name(key)
                 .value(value)
@@ -123,31 +74,27 @@ public class ParameterStoreConfigService implements ConfigService {
 
     @Override
     public Optional<String> getConfigPropertyAsOptional(ConfigProperty property) {
-        String paramName = null;
+        String paramName = parameterName(property);
+
         try {
-            paramName = parameterName(property);
-            String value = getCache().get(paramName);
-            // useful for debugging to check if cache works as expected
-            // log.info(getCache().stats().toString());
-            if (NEGATIVE_VALUE.equals(value)) {
-                // Optional is common, do not log, just for testing/debugging purposes
-                // log.log(Level.WARNING, String.format("Parameter not found %s", paramName));
-                return Optional.empty();
-            } else {
-                return Optional.of(value);
+            GetParameterRequest parameterRequest = GetParameterRequest.builder()
+                .name(paramName)
+                .withDecryption(true)
+                .build();
+            GetParameterResponse parameterResponse = client.getParameter(parameterRequest);
+            return Optional.of(parameterResponse.parameter().value());
+        } catch (ParameterNotFoundException | ParameterVersionNotFoundException ignore) {
+            // does not exist, that could be OK depending on case.
+            return Optional.empty();
+        } catch (SsmException ignore) {
+            // very likely the policy doesn't allow reading this parameter
+            // OK in those cases
+            return Optional.empty();
+        } catch (AwsServiceException e) {
+            if (e.isThrottlingException()) {
+                log.log(Level.SEVERE, String.format("Throttling issues for key %s, rate limit reached most likely despite retries", paramName), e);
             }
-        } catch (ExecutionException ee) {
-            Throwable cause = ee.getCause();
-            if (cause instanceof AwsServiceException) {
-                AwsServiceException ase = (AwsServiceException) cause;
-                if (ase.isThrottlingException()) {
-                    log.log(Level.SEVERE, String.format("Throttling issues for key %s, rate limit reached most likely despite retries", paramName), ase);
-                }
-            }
-            throw new IllegalStateException(String.format("failed to get config value: %s", paramName), cause);
-        } catch (UncheckedExecutionException uee) {
-            // unchecked?
-            throw new IllegalStateException(String.format("failed to get config value: %s", paramName), uee.getCause());
+            throw new IllegalStateException(String.format("failed to get config value: %s", paramName), e);
         }
     }
 

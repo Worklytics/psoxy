@@ -3,6 +3,7 @@ package co.worklytics.psoxy.aws;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.impl.CompositeConfigService;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
+import co.worklytics.psoxy.gateway.impl.*;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import dagger.Module;
@@ -51,8 +52,8 @@ public interface AwsModule {
     // singleton to be reused in lambda container
     @Provides @Named("Global") @Singleton
     static ParameterStoreConfigService parameterStoreConfigService(SsmClient ssmClient) {
-        // Global don't change that often, use longer TTL
-        return new ParameterStoreConfigService(null, Duration.ofMinutes(20), ssmClient);
+
+        return new ParameterStoreConfigService(null, ssmClient);
     }
 
     // parameters scoped to function
@@ -61,8 +62,7 @@ public interface AwsModule {
     static ParameterStoreConfigService functionParameterStoreConfigService(SsmClient ssmClient) {
         String namespace =
             asParameterStoreNamespace(System.getenv(RuntimeEnvironmentVariables.AWS_LAMBDA_FUNCTION_NAME.name()));
-        // Namespaced params may change often (refresh tokens), use shorter TTL
-        return new ParameterStoreConfigService(namespace, Duration.ofMinutes(5), ssmClient);
+        return new ParameterStoreConfigService(namespace, ssmClient);
     }
 
     static String asParameterStoreNamespace(String functionName) {
@@ -74,10 +74,11 @@ public interface AwsModule {
                                        @Named("Global") ParameterStoreConfigService globalParameterStoreConfigService,
                                        ParameterStoreConfigService functionScopedParameterStoreConfigService
                                       ) {
-
+        Duration sharedTtl = Duration.ofMinutes(20);
+        Duration connectorTtl = Duration.ofMinutes(5);
         CompositeConfigService parameterStoreConfigHierarchy = CompositeConfigService.builder()
-            .fallback(globalParameterStoreConfigService)
-            .preferred(functionScopedParameterStoreConfigService)
+            .fallback(new CachingConfigServiceDecorator(globalParameterStoreConfigService, sharedTtl))
+            .preferred(new CachingConfigServiceDecorator(functionScopedParameterStoreConfigService, connectorTtl))
             .build();
 
         return CompositeConfigService.builder()
