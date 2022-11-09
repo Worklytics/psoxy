@@ -216,6 +216,12 @@ module "connector-long-auth-function" {
     }
   )
 
+  secret_bindings = {for entry in local.long_access_parameters_by_connector[each.key] : local.long_access_parameters[entry].secret_name => {
+    secret_id      = module.connector-oauth[entry].secret_id,
+    version_number = "latest"
+  }
+}
+
 
   # NOTE: ACCESS_TOKEN, ENCRYPTION_KEY not passed via secret_bindings (which would get bound as
   # env vars at function start-up) because
