@@ -216,9 +216,8 @@ module "connector-long-auth-function" {
     }
   )
 
-  secret_bindings = {for entry in local.long_access_parameters_by_connector[each.key] : local.long_access_parameters[entry].secret_name => {
-    secret_id      = module.connector-oauth[entry].secret_id,
-    version_number = "latest"
+  secret_volumes = {for entry in local.long_access_parameters_by_connector[each.key] : local.long_access_parameters[entry].secret_name => {
+    secret_id      = module.connector-oauth[entry].secret_id
   }
 }
 

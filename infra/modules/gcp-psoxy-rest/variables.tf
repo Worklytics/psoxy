@@ -28,6 +28,14 @@ variable "secret_bindings" {
   default     = {}
 }
 
+variable "secret_volumes" {
+  type = map(object({
+    secret_id = string # NOT the full resource ID; just the secret_id within GCP project
+  }))
+  description = "map of Secret Manager Secrets to expose to cloud function by Secret Volume"
+  default     = {}
+}
+
 variable "artifacts_bucket_name" {
   type        = string
   description = "Name of the bucket where artifacts are stored"

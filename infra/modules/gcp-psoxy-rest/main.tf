@@ -61,6 +61,19 @@ resource "google_cloudfunctions_function" "function" {
     }
   }
 
+  dynamic "secret_volumes" {
+    for_each = var.secret_volumes
+    iterator = secret_volume
+
+    content {
+      project_id = data.google_project.project.number
+      secret     = secret_volume.value.secret_id
+      mount_path = "/etc/secrets/${secret_volume.key}"
+
+      # TODO: Support version, by default now is latest
+    }
+  }
+
   trigger_http = true
 
   lifecycle {
@@ -77,8 +90,9 @@ resource "google_cloudfunctions_function" "function" {
 locals {
   proxy_endpoint_url  = "https://${var.region}-${var.project_id}.cloudfunctions.net/${google_cloudfunctions_function.function.name}"
   impersonation_param = var.example_api_calls_user_to_impersonate == null ? "" : " -i \"${var.example_api_calls_user_to_impersonate}\""
-  test_commands = [for path in var.example_api_calls :
-    "${var.path_to_repo_root}tools/test-psoxy.sh -g -u \"${local.proxy_endpoint_url}${path}\"${local.impersonation_param}"
+  test_commands       = [
+  for path in var.example_api_calls :
+  "${var.path_to_repo_root}tools/test-psoxy.sh -g -u \"${local.proxy_endpoint_url}${path}\"${local.impersonation_param}"
   ]
 }
 
