@@ -63,7 +63,7 @@ module "google-workspace-key-secrets" {
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-secrets"
 
   secret_project = var.gcp_project_id
-  secrets = {
+  secrets        = {
     "PSOXY_${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY" : {
       value       = module.google-workspace-connection-auth[each.key].key_value
       description = "Auth key for ${each.key} service account"
@@ -116,7 +116,7 @@ module "psoxy-google-workspace-connector" {
   example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
   todo_step                             = module.google-workspace-connection[each.key].next_todo_step
 
-  environment_variables =  merge(try(each.value.environment_variables, {}),
+  environment_variables = merge(try(each.value.environment_variables, {}),
     {
       IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
     }
@@ -144,6 +144,12 @@ module "worklytics-psoxy-connection" {
 }
 
 # BEGIN LONG ACCESS AUTH CONNECTORS
+locals {
+  long_access_parameters = { for entry in module.worklytics_connector_specs.enabled_oauth_secrets_to_create : "${entry.connector_name}.${entry.secret_name}" => entry }
+  long_access_parameters_by_connector = { for k, spec in module.worklytics_connector_specs.enabled_oauth_long_access_connectors :
+  k => [for secret in spec.secured_variables : "${k}.${secret.name}"]
+  }
+}
 
 resource "google_service_account" "long_auth_connector_sa" {
   for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
@@ -153,26 +159,24 @@ resource "google_service_account" "long_auth_connector_sa" {
   display_name = "${title(each.key)}{var.connector_display_name_suffix} via Psoxy"
 }
 
-# creates the secret, without versions.
-module "connector-long-auth-block" {
-  for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
+module "connector-oauth" {
+  for_each = local.long_access_parameters
 
-  source = "../../modules/gcp-oauth-long-access-strategy"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-oauth-long-access-strategy"
+  source = "../../modules/gcp-oauth-secrets"
 
-  project_id              = var.gcp_project_id
-  function_name           = "psoxy-${each.key}"
-  token_adder_user_emails = []
+  secret_name           = "PSOXY_${upper(replace(each.value.connector_name, "-", "_"))}_${upper(each.value.secret_name)}"
+  project_id            = var.gcp_project_id
+  service_account_email = google_service_account.long_auth_connector_sa[each.value.connector_name].email
 }
 
 module "long-auth-token-secret-fill-instructions" {
-  for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
+  for_each = local.long_access_parameters
 
   source = "../../modules/gcp-secret-fill-md"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-secret-fill-md"
 
   project_id = var.gcp_project_id
-  secret_id  = module.connector-long-auth-block[each.key].access_token_secret_id
+  secret_id  = module.connector-oauth[each.key].secret_id
 }
 
 module "source_token_external_todo" {
@@ -185,9 +189,7 @@ module "source_token_external_todo" {
   connector_specific_external_steps = each.value.external_token_todo
   todo_step                         = 1
 
-  additional_steps = [
-    module.long-auth-token-secret-fill-instructions[each.key].todo_markdown
-  ]
+  additional_steps = [for parameter_ref in local.long_access_parameters_by_connector[each.key] : module.long-auth-token-secret-fill-instructions[parameter_ref].todo_markdown]
 }
 
 module "connector-long-auth-function" {
@@ -208,7 +210,7 @@ module "connector-long-auth-function" {
   salt_secret_version_number    = module.psoxy-gcp.salt_secret_version_number
   todo_step                     = module.source_token_external_todo[each.key].next_todo_step
 
-  environment_variables =  merge(try(each.value.environment_variables, {}),
+  environment_variables = merge(try(each.value.environment_variables, {}),
     {
       IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
     }
@@ -242,7 +244,7 @@ module "worklytics-psoxy-connection-long-auth" {
 # BEGIN BULK CONNECTORS
 module "psoxy-gcp-bulk" {
   for_each = merge(module.worklytics_connector_specs.enabled_bulk_connectors,
-  var.custom_bulk_connectors)
+    var.custom_bulk_connectors)
 
   source = "../../modules/gcp-psoxy-bulk"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-bulk"
