@@ -61,19 +61,6 @@ resource "google_cloudfunctions_function" "function" {
     }
   }
 
-  dynamic "secret_volumes" {
-    for_each = var.secret_volumes
-    iterator = secret_volume
-
-    content {
-      project_id = data.google_project.project.number
-      secret     = secret_volume.value.secret_id
-      mount_path = "/etc/secrets/${secret_volume.key}"
-
-      # TODO: Support version, by default now is latest
-    }
-  }
-
   trigger_http = true
 
   lifecycle {

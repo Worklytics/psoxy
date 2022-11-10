@@ -215,10 +215,6 @@ module "connector-long-auth-function" {
       IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
     }
   )
-
-  secret_volumes = {for entry in local.long_access_parameters_by_connector[each.key] : local.long_access_parameters[entry].secret_name => {
-    secret_id      = module.connector-oauth[entry].secret_id
-  }
 }
 
 
@@ -231,8 +227,6 @@ module "connector-long-auth-function" {
   #     way for users to force function restart, and env vars won't reload value of a secret until
   #     function restarts. Better to let app-code load these values from Secret Manager, cache with
   #     a TTL, and periodically refresh or refresh on auth errors.
-}
-
 module "worklytics-psoxy-connection-long-auth" {
   for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
 
