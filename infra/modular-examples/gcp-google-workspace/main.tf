@@ -156,7 +156,7 @@ resource "google_service_account" "long_auth_connector_sa" {
 
   project      = var.gcp_project_id
   account_id   = "psoxy-${substr(each.key, 0, 24)}"
-  display_name = "${title(each.key)}{var.connector_display_name_suffix} via Psoxy"
+  display_name = "${title(each.key)}${var.connector_display_name_suffix} via Psoxy"
 }
 
 module "connector-oauth" {
