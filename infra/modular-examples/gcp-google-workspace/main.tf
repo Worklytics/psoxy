@@ -110,8 +110,6 @@ module "psoxy-google-workspace-connector" {
   deployment_bundle_object_name         = module.psoxy-gcp.deployment_bundle_object_name
   path_to_config                        = "${local.base_config_path}${each.value.source_kind}.yaml"
   path_to_repo_root                     = var.psoxy_base_dir
-  salt_secret_id                        = module.psoxy-gcp.salt_secret_id
-  salt_secret_version_number            = module.psoxy-gcp.salt_secret_version_number
   example_api_calls                     = each.value.example_api_calls
   example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
   todo_step                             = module.google-workspace-connection[each.key].next_todo_step
@@ -122,13 +120,13 @@ module "psoxy-google-workspace-connector" {
     }
   )
 
-  secret_bindings = {
+  secret_bindings = merge({
     # as SERVICE_ACCOUNT_KEY rotated by Terraform, reasonable to bind as env variable
     SERVICE_ACCOUNT_KEY = {
       secret_id      = module.google-workspace-key-secrets[each.key].secret_ids["PSOXY_${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY"]
       version_number = module.google-workspace-key-secrets[each.key].secret_version_numbers["PSOXY_${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY"]
     }
-  }
+  }, module.psoxy-gcp.secrets)
 }
 
 module "worklytics-psoxy-connection" {
@@ -206,9 +204,9 @@ module "connector-long-auth-function" {
   deployment_bundle_object_name = module.psoxy-gcp.deployment_bundle_object_name
   path_to_config                = "${local.base_config_path}${each.value.source_kind}.yaml"
   path_to_repo_root             = var.psoxy_base_dir
-  salt_secret_id                = module.psoxy-gcp.salt_secret_id
-  salt_secret_version_number    = module.psoxy-gcp.salt_secret_version_number
   todo_step                     = module.source_token_external_todo[each.key].next_todo_step
+
+  secret_bindings = module.psoxy-gcp.secrets
 
   environment_variables = merge(try(each.value.environment_variables, {}),
     {
@@ -252,13 +250,12 @@ module "psoxy-gcp-bulk" {
   worklytics_sa_emails          = var.worklytics_sa_emails
   region                        = var.gcp_region
   source_kind                   = each.value.source_kind
-  salt_secret_id                = module.psoxy-gcp.salt_secret_id
   artifacts_bucket_name         = module.psoxy-gcp.artifacts_bucket_name
   deployment_bundle_object_name = module.psoxy-gcp.deployment_bundle_object_name
-  salt_secret_version_number    = module.psoxy-gcp.salt_secret_version_number
   psoxy_base_dir                = var.psoxy_base_dir
   bucket_write_role_id          = module.psoxy-gcp.bucket_write_role_id
 
+  secret_bindings = module.psoxy-gcp.secrets
   environment_variables = {
     SOURCE              = each.value.source_kind
     RULES               = yamlencode(each.value.rules)

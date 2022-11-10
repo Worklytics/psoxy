@@ -80,17 +80,8 @@ resource "google_storage_bucket_iam_member" "access_for_processed_bucket" {
   member = "serviceAccount:${google_service_account.service-account.email}"
 }
 
-locals {
-  secret_bindings = merge({
-    PSOXY_SALT = {
-      secret_id      = var.salt_secret_id
-      version_number = var.salt_secret_version_number
-    }
-  }, var.secret_bindings)
-}
-
 resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_secret" {
-  for_each = local.secret_bindings
+  for_each = var.secret_bindings
 
   project   = var.project_id
   secret_id = each.value.secret_id
@@ -120,7 +111,7 @@ resource "google_cloudfunctions_function" "function" {
   )
 
   dynamic "secret_environment_variables" {
-    for_each = local.secret_bindings
+    for_each = var.secret_bindings
     iterator = secret_environment_variable
 
     content {

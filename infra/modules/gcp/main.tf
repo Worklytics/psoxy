@@ -160,14 +160,6 @@ resource "google_project_iam_custom_role" "bucket-write" {
   permissions = ["storage.objects.create", "storage.objects.delete"]
 }
 
-output "salt_secret_id" {
-  value = google_secret_manager_secret.pseudonymization-salt.secret_id
-}
-
-output "salt_secret_version_number" {
-  value = trimprefix(google_secret_manager_secret_version.initial_version.name, "${google_secret_manager_secret.pseudonymization-salt.name}/versions/")
-}
-
 output "artifacts_bucket_name" {
   value = google_storage_bucket.artifacts.name
 }
@@ -178,4 +170,17 @@ output "deployment_bundle_object_name" {
 
 output "bucket_write_role_id" {
   value = google_project_iam_custom_role.bucket-write.id
+}
+
+output "secrets" {
+  value = {
+    PSOXY_ENCRYPTION_KEY = {
+      secret_id       = google_secret_manager_secret.pseudonymization-key.secret_id,
+      version_number = trimprefix(google_secret_manager_secret_version.pseudonymization-key_initial_version.name, "${google_secret_manager_secret.pseudonymization-key.name}/versions/")
+    },
+    PSOXY_SALT = {
+      secret_id       = google_secret_manager_secret.pseudonymization-salt.secret_id,
+      version_number = trimprefix(google_secret_manager_secret_version.initial_version.name, "${google_secret_manager_secret.pseudonymization-salt.name}/versions/")
+    }
+  }
 }
