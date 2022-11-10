@@ -42,7 +42,7 @@ public class SecretManagerConfigService implements ConfigService {
                             .recordStats()
                             .build(new CacheLoader<>() {
                                 @Override
-                                public String load(String key) throws IOException {
+                                public String load(String key) {
                                     try (SecretManagerServiceClient client = SecretManagerServiceClient.create()) {
                                         SecretVersionName secretVersionName = SecretVersionName.of(projectId, key, "latest");
 
@@ -50,6 +50,9 @@ public class SecretManagerConfigService implements ConfigService {
                                         AccessSecretVersionResponse response = client.accessSecretVersion(secretVersionName);
 
                                         return response.getPayload().getData().toStringUtf8();
+                                    } catch (Exception ignored) {
+                                        // If secret is not found, it will return an exception
+                                        return NEGATIVE_VALUE;
                                     }
                                 }
                             });
