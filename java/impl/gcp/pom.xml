@@ -22,7 +22,8 @@
          one configured as OAuth Client and authorized for your instance. -->
         <serviceAccount>psoxy-gmail-dwd@psoxy-dev-erik.iam.gserviceaccount.com</serviceAccount>
         <dependency.google-cloud-storage.version>2.4.0</dependency.google-cloud-storage.version>
-        <dependency.google-cloud-secretmanager.version>2.5.0</dependency.google-cloud-secretmanager.version>
+        <dependency.google-cloud-secretmanager.version>2.4.0</dependency.google-cloud-secretmanager.version>
+        <google-libraries-bom.version>26.1.4</google-libraries-bom.version>
     </properties>
 
     <repositories>
@@ -41,6 +42,19 @@
             </snapshots>
         </repository>
     </repositories>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.google.cloud</groupId>
+                <artifactId>libraries-bom</artifactId>
+                <version>${google-libraries-bom.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
 
     <dependencies>
 
