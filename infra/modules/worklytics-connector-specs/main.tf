@@ -313,7 +313,6 @@ Dropbox connector through Psoxy requires a Dropbox Application created in Dropbo
 does not require to be public, and it needs to have the following scopes to support
 all the operations for the connector:
 
-- files.metadata.read: for file listing and revision
 - members.read: member listing
 - events.read: event listing
 - groups.read: group listing
@@ -438,4 +437,3 @@ output "msft_token_refresh_endpoint" {
 output "enabled_bulk_connectors" {
   value = local.enabled_bulk_connectors
 }
-
