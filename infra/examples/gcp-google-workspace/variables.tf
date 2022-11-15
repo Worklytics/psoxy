@@ -6,7 +6,7 @@ variable "gcp_project_id" {
 variable "environment_name" {
   type        = string
   description = "qualifier to append to name of project that will host your psoxy instance"
-  default     = null
+  default     = ""
 }
 
 variable "gcp_folder_id" {
