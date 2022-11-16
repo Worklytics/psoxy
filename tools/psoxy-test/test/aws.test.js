@@ -1,5 +1,8 @@
 import test from 'ava';
 import * as td from 'testdouble';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const logsSample = require('./cloudwatch-log-events-sample.json').events;
 
 const LAMBDA_URL = 'https://foo.lambda-url.us-east-1.on.aws/';
 
@@ -70,6 +73,37 @@ test('Psoxy Bulk: no retries on unknown S3 error', async (t) => {
     async () => aws.download('foo', '/path/to/file', {}, fakeS3Client),
     { instanceOf: AWSError }
   );
+});
+
+test('Psoxy Logs: parse log events command result', (t) => {
+  const aws = t.context.subject;
+
+  t.deepEqual([], aws.parseLogEvents(null));
+  t.deepEqual([], aws.parseLogEvents({}));
+
+  const result = aws.parseLogEvents(logsSample);
+
+  t.is(result.length, logsSample.length);
+  // It doesn't modify the message
+  t.is(result[0].message, logsSample[0].message);
+  
+  // It formats the timestamp
+  t.not(result[0].timestamp, logsSample[0].timestamp);
+
+  // It creates a new property "level" if the starting of the message matches
+  // "SEVERE" or "WARNING" logging Java levels, and removes the level keyword 
+  // from the original message
+  const severePrefix = 'SEVERE';
+  const severeEventIndex = logsSample
+    .findIndex(event => event.message.startsWith(severePrefix));
+  t.is(result[severeEventIndex].level, severePrefix);
+  t.not(result[severeEventIndex].message.startsWith(severePrefix));
+  
+  const warningPrefix = 'WARNING';
+  const warningEventIndex = logsSample
+    .findIndex(event => event.message.startsWith(warningPrefix));
+  t.is(result[warningEventIndex].level, warningPrefix);
+  t.not(result[warningEventIndex].message.startsWith(warningPrefix));  
 });
 
 test('Psoxy call: missing role throws error', async (t) => {
