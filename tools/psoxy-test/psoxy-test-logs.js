@@ -46,7 +46,7 @@ async function getAWSLogs(options = {}, logger) {
       },
       client
     );
-
+    
     if (logEventsResult['$metadata'].httpStatusCode !== 200) {
       throw new Error(`Unable to get log events for stream ${logEventsResult}`, 
         { additional: logEventsResult });
@@ -58,11 +58,14 @@ async function getAWSLogs(options = {}, logger) {
     } else {
       logger.success(`Displaying logs for stream ${logStreamName}`);
       events.forEach((event) => {
-        let messagePrefix = `${chalk.blue(event.timestamp)}\n`;
+        let messagePrefix = `${chalk.blue(event.timestamp)}`;
+        let message = event.message;
         if (event.level) {
           messagePrefix += `${chalk.bold.red(event.level)}: `;
+        } else if (event.highlight) {
+          message = chalk.red(message);
         }
-        logger.entry(`${messagePrefix}${event.message}`);
+        logger.entry(`${messagePrefix}\n${message}`);
       });
     }
   }

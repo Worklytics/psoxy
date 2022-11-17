@@ -91,18 +91,20 @@ test('Psoxy Logs: parse log events command result', (t) => {
   t.not(result[0].timestamp, logsSample[0].timestamp);
 
   // It creates a new property "level" if the starting of the message matches
-  // "SEVERE" or "WARNING" logging Java levels, and removes the level keyword 
-  // from the original message
+  // "SEVERE" or "WARNING" logging Java levels, and removes 
+  // the level keyword from the original message
   const severePrefix = 'SEVERE';
   const severeEventIndex = logsSample
     .findIndex(event => event.message.startsWith(severePrefix));
   t.is(result[severeEventIndex].level, severePrefix);
+  t.is(result[severeEventIndex].highlight, true);
   t.not(result[severeEventIndex].message.startsWith(severePrefix));
   
   const warningPrefix = 'WARNING';
   const warningEventIndex = logsSample
     .findIndex(event => event.message.startsWith(warningPrefix));
   t.is(result[warningEventIndex].level, warningPrefix);
+  t.is(result[severeEventIndex].highlight, true);
   t.not(result[warningEventIndex].message.startsWith(warningPrefix));  
 });
 

@@ -207,7 +207,7 @@ async function getLogEvents(options, client) {
  * - Events format: https://docs.aws.amazon.com/AmazonCloudWatchLogs/latest/APIReference/API_GetLogEvents.html#API_GetLogEvents_ResponseSyntax
  * 
  * @param {Array} logEvents 
- * @returns {Array}
+ * @returns {Array<Object>}
  */
 function parseLogEvents(logEvents) {
   if (!Array.isArray(logEvents) || logEvents.length === 0) {
@@ -224,6 +224,9 @@ function parseLogEvents(logEvents) {
     if (typeof level !== 'undefined') {
       result.message = result.message.replace(`${level}:`, '');
       result.level = level;
+      result.highlight = true;
+    } else if (event.message.toLowerCase().startsWith('error')) {
+      result.highlight = true;
     }
 
     return result;    
