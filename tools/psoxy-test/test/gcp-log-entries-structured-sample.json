@@ -1,0 +1,790 @@
+[
+  {
+    "timestamp": {
+      "seconds": 1668691650,
+      "nanos": 233999967
+    },
+    "httpRequest": null,
+    "resource": {
+      "labels": {
+        "function_name": "psoxy-asana",
+        "region": "us-central1",
+        "project_id": "psoxy-dev-david"
+      },
+      "type": "cloud_function"
+    },
+    "severity": "DEFAULT",
+    "logName": "projects/psoxy-dev-david/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "receiveTimestamp": {
+      "seconds": "1668691650",
+      "nanos": 334150144
+    },
+    "split": null,
+    "payload": "textPayload",
+    "logging.googleapis.com/labels": {
+      "execution_id": "rjejswnh9hfj",
+      "instance_id": "00c61b117ceb0cfe1726d54d43bd76449da52327a4c639aefcb8b70093ae7471aa5e432af8cb2046fd36eb00ddef088c323509516a5564a5c465"
+    },
+    "logging.googleapis.com/insertId": "637636c200039254f6643d0f",
+    "logging.googleapis.com/trace": "projects/psoxy-dev-david/traces/",
+    "logging.googleapis.com/trace_sampled": false,
+    "message": "2022-11-17 13:27:30.233:INFO:oejs.Server:main: Started @574ms"
+  },
+  {
+    "timestamp": {
+      "seconds": 1668691650,
+      "nanos": 233000040
+    },
+    "httpRequest": null,
+    "resource": {
+      "labels": {
+        "function_name": "psoxy-asana",
+        "region": "us-central1",
+        "project_id": "psoxy-dev-david"
+      },
+      "type": "cloud_function"
+    },
+    "severity": "DEFAULT",
+    "logName": "projects/psoxy-dev-david/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "receiveTimestamp": {
+      "seconds": "1668691650",
+      "nanos": 334150144
+    },
+    "split": null,
+    "payload": "textPayload",
+    "logging.googleapis.com/labels": {
+      "instance_id": "00c61b117ceb0cfe1726d54d43bd76449da52327a4c639aefcb8b70093ae7471aa5e432af8cb2046fd36eb00ddef088c323509516a5564a5c465",
+      "execution_id": "rjejswnh9hfj"
+    },
+    "logging.googleapis.com/insertId": "637636c200039145f02bf893",
+    "logging.googleapis.com/trace": "projects/psoxy-dev-david/traces/",
+    "logging.googleapis.com/trace_sampled": false,
+    "message": "2022-11-17 13:27:30.233:INFO:oejs.AbstractConnector:main: Started ServerConnector@7f560810{HTTP/1.1,[http/1.1]}{0.0.0.0:8080}"
+  },
+  {
+    "timestamp": {
+      "seconds": 1668691650,
+      "nanos": 209000110
+    },
+    "httpRequest": null,
+    "resource": {
+      "labels": {
+        "region": "us-central1",
+        "project_id": "psoxy-dev-david",
+        "function_name": "psoxy-asana"
+      },
+      "type": "cloud_function"
+    },
+    "severity": "DEFAULT",
+    "logName": "projects/psoxy-dev-david/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "receiveTimestamp": {
+      "seconds": "1668691650",
+      "nanos": 334150144
+    },
+    "split": null,
+    "payload": "textPayload",
+    "logging.googleapis.com/labels": {
+      "instance_id": "00c61b117ceb0cfe1726d54d43bd76449da52327a4c639aefcb8b70093ae7471aa5e432af8cb2046fd36eb00ddef088c323509516a5564a5c465",
+      "execution_id": "rjejswnh9hfj"
+    },
+    "logging.googleapis.com/insertId": "637636c200033144128b32ce",
+    "logging.googleapis.com/trace": "projects/psoxy-dev-david/traces/",
+    "logging.googleapis.com/trace_sampled": false,
+    "message": "2022-11-17 13:27:30.208:INFO:oejsh.ContextHandler:main: Started o.e.j.s.ServletContextHandler@76b0bfab{/,null,AVAILABLE}"
+  },
+  {
+    "timestamp": {
+      "seconds": 1668691650,
+      "nanos": 163000106
+    },
+    "httpRequest": null,
+    "resource": {
+      "labels": {
+        "region": "us-central1",
+        "project_id": "psoxy-dev-david",
+        "function_name": "psoxy-asana"
+      },
+      "type": "cloud_function"
+    },
+    "severity": "DEFAULT",
+    "logName": "projects/psoxy-dev-david/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "receiveTimestamp": {
+      "seconds": "1668691650",
+      "nanos": 334150144
+    },
+    "split": null,
+    "payload": "textPayload",
+    "logging.googleapis.com/labels": {
+      "execution_id": "rjejswnh9hfj",
+      "instance_id": "00c61b117ceb0cfe1726d54d43bd76449da52327a4c639aefcb8b70093ae7471aa5e432af8cb2046fd36eb00ddef088c323509516a5564a5c465"
+    },
+    "logging.googleapis.com/insertId": "637636c20002807590c1e65f",
+    "logging.googleapis.com/trace": "projects/psoxy-dev-david/traces/",
+    "logging.googleapis.com/trace_sampled": false,
+    "message": "2022-11-17 13:27:30.163:INFO:oejs.Server:main: jetty-9.4.26.v20200117; built: 2020-01-17T12:35:33.676Z; git: 7b38981d25d14afb4a12ff1f2596756144edf695; jvm 11.0.16+8-post-Ubuntu-0ubuntu118.04"
+  },
+  {
+    "timestamp": {
+      "seconds": 1668691650,
+      "nanos": 5000114
+    },
+    "httpRequest": null,
+    "resource": {
+      "labels": {
+        "project_id": "psoxy-dev-david",
+        "function_name": "psoxy-asana",
+        "region": "us-central1"
+      },
+      "type": "cloud_function"
+    },
+    "severity": "DEFAULT",
+    "logName": "projects/psoxy-dev-david/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "receiveTimestamp": {
+      "seconds": "1668691650",
+      "nanos": 334150144
+    },
+    "split": null,
+    "payload": "textPayload",
+    "logging.googleapis.com/labels": {
+      "execution_id": "rjejswnh9hfj",
+      "instance_id": "00c61b117ceb0cfe1726d54d43bd76449da52327a4c639aefcb8b70093ae7471aa5e432af8cb2046fd36eb00ddef088c323509516a5564a5c465"
+    },
+    "logging.googleapis.com/insertId": "637636c2000014316c66f686",
+    "logging.googleapis.com/trace": "projects/psoxy-dev-david/traces/",
+    "logging.googleapis.com/trace_sampled": false,
+    "message": "2022-11-17 13:27:30.003:INFO::main: Logging initialized @338ms to org.eclipse.jetty.util.log.StdErrLog"
+  },
+  {
+    "timestamp": {
+      "seconds": 1668691649,
+      "nanos": 661000013
+    },
+    "httpRequest": null,
+    "resource": {
+      "labels": {
+        "function_name": "psoxy-asana",
+        "region": "us-central1",
+        "project_id": "psoxy-dev-david"
+      },
+      "type": "cloud_function"
+    },
+    "severity": "DEFAULT",
+    "logName": "projects/psoxy-dev-david/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "receiveTimestamp": {
+      "seconds": "1668691649",
+      "nanos": 665923579
+    },
+    "split": null,
+    "payload": "textPayload",
+    "logging.googleapis.com/labels": {
+      "execution_id": "rjejswnh9hfj",
+      "instance_id": "00c61b117ceb0cfe1726d54d43bd76449da52327a4c639aefcb8b70093ae7471aa5e432af8cb2046fd36eb00ddef088c323509516a5564a5c465"
+    },
+    "logging.googleapis.com/insertId": "637636c1000a17290f81fc0e",
+    "logging.googleapis.com/trace": "projects/psoxy-dev-david/traces/",
+    "logging.googleapis.com/trace_sampled": false,
+    "message": "Picked up JAVA_TOOL_OPTIONS: -XX:MaxRAM=1024m -XX:MaxRAMPercentage=70"
+  },
+  {
+    "timestamp": {
+      "seconds": 1668691598,
+      "nanos": 938999891
+    },
+    "httpRequest": null,
+    "resource": {
+      "labels": {
+        "project_id": "psoxy-dev-david",
+        "region": "us-central1",
+        "function_name": "psoxy-asana"
+      },
+      "type": "cloud_function"
+    },
+    "severity": "DEBUG",
+    "logName": "projects/psoxy-dev-david/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "receiveTimestamp": {
+      "seconds": "1668691599",
+      "nanos": 145315963
+    },
+    "split": null,
+    "payload": "textPayload",
+    "logging.googleapis.com/labels": {
+      "execution_id": "nesf67y1tv24"
+    },
+    "logging.googleapis.com/insertId": "vwwvfmfixd15u",
+    "logging.googleapis.com/trace": "projects/psoxy-dev-david/traces/d553086756e62825bdd18f576d63c6ff",
+    "logging.googleapis.com/trace_sampled": false,
+    "message": "Function execution took 29 ms. Finished with status code: 500"
+  },
+  {
+    "timestamp": {
+      "seconds": 1668691598,
+      "nanos": 934000015
+    },
+    "httpRequest": null,
+    "resource": {
+      "labels": {
+        "region": "us-central1",
+        "project_id": "psoxy-dev-david",
+        "function_name": "psoxy-asana"
+      },
+      "type": "cloud_function"
+    },
+    "severity": "ERROR",
+    "logName": "projects/psoxy-dev-david/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "receiveTimestamp": {
+      "seconds": "1668691599",
+      "nanos": 145315963
+    },
+    "split": null,
+    "payload": "jsonPayload",
+    "logging.googleapis.com/labels": {
+      "instance_id": "00c61b117cac86fa8f6d0bd65852ab8ee8fbc532530c4144c1795488993aa532e2486706b29d8d57da8216f38b18d1f7384a8188abacdb0778ba",
+      "execution_id": "nesf67y1tv24"
+    },
+    "logging.googleapis.com/insertId": "6376368e000e438773696d4a",
+    "logging.googleapis.com/trace": "projects/psoxy-dev-david/traces/d553086756e62825bdd18f576d63c6ff",
+    "logging.googleapis.com/trace_sampled": false,
+    "message": {
+      "logging.googleapis.com/sourceLocation": {
+        "file": "com/google/cloud/functions/invoker/HttpFunctionExecutor.java",
+        "method": "service"
+      },
+      "message": "Failed to execute co.worklytics.psoxy.Route\njava.lang.NullPointerException\n\tat co.worklytics.psoxy.Route.service(Route.java:36)\n\tat com.google.cloud.functions.invoker.HttpFunctionExecutor.service(HttpFunctionExecutor.java:69)\n\tat javax.servlet.http.HttpServlet.service(HttpServlet.java:790)\n\tat org.eclipse.jetty.servlet.ServletHolder.handle(ServletHolder.java:755)\n\tat org.eclipse.jetty.servlet.ServletHandler.doHandle(ServletHandler.java:547)\n\tat org.eclipse.jetty.server.handler.ScopedHandler.nextHandle(ScopedHandler.java:233)\n\tat org.eclipse.jetty.server.handler.ContextHandler.doHandle(ContextHandler.java:1297)\n\tat org.eclipse.jetty.server.handler.ScopedHandler.nextScope(ScopedHandler.java:188)\n\tat org.eclipse.jetty.servlet.ServletHandler.doScope(ServletHandler.java:485)\n\tat org.eclipse.jetty.server.handler.ScopedHandler.nextScope(ScopedHandler.java:186)\n\tat org.eclipse.jetty.server.handler.ContextHandler.doScope(ContextHandler.java:1212)\n\tat org.eclipse.jetty.server.handler.ScopedHandler.handle(ScopedHandler.java:141)\n\tat org.eclipse.jetty.server.handler.HandlerWrapper.handle(HandlerWrapper.java:127)\n\tat com.google.cloud.functions.invoker.runner.Invoker$NotFoundHandler.handle(Invoker.java:390)\n\tat org.eclipse.jetty.server.handler.HandlerWrapper.handle(HandlerWrapper.java:127)\n\tat org.eclipse.jetty.server.Server.handle(Server.java:500)\n\tat org.eclipse.jetty.server.HttpChannel.lambda$handle$1(HttpChannel.java:383)\n\tat org.eclipse.jetty.server.HttpChannel.dispatch(HttpChannel.java:547)\n\tat org.eclipse.jetty.server.HttpChannel.handle(HttpChannel.java:375)\n\tat org.eclipse.jetty.server.HttpConnection.onFillable(HttpConnection.java:270)\n\tat org.eclipse.jetty.io.AbstractConnection$ReadCallback.succeeded(AbstractConnection.java:311)\n\tat org.eclipse.jetty.io.FillInterest.fillable(FillInterest.java:103)\n\tat org.eclipse.jetty.io.ChannelEndPoint$2.run(ChannelEndPoint.java:117)\n\tat org.eclipse.jetty.util.thread.strategy.EatWhatYouKill.runTask(EatWhatYouKill.java:336)\n\tat org.eclipse.jetty.util.thread.strategy.EatWhatYouKill.doProduce(EatWhatYouKill.java:313)\n\tat org.eclipse.jetty.util.thread.strategy.EatWhatYouKill.tryProduce(EatWhatYouKill.java:171)\n\tat org.eclipse.jetty.util.thread.strategy.EatWhatYouKill.run(EatWhatYouKill.java:129)\n\tat org.eclipse.jetty.util.thread.ReservedThreadExecutor$ReservedThread.run(ReservedThreadExecutor.java:388)\n\tat org.eclipse.jetty.util.thread.QueuedThreadPool.runJob(QueuedThreadPool.java:806)\n\tat org.eclipse.jetty.util.thread.QueuedThreadPool$Runner.run(QueuedThreadPool.java:938)\n\tat java.base/java.lang.Thread.run(Thread.java:829)\n"
+    }
+  },
+  {
+    "timestamp": {
+      "seconds": 1668691598,
+      "nanos": 933000087
+    },
+    "httpRequest": null,
+    "resource": {
+      "labels": {
+        "project_id": "psoxy-dev-david",
+        "region": "us-central1",
+        "function_name": "psoxy-asana"
+      },
+      "type": "cloud_function"
+    },
+    "severity": "WARNING",
+    "logName": "projects/psoxy-dev-david/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "receiveTimestamp": {
+      "seconds": "1668691599",
+      "nanos": 145315963
+    },
+    "split": null,
+    "payload": "jsonPayload",
+    "logging.googleapis.com/labels": {
+      "instance_id": "00c61b117cac86fa8f6d0bd65852ab8ee8fbc532530c4144c1795488993aa532e2486706b29d8d57da8216f38b18d1f7384a8188abacdb0778ba",
+      "execution_id": "nesf67y1tv24"
+    },
+    "logging.googleapis.com/insertId": "6376368e000e3f32626876ab",
+    "logging.googleapis.com/trace": "projects/psoxy-dev-david/traces/d553086756e62825bdd18f576d63c6ff",
+    "logging.googleapis.com/trace_sampled": false,
+    "message": {
+      "message": "GET /api/users. Blocked call by rules {\"allowAllEndpoints\":false,\"endpoints\":[{\"pathRegex\":\"^/api/1.0/workspaces[?]?[^/]*$\",\"allowedQueryParams\":[\"limit\",\"offset\",\"opt_fields\"]},{\"pathRegex\":\"^/api/1.0/users[?]?[^/]*\",\"allowedQueryParams\":[\"limit\",\"offset\",\"opt_fields\",\"workspace\",\"team\"],\"transforms\":[{\"method\":\"redact\",\"jsonPaths\":[\"$.data[*].name\",\"$.data[*].photo\"]},{\"method\":\"pseudonymize\",\"jsonPaths\":[\"$.data[*].email\"],\"encoding\":\"JSON\"},{\"method\":\"pseudonymize\",\"jsonPaths\":[\"$.data[*].gid\"],\"includeReversible\":true,\"encoding\":\"JSON\"}]},{\"pathRegex\":\"^/api/1.0/workspaces/[^/]*/teams?[^/]*\",\"allowedQueryParams\":[\"limit\",\"offset\",\"opt_fields\"],\"transforms\":[{\"method\":\"redact\",\"jsonPaths\":[\"$.data[*]..name\",\"$.data[*].description\",\"$.data[*].html_description\"]}]},{\"pathRegex\":\"^/api/1.0/teams/[^/]*/projects?[^/]*\",\"allowedQueryParams\":[\"limit\",\"offset\",\"opt_fields\",\"archived\"],\"transforms\":[{\"method\":\"redact\",\"jsonPaths\":[\"$.data[*].current_status\",\"$.data[*].current_status_update\",\"$.data[*].custom_field_settings[*].custom_field.created_by\",\"$.data[*].custom_field_settings[*].custom_field.description\",\"$.data[*].name\",\"$.data[*].notes\",\"$.data[*].html_notes\",\"$.data[*].created_by\",\"$.data[*].completed_by\",\"$..name\"]}]},{\"pathRegex\":\"^/api/1.0/tasks[?][^/]*\",\"allowedQueryParams\":[\"limit\",\"offset\",\"opt_fields\",\"project\",\"completed_since\",\"modified_since\"],\"transforms\":[{\"method\":\"redact\",\"jsonPaths\":[\"$.data[*].external\",\"$.data[*].html_notes\",\"$.data[*].notes\",\"$.data[*]..name\",\"$.data[*].custom_fields[*].description\"]},{\"method\":\"pseudonymize\",\"jsonPaths\":[\"$.data[*].completed_by.gid\",\"$.data[*].hearts[*].user.gid\",\"$.data[*].likes[*].user.gid\",\"$.data[*].assignee.gid\",\"$.data[*].custom_fields[*].created_by.gid\",\"$.data[*].custom_fields[*].people_value[*].gid\",\"$.data[*].followers[*].gid\",\"$.data[*]..email\"],\"encoding\":\"JSON\"}]},{\"pathRegex\":\"^/api/1.0/tasks/[^/]*(\\\\?)?[^/]*\",\"allowedQueryParams\":[\"limit\",\"offset\",\"opt_fields\",\"project\",\"completed_since\",\"modified_since\"],\"transforms\":[{\"method\":\"redact\",\"jsonPaths\":[\"$.data.external\",\"$.data.html_notes\",\"$.data.notes\",\"$.data..name\",\"$.data.custom_fields[*].description\"]},{\"method\":\"pseudonymize\",\"jsonPaths\":[\"$.data.completed_by.gid\",\"$.data.hearts[*].user.gid\",\"$.data.likes[*].user.gid\",\"$.data.assignee.gid\",\"$.data.custom_fields[*].created_by.gid\",\"$.data.custom_fields[*].people_value[*].gid\",\"$.data.followers[*].gid\",\"$.data..email\"],\"encoding\":\"JSON\"}]},{\"pathRegex\":\"^/api/1.0/tasks/[^/]*/stories?[^/]*\",\"allowedQueryParams\":[\"limit\",\"offset\",\"opt_fields\"],\"transforms\":[{\"method\":\"redact\",\"jsonPaths\":[\"$.data[*]..name\",\"$.data[*].html_text\",\"$.data[*].text\",\"$.data[*].new_text_value\",\"$.data[*].old_text_value\",\"$.data[*].new_name\",\"$.data[*].old_name\",\"$.data[*].previews\"]},{\"method\":\"pseudonymize\",\"jsonPaths\":[\"$.data[*].assignee.gid\",\"$.data[*].created_by.gid\",\"$.data[*].follower.gid\",\"$.data[*].hearts[*].user.gid\",\"$.data[*].likes[*].user.gid\",\"$.data[*].story.created_by.gid\",\"$.data[*]..email\"],\"encoding\":\"JSON\"}]},{\"pathRegex\":\"^/api/1.0/tasks/[^/]*/subtasks?[^/]*\",\"allowedQueryParams\":[\"limit\",\"offset\",\"opt_fields\",\"project\",\"completed_since\",\"modified_since\"],\"transforms\":[{\"method\":\"redact\",\"jsonPaths\":[\"$.data[*].external\",\"$.data[*].html_notes\",\"$.data[*].notes\",\"$.data[*]..name\",\"$.data[*].custom_fields[*].description\"]},{\"method\":\"pseudonymize\",\"jsonPaths\":[\"$.data[*].completed_by.gid\",\"$.data[*].hearts[*].user.gid\",\"$.data[*].likes[*].user.gid\",\"$.data[*].assignee.gid\",\"$.data[*].custom_fields[*].created_by.gid\",\"$.data[*].custom_fields[*].people_value[*].gid\",\"$.data[*].followers[*].gid\",\"$.data[*]..email\"],\"encoding\":\"JSON\"}]},{\"pathRegex\":\"^/api/1.0/workspaces/[^/]*/tasks/search?[^/]*\",\"allowedQueryParams\":[\"limit\",\"modified_at.after\",\"modified_at.before\",\"is_subtask\",\"sort_ascending\"],\"transforms\":[{\"method\":\"redact\",\"jsonPaths\":[\"$.data[*].external\",\"$.data[*].html_notes\",\"$.data[*].notes\",\"$.data[*]..name\",\"$.data[*].custom_fields[*].description\"]},{\"method\":\"pseudonymize\",\"jsonPaths\":[\"$.data[*].completed_by.gid\",\"$.data[*].hearts[*].user.gid\",\"$.data[*].likes[*].user.gid\",\"$.data[*].assignee.gid\",\"$.data[*].custom_fields[*].created_by.gid\",\"$.data[*].custom_fields[*].people_value[*].gid\",\"$.data[*].followers[*].gid\",\"$.data[*]..email\"],\"encoding\":\"JSON\"}]}]}",
+      "logging.googleapis.com/sourceLocation": {
+        "method": "handle",
+        "file": "co/worklytics/psoxy/gateway/impl/CommonRequestHandler.java"
+      }
+    }
+  },
+  {
+    "timestamp": {
+      "seconds": 1668691598,
+      "nanos": 918999910
+    },
+    "httpRequest": null,
+    "resource": {
+      "labels": {
+        "region": "us-central1",
+        "project_id": "psoxy-dev-david",
+        "function_name": "psoxy-asana"
+      },
+      "type": "cloud_function"
+    },
+    "severity": "WARNING",
+    "logName": "projects/psoxy-dev-david/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "receiveTimestamp": {
+      "seconds": "1668691599",
+      "nanos": 145315963
+    },
+    "split": null,
+    "payload": "jsonPayload",
+    "logging.googleapis.com/labels": {
+      "execution_id": "nesf67y1tv24",
+      "instance_id": "00c61b117cac86fa8f6d0bd65852ab8ee8fbc532530c4144c1795488993aa532e2486706b29d8d57da8216f38b18d1f7384a8188abacdb0778ba"
+    },
+    "logging.googleapis.com/insertId": "6376368e000e076c372b59a0",
+    "logging.googleapis.com/trace": "projects/psoxy-dev-david/traces/d553086756e62825bdd18f576d63c6ff",
+    "logging.googleapis.com/trace_sampled": false,
+    "message": {
+      "logging.googleapis.com/sourceLocation": {
+        "method": "pseudonymizationStrategy",
+        "file": "co/worklytics/psoxy/PsoxyModule.java"
+      },
+      "message": "No value for PSOXY_ENCRYPTION_KEY; any transforms depending on it will fail!"
+    }
+  },
+  {
+    "timestamp": {
+      "seconds": 1668691598,
+      "nanos": 917999982
+    },
+    "httpRequest": null,
+    "resource": {
+      "labels": {
+        "project_id": "psoxy-dev-david",
+        "region": "us-central1",
+        "function_name": "psoxy-asana"
+      },
+      "type": "cloud_function"
+    },
+    "severity": "INFO",
+    "logName": "projects/psoxy-dev-david/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "receiveTimestamp": {
+      "seconds": "1668691599",
+      "nanos": 145315963
+    },
+    "split": null,
+    "payload": "jsonPayload",
+    "logging.googleapis.com/labels": {
+      "execution_id": "nesf67y1tv24",
+      "instance_id": "00c61b117cac86fa8f6d0bd65852ab8ee8fbc532530c4144c1795488993aa532e2486706b29d8d57da8216f38b18d1f7384a8188abacdb0778ba"
+    },
+    "logging.googleapis.com/insertId": "6376368e000e05d369bf6450",
+    "logging.googleapis.com/trace": "projects/psoxy-dev-david/traces/d553086756e62825bdd18f576d63c6ff",
+    "logging.googleapis.com/trace_sampled": false,
+    "message": {
+      "logging.googleapis.com/sourceLocation": {
+        "file": "co/worklytics/psoxy/ConfigRulesModule.java",
+        "method": "lambda$rules$0"
+      },
+      "message": "Rules: fallback to prebuilt rules"
+    }
+  },
+  {
+    "timestamp": {
+      "seconds": 1668691598,
+      "nanos": 910000085
+    },
+    "httpRequest": null,
+    "resource": {
+      "labels": {
+        "project_id": "psoxy-dev-david",
+        "function_name": "psoxy-asana",
+        "region": "us-central1"
+      },
+      "type": "cloud_function"
+    },
+    "severity": "DEBUG",
+    "logName": "projects/psoxy-dev-david/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "receiveTimestamp": {
+      "seconds": "1668691599",
+      "nanos": 145315963
+    },
+    "split": null,
+    "payload": "textPayload",
+    "logging.googleapis.com/labels": {
+      "execution_id": "nesf67y1tv24"
+    },
+    "logging.googleapis.com/insertId": "vwwvfmfixd15t",
+    "logging.googleapis.com/trace": "projects/psoxy-dev-david/traces/d553086756e62825bdd18f576d63c6ff",
+    "logging.googleapis.com/trace_sampled": false,
+    "message": "Function execution started"
+  },
+  {
+    "timestamp": {
+      "seconds": 1668691589,
+      "nanos": 108999967
+    },
+    "httpRequest": null,
+    "resource": {
+      "labels": {
+        "project_id": "psoxy-dev-david",
+        "function_name": "psoxy-asana",
+        "region": "us-central1"
+      },
+      "type": "cloud_function"
+    },
+    "severity": "DEBUG",
+    "logName": "projects/psoxy-dev-david/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "receiveTimestamp": {
+      "seconds": "1668691589",
+      "nanos": 152747399
+    },
+    "split": null,
+    "payload": "textPayload",
+    "logging.googleapis.com/labels": {
+      "execution_id": "nesffq3c66bg"
+    },
+    "logging.googleapis.com/insertId": "1x3ahllfo0kjjb",
+    "logging.googleapis.com/trace": "projects/psoxy-dev-david/traces/51b334fe0e1d3099c0cae296a25496c9",
+    "logging.googleapis.com/trace_sampled": false,
+    "message": "Function execution took 1960 ms. Finished with status code: 500"
+  },
+  {
+    "timestamp": {
+      "seconds": 1668691589,
+      "nanos": 101000070
+    },
+    "httpRequest": null,
+    "resource": {
+      "labels": {
+        "function_name": "psoxy-asana",
+        "region": "us-central1",
+        "project_id": "psoxy-dev-david"
+      },
+      "type": "cloud_function"
+    },
+    "severity": "ERROR",
+    "logName": "projects/psoxy-dev-david/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "receiveTimestamp": {
+      "seconds": "1668691589",
+      "nanos": 152747399
+    },
+    "split": null,
+    "payload": "jsonPayload",
+    "logging.googleapis.com/labels": {
+      "instance_id": "00c61b117cac86fa8f6d0bd65852ab8ee8fbc532530c4144c1795488993aa532e2486706b29d8d57da8216f38b18d1f7384a8188abacdb0778ba",
+      "execution_id": "nesffq3c66bg"
+    },
+    "logging.googleapis.com/insertId": "6376368500018e2256d69f09",
+    "logging.googleapis.com/trace": "projects/psoxy-dev-david/traces/51b334fe0e1d3099c0cae296a25496c9",
+    "logging.googleapis.com/trace_sampled": false,
+    "message": {
+      "logging.googleapis.com/sourceLocation": {
+        "method": "service",
+        "file": "com/google/cloud/functions/invoker/HttpFunctionExecutor.java"
+      },
+      "message": "Failed to execute co.worklytics.psoxy.Route\njava.lang.NullPointerException\n\tat co.worklytics.psoxy.Route.service(Route.java:36)\n\tat com.google.cloud.functions.invoker.HttpFunctionExecutor.service(HttpFunctionExecutor.java:69)\n\tat javax.servlet.http.HttpServlet.service(HttpServlet.java:790)\n\tat org.eclipse.jetty.servlet.ServletHolder.handle(ServletHolder.java:755)\n\tat org.eclipse.jetty.servlet.ServletHandler.doHandle(ServletHandler.java:547)\n\tat org.eclipse.jetty.server.handler.ScopedHandler.nextHandle(ScopedHandler.java:233)\n\tat org.eclipse.jetty.server.handler.ContextHandler.doHandle(ContextHandler.java:1297)\n\tat org.eclipse.jetty.server.handler.ScopedHandler.nextScope(ScopedHandler.java:188)\n\tat org.eclipse.jetty.servlet.ServletHandler.doScope(ServletHandler.java:485)\n\tat org.eclipse.jetty.server.handler.ScopedHandler.nextScope(ScopedHandler.java:186)\n\tat org.eclipse.jetty.server.handler.ContextHandler.doScope(ContextHandler.java:1212)\n\tat org.eclipse.jetty.server.handler.ScopedHandler.handle(ScopedHandler.java:141)\n\tat org.eclipse.jetty.server.handler.HandlerWrapper.handle(HandlerWrapper.java:127)\n\tat com.google.cloud.functions.invoker.runner.Invoker$NotFoundHandler.handle(Invoker.java:390)\n\tat org.eclipse.jetty.server.handler.HandlerWrapper.handle(HandlerWrapper.java:127)\n\tat org.eclipse.jetty.server.Server.handle(Server.java:500)\n\tat org.eclipse.jetty.server.HttpChannel.lambda$handle$1(HttpChannel.java:383)\n\tat org.eclipse.jetty.server.HttpChannel.dispatch(HttpChannel.java:547)\n\tat org.eclipse.jetty.server.HttpChannel.handle(HttpChannel.java:375)\n\tat org.eclipse.jetty.server.HttpConnection.onFillable(HttpConnection.java:270)\n\tat org.eclipse.jetty.io.AbstractConnection$ReadCallback.succeeded(AbstractConnection.java:311)\n\tat org.eclipse.jetty.io.FillInterest.fillable(FillInterest.java:103)\n\tat org.eclipse.jetty.io.ChannelEndPoint$2.run(ChannelEndPoint.java:117)\n\tat org.eclipse.jetty.util.thread.QueuedThreadPool.runJob(QueuedThreadPool.java:806)\n\tat org.eclipse.jetty.util.thread.QueuedThreadPool$Runner.run(QueuedThreadPool.java:938)\n\tat java.base/java.lang.Thread.run(Thread.java:829)\n"
+    }
+  },
+  {
+    "timestamp": {
+      "seconds": 1668691589,
+      "nanos": 96999883
+    },
+    "httpRequest": null,
+    "resource": {
+      "labels": {
+        "function_name": "psoxy-asana",
+        "project_id": "psoxy-dev-david",
+        "region": "us-central1"
+      },
+      "type": "cloud_function"
+    },
+    "severity": "WARNING",
+    "logName": "projects/psoxy-dev-david/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "receiveTimestamp": {
+      "seconds": "1668691589",
+      "nanos": 152747399
+    },
+    "split": null,
+    "payload": "jsonPayload",
+    "logging.googleapis.com/labels": {
+      "instance_id": "00c61b117cac86fa8f6d0bd65852ab8ee8fbc532530c4144c1795488993aa532e2486706b29d8d57da8216f38b18d1f7384a8188abacdb0778ba",
+      "execution_id": "nesffq3c66bg"
+    },
+    "logging.googleapis.com/insertId": "6376368500017c0a029de838",
+    "logging.googleapis.com/trace": "projects/psoxy-dev-david/traces/51b334fe0e1d3099c0cae296a25496c9",
+    "logging.googleapis.com/trace_sampled": false,
+    "message": {
+      "message": "GET /. Blocked call by rules {\"allowAllEndpoints\":false,\"endpoints\":[{\"pathRegex\":\"^/api/1.0/workspaces[?]?[^/]*$\",\"allowedQueryParams\":[\"limit\",\"offset\",\"opt_fields\"]},{\"pathRegex\":\"^/api/1.0/users[?]?[^/]*\",\"allowedQueryParams\":[\"limit\",\"offset\",\"opt_fields\",\"workspace\",\"team\"],\"transforms\":[{\"method\":\"redact\",\"jsonPaths\":[\"$.data[*].name\",\"$.data[*].photo\"]},{\"method\":\"pseudonymize\",\"jsonPaths\":[\"$.data[*].email\"],\"encoding\":\"JSON\"},{\"method\":\"pseudonymize\",\"jsonPaths\":[\"$.data[*].gid\"],\"includeReversible\":true,\"encoding\":\"JSON\"}]},{\"pathRegex\":\"^/api/1.0/workspaces/[^/]*/teams?[^/]*\",\"allowedQueryParams\":[\"limit\",\"offset\",\"opt_fields\"],\"transforms\":[{\"method\":\"redact\",\"jsonPaths\":[\"$.data[*]..name\",\"$.data[*].description\",\"$.data[*].html_description\"]}]},{\"pathRegex\":\"^/api/1.0/teams/[^/]*/projects?[^/]*\",\"allowedQueryParams\":[\"limit\",\"offset\",\"opt_fields\",\"archived\"],\"transforms\":[{\"method\":\"redact\",\"jsonPaths\":[\"$.data[*].current_status\",\"$.data[*].current_status_update\",\"$.data[*].custom_field_settings[*].custom_field.created_by\",\"$.data[*].custom_field_settings[*].custom_field.description\",\"$.data[*].name\",\"$.data[*].notes\",\"$.data[*].html_notes\",\"$.data[*].created_by\",\"$.data[*].completed_by\",\"$..name\"]}]},{\"pathRegex\":\"^/api/1.0/tasks[?][^/]*\",\"allowedQueryParams\":[\"limit\",\"offset\",\"opt_fields\",\"project\",\"completed_since\",\"modified_since\"],\"transforms\":[{\"method\":\"redact\",\"jsonPaths\":[\"$.data[*].external\",\"$.data[*].html_notes\",\"$.data[*].notes\",\"$.data[*]..name\",\"$.data[*].custom_fields[*].description\"]},{\"method\":\"pseudonymize\",\"jsonPaths\":[\"$.data[*].completed_by.gid\",\"$.data[*].hearts[*].user.gid\",\"$.data[*].likes[*].user.gid\",\"$.data[*].assignee.gid\",\"$.data[*].custom_fields[*].created_by.gid\",\"$.data[*].custom_fields[*].people_value[*].gid\",\"$.data[*].followers[*].gid\",\"$.data[*]..email\"],\"encoding\":\"JSON\"}]},{\"pathRegex\":\"^/api/1.0/tasks/[^/]*(\\\\?)?[^/]*\",\"allowedQueryParams\":[\"limit\",\"offset\",\"opt_fields\",\"project\",\"completed_since\",\"modified_since\"],\"transforms\":[{\"method\":\"redact\",\"jsonPaths\":[\"$.data.external\",\"$.data.html_notes\",\"$.data.notes\",\"$.data..name\",\"$.data.custom_fields[*].description\"]},{\"method\":\"pseudonymize\",\"jsonPaths\":[\"$.data.completed_by.gid\",\"$.data.hearts[*].user.gid\",\"$.data.likes[*].user.gid\",\"$.data.assignee.gid\",\"$.data.custom_fields[*].created_by.gid\",\"$.data.custom_fields[*].people_value[*].gid\",\"$.data.followers[*].gid\",\"$.data..email\"],\"encoding\":\"JSON\"}]},{\"pathRegex\":\"^/api/1.0/tasks/[^/]*/stories?[^/]*\",\"allowedQueryParams\":[\"limit\",\"offset\",\"opt_fields\"],\"transforms\":[{\"method\":\"redact\",\"jsonPaths\":[\"$.data[*]..name\",\"$.data[*].html_text\",\"$.data[*].text\",\"$.data[*].new_text_value\",\"$.data[*].old_text_value\",\"$.data[*].new_name\",\"$.data[*].old_name\",\"$.data[*].previews\"]},{\"method\":\"pseudonymize\",\"jsonPaths\":[\"$.data[*].assignee.gid\",\"$.data[*].created_by.gid\",\"$.data[*].follower.gid\",\"$.data[*].hearts[*].user.gid\",\"$.data[*].likes[*].user.gid\",\"$.data[*].story.created_by.gid\",\"$.data[*]..email\"],\"encoding\":\"JSON\"}]},{\"pathRegex\":\"^/api/1.0/tasks/[^/]*/subtasks?[^/]*\",\"allowedQueryParams\":[\"limit\",\"offset\",\"opt_fields\",\"project\",\"completed_since\",\"modified_since\"],\"transforms\":[{\"method\":\"redact\",\"jsonPaths\":[\"$.data[*].external\",\"$.data[*].html_notes\",\"$.data[*].notes\",\"$.data[*]..name\",\"$.data[*].custom_fields[*].description\"]},{\"method\":\"pseudonymize\",\"jsonPaths\":[\"$.data[*].completed_by.gid\",\"$.data[*].hearts[*].user.gid\",\"$.data[*].likes[*].user.gid\",\"$.data[*].assignee.gid\",\"$.data[*].custom_fields[*].created_by.gid\",\"$.data[*].custom_fields[*].people_value[*].gid\",\"$.data[*].followers[*].gid\",\"$.data[*]..email\"],\"encoding\":\"JSON\"}]},{\"pathRegex\":\"^/api/1.0/workspaces/[^/]*/tasks/search?[^/]*\",\"allowedQueryParams\":[\"limit\",\"modified_at.after\",\"modified_at.before\",\"is_subtask\",\"sort_ascending\"],\"transforms\":[{\"method\":\"redact\",\"jsonPaths\":[\"$.data[*].external\",\"$.data[*].html_notes\",\"$.data[*].notes\",\"$.data[*]..name\",\"$.data[*].custom_fields[*].description\"]},{\"method\":\"pseudonymize\",\"jsonPaths\":[\"$.data[*].completed_by.gid\",\"$.data[*].hearts[*].user.gid\",\"$.data[*].likes[*].user.gid\",\"$.data[*].assignee.gid\",\"$.data[*].custom_fields[*].created_by.gid\",\"$.data[*].custom_fields[*].people_value[*].gid\",\"$.data[*].followers[*].gid\",\"$.data[*]..email\"],\"encoding\":\"JSON\"}]}]}",
+      "logging.googleapis.com/sourceLocation": {
+        "file": "co/worklytics/psoxy/gateway/impl/CommonRequestHandler.java",
+        "method": "handle"
+      }
+    }
+  },
+  {
+    "timestamp": {
+      "seconds": 1668691588,
+      "nanos": 882999897
+    },
+    "httpRequest": null,
+    "resource": {
+      "labels": {
+        "project_id": "psoxy-dev-david",
+        "function_name": "psoxy-asana",
+        "region": "us-central1"
+      },
+      "type": "cloud_function"
+    },
+    "severity": "WARNING",
+    "logName": "projects/psoxy-dev-david/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "receiveTimestamp": {
+      "seconds": "1668691589",
+      "nanos": 152747399
+    },
+    "split": null,
+    "payload": "jsonPayload",
+    "logging.googleapis.com/labels": {
+      "execution_id": "nesffq3c66bg",
+      "instance_id": "00c61b117cac86fa8f6d0bd65852ab8ee8fbc532530c4144c1795488993aa532e2486706b29d8d57da8216f38b18d1f7384a8188abacdb0778ba"
+    },
+    "logging.googleapis.com/insertId": "63763684000d7cb0ca5b0329",
+    "logging.googleapis.com/trace": "projects/psoxy-dev-david/traces/51b334fe0e1d3099c0cae296a25496c9",
+    "logging.googleapis.com/trace_sampled": false,
+    "message": {
+      "logging.googleapis.com/sourceLocation": {
+        "file": "co/worklytics/psoxy/PsoxyModule.java",
+        "method": "pseudonymizationStrategy"
+      },
+      "message": "No value for PSOXY_ENCRYPTION_KEY; any transforms depending on it will fail!"
+    }
+  },
+  {
+    "timestamp": {
+      "seconds": 1668691588,
+      "nanos": 880000114
+    },
+    "httpRequest": null,
+    "resource": {
+      "labels": {
+        "function_name": "psoxy-asana",
+        "region": "us-central1",
+        "project_id": "psoxy-dev-david"
+      },
+      "type": "cloud_function"
+    },
+    "severity": "INFO",
+    "logName": "projects/psoxy-dev-david/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "receiveTimestamp": {
+      "seconds": "1668691589",
+      "nanos": 152747399
+    },
+    "split": null,
+    "payload": "jsonPayload",
+    "logging.googleapis.com/labels": {
+      "execution_id": "nesffq3c66bg",
+      "instance_id": "00c61b117cac86fa8f6d0bd65852ab8ee8fbc532530c4144c1795488993aa532e2486706b29d8d57da8216f38b18d1f7384a8188abacdb0778ba"
+    },
+    "logging.googleapis.com/insertId": "63763684000d6e1729764b99",
+    "logging.googleapis.com/trace": "projects/psoxy-dev-david/traces/51b334fe0e1d3099c0cae296a25496c9",
+    "logging.googleapis.com/trace_sampled": false,
+    "message": {
+      "logging.googleapis.com/sourceLocation": {
+        "method": "lambda$rules$0",
+        "file": "co/worklytics/psoxy/ConfigRulesModule.java"
+      },
+      "message": "Rules: fallback to prebuilt rules"
+    }
+  },
+  {
+    "timestamp": {
+      "seconds": 1668691588,
+      "nanos": 158999919
+    },
+    "httpRequest": null,
+    "resource": {
+      "labels": {
+        "function_name": "psoxy-asana",
+        "region": "us-central1",
+        "project_id": "psoxy-dev-david"
+      },
+      "type": "cloud_function"
+    },
+    "severity": "DEFAULT",
+    "logName": "projects/psoxy-dev-david/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "receiveTimestamp": {
+      "seconds": "1668691588",
+      "nanos": 489236556
+    },
+    "split": null,
+    "payload": "textPayload",
+    "logging.googleapis.com/labels": {
+      "execution_id": "nesffq3c66bg",
+      "instance_id": "00c61b117cac86fa8f6d0bd65852ab8ee8fbc532530c4144c1795488993aa532e2486706b29d8d57da8216f38b18d1f7384a8188abacdb0778ba"
+    },
+    "logging.googleapis.com/insertId": "6376368400026d67f6583ba3",
+    "logging.googleapis.com/trace": "projects/psoxy-dev-david/traces/51b334fe0e1d3099c0cae296a25496c9",
+    "logging.googleapis.com/trace_sampled": false,
+    "message": "2022-11-17 13:26:28.158:INFO:oejs.Server:main: Started @799ms"
+  },
+  {
+    "timestamp": {
+      "seconds": 1668691588,
+      "nanos": 157999992
+    },
+    "httpRequest": null,
+    "resource": {
+      "labels": {
+        "function_name": "psoxy-asana",
+        "project_id": "psoxy-dev-david",
+        "region": "us-central1"
+      },
+      "type": "cloud_function"
+    },
+    "severity": "DEFAULT",
+    "logName": "projects/psoxy-dev-david/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "receiveTimestamp": {
+      "seconds": "1668691588",
+      "nanos": 489236556
+    },
+    "split": null,
+    "payload": "textPayload",
+    "logging.googleapis.com/labels": {
+      "instance_id": "00c61b117cac86fa8f6d0bd65852ab8ee8fbc532530c4144c1795488993aa532e2486706b29d8d57da8216f38b18d1f7384a8188abacdb0778ba",
+      "execution_id": "nesffq3c66bg"
+    },
+    "logging.googleapis.com/insertId": "6376368400026cc2b0ee84db",
+    "logging.googleapis.com/trace": "projects/psoxy-dev-david/traces/51b334fe0e1d3099c0cae296a25496c9",
+    "logging.googleapis.com/trace_sampled": false,
+    "message": "2022-11-17 13:26:28.158:INFO:oejs.AbstractConnector:main: Started ServerConnector@7f560810{HTTP/1.1,[http/1.1]}{0.0.0.0:8080}"
+  },
+  {
+    "timestamp": {
+      "seconds": 1668691588,
+      "nanos": 130000114
+    },
+    "httpRequest": null,
+    "resource": {
+      "labels": {
+        "project_id": "psoxy-dev-david",
+        "function_name": "psoxy-asana",
+        "region": "us-central1"
+      },
+      "type": "cloud_function"
+    },
+    "severity": "DEFAULT",
+    "logName": "projects/psoxy-dev-david/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "receiveTimestamp": {
+      "seconds": "1668691588",
+      "nanos": 154248237
+    },
+    "split": null,
+    "payload": "textPayload",
+    "logging.googleapis.com/labels": {
+      "execution_id": "nesffq3c66bg",
+      "instance_id": "00c61b117cac86fa8f6d0bd65852ab8ee8fbc532530c4144c1795488993aa532e2486706b29d8d57da8216f38b18d1f7384a8188abacdb0778ba"
+    },
+    "logging.googleapis.com/insertId": "637636840001fc2568db39e3",
+    "logging.googleapis.com/trace": "projects/psoxy-dev-david/traces/51b334fe0e1d3099c0cae296a25496c9",
+    "logging.googleapis.com/trace_sampled": false,
+    "message": "2022-11-17 13:26:28.129:INFO:oejsh.ContextHandler:main: Started o.e.j.s.ServletContextHandler@76b0bfab{/,null,AVAILABLE}"
+  },
+  {
+    "timestamp": {
+      "seconds": 1668691588,
+      "nanos": 69999933
+    },
+    "httpRequest": null,
+    "resource": {
+      "labels": {
+        "project_id": "psoxy-dev-david",
+        "function_name": "psoxy-asana",
+        "region": "us-central1"
+      },
+      "type": "cloud_function"
+    },
+    "severity": "DEFAULT",
+    "logName": "projects/psoxy-dev-david/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "receiveTimestamp": {
+      "seconds": "1668691588",
+      "nanos": 154248237
+    },
+    "split": null,
+    "payload": "textPayload",
+    "logging.googleapis.com/labels": {
+      "instance_id": "00c61b117cac86fa8f6d0bd65852ab8ee8fbc532530c4144c1795488993aa532e2486706b29d8d57da8216f38b18d1f7384a8188abacdb0778ba",
+      "execution_id": "nesffq3c66bg"
+    },
+    "logging.googleapis.com/insertId": "63763684000112726b2f5492",
+    "logging.googleapis.com/trace": "projects/psoxy-dev-david/traces/51b334fe0e1d3099c0cae296a25496c9",
+    "logging.googleapis.com/trace_sampled": false,
+    "message": "2022-11-17 13:26:28.069:INFO:oejs.Server:main: jetty-9.4.26.v20200117; built: 2020-01-17T12:35:33.676Z; git: 7b38981d25d14afb4a12ff1f2596756144edf695; jvm 11.0.16+8-post-Ubuntu-0ubuntu118.04"
+  },
+  {
+    "timestamp": {
+      "seconds": 1668691587,
+      "nanos": 825000047
+    },
+    "httpRequest": null,
+    "resource": {
+      "labels": {
+        "function_name": "psoxy-asana",
+        "region": "us-central1",
+        "project_id": "psoxy-dev-david"
+      },
+      "type": "cloud_function"
+    },
+    "severity": "DEFAULT",
+    "logName": "projects/psoxy-dev-david/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "receiveTimestamp": {
+      "seconds": "1668691588",
+      "nanos": 154248237
+    },
+    "split": null,
+    "payload": "textPayload",
+    "logging.googleapis.com/labels": {
+      "instance_id": "00c61b117cac86fa8f6d0bd65852ab8ee8fbc532530c4144c1795488993aa532e2486706b29d8d57da8216f38b18d1f7384a8188abacdb0778ba",
+      "execution_id": "nesffq3c66bg"
+    },
+    "logging.googleapis.com/insertId": "63763683000c9985fc45c9c4",
+    "logging.googleapis.com/trace": "projects/psoxy-dev-david/traces/51b334fe0e1d3099c0cae296a25496c9",
+    "logging.googleapis.com/trace_sampled": false,
+    "message": "2022-11-17 13:26:27.817:INFO::main: Logging initialized @451ms to org.eclipse.jetty.util.log.StdErrLog"
+  },
+  {
+    "timestamp": {
+      "seconds": 1668691587,
+      "nanos": 361000061
+    },
+    "httpRequest": null,
+    "resource": {
+      "labels": {
+        "project_id": "psoxy-dev-david",
+        "region": "us-central1",
+        "function_name": "psoxy-asana"
+      },
+      "type": "cloud_function"
+    },
+    "severity": "DEFAULT",
+    "logName": "projects/psoxy-dev-david/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "receiveTimestamp": {
+      "seconds": "1668691587",
+      "nanos": 485589169
+    },
+    "split": null,
+    "payload": "textPayload",
+    "logging.googleapis.com/labels": {
+      "instance_id": "00c61b117cac86fa8f6d0bd65852ab8ee8fbc532530c4144c1795488993aa532e2486706b29d8d57da8216f38b18d1f7384a8188abacdb0778ba",
+      "execution_id": "nesffq3c66bg"
+    },
+    "logging.googleapis.com/insertId": "6376368300058316f2092fb2",
+    "logging.googleapis.com/trace": "projects/psoxy-dev-david/traces/51b334fe0e1d3099c0cae296a25496c9",
+    "logging.googleapis.com/trace_sampled": false,
+    "message": "Picked up JAVA_TOOL_OPTIONS: -XX:MaxRAM=1024m -XX:MaxRAMPercentage=70"
+  },
+  {
+    "timestamp": {
+      "seconds": 1668691587,
+      "nanos": 148000001
+    },
+    "httpRequest": null,
+    "resource": {
+      "labels": {
+        "function_name": "psoxy-asana",
+        "region": "us-central1",
+        "project_id": "psoxy-dev-david"
+      },
+      "type": "cloud_function"
+    },
+    "severity": "DEBUG",
+    "logName": "projects/psoxy-dev-david/logs/cloudfunctions.googleapis.com%2Fcloud-functions",
+    "receiveTimestamp": {
+      "seconds": "1668691587",
+      "nanos": 154700044
+    },
+    "split": null,
+    "payload": "textPayload",
+    "logging.googleapis.com/labels": {
+      "execution_id": "nesffq3c66bg"
+    },
+    "logging.googleapis.com/insertId": "1nxxy0rflm3h7a",
+    "logging.googleapis.com/trace": "projects/psoxy-dev-david/traces/51b334fe0e1d3099c0cae296a25496c9",
+    "logging.googleapis.com/trace_sampled": false,
+    "message": "Function execution started"
+  }
+]

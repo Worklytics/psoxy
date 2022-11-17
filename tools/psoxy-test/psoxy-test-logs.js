@@ -84,12 +84,24 @@ async function getAWSLogs(options = {}, logger) {
  */
 async function getGCPLogs(options = {}, logger) {
   logger.verbose(`Getting logs, function: ${options.functionName}`);
-  const entries = await gcp.getLogs(options);
+  let entries = await gcp.getLogs(options);
+  
+  if (entries.length === 0) {
+    logger.info('The logs don\'t contain any entries');
+  } else {
+    logger.verbose('Raw Log entries', { additional: entries });
 
-  entries.forEach((entry) => {
-    logger.info('Entry', { additional: entry });
-  });
-
+    entries = gcp.parseLogEntries(entries);
+    entries.forEach(entry => {
+      let messagePrefix = `${chalk.blue(entry.timestamp)}`;
+      if (entry.level) {
+        messagePrefix += ` ${chalk.bold.red(entry.level)}: `;
+      } 
+      
+      logger.entry(`${messagePrefix}\n${entry.message}`);
+    });  
+  }
+  
   return entries;
 }
 

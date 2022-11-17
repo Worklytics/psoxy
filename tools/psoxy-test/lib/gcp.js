@@ -1,6 +1,7 @@
 import { getCommonHTTPHeaders, request, executeCommand, resolveHTTPMethod } from './utils.js';
 import { Logging } from '@google-cloud/logging';
 import getLogger from './logger.js';
+import _ from 'lodash';
 
 /**
  * Helper: check url deploy type
@@ -62,10 +63,13 @@ async function call(options = {}) {
  * Refs:
  * - https://cloud.google.com/functions/docs/monitoring/logging#using_the_logging_api
  * - resource names and filter format: https://cloud.google.com/logging/docs/reference/v2/rest/v2/entries/list
+ * - https://googleapis.dev/nodejs/logging/latest/Entry.html
+ * - https://cloud.google.com/logging/docs/structured-logging
  * 
  * @param {object} options - see `psoxy-test-logs.js`
  * @param {string} options.projectId
  * @param {string} options.functionName
+ * @return {Array<Object>} - array of serialized log entries
  */
 async function getLogs(options = {}) {
   const logging = new Logging();
@@ -74,8 +78,42 @@ async function getLogs(options = {}) {
     filter: `resource.labels.function_name=${options.functionName}`,
     resourceNames: [`projects/${options.projectId}`],
   });
-  
-  return entries;
+  return entries.map(entry => entry.toStructuredJSON());
+}
+
+/**
+ * Parse GCP log entries and return a simplre format for our use-case:
+ * display: timestamp, message, and severity
+ * 
+ * @param {Array<Object>} entries 
+ * @returns {Array<Object>}
+ */
+function parseLogEntries(entries) {
+  if (!Array.isArray(entries) || entries.length === 0) {
+    return [];
+  }
+
+  // https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#LogSeverity
+  const LOG_LEVELS = ['WARNING', 'ERROR', 'CRITICAL', 'ALERT', 'EMERGENCY'];
+  const dateRegex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{3}/
+  return entries.map(entry => {
+    const result = {
+      timestamp: new Date(entry.timestamp.seconds * 1000).toISOString(),
+    }
+
+    let message = entry.message;
+    if (_.isObject(message)) {
+      message = message.message;
+    }
+    result.message = _.isString(message) ? 
+      message.replace(dateRegex, '') : JSON.stringify(message);
+
+    if (LOG_LEVELS.find(level => entry.severity === level)) {
+      result.level = entry.severity;
+    }
+
+    return result;
+  });
 }
 
 export default {
@@ -83,4 +121,5 @@ export default {
   getIdentityToken,
   getLogs,
   isValidURL,
+  parseLogEntries,
 };
