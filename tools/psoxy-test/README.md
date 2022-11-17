@@ -69,12 +69,25 @@ node cli-call.js -u https://us-central1-acme.cloudfunctions.net -d zoom
 
 Notice how the URL changes, and any other option the Psoxy may need doesn't.
 
-## Psoxy logs (only AWS)
+## Psoxy Logs: AWS
 Assuming that you've successfully deployed the Psoxy to AWS, you can inspect the logs by running the following command:
 
 ```shell
 node cli-logs.js -r <role> -re <region> -l <logGroupName>
 ```
+
+## Psoxy Logs: GCP
+Use the following command to review the runtime logs of your Psoxy deploy to
+GCP:
+
+```shell
+node cli-logs.js -p <projectId> -f <functionName>
+```
+
+The `<projectId>` option is the Google Cloud project identifier that hosts your
+Psoxy deploy, and the `<functionName>` options is the identifier of the
+Cloud Function that represents the Psoxy instance itself.
+
 
 ## Psoxy Bulk Instances (only AWS)
 Assuming that you've successfully deployed the Psoxy "bulk instance" to AWS, you need to provide the script with a CSV example file containing some PII records, the name of the input bucket and the output one (these are expected to be [S3] buckets in the same AWS region). The script also needs the AWS region (default is `us-east-1`), and the ARN of the role that will be assumed to perform the upload and download operations.
