@@ -165,12 +165,6 @@ endpoints:
           - "$.data[*]..email"
         encoding: "JSON"
   - pathRegex: "^/api/1.0/workspaces/[^/]*/tasks/search?[^/]*"
-    allowedQueryParams:
-      - "limit"
-      - "modified_at.after"
-      - "modified_at.before"
-      - "is_subtask"
-      - "sort_ascending"
     transforms:
       - !<redact>
         jsonPaths:

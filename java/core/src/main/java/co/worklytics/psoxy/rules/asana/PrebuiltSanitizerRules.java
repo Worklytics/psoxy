@@ -32,14 +32,6 @@ public class PrebuiltSanitizerRules {
                     Lists.newArrayList("workspace", "team").stream())
             .collect(Collectors.toList());
 
-    private static final List<String> searchTaskByWorkspaceAllowedQueryParameters = Lists.newArrayList(
-            "limit",
-            "modified_at.after",
-            "modified_at.before",
-            "is_subtask",
-            "sort_ascending"
-    );
-
     static final Rules2.Endpoint WORKSPACES = Rules2.Endpoint.builder()
             .pathRegex("^/api/1.0/workspaces[?]?[^/]*$")
             .allowedQueryParams(commonAllowedQueryParameters)
@@ -99,7 +91,6 @@ public class PrebuiltSanitizerRules {
 
     static final Rules2.Endpoint WORKSPACE_TASKS_SEARCH = Rules2.Endpoint.builder()
             .pathRegex("^/api/1.0/workspaces/[^/]*/tasks/search?[^/]*")
-            .allowedQueryParams(searchTaskByWorkspaceAllowedQueryParameters)
             .transforms(getTaskTransforms(true))
             .build();
 
