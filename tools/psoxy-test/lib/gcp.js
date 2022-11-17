@@ -1,4 +1,5 @@
 import { getCommonHTTPHeaders, request, executeCommand, resolveHTTPMethod } from './utils.js';
+import { Logging } from '@google-cloud/logging';
 import getLogger from './logger.js';
 
 /**
@@ -37,7 +38,7 @@ function getIdentityToken() {
 async function call(options = {}) {
   const logger = getLogger(options.verbose);
   if (!options.token) {
-    logger.verbose('Getting Google Cloud identity token')
+    logger.verbose('Getting Google Cloud identity token');
     options.token = getIdentityToken();
   }
 
@@ -48,7 +49,7 @@ async function call(options = {}) {
 
   logger.info(`Calling Psoxy and waiting response: ${options.url}`);
   logger.verbose('Request Options:', { additional: options });
-  logger.verbose('Request Headers:', { additional: headers })
+  logger.verbose('Request Headers:', { additional: headers });
 
   const url = new URL(options.url);
   const method = options.method || resolveHTTPMethod(url.pathname);
@@ -56,8 +57,30 @@ async function call(options = {}) {
   return await request(url, method, headers);
 }
 
+/**
+ * Google Cloud Logging: get logs for a cloud function
+ * Refs:
+ * - https://cloud.google.com/functions/docs/monitoring/logging#using_the_logging_api
+ * - resource names and filter format: https://cloud.google.com/logging/docs/reference/v2/rest/v2/entries/list
+ * 
+ * @param {object} options - see `psoxy-test-logs.js`
+ * @param {string} options.projectId
+ * @param {string} options.functionName
+ */
+async function getLogs(options = {}) {
+  const logging = new Logging();
+  const log = logging.log('cloudfunctions.googleapis.com%2Fcloud-functions');
+  const [entries] = await log.getEntries({
+    filter: `resource.labels.function_name=${options.functionName}`,
+    resourceNames: [`projects/${options.projectId}`],
+  });
+  
+  return entries;
+}
+
 export default {
-  isValidURL: isValidURL,
-  getIdentityToken: getIdentityToken,
-  call: call,
+  call,
+  getIdentityToken,
+  getLogs,
+  isValidURL,
 };
