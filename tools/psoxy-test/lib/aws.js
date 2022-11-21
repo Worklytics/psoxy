@@ -3,6 +3,7 @@ import {
   getCommonHTTPHeaders,
   signAWSRequestURL,
   executeCommand,
+  executeWithRetry,
   resolveHTTPMethod
 } from './utils.js';
 import {
@@ -294,47 +295,34 @@ async function upload(bucket, file, options, client) {
  *  
  * @param {string} bucket 
  * @param {string} filename 
- * @param {object} options
+ * @param {Object} options
  * @param {string} options.role
  * @param {string} options.region
  * @param {number} options.delay - ms to wait between retries
  * @param {number} options.attempts - max number of download attempts
  * @param {S3Client} client
+ * @param {Object} logger - winston instance
  * @returns {Promise} resolves with contents of file
  */
-async function download(bucket, filename, options, client) {
+async function download(bucket, filename, options, client, logger) {
   if (!client) {
     client = createS3Client(options.role, options.region);  
   }
 
-  let data;
-  let attempts = 0;
-  const MAX_ATTEMPTS = options.attempts || 60;
-  const DELAY = options.delay || 1000;
-  while (data === undefined && attempts <= MAX_ATTEMPTS) {
-    try {
-      data = await client.send(new GetObjectCommand({
-        Bucket: bucket,
-        Key: filename,
-      }));
-    } catch (error) {
-      if (error.Code !== 'NoSuchKey') {
-        throw(error);
-      }
-    }
-    attempts++;
+  const downloadFunction = async () => await client.send(new GetObjectCommand({
+      Bucket: bucket,
+      Key: filename,
+    }));
+  const onErrorStop = (error) => error.code !== 'NoSuchKey';
 
-    // Wait 1' before retry; in theory, only if this is the first operation 
-    // after Psoxy deployment, we'd need a max of 60' until it processes the 
-    // file and puts it in the output bucket
-    clearTimeout(await new Promise(resolve => setTimeout(resolve, DELAY)));    
-  }
+  const downloadResponse = await executeWithRetry(downloadFunction, onErrorStop, 
+    logger, options.attempts, options.delay);  
 
-  if (data === undefined) {
-    throw new Error(`${filename} not found after ${attempts} attempts`);
+  if (downloadResponse === undefined) {
+    throw new Error(`${filename} not found after multiple attempts`);
   }
   
-  return data.Body.transformToString();
+  return downloadResponse.Body.transformToString();
 }
 
 export default {  

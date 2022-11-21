@@ -27,54 +27,6 @@ test('isValidURL URL', (t) => {
   );
 });
 
-// Helper class for AWS errors
-class AWSError extends Error {
-  constructor(message, code) {
-    super(message);
-    this.Code = code;
-  }
-}
-
-test('Psoxy Bulk: download retries on 404', async (t) => {
-  const aws = t.context.subject;
-  const options = {
-    attempts: 3,
-    delay: 1, // timeout, make test to not wait
-  }
-
-  // Stub S3 client, always return 404 alike error
-  const fakeS3Client = td.object({
-    send: function() {}
-  });
-  td.when(fakeS3Client.send(td.matchers.anything()))
-    .thenThrow(new AWSError('404 error', 'NoSuchKey'));
-
-  await t.throwsAsync(
-    async () => aws.download('foo', '/path/to/file', options, fakeS3Client),
-    { instanceOf: Error }
-  );
-
-  // Verify as many download attempts as passed in options
-  td.verify(fakeS3Client.send(td.matchers.anything()), 
-    { times: options.attemtps });
-});
-
-test('Psoxy Bulk: no retries on unknown S3 error', async (t) => {
-  const aws = t.context.subject;
-  // Stub S3 client, always return unknown error
-  const fakeS3Client = td.object({
-    send: function() {}
-  });
-  td.when(fakeS3Client.send(td.matchers.anything()))
-    .thenThrow(new AWSError('500 error', 'Unknown'));
-
-  // We get AWSError directly
-  await t.throwsAsync(
-    async () => aws.download('foo', '/path/to/file', {}, fakeS3Client),
-    { instanceOf: AWSError }
-  );
-});
-
 test('Psoxy Logs: parse log events command result', (t) => {
   const aws = t.context.subject;
 

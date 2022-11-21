@@ -14,6 +14,15 @@ test.beforeEach(async (t) => {
 
 test.afterEach(() => td.reset());
 
+// TODO:remove
+test('Console test: list bucket files', async (t) => {
+  const gcp = t.context.subject;
+
+  const files = await gcp.listFilesMetadata('psoxy-hris-m15dkpse-input');
+
+  t.truthy(files, 'listing files');
+});
+
 test('isValidURL URL', (t) => {
   const gcp = t.context.subject;
 
@@ -78,4 +87,3 @@ test('Psoxy Call: get identity token when option missing', async (t) => {
 
   td.verify(utils.executeCommand(COMMAND));
 });
-

@@ -1,5 +1,12 @@
-import { getCommonHTTPHeaders, request, executeCommand, resolveHTTPMethod } from './utils.js';
+import {
+  executeWithRetry,
+  getCommonHTTPHeaders,
+  request,
+  executeCommand,
+  resolveHTTPMethod,
+} from './utils.js';
 import { Logging } from '@google-cloud/logging';
+import { Storage } from '@google-cloud/storage';
 import getLogger from './logger.js';
 import _ from 'lodash';
 
@@ -65,7 +72,7 @@ async function call(options = {}) {
  * - resource names and filter format: https://cloud.google.com/logging/docs/reference/v2/rest/v2/entries/list
  * - https://googleapis.dev/nodejs/logging/latest/Entry.html
  * - https://cloud.google.com/logging/docs/structured-logging
- * 
+ *
  * @param {object} options - see `psoxy-test-logs.js`
  * @param {string} options.projectId
  * @param {string} options.functionName
@@ -77,6 +84,7 @@ async function getLogs(options = {}) {
   const [entries] = await log.getEntries({
     filter: `resource.labels.function_name=${options.functionName}`,
     resourceNames: [`projects/${options.projectId}`],
+    orderBy: 'timestamp asc',
   });
   return entries.map(entry => entry.toStructuredJSON());
 }
@@ -84,8 +92,8 @@ async function getLogs(options = {}) {
 /**
  * Parse GCP log entries and return a simplre format for our use-case:
  * display: timestamp, message, and severity
- * 
- * @param {Array<Object>} entries 
+ *
+ * @param {Array<Object>} entries
  * @returns {Array<Object>}
  */
 function parseLogEntries(entries) {
@@ -105,7 +113,7 @@ function parseLogEntries(entries) {
     if (_.isObject(message)) {
       message = message.message;
     }
-    result.message = _.isString(message) ? 
+    result.message = _.isString(message) ?
       message.replace(dateRegex, '') : JSON.stringify(message);
 
     if (LOG_LEVELS.find(level => entry.severity === level)) {
@@ -116,10 +124,93 @@ function parseLogEntries(entries) {
   });
 }
 
+/**
+ * Get Google Cloud Storage (GCS) client
+ *
+ * Refs:
+ * - GCS docs: https://cloud.google.com/nodejs/docs/reference/storage/latest
+ * - GCS API: https://googleapis.dev/nodejs/storage/latest/index.html
+ *
+ * @returns {Storage}
+ */
+function createStorageClient() {
+  return new Storage();
+}
+
+/**
+ * Only for testing: List of files' metadata in a bucket
+ * Refs:
+ * - https://googleapis.dev/nodejs/storage/latest/global.html#GetFileMetadataResponse
+ *
+ * @param {string} bucketName
+ * @returns {Array<Object>}
+ */
+async function listFilesMetadata(bucketName) {
+  if (_.isEmpty(bucketName)) {
+    return null;
+  }
+  const client = createStorageClient();
+  const [files] = await client.bucket(bucketName).getFiles();
+
+  return await Promise.all(files.map(async (file) => {
+    const [metadata] = await file.getMetadata();
+    return metadata;
+  }));
+}
+
+/**
+ * Upload file to GCS;
+ * by default the name of the local file will be used
+ * https://googleapis.dev/nodejs/storage/latest/Bucket.html#upload
+ *
+ * @param {string} bucketName - destination GCS bucket
+ * @param {string} filePath - local file path
+ * @param {Storage} client
+ * @returns {UploadResponse} - https://googleapis.dev/nodejs/storage/latest/global.html#UploadResponse
+ */
+async function upload(bucketName, filePath, client) {
+  if (!client) {
+    client = createStorageClient();
+  }
+  return client.bucket(bucketName).upload(filePath);
+}
+
+/**
+ * Download file from GCS
+ *
+ * @param {string} bucketName
+ * @param {string} fileName
+ * @param {Storage} client
+ * @param {Object} logger - winston instance
+ * @returns {DownloadResponse} - https://googleapis.dev/nodejs/storage/latest/global.html#DownloadResponse
+ */
+async function download(bucketName, fileName, client, logger) {
+  if (!client) {
+    client = createStorageClient();
+  }
+
+  const downloadFunction = async () => client.bucket(bucketName).file(fileName)
+    .download();
+  const onErrorStop = (error) => error.code !== 404;
+
+  const downloadResponse = await executeWithRetry(downloadFunction, onErrorStop,
+    logger);
+
+  if (downloadResponse === undefined) {
+    throw new Error(`${fileName} not found after multiple attempts`);
+  }
+
+  return downloadResponse;
+}
+
 export default {
   call,
+  createStorageClient,
+  download,
   getIdentityToken,
   getLogs,
   isValidURL,
   parseLogEntries,
+  listFilesMetadata,
+  upload,
 };

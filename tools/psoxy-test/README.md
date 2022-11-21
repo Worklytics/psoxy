@@ -6,7 +6,10 @@ This folder contains Node.js scripts to help you test your Worklytics Psoxy depl
 
 The primary tool is a command line interface (CLI) script that allows you to execute "Psoxy Test Calls" to your Worklytics Psoxy instance. Check all the available options by running `node cli-call.js -h` (*). 
 
-We also provide a script to test "Psoxy bulk instances" (on AWS): they consist of an input bucket, an output one, and the Psoxy instance itself. The script allows you to upload a comma-separated values file (CSV) to the input bucket, it will check that the Psoxy has processed the file and have written it to the output bucket removing all Personal Identifiable Information (PII) from the file (as per Psoxy rules). Check available options by running `node cli-file-upload.js -h` (*).
+We also provide a script to test "Psoxy bulk instances": they consist of an input bucket, an output one, and the Psoxy instance itself. The script allows you to upload a comma-separated values file (CSV) to the input bucket, it will check that the Psoxy has processed the file and have written it to the output bucket removing all Personal Identifiable Information (PII) from the file (as per Psoxy rules). Check available options by running `node cli-file-upload.js -h` (*).
+
+A third script lets you check your Psoxy instance logs: `node cli-logs.js -h` 
+(*).
 
 (*) Options may vary depending on whether you've deployed the Worklytics Psoxy to Amazon Web Services ([AWS]) or Google Cloud Platform ([GCP]).
 
@@ -85,17 +88,27 @@ node cli-logs.js -p <projectId> -f <functionName>
 ```
 
 The `<projectId>` option is the Google Cloud project identifier that hosts your
-Psoxy deploy, and the `<functionName>` options is the identifier of the
+Psoxy deploy, and the `<functionName>` option is the identifier of the
 Cloud Function that represents the Psoxy instance itself.
 
 
-## Psoxy Bulk Instances (only AWS)
+## Psoxy Bulk Instances: AWS
 Assuming that you've successfully deployed the Psoxy "bulk instance" to AWS, you need to provide the script with a CSV example file containing some PII records, the name of the input bucket and the output one (these are expected to be [S3] buckets in the same AWS region). The script also needs the AWS region (default is `us-east-1`), and the ARN of the role that will be assumed to perform the upload and download operations.
 
 Example:
 ```shell
-node cli-file-upload.js -r <ROLE> -i input-bucket-name -o output-bucket-name -f /path/to/file.csv
+node cli-file-upload.js -d AWS -i input-bucket-name -o output-bucket-name -f /path/to/file.csv -r <ROLE> -re <REGION>
 ```
+
+## Psoxy Bulk Instances: GCP
+Use the following command to test a Psoxy "bulk" instance deployed to GCP:
+
+```shell
+node cli-file-upload.js -d GCP -i input-bucket-name -o output-bucket-name -f /path/to/file.csv
+```
+
+In this case, `-i` and `-o` options represent [Google Cloud Storage] buckets.
+
 
 
 [AWS]: https://aws.amazon.com
@@ -109,3 +122,4 @@ node cli-file-upload.js -r <ROLE> -i input-bucket-name -o output-bucket-name -f 
 [Google Cloud SDK]: https://cloud.google.com/sdk/gcloud/reference/auth/print-identity-token
 [authorize gcloud first]: https://cloud.google.com/sdk/gcloud/reference/auth/login
 [S3]: https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html
+[Google Cloud Storage]: https://cloud.google.com/storage

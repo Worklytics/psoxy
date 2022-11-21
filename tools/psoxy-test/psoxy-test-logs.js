@@ -61,7 +61,7 @@ async function getAWSLogs(options = {}, logger) {
         let messagePrefix = `${chalk.blue(event.timestamp)}`;
         let message = event.message;
         if (event.level) {
-          messagePrefix += `${chalk.bold.red(event.level)}: `;
+          messagePrefix += ` ${chalk.bold.red(event.level)}: `;
         } else if (event.highlight) {
           message = chalk.red(message);
         }
