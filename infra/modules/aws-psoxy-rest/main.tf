@@ -64,8 +64,8 @@ Review the deployed function in AWS console:
 
 - https://console.aws.amazon.com/lambda/home?region=${var.region}#/functions/${var.function_name}?tab=monitoring
 
-We provide some Node.js scripts to easily validate the deploy. To be able
-to run the test commands below, you need Node.js (>=16) and npm (v >=8)
+We provide some Node.js scripts to easily validate the deployment. To be able
+to run the test commands below, you need Node.js (>=16) and npm (v >=8) 
 installed. Then, ensure all dependencies are installed by running:
 
 ```shell
@@ -88,15 +88,15 @@ a RULES variable in the source.
 ### Check logs (AWS CloudWatch)
 
 Based on your configuration, the following command allows you to inspect the
-logs of your Psoxy deploy:
+logs of your Psoxy deployment:
 
 ```shell
 ${local.command_test_logs}
 ```
 
---
-Please, check the documentation of our Psoxy testing tool
-([`/tools/psoxy-test/README.md`](https://github.com/Worklytics/psoxy/blob/v0.4.7/tools/psoxy-test/README.md))
+---
+
+Please, check the documentation of our [Psoxy Testing tools](${var.path_to_repo_root}tools/psoxy-test/README.md)
 for a detailed description of all the different options.
 
 Contact support@worklytics.co for assistance modifying the rules as needed.
