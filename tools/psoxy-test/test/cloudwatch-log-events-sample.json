@@ -7,6 +7,11 @@
   },
   "events": [
     {
+      "ingestionTime": 1668681947450,
+      "message": "Error loading class co.worklytics.psoxy.Handler: co/worklytics/psoxy/gateway/impl/CommonRequestHandler_Factory: java.lang.NoClassDefFoundError\njava.lang.NoClassDefFoundError: co/worklytics/psoxy/gateway/impl/CommonRequestHandler_Factory\n\tat co.worklytics.psoxy.aws.DaggerAwsContainer.createHandler(DaggerAwsContainer.java:288)\n\tat co.worklytics.psoxy.Handler.staticInit(Handler.java:45)\n\tat co.worklytics.psoxy.Handler.<clinit>(Handler.java:40)\n\tat java.base/java.lang.Class.forName0(Native Method)\n\tat java.base/java.lang.Class.forName(Unknown Source)\nCaused by: java.lang.ClassNotFoundException: co.worklytics.psoxy.gateway.impl.CommonRequestHandler_Factory. Current classpath: file:/var/task/\n\n",
+      "timestamp": 1668681947346
+    },
+    {
       "ingestionTime": 1667221702239,
       "message": "START RequestId: fbfdeb36-b72c-49f1-aa5d-04321f20abab Version: $LATEST\n",
       "timestamp": 1667221701802

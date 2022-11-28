@@ -206,6 +206,7 @@ module "connector-long-auth-function" {
   path_to_repo_root             = var.psoxy_base_dir
   salt_secret_id                = module.psoxy-gcp.salt_secret_id
   salt_secret_version_number    = module.psoxy-gcp.salt_secret_version_number
+  example_api_calls             = each.value.example_api_calls
   todo_step                     = module.source_token_external_todo[each.key].next_todo_step
 
   environment_variables =  merge(try(each.value.environment_variables, {}),

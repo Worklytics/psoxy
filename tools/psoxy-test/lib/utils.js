@@ -205,8 +205,50 @@ function resolveHTTPMethod(path = '') {
   return endpointMatch?.method || 'GET';
 }
 
+/**
+ * "retry" helper function, execute "fn" until returning value is not undefined
+ * 
+ * @param {Function} fn 
+ * @param {Function} onErrorStop 
+ * @param {Object} logger - winston instance
+ * @param {number} maxAttempts 
+ * @param {number} delay 
+ * @param {string} progressMessage 
+ * @returns 
+ */
+async function executeWithRetry(fn, onErrorStop, logger, maxAttempts = 60, 
+  delay = 1000, progressMessage = 'Downloading...') {
+
+  let result;
+  let attempts = 0;
+  while(_.isUndefined(result) && attempts <= maxAttempts) {
+    try {
+      result = await fn();
+    } catch (error) {
+      if (onErrorStop(error)) {
+        throw error;
+      }
+    }
+    attempts++;
+    if (_.isUndefined(result)) {
+      // Wait "delay" ms before retry; 
+      // Psoxy bulk use-case: in theory, only if this is the first 
+      // operation  after Psoxy deployment, we'd need a max of 60' until it 
+      // processes the file and puts it in the output bucket
+      clearTimeout(await new Promise(resolve => setTimeout(resolve, delay)));
+      
+      if (logger) {
+        logger.info(progressMessage);
+      }
+    }
+  }
+
+  return result;
+}
+
 export {
   executeCommand,
+  executeWithRetry,
   getCommonHTTPHeaders,
   getFileNameFromURL,
   requestWrapper as request,
