@@ -171,6 +171,7 @@ endpoints:
       - "modified_at.before"
       - "is_subtask"
       - "sort_ascending"
+      - "opt_fields"
     transforms:
       - !<redact>
         jsonPaths:
