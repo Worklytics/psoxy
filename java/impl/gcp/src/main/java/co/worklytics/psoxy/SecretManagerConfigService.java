@@ -7,6 +7,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.google.protobuf.ByteString;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
@@ -22,10 +23,22 @@ import java.util.logging.Level;
 @RequiredArgsConstructor
 public class SecretManagerConfigService implements ConfigService {
 
+    /**
+     * Namespace to use; it could be empty for accessing all the secrets or with some value will be used
+     * for being the prefix of the key to use. Ex of a key using a namespace: someNamespace_myKey
+     */
     final String namespace;
 
+    /**
+     * GCP projectId to use; it could be the name of the project (my-project) or its id (1234)
+     */
+    @NonNull
     final String projectId;
 
+    /**
+     * TTL to use for cache expiration
+     */
+    @NonNull
     final Duration defaultTtl;
     private volatile LoadingCache<String, String> cache;
     private final Object $writeLock = new Object[0];
