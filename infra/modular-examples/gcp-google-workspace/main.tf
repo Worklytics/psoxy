@@ -204,6 +204,7 @@ module "connector-long-auth-function" {
   deployment_bundle_object_name = module.psoxy-gcp.deployment_bundle_object_name
   path_to_config                = "${local.base_config_path}${each.value.source_kind}.yaml"
   path_to_repo_root             = var.psoxy_base_dir
+  example_api_calls             = each.value.example_api_calls
   todo_step                     = module.source_token_external_todo[each.key].next_todo_step
 
   secret_bindings = module.psoxy-gcp.secrets
