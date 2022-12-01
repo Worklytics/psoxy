@@ -172,6 +172,16 @@ output "bucket_write_role_id" {
   value = google_project_iam_custom_role.bucket-write.id
 }
 
+# Deprecated, it will be removed in v0.5.x
+output "salt_secret_id" {
+  value = google_secret_manager_secret.pseudonymization-salt.secret_id
+}
+
+# Deprecated, it will be removed in v0.5.x
+output "salt_secret_version_number" {
+  value = trimprefix(google_secret_manager_secret_version.initial_version.name, "${google_secret_manager_secret.pseudonymization-salt.name}/versions/")
+}
+
 output "secrets" {
   value = {
     PSOXY_ENCRYPTION_KEY = {
