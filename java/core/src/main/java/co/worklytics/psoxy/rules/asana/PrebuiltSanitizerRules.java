@@ -37,7 +37,8 @@ public class PrebuiltSanitizerRules {
             "modified_at.after",
             "modified_at.before",
             "is_subtask",
-            "sort_ascending"
+            "sort_ascending",
+            "opt_fields"
     );
 
     static final Rules2.Endpoint WORKSPACES = Rules2.Endpoint.builder()
