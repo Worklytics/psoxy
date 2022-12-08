@@ -1,11 +1,11 @@
 # AWS - Getting Started
 
-**YMMV : this is a work-in-progress guide on how to use EC2 or other environment  to deploy psoxy to AWS.**
+**YMMV : this is a work-in-progress guide on how to use EC2 or other environment to deploy psoxy 
+to AWS.**
 
-
-To deploy to AWS, you'll need an AWS account in which to deploy. We recommend you provision one
-specifically for use in running Psoxy, as this simplifies security boundaries as well as eventual
-cleanup.
+To deploy to AWS, you'll need an AWS account in which to deploy. We *strongly* recommend you 
+provision one specifically for use to host Psoxy, as this will create an implicit security boundary,
+reduce possible conflicts with other infra configured in the account, and simplify eventual cleanup.
 
 ## Prerequisites
 
