@@ -11,6 +11,37 @@
 
 ## General Tips
 
+### Build problems with Java 19 (specifically, openjdk 19.0.1)
+
+If you are using openjdk 19.0.1, you may run into problems with the build. We suggest you downgrade
+to some java 17 (which is Long-Term Support edition) and use that. 
+
+On Mac, steps would be:
+
+1. check version
+```bash
+mvn -v
+```
+- java version says "17", you're good to go. otherwise, try to downgrade
+
+2. install java 17
+```bash
+brew install openjdk@17
+```
+
+3. set `JAVA_HOME` env variable to point to java 17:
+
+```bash
+export JAVA_HOME=`/opt/homebrew/Cellar/openjdk/19.0.1/libexec/openjdk.jdk/Contents/Home`
+```
+
+NOTE:
+  - you may need to edit some similar `export` command in your `.bashrc`/`.zshrc` file, or similar;
+    or repeat the above command every time you open a new terminal window.
+  - if you install/upgrade something via Homebrew that depends on Java, you may need to repeat step
+    3 again to reset your `JAVA_HOME`
+
+
 ### Upgrading Psoxy Code
 
 If you upgrade your psoxy code, it may be worth trying `terraform init --upgrade` to make sure

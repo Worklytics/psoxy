@@ -38,7 +38,7 @@ via Terraform, relying on Google Cloud and/or AWS command line tools.  You will 
 versions of all of the following:
 
   - git
-  - Java 11+ JDK variant
+  - Java 11+ JDK variant, but not Java 19 (currently broken, see [docs/troubleshooting.md](docs/troubleshooting.md) for downgrade help)
   - [Maven 3.6+](https://maven.apache.org/docs/history.html)
   - [terraform 1.3.x+](https://www.terraform.io/) optional; if you don't use this, you'll need to
     configure your GCP/AWS project via the web console/CLI tools. Adapting one of our
