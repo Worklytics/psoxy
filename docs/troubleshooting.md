@@ -14,7 +14,7 @@
 ### Build problems with Java 19 (specifically, openjdk 19.0.1)
 
 If you are using openjdk 19.0.1, you may run into problems with the build. We suggest you downgrade
-to some java 17 (which is Long-Term Support edition) and use that. 
+to some java 17 (which is Long-Term Support edition) and use that.
 
 On Mac, steps would be:
 
@@ -32,7 +32,7 @@ brew install openjdk@17
 3. set `JAVA_HOME` env variable to point to java 17:
 
 ```bash
-export JAVA_HOME=`/opt/homebrew/Cellar/openjdk/19.0.1/libexec/openjdk.jdk/Contents/Home`
+export JAVA_HOME=`/opt/homebrew/Cellar/openjdk@17/17.0.5/libexec/openjdk.jdk/Contents/Home`
 ```
 
 NOTE:
