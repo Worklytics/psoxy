@@ -8,7 +8,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 
 import java.time.Duration;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 
@@ -58,12 +60,28 @@ public class CachingConfigServiceDecorator implements ConfigService {
     @SneakyThrows
     @Override
     public String getConfigPropertyOrError(ConfigProperty property) {
-        return getCache().get(property);
+        return getConfigPropertyAsOptional(property)
+            .orElseThrow(() -> new Error("Psoxy misconfigured. Expected value for: " + property.name()));
     }
 
+    @SneakyThrows
     @Override
     public Optional<String> getConfigPropertyAsOptional(ConfigProperty property) {
-        return Optional.empty();
+        try {
+            String value = getCache().get(property);
+            if (Objects.equals(NEGATIVE_VALUE, value)) {
+                return Optional.empty();
+            } else {
+                return Optional.of(value);
+            }
+        } catch (ExecutionException e) {
+            //unwrap if possible, re-throw
+            if (e.getCause() == null) {
+                throw e;
+            } else {
+                throw e.getCause();
+            }
+        }
     }
 
     @Override
