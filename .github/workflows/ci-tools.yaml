@@ -1,0 +1,27 @@
+name: CI - Tools
+
+on: 
+  push: 
+    branches: 
+      - '**'
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [16.x] # min version recommended to users
+    steps:
+    - uses: actions/checkout@v3
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: ./tools/psoxy-test
+    - name: Install dependencies    
+      working-directory: ./tools/psoxy-test
+      run: npm i
+    - name: Run test
+      working-directory: ./tools/psoxy-test
+      run: npm test

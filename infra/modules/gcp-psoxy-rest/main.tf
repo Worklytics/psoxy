@@ -9,21 +9,12 @@ terraform {
   }
 }
 
-locals {
-  secret_bindings = merge({
-    PSOXY_SALT = {
-      secret_id      = var.salt_secret_id
-      version_number = var.salt_secret_version_number
-    }
-  }, var.secret_bindings)
-}
-
 data "google_project" "project" {
   project_id = var.project_id
 }
 
 resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_secret" {
-  for_each = local.secret_bindings
+  for_each = var.secret_bindings
 
   project   = var.project_id
   secret_id = each.value.secret_id
@@ -50,7 +41,7 @@ resource "google_cloudfunctions_function" "function" {
   )
 
   dynamic "secret_environment_variables" {
-    for_each = local.secret_bindings
+    for_each = var.secret_bindings
     iterator = secret_environment_variable
 
     content {
@@ -77,43 +68,55 @@ resource "google_cloudfunctions_function" "function" {
 locals {
   proxy_endpoint_url  = "https://${var.region}-${var.project_id}.cloudfunctions.net/${google_cloudfunctions_function.function.name}"
   impersonation_param = var.example_api_calls_user_to_impersonate == null ? "" : " -i \"${var.example_api_calls_user_to_impersonate}\""
-  test_commands = [for path in var.example_api_calls :
-    "${var.path_to_repo_root}tools/test-psoxy.sh -g -u \"${local.proxy_endpoint_url}${path}\"${local.impersonation_param}"
+  command_npm_install = "npm --prefix ${var.path_to_repo_root}tools/psoxy-test install"
+  command_test_calls = [for path in var.example_api_calls :
+    "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js -u \"${local.proxy_endpoint_url}${path}\"${local.impersonation_param}"
   ]
+  command_test_logs = "node ${var.path_to_repo_root}tools/psoxy-test/cli-logs.js -p \"${var.project_id}\" -f \"${google_cloudfunctions_function.function.name}\""
 }
 
 
 resource "local_file" "review" {
   filename = "TODO ${var.todo_step} - test ${google_cloudfunctions_function.function.name}.md"
   content  = <<EOT
-## Testing
+## Testing ${google_cloudfunctions_function.function.name}
 
 Review the deployed Cloud function in GCP console:
 
 [Function in GCP Console](https://console.cloud.google.com/functions/details/${var.region}/${google_cloudfunctions_function.function.name}?project=${var.project_id})
 
-### Make "test calls" using our Psoxy testing tool
-
-From root of your checkout of the Psoxy repo, these are some example test calls you can try (YMMV):
-
-Based on your configuration, these are some example test calls you can try using our Node.js-based Psoxy testing tool (YMMV):
+We provide some Node.js scripts to easily validate the deployment. To be able
+to run the test commands below, you need Node.js (>=16) and npm (v >=8)
+installed. Then, ensure all dependencies are installed by running:
 
 ```shell
-${coalesce(join("\n", local.test_commands), "cd docs/example-api-calls/")}
+${local.command_npm_install}
 ```
 
-To be able to run the commands above you need:
-   1. install Node.js (>=16) and npm (v >=8) installed
-   2. run `npm install` in the `${var.path_to_repo_root}tools/psoxy-test/`
+### Make "test calls"
 
-Review the [documentation of our Psoxy testing tool](${var.path_to_repo_root}tools/psoxy-test/README.md) for a detailed description
-of all the different options.
+Based on your configuration, these are some example test calls you can try (YMMV):
+
+```shell
+${coalesce(join("\n", local.command_test_calls), "cd docs/example-api-calls/")}
+```
 
 Feel free to try the above calls, and reference to the source's API docs for other parameters /
-endpoints to experiment with.
+endpoints to experiment with. If you spot any additional fields you believe should be
+redacted/pseudonymized, feel free to modify [customize the rules](${var.path_to_repo_root}docs/gcp/custom-rules.md).
 
-If you spot any additional fields you believe should be redacted/pseudonymized, feel free to modify
-[customize the rules](${var.path_to_repo_root}docs/gcp/custom-rules.md).
+### Check logs (GCP runtime logs)
+
+Based on your configuration, the following command allows you to inspect the logs of your Psoxy
+deployment:
+
+```shell
+${local.command_test_logs}
+```
+
+---
+Please, check the documentation of our [Psoxy Testing tools](${var.path_to_repo_root}tools/psoxy-test/README.md)
+for a detailed description of all the different options.
 
 Contact support@worklytics.co for assistance modifying the rules as needed.
 

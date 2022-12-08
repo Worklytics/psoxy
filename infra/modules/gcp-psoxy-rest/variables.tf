@@ -52,16 +52,14 @@ variable "path_to_config" {
 
 variable "salt_secret_id" {
   type        = string
-  description = "Id of the secret used to salt pseudonyms"
+  description = "DEPRECATED: Id of the secret used to salt pseudonyms"
+  default     = ""
 }
 
 variable "salt_secret_version_number" {
   type        = string
-  description = "Version number of the secret used to salt pseudonyms"
-  validation {
-    condition     = can(regex("^([0-9]+)|latest$", var.salt_secret_version_number))
-    error_message = "Version number must be a number or 'latest'."
-  }
+  description = "DEPRECATED: Version number of the secret used to salt pseudonyms"
+  default     = ""
 }
 
 variable "example_api_calls" {

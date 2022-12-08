@@ -26,7 +26,7 @@ locals {
         "/admin/directory/v1/groups?customer=my_customer&maxResults=10",
         "/admin/directory/v1/customer/my_customer/domains",
         "/admin/directory/v1/customer/my_customer/roles?maxResults=10",
-        "/admin/directory/v1/customer/my_customer/rolesassignments?maxResults=10"
+        "/admin/directory/v1/customer/my_customer/roleassignments?maxResults=10"
       ]
       example_api_calls_user_to_impersonate : var.google_workspace_example_user
     },
@@ -201,6 +201,7 @@ locals {
   1. Create a [Service Account User + token](https://asana.com/guide/help/premium/service-accounts)
      or a sufficiently [Personal Access Token]() for a sufficiently privileged user (who can see all
      the workspaces/teams/projects/tasks you wish to import to Worklytics via this connection).
+  2. Update the content of PSOXY_ASANA_ACCESS_TOKEN variable with the previous token value obtained
 EOT
     }
     slack-discovery-api = {
@@ -313,7 +314,6 @@ Dropbox connector through Psoxy requires a Dropbox Application created in Dropbo
 does not require to be public, and it needs to have the following scopes to support
 all the operations for the connector:
 
-- files.metadata.read: for file listing and revision
 - members.read: member listing
 - events.read: event listing
 - groups.read: group listing
@@ -438,4 +438,3 @@ output "msft_token_refresh_endpoint" {
 output "enabled_bulk_connectors" {
   value = local.enabled_bulk_connectors
 }
-

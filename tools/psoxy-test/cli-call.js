@@ -7,7 +7,7 @@ import { callDataSourceEndpoints } from './data-sources/runner.js';
 import getLogger from './lib/logger.js';
 
 const require = createRequire(import.meta.url);
-const { name, version, description } = require('./package.json');
+const { version } = require('./package.json');
 
 (async function () {
   const program = new Command();
@@ -21,30 +21,30 @@ const { name, version, description } = require('./package.json');
     .option('-i, --impersonate <user>', 'User to impersonate, needed for certain connectors')
     .option('-r, --role <arn>', 'AWS role to assume, use its ARN')
     .option('-s, --save-to-file', 'Save test results to file', false)
-    .option('--skip', 
+    .option('--skip',
       'Skip sanitization rules, only works if function deployed in development mode',
       false
     )
     .option('-t, --token <token>', 'Authorization token for GCP')
     .option('-v, --verbose', 'Verbose output', false)
     .option('-z, --gzip', 'Add gzip compression header', false)
-    .addOption(new Option('-d, --data-source <name>', 
+    .addOption(new Option('-d, --data-source <name>',
       'Data source to test all available endpoints').choices([
         'asana',
         'azure-ad',
         'dropbox-business',
-        'gcal', 
-        'gdrive', 
+        'gcal',
+        'gdrive',
         'gdirectory',
         'gmail',
-        'google-chat', 
-        'google-meet', 
+        'google-chat',
+        'google-meet',
         'slack-discovery-api',
         'outlook-cal',
         'outlook-mail',
         'zoom'
       ]))
-    .addOption(new Option('-m, --method <HTTP method>', 
+    .addOption(new Option('-m, --method <HTTP method>',
       'HTTP method used when calling URL', 'GET').choices(['GET', 'POST']))
     .configureOutput({
       outputError: (str, write) => write(chalk.bold.red(str)),
@@ -52,7 +52,7 @@ const { name, version, description } = require('./package.json');
 
   program.addHelpText(
     'after',
-    `Example calls: 
+    `Example calls:
       AWS: node cli-call.js -u https://url-to-psoxy-function/path-to-api -r arn:aws:iam::id:myRole
       GCP: node cli-call.js -u https://url-to-psoxy-function/path-to-api -t foo
     `

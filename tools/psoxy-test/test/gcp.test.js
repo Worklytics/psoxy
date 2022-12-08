@@ -1,5 +1,9 @@
 import test from 'ava';
 import * as td from 'testdouble';
+import _ from 'lodash';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const logsSample = require('./gcp-log-entries-structured-sample.json');
 
 const GCP_URL = 'https://foo.cloudfunctions.net';
 
@@ -23,6 +27,28 @@ test('isValidURL URL', (t) => {
     },
     { instanceOf: TypeError }
   );
+});
+
+test('Psoxy Logs: parse log entries', (t) => {
+  const gcp = t.context.subject;
+
+  t.deepEqual(gcp.parseLogEntries(), []);
+
+  const result = gcp.parseLogEntries(logsSample);
+
+  t.truthy(result[0].timestamp, 'Contains timestamp');
+  t.truthy(result[0].message, 'Contains message');
+  
+  const errorSeverity = 'ERROR';
+  const errorEntryIndex = logsSample
+    .findIndex(entry => entry.severity === 'ERROR');
+
+  t.is(result[errorEntryIndex].level, errorSeverity);
+
+  // it handles one level of nesting in messsages
+  const nestedMessageEntryIndex = logsSample
+    .findIndex(entry => _.isObject(entry.message));
+  t.true(_.isString(result[nestedMessageEntryIndex].message))
 });
 
 test('Psoxy Call: get identity token when option missing', async (t) => {
