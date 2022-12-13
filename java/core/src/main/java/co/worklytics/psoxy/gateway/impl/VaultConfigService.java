@@ -2,7 +2,10 @@ package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.gateway.ConfigService;
 import com.bettercloud.vault.Vault;
+import com.bettercloud.vault.VaultException;
+import com.bettercloud.vault.response.AuthResponse;
 import com.bettercloud.vault.response.LogicalResponse;
+import com.bettercloud.vault.response.LookupResponse;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
 import lombok.Getter;
@@ -10,8 +13,10 @@ import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 
+import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
+import java.util.logging.Level;
 
 @Log
 public class VaultConfigService implements ConfigService {
@@ -29,6 +34,13 @@ public class VaultConfigService implements ConfigService {
     // values), but that distinction not in Java implementation atm.
     public static final String VALUE_FIELD = "value";
 
+
+    //how long we want vault auth token to be good for
+    // as proxy isn't continually running, and usually runs nightly
+    // NOTE: if proxy doesn't run AT LEAST this option, and configured with 'periodic' token, it
+    // might expire ...
+    public static final Duration MIN_AUTH_TTL = Duration.ofHours(36);
+
     @Getter @NonNull
     final String path;
 
@@ -38,6 +50,36 @@ public class VaultConfigService implements ConfigService {
     VaultConfigService(Vault vault, @Assisted @NonNull String path) {
         this.vault = vault;
         this.path = path;
+    }
+
+    @SneakyThrows
+    public void init() {
+        LookupResponse initialAuth = this.vault.auth().lookupSelf();
+
+        if (initialAuth.getTTL() == 0) {
+            // 0 is default value in client; 0 also means 'infinite', per their docs:
+            // https://developer.hashicorp.com/vault/docs/concepts/tokens#token-time-to-live-periodic-tokens-and-explicit-max-ttls
+
+            //NOTE: if ttl not infinite, we better have a 'periodic' token; as current impl of Vault
+            // takes token from ENV_VAR, which is presumably not writable by the java process
+
+        } else if (initialAuth.getTTL() < MIN_AUTH_TTL.getSeconds()) {
+            if (!initialAuth.isRenewable()) {
+                //appears we don't actually have a 'periodic' token? or it's expired such that can't renew?
+                log.warning("Vault token is not renewable, and has less than " + MIN_AUTH_TTL.getSeconds() + " seconds left. Will attempt renewal anyways, but could fail.");
+            }
+            try {
+                log.info("Vault token TTL is less than " + MIN_AUTH_TTL.getSeconds() + " seconds. Renewing token.");
+                AuthResponse renewedAuth = this.vault.auth()
+                    .renewSelf(MIN_AUTH_TTL.getSeconds() * 2);
+                log.info("Renewed Vault token. New TTL: " + renewedAuth.getAuthLeaseDuration() + " seconds");
+            } catch (VaultException e) {
+                //log, but continue in case remaining one has some validity
+                log.log(Level.WARNING, "Failed to renew Vault token. ", e);
+            }
+        } else {
+            log.info("Vault token TTL is " + initialAuth.getTTL() + " seconds. No need to renew.");
+        }
     }
 
     private String path(@NonNull ConfigProperty configProperty) {
@@ -59,6 +101,7 @@ public class VaultConfigService implements ConfigService {
     @SneakyThrows
     @Override
     public String getConfigPropertyOrError(ConfigProperty property) {
+
         LogicalResponse response = vault.logical()
             .read(path(property));
         if (response.getRestResponse().getStatus() == 200) {
@@ -75,7 +118,6 @@ public class VaultConfigService implements ConfigService {
     public Optional<String> getConfigPropertyAsOptional(ConfigProperty property) {
         LogicalResponse response = vault.logical()
             .read(path(property));
-
 
         if (response.getRestResponse().getStatus() == 200) {
             return Optional.ofNullable(response.getData().get(VALUE_FIELD));
