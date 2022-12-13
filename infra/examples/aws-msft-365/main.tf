@@ -37,8 +37,8 @@ provider "azuread" {
 }
 
 module "psoxy-aws-msft-365" {
-  # source = "../../modular-examples/aws-msft-365"
-  source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-msft-365?ref=v0.4.8"
+  source = "../../modular-examples/aws-msft-365"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-msft-365?ref=v0.4.8"
 
   aws_account_id                 = var.aws_account_id
   aws_assume_role_arn            = var.aws_assume_role_arn # role that can test the instances (lambdas)
@@ -54,6 +54,7 @@ module "psoxy-aws-msft-365" {
   msft_tenant_id                 = var.msft_tenant_id
   certificate_subject            = var.certificate_subject
   pseudonymize_app_ids           = var.pseudonymize_app_ids
+  general_environment_variables  = var.general_environment_variables
 }
 
 # if you generated these, you may want them to import back into your data warehouse

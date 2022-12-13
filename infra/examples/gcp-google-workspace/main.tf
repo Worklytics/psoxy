@@ -24,8 +24,8 @@ resource "google_project" "psoxy-project" {
 }
 
 module "psoxy-gcp-google-workspace" {
-  # source = "../../modular-examples/gcp-google-workspace"
-  source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/gcp-google-workspace?ref=v0.4.8"
+  source = "../../modular-examples/gcp-google-workspace"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/gcp-google-workspace?ref=v0.4.8"
 
   gcp_project_id                 = google_project.psoxy-project.project_id
   environment_name               = var.environment_name
@@ -38,6 +38,7 @@ module "psoxy-gcp-google-workspace" {
   non_production_connectors      = var.non_production_connectors
   custom_bulk_connectors         = var.custom_bulk_connectors
   google_workspace_example_user  = var.google_workspace_example_user
+  general_environment_variables  = var.general_environment_variables
 
   depends_on = [
     google_project.psoxy-project

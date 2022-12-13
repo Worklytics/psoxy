@@ -70,6 +70,12 @@ variable "psoxy_base_dir" {
   }
 }
 
+variable "general_environment_variables" {
+  type        = map(string)
+  description = "environment variables to add for all connectors"
+  default     = {}
+}
+
 variable "pseudonymize_app_ids" {
   type        = string
   description = "if set, will set value of PSEUDONYMIZE_APP_IDS environment variable to this value for all sources"

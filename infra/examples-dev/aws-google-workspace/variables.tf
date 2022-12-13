@@ -66,7 +66,11 @@ variable "connector_display_name_suffix" {
   default     = ""
 }
 
-
+variable "general_environment_variables" {
+  type        = map(string)
+  description = "environment variables to add for all connectors"
+  default     = {}
+}
 
 variable "enabled_connectors" {
   type        = list(string)

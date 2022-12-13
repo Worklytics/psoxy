@@ -52,6 +52,12 @@ variable "psoxy_base_dir" {
   }
 }
 
+variable "general_environment_variables" {
+  type        = map(string)
+  description = "environment variables to add for all connectors"
+  default     = {}
+}
+
 variable "google_workspace_example_user" {
   type        = string
   description = "User to impersonate for Google Workspace API calls (null for none)"
