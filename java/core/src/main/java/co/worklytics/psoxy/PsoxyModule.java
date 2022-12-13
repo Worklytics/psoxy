@@ -16,6 +16,7 @@ import com.avaulta.gateway.tokens.impl.Sha256DeterministicTokenizationStrategy;
 import com.bettercloud.vault.Vault;
 import com.bettercloud.vault.VaultConfig;
 import com.bettercloud.vault.VaultException;
+import com.bettercloud.vault.response.AuthResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.api.client.http.HttpContent;
@@ -159,27 +160,5 @@ public class PsoxyModule {
     UrlSafeTokenPseudonymEncoder urlSafeTokenPseudonymEncoder() {
         return new UrlSafeTokenPseudonymEncoder();
     }
-
-    @SneakyThrows
-    @Provides @Singleton
-    Vault vault(EnvVarsConfigService envVarsConfigService) {
-        VaultConfig vaultConfig =
-            new VaultConfig()
-                .address(envVarsConfigService.getConfigPropertyOrError(VaultConfigService.VaultConfigProperty.VAULT_ADDR))
-               .token(envVarsConfigService.getConfigPropertyOrError(VaultConfigService.VaultConfigProperty.VAULT_TOKEN));
-
-        envVarsConfigService.getConfigPropertyAsOptional(VaultConfigService.VaultConfigProperty.VAULT_NAMESPACE)
-            .filter(StringUtils::isNotBlank)  //don't bother tossing error here, assume meant no namespace
-            .ifPresent(ns -> {
-                try {
-                    vaultConfig.nameSpace(ns);
-                } catch (VaultException e) {
-                    throw new Error("Error setting Vault namespace", e);
-                }
-            });
-
-        return new Vault(vaultConfig.build());
-    }
-
 
 }

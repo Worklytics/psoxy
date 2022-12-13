@@ -9,6 +9,9 @@ import co.worklytics.psoxy.gateway.impl.VaultConfigService;
 import co.worklytics.psoxy.gateway.impl.VaultConfigServiceFactory;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.bettercloud.vault.Vault;
+import com.bettercloud.vault.VaultConfig;
+import com.bettercloud.vault.response.AuthResponse;
 import dagger.Module;
 import dagger.Provides;
 import software.amazon.awssdk.core.client.config.ClientOverrideConfiguration;
@@ -136,5 +139,18 @@ public interface AwsModule {
     @Provides
     static AmazonS3 getStorageClient() {
         return AmazonS3ClientBuilder.defaultClient();
+    }
+
+    @Provides @Singleton
+    static Vault vault(EnvVarsConfigService envVarsConfigService,
+                       VaultAwsIamAuth vaultAwsIamAuth) {
+        if (envVarsConfigService.getConfigPropertyAsOptional(VaultConfigService.VaultConfigProperty.VAULT_TOKEN).isPresent()) {
+            return VaultConfigService.createVaultClientFromEnvVarsToken(envVarsConfigService);
+        } else {
+            VaultConfig vaultConfig = new VaultConfig()
+                .address(envVarsConfigService.getConfigPropertyOrError(VaultConfigService.VaultConfigProperty.VAULT_ADDR))
+                .token(vaultAwsIamAuth.getToken());
+            return new Vault(vaultConfig);
+        }
     }
 }

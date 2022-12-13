@@ -149,7 +149,7 @@
         <dependency>
             <groupId>com.bettercloud</groupId>
             <artifactId>vault-java-driver</artifactId>
-            <version>5.0.0</version>
+            <version>${dependency.bettercloud-vault-java-driver}</version>
         </dependency>
 
         <dependency>

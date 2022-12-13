@@ -34,3 +34,15 @@ including minor releases which should not break production-ready features.
 
    3. **Ensure ACL permits 'read' and, if necessary, write**. Psoxy will need to be able to read
       secrets from Vault, and in some cases (eg, Oauth tokens subject to refresh) write.
+
+
+## AWS Auth
+
+  - Create [IAM policy needed by Vault](https://developer.hashicorp.com/vault/docs/auth/aws#recommended-vault-iam-policy) in your AWS account.
+  - Create IAM User for Vault in your AWS account.
+  - Enable `aws` auth method in your Vault instance. Set access key + secret for the vault user created above.
+  - Create a Vault policy to allow access to the necessary secrets in Vault.
+  - Bind a Vault role with AWS role (once for each lambda)
+```shell
+vault write auth/aws/role/psoxy-gcal auth_type=iam policies={{YOUR_VAULT_POLICY}} max_ttl=500h bound_iam_principal_arn={{EXECUTION_ROLE_ARN}}
+```

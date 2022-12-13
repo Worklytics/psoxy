@@ -2,6 +2,7 @@ package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.gateway.ConfigService;
 import com.bettercloud.vault.Vault;
+import com.bettercloud.vault.VaultConfig;
 import com.bettercloud.vault.VaultException;
 import com.bettercloud.vault.response.AuthResponse;
 import com.bettercloud.vault.response.LogicalResponse;
@@ -12,6 +13,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
+import org.apache.commons.lang3.StringUtils;
 
 import java.time.Duration;
 import java.util.Map;
@@ -26,6 +28,9 @@ public class VaultConfigService implements ConfigService {
         VAULT_ADDR,
         VAULT_NAMESPACE, // optional; if omitted, won't be set
         VAULT_TOKEN, //makes this pretty f'ing circular ...
+
+        // aws ARN of role to assume when accessing vault
+        VAULT_ROLE,
         ;
     }
 
@@ -126,6 +131,27 @@ public class VaultConfigService implements ConfigService {
             log.info(property.name() + " " + response.getRestResponse().getStatus() + " " + new String(response.getRestResponse().getBody()));
             return Optional.empty();
         }
+    }
+
+    //q: do we even want to support this? possibly just for local dev
+    @SneakyThrows
+    public static Vault createVaultClientFromEnvVarsToken(EnvVarsConfigService envVarsConfigService) {
+        VaultConfig vaultConfig =
+            new VaultConfig()
+                .address(envVarsConfigService.getConfigPropertyOrError(VaultConfigService.VaultConfigProperty.VAULT_ADDR))
+                .token(envVarsConfigService.getConfigPropertyOrError(VaultConfigService.VaultConfigProperty.VAULT_TOKEN));
+
+        envVarsConfigService.getConfigPropertyAsOptional(VaultConfigService.VaultConfigProperty.VAULT_NAMESPACE)
+            .filter(StringUtils::isNotBlank)  //don't bother tossing error here, assume meant no namespace
+            .ifPresent(ns -> {
+                try {
+                    vaultConfig.nameSpace(ns);
+                } catch (VaultException e) {
+                    throw new Error("Error setting Vault namespace", e);
+                }
+            });
+
+        return new Vault(vaultConfig.build());
     }
 
 
