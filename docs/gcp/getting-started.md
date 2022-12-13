@@ -3,7 +3,7 @@
 ## Prerequisites
 
 A Google (GCP) user who can create projects (or with sufficient permissions to provision Service 
-Accounts, Keys, GCS buckets, and Cloud Functions within an existing project).
+Accounts, Keys, Secret Manager, GCS buckets, and Cloud Functions within an existing project).
 
 
 ## Terraform State Backend
