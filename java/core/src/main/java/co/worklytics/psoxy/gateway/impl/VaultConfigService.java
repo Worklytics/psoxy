@@ -29,7 +29,7 @@ public class VaultConfigService implements ConfigService {
         VAULT_NAMESPACE, // optional; if omitted, won't be set
         VAULT_TOKEN, //makes this pretty f'ing circular ...
 
-        // aws ARN of role to assume when accessing vault
+        // aws ARN of role to assume when accessing vault, if other than function's exec role
         VAULT_ROLE,
         ;
     }

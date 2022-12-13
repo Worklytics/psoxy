@@ -1,5 +1,6 @@
 package co.worklytics.psoxy.aws;
 
+import co.worklytics.psoxy.AWSConfigProperty;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.gateway.impl.VaultConfigService;
 import com.amazonaws.DefaultRequest;
@@ -94,9 +95,9 @@ public class VaultAwsIamAuth {
             .address(vaultAddress);
         Vault authVault = new Vault(vaultConfig);
 
-        //can we get
         String role =
-            envVarsConfigService.getConfigPropertyOrError(VaultConfigService.VaultConfigProperty.VAULT_ROLE);
+            envVarsConfigService.getConfigPropertyAsOptional(VaultConfigService.VaultConfigProperty.VAULT_ROLE)
+                .orElseGet(() -> envVarsConfigService.getConfigPropertyOrError(AWSConfigProperty.EXECUTION_ROLE));
 
         AuthResponse authResponse = authVault.auth()
             .loginByAwsIam(
