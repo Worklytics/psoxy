@@ -208,16 +208,11 @@ module "connector-long-auth-function" {
   path_to_repo_root             = var.psoxy_base_dir
   example_api_calls             = each.value.example_api_calls
   todo_step                     = module.source_token_external_todo[each.key].next_todo_step
+  secret_bindings               = module.psoxy-gcp.secrets
 
-<<<<<<< HEAD
   environment_variables = merge(
     var.general_environment_variables,
     try(each.value.environment_variables, {}),
-=======
-  secret_bindings = module.psoxy-gcp.secrets
-
-  environment_variables = merge(try(each.value.environment_variables, {}),
->>>>>>> v0.4.9-rc
     {
       IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
     }
@@ -264,8 +259,8 @@ module "psoxy-gcp-bulk" {
   deployment_bundle_object_name = module.psoxy-gcp.deployment_bundle_object_name
   psoxy_base_dir                = var.psoxy_base_dir
   bucket_write_role_id          = module.psoxy-gcp.bucket_write_role_id
+  secret_bindings               = module.psoxy-gcp.secrets
 
-<<<<<<< HEAD
   environment_variables = merge(
     var.general_environment_variables,
     try(each.value.environment_variables, {}),
@@ -276,13 +271,3 @@ module "psoxy-gcp-bulk" {
     }
   )
 }
-=======
-  secret_bindings = module.psoxy-gcp.secrets
-  environment_variables = {
-    SOURCE              = each.value.source_kind
-    RULES               = yamlencode(each.value.rules)
-    IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
-  }
-
-}
->>>>>>> v0.4.9-rc
