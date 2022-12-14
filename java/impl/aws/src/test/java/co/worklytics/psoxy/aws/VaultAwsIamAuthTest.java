@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.aws;
 
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
+import com.amazonaws.DefaultRequest;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
@@ -8,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import lombok.SneakyThrows;
+import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
@@ -25,6 +27,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class VaultAwsIamAuthTest {
 
+    //these both taken directly from Vault documentation
+    static final String BASE64_UTF8_ENCODED_ENDPOINT = "aHR0cHM6Ly9zdHMuYW1hem9uYXdzLmNvbQ==";
+    static final String BASE64_UTF8_ENCODED_PAYLOAD = "QWN0aW9uPUdldENhbGxlcklkZW50aXR5JlZlcnNpb249MjAxMS0wNi0xNQ==";
+
     @Test
     void payloadEncoded() {
         VaultAwsIamAuth vaultAwsIamAuth = new VaultAwsIamAuth(
@@ -34,26 +40,28 @@ class VaultAwsIamAuthTest {
         vaultAwsIamAuth.envVarsConfigService = new EnvVarsConfigService();
         vaultAwsIamAuth.objectMapper = new ObjectMapper();
         String payload = vaultAwsIamAuth.getPayload();
-        assertEquals("QWN0aW9uPUdldENhbGxlcklkZW50aXR5JlZlcnNpb249MjAxMS0wNi0xNQ==",
+        assertEquals(BASE64_UTF8_ENCODED_PAYLOAD,
             Base64.getEncoder().encodeToString(payload.getBytes(StandardCharsets.UTF_8)));
     }
 
     @Test
     void endpointEncoded() {
+
+        String vaultServer = "http://localhost:8200";
         VaultAwsIamAuth vaultAwsIamAuth = new VaultAwsIamAuth(
             "us-east-1",
             new BasicAWSCredentials("access_key_id", "secret_key_id")
         );
         vaultAwsIamAuth.envVarsConfigService = new EnvVarsConfigService();
         vaultAwsIamAuth.objectMapper = new ObjectMapper();
-        String endpoint = vaultAwsIamAuth.getEndpoint();
-        assertEquals("aHR0cHM6Ly9zdHMuYW1hem9uYXdzLmNvbQ==",
-            Base64.getEncoder().encodeToString(endpoint.getBytes(StandardCharsets.UTF_8)));
+        assertEquals(BASE64_UTF8_ENCODED_ENDPOINT,
+            Base64.getEncoder().encodeToString(vaultAwsIamAuth.getEndpoint().getBytes(StandardCharsets.UTF_8)));
     }
 
     //provide these values in CI env to run this test
+    @SneakyThrows
     @Test
-    void buildRequestHeaders() {
+    void buildGetCallerIdentityRequest() {
         String vaultServer = "http://localhost:8200";
 
         VaultAwsIamAuth vaultAwsIamAuth = new VaultAwsIamAuth(
@@ -62,10 +70,16 @@ class VaultAwsIamAuthTest {
         );
         vaultAwsIamAuth.objectMapper = new ObjectMapper();
         vaultAwsIamAuth.envVarsConfigService = new EnvVarsConfigService();
-        Map<String, String> headers = vaultAwsIamAuth.buildRequestHeaders(vaultServer);
+        DefaultRequest request = vaultAwsIamAuth.buildGetCallerIdentityRequest(vaultServer);
 
-        assertTrue(headers.containsKey("X-Vault-AWS-IAM-Server-ID"));
-        assertTrue(headers.containsKey(AUTHORIZATION));
+        assertTrue(request.getHeaders().containsKey("X-Vault-AWS-IAM-Server-ID"));
+        assertTrue(request.getHeaders().containsKey(AUTHORIZATION));
+
+        assertEquals(BASE64_UTF8_ENCODED_ENDPOINT,
+            Base64.getEncoder().encodeToString(request.getEndpoint().toString().getBytes(StandardCharsets.UTF_8)));
+
+        assertEquals(BASE64_UTF8_ENCODED_PAYLOAD,
+            Base64.getEncoder().encodeToString(IOUtils.toByteArray(request.getContent())));
     }
 
     @Test
@@ -78,10 +92,11 @@ class VaultAwsIamAuthTest {
         );
         vaultAwsIamAuth.objectMapper = new ObjectMapper();
         vaultAwsIamAuth.envVarsConfigService = new EnvVarsConfigService();
-        Map<String, String> headers = vaultAwsIamAuth.buildRequestHeaders(vaultServer);
 
-        assertTrue(headers.containsKey("X-Vault-AWS-IAM-Server-ID"));
-        assertTrue(headers.containsKey(AUTHORIZATION));
+        DefaultRequest request = vaultAwsIamAuth.buildGetCallerIdentityRequest(vaultServer);
+
+        assertTrue(request.getHeaders().containsKey("X-Vault-AWS-IAM-Server-ID"));
+        assertTrue(request.getHeaders().containsKey(AUTHORIZATION));
     }
 
 
@@ -100,14 +115,14 @@ class VaultAwsIamAuthTest {
         );
         vaultAwsIamAuth.objectMapper = new ObjectMapper();
         vaultAwsIamAuth.envVarsConfigService = new EnvVarsConfigService();
-        Map<String, String> headers = vaultAwsIamAuth.buildRequestHeaders(vaultServer);
+        DefaultRequest request = vaultAwsIamAuth.buildGetCallerIdentityRequest(vaultServer);
 
         //assertTrue(headers.containsKey("X-Vault-AWS-IAM-Server-ID"));
-        assertTrue(headers.containsKey(AUTHORIZATION));
+        assertTrue(request.getHeaders().containsKey(AUTHORIZATION));
 
         String asCurl = "curl -X POST -D \"" + vaultAwsIamAuth.getPayload() + "\" \\\n";
-        String headerString = headers.entrySet().stream()
-            .map(entry ->  "-H \"" + entry.getKey() + ": " + entry.getValue() + "\"")
+        String headerString = (String) request.getHeaders().entrySet().stream()
+            .map(entry ->  "-H \"" + ((Map.Entry<String, String>) entry).getKey() + ": " + ((Map.Entry<String, String>) entry).getValue() + "\"")
             .collect(Collectors.joining(" \\\n"));
 
         asCurl += headerString;
@@ -116,7 +131,7 @@ class VaultAwsIamAuthTest {
 
 
         final JsonObject jsonObject = new JsonObject();
-        headers.forEach((k, v) -> {
+        request.getHeaders().forEach((k, v) -> {
             final JsonArray array = new JsonArray();
             array.add((String) v);
             jsonObject.add((String) k, array);
