@@ -74,6 +74,12 @@ resource "aws_iam_role" "iam_for_lambda" {
   }
 }
 
+resource "aws_iam_role_policy_attachment" "basic" {
+  role       = aws_iam_role.iam_for_lambda.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+
 # NOTE: these are known at plan time, allowing all the locals below to also be known at plan time
 #   (if you take region from lambda/role, terraform plan shows the IAM policy as 'Known after apply')
 data "aws_region" "current" {}
@@ -137,16 +143,10 @@ resource "aws_iam_policy" "ssm_param_policy" {
 }
 
 
-resource "aws_iam_role_policy_attachment" "basic" {
-  role       = aws_iam_role.iam_for_lambda.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-}
-
 resource "aws_iam_role_policy_attachment" "attach_policy" {
   role       = aws_iam_role.iam_for_lambda.name
   policy_arn = aws_iam_policy.ssm_param_policy.arn
 }
-
 
 output "function_arn" {
   value = aws_lambda_function.psoxy-instance.arn
