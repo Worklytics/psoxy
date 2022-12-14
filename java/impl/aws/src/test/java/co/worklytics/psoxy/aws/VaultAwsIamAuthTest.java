@@ -29,7 +29,7 @@ class VaultAwsIamAuthTest {
     void payloadEncoded() {
         VaultAwsIamAuth vaultAwsIamAuth = new VaultAwsIamAuth(
             "us-east-1",
-            DefaultAWSCredentialsProviderChain.getInstance().getCredentials()
+            new BasicAWSCredentials("access_key_id", "secret_key_id")
         );
         vaultAwsIamAuth.envVarsConfigService = new EnvVarsConfigService();
         vaultAwsIamAuth.objectMapper = new ObjectMapper();
@@ -42,7 +42,7 @@ class VaultAwsIamAuthTest {
     void endpointEncoded() {
         VaultAwsIamAuth vaultAwsIamAuth = new VaultAwsIamAuth(
             "us-east-1",
-            DefaultAWSCredentialsProviderChain.getInstance().getCredentials()
+            new BasicAWSCredentials("access_key_id", "secret_key_id")
         );
         vaultAwsIamAuth.envVarsConfigService = new EnvVarsConfigService();
         vaultAwsIamAuth.objectMapper = new ObjectMapper();
@@ -70,7 +70,7 @@ class VaultAwsIamAuthTest {
 
     @Test
     void curlExample() {
-        String vaultServer = "http://localhost:8200";
+        String vaultServer = "http://localhost";
 
         VaultAwsIamAuth vaultAwsIamAuth = new VaultAwsIamAuth(
             "us-east-1",
