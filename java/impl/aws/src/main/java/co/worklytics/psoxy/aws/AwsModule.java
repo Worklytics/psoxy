@@ -7,11 +7,12 @@ import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.gateway.impl.*;
 import co.worklytics.psoxy.gateway.impl.VaultConfigService;
 import co.worklytics.psoxy.gateway.impl.VaultConfigServiceFactory;
+import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.bettercloud.vault.SslConfig;
 import com.bettercloud.vault.Vault;
 import com.bettercloud.vault.VaultConfig;
-import com.bettercloud.vault.response.AuthResponse;
 import dagger.Module;
 import dagger.Provides;
 import software.amazon.awssdk.core.client.config.ClientOverrideConfiguration;
@@ -143,11 +144,15 @@ public interface AwsModule {
 
     @Provides @Singleton
     static Vault vault(EnvVarsConfigService envVarsConfigService,
-                       VaultAwsIamAuth vaultAwsIamAuth) {
+                       VaultAwsIamAuthFactory vaultAwsIamAuthFactory) {
         if (envVarsConfigService.getConfigPropertyAsOptional(VaultConfigService.VaultConfigProperty.VAULT_TOKEN).isPresent()) {
             return VaultConfigService.createVaultClientFromEnvVarsToken(envVarsConfigService);
         } else {
+            VaultAwsIamAuth vaultAwsIamAuth = vaultAwsIamAuthFactory.create(
+                System.getenv(AwsModule.RuntimeEnvironmentVariables.AWS_REGION.name()),
+                DefaultAWSCredentialsProviderChain.getInstance().getCredentials());
             VaultConfig vaultConfig = new VaultConfig()
+                .sslConfig(new SslConfig())
                 .address(envVarsConfigService.getConfigPropertyOrError(VaultConfigService.VaultConfigProperty.VAULT_ADDR))
                 .token(vaultAwsIamAuth.getToken());
             return new Vault(vaultConfig);

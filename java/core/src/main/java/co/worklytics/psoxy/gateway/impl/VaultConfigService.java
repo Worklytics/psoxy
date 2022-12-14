@@ -31,6 +31,12 @@ public class VaultConfigService implements ConfigService {
 
         // aws ARN of role to assume when accessing vault, if other than function's exec role
         VAULT_ROLE,
+
+        //TODO: support this, so self-signed certificates on vault certificates can be used with
+        // verification
+        //SSL certificate to be used to validate SSL connection to vault server
+        //base64 encoding of an X.509 certificate in PEM format with UTF-8 encoding
+        //VAULT_SSL_CERTIFICATE,
         ;
     }
 

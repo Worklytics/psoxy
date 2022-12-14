@@ -1,6 +1,5 @@
 package co.worklytics.psoxy.gateway.impl;
 
-import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import dagger.assisted.AssistedFactory;
 
 //see https://dagger.dev/dev-guide/assisted-injection.html
