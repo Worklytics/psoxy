@@ -2,14 +2,17 @@ package co.worklytics.psoxy;
 
 
 import co.worklytics.psoxy.gateway.ConfigService;
-import co.worklytics.psoxy.gateway.impl.CompositeConfigService;
-import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
+import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.impl.*;
+import com.bettercloud.vault.Vault;
+import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.ServiceOptions;
 import dagger.Module;
 import dagger.Provides;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
+import java.io.IOException;
 import java.time.Duration;
 
 /**
@@ -56,19 +59,33 @@ public interface GcpModule {
      * @see "https://cloud.google.com/functions/docs/configuring/env-var"
      * @see "https://cloud.google.com/functions/docs/configuring/secrets"
      */
-    @Provides
-    static ConfigService configService(EnvVarsConfigService envVarsConfigService,
-                                       @Named("Global") SecretManagerConfigService globalSecretManagerConfigService,
-                                       SecretManagerConfigService functionScopedSecretManagerConfigService) {
+    @Provides @Named("Native")
+    static ConfigService nativeConfigService(@Named("Global") SecretManagerConfigService globalSecretManagerConfigService,
+                                            SecretManagerConfigService functionScopedSecretManagerConfigService) {
 
-        CompositeConfigService parameterStoreConfigHierarchy = CompositeConfigService.builder()
+        return CompositeConfigService.builder()
                 .fallback(globalSecretManagerConfigService)
                 .preferred(functionScopedSecretManagerConfigService)
                 .build();
 
-        return CompositeConfigService.builder()
-                .fallback(parameterStoreConfigHierarchy)
-                .preferred(envVarsConfigService)
-                .build();
+    }
+
+    @Provides @Singleton
+    static Vault vault(EnvVarsConfigService envVarsConfigService,
+                       VaultGcpIamAuth vaultGcpIamAuth) {
+        if (envVarsConfigService.getConfigPropertyAsOptional(VaultConfigService.VaultConfigProperty.VAULT_TOKEN).isPresent()) {
+            return VaultConfigService.createVaultClientFromEnvVarsToken(envVarsConfigService);
+        } else {
+            String vaultAddr =
+                envVarsConfigService.getConfigPropertyOrError(VaultConfigService.VaultConfigProperty.VAULT_ADDR);
+
+            try {
+                GoogleCredentials googleCredentials = GoogleCredentials.getApplicationDefault();
+                return vaultGcpIamAuth.createVaultClient(vaultAddr, CloudFunctionRequest.getFunctionName(), googleCredentials);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+        }
     }
 }
