@@ -2,7 +2,6 @@ package co.worklytics.psoxy;
 
 
 import co.worklytics.psoxy.gateway.ConfigService;
-import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.impl.*;
 import com.bettercloud.vault.Vault;
 import com.google.auth.oauth2.GoogleCredentials;
@@ -13,7 +12,6 @@ import dagger.Provides;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.IOException;
-import java.time.Duration;
 
 /**
  * defines how to fulfill dependencies that need platform-specific implementations for GCP platform
@@ -37,8 +35,7 @@ public interface GcpModule {
     @Named("Global")
     @Singleton
     static SecretManagerConfigService secretManagerConfigService() {
-        // Global don't change that often, use longer TTL
-        return new SecretManagerConfigService(null, ServiceOptions.getDefaultProjectId(), Duration.ofMinutes(20));
+        return new SecretManagerConfigService(null, ServiceOptions.getDefaultProjectId());
     }
 
     // parameters scoped to function
@@ -48,8 +45,7 @@ public interface GcpModule {
     static SecretManagerConfigService functionSecretManagerConfigService() {
         String namespace =
                 asParameterStoreNamespace(System.getenv(RuntimeEnvironmentVariables.K_SERVICE.name()));
-        // Namespaced params may change often (refresh tokens), use shorter TTL
-        return new SecretManagerConfigService(namespace, ServiceOptions.getDefaultProjectId(), Duration.ofMinutes(5));
+        return new SecretManagerConfigService(namespace, ServiceOptions.getDefaultProjectId());
     }
 
     /**
