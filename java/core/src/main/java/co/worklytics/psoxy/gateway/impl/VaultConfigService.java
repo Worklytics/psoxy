@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.gateway.ConfigService;
+import com.bettercloud.vault.SslConfig;
 import com.bettercloud.vault.Vault;
 import com.bettercloud.vault.VaultConfig;
 import com.bettercloud.vault.VaultException;
@@ -144,6 +145,7 @@ public class VaultConfigService implements ConfigService {
     public static Vault createVaultClientFromEnvVarsToken(EnvVarsConfigService envVarsConfigService) {
         VaultConfig vaultConfig =
             new VaultConfig()
+                .sslConfig(new SslConfig())
                 .address(envVarsConfigService.getConfigPropertyOrError(VaultConfigService.VaultConfigProperty.VAULT_ADDR))
                 .token(envVarsConfigService.getConfigPropertyOrError(VaultConfigService.VaultConfigProperty.VAULT_TOKEN));
 
