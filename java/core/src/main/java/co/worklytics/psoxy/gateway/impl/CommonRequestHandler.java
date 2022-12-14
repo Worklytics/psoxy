@@ -177,12 +177,7 @@ public class CommonRequestHandler {
 
         //q: add exception handlers for IOExceptions / HTTP error responses, so those retries
         // happen in proxy rather than on Worklytics-side?
-
-        logIfDevelopmentMode(sourceApiRequest::toString);
-
         com.google.api.client.http.HttpResponse sourceApiResponse = sourceApiRequest.execute();
-
-        logIfDevelopmentMode(sourceApiResponse::toString);
 
         // return response
         builder.statusCode(sourceApiResponse.getStatusCode());
