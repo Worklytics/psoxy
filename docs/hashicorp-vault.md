@@ -1,4 +1,4 @@
-# Using HashiCorp Vault with Psoxy
+# Using HashiCorp Vault with Psoxy *alpha*
 
 As of Nov 10, 2022, Psoxy has added *alpha* support for using Hashicorp Vault as its secret store
 (rather than AWS Systems Manager Parameter Store or GCP Secret Manager). We're releasing this as an
@@ -36,13 +36,13 @@ including minor releases which should not break production-ready features.
       secrets from Vault, and in some cases (eg, Oauth tokens subject to refresh) write.
 
 
-## AWS Auth
+## AWS Auth *alpha*
 
   - Create [IAM policy needed by Vault](https://developer.hashicorp.com/vault/docs/auth/aws#recommended-vault-iam-policy) in your AWS account.
   - Create IAM User for Vault in your AWS account.
   - Enable `aws` auth method in your Vault instance. Set access key + secret for the vault user created above.
   - Create a Vault policy to allow access to the necessary secrets in Vault.
-  - Bind a Vault role with AWS role (once for each lambda)
+  - Bind a Vault role with same name as your lambda function with lambda's AWS exec role (once for each lambda)
 ```shell
 vault write auth/aws/role/psoxy-gcal auth_type=iam policies={{YOUR_VAULT_POLICY}} max_ttl=500h bound_iam_principal_arn={{EXECUTION_ROLE_ARN}}
 ```
