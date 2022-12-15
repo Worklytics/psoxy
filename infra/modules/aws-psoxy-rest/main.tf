@@ -49,7 +49,7 @@ locals {
   impersonation_param = var.example_api_calls_user_to_impersonate == null ? "" : " -i \"${var.example_api_calls_user_to_impersonate}\""
   command_npm_install = "npm --prefix ${var.path_to_repo_root}tools/psoxy-test install"
   command_test_calls = [for path in var.example_api_calls :
-  "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js -r \"${var.aws_assume_role_arn}\" -u \"${local.proxy_endpoint_url}${path}\"${local.impersonation_param}"
+    "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js -r \"${var.aws_assume_role_arn}\" -u \"${local.proxy_endpoint_url}${path}\"${local.impersonation_param}"
   ]
   command_test_logs = "node ${var.path_to_repo_root}tools/psoxy-test/cli-logs.js -r \"${var.aws_assume_role_arn}\" -re \"${var.region}\" -l \"${module.psoxy_lambda.log_group}\""
 }
@@ -65,7 +65,7 @@ Review the deployed function in AWS console:
 - https://console.aws.amazon.com/lambda/home?region=${var.region}#/functions/${var.function_name}?tab=monitoring
 
 We provide some Node.js scripts to easily validate the deployment. To be able
-to run the test commands below, you need Node.js (>=16) and npm (v >=8) 
+to run the test commands below, you need Node.js (>=16) and npm (v >=8)
 installed. Then, ensure all dependencies are installed by running:
 
 ```shell
@@ -114,4 +114,8 @@ output "function_arn" {
 
 output "next_todo_step" {
   value = var.todo_step + 1
+}
+
+output "instance_id" {
+  value = module.psoxy_lambda.function_name
 }

@@ -63,7 +63,7 @@ module "google-workspace-key-secrets" {
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-secrets"
 
   secret_project = var.gcp_project_id
-  secrets        = {
+  secrets = {
     "PSOXY_${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY" : {
       value       = module.google-workspace-connection-auth[each.key].key_value
       description = "Auth key for ${each.key} service account"
@@ -114,7 +114,7 @@ module "psoxy-google-workspace-connector" {
   example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
   todo_step                             = module.google-workspace-connection[each.key].next_todo_step
 
-  environment_variables =  merge(
+  environment_variables = merge(
     var.general_environment_variables,
     try(each.value.environment_variables, {}),
     {
@@ -147,7 +147,7 @@ module "worklytics-psoxy-connection" {
 locals {
   long_access_parameters = { for entry in module.worklytics_connector_specs.enabled_oauth_secrets_to_create : "${entry.connector_name}.${entry.secret_name}" => entry }
   long_access_parameters_by_connector = { for k, spec in module.worklytics_connector_specs.enabled_oauth_long_access_connectors :
-  k => [for secret in spec.secured_variables : "${k}.${secret.name}"]
+    k => [for secret in spec.secured_variables : "${k}.${secret.name}"]
   }
 }
 
@@ -221,15 +221,15 @@ module "connector-long-auth-function" {
 
 
 
-  # NOTE: ACCESS_TOKEN, ENCRYPTION_KEY not passed via secret_bindings (which would get bound as
-  # env vars at function start-up) because
-  #   - to be bound as env vars, secrets must already exist or function fails to start (w/o any
-  #     error visible to Terraform other than timeout); ACCESS_TOKEN may need to be created manually
-  #     so may not be defined at time of provisioning, and ENCRYPTION_KEY is optional
-  #   - both ACCESS_TOKEN, ENCRYPTION_KEY may be subject to rotation outside of terraform; no easy
-  #     way for users to force function restart, and env vars won't reload value of a secret until
-  #     function restarts. Better to let app-code load these values from Secret Manager, cache with
-  #     a TTL, and periodically refresh or refresh on auth errors.
+# NOTE: ACCESS_TOKEN, ENCRYPTION_KEY not passed via secret_bindings (which would get bound as
+# env vars at function start-up) because
+#   - to be bound as env vars, secrets must already exist or function fails to start (w/o any
+#     error visible to Terraform other than timeout); ACCESS_TOKEN may need to be created manually
+#     so may not be defined at time of provisioning, and ENCRYPTION_KEY is optional
+#   - both ACCESS_TOKEN, ENCRYPTION_KEY may be subject to rotation outside of terraform; no easy
+#     way for users to force function restart, and env vars won't reload value of a secret until
+#     function restarts. Better to let app-code load these values from Secret Manager, cache with
+#     a TTL, and periodically refresh or refresh on auth errors.
 module "worklytics-psoxy-connection-long-auth" {
   for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
 
@@ -246,7 +246,7 @@ module "worklytics-psoxy-connection-long-auth" {
 # BEGIN BULK CONNECTORS
 module "psoxy-gcp-bulk" {
   for_each = merge(module.worklytics_connector_specs.enabled_bulk_connectors,
-    var.custom_bulk_connectors)
+  var.custom_bulk_connectors)
 
   source = "../../modules/gcp-psoxy-bulk"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-bulk"

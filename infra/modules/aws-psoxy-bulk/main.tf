@@ -241,7 +241,7 @@ locals {
 }
 
 resource "aws_iam_role_policy_attachment" "reader_policy_to_accessor_role" {
-  for_each   = toset([ for r in local.accessor_role_names : r if r != null])
+  for_each = toset([for r in local.accessor_role_names : r if r != null])
 
   role       = each.key
   policy_arn = aws_iam_policy.sanitized_bucket_read.arn
@@ -269,4 +269,12 @@ output "input_bucket" {
 # to facilitate composition of output pipeline
 output "sanitized_bucket" {
   value = aws_s3_bucket.sanitized.bucket
+}
+
+output "function_arn" {
+  value = module.psoxy_lambda.function_arn
+}
+
+output "instance_id" {
+  value = module.psoxy_lambda.function_name
 }

@@ -88,7 +88,7 @@ variable "rules" {
     # will break existing invocations of this module
 
     # pseudonymFormat       = string
-    columnsToRedact       = list(string)
+    columnsToRedact = list(string)
     # columnsToInclude      = list(string)
     columnsToPseudonymize = list(string)
     # columnsToDuplicate    = map(string)
@@ -97,7 +97,7 @@ variable "rules" {
   description = "Rules to apply to a columnar flat file during transformation"
   default = {
     # pseudonymFormat       = "URL_SAFE_TOKEN"
-    columnsToRedact       = []
+    columnsToRedact = []
     # columnsToInclude      = null
     columnsToPseudonymize = []
     # columnsToDuplicate    = {}

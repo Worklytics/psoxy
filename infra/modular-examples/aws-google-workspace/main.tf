@@ -116,7 +116,7 @@ module "psoxy-google-workspace-connector" {
   global_parameter_arns                 = module.global_secrets.secret_arns
   todo_step                             = module.google-workspace-connection[each.key].next_todo_step
 
-  environment_variables =  merge(
+  environment_variables = merge(
     var.general_environment_variables,
     try(each.value.environment_variables, {}),
     {
@@ -210,7 +210,7 @@ module "aws-psoxy-long-auth-connectors" {
   function_parameters            = each.value.secured_variables
   todo_step                      = module.source_token_external_todo[each.key].next_todo_step
 
-  environment_variables =  merge(
+  environment_variables = merge(
     var.general_environment_variables,
     try(each.value.environment_variables, {}),
     {
@@ -290,7 +290,18 @@ module "psoxy_lookup_tables_builders" {
   )
 }
 
+locals {
+  all_instances = merge(
+    { for instance in module.psoxy-google-workspace-connector : instance.instance_id => instance},
+    { for instance in module.psoxy-bulk : instance.instance_id => instance},
+    { for instance in module.aws-psoxy-long-auth-connectors : instance.instance_id => instance}
+  )
+}
+
+output "instances" {
+  value = local.all_instances
+}
 
 output "lookup_tables" {
-  value = { for k,v in var.lookup_table_builders : k => module.psoxy_lookup_tables_builders[k].output_bucket }
+  value = { for k, v in var.lookup_table_builders : k => module.psoxy_lookup_tables_builders[k].output_bucket }
 }
