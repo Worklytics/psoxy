@@ -39,7 +39,7 @@ moved {
   to   = module.aws-google-workspace.module.psoxy-google-workspace-connector
 }
 
-moved{
+moved {
   from = module.worklytics-psoxy-connection-google-workspace
   to   = module.aws-google-workspace.module.worklytics-psoxy-connection-google-workspace
 }

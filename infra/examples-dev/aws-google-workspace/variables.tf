@@ -99,7 +99,7 @@ variable "non_production_connectors" {
 variable "custom_bulk_connectors" {
   type = map(object({
     source_kind = string
-    rules       = object({
+    rules = object({
       pseudonymFormat       = string
       columnsToRedact       = list(string)
       columnsToInclude      = list(string)
@@ -128,7 +128,7 @@ variable "lookup_table_builders" {
   type = map(object({
     input_connector_id            = string
     sanitized_accessor_role_names = list(string)
-    rules                         = object({
+    rules = object({
       pseudonymFormat       = string
       columnsToRedact       = list(string)
       columnsToInclude      = list(string)
