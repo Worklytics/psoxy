@@ -36,8 +36,18 @@ including minor releases which should not break production-ready features.
       secrets from Vault, and in some cases (eg, Oauth tokens subject to refresh) write.
 
 
-## AWS Auth *alpha*
+## AWS IAM Auth *alpha*
 
+Generally, follow Vault's guide: [https://developer.hashicorp.com/vault/docs/auth/aws](https://developer.hashicorp.com/vault/docs/auth/aws)
+
+We also have a Terraform module you can try to set-up Vault for use from Psoxy:
+  - [infra/modules/aws-vault-auth](../infra/modules/aws-vault-auth)
+
+And another Terraform module to add Vault access for each psoxy instance:
+  - [infra/modules/aws-vault-access](../infra/modules/aws-vault-access)
+
+
+Manually, steps are roughly:
   - Create [IAM policy needed by Vault](https://developer.hashicorp.com/vault/docs/auth/aws#recommended-vault-iam-policy) in your AWS account.
   - Create IAM User for Vault in your AWS account.
   - Enable `aws` auth method in your Vault instance. Set access key + secret for the vault user created above.
@@ -46,3 +56,10 @@ including minor releases which should not break production-ready features.
 ```shell
 vault write auth/aws/role/psoxy-gcal auth_type=iam policies={{YOUR_VAULT_POLICY}} max_ttl=500h bound_iam_principal_arn={{EXECUTION_ROLE_ARN}}
 ```
+
+NOTE: pretty certain must be plain role arn, not assumed_role arn even though that's what vault sees
+ - eg `arn:aws:iam::{{YOUR_AWS_ACCOUNT_ID}}:role/PsoxyExec_psoxy-gcal` not `arn:aws:sts::{{YOUR_AWS_ACCOUNT_ID}}:assumed_role/PsoxyExec_psoxy-gcal/psoxy-gcal`
+
+## GCP IAM Auth *alpha*
+
+TODO
