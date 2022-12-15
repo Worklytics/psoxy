@@ -271,6 +271,10 @@ output "sanitized_bucket" {
   value = aws_s3_bucket.sanitized.bucket
 }
 
+output "instance_role_arn" {
+  value = module.psoxy_lambda.iam_role_for_lambda_arn
+}
+
 output "function_arn" {
   value = module.psoxy_lambda.function_arn
 }

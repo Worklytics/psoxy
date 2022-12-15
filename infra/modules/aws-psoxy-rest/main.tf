@@ -112,6 +112,10 @@ output "function_arn" {
   value = module.psoxy_lambda.function_arn
 }
 
+output "instance_role_arn" {
+  value = module.psoxy_lambda.iam_role_for_lambda_arn
+}
+
 output "next_todo_step" {
   value = var.todo_step + 1
 }
