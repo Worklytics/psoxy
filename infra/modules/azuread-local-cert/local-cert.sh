@@ -16,7 +16,7 @@ openssl req -x509 -newkey rsa:2048 -subj "${SUBJECT}" -keyout $KEY_FILE -out $CE
 openssl pkcs8 -nocrypt -in $KEY_FILE  -inform PEM -topk8 -outform PEM -out $KEY_FILE_PKCS8 >/dev/null 2>&1
 
 #CERT_DER=`openssl x509 -in $CERT_FILE -outform DER | base64`
-FINGERPRINT_RESULT=`openssl x509 -in $CERT_FILE -noout -fingerprint`
+FINGERPRINT_RESULT=`openssl x509 -in $CERT_FILE -noout -fingerprint -sha1`
 # output as JSON
 OUTPUT_JSON="{\"cert\": \"`cat $CERT_FILE | base64`\",\"key_pkcs8\": \"`cat $KEY_FILE_PKCS8 | base64`\",\"fingerprint\":\"${FINGERPRINT_RESULT}\"}"
 echo "$OUTPUT_JSON"
