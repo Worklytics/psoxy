@@ -158,11 +158,15 @@ public class VaultAwsIamAuth {
             } else {
                 throw new RuntimeException("STS preflight failed: " + r.getStatusLine());
             }
+
+            // TODO: this curl command times out (408) when run from local machine
+            log.info(asCurlCommand(getCallerIdentityRequest).replace("\\\n", ""));
         }
 
         return getCallerIdentityRequest;
     }
 
+    //for preflight check
     HttpPost asHttpPost(DefaultRequest awsRequest) {
         HttpPost httpPost = new HttpPost(awsRequest.getEndpoint());
         awsRequest.getHeaders().forEach((k, v) -> httpPost.addHeader((String) k, (String) v));
@@ -172,6 +176,19 @@ public class VaultAwsIamAuth {
 
         httpPost.setEntity(new StringEntity(getPayload(), StandardCharsets.UTF_8));
         return httpPost;
+    }
+
+    //for debugging
+    @SneakyThrows
+    String asCurlCommand(DefaultRequest awsRequest) {
+        String asCurl = "curl -X POST -D \"" + IOUtils.toString(awsRequest.getContent(), StandardCharsets.UTF_8) + "\" \\\n";
+        String headerString = (String) awsRequest.getHeaders().entrySet().stream()
+            .map(entry ->  "-H \"" + ((Map.Entry<String, String>) entry).getKey() + ": " + ((Map.Entry<String, String>) entry).getValue() + "\"")
+            .collect(Collectors.joining(" \\\n"));
+
+        asCurl += headerString;
+        asCurl += " " + awsRequest.getEndpoint().toString();
+        return asCurl;
     }
 
 

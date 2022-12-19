@@ -120,16 +120,6 @@ class VaultAwsIamAuthTest {
         //assertTrue(headers.containsKey("X-Vault-AWS-IAM-Server-ID"));
         assertTrue(request.getHeaders().containsKey(AUTHORIZATION));
 
-        String asCurl = "curl -X POST -D \"" + vaultAwsIamAuth.getPayload() + "\" \\\n";
-        String headerString = (String) request.getHeaders().entrySet().stream()
-            .map(entry ->  "-H \"" + ((Map.Entry<String, String>) entry).getKey() + ": " + ((Map.Entry<String, String>) entry).getValue() + "\"")
-            .collect(Collectors.joining(" \\\n"));
-
-        asCurl += headerString;
-        asCurl += " " + vaultAwsIamAuth.getEndpoint();
-
-
-
         final JsonObject jsonObject = new JsonObject();
         request.getHeaders().forEach((k, v) -> {
             final JsonArray array = new JsonArray();
