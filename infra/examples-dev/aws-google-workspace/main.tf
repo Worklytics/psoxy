@@ -12,6 +12,13 @@ terraform {
     google = {
       version = ">= 3.74, <= 5.0"
     }
+
+    /**
+    vault = {
+      source  = "hashicorp/vault"
+      version = "~> 3.11.0"
+    }
+    **/
   }
 
   # if you leave this as local, you should backup/commit your TF state files
@@ -67,7 +74,40 @@ module "psoxy-aws-google-workspace" {
   ]
 }
 
+
+
 # if you generated these, you may want them to import back into your data warehouse
 output "lookup_tables" {
   value = module.psoxy-aws-google-workspace.lookup_tables
 }
+
+/** Vault dev config for local testing
+
+# used for peering to Vault Cloud HVN
+resource "aws_vpc" "psoxy_vpc" {
+  cidr_block = var.vpc_ip_block
+}
+
+provider "vault" {
+  address = var.vault_addr
+
+  # NOTE: set a token in your env vars, eg
+  # export VAULT_TOKEN=...
+}
+
+module "aws_vault_auth" {
+  source = "../../modules/aws-vault-auth"
+}
+
+module "aws_vault_connection_gcal" {
+  source = "../../modules/aws-vault-access"
+
+  for_each = module.psoxy-aws-google-workspace.instances
+
+  aws_auth_backend_name = module.aws_vault_auth.vault_aws_auth_backend_path
+  instance_id           = each.key
+  role_arn              = each.value.instance_role_arn
+}
+
+
+**/

@@ -192,3 +192,15 @@ variable "google_workspace_example_user" {
   type        = string
   description = "user to impersonate for Google Workspace API calls (null for none)"
 }
+
+variable "vpc_ip_block" {
+  type        = string
+  description = "IP block for VPC to create for psoxy instances, in CIDR notation"
+  default     = "10.0.0.0/18"
+}
+
+variable "vault_addr" {
+  type        = string
+  description = "address of your Vault instance"
+  default     = null # leave null if not using Vault
+}
