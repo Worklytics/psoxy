@@ -78,7 +78,7 @@ variable "bucket_write_role_id" {
 }
 
 variable "available_memory_mb" {
-  type = string
+  type = number
   description = "Memory (in MB), available to the function. Default value is 1024. Possible values include 128, 256, 512, 1024, etc."
   default = 1024
 }

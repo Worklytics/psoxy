@@ -108,7 +108,7 @@ variable "todo_step" {
 
 variable "memory_size_mb" {
   # See https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function#memory_size
-  type = string
+  type = number
   description = "Amount of memory in MB your Lambda Function can use at runtime. Defaults to 512"
   default = 512
 }
