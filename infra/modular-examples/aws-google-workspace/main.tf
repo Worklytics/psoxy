@@ -252,6 +252,8 @@ module "psoxy-bulk" {
   sanitized_accessor_role_names = [
     module.psoxy-aws.api_caller_role_name
   ]
+
+  memory_size_mb = 1024
 }
 
 

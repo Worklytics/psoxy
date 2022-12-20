@@ -270,6 +270,8 @@ module "psoxy-bulk" {
   environment_variables = {
     IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
   }
+
+  memory_size_mb = 1024
 }
 
 module "psoxy_lookup_tables_builders" {
