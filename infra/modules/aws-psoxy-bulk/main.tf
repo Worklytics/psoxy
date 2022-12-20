@@ -241,7 +241,7 @@ locals {
 }
 
 resource "aws_iam_role_policy_attachment" "reader_policy_to_accessor_role" {
-  for_each   = toset([ for r in local.accessor_role_names : r if r != null])
+  for_each = toset([for r in local.accessor_role_names : r if r != null])
 
   role       = each.key
   policy_arn = aws_iam_policy.sanitized_bucket_read.arn

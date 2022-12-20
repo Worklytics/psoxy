@@ -96,7 +96,7 @@ variable "todo_step" {
 }
 
 variable "available_memory_mb" {
-  type = number
+  type        = number
   description = "Memory (in MB), available to the function. Default value is 1024. Possible values include 128, 256, 512, 1024, etc."
-  default = 1024
+  default     = 1024
 }
