@@ -23,11 +23,11 @@ terraform {
 
   # example remove backend (this S3 bucket must already be provisioned, and AWS role executing
   # terraform must be able to read/write to it - and use encryption key, if any)
-#  backend "s3" {
-#    bucket = "mybucket"
-#    key    = "path/to/my/key"
-#    region = "us-east-1"
-#  }
+  #  backend "s3" {
+  #    bucket = "mybucket"
+  #    key    = "path/to/my/key"
+  #    region = "us-east-1"
+  #  }
 }
 
 # NOTE: you need to provide credentials. usual way to do this is to set env vars:

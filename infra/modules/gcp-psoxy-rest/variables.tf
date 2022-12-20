@@ -94,3 +94,9 @@ variable "todo_step" {
   description = "of all todos, where does this one logically fall in sequence"
   default     = 1
 }
+
+variable "available_memory_mb" {
+  type        = number
+  description = "Memory (in MB), available to the function. Default value is 1024. Possible values include 128, 256, 512, 1024, etc."
+  default     = 1024
+}

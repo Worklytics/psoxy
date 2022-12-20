@@ -39,7 +39,7 @@ moved {
   to   = module.psoxy-aws-msft-365.module.psoxy-msft-connector
 }
 
-moved{
+moved {
   from = module.worklytics-psoxy-connection-msft-365
   to   = module.psoxy-aws-msft-365.module.worklytics-psoxy-connection-msft-365
 }

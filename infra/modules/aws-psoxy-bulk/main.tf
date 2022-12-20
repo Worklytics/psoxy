@@ -21,7 +21,7 @@ module "psoxy_lambda" {
   function_name         = "psoxy-${var.instance_id}"
   handler_class         = "co.worklytics.psoxy.S3Handler"
   timeout_seconds       = 600 # 10 minutes
-  memory_size_mb        = 512
+  memory_size_mb        = var.memory_size_mb
   source_kind           = var.source_kind
   path_to_function_zip  = var.path_to_function_zip
   function_zip_hash     = var.function_zip_hash
@@ -241,7 +241,7 @@ locals {
 }
 
 resource "aws_iam_role_policy_attachment" "reader_policy_to_accessor_role" {
-  for_each   = toset([ for r in local.accessor_role_names : r if r != null])
+  for_each = toset([for r in local.accessor_role_names : r if r != null])
 
   role       = each.key
   policy_arn = aws_iam_policy.sanitized_bucket_read.arn

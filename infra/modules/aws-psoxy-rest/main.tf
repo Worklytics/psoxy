@@ -15,7 +15,7 @@ module "psoxy_lambda" {
   handler_class                  = "co.worklytics.psoxy.Handler"
   path_to_function_zip           = var.path_to_function_zip
   function_zip_hash              = var.function_zip_hash
-  memory_size_mb                 = 512
+  memory_size_mb                 = var.memory_size_mb
   timeout_seconds                = 55
   reserved_concurrent_executions = var.reserved_concurrent_executions
   path_to_config                 = var.path_to_config
@@ -49,7 +49,7 @@ locals {
   impersonation_param = var.example_api_calls_user_to_impersonate == null ? "" : " -i \"${var.example_api_calls_user_to_impersonate}\""
   command_npm_install = "npm --prefix ${var.path_to_repo_root}tools/psoxy-test install"
   command_test_calls = [for path in var.example_api_calls :
-  "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js -r \"${var.aws_assume_role_arn}\" -u \"${local.proxy_endpoint_url}${path}\"${local.impersonation_param}"
+    "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js -r \"${var.aws_assume_role_arn}\" -u \"${local.proxy_endpoint_url}${path}\"${local.impersonation_param}"
   ]
   command_test_logs = "node ${var.path_to_repo_root}tools/psoxy-test/cli-logs.js -r \"${var.aws_assume_role_arn}\" -re \"${var.region}\" -l \"${module.psoxy_lambda.log_group}\""
 }

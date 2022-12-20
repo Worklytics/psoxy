@@ -16,10 +16,10 @@ terraform {
 
   # example remove backend (this GCS bucket must already be provisioned, and GCP user executing
   # terraform must be able to read/write to it)
-#  backend "gcs" {
-#    bucket  = "tf-state-prod"
-#    prefix  = "terraform/state"
-#  }
+  #  backend "gcs" {
+  #    bucket  = "tf-state-prod"
+  #    prefix  = "terraform/state"
+  #  }
 }
 
 # NOTE: if you don't have perms to provision a GCP project in your billing account, you can have
@@ -39,17 +39,17 @@ module "psoxy-gcp-google-workspace" {
   # source = "../../modular-examples/gcp-google-workspace"
   source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/gcp-google-workspace?ref=v0.4.8"
 
-  gcp_project_id                 = google_project.psoxy-project.project_id
-  environment_name               = var.environment_name
-  worklytics_sa_emails           = var.worklytics_sa_emails
-  connector_display_name_suffix  = var.connector_display_name_suffix
-  psoxy_base_dir                 = var.psoxy_base_dir
-  gcp_region                     = var.gcp_region
-  replica_regions                = var.replica_regions
-  enabled_connectors             = var.enabled_connectors
-  non_production_connectors      = var.non_production_connectors
-  custom_bulk_connectors         = var.custom_bulk_connectors
-  google_workspace_example_user  = var.google_workspace_example_user
+  gcp_project_id                = google_project.psoxy-project.project_id
+  environment_name              = var.environment_name
+  worklytics_sa_emails          = var.worklytics_sa_emails
+  connector_display_name_suffix = var.connector_display_name_suffix
+  psoxy_base_dir                = var.psoxy_base_dir
+  gcp_region                    = var.gcp_region
+  replica_regions               = var.replica_regions
+  enabled_connectors            = var.enabled_connectors
+  non_production_connectors     = var.non_production_connectors
+  custom_bulk_connectors        = var.custom_bulk_connectors
+  google_workspace_example_user = var.google_workspace_example_user
 
   depends_on = [
     google_project.psoxy-project
