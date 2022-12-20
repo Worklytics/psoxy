@@ -18,7 +18,7 @@ module "psoxy_lambda" {
   function_name         = "psoxy-${var.instance_id}"
   handler_class         = "co.worklytics.psoxy.S3Handler"
   timeout_seconds       = 600 # 10 minutes
-  memory_size_mb        = 512
+  memory_size_mb        = var.memory_size_mb
   path_to_function_zip  = var.path_to_function_zip
   function_zip_hash     = var.function_zip_hash
   global_parameter_arns = var.global_parameter_arns

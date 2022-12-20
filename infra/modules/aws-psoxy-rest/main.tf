@@ -15,7 +15,7 @@ module "psoxy_lambda" {
   handler_class                  = "co.worklytics.psoxy.Handler"
   path_to_function_zip           = var.path_to_function_zip
   function_zip_hash              = var.function_zip_hash
-  memory_size_mb                 = 512
+  memory_size_mb                 = var.memory_size_mb
   timeout_seconds                = 55
   reserved_concurrent_executions = var.reserved_concurrent_executions
   path_to_config                 = var.path_to_config
