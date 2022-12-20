@@ -50,10 +50,10 @@ output "secret_secret_ids" {
 }
 
 output "secret_version_names" {
-  value = { for k, v in var.secrets : k =>  google_secret_manager_secret_version.version[k].name}
+  value = { for k, v in var.secrets : k => google_secret_manager_secret_version.version[k].name }
 }
 
 output "secret_version_numbers" {
-  value = { for k, v in var.secrets : k =>  trimprefix(google_secret_manager_secret_version.version[k].name, "${google_secret_manager_secret.secret[k].name}/versions/") }
+  value = { for k, v in var.secrets : k => trimprefix(google_secret_manager_secret_version.version[k].name, "${google_secret_manager_secret.secret[k].name}/versions/") }
 }
 

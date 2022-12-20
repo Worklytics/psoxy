@@ -206,8 +206,7 @@ module "connector-long-auth-function" {
   path_to_repo_root             = var.psoxy_base_dir
   example_api_calls             = each.value.example_api_calls
   todo_step                     = module.source_token_external_todo[each.key].next_todo_step
-
-  secret_bindings = module.psoxy-gcp.secrets
+  secret_bindings               = module.psoxy-gcp.secrets
 
   environment_variables = merge(try(each.value.environment_variables, {}),
     {

@@ -116,10 +116,10 @@ module "psoxy-google-workspace-connector" {
   global_parameter_arns                 = module.global_secrets.secret_arns
   todo_step                             = module.google-workspace-connection[each.key].next_todo_step
 
-  environment_variables =  merge(try(each.value.environment_variables, {}),
+  environment_variables = merge(try(each.value.environment_variables, {}),
     {
       IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
-    })
+  })
 }
 
 
@@ -207,10 +207,10 @@ module "aws-psoxy-long-auth-connectors" {
   function_parameters            = each.value.secured_variables
   todo_step                      = module.source_token_external_todo[each.key].next_todo_step
 
-  environment_variables =  merge(try(each.value.environment_variables, {}),
+  environment_variables = merge(try(each.value.environment_variables, {}),
     {
       IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
-    })
+  })
 }
 
 module "worklytics-psoxy-connection" {
@@ -252,6 +252,8 @@ module "psoxy-bulk" {
   sanitized_accessor_role_names = [
     module.psoxy-aws.api_caller_role_name
   ]
+
+  memory_size_mb = 1024
 }
 
 
@@ -278,5 +280,5 @@ module "psoxy_lookup_tables_builders" {
 
 
 output "lookup_tables" {
-  value = { for k,v in var.lookup_table_builders : k => module.psoxy_lookup_tables_builders[k].output_bucket }
+  value = { for k, v in var.lookup_table_builders : k => module.psoxy_lookup_tables_builders[k].output_bucket }
 }

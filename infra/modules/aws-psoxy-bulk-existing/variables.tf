@@ -82,3 +82,10 @@ variable "global_parameter_arns" {
   description = "System Manager Parameters ARNS to expose to function, expected to contain global shared parameters, like salt or encryption keys"
   default     = []
 }
+
+variable "memory_size_mb" {
+  # See https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function#memory_size
+  type        = number
+  description = "Amount of memory in MB your Lambda Function can use at runtime. Defaults to 512"
+  default     = 512
+}

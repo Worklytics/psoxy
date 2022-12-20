@@ -129,13 +129,13 @@ module "psoxy-msft-connector" {
   todo_step             = module.msft_365_grants[each.key].next_todo_step
   global_parameter_arns = module.global_secrets.secret_arns
 
-  environment_variables =  merge(try(each.value.environment_variables, {}),
+  environment_variables = merge(try(each.value.environment_variables, {}),
     {
-      IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
+      IS_DEVELOPMENT_MODE  = contains(var.non_production_connectors, each.key)
       CLIENT_ID            = module.msft-connection[each.key].connector.application_id
       REFRESH_ENDPOINT     = module.worklytics_connector_specs.msft_token_refresh_endpoint
       PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
-    })
+  })
 }
 
 module "worklytics-psoxy-connection-msft-365" {
@@ -222,11 +222,11 @@ module "aws-psoxy-long-auth-connectors" {
   global_parameter_arns                 = module.global_secrets.secret_arns
   function_parameters                   = each.value.secured_variables
 
-  environment_variables =  merge(try(each.value.environment_variables, {}),
+  environment_variables = merge(try(each.value.environment_variables, {}),
     {
       PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
-      IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
-    })
+      IS_DEVELOPMENT_MODE  = contains(var.non_production_connectors, each.key)
+  })
 }
 
 module "worklytics-psoxy-connection-oauth-long-access" {
@@ -247,20 +247,20 @@ module "worklytics-psoxy-connection-oauth-long-access" {
 
 module "psoxy-bulk" {
   for_each = merge(module.worklytics_connector_specs.enabled_bulk_connectors,
-    var.custom_bulk_connectors)
+  var.custom_bulk_connectors)
 
   source = "../../modules/aws-psoxy-bulk"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-bulk?ref=v0.4.8"
 
-  aws_account_id        = var.aws_account_id
-  aws_assume_role_arn   = var.aws_assume_role_arn
-  instance_id           = each.key
-  source_kind           = each.value.source_kind
-  aws_region            = var.aws_region
-  path_to_function_zip  = module.psoxy-aws.path_to_deployment_jar
-  function_zip_hash     = module.psoxy-aws.deployment_package_hash
-  api_caller_role_arn   = module.psoxy-aws.api_caller_role_arn
-  api_caller_role_name  = module.psoxy-aws.api_caller_role_name
+  aws_account_id       = var.aws_account_id
+  aws_assume_role_arn  = var.aws_assume_role_arn
+  instance_id          = each.key
+  source_kind          = each.value.source_kind
+  aws_region           = var.aws_region
+  path_to_function_zip = module.psoxy-aws.path_to_deployment_jar
+  function_zip_hash    = module.psoxy-aws.deployment_package_hash
+  api_caller_role_arn  = module.psoxy-aws.api_caller_role_arn
+  api_caller_role_name = module.psoxy-aws.api_caller_role_name
   sanitized_accessor_role_names = [
     module.psoxy-aws.api_caller_role_name
   ]
@@ -270,6 +270,8 @@ module "psoxy-bulk" {
   environment_variables = {
     IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
   }
+
+  memory_size_mb = 1024
 }
 
 module "psoxy_lookup_tables_builders" {
@@ -295,5 +297,5 @@ module "psoxy_lookup_tables_builders" {
 }
 
 output "lookup_tables" {
-  value = { for k,v in var.lookup_table_builders : k => module.psoxy_lookup_tables_builders[k].output_bucket }
+  value = { for k, v in var.lookup_table_builders : k => module.psoxy_lookup_tables_builders[k].output_bucket }
 }

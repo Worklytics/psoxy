@@ -105,3 +105,10 @@ variable "todo_step" {
   description = "of all todos, where does this one logically fall in sequence"
   default     = 2
 }
+
+variable "memory_size_mb" {
+  # See https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function#memory_size
+  type        = number
+  description = "Amount of memory in MB your Lambda Function can use at runtime. Defaults to 512"
+  default     = 512
+}

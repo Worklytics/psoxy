@@ -61,3 +61,9 @@ variable "bucket_write_role_id" {
   type        = string
   description = "The id of role to grant on bucket to enable writes"
 }
+
+variable "available_memory_mb" {
+  type        = number
+  description = "Memory (in MB), available to the function. Default value is 1024. Possible values include 128, 256, 512, 1024, etc."
+  default     = 1024
+}
