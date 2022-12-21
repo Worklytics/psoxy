@@ -4,6 +4,12 @@ variable "psoxy_instance_id" {
   default     = null
 }
 
+variable "psoxy_host_platform_id" {
+  type        = string
+  description = "Psoxy host platform id (AWS, GCP, etc"
+  default     = "GCP"
+}
+
 variable "psoxy_endpoint_url" {
   type        = string
   description = "url of endpoint which hosts Psoxy instance"
