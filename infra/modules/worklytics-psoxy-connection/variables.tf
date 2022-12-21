@@ -8,6 +8,11 @@ variable "psoxy_host_platform_id" {
   type        = string
   description = "Psoxy host platform id (AWS, GCP, etc"
   default     = "GCP"
+
+  validation {
+    condition     = contains(["AWS", "GCP"], var.psoxy_host_platform_id)
+    error_message = "`psoxy_host_platform_id` must be one of AWS or GCP."
+  }
 }
 
 variable "psoxy_endpoint_url" {
