@@ -360,14 +360,44 @@ EOT
   }
 
   bulk_connectors = {
+    "badge" = {
+      worklytics_connector_name = "Bulk Data Import via Psoxy"
+      source_kind = "badge"
+      rules = {
+        columnsToRedact = []
+        columnsToPseudonymize = [
+          "EMPLOYEE_ID", # primary key
+          # "employee_email", # if exists
+        ]
+      }
+      settings_to_provide = {
+        "Data Source Processing" = "badge"
+      }
+    }
     "hris" = {
+      worklytics_connector_name = "HRIS Data Import via Psoxy"
       source_kind = "hris"
       rules = {
         columnsToRedact = []
         columnsToPseudonymize = [
-          "employee_id",    # primary key
-          "employee_email", # for matching
-          "manager_id"      # should match to employee_id
+          "EMPLOYEE_ID",    # primary key
+          "EMPLOYEE_EMAIL", # for matching
+          "MANAGER_ID",      # should match to employee_id
+          # "MANAGER_EMAIL"      # if exists
+        ]
+      }
+      settings_to_provide = {
+        "Parser" = "EMPLOYEE_SNAPSHOT"
+      }
+    }
+    "survey" = {
+      source_kind = "survey"
+      worklytics_connector_name = "Survey Data Import via Psoxy"
+      rules = {
+        columnsToRedact = []
+        columnsToPseudonymize = [
+          "EMPLOYEE_ID", # primary key
+          # "EMPLOYEE_EMAIL", # if exists
         ]
       }
     }
@@ -376,7 +406,7 @@ EOT
       rules = {
         columnsToRedact = []
         columnsToPseudonymize = [
-          "employee_id", # primary key
+          "EMPLOYEE_ID", # primary key
           # "employee_email", # if exists
         ]
       }
