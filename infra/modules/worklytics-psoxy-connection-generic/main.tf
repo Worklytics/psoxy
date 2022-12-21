@@ -4,8 +4,8 @@ locals {
   instance_id = coalesce(var.psoxy_instance_id, var.display_name)
 
   # build TODO
-  last_step   = 5 + (length(var.settings_to_provide) > 0 ? 1 : 0) + 1
-  per_setting_instructions = [ for k, v in var.settings_to_provide : "    - Copy and paste `${v}` as the value for \"${k}\"." ]
+  last_step                     = 5 + (length(var.settings_to_provide) > 0 ? 1 : 0) + 1
+  per_setting_instructions      = [for k, v in var.settings_to_provide : "    - Copy and paste `${v}` as the value for \"${k}\"."]
   per_setting_instructions_text = length(var.settings_to_provide) > 0 ? "\n${join("\n", tolist(local.per_setting_instructions))}" : ""
 }
 

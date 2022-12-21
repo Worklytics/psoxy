@@ -37,7 +37,7 @@ locals {
     "https://www.googleapis.com/auth/admin.reports.audit.readonly",
   ]
   google_workspace_admin_account_required = (length(setintersection(local.scopes_requiring_admin_account, var.oauth_scopes_needed)) > 0)
-  google_workspace_service_account_setup = <<EOT
+  google_workspace_service_account_setup  = <<EOT
   5. Create an account to act as a 'Service Account' for the connection in your Google Workspace
      Directory. This is not to be confused with a GCP Service Account. Rather, this is a regular
      Google Workspace user account, but intended to be assigned to a service rather than a human

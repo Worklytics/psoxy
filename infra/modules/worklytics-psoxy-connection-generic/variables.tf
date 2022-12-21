@@ -33,15 +33,15 @@ variable "settings_to_provide" {
 
   # TODO: fix these validations; logically correct, but Terraform doesn't allow validation conditions
   # to depend on values of other variables
-#  validation {
-#    condition     = var.psoxy_host_platform_id != "AWS" || contains(keys(var.settings_to_provide), "AWS Psoxy Region")
-#    error_message = "For connections to AWS deployments, must provide 'AWS Psoxy Region' in settings_to_provide."
-#  }
-#
-#  validation {
-#    condition     = var.psoxy_host_platform_id != "AWS" || contains(keys(var.settings_to_provide), "AWS Psoxy Role ARN")
-#    error_message = "For connections to AWS deployments, must provide 'AWS Psoxy Role ARN' in settings_to_provide."
-#  }
+  #  validation {
+  #    condition     = var.psoxy_host_platform_id != "AWS" || contains(keys(var.settings_to_provide), "AWS Psoxy Region")
+  #    error_message = "For connections to AWS deployments, must provide 'AWS Psoxy Region' in settings_to_provide."
+  #  }
+  #
+  #  validation {
+  #    condition     = var.psoxy_host_platform_id != "AWS" || contains(keys(var.settings_to_provide), "AWS Psoxy Role ARN")
+  #    error_message = "For connections to AWS deployments, must provide 'AWS Psoxy Role ARN' in settings_to_provide."
+  #  }
 }
 
 

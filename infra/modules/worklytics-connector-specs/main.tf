@@ -179,7 +179,7 @@ locals {
     asana = {
       source_kind : "asana",
       display_name : "Asana"
-      worklytics_connector_name: "Asana via Psoxy",
+      worklytics_connector_name : "Asana via Psoxy",
       environment_variables : {}
       secured_variables : [
         { name : "ACCESS_TOKEN", writable : false },
@@ -207,7 +207,7 @@ EOT
     }
     slack-discovery-api = {
       source_kind : "slack"
-      worklytics_connector_name: "Slack via Psoxy",
+      worklytics_connector_name : "Slack via Psoxy",
       display_name : "Slack Discovery API"
       environment_variables : {}
       secured_variables : [
@@ -251,7 +251,7 @@ EOT
     zoom = {
       source_kind : "zoom"
       display_name : "Zoom"
-      worklytics_connector_name: "Zoom via Psoxy",
+      worklytics_connector_name : "Zoom via Psoxy",
       environment_variables : {}
       secured_variables : [
         { name : "CLIENT_SECRET", writable : false },
@@ -296,7 +296,7 @@ EOT
     dropbox-business = {
       source_kind : "dropbox-business",
       display_name : "Dropbox Business",
-      worklytics_connector_name: "Dropbox Business via Psoxy",
+      worklytics_connector_name : "Dropbox Business via Psoxy",
       secured_variables : [
         { name : "REFRESH_TOKEN", writable : false },
         { name : "CLIENT_ID", writable : false },
@@ -364,7 +364,7 @@ EOT
 
   bulk_connectors = {
     "badge" = {
-      source_kind = "badge"
+      source_kind               = "badge"
       worklytics_connector_name = "Bulk Data Import via Psoxy"
       rules = {
         columnsToRedact = []
@@ -378,14 +378,14 @@ EOT
       }
     }
     "hris" = {
-      source_kind = "hris"
+      source_kind               = "hris"
       worklytics_connector_name = "HRIS Data Import via Psoxy"
       rules = {
         columnsToRedact = []
         columnsToPseudonymize = [
           "EMPLOYEE_ID",    # primary key
           "EMPLOYEE_EMAIL", # for matching
-          "MANAGER_ID",      # should match to employee_id
+          "MANAGER_ID",     # should match to employee_id
           # "MANAGER_EMAIL"      # if exists
         ]
       }
@@ -394,7 +394,7 @@ EOT
       }
     }
     "survey" = {
-      source_kind = "survey"
+      source_kind               = "survey"
       worklytics_connector_name = "Survey Data Import via Psoxy"
       rules = {
         columnsToRedact = []
@@ -405,7 +405,7 @@ EOT
       }
     }
     "qualtrics" = {
-      source_kind = "qualtrics"
+      source_kind               = "qualtrics"
       worklytics_connector_name = "Survey Data Import via Psoxy"
       rules = {
         columnsToRedact = []

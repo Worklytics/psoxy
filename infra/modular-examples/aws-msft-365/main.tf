@@ -282,13 +282,13 @@ module "psoxy-bulk" {
 
 module "psoxy-bulk-to-worklytics" {
   for_each = merge(module.worklytics_connector_specs.enabled_bulk_connectors,
-    var.custom_bulk_connectors)
+  var.custom_bulk_connectors)
 
   source = "../../modules/worklytics-psoxy-connection-generic"
 
-  psoxy_instance_id  = each.key
-  display_name       = coalesce(each.value.worklytics_connector_name, "${each.value.source_kind} via Psoxy")
-  todo_step          = module.psoxy-bulk[each.key].next_todo_step
+  psoxy_instance_id = each.key
+  display_name      = coalesce(each.value.worklytics_connector_name, "${each.value.source_kind} via Psoxy")
+  todo_step         = module.psoxy-bulk[each.key].next_todo_step
 
   settings_to_provide = merge({
     "AWS Psoxy Region"   = var.aws_region,

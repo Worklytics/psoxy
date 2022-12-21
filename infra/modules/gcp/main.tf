@@ -185,11 +185,11 @@ output "salt_secret_version_number" {
 output "secrets" {
   value = {
     PSOXY_ENCRYPTION_KEY = {
-      secret_id       = google_secret_manager_secret.pseudonymization-key.secret_id,
+      secret_id      = google_secret_manager_secret.pseudonymization-key.secret_id,
       version_number = trimprefix(google_secret_manager_secret_version.pseudonymization-key_initial_version.name, "${google_secret_manager_secret.pseudonymization-key.name}/versions/")
     },
     PSOXY_SALT = {
-      secret_id       = google_secret_manager_secret.pseudonymization-salt.secret_id,
+      secret_id      = google_secret_manager_secret.pseudonymization-salt.secret_id,
       version_number = trimprefix(google_secret_manager_secret_version.initial_version.name, "${google_secret_manager_secret.pseudonymization-salt.name}/versions/")
     }
   }
