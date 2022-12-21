@@ -139,3 +139,7 @@ resource "google_cloudfunctions_function" "function" {
     google_secret_manager_secret_iam_member.grant_sa_accessor_on_secret
   ]
 }
+
+output "next_todo_step" {
+  value = var.todo_step + 1
+}

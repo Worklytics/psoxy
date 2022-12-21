@@ -270,3 +270,7 @@ output "input_bucket" {
 output "sanitized_bucket" {
   value = aws_s3_bucket.sanitized.bucket
 }
+
+output "next_todo_step" {
+  value = var.todo_step + 1
+}

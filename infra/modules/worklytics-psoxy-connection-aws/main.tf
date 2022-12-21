@@ -1,5 +1,7 @@
 # DEPRECATED; use `worklytics-psoxy-connection` with psoxy_host_platform_id==AWS
 
+# alternatively, could keep this as a 'strong' interface for AWS-case; but you end up with lots of
+# permutations (GCP, AWS) x (REST, BULK), etc.
 
 module "generic"{
   source = "../worklytics-psoxy-connection"

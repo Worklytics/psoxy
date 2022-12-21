@@ -261,5 +261,19 @@ module "psoxy-gcp-bulk" {
     RULES               = yamlencode(each.value.rules)
     IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
   }
+}
 
+module "psoxy-bulk-to-worklytics" {
+  for_each = merge(module.worklytics_connector_specs.enabled_bulk_connectors,
+    var.custom_bulk_connectors)
+
+  source = "../../modules/worklytics-psoxy-connection-generic"
+
+  psoxy_instance_id  = each.key
+  display_name       = coalesce(each.value.worklytics_connector_name, "${each.value.display_name} via Psoxy")
+  todo_step          = module.psoxy-gcp-bulk[each.key].next_todo_step
+
+  settings_to_provide = merge({
+    "Bucket Name"        = module.psoxy-gcp-bulk[each.key].sanitized_bucket
+  }, coalesce(each.value.settings_to_provide, {}))
 }

@@ -224,7 +224,7 @@ module "worklytics-psoxy-connection" {
 
   psoxy_instance_id  = each.key
   psoxy_endpoint_url = module.aws-psoxy-long-auth-connectors[each.key].endpoint_url
-  display_name       = "${each.value.display_name} via Psoxy${var.connector_display_name_suffix}"
+  display_name       = coalesce(each.value.worklytics_connector_name, "${each.value.display_name} via Psoxy")
   todo_step          = module.aws-psoxy-long-auth-connectors[each.key].next_todo_step
 
   settings_to_provide = {
@@ -232,6 +232,8 @@ module "worklytics-psoxy-connection" {
     "AWS Psoxy Role ARN" = module.psoxy-aws.api_caller_role_arn
   }
 }
+
+
 
 # END LONG ACCESS AUTH CONNECTORS
 
@@ -269,9 +271,8 @@ module "psoxy-bulk-to-worklytics" {
   source = "../../modules/worklytics-psoxy-connection-generic"
 
   psoxy_instance_id  = each.key
-  psoxy_endpoint_url = module.aws-psoxy-long-auth-connectors[each.key].endpoint_url
-  display_name       = coalesce(each.value.worklytics_connector_name, "${each.value.display_name} via Psoxy")
-  todo_step          = module.aws-psoxy-long-auth-connectors[each.key].next_todo_step
+  display_name       = coalesce(each.value.worklytics_connector_name, "${each.value.source_kind} via Psoxy")
+  todo_step          = module.psoxy-bulk[each.key].next_todo_step
 
   settings_to_provide = merge({
     "AWS Psoxy Region"   = var.aws_region,
@@ -279,7 +280,6 @@ module "psoxy-bulk-to-worklytics" {
     "Bucket Name"        = module.psoxy-bulk[each.key].sanitized_bucket
   }, coalesce(each.value.settings_to_provide, {}))
 }
-
 
 module "psoxy_lookup_tables_builders" {
   for_each = var.lookup_table_builders
@@ -301,7 +301,6 @@ module "psoxy_lookup_tables_builders" {
     IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
   }
 }
-
 
 output "lookup_tables" {
   value = { for k, v in var.lookup_table_builders : k => module.psoxy_lookup_tables_builders[k].output_bucket }

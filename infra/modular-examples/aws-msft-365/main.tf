@@ -287,9 +287,8 @@ module "psoxy-bulk-to-worklytics" {
   source = "../../modules/worklytics-psoxy-connection-generic"
 
   psoxy_instance_id  = each.key
-  psoxy_endpoint_url = module.aws-psoxy-long-auth-connectors[each.key].endpoint_url
-  display_name       = coalesce(each.value.worklytics_connector_name, "${each.value.display_name} via Psoxy")
-  todo_step          = module.aws-psoxy-long-auth-connectors[each.key].next_todo_step
+  display_name       = coalesce(each.value.worklytics_connector_name, "${each.value.source_kind} via Psoxy")
+  todo_step          = module.psoxy-bulk[each.key].next_todo_step
 
   settings_to_provide = merge({
     "AWS Psoxy Region"   = var.aws_region,
@@ -314,6 +313,7 @@ module "psoxy_lookup_tables_builders" {
   rules                         = each.value.rules
   global_parameter_arns         = module.global_secrets.secret_arns
   sanitized_accessor_role_names = each.value.sanitized_accessor_role_names
+
   environment_variables = {
     IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
   }
