@@ -26,4 +26,10 @@ variable "todo_step" {
   default     = 3
 }
 
+variable "settings_to_provide" {
+  type        = map(string)
+  description = "map of values for installer to copy-paste into connection settings in Worklytics UX"
+  default     = {}
+}
+
 

@@ -2,6 +2,11 @@
 locals {
   # for backwards compatibility < 0.4.6
   instance_id = coalesce(var.psoxy_instance_id, var.display_name)
+
+  # build TODO
+  last_step   = 6 + (length(var.settings_to_provide) > 0 ? 1 : 0) + 1
+  per_setting_instructions = [ for k, v in var.settings_to_provide : "    - Copy and paste `${v}` as the value for \"${k}\"." ]
+  per_setting_instructions_text = length(var.settings_to_provide) > 0 ? "\n${join("\n", tolist(local.per_setting_instructions))}" : ""
 }
 
 resource "local_file" "todo-worklytics-connection" {
@@ -15,8 +20,8 @@ Complete the following steps in Worklytics AFTER you have deployed the Psoxy ins
       - If presented with a further screen with several options, choose the 'via Psoxy' one.
   4. Review instructions and click 'Connect' again.
   5. Select `${var.psoxy_host_platform_id}` for "Proxy Instance Type".
-  6. Copy and paste `${var.psoxy_endpoint_url}` as the value for "Psoxy Base URL".
-  7. Review any additional settings that connector supports, adjusting values as you see fit, then
+  6. Copy and paste `${var.psoxy_endpoint_url}` as the value for "Psoxy Base URL". ${local.per_setting_instructions_text}
+  ${local.last_step}. Review any additional settings that connector supports, adjusting values as you see fit, then
      click "Connect".
 
 Worklytics will attempt some basic health checks to ensure your Psoxy instance is reachable and
