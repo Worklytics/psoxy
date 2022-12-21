@@ -280,6 +280,24 @@ module "psoxy-bulk" {
   memory_size_mb = 1024
 }
 
+module "psoxy-bulk-to-worklytics" {
+  for_each = merge(module.worklytics_connector_specs.enabled_bulk_connectors,
+    var.custom_bulk_connectors)
+
+  source = "../../modules/worklytics-psoxy-connection-generic"
+
+  psoxy_instance_id  = each.key
+  psoxy_endpoint_url = module.aws-psoxy-long-auth-connectors[each.key].endpoint_url
+  display_name       = coalesce(each.value.worklytics_connector_name, "${each.value.display_name} via Psoxy")
+  todo_step          = module.aws-psoxy-long-auth-connectors[each.key].next_todo_step
+
+  settings_to_provide = merge({
+    "AWS Psoxy Region"   = var.aws_region,
+    "AWS Psoxy Role ARN" = module.psoxy-aws.api_caller_role_arn
+    "Bucket Name"        = module.psoxy-bulk[each.key].sanitized_bucket
+  }, coalesce(each.value.settings_to_provide, {}))
+}
+
 module "psoxy_lookup_tables_builders" {
   for_each = var.lookup_table_builders
 
