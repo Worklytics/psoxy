@@ -179,6 +179,7 @@ locals {
     asana = {
       source_kind : "asana",
       display_name : "Asana"
+      worklytics_connector_name : "Asana via Psoxy",
       environment_variables : {}
       secured_variables : [
         { name : "ACCESS_TOKEN", writable : false },
@@ -206,6 +207,7 @@ EOT
     }
     slack-discovery-api = {
       source_kind : "slack"
+      worklytics_connector_name : "Slack via Psoxy",
       display_name : "Slack Discovery API"
       environment_variables : {}
       secured_variables : [
@@ -249,7 +251,7 @@ EOT
     zoom = {
       source_kind : "zoom"
       display_name : "Zoom"
-
+      worklytics_connector_name : "Zoom via Psoxy",
       environment_variables : {}
       secured_variables : [
         { name : "CLIENT_SECRET", writable : false },
@@ -293,7 +295,8 @@ EOT
     },
     dropbox-business = {
       source_kind : "dropbox-business",
-      display_name : "Dropbox Business"
+      display_name : "Dropbox Business",
+      worklytics_connector_name : "Dropbox Business via Psoxy",
       secured_variables : [
         { name : "REFRESH_TOKEN", writable : false },
         { name : "CLIENT_ID", writable : false },
@@ -360,23 +363,54 @@ EOT
   }
 
   bulk_connectors = {
-    "hris" = {
-      source_kind = "hris"
+    "badge" = {
+      source_kind               = "badge"
+      worklytics_connector_name = "Bulk Data Import via Psoxy"
       rules = {
         columnsToRedact = []
         columnsToPseudonymize = [
-          "employee_id",    # primary key
-          "employee_email", # for matching
-          "manager_id"      # should match to employee_id
+          "EMPLOYEE_ID", # primary key
+          # "employee_email", # if exists
+        ]
+      }
+      settings_to_provide = {
+        "Data Source Processing" = "badge"
+      }
+    }
+    "hris" = {
+      source_kind               = "hris"
+      worklytics_connector_name = "HRIS Data Import via Psoxy"
+      rules = {
+        columnsToRedact = []
+        columnsToPseudonymize = [
+          "EMPLOYEE_ID",    # primary key
+          "EMPLOYEE_EMAIL", # for matching
+          "MANAGER_ID",     # should match to employee_id
+          # "MANAGER_EMAIL"      # if exists
+        ]
+      }
+      settings_to_provide = {
+        "Parser" = "EMPLOYEE_SNAPSHOT"
+      }
+    }
+    "survey" = {
+      source_kind               = "survey"
+      worklytics_connector_name = "Survey Data Import via Psoxy"
+      rules = {
+        columnsToRedact = []
+        columnsToPseudonymize = [
+          "EMPLOYEE_ID", # primary key
+          # "EMPLOYEE_EMAIL", # if exists
         ]
       }
     }
     "qualtrics" = {
-      source_kind = "qualtrics"
+      source_kind               = "qualtrics"
+      worklytics_connector_name = "Survey Data Import via Psoxy"
       rules = {
         columnsToRedact = []
         columnsToPseudonymize = [
-          "employee_id", # primary key
+          "EMPLOYEE_ID", # primary key
           # "employee_email", # if exists
         ]
       }

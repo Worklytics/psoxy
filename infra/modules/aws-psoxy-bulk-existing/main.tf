@@ -208,3 +208,7 @@ resource "aws_ssm_parameter" "rules" {
 output "output_bucket" {
   value = aws_s3_bucket.output.bucket
 }
+
+output "next_todo_step" {
+  value = var.todo_step + 1
+}

@@ -118,3 +118,9 @@ variable "memory_size_mb" {
   description = "Amount of memory in MB your Lambda Function can use at runtime. Defaults to 512"
   default     = 512
 }
+
+variable "todo_step" {
+  type        = number
+  description = "of all todos, where does this one logically fall in sequence"
+  default     = 2
+}

@@ -141,15 +141,18 @@ module "psoxy-msft-connector" {
 module "worklytics-psoxy-connection-msft-365" {
   for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
-  source = "../../modules/worklytics-psoxy-connection-aws"
+  source = "../../modules/worklytics-psoxy-connection"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=v0.4.8"
 
   psoxy_instance_id  = each.key
   psoxy_endpoint_url = module.psoxy-msft-connector[each.key].endpoint_url
   display_name       = "${each.value.display_name} via Psoxy${var.connector_display_name_suffix}"
-  aws_region         = var.aws_region
-  aws_role_arn       = module.psoxy-aws.api_caller_role_arn
   todo_step          = module.psoxy-msft-connector[each.key].next_todo_step
+
+  settings_to_provide = {
+    "AWS Psoxy Region"   = var.aws_region,
+    "AWS Psoxy Role ARN" = module.psoxy-aws.api_caller_role_arn
+  }
 }
 
 # BEGIN LONG ACCESS AUTH CONNECTORS
@@ -232,15 +235,18 @@ module "aws-psoxy-long-auth-connectors" {
 module "worklytics-psoxy-connection-oauth-long-access" {
   for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
 
-  source = "../../modules/worklytics-psoxy-connection-aws"
+  source = "../../modules/worklytics-psoxy-connection"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=v0.4.8"
 
   psoxy_instance_id  = each.key
   psoxy_endpoint_url = module.aws-psoxy-long-auth-connectors[each.key].endpoint_url
   display_name       = "${each.value.display_name} via Psoxy${var.connector_display_name_suffix}"
-  aws_region         = var.aws_region
-  aws_role_arn       = module.psoxy-aws.api_caller_role_arn
   todo_step          = module.aws-psoxy-long-auth-connectors[each.key].next_todo_step
+
+  settings_to_provide = {
+    "AWS Psoxy Region"   = var.aws_region,
+    "AWS Psoxy Role ARN" = module.psoxy-aws.api_caller_role_arn
+  }
 }
 
 # END LONG ACCESS AUTH CONNECTORS
@@ -274,6 +280,23 @@ module "psoxy-bulk" {
   memory_size_mb = 1024
 }
 
+module "psoxy-bulk-to-worklytics" {
+  for_each = merge(module.worklytics_connector_specs.enabled_bulk_connectors,
+  var.custom_bulk_connectors)
+
+  source = "../../modules/worklytics-psoxy-connection-generic"
+
+  psoxy_instance_id = each.key
+  display_name      = coalesce(each.value.worklytics_connector_name, "${each.value.source_kind} via Psoxy")
+  todo_step         = module.psoxy-bulk[each.key].next_todo_step
+
+  settings_to_provide = merge({
+    "AWS Psoxy Region"   = var.aws_region,
+    "AWS Psoxy Role ARN" = module.psoxy-aws.api_caller_role_arn
+    "Bucket Name"        = module.psoxy-bulk[each.key].sanitized_bucket
+  }, coalesce(each.value.settings_to_provide, {}))
+}
+
 module "psoxy_lookup_tables_builders" {
   for_each = var.lookup_table_builders
 
@@ -290,6 +313,7 @@ module "psoxy_lookup_tables_builders" {
   rules                         = each.value.rules
   global_parameter_arns         = module.global_secrets.secret_arns
   sanitized_accessor_role_names = each.value.sanitized_accessor_role_names
+
   environment_variables = {
     IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
   }
