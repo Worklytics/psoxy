@@ -9,6 +9,11 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
     @Deprecated //removed from v0.4
     IDENTIFIER_SCOPE_ID,
     PSOXY_SALT,
+    // If this customer email provider considers emails with dots as equivalent to emails without
+    // f.e. Gmail -> John.Smith@gmail.com == johnsmith@gmail.com
+    IGNORED_DOTS_ON_EMAILS,
+    // if IGNORED_DOTS_ON_EMAILS set, the list of domains to apply the rule
+    CUSTOMER_DOMAINS,
     //if relying on default rules, whether to use version that pseudonymizes per-account source IDs
     // that aren't email addresses (eg, the IDs that sources generate for each account, which aren't
     // usually PII without having access to the source's dataset)

@@ -14,6 +14,7 @@ import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableSet;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.MapFunction;
 import dagger.Component;
@@ -40,6 +41,7 @@ class SanitizerImplTest {
 
     SanitizerImpl sanitizer;
 
+    SanitizerImpl sanitizerIgnoreDots;
 
     @Inject
     protected SanitizerFactory sanitizerFactory;
@@ -74,6 +76,14 @@ class SanitizerImplTest {
             .pseudonymizationSalt("an irrelevant per org secret")
             .defaultScopeId("scope")
             .pseudonymImplementation(PseudonymImplementation.LEGACY)
+            .build());
+
+        sanitizerIgnoreDots = sanitizerFactory.create(Sanitizer.ConfigurationOptions.builder()
+            .rules(PrebuiltSanitizerRules.DEFAULTS.get("gmail"))
+            .pseudonymizationSalt("an irrelevant per org secret")
+            .pseudonymImplementation(PseudonymImplementation.DEFAULT)
+            .customerDomains(ImmutableSet.of("worklytics.co"))
+            .ignoreDotsOnCustomerDomains(true)
             .build());
 
         withMockEncryptionKey(config);
@@ -135,6 +145,22 @@ class SanitizerImplTest {
 
         assertEquals(canonicalExample.getHash(),
             sanitizer.pseudonymize(mailHeaderValue).getHash());
+    }
+
+    @ValueSource(strings = {
+        ALICE_CANONICAL,
+        "Alice Example <alice@worklytics.co>",
+        "\"Alice Different Last name\" <alice@worklytics.co>",
+        "Alice@worklytics.co",
+        "AlIcE@worklytics.co",
+        "ali.ce@worklytics.co",
+    })
+    @ParameterizedTest
+    void emailCanonicalEquivalentsWithDots(String mailHeaderValue) {
+        PseudonymizedIdentity canonicalExample = sanitizerIgnoreDots.pseudonymize(ALICE_CANONICAL);
+
+        assertEquals(canonicalExample.getHash(),
+            sanitizerIgnoreDots.pseudonymize(mailHeaderValue).getHash());
     }
 
     @ValueSource(strings = {

@@ -1,10 +1,14 @@
 package co.worklytics.psoxy.impl;
 
-import co.worklytics.psoxy.*;
+import co.worklytics.psoxy.HashUtils;
+import co.worklytics.psoxy.PseudonymizedIdentity;
+import co.worklytics.psoxy.Sanitizer;
 import co.worklytics.psoxy.rules.Rules2;
 import co.worklytics.psoxy.rules.Transform;
 import co.worklytics.psoxy.utils.URLUtils;
-import com.avaulta.gateway.pseudonyms.*;
+import com.avaulta.gateway.pseudonyms.Pseudonym;
+import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
+import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
@@ -338,9 +342,15 @@ public class SanitizerImpl implements Sanitizer {
     String emailCanonicalization(String original) {
         String domain = EmailAddressParser.getDomain(original, EmailAddressCriteria.DEFAULT, true);
 
-        //NOTE: lower-case here is NOT stipulated by RFC
-        return  EmailAddressParser.getLocalPart(original, EmailAddressCriteria.DEFAULT, true)
-            .toLowerCase()
+        String localPart = EmailAddressParser.getLocalPart(original, EmailAddressCriteria.DEFAULT, true)
+            //NOTE: lower-case here is NOT stipulated by RFC
+            .toLowerCase();
+
+        if (configurationOptions.isIgnoreDotsOnCustomerDomains() && configurationOptions.getCustomerDomains().contains(domain)) {
+            localPart = localPart.replace(".","");
+        }
+
+        return localPart
             + "@"
             + domain.toLowerCase();
 
