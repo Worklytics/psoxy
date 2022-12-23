@@ -137,13 +137,23 @@ class SanitizerImplTest {
         "\"Alice Different Last name\" <alice@worklytics.co>",
         "Alice@worklytics.co",
         "AlIcE@worklytics.co",
-        "ali.ce@worklytics.co",
     })
     @ParameterizedTest
     void emailCanonicalEquivalents(String mailHeaderValue) {
         PseudonymizedIdentity canonicalExample = sanitizer.pseudonymize(ALICE_CANONICAL);
 
         assertEquals(canonicalExample.getHash(),
+            sanitizer.pseudonymize(mailHeaderValue).getHash());
+    }
+
+    @ValueSource(strings = {
+        "ali.ce@worklytics.co",
+    })
+    @ParameterizedTest
+    void emailCanonicalNotEquivalents(String mailHeaderValue) {
+        PseudonymizedIdentity canonicalExample = sanitizer.pseudonymize(ALICE_CANONICAL);
+
+        assertNotEquals(canonicalExample.getHash(),
             sanitizer.pseudonymize(mailHeaderValue).getHash());
     }
 
