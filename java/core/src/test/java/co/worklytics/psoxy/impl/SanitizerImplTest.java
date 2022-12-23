@@ -1,6 +1,9 @@
 package co.worklytics.psoxy.impl;
 
-import co.worklytics.psoxy.*;
+import co.worklytics.psoxy.PseudonymizedIdentity;
+import co.worklytics.psoxy.PsoxyModule;
+import co.worklytics.psoxy.Sanitizer;
+import co.worklytics.psoxy.SanitizerFactory;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
 import co.worklytics.psoxy.rules.Rules2;
@@ -124,6 +127,7 @@ class SanitizerImplTest {
         "\"Alice Different Last name\" <alice@worklytics.co>",
         "Alice@worklytics.co",
         "AlIcE@worklytics.co",
+        "ali.ce@worklytics.co",
     })
     @ParameterizedTest
     void emailCanonicalEquivalents(String mailHeaderValue) {
