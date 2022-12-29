@@ -13,12 +13,10 @@ terraform {
       version = ">= 3.74, <= 5.0"
     }
 
-    /**
     vault = {
       source  = "hashicorp/vault"
       version = "~> 3.11.0"
     }
-    **/
   }
 
   # if you leave this as local, you should backup/commit your TF state files
@@ -81,7 +79,7 @@ output "lookup_tables" {
   value = module.psoxy-aws-google-workspace.lookup_tables
 }
 
-/** Vault dev config for local testing
+/** Vault dev config for local testing **/
 
 # used for peering to Vault Cloud HVN
 resource "aws_vpc" "psoxy_vpc" {
@@ -97,6 +95,8 @@ provider "vault" {
 
 module "aws_vault_auth" {
   source = "../../modules/aws-vault-auth"
+
+  aws_vault_role_arn = var.aws_vault_role_arn
 }
 
 module "aws_vault_connection_gcal" {
@@ -110,4 +110,3 @@ module "aws_vault_connection_gcal" {
 }
 
 
-**/

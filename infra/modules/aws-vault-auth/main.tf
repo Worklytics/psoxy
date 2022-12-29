@@ -31,7 +31,7 @@ resource "aws_iam_user_policy" "vault" {
             "sts:AssumeRole"
           ],
           "Resource" : [
-            "arn:aws:iam::874171213677:role/VaultRole"
+            var.aws_vault_role_arn
           ]
         },
         {
@@ -75,7 +75,4 @@ resource "vault_aws_auth_backend_client" "aws" {
 output "vault_aws_auth_backend_path" {
   value = vault_auth_backend.aws.path
 }
-
-
-
 
