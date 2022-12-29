@@ -58,17 +58,23 @@ public interface AwsModule {
     // global parameters
     // singleton to be reused in lambda container
     @Provides @Named("Global") @Singleton
-    static ParameterStoreConfigService parameterStoreConfigService(SsmClient ssmClient) {
+    static ParameterStoreConfigService parameterStoreConfigService(EnvVarsConfigService envVarsConfigService,
+                                                                   SsmClient ssmClient) {
 
-        return new ParameterStoreConfigService(null, ssmClient);
+        String namespace = envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_SHARED_CONFIG)
+            .orElse(null);
+
+        return new ParameterStoreConfigService(namespace, ssmClient);
     }
 
     // parameters scoped to function
     // singleton to be reused in lambda container
     @Provides @Singleton
-    static ParameterStoreConfigService functionParameterStoreConfigService(SsmClient ssmClient) {
+    static ParameterStoreConfigService functionParameterStoreConfigService(EnvVarsConfigService envVarsConfigService,
+                                                                           SsmClient ssmClient) {
         String namespace =
-            asParameterStoreNamespace(System.getenv(RuntimeEnvironmentVariables.AWS_LAMBDA_FUNCTION_NAME.name()));
+            envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_CONNECTOR_CONFIG)
+                .orElseGet(() -> asParameterStoreNamespace(System.getenv(RuntimeEnvironmentVariables.AWS_LAMBDA_FUNCTION_NAME.name())));
         return new ParameterStoreConfigService(namespace, ssmClient);
     }
 
