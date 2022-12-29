@@ -273,13 +273,15 @@ module "psoxy-bulk" {
   function_zip_hash    = module.psoxy-aws.deployment_package_hash
   api_caller_role_arn  = module.psoxy-aws.api_caller_role_arn
   api_caller_role_name = module.psoxy-aws.api_caller_role_name
-  memory_size_mb = 1024
+  memory_size_mb       = 1024
+
   sanitized_accessor_role_names = [
     module.psoxy-aws.api_caller_role_name
   ]
   psoxy_base_dir        = var.psoxy_base_dir
   rules                 = each.value.rules
   global_parameter_arns = module.global_secrets.secret_arns
+
 
   environment_variables = merge(
     var.general_environment_variables,
@@ -324,6 +326,7 @@ module "psoxy_lookup_tables_builders" {
   global_parameter_arns         = module.global_secrets.secret_arns
   sanitized_accessor_role_names = each.value.sanitized_accessor_role_names
 
+
   environment_variables = merge(
     var.general_environment_variables,
     try(each.value.environment_variables, {}),
@@ -335,7 +338,6 @@ module "psoxy_lookup_tables_builders" {
 
 output "lookup_tables" {
   value = { for k, v in var.lookup_table_builders : k => module.psoxy_lookup_tables_builders[k].output_bucket }
-
 }
 
 locals {

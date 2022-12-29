@@ -222,6 +222,7 @@ module "aws-psoxy-long-auth-connectors" {
   )
 }
 
+
 module "worklytics-psoxy-connection" {
   for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
 
@@ -327,7 +328,6 @@ locals {
 output "instances" {
   value = local.all_instances
 }
-
 
 output "lookup_tables" {
   value = { for k, v in var.lookup_table_builders : k => module.psoxy_lookup_tables_builders[k].output_bucket }
