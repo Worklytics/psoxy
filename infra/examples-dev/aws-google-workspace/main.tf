@@ -99,6 +99,14 @@ module "aws_vault_auth" {
   aws_vault_role_arn = var.aws_vault_role_arn
 }
 
+module "vault_psoxy" {
+  source = "../../modules/vault-psoxy"
+
+  for_each = module.psoxy-aws-google-workspace.instances
+
+  instance_id           = each.key
+}
+
 module "aws_vault_connection_gcal" {
   source = "../../modules/aws-vault-access"
 
@@ -107,6 +115,7 @@ module "aws_vault_connection_gcal" {
   aws_auth_backend_name = module.aws_vault_auth.vault_aws_auth_backend_path
   instance_id           = each.key
   role_arn              = each.value.instance_role_arn
+  vault_policy_name     = module.vault_psoxy[each.key].vault_policy_name
 }
 
 
