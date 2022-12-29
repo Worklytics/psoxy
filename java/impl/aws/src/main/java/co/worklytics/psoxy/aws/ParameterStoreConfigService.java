@@ -1,6 +1,8 @@
 package co.worklytics.psoxy.aws;
 
 import co.worklytics.psoxy.gateway.ConfigService;
+import com.google.common.annotations.VisibleForTesting;
+import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
@@ -29,6 +31,7 @@ import java.util.logging.Level;
 @RequiredArgsConstructor
 public class ParameterStoreConfigService implements ConfigService {
 
+    @Getter(onMethod_ = @VisibleForTesting)
     final String namespace;
 
     @Inject
