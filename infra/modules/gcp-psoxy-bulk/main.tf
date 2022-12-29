@@ -96,7 +96,7 @@ resource "google_cloudfunctions_function" "function" {
   project     = var.project_id
   region      = var.region
 
-  available_memory_mb   = 1024
+  available_memory_mb   = var.available_memory_mb
   source_archive_bucket = var.artifacts_bucket_name
   source_archive_object = var.deployment_bundle_object_name
   entry_point           = "co.worklytics.psoxy.GCSFileEvent"
@@ -138,4 +138,12 @@ resource "google_cloudfunctions_function" "function" {
   depends_on = [
     google_secret_manager_secret_iam_member.grant_sa_accessor_on_secret
   ]
+}
+
+output "next_todo_step" {
+  value = var.todo_step + 1
+}
+
+output "sanitized_bucket" {
+  value = google_storage_bucket.output-bucket.name
 }

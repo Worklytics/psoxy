@@ -1,6 +1,16 @@
-pseudonymizationSalt: someSalt
+# you can inline the salt value,
+# pseudonymizationSalt: someSalt
+
+# using a SALT value stored as a secret in GCP Secret Manager / AWS Parameter Store is recommended
+pseudonymizationSaltSecret:
+  service: GCP
+  identifier: projects/{{YOUR_GCP_PROJECT_ID}}/secrets/PSOXY_SALT/versions/1
 defaultScopeId: hris
 columnsToPseudonymize:
-  - email
-columnsToRedact:
-  - managerEmail
+  - EMPLOYEE_ID
+  - EMPLOYEE_EMAIL
+  - MANAGER_ID
+  - MANAGER_EMAIL
+columnsToRedact: # add anything here that's in your original .csv, that you don't want in sanitized version
+  - EMPLOYEE_NAME
+
