@@ -34,6 +34,7 @@
     <orderEntry type="library" name="Maven: com.sun.mail:javax.mail:1.6.2" level="project" />
     <orderEntry type="library" name="Maven: javax.activation:activation:1.1" level="project" />
     <orderEntry type="library" name="Maven: org.apache.httpcomponents:httpcore:4.4.15" level="project" />
+    <orderEntry type="library" name="Maven: com.bettercloud:vault-java-driver:5.1.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.projectlombok:lombok:1.18.22" level="project" />
     <orderEntry type="library" name="Maven: com.google.dagger:dagger:2.40.5" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.google.dagger:dagger-compiler:2.40.5" level="project" />
