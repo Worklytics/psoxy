@@ -217,9 +217,6 @@ public class VaultAwsIamAuth {
 
         DefaultRequest prototypeRequest = buildGetCallerIdentityRequest(vaultAddress);
         String serializedHeaders = serializeToJsonMultimap(prototypeRequest.getHeaders());
-        //serializedHeaders = objectMapper.writeValueAsString(buildRequestHeaders(vaultAddress));
-
-        log.info(serializedHeaders);
 
         // authenticate with Vault server by sending it prototype AWS STS request, which it will
         // then send to AWS STS to establish caller's identity.

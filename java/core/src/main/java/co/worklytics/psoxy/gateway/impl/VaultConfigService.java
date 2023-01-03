@@ -30,7 +30,7 @@ public class VaultConfigService implements ConfigService {
         VAULT_NAMESPACE, // optional; if omitted, won't be set
         VAULT_TOKEN, //makes this pretty f'ing circular ...
 
-        // aws ARN of role to assume when accessing vault, if other than function's exec role
+        // name of role in Vault (not an AWS IAM role) to auth as, if not simply the function's name
         VAULT_ROLE,
 
         //TODO: support this, so self-signed certificates on vault certificates can be used with
