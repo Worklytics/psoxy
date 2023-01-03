@@ -64,6 +64,29 @@ public class VaultConfigService implements ConfigService {
         this.path = path;
     }
 
+    //q: do we even want to support this? possibly just for local dev
+    @SneakyThrows
+    public static Vault createVaultClientFromEnvVarsToken(EnvVarsConfigService envVarsConfigService) {
+        VaultConfig vaultConfig =
+            new VaultConfig()
+                .sslConfig(new SslConfig())
+                .address(envVarsConfigService.getConfigPropertyOrError(VaultConfigService.VaultConfigProperty.VAULT_ADDR))
+                .token(envVarsConfigService.getConfigPropertyOrError(VaultConfigService.VaultConfigProperty.VAULT_TOKEN));
+
+        envVarsConfigService.getConfigPropertyAsOptional(VaultConfigService.VaultConfigProperty.VAULT_NAMESPACE)
+            .filter(StringUtils::isNotBlank)  //don't bother tossing error here, assume meant no namespace
+            .ifPresent(ns -> {
+                try {
+                    vaultConfig.nameSpace(ns);
+                } catch (VaultException e) {
+                    throw new Error("Error setting Vault namespace", e);
+                }
+            });
+
+        return new Vault(vaultConfig.build());
+    }
+
+
     @SneakyThrows
     public void init() {
         LookupResponse initialAuth = this.vault.auth().lookupSelf();
@@ -94,9 +117,6 @@ public class VaultConfigService implements ConfigService {
         }
     }
 
-    private String path(@NonNull ConfigProperty configProperty) {
-        return getPath() + configProperty.name();
-    }
 
     @Override
     public boolean supportsWriting() {
@@ -140,26 +160,8 @@ public class VaultConfigService implements ConfigService {
         }
     }
 
-    //q: do we even want to support this? possibly just for local dev
-    @SneakyThrows
-    public static Vault createVaultClientFromEnvVarsToken(EnvVarsConfigService envVarsConfigService) {
-        VaultConfig vaultConfig =
-            new VaultConfig()
-                .sslConfig(new SslConfig())
-                .address(envVarsConfigService.getConfigPropertyOrError(VaultConfigService.VaultConfigProperty.VAULT_ADDR))
-                .token(envVarsConfigService.getConfigPropertyOrError(VaultConfigService.VaultConfigProperty.VAULT_TOKEN));
-
-        envVarsConfigService.getConfigPropertyAsOptional(VaultConfigService.VaultConfigProperty.VAULT_NAMESPACE)
-            .filter(StringUtils::isNotBlank)  //don't bother tossing error here, assume meant no namespace
-            .ifPresent(ns -> {
-                try {
-                    vaultConfig.nameSpace(ns);
-                } catch (VaultException e) {
-                    throw new Error("Error setting Vault namespace", e);
-                }
-            });
-
-        return new Vault(vaultConfig.build());
+    private String path(@NonNull ConfigProperty configProperty) {
+        return getPath() + configProperty.name();
     }
 
 
