@@ -14,12 +14,7 @@ variable "role_arn" {
   description = "ARN of proxy instance's execution role"
 }
 
-variable "path_to_global_secrets" {
-  type    = string
-  default = "secret/PSOXY_GLOBAL"
-}
-
-variable "path_to_instance_secrets" {
-  type    = string
-  default = null
+variable "vault_policy_name" {
+  type        = string
+  description = "name of Vault policy to bind to AWS role"
 }
