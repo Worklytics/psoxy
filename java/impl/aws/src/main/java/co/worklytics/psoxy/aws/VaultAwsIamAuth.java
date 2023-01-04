@@ -1,6 +1,6 @@
 package co.worklytics.psoxy.aws;
 
-import co.worklytics.psoxy.AWSConfigProperty;
+import co.worklytics.psoxy.gateway.HostEnvironment;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.gateway.impl.VaultConfigService;
 import com.amazonaws.DefaultRequest;
@@ -26,20 +26,15 @@ import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.HttpEntityWrapper;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import software.amazon.awssdk.services.sts.model.GetCallerIdentityRequest;
 
 import javax.inject.Inject;
 import java.io.ByteArrayInputStream;
 import java.net.URI;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.LinkedHashMap;
@@ -66,6 +61,8 @@ public class VaultAwsIamAuth {
     EnvVarsConfigService envVarsConfigService;
     @Inject
     ObjectMapper objectMapper;
+    @Inject
+    HostEnvironment hostEnvironment;
 
     @AssistedInject
     VaultAwsIamAuth(@Assisted @NonNull String awsRegion,
@@ -211,7 +208,7 @@ public class VaultAwsIamAuth {
 
         String role =
             envVarsConfigService.getConfigPropertyAsOptional(VaultConfigService.VaultConfigProperty.VAULT_ROLE)
-                .orElseGet(() -> System.getenv(AwsModule.RuntimeEnvironmentVariables.AWS_LAMBDA_FUNCTION_NAME.name()));
+                .orElseGet(hostEnvironment::getInstanceId);
 
         log.info("Vault Auth : aws iam with role:" + role);
 

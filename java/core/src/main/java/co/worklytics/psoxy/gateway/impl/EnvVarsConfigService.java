@@ -31,5 +31,4 @@ public class EnvVarsConfigService implements ConfigService {
     public Optional<String> getConfigPropertyAsOptional(ConfigProperty property) {
         return Optional.ofNullable(System.getenv(property.name()));
     }
-
 }

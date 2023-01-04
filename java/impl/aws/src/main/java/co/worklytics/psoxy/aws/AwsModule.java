@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.aws;
 
 import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.HostEnvironment;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.impl.CompositeConfigService;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
@@ -31,17 +32,19 @@ import java.time.Duration;
 @Module
 public interface AwsModule {
 
-    /**
-     * see "https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html#configuration-envvars-runtimer"
-     */
-    enum RuntimeEnvironmentVariables {
-        AWS_REGION,
-        AWS_LAMBDA_FUNCTION_NAME,
+    @Provides @Singleton
+    static AwsEnvironment awsEnvironment() {
+        return new AwsEnvironment();
+    }
+
+    @Provides @Singleton
+    static HostEnvironment hostEnvironment(AwsEnvironment awsEnvironment) {
+        return awsEnvironment;
     }
 
     @Provides
-    static SsmClient ssmClient() {
-        Region region = Region.of(System.getenv(RuntimeEnvironmentVariables.AWS_REGION.name()));
+    static SsmClient ssmClient(AwsEnvironment awsEnvironment) {
+        Region region = Region.of(awsEnvironment.getRegion());
         return SsmClient.builder()
             // Add custom retry policy
             .overrideConfiguration(ClientOverrideConfiguration.builder()
@@ -69,11 +72,12 @@ public interface AwsModule {
     // parameters scoped to function
     // singleton to be reused in lambda container
     @Provides @Singleton
-    static ParameterStoreConfigService functionParameterStoreConfigService(EnvVarsConfigService envVarsConfigService,
+    static ParameterStoreConfigService functionParameterStoreConfigService(HostEnvironment hostEnvironment,
+                                                                           EnvVarsConfigService envVarsConfigService,
                                                                            SsmClient ssmClient) {
         String namespace =
             envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_INSTANCE_CONFIG)
-                .orElseGet(() -> asParameterStoreNamespace(System.getenv(RuntimeEnvironmentVariables.AWS_LAMBDA_FUNCTION_NAME.name())));
+                .orElseGet(() -> asParameterStoreNamespace(hostEnvironment.getInstanceId()));
         return new ParameterStoreConfigService(namespace, ssmClient);
     }
 
@@ -99,13 +103,14 @@ public interface AwsModule {
     }
 
     @Provides @Singleton
-    static Vault vault(EnvVarsConfigService envVarsConfigService,
+    static Vault vault(AwsEnvironment awsEnvironment,
+                       EnvVarsConfigService envVarsConfigService,
                        VaultAwsIamAuthFactory vaultAwsIamAuthFactory) {
         if (envVarsConfigService.getConfigPropertyAsOptional(VaultConfigService.VaultConfigProperty.VAULT_TOKEN).isPresent()) {
             return VaultConfigService.createVaultClientFromEnvVarsToken(envVarsConfigService);
         } else {
             VaultAwsIamAuth vaultAwsIamAuth = vaultAwsIamAuthFactory.create(
-                System.getenv(AwsModule.RuntimeEnvironmentVariables.AWS_REGION.name()),
+                awsEnvironment.getRegion(),
                 DefaultAWSCredentialsProviderChain.getInstance().getCredentials());
             VaultConfig vaultConfig = new VaultConfig()
                 .sslConfig(new SslConfig())

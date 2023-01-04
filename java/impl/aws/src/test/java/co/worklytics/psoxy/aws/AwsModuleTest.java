@@ -38,6 +38,6 @@ class AwsModuleTest {
         EnvVarsConfigService envVars = mock(EnvVarsConfigService.class);
 
         when(envVars.getConfigPropertyAsOptional(eq(ProxyConfigProperty.PATH_TO_INSTANCE_CONFIG))).thenReturn(Optional.of("PSOXY_GCAL/"));
-        assertEquals("PSOXY_GCAL/", AwsModule.functionParameterStoreConfigService(envVars, mock(SsmClient.class)).getNamespace());
+        assertEquals("PSOXY_GCAL/", AwsModule.functionParameterStoreConfigService(new AwsEnvironment(), envVars, mock(SsmClient.class)).getNamespace());
     }
 }

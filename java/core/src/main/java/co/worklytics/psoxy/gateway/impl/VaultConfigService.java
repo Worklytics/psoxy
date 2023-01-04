@@ -152,9 +152,11 @@ public class VaultConfigService implements ConfigService {
             .read(path(property));
 
         if (response.getRestResponse().getStatus() == 200) {
+            log.info("Config value for " + path(property)  + " from Vault");
             return Optional.ofNullable(response.getData().get(VALUE_FIELD));
         } else {
             //403 unless explicit ACL policy set
+            //also 403 if no property?
             log.info(path(property) + " " + response.getRestResponse().getStatus() + " " + new String(response.getRestResponse().getBody()));
             return Optional.empty();
         }

@@ -27,5 +27,4 @@ public interface ConfigService {
         return this.getConfigPropertyAsOptional(ProxyConfigProperty.IS_DEVELOPMENT_MODE)
             .map(Boolean::parseBoolean).orElse(false);
     }
-
 }

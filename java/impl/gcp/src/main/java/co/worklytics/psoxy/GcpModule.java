@@ -2,6 +2,7 @@ package co.worklytics.psoxy;
 
 
 import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.HostEnvironment;
 import co.worklytics.psoxy.gateway.impl.*;
 import com.bettercloud.vault.Vault;
 import com.google.auth.oauth2.GoogleCredentials;
@@ -19,15 +20,21 @@ import java.io.IOException;
 @Module
 public interface GcpModule {
 
-    // https://cloud.google.com/functions/docs/configuring/env-var#newer_runtimes
-    enum RuntimeEnvironmentVariables {
-        K_SERVICE
-    }
 
-
-    static String asParameterStoreNamespace(String functionName) {
+    static String asSecretManagerNamespace(String functionName) {
         return functionName.toUpperCase().replace("-", "_");
     }
+    @Provides
+    @Singleton
+    static GcpEnvironment gcpEnvironment() {
+        return new GcpEnvironment();
+    }
+    @Provides
+    @Singleton
+    static HostEnvironment hostEnvironment(GcpEnvironment gcpEnvironment) {
+        return gcpEnvironment;
+    }
+
 
     // global parameters
     // singleton to be reused in cloud function container
@@ -42,9 +49,9 @@ public interface GcpModule {
     // singleton to be reused in cloud function container
     @Provides
     @Singleton
-    static SecretManagerConfigService functionSecretManagerConfigService() {
+    static SecretManagerConfigService functionSecretManagerConfigService(HostEnvironment hostEnvironment) {
         String namespace =
-                asParameterStoreNamespace(System.getenv(RuntimeEnvironmentVariables.K_SERVICE.name()));
+                asSecretManagerNamespace(hostEnvironment.getInstanceId());
         return new SecretManagerConfigService(namespace, ServiceOptions.getDefaultProjectId());
     }
 
