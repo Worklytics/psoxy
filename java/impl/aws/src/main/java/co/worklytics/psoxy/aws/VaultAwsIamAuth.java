@@ -13,6 +13,7 @@ import com.amazonaws.services.securitytoken.model.GetCallerIdentityResult;
 import com.bettercloud.vault.SslConfig;
 import com.bettercloud.vault.Vault;
 import com.bettercloud.vault.VaultConfig;
+import com.bettercloud.vault.VaultException;
 import com.bettercloud.vault.response.AuthResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
@@ -26,6 +27,7 @@ import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -56,6 +58,8 @@ import java.util.stream.Collectors;
 @Log
 @NoArgsConstructor(onConstructor_ = @Inject)
 public class VaultAwsIamAuth {
+
+    static final Integer VAULT_ENGINE_VERSION = 2;
 
     @Inject
     EnvVarsConfigService envVarsConfigService;
@@ -202,8 +206,20 @@ public class VaultAwsIamAuth {
         String vaultAddress =
             envVarsConfigService.getConfigPropertyOrError(VaultConfigService.VaultConfigProperty.VAULT_ADDR);
         VaultConfig vaultConfig = new VaultConfig()
+            .engineVersion(VAULT_ENGINE_VERSION)
             .sslConfig(new SslConfig().build())
             .address(vaultAddress);
+
+        envVarsConfigService.getConfigPropertyAsOptional(VaultConfigService.VaultConfigProperty.VAULT_NAMESPACE)
+            .filter(StringUtils::isNotBlank)  //don't bother tossing error here, assume meant no namespace
+            .ifPresent(ns -> {
+                try {
+                    vaultConfig.nameSpace(ns);
+                } catch (VaultException e) {
+                    throw new Error("Error setting Vault namespace", e);
+                }
+            });
+
         Vault authVault = new Vault(vaultConfig);
 
         String role =

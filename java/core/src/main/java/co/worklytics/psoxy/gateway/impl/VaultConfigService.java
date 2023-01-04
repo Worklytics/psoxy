@@ -53,6 +53,8 @@ public class VaultConfigService implements ConfigService {
     // might expire ...
     public static final Duration MIN_AUTH_TTL = Duration.ofHours(36);
 
+    static final Integer VAULT_ENGINE_VERSION = 2;
+
     @Getter @NonNull
     final String path;
 
@@ -69,6 +71,7 @@ public class VaultConfigService implements ConfigService {
     public static Vault createVaultClientFromEnvVarsToken(EnvVarsConfigService envVarsConfigService) {
         VaultConfig vaultConfig =
             new VaultConfig()
+                .engineVersion(VAULT_ENGINE_VERSION) //avoid log complaints about not providing a value
                 .sslConfig(new SslConfig())
                 .address(envVarsConfigService.getConfigPropertyOrError(VaultConfigService.VaultConfigProperty.VAULT_ADDR))
                 .token(envVarsConfigService.getConfigPropertyOrError(VaultConfigService.VaultConfigProperty.VAULT_TOKEN));
