@@ -11,9 +11,10 @@ including minor releases which should not break production-ready features.
 
      * `VAULT_ADDR` - the address of your Vault instance, e.g. `https://vault.example.com:8200`
        * NOTE: must be accessible from AWS account / GCP project where you're deploying
-     * `VAULT_TOKEN` - choose the appropriate token type for your use case; if it's going to expire,
-        it's your responsibility either renew it OR replace it by updating this environment variable
-        before expiration.
+     * `VAULT_TOKEN` - choose the appropriate token type for your use case; we recommend you use
+        a periodic token that can lookup and renew itself, with period of > 8 days. With such a
+        setup, Psoxy will lookup and renew this token as needed. Otherwise, it's your responsibility
+        either renew it OR replace it by updating this environment variable before expiration.
      * `VAULT_NAMESPACE` - optional, if you're using Vault Namespaces
      * `PATH_TO_SHARED_CONFIG` - eg, `secret/worklytics_deployment/PSOXY_SHARED/`
      * `PATH_TO_INSTANCE_CONFIG` - eg, `secret/worklytics_deployment/PSOXY_GCAL/`
@@ -34,6 +35,8 @@ including minor releases which should not break production-ready features.
 
    3. **Ensure ACL permits 'read' and, if necessary, write**. Psoxy will need to be able to read
       secrets from Vault, and in some cases (eg, Oauth tokens subject to refresh) write.
+      Additionally, if you're using a periodic token as recommended, the token must be authorized
+      to lookup and renew itself.
 
 
 ## AWS IAM Auth *alpha*
