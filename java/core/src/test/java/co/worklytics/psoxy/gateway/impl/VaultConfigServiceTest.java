@@ -14,6 +14,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 @EnabledIfEnvironmentVariables({
+    @EnabledIfEnvironmentVariable(named = "VAULT_PSOXY_CI", matches = ".*"),
     @EnabledIfEnvironmentVariable(named = "VAULT_ADDR", matches = ".*"),
     @EnabledIfEnvironmentVariable(named = "VAULT_TOKEN", matches = ".*")
 })
