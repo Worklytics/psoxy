@@ -38,7 +38,7 @@ public class FunctionRuntimeModule {
         //atm, all function runtimes expected to use generic java NetHttpTransport
         return (new NetHttpTransport()).createRequestFactory();
     }
-    @Provides
+    @Provides @Singleton
     static ConfigService configService(EnvVarsConfigService envVarsConfigService,
                                        @Named("Native") ConfigService nativeConfigService,
                                        VaultConfigServiceFactory vaultConfigServiceFactory) {

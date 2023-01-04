@@ -82,7 +82,7 @@ public interface AwsModule {
         return functionName.toUpperCase().replace("-", "_");
     }
 
-    @Provides @Named("Native")
+    @Provides @Named("Native") @Singleton
     static ConfigService nativeConfigService(@Named("Global") ParameterStoreConfigService globalParameterStoreConfigService,
                                              ParameterStoreConfigService functionScopedParameterStoreConfigService) {
 

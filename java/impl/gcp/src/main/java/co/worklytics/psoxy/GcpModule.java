@@ -55,7 +55,7 @@ public interface GcpModule {
      * @see "https://cloud.google.com/functions/docs/configuring/env-var"
      * @see "https://cloud.google.com/functions/docs/configuring/secrets"
      */
-    @Provides @Named("Native")
+    @Provides @Named("Native") @Singleton
     static ConfigService nativeConfigService(@Named("Global") SecretManagerConfigService globalSecretManagerConfigService,
                                             SecretManagerConfigService functionScopedSecretManagerConfigService) {
 
