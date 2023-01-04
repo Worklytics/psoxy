@@ -21,16 +21,16 @@ including minor releases which should not break production-ready features.
   2. **Configure your secrets in Vault.** Given the above, Psoxy will connect to Vault in lieu of
      the usual Secret storage solution for your cloud provider. It will expect config properties
      (secrets) organized as follows:
-        * global secrets: `${PATH_TO_SHARED_CONFIG}${PROPERTY_NAME}`, eg with vault path
-         `worklytics_deployment`, then:
+        * global secrets: `${PATH_TO_SHARED_CONFIG}${PROPERTY_NAME}`, eg with
+          `PATH_TO_SHARED_CONFIG` - eg, `secret/worklytics_deployment/PSOXY_SHARED/`then:
             * `secret/worklytics_deployment/PSOXY_SHARED/PSOXY_SALT`
             * `secret/worklytics_deployment/PSOXY_SHARED/PSOXY_ENCRYPTION_KEY`
-        * per-connector secrets:`${PATH_TO_CONNECTOR_CONFIG}${PROPERTY_NAME}` eg with vault path
-          `worklytics_deployment` and function id `PSOXY_GCAL`
-            * `worklytics_deployment/PSOXY_GCAL/RULES`
-            * `worklytics_deployment/PSOXY_GCAL/ACCESS_TOKEN`
-            * `worklytics_deployment/PSOXY_GCAL/CLIENT_ID`
-            * `worklytics_deployment/PSOXY_GCAL/CLIENT_SECRET`
+        * per-connector secrets:`${PATH_TO_CONNECTOR_CONFIG}${PROPERTY_NAME}` eg with
+          `PATH_TO_INSTANCE_CONFIG` as `secret/worklytics_deployment/PSOXY_GCAL/`:
+            * `secret/worklytics_deployment/PSOXY_GCAL/RULES`
+            * `secret/worklytics_deployment/PSOXY_GCAL/ACCESS_TOKEN`
+            * `secret/worklytics_deployment/PSOXY_GCAL/CLIENT_ID`
+            * `secret/worklytics_deployment/PSOXY_GCAL/CLIENT_SECRET`
 
    3. **Ensure ACL permits 'read' and, if necessary, write**. Psoxy will need to be able to read
       secrets from Vault, and in some cases (eg, Oauth tokens subject to refresh) write.
