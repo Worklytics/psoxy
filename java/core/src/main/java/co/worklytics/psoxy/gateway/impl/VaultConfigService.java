@@ -155,7 +155,7 @@ public class VaultConfigService implements ConfigService {
             return Optional.ofNullable(response.getData().get(VALUE_FIELD));
         } else {
             //403 unless explicit ACL policy set
-            log.info(property.name() + " " + response.getRestResponse().getStatus() + " " + new String(response.getRestResponse().getBody()));
+            log.info(path(property) + " " + response.getRestResponse().getStatus() + " " + new String(response.getRestResponse().getBody()));
             return Optional.empty();
         }
     }
