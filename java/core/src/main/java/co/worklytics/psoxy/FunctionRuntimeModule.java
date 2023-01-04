@@ -51,7 +51,7 @@ public class FunctionRuntimeModule {
 
         String connectorPath
             = envVarsConfigService
-            .getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_CONNECTOR_CONFIG)
+            .getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_INSTANCE_CONFIG)
             .orElse("");
 
         ConfigService remoteConfigService;

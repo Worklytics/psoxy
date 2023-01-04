@@ -6,7 +6,6 @@ import co.worklytics.psoxy.gateway.impl.CompositeConfigService;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.gateway.impl.*;
 import co.worklytics.psoxy.gateway.impl.VaultConfigService;
-import co.worklytics.psoxy.gateway.impl.VaultConfigServiceFactory;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
@@ -73,7 +72,7 @@ public interface AwsModule {
     static ParameterStoreConfigService functionParameterStoreConfigService(EnvVarsConfigService envVarsConfigService,
                                                                            SsmClient ssmClient) {
         String namespace =
-            envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_CONNECTOR_CONFIG)
+            envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_INSTANCE_CONFIG)
                 .orElseGet(() -> asParameterStoreNamespace(System.getenv(RuntimeEnvironmentVariables.AWS_LAMBDA_FUNCTION_NAME.name())));
         return new ParameterStoreConfigService(namespace, ssmClient);
     }

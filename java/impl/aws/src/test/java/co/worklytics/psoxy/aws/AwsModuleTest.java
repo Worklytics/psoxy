@@ -1,6 +1,5 @@
 package co.worklytics.psoxy.aws;
 
-import co.worklytics.psoxy.AWSConfigProperty;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import org.junit.jupiter.api.Test;
@@ -38,7 +37,7 @@ class AwsModuleTest {
     void customConnectorConfig() {
         EnvVarsConfigService envVars = mock(EnvVarsConfigService.class);
 
-        when(envVars.getConfigPropertyAsOptional(eq(ProxyConfigProperty.PATH_TO_CONNECTOR_CONFIG))).thenReturn(Optional.of("PSOXY_GCAL/"));
+        when(envVars.getConfigPropertyAsOptional(eq(ProxyConfigProperty.PATH_TO_INSTANCE_CONFIG))).thenReturn(Optional.of("PSOXY_GCAL/"));
         assertEquals("PSOXY_GCAL/", AwsModule.functionParameterStoreConfigService(envVars, mock(SsmClient.class)).getNamespace());
     }
 }

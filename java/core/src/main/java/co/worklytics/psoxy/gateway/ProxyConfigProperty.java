@@ -10,12 +10,11 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
      * OPTIONAL; default to ""
      */
     PATH_TO_SHARED_CONFIG,
-
     /**
-     * where to find configuration parameters that are specific to this connector instance
+     * where to find configuration parameters that are specific to this instance
      * OPTIONAL; default to ""
      */
-    PATH_TO_CONNECTOR_CONFIG,
+    PATH_TO_INSTANCE_CONFIG,
 
     PSOXY_ENCRYPTION_KEY,
 
