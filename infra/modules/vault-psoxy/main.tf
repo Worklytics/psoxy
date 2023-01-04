@@ -9,7 +9,7 @@ locals {
 resource "vault_policy" "psoxy_instance" {
   name   = var.instance_id
   policy = <<EOT
-path "${var.path_to_global_secrets}"
+path "${var.path_to_global_secrets}/*"
 {
 	capabilities = ["read"]
 }
@@ -20,6 +20,7 @@ path "${local.path_to_instance_secrets}/*"
 }
 EOT
 }
+
 
 output "vault_policy_name" {
   value = vault_policy.psoxy_instance.name
