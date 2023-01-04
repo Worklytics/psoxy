@@ -5,7 +5,7 @@ variable "instance_id" {
 
 variable "path_to_global_secrets" {
   type    = string
-  default = "secret/PSOXY_GLOBAL"
+  default = "secret/PSOXY_GLOBAL/"
 }
 
 variable "path_to_instance_secrets" {
