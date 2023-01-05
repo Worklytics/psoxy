@@ -114,7 +114,9 @@ module "psoxy-google-workspace-connector" {
   example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
   todo_step                             = module.google-workspace-connection[each.key].next_todo_step
 
-  environment_variables = merge(try(each.value.environment_variables, {}),
+  environment_variables = merge(
+    var.general_environment_variables,
+    try(each.value.environment_variables, {}),
     {
       IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
     }
@@ -208,7 +210,9 @@ module "connector-long-auth-function" {
   todo_step                     = module.source_token_external_todo[each.key].next_todo_step
   secret_bindings               = module.psoxy-gcp.secrets
 
-  environment_variables = merge(try(each.value.environment_variables, {}),
+  environment_variables = merge(
+    var.general_environment_variables,
+    try(each.value.environment_variables, {}),
     {
       IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
     }
@@ -254,13 +258,17 @@ module "psoxy-gcp-bulk" {
   deployment_bundle_object_name = module.psoxy-gcp.deployment_bundle_object_name
   psoxy_base_dir                = var.psoxy_base_dir
   bucket_write_role_id          = module.psoxy-gcp.bucket_write_role_id
+  secret_bindings               = module.psoxy-gcp.secrets
 
-  secret_bindings = module.psoxy-gcp.secrets
-  environment_variables = {
-    SOURCE              = each.value.source_kind
-    RULES               = yamlencode(each.value.rules)
-    IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
-  }
+  environment_variables = merge(
+    var.general_environment_variables,
+    try(each.value.environment_variables, {}),
+    {
+      SOURCE              = each.value.source_kind
+      RULES               = yamlencode(each.value.rules)
+      IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
+    }
+  )
 }
 
 module "psoxy-bulk-to-worklytics" {

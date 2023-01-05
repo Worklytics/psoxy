@@ -197,6 +197,7 @@ resource "aws_ssm_parameter" "rules" {
   description    = "Rules for transformation of files. NOTE: any 'RULES' env var will override this value"
   insecure_value = yamlencode(var.rules) # NOTE: insecure_value just means shown in Terraform output
 
+
   lifecycle {
     ignore_changes = [
       tags
@@ -208,6 +209,19 @@ resource "aws_ssm_parameter" "rules" {
 output "output_bucket" {
   value = aws_s3_bucket.output.bucket
 }
+
+output "function_arn" {
+  value = module.psoxy_lambda.function_arn
+}
+
+output "instance_role_arn" {
+  value = module.psoxy_lambda.iam_role_for_lambda_arn
+}
+
+output "instance_id" {
+  value = module.psoxy_lambda.function_name
+}
+
 
 output "next_todo_step" {
   value = var.todo_step + 1

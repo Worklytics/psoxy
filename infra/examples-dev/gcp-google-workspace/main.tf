@@ -38,6 +38,7 @@ module "psoxy-gcp-google-workspace" {
   non_production_connectors     = var.non_production_connectors
   custom_bulk_connectors        = var.custom_bulk_connectors
   google_workspace_example_user = var.google_workspace_example_user
+  general_environment_variables = var.general_environment_variables
 
   depends_on = [
     google_project.psoxy-project

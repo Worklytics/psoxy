@@ -4,6 +4,18 @@ package co.worklytics.psoxy.gateway;
  * config properties that control basic proxy behavior
  */
 public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
+
+    /**
+     * where to find configuration parameters that are shared across connectors
+     * OPTIONAL; default to ""
+     */
+    PATH_TO_SHARED_CONFIG,
+    /**
+     * where to find configuration parameters that are specific to this instance
+     * OPTIONAL; default to ""
+     */
+    PATH_TO_INSTANCE_CONFIG,
+
     PSOXY_ENCRYPTION_KEY,
 
     @Deprecated //removed from v0.4

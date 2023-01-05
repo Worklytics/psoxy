@@ -116,10 +116,13 @@ module "psoxy-google-workspace-connector" {
   global_parameter_arns                 = module.global_secrets.secret_arns
   todo_step                             = module.google-workspace-connection[each.key].next_todo_step
 
-  environment_variables = merge(try(each.value.environment_variables, {}),
+  environment_variables = merge(
+    var.general_environment_variables,
+    try(each.value.environment_variables, {}),
     {
       IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
-  })
+    }
+  )
 }
 
 
@@ -210,11 +213,15 @@ module "aws-psoxy-long-auth-connectors" {
   function_parameters            = each.value.secured_variables
   todo_step                      = module.source_token_external_todo[each.key].next_todo_step
 
-  environment_variables = merge(try(each.value.environment_variables, {}),
+  environment_variables = merge(
+    var.general_environment_variables,
+    try(each.value.environment_variables, {}),
     {
       IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
-  })
+    }
+  )
 }
+
 
 module "worklytics-psoxy-connection" {
   for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
@@ -254,9 +261,13 @@ module "psoxy-bulk" {
   psoxy_base_dir        = var.psoxy_base_dir
   rules                 = each.value.rules
   global_parameter_arns = module.global_secrets.secret_arns
-  environment_variables = {
-    IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
-  }
+  environment_variables = merge(
+    var.general_environment_variables,
+    try(each.value.environment_variables, {}),
+    {
+      IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
+    }
+  )
   sanitized_accessor_role_names = [
     module.psoxy-aws.api_caller_role_name
   ]
@@ -297,9 +308,25 @@ module "psoxy_lookup_tables_builders" {
   rules                         = each.value.rules
   global_parameter_arns         = module.global_secrets.secret_arns
   sanitized_accessor_role_names = each.value.sanitized_accessor_role_names
-  environment_variables = {
-    IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
-  }
+  environment_variables = merge(
+    var.general_environment_variables,
+    try(each.value.environment_variables, {}),
+    {
+      IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
+    }
+  )
+}
+
+locals {
+  all_instances = merge(
+    { for instance in module.psoxy-google-workspace-connector : instance.instance_id => instance},
+    { for instance in module.psoxy-bulk : instance.instance_id => instance},
+    { for instance in module.aws-psoxy-long-auth-connectors : instance.instance_id => instance}
+  )
+}
+
+output "instances" {
+  value = local.all_instances
 }
 
 output "lookup_tables" {

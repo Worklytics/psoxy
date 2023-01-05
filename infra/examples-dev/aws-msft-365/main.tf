@@ -53,6 +53,7 @@ module "psoxy-aws-msft-365" {
   msft_tenant_id                 = var.msft_tenant_id
   certificate_subject            = var.certificate_subject
   pseudonymize_app_ids           = var.pseudonymize_app_ids
+  general_environment_variables  = var.general_environment_variables
 }
 
 # if you generated these, you may want them to import back into your data warehouse

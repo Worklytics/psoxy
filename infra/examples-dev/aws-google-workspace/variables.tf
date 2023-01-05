@@ -66,7 +66,11 @@ variable "connector_display_name_suffix" {
   default     = ""
 }
 
-
+variable "general_environment_variables" {
+  type        = map(string)
+  description = "environment variables to add for all connectors"
+  default     = {}
+}
 
 variable "enabled_connectors" {
   type        = list(string)
@@ -187,4 +191,22 @@ variable "gcp_billing_account_id" {
 variable "google_workspace_example_user" {
   type        = string
   description = "user to impersonate for Google Workspace API calls (null for none)"
+}
+
+variable "vpc_ip_block" {
+  type        = string
+  description = "IP block for VPC to create for psoxy instances, in CIDR notation"
+  default     = "10.0.0.0/18"
+}
+
+variable "vault_addr" {
+  type        = string
+  description = "address of your Vault instance"
+  default     = null # leave null if not using Vault
+}
+
+variable "aws_vault_role_arn" {
+  type        = string
+  description = "ARN of vault role; see https://developer.hashicorp.com/vault/docs/auth/aws"
+  default     = null # leave null if not using Vault
 }

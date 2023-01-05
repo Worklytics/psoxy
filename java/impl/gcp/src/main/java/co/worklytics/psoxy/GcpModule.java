@@ -2,15 +2,17 @@ package co.worklytics.psoxy;
 
 
 import co.worklytics.psoxy.gateway.ConfigService;
-import co.worklytics.psoxy.gateway.impl.CompositeConfigService;
-import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
+import co.worklytics.psoxy.gateway.HostEnvironment;
+import co.worklytics.psoxy.gateway.impl.*;
+import com.bettercloud.vault.Vault;
+import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.ServiceOptions;
 import dagger.Module;
 import dagger.Provides;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
-import java.time.Duration;
+import java.io.IOException;
 
 /**
  * defines how to fulfill dependencies that need platform-specific implementations for GCP platform
@@ -18,15 +20,21 @@ import java.time.Duration;
 @Module
 public interface GcpModule {
 
-    // https://cloud.google.com/functions/docs/configuring/env-var#newer_runtimes
-    enum RuntimeEnvironmentVariables {
-        K_SERVICE
-    }
 
-
-    static String asParameterStoreNamespace(String functionName) {
+    static String asSecretManagerNamespace(String functionName) {
         return functionName.toUpperCase().replace("-", "_");
     }
+    @Provides
+    @Singleton
+    static GcpEnvironment gcpEnvironment() {
+        return new GcpEnvironment();
+    }
+    @Provides
+    @Singleton
+    static HostEnvironment hostEnvironment(GcpEnvironment gcpEnvironment) {
+        return gcpEnvironment;
+    }
+
 
     // global parameters
     // singleton to be reused in cloud function container
@@ -34,19 +42,17 @@ public interface GcpModule {
     @Named("Global")
     @Singleton
     static SecretManagerConfigService secretManagerConfigService() {
-        // Global don't change that often, use longer TTL
-        return new SecretManagerConfigService(null, ServiceOptions.getDefaultProjectId(), Duration.ofMinutes(20));
+        return new SecretManagerConfigService(null, ServiceOptions.getDefaultProjectId());
     }
 
     // parameters scoped to function
     // singleton to be reused in cloud function container
     @Provides
     @Singleton
-    static SecretManagerConfigService functionSecretManagerConfigService() {
+    static SecretManagerConfigService functionSecretManagerConfigService(HostEnvironment hostEnvironment) {
         String namespace =
-                asParameterStoreNamespace(System.getenv(RuntimeEnvironmentVariables.K_SERVICE.name()));
-        // Namespaced params may change often (refresh tokens), use shorter TTL
-        return new SecretManagerConfigService(namespace, ServiceOptions.getDefaultProjectId(), Duration.ofMinutes(5));
+                asSecretManagerNamespace(hostEnvironment.getInstanceId());
+        return new SecretManagerConfigService(namespace, ServiceOptions.getDefaultProjectId());
     }
 
     /**
@@ -56,19 +62,33 @@ public interface GcpModule {
      * @see "https://cloud.google.com/functions/docs/configuring/env-var"
      * @see "https://cloud.google.com/functions/docs/configuring/secrets"
      */
-    @Provides
-    static ConfigService configService(EnvVarsConfigService envVarsConfigService,
-                                       @Named("Global") SecretManagerConfigService globalSecretManagerConfigService,
-                                       SecretManagerConfigService functionScopedSecretManagerConfigService) {
+    @Provides @Named("Native") @Singleton
+    static ConfigService nativeConfigService(@Named("Global") SecretManagerConfigService globalSecretManagerConfigService,
+                                            SecretManagerConfigService functionScopedSecretManagerConfigService) {
 
-        CompositeConfigService parameterStoreConfigHierarchy = CompositeConfigService.builder()
+        return CompositeConfigService.builder()
                 .fallback(globalSecretManagerConfigService)
                 .preferred(functionScopedSecretManagerConfigService)
                 .build();
 
-        return CompositeConfigService.builder()
-                .fallback(parameterStoreConfigHierarchy)
-                .preferred(envVarsConfigService)
-                .build();
+    }
+
+    @Provides @Singleton
+    static Vault vault(EnvVarsConfigService envVarsConfigService,
+                       VaultGcpIamAuth vaultGcpIamAuth) {
+        if (envVarsConfigService.getConfigPropertyAsOptional(VaultConfigService.VaultConfigProperty.VAULT_TOKEN).isPresent()) {
+            return VaultConfigService.createVaultClientFromEnvVarsToken(envVarsConfigService);
+        } else {
+            String vaultAddr =
+                envVarsConfigService.getConfigPropertyOrError(VaultConfigService.VaultConfigProperty.VAULT_ADDR);
+
+            try {
+                GoogleCredentials googleCredentials = GoogleCredentials.getApplicationDefault();
+                return vaultGcpIamAuth.createVaultClient(vaultAddr, CloudFunctionRequest.getFunctionName(), googleCredentials);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+        }
     }
 }

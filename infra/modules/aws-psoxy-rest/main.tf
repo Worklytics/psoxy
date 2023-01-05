@@ -65,7 +65,7 @@ Review the deployed function in AWS console:
 - https://console.aws.amazon.com/lambda/home?region=${var.region}#/functions/${var.function_name}?tab=monitoring
 
 We provide some Node.js scripts to easily validate the deployment. To be able
-to run the test commands below, you need Node.js (>=16) and npm (v >=8) 
+to run the test commands below, you need Node.js (>=16) and npm (v >=8)
 installed. Then, ensure all dependencies are installed by running:
 
 ```shell
@@ -110,6 +110,14 @@ output "endpoint_url" {
 
 output "function_arn" {
   value = module.psoxy_lambda.function_arn
+}
+
+output "instance_role_arn" {
+  value = module.psoxy_lambda.iam_role_for_lambda_arn
+}
+
+output "instance_id" {
+  value = module.psoxy_lambda.function_name
 }
 
 output "next_todo_step" {
