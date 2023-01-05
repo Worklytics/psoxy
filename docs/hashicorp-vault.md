@@ -7,6 +7,10 @@ including minor releases which should not break production-ready features.
 
 # Getting Started with HashiCorp Vault
 
+NOTE: you will NOT be able to use the Terraform examples found in `infra/examples`; you will have
+to adapt the modular forms of those found in `infra/modular-examples`, swapping the host platform's
+secret manager for Vault.
+
   1. Set the following environment variables in your instance:
 
      * `VAULT_ADDR` - the address of your Vault instance, e.g. `https://vault.example.com:8200`
