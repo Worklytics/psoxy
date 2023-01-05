@@ -1,7 +1,6 @@
 package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.rules.CsvRules;
-import com.avaulta.gateway.rules.ColumnarRules;
 import co.worklytics.psoxy.storage.FileHandlerFactory;
 import com.google.api.client.util.Lists;
 import com.google.cloud.secretmanager.v1.AccessSecretVersionResponse;
@@ -26,9 +25,9 @@ public class Handler {
     FileHandlerFactory fileHandlerStrategy;
 
     @SneakyThrows
-    public void pseudonymize(@NonNull Config config,
-                             @NonNull File inputFile,
-                             @NonNull Appendable out) {
+    public void sanitize(@NonNull Config config,
+                         @NonNull File inputFile,
+                         @NonNull Appendable out) {
         Sanitizer.ConfigurationOptions.ConfigurationOptionsBuilder options =
             Sanitizer.ConfigurationOptions.builder()
             .defaultScopeId(config.getDefaultScopeId());
