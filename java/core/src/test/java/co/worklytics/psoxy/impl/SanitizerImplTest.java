@@ -1,7 +1,11 @@
 package co.worklytics.psoxy.impl;
 
-import co.worklytics.psoxy.*;
+import co.worklytics.psoxy.PseudonymizedIdentity;
+import co.worklytics.psoxy.PsoxyModule;
+import co.worklytics.psoxy.Sanitizer;
+import co.worklytics.psoxy.SanitizerFactory;
 import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
 import co.worklytics.psoxy.rules.Rules2;
 import co.worklytics.psoxy.rules.Transform;
@@ -66,14 +70,15 @@ class SanitizerImplTest {
         Container container = DaggerSanitizerImplTest_Container.create();
         container.inject(this);
 
+        // this also sets salt to "salt"
+        withMockEncryptionKey(config);
+
         sanitizer = sanitizerFactory.create(Sanitizer.ConfigurationOptions.builder()
             .rules(PrebuiltSanitizerRules.DEFAULTS.get("gmail"))
             .pseudonymizationSalt("an irrelevant per org secret")
             .defaultScopeId("scope")
             .pseudonymImplementation(PseudonymImplementation.LEGACY)
             .build());
-
-        withMockEncryptionKey(config);
     }
 
     @SneakyThrows
@@ -374,5 +379,38 @@ class SanitizerImplTest {
 
         assertTrue(strictSanitizer.isAllowed("GET", EXAMPLE_URL));
         assertFalse(strictSanitizer.isAllowed(notGet, EXAMPLE_URL));
+    }
+
+    @SneakyThrows
+    @Test
+    void legacyVsDefault() {
+        Sanitizer.ConfigurationOptions options = Sanitizer.ConfigurationOptions.builder()
+            .pseudonymizationSalt(config.getConfigPropertyOrError(ProxyConfigProperty.PSOXY_SALT))
+            //.rules(PrebuiltSanitizerRules.DEFAULTS.get("gmail"))
+            .defaultScopeId("hris")
+            .pseudonymImplementation(PseudonymImplementation.LEGACY)
+            .build();
+
+        Sanitizer legacySanitizer = sanitizerFactory.create(options);
+        Sanitizer defaultSanitizer = sanitizerFactory.create(options.withPseudonymImplementation(PseudonymImplementation.DEFAULT));
+
+        String EMAIL = "juan@acme.com";
+        PseudonymizedIdentity pseudonymizeLegacy = legacySanitizer.pseudonymize(EMAIL);
+        PseudonymizedIdentity pseudonymizeDefault = defaultSanitizer.pseudonymize(EMAIL);
+        System.out.println(String.format("%s\nlegacy: %s\ndefault: %s", EMAIL, pseudonymizeLegacy, pseudonymizeDefault));
+        assertEquals(pseudonymizeDefault.getHash(), pseudonymizeLegacy.getHash());
+
+        EMAIL = "bob@acme.com";
+        // fails, contains a base64 /+, that gets replaced by _.
+        pseudonymizeLegacy = legacySanitizer.pseudonymize(EMAIL);
+        pseudonymizeDefault = defaultSanitizer.pseudonymize(EMAIL);
+        System.out.println(String.format("%s\nlegacy: %s\ndefault: %s", EMAIL, pseudonymizeLegacy, pseudonymizeDefault));
+        assertEquals(pseudonymizeDefault.getHash(), pseudonymizeLegacy.getHash());
+
+        String EMPLOYEE_ID = "000123456";
+        pseudonymizeLegacy = legacySanitizer.pseudonymize(EMPLOYEE_ID);
+        pseudonymizeDefault = defaultSanitizer.pseudonymize(EMPLOYEE_ID);
+        System.out.println(String.format("%s\nlegacy: %s\ndefault: %s", EMPLOYEE_ID, pseudonymizeLegacy, pseudonymizeDefault));
+        assertNotEquals(pseudonymizeDefault.getHash(), pseudonymizeLegacy.getHash());
     }
 }
