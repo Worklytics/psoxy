@@ -21,10 +21,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.SneakyThrows;
+import lombok.*;
 import lombok.extern.java.Log;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -83,9 +80,82 @@ public class VaultAwsIamAuth {
     @Getter
     AWSCredentials credentials;
 
-    @Getter
+    @Getter(AccessLevel.PACKAGE)
     final String payload = "Action=GetCallerIdentity&Version=2011-06-15";
 
+
+
+    @SneakyThrows
+    public String getToken() {
+        String vaultAddress =
+            envVarsConfigService.getConfigPropertyOrError(VaultConfigService.VaultConfigProperty.VAULT_ADDR);
+        VaultConfig vaultConfig = new VaultConfig()
+            .engineVersion(VAULT_ENGINE_VERSION)
+            .sslConfig(new SslConfig().build())
+            .address(vaultAddress);
+
+        envVarsConfigService.getConfigPropertyAsOptional(VaultConfigService.VaultConfigProperty.VAULT_NAMESPACE)
+            .filter(StringUtils::isNotBlank)  //don't bother tossing error here, assume meant no namespace
+            .ifPresent(ns -> {
+                try {
+                    vaultConfig.nameSpace(ns);
+                } catch (VaultException e) {
+                    throw new Error("Error setting Vault namespace", e);
+                }
+            });
+
+        Vault authVault = new Vault(vaultConfig);
+
+        String role =
+            envVarsConfigService.getConfigPropertyAsOptional(VaultConfigService.VaultConfigProperty.VAULT_ROLE)
+                .orElseGet(hostEnvironment::getInstanceId);
+
+        log.info("Vault Auth : aws iam with role:" + role);
+
+        DefaultRequest prototypeRequest = buildGetCallerIdentityRequest(vaultAddress);
+        String serializedHeaders = serializeToJsonMultimap(prototypeRequest.getHeaders());
+
+        // authenticate with Vault server by sending it prototype AWS STS request, which it will
+        // then send to AWS STS to establish caller's identity.
+        // if this works, and the caller's identity is allowed to access the role, then Vault will
+        // return a token for that role
+
+        String iamRequestBody =
+            Base64.getEncoder().encodeToString(IOUtils.toByteArray(prototypeRequest.getContent()));
+
+
+        AuthResponse authResponse = authVault.auth()
+            .loginByAwsIam(
+                role, //the Vault role, not AWS IAM role
+                // eg if configured with `vault write auth/aws/role/psoxy-gcal auth_type=iam policies={{YOUR_VAULT_POLICY}} max_ttl=500h bound_iam_principal_arn={{EXECUTION_ROLE_ARN}}`
+                //  then --> `psoxy-gcal`
+                Base64.getEncoder().encodeToString(prototypeRequest.getEndpoint().toString().getBytes(StandardCharsets.UTF_8)),
+                iamRequestBody,
+                Base64.getEncoder().encodeToString(serializedHeaders.getBytes(StandardCharsets.UTF_8)),
+                "aws"
+            );
+
+        //above gives 403
+        // ideas
+        //   - something misconfigured in Vault?
+        //   - AWS STS call fails?
+
+        return authResponse.getAuthClientToken();
+    }
+
+    @VisibleForTesting
+    void logCallerIdentity() {
+        AWSSecurityTokenService awsSecurityTokenService = AWSSecurityTokenServiceClient.builder()
+            .withRegion(region)
+            .build();
+        com.amazonaws.services.securitytoken.model.GetCallerIdentityRequest request =
+            new com.amazonaws.services.securitytoken.model.GetCallerIdentityRequest();
+        GetCallerIdentityResult r = awsSecurityTokenService.getCallerIdentity(request);
+
+        //result is something like
+        // arn:aws:sts::{{YOUR_AWS_ACCOUNT_ID}}:assumed-role/PsoxyExec_psoxy-gcal/psoxy-gcal
+        log.info("getCallerIdentity: " + r.getArn());
+    }
 
     /**
      * @return the prototype request that Vault should send to AWS to get the identity of the
@@ -93,26 +163,12 @@ public class VaultAwsIamAuth {
      *   the caller has credentials for the identity returned by the request
      */
     @SneakyThrows
+    @VisibleForTesting
     DefaultRequest buildGetCallerIdentityRequest(@NonNull String getVaultServerUrl) {
 
         Map<String, String> headers = new LinkedHashMap<>();
         headers.put(SERVER_ID_HEADER, getVaultServerUrl.split("//")[1]);
         //headers.put("User-Agent", "Psoxy/0.4.9");
-
-        AWSSecurityTokenService awsSecurityTokenService = AWSSecurityTokenServiceClient.builder()
-            .withRegion(region)
-            .build();
-
-        if (envVarsConfigService.isDevelopment()) {
-            com.amazonaws.services.securitytoken.model.GetCallerIdentityRequest request =
-                new com.amazonaws.services.securitytoken.model.GetCallerIdentityRequest();
-            GetCallerIdentityResult r = awsSecurityTokenService.getCallerIdentity(request);
-
-            //result is something like
-            // arn:aws:sts::{{YOUR_AWS_ACCOUNT_ID}}:assumed-role/PsoxyExec_psoxy-gcal/psoxy-gcal
-            log.info("getCallerIdentity: " + r.getArn());
-        }
-
         //ideas : try to migrate this all to v2? https://github.com/aws/aws-sdk-java-v2/blob/master/core/auth/src/main/java/software/amazon/awssdk/auth/signer/internal/BaseAws4Signer.java
 
         //try to differentiate Vault errors:
@@ -146,25 +202,27 @@ public class VaultAwsIamAuth {
         // vault example includes charset, but not in AWS docs don't
         getCallerIdentityRequest.addHeader("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
         //w/o Content-Length, trying this over curl gives 302; both AWS and vault examples include it
-        getCallerIdentityRequest.addHeader("Content-Length", String.valueOf(payload.getBytes(StandardCharsets.UTF_8).length));
-
-        if (envVarsConfigService.isDevelopment()) {
-            //preflight check; if this doesn't work directly against AWS, then it won't work when
-            // Vault sends to STS either
-            CloseableHttpClient httpClient = HttpClients.createDefault();
-            CloseableHttpResponse r = httpClient.execute(asHttpPost(getCallerIdentityRequest));
-            if (r.getStatusLine().getStatusCode() == 200) {
-                //if succeeds, content is the lambda's identity  (eg, it's IAM execution role)
-                log.info("STS preflight check succeeded: " + IOUtils.toString(r.getEntity().getContent(), StandardCharsets.UTF_8));
-            } else {
-                throw new RuntimeException("STS preflight failed: " + r.getStatusLine());
-            }
-
-            // TODO: this curl command times out (408) when run from local machine
-            log.info(asCurlCommand(getCallerIdentityRequest).replace("\\\n", ""));
-        }
+        getCallerIdentityRequest.addHeader("Content-Length", String.valueOf(getPayload().getBytes(StandardCharsets.UTF_8).length));
 
         return getCallerIdentityRequest;
+    }
+
+    @SneakyThrows
+    @VisibleForTesting
+    void preflightChecks(@NonNull String getVaultServerUrl) {
+        //preflight check; if this doesn't work directly against AWS, then it won't work when
+        // Vault sends to STS either
+        CloseableHttpClient httpClient = HttpClients.createDefault();
+        CloseableHttpResponse r = httpClient.execute(asHttpPost(buildGetCallerIdentityRequest(getVaultServerUrl)));
+        if (r.getStatusLine().getStatusCode() == 200) {
+            //if succeeds, content is the lambda's identity  (eg, it's IAM execution role)
+            log.info("STS preflight check succeeded: " + IOUtils.toString(r.getEntity().getContent(), StandardCharsets.UTF_8));
+        } else {
+            throw new RuntimeException("STS preflight failed: " + r.getStatusLine());
+        }
+
+        // TODO: this curl command times out (408) when run from local machine
+        log.info(asCurlCommand(buildGetCallerIdentityRequest(getVaultServerUrl)).replace("\\\n", ""));
     }
 
     //for preflight check
@@ -201,58 +259,6 @@ public class VaultAwsIamAuth {
     }
 
 
-    @SneakyThrows
-    String getToken() {
-        String vaultAddress =
-            envVarsConfigService.getConfigPropertyOrError(VaultConfigService.VaultConfigProperty.VAULT_ADDR);
-        VaultConfig vaultConfig = new VaultConfig()
-            .engineVersion(VAULT_ENGINE_VERSION)
-            .sslConfig(new SslConfig().build())
-            .address(vaultAddress);
-
-        envVarsConfigService.getConfigPropertyAsOptional(VaultConfigService.VaultConfigProperty.VAULT_NAMESPACE)
-            .filter(StringUtils::isNotBlank)  //don't bother tossing error here, assume meant no namespace
-            .ifPresent(ns -> {
-                try {
-                    vaultConfig.nameSpace(ns);
-                } catch (VaultException e) {
-                    throw new Error("Error setting Vault namespace", e);
-                }
-            });
-
-        Vault authVault = new Vault(vaultConfig);
-
-        String role =
-            envVarsConfigService.getConfigPropertyAsOptional(VaultConfigService.VaultConfigProperty.VAULT_ROLE)
-                .orElseGet(hostEnvironment::getInstanceId);
-
-        log.info("Vault Auth : aws iam with role:" + role);
-
-        DefaultRequest prototypeRequest = buildGetCallerIdentityRequest(vaultAddress);
-        String serializedHeaders = serializeToJsonMultimap(prototypeRequest.getHeaders());
-
-        // authenticate with Vault server by sending it prototype AWS STS request, which it will
-        // then send to AWS STS to establish caller's identity.
-        // if this works, and the caller's identity is allowed to access the role, then Vault will
-        // return an token for that role
-        AuthResponse authResponse = authVault.auth()
-            .loginByAwsIam(
-                role, //the Vault role, not AWS IAM role
-                // eg if configured with `vault write auth/aws/role/psoxy-gcal auth_type=iam policies={{YOUR_VAULT_POLICY}} max_ttl=500h bound_iam_principal_arn={{EXECUTION_ROLE_ARN}}`
-                //  then --> `psoxy-gcal`
-                Base64.getEncoder().encodeToString(prototypeRequest.getEndpoint().toString().getBytes(StandardCharsets.UTF_8)),
-                Base64.getEncoder().encodeToString(IOUtils.toByteArray(prototypeRequest.getContent())),
-                Base64.getEncoder().encodeToString(serializedHeaders.getBytes(StandardCharsets.UTF_8)),
-                "aws"
-            );
-
-        //above gives 403
-        // ideas
-        //   - something misconfigured in Vault?
-        //   - AWS STS call fails?
-
-        return authResponse.getAuthClientToken();
-    }
 
     // results in JSON payload that is most similar to Vault aws auth example
     // *seems* like this is closer to working? think error message from vault has changed; still 403,

@@ -25,6 +25,8 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import java.time.Duration;
 
+import static co.worklytics.psoxy.aws.VaultAwsIamAuth.VAULT_ENGINE_VERSION;
+
 
 /**
  * defines how to fulfill dependencies that need platform-specific implementations for GCP platform
@@ -112,10 +114,18 @@ public interface AwsModule {
             VaultAwsIamAuth vaultAwsIamAuth = vaultAwsIamAuthFactory.create(
                 awsEnvironment.getRegion(),
                 DefaultAWSCredentialsProviderChain.getInstance().getCredentials());
+
+            if (envVarsConfigService.isDevelopment()) {
+                vaultAwsIamAuth.logCallerIdentity();
+                vaultAwsIamAuth.preflightChecks(envVarsConfigService.getConfigPropertyOrError(VaultConfigService.VaultConfigProperty.VAULT_ADDR));
+            }
+
             VaultConfig vaultConfig = new VaultConfig()
+                .engineVersion(VaultAwsIamAuth.VAULT_ENGINE_VERSION)
                 .sslConfig(new SslConfig())
                 .address(envVarsConfigService.getConfigPropertyOrError(VaultConfigService.VaultConfigProperty.VAULT_ADDR))
                 .token(vaultAwsIamAuth.getToken());
+
             return new Vault(vaultConfig);
         }
     }
