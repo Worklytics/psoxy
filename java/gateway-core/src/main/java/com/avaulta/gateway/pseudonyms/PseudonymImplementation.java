@@ -7,6 +7,11 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum PseudonymImplementation {
 
+
+    //NOTE: use a version id (v0.3, etc) NOT the enum name, as the enum name --> version number
+    // is convention, to clarify what's default or not
+
+
     //not based on scope; base64-url encoded
     DEFAULT("v0.4"),
     //includes 'scope'
