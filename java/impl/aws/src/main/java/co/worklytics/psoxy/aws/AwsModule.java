@@ -13,8 +13,10 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.bettercloud.vault.SslConfig;
 import com.bettercloud.vault.Vault;
 import com.bettercloud.vault.VaultConfig;
+import com.bettercloud.vault.VaultException;
 import dagger.Module;
 import dagger.Provides;
+import org.apache.commons.lang3.StringUtils;
 import software.amazon.awssdk.core.client.config.ClientOverrideConfiguration;
 import software.amazon.awssdk.core.retry.RetryPolicy;
 import software.amazon.awssdk.core.retry.backoff.BackoffStrategy;
@@ -125,6 +127,16 @@ public interface AwsModule {
                 .sslConfig(new SslConfig())
                 .address(envVarsConfigService.getConfigPropertyOrError(VaultConfigService.VaultConfigProperty.VAULT_ADDR))
                 .token(vaultAwsIamAuth.getToken());
+
+            envVarsConfigService.getConfigPropertyAsOptional(VaultConfigService.VaultConfigProperty.VAULT_NAMESPACE)
+                .filter(StringUtils::isNotBlank)  //don't bother tossing error here, assume meant no namespace
+                .ifPresent(ns -> {
+                    try {
+                        vaultConfig.nameSpace(ns);
+                    } catch (VaultException e) {
+                        throw new Error("Error setting Vault namespace", e);
+                    }
+                });
 
             return new Vault(vaultConfig);
         }
