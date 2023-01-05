@@ -6,11 +6,15 @@ locals {
   path_to_instance_secrets    = coalesce(var.path_to_instance_secrets, "secret/${local.instance_id_upper_snakecase}/")
 }
 
-# NOTE: as of 4 Jan 2023, this policy seems to only work if modified to allow read of `secret/*`
-
 resource "vault_policy" "psoxy_instance" {
   name   = var.instance_id
+
+  # TODO: as of 4 Jan 2023, secret/* case needed here; please scope better for your prod use!!
   policy = <<EOT
+path "secret/*"
+{
+	capabilities = ["read"]
+}
 path "${var.path_to_global_secrets}*"
 {
 	capabilities = ["read"]
