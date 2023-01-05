@@ -20,11 +20,19 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
 
     @Deprecated //removed from v0.4
     IDENTIFIER_SCOPE_ID,
+
+
     PSOXY_SALT,
+
+
+    //see PseudonymImplementation
+    PSEUDONYM_IMPLEMENTATION,
+
     //if relying on default rules, whether to use version that pseudonymizes per-account source IDs
     // that aren't email addresses (eg, the IDs that sources generate for each account, which aren't
     // usually PII without having access to the source's dataset)
     PSEUDONYMIZE_APP_IDS,
+
     // if set, a base64-YAML encoding of rules
     RULES,
     // for testing - if set, allows for behavior that should only be permitted in development context,

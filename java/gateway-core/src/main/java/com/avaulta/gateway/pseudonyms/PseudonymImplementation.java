@@ -16,7 +16,6 @@ public enum PseudonymImplementation {
     @Getter @NonNull
     private final String httpHeaderValue;
 
-
     public static PseudonymImplementation parseHttpHeaderValue(String httpHeaderValue) {
         for (PseudonymImplementation impl : values()) {
             if (impl.getHttpHeaderValue().equals(httpHeaderValue)) {
@@ -24,5 +23,14 @@ public enum PseudonymImplementation {
             }
         }
         throw new IllegalArgumentException("Unknown pseudonym implementation: " + httpHeaderValue);
+    }
+
+    public static PseudonymImplementation parseConfigPropertyValue(String configPropertyValue) {
+        for (PseudonymImplementation impl : values()) {
+            if (impl.getHttpHeaderValue().equals(configPropertyValue)) {
+                return impl;
+            }
+        }
+        throw new IllegalArgumentException("Unknown pseudonym implementation: " + configPropertyValue);
     }
 }
