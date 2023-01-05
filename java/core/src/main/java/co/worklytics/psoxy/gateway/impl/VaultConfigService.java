@@ -8,6 +8,7 @@ import com.bettercloud.vault.VaultException;
 import com.bettercloud.vault.response.AuthResponse;
 import com.bettercloud.vault.response.LogicalResponse;
 import com.bettercloud.vault.response.LookupResponse;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
 import lombok.Getter;
@@ -52,6 +53,7 @@ public class VaultConfigService implements ConfigService {
     // NOTE: if proxy doesn't run AT LEAST this option, and configured with 'periodic' token, it
     // might expire ...
     public static final Duration MIN_AUTH_TTL = Duration.ofHours(36);
+    public static final Duration IAM_AUTH_MIN_TTL = Duration.ofHours(2);
 
     static final Integer VAULT_ENGINE_VERSION = 2;
 
@@ -61,7 +63,8 @@ public class VaultConfigService implements ConfigService {
     Vault vault;
 
     @AssistedInject
-    VaultConfigService(Vault vault, @Assisted @NonNull String path) {
+    VaultConfigService(Vault vault,
+                       @Assisted @NonNull String path) {
         this.vault = vault;
         this.path = path;
     }
@@ -90,24 +93,21 @@ public class VaultConfigService implements ConfigService {
     }
 
 
+
+
     @SneakyThrows
     public void init() {
         LookupResponse initialAuth = this.vault.auth().lookupSelf();
 
-        if (initialAuth.getTTL() == 0) {
-            // 0 is default value in client; 0 also means 'infinite', per their docs:
-            // https://developer.hashicorp.com/vault/docs/concepts/tokens#token-time-to-live-periodic-tokens-and-explicit-max-ttls
+        log.info("Token: " + (new ObjectMapper()).writeValueAsString(initialAuth));
 
-            //NOTE: if ttl not infinite, we better have a 'periodic' token; as current impl of Vault
-            // takes token from ENV_VAR, which is presumably not writable by the java process
-
-        } else if (initialAuth.getTTL() < MIN_AUTH_TTL.getSeconds()) {
+        if (needsRenewal(initialAuth)) {
             if (!initialAuth.isRenewable()) {
                 //appears we don't actually have a 'periodic' token? or it's expired such that can't renew?
-                log.warning("Vault token is not renewable, and has less than " + MIN_AUTH_TTL.getSeconds() + " seconds left. Will attempt renewal anyways, but could fail.");
+                log.warning("Vault token should be renewed, but is not renewable");
             }
             try {
-                log.info("Vault token TTL is less than " + MIN_AUTH_TTL.getSeconds() + " seconds. Renewing token.");
+                log.info("Renewing vault token.");
                 AuthResponse renewedAuth = this.vault.auth()
                     .renewSelf(MIN_AUTH_TTL.getSeconds() * 2);
                 log.info("Renewed Vault token. New TTL: " + renewedAuth.getAuthLeaseDuration() + " seconds");
@@ -115,8 +115,6 @@ public class VaultConfigService implements ConfigService {
                 //log, but continue in case remaining one has some validity
                 log.log(Level.WARNING, "Failed to renew Vault token. ", e);
             }
-        } else {
-            log.info("Vault token TTL is " + initialAuth.getTTL() + " seconds. No need to renew.");
         }
     }
 
@@ -169,5 +167,25 @@ public class VaultConfigService implements ConfigService {
         return getPath() + configProperty.name();
     }
 
+    boolean isIamAuthMethod(String path) {
+        return path.startsWith("auth/aws") || path.startsWith("auth/gcp");
+    }
+    boolean needsRenewal(LookupResponse tokenLookupResponse) {
+        if (tokenLookupResponse.getTTL() == 0) {
+            // 0 is default value in client; 0 also means 'infinite', per their docs:
+            // https://developer.hashicorp.com/vault/docs/concepts/tokens#token-time-to-live-periodic-tokens-and-explicit-max-ttls
+
+            //NOTE: if ttl not infinite, we better have a 'periodic' token; as current impl of Vault
+            // takes token from ENV_VAR, which is presumably not writable by the java process
+            return false;
+        } else if (isIamAuthMethod(tokenLookupResponse.getPath())) {
+            return tokenLookupResponse.getTTL() < IAM_AUTH_MIN_TTL.getSeconds();
+        } else {
+            //NOTE: if ttl not infinite, and not an IAM token, we better have a 'periodic' token;
+            // as current impl of Vault takes token from ENV_VAR, which is presumably not writable
+            // by the java process
+            return tokenLookupResponse.getTTL() < MIN_AUTH_TTL.getSeconds();
+        }
+    }
 
 }
