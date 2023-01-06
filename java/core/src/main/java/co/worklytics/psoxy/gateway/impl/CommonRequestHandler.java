@@ -32,6 +32,7 @@ import javax.inject.Inject;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -199,11 +200,7 @@ public class CommonRequestHandler {
                 if (skipSanitization) {
                     proxyResponseContent = responseContent;
                 } else {
-                    Optional<PseudonymImplementation> pseudonymImplementation = parsePseudonymImplementation(request);
-                    if (pseudonymImplementation.isPresent()) {
-                        sanitizer = sanitizerFactory.create(sanitizerFactory.buildOptions(config, rules)
-                            .withPseudonymImplementation(pseudonymImplementation.get()));
-                    }
+                    dynamicallyConfigureSanitizer(request);
 
                     proxyResponseContent = sanitizer.sanitize(request.getHttpMethod(), targetUrl, responseContent);
                     String rulesSha = rulesUtils.sha(sanitizer.getConfigurationOptions().getRules());
@@ -221,6 +218,23 @@ public class CommonRequestHandler {
             return builder.build();
         } finally {
             sourceApiResponse.disconnect();
+        }
+    }
+
+    /**
+     * encapsulates dynamically configuring Sanitizer based on request (to support some aspects of
+     * its behavior being controlled via HTTP headers)
+     *
+     * @param request
+     */
+    void dynamicallyConfigureSanitizer(HttpEventRequest request) {
+        Optional<PseudonymImplementation> pseudonymImplementation = parsePseudonymImplementation(request);
+        if (pseudonymImplementation.isPresent()) {
+            if (!Objects.equals(pseudonymImplementation.get(),
+                    sanitizer.getConfigurationOptions().getPseudonymImplementation())) {
+                sanitizer = sanitizerFactory.create(sanitizerFactory.buildOptions(config, rules)
+                    .withPseudonymImplementation(pseudonymImplementation.get()));
+            }
         }
     }
 

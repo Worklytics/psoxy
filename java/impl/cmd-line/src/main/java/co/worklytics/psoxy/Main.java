@@ -31,7 +31,7 @@ public class Main {
 
         Preconditions.checkArgument(inputFile.exists(), "File %s does not exist", args[0]);
 
-        container.fileHandler().pseudonymize(config, inputFile, System.out);
+        container.fileHandler().sanitize(config, inputFile, System.out);
     }
 
 
