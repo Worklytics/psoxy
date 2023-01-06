@@ -19,6 +19,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
@@ -95,6 +97,7 @@ public class CommonRequestHandler {
     private static final Joiner HEADER_JOINER = Joiner.on(",");
 
 
+    @Getter(value = AccessLevel.PACKAGE, onMethod_ = @VisibleForTesting)
     private volatile Sanitizer sanitizer;
     private final Object $writeLock = new Object[0];
 
@@ -227,14 +230,25 @@ public class CommonRequestHandler {
      *
      * @param request
      */
+    @VisibleForTesting
     void dynamicallyConfigureSanitizer(HttpEventRequest request) {
         Optional<PseudonymImplementation> pseudonymImplementation = parsePseudonymImplementation(request);
+
+        Sanitizer.ConfigurationOptions defaults = sanitizerFactory.buildOptions(config, rules);
+
         if (pseudonymImplementation.isPresent()) {
+            loadSanitizerRules();
+
             if (!Objects.equals(pseudonymImplementation.get(),
                     sanitizer.getConfigurationOptions().getPseudonymImplementation())) {
-                sanitizer = sanitizerFactory.create(sanitizerFactory.buildOptions(config, rules)
+                sanitizer = sanitizerFactory.create(defaults
                     .withPseudonymImplementation(pseudonymImplementation.get()));
             }
+        } else if (!Objects.equals(defaults.getPseudonymImplementation(),
+                sanitizer.getConfigurationOptions().getPseudonymImplementation())) {
+            //no header passed, reset to defaults if necessary
+            // (covers case where header not passed, but was previously passed; not expected)
+            sanitizer = sanitizerFactory.create(defaults);
         }
     }
 

@@ -3,6 +3,7 @@ package co.worklytics.psoxy.gateway.impl;
 import co.worklytics.psoxy.ControlHeader;
 import co.worklytics.psoxy.PsoxyModule;
 import co.worklytics.psoxy.Sanitizer;
+import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
@@ -55,6 +56,9 @@ class CommonRequestHandlerTest {
     public void setup() {
         CommonRequestHandlerTest.Container container = DaggerCommonRequestHandlerTest_Container.create();
         container.inject(this);
+
+        when(handler.config.getConfigPropertyAsOptional(eq(ProxyConfigProperty.PSOXY_SALT)))
+            .thenReturn(Optional.of("salt"));
     }
 
     @Inject
@@ -115,7 +119,7 @@ class CommonRequestHandlerTest {
     }
 
     @Test
-    void parseOptionsFromRequest() {
+    void parsePseudonymImplFromRequest() {
         //verify precondition that defaults != LEGACY
         assertEquals(
             PseudonymImplementation.DEFAULT,
@@ -131,6 +135,28 @@ class CommonRequestHandlerTest {
 
         //verify options were parsed correctly
         assertEquals(PseudonymImplementation.LEGACY, impl.orElseThrow());
+    }
+
+    @Test
+    void dynamicallyConfigureSanitizer() {
+
+        //prep mock request
+        HttpEventRequest request = mock(HttpEventRequest.class);
+        when(request.getHeader(ControlHeader.PSEUDONYM_IMPLEMENTATION.getHttpHeader()))
+            .thenReturn(Optional.of(PseudonymImplementation.LEGACY.getHttpHeaderValue()));
+
+
+        //test set sanitizer
+        handler.dynamicallyConfigureSanitizer(request);
+
+        assertEquals(PseudonymImplementation.LEGACY,
+            handler.getSanitizer().getConfigurationOptions().getPseudonymImplementation());
+
+        //test returns to default
+        HttpEventRequest nextRequest = mock(HttpEventRequest.class);
+        handler.dynamicallyConfigureSanitizer(nextRequest);
+        assertEquals(PseudonymImplementation.DEFAULT,
+            handler.getSanitizer().getConfigurationOptions().getPseudonymImplementation());
     }
 
     @Test
