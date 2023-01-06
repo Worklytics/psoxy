@@ -13,8 +13,9 @@ resource "aws_ssm_parameter" "secret" {
 
   lifecycle {
     ignore_changes = [
-      tags,
-      value
+      # value, # previously, we ignored changes to value; but this doesn't actually prevent new
+               # value from being in your state file - so little point.
+      tags
     ]
   }
 }

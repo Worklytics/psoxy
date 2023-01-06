@@ -5,7 +5,7 @@ gcp_org_id                    = "123123123123"
 gcp_folder_id                 = "123123123123"
 gcp_billing_account_id        = "123456-ABCDEFG-ABCDEFG"
 google_workspace_example_user = "example@acme.com"
-# force_bundle                  = false # if making changes to Java code w/o changing version number, set to true
+force_bundle                  = true # if making changes to Java code w/o changing version number, set to true
 enabled_connectors = [
   "asana",
   "dropbox-business",

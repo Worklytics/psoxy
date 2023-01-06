@@ -7,9 +7,22 @@ terraform {
     }
   }
 
-  # if you leave this as local, you should backup/commit your TF state files
+  # we recommend you use a secure location for your Terraform state (such as S3 bucket), as it
+  # may contain sensitive values (such as API keys) depending on which data sources you configure.
+  #
+  # local may be safe for production-use IFF you are executing Terraform from a secure location
+  #
+  # Please review and seek guidance from your Security team if in doubt.
   backend "local" {
   }
+
+  # example remove backend (this S3 bucket must already be provisioned, and AWS role executing
+  # terraform must be able to read/write to it - and use encryption key, if any)
+  #  backend "s3" {
+  #    bucket = "mybucket"
+  #    key    = "path/to/my/key"
+  #    region = "us-east-1"
+  #  }
 }
 
 
@@ -21,7 +34,7 @@ data "azuread_client_config" "current" {}
 
 module "worklytics_connector_specs" {
   # source = "../../modules/worklytics-connector-specs"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connector-specs?ref=v0.4.8"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connector-specs?ref=v0.4.9"
 
   enabled_connectors = var.enabled_connectors
 
@@ -39,7 +52,7 @@ module "msft-connection" {
   for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
   # source = "../../modules/azuread-connection"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-connection?ref=v0.4.8"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-connection?ref=v0.4.9"
 
   display_name                      = "Psoxy Connector - ${each.value.display_name}${var.connector_display_name_suffix}"
   tenant_id                         = var.msft_tenant_id
@@ -54,7 +67,7 @@ module "msft-connection-auth" {
   for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
   # source = "../../modules/azuread-local-cert"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-local-cert?ref=v0.4.8"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-local-cert?ref=v0.4.9"
 
   application_object_id = module.msft-connection[each.key].connector.id
   rotation_days         = 60
@@ -94,7 +107,7 @@ module "msft_365_grants" {
   for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
   # source = "../../modules/azuread-grant-all-users"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-grant-all-users?ref=v0.4.8"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-grant-all-users?ref=v0.4.9"
 
   psoxy_instance_id        = each.key
   application_id           = module.msft-connection[each.key].connector.application_id

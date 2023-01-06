@@ -5,9 +5,21 @@ terraform {
     }
   }
 
-  # if you leave this as local, you should backup/commit your TF state files
+  # we recommend you use a secure location for your Terraform state (such as GCS bucket), as it
+  # may contain sensitive values (such as API keys) depending on which data sources you configure.
+  #
+  # local may be safe for production-use IFF you are executing Terraform from a secure location
+  #
+  # Please review and seek guidance from your Security team if in doubt.
   backend "local" {
   }
+
+  # example remove backend (this GCS bucket must already be provisioned, and GCP user executing
+  # terraform must be able to read/write to it)
+  #  backend "gcs" {
+  #    bucket  = "tf-state-prod"
+  #    prefix  = "terraform/state"
+  #  }
 }
 
 # NOTE: if you don't have perms to provision a GCP project in your billing account, you can have
@@ -25,13 +37,14 @@ resource "google_project" "psoxy-project" {
 
 module "psoxy-gcp-google-workspace" {
   source = "../../modular-examples/gcp-google-workspace"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-google-workspace?ref=v0.4.8"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-google-workspace?ref=v0.4.9"
 
   gcp_project_id                = google_project.psoxy-project.project_id
   environment_name              = var.environment_name
   worklytics_sa_emails          = var.worklytics_sa_emails
   connector_display_name_suffix = var.connector_display_name_suffix
   psoxy_base_dir                = var.psoxy_base_dir
+  force_bundle                  = var.force_bundle
   gcp_region                    = var.gcp_region
   replica_regions               = var.replica_regions
   enabled_connectors            = var.enabled_connectors

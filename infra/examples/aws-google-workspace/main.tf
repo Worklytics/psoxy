@@ -19,7 +19,7 @@ terraform {
   #
   # local may be safe for production-use IFF you are executing Terraform from a secure location
   #
-  # Please review seek guidance from your Security team if in doubt.
+  # Please review and seek guidance from your Security team if in doubt.
   backend "local" {
   }
 
@@ -57,13 +57,14 @@ resource "google_project" "psoxy-google-connectors" {
 }
 
 module "psoxy-aws-google-workspace" {
-  source = "../../modular-examples/aws-google-workspace"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-google-workspace?ref=v0.4.8"
+  # source = "../../modular-examples/aws-google-workspace"
+  source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-google-workspace?ref=v0.4.9"
 
   aws_account_id                 = var.aws_account_id
   aws_assume_role_arn            = var.aws_assume_role_arn # role that can test the instances (lambdas)
   aws_region                     = var.aws_region
   psoxy_base_dir                 = var.psoxy_base_dir
+  force_bundle                   = var.force_bundle
   caller_aws_arns                = var.caller_aws_arns
   caller_gcp_service_account_ids = var.caller_gcp_service_account_ids
   environment_name               = var.environment_name

@@ -1,29 +1,23 @@
 aws_account_id                = "123123123123" # your AWS account ID here
 aws_assume_role_arn           = "arn:aws:iam::123123123123:role/InfraAdmin" # role in that AWS account ID to assume
-gcp_project_id                = "psoxy-acme-example"
-gcp_org_id                    = "123123123123"
-gcp_folder_id                 = "123123123123"
-gcp_billing_account_id        = "123456-ABCDEFG-ABCDEFG"
-google_workspace_example_user = "example@acme.com"
-# force_bundle                  = false # if making changes to Java code w/o changing version number, set to true
+msft_tenant_id                = "" # your Microsoft tenant ID here
 enabled_connectors = [
   "asana",
   "dropbox-business",
-  "gcal",
-  "gdirectory",
-  "gdrive",
-  "gmail",
-  "google-meet",
-  "google-chat",
+  "outlook-calendar",
+  "outlook-mail",
   "hris",
   "slack-discovery-api",
   "zoom",
 ]
-non_production_connectors = [] # use to mark any of the above as 'non-production' (NOTE: allows test calls that may expose PII)
+force_bundle                  = true # if making changes to Java code w/o changing version number, set to true
+non_production_connectors = [
+  # use to mark any of the above as 'non-production' (NOTE: allows test calls that may expose PII)
+]
 caller_aws_arns = [
 ]
 caller_gcp_service_account_ids = [
-  # "123456712345671234567" # 21-digits; get this from Worklytics once prod-ready
+  # "123456712345671234567" # 21-digits, get this from Worklytics once prod-ready
 ]
 lookup_table_builders = {
     #    "lookup-hris" = {

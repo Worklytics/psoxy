@@ -27,11 +27,10 @@ variable "psoxy_base_dir" {
     error_message = "The psoxy_base_dir value should end with a slash."
   }
 }
-
-variable "general_environment_variables" {
-  type        = map(string)
-  description = "environment variables to add for all connectors"
-  default     = {}
+variable "force_bundle" {
+  type        =  bool
+  description = "whether to force build of deployment bundle, even if it already exists for this proxy version"
+  default     = false
 }
 
 variable "caller_gcp_service_account_ids" {
@@ -72,7 +71,11 @@ variable "connector_display_name_suffix" {
   default     = ""
 }
 
-
+variable "general_environment_variables" {
+  type        = map(string)
+  description = "environment variables to add for all connectors"
+  default     = {}
+}
 
 variable "enabled_connectors" {
   type        = list(string)
@@ -159,7 +162,7 @@ variable "lookup_table_builders" {
     #          "employee_id" = "employee_id_orig"
     #        }
     #        columnsToRename      = {}
-    #        columnsToInclude     = null
+    #        columnsToInclude     = null # if any,  only columns defined here will be part of the output
     #      }
     #
     #    }

@@ -77,7 +77,6 @@ EOT
 
 }
 
-
 # enable domain-wide-delegation via Google Workspace Admin console
 resource "local_file" "todo-google-workspace-admin-console" {
   filename = "TODO ${var.todo_step} - setup ${var.display_name}.md"
