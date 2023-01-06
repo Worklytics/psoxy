@@ -16,3 +16,9 @@ variable "psoxy_version" {
   default     = "0.4.8"
 }
 
+variable "force_bundle" {
+  type        =  bool
+  description = "whether to force build of deployment bundle, even if it already exists"
+  default     = false
+}
+

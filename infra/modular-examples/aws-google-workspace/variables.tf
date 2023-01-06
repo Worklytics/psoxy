@@ -71,6 +71,12 @@ variable "psoxy_base_dir" {
   }
 }
 
+variable "force_bundle" {
+  type        =  bool
+  description = "whether to force build of deployment bundle, even if it already exists"
+  default     = false
+}
+
 variable "general_environment_variables" {
   type        = map(string)
   description = "environment variables to add for all connectors"

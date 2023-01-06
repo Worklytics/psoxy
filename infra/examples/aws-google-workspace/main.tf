@@ -64,6 +64,7 @@ module "psoxy-aws-google-workspace" {
   aws_assume_role_arn            = var.aws_assume_role_arn # role that can test the instances (lambdas)
   aws_region                     = var.aws_region
   psoxy_base_dir                 = var.psoxy_base_dir
+  force_bundle                   = var.force_bundle
   caller_aws_arns                = var.caller_aws_arns
   caller_gcp_service_account_ids = var.caller_gcp_service_account_ids
   environment_name               = var.environment_name

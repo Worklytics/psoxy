@@ -76,6 +76,12 @@ variable "psoxy_base_dir" {
   }
 }
 
+variable "force_bundle" {
+  type        =  bool
+  description = "whether to force build of deployment bundle, even if it already exists for this proxy version"
+  default     = false
+}
+
 variable "pseudonymize_app_ids" {
   type        = string
   description = "if set, will set value of PSEUDONYMIZE_APP_IDS environment variable to this value for all sources"

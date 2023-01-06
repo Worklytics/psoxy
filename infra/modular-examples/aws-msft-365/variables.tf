@@ -54,6 +54,13 @@ variable "psoxy_base_dir" {
   }
 }
 
+variable "force_bundle" {
+  type        =  bool
+  description = "whether to force build of deployment bundle, even if it already exists"
+  default     = false
+}
+
+
 variable "connector_display_name_suffix" {
   type        = string
   description = "suffix to append to display_names of connector SAs; helpful to distinguish between various ones in testing/dev scenarios"

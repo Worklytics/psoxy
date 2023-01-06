@@ -26,6 +26,7 @@ module "psoxy-gcp" {
   invoker_sa_emails = var.worklytics_sa_emails
   psoxy_base_dir    = var.psoxy_base_dir
   bucket_location   = var.gcp_region
+  force_bundle      = var.force_bundle
 }
 
 module "google-workspace-connection" {

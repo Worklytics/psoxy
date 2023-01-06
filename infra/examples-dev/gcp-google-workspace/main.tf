@@ -44,6 +44,7 @@ module "psoxy-gcp-google-workspace" {
   worklytics_sa_emails          = var.worklytics_sa_emails
   connector_display_name_suffix = var.connector_display_name_suffix
   psoxy_base_dir                = var.psoxy_base_dir
+  force_bundle                  = var.force_bundle
   gcp_region                    = var.gcp_region
   replica_regions               = var.replica_regions
   enabled_connectors            = var.enabled_connectors
