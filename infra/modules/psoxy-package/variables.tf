@@ -13,7 +13,7 @@ variable "implementation" {
 variable "psoxy_version" {
   type        = string
   description = "version of psoxy to deploy"
-  default     = "0.4.8"
+  default     = "0.4.9"
 }
 
 variable "force_bundle" {
@@ -21,4 +21,3 @@ variable "force_bundle" {
   description = "whether to force build of deployment bundle, even if it already exists"
   default     = false
 }
-

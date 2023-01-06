@@ -109,7 +109,6 @@ variable "non_production_connectors" {
   default     = []
 }
 
-
 variable "custom_bulk_connectors" {
   type = map(object({
     source_kind = string

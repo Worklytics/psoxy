@@ -18,12 +18,6 @@ variable "aws_region" {
   description = "default region in which to provision your AWS infra"
 }
 
-variable "general_environment_variables" {
-  type        = map(string)
-  description = "environment variables to add for all connectors"
-  default     = {}
-}
-
 variable "caller_gcp_service_account_ids" {
   type        = list(string)
   description = "ids of GCP service accounts allowed to send requests to the proxy (eg, unique ID of the SA of your Worklytics instance)"
@@ -80,6 +74,12 @@ variable "force_bundle" {
   type        =  bool
   description = "whether to force build of deployment bundle, even if it already exists for this proxy version"
   default     = false
+}
+
+variable "general_environment_variables" {
+  type        = map(string)
+  description = "environment variables to add for all connectors"
+  default     = {}
 }
 
 variable "pseudonymize_app_ids" {
