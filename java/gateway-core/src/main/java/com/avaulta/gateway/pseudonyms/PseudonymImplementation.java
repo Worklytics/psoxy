@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Arrays;
+
 @RequiredArgsConstructor
 public enum PseudonymImplementation {
 
@@ -22,20 +24,13 @@ public enum PseudonymImplementation {
     private final String httpHeaderValue;
 
     public static PseudonymImplementation parseHttpHeaderValue(String httpHeaderValue) {
-        for (PseudonymImplementation impl : values()) {
-            if (impl.getHttpHeaderValue().equals(httpHeaderValue)) {
-                return impl;
-            }
-        }
-        throw new IllegalArgumentException("Unknown pseudonym implementation: " + httpHeaderValue);
+        return Arrays.stream(values())
+            .filter( p -> p.getHttpHeaderValue().equals(httpHeaderValue))
+            .findFirst()
+            .orElseThrow( () -> new IllegalArgumentException("Unknown pseudonym implementation: " + httpHeaderValue));
     }
 
     public static PseudonymImplementation parseConfigPropertyValue(String configPropertyValue) {
-        for (PseudonymImplementation impl : values()) {
-            if (impl.getHttpHeaderValue().equals(configPropertyValue)) {
-                return impl;
-            }
-        }
-        throw new IllegalArgumentException("Unknown pseudonym implementation: " + configPropertyValue);
+        return parseHttpHeaderValue(configPropertyValue);
     }
 }
