@@ -106,6 +106,7 @@ variable "custom_bulk_connectors" {
       columnsToDuplicate    = map(string)
       columnsToRename       = map(string)
     })
+    settings_to_provide = optional(map(string), {})
   }))
   description = "specs of custom bulk connectors to create"
 

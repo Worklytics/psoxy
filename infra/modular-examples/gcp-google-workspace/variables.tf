@@ -87,8 +87,9 @@ variable "non_production_connectors" {
 
 variable "custom_bulk_connectors" {
   type = map(object({
-    source_kind = string
-    rules       = map(list(string))
+    source_kind         = string
+    rules               = map(list(string))
+    settings_to_provide = optional(map(string), {})
   }))
   description = "specs of custom bulk connectors to create"
 
