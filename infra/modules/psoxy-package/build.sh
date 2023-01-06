@@ -5,7 +5,9 @@ set -e
 # psoxy build script to be invoked from Terraform 'external' data resource
 # NOTE:
 TERRAFORM_CONFIG_PATH=`pwd`
-LOG_FILE=${TERRAFORM_CONFIG_PATH}/psoxy-package.`date +%Y%m%d'T'%H%M%S`.log
+LOG_FILE=/tmp/psoxy-package.`date +%Y%m%d'T'%H%M%S`.log
+
+ln -sf ${LOG_FILE} ${TERRAFORM_CONFIG_PATH}/last-build.log
 
 cd $1/gateway-core
 mvn package install > ${LOG_FILE} 2>&1
