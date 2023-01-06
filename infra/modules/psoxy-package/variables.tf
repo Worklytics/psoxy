@@ -13,6 +13,5 @@ variable "implementation" {
 variable "psoxy_version" {
   type        = string
   description = "version of psoxy to deploy"
-  default     = "0.4.8"
+  default     = "0.4.9"
 }
-

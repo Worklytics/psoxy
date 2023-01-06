@@ -28,12 +28,6 @@ variable "psoxy_base_dir" {
   }
 }
 
-variable "general_environment_variables" {
-  type        = map(string)
-  description = "environment variables to add for all connectors"
-  default     = {}
-}
-
 variable "caller_gcp_service_account_ids" {
   type        = list(string)
   description = "ids of GCP service accounts allowed to send requests to the proxy (eg, unique ID of the SA of your Worklytics instance)"
@@ -72,7 +66,11 @@ variable "connector_display_name_suffix" {
   default     = ""
 }
 
-
+variable "general_environment_variables" {
+  type        = map(string)
+  description = "environment variables to add for all connectors"
+  default     = {}
+}
 
 variable "enabled_connectors" {
   type        = list(string)
@@ -159,7 +157,7 @@ variable "lookup_table_builders" {
     #          "employee_id" = "employee_id_orig"
     #        }
     #        columnsToRename      = {}
-    #        columnsToInclude     = null
+    #        columnsToInclude     = null # if any,  only columns defined here will be part of the output
     #      }
     #
     #    }
