@@ -127,15 +127,13 @@ resource "random_password" "encryption_key" {
   special = true
 }
 
-
-
-
 module "psoxy-package" {
   source = "../psoxy-package"
 
   implementation     = "aws"
   path_to_psoxy_java = "${var.psoxy_base_dir}java"
   psoxy_version      = var.psoxy_version
+  force_bundle       = var.force_bundle
 }
 
 output "secrets" {

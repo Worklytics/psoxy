@@ -19,6 +19,12 @@ variable "psoxy_base_dir" {
   default     = "../../.."
 }
 
+variable "force_bundle" {
+  type        =  bool
+  description = "whether to force build of deployment bundle, even if it already exists"
+  default     = false
+}
+
 variable "caller_gcp_service_account_ids" {
   type        = list(string)
   description = "ids of GCP OAuth Clients (service accounts) allowed to send requests to the proxy (eg, unique ID of the SA of your Worklytics instance)"

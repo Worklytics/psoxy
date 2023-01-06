@@ -10,6 +10,7 @@ enabled_connectors = [
   "slack-discovery-api",
   "zoom",
 ]
+# force_bundle                  = false # if making changes to Java code w/o changing version number, set to true
 non_production_connectors = [
   # use to mark any of the above as 'non-production' (NOTE: allows test calls that may expose PII)
 ]

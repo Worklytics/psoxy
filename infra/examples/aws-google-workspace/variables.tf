@@ -27,6 +27,11 @@ variable "psoxy_base_dir" {
     error_message = "The psoxy_base_dir value should end with a slash."
   }
 }
+variable "force_bundle" {
+  type        =  bool
+  description = "whether to force build of deployment bundle, even if it already exists for this proxy version"
+  default     = false
+}
 
 variable "caller_gcp_service_account_ids" {
   type        = list(string)
