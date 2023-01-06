@@ -126,7 +126,7 @@ module "psoxy-google-workspace-connector" {
   secret_bindings = merge({
     # as SERVICE_ACCOUNT_KEY rotated by Terraform, reasonable to bind as env variable
     SERVICE_ACCOUNT_KEY = {
-      secret_id      = module.google-workspace-key-secrets[each.key].secret_ids["PSOXY_${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY"]
+      secret_id      = module.google-workspace-key-secrets[each.key].secret_secret_ids["PSOXY_${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY"]
       version_number = module.google-workspace-key-secrets[each.key].secret_version_numbers["PSOXY_${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY"]
     }
   }, module.psoxy-gcp.secrets)
