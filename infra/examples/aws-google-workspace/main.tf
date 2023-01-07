@@ -47,13 +47,10 @@ provider "aws" {
   ]
 }
 
-# holds SAs + keys needed to connect to Google Workspace APIs
-resource "google_project" "psoxy-google-connectors" {
-  name            = "Worklytics Connect%{if var.environment_name != ""} - ${var.environment_name}%{endif}"
-  project_id      = var.gcp_project_id
-  billing_account = var.gcp_billing_account_id
-  folder_id       = var.gcp_folder_id # if project is at top-level of your GCP organization, rather than in a folder, comment this line out
-  # org_id          = var.gcp_org_id # if project is in a GCP folder, this value is implicit and this line should be commented out
+# Google user or service account which Terraform is authenticated as must be authorized to
+# provision resources (Service Accounts + Keys; and activate APIs) in this project
+data "google_project" "psoxy-google-connectors" {
+  project_id = var.gcp_project_id
 }
 
 module "psoxy-aws-google-workspace" {
@@ -73,13 +70,9 @@ module "psoxy-aws-google-workspace" {
   non_production_connectors      = var.non_production_connectors
   custom_bulk_connectors         = var.custom_bulk_connectors
   lookup_table_builders          = var.lookup_table_builders
-  gcp_project_id                 = google_project.psoxy-google-connectors.project_id
+  gcp_project_id                 = data.google_project.psoxy-google-connectors.project_id
   google_workspace_example_user  = var.google_workspace_example_user
   general_environment_variables  = var.general_environment_variables
-
-  depends_on = [
-    google_project.psoxy-google-connectors
-  ]
 }
 
 # if you generated these, you may want them to import back into your data warehouse

@@ -14,9 +14,6 @@ caller_gcp_service_account_ids = [
 ]
 
 gcp_project_id                = "psoxy-dev-aws-example-12314332"
-gcp_org_id                    = "123456789" # your GCP organization ID; if existing project, you can leave as empty string and see the value from `terraform plan`
-gcp_folder_id                 = "111111111111" # folder ID for the project; if existing project, you can leave as empty string and see the value from `terraform plan`
-gcp_billing_account_id        = "123456-789ABC-DEF012" # GCP billing account ID for project; if existing project, you can leave as empty string and see the value from `terraform plan`
 psoxy_base_dir                = "~/psoxy/" # TODO: we suggest using absolute path here
 ```
 
