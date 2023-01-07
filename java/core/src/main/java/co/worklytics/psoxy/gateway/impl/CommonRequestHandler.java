@@ -200,10 +200,10 @@ public class CommonRequestHandler {
                 if (skipSanitization) {
                     proxyResponseContent = responseContent;
                 } else {
-                    dynamicallyConfigureSanitizer(request);
+                    Sanitizer sanitizerForRequest = getSanitizerForRequest(request);
 
-                    proxyResponseContent = sanitizer.sanitize(request.getHttpMethod(), targetUrl, responseContent);
-                    String rulesSha = rulesUtils.sha(sanitizer.getConfigurationOptions().getRules());
+                    proxyResponseContent = sanitizerForRequest.sanitize(request.getHttpMethod(), targetUrl, responseContent);
+                    String rulesSha = rulesUtils.sha(sanitizerForRequest.getConfigurationOptions().getRules());
                     builder.header(ResponseHeader.RULES_SHA.getHttpHeader(), rulesSha);
                     log.info("response sanitized with rule set " + rulesSha);
                 }
@@ -227,15 +227,19 @@ public class CommonRequestHandler {
      *
      * @param request
      */
-    void dynamicallyConfigureSanitizer(HttpEventRequest request) {
+    Sanitizer getSanitizerForRequest(HttpEventRequest request) {
         Optional<PseudonymImplementation> pseudonymImplementation = parsePseudonymImplementation(request);
         if (pseudonymImplementation.isPresent()) {
+            loadSanitizerRules(); // ensure sanitizer is loaded
             if (!Objects.equals(pseudonymImplementation.get(),
                     sanitizer.getConfigurationOptions().getPseudonymImplementation())) {
-                sanitizer = sanitizerFactory.create(sanitizerFactory.buildOptions(config, rules)
+                return sanitizerFactory.create(sanitizerFactory.buildOptions(config, rules)
                     .withPseudonymImplementation(pseudonymImplementation.get()));
             }
         }
+
+        // just use the default
+        return sanitizer;
     }
 
     @VisibleForTesting
