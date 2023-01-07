@@ -63,7 +63,7 @@ resource "google_project" "psoxy-google-connectors" {
 
 module "psoxy-aws-google-workspace" {
   source = "../../modular-examples/aws-google-workspace"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-google-workspace?ref=v0.4.8"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-google-workspace?ref=v0.4.9"
 
   aws_account_id                 = var.aws_account_id
   aws_assume_role_arn            = var.aws_assume_role_arn # role that can test the instances (lambdas)
