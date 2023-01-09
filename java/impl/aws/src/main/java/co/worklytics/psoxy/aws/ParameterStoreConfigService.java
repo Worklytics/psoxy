@@ -12,6 +12,7 @@ import software.amazon.awssdk.services.ssm.SsmClient;
 import software.amazon.awssdk.services.ssm.model.*;
 
 import javax.inject.Inject;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.logging.Level;
 
@@ -64,7 +65,7 @@ public class ParameterStoreConfigService implements ConfigService {
     @Override
     public String getConfigPropertyOrError(ConfigProperty property) {
         return getConfigPropertyAsOptional(property)
-            .orElseThrow(() -> new Error("Proxy misconfigured; no value for " + property));
+            .orElseThrow(() -> new NoSuchElementException("Proxy misconfigured; no value for " + property));
     }
 
     private String parameterName(ConfigProperty property) {

@@ -19,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.time.Duration;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.logging.Level;
 
@@ -142,7 +143,7 @@ public class VaultConfigService implements ConfigService {
         } else {
             //403 unless explicit ACL policy set
             log.info(property.name() + " " + response.getRestResponse().getStatus() + " " + new String(response.getRestResponse().getBody()));
-            throw new IllegalStateException("Missing config value: " + property.name());
+            throw new NoSuchElementException("Missing config value: " + property.name());
         }
     }
 
