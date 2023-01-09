@@ -46,6 +46,9 @@ class CachingConfigServiceDecoratorTest {
     void putConfigProperty() {
         assertTrue(config.getConfigPropertyAsOptional(TestConfigProperties.EXAMPLE_PROPERTY).isEmpty());
 
+        assertThrows(NoSuchElementException.class,
+            () -> config.getConfigPropertyOrError(TestConfigProperties.EXAMPLE_PROPERTY));
+
         //read from underlying cache
         verify(spy, times(1))
             .getConfigPropertyAsOptional(TestConfigProperties.EXAMPLE_PROPERTY);
