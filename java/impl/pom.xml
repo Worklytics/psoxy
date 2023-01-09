@@ -6,7 +6,7 @@
 
     <parent>
         <groupId>co.worklytics.psoxy</groupId>
-        <artifactId>root</artifactId>
+        <artifactId>java</artifactId>
         <version>${revision}</version>
     </parent>
 

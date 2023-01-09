@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>co.worklytics.psoxy</groupId>
-    <artifactId>root</artifactId>
+    <artifactId>java</artifactId>
     <version>${revision}</version>
     <packaging>pom</packaging>
 
