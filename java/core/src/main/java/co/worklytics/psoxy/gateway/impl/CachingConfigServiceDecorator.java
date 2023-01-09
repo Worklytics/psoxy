@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.gateway.ConfigService;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -24,9 +25,11 @@ public class CachingConfigServiceDecorator implements ConfigService {
 
     private final Object $writeLock = new Object[0];
 
-    private final String NEGATIVE_VALUE = "##NO_VALUE##";
+    @VisibleForTesting
+    static final String NEGATIVE_VALUE = "##NO_VALUE##";
 
-    private LoadingCache<ConfigProperty, String> getCache() {
+    @VisibleForTesting
+    LoadingCache<ConfigProperty, String> getCache() {
         if (this.cache == null) {
             synchronized ($writeLock) {
                 if (this.cache == null) {
