@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 
 import java.time.Duration;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -56,7 +57,9 @@ public class CachingConfigServiceDecorator implements ConfigService {
 
     @Override
     public void putConfigProperty(ConfigProperty property, String value) {
-        getCache().put(property, value);
+        if (!property.noCache()) {
+            getCache().put(property, value);
+        }
         delegate.putConfigProperty(property, value);
     }
 
@@ -64,25 +67,29 @@ public class CachingConfigServiceDecorator implements ConfigService {
     @Override
     public String getConfigPropertyOrError(ConfigProperty property) {
         return getConfigPropertyAsOptional(property)
-            .orElseThrow(() -> new Error("Psoxy misconfigured. Expected value for: " + property.name()));
+            .orElseThrow(() -> new NoSuchElementException("Psoxy misconfigured. Expected value for: " + property.name()));
     }
 
     @SneakyThrows
     @Override
     public Optional<String> getConfigPropertyAsOptional(ConfigProperty property) {
-        try {
-            String value = getCache().get(property);
-            if (Objects.equals(NEGATIVE_VALUE, value)) {
-                return Optional.empty();
-            } else {
-                return Optional.of(value);
-            }
-        } catch (ExecutionException e) {
-            //unwrap if possible, re-throw
-            if (e.getCause() == null) {
-                throw e;
-            } else {
-                throw e.getCause();
+        if (property.noCache()) {
+            return delegate.getConfigPropertyAsOptional(property);
+        } else {
+            try {
+                String value = getCache().get(property);
+                if (Objects.equals(NEGATIVE_VALUE, value)) {
+                    return Optional.empty();
+                } else {
+                    return Optional.of(value);
+                }
+            } catch (ExecutionException e) {
+                //unwrap if possible, re-throw
+                if (e.getCause() == null) {
+                    throw e;
+                } else {
+                    throw e.getCause();
+                }
             }
         }
     }

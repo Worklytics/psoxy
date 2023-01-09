@@ -1,6 +1,8 @@
 package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.gateway.ConfigService;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,9 +27,18 @@ class CachingConfigServiceDecoratorTest {
         spy = spy(new LocalHashMapConfigService());
         config = new CachingConfigServiceDecorator(spy, Duration.ofMinutes(1));
     }
+
+    @AllArgsConstructor
     enum TestConfigProperties implements ConfigService.ConfigProperty {
-        EXAMPLE_PROPERTY,
+        EXAMPLE_PROPERTY(false),
+        NO_CACHE(true),
         ;
+
+        private final Boolean noCache;
+
+        public Boolean noCache() {
+            return noCache;
+        }
     }
 
     @SneakyThrows
@@ -61,6 +72,27 @@ class CachingConfigServiceDecoratorTest {
             spy.getConfigPropertyOrError(TestConfigProperties.EXAMPLE_PROPERTY));
     }
 
+    @Test
+    void getConfigProperty_noCache() {
+        assertTrue(config.getConfigPropertyAsOptional(TestConfigProperties.NO_CACHE).isEmpty());
+        verify(spy, times(1))
+            .getConfigPropertyAsOptional(TestConfigProperties.NO_CACHE);
+
+
+        //after write, still goes to origin
+        config.putConfigProperty(TestConfigProperties.NO_CACHE, "value");
+        assertEquals("value",
+            config.getConfigPropertyOrError(TestConfigProperties.NO_CACHE));
+        verify(spy, times(2))
+            .getConfigPropertyAsOptional(TestConfigProperties.NO_CACHE);
+
+        // after read, still goes to origin
+        assertEquals("value",
+            config.getConfigPropertyOrError(TestConfigProperties.NO_CACHE));
+        verify(spy, times(3))
+            .getConfigPropertyAsOptional(TestConfigProperties.NO_CACHE);
+    }
+
 
     static class LocalHashMapConfigService implements ConfigService {
 
@@ -82,7 +114,7 @@ class CachingConfigServiceDecoratorTest {
 
         @Override
         public Optional<String> getConfigPropertyAsOptional(ConfigProperty property) {
-            return Optional.empty();
+            return Optional.ofNullable(map.get(property));
         }
 
         @Override

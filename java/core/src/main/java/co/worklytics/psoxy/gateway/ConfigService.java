@@ -12,6 +12,15 @@ public interface ConfigService {
         // shared? (across multiple instances?)
         // local? (per-instance secrets)
 
+        /**
+         * @return whether cached value for property must be revalidated with origin before re-use
+         *  (equivalent to HTTP `Cache-Control: no-cache` semantics as defined by RFC 7234)
+         *
+         * @see 'https://www.rfc-editor.org/rfc/rfc7234#section-5.2.2'
+         */
+        default Boolean noCache() {
+            return false;
+        }
     }
 
     /**
