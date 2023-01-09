@@ -11,7 +11,7 @@
       <module fileurl="file://$PROJECT_DIR$/java/impl/impl.iml" filepath="$PROJECT_DIR$/java/impl/impl.iml" group="impl and modules" />
       <module fileurl="file://$PROJECT_DIR$/infra/infra.iml" filepath="$PROJECT_DIR$/infra/infra.iml" />
       <module fileurl="file://$PROJECT_DIR$/java/java.iml" filepath="$PROJECT_DIR$/java/java.iml" />
-      <module fileurl="file://$PROJECT_DIR$/tools/psoxy-test/psoxy-test.iml" filepath="$PROJECT_DIR$/tools/psoxy-test/psoxy-test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/tools/psoxy-test/tools.iml" filepath="$PROJECT_DIR$/tools/psoxy-test/tools.iml" />
     </modules>
   </component>
 </project>
