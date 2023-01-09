@@ -10,9 +10,11 @@ import com.google.auth.Credentials;
 import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.OAuth2CredentialsWithRefresh;
 import com.google.common.annotations.VisibleForTesting;
+import dagger.Component;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 
 import javax.inject.Inject;
@@ -61,11 +63,20 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
     //q: should we put these as config properties? creates potential for inconsistent configs
     // eg, orphaned config properties for SourceAuthStrategy not in use; missing config properties
     //  expected by this
+    @RequiredArgsConstructor
     public enum ConfigProperty implements ConfigService.ConfigProperty {
-        REFRESH_ENDPOINT,
-        CLIENT_ID,
-        GRANT_TYPE,
-        ACCESS_TOKEN,
+        REFRESH_ENDPOINT(false),
+        CLIENT_ID(false),
+        GRANT_TYPE(false),
+        ACCESS_TOKEN(true),
+        ;
+
+        private final Boolean noCache;
+
+        @Override
+        public Boolean noCache() {
+            return noCache;
+        }
     }
 
     @Inject OAuth2CredentialsWithRefresh.OAuth2RefreshHandler refreshHandler;
