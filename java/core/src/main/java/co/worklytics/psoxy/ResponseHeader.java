@@ -17,7 +17,16 @@ public enum ResponseHeader {
      */
     RULES_SHA("Rules-SHA"),
     ERROR("Error"),
-    PROXY_SOURCE_AUTH("Source-Auth");
+
+    /**
+     * how source authentication is configured to be performed (non-sensitive config values)
+     */
+    SOURCE_AUTH("Source-Auth"),
+
+    /**
+     * when various config values were filled (timestamps, not actually config values)
+     */
+    CONFIG_FILLED("Config-Filled");
 
     @NonNull
     final String httpNamePart;

@@ -33,6 +33,7 @@ import org.apache.http.entity.ContentType;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.net.URL;
+import java.time.Instant;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
@@ -233,13 +234,26 @@ public class CommonRequestHandler {
                 OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.GRANT_TYPE
                 );
 
-        builder.header(ResponseHeader.PROXY_SOURCE_AUTH.getHttpHeader(),
+        builder.header(ResponseHeader.SOURCE_AUTH.getHttpHeader(),
             toCapture
                 .map(param -> Pair.of(param, config.getConfigPropertyAsOptional(param).orElse("none")))
                 .map(p -> p.getKey() + "=" + p.getValue())
                 .collect(Collectors.joining(";")));
 
-        //q: get more config info here??
+
+        Stream<ConfigService.ConfigProperty> toCaptureLastModified =
+            Stream.of(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.ACCESS_TOKEN);
+
+        builder.header(ResponseHeader.CONFIG_FILLED.getHttpHeader(),
+            toCaptureLastModified
+                .map(param -> Pair.of(param, config.getConfigPropertyWithMetadata(param)
+                        .map(ConfigService.ConfigValueWithMetadata::getLastModifiedDate)
+                        .map(lastModified -> lastModified.map(Instant::toString)
+                                            .orElse("not-available") // config service that doesn't support it
+                        )
+                        .orElse("")))
+                .map(p -> p.getKey() + "=" + p.getValue())
+                .collect(Collectors.joining(";")));
 
         //q: make this all conditional on some control header being passed (e.g. `X-Psoxy-Debug-Config`)?
     }
