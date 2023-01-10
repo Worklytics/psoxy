@@ -183,22 +183,37 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                 objectMapper.readerFor(CanonicalOAuthAccessTokenResponseDto.class)
                     .readValue(response.getContent());
 
+            storeRefreshTokenIfRotated(tokenResponse);
+
+            return tokenResponse;
+        }
+
+        /**
+         * Store the new refresh token if included in token response and differs from stored value
+         *
+         * this method encapsulates the logic for checking and storing new token
+         *
+         * @param tokenResponse the token response
+         */
+        @VisibleForTesting
+        void storeRefreshTokenIfRotated(CanonicalOAuthAccessTokenResponseDto tokenResponse) {
             if (!StringUtils.isBlank(tokenResponse.getRefreshToken())) {
                 //if a refresh_token came back from server, potentially update it
                 config.getConfigPropertyAsOptional(RefreshTokenPayloadBuilder.ConfigProperty.REFRESH_TOKEN)
-                    .ifPresent(currentRefreshToken -> {
-                        if (!Objects.equals(currentRefreshToken, tokenResponse.getRefreshToken())) {
+                    .filter(storedToken -> !Objects.equals(storedToken, tokenResponse.getRefreshToken()))
+                    .ifPresent(storedTokenToRotate -> {
+                        if (config.supportsWriting()) {
                             try {
                                 config.putConfigProperty(RefreshTokenPayloadBuilder.ConfigProperty.REFRESH_TOKEN,
                                     tokenResponse.getRefreshToken());
                             } catch (Throwable e) {
                                 log.log(Level.SEVERE, "refresh_token rotated, but failed to write updated value; while this access_token may work, future token exchanges may fail", e);
                             }
+                        } else {
+                            log.log(Level.SEVERE, "refresh_token rotated, but config service does not support writing; while this access_token may work, future token exchanges may fail");
                         }
                     });
             }
-
-            return tokenResponse;
         }
 
 

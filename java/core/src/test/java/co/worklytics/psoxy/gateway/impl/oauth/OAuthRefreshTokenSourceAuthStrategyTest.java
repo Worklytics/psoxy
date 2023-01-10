@@ -11,6 +11,9 @@ import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.ArgumentsSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import javax.inject.Inject;
@@ -21,6 +24,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -148,5 +152,30 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
         assertTrue(accessToken.isPresent());
         assertEquals("my-token", accessToken.get().getTokenValue());
         assertEquals(1639526410000L, accessToken.get().getExpirationTime().getTime());
+    }
+
+    static Stream<Arguments> refreshTokenNotRotated() {
+        return Stream.of(
+            Arguments.of("old-token", "new-token", true),
+            Arguments.of("old-token", "old-token", false),
+            Arguments.of("old-token", null, false),
+            Arguments.of("old-token", null, false)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource
+    public void refreshTokenNotRotated(String originalToken, String newToken, boolean shouldRotate) {
+        OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl tokenRefreshHandler = new OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl();
+        tokenRefreshHandler.config = spy(ConfigService.class);
+        when(tokenRefreshHandler.config.supportsWriting()).thenReturn(true);
+        when(tokenRefreshHandler.config.getConfigPropertyAsOptional(eq(RefreshTokenPayloadBuilder.ConfigProperty.REFRESH_TOKEN)))
+            .thenReturn(Optional.of(originalToken));
+
+        CanonicalOAuthAccessTokenResponseDto exampleResponse = new CanonicalOAuthAccessTokenResponseDto();
+        exampleResponse.refreshToken = newToken;
+        tokenRefreshHandler.storeRefreshTokenIfRotated(exampleResponse);
+
+        verify(tokenRefreshHandler.config, times(shouldRotate ? 1 : 0)).putConfigProperty(eq(RefreshTokenPayloadBuilder.ConfigProperty.REFRESH_TOKEN), eq(newToken));
     }
 }
