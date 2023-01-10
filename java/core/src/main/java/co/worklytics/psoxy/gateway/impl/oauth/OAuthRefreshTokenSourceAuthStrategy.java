@@ -14,6 +14,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.java.Log;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Inject;
 import java.io.IOException;
@@ -182,18 +183,20 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                 objectMapper.readerFor(CanonicalOAuthAccessTokenResponseDto.class)
                     .readValue(response.getContent());
 
-            //TODO: this is obviously not great; if we're going to support refresh token rotation,
-            // need to have some way to control the logic based on grant type
-            config.getConfigPropertyAsOptional(RefreshTokenPayloadBuilder.ConfigProperty.REFRESH_TOKEN)
-                .ifPresent(currentRefreshToken -> {
-                    if (!Objects.equals(currentRefreshToken, tokenResponse.getRefreshToken())) {
-                        //TODO: update refreshToken (some source APIs do this; TBC whether ones currently
-                        // in scope for psoxy use do)
-                        //q: write to secret? (most correct ...)
-                        //q: write to file system?
-                        log.severe("Source API rotated refreshToken, which is currently NOT supported by psoxy");
-                    }
-                });
+            if (!StringUtils.isBlank(tokenResponse.getRefreshToken())) {
+                //if a refresh_token came back from server, potentially update it
+                config.getConfigPropertyAsOptional(RefreshTokenPayloadBuilder.ConfigProperty.REFRESH_TOKEN)
+                    .ifPresent(currentRefreshToken -> {
+                        if (!Objects.equals(currentRefreshToken, tokenResponse.getRefreshToken())) {
+                            try {
+                                config.putConfigProperty(RefreshTokenPayloadBuilder.ConfigProperty.REFRESH_TOKEN,
+                                    tokenResponse.getRefreshToken());
+                            } catch (Throwable e) {
+                                log.log(Level.SEVERE, "refresh_token rotated, but failed to write updated value; while this access_token may work, future token exchanges may fail", e);
+                            }
+                        }
+                    });
+            }
 
             return tokenResponse;
         }
