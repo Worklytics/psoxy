@@ -13,6 +13,7 @@ import software.amazon.awssdk.services.ssm.model.*;
 
 import javax.inject.Inject;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.logging.Level;
 
 /**
@@ -77,6 +78,10 @@ public class ParameterStoreConfigService implements ConfigService {
 
     @Override
     public Optional<String> getConfigPropertyAsOptional(ConfigProperty property) {
+        return getConfigPropertyAsOptional(property, r -> r.parameter().value());
+    }
+
+    <T> Optional<T> getConfigPropertyAsOptional(ConfigProperty property, Function<GetParameterResponse, T> mapping) {
         String paramName = parameterName(property);
 
         try {
@@ -85,7 +90,7 @@ public class ParameterStoreConfigService implements ConfigService {
                 .withDecryption(true)
                 .build();
             GetParameterResponse parameterResponse = client.getParameter(parameterRequest);
-            return Optional.of(parameterResponse.parameter().value());
+            return Optional.of(mapping.apply(parameterResponse));
         } catch (ParameterNotFoundException | ParameterVersionNotFoundException ignore) {
             // does not exist, that could be OK depending on case.
             return Optional.empty();
@@ -99,6 +104,14 @@ public class ParameterStoreConfigService implements ConfigService {
             }
             throw new IllegalStateException(String.format("failed to get config value: %s", paramName), e);
         }
+    }
+
+    @Override
+    public Optional<ConfigValueWithMetadata> getConfigPropertyWithMetadata(ConfigProperty configProperty) {
+        return getConfigPropertyAsOptional(configProperty, r -> ConfigValueWithMetadata.builder()
+            .value(r.parameter().value())
+            .lastModifiedDate(r.parameter().lastModifiedDate())
+            .build());
     }
 
 }
