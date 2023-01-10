@@ -34,10 +34,13 @@ public class CompositeConfigService implements ConfigService {
 
     @Override
     public void putConfigProperty(ConfigProperty property, String value) {
+        //TODO: this is ill-defined and probably a bad idea; should revisit (eliminating this config
+        // service entirely; or just moving things that need to be written out of it entirely)
+
         if (preferred.supportsWriting()) {
             preferred.putConfigProperty(property, value);
-        }
-        if (fallback.supportsWriting()) {
+        } else if (fallback.supportsWriting()) {
+            //not point to writing in both
             fallback.putConfigProperty(property, value);
         }
     }
