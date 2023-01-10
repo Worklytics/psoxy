@@ -94,14 +94,31 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
     public interface TokenRequestPayloadBuilder {
 
+        /**
+         * @return identifier of type of OAuth grant that this payload builder should be used for
+         */
         String getGrantType();
 
-        //q: what does this have to do with a token request payload??
-
+        /**
+         * whether resulting `access_token` should be shared across all instances of connections
+         * to this source.
+         *
+         * q: what does this have to do with a token request payload?? it's semantics of tokens
+         * according to Source, right? (eg, whether they allow multiple valid token instances to
+         * be used concurrently for the same grant)
+         *
+         * q: maybe this should just *always* be true? or should be env var?
+         *
+         * @return whether resulting `access_token` should be shared across all instances of
+         * connections to this source.
+         */
         default boolean useSharedToken() {
             return false;
         }
 
+        /**
+         * @return request paylaod for token request
+         */
         HttpContent buildPayload();
 
         /**
