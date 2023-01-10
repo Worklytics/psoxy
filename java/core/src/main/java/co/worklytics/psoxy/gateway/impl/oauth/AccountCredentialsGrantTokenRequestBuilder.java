@@ -21,7 +21,7 @@ import java.util.TreeMap;
  * {@link "https://marketplace.zoom.us/docs/guides/build/server-to-server-oauth-app/#use-account-credentials-to-get-an-access-token"}
  */
 @NoArgsConstructor(onConstructor_ = @Inject)
-public class AccountCredentialsGrantTokenRequestPayloadBuilder implements OAuthRefreshTokenSourceAuthStrategy.TokenRequestPayloadBuilder, RequiresConfiguration {
+public class AccountCredentialsGrantTokenRequestBuilder implements OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder, RequiresConfiguration {
 
     @Inject
     ConfigService config;

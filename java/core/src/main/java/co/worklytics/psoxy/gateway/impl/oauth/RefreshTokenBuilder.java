@@ -20,8 +20,8 @@ import java.util.Set;
  *
  */
 @NoArgsConstructor(onConstructor_ = @Inject)
-public class RefreshTokenPayloadBuilder
-        implements OAuthRefreshTokenSourceAuthStrategy.TokenRequestPayloadBuilder, RequiresConfiguration {
+public class RefreshTokenBuilder
+        implements OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder, RequiresConfiguration {
 
     @Inject
     ConfigService config;

@@ -23,7 +23,7 @@ class RefreshTokenPayloadBuilderTest {
     ConfigService configService;
 
     @Inject
-    RefreshTokenPayloadBuilder refreshTokenPayloadBuilder;
+    RefreshTokenBuilder refreshTokenPayloadBuilder;
 
     @Singleton
     @Component(modules = {
@@ -49,9 +49,9 @@ class RefreshTokenPayloadBuilderTest {
 
         when(configService.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID))
             .thenReturn("1");
-        when(configService.getConfigPropertyOrError(RefreshTokenPayloadBuilder.ConfigProperty.REFRESH_TOKEN))
+        when(configService.getConfigPropertyOrError(RefreshTokenBuilder.ConfigProperty.REFRESH_TOKEN))
             .thenReturn("tokenValue");
-        when(configService.getConfigPropertyOrError(RefreshTokenPayloadBuilder.ConfigProperty.CLIENT_SECRET))
+        when(configService.getConfigPropertyOrError(RefreshTokenBuilder.ConfigProperty.CLIENT_SECRET))
             .thenReturn("secretValue");
 
         HttpContent payload = refreshTokenPayloadBuilder.buildPayload();

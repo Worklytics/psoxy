@@ -92,7 +92,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
             .build();
     }
 
-    public interface TokenRequestPayloadBuilder {
+    public interface TokenRequestBuilder {
 
         /**
          * @return identifier of type of OAuth grant that this payload builder should be used for
@@ -140,7 +140,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         @Inject
         HttpRequestFactory httpRequestFactory;
         @Inject
-        OAuthRefreshTokenSourceAuthStrategy.TokenRequestPayloadBuilder payloadBuilder;
+        TokenRequestBuilder payloadBuilder;
         @Inject
         Clock clock;
 
@@ -200,7 +200,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
             //TODO: this is obviously not great; if we're going to support refresh token rotation,
             // need to have some way to control the logic based on grant type
-            config.getConfigPropertyAsOptional(RefreshTokenPayloadBuilder.ConfigProperty.REFRESH_TOKEN)
+            config.getConfigPropertyAsOptional(RefreshTokenBuilder.ConfigProperty.REFRESH_TOKEN)
                 .ifPresent(currentRefreshToken -> {
                     if (!Objects.equals(currentRefreshToken, tokenResponse.getRefreshToken())) {
                         //TODO: update refreshToken (some source APIs do this; TBC whether ones currently
