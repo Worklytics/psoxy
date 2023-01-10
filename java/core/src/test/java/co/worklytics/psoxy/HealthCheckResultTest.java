@@ -1,6 +1,6 @@
 package co.worklytics.psoxy;
 
-import co.worklytics.psoxy.gateway.SourceAuthConfigProperty;
+import co.worklytics.psoxy.gateway.impl.GoogleCloudPlatformServiceAccountKeyAuthStrategy;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -22,7 +22,7 @@ class HealthCheckResultTest {
         HealthCheckResult healthCheckResult = HealthCheckResult.builder()
             .configuredSource("blah")
             .nonDefaultSalt(true)
-            .missingConfigProperties(Collections.singleton(SourceAuthConfigProperty.SERVICE_ACCOUNT_KEY.name()))
+            .missingConfigProperties(Collections.singleton(GoogleCloudPlatformServiceAccountKeyAuthStrategy.ConfigProperty.SERVICE_ACCOUNT_KEY.name()))
             .build();
 
         assertEquals(JSON, objectMapper.writeValueAsString(healthCheckResult));

@@ -1,7 +1,6 @@
 package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.gateway.ConfigService;
-import co.worklytics.psoxy.gateway.SourceAuthConfigProperty;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
 import com.google.auth.Credentials;
 import com.google.auth.oauth2.GoogleCredentials;
@@ -24,17 +23,28 @@ public class GoogleCloudPlatformServiceAccountKeyAuthStrategy implements SourceA
     @Getter
     private final String configIdentifier = "gcp_service_account_key";
 
+    /**
+     * config properties that control how Psoxy authenticates against host
+     */
+    public enum ConfigProperty implements ConfigService.ConfigProperty {
+        OAUTH_SCOPES,
+        //this should ACTUALLY be stored in secret manager, and then exposed as env var to the
+        // cloud function
+        // see "https://cloud.google.com/functions/docs/configuring/secrets#gcloud"
+        SERVICE_ACCOUNT_KEY,
+    }
+
     @Inject ConfigService config;
 
     @SneakyThrows
     @Override
     public Credentials getCredentials(Optional<String> userToImpersonate) {
 
-        Set<String> scopes = Arrays.stream(config.getConfigPropertyOrError(SourceAuthConfigProperty.OAUTH_SCOPES).split(","))
+        Set<String> scopes = Arrays.stream(config.getConfigPropertyOrError(ConfigProperty.OAUTH_SCOPES).split(","))
             .collect(Collectors.toSet());
         GoogleCredentials credentials;
 
-        Optional<String> key = config.getConfigPropertyAsOptional(SourceAuthConfigProperty.SERVICE_ACCOUNT_KEY);
+        Optional<String> key = config.getConfigPropertyAsOptional(ConfigProperty.SERVICE_ACCOUNT_KEY);
 
         if (key.isPresent()) {
             credentials = ServiceAccountCredentials.fromStream(new ByteArrayInputStream(Base64.getDecoder().decode(key.get())));
@@ -64,9 +74,10 @@ public class GoogleCloudPlatformServiceAccountKeyAuthStrategy implements SourceA
     @Override
     public Set<ConfigService.ConfigProperty> getRequiredConfigProperties() {
         return Set.of(
-            SourceAuthConfigProperty.SERVICE_ACCOUNT_KEY,
-            SourceAuthConfigProperty.OAUTH_SCOPES
+            ConfigProperty.SERVICE_ACCOUNT_KEY,
+            ConfigProperty.OAUTH_SCOPES
         );
     }
+
 
 }
