@@ -72,10 +72,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
     @Override
     public Set<ConfigService.ConfigProperty> getRequiredConfigProperties() {
-        Stream<ConfigService.ConfigProperty> propertyStream = Stream.of(ConfigProperty.REFRESH_ENDPOINT,
-                // ACCESS_TOKEN is optional
-                ConfigProperty.GRANT_TYPE,
-                ConfigProperty.CLIENT_ID);
+        Stream<ConfigService.ConfigProperty> propertyStream = Stream.empty();
 
         if (refreshHandler instanceof RequiresConfiguration) {
             propertyStream = Stream.concat(propertyStream,
@@ -98,6 +95,8 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
     public interface TokenRequestPayloadBuilder {
 
         String getGrantType();
+
+        //q: what does this have to do with a token request payload??
 
         default boolean useSharedToken() {
             return false;
@@ -220,10 +219,14 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
         @Override
         public Set<ConfigService.ConfigProperty> getRequiredConfigProperties() {
-            Stream<ConfigService.ConfigProperty> propertyStream = Stream.of(ConfigProperty.REFRESH_ENDPOINT,
+
+            // only things
+            Stream<ConfigService.ConfigProperty> propertyStream = Stream.of(
+                    ConfigProperty.REFRESH_ENDPOINT,
                     // ACCESS_TOKEN is optional
-                    ConfigProperty.GRANT_TYPE,
-                    ConfigProperty.CLIENT_ID);
+                    ConfigProperty.GRANT_TYPE
+                      // CLIENT_ID not required by RefreshHandler, though likely by payload builder
+            );
 
             if (payloadBuilder instanceof RequiresConfiguration) {
                 propertyStream = Stream.concat(propertyStream,

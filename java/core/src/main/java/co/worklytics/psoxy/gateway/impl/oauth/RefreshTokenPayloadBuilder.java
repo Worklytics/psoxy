@@ -50,6 +50,10 @@ public class RefreshTokenPayloadBuilder
 
     @Override
     public Set<ConfigService.ConfigProperty> getRequiredConfigProperties() {
-        return Set.of(ConfigProperty.REFRESH_TOKEN, ConfigProperty.CLIENT_SECRET);
+        return Set.of(
+            OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID,
+            ConfigProperty.CLIENT_SECRET,
+            ConfigProperty.REFRESH_TOKEN
+            );
     }
 }
