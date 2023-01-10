@@ -2,6 +2,7 @@ package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.gateway.*;
+import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 import co.worklytics.psoxy.rules.RuleSet;
 import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.psoxy.utils.ComposedHttpRequestInitializer;
@@ -23,6 +24,7 @@ import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.utils.URIBuilder;
@@ -39,6 +41,7 @@ import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @NoArgsConstructor(onConstructor_ = @Inject)
 @Log
@@ -126,6 +129,8 @@ public class CommonRequestHandler {
         boolean skipSanitization = skipSanitization(request);
 
         HttpEventResponse.HttpEventResponseBuilder builder = HttpEventResponse.builder();
+
+        addProxyHeaders(builder, config);
 
         this.sanitizer = loadSanitizerRules();
 
@@ -219,6 +224,24 @@ public class CommonRequestHandler {
         } finally {
             sourceApiResponse.disconnect();
         }
+    }
+
+    private void addProxyHeaders(HttpEventResponse.HttpEventResponseBuilder builder, ConfigService config) {
+        Stream<ConfigService.ConfigProperty> toCapture =
+            Stream.of(
+                ProxyConfigProperty.SOURCE_AUTH_STRATEGY_IDENTIFIER,
+                OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.GRANT_TYPE
+                );
+
+        builder.header(ResponseHeader.PROXY_SOURCE_AUTH.getHttpHeader(),
+            toCapture
+                .map(param -> Pair.of(param, config.getConfigPropertyAsOptional(param).orElse("none")))
+                .map(p -> p.getKey() + "=" + p.getValue())
+                .collect(Collectors.joining(";")));
+
+        //q: get more config info here??
+
+        //q: make this all conditional on some control header being passed (e.g. `X-Psoxy-Debug-Config`)?
     }
 
     /**

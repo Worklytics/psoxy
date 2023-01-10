@@ -16,7 +16,8 @@ public enum ResponseHeader {
      *
      */
     RULES_SHA("Rules-SHA"),
-    ERROR("Error");
+    ERROR("Error"),
+    PROXY_SOURCE_AUTH("Source-Auth");
 
     @NonNull
     final String httpNamePart;
