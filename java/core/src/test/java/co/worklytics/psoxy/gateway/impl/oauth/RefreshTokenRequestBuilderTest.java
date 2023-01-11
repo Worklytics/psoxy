@@ -38,7 +38,7 @@ class RefreshTokenRequestBuilderTest {
     @BeforeEach
     public void setup() {
         RefreshTokenRequestBuilderTest.Container container =
-            DaggerRefreshTokenPayloadBuilderTest_Container.create();
+            DaggerRefreshTokenRequestBuilderTest_Container.create();
         container.inject(this);
     }
 
