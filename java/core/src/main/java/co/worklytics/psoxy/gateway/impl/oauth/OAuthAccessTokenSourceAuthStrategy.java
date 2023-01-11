@@ -61,4 +61,9 @@ public class OAuthAccessTokenSourceAuthStrategy implements SourceAuthStrategy {
     public Set<ConfigService.ConfigProperty> getRequiredConfigProperties() {
         return Set.of(ConfigProperty.values());
     }
+
+    @Override
+    public Set<ConfigService.ConfigProperty> getAllConfigProperties() {
+        return Set.of(ConfigProperty.values());
+    }
 }

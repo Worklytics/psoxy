@@ -72,14 +72,22 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
     @Override
     public Set<ConfigService.ConfigProperty> getRequiredConfigProperties() {
-        Stream<ConfigService.ConfigProperty> propertyStream = Stream.of(ConfigProperty.REFRESH_ENDPOINT,
-                // ACCESS_TOKEN is optional
-                ConfigProperty.GRANT_TYPE,
-                ConfigProperty.CLIENT_ID);
+        Stream<ConfigService.ConfigProperty> propertyStream = Stream.empty();
 
         if (refreshHandler instanceof RequiresConfiguration) {
             propertyStream = Stream.concat(propertyStream,
                 ((RequiresConfiguration) refreshHandler).getRequiredConfigProperties().stream());
+        }
+        return propertyStream.collect(Collectors.toSet());
+    }
+
+    @Override
+    public Set<ConfigService.ConfigProperty> getAllConfigProperties() {
+        Stream<ConfigService.ConfigProperty> propertyStream = Stream.of(ConfigProperty.values());
+
+        if (refreshHandler instanceof RequiresConfiguration) {
+            propertyStream = Stream.concat(propertyStream,
+                ((RequiresConfiguration) refreshHandler).getAllConfigProperties().stream());
         }
         return propertyStream.collect(Collectors.toSet());
     }
@@ -95,14 +103,33 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
             .build();
     }
 
-    public interface TokenRequestPayloadBuilder {
+    public interface TokenRequestBuilder {
 
+        /**
+         * @return identifier of type of OAuth grant that this payload builder should be used for
+         */
         String getGrantType();
 
+        /**
+         * whether resulting `access_token` should be shared across all instances of connections
+         * to this source.
+         *
+         * q: what does this have to do with a token request payload?? it's semantics of tokens
+         * according to Source, right? (eg, whether they allow multiple valid token instances to
+         * be used concurrently for the same grant)
+         *
+         * q: maybe this should just *always* be true? or should be env var?
+         *
+         * @return whether resulting `access_token` should be shared across all instances of
+         * connections to this source.
+         */
         default boolean useSharedToken() {
             return false;
         }
 
+        /**
+         * @return request paylaod for token request
+         */
         HttpContent buildPayload();
 
         /**
@@ -124,7 +151,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         @Inject
         HttpRequestFactory httpRequestFactory;
         @Inject
-        OAuthRefreshTokenSourceAuthStrategy.TokenRequestPayloadBuilder payloadBuilder;
+        TokenRequestBuilder payloadBuilder;
         @Inject
         Clock clock;
 
@@ -184,7 +211,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
             //TODO: this is obviously not great; if we're going to support refresh token rotation,
             // need to have some way to control the logic based on grant type
-            config.getConfigPropertyAsOptional(RefreshTokenPayloadBuilder.ConfigProperty.REFRESH_TOKEN)
+            config.getConfigPropertyAsOptional(RefreshTokenBuilder.ConfigProperty.REFRESH_TOKEN)
                 .ifPresent(currentRefreshToken -> {
                     if (!Objects.equals(currentRefreshToken, tokenResponse.getRefreshToken())) {
                         //TODO: update refreshToken (some source APIs do this; TBC whether ones currently
@@ -220,16 +247,31 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
         @Override
         public Set<ConfigService.ConfigProperty> getRequiredConfigProperties() {
-            Stream<ConfigService.ConfigProperty> propertyStream = Stream.of(ConfigProperty.REFRESH_ENDPOINT,
+
+            // only things
+            Stream<ConfigService.ConfigProperty> propertyStream = Stream.of(
+                    ConfigProperty.REFRESH_ENDPOINT,
                     // ACCESS_TOKEN is optional
-                    ConfigProperty.GRANT_TYPE,
-                    ConfigProperty.CLIENT_ID);
+                    ConfigProperty.GRANT_TYPE
+                      // CLIENT_ID not required by RefreshHandler, though likely by payload builder
+            );
 
             if (payloadBuilder instanceof RequiresConfiguration) {
                 propertyStream = Stream.concat(propertyStream,
                     ((RequiresConfiguration) payloadBuilder).getRequiredConfigProperties().stream());
             }
             return propertyStream.collect(Collectors.toSet());
+        }
+
+        @Override
+        public Set<ConfigService.ConfigProperty> getAllConfigProperties() {
+            Stream<ConfigService.ConfigProperty> allConfigPropertiesStream = Arrays.stream(ConfigProperty.values());
+
+            if (payloadBuilder instanceof RequiresConfiguration) {
+                allConfigPropertiesStream = Stream.concat(allConfigPropertiesStream,
+                    ((RequiresConfiguration) payloadBuilder).getAllConfigProperties().stream());
+            }
+            return allConfigPropertiesStream.collect(Collectors.toSet());
         }
 
         @VisibleForTesting
