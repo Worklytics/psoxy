@@ -20,8 +20,8 @@ import java.util.Set;
  *
  */
 @NoArgsConstructor(onConstructor_ = @Inject)
-public class RefreshTokenPayloadBuilder
-        implements OAuthRefreshTokenSourceAuthStrategy.TokenRequestPayloadBuilder, RequiresConfiguration {
+public class RefreshTokenBuilder
+        implements OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder, RequiresConfiguration {
 
     @Inject
     ConfigService config;
@@ -50,6 +50,15 @@ public class RefreshTokenPayloadBuilder
 
     @Override
     public Set<ConfigService.ConfigProperty> getRequiredConfigProperties() {
-        return Set.of(ConfigProperty.REFRESH_TOKEN, ConfigProperty.CLIENT_SECRET);
+        return Set.of(
+            OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID,
+            ConfigProperty.CLIENT_SECRET,
+            ConfigProperty.REFRESH_TOKEN
+            );
+    }
+
+    @Override
+    public Set<ConfigService.ConfigProperty> getAllConfigProperties() {
+        return Set.of(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.values());
     }
 }

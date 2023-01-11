@@ -17,13 +17,13 @@ import java.io.ByteArrayOutputStream;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
-class RefreshTokenPayloadBuilderTest {
+class RefreshTokenRequestBuilderTest {
 
     @Inject
     ConfigService configService;
 
     @Inject
-    RefreshTokenPayloadBuilder refreshTokenPayloadBuilder;
+    RefreshTokenBuilder refreshTokenPayloadBuilder;
 
     @Singleton
     @Component(modules = {
@@ -32,13 +32,13 @@ class RefreshTokenPayloadBuilderTest {
         MockModules.ForConfigService.class,
     })
     public interface Container {
-        void inject(RefreshTokenPayloadBuilderTest test);
+        void inject(RefreshTokenRequestBuilderTest test);
     }
 
     @BeforeEach
     public void setup() {
-        RefreshTokenPayloadBuilderTest.Container container =
-            DaggerRefreshTokenPayloadBuilderTest_Container.create();
+        RefreshTokenRequestBuilderTest.Container container =
+            DaggerRefreshTokenRequestBuilderTest_Container.create();
         container.inject(this);
     }
 
@@ -49,9 +49,9 @@ class RefreshTokenPayloadBuilderTest {
 
         when(configService.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID))
             .thenReturn("1");
-        when(configService.getConfigPropertyOrError(RefreshTokenPayloadBuilder.ConfigProperty.REFRESH_TOKEN))
+        when(configService.getConfigPropertyOrError(RefreshTokenBuilder.ConfigProperty.REFRESH_TOKEN))
             .thenReturn("tokenValue");
-        when(configService.getConfigPropertyOrError(RefreshTokenPayloadBuilder.ConfigProperty.CLIENT_SECRET))
+        when(configService.getConfigPropertyOrError(RefreshTokenBuilder.ConfigProperty.CLIENT_SECRET))
             .thenReturn("secretValue");
 
         HttpContent payload = refreshTokenPayloadBuilder.buildPayload();

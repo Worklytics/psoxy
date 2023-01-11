@@ -21,7 +21,7 @@ import java.util.TreeMap;
  * {@link "https://marketplace.zoom.us/docs/guides/build/server-to-server-oauth-app/#use-account-credentials-to-get-an-access-token"}
  */
 @NoArgsConstructor(onConstructor_ = @Inject)
-public class AccountCredentialsGrantTokenRequestPayloadBuilder implements OAuthRefreshTokenSourceAuthStrategy.TokenRequestPayloadBuilder, RequiresConfiguration {
+public class AccountCredentialsGrantTokenRequestBuilder implements OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder, RequiresConfiguration {
 
     @Inject
     ConfigService config;
@@ -32,14 +32,18 @@ public class AccountCredentialsGrantTokenRequestPayloadBuilder implements OAuthR
 
     @Override
     public Set<ConfigService.ConfigProperty> getRequiredConfigProperties() {
-        return Set.of(ConfigProperty.ACCOUNT_ID, ConfigProperty.CLIENT_ID, ConfigProperty.CLIENT_SECRET, ConfigProperty.ACCESS_TOKEN);
+        return Set.of(ConfigProperty.ACCOUNT_ID, ConfigProperty.CLIENT_ID, ConfigProperty.CLIENT_SECRET);
+    }
+
+    @Override
+    public Set<ConfigService.ConfigProperty> getAllConfigProperties() {
+        return Set.of(ConfigProperty.values());
     }
 
     public enum ConfigProperty implements ConfigService.ConfigProperty {
         ACCOUNT_ID, //NOTE: you should configure this as a secret in Secret Manager
         CLIENT_ID,  //NOTE: you should configure this as a secret in Secret Manager
         CLIENT_SECRET, //NOTE: you should configure this as a secret in Secret Manager
-        ACCESS_TOKEN //NOTE: you should configure this as a secret in Secret Manager
     }
 
     @Override

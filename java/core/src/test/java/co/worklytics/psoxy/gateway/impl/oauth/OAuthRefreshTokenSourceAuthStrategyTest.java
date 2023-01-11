@@ -124,7 +124,7 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
         OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl tokenRefreshHandler = new OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl();
         tokenRefreshHandler.objectMapper = objectMapper;
         tokenRefreshHandler.config = mock(ConfigService.class);
-        tokenRefreshHandler.payloadBuilder = mock(OAuthRefreshTokenSourceAuthStrategy.TokenRequestPayloadBuilder.class);
+        tokenRefreshHandler.payloadBuilder = mock(OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder.class);
         when(tokenRefreshHandler.payloadBuilder.useSharedToken()).thenReturn(true);
         Instant anyTime = Instant.parse("2021-12-15T00:00:00Z");
         tokenRefreshHandler.clock = Clock.fixed(anyTime, ZoneOffset.UTC);
@@ -145,7 +145,7 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
         tokenRefreshHandler.config = mock(ConfigService.class);
         when(tokenRefreshHandler.config.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.ACCESS_TOKEN)).thenReturn(Optional.of("{\"token\":\"my-token\",\"expirationDate\":1639526410000}"));
 
-        tokenRefreshHandler.payloadBuilder = mock(OAuthRefreshTokenSourceAuthStrategy.TokenRequestPayloadBuilder.class);
+        tokenRefreshHandler.payloadBuilder = mock(OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder.class);
         when(tokenRefreshHandler.payloadBuilder.useSharedToken()).thenReturn(true);
 
         Optional<AccessToken> accessToken = tokenRefreshHandler.getSharedAccessTokenIfSupported();
@@ -169,13 +169,13 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
         OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl tokenRefreshHandler = new OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl();
         tokenRefreshHandler.config = spy(ConfigService.class);
         when(tokenRefreshHandler.config.supportsWriting()).thenReturn(true);
-        when(tokenRefreshHandler.config.getConfigPropertyAsOptional(eq(RefreshTokenPayloadBuilder.ConfigProperty.REFRESH_TOKEN)))
+        when(tokenRefreshHandler.config.getConfigPropertyAsOptional(eq(RefreshTokenBuilder.ConfigProperty.REFRESH_TOKEN)))
             .thenReturn(Optional.of(originalToken));
 
         CanonicalOAuthAccessTokenResponseDto exampleResponse = new CanonicalOAuthAccessTokenResponseDto();
         exampleResponse.refreshToken = newToken;
         tokenRefreshHandler.storeRefreshTokenIfRotated(exampleResponse);
 
-        verify(tokenRefreshHandler.config, times(shouldRotate ? 1 : 0)).putConfigProperty(eq(RefreshTokenPayloadBuilder.ConfigProperty.REFRESH_TOKEN), eq(newToken));
+        verify(tokenRefreshHandler.config, times(shouldRotate ? 1 : 0)).putConfigProperty(eq(RefreshTokenBuilder.ConfigProperty.REFRESH_TOKEN), eq(newToken));
     }
 }

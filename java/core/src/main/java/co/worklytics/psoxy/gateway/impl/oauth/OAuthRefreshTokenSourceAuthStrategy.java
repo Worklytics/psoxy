@@ -73,14 +73,22 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
     @Override
     public Set<ConfigService.ConfigProperty> getRequiredConfigProperties() {
-        Stream<ConfigService.ConfigProperty> propertyStream = Stream.of(ConfigProperty.REFRESH_ENDPOINT,
-                // ACCESS_TOKEN is optional
-                ConfigProperty.GRANT_TYPE,
-                ConfigProperty.CLIENT_ID);
+        Stream<ConfigService.ConfigProperty> propertyStream = Stream.empty();
 
         if (refreshHandler instanceof RequiresConfiguration) {
             propertyStream = Stream.concat(propertyStream,
                 ((RequiresConfiguration) refreshHandler).getRequiredConfigProperties().stream());
+        }
+        return propertyStream.collect(Collectors.toSet());
+    }
+
+    @Override
+    public Set<ConfigService.ConfigProperty> getAllConfigProperties() {
+        Stream<ConfigService.ConfigProperty> propertyStream = Stream.of(ConfigProperty.values());
+
+        if (refreshHandler instanceof RequiresConfiguration) {
+            propertyStream = Stream.concat(propertyStream,
+                ((RequiresConfiguration) refreshHandler).getAllConfigProperties().stream());
         }
         return propertyStream.collect(Collectors.toSet());
     }
@@ -96,14 +104,33 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
             .build();
     }
 
-    public interface TokenRequestPayloadBuilder {
+    public interface TokenRequestBuilder {
 
+        /**
+         * @return identifier of type of OAuth grant that this payload builder should be used for
+         */
         String getGrantType();
 
+        /**
+         * whether resulting `access_token` should be shared across all instances of connections
+         * to this source.
+         *
+         * q: what does this have to do with a token request payload?? it's semantics of tokens
+         * according to Source, right? (eg, whether they allow multiple valid token instances to
+         * be used concurrently for the same grant)
+         *
+         * q: maybe this should just *always* be true? or should be env var?
+         *
+         * @return whether resulting `access_token` should be shared across all instances of
+         * connections to this source.
+         */
         default boolean useSharedToken() {
             return false;
         }
 
+        /**
+         * @return request paylaod for token request
+         */
         HttpContent buildPayload();
 
         /**
@@ -125,7 +152,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         @Inject
         HttpRequestFactory httpRequestFactory;
         @Inject
-        OAuthRefreshTokenSourceAuthStrategy.TokenRequestPayloadBuilder payloadBuilder;
+        TokenRequestBuilder payloadBuilder;
         @Inject
         Clock clock;
 
@@ -199,12 +226,12 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         void storeRefreshTokenIfRotated(CanonicalOAuthAccessTokenResponseDto tokenResponse) {
             if (!StringUtils.isBlank(tokenResponse.getRefreshToken())) {
                 //if a refresh_token came back from server, potentially update it
-                config.getConfigPropertyAsOptional(RefreshTokenPayloadBuilder.ConfigProperty.REFRESH_TOKEN)
+                config.getConfigPropertyAsOptional(RefreshTokenBuilder.ConfigProperty.REFRESH_TOKEN)
                     .filter(storedToken -> !Objects.equals(storedToken, tokenResponse.getRefreshToken()))
                     .ifPresent(storedTokenToRotate -> {
                         if (config.supportsWriting()) {
                             try {
-                                config.putConfigProperty(RefreshTokenPayloadBuilder.ConfigProperty.REFRESH_TOKEN,
+                                config.putConfigProperty(RefreshTokenBuilder.ConfigProperty.REFRESH_TOKEN,
                                     tokenResponse.getRefreshToken());
                             } catch (Throwable e) {
                                 log.log(Level.SEVERE, "refresh_token rotated, but failed to write updated value; while this access_token may work, future token exchanges may fail", e);
@@ -238,16 +265,31 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
         @Override
         public Set<ConfigService.ConfigProperty> getRequiredConfigProperties() {
-            Stream<ConfigService.ConfigProperty> propertyStream = Stream.of(ConfigProperty.REFRESH_ENDPOINT,
+
+            // only things
+            Stream<ConfigService.ConfigProperty> propertyStream = Stream.of(
+                    ConfigProperty.REFRESH_ENDPOINT,
                     // ACCESS_TOKEN is optional
-                    ConfigProperty.GRANT_TYPE,
-                    ConfigProperty.CLIENT_ID);
+                    ConfigProperty.GRANT_TYPE
+                      // CLIENT_ID not required by RefreshHandler, though likely by payload builder
+            );
 
             if (payloadBuilder instanceof RequiresConfiguration) {
                 propertyStream = Stream.concat(propertyStream,
                     ((RequiresConfiguration) payloadBuilder).getRequiredConfigProperties().stream());
             }
             return propertyStream.collect(Collectors.toSet());
+        }
+
+        @Override
+        public Set<ConfigService.ConfigProperty> getAllConfigProperties() {
+            Stream<ConfigService.ConfigProperty> allConfigPropertiesStream = Arrays.stream(ConfigProperty.values());
+
+            if (payloadBuilder instanceof RequiresConfiguration) {
+                allConfigPropertiesStream = Stream.concat(allConfigPropertiesStream,
+                    ((RequiresConfiguration) payloadBuilder).getAllConfigProperties().stream());
+            }
+            return allConfigPropertiesStream.collect(Collectors.toSet());
         }
 
         @VisibleForTesting
