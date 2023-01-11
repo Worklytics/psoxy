@@ -35,6 +35,11 @@ public class AccountCredentialsGrantTokenRequestBuilder implements OAuthRefreshT
         return Set.of(ConfigProperty.ACCOUNT_ID, ConfigProperty.CLIENT_ID, ConfigProperty.CLIENT_SECRET);
     }
 
+    @Override
+    public Set<ConfigService.ConfigProperty> getAllConfigProperties() {
+        return Set.of(ConfigProperty.values());
+    }
+
     public enum ConfigProperty implements ConfigService.ConfigProperty {
         ACCOUNT_ID, //NOTE: you should configure this as a secret in Secret Manager
         CLIENT_ID,  //NOTE: you should configure this as a secret in Secret Manager

@@ -56,4 +56,9 @@ public class RefreshTokenBuilder
             ConfigProperty.REFRESH_TOKEN
             );
     }
+
+    @Override
+    public Set<ConfigService.ConfigProperty> getAllConfigProperties() {
+        return Set.of(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.values());
+    }
 }

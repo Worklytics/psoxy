@@ -1,8 +1,13 @@
 package co.worklytics.psoxy;
 
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.*;
 
+import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 @JsonPropertyOrder(alphabetic = true) //for consistent json format across jdks
@@ -12,11 +17,28 @@ import java.util.Set;
 @AllArgsConstructor
 public class HealthCheckResult {
 
+    // TODO: get this from pom.xml or something
+    @Builder.Default
+    String version = "v0.4.10";
+
+    //q: terraform module version?? (eg, have terraform deployment set its version number as ENV
+    // variable, and then psoxy can read it and report it here)
+
     String configuredSource;
+
+    String sourceAuthStrategy;
+
+    String sourceAuthGrantType;
 
     Boolean nonDefaultSalt;
 
     Set<String> missingConfigProperties;
+
+    Map<String, Instant> configPropertiesLastModified;
+
+
+    @Builder.Default
+    Map<String, Object> unknowns = new HashMap<>();
 
     public boolean passed() {
         return getConfiguredSource() != null
@@ -24,5 +46,9 @@ public class HealthCheckResult {
             && getMissingConfigProperties().isEmpty();
     }
 
-    //TODO: to make this robust across versions, add a JsonAnySetter handler to catch unknown stuff?
+    //any setter, so robust across versions (eg, proxy server has something that proxy client lacks)
+    @JsonAnySetter
+    public void setUnknown(String key, Object value) {
+        unknowns.put(key, value);
+    }
 }

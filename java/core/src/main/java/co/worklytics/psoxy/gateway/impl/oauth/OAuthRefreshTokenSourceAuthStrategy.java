@@ -81,6 +81,17 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         return propertyStream.collect(Collectors.toSet());
     }
 
+    @Override
+    public Set<ConfigService.ConfigProperty> getAllConfigProperties() {
+        Stream<ConfigService.ConfigProperty> propertyStream = Stream.of(ConfigProperty.values());
+
+        if (refreshHandler instanceof RequiresConfiguration) {
+            propertyStream = Stream.concat(propertyStream,
+                ((RequiresConfiguration) refreshHandler).getAllConfigProperties().stream());
+        }
+        return propertyStream.collect(Collectors.toSet());
+    }
+
 
     @Override
     public Credentials getCredentials(Optional<String> userToImpersonate) {
@@ -250,6 +261,17 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                     ((RequiresConfiguration) payloadBuilder).getRequiredConfigProperties().stream());
             }
             return propertyStream.collect(Collectors.toSet());
+        }
+
+        @Override
+        public Set<ConfigService.ConfigProperty> getAllConfigProperties() {
+            Stream<ConfigService.ConfigProperty> allConfigPropertiesStream = Arrays.stream(ConfigProperty.values());
+
+            if (payloadBuilder instanceof RequiresConfiguration) {
+                allConfigPropertiesStream = Stream.concat(allConfigPropertiesStream,
+                    ((RequiresConfiguration) payloadBuilder).getAllConfigProperties().stream());
+            }
+            return allConfigPropertiesStream.collect(Collectors.toSet());
         }
 
         @VisibleForTesting

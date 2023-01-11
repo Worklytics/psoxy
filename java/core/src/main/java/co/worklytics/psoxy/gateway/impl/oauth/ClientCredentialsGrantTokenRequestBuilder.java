@@ -86,6 +86,11 @@ public class ClientCredentialsGrantTokenRequestBuilder
         );
     }
 
+    @Override
+    public Set<ConfigService.ConfigProperty> getAllConfigProperties() {
+        return Set.of(ConfigProperty.values());
+    }
+
     @SneakyThrows
     public HttpContent buildPayload() {
 
