@@ -26,6 +26,11 @@ public class HealthCheckResult {
 
     String configuredSource;
 
+    /**
+     * from config, if any. (if null, the computed logically)
+     */
+    String pseudonymImplementation;
+
     String sourceAuthStrategy;
 
     String sourceAuthGrantType;

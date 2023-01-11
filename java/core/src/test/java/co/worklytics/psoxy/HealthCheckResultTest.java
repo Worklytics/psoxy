@@ -20,6 +20,7 @@ class HealthCheckResultTest {
             "  \"configuredSource\" : \"blah\",\n" +
             "  \"missingConfigProperties\" : [ \"SERVICE_ACCOUNT_KEY\" ],\n" +
             "  \"nonDefaultSalt\" : true,\n" +
+            "  \"pseudonymImplementation\" : null,\n" +
             "  \"sourceAuthGrantType\" : null,\n" +
             "  \"sourceAuthStrategy\" : null,\n" +
             "  \"version\" : \"v0.EXAMPLE\"\n" +
