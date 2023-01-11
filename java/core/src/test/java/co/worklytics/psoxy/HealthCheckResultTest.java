@@ -15,17 +15,26 @@ class HealthCheckResultTest {
 
     @Test
     public void json() throws JsonProcessingException {
-        final String JSON = "{\"configuredSource\":\"blah\",\"missingConfigProperties\":[\"SERVICE_ACCOUNT_KEY\"],\"nonDefaultSalt\":true}";
+        final String JSON = "{\n" +
+            "  \"configPropertiesLastModified\" : null,\n" +
+            "  \"configuredSource\" : \"blah\",\n" +
+            "  \"missingConfigProperties\" : [ \"SERVICE_ACCOUNT_KEY\" ],\n" +
+            "  \"nonDefaultSalt\" : true,\n" +
+            "  \"sourceAuthGrantType\" : null,\n" +
+            "  \"sourceAuthStrategy\" : null,\n" +
+            "  \"version\" : \"v0.EXAMPLE\"\n" +
+            "}";
 
         ObjectMapper objectMapper = new ObjectMapper();
 
         HealthCheckResult healthCheckResult = HealthCheckResult.builder()
+            .version("v0.EXAMPLE") //avoid needing to change this test every version change
             .configuredSource("blah")
             .nonDefaultSalt(true)
             .missingConfigProperties(Collections.singleton(GoogleCloudPlatformServiceAccountKeyAuthStrategy.ConfigProperty.SERVICE_ACCOUNT_KEY.name()))
             .build();
 
-        assertEquals(JSON, objectMapper.writeValueAsString(healthCheckResult));
+        assertEquals(JSON, objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(healthCheckResult));
 
         HealthCheckResult fromJson = objectMapper.readerFor(HealthCheckResult.class).readValue(JSON);
         assertEquals("blah", fromJson.getConfiguredSource());

@@ -37,18 +37,19 @@ public class HealthCheckResult {
     Map<String, Instant> configPropertiesLastModified;
 
 
-    @Builder.Default
-    Map<String, Object> unknowns = new HashMap<>();
-
     public boolean passed() {
         return getConfiguredSource() != null
             && getNonDefaultSalt()
             && getMissingConfigProperties().isEmpty();
     }
 
-    //any setter, so robust across versions (eg, proxy server has something that proxy client lacks)
+    //unknownProperties + any setter, so robust across versions (eg, proxy server has something that proxy client lacks)
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    @Builder.Default
+    Map<String, Object> unknownProperties = new HashMap<>();
+
     @JsonAnySetter
-    public void setUnknown(String key, Object value) {
-        unknowns.put(key, value);
+    public void setUnknownProperty(String key, Object value) {
+        unknownProperties.put(key, value);
     }
 }

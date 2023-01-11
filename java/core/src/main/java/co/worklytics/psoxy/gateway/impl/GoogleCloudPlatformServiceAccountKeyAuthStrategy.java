@@ -79,5 +79,10 @@ public class GoogleCloudPlatformServiceAccountKeyAuthStrategy implements SourceA
         );
     }
 
+    @Override
+    public Set<ConfigService.ConfigProperty> getAllConfigProperties() {
+        return Set.of(ConfigProperty.values());
+    }
+
 
 }
