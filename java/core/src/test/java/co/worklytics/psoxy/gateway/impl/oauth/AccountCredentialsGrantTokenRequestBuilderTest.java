@@ -32,7 +32,7 @@ class AccountCredentialsGrantTokenRequestBuilderTest {
     @BeforeEach
     public void setup() {
         AccountCredentialsGrantTokenRequestBuilderTest.Container container =
-            DaggerAccountCredentialsGrantTokenRequestPayloadBuilderTest_Container.create();
+            DaggerAccountCredentialsGrantTokenRequestBuilderTest_Container.create();
         container.inject(this);
     }
 

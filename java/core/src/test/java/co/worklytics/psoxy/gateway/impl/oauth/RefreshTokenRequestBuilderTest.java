@@ -17,7 +17,7 @@ import java.io.ByteArrayOutputStream;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
-class RefreshTokenPayloadBuilderTest {
+class RefreshTokenRequestBuilderTest {
 
     @Inject
     ConfigService configService;
@@ -32,12 +32,12 @@ class RefreshTokenPayloadBuilderTest {
         MockModules.ForConfigService.class,
     })
     public interface Container {
-        void inject(RefreshTokenPayloadBuilderTest test);
+        void inject(RefreshTokenRequestBuilderTest test);
     }
 
     @BeforeEach
     public void setup() {
-        RefreshTokenPayloadBuilderTest.Container container =
+        RefreshTokenRequestBuilderTest.Container container =
             DaggerRefreshTokenPayloadBuilderTest_Container.create();
         container.inject(this);
     }

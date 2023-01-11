@@ -82,7 +82,7 @@ class ClientCredentialsGrantTokenRequestBuilderTest {
     @BeforeEach
     public void setup() {
         ClientCredentialsGrantTokenRequestBuilderTest.Container container =
-            DaggerClientCredentialsGrantTokenRequestPayloadBuilderTest_Container.create();
+            DaggerClientCredentialsGrantTokenRequestBuilderTest_Container.create();
         container.inject(this);
 
         when(configService.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID))
