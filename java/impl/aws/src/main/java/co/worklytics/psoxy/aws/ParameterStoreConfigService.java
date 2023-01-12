@@ -100,7 +100,10 @@ public class ParameterStoreConfigService implements ConfigService {
             return Optional.empty();
         } catch (SsmException ignore) {
             // very likely the policy doesn't allow reading this parameter
-            // OK in those cases
+            // may be OK in those cases
+            if (envVarsConfig.isDevelopment()) {
+                log.log(Level.WARNING, "Couldn't read SSM parameter for " + paramName, ignore);
+            }
             return Optional.empty();
         } catch (AwsServiceException e) {
             if (e.isThrottlingException()) {
