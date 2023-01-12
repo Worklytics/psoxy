@@ -100,7 +100,7 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
     @Test
     public void testCachedTokenNeedsRefreshWhenNull() {
         OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl tokenRefreshHandler = new OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl();
-        assertFalse(tokenRefreshHandler.noRefreshNeeded(null, Instant.now()));
+        assertTrue(tokenRefreshHandler.shouldRefresh(null, Instant.now()));
     }
 
     @ParameterizedTest
@@ -114,7 +114,7 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
 
         AccessToken token = new AccessToken("any-token", Date.from(expiration));
         tokenRefreshHandler.randomNumberGenerator = this.randomNumberGenerator;
-        assertTrue(tokenRefreshHandler.noRefreshNeeded(token, fixed));
+        assertFalse(tokenRefreshHandler.shouldRefresh(token, fixed));
     }
 
     @ParameterizedTest
@@ -126,7 +126,7 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
 
         AccessToken token = new AccessToken("any-token", Date.from(expiration));
         tokenRefreshHandler.randomNumberGenerator = this.randomNumberGenerator;
-        assertFalse(tokenRefreshHandler.noRefreshNeeded(token, fixed));
+        assertTrue(tokenRefreshHandler.shouldRefresh(token, fixed));
     }
 
     @Test
