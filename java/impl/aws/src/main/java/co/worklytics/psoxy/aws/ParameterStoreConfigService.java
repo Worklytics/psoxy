@@ -2,7 +2,10 @@ package co.worklytics.psoxy.aws;
 
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
+import com.amazonaws.auth.AWSCredentials;
 import com.google.common.annotations.VisibleForTesting;
+import dagger.assisted.Assisted;
+import dagger.assisted.AssistedInject;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -24,25 +27,22 @@ import java.util.logging.Level;
  * https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html
  *
  */
-//TODO: AssistedFactory??
-//@NoArgsConstructor(onConstructor_ = @Inject)
-// IDE accepts this, but mvn compile complains --> badly linked lombok??
-//[ERROR] /Users/erik/code/psoxy/java/impl/aws/src/main/java/co/worklytics/psoxy/aws/ParameterStoreConfigService.java:[18,20] cannot find symbol
-//[ERROR]   symbol:   method onConstructor_()
-//[ERROR]   location: @interface lombok.NoArgsConstructo
 @Log
-@RequiredArgsConstructor
 public class ParameterStoreConfigService implements ConfigService {
 
     @Getter(onMethod_ = @VisibleForTesting)
     final String namespace;
 
     @Inject
-    @NonNull
     SsmClient client;
 
     @Inject
     EnvVarsConfigService envVarsConfig;
+
+    @AssistedInject
+    ParameterStoreConfigService(@Assisted String namespace) {
+        this.namespace = namespace;
+    }
 
 
     @Override

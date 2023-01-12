@@ -53,7 +53,7 @@ import java.util.stream.Collectors;
  *
  */
 @Log
-@NoArgsConstructor(onConstructor_ = @Inject)
+@NoArgsConstructor(onConstructor_ = @Inject) //q: actually needed?? isn't just the `@AssistedInject` constructor enough?
 public class VaultAwsIamAuth {
 
     static final Integer VAULT_ENGINE_VERSION = 2;

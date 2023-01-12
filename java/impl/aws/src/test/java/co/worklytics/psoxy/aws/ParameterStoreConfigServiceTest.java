@@ -1,5 +1,6 @@
 package co.worklytics.psoxy.aws;
 
+import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -22,7 +23,7 @@ class ParameterStoreConfigServiceTest {
     void parameterName(String namespace, String expectedParameterName) {
 
         ParameterStoreConfigService parameterStoreConfigService =
-            new ParameterStoreConfigService(namespace, mock(SsmClient.class));
+            new ParameterStoreConfigService(namespace);
 
         assertEquals(
             expectedParameterName,
