@@ -3,6 +3,7 @@ package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.HostEnvironment;
+import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.impl.*;
 import com.bettercloud.vault.Vault;
 import com.google.auth.oauth2.GoogleCredentials;
@@ -35,26 +36,6 @@ public interface GcpModule {
         return gcpEnvironment;
     }
 
-
-    // global parameters
-    // singleton to be reused in cloud function container
-    @Provides
-    @Named("Global")
-    @Singleton
-    static SecretManagerConfigService secretManagerConfigService() {
-        return new SecretManagerConfigService(null, ServiceOptions.getDefaultProjectId());
-    }
-
-    // parameters scoped to function
-    // singleton to be reused in cloud function container
-    @Provides
-    @Singleton
-    static SecretManagerConfigService functionSecretManagerConfigService(HostEnvironment hostEnvironment) {
-        String namespace =
-                asSecretManagerNamespace(hostEnvironment.getInstanceId());
-        return new SecretManagerConfigService(namespace, ServiceOptions.getDefaultProjectId());
-    }
-
     /**
      * in GCP cloud function, we should be able to configure everything via env vars; either
      * directly or by binding them to secrets at function deployment:
@@ -63,14 +44,20 @@ public interface GcpModule {
      * @see "https://cloud.google.com/functions/docs/configuring/secrets"
      */
     @Provides @Named("Native") @Singleton
-    static ConfigService nativeConfigService(@Named("Global") SecretManagerConfigService globalSecretManagerConfigService,
-                                            SecretManagerConfigService functionScopedSecretManagerConfigService) {
+    static ConfigService nativeConfigService(HostEnvironment hostEnvironment,
+                                             EnvVarsConfigService envVarsConfigService) {
+        String pathToSharedConfig =
+            envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_SHARED_CONFIG)
+                .orElse(null);
+
+        String pathToInstanceConfig =
+            envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_INSTANCE_CONFIG)
+                .orElseGet(() -> asSecretManagerNamespace(hostEnvironment.getInstanceId()) + "_");
 
         return CompositeConfigService.builder()
-                .fallback(globalSecretManagerConfigService)
-                .preferred(functionScopedSecretManagerConfigService)
+                .preferred(new SecretManagerConfigService(pathToInstanceConfig, ServiceOptions.getDefaultProjectId()))
+                .fallback(new SecretManagerConfigService(pathToSharedConfig, ServiceOptions.getDefaultProjectId()))
                 .build();
-
     }
 
     @Provides @Singleton
