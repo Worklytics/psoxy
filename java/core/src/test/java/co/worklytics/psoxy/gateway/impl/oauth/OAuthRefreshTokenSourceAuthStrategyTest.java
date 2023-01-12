@@ -12,7 +12,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -169,13 +168,13 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
         OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl tokenRefreshHandler = new OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl();
         tokenRefreshHandler.config = spy(ConfigService.class);
         when(tokenRefreshHandler.config.supportsWriting()).thenReturn(true);
-        when(tokenRefreshHandler.config.getConfigPropertyAsOptional(eq(RefreshTokenBuilder.ConfigProperty.REFRESH_TOKEN)))
+        when(tokenRefreshHandler.config.getConfigPropertyAsOptional(eq(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN)))
             .thenReturn(Optional.of(originalToken));
 
         CanonicalOAuthAccessTokenResponseDto exampleResponse = new CanonicalOAuthAccessTokenResponseDto();
         exampleResponse.refreshToken = newToken;
         tokenRefreshHandler.storeRefreshTokenIfRotated(exampleResponse);
 
-        verify(tokenRefreshHandler.config, times(shouldRotate ? 1 : 0)).putConfigProperty(eq(RefreshTokenBuilder.ConfigProperty.REFRESH_TOKEN), eq(newToken));
+        verify(tokenRefreshHandler.config, times(shouldRotate ? 1 : 0)).putConfigProperty(eq(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN), eq(newToken));
     }
 }

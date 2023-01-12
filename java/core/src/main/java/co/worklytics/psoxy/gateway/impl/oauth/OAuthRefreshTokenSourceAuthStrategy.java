@@ -22,7 +22,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
@@ -237,7 +236,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         void storeRefreshTokenIfRotated(CanonicalOAuthAccessTokenResponseDto tokenResponse) {
             if (!StringUtils.isBlank(tokenResponse.getRefreshToken())) {
                 //if a refresh_token came back from server, potentially update it
-                config.getConfigPropertyWithMetadata(RefreshTokenBuilder.ConfigProperty.REFRESH_TOKEN)
+                config.getConfigPropertyWithMetadata(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN)
                     .filter(storedToken -> !Objects.equals(storedToken.getValue(), tokenResponse.getRefreshToken()))
                     .filter(storedToken -> storedToken.getLastModifiedDate().isEmpty()
                         || storedToken.getLastModifiedDate().get()
@@ -245,7 +244,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                     .ifPresent(storedTokenToRotate -> {
                         if (config.supportsWriting()) {
                             try {
-                                config.putConfigProperty(RefreshTokenBuilder.ConfigProperty.REFRESH_TOKEN,
+                                config.putConfigProperty(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN,
                                     tokenResponse.getRefreshToken());
                             } catch (Throwable e) {
                                 log.log(Level.SEVERE, "refresh_token rotated, but failed to write updated value; while this access_token may work, future token exchanges may fail", e);

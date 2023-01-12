@@ -38,7 +38,7 @@ public class SourceAuthModule {
     }
 
     @Provides @IntoSet
-    OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder refreshTokenPayloadBuilder(RefreshTokenBuilder refreshTokenPayloadBuilder) {
+    OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder refreshTokenPayloadBuilder(RefreshTokenTokenRequestBuilder refreshTokenPayloadBuilder) {
         return refreshTokenPayloadBuilder;
     }
 
