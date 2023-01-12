@@ -24,7 +24,6 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
-import java.util.Random;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -101,7 +100,7 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
     @Test
     public void testCachedTokenNeedsRefreshWhenNull() {
         OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl tokenRefreshHandler = new OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl();
-        assertFalse(tokenRefreshHandler.needsRefresh(null, Instant.now()));
+        assertFalse(tokenRefreshHandler.noRefreshNeeded(null, Instant.now()));
     }
 
     @ParameterizedTest
@@ -115,7 +114,7 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
 
         AccessToken token = new AccessToken("any-token", Date.from(expiration));
         tokenRefreshHandler.randomNumberGenerator = this.randomNumberGenerator;
-        assertTrue(tokenRefreshHandler.needsRefresh(token, fixed));
+        assertTrue(tokenRefreshHandler.noRefreshNeeded(token, fixed));
     }
 
     @ParameterizedTest
@@ -127,7 +126,7 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
 
         AccessToken token = new AccessToken("any-token", Date.from(expiration));
         tokenRefreshHandler.randomNumberGenerator = this.randomNumberGenerator;
-        assertFalse(tokenRefreshHandler.needsRefresh(token, fixed));
+        assertFalse(tokenRefreshHandler.noRefreshNeeded(token, fixed));
     }
 
     @Test

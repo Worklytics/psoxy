@@ -11,7 +11,6 @@ import com.google.auth.Credentials;
 import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.OAuth2CredentialsWithRefresh;
 import com.google.common.annotations.VisibleForTesting;
-import dagger.Component;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -205,7 +204,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                 }
             }
 
-            if (needsRefresh(this.currentToken, clock.instant())) {
+            if (noRefreshNeeded(this.currentToken, clock.instant())) {
                 return this.currentToken;
             }
 
@@ -278,7 +277,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         }
 
         @VisibleForTesting
-        protected boolean needsRefresh(AccessToken accessToken, Instant now) {
+        protected boolean noRefreshNeeded(AccessToken accessToken, Instant now) {
             if (accessToken == null) {
                 return false;
             }
