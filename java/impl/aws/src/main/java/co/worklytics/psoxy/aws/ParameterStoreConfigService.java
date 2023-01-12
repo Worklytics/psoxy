@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.aws;
 
 import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.Getter;
 import lombok.NonNull;
@@ -37,6 +38,9 @@ public class ParameterStoreConfigService implements ConfigService {
     @Inject
     @NonNull
     SsmClient client;
+
+    @Inject
+    EnvVarsConfigService envVarsConfig;
 
 
     @Override
@@ -77,9 +81,15 @@ public class ParameterStoreConfigService implements ConfigService {
                 .withDecryption(true)
                 .build();
             GetParameterResponse parameterResponse = client.getParameter(parameterRequest);
+            if (envVarsConfig.isDevelopment()) {
+                log.info("Found SSM parameter for " + paramName);
+            }
             return Optional.of(parameterResponse.parameter().value());
         } catch (ParameterNotFoundException | ParameterVersionNotFoundException ignore) {
             // does not exist, that could be OK depending on case.
+            if (envVarsConfig.isDevelopment()) {
+                log.info("No SSM parameter for " + paramName + " (may be expected)");
+            }
             return Optional.empty();
         } catch (SsmException ignore) {
             // very likely the policy doesn't allow reading this parameter
