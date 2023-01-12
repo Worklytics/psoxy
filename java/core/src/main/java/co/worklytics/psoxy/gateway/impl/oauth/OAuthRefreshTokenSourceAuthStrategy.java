@@ -3,6 +3,7 @@ package co.worklytics.psoxy.gateway.impl.oauth;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.RequiresConfiguration;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
+import co.worklytics.psoxy.utils.RandomNumberGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.http.*;
@@ -14,6 +15,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.java.Log;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Inject;
 import java.io.IOException;
@@ -48,14 +50,21 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
     @Getter
     private final String configIdentifier = "oauth2_refresh_token";
 
-    @Inject
-    ConfigService config;
-
     /**
      * default access token expiration to assume, if 'expires_in' value is omitted from response
      * (which is allowed under OAuth 2.0 spec)
      */
     public static final Duration DEFAULT_ACCESS_TOKEN_EXPIRATION = Duration.ofHours(1);
+
+    /**
+     * some sources seem to give you a new refresh token on EVERY token refresh request; we don't
+     * want to churn through refresh tokens when not really needed
+     *
+     * examples: Dropbox
+     *
+     * TODO: revisit whether this needs to be configured per data source
+     */
+    public static final Duration MIN_DURATION_TO_KEEP_REFRESH_TOKEN = Duration.ofDays(7);
 
 
     //q: should we put these as config properties? creates potential for inconsistent configs
@@ -154,9 +163,11 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         TokenRequestBuilder payloadBuilder;
         @Inject
         Clock clock;
+        @Inject //injected, so can be mocked for tests
+        RandomNumberGenerator randomNumberGenerator;
 
         @VisibleForTesting
-        protected final Duration TOKEN_REFRESH_THRESHOLD = Duration.ofMinutes(1L);
+        protected final Duration MAX_PROACTIVE_TOKEN_REFRESH = Duration.ofMinutes(5L);
 
         private AccessToken currentToken = null;
 
@@ -183,7 +194,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                 }
             }
 
-            if (isCurrentTokenValid(this.currentToken, clock.instant())) {
+            if (needsRefresh(this.currentToken, clock.instant())) {
                 return this.currentToken;
             }
 
@@ -209,20 +220,40 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                 objectMapper.readerFor(CanonicalOAuthAccessTokenResponseDto.class)
                     .readValue(response.getContent());
 
-            //TODO: this is obviously not great; if we're going to support refresh token rotation,
-            // need to have some way to control the logic based on grant type
-            config.getConfigPropertyAsOptional(RefreshTokenBuilder.ConfigProperty.REFRESH_TOKEN)
-                .ifPresent(currentRefreshToken -> {
-                    if (!Objects.equals(currentRefreshToken, tokenResponse.getRefreshToken())) {
-                        //TODO: update refreshToken (some source APIs do this; TBC whether ones currently
-                        // in scope for psoxy use do)
-                        //q: write to secret? (most correct ...)
-                        //q: write to file system?
-                        log.severe("Source API rotated refreshToken, which is currently NOT supported by psoxy");
-                    }
-                });
+            storeRefreshTokenIfRotated(tokenResponse);
 
             return tokenResponse;
+        }
+
+        /**
+         * Store the new refresh token if included in token response and differs from stored value
+         *
+         * this method encapsulates the logic for checking and storing new token
+         *
+         * @param tokenResponse the token response
+         */
+        @VisibleForTesting
+        void storeRefreshTokenIfRotated(CanonicalOAuthAccessTokenResponseDto tokenResponse) {
+            if (!StringUtils.isBlank(tokenResponse.getRefreshToken())) {
+                //if a refresh_token came back from server, potentially update it
+                config.getConfigPropertyWithMetadata(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN)
+                    .filter(storedToken -> !Objects.equals(storedToken.getValue(), tokenResponse.getRefreshToken()))
+                    .filter(storedToken -> storedToken.getLastModifiedDate().isEmpty()
+                        || storedToken.getLastModifiedDate().get()
+                                .isBefore(Instant.now().minus(MIN_DURATION_TO_KEEP_REFRESH_TOKEN)))
+                    .ifPresent(storedTokenToRotate -> {
+                        if (config.supportsWriting()) {
+                            try {
+                                config.putConfigProperty(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN,
+                                    tokenResponse.getRefreshToken());
+                            } catch (Throwable e) {
+                                log.log(Level.SEVERE, "refresh_token rotated, but failed to write updated value; while this access_token may work, future token exchanges may fail", e);
+                            }
+                        } else {
+                            log.log(Level.SEVERE, "refresh_token rotated, but config service does not support writing; while this access_token may work, future token exchanges may fail");
+                        }
+                    });
+            }
         }
 
 
@@ -236,12 +267,13 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         }
 
         @VisibleForTesting
-        protected boolean isCurrentTokenValid(AccessToken accessToken, Instant now) {
+        protected boolean needsRefresh(AccessToken accessToken, Instant now) {
             if (accessToken == null) {
                 return false;
             }
             Instant expiresAt = accessToken.getExpirationTime().toInstant();
-            Instant minimumValid = expiresAt.minus(TOKEN_REFRESH_THRESHOLD);
+            Instant minimumValid = expiresAt
+                .minusSeconds(randomNumberGenerator.nextInt((int) MAX_PROACTIVE_TOKEN_REFRESH.toSeconds()));
             return now.isBefore(minimumValid);
         }
 

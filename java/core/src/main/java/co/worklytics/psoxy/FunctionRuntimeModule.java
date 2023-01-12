@@ -4,6 +4,8 @@ import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.HostEnvironment;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.impl.*;
+import co.worklytics.psoxy.utils.RandomNumberGenerator;
+import co.worklytics.psoxy.utils.RandomNumberGeneratorImpl;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import dagger.Module;
@@ -13,6 +15,7 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import java.time.Clock;
 import java.time.Duration;
+import java.util.Random;
 import java.util.UUID;
 
 /**
@@ -32,6 +35,12 @@ public class FunctionRuntimeModule {
     @Provides
     static UUID randomUUID() {
         return UUID.randomUUID();
+    }
+
+    @Provides @Singleton
+    static RandomNumberGenerator randomNumberGenerator() {
+        //to be clear, NOT for cryptography
+        return new RandomNumberGeneratorImpl();
     }
 
     @Provides
