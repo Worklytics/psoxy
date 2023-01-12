@@ -200,6 +200,12 @@ variable "google_workspace_example_user" {
   description = "user to impersonate for Google Workspace API calls (null for none)"
 }
 
+variable "google_workspace_example_admin" {
+  type        = string
+  description = "user to impersonate for Google Workspace API calls (null for value of `google_workspace_example_user`)"
+  default     = null # will failover to user
+}
+
 variable "vpc_ip_block" {
   type        = string
   description = "IP block for VPC to create for psoxy instances, in CIDR notation"

@@ -72,6 +72,7 @@ module "psoxy-aws-google-workspace" {
   lookup_table_builders          = var.lookup_table_builders
   gcp_project_id                 = data.google_project.psoxy-google-connectors.project_id
   google_workspace_example_user  = var.google_workspace_example_user
+  google_workspace_example_admin = var.google_workspace_example_admin
   general_environment_variables  = var.general_environment_variables
 }
 
