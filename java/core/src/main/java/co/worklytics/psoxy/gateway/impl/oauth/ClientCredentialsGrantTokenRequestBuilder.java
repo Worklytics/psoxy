@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.gateway.impl.oauth;
 
 import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.RequiresConfiguration;
 import com.google.api.client.http.HttpContent;
 import com.google.api.client.http.UrlEncodedContent;
 import com.google.api.client.json.JsonFactory;
@@ -27,10 +28,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Base64;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * implementation of an Access Token Request (per RFC6749 4.4.2) authenticated by an assertion (RFC 7521)
@@ -40,8 +38,8 @@ import java.util.UUID;
  *   - https://datatracker.ietf.org/doc/html/rfc6749#section-4.4.2
  */
 @NoArgsConstructor(onConstructor_ = @Inject)
-public class ClientCredentialsGrantTokenRequestPayloadBuilder
-        implements OAuthRefreshTokenSourceAuthStrategy.TokenRequestPayloadBuilder {
+public class ClientCredentialsGrantTokenRequestBuilder
+        implements OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder, RequiresConfiguration {
 
     enum ConfigProperty implements ConfigService.ConfigProperty {
         PRIVATE_KEY_ID,
@@ -77,6 +75,21 @@ public class ClientCredentialsGrantTokenRequestPayloadBuilder
     Clock clock;
     @Inject
     Provider<UUID> uuidGenerator;
+
+    @Override
+    public Set<ConfigService.ConfigProperty> getRequiredConfigProperties() {
+        return Set.of(
+            OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.REFRESH_ENDPOINT, //should be redundant with strategy, but nonetheless req'd here too
+            OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID,
+            ConfigProperty.PRIVATE_KEY_ID,
+            ConfigProperty.PRIVATE_KEY
+        );
+    }
+
+    @Override
+    public Set<ConfigService.ConfigProperty> getAllConfigProperties() {
+        return Set.of(ConfigProperty.values());
+    }
 
     @SneakyThrows
     public HttpContent buildPayload() {

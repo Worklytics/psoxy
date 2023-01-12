@@ -93,8 +93,8 @@ public class PsoxyModule {
     }
 
     @Provides
-    static OAuthRefreshTokenSourceAuthStrategy.TokenRequestPayloadBuilder tokenRequestPayloadBuilder(ConfigService configService,
-                                                                                                     Set<OAuthRefreshTokenSourceAuthStrategy.TokenRequestPayloadBuilder> payloadBuilders) {
+    static OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder tokenRequestPayloadBuilder(ConfigService configService,
+                                                                                              Set<OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder> payloadBuilders) {
         // Final instantiation of configs are per-function. Grant type is dependent of type of auth
         // strategy so might not exist for certain functions.
         // If it is mis-configured will throw NPE at some point
@@ -105,7 +105,7 @@ public class PsoxyModule {
                 .findFirst()
                 .orElseThrow(() -> new Error("No TokenRequestPayloadBuilder impl supporting oauth grant type: " + grantType)))
             // return no-op payload builder as Provides can't return null
-            .orElse(new OAuthRefreshTokenSourceAuthStrategy.TokenRequestPayloadBuilder() {
+            .orElse(new OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder() {
                 @Override
                 public String getGrantType() {
                     return null;

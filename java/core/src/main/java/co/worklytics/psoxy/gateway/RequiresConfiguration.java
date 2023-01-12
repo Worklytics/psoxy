@@ -8,4 +8,6 @@ public interface RequiresConfiguration {
      * @return set of any config properties that are required to be defined
      */
     Set<ConfigService.ConfigProperty> getRequiredConfigProperties();
+
+    Set<ConfigService.ConfigProperty> getAllConfigProperties();
 }

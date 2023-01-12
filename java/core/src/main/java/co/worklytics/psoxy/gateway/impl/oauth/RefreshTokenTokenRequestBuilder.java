@@ -16,12 +16,15 @@ import java.util.Set;
  * build payload for canonical OAuth access token request authenticated by a long-lived refresh
  * token + client secret
  *
+ * (apologies for awkward name, but to be clear: this is using one kind of token to request another,
+ *  so it's a token request, using a token)
+ *
  * @see OAuthAccessTokenSourceAuthStrategy
  *
  */
 @NoArgsConstructor(onConstructor_ = @Inject)
-public class RefreshTokenPayloadBuilder
-        implements OAuthRefreshTokenSourceAuthStrategy.TokenRequestPayloadBuilder, RequiresConfiguration {
+public class RefreshTokenTokenRequestBuilder
+        implements OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder, RequiresConfiguration {
 
     @Inject
     ConfigService config;
@@ -50,6 +53,15 @@ public class RefreshTokenPayloadBuilder
 
     @Override
     public Set<ConfigService.ConfigProperty> getRequiredConfigProperties() {
-        return Set.of(ConfigProperty.REFRESH_TOKEN, ConfigProperty.CLIENT_SECRET);
+        return Set.of(
+            OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID,
+            ConfigProperty.CLIENT_SECRET,
+            ConfigProperty.REFRESH_TOKEN
+            );
+    }
+
+    @Override
+    public Set<ConfigService.ConfigProperty> getAllConfigProperties() {
+        return Set.of(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.values());
     }
 }
