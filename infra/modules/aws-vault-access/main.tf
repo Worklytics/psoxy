@@ -9,7 +9,7 @@ resource "vault_aws_auth_backend_role" "example" {
   resolve_aws_unique_ids   = false
   token_ttl                = 3600      # in seconds; so this is one hour
   token_max_ttl            = 24 * 3600 # in seconds; so this is one day
-  token_policies           = [
+  token_policies = [
     var.vault_policy_name
   ]
 }

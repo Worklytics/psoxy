@@ -247,7 +247,7 @@ module "worklytics-psoxy-connection-long-auth" {
 # BEGIN BULK CONNECTORS
 module "psoxy-gcp-bulk" {
   for_each = merge(module.worklytics_connector_specs.enabled_bulk_connectors,
-                   var.custom_bulk_connectors)
+  var.custom_bulk_connectors)
 
   source = "../../modules/gcp-psoxy-bulk"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-bulk?ref=v0.4.9"
@@ -275,7 +275,7 @@ module "psoxy-gcp-bulk" {
 
 module "psoxy-bulk-to-worklytics" {
   for_each = merge(module.worklytics_connector_specs.enabled_bulk_connectors,
-                   var.custom_bulk_connectors)
+  var.custom_bulk_connectors)
 
   source = "../../modules/worklytics-psoxy-connection-generic"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-generic?ref=v0.4.9"

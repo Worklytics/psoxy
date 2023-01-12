@@ -53,7 +53,7 @@ variable "psoxy_base_dir" {
 }
 
 variable "force_bundle" {
-  type        =  bool
+  type        = bool
   description = "whether to force build of deployment bundle, even if it already exists for this proxy version"
   default     = false
 }
@@ -120,7 +120,7 @@ variable "custom_bulk_connectors" {
       columnsToDuplicate    = optional(map(string), {})
       columnsToRename       = optional(map(string), {})
     })
-    settings_to_provide     = optional(map(string), {})
+    settings_to_provide = optional(map(string), {})
   }))
   description = "specs of custom bulk connectors to create"
 

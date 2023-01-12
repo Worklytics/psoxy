@@ -248,7 +248,7 @@ module "worklytics-psoxy-connection" {
 
 module "psoxy-bulk" {
   for_each = merge(module.worklytics_connector_specs.enabled_bulk_connectors,
-                   var.custom_bulk_connectors)
+  var.custom_bulk_connectors)
 
   source = "../../modules/aws-psoxy-bulk"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-bulk?ref=v0.4.9"
@@ -279,7 +279,7 @@ module "psoxy-bulk" {
 
 module "psoxy-bulk-to-worklytics" {
   for_each = merge(module.worklytics_connector_specs.enabled_bulk_connectors,
-                   var.custom_bulk_connectors)
+  var.custom_bulk_connectors)
 
   source = "../../modules/worklytics-psoxy-connection-generic"
 
@@ -321,9 +321,9 @@ module "psoxy_lookup_tables_builders" {
 
 locals {
   all_instances = merge(
-    { for instance in module.psoxy-google-workspace-connector : instance.instance_id => instance},
-    { for instance in module.psoxy-bulk : instance.instance_id => instance},
-    { for instance in module.aws-psoxy-long-auth-connectors : instance.instance_id => instance}
+    { for instance in module.psoxy-google-workspace-connector : instance.instance_id => instance },
+    { for instance in module.psoxy-bulk : instance.instance_id => instance },
+    { for instance in module.aws-psoxy-long-auth-connectors : instance.instance_id => instance }
   )
 }
 

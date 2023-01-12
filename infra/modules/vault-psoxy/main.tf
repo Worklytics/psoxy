@@ -7,7 +7,7 @@ locals {
 }
 
 resource "vault_policy" "psoxy_instance" {
-  name   = var.instance_id
+  name = var.instance_id
 
   # TODO: as of 4 Jan 2023, secret/* case needed here; please scope better for your prod use!!
   policy = <<EOT
