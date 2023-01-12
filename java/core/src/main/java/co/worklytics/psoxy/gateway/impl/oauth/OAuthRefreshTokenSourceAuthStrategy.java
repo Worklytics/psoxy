@@ -22,6 +22,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
@@ -57,6 +58,16 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
      * (which is allowed under OAuth 2.0 spec)
      */
     public static final Duration DEFAULT_ACCESS_TOKEN_EXPIRATION = Duration.ofHours(1);
+
+    /**
+     * some sources seem to give you a new refresh token on EVERY token refresh request; we don't
+     * want to churn through refresh tokens when not really needed
+     *
+     * examples: Dropbox
+     *
+     * TODO: revisit whether this needs to be configured per data source
+     */
+    public static final Duration MIN_DURATION_TO_KEEP_REFRESH_TOKEN = Duration.ofDays(7);
 
 
     //q: should we put these as config properties? creates potential for inconsistent configs
@@ -226,8 +237,11 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         void storeRefreshTokenIfRotated(CanonicalOAuthAccessTokenResponseDto tokenResponse) {
             if (!StringUtils.isBlank(tokenResponse.getRefreshToken())) {
                 //if a refresh_token came back from server, potentially update it
-                config.getConfigPropertyAsOptional(RefreshTokenBuilder.ConfigProperty.REFRESH_TOKEN)
-                    .filter(storedToken -> !Objects.equals(storedToken, tokenResponse.getRefreshToken()))
+                config.getConfigPropertyWithMetadata(RefreshTokenBuilder.ConfigProperty.REFRESH_TOKEN)
+                    .filter(storedToken -> !Objects.equals(storedToken.getValue(), tokenResponse.getRefreshToken()))
+                    .filter(storedToken -> storedToken.getLastModifiedDate().isEmpty()
+                        || storedToken.getLastModifiedDate().get()
+                                .isBefore(Instant.now().minus(MIN_DURATION_TO_KEEP_REFRESH_TOKEN)))
                     .ifPresent(storedTokenToRotate -> {
                         if (config.supportsWriting()) {
                             try {
