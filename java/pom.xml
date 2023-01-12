@@ -23,7 +23,8 @@
         <dependency.google-cloud-bom.version>0.163.0</dependency.google-cloud-bom.version>
         <dependency.google-http-client.version>1.41.0</dependency.google-http-client.version>
         <dependency.google-auth-library-oauth2-http.version>1.2.2</dependency.google-auth-library-oauth2-http.version>
-        <dependency.mockito-junit-jupiter.version>4.2.0</dependency.mockito-junit-jupiter.version>
+        <dependency.junit-jupiter.version>5.9.1</dependency.junit-jupiter.version>
+        <dependency.mockito-junit-jupiter.version>4.11.0</dependency.mockito-junit-jupiter.version>
         <dependency.json-path.version>2.7.0</dependency.json-path.version>
         <dependency.bettercloud-vault-java-driver>5.1.0</dependency.bettercloud-vault-java-driver>
     </properties>
@@ -90,7 +91,7 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>5.8.2</version>
+            <version>${dependency.junit-jupiter.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
