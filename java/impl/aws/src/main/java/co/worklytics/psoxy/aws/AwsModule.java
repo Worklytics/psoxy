@@ -27,6 +27,7 @@ import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import java.time.Duration;
+import java.util.logging.Logger;
 
 import static co.worklytics.psoxy.aws.VaultAwsIamAuth.VAULT_ENGINE_VERSION;
 
@@ -68,22 +69,29 @@ public interface AwsModule {
 
     @Provides @Named("Native") @Singleton
     static ConfigService nativeConfigService(HostEnvironment hostEnvironment,
-                                             ParameterStoreConfigServiceFactory parameterStoreConfigServiceFactory,
-                                             EnvVarsConfigService envVarsConfigService) {
+                                             EnvVarsConfigService envVarsConfigService,
+                                             ParameterStoreConfigServiceFactory parameterStoreConfigServiceFactory) {
 
-        ParameterStoreConfigService sharedParameterStoreConfigService =
-                parameterStoreConfigServiceFactory.create(envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_SHARED_CONFIG)
-                    .orElse(null));
+        String pathToSharedConfig =
+            envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_SHARED_CONFIG)
+                .orElse(null);
 
-        ParameterStoreConfigService functionScopedParameterStoreConfigService =
-            parameterStoreConfigServiceFactory.create(envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_INSTANCE_CONFIG)
-                .orElseGet(() -> asParameterStoreNamespace(hostEnvironment.getInstanceId()) + "_"));
+        ParameterStoreConfigService sharedConfigService =
+                parameterStoreConfigServiceFactory.create(pathToSharedConfig);
 
-        Duration sharedTtl = Duration.ofMinutes(20);
-        Duration connectorTtl = Duration.ofMinutes(5);
+        String pathToInstanceConfig =
+            envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_INSTANCE_CONFIG)
+            .orElseGet(() -> asParameterStoreNamespace(hostEnvironment.getInstanceId()) + "_");
+
+        ParameterStoreConfigService instanceScopedConfigService =
+            parameterStoreConfigServiceFactory.create(pathToInstanceConfig);
+
+
+        Duration proxyInstanceConfigCacheTtl = Duration.ofMinutes(5);
+        Duration sharedConfigCacheTtl = Duration.ofMinutes(20);
         return CompositeConfigService.builder()
-            .preferred(new CachingConfigServiceDecorator(functionScopedParameterStoreConfigService, connectorTtl))
-            .fallback(new CachingConfigServiceDecorator(sharedParameterStoreConfigService, sharedTtl))
+            .preferred(new CachingConfigServiceDecorator(instanceScopedConfigService, proxyInstanceConfigCacheTtl))
+            .fallback(new CachingConfigServiceDecorator(sharedConfigService, sharedConfigCacheTtl))
             .build();
     }
 
