@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 /**
@@ -50,7 +51,7 @@ public class CompositeConfigService implements ConfigService {
         return preferred.getConfigPropertyAsOptional(property)
             .orElseGet(() ->
                 fallback.getConfigPropertyAsOptional(property)
-                    .orElseThrow(() -> new Error("missing config. no value for " + property))
+                    .orElseThrow(() -> new NoSuchElementException("Missing config. no value for " + property))
             );
     }
 
