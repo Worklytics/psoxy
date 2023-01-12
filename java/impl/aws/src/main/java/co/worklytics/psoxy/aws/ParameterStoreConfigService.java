@@ -13,7 +13,9 @@ import software.amazon.awssdk.services.ssm.SsmClient;
 import software.amazon.awssdk.services.ssm.model.*;
 
 import javax.inject.Inject;
+import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.logging.Level;
 
 /**
@@ -68,11 +70,15 @@ public class ParameterStoreConfigService implements ConfigService {
     @Override
     public String getConfigPropertyOrError(ConfigProperty property) {
         return getConfigPropertyAsOptional(property)
-            .orElseThrow(() -> new Error("Proxy misconfigured; no value for " + property));
+            .orElseThrow(() -> new NoSuchElementException("Proxy misconfigured; no value for " + property));
     }
 
     @Override
     public Optional<String> getConfigPropertyAsOptional(ConfigProperty property) {
+        return getConfigPropertyAsOptional(property, r -> r.parameter().value());
+    }
+
+    <T> Optional<T> getConfigPropertyAsOptional(ConfigProperty property, Function<GetParameterResponse, T> mapping) {
         String paramName = parameterName(property);
 
         try {
@@ -81,10 +87,11 @@ public class ParameterStoreConfigService implements ConfigService {
                 .withDecryption(true)
                 .build();
             GetParameterResponse parameterResponse = client.getParameter(parameterRequest);
+
             if (envVarsConfig.isDevelopment()) {
                 log.info("Found SSM parameter for " + paramName);
             }
-            return Optional.of(parameterResponse.parameter().value());
+            return Optional.of(mapping.apply(parameterResponse));
         } catch (ParameterNotFoundException | ParameterVersionNotFoundException ignore) {
             // does not exist, that could be OK depending on case.
             if (envVarsConfig.isDevelopment()) {
@@ -103,6 +110,15 @@ public class ParameterStoreConfigService implements ConfigService {
         }
     }
 
+    @Override
+    public Optional<ConfigValueWithMetadata> getConfigPropertyWithMetadata(ConfigProperty configProperty) {
+        return getConfigPropertyAsOptional(configProperty, r -> ConfigValueWithMetadata.builder()
+            .value(r.parameter().value())
+            .lastModifiedDate(r.parameter().lastModifiedDate())
+            .build());
+
+    }
+
     @VisibleForTesting
     String parameterName(ConfigProperty property) {
         if (StringUtils.isBlank(this.namespace)) {
@@ -111,5 +127,4 @@ public class ParameterStoreConfigService implements ConfigService {
             return this.namespace + property.name();
         }
     }
-
 }

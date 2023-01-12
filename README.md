@@ -130,58 +130,20 @@ terraform apply
 
 ## Releases
 
+### [v0.4.9](https://github.com/Worklytics/psoxy/releases/tag/v0.4.9)
+
+Features:
+  - vault support (_alpha_)
+
 ### [v0.4.8](https://github.com/Worklytics/psoxy/releases/tag/v0.4.8)
 
 Features:
  - modular examples, simplifying usage/upgrades
  - tools to support for testing `bulk` cases, quick review of logs
- - lookup table builder examples 
- - restricting HTTP methods in rules 
+ - lookup table builder examples
+ - restricting HTTP methods in rules
 
-### [v0.4.7](https://github.com/Worklytics/psoxy/releases/tag/v0.4.7)
-
-Features:
- - rules can limit allowed query parameters
- - modules support decoupling secret storage
-
-Fixes:
- - numerous misc rule fixes
-
-### [v0.4.6](https://github.com/Worklytics/psoxy/releases/tag/v0.4.6)
-
-Features:
- - pass through headers
- - more concise parameter policies
- - testing tool improvements (npm/node-based)
-
-### [v0.4.5](https://github.com/Worklytics/psoxy/releases/tag/v0.4.5)
-
-Features:
-- Store and share short-lived OAuth access token across AWS lambda instances for Zoom Server-to-server OAuth connector.
-- AWS secured parameters. New set of policies limiting access to just the subset of parameters used by the lambda function.
-
-
-### [v0.4.4](https://github.com/Worklytics/psoxy/releases/tag/v0.4.4)
-
-Features:
-- Zoom connector now is built against Server-to-server OAuth apps, removing the use of the JWT application (will be deprecated in June 2023).
-
-
-### [v0.4.3](https://github.com/Worklytics/psoxy/releases/tag/v0.4.3)
-
-Features:
-  - **transiently reversible pseudonyms** - rules to support returning  'transiently' reversible
-    pseudonyms client, which can be encrypted using key available to psoxy instances (and expected
-    to rotate, such that reversible only until it is rotated).
-  - **endpoint-based rules** - fully move to 'Rules 2.0', dropping support
-    for 'Rules 1.0' format
-
-Breaking changes:
-  - drop support for 'Rules 1.0' format
-  - default pseudonym format will have hashes based only on canonical identifier + salt, not
-    considering the 'scope' in which the identifier appears; and will be base64-urlencoded plain
-    strings, rather than nested JSON.
-
+Review [earlier release notes in GitHub](https://github.com/Worklytics/psoxy/releases).
 
 ## Supported Data Sources
 As of September 2022, the following sources can be connected to Worklytics via psoxy:

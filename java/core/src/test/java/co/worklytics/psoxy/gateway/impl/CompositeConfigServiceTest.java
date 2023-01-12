@@ -4,6 +4,7 @@ import co.worklytics.psoxy.gateway.ConfigService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -62,7 +63,7 @@ class CompositeConfigServiceTest {
         assertEquals("defined-in-both-a",
             test.getConfigPropertyOrError(Properties.DEFINED_IN_BOTH));
 
-        assertThrows(Error.class,
+        assertThrows(NoSuchElementException.class,
             () -> test.getConfigPropertyOrError(Properties.DEFINED_IN_NEITHER));
     }
 

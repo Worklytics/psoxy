@@ -7,8 +7,23 @@ configuration itself is the stuff that we expect needs to be customized on per-o
 
 ## Getting Started
 
-We recommend you make a copy of this directory and customize it for your org. Run `./init` to get
-started.
+We recommend you make a copy of this directory and customize it for your org.
+
+Run `./init` in this directory to create an example `terraform.tfvars` file.  Edit it to customize.
+
+Create a file in this directory named `terraform.tfvars` to specify your settings:
+
+Initialize your configuration (at this location in directory hierarchy):
+```shell
+terraform init
+```
+
+Apply
+```shell
+terraform apply
+```
+
+Review the plan and confirm to apply.
 
 ### AWS
 Follow [`docs/aws/getting-started.md`](../../../docs/aws/getting-started.md) to setup AWS CLI to

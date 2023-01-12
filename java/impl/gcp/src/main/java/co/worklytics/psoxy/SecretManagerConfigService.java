@@ -10,6 +10,7 @@ import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.logging.Level;
 
@@ -57,7 +58,7 @@ public class SecretManagerConfigService implements ConfigService {
     @Override
     public String getConfigPropertyOrError(ConfigProperty property) {
         return getConfigPropertyAsOptional(property)
-                .orElseThrow(() -> new Error("Proxy misconfigured; no value for " + property));
+                .orElseThrow(() -> new NoSuchElementException("Proxy misconfigured; no value for " + property));
     }
 
     private String parameterName(ConfigProperty property) {

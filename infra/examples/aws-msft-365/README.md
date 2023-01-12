@@ -21,10 +21,25 @@ alternatives, but this will require your own modification to the example configu
 If your target MSFT tenant (specified in `terraform.tfvars`) lacks an Azure subscription (eg, is
 only Microsoft 365), you should auth with `az login --allow-no-subscriptions`. (or run `./az-auth)
 
-###
+## Usage
 
-We recommend you make a copy of this directory and customize it for your org. Run `./init` to get
-started.
+We recommend you make a copy of this directory and customize it for your org.
+
+Run `./init` in this directory to create an example `terraform.tfvars` file.  Edit it to customize.
+
+Create a file in this directory named `terraform.tfvars` to specify your settings:
+
+Initialize your configuration (at this location in directory hierarchy):
+```shell
+terraform init
+```
+
+Apply
+```shell
+terraform apply
+```
+
+Review the plan and confirm to apply.
 
 
 ## Security
