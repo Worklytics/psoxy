@@ -81,7 +81,7 @@ public interface AwsModule {
                                                                            SsmClient ssmClient) {
         String namespace =
             envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_INSTANCE_CONFIG)
-                .orElseGet(() -> asParameterStoreNamespace(hostEnvironment.getInstanceId()));
+                .orElseGet(() -> asParameterStoreNamespace(hostEnvironment.getInstanceId()) + "_");
         return new ParameterStoreConfigService(namespace, ssmClient);
     }
 

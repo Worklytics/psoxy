@@ -67,14 +67,6 @@ public class ParameterStoreConfigService implements ConfigService {
             .orElseThrow(() -> new Error("Proxy misconfigured; no value for " + property));
     }
 
-    private String parameterName(ConfigProperty property) {
-        if (StringUtils.isBlank(this.namespace)) {
-            return property.name();
-        } else {
-            return String.join("_", this.namespace, property.name());
-        }
-    }
-
     @Override
     public Optional<String> getConfigPropertyAsOptional(ConfigProperty property) {
         String paramName = parameterName(property);
@@ -98,6 +90,15 @@ public class ParameterStoreConfigService implements ConfigService {
                 log.log(Level.SEVERE, String.format("Throttling issues for key %s, rate limit reached most likely despite retries", paramName), e);
             }
             throw new IllegalStateException(String.format("failed to get config value: %s", paramName), e);
+        }
+    }
+
+    @VisibleForTesting
+    String parameterName(ConfigProperty property) {
+        if (StringUtils.isBlank(this.namespace)) {
+            return property.name();
+        } else {
+            return this.namespace + property.name();
         }
     }
 
