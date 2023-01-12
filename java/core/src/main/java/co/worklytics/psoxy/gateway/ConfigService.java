@@ -75,6 +75,9 @@ public interface ConfigService {
             .map(value -> ConfigValueWithMetadata.builder().value(value).build());
     }
 
+    /**
+     * @deprecated use EnvVarsConfigService::isDevelopment
+     */
     @Deprecated // use EnvVarsConfigService::isDevelopment
     default boolean isDevelopment() {
         return this.getConfigPropertyAsOptional(ProxyConfigProperty.IS_DEVELOPMENT_MODE)
