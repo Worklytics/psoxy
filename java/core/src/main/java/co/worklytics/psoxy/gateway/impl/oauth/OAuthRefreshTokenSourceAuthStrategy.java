@@ -3,6 +3,7 @@ package co.worklytics.psoxy.gateway.impl.oauth;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.RequiresConfiguration;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
+import co.worklytics.psoxy.utils.RandomNumberGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.http.*;
@@ -48,9 +49,6 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
     @Getter
     private final String configIdentifier = "oauth2_refresh_token";
-
-    @Inject
-    ConfigService config;
 
     /**
      * default access token expiration to assume, if 'expires_in' value is omitted from response
@@ -165,9 +163,11 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         TokenRequestBuilder payloadBuilder;
         @Inject
         Clock clock;
+        @Inject //injected, so can be mocked for tests
+        RandomNumberGenerator randomNumberGenerator;
 
         @VisibleForTesting
-        protected final Duration TOKEN_REFRESH_THRESHOLD = Duration.ofMinutes(1L);
+        protected final Duration MAX_PROACTIVE_TOKEN_REFRESH = Duration.ofMinutes(5L);
 
         private AccessToken currentToken = null;
 
@@ -194,7 +194,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                 }
             }
 
-            if (isCurrentTokenValid(this.currentToken, clock.instant())) {
+            if (needsRefresh(this.currentToken, clock.instant())) {
                 return this.currentToken;
             }
 
@@ -267,12 +267,13 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         }
 
         @VisibleForTesting
-        protected boolean isCurrentTokenValid(AccessToken accessToken, Instant now) {
+        protected boolean needsRefresh(AccessToken accessToken, Instant now) {
             if (accessToken == null) {
                 return false;
             }
             Instant expiresAt = accessToken.getExpirationTime().toInstant();
-            Instant minimumValid = expiresAt.minus(TOKEN_REFRESH_THRESHOLD);
+            Instant minimumValid = expiresAt
+                .minusSeconds(randomNumberGenerator.nextInt((int) MAX_PROACTIVE_TOKEN_REFRESH.toSeconds()));
             return now.isBefore(minimumValid);
         }
 
