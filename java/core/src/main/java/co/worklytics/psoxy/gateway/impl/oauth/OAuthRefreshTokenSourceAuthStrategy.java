@@ -204,13 +204,12 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                 }
             }
 
-            if (noRefreshNeeded(this.currentToken, clock.instant())) {
-                return this.currentToken;
+            if (shouldRefresh(this.currentToken, clock.instant())) {
+                tokenResponse = exchangeRefreshTokenForAccessToken();
+                this.currentToken = asAccessToken(tokenResponse);
+                storeSharedAccessTokenIfSupported(this.currentToken);
             }
 
-            tokenResponse = exchangeRefreshTokenForAccessToken();
-            this.currentToken = asAccessToken(tokenResponse);
-            storeSharedAccessTokenIfSupported(this.currentToken);
             return this.currentToken;
         }
 
@@ -276,15 +275,27 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                 Date.from(clock.instant().plusSeconds(expiresIn)));
         }
 
+
+        /**
+         * whether token should be refreshed
+         *   - it's null
+         *   - it's expired
+         *   - it's close to expiring (proactive refresh)
+         *
+         * @param accessToken to check
+         * @param now effective time of check
+         * @return whether token should be refreshed
+         */
+
         @VisibleForTesting
-        protected boolean noRefreshNeeded(AccessToken accessToken, Instant now) {
+        protected boolean shouldRefresh(AccessToken accessToken, Instant now) {
             if (accessToken == null) {
-                return false;
+                return true;
             }
             Instant expiresAt = accessToken.getExpirationTime().toInstant();
-            Instant minimumValid = expiresAt
+            Instant thresholdToProactiveRefresh = expiresAt
                 .minusSeconds(randomNumberGenerator.nextInt((int) MAX_PROACTIVE_TOKEN_REFRESH.toSeconds()));
-            return now.isBefore(minimumValid);
+            return now.isAfter(thresholdToProactiveRefresh);
         }
 
         @Override
