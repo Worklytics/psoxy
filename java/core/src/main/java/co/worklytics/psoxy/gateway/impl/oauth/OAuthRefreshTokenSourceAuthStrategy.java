@@ -290,12 +290,12 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         @VisibleForTesting
         protected boolean shouldRefresh(AccessToken accessToken, Instant now) {
             if (accessToken == null) {
-                return false;
+                return true;
             }
             Instant expiresAt = accessToken.getExpirationTime().toInstant();
-            Instant minimumValid = expiresAt
+            Instant thresholdToProactiveRefresh = expiresAt
                 .minusSeconds(randomNumberGenerator.nextInt((int) MAX_PROACTIVE_TOKEN_REFRESH.toSeconds()));
-            return now.isBefore(minimumValid);
+            return now.isAfter(thresholdToProactiveRefresh);
         }
 
         @Override

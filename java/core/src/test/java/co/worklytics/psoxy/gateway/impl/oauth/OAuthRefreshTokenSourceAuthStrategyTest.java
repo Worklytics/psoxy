@@ -55,7 +55,7 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
             DaggerOAuthRefreshTokenSourceAuthStrategyTest_Container.create();
         container.inject(this);
 
-        when(randomNumberGenerator.nextInt(anyInt())).thenReturn(300); //5 minutes
+        when(randomNumberGenerator.nextInt(anyInt())).thenReturn(60); //5 minutes
     }
 
     public static final String EXAMPLE_TOKEN_RESPONSE =
@@ -118,11 +118,14 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = { -3_600_000, -1, 0})
+    @ValueSource(ints = { -3_600_000, -1_000, -1, 0})
     public void testCachedTokenNeedsRefreshIfExpiredOrCloseTo(int millis) {
         OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl tokenRefreshHandler = new OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl();
         Instant fixed = Instant.now().truncatedTo(ChronoUnit.MILLIS);
-        Instant expiration = fixed.plus(tokenRefreshHandler.MAX_PROACTIVE_TOKEN_REFRESH).plusMillis(millis);
+        Instant expiration = fixed
+            .minus(tokenRefreshHandler.MAX_PROACTIVE_TOKEN_REFRESH) //expired 5 minutes ago
+            .plusMillis(millis); // plus some additional (negative) millisecond amount
+
 
         AccessToken token = new AccessToken("any-token", Date.from(expiration));
         tokenRefreshHandler.randomNumberGenerator = this.randomNumberGenerator;
