@@ -19,6 +19,26 @@ Working tracking of changes, updated as work done prior to release.  Please revi
   - keys/salts per value kind (PII, item id, etc)
 
 
+## v0.4.10
+
+Features:
+  - `PATH_TO_SHARED_CONFIG`/`PATH_TO_CONNECTOR_CONFIG` fully supported for AWS SSM Parameter Store
+     deployments (this includes our standard AWS examples).  By default, these values are `""` and
+     `"PSOXY_GCAL"` for usual case; but if you want to add a prefix/path to your SSM parameters,
+     you can set Terraform variable `aws_ssm_param_root_path` for our examples. This is useful if
+     your AWS account is multipurpose and will hold more than just Proxy deployment (although that
+     is not what we recommend, as accounts create implicit security boundaries around your infra; so
+     limiting a single account to a single project is a good practice).
+        - `v0.4.9` introduced these, but values with `/` didn't work properly due to how AWS SSM
+          interprets them; and our terraform examples didn't support setting them
+        - Terraform examples still only envision hierarchy, where you locate all your proxy-related
+          parameters under a single path (eg, `/corp_it/worklytics/`, with parameters needed by
+          all lambdas at that top level; and parameters needed by a specific lambda under a subpath
+          named for that lambda, eg `/corp_it/worklytics/PSOXY_GCAL_`; in `v0.5`, we will make these
+          distinct.
+  - `PATH_TO_SHARED_CONFIG`/`PATH_TO_CONNECTOR_CONFIG` should work in GCP Secret Manager deployments
+     too, but is not yet supported throughout our Terraform examples.
+
 ## v0.4.9
 
 Breaking Changes: (at least, somewhat breaking)

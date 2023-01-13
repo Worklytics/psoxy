@@ -3,10 +3,18 @@
 #   eg, GCP Secret Manager, AWS SSM Parameter Store, Hashicorp Vault, etc.
 #  but is this good Terraform style? clearly in AWS case, this module doesn't do much ...
 
+locals {
+  # AWS SSM param name must be fully qualified if contains `/`;
+  # so test for that case, and prefix with `/` if needed
+  non_empty_path           = length(var.path) > 0
+  non_fully_qualified_path = length(regexall("/", var.path)) > 0 && !startswith(var.path, "/")
+  path_prefix              = local.non_empty_path && local.non_fully_qualified_path ? "/${var.path}" : var.path
+}
+
 resource "aws_ssm_parameter" "secret" {
   for_each = var.secrets
 
-  name        = each.key
+  name        = "${local.path_prefix}${each.key}"
   type        = "SecureString"
   description = each.value.description
   value       = sensitive(each.value.value)
@@ -14,7 +22,7 @@ resource "aws_ssm_parameter" "secret" {
   lifecycle {
     ignore_changes = [
       # value, # previously, we ignored changes to value; but this doesn't actually prevent new
-               # value from being in your state file - so little point.
+      # value from being in your state file - so little point.
       tags
     ]
   }

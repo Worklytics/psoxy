@@ -18,6 +18,12 @@ variable "function_name" {
   description = "name of function"
 }
 
+variable "path_to_instance_ssm_parameters" {
+  type        = string
+  description = "path to instance config parameters in SSM Parameter Store (`null` for default, which is `PSOXY_{function_name}_`); lambda will be able to read/write params beneath this path/prefix"
+  default     = null
+}
+
 variable "handler_class" {
   type        = string
   description = "Class to handle the request"

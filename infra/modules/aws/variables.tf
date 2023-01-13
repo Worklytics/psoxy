@@ -20,7 +20,7 @@ variable "psoxy_base_dir" {
 }
 
 variable "force_bundle" {
-  type        =  bool
+  type        = bool
   description = "whether to force build of deployment bundle, even if it already exists"
   default     = false
 }

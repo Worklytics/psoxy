@@ -11,18 +11,19 @@ terraform {
 module "psoxy_lambda" {
   source = "../aws-psoxy-lambda"
 
-  function_name                  = var.function_name
-  handler_class                  = "co.worklytics.psoxy.Handler"
-  path_to_function_zip           = var.path_to_function_zip
-  function_zip_hash              = var.function_zip_hash
-  memory_size_mb                 = var.memory_size_mb
-  timeout_seconds                = 55
-  reserved_concurrent_executions = var.reserved_concurrent_executions
-  path_to_config                 = var.path_to_config
-  source_kind                    = var.source_kind
-  function_parameters            = var.function_parameters
-  global_parameter_arns          = var.global_parameter_arns
-  environment_variables          = var.environment_variables
+  function_name                   = var.function_name
+  handler_class                   = "co.worklytics.psoxy.Handler"
+  path_to_function_zip            = var.path_to_function_zip
+  function_zip_hash               = var.function_zip_hash
+  memory_size_mb                  = var.memory_size_mb
+  timeout_seconds                 = 55
+  reserved_concurrent_executions  = var.reserved_concurrent_executions
+  path_to_config                  = var.path_to_config
+  source_kind                     = var.source_kind
+  function_parameters             = var.function_parameters
+  path_to_instance_ssm_parameters = var.path_to_instance_ssm_parameters
+  global_parameter_arns           = var.global_parameter_arns
+  environment_variables           = var.environment_variables
 }
 
 resource "aws_lambda_function_url" "lambda_url" {

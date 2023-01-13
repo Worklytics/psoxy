@@ -18,6 +18,17 @@ variable "aws_region" {
   description = "default region in which to provision your AWS infra"
 }
 
+variable "aws_ssm_param_root_path" {
+  type        = string
+  description = "root to path under which SSM parameters created by this module will be created"
+  default     = ""
+
+  validation {
+    condition     = length(var.aws_ssm_param_root_path) == 0 || length(regexall("/", var.aws_ssm_param_root_path)) == 0 || startswith(var.aws_ssm_param_root_path, "/")
+    error_message = "The aws_ssm_param_root_path value must be fully qualified (begin with `/`) if it contains any `/` characters."
+  }
+}
+
 variable "caller_gcp_service_account_ids" {
   type        = list(string)
   description = "ids of GCP service accounts allowed to send requests to the proxy (eg, unique ID of the SA of your Worklytics instance)"
@@ -71,7 +82,7 @@ variable "psoxy_base_dir" {
 }
 
 variable "force_bundle" {
-  type        =  bool
+  type        = bool
   description = "whether to force build of deployment bundle, even if it already exists for this proxy version"
   default     = false
 }
@@ -120,7 +131,7 @@ variable "custom_bulk_connectors" {
       columnsToDuplicate    = optional(map(string), {})
       columnsToRename       = optional(map(string), {})
     })
-    settings_to_provide     = optional(map(string), {})
+    settings_to_provide = optional(map(string), {})
   }))
   description = "specs of custom bulk connectors to create"
 

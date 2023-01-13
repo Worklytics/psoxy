@@ -24,6 +24,12 @@ variable "aws_assume_role_arn" {
   default     = null
 }
 
+variable "path_to_instance_ssm_parameters" {
+  type        = string
+  description = "path to instance config parameters in SSM Parameter Store (`null` for default, which is `PSOXY_{function_name}_`); lambda will be able to read/write params beneath this path/prefix"
+  default     = null
+}
+
 variable "reserved_concurrent_executions" {
   type        = number
   description = "Max number of concurrent instances for the function"
@@ -84,6 +90,7 @@ variable "global_parameter_arns" {
   description = "System Manager Parameters ARNS to expose to psoxy instance, expected to contain global shared parameters, like salt or encryption keys"
 }
 
+
 # TODO: remove after v0.4.x
 variable "function_parameters" {
   type = list(object({
@@ -93,3 +100,4 @@ variable "function_parameters" {
   description = "IGNORED; Parameter names and expected grant to create for function"
   default     = []
 }
+

@@ -35,7 +35,7 @@ variable "psoxy_base_dir" {
 }
 
 variable "force_bundle" {
-  type        =  bool
+  type        = bool
   description = "whether to force build of deployment bundle, even if it already exists"
   default     = false
 }
@@ -87,7 +87,7 @@ variable "non_production_connectors" {
 
 variable "custom_bulk_connectors" {
   type = map(object({
-    source_kind         = string
+    source_kind = string
     rules = object({
       pseudonymFormat       = optional(string)
       columnsToRedact       = optional(list(string), [])

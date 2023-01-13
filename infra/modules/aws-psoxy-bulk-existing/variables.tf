@@ -24,6 +24,12 @@ variable "instance_id" {
   }
 }
 
+variable "path_to_instance_ssm_parameters" {
+  type        = string
+  description = "path to instance config parameters in SSM Parameter Store (`null` for default, which is `PSOXY_{function_name}_`); lambda will be able to read/write params beneath this path/prefix"
+  default     = null
+}
+
 variable "input_bucket" {
   type        = string
   description = "name S3 input bucket"
