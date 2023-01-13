@@ -6,11 +6,11 @@
 module "generic" {
   source = "../worklytics-psoxy-connection-generic"
 
-  psoxy_instance_id = var.psoxy_instance_id
-  connector_id = var.connector_id
+  psoxy_instance_id      = var.psoxy_instance_id
+  connector_id           = var.connector_id
   psoxy_host_platform_id = var.psoxy_host_platform_id
-  display_name = var.display_name
-  todo_step = var.todo_step
+  display_name           = var.display_name
+  todo_step              = var.todo_step
   settings_to_provide = merge(var.settings_to_provide,
     {
       "Psoxy Base URL" = var.psoxy_endpoint_url

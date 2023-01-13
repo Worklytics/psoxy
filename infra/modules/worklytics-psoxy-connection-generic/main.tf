@@ -1,21 +1,21 @@
 
 locals {
   # for backwards compatibility < 0.4.6
-  instance_id                   = coalesce(var.psoxy_instance_id, var.display_name)
+  instance_id = coalesce(var.psoxy_instance_id, var.display_name)
 
   # build TODO
 
   worklytics_add_connection_url = "https://intl.worklytics.co/analytics/connect/"
 
   # map of Worklytics setting key --> display name
-  autofilled_settings           =  {
+  autofilled_settings = {
     PROXY_AWS_ROLE_ARN = "AWS Psoxy Role ARN",
     PROXY_AWS_REGION   = "AWS Psoxy Region"
     PROXY_ENDPOINT     = "Psoxy Base URL"
   }
 
-  query_params       = [for k, v in local.autofilled_settings : "${k}=${urlencode(var.settings_to_provide[(v)])}"
-    if contains(keys(var.settings_to_provide), v)]
+  query_params = [for k, v in local.autofilled_settings : "${k}=${urlencode(var.settings_to_provide[(v)])}"
+  if contains(keys(var.settings_to_provide), v)]
   query_param_string = join("&", local.query_params)
 
   per_setting_instructions      = [for k, v in var.settings_to_provide : "    - Copy and paste `${v}` as the value for \"${k}\"." if !contains(values(local.autofilled_settings), k)]
