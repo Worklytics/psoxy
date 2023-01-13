@@ -140,10 +140,18 @@ resource "google_cloudfunctions_function" "function" {
   ]
 }
 
-output "next_todo_step" {
-  value = var.todo_step + 1
+output "instance_id" {
+  value = local.function_name
+}
+
+output "input_bucket" {
+  value = google_storage_bucket.input-bucket.name
 }
 
 output "sanitized_bucket" {
   value = google_storage_bucket.output-bucket.name
+}
+
+output "next_todo_step" {
+  value = var.todo_step + 1
 }

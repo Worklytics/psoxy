@@ -288,3 +288,15 @@ module "psoxy-bulk-to-worklytics" {
     "Bucket Name" = module.psoxy-gcp-bulk[each.key].sanitized_bucket
   }, try(each.value.settings_to_provide, {}))
 }
+
+locals {
+  all_instances = merge(
+    { for instance in module.psoxy-google-workspace-connector : instance.instance_id => instance },
+    { for instance in module.psoxy-gcp-bulk : instance.instance_id => instance },
+    { for instance in module.connector-long-auth-function : instance.instance_id => instance }
+  )
+}
+
+output "instances" {
+  value = ""
+}
