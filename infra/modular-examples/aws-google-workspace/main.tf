@@ -21,8 +21,9 @@ module "worklytics_connector_specs" {
   source = "../../modules/worklytics-connector-specs"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connector-specs?ref=v0.4.9
 
-  enabled_connectors            = var.enabled_connectors
-  google_workspace_example_user = var.google_workspace_example_user
+  enabled_connectors             = var.enabled_connectors
+  google_workspace_example_user  = var.google_workspace_example_user
+  google_workspace_example_admin = coalesce(var.google_workspace_example_admin, var.google_workspace_example_user)
 }
 
 module "psoxy-aws" {
@@ -332,7 +333,8 @@ locals {
   all_instances = merge(
     { for instance in module.psoxy-google-workspace-connector : instance.instance_id => instance },
     { for instance in module.psoxy-bulk : instance.instance_id => instance },
-    { for instance in module.aws-psoxy-long-auth-connectors : instance.instance_id => instance }
+    { for instance in module.aws-psoxy-long-auth-connectors : instance.instance_id => instance },
+    { for instance in module.psoxy_lookup_tables_builders : instance.instance_id => instance }
   )
 }
 

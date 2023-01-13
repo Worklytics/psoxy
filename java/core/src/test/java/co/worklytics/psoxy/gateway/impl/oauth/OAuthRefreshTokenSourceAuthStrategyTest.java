@@ -24,7 +24,6 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
-import java.util.Random;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -101,7 +100,7 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
     @Test
     public void testCachedTokenNeedsRefreshWhenNull() {
         OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl tokenRefreshHandler = new OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl();
-        assertFalse(tokenRefreshHandler.needsRefresh(null, Instant.now()));
+        assertTrue(tokenRefreshHandler.shouldRefresh(null, Instant.now()));
     }
 
     @ParameterizedTest
@@ -115,19 +114,22 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
 
         AccessToken token = new AccessToken("any-token", Date.from(expiration));
         tokenRefreshHandler.randomNumberGenerator = this.randomNumberGenerator;
-        assertTrue(tokenRefreshHandler.needsRefresh(token, fixed));
+        assertFalse(tokenRefreshHandler.shouldRefresh(token, fixed));
     }
 
     @ParameterizedTest
-    @ValueSource(ints = { -3_600_000, -1, 0})
+    @ValueSource(ints = { -3_600_000, -1_000, -1, 0})
     public void testCachedTokenNeedsRefreshIfExpiredOrCloseTo(int millis) {
         OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl tokenRefreshHandler = new OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl();
         Instant fixed = Instant.now().truncatedTo(ChronoUnit.MILLIS);
-        Instant expiration = fixed.plus(tokenRefreshHandler.MAX_PROACTIVE_TOKEN_REFRESH).plusMillis(millis);
+        Instant expiration = fixed
+            .minus(tokenRefreshHandler.MAX_PROACTIVE_TOKEN_REFRESH) //expired 5 minutes ago
+            .plusMillis(millis); // plus some additional (negative) millisecond amount
+
 
         AccessToken token = new AccessToken("any-token", Date.from(expiration));
         tokenRefreshHandler.randomNumberGenerator = this.randomNumberGenerator;
-        assertFalse(tokenRefreshHandler.needsRefresh(token, fixed));
+        assertTrue(tokenRefreshHandler.shouldRefresh(token, fixed));
     }
 
     @Test
