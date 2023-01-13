@@ -1,10 +1,11 @@
 package co.worklytics.psoxy.aws;
 
 import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import com.google.common.annotations.VisibleForTesting;
+import dagger.assisted.Assisted;
+import dagger.assisted.AssistedInject;
 import lombok.Getter;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
@@ -23,22 +24,26 @@ import java.util.logging.Level;
  * https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html
  *
  */
-//TODO: AssistedFactory??
-//@NoArgsConstructor(onConstructor_ = @Inject)
-// IDE accepts this, but mvn compile complains --> badly linked lombok??
-//[ERROR] /Users/erik/code/psoxy/java/impl/aws/src/main/java/co/worklytics/psoxy/aws/ParameterStoreConfigService.java:[18,20] cannot find symbol
-//[ERROR]   symbol:   method onConstructor_()
-//[ERROR]   location: @interface lombok.NoArgsConstructo
 @Log
-@RequiredArgsConstructor
 public class ParameterStoreConfigService implements ConfigService {
 
     @Getter(onMethod_ = @VisibleForTesting)
     final String namespace;
 
     @Inject
-    @NonNull
     SsmClient client;
+
+    @Inject
+    EnvVarsConfigService envVarsConfig;
+
+    @AssistedInject
+    ParameterStoreConfigService(@Assisted String namespace) {
+        //SSM parameter stores must be "fully qualified" if contain a "/"
+        if (StringUtils.isNotBlank(namespace) && namespace.contains("/") && !namespace.startsWith("/")) {
+            namespace = "/" + namespace;
+        }
+        this.namespace = namespace;
+    }
 
 
     @Override
@@ -69,14 +74,6 @@ public class ParameterStoreConfigService implements ConfigService {
             .orElseThrow(() -> new NoSuchElementException("Proxy misconfigured; no value for " + property));
     }
 
-    private String parameterName(ConfigProperty property) {
-        if (StringUtils.isBlank(this.namespace)) {
-            return property.name();
-        } else {
-            return String.join("_", this.namespace, property.name());
-        }
-    }
-
     @Override
     public Optional<String> getConfigPropertyAsOptional(ConfigProperty property) {
         return getConfigPropertyAsOptional(property, r -> r.parameter().value());
@@ -91,13 +88,23 @@ public class ParameterStoreConfigService implements ConfigService {
                 .withDecryption(true)
                 .build();
             GetParameterResponse parameterResponse = client.getParameter(parameterRequest);
+
+            if (envVarsConfig.isDevelopment()) {
+                log.info("Found SSM parameter for " + paramName);
+            }
             return Optional.of(mapping.apply(parameterResponse));
         } catch (ParameterNotFoundException | ParameterVersionNotFoundException ignore) {
             // does not exist, that could be OK depending on case.
+            if (envVarsConfig.isDevelopment()) {
+                log.info("No SSM parameter for " + paramName + " (may be expected)");
+            }
             return Optional.empty();
         } catch (SsmException ignore) {
             // very likely the policy doesn't allow reading this parameter
-            // OK in those cases
+            // may be OK in those cases
+            if (envVarsConfig.isDevelopment()) {
+                log.log(Level.WARNING, "Couldn't read SSM parameter for " + paramName, ignore);
+            }
             return Optional.empty();
         } catch (AwsServiceException e) {
             if (e.isThrottlingException()) {
@@ -113,6 +120,15 @@ public class ParameterStoreConfigService implements ConfigService {
             .value(r.parameter().value())
             .lastModifiedDate(r.parameter().lastModifiedDate())
             .build());
+
     }
 
+    @VisibleForTesting
+    String parameterName(ConfigProperty property) {
+        if (StringUtils.isBlank(this.namespace)) {
+            return property.name();
+        } else {
+            return this.namespace + property.name();
+        }
+    }
 }

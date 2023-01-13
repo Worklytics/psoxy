@@ -8,6 +8,16 @@ terraform {
   }
 }
 
+locals {
+  instance_ssm_prefix = coalesce(var.path_to_instance_ssm_parameters, "${upper(replace(var.function_name, "-", "_"))}_")
+
+  # parse PATH_TO_SHARED_CONFIG in super-hacky way
+  # expect something like:
+  # arn:aws:ssm:us-east-1:123123123123:parameter/PSOXY_SALT
+  salt_arn              = [for l in var.global_parameter_arns : l if endswith(l, "PSOXY_SALT")][0]
+  path_to_shared_config = regex("arn.+parameter/(.*)PSOXY_SALT", local.salt_arn)[0]
+}
+
 resource "aws_lambda_function" "psoxy-instance" {
   function_name                  = var.function_name
   role                           = aws_iam_role.iam_for_lambda.arn
@@ -25,7 +35,9 @@ resource "aws_lambda_function" "psoxy-instance" {
       var.path_to_config == null ? {} : yamldecode(file(var.path_to_config)),
       var.environment_variables,
       {
-        EXECUTION_ROLE = aws_iam_role.iam_for_lambda.arn
+        EXECUTION_ROLE          = aws_iam_role.iam_for_lambda.arn
+        PATH_TO_INSTANCE_CONFIG = local.instance_ssm_prefix
+        PATH_TO_SHARED_CONFIG   = local.path_to_shared_config
       }
     )
   }
@@ -86,10 +98,8 @@ data "aws_region" "current" {}
 data "aws_caller_identity" "current" {}
 
 locals {
-  # TODO : revisit; this is exploiting convention
-  prefix = "${upper(replace(var.function_name, "-", "_"))}_"
-
-  param_arn_prefix = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/${local.prefix}"
+  instance_ssm_prefix_with_slash = startswith(local.instance_ssm_prefix, "/") ? local.instance_ssm_prefix : "/${local.instance_ssm_prefix}"
+  param_arn_prefix               = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter${local.instance_ssm_prefix_with_slash}"
 
   function_write_arns = [
     "${local.param_arn_prefix}*" # wildcard to match all params corresponding to this function

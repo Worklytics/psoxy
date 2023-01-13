@@ -24,8 +24,10 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ssm.SsmClient;
 
 import javax.inject.Named;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 import java.time.Duration;
+import java.util.logging.Logger;
 
 import static co.worklytics.psoxy.aws.VaultAwsIamAuth.VAULT_ENGINE_VERSION;
 
@@ -61,43 +63,35 @@ public interface AwsModule {
             .build();
     }
 
-    // global parameters
-    // singleton to be reused in lambda container
-    @Provides @Named("Global") @Singleton
-    static ParameterStoreConfigService parameterStoreConfigService(EnvVarsConfigService envVarsConfigService,
-                                                                   SsmClient ssmClient) {
-
-        String namespace = envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_SHARED_CONFIG)
-            .orElse(null);
-
-        return new ParameterStoreConfigService(namespace, ssmClient);
-    }
-
-    // parameters scoped to function
-    // singleton to be reused in lambda container
-    @Provides @Singleton
-    static ParameterStoreConfigService functionParameterStoreConfigService(HostEnvironment hostEnvironment,
-                                                                           EnvVarsConfigService envVarsConfigService,
-                                                                           SsmClient ssmClient) {
-        String namespace =
-            envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_INSTANCE_CONFIG)
-                .orElseGet(() -> asParameterStoreNamespace(hostEnvironment.getInstanceId()));
-        return new ParameterStoreConfigService(namespace, ssmClient);
-    }
-
     static String asParameterStoreNamespace(String functionName) {
         return functionName.toUpperCase().replace("-", "_");
     }
 
     @Provides @Named("Native") @Singleton
-    static ConfigService nativeConfigService(@Named("Global") ParameterStoreConfigService globalParameterStoreConfigService,
-                                             ParameterStoreConfigService functionScopedParameterStoreConfigService) {
+    static ConfigService nativeConfigService(HostEnvironment hostEnvironment,
+                                             EnvVarsConfigService envVarsConfigService,
+                                             ParameterStoreConfigServiceFactory parameterStoreConfigServiceFactory) {
 
-        Duration sharedTtl = Duration.ofMinutes(20);
-        Duration connectorTtl = Duration.ofMinutes(5);
+        String pathToSharedConfig =
+            envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_SHARED_CONFIG)
+                .orElse(null);
+
+        ParameterStoreConfigService sharedConfigService =
+                parameterStoreConfigServiceFactory.create(pathToSharedConfig);
+
+        String pathToInstanceConfig =
+            envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_INSTANCE_CONFIG)
+            .orElseGet(() -> asParameterStoreNamespace(hostEnvironment.getInstanceId()) + "_");
+
+        ParameterStoreConfigService instanceScopedConfigService =
+            parameterStoreConfigServiceFactory.create(pathToInstanceConfig);
+
+
+        Duration proxyInstanceConfigCacheTtl = Duration.ofMinutes(5);
+        Duration sharedConfigCacheTtl = Duration.ofMinutes(20);
         return CompositeConfigService.builder()
-            .preferred(new CachingConfigServiceDecorator(functionScopedParameterStoreConfigService, connectorTtl))
-            .fallback(new CachingConfigServiceDecorator(globalParameterStoreConfigService, sharedTtl))
+            .preferred(new CachingConfigServiceDecorator(instanceScopedConfigService, proxyInstanceConfigCacheTtl))
+            .fallback(new CachingConfigServiceDecorator(sharedConfigService, sharedConfigCacheTtl))
             .build();
     }
 

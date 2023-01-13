@@ -46,6 +46,7 @@ module "global_secrets" {
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-ssm-secrets?ref=v0.4.9"
 
   secrets = module.psoxy-aws.secrets
+  path    = var.aws_ssm_param_root_path
 }
 
 moved {
@@ -92,6 +93,7 @@ module "msft-365-connector-key-secrets" {
 
   private_key_id = module.msft-connection-auth[each.key].private_key_id
   private_key    = module.msft-connection-auth[each.key].private_key
+  ssm_path       = var.aws_ssm_param_root_path
 }
 
 # grant required permissions to connectors via Azure AD
@@ -117,18 +119,19 @@ module "psoxy-msft-connector" {
   source = "../../modules/aws-psoxy-rest"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-rest?ref=v0.4.9"
 
-  function_name         = "psoxy-${each.key}"
-  source_kind           = each.value.source_kind
-  path_to_config        = "${var.psoxy_base_dir}/configs/${each.value.source_kind}.yaml"
-  path_to_function_zip  = module.psoxy-aws.path_to_deployment_jar
-  function_zip_hash     = module.psoxy-aws.deployment_package_hash
-  api_caller_role_arn   = module.psoxy-aws.api_caller_role_arn
-  aws_assume_role_arn   = var.aws_assume_role_arn
-  example_api_calls     = each.value.example_calls
-  aws_account_id        = var.aws_account_id
-  path_to_repo_root     = var.psoxy_base_dir
-  todo_step             = module.msft_365_grants[each.key].next_todo_step
-  global_parameter_arns = module.global_secrets.secret_arns
+  function_name                   = "psoxy-${each.key}"
+  source_kind                     = each.value.source_kind
+  path_to_config                  = "${var.psoxy_base_dir}/configs/${each.value.source_kind}.yaml"
+  path_to_function_zip            = module.psoxy-aws.path_to_deployment_jar
+  function_zip_hash               = module.psoxy-aws.deployment_package_hash
+  api_caller_role_arn             = module.psoxy-aws.api_caller_role_arn
+  aws_assume_role_arn             = var.aws_assume_role_arn
+  example_api_calls               = each.value.example_calls
+  aws_account_id                  = var.aws_account_id
+  path_to_repo_root               = var.psoxy_base_dir
+  todo_step                       = module.msft_365_grants[each.key].next_todo_step
+  global_parameter_arns           = module.global_secrets.secret_arns
+  path_to_instance_ssm_parameters = "${var.aws_ssm_param_root_path}PSOXY_${upper(replace(each.key, "-", "_"))}_"
 
   environment_variables = merge(
     var.general_environment_variables,
@@ -172,7 +175,7 @@ locals {
 resource "aws_ssm_parameter" "long-access-secrets" {
   for_each = { for entry in module.worklytics_connector_specs.enabled_oauth_secrets_to_create : "${entry.connector_name}.${entry.secret_name}" => entry }
 
-  name        = "PSOXY_${upper(replace(each.value.connector_name, "-", "_"))}_${upper(each.value.secret_name)}"
+  name        = "${var.aws_ssm_param_root_path}PSOXY_${upper(replace(each.value.connector_name, "-", "_"))}_${upper(each.value.secret_name)}"
   type        = "SecureString"
   description = "Stores the value of ${upper(each.value.secret_name)} for `psoxy-${each.value.connector_name}`"
   value       = sensitive("TODO: fill me with the proper value for ${upper(each.value.secret_name)}!! (via AWS console)")
@@ -227,6 +230,7 @@ module "aws-psoxy-long-auth-connectors" {
   todo_step                             = module.source_token_external_todo[each.key].next_todo_step
   reserved_concurrent_executions        = each.value.reserved_concurrent_executions
   global_parameter_arns                 = module.global_secrets.secret_arns
+  path_to_instance_ssm_parameters       = "${var.aws_ssm_param_root_path}PSOXY_${upper(replace(each.key, "-", "_"))}_"
   function_parameters                   = each.value.secured_variables
 
   environment_variables = merge(
@@ -265,24 +269,24 @@ module "psoxy-bulk" {
   source = "../../modules/aws-psoxy-bulk"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-bulk?ref=v0.4.9"
 
-  aws_account_id       = var.aws_account_id
-  aws_assume_role_arn  = var.aws_assume_role_arn
-  instance_id          = each.key
-  source_kind          = each.value.source_kind
-  aws_region           = var.aws_region
-  path_to_function_zip = module.psoxy-aws.path_to_deployment_jar
-  function_zip_hash    = module.psoxy-aws.deployment_package_hash
-  api_caller_role_arn  = module.psoxy-aws.api_caller_role_arn
-  api_caller_role_name = module.psoxy-aws.api_caller_role_name
-  memory_size_mb       = 1024
+  aws_account_id                  = var.aws_account_id
+  aws_assume_role_arn             = var.aws_assume_role_arn
+  instance_id                     = each.key
+  source_kind                     = each.value.source_kind
+  aws_region                      = var.aws_region
+  path_to_function_zip            = module.psoxy-aws.path_to_deployment_jar
+  function_zip_hash               = module.psoxy-aws.deployment_package_hash
+  api_caller_role_arn             = module.psoxy-aws.api_caller_role_arn
+  api_caller_role_name            = module.psoxy-aws.api_caller_role_name
+  memory_size_mb                  = 1024
+  psoxy_base_dir                  = var.psoxy_base_dir
+  rules                           = each.value.rules
+  global_parameter_arns           = module.global_secrets.secret_arns
+  path_to_instance_ssm_parameters = "${var.aws_ssm_param_root_path}PSOXY_${upper(replace(each.key, "-", "_"))}_"
 
   sanitized_accessor_role_names = [
     module.psoxy-aws.api_caller_role_name
   ]
-  psoxy_base_dir        = var.psoxy_base_dir
-  rules                 = each.value.rules
-  global_parameter_arns = module.global_secrets.secret_arns
-
 
   environment_variables = merge(
     var.general_environment_variables,
@@ -316,17 +320,17 @@ module "psoxy_lookup_tables_builders" {
   source = "../../modules/aws-psoxy-bulk-existing"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-existing?ref=v0.4.9"
 
-  input_bucket                  = module.psoxy-bulk[each.value.input_connector_id].input_bucket
-  aws_account_id                = var.aws_account_id
-  instance_id                   = each.key
-  aws_region                    = var.aws_region
-  path_to_function_zip          = module.psoxy-aws.path_to_deployment_jar
-  function_zip_hash             = module.psoxy-aws.deployment_package_hash
-  psoxy_base_dir                = var.psoxy_base_dir
-  rules                         = each.value.rules
-  global_parameter_arns         = module.global_secrets.secret_arns
-  sanitized_accessor_role_names = each.value.sanitized_accessor_role_names
-
+  input_bucket                    = module.psoxy-bulk[each.value.input_connector_id].input_bucket
+  aws_account_id                  = var.aws_account_id
+  instance_id                     = each.key
+  aws_region                      = var.aws_region
+  path_to_function_zip            = module.psoxy-aws.path_to_deployment_jar
+  function_zip_hash               = module.psoxy-aws.deployment_package_hash
+  psoxy_base_dir                  = var.psoxy_base_dir
+  rules                           = each.value.rules
+  global_parameter_arns           = module.global_secrets.secret_arns
+  sanitized_accessor_role_names   = each.value.sanitized_accessor_role_names
+  path_to_instance_ssm_parameters = "${var.aws_ssm_param_root_path}PSOXY_${upper(replace(each.key, "-", "_"))}_"
 
   environment_variables = merge(
     var.general_environment_variables,
@@ -347,6 +351,7 @@ locals {
     { for instance in module.psoxy-bulk : instance.instance_id => instance },
     { for instance in module.aws-psoxy-long-auth-connectors : instance.instance_id => instance },
     { for instance in module.psoxy_lookup_tables_builders : instance.instance_id => instance }
+
   )
 }
 
