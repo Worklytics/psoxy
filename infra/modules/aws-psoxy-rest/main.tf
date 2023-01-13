@@ -112,7 +112,7 @@ resource "local_file" "test_script" {
   content  = <<EOT
 #!/bin/bash
 API_PATH=$${1:-${try(var.example_api_calls[0], "")}}
-echo "Quick test of ${var.function_name}" ...
+echo "Quick test of ${var.function_name} ..."
 
 ${local.command_cli_call} -u "${local.proxy_endpoint_url}$API_PATH" ${local.impersonation_param}
 
