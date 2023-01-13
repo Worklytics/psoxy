@@ -20,7 +20,7 @@ variable "aws_region" {
 
 variable "aws_ssm_param_root_path" {
   type        = string
-  description = "root to path under which SSM parameters created by this module will be created; NOTE: shouldn't be necessary to use this is you're following recommended approahc of using dedicated AWS account for deployment"
+  description = "root to path under which SSM parameters created by this module will be created; NOTE: shouldn't be necessary to use this is you're following recommended approach of using dedicated AWS account for deployment"
   default     = ""
 
   validation {
