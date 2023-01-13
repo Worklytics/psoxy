@@ -55,7 +55,7 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
             DaggerOAuthRefreshTokenSourceAuthStrategyTest_Container.create();
         container.inject(this);
 
-        when(randomNumberGenerator.nextInt(anyInt())).thenReturn(60); //5 minutes
+        when(randomNumberGenerator.nextInt(anyInt())).thenReturn(300); //5 minutes
     }
 
     public static final String EXAMPLE_TOKEN_RESPONSE =
