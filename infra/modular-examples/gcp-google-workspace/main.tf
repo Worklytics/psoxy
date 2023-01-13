@@ -139,7 +139,9 @@ module "worklytics-psoxy-connection" {
   source = "../../modules/worklytics-psoxy-connection"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection?ref=v0.4.9"
 
+  psoxy_host_platform_id = "GCP"
   psoxy_instance_id  = each.key
+  connector_id       = try(each.value.worklytics_connector_id, "")
   psoxy_endpoint_url = module.psoxy-google-workspace-connector[each.key].cloud_function_url
   display_name       = "${title(each.key)}${var.connector_display_name_suffix} via Psoxy"
   todo_step          = module.psoxy-google-workspace-connector[each.key].next_todo_step
@@ -237,7 +239,9 @@ module "worklytics-psoxy-connection-long-auth" {
   source = "../../modules/worklytics-psoxy-connection"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection?ref=v0.4.9"
 
+  psoxy_host_platform_id = "GCP"
   psoxy_instance_id  = each.key
+  connector_id       = try(each.value.worklytics_connector_id, "")
   psoxy_endpoint_url = module.connector-long-auth-function[each.key].cloud_function_url
   display_name       = "${each.value.display_name} via Psoxy${var.connector_display_name_suffix}"
   todo_step          = module.connector-long-auth-function[each.key].next_todo_step
@@ -280,7 +284,9 @@ module "psoxy-bulk-to-worklytics" {
   source = "../../modules/worklytics-psoxy-connection-generic"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-generic?ref=v0.4.9"
 
+  psoxy_host_platform_id = "GCP"
   psoxy_instance_id = each.key
+  connector_id      = try(each.value.worklytics_connector_id, "")
   display_name      = try(each.value.worklytics_connector_name, "${each.value.display_name} via Psoxy")
   todo_step         = module.psoxy-gcp-bulk[each.key].next_todo_step
 

@@ -1,4 +1,6 @@
 locals {
+
+
   google_workspace_sources = {
     # GDirectory connections are a PRE-REQ for gmail, gdrive, and gcal connections. remove only
     # if you plan to directly connect Directory to worklytics (without proxy). such a scenario is
@@ -7,6 +9,7 @@ locals {
     # to the Google Workspace, so may be directly connected in such scenarios.
     "gdirectory" : {
       source_kind : "gdirectory",
+      worklytics_connector_id : "gdirectory-psoxy",
       display_name : "Google Directory"
       apis_consumed : [
         "admin.googleapis.com"
