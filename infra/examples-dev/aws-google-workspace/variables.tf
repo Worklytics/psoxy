@@ -29,7 +29,7 @@ variable "psoxy_base_dir" {
 }
 
 variable "force_bundle" {
-  type        =  bool
+  type        = bool
   description = "whether to force build of deployment bundle, even if it already exists for this proxy version"
   default     = false
 }
@@ -113,7 +113,7 @@ variable "custom_bulk_connectors" {
       columnsToDuplicate    = optional(map(string), {})
       columnsToRename       = optional(map(string), {})
     })
-    settings_to_provide     = optional(map(string), {})
+    settings_to_provide = optional(map(string), {})
   }))
   description = "specs of custom bulk connectors to create"
 
@@ -198,6 +198,12 @@ variable "gcp_billing_account_id" {
 variable "google_workspace_example_user" {
   type        = string
   description = "user to impersonate for Google Workspace API calls (null for none)"
+}
+
+variable "google_workspace_example_admin" {
+  type        = string
+  description = "user to impersonate for Google Workspace API calls (null for value of `google_workspace_example_user`)"
+  default     = null # will failover to user
 }
 
 variable "vpc_ip_block" {

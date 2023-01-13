@@ -1,5 +1,6 @@
-gcp_project_id                = "psoxy-acme-example"
-google_workspace_example_user = "example@acme.com"
+gcp_project_id                 = "psoxy-acme-example"
+google_workspace_example_user  = "example@acme.com"
+google_workspace_example_admin = "admin@acme.com"
 # gcp_region                    = "us-central1"
 # replica regions = ["us-central1", "us-east1", "us-west1"]
 # force_bundle                  = false # if making changes to Java code w/o changing version number, set to true

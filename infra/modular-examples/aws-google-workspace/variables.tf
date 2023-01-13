@@ -72,7 +72,7 @@ variable "psoxy_base_dir" {
 }
 
 variable "force_bundle" {
-  type        =  bool
+  type        = bool
   description = "whether to force build of deployment bundle, even if it already exists"
   default     = false
 }
@@ -180,4 +180,10 @@ variable "lookup_table_builders" {
 variable "google_workspace_example_user" {
   type        = string
   description = "user to impersonate for Google Workspace API calls (null for none)"
+}
+
+variable "google_workspace_example_admin" {
+  type        = string
+  description = "user to impersonate for Google Workspace API calls (null for value of `google_workspace_example_user`)"
+  default     = null # will failover to user
 }

@@ -123,6 +123,14 @@ Contact support@worklytics.co for assistance modifying the rules as needed.
 EOT
 }
 
+output "instance_id" {
+  value = var.instance_id
+}
+
+output "cloud_function_name" {
+  value = google_cloudfunctions_function.function.name
+}
+
 
 output "cloud_function_url" {
   value = local.proxy_endpoint_url

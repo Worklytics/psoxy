@@ -14,8 +14,9 @@ module "worklytics_connector_specs" {
   source = "../../modules/worklytics-connector-specs"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connector-specs?ref=v0.4.9"
 
-  enabled_connectors            = var.enabled_connectors
-  google_workspace_example_user = var.google_workspace_example_user
+  enabled_connectors             = var.enabled_connectors
+  google_workspace_example_user  = var.google_workspace_example_user
+  google_workspace_example_admin = coalesce(var.google_workspace_example_admin, var.google_workspace_example_user)
 }
 
 module "psoxy-gcp" {
@@ -246,7 +247,7 @@ module "worklytics-psoxy-connection-long-auth" {
 # BEGIN BULK CONNECTORS
 module "psoxy-gcp-bulk" {
   for_each = merge(module.worklytics_connector_specs.enabled_bulk_connectors,
-                   var.custom_bulk_connectors)
+  var.custom_bulk_connectors)
 
   source = "../../modules/gcp-psoxy-bulk"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-bulk?ref=v0.4.9"
@@ -274,7 +275,7 @@ module "psoxy-gcp-bulk" {
 
 module "psoxy-bulk-to-worklytics" {
   for_each = merge(module.worklytics_connector_specs.enabled_bulk_connectors,
-                   var.custom_bulk_connectors)
+  var.custom_bulk_connectors)
 
   source = "../../modules/worklytics-psoxy-connection-generic"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-generic?ref=v0.4.9"
@@ -286,4 +287,16 @@ module "psoxy-bulk-to-worklytics" {
   settings_to_provide = merge({
     "Bucket Name" = module.psoxy-gcp-bulk[each.key].sanitized_bucket
   }, try(each.value.settings_to_provide, {}))
+}
+
+locals {
+  all_instances = merge(
+    { for instance in module.psoxy-google-workspace-connector : instance.instance_id => instance },
+    { for instance in module.psoxy-gcp-bulk : instance.instance_id => instance },
+    { for instance in module.connector-long-auth-function : instance.instance_id => instance }
+  )
+}
+
+output "instances" {
+  value = ""
 }

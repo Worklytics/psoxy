@@ -35,7 +35,7 @@ variable "psoxy_base_dir" {
 }
 
 variable "force_bundle" {
-  type        =  bool
+  type        = bool
   description = "whether to force build of deployment bundle, even if it already exists"
   default     = false
 }
@@ -87,7 +87,7 @@ variable "non_production_connectors" {
 
 variable "custom_bulk_connectors" {
   type = map(object({
-    source_kind         = string
+    source_kind = string
     rules = object({
       pseudonymFormat       = optional(string)
       columnsToRedact       = optional(list(string), [])
@@ -117,4 +117,10 @@ variable "custom_bulk_connectors" {
 variable "google_workspace_example_user" {
   type        = string
   description = "User to impersonate for Google Workspace API calls (null for none)"
+}
+
+variable "google_workspace_example_admin" {
+  type        = string
+  description = "user to impersonate for Google Workspace API calls (null for value of `google_workspace_example_user`)"
+  default     = null # will failover to user
 }
