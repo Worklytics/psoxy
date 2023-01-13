@@ -15,7 +15,7 @@ class ParameterStoreConfigServiceTest {
 
     @CsvSource({
         ",ACCESS_TOKEN",
-        "corp/,corp/ACCESS_TOKEN",
+        "corp/,/corp/ACCESS_TOKEN",
         "/corp/,/corp/ACCESS_TOKEN",
         "PSOXY_GCAL_,PSOXY_GCAL_ACCESS_TOKEN"
     })

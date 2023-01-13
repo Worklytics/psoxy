@@ -2,13 +2,10 @@ package co.worklytics.psoxy.aws;
 
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
-import com.amazonaws.auth.AWSCredentials;
 import com.google.common.annotations.VisibleForTesting;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
 import lombok.Getter;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
@@ -41,6 +38,10 @@ public class ParameterStoreConfigService implements ConfigService {
 
     @AssistedInject
     ParameterStoreConfigService(@Assisted String namespace) {
+        //SSM parameter stores must be "fully qualified" if contain a "/"
+        if (StringUtils.isNotBlank(namespace) && namespace.contains("/") && !namespace.startsWith("/")) {
+            namespace = "/" + namespace;
+        }
         this.namespace = namespace;
     }
 
