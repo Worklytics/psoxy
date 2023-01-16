@@ -130,6 +130,15 @@ terraform apply
 
 ## Releases
 
+### [v0.4.10](https://github.com/Worklytics/psoxy/releases/tag/v0.4.10)
+Features:
+  - token handling improvements
+  - support for config paths in AWS SSM (prev, only supported for Vault)
+  - cleaner Google project references in samples
+  - deep-link TODO files to 'Add Connection' interface in Worklytics, prefilling params
+  - generate simpler bash test script, facilitate rapid integration tests
+
+
 ### [v0.4.9](https://github.com/Worklytics/psoxy/releases/tag/v0.4.9)
 
 Features:
