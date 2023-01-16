@@ -4,9 +4,15 @@ variable "psoxy_instance_id" {
   default     = null
 }
 
+variable "connector_id" {
+  type        = string
+  description = "ID for connector implementation in Worklytics (to build deeplinks)"
+  default     = "" # will be REQUIRED for v0.5 onwards
+}
+
 variable "psoxy_host_platform_id" {
   type        = string
-  description = "Psoxy host platform id (AWS, GCP, etc"
+  description = "Psoxy host platform id (AWS, GCP, etc)"
   default     = "GCP"
 
   validation {
@@ -22,7 +28,7 @@ variable "psoxy_endpoint_url" {
 
 variable "display_name" {
   type        = string
-  description = "display name of connector in Worklytics"
+  description = "display name of connector in Worklytics."
 }
 
 variable "todo_step" {

@@ -15,6 +15,7 @@ terraform {
 
 locals {
   base_config_path = "${var.psoxy_base_dir}configs/"
+  host_platform_id = "AWS"
 }
 
 data "azuread_client_config" "current" {}
@@ -151,10 +152,12 @@ module "worklytics-psoxy-connection-msft-365" {
   source = "../../modules/worklytics-psoxy-connection"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=v0.4.9"
 
-  psoxy_instance_id  = each.key
-  psoxy_endpoint_url = module.psoxy-msft-connector[each.key].endpoint_url
-  display_name       = "${each.value.display_name} via Psoxy${var.connector_display_name_suffix}"
-  todo_step          = module.psoxy-msft-connector[each.key].next_todo_step
+  psoxy_host_platform_id = local.host_platform_id
+  psoxy_instance_id      = each.key
+  connector_id           = try(each.value.worklytics_connector_id, "")
+  psoxy_endpoint_url     = module.psoxy-msft-connector[each.key].endpoint_url
+  display_name           = "${each.value.display_name} via Psoxy${var.connector_display_name_suffix}"
+  todo_step              = module.psoxy-msft-connector[each.key].next_todo_step
 
   settings_to_provide = {
     "AWS Psoxy Region"   = var.aws_region,
@@ -249,10 +252,12 @@ module "worklytics-psoxy-connection-oauth-long-access" {
   source = "../../modules/worklytics-psoxy-connection"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=v0.4.9"
 
-  psoxy_instance_id  = each.key
-  psoxy_endpoint_url = module.aws-psoxy-long-auth-connectors[each.key].endpoint_url
-  display_name       = "${each.value.display_name} via Psoxy${var.connector_display_name_suffix}"
-  todo_step          = module.aws-psoxy-long-auth-connectors[each.key].next_todo_step
+  psoxy_host_platform_id = local.host_platform_id
+  psoxy_instance_id      = each.key
+  connector_id           = try(each.value.worklytics_connector_id, "")
+  psoxy_endpoint_url     = module.aws-psoxy-long-auth-connectors[each.key].endpoint_url
+  display_name           = "${each.value.display_name} via Psoxy${var.connector_display_name_suffix}"
+  todo_step              = module.aws-psoxy-long-auth-connectors[each.key].next_todo_step
 
   settings_to_provide = {
     "AWS Psoxy Region"   = var.aws_region,
@@ -303,9 +308,11 @@ module "psoxy-bulk-to-worklytics" {
 
   source = "../../modules/worklytics-psoxy-connection-generic"
 
-  psoxy_instance_id = each.key
-  display_name      = try(each.value.worklytics_connector_name, "${each.value.source_kind} via Psoxy")
-  todo_step         = module.psoxy-bulk[each.key].next_todo_step
+  psoxy_host_platform_id = local.host_platform_id
+  psoxy_instance_id      = each.key
+  connector_id           = try(each.value.worklytics_connector_id, "")
+  display_name           = try(each.value.worklytics_connector_name, "${each.value.source_kind} via Psoxy")
+  todo_step              = module.psoxy-bulk[each.key].next_todo_step
 
   settings_to_provide = merge({
     "AWS Psoxy Region"   = var.aws_region,

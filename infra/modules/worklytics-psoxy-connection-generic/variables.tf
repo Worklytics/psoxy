@@ -1,9 +1,17 @@
+# TODO: rename to `proxy_instance_id` in future versions; avoid coupling to brand name
 variable "psoxy_instance_id" {
   type        = string
   description = "friendly unique-id for Psoxy instance"
   default     = null
 }
 
+variable "connector_id" {
+  type        = string
+  description = "ID for connector implementation in Worklytics (to build deeplinks)"
+  default     = "" # will be REQUIRED for v0.5 onwards
+}
+
+# TODO: rename to `host_platform_id` in future versions; avoid coupling to brand name
 variable "psoxy_host_platform_id" {
   type        = string
   description = "Psoxy host platform id (AWS, GCP, etc"

@@ -1,4 +1,6 @@
 locals {
+
+
   google_workspace_sources = {
     # GDirectory connections are a PRE-REQ for gmail, gdrive, and gcal connections. remove only
     # if you plan to directly connect Directory to worklytics (without proxy). such a scenario is
@@ -7,6 +9,7 @@ locals {
     # to the Google Workspace, so may be directly connected in such scenarios.
     "gdirectory" : {
       source_kind : "gdirectory",
+      worklytics_connector_id : "gdirectory-psoxy",
       display_name : "Google Directory"
       apis_consumed : [
         "admin.googleapis.com"
@@ -32,6 +35,7 @@ locals {
     },
     "gcal" : {
       source_kind : "gcal",
+      worklytics_connector_id : "gcal-psoxy",
       display_name : "Google Calendar"
       apis_consumed : [
         "calendar-json.googleapis.com"
@@ -49,6 +53,7 @@ locals {
     },
     "gmail" : {
       source_kind : "gmail",
+      worklytics_connector_id : "gmail-meta-psoxy",
       display_name : "GMail"
       apis_consumed : [
         "gmail.googleapis.com"
@@ -64,6 +69,7 @@ locals {
     },
     "google-chat" : {
       source_kind : "google-chat",
+      worklytics_connector_id : "google-chat-psoxy",
       display_name : "Google Chat"
       apis_consumed : [
         "admin.googleapis.com"
@@ -79,6 +85,7 @@ locals {
     },
     "google-meet" : {
       source_kind : "google-meet",
+      worklytics_connector_id : "google-meet-psoxy",
       display_name : "Google Meet"
       apis_consumed : [
         "admin.googleapis.com"
@@ -94,6 +101,7 @@ locals {
     },
     "gdrive" : {
       source_kind : "gdrive",
+      worklytics_connector_id : "gdrive-psoxy",
       display_name : "Google Drive"
       apis_consumed : [
         "drive.googleapis.com"
@@ -115,6 +123,7 @@ locals {
   msft_365_connectors = {
     "azure-ad" : {
       enabled : true,
+      worklytics_connector_id : "azure-ad-psoxy",
       source_kind : "azure-ad",
       display_name : "Azure Directory"
       required_oauth2_permission_scopes : [],
@@ -135,6 +144,7 @@ locals {
     "outlook-cal" : {
       enabled : true,
       source_kind : "outlook-cal",
+      worklytics_connector_id : "outlook-cal-psoxy",
       display_name : "Outlook Calendar"
       required_oauth2_permission_scopes : [],
       required_app_roles : [
@@ -157,6 +167,7 @@ locals {
     "outlook-mail" : {
       enabled : true,
       source_kind : "outlook-mail"
+      worklytics_connector_id : "outlook-mail-psoxy",
       display_name : "Outlook Mail"
       required_oauth2_permission_scopes : [],
       required_app_roles : [
@@ -178,6 +189,7 @@ locals {
   oauth_long_access_connectors = {
     asana = {
       source_kind : "asana",
+      worklytics_connector_id : "asana-psoxy",
       display_name : "Asana"
       worklytics_connector_name : "Asana via Psoxy",
       environment_variables : {}
@@ -207,6 +219,7 @@ EOT
     }
     slack-discovery-api = {
       source_kind : "slack"
+      worklytics_connector_id : "slack-discovery-api-psoxy",
       worklytics_connector_name : "Slack via Psoxy",
       display_name : "Slack Discovery API"
       environment_variables : {}
@@ -250,6 +263,7 @@ EOT
     }
     zoom = {
       source_kind : "zoom"
+      worklytics_connector_id : "zoom-psoxy",
       display_name : "Zoom"
       worklytics_connector_name : "Zoom via Psoxy",
       environment_variables : {}
@@ -295,6 +309,7 @@ EOT
     },
     dropbox-business = {
       source_kind : "dropbox-business",
+      worklytics_connector_id : "dropbox-business-log-psoxy",
       display_name : "Dropbox Business",
       worklytics_connector_name : "Dropbox Business via Psoxy",
       secured_variables : [
@@ -365,6 +380,7 @@ EOT
   bulk_connectors = {
     "badge" = {
       source_kind               = "badge"
+      worklytics_connector_id   = "bulk-import-psoxy",
       worklytics_connector_name = "Bulk Data Import via Psoxy"
       rules = {
         columnsToRedact = []
@@ -379,6 +395,7 @@ EOT
     }
     "hris" = {
       source_kind               = "hris"
+      worklytics_connector_id   = "bulk-import-psoxy"
       worklytics_connector_name = "HRIS Data Import via Psoxy"
       rules = {
         columnsToRedact = []
@@ -394,6 +411,7 @@ EOT
       }
     }
     "survey" = {
+      worklytics_connector_id   = "survey-import-psoxy"
       source_kind               = "survey"
       worklytics_connector_name = "Survey Data Import via Psoxy"
       rules = {
@@ -406,6 +424,7 @@ EOT
     }
     "qualtrics" = {
       source_kind               = "qualtrics"
+      worklytics_connector_id   = "survey-import-psoxy"
       worklytics_connector_name = "Survey Data Import via Psoxy"
       rules = {
         columnsToRedact = []
