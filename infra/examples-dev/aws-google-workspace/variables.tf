@@ -22,6 +22,7 @@ variable "aws_ssm_param_root_path" {
   type        = string
   description = "root to path under which SSM parameters created by this module will be created; NOTE: shouldn't be necessary to use this is you're following recommended approach of using dedicated AWS account for deployment"
   default     = ""
+
   validation {
     condition     = length(var.aws_ssm_param_root_path) == 0 || length(regexall("/", var.aws_ssm_param_root_path)) == 0 || startswith(var.aws_ssm_param_root_path, "/")
     error_message = "The aws_ssm_param_root_path value must be fully qualified (begin with `/`) if it contains any `/` characters."
@@ -183,27 +184,26 @@ variable "lookup_table_builders" {
 
 variable "gcp_project_id" {
   type        = string
-  description = "id of GCP project that will host psoxy instance"
+  description = "id of GCP project that will host psoxy instance; must exist"
 }
 
 variable "gcp_org_id" {
   type        = string
-  description = "your GCP organization ID"
+  description = "DEPRECATED; IGNORED; your GCP organization ID"
   default     = null
 }
 
 variable "gcp_folder_id" {
   type        = string
-  description = "optionally, a folder into which to provision it"
+  description = "DEPRECATED; IGNORED; optionally, a folder into which to provision it"
   default     = null
 }
 
 variable "gcp_billing_account_id" {
   type        = string
-  description = "billing account ID; needed to create the project"
+  description = "DEPRECATED; IGNORED; billing account ID; needed to create the project"
   default     = null
 }
-
 
 variable "google_workspace_example_user" {
   type        = string

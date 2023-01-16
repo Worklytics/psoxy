@@ -127,7 +127,7 @@ EOT
 resource "local_file" "test_script" {
   filename        = "test-${var.instance_id}.sh"
   file_permission = "0770"
-  content  = <<EOT
+  content         = <<EOT
 #!/bin/bash
 API_PATH=$${1:-${try(var.example_api_calls[0], "")}}
 echo "Quick test of ${var.instance_id} ..."

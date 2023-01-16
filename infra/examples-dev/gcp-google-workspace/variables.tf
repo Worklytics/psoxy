@@ -1,6 +1,6 @@
 variable "gcp_project_id" {
   type        = string
-  description = "id of GCP project that will host psoxy instance"
+  description = "id of GCP project that will host psoxy instance; must exist"
 }
 
 variable "environment_name" {
@@ -9,21 +9,21 @@ variable "environment_name" {
   default     = ""
 }
 
+variable "gcp_org_id" {
+  type        = string
+  description = "DEPRECATED; IGNORED; your GCP organization ID"
+  default     = null
+}
+
 variable "gcp_folder_id" {
   type        = string
-  description = "optionally, a folder into which to provision it"
+  description = "DEPRECATED; IGNORED; optionally, a folder into which to provision it"
   default     = null
 }
 
 variable "gcp_billing_account_id" {
   type        = string
-  description = "billing account ID; needed to create the project"
-  default     = null
-}
-
-variable "gcp_org_id" {
-  type        = string
-  description = "your GCP organization ID"
+  description = "DEPRECATED; IGNORED; billing account ID; needed to create the project"
   default     = null
 }
 
@@ -57,7 +57,6 @@ variable "force_bundle" {
   description = "whether to force build of deployment bundle, even if it already exists for this proxy version"
   default     = false
 }
-
 
 variable "general_environment_variables" {
   type        = map(string)
