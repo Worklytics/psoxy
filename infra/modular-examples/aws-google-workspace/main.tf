@@ -15,6 +15,7 @@ terraform {
 
 locals {
   base_config_path = "${var.psoxy_base_dir}/configs/"
+  host_platform_id = "AWS"
 }
 
 module "worklytics_connector_specs" {
@@ -140,7 +141,7 @@ module "worklytics-psoxy-connection-google-workspace" {
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=v0.4.9"
 
   psoxy_instance_id      = each.key
-  psoxy_host_platform_id = "AWS"
+  psoxy_host_platform_id = local.host_platform_id
   connector_id           = try(each.value.worklytics_connector_id, "")
   psoxy_endpoint_url     = module.psoxy-google-workspace-connector[each.key].endpoint_url
   display_name           = "${each.value.display_name} via Psoxy${var.connector_display_name_suffix}"
@@ -294,7 +295,7 @@ module "psoxy-bulk-to-worklytics" {
 
   source = "../../modules/worklytics-psoxy-connection-generic"
 
-  psoxy_host_platform_id = "AWS"
+  psoxy_host_platform_id = local.host_platform_id
   psoxy_instance_id      = each.key
   connector_id           = try(each.value.worklytics_connector_id, "")
   display_name           = try(each.value.worklytics_connector_name, "${each.value.source_kind} via Psoxy")

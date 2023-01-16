@@ -8,6 +8,7 @@ terraform {
 
 locals {
   base_config_path = "${var.psoxy_base_dir}/configs/"
+  host_platform_id = "GCP"
 }
 
 module "worklytics_connector_specs" {
@@ -139,7 +140,7 @@ module "worklytics-psoxy-connection" {
   source = "../../modules/worklytics-psoxy-connection"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection?ref=v0.4.9"
 
-  psoxy_host_platform_id = "GCP"
+  psoxy_host_platform_id = local.host_platform_id
   psoxy_instance_id      = each.key
   connector_id           = try(each.value.worklytics_connector_id, "")
   psoxy_endpoint_url     = module.psoxy-google-workspace-connector[each.key].cloud_function_url
@@ -284,7 +285,7 @@ module "psoxy-bulk-to-worklytics" {
   source = "../../modules/worklytics-psoxy-connection-generic"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-generic?ref=v0.4.9"
 
-  psoxy_host_platform_id = "GCP"
+  psoxy_host_platform_id = local.host_platform_id
   psoxy_instance_id      = each.key
   connector_id           = try(each.value.worklytics_connector_id, "")
   display_name           = try(each.value.worklytics_connector_name, "${each.value.display_name} via Psoxy")

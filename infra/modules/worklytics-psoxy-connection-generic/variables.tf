@@ -1,3 +1,4 @@
+# TODO: rename to `proxy_instance_id` in future versions; avoid coupling to brand name
 variable "psoxy_instance_id" {
   type        = string
   description = "friendly unique-id for Psoxy instance"
@@ -10,6 +11,7 @@ variable "connector_id" {
   default     = "" # will be REQUIRED for v0.5 onwards
 }
 
+# TODO: rename to `host_platform_id` in future versions; avoid coupling to brand name
 variable "psoxy_host_platform_id" {
   type        = string
   description = "Psoxy host platform id (AWS, GCP, etc"

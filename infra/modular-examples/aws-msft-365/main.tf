@@ -15,6 +15,7 @@ terraform {
 
 locals {
   base_config_path = "${var.psoxy_base_dir}configs/"
+  host_platform_id = "AWS"
 }
 
 data "azuread_client_config" "current" {}
@@ -151,7 +152,7 @@ module "worklytics-psoxy-connection-msft-365" {
   source = "../../modules/worklytics-psoxy-connection"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=v0.4.9"
 
-  psoxy_host_platform_id = "AWS"
+  psoxy_host_platform_id = local.host_platform_id
   psoxy_instance_id      = each.key
   connector_id           = try(each.value.worklytics_connector_id, "")
   psoxy_endpoint_url     = module.psoxy-msft-connector[each.key].endpoint_url
@@ -251,7 +252,7 @@ module "worklytics-psoxy-connection-oauth-long-access" {
   source = "../../modules/worklytics-psoxy-connection"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=v0.4.9"
 
-  psoxy_host_platform_id = "AWS"
+  psoxy_host_platform_id = local.host_platform_id
   psoxy_instance_id      = each.key
   connector_id           = try(each.value.worklytics_connector_id, "")
   psoxy_endpoint_url     = module.aws-psoxy-long-auth-connectors[each.key].endpoint_url
@@ -307,7 +308,7 @@ module "psoxy-bulk-to-worklytics" {
 
   source = "../../modules/worklytics-psoxy-connection-generic"
 
-  psoxy_host_platform_id = "AWS"
+  psoxy_host_platform_id = local.host_platform_id
   psoxy_instance_id      = each.key
   connector_id           = try(each.value.worklytics_connector_id, "")
   display_name           = try(each.value.worklytics_connector_name, "${each.value.source_kind} via Psoxy")
