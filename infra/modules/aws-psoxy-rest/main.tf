@@ -49,8 +49,9 @@ locals {
   proxy_endpoint_url  = substr(aws_lambda_function_url.lambda_url.function_url, 0, length(aws_lambda_function_url.lambda_url.function_url) - 1)
   impersonation_param = var.example_api_calls_user_to_impersonate == null ? "" : " -i \"${var.example_api_calls_user_to_impersonate}\""
   command_npm_install = "npm --prefix ${var.path_to_repo_root}tools/psoxy-test install"
+  command_cli_call    = "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js -r \"${var.aws_assume_role_arn}\""
   command_test_calls = [for path in var.example_api_calls :
-    "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js -r \"${var.aws_assume_role_arn}\" -u \"${local.proxy_endpoint_url}${path}\"${local.impersonation_param}"
+    "${local.command_cli_call} -u \"${local.proxy_endpoint_url}${path}\"${local.impersonation_param}"
   ]
   command_test_logs = "node ${var.path_to_repo_root}tools/psoxy-test/cli-logs.js -r \"${var.aws_assume_role_arn}\" -re \"${var.region}\" -l \"${module.psoxy_lambda.log_group}\""
 }
@@ -104,6 +105,22 @@ Contact support@worklytics.co for assistance modifying the rules as needed.
 
 EOT
 }
+
+resource "local_file" "test_script" {
+  filename        = "test-${var.function_name}.sh"
+  file_permission = "0770"
+  content  = <<EOT
+#!/bin/bash
+API_PATH=$${1:-${try(var.example_api_calls[0], "")}}
+echo "Quick test of ${var.function_name} ..."
+
+${local.command_cli_call} -u "${local.proxy_endpoint_url}$API_PATH" ${local.impersonation_param}
+
+echo "Invoke this script with any of the following as arguments to test other endpoints:${"\r\n\t"}${join("\r\n\t", var.example_api_calls)}"
+EOT
+
+}
+
 
 output "endpoint_url" {
   value = aws_lambda_function_url.lambda_url.function_url

@@ -69,8 +69,9 @@ locals {
   proxy_endpoint_url  = "https://${var.region}-${var.project_id}.cloudfunctions.net/${google_cloudfunctions_function.function.name}"
   impersonation_param = var.example_api_calls_user_to_impersonate == null ? "" : " -i \"${var.example_api_calls_user_to_impersonate}\""
   command_npm_install = "npm --prefix ${var.path_to_repo_root}tools/psoxy-test install"
+  command_cli_call    = "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js"
   command_test_calls = [for path in var.example_api_calls :
-    "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js -u \"${local.proxy_endpoint_url}${path}\"${local.impersonation_param}"
+    "${local.command_cli_call} -u \"${local.proxy_endpoint_url}${path}\"${local.impersonation_param}"
   ]
   command_test_logs = "node ${var.path_to_repo_root}tools/psoxy-test/cli-logs.js -p \"${var.project_id}\" -f \"${google_cloudfunctions_function.function.name}\""
 }
@@ -121,6 +122,21 @@ for a detailed description of all the different options.
 Contact support@worklytics.co for assistance modifying the rules as needed.
 
 EOT
+}
+
+resource "local_file" "test_script" {
+  filename        = "test-${var.instance_id}.sh"
+  file_permission = "0770"
+  content  = <<EOT
+#!/bin/bash
+API_PATH=$${1:-${try(var.example_api_calls[0], "")}}
+echo "Quick test of ${var.instance_id} ..."
+
+${local.command_cli_call} -u "${local.proxy_endpoint_url}$API_PATH" ${local.impersonation_param}
+
+echo "Invoke this script with any of the following as arguments to test other endpoints:${"\r\n\t"}${join("\r\n\t", var.example_api_calls)}"
+EOT
+
 }
 
 output "instance_id" {
