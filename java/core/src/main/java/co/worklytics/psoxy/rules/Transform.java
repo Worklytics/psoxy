@@ -1,9 +1,11 @@
 package co.worklytics.psoxy.rules;
 
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
+import com.avaulta.gateway.rules.SchemaRuleUtils;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.kjetland.jackson.jsonSchema.annotations.JsonSchemaFormat;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -18,6 +20,7 @@ import java.util.List;
     @JsonSubTypes.Type(value = Transform.RedactRegexMatches.class, name = "redactRegexMatches"),
     @JsonSubTypes.Type(value = Transform.Pseudonymize.class, name = "pseudonymize"),
     @JsonSubTypes.Type(value = Transform.PseudonymizeEmailHeader.class, name = "pseudonymizeEmailHeader"),
+    @JsonSubTypes.Type(value = Transform.FilterBySchema.class, name = "filterBySchema"),
     @JsonSubTypes.Type(value = Transform.FilterTokenByRegex.class, name = "filterTokenByRegex"),
     @JsonSubTypes.Type(value = Transform.Tokenize.class, name = "tokenize"),
 })
@@ -131,6 +134,34 @@ public abstract class Transform {
                 .fields(new ArrayList<>(this.fields))
                 .clearFilters()
                 .filters(new ArrayList<>(this.filters))
+                .build();
+        }
+    }
+
+    /**
+     * **alpha support**
+     *
+     * transform to tokenize String field by delimiter (if provided), then return any matches against
+     * filter regex
+     */
+    @NoArgsConstructor //for jackson
+    @SuperBuilder(toBuilder = true)
+    @Getter
+    @ToString
+    @EqualsAndHashCode(callSuper = true)
+    public static class FilterBySchema extends Transform {
+
+
+        /**
+         * filter content by schema (Eg, redact any properties not in schema; or any values that
+         * don't match types specified in schema)
+         */
+        SchemaRuleUtils.JsonSchema schema;
+
+        public FilterBySchema clone() {
+            return this.toBuilder()
+                .clearJsonPaths()
+                .jsonPaths(new ArrayList<>(this.jsonPaths))
                 .build();
         }
     }

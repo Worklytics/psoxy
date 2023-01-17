@@ -6,6 +6,7 @@ import co.worklytics.psoxy.rules.Transform;
 import co.worklytics.psoxy.utils.URLUtils;
 import com.avaulta.gateway.pseudonyms.*;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
+import com.avaulta.gateway.rules.SchemaRuleUtils;
 import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
 import com.google.common.annotations.VisibleForTesting;
@@ -74,6 +75,9 @@ public class SanitizerImpl implements Sanitizer {
     DeterministicTokenizationStrategy deterministicTokenizationStrategy;
     @Inject
     UrlSafeTokenPseudonymEncoder urlSafePseudonymEncoder;
+
+    @Inject
+    SchemaRuleUtils schemaRuleUtils;
 
     Map<Rules2.Endpoint, Pattern> getCompiledAllowedEndpoints() {
         if (compiledAllowedEndpoints == null) {
@@ -200,6 +204,8 @@ public class SanitizerImpl implements Sanitizer {
             f = getRedactRegexMatches((Transform.RedactRegexMatches) transform);
         } else if (transform instanceof Transform.FilterTokenByRegex) {
             f = getFilterTokenByRegex((Transform.FilterTokenByRegex) transform);
+        } else if (transform instanceof Transform.FilterBySchema) {
+            f = getFilterBySchema((Transform.FilterBySchema) transform);
         } else if (transform instanceof Transform.Tokenize) {
             f = getTokenize((Transform.Tokenize) transform);
         } else {
@@ -254,6 +260,10 @@ public class SanitizerImpl implements Sanitizer {
                     .collect(Collectors.joining(" ")));
             }
         };
+    }
+
+    MapFunction getFilterBySchema(Transform.FilterBySchema transform) {
+        return (s, jsonConfiguration) -> schemaRuleUtils.filterBySchema(s, transform.getSchema());
     }
 
     MapFunction getTokenize(Transform.Tokenize transform) {
