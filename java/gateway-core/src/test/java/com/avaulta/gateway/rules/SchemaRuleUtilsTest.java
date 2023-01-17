@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.kjetland.jackson.jsonSchema.JsonSchemaConfig;
+import com.kjetland.jackson.jsonSchema.JsonSchemaDraft;
 import com.kjetland.jackson.jsonSchema.JsonSchemaGenerator;
 import lombok.Builder;
 import lombok.Data;
@@ -38,7 +40,13 @@ class SchemaRuleUtilsTest {
             .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
 
         schemaRuleUtils.objectMapper = objectMapper;
-        schemaRuleUtils.jsonSchemaGenerator = new JsonSchemaGenerator(schemaRuleUtils.objectMapper);
+        schemaRuleUtils.jsonSchemaGenerator = new JsonSchemaGenerator(schemaRuleUtils.objectMapper,
+            JsonSchemaConfig
+                //.nullableJsonSchemaDraft4() // uses oneOf [ { type: null }, ... ] everywhere, which is verbose
+                .vanillaJsonSchemaDraft4()
+
+                .withJsonSchemaDraft(JsonSchemaDraft.DRAFT_2019_09)
+        );
     }
 
     @SneakyThrows
@@ -71,19 +79,6 @@ class SchemaRuleUtilsTest {
             .someListItem("list-item-1")
             .build();
 
-
-        Object filteredToSimple = schemaRuleUtils.filterBySchema(simplePlus,
-            schemaRuleUtils.generateJsonSchema(SimplePojo.class));
-
-
-        assertEquals("{\n" +
-                "  \"date\" : \"2023-01-16\",\n" +
-                "  \"someString\" : \"some-string\",\n" +
-                "  \"timestamp\" : \"2023-01-16T05:12:34Z\"\n" +
-                "}",
-            objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(filteredToSimple));
-
-
         Object filteredToSimplePlus = schemaRuleUtils.filterBySchema(simplePlus,
             schemaRuleUtils.generateJsonSchema(SimplePojoPlus.class));
 
@@ -95,6 +90,18 @@ class SchemaRuleUtilsTest {
                 "  \"timestamp\" : \"2023-01-16T05:12:34Z\"\n" +
                 "}",
             objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(filteredToSimplePlus));
+
+
+        Object filteredToSimple = schemaRuleUtils.filterBySchema(simplePlus,
+            schemaRuleUtils.generateJsonSchema(SimplePojo.class));
+
+        assertEquals("{\n" +
+                "  \"date\" : \"2023-01-16\",\n" +
+                "  \"someString\" : \"some-string\",\n" +
+                "  \"timestamp\" : \"2023-01-16T05:12:34Z\"\n" +
+                "}",
+            objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(filteredToSimple));
+
     }
 
     @Builder
@@ -122,6 +129,7 @@ class SchemaRuleUtilsTest {
         Instant timestamp;
 
         static final String EXPECTED_SCHEMA = "{\n" +
+            "  \"$schema\" : \"http://json-schema.org/draft/2019-09/schema#\",\n" +
             "  \"type\" : \"object\",\n" +
             "  \"additionalProperties\" : false,\n" +
             "  \"properties\" : {\n" +
@@ -140,6 +148,7 @@ class SchemaRuleUtilsTest {
             "}";
 
         static final String EXPECTED_SCHEMA_YAML = "---\n" +
+            "$schema: \"http://json-schema.org/draft/2019-09/schema#\"\n" +
             "type: \"object\"\n" +
             "additionalProperties: false\n" +
             "properties:\n" +
@@ -153,4 +162,98 @@ class SchemaRuleUtilsTest {
             "    format: \"date-time\"\n";
 
     }
+
+    @SneakyThrows
+    @Test
+    void filterBySchema_refs() {
+
+        SchemaRuleUtils.JsonSchema schemaWithRefs =
+            schemaRuleUtils.generateJsonSchema(ComplexPojo.class);
+
+        SimplePojoPlus simplePlus = SimplePojoPlus.builder()
+            .someString("some-string")
+            .date(LocalDate.parse("2023-01-16"))
+            .timestamp(Instant.parse("2023-01-16T05:12:34Z"))
+            .someListItem("list-item-1")
+            .build();
+
+
+        assertEquals(ComplexPojo.EXPECTED_SCHEMA,
+            objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(schemaWithRefs));
+
+        assertEquals("{\n" +
+                "  \"additionalSimplePojos\" : [ {\n" +
+                "    \"date\" : \"2023-01-16\",\n" +
+                "    \"someString\" : \"some-string\",\n" +
+                "    \"timestamp\" : \"2023-01-16T05:12:34Z\"\n" +
+                "  } ],\n" +
+                "  \"simplePojo\" : {\n" +
+                "    \"date\" : \"2023-01-16\",\n" +
+                "    \"someString\" : \"some-string\",\n" +
+                "    \"timestamp\" : \"2023-01-16T05:12:34Z\"\n" +
+                "  }\n" +
+                "}",
+            objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(schemaRuleUtils.filterBySchema(ComplexPojoPlus.builder()
+                .simplePojo(simplePlus)
+                .additionalSimplePojo(simplePlus)
+                .build(), schemaWithRefs)));
+
+    }
+
+    @Builder
+    @Data
+    static class ComplexPojo {
+
+        public static final String EXPECTED_SCHEMA = "{\n" +
+            "  \"$schema\" : \"http://json-schema.org/draft/2019-09/schema#\",\n" +
+            "  \"type\" : \"object\",\n" +
+            "  \"additionalProperties\" : false,\n" +
+            "  \"properties\" : {\n" +
+            "    \"simplePojo\" : {\n" +
+            "      \"$ref\" : \"#/definitions/SimplePojo\"\n" +
+            "    },\n" +
+            "    \"additionalSimplePojos\" : {\n" +
+            "      \"type\" : \"array\",\n" +
+            "      \"items\" : {\n" +
+            "        \"$ref\" : \"#/definitions/SimplePojo\"\n" +
+            "      }\n" +
+            "    }\n" +
+            "  },\n" +
+            "  \"definitions\" : {\n" +
+            "    \"SimplePojo\" : {\n" +
+            "      \"type\" : \"object\",\n" +
+            "      \"additionalProperties\" : false,\n" +
+            "      \"properties\" : {\n" +
+            "        \"someString\" : {\n" +
+            "          \"type\" : \"string\"\n" +
+            "        },\n" +
+            "        \"date\" : {\n" +
+            "          \"type\" : \"string\",\n" +
+            "          \"format\" : \"date\"\n" +
+            "        },\n" +
+            "        \"timestamp\" : {\n" +
+            "          \"type\" : \"string\",\n" +
+            "          \"format\" : \"date-time\"\n" +
+            "        }\n" +
+            "      }\n" +
+            "    }\n" +
+            "  }\n" +
+            "}";
+
+
+        SimplePojo simplePojo;
+
+        List<SimplePojo> additionalSimplePojos;
+    }
+
+    @Builder
+    @Data
+    static class ComplexPojoPlus {
+
+        SimplePojoPlus simplePojo;
+
+        @Singular
+        List<SimplePojoPlus> additionalSimplePojos;
+    }
+
 }
