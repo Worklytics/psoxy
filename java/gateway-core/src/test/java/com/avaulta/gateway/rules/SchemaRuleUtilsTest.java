@@ -6,13 +6,16 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.kjetland.jackson.jsonSchema.JsonSchemaGenerator;
+import lombok.Builder;
 import lombok.Data;
+import lombok.Singular;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -55,6 +58,57 @@ class SchemaRuleUtilsTest {
 
         assertEquals(SimplePojo.EXPECTED_SCHEMA_YAML,
             yamlMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonSchema));
+    }
+
+    @SneakyThrows
+    @Test
+    void filterBySchema() {
+
+        SimplePojoPlus simplePlus = SimplePojoPlus.builder()
+            .someString("some-string")
+            .date(LocalDate.parse("2023-01-16"))
+            .timestamp(Instant.parse("2023-01-16T05:12:34Z"))
+            .someListItem("list-item-1")
+            .build();
+
+
+        Object filteredToSimple = schemaRuleUtils.filterBySchema(simplePlus,
+            schemaRuleUtils.generateJsonSchema(SimplePojo.class));
+
+
+        assertEquals("{\n" +
+                "  \"date\" : \"2023-01-16\",\n" +
+                "  \"someString\" : \"some-string\",\n" +
+                "  \"timestamp\" : \"2023-01-16T05:12:34Z\"\n" +
+                "}",
+            objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(filteredToSimple));
+
+
+        Object filteredToSimplePlus = schemaRuleUtils.filterBySchema(simplePlus,
+            schemaRuleUtils.generateJsonSchema(SimplePojoPlus.class));
+
+
+        assertEquals("{\n" +
+                "  \"date\" : \"2023-01-16\",\n" +
+                "  \"someString\" : \"some-string\",\n" +
+                "  \"someListItems\" : [ \"list-item-1\" ],\n" +
+                "  \"timestamp\" : \"2023-01-16T05:12:34Z\"\n" +
+                "}",
+            objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(filteredToSimplePlus));
+    }
+
+    @Builder
+    @Data
+    static class SimplePojoPlus {
+
+        String someString;
+
+        LocalDate date;
+
+        Instant timestamp;
+
+        @Singular
+        List<String> someListItems;
     }
 
 
