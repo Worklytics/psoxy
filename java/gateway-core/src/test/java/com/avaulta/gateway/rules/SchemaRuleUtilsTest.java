@@ -79,7 +79,7 @@ class SchemaRuleUtilsTest {
             .someListItem("list-item-1")
             .build();
 
-        Object filteredToSimplePlus = schemaRuleUtils.filterBySchema(simplePlus,
+        Object filteredToSimplePlus = schemaRuleUtils.filterObjectBySchema(simplePlus,
             schemaRuleUtils.generateJsonSchema(SimplePojoPlus.class));
 
 
@@ -92,7 +92,7 @@ class SchemaRuleUtilsTest {
             objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(filteredToSimplePlus));
 
 
-        Object filteredToSimple = schemaRuleUtils.filterBySchema(simplePlus,
+        Object filteredToSimple = schemaRuleUtils.filterObjectBySchema(simplePlus,
             schemaRuleUtils.generateJsonSchema(SimplePojo.class));
 
         assertEquals("{\n" +
@@ -193,7 +193,7 @@ class SchemaRuleUtilsTest {
                 "    \"timestamp\" : \"2023-01-16T05:12:34Z\"\n" +
                 "  }\n" +
                 "}",
-            objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(schemaRuleUtils.filterBySchema(ComplexPojoPlus.builder()
+            objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(schemaRuleUtils.filterObjectBySchema(ComplexPojoPlus.builder()
                 .simplePojo(simplePlus)
                 .additionalSimplePojo(simplePlus)
                 .build(), schemaWithRefs)));

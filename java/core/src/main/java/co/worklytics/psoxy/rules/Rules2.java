@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.rules;
 
 
+import com.avaulta.gateway.rules.SchemaRuleUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -113,6 +114,13 @@ public class Rules2 implements RuleSet, Serializable {
             return Optional.ofNullable(allowedMethods);
         }
 
+
+        SchemaRuleUtils.JsonSchema responseSchema;
+
+        @JsonIgnore
+        public Optional<SchemaRuleUtils.JsonSchema> getResponseSchemaOptional() {
+            return Optional.ofNullable(responseSchema);
+        }
 
 
         @JsonInclude(value=JsonInclude.Include.NON_EMPTY)

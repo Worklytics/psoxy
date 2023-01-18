@@ -20,6 +20,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hazlewood.connor.bottema.emailaddress.EmailAddressCriteria;
@@ -148,19 +149,41 @@ public class SanitizerImpl implements Sanitizer {
 
     String transform(@NonNull URL url, @NonNull String jsonResponse) {
         String relativeUrl = URLUtils.relativeURL(url);
-        Optional<Pair<Pattern, Rules2.Endpoint>> matchingEndpoint = getEndpointRules().stream()
+        Optional<Pair<Pattern, Rules2.Endpoint>> matchingEndpoint = getEndpointRules()
+            .stream()
             .filter(compiledEndpoint -> compiledEndpoint.getKey().asMatchPredicate().test(relativeUrl))
             .findFirst();
 
         return matchingEndpoint.map(match -> {
+            String filteredJson = match.getValue().getResponseSchemaOptional()
+                .map(schema -> {
+                    //q: this read
+                    try {
+                        return schemaRuleUtils.filterJsonBySchema(jsonResponse, schema);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .orElse(jsonResponse);
 
-            Object document = jsonConfiguration.jsonProvider().parse(jsonResponse);
+            //q: more efficient to filter on `document` directly? problem is that our json path
+            // library contract only specifies 'Object' for it's parsed document type; but in
+            // practice, both it and our SchemaRuleUtils are using Jackson underneath - so expect
+            // everything to work OK.
 
-            for (Transform transform : match.getValue().getTransforms()) {
-                applyTransform(transform, document);
+            //NOTE: `document` here is a `LinkedHashMap`
+
+            if (ObjectUtils.isNotEmpty(match.getValue().getTransforms())) {
+                Object document = jsonConfiguration.jsonProvider().parse(filteredJson);
+
+                for (Transform transform : match.getValue().getTransforms()) {
+                    applyTransform(transform, document);
+                }
+
+                filteredJson = jsonConfiguration.jsonProvider().toJson(document);
             }
+            return filteredJson;
 
-            return jsonConfiguration.jsonProvider().toJson(document);
         }).orElse(jsonResponse);
     }
 
@@ -204,8 +227,6 @@ public class SanitizerImpl implements Sanitizer {
             f = getRedactRegexMatches((Transform.RedactRegexMatches) transform);
         } else if (transform instanceof Transform.FilterTokenByRegex) {
             f = getFilterTokenByRegex((Transform.FilterTokenByRegex) transform);
-        } else if (transform instanceof Transform.FilterBySchema) {
-            f = getFilterBySchema((Transform.FilterBySchema) transform);
         } else if (transform instanceof Transform.Tokenize) {
             f = getTokenize((Transform.Tokenize) transform);
         } else {
@@ -260,10 +281,6 @@ public class SanitizerImpl implements Sanitizer {
                     .collect(Collectors.joining(" ")));
             }
         };
-    }
-
-    MapFunction getFilterBySchema(Transform.FilterBySchema transform) {
-        return (s, jsonConfiguration) -> schemaRuleUtils.filterBySchema(s, transform.getSchema());
     }
 
     MapFunction getTokenize(Transform.Tokenize transform) {

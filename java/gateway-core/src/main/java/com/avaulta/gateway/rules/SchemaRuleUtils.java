@@ -4,10 +4,7 @@ import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kjetland.jackson.jsonSchema.JsonSchemaGenerator;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.*;
 
@@ -54,23 +51,27 @@ public class SchemaRuleUtils {
      * @param schema to filter object's properties by
      * @return object, if matches schema; or sub
      */
-    public Object filterBySchema(Object object, JsonSchema schema) {
-        return filterBySchema(object, schema, schema);
+    public Object filterObjectBySchema(Object object, JsonSchema schema) {
+        JsonNode provisionalOutput = objectMapper.valueToTree(object);
+        return filterBySchema(provisionalOutput, schema, schema);
+    }
 
+    @SneakyThrows
+    public String filterJsonBySchema(String jsonString, JsonSchema schema) {
+        JsonNode provisionalOutput = objectMapper.readTree(jsonString);
+        return objectMapper.writeValueAsString(filterBySchema(provisionalOutput, schema, schema));
     }
 
 
-    Object filterBySchema(Object object, JsonSchema schema, JsonSchema root) {
-        JsonNode provisionalOutput = objectMapper.valueToTree(object);
-
+    Object filterBySchema(JsonNode provisionalOutput, JsonSchema schema, JsonSchema root) {
         if (schema.isRef()) {
             if (schema.getRef().equals("#")) {
                 // recursive self-reference; see
-                return filterBySchema(object, root, root);
+                return filterBySchema(provisionalOutput, root, root);
             } else if (schema.getRef().startsWith("#/definitions/")) {
                 String definitionName = schema.getRef().substring("#/definitions/".length());
                 JsonSchema definition = root.getDefinitions().get(definitionName);
-                return filterBySchema(object, definition, root);
+                return filterBySchema(provisionalOutput, definition, root);
             } else {
                 //cases like URLs relative to schema URI are not supported
                 throw new RuntimeException("unsupported ref: " + schema.getRef());
@@ -149,11 +150,14 @@ public class SchemaRuleUtils {
                 // or do we want to FAIL if value from source is NON-NULL?
                 return null;
             } else {
-                throw new IllegalArgumentException("Unknown schema type: " + schema.getType());
+                throw new IllegalArgumentException("Unknown schema type: " + schema);
             }
         }
     }
 
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor // for builder
     @Data
     @JsonPropertyOrder({"$schema"})
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -235,6 +239,8 @@ public class SchemaRuleUtils {
      * polymorphism; but not sure we currently have a use-case for these in Proxy.
      *
      */
+    @AllArgsConstructor
+    @NoArgsConstructor
     @Data
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonIgnoreProperties({"title"})
