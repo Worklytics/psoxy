@@ -39,8 +39,6 @@ public class SchemaRuleUtils {
      * object OR value is of type that doesn't match schema.
      *  (eg, `null` is considered to fulfill any type-constraint)
      *
-     *
-     *   TODO support schemas with "$ref"
      *   TODO support format
      *
      * q: do we want to support filtering by full JsonSchema here?? complex, and not always
@@ -76,7 +74,7 @@ public class SchemaRuleUtils {
                 //cases like URLs relative to schema URI are not supported
                 throw new RuntimeException("unsupported ref: " + schema.getRef());
             }
-        } else {
+        } else if (schema.hasType()) {
             //must have explicit type
 
             // https://json-schema.org/understanding-json-schema/reference/type.html
@@ -152,6 +150,8 @@ public class SchemaRuleUtils {
             } else {
                 throw new IllegalArgumentException("Unknown schema type: " + schema);
             }
+        } else {
+            throw new IllegalArgumentException("Only schema with 'type' or '$ref' are supported: " + schema);
         }
     }
 
@@ -164,6 +164,7 @@ public class SchemaRuleUtils {
     @JsonIgnoreProperties({"title"})
     public static class JsonSchema {
 
+        //q: should we drop this? only makes sense at root of schema
         @JsonProperty("$schema")
         String schema;
 
@@ -189,6 +190,34 @@ public class SchemaRuleUtils {
         //        //  when calling objectMapper.convertValue(((JsonNode) schema), JsonSchema.class);??
         // perhaps it's a problem with the library we use to build the JsonNode schema??
         Map<String, JsonSchema> definitions;
+
+        // part of JSON schema standard, but how to support for filters?
+        //  what if something validates against multiple of these, but filtering by the valid ones
+        //  yields different result??
+        // use case would be polymorphism, such as a groupMembers array can can contain
+        // objects of type Group or User, to provide hierarchical groups
+        // --> take whichever schema produces the "largest" result (eg, longest as a string??)
+        //List<CompoundJsonSchema> anyOf;
+
+        // part of JSON schema standard, but how to support for filters?
+        //  what if something validates against multiple of these, but filtering by the valid ones
+        //  yields different result??
+        // ultimately, don't see a use case anyways
+        //List<CompoundJsonSchema> oneOf;
+
+        // part of JSON schema standard
+        // it's clear how we would implement this as a filter (chain them), but not why
+        // this would ever be a good use case
+        //List<CompoundJsonSchema> allOf;
+
+        //part of JSON schema standard, but not a proxy-filtering use case this
+        // -- omitting the property produces same result
+        // -- no reason you'd ever want to all objects that DON'T match a schema, right?
+        // -- only use case I think of is to explicitly note what properties we know are in
+        //   source schema, so intend for filter to remove (rather than filter removing them by
+        //   omission)
+        //CompoundJsonSchema not;
+
 
         @JsonIgnore
         public boolean isRef() {
@@ -229,6 +258,11 @@ public class SchemaRuleUtils {
         public boolean isNull() {
             return Objects.equals(type, "null");
         }
+
+        @JsonIgnore
+        public boolean hasType() {
+            return this.type != null;
+        }
     }
 
 
@@ -245,12 +279,6 @@ public class SchemaRuleUtils {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonIgnoreProperties({"title"})
     public static class CompoundJsonSchema extends JsonSchema {
-        List<CompoundJsonSchema> anyOf;
 
-        List<CompoundJsonSchema> allOf;
-
-        List<CompoundJsonSchema> oneOf;
-
-        CompoundJsonSchema not;
     }
 }
