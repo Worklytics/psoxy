@@ -157,21 +157,21 @@ Review [earlier release notes in GitHub](https://github.com/Worklytics/psoxy/rel
 ## Supported Data Sources
 As of September 2022, the following sources can be connected to Worklytics via psoxy:
 
-  * Asana - [example data](docs/sources/api-response-examples/asana) |
+  * Asana - [example data](docs/sources/api-response-examples/asana) | [example rules](docs/sources/rules/asana/asana.yaml)
   * Google Workspace
-    * Calendar - [example data](docs/sources/api-response-examples/g-workspace/calendar)
-    * Chat - [example data](docs/sources/api-response-examples/g-workspace/google-chat)
-    * Directory - [example data](docs/sources/api-response-examples/g-workspace/directory)
-    * Drive - [example data](docs/sources/api-response-examples/g-workspace/gdrive-v3)
-    * GMail - [example data](docs/sources/api-response-examples/g-workspace/gmail)
-    * Meet - [example data](docs/sources/api-response-examples/g-workspace/meet)
+    * Calendar - [example data](docs/sources/api-response-examples/g-workspace/calendar) | [example rules](docs/sources/example-rules/google-workspace/calendar.yaml)
+    * Chat - [example data](docs/sources/api-response-examples/g-workspace/google-chat) | [example rules](docs/sources/example-rules/google-workspace/google-chat.yaml)
+    * Directory - [example data](docs/sources/api-response-examples/g-workspace/directory) | [example rules](docs/sources/example-rules/google-workspace/directory.yaml)
+    * Drive - [example data](docs/sources/api-response-examples/g-workspace/gdrive-v3) | [example rules](docs/sources/example-rules/google-workspace/gdrive.yaml)
+    * GMail - [example data](docs/sources/api-response-examples/g-workspace/gmail) | [example rules](docs/sources/example-rules/google-workspace/gmail.yaml)
+    * Meet - [example data](docs/sources/api-response-examples/g-workspace/meet) | [example rules](docs/sources/example-rules/google-workspace/google-meet.yaml)
   * Microsoft 365
-    * Active Directory - [example data](docs/sources/api-response-examples/microsoft-365/directory)
-    * Calendar - [example data](docs/sources/api-response-examples/microsoft-365/outlook-cal)
-    * Mail - [example data](docs/sources/api-response-examples/microsoft-365/outlook-mail)
+    * Active Directory - [example data](docs/sources/api-response-examples/microsoft-365/directory) | [example rules](docs/sources/example-rules/microsoft-365/directory.yaml)
+    * Calendar - [example data](docs/sources/api-response-examples/microsoft-365/outlook-cal)  | [example rules](docs/sources/example-rules/microsoft-365/outlook-cal.yaml)
+    * Mail - [example data](docs/sources/api-response-examples/microsoft-365/outlook-mail) | [example rules](docs/sources/example-rules/microsoft-365/outlook-mail.yaml)
   * Slack
-    * eDiscovery API - [example data](docs/sources/api-response-examples/slack)
-  * Zoom - [example data](docs/sources/api-response-examples/zoom)
+    * eDiscovery API - [example data](docs/sources/api-response-examples/slack) | [example rules](docs/sources/example-rules/slack/discovery.yaml)
+  * Zoom - [example data](docs/sources/api-response-examples/zoom) | [example rules](docs/sources/example-rules/zoom/zoom.yaml)
 
 You can also use the command line tool to pseudonymize arbitrary CSV files (eg, exports from your
 HRIS), in a manner consistent with how a psoxy instance will pseudonymize identifiers in a target
