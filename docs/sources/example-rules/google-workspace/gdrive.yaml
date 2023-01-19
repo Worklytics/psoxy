@@ -1,4 +1,3 @@
-allowAllEndpoints: false
 endpoints:
   - pathRegex: "^/drive/v[2,3]/files[/]?[^/]*"
     transforms:

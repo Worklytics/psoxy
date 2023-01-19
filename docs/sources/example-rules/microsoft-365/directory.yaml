@@ -1,5 +1,4 @@
 ---
-allowAllEndpoints: false
 endpoints:
   - pathRegex: "^/(v1.0|beta)/users/?[^/]*"
     allowedQueryParams:

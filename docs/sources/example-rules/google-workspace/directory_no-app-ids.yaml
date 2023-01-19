@@ -1,5 +1,4 @@
 ---
-allowAllEndpoints: false
 endpoints:
   - pathRegex: "^/admin/directory/v1/customer/[^/]*/domains.*"
   - pathRegex: "^/admin/directory/v1/users\\?.*$"

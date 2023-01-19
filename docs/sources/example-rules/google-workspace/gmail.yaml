@@ -1,4 +1,3 @@
-allowAllEndpoints: false
 endpoints:
   - pathRegex: "^/gmail/v1/users/[^/]*/messages[/]?.*?$"
     transforms:
