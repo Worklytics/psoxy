@@ -11,6 +11,7 @@ terraform {
 locals {
   instance_ssm_prefix_default    = "${upper(replace(var.function_name, "-", "_"))}_"
   instance_ssm_prefix            = coalesce(var.path_to_instance_ssm_parameters, local.instance_ssm_prefix_default)
+  is_instance_ssm_prefix_default = local.instance_ssm_prefix == local.instance_ssm_prefix_default
   instance_ssm_prefix_with_slash = startswith(local.instance_ssm_prefix, "/") ? local.instance_ssm_prefix : "/${local.instance_ssm_prefix}"
 
 
@@ -40,8 +41,9 @@ resource "aws_lambda_function" "psoxy-instance" {
       {
         EXECUTION_ROLE          = aws_iam_role.iam_for_lambda.arn
       },
+      # only set env vars for config paths if non-default values
       length(local.path_to_shared_config) > 1 ? { PATH_TO_SHARED_CONFIG = local.path_to_shared_config } : {},
-      var.path_to_instance_ssm_parameters == null ? {} : { PATH_TO_INSTANCE_CONFIG = var.path_to_instance_ssm_parameters }
+      local.is_instance_ssm_prefix_default ? {} : { PATH_TO_INSTANCE_CONFIG = var.path_to_instance_ssm_parameters }
     )
   }
 
