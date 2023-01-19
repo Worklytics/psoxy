@@ -157,22 +157,21 @@ Review [earlier release notes in GitHub](https://github.com/Worklytics/psoxy/rel
 ## Supported Data Sources
 As of September 2022, the following sources can be connected to Worklytics via psoxy:
 
-  * Asana
+  * Asana - [example data](docs/sources/api-response-examples/asana) |
   * Google Workspace
-    * Calendar
-    * Chat
-    * Directory
-    * Drive
-    * GMail
-    * Meet
+    * Calendar - [example data](docs/sources/api-response-examples/g-workspace/calendar)
+    * Chat - [example data](docs/sources/api-response-examples/g-workspace/google-chat)
+    * Directory - [example data](docs/sources/api-response-examples/g-workspace/directory)
+    * Drive - [example data](docs/sources/api-response-examples/g-workspace/gdrive-v3)
+    * GMail - [example data](docs/sources/api-response-examples/g-workspace/gmail)
+    * Meet - [example data](docs/sources/api-response-examples/g-workspace/meet)
   * Microsoft 365
-    * Active Directory
-    * Calendar
-    * Mail
+    * Active Directory - [example data](docs/sources/api-response-examples/microsoft-365/directory)
+    * Calendar - [example data](docs/sources/api-response-examples/microsoft-365/outlook-cal)
+    * Mail - [example data](docs/sources/api-response-examples/microsoft-365/outlook-mail)
   * Slack
-    * eDiscovery API
-  * Zoom
-
+    * eDiscovery API - [example data](docs/sources/api-response-examples/slack)
+  * Zoom - [example data](docs/sources/api-response-examples/zoom)
 
 You can also use the command line tool to pseudonymize arbitrary CSV files (eg, exports from your
 HRIS), in a manner consistent with how a psoxy instance will pseudonymize identifiers in a target
