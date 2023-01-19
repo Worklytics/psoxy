@@ -265,20 +265,4 @@ public class SchemaRuleUtils {
         }
     }
 
-
-    /**
-     * compound JsonSchema - eg, composition of multiple schemas
-     *
-     * properties anyOf/allOf/oneOf/not allow you to compose types for a single property / support
-     * polymorphism; but not sure we currently have a use-case for these in Proxy.
-     *
-     */
-    @AllArgsConstructor
-    @NoArgsConstructor
-    @Data
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    @JsonIgnoreProperties({"title"})
-    public static class CompoundJsonSchema extends JsonSchema {
-
-    }
 }
