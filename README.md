@@ -63,7 +63,7 @@ Depending on your scenario, you may also need:
 
   1. Choose the cloud platform you'll deploy to, and follow its guide:
        - [AWS](docs/aws/getting-started.md)
-       - [Google Cloud platform]
+       - [Google Cloud platform](docs/gcp/getting-started.md)
 
   2. Pick the location from which you will provision the psoxy instance. Some suggestions:
 
