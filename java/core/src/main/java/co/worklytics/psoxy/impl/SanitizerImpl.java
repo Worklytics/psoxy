@@ -1,8 +1,9 @@
 package co.worklytics.psoxy.impl;
 
 import co.worklytics.psoxy.*;
+import com.avaulta.gateway.rules.Endpoint;
 import co.worklytics.psoxy.rules.Rules2;
-import co.worklytics.psoxy.rules.Transform;
+import com.avaulta.gateway.rules.transforms.Transform;
 import co.worklytics.psoxy.utils.URLUtils;
 import com.avaulta.gateway.pseudonyms.*;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
@@ -52,10 +53,10 @@ public class SanitizerImpl implements Sanitizer {
     //  - https://github.com/json-path/JsonPath/issues/384
     //  - https://github.com/json-path/JsonPath/issues/187 (earlier issue fixing stuff that wasn't thread-safe)
 
-    Map<Rules2.Endpoint, Pattern> compiledAllowedEndpoints;
+    Map<Endpoint, Pattern> compiledAllowedEndpoints;
 
     private final Object $writeLock = new Object[0];
-    List<Pair<Pattern, Rules2.Endpoint>> compiledEndpointRules;
+    List<Pair<Pattern, Endpoint>> compiledEndpointRules;
     Map<Transform, List<JsonPath>> compiledTransforms = new ConcurrentHashMap<>();
 
     @AssistedInject
@@ -80,7 +81,7 @@ public class SanitizerImpl implements Sanitizer {
     @Inject
     SchemaRuleUtils schemaRuleUtils;
 
-    Map<Rules2.Endpoint, Pattern> getCompiledAllowedEndpoints() {
+    Map<Endpoint, Pattern> getCompiledAllowedEndpoints() {
         if (compiledAllowedEndpoints == null) {
             synchronized ($writeLock) {
                 if (configurationOptions.getRules() instanceof Rules2) {
@@ -133,7 +134,7 @@ public class SanitizerImpl implements Sanitizer {
 
     }
 
-    synchronized List<Pair<Pattern, Rules2.Endpoint>> getEndpointRules() {
+    synchronized List<Pair<Pattern, Endpoint>> getEndpointRules() {
         if (compiledEndpointRules == null) {
             synchronized ($writeLock) {
                 if (compiledEndpointRules == null) {
@@ -149,7 +150,7 @@ public class SanitizerImpl implements Sanitizer {
 
     String transform(@NonNull URL url, @NonNull String jsonResponse) {
         String relativeUrl = URLUtils.relativeURL(url);
-        Optional<Pair<Pattern, Rules2.Endpoint>> matchingEndpoint = getEndpointRules()
+        Optional<Pair<Pattern, Endpoint>> matchingEndpoint = getEndpointRules()
             .stream()
             .filter(compiledEndpoint -> compiledEndpoint.getKey().asMatchPredicate().test(relativeUrl))
             .findFirst();

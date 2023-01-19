@@ -2,16 +2,16 @@ package co.worklytics.psoxy.impl;
 
 import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.gateway.ConfigService;
+import com.avaulta.gateway.rules.Endpoint;
 import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
 import co.worklytics.psoxy.rules.Rules2;
-import co.worklytics.psoxy.rules.Transform;
+import com.avaulta.gateway.rules.transforms.Transform;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestUtils;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.SchemaRuleUtils;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.MapFunction;
@@ -370,7 +370,7 @@ class SanitizerImplTest {
         final URL EXAMPLE_URL = new URL("https://gmail.googleapis.com/gmail/v1/users/me/messages");
         SanitizerImpl strictSanitizer = sanitizerFactory.create(Sanitizer.ConfigurationOptions.builder()
             .rules(Rules2.builder()
-                .endpoint(Rules2.Endpoint.builder()
+                .endpoint(Endpoint.builder()
                     .allowedMethods(Collections.singleton("GET"))
                     .pathRegex("^/gmail/v1/users/[^/]*/messages[/]?.*?$")
                     .build())
@@ -442,7 +442,7 @@ class SanitizerImplTest {
 
         SanitizerImpl strictSanitizer = sanitizerFactory.create(Sanitizer.ConfigurationOptions.builder()
             .rules(Rules2.builder()
-                .endpoint(Rules2.Endpoint.builder()
+                .endpoint(Endpoint.builder()
                     .allowedMethods(Collections.singleton("GET"))
                     .pathRegex("^/gmail/v1/users/[^/]*/messages[/]?.*?$")
                     .responseSchema(jsonSchema)

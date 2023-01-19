@@ -1,8 +1,9 @@
 package co.worklytics.psoxy.rules.slack;
 
+import com.avaulta.gateway.rules.Endpoint;
 import co.worklytics.psoxy.rules.RuleSet;
 import co.worklytics.psoxy.rules.Rules2;
-import co.worklytics.psoxy.rules.Transform;
+import com.avaulta.gateway.rules.transforms.Transform;
 import com.google.common.collect.ImmutableMap;
 
 import java.util.Map;
@@ -12,7 +13,7 @@ import java.util.Map;
 public class PrebuiltSanitizerRules {
 
     static final RuleSet SLACK = Rules2.builder()
-        .endpoint(Rules2.Endpoint.builder()
+        .endpoint(Endpoint.builder()
             .pathRegex("^/api/discovery\\.enterprise\\.info(?:\\?.+)?")
             .transform(Transform.Redact.builder()
                 // we don't care about names
@@ -20,7 +21,7 @@ public class PrebuiltSanitizerRules {
                 .jsonPath("$.enterprise['icon','name']")
                 .build())
             .build())
-        .endpoint(Rules2.Endpoint.builder()
+        .endpoint(Endpoint.builder()
             .pathRegex("^/api/discovery\\.users\\.list(?:\\?.+)?")
             .transform(Transform.Pseudonymize.builder()
                 .jsonPath("$.users[*].id")
@@ -37,7 +38,7 @@ public class PrebuiltSanitizerRules {
                 .jsonPath("$.users[*].profile['image_original','is_custom_image','image_24','image_32','image_48','image_72','image_192','image_512','image_1024','status_text_canonical']")
                 .build())
             .build())
-        .endpoint(Rules2.Endpoint.builder()
+        .endpoint(Endpoint.builder()
             .pathRegex("^/api/discovery\\.conversations\\.(list|recent)(?:\\?.+)?")
             // no PII
             // redact channel name, topic and purpose
@@ -47,7 +48,7 @@ public class PrebuiltSanitizerRules {
                 .jsonPath("$.channels[*]['name','topic','purpose']")
                 .build())
             .build())
-        .endpoint(Rules2.Endpoint.builder()
+        .endpoint(Endpoint.builder()
             .pathRegex("^/api/discovery\\.conversations\\.info(?:\\?.+)?")
             .transform(Transform.Pseudonymize.builder()
                 .jsonPath("$.info[*].creator")
@@ -58,7 +59,7 @@ public class PrebuiltSanitizerRules {
                 .jsonPath("$.info[*]['name','name_normalized','previous_names','topic','purpose']")
                 .build())
             .build())
-        .endpoint(Rules2.Endpoint.builder()
+        .endpoint(Endpoint.builder()
             .pathRegex("^/api/discovery\\.conversations\\.history(?:\\?.+)?")
             .transform(Transform.Pseudonymize.builder()
                 .jsonPath("$.messages[*].user")

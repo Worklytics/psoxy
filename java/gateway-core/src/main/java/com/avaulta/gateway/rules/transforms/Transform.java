@@ -1,15 +1,12 @@
-package co.worklytics.psoxy.rules;
+package com.avaulta.gateway.rules.transforms;
 
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
-import com.avaulta.gateway.rules.SchemaRuleUtils;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.kjetland.jackson.jsonSchema.annotations.JsonSchemaFormat;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -219,7 +216,6 @@ public abstract class Transform {
          * HUGE CAVEAT: as of Aug 2022, reversing encapsulated tokens BACK to their original values
          * will work if and only if token is bounded by non-base64-urlencoded character
          */
-        @Nullable
         String regex;
 
         //NOTE: always format to URL-safe

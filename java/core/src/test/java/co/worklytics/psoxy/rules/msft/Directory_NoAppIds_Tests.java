@@ -1,7 +1,6 @@
 package co.worklytics.psoxy.rules.msft;
 
 import co.worklytics.psoxy.rules.Rules2;
-import co.worklytics.psoxy.rules.Transform;
 import lombok.Getter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

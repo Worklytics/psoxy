@@ -1,8 +1,9 @@
 package co.worklytics.psoxy.rules.asana;
 
+import com.avaulta.gateway.rules.Endpoint;
 import co.worklytics.psoxy.rules.RuleSet;
 import co.worklytics.psoxy.rules.Rules2;
-import co.worklytics.psoxy.rules.Transform;
+import com.avaulta.gateway.rules.transforms.Transform;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Streams;
 
@@ -41,7 +42,7 @@ public class PrebuiltSanitizerRules {
             "opt_fields"
     );
 
-    static final Rules2.Endpoint WORKSPACES = Rules2.Endpoint.builder()
+    static final Endpoint WORKSPACES = Endpoint.builder()
             .pathRegex("^/api/1.0/workspaces[?]?[^/]*$")
             .allowedQueryParams(commonAllowedQueryParameters)
             //no redaction/pseudonymization
@@ -49,7 +50,7 @@ public class PrebuiltSanitizerRules {
             // and we don't expect Workspace names to be sensitive or PII.
             .build();
 
-    static final Rules2.Endpoint USERS = Rules2.Endpoint.builder()
+    static final Endpoint USERS = Endpoint.builder()
             .pathRegex("^/api/1.0/users[?]?[^/]*")
             .allowedQueryParams(usersAllowedQueryParameters)
             .transform(Transform.Redact.builder()
@@ -65,7 +66,7 @@ public class PrebuiltSanitizerRules {
                     .build())
             .build();
 
-    static final Rules2.Endpoint TEAMS = Rules2.Endpoint.builder()
+    static final Endpoint TEAMS = Endpoint.builder()
             .pathRegex("^/api/1.0/workspaces/[^/]*/teams?[^/]*")
             .allowedQueryParams(commonAllowedQueryParameters)
             .transform(Transform.Redact.builder()
@@ -75,7 +76,7 @@ public class PrebuiltSanitizerRules {
                     .build())
             .build();
 
-    static final Rules2.Endpoint TEAM_PROJECTS = Rules2.Endpoint.builder()
+    static final Endpoint TEAM_PROJECTS = Endpoint.builder()
             .pathRegex("^/api/1.0/teams/[^/]*/projects?[^/]*")
             .allowedQueryParams(teamsAllowedQueryParameters)
             .transform(Transform.Redact.builder()
@@ -92,25 +93,25 @@ public class PrebuiltSanitizerRules {
                     .build())
             .build();
 
-    static final Rules2.Endpoint LIST_TASKS = Rules2.Endpoint.builder()
+    static final Endpoint LIST_TASKS = Endpoint.builder()
             .pathRegex("^/api/1.0/tasks[?][^/]*")
             .allowedQueryParams(taskAllowedQueryParameters)
             .transforms(getTaskTransforms(true))
             .build();
 
-    static final Rules2.Endpoint WORKSPACE_TASKS_SEARCH = Rules2.Endpoint.builder()
+    static final Endpoint WORKSPACE_TASKS_SEARCH = Endpoint.builder()
             .pathRegex("^/api/1.0/workspaces/[^/]*/tasks/search?[^/]*")
             .allowedQueryParams(searchTaskByWorkspaceAllowedQueryParameters)
             .transforms(getTaskTransforms(true))
             .build();
 
-    static final Rules2.Endpoint TASK = Rules2.Endpoint.builder()
+    static final Endpoint TASK = Endpoint.builder()
             .pathRegex("^/api/1.0/tasks/[^/]*(\\?)?[^/]*")
             .allowedQueryParams(taskAllowedQueryParameters)
             .transforms(getTaskTransforms(false))
             .build();
 
-    static final Rules2.Endpoint TASK_STORIES = Rules2.Endpoint.builder()
+    static final Endpoint TASK_STORIES = Endpoint.builder()
             .pathRegex("^/api/1.0/tasks/[^/]*/stories?[^/]*")
             .allowedQueryParams(commonAllowedQueryParameters)
             .transform(Transform.Redact.builder()
@@ -135,7 +136,7 @@ public class PrebuiltSanitizerRules {
                     .build())
             .build();
 
-    static final Rules2.Endpoint TASK_SUBTASKS = Rules2.Endpoint.builder()
+    static final Endpoint TASK_SUBTASKS = Endpoint.builder()
             .pathRegex("^/api/1.0/tasks/[^/]*/subtasks?[^/]*")
             .allowedQueryParams(taskAllowedQueryParameters)
             .transforms(getTaskTransforms(true))
