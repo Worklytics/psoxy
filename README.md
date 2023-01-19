@@ -157,7 +157,7 @@ Review [earlier release notes in GitHub](https://github.com/Worklytics/psoxy/rel
 ## Supported Data Sources
 As of September 2022, the following sources can be connected to Worklytics via psoxy:
 
-  * Asana - [example data](docs/sources/api-response-examples/asana) | [example rules](docs/sources/rules/asana/asana.yaml)
+  * Asana - [example data](docs/sources/api-response-examples/asana) | [example rules](docs/sources/example-rules/asana/asana.yaml)
   * Google Workspace
     * Calendar - [example data](docs/sources/api-response-examples/g-workspace/calendar) | [example rules](docs/sources/example-rules/google-workspace/calendar.yaml)
     * Chat - [example data](docs/sources/api-response-examples/g-workspace/google-chat) | [example rules](docs/sources/example-rules/google-workspace/google-chat.yaml)
