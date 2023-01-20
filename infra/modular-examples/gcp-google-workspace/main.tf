@@ -275,7 +275,7 @@ module "msft-connection-auth-federation" {
   application_object_id = module.msft-connection[each.key].connector.id
   display_name = "TODO"
   issuer = "https://accounts.google.com"
-  subject = google_service_account.msft-connector-sa[each.key].id
+  subject = google_service_account.msft-connector-sa[each.key].unique_id
 }
 
 module "msft-connection" {
