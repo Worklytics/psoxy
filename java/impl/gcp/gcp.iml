@@ -13,7 +13,6 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="gateway-core" />
     <orderEntry type="module" module-name="core" />
     <orderEntry type="module" module-name="gateway-core" />
     <orderEntry type="library" name="Maven: org.apache.commons:commons-csv:1.4" level="project" />
