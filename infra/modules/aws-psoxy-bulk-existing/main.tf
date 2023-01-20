@@ -23,6 +23,8 @@ module "psoxy_lambda" {
   function_zip_hash               = var.function_zip_hash
   global_parameter_arns           = var.global_parameter_arns
   path_to_instance_ssm_parameters = var.path_to_instance_ssm_parameters
+  ssm_kms_key_ids                 = var.ssm_kms_key_ids
+
   environment_variables = merge(
     var.environment_variables,
     {
