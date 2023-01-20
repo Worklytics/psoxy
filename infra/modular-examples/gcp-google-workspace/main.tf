@@ -278,6 +278,18 @@ module "msft-connection-auth-federation" {
   subject = google_service_account.msft-connector-sa[each.key].id
 }
 
+module "msft-connection" {
+  for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
+
+  source = "../../modules/azuread-connection"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-connection?ref=v0.4.10"
+
+  display_name                      = "Psoxy Connector - ${each.value.display_name}${var.connector_display_name_suffix}"
+  tenant_id                         = var.msft_tenant_id
+  required_app_roles                = each.value.required_app_roles
+  required_oauth2_permission_scopes = each.value.required_oauth2_permission_scopes
+}
+
 module "psoxy-msft-connector" {
   for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
@@ -299,23 +311,13 @@ module "psoxy-msft-connector" {
     var.general_environment_variables,
     try(each.value.environment_variables, {}),
     {
+      CLIENT_ID = module.msft-connection[each.key].connector.application_id
+      TENANT_ID = var.msft_tenant_id
       IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
     }
   )
 
   secret_bindings = module.psoxy-gcp.secrets
-}
-
-module "msft-connection" {
-  for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
-
-  source = "../../modules/azuread-connection"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-connection?ref=v0.4.10"
-
-  display_name                      = "Psoxy Connector - ${each.value.display_name}${var.connector_display_name_suffix}"
-  tenant_id                         = var.msft_tenant_id
-  required_app_roles                = each.value.required_app_roles
-  required_oauth2_permission_scopes = each.value.required_oauth2_permission_scopes
 }
 
 
