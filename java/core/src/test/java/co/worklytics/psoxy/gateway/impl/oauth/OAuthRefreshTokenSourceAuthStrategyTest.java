@@ -3,6 +3,7 @@ package co.worklytics.psoxy.gateway.impl.oauth;
 import co.worklytics.psoxy.PsoxyModule;
 import co.worklytics.psoxy.SourceAuthModule;
 import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.utils.RandomNumberGenerator;
 import co.worklytics.test.MockModules;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.auth.oauth2.AccessToken;
@@ -11,6 +12,8 @@ import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import javax.inject.Inject;
@@ -21,6 +24,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -30,11 +34,15 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
     @Inject
     ObjectMapper objectMapper;
 
+    @Inject
+    RandomNumberGenerator randomNumberGenerator;
+
     @Singleton
     @Component(modules = {
         PsoxyModule.class,
         SourceAuthModule.class,
-        MockModules.ForConfigService.class
+        MockModules.ForConfigService.class,
+        MockModules.ForRandomNumberGenerator.class,
     })
     public interface Container {
         void inject(OAuthRefreshTokenSourceAuthStrategyTest test);
@@ -46,6 +54,8 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
         OAuthRefreshTokenSourceAuthStrategyTest.Container container =
             DaggerOAuthRefreshTokenSourceAuthStrategyTest_Container.create();
         container.inject(this);
+
+        when(randomNumberGenerator.nextInt(anyInt())).thenReturn(300); //5 minutes
     }
 
     public static final String EXAMPLE_TOKEN_RESPONSE =
@@ -90,7 +100,7 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
     @Test
     public void testCachedTokenNeedsRefreshWhenNull() {
         OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl tokenRefreshHandler = new OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl();
-        assertFalse(tokenRefreshHandler.isCurrentTokenValid(null, Instant.now()));
+        assertTrue(tokenRefreshHandler.shouldRefresh(null, Instant.now()));
     }
 
     @ParameterizedTest
@@ -98,21 +108,28 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
     public void testCachedTokenDoesntNeedRefreshIfNotExpired(int millis) {
         OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl tokenRefreshHandler = new OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl();
         Instant fixed = Instant.now().truncatedTo(ChronoUnit.MILLIS);
-        Instant expiration = fixed.plus(tokenRefreshHandler.TOKEN_REFRESH_THRESHOLD).plusMillis(millis);
+        Instant expiration = fixed
+            .plus(tokenRefreshHandler.MAX_PROACTIVE_TOKEN_REFRESH)
+            .plusMillis(millis);
 
         AccessToken token = new AccessToken("any-token", Date.from(expiration));
-        assertTrue(tokenRefreshHandler.isCurrentTokenValid(token, fixed));
+        tokenRefreshHandler.randomNumberGenerator = this.randomNumberGenerator;
+        assertFalse(tokenRefreshHandler.shouldRefresh(token, fixed));
     }
 
     @ParameterizedTest
-    @ValueSource(ints = { -3_600_000, -1, 0})
+    @ValueSource(ints = { -3_600_000, -1_000, -1, 0})
     public void testCachedTokenNeedsRefreshIfExpiredOrCloseTo(int millis) {
         OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl tokenRefreshHandler = new OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl();
         Instant fixed = Instant.now().truncatedTo(ChronoUnit.MILLIS);
-        Instant expiration = fixed.plus(tokenRefreshHandler.TOKEN_REFRESH_THRESHOLD).plusMillis(millis);
+        Instant expiration = fixed
+            .minus(tokenRefreshHandler.MAX_PROACTIVE_TOKEN_REFRESH) //expired 5 minutes ago
+            .plusMillis(millis); // plus some additional (negative) millisecond amount
+
 
         AccessToken token = new AccessToken("any-token", Date.from(expiration));
-        assertFalse(tokenRefreshHandler.isCurrentTokenValid(token, fixed));
+        tokenRefreshHandler.randomNumberGenerator = this.randomNumberGenerator;
+        assertTrue(tokenRefreshHandler.shouldRefresh(token, fixed));
     }
 
     @Test
@@ -120,7 +137,7 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
         OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl tokenRefreshHandler = new OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl();
         tokenRefreshHandler.objectMapper = objectMapper;
         tokenRefreshHandler.config = mock(ConfigService.class);
-        tokenRefreshHandler.payloadBuilder = mock(OAuthRefreshTokenSourceAuthStrategy.TokenRequestPayloadBuilder.class);
+        tokenRefreshHandler.payloadBuilder = mock(OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder.class);
         when(tokenRefreshHandler.payloadBuilder.useSharedToken()).thenReturn(true);
         Instant anyTime = Instant.parse("2021-12-15T00:00:00Z");
         tokenRefreshHandler.clock = Clock.fixed(anyTime, ZoneOffset.UTC);
@@ -141,12 +158,37 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
         tokenRefreshHandler.config = mock(ConfigService.class);
         when(tokenRefreshHandler.config.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.ACCESS_TOKEN)).thenReturn(Optional.of("{\"token\":\"my-token\",\"expirationDate\":1639526410000}"));
 
-        tokenRefreshHandler.payloadBuilder = mock(OAuthRefreshTokenSourceAuthStrategy.TokenRequestPayloadBuilder.class);
+        tokenRefreshHandler.payloadBuilder = mock(OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder.class);
         when(tokenRefreshHandler.payloadBuilder.useSharedToken()).thenReturn(true);
 
         Optional<AccessToken> accessToken = tokenRefreshHandler.getSharedAccessTokenIfSupported();
         assertTrue(accessToken.isPresent());
         assertEquals("my-token", accessToken.get().getTokenValue());
         assertEquals(1639526410000L, accessToken.get().getExpirationTime().getTime());
+    }
+
+    static Stream<Arguments> refreshTokenNotRotated() {
+        return Stream.of(
+            Arguments.of("old-token", "new-token", true),
+            Arguments.of("old-token", "old-token", false),
+            Arguments.of("old-token", null, false),
+            Arguments.of("old-token", null, false)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource
+    public void refreshTokenNotRotated(String originalToken, String newToken, boolean shouldRotate) {
+        OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl tokenRefreshHandler = new OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl();
+        tokenRefreshHandler.config = spy(ConfigService.class);
+        when(tokenRefreshHandler.config.supportsWriting()).thenReturn(true);
+        when(tokenRefreshHandler.config.getConfigPropertyAsOptional(eq(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN)))
+            .thenReturn(Optional.of(originalToken));
+
+        CanonicalOAuthAccessTokenResponseDto exampleResponse = new CanonicalOAuthAccessTokenResponseDto();
+        exampleResponse.refreshToken = newToken;
+        tokenRefreshHandler.storeRefreshTokenIfRotated(exampleResponse);
+
+        verify(tokenRefreshHandler.config, times(shouldRotate ? 1 : 0)).putConfigProperty(eq(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN), eq(newToken));
     }
 }

@@ -18,6 +18,17 @@ variable "aws_region" {
   description = "default region in which to provision your AWS infra"
 }
 
+variable "aws_ssm_param_root_path" {
+  type        = string
+  description = "root to path under which SSM parameters created by this module will be created; NOTE: shouldn't be necessary to use this is you're following recommended approach of using dedicated AWS account for deployment"
+  default     = ""
+
+  validation {
+    condition     = length(var.aws_ssm_param_root_path) == 0 || length(regexall("/", var.aws_ssm_param_root_path)) == 0 || startswith(var.aws_ssm_param_root_path, "/")
+    error_message = "The aws_ssm_param_root_path value must be fully qualified (begin with `/`) if it contains any `/` characters."
+  }
+}
+
 variable "psoxy_base_dir" {
   type        = string
   description = "the path where your psoxy repo resides. Preferably a full path, /home/user/repos/, avoid tilde (~) shortcut to $HOME"
@@ -26,6 +37,12 @@ variable "psoxy_base_dir" {
     condition     = can(regex(".*\\/$", var.psoxy_base_dir))
     error_message = "The psoxy_base_dir value should end with a slash."
   }
+}
+
+variable "force_bundle" {
+  type        = bool
+  description = "whether to force build of deployment bundle, even if it already exists for this proxy version"
+  default     = false
 }
 
 variable "caller_gcp_service_account_ids" {
@@ -66,7 +83,11 @@ variable "connector_display_name_suffix" {
   default     = ""
 }
 
-
+variable "general_environment_variables" {
+  type        = map(string)
+  description = "environment variables to add for all connectors"
+  default     = {}
+}
 
 variable "enabled_connectors" {
   type        = list(string)
@@ -95,14 +116,15 @@ variable "non_production_connectors" {
 variable "custom_bulk_connectors" {
   type = map(object({
     source_kind = string
-    rules       = object({
-      pseudonymFormat       = string
-      columnsToRedact       = list(string)
-      columnsToInclude      = list(string)
-      columnsToPseudonymize = list(string)
-      columnsToDuplicate    = map(string)
-      columnsToRename       = map(string)
+    rules = object({
+      pseudonymFormat       = optional(string)
+      columnsToRedact       = optional(list(string), [])
+      columnsToInclude      = optional(list(string), [])
+      columnsToPseudonymize = optional(list(string), [])
+      columnsToDuplicate    = optional(map(string), {})
+      columnsToRename       = optional(map(string), {})
     })
+    settings_to_provide = optional(map(string), {})
   }))
   description = "specs of custom bulk connectors to create"
 
@@ -124,7 +146,7 @@ variable "lookup_table_builders" {
   type = map(object({
     input_connector_id            = string
     sanitized_accessor_role_names = list(string)
-    rules                         = object({
+    rules = object({
       pseudonymFormat       = string
       columnsToRedact       = list(string)
       columnsToInclude      = list(string)
@@ -153,7 +175,7 @@ variable "lookup_table_builders" {
     #          "employee_id" = "employee_id_orig"
     #        }
     #        columnsToRename      = {}
-    #        columnsToInclude     = null
+    #        columnsToInclude     = null # if any,  only columns defined here will be part of the output
     #      }
     #
     #    }
@@ -162,29 +184,34 @@ variable "lookup_table_builders" {
 
 variable "gcp_project_id" {
   type        = string
-  description = "id of GCP project that will host psoxy instance"
+  description = "id of GCP project that will host psoxy instance; must exist"
 }
 
 variable "gcp_org_id" {
   type        = string
-  description = "your GCP organization ID"
+  description = "DEPRECATED; IGNORED; your GCP organization ID"
   default     = null
 }
 
 variable "gcp_folder_id" {
   type        = string
-  description = "optionally, a folder into which to provision it"
+  description = "DEPRECATED; IGNORED; optionally, a folder into which to provision it"
   default     = null
 }
 
 variable "gcp_billing_account_id" {
   type        = string
-  description = "billing account ID; needed to create the project"
+  description = "DEPRECATED; IGNORED; billing account ID; needed to create the project"
   default     = null
 }
-
 
 variable "google_workspace_example_user" {
   type        = string
   description = "user to impersonate for Google Workspace API calls (null for none)"
+}
+
+variable "google_workspace_example_admin" {
+  type        = string
+  description = "user to impersonate for Google Workspace API calls (null for value of `google_workspace_example_user`)"
+  default     = null # will failover to user
 }

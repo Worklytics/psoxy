@@ -32,6 +32,7 @@ import javax.inject.Inject;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -177,12 +178,7 @@ public class CommonRequestHandler {
 
         //q: add exception handlers for IOExceptions / HTTP error responses, so those retries
         // happen in proxy rather than on Worklytics-side?
-
-        logIfDevelopmentMode(sourceApiRequest::toString);
-
         com.google.api.client.http.HttpResponse sourceApiResponse = sourceApiRequest.execute();
-
-        logIfDevelopmentMode(sourceApiResponse::toString);
 
         // return response
         builder.statusCode(sourceApiResponse.getStatusCode());
@@ -204,14 +200,10 @@ public class CommonRequestHandler {
                 if (skipSanitization) {
                     proxyResponseContent = responseContent;
                 } else {
-                    Optional<PseudonymImplementation> pseudonymImplementation = parsePseudonymImplementation(request);
-                    if (pseudonymImplementation.isPresent()) {
-                        sanitizer = sanitizerFactory.create(sanitizerFactory.buildOptions(config, rules)
-                            .withPseudonymImplementation(pseudonymImplementation.get()));
-                    }
+                    Sanitizer sanitizerForRequest = getSanitizerForRequest(request);
 
-                    proxyResponseContent = sanitizer.sanitize(request.getHttpMethod(), targetUrl, responseContent);
-                    String rulesSha = rulesUtils.sha(sanitizer.getConfigurationOptions().getRules());
+                    proxyResponseContent = sanitizerForRequest.sanitize(request.getHttpMethod(), targetUrl, responseContent);
+                    String rulesSha = rulesUtils.sha(sanitizerForRequest.getConfigurationOptions().getRules());
                     builder.header(ResponseHeader.RULES_SHA.getHttpHeader(), rulesSha);
                     log.info("response sanitized with rule set " + rulesSha);
                 }
@@ -227,6 +219,29 @@ public class CommonRequestHandler {
         } finally {
             sourceApiResponse.disconnect();
         }
+    }
+
+
+
+    /**
+     * encapsulates dynamically configuring Sanitizer based on request (to support some aspects of
+     * its behavior being controlled via HTTP headers)
+     *
+     * @param request
+     */
+    Sanitizer getSanitizerForRequest(HttpEventRequest request) {
+        Optional<PseudonymImplementation> pseudonymImplementation = parsePseudonymImplementation(request);
+        if (pseudonymImplementation.isPresent()) {
+            loadSanitizerRules(); // ensure sanitizer is loaded
+            if (!Objects.equals(pseudonymImplementation.get(),
+                    sanitizer.getConfigurationOptions().getPseudonymImplementation())) {
+                return sanitizerFactory.create(sanitizerFactory.buildOptions(config, rules)
+                    .withPseudonymImplementation(pseudonymImplementation.get()));
+            }
+        }
+
+        // just use the default
+        return sanitizer;
     }
 
     @VisibleForTesting

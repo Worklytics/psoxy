@@ -1,29 +1,29 @@
 variable "gcp_project_id" {
   type        = string
-  description = "id of GCP project that will host psoxy instance"
+  description = "id of GCP project that will host psoxy instance; must exist"
 }
 
 variable "environment_name" {
   type        = string
   description = "qualifier to append to name of project that will host your psoxy instance"
+  default     = ""
+}
+
+variable "gcp_org_id" {
+  type        = string
+  description = "DEPRECATED; IGNORED; your GCP organization ID"
   default     = null
 }
 
 variable "gcp_folder_id" {
   type        = string
-  description = "optionally, a folder into which to provision it"
+  description = "DEPRECATED; IGNORED; optionally, a folder into which to provision it"
   default     = null
 }
 
 variable "gcp_billing_account_id" {
   type        = string
-  description = "billing account ID; needed to create the project"
-  default     = null
-}
-
-variable "gcp_org_id" {
-  type        = string
-  description = "your GCP organization ID"
+  description = "DEPRECATED; IGNORED; billing account ID; needed to create the project"
   default     = null
 }
 
@@ -52,9 +52,27 @@ variable "psoxy_base_dir" {
   }
 }
 
+variable "force_bundle" {
+  type        = bool
+  description = "whether to force build of deployment bundle, even if it already exists for this proxy version"
+  default     = false
+}
+
+variable "general_environment_variables" {
+  type        = map(string)
+  description = "environment variables to add for all connectors"
+  default     = {}
+}
+
 variable "google_workspace_example_user" {
   type        = string
   description = "User to impersonate for Google Workspace API calls (null for none)"
+}
+
+variable "google_workspace_example_admin" {
+  type        = string
+  description = "user to impersonate for Google Workspace API calls (null for value of `google_workspace_example_user`)"
+  default     = null # will failover to user
 }
 
 variable "gcp_region" {
@@ -93,7 +111,15 @@ variable "enabled_connectors" {
 variable "custom_bulk_connectors" {
   type = map(object({
     source_kind = string
-    rules       = map(list(string))
+    rules = object({
+      pseudonymFormat       = optional(string)
+      columnsToRedact       = optional(list(string), [])
+      columnsToInclude      = optional(list(string), [])
+      columnsToPseudonymize = optional(list(string), [])
+      columnsToDuplicate    = optional(map(string), {})
+      columnsToRename       = optional(map(string), {})
+    })
+    settings_to_provide = optional(map(string), {})
   }))
   description = "specs of custom bulk connectors to create"
 

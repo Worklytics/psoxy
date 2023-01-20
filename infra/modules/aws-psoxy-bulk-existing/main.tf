@@ -15,13 +15,14 @@ terraform {
 module "psoxy_lambda" {
   source = "../aws-psoxy-lambda"
 
-  function_name         = "psoxy-${var.instance_id}"
-  handler_class         = "co.worklytics.psoxy.S3Handler"
-  timeout_seconds       = 600 # 10 minutes
-  memory_size_mb        = 512
-  path_to_function_zip  = var.path_to_function_zip
-  function_zip_hash     = var.function_zip_hash
-  global_parameter_arns = var.global_parameter_arns
+  function_name                   = "psoxy-${var.instance_id}"
+  handler_class                   = "co.worklytics.psoxy.S3Handler"
+  timeout_seconds                 = 600 # 10 minutes
+  memory_size_mb                  = var.memory_size_mb
+  path_to_function_zip            = var.path_to_function_zip
+  function_zip_hash               = var.function_zip_hash
+  global_parameter_arns           = var.global_parameter_arns
+  path_to_instance_ssm_parameters = var.path_to_instance_ssm_parameters
   environment_variables = merge(
     var.environment_variables,
     {
@@ -185,7 +186,7 @@ locals {
 }
 
 resource "aws_iam_role_policy_attachment" "reader_policy_to_accessor_role" {
-  for_each   = toset([ for r in local.accessor_role_names : r if r != null])
+  for_each = toset([for r in local.accessor_role_names : r if r != null])
 
   role       = each.key
   policy_arn = aws_iam_policy.sanitized_bucket_read.arn
@@ -197,6 +198,7 @@ resource "aws_ssm_parameter" "rules" {
   description    = "Rules for transformation of files. NOTE: any 'RULES' env var will override this value"
   insecure_value = yamlencode(var.rules) # NOTE: insecure_value just means shown in Terraform output
 
+
   lifecycle {
     ignore_changes = [
       tags
@@ -207,4 +209,21 @@ resource "aws_ssm_parameter" "rules" {
 # to facilitate composition of output pipeline
 output "output_bucket" {
   value = aws_s3_bucket.output.bucket
+}
+
+output "function_arn" {
+  value = module.psoxy_lambda.function_arn
+}
+
+output "instance_role_arn" {
+  value = module.psoxy_lambda.iam_role_for_lambda_arn
+}
+
+output "instance_id" {
+  value = module.psoxy_lambda.function_name
+}
+
+
+output "next_todo_step" {
+  value = var.todo_step + 1
 }

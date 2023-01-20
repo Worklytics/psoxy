@@ -52,7 +52,7 @@ public class HandlerTest {
         File inputFile = new File(getClass().getResource("/hris-example.csv").getFile());
 
         StringWriter s = new StringWriter();
-        handler.pseudonymize(config, inputFile, s);
+        handler.sanitize(config, inputFile, s);
 
 
         assertEquals(EXPECTED, s.toString());
@@ -75,7 +75,7 @@ public class HandlerTest {
         File inputFile = new File(getClass().getResource("/hris-example.csv").getFile());
 
         StringWriter s = new StringWriter();
-        handler.pseudonymize(config, inputFile, s);
+        handler.sanitize(config, inputFile, s);
 
         assertEquals(EXPECTED, s.toString());
     }
@@ -93,7 +93,7 @@ public class HandlerTest {
         File inputFile = new File(getClass().getResource("/hris-example-headers-w-spaces.csv").getFile());
 
         StringWriter s = new StringWriter();
-        handler.pseudonymize(config, inputFile, s);
+        handler.sanitize(config, inputFile, s);
 
         assertEquals(EXPECTED, s.toString());
     }

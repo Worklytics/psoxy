@@ -5,12 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>co.worklytics.psoxy</groupId>
-    <artifactId>root</artifactId>
+    <artifactId>java</artifactId>
     <version>${revision}</version>
     <packaging>pom</packaging>
 
     <properties>
-        <revision>0.4.8-SNAPSHOT</revision>
+        <revision>0.4.11-SNAPSHOT</revision>
         <dependency.jackson.version>2.12.5</dependency.jackson.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <dependency.lombok.version>1.18.22</dependency.lombok.version>
@@ -23,8 +23,10 @@
         <dependency.google-cloud-bom.version>0.163.0</dependency.google-cloud-bom.version>
         <dependency.google-http-client.version>1.41.0</dependency.google-http-client.version>
         <dependency.google-auth-library-oauth2-http.version>1.2.2</dependency.google-auth-library-oauth2-http.version>
-        <dependency.mockito-junit-jupiter.version>4.2.0</dependency.mockito-junit-jupiter.version>
+        <dependency.junit-jupiter.version>5.9.1</dependency.junit-jupiter.version>
+        <dependency.mockito-junit-jupiter.version>4.11.0</dependency.mockito-junit-jupiter.version>
         <dependency.json-path.version>2.7.0</dependency.json-path.version>
+        <dependency.bettercloud-vault-java-driver>5.1.0</dependency.bettercloud-vault-java-driver>
     </properties>
 
     <modules>
@@ -89,7 +91,7 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>5.8.2</version>
+            <version>${dependency.junit-jupiter.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

@@ -14,10 +14,10 @@ import javax.inject.Singleton;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
-class AccountCredentialsGrantTokenRequestPayloadBuilderTest {
+class AccountCredentialsGrantTokenRequestBuilderTest {
 
     @Inject
-    AccountCredentialsGrantTokenRequestPayloadBuilder payloadBuilder;
+    AccountCredentialsGrantTokenRequestBuilder payloadBuilder;
 
     @Singleton
     @Component(modules = {
@@ -26,23 +26,23 @@ class AccountCredentialsGrantTokenRequestPayloadBuilderTest {
         MockModules.ForConfigService.class,
     })
     public interface Container {
-        void inject(AccountCredentialsGrantTokenRequestPayloadBuilderTest test);
+        void inject(AccountCredentialsGrantTokenRequestBuilderTest test);
     }
 
     @BeforeEach
     public void setup() {
-        AccountCredentialsGrantTokenRequestPayloadBuilderTest.Container container =
-            DaggerAccountCredentialsGrantTokenRequestPayloadBuilderTest_Container.create();
+        AccountCredentialsGrantTokenRequestBuilderTest.Container container =
+            DaggerAccountCredentialsGrantTokenRequestBuilderTest_Container.create();
         container.inject(this);
     }
 
     @Test
     void addHeaders() {
         when(payloadBuilder.config
-            .getConfigPropertyOrError(AccountCredentialsGrantTokenRequestPayloadBuilder.ConfigProperty.CLIENT_ID))
+            .getConfigPropertyOrError(AccountCredentialsGrantTokenRequestBuilder.ConfigProperty.CLIENT_ID))
             .thenReturn("client");
         when(payloadBuilder.config
-            .getConfigPropertyOrError(AccountCredentialsGrantTokenRequestPayloadBuilder.ConfigProperty.CLIENT_SECRET))
+            .getConfigPropertyOrError(AccountCredentialsGrantTokenRequestBuilder.ConfigProperty.CLIENT_SECRET))
             .thenReturn("secret");
 
         HttpHeaders headers = new HttpHeaders();

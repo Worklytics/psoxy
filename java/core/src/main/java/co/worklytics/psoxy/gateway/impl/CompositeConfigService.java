@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 /**
@@ -34,10 +35,13 @@ public class CompositeConfigService implements ConfigService {
 
     @Override
     public void putConfigProperty(ConfigProperty property, String value) {
+        //TODO: this is ill-defined and probably a bad idea; should revisit (eliminating this config
+        // service entirely; or just moving things that need to be written out of it entirely)
+
         if (preferred.supportsWriting()) {
             preferred.putConfigProperty(property, value);
-        }
-        if (fallback.supportsWriting()) {
+        } else if (fallback.supportsWriting()) {
+            //not point to writing in both
             fallback.putConfigProperty(property, value);
         }
     }
@@ -47,12 +51,18 @@ public class CompositeConfigService implements ConfigService {
         return preferred.getConfigPropertyAsOptional(property)
             .orElseGet(() ->
                 fallback.getConfigPropertyAsOptional(property)
-                    .orElseThrow(() -> new Error("missing config. no value for " + property))
+                    .orElseThrow(() -> new NoSuchElementException("Missing config. no value for " + property))
             );
     }
 
     @Override
     public Optional<String> getConfigPropertyAsOptional(ConfigProperty property) {
         return preferred.getConfigPropertyAsOptional(property).or(() -> fallback.getConfigPropertyAsOptional(property));
+    }
+
+    @Override
+    public Optional<ConfigValueWithMetadata> getConfigPropertyWithMetadata(ConfigProperty configProperty) {
+        return preferred.getConfigPropertyWithMetadata(configProperty)
+            .or(() -> fallback.getConfigPropertyWithMetadata(configProperty));
     }
 }

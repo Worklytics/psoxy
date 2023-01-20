@@ -16,11 +16,13 @@ const { version } = require('./package.json');
     .version(version)
     .description(`
       Psoxy Test: display logs
-      Get CloudWatch logs of a Worklytics Psoxy instance on AWS
+      CloudWatch logs of AWS deploys or runtime logs of GCP deploys
     `)
-    .requiredOption('-l, --log-group-name <logGroupName>', 'Log group to display')
-    .option('-r, --role <arn>', 'AWS role to assume, use its ARN')
-    .requiredOption('-re, --region <region>', 'AWS region of Psoxy instance', 
+    .option('-p --project-id <projectId>', 'GCP: Name of the project that hosts the cloud function (Psoxy instance)')
+    .option('-f --function-name <functionName>', 'GCP: Name of the cloud function from which to list entries')
+    .option('-l, --log-group-name <logGroupName>', 'AWS: Log group to display')
+    .option('-r, --role <arn>', 'AWS: role to assume, use its ARN')
+    .option('-re, --region <region>', 'AWS: region of your Psoxy instance',
       'us-east-1')
     .option('-v, --verbose', 'Verbose output', false)
     .configureOutput({
@@ -29,7 +31,10 @@ const { version } = require('./package.json');
 
   program.addHelpText(
     'after',
-    `Example call: node cli-logs.js -l \"/aws/lambda/psoxy-name\" -r \"arn:aws:iam::id:myRole\" -re us-east-1`
+    `
+      AWS example call: node cli-logs.js -l \"/aws/lambda/psoxy-name\" -r \"arn:aws:iam::id:myRole\" -re us-east-1\n
+      GCP example call: node cli-logs.js -p \"psoxy-project-name\" -f \"psoxy-function-name\"
+    `
   );
 
   program.parse(process.argv);
@@ -38,7 +43,7 @@ const { version } = require('./package.json');
 
   let result;
   try {
-    result = await psoxyTestLogs(options);
+    result = await psoxyTestLogs(options, logger);
   } catch (error) {
     logger.error(error.message);
     process.exitCode = 1;

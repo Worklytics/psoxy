@@ -6,7 +6,7 @@
 
     <parent>
         <groupId>co.worklytics.psoxy</groupId>
-        <artifactId>root</artifactId>
+        <artifactId>java</artifactId>
         <version>${revision}</version>
     </parent>
 
@@ -144,6 +144,13 @@
             <version>${dependency.apache-httpcore.version}</version>
         </dependency>
 
+        <!-- support Hashicorp Vault as a secret store-->
+        <!-- see https://github.com/BetterCloud/vault-java-driver -->
+        <dependency>
+            <groupId>com.bettercloud</groupId>
+            <artifactId>vault-java-driver</artifactId>
+            <version>${dependency.bettercloud-vault-java-driver}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.mockito</groupId>

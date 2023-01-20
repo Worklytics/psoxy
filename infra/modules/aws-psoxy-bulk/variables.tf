@@ -29,6 +29,12 @@ variable "instance_id" {
   }
 }
 
+variable "path_to_instance_ssm_parameters" {
+  type        = string
+  description = "path to instance config parameters in SSM Parameter Store (`null` for default, which is `PSOXY_{function_name}_`); lambda will be able to read/write params beneath this path/prefix"
+  default     = null
+}
+
 # NOTE: currently unused; but perhaps we'll have default rules by source_kind in the future,
 # so leaving it in
 variable "source_kind" {
@@ -88,7 +94,7 @@ variable "rules" {
     # will break existing invocations of this module
 
     # pseudonymFormat       = string
-    columnsToRedact       = list(string)
+    columnsToRedact = list(string)
     # columnsToInclude      = list(string)
     columnsToPseudonymize = list(string)
     # columnsToDuplicate    = map(string)
@@ -97,7 +103,7 @@ variable "rules" {
   description = "Rules to apply to a columnar flat file during transformation"
   default = {
     # pseudonymFormat       = "URL_SAFE_TOKEN"
-    columnsToRedact       = []
+    columnsToRedact = []
     # columnsToInclude      = null
     columnsToPseudonymize = []
     # columnsToDuplicate    = {}
@@ -110,4 +116,17 @@ variable "global_parameter_arns" {
   type        = list(string)
   description = "System Manager Parameters ARNS to expose to function, expected to contain global shared parameters, like salt or encryption keys"
   default     = []
+}
+
+variable "memory_size_mb" {
+  # See https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function#memory_size
+  type        = number
+  description = "Amount of memory in MB your Lambda Function can use at runtime. Defaults to 512"
+  default     = 512
+}
+
+variable "todo_step" {
+  type        = number
+  description = "of all todos, where does this one logically fall in sequence"
+  default     = 2
 }

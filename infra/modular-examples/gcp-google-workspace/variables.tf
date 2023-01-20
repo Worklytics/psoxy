@@ -6,7 +6,7 @@ variable "gcp_project_id" {
 variable "environment_name" {
   type        = string
   description = "qualifier to append to name of project that will host your psoxy instance"
-  default     = null
+  default     = ""
 }
 
 variable "worklytics_sa_emails" {
@@ -32,6 +32,18 @@ variable "psoxy_base_dir" {
     condition     = can(regex("^[^~].*$", var.psoxy_base_dir))
     error_message = "The psoxy_base_dir value should be absolute path (not start with ~)."
   }
+}
+
+variable "force_bundle" {
+  type        = bool
+  description = "whether to force build of deployment bundle, even if it already exists"
+  default     = false
+}
+
+variable "general_environment_variables" {
+  type        = map(string)
+  description = "environment variables to add for all connectors"
+  default     = {}
 }
 
 variable "gcp_region" {
@@ -76,7 +88,15 @@ variable "non_production_connectors" {
 variable "custom_bulk_connectors" {
   type = map(object({
     source_kind = string
-    rules       = map(list(string))
+    rules = object({
+      pseudonymFormat       = optional(string)
+      columnsToRedact       = optional(list(string), [])
+      columnsToInclude      = optional(list(string), [])
+      columnsToPseudonymize = optional(list(string), [])
+      columnsToDuplicate    = optional(map(string), {})
+      columnsToRename       = optional(map(string), {})
+    })
+    settings_to_provide = optional(map(string), {})
   }))
   description = "specs of custom bulk connectors to create"
 
@@ -97,4 +117,10 @@ variable "custom_bulk_connectors" {
 variable "google_workspace_example_user" {
   type        = string
   description = "User to impersonate for Google Workspace API calls (null for none)"
+}
+
+variable "google_workspace_example_admin" {
+  type        = string
+  description = "user to impersonate for Google Workspace API calls (null for value of `google_workspace_example_user`)"
+  default     = null # will failover to user
 }

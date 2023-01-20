@@ -11,18 +11,19 @@ terraform {
 module "psoxy_lambda" {
   source = "../aws-psoxy-lambda"
 
-  function_name                  = var.function_name
-  handler_class                  = "co.worklytics.psoxy.Handler"
-  path_to_function_zip           = var.path_to_function_zip
-  function_zip_hash              = var.function_zip_hash
-  memory_size_mb                 = 512
-  timeout_seconds                = 55
-  reserved_concurrent_executions = var.reserved_concurrent_executions
-  path_to_config                 = var.path_to_config
-  source_kind                    = var.source_kind
-  function_parameters            = var.function_parameters
-  global_parameter_arns          = var.global_parameter_arns
-  environment_variables          = var.environment_variables
+  function_name                   = var.function_name
+  handler_class                   = "co.worklytics.psoxy.Handler"
+  path_to_function_zip            = var.path_to_function_zip
+  function_zip_hash               = var.function_zip_hash
+  memory_size_mb                  = var.memory_size_mb
+  timeout_seconds                 = 55
+  reserved_concurrent_executions  = var.reserved_concurrent_executions
+  path_to_config                  = var.path_to_config
+  source_kind                     = var.source_kind
+  function_parameters             = var.function_parameters
+  path_to_instance_ssm_parameters = var.path_to_instance_ssm_parameters
+  global_parameter_arns           = var.global_parameter_arns
+  environment_variables           = var.environment_variables
 }
 
 resource "aws_lambda_function_url" "lambda_url" {
@@ -48,8 +49,9 @@ locals {
   proxy_endpoint_url  = substr(aws_lambda_function_url.lambda_url.function_url, 0, length(aws_lambda_function_url.lambda_url.function_url) - 1)
   impersonation_param = var.example_api_calls_user_to_impersonate == null ? "" : " -i \"${var.example_api_calls_user_to_impersonate}\""
   command_npm_install = "npm --prefix ${var.path_to_repo_root}tools/psoxy-test install"
+  command_cli_call    = "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js -r \"${var.aws_assume_role_arn}\""
   command_test_calls = [for path in var.example_api_calls :
-  "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js -r \"${var.aws_assume_role_arn}\" -u \"${local.proxy_endpoint_url}${path}\"${local.impersonation_param}"
+    "${local.command_cli_call} -u \"${local.proxy_endpoint_url}${path}\"${local.impersonation_param}"
   ]
   command_test_logs = "node ${var.path_to_repo_root}tools/psoxy-test/cli-logs.js -r \"${var.aws_assume_role_arn}\" -re \"${var.region}\" -l \"${module.psoxy_lambda.log_group}\""
 }
@@ -64,7 +66,7 @@ Review the deployed function in AWS console:
 
 - https://console.aws.amazon.com/lambda/home?region=${var.region}#/functions/${var.function_name}?tab=monitoring
 
-We provide some Node.js scripts to easily validate the deploy. To be able
+We provide some Node.js scripts to easily validate the deployment. To be able
 to run the test commands below, you need Node.js (>=16) and npm (v >=8)
 installed. Then, ensure all dependencies are installed by running:
 
@@ -88,15 +90,15 @@ a RULES variable in the source.
 ### Check logs (AWS CloudWatch)
 
 Based on your configuration, the following command allows you to inspect the
-logs of your Psoxy deploy:
+logs of your Psoxy deployment:
 
 ```shell
 ${local.command_test_logs}
 ```
 
---
-Please, check the documentation of our Psoxy testing tool
-([`/tools/psoxy-test/README.md`](https://github.com/Worklytics/psoxy/blob/v0.4.7/tools/psoxy-test/README.md))
+---
+
+Please, check the documentation of our [Psoxy Testing tools](${var.path_to_repo_root}tools/psoxy-test/README.md)
 for a detailed description of all the different options.
 
 Contact support@worklytics.co for assistance modifying the rules as needed.
@@ -104,12 +106,36 @@ Contact support@worklytics.co for assistance modifying the rules as needed.
 EOT
 }
 
+resource "local_file" "test_script" {
+  filename        = "test-${var.function_name}.sh"
+  file_permission = "0770"
+  content         = <<EOT
+#!/bin/bash
+API_PATH=$${1:-${try(var.example_api_calls[0], "")}}
+echo "Quick test of ${var.function_name} ..."
+
+${local.command_cli_call} -u "${local.proxy_endpoint_url}$API_PATH" ${local.impersonation_param}
+
+echo "Invoke this script with any of the following as arguments to test other endpoints:${"\r\n\t"}${join("\r\n\t", var.example_api_calls)}"
+EOT
+
+}
+
+
 output "endpoint_url" {
   value = aws_lambda_function_url.lambda_url.function_url
 }
 
 output "function_arn" {
   value = module.psoxy_lambda.function_arn
+}
+
+output "instance_role_arn" {
+  value = module.psoxy_lambda.iam_role_for_lambda_arn
+}
+
+output "instance_id" {
+  value = module.psoxy_lambda.function_name
 }
 
 output "next_todo_step" {

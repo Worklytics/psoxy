@@ -55,6 +55,9 @@ class CommonRequestHandlerTest {
     public void setup() {
         CommonRequestHandlerTest.Container container = DaggerCommonRequestHandlerTest_Container.create();
         container.inject(this);
+
+        when(handler.config.getConfigPropertyAsOptional(eq(ProxyConfigProperty.PSOXY_SALT)))
+            .thenReturn(Optional.of("salt"));
     }
 
     @Inject
@@ -131,6 +134,25 @@ class CommonRequestHandlerTest {
 
         //verify options were parsed correctly
         assertEquals(PseudonymImplementation.LEGACY, impl.orElseThrow());
+    }
+
+    @Test
+    void getSanitizerForRequest() {
+        //verify precondition that defaults != LEGACY
+        assertEquals(
+            PseudonymImplementation.DEFAULT,
+            Sanitizer.ConfigurationOptions.builder().build().getPseudonymImplementation());
+
+        //prep mock request
+        HttpEventRequest request = mock(HttpEventRequest.class);
+        when(request.getHeader(ControlHeader.PSEUDONYM_IMPLEMENTATION.getHttpHeader()))
+            .thenReturn(Optional.of(PseudonymImplementation.LEGACY.getHttpHeaderValue()));
+
+        assertEquals(PseudonymImplementation.LEGACY,
+            handler.getSanitizerForRequest(request).getConfigurationOptions().getPseudonymImplementation());
+
+        assertEquals(PseudonymImplementation.DEFAULT,
+            handler.getSanitizerForRequest(mock(HttpEventRequest.class)).getConfigurationOptions().getPseudonymImplementation());
     }
 
     @Test

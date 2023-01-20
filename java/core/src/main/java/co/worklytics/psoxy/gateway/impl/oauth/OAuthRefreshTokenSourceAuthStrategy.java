@@ -3,6 +3,7 @@ package co.worklytics.psoxy.gateway.impl.oauth;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.RequiresConfiguration;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
+import co.worklytics.psoxy.utils.RandomNumberGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.http.*;
@@ -13,7 +14,9 @@ import com.google.common.annotations.VisibleForTesting;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Inject;
 import java.io.IOException;
@@ -48,38 +51,62 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
     @Getter
     private final String configIdentifier = "oauth2_refresh_token";
 
-    @Inject
-    ConfigService config;
-
     /**
      * default access token expiration to assume, if 'expires_in' value is omitted from response
      * (which is allowed under OAuth 2.0 spec)
      */
     public static final Duration DEFAULT_ACCESS_TOKEN_EXPIRATION = Duration.ofHours(1);
 
+    /**
+     * some sources seem to give you a new refresh token on EVERY token refresh request; we don't
+     * want to churn through refresh tokens when not really needed
+     *
+     * examples: Dropbox
+     *
+     * TODO: revisit whether this needs to be configured per data source
+     */
+    public static final Duration MIN_DURATION_TO_KEEP_REFRESH_TOKEN = Duration.ofDays(7);
+
 
     //q: should we put these as config properties? creates potential for inconsistent configs
     // eg, orphaned config properties for SourceAuthStrategy not in use; missing config properties
     //  expected by this
+    @RequiredArgsConstructor
     public enum ConfigProperty implements ConfigService.ConfigProperty {
-        REFRESH_ENDPOINT,
-        CLIENT_ID,
-        GRANT_TYPE,
-        ACCESS_TOKEN,
+        REFRESH_ENDPOINT(false),
+        CLIENT_ID(false),
+        GRANT_TYPE(false),
+        ACCESS_TOKEN(true),
+        ;
+
+        private final Boolean noCache;
+
+        @Override
+        public Boolean noCache() {
+            return noCache;
+        }
     }
 
     @Inject OAuth2CredentialsWithRefresh.OAuth2RefreshHandler refreshHandler;
 
     @Override
     public Set<ConfigService.ConfigProperty> getRequiredConfigProperties() {
-        Stream<ConfigService.ConfigProperty> propertyStream = Stream.of(ConfigProperty.REFRESH_ENDPOINT,
-                // ACCESS_TOKEN is optional
-                ConfigProperty.GRANT_TYPE,
-                ConfigProperty.CLIENT_ID);
+        Stream<ConfigService.ConfigProperty> propertyStream = Stream.empty();
 
         if (refreshHandler instanceof RequiresConfiguration) {
             propertyStream = Stream.concat(propertyStream,
                 ((RequiresConfiguration) refreshHandler).getRequiredConfigProperties().stream());
+        }
+        return propertyStream.collect(Collectors.toSet());
+    }
+
+    @Override
+    public Set<ConfigService.ConfigProperty> getAllConfigProperties() {
+        Stream<ConfigService.ConfigProperty> propertyStream = Stream.of(ConfigProperty.values());
+
+        if (refreshHandler instanceof RequiresConfiguration) {
+            propertyStream = Stream.concat(propertyStream,
+                ((RequiresConfiguration) refreshHandler).getAllConfigProperties().stream());
         }
         return propertyStream.collect(Collectors.toSet());
     }
@@ -95,14 +122,33 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
             .build();
     }
 
-    public interface TokenRequestPayloadBuilder {
+    public interface TokenRequestBuilder {
 
+        /**
+         * @return identifier of type of OAuth grant that this payload builder should be used for
+         */
         String getGrantType();
 
+        /**
+         * whether resulting `access_token` should be shared across all instances of connections
+         * to this source.
+         *
+         * q: what does this have to do with a token request payload?? it's semantics of tokens
+         * according to Source, right? (eg, whether they allow multiple valid token instances to
+         * be used concurrently for the same grant)
+         *
+         * q: maybe this should just *always* be true? or should be env var?
+         *
+         * @return whether resulting `access_token` should be shared across all instances of
+         * connections to this source.
+         */
         default boolean useSharedToken() {
             return false;
         }
 
+        /**
+         * @return request paylaod for token request
+         */
         HttpContent buildPayload();
 
         /**
@@ -124,12 +170,14 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         @Inject
         HttpRequestFactory httpRequestFactory;
         @Inject
-        OAuthRefreshTokenSourceAuthStrategy.TokenRequestPayloadBuilder payloadBuilder;
+        TokenRequestBuilder payloadBuilder;
         @Inject
         Clock clock;
+        @Inject //injected, so can be mocked for tests
+        RandomNumberGenerator randomNumberGenerator;
 
         @VisibleForTesting
-        protected final Duration TOKEN_REFRESH_THRESHOLD = Duration.ofMinutes(1L);
+        protected final Duration MAX_PROACTIVE_TOKEN_REFRESH = Duration.ofMinutes(5L);
 
         private AccessToken currentToken = null;
 
@@ -156,13 +204,12 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                 }
             }
 
-            if (isCurrentTokenValid(this.currentToken, clock.instant())) {
-                return this.currentToken;
+            if (shouldRefresh(this.currentToken, clock.instant())) {
+                tokenResponse = exchangeRefreshTokenForAccessToken();
+                this.currentToken = asAccessToken(tokenResponse);
+                storeSharedAccessTokenIfSupported(this.currentToken);
             }
 
-            tokenResponse = exchangeRefreshTokenForAccessToken();
-            this.currentToken = asAccessToken(tokenResponse);
-            storeSharedAccessTokenIfSupported(this.currentToken);
             return this.currentToken;
         }
 
@@ -182,20 +229,40 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                 objectMapper.readerFor(CanonicalOAuthAccessTokenResponseDto.class)
                     .readValue(response.getContent());
 
-            //TODO: this is obviously not great; if we're going to support refresh token rotation,
-            // need to have some way to control the logic based on grant type
-            config.getConfigPropertyAsOptional(RefreshTokenPayloadBuilder.ConfigProperty.REFRESH_TOKEN)
-                .ifPresent(currentRefreshToken -> {
-                    if (!Objects.equals(currentRefreshToken, tokenResponse.getRefreshToken())) {
-                        //TODO: update refreshToken (some source APIs do this; TBC whether ones currently
-                        // in scope for psoxy use do)
-                        //q: write to secret? (most correct ...)
-                        //q: write to file system?
-                        log.severe("Source API rotated refreshToken, which is currently NOT supported by psoxy");
-                    }
-                });
+            storeRefreshTokenIfRotated(tokenResponse);
 
             return tokenResponse;
+        }
+
+        /**
+         * Store the new refresh token if included in token response and differs from stored value
+         *
+         * this method encapsulates the logic for checking and storing new token
+         *
+         * @param tokenResponse the token response
+         */
+        @VisibleForTesting
+        void storeRefreshTokenIfRotated(CanonicalOAuthAccessTokenResponseDto tokenResponse) {
+            if (!StringUtils.isBlank(tokenResponse.getRefreshToken())) {
+                //if a refresh_token came back from server, potentially update it
+                config.getConfigPropertyWithMetadata(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN)
+                    .filter(storedToken -> !Objects.equals(storedToken.getValue(), tokenResponse.getRefreshToken()))
+                    .filter(storedToken -> storedToken.getLastModifiedDate().isEmpty()
+                        || storedToken.getLastModifiedDate().get()
+                                .isBefore(Instant.now().minus(MIN_DURATION_TO_KEEP_REFRESH_TOKEN)))
+                    .ifPresent(storedTokenToRotate -> {
+                        if (config.supportsWriting()) {
+                            try {
+                                config.putConfigProperty(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN,
+                                    tokenResponse.getRefreshToken());
+                            } catch (Throwable e) {
+                                log.log(Level.SEVERE, "refresh_token rotated, but failed to write updated value; while this access_token may work, future token exchanges may fail", e);
+                            }
+                        } else {
+                            log.log(Level.SEVERE, "refresh_token rotated, but config service does not support writing; while this access_token may work, future token exchanges may fail");
+                        }
+                    });
+            }
         }
 
 
@@ -208,28 +275,56 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                 Date.from(clock.instant().plusSeconds(expiresIn)));
         }
 
+
+        /**
+         * whether token should be refreshed
+         *   - it's null
+         *   - it's expired
+         *   - it's close to expiring (proactive refresh)
+         *
+         * @param accessToken to check
+         * @param now effective time of check
+         * @return whether token should be refreshed
+         */
+
         @VisibleForTesting
-        protected boolean isCurrentTokenValid(AccessToken accessToken, Instant now) {
+        protected boolean shouldRefresh(AccessToken accessToken, Instant now) {
             if (accessToken == null) {
-                return false;
+                return true;
             }
             Instant expiresAt = accessToken.getExpirationTime().toInstant();
-            Instant minimumValid = expiresAt.minus(TOKEN_REFRESH_THRESHOLD);
-            return now.isBefore(minimumValid);
+            Instant thresholdToProactiveRefresh = expiresAt
+                .minusSeconds(randomNumberGenerator.nextInt((int) MAX_PROACTIVE_TOKEN_REFRESH.toSeconds()));
+            return now.isAfter(thresholdToProactiveRefresh);
         }
 
         @Override
         public Set<ConfigService.ConfigProperty> getRequiredConfigProperties() {
-            Stream<ConfigService.ConfigProperty> propertyStream = Stream.of(ConfigProperty.REFRESH_ENDPOINT,
+
+            // only things
+            Stream<ConfigService.ConfigProperty> propertyStream = Stream.of(
+                    ConfigProperty.REFRESH_ENDPOINT,
                     // ACCESS_TOKEN is optional
-                    ConfigProperty.GRANT_TYPE,
-                    ConfigProperty.CLIENT_ID);
+                    ConfigProperty.GRANT_TYPE
+                      // CLIENT_ID not required by RefreshHandler, though likely by payload builder
+            );
 
             if (payloadBuilder instanceof RequiresConfiguration) {
                 propertyStream = Stream.concat(propertyStream,
                     ((RequiresConfiguration) payloadBuilder).getRequiredConfigProperties().stream());
             }
             return propertyStream.collect(Collectors.toSet());
+        }
+
+        @Override
+        public Set<ConfigService.ConfigProperty> getAllConfigProperties() {
+            Stream<ConfigService.ConfigProperty> allConfigPropertiesStream = Arrays.stream(ConfigProperty.values());
+
+            if (payloadBuilder instanceof RequiresConfiguration) {
+                allConfigPropertiesStream = Stream.concat(allConfigPropertiesStream,
+                    ((RequiresConfiguration) payloadBuilder).getAllConfigProperties().stream());
+            }
+            return allConfigPropertiesStream.collect(Collectors.toSet());
         }
 
         @VisibleForTesting

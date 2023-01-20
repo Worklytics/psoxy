@@ -18,6 +18,17 @@ variable "aws_region" {
   description = "default region in which to provision your AWS infra"
 }
 
+variable "aws_ssm_param_root_path" {
+  type        = string
+  description = "root to path under which SSM parameters created by this module will be created; NOTE: shouldn't be necessary to use this is you're following recommended approach of using dedicated AWS account for deployment"
+  default     = ""
+
+  validation {
+    condition     = length(var.aws_ssm_param_root_path) == 0 || length(regexall("/", var.aws_ssm_param_root_path)) == 0 || startswith(var.aws_ssm_param_root_path, "/")
+    error_message = "The aws_ssm_param_root_path value must be fully qualified (begin with `/`) if it contains any `/` characters."
+  }
+}
+
 variable "caller_gcp_service_account_ids" {
   type        = list(string)
   description = "ids of GCP service accounts allowed to send requests to the proxy (eg, unique ID of the SA of your Worklytics instance)"
@@ -70,6 +81,18 @@ variable "psoxy_base_dir" {
   }
 }
 
+variable "force_bundle" {
+  type        = bool
+  description = "whether to force build of deployment bundle, even if it already exists for this proxy version"
+  default     = false
+}
+
+variable "general_environment_variables" {
+  type        = map(string)
+  description = "environment variables to add for all connectors"
+  default     = {}
+}
+
 variable "pseudonymize_app_ids" {
   type        = string
   description = "if set, will set value of PSEUDONYMIZE_APP_IDS environment variable to this value for all sources"
@@ -100,14 +123,15 @@ variable "non_production_connectors" {
 variable "custom_bulk_connectors" {
   type = map(object({
     source_kind = string
-    rules       = object({
-      pseudonymFormat       = string
-      columnsToRedact       = list(string)
-      columnsToInclude      = list(string)
-      columnsToPseudonymize = list(string)
-      columnsToDuplicate    = map(string)
-      columnsToRename       = map(string)
+    rules = object({
+      pseudonymFormat       = optional(string)
+      columnsToRedact       = optional(list(string), [])
+      columnsToInclude      = optional(list(string), [])
+      columnsToPseudonymize = optional(list(string), [])
+      columnsToDuplicate    = optional(map(string), {})
+      columnsToRename       = optional(map(string), {})
     })
+    settings_to_provide = optional(map(string), {})
   }))
   description = "specs of custom bulk connectors to create"
 
@@ -129,7 +153,7 @@ variable "lookup_table_builders" {
   type = map(object({
     input_connector_id            = string
     sanitized_accessor_role_names = list(string)
-    rules                         = object({
+    rules = object({
       pseudonymFormat       = string
       columnsToRedact       = list(string)
       columnsToInclude      = list(string)

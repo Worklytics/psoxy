@@ -1,12 +1,22 @@
 package co.worklytics.psoxy.aws;
 
 import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.HostEnvironment;
+import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.impl.CompositeConfigService;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
+import co.worklytics.psoxy.gateway.impl.*;
+import co.worklytics.psoxy.gateway.impl.VaultConfigService;
+import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.bettercloud.vault.SslConfig;
+import com.bettercloud.vault.Vault;
+import com.bettercloud.vault.VaultConfig;
+import com.bettercloud.vault.VaultException;
 import dagger.Module;
 import dagger.Provides;
+import org.apache.commons.lang3.StringUtils;
 import software.amazon.awssdk.core.client.config.ClientOverrideConfiguration;
 import software.amazon.awssdk.core.retry.RetryPolicy;
 import software.amazon.awssdk.core.retry.backoff.BackoffStrategy;
@@ -14,8 +24,12 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ssm.SsmClient;
 
 import javax.inject.Named;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 import java.time.Duration;
+import java.util.logging.Logger;
+
+import static co.worklytics.psoxy.aws.VaultAwsIamAuth.VAULT_ENGINE_VERSION;
 
 
 /**
@@ -24,17 +38,19 @@ import java.time.Duration;
 @Module
 public interface AwsModule {
 
-    /**
-     * see "https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html#configuration-envvars-runtimer"
-     */
-    enum RuntimeEnvironmentVariables {
-        AWS_REGION,
-        AWS_LAMBDA_FUNCTION_NAME,
+    @Provides @Singleton
+    static AwsEnvironment awsEnvironment() {
+        return new AwsEnvironment();
+    }
+
+    @Provides @Singleton
+    static HostEnvironment hostEnvironment(AwsEnvironment awsEnvironment) {
+        return awsEnvironment;
     }
 
     @Provides
-    static SsmClient ssmClient() {
-        Region region = Region.of(System.getenv(RuntimeEnvironmentVariables.AWS_REGION.name()));
+    static SsmClient ssmClient(AwsEnvironment awsEnvironment) {
+        Region region = Region.of(awsEnvironment.getRegion());
         return SsmClient.builder()
             // Add custom retry policy
             .overrideConfiguration(ClientOverrideConfiguration.builder()
@@ -47,47 +63,76 @@ public interface AwsModule {
             .build();
     }
 
-    // global parameters
-    // singleton to be reused in lambda container
-    @Provides @Named("Global") @Singleton
-    static ParameterStoreConfigService parameterStoreConfigService(SsmClient ssmClient) {
-        // Global don't change that often, use longer TTL
-        return new ParameterStoreConfigService(null, Duration.ofMinutes(20), ssmClient);
-    }
-
-    // parameters scoped to function
-    // singleton to be reused in lambda container
-    @Provides @Singleton
-    static ParameterStoreConfigService functionParameterStoreConfigService(SsmClient ssmClient) {
-        String namespace =
-            asParameterStoreNamespace(System.getenv(RuntimeEnvironmentVariables.AWS_LAMBDA_FUNCTION_NAME.name()));
-        // Namespaced params may change often (refresh tokens), use shorter TTL
-        return new ParameterStoreConfigService(namespace, Duration.ofMinutes(5), ssmClient);
-    }
-
     static String asParameterStoreNamespace(String functionName) {
         return functionName.toUpperCase().replace("-", "_");
     }
 
-    @Provides
-    static ConfigService configService(EnvVarsConfigService envVarsConfigService,
-                                       @Named("Global") ParameterStoreConfigService globalParameterStoreConfigService,
-                                       ParameterStoreConfigService functionScopedParameterStoreConfigService
-                                      ) {
+    @Provides @Named("Native") @Singleton
+    static ConfigService nativeConfigService(HostEnvironment hostEnvironment,
+                                             EnvVarsConfigService envVarsConfigService,
+                                             ParameterStoreConfigServiceFactory parameterStoreConfigServiceFactory) {
 
-        CompositeConfigService parameterStoreConfigHierarchy = CompositeConfigService.builder()
-            .fallback(globalParameterStoreConfigService)
-            .preferred(functionScopedParameterStoreConfigService)
-            .build();
+        String pathToSharedConfig =
+            envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_SHARED_CONFIG)
+                .orElse(null);
 
+        ParameterStoreConfigService sharedConfigService =
+                parameterStoreConfigServiceFactory.create(pathToSharedConfig);
+
+        String pathToInstanceConfig =
+            envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_INSTANCE_CONFIG)
+            .orElseGet(() -> asParameterStoreNamespace(hostEnvironment.getInstanceId()) + "_");
+
+        ParameterStoreConfigService instanceScopedConfigService =
+            parameterStoreConfigServiceFactory.create(pathToInstanceConfig);
+
+
+        Duration proxyInstanceConfigCacheTtl = Duration.ofMinutes(5);
+        Duration sharedConfigCacheTtl = Duration.ofMinutes(20);
         return CompositeConfigService.builder()
-            .fallback(parameterStoreConfigHierarchy)
-            .preferred(envVarsConfigService)
+            .preferred(new CachingConfigServiceDecorator(instanceScopedConfigService, proxyInstanceConfigCacheTtl))
+            .fallback(new CachingConfigServiceDecorator(sharedConfigService, sharedConfigCacheTtl))
             .build();
     }
 
     @Provides
     static AmazonS3 getStorageClient() {
         return AmazonS3ClientBuilder.defaultClient();
+    }
+
+    @Provides @Singleton
+    static Vault vault(AwsEnvironment awsEnvironment,
+                       EnvVarsConfigService envVarsConfigService,
+                       VaultAwsIamAuthFactory vaultAwsIamAuthFactory) {
+        if (envVarsConfigService.getConfigPropertyAsOptional(VaultConfigService.VaultConfigProperty.VAULT_TOKEN).isPresent()) {
+            return VaultConfigService.createVaultClientFromEnvVarsToken(envVarsConfigService);
+        } else {
+            VaultAwsIamAuth vaultAwsIamAuth = vaultAwsIamAuthFactory.create(
+                awsEnvironment.getRegion(),
+                DefaultAWSCredentialsProviderChain.getInstance().getCredentials());
+
+            if (envVarsConfigService.isDevelopment()) {
+                vaultAwsIamAuth.logCallerIdentity();
+                vaultAwsIamAuth.preflightChecks(envVarsConfigService.getConfigPropertyOrError(VaultConfigService.VaultConfigProperty.VAULT_ADDR));
+            }
+
+            VaultConfig vaultConfig = new VaultConfig()
+                .engineVersion(VaultAwsIamAuth.VAULT_ENGINE_VERSION)
+                .sslConfig(new SslConfig())
+                .address(envVarsConfigService.getConfigPropertyOrError(VaultConfigService.VaultConfigProperty.VAULT_ADDR))
+                .token(vaultAwsIamAuth.getToken());
+
+            envVarsConfigService.getConfigPropertyAsOptional(VaultConfigService.VaultConfigProperty.VAULT_NAMESPACE)
+                .filter(StringUtils::isNotBlank)  //don't bother tossing error here, assume meant no namespace
+                .ifPresent(ns -> {
+                    try {
+                        vaultConfig.nameSpace(ns);
+                    } catch (VaultException e) {
+                        throw new Error("Error setting Vault namespace", e);
+                    }
+                });
+
+            return new Vault(vaultConfig);
+        }
     }
 }

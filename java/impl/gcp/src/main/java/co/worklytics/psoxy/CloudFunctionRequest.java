@@ -19,6 +19,10 @@ public class CloudFunctionRequest implements HttpEventRequest {
         K_SERVICE,
     }
 
+    public static String getFunctionName() {
+        return System.getenv(RuntimeEnvironmentVariables.K_SERVICE.name());
+    }
+
     @NonNull
     final HttpRequest request;
 
@@ -27,7 +31,7 @@ public class CloudFunctionRequest implements HttpEventRequest {
     @Override
     public String getPath() {
         return request.getPath()
-            .replace(System.getenv(RuntimeEnvironmentVariables.K_SERVICE.name()) + "/", "");
+            .replace(getFunctionName() + "/", "");
     }
 
     @Override

@@ -40,20 +40,26 @@ resource "google_secret_manager_secret_version" "version" {
 }
 
 # for use in explicit IAM policy grants
-output "secret_ids" {
+output "secret_ids" { # prefixed w `projects/{numeric_id}/secrets/`
   value = { for k, v in var.secrets : k => google_secret_manager_secret.secret[k].id }
 }
 
+#DEPRECATED; use `secret_ids_within_project` instead
 output "secret_secret_ids" {
   # relative to project
   value = { for k, v in var.secrets : k => google_secret_manager_secret.secret[k].secret_id }
 }
 
+output "secret_ids_within_project" {
+  # relative to project
+  value = { for k, v in var.secrets : k => google_secret_manager_secret.secret[k].secret_id }
+}
+
 output "secret_version_names" {
-  value = { for k, v in var.secrets : k =>  google_secret_manager_secret_version.version[k].name}
+  value = { for k, v in var.secrets : k => google_secret_manager_secret_version.version[k].name }
 }
 
 output "secret_version_numbers" {
-  value = { for k, v in var.secrets : k =>  trimprefix(google_secret_manager_secret_version.version[k].name, "${google_secret_manager_secret.secret[k].name}/versions/") }
+  value = { for k, v in var.secrets : k => trimprefix(google_secret_manager_secret_version.version[k].name, "${google_secret_manager_secret.secret[k].name}/versions/") }
 }
 

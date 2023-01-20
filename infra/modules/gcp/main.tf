@@ -120,6 +120,7 @@ module "psoxy-package" {
   implementation     = "gcp"
   path_to_psoxy_java = "${var.psoxy_base_dir}java"
   psoxy_version      = var.psoxy_version
+  force_bundle       = var.force_bundle
 }
 
 data "archive_file" "source" {
@@ -172,14 +173,24 @@ output "bucket_write_role_id" {
   value = google_project_iam_custom_role.bucket-write.id
 }
 
+# Deprecated, it will be removed in v0.5.x
+output "salt_secret_id" {
+  value = google_secret_manager_secret.pseudonymization-salt.secret_id
+}
+
+# Deprecated, it will be removed in v0.5.x
+output "salt_secret_version_number" {
+  value = trimprefix(google_secret_manager_secret_version.initial_version.name, "${google_secret_manager_secret.pseudonymization-salt.name}/versions/")
+}
+
 output "secrets" {
   value = {
     PSOXY_ENCRYPTION_KEY = {
-      secret_id       = google_secret_manager_secret.pseudonymization-key.secret_id,
+      secret_id      = google_secret_manager_secret.pseudonymization-key.secret_id,
       version_number = trimprefix(google_secret_manager_secret_version.pseudonymization-key_initial_version.name, "${google_secret_manager_secret.pseudonymization-key.name}/versions/")
     },
     PSOXY_SALT = {
-      secret_id       = google_secret_manager_secret.pseudonymization-salt.secret_id,
+      secret_id      = google_secret_manager_secret.pseudonymization-salt.secret_id,
       version_number = trimprefix(google_secret_manager_secret_version.initial_version.name, "${google_secret_manager_secret.pseudonymization-salt.name}/versions/")
     }
   }
