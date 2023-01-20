@@ -1,5 +1,4 @@
 ---
-allowAllEndpoints: false
 endpoints:
   - pathRegex: "^/admin/directory/v1/customer/[^/]*/domains.*"
   - pathRegex: "^/admin/directory/v1/users\\?.*$"
@@ -28,6 +27,11 @@ endpoints:
           - "$.users[*].posixAccounts[*].homeDirectory"
           - "$.users[*].sshPublicKeys[*]"
           - "$.users[*].websites[*]"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.users[*].id"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
   - pathRegex: "^/admin/directory/v1/users/[^/]*$"
     transforms:
       - !<pseudonymize>
@@ -54,6 +58,11 @@ endpoints:
           - "$.posixAccounts[*].homeDirectory"
           - "$.sshPublicKeys[*]"
           - "$.websites[*]"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.id"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
   - pathRegex: "^/admin/directory/v1/groups(\\?)?[^/]*$"
     transforms:
       - !<pseudonymize>
@@ -85,6 +94,10 @@ endpoints:
           - "$..email"
           - "$..aliases[*]"
           - "$..nonEditableAliases[*]"
+        encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.members[*].id"
         encoding: "JSON"
   - pathRegex: "^/admin/directory/v1/customer/[^/]*/orgunits\\?.*"
     transforms:
