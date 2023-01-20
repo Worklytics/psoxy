@@ -69,16 +69,28 @@ module "msft-connection" {
   required_oauth2_permission_scopes = each.value.required_oauth2_permission_scopes
 }
 
-module "msft-connection-auth-federation" {
+module "msft-connection-auth" {
   for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
-  source = "../../modules/azuread-federated-credentials"
+  source = "../../modules/azuread-local-cert"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-local-cert?ref=v0.4.8"
 
   application_object_id = module.msft-connection[each.key].connector.id
-  display_name = "TODO"
-  issuer = "https://sts.amazonaws.com"
-  subject = var.aws_account_id
+  rotation_days         = 60
+  cert_expiration_days  = 180
+  certificate_subject   = var.certificate_subject
+}
+
+module "msft-365-connector-key-secrets" {
+  for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
+
+  source = "../../modules/private-key-aws-parameter"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/private-key-aws-parameter?ref=v0.4.8"
+
+  instance_id = each.key
+
+  private_key_id = module.msft-connection-auth[each.key].private_key_id
+  private_key    = module.msft-connection-auth[each.key].private_key
 }
 
 # grant required permissions to connectors via Azure AD
