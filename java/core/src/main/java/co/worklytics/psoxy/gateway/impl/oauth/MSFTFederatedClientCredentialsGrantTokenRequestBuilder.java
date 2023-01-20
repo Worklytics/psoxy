@@ -15,10 +15,10 @@ import java.util.TreeMap;
 
 /**
  * implementation of https://learn.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow#third-case-access-token-request-with-a-federated-credential
- *
+ * <p>
  * see
- *   - https://datatracker.ietf.org/doc/html/rfc7521
- *   - https://datatracker.ietf.org/doc/html/rfc6749#section-4.4.2
+ * - https://datatracker.ietf.org/doc/html/rfc7521
+ * - https://datatracker.ietf.org/doc/html/rfc6749#section-4.4.2
  */
 public abstract class MSFTFederatedClientCredentialsGrantTokenRequestBuilder
         implements OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder, RequiresConfiguration {
@@ -53,8 +53,8 @@ public abstract class MSFTFederatedClientCredentialsGrantTokenRequestBuilder
     public Set<ConfigService.ConfigProperty> getRequiredConfigProperties() {
         return Set.of(
                 OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.REFRESH_ENDPOINT,
-            ConfigProperty.CLIENT_ID,
-            ConfigProperty.TENANT_ID,
+                ConfigProperty.CLIENT_ID,
+                ConfigProperty.TENANT_ID,
                 ConfigProperty.TOKEN_SCOPE
         );
     }
@@ -72,13 +72,13 @@ public abstract class MSFTFederatedClientCredentialsGrantTokenRequestBuilder
 
         String oauthClientId = config.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID);
         String tokenEndpoint =
-            config.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.REFRESH_ENDPOINT);
+                config.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.REFRESH_ENDPOINT);
 
         Map<String, String> data = new TreeMap<>();
         //https://datatracker.ietf.org/doc/html/rfc6749#section-4.4.2
-        data.put(PARAM_GRANT_TYPE, getGrantType());
+        data.put(PARAM_GRANT_TYPE, "client_credentials");
         config.getConfigPropertyAsOptional(ConfigProperty.TOKEN_SCOPE)
-            .ifPresent(r -> data.put(PARAM_SCOPE, r)); // 'scope' param is optional, per RFC
+                .ifPresent(r -> data.put(PARAM_SCOPE, r)); // 'scope' param is optional, per RFC
 
         //https://datatracker.ietf.org/doc/html/rfc7521#section-4.2
         data.put(PARAM_CLIENT_ASSERTION_TYPE, CLIENT_ASSERTION_TYPE_JWT);

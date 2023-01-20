@@ -176,7 +176,9 @@ locals {
         "Group.Read.All",
         "User.Read.All"
       ],
-      environment_variables : {}
+      environment_variables : {
+        REFRESH_ENDPOINT = "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
+      }
       example_calls : [
         "/beta/users",
         "/beta/users/${var.example_msft_user_guid}/mailboxSettings",

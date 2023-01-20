@@ -142,3 +142,9 @@ variable "non_production_connectors" {
   description = "connector ids in this list will be in development mode (not for production use"
   default     = []
 }
+
+variable "msft_tenant_id" {
+  type        = string
+  default     = ""
+  description = "ID of Microsoft tenant to connect to (req'd only if config includes MSFT connectors)"
+}

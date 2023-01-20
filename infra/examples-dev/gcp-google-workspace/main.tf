@@ -46,6 +46,7 @@ module "psoxy-gcp-google-workspace" {
   google_workspace_example_user  = var.google_workspace_example_user
   google_workspace_example_admin = var.google_workspace_example_admin
   general_environment_variables  = var.general_environment_variables
+  msft_tenant_id = var.msft_tenant_id
 }
 
 moved {
@@ -117,4 +118,3 @@ moved {
   from = module.psoxy-gcp-bulk
   to   = module.psoxy-gcp-google-workspace.module.psoxy-gcp-bulk
 }
-
