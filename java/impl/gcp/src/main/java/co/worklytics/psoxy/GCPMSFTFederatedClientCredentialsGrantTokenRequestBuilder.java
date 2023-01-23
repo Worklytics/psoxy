@@ -3,6 +3,7 @@ package co.worklytics.psoxy;
 import co.worklytics.psoxy.gateway.impl.oauth.MSFTFederatedClientCredentialsGrantTokenRequestBuilder;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.java.Log;
 
 import javax.inject.Inject;
 import java.io.BufferedReader;
@@ -12,6 +13,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 @NoArgsConstructor(onConstructor_ = @Inject)
+@Log
 public class GCPMSFTFederatedClientCredentialsGrantTokenRequestBuilder extends MSFTFederatedClientCredentialsGrantTokenRequestBuilder {
 
     public static final String ENDPOINT = "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/identity?audience=api://AzureADTokenExchange";
@@ -38,6 +40,8 @@ public class GCPMSFTFederatedClientCredentialsGrantTokenRequestBuilder extends M
             while ((inputLine = bufferedReader.readLine()) != null)
                 content.append(inputLine);
         }
+
+        log.info("Federated access token:" + content.toString());
 
         return content.toString();
     }
