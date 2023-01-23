@@ -11,6 +11,7 @@ locals {
   path_prefix              = local.non_empty_path && local.non_fully_qualified_path ? "/${var.path}" : var.path
 }
 
+# see: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter
 resource "aws_ssm_parameter" "secret" {
   for_each = var.secrets
 
@@ -18,6 +19,7 @@ resource "aws_ssm_parameter" "secret" {
   type        = "SecureString"
   description = each.value.description
   value       = sensitive(each.value.value)
+  key_id      = coalesce(var.kms_key_id, "alias/aws/ssm")
 
   lifecycle {
     ignore_changes = [
