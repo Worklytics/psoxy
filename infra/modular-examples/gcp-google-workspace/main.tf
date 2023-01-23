@@ -252,8 +252,6 @@ module "worklytics-psoxy-connection-long-auth" {
 # END LONG ACCESS AUTH CONNECTORS
 
 # BEGIN MSFT Connectors
-
-
 resource "google_service_account" "msft-connector-sa" {
   for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
