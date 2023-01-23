@@ -260,7 +260,7 @@ resource "google_service_account" "msft-connector-sa" {
   project      = var.gcp_project_id
   account_id   = "psoxy-${substr(each.key, 0, 24)}"
   display_name = "Psoxy Connector - ${each.value.display_name}${var.connector_display_name_suffix}"
-  description  = "TODO"
+  description  = "Service account for psoxy Connector - ${each.value.display_name}${var.connector_display_name_suffix}"
 
   depends_on = [
     module.psoxy-gcp
@@ -274,7 +274,8 @@ module "msft-connection-auth-federation" {
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-local-cert?ref=v0.4.8"
 
   application_object_id = module.msft-connection[each.key].connector.id
-  display_name = "TODO"
+  display_name = "GcpFederation"
+  description = "Federation to be used for psoxy Connector - ${each.value.display_name}${var.connector_display_name_suffix}"
   issuer = "https://accounts.google.com"
   subject = google_service_account.msft-connector-sa[each.key].unique_id
 }
@@ -314,6 +315,7 @@ module "psoxy-msft-connector" {
     {
       CLIENT_ID = module.msft-connection[each.key].connector.application_id
       TENANT_ID = var.msft_tenant_id
+      AUDIENCE = module.msft-connection-auth-federation[each.key].audience
       IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
     }
   )
