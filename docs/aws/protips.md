@@ -25,7 +25,7 @@ module "psoxy-aws-google-workspace" {
   aws_ssm_key_id                 = aws_kms_key.key.key_id
 }
 # NOTE: if you use this, likely will have to first apply with -target=aws_kms_key.key, before doing
-# the generall `terraform apply`, as some module `for_each` values will depend on the key_id
+# the general `terraform apply`, as some module `for_each` values will depend on the key_id
 ```
 
 Our modules will give each proxy's role perms to decrypt using that key.  The role you're using to
