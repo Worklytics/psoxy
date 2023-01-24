@@ -4,6 +4,7 @@ import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.RequiresConfiguration;
 import com.google.api.client.http.HttpContent;
 import com.google.api.client.http.UrlEncodedContent;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.SneakyThrows;
 
@@ -23,10 +24,9 @@ import java.util.TreeMap;
 public abstract class WorkloadIdentityFederationGrantTokenRequestBuilder
         implements OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder, RequiresConfiguration {
 
-    enum ConfigProperty implements ConfigService.ConfigProperty {
+    protected enum ConfigProperty implements ConfigService.ConfigProperty {
         CLIENT_ID,
-        TOKEN_SCOPE,
-        AUDIENCE,
+        TOKEN_SCOPE
     }
 
     // 'client_credentials' is MSFT
@@ -47,6 +47,7 @@ public abstract class WorkloadIdentityFederationGrantTokenRequestBuilder
     private static final String PARAM_GRANT_TYPE = "grant_type";
 
     @Inject
+            @Getter(AccessLevel.PROTECTED)
     ConfigService config;
 
     @Override
@@ -54,8 +55,7 @@ public abstract class WorkloadIdentityFederationGrantTokenRequestBuilder
         return Set.of(
                 OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.REFRESH_ENDPOINT,
                 ConfigProperty.CLIENT_ID,
-                ConfigProperty.TOKEN_SCOPE,
-                ConfigProperty.AUDIENCE
+                ConfigProperty.TOKEN_SCOPE
         );
     }
 
@@ -76,11 +76,11 @@ public abstract class WorkloadIdentityFederationGrantTokenRequestBuilder
 
         //https://datatracker.ietf.org/doc/html/rfc7521#section-4.2
         data.put(PARAM_CLIENT_ASSERTION_TYPE, CLIENT_ASSERTION_TYPE_JWT);
-        data.put(PARAM_CLIENT_ASSERTION, getClientAssertion(config.getConfigPropertyOrError(ConfigProperty.AUDIENCE)));
+        data.put(PARAM_CLIENT_ASSERTION, getClientAssertion());
         data.put(PARAM_CLIENT_ID, oauthClientId);
 
         return new UrlEncodedContent(data);
     }
 
-    protected abstract String getClientAssertion(String audience);
+    protected abstract String getClientAssertion();
 }
