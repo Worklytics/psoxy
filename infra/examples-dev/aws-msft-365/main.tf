@@ -8,7 +8,7 @@ terraform {
 
     # for API connections to Microsoft 365
     azuread = {
-      version = "~> 2.0"
+      version = "~> 2.3"
     }
   }
 

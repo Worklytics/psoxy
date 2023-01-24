@@ -3,12 +3,12 @@ terraform {
     # for the infra that will host Psoxy instances
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 4.12"
+      version = "~> 4.51"
     }
 
     # for API connections to Microsoft 365
     azuread = {
-      version = "~> 2.0"
+      version = "~> 2.3"
     }
   }
 }
@@ -84,11 +84,7 @@ module "cognito-identity" {
 
   identity_pool_id = module.cognito-identity-pool.pool_id
   aws_region = var.aws_region
-  login-ids = {for k in keys(module.msft-connection) : k =>
-{
-  connection-id  = k
-login = "${module.cognito-identity-pool.developer_provider_name}=${module.msft-connection[k].connector.id}"
-}}
+  login-ids = {for k in keys(module.msft-connection) : k => "${module.cognito-identity-pool.developer_provider_name}=${module.msft-connection[k].connector.id}"}
   aws_role = var.aws_assume_role_arn
 }
 
@@ -103,7 +99,9 @@ module "msft-connection-auth-federation" {
   description = "AWS federation to be used for psoxy Connector - ${each.value.display_name}${var.connector_display_name_suffix}"
   issuer = "https://cognito-identity.amazonaws.com"
   audience = "${var.aws_region}:${module.cognito-identity-pool.pool_id}"
-  subject = "${var.aws_region}:${module.cognito-identity[each.key].identity_id}"
+  subject = "${var.aws_region}:${module.cognito-identity.identity_id[each.key]}"
+
+  depends_on = [module.cognito-identity]
 }
 
 # grant required permissions to connectors via Azure AD
@@ -158,7 +156,8 @@ module "psoxy-msft-connector" {
 
 resource "aws_iam_role_policy_attachment" "cognito_lambda_policy" {
   for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
-  role       = module.psoxy-msft-connector[each.key].instance_role_arn
+
+  role       = module.psoxy-msft-connector[each.key].instance_role_name
   policy_arn = module.cognito-identity-pool.policy_arn
 }
 
@@ -381,4 +380,8 @@ locals {
 
 output "instances" {
   value = local.all_instances
+}
+
+output "cognito-identities" {
+  value = module.cognito-identity
 }

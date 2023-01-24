@@ -14,8 +14,5 @@ variable "aws_role" {
 }
 
 variable "login-ids" {
-  type = map(object({
-    connection-id     = string
-    login = string
-  }))
+  type = map(string)
 }
