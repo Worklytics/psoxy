@@ -47,7 +47,7 @@ public abstract class WorkloadIdentityFederationGrantTokenRequestBuilder
     private static final String PARAM_GRANT_TYPE = "grant_type";
 
     @Inject
-            @Getter(AccessLevel.PROTECTED)
+    @Getter
     ConfigService config;
 
     @Override

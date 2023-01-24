@@ -7,6 +7,7 @@ import co.worklytics.psoxy.gateway.impl.CachingConfigServiceDecorator;
 import co.worklytics.psoxy.gateway.impl.CompositeConfigService;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.gateway.impl.VaultConfigService;
+import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.services.s3.AmazonS3;
@@ -17,6 +18,7 @@ import com.bettercloud.vault.VaultConfig;
 import com.bettercloud.vault.VaultException;
 import dagger.Module;
 import dagger.Provides;
+import dagger.multibindings.IntoSet;
 import org.apache.commons.lang3.StringUtils;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
@@ -70,8 +72,10 @@ public interface AwsModule {
     }
 
     @Provides
+    @Singleton
     static CognitoIdentityClient cognitoClient(AwsEnvironment awsEnvironment) {
         AWSCredentials credentials = DefaultAWSCredentialsProviderChain.getInstance().getCredentials();
+
         return CognitoIdentityClient.builder()
                 .region(Region.of(awsEnvironment.getRegion()))
                 .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(credentials.getAWSAccessKeyId(), credentials.getAWSAccessKeyId())))
@@ -148,5 +152,11 @@ public interface AwsModule {
 
             return new Vault(vaultConfig);
         }
+    }
+
+    @Provides
+    @IntoSet
+    static OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder providesSourceAuthStrategy(AWSWorkloadIdentityFederationGrantTokenRequestBuilder tokenRequestBuilder) {
+        return tokenRequestBuilder;
     }
 }

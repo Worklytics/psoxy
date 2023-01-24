@@ -149,7 +149,9 @@ module "psoxy-msft-connector" {
       CLIENT_ID            = module.msft-connection[each.key].connector.application_id
       REFRESH_ENDPOINT     = module.worklytics_connector_specs.msft_token_refresh_endpoint
       PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
-      TENANT_ID = var.msft_tenant_id
+      TENANT_ID = var.msft_tenant_id,
+      IDENTITY_POOL_ID = module.cognito-identity-pool.pool_id,
+      DEVELOPER_NAME_ID = module.cognito-identity-pool.developer_provider_name
     }
   )
 }

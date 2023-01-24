@@ -3,7 +3,7 @@ package co.worklytics.psoxy.aws;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.impl.oauth.WorkloadIdentityFederationGrantTokenRequestBuilder;
 import com.google.common.collect.Streams;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 import software.amazon.awssdk.services.cognitoidentity.CognitoIdentityClient;
@@ -20,12 +20,12 @@ import java.util.stream.Stream;
 /**
  * Based on <a href="https://learn.microsoft.com/en-us/azure/active-directory/develop/workload-identity-federation-create-trust-gcp?tabs=azure-cli%2Cjava#get-an-id-token-for-your-google-service-account">...</a>
  * <p>
- * Implementation of Workload Identity Federation for GCP, getting an ID token
+ * Implementation of Workload Identity Federation for AWS, getting an ID token
  * to be exposed as client assertion
  */
 
+@NoArgsConstructor(onConstructor_ = @Inject)
 @Log
-@RequiredArgsConstructor
 public class AWSWorkloadIdentityFederationGrantTokenRequestBuilder extends WorkloadIdentityFederationGrantTokenRequestBuilder {
 
     enum ConfigProperty implements ConfigService.ConfigProperty {
