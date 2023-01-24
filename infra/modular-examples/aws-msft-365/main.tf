@@ -60,6 +60,13 @@ moved {
   to   = module.global_secrets.aws_ssm_parameter.secret["PSOXY_ENCRYPTION_KEY"]
 }
 
+module "cognito-identity-pool" {
+  source = "../../modules/aws-cognito-pool"
+
+  developer_provider_name = "azure-access"
+  name = "Azure AD Federation"
+}
+
 module "msft-connection" {
   for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
@@ -72,33 +79,32 @@ module "msft-connection" {
   required_oauth2_permission_scopes = each.value.required_oauth2_permission_scopes
 }
 
-module "msft-connection-auth" {
+module "cognito-identity" {
   for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
-  source = "../../modules/azuread-local-cert"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-local-cert?ref=v0.4.10"
+  source = "../../modules/aws-cognito-identity-cli"
 
-  application_object_id = module.msft-connection[each.key].connector.id
-  rotation_days         = 60
-  cert_expiration_days  = 180
-  certificate_subject   = var.certificate_subject
+  identity_pool_id = module.cognito-identity-pool.pool_id
+  aws_region = var.aws_region
+  login = module.msft-connection[each.key].connector.id
 }
 
-module "msft-365-connector-key-secrets" {
+module "msft-connection-auth-federation" {
   for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
-  source = "../../modules/private-key-aws-parameter"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/private-key-aws-parameter?ref=v0.4.10"
+  source = "../../modules/azuread-federated-credentials"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-local-cert?ref=v0.4.8"
 
-  instance_id = each.key
-
-  private_key_id = module.msft-connection-auth[each.key].private_key_id
-  private_key    = module.msft-connection-auth[each.key].private_key
-  ssm_path       = var.aws_ssm_param_root_path
+  application_object_id = module.msft-connection[each.key].connector.id
+  display_name = "AccessFromAWS"
+  description = "AWS federation to be used for psoxy Connector - ${each.value.display_name}${var.connector_display_name_suffix}"
+  issuer = "https://cognito-identity.amazonaws.com"
+  audience = "${var.aws_region}:${module.cognito-identity-pool.pool_id}"
+  subject = "${var.aws_region}:${module.cognito-identity[each.key].identity_id}"
 }
 
 # grant required permissions to connectors via Azure AD
-# (requires terraform configuration being applied by an Azure User with privelleges to do this; it
+# (requires terraform configuration being applied by an Azure User with privileges to do this; it
 #  usually requires a 'Global Administrator' for your tenant)
 module "msft_365_grants" {
   for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
@@ -142,8 +148,15 @@ module "psoxy-msft-connector" {
       CLIENT_ID            = module.msft-connection[each.key].connector.application_id
       REFRESH_ENDPOINT     = module.worklytics_connector_specs.msft_token_refresh_endpoint
       PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
+      TENANT_ID = var.msft_tenant_id
     }
   )
+}
+
+resource "aws_iam_role_policy_attachment" "cognito_lambda_policy" {
+  for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
+  role       = module.psoxy-msft-connector[each.key].instance_role_arn
+  policy_arn = module.cognito-identity-pool.policy_arn
 }
 
 module "worklytics-psoxy-connection-msft-365" {
