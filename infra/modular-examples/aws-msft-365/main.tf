@@ -64,7 +64,7 @@ module "cognito-identity-pool" {
   source = "../../modules/aws-cognito-pool"
 
   developer_provider_name = "azure-access"
-  name = "Azure AD Federation"
+  name = "azure-ad-federation"
 }
 
 module "msft-connection" {
@@ -80,13 +80,16 @@ module "msft-connection" {
 }
 
 module "cognito-identity" {
-  for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
-
   source = "../../modules/aws-cognito-identity-cli"
 
   identity_pool_id = module.cognito-identity-pool.pool_id
   aws_region = var.aws_region
-  login = module.msft-connection[each.key].connector.id
+  login-ids = {for k in keys(module.msft-connection) : k =>
+{
+  connection-id  = k
+login = "${module.cognito-identity-pool.developer_provider_name}=${module.msft-connection[k].connector.id}"
+}}
+  aws_role = var.aws_assume_role_arn
 }
 
 module "msft-connection-auth-federation" {
