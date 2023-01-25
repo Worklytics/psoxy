@@ -45,7 +45,6 @@ public class GCPWorkloadIdentityFederationGrantTokenRequestBuilder extends Workl
                 .collect(Collectors.toSet());
     }
 
-
     @Override
     @SneakyThrows
     protected String getClientAssertion() {
