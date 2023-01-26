@@ -69,7 +69,11 @@ module "psoxy-aws-msft-365" {
   msft_tenant_id                 = var.msft_tenant_id
   pseudonymize_app_ids           = var.pseudonymize_app_ids
   general_environment_variables  = var.general_environment_variables
+#  aws_ssm_key_id                 = aws_kms_key.key.key_id
 }
+
+#resource "aws_kms_key" "key"  {
+#}
 
 # if you generated these, you may want them to import back into your data warehouse
 output "lookup_tables" {

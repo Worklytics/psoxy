@@ -1,4 +1,3 @@
-allowAllEndpoints: false
 endpoints:
   - pathRegex: "^/admin/reports/v1/activity/users/all/applications/chat.*$"
     transforms:

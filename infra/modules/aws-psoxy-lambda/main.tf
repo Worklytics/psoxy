@@ -102,6 +102,12 @@ resource "aws_iam_role_policy_attachment" "basic" {
 data "aws_region" "current" {}
 data "aws_caller_identity" "current" {}
 
+data "aws_kms_key" "keys" {
+  for_each = var.ssm_kms_key_ids
+
+  key_id = each.value
+}
+
 locals {
   param_arn_prefix = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter${local.instance_ssm_prefix_with_slash}"
 
@@ -132,9 +138,18 @@ locals {
     Resource = local.function_read_arns
   }]
 
+  key_statements = length(var.ssm_kms_key_ids) > 0 ? [{
+    Action = [
+      "kms:Decrypt"
+    ]
+    Effect   = "Allow"
+    Resource = [ for k in data.aws_kms_key.keys : k.arn]
+  }] : []
+
   policy_statements = concat(
     local.read_statements,
-    local.write_statements
+    local.write_statements,
+    local.key_statements
   )
 }
 

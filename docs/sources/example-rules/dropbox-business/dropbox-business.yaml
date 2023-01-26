@@ -1,5 +1,4 @@
 ---
-defaultScopeIdForSource: null
 endpoints:
   - pathRegex: "^/2/team_log/get_events(/continue)?$"
     transforms:

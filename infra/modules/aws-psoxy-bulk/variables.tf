@@ -35,6 +35,12 @@ variable "path_to_instance_ssm_parameters" {
   default     = null
 }
 
+variable "ssm_kms_key_ids" {
+  type        = map(string)
+  description = "KMS key IDs or ARNs that were used for encrypting SSM parameters needed by this lambda, if any."
+  default     = {}
+}
+
 # NOTE: currently unused; but perhaps we'll have default rules by source_kind in the future,
 # so leaving it in
 variable "source_kind" {

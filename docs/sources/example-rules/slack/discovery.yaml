@@ -1,5 +1,4 @@
 ---
-allowAllEndpoints: false
 endpoints:
   - pathRegex: "^/api/discovery\\.enterprise\\.info(?:\\?.+)?"
     transforms:

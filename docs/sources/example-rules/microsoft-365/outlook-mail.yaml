@@ -1,5 +1,4 @@
 ---
-allowAllEndpoints: false
 endpoints:
   - pathRegex: "^/(v1.0|beta)/users/?[^/]*"
     allowedQueryParams:
@@ -108,41 +107,35 @@ endpoints:
         jsonPaths:
           - "$..internalReplyMessage"
           - "$..externalReplyMessage"
-  - pathRegex: "^/(v1.0|beta)/users/[^/]*/(((calendars/[^/]*/)?events.*)|(calendar/calendarView(?)[^/]*))"
+  - pathRegex: "^/(v1.0|beta)/users/[^/]*/messages/[^/]*"
     transforms:
       - !<redact>
         jsonPaths:
           - "$..subject"
+          - "$..body"
+          - "$..bodyPreview"
           - "$..emailAddress.name"
           - "$..extensions"
           - "$..multiValueExtendedProperties"
           - "$..singleValueExtendedProperties"
-          - "$..location.coordinates"
-          - "$..locations[*].coordinates"
-          - "$..location.address"
-          - "$..locations[*].address"
+          - "$..internetMessageHeaders"
       - !<pseudonymize>
         jsonPaths:
           - "$..emailAddress.address"
         encoding: "JSON"
-      - !<redactRegexMatches>
+  - pathRegex: "^/(v1.0|beta)/users/[^/]*/mailFolders(/SentItems|\\('SentItems'\\))/messages.*"
+    transforms:
+      - !<redact>
         jsonPaths:
-          - "$..location.uniqueId"
-          - "$..locations[*].uniqueId"
-          - "$..location.displayName"
-          - "$..locations[*].displayName"
-          - "$..location.locationUri"
-          - "$..locations[*].locationUri"
-          - "$..onlineMeeting.joinUrl"
-          - "$..onlineMeetingUrl"
-          - "$..body.content"
+          - "$..subject"
+          - "$..body"
           - "$..bodyPreview"
-        redactions:
-          - "(?i)pwd=[^&]*"
-      - !<filterTokenByRegex>
+          - "$..emailAddress.name"
+          - "$..extensions"
+          - "$..multiValueExtendedProperties"
+          - "$..singleValueExtendedProperties"
+          - "$..internetMessageHeaders"
+      - !<pseudonymize>
         jsonPaths:
-          - "$..body.content"
-          - "$..bodyPreview"
-        delimiter: "\\s+"
-        filters:
-          - "https://[^.]+\\.zoom\\.us/.*"
+          - "$..emailAddress.address"
+        encoding: "JSON"
