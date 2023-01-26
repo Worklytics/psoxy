@@ -18,14 +18,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Based on <a href="https://learn.microsoft.com/en-us/azure/active-directory/develop/workload-identity-federation-create-trust-gcp?tabs=azure-cli%2Cjava#get-an-id-token-for-your-google-service-account">...</a>
- * <p>
- * Implementation of Workload Identity Federation for AWS, getting an ID token
- * to be exposed as client assertion
+ * Federation for AWS using a Cognito instance to have an IDENTITY_ID previously created
+ * identity to obtain its security JWT.
+ * The identity created should match login link DEVELOPER_NAME_ID=CLIENT_ID value created
  */
-
 // NOTE: For some reason, this annotation is not working with @NoArgsConstructor(onConstructor_ = @Inject) syntax
-@NoArgsConstructor(onConstructor=@__(@Inject))
+@NoArgsConstructor(onConstructor = @__(@Inject))
 @Log
 public class AWSWorkloadIdentityFederationGrantTokenRequestBuilder extends WorkloadIdentityFederationGrantTokenRequestBuilder {
 

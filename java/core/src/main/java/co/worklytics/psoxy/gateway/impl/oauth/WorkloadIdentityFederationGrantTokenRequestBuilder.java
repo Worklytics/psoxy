@@ -4,7 +4,6 @@ import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.RequiresConfiguration;
 import com.google.api.client.http.HttpContent;
 import com.google.api.client.http.UrlEncodedContent;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.SneakyThrows;
 
@@ -14,10 +13,13 @@ import java.util.Set;
 import java.util.TreeMap;
 
 /**
- * implementation of <a href="https://learn.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow#third-case-access-token-request-with-a-federated-credential">...</a>
- * This is same as client credentials with the difference that the JWT assertion needs to be externally provided
- * <p>
- * see
+ * implementation of a "workload identity" credentials.
+ * This is same as client credentials with the difference that the JWT assertion needs to be externally provided and
+ * claims "aud" and "iss" should be the same between two parts.
+ *
+ * @see <a href="https://learn.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow#third-case-access-token-request-with-a-federated-credential">...</a>
+ * as an example of MSFT implementation
+ *
  * - <a href="https://datatracker.ietf.org/doc/html/rfc7521">...</a>
  * - <a href="https://datatracker.ietf.org/doc/html/rfc6749#section-4.4.2">...</a>
  */

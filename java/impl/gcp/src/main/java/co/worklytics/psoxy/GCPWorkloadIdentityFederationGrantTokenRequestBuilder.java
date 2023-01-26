@@ -19,7 +19,7 @@ import java.util.stream.Stream;
 
 /**
  * Based on <a href="https://learn.microsoft.com/en-us/azure/active-directory/develop/workload-identity-federation-create-trust-gcp?tabs=azure-cli%2Cjava#get-an-id-token-for-your-google-service-account">...</a>
- *
+ * <p>
  * Implementation of Workload Identity Federation for GCP, getting an ID token
  * to be exposed as client assertion
  */
