@@ -290,6 +290,23 @@ module "msft-connection" {
   required_oauth2_permission_scopes = each.value.required_oauth2_permission_scopes
 }
 
+# grant required permissions to connectors via Azure AD
+# (requires terraform configuration being applied by an Azure User with privileges to do this; it
+#  usually requires a 'Global Administrator' for your tenant)
+module "msft_365_grants" {
+  for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
+
+  source = "../../modules/azuread-grant-all-users"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-grant-all-users?ref=v0.4.10"
+
+  psoxy_instance_id        = each.key
+  application_id           = module.msft-connection[each.key].connector.application_id
+  oauth2_permission_scopes = each.value.required_oauth2_permission_scopes
+  app_roles                = each.value.required_app_roles
+  application_name         = each.key
+  todo_step                = 1
+}
+
 module "psoxy-msft-connector" {
   for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
@@ -305,14 +322,13 @@ module "psoxy-msft-connector" {
   path_to_config                        = "${local.base_config_path}${each.value.source_kind}.yaml"
   path_to_repo_root                     = var.psoxy_base_dir
   example_api_calls                     = each.value.example_calls
-  todo_step                             = 42
+  todo_step                             = 2
 
   environment_variables = merge(
     var.general_environment_variables,
     try(each.value.environment_variables, {}),
     {
       CLIENT_ID = module.msft-connection[each.key].connector.application_id
-      TENANT_ID = var.msft_tenant_id
       AUDIENCE = module.msft-connection-auth-federation[each.key].audience
       IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
     }

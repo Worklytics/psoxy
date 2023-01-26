@@ -92,7 +92,7 @@ module "msft-connection-auth-federation" {
   for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
   source = "../../modules/azuread-federated-credentials"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-local-cert?ref=v0.4.8"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-federated-credentials?ref=v0.4.11"
 
   application_object_id = module.msft-connection[each.key].connector.id
   display_name = "AccessFromAWS"
