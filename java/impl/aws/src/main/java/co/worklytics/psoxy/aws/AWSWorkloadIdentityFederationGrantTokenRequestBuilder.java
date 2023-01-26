@@ -33,6 +33,7 @@ public class AWSWorkloadIdentityFederationGrantTokenRequestBuilder extends Workl
 
     enum ConfigProperty implements ConfigService.ConfigProperty {
         IDENTITY_POOL_ID,
+        IDENTITY_ID,
         DEVELOPER_NAME_ID
     }
 
@@ -61,6 +62,7 @@ public class AWSWorkloadIdentityFederationGrantTokenRequestBuilder extends Workl
     protected String getClientAssertion() {
         GetOpenIdTokenForDeveloperIdentityResponse response = cognitoIdentityClient
                 .getOpenIdTokenForDeveloperIdentity(GetOpenIdTokenForDeveloperIdentityRequest.builder()
+                        .identityId(getConfig().getConfigPropertyOrError(ConfigProperty.IDENTITY_ID))
                         .identityPoolId(getConfig().getConfigPropertyOrError(ConfigProperty.IDENTITY_POOL_ID))
                         .logins(Collections.singletonMap(getConfig().getConfigPropertyOrError(ConfigProperty.DEVELOPER_NAME_ID),
                                 getConfig().getConfigPropertyOrError(WorkloadIdentityFederationGrantTokenRequestBuilder.ConfigProperty.CLIENT_ID)))

@@ -84,7 +84,7 @@ module "cognito-identity" {
 
   identity_pool_id = module.cognito-identity-pool.pool_id
   aws_region = var.aws_region
-  login-ids = {for k in keys(module.msft-connection) : k => "${module.cognito-identity-pool.developer_provider_name}=${module.msft-connection[k].connector.id}"}
+  login-ids = {for k in keys(module.msft-connection) : k => "${module.cognito-identity-pool.developer_provider_name}=${module.msft-connection[k].connector.application_id}"}
   aws_role = var.aws_assume_role_arn
 }
 
@@ -98,8 +98,8 @@ module "msft-connection-auth-federation" {
   display_name = "AccessFromAWS"
   description = "AWS federation to be used for psoxy Connector - ${each.value.display_name}${var.connector_display_name_suffix}"
   issuer = "https://cognito-identity.amazonaws.com"
-  audience = "${var.aws_region}:${module.cognito-identity-pool.pool_id}"
-  subject = "${var.aws_region}:${module.cognito-identity.identity_id[each.key]}"
+  audience = module.cognito-identity-pool.pool_id
+  subject = module.cognito-identity.identity_id[each.key]
 
   depends_on = [module.cognito-identity]
 }
@@ -151,6 +151,7 @@ module "psoxy-msft-connector" {
       PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
       TENANT_ID = var.msft_tenant_id,
       IDENTITY_POOL_ID = module.cognito-identity-pool.pool_id,
+      IDENTITY_ID = module.cognito-identity.identity_id[each.key]
       DEVELOPER_NAME_ID = module.cognito-identity-pool.developer_provider_name
     }
   )
