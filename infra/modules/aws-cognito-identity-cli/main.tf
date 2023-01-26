@@ -23,6 +23,5 @@ data "local_file" "identity-result" {
 }
 
 output "identity_id" {
-  #value = data.external.identity-command.result.IdentityId
 value = { for k, v in var.login-ids : k => jsondecode(data.local_file.identity-result[k].content).IdentityId }
 }
