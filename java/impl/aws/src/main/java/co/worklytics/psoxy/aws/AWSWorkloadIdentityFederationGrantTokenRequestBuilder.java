@@ -3,6 +3,7 @@ package co.worklytics.psoxy.aws;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.impl.oauth.WorkloadIdentityFederationGrantTokenRequestBuilder;
 import com.google.common.collect.Streams;
+import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 import software.amazon.awssdk.services.cognitoidentity.CognitoIdentityClient;
@@ -23,11 +24,8 @@ import java.util.stream.Stream;
  * to be exposed as client assertion
  */
 
-// NOTE: For some reason, this annotation is not working in this class,
-//       and we need to create a default constructor manually.
-//       Otherwise, the compiler will complain with the following message: cannot be provided without an @Inject constructor or an @Provides-annotated method
-//       like lombok is not being executed in the right order
-//@NoArgsConstructor(onConstructor_ = @Inject)
+// NOTE: For some reason, this annotation is not working with @NoArgsConstructor(onConstructor_ = @Inject) syntax
+@NoArgsConstructor(onConstructor=@__(@Inject))
 @Log
 public class AWSWorkloadIdentityFederationGrantTokenRequestBuilder extends WorkloadIdentityFederationGrantTokenRequestBuilder {
 
@@ -36,9 +34,6 @@ public class AWSWorkloadIdentityFederationGrantTokenRequestBuilder extends Workl
         IDENTITY_ID,
         DEVELOPER_NAME_ID
     }
-
-    @Inject
-    public AWSWorkloadIdentityFederationGrantTokenRequestBuilder(){}
 
     @Inject
     CognitoIdentityClient cognitoIdentityClient;
