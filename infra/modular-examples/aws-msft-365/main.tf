@@ -134,7 +134,7 @@ module "psoxy-msft-connector" {
   function_zip_hash               = module.psoxy-aws.deployment_package_hash
   api_caller_role_arn             = module.psoxy-aws.api_caller_role_arn
   aws_assume_role_arn             = var.aws_assume_role_arn
-  example_api_calls               = each.value.example_calls
+  example_api_calls               = each.value.example_api_calls
   aws_account_id                  = var.aws_account_id
   path_to_repo_root               = var.psoxy_base_dir
   todo_step                       = module.msft_365_grants[each.key].next_todo_step
