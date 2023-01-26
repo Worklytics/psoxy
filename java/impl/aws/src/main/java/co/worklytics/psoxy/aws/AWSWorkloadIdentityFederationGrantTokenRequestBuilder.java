@@ -68,8 +68,6 @@ public class AWSWorkloadIdentityFederationGrantTokenRequestBuilder extends Workl
                                 getConfig().getConfigPropertyOrError(WorkloadIdentityFederationGrantTokenRequestBuilder.ConfigProperty.CLIENT_ID)))
                         .build());
 
-        log.info("Token: " + response.token());
-
         return response.token();
     }
 }
