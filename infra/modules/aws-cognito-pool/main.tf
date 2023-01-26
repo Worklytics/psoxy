@@ -20,7 +20,7 @@ resource "aws_iam_policy" "cognito_developer_identities" {
             "cognito-identity:LookupDeveloperIdentity"
           ],
           "Effect" : "Allow",
-          "Resource" : "${aws_cognito_identity_pool.main.arn}/*"
+          "Resource" : aws_cognito_identity_pool.main.arn
         }
       ]
     })
