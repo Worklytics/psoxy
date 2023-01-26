@@ -23,7 +23,7 @@ resource "aws_iam_policy" "cognito_developer_identities" {
           "Resource" : aws_cognito_identity_pool.main.arn
         }
       ]
-    })
+  })
 
   lifecycle {
     ignore_changes = [

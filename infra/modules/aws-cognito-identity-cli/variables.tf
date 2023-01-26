@@ -9,7 +9,7 @@ variable "aws_region" {
 }
 
 variable "aws_role" {
-  type = string
+  type        = string
   description = "Role to assume during script execution"
 }
 

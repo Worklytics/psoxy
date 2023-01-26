@@ -64,7 +64,7 @@ module "cognito-identity-pool" {
   source = "../../modules/aws-cognito-pool"
 
   developer_provider_name = "azure-access"
-  name = "azure-ad-federation"
+  name                    = "azure-ad-federation"
 }
 
 module "msft-connection" {
@@ -83,9 +83,9 @@ module "cognito-identity" {
   source = "../../modules/aws-cognito-identity-cli"
 
   identity_pool_id = module.cognito-identity-pool.pool_id
-  aws_region = var.aws_region
-  login-ids = {for k in keys(module.msft-connection) : k => "${module.cognito-identity-pool.developer_provider_name}=${module.msft-connection[k].connector.application_id}"}
-  aws_role = var.aws_assume_role_arn
+  aws_region       = var.aws_region
+  login-ids        = { for k in keys(module.msft-connection) : k => "${module.cognito-identity-pool.developer_provider_name}=${module.msft-connection[k].connector.application_id}" }
+  aws_role         = var.aws_assume_role_arn
 }
 
 module "msft-connection-auth-federation" {
@@ -95,11 +95,11 @@ module "msft-connection-auth-federation" {
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-federated-credentials?ref=v0.4.11"
 
   application_object_id = module.msft-connection[each.key].connector.id
-  display_name = "AccessFromAWS"
-  description = "AWS federation to be used for psoxy Connector - ${each.value.display_name}${var.connector_display_name_suffix}"
-  issuer = "https://cognito-identity.amazonaws.com"
-  audience = module.cognito-identity-pool.pool_id
-  subject = module.cognito-identity.identity_id[each.key]
+  display_name          = "AccessFromAWS"
+  description           = "AWS federation to be used for psoxy Connector - ${each.value.display_name}${var.connector_display_name_suffix}"
+  issuer                = "https://cognito-identity.amazonaws.com"
+  audience              = module.cognito-identity-pool.pool_id
+  subject               = module.cognito-identity.identity_id[each.key]
 
   depends_on = [module.cognito-identity]
 }
@@ -149,9 +149,9 @@ module "psoxy-msft-connector" {
       CLIENT_ID            = module.msft-connection[each.key].connector.application_id
       REFRESH_ENDPOINT     = module.worklytics_connector_specs.msft_token_refresh_endpoint
       PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
-      IDENTITY_POOL_ID = module.cognito-identity-pool.pool_id,
-      IDENTITY_ID = module.cognito-identity.identity_id[each.key]
-      DEVELOPER_NAME_ID = module.cognito-identity-pool.developer_provider_name
+      IDENTITY_POOL_ID     = module.cognito-identity-pool.pool_id,
+      IDENTITY_ID          = module.cognito-identity.identity_id[each.key]
+      DEVELOPER_NAME_ID    = module.cognito-identity-pool.developer_provider_name
     }
   )
 }

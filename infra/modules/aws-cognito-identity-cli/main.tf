@@ -1,13 +1,13 @@
 provider "aws" {
   assume_role {
-    role_arn    = var.aws_role
+    role_arn = var.aws_role
   }
 }
 
 resource "null_resource" "identity-command" {
   for_each = var.login-ids
 
-  triggers  =  {
+  triggers = {
     always_run = "${timestamp()}"
   }
   provisioner "local-exec" {
@@ -18,10 +18,10 @@ resource "null_resource" "identity-command" {
 data "local_file" "identity-result" {
   for_each = var.login-ids
 
-  filename = "${path.module}/cognito_identity_${each.key}.json"
+  filename   = "${path.module}/cognito_identity_${each.key}.json"
   depends_on = [null_resource.identity-command]
 }
 
 output "identity_id" {
-value = { for k, v in var.login-ids : k => jsondecode(data.local_file.identity-result[k].content).IdentityId }
+  value = { for k, v in var.login-ids : k => jsondecode(data.local_file.identity-result[k].content).IdentityId }
 }

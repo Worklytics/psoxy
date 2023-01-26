@@ -20,7 +20,7 @@ variable "issuer" {
 }
 
 variable "audience" {
-  type        = string
+  type = string
   # This is the recommended value from MSFT, as it is what AAD expects to be in the "aud"
   # property token value
   # See https://learn.microsoft.com/en-us/azure/active-directory/develop/workload-identity-federation-create-trust?pivots=identity-wif-apps-methods-azp#important-considerations-and-restrictions

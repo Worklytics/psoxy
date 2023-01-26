@@ -18,7 +18,7 @@ locals {
   # parse PATH_TO_SHARED_CONFIG in super-hacky way
   # expect something like:
   # arn:aws:ssm:us-east-1:123123123123:parameter/PSOXY_SALT
-  salt_arn              = [ for l in var.global_parameter_arns : l if endswith(l, "PSOXY_SALT") ][0]
+  salt_arn              = [for l in var.global_parameter_arns : l if endswith(l, "PSOXY_SALT")][0]
   path_to_shared_config = regex("arn.+parameter(/.*)PSOXY_SALT", local.salt_arn)[0]
 }
 
@@ -39,7 +39,7 @@ resource "aws_lambda_function" "psoxy-instance" {
       var.path_to_config == null ? {} : yamldecode(file(var.path_to_config)),
       var.environment_variables,
       {
-        EXECUTION_ROLE          = aws_iam_role.iam_for_lambda.arn
+        EXECUTION_ROLE = aws_iam_role.iam_for_lambda.arn
       },
       # only set env vars for config paths if non-default values
       length(local.path_to_shared_config) > 1 ? { PATH_TO_SHARED_CONFIG = local.path_to_shared_config } : {},
@@ -103,7 +103,7 @@ data "aws_region" "current" {}
 data "aws_caller_identity" "current" {}
 
 locals {
-  param_arn_prefix               = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter${local.instance_ssm_prefix_with_slash}"
+  param_arn_prefix = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter${local.instance_ssm_prefix_with_slash}"
 
   function_write_arns = [
     "${local.param_arn_prefix}*" # wildcard to match all params corresponding to this function
