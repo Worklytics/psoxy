@@ -1,9 +1,3 @@
-provider "aws" {
-  assume_role {
-    role_arn = var.aws_role
-  }
-}
-
 resource "null_resource" "identity-command" {
   for_each = var.login-ids
 
