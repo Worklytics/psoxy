@@ -16,8 +16,7 @@ resource "aws_iam_policy" "cognito_developer_identities" {
       "Statement" : [
         {
           "Action" : [
-            "cognito-identity:GetOpenIdTokenForDeveloperIdentity",
-            "cognito-identity:LookupDeveloperIdentity"
+            "cognito-identity:GetOpenIdTokenForDeveloperIdentity"
           ],
           "Effect" : "Allow",
           "Resource" : aws_cognito_identity_pool.main.arn
