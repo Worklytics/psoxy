@@ -82,16 +82,19 @@ resource "local_file" "todo-google-workspace-admin-console" {
   filename = "TODO ${var.todo_step} - setup ${var.display_name}.md"
   content  = <<EOT
 Complete the following steps via the Google Workspace Admin console:
-   1. Visit https://admin.google.com/ and navigate to Security --> API Controls, then find "Manage
-      Domain Wide Delegation". Click "Add new"
-   2. Copy and paste client ID `${google_service_account.connector-sa.unique_id}` into the "Client ID" input in the popup.
+   1. Visit https://admin.google.com/ and navigate to "Security" --> "API Controls", then find
+      "Manage Domain Wide Delegation". Click "Add new".
+   2. Copy and paste client ID `${google_service_account.connector-sa.unique_id}` into the
+      "Client ID" input in the popup. (this is the unique ID of the GCP service account with
+       email `${google_service_account.connector-sa.email}`; you can verify it via the GCP console,
+       under "IAM & Admin" --> "Service Accounts")
    3. Copy and paste the following OAuth 2.0 scope string into the "Scopes" input:
 ```
 ${join(",", var.oauth_scopes_needed)}
 ```
    4. Authorize it. With this, your psoxy instance should be able to authenticate with Google as
-     `${var.connector_service_account_id}` and request data from Google as authorized by the OAuth
-      scopes you granted.
+      the GCP Service Account `${google_service_account.connector-sa.email}` and request data from
+      Google as authorized by the OAuth scopes you granted.
 ${local.google_workspace_admin_account_required ? local.google_workspace_service_account_setup : ""}
 EOT
 
