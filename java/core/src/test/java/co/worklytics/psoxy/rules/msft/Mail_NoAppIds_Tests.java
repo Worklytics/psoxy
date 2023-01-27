@@ -22,7 +22,7 @@ public class Mail_NoAppIds_Tests extends MailTests {
     public void setTestSpec() {
         this.setTestSpec(RulesTestSpec.builder()
             .yamlSerializationFilePath("microsoft-365/outlook-mail_no-app-ids")
-            .sanitizedExamplesDirectoryPath("api-response-examples/microsoft-365/outlook-mail/no-app-ids")
+            .sanitizedExamplesDirectoryPath("api-response-examples/microsoft-365/outlook-mail/sanitized-no-app-ids")
             .build());
     }
 }
