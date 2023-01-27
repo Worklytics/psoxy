@@ -3,6 +3,8 @@ import aws from './lib/aws.js';
 import gcp from './lib/gcp.js';
 import getLogger from './lib/logger.js';
 import path from 'path';
+import _ from 'lodash';
+import { constants as httpCodes } from 'http2';
 import { fileURLToPath } from 'url';
 import { saveToFile, getFileNameFromURL } from './lib/utils.js';
 
@@ -14,7 +16,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
  * @property {string} statusMessage - Error message if any
  * @property {number} status - HTTP request status code
  * @property {Object} headers - HTTP response headers
- * @property {Object} data - HTTP request body (JSON)
+ * @property {Object} data - HTTP request body
  */
 
 /**
@@ -31,6 +33,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
  * @param {boolean} options.verbose - Verbose ouput
  * @param {boolean} options.saveToFile - Whether to save successful responses to a file (responses/[api-path]-[ISO8601 timestamp].json)
  * @param {string} options.method - HTTP request method
+ * @param {boolean} options.healthCheck - Run "Health Check" call against Psoxy deploy
  * @return {PsoxyResponse}
  */
 export default async function (options = {}) {
@@ -60,17 +63,34 @@ export default async function (options = {}) {
 
   result = await psoxyCall(options);
 
-  if (result.status === 200) {
-    logger.success(`Call result: ${result.status}`, { additional: result.data });
+  if (result.status === httpCodes.HTTP_STATUS_OK) {
+    let successMessagePrefix = options.healthCheck ? 'Health Check result:' :
+      'Call result:'
+    let jsonCallResult;
+    
+    if (!_.isEmpty(result.data)) {
+      
+      try {
+        jsonCallResult = JSON.parse(result.data)
+      } catch(error) {
+        logger.error(error);
+      }
 
-    if (options.saveToFile) {
-      const filename = getFileNameFromURL(url);
-      await saveToFile(__dirname, filename, JSON.stringify(result.data, undefined, 2));
-      logger.success(`Results saved to: ${__dirname}/${filename}`);
+      if (options.saveToFile) {
+        const filename = getFileNameFromURL(url);
+        await saveToFile(__dirname, filename, JSON.stringify(jsonCallResult, undefined, 2));
+        logger.success(`Results saved to: ${__dirname}/${filename}`);
+      } else {
+        // Response potentially long, let's remind to check logs for complete results
+        logger.success(`Check out run log to see complete results: ${__dirname}/run.log`);
+      }
     } else {
-      // Response potentially long, let's remind to check logs for complete results
-      logger.success(`Check out run log to see complete results: ${__dirname}/run.log`);
+      
     }
+  
+    logger.success(`${successMessagePrefix} ${result.statusMessage} - ${result.status}`, 
+      { additional: jsonCallResult });
+
   } else {
     let errorMessage = result.statusMessage || 'Unknown';
 
@@ -97,12 +117,13 @@ export default async function (options = {}) {
       } else if (result.headers['www-authenticate']) {
         errorMessage += `: GCP ${result.headers['www-authenticate']}`
       }
-      
+
       logger.verbose(`Response headers:\n ${JSON.stringify(result.headers, null, 2)}`);
     }
 
     logger.error(`${chalk.bold.red(result.status)}\n${chalk.bold.red(errorMessage)}`);
-    if ([500, 502].includes(result.status)) {
+    if ([httpCodes.HTTP_STATUS_INTERNAL_SERVER_ERROR, 
+      httpCodes.HTTP_STATUS_BAD_GATEWAY].includes(result.status)) {
       logger.info('This looks like an internal error in the Proxy; please review the logs.')
     }
   }
