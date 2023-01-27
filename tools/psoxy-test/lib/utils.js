@@ -62,8 +62,7 @@ function getCommonHTTPHeaders(options = {}) {
     headers['X-Psoxy-User-To-Impersonate'] = options.impersonate;
   }
   if (options.healthCheck) {
-    // option presence is enough, since Psoxy doesn't seem to support 
-    // the header with a "false" value
+    // option presence is enough, since Psoxy doesn't check header value
     headers['X-Psoxy-Health-Check'] = 'true';
   }
 
