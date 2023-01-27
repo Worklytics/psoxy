@@ -1,6 +1,7 @@
 import test from 'ava';
 import * as td from 'testdouble';
 import _ from 'lodash';
+import { constants as httpCodes } from 'http2';
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const logsSample = require('./gcp-log-entries-structured-sample.json');
@@ -71,10 +72,10 @@ test('Psoxy Call: get identity token when option missing', async (t) => {
         Authorization: `Bearer ${TOKEN}`,
       })
     )
-  ).thenReturn({ status: 200 });
+  ).thenReturn({ status: httpCodes.HTTP_STATUS_OK });
 
   const result = await gcp.call(options);
-  t.is(result.status, 200);
+  t.is(result.status, httpCodes.HTTP_STATUS_OK);
 
   td.verify(utils.executeCommand(COMMAND));
 });

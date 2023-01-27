@@ -1,5 +1,6 @@
 import aws from './lib/aws.js';
 import gcp from './lib/gcp.js';
+import { constants as httpCodes } from 'http2';
 import { saveToFile } from './lib/utils.js';
 import { execSync } from 'child_process';
 import path from 'path';
@@ -26,7 +27,7 @@ async function testAWS(options, logger) {
     region: options.region
   }, client);
 
-  if (uploadResult['$metadata'].httpStatusCode !== 200) {
+  if (uploadResult['$metadata'].httpStatusCode !== httpCodes.HTTP_STATUS_OK) {
     throw new Error('Unable to upload file', { cause: uploadResult });
   }
 
