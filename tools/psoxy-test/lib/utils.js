@@ -6,6 +6,7 @@ import https from 'https';
 import path from 'path';
 import _ from 'lodash';
 import spec from '../data-sources/spec.js';
+import { constants as httpCodes } from 'http2';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -60,6 +61,12 @@ function getCommonHTTPHeaders(options = {}) {
   if (options.impersonate) {
     headers['X-Psoxy-User-To-Impersonate'] = options.impersonate;
   }
+  if (options.healthCheck) {
+    // option presence is enough, since Psoxy doesn't seem to support 
+    // the header with a "false" value
+    headers['X-Psoxy-Health-Check'] = 'true';
+  }
+
   return headers;
 }
 
@@ -72,11 +79,11 @@ function getCommonHTTPHeaders(options = {}) {
  * @param {String} method
  * @return {Promise}
  */
-async function requestWrapper(url, method = 'GET', headers) {
+function requestWrapper(url, method = 'GET', headers) {
   url = typeof url === 'string' ? new URL(url) : url;
   const params = url.searchParams.toString();
 
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const req = https.request(
       {
         hostname: url.host,
@@ -92,26 +99,19 @@ async function requestWrapper(url, method = 'GET', headers) {
           headers: res.headers,
         };
 
-        if (res.statusCode !== 200) {
+        if (res.statusCode !== httpCodes.HTTP_STATUS_OK) {
           resolve(result);
         } else {
           let responseData = '';
           res.on('data', (data) => (responseData += data));
           res.on('end', () => {
-            try {
-              result.data = JSON.parse(responseData);
-            } catch (error) {
-              throw new Error('Error parsing JSON response', { cause: error });
-            }
-            resolve(result);
+            resolve({...result, data: responseData});
           });
         }
       }
     );
-    req.on('error', (err) => {
-      // resolve promise to not force caller to "catch"; `status` is not the
-      // right key, but callers expect a result object with these keys
-      resolve({ status: err.code, statusMessage: err.message });
+    req.on('error', (error) => {
+      reject({ status: error.code, statusMessage: error.message });
     });
     req.end();
   });
@@ -207,16 +207,16 @@ function resolveHTTPMethod(path = '') {
 
 /**
  * "retry" helper function, execute "fn" until returning value is not undefined
- * 
- * @param {Function} fn 
- * @param {Function} onErrorStop 
+ *
+ * @param {Function} fn
+ * @param {Function} onErrorStop
  * @param {Object} logger - winston instance
- * @param {number} maxAttempts 
- * @param {number} delay 
- * @param {string} progressMessage 
- * @returns 
+ * @param {number} maxAttempts
+ * @param {number} delay
+ * @param {string} progressMessage
+ * @returns
  */
-async function executeWithRetry(fn, onErrorStop, logger, maxAttempts = 60, 
+async function executeWithRetry(fn, onErrorStop, logger, maxAttempts = 60,
   delay = 1000, progressMessage = 'Downloading...') {
 
   let result;
@@ -231,12 +231,12 @@ async function executeWithRetry(fn, onErrorStop, logger, maxAttempts = 60,
     }
     attempts++;
     if (_.isUndefined(result)) {
-      // Wait "delay" ms before retry; 
-      // Psoxy bulk use-case: in theory, only if this is the first 
-      // operation  after Psoxy deployment, we'd need a max of 60' until it 
+      // Wait "delay" ms before retry;
+      // Psoxy bulk use-case: in theory, only if this is the first
+      // operation  after Psoxy deployment, we'd need a max of 60' until it
       // processes the file and puts it in the output bucket
       clearTimeout(await new Promise(resolve => setTimeout(resolve, delay)));
-      
+
       if (logger) {
         logger.info(progressMessage);
       }
