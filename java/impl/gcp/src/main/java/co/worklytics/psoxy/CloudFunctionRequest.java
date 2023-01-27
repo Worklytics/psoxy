@@ -7,7 +7,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor(staticName = "of")
 public class CloudFunctionRequest implements HttpEventRequest {
@@ -26,6 +28,9 @@ public class CloudFunctionRequest implements HttpEventRequest {
     @NonNull
     final HttpRequest request;
 
+    private Map<String, List<String>> caseInsensitiveHeaders;
+
+
     private byte[] body;
 
     @Override
@@ -39,14 +44,33 @@ public class CloudFunctionRequest implements HttpEventRequest {
         return request.getQuery();
     }
 
-    @Override
-    public Optional<String> getHeader(@NonNull String headerName) {
-        return request.getFirstHeader(headerName);
+    /**
+     * @return view of Headers with lower-case names
+     *
+     * this is kinda defensive; while AWS seems to pass headers in lower-case, GCP does not. (or
+     * at least docs, and prior practice, suggest they do not). But really we probably want to
+     * presume case-insensitivity, giving clients leeway in how they send headers.
+     */
+    private Map<String, List<String>> getCaseInsensitiveHeaders() {
+        if (caseInsensitiveHeaders == null) {
+            caseInsensitiveHeaders = request.getHeaders().entrySet().stream()
+                .collect(Collectors.toMap(
+                    entry -> entry.getKey().toLowerCase(),
+                    Map.Entry::getValue
+                ));
+        }
+        return caseInsensitiveHeaders;
     }
 
     @Override
-    public Optional<List<String>> getMultiValueHeader(String headerName) {
-        return Optional.ofNullable(request.getHeaders().get(headerName));
+    public Optional<String> getHeader(@NonNull String headerName) {
+        return Optional.ofNullable(getCaseInsensitiveHeaders().get(headerName.toLowerCase()))
+            .map(values -> values.get(0));
+    }
+
+    @Override
+    public Optional<List<String>> getMultiValueHeader(@NonNull String headerName) {
+        return Optional.ofNullable(getCaseInsensitiveHeaders().get(headerName.toLowerCase()));
     }
 
     @Override
