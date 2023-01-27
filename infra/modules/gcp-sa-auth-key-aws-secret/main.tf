@@ -27,6 +27,7 @@ resource "aws_ssm_parameter" "value" {
   type        = "SecureString"
   description = "Key for gcp service account ${var.service_account_id}"
   value       = google_service_account_key.key.private_key
+  key_id      = coalesce(var.kms_key_id, "alias/aws/ssm")
 
   lifecycle {
     ignore_changes = [
