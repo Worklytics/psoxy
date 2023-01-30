@@ -24,6 +24,7 @@ module "psoxy_lambda" {
   path_to_instance_ssm_parameters = var.path_to_instance_ssm_parameters
   global_parameter_arns           = var.global_parameter_arns
   environment_variables           = var.environment_variables
+  ssm_kms_key_ids                 = var.ssm_kms_key_ids
 }
 
 resource "aws_lambda_function_url" "lambda_url" {

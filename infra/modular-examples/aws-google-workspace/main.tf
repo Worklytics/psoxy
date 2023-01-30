@@ -16,6 +16,7 @@ terraform {
 locals {
   base_config_path = "${var.psoxy_base_dir}/configs/"
   host_platform_id = "AWS"
+  ssm_key_ids      = var.aws_ssm_key_id == null ? {} : { 0 : var.aws_ssm_key_id }
 }
 
 module "worklytics_connector_specs" {
@@ -43,8 +44,9 @@ module "global_secrets" {
   source = "../../modules/aws-ssm-secrets"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-ssm-secrets?ref=v0.4.10
 
-  secrets = module.psoxy-aws.secrets
-  path    = var.aws_ssm_param_root_path
+  path       = var.aws_ssm_param_root_path
+  kms_key_id = var.aws_ssm_key_id
+  secrets    = module.psoxy-aws.secrets
 }
 
 moved {
@@ -92,7 +94,8 @@ module "sa-key-secrets" {
   # other possibly implementations:
   # source = "../hashicorp-vault-secrets"
 
-  path = var.aws_ssm_param_root_path
+  path       = var.aws_ssm_param_root_path
+  kms_key_id = var.aws_ssm_key_id
 
   secrets = {
     "PSOXY_${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY" : {
@@ -121,6 +124,7 @@ module "psoxy-google-workspace-connector" {
   example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
   global_parameter_arns                 = module.global_secrets.secret_arns
   path_to_instance_ssm_parameters       = "${var.aws_ssm_param_root_path}PSOXY_${upper(replace(each.key, "-", "_"))}_"
+  ssm_kms_key_ids                       = local.ssm_key_ids
 
   todo_step = module.google-workspace-connection[each.key].next_todo_step
 
@@ -171,6 +175,7 @@ resource "aws_ssm_parameter" "long-access-secrets" {
   type        = "SecureString"
   description = "Stores the value of ${upper(each.value.secret_name)} for `psoxy-${each.value.connector_name}`"
   value       = sensitive("TODO: fill me with the proper value for ${upper(each.value.secret_name)}!! (via AWS console)")
+  key_id      = coalesce(var.aws_ssm_key_id, "alias/aws/ssm")
 
   lifecycle {
     ignore_changes = [
@@ -222,6 +227,7 @@ module "aws-psoxy-long-auth-connectors" {
   global_parameter_arns           = module.global_secrets.secret_arns
   function_parameters             = each.value.secured_variables
   path_to_instance_ssm_parameters = "${var.aws_ssm_param_root_path}PSOXY_${upper(replace(each.key, "-", "_"))}_"
+  ssm_kms_key_ids                 = local.ssm_key_ids
 
   todo_step = module.source_token_external_todo[each.key].next_todo_step
 
@@ -275,6 +281,8 @@ module "psoxy-bulk" {
   rules                           = each.value.rules
   global_parameter_arns           = module.global_secrets.secret_arns
   path_to_instance_ssm_parameters = "${var.aws_ssm_param_root_path}PSOXY_${upper(replace(each.key, "-", "_"))}_"
+  ssm_kms_key_ids                 = local.ssm_key_ids
+
   environment_variables = merge(
     var.general_environment_variables,
     try(each.value.environment_variables, {}),
@@ -325,6 +333,7 @@ module "psoxy_lookup_tables_builders" {
   rules                           = each.value.rules
   global_parameter_arns           = module.global_secrets.secret_arns
   path_to_instance_ssm_parameters = "${var.aws_ssm_param_root_path}PSOXY_${upper(replace(each.key, "-", "_"))}_"
+  ssm_kms_key_ids                 = local.ssm_key_ids
 
   sanitized_accessor_role_names = each.value.sanitized_accessor_role_names
   environment_variables = merge(

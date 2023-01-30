@@ -22,7 +22,7 @@ public class Calendar_NoAppIds_NoGroups_Tests extends CalendarTests {
     public void setTestSpec() {
         this.setTestSpec(RulesTestSpec.builder()
             .yamlSerializationFilePath("microsoft-365/outlook-cal_no-app-ids_no-groups")
-            .sanitizedExamplesDirectoryPath("api-response-examples/microsoft-365/outlook-cal/no-app-ids_no-groups")
+            .sanitizedExamplesDirectoryPath("api-response-examples/microsoft-365/outlook-cal/sanitized-no-app-ids_no-groups")
             .build());
     }
 

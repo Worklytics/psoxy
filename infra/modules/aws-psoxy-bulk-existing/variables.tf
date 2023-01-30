@@ -30,6 +30,12 @@ variable "path_to_instance_ssm_parameters" {
   default     = null
 }
 
+variable "ssm_kms_key_ids" {
+  type        = map(string)
+  description = "KMS key IDs or ARNs that were used for encrypting SSM parameters needed by this lambda, if any."
+  default     = {}
+}
+
 variable "input_bucket" {
   type        = string
   description = "name S3 input bucket"

@@ -24,6 +24,12 @@ variable "aws_assume_role_arn" {
   default     = null
 }
 
+variable "ssm_kms_key_ids" {
+  type        = map(string)
+  description = "KMS key IDs or ARNs that were used for encrypting SSM parameters needed by this lambda, if any."
+  default     = {}
+}
+
 variable "path_to_instance_ssm_parameters" {
   type        = string
   description = "path to instance config parameters in SSM Parameter Store (`null` for default, which is `PSOXY_{function_name}_`); lambda will be able to read/write params beneath this path/prefix"

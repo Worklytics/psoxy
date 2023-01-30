@@ -24,6 +24,12 @@ variable "path_to_instance_ssm_parameters" {
   default     = null
 }
 
+variable "ssm_kms_key_ids" {
+  type        = map(string)
+  description = "KMS key IDs or ARNs that were used for encrypting SSM parameters needed by this lambda, if any."
+  default     = {}
+}
+
 variable "handler_class" {
   type        = string
   description = "Class to handle the request"

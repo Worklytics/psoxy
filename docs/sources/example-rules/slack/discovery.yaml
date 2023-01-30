@@ -1,0 +1,56 @@
+---
+endpoints:
+  - pathRegex: "^/api/discovery\\.enterprise\\.info(?:\\?.+)?"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$.enterprise.teams[*]['name','description','icon','enterprise_name']"
+          - "$.enterprise['icon','name']"
+  - pathRegex: "^/api/discovery\\.users\\.list(?:\\?.+)?"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.users[*].id"
+          - "$.users[*].profile.email"
+          - "$.users[*].profile.guest_invited_by"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$.users[*]['name','real_name']"
+          - "$.users[*].profile['title','phone','skype','first_name','last_name','real_name','real_name_normalized','display_name','display_name_normalized']"
+          - "$.users[*].profile['fields','pronouns','status_text','status_emoji','status_emoji_display_info','status_expiration','avatar_hash']"
+          - "$.users[*].profile['image_original','is_custom_image','image_24','image_32','image_48','image_72','image_192','image_512','image_1024','status_text_canonical']"
+  - pathRegex: "^/api/discovery\\.conversations\\.(list|recent)(?:\\?.+)?"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$.channels[*]['name','topic','purpose']"
+  - pathRegex: "^/api/discovery\\.conversations\\.info(?:\\?.+)?"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.info[*].creator"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$.info[*]['name','name_normalized','previous_names','topic','purpose']"
+  - pathRegex: "^/api/discovery\\.conversations\\.history(?:\\?.+)?"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.messages[*].user"
+          - "$.messages[*].files[*].user"
+          - "$.messages[*].reactions[*].users[*]"
+          - "$.messages[*].replies[*].user"
+          - "$.messages[*].replies[*].parent_user_id"
+          - "$.messages[*].reply_users[*]"
+          - "$.messages[*].edited.user"
+          - "$.messages[*].blocks[*].elements[*].elements[*].user_id"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$.messages[*]['text','username','permalink']"
+          - "$.messages[*]..['text']"
+          - "$.messages[*].user_profile"
+          - "$.messages[*].attachments[*]['fallback','service_name', 'thumb_url','thumb_width','thumb_height']"
+          - "$.messages[*].files[*]['thumb_url','thumb_width','thumb_height','thumb_tiny']"

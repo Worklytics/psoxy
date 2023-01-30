@@ -36,6 +36,7 @@ public class Rules2 implements RuleSet, Serializable {
     @Singular
     List<Endpoint> endpoints;
 
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     @Deprecated //will be dropped in v0.5
     @Builder.Default
     Boolean allowAllEndpoints = false;

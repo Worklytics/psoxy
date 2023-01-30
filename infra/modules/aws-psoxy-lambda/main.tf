@@ -9,13 +9,17 @@ terraform {
 }
 
 locals {
-  instance_ssm_prefix = coalesce(var.path_to_instance_ssm_parameters, "${upper(replace(var.function_name, "-", "_"))}_")
+  instance_ssm_prefix_default    = "${upper(replace(var.function_name, "-", "_"))}_"
+  instance_ssm_prefix            = coalesce(var.path_to_instance_ssm_parameters, local.instance_ssm_prefix_default)
+  is_instance_ssm_prefix_default = local.instance_ssm_prefix == local.instance_ssm_prefix_default
+  instance_ssm_prefix_with_slash = startswith(local.instance_ssm_prefix, "/") ? local.instance_ssm_prefix : "/${local.instance_ssm_prefix}"
+
 
   # parse PATH_TO_SHARED_CONFIG in super-hacky way
   # expect something like:
   # arn:aws:ssm:us-east-1:123123123123:parameter/PSOXY_SALT
-  salt_arn              = [for l in var.global_parameter_arns : l if endswith(l, "PSOXY_SALT")][0]
-  path_to_shared_config = regex("arn.+parameter/(.*)PSOXY_SALT", local.salt_arn)[0]
+  salt_arn              = [ for l in var.global_parameter_arns : l if endswith(l, "PSOXY_SALT") ][0]
+  path_to_shared_config = regex("arn.+parameter(/.*)PSOXY_SALT", local.salt_arn)[0]
 }
 
 resource "aws_lambda_function" "psoxy-instance" {
@@ -36,9 +40,10 @@ resource "aws_lambda_function" "psoxy-instance" {
       var.environment_variables,
       {
         EXECUTION_ROLE          = aws_iam_role.iam_for_lambda.arn
-        PATH_TO_INSTANCE_CONFIG = local.instance_ssm_prefix
-        PATH_TO_SHARED_CONFIG   = local.path_to_shared_config
-      }
+      },
+      # only set env vars for config paths if non-default values
+      length(local.path_to_shared_config) > 1 ? { PATH_TO_SHARED_CONFIG = local.path_to_shared_config } : {},
+      local.is_instance_ssm_prefix_default ? {} : { PATH_TO_INSTANCE_CONFIG = var.path_to_instance_ssm_parameters }
     )
   }
 
@@ -97,8 +102,13 @@ resource "aws_iam_role_policy_attachment" "basic" {
 data "aws_region" "current" {}
 data "aws_caller_identity" "current" {}
 
+data "aws_kms_key" "keys" {
+  for_each = var.ssm_kms_key_ids
+
+  key_id = each.value
+}
+
 locals {
-  instance_ssm_prefix_with_slash = startswith(local.instance_ssm_prefix, "/") ? local.instance_ssm_prefix : "/${local.instance_ssm_prefix}"
   param_arn_prefix               = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter${local.instance_ssm_prefix_with_slash}"
 
   function_write_arns = [
@@ -128,9 +138,18 @@ locals {
     Resource = local.function_read_arns
   }]
 
+  key_statements = length(var.ssm_kms_key_ids) > 0 ? [{
+    Action = [
+      "kms:Decrypt"
+    ]
+    Effect   = "Allow"
+    Resource = [ for k in data.aws_kms_key.keys : k.arn]
+  }] : []
+
   policy_statements = concat(
     local.read_statements,
-    local.write_statements
+    local.write_statements,
+    local.key_statements
   )
 }
 
