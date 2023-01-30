@@ -1,5 +1,6 @@
 import test from 'ava';
 import * as td from 'testdouble';
+import { constants as httpCodes } from 'http2';
 
 let aws, gcp, psoxyTestLogs;
 test.beforeEach(async (t) => {
@@ -45,7 +46,7 @@ test('Psoxy Logs: AWS valid options', async (t) => {
     td.matchers.isA(Object), // cloudwatch client
   )).thenResolve({
     "$metadata": {
-      httpStatusCode: 200
+      httpStatusCode: httpCodes.HTTP_STATUS_OK
     },
     logStreams: [{
       logStreamName: 'foo',
@@ -57,7 +58,7 @@ test('Psoxy Logs: AWS valid options', async (t) => {
     td.matchers.isA(Object), // cloudwatch client
   )).thenResolve({
     "$metadata": {
-      httpStatusCode: 200
+      httpStatusCode: httpCodes.HTTP_STATUS_OK
     },
     events: []
   });

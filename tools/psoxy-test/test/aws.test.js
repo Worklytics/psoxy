@@ -1,6 +1,7 @@
 import test from 'ava';
 import * as td from 'testdouble';
 import { createRequire } from 'module';
+import { constants as httpCodes } from 'http2';
 const require = createRequire(import.meta.url);
 const logsSample = require('./cloudwatch-log-events-sample.json').events;
 
@@ -143,8 +144,8 @@ test('Psoxy call: works as expected', async (t) => {
       td.matchers.contains('GET'),
       td.matchers.contains(signedRequest.headers)
     )
-  ).thenReturn({ status: 200 });
+  ).thenReturn({ status: httpCodes.HTTP_STATUS_OK });
 
   result = await aws.call(options);
-  t.is(result.status, 200);
+  t.is(result.status, httpCodes.HTTP_STATUS_OK);
 });

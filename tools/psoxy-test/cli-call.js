@@ -28,6 +28,7 @@ const { version } = require('./package.json');
     .option('-t, --token <token>', 'Authorization token for GCP')
     .option('-v, --verbose', 'Verbose output', false)
     .option('-z, --gzip', 'Add gzip compression header', false)
+    .option('--health-check', 'Health Check call: check Psoxy deploy is running')
     .addOption(new Option('-d, --data-source <name>',
       'Data source to test all available endpoints').choices([
         'asana',
@@ -70,7 +71,7 @@ const { version } = require('./package.json');
       result = await psoxyTestCall(options);
     }
   } catch (error) {
-    logger.error(error.message);
+    logger.error(error.statusMessage || error.message);
     process.exitCode = 1;
   }
   return result;
