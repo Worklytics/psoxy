@@ -18,7 +18,6 @@ module "worklytics_connector_specs" {
   enabled_connectors             = var.enabled_connectors
   google_workspace_example_user  = var.google_workspace_example_user
   google_workspace_example_admin = coalesce(var.google_workspace_example_admin, var.google_workspace_example_user)
-  msft_tenant_id                 = var.msft_tenant_id
 }
 
 module "psoxy-gcp" {
@@ -250,95 +249,6 @@ module "worklytics-psoxy-connection-long-auth" {
   todo_step              = module.connector-long-auth-function[each.key].next_todo_step
 }
 # END LONG ACCESS AUTH CONNECTORS
-
-# BEGIN MSFT Connectors
-resource "google_service_account" "msft-connector-sa" {
-  for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
-
-  project      = var.gcp_project_id
-  account_id   = "psoxy-${substr(each.key, 0, 24)}"
-  display_name = "Psoxy Connector - ${each.value.display_name}${var.connector_display_name_suffix}"
-  description  = "Service account for psoxy Connector - ${each.value.display_name}${var.connector_display_name_suffix}"
-
-  depends_on = [
-    module.psoxy-gcp
-  ]
-}
-
-module "msft-connection-auth-federation" {
-  for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
-
-  source = "../../modules/azuread-federated-credentials"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-local-cert?ref=v0.4.8"
-
-  application_object_id = module.msft-connection[each.key].connector.id
-  display_name          = "GcpFederation"
-  description           = "Federation to be used for psoxy Connector - ${each.value.display_name}${var.connector_display_name_suffix}"
-  issuer                = "https://accounts.google.com"
-  subject               = google_service_account.msft-connector-sa[each.key].unique_id
-}
-
-module "msft-connection" {
-  for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
-
-  source = "../../modules/azuread-connection"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-connection?ref=v0.4.10"
-
-  display_name                      = "Psoxy Connector - ${each.value.display_name}${var.connector_display_name_suffix}"
-  tenant_id                         = var.msft_tenant_id
-  required_app_roles                = each.value.required_app_roles
-  required_oauth2_permission_scopes = each.value.required_oauth2_permission_scopes
-}
-
-# grant required permissions to connectors via Azure AD
-# (requires terraform configuration being applied by an Azure User with privileges to do this; it
-#  usually requires a 'Global Administrator' for your tenant)
-module "msft_365_grants" {
-  for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
-
-  source = "../../modules/azuread-grant-all-users"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-grant-all-users?ref=v0.4.10"
-
-  psoxy_instance_id        = each.key
-  application_id           = module.msft-connection[each.key].connector.application_id
-  oauth2_permission_scopes = each.value.required_oauth2_permission_scopes
-  app_roles                = each.value.required_app_roles
-  application_name         = each.key
-  todo_step                = 1
-}
-
-module "psoxy-msft-connector" {
-  for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
-
-  source = "../../modules/gcp-psoxy-rest"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-rest?ref=v0.4.10"
-
-  project_id                    = var.gcp_project_id
-  source_kind                   = each.value.source_kind
-  instance_id                   = "psoxy-${each.key}"
-  service_account_email         = google_service_account.msft-connector-sa[each.key].email
-  artifacts_bucket_name         = module.psoxy-gcp.artifacts_bucket_name
-  deployment_bundle_object_name = module.psoxy-gcp.deployment_bundle_object_name
-  path_to_config                = "${local.base_config_path}${each.value.source_kind}.yaml"
-  path_to_repo_root             = var.psoxy_base_dir
-  example_api_calls             = each.value.example_api_calls
-  todo_step                     = 2
-
-  environment_variables = merge(
-    var.general_environment_variables,
-    try(each.value.environment_variables, {}),
-    {
-      CLIENT_ID           = module.msft-connection[each.key].connector.application_id
-      AUDIENCE            = module.msft-connection-auth-federation[each.key].audience
-      IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
-    }
-  )
-
-  secret_bindings = module.psoxy-gcp.secrets
-}
-
-
-# END MSFT Connectors
 
 # BEGIN BULK CONNECTORS
 module "psoxy-gcp-bulk" {

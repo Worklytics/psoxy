@@ -124,9 +124,3 @@ variable "google_workspace_example_admin" {
   description = "user to impersonate for Google Workspace API calls (null for value of `google_workspace_example_user`)"
   default     = null # will failover to user
 }
-
-variable "msft_tenant_id" {
-  type        = string
-  default     = ""
-  description = "ID of Microsoft tenant to connect to (req'd only if config includes MSFT connectors)"
-}
