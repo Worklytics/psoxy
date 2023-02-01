@@ -17,6 +17,10 @@ Working tracking of changes, updated as work done prior to release.  Please revi
         "read+write `PSOXY_GCAL*`" (if shared secrets have common prefix with connector secrets,
         then wildcard policy to read shared also grants read of secrets across all connectors)
   - keys/salts per value kind (PII, item id, etc)
+  - Updated `azuread` and `aws` modules. Please run following Terraform command if you are coming 
+    from an older version:
+        `terraform init --upgrade`
+  - Replace certificates for MSFT connectors and using Workload Identity Federation instead.
 
 
 ## v0.4.10

@@ -117,4 +117,3 @@ moved {
   from = module.psoxy-gcp-bulk
   to   = module.psoxy-gcp-google-workspace.module.psoxy-gcp-bulk
 }
-

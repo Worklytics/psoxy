@@ -108,9 +108,10 @@
     <orderEntry type="library" scope="RUNTIME" name="Maven: io.netty:netty-transport-native-unix-common:4.1.68.Final" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Maven: com.typesafe.netty:netty-reactive-streams-http:2.0.5" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Maven: com.typesafe.netty:netty-reactive-streams:2.0.5" level="project" />
-    <orderEntry type="library" name="Maven: software.amazon.awssdk:ssm:2.17.46" level="project" />
+    <orderEntry type="library" name="Maven: software.amazon.awssdk:cognitoidentity:2.17.46" level="project" />
     <orderEntry type="library" name="Maven: software.amazon.awssdk:aws-json-protocol:2.17.46" level="project" />
     <orderEntry type="library" name="Maven: software.amazon.awssdk:third-party-jackson-core:2.17.46" level="project" />
+    <orderEntry type="library" name="Maven: software.amazon.awssdk:ssm:2.17.46" level="project" />
     <orderEntry type="library" name="Maven: com.bettercloud:vault-java-driver:5.1.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.mockito:mockito-junit-jupiter:4.11.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.mockito:mockito-core:4.11.0" level="project" />
