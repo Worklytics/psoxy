@@ -102,8 +102,6 @@ module "msft-connection-auth-federation" {
   issuer                = "https://cognito-identity.amazonaws.com"
   audience              = module.cognito-identity-pool.pool_id
   subject               = module.cognito-identity.identity_id[each.key]
-
-  depends_on = [module.cognito-identity]
 }
 
 # grant required permissions to connectors via Azure AD
