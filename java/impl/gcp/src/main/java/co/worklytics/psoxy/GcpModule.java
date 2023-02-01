@@ -5,11 +5,13 @@ import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.HostEnvironment;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.impl.*;
+import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 import com.bettercloud.vault.Vault;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.ServiceOptions;
 import dagger.Module;
 import dagger.Provides;
+import dagger.multibindings.IntoSet;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -77,5 +79,11 @@ public interface GcpModule {
             }
 
         }
+    }
+
+    @Provides
+    @IntoSet
+    static OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder providesSourceAuthStrategy(GCPWorkloadIdentityFederationGrantTokenRequestBuilder tokenRequestBuilder) {
+        return tokenRequestBuilder;
     }
 }
