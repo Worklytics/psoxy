@@ -18,7 +18,14 @@ variable "required_app_roles" {
   type        = list(string)
   description = "list of names of Microsoft Graph App Roles required by connector"
 }
+
 variable "required_oauth2_permission_scopes" {
   type        = list(string)
   description = "list of names of Microsoft Graph OAuth2 Permissions required by connector"
+}
+
+variable "owners" {
+  type = list(string)
+  description = "list of object ids to be set as owner of the application"
+  default = []
 }

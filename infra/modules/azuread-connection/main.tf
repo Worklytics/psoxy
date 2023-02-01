@@ -27,6 +27,8 @@ resource "azuread_application" "connector" {
     gallery = false # default; but to clarify intent
   }
 
+  owners = [var.owners]
+
   required_resource_access {
     resource_app_id = data.azuread_application_published_app_ids.well_known.result.MicrosoftGraph
 
