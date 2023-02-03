@@ -11,6 +11,7 @@ import lombok.extern.java.Log;
 import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Builder(toBuilder = true)
 @Log
@@ -69,10 +70,9 @@ public class Rules2 implements RuleSet, Serializable {
         Endpoint endpoint = matchedEndpoint
             .orElseThrow(() -> new IllegalArgumentException("No endpoint found for pathRegex: " + pathRegex));
 
-        endpoint.setTransforms(new ArrayList<>(endpoint.getTransforms()));
-
-        Arrays.stream(transforms)
-            .forEach(endpoint.getTransforms()::add);
+        endpoint.setTransforms(
+            Stream.concat(endpoint.getTransforms().stream(), Arrays.stream(transforms))
+                .collect(Collectors.toList()));
 
         return clone;
     }
