@@ -1,6 +1,8 @@
 package co.worklytics.psoxy.rules;
 
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
+import com.avaulta.gateway.rules.Endpoint;
+import com.avaulta.gateway.rules.transforms.Transform;
 import com.google.common.base.Preconditions;
 import com.jayway.jsonpath.JsonPath;
 import lombok.NonNull;
@@ -36,7 +38,7 @@ public class Validator {
     static public void validate(@NonNull Rules2 rules) {
         rules.getEndpoints().forEach(Validator::validate);
     }
-    static void validate(@NonNull Rules2.Endpoint endpoint) {
+    static void validate(@NonNull Endpoint endpoint) {
         Pattern.compile(endpoint.getPathRegex());
         endpoint.getTransforms().forEach(Validator::validate);
     }

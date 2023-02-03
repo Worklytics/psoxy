@@ -1,8 +1,9 @@
 package co.worklytics.psoxy.rules.zoom;
 
+import com.avaulta.gateway.rules.Endpoint;
 import co.worklytics.psoxy.rules.RuleSet;
 import co.worklytics.psoxy.rules.Rules2;
-import co.worklytics.psoxy.rules.Transform;
+import com.avaulta.gateway.rules.transforms.Transform;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.google.common.collect.ImmutableMap;
 
@@ -16,7 +17,7 @@ public class PrebuiltSanitizerRules {
     static final Rules2 MEETINGS_ENDPOINTS = Rules2.builder()
         // Users' meetings
         // https://marketplace.zoom.us/docs/api-reference/zoom-api/meetings/meetings
-        .endpoint(Rules2.Endpoint.builder()
+        .endpoint(Endpoint.builder()
             .pathRegex("^/v2/users/(?:[^/]*)/meetings(?:\\?.+)?")
             .transform(Transform.Pseudonymize.builder()
                 .jsonPath("$.meetings[*].['host_id','host_email']")
@@ -28,7 +29,7 @@ public class PrebuiltSanitizerRules {
         )
         // Meeting details
         // https://marketplace.zoom.us/docs/api-reference/zoom-api/meetings/meeting
-        .endpoint(Rules2.Endpoint.builder()
+        .endpoint(Endpoint.builder()
             .pathRegex("^/v2/meetings/(?:[^/]*)(?:\\?.+)?")
             .transform(Transform.Pseudonymize.builder()
                 .jsonPath("$.['host_id','host_email']")
@@ -41,12 +42,12 @@ public class PrebuiltSanitizerRules {
         )
         // List past meeting instances
         // https://marketplace.zoom.us/docs/api-reference/zoom-api/meetings/pastmeetings
-        .endpoint(Rules2.Endpoint.builder()
+        .endpoint(Endpoint.builder()
             .pathRegex("^/v2/past_meetings/(?:.*)/instances")
             .build())
         // Past meeting details
         // https://marketplace.zoom.us/docs/api-reference/zoom-api/meetings/pastmeetingdetails
-        .endpoint(Rules2.Endpoint.builder()
+        .endpoint(Endpoint.builder()
             .pathRegex("^/v2/past_meetings/(?:[^\\/]*)")
             .transform(Transform.Pseudonymize.builder()
                 .jsonPath("$.['host_id','user_email','host_email']")
@@ -59,7 +60,7 @@ public class PrebuiltSanitizerRules {
             .build())
         // Past meeting participants
         // https://marketplace.zoom.us/docs/api-reference/zoom-api/meetings/pastmeetingparticipants
-        .endpoint(Rules2.Endpoint.builder()
+        .endpoint(Endpoint.builder()
             .pathRegex("^/v2/past_meetings/(?:.*)/participants(?:\\?.+)?")
             .transform(Transform.Pseudonymize.builder()
                 .jsonPath("$.participants[*].['id','user_email']")
@@ -76,7 +77,7 @@ public class PrebuiltSanitizerRules {
     static final Rules2 REPORT_ENDPOINTS = Rules2.builder()
         // List meetings
         // https://marketplace.zoom.us/docs/api-reference/zoom-api/methods#operation/reportMeetings
-        .endpoint(Rules2.Endpoint.builder()
+        .endpoint(Endpoint.builder()
             .pathRegex("^/v2/report/users/(?:.*)/meetings(?:\\?.+)?")
             .transform(Transform.Pseudonymize.builder()
                 .jsonPath("$.meetings[*]['host_id','user_email','host_email']")
@@ -89,7 +90,7 @@ public class PrebuiltSanitizerRules {
             .build())
         // Past meeting details
         // https://marketplace.zoom.us/docs/api-reference/zoom-api/methods#operation/reportMeetingDetails
-        .endpoint(Rules2.Endpoint.builder()
+        .endpoint(Endpoint.builder()
             .pathRegex("^/v2/report/meetings/(?:[^/]*)")
             .transform(Transform.Pseudonymize.builder()
                 .jsonPath("$.['host_id','user_email','host_email']")
@@ -102,7 +103,7 @@ public class PrebuiltSanitizerRules {
         .build())
         // Past meeting participants
         // https://marketplace.zoom.us/docs/api-reference/zoom-api/methods#operation/reportMeetingParticipants
-        .endpoint(Rules2.Endpoint.builder()
+        .endpoint(Endpoint.builder()
             .pathRegex("^/v2/report/meetings/(?:.*)/participants(?:\\?.+)?")
             .transform(Transform.Pseudonymize.builder()
                 .jsonPath("$.participants[*].['id','user_email','user_id']")
@@ -121,7 +122,7 @@ public class PrebuiltSanitizerRules {
     static final Rules2 USERS_ENDPOINTS = Rules2.builder()
         // List users
         // https://marketplace.zoom.us/docs/api-reference/zoom-api/users/users
-        .endpoint(Rules2.Endpoint.builder()
+        .endpoint(Endpoint.builder()
             .pathRegex("/v2/users(?:\\?.+)?")
             .transform(Transform.Pseudonymize.builder()
                 .jsonPath("$.users[*].email")

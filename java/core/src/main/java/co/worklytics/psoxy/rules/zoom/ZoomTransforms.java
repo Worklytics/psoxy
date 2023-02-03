@@ -1,6 +1,6 @@
 package co.worklytics.psoxy.rules.zoom;
 
-import co.worklytics.psoxy.rules.Transform;
+import com.avaulta.gateway.rules.transforms.Transform;
 
 /**
  * library of transforms used to support Zoom stuff

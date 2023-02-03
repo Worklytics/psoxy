@@ -1,9 +1,10 @@
 package co.worklytics.psoxy.rules.google;
 
 import co.worklytics.psoxy.ConfigRulesModule;
+import com.avaulta.gateway.rules.Endpoint;
 import co.worklytics.psoxy.rules.Rules2;
 import co.worklytics.psoxy.rules.RuleSet;
-import co.worklytics.psoxy.rules.Transform;
+import com.avaulta.gateway.rules.transforms.Transform;
 import co.worklytics.psoxy.rules.zoom.ZoomTransforms;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.google.common.collect.ImmutableMap;
@@ -19,12 +20,12 @@ import java.util.stream.Collectors;
 public class PrebuiltSanitizerRules {
 
     static final Rules2 GCAL = Rules2.builder()
-        .endpoint(Rules2.Endpoint.builder()
+        .endpoint(Endpoint.builder()
             .pathRegex("^/calendar/v3/calendars/[^/]*?$")
             .transform(Transform.Redact.ofPaths("$.summary"))
             .transform(Transform.Pseudonymize.ofPaths("$.id"))
             .build())
-        .endpoint(Rules2.Endpoint.builder()
+        .endpoint(Endpoint.builder()
             .pathRegex("^/calendar/v3/calendars/[^/]*?/events[^/]*")
             .transform(Transform.Pseudonymize.ofPaths("$..email"))
             .transform(Transform.Redact.ofPaths(
@@ -45,7 +46,7 @@ public class PrebuiltSanitizerRules {
                 .jsonPath("$.items[*].conferenceData.entryPoints[*].uri")
                 .build())
             .build())
-        .endpoint( Rules2.Endpoint.builder()
+        .endpoint( Endpoint.builder()
             .pathRegex("^/calendar/v3/calendars/[^/]*?/events/.*")
             .transform(Transform.Redact.ofPaths(
                 "$..displayName",
@@ -67,11 +68,11 @@ public class PrebuiltSanitizerRules {
                 .jsonPath("$..email")
                 .build())
             .build())
-        .endpoint(Rules2.Endpoint.builder()
+        .endpoint(Endpoint.builder()
             .pathRegex("^/calendar/v3/users/[^/]*?/settings.*")
             .build())
         //calendarList needed to analyze historical calendars
-        .endpoint(Rules2.Endpoint.builder()
+        .endpoint(Endpoint.builder()
             .pathRegex("^/calendar/v3/users/[^/]*?/calendarList[^/]*$")
             .transform(Transform.FilterTokenByRegex.builder().jsonPath("$.items[*].summaryOverride")
                 .jsonPath("$.items[*].summary")
@@ -90,7 +91,7 @@ public class PrebuiltSanitizerRules {
 
 
     static final RuleSet GOOGLE_CHAT = Rules2.builder()
-            .endpoint(Rules2.Endpoint.builder()
+            .endpoint(Endpoint.builder()
                     .pathRegex("^/admin/reports/v1/activity/users/all/applications/chat.*$")
                     .transform(Transform.Pseudonymize.builder()
                             .jsonPath("$..email")
@@ -113,11 +114,11 @@ public class PrebuiltSanitizerRules {
 
 
     static final Rules2 GDIRECTORY = Rules2.builder()
-            .endpoint(Rules2.Endpoint.builder()
+            .endpoint(Endpoint.builder()
                     .pathRegex("^/admin/directory/v1/customer/[^/]*/domains.*")
                     .build())
             //list users
-            .endpoint(Rules2.Endpoint.builder()
+            .endpoint(Endpoint.builder()
                     .pathRegex(GDIRECTORY_ENDPOINT_REGEX_USERS)
                     .transform(Transform.Pseudonymize.builder()
                             .jsonPath("$.users[*].primaryEmail")
@@ -144,7 +145,7 @@ public class PrebuiltSanitizerRules {
                             .build())
                     .build())
             //single user
-            .endpoint(Rules2.Endpoint.builder()
+            .endpoint(Endpoint.builder()
                     .pathRegex(GDIRECTORY_ENDPOINT_REGEX_USER)
                     .transform(Transform.Pseudonymize.builder()
                             .jsonPath("$.primaryEmail")
@@ -172,7 +173,7 @@ public class PrebuiltSanitizerRules {
                             .build())
                     .build())
             //list groups
-            .endpoint(Rules2.Endpoint.builder()
+            .endpoint(Endpoint.builder()
                     .pathRegex("^/admin/directory/v1/groups(\\?)?[^/]*$")
                     .transform(Transform.Pseudonymize.builder()
                             .includeOriginal(true)
@@ -186,7 +187,7 @@ public class PrebuiltSanitizerRules {
                             .build())
                     .build())
             //single group
-            .endpoint(Rules2.Endpoint.builder()
+            .endpoint(Endpoint.builder()
                     .pathRegex("^/admin/directory/v1/groups/[^/]*$")
                     .transform(Transform.Pseudonymize.builder()
                             .includeOriginal(true)
@@ -200,7 +201,7 @@ public class PrebuiltSanitizerRules {
                             .build())
                     .build())
             //list group members
-            .endpoint(Rules2.Endpoint.builder()
+            .endpoint(Endpoint.builder()
                     .pathRegex(GDIRECTORY_ENDPOINT_REGEX_MEMBERS)
                     .transform(Transform.Pseudonymize.builder()
                             .jsonPath("$..email")
@@ -210,27 +211,27 @@ public class PrebuiltSanitizerRules {
                     .build())
             //list org units
             // https://developers.google.com/admin-sdk/directory/reference/rest/v1/orgunits/list
-            .endpoint(Rules2.Endpoint.builder()
+            .endpoint(Endpoint.builder()
                     .pathRegex("^/admin/directory/v1/customer/[^/]*/orgunits\\?.*")
                     .transform(Transform.Redact.builder()
                             .jsonPath("$..description")
                             .build())
                     .build())
             //get org unit
-            .endpoint(Rules2.Endpoint.builder()
+            .endpoint(Endpoint.builder()
                     .pathRegex("^/admin/directory/v1/customer/[^/]*/orgunits/[^/]*")
                     .transform(Transform.Redact.builder()
                             .jsonPath("$..description")
                             .build())
                     .build())
 
-            .endpoint(Rules2.Endpoint.builder()
+            .endpoint(Endpoint.builder()
                     .pathRegex("^/admin/directory/v1/customer/[^/]*/roles[^/]*")
                     .transform(Transform.Redact.builder()
                             .jsonPath("$..roleDescription")
                             .build())
                     .build())
-            .endpoint(Rules2.Endpoint.builder()
+            .endpoint(Endpoint.builder()
                     .pathRegex("^/admin/directory/v1/customer/[^/]*/roles/[^/]*")
                     .transform(Transform.Redact.builder()
                             .jsonPath("$..roleDescription")
@@ -260,7 +261,7 @@ public class PrebuiltSanitizerRules {
                             .jsonPath("$.members[*].id")
                             .build());
 
-    public static co.worklytics.psoxy.rules.Rules2.Endpoint GDRIVE_ENDPOINT_RULES = Rules2.Endpoint.builder()
+    public static Endpoint GDRIVE_ENDPOINT_RULES = Endpoint.builder()
             .transform(Transform.Pseudonymize.builder()
                     .jsonPath("$..emailAddress")
                     .build())
@@ -312,7 +313,7 @@ public class PrebuiltSanitizerRules {
             .build();
 
     static final RuleSet GMAIL = Rules2.builder()
-            .endpoint(Rules2.Endpoint.builder()
+            .endpoint(Endpoint.builder()
                     .pathRegex("^/gmail/v1/users/[^/]*/messages[/]?.*?$")
                     .transform(Transform.PseudonymizeEmailHeader.builder()
                             .jsonPath("$.payload.headers[?(@.name =~ /^(" + String.join("|", EMAIL_HEADERS_CONTAINING_MULTIPLE_EMAILS) + ")$/i)].value")
@@ -345,7 +346,7 @@ public class PrebuiltSanitizerRules {
             .build();
 
     static final RuleSet GOOGLE_MEET = Rules2.builder()
-            .endpoint(Rules2.Endpoint.builder()
+            .endpoint(Endpoint.builder()
                     .pathRegex("^/admin/reports/v1/activity/users/all/applications/meet.*")
                     .transform(Transform.Pseudonymize.builder()
                             .jsonPath("$..email")
