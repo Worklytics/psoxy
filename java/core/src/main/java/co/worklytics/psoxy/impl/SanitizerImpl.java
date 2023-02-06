@@ -1,11 +1,13 @@
 package co.worklytics.psoxy.impl;
 
 import co.worklytics.psoxy.*;
+import com.avaulta.gateway.rules.Endpoint;
 import co.worklytics.psoxy.rules.Rules2;
-import co.worklytics.psoxy.rules.Transform;
+import com.avaulta.gateway.rules.transforms.Transform;
 import co.worklytics.psoxy.utils.URLUtils;
 import com.avaulta.gateway.pseudonyms.*;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
+import com.avaulta.gateway.rules.SchemaRuleUtils;
 import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
 import com.google.common.annotations.VisibleForTesting;
@@ -19,6 +21,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hazlewood.connor.bottema.emailaddress.EmailAddressCriteria;
@@ -50,10 +53,10 @@ public class SanitizerImpl implements Sanitizer {
     //  - https://github.com/json-path/JsonPath/issues/384
     //  - https://github.com/json-path/JsonPath/issues/187 (earlier issue fixing stuff that wasn't thread-safe)
 
-    Map<Rules2.Endpoint, Pattern> compiledAllowedEndpoints;
+    Map<Endpoint, Pattern> compiledAllowedEndpoints;
 
     private final Object $writeLock = new Object[0];
-    List<Pair<Pattern, Rules2.Endpoint>> compiledEndpointRules;
+    List<Pair<Pattern, Endpoint>> compiledEndpointRules;
     Map<Transform, List<JsonPath>> compiledTransforms = new ConcurrentHashMap<>();
 
     @AssistedInject
@@ -75,7 +78,10 @@ public class SanitizerImpl implements Sanitizer {
     @Inject
     UrlSafeTokenPseudonymEncoder urlSafePseudonymEncoder;
 
-    Map<Rules2.Endpoint, Pattern> getCompiledAllowedEndpoints() {
+    @Inject
+    SchemaRuleUtils schemaRuleUtils;
+
+    Map<Endpoint, Pattern> getCompiledAllowedEndpoints() {
         if (compiledAllowedEndpoints == null) {
             synchronized ($writeLock) {
                 if (configurationOptions.getRules() instanceof Rules2) {
@@ -128,7 +134,7 @@ public class SanitizerImpl implements Sanitizer {
 
     }
 
-    synchronized List<Pair<Pattern, Rules2.Endpoint>> getEndpointRules() {
+    synchronized List<Pair<Pattern, Endpoint>> getEndpointRules() {
         if (compiledEndpointRules == null) {
             synchronized ($writeLock) {
                 if (compiledEndpointRules == null) {
@@ -144,19 +150,41 @@ public class SanitizerImpl implements Sanitizer {
 
     String transform(@NonNull URL url, @NonNull String jsonResponse) {
         String relativeUrl = URLUtils.relativeURL(url);
-        Optional<Pair<Pattern, Rules2.Endpoint>> matchingEndpoint = getEndpointRules().stream()
+        Optional<Pair<Pattern, Endpoint>> matchingEndpoint = getEndpointRules()
+            .stream()
             .filter(compiledEndpoint -> compiledEndpoint.getKey().asMatchPredicate().test(relativeUrl))
             .findFirst();
 
         return matchingEndpoint.map(match -> {
+            String filteredJson = match.getValue().getResponseSchemaOptional()
+                .map(schema -> {
+                    //q: this read
+                    try {
+                        return schemaRuleUtils.filterJsonBySchema(jsonResponse, schema);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .orElse(jsonResponse);
 
-            Object document = jsonConfiguration.jsonProvider().parse(jsonResponse);
+            //q: more efficient to filter on `document` directly? problem is that our json path
+            // library contract only specifies 'Object' for it's parsed document type; but in
+            // practice, both it and our SchemaRuleUtils are using Jackson underneath - so expect
+            // everything to work OK.
 
-            for (Transform transform : match.getValue().getTransforms()) {
-                applyTransform(transform, document);
+            //NOTE: `document` here is a `LinkedHashMap`
+
+            if (ObjectUtils.isNotEmpty(match.getValue().getTransforms())) {
+                Object document = jsonConfiguration.jsonProvider().parse(filteredJson);
+
+                for (Transform transform : match.getValue().getTransforms()) {
+                    applyTransform(transform, document);
+                }
+
+                filteredJson = jsonConfiguration.jsonProvider().toJson(document);
             }
+            return filteredJson;
 
-            return jsonConfiguration.jsonProvider().toJson(document);
         }).orElse(jsonResponse);
     }
 

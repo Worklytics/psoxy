@@ -2,13 +2,15 @@ package co.worklytics.psoxy.impl;
 
 import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.gateway.ConfigService;
+import com.avaulta.gateway.rules.Endpoint;
 import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
 import co.worklytics.psoxy.rules.Rules2;
-import co.worklytics.psoxy.rules.Transform;
+import com.avaulta.gateway.rules.transforms.Transform;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestUtils;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
+import com.avaulta.gateway.rules.SchemaRuleUtils;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
@@ -26,6 +28,7 @@ import javax.inject.Singleton;
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import static co.worklytics.test.TestModules.withMockEncryptionKey;
@@ -46,6 +49,9 @@ class SanitizerImplTest {
 
     @Inject
     protected UrlSafeTokenPseudonymEncoder pseudonymEncoder;
+
+    @Inject
+    protected SchemaRuleUtils schemaRuleUtils;
 
 
     @Inject
@@ -364,7 +370,7 @@ class SanitizerImplTest {
         final URL EXAMPLE_URL = new URL("https://gmail.googleapis.com/gmail/v1/users/me/messages");
         SanitizerImpl strictSanitizer = sanitizerFactory.create(Sanitizer.ConfigurationOptions.builder()
             .rules(Rules2.builder()
-                .endpoint(Rules2.Endpoint.builder()
+                .endpoint(Endpoint.builder()
                     .allowedMethods(Collections.singleton("GET"))
                     .pathRegex("^/gmail/v1/users/[^/]*/messages[/]?.*?$")
                     .build())
@@ -374,5 +380,80 @@ class SanitizerImplTest {
 
         assertTrue(strictSanitizer.isAllowed("GET", EXAMPLE_URL));
         assertFalse(strictSanitizer.isAllowed(notGet, EXAMPLE_URL));
+    }
+
+    @SneakyThrows
+    @Test
+    public void schema_poc() {
+        String jsonString = new String(TestUtils.getData("api-response-examples/g-workspace/gmail/message.json"));
+
+
+        final URL EXAMPLE_URL = new URL("https://gmail.googleapis.com/gmail/v1/users/me/messages");
+
+        String sanitized = sanitizer.sanitize("GET", EXAMPLE_URL, jsonString);
+
+        assertTrue(sanitized.contains("historyId"));
+
+        SchemaRuleUtils.JsonSchema jsonSchema = SchemaRuleUtils.JsonSchema.builder()
+            .type("object")
+            .properties(Map.<String, SchemaRuleUtils.JsonSchema>of(
+                "id", SchemaRuleUtils.JsonSchema.builder()
+                    .type("string")
+                    .build(),
+                "threadId", SchemaRuleUtils.JsonSchema.builder()
+                    .type("string")
+                    .build(),
+                "labelIds", SchemaRuleUtils.JsonSchema.builder()
+                    .type("array")
+                    .items(SchemaRuleUtils.JsonSchema.builder()
+                        .type("string")
+                        .build())
+                    .build(),
+                "payload", SchemaRuleUtils.JsonSchema.builder()
+                    .type("object")
+                    .properties(Map.<String, SchemaRuleUtils.JsonSchema>of(
+                        "headers", SchemaRuleUtils.JsonSchema.builder()
+                            .type("array")
+                            .items(SchemaRuleUtils.JsonSchema.builder()
+                                .type("object")
+                                .properties(Map.<String, SchemaRuleUtils.JsonSchema>of(
+                                    "name", SchemaRuleUtils.JsonSchema.builder()
+                                        .type("string")
+                                        .build(),
+                                    "value", SchemaRuleUtils.JsonSchema.builder()
+                                        .type("string")
+                                        .build()
+                                ))
+                                .build())
+                            .build(),
+                        "partId", SchemaRuleUtils.JsonSchema.builder()
+                            .type("string")
+                            .build()
+                    ))
+                    .build(),
+                "sizeEstimate", SchemaRuleUtils.JsonSchema.builder()
+                    .type("integer")
+                    .build(),
+                "internalDate", SchemaRuleUtils.JsonSchema.builder()
+                    .type("string")
+                    .build()
+                ))
+            .build();
+
+        SanitizerImpl strictSanitizer = sanitizerFactory.create(Sanitizer.ConfigurationOptions.builder()
+            .rules(Rules2.builder()
+                .endpoint(Endpoint.builder()
+                    .allowedMethods(Collections.singleton("GET"))
+                    .pathRegex("^/gmail/v1/users/[^/]*/messages[/]?.*?$")
+                    .responseSchema(jsonSchema)
+                    .build())
+                .build())
+            .build()
+        );
+
+        String strict = strictSanitizer.sanitize("GET", EXAMPLE_URL, jsonString);
+
+        assertTrue(strict.contains("internalDate"));
+        assertFalse(strict.contains("historyId"));
     }
 }

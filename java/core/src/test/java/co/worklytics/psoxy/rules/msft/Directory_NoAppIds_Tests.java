@@ -1,7 +1,6 @@
 package co.worklytics.psoxy.rules.msft;
 
 import co.worklytics.psoxy.rules.Rules2;
-import co.worklytics.psoxy.rules.Transform;
 import lombok.Getter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,7 +20,7 @@ public class Directory_NoAppIds_Tests extends DirectoryTests {
     public void setTestSpec() {
         this.setTestSpec(RulesTestSpec.builder()
                 .yamlSerializationFilePath("microsoft-365/directory_no-app-ids")
-                .sanitizedExamplesDirectoryPath("api-response-examples/microsoft-365/directory/no-app-ids")
+                .sanitizedExamplesDirectoryPath("api-response-examples/microsoft-365/directory/sanitized-no-app-ids")
                 .build());
     }
 

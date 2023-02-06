@@ -5,7 +5,7 @@ terraform {
     # for the infra that will host Psoxy instances
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 4.12"
+      version = "~> 4.15"
     }
 
     # for the API connections to Google Workspace
@@ -80,13 +80,24 @@ module "psoxy-aws-google-workspace" {
   google_workspace_example_user  = var.google_workspace_example_user
   google_workspace_example_admin = var.google_workspace_example_admin
   general_environment_variables  = var.general_environment_variables
-
+# Uncomment the following line if you want to apply KMS encryption on your SSM parameters
+#  aws_ssm_key_id                 = aws_kms_key.key.key_id
 }
+
+## TODO: requires targeted apply to create key first, bc value of key_id determines map content
+## in example
+#resource "aws_kms_key" "key" {
+#  description             = "KMS key for Psoxy"
+#  enable_key_rotation     = true
+#  is_enabled              = true
+#}
 
 # if you generated these, you may want them to import back into your data warehouse
 output "lookup_tables" {
   value = module.psoxy-aws-google-workspace.lookup_tables
 }
+
+
 
 /** Vault dev config for local testing **/
 

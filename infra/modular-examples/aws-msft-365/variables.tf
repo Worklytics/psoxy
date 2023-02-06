@@ -29,6 +29,12 @@ variable "aws_ssm_param_root_path" {
   }
 }
 
+variable "aws_ssm_key_id" {
+  type        = string
+  description = "KMS key id to use for encrypting SSM SecureString parameters created by this module, in any. (by default, will encrypt with AWS-managed keys)"
+  default     = null
+}
+
 variable "caller_gcp_service_account_ids" {
   type        = list(string)
   description = "ids of GCP service accounts allowed to send requests to the proxy (eg, unique ID of the SA of your Worklytics instance)"
@@ -181,16 +187,8 @@ variable "msft_tenant_id" {
   description = "ID of Microsoft tenant to connect to (req'd only if config includes MSFT connectors)"
 }
 
-variable "certificate_subject" {
-  type        = string
-  description = "value for 'subject' passed to openssl when generation certificate (eg '/C=US/ST=New York/L=New York/CN=www.worklytics.co')"
-}
-
 variable "pseudonymize_app_ids" {
   type        = string
   description = "if set, will set value of PSEUDONYMIZE_APP_IDS environment variable to this value for all sources"
   default     = false
 }
-
-
-

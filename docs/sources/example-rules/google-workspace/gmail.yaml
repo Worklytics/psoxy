@@ -1,0 +1,13 @@
+endpoints:
+  - pathRegex: "^/gmail/v1/users/[^/]*/messages[/]?.*?$"
+    transforms:
+      - !<pseudonymizeEmailHeader>
+        jsonPaths:
+          - "$.payload.headers[?(@.name =~ /^(From|To|Cc|Bcc)$/i)].value"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.payload.headers[?(@.name =~ /^(X-Original-Sender|Delivered-To|Sender)$/i)].value"
+      - !<redact>
+        jsonPaths:
+          - "$.payload.headers[?(!(@.name =~ /^From|To|Cc|Bcc|X-Original-Sender|Delivered-To|Sender|Message-ID|Date|In-Reply-To|Original-Message-ID|References$/i))]"
+

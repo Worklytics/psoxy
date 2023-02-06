@@ -12,9 +12,11 @@ fi
 
 cp terraform.tfvars.example terraform.tfvars
 
+TFVARS_FILE="$(pwd)/terraform.tfvars"
+
 # append root of checkout automatically
 cd ../../..
-echo "psoxy_base_dir                = \"$(pwd)\"" >> infra/examples/aws-google-workspace/terraform.tfvars
+echo "psoxy_base_dir                = \"$(pwd)/\"" >> $TFVARS_FILE
 
 # give user some feedback
 printf "Init'd example terraform config. Please open ${BLUE}terraform.tfvars${NC} and customize it to your needs.\n"

@@ -134,7 +134,7 @@ locals {
         "Group.Read.All"
       ]
       environment_variables : {}
-      example_calls : [
+      example_api_calls : [
         "/v1.0/users",
         "/v1.0/users/${var.example_msft_user_guid}",
         "/v1.0/groups",
@@ -155,7 +155,7 @@ locals {
         "User.Read.All"
       ],
       environment_variables : {}
-      example_calls : [
+      example_api_calls : [
         "/v1.0/users",
         "/v1.0/users/${var.example_msft_user_guid}/events",
         "/v1.0/users/${var.example_msft_user_guid}/calendarView?startDateTime=2022-10-01T00:00:00Z&endDateTime=${timestamp()}",
@@ -176,8 +176,10 @@ locals {
         "Group.Read.All",
         "User.Read.All"
       ],
-      environment_variables : {}
-      example_calls : [
+      environment_variables : {
+        REFRESH_ENDPOINT = "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
+      }
+      example_api_calls : [
         "/beta/users",
         "/beta/users/${var.example_msft_user_guid}/mailboxSettings",
         "/beta/users/${var.example_msft_user_guid}/mailFolders/SentItems/messages",

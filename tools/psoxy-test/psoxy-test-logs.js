@@ -3,6 +3,7 @@ import aws from './lib/aws.js';
 import gcp from './lib/gcp.js';
 import getLogger from './lib/logger.js';
 import _ from 'lodash';
+import { constants as httpCodes } from 'http2';
 
 /**
  * Get (and display using logger passed as param) the latest log events from a 
@@ -25,7 +26,7 @@ async function getAWSLogs(options = {}, logger) {
   logger.verbose(`Getting logs for ${options.logGroupName}`);
 
   const logStreamsResult = await aws.getLogStreams(options, client);
-  if (logStreamsResult['$metadata'].httpStatusCode !== 200) {
+  if (logStreamsResult['$metadata'].httpStatusCode !== httpCodes.HTTP_STATUS_OK) {
     throw new Error(`Unable to get logs for ${options.logGroupName}`, {
       additional: logStreamsResult,
     });
@@ -47,7 +48,7 @@ async function getAWSLogs(options = {}, logger) {
       client
     );
     
-    if (logEventsResult['$metadata'].httpStatusCode !== 200) {
+    if (logEventsResult['$metadata'].httpStatusCode !== httpCodes.HTTP_STATUS_OK) {
       throw new Error(`Unable to get log events for stream ${logEventsResult}`, 
         { additional: logEventsResult });
     }

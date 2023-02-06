@@ -24,6 +24,7 @@ module "psoxy_lambda" {
   path_to_instance_ssm_parameters = var.path_to_instance_ssm_parameters
   global_parameter_arns           = var.global_parameter_arns
   environment_variables           = var.environment_variables
+  ssm_kms_key_ids                 = var.ssm_kms_key_ids
 }
 
 resource "aws_lambda_function_url" "lambda_url" {
@@ -75,8 +76,13 @@ ${local.command_npm_install}
 ```
 
 ### Make "test calls"
+First, run an initial "Health Check" call to make sure the Psoxy instance is up and running:
 
-Based on your configuration, these are some example test calls you can try (YMMV):
+```shell
+${local.command_cli_call} -u ${local.proxy_endpoint_url} --health-check
+```
+
+Then, based on your configuration, these are some example test calls you can try (YMMV):
 
 ```shell
 ${coalesce(join("\n", local.command_test_calls), "cd docs/example-api-calls/")}
@@ -132,6 +138,10 @@ output "function_arn" {
 
 output "instance_role_arn" {
   value = module.psoxy_lambda.iam_role_for_lambda_arn
+}
+
+output "instance_role_name" {
+  value = module.psoxy_lambda.iam_role_for_lambda_name
 }
 
 output "instance_id" {

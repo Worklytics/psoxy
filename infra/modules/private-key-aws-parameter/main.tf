@@ -11,6 +11,8 @@ resource "aws_ssm_parameter" "private-key" {
   type        = "SecureString"
   description = "Value of private key"
   value       = var.private_key
+  key_id      = coalesce(var.kms_key_id, "alias/aws/ssm")
+
 
   lifecycle {
     ignore_changes = [
@@ -24,6 +26,7 @@ resource "aws_ssm_parameter" "private-key-id" {
   type        = "SecureString" # probably not necessary
   description = "ID of private key"
   value       = var.private_key_id
+  key_id      = coalesce(var.kms_key_id, "alias/aws/ssm")
 
   lifecycle {
     ignore_changes = [

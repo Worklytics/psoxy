@@ -1,9 +1,10 @@
 package co.worklytics.psoxy.rules.msft;
 
 import co.worklytics.psoxy.ConfigRulesModule;
+import com.avaulta.gateway.rules.Endpoint;
 import co.worklytics.psoxy.rules.Rules2;
 import co.worklytics.psoxy.rules.RuleSet;
-import co.worklytics.psoxy.rules.Transform;
+import com.avaulta.gateway.rules.transforms.Transform;
 import co.worklytics.psoxy.rules.zoom.ZoomTransforms;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.google.common.collect.ImmutableMap;
@@ -59,19 +60,19 @@ public class PrebuiltSanitizerRules {
             .build()
 
     );
-    static final Rules2.Endpoint DIRECTORY_USERS = Rules2.Endpoint.builder()
+    static final Endpoint DIRECTORY_USERS = Endpoint.builder()
         .pathRegex(DIRECTORY_REGEX_USERS)
         .allowedQueryParams(List.of("$top","$select","$skiptoken","$orderBy","$count"))
         .transforms(USER_TRANSFORMS)
         .build();
 
-    static final Rules2.Endpoint DIRECTORY_USERS_NO_APP_IDS = Rules2.Endpoint.builder()
+    static final Endpoint DIRECTORY_USERS_NO_APP_IDS = Endpoint.builder()
         .pathRegex(DIRECTORY_REGEX_USERS_BY_PSEUDO)
         .allowedQueryParams(List.of("$top","$select","$skiptoken","$orderBy","$count"))
         .transforms(USER_TRANSFORMS)
         .build();
 
-    static final Rules2.Endpoint DIRECTORY_GROUPS = Rules2.Endpoint.builder()
+    static final Endpoint DIRECTORY_GROUPS = Endpoint.builder()
         .pathRegex("^/(v1.0|beta)/groups/?[^/]*")
             .transform(Transform.Redact.builder()
                 .jsonPath("$..owners")
@@ -95,7 +96,7 @@ public class PrebuiltSanitizerRules {
                 .build())
         .build();
 
-    static final Rules2.Endpoint DIRECTORY_GROUP_MEMBERS = Rules2.Endpoint.builder()
+    static final Endpoint DIRECTORY_GROUP_MEMBERS = Endpoint.builder()
         .pathRegex(DIRECTORY_REGEX_GROUP_MEMBERS)
         .allowedQueryParams(List.of("$top","$select","$skiptoken","$orderBy","$count"))
         .transforms(USER_TRANSFORMS)
@@ -136,15 +137,15 @@ public class PrebuiltSanitizerRules {
     static final String OUTLOOK_MAIL_PATH_REGEX_MESSAGES = "^/(v1.0|beta)/users/[^/]*/messages/[^/]*";
     static final String OUTLOOK_MAIL_PATH_REGEX_SENT_MESSAGES = "^/(v1.0|beta)/users/[^/]*/mailFolders(/SentItems|\\('SentItems'\\))/messages.*";
 
-    static final List<Rules2.Endpoint> OUTLOOK_MAIL_ENDPOINTS = Arrays.asList(
-        Rules2.Endpoint.builder()
+    static final List<Endpoint> OUTLOOK_MAIL_ENDPOINTS = Arrays.asList(
+        Endpoint.builder()
             .pathRegex(OUTLOOK_PATH_REGEX_MAILBOX_SETTINGS)
             .transform(Transform.Redact.builder()
                 .jsonPath("$..internalReplyMessage")
                 .jsonPath("$..externalReplyMessage")
                 .build())
             .build(),
-        Rules2.Endpoint.builder()
+        Endpoint.builder()
             .pathRegex(OUTLOOK_MAIL_PATH_REGEX_MESSAGES)
             .transform(Transform.Redact.builder()
                 .jsonPath("$..subject")
@@ -162,7 +163,7 @@ public class PrebuiltSanitizerRules {
                 .build()
             )
             .build(),
-        Rules2.Endpoint.builder()
+        Endpoint.builder()
             .pathRegex(OUTLOOK_MAIL_PATH_REGEX_SENT_MESSAGES)
             .transform(Transform.Redact.builder()
                 .jsonPath("$..subject")
@@ -196,7 +197,7 @@ public class PrebuiltSanitizerRules {
 
 
     //transforms to apply to endpoints that return Event or Event collection
-    static final Rules2.Endpoint EVENT_TRANSFORMS = Rules2.Endpoint.builder()
+    static final Endpoint EVENT_TRANSFORMS = Endpoint.builder()
         .transform(Transform.Redact.builder()
             .jsonPath("$..subject")
             .jsonPath("$..emailAddress.name")
@@ -232,8 +233,8 @@ public class PrebuiltSanitizerRules {
 
     static final String OUTLOOK_CALENDAR_PATH_REGEX_EVENTS = "^/(v1.0|beta)/users/[^/]*/(((calendars/[^/]*/)?events.*)|(calendar/calendarView(?)[^/]*))";
 
-    static final List<Rules2.Endpoint> OUTLOOK_CALENDAR_ENDPOINTS = Arrays.asList(
-        Rules2.Endpoint.builder()
+    static final List<Endpoint> OUTLOOK_CALENDAR_ENDPOINTS = Arrays.asList(
+        Endpoint.builder()
             .pathRegex(OUTLOOK_PATH_REGEX_MAILBOX_SETTINGS)
             .transform(Transform.Redact.builder()
                 .jsonPath("$..internalReplyMessage")
