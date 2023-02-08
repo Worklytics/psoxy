@@ -14,7 +14,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.zip.GZIPInputStream;
 
-import static co.worklytics.psoxy.Handler.ResponseCompressionHandler.GZIP;
+import static co.worklytics.psoxy.ResponseCompressionHandler.GZIP;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ResponseCompressionHandlerTest {
@@ -24,7 +24,7 @@ class ResponseCompressionHandlerTest {
     @ValueSource(ints = {0, 512, 1024, 2047, 2048, 100_000})
     void compress(int bodySize) {
 
-        Handler.ResponseCompressionHandler responseCompressionHandler = new Handler.ResponseCompressionHandler();
+        ResponseCompressionHandler responseCompressionHandler = new ResponseCompressionHandler();
         String uncompressed = RandomStringUtils.random(bodySize);
 
         HttpEventResponse originalResponse =
