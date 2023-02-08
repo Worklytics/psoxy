@@ -152,6 +152,11 @@ output "sanitized_bucket" {
   value = google_storage_bucket.output-bucket.name
 }
 
+output "proxy_kind" {
+  value       = "bulk"
+  description = "The kind of proxy instance this is."
+}
+
 output "next_todo_step" {
   value = var.todo_step + 1
 }

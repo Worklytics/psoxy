@@ -293,3 +293,8 @@ output "instance_id" {
 output "next_todo_step" {
   value = var.todo_step + 1
 }
+
+output "proxy_kind" {
+  value       = "bulk"
+  description = "The kind of proxy instance this is."
+}

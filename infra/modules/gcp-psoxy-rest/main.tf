@@ -157,6 +157,11 @@ output "cloud_function_url" {
   value = local.proxy_endpoint_url
 }
 
+output "proxy_kind" {
+  value       = "rest"
+  description = "The kind of proxy instance this is."
+}
+
 output "next_todo_step" {
   value = var.todo_step + 1
 }
