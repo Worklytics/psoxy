@@ -1,13 +1,3 @@
-terraform {
-  required_providers {
-    # for the infra that will host Psoxy instances
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 4.29"
-    }
-  }
-}
-
 resource "random_string" "bucket_suffix" {
   length  = 8
   lower   = true

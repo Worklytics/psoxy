@@ -2,16 +2,6 @@
 # TODO: highly duplicative with regular `aws-psoxy-bulk` case, and could likely be unified in future
 # version
 
-terraform {
-  required_providers {
-    # for the infra that will host Psoxy instances
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 4.29"
-    }
-  }
-}
-
 module "psoxy_lambda" {
   source = "../aws-psoxy-lambda"
 

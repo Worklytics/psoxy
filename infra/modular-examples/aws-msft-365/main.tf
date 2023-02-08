@@ -3,12 +3,12 @@ terraform {
     # for the infra that will host Psoxy instances
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 4.51"
+      version = ">= 4.12"
     }
 
     # for API connections to Microsoft 365
     azuread = {
-      version = "~> 2.3"
+      version = ">= 2.3, < 3.0"
     }
   }
 }
