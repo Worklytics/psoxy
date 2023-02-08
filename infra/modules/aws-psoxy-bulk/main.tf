@@ -278,6 +278,10 @@ output "instance_role_arn" {
   value = module.psoxy_lambda.iam_role_for_lambda_arn
 }
 
+output "instance_role_name" {
+  value = module.psoxy_lambda.iam_role_for_lambda_name
+}
+
 output "function_arn" {
   value = module.psoxy_lambda.function_arn
 }
