@@ -92,8 +92,6 @@ export default async function (options = {}) {
         // Response potentially long, let's remind to check logs for complete results
         logger.success(`Check out run log to see complete results: ${__dirname}/run.log`);
       }
-    } else {
-
     }
 
     logger.success(`${successMessagePrefix} ${result.statusMessage} - ${result.status}`,
