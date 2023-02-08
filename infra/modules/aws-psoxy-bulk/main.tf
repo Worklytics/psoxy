@@ -290,11 +290,12 @@ output "instance_id" {
   value = module.psoxy_lambda.function_name
 }
 
-output "next_todo_step" {
-  value = var.todo_step + 1
-}
-
 output "proxy_kind" {
   value       = "bulk"
   description = "The kind of proxy instance this is."
 }
+
+output "next_todo_step" {
+  value = var.todo_step + 1
+}
+

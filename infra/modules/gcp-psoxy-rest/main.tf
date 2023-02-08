@@ -152,7 +152,6 @@ output "cloud_function_name" {
   value = google_cloudfunctions_function.function.name
 }
 
-
 output "cloud_function_url" {
   value = local.proxy_endpoint_url
 }
