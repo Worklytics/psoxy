@@ -286,6 +286,10 @@ output "function_arn" {
   value = module.psoxy_lambda.function_arn
 }
 
+output "function_name" {
+  value = module.psoxy_lambda.function_name
+}
+
 output "instance_id" {
   value = module.psoxy_lambda.function_name
 }
