@@ -143,7 +143,7 @@ locals {
       "kms:Decrypt"
     ]
     Effect   = "Allow"
-    Resource = [ for k in data.aws_kms_key.keys : k.arn]
+    Resource = [for k in data.aws_kms_key.keys : k.arn]
   }] : []
 
   policy_statements = concat(

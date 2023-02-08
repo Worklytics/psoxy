@@ -16,7 +16,7 @@ terraform {
 locals {
   base_config_path = "${var.psoxy_base_dir}configs/"
   host_platform_id = "AWS"
-  ssm_key_ids      = var.aws_ssm_key_id == null ? {} : { 0: var.aws_ssm_key_id }
+  ssm_key_ids      = var.aws_ssm_key_id == null ? {} : { 0 : var.aws_ssm_key_id }
 }
 
 data "azuread_client_config" "current" {}
