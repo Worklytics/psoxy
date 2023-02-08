@@ -47,12 +47,17 @@ public class APIGatewayV1ProxyEventRequestAdapter implements co.worklytics.psoxy
 
     @Override
     public String getHttpMethod() {
+        if (event.getRequestContext().getHttpMethod() == null) {
+            //q: better exception to throw here???
+            throw new IllegalStateException("Psoxy expects API Gateway V1 REST API proxy payload here. If using API Gateway V2 or Lambda function, please set the handler as co.worklytics.psoxy.Handler");
+        }
+
         return event.getRequestContext().getHttpMethod();
     }
 
     @Override
     public byte[] getBody() {
-        return Optional.ofNullable(event.getBody()).map(String::getBytes).orElse(null);
+        return StringUtils.isNotBlank(event.getBody()) ? event.getBody().getBytes() : null;
     }
 
     @Override
