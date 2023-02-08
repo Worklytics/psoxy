@@ -2,7 +2,6 @@
 
 Working tracking of changes, updated as work done prior to release.  Please review [releases](https://github.com/Worklytics/psoxy/releases) for ultimate versions.
 
-
 ## Next
 
 ## 0.5 *future, subject to change!!*
@@ -17,11 +16,23 @@ Working tracking of changes, updated as work done prior to release.  Please revi
         "read+write `PSOXY_GCAL*`" (if shared secrets have common prefix with connector secrets,
         then wildcard policy to read shared also grants read of secrets across all connectors)
   - keys/salts per value kind (PII, item id, etc)
-  - Updated `azuread` and `aws` modules. Please run following Terraform command if you are coming 
-    from an older version:
-        `terraform init --upgrade`
-  - Replace certificates for MSFT connectors and using Workload Identity Federation instead.
 
+## v0.4.11
+Features:
+ - avoid ENV vars for config paths if default values
+ - troubleshooting docs
+ - support for encryption SSM parameters with AWS KMS keys
+ - sanitized examples for outlook-cal, mail
+ - improve GCP connector TODOs
+ - defensive HTTP header handling, in case unexpected casing from clients
+ - npm test tool support for sending the basic health check
+ - MSFT connections authenticated via identity federation, rather than certificates
+ - support for adding filter by JSON schema to rules
+ - npm test tool support for psoxy instances deployed behind API gateway
+
+Fixes:
+  - update NPM dependencies to avoid some vulnerabilities (npm packages are only used for testing;
+    not exposed to any external clients)
 
 ## v0.4.10
 

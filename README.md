@@ -130,27 +130,20 @@ terraform apply
 
 ## Releases
 
+### [v0.4.11](https://github.com/Worklytics/psoxy/releases/tag/v0.4.11)
+
+Highlights:
+  - Azure authentication with federation rather than certificates/secrets
+  - npm test tool support health check, API gateway endpoints
+
 ### [v0.4.10](https://github.com/Worklytics/psoxy/releases/tag/v0.4.10)
-Features:
+
+Highlights:
   - token handling improvements
   - support for config paths in AWS SSM (prev, only supported for Vault)
   - cleaner Google project references in samples
   - deep-link TODO files to 'Add Connection' interface in Worklytics, prefilling params
   - generate simpler bash test script, facilitate rapid integration tests
-
-
-### [v0.4.9](https://github.com/Worklytics/psoxy/releases/tag/v0.4.9)
-
-Features:
-  - vault support (_alpha_)
-
-### [v0.4.8](https://github.com/Worklytics/psoxy/releases/tag/v0.4.8)
-
-Features:
- - modular examples, simplifying usage/upgrades
- - tools to support for testing `bulk` cases, quick review of logs
- - lookup table builder examples
- - restricting HTTP methods in rules
 
 Review [earlier release notes in GitHub](https://github.com/Worklytics/psoxy/releases).
 
