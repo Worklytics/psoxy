@@ -1,3 +1,5 @@
+# example configuration of Psoxy deployment for Google Workspace-based organization into AWS
+
 terraform {
   required_providers {
     # for the infra that will host Psoxy instances
@@ -6,9 +8,9 @@ terraform {
       version = "~> 4.12"
     }
 
-    # for API connections to Microsoft 365
-    azuread = {
-      version = "~> 2.0"
+    # for the API connections to Google Workspace
+    google = {
+      version = ">= 3.74, <= 5.0"
     }
   }
 
@@ -45,13 +47,20 @@ provider "aws" {
   ]
 }
 
-provider "azuread" {
-  tenant_id = var.msft_tenant_id
+# Google user or service account which Terraform is authenticated as must be authorized to
+# provision resources (Service Accounts + Keys; and activate APIs) in this project
+#data "google_project" "psoxy-google-connectors" {
+#  project_id = var.gcp_project_id
+#}
+
+resource "google_project" "psoxy-google-connectors" {
+  project_id = var.gcp_project_id
+  name = var.gcp_project_id
 }
 
-module "psoxy-aws-msft-365" {
-  # source = "../../modular-examples/aws-msft-365"
-  source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-msft-365?ref=v0.4.11"
+module "psoxy-aws-google-workspace" {
+  source = "../../modular-examples/aws-google-workspace"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-google-workspace?ref=v0.4.10"
 
   aws_account_id                 = var.aws_account_id
   aws_assume_role_arn            = var.aws_assume_role_arn # role that can test the instances (lambdas)
@@ -59,20 +68,22 @@ module "psoxy-aws-msft-365" {
   aws_ssm_param_root_path        = var.aws_ssm_param_root_path
   psoxy_base_dir                 = var.psoxy_base_dir
   force_bundle                   = var.force_bundle
-  caller_gcp_service_account_ids = var.caller_gcp_service_account_ids
   caller_aws_arns                = var.caller_aws_arns
+  caller_gcp_service_account_ids = var.caller_gcp_service_account_ids
+  environment_name               = var.environment_name
+  connector_display_name_suffix  = var.connector_display_name_suffix
   enabled_connectors             = var.enabled_connectors
   non_production_connectors      = var.non_production_connectors
-  connector_display_name_suffix  = var.connector_display_name_suffix
   custom_bulk_connectors         = var.custom_bulk_connectors
   lookup_table_builders          = var.lookup_table_builders
-  msft_tenant_id                 = var.msft_tenant_id
-  certificate_subject            = var.certificate_subject
-  pseudonymize_app_ids           = var.pseudonymize_app_ids
+  gcp_project_id                 = google_project.psoxy-google-connectors.project_id
+  google_workspace_example_user  = var.google_workspace_example_user
+  google_workspace_example_admin = var.google_workspace_example_admin
   general_environment_variables  = var.general_environment_variables
 }
 
 # if you generated these, you may want them to import back into your data warehouse
 output "lookup_tables" {
-  value = module.psoxy-aws-msft-365.lookup_tables
+  value = module.psoxy-aws-google-workspace.lookup_tables
 }
+

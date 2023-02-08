@@ -1,0 +1,2957 @@
+[0m[1mmodule.psoxy-aws-google-workspace.module.psoxy-aws.module.psoxy-package.data.external.deployment_package: Reading...[0m[0m
+[0m[1mmodule.psoxy-aws-google-workspace.module.psoxy-aws.module.psoxy-package.data.external.deployment_package: Read complete after 0s [id=-][0m
+[0m[1mmodule.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].module.psoxy_lambda.data.aws_region.current: Reading...[0m[0m
+[0m[1mmodule.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["zoom"].module.psoxy_lambda.data.aws_region.current: Reading...[0m[0m
+[0m[1mmodule.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["slack-discovery-api"].module.psoxy_lambda.data.aws_region.current: Reading...[0m[0m
+[0m[1mmodule.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].module.psoxy_lambda.data.aws_region.current: Read complete after 0s [id=us-east-1][0m
+[0m[1mmodule.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].module.psoxy_lambda.data.aws_caller_identity.current: Reading...[0m[0m
+[0m[1mmodule.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["zoom"].module.psoxy_lambda.data.aws_region.current: Read complete after 0s [id=us-east-1][0m
+[0m[1mmodule.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["slack-discovery-api"].module.psoxy_lambda.data.aws_region.current: Read complete after 0s [id=us-east-1][0m
+[0m[1mmodule.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["zoom"].module.psoxy_lambda.data.aws_caller_identity.current: Reading...[0m[0m
+[0m[1mmodule.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["slack-discovery-api"].module.psoxy_lambda.data.aws_caller_identity.current: Reading...[0m[0m
+[0m[1mmodule.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdrive"].module.psoxy_lambda.data.aws_caller_identity.current: Reading...[0m[0m
+[0m[1mmodule.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gcal"].module.psoxy_lambda.data.aws_caller_identity.current: Reading...[0m[0m
+[0m[1mmodule.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gmail"].module.psoxy_lambda.data.aws_caller_identity.current: Reading...[0m[0m
+[0m[1mmodule.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-chat"].module.psoxy_lambda.data.aws_caller_identity.current: Reading...[0m[0m
+[0m[1mmodule.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-meet"].module.psoxy_lambda.data.aws_caller_identity.current: Reading...[0m[0m
+[0m[1mmodule.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdirectory"].module.psoxy_lambda.data.aws_caller_identity.current: Reading...[0m[0m
+[0m[1mmodule.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-chat"].module.psoxy_lambda.data.aws_region.current: Reading...[0m[0m
+[0m[1mmodule.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-chat"].module.psoxy_lambda.data.aws_region.current: Read complete after 0s [id=us-east-1][0m
+[0m[1mmodule.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-meet"].module.psoxy_lambda.data.aws_region.current: Reading...[0m[0m
+[0m[1mmodule.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-meet"].module.psoxy_lambda.data.aws_region.current: Read complete after 0s [id=us-east-1][0m
+[0m[1mmodule.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gcal"].module.psoxy_lambda.data.aws_region.current: Reading...[0m[0m
+[0m[1mmodule.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gcal"].module.psoxy_lambda.data.aws_region.current: Read complete after 0s [id=us-east-1][0m
+[0m[1mmodule.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdirectory"].module.psoxy_lambda.data.aws_region.current: Reading...[0m[0m
+[0m[1mmodule.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdirectory"].module.psoxy_lambda.data.aws_region.current: Read complete after 0s [id=us-east-1][0m
+[0m[1mmodule.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdrive"].module.psoxy_lambda.data.aws_region.current: Reading...[0m[0m
+[0m[1mmodule.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdrive"].module.psoxy_lambda.data.aws_region.current: Read complete after 0s [id=us-east-1][0m
+[0m[1mmodule.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gmail"].module.psoxy_lambda.data.aws_region.current: Reading...[0m[0m
+[0m[1mmodule.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gmail"].module.psoxy_lambda.data.aws_region.current: Read complete after 0s [id=us-east-1][0m
+[0m[1mmodule.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].module.psoxy_lambda.data.aws_caller_identity.current: Read complete after 0s [id=962428643465][0m
+[0m[1mmodule.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["zoom"].module.psoxy_lambda.data.aws_caller_identity.current: Read complete after 0s [id=962428643465][0m
+[0m[1mmodule.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdirectory"].module.psoxy_lambda.data.aws_caller_identity.current: Read complete after 0s [id=962428643465][0m
+[0m[1mmodule.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["slack-discovery-api"].module.psoxy_lambda.data.aws_caller_identity.current: Read complete after 0s [id=962428643465][0m
+[0m[1mmodule.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-meet"].module.psoxy_lambda.data.aws_caller_identity.current: Read complete after 0s [id=962428643465][0m
+[0m[1mmodule.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gcal"].module.psoxy_lambda.data.aws_caller_identity.current: Read complete after 0s [id=962428643465][0m
+[0m[1mmodule.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-chat"].module.psoxy_lambda.data.aws_caller_identity.current: Read complete after 0s [id=962428643465][0m
+[0m[1mmodule.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdrive"].module.psoxy_lambda.data.aws_caller_identity.current: Read complete after 1s [id=962428643465][0m
+[0m[1mmodule.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gmail"].module.psoxy_lambda.data.aws_caller_identity.current: Read complete after 1s [id=962428643465][0m
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  [32m+[0m create
+[0m
+Terraform will perform the following actions:
+
+[1m  # google_project.psoxy-google-connectors[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "google_project" "psoxy-google-connectors" {
+      [32m+[0m [0m[1m[0mauto_create_network[0m[0m = true
+      [32m+[0m [0m[1m[0mid[0m[0m                  = (known after apply)
+      [32m+[0m [0m[1m[0mname[0m[0m                = "psoxy-acme-example"
+      [32m+[0m [0m[1m[0mnumber[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0mproject_id[0m[0m          = "psoxy-acme-example"
+      [32m+[0m [0m[1m[0mskip_delete[0m[0m         = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.aws_ssm_parameter.long-access-secrets["slack-discovery-api.ACCESS_TOKEN"][0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_ssm_parameter" "long-access-secrets" {
+      [32m+[0m [0m[1m[0marn[0m[0m            = (known after apply)
+      [32m+[0m [0m[1m[0mdata_type[0m[0m      = (known after apply)
+      [32m+[0m [0m[1m[0mdescription[0m[0m    = "Stores the value of ACCESS_TOKEN for `psoxy-slack-discovery-api`"
+      [32m+[0m [0m[1m[0mid[0m[0m             = (known after apply)
+      [32m+[0m [0m[1m[0minsecure_value[0m[0m = (known after apply)
+      [32m+[0m [0m[1m[0mkey_id[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mname[0m[0m           = "PSOXY_SLACK_DISCOVERY_API_ACCESS_TOKEN"
+      [32m+[0m [0m[1m[0mtags_all[0m[0m       = (known after apply)
+      [32m+[0m [0m[1m[0mtier[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mtype[0m[0m           = "SecureString"
+      [32m+[0m [0m[1m[0mvalue[0m[0m          = (sensitive value)
+      [32m+[0m [0m[1m[0mversion[0m[0m        = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.aws_ssm_parameter.long-access-secrets["zoom.ACCESS_TOKEN"][0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_ssm_parameter" "long-access-secrets" {
+      [32m+[0m [0m[1m[0marn[0m[0m            = (known after apply)
+      [32m+[0m [0m[1m[0mdata_type[0m[0m      = (known after apply)
+      [32m+[0m [0m[1m[0mdescription[0m[0m    = "Stores the value of ACCESS_TOKEN for `psoxy-zoom`"
+      [32m+[0m [0m[1m[0mid[0m[0m             = (known after apply)
+      [32m+[0m [0m[1m[0minsecure_value[0m[0m = (known after apply)
+      [32m+[0m [0m[1m[0mkey_id[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mname[0m[0m           = "PSOXY_ZOOM_ACCESS_TOKEN"
+      [32m+[0m [0m[1m[0mtags_all[0m[0m       = (known after apply)
+      [32m+[0m [0m[1m[0mtier[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mtype[0m[0m           = "SecureString"
+      [32m+[0m [0m[1m[0mvalue[0m[0m          = (sensitive value)
+      [32m+[0m [0m[1m[0mversion[0m[0m        = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.aws_ssm_parameter.long-access-secrets["zoom.ACCOUNT_ID"][0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_ssm_parameter" "long-access-secrets" {
+      [32m+[0m [0m[1m[0marn[0m[0m            = (known after apply)
+      [32m+[0m [0m[1m[0mdata_type[0m[0m      = (known after apply)
+      [32m+[0m [0m[1m[0mdescription[0m[0m    = "Stores the value of ACCOUNT_ID for `psoxy-zoom`"
+      [32m+[0m [0m[1m[0mid[0m[0m             = (known after apply)
+      [32m+[0m [0m[1m[0minsecure_value[0m[0m = (known after apply)
+      [32m+[0m [0m[1m[0mkey_id[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mname[0m[0m           = "PSOXY_ZOOM_ACCOUNT_ID"
+      [32m+[0m [0m[1m[0mtags_all[0m[0m       = (known after apply)
+      [32m+[0m [0m[1m[0mtier[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mtype[0m[0m           = "SecureString"
+      [32m+[0m [0m[1m[0mvalue[0m[0m          = (sensitive value)
+      [32m+[0m [0m[1m[0mversion[0m[0m        = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.aws_ssm_parameter.long-access-secrets["zoom.CLIENT_ID"][0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_ssm_parameter" "long-access-secrets" {
+      [32m+[0m [0m[1m[0marn[0m[0m            = (known after apply)
+      [32m+[0m [0m[1m[0mdata_type[0m[0m      = (known after apply)
+      [32m+[0m [0m[1m[0mdescription[0m[0m    = "Stores the value of CLIENT_ID for `psoxy-zoom`"
+      [32m+[0m [0m[1m[0mid[0m[0m             = (known after apply)
+      [32m+[0m [0m[1m[0minsecure_value[0m[0m = (known after apply)
+      [32m+[0m [0m[1m[0mkey_id[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mname[0m[0m           = "PSOXY_ZOOM_CLIENT_ID"
+      [32m+[0m [0m[1m[0mtags_all[0m[0m       = (known after apply)
+      [32m+[0m [0m[1m[0mtier[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mtype[0m[0m           = "SecureString"
+      [32m+[0m [0m[1m[0mvalue[0m[0m          = (sensitive value)
+      [32m+[0m [0m[1m[0mversion[0m[0m        = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.aws_ssm_parameter.long-access-secrets["zoom.CLIENT_SECRET"][0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_ssm_parameter" "long-access-secrets" {
+      [32m+[0m [0m[1m[0marn[0m[0m            = (known after apply)
+      [32m+[0m [0m[1m[0mdata_type[0m[0m      = (known after apply)
+      [32m+[0m [0m[1m[0mdescription[0m[0m    = "Stores the value of CLIENT_SECRET for `psoxy-zoom`"
+      [32m+[0m [0m[1m[0mid[0m[0m             = (known after apply)
+      [32m+[0m [0m[1m[0minsecure_value[0m[0m = (known after apply)
+      [32m+[0m [0m[1m[0mkey_id[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mname[0m[0m           = "PSOXY_ZOOM_CLIENT_SECRET"
+      [32m+[0m [0m[1m[0mtags_all[0m[0m       = (known after apply)
+      [32m+[0m [0m[1m[0mtier[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mtype[0m[0m           = "SecureString"
+      [32m+[0m [0m[1m[0mvalue[0m[0m          = (sensitive value)
+      [32m+[0m [0m[1m[0mversion[0m[0m        = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["slack-discovery-api"].aws_lambda_function_url.lambda_url[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_lambda_function_url" "lambda_url" {
+      [32m+[0m [0m[1m[0mauthorization_type[0m[0m = "AWS_IAM"
+      [32m+[0m [0m[1m[0mfunction_arn[0m[0m       = (known after apply)
+      [32m+[0m [0m[1m[0mfunction_name[0m[0m      = "psoxy-slack-discovery-api"
+      [32m+[0m [0m[1m[0mfunction_url[0m[0m       = (known after apply)
+      [32m+[0m [0m[1m[0mid[0m[0m                 = (known after apply)
+      [32m+[0m [0m[1m[0murl_id[0m[0m             = (known after apply)
+
+      [32m+[0m [0mcors {
+          [32m+[0m [0m[1m[0mallow_credentials[0m[0m = true
+          [32m+[0m [0m[1m[0mallow_headers[0m[0m     = [
+              [32m+[0m [0m"date",
+              [32m+[0m [0m"keep-alive",
+            ]
+          [32m+[0m [0m[1m[0mallow_methods[0m[0m     = [
+              [32m+[0m [0m"GET",
+              [32m+[0m [0m"HEAD",
+              [32m+[0m [0m"POST",
+            ]
+          [32m+[0m [0m[1m[0mallow_origins[0m[0m     = [
+              [32m+[0m [0m"*",
+            ]
+          [32m+[0m [0m[1m[0mexpose_headers[0m[0m    = [
+              [32m+[0m [0m"date",
+              [32m+[0m [0m"keep-alive",
+            ]
+          [32m+[0m [0m[1m[0mmax_age[0m[0m           = 86400
+        }
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["slack-discovery-api"].local_file.test_script[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "local_file" "test_script" {
+      [32m+[0m [0m[1m[0mcontent[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0mdirectory_permission[0m[0m = "0777"
+      [32m+[0m [0m[1m[0mfile_permission[0m[0m      = "0770"
+      [32m+[0m [0m[1m[0mfilename[0m[0m             = "test-psoxy-slack-discovery-api.sh"
+      [32m+[0m [0m[1m[0mid[0m[0m                   = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["slack-discovery-api"].local_file.todo[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "local_file" "todo" {
+      [32m+[0m [0m[1m[0mcontent[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0mdirectory_permission[0m[0m = "0777"
+      [32m+[0m [0m[1m[0mfile_permission[0m[0m      = "0777"
+      [32m+[0m [0m[1m[0mfilename[0m[0m             = "TODO 2 - test psoxy-slack-discovery-api.md"
+      [32m+[0m [0m[1m[0mid[0m[0m                   = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["zoom"].aws_lambda_function_url.lambda_url[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_lambda_function_url" "lambda_url" {
+      [32m+[0m [0m[1m[0mauthorization_type[0m[0m = "AWS_IAM"
+      [32m+[0m [0m[1m[0mfunction_arn[0m[0m       = (known after apply)
+      [32m+[0m [0m[1m[0mfunction_name[0m[0m      = "psoxy-zoom"
+      [32m+[0m [0m[1m[0mfunction_url[0m[0m       = (known after apply)
+      [32m+[0m [0m[1m[0mid[0m[0m                 = (known after apply)
+      [32m+[0m [0m[1m[0murl_id[0m[0m             = (known after apply)
+
+      [32m+[0m [0mcors {
+          [32m+[0m [0m[1m[0mallow_credentials[0m[0m = true
+          [32m+[0m [0m[1m[0mallow_headers[0m[0m     = [
+              [32m+[0m [0m"date",
+              [32m+[0m [0m"keep-alive",
+            ]
+          [32m+[0m [0m[1m[0mallow_methods[0m[0m     = [
+              [32m+[0m [0m"GET",
+              [32m+[0m [0m"HEAD",
+              [32m+[0m [0m"POST",
+            ]
+          [32m+[0m [0m[1m[0mallow_origins[0m[0m     = [
+              [32m+[0m [0m"*",
+            ]
+          [32m+[0m [0m[1m[0mexpose_headers[0m[0m    = [
+              [32m+[0m [0m"date",
+              [32m+[0m [0m"keep-alive",
+            ]
+          [32m+[0m [0m[1m[0mmax_age[0m[0m           = 86400
+        }
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["zoom"].local_file.test_script[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "local_file" "test_script" {
+      [32m+[0m [0m[1m[0mcontent[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0mdirectory_permission[0m[0m = "0777"
+      [32m+[0m [0m[1m[0mfile_permission[0m[0m      = "0770"
+      [32m+[0m [0m[1m[0mfilename[0m[0m             = "test-psoxy-zoom.sh"
+      [32m+[0m [0m[1m[0mid[0m[0m                   = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["zoom"].local_file.todo[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "local_file" "todo" {
+      [32m+[0m [0m[1m[0mcontent[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0mdirectory_permission[0m[0m = "0777"
+      [32m+[0m [0m[1m[0mfile_permission[0m[0m      = "0777"
+      [32m+[0m [0m[1m[0mfilename[0m[0m             = "TODO 2 - test psoxy-zoom.md"
+      [32m+[0m [0m[1m[0mid[0m[0m                   = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.global_secrets.aws_ssm_parameter.secret["PSOXY_ENCRYPTION_KEY"][0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_ssm_parameter" "secret" {
+      [32m+[0m [0m[1m[0marn[0m[0m            = (known after apply)
+      [32m+[0m [0m[1m[0mdata_type[0m[0m      = (known after apply)
+      [32m+[0m [0m[1m[0mdescription[0m[0m    = "secret used to generate reversible pseudonyms, if any; rotate to render all existing ones irreversible"
+      [32m+[0m [0m[1m[0mid[0m[0m             = (known after apply)
+      [32m+[0m [0m[1m[0minsecure_value[0m[0m = (known after apply)
+      [32m+[0m [0m[1m[0mkey_id[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mname[0m[0m           = "PSOXY_ENCRYPTION_KEY"
+      [32m+[0m [0m[1m[0mtags_all[0m[0m       = (known after apply)
+      [32m+[0m [0m[1m[0mtier[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mtype[0m[0m           = "SecureString"
+      [32m+[0m [0m[1m[0mvalue[0m[0m          = (sensitive value)
+      [32m+[0m [0m[1m[0mversion[0m[0m        = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.global_secrets.aws_ssm_parameter.secret["PSOXY_SALT"][0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_ssm_parameter" "secret" {
+      [32m+[0m [0m[1m[0marn[0m[0m            = (known after apply)
+      [32m+[0m [0m[1m[0mdata_type[0m[0m      = (known after apply)
+      [32m+[0m [0m[1m[0mdescription[0m[0m    = "Salt used to build pseudonyms."
+      [32m+[0m [0m[1m[0mid[0m[0m             = (known after apply)
+      [32m+[0m [0m[1m[0minsecure_value[0m[0m = (known after apply)
+      [32m+[0m [0m[1m[0mkey_id[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mname[0m[0m           = "PSOXY_SALT"
+      [32m+[0m [0m[1m[0mtags_all[0m[0m       = (known after apply)
+      [32m+[0m [0m[1m[0mtier[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mtype[0m[0m           = "SecureString"
+      [32m+[0m [0m[1m[0mvalue[0m[0m          = (sensitive value)
+      [32m+[0m [0m[1m[0mversion[0m[0m        = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.google-workspace-connection["gcal"].google_project_service.apis_needed["calendar-json.googleapis.com"][0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "google_project_service" "apis_needed" {
+      [32m+[0m [0m[1m[0mdisable_dependent_services[0m[0m = false
+      [32m+[0m [0m[1m[0mdisable_on_destroy[0m[0m         = true
+      [32m+[0m [0m[1m[0mid[0m[0m                         = (known after apply)
+      [32m+[0m [0m[1m[0mproject[0m[0m                    = "psoxy-acme-example"
+      [32m+[0m [0m[1m[0mservice[0m[0m                    = "calendar-json.googleapis.com"
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.google-workspace-connection["gcal"].google_service_account.connector-sa[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "google_service_account" "connector-sa" {
+      [32m+[0m [0m[1m[0maccount_id[0m[0m   = "psoxy-gcal"
+      [32m+[0m [0m[1m[0mdisabled[0m[0m     = false
+      [32m+[0m [0m[1m[0mdisplay_name[0m[0m = "Psoxy Connector - Google Calendar"
+      [32m+[0m [0m[1m[0memail[0m[0m        = (known after apply)
+      [32m+[0m [0m[1m[0mid[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mmember[0m[0m       = (known after apply)
+      [32m+[0m [0m[1m[0mname[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mproject[0m[0m      = "psoxy-acme-example"
+      [32m+[0m [0m[1m[0munique_id[0m[0m    = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.google-workspace-connection["gcal"].local_file.todo-google-workspace-admin-console[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "local_file" "todo-google-workspace-admin-console" {
+      [32m+[0m [0m[1m[0mcontent[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0mdirectory_permission[0m[0m = "0777"
+      [32m+[0m [0m[1m[0mfile_permission[0m[0m      = "0777"
+      [32m+[0m [0m[1m[0mfilename[0m[0m             = "TODO 1 - setup Psoxy Connector - Google Calendar.md"
+      [32m+[0m [0m[1m[0mid[0m[0m                   = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.google-workspace-connection["gdirectory"].google_project_service.apis_needed["admin.googleapis.com"][0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "google_project_service" "apis_needed" {
+      [32m+[0m [0m[1m[0mdisable_dependent_services[0m[0m = false
+      [32m+[0m [0m[1m[0mdisable_on_destroy[0m[0m         = true
+      [32m+[0m [0m[1m[0mid[0m[0m                         = (known after apply)
+      [32m+[0m [0m[1m[0mproject[0m[0m                    = "psoxy-acme-example"
+      [32m+[0m [0m[1m[0mservice[0m[0m                    = "admin.googleapis.com"
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.google-workspace-connection["gdirectory"].google_service_account.connector-sa[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "google_service_account" "connector-sa" {
+      [32m+[0m [0m[1m[0maccount_id[0m[0m   = "psoxy-gdirectory"
+      [32m+[0m [0m[1m[0mdisabled[0m[0m     = false
+      [32m+[0m [0m[1m[0mdisplay_name[0m[0m = "Psoxy Connector - Google Directory"
+      [32m+[0m [0m[1m[0memail[0m[0m        = (known after apply)
+      [32m+[0m [0m[1m[0mid[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mmember[0m[0m       = (known after apply)
+      [32m+[0m [0m[1m[0mname[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mproject[0m[0m      = "psoxy-acme-example"
+      [32m+[0m [0m[1m[0munique_id[0m[0m    = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.google-workspace-connection["gdirectory"].local_file.todo-google-workspace-admin-console[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "local_file" "todo-google-workspace-admin-console" {
+      [32m+[0m [0m[1m[0mcontent[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0mdirectory_permission[0m[0m = "0777"
+      [32m+[0m [0m[1m[0mfile_permission[0m[0m      = "0777"
+      [32m+[0m [0m[1m[0mfilename[0m[0m             = "TODO 1 - setup Psoxy Connector - Google Directory.md"
+      [32m+[0m [0m[1m[0mid[0m[0m                   = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.google-workspace-connection["gdrive"].google_project_service.apis_needed["drive.googleapis.com"][0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "google_project_service" "apis_needed" {
+      [32m+[0m [0m[1m[0mdisable_dependent_services[0m[0m = false
+      [32m+[0m [0m[1m[0mdisable_on_destroy[0m[0m         = true
+      [32m+[0m [0m[1m[0mid[0m[0m                         = (known after apply)
+      [32m+[0m [0m[1m[0mproject[0m[0m                    = "psoxy-acme-example"
+      [32m+[0m [0m[1m[0mservice[0m[0m                    = "drive.googleapis.com"
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.google-workspace-connection["gdrive"].google_service_account.connector-sa[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "google_service_account" "connector-sa" {
+      [32m+[0m [0m[1m[0maccount_id[0m[0m   = "psoxy-gdrive"
+      [32m+[0m [0m[1m[0mdisabled[0m[0m     = false
+      [32m+[0m [0m[1m[0mdisplay_name[0m[0m = "Psoxy Connector - Google Drive"
+      [32m+[0m [0m[1m[0memail[0m[0m        = (known after apply)
+      [32m+[0m [0m[1m[0mid[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mmember[0m[0m       = (known after apply)
+      [32m+[0m [0m[1m[0mname[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mproject[0m[0m      = "psoxy-acme-example"
+      [32m+[0m [0m[1m[0munique_id[0m[0m    = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.google-workspace-connection["gdrive"].local_file.todo-google-workspace-admin-console[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "local_file" "todo-google-workspace-admin-console" {
+      [32m+[0m [0m[1m[0mcontent[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0mdirectory_permission[0m[0m = "0777"
+      [32m+[0m [0m[1m[0mfile_permission[0m[0m      = "0777"
+      [32m+[0m [0m[1m[0mfilename[0m[0m             = "TODO 1 - setup Psoxy Connector - Google Drive.md"
+      [32m+[0m [0m[1m[0mid[0m[0m                   = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.google-workspace-connection["gmail"].google_project_service.apis_needed["gmail.googleapis.com"][0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "google_project_service" "apis_needed" {
+      [32m+[0m [0m[1m[0mdisable_dependent_services[0m[0m = false
+      [32m+[0m [0m[1m[0mdisable_on_destroy[0m[0m         = true
+      [32m+[0m [0m[1m[0mid[0m[0m                         = (known after apply)
+      [32m+[0m [0m[1m[0mproject[0m[0m                    = "psoxy-acme-example"
+      [32m+[0m [0m[1m[0mservice[0m[0m                    = "gmail.googleapis.com"
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.google-workspace-connection["gmail"].google_service_account.connector-sa[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "google_service_account" "connector-sa" {
+      [32m+[0m [0m[1m[0maccount_id[0m[0m   = "psoxy-gmail"
+      [32m+[0m [0m[1m[0mdisabled[0m[0m     = false
+      [32m+[0m [0m[1m[0mdisplay_name[0m[0m = "Psoxy Connector - GMail"
+      [32m+[0m [0m[1m[0memail[0m[0m        = (known after apply)
+      [32m+[0m [0m[1m[0mid[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mmember[0m[0m       = (known after apply)
+      [32m+[0m [0m[1m[0mname[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mproject[0m[0m      = "psoxy-acme-example"
+      [32m+[0m [0m[1m[0munique_id[0m[0m    = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.google-workspace-connection["gmail"].local_file.todo-google-workspace-admin-console[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "local_file" "todo-google-workspace-admin-console" {
+      [32m+[0m [0m[1m[0mcontent[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0mdirectory_permission[0m[0m = "0777"
+      [32m+[0m [0m[1m[0mfile_permission[0m[0m      = "0777"
+      [32m+[0m [0m[1m[0mfilename[0m[0m             = "TODO 1 - setup Psoxy Connector - GMail.md"
+      [32m+[0m [0m[1m[0mid[0m[0m                   = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.google-workspace-connection["google-chat"].google_project_service.apis_needed["admin.googleapis.com"][0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "google_project_service" "apis_needed" {
+      [32m+[0m [0m[1m[0mdisable_dependent_services[0m[0m = false
+      [32m+[0m [0m[1m[0mdisable_on_destroy[0m[0m         = true
+      [32m+[0m [0m[1m[0mid[0m[0m                         = (known after apply)
+      [32m+[0m [0m[1m[0mproject[0m[0m                    = "psoxy-acme-example"
+      [32m+[0m [0m[1m[0mservice[0m[0m                    = "admin.googleapis.com"
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.google-workspace-connection["google-chat"].google_service_account.connector-sa[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "google_service_account" "connector-sa" {
+      [32m+[0m [0m[1m[0maccount_id[0m[0m   = "psoxy-google-chat"
+      [32m+[0m [0m[1m[0mdisabled[0m[0m     = false
+      [32m+[0m [0m[1m[0mdisplay_name[0m[0m = "Psoxy Connector - Google Chat"
+      [32m+[0m [0m[1m[0memail[0m[0m        = (known after apply)
+      [32m+[0m [0m[1m[0mid[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mmember[0m[0m       = (known after apply)
+      [32m+[0m [0m[1m[0mname[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mproject[0m[0m      = "psoxy-acme-example"
+      [32m+[0m [0m[1m[0munique_id[0m[0m    = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.google-workspace-connection["google-chat"].local_file.todo-google-workspace-admin-console[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "local_file" "todo-google-workspace-admin-console" {
+      [32m+[0m [0m[1m[0mcontent[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0mdirectory_permission[0m[0m = "0777"
+      [32m+[0m [0m[1m[0mfile_permission[0m[0m      = "0777"
+      [32m+[0m [0m[1m[0mfilename[0m[0m             = "TODO 1 - setup Psoxy Connector - Google Chat.md"
+      [32m+[0m [0m[1m[0mid[0m[0m                   = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.google-workspace-connection["google-meet"].google_project_service.apis_needed["admin.googleapis.com"][0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "google_project_service" "apis_needed" {
+      [32m+[0m [0m[1m[0mdisable_dependent_services[0m[0m = false
+      [32m+[0m [0m[1m[0mdisable_on_destroy[0m[0m         = true
+      [32m+[0m [0m[1m[0mid[0m[0m                         = (known after apply)
+      [32m+[0m [0m[1m[0mproject[0m[0m                    = "psoxy-acme-example"
+      [32m+[0m [0m[1m[0mservice[0m[0m                    = "admin.googleapis.com"
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.google-workspace-connection["google-meet"].google_service_account.connector-sa[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "google_service_account" "connector-sa" {
+      [32m+[0m [0m[1m[0maccount_id[0m[0m   = "psoxy-google-meet"
+      [32m+[0m [0m[1m[0mdisabled[0m[0m     = false
+      [32m+[0m [0m[1m[0mdisplay_name[0m[0m = "Psoxy Connector - Google Meet"
+      [32m+[0m [0m[1m[0memail[0m[0m        = (known after apply)
+      [32m+[0m [0m[1m[0mid[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mmember[0m[0m       = (known after apply)
+      [32m+[0m [0m[1m[0mname[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mproject[0m[0m      = "psoxy-acme-example"
+      [32m+[0m [0m[1m[0munique_id[0m[0m    = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.google-workspace-connection["google-meet"].local_file.todo-google-workspace-admin-console[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "local_file" "todo-google-workspace-admin-console" {
+      [32m+[0m [0m[1m[0mcontent[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0mdirectory_permission[0m[0m = "0777"
+      [32m+[0m [0m[1m[0mfile_permission[0m[0m      = "0777"
+      [32m+[0m [0m[1m[0mfilename[0m[0m             = "TODO 1 - setup Psoxy Connector - Google Meet.md"
+      [32m+[0m [0m[1m[0mid[0m[0m                   = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.google-workspace-connection-auth["gcal"].google_service_account_key.key[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "google_service_account_key" "key" {
+      [32m+[0m [0m[1m[0mid[0m[0m                 = (known after apply)
+      [32m+[0m [0m[1m[0mkeepers[0m[0m            = (known after apply)
+      [32m+[0m [0m[1m[0mkey_algorithm[0m[0m      = "KEY_ALG_RSA_2048"
+      [32m+[0m [0m[1m[0mname[0m[0m               = (known after apply)
+      [32m+[0m [0m[1m[0mprivate_key[0m[0m        = (sensitive value)
+      [32m+[0m [0m[1m[0mprivate_key_type[0m[0m   = "TYPE_GOOGLE_CREDENTIALS_FILE"
+      [32m+[0m [0m[1m[0mpublic_key[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mpublic_key_type[0m[0m    = "TYPE_X509_PEM_FILE"
+      [32m+[0m [0m[1m[0mservice_account_id[0m[0m = (known after apply)
+      [32m+[0m [0m[1m[0mvalid_after[0m[0m        = (known after apply)
+      [32m+[0m [0m[1m[0mvalid_before[0m[0m       = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.google-workspace-connection-auth["gcal"].time_rotating.sa-key-rotation[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "time_rotating" "sa-key-rotation" {
+      [32m+[0m [0m[1m[0mday[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0mhour[0m[0m             = (known after apply)
+      [32m+[0m [0m[1m[0mid[0m[0m               = (known after apply)
+      [32m+[0m [0m[1m[0mminute[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mmonth[0m[0m            = (known after apply)
+      [32m+[0m [0m[1m[0mrfc3339[0m[0m          = (known after apply)
+      [32m+[0m [0m[1m[0mrotation_days[0m[0m    = 60
+      [32m+[0m [0m[1m[0mrotation_rfc3339[0m[0m = (known after apply)
+      [32m+[0m [0m[1m[0msecond[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0munix[0m[0m             = (known after apply)
+      [32m+[0m [0m[1m[0myear[0m[0m             = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.google-workspace-connection-auth["gdirectory"].google_service_account_key.key[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "google_service_account_key" "key" {
+      [32m+[0m [0m[1m[0mid[0m[0m                 = (known after apply)
+      [32m+[0m [0m[1m[0mkeepers[0m[0m            = (known after apply)
+      [32m+[0m [0m[1m[0mkey_algorithm[0m[0m      = "KEY_ALG_RSA_2048"
+      [32m+[0m [0m[1m[0mname[0m[0m               = (known after apply)
+      [32m+[0m [0m[1m[0mprivate_key[0m[0m        = (sensitive value)
+      [32m+[0m [0m[1m[0mprivate_key_type[0m[0m   = "TYPE_GOOGLE_CREDENTIALS_FILE"
+      [32m+[0m [0m[1m[0mpublic_key[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mpublic_key_type[0m[0m    = "TYPE_X509_PEM_FILE"
+      [32m+[0m [0m[1m[0mservice_account_id[0m[0m = (known after apply)
+      [32m+[0m [0m[1m[0mvalid_after[0m[0m        = (known after apply)
+      [32m+[0m [0m[1m[0mvalid_before[0m[0m       = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.google-workspace-connection-auth["gdirectory"].time_rotating.sa-key-rotation[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "time_rotating" "sa-key-rotation" {
+      [32m+[0m [0m[1m[0mday[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0mhour[0m[0m             = (known after apply)
+      [32m+[0m [0m[1m[0mid[0m[0m               = (known after apply)
+      [32m+[0m [0m[1m[0mminute[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mmonth[0m[0m            = (known after apply)
+      [32m+[0m [0m[1m[0mrfc3339[0m[0m          = (known after apply)
+      [32m+[0m [0m[1m[0mrotation_days[0m[0m    = 60
+      [32m+[0m [0m[1m[0mrotation_rfc3339[0m[0m = (known after apply)
+      [32m+[0m [0m[1m[0msecond[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0munix[0m[0m             = (known after apply)
+      [32m+[0m [0m[1m[0myear[0m[0m             = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.google-workspace-connection-auth["gdrive"].google_service_account_key.key[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "google_service_account_key" "key" {
+      [32m+[0m [0m[1m[0mid[0m[0m                 = (known after apply)
+      [32m+[0m [0m[1m[0mkeepers[0m[0m            = (known after apply)
+      [32m+[0m [0m[1m[0mkey_algorithm[0m[0m      = "KEY_ALG_RSA_2048"
+      [32m+[0m [0m[1m[0mname[0m[0m               = (known after apply)
+      [32m+[0m [0m[1m[0mprivate_key[0m[0m        = (sensitive value)
+      [32m+[0m [0m[1m[0mprivate_key_type[0m[0m   = "TYPE_GOOGLE_CREDENTIALS_FILE"
+      [32m+[0m [0m[1m[0mpublic_key[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mpublic_key_type[0m[0m    = "TYPE_X509_PEM_FILE"
+      [32m+[0m [0m[1m[0mservice_account_id[0m[0m = (known after apply)
+      [32m+[0m [0m[1m[0mvalid_after[0m[0m        = (known after apply)
+      [32m+[0m [0m[1m[0mvalid_before[0m[0m       = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.google-workspace-connection-auth["gdrive"].time_rotating.sa-key-rotation[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "time_rotating" "sa-key-rotation" {
+      [32m+[0m [0m[1m[0mday[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0mhour[0m[0m             = (known after apply)
+      [32m+[0m [0m[1m[0mid[0m[0m               = (known after apply)
+      [32m+[0m [0m[1m[0mminute[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mmonth[0m[0m            = (known after apply)
+      [32m+[0m [0m[1m[0mrfc3339[0m[0m          = (known after apply)
+      [32m+[0m [0m[1m[0mrotation_days[0m[0m    = 60
+      [32m+[0m [0m[1m[0mrotation_rfc3339[0m[0m = (known after apply)
+      [32m+[0m [0m[1m[0msecond[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0munix[0m[0m             = (known after apply)
+      [32m+[0m [0m[1m[0myear[0m[0m             = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.google-workspace-connection-auth["gmail"].google_service_account_key.key[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "google_service_account_key" "key" {
+      [32m+[0m [0m[1m[0mid[0m[0m                 = (known after apply)
+      [32m+[0m [0m[1m[0mkeepers[0m[0m            = (known after apply)
+      [32m+[0m [0m[1m[0mkey_algorithm[0m[0m      = "KEY_ALG_RSA_2048"
+      [32m+[0m [0m[1m[0mname[0m[0m               = (known after apply)
+      [32m+[0m [0m[1m[0mprivate_key[0m[0m        = (sensitive value)
+      [32m+[0m [0m[1m[0mprivate_key_type[0m[0m   = "TYPE_GOOGLE_CREDENTIALS_FILE"
+      [32m+[0m [0m[1m[0mpublic_key[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mpublic_key_type[0m[0m    = "TYPE_X509_PEM_FILE"
+      [32m+[0m [0m[1m[0mservice_account_id[0m[0m = (known after apply)
+      [32m+[0m [0m[1m[0mvalid_after[0m[0m        = (known after apply)
+      [32m+[0m [0m[1m[0mvalid_before[0m[0m       = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.google-workspace-connection-auth["gmail"].time_rotating.sa-key-rotation[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "time_rotating" "sa-key-rotation" {
+      [32m+[0m [0m[1m[0mday[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0mhour[0m[0m             = (known after apply)
+      [32m+[0m [0m[1m[0mid[0m[0m               = (known after apply)
+      [32m+[0m [0m[1m[0mminute[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mmonth[0m[0m            = (known after apply)
+      [32m+[0m [0m[1m[0mrfc3339[0m[0m          = (known after apply)
+      [32m+[0m [0m[1m[0mrotation_days[0m[0m    = 60
+      [32m+[0m [0m[1m[0mrotation_rfc3339[0m[0m = (known after apply)
+      [32m+[0m [0m[1m[0msecond[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0munix[0m[0m             = (known after apply)
+      [32m+[0m [0m[1m[0myear[0m[0m             = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.google-workspace-connection-auth["google-chat"].google_service_account_key.key[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "google_service_account_key" "key" {
+      [32m+[0m [0m[1m[0mid[0m[0m                 = (known after apply)
+      [32m+[0m [0m[1m[0mkeepers[0m[0m            = (known after apply)
+      [32m+[0m [0m[1m[0mkey_algorithm[0m[0m      = "KEY_ALG_RSA_2048"
+      [32m+[0m [0m[1m[0mname[0m[0m               = (known after apply)
+      [32m+[0m [0m[1m[0mprivate_key[0m[0m        = (sensitive value)
+      [32m+[0m [0m[1m[0mprivate_key_type[0m[0m   = "TYPE_GOOGLE_CREDENTIALS_FILE"
+      [32m+[0m [0m[1m[0mpublic_key[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mpublic_key_type[0m[0m    = "TYPE_X509_PEM_FILE"
+      [32m+[0m [0m[1m[0mservice_account_id[0m[0m = (known after apply)
+      [32m+[0m [0m[1m[0mvalid_after[0m[0m        = (known after apply)
+      [32m+[0m [0m[1m[0mvalid_before[0m[0m       = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.google-workspace-connection-auth["google-chat"].time_rotating.sa-key-rotation[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "time_rotating" "sa-key-rotation" {
+      [32m+[0m [0m[1m[0mday[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0mhour[0m[0m             = (known after apply)
+      [32m+[0m [0m[1m[0mid[0m[0m               = (known after apply)
+      [32m+[0m [0m[1m[0mminute[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mmonth[0m[0m            = (known after apply)
+      [32m+[0m [0m[1m[0mrfc3339[0m[0m          = (known after apply)
+      [32m+[0m [0m[1m[0mrotation_days[0m[0m    = 60
+      [32m+[0m [0m[1m[0mrotation_rfc3339[0m[0m = (known after apply)
+      [32m+[0m [0m[1m[0msecond[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0munix[0m[0m             = (known after apply)
+      [32m+[0m [0m[1m[0myear[0m[0m             = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.google-workspace-connection-auth["google-meet"].google_service_account_key.key[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "google_service_account_key" "key" {
+      [32m+[0m [0m[1m[0mid[0m[0m                 = (known after apply)
+      [32m+[0m [0m[1m[0mkeepers[0m[0m            = (known after apply)
+      [32m+[0m [0m[1m[0mkey_algorithm[0m[0m      = "KEY_ALG_RSA_2048"
+      [32m+[0m [0m[1m[0mname[0m[0m               = (known after apply)
+      [32m+[0m [0m[1m[0mprivate_key[0m[0m        = (sensitive value)
+      [32m+[0m [0m[1m[0mprivate_key_type[0m[0m   = "TYPE_GOOGLE_CREDENTIALS_FILE"
+      [32m+[0m [0m[1m[0mpublic_key[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mpublic_key_type[0m[0m    = "TYPE_X509_PEM_FILE"
+      [32m+[0m [0m[1m[0mservice_account_id[0m[0m = (known after apply)
+      [32m+[0m [0m[1m[0mvalid_after[0m[0m        = (known after apply)
+      [32m+[0m [0m[1m[0mvalid_before[0m[0m       = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.google-workspace-connection-auth["google-meet"].time_rotating.sa-key-rotation[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "time_rotating" "sa-key-rotation" {
+      [32m+[0m [0m[1m[0mday[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0mhour[0m[0m             = (known after apply)
+      [32m+[0m [0m[1m[0mid[0m[0m               = (known after apply)
+      [32m+[0m [0m[1m[0mminute[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mmonth[0m[0m            = (known after apply)
+      [32m+[0m [0m[1m[0mrfc3339[0m[0m          = (known after apply)
+      [32m+[0m [0m[1m[0mrotation_days[0m[0m    = 60
+      [32m+[0m [0m[1m[0mrotation_rfc3339[0m[0m = (known after apply)
+      [32m+[0m [0m[1m[0msecond[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0munix[0m[0m             = (known after apply)
+      [32m+[0m [0m[1m[0myear[0m[0m             = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-aws.aws_iam_policy.execution_lambda_to_caller[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_iam_policy" "execution_lambda_to_caller" {
+      [32m+[0m [0m[1m[0marn[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mdescription[0m[0m = "Allow caller role to execute the lambda url directly"
+      [32m+[0m [0m[1m[0mid[0m[0m          = (known after apply)
+      [32m+[0m [0m[1m[0mname[0m[0m        = "ExecutePsoxyLambdas"
+      [32m+[0m [0m[1m[0mpath[0m[0m        = "/"
+      [32m+[0m [0m[1m[0mpolicy[0m[0m      = jsonencode(
+            {
+              [32m+[0m [0mStatement = [
+                  [32m+[0m [0m{
+                      [32m+[0m [0mAction   = [
+                          [32m+[0m [0m"lambda:InvokeFunctionUrl",
+                        ]
+                      [32m+[0m [0mEffect   = "Allow"
+                      [32m+[0m [0mResource = "arn:aws:lambda:us-east-1:962428643465:function:psoxy-*"
+                    },
+                ]
+              [32m+[0m [0mVersion   = "2012-10-17"
+            }
+        )
+      [32m+[0m [0m[1m[0mpolicy_id[0m[0m   = (known after apply)
+      [32m+[0m [0m[1m[0mtags_all[0m[0m    = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-aws.aws_iam_role.api-caller[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_iam_role" "api-caller" {
+      [32m+[0m [0m[1m[0marn[0m[0m                   = (known after apply)
+      [32m+[0m [0m[1m[0massume_role_policy[0m[0m    = jsonencode(
+            {
+              [32m+[0m [0mStatement = [
+                  [32m+[0m [0m{
+                      [32m+[0m [0mAction    = "sts:AssumeRole"
+                      [32m+[0m [0mEffect    = "Allow"
+                      [32m+[0m [0mPrincipal = {
+                          [32m+[0m [0mService = "lambda.amazonaws.com"
+                        }
+                      [32m+[0m [0mSid       = ""
+                    },
+                ]
+              [32m+[0m [0mVersion   = "2012-10-17"
+            }
+        )
+      [32m+[0m [0m[1m[0mcreate_date[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mdescription[0m[0m           = "role for AWS principals that may invoke the psoxy instance or read an instance's output"
+      [32m+[0m [0m[1m[0mforce_detach_policies[0m[0m = false
+      [32m+[0m [0m[1m[0mid[0m[0m                    = (known after apply)
+      [32m+[0m [0m[1m[0mmanaged_policy_arns[0m[0m   = (known after apply)
+      [32m+[0m [0m[1m[0mmax_session_duration[0m[0m  = 3600
+      [32m+[0m [0m[1m[0mname[0m[0m                  = "PsoxyCaller"
+      [32m+[0m [0m[1m[0mname_prefix[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mpath[0m[0m                  = "/"
+      [32m+[0m [0m[1m[0mtags_all[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0munique_id[0m[0m             = (known after apply)
+
+      [32m+[0m [0minline_policy {
+          [32m+[0m [0m[1m[0mname[0m[0m   = (known after apply)
+          [32m+[0m [0m[1m[0mpolicy[0m[0m = (known after apply)
+        }
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-aws.aws_iam_role_policy_attachment.invoker_lambda_execution[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_iam_role_policy_attachment" "invoker_lambda_execution" {
+      [32m+[0m [0m[1m[0mid[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mpolicy_arn[0m[0m = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+      [32m+[0m [0m[1m[0mrole[0m[0m       = "PsoxyCaller"
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-aws.aws_iam_role_policy_attachment.invoker_url_lambda_execution[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_iam_role_policy_attachment" "invoker_url_lambda_execution" {
+      [32m+[0m [0m[1m[0mid[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mpolicy_arn[0m[0m = (known after apply)
+      [32m+[0m [0m[1m[0mrole[0m[0m       = "PsoxyCaller"
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-aws.random_password.encryption_key[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "random_password" "encryption_key" {
+      [32m+[0m [0m[1m[0mbcrypt_hash[0m[0m = (sensitive value)
+      [32m+[0m [0m[1m[0mid[0m[0m          = (known after apply)
+      [32m+[0m [0m[1m[0mlength[0m[0m      = 32
+      [32m+[0m [0m[1m[0mlower[0m[0m       = true
+      [32m+[0m [0m[1m[0mmin_lower[0m[0m   = 0
+      [32m+[0m [0m[1m[0mmin_numeric[0m[0m = 0
+      [32m+[0m [0m[1m[0mmin_special[0m[0m = 0
+      [32m+[0m [0m[1m[0mmin_upper[0m[0m   = 0
+      [32m+[0m [0m[1m[0mnumber[0m[0m      = true
+      [32m+[0m [0m[1m[0mnumeric[0m[0m     = true
+      [32m+[0m [0m[1m[0mresult[0m[0m      = (sensitive value)
+      [32m+[0m [0m[1m[0mspecial[0m[0m     = true
+      [32m+[0m [0m[1m[0mupper[0m[0m       = true
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-aws.random_password.random[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "random_password" "random" {
+      [32m+[0m [0m[1m[0mbcrypt_hash[0m[0m = (sensitive value)
+      [32m+[0m [0m[1m[0mid[0m[0m          = (known after apply)
+      [32m+[0m [0m[1m[0mlength[0m[0m      = 20
+      [32m+[0m [0m[1m[0mlower[0m[0m       = true
+      [32m+[0m [0m[1m[0mmin_lower[0m[0m   = 0
+      [32m+[0m [0m[1m[0mmin_numeric[0m[0m = 0
+      [32m+[0m [0m[1m[0mmin_special[0m[0m = 0
+      [32m+[0m [0m[1m[0mmin_upper[0m[0m   = 0
+      [32m+[0m [0m[1m[0mnumber[0m[0m      = true
+      [32m+[0m [0m[1m[0mnumeric[0m[0m     = true
+      [32m+[0m [0m[1m[0mresult[0m[0m      = (sensitive value)
+      [32m+[0m [0m[1m[0mspecial[0m[0m     = true
+      [32m+[0m [0m[1m[0mupper[0m[0m       = true
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].aws_iam_policy.input_bucket_getObject_policy[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_iam_policy" "input_bucket_getObject_policy" {
+      [32m+[0m [0m[1m[0marn[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mdescription[0m[0m = (known after apply)
+      [32m+[0m [0m[1m[0mid[0m[0m          = (known after apply)
+      [32m+[0m [0m[1m[0mname[0m[0m        = (known after apply)
+      [32m+[0m [0m[1m[0mpath[0m[0m        = "/"
+      [32m+[0m [0m[1m[0mpolicy[0m[0m      = (known after apply)
+      [32m+[0m [0m[1m[0mpolicy_id[0m[0m   = (known after apply)
+      [32m+[0m [0m[1m[0mtags_all[0m[0m    = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].aws_iam_policy.sanitized_bucket_read[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_iam_policy" "sanitized_bucket_read" {
+      [32m+[0m [0m[1m[0marn[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mdescription[0m[0m = (known after apply)
+      [32m+[0m [0m[1m[0mid[0m[0m          = (known after apply)
+      [32m+[0m [0m[1m[0mname[0m[0m        = (known after apply)
+      [32m+[0m [0m[1m[0mpath[0m[0m        = "/"
+      [32m+[0m [0m[1m[0mpolicy[0m[0m      = (known after apply)
+      [32m+[0m [0m[1m[0mpolicy_id[0m[0m   = (known after apply)
+      [32m+[0m [0m[1m[0mtags_all[0m[0m    = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].aws_iam_policy.sanitized_bucket_write_policy[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_iam_policy" "sanitized_bucket_write_policy" {
+      [32m+[0m [0m[1m[0marn[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mdescription[0m[0m = (known after apply)
+      [32m+[0m [0m[1m[0mid[0m[0m          = (known after apply)
+      [32m+[0m [0m[1m[0mname[0m[0m        = (known after apply)
+      [32m+[0m [0m[1m[0mpath[0m[0m        = "/"
+      [32m+[0m [0m[1m[0mpolicy[0m[0m      = (known after apply)
+      [32m+[0m [0m[1m[0mpolicy_id[0m[0m   = (known after apply)
+      [32m+[0m [0m[1m[0mtags_all[0m[0m    = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].aws_iam_role_policy_attachment.read_policy_for_import_bucket[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_iam_role_policy_attachment" "read_policy_for_import_bucket" {
+      [32m+[0m [0m[1m[0mid[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mpolicy_arn[0m[0m = (known after apply)
+      [32m+[0m [0m[1m[0mrole[0m[0m       = "PsoxyExec_psoxy-hris"
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].aws_iam_role_policy_attachment.reader_policy_to_accessor_role["PsoxyCaller"][0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_iam_role_policy_attachment" "reader_policy_to_accessor_role" {
+      [32m+[0m [0m[1m[0mid[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mpolicy_arn[0m[0m = (known after apply)
+      [32m+[0m [0m[1m[0mrole[0m[0m       = "PsoxyCaller"
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].aws_iam_role_policy_attachment.write_policy_for_sanitized_bucket[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_iam_role_policy_attachment" "write_policy_for_sanitized_bucket" {
+      [32m+[0m [0m[1m[0mid[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mpolicy_arn[0m[0m = (known after apply)
+      [32m+[0m [0m[1m[0mrole[0m[0m       = "PsoxyExec_psoxy-hris"
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].aws_lambda_permission.allow_input_bucket[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_lambda_permission" "allow_input_bucket" {
+      [32m+[0m [0m[1m[0maction[0m[0m              = "lambda:InvokeFunction"
+      [32m+[0m [0m[1m[0mfunction_name[0m[0m       = "psoxy-hris"
+      [32m+[0m [0m[1m[0mid[0m[0m                  = (known after apply)
+      [32m+[0m [0m[1m[0mprincipal[0m[0m           = "s3.amazonaws.com"
+      [32m+[0m [0m[1m[0msource_arn[0m[0m          = (known after apply)
+      [32m+[0m [0m[1m[0mstatement_id[0m[0m        = "AllowExecutionFromS3Bucket"
+      [32m+[0m [0m[1m[0mstatement_id_prefix[0m[0m = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].aws_s3_bucket.input[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_s3_bucket" "input" {
+      [32m+[0m [0m[1m[0macceleration_status[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0macl[0m[0m                         = (known after apply)
+      [32m+[0m [0m[1m[0marn[0m[0m                         = (known after apply)
+      [32m+[0m [0m[1m[0mbucket[0m[0m                      = (known after apply)
+      [32m+[0m [0m[1m[0mbucket_domain_name[0m[0m          = (known after apply)
+      [32m+[0m [0m[1m[0mbucket_regional_domain_name[0m[0m = (known after apply)
+      [32m+[0m [0m[1m[0mforce_destroy[0m[0m               = false
+      [32m+[0m [0m[1m[0mhosted_zone_id[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0mid[0m[0m                          = (known after apply)
+      [32m+[0m [0m[1m[0mobject_lock_enabled[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mpolicy[0m[0m                      = (known after apply)
+      [32m+[0m [0m[1m[0mregion[0m[0m                      = (known after apply)
+      [32m+[0m [0m[1m[0mrequest_payer[0m[0m               = (known after apply)
+      [32m+[0m [0m[1m[0mtags_all[0m[0m                    = (known after apply)
+      [32m+[0m [0m[1m[0mwebsite_domain[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0mwebsite_endpoint[0m[0m            = (known after apply)
+
+      [32m+[0m [0mcors_rule {
+          [32m+[0m [0m[1m[0mallowed_headers[0m[0m = (known after apply)
+          [32m+[0m [0m[1m[0mallowed_methods[0m[0m = (known after apply)
+          [32m+[0m [0m[1m[0mallowed_origins[0m[0m = (known after apply)
+          [32m+[0m [0m[1m[0mexpose_headers[0m[0m  = (known after apply)
+          [32m+[0m [0m[1m[0mmax_age_seconds[0m[0m = (known after apply)
+        }
+
+      [32m+[0m [0mgrant {
+          [32m+[0m [0m[1m[0mid[0m[0m          = (known after apply)
+          [32m+[0m [0m[1m[0mpermissions[0m[0m = (known after apply)
+          [32m+[0m [0m[1m[0mtype[0m[0m        = (known after apply)
+          [32m+[0m [0m[1m[0muri[0m[0m         = (known after apply)
+        }
+
+      [32m+[0m [0mlifecycle_rule {
+          [32m+[0m [0m[1m[0mabort_incomplete_multipart_upload_days[0m[0m = (known after apply)
+          [32m+[0m [0m[1m[0menabled[0m[0m                                = (known after apply)
+          [32m+[0m [0m[1m[0mid[0m[0m                                     = (known after apply)
+          [32m+[0m [0m[1m[0mprefix[0m[0m                                 = (known after apply)
+          [32m+[0m [0m[1m[0mtags[0m[0m                                   = (known after apply)
+
+          [32m+[0m [0mexpiration {
+              [32m+[0m [0m[1m[0mdate[0m[0m                         = (known after apply)
+              [32m+[0m [0m[1m[0mdays[0m[0m                         = (known after apply)
+              [32m+[0m [0m[1m[0mexpired_object_delete_marker[0m[0m = (known after apply)
+            }
+
+          [32m+[0m [0mnoncurrent_version_expiration {
+              [32m+[0m [0m[1m[0mdays[0m[0m = (known after apply)
+            }
+
+          [32m+[0m [0mnoncurrent_version_transition {
+              [32m+[0m [0m[1m[0mdays[0m[0m          = (known after apply)
+              [32m+[0m [0m[1m[0mstorage_class[0m[0m = (known after apply)
+            }
+
+          [32m+[0m [0mtransition {
+              [32m+[0m [0m[1m[0mdate[0m[0m          = (known after apply)
+              [32m+[0m [0m[1m[0mdays[0m[0m          = (known after apply)
+              [32m+[0m [0m[1m[0mstorage_class[0m[0m = (known after apply)
+            }
+        }
+
+      [32m+[0m [0mlogging {
+          [32m+[0m [0m[1m[0mtarget_bucket[0m[0m = (known after apply)
+          [32m+[0m [0m[1m[0mtarget_prefix[0m[0m = (known after apply)
+        }
+
+      [32m+[0m [0mobject_lock_configuration {
+          [32m+[0m [0m[1m[0mobject_lock_enabled[0m[0m = (known after apply)
+
+          [32m+[0m [0mrule {
+              [32m+[0m [0mdefault_retention {
+                  [32m+[0m [0m[1m[0mdays[0m[0m  = (known after apply)
+                  [32m+[0m [0m[1m[0mmode[0m[0m  = (known after apply)
+                  [32m+[0m [0m[1m[0myears[0m[0m = (known after apply)
+                }
+            }
+        }
+
+      [32m+[0m [0mreplication_configuration {
+          [32m+[0m [0m[1m[0mrole[0m[0m = (known after apply)
+
+          [32m+[0m [0mrules {
+              [32m+[0m [0m[1m[0mdelete_marker_replication_status[0m[0m = (known after apply)
+              [32m+[0m [0m[1m[0mid[0m[0m                               = (known after apply)
+              [32m+[0m [0m[1m[0mprefix[0m[0m                           = (known after apply)
+              [32m+[0m [0m[1m[0mpriority[0m[0m                         = (known after apply)
+              [32m+[0m [0m[1m[0mstatus[0m[0m                           = (known after apply)
+
+              [32m+[0m [0mdestination {
+                  [32m+[0m [0m[1m[0maccount_id[0m[0m         = (known after apply)
+                  [32m+[0m [0m[1m[0mbucket[0m[0m             = (known after apply)
+                  [32m+[0m [0m[1m[0mreplica_kms_key_id[0m[0m = (known after apply)
+                  [32m+[0m [0m[1m[0mstorage_class[0m[0m      = (known after apply)
+
+                  [32m+[0m [0maccess_control_translation {
+                      [32m+[0m [0m[1m[0mowner[0m[0m = (known after apply)
+                    }
+
+                  [32m+[0m [0mmetrics {
+                      [32m+[0m [0m[1m[0mminutes[0m[0m = (known after apply)
+                      [32m+[0m [0m[1m[0mstatus[0m[0m  = (known after apply)
+                    }
+
+                  [32m+[0m [0mreplication_time {
+                      [32m+[0m [0m[1m[0mminutes[0m[0m = (known after apply)
+                      [32m+[0m [0m[1m[0mstatus[0m[0m  = (known after apply)
+                    }
+                }
+
+              [32m+[0m [0mfilter {
+                  [32m+[0m [0m[1m[0mprefix[0m[0m = (known after apply)
+                  [32m+[0m [0m[1m[0mtags[0m[0m   = (known after apply)
+                }
+
+              [32m+[0m [0msource_selection_criteria {
+                  [32m+[0m [0msse_kms_encrypted_objects {
+                      [32m+[0m [0m[1m[0menabled[0m[0m = (known after apply)
+                    }
+                }
+            }
+        }
+
+      [32m+[0m [0mserver_side_encryption_configuration {
+          [32m+[0m [0mrule {
+              [32m+[0m [0m[1m[0mbucket_key_enabled[0m[0m = (known after apply)
+
+              [32m+[0m [0mapply_server_side_encryption_by_default {
+                  [32m+[0m [0m[1m[0mkms_master_key_id[0m[0m = (known after apply)
+                  [32m+[0m [0m[1m[0msse_algorithm[0m[0m     = (known after apply)
+                }
+            }
+        }
+
+      [32m+[0m [0mversioning {
+          [32m+[0m [0m[1m[0menabled[0m[0m    = (known after apply)
+          [32m+[0m [0m[1m[0mmfa_delete[0m[0m = (known after apply)
+        }
+
+      [32m+[0m [0mwebsite {
+          [32m+[0m [0m[1m[0merror_document[0m[0m           = (known after apply)
+          [32m+[0m [0m[1m[0mindex_document[0m[0m           = (known after apply)
+          [32m+[0m [0m[1m[0mredirect_all_requests_to[0m[0m = (known after apply)
+          [32m+[0m [0m[1m[0mrouting_rules[0m[0m            = (known after apply)
+        }
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].aws_s3_bucket.sanitized[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_s3_bucket" "sanitized" {
+      [32m+[0m [0m[1m[0macceleration_status[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0macl[0m[0m                         = (known after apply)
+      [32m+[0m [0m[1m[0marn[0m[0m                         = (known after apply)
+      [32m+[0m [0m[1m[0mbucket[0m[0m                      = (known after apply)
+      [32m+[0m [0m[1m[0mbucket_domain_name[0m[0m          = (known after apply)
+      [32m+[0m [0m[1m[0mbucket_regional_domain_name[0m[0m = (known after apply)
+      [32m+[0m [0m[1m[0mforce_destroy[0m[0m               = false
+      [32m+[0m [0m[1m[0mhosted_zone_id[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0mid[0m[0m                          = (known after apply)
+      [32m+[0m [0m[1m[0mobject_lock_enabled[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mpolicy[0m[0m                      = (known after apply)
+      [32m+[0m [0m[1m[0mregion[0m[0m                      = (known after apply)
+      [32m+[0m [0m[1m[0mrequest_payer[0m[0m               = (known after apply)
+      [32m+[0m [0m[1m[0mtags_all[0m[0m                    = (known after apply)
+      [32m+[0m [0m[1m[0mwebsite_domain[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0mwebsite_endpoint[0m[0m            = (known after apply)
+
+      [32m+[0m [0mcors_rule {
+          [32m+[0m [0m[1m[0mallowed_headers[0m[0m = (known after apply)
+          [32m+[0m [0m[1m[0mallowed_methods[0m[0m = (known after apply)
+          [32m+[0m [0m[1m[0mallowed_origins[0m[0m = (known after apply)
+          [32m+[0m [0m[1m[0mexpose_headers[0m[0m  = (known after apply)
+          [32m+[0m [0m[1m[0mmax_age_seconds[0m[0m = (known after apply)
+        }
+
+      [32m+[0m [0mgrant {
+          [32m+[0m [0m[1m[0mid[0m[0m          = (known after apply)
+          [32m+[0m [0m[1m[0mpermissions[0m[0m = (known after apply)
+          [32m+[0m [0m[1m[0mtype[0m[0m        = (known after apply)
+          [32m+[0m [0m[1m[0muri[0m[0m         = (known after apply)
+        }
+
+      [32m+[0m [0mlifecycle_rule {
+          [32m+[0m [0m[1m[0mabort_incomplete_multipart_upload_days[0m[0m = (known after apply)
+          [32m+[0m [0m[1m[0menabled[0m[0m                                = (known after apply)
+          [32m+[0m [0m[1m[0mid[0m[0m                                     = (known after apply)
+          [32m+[0m [0m[1m[0mprefix[0m[0m                                 = (known after apply)
+          [32m+[0m [0m[1m[0mtags[0m[0m                                   = (known after apply)
+
+          [32m+[0m [0mexpiration {
+              [32m+[0m [0m[1m[0mdate[0m[0m                         = (known after apply)
+              [32m+[0m [0m[1m[0mdays[0m[0m                         = (known after apply)
+              [32m+[0m [0m[1m[0mexpired_object_delete_marker[0m[0m = (known after apply)
+            }
+
+          [32m+[0m [0mnoncurrent_version_expiration {
+              [32m+[0m [0m[1m[0mdays[0m[0m = (known after apply)
+            }
+
+          [32m+[0m [0mnoncurrent_version_transition {
+              [32m+[0m [0m[1m[0mdays[0m[0m          = (known after apply)
+              [32m+[0m [0m[1m[0mstorage_class[0m[0m = (known after apply)
+            }
+
+          [32m+[0m [0mtransition {
+              [32m+[0m [0m[1m[0mdate[0m[0m          = (known after apply)
+              [32m+[0m [0m[1m[0mdays[0m[0m          = (known after apply)
+              [32m+[0m [0m[1m[0mstorage_class[0m[0m = (known after apply)
+            }
+        }
+
+      [32m+[0m [0mlogging {
+          [32m+[0m [0m[1m[0mtarget_bucket[0m[0m = (known after apply)
+          [32m+[0m [0m[1m[0mtarget_prefix[0m[0m = (known after apply)
+        }
+
+      [32m+[0m [0mobject_lock_configuration {
+          [32m+[0m [0m[1m[0mobject_lock_enabled[0m[0m = (known after apply)
+
+          [32m+[0m [0mrule {
+              [32m+[0m [0mdefault_retention {
+                  [32m+[0m [0m[1m[0mdays[0m[0m  = (known after apply)
+                  [32m+[0m [0m[1m[0mmode[0m[0m  = (known after apply)
+                  [32m+[0m [0m[1m[0myears[0m[0m = (known after apply)
+                }
+            }
+        }
+
+      [32m+[0m [0mreplication_configuration {
+          [32m+[0m [0m[1m[0mrole[0m[0m = (known after apply)
+
+          [32m+[0m [0mrules {
+              [32m+[0m [0m[1m[0mdelete_marker_replication_status[0m[0m = (known after apply)
+              [32m+[0m [0m[1m[0mid[0m[0m                               = (known after apply)
+              [32m+[0m [0m[1m[0mprefix[0m[0m                           = (known after apply)
+              [32m+[0m [0m[1m[0mpriority[0m[0m                         = (known after apply)
+              [32m+[0m [0m[1m[0mstatus[0m[0m                           = (known after apply)
+
+              [32m+[0m [0mdestination {
+                  [32m+[0m [0m[1m[0maccount_id[0m[0m         = (known after apply)
+                  [32m+[0m [0m[1m[0mbucket[0m[0m             = (known after apply)
+                  [32m+[0m [0m[1m[0mreplica_kms_key_id[0m[0m = (known after apply)
+                  [32m+[0m [0m[1m[0mstorage_class[0m[0m      = (known after apply)
+
+                  [32m+[0m [0maccess_control_translation {
+                      [32m+[0m [0m[1m[0mowner[0m[0m = (known after apply)
+                    }
+
+                  [32m+[0m [0mmetrics {
+                      [32m+[0m [0m[1m[0mminutes[0m[0m = (known after apply)
+                      [32m+[0m [0m[1m[0mstatus[0m[0m  = (known after apply)
+                    }
+
+                  [32m+[0m [0mreplication_time {
+                      [32m+[0m [0m[1m[0mminutes[0m[0m = (known after apply)
+                      [32m+[0m [0m[1m[0mstatus[0m[0m  = (known after apply)
+                    }
+                }
+
+              [32m+[0m [0mfilter {
+                  [32m+[0m [0m[1m[0mprefix[0m[0m = (known after apply)
+                  [32m+[0m [0m[1m[0mtags[0m[0m   = (known after apply)
+                }
+
+              [32m+[0m [0msource_selection_criteria {
+                  [32m+[0m [0msse_kms_encrypted_objects {
+                      [32m+[0m [0m[1m[0menabled[0m[0m = (known after apply)
+                    }
+                }
+            }
+        }
+
+      [32m+[0m [0mserver_side_encryption_configuration {
+          [32m+[0m [0mrule {
+              [32m+[0m [0m[1m[0mbucket_key_enabled[0m[0m = (known after apply)
+
+              [32m+[0m [0mapply_server_side_encryption_by_default {
+                  [32m+[0m [0m[1m[0mkms_master_key_id[0m[0m = (known after apply)
+                  [32m+[0m [0m[1m[0msse_algorithm[0m[0m     = (known after apply)
+                }
+            }
+        }
+
+      [32m+[0m [0mversioning {
+          [32m+[0m [0m[1m[0menabled[0m[0m    = (known after apply)
+          [32m+[0m [0m[1m[0mmfa_delete[0m[0m = (known after apply)
+        }
+
+      [32m+[0m [0mwebsite {
+          [32m+[0m [0m[1m[0merror_document[0m[0m           = (known after apply)
+          [32m+[0m [0m[1m[0mindex_document[0m[0m           = (known after apply)
+          [32m+[0m [0m[1m[0mredirect_all_requests_to[0m[0m = (known after apply)
+          [32m+[0m [0m[1m[0mrouting_rules[0m[0m            = (known after apply)
+        }
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].aws_s3_bucket_notification.bucket_notification[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_s3_bucket_notification" "bucket_notification" {
+      [32m+[0m [0m[1m[0mbucket[0m[0m      = (known after apply)
+      [32m+[0m [0m[1m[0meventbridge[0m[0m = false
+      [32m+[0m [0m[1m[0mid[0m[0m          = (known after apply)
+
+      [32m+[0m [0mlambda_function {
+          [32m+[0m [0m[1m[0mevents[0m[0m              = [
+              [32m+[0m [0m"s3:ObjectCreated:*",
+            ]
+          [32m+[0m [0m[1m[0mid[0m[0m                  = (known after apply)
+          [32m+[0m [0m[1m[0mlambda_function_arn[0m[0m = (known after apply)
+        }
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].aws_s3_bucket_public_access_block.input-block-public-access[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_s3_bucket_public_access_block" "input-block-public-access" {
+      [32m+[0m [0m[1m[0mblock_public_acls[0m[0m       = true
+      [32m+[0m [0m[1m[0mblock_public_policy[0m[0m     = true
+      [32m+[0m [0m[1m[0mbucket[0m[0m                  = (known after apply)
+      [32m+[0m [0m[1m[0mid[0m[0m                      = (known after apply)
+      [32m+[0m [0m[1m[0mignore_public_acls[0m[0m      = true
+      [32m+[0m [0m[1m[0mrestrict_public_buckets[0m[0m = true
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].aws_s3_bucket_public_access_block.sanitized[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_s3_bucket_public_access_block" "sanitized" {
+      [32m+[0m [0m[1m[0mblock_public_acls[0m[0m       = true
+      [32m+[0m [0m[1m[0mblock_public_policy[0m[0m     = true
+      [32m+[0m [0m[1m[0mbucket[0m[0m                  = (known after apply)
+      [32m+[0m [0m[1m[0mid[0m[0m                      = (known after apply)
+      [32m+[0m [0m[1m[0mignore_public_acls[0m[0m      = true
+      [32m+[0m [0m[1m[0mrestrict_public_buckets[0m[0m = true
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].aws_s3_bucket_server_side_encryption_configuration.input[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_s3_bucket_server_side_encryption_configuration" "input" {
+      [32m+[0m [0m[1m[0mbucket[0m[0m = (known after apply)
+      [32m+[0m [0m[1m[0mid[0m[0m     = (known after apply)
+
+      [32m+[0m [0mrule {
+          [32m+[0m [0mapply_server_side_encryption_by_default {
+              [32m+[0m [0m[1m[0msse_algorithm[0m[0m = "aws:kms"
+            }
+        }
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].aws_s3_bucket_server_side_encryption_configuration.sanitized[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_s3_bucket_server_side_encryption_configuration" "sanitized" {
+      [32m+[0m [0m[1m[0mbucket[0m[0m = (known after apply)
+      [32m+[0m [0m[1m[0mid[0m[0m     = (known after apply)
+
+      [32m+[0m [0mrule {
+          [32m+[0m [0mapply_server_side_encryption_by_default {
+              [32m+[0m [0m[1m[0msse_algorithm[0m[0m = "aws:kms"
+            }
+        }
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].aws_ssm_parameter.rules[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_ssm_parameter" "rules" {
+      [32m+[0m [0m[1m[0marn[0m[0m            = (known after apply)
+      [32m+[0m [0m[1m[0mdata_type[0m[0m      = (known after apply)
+      [32m+[0m [0m[1m[0mdescription[0m[0m    = "Rules for transformation of files. NOTE: any 'RULES' env var will override this value"
+      [32m+[0m [0m[1m[0mid[0m[0m             = (known after apply)
+      [32m+[0m [0m[1m[0minsecure_value[0m[0m = <<-EOT
+            "columnsToPseudonymize":
+            - "EMPLOYEE_ID"
+            - "EMPLOYEE_EMAIL"
+            - "MANAGER_ID"
+            "columnsToRedact": []
+        EOT
+      [32m+[0m [0m[1m[0mkey_id[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mname[0m[0m           = "PSOXY_HRIS_RULES"
+      [32m+[0m [0m[1m[0mtags_all[0m[0m       = (known after apply)
+      [32m+[0m [0m[1m[0mtier[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mtype[0m[0m           = "String"
+      [32m+[0m [0m[1m[0mvalue[0m[0m          = (sensitive value)
+      [32m+[0m [0m[1m[0mversion[0m[0m        = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].random_string.bucket_suffix[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "random_string" "bucket_suffix" {
+      [32m+[0m [0m[1m[0mid[0m[0m          = (known after apply)
+      [32m+[0m [0m[1m[0mlength[0m[0m      = 8
+      [32m+[0m [0m[1m[0mlower[0m[0m       = true
+      [32m+[0m [0m[1m[0mmin_lower[0m[0m   = 0
+      [32m+[0m [0m[1m[0mmin_numeric[0m[0m = 0
+      [32m+[0m [0m[1m[0mmin_special[0m[0m = 0
+      [32m+[0m [0m[1m[0mmin_upper[0m[0m   = 0
+      [32m+[0m [0m[1m[0mnumber[0m[0m      = true
+      [32m+[0m [0m[1m[0mnumeric[0m[0m     = true
+      [32m+[0m [0m[1m[0mresult[0m[0m      = (known after apply)
+      [32m+[0m [0m[1m[0mspecial[0m[0m     = false
+      [32m+[0m [0m[1m[0mupper[0m[0m       = false
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-bulk-to-worklytics["hris"].local_file.todo-worklytics-connection[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "local_file" "todo-worklytics-connection" {
+      [32m+[0m [0m[1m[0mcontent[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0mdirectory_permission[0m[0m = "0777"
+      [32m+[0m [0m[1m[0mfile_permission[0m[0m      = "0777"
+      [32m+[0m [0m[1m[0mfilename[0m[0m             = "TODO 3 - connect hris in Worklytics.md"
+      [32m+[0m [0m[1m[0mid[0m[0m                   = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gcal"].aws_lambda_function_url.lambda_url[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_lambda_function_url" "lambda_url" {
+      [32m+[0m [0m[1m[0mauthorization_type[0m[0m = "AWS_IAM"
+      [32m+[0m [0m[1m[0mfunction_arn[0m[0m       = (known after apply)
+      [32m+[0m [0m[1m[0mfunction_name[0m[0m      = "psoxy-gcal"
+      [32m+[0m [0m[1m[0mfunction_url[0m[0m       = (known after apply)
+      [32m+[0m [0m[1m[0mid[0m[0m                 = (known after apply)
+      [32m+[0m [0m[1m[0murl_id[0m[0m             = (known after apply)
+
+      [32m+[0m [0mcors {
+          [32m+[0m [0m[1m[0mallow_credentials[0m[0m = true
+          [32m+[0m [0m[1m[0mallow_headers[0m[0m     = [
+              [32m+[0m [0m"date",
+              [32m+[0m [0m"keep-alive",
+            ]
+          [32m+[0m [0m[1m[0mallow_methods[0m[0m     = [
+              [32m+[0m [0m"GET",
+              [32m+[0m [0m"HEAD",
+              [32m+[0m [0m"POST",
+            ]
+          [32m+[0m [0m[1m[0mallow_origins[0m[0m     = [
+              [32m+[0m [0m"*",
+            ]
+          [32m+[0m [0m[1m[0mexpose_headers[0m[0m    = [
+              [32m+[0m [0m"date",
+              [32m+[0m [0m"keep-alive",
+            ]
+          [32m+[0m [0m[1m[0mmax_age[0m[0m           = 86400
+        }
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gcal"].local_file.test_script[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "local_file" "test_script" {
+      [32m+[0m [0m[1m[0mcontent[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0mdirectory_permission[0m[0m = "0777"
+      [32m+[0m [0m[1m[0mfile_permission[0m[0m      = "0770"
+      [32m+[0m [0m[1m[0mfilename[0m[0m             = "test-psoxy-gcal.sh"
+      [32m+[0m [0m[1m[0mid[0m[0m                   = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gcal"].local_file.todo[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "local_file" "todo" {
+      [32m+[0m [0m[1m[0mcontent[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0mdirectory_permission[0m[0m = "0777"
+      [32m+[0m [0m[1m[0mfile_permission[0m[0m      = "0777"
+      [32m+[0m [0m[1m[0mfilename[0m[0m             = "TODO 2 - test psoxy-gcal.md"
+      [32m+[0m [0m[1m[0mid[0m[0m                   = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdirectory"].aws_lambda_function_url.lambda_url[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_lambda_function_url" "lambda_url" {
+      [32m+[0m [0m[1m[0mauthorization_type[0m[0m = "AWS_IAM"
+      [32m+[0m [0m[1m[0mfunction_arn[0m[0m       = (known after apply)
+      [32m+[0m [0m[1m[0mfunction_name[0m[0m      = "psoxy-gdirectory"
+      [32m+[0m [0m[1m[0mfunction_url[0m[0m       = (known after apply)
+      [32m+[0m [0m[1m[0mid[0m[0m                 = (known after apply)
+      [32m+[0m [0m[1m[0murl_id[0m[0m             = (known after apply)
+
+      [32m+[0m [0mcors {
+          [32m+[0m [0m[1m[0mallow_credentials[0m[0m = true
+          [32m+[0m [0m[1m[0mallow_headers[0m[0m     = [
+              [32m+[0m [0m"date",
+              [32m+[0m [0m"keep-alive",
+            ]
+          [32m+[0m [0m[1m[0mallow_methods[0m[0m     = [
+              [32m+[0m [0m"GET",
+              [32m+[0m [0m"HEAD",
+              [32m+[0m [0m"POST",
+            ]
+          [32m+[0m [0m[1m[0mallow_origins[0m[0m     = [
+              [32m+[0m [0m"*",
+            ]
+          [32m+[0m [0m[1m[0mexpose_headers[0m[0m    = [
+              [32m+[0m [0m"date",
+              [32m+[0m [0m"keep-alive",
+            ]
+          [32m+[0m [0m[1m[0mmax_age[0m[0m           = 86400
+        }
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdirectory"].local_file.test_script[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "local_file" "test_script" {
+      [32m+[0m [0m[1m[0mcontent[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0mdirectory_permission[0m[0m = "0777"
+      [32m+[0m [0m[1m[0mfile_permission[0m[0m      = "0770"
+      [32m+[0m [0m[1m[0mfilename[0m[0m             = "test-psoxy-gdirectory.sh"
+      [32m+[0m [0m[1m[0mid[0m[0m                   = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdirectory"].local_file.todo[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "local_file" "todo" {
+      [32m+[0m [0m[1m[0mcontent[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0mdirectory_permission[0m[0m = "0777"
+      [32m+[0m [0m[1m[0mfile_permission[0m[0m      = "0777"
+      [32m+[0m [0m[1m[0mfilename[0m[0m             = "TODO 2 - test psoxy-gdirectory.md"
+      [32m+[0m [0m[1m[0mid[0m[0m                   = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdrive"].aws_lambda_function_url.lambda_url[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_lambda_function_url" "lambda_url" {
+      [32m+[0m [0m[1m[0mauthorization_type[0m[0m = "AWS_IAM"
+      [32m+[0m [0m[1m[0mfunction_arn[0m[0m       = (known after apply)
+      [32m+[0m [0m[1m[0mfunction_name[0m[0m      = "psoxy-gdrive"
+      [32m+[0m [0m[1m[0mfunction_url[0m[0m       = (known after apply)
+      [32m+[0m [0m[1m[0mid[0m[0m                 = (known after apply)
+      [32m+[0m [0m[1m[0murl_id[0m[0m             = (known after apply)
+
+      [32m+[0m [0mcors {
+          [32m+[0m [0m[1m[0mallow_credentials[0m[0m = true
+          [32m+[0m [0m[1m[0mallow_headers[0m[0m     = [
+              [32m+[0m [0m"date",
+              [32m+[0m [0m"keep-alive",
+            ]
+          [32m+[0m [0m[1m[0mallow_methods[0m[0m     = [
+              [32m+[0m [0m"GET",
+              [32m+[0m [0m"HEAD",
+              [32m+[0m [0m"POST",
+            ]
+          [32m+[0m [0m[1m[0mallow_origins[0m[0m     = [
+              [32m+[0m [0m"*",
+            ]
+          [32m+[0m [0m[1m[0mexpose_headers[0m[0m    = [
+              [32m+[0m [0m"date",
+              [32m+[0m [0m"keep-alive",
+            ]
+          [32m+[0m [0m[1m[0mmax_age[0m[0m           = 86400
+        }
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdrive"].local_file.test_script[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "local_file" "test_script" {
+      [32m+[0m [0m[1m[0mcontent[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0mdirectory_permission[0m[0m = "0777"
+      [32m+[0m [0m[1m[0mfile_permission[0m[0m      = "0770"
+      [32m+[0m [0m[1m[0mfilename[0m[0m             = "test-psoxy-gdrive.sh"
+      [32m+[0m [0m[1m[0mid[0m[0m                   = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdrive"].local_file.todo[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "local_file" "todo" {
+      [32m+[0m [0m[1m[0mcontent[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0mdirectory_permission[0m[0m = "0777"
+      [32m+[0m [0m[1m[0mfile_permission[0m[0m      = "0777"
+      [32m+[0m [0m[1m[0mfilename[0m[0m             = "TODO 2 - test psoxy-gdrive.md"
+      [32m+[0m [0m[1m[0mid[0m[0m                   = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gmail"].aws_lambda_function_url.lambda_url[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_lambda_function_url" "lambda_url" {
+      [32m+[0m [0m[1m[0mauthorization_type[0m[0m = "AWS_IAM"
+      [32m+[0m [0m[1m[0mfunction_arn[0m[0m       = (known after apply)
+      [32m+[0m [0m[1m[0mfunction_name[0m[0m      = "psoxy-gmail"
+      [32m+[0m [0m[1m[0mfunction_url[0m[0m       = (known after apply)
+      [32m+[0m [0m[1m[0mid[0m[0m                 = (known after apply)
+      [32m+[0m [0m[1m[0murl_id[0m[0m             = (known after apply)
+
+      [32m+[0m [0mcors {
+          [32m+[0m [0m[1m[0mallow_credentials[0m[0m = true
+          [32m+[0m [0m[1m[0mallow_headers[0m[0m     = [
+              [32m+[0m [0m"date",
+              [32m+[0m [0m"keep-alive",
+            ]
+          [32m+[0m [0m[1m[0mallow_methods[0m[0m     = [
+              [32m+[0m [0m"GET",
+              [32m+[0m [0m"HEAD",
+              [32m+[0m [0m"POST",
+            ]
+          [32m+[0m [0m[1m[0mallow_origins[0m[0m     = [
+              [32m+[0m [0m"*",
+            ]
+          [32m+[0m [0m[1m[0mexpose_headers[0m[0m    = [
+              [32m+[0m [0m"date",
+              [32m+[0m [0m"keep-alive",
+            ]
+          [32m+[0m [0m[1m[0mmax_age[0m[0m           = 86400
+        }
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gmail"].local_file.test_script[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "local_file" "test_script" {
+      [32m+[0m [0m[1m[0mcontent[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0mdirectory_permission[0m[0m = "0777"
+      [32m+[0m [0m[1m[0mfile_permission[0m[0m      = "0770"
+      [32m+[0m [0m[1m[0mfilename[0m[0m             = "test-psoxy-gmail.sh"
+      [32m+[0m [0m[1m[0mid[0m[0m                   = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gmail"].local_file.todo[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "local_file" "todo" {
+      [32m+[0m [0m[1m[0mcontent[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0mdirectory_permission[0m[0m = "0777"
+      [32m+[0m [0m[1m[0mfile_permission[0m[0m      = "0777"
+      [32m+[0m [0m[1m[0mfilename[0m[0m             = "TODO 2 - test psoxy-gmail.md"
+      [32m+[0m [0m[1m[0mid[0m[0m                   = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-chat"].aws_lambda_function_url.lambda_url[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_lambda_function_url" "lambda_url" {
+      [32m+[0m [0m[1m[0mauthorization_type[0m[0m = "AWS_IAM"
+      [32m+[0m [0m[1m[0mfunction_arn[0m[0m       = (known after apply)
+      [32m+[0m [0m[1m[0mfunction_name[0m[0m      = "psoxy-google-chat"
+      [32m+[0m [0m[1m[0mfunction_url[0m[0m       = (known after apply)
+      [32m+[0m [0m[1m[0mid[0m[0m                 = (known after apply)
+      [32m+[0m [0m[1m[0murl_id[0m[0m             = (known after apply)
+
+      [32m+[0m [0mcors {
+          [32m+[0m [0m[1m[0mallow_credentials[0m[0m = true
+          [32m+[0m [0m[1m[0mallow_headers[0m[0m     = [
+              [32m+[0m [0m"date",
+              [32m+[0m [0m"keep-alive",
+            ]
+          [32m+[0m [0m[1m[0mallow_methods[0m[0m     = [
+              [32m+[0m [0m"GET",
+              [32m+[0m [0m"HEAD",
+              [32m+[0m [0m"POST",
+            ]
+          [32m+[0m [0m[1m[0mallow_origins[0m[0m     = [
+              [32m+[0m [0m"*",
+            ]
+          [32m+[0m [0m[1m[0mexpose_headers[0m[0m    = [
+              [32m+[0m [0m"date",
+              [32m+[0m [0m"keep-alive",
+            ]
+          [32m+[0m [0m[1m[0mmax_age[0m[0m           = 86400
+        }
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-chat"].local_file.test_script[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "local_file" "test_script" {
+      [32m+[0m [0m[1m[0mcontent[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0mdirectory_permission[0m[0m = "0777"
+      [32m+[0m [0m[1m[0mfile_permission[0m[0m      = "0770"
+      [32m+[0m [0m[1m[0mfilename[0m[0m             = "test-psoxy-google-chat.sh"
+      [32m+[0m [0m[1m[0mid[0m[0m                   = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-chat"].local_file.todo[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "local_file" "todo" {
+      [32m+[0m [0m[1m[0mcontent[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0mdirectory_permission[0m[0m = "0777"
+      [32m+[0m [0m[1m[0mfile_permission[0m[0m      = "0777"
+      [32m+[0m [0m[1m[0mfilename[0m[0m             = "TODO 2 - test psoxy-google-chat.md"
+      [32m+[0m [0m[1m[0mid[0m[0m                   = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-meet"].aws_lambda_function_url.lambda_url[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_lambda_function_url" "lambda_url" {
+      [32m+[0m [0m[1m[0mauthorization_type[0m[0m = "AWS_IAM"
+      [32m+[0m [0m[1m[0mfunction_arn[0m[0m       = (known after apply)
+      [32m+[0m [0m[1m[0mfunction_name[0m[0m      = "psoxy-google-meet"
+      [32m+[0m [0m[1m[0mfunction_url[0m[0m       = (known after apply)
+      [32m+[0m [0m[1m[0mid[0m[0m                 = (known after apply)
+      [32m+[0m [0m[1m[0murl_id[0m[0m             = (known after apply)
+
+      [32m+[0m [0mcors {
+          [32m+[0m [0m[1m[0mallow_credentials[0m[0m = true
+          [32m+[0m [0m[1m[0mallow_headers[0m[0m     = [
+              [32m+[0m [0m"date",
+              [32m+[0m [0m"keep-alive",
+            ]
+          [32m+[0m [0m[1m[0mallow_methods[0m[0m     = [
+              [32m+[0m [0m"GET",
+              [32m+[0m [0m"HEAD",
+              [32m+[0m [0m"POST",
+            ]
+          [32m+[0m [0m[1m[0mallow_origins[0m[0m     = [
+              [32m+[0m [0m"*",
+            ]
+          [32m+[0m [0m[1m[0mexpose_headers[0m[0m    = [
+              [32m+[0m [0m"date",
+              [32m+[0m [0m"keep-alive",
+            ]
+          [32m+[0m [0m[1m[0mmax_age[0m[0m           = 86400
+        }
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-meet"].local_file.test_script[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "local_file" "test_script" {
+      [32m+[0m [0m[1m[0mcontent[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0mdirectory_permission[0m[0m = "0777"
+      [32m+[0m [0m[1m[0mfile_permission[0m[0m      = "0770"
+      [32m+[0m [0m[1m[0mfilename[0m[0m             = "test-psoxy-google-meet.sh"
+      [32m+[0m [0m[1m[0mid[0m[0m                   = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-meet"].local_file.todo[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "local_file" "todo" {
+      [32m+[0m [0m[1m[0mcontent[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0mdirectory_permission[0m[0m = "0777"
+      [32m+[0m [0m[1m[0mfile_permission[0m[0m      = "0777"
+      [32m+[0m [0m[1m[0mfilename[0m[0m             = "TODO 2 - test psoxy-google-meet.md"
+      [32m+[0m [0m[1m[0mid[0m[0m                   = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.sa-key-secrets["gcal"].aws_ssm_parameter.secret["PSOXY_GCAL_SERVICE_ACCOUNT_KEY"][0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_ssm_parameter" "secret" {
+      [32m+[0m [0m[1m[0marn[0m[0m            = (known after apply)
+      [32m+[0m [0m[1m[0mdata_type[0m[0m      = (known after apply)
+      [32m+[0m [0m[1m[0mdescription[0m[0m    = "GCP service account key for gcal connector"
+      [32m+[0m [0m[1m[0mid[0m[0m             = (known after apply)
+      [32m+[0m [0m[1m[0minsecure_value[0m[0m = (known after apply)
+      [32m+[0m [0m[1m[0mkey_id[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mname[0m[0m           = "PSOXY_GCAL_SERVICE_ACCOUNT_KEY"
+      [32m+[0m [0m[1m[0mtags_all[0m[0m       = (known after apply)
+      [32m+[0m [0m[1m[0mtier[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mtype[0m[0m           = "SecureString"
+      [32m+[0m [0m[1m[0mvalue[0m[0m          = (sensitive value)
+      [32m+[0m [0m[1m[0mversion[0m[0m        = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.sa-key-secrets["gdirectory"].aws_ssm_parameter.secret["PSOXY_GDIRECTORY_SERVICE_ACCOUNT_KEY"][0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_ssm_parameter" "secret" {
+      [32m+[0m [0m[1m[0marn[0m[0m            = (known after apply)
+      [32m+[0m [0m[1m[0mdata_type[0m[0m      = (known after apply)
+      [32m+[0m [0m[1m[0mdescription[0m[0m    = "GCP service account key for gdirectory connector"
+      [32m+[0m [0m[1m[0mid[0m[0m             = (known after apply)
+      [32m+[0m [0m[1m[0minsecure_value[0m[0m = (known after apply)
+      [32m+[0m [0m[1m[0mkey_id[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mname[0m[0m           = "PSOXY_GDIRECTORY_SERVICE_ACCOUNT_KEY"
+      [32m+[0m [0m[1m[0mtags_all[0m[0m       = (known after apply)
+      [32m+[0m [0m[1m[0mtier[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mtype[0m[0m           = "SecureString"
+      [32m+[0m [0m[1m[0mvalue[0m[0m          = (sensitive value)
+      [32m+[0m [0m[1m[0mversion[0m[0m        = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.sa-key-secrets["gdrive"].aws_ssm_parameter.secret["PSOXY_GDRIVE_SERVICE_ACCOUNT_KEY"][0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_ssm_parameter" "secret" {
+      [32m+[0m [0m[1m[0marn[0m[0m            = (known after apply)
+      [32m+[0m [0m[1m[0mdata_type[0m[0m      = (known after apply)
+      [32m+[0m [0m[1m[0mdescription[0m[0m    = "GCP service account key for gdrive connector"
+      [32m+[0m [0m[1m[0mid[0m[0m             = (known after apply)
+      [32m+[0m [0m[1m[0minsecure_value[0m[0m = (known after apply)
+      [32m+[0m [0m[1m[0mkey_id[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mname[0m[0m           = "PSOXY_GDRIVE_SERVICE_ACCOUNT_KEY"
+      [32m+[0m [0m[1m[0mtags_all[0m[0m       = (known after apply)
+      [32m+[0m [0m[1m[0mtier[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mtype[0m[0m           = "SecureString"
+      [32m+[0m [0m[1m[0mvalue[0m[0m          = (sensitive value)
+      [32m+[0m [0m[1m[0mversion[0m[0m        = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.sa-key-secrets["gmail"].aws_ssm_parameter.secret["PSOXY_GMAIL_SERVICE_ACCOUNT_KEY"][0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_ssm_parameter" "secret" {
+      [32m+[0m [0m[1m[0marn[0m[0m            = (known after apply)
+      [32m+[0m [0m[1m[0mdata_type[0m[0m      = (known after apply)
+      [32m+[0m [0m[1m[0mdescription[0m[0m    = "GCP service account key for gmail connector"
+      [32m+[0m [0m[1m[0mid[0m[0m             = (known after apply)
+      [32m+[0m [0m[1m[0minsecure_value[0m[0m = (known after apply)
+      [32m+[0m [0m[1m[0mkey_id[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mname[0m[0m           = "PSOXY_GMAIL_SERVICE_ACCOUNT_KEY"
+      [32m+[0m [0m[1m[0mtags_all[0m[0m       = (known after apply)
+      [32m+[0m [0m[1m[0mtier[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mtype[0m[0m           = "SecureString"
+      [32m+[0m [0m[1m[0mvalue[0m[0m          = (sensitive value)
+      [32m+[0m [0m[1m[0mversion[0m[0m        = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.sa-key-secrets["google-chat"].aws_ssm_parameter.secret["PSOXY_GOOGLE_CHAT_SERVICE_ACCOUNT_KEY"][0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_ssm_parameter" "secret" {
+      [32m+[0m [0m[1m[0marn[0m[0m            = (known after apply)
+      [32m+[0m [0m[1m[0mdata_type[0m[0m      = (known after apply)
+      [32m+[0m [0m[1m[0mdescription[0m[0m    = "GCP service account key for google-chat connector"
+      [32m+[0m [0m[1m[0mid[0m[0m             = (known after apply)
+      [32m+[0m [0m[1m[0minsecure_value[0m[0m = (known after apply)
+      [32m+[0m [0m[1m[0mkey_id[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mname[0m[0m           = "PSOXY_GOOGLE_CHAT_SERVICE_ACCOUNT_KEY"
+      [32m+[0m [0m[1m[0mtags_all[0m[0m       = (known after apply)
+      [32m+[0m [0m[1m[0mtier[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mtype[0m[0m           = "SecureString"
+      [32m+[0m [0m[1m[0mvalue[0m[0m          = (sensitive value)
+      [32m+[0m [0m[1m[0mversion[0m[0m        = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.sa-key-secrets["google-meet"].aws_ssm_parameter.secret["PSOXY_GOOGLE_MEET_SERVICE_ACCOUNT_KEY"][0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_ssm_parameter" "secret" {
+      [32m+[0m [0m[1m[0marn[0m[0m            = (known after apply)
+      [32m+[0m [0m[1m[0mdata_type[0m[0m      = (known after apply)
+      [32m+[0m [0m[1m[0mdescription[0m[0m    = "GCP service account key for google-meet connector"
+      [32m+[0m [0m[1m[0mid[0m[0m             = (known after apply)
+      [32m+[0m [0m[1m[0minsecure_value[0m[0m = (known after apply)
+      [32m+[0m [0m[1m[0mkey_id[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mname[0m[0m           = "PSOXY_GOOGLE_MEET_SERVICE_ACCOUNT_KEY"
+      [32m+[0m [0m[1m[0mtags_all[0m[0m       = (known after apply)
+      [32m+[0m [0m[1m[0mtier[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mtype[0m[0m           = "SecureString"
+      [32m+[0m [0m[1m[0mvalue[0m[0m          = (sensitive value)
+      [32m+[0m [0m[1m[0mversion[0m[0m        = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.source_token_external_todo["slack-discovery-api"].local_file.source_connection_instructions[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "local_file" "source_connection_instructions" {
+      [32m+[0m [0m[1m[0mcontent[0m[0m              = <<-EOT
+            # TODO - Create User-Managed Token for slack-discovery-api
+            
+            Follow the following steps:
+            
+            ## Slack Discovery Setup
+            For enabling Slack Discovery with the Psoxy you must first setup an app on your Slack Enterprise
+            instance.
+              1. Go to https://api.slack.com/apps and create an app, select name a development workspace
+              2. Take note of your App ID and contact your Slack rep and ask them to enable `discovery:read` scope for the app.
+            If they also enable `discovery:write` then delete it for safety, the app just needs read access.
+            3. Generate the following URL replacing the placeholders for *YOUR_CLIENT_ID* and *YOUR_APP_SECRET* and save it for later
+            `https://api.slack.com/api/oauth.v2.access?client_id=YOUR_CLIENT_ID&client_secret=YOUR_APP_SECRET`
+            4. Go to OAuth & Permissions > Redirect URLs and add the previous URL there
+            The next step depends on your installation approach you might need to change slightly
+            ### Org wide install
+            Use this step if you want to install in the whole org, across multiple workspaces.
+              1. Add a bot scope (not really used, but Slack doesn't allow org-wide without a bot scope requested).
+                 Just add `users:read`, something that is read-only and we already have access through discovery.
+              2. Go to *Org Level Apps* and Opt-in to the program
+              3. Go to Settings > Install App
+              4. Install into *organization*
+              5. Copy the User OAuth Token and store it in secret manager.
+              Otherwise, share the token with the AWS/GCP administrator completing the implementation.
+            ### Workspace install
+            Use this steps if you intend to install in just one workspace within your org.
+              1. Go to Settings > Install App
+              2. Install into *workspace*
+              3. Copy the User OAuth Token and store it in the secret manager (or share with the administrator completing the implementation)
+            
+            
+            ## Populate the token for PSOXY_SLACK_DISCOVERY_API_ACCESS_TOKEN in AWS Systems Manager Parameter Store.
+            
+            ### Using AWS cli
+            
+            YMMV.
+            ```shell
+            aws ssm put-parameter \
+            --region us-east-1 \
+            --name "PSOXY_SLACK_DISCOVERY_API_ACCESS_TOKEN" \
+            --type "SecureString " \
+            --value "YOUR_VALUE_HERE" \
+            --overwrite
+            ```
+            
+            from macOS clipboard
+            ```shell
+            pbpaste | aws ssm put-parameter \
+            --region us-east-1 \
+            --name "PSOXY_SLACK_DISCOVERY_API_ACCESS_TOKEN" \
+            --type "SecureString " \
+            --value=- \
+            --overwrite
+            ```
+            
+            reference: https://cloud.google.com/sdk/gcloud/reference/secrets/versions/add
+            
+            ### AWS  Console
+            
+            1. Visit
+            
+            https://us-east-1.console.aws.amazon.com/systems-manager/parameters/PSOXY_SLACK_DISCOVERY_API_ACCESS_TOKEN/description?region=us-east-1&tab=Table
+            
+            2. Click "Edit"; paste your value in the 'Value' field and click 'Save changes'.
+            
+            
+        EOT
+      [32m+[0m [0m[1m[0mdirectory_permission[0m[0m = "0777"
+      [32m+[0m [0m[1m[0mfile_permission[0m[0m      = "0777"
+      [32m+[0m [0m[1m[0mfilename[0m[0m             = "TODO 1 - setup slack-discovery-api.md"
+      [32m+[0m [0m[1m[0mid[0m[0m                   = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.source_token_external_todo["zoom"].local_file.source_connection_instructions[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "local_file" "source_connection_instructions" {
+      [32m+[0m [0m[1m[0mcontent[0m[0m              = <<-EOT
+            # TODO - Create User-Managed Token for zoom
+            
+            Follow the following steps:
+            
+            ## Zoom Setup
+            Zoom connector through Psoxy requires a custom managed app on the Zoom Marketplace (in development
+            mode, no need to publish).
+            1. Go to https://marketplace.zoom.us/develop/create and create an app of type "Server to Server OAuth"
+            2. After creation it will show the App Credentials. Share them with the AWS/GCP administrator, the
+            following secret values must be filled in the Secret Manager for the Proxy with the appropriate values:
+            - `PSOXY_ZOOM_CLIENT_ID`
+            - `PSOXY_ZOOM_ACCOUNT_ID`
+            - `PSOXY_ZOOM_CLIENT_SECRET`
+            Anytime the *client secret* is regenerated it needs to be updated in the Proxy too.
+            3. Fill the information section
+            4. Fill the scopes section, enabling the following:
+            - Users / View all user information /user:read:admin
+              - To be able to gather information about the zoom users
+            - Meetings / View all user meetings /meeting:read:admin
+              - Allows us to list all user meeting
+            - Report / View report data /report:read:admin
+              - Last 6 months view for user meetings
+            5. Activate the app
+            
+            
+            ## Populate the token for PSOXY_ZOOM_CLIENT_SECRET in AWS Systems Manager Parameter Store.
+            
+            ### Using AWS cli
+            
+            YMMV.
+            ```shell
+            aws ssm put-parameter \
+            --region us-east-1 \
+            --name "PSOXY_ZOOM_CLIENT_SECRET" \
+            --type "SecureString " \
+            --value "YOUR_VALUE_HERE" \
+            --overwrite
+            ```
+            
+            from macOS clipboard
+            ```shell
+            pbpaste | aws ssm put-parameter \
+            --region us-east-1 \
+            --name "PSOXY_ZOOM_CLIENT_SECRET" \
+            --type "SecureString " \
+            --value=- \
+            --overwrite
+            ```
+            
+            reference: https://cloud.google.com/sdk/gcloud/reference/secrets/versions/add
+            
+            ### AWS  Console
+            
+            1. Visit
+            
+            https://us-east-1.console.aws.amazon.com/systems-manager/parameters/PSOXY_ZOOM_CLIENT_SECRET/description?region=us-east-1&tab=Table
+            
+            2. Click "Edit"; paste your value in the 'Value' field and click 'Save changes'.
+            
+            
+            ## Populate the token for PSOXY_ZOOM_CLIENT_ID in AWS Systems Manager Parameter Store.
+            
+            ### Using AWS cli
+            
+            YMMV.
+            ```shell
+            aws ssm put-parameter \
+            --region us-east-1 \
+            --name "PSOXY_ZOOM_CLIENT_ID" \
+            --type "SecureString " \
+            --value "YOUR_VALUE_HERE" \
+            --overwrite
+            ```
+            
+            from macOS clipboard
+            ```shell
+            pbpaste | aws ssm put-parameter \
+            --region us-east-1 \
+            --name "PSOXY_ZOOM_CLIENT_ID" \
+            --type "SecureString " \
+            --value=- \
+            --overwrite
+            ```
+            
+            reference: https://cloud.google.com/sdk/gcloud/reference/secrets/versions/add
+            
+            ### AWS  Console
+            
+            1. Visit
+            
+            https://us-east-1.console.aws.amazon.com/systems-manager/parameters/PSOXY_ZOOM_CLIENT_ID/description?region=us-east-1&tab=Table
+            
+            2. Click "Edit"; paste your value in the 'Value' field and click 'Save changes'.
+            
+            
+            ## Populate the token for PSOXY_ZOOM_ACCOUNT_ID in AWS Systems Manager Parameter Store.
+            
+            ### Using AWS cli
+            
+            YMMV.
+            ```shell
+            aws ssm put-parameter \
+            --region us-east-1 \
+            --name "PSOXY_ZOOM_ACCOUNT_ID" \
+            --type "SecureString " \
+            --value "YOUR_VALUE_HERE" \
+            --overwrite
+            ```
+            
+            from macOS clipboard
+            ```shell
+            pbpaste | aws ssm put-parameter \
+            --region us-east-1 \
+            --name "PSOXY_ZOOM_ACCOUNT_ID" \
+            --type "SecureString " \
+            --value=- \
+            --overwrite
+            ```
+            
+            reference: https://cloud.google.com/sdk/gcloud/reference/secrets/versions/add
+            
+            ### AWS  Console
+            
+            1. Visit
+            
+            https://us-east-1.console.aws.amazon.com/systems-manager/parameters/PSOXY_ZOOM_ACCOUNT_ID/description?region=us-east-1&tab=Table
+            
+            2. Click "Edit"; paste your value in the 'Value' field and click 'Save changes'.
+            
+            
+            ## Populate the token for PSOXY_ZOOM_ACCESS_TOKEN in AWS Systems Manager Parameter Store.
+            
+            ### Using AWS cli
+            
+            YMMV.
+            ```shell
+            aws ssm put-parameter \
+            --region us-east-1 \
+            --name "PSOXY_ZOOM_ACCESS_TOKEN" \
+            --type "SecureString " \
+            --value "YOUR_VALUE_HERE" \
+            --overwrite
+            ```
+            
+            from macOS clipboard
+            ```shell
+            pbpaste | aws ssm put-parameter \
+            --region us-east-1 \
+            --name "PSOXY_ZOOM_ACCESS_TOKEN" \
+            --type "SecureString " \
+            --value=- \
+            --overwrite
+            ```
+            
+            reference: https://cloud.google.com/sdk/gcloud/reference/secrets/versions/add
+            
+            ### AWS  Console
+            
+            1. Visit
+            
+            https://us-east-1.console.aws.amazon.com/systems-manager/parameters/PSOXY_ZOOM_ACCESS_TOKEN/description?region=us-east-1&tab=Table
+            
+            2. Click "Edit"; paste your value in the 'Value' field and click 'Save changes'.
+            
+            
+        EOT
+      [32m+[0m [0m[1m[0mdirectory_permission[0m[0m = "0777"
+      [32m+[0m [0m[1m[0mfile_permission[0m[0m      = "0777"
+      [32m+[0m [0m[1m[0mfilename[0m[0m             = "TODO 1 - setup zoom.md"
+      [32m+[0m [0m[1m[0mid[0m[0m                   = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["slack-discovery-api"].module.psoxy_lambda.aws_cloudwatch_log_group.lambda-log[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_cloudwatch_log_group" "lambda-log" {
+      [32m+[0m [0m[1m[0marn[0m[0m               = (known after apply)
+      [32m+[0m [0m[1m[0mid[0m[0m                = (known after apply)
+      [32m+[0m [0m[1m[0mname[0m[0m              = "/aws/lambda/psoxy-slack-discovery-api"
+      [32m+[0m [0m[1m[0mname_prefix[0m[0m       = (known after apply)
+      [32m+[0m [0m[1m[0mretention_in_days[0m[0m = 7
+      [32m+[0m [0m[1m[0mskip_destroy[0m[0m      = false
+      [32m+[0m [0m[1m[0mtags_all[0m[0m          = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["slack-discovery-api"].module.psoxy_lambda.aws_iam_policy.ssm_param_policy[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_iam_policy" "ssm_param_policy" {
+      [32m+[0m [0m[1m[0marn[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mdescription[0m[0m = "Allow SSM parameter access needed by psoxy-slack-discovery-api"
+      [32m+[0m [0m[1m[0mid[0m[0m          = (known after apply)
+      [32m+[0m [0m[1m[0mname[0m[0m        = "psoxy-slack-discovery-api_ssmParameters"
+      [32m+[0m [0m[1m[0mpath[0m[0m        = "/"
+      [32m+[0m [0m[1m[0mpolicy[0m[0m      = (known after apply)
+      [32m+[0m [0m[1m[0mpolicy_id[0m[0m   = (known after apply)
+      [32m+[0m [0m[1m[0mtags_all[0m[0m    = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["slack-discovery-api"].module.psoxy_lambda.aws_iam_role.iam_for_lambda[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_iam_role" "iam_for_lambda" {
+      [32m+[0m [0m[1m[0marn[0m[0m                   = (known after apply)
+      [32m+[0m [0m[1m[0massume_role_policy[0m[0m    = jsonencode(
+            {
+              [32m+[0m [0mStatement = [
+                  [32m+[0m [0m{
+                      [32m+[0m [0mAction    = "sts:AssumeRole"
+                      [32m+[0m [0mEffect    = "Allow"
+                      [32m+[0m [0mPrincipal = {
+                          [32m+[0m [0mService = "lambda.amazonaws.com"
+                        }
+                      [32m+[0m [0mSid       = ""
+                    },
+                ]
+              [32m+[0m [0mVersion   = "2012-10-17"
+            }
+        )
+      [32m+[0m [0m[1m[0mcreate_date[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mdescription[0m[0m           = "execution role for psoxy instance"
+      [32m+[0m [0m[1m[0mforce_detach_policies[0m[0m = false
+      [32m+[0m [0m[1m[0mid[0m[0m                    = (known after apply)
+      [32m+[0m [0m[1m[0mmanaged_policy_arns[0m[0m   = (known after apply)
+      [32m+[0m [0m[1m[0mmax_session_duration[0m[0m  = 3600
+      [32m+[0m [0m[1m[0mname[0m[0m                  = "PsoxyExec_psoxy-slack-discovery-api"
+      [32m+[0m [0m[1m[0mname_prefix[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mpath[0m[0m                  = "/"
+      [32m+[0m [0m[1m[0mtags_all[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0munique_id[0m[0m             = (known after apply)
+
+      [32m+[0m [0minline_policy {
+          [32m+[0m [0m[1m[0mname[0m[0m   = (known after apply)
+          [32m+[0m [0m[1m[0mpolicy[0m[0m = (known after apply)
+        }
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["slack-discovery-api"].module.psoxy_lambda.aws_iam_role_policy_attachment.attach_policy[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_iam_role_policy_attachment" "attach_policy" {
+      [32m+[0m [0m[1m[0mid[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mpolicy_arn[0m[0m = (known after apply)
+      [32m+[0m [0m[1m[0mrole[0m[0m       = "PsoxyExec_psoxy-slack-discovery-api"
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["slack-discovery-api"].module.psoxy_lambda.aws_iam_role_policy_attachment.basic[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_iam_role_policy_attachment" "basic" {
+      [32m+[0m [0m[1m[0mid[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mpolicy_arn[0m[0m = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+      [32m+[0m [0m[1m[0mrole[0m[0m       = "PsoxyExec_psoxy-slack-discovery-api"
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["slack-discovery-api"].module.psoxy_lambda.aws_lambda_function.psoxy-instance[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_lambda_function" "psoxy-instance" {
+      [32m+[0m [0m[1m[0marchitectures[0m[0m                  = [
+          [32m+[0m [0m"arm64",
+        ]
+      [32m+[0m [0m[1m[0marn[0m[0m                            = (known after apply)
+      [32m+[0m [0m[1m[0mfilename[0m[0m                       = "/Users/erik/code/psoxy/java/impl/aws/target/psoxy-aws-0.4.10-SNAPSHOT.jar"
+      [32m+[0m [0m[1m[0mfunction_name[0m[0m                  = "psoxy-slack-discovery-api"
+      [32m+[0m [0m[1m[0mhandler[0m[0m                        = "co.worklytics.psoxy.Handler"
+      [32m+[0m [0m[1m[0mid[0m[0m                             = (known after apply)
+      [32m+[0m [0m[1m[0minvoke_arn[0m[0m                     = (known after apply)
+      [32m+[0m [0m[1m[0mlast_modified[0m[0m                  = (known after apply)
+      [32m+[0m [0m[1m[0mmemory_size[0m[0m                    = 512
+      [32m+[0m [0m[1m[0mpackage_type[0m[0m                   = "Zip"
+      [32m+[0m [0m[1m[0mpublish[0m[0m                        = false
+      [32m+[0m [0m[1m[0mqualified_arn[0m[0m                  = (known after apply)
+      [32m+[0m [0m[1m[0mqualified_invoke_arn[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mreserved_concurrent_executions[0m[0m = -1
+      [32m+[0m [0m[1m[0mrole[0m[0m                           = (known after apply)
+      [32m+[0m [0m[1m[0mruntime[0m[0m                        = "java11"
+      [32m+[0m [0m[1m[0msigning_job_arn[0m[0m                = (known after apply)
+      [32m+[0m [0m[1m[0msigning_profile_version_arn[0m[0m    = (known after apply)
+      [32m+[0m [0m[1m[0msource_code_hash[0m[0m               = "YquDr9FirQBF4lF8plbjFn6cykvusIuF3NqQ3QkXQBo="
+      [32m+[0m [0m[1m[0msource_code_size[0m[0m               = (known after apply)
+      [32m+[0m [0m[1m[0mtags_all[0m[0m                       = (known after apply)
+      [32m+[0m [0m[1m[0mtimeout[0m[0m                        = 55
+      [32m+[0m [0m[1m[0mversion[0m[0m                        = (known after apply)
+
+      [32m+[0m [0menvironment {
+          [32m+[0m [0m[1m[0mvariables[0m[0m = (known after apply)
+        }
+
+      [32m+[0m [0mephemeral_storage {
+          [32m+[0m [0m[1m[0msize[0m[0m = (known after apply)
+        }
+
+      [32m+[0m [0mtracing_config {
+          [32m+[0m [0m[1m[0mmode[0m[0m = (known after apply)
+        }
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["zoom"].module.psoxy_lambda.aws_cloudwatch_log_group.lambda-log[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_cloudwatch_log_group" "lambda-log" {
+      [32m+[0m [0m[1m[0marn[0m[0m               = (known after apply)
+      [32m+[0m [0m[1m[0mid[0m[0m                = (known after apply)
+      [32m+[0m [0m[1m[0mname[0m[0m              = "/aws/lambda/psoxy-zoom"
+      [32m+[0m [0m[1m[0mname_prefix[0m[0m       = (known after apply)
+      [32m+[0m [0m[1m[0mretention_in_days[0m[0m = 7
+      [32m+[0m [0m[1m[0mskip_destroy[0m[0m      = false
+      [32m+[0m [0m[1m[0mtags_all[0m[0m          = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["zoom"].module.psoxy_lambda.aws_iam_policy.ssm_param_policy[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_iam_policy" "ssm_param_policy" {
+      [32m+[0m [0m[1m[0marn[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mdescription[0m[0m = "Allow SSM parameter access needed by psoxy-zoom"
+      [32m+[0m [0m[1m[0mid[0m[0m          = (known after apply)
+      [32m+[0m [0m[1m[0mname[0m[0m        = "psoxy-zoom_ssmParameters"
+      [32m+[0m [0m[1m[0mpath[0m[0m        = "/"
+      [32m+[0m [0m[1m[0mpolicy[0m[0m      = (known after apply)
+      [32m+[0m [0m[1m[0mpolicy_id[0m[0m   = (known after apply)
+      [32m+[0m [0m[1m[0mtags_all[0m[0m    = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["zoom"].module.psoxy_lambda.aws_iam_role.iam_for_lambda[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_iam_role" "iam_for_lambda" {
+      [32m+[0m [0m[1m[0marn[0m[0m                   = (known after apply)
+      [32m+[0m [0m[1m[0massume_role_policy[0m[0m    = jsonencode(
+            {
+              [32m+[0m [0mStatement = [
+                  [32m+[0m [0m{
+                      [32m+[0m [0mAction    = "sts:AssumeRole"
+                      [32m+[0m [0mEffect    = "Allow"
+                      [32m+[0m [0mPrincipal = {
+                          [32m+[0m [0mService = "lambda.amazonaws.com"
+                        }
+                      [32m+[0m [0mSid       = ""
+                    },
+                ]
+              [32m+[0m [0mVersion   = "2012-10-17"
+            }
+        )
+      [32m+[0m [0m[1m[0mcreate_date[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mdescription[0m[0m           = "execution role for psoxy instance"
+      [32m+[0m [0m[1m[0mforce_detach_policies[0m[0m = false
+      [32m+[0m [0m[1m[0mid[0m[0m                    = (known after apply)
+      [32m+[0m [0m[1m[0mmanaged_policy_arns[0m[0m   = (known after apply)
+      [32m+[0m [0m[1m[0mmax_session_duration[0m[0m  = 3600
+      [32m+[0m [0m[1m[0mname[0m[0m                  = "PsoxyExec_psoxy-zoom"
+      [32m+[0m [0m[1m[0mname_prefix[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mpath[0m[0m                  = "/"
+      [32m+[0m [0m[1m[0mtags_all[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0munique_id[0m[0m             = (known after apply)
+
+      [32m+[0m [0minline_policy {
+          [32m+[0m [0m[1m[0mname[0m[0m   = (known after apply)
+          [32m+[0m [0m[1m[0mpolicy[0m[0m = (known after apply)
+        }
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["zoom"].module.psoxy_lambda.aws_iam_role_policy_attachment.attach_policy[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_iam_role_policy_attachment" "attach_policy" {
+      [32m+[0m [0m[1m[0mid[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mpolicy_arn[0m[0m = (known after apply)
+      [32m+[0m [0m[1m[0mrole[0m[0m       = "PsoxyExec_psoxy-zoom"
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["zoom"].module.psoxy_lambda.aws_iam_role_policy_attachment.basic[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_iam_role_policy_attachment" "basic" {
+      [32m+[0m [0m[1m[0mid[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mpolicy_arn[0m[0m = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+      [32m+[0m [0m[1m[0mrole[0m[0m       = "PsoxyExec_psoxy-zoom"
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["zoom"].module.psoxy_lambda.aws_lambda_function.psoxy-instance[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_lambda_function" "psoxy-instance" {
+      [32m+[0m [0m[1m[0marchitectures[0m[0m                  = [
+          [32m+[0m [0m"arm64",
+        ]
+      [32m+[0m [0m[1m[0marn[0m[0m                            = (known after apply)
+      [32m+[0m [0m[1m[0mfilename[0m[0m                       = "/Users/erik/code/psoxy/java/impl/aws/target/psoxy-aws-0.4.10-SNAPSHOT.jar"
+      [32m+[0m [0m[1m[0mfunction_name[0m[0m                  = "psoxy-zoom"
+      [32m+[0m [0m[1m[0mhandler[0m[0m                        = "co.worklytics.psoxy.Handler"
+      [32m+[0m [0m[1m[0mid[0m[0m                             = (known after apply)
+      [32m+[0m [0m[1m[0minvoke_arn[0m[0m                     = (known after apply)
+      [32m+[0m [0m[1m[0mlast_modified[0m[0m                  = (known after apply)
+      [32m+[0m [0m[1m[0mmemory_size[0m[0m                    = 512
+      [32m+[0m [0m[1m[0mpackage_type[0m[0m                   = "Zip"
+      [32m+[0m [0m[1m[0mpublish[0m[0m                        = false
+      [32m+[0m [0m[1m[0mqualified_arn[0m[0m                  = (known after apply)
+      [32m+[0m [0m[1m[0mqualified_invoke_arn[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mreserved_concurrent_executions[0m[0m = -1
+      [32m+[0m [0m[1m[0mrole[0m[0m                           = (known after apply)
+      [32m+[0m [0m[1m[0mruntime[0m[0m                        = "java11"
+      [32m+[0m [0m[1m[0msigning_job_arn[0m[0m                = (known after apply)
+      [32m+[0m [0m[1m[0msigning_profile_version_arn[0m[0m    = (known after apply)
+      [32m+[0m [0m[1m[0msource_code_hash[0m[0m               = "YquDr9FirQBF4lF8plbjFn6cykvusIuF3NqQ3QkXQBo="
+      [32m+[0m [0m[1m[0msource_code_size[0m[0m               = (known after apply)
+      [32m+[0m [0m[1m[0mtags_all[0m[0m                       = (known after apply)
+      [32m+[0m [0m[1m[0mtimeout[0m[0m                        = 55
+      [32m+[0m [0m[1m[0mversion[0m[0m                        = (known after apply)
+
+      [32m+[0m [0menvironment {
+          [32m+[0m [0m[1m[0mvariables[0m[0m = (known after apply)
+        }
+
+      [32m+[0m [0mephemeral_storage {
+          [32m+[0m [0m[1m[0msize[0m[0m = (known after apply)
+        }
+
+      [32m+[0m [0mtracing_config {
+          [32m+[0m [0m[1m[0mmode[0m[0m = (known after apply)
+        }
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].module.psoxy_lambda.aws_cloudwatch_log_group.lambda-log[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_cloudwatch_log_group" "lambda-log" {
+      [32m+[0m [0m[1m[0marn[0m[0m               = (known after apply)
+      [32m+[0m [0m[1m[0mid[0m[0m                = (known after apply)
+      [32m+[0m [0m[1m[0mname[0m[0m              = "/aws/lambda/psoxy-hris"
+      [32m+[0m [0m[1m[0mname_prefix[0m[0m       = (known after apply)
+      [32m+[0m [0m[1m[0mretention_in_days[0m[0m = 7
+      [32m+[0m [0m[1m[0mskip_destroy[0m[0m      = false
+      [32m+[0m [0m[1m[0mtags_all[0m[0m          = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].module.psoxy_lambda.aws_iam_policy.ssm_param_policy[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_iam_policy" "ssm_param_policy" {
+      [32m+[0m [0m[1m[0marn[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mdescription[0m[0m = "Allow SSM parameter access needed by psoxy-hris"
+      [32m+[0m [0m[1m[0mid[0m[0m          = (known after apply)
+      [32m+[0m [0m[1m[0mname[0m[0m        = "psoxy-hris_ssmParameters"
+      [32m+[0m [0m[1m[0mpath[0m[0m        = "/"
+      [32m+[0m [0m[1m[0mpolicy[0m[0m      = (known after apply)
+      [32m+[0m [0m[1m[0mpolicy_id[0m[0m   = (known after apply)
+      [32m+[0m [0m[1m[0mtags_all[0m[0m    = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].module.psoxy_lambda.aws_iam_role.iam_for_lambda[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_iam_role" "iam_for_lambda" {
+      [32m+[0m [0m[1m[0marn[0m[0m                   = (known after apply)
+      [32m+[0m [0m[1m[0massume_role_policy[0m[0m    = jsonencode(
+            {
+              [32m+[0m [0mStatement = [
+                  [32m+[0m [0m{
+                      [32m+[0m [0mAction    = "sts:AssumeRole"
+                      [32m+[0m [0mEffect    = "Allow"
+                      [32m+[0m [0mPrincipal = {
+                          [32m+[0m [0mService = "lambda.amazonaws.com"
+                        }
+                      [32m+[0m [0mSid       = ""
+                    },
+                ]
+              [32m+[0m [0mVersion   = "2012-10-17"
+            }
+        )
+      [32m+[0m [0m[1m[0mcreate_date[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mdescription[0m[0m           = "execution role for psoxy instance"
+      [32m+[0m [0m[1m[0mforce_detach_policies[0m[0m = false
+      [32m+[0m [0m[1m[0mid[0m[0m                    = (known after apply)
+      [32m+[0m [0m[1m[0mmanaged_policy_arns[0m[0m   = (known after apply)
+      [32m+[0m [0m[1m[0mmax_session_duration[0m[0m  = 3600
+      [32m+[0m [0m[1m[0mname[0m[0m                  = "PsoxyExec_psoxy-hris"
+      [32m+[0m [0m[1m[0mname_prefix[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mpath[0m[0m                  = "/"
+      [32m+[0m [0m[1m[0mtags_all[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0munique_id[0m[0m             = (known after apply)
+
+      [32m+[0m [0minline_policy {
+          [32m+[0m [0m[1m[0mname[0m[0m   = (known after apply)
+          [32m+[0m [0m[1m[0mpolicy[0m[0m = (known after apply)
+        }
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].module.psoxy_lambda.aws_iam_role_policy_attachment.attach_policy[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_iam_role_policy_attachment" "attach_policy" {
+      [32m+[0m [0m[1m[0mid[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mpolicy_arn[0m[0m = (known after apply)
+      [32m+[0m [0m[1m[0mrole[0m[0m       = "PsoxyExec_psoxy-hris"
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].module.psoxy_lambda.aws_iam_role_policy_attachment.basic[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_iam_role_policy_attachment" "basic" {
+      [32m+[0m [0m[1m[0mid[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mpolicy_arn[0m[0m = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+      [32m+[0m [0m[1m[0mrole[0m[0m       = "PsoxyExec_psoxy-hris"
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].module.psoxy_lambda.aws_lambda_function.psoxy-instance[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_lambda_function" "psoxy-instance" {
+      [32m+[0m [0m[1m[0marchitectures[0m[0m                  = [
+          [32m+[0m [0m"arm64",
+        ]
+      [32m+[0m [0m[1m[0marn[0m[0m                            = (known after apply)
+      [32m+[0m [0m[1m[0mfilename[0m[0m                       = "/Users/erik/code/psoxy/java/impl/aws/target/psoxy-aws-0.4.10-SNAPSHOT.jar"
+      [32m+[0m [0m[1m[0mfunction_name[0m[0m                  = "psoxy-hris"
+      [32m+[0m [0m[1m[0mhandler[0m[0m                        = "co.worklytics.psoxy.S3Handler"
+      [32m+[0m [0m[1m[0mid[0m[0m                             = (known after apply)
+      [32m+[0m [0m[1m[0minvoke_arn[0m[0m                     = (known after apply)
+      [32m+[0m [0m[1m[0mlast_modified[0m[0m                  = (known after apply)
+      [32m+[0m [0m[1m[0mmemory_size[0m[0m                    = 1024
+      [32m+[0m [0m[1m[0mpackage_type[0m[0m                   = "Zip"
+      [32m+[0m [0m[1m[0mpublish[0m[0m                        = false
+      [32m+[0m [0m[1m[0mqualified_arn[0m[0m                  = (known after apply)
+      [32m+[0m [0m[1m[0mqualified_invoke_arn[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mreserved_concurrent_executions[0m[0m = -1
+      [32m+[0m [0m[1m[0mrole[0m[0m                           = (known after apply)
+      [32m+[0m [0m[1m[0mruntime[0m[0m                        = "java11"
+      [32m+[0m [0m[1m[0msigning_job_arn[0m[0m                = (known after apply)
+      [32m+[0m [0m[1m[0msigning_profile_version_arn[0m[0m    = (known after apply)
+      [32m+[0m [0m[1m[0msource_code_hash[0m[0m               = "YquDr9FirQBF4lF8plbjFn6cykvusIuF3NqQ3QkXQBo="
+      [32m+[0m [0m[1m[0msource_code_size[0m[0m               = (known after apply)
+      [32m+[0m [0m[1m[0mtags_all[0m[0m                       = (known after apply)
+      [32m+[0m [0m[1m[0mtimeout[0m[0m                        = 600
+      [32m+[0m [0m[1m[0mversion[0m[0m                        = (known after apply)
+
+      [32m+[0m [0menvironment {
+          [32m+[0m [0m[1m[0mvariables[0m[0m = (known after apply)
+        }
+
+      [32m+[0m [0mephemeral_storage {
+          [32m+[0m [0m[1m[0msize[0m[0m = (known after apply)
+        }
+
+      [32m+[0m [0mtracing_config {
+          [32m+[0m [0m[1m[0mmode[0m[0m = (known after apply)
+        }
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gcal"].module.psoxy_lambda.aws_cloudwatch_log_group.lambda-log[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_cloudwatch_log_group" "lambda-log" {
+      [32m+[0m [0m[1m[0marn[0m[0m               = (known after apply)
+      [32m+[0m [0m[1m[0mid[0m[0m                = (known after apply)
+      [32m+[0m [0m[1m[0mname[0m[0m              = "/aws/lambda/psoxy-gcal"
+      [32m+[0m [0m[1m[0mname_prefix[0m[0m       = (known after apply)
+      [32m+[0m [0m[1m[0mretention_in_days[0m[0m = 7
+      [32m+[0m [0m[1m[0mskip_destroy[0m[0m      = false
+      [32m+[0m [0m[1m[0mtags_all[0m[0m          = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gcal"].module.psoxy_lambda.aws_iam_policy.ssm_param_policy[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_iam_policy" "ssm_param_policy" {
+      [32m+[0m [0m[1m[0marn[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mdescription[0m[0m = "Allow SSM parameter access needed by psoxy-gcal"
+      [32m+[0m [0m[1m[0mid[0m[0m          = (known after apply)
+      [32m+[0m [0m[1m[0mname[0m[0m        = "psoxy-gcal_ssmParameters"
+      [32m+[0m [0m[1m[0mpath[0m[0m        = "/"
+      [32m+[0m [0m[1m[0mpolicy[0m[0m      = (known after apply)
+      [32m+[0m [0m[1m[0mpolicy_id[0m[0m   = (known after apply)
+      [32m+[0m [0m[1m[0mtags_all[0m[0m    = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gcal"].module.psoxy_lambda.aws_iam_role.iam_for_lambda[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_iam_role" "iam_for_lambda" {
+      [32m+[0m [0m[1m[0marn[0m[0m                   = (known after apply)
+      [32m+[0m [0m[1m[0massume_role_policy[0m[0m    = jsonencode(
+            {
+              [32m+[0m [0mStatement = [
+                  [32m+[0m [0m{
+                      [32m+[0m [0mAction    = "sts:AssumeRole"
+                      [32m+[0m [0mEffect    = "Allow"
+                      [32m+[0m [0mPrincipal = {
+                          [32m+[0m [0mService = "lambda.amazonaws.com"
+                        }
+                      [32m+[0m [0mSid       = ""
+                    },
+                ]
+              [32m+[0m [0mVersion   = "2012-10-17"
+            }
+        )
+      [32m+[0m [0m[1m[0mcreate_date[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mdescription[0m[0m           = "execution role for psoxy instance"
+      [32m+[0m [0m[1m[0mforce_detach_policies[0m[0m = false
+      [32m+[0m [0m[1m[0mid[0m[0m                    = (known after apply)
+      [32m+[0m [0m[1m[0mmanaged_policy_arns[0m[0m   = (known after apply)
+      [32m+[0m [0m[1m[0mmax_session_duration[0m[0m  = 3600
+      [32m+[0m [0m[1m[0mname[0m[0m                  = "PsoxyExec_psoxy-gcal"
+      [32m+[0m [0m[1m[0mname_prefix[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mpath[0m[0m                  = "/"
+      [32m+[0m [0m[1m[0mtags_all[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0munique_id[0m[0m             = (known after apply)
+
+      [32m+[0m [0minline_policy {
+          [32m+[0m [0m[1m[0mname[0m[0m   = (known after apply)
+          [32m+[0m [0m[1m[0mpolicy[0m[0m = (known after apply)
+        }
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gcal"].module.psoxy_lambda.aws_iam_role_policy_attachment.attach_policy[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_iam_role_policy_attachment" "attach_policy" {
+      [32m+[0m [0m[1m[0mid[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mpolicy_arn[0m[0m = (known after apply)
+      [32m+[0m [0m[1m[0mrole[0m[0m       = "PsoxyExec_psoxy-gcal"
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gcal"].module.psoxy_lambda.aws_iam_role_policy_attachment.basic[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_iam_role_policy_attachment" "basic" {
+      [32m+[0m [0m[1m[0mid[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mpolicy_arn[0m[0m = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+      [32m+[0m [0m[1m[0mrole[0m[0m       = "PsoxyExec_psoxy-gcal"
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gcal"].module.psoxy_lambda.aws_lambda_function.psoxy-instance[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_lambda_function" "psoxy-instance" {
+      [32m+[0m [0m[1m[0marchitectures[0m[0m                  = [
+          [32m+[0m [0m"arm64",
+        ]
+      [32m+[0m [0m[1m[0marn[0m[0m                            = (known after apply)
+      [32m+[0m [0m[1m[0mfilename[0m[0m                       = "/Users/erik/code/psoxy/java/impl/aws/target/psoxy-aws-0.4.10-SNAPSHOT.jar"
+      [32m+[0m [0m[1m[0mfunction_name[0m[0m                  = "psoxy-gcal"
+      [32m+[0m [0m[1m[0mhandler[0m[0m                        = "co.worklytics.psoxy.Handler"
+      [32m+[0m [0m[1m[0mid[0m[0m                             = (known after apply)
+      [32m+[0m [0m[1m[0minvoke_arn[0m[0m                     = (known after apply)
+      [32m+[0m [0m[1m[0mlast_modified[0m[0m                  = (known after apply)
+      [32m+[0m [0m[1m[0mmemory_size[0m[0m                    = 512
+      [32m+[0m [0m[1m[0mpackage_type[0m[0m                   = "Zip"
+      [32m+[0m [0m[1m[0mpublish[0m[0m                        = false
+      [32m+[0m [0m[1m[0mqualified_arn[0m[0m                  = (known after apply)
+      [32m+[0m [0m[1m[0mqualified_invoke_arn[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mreserved_concurrent_executions[0m[0m = -1
+      [32m+[0m [0m[1m[0mrole[0m[0m                           = (known after apply)
+      [32m+[0m [0m[1m[0mruntime[0m[0m                        = "java11"
+      [32m+[0m [0m[1m[0msigning_job_arn[0m[0m                = (known after apply)
+      [32m+[0m [0m[1m[0msigning_profile_version_arn[0m[0m    = (known after apply)
+      [32m+[0m [0m[1m[0msource_code_hash[0m[0m               = "YquDr9FirQBF4lF8plbjFn6cykvusIuF3NqQ3QkXQBo="
+      [32m+[0m [0m[1m[0msource_code_size[0m[0m               = (known after apply)
+      [32m+[0m [0m[1m[0mtags_all[0m[0m                       = (known after apply)
+      [32m+[0m [0m[1m[0mtimeout[0m[0m                        = 55
+      [32m+[0m [0m[1m[0mversion[0m[0m                        = (known after apply)
+
+      [32m+[0m [0menvironment {
+          [32m+[0m [0m[1m[0mvariables[0m[0m = (known after apply)
+        }
+
+      [32m+[0m [0mephemeral_storage {
+          [32m+[0m [0m[1m[0msize[0m[0m = (known after apply)
+        }
+
+      [32m+[0m [0mtracing_config {
+          [32m+[0m [0m[1m[0mmode[0m[0m = (known after apply)
+        }
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdirectory"].module.psoxy_lambda.aws_cloudwatch_log_group.lambda-log[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_cloudwatch_log_group" "lambda-log" {
+      [32m+[0m [0m[1m[0marn[0m[0m               = (known after apply)
+      [32m+[0m [0m[1m[0mid[0m[0m                = (known after apply)
+      [32m+[0m [0m[1m[0mname[0m[0m              = "/aws/lambda/psoxy-gdirectory"
+      [32m+[0m [0m[1m[0mname_prefix[0m[0m       = (known after apply)
+      [32m+[0m [0m[1m[0mretention_in_days[0m[0m = 7
+      [32m+[0m [0m[1m[0mskip_destroy[0m[0m      = false
+      [32m+[0m [0m[1m[0mtags_all[0m[0m          = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdirectory"].module.psoxy_lambda.aws_iam_policy.ssm_param_policy[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_iam_policy" "ssm_param_policy" {
+      [32m+[0m [0m[1m[0marn[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mdescription[0m[0m = "Allow SSM parameter access needed by psoxy-gdirectory"
+      [32m+[0m [0m[1m[0mid[0m[0m          = (known after apply)
+      [32m+[0m [0m[1m[0mname[0m[0m        = "psoxy-gdirectory_ssmParameters"
+      [32m+[0m [0m[1m[0mpath[0m[0m        = "/"
+      [32m+[0m [0m[1m[0mpolicy[0m[0m      = (known after apply)
+      [32m+[0m [0m[1m[0mpolicy_id[0m[0m   = (known after apply)
+      [32m+[0m [0m[1m[0mtags_all[0m[0m    = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdirectory"].module.psoxy_lambda.aws_iam_role.iam_for_lambda[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_iam_role" "iam_for_lambda" {
+      [32m+[0m [0m[1m[0marn[0m[0m                   = (known after apply)
+      [32m+[0m [0m[1m[0massume_role_policy[0m[0m    = jsonencode(
+            {
+              [32m+[0m [0mStatement = [
+                  [32m+[0m [0m{
+                      [32m+[0m [0mAction    = "sts:AssumeRole"
+                      [32m+[0m [0mEffect    = "Allow"
+                      [32m+[0m [0mPrincipal = {
+                          [32m+[0m [0mService = "lambda.amazonaws.com"
+                        }
+                      [32m+[0m [0mSid       = ""
+                    },
+                ]
+              [32m+[0m [0mVersion   = "2012-10-17"
+            }
+        )
+      [32m+[0m [0m[1m[0mcreate_date[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mdescription[0m[0m           = "execution role for psoxy instance"
+      [32m+[0m [0m[1m[0mforce_detach_policies[0m[0m = false
+      [32m+[0m [0m[1m[0mid[0m[0m                    = (known after apply)
+      [32m+[0m [0m[1m[0mmanaged_policy_arns[0m[0m   = (known after apply)
+      [32m+[0m [0m[1m[0mmax_session_duration[0m[0m  = 3600
+      [32m+[0m [0m[1m[0mname[0m[0m                  = "PsoxyExec_psoxy-gdirectory"
+      [32m+[0m [0m[1m[0mname_prefix[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mpath[0m[0m                  = "/"
+      [32m+[0m [0m[1m[0mtags_all[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0munique_id[0m[0m             = (known after apply)
+
+      [32m+[0m [0minline_policy {
+          [32m+[0m [0m[1m[0mname[0m[0m   = (known after apply)
+          [32m+[0m [0m[1m[0mpolicy[0m[0m = (known after apply)
+        }
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdirectory"].module.psoxy_lambda.aws_iam_role_policy_attachment.attach_policy[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_iam_role_policy_attachment" "attach_policy" {
+      [32m+[0m [0m[1m[0mid[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mpolicy_arn[0m[0m = (known after apply)
+      [32m+[0m [0m[1m[0mrole[0m[0m       = "PsoxyExec_psoxy-gdirectory"
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdirectory"].module.psoxy_lambda.aws_iam_role_policy_attachment.basic[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_iam_role_policy_attachment" "basic" {
+      [32m+[0m [0m[1m[0mid[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mpolicy_arn[0m[0m = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+      [32m+[0m [0m[1m[0mrole[0m[0m       = "PsoxyExec_psoxy-gdirectory"
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdirectory"].module.psoxy_lambda.aws_lambda_function.psoxy-instance[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_lambda_function" "psoxy-instance" {
+      [32m+[0m [0m[1m[0marchitectures[0m[0m                  = [
+          [32m+[0m [0m"arm64",
+        ]
+      [32m+[0m [0m[1m[0marn[0m[0m                            = (known after apply)
+      [32m+[0m [0m[1m[0mfilename[0m[0m                       = "/Users/erik/code/psoxy/java/impl/aws/target/psoxy-aws-0.4.10-SNAPSHOT.jar"
+      [32m+[0m [0m[1m[0mfunction_name[0m[0m                  = "psoxy-gdirectory"
+      [32m+[0m [0m[1m[0mhandler[0m[0m                        = "co.worklytics.psoxy.Handler"
+      [32m+[0m [0m[1m[0mid[0m[0m                             = (known after apply)
+      [32m+[0m [0m[1m[0minvoke_arn[0m[0m                     = (known after apply)
+      [32m+[0m [0m[1m[0mlast_modified[0m[0m                  = (known after apply)
+      [32m+[0m [0m[1m[0mmemory_size[0m[0m                    = 512
+      [32m+[0m [0m[1m[0mpackage_type[0m[0m                   = "Zip"
+      [32m+[0m [0m[1m[0mpublish[0m[0m                        = false
+      [32m+[0m [0m[1m[0mqualified_arn[0m[0m                  = (known after apply)
+      [32m+[0m [0m[1m[0mqualified_invoke_arn[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mreserved_concurrent_executions[0m[0m = -1
+      [32m+[0m [0m[1m[0mrole[0m[0m                           = (known after apply)
+      [32m+[0m [0m[1m[0mruntime[0m[0m                        = "java11"
+      [32m+[0m [0m[1m[0msigning_job_arn[0m[0m                = (known after apply)
+      [32m+[0m [0m[1m[0msigning_profile_version_arn[0m[0m    = (known after apply)
+      [32m+[0m [0m[1m[0msource_code_hash[0m[0m               = "YquDr9FirQBF4lF8plbjFn6cykvusIuF3NqQ3QkXQBo="
+      [32m+[0m [0m[1m[0msource_code_size[0m[0m               = (known after apply)
+      [32m+[0m [0m[1m[0mtags_all[0m[0m                       = (known after apply)
+      [32m+[0m [0m[1m[0mtimeout[0m[0m                        = 55
+      [32m+[0m [0m[1m[0mversion[0m[0m                        = (known after apply)
+
+      [32m+[0m [0menvironment {
+          [32m+[0m [0m[1m[0mvariables[0m[0m = (known after apply)
+        }
+
+      [32m+[0m [0mephemeral_storage {
+          [32m+[0m [0m[1m[0msize[0m[0m = (known after apply)
+        }
+
+      [32m+[0m [0mtracing_config {
+          [32m+[0m [0m[1m[0mmode[0m[0m = (known after apply)
+        }
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdrive"].module.psoxy_lambda.aws_cloudwatch_log_group.lambda-log[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_cloudwatch_log_group" "lambda-log" {
+      [32m+[0m [0m[1m[0marn[0m[0m               = (known after apply)
+      [32m+[0m [0m[1m[0mid[0m[0m                = (known after apply)
+      [32m+[0m [0m[1m[0mname[0m[0m              = "/aws/lambda/psoxy-gdrive"
+      [32m+[0m [0m[1m[0mname_prefix[0m[0m       = (known after apply)
+      [32m+[0m [0m[1m[0mretention_in_days[0m[0m = 7
+      [32m+[0m [0m[1m[0mskip_destroy[0m[0m      = false
+      [32m+[0m [0m[1m[0mtags_all[0m[0m          = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdrive"].module.psoxy_lambda.aws_iam_policy.ssm_param_policy[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_iam_policy" "ssm_param_policy" {
+      [32m+[0m [0m[1m[0marn[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mdescription[0m[0m = "Allow SSM parameter access needed by psoxy-gdrive"
+      [32m+[0m [0m[1m[0mid[0m[0m          = (known after apply)
+      [32m+[0m [0m[1m[0mname[0m[0m        = "psoxy-gdrive_ssmParameters"
+      [32m+[0m [0m[1m[0mpath[0m[0m        = "/"
+      [32m+[0m [0m[1m[0mpolicy[0m[0m      = (known after apply)
+      [32m+[0m [0m[1m[0mpolicy_id[0m[0m   = (known after apply)
+      [32m+[0m [0m[1m[0mtags_all[0m[0m    = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdrive"].module.psoxy_lambda.aws_iam_role.iam_for_lambda[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_iam_role" "iam_for_lambda" {
+      [32m+[0m [0m[1m[0marn[0m[0m                   = (known after apply)
+      [32m+[0m [0m[1m[0massume_role_policy[0m[0m    = jsonencode(
+            {
+              [32m+[0m [0mStatement = [
+                  [32m+[0m [0m{
+                      [32m+[0m [0mAction    = "sts:AssumeRole"
+                      [32m+[0m [0mEffect    = "Allow"
+                      [32m+[0m [0mPrincipal = {
+                          [32m+[0m [0mService = "lambda.amazonaws.com"
+                        }
+                      [32m+[0m [0mSid       = ""
+                    },
+                ]
+              [32m+[0m [0mVersion   = "2012-10-17"
+            }
+        )
+      [32m+[0m [0m[1m[0mcreate_date[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mdescription[0m[0m           = "execution role for psoxy instance"
+      [32m+[0m [0m[1m[0mforce_detach_policies[0m[0m = false
+      [32m+[0m [0m[1m[0mid[0m[0m                    = (known after apply)
+      [32m+[0m [0m[1m[0mmanaged_policy_arns[0m[0m   = (known after apply)
+      [32m+[0m [0m[1m[0mmax_session_duration[0m[0m  = 3600
+      [32m+[0m [0m[1m[0mname[0m[0m                  = "PsoxyExec_psoxy-gdrive"
+      [32m+[0m [0m[1m[0mname_prefix[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mpath[0m[0m                  = "/"
+      [32m+[0m [0m[1m[0mtags_all[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0munique_id[0m[0m             = (known after apply)
+
+      [32m+[0m [0minline_policy {
+          [32m+[0m [0m[1m[0mname[0m[0m   = (known after apply)
+          [32m+[0m [0m[1m[0mpolicy[0m[0m = (known after apply)
+        }
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdrive"].module.psoxy_lambda.aws_iam_role_policy_attachment.attach_policy[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_iam_role_policy_attachment" "attach_policy" {
+      [32m+[0m [0m[1m[0mid[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mpolicy_arn[0m[0m = (known after apply)
+      [32m+[0m [0m[1m[0mrole[0m[0m       = "PsoxyExec_psoxy-gdrive"
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdrive"].module.psoxy_lambda.aws_iam_role_policy_attachment.basic[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_iam_role_policy_attachment" "basic" {
+      [32m+[0m [0m[1m[0mid[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mpolicy_arn[0m[0m = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+      [32m+[0m [0m[1m[0mrole[0m[0m       = "PsoxyExec_psoxy-gdrive"
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdrive"].module.psoxy_lambda.aws_lambda_function.psoxy-instance[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_lambda_function" "psoxy-instance" {
+      [32m+[0m [0m[1m[0marchitectures[0m[0m                  = [
+          [32m+[0m [0m"arm64",
+        ]
+      [32m+[0m [0m[1m[0marn[0m[0m                            = (known after apply)
+      [32m+[0m [0m[1m[0mfilename[0m[0m                       = "/Users/erik/code/psoxy/java/impl/aws/target/psoxy-aws-0.4.10-SNAPSHOT.jar"
+      [32m+[0m [0m[1m[0mfunction_name[0m[0m                  = "psoxy-gdrive"
+      [32m+[0m [0m[1m[0mhandler[0m[0m                        = "co.worklytics.psoxy.Handler"
+      [32m+[0m [0m[1m[0mid[0m[0m                             = (known after apply)
+      [32m+[0m [0m[1m[0minvoke_arn[0m[0m                     = (known after apply)
+      [32m+[0m [0m[1m[0mlast_modified[0m[0m                  = (known after apply)
+      [32m+[0m [0m[1m[0mmemory_size[0m[0m                    = 512
+      [32m+[0m [0m[1m[0mpackage_type[0m[0m                   = "Zip"
+      [32m+[0m [0m[1m[0mpublish[0m[0m                        = false
+      [32m+[0m [0m[1m[0mqualified_arn[0m[0m                  = (known after apply)
+      [32m+[0m [0m[1m[0mqualified_invoke_arn[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mreserved_concurrent_executions[0m[0m = -1
+      [32m+[0m [0m[1m[0mrole[0m[0m                           = (known after apply)
+      [32m+[0m [0m[1m[0mruntime[0m[0m                        = "java11"
+      [32m+[0m [0m[1m[0msigning_job_arn[0m[0m                = (known after apply)
+      [32m+[0m [0m[1m[0msigning_profile_version_arn[0m[0m    = (known after apply)
+      [32m+[0m [0m[1m[0msource_code_hash[0m[0m               = "YquDr9FirQBF4lF8plbjFn6cykvusIuF3NqQ3QkXQBo="
+      [32m+[0m [0m[1m[0msource_code_size[0m[0m               = (known after apply)
+      [32m+[0m [0m[1m[0mtags_all[0m[0m                       = (known after apply)
+      [32m+[0m [0m[1m[0mtimeout[0m[0m                        = 55
+      [32m+[0m [0m[1m[0mversion[0m[0m                        = (known after apply)
+
+      [32m+[0m [0menvironment {
+          [32m+[0m [0m[1m[0mvariables[0m[0m = (known after apply)
+        }
+
+      [32m+[0m [0mephemeral_storage {
+          [32m+[0m [0m[1m[0msize[0m[0m = (known after apply)
+        }
+
+      [32m+[0m [0mtracing_config {
+          [32m+[0m [0m[1m[0mmode[0m[0m = (known after apply)
+        }
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gmail"].module.psoxy_lambda.aws_cloudwatch_log_group.lambda-log[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_cloudwatch_log_group" "lambda-log" {
+      [32m+[0m [0m[1m[0marn[0m[0m               = (known after apply)
+      [32m+[0m [0m[1m[0mid[0m[0m                = (known after apply)
+      [32m+[0m [0m[1m[0mname[0m[0m              = "/aws/lambda/psoxy-gmail"
+      [32m+[0m [0m[1m[0mname_prefix[0m[0m       = (known after apply)
+      [32m+[0m [0m[1m[0mretention_in_days[0m[0m = 7
+      [32m+[0m [0m[1m[0mskip_destroy[0m[0m      = false
+      [32m+[0m [0m[1m[0mtags_all[0m[0m          = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gmail"].module.psoxy_lambda.aws_iam_policy.ssm_param_policy[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_iam_policy" "ssm_param_policy" {
+      [32m+[0m [0m[1m[0marn[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mdescription[0m[0m = "Allow SSM parameter access needed by psoxy-gmail"
+      [32m+[0m [0m[1m[0mid[0m[0m          = (known after apply)
+      [32m+[0m [0m[1m[0mname[0m[0m        = "psoxy-gmail_ssmParameters"
+      [32m+[0m [0m[1m[0mpath[0m[0m        = "/"
+      [32m+[0m [0m[1m[0mpolicy[0m[0m      = (known after apply)
+      [32m+[0m [0m[1m[0mpolicy_id[0m[0m   = (known after apply)
+      [32m+[0m [0m[1m[0mtags_all[0m[0m    = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gmail"].module.psoxy_lambda.aws_iam_role.iam_for_lambda[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_iam_role" "iam_for_lambda" {
+      [32m+[0m [0m[1m[0marn[0m[0m                   = (known after apply)
+      [32m+[0m [0m[1m[0massume_role_policy[0m[0m    = jsonencode(
+            {
+              [32m+[0m [0mStatement = [
+                  [32m+[0m [0m{
+                      [32m+[0m [0mAction    = "sts:AssumeRole"
+                      [32m+[0m [0mEffect    = "Allow"
+                      [32m+[0m [0mPrincipal = {
+                          [32m+[0m [0mService = "lambda.amazonaws.com"
+                        }
+                      [32m+[0m [0mSid       = ""
+                    },
+                ]
+              [32m+[0m [0mVersion   = "2012-10-17"
+            }
+        )
+      [32m+[0m [0m[1m[0mcreate_date[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mdescription[0m[0m           = "execution role for psoxy instance"
+      [32m+[0m [0m[1m[0mforce_detach_policies[0m[0m = false
+      [32m+[0m [0m[1m[0mid[0m[0m                    = (known after apply)
+      [32m+[0m [0m[1m[0mmanaged_policy_arns[0m[0m   = (known after apply)
+      [32m+[0m [0m[1m[0mmax_session_duration[0m[0m  = 3600
+      [32m+[0m [0m[1m[0mname[0m[0m                  = "PsoxyExec_psoxy-gmail"
+      [32m+[0m [0m[1m[0mname_prefix[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mpath[0m[0m                  = "/"
+      [32m+[0m [0m[1m[0mtags_all[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0munique_id[0m[0m             = (known after apply)
+
+      [32m+[0m [0minline_policy {
+          [32m+[0m [0m[1m[0mname[0m[0m   = (known after apply)
+          [32m+[0m [0m[1m[0mpolicy[0m[0m = (known after apply)
+        }
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gmail"].module.psoxy_lambda.aws_iam_role_policy_attachment.attach_policy[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_iam_role_policy_attachment" "attach_policy" {
+      [32m+[0m [0m[1m[0mid[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mpolicy_arn[0m[0m = (known after apply)
+      [32m+[0m [0m[1m[0mrole[0m[0m       = "PsoxyExec_psoxy-gmail"
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gmail"].module.psoxy_lambda.aws_iam_role_policy_attachment.basic[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_iam_role_policy_attachment" "basic" {
+      [32m+[0m [0m[1m[0mid[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mpolicy_arn[0m[0m = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+      [32m+[0m [0m[1m[0mrole[0m[0m       = "PsoxyExec_psoxy-gmail"
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gmail"].module.psoxy_lambda.aws_lambda_function.psoxy-instance[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_lambda_function" "psoxy-instance" {
+      [32m+[0m [0m[1m[0marchitectures[0m[0m                  = [
+          [32m+[0m [0m"arm64",
+        ]
+      [32m+[0m [0m[1m[0marn[0m[0m                            = (known after apply)
+      [32m+[0m [0m[1m[0mfilename[0m[0m                       = "/Users/erik/code/psoxy/java/impl/aws/target/psoxy-aws-0.4.10-SNAPSHOT.jar"
+      [32m+[0m [0m[1m[0mfunction_name[0m[0m                  = "psoxy-gmail"
+      [32m+[0m [0m[1m[0mhandler[0m[0m                        = "co.worklytics.psoxy.Handler"
+      [32m+[0m [0m[1m[0mid[0m[0m                             = (known after apply)
+      [32m+[0m [0m[1m[0minvoke_arn[0m[0m                     = (known after apply)
+      [32m+[0m [0m[1m[0mlast_modified[0m[0m                  = (known after apply)
+      [32m+[0m [0m[1m[0mmemory_size[0m[0m                    = 512
+      [32m+[0m [0m[1m[0mpackage_type[0m[0m                   = "Zip"
+      [32m+[0m [0m[1m[0mpublish[0m[0m                        = false
+      [32m+[0m [0m[1m[0mqualified_arn[0m[0m                  = (known after apply)
+      [32m+[0m [0m[1m[0mqualified_invoke_arn[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mreserved_concurrent_executions[0m[0m = -1
+      [32m+[0m [0m[1m[0mrole[0m[0m                           = (known after apply)
+      [32m+[0m [0m[1m[0mruntime[0m[0m                        = "java11"
+      [32m+[0m [0m[1m[0msigning_job_arn[0m[0m                = (known after apply)
+      [32m+[0m [0m[1m[0msigning_profile_version_arn[0m[0m    = (known after apply)
+      [32m+[0m [0m[1m[0msource_code_hash[0m[0m               = "YquDr9FirQBF4lF8plbjFn6cykvusIuF3NqQ3QkXQBo="
+      [32m+[0m [0m[1m[0msource_code_size[0m[0m               = (known after apply)
+      [32m+[0m [0m[1m[0mtags_all[0m[0m                       = (known after apply)
+      [32m+[0m [0m[1m[0mtimeout[0m[0m                        = 55
+      [32m+[0m [0m[1m[0mversion[0m[0m                        = (known after apply)
+
+      [32m+[0m [0menvironment {
+          [32m+[0m [0m[1m[0mvariables[0m[0m = (known after apply)
+        }
+
+      [32m+[0m [0mephemeral_storage {
+          [32m+[0m [0m[1m[0msize[0m[0m = (known after apply)
+        }
+
+      [32m+[0m [0mtracing_config {
+          [32m+[0m [0m[1m[0mmode[0m[0m = (known after apply)
+        }
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-chat"].module.psoxy_lambda.aws_cloudwatch_log_group.lambda-log[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_cloudwatch_log_group" "lambda-log" {
+      [32m+[0m [0m[1m[0marn[0m[0m               = (known after apply)
+      [32m+[0m [0m[1m[0mid[0m[0m                = (known after apply)
+      [32m+[0m [0m[1m[0mname[0m[0m              = "/aws/lambda/psoxy-google-chat"
+      [32m+[0m [0m[1m[0mname_prefix[0m[0m       = (known after apply)
+      [32m+[0m [0m[1m[0mretention_in_days[0m[0m = 7
+      [32m+[0m [0m[1m[0mskip_destroy[0m[0m      = false
+      [32m+[0m [0m[1m[0mtags_all[0m[0m          = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-chat"].module.psoxy_lambda.aws_iam_policy.ssm_param_policy[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_iam_policy" "ssm_param_policy" {
+      [32m+[0m [0m[1m[0marn[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mdescription[0m[0m = "Allow SSM parameter access needed by psoxy-google-chat"
+      [32m+[0m [0m[1m[0mid[0m[0m          = (known after apply)
+      [32m+[0m [0m[1m[0mname[0m[0m        = "psoxy-google-chat_ssmParameters"
+      [32m+[0m [0m[1m[0mpath[0m[0m        = "/"
+      [32m+[0m [0m[1m[0mpolicy[0m[0m      = (known after apply)
+      [32m+[0m [0m[1m[0mpolicy_id[0m[0m   = (known after apply)
+      [32m+[0m [0m[1m[0mtags_all[0m[0m    = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-chat"].module.psoxy_lambda.aws_iam_role.iam_for_lambda[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_iam_role" "iam_for_lambda" {
+      [32m+[0m [0m[1m[0marn[0m[0m                   = (known after apply)
+      [32m+[0m [0m[1m[0massume_role_policy[0m[0m    = jsonencode(
+            {
+              [32m+[0m [0mStatement = [
+                  [32m+[0m [0m{
+                      [32m+[0m [0mAction    = "sts:AssumeRole"
+                      [32m+[0m [0mEffect    = "Allow"
+                      [32m+[0m [0mPrincipal = {
+                          [32m+[0m [0mService = "lambda.amazonaws.com"
+                        }
+                      [32m+[0m [0mSid       = ""
+                    },
+                ]
+              [32m+[0m [0mVersion   = "2012-10-17"
+            }
+        )
+      [32m+[0m [0m[1m[0mcreate_date[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mdescription[0m[0m           = "execution role for psoxy instance"
+      [32m+[0m [0m[1m[0mforce_detach_policies[0m[0m = false
+      [32m+[0m [0m[1m[0mid[0m[0m                    = (known after apply)
+      [32m+[0m [0m[1m[0mmanaged_policy_arns[0m[0m   = (known after apply)
+      [32m+[0m [0m[1m[0mmax_session_duration[0m[0m  = 3600
+      [32m+[0m [0m[1m[0mname[0m[0m                  = "PsoxyExec_psoxy-google-chat"
+      [32m+[0m [0m[1m[0mname_prefix[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mpath[0m[0m                  = "/"
+      [32m+[0m [0m[1m[0mtags_all[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0munique_id[0m[0m             = (known after apply)
+
+      [32m+[0m [0minline_policy {
+          [32m+[0m [0m[1m[0mname[0m[0m   = (known after apply)
+          [32m+[0m [0m[1m[0mpolicy[0m[0m = (known after apply)
+        }
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-chat"].module.psoxy_lambda.aws_iam_role_policy_attachment.attach_policy[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_iam_role_policy_attachment" "attach_policy" {
+      [32m+[0m [0m[1m[0mid[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mpolicy_arn[0m[0m = (known after apply)
+      [32m+[0m [0m[1m[0mrole[0m[0m       = "PsoxyExec_psoxy-google-chat"
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-chat"].module.psoxy_lambda.aws_iam_role_policy_attachment.basic[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_iam_role_policy_attachment" "basic" {
+      [32m+[0m [0m[1m[0mid[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mpolicy_arn[0m[0m = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+      [32m+[0m [0m[1m[0mrole[0m[0m       = "PsoxyExec_psoxy-google-chat"
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-chat"].module.psoxy_lambda.aws_lambda_function.psoxy-instance[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_lambda_function" "psoxy-instance" {
+      [32m+[0m [0m[1m[0marchitectures[0m[0m                  = [
+          [32m+[0m [0m"arm64",
+        ]
+      [32m+[0m [0m[1m[0marn[0m[0m                            = (known after apply)
+      [32m+[0m [0m[1m[0mfilename[0m[0m                       = "/Users/erik/code/psoxy/java/impl/aws/target/psoxy-aws-0.4.10-SNAPSHOT.jar"
+      [32m+[0m [0m[1m[0mfunction_name[0m[0m                  = "psoxy-google-chat"
+      [32m+[0m [0m[1m[0mhandler[0m[0m                        = "co.worklytics.psoxy.Handler"
+      [32m+[0m [0m[1m[0mid[0m[0m                             = (known after apply)
+      [32m+[0m [0m[1m[0minvoke_arn[0m[0m                     = (known after apply)
+      [32m+[0m [0m[1m[0mlast_modified[0m[0m                  = (known after apply)
+      [32m+[0m [0m[1m[0mmemory_size[0m[0m                    = 512
+      [32m+[0m [0m[1m[0mpackage_type[0m[0m                   = "Zip"
+      [32m+[0m [0m[1m[0mpublish[0m[0m                        = false
+      [32m+[0m [0m[1m[0mqualified_arn[0m[0m                  = (known after apply)
+      [32m+[0m [0m[1m[0mqualified_invoke_arn[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mreserved_concurrent_executions[0m[0m = -1
+      [32m+[0m [0m[1m[0mrole[0m[0m                           = (known after apply)
+      [32m+[0m [0m[1m[0mruntime[0m[0m                        = "java11"
+      [32m+[0m [0m[1m[0msigning_job_arn[0m[0m                = (known after apply)
+      [32m+[0m [0m[1m[0msigning_profile_version_arn[0m[0m    = (known after apply)
+      [32m+[0m [0m[1m[0msource_code_hash[0m[0m               = "YquDr9FirQBF4lF8plbjFn6cykvusIuF3NqQ3QkXQBo="
+      [32m+[0m [0m[1m[0msource_code_size[0m[0m               = (known after apply)
+      [32m+[0m [0m[1m[0mtags_all[0m[0m                       = (known after apply)
+      [32m+[0m [0m[1m[0mtimeout[0m[0m                        = 55
+      [32m+[0m [0m[1m[0mversion[0m[0m                        = (known after apply)
+
+      [32m+[0m [0menvironment {
+          [32m+[0m [0m[1m[0mvariables[0m[0m = (known after apply)
+        }
+
+      [32m+[0m [0mephemeral_storage {
+          [32m+[0m [0m[1m[0msize[0m[0m = (known after apply)
+        }
+
+      [32m+[0m [0mtracing_config {
+          [32m+[0m [0m[1m[0mmode[0m[0m = (known after apply)
+        }
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-meet"].module.psoxy_lambda.aws_cloudwatch_log_group.lambda-log[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_cloudwatch_log_group" "lambda-log" {
+      [32m+[0m [0m[1m[0marn[0m[0m               = (known after apply)
+      [32m+[0m [0m[1m[0mid[0m[0m                = (known after apply)
+      [32m+[0m [0m[1m[0mname[0m[0m              = "/aws/lambda/psoxy-google-meet"
+      [32m+[0m [0m[1m[0mname_prefix[0m[0m       = (known after apply)
+      [32m+[0m [0m[1m[0mretention_in_days[0m[0m = 7
+      [32m+[0m [0m[1m[0mskip_destroy[0m[0m      = false
+      [32m+[0m [0m[1m[0mtags_all[0m[0m          = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-meet"].module.psoxy_lambda.aws_iam_policy.ssm_param_policy[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_iam_policy" "ssm_param_policy" {
+      [32m+[0m [0m[1m[0marn[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mdescription[0m[0m = "Allow SSM parameter access needed by psoxy-google-meet"
+      [32m+[0m [0m[1m[0mid[0m[0m          = (known after apply)
+      [32m+[0m [0m[1m[0mname[0m[0m        = "psoxy-google-meet_ssmParameters"
+      [32m+[0m [0m[1m[0mpath[0m[0m        = "/"
+      [32m+[0m [0m[1m[0mpolicy[0m[0m      = (known after apply)
+      [32m+[0m [0m[1m[0mpolicy_id[0m[0m   = (known after apply)
+      [32m+[0m [0m[1m[0mtags_all[0m[0m    = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-meet"].module.psoxy_lambda.aws_iam_role.iam_for_lambda[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_iam_role" "iam_for_lambda" {
+      [32m+[0m [0m[1m[0marn[0m[0m                   = (known after apply)
+      [32m+[0m [0m[1m[0massume_role_policy[0m[0m    = jsonencode(
+            {
+              [32m+[0m [0mStatement = [
+                  [32m+[0m [0m{
+                      [32m+[0m [0mAction    = "sts:AssumeRole"
+                      [32m+[0m [0mEffect    = "Allow"
+                      [32m+[0m [0mPrincipal = {
+                          [32m+[0m [0mService = "lambda.amazonaws.com"
+                        }
+                      [32m+[0m [0mSid       = ""
+                    },
+                ]
+              [32m+[0m [0mVersion   = "2012-10-17"
+            }
+        )
+      [32m+[0m [0m[1m[0mcreate_date[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mdescription[0m[0m           = "execution role for psoxy instance"
+      [32m+[0m [0m[1m[0mforce_detach_policies[0m[0m = false
+      [32m+[0m [0m[1m[0mid[0m[0m                    = (known after apply)
+      [32m+[0m [0m[1m[0mmanaged_policy_arns[0m[0m   = (known after apply)
+      [32m+[0m [0m[1m[0mmax_session_duration[0m[0m  = 3600
+      [32m+[0m [0m[1m[0mname[0m[0m                  = "PsoxyExec_psoxy-google-meet"
+      [32m+[0m [0m[1m[0mname_prefix[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mpath[0m[0m                  = "/"
+      [32m+[0m [0m[1m[0mtags_all[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0munique_id[0m[0m             = (known after apply)
+
+      [32m+[0m [0minline_policy {
+          [32m+[0m [0m[1m[0mname[0m[0m   = (known after apply)
+          [32m+[0m [0m[1m[0mpolicy[0m[0m = (known after apply)
+        }
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-meet"].module.psoxy_lambda.aws_iam_role_policy_attachment.attach_policy[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_iam_role_policy_attachment" "attach_policy" {
+      [32m+[0m [0m[1m[0mid[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mpolicy_arn[0m[0m = (known after apply)
+      [32m+[0m [0m[1m[0mrole[0m[0m       = "PsoxyExec_psoxy-google-meet"
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-meet"].module.psoxy_lambda.aws_iam_role_policy_attachment.basic[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_iam_role_policy_attachment" "basic" {
+      [32m+[0m [0m[1m[0mid[0m[0m         = (known after apply)
+      [32m+[0m [0m[1m[0mpolicy_arn[0m[0m = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+      [32m+[0m [0m[1m[0mrole[0m[0m       = "PsoxyExec_psoxy-google-meet"
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-meet"].module.psoxy_lambda.aws_lambda_function.psoxy-instance[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "aws_lambda_function" "psoxy-instance" {
+      [32m+[0m [0m[1m[0marchitectures[0m[0m                  = [
+          [32m+[0m [0m"arm64",
+        ]
+      [32m+[0m [0m[1m[0marn[0m[0m                            = (known after apply)
+      [32m+[0m [0m[1m[0mfilename[0m[0m                       = "/Users/erik/code/psoxy/java/impl/aws/target/psoxy-aws-0.4.10-SNAPSHOT.jar"
+      [32m+[0m [0m[1m[0mfunction_name[0m[0m                  = "psoxy-google-meet"
+      [32m+[0m [0m[1m[0mhandler[0m[0m                        = "co.worklytics.psoxy.Handler"
+      [32m+[0m [0m[1m[0mid[0m[0m                             = (known after apply)
+      [32m+[0m [0m[1m[0minvoke_arn[0m[0m                     = (known after apply)
+      [32m+[0m [0m[1m[0mlast_modified[0m[0m                  = (known after apply)
+      [32m+[0m [0m[1m[0mmemory_size[0m[0m                    = 512
+      [32m+[0m [0m[1m[0mpackage_type[0m[0m                   = "Zip"
+      [32m+[0m [0m[1m[0mpublish[0m[0m                        = false
+      [32m+[0m [0m[1m[0mqualified_arn[0m[0m                  = (known after apply)
+      [32m+[0m [0m[1m[0mqualified_invoke_arn[0m[0m           = (known after apply)
+      [32m+[0m [0m[1m[0mreserved_concurrent_executions[0m[0m = -1
+      [32m+[0m [0m[1m[0mrole[0m[0m                           = (known after apply)
+      [32m+[0m [0m[1m[0mruntime[0m[0m                        = "java11"
+      [32m+[0m [0m[1m[0msigning_job_arn[0m[0m                = (known after apply)
+      [32m+[0m [0m[1m[0msigning_profile_version_arn[0m[0m    = (known after apply)
+      [32m+[0m [0m[1m[0msource_code_hash[0m[0m               = "YquDr9FirQBF4lF8plbjFn6cykvusIuF3NqQ3QkXQBo="
+      [32m+[0m [0m[1m[0msource_code_size[0m[0m               = (known after apply)
+      [32m+[0m [0m[1m[0mtags_all[0m[0m                       = (known after apply)
+      [32m+[0m [0m[1m[0mtimeout[0m[0m                        = 55
+      [32m+[0m [0m[1m[0mversion[0m[0m                        = (known after apply)
+
+      [32m+[0m [0menvironment {
+          [32m+[0m [0m[1m[0mvariables[0m[0m = (known after apply)
+        }
+
+      [32m+[0m [0mephemeral_storage {
+          [32m+[0m [0m[1m[0msize[0m[0m = (known after apply)
+        }
+
+      [32m+[0m [0mtracing_config {
+          [32m+[0m [0m[1m[0mmode[0m[0m = (known after apply)
+        }
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.worklytics-psoxy-connection["slack-discovery-api"].module.generic.local_file.todo-worklytics-connection[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "local_file" "todo-worklytics-connection" {
+      [32m+[0m [0m[1m[0mcontent[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0mdirectory_permission[0m[0m = "0777"
+      [32m+[0m [0m[1m[0mfile_permission[0m[0m      = "0777"
+      [32m+[0m [0m[1m[0mfilename[0m[0m             = "TODO 3 - connect slack-discovery-api in Worklytics.md"
+      [32m+[0m [0m[1m[0mid[0m[0m                   = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.worklytics-psoxy-connection["zoom"].module.generic.local_file.todo-worklytics-connection[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "local_file" "todo-worklytics-connection" {
+      [32m+[0m [0m[1m[0mcontent[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0mdirectory_permission[0m[0m = "0777"
+      [32m+[0m [0m[1m[0mfile_permission[0m[0m      = "0777"
+      [32m+[0m [0m[1m[0mfilename[0m[0m             = "TODO 3 - connect zoom in Worklytics.md"
+      [32m+[0m [0m[1m[0mid[0m[0m                   = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.worklytics-psoxy-connection-google-workspace["gcal"].module.generic.local_file.todo-worklytics-connection[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "local_file" "todo-worklytics-connection" {
+      [32m+[0m [0m[1m[0mcontent[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0mdirectory_permission[0m[0m = "0777"
+      [32m+[0m [0m[1m[0mfile_permission[0m[0m      = "0777"
+      [32m+[0m [0m[1m[0mfilename[0m[0m             = "TODO 3 - connect gcal in Worklytics.md"
+      [32m+[0m [0m[1m[0mid[0m[0m                   = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.worklytics-psoxy-connection-google-workspace["gdirectory"].module.generic.local_file.todo-worklytics-connection[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "local_file" "todo-worklytics-connection" {
+      [32m+[0m [0m[1m[0mcontent[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0mdirectory_permission[0m[0m = "0777"
+      [32m+[0m [0m[1m[0mfile_permission[0m[0m      = "0777"
+      [32m+[0m [0m[1m[0mfilename[0m[0m             = "TODO 3 - connect gdirectory in Worklytics.md"
+      [32m+[0m [0m[1m[0mid[0m[0m                   = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.worklytics-psoxy-connection-google-workspace["gdrive"].module.generic.local_file.todo-worklytics-connection[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "local_file" "todo-worklytics-connection" {
+      [32m+[0m [0m[1m[0mcontent[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0mdirectory_permission[0m[0m = "0777"
+      [32m+[0m [0m[1m[0mfile_permission[0m[0m      = "0777"
+      [32m+[0m [0m[1m[0mfilename[0m[0m             = "TODO 3 - connect gdrive in Worklytics.md"
+      [32m+[0m [0m[1m[0mid[0m[0m                   = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.worklytics-psoxy-connection-google-workspace["gmail"].module.generic.local_file.todo-worklytics-connection[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "local_file" "todo-worklytics-connection" {
+      [32m+[0m [0m[1m[0mcontent[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0mdirectory_permission[0m[0m = "0777"
+      [32m+[0m [0m[1m[0mfile_permission[0m[0m      = "0777"
+      [32m+[0m [0m[1m[0mfilename[0m[0m             = "TODO 3 - connect gmail in Worklytics.md"
+      [32m+[0m [0m[1m[0mid[0m[0m                   = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.worklytics-psoxy-connection-google-workspace["google-chat"].module.generic.local_file.todo-worklytics-connection[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "local_file" "todo-worklytics-connection" {
+      [32m+[0m [0m[1m[0mcontent[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0mdirectory_permission[0m[0m = "0777"
+      [32m+[0m [0m[1m[0mfile_permission[0m[0m      = "0777"
+      [32m+[0m [0m[1m[0mfilename[0m[0m             = "TODO 3 - connect google-chat in Worklytics.md"
+      [32m+[0m [0m[1m[0mid[0m[0m                   = (known after apply)
+    }
+
+[1m  # module.psoxy-aws-google-workspace.module.worklytics-psoxy-connection-google-workspace["google-meet"].module.generic.local_file.todo-worklytics-connection[0m will be created[0m[0m
+[0m  [32m+[0m[0m resource "local_file" "todo-worklytics-connection" {
+      [32m+[0m [0m[1m[0mcontent[0m[0m              = (known after apply)
+      [32m+[0m [0m[1m[0mdirectory_permission[0m[0m = "0777"
+      [32m+[0m [0m[1m[0mfile_permission[0m[0m      = "0777"
+      [32m+[0m [0m[1m[0mfilename[0m[0m             = "TODO 3 - connect google-meet in Worklytics.md"
+      [32m+[0m [0m[1m[0mid[0m[0m                   = (known after apply)
+    }
+
+[0m[1mPlan:[0m 155 to add, 0 to change, 0 to destroy.
+[0m[0m
+[1mChanges to Outputs:[0m[0m
+  [32m+[0m [0m[1m[0mlookup_tables[0m[0m = {}
+[90m
+─────────────────────────────────────────────────────────────────────────────[0m
+
+Note: You didn't use the -out option to save this plan, so Terraform can't
+guarantee to take exactly these actions if you run "terraform apply" now.
