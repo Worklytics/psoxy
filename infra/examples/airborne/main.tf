@@ -55,7 +55,7 @@ provider "aws" {
 
 resource "google_project" "psoxy-google-connectors" {
   project_id = var.gcp_project_id
-  name = var.gcp_project_id
+  name       = var.gcp_project_id
 }
 
 module "psoxy-aws-google-workspace" {
