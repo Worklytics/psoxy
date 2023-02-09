@@ -10,6 +10,9 @@ REGION=$3 # expected us-east-1, etc
 ROLE=$4 # ARN of the role to assume
 CONNECTOR_ID=$5 # connector id, such "outlook-mail", etc
 
+# defensive; AWS_SECURITY_TOKEN is legacy
+unset AWS_SECURITY_TOKEN
+
 export $(printf "AWS_ACCESS_KEY_ID=%s AWS_SECRET_ACCESS_KEY=%s AWS_SESSION_TOKEN=%s" \
 $(aws sts assume-role \
  --role-session-name="session_for_$CONNECTOR_ID" \
