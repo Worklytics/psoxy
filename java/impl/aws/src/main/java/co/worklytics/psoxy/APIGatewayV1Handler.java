@@ -16,6 +16,7 @@ import static co.worklytics.psoxy.ResponseCompressionHandler.isCompressionReques
 
 /**
  * *ALPHA support* handler to use for API Gateway V1 configurations
+ *  - this is NOT going to be subject routine QA as part of release process, so YMMV
  *
  * usage:
  *  - when configure/deploy your lambda, set entry point to `co.worklytis.psoxy.APIGatewayV1Handler`
@@ -26,7 +27,6 @@ import static co.worklytics.psoxy.ResponseCompressionHandler.isCompressionReques
  *
  */
 public class APIGatewayV1Handler implements com.amazonaws.services.lambda.runtime.RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
-
 
     /**
      * Static initialization allows reuse in containers
