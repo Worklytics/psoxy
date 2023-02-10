@@ -20,6 +20,9 @@ node cli-call.js -u https://acme.lambda-url.us-east-1.on.aws/calendar/v3/calenda
 ```
 The `-r` option is mandatory for AWS deploys, and identifies the Amazon Resource Name (ARN) of the "role" that will be assumed (*) to be able to execute the call. The `-u` option is the URL you want to test. In this case, the URL's path matches a Google Calendar API endpoint (access the primary calendar of the currently logged-in user). The `-i` option identifies the user "to impersonate"; this option is only relevant for Google Workspace data sources.
 
+Passing `-r current` allows the current identity of your AWS CLI to be used rather than assuming a
+role. This has some dev applications, but generally isn't needed otherwise.
+
 Another example for [Zoom]:
 ```shell
 node cli-call.js -u https://acme.lambda-url.us-east-1.on.aws/v2/users -r arn:aws:iam::310635719553:role/PsoxyApiCaller

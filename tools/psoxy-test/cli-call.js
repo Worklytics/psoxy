@@ -19,7 +19,7 @@ const { version } = require('./package.json');
     .requiredOption('-u, --url <url>', 'URL to call')
     .option('-f, --force <type>', 'Force deploy type: AWS or GCP')
     .option('-i, --impersonate <user>', 'User to impersonate, needed for certain connectors')
-    .option('-r, --role <arn>', 'AWS role to assume, use its ARN')
+    .option('-r, --role <arn>', 'AWS role to assume, use its ARN (set `current` if you really intend to use current role)')
     .option('-s, --save-to-file', 'Save test results to file', false)
     .option('--skip',
       'Skip sanitization rules, only works if function deployed in development mode',

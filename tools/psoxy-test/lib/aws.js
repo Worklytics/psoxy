@@ -80,14 +80,19 @@ async function call(options = {}) {
   let credentials;
 
   if (options.role) {
-    logger.verbose(`Assuming role ${options.role}`);
-    try {
-      credentials = assumeRole(options.role);
-    } catch (error) {
-      throw new Error(`Unable to assume ${options.role}`, {cause: error});
+    if (options.role == 'current') {
+      logger.verbose(`Using ${options.role} role rather than assuming one`);
+      credentials = getCredentials();
+    } else {
+      logger.verbose(`Assuming role ${options.role}`);
+      try {
+        credentials = assumeRole(options.role);
+      } catch (error) {
+        throw new Error(`Unable to assume ${options.role}`, {cause: error});
+      }
     }
   } else {
-    credentials = getCredentials();
+    throw new Error('Role is a required option for AWS');
   }
 
   const url = new URL(options.url);
@@ -122,13 +127,17 @@ function createS3Client(role, region = 'us-east-1') {
 
   let credentials;
   if (role) {
-    try {
-      credentials = assumeRole(role);
-    } catch (error) {
-      throw new Error(`Unable to assume ${role}`, {cause: error});
+    if (role == 'current') {
+      credentials = getCredentials();
+    } else {
+      try {
+        credentials = assumeRole(role);
+      } catch (error) {
+        throw new Error(`Unable to assume ${role}`, {cause: error});
+      }
     }
   } else {
-    credentials = getCredentials();
+    throw new Error('Role is a required option for AWS');
   }
 
   options.credentials = {
