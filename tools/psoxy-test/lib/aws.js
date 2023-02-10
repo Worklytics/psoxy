@@ -38,6 +38,21 @@ function assumeRole(role) {
   return JSON.parse(executeCommand(command)).Credentials;
 }
 
+function getCredentials() {
+  // this will consider the current profile value set, if any
+  let accessKeyId = executeCommand('aws configure get aws_access_key_id');
+  let secretAccessKey = executeCommand('aws configure get aws_secret_access_key');
+  let sessionToken = executeCommand('aws configure get aws_session_token');
+
+  // trim off trailing newlines
+  return {
+    "AccessKeyId" : accessKeyId.trim(),
+    "SecretAccessKey": secretAccessKey.trim(),
+    "SessionToken": sessionToken.trim(),
+  }
+}
+
+
 /**
  * Helper: check url deploy type
  *
@@ -62,17 +77,20 @@ function isValidURL(url) {
 async function call(options = {}) {
   const logger = getLogger(options.verbose);
 
-  if (!options.role) {
-    throw new Error('Role is a required option for AWS');
+  let credentials;
+
+  if (options.role) {
+    logger.verbose(`Assuming role ${options.role}`);
+    try {
+      credentials = assumeRole(options.role);
+    } catch (error) {
+      throw new Error(`Unable to assume ${options.role}`, {cause: error});
+    }
+  } else {
+    credentials = getCredentials();
   }
 
-  logger.verbose(`Assuming role ${options.role}`);
-  let credentials;
-  try {
-    credentials = assumeRole(options.role);
-  } catch (error) {
-    throw new Error(`Unable to assume ${options.role}`, { cause: error });
-  }
+  console.log(credentials);
 
   const url = new URL(options.url);
   const method = options.method || resolveHTTPMethod(url.pathname);
@@ -103,22 +121,25 @@ function createS3Client(role, region = 'us-east-1') {
   const options = {
     region: region,
   }
+
+  let credentials;
   if (role) {
-    let credentials;
     try {
       credentials = assumeRole(role);
     } catch (error) {
-      throw new Error(`Unable to assume ${role}`, { cause: error });
+      throw new Error(`Unable to assume ${role}`, {cause: error});
     }
+  } else {
+    credentials = getCredentials();
+  }
 
-    options.credentials = {
-      // AWS CLI command will return credentials with 1st letter upper-case.
-      // However, S3 client expects different capitalization
-      ...Object.keys(credentials).reduce((memo, key) => {
-        memo[key.charAt(0).toLowerCase() + key.slice(1)] = credentials[key];
-        return memo;
-      }, {}),
-    }
+  options.credentials = {
+    // AWS CLI command will return credentials with 1st letter upper-case.
+    // However, S3 client expects different capitalization
+    ...Object.keys(credentials).reduce((memo, key) => {
+      memo[key.charAt(0).toLowerCase() + key.slice(1)] = credentials[key];
+      return memo;
+    }, {}),
   }
 
   return new S3Client(options);
