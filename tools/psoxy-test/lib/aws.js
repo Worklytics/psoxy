@@ -13,8 +13,8 @@ import {
   ListBucketsCommand,
   ListObjectsV2Command
 } from '@aws-sdk/client-s3';
-import { 
-  CloudWatchLogsClient, 
+import {
+  CloudWatchLogsClient,
   DescribeLogStreamsCommand,
   GetLogEventsCommand,
 } from '@aws-sdk/client-cloudwatch-logs';
@@ -48,7 +48,9 @@ function isValidURL(url) {
   if (typeof url === 'string') {
     url = new URL(url);
   }
-  return url.hostname.endsWith('.on.aws');
+  return url.hostname.endsWith('.on.aws')
+    // api gateway v2 : '.execute-api.us-east-1.amazonaws.com'
+    || url.hostname.endsWith('amazonaws.com');
 }
 
 /**
@@ -92,9 +94,9 @@ async function call(options = {}) {
 
 /**
  * Create S3 client with appropriate credentials
- * 
- * @param {string} role 
- * @param {string} region 
+ *
+ * @param {string} role
+ * @param {string} region
  * @returns {S3Client}
  */
 function createS3Client(role, region = 'us-east-1') {
@@ -124,9 +126,9 @@ function createS3Client(role, region = 'us-east-1') {
 
 /**
  * Create CloudWatchLogs client with appropriate credentials
- * 
- * @param {string} role 
- * @param {string} region 
+ *
+ * @param {string} role
+ * @param {string} region
  * @returns {CloudWatchLogsClient}
  */
 function createCloudWatchClient(role, region = 'us-east-1') {
@@ -156,13 +158,13 @@ function createCloudWatchClient(role, region = 'us-east-1') {
 
 /**
  * Get log streams for `options.logGroupName` (sort by last event time, limit 10)
- * 
- * @param {object} options 
+ *
+ * @param {object} options
  * @param {string} options.logGroupName
  * @param {string} options.role
  * @param {string} options.region
- * @param {CloudWatchLogsClient} client 
- * @returns 
+ * @param {CloudWatchLogsClient} client
+ * @returns
  */
 async function getLogStreams(options, client) {
   if (!client) {
@@ -179,13 +181,13 @@ async function getLogStreams(options, client) {
 
 /**
  * Get log events for `options.logStreamName`
- * 
- * @param {object} options 
+ *
+ * @param {object} options
  * @param {string} options.logGroupName
  * @param {string} options.logStreamName
  * @param {string} options.role
  * @param {string} options.region
- * @param {CloudWatchLogsClient} client 
+ * @param {CloudWatchLogsClient} client
  * @returns {Promise}
  */
 async function getLogEvents(options, client) {
@@ -202,12 +204,12 @@ async function getLogEvents(options, client) {
 /**
  * Parse CloudWatch log events and return a simpler format focused on
  * our use-case: display results via shell
- * 
- * Refs: 
+ *
+ * Refs:
  * - Command output: https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-cloudwatch-logs/interfaces/getlogeventscommandoutput.html
  * - Events format: https://docs.aws.amazon.com/AmazonCloudWatchLogs/latest/APIReference/API_GetLogEvents.html#API_GetLogEvents_ResponseSyntax
- * 
- * @param {Array} logEvents 
+ *
+ * @param {Array} logEvents
  * @returns {Array<Object>}
  */
 function parseLogEvents(logEvents) {
@@ -230,7 +232,7 @@ function parseLogEvents(logEvents) {
       result.highlight = true;
     }
 
-    return result;    
+    return result;
   });
 }
 
@@ -238,12 +240,12 @@ function parseLogEvents(logEvents) {
  * Only for testing: List all available buckets
  * Ref: https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/classes/listbucketscommand.html
  * Req: options.role requires "s3:ListAllMyBuckets" permissions
- * @param {object} options 
+ * @param {object} options
  */
 async function listBuckets(options) {
   const client = createS3Client(options.role, options.region);
   return await client.send(new ListBucketsCommand({}));
-}  
+}
 
 /**
  * Only for testing: List all objects in a bucket
@@ -261,18 +263,18 @@ async function listObjects(bucket, options) {
  * Upload file to S3
  * Ref: https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/classes/putobjectcommand.html
  * Reqs: "s3:PutObject" permissions
- * 
- * @param {string} bucket 
+ *
+ * @param {string} bucket
  * @param {string} file - path to file
  * @param {object} options
  * @param {S3Client} client
- * @returns 
+ * @returns
  */
 async function upload(bucket, file, options, client) {
   if (!client) {
-    client = createS3Client(options.role, options.region);  
+    client = createS3Client(options.role, options.region);
   }
-  
+
   const uploadParams = {
     Bucket: bucket,
     Key: path.basename(file),
@@ -286,15 +288,15 @@ async function upload(bucket, file, options, client) {
  * Only for standard S3 storage (others such as Glacier need to restore object first)
  * Ref: https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/classes/getobjectcommand.html
  * Reqs: "s3:ListBucket" (404 if request object doesn't exit, 403 if no perms)
- * 
- * This will retry the download if we get a 404; use-case: Psoxy hasn't 
+ *
+ * This will retry the download if we get a 404; use-case: Psoxy hasn't
  * processed the file yet...
- * 
+ *
  * TODO check if "@aws-sdk/middleware-retry" could help with "download" retries
  * https://github.com/aws/aws-sdk-js-v3/issues/3611
- *  
- * @param {string} bucket 
- * @param {string} filename 
+ *
+ * @param {string} bucket
+ * @param {string} filename
  * @param {Object} options
  * @param {string} options.role
  * @param {string} options.region
@@ -306,7 +308,7 @@ async function upload(bucket, file, options, client) {
  */
 async function download(bucket, filename, options, client, logger) {
   if (!client) {
-    client = createS3Client(options.role, options.region);  
+    client = createS3Client(options.role, options.region);
   }
 
   const downloadFunction = async () => await client.send(new GetObjectCommand({
@@ -315,23 +317,23 @@ async function download(bucket, filename, options, client, logger) {
     }));
   const onErrorStop = (error) => error.code !== 'NoSuchKey';
 
-  const downloadResponse = await executeWithRetry(downloadFunction, onErrorStop, 
-    logger, options.attempts, options.delay);  
+  const downloadResponse = await executeWithRetry(downloadFunction, onErrorStop,
+    logger, options.attempts, options.delay);
 
   if (downloadResponse === undefined) {
     throw new Error(`${filename} not found after multiple attempts`);
   }
-  
+
   return downloadResponse.Body.transformToString();
 }
 
-export default {  
+export default {
   call,
   createCloudWatchClient,
   createS3Client,
   download,
   getLogEvents,
-  getLogStreams,  
+  getLogStreams,
   isValidURL,
   listBuckets,
   listObjects,

@@ -52,7 +52,7 @@ export default async function (options = {}) {
   let psoxyCall;
 
   if (options.force && ['aws', 'gcp'].includes(options.force.toLowerCase())) {
-    psoxyCall = options.force === 'aws' ? aws.call : gcp.call;
+    psoxyCall = options.force.toLowerCase() === 'aws' ? aws.call : gcp.call;
   } else if (!isAWS && !isGCP) {
     const message = `"${options.url}" doesn't seem to be a valid endpoint: AWS or GCP`;
     const tip = 'Use "-f" option if you\'re certain it\'s a valid deploy';
@@ -67,9 +67,9 @@ export default async function (options = {}) {
     let successMessagePrefix = options.healthCheck ? 'Health Check result:' :
       'Call result:'
     let jsonCallResult;
-    
+
     if (!_.isEmpty(result.data)) {
-      
+
       try {
         jsonCallResult = JSON.parse(result.data)
       } catch(error) {
@@ -85,10 +85,10 @@ export default async function (options = {}) {
         logger.success(`Check out run log to see complete results: ${__dirname}/run.log`);
       }
     } else {
-      
+
     }
-  
-    logger.success(`${successMessagePrefix} ${result.statusMessage} - ${result.status}`, 
+
+    logger.success(`${successMessagePrefix} ${result.statusMessage} - ${result.status}`,
       { additional: jsonCallResult });
 
   } else {
@@ -122,7 +122,7 @@ export default async function (options = {}) {
     }
 
     logger.error(`${chalk.bold.red(result.status)}\n${chalk.bold.red(errorMessage)}`);
-    if ([httpCodes.HTTP_STATUS_INTERNAL_SERVER_ERROR, 
+    if ([httpCodes.HTTP_STATUS_INTERNAL_SERVER_ERROR,
       httpCodes.HTTP_STATUS_BAD_GATEWAY].includes(result.status)) {
       logger.info('This looks like an internal error in the Proxy; please review the logs.')
     }
