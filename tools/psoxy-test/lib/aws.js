@@ -90,8 +90,6 @@ async function call(options = {}) {
     credentials = getCredentials();
   }
 
-  console.log(credentials);
-
   const url = new URL(options.url);
   const method = options.method || resolveHTTPMethod(url.pathname);
 
