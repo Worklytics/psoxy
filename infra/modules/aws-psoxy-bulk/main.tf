@@ -231,6 +231,7 @@ moved {
 
 locals {
   accessor_role_names = concat([var.api_caller_role_name], var.sanitized_accessor_role_names)
+  command_npm_install = "npm --prefix ${var.psoxy_base_dir}tools/psoxy-test install"
 }
 
 resource "aws_iam_role_policy_attachment" "reader_policy_to_accessor_role" {
@@ -239,7 +240,6 @@ resource "aws_iam_role_policy_attachment" "reader_policy_to_accessor_role" {
   role       = each.key
   policy_arn = aws_iam_policy.sanitized_bucket_read.arn
 }
-
 
 resource "aws_ssm_parameter" "rules" {
   name           = "PSOXY_${upper(replace(var.instance_id, "-", "_"))}_RULES"
@@ -252,6 +252,44 @@ resource "aws_ssm_parameter" "rules" {
       tags
     ]
   }
+}
+
+resource "local_file" "todo-aws-psoxy-bulk-test" {
+  filename = "TODO ${var.todo_step} - test ${var.instance_id}.md"
+  content  = <<EOT
+
+## Testing Psoxy Bulk: ${var.instance_id}
+
+Review the deployed function in AWS console:
+
+- https://console.aws.amazon.com/lambda/home?region=${var.aws_region}#/functions/${module.psoxy_lambda.function_name}?tab=monitoring
+
+We provide some Node.js scripts to easily validate the deployment. To be able
+to run the test commands below, you need Node.js (>=16) and npm (v >=8)
+installed. Ensure all dependencies are installed by running:
+
+```shell
+${local.command_npm_install}
+```
+
+Then, check that the Psoxy works as expected and it transforms the files of your input
+bucket following the rules you have defined. Change the value of the `-f` option in the
+following command with the path of a CSV file (*) you would like to test:
+
+```shell
+node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f /path/to/file -d AWS -i ${aws_s3_bucket.input.bucket} -o ${aws_s3_bucket.sanitized.bucket} -r ${var.aws_assume_role_arn} -re ${var.aws_region}
+```
+
+Notice that the rest of the options should match your Psoxy configuration.
+
+(*) Check supported formats in [Bulk Data Imports Docs](https://app.worklytics.co/docs/hris-import)
+
+---
+
+Please, check the documentation of our [Psoxy Testing tools](${var.psoxy_base_dir}tools/psoxy-test/README.md)
+for a detailed description of all the different options.
+
+EOT
 }
 
 # to facilitate composition of ingestion pipeline
