@@ -70,7 +70,7 @@ module "cognito-identity-pool" {
 }
 
 data "azuread_users" "owners" {
-  user_principal_names = var.msft_owners
+  user_principal_names = var.msft_owners_email
 }
 
 module "msft-connection" {
