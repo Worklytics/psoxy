@@ -187,6 +187,12 @@ variable "msft_tenant_id" {
   description = "ID of Microsoft tenant to connect to (req'd only if config includes MSFT connectors)"
 }
 
+variable "msft_owners" {
+  type = set(string)
+  default = []
+  description = "(Only if config includes MSFT connectors). Optionally, set of emails to apply as owners on AAD apps apart from current logged user"
+}
+
 variable "pseudonymize_app_ids" {
   type        = string
   description = "if set, will set value of PSEUDONYMIZE_APP_IDS environment variable to this value for all sources"

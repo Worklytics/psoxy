@@ -61,6 +61,12 @@ variable "msft_tenant_id" {
   description = "ID of Microsoft tenant to connect to (req'd only if config includes MSFT connectors)"
 }
 
+variable "msft_owners" {
+  type = set(string)
+  default = []
+  description = "(Only if config includes MSFT connectors). Optionally, set of emails to apply as owners on AAD apps apart from current logged user"
+}
+
 variable "connector_display_name_suffix" {
   type        = string
   description = "suffix to append to display_names of connector SAs; helpful to distinguish between various ones in testing/dev scenarios"

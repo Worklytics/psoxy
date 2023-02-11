@@ -69,6 +69,10 @@ module "cognito-identity-pool" {
   name                    = "azure-ad-federation"
 }
 
+data "azuread_users" "owners" {
+  user_principal_names = var.msft_owners
+}
+
 module "msft-connection" {
   for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
@@ -79,6 +83,7 @@ module "msft-connection" {
   tenant_id                         = var.msft_tenant_id
   required_app_roles                = each.value.required_app_roles
   required_oauth2_permission_scopes = each.value.required_oauth2_permission_scopes
+  owners = toset(concat(data.azuread_users.owners.object_ids, [data.azuread_client_config.current.object_id]))
 }
 
 module "cognito-identity" {
