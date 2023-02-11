@@ -83,7 +83,7 @@ module "msft-connection" {
   tenant_id                         = var.msft_tenant_id
   required_app_roles                = each.value.required_app_roles
   required_oauth2_permission_scopes = each.value.required_oauth2_permission_scopes
-  owners = toset(concat(data.azuread_users.owners.object_ids, [data.azuread_client_config.current.object_id]))
+  owners                            = toset(concat(data.azuread_users.owners.object_ids, [data.azuread_client_config.current.object_id]))
 }
 
 module "cognito-identity" {

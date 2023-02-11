@@ -7,7 +7,7 @@ terraform {
 }
 
 locals {
-  function_name = "psoxy-${substr(var.source_kind, 0, 24)}"
+  function_name       = "psoxy-${substr(var.source_kind, 0, 24)}"
   command_npm_install = "npm --prefix ${var.psoxy_base_dir}tools/psoxy-test install"
 }
 
@@ -143,7 +143,7 @@ resource "google_cloudfunctions_function" "function" {
 
 resource "local_file" "todo-gcp-psoxy-bulk-test" {
   filename = "TODO ${var.todo_step} - test ${local.function_name}.md"
-  content = <<EOT
+  content  = <<EOT
 
 ## Testing Psoxy Bulk: ${local.function_name}
 

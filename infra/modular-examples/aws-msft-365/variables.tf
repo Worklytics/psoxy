@@ -188,8 +188,8 @@ variable "msft_tenant_id" {
 }
 
 variable "msft_owners_email" {
-  type = set(string)
-  default = []
+  type        = set(string)
+  default     = []
   description = "(Only if config includes MSFT connectors). Optionally, set of emails to apply as owners on AAD apps apart from current logged user"
 }
 
