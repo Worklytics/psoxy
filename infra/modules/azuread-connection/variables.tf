@@ -25,7 +25,7 @@ variable "required_oauth2_permission_scopes" {
 }
 
 variable "owners" {
-  type = list(string)
+  type = set(string)
   description = "list of object ids to be set as owner of the application"
   default = []
 }
