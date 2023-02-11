@@ -1,0 +1,2957 @@
+module.psoxy-aws-google-workspace.module.psoxy-aws.module.psoxy-package.data.external.deployment_package: Reading...
+module.psoxy-aws-google-workspace.module.psoxy-aws.module.psoxy-package.data.external.deployment_package: Read complete after 0s [id=-]
+module.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].module.psoxy_lambda.data.aws_region.current: Reading...
+module.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["zoom"].module.psoxy_lambda.data.aws_region.current: Reading...
+module.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["slack-discovery-api"].module.psoxy_lambda.data.aws_region.current: Reading...
+module.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].module.psoxy_lambda.data.aws_region.current: Read complete after 0s [id=us-east-1]
+module.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].module.psoxy_lambda.data.aws_caller_identity.current: Reading...
+module.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["zoom"].module.psoxy_lambda.data.aws_region.current: Read complete after 0s [id=us-east-1]
+module.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["slack-discovery-api"].module.psoxy_lambda.data.aws_region.current: Read complete after 0s [id=us-east-1]
+module.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["zoom"].module.psoxy_lambda.data.aws_caller_identity.current: Reading...
+module.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["slack-discovery-api"].module.psoxy_lambda.data.aws_caller_identity.current: Reading...
+module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdrive"].module.psoxy_lambda.data.aws_caller_identity.current: Reading...
+module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gcal"].module.psoxy_lambda.data.aws_caller_identity.current: Reading...
+module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gmail"].module.psoxy_lambda.data.aws_caller_identity.current: Reading...
+module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-chat"].module.psoxy_lambda.data.aws_caller_identity.current: Reading...
+module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-meet"].module.psoxy_lambda.data.aws_caller_identity.current: Reading...
+module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdirectory"].module.psoxy_lambda.data.aws_caller_identity.current: Reading...
+module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-chat"].module.psoxy_lambda.data.aws_region.current: Reading...
+module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-chat"].module.psoxy_lambda.data.aws_region.current: Read complete after 0s [id=us-east-1]
+module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-meet"].module.psoxy_lambda.data.aws_region.current: Reading...
+module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-meet"].module.psoxy_lambda.data.aws_region.current: Read complete after 0s [id=us-east-1]
+module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gcal"].module.psoxy_lambda.data.aws_region.current: Reading...
+module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gcal"].module.psoxy_lambda.data.aws_region.current: Read complete after 0s [id=us-east-1]
+module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdirectory"].module.psoxy_lambda.data.aws_region.current: Reading...
+module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdirectory"].module.psoxy_lambda.data.aws_region.current: Read complete after 0s [id=us-east-1]
+module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdrive"].module.psoxy_lambda.data.aws_region.current: Reading...
+module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdrive"].module.psoxy_lambda.data.aws_region.current: Read complete after 0s [id=us-east-1]
+module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gmail"].module.psoxy_lambda.data.aws_region.current: Reading...
+module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gmail"].module.psoxy_lambda.data.aws_region.current: Read complete after 0s [id=us-east-1]
+module.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].module.psoxy_lambda.data.aws_caller_identity.current: Read complete after 0s [id=962428643465]
+module.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["zoom"].module.psoxy_lambda.data.aws_caller_identity.current: Read complete after 0s [id=962428643465]
+module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdirectory"].module.psoxy_lambda.data.aws_caller_identity.current: Read complete after 0s [id=962428643465]
+module.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["slack-discovery-api"].module.psoxy_lambda.data.aws_caller_identity.current: Read complete after 0s [id=962428643465]
+module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-meet"].module.psoxy_lambda.data.aws_caller_identity.current: Read complete after 0s [id=962428643465]
+module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gcal"].module.psoxy_lambda.data.aws_caller_identity.current: Read complete after 0s [id=962428643465]
+module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-chat"].module.psoxy_lambda.data.aws_caller_identity.current: Read complete after 0s [id=962428643465]
+module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdrive"].module.psoxy_lambda.data.aws_caller_identity.current: Read complete after 1s [id=962428643465]
+module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gmail"].module.psoxy_lambda.data.aws_caller_identity.current: Read complete after 1s [id=962428643465]
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  + create
+
+Terraform will perform the following actions:
+
+  # google_project.psoxy-google-connectors will be created
+  + resource "google_project" "psoxy-google-connectors" {
+      + auto_create_network = true
+      + id                  = (known after apply)
+      + name                = "psoxy-acme-example"
+      + number              = (known after apply)
+      + project_id          = "psoxy-acme-example"
+      + skip_delete         = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.aws_ssm_parameter.long-access-secrets["slack-discovery-api.ACCESS_TOKEN"] will be created
+  + resource "aws_ssm_parameter" "long-access-secrets" {
+      + arn            = (known after apply)
+      + data_type      = (known after apply)
+      + description    = "Stores the value of ACCESS_TOKEN for `psoxy-slack-discovery-api`"
+      + id             = (known after apply)
+      + insecure_value = (known after apply)
+      + key_id         = (known after apply)
+      + name           = "PSOXY_SLACK_DISCOVERY_API_ACCESS_TOKEN"
+      + tags_all       = (known after apply)
+      + tier           = (known after apply)
+      + type           = "SecureString"
+      + value          = (sensitive value)
+      + version        = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.aws_ssm_parameter.long-access-secrets["zoom.ACCESS_TOKEN"] will be created
+  + resource "aws_ssm_parameter" "long-access-secrets" {
+      + arn            = (known after apply)
+      + data_type      = (known after apply)
+      + description    = "Stores the value of ACCESS_TOKEN for `psoxy-zoom`"
+      + id             = (known after apply)
+      + insecure_value = (known after apply)
+      + key_id         = (known after apply)
+      + name           = "PSOXY_ZOOM_ACCESS_TOKEN"
+      + tags_all       = (known after apply)
+      + tier           = (known after apply)
+      + type           = "SecureString"
+      + value          = (sensitive value)
+      + version        = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.aws_ssm_parameter.long-access-secrets["zoom.ACCOUNT_ID"] will be created
+  + resource "aws_ssm_parameter" "long-access-secrets" {
+      + arn            = (known after apply)
+      + data_type      = (known after apply)
+      + description    = "Stores the value of ACCOUNT_ID for `psoxy-zoom`"
+      + id             = (known after apply)
+      + insecure_value = (known after apply)
+      + key_id         = (known after apply)
+      + name           = "PSOXY_ZOOM_ACCOUNT_ID"
+      + tags_all       = (known after apply)
+      + tier           = (known after apply)
+      + type           = "SecureString"
+      + value          = (sensitive value)
+      + version        = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.aws_ssm_parameter.long-access-secrets["zoom.CLIENT_ID"] will be created
+  + resource "aws_ssm_parameter" "long-access-secrets" {
+      + arn            = (known after apply)
+      + data_type      = (known after apply)
+      + description    = "Stores the value of CLIENT_ID for `psoxy-zoom`"
+      + id             = (known after apply)
+      + insecure_value = (known after apply)
+      + key_id         = (known after apply)
+      + name           = "PSOXY_ZOOM_CLIENT_ID"
+      + tags_all       = (known after apply)
+      + tier           = (known after apply)
+      + type           = "SecureString"
+      + value          = (sensitive value)
+      + version        = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.aws_ssm_parameter.long-access-secrets["zoom.CLIENT_SECRET"] will be created
+  + resource "aws_ssm_parameter" "long-access-secrets" {
+      + arn            = (known after apply)
+      + data_type      = (known after apply)
+      + description    = "Stores the value of CLIENT_SECRET for `psoxy-zoom`"
+      + id             = (known after apply)
+      + insecure_value = (known after apply)
+      + key_id         = (known after apply)
+      + name           = "PSOXY_ZOOM_CLIENT_SECRET"
+      + tags_all       = (known after apply)
+      + tier           = (known after apply)
+      + type           = "SecureString"
+      + value          = (sensitive value)
+      + version        = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["slack-discovery-api"].aws_lambda_function_url.lambda_url will be created
+  + resource "aws_lambda_function_url" "lambda_url" {
+      + authorization_type = "AWS_IAM"
+      + function_arn       = (known after apply)
+      + function_name      = "psoxy-slack-discovery-api"
+      + function_url       = (known after apply)
+      + id                 = (known after apply)
+      + url_id             = (known after apply)
+
+      + cors {
+          + allow_credentials = true
+          + allow_headers     = [
+              + "date",
+              + "keep-alive",
+            ]
+          + allow_methods     = [
+              + "GET",
+              + "HEAD",
+              + "POST",
+            ]
+          + allow_origins     = [
+              + "*",
+            ]
+          + expose_headers    = [
+              + "date",
+              + "keep-alive",
+            ]
+          + max_age           = 86400
+        }
+    }
+
+  # module.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["slack-discovery-api"].local_file.test_script will be created
+  + resource "local_file" "test_script" {
+      + content              = (known after apply)
+      + directory_permission = "0777"
+      + file_permission      = "0770"
+      + filename             = "test-psoxy-slack-discovery-api.sh"
+      + id                   = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["slack-discovery-api"].local_file.todo will be created
+  + resource "local_file" "todo" {
+      + content              = (known after apply)
+      + directory_permission = "0777"
+      + file_permission      = "0777"
+      + filename             = "TODO 2 - test psoxy-slack-discovery-api.md"
+      + id                   = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["zoom"].aws_lambda_function_url.lambda_url will be created
+  + resource "aws_lambda_function_url" "lambda_url" {
+      + authorization_type = "AWS_IAM"
+      + function_arn       = (known after apply)
+      + function_name      = "psoxy-zoom"
+      + function_url       = (known after apply)
+      + id                 = (known after apply)
+      + url_id             = (known after apply)
+
+      + cors {
+          + allow_credentials = true
+          + allow_headers     = [
+              + "date",
+              + "keep-alive",
+            ]
+          + allow_methods     = [
+              + "GET",
+              + "HEAD",
+              + "POST",
+            ]
+          + allow_origins     = [
+              + "*",
+            ]
+          + expose_headers    = [
+              + "date",
+              + "keep-alive",
+            ]
+          + max_age           = 86400
+        }
+    }
+
+  # module.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["zoom"].local_file.test_script will be created
+  + resource "local_file" "test_script" {
+      + content              = (known after apply)
+      + directory_permission = "0777"
+      + file_permission      = "0770"
+      + filename             = "test-psoxy-zoom.sh"
+      + id                   = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["zoom"].local_file.todo will be created
+  + resource "local_file" "todo" {
+      + content              = (known after apply)
+      + directory_permission = "0777"
+      + file_permission      = "0777"
+      + filename             = "TODO 2 - test psoxy-zoom.md"
+      + id                   = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.global_secrets.aws_ssm_parameter.secret["PSOXY_ENCRYPTION_KEY"] will be created
+  + resource "aws_ssm_parameter" "secret" {
+      + arn            = (known after apply)
+      + data_type      = (known after apply)
+      + description    = "secret used to generate reversible pseudonyms, if any; rotate to render all existing ones irreversible"
+      + id             = (known after apply)
+      + insecure_value = (known after apply)
+      + key_id         = (known after apply)
+      + name           = "PSOXY_ENCRYPTION_KEY"
+      + tags_all       = (known after apply)
+      + tier           = (known after apply)
+      + type           = "SecureString"
+      + value          = (sensitive value)
+      + version        = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.global_secrets.aws_ssm_parameter.secret["PSOXY_SALT"] will be created
+  + resource "aws_ssm_parameter" "secret" {
+      + arn            = (known after apply)
+      + data_type      = (known after apply)
+      + description    = "Salt used to build pseudonyms."
+      + id             = (known after apply)
+      + insecure_value = (known after apply)
+      + key_id         = (known after apply)
+      + name           = "PSOXY_SALT"
+      + tags_all       = (known after apply)
+      + tier           = (known after apply)
+      + type           = "SecureString"
+      + value          = (sensitive value)
+      + version        = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.google-workspace-connection["gcal"].google_project_service.apis_needed["calendar-json.googleapis.com"] will be created
+  + resource "google_project_service" "apis_needed" {
+      + disable_dependent_services = false
+      + disable_on_destroy         = true
+      + id                         = (known after apply)
+      + project                    = "psoxy-acme-example"
+      + service                    = "calendar-json.googleapis.com"
+    }
+
+  # module.psoxy-aws-google-workspace.module.google-workspace-connection["gcal"].google_service_account.connector-sa will be created
+  + resource "google_service_account" "connector-sa" {
+      + account_id   = "psoxy-gcal"
+      + disabled     = false
+      + display_name = "Psoxy Connector - Google Calendar"
+      + email        = (known after apply)
+      + id           = (known after apply)
+      + member       = (known after apply)
+      + name         = (known after apply)
+      + project      = "psoxy-acme-example"
+      + unique_id    = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.google-workspace-connection["gcal"].local_file.todo-google-workspace-admin-console will be created
+  + resource "local_file" "todo-google-workspace-admin-console" {
+      + content              = (known after apply)
+      + directory_permission = "0777"
+      + file_permission      = "0777"
+      + filename             = "TODO 1 - setup Psoxy Connector - Google Calendar.md"
+      + id                   = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.google-workspace-connection["gdirectory"].google_project_service.apis_needed["admin.googleapis.com"] will be created
+  + resource "google_project_service" "apis_needed" {
+      + disable_dependent_services = false
+      + disable_on_destroy         = true
+      + id                         = (known after apply)
+      + project                    = "psoxy-acme-example"
+      + service                    = "admin.googleapis.com"
+    }
+
+  # module.psoxy-aws-google-workspace.module.google-workspace-connection["gdirectory"].google_service_account.connector-sa will be created
+  + resource "google_service_account" "connector-sa" {
+      + account_id   = "psoxy-gdirectory"
+      + disabled     = false
+      + display_name = "Psoxy Connector - Google Directory"
+      + email        = (known after apply)
+      + id           = (known after apply)
+      + member       = (known after apply)
+      + name         = (known after apply)
+      + project      = "psoxy-acme-example"
+      + unique_id    = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.google-workspace-connection["gdirectory"].local_file.todo-google-workspace-admin-console will be created
+  + resource "local_file" "todo-google-workspace-admin-console" {
+      + content              = (known after apply)
+      + directory_permission = "0777"
+      + file_permission      = "0777"
+      + filename             = "TODO 1 - setup Psoxy Connector - Google Directory.md"
+      + id                   = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.google-workspace-connection["gdrive"].google_project_service.apis_needed["drive.googleapis.com"] will be created
+  + resource "google_project_service" "apis_needed" {
+      + disable_dependent_services = false
+      + disable_on_destroy         = true
+      + id                         = (known after apply)
+      + project                    = "psoxy-acme-example"
+      + service                    = "drive.googleapis.com"
+    }
+
+  # module.psoxy-aws-google-workspace.module.google-workspace-connection["gdrive"].google_service_account.connector-sa will be created
+  + resource "google_service_account" "connector-sa" {
+      + account_id   = "psoxy-gdrive"
+      + disabled     = false
+      + display_name = "Psoxy Connector - Google Drive"
+      + email        = (known after apply)
+      + id           = (known after apply)
+      + member       = (known after apply)
+      + name         = (known after apply)
+      + project      = "psoxy-acme-example"
+      + unique_id    = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.google-workspace-connection["gdrive"].local_file.todo-google-workspace-admin-console will be created
+  + resource "local_file" "todo-google-workspace-admin-console" {
+      + content              = (known after apply)
+      + directory_permission = "0777"
+      + file_permission      = "0777"
+      + filename             = "TODO 1 - setup Psoxy Connector - Google Drive.md"
+      + id                   = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.google-workspace-connection["gmail"].google_project_service.apis_needed["gmail.googleapis.com"] will be created
+  + resource "google_project_service" "apis_needed" {
+      + disable_dependent_services = false
+      + disable_on_destroy         = true
+      + id                         = (known after apply)
+      + project                    = "psoxy-acme-example"
+      + service                    = "gmail.googleapis.com"
+    }
+
+  # module.psoxy-aws-google-workspace.module.google-workspace-connection["gmail"].google_service_account.connector-sa will be created
+  + resource "google_service_account" "connector-sa" {
+      + account_id   = "psoxy-gmail"
+      + disabled     = false
+      + display_name = "Psoxy Connector - GMail"
+      + email        = (known after apply)
+      + id           = (known after apply)
+      + member       = (known after apply)
+      + name         = (known after apply)
+      + project      = "psoxy-acme-example"
+      + unique_id    = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.google-workspace-connection["gmail"].local_file.todo-google-workspace-admin-console will be created
+  + resource "local_file" "todo-google-workspace-admin-console" {
+      + content              = (known after apply)
+      + directory_permission = "0777"
+      + file_permission      = "0777"
+      + filename             = "TODO 1 - setup Psoxy Connector - GMail.md"
+      + id                   = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.google-workspace-connection["google-chat"].google_project_service.apis_needed["admin.googleapis.com"] will be created
+  + resource "google_project_service" "apis_needed" {
+      + disable_dependent_services = false
+      + disable_on_destroy         = true
+      + id                         = (known after apply)
+      + project                    = "psoxy-acme-example"
+      + service                    = "admin.googleapis.com"
+    }
+
+  # module.psoxy-aws-google-workspace.module.google-workspace-connection["google-chat"].google_service_account.connector-sa will be created
+  + resource "google_service_account" "connector-sa" {
+      + account_id   = "psoxy-google-chat"
+      + disabled     = false
+      + display_name = "Psoxy Connector - Google Chat"
+      + email        = (known after apply)
+      + id           = (known after apply)
+      + member       = (known after apply)
+      + name         = (known after apply)
+      + project      = "psoxy-acme-example"
+      + unique_id    = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.google-workspace-connection["google-chat"].local_file.todo-google-workspace-admin-console will be created
+  + resource "local_file" "todo-google-workspace-admin-console" {
+      + content              = (known after apply)
+      + directory_permission = "0777"
+      + file_permission      = "0777"
+      + filename             = "TODO 1 - setup Psoxy Connector - Google Chat.md"
+      + id                   = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.google-workspace-connection["google-meet"].google_project_service.apis_needed["admin.googleapis.com"] will be created
+  + resource "google_project_service" "apis_needed" {
+      + disable_dependent_services = false
+      + disable_on_destroy         = true
+      + id                         = (known after apply)
+      + project                    = "psoxy-acme-example"
+      + service                    = "admin.googleapis.com"
+    }
+
+  # module.psoxy-aws-google-workspace.module.google-workspace-connection["google-meet"].google_service_account.connector-sa will be created
+  + resource "google_service_account" "connector-sa" {
+      + account_id   = "psoxy-google-meet"
+      + disabled     = false
+      + display_name = "Psoxy Connector - Google Meet"
+      + email        = (known after apply)
+      + id           = (known after apply)
+      + member       = (known after apply)
+      + name         = (known after apply)
+      + project      = "psoxy-acme-example"
+      + unique_id    = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.google-workspace-connection["google-meet"].local_file.todo-google-workspace-admin-console will be created
+  + resource "local_file" "todo-google-workspace-admin-console" {
+      + content              = (known after apply)
+      + directory_permission = "0777"
+      + file_permission      = "0777"
+      + filename             = "TODO 1 - setup Psoxy Connector - Google Meet.md"
+      + id                   = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.google-workspace-connection-auth["gcal"].google_service_account_key.key will be created
+  + resource "google_service_account_key" "key" {
+      + id                 = (known after apply)
+      + keepers            = (known after apply)
+      + key_algorithm      = "KEY_ALG_RSA_2048"
+      + name               = (known after apply)
+      + private_key        = (sensitive value)
+      + private_key_type   = "TYPE_GOOGLE_CREDENTIALS_FILE"
+      + public_key         = (known after apply)
+      + public_key_type    = "TYPE_X509_PEM_FILE"
+      + service_account_id = (known after apply)
+      + valid_after        = (known after apply)
+      + valid_before       = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.google-workspace-connection-auth["gcal"].time_rotating.sa-key-rotation will be created
+  + resource "time_rotating" "sa-key-rotation" {
+      + day              = (known after apply)
+      + hour             = (known after apply)
+      + id               = (known after apply)
+      + minute           = (known after apply)
+      + month            = (known after apply)
+      + rfc3339          = (known after apply)
+      + rotation_days    = 60
+      + rotation_rfc3339 = (known after apply)
+      + second           = (known after apply)
+      + unix             = (known after apply)
+      + year             = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.google-workspace-connection-auth["gdirectory"].google_service_account_key.key will be created
+  + resource "google_service_account_key" "key" {
+      + id                 = (known after apply)
+      + keepers            = (known after apply)
+      + key_algorithm      = "KEY_ALG_RSA_2048"
+      + name               = (known after apply)
+      + private_key        = (sensitive value)
+      + private_key_type   = "TYPE_GOOGLE_CREDENTIALS_FILE"
+      + public_key         = (known after apply)
+      + public_key_type    = "TYPE_X509_PEM_FILE"
+      + service_account_id = (known after apply)
+      + valid_after        = (known after apply)
+      + valid_before       = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.google-workspace-connection-auth["gdirectory"].time_rotating.sa-key-rotation will be created
+  + resource "time_rotating" "sa-key-rotation" {
+      + day              = (known after apply)
+      + hour             = (known after apply)
+      + id               = (known after apply)
+      + minute           = (known after apply)
+      + month            = (known after apply)
+      + rfc3339          = (known after apply)
+      + rotation_days    = 60
+      + rotation_rfc3339 = (known after apply)
+      + second           = (known after apply)
+      + unix             = (known after apply)
+      + year             = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.google-workspace-connection-auth["gdrive"].google_service_account_key.key will be created
+  + resource "google_service_account_key" "key" {
+      + id                 = (known after apply)
+      + keepers            = (known after apply)
+      + key_algorithm      = "KEY_ALG_RSA_2048"
+      + name               = (known after apply)
+      + private_key        = (sensitive value)
+      + private_key_type   = "TYPE_GOOGLE_CREDENTIALS_FILE"
+      + public_key         = (known after apply)
+      + public_key_type    = "TYPE_X509_PEM_FILE"
+      + service_account_id = (known after apply)
+      + valid_after        = (known after apply)
+      + valid_before       = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.google-workspace-connection-auth["gdrive"].time_rotating.sa-key-rotation will be created
+  + resource "time_rotating" "sa-key-rotation" {
+      + day              = (known after apply)
+      + hour             = (known after apply)
+      + id               = (known after apply)
+      + minute           = (known after apply)
+      + month            = (known after apply)
+      + rfc3339          = (known after apply)
+      + rotation_days    = 60
+      + rotation_rfc3339 = (known after apply)
+      + second           = (known after apply)
+      + unix             = (known after apply)
+      + year             = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.google-workspace-connection-auth["gmail"].google_service_account_key.key will be created
+  + resource "google_service_account_key" "key" {
+      + id                 = (known after apply)
+      + keepers            = (known after apply)
+      + key_algorithm      = "KEY_ALG_RSA_2048"
+      + name               = (known after apply)
+      + private_key        = (sensitive value)
+      + private_key_type   = "TYPE_GOOGLE_CREDENTIALS_FILE"
+      + public_key         = (known after apply)
+      + public_key_type    = "TYPE_X509_PEM_FILE"
+      + service_account_id = (known after apply)
+      + valid_after        = (known after apply)
+      + valid_before       = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.google-workspace-connection-auth["gmail"].time_rotating.sa-key-rotation will be created
+  + resource "time_rotating" "sa-key-rotation" {
+      + day              = (known after apply)
+      + hour             = (known after apply)
+      + id               = (known after apply)
+      + minute           = (known after apply)
+      + month            = (known after apply)
+      + rfc3339          = (known after apply)
+      + rotation_days    = 60
+      + rotation_rfc3339 = (known after apply)
+      + second           = (known after apply)
+      + unix             = (known after apply)
+      + year             = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.google-workspace-connection-auth["google-chat"].google_service_account_key.key will be created
+  + resource "google_service_account_key" "key" {
+      + id                 = (known after apply)
+      + keepers            = (known after apply)
+      + key_algorithm      = "KEY_ALG_RSA_2048"
+      + name               = (known after apply)
+      + private_key        = (sensitive value)
+      + private_key_type   = "TYPE_GOOGLE_CREDENTIALS_FILE"
+      + public_key         = (known after apply)
+      + public_key_type    = "TYPE_X509_PEM_FILE"
+      + service_account_id = (known after apply)
+      + valid_after        = (known after apply)
+      + valid_before       = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.google-workspace-connection-auth["google-chat"].time_rotating.sa-key-rotation will be created
+  + resource "time_rotating" "sa-key-rotation" {
+      + day              = (known after apply)
+      + hour             = (known after apply)
+      + id               = (known after apply)
+      + minute           = (known after apply)
+      + month            = (known after apply)
+      + rfc3339          = (known after apply)
+      + rotation_days    = 60
+      + rotation_rfc3339 = (known after apply)
+      + second           = (known after apply)
+      + unix             = (known after apply)
+      + year             = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.google-workspace-connection-auth["google-meet"].google_service_account_key.key will be created
+  + resource "google_service_account_key" "key" {
+      + id                 = (known after apply)
+      + keepers            = (known after apply)
+      + key_algorithm      = "KEY_ALG_RSA_2048"
+      + name               = (known after apply)
+      + private_key        = (sensitive value)
+      + private_key_type   = "TYPE_GOOGLE_CREDENTIALS_FILE"
+      + public_key         = (known after apply)
+      + public_key_type    = "TYPE_X509_PEM_FILE"
+      + service_account_id = (known after apply)
+      + valid_after        = (known after apply)
+      + valid_before       = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.google-workspace-connection-auth["google-meet"].time_rotating.sa-key-rotation will be created
+  + resource "time_rotating" "sa-key-rotation" {
+      + day              = (known after apply)
+      + hour             = (known after apply)
+      + id               = (known after apply)
+      + minute           = (known after apply)
+      + month            = (known after apply)
+      + rfc3339          = (known after apply)
+      + rotation_days    = 60
+      + rotation_rfc3339 = (known after apply)
+      + second           = (known after apply)
+      + unix             = (known after apply)
+      + year             = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-aws.aws_iam_policy.execution_lambda_to_caller will be created
+  + resource "aws_iam_policy" "execution_lambda_to_caller" {
+      + arn         = (known after apply)
+      + description = "Allow caller role to execute the lambda url directly"
+      + id          = (known after apply)
+      + name        = "ExecutePsoxyLambdas"
+      + path        = "/"
+      + policy      = jsonencode(
+            {
+              + Statement = [
+                  + {
+                      + Action   = [
+                          + "lambda:InvokeFunctionUrl",
+                        ]
+                      + Effect   = "Allow"
+                      + Resource = "arn:aws:lambda:us-east-1:962428643465:function:psoxy-*"
+                    },
+                ]
+              + Version   = "2012-10-17"
+            }
+        )
+      + policy_id   = (known after apply)
+      + tags_all    = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-aws.aws_iam_role.api-caller will be created
+  + resource "aws_iam_role" "api-caller" {
+      + arn                   = (known after apply)
+      + assume_role_policy    = jsonencode(
+            {
+              + Statement = [
+                  + {
+                      + Action    = "sts:AssumeRole"
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + Service = "lambda.amazonaws.com"
+                        }
+                      + Sid       = ""
+                    },
+                ]
+              + Version   = "2012-10-17"
+            }
+        )
+      + create_date           = (known after apply)
+      + description           = "role for AWS principals that may invoke the psoxy instance or read an instance's output"
+      + force_detach_policies = false
+      + id                    = (known after apply)
+      + managed_policy_arns   = (known after apply)
+      + max_session_duration  = 3600
+      + name                  = "PsoxyCaller"
+      + name_prefix           = (known after apply)
+      + path                  = "/"
+      + tags_all              = (known after apply)
+      + unique_id             = (known after apply)
+
+      + inline_policy {
+          + name   = (known after apply)
+          + policy = (known after apply)
+        }
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-aws.aws_iam_role_policy_attachment.invoker_lambda_execution will be created
+  + resource "aws_iam_role_policy_attachment" "invoker_lambda_execution" {
+      + id         = (known after apply)
+      + policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+      + role       = "PsoxyCaller"
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-aws.aws_iam_role_policy_attachment.invoker_url_lambda_execution will be created
+  + resource "aws_iam_role_policy_attachment" "invoker_url_lambda_execution" {
+      + id         = (known after apply)
+      + policy_arn = (known after apply)
+      + role       = "PsoxyCaller"
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-aws.random_password.encryption_key will be created
+  + resource "random_password" "encryption_key" {
+      + bcrypt_hash = (sensitive value)
+      + id          = (known after apply)
+      + length      = 32
+      + lower       = true
+      + min_lower   = 0
+      + min_numeric = 0
+      + min_special = 0
+      + min_upper   = 0
+      + number      = true
+      + numeric     = true
+      + result      = (sensitive value)
+      + special     = true
+      + upper       = true
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-aws.random_password.random will be created
+  + resource "random_password" "random" {
+      + bcrypt_hash = (sensitive value)
+      + id          = (known after apply)
+      + length      = 20
+      + lower       = true
+      + min_lower   = 0
+      + min_numeric = 0
+      + min_special = 0
+      + min_upper   = 0
+      + number      = true
+      + numeric     = true
+      + result      = (sensitive value)
+      + special     = true
+      + upper       = true
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].aws_iam_policy.input_bucket_getObject_policy will be created
+  + resource "aws_iam_policy" "input_bucket_getObject_policy" {
+      + arn         = (known after apply)
+      + description = (known after apply)
+      + id          = (known after apply)
+      + name        = (known after apply)
+      + path        = "/"
+      + policy      = (known after apply)
+      + policy_id   = (known after apply)
+      + tags_all    = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].aws_iam_policy.sanitized_bucket_read will be created
+  + resource "aws_iam_policy" "sanitized_bucket_read" {
+      + arn         = (known after apply)
+      + description = (known after apply)
+      + id          = (known after apply)
+      + name        = (known after apply)
+      + path        = "/"
+      + policy      = (known after apply)
+      + policy_id   = (known after apply)
+      + tags_all    = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].aws_iam_policy.sanitized_bucket_write_policy will be created
+  + resource "aws_iam_policy" "sanitized_bucket_write_policy" {
+      + arn         = (known after apply)
+      + description = (known after apply)
+      + id          = (known after apply)
+      + name        = (known after apply)
+      + path        = "/"
+      + policy      = (known after apply)
+      + policy_id   = (known after apply)
+      + tags_all    = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].aws_iam_role_policy_attachment.read_policy_for_import_bucket will be created
+  + resource "aws_iam_role_policy_attachment" "read_policy_for_import_bucket" {
+      + id         = (known after apply)
+      + policy_arn = (known after apply)
+      + role       = "PsoxyExec_psoxy-hris"
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].aws_iam_role_policy_attachment.reader_policy_to_accessor_role["PsoxyCaller"] will be created
+  + resource "aws_iam_role_policy_attachment" "reader_policy_to_accessor_role" {
+      + id         = (known after apply)
+      + policy_arn = (known after apply)
+      + role       = "PsoxyCaller"
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].aws_iam_role_policy_attachment.write_policy_for_sanitized_bucket will be created
+  + resource "aws_iam_role_policy_attachment" "write_policy_for_sanitized_bucket" {
+      + id         = (known after apply)
+      + policy_arn = (known after apply)
+      + role       = "PsoxyExec_psoxy-hris"
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].aws_lambda_permission.allow_input_bucket will be created
+  + resource "aws_lambda_permission" "allow_input_bucket" {
+      + action              = "lambda:InvokeFunction"
+      + function_name       = "psoxy-hris"
+      + id                  = (known after apply)
+      + principal           = "s3.amazonaws.com"
+      + source_arn          = (known after apply)
+      + statement_id        = "AllowExecutionFromS3Bucket"
+      + statement_id_prefix = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].aws_s3_bucket.input will be created
+  + resource "aws_s3_bucket" "input" {
+      + acceleration_status         = (known after apply)
+      + acl                         = (known after apply)
+      + arn                         = (known after apply)
+      + bucket                      = (known after apply)
+      + bucket_domain_name          = (known after apply)
+      + bucket_regional_domain_name = (known after apply)
+      + force_destroy               = false
+      + hosted_zone_id              = (known after apply)
+      + id                          = (known after apply)
+      + object_lock_enabled         = (known after apply)
+      + policy                      = (known after apply)
+      + region                      = (known after apply)
+      + request_payer               = (known after apply)
+      + tags_all                    = (known after apply)
+      + website_domain              = (known after apply)
+      + website_endpoint            = (known after apply)
+
+      + cors_rule {
+          + allowed_headers = (known after apply)
+          + allowed_methods = (known after apply)
+          + allowed_origins = (known after apply)
+          + expose_headers  = (known after apply)
+          + max_age_seconds = (known after apply)
+        }
+
+      + grant {
+          + id          = (known after apply)
+          + permissions = (known after apply)
+          + type        = (known after apply)
+          + uri         = (known after apply)
+        }
+
+      + lifecycle_rule {
+          + abort_incomplete_multipart_upload_days = (known after apply)
+          + enabled                                = (known after apply)
+          + id                                     = (known after apply)
+          + prefix                                 = (known after apply)
+          + tags                                   = (known after apply)
+
+          + expiration {
+              + date                         = (known after apply)
+              + days                         = (known after apply)
+              + expired_object_delete_marker = (known after apply)
+            }
+
+          + noncurrent_version_expiration {
+              + days = (known after apply)
+            }
+
+          + noncurrent_version_transition {
+              + days          = (known after apply)
+              + storage_class = (known after apply)
+            }
+
+          + transition {
+              + date          = (known after apply)
+              + days          = (known after apply)
+              + storage_class = (known after apply)
+            }
+        }
+
+      + logging {
+          + target_bucket = (known after apply)
+          + target_prefix = (known after apply)
+        }
+
+      + object_lock_configuration {
+          + object_lock_enabled = (known after apply)
+
+          + rule {
+              + default_retention {
+                  + days  = (known after apply)
+                  + mode  = (known after apply)
+                  + years = (known after apply)
+                }
+            }
+        }
+
+      + replication_configuration {
+          + role = (known after apply)
+
+          + rules {
+              + delete_marker_replication_status = (known after apply)
+              + id                               = (known after apply)
+              + prefix                           = (known after apply)
+              + priority                         = (known after apply)
+              + status                           = (known after apply)
+
+              + destination {
+                  + account_id         = (known after apply)
+                  + bucket             = (known after apply)
+                  + replica_kms_key_id = (known after apply)
+                  + storage_class      = (known after apply)
+
+                  + access_control_translation {
+                      + owner = (known after apply)
+                    }
+
+                  + metrics {
+                      + minutes = (known after apply)
+                      + status  = (known after apply)
+                    }
+
+                  + replication_time {
+                      + minutes = (known after apply)
+                      + status  = (known after apply)
+                    }
+                }
+
+              + filter {
+                  + prefix = (known after apply)
+                  + tags   = (known after apply)
+                }
+
+              + source_selection_criteria {
+                  + sse_kms_encrypted_objects {
+                      + enabled = (known after apply)
+                    }
+                }
+            }
+        }
+
+      + server_side_encryption_configuration {
+          + rule {
+              + bucket_key_enabled = (known after apply)
+
+              + apply_server_side_encryption_by_default {
+                  + kms_master_key_id = (known after apply)
+                  + sse_algorithm     = (known after apply)
+                }
+            }
+        }
+
+      + versioning {
+          + enabled    = (known after apply)
+          + mfa_delete = (known after apply)
+        }
+
+      + website {
+          + error_document           = (known after apply)
+          + index_document           = (known after apply)
+          + redirect_all_requests_to = (known after apply)
+          + routing_rules            = (known after apply)
+        }
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].aws_s3_bucket.sanitized will be created
+  + resource "aws_s3_bucket" "sanitized" {
+      + acceleration_status         = (known after apply)
+      + acl                         = (known after apply)
+      + arn                         = (known after apply)
+      + bucket                      = (known after apply)
+      + bucket_domain_name          = (known after apply)
+      + bucket_regional_domain_name = (known after apply)
+      + force_destroy               = false
+      + hosted_zone_id              = (known after apply)
+      + id                          = (known after apply)
+      + object_lock_enabled         = (known after apply)
+      + policy                      = (known after apply)
+      + region                      = (known after apply)
+      + request_payer               = (known after apply)
+      + tags_all                    = (known after apply)
+      + website_domain              = (known after apply)
+      + website_endpoint            = (known after apply)
+
+      + cors_rule {
+          + allowed_headers = (known after apply)
+          + allowed_methods = (known after apply)
+          + allowed_origins = (known after apply)
+          + expose_headers  = (known after apply)
+          + max_age_seconds = (known after apply)
+        }
+
+      + grant {
+          + id          = (known after apply)
+          + permissions = (known after apply)
+          + type        = (known after apply)
+          + uri         = (known after apply)
+        }
+
+      + lifecycle_rule {
+          + abort_incomplete_multipart_upload_days = (known after apply)
+          + enabled                                = (known after apply)
+          + id                                     = (known after apply)
+          + prefix                                 = (known after apply)
+          + tags                                   = (known after apply)
+
+          + expiration {
+              + date                         = (known after apply)
+              + days                         = (known after apply)
+              + expired_object_delete_marker = (known after apply)
+            }
+
+          + noncurrent_version_expiration {
+              + days = (known after apply)
+            }
+
+          + noncurrent_version_transition {
+              + days          = (known after apply)
+              + storage_class = (known after apply)
+            }
+
+          + transition {
+              + date          = (known after apply)
+              + days          = (known after apply)
+              + storage_class = (known after apply)
+            }
+        }
+
+      + logging {
+          + target_bucket = (known after apply)
+          + target_prefix = (known after apply)
+        }
+
+      + object_lock_configuration {
+          + object_lock_enabled = (known after apply)
+
+          + rule {
+              + default_retention {
+                  + days  = (known after apply)
+                  + mode  = (known after apply)
+                  + years = (known after apply)
+                }
+            }
+        }
+
+      + replication_configuration {
+          + role = (known after apply)
+
+          + rules {
+              + delete_marker_replication_status = (known after apply)
+              + id                               = (known after apply)
+              + prefix                           = (known after apply)
+              + priority                         = (known after apply)
+              + status                           = (known after apply)
+
+              + destination {
+                  + account_id         = (known after apply)
+                  + bucket             = (known after apply)
+                  + replica_kms_key_id = (known after apply)
+                  + storage_class      = (known after apply)
+
+                  + access_control_translation {
+                      + owner = (known after apply)
+                    }
+
+                  + metrics {
+                      + minutes = (known after apply)
+                      + status  = (known after apply)
+                    }
+
+                  + replication_time {
+                      + minutes = (known after apply)
+                      + status  = (known after apply)
+                    }
+                }
+
+              + filter {
+                  + prefix = (known after apply)
+                  + tags   = (known after apply)
+                }
+
+              + source_selection_criteria {
+                  + sse_kms_encrypted_objects {
+                      + enabled = (known after apply)
+                    }
+                }
+            }
+        }
+
+      + server_side_encryption_configuration {
+          + rule {
+              + bucket_key_enabled = (known after apply)
+
+              + apply_server_side_encryption_by_default {
+                  + kms_master_key_id = (known after apply)
+                  + sse_algorithm     = (known after apply)
+                }
+            }
+        }
+
+      + versioning {
+          + enabled    = (known after apply)
+          + mfa_delete = (known after apply)
+        }
+
+      + website {
+          + error_document           = (known after apply)
+          + index_document           = (known after apply)
+          + redirect_all_requests_to = (known after apply)
+          + routing_rules            = (known after apply)
+        }
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].aws_s3_bucket_notification.bucket_notification will be created
+  + resource "aws_s3_bucket_notification" "bucket_notification" {
+      + bucket      = (known after apply)
+      + eventbridge = false
+      + id          = (known after apply)
+
+      + lambda_function {
+          + events              = [
+              + "s3:ObjectCreated:*",
+            ]
+          + id                  = (known after apply)
+          + lambda_function_arn = (known after apply)
+        }
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].aws_s3_bucket_public_access_block.input-block-public-access will be created
+  + resource "aws_s3_bucket_public_access_block" "input-block-public-access" {
+      + block_public_acls       = true
+      + block_public_policy     = true
+      + bucket                  = (known after apply)
+      + id                      = (known after apply)
+      + ignore_public_acls      = true
+      + restrict_public_buckets = true
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].aws_s3_bucket_public_access_block.sanitized will be created
+  + resource "aws_s3_bucket_public_access_block" "sanitized" {
+      + block_public_acls       = true
+      + block_public_policy     = true
+      + bucket                  = (known after apply)
+      + id                      = (known after apply)
+      + ignore_public_acls      = true
+      + restrict_public_buckets = true
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].aws_s3_bucket_server_side_encryption_configuration.input will be created
+  + resource "aws_s3_bucket_server_side_encryption_configuration" "input" {
+      + bucket = (known after apply)
+      + id     = (known after apply)
+
+      + rule {
+          + apply_server_side_encryption_by_default {
+              + sse_algorithm = "aws:kms"
+            }
+        }
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].aws_s3_bucket_server_side_encryption_configuration.sanitized will be created
+  + resource "aws_s3_bucket_server_side_encryption_configuration" "sanitized" {
+      + bucket = (known after apply)
+      + id     = (known after apply)
+
+      + rule {
+          + apply_server_side_encryption_by_default {
+              + sse_algorithm = "aws:kms"
+            }
+        }
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].aws_ssm_parameter.rules will be created
+  + resource "aws_ssm_parameter" "rules" {
+      + arn            = (known after apply)
+      + data_type      = (known after apply)
+      + description    = "Rules for transformation of files. NOTE: any 'RULES' env var will override this value"
+      + id             = (known after apply)
+      + insecure_value = <<-EOT
+            "columnsToPseudonymize":
+            - "EMPLOYEE_ID"
+            - "EMPLOYEE_EMAIL"
+            - "MANAGER_ID"
+            "columnsToRedact": []
+        EOT
+      + key_id         = (known after apply)
+      + name           = "PSOXY_HRIS_RULES"
+      + tags_all       = (known after apply)
+      + tier           = (known after apply)
+      + type           = "String"
+      + value          = (sensitive value)
+      + version        = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].random_string.bucket_suffix will be created
+  + resource "random_string" "bucket_suffix" {
+      + id          = (known after apply)
+      + length      = 8
+      + lower       = true
+      + min_lower   = 0
+      + min_numeric = 0
+      + min_special = 0
+      + min_upper   = 0
+      + number      = true
+      + numeric     = true
+      + result      = (known after apply)
+      + special     = false
+      + upper       = false
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-bulk-to-worklytics["hris"].local_file.todo-worklytics-connection will be created
+  + resource "local_file" "todo-worklytics-connection" {
+      + content              = (known after apply)
+      + directory_permission = "0777"
+      + file_permission      = "0777"
+      + filename             = "TODO 3 - connect hris in Worklytics.md"
+      + id                   = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gcal"].aws_lambda_function_url.lambda_url will be created
+  + resource "aws_lambda_function_url" "lambda_url" {
+      + authorization_type = "AWS_IAM"
+      + function_arn       = (known after apply)
+      + function_name      = "psoxy-gcal"
+      + function_url       = (known after apply)
+      + id                 = (known after apply)
+      + url_id             = (known after apply)
+
+      + cors {
+          + allow_credentials = true
+          + allow_headers     = [
+              + "date",
+              + "keep-alive",
+            ]
+          + allow_methods     = [
+              + "GET",
+              + "HEAD",
+              + "POST",
+            ]
+          + allow_origins     = [
+              + "*",
+            ]
+          + expose_headers    = [
+              + "date",
+              + "keep-alive",
+            ]
+          + max_age           = 86400
+        }
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gcal"].local_file.test_script will be created
+  + resource "local_file" "test_script" {
+      + content              = (known after apply)
+      + directory_permission = "0777"
+      + file_permission      = "0770"
+      + filename             = "test-psoxy-gcal.sh"
+      + id                   = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gcal"].local_file.todo will be created
+  + resource "local_file" "todo" {
+      + content              = (known after apply)
+      + directory_permission = "0777"
+      + file_permission      = "0777"
+      + filename             = "TODO 2 - test psoxy-gcal.md"
+      + id                   = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdirectory"].aws_lambda_function_url.lambda_url will be created
+  + resource "aws_lambda_function_url" "lambda_url" {
+      + authorization_type = "AWS_IAM"
+      + function_arn       = (known after apply)
+      + function_name      = "psoxy-gdirectory"
+      + function_url       = (known after apply)
+      + id                 = (known after apply)
+      + url_id             = (known after apply)
+
+      + cors {
+          + allow_credentials = true
+          + allow_headers     = [
+              + "date",
+              + "keep-alive",
+            ]
+          + allow_methods     = [
+              + "GET",
+              + "HEAD",
+              + "POST",
+            ]
+          + allow_origins     = [
+              + "*",
+            ]
+          + expose_headers    = [
+              + "date",
+              + "keep-alive",
+            ]
+          + max_age           = 86400
+        }
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdirectory"].local_file.test_script will be created
+  + resource "local_file" "test_script" {
+      + content              = (known after apply)
+      + directory_permission = "0777"
+      + file_permission      = "0770"
+      + filename             = "test-psoxy-gdirectory.sh"
+      + id                   = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdirectory"].local_file.todo will be created
+  + resource "local_file" "todo" {
+      + content              = (known after apply)
+      + directory_permission = "0777"
+      + file_permission      = "0777"
+      + filename             = "TODO 2 - test psoxy-gdirectory.md"
+      + id                   = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdrive"].aws_lambda_function_url.lambda_url will be created
+  + resource "aws_lambda_function_url" "lambda_url" {
+      + authorization_type = "AWS_IAM"
+      + function_arn       = (known after apply)
+      + function_name      = "psoxy-gdrive"
+      + function_url       = (known after apply)
+      + id                 = (known after apply)
+      + url_id             = (known after apply)
+
+      + cors {
+          + allow_credentials = true
+          + allow_headers     = [
+              + "date",
+              + "keep-alive",
+            ]
+          + allow_methods     = [
+              + "GET",
+              + "HEAD",
+              + "POST",
+            ]
+          + allow_origins     = [
+              + "*",
+            ]
+          + expose_headers    = [
+              + "date",
+              + "keep-alive",
+            ]
+          + max_age           = 86400
+        }
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdrive"].local_file.test_script will be created
+  + resource "local_file" "test_script" {
+      + content              = (known after apply)
+      + directory_permission = "0777"
+      + file_permission      = "0770"
+      + filename             = "test-psoxy-gdrive.sh"
+      + id                   = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdrive"].local_file.todo will be created
+  + resource "local_file" "todo" {
+      + content              = (known after apply)
+      + directory_permission = "0777"
+      + file_permission      = "0777"
+      + filename             = "TODO 2 - test psoxy-gdrive.md"
+      + id                   = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gmail"].aws_lambda_function_url.lambda_url will be created
+  + resource "aws_lambda_function_url" "lambda_url" {
+      + authorization_type = "AWS_IAM"
+      + function_arn       = (known after apply)
+      + function_name      = "psoxy-gmail"
+      + function_url       = (known after apply)
+      + id                 = (known after apply)
+      + url_id             = (known after apply)
+
+      + cors {
+          + allow_credentials = true
+          + allow_headers     = [
+              + "date",
+              + "keep-alive",
+            ]
+          + allow_methods     = [
+              + "GET",
+              + "HEAD",
+              + "POST",
+            ]
+          + allow_origins     = [
+              + "*",
+            ]
+          + expose_headers    = [
+              + "date",
+              + "keep-alive",
+            ]
+          + max_age           = 86400
+        }
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gmail"].local_file.test_script will be created
+  + resource "local_file" "test_script" {
+      + content              = (known after apply)
+      + directory_permission = "0777"
+      + file_permission      = "0770"
+      + filename             = "test-psoxy-gmail.sh"
+      + id                   = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gmail"].local_file.todo will be created
+  + resource "local_file" "todo" {
+      + content              = (known after apply)
+      + directory_permission = "0777"
+      + file_permission      = "0777"
+      + filename             = "TODO 2 - test psoxy-gmail.md"
+      + id                   = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-chat"].aws_lambda_function_url.lambda_url will be created
+  + resource "aws_lambda_function_url" "lambda_url" {
+      + authorization_type = "AWS_IAM"
+      + function_arn       = (known after apply)
+      + function_name      = "psoxy-google-chat"
+      + function_url       = (known after apply)
+      + id                 = (known after apply)
+      + url_id             = (known after apply)
+
+      + cors {
+          + allow_credentials = true
+          + allow_headers     = [
+              + "date",
+              + "keep-alive",
+            ]
+          + allow_methods     = [
+              + "GET",
+              + "HEAD",
+              + "POST",
+            ]
+          + allow_origins     = [
+              + "*",
+            ]
+          + expose_headers    = [
+              + "date",
+              + "keep-alive",
+            ]
+          + max_age           = 86400
+        }
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-chat"].local_file.test_script will be created
+  + resource "local_file" "test_script" {
+      + content              = (known after apply)
+      + directory_permission = "0777"
+      + file_permission      = "0770"
+      + filename             = "test-psoxy-google-chat.sh"
+      + id                   = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-chat"].local_file.todo will be created
+  + resource "local_file" "todo" {
+      + content              = (known after apply)
+      + directory_permission = "0777"
+      + file_permission      = "0777"
+      + filename             = "TODO 2 - test psoxy-google-chat.md"
+      + id                   = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-meet"].aws_lambda_function_url.lambda_url will be created
+  + resource "aws_lambda_function_url" "lambda_url" {
+      + authorization_type = "AWS_IAM"
+      + function_arn       = (known after apply)
+      + function_name      = "psoxy-google-meet"
+      + function_url       = (known after apply)
+      + id                 = (known after apply)
+      + url_id             = (known after apply)
+
+      + cors {
+          + allow_credentials = true
+          + allow_headers     = [
+              + "date",
+              + "keep-alive",
+            ]
+          + allow_methods     = [
+              + "GET",
+              + "HEAD",
+              + "POST",
+            ]
+          + allow_origins     = [
+              + "*",
+            ]
+          + expose_headers    = [
+              + "date",
+              + "keep-alive",
+            ]
+          + max_age           = 86400
+        }
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-meet"].local_file.test_script will be created
+  + resource "local_file" "test_script" {
+      + content              = (known after apply)
+      + directory_permission = "0777"
+      + file_permission      = "0770"
+      + filename             = "test-psoxy-google-meet.sh"
+      + id                   = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-meet"].local_file.todo will be created
+  + resource "local_file" "todo" {
+      + content              = (known after apply)
+      + directory_permission = "0777"
+      + file_permission      = "0777"
+      + filename             = "TODO 2 - test psoxy-google-meet.md"
+      + id                   = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.sa-key-secrets["gcal"].aws_ssm_parameter.secret["PSOXY_GCAL_SERVICE_ACCOUNT_KEY"] will be created
+  + resource "aws_ssm_parameter" "secret" {
+      + arn            = (known after apply)
+      + data_type      = (known after apply)
+      + description    = "GCP service account key for gcal connector"
+      + id             = (known after apply)
+      + insecure_value = (known after apply)
+      + key_id         = (known after apply)
+      + name           = "PSOXY_GCAL_SERVICE_ACCOUNT_KEY"
+      + tags_all       = (known after apply)
+      + tier           = (known after apply)
+      + type           = "SecureString"
+      + value          = (sensitive value)
+      + version        = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.sa-key-secrets["gdirectory"].aws_ssm_parameter.secret["PSOXY_GDIRECTORY_SERVICE_ACCOUNT_KEY"] will be created
+  + resource "aws_ssm_parameter" "secret" {
+      + arn            = (known after apply)
+      + data_type      = (known after apply)
+      + description    = "GCP service account key for gdirectory connector"
+      + id             = (known after apply)
+      + insecure_value = (known after apply)
+      + key_id         = (known after apply)
+      + name           = "PSOXY_GDIRECTORY_SERVICE_ACCOUNT_KEY"
+      + tags_all       = (known after apply)
+      + tier           = (known after apply)
+      + type           = "SecureString"
+      + value          = (sensitive value)
+      + version        = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.sa-key-secrets["gdrive"].aws_ssm_parameter.secret["PSOXY_GDRIVE_SERVICE_ACCOUNT_KEY"] will be created
+  + resource "aws_ssm_parameter" "secret" {
+      + arn            = (known after apply)
+      + data_type      = (known after apply)
+      + description    = "GCP service account key for gdrive connector"
+      + id             = (known after apply)
+      + insecure_value = (known after apply)
+      + key_id         = (known after apply)
+      + name           = "PSOXY_GDRIVE_SERVICE_ACCOUNT_KEY"
+      + tags_all       = (known after apply)
+      + tier           = (known after apply)
+      + type           = "SecureString"
+      + value          = (sensitive value)
+      + version        = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.sa-key-secrets["gmail"].aws_ssm_parameter.secret["PSOXY_GMAIL_SERVICE_ACCOUNT_KEY"] will be created
+  + resource "aws_ssm_parameter" "secret" {
+      + arn            = (known after apply)
+      + data_type      = (known after apply)
+      + description    = "GCP service account key for gmail connector"
+      + id             = (known after apply)
+      + insecure_value = (known after apply)
+      + key_id         = (known after apply)
+      + name           = "PSOXY_GMAIL_SERVICE_ACCOUNT_KEY"
+      + tags_all       = (known after apply)
+      + tier           = (known after apply)
+      + type           = "SecureString"
+      + value          = (sensitive value)
+      + version        = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.sa-key-secrets["google-chat"].aws_ssm_parameter.secret["PSOXY_GOOGLE_CHAT_SERVICE_ACCOUNT_KEY"] will be created
+  + resource "aws_ssm_parameter" "secret" {
+      + arn            = (known after apply)
+      + data_type      = (known after apply)
+      + description    = "GCP service account key for google-chat connector"
+      + id             = (known after apply)
+      + insecure_value = (known after apply)
+      + key_id         = (known after apply)
+      + name           = "PSOXY_GOOGLE_CHAT_SERVICE_ACCOUNT_KEY"
+      + tags_all       = (known after apply)
+      + tier           = (known after apply)
+      + type           = "SecureString"
+      + value          = (sensitive value)
+      + version        = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.sa-key-secrets["google-meet"].aws_ssm_parameter.secret["PSOXY_GOOGLE_MEET_SERVICE_ACCOUNT_KEY"] will be created
+  + resource "aws_ssm_parameter" "secret" {
+      + arn            = (known after apply)
+      + data_type      = (known after apply)
+      + description    = "GCP service account key for google-meet connector"
+      + id             = (known after apply)
+      + insecure_value = (known after apply)
+      + key_id         = (known after apply)
+      + name           = "PSOXY_GOOGLE_MEET_SERVICE_ACCOUNT_KEY"
+      + tags_all       = (known after apply)
+      + tier           = (known after apply)
+      + type           = "SecureString"
+      + value          = (sensitive value)
+      + version        = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.source_token_external_todo["slack-discovery-api"].local_file.source_connection_instructions will be created
+  + resource "local_file" "source_connection_instructions" {
+      + content              = <<-EOT
+            # TODO - Create User-Managed Token for slack-discovery-api
+            
+            Follow the following steps:
+            
+            ## Slack Discovery Setup
+            For enabling Slack Discovery with the Psoxy you must first setup an app on your Slack Enterprise
+            instance.
+              1. Go to https://api.slack.com/apps and create an app, select name a development workspace
+              2. Take note of your App ID and contact your Slack rep and ask them to enable `discovery:read` scope for the app.
+            If they also enable `discovery:write` then delete it for safety, the app just needs read access.
+            3. Generate the following URL replacing the placeholders for *YOUR_CLIENT_ID* and *YOUR_APP_SECRET* and save it for later
+            `https://api.slack.com/api/oauth.v2.access?client_id=YOUR_CLIENT_ID&client_secret=YOUR_APP_SECRET`
+            4. Go to OAuth & Permissions > Redirect URLs and add the previous URL there
+            The next step depends on your installation approach you might need to change slightly
+            ### Org wide install
+            Use this step if you want to install in the whole org, across multiple workspaces.
+              1. Add a bot scope (not really used, but Slack doesn't allow org-wide without a bot scope requested).
+                 Just add `users:read`, something that is read-only and we already have access through discovery.
+              2. Go to *Org Level Apps* and Opt-in to the program
+              3. Go to Settings > Install App
+              4. Install into *organization*
+              5. Copy the User OAuth Token and store it in secret manager.
+              Otherwise, share the token with the AWS/GCP administrator completing the implementation.
+            ### Workspace install
+            Use this steps if you intend to install in just one workspace within your org.
+              1. Go to Settings > Install App
+              2. Install into *workspace*
+              3. Copy the User OAuth Token and store it in the secret manager (or share with the administrator completing the implementation)
+            
+            
+            ## Populate the token for PSOXY_SLACK_DISCOVERY_API_ACCESS_TOKEN in AWS Systems Manager Parameter Store.
+            
+            ### Using AWS cli
+            
+            YMMV.
+            ```shell
+            aws ssm put-parameter \
+            --region us-east-1 \
+            --name "PSOXY_SLACK_DISCOVERY_API_ACCESS_TOKEN" \
+            --type "SecureString " \
+            --value "YOUR_VALUE_HERE" \
+            --overwrite
+            ```
+            
+            from macOS clipboard
+            ```shell
+            pbpaste | aws ssm put-parameter \
+            --region us-east-1 \
+            --name "PSOXY_SLACK_DISCOVERY_API_ACCESS_TOKEN" \
+            --type "SecureString " \
+            --value=- \
+            --overwrite
+            ```
+            
+            reference: https://cloud.google.com/sdk/gcloud/reference/secrets/versions/add
+            
+            ### AWS  Console
+            
+            1. Visit
+            
+            https://us-east-1.console.aws.amazon.com/systems-manager/parameters/PSOXY_SLACK_DISCOVERY_API_ACCESS_TOKEN/description?region=us-east-1&tab=Table
+            
+            2. Click "Edit"; paste your value in the 'Value' field and click 'Save changes'.
+            
+            
+        EOT
+      + directory_permission = "0777"
+      + file_permission      = "0777"
+      + filename             = "TODO 1 - setup slack-discovery-api.md"
+      + id                   = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.source_token_external_todo["zoom"].local_file.source_connection_instructions will be created
+  + resource "local_file" "source_connection_instructions" {
+      + content              = <<-EOT
+            # TODO - Create User-Managed Token for zoom
+            
+            Follow the following steps:
+            
+            ## Zoom Setup
+            Zoom connector through Psoxy requires a custom managed app on the Zoom Marketplace (in development
+            mode, no need to publish).
+            1. Go to https://marketplace.zoom.us/develop/create and create an app of type "Server to Server OAuth"
+            2. After creation it will show the App Credentials. Share them with the AWS/GCP administrator, the
+            following secret values must be filled in the Secret Manager for the Proxy with the appropriate values:
+            - `PSOXY_ZOOM_CLIENT_ID`
+            - `PSOXY_ZOOM_ACCOUNT_ID`
+            - `PSOXY_ZOOM_CLIENT_SECRET`
+            Anytime the *client secret* is regenerated it needs to be updated in the Proxy too.
+            3. Fill the information section
+            4. Fill the scopes section, enabling the following:
+            - Users / View all user information /user:read:admin
+              - To be able to gather information about the zoom users
+            - Meetings / View all user meetings /meeting:read:admin
+              - Allows us to list all user meeting
+            - Report / View report data /report:read:admin
+              - Last 6 months view for user meetings
+            5. Activate the app
+            
+            
+            ## Populate the token for PSOXY_ZOOM_CLIENT_SECRET in AWS Systems Manager Parameter Store.
+            
+            ### Using AWS cli
+            
+            YMMV.
+            ```shell
+            aws ssm put-parameter \
+            --region us-east-1 \
+            --name "PSOXY_ZOOM_CLIENT_SECRET" \
+            --type "SecureString " \
+            --value "YOUR_VALUE_HERE" \
+            --overwrite
+            ```
+            
+            from macOS clipboard
+            ```shell
+            pbpaste | aws ssm put-parameter \
+            --region us-east-1 \
+            --name "PSOXY_ZOOM_CLIENT_SECRET" \
+            --type "SecureString " \
+            --value=- \
+            --overwrite
+            ```
+            
+            reference: https://cloud.google.com/sdk/gcloud/reference/secrets/versions/add
+            
+            ### AWS  Console
+            
+            1. Visit
+            
+            https://us-east-1.console.aws.amazon.com/systems-manager/parameters/PSOXY_ZOOM_CLIENT_SECRET/description?region=us-east-1&tab=Table
+            
+            2. Click "Edit"; paste your value in the 'Value' field and click 'Save changes'.
+            
+            
+            ## Populate the token for PSOXY_ZOOM_CLIENT_ID in AWS Systems Manager Parameter Store.
+            
+            ### Using AWS cli
+            
+            YMMV.
+            ```shell
+            aws ssm put-parameter \
+            --region us-east-1 \
+            --name "PSOXY_ZOOM_CLIENT_ID" \
+            --type "SecureString " \
+            --value "YOUR_VALUE_HERE" \
+            --overwrite
+            ```
+            
+            from macOS clipboard
+            ```shell
+            pbpaste | aws ssm put-parameter \
+            --region us-east-1 \
+            --name "PSOXY_ZOOM_CLIENT_ID" \
+            --type "SecureString " \
+            --value=- \
+            --overwrite
+            ```
+            
+            reference: https://cloud.google.com/sdk/gcloud/reference/secrets/versions/add
+            
+            ### AWS  Console
+            
+            1. Visit
+            
+            https://us-east-1.console.aws.amazon.com/systems-manager/parameters/PSOXY_ZOOM_CLIENT_ID/description?region=us-east-1&tab=Table
+            
+            2. Click "Edit"; paste your value in the 'Value' field and click 'Save changes'.
+            
+            
+            ## Populate the token for PSOXY_ZOOM_ACCOUNT_ID in AWS Systems Manager Parameter Store.
+            
+            ### Using AWS cli
+            
+            YMMV.
+            ```shell
+            aws ssm put-parameter \
+            --region us-east-1 \
+            --name "PSOXY_ZOOM_ACCOUNT_ID" \
+            --type "SecureString " \
+            --value "YOUR_VALUE_HERE" \
+            --overwrite
+            ```
+            
+            from macOS clipboard
+            ```shell
+            pbpaste | aws ssm put-parameter \
+            --region us-east-1 \
+            --name "PSOXY_ZOOM_ACCOUNT_ID" \
+            --type "SecureString " \
+            --value=- \
+            --overwrite
+            ```
+            
+            reference: https://cloud.google.com/sdk/gcloud/reference/secrets/versions/add
+            
+            ### AWS  Console
+            
+            1. Visit
+            
+            https://us-east-1.console.aws.amazon.com/systems-manager/parameters/PSOXY_ZOOM_ACCOUNT_ID/description?region=us-east-1&tab=Table
+            
+            2. Click "Edit"; paste your value in the 'Value' field and click 'Save changes'.
+            
+            
+            ## Populate the token for PSOXY_ZOOM_ACCESS_TOKEN in AWS Systems Manager Parameter Store.
+            
+            ### Using AWS cli
+            
+            YMMV.
+            ```shell
+            aws ssm put-parameter \
+            --region us-east-1 \
+            --name "PSOXY_ZOOM_ACCESS_TOKEN" \
+            --type "SecureString " \
+            --value "YOUR_VALUE_HERE" \
+            --overwrite
+            ```
+            
+            from macOS clipboard
+            ```shell
+            pbpaste | aws ssm put-parameter \
+            --region us-east-1 \
+            --name "PSOXY_ZOOM_ACCESS_TOKEN" \
+            --type "SecureString " \
+            --value=- \
+            --overwrite
+            ```
+            
+            reference: https://cloud.google.com/sdk/gcloud/reference/secrets/versions/add
+            
+            ### AWS  Console
+            
+            1. Visit
+            
+            https://us-east-1.console.aws.amazon.com/systems-manager/parameters/PSOXY_ZOOM_ACCESS_TOKEN/description?region=us-east-1&tab=Table
+            
+            2. Click "Edit"; paste your value in the 'Value' field and click 'Save changes'.
+            
+            
+        EOT
+      + directory_permission = "0777"
+      + file_permission      = "0777"
+      + filename             = "TODO 1 - setup zoom.md"
+      + id                   = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["slack-discovery-api"].module.psoxy_lambda.aws_cloudwatch_log_group.lambda-log will be created
+  + resource "aws_cloudwatch_log_group" "lambda-log" {
+      + arn               = (known after apply)
+      + id                = (known after apply)
+      + name              = "/aws/lambda/psoxy-slack-discovery-api"
+      + name_prefix       = (known after apply)
+      + retention_in_days = 7
+      + skip_destroy      = false
+      + tags_all          = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["slack-discovery-api"].module.psoxy_lambda.aws_iam_policy.ssm_param_policy will be created
+  + resource "aws_iam_policy" "ssm_param_policy" {
+      + arn         = (known after apply)
+      + description = "Allow SSM parameter access needed by psoxy-slack-discovery-api"
+      + id          = (known after apply)
+      + name        = "psoxy-slack-discovery-api_ssmParameters"
+      + path        = "/"
+      + policy      = (known after apply)
+      + policy_id   = (known after apply)
+      + tags_all    = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["slack-discovery-api"].module.psoxy_lambda.aws_iam_role.iam_for_lambda will be created
+  + resource "aws_iam_role" "iam_for_lambda" {
+      + arn                   = (known after apply)
+      + assume_role_policy    = jsonencode(
+            {
+              + Statement = [
+                  + {
+                      + Action    = "sts:AssumeRole"
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + Service = "lambda.amazonaws.com"
+                        }
+                      + Sid       = ""
+                    },
+                ]
+              + Version   = "2012-10-17"
+            }
+        )
+      + create_date           = (known after apply)
+      + description           = "execution role for psoxy instance"
+      + force_detach_policies = false
+      + id                    = (known after apply)
+      + managed_policy_arns   = (known after apply)
+      + max_session_duration  = 3600
+      + name                  = "PsoxyExec_psoxy-slack-discovery-api"
+      + name_prefix           = (known after apply)
+      + path                  = "/"
+      + tags_all              = (known after apply)
+      + unique_id             = (known after apply)
+
+      + inline_policy {
+          + name   = (known after apply)
+          + policy = (known after apply)
+        }
+    }
+
+  # module.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["slack-discovery-api"].module.psoxy_lambda.aws_iam_role_policy_attachment.attach_policy will be created
+  + resource "aws_iam_role_policy_attachment" "attach_policy" {
+      + id         = (known after apply)
+      + policy_arn = (known after apply)
+      + role       = "PsoxyExec_psoxy-slack-discovery-api"
+    }
+
+  # module.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["slack-discovery-api"].module.psoxy_lambda.aws_iam_role_policy_attachment.basic will be created
+  + resource "aws_iam_role_policy_attachment" "basic" {
+      + id         = (known after apply)
+      + policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+      + role       = "PsoxyExec_psoxy-slack-discovery-api"
+    }
+
+  # module.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["slack-discovery-api"].module.psoxy_lambda.aws_lambda_function.psoxy-instance will be created
+  + resource "aws_lambda_function" "psoxy-instance" {
+      + architectures                  = [
+          + "arm64",
+        ]
+      + arn                            = (known after apply)
+      + filename                       = "/Users/erik/code/psoxy/java/impl/aws/target/psoxy-aws-0.4.10-SNAPSHOT.jar"
+      + function_name                  = "psoxy-slack-discovery-api"
+      + handler                        = "co.worklytics.psoxy.Handler"
+      + id                             = (known after apply)
+      + invoke_arn                     = (known after apply)
+      + last_modified                  = (known after apply)
+      + memory_size                    = 512
+      + package_type                   = "Zip"
+      + publish                        = false
+      + qualified_arn                  = (known after apply)
+      + qualified_invoke_arn           = (known after apply)
+      + reserved_concurrent_executions = -1
+      + role                           = (known after apply)
+      + runtime                        = "java11"
+      + signing_job_arn                = (known after apply)
+      + signing_profile_version_arn    = (known after apply)
+      + source_code_hash               = "YquDr9FirQBF4lF8plbjFn6cykvusIuF3NqQ3QkXQBo="
+      + source_code_size               = (known after apply)
+      + tags_all                       = (known after apply)
+      + timeout                        = 55
+      + version                        = (known after apply)
+
+      + environment {
+          + variables = (known after apply)
+        }
+
+      + ephemeral_storage {
+          + size = (known after apply)
+        }
+
+      + tracing_config {
+          + mode = (known after apply)
+        }
+    }
+
+  # module.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["zoom"].module.psoxy_lambda.aws_cloudwatch_log_group.lambda-log will be created
+  + resource "aws_cloudwatch_log_group" "lambda-log" {
+      + arn               = (known after apply)
+      + id                = (known after apply)
+      + name              = "/aws/lambda/psoxy-zoom"
+      + name_prefix       = (known after apply)
+      + retention_in_days = 7
+      + skip_destroy      = false
+      + tags_all          = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["zoom"].module.psoxy_lambda.aws_iam_policy.ssm_param_policy will be created
+  + resource "aws_iam_policy" "ssm_param_policy" {
+      + arn         = (known after apply)
+      + description = "Allow SSM parameter access needed by psoxy-zoom"
+      + id          = (known after apply)
+      + name        = "psoxy-zoom_ssmParameters"
+      + path        = "/"
+      + policy      = (known after apply)
+      + policy_id   = (known after apply)
+      + tags_all    = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["zoom"].module.psoxy_lambda.aws_iam_role.iam_for_lambda will be created
+  + resource "aws_iam_role" "iam_for_lambda" {
+      + arn                   = (known after apply)
+      + assume_role_policy    = jsonencode(
+            {
+              + Statement = [
+                  + {
+                      + Action    = "sts:AssumeRole"
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + Service = "lambda.amazonaws.com"
+                        }
+                      + Sid       = ""
+                    },
+                ]
+              + Version   = "2012-10-17"
+            }
+        )
+      + create_date           = (known after apply)
+      + description           = "execution role for psoxy instance"
+      + force_detach_policies = false
+      + id                    = (known after apply)
+      + managed_policy_arns   = (known after apply)
+      + max_session_duration  = 3600
+      + name                  = "PsoxyExec_psoxy-zoom"
+      + name_prefix           = (known after apply)
+      + path                  = "/"
+      + tags_all              = (known after apply)
+      + unique_id             = (known after apply)
+
+      + inline_policy {
+          + name   = (known after apply)
+          + policy = (known after apply)
+        }
+    }
+
+  # module.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["zoom"].module.psoxy_lambda.aws_iam_role_policy_attachment.attach_policy will be created
+  + resource "aws_iam_role_policy_attachment" "attach_policy" {
+      + id         = (known after apply)
+      + policy_arn = (known after apply)
+      + role       = "PsoxyExec_psoxy-zoom"
+    }
+
+  # module.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["zoom"].module.psoxy_lambda.aws_iam_role_policy_attachment.basic will be created
+  + resource "aws_iam_role_policy_attachment" "basic" {
+      + id         = (known after apply)
+      + policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+      + role       = "PsoxyExec_psoxy-zoom"
+    }
+
+  # module.psoxy-aws-google-workspace.module.aws-psoxy-long-auth-connectors["zoom"].module.psoxy_lambda.aws_lambda_function.psoxy-instance will be created
+  + resource "aws_lambda_function" "psoxy-instance" {
+      + architectures                  = [
+          + "arm64",
+        ]
+      + arn                            = (known after apply)
+      + filename                       = "/Users/erik/code/psoxy/java/impl/aws/target/psoxy-aws-0.4.10-SNAPSHOT.jar"
+      + function_name                  = "psoxy-zoom"
+      + handler                        = "co.worklytics.psoxy.Handler"
+      + id                             = (known after apply)
+      + invoke_arn                     = (known after apply)
+      + last_modified                  = (known after apply)
+      + memory_size                    = 512
+      + package_type                   = "Zip"
+      + publish                        = false
+      + qualified_arn                  = (known after apply)
+      + qualified_invoke_arn           = (known after apply)
+      + reserved_concurrent_executions = -1
+      + role                           = (known after apply)
+      + runtime                        = "java11"
+      + signing_job_arn                = (known after apply)
+      + signing_profile_version_arn    = (known after apply)
+      + source_code_hash               = "YquDr9FirQBF4lF8plbjFn6cykvusIuF3NqQ3QkXQBo="
+      + source_code_size               = (known after apply)
+      + tags_all                       = (known after apply)
+      + timeout                        = 55
+      + version                        = (known after apply)
+
+      + environment {
+          + variables = (known after apply)
+        }
+
+      + ephemeral_storage {
+          + size = (known after apply)
+        }
+
+      + tracing_config {
+          + mode = (known after apply)
+        }
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].module.psoxy_lambda.aws_cloudwatch_log_group.lambda-log will be created
+  + resource "aws_cloudwatch_log_group" "lambda-log" {
+      + arn               = (known after apply)
+      + id                = (known after apply)
+      + name              = "/aws/lambda/psoxy-hris"
+      + name_prefix       = (known after apply)
+      + retention_in_days = 7
+      + skip_destroy      = false
+      + tags_all          = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].module.psoxy_lambda.aws_iam_policy.ssm_param_policy will be created
+  + resource "aws_iam_policy" "ssm_param_policy" {
+      + arn         = (known after apply)
+      + description = "Allow SSM parameter access needed by psoxy-hris"
+      + id          = (known after apply)
+      + name        = "psoxy-hris_ssmParameters"
+      + path        = "/"
+      + policy      = (known after apply)
+      + policy_id   = (known after apply)
+      + tags_all    = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].module.psoxy_lambda.aws_iam_role.iam_for_lambda will be created
+  + resource "aws_iam_role" "iam_for_lambda" {
+      + arn                   = (known after apply)
+      + assume_role_policy    = jsonencode(
+            {
+              + Statement = [
+                  + {
+                      + Action    = "sts:AssumeRole"
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + Service = "lambda.amazonaws.com"
+                        }
+                      + Sid       = ""
+                    },
+                ]
+              + Version   = "2012-10-17"
+            }
+        )
+      + create_date           = (known after apply)
+      + description           = "execution role for psoxy instance"
+      + force_detach_policies = false
+      + id                    = (known after apply)
+      + managed_policy_arns   = (known after apply)
+      + max_session_duration  = 3600
+      + name                  = "PsoxyExec_psoxy-hris"
+      + name_prefix           = (known after apply)
+      + path                  = "/"
+      + tags_all              = (known after apply)
+      + unique_id             = (known after apply)
+
+      + inline_policy {
+          + name   = (known after apply)
+          + policy = (known after apply)
+        }
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].module.psoxy_lambda.aws_iam_role_policy_attachment.attach_policy will be created
+  + resource "aws_iam_role_policy_attachment" "attach_policy" {
+      + id         = (known after apply)
+      + policy_arn = (known after apply)
+      + role       = "PsoxyExec_psoxy-hris"
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].module.psoxy_lambda.aws_iam_role_policy_attachment.basic will be created
+  + resource "aws_iam_role_policy_attachment" "basic" {
+      + id         = (known after apply)
+      + policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+      + role       = "PsoxyExec_psoxy-hris"
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-bulk["hris"].module.psoxy_lambda.aws_lambda_function.psoxy-instance will be created
+  + resource "aws_lambda_function" "psoxy-instance" {
+      + architectures                  = [
+          + "arm64",
+        ]
+      + arn                            = (known after apply)
+      + filename                       = "/Users/erik/code/psoxy/java/impl/aws/target/psoxy-aws-0.4.10-SNAPSHOT.jar"
+      + function_name                  = "psoxy-hris"
+      + handler                        = "co.worklytics.psoxy.S3Handler"
+      + id                             = (known after apply)
+      + invoke_arn                     = (known after apply)
+      + last_modified                  = (known after apply)
+      + memory_size                    = 1024
+      + package_type                   = "Zip"
+      + publish                        = false
+      + qualified_arn                  = (known after apply)
+      + qualified_invoke_arn           = (known after apply)
+      + reserved_concurrent_executions = -1
+      + role                           = (known after apply)
+      + runtime                        = "java11"
+      + signing_job_arn                = (known after apply)
+      + signing_profile_version_arn    = (known after apply)
+      + source_code_hash               = "YquDr9FirQBF4lF8plbjFn6cykvusIuF3NqQ3QkXQBo="
+      + source_code_size               = (known after apply)
+      + tags_all                       = (known after apply)
+      + timeout                        = 600
+      + version                        = (known after apply)
+
+      + environment {
+          + variables = (known after apply)
+        }
+
+      + ephemeral_storage {
+          + size = (known after apply)
+        }
+
+      + tracing_config {
+          + mode = (known after apply)
+        }
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gcal"].module.psoxy_lambda.aws_cloudwatch_log_group.lambda-log will be created
+  + resource "aws_cloudwatch_log_group" "lambda-log" {
+      + arn               = (known after apply)
+      + id                = (known after apply)
+      + name              = "/aws/lambda/psoxy-gcal"
+      + name_prefix       = (known after apply)
+      + retention_in_days = 7
+      + skip_destroy      = false
+      + tags_all          = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gcal"].module.psoxy_lambda.aws_iam_policy.ssm_param_policy will be created
+  + resource "aws_iam_policy" "ssm_param_policy" {
+      + arn         = (known after apply)
+      + description = "Allow SSM parameter access needed by psoxy-gcal"
+      + id          = (known after apply)
+      + name        = "psoxy-gcal_ssmParameters"
+      + path        = "/"
+      + policy      = (known after apply)
+      + policy_id   = (known after apply)
+      + tags_all    = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gcal"].module.psoxy_lambda.aws_iam_role.iam_for_lambda will be created
+  + resource "aws_iam_role" "iam_for_lambda" {
+      + arn                   = (known after apply)
+      + assume_role_policy    = jsonencode(
+            {
+              + Statement = [
+                  + {
+                      + Action    = "sts:AssumeRole"
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + Service = "lambda.amazonaws.com"
+                        }
+                      + Sid       = ""
+                    },
+                ]
+              + Version   = "2012-10-17"
+            }
+        )
+      + create_date           = (known after apply)
+      + description           = "execution role for psoxy instance"
+      + force_detach_policies = false
+      + id                    = (known after apply)
+      + managed_policy_arns   = (known after apply)
+      + max_session_duration  = 3600
+      + name                  = "PsoxyExec_psoxy-gcal"
+      + name_prefix           = (known after apply)
+      + path                  = "/"
+      + tags_all              = (known after apply)
+      + unique_id             = (known after apply)
+
+      + inline_policy {
+          + name   = (known after apply)
+          + policy = (known after apply)
+        }
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gcal"].module.psoxy_lambda.aws_iam_role_policy_attachment.attach_policy will be created
+  + resource "aws_iam_role_policy_attachment" "attach_policy" {
+      + id         = (known after apply)
+      + policy_arn = (known after apply)
+      + role       = "PsoxyExec_psoxy-gcal"
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gcal"].module.psoxy_lambda.aws_iam_role_policy_attachment.basic will be created
+  + resource "aws_iam_role_policy_attachment" "basic" {
+      + id         = (known after apply)
+      + policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+      + role       = "PsoxyExec_psoxy-gcal"
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gcal"].module.psoxy_lambda.aws_lambda_function.psoxy-instance will be created
+  + resource "aws_lambda_function" "psoxy-instance" {
+      + architectures                  = [
+          + "arm64",
+        ]
+      + arn                            = (known after apply)
+      + filename                       = "/Users/erik/code/psoxy/java/impl/aws/target/psoxy-aws-0.4.10-SNAPSHOT.jar"
+      + function_name                  = "psoxy-gcal"
+      + handler                        = "co.worklytics.psoxy.Handler"
+      + id                             = (known after apply)
+      + invoke_arn                     = (known after apply)
+      + last_modified                  = (known after apply)
+      + memory_size                    = 512
+      + package_type                   = "Zip"
+      + publish                        = false
+      + qualified_arn                  = (known after apply)
+      + qualified_invoke_arn           = (known after apply)
+      + reserved_concurrent_executions = -1
+      + role                           = (known after apply)
+      + runtime                        = "java11"
+      + signing_job_arn                = (known after apply)
+      + signing_profile_version_arn    = (known after apply)
+      + source_code_hash               = "YquDr9FirQBF4lF8plbjFn6cykvusIuF3NqQ3QkXQBo="
+      + source_code_size               = (known after apply)
+      + tags_all                       = (known after apply)
+      + timeout                        = 55
+      + version                        = (known after apply)
+
+      + environment {
+          + variables = (known after apply)
+        }
+
+      + ephemeral_storage {
+          + size = (known after apply)
+        }
+
+      + tracing_config {
+          + mode = (known after apply)
+        }
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdirectory"].module.psoxy_lambda.aws_cloudwatch_log_group.lambda-log will be created
+  + resource "aws_cloudwatch_log_group" "lambda-log" {
+      + arn               = (known after apply)
+      + id                = (known after apply)
+      + name              = "/aws/lambda/psoxy-gdirectory"
+      + name_prefix       = (known after apply)
+      + retention_in_days = 7
+      + skip_destroy      = false
+      + tags_all          = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdirectory"].module.psoxy_lambda.aws_iam_policy.ssm_param_policy will be created
+  + resource "aws_iam_policy" "ssm_param_policy" {
+      + arn         = (known after apply)
+      + description = "Allow SSM parameter access needed by psoxy-gdirectory"
+      + id          = (known after apply)
+      + name        = "psoxy-gdirectory_ssmParameters"
+      + path        = "/"
+      + policy      = (known after apply)
+      + policy_id   = (known after apply)
+      + tags_all    = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdirectory"].module.psoxy_lambda.aws_iam_role.iam_for_lambda will be created
+  + resource "aws_iam_role" "iam_for_lambda" {
+      + arn                   = (known after apply)
+      + assume_role_policy    = jsonencode(
+            {
+              + Statement = [
+                  + {
+                      + Action    = "sts:AssumeRole"
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + Service = "lambda.amazonaws.com"
+                        }
+                      + Sid       = ""
+                    },
+                ]
+              + Version   = "2012-10-17"
+            }
+        )
+      + create_date           = (known after apply)
+      + description           = "execution role for psoxy instance"
+      + force_detach_policies = false
+      + id                    = (known after apply)
+      + managed_policy_arns   = (known after apply)
+      + max_session_duration  = 3600
+      + name                  = "PsoxyExec_psoxy-gdirectory"
+      + name_prefix           = (known after apply)
+      + path                  = "/"
+      + tags_all              = (known after apply)
+      + unique_id             = (known after apply)
+
+      + inline_policy {
+          + name   = (known after apply)
+          + policy = (known after apply)
+        }
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdirectory"].module.psoxy_lambda.aws_iam_role_policy_attachment.attach_policy will be created
+  + resource "aws_iam_role_policy_attachment" "attach_policy" {
+      + id         = (known after apply)
+      + policy_arn = (known after apply)
+      + role       = "PsoxyExec_psoxy-gdirectory"
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdirectory"].module.psoxy_lambda.aws_iam_role_policy_attachment.basic will be created
+  + resource "aws_iam_role_policy_attachment" "basic" {
+      + id         = (known after apply)
+      + policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+      + role       = "PsoxyExec_psoxy-gdirectory"
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdirectory"].module.psoxy_lambda.aws_lambda_function.psoxy-instance will be created
+  + resource "aws_lambda_function" "psoxy-instance" {
+      + architectures                  = [
+          + "arm64",
+        ]
+      + arn                            = (known after apply)
+      + filename                       = "/Users/erik/code/psoxy/java/impl/aws/target/psoxy-aws-0.4.10-SNAPSHOT.jar"
+      + function_name                  = "psoxy-gdirectory"
+      + handler                        = "co.worklytics.psoxy.Handler"
+      + id                             = (known after apply)
+      + invoke_arn                     = (known after apply)
+      + last_modified                  = (known after apply)
+      + memory_size                    = 512
+      + package_type                   = "Zip"
+      + publish                        = false
+      + qualified_arn                  = (known after apply)
+      + qualified_invoke_arn           = (known after apply)
+      + reserved_concurrent_executions = -1
+      + role                           = (known after apply)
+      + runtime                        = "java11"
+      + signing_job_arn                = (known after apply)
+      + signing_profile_version_arn    = (known after apply)
+      + source_code_hash               = "YquDr9FirQBF4lF8plbjFn6cykvusIuF3NqQ3QkXQBo="
+      + source_code_size               = (known after apply)
+      + tags_all                       = (known after apply)
+      + timeout                        = 55
+      + version                        = (known after apply)
+
+      + environment {
+          + variables = (known after apply)
+        }
+
+      + ephemeral_storage {
+          + size = (known after apply)
+        }
+
+      + tracing_config {
+          + mode = (known after apply)
+        }
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdrive"].module.psoxy_lambda.aws_cloudwatch_log_group.lambda-log will be created
+  + resource "aws_cloudwatch_log_group" "lambda-log" {
+      + arn               = (known after apply)
+      + id                = (known after apply)
+      + name              = "/aws/lambda/psoxy-gdrive"
+      + name_prefix       = (known after apply)
+      + retention_in_days = 7
+      + skip_destroy      = false
+      + tags_all          = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdrive"].module.psoxy_lambda.aws_iam_policy.ssm_param_policy will be created
+  + resource "aws_iam_policy" "ssm_param_policy" {
+      + arn         = (known after apply)
+      + description = "Allow SSM parameter access needed by psoxy-gdrive"
+      + id          = (known after apply)
+      + name        = "psoxy-gdrive_ssmParameters"
+      + path        = "/"
+      + policy      = (known after apply)
+      + policy_id   = (known after apply)
+      + tags_all    = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdrive"].module.psoxy_lambda.aws_iam_role.iam_for_lambda will be created
+  + resource "aws_iam_role" "iam_for_lambda" {
+      + arn                   = (known after apply)
+      + assume_role_policy    = jsonencode(
+            {
+              + Statement = [
+                  + {
+                      + Action    = "sts:AssumeRole"
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + Service = "lambda.amazonaws.com"
+                        }
+                      + Sid       = ""
+                    },
+                ]
+              + Version   = "2012-10-17"
+            }
+        )
+      + create_date           = (known after apply)
+      + description           = "execution role for psoxy instance"
+      + force_detach_policies = false
+      + id                    = (known after apply)
+      + managed_policy_arns   = (known after apply)
+      + max_session_duration  = 3600
+      + name                  = "PsoxyExec_psoxy-gdrive"
+      + name_prefix           = (known after apply)
+      + path                  = "/"
+      + tags_all              = (known after apply)
+      + unique_id             = (known after apply)
+
+      + inline_policy {
+          + name   = (known after apply)
+          + policy = (known after apply)
+        }
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdrive"].module.psoxy_lambda.aws_iam_role_policy_attachment.attach_policy will be created
+  + resource "aws_iam_role_policy_attachment" "attach_policy" {
+      + id         = (known after apply)
+      + policy_arn = (known after apply)
+      + role       = "PsoxyExec_psoxy-gdrive"
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdrive"].module.psoxy_lambda.aws_iam_role_policy_attachment.basic will be created
+  + resource "aws_iam_role_policy_attachment" "basic" {
+      + id         = (known after apply)
+      + policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+      + role       = "PsoxyExec_psoxy-gdrive"
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gdrive"].module.psoxy_lambda.aws_lambda_function.psoxy-instance will be created
+  + resource "aws_lambda_function" "psoxy-instance" {
+      + architectures                  = [
+          + "arm64",
+        ]
+      + arn                            = (known after apply)
+      + filename                       = "/Users/erik/code/psoxy/java/impl/aws/target/psoxy-aws-0.4.10-SNAPSHOT.jar"
+      + function_name                  = "psoxy-gdrive"
+      + handler                        = "co.worklytics.psoxy.Handler"
+      + id                             = (known after apply)
+      + invoke_arn                     = (known after apply)
+      + last_modified                  = (known after apply)
+      + memory_size                    = 512
+      + package_type                   = "Zip"
+      + publish                        = false
+      + qualified_arn                  = (known after apply)
+      + qualified_invoke_arn           = (known after apply)
+      + reserved_concurrent_executions = -1
+      + role                           = (known after apply)
+      + runtime                        = "java11"
+      + signing_job_arn                = (known after apply)
+      + signing_profile_version_arn    = (known after apply)
+      + source_code_hash               = "YquDr9FirQBF4lF8plbjFn6cykvusIuF3NqQ3QkXQBo="
+      + source_code_size               = (known after apply)
+      + tags_all                       = (known after apply)
+      + timeout                        = 55
+      + version                        = (known after apply)
+
+      + environment {
+          + variables = (known after apply)
+        }
+
+      + ephemeral_storage {
+          + size = (known after apply)
+        }
+
+      + tracing_config {
+          + mode = (known after apply)
+        }
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gmail"].module.psoxy_lambda.aws_cloudwatch_log_group.lambda-log will be created
+  + resource "aws_cloudwatch_log_group" "lambda-log" {
+      + arn               = (known after apply)
+      + id                = (known after apply)
+      + name              = "/aws/lambda/psoxy-gmail"
+      + name_prefix       = (known after apply)
+      + retention_in_days = 7
+      + skip_destroy      = false
+      + tags_all          = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gmail"].module.psoxy_lambda.aws_iam_policy.ssm_param_policy will be created
+  + resource "aws_iam_policy" "ssm_param_policy" {
+      + arn         = (known after apply)
+      + description = "Allow SSM parameter access needed by psoxy-gmail"
+      + id          = (known after apply)
+      + name        = "psoxy-gmail_ssmParameters"
+      + path        = "/"
+      + policy      = (known after apply)
+      + policy_id   = (known after apply)
+      + tags_all    = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gmail"].module.psoxy_lambda.aws_iam_role.iam_for_lambda will be created
+  + resource "aws_iam_role" "iam_for_lambda" {
+      + arn                   = (known after apply)
+      + assume_role_policy    = jsonencode(
+            {
+              + Statement = [
+                  + {
+                      + Action    = "sts:AssumeRole"
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + Service = "lambda.amazonaws.com"
+                        }
+                      + Sid       = ""
+                    },
+                ]
+              + Version   = "2012-10-17"
+            }
+        )
+      + create_date           = (known after apply)
+      + description           = "execution role for psoxy instance"
+      + force_detach_policies = false
+      + id                    = (known after apply)
+      + managed_policy_arns   = (known after apply)
+      + max_session_duration  = 3600
+      + name                  = "PsoxyExec_psoxy-gmail"
+      + name_prefix           = (known after apply)
+      + path                  = "/"
+      + tags_all              = (known after apply)
+      + unique_id             = (known after apply)
+
+      + inline_policy {
+          + name   = (known after apply)
+          + policy = (known after apply)
+        }
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gmail"].module.psoxy_lambda.aws_iam_role_policy_attachment.attach_policy will be created
+  + resource "aws_iam_role_policy_attachment" "attach_policy" {
+      + id         = (known after apply)
+      + policy_arn = (known after apply)
+      + role       = "PsoxyExec_psoxy-gmail"
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gmail"].module.psoxy_lambda.aws_iam_role_policy_attachment.basic will be created
+  + resource "aws_iam_role_policy_attachment" "basic" {
+      + id         = (known after apply)
+      + policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+      + role       = "PsoxyExec_psoxy-gmail"
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["gmail"].module.psoxy_lambda.aws_lambda_function.psoxy-instance will be created
+  + resource "aws_lambda_function" "psoxy-instance" {
+      + architectures                  = [
+          + "arm64",
+        ]
+      + arn                            = (known after apply)
+      + filename                       = "/Users/erik/code/psoxy/java/impl/aws/target/psoxy-aws-0.4.10-SNAPSHOT.jar"
+      + function_name                  = "psoxy-gmail"
+      + handler                        = "co.worklytics.psoxy.Handler"
+      + id                             = (known after apply)
+      + invoke_arn                     = (known after apply)
+      + last_modified                  = (known after apply)
+      + memory_size                    = 512
+      + package_type                   = "Zip"
+      + publish                        = false
+      + qualified_arn                  = (known after apply)
+      + qualified_invoke_arn           = (known after apply)
+      + reserved_concurrent_executions = -1
+      + role                           = (known after apply)
+      + runtime                        = "java11"
+      + signing_job_arn                = (known after apply)
+      + signing_profile_version_arn    = (known after apply)
+      + source_code_hash               = "YquDr9FirQBF4lF8plbjFn6cykvusIuF3NqQ3QkXQBo="
+      + source_code_size               = (known after apply)
+      + tags_all                       = (known after apply)
+      + timeout                        = 55
+      + version                        = (known after apply)
+
+      + environment {
+          + variables = (known after apply)
+        }
+
+      + ephemeral_storage {
+          + size = (known after apply)
+        }
+
+      + tracing_config {
+          + mode = (known after apply)
+        }
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-chat"].module.psoxy_lambda.aws_cloudwatch_log_group.lambda-log will be created
+  + resource "aws_cloudwatch_log_group" "lambda-log" {
+      + arn               = (known after apply)
+      + id                = (known after apply)
+      + name              = "/aws/lambda/psoxy-google-chat"
+      + name_prefix       = (known after apply)
+      + retention_in_days = 7
+      + skip_destroy      = false
+      + tags_all          = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-chat"].module.psoxy_lambda.aws_iam_policy.ssm_param_policy will be created
+  + resource "aws_iam_policy" "ssm_param_policy" {
+      + arn         = (known after apply)
+      + description = "Allow SSM parameter access needed by psoxy-google-chat"
+      + id          = (known after apply)
+      + name        = "psoxy-google-chat_ssmParameters"
+      + path        = "/"
+      + policy      = (known after apply)
+      + policy_id   = (known after apply)
+      + tags_all    = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-chat"].module.psoxy_lambda.aws_iam_role.iam_for_lambda will be created
+  + resource "aws_iam_role" "iam_for_lambda" {
+      + arn                   = (known after apply)
+      + assume_role_policy    = jsonencode(
+            {
+              + Statement = [
+                  + {
+                      + Action    = "sts:AssumeRole"
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + Service = "lambda.amazonaws.com"
+                        }
+                      + Sid       = ""
+                    },
+                ]
+              + Version   = "2012-10-17"
+            }
+        )
+      + create_date           = (known after apply)
+      + description           = "execution role for psoxy instance"
+      + force_detach_policies = false
+      + id                    = (known after apply)
+      + managed_policy_arns   = (known after apply)
+      + max_session_duration  = 3600
+      + name                  = "PsoxyExec_psoxy-google-chat"
+      + name_prefix           = (known after apply)
+      + path                  = "/"
+      + tags_all              = (known after apply)
+      + unique_id             = (known after apply)
+
+      + inline_policy {
+          + name   = (known after apply)
+          + policy = (known after apply)
+        }
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-chat"].module.psoxy_lambda.aws_iam_role_policy_attachment.attach_policy will be created
+  + resource "aws_iam_role_policy_attachment" "attach_policy" {
+      + id         = (known after apply)
+      + policy_arn = (known after apply)
+      + role       = "PsoxyExec_psoxy-google-chat"
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-chat"].module.psoxy_lambda.aws_iam_role_policy_attachment.basic will be created
+  + resource "aws_iam_role_policy_attachment" "basic" {
+      + id         = (known after apply)
+      + policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+      + role       = "PsoxyExec_psoxy-google-chat"
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-chat"].module.psoxy_lambda.aws_lambda_function.psoxy-instance will be created
+  + resource "aws_lambda_function" "psoxy-instance" {
+      + architectures                  = [
+          + "arm64",
+        ]
+      + arn                            = (known after apply)
+      + filename                       = "/Users/erik/code/psoxy/java/impl/aws/target/psoxy-aws-0.4.10-SNAPSHOT.jar"
+      + function_name                  = "psoxy-google-chat"
+      + handler                        = "co.worklytics.psoxy.Handler"
+      + id                             = (known after apply)
+      + invoke_arn                     = (known after apply)
+      + last_modified                  = (known after apply)
+      + memory_size                    = 512
+      + package_type                   = "Zip"
+      + publish                        = false
+      + qualified_arn                  = (known after apply)
+      + qualified_invoke_arn           = (known after apply)
+      + reserved_concurrent_executions = -1
+      + role                           = (known after apply)
+      + runtime                        = "java11"
+      + signing_job_arn                = (known after apply)
+      + signing_profile_version_arn    = (known after apply)
+      + source_code_hash               = "YquDr9FirQBF4lF8plbjFn6cykvusIuF3NqQ3QkXQBo="
+      + source_code_size               = (known after apply)
+      + tags_all                       = (known after apply)
+      + timeout                        = 55
+      + version                        = (known after apply)
+
+      + environment {
+          + variables = (known after apply)
+        }
+
+      + ephemeral_storage {
+          + size = (known after apply)
+        }
+
+      + tracing_config {
+          + mode = (known after apply)
+        }
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-meet"].module.psoxy_lambda.aws_cloudwatch_log_group.lambda-log will be created
+  + resource "aws_cloudwatch_log_group" "lambda-log" {
+      + arn               = (known after apply)
+      + id                = (known after apply)
+      + name              = "/aws/lambda/psoxy-google-meet"
+      + name_prefix       = (known after apply)
+      + retention_in_days = 7
+      + skip_destroy      = false
+      + tags_all          = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-meet"].module.psoxy_lambda.aws_iam_policy.ssm_param_policy will be created
+  + resource "aws_iam_policy" "ssm_param_policy" {
+      + arn         = (known after apply)
+      + description = "Allow SSM parameter access needed by psoxy-google-meet"
+      + id          = (known after apply)
+      + name        = "psoxy-google-meet_ssmParameters"
+      + path        = "/"
+      + policy      = (known after apply)
+      + policy_id   = (known after apply)
+      + tags_all    = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-meet"].module.psoxy_lambda.aws_iam_role.iam_for_lambda will be created
+  + resource "aws_iam_role" "iam_for_lambda" {
+      + arn                   = (known after apply)
+      + assume_role_policy    = jsonencode(
+            {
+              + Statement = [
+                  + {
+                      + Action    = "sts:AssumeRole"
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + Service = "lambda.amazonaws.com"
+                        }
+                      + Sid       = ""
+                    },
+                ]
+              + Version   = "2012-10-17"
+            }
+        )
+      + create_date           = (known after apply)
+      + description           = "execution role for psoxy instance"
+      + force_detach_policies = false
+      + id                    = (known after apply)
+      + managed_policy_arns   = (known after apply)
+      + max_session_duration  = 3600
+      + name                  = "PsoxyExec_psoxy-google-meet"
+      + name_prefix           = (known after apply)
+      + path                  = "/"
+      + tags_all              = (known after apply)
+      + unique_id             = (known after apply)
+
+      + inline_policy {
+          + name   = (known after apply)
+          + policy = (known after apply)
+        }
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-meet"].module.psoxy_lambda.aws_iam_role_policy_attachment.attach_policy will be created
+  + resource "aws_iam_role_policy_attachment" "attach_policy" {
+      + id         = (known after apply)
+      + policy_arn = (known after apply)
+      + role       = "PsoxyExec_psoxy-google-meet"
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-meet"].module.psoxy_lambda.aws_iam_role_policy_attachment.basic will be created
+  + resource "aws_iam_role_policy_attachment" "basic" {
+      + id         = (known after apply)
+      + policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+      + role       = "PsoxyExec_psoxy-google-meet"
+    }
+
+  # module.psoxy-aws-google-workspace.module.psoxy-google-workspace-connector["google-meet"].module.psoxy_lambda.aws_lambda_function.psoxy-instance will be created
+  + resource "aws_lambda_function" "psoxy-instance" {
+      + architectures                  = [
+          + "arm64",
+        ]
+      + arn                            = (known after apply)
+      + filename                       = "/Users/erik/code/psoxy/java/impl/aws/target/psoxy-aws-0.4.10-SNAPSHOT.jar"
+      + function_name                  = "psoxy-google-meet"
+      + handler                        = "co.worklytics.psoxy.Handler"
+      + id                             = (known after apply)
+      + invoke_arn                     = (known after apply)
+      + last_modified                  = (known after apply)
+      + memory_size                    = 512
+      + package_type                   = "Zip"
+      + publish                        = false
+      + qualified_arn                  = (known after apply)
+      + qualified_invoke_arn           = (known after apply)
+      + reserved_concurrent_executions = -1
+      + role                           = (known after apply)
+      + runtime                        = "java11"
+      + signing_job_arn                = (known after apply)
+      + signing_profile_version_arn    = (known after apply)
+      + source_code_hash               = "YquDr9FirQBF4lF8plbjFn6cykvusIuF3NqQ3QkXQBo="
+      + source_code_size               = (known after apply)
+      + tags_all                       = (known after apply)
+      + timeout                        = 55
+      + version                        = (known after apply)
+
+      + environment {
+          + variables = (known after apply)
+        }
+
+      + ephemeral_storage {
+          + size = (known after apply)
+        }
+
+      + tracing_config {
+          + mode = (known after apply)
+        }
+    }
+
+  # module.psoxy-aws-google-workspace.module.worklytics-psoxy-connection["slack-discovery-api"].module.generic.local_file.todo-worklytics-connection will be created
+  + resource "local_file" "todo-worklytics-connection" {
+      + content              = (known after apply)
+      + directory_permission = "0777"
+      + file_permission      = "0777"
+      + filename             = "TODO 3 - connect slack-discovery-api in Worklytics.md"
+      + id                   = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.worklytics-psoxy-connection["zoom"].module.generic.local_file.todo-worklytics-connection will be created
+  + resource "local_file" "todo-worklytics-connection" {
+      + content              = (known after apply)
+      + directory_permission = "0777"
+      + file_permission      = "0777"
+      + filename             = "TODO 3 - connect zoom in Worklytics.md"
+      + id                   = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.worklytics-psoxy-connection-google-workspace["gcal"].module.generic.local_file.todo-worklytics-connection will be created
+  + resource "local_file" "todo-worklytics-connection" {
+      + content              = (known after apply)
+      + directory_permission = "0777"
+      + file_permission      = "0777"
+      + filename             = "TODO 3 - connect gcal in Worklytics.md"
+      + id                   = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.worklytics-psoxy-connection-google-workspace["gdirectory"].module.generic.local_file.todo-worklytics-connection will be created
+  + resource "local_file" "todo-worklytics-connection" {
+      + content              = (known after apply)
+      + directory_permission = "0777"
+      + file_permission      = "0777"
+      + filename             = "TODO 3 - connect gdirectory in Worklytics.md"
+      + id                   = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.worklytics-psoxy-connection-google-workspace["gdrive"].module.generic.local_file.todo-worklytics-connection will be created
+  + resource "local_file" "todo-worklytics-connection" {
+      + content              = (known after apply)
+      + directory_permission = "0777"
+      + file_permission      = "0777"
+      + filename             = "TODO 3 - connect gdrive in Worklytics.md"
+      + id                   = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.worklytics-psoxy-connection-google-workspace["gmail"].module.generic.local_file.todo-worklytics-connection will be created
+  + resource "local_file" "todo-worklytics-connection" {
+      + content              = (known after apply)
+      + directory_permission = "0777"
+      + file_permission      = "0777"
+      + filename             = "TODO 3 - connect gmail in Worklytics.md"
+      + id                   = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.worklytics-psoxy-connection-google-workspace["google-chat"].module.generic.local_file.todo-worklytics-connection will be created
+  + resource "local_file" "todo-worklytics-connection" {
+      + content              = (known after apply)
+      + directory_permission = "0777"
+      + file_permission      = "0777"
+      + filename             = "TODO 3 - connect google-chat in Worklytics.md"
+      + id                   = (known after apply)
+    }
+
+  # module.psoxy-aws-google-workspace.module.worklytics-psoxy-connection-google-workspace["google-meet"].module.generic.local_file.todo-worklytics-connection will be created
+  + resource "local_file" "todo-worklytics-connection" {
+      + content              = (known after apply)
+      + directory_permission = "0777"
+      + file_permission      = "0777"
+      + filename             = "TODO 3 - connect google-meet in Worklytics.md"
+      + id                   = (known after apply)
+    }
+
+Plan: 155 to add, 0 to change, 0 to destroy.
+
+Changes to Outputs:
+  + lookup_tables = {}
+
+─────────────────────────────────────────────────────────────────────────────
+
+Note: You didn't use the -out option to save this plan, so Terraform can't
+guarantee to take exactly these actions if you run "terraform apply" now.

@@ -1,8 +1,9 @@
 package co.worklytics.psoxy.rules.dropbox;
 
+import com.avaulta.gateway.rules.Endpoint;
 import co.worklytics.psoxy.rules.RuleSet;
 import co.worklytics.psoxy.rules.Rules2;
-import co.worklytics.psoxy.rules.Transform;
+import com.avaulta.gateway.rules.transforms.Transform;
 import com.google.common.collect.ImmutableMap;
 
 import java.util.Map;
@@ -46,7 +47,7 @@ public class PrebuiltSanitizerRules {
 
     static private Rules2 MemberProfile(String pathRegex) {
         return Rules2.builder()
-                .endpoint(Rules2.Endpoint.builder()
+                .endpoint(Endpoint.builder()
                         .pathRegex(pathRegex)
                         .transform(Transform.Pseudonymize.builder()
                                 .jsonPath("$.members[*].profile.email")
@@ -70,7 +71,7 @@ public class PrebuiltSanitizerRules {
 
     static private Rules2 Metadata(String pathRegex) {
         return Rules2.builder()
-                .endpoint(Rules2.Endpoint.builder()
+                .endpoint(Endpoint.builder()
                         .pathRegex(pathRegex)
                         .transform(Transform.Pseudonymize.builder()
                                 .jsonPath("$.entries[*].details.shared_content_owner.email")
@@ -93,7 +94,7 @@ public class PrebuiltSanitizerRules {
 
     static private Rules2 Events(String pathRegex) {
         return Rules2.builder()
-                .endpoint(Rules2.Endpoint.builder()
+                .endpoint(Endpoint.builder()
                         .pathRegex(pathRegex)
                         .transform(Transform.Pseudonymize.builder()
                                 .jsonPath("$.events[*].details.shared_content_owner.email")

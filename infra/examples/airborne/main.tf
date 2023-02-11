@@ -5,17 +5,12 @@ terraform {
     # for the infra that will host Psoxy instances
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 4.15"
+      version = "~> 4.12"
     }
 
     # for the API connections to Google Workspace
     google = {
       version = ">= 3.74, <= 5.0"
-    }
-
-    vault = {
-      source  = "hashicorp/vault"
-      version = "~> 3.11.0"
     }
   }
 
@@ -54,13 +49,18 @@ provider "aws" {
 
 # Google user or service account which Terraform is authenticated as must be authorized to
 # provision resources (Service Accounts + Keys; and activate APIs) in this project
-data "google_project" "psoxy-google-connectors" {
+#data "google_project" "psoxy-google-connectors" {
+#  project_id = var.gcp_project_id
+#}
+
+resource "google_project" "psoxy-google-connectors" {
   project_id = var.gcp_project_id
+  name       = var.gcp_project_id
 }
 
 module "psoxy-aws-google-workspace" {
   source = "../../modular-examples/aws-google-workspace"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-google-workspace?ref=v0.4.11"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-google-workspace?ref=v0.4.10"
 
   aws_account_id                 = var.aws_account_id
   aws_assume_role_arn            = var.aws_assume_role_arn # role that can test the instances (lambdas)
@@ -76,96 +76,14 @@ module "psoxy-aws-google-workspace" {
   non_production_connectors      = var.non_production_connectors
   custom_bulk_connectors         = var.custom_bulk_connectors
   lookup_table_builders          = var.lookup_table_builders
-  gcp_project_id                 = data.google_project.psoxy-google-connectors.project_id
+  gcp_project_id                 = google_project.psoxy-google-connectors.project_id
   google_workspace_example_user  = var.google_workspace_example_user
   google_workspace_example_admin = var.google_workspace_example_admin
   general_environment_variables  = var.general_environment_variables
-  # Uncomment the following line if you want to apply KMS encryption on your SSM parameters
-  #  aws_ssm_key_id                 = aws_kms_key.key.key_id
 }
-
-## TODO: requires targeted apply to create key first, bc value of key_id determines map content
-## in example
-#resource "aws_kms_key" "key" {
-#  description             = "KMS key for Psoxy"
-#  enable_key_rotation     = true
-#  is_enabled              = true
-#}
 
 # if you generated these, you may want them to import back into your data warehouse
 output "lookup_tables" {
   value = module.psoxy-aws-google-workspace.lookup_tables
 }
 
-
-
-/** Vault dev config for local testing **/
-
-# used for peering to Vault Cloud HVN
-resource "aws_vpc" "psoxy_vpc" {
-  cidr_block = var.vpc_ip_block
-}
-
-provider "vault" {
-  address = var.vault_addr
-
-  # NOTE: set a token in your env vars, eg
-  # export VAULT_TOKEN=...
-}
-
-#module "aws_vault_auth" {
-#  source = "../../modules/aws-vault-auth"
-#
-#  aws_vault_role_arn = var.aws_vault_role_arn
-#}
-#
-#module "vault_psoxy" {
-#  for_each = module.psoxy-aws-google-workspace.instances
-#
-#  source = "../../modules/vault-psoxy"
-#
-#  instance_id           = each.key
-#}
-#
-## BEGIN AWS iam-based Auth
-#module "aws_vault_connection_gcal" {
-#  for_each = module.psoxy-aws-google-workspace.instances
-#
-#  source = "../../modules/aws-vault-access"
-#
-#  aws_auth_backend_name = module.aws_vault_auth.vault_aws_auth_backend_path
-#  instance_id           = each.key
-#  role_arn              = each.value.instance_role_arn
-#  vault_policy_name     = module.vault_psoxy[each.key].vault_policy_name
-#}
-## END AWS iam-based Auth
-
-#
-## BEGIN periodic token-based vault auth
-#module "aws_vault_token" {
-#  for_each = module.psoxy-aws-google-workspace.instances
-#
-#  source = "../../modules/vault-access-token"
-#
-#  instance_id           = each.key
-#
-#  vault_policy_name     = module.vault_psoxy[each.key].vault_policy_name
-#}
-#
-#locals {
-#  tokens_to_set = [ for k, v in module.aws_vault_token : " - on `${k}` set `VAULT_TOKEN` = `${v.vault_token}`"]
-#}
-#
-## unfortunately, no way to backfill these on per-lambda basis without deeper refactor
-#resource "local_file" "fill_token_vars" {
-#  filename = "TODO 0 - fill VAULT_TOKEN env vars.md"
-#  content = <<EOT
-## TODO - fill token env vars on lambdas
-#
-#Via AWS console --> Lambdas:
-#${join("\n", local.tokens_to_set)}
-#
-#EOT
-#}
-#
-## END periodic token-based vault auth

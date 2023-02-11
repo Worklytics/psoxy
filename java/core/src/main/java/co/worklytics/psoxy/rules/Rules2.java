@@ -1,7 +1,8 @@
 package co.worklytics.psoxy.rules;
 
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.avaulta.gateway.rules.Endpoint;
+import com.avaulta.gateway.rules.transforms.Transform;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.*;
@@ -10,6 +11,7 @@ import lombok.extern.java.Log;
 import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Builder(toBuilder = true)
 @Log
@@ -28,7 +30,7 @@ public class Rules2 implements RuleSet, Serializable {
      * scopeId to set for any identifiers parsed from source that aren't email addresses
      *
      * NOTE: can be overridden by config, in case you're connecting to an on-prem / private instance
-     * of the source and you don't want it's identifiers to be treated as under the default scope
+     * of the source and you don't want its identifiers to be treated as under the default scope
      */
     @Getter
     String defaultScopeIdForSource;
@@ -68,9 +70,9 @@ public class Rules2 implements RuleSet, Serializable {
         Endpoint endpoint = matchedEndpoint
             .orElseThrow(() -> new IllegalArgumentException("No endpoint found for pathRegex: " + pathRegex));
 
-        endpoint.transforms = new ArrayList<>(endpoint.getTransforms());
-
-        Arrays.stream(transforms).forEach(endpoint.transforms::add);
+        endpoint.setTransforms(
+            Stream.concat(endpoint.getTransforms().stream(), Arrays.stream(transforms))
+                .collect(Collectors.toList()));
 
         return clone;
     }
@@ -81,53 +83,6 @@ public class Rules2 implements RuleSet, Serializable {
             .endpoints(this.endpoints.stream().map(Endpoint::clone).collect(Collectors.toList()))
             .build();
         return clone;
-    }
-
-
-    @JsonPropertyOrder({"pathRegex", "allowedQueryParams", "transforms"})
-    @Builder(toBuilder = true)
-    @AllArgsConstructor //for builder
-    @NoArgsConstructor //for Jackson
-    @Getter
-    public static class Endpoint {
-
-        String pathRegex;
-
-        //if provided, only query params in this list will be allowed
-        @JsonInclude(JsonInclude.Include.NON_NULL)
-        List<String> allowedQueryParams;
-
-        //TODO: add conditionally allowed query parameters? (eg, match value against a regex?)
-
-        @JsonIgnore
-        public Optional<List<String>> getAllowedQueryParamsOptional() {
-            return Optional.ofNullable(allowedQueryParams);
-        }
-
-
-        //if provided, only http methods in this list will be allowed
-        @JsonInclude(JsonInclude.Include.NON_NULL)
-        Set<String> allowedMethods;
-
-        @JsonIgnore
-        public Optional<Set<String>> getAllowedMethods() {
-            return Optional.ofNullable(allowedMethods);
-        }
-
-
-
-        @JsonInclude(value=JsonInclude.Include.NON_EMPTY)
-        @Singular
-        List<Transform> transforms = new ArrayList<>();
-
-        @Override
-        public Endpoint clone() {
-            return this.toBuilder()
-                .clearTransforms()
-                .transforms(this.transforms.stream().map(Transform::clone).collect(Collectors.toList()))
-                .allowedQueryParams(this.getAllowedQueryParamsOptional().map(ArrayList::new).orElse(null))
-                .build();
-        }
     }
 
 

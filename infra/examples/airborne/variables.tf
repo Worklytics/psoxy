@@ -29,6 +29,22 @@ variable "aws_ssm_param_root_path" {
   }
 }
 
+variable "psoxy_base_dir" {
+  type        = string
+  description = "the path where your psoxy repo resides. Preferably a full path, /home/user/repos/, avoid tilde (~) shortcut to $HOME"
+
+  validation {
+    condition     = can(regex(".*\\/$", var.psoxy_base_dir))
+    error_message = "The psoxy_base_dir value should end with a slash."
+  }
+}
+
+variable "force_bundle" {
+  type        = bool
+  description = "whether to force build of deployment bundle, even if it already exists for this proxy version"
+  default     = false
+}
+
 variable "caller_gcp_service_account_ids" {
   type        = list(string)
   description = "ids of GCP service accounts allowed to send requests to the proxy (eg, unique ID of the SA of your Worklytics instance)"
@@ -55,10 +71,10 @@ variable "caller_aws_arns" {
   }
 }
 
-variable "msft_tenant_id" {
+variable "environment_name" {
   type        = string
+  description = "qualifier to append to name of project that will host your psoxy instance"
   default     = ""
-  description = "ID of Microsoft tenant to connect to (req'd only if config includes MSFT connectors)"
 }
 
 variable "connector_display_name_suffix" {
@@ -67,38 +83,10 @@ variable "connector_display_name_suffix" {
   default     = ""
 }
 
-# this is no longer used; azure connectors auth'd via identity federation (OIDC)
-variable "certificate_subject" {
-  type        = string
-  description = "IGNORED; value for 'subject' passed to openssl when generation certificate (eg '/C=US/ST=New York/L=New York/CN=www.worklytics.co')"
-}
-
-variable "psoxy_base_dir" {
-  type        = string
-  description = "the path where your psoxy repo resides. Preferably a full path, /home/user/repos/, avoid tilde (~) shortcut to $HOME"
-
-  validation {
-    condition     = can(regex(".*\\/$", var.psoxy_base_dir))
-    error_message = "The psoxy_base_dir value should end with a slash."
-  }
-}
-
-variable "force_bundle" {
-  type        = bool
-  description = "whether to force build of deployment bundle, even if it already exists for this proxy version"
-  default     = false
-}
-
 variable "general_environment_variables" {
   type        = map(string)
   description = "environment variables to add for all connectors"
   default     = {}
-}
-
-variable "pseudonymize_app_ids" {
-  type        = string
-  description = "if set, will set value of PSEUDONYMIZE_APP_IDS environment variable to this value for all sources"
-  default     = false
 }
 
 variable "enabled_connectors" {
@@ -106,10 +94,13 @@ variable "enabled_connectors" {
   description = "list of ids of connectors to enabled; see modules/worklytics-connector-specs"
 
   default = [
-    "azure-ad",
-    "outlook-cal",
-    "outlook-mail",
     "asana",
+    "gdirectory",
+    "gcal",
+    "gmail",
+    "gdrive",
+    "google-chat",
+    "google-meet",
     "hris",
     "slack-discovery-api",
     "zoom",
@@ -118,7 +109,7 @@ variable "enabled_connectors" {
 
 variable "non_production_connectors" {
   type        = list(string)
-  description = "connector ids in this list will be in development mode (not for production use)"
+  description = "connector ids in this list will be in development mode (not for production use"
   default     = []
 }
 
@@ -184,9 +175,43 @@ variable "lookup_table_builders" {
     #          "employee_id" = "employee_id_orig"
     #        }
     #        columnsToRename      = {}
-    #        columnsToInclude     = null
+    #        columnsToInclude     = null # if any,  only columns defined here will be part of the output
     #      }
     #
     #    }
   }
+}
+
+variable "gcp_project_id" {
+  type        = string
+  description = "id of GCP project that will host psoxy instance; must exist"
+}
+
+variable "gcp_org_id" {
+  type        = string
+  description = "DEPRECATED; IGNORED; your GCP organization ID"
+  default     = null
+}
+
+variable "gcp_folder_id" {
+  type        = string
+  description = "DEPRECATED; IGNORED; optionally, a folder into which to provision it"
+  default     = null
+}
+
+variable "gcp_billing_account_id" {
+  type        = string
+  description = "DEPRECATED; IGNORED; billing account ID; needed to create the project"
+  default     = null
+}
+
+variable "google_workspace_example_user" {
+  type        = string
+  description = "user to impersonate for Google Workspace API calls (null for none)"
+}
+
+variable "google_workspace_example_admin" {
+  type        = string
+  description = "user to impersonate for Google Workspace API calls (null for value of `google_workspace_example_user`)"
+  default     = null # will failover to user
 }

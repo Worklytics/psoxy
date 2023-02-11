@@ -51,7 +51,7 @@ provider "azuread" {
 
 module "psoxy-aws-msft-365" {
   source = "../../modular-examples/aws-msft-365"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-msft-365?ref=v0.4.10"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-msft-365?ref=v0.4.11"
 
   aws_account_id                 = var.aws_account_id
   aws_assume_role_arn            = var.aws_assume_role_arn # role that can test the instances (lambdas)
@@ -69,7 +69,7 @@ module "psoxy-aws-msft-365" {
   msft_tenant_id                 = var.msft_tenant_id
   pseudonymize_app_ids           = var.pseudonymize_app_ids
   general_environment_variables  = var.general_environment_variables
-#  aws_ssm_key_id                 = aws_kms_key.key.key_id
+  #  aws_ssm_key_id                 = aws_kms_key.key.key_id
 }
 
 #resource "aws_kms_key" "key"  {

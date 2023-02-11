@@ -117,11 +117,9 @@ function requestWrapper(url, method = 'GET', headers) {
 }
 
 /**
- * Simple wrapper around `aws4` (*) to ease testing.
+ * Simple wrapper around `aws4` to ease testing.
  *
- * (*) aws4 is not able to parse a full URL:
- * https://[id].lambda-url.us-east-1.on.aws/
- * the result is missing `service` and `region` which are mandatory
+ * Ref: https://github.com/mhart/aws4#api
  *
  * @param {URL} url
  * @param {String} method
@@ -132,20 +130,27 @@ function signAWSRequestURL(url, method = 'GET', credentials) {
   // According to aws4 docs, search params should be part of the "path"
   const params = url.searchParams.toString();
 
-  return aws4.sign(
-    {
-      host: url.host,
-      path: url.pathname + (params !== '' ? `?${params}` : ''),
-      service: 'lambda',
-      region: url.host.split('.')[2],
-      method: method,
-    },
-    {
-      accessKeyId: credentials?.AccessKeyId,
-      secretAccessKey: credentials?.SecretAccessKey,
-      sessionToken: credentials?.SessionToken,
-    }
-  );
+  const requestOptions = {
+    host: url.host,
+    path: url.pathname + (params !== '' ? `?${params}` : ''),
+    method: method,
+  };
+
+  // Closer look at aws4 source code: region and service are calculated from
+  // URL's host, but for Lambda functions it doesn't translate the URL part
+  // to the name of the service; API Gateway use-case works OK
+  const serviceHostPart = url.host.split('.')[1];
+  if (serviceHostPart === 'lambda-url') {
+    requestOptions.service = 'lambda';
+  } else {
+    requestOptions.service = serviceHostPart;
+  }
+
+  return aws4.sign(requestOptions, {
+    accessKeyId: credentials?.AccessKeyId,
+    secretAccessKey: credentials?.SecretAccessKey,
+    sessionToken: credentials?.SessionToken,
+  });
 }
 
 /**
