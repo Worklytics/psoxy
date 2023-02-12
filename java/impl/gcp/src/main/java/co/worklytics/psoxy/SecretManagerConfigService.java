@@ -61,14 +61,6 @@ public class SecretManagerConfigService implements ConfigService {
                 .orElseThrow(() -> new NoSuchElementException("Proxy misconfigured; no value for " + property));
     }
 
-    private String parameterName(ConfigProperty property) {
-        if (StringUtils.isBlank(this.namespace)) {
-            return property.name();
-        } else {
-            return String.join("_", this.namespace, property.name());
-        }
-    }
-
     @SneakyThrows
     @Override
     public Optional<String> getConfigPropertyAsOptional(ConfigProperty property) {
@@ -83,6 +75,14 @@ public class SecretManagerConfigService implements ConfigService {
         } catch (Exception ignored) {
             // If secret is not found, it will return an exception
             return Optional.empty();
+        }
+    }
+
+    private String parameterName(ConfigProperty property) {
+        if (StringUtils.isBlank(this.namespace)) {
+            return property.name();
+        } else {
+            return String.join("_", this.namespace, property.name());
         }
     }
 }
