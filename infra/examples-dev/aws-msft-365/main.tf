@@ -67,6 +67,7 @@ module "psoxy-aws-msft-365" {
   custom_bulk_connectors         = var.custom_bulk_connectors
   lookup_table_builders          = var.lookup_table_builders
   msft_tenant_id                 = var.msft_tenant_id
+  msft_owners_email              = var.msft_owners_email
   pseudonymize_app_ids           = var.pseudonymize_app_ids
   general_environment_variables  = var.general_environment_variables
   #  aws_ssm_key_id                 = aws_kms_key.key.key_id
