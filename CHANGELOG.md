@@ -27,6 +27,7 @@ Features:
  - defensive HTTP header handling, in case unexpected casing from clients
  - npm test tool support for sending the basic health check
  - MSFT connections authenticated via identity federation, rather than certificates
+ - Email owners can be specified for MSFT connections
  - support for adding filter by JSON schema to rules
  - npm test tool support for psoxy instances deployed behind API gateway
 
@@ -103,4 +104,3 @@ Upgrade Notes:
   - secret management has been refactored; you may see indications of some secrets being moved, or
     even destroyed and recreated. If you plan shows SALT or ENCRYPTION_KEY as being destroyed,
     **DO NOT** apply the plan and contact Worklytics support for assistance.
-
