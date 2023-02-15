@@ -85,3 +85,15 @@ variable "enabled_connectors" {
     "zoom",
   ]
 }
+
+# see infra/modules/aws-cognito-pool
+variable "cognito_pool_id" {
+  type        = string
+  description = "id of cognito pool to use for identity management (eg, cognito-identity-pool.pool_id from an aws_cognito_identity_pool resource)."
+}
+
+# see infra/modules/aws-cognito-identity-cli
+variable "cognito_connector_identities" {
+  type        = map(string)
+  description = "map of connector ids to cognito identity ids (eg, IdentityId from running `aws cognito-identity get-open-id-token-for-developer-identity ` for given login)."
+}
