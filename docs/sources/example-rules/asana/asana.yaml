@@ -74,6 +74,7 @@ endpoints:
           - "$.data[*].custom_fields[*].description"
       - !<pseudonymize>
         jsonPaths:
+          - "$.data[*].created_by.gid"
           - "$.data[*].completed_by.gid"
           - "$.data[*].hearts[*].user.gid"
           - "$.data[*].likes[*].user.gid"
@@ -101,6 +102,7 @@ endpoints:
           - "$.data.custom_fields[*].description"
       - !<pseudonymize>
         jsonPaths:
+          - "$.data.created_by.gid"
           - "$.data.completed_by.gid"
           - "$.data.hearts[*].user.gid"
           - "$.data.likes[*].user.gid"
@@ -154,6 +156,7 @@ endpoints:
           - "$.data[*].custom_fields[*].description"
       - !<pseudonymize>
         jsonPaths:
+          - "$.data[*].created_by.gid"
           - "$.data[*].completed_by.gid"
           - "$.data[*].hearts[*].user.gid"
           - "$.data[*].likes[*].user.gid"
@@ -181,6 +184,7 @@ endpoints:
           - "$.data[*].custom_fields[*].description"
       - !<pseudonymize>
         jsonPaths:
+          - "$.data[*].created_by.gid"
           - "$.data[*].completed_by.gid"
           - "$.data[*].hearts[*].user.gid"
           - "$.data[*].likes[*].user.gid"

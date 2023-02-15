@@ -165,6 +165,7 @@ public class PrebuiltSanitizerRules {
                         .jsonPath(String.format("$.data%s.custom_fields[*].description", multipleExpression))
                         .build(),
                 Transform.Pseudonymize.builder()
+                        .jsonPath(String.format("$.data%s.created_by.gid", multipleExpression))
                         .jsonPath(String.format("$.data%s.completed_by.gid", multipleExpression))
                         .jsonPath(String.format("$.data%s.hearts[*].user.gid", multipleExpression))
                         .jsonPath(String.format("$.data%s.likes[*].user.gid", multipleExpression))
