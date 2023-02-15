@@ -61,18 +61,18 @@ module "msft-connection" {
 }
 
 
-# if you don't want Terraform to generate certificate for you on your local machine, comment this
-# out
-module "msft-connection-auth" {
+module "msft-connection-auth-federation" {
   for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
-  # source = "../../modules/azuread-local-cert"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-local-cert?ref=v0.4.11"
+  # source = "../../modules/azuread-federated-credentials"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-federated-credentials?ref=v0.4.11"
 
   application_object_id = module.msft-connection[each.key].connector.id
-  rotation_days         = 60
-  cert_expiration_days  = 180
-  certificate_subject   = var.certificate_subject
+  display_name          = "AccessFromAWS"
+  description           = "AWS federation to be used for psoxy Connector - ${each.value.display_name}${var.connector_display_name_suffix}"
+  issuer                = "https://cognito-identity.amazonaws.com"
+  audience              = var.cognito_pool_id
+  subject               = var.cognito_connector_identities[each.key]
 }
 
 
