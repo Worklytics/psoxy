@@ -394,6 +394,10 @@ output "instances" {
   value = local.all_instances
 }
 
-output "cognito-identities" {
+output "cognito_identities" {
   value = module.cognito-identity
+}
+
+output "cognito_identity_pool_id" {
+  value = module.cognito-identity-pool.pool_id
 }
