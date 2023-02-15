@@ -1,5 +1,5 @@
 data "external" "identity-result" {
-  for_each = var.login-ids
+  for_each = var.login_ids
 
   program = [
     "${path.module}/addIdentity.sh",
@@ -12,5 +12,5 @@ data "external" "identity-result" {
 }
 
 output "identity_id" {
-  value = { for k, v in var.login-ids : k => data.external.identity-result[k].result.IdentityId }
+  value = { for k, v in var.login_ids : k => data.external.identity-result[k].result.IdentityId }
 }
