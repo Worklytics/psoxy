@@ -91,7 +91,7 @@ module "cognito-identity" {
 
   identity_pool_id = module.cognito-identity-pool.pool_id
   aws_region       = var.aws_region
-  login-ids        = { for k in keys(module.msft-connection) : k => "${module.cognito-identity-pool.developer_provider_name}=${module.msft-connection[k].connector.application_id}" }
+  login_ids        = { for k in keys(module.msft-connection) : k => "${module.cognito-identity-pool.developer_provider_name}=${module.msft-connection[k].connector.application_id}" }
   aws_role         = var.aws_assume_role_arn
 }
 
@@ -394,6 +394,10 @@ output "instances" {
   value = local.all_instances
 }
 
-output "cognito-identities" {
+output "cognito_identities" {
   value = module.cognito-identity
+}
+
+output "cognito_identity_pool_id" {
+  value = module.cognito-identity-pool.pool_id
 }

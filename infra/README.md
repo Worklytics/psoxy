@@ -10,12 +10,17 @@ Please review the `README.md` within each provider's module for pre-reqs and usa
 
   - `examples/` - example configurations to be adapted by customers
   - `examples-dev/` - example configurations to be adapted by developers
-  - `modules/` - modules to be re-used primarily by other modules or if customers need very custom configurations
+  - `modules/` - modules to be re-used primarily by other modules or if customers need very custom
+     configurations. We do NOT commit to maintaining backwards compatibility of these modules
+     interfaces between minor or patch versions. (eg, `0.4.z` variants may break things)
   - `modules-examples/` - psoxy configurations that have been 'modularized', to enable use by
     customers via a minimal root configuration (see `examples/`) OR as part of their larger
     Terraform configuration (presumably covering infra beyond psoxy). If you need more control than
     what variables of these  modules expose, you can copy one of these modules, use it as a root
-    terraform configuration, and directly modify how it invokes modules.
+    terraform configuration, and directly modify how it invokes modules.  We DO commit to maintaining
+    the interfaces of these modules between minor patch versions (eg, `0.4.z` variants should not
+    break).
+
 
 ## Per Connector Setup
 

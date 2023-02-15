@@ -13,6 +13,9 @@ variable "aws_role" {
   description = "Role to assume during script execution"
 }
 
-variable "login-ids" {
+# TODO: expect value format "${module.cognito-identity-pool.developer_provider_name}=${module.msft-connection[k].connector.application_id}"
+# --> add validation of that OR split those components in properties of an object??
+variable "login_ids" {
   type = map(string)
+  description = "Map of connector id => login id for which to create identities in pool"
 }
