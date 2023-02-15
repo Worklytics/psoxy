@@ -150,5 +150,6 @@ Our Terraform examples should provide both of the above for you, but worth doubl
 
 If those are present, yet the error persists, it's possible that you have some org-level security
 constraint/policy preventing SSM parameters from being used / read. For example, you have a
-"default deny" policy set for SSM GET/etc.  In such a case, you need to add the execute roles for
-each lambda as exceptions to such policies.
+"default deny" policy set for SSM GET actions/etc.  In such a case, you need to add the execute
+roles for each lambda as exceptions to such policies (find these under AWS --> IAM --> Roles).
+
