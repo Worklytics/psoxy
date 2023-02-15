@@ -83,9 +83,10 @@ public class HealthCheckRequestHandler {
         HttpEventResponse.HttpEventResponseBuilder responseBuilder = HttpEventResponse.builder();
 
         try {
-            responseBuilder.statusCode(responseStatusCode(healthCheckResult.build()));
+            HealthCheckResult result = healthCheckResult.build();
+            responseBuilder.statusCode(responseStatusCode(result));
             responseBuilder.header(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.withCharset(StandardCharsets.UTF_8).getMimeType());
-            responseBuilder.body(objectMapper.writeValueAsString(healthCheckResult) + "\r\n");
+            responseBuilder.body(objectMapper.writeValueAsString(result) + "\r\n");
         } catch (IOException e) {
             log.log(Level.WARNING, "Failed to write health check details", e);
         }
