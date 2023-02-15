@@ -38,15 +38,15 @@ public class HealthCheckRequestHandler {
     @Inject
     ObjectMapper objectMapper;
 
-    private boolean isHealthCheckRequest(HttpEventRequest request) {
-        return request.getHeader(ControlHeader.HEALTH_CHECK.getHttpHeader()).isPresent();
-    }
-
     public Optional<HttpEventResponse> handleIfHealthCheck(HttpEventRequest request) {
         if (isHealthCheckRequest(request)) {
             return Optional.of(handle());
         }
         return Optional.empty();
+    }
+
+    private boolean isHealthCheckRequest(HttpEventRequest request) {
+        return request.getHeader(ControlHeader.HEALTH_CHECK.getHttpHeader()).isPresent();
     }
 
     private HttpEventResponse handle() {
