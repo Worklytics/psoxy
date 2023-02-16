@@ -20,7 +20,7 @@ what permission is using each connector.
 ### DEPRECATED: Certificate creation via Terraform
 
 **DEPRECATED** - will be removed in v0.5; this is not recommended approach, for a variety of
-reasons, since Microsoft release support for federated credentials in ~Sept 202. See our module
+reasons, since Microsoft release support for federated credentials in ~Sept 2022. See our module
 `azuread-federated-credentials` for preferred alternative.
 
 Psoxy's terraform modules create certificates on your machine, and deploy these to Azure and the
