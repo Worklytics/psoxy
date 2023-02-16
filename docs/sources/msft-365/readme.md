@@ -5,15 +5,14 @@ Examples `msft-365` will create an *Azure Active Directory* (AAD) application if
 as `azure-ad`, `outlook-cal` or `outlook-mail`. The AAD application created will have the right permissions to access to
 MSFT Graph API to perform the requests from proxy.
 
-For this, the user who run the Terraform code should have [Application Administrator](https://learn.microsoft.com/en-us/azure/active-directory/roles/permissions-reference#application-administrator)
-role enabled; otherwise applications cannot be properly managed.
+The user who runs Terraform will require following at least following roles enabled in its account:
+- [Cloud Application Administrator](https://learn.microsoft.com/en-us/azure/active-directory/roles/permissions-reference#cloud-application-administrator). This is to create/update/delete AAD applications and its settings.
+- [Privileged Role Administrator](https://learn.microsoft.com/en-us/azure/active-directory/roles/permissions-reference#privileged-role-administrator) to perform [admin consent](https://learn.microsoft.com/en-us/azure/active-directory/manage-apps/grant-admin-consent?pivots=ms-graph#prerequisites) operation once to grant permissions
+to grant permission access to MSFT Graph API from the AAD application
 
-### Admin consent
-Once all AAD applications are created it is required to perform the [admin consent](https://learn.microsoft.com/en-us/azure/active-directory/manage-apps/grant-admin-consent?pivots=ms-graph#prerequisites) operation once to grant permissions
-from the AAD application to MSFT Graph API. This operation should be applied with a user with [Global Admin](https://learn.microsoft.com/en-us/azure/active-directory/roles/permissions-reference#global-administrator).
 Please follow instructions on *TODO - setup ..* markdown document generated after
 deploying the Terraform project to apply these operations and for further information about
-what permission is using each connector.
+permissions are using each connector.
 
 ## Troubleshooting
 
