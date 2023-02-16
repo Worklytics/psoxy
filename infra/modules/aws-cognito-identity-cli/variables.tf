@@ -10,7 +10,8 @@ variable "aws_region" {
 
 variable "aws_role" {
   type        = string
-  description = "Role to assume during script execution"
+  description = "If provided, role to assume during script execution"
+  default = ""
 }
 
 # TODO: expect value format "${module.cognito-identity-pool.developer_provider_name}=${module.msft-connection[k].connector.application_id}"
