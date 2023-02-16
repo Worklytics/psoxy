@@ -5,14 +5,11 @@ Examples `msft-365` will create an *Azure Active Directory* (AAD) application if
 as `azure-ad`, `outlook-cal` or `outlook-mail`. The AAD application created will have the right permissions to access to
 MSFT Graph API to perform the requests from proxy.
 
-The user who runs Terraform will require following at least following roles enabled in its account:
-- [Cloud Application Administrator](https://learn.microsoft.com/en-us/azure/active-directory/roles/permissions-reference#cloud-application-administrator). This is to create/update/delete AAD applications and its settings.
-- [Privileged Role Administrator](https://learn.microsoft.com/en-us/azure/active-directory/roles/permissions-reference#privileged-role-administrator) to perform [admin consent](https://learn.microsoft.com/en-us/azure/active-directory/manage-apps/grant-admin-consent?pivots=ms-graph#prerequisites) operation once to grant permissions
-to grant permission access to MSFT Graph API from the AAD application
-
-Please follow instructions on *TODO - setup ..* markdown document generated after
-deploying the Terraform project to apply these operations and for further information about
-permissions are using each connector.
+The user who require following at least following roles enabled in its account:
+- [Cloud Application Administrator](https://learn.microsoft.com/en-us/azure/active-directory/roles/permissions-reference#cloud-application-administrator). This is to create/update/delete AAD applications and its settings during Terraform apply command.
+- [Privileged Role Administrator](https://learn.microsoft.com/en-us/azure/active-directory/roles/permissions-reference#privileged-role-administrator) to perform [admin consent](https://learn.microsoft.com/en-us/azure/active-directory/manage-apps/grant-admin-consent?pivots=ms-graph#prerequisites) operation once
+to grant permission access to MSFT Graph API from the AAD application. This has to be done after Terraform execution, following our instructions on *TODO - setup ..* markdown document generated after
+deploying the Terraform project. That document can be used as well to have further details about permissions required per each connector.
 
 ## Troubleshooting
 
