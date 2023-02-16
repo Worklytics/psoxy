@@ -1,7 +1,13 @@
-# Microsoft 365 Troubleshooting
+# Microsoft 365 
 
 
-## Certificate creation via Terraform
+## Troubleshooting
+
+### DEPRECATED: Certificate creation via Terraform
+
+**DEPRECATED** - will be removed in v0.5; this is not recommended approach, for a variety of
+reasons, since Microsoft release support for federated credentials in ~Sept 202. See our module
+`azuread-federated-credentials` for preferred alternative.
 
 Psoxy's terraform modules create certificates on your machine, and deploy these to Azure and the
 keys to your AWS/GCP host environment. This all works via APIs.
@@ -24,5 +30,3 @@ like this:
 Just running `terraform apply` again (and maybe again) usually fixes it. Likely it's something with
 with Azure's clock relative to your machine, plus whatever flight time is required between cert
 generation and it being PUT to Azure.
-
-
