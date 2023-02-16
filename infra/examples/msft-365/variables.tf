@@ -58,6 +58,7 @@ variable "connector_display_name_suffix" {
 variable "certificate_subject" {
   type        = string
   description = "value for 'subject' passed to openssl when generation certificate (eg '/C=US/ST=New York/L=New York/CN=www.worklytics.co')"
+  default     = null
 }
 
 variable "psoxy_base_dir" {
