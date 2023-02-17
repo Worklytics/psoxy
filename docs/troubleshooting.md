@@ -51,6 +51,41 @@ NOTE:
     3 again to reset your `JAVA_HOME`
 
 
+### General Build / Packaging Failures
+Our example Terraform configurations should compile and package the Java code into a JAR file, which
+is then deployed by Terraform to your host environment.
+
+This is done via a build script, invoked by a Terraform module (see [`modules/psoxy-package`](../infra/modules/psoxy-package)).
+
+If, on your first `terraform plan`/`terraform apply`, you see the line such as
+
+`module.psoxy-aws-msft-365.module.psoxy-aws.module.psoxy-package.data.external.deployment_package: Reading...`
+
+And that returns really quickly, something may have gone wrong with the build. You can trigger the
+build directly by running:
+```bash
+# from the root of your checkout of the repository
+cd java/gateway-core
+mvn package install
+cd ../core
+mvn package install
+cd ../impl/aws
+mvn package
+```
+That may give you some clues as to what went wrong.
+
+You can also look for a file called `last-build.log` in the directory where your Terraform
+configuration resides.
+
+Some problems we've seen:
+  - **Maven repository access** - the build process must get various dependencies from a remote
+    Maven respository; if your laptop cannot reach Maven Central, is configured to get dependencies
+    from some other Maven repository, etc - you might need to fix this issue. You can check your
+    `~/.m2/settings.xml` file, which might give you some insight into what Maven repository you're
+    using. It's also where you'd configure credentials for a private Maven repository, such as
+    Artifactory/etc - so make sure those are correct.
+
+
 ### Upgrading Psoxy Code
 
 If you upgrade your psoxy code, it may be worth trying `terraform init --upgrade` to make sure
