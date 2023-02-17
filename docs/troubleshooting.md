@@ -16,6 +16,9 @@
 If you are using openjdk 19.0.1, you may run into problems with the build. We suggest you downgrade
 to some java 17 (which is Long-Term Support edition) and use that.
 
+NOTE: we believe the issue is fixed in 19.0.2, which was [released Jan 23, 2023](https://www.oracle.com/java/technologies/javase/19-0-2-relnotes.html).
+So alternatively you could try upgrading to that (or higher).
+
 On Mac, steps would be:
 
 1. check version
@@ -29,10 +32,16 @@ mvn -v
 brew install openjdk@17
 ```
 
-3. set `JAVA_HOME` env variable to point to java 17:
+3. set `JAVA_HOME` env variable to point to java 17; for example:
 
 ```bash
-export JAVA_HOME=`/opt/homebrew/Cellar/openjdk@17/17.0.5/libexec/openjdk.jdk/Contents/Home`
+export JAVA_HOME='/opt/homebrew/Cellar/openjdk@17/17.0.5/libexec/openjdk.jdk/Contents/Home'
+```
+
+or, possibly your Homebrew default installation is at `/usr/local/Cellar/`, in which case:
+
+```bash
+/usr/local/Cellar/openjdk@17/17.0.5/libexec/openjdk.jdk/Contents/Home
 ```
 
 NOTE:
