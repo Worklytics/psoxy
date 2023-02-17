@@ -9,3 +9,4 @@
 # standard demos directory, so we can create demo examples for customers without mistakenly in a
 # consistent location that won't be inadvertently committed to repo
 examples-demo/**
+!examples-demo/README.md
