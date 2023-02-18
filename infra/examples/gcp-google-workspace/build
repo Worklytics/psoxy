@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# NOTE: Terraform modules *should* build deployment bundle themselves, but in case that fails, this
+# script will do the equivalent with its output directly in your terminal
+
+../../../tools/build.sh gcp ../../../java
