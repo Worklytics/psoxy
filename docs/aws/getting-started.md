@@ -1,14 +1,10 @@
 # AWS - Getting Started
 
-To deploy to AWS, you'll need an AWS account in which to deploy. We *strongly* recommend you
-provision one specifically for use to host Psoxy, as this will create an implicit security boundary,
-reduce possible conflicts with other infra configured in the account, and simplify eventual cleanup.
-
 ## Prerequisites
 
 1. **An AWS Account in which to deploy Psoxy** We *strongly* recommend you provision one specifically
-   for use to host Psoxy, as this will create  an implicit security boundary, reduce possible conflicts with other infra configured in the
-   account, and simplify eventual cleanup.
+   for use to host Psoxy, as this will create  an implicit security boundary, reduce possible
+   conflicts with other infra configured in the account, and simplify eventual cleanup.
 
    You will need the numeric AWS Account ID for this account, which you can find in the AWS Console.
 
