@@ -1,6 +1,11 @@
 aws_account_id                = "123123123123" # your AWS account ID here
 aws_assume_role_arn           = "arn:aws:iam::123123123123:role/InfraAdmin" # role in that AWS account ID to assume
-msft_tenant_id                = "" # your Microsoft tenant ID here
+
+# your Microsoft 365 tenant ID
+# hint: if you run `az login --allow-no-subscriptions`, there's a `tenantId` in the JSON output; you
+# can copy-paste that value into this variable
+msft_tenant_id                = ""
+
 enabled_connectors = [
   "asana",
   "dropbox-business",
