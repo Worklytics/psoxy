@@ -401,3 +401,11 @@ output "cognito_identities" {
 output "cognito_identity_pool_id" {
   value = module.cognito-identity-pool.pool_id
 }
+
+//q: better to invert control, let calling modules write the files??
+output "todos_1" {
+  value = concat(
+    values(module.msft_365_grants)[*].todo,
+    values(module.source_token_external_todo)[*].todo,
+  )
+}

@@ -17,3 +17,11 @@ module "generic" {
     }
   )
 }
+
+output "todo" {
+  value = module.generic.todo
+}
+
+output "next_todo_step" {
+  value = module.generic.next_todo_step
+}

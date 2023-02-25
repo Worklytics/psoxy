@@ -75,12 +75,7 @@ connection to will fail)
      as well as the ability of the proxy connection to impersonate it.
 EOT
 
-}
-
-# enable domain-wide-delegation via Google Workspace Admin console
-resource "local_file" "todo-google-workspace-admin-console" {
-  filename = "TODO ${var.todo_step} - setup ${var.display_name}.md"
-  content  = <<EOT
+  todo_content = <<EOT
 Complete the following steps via the Google Workspace Admin console:
    1. Visit https://admin.google.com/ and navigate to "Security" --> "API Controls", then find
       "Manage Domain Wide Delegation". Click "Add new".
@@ -97,7 +92,12 @@ ${join(",", var.oauth_scopes_needed)}
       Google as authorized by the OAuth scopes you granted.
 ${local.google_workspace_admin_account_required ? local.google_workspace_service_account_setup : ""}
 EOT
+}
 
+# enable domain-wide-delegation via Google Workspace Admin console
+resource "local_file" "todo-google-workspace-admin-console" {
+  filename = "TODO ${var.todo_step} - setup ${var.display_name}.md"
+  content  = local.todo_content
 }
 
 
