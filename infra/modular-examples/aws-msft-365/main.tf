@@ -410,3 +410,14 @@ output "todos_1" {
     values(module.source_token_external_todo)[*].todo,
   )
 }
+
+
+
+output "todos_3" {
+  description = "List of todo steps to complete 3rd."
+  value       = concat(
+    values(module.worklytics-psoxy-connection-msft-365)[*].todo,
+    values(module.psoxy-bulk-to-worklytics)[*].todo,
+    values(module.worklytics-psoxy-connection-oauth-long-access)[*].todo
+  )
+}

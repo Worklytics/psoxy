@@ -370,3 +370,11 @@ output "todos_1" {
   )
 }
 
+output "todos_3" {
+  description = "List of todo steps to complete 3rd."
+  value       = concat(
+    values(module.worklytics-psoxy-connection-google-workspace)[*].todo,
+    values(module.psoxy-bulk-to-worklytics)[*].todo,
+    values(module.worklytics-psoxy-connection)[*].todo
+  )
+}
