@@ -404,7 +404,8 @@ output "cognito_identity_pool_id" {
 
 //q: better to invert control, let calling modules write the files??
 output "todos_1" {
-  value = concat(
+  description = "List of TODO steps to complete 1st."
+  value       = concat(
     values(module.msft_365_grants)[*].todo,
     values(module.source_token_external_todo)[*].todo,
   )

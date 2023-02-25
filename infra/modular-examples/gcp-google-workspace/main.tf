@@ -306,5 +306,13 @@ locals {
 }
 
 output "instances" {
-  value = ""
+  value = local.all_instances
+}
+
+output "todos_1" {
+  description = "List of todo steps to complete 1st."
+  value       = concat(
+    values(module.google-workspace-connection)[*].todo,
+    values(module.source_token_external_todo)[*].todo,
+  )
 }

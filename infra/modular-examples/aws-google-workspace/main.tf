@@ -361,3 +361,12 @@ output "instances" {
 output "lookup_tables" {
   value = { for k, v in var.lookup_table_builders : k => module.psoxy_lookup_tables_builders[k].output_bucket }
 }
+
+output "todos_1" {
+  description = "List of todo steps to complete 1st."
+  value       = concat(
+    values(module.google-workspace-connection)[*].todo,
+    values(module.source_token_external_todo)[*].todo,
+  )
+}
+
