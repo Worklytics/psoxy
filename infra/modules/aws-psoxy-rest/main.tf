@@ -55,11 +55,8 @@ locals {
     "${local.command_cli_call} -u \"${local.proxy_endpoint_url}${path}\"${local.impersonation_param}"
   ]
   command_test_logs = "node ${var.path_to_repo_root}tools/psoxy-test/cli-logs.js -r \"${var.aws_assume_role_arn}\" -re \"${var.region}\" -l \"${module.psoxy_lambda.log_group}\""
-}
 
-resource "local_file" "todo" {
-  filename = "TODO ${var.todo_step} - test ${var.function_name}.md"
-  content  = <<EOT
+  todo_content = <<EOT
 
 ## Testing ${var.function_name}
 
@@ -112,6 +109,11 @@ Contact support@worklytics.co for assistance modifying the rules as needed.
 EOT
 }
 
+resource "local_file" "todo" {
+  filename = "TODO ${var.todo_step} - test ${var.function_name}.md"
+  content  = local.todo_content
+}
+
 resource "local_file" "test_script" {
   filename        = "test-${var.function_name}.sh"
   file_permission = "0770"
@@ -146,6 +148,10 @@ output "instance_role_name" {
 
 output "instance_id" {
   value = module.psoxy_lambda.function_name
+}
+
+output "todo" {
+  value = local.todo_content
 }
 
 output "next_todo_step" {

@@ -411,7 +411,13 @@ output "todos_1" {
   )
 }
 
-
+output "todos_2" {
+  description = "List of todo steps to complete 3rd."
+  value       = concat(
+    values(module.psoxy-msft-connector)[*].todo,
+    values(module.aws-psoxy-long-auth-connectors)[*].todo,
+  )
+}
 
 output "todos_3" {
   description = "List of todo steps to complete 3rd."
