@@ -371,7 +371,7 @@ output "todos_1" {
 }
 
 output "todos_2" {
-  description = "List of todo steps to complete 3rd."
+  description = "List of todo steps to complete 2nd."
   value       = concat(
     values(module.psoxy-google-workspace-connector)[*].todo,
     values(module.aws-psoxy-long-auth-connectors)[*].todo,
