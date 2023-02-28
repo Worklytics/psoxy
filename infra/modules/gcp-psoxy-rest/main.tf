@@ -152,9 +152,13 @@ output "cloud_function_name" {
   value = google_cloudfunctions_function.function.name
 }
 
-
 output "cloud_function_url" {
   value = local.proxy_endpoint_url
+}
+
+output "proxy_kind" {
+  value       = "rest"
+  description = "The kind of proxy instance this is."
 }
 
 output "next_todo_step" {

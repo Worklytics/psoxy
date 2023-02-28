@@ -401,3 +401,9 @@ output "cognito_identities" {
 output "cognito_identity_pool_id" {
   value = module.cognito-identity-pool.pool_id
 }
+
+output "caller_role_arn" {
+  value = module.psoxy-aws.api_caller_role_arn
+}
+
+

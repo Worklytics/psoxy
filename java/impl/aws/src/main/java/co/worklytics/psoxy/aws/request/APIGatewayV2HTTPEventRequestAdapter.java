@@ -87,6 +87,11 @@ public class APIGatewayV2HTTPEventRequestAdapter implements HttpEventRequest {
 
     @Override
     public String getHttpMethod() {
+        if (event.getRequestContext().getHttp() == null) {
+            //q: better exception to throw here???
+            throw new IllegalStateException("Psoxy expects an AWS API Gateway V2 HTTP Proxy payload here.  If your lambda is triggered by API Gateway V1 instead of a V2 API gateway or a Lambda Function URL, please use co.worklytics.psoxy.APIGatewayV1Handler as the handler class");
+        }
+
         return event.getRequestContext().getHttp().getMethod();
     }
 

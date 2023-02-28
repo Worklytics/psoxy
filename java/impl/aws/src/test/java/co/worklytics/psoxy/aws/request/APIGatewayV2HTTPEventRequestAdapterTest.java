@@ -3,7 +3,6 @@ package co.worklytics.psoxy.aws.request;
 import co.worklytics.test.TestUtils;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Lists;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 

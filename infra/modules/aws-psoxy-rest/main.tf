@@ -136,6 +136,11 @@ output "function_arn" {
   value = module.psoxy_lambda.function_arn
 }
 
+# assuredly unique within AWS account
+output "function_name" {
+  value = module.psoxy_lambda.function_name
+}
+
 output "instance_role_arn" {
   value = module.psoxy_lambda.iam_role_for_lambda_arn
 }
@@ -144,10 +149,17 @@ output "instance_role_name" {
   value = module.psoxy_lambda.iam_role_for_lambda_name
 }
 
+# in practice, same as function_name; but for simplicity may want something specific to the deployment
 output "instance_id" {
   value = module.psoxy_lambda.function_name
+}
+
+output "proxy_kind" {
+  value       = "rest"
+  description = "The kind of proxy instance this is."
 }
 
 output "next_todo_step" {
   value = var.todo_step + 1
 }
+
