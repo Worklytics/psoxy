@@ -32,10 +32,27 @@ public class APIGatewayV2HTTPEventRequestAdapter implements HttpEventRequest {
 
     @Override
     public String getPath() {
-        //remove stage portion from path
+        //remove stage portion from path, if any
+        //  - for Lambda URL deployments, we expect 'stage' to be '$default', and not match any portion
+        //    of rawPath; this will be no-op
+        //  - for API Gateway deployments, this should strip the stage
         String rawPath = event.getRawPath().replace("/" + event.getRequestContext().getStage(), "");
 
-        //TODO: route portion
+
+        // in API gateway deployments, multiple lambdas are behind single gateway with routes like
+        //  - ANY /gcal/{proxy+} --> psoxy-gcal lambda
+        //  - ANY /gdrive/{proxy+} --> psoxy-gcal-settings lambda
+        // eg ANY /gcal/{proxy+} -> /gcal/...
+
+        //NOTE: we're *assuming* routeKey of structure "ANY /gcal" for route "ANY /gcal/{proxy+}",
+        // but haven't found an example or documentation that explicitly states this
+
+        if (event.getRequestContext().getRouteKey() != null &&
+            event.getRequestContext().getRouteKey().contains(" ")) {
+            String route = event.getRequestContext().getRouteKey().split(" ")[1];
+
+            rawPath = rawPath.replace(route, "");
+        }
 
         //don't think needed
         return StringUtils.prependIfMissing(rawPath, "/");

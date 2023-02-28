@@ -43,7 +43,19 @@ class APIGatewayV2HTTPEventRequestAdapterTest {
 
         APIGatewayV2HTTPEventRequestAdapter requestAdapter = new APIGatewayV2HTTPEventRequestAdapter(apiGatewayV2HTTPEvent);
 
-        assertEquals("/nodejs-apig-function-1G3XMPLZXVXYI", requestAdapter.getPath());
+        assertEquals("/", requestAdapter.getPath());
+    }
+
+    @SneakyThrows
+    @Test
+    public void parse_apigatewayv2_route() {
+
+        APIGatewayV2HTTPEvent apiGatewayV2HTTPEvent = objectMapper.readerFor(APIGatewayV2HTTPEvent.class)
+            .readValue(TestUtils.getData("lambda-proxy-events/api-gateway-v2-event_ours.json"));
+
+        APIGatewayV2HTTPEventRequestAdapter requestAdapter = new APIGatewayV2HTTPEventRequestAdapter(apiGatewayV2HTTPEvent);
+
+        assertEquals("/calendars/v2/users/me/settings", requestAdapter.getPath());
     }
 
     @Test
