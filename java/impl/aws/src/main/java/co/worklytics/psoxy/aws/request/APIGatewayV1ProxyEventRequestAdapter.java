@@ -4,6 +4,7 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.google.common.base.Splitter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
@@ -21,7 +22,14 @@ public class APIGatewayV1ProxyEventRequestAdapter implements co.worklytics.psoxy
 
     @Override
     public String getPath() {
-        return StringUtils.prependIfMissing(event.getPath(), "/");
+        String resourcePath;
+        if (event.getRequestContext() != null) {
+            resourcePath = event.getRequestContext().getResourcePath();
+        } else {
+            resourcePath = ObjectUtils.firstNonNull(event.getResource(), event.getPath());
+        }
+
+        return StringUtils.prependIfMissing(resourcePath, "/");
     }
 
     @Override
