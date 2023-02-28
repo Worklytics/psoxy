@@ -32,6 +32,13 @@ public class APIGatewayV2HTTPEventRequestAdapter implements HttpEventRequest {
 
     @Override
     public String getPath() {
+
+        // unclear whether this will exist, but if it does, use it
+        // q: is this only a v1 thing??
+        if (event.getPathParameters().containsKey("proxy")) {
+            return StringUtils.prependIfMissing(event.getPathParameters().get("proxy"), "/");
+        }
+
         //remove stage portion from path, if any
         //  - for Lambda URL deployments, we expect 'stage' to be '$default', and not match any portion
         //    of rawPath; this will be no-op
