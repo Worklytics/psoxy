@@ -6,11 +6,13 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @RequiredArgsConstructor(staticName = "of")
 public class APIGatewayV1ProxyEventRequestAdapter implements co.worklytics.psoxy.gateway.HttpEventRequest {
@@ -34,13 +36,21 @@ public class APIGatewayV1ProxyEventRequestAdapter implements co.worklytics.psoxy
 
     @Override
     public Optional<String> getQuery() {
-        if (event.getQueryStringParameters() == null || event.getQueryStringParameters().isEmpty()) {
-            return Optional.empty();
-        } else {
-            return Optional.of(event.getQueryStringParameters().entrySet().stream()
-                .map(e -> e.getKey() + "=" + e.getValue())
-                .collect(Collectors.joining("&")));
-        }
+
+        Stream<Pair<String, String>> paramStream = Stream.concat(
+            Optional.ofNullable(event.getQueryStringParameters())
+                .map(params -> params.entrySet().stream()
+                    .map(k -> Pair.of(k.getKey(), k.getValue())))
+                .orElse(Stream.empty()),
+            Optional.ofNullable(event.getMultiValueQueryStringParameters())
+                .map(params -> params.entrySet().stream()
+                    .flatMap(k -> k.getValue().stream().map(v -> Pair.of(k.getKey(), v))))
+                .orElse(Stream.empty())
+        );
+
+        return Optional.ofNullable(StringUtils.trimToNull(paramStream
+                .map(pair -> pair.getLeft() + "=" + pair.getRight())
+                .collect(Collectors.joining("&"))));
     }
 
     @Override

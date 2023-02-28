@@ -3,7 +3,6 @@ package co.worklytics.psoxy;
 import co.worklytics.psoxy.aws.AwsContainer;
 import co.worklytics.psoxy.aws.DaggerAwsContainer;
 import co.worklytics.psoxy.aws.request.APIGatewayV2HTTPEventRequestAdapter;
-import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.impl.CommonRequestHandler;
 import com.amazonaws.services.lambda.runtime.Context;
@@ -14,8 +13,6 @@ import lombok.extern.java.Log;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpHeaders;
-
-import static co.worklytics.psoxy.ResponseCompressionHandler.isCompressionRequested;
 
 /**
  * default AWS lambda handler
@@ -65,7 +62,7 @@ public class Handler implements com.amazonaws.services.lambda.runtime.RequestHan
             response = requestHandler.handle(httpEventRequestAdapter);
 
             context.getLogger().log(httpEventRequestAdapter.getHeader(HttpHeaders.ACCEPT_ENCODING).orElse("accept-encoding not found"));
-            if (isCompressionRequested(httpEventRequestAdapter)) {
+            if (ResponseCompressionHandler.isCompressionRequested(httpEventRequestAdapter)) {
                 Pair<Boolean, HttpEventResponse> compressedResponse = responseCompressionHandler.compressIfNeeded(response);
                 base64Encoded = compressedResponse.getLeft();
                 response = compressedResponse.getRight();
