@@ -34,6 +34,18 @@ class APIGatewayV2HTTPEventRequestAdapterTest {
         assertEquals("value1,value2", String.join(",", requestAdapter.getMultiValueHeader("multi-header").get()));
     }
 
+    @SneakyThrows
+    @Test
+    public void parse_apigatewayv2() {
+
+        APIGatewayV2HTTPEvent apiGatewayV2HTTPEvent = objectMapper.readerFor(APIGatewayV2HTTPEvent.class)
+            .readValue(TestUtils.getData("lambda-proxy-events/api-gateway-v2-event.json"));
+
+        APIGatewayV2HTTPEventRequestAdapter requestAdapter = new APIGatewayV2HTTPEventRequestAdapter(apiGatewayV2HTTPEvent);
+
+        assertEquals("/nodejs-apig-function-1G3XMPLZXVXYI", requestAdapter.getPath());
+    }
+
     @Test
     public void getHeader() {
         APIGatewayV2HTTPEvent apiGatewayV2HTTPEvent = new APIGatewayV2HTTPEvent();

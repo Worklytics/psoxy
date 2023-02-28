@@ -32,7 +32,13 @@ public class APIGatewayV2HTTPEventRequestAdapter implements HttpEventRequest {
 
     @Override
     public String getPath() {
-        return StringUtils.prependIfMissing(event.getRawPath(), "/");
+        //remove stage portion from path
+        String rawPath = event.getRawPath().replace("/" + event.getRequestContext().getStage(), "");
+
+        //TODO: route portion
+
+        //don't think needed
+        return StringUtils.prependIfMissing(rawPath, "/");
     }
 
     @Override
