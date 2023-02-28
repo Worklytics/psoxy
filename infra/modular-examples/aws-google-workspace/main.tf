@@ -363,7 +363,7 @@ output "lookup_tables" {
 }
 
 output "todos_1" {
-  description = "List of todo steps to complete 1st."
+  description = "List of todo steps to complete 1st, in markdown format."
   value       = concat(
     values(module.google-workspace-connection)[*].todo,
     values(module.source_token_external_todo)[*].todo,
@@ -371,7 +371,7 @@ output "todos_1" {
 }
 
 output "todos_2" {
-  description = "List of todo steps to complete 2nd."
+  description = "List of todo steps to complete 2nd, in markdown format."
   value       = concat(
     values(module.psoxy-google-workspace-connector)[*].todo,
     values(module.aws-psoxy-long-auth-connectors)[*].todo,
@@ -379,7 +379,7 @@ output "todos_2" {
 }
 
 output "todos_3" {
-  description = "List of todo steps to complete 3rd."
+  description = "List of todo steps to complete 3rd, in markdown format."
   value       = concat(
     values(module.worklytics-psoxy-connection-google-workspace)[*].todo,
     values(module.psoxy-bulk-to-worklytics)[*].todo,
@@ -387,7 +387,7 @@ output "todos_3" {
   )
 }
 
-
 output "caller_role_arn" {
-  value = module.psoxy-aws.api_caller_role_arn
+  description = "ARN of the AWS IAM role that can be assumed to invoke the Lambdas."
+  value       = module.psoxy-aws.api_caller_role_arn
 }

@@ -306,11 +306,12 @@ locals {
 }
 
 output "instances" {
-  value = local.all_instances
+  description = "Instances of Psoxy connectors deployments as Cloud Functions."
+  value       = local.all_instances
 }
 
 output "todos_1" {
-  description = "List of todo steps to complete 1st."
+  description = "List of todo steps to complete 1st, in markdown format."
   value       = concat(
     values(module.google-workspace-connection)[*].todo,
     values(module.source_token_external_todo)[*].todo,
@@ -318,16 +319,15 @@ output "todos_1" {
 }
 
 output "todos_2" {
-  description = "List of todo steps to complete 2nd."
+  description = "List of todo steps to complete 2nd, in markdown format."
   value       = concat(
     values(module.psoxy-google-workspace-connector)[*].todo,
     values(module.connector-long-auth-function)[*].todo,
   )
 }
 
-
 output "todos_3" {
-  description = "List of todo steps to complete 3rd."
+  description = "List of todo steps to complete 3rd, in markdown format."
   value       = concat(
     values(module.worklytics-psoxy-connection)[*].todo,
     values(module.psoxy-bulk-to-worklytics)[*].todo,
