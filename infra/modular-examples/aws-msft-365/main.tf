@@ -392,3 +392,7 @@ output "instances" {
 output "cognito-identities" {
   value = module.cognito-identity
 }
+
+output "caller_role_arn" {
+  value = module.psoxy-aws.api_caller_role_arn
+}

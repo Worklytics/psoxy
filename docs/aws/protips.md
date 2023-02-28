@@ -124,6 +124,32 @@ resource "aws_lambda_permission" "lambda_permission" {
   # within API Gateway REST API.
   source_arn = "${aws_apigatewayv2_api.psoxy-api.execution_arn}/*/*/${each.value.function_name}/{proxy+}"
 }
+
+resource "aws_iam_policy" "invoke_api" {
+  name_prefix = "PsoxyInvokeAPI"
+
+  policy = jsonencode({
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Effect" : "Allow",
+        "Action" : "execute-api:Invoke",
+        "Resource" : "arn:aws:execute-api:*:${var.aws_account_id}:${aws_apigatewayv2_api.psoxy-api.id}/*/GET/*",
+      },
+      {
+        "Effect" : "Allow",
+        "Action" : "execute-api:Invoke",
+        "Resource" : "arn:aws:execute-api:*:${var.aws_account_id}:${aws_apigatewayv2_api.psoxy-api.id}/*/HEAD/*",
+      },
+    ]
+  })
+}
+
+resource "aws_iam_policy_attachment" "invoke_api_policy_to_role" {
+  name       = module.psoxy-aws-google-workspace.caller_role_arn
+  policy_arn = aws_iam_policy.invoke_api.arn
+}
+
 ```
 
 ### Using API Gateway V1 **alpha**
