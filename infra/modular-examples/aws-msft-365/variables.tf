@@ -9,7 +9,8 @@ variable "aws_account_id" {
 
 variable "aws_assume_role_arn" {
   type        = string
-  description = "arn of role Terraform should assume when provisioning your infra"
+  description = "if provided, arn of role Terraform should assume when provisioning your infra"
+  default     = ""
 }
 
 variable "aws_region" {
@@ -185,6 +186,12 @@ variable "msft_tenant_id" {
   type        = string
   default     = ""
   description = "ID of Microsoft tenant to connect to (req'd only if config includes MSFT connectors)"
+}
+
+variable "msft_owners_email" {
+  type        = set(string)
+  default     = []
+  description = "(Only if config includes MSFT connectors). Optionally, set of emails to apply as owners on AAD apps apart from current logged user"
 }
 
 variable "pseudonymize_app_ids" {

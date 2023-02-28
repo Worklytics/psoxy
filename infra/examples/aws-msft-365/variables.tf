@@ -54,6 +54,7 @@ variable "caller_aws_arns" {
     error_message = "The values of caller_aws_arns should be AWS Resource Names, something like 'arn:aws:iam::914358739851:root'."
   }
 }
+
 variable "msft_tenant_id" {
   type        = string
   default     = ""
@@ -66,9 +67,11 @@ variable "connector_display_name_suffix" {
   default     = ""
 }
 
+# this is no longer used; azure connectors auth'd via identity federation (OIDC)
 variable "certificate_subject" {
   type        = string
-  description = "value for 'subject' passed to openssl when generation certificate (eg '/C=US/ST=New York/L=New York/CN=www.worklytics.co')"
+  description = "IGNORED; value for 'subject' passed to openssl when generation certificate (eg '/C=US/ST=New York/L=New York/CN=www.worklytics.co')"
+  default     = null
 }
 
 variable "psoxy_base_dir" {

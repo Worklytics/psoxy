@@ -60,7 +60,7 @@ data "google_project" "psoxy-google-connectors" {
 
 module "psoxy-aws-google-workspace" {
   source = "../../modular-examples/aws-google-workspace"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-google-workspace?ref=v0.4.10"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-google-workspace?ref=v0.4.11"
 
   aws_account_id                 = var.aws_account_id
   aws_assume_role_arn            = var.aws_assume_role_arn # role that can test the instances (lambdas)
@@ -80,8 +80,8 @@ module "psoxy-aws-google-workspace" {
   google_workspace_example_user  = var.google_workspace_example_user
   google_workspace_example_admin = var.google_workspace_example_admin
   general_environment_variables  = var.general_environment_variables
-# Uncomment the following line if you want to apply KMS encryption on your SSM parameters
-#  aws_ssm_key_id                 = aws_kms_key.key.key_id
+  # Uncomment the following line if you want to apply KMS encryption on your SSM parameters
+  #  aws_ssm_key_id                 = aws_kms_key.key.key_id
 }
 
 ## TODO: requires targeted apply to create key first, bc value of key_id determines map content

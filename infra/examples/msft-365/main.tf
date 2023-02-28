@@ -34,7 +34,7 @@ data "azuread_client_config" "current" {}
 
 module "worklytics_connector_specs" {
   # source = "../../modules/worklytics-connector-specs"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connector-specs?ref=v0.4.10"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connector-specs?ref=v0.4.11"
 
   enabled_connectors = var.enabled_connectors
 
@@ -52,7 +52,7 @@ module "msft-connection" {
   for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
   # source = "../../modules/azuread-connection"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-connection?ref=v0.4.10"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-connection?ref=v0.4.11"
 
   display_name                      = "Psoxy Connector - ${each.value.display_name}${var.connector_display_name_suffix}"
   tenant_id                         = var.msft_tenant_id
@@ -61,18 +61,18 @@ module "msft-connection" {
 }
 
 
-# if you don't want Terraform to generate certificate for you on your local machine, comment this
-# out
-module "msft-connection-auth" {
+module "msft-connection-auth-federation" {
   for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
-  # source = "../../modules/azuread-local-cert"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-local-cert?ref=v0.4.10"
+  # source = "../../modules/azuread-federated-credentials"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-federated-credentials?ref=v0.4.11"
 
   application_object_id = module.msft-connection[each.key].connector.id
-  rotation_days         = 60
-  cert_expiration_days  = 180
-  certificate_subject   = var.certificate_subject
+  display_name          = "AccessFromAWS"
+  description           = "AWS federation to be used for psoxy Connector - ${each.value.display_name}${var.connector_display_name_suffix}"
+  issuer                = "https://cognito-identity.amazonaws.com"
+  audience              = var.cognito_pool_id
+  subject               = var.cognito_connector_identities[each.key]
 }
 
 
@@ -107,7 +107,7 @@ module "msft_365_grants" {
   for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
   # source = "../../modules/azuread-grant-all-users"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-grant-all-users?ref=v0.4.10"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-grant-all-users?ref=v0.4.11"
 
   psoxy_instance_id        = each.key
   application_id           = module.msft-connection[each.key].connector.application_id

@@ -9,11 +9,7 @@ component will be run separately.
 As of Aug 2022, this is alpha-quality and generally not tested/recommended. Please carefully
 review Terraform plan and be prepared to debug issues.
 
-NOTE: this generates local certificate/etc. You can always remove these from Azure AD, and replace
-with your own generated out of band. Goal of terraform scripts is to simplify everything.
-
 ## Authentication
-
 
 ### Azure AD (Microsoft 365)
 Download and install the [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli).
@@ -36,14 +32,9 @@ msft_tenant_id                = "some-uuid-of-msft-tenant" # should hold your Mi
 
 ## Security
 
-This example includes generation of certificates for your Azure AD application listings.
-   - anyone in possession of those certificates could access your data with whatever permissions you
-     grant to the Azure AD application.
-   - this example should be used with caution and only run from a location that, based on your
-     org's infosec rules, can be used to generate such a certificate.
-   - the terraform state produced by this module should be persisted to a secure location, such as
-     an encrypted disk of a VM dedicated for this purpose OR a cloud storage service (GCS, S3 etc).
-     It is generally NOT good practice to commit such state files to a source code repository such
-     as git/github.
-
-
+As of `v0.4.11`, authentication of your instance with Microsoft 365 is done via identity federation,
+establishing a trust relationship between your Azure AD Application and your AWS account,
+allowing the latter to authenticate as the former to access Microsoft 365 APIs. This approach
+requires no shared secrets between your AWS account and your Microsoft 365 tenant, nor any secrets/
+certficates to be generated/stored on your machine or in your AWS account. As such, this alone will
+not result in anything sensitive being in your Terraform state files.

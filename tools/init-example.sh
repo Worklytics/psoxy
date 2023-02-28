@@ -5,21 +5,31 @@ RED='\033[0;31m'
 BLUE='\33[0;34m'
 NC='\033[0m' # No Color
 
-if [ -f terraform.tfvars ]; then
-    printf "${RED}Nothing to initialize. File terraform.tfvars already exists!${NC}\n"
-    exit 1 # error
+TF_CONFIG_ROOT=`pwd`
+cd ../../..
+PSOXY_BASE_DIR=`pwd`
+
+
+if [ ! -f terraform.tfvars ]; then
+  TFVARS_FILE="${TF_CONFIG_ROOT}/terraform.tfvars"
+
+  cp ${TF_CONFIG_ROOT}/terraform.tfvars.example $TFVARS_FILE
+
+  # append root of checkout automatically
+  echo "psoxy_base_dir                = \"${PSOXY_BASE_DIR}/\"" >> $TFVARS_FILE
+
+  # give user some feedback
+  printf "Init'd example terraform config. Please open ${BLUE}terraform.tfvars${NC} and customize it to your needs.\n"
+  printf "Review ${BLUE}variables.tf${NC} for descriptions of each variable.\n\n"
+else
+  printf "${RED}Nothing to initialize. File terraform.tfvars already exists!${NC}\n\n"
 fi
 
-cp terraform.tfvars.example terraform.tfvars
-
-TFVARS_FILE="$(pwd)/terraform.tfvars"
-
-# append root of checkout automatically
-cd ../../..
-echo "psoxy_base_dir                = \"$(pwd)/\"" >> $TFVARS_FILE
-
-# give user some feedback
-printf "Init'd example terraform config. Please open ${BLUE}terraform.tfvars${NC} and customize it to your needs.\n"
-printf "Review ${BLUE}variables.tf${NC} for descriptions of each variable.\n"
-
+if which node > /dev/null; then
+  printf "Node available. Installing ${BLUE}psoxy-test${NC} tool ...\n"
+  cd ${PSOXY_BASE_DIR}/tools/psoxy-test
+  npm --prefix ${PSOXY_BASE_DIR}/tools/psoxy-test install
+else
+  printf "${RED}Node.JS not available; could not install test tool.${NC}\n"
+fi
 

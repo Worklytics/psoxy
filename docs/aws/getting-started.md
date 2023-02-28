@@ -1,25 +1,39 @@
 # AWS - Getting Started
 
-**YMMV : this is a work-in-progress guide on how to use EC2 or other environment  to deploy psoxy to AWS.**
-
-
-To deploy to AWS, you'll need an AWS account in which to deploy. We recommend you provision one
-specifically for use in running Psoxy, as this simplifies security boundaries as well as eventual
-cleanup.
-
 ## Prerequisites
 
-You must have a IAM Role within the target AWS account with sufficient privileges to (AWS managed role examples linked):
-   1. create IAM roles + policies (eg [IAMFullAccess](https://us-east-1.console.aws.amazon.com/iam/home?region=us-east-1#/policies/arn:aws:iam::aws:policy/IAMFullAccess$serviceLevelSummary))
-   2. create and update Systems Manager Parameters (eg, [AmazonSSMFullAccess](https://us-east-1.console.aws.amazon.com/iam/home?region=us-east-1#/policies/arn:aws:iam::aws:policy/AmazonSSMFullAccess$serviceLevelSummary) )
-   3. create and manage Lambdas (eg [AWSLambda_FullAccess](https://us-east-1.console.aws.amazon.com/iam/home?region=us-east-1#/policies/arn:aws:iam::aws:policy/AWSLambda_FullAccess$serviceLevelSummary) )
-   4. create and manage S3 buckets (eg [AmazonS3FullAccess](https://us-east-1.console.aws.amazon.com/iam/home?region=us-east-1#/policies/arn:aws:iam::aws:policy/AmazonS3FullAccess$serviceLevelSummary) )
-   5. create Cloud Watch Log groups (eg [CloudWatchFullAccess](https://us-east-1.console.aws.amazon.com/iam/home?region=us-east-1#/policies/arn:aws:iam::aws:policy/CloudWatchFullAccess$serviceLevelSummary))
+1. **An AWS Account in which to deploy Psoxy** We *strongly* recommend you provision one specifically
+   for use to host Psoxy, as this will create  an implicit security boundary, reduce possible
+   conflicts with other infra configured in the account, and simplify eventual cleanup.
 
-You must be able to assume that role.
+   You will need the numeric AWS Account ID for this account, which you can find in the AWS Console.
 
-(Yes, the use of AWS Managed Policies results in a role with many privileges; that's why we
-recommend you use a dedicated AWS account to host proxy which is NOT shared with any other use case)
+
+2. **A sufficiently privileged AWS Role** You must have a IAM Role within the AWS account with
+  sufficient privileges to (AWS managed role examples linked):
+       1. create IAM roles + policies (eg [IAMFullAccess](https://us-east-1.console.aws.amazon.com/iam/home?region=us-east-1#/policies/arn:aws:iam::aws:policy/IAMFullAccess$serviceLevelSummary))
+       2. create and update Systems Manager Parameters (eg, [AmazonSSMFullAccess](https://us-east-1.console.aws.amazon.com/iam/home?region=us-east-1#/policies/arn:aws:iam::aws:policy/AmazonSSMFullAccess$serviceLevelSummary) )
+       3. create and manage Lambdas (eg [AWSLambda_FullAccess](https://us-east-1.console.aws.amazon.com/iam/home?region=us-east-1#/policies/arn:aws:iam::aws:policy/AWSLambda_FullAccess$serviceLevelSummary) )
+       4. create and manage S3 buckets (eg [AmazonS3FullAccess](https://us-east-1.console.aws.amazon.com/iam/home?region=us-east-1#/policies/arn:aws:iam::aws:policy/AmazonS3FullAccess$serviceLevelSummary) )
+       5. create Cloud Watch Log groups (eg [CloudWatchFullAccess](https://us-east-1.console.aws.amazon.com/iam/home?region=us-east-1#/policies/arn:aws:iam::aws:policy/CloudWatchFullAccess$serviceLevelSummary))
+
+    (Yes, the use of AWS Managed Policies results in a role with many privileges; that's why we
+    recommend you use a dedicated AWS account to host proxy which is NOT shared with any other use case)
+
+    You will need the ARN of this role.
+
+3. **An authenticated AWS CLI in your provisioning environment**. Your environment (eg, shell/etc
+   from which you'll run terraform commands) must be authenticated as an identity that can assume
+   that role. (see next section for tips on options for various environments you can use)
+
+    Eg, if your Role is `arn:aws:iam::123456789012:role/PsoxyProvisioningRole`, the following
+    should work:
+
+```shell
+aws sts assume-role --role-arn arn:aws:iam::123456789012:role/PsoxyProvisioningRole --role-session-name tf_session
+```
+
+    If not, use `aws sts get-caller-identity` to confirm how your CLI is authenticated.
 
 ## Provisioning Environment
 
@@ -63,9 +77,9 @@ when ready, continue with [README](../../README.md).
 
 ## Terraform State Backend
 
-You'll also need a backend location for your Terraform state (such as an S3 bucket). It can be in 
-any AWS account, as long as the AWS role that you'll use to run Terraform has read/write access to 
-it. 
+You'll also need a backend location for your Terraform state (such as an S3 bucket). It can be in
+any AWS account, as long as the AWS role that you'll use to run Terraform has read/write access to
+it.
 
 Alternatively, you may use a local file system, but this is not recommended for production use - as
 your Terraform state may contain secrets such as API keys, depending on the sources you connect.

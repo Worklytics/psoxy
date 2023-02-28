@@ -32,7 +32,41 @@ public class APIGatewayV2HTTPEventRequestAdapter implements HttpEventRequest {
 
     @Override
     public String getPath() {
-        return StringUtils.prependIfMissing(event.getRawPath(), "/");
+
+        // unclear whether this will exist, but if it does, use it
+        // q: is this only a v1 thing?? or only a v2 thing??
+        // - I can't find a v2 proxy payload example
+        // - AWS docs seem to have a v1 exxample, but not v2 https://docs.aws.amazon.com/lambda/latest/dg/services-apigateway.html#apigateway-proxy
+        // - https://github.com/aws/aws-sam-cli/issues/3654 - shows it, but not filled with a value that
+        //   seems consistent with other properties
+        if (event.getPathParameters() != null && event.getPathParameters().containsKey("proxy")) {
+            return StringUtils.prependIfMissing(event.getPathParameters().get("proxy"), "/");
+        }
+
+        //remove stage portion from path, if any
+        //  - for Lambda URL deployments, we expect 'stage' to be '$default', and not match any portion
+        //    of rawPath; this will be no-op
+        //  - for API Gateway deployments, this should strip the stage
+        String rawPath = event.getRawPath().replace("/" + event.getRequestContext().getStage(), "");
+
+
+        // in API gateway deployments, multiple lambdas are behind single gateway with routes like
+        //  - ANY /gcal/{proxy+} --> psoxy-gcal lambda
+        //  - ANY /gdrive/{proxy+} --> psoxy-gcal-settings lambda
+        // eg ANY /gcal/{proxy+} -> /gcal/...
+
+        //NOTE: we're *assuming* routeKey of structure "ANY /gcal" for route "ANY /gcal/{proxy+}",
+        // but haven't found an example or documentation that explicitly states this
+
+        if (event.getRequestContext().getRouteKey() != null &&
+            event.getRequestContext().getRouteKey().contains(" ")) {
+            String route = event.getRequestContext().getRouteKey().split(" ")[1];
+
+            rawPath = rawPath.replace(route, "");
+        }
+
+        //don't think needed
+        return StringUtils.prependIfMissing(rawPath, "/");
     }
 
     @Override

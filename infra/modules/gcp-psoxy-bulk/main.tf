@@ -7,7 +7,8 @@ terraform {
 }
 
 locals {
-  function_name = "psoxy-${substr(var.source_kind, 0, 24)}"
+  function_name       = "psoxy-${substr(var.source_kind, 0, 24)}"
+  command_npm_install = "npm --prefix ${var.psoxy_base_dir}tools/psoxy-test install"
 }
 
 data "google_project" "project" {
@@ -138,6 +139,44 @@ resource "google_cloudfunctions_function" "function" {
   depends_on = [
     google_secret_manager_secret_iam_member.grant_sa_accessor_on_secret
   ]
+}
+
+resource "local_file" "todo-gcp-psoxy-bulk-test" {
+  filename = "TODO ${var.todo_step} - test ${local.function_name}.md"
+  content  = <<EOT
+
+## Testing Psoxy Bulk: ${local.function_name}
+
+Review the deployed Cloud function in GCP console:
+
+[Function in GCP Console](https://console.cloud.google.com/functions/details/${var.region}/${google_cloudfunctions_function.function.name}?project=${var.project_id})
+
+We provide some Node.js scripts to easily validate the deployment. To be able
+to run the test commands below, you need Node.js (>=16) and npm (v >=8)
+installed. Ensure all dependencies are installed by running:
+
+```shell
+${local.command_npm_install}
+```
+
+Then, check that the Psoxy works as expected and it transforms the files of your input
+bucket following the rules you have defined. Change the value of the `-f` option in the
+following command with the path of a CSV file (*) you would like to test:
+
+```shell
+node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f /path/to/file -d GCP -i ${google_storage_bucket.input-bucket.name} -o ${google_storage_bucket.output-bucket.name}
+```
+
+Notice that the rest of the options should match your Psoxy configuration.
+
+(*) Check supported formats in [Bulk Data Imports Docs](https://app.worklytics.co/docs/hris-import)
+
+---
+
+Please, check the documentation of our [Psoxy Testing tools](${var.psoxy_base_dir}tools/psoxy-test/README.md)
+for a detailed description of all the different options.
+
+EOT
 }
 
 output "instance_id" {

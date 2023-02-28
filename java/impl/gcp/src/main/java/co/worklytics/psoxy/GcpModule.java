@@ -4,7 +4,9 @@ package co.worklytics.psoxy;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.HostEnvironment;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
-import co.worklytics.psoxy.gateway.impl.*;
+import co.worklytics.psoxy.gateway.impl.CompositeConfigService;
+import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
+import co.worklytics.psoxy.gateway.impl.VaultConfigService;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 import com.bettercloud.vault.Vault;
 import com.google.auth.oauth2.GoogleCredentials;
@@ -54,7 +56,7 @@ public interface GcpModule {
 
         String pathToInstanceConfig =
             envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_INSTANCE_CONFIG)
-                .orElseGet(() -> asSecretManagerNamespace(hostEnvironment.getInstanceId()) + "_");
+                .orElseGet(() -> asSecretManagerNamespace(hostEnvironment.getInstanceId()));
 
         return CompositeConfigService.builder()
                 .preferred(new SecretManagerConfigService(pathToInstanceConfig, ServiceOptions.getDefaultProjectId()))

@@ -58,6 +58,7 @@ variable "connector_display_name_suffix" {
 variable "certificate_subject" {
   type        = string
   description = "value for 'subject' passed to openssl when generation certificate (eg '/C=US/ST=New York/L=New York/CN=www.worklytics.co')"
+  default     = null
 }
 
 variable "psoxy_base_dir" {
@@ -84,4 +85,16 @@ variable "enabled_connectors" {
     "slack-discovery-api",
     "zoom",
   ]
+}
+
+# see infra/modules/aws-cognito-pool
+variable "cognito_pool_id" {
+  type        = string
+  description = "id of cognito pool to use for identity management (eg, cognito-identity-pool.pool_id from an aws_cognito_identity_pool resource)."
+}
+
+# see infra/modules/aws-cognito-identity-cli
+variable "cognito_connector_identities" {
+  type        = map(string)
+  description = "map of connector ids to cognito identity ids (eg, IdentityId from running `aws cognito-identity get-open-id-token-for-developer-identity ` for given login)."
 }

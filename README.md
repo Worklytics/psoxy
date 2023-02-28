@@ -32,32 +32,47 @@ Orchestration continues to be performed on the Worklytics-side.
 
 ## Getting Started - Customers
 
-### Prereqs
-As of Oct 2021, Psoxy is implemented with Java 11 and built via Maven. Infrastructure is provisioned
-via Terraform, relying on Google Cloud and/or AWS command line tools.  You will need recent
-versions of all of the following:
+### Prerequisites
+As of Feb 2023, Psoxy is implemented with Java 11 and built via Maven. The proxy infrastructure is
+provisioned and the Psoxy code deployed using Terraform, relying on Azure, Google Cloud, and/or AWS
+command line tools.
 
-  - git
-  - Java 11+ JDK variant, but not Java 19 (currently broken, see [docs/troubleshooting.md](docs/troubleshooting.md) for downgrade help)
-  - [Maven 3.6+](https://maven.apache.org/docs/history.html)
-  - [terraform 1.3.x+](https://www.terraform.io/) optional; if you don't use this, you'll need to
-    configure your GCP/AWS project via the web console/CLI tools. Adapting one of our
-    [terraform examples](infra/examples) or writing your own config that re-uses our
-    [modules](infra/modules) will simplify things greatly.
+You will need all of the following:
 
-Depending on your scenario, you may also need:
-  - [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) is
-    required to deploy your psoxy instances in AWS.
-  - [Google Cloud Command Line tool](https://cloud.google.com/sdk/docs/install) Required to host
-    your psoxy instances in GCP *OR* if you plan to connect Google Workspace as a data source. It
-    should be configured for the GCP project that will host your psoxy instance(s) and/or your
-    connectors.
-  - [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) Required to connect to
-    Microsoft 365 sources.
-  - [openssl](https://www.openssl.org/) If generating local certificates (see
-    [`infra/modules/azure-local-cert`](infra/modules/azuread-local-cert))
-  - [Node.js v16+](https://nodejs.org/en/) and [npm v8+](https://www.npmjs.com/package/npm), to be
-    able to test your proxy instances locally (see `tools/psoxy-test/README.md`).
+| Tool                                         | Version        | Test Command        |
+|----------------------------------------------|----------------|---------------------|
+| [git](https://git-scm.com/)                  | 2.17+          | `git --version`     |
+| [Maven](https://maven.apache.org/)           | 3.6+           | `mvn -v`            |
+| [Java 11+ JDK](https://openjdk.org/install/) | 11+, but < 19  | `mvn -v \| grep Java` |
+| [Terraform](https://www.terraform.io/)       | 1.3.x+         | `terraform version` |
+
+
+NOTE: Java 19 is currently broken, see [docs/troubleshooting.md](docs/troubleshooting.md); we suggest
+Java 17, which is a LTS edition.
+
+NOTE: Using `terraform` is not strictly necessary, but it is the only supported method. You may
+provision your infrastructure via your host's CLI, web console, or another infrastructure provisioning
+tool, but we don't offer documentation or support in doing so.  Adapting one of our
+[terraform examples](infra/examples) or writing your own config that re-uses our
+[modules](infra/modules) will simplify things greatly.
+
+
+Depending on your Cloud Host / Data Sources, you will need:
+
+| Condition                         | Tool                                                                                       | Version | Test Command     |
+|-----------------------------------|--------------------------------------------------------------------------------------------|---------|------------------|
+| if deploying to AWS               | [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)   | 2.2+    | `aws --version`  |
+| if deploying to GCP               | [Google Cloud CLI](https://cloud.google.com/sdk/docs/install)                              | 1.0+    | `gcloud version` |
+| if connecting to Microsoft 365    | [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)                  | 2.29+   | `az --version`   |
+| if connecting to Google Workspace | [Google Cloud CLI](https://cloud.google.com/sdk/docs/install)                              | 1.0+    | `gcloud version` |
+
+For testing your psoxy instance, you will need:
+
+| Tool                                                               | Version | Test Command      |
+|--------------------------------------------------------------------|---------|-------------------|
+| [Node.js](https://nodejs.org/en/)                                  | 16+     | `node --version`  |
+| [npm](https://www.npmjs.com/package/npm) (should come with `node`) | 8+      | `npm --version`   |
+
 
 ### Setup
 
@@ -130,27 +145,20 @@ terraform apply
 
 ## Releases
 
+### [v0.4.11](https://github.com/Worklytics/psoxy/releases/tag/v0.4.11)
+
+Highlights:
+  - Azure authentication with federation rather than certificates/secrets
+  - npm test tool support health check, API gateway endpoints
+
 ### [v0.4.10](https://github.com/Worklytics/psoxy/releases/tag/v0.4.10)
-Features:
+
+Highlights:
   - token handling improvements
   - support for config paths in AWS SSM (prev, only supported for Vault)
   - cleaner Google project references in samples
   - deep-link TODO files to 'Add Connection' interface in Worklytics, prefilling params
   - generate simpler bash test script, facilitate rapid integration tests
-
-
-### [v0.4.9](https://github.com/Worklytics/psoxy/releases/tag/v0.4.9)
-
-Features:
-  - vault support (_alpha_)
-
-### [v0.4.8](https://github.com/Worklytics/psoxy/releases/tag/v0.4.8)
-
-Features:
- - modular examples, simplifying usage/upgrades
- - tools to support for testing `bulk` cases, quick review of logs
- - lookup table builder examples
- - restricting HTTP methods in rules
 
 Review [earlier release notes in GitHub](https://github.com/Worklytics/psoxy/releases).
 
