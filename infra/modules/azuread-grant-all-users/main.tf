@@ -20,13 +20,8 @@ terraform {
 # entity in Azure, which is overwritten by the user and then missing on subsequent terraform runs)
 
 locals {
-  instance_id = coalesce(var.psoxy_instance_id, var.application_name)
-}
-
-resource "local_file" "todo" {
-  filename = "TODO ${var.todo_step} - setup ${local.instance_id}.md"
-
-  content = <<EOT
+  instance_id  = coalesce(var.psoxy_instance_id, var.application_name)
+  todo_content = <<EOT
 # Authorize ${var.application_name}
 
 Visit the following page in the Azure AD console and grant the required application permissions:
@@ -42,6 +37,16 @@ ${join("\n", concat(var.app_roles, var.oauth2_permission_scopes))}
 ```
 
 EOT
+}
+
+resource "local_file" "todo" {
+  filename = "TODO ${var.todo_step} - setup ${local.instance_id}.md"
+
+  content = local.todo_content
+}
+
+output "todo" {
+  value = local.todo_content
 }
 
 output "next_todo_step" {

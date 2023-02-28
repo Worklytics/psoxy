@@ -76,10 +76,8 @@ locals {
   command_test_logs = "node ${var.path_to_repo_root}tools/psoxy-test/cli-logs.js -p \"${var.project_id}\" -f \"${google_cloudfunctions_function.function.name}\""
 }
 
-
-resource "local_file" "review" {
-  filename = "TODO ${var.todo_step} - test ${google_cloudfunctions_function.function.name}.md"
-  content  = <<EOT
+locals {
+  todo_content = <<EOT
 ## Testing ${google_cloudfunctions_function.function.name}
 
 Review the deployed Cloud function in GCP console:
@@ -141,7 +139,12 @@ ${local.command_cli_call} -u "${local.proxy_endpoint_url}$API_PATH" ${local.impe
 
 echo "Invoke this script with any of the following as arguments to test other endpoints:${"\r\n\t"}${join("\r\n\t", var.example_api_calls)}"
 EOT
+}
 
+
+resource "local_file" "review" {
+  filename = "TODO ${var.todo_step} - test ${google_cloudfunctions_function.function.name}.md"
+  content  = local.todo_content
 }
 
 output "instance_id" {
@@ -154,6 +157,10 @@ output "cloud_function_name" {
 
 output "cloud_function_url" {
   value = local.proxy_endpoint_url
+}
+
+output "todo" {
+  value = local.todo_content
 }
 
 output "proxy_kind" {

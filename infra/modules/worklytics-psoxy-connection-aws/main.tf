@@ -20,3 +20,7 @@ module "generic" {
 output "next_todo_step" {
   value = module.generic.next_todo_step
 }
+
+output "todo" {
+  value = module.generic.todo
+}

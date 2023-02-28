@@ -9,6 +9,9 @@ IMPLEMENTATION=$2 # expected to be 'aws', 'gcp', etc ...
 PATH_TO_DEPLOYMENT_JAR=$3
 FORCE_BUILD=$4
 
+# force creation of location where we
+# mkdir -p ${JAVA_SOURCE_ROOT}/target/impl/${IMPLEMENTATION}
+
 #  build JAR if deployment does already not exist, or anything passed for $FORCE_BUILD
 if [ ! -f $PATH_TO_DEPLOYMENT_JAR ] || [ ! -z "$FORCE_BUILD" ] ; then
   TERRAFORM_CONFIG_PATH=`pwd`

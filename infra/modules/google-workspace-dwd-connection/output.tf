@@ -9,3 +9,7 @@ output "service_account_email" {
 output "next_todo_step" {
   value = var.todo_step + 1
 }
+
+output "todo" {
+  value = local.todo_content
+}

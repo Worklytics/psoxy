@@ -53,11 +53,7 @@ Alternatively, you may follow the manual instructions below:
 ${local.manual_instructions}
 EOT
 
-}
-
-resource "local_file" "todo-worklytics-connection" {
-  filename = "TODO ${var.todo_step} - connect ${local.instance_id} in Worklytics.md"
-  content  = <<EOT
+  todo_content = <<EOT
 Complete the following steps in Worklytics AFTER you have deployed the Psoxy instance for your connection:
 
 ${var.connector_id == "" ? local.manual_instructions : local.deep_link_instructions}
@@ -69,6 +65,15 @@ EOT
 
 }
 
+resource "local_file" "todo-worklytics-connection" {
+  filename = "TODO ${var.todo_step} - connect ${local.instance_id} in Worklytics.md"
+  content  = local.todo_content
+}
+
 output "next_todo_step" {
   value = var.todo_step + 1
+}
+
+output "todo" {
+  value = local.todo_content
 }

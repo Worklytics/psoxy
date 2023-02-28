@@ -402,8 +402,33 @@ output "cognito_identity_pool_id" {
   value = module.cognito-identity-pool.pool_id
 }
 
-output "caller_role_arn" {
-  value = module.psoxy-aws.api_caller_role_arn
+//q: better to invert control, let calling modules write the files??
+output "todos_1" {
+  description = "List of TODO steps to complete 1st, in markdown format."
+  value       = concat(
+    values(module.msft_365_grants)[*].todo,
+    values(module.source_token_external_todo)[*].todo,
+  )
 }
 
+output "todos_2" {
+  description = "List of todo steps to complete 2nd, in markdown format."
+  value       = concat(
+    values(module.psoxy-msft-connector)[*].todo,
+    values(module.aws-psoxy-long-auth-connectors)[*].todo,
+  )
+}
 
+output "todos_3" {
+  description = "List of todo steps to complete 3rd, in markdown format."
+  value       = concat(
+    values(module.worklytics-psoxy-connection-msft-365)[*].todo,
+    values(module.psoxy-bulk-to-worklytics)[*].todo,
+    values(module.worklytics-psoxy-connection-oauth-long-access)[*].todo
+  )
+}
+
+output "caller_role_arn" {
+  description = "ARN of the AWS IAM role that can be assumed to invoke the Lambdas."
+  value       = module.psoxy-aws.api_caller_role_arn
+}
