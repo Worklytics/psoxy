@@ -34,8 +34,12 @@ public class APIGatewayV2HTTPEventRequestAdapter implements HttpEventRequest {
     public String getPath() {
 
         // unclear whether this will exist, but if it does, use it
-        // q: is this only a v1 thing??
-        if (event.getPathParameters().containsKey("proxy")) {
+        // q: is this only a v1 thing?? or only a v2 thing??
+        // - I can't find a v2 proxy payload example
+        // - AWS docs seem to have a v1 exxample, but not v2 https://docs.aws.amazon.com/lambda/latest/dg/services-apigateway.html#apigateway-proxy
+        // - https://github.com/aws/aws-sam-cli/issues/3654 - shows it, but not filled with a value that
+        //   seems consistent with other properties
+        if (event.getPathParameters() != null && event.getPathParameters().containsKey("proxy")) {
             return StringUtils.prependIfMissing(event.getPathParameters().get("proxy"), "/");
         }
 
