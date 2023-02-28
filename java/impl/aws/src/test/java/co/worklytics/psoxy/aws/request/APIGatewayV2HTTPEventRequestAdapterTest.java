@@ -3,7 +3,6 @@ package co.worklytics.psoxy.aws.request;
 import co.worklytics.test.TestUtils;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Lists;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 
@@ -32,6 +31,30 @@ class APIGatewayV2HTTPEventRequestAdapterTest {
 
         assertTrue(requestAdapter.getMultiValueHeader("multi-header").isPresent());
         assertEquals("value1,value2", String.join(",", requestAdapter.getMultiValueHeader("multi-header").get()));
+    }
+
+    @SneakyThrows
+    @Test
+    public void parse_apigatewayv2() {
+
+        APIGatewayV2HTTPEvent apiGatewayV2HTTPEvent = objectMapper.readerFor(APIGatewayV2HTTPEvent.class)
+            .readValue(TestUtils.getData("lambda-proxy-events/api-gateway-v2-event.json"));
+
+        APIGatewayV2HTTPEventRequestAdapter requestAdapter = new APIGatewayV2HTTPEventRequestAdapter(apiGatewayV2HTTPEvent);
+
+        assertEquals("/", requestAdapter.getPath());
+    }
+
+    @SneakyThrows
+    @Test
+    public void parse_apigatewayv2_route() {
+
+        APIGatewayV2HTTPEvent apiGatewayV2HTTPEvent = objectMapper.readerFor(APIGatewayV2HTTPEvent.class)
+            .readValue(TestUtils.getData("lambda-proxy-events/api-gateway-v2-event_ours.json"));
+
+        APIGatewayV2HTTPEventRequestAdapter requestAdapter = new APIGatewayV2HTTPEventRequestAdapter(apiGatewayV2HTTPEvent);
+
+        assertEquals("/calendars/v2/users/me/settings", requestAdapter.getPath());
     }
 
     @Test

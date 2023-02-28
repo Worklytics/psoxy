@@ -2,26 +2,31 @@ package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.aws.AwsContainer;
 import co.worklytics.psoxy.aws.DaggerAwsContainer;
-import co.worklytics.psoxy.aws.request.APIGatewayV2HTTPEventRequestAdapter;
+import co.worklytics.psoxy.aws.request.APIGatewayV1ProxyEventRequestAdapter;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.impl.CommonRequestHandler;
 import com.amazonaws.services.lambda.runtime.Context;
-import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
-import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPResponse;
-import lombok.SneakyThrows;
-import lombok.extern.java.Log;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpHeaders;
 
+import static co.worklytics.psoxy.ResponseCompressionHandler.isCompressionRequested;
+
 /**
- * default AWS lambda handler
+ * *ALPHA support* handler to use for API Gateway V1 configurations
+ *  - this is NOT going to be subject routine QA as part of release process, so YMMV
  *
- * works with 1) lambda function URL invocations, or 2) API Gateway v2 HTTP proxy invocations
+ * usage:
+ *  - when configure/deploy your lambda, set entry point to `co.worklytis.psoxy.APIGatewayV1Handler`
+ *  - in terraform, this is the `handler_class` variable
+ *     - https://github.com/Worklytics/psoxy/blob/main/infra/modules/aws-psoxy-rest/main.tf#L15
+ *     - under Lambda --> Runtime Settings via AWS console
+ *
  *
  */
-@Log
-public class Handler implements com.amazonaws.services.lambda.runtime.RequestHandler<APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse> {
+public class APIGatewayV1Handler implements com.amazonaws.services.lambda.runtime.RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
     /**
      * Static initialization allows reuse in containers
@@ -42,27 +47,17 @@ public class Handler implements com.amazonaws.services.lambda.runtime.RequestHan
         responseCompressionHandler = new ResponseCompressionHandler();
     }
 
-    @SneakyThrows
     @Override
-    public APIGatewayV2HTTPResponse handleRequest(APIGatewayV2HTTPEvent httpEvent, Context context) {
-
-        //interfaces:
-        // - HttpRequestEvent --> HttpResponseEvent
-
-        //q: what's the component?
-        // - request handler?? but it's abstract ...
-        //    - make it bound with interface, rather than generic? --> prob best approach
-        // - objectMapper
-        //
+    public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent input, Context context) {
 
         HttpEventResponse response;
         boolean base64Encoded = false;
         try {
-            APIGatewayV2HTTPEventRequestAdapter httpEventRequestAdapter = new APIGatewayV2HTTPEventRequestAdapter(httpEvent);
+            APIGatewayV1ProxyEventRequestAdapter httpEventRequestAdapter = APIGatewayV1ProxyEventRequestAdapter.of(input);
             response = requestHandler.handle(httpEventRequestAdapter);
 
             context.getLogger().log(httpEventRequestAdapter.getHeader(HttpHeaders.ACCEPT_ENCODING).orElse("accept-encoding not found"));
-            if (ResponseCompressionHandler.isCompressionRequested(httpEventRequestAdapter)) {
+            if (isCompressionRequested(httpEventRequestAdapter)) {
                 Pair<Boolean, HttpEventResponse> compressedResponse = responseCompressionHandler.compressIfNeeded(response);
                 base64Encoded = compressedResponse.getLeft();
                 response = compressedResponse.getRight();
@@ -81,17 +76,15 @@ public class Handler implements com.amazonaws.services.lambda.runtime.RequestHan
         try {
             //NOTE: AWS seems to give 502 Bad Gateway errors without explanation or any info
             // in the lambda logs if this is malformed somehow (Eg, missing statusCode)
-            return APIGatewayV2HTTPResponse.builder()
+
+            return new APIGatewayProxyResponseEvent()
                 .withStatusCode(response.getStatusCode())
                 .withHeaders(response.getHeaders())
                 .withBody(response.getBody())
-                .withIsBase64Encoded(base64Encoded)
-                .build();
+                .withIsBase64Encoded(base64Encoded);
         } catch (Throwable e) {
             context.getLogger().log("Error writing response as Lambda return");
             throw new Error(e);
         }
     }
-
-
 }

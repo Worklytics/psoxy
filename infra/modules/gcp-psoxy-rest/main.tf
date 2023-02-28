@@ -163,6 +163,11 @@ output "todo" {
   value = local.todo_content
 }
 
+output "proxy_kind" {
+  value       = "rest"
+  description = "The kind of proxy instance this is."
+}
+
 output "next_todo_step" {
   value = var.todo_step + 1
 }

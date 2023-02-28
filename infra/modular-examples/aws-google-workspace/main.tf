@@ -386,3 +386,8 @@ output "todos_3" {
     values(module.worklytics-psoxy-connection)[*].todo
   )
 }
+
+
+output "caller_role_arn" {
+  value = module.psoxy-aws.api_caller_role_arn
+}
