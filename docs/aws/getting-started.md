@@ -10,17 +10,18 @@
 
 
 2. **A sufficiently privileged AWS Role** You must have a IAM Role within the AWS account with
-  sufficient privileges to (AWS managed role examples linked):
-       1. create IAM roles + policies (eg [IAMFullAccess](https://us-east-1.console.aws.amazon.com/iam/home?region=us-east-1#/policies/arn:aws:iam::aws:policy/IAMFullAccess$serviceLevelSummary))
-       2. create and update Systems Manager Parameters (eg, [AmazonSSMFullAccess](https://us-east-1.console.aws.amazon.com/iam/home?region=us-east-1#/policies/arn:aws:iam::aws:policy/AmazonSSMFullAccess$serviceLevelSummary) )
-       3. create and manage Lambdas (eg [AWSLambda_FullAccess](https://us-east-1.console.aws.amazon.com/iam/home?region=us-east-1#/policies/arn:aws:iam::aws:policy/AWSLambda_FullAccess$serviceLevelSummary) )
-       4. create and manage S3 buckets (eg [AmazonS3FullAccess](https://us-east-1.console.aws.amazon.com/iam/home?region=us-east-1#/policies/arn:aws:iam::aws:policy/AmazonS3FullAccess$serviceLevelSummary) )
-       5. create Cloud Watch Log groups (eg [CloudWatchFullAccess](https://us-east-1.console.aws.amazon.com/iam/home?region=us-east-1#/policies/arn:aws:iam::aws:policy/CloudWatchFullAccess$serviceLevelSummary))
+   sufficient privileges to (AWS managed role examples linked):
 
-    (Yes, the use of AWS Managed Policies results in a role with many privileges; that's why we
+   - create IAM roles + policies (eg [IAMFullAccess](https://us-east-1.console.aws.amazon.com/iam/home?region=us-east-1#/policies/arn:aws:iam::aws:policy/IAMFullAccess$serviceLevelSummary))
+   - create and update Systems Manager Parameters (eg, [AmazonSSMFullAccess](https://us-east-1.console.aws.amazon.com/iam/home?region=us-east-1#/policies/arn:aws:iam::aws:policy/AmazonSSMFullAccess$serviceLevelSummary) )
+   - create and manage Lambdas (eg [AWSLambda_FullAccess](https://us-east-1.console.aws.amazon.com/iam/home?region=us-east-1#/policies/arn:aws:iam::aws:policy/AWSLambda_FullAccess$serviceLevelSummary) )
+   - create and manage S3 buckets (eg [AmazonS3FullAccess](https://us-east-1.console.aws.amazon.com/iam/home?region=us-east-1#/policies/arn:aws:iam::aws:policy/AmazonS3FullAccess$serviceLevelSummary) )
+   - create Cloud Watch Log groups (eg [CloudWatchFullAccess](https://us-east-1.console.aws.amazon.com/iam/home?region=us-east-1#/policies/arn:aws:iam::aws:policy/CloudWatchFullAccess$serviceLevelSummary))
+
+   (Yes, the use of AWS Managed Policies results in a role with many privileges; that's why we
     recommend you use a dedicated AWS account to host proxy which is NOT shared with any other use case)
 
-    You will need the ARN of this role.
+   You will need the ARN of this role.
 
 3. **An authenticated AWS CLI in your provisioning environment**. Your environment (eg, shell/etc
    from which you'll run terraform commands) must be authenticated as an identity that can assume
