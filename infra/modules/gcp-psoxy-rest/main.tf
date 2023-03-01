@@ -25,6 +25,7 @@ resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_secret"
 locals {
   # from v0.5, these will be required; for now, allow `null` but filter out so taken from config yaml
   required_env_vars = { for k, v in {
+      SOURCE                          = var.source_kind
       TARGET_HOST                     = var.target_host
       SOURCE_AUTH_STRATEGY_IDENTIFIER = var.source_auth_strategy
     }

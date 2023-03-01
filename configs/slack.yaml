@@ -1,3 +1,2 @@
-SOURCE: slack
 OAUTH_SCOPES: discovery:read
 IDENTIFIER_SCOPE_ID: slack

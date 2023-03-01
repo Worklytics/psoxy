@@ -1,3 +1,2 @@
-SOURCE: gcal
 OAUTH_SCOPES: https://www.googleapis.com/auth/calendar.readonly
 IDENTIFIER_SCOPE_ID: gapps

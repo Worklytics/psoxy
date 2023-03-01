@@ -1,3 +1,2 @@
-SOURCE: gdrive
 OAUTH_SCOPES: https://www.googleapis.com/auth/drive.metadata.readonly
 IDENTIFIER_SCOPE_ID: gapps
