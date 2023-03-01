@@ -133,7 +133,9 @@ locals {
         "User.Read.All",
         "Group.Read.All"
       ]
-      environment_variables : {}
+      environment_variables : {
+        REFRESH_ENDPOINT = "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
+      },
       example_api_calls : [
         "/v1.0/users",
         "/v1.0/users/${var.example_msft_user_guid}",
@@ -154,7 +156,9 @@ locals {
         "Group.Read.All",
         "User.Read.All"
       ],
-      environment_variables : {}
+      environment_variables : {
+        REFRESH_ENDPOINT = "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
+      },
       example_api_calls : [
         "/v1.0/users",
         "/v1.0/users/${var.example_msft_user_guid}/events",
@@ -484,10 +488,6 @@ output "enabled_oauth_long_access_connectors_todos" {
 
 output "enabled_oauth_secrets_to_create" {
   value = local.enabled_oauth_secrets_to_create
-}
-
-output "msft_token_refresh_endpoint" {
-  value = "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
 }
 
 output "enabled_bulk_connectors" {
