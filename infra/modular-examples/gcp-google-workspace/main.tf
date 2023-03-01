@@ -118,6 +118,7 @@ module "psoxy-google-workspace-connector" {
   todo_step                             = module.google-workspace-connection[each.key].next_todo_step
   target_host                           = each.value.target_host
   source_auth_strategy                  = each.value.source_auth_strategy
+  oauth_scopes                          = try(each.value.oauth_scopes_needed, [])
 
   environment_variables = merge(
     var.general_environment_variables,
@@ -219,6 +220,7 @@ module "connector-long-auth-function" {
   secret_bindings               = module.psoxy-gcp.secrets
   target_host                   = each.value.target_host
   source_auth_strategy          = each.value.source_auth_strategy
+  oauth_scopes                  = try(each.value.oauth_scopes_needed, [])
 
   environment_variables = merge(
     var.general_environment_variables,

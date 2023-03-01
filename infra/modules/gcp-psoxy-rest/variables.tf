@@ -74,6 +74,12 @@ variable "source_auth_strategy" {
   default     = null # for v0.4, this is optional; assumed to be in config if not defined here
 }
 
+variable "oauth_scopes" {
+  type        = list(string)
+  description = "The OAuth scopes to use when connecting to the source."
+  default     = []
+}
+
 variable "example_api_calls" {
   type        = list(string)
   description = "example endpoints that can be called via proxy"

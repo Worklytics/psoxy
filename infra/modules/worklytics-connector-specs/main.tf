@@ -254,6 +254,9 @@ EOT
       display_name : "Slack Discovery API"
       target_host : "www.slack.com"
       source_auth_strategy : "oauth2_access_token"
+      oauth_scopes_needed : [
+        "discovery:read",
+      ]
       environment_variables : {}
       secured_variables : [
         { name : "ACCESS_TOKEN", writable : false },

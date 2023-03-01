@@ -85,6 +85,12 @@ variable "source_auth_strategy" {
   default     = null # for v0.4, this is optional; assumed to be in config if not defined here
 }
 
+variable "oauth_scopes" {
+  type        = list(string)
+  description = "The OAuth scopes to use when connecting to the source."
+  default     = []
+}
+
 variable "api_caller_role_arn" {
   type        = string
   description = "arn of role which can be assumed to call API"

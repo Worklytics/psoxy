@@ -264,6 +264,7 @@ module "aws-psoxy-long-auth-connectors" {
   ssm_kms_key_ids                       = local.ssm_key_ids
   target_host                           = each.value.target_host
   source_auth_strategy                  = each.value.source_auth_strategy
+  oauth_scopes                          = try(each.value.oauth_scopes_needed, [])
 
   environment_variables = merge(
     var.general_environment_variables,

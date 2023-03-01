@@ -127,6 +127,7 @@ module "psoxy-google-workspace-connector" {
   ssm_kms_key_ids                       = local.ssm_key_ids
   target_host                           = each.value.target_host
   source_auth_strategy                  = each.value.source_auth_strategy
+  oauth_scopes                          = try(each.value.oauth_scopes_needed, [])
 
   todo_step = module.google-workspace-connection[each.key].next_todo_step
 
@@ -232,6 +233,8 @@ module "aws-psoxy-long-auth-connectors" {
   ssm_kms_key_ids                 = local.ssm_key_ids
   target_host                     = each.value.target_host
   source_auth_strategy            = each.value.source_auth_strategy
+  oauth_scopes                    = try(each.value.oauth_scopes_needed, [])
+
 
   todo_step = module.source_token_external_todo[each.key].next_todo_step
 
