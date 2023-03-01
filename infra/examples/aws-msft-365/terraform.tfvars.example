@@ -8,6 +8,7 @@ msft_tenant_id                = ""
 
 enabled_connectors = [
   "asana",
+  "azure-ad",
   "dropbox-business",
   "outlook-calendar",
   "outlook-mail",
