@@ -18,7 +18,7 @@ resource "aws_kms_key" "key" {
 
 # pass it's id to example
 module "psoxy-aws-google-workspace" {
-  source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-google-workspace?ref=v0.4.11"
+  source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-google-workspace?ref=v0.4.12"
 
   # ... other variables omitted for brevity
 
