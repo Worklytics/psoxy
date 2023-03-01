@@ -44,7 +44,8 @@ or, possibly your Homebrew default installation is at `/usr/local/Cellar/`, in w
 
 NOTE:
   - you may need to edit some similar `export` command in your `.bashrc`/`.zshrc` file, or similar;
-    or repeat the above command every time you open a new terminal window.
+    or add that `export` command to such a file. Otherwise, you'll need to repeat the command every
+    time you open a new terminal window.
   - if you install/upgrade something via Homebrew that depends on Java, you may need to repeat step
     3 again to reset your `JAVA_HOME`
 
@@ -61,6 +62,18 @@ If, on your first `terraform plan`/`terraform apply`, you see the line such as
 
 And that returns really quickly, something may have gone wrong with the build. You can trigger the
 build directly by running:
+
+```bash
+# from the root of your checkout of the repository
+./tools/build.sh
+```
+That may give you some clues as to what went wrong.
+
+You can also look for a file called `last-build.log` in the directory where your Terraform
+configuration resides.
+
+
+If you want to go step-by-step, you can run the following commands:
 ```bash
 # from the root of your checkout of the repository
 cd java/gateway-core
@@ -70,10 +83,6 @@ mvn package install
 cd ../impl/aws
 mvn package
 ```
-That may give you some clues as to what went wrong.
-
-You can also look for a file called `last-build.log` in the directory where your Terraform
-configuration resides.
 
 Some problems we've seen:
   - **Maven repository access** - the build process must get various dependencies from a remote
