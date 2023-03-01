@@ -111,11 +111,14 @@ module "psoxy-google-workspace-connector" {
   service_account_email                 = module.google-workspace-connection[each.key].service_account_email
   artifacts_bucket_name                 = module.psoxy-gcp.artifacts_bucket_name
   deployment_bundle_object_name         = module.psoxy-gcp.deployment_bundle_object_name
-  path_to_config                        = "${local.base_config_path}${each.value.source_kind}.yaml"
+  path_to_config                        = null
   path_to_repo_root                     = var.psoxy_base_dir
   example_api_calls                     = each.value.example_api_calls
   example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
   todo_step                             = module.google-workspace-connection[each.key].next_todo_step
+  target_host                           = each.value.target_host
+  source_auth_strategy                  = each.value.source_auth_strategy
+  oauth_scopes                          = try(each.value.oauth_scopes_needed, [])
 
   environment_variables = merge(
     var.general_environment_variables,
@@ -210,11 +213,14 @@ module "connector-long-auth-function" {
   service_account_email         = google_service_account.long_auth_connector_sa[each.key].email
   artifacts_bucket_name         = module.psoxy-gcp.artifacts_bucket_name
   deployment_bundle_object_name = module.psoxy-gcp.deployment_bundle_object_name
-  path_to_config                = "${local.base_config_path}${each.value.source_kind}.yaml"
+  path_to_config                = null
   path_to_repo_root             = var.psoxy_base_dir
   example_api_calls             = each.value.example_api_calls
   todo_step                     = module.source_token_external_todo[each.key].next_todo_step
   secret_bindings               = module.psoxy-gcp.secrets
+  target_host                   = each.value.target_host
+  source_auth_strategy          = each.value.source_auth_strategy
+  oauth_scopes                  = try(each.value.oauth_scopes_needed, [])
 
   environment_variables = merge(
     var.general_environment_variables,

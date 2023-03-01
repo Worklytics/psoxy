@@ -46,7 +46,7 @@ variable "path_to_repo_root" {
 
 variable "path_to_config" {
   type        = string
-  description = "path to config file (usually something in ../../configs/, eg configs/gdirectory.yaml"
+  description = "DEPRECATED; path to config file (usually something in ../../configs/, eg configs/gdirectory.yaml"
   default     = null
 }
 
@@ -60,6 +60,24 @@ variable "salt_secret_version_number" {
   type        = string
   description = "DEPRECATED: Version number of the secret used to salt pseudonyms"
   default     = ""
+}
+
+variable "target_host" {
+  type        = string
+  description = "The target host to which to forward requests."
+  default     = null # for v0.4, this is optional; assumed to be in config if not defined here
+}
+
+variable "source_auth_strategy" {
+  type        = string
+  description = "The authentication strategy to use when connecting to the source."
+  default     = null # for v0.4, this is optional; assumed to be in config if not defined here
+}
+
+variable "oauth_scopes" {
+  type        = list(string)
+  description = "The OAuth scopes to use when connecting to the source."
+  default     = []
 }
 
 variable "example_api_calls" {
@@ -84,6 +102,12 @@ variable "source_kind" {
   type        = string
   description = "kind of source to which you're connecting"
   default     = "unknown"
+}
+
+variable "identifier_scope_id" {
+  type        = string
+  description = "DEPRECATED; will be removed in v0.5.x"
+  default     = null
 }
 
 variable "available_memory_mb" {

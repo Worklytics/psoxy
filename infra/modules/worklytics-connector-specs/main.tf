@@ -1,5 +1,9 @@
-locals {
 
+# TODO: arguably it does make sense to have these in yaml, and read them from there; bc YAML gives
+# more interoperability than in a .tf file
+
+
+locals {
 
   google_workspace_sources = {
     # GDirectory connections are a PRE-REQ for gmail, gdrive, and gcal connections. remove only
@@ -11,6 +15,7 @@ locals {
       source_kind : "gdirectory",
       worklytics_connector_id : "gdirectory-psoxy",
       display_name : "Google Directory"
+      identifier_scope_id : "gapps"
       apis_consumed : [
         "admin.googleapis.com"
       ]
@@ -23,6 +28,8 @@ locals {
         "https://www.googleapis.com/auth/admin.directory.orgunit.readonly",
         "https://www.googleapis.com/auth/admin.directory.rolemanagement.readonly"
       ]
+      source_auth_strategy : "gcp_service_account_key"
+      target_host : "admin.googleapis.com"
       environment_variables : {}
       example_api_calls : [
         "/admin/directory/v1/users?customer=my_customer&maxResults=10",
@@ -37,9 +44,12 @@ locals {
       source_kind : "gcal",
       worklytics_connector_id : "gcal-psoxy",
       display_name : "Google Calendar"
+      identifier_scope_id : "gapps"
       apis_consumed : [
         "calendar-json.googleapis.com"
       ]
+      source_auth_strategy : "gcp_service_account_key"
+      target_host : "www.googleapis.com"
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/calendar.readonly"
       ],
@@ -55,9 +65,12 @@ locals {
       source_kind : "gmail",
       worklytics_connector_id : "gmail-meta-psoxy",
       display_name : "GMail"
+      identifier_scope_id : "gapps"
       apis_consumed : [
         "gmail.googleapis.com"
       ]
+      source_auth_strategy : "gcp_service_account_key"
+      target_host : "www.googleapis.com"
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/gmail.metadata"
       ],
@@ -71,9 +84,12 @@ locals {
       source_kind : "google-chat",
       worklytics_connector_id : "google-chat-psoxy",
       display_name : "Google Chat"
+      identifier_scope_id : "gapps"
       apis_consumed : [
         "admin.googleapis.com"
       ]
+      source_auth_strategy : "gcp_service_account_key"
+      target_host : "admin.googleapis.com"
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/admin.reports.audit.readonly"
       ]
@@ -84,12 +100,15 @@ locals {
       example_api_calls_user_to_impersonate : var.google_workspace_example_user
     },
     "google-meet" : {
-      source_kind : "google-meet",
-      worklytics_connector_id : "google-meet-psoxy",
+      source_kind : "google-meet"
+      worklytics_connector_id : "google-meet-psoxy"
       display_name : "Google Meet"
+      identifier_scope_id : "gapps"
       apis_consumed : [
         "admin.googleapis.com"
       ]
+      source_auth_strategy : "gcp_service_account_key"
+      target_host : "admin.googleapis.com"
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/admin.reports.audit.readonly"
       ]
@@ -103,9 +122,12 @@ locals {
       source_kind : "gdrive",
       worklytics_connector_id : "gdrive-psoxy",
       display_name : "Google Drive"
+      identifier_scope_id : "gapps"
       apis_consumed : [
         "drive.googleapis.com"
       ]
+      source_auth_strategy : "gcp_service_account_key"
+      target_host : "www.googleapis.com"
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/drive.metadata.readonly"
       ],
@@ -126,6 +148,9 @@ locals {
       worklytics_connector_id : "azure-ad-psoxy",
       source_kind : "azure-ad",
       display_name : "Azure Directory"
+      identifier_scope_id : "azure-ad"
+      source_auth_strategy : "oauth2_refresh_token"
+      target_host : "graph.microsoft.com"
       required_oauth2_permission_scopes : [],
       # Delegated permissions (from `az ad sp list --query "[?appDisplayName=='Microsoft Graph'].oauth2Permissions" --all`)
       required_app_roles : [
@@ -134,6 +159,8 @@ locals {
         "Group.Read.All"
       ]
       environment_variables : {
+        GRANT_TYPE : "workload_identity_federation" # by default, assumed to be of type 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
+        TOKEN_SCOPE : "https://graph.microsoft.com/.default"
         REFRESH_ENDPOINT = "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
       },
       example_api_calls : [
@@ -148,6 +175,9 @@ locals {
       source_kind : "outlook-cal",
       worklytics_connector_id : "outlook-cal-psoxy",
       display_name : "Outlook Calendar"
+      identifier_scope_id : "azure-ad"
+      source_auth_strategy : "oauth2_refresh_token"
+      target_host : "graph.microsoft.com"
       required_oauth2_permission_scopes : [],
       required_app_roles : [
         "OnlineMeetings.Read.All",
@@ -157,6 +187,8 @@ locals {
         "User.Read.All"
       ],
       environment_variables : {
+        GRANT_TYPE : "workload_identity_federation" # by default, assumed to be of type 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
+        TOKEN_SCOPE : "https://graph.microsoft.com/.default"
         REFRESH_ENDPOINT = "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
       },
       example_api_calls : [
@@ -173,6 +205,9 @@ locals {
       source_kind : "outlook-mail"
       worklytics_connector_id : "outlook-mail-psoxy",
       display_name : "Outlook Mail"
+      identifier_scope_id : "azure-ad"
+      source_auth_strategy : "oauth2_refresh_token"
+      target_host : "graph.microsoft.com"
       required_oauth2_permission_scopes : [],
       required_app_roles : [
         "Mail.ReadBasic.All",
@@ -181,7 +216,9 @@ locals {
         "User.Read.All"
       ],
       environment_variables : {
-        REFRESH_ENDPOINT = "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
+        GRANT_TYPE : "workload_identity_federation" # by default, assumed to be of type 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
+        TOKEN_SCOPE : "https://graph.microsoft.com/.default"
+        REFRESH_ENDPOINT : "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
       }
       example_api_calls : [
         "/beta/users",
@@ -195,9 +232,12 @@ locals {
   oauth_long_access_connectors = {
     asana = {
       source_kind : "asana",
-      worklytics_connector_id : "asana-psoxy",
+      worklytics_connector_id : "asana-psoxy"
       display_name : "Asana"
-      worklytics_connector_name : "Asana via Psoxy",
+      identifier_scope_id : "asana"
+      worklytics_connector_name : "Asana via Psoxy"
+      target_host : "app.asana.com"
+      source_auth_strategy : "oauth2_access_token"
       environment_variables : {}
       secured_variables : [
         { name : "ACCESS_TOKEN", writable : false },
@@ -225,9 +265,15 @@ EOT
     }
     slack-discovery-api = {
       source_kind : "slack"
+      identifier_scope_id : "slack"
       worklytics_connector_id : "slack-discovery-api-psoxy",
       worklytics_connector_name : "Slack via Psoxy",
       display_name : "Slack Discovery API"
+      target_host : "www.slack.com"
+      source_auth_strategy : "oauth2_access_token"
+      oauth_scopes_needed : [
+        "discovery:read",
+      ]
       environment_variables : {}
       secured_variables : [
         { name : "ACCESS_TOKEN", writable : false },
@@ -269,10 +315,16 @@ EOT
     }
     zoom = {
       source_kind : "zoom"
-      worklytics_connector_id : "zoom-psoxy",
+      worklytics_connector_id : "zoom-psoxy"
       display_name : "Zoom"
-      worklytics_connector_name : "Zoom via Psoxy",
-      environment_variables : {}
+      worklytics_connector_name : "Zoom via Psoxy"
+      identifier_scope_id : "zoom"
+      source_auth_strategy: "oauth2_refresh_token"
+      target_host: "api.zoom.us"
+      environment_variables : {
+        GRANT_TYPE: "account_credentials"
+        REFRESH_ENDPOINT: "https://zoom.us/oauth/token"
+      }
       secured_variables : [
         { name : "CLIENT_SECRET", writable : false },
         { name : "CLIENT_ID", writable : false },
@@ -314,16 +366,20 @@ Anytime the *client secret* is regenerated it needs to be updated in the Proxy t
 EOT
     },
     dropbox-business = {
-      source_kind : "dropbox-business",
-      worklytics_connector_id : "dropbox-business-log-psoxy",
-      display_name : "Dropbox Business",
-      worklytics_connector_name : "Dropbox Business via Psoxy",
+      source_kind : "dropbox-business"
+      worklytics_connector_id : "dropbox-business-log-psoxy"
+      target_host: "api.dropboxapi.com"
+      source_auth_strategy: "oauth2_refresh_token"
+      display_name : "Dropbox Business"
+      identifier_scope_id : "dropbox-business"
+      worklytics_connector_name : "Dropbox Business via Psoxy"
       secured_variables : [
         { name : "REFRESH_TOKEN", writable : false },
         { name : "CLIENT_ID", writable : false },
         { name : "CLIENT_SECRET", writable : false },
       ],
       environment_variables : {
+        GRANT_TYPE : "refresh_token"
         REFRESH_ENDPOINT : "https://api.dropboxapi.com/oauth2/token"
       }
       reserved_concurrent_executions : null

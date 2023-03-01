@@ -8,6 +8,19 @@ terraform {
   }
 }
 
+locals {
+  # from v0.5, these will be required; for now, allow `null` but filter out so taken from config yaml
+  required_env_vars = { for k, v in {
+        SOURCE                          = var.source_kind
+        TARGET_HOST                     = var.target_host
+        SOURCE_AUTH_STRATEGY_IDENTIFIER = var.source_auth_strategy
+        OAUTH_SCOPES                    = join(" ", var.oauth_scopes)
+        IDENTIFIER_SCOPE_ID             = var.identifier_scope_id
+      }
+    : k => v if v != null
+  }
+}
+
 module "psoxy_lambda" {
   source = "../aws-psoxy-lambda"
 
@@ -23,8 +36,11 @@ module "psoxy_lambda" {
   function_parameters             = var.function_parameters
   path_to_instance_ssm_parameters = var.path_to_instance_ssm_parameters
   global_parameter_arns           = var.global_parameter_arns
-  environment_variables           = var.environment_variables
   ssm_kms_key_ids                 = var.ssm_kms_key_ids
+  environment_variables           = merge(
+    var.environment_variables,
+    local.required_env_vars
+  )
 }
 
 resource "aws_lambda_function_url" "lambda_url" {

@@ -52,6 +52,12 @@ variable "source_kind" {
   description = "kind of source (eg, 'gmail', 'google-chat', etc)"
 }
 
+variable "identifier_scope_id" {
+  type        = string
+  description = "DEPRECATED; will be removed in v0.5.x"
+  default     = null
+}
+
 variable "path_to_repo_root" {
   type        = string
   description = "the path where your psoxy repo resides"
@@ -70,7 +76,26 @@ variable "function_zip_hash" {
 
 variable "path_to_config" {
   type        = string
-  description = "path to config file (usually someting in ../../configs/, eg configs/gdirectory.yaml"
+  description = "DEPRECATED; path to config file (usually someting in ../../configs/, eg configs/gdirectory.yaml"
+  default     = null
+}
+
+variable "target_host" {
+  type        = string
+  description = "The target host to which to forward requests."
+  default     = null # for v0.4, this is optional; assumed to be in config if not defined here
+}
+
+variable "source_auth_strategy" {
+  type        = string
+  description = "The authentication strategy to use when connecting to the source."
+  default     = null # for v0.4, this is optional; assumed to be in config if not defined here
+}
+
+variable "oauth_scopes" {
+  type        = list(string)
+  description = "The OAuth scopes to use when connecting to the source."
+  default     = []
 }
 
 variable "api_caller_role_arn" {

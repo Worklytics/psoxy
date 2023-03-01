@@ -22,6 +22,21 @@ resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_secret"
   role      = "roles/secretmanager.secretAccessor"
 }
 
+locals {
+  # from v0.5, these will be required; for now, allow `null` but filter out so taken from config yaml
+  # these are 'standard' env vars, expected from most connectors
+  # any 'non-standard' ones can just be passed through var.environment_variables
+  required_env_vars = { for k, v in {
+      SOURCE                          = var.source_kind
+      TARGET_HOST                     = var.target_host
+      SOURCE_AUTH_STRATEGY_IDENTIFIER = var.source_auth_strategy
+      OAUTH_SCOPES                    = join(" ", var.oauth_scopes)
+      IDENTIFIER_SCOPE_ID             = var.identifier_scope_id
+    }
+    : k => v if v != null
+  }
+}
+
 resource "google_cloudfunctions_function" "function" {
   name        = var.instance_id
   description = "Psoxy Connector - ${var.source_kind}"
@@ -36,6 +51,7 @@ resource "google_cloudfunctions_function" "function" {
   service_account_email = var.service_account_email
 
   environment_variables = merge(
+    local.required_env_vars,
     var.path_to_config == null ? {} : yamldecode(file(var.path_to_config)),
     var.environment_variables
   )

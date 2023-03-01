@@ -115,7 +115,7 @@ module "psoxy-google-workspace-connector" {
   source_kind                           = each.key
   path_to_function_zip                  = module.psoxy-aws.path_to_deployment_jar
   function_zip_hash                     = module.psoxy-aws.deployment_package_hash
-  path_to_config                        = "${local.base_config_path}/${each.key}.yaml"
+  path_to_config                        = null
   api_caller_role_arn                   = module.psoxy-aws.api_caller_role_arn
   aws_assume_role_arn                   = var.aws_assume_role_arn
   aws_account_id                        = var.aws_account_id
@@ -125,6 +125,9 @@ module "psoxy-google-workspace-connector" {
   global_parameter_arns                 = module.global_secrets.secret_arns
   path_to_instance_ssm_parameters       = "${var.aws_ssm_param_root_path}PSOXY_${upper(replace(each.key, "-", "_"))}_"
   ssm_kms_key_ids                       = local.ssm_key_ids
+  target_host                           = each.value.target_host
+  source_auth_strategy                  = each.value.source_auth_strategy
+  oauth_scopes                          = try(each.value.oauth_scopes_needed, [])
 
   todo_step = module.google-workspace-connection[each.key].next_todo_step
 
@@ -216,7 +219,7 @@ module "aws-psoxy-long-auth-connectors" {
   function_name                   = "psoxy-${each.key}"
   path_to_function_zip            = module.psoxy-aws.path_to_deployment_jar
   function_zip_hash               = module.psoxy-aws.deployment_package_hash
-  path_to_config                  = "${local.base_config_path}/${each.value.source_kind}.yaml"
+  path_to_config                  = null
   aws_assume_role_arn             = var.aws_assume_role_arn
   aws_account_id                  = var.aws_account_id
   api_caller_role_arn             = module.psoxy-aws.api_caller_role_arn
@@ -228,6 +231,10 @@ module "aws-psoxy-long-auth-connectors" {
   function_parameters             = each.value.secured_variables
   path_to_instance_ssm_parameters = "${var.aws_ssm_param_root_path}PSOXY_${upper(replace(each.key, "-", "_"))}_"
   ssm_kms_key_ids                 = local.ssm_key_ids
+  target_host                     = each.value.target_host
+  source_auth_strategy            = each.value.source_auth_strategy
+  oauth_scopes                    = try(each.value.oauth_scopes_needed, [])
+
 
   todo_step = module.source_token_external_todo[each.key].next_todo_step
 
