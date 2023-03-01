@@ -1,3 +1,2 @@
 SOURCE: dropbox-business
-GRANT_TYPE: refresh_token
 IDENTIFIER_SCOPE_ID: dropbox-business

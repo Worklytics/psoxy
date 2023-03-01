@@ -1,5 +1,3 @@
 SOURCE: zoom
 OAUTH_SCOPES:
 IDENTIFIER_SCOPE_ID: zoom
-GRANT_TYPE: account_credentials
-REFRESH_ENDPOINT: https://zoom.us/oauth/token

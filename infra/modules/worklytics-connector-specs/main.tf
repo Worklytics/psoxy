@@ -147,7 +147,10 @@ locals {
         "User.Read.All",
         "Group.Read.All"
       ]
-      environment_variables : {}
+      environment_variables : {
+        GRANT_TYPE : "workload_identity_federation" # by default, assumed to be of type 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
+        TOKEN_SCOPE : "https://graph.microsoft.com/.default"
+      }
       example_api_calls : [
         "/v1.0/users",
         "/v1.0/users/${var.example_msft_user_guid}",
@@ -170,7 +173,10 @@ locals {
         "Group.Read.All",
         "User.Read.All"
       ],
-      environment_variables : {}
+      environment_variables : {
+        GRANT_TYPE : "workload_identity_federation" # by default, assumed to be of type 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
+        TOKEN_SCOPE : "https://graph.microsoft.com/.default"
+      }
       example_api_calls : [
         "/v1.0/users",
         "/v1.0/users/${var.example_msft_user_guid}/events",
@@ -195,7 +201,9 @@ locals {
         "User.Read.All"
       ],
       environment_variables : {
-        REFRESH_ENDPOINT = "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
+        GRANT_TYPE : "workload_identity_federation" # by default, assumed to be of type 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
+        TOKEN_SCOPE : "https://graph.microsoft.com/.default"
+        REFRESH_ENDPOINT : "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
       }
       example_api_calls : [
         "/beta/users",
@@ -292,7 +300,10 @@ EOT
       worklytics_connector_name : "Zoom via Psoxy"
       source_auth_strategy: "oauth2_refresh_token"
       target_host: "api.zoom.us"
-      environment_variables : {}
+      environment_variables : {
+        GRANT_TYPE: "account_credentials"
+        REFRESH_ENDPOINT: "https://zoom.us/oauth/token"
+      }
       secured_variables : [
         { name : "CLIENT_SECRET", writable : false },
         { name : "CLIENT_ID", writable : false },
@@ -346,6 +357,7 @@ EOT
         { name : "CLIENT_SECRET", writable : false },
       ],
       environment_variables : {
+        GRANT_TYPE : "refresh_token"
         REFRESH_ENDPOINT : "https://api.dropboxapi.com/oauth2/token"
       }
       reserved_concurrent_executions : null

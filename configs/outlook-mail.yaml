@@ -1,4 +1,2 @@
 SOURCE: outlook-mail
-GRANT_TYPE: workload_identity_federation # by default, assumed to be of type 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
 IDENTIFIER_SCOPE_ID: azure-ad
-TOKEN_SCOPE: https://graph.microsoft.com/.default
