@@ -155,7 +155,6 @@ module "psoxy-msft-connector" {
     {
       IS_DEVELOPMENT_MODE  = contains(var.non_production_connectors, each.key)
       CLIENT_ID            = module.msft-connection[each.key].connector.application_id
-      REFRESH_ENDPOINT     = module.worklytics_connector_specs.msft_token_refresh_endpoint
       PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
       IDENTITY_POOL_ID     = module.cognito-identity-pool.pool_id,
       IDENTITY_ID          = module.cognito-identity.identity_id[each.key]
