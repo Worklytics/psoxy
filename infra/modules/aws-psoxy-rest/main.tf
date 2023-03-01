@@ -122,6 +122,8 @@ resource "local_file" "test_script" {
 API_PATH=$${1:-${try(var.example_api_calls[0], "")}}
 echo "Quick test of ${var.function_name} ..."
 
+${local.command_cli_call} -u "${local.proxy_endpoint_url}" --health-check
+
 ${local.command_cli_call} -u "${local.proxy_endpoint_url}$API_PATH" ${local.impersonation_param}
 
 echo "Invoke this script with any of the following as arguments to test other endpoints:${"\r\n\t"}${join("\r\n\t", var.example_api_calls)}"
