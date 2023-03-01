@@ -73,6 +73,18 @@ variable "path_to_config" {
   description = "path to config file (usually someting in ../../configs/, eg configs/gdirectory.yaml"
 }
 
+variable "target_host" {
+  type        = string
+  description = "The target host to which to forward requests."
+  default     = null # for v0.4, this is optional; assumed to be in config if not defined here
+}
+
+variable "source_auth_strategy" {
+  type        = string
+  description = "The authentication strategy to use when connecting to the source."
+  default     = null # for v0.4, this is optional; assumed to be in config if not defined here
+}
+
 variable "api_caller_role_arn" {
   type        = string
   description = "arn of role which can be assumed to call API"

@@ -1,5 +1,3 @@
 SOURCE: dropbox-business
-TARGET_HOST: api.dropboxapi.com
-SOURCE_AUTH_STRATEGY_IDENTIFIER: oauth2_refresh_token
 GRANT_TYPE: refresh_token
 IDENTIFIER_SCOPE_ID: dropbox-business

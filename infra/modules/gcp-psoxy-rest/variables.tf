@@ -62,6 +62,18 @@ variable "salt_secret_version_number" {
   default     = ""
 }
 
+variable "target_host" {
+  type        = string
+  description = "The target host to which to forward requests."
+  default     = null # for v0.4, this is optional; assumed to be in config if not defined here
+}
+
+variable "source_auth_strategy" {
+  type        = string
+  description = "The authentication strategy to use when connecting to the source."
+  default     = null # for v0.4, this is optional; assumed to be in config if not defined here
+}
+
 variable "example_api_calls" {
   type        = list(string)
   description = "example endpoints that can be called via proxy"

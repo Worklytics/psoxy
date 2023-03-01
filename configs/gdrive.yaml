@@ -1,5 +1,3 @@
 SOURCE: gdrive
-SOURCE_AUTH_STRATEGY_IDENTIFIER: gcp_service_account_key
-TARGET_HOST: www.googleapis.com
 OAUTH_SCOPES: https://www.googleapis.com/auth/drive.metadata.readonly
 IDENTIFIER_SCOPE_ID: gapps

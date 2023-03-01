@@ -146,6 +146,8 @@ module "psoxy-msft-connector" {
   global_parameter_arns           = module.global_secrets.secret_arns
   path_to_instance_ssm_parameters = "${var.aws_ssm_param_root_path}PSOXY_${upper(replace(each.key, "-", "_"))}_"
   ssm_kms_key_ids                 = local.ssm_key_ids
+  target_host                     = each.value.target_host
+  source_auth_strategy            = each.value.source_auth_strategy
 
   environment_variables = merge(
     var.general_environment_variables,
@@ -260,6 +262,8 @@ module "aws-psoxy-long-auth-connectors" {
   path_to_instance_ssm_parameters       = "${var.aws_ssm_param_root_path}PSOXY_${upper(replace(each.key, "-", "_"))}_"
   function_parameters                   = each.value.secured_variables
   ssm_kms_key_ids                       = local.ssm_key_ids
+  target_host                           = each.value.target_host
+  source_auth_strategy                  = each.value.source_auth_strategy
 
   environment_variables = merge(
     var.general_environment_variables,

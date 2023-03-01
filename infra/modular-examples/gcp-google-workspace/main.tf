@@ -116,6 +116,8 @@ module "psoxy-google-workspace-connector" {
   example_api_calls                     = each.value.example_api_calls
   example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
   todo_step                             = module.google-workspace-connection[each.key].next_todo_step
+  target_host                           = each.value.target_host
+  source_auth_strategy                  = each.value.source_auth_strategy
 
   environment_variables = merge(
     var.general_environment_variables,
@@ -215,6 +217,8 @@ module "connector-long-auth-function" {
   example_api_calls             = each.value.example_api_calls
   todo_step                     = module.source_token_external_todo[each.key].next_todo_step
   secret_bindings               = module.psoxy-gcp.secrets
+  target_host                   = each.value.target_host
+  source_auth_strategy          = each.value.source_auth_strategy
 
   environment_variables = merge(
     var.general_environment_variables,

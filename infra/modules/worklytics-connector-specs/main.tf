@@ -23,6 +23,8 @@ locals {
         "https://www.googleapis.com/auth/admin.directory.orgunit.readonly",
         "https://www.googleapis.com/auth/admin.directory.rolemanagement.readonly"
       ]
+      source_auth_strategy : "gcp_service_account_key"
+      target_host : "admin.googleapis.com"
       environment_variables : {}
       example_api_calls : [
         "/admin/directory/v1/users?customer=my_customer&maxResults=10",
@@ -40,6 +42,8 @@ locals {
       apis_consumed : [
         "calendar-json.googleapis.com"
       ]
+      source_auth_strategy : "gcp_service_account_key"
+      target_host : "www.googleapis.com"
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/calendar.readonly"
       ],
@@ -58,6 +62,8 @@ locals {
       apis_consumed : [
         "gmail.googleapis.com"
       ]
+      source_auth_strategy : "gcp_service_account_key"
+      target_host : "www.googleapis.com"
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/gmail.metadata"
       ],
@@ -74,6 +80,8 @@ locals {
       apis_consumed : [
         "admin.googleapis.com"
       ]
+      source_auth_strategy : "gcp_service_account_key"
+      target_host : "admin.googleapis.com"
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/admin.reports.audit.readonly"
       ]
@@ -90,6 +98,8 @@ locals {
       apis_consumed : [
         "admin.googleapis.com"
       ]
+      source_auth_strategy : "gcp_service_account_key"
+      target_host : "admin.googleapis.com"
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/admin.reports.audit.readonly"
       ]
@@ -106,6 +116,8 @@ locals {
       apis_consumed : [
         "drive.googleapis.com"
       ]
+      source_auth_strategy : "gcp_service_account_key"
+      target_host : "www.googleapis.com"
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/drive.metadata.readonly"
       ],
@@ -126,6 +138,8 @@ locals {
       worklytics_connector_id : "azure-ad-psoxy",
       source_kind : "azure-ad",
       display_name : "Azure Directory"
+      source_auth_strategy : "oauth2_refresh_token"
+      target_host : "graph.microsoft.com"
       required_oauth2_permission_scopes : [],
       # Delegated permissions (from `az ad sp list --query "[?appDisplayName=='Microsoft Graph'].oauth2Permissions" --all`)
       required_app_roles : [
@@ -146,6 +160,8 @@ locals {
       source_kind : "outlook-cal",
       worklytics_connector_id : "outlook-cal-psoxy",
       display_name : "Outlook Calendar"
+      source_auth_strategy : "oauth2_refresh_token"
+      target_host : "graph.microsoft.com"
       required_oauth2_permission_scopes : [],
       required_app_roles : [
         "OnlineMeetings.Read.All",
@@ -169,6 +185,8 @@ locals {
       source_kind : "outlook-mail"
       worklytics_connector_id : "outlook-mail-psoxy",
       display_name : "Outlook Mail"
+      source_auth_strategy : "oauth2_refresh_token"
+      target_host : "graph.microsoft.com"
       required_oauth2_permission_scopes : [],
       required_app_roles : [
         "Mail.ReadBasic.All",
@@ -191,9 +209,11 @@ locals {
   oauth_long_access_connectors = {
     asana = {
       source_kind : "asana",
-      worklytics_connector_id : "asana-psoxy",
+      worklytics_connector_id : "asana-psoxy"
       display_name : "Asana"
-      worklytics_connector_name : "Asana via Psoxy",
+      worklytics_connector_name : "Asana via Psoxy"
+      target_host : "app.asana.com"
+      source_auth_strategy : "oauth2_access_token"
       environment_variables : {}
       secured_variables : [
         { name : "ACCESS_TOKEN", writable : false },
@@ -224,6 +244,8 @@ EOT
       worklytics_connector_id : "slack-discovery-api-psoxy",
       worklytics_connector_name : "Slack via Psoxy",
       display_name : "Slack Discovery API"
+      target_host : "www.slack.com"
+      source_auth_strategy : "oauth2_access_token"
       environment_variables : {}
       secured_variables : [
         { name : "ACCESS_TOKEN", writable : false },
@@ -265,9 +287,11 @@ EOT
     }
     zoom = {
       source_kind : "zoom"
-      worklytics_connector_id : "zoom-psoxy",
+      worklytics_connector_id : "zoom-psoxy"
       display_name : "Zoom"
-      worklytics_connector_name : "Zoom via Psoxy",
+      worklytics_connector_name : "Zoom via Psoxy"
+      source_auth_strategy: "oauth2_refresh_token"
+      target_host: "api.zoom.us"
       environment_variables : {}
       secured_variables : [
         { name : "CLIENT_SECRET", writable : false },
@@ -310,10 +334,12 @@ Anytime the *client secret* is regenerated it needs to be updated in the Proxy t
 EOT
     },
     dropbox-business = {
-      source_kind : "dropbox-business",
-      worklytics_connector_id : "dropbox-business-log-psoxy",
-      display_name : "Dropbox Business",
-      worklytics_connector_name : "Dropbox Business via Psoxy",
+      source_kind : "dropbox-business"
+      worklytics_connector_id : "dropbox-business-log-psoxy"
+      target_host: "api.dropboxapi.com"
+      source_auth_strategy: "oauth2_refresh_token"
+      display_name : "Dropbox Business"
+      worklytics_connector_name : "Dropbox Business via Psoxy"
       secured_variables : [
         { name : "REFRESH_TOKEN", writable : false },
         { name : "CLIENT_ID", writable : false },
