@@ -52,6 +52,12 @@ variable "source_kind" {
   description = "kind of source (eg, 'gmail', 'google-chat', etc)"
 }
 
+variable "identifier_scope_id" {
+  type        = string
+  description = "DEPRECATED; will be removed in v0.5.x"
+  default     = null
+}
+
 variable "path_to_repo_root" {
   type        = string
   description = "the path where your psoxy repo resides"
@@ -70,7 +76,8 @@ variable "function_zip_hash" {
 
 variable "path_to_config" {
   type        = string
-  description = "path to config file (usually someting in ../../configs/, eg configs/gdirectory.yaml"
+  description = "DEPRECATED; path to config file (usually someting in ../../configs/, eg configs/gdirectory.yaml"
+  default     = null
 }
 
 variable "target_host" {

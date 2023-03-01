@@ -46,7 +46,7 @@ variable "path_to_repo_root" {
 
 variable "path_to_config" {
   type        = string
-  description = "path to config file (usually something in ../../configs/, eg configs/gdirectory.yaml"
+  description = "DEPRECATED; path to config file (usually something in ../../configs/, eg configs/gdirectory.yaml"
   default     = null
 }
 
@@ -102,6 +102,12 @@ variable "source_kind" {
   type        = string
   description = "kind of source to which you're connecting"
   default     = "unknown"
+}
+
+variable "identifier_scope_id" {
+  type        = string
+  description = "DEPRECATED; will be removed in v0.5.x"
+  default     = null
 }
 
 variable "available_memory_mb" {

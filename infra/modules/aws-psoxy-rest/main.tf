@@ -15,6 +15,7 @@ locals {
         TARGET_HOST                     = var.target_host
         SOURCE_AUTH_STRATEGY_IDENTIFIER = var.source_auth_strategy
         OAUTH_SCOPES                    = concat(" ", var.oauth_scopes)
+        IDENTIFIER_SCOPE_ID             = var.identifier_scope_id
       }
     : k => v if v != null
   }

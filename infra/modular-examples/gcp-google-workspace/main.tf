@@ -111,7 +111,7 @@ module "psoxy-google-workspace-connector" {
   service_account_email                 = module.google-workspace-connection[each.key].service_account_email
   artifacts_bucket_name                 = module.psoxy-gcp.artifacts_bucket_name
   deployment_bundle_object_name         = module.psoxy-gcp.deployment_bundle_object_name
-  path_to_config                        = "${local.base_config_path}${each.value.source_kind}.yaml"
+  path_to_config                        = null
   path_to_repo_root                     = var.psoxy_base_dir
   example_api_calls                     = each.value.example_api_calls
   example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
@@ -213,7 +213,7 @@ module "connector-long-auth-function" {
   service_account_email         = google_service_account.long_auth_connector_sa[each.key].email
   artifacts_bucket_name         = module.psoxy-gcp.artifacts_bucket_name
   deployment_bundle_object_name = module.psoxy-gcp.deployment_bundle_object_name
-  path_to_config                = "${local.base_config_path}${each.value.source_kind}.yaml"
+  path_to_config                = null
   path_to_repo_root             = var.psoxy_base_dir
   example_api_calls             = each.value.example_api_calls
   todo_step                     = module.source_token_external_todo[each.key].next_todo_step

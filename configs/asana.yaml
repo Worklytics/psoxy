@@ -1,1 +1,5 @@
+SOURCE: asana
+SOURCE_AUTH_STRATEGY_IDENTIFIER: oauth2_access_token
+TARGET_HOST: app.asana.com
+OAUTH_SCOPES:
 IDENTIFIER_SCOPE_ID: asana
