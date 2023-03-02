@@ -10,8 +10,7 @@ It can serve as guide for  how to create equivalent Terraform configurations for
 ## Usage
 
 Create a file in this directory named `terraform.tfvars` to specify your personal settings, with
-content
-
+content:
 ```terraform
 billing_account_id   = "--your billing account id--"
 project_id           = "--desired project id (must be unique)--"
@@ -21,8 +20,10 @@ worklytics_sa_emails = [
   "--email address of service account that personifies your Worklytics account--"
 ]
 ```
+In order to get the Service Account Email value for `worklytics_sa_emails`, log in to your Worklytics
+Account and visit the [Configuration Values](https://app.worklytics.co/analytics/integrations/configuration) page.
 
-for example:
+For example:
 ```terraform
 billing_account_id   = "0A2AE4-1D396E-1219D9"
 folder_id            = "33576234038"
