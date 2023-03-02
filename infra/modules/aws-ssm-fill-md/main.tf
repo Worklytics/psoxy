@@ -19,7 +19,7 @@ YMMV.
 aws ssm put-parameter \
 --region ${var.region} \
 --name "${var.parameter_name}" \
---type "SecureString " \
+--type "SecureString" \
 --value "YOUR_VALUE_HERE" \
 --overwrite
 ```
@@ -29,7 +29,7 @@ from macOS clipboard
 pbpaste | aws ssm put-parameter \
 --region ${var.region} \
 --name "${var.parameter_name}" \
---type "SecureString " \
+--type "SecureString" \
 --value=- \
 --overwrite
 ```
