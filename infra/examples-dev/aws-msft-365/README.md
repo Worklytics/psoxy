@@ -41,6 +41,8 @@ caller_gcp_service_account_ids = [
 psoxy_base_dir                = "../../../"
 ```
 
+In order to get the Service Account Unique ID value for `caller_gcp_service_account_ids`, log in to your Worklytics
+Account and visit the [Configuration Values](https://app.worklytics.co/analytics/integrations/configuration) page.
 
 ## Security
 
