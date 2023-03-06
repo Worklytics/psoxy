@@ -23,7 +23,7 @@ non_production_connectors = [
 caller_aws_arns = [
 ]
 caller_gcp_service_account_ids = [
-  # "123456712345671234567" # 21-digits, get this from Worklytics once prod-ready
+  # "123456712345671234567" # 21-digits, get this from Worklytics (https://app.worlytics.co/analytics/integrations/configuration) once prod-ready
 ]
 lookup_table_builders = {
     #    "lookup-hris" = {

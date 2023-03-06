@@ -17,4 +17,7 @@ gcp_project_id                = "psoxy-dev-aws-example-12314332"
 psoxy_base_dir                = "~/psoxy/" # TODO: we suggest using absolute path here
 ```
 
+In order to get the Service Account Unique ID value for `caller_gcp_service_account_ids`, log in to your Worklytics
+Account and visit the [Configuration Values](https://app.worklytics.co/analytics/integrations/configuration) page.
+
 
