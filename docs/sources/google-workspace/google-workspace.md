@@ -3,6 +3,30 @@
 Google Workspace sources can be setup via Terraform, using modules found in our GitHub repo.  These
 are included in the examples found in `[infra/examples/](../../infra/examples).
 
+
+## Required Permissions
+
+You (the user running Terraform) must have the following roles (or some of the permissions within
+them) in the GCP project in which you will provision the OAuth clients that will be used to connect to your Google Workspace
+data:
+
+| Role                                                                                                       | Reason |
+|------------------------------------------------------------------------------------------------------------| ------ |
+| [Service Account Creator](https://cloud.google.com/iam/docs/understanding-roles#iam.serviceAccountCreator) | create Service Accounts to be used as API clients |
+| [Service Account Key Admin](https://cloud.google.com/iam/docs/understanding-roles#iam.serviceAccountKeyAdmin) | to access Google Workspace API, proxy *must* be authenticated by a key that you need to create |
+| [Service Usage Admin](https://cloud.google.com/iam/docs/understanding-roles#serviceusage.serviceUsageAdmin) | you will need to enable the Google Workspace APIs in your GCP Project |
+
+As these are very permissive roles, we recommend that you use a *dedicated* GCP project so that
+these roles are scoped just to the Service Accounts used for this deployment. If you used a shared
+GCP project, these roles would give you access to create keys for ALL the service accounts in the
+project, for example - which is not good practice.
+
+Additionally, a Google Workspace Admin will need to make a Domain-wide Delegation grant to the
+Oauth Clients you create. This is done via the Google Workspace Admin console.  In default setup, this
+requires [Super Admin](https://support.google.com/a/answer/2405986?hl=en&fl=1) role, but your
+organization may have a Custom Role with sufficient privileges.
+
+
 ## Without Terraform
 
 Instructions for how to setup Google Workspace without terraform:

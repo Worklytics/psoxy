@@ -19,7 +19,12 @@ Service Account Keys and activate Google Workspace APIs.
 
   - a Google Project (or permissions to create one)
   - permissions to create Service Accounts, Secret Manager Secrets, Cloud Storage Buckets, and Cloud
-    Functions within that project
+    Functions within that project; eg:
+     * [Service Account Creator](https://cloud.google.com/iam/docs/understanding-roles#iam.serviceAccountCreator) - create Service Accounts to personify Cloud Functions
+     * [Cloud Functions Admin](https://cloud.google.com/iam/docs/understanding-roles#cloudfunctions.admin) - proxy instances are deployed as GCP cloud functions
+     * [Cloud Storage Admin](https://cloud.google.com/iam/docs/understanding-roles#storage.admin) - processing of bulk data (such as HRIS exports) uses GCS buckets
+     * [Secret Manager Admin](https://cloud.google.com/iam/docs/understanding-roles#secretmanager.admin) - your API keys and pseudonymization salt is stored in Secret Manager
+     * [Service Usage Admin](https://cloud.google.com/iam/docs/understanding-roles#serviceusage.serviceUsageAdmin) - you will need to enable various GCP APIs
 
 ### Terraform State Backend
 
