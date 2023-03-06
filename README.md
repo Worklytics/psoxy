@@ -145,20 +145,21 @@ terraform apply
 
 ## Releases
 
+### [v0.4.13](https://github.com/Worklytics/psoxy/releases/tag/v0.4.13)
+
+### [v0.4.12](https://github.com/Worklytics/psoxy/releases/tag/v0.4.12)
+
+Highlights:
+  - compatibility for using AWS API Gateway in front of AWS lambda deployments (*alpha*; our only
+    supported approach is exposing AWS lambdas via function URLs)
+  - TODOs via `terraform` output, to improve compatibility with [Terraform Cloud](https://cloud.hashicorp.com/products/terraform)
+
+
 ### [v0.4.11](https://github.com/Worklytics/psoxy/releases/tag/v0.4.11)
 
 Highlights:
   - Azure authentication with federation rather than certificates/secrets
   - npm test tool support health check, API gateway endpoints
-
-### [v0.4.10](https://github.com/Worklytics/psoxy/releases/tag/v0.4.10)
-
-Highlights:
-  - token handling improvements
-  - support for config paths in AWS SSM (prev, only supported for Vault)
-  - cleaner Google project references in samples
-  - deep-link TODO files to 'Add Connection' interface in Worklytics, prefilling params
-  - generate simpler bash test script, facilitate rapid integration tests
 
 Review [earlier release notes in GitHub](https://github.com/Worklytics/psoxy/releases).
 
