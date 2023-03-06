@@ -48,7 +48,7 @@ locals {
 
      We recommend naming the account `svc-worklytics@{your-domain.com}`.
 
-     If you have already created a sufficiently privelleged service account user for a different
+     If you have already created a sufficiently privileged service account user for a different
      Google Workspace connection, you can re-use that one.
 
   6. Assign the account a sufficiently privileged role. At minimum, the role must have the following
