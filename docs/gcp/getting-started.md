@@ -1,8 +1,19 @@
 # Getting Started - GCP
 
+## Overview
+
+You'll provision infrastructure that ultimately looks as follows:
+
+![gcp-arch-diagram.png](gcp-arch-diagram.png)
+
+NOTE:
+  -
+  - "Data Export" path is optional, needed only if you plan to export data from Worklytics back to
+    your premises.
+
 ## Prerequisites
 
-A Google (GCP) user who can create projects (or with sufficient permissions to provision Service 
+A Google (GCP) user who can create projects (or with sufficient permissions to provision Service
 Accounts, Keys, Secret Manager, GCS buckets, and Cloud Functions within an existing project).
 
 

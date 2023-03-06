@@ -164,29 +164,80 @@ Highlights:
 Review [earlier release notes in GitHub](https://github.com/Worklytics/psoxy/releases).
 
 ## Supported Data Sources
-As of September 2022, the following sources can be connected to Worklytics via psoxy:
+As of September 2022, the following sources can be connected to Worklytics via psoxy.
 
-  * Asana - [example data](docs/sources/api-response-examples/asana) | [example rules](docs/sources/example-rules/asana/asana.yaml)
-  * Google Workspace
-    * Calendar - [example data](docs/sources/api-response-examples/g-workspace/calendar) | [example rules](docs/sources/example-rules/google-workspace/calendar.yaml)
-    * Chat - [example data](docs/sources/api-response-examples/g-workspace/google-chat) | [example rules](docs/sources/example-rules/google-workspace/google-chat.yaml)
-    * Directory - [example data](docs/sources/api-response-examples/g-workspace/directory) | [example rules](docs/sources/example-rules/google-workspace/directory.yaml)
-    * Drive - [example data](docs/sources/api-response-examples/g-workspace/gdrive-v3) | [example rules](docs/sources/example-rules/google-workspace/gdrive.yaml)
-    * GMail - [example data](docs/sources/api-response-examples/g-workspace/gmail) | [example rules](docs/sources/example-rules/google-workspace/gmail.yaml)
-    * Meet - [example data](docs/sources/api-response-examples/g-workspace/meet) | [example rules](docs/sources/example-rules/google-workspace/google-meet.yaml)
-  * Microsoft 365
-    * Active Directory - [example data](docs/sources/api-response-examples/microsoft-365/directory) | [example rules](docs/sources/example-rules/microsoft-365/directory.yaml)
-    * Calendar - [example data](docs/sources/api-response-examples/microsoft-365/outlook-cal)  | [example rules](docs/sources/example-rules/microsoft-365/outlook-cal.yaml)
-    * Mail - [example data](docs/sources/api-response-examples/microsoft-365/outlook-mail) | [example rules](docs/sources/example-rules/microsoft-365/outlook-mail.yaml)
-  * Slack
-    * eDiscovery API - [example data](docs/sources/api-response-examples/slack) | [example rules](docs/sources/example-rules/slack/discovery.yaml)
-  * Zoom - [example data](docs/sources/api-response-examples/zoom) | [example rules](docs/sources/example-rules/zoom/zoom.yaml)
+### Google Workspace (formerly GSuite)
 
-You can also use the command line tool to pseudonymize arbitrary CSV files (eg, exports from your
-HRIS), in a manner consistent with how a psoxy instance will pseudonymize identifiers in a target
-REST API. This is REQUIRED if you want SaaS accounts to be linked with HRIS data for analysis (eg,
-Worklytics will match email set in HRIS with email set in SaaS tool's account - so these must be
-pseudonymized using an equivalent algorithm and secret). See [`java/impl/cmd-line/`](/java/impl/cmd-line)
+For all of these, a Google Workspace Admin must authorize the Google OAuth client you
+provision (with provided terraform modules) to access your organization's data. This requires a
+Domain-wide Delegation grant with a set of scopes specific to each data source, via the Google
+Workspace Admin Console.
+
+If you use our provided Terraform modules, specific instructions that you can pass to the Google
+Workspace Admi will be output for you.
+
+| Source | Example Data | Example Rules | Scopes Needed                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+|--------|--------------|---------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Google Calendar | [example data](docs/sources/api-response-examples/g-workspace/calendar) | [example rules](docs/sources/example-rules/google-workspace/calendar.yaml) |`https://www.googleapis.com/auth/calendar.readonly`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| Google Chat | [example data](docs/sources/api-response-examples/g-workspace/google-chat) | [example rules](docs/sources/example-rules/google-workspace/google-chat.yaml) |`https://www.googleapis.com/auth/admin.reports.audit.readonly`                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| Google Directory | [example data](docs/sources/api-response-examples/g-workspace/directory) | [example rules](docs/sources/example-rules/google-workspace/directory.yaml) |`https://www.googleapis.com/auth/admin.directory.user.readonly https://www.googleapis.com/auth/admin.directory.user.alias.readonly https://www.googleapis.com/auth/admin.directory.domain.readonly`<br/>`https://www.googleapis.com/auth/admin.directory.group.readonly https://www.googleapis.com/auth/admin.directory.group.member.readonly https://www.googleapis.com/auth/admin.directory.orgunit.readonly https://www.googleapis.com/auth/admin.directory.rolemanagement.readonly` |
+| Google Drive | [example data](docs/sources/api-response-examples/g-workspace/gdrive-v3) | [example rules](docs/sources/example-rules/google-workspace/gdrive-v3.yaml) |`https://www.googleapis.com/auth/drive.metadata.readonly`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| GMail | [example data](docs/sources/api-response-examples/g-workspace/gmail) | [example rules](docs/sources/example-rules/google-workspace/gmail.yaml) |`https://www.googleapis.com/auth/gmail.metadata`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+ | Google Meet | [example data](docs/sources/api-response-examples/g-workspace/meet) | [example rules](docs/sources/example-rules/google-workspace/meet.yaml) |`https://www.googleapis.com/auth/admin.reports.audit.readonly`                                                                                                                                                                                                                                                                                                                                                                                                                          |
+
+NOTE: the above scopes are copied from [infra/modules/worklytics-connector-specs](infra/modules/worklytics-connector-specs).
+Please refer to that module for a definitive list.
+
+NOTE: you may need to enable the various Google Workspace APIs within the GCP project in which you
+provision the OAuth Clients. If you use our provided terraform modules, this is done automatically.
+
+See details: [docs/sources/google-workspace/readme.md](docs/sources/google-workspace/google-workspace.md)
+
+### Microsoft 365
+
+For all of these, a Microsoft 365 Admin must authorize the Azure Enterprise Application you provision
+(with provided terraform modules) to access your Microsoft 365 tenant's data with the scopes listed
+below. This is done via the Azure Portal (Active Directory).  If you use our provided Terraform
+modules, specific instructions that you can pass to the Microsoft 365 Admin will be output for you.
+
+| Source                 | Example Data                                                                  | Example Rules | Application Scopes                                                                                |
+|------------------------|-------------------------------------------------------------------------------|---------------|---------------------------------------------------------------------------------------------------|
+| Azure Active Directory | [example data](docs/sources/api-response-examples/microsoft-365/directory)    | [example rules](docs/sources/example-rules/microsoft-365/directory.yaml) | `User.Read.All` `Group.Read.All`                                                                  |
+| Calendar | [example data](docs/sources/api-response-examples/microsoft-365/outlook-cal)  | [example rules](docs/sources/example-rules/microsoft-365/outlook-cal.yaml) | `OnlineMeetings.Read.All` Calendars.Read` `MailboxSettings.Read` `Group.Read.All` `User.Read.All` |
+| Mail | [example data](docs/sources/api-response-examples/microsoft-365/outlook-mail) | [example rules](docs/sources/example-rules/microsoft-365/outlook-mail.yaml) | `Mail.ReadBasic.All` `MailboxSettings.Read` `Group.Read.All` `User.Read.All`                       |
+
+NOTE: the above scopes are copied from [infra/modules/worklytics-connector-specs](infra/modules/worklytics-connector-specs).
+Please refer to that module for a definitive list.
+
+See details: [docs/sources/msft-365/readme.md](docs/sources/msft-365/readme.md)
+
+### Other Data Sources via REST APIs
+
+These sources will typically require some kind of "Admin" within the tool to create an API key or
+client, grant the client access to your organization's data, and provide you with the API key/secret
+which you must provide as a configuration value in your proxy deployment.
+
+The API key/secret will be used to authenticate with the source's REST API and access the data.
+
+| Source  | Example Data | Example Rules |
+|---------|--------------|---------------|
+| Asana   | [example data](docs/sources/api-response-examples/asana) | [example rules](docs/sources/example-rules/asana/asana.yaml) |
+| Slack   | [example data](docs/sources/api-response-examples/slack) | [example rules](docs/sources/example-rules/slack/discovery.yaml) |
+| Zoom    | [example data](docs/sources/api-response-examples/zoom) | [example rules](docs/sources/example-rules/zoom/zoom.yaml) |
+
+
+### Other Data Sources without REST APIs
+
+Other data sources, such as HRIS, Badge, or Survey data can be exported to a CSV file. The "bulk"
+mode of the proxy can be used to pseudonymize these files by copying/uploading the original to
+a cloud storage bucket (GCS, S3, etc), which will trigger the proxy to sanitize the file and write
+the result to a 2nd storage bucket, which you can grant Worklytics access to read.
+
+Alternatively, the proxy can be used as a command line tool to pseudonymize arbitrary CSV files
+(eg, exports from your  HRIS), in a manner consistent with how a psoxy instance will pseudonymize
+identifiers in a target REST API. This is REQUIRED if you want SaaS accounts to be linked with HRIS
+data for analysis (eg, Worklytics will match email set in HRIS with email set in SaaS tool's account
+- so these must be pseudonymized using an equivalent algorithm and secret). See [`java/impl/cmd-line/`](/java/impl/cmd-line)
 for details.
 
 
