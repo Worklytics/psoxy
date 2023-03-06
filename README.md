@@ -109,8 +109,8 @@ Alternatively, the proxy can be used as a command line tool to pseudonymize arbi
 (eg, exports from your  HRIS), in a manner consistent with how a psoxy instance will pseudonymize
 identifiers in a target REST API. This is REQUIRED if you want SaaS accounts to be linked with HRIS
 data for analysis (eg, Worklytics will match email set in HRIS with email set in SaaS tool's account
-- so these must be pseudonymized using an equivalent algorithm and secret). See [`java/impl/cmd-line/`](/java/impl/cmd-line)
-  for details.
+so these must be pseudonymized using an equivalent algorithm and secret). See [`java/impl/cmd-line/`](/java/impl/cmd-line)
+ for details.
 
 ## Getting Started - Customers
 
