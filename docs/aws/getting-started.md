@@ -1,5 +1,19 @@
 # AWS - Getting Started
 
+## Overview
+
+You'll provision the following to host Psoxy in AWS:
+  - Lambda Functions
+  - IAM Roles and Policies
+  - System Manager Parameter Store Parameters
+  - Cloud Watch Log Groups
+  - S3 buckets, if using the 'bulk' mode to sanitize file data (such as CSVs)
+  - Cognito Pools and Identities, if connecting to Microsoft 365 (Azure AD) data sources
+
+The diagram below provides an architecture overview of the 'REST' and 'Bulk'
+
+![AWS Arch Diagram](aws-arch-diagram.jpg)
+
 ## Prerequisites
 
 1. **An AWS Account in which to deploy Psoxy** We *strongly* recommend you provision one specifically

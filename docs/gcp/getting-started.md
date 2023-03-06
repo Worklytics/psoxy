@@ -4,26 +4,30 @@
 
 You'll provision infrastructure that ultimately looks as follows:
 
-![gcp-arch-diagram.png](gcp-arch-diagram.png)
+![GCP Archiecture Diagram.png](gcp-arch-diagram.jpg)
 
-NOTE:
-  -
-  - "Data Export" path is optional, needed only if you plan to export data from Worklytics back to
-    your premises.
+This includes:
+  - Cloud Functions
+  - Service Accounts
+  - Secret Manager Secrets, to hold pseudonymization salt, encryption keys, and data source API keys
+  - Cloud Storage Buckets (GCS), if using psoxy to sanitize bulk file data, such as CSVs
+
+NOTE: if you're connecting to Google Workspace as a data source, you'll also need to provision
+Service Account Keys and activate Google Workspace APIs.
 
 ## Prerequisites
 
-A Google (GCP) user who can create projects (or with sufficient permissions to provision Service
-Accounts, Keys, Secret Manager, GCS buckets, and Cloud Functions within an existing project).
+  - a Google Project (or permissions to create one)
+  - permissions to create Service Accounts, Secret Manager Secrets, Cloud Storage Buckets, and Cloud
+    Functions within that project
 
+### Terraform State Backend
 
-## Terraform State Backend
-
-You'll also need a backend location for your Terraform state (such as an S3 bucket). It can be in
-any AWS account, as long as the AWS role that you'll use to run Terraform has read/write access to
-it.
+You'll also need a secure backend location for your Terraform state (such as a GCS or S3 bucket). It
+need not be in the same host platform/project/account to which you are deploying the proxy, as long
+as the Google/AWS user you are authenticated as when running Terraform has permissions to access it.
 
 Alternatively, you may use a local file system, but this is not recommended for production use - as
 your Terraform state may contain secrets such as API keys, depending on the sources you connect.
 
-See also: infra/modules/gcp-bootstrap/README.md
+See also: [infra/modules/gcp-bootstrap/README.md](../../infra/modules/gcp-bootstrap/README.md)
