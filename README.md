@@ -176,14 +176,14 @@ Workspace Admin Console.
 If you use our provided Terraform modules, specific instructions that you can pass to the Google
 Workspace Admi will be output for you.
 
-| Source | Examples | Scopes Needed                                                                                                                                                                                                                                     |
-|--------|----------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Google Calendar | [data](docs/sources/api-response-examples/g-workspace/calendar) [rules](docs/sources/example-rules/google-workspace/calendar.yaml) | `calendar.readonly`                                                                                                                                                                                                                               |
-| Google Chat | [data](docs/sources/api-response-examples/g-workspace/google-chat) [rules](docs/sources/example-rules/google-workspace/google-chat.yaml) | `admin.reports.audit.readonly`                                                                                                                                                                                                                    |
-| Google Directory | [data](docs/sources/api-response-examples/g-workspace/directory) [rules](docs/sources/example-rules/google-workspace/directory.yaml) | `admin.directory.user.readonly admin.directory.user.alias.readonly admin.directory.domain.readonly admin.directory.group.readonly admin.directory.group.member.readonly admin.directory.orgunit.readonly admin.directory.rolemanagement.readonly` |
-| Google Drive | [data](docs/sources/api-response-examples/g-workspace/gdrive-v3) [rules](docs/sources/example-rules/google-workspace/gdrive-v3.yaml) | `drive.metadata.readonly`                                                                                                                                                                                                                         |
-| GMail | [data](docs/sources/api-response-examples/g-workspace/gmail) [rules](docs/sources/example-rules/google-workspace/gmail.yaml) | `gmail.metadata`                                                                                                                                                                                                                                  |
- | Google Meet | [data](docs/sources/api-response-examples/g-workspace/meet) [rules](docs/sources/example-rules/google-workspace/meet.yaml) | `admin.reports.audit.readonly`                                                                                                                                                                                                                    |
+| Source | Examples                                                                                                                                   | Scopes Needed                                                                                                                                                                                                                                     |
+|--------|--------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Google Calendar | [data](docs/sources/api-response-examples/g-workspace/calendar) - [rules](docs/sources/example-rules/google-workspace/calendar.yaml)       | `calendar.readonly`                                                                                                                                                                                                                               |
+| Google Chat | [data](docs/sources/api-response-examples/g-workspace/google-chat) - [rules](docs/sources/example-rules/google-workspace/google-chat.yaml) | `admin.reports.audit.readonly`                                                                                                                                                                                                                    |
+| Google Directory | [data](docs/sources/api-response-examples/g-workspace/directory) - [rules](docs/sources/example-rules/google-workspace/directory.yaml)     | `admin.directory.user.readonly admin.directory.user.alias.readonly admin.directory.domain.readonly admin.directory.group.readonly admin.directory.group.member.readonly admin.directory.orgunit.readonly admin.directory.rolemanagement.readonly` |
+| Google Drive | [data](docs/sources/api-response-examples/g-workspace/gdrive-v3) - [rules](docs/sources/example-rules/google-workspace/gdrive-v3.yaml)     | `drive.metadata.readonly`                                                                                                                                                                                                                         |
+| GMail | [data](docs/sources/api-response-examples/g-workspace/gmail) - [rules](docs/sources/example-rules/google-workspace/gmail.yaml)             | `gmail.metadata`                                                                                                                                                                                                                                  |
+ | Google Meet | [data](docs/sources/api-response-examples/g-workspace/meet) - [rules](docs/sources/example-rules/google-workspace/meet.yaml)               | `admin.reports.audit.readonly`                                                                                                                                                                                                                    |
 
 NOTE: the above scopes are copied from [infra/modules/worklytics-connector-specs](infra/modules/worklytics-connector-specs).
 Please refer to that module for a definitive list.
@@ -205,11 +205,11 @@ For all of these, a Microsoft 365 Admin must authorize the Azure Enterprise Appl
 below. This is done via the Azure Portal (Active Directory).  If you use our provided Terraform
 modules, specific instructions that you can pass to the Microsoft 365 Admin will be output for you.
 
-| Source                 | Examples                                                                     | Application Scopes                                                                                 |
-|------------------------|------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------|
-| Azure Active Directory | [data](docs/sources/api-response-examples/microsoft-365/directory) [rules](docs/sources/example-rules/microsoft-365/directory.yaml) | `User.Read.All` `Group.Read.All`                                                                   |
-| Calendar | [data](docs/sources/api-response-examples/microsoft-365/outlook-cal) [rules](docs/sources/example-rules/microsoft-365/outlook-cal.yaml) | `User.Read.All` `Group.Read.All``OnlineMeetings.Read.All` `Calendars.Read` `MailboxSettings.Read`  |
-| Mail | [data](docs/sources/api-response-examples/microsoft-365/outlook-mail) [rules](docs/sources/example-rules/microsoft-365/outlook-mail.yaml) | `User.Read.All` `Group.Read.All`  `Mail.ReadBasic.All` `MailboxSettings.Read` |
+| Source                 | Examples                                                                                                                                    | Application Scopes                                                                                 |
+|------------------------|---------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------|
+| Azure Active Directory | [data](docs/sources/api-response-examples/microsoft-365/directory) - [rules](docs/sources/example-rules/microsoft-365/directory.yaml)       | `User.Read.All` `Group.Read.All`                                                                   |
+| Calendar | [data](docs/sources/api-response-examples/microsoft-365/outlook-cal) - [rules](docs/sources/example-rules/microsoft-365/outlook-cal.yaml)   | `User.Read.All` `Group.Read.All``OnlineMeetings.Read.All` `Calendars.Read` `MailboxSettings.Read`  |
+| Mail | [data](docs/sources/api-response-examples/microsoft-365/outlook-mail) - [rules](docs/sources/example-rules/microsoft-365/outlook-mail.yaml) | `User.Read.All` `Group.Read.All`  `Mail.ReadBasic.All` `MailboxSettings.Read` |
 
 NOTE: the above scopes are copied from [infra/modules/worklytics-connector-specs](infra/modules/worklytics-connector-specs).
 Please refer to that module for a definitive list.
@@ -224,11 +224,11 @@ which you must provide as a configuration value in your proxy deployment.
 
 The API key/secret will be used to authenticate with the source's REST API and access the data.
 
-| Source  | Examples |
-|---------|----------|
-| Asana   | [data](docs/sources/api-response-examples/asana) [rules](docs/sources/example-rules/asana/asana.yaml) |
-| Slack   | [data](docs/sources/api-response-examples/slack) [rules](docs/sources/example-rules/slack/discovery.yaml) |
-| Zoom    | [data](docs/sources/api-response-examples/zoom) [rules](docs/sources/example-rules/zoom/zoom.yaml) |
+| Source  | Examples                                                                                                    |
+|---------|-------------------------------------------------------------------------------------------------------------|
+| Asana   | [data](docs/sources/api-response-examples/asana) - [rules](docs/sources/example-rules/asana/asana.yaml)     |
+| Slack   | [data](docs/sources/api-response-examples/slack) - [rules](docs/sources/example-rules/slack/discovery.yaml) |
+| Zoom    | [data](docs/sources/api-response-examples/zoom) - [rules](docs/sources/example-rules/zoom/zoom.yaml)       |
 
 
 ### Other Data Sources without REST APIs
