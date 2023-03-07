@@ -42,7 +42,7 @@ public class Endpoint {
         return Optional.ofNullable(allowedMethods);
     }
 
-
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     SchemaRuleUtils.JsonSchema responseSchema;
 
     @JsonIgnore
