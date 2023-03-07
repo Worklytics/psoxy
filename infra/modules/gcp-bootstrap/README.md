@@ -11,7 +11,7 @@ expense of more complexity.
 This should be executed by a sufficiently privileged GCP user.  Alternatively, you can use the
 Terraform code as a guide to create the resources directly via GCP console.
 
-NOTE: as this is intended to bootstrap GCP infra for storing Terrafrom state, its own state will
+NOTE: as this is intended to bootstrap GCP infra for storing Terraform state, its own state will
 be written to your local file system. You could commit this state to a code repository if you wish,
 or, given its simplicity, discard it and re-import in the future if needed.
 

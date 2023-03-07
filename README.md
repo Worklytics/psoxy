@@ -30,6 +30,88 @@ Orchestration continues to be performed on the Worklytics-side.
 
 ![proxy illustration](docs/proxy-illustration.jpg)
 
+## Supported Data Sources
+As of September 2022, the following sources can be connected to Worklytics via psoxy.
+
+### Google Workspace (formerly GSuite)
+
+For all of these, a Google Workspace Admin must authorize the Google OAuth client you
+provision (with [provided terraform modules](infra/examples)) to access your organization's data. This requires a
+Domain-wide Delegation grant with a set of scopes specific to each data source, via the Google
+Workspace Admin Console.
+
+If you use our provided Terraform modules, specific instructions that you can pass to the Google
+Workspace Admin will be output for you.
+
+| Source&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Examples&nbsp;&nbsp;&nbsp;&nbsp;                                                                                                        | Scopes Needed                                                                                                                                                                                                                                     |
+|--------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Google Calendar                | [data](docs/sources/api-response-examples/g-workspace/calendar) - [rules](docs/sources/example-rules/google-workspace/calendar.yaml)    | `calendar.readonly`                                                                                                                                                                                                                               |
+| Google Chat                    | [data](docs/sources/api-response-examples/g-workspace/google-chat) - [rules](docs/sources/example-rules/google-workspace/google-chat.yaml) | `admin.reports.audit.readonly`                                                                                                                                                                                                                    |
+| Google Directory               | [data](docs/sources/api-response-examples/g-workspace/directory) - [rules](docs/sources/example-rules/google-workspace/directory.yaml)  | `admin.directory.user.readonly admin.directory.user.alias.readonly admin.directory.domain.readonly admin.directory.group.readonly admin.directory.group.member.readonly admin.directory.orgunit.readonly admin.directory.rolemanagement.readonly` |
+| Google Drive                   | [data](docs/sources/api-response-examples/g-workspace/gdrive-v3) - [rules](docs/sources/example-rules/google-workspace/gdrive-v3.yaml)  | `drive.metadata.readonly`                                                                                                                                                                                                                         |
+| GMail                          | [data](docs/sources/api-response-examples/g-workspace/gmail) - [rules](docs/sources/example-rules/google-workspace/gmail.yaml)          | `gmail.metadata`                                                                                                                                                                                                                                  |
+| Google Meet                    | [data](docs/sources/api-response-examples/g-workspace/meet) - [rules](docs/sources/example-rules/google-workspace/meet.yaml)            | `admin.reports.audit.readonly`                                                                                                                                                                                                                    |
+
+NOTE: the above scopes are copied from [infra/modules/worklytics-connector-specs](infra/modules/worklytics-connector-specs).
+Please refer to that module for a definitive list.
+
+NOTE: 'Google Directory' connection is required prerequisite for all other Google Workspace
+connectors.
+
+NOTE: you may need to enable the various Google Workspace APIs within the GCP project in which you
+provision the OAuth Clients. If you use our provided terraform modules, this is done automatically.
+
+NOTE: the above OAuth scopes omit the `https://www.googleapis.com/auth/` prefix. See [OAuth 2.0 Scopes for Google APIs](https://developers.google.com/identity/protocols/oauth2/scopes) for details of scopes.
+
+See details: [docs/sources/google-workspace/readme.md](docs/sources/google-workspace/google-workspace.md)
+
+### Microsoft 365
+
+For all of these, a Microsoft 365 Admin (at minimum, a [Privileged Role Administrator](https://learn.microsoft.com/en-us/azure/active-directory/roles/permissions-reference#privileged-role-administrator))
+must authorize the Azure Enterprise Application you provision (with [provided terraform modules](infra/examples)) to access your Microsoft 365 tenant's data with the scopes listed
+below. This is done via the Azure Portal (Active Directory).  If you use our provided Terraform
+modules, specific instructions that you can pass to the Microsoft 365 Admin will be output for you.
+
+| Source&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Examples &nbsp;&nbsp;&nbsp;&nbsp;                                                                                                    | Application Scopes                                                                                 |
+|--------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------|
+| Active Directory                                                                                 | [data](docs/sources/api-response-examples/microsoft-365/directory) - [rules](docs/sources/example-rules/microsoft-365/directory.yaml)       | `User.Read.All` `Group.Read.All`                                                                   |
+| Calendar                                                                                               | [data](docs/sources/api-response-examples/microsoft-365/outlook-cal) - [rules](docs/sources/example-rules/microsoft-365/outlook-cal.yaml)   | `User.Read.All` `Group.Read.All` `OnlineMeetings.Read.All` `Calendars.Read` `MailboxSettings.Read` |
+| Mail                                                                                                   | [data](docs/sources/api-response-examples/microsoft-365/outlook-mail) - [rules](docs/sources/example-rules/microsoft-365/outlook-mail.yaml) | `User.Read.All` `Group.Read.All`  `Mail.ReadBasic.All` `MailboxSettings.Read`                      |
+
+NOTE: the above scopes are copied from [infra/modules/worklytics-connector-specs](infra/modules/worklytics-connector-specs).
+Please refer to that module for a definitive list.
+
+See details: [docs/sources/msft-365/readme.md](docs/sources/msft-365/readme.md)
+
+### Other Data Sources via REST APIs
+
+These sources will typically require some kind of "Admin" within the tool to create an API key or
+client, grant the client access to your organization's data, and provide you with the API key/secret
+which you must provide as a configuration value in your proxy deployment.
+
+The API key/secret will be used to authenticate with the source's REST API and access the data.
+
+| Source  | Examples                                                                                                    |
+|---------|-------------------------------------------------------------------------------------------------------------|
+| Asana   | [data](docs/sources/api-response-examples/asana) - [rules](docs/sources/example-rules/asana/asana.yaml)     |
+| Slack   | [data](docs/sources/api-response-examples/slack) - [rules](docs/sources/example-rules/slack/discovery.yaml) |
+| Zoom    | [data](docs/sources/api-response-examples/zoom) - [rules](docs/sources/example-rules/zoom/zoom.yaml)       |
+
+
+### Other Data Sources without REST APIs
+
+Other data sources, such as HRIS, Badge, or Survey data can be exported to a CSV file. The "bulk"
+mode of the proxy can be used to pseudonymize these files by copying/uploading the original to
+a cloud storage bucket (GCS, S3, etc), which will trigger the proxy to sanitize the file and write
+the result to a 2nd storage bucket, which you can grant Worklytics access to read.
+
+Alternatively, the proxy can be used as a command line tool to pseudonymize arbitrary CSV files
+(eg, exports from your  HRIS), in a manner consistent with how a psoxy instance will pseudonymize
+identifiers in a target REST API. This is REQUIRED if you want SaaS accounts to be linked with HRIS
+data for analysis (eg, Worklytics will match email set in HRIS with email set in SaaS tool's account
+so these must be pseudonymized using an equivalent algorithm and secret). See [`java/impl/cmd-line/`](/java/impl/cmd-line)
+ for details.
+
 ## Getting Started - Customers
 
 ### Prerequisites
@@ -142,51 +224,27 @@ terraform apply
      adapt the rules as needed. Customers needing assistance adapting the proxy behavior for their
      needs can contact support@worklytics.co
 
-## Releases
 
-### [v0.4.11](https://github.com/Worklytics/psoxy/releases/tag/v0.4.11)
 
-Highlights:
-  - Azure authentication with federation rather than certificates/secrets
-  - npm test tool support health check, API gateway endpoints
+## Latest Releases
 
-### [v0.4.10](https://github.com/Worklytics/psoxy/releases/tag/v0.4.10)
+### Next:  [v0.4.13](https://github.com/Worklytics/psoxy/releases/tag/v0.4.13)
+
+### Current: [v0.4.12](https://github.com/Worklytics/psoxy/releases/tag/v0.4.12)
 
 Highlights:
-  - token handling improvements
-  - support for config paths in AWS SSM (prev, only supported for Vault)
-  - cleaner Google project references in samples
-  - deep-link TODO files to 'Add Connection' interface in Worklytics, prefilling params
-  - generate simpler bash test script, facilitate rapid integration tests
+- compatibility for using AWS API Gateway in front of AWS lambda deployments (*alpha*; our only
+  supported approach is exposing AWS lambdas via function URLs)
+- TODOs via `terraform` output, to improve compatibility with [Terraform Cloud](https://cloud.hashicorp.com/products/terraform)
+
+
+### Previous: [v0.4.11](https://github.com/Worklytics/psoxy/releases/tag/v0.4.11)
+
+Highlights:
+- Azure authentication with federation rather than certificates/secrets
+- npm test tool support health check, API gateway endpoints
 
 Review [earlier release notes in GitHub](https://github.com/Worklytics/psoxy/releases).
-
-## Supported Data Sources
-As of September 2022, the following sources can be connected to Worklytics via psoxy:
-
-  * Asana - [example data](docs/sources/api-response-examples/asana) | [example rules](docs/sources/example-rules/asana/asana.yaml)
-  * Google Workspace
-    * Calendar - [example data](docs/sources/api-response-examples/g-workspace/calendar) | [example rules](docs/sources/example-rules/google-workspace/calendar.yaml)
-    * Chat - [example data](docs/sources/api-response-examples/g-workspace/google-chat) | [example rules](docs/sources/example-rules/google-workspace/google-chat.yaml)
-    * Directory - [example data](docs/sources/api-response-examples/g-workspace/directory) | [example rules](docs/sources/example-rules/google-workspace/directory.yaml)
-    * Drive - [example data](docs/sources/api-response-examples/g-workspace/gdrive-v3) | [example rules](docs/sources/example-rules/google-workspace/gdrive.yaml)
-    * GMail - [example data](docs/sources/api-response-examples/g-workspace/gmail) | [example rules](docs/sources/example-rules/google-workspace/gmail.yaml)
-    * Meet - [example data](docs/sources/api-response-examples/g-workspace/meet) | [example rules](docs/sources/example-rules/google-workspace/google-meet.yaml)
-  * Microsoft 365
-    * Active Directory - [example data](docs/sources/api-response-examples/microsoft-365/directory) | [example rules](docs/sources/example-rules/microsoft-365/directory.yaml)
-    * Calendar - [example data](docs/sources/api-response-examples/microsoft-365/outlook-cal)  | [example rules](docs/sources/example-rules/microsoft-365/outlook-cal.yaml)
-    * Mail - [example data](docs/sources/api-response-examples/microsoft-365/outlook-mail) | [example rules](docs/sources/example-rules/microsoft-365/outlook-mail.yaml)
-  * Slack
-    * eDiscovery API - [example data](docs/sources/api-response-examples/slack) | [example rules](docs/sources/example-rules/slack/discovery.yaml)
-  * Zoom - [example data](docs/sources/api-response-examples/zoom) | [example rules](docs/sources/example-rules/zoom/zoom.yaml)
-
-You can also use the command line tool to pseudonymize arbitrary CSV files (eg, exports from your
-HRIS), in a manner consistent with how a psoxy instance will pseudonymize identifiers in a target
-REST API. This is REQUIRED if you want SaaS accounts to be linked with HRIS data for analysis (eg,
-Worklytics will match email set in HRIS with email set in SaaS tool's account - so these must be
-pseudonymized using an equivalent algorithm and secret). See [`java/impl/cmd-line/`](/java/impl/cmd-line)
-for details.
-
 
 ## Support
 
