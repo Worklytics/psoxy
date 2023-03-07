@@ -8,7 +8,7 @@
       "id":"p~JzXCV2FA272NOeqHYQbR4PewwSZI9hznATn7Wse3j8GpsoD91NC0nDg1vNKrhPEc",
       "email":"{\"scope\":\"email\",\"domain\":\"example.com\",\"hash\":\"Oyl8_kWC39yrNSWNGUSM7xylJREQ62Dj6OynAkyY2Ro\"}",
       "type":2,
-      "pmi":111111111,
+      "pmi":"{\"scope\":\"zoom\",\"hash\":\"b4spdxpK7EOqmO86s79CDfEPeOvKSCq7aUndB5pE26Y\"}",
       "phone_number":"{\"scope\":\"zoom\",\"hash\":\"iNlsdCT16rKNdAUT1D9VAG4oJ9FaXs6ndFk0sc8KGc0\"}",
       "timezone":"America/Los_Angeles",
       "verified":1,

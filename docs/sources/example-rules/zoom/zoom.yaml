@@ -4,8 +4,7 @@ endpoints:
     transforms:
       - !<pseudonymize>
         jsonPaths:
-          - "$.users[*].email"
-          - "$.users[*].phone_number"
+          - "$.users[*].['email','pmi','phone_number']"
         encoding: "JSON"
       - !<pseudonymize>
         jsonPaths:
@@ -14,7 +13,8 @@ endpoints:
         encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
-          - "$.users[*]['first_name','last_name','pic_url','employee_unique_id']"
+          - "$.users[*]['display_name','first_name','last_name','pic_url','employee_unique_id']"
+    responseSchema: null
   - pathRegex: "^/v2/users/(?:[^/]*)/meetings(?:\\?.+)?"
     transforms:
       - !<pseudonymize>
@@ -24,6 +24,7 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$.meetings[*]['topic','join_url','start_url','agenda']"
+    responseSchema: null
   - pathRegex: "^/v2/meetings/(?:[^/]*)(?:\\?.+)?"
     transforms:
       - !<pseudonymize>
@@ -34,7 +35,9 @@ endpoints:
         jsonPaths:
           - "$.['topic','settings','agenda','custom_keys']"
           - "$.['password','h323_password','pstn_password','encrypted_password','join_url','start_url']"
+    responseSchema: null
   - pathRegex: "^/v2/past_meetings/(?:.*)/instances"
+    responseSchema: null
   - pathRegex: "^/v2/past_meetings/(?:[^\\/]*)"
     transforms:
       - !<pseudonymize>
@@ -44,6 +47,7 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$.['user_name','topic','agenda']"
+    responseSchema: null
   - pathRegex: "^/v2/past_meetings/(?:.*)/participants(?:\\?.+)?"
     transforms:
       - !<pseudonymize>
@@ -53,6 +57,7 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$.participants[*].['name','registrant_id']"
+    responseSchema: null
   - pathRegex: "^/v2/report/users/(?:.*)/meetings(?:\\?.+)?"
     transforms:
       - !<pseudonymize>
@@ -62,6 +67,7 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$.meetings[*]['user_name','topic','custom_keys','tracking_fields']"
+    responseSchema: null
   - pathRegex: "^/v2/report/meetings/(?:[^/]*)"
     transforms:
       - !<pseudonymize>
@@ -71,6 +77,7 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$.['user_name','topic','custom_keys','tracking_fields']"
+    responseSchema: null
   - pathRegex: "^/v2/report/meetings/(?:.*)/participants(?:\\?.+)?"
     transforms:
       - !<pseudonymize>
@@ -80,3 +87,4 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$.participants[*].['name','registrant_id']"
+    responseSchema: null
