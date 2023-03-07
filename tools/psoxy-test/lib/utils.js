@@ -81,7 +81,7 @@ function getCommonHTTPHeaders(options = {}) {
 function requestWrapper(url, method = 'GET', headers) {
   url = typeof url === 'string' ? new URL(url) : url;
   const params = url.searchParams.toString();
-
+  let responseData = '';
   return new Promise((resolve, reject) => {
     const req = https.request(
       {
@@ -92,21 +92,15 @@ function requestWrapper(url, method = 'GET', headers) {
         headers: headers,
       },
       (res) => {
-        const result = {
-          status: res.statusCode,
-          statusMessage: res.statusMessage,
-          headers: res.headers,
-        };
-
-        if (res.statusCode !== httpCodes.HTTP_STATUS_OK) {
-          resolve(result);
-        } else {
-          let responseData = '';
-          res.on('data', (data) => (responseData += data));
-          res.on('end', () => {
-            resolve({...result, data: responseData});
+        res.on('data', (data) => (responseData += data));
+        res.on('end', () => {
+          resolve({
+            status: res.statusCode,
+            statusMessage: res.statusMessage,
+            headers: res.headers,
+            data: responseData,
           });
-        }
+        });
       }
     );
     req.on('error', (error) => {
