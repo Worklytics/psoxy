@@ -4,17 +4,17 @@ endpoints:
     transforms:
       - !<pseudonymize>
         jsonPaths:
-          - "$.users[*].email"
-          - "$.users[*].phone_number"
+          - "$.users[*].['email','phone_number']"
         encoding: "JSON"
       - !<pseudonymize>
         jsonPaths:
-          - "$.users[*].id"
+          - "$.users[*].['id','pmi']"
         includeReversible: true
         encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
-          - "$.users[*]['first_name','last_name','pic_url','employee_unique_id']"
+          - "$.users[*]['display_name','first_name','last_name','pic_url','employee_unique_id']"
+    responseSchema: null
   - pathRegex: "^/v2/users/(?:[^/]*)/meetings(?:\\?.+)?"
     transforms:
       - !<pseudonymize>
@@ -24,6 +24,7 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$.meetings[*]['topic','join_url','start_url','agenda']"
+    responseSchema: null
   - pathRegex: "^/v2/meetings/(?:[^/]*)(?:\\?.+)?"
     transforms:
       - !<pseudonymize>
