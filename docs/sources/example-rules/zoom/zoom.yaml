@@ -4,11 +4,11 @@ endpoints:
     transforms:
       - !<pseudonymize>
         jsonPaths:
-          - "$.users[*].['email','pmi','phone_number']"
+          - "$.users[*].['email','phone_number']"
         encoding: "JSON"
       - !<pseudonymize>
         jsonPaths:
-          - "$.users[*].id"
+          - "$.users[*].['id','pmi']"
         includeReversible: true
         encoding: "URL_SAFE_TOKEN"
       - !<redact>
