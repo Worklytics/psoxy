@@ -6,9 +6,10 @@ import https from 'https';
 import path from 'path';
 import _ from 'lodash';
 import spec from '../data-sources/spec.js';
-import { constants as httpCodes } from 'http2';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+// In case Psoxy is slow to respond, Node.js doesn't have a default since v13
+const REQUEST_TIMEOUT = 10000;
 
 /**
  * Save data to file.
@@ -90,6 +91,7 @@ function requestWrapper(url, method = 'GET', headers) {
         path: url.pathname + (params !== '' ? `?${params}` : ''),
         method: method,
         headers: headers,
+        timeout: REQUEST_TIMEOUT,
       },
       (res) => {
         res.on('data', (data) => (responseData += data));
@@ -103,6 +105,10 @@ function requestWrapper(url, method = 'GET', headers) {
         });
       }
     );
+    req.on('timeout', () => {
+      req.destroy();
+      reject({ statusMessage: 'Psoxy is taking too long to respond'});
+    });
     req.on('error', (error) => {
       reject({ status: error.code, statusMessage: error.message });
     });
