@@ -1,0 +1,5 @@
+org_id=123412341234
+billing_account=123ABC-123ABC-123ABC
+group_org_admins=admins@acme.com
+group_billing_admins=admins@acme.com
+project_id=my-gcp-project

@@ -23,7 +23,10 @@ worklytics_sa_emails = [
 psoxy_base_dir                = "/home/user/psoxy/" # use absolute path to your local psoxy repo****
 ```
 
-for example:
+In order to get the Service Account Email value for `worklytics_sa_emails`, log in to your Worklytics
+Account and visit the [Configuration Values](https://app.worklytics.co/analytics/integrations/configuration) page.
+
+For example:
 ```terraform
 gcp_project_id                = "psoxy-dev-alice"
 gcp_org_id                    = "123456789" # your GCP organization ID; if existing project, you can leave as empty string and see the value from `terraform plan`
