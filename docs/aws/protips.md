@@ -98,16 +98,16 @@ resource "aws_apigatewayv2_route" "get_route" {
   api_id             = aws_apigatewayv2_api.psoxy-api.id
   route_key          = "GET /${each.key}/{proxy+}"
   authorization_type = "AWS_IAM"
-  target             = "integrations/${aws_apigatewayv2_integration.map.id}"
+  target             = "integrations/${aws_apigatewayv2_integration.map[each.key].id}"
 }
 
 resource "aws_apigatewayv2_route" "head_route" {
   for_each = local.rest_instances
 
   api_id             = aws_apigatewayv2_api.psoxy-api.id
-  route_key          = "HEAD /${each.key}}/{proxy+}"
+  route_key          = "HEAD /${each.key}/{proxy+}"
   authorization_type = "AWS_IAM"
-  target             = "integrations/${aws_apigatewayv2_integration.map.id}"
+  target             = "integrations/${aws_apigatewayv2_integration.map[each.key].id}"
 }
 
 # allow API gateway to invoke the lambda function
@@ -145,8 +145,8 @@ resource "aws_iam_policy" "invoke_api" {
   })
 }
 
-resource "aws_iam_policy_attachment" "invoke_api_policy_to_role" {
-  name       = module.psoxy-aws-google-workspace.caller_role_arn
+resource "aws_iam_role_policy_attachment" "invoke_api_policy_to_role" {
+  role       = "PsoxyCaller" # Name (not ARN) of the API caller role
   policy_arn = aws_iam_policy.invoke_api.arn
 }
 
