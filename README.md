@@ -97,6 +97,8 @@ The API key/secret will be used to authenticate with the source's REST API and a
 | Slack  | [docs/sources/slack-discovery](docs/sources/slack-discovery.md) | `discovery:read`                                           |
 | Zoom   | [docs/sources/zoom](docs/sources/zoom.md)                       | `user:read:admin` `meeting:read:admin` `report:read:admin` |
 
+NOTE: the above scopes are copied from [infra/modules/worklytics-connector-specs](infra/modules/worklytics-connector-specs).
+Please refer to that module for a definitive list.
 
 ### Other Data Sources without REST APIs
 
