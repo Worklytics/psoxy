@@ -91,11 +91,11 @@ which you must provide as a configuration value in your proxy deployment.
 
 The API key/secret will be used to authenticate with the source's REST API and access the data.
 
-| Source                                                           | API Permissions / Scopes                                                                                       |
-|------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------|
-| Asana [details + data examples](docs/sources/asana.md)           | a [Service Account](https://asana.com/guide/help/premium/service-accounts) (provides full access to Workspace) |
-| Slack [details + data examples](docs/sources/slack-discovery.md) | `discovery:read`                                                                                               |
-| Zoom [details + data examples](docs/sources/zoom.md)             | `user:read:admin` `meeting:read:admin` `report:read:admin`                                                     |
+| Source | Details + Examples                                              | API Permissions / Scopes                                                                                       |
+|--------|-----------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------|
+| Asana  | [docs/sources/asana](docs/sources/asana.md)                     | a [Service Account](https://asana.com/guide/help/premium/service-accounts) (provides full access to Workspace) |
+| Slack  | [docs/sources/slack-discovery](docs/sources/slack-discovery.md) | `discovery:read`                                           |
+| Zoom   | [docs/sources/zoom](docs/sources/zoom.md)                       | `user:read:admin` `meeting:read:admin` `report:read:admin` |
 
 
 ### Other Data Sources without REST APIs
