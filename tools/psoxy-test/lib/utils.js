@@ -8,8 +8,9 @@ import _ from 'lodash';
 import spec from '../data-sources/spec.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-// In case Psoxy is slow to respond, Node.js doesn't have a default since v13
-const REQUEST_TIMEOUT = 10000;
+// In case Psoxy is slow to respond (Lambda can take up to 20s+ to bootstrap), 
+// Node.js request doesn't have a default since v13
+const REQUEST_TIMEOUT_MS = 25000;
 
 /**
  * Save data to file.
@@ -91,7 +92,7 @@ function requestWrapper(url, method = 'GET', headers) {
         path: url.pathname + (params !== '' ? `?${params}` : ''),
         method: method,
         headers: headers,
-        timeout: REQUEST_TIMEOUT,
+        timeout: REQUEST_TIMEOUT_MS,
       },
       (res) => {
         res.on('data', (data) => (responseData += data));
