@@ -91,11 +91,11 @@ which you must provide as a configuration value in your proxy deployment.
 
 The API key/secret will be used to authenticate with the source's REST API and access the data.
 
-| Source  | Examples                                                                                                    |
-|---------|-------------------------------------------------------------------------------------------------------------|
-| Asana   | [data](docs/sources/api-response-examples/asana) - [rules](docs/sources/example-rules/asana/asana.yaml)     |
-| Slack   | [data](docs/sources/api-response-examples/slack) - [rules](docs/sources/example-rules/slack/discovery.yaml) |
-| Zoom    | [data](docs/sources/api-response-examples/zoom) - [rules](docs/sources/example-rules/zoom/zoom.yaml)       |
+| Source  | Examples                                                                                                    | API Permissions / Scopes                                                                                       |
+|---------|-------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------|
+| Asana   | [data](docs/sources/api-response-examples/asana) - [rules](docs/sources/example-rules/asana/asana.yaml)     | a [Service Account](https://asana.com/guide/help/premium/service-accounts) (provides full access to Workspace) |
+| Slack   | [data](docs/sources/api-response-examples/slack) - [rules](docs/sources/example-rules/slack/discovery.yaml) | `discovery:read`                                                                                               |
+| Zoom    | [data](docs/sources/api-response-examples/zoom) - [rules](docs/sources/example-rules/zoom/zoom.yaml)        | `user:read:admin` `meeting:read:admin` `report:read:admin`                                                     |
 
 
 ### Other Data Sources without REST APIs
