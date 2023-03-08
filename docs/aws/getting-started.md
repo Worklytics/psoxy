@@ -10,7 +10,7 @@ You'll provision the following to host Psoxy in AWS:
   - S3 buckets, if using the 'bulk' mode to sanitize file data (such as CSVs)
   - Cognito Pools and Identities, if connecting to Microsoft 365 (Azure AD) data sources
 
-The diagram below provides an architecture overview of the 'REST' and 'Bulk'
+The diagram below provides an architecture overview of the 'REST' and 'Bulk' use-cases.
 
 ![AWS Arch Diagram](aws-arch-diagram.jpg)
 
@@ -24,7 +24,7 @@ The diagram below provides an architecture overview of the 'REST' and 'Bulk'
 
 
 2. **A sufficiently privileged AWS Role** You must have a IAM Role within the AWS account with
-   sufficient privileges to (AWS managed role examples linked):
+   sufficient privileges to (AWS managed policy examples linked):
 
    - create IAM roles + policies (eg [IAMFullAccess](https://us-east-1.console.aws.amazon.com/iam/home?region=us-east-1#/policies/arn:aws:iam::aws:policy/IAMFullAccess$serviceLevelSummary))
    - create and update Systems Manager Parameters (eg, [AmazonSSMFullAccess](https://us-east-1.console.aws.amazon.com/iam/home?region=us-east-1#/policies/arn:aws:iam::aws:policy/AmazonSSMFullAccess$serviceLevelSummary) )
@@ -36,6 +36,12 @@ The diagram below provides an architecture overview of the 'REST' and 'Bulk'
     recommend you use a dedicated AWS account to host proxy which is NOT shared with any other use case)
 
    You will need the ARN of this role.
+
+   NOTE: if you're connecting to Microsoft 365 (Azure AD) data sources, you'll also need permissions
+   to create AWS Cognito Identity Pools and add Identities to them, such as [arn:aws:iam::aws:policy/AmazonCognitoPowerUser](https://us-east-1.console.aws.amazon.com/iam/home?region=us-east-1#/policies/arn:aws:iam::aws:policy/AmazonCognitoPowerUser$serviceLevelSummary].
+   Some AWS Organizations have [Service Control Policies](https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html)
+   in place that deny this by default, even if you have an IAM role that allows it at an account
+   level.
 
 3. **An authenticated AWS CLI in your provisioning environment**. Your environment (eg, shell/etc
    from which you'll run terraform commands) must be authenticated as an identity that can assume
