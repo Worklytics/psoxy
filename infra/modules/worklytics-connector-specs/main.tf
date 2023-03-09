@@ -264,6 +264,44 @@ locals {
   2. Update the content of PSOXY_ASANA_ACCESS_TOKEN variable with the previous token value obtained
 EOT
     }
+    salesforce = {
+      source_kind : "salesforce",
+      worklytics_connector_id : "salesforce-psoxy"
+      display_name : "Salesforce"
+      identifier_scope_id : "salesforce"
+      worklytics_connector_name : "Salesforce via Psoxy"
+      target_host : "${var.salesforce_domain}.my.salesforce.com"
+      source_auth_strategy : "oauth2_access_token"
+      environment_variables : {}
+      secured_variables : [
+        { name : "ACCESS_TOKEN", writable : false },
+      ],
+      reserved_concurrent_executions : null
+      example_api_calls_user_to_impersonate : null
+      example_api_calls : [
+        "/services/data/v51.0/sobjects/Account/describe",
+        "/services/data/v51.0/sobjects/ActivityHistory/describe",
+        "/services/data/v51.0/sobjects/Account/updated/?start=2016-03-09T18%3A44%3A00%2B00%3A00&end=2023-03-09T18%3A44%3A00%2B00%3A00",
+        "/services/data/v51.0/composite/sobjects/Account?ids={ANY_ACCOUNT_ID}&fields=Id,AccountSource,AnnualRevenue,CreatedDate,CreatedById,IsDeleted,LastActivityDate,LastModifiedDate,LastModifiedById,NumberOfEmployees,OwnerId,Ownership,ParentId,Rating,Sic,Type",
+        "/services/data/v51.0/query?q=SELECT%20%28SELECT%20AccountId%2CActivityDate%2CActivityDateTime%2CActivitySubtype%2CActivityType%2CCallDurationInSeconds%2CCallType%2CCreatedDate%2CCreatedById%2CDurationInMinutes%2CEndDateTime%2CId%2CIsAllDayEvent%2CIsDeleted%2CIsHighPriority%2CIsTask%2CLastModifiedDate%2CLastModifiedById%2COwnerId%2CPriority%2CStartDateTime%2CStatus%2CWhatId%2CWhoId%20FROM%20ActivityHistories%20ORDER%20BY%20LastModifiedDate%20DESC%20NULLS%20LAST%29%20FROM%20Account%20where%20id%3D%27{ANY_ACCOUNT_ID}%27",
+        "/services/data/v51.0/query?q=SELECT%20Id%20from%20Account%20ORDER%20BY%20Id%20ASC"
+      ],
+      secured_variables : [
+        { name : "ACCESS_TOKEN", writable : false },
+      ],
+      external_token_todo : <<EOT
+  1. Create a [Salesforce application + initial access token](https://help.salesforce.com/s/articleView?id=sf.remoteaccess_oidc_initial_access_token.htm&type=5)
+    with following permissions:
+    - Perform requests at any time (refresh_token, offline_access)
+    - Access unique user identifiers (openid)
+    - Access content resources (content)
+    - Perform ANSI SQL queries on Customer Data Platform data (cdp_query_api)
+
+  2. It is not required to put any OAuth flow. API URL should have a value as it is required but it is not going to be used.
+  3. Once created, generate a token on `Initial Access Token` and reveal the value.
+  4. Update the content of PSOXY_SALESFORCE_ACCESS_TOKEN variable with the previous token value obtained
+EOT
+    }
     slack-discovery-api = {
       source_kind : "slack"
       identifier_scope_id : "slack"

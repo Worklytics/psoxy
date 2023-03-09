@@ -26,3 +26,9 @@ variable "example_msft_user_guid" {
   description = "example MSFT user guid (uuid) for test API calls (OPTIONAL)"
   default     = "{EXAMPLE_MSFT_USER_GUID}"
 }
+
+variable "salesforce_domain" {
+  type = string
+  default = ""
+  description = "Domain of the Salesforce to connect to (only required if using Salesforce connector)"
+}
