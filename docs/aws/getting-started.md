@@ -38,7 +38,7 @@ The diagram below provides an architecture overview of the 'REST' and 'Bulk' use
    You will need the ARN of this role.
 
    NOTE: if you're connecting to Microsoft 365 (Azure AD) data sources, you'll also need permissions
-   to create AWS Cognito Identity Pools and add Identities to them, such as [arn:aws:iam::aws:policy/AmazonCognitoPowerUser](https://us-east-1.console.aws.amazon.com/iam/home?region=us-east-1#/policies/arn:aws:iam::aws:policy/AmazonCognitoPowerUser$serviceLevelSummary].
+   to create AWS Cognito Identity Pools and add Identities to them, such as [arn:aws:iam::aws:policy/AmazonCognitoPowerUser](https://us-east-1.console.aws.amazon.com/iam/home?region=us-east-1#/policies/arn:aws:iam::aws:policy/AmazonCognitoPowerUser$serviceLevelSummary).
    Some AWS Organizations have [Service Control Policies](https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html)
    in place that deny this by default, even if you have an IAM role that allows it at an account
    level.
