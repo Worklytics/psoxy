@@ -149,6 +149,8 @@ Depending on your Cloud Host / Data Sources, you will need:
 | if deploying to GCP               | [Google Cloud CLI](https://cloud.google.com/sdk/docs/install)                              | 1.0+    | `gcloud version` | <ul><li>[Service Account Creator](https://cloud.google.com/iam/docs/understanding-roles#iam.serviceAccountCreator)</li><li>[Cloud Functions Admin](https://cloud.google.com/iam/docs/understanding-roles#cloudfunctions.admin)</li><li>[Cloud Storage Admin](https://cloud.google.com/iam/docs/understanding-roles#storage.admin)</li><li>[Secret Manager Admin](https://cloud.google.com/iam/docs/understanding-roles#secretmanager.admin)</li><li>[Service Usage Admin](https://cloud.google.com/iam/docs/understanding-roles#serviceusage.serviceUsageAdmin)</li></ul><br/>see [docs/gcp/getting-started.md](docs/gcp/getting-started.md)                                                                                                                                                                                                                   |
 | if connecting to Microsoft 365    | [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)                  | 2.29+   | `az --version`   | [Cloud Application Administrator](https://learn.microsoft.com/en-us/azure/active-directory/roles/permissions-reference#cloud-application-administrator)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | if connecting to Google Workspace | [Google Cloud CLI](https://cloud.google.com/sdk/docs/install)                              | 1.0+    | `gcloud version` | <ul><li>[Service Account Creator](https://cloud.google.com/iam/docs/understanding-roles#iam.serviceAccountCreator)</li><li>[Service Account Key Admin](https://cloud.google.com/iam/docs/understanding-roles#iam.serviceAccountKeyAdmin)</li><li>[Service Usage Admin](https://cloud.google.com/iam/docs/understanding-roles#serviceusage.serviceUsageAdmin)</li></ul><br/>see [docs/sources/google-workspace/google-workspace.md](docs/sources/google-workspace/google-workspace.md)                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+
+
 For testing your psoxy instance, you will need:
 
 | Tool                                                               | Version | Test Command      |
@@ -230,21 +232,17 @@ terraform apply
 
 ## Latest Releases
 
-### Next:  [v0.4.13](https://github.com/Worklytics/psoxy/releases/tag/v0.4.13)
+### Current:  [v0.4.13](https://github.com/Worklytics/psoxy/releases/tag/v0.4.13)
 
-### Current: [v0.4.12](https://github.com/Worklytics/psoxy/releases/tag/v0.4.12)
+Highlights:
+ - documentation improvements
+
+### Previous: [v0.4.12](https://github.com/Worklytics/psoxy/releases/tag/v0.4.12)
 
 Highlights:
 - compatibility for using AWS API Gateway in front of AWS lambda deployments (*alpha*; our only
   supported approach is exposing AWS lambdas via function URLs)
 - TODOs via `terraform` output, to improve compatibility with [Terraform Cloud](https://cloud.hashicorp.com/products/terraform)
-
-
-### Previous: [v0.4.11](https://github.com/Worklytics/psoxy/releases/tag/v0.4.11)
-
-Highlights:
-- Azure authentication with federation rather than certificates/secrets
-- npm test tool support health check, API gateway endpoints
 
 Review [earlier release notes in GitHub](https://github.com/Worklytics/psoxy/releases).
 
