@@ -31,6 +31,30 @@ module "psoxy-aws-google-workspace" {
 Our modules will give each proxy's role perms to decrypt using that key.  The role you're using to
 run terraform will need to have perms to grant such permissions.
 
+## Tagging ALL infra created by your Terraform Configuration
+
+In the `main.tf` of your configuration, add a `default_tags` block to your configuration. Example
+shown below.
+
+See: [https://registry.terraform.io/providers/hashicorp/aws/latest/docs#default_tags]
+
+```hcl
+provider "aws" {
+  region = var.aws_region
+
+  assume_role {
+    role_arn = var.aws_assume_role_arn
+  }
+
+  default_tags {
+    Vendor  = "Worklytics"
+  }
+
+  allowed_account_ids = [
+    var.aws_account_id
+  ]
+}
+```
 
 ## Using AWS API Gateway **alpha**
 
