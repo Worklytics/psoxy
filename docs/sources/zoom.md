@@ -1,5 +1,11 @@
 # Zoom
 
+## Examples
+
+  * [Example Rules](example-rules/zoom/zoom.yaml)
+  * Example Data : [original](api-response-examples/zoom) | [sanitized](api-response-examples/zoom/sanitized)
+
+## Steps to Connect
 Zoom connector through Psoxy requires a custom managed app on the Zoom Marketplace (in development
 mode, no need to publish).
 

@@ -83,3 +83,17 @@ output "lookup_tables" {
   value = module.psoxy-aws-google-workspace.lookup_tables
 }
 
+output "todos_1" {
+  description = "List of todo steps to complete 1st, in markdown format."
+  value = join("\n", module.psoxy-aws-google-workspace.todos_1)
+}
+
+output "todos_2" {
+  description = "List of todo steps to complete 2nd, in markdown format."
+  value = join("\n", module.psoxy-aws-google-workspace.todos_2)
+}
+
+output "todos_3" {
+  description = "List of todo steps to complete 3rd, in markdown format."
+  value = join("\n", module.psoxy-aws-google-workspace.todos_3)
+}

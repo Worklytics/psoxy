@@ -81,6 +81,21 @@ output "lookup_tables" {
   value = module.psoxy-aws-msft-365.lookup_tables
 }
 
+output "todos_1" {
+  description = "List of todo steps to complete 1st, in markdown format."
+  value = join("\n", module.psoxy-aws-msft-365.todos_1)
+}
+
+output "todos_2" {
+  description = "List of todo steps to complete 2nd, in markdown format."
+  value = join("\n", module.psoxy-aws-msft-365.todos_2)
+}
+
+output "todos_3" {
+  description = "List of todo steps to complete 3rd, in markdown format."
+  value = join("\n", module.psoxy-aws-msft-365.todos_3)
+}
+
 moved {
   from = module.worklytics_connector_specs
   to   = module.psoxy-aws-msft-365.module.worklytics_connector_specs
