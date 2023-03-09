@@ -47,3 +47,18 @@ module "psoxy-gcp-google-workspace" {
   google_workspace_example_admin = var.google_workspace_example_admin
   general_environment_variables  = var.general_environment_variables
 }
+
+output "todos_1" {
+  description = "List of todo steps to complete 1st, in markdown format."
+  value = module.psoxy-gcp-google-workspace.todos_1
+}
+
+output "todos_2" {
+  description = "List of todo steps to complete 2nd, in markdown format."
+  value = module.psoxy-gcp-google-workspace.todos_2
+}
+
+output "todos_3" {
+  description = "List of todo steps to complete 3rd, in markdown format."
+  value = module.psoxy-gcp-google-workspace.todos_3
+}
