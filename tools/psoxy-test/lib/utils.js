@@ -6,9 +6,11 @@ import https from 'https';
 import path from 'path';
 import _ from 'lodash';
 import spec from '../data-sources/spec.js';
-import { constants as httpCodes } from 'http2';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+// In case Psoxy is slow to respond (Lambda can take up to 20s+ to bootstrap), 
+// Node.js request doesn't have a default since v13
+const REQUEST_TIMEOUT_MS = 25000;
 
 /**
  * Save data to file.
@@ -81,7 +83,7 @@ function getCommonHTTPHeaders(options = {}) {
 function requestWrapper(url, method = 'GET', headers) {
   url = typeof url === 'string' ? new URL(url) : url;
   const params = url.searchParams.toString();
-
+  let responseData = '';
   return new Promise((resolve, reject) => {
     const req = https.request(
       {
@@ -90,25 +92,24 @@ function requestWrapper(url, method = 'GET', headers) {
         path: url.pathname + (params !== '' ? `?${params}` : ''),
         method: method,
         headers: headers,
+        timeout: REQUEST_TIMEOUT_MS,
       },
       (res) => {
-        const result = {
-          status: res.statusCode,
-          statusMessage: res.statusMessage,
-          headers: res.headers,
-        };
-
-        if (res.statusCode !== httpCodes.HTTP_STATUS_OK) {
-          resolve(result);
-        } else {
-          let responseData = '';
-          res.on('data', (data) => (responseData += data));
-          res.on('end', () => {
-            resolve({...result, data: responseData});
+        res.on('data', (data) => (responseData += data));
+        res.on('end', () => {
+          resolve({
+            status: res.statusCode,
+            statusMessage: res.statusMessage,
+            headers: res.headers,
+            data: responseData,
           });
-        }
+        });
       }
     );
+    req.on('timeout', () => {
+      req.destroy();
+      reject({ statusMessage: 'Psoxy is taking too long to respond'});
+    });
     req.on('error', (error) => {
       reject({ status: error.code, statusMessage: error.message });
     });

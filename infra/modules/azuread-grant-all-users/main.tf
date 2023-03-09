@@ -2,14 +2,6 @@
 #  - there is no way to do another org unit / group via Terraform; if that's the configure you
 #   desire, you'll have to do that via Azure AD console OR cli
 
-terraform {
-  required_providers {
-    azuread = {
-      version = "~> 2.33.0"
-    }
-  }
-}
-
 # TODO: if grant can be made fully through API, do it here; until then, TODO file is best option
 
 # NOTE: using `azuread_service_principal_delegated_permission_grant` seems to NOT work for this,

@@ -27,7 +27,10 @@ bucket_location      = "--OPTIONAL location where the buckets will be created"
 source_kind          = "Kind of the content to process; it should match one of the config.yaml file available"
 ```
 
-for example:
+In order to get the Service Account Email value for `worklytics_sa_emails`, log in to your Worklytics
+Account and visit the [Configuration Values](https://app.worklytics.co/analytics/integrations/configuration) page.
+
+For example:
 ```terraform
 billing_account_id   = "0A2AE4-1D396E-1219D9"
 folder_id            = "33576234038"
@@ -39,8 +42,8 @@ bucket_prefix        = "alice-psoxy-dev"
 source_kind          = "hris"
 ```
 
-It is mandatory that `source_kind` matches with a configuration file provided into the platform. For example, if the 
-value is `hris` it will expect a `hris.yaml` file at some point. You could include this kind of files as part of `config` 
+It is mandatory that `source_kind` matches with a configuration file provided into the platform. For example, if the
+value is `hris` it will expect a `hris.yaml` file at some point. You could include this kind of files as part of `config`
 folder or include it as part of the deployment files in the target folder.
 
 Example of `hris.yaml` config file with Base64 rules:

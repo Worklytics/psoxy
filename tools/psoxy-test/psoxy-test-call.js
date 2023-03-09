@@ -71,6 +71,10 @@ export default async function (options = {}) {
 
   result = await psoxyCall(options);
 
+  if (result.headers) {
+    logger.verbose(`Response headers:\n ${JSON.stringify(result.headers, null, 2)}`);
+  }
+
   if (result.status === httpCodes.HTTP_STATUS_OK) {
     let successMessagePrefix = options.healthCheck ? 'Health Check result:' :
       'Call result:'
@@ -81,7 +85,7 @@ export default async function (options = {}) {
       try {
         jsonCallResult = JSON.parse(result.data)
       } catch(error) {
-        logger.error(error);
+        logger.error(error.message);
       }
 
       if (options.saveToFile) {
@@ -123,8 +127,6 @@ export default async function (options = {}) {
       } else if (result.headers['www-authenticate']) {
         errorMessage += `: GCP ${result.headers['www-authenticate']}`
       }
-
-      logger.verbose(`Response headers:\n ${JSON.stringify(result.headers, null, 2)}`);
     }
 
     logger.error(`${chalk.bold.red(result.status)}\n${chalk.bold.red(errorMessage)}`);

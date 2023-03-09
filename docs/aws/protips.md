@@ -31,6 +31,30 @@ module "psoxy-aws-google-workspace" {
 Our modules will give each proxy's role perms to decrypt using that key.  The role you're using to
 run terraform will need to have perms to grant such permissions.
 
+## Tagging ALL infra created by your Terraform Configuration
+
+In the `main.tf` of your configuration, add a `default_tags` block to your configuration. Example
+shown below.
+
+See: [https://registry.terraform.io/providers/hashicorp/aws/latest/docs#default_tags]
+
+```hcl
+provider "aws" {
+  region = var.aws_region
+
+  assume_role {
+    role_arn = var.aws_assume_role_arn
+  }
+
+  default_tags {
+    Vendor  = "Worklytics"
+  }
+
+  allowed_account_ids = [
+    var.aws_account_id
+  ]
+}
+```
 
 ## Using AWS API Gateway **alpha**
 
@@ -98,16 +122,16 @@ resource "aws_apigatewayv2_route" "get_route" {
   api_id             = aws_apigatewayv2_api.psoxy-api.id
   route_key          = "GET /${each.key}/{proxy+}"
   authorization_type = "AWS_IAM"
-  target             = "integrations/${aws_apigatewayv2_integration.map.id}"
+  target             = "integrations/${aws_apigatewayv2_integration.map[each.key].id}"
 }
 
 resource "aws_apigatewayv2_route" "head_route" {
   for_each = local.rest_instances
 
   api_id             = aws_apigatewayv2_api.psoxy-api.id
-  route_key          = "HEAD /${each.key}}/{proxy+}"
+  route_key          = "HEAD /${each.key}/{proxy+}"
   authorization_type = "AWS_IAM"
-  target             = "integrations/${aws_apigatewayv2_integration.map.id}"
+  target             = "integrations/${aws_apigatewayv2_integration.map[each.key].id}"
 }
 
 # allow API gateway to invoke the lambda function
@@ -145,8 +169,8 @@ resource "aws_iam_policy" "invoke_api" {
   })
 }
 
-resource "aws_iam_policy_attachment" "invoke_api_policy_to_role" {
-  name       = module.psoxy-aws-google-workspace.caller_role_arn
+resource "aws_iam_role_policy_attachment" "invoke_api_policy_to_role" {
+  role       = "PsoxyCaller" # Name (not ARN) of the API caller role
   policy_arn = aws_iam_policy.invoke_api.arn
 }
 

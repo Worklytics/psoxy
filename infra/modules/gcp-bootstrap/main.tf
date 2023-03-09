@@ -27,9 +27,8 @@ resource "google_storage_bucket" "state_bucket" {
   }
 }
 
-resource "local_file" "todo" {
-  filename = "TODO - terraform backend.md"
-  content  = <<EOT
+locals {
+  todo_content =  <<EOT
 Ensure the `terraform` block at the top of your Terraform configuration is something like following:
 ```terraform
 terraform {
@@ -47,8 +46,18 @@ terraform {
 EOT
 }
 
+resource "local_file" "todo" {
+  filename = "TODO - terraform backend.md"
+  content  = local.todo_content
+}
+
+output "todo" {
+  value       = local.todo_content
+  description = "Markdown-formatted TODO list."
+}
 
 # NOTE: outputs aligned to https://registry.terraform.io/modules/terraform-google-modules/bootstrap/google/latest
 output "gcs_bucket_tfstate" {
-  value = google_storage_bucket.state_bucket.name
+  value       = google_storage_bucket.state_bucket.name
+  description = "GCS bucket to be used to persist Terraform state."
 }
