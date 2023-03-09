@@ -4,15 +4,24 @@ import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
 import co.worklytics.psoxy.rules.RuleSet;
 import co.worklytics.psoxy.utils.RandomNumberGenerator;
+import com.google.api.client.http.*;
+import com.google.api.client.testing.http.MockHttpTransport;
+import com.google.api.client.testing.http.MockLowLevelHttpResponse;
+import com.google.auth.http.HttpTransportFactory;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoSet;
+import lombok.SneakyThrows;
 
 import javax.inject.Singleton;
 
+import java.io.ByteArrayInputStream;
+import java.util.Map;
 import java.util.Random;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class MockModules {
 
@@ -53,6 +62,27 @@ public class MockModules {
         static SourceAuthStrategy sourceStratey() {
             return mock(SourceAuthStrategy.class);
         }
+    }
+
+    @Module
+    public interface ForHttpTransportFactory {
+        @Provides @Singleton
+        static HttpTransportFactory httpTransportFactory() {
+            return mock(HttpTransportFactory.class);
+        }
+
+        @SneakyThrows
+        public static void mockResponse(HttpTransportFactory factory, String content) {
+
+            MockHttpTransport.Builder builder = new MockHttpTransport.Builder();
+
+            builder.setLowLevelHttpResponse(new MockLowLevelHttpResponse()
+                .setStatusCode(200)
+                .setContent(content));
+
+            when(factory.create()).thenReturn(builder.build());
+        }
+
     }
 
 }
