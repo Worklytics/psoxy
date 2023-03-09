@@ -5,7 +5,7 @@ terraform {
     # for the infra that will host Psoxy instances
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 4.12"
+      version = "~> 4.15"
     }
 
     # for the API connections to Google Workspace
@@ -85,15 +85,15 @@ output "lookup_tables" {
 
 output "todos_1" {
   description = "List of todo steps to complete 1st, in markdown format."
-  value = join("\n", module.psoxy-aws-google-workspace.todos_1)
+  value       = join("\n", module.psoxy-aws-google-workspace.todos_1)
 }
 
 output "todos_2" {
   description = "List of todo steps to complete 2nd, in markdown format."
-  value = join("\n", module.psoxy-aws-google-workspace.todos_2)
+  value       = join("\n", module.psoxy-aws-google-workspace.todos_2)
 }
 
 output "todos_3" {
   description = "List of todo steps to complete 3rd, in markdown format."
-  value = join("\n", module.psoxy-aws-google-workspace.todos_3)
+  value       = join("\n", module.psoxy-aws-google-workspace.todos_3)
 }
