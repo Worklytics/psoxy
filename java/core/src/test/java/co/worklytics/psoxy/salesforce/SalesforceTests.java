@@ -7,10 +7,6 @@ import lombok.Getter;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.stream.Stream;
 
 public class SalesforceTests extends JavaRulesTestBaseCase {
@@ -69,6 +65,15 @@ public class SalesforceTests extends JavaRulesTestBaseCase {
     }
 
     @Test
+    void users_by_id() {
+        String jsonString = asJson(exampleDirectoryPath, "users.json");
+
+        String endpoint = "https://test.salesforce.com/services/data/v51.0/composite/sobjects/User?ids=0055Y00000ExkfuQAB,0055Y00000ExkfpQAB&fields=Alias,AccountId,ContactId,CreatedDate,CreatedById,Email,EmailEncodingKey,Id,IsActive,LastLoginDate,LastModifiedDate,ManagerId,Name,TimeZoneSidKey,Username,UserRoleId,UserType";
+
+        String sanitized = this.sanitize(endpoint, jsonString);
+    }
+
+    @Test
     void query_by_id() {
         String jsonString = asJson(exampleDirectoryPath, "basic_query.json");
 
@@ -88,10 +93,10 @@ public class SalesforceTests extends JavaRulesTestBaseCase {
 
     @Override
     public Stream<InvocationExample> getExamples() {
-        return Stream.of(InvocationExample.of("https://test.salesforce.com/services/data/v51.0/composite/sobjects/Account?ids=0015Y00002c7g95QAA,0015Y00002c7g8uQAA&fields=Id,AnnualRevenue,CreatedDate,CreatedById,IsDeleted,LastActivityDate,LastModifiedDate,LastModifiedById,NumberOfEmployees,OwnerId,Ownership,ParentId,Rating,Sic,Type", "accounts.json"),
-
+        return Stream.of(
+                InvocationExample.of("https://test.salesforce.com/services/data/v51.0/composite/sobjects/User?ids=0055Y00000ExkfuQAB,0055Y00000ExkfpQAB&fields=Alias,AccountId,ContactId,CreatedDate,CreatedById,Email,EmailEncodingKey,Id,IsActive,LastLoginDate,LastModifiedDate,ManagerId,Name,TimeZoneSidKey,Username,UserRoleId,UserType", "users.json"),
+                InvocationExample.of("https://test.salesforce.com/services/data/v51.0/composite/sobjects/Account?ids=0015Y00002c7g95QAA,0015Y00002c7g8uQAA&fields=Id,AnnualRevenue,CreatedDate,CreatedById,IsDeleted,LastActivityDate,LastModifiedDate,LastModifiedById,NumberOfEmployees,OwnerId,Ownership,ParentId,Rating,Sic,Type", "accounts.json"),
                 InvocationExample.of("https://test.salesforce.com/services/data/v51.0/query?q=SELECT%20Id%20from%20Account%20ORDER%20BY%20Id%20ASC", "basic_query.json"),
-
                 InvocationExample.of("https://test.salesforce.com/services/data/v51.0/query?q=SELECT%20%28SELECT%20AccountId%2CActivityDate%2CActivityDateTime%2CActivitySubtype%2CActivityType%2CCallDurationInSeconds%2CCallType%2CCreatedDate%2CCreatedById%2CDurationInMinutes%2CEndDateTime%2CId%2CIsAllDayEvent%2CIsDeleted%2CIsHighPriority%2CIsTask%2CLastModifiedDate%2CLastModifiedById%2COwnerId%2CPriority%2CStartDateTime%2CStatus%2CWhatId%2CWhoId%20FROM%20ActivityHistories%20ORDER%20BY%20LastModifiedDate%20DESC%20NULLS%20LAST%29%20FROM%20Account%20where%20id%3D%270015Y00002c7g95QAA%27", "related_item_query.json")
         );
     }
