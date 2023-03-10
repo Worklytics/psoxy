@@ -46,6 +46,7 @@ module "psoxy-gcp-google-workspace" {
   google_workspace_example_user  = var.google_workspace_example_user
   google_workspace_example_admin = var.google_workspace_example_admin
   general_environment_variables  = var.general_environment_variables
+  salesforce_domain = var.salesforce_domain
 }
 
 moved {

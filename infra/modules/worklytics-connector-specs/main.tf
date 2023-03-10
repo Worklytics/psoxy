@@ -241,7 +241,7 @@ locals {
       environment_variables : {}
       secured_variables : [
         { name : "ACCESS_TOKEN", writable : false },
-      ],
+      ]
       reserved_concurrent_executions : null
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
@@ -252,10 +252,7 @@ locals {
         "/api/1.0/tasks?project={ANY_PROJECT_GID}",
         "/api/1.0/tasks/{ANY_TASK_GID}",
         "/api/1.0/tasks/{ANY_TASK_GID}/stories",
-      ],
-      secured_variables : [
-        { name : "ACCESS_TOKEN", writable : false },
-      ],
+      ]
       external_token_todo : <<EOT
   1. Create a [Service Account User + token](https://asana.com/guide/help/premium/service-accounts)
     or a sufficiently [Personal Access Token](https://developers.asana.com/docs/personal-access-token)
@@ -270,12 +267,16 @@ EOT
       display_name : "Salesforce"
       identifier_scope_id : "salesforce"
       worklytics_connector_name : "Salesforce via Psoxy"
-      target_host : "${var.salesforce_domain}.my.salesforce.com"
-      source_auth_strategy : "oauth2_access_token"
-      environment_variables : {}
+      target_host : "https://${var.salesforce_domain}"
+      source_auth_strategy: "oauth2_refresh_token"
+      environment_variables : {
+        GRANT_TYPE: "client_credentials"
+        REFRESH_ENDPOINT: "https://${var.salesforce_domain}/services/oauth2/token"
+      }
       secured_variables : [
-        { name : "ACCESS_TOKEN", writable : false },
-      ],
+        { name : "CLIENT_SECRET", writable : false },
+        { name : "CLIENT_ID", writable : false },
+      ]
       reserved_concurrent_executions : null
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
@@ -285,10 +286,7 @@ EOT
         "/services/data/v51.0/composite/sobjects/Account?ids={ANY_ACCOUNT_ID}&fields=Id,AccountSource,AnnualRevenue,CreatedDate,CreatedById,IsDeleted,LastActivityDate,LastModifiedDate,LastModifiedById,NumberOfEmployees,OwnerId,Ownership,ParentId,Rating,Sic,Type",
         "/services/data/v51.0/query?q=SELECT%20%28SELECT%20AccountId%2CActivityDate%2CActivityDateTime%2CActivitySubtype%2CActivityType%2CCallDurationInSeconds%2CCallType%2CCreatedDate%2CCreatedById%2CDurationInMinutes%2CEndDateTime%2CId%2CIsAllDayEvent%2CIsDeleted%2CIsHighPriority%2CIsTask%2CLastModifiedDate%2CLastModifiedById%2COwnerId%2CPriority%2CStartDateTime%2CStatus%2CWhatId%2CWhoId%20FROM%20ActivityHistories%20ORDER%20BY%20LastModifiedDate%20DESC%20NULLS%20LAST%29%20FROM%20Account%20where%20id%3D%27{ANY_ACCOUNT_ID}%27",
         "/services/data/v51.0/query?q=SELECT%20Id%20from%20Account%20ORDER%20BY%20Id%20ASC"
-      ],
-      secured_variables : [
-        { name : "ACCESS_TOKEN", writable : false },
-      ],
+      ]
       external_token_todo : <<EOT
   1. Create a [Salesforce application + initial access token](https://help.salesforce.com/s/articleView?id=sf.remoteaccess_oidc_initial_access_token.htm&type=5)
     with following permissions:
