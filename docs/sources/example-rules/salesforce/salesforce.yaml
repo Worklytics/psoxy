@@ -1,0 +1,23 @@
+---
+endpoints:
+  - pathRegex: "^/services/data/v51.0/sobjects/Account/describe$"
+  - pathRegex: "^/services/data/v51.0/ActivityHistory/Account/describe$"
+  - pathRegex: "^/services/data/v51.0/composite/sobjects/Account?"
+    allowedQueryParams:
+      - "ids"
+      - "fields"
+  - pathRegex: "^/services/data/v51.0/composite/sobjects/ActivityHistory?"
+    allowedQueryParams:
+      - "ids"
+      - "fields"
+  - pathRegex: "^/services/data/v51.0/Account/updated?"
+    allowedQueryParams:
+      - "start"
+      - "end"
+  - pathRegex: "^/services/data/v51.0/ActivityHistory/updated?"
+    allowedQueryParams:
+      - "start"
+      - "end"
+  - pathRegex: "^/services/data/v51.0/query?"
+    allowedQueryParams:
+      - "q"

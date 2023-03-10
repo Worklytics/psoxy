@@ -282,7 +282,7 @@ EOT
       example_api_calls : [
         "/services/data/v51.0/sobjects/Account/describe",
         "/services/data/v51.0/sobjects/ActivityHistory/describe",
-        "/services/data/v51.0/sobjects/Account/updated/?start=2016-03-09T18%3A44%3A00%2B00%3A00&end=2023-03-09T18%3A44%3A00%2B00%3A00",
+        "/services/data/v51.0/sobjects/Account/updated?start=2016-03-09T18%3A44%3A00%2B00%3A00&end=2023-03-09T18%3A44%3A00%2B00%3A00",
         "/services/data/v51.0/composite/sobjects/Account?ids={ANY_ACCOUNT_ID}&fields=Id,AccountSource,AnnualRevenue,CreatedDate,CreatedById,IsDeleted,LastActivityDate,LastModifiedDate,LastModifiedById,NumberOfEmployees,OwnerId,Ownership,ParentId,Rating,Sic,Type",
         "/services/data/v51.0/query?q=SELECT%20%28SELECT%20AccountId%2CActivityDate%2CActivityDateTime%2CActivitySubtype%2CActivityType%2CCallDurationInSeconds%2CCallType%2CCreatedDate%2CCreatedById%2CDurationInMinutes%2CEndDateTime%2CId%2CIsAllDayEvent%2CIsDeleted%2CIsHighPriority%2CIsTask%2CLastModifiedDate%2CLastModifiedById%2COwnerId%2CPriority%2CStartDateTime%2CStatus%2CWhatId%2CWhoId%20FROM%20ActivityHistories%20ORDER%20BY%20LastModifiedDate%20DESC%20NULLS%20LAST%29%20FROM%20Account%20where%20id%3D%27{ANY_ACCOUNT_ID}%27",
         "/services/data/v51.0/query?q=SELECT%20Id%20from%20Account%20ORDER%20BY%20Id%20ASC"
