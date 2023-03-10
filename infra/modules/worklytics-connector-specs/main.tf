@@ -288,16 +288,27 @@ EOT
         "/services/data/v51.0/query?q=SELECT%20Id%20from%20Account%20ORDER%20BY%20Id%20ASC"
       ]
       external_token_todo : <<EOT
-  1. Create a [Salesforce application + initial access token](https://help.salesforce.com/s/articleView?id=sf.remoteaccess_oidc_initial_access_token.htm&type=5)
+  1. Create a [Salesforce application + client credentials flow](https://help.salesforce.com/s/articleView?language=en_US&id=sf.remoteaccess_oauth_client_credentials_flow.htm&type=5)
     with following permissions:
+    - Manage user data via APIs (api)
+    - Access Connect REST API resources (chatter_api)
     - Perform requests at any time (refresh_token, offline_access)
     - Access unique user identifiers (openid)
+    - Access Lightning applications (lightning)
     - Access content resources (content)
     - Perform ANSI SQL queries on Customer Data Platform data (cdp_query_api)
 
-  2. It is not required to put any OAuth flow. API URL should have a value as it is required but it is not going to be used.
-  3. Once created, generate a token on `Initial Access Token` and reveal the value.
-  4. Update the content of PSOXY_SALESFORCE_ACCESS_TOKEN variable with the previous token value obtained
+  Apart from Salesforce instructions please review the following:
+  - "Callback URL" can be anything, not required in this flow but required by Salesforce.
+  - Application is marked with "Enable Client Credentials Flow"
+  - You have to assign an user for Client Credentials, be sure:
+      - The user is with
+      - The police associated to the user has the enabled next Administrative Permissions:
+        - API Enabled
+        - APEX REST Services
+      - And the police has the application created marked as enabled in "Connected App Access". Otherwise request will return 401 with INVALID_SESSION_ID
+  2. Once created, open "Manage Consumer Details"
+  3. Update the content of PSOXY_SALESFORCE_CLIENT_ID from Consumer Key	and PSOXY_SALESFORCE_CLIENT_SECRET from Consumer Secret
 EOT
     }
     slack-discovery-api = {
