@@ -267,7 +267,7 @@ EOT
       display_name : "Salesforce"
       identifier_scope_id : "salesforce"
       worklytics_connector_name : "Salesforce via Psoxy"
-      target_host : "https://${var.salesforce_domain}"
+      target_host : var.salesforce_domain
       source_auth_strategy: "oauth2_refresh_token"
       environment_variables : {
         GRANT_TYPE: "client_credentials"

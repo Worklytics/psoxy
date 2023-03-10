@@ -50,7 +50,7 @@ public class ClientCredentialsGrantTokenRequestBuilder
     // 'client_credentials' is MSFT
     //for Google, this is "urn:ietf:params:oauth:grant-type:jwt-bearer"
     @Getter(onMethod_ = @Override)
-    private final String grantType = "client_credentials";
+    private final String grantType = "client_credentials_jwt";
 
     //for Google, this is "assertion"
     // see: https://datatracker.ietf.org/doc/html/rfc7521#section-4.2
@@ -103,7 +103,7 @@ public class ClientCredentialsGrantTokenRequestBuilder
 
         Map<String, String> data = new TreeMap<>();
         //https://datatracker.ietf.org/doc/html/rfc6749#section-4.4.2
-        data.put(PARAM_GRANT_TYPE, getGrantType());
+        data.put(PARAM_GRANT_TYPE, "client_credentials");
         config.getConfigPropertyAsOptional(ConfigProperty.TOKEN_SCOPE)
             .ifPresent(r -> data.put(PARAM_SCOPE, r)); // 'scope' param is optional, per RFC
 

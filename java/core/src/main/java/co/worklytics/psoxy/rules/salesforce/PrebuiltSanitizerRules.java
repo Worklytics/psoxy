@@ -29,32 +29,32 @@ public class PrebuiltSanitizerRules {
             .build();
 
     static final Endpoint ACTIVITY_HISTORY_DESCRIBE = Endpoint.builder()
-            .pathRegex("^/services/data/v51.0/ActivityHistory/Account/describe$")
+            .pathRegex("^/services/data/v51.0/sobjects/ActivityHistory/describe$")
             // No redaction/pseudonymization, response is just metadata of the object
             .build();
 
     static final Endpoint ACCOUNT_UPDATED = Endpoint.builder()
-            .pathRegex("^/services/data/v51.0/Account/updated?")
+            .pathRegex("^/services/data/v51.0/Account/updated[?][^/]*")
             .allowedQueryParams(intervalQueryParameters)
             .build();
 
     static final Endpoint ACTIVITY_HISTORY_UPDATED = Endpoint.builder()
-            .pathRegex("^/services/data/v51.0/ActivityHistory/updated?")
+            .pathRegex("^/services/data/v51.0/ActivityHistory/updated[?][^/]*")
             .allowedQueryParams(intervalQueryParameters)
             .build();
 
     static final Endpoint GET_ACCOUNT = Endpoint.builder()
-            .pathRegex("^/services/data/v51.0/composite/sobjects/Account?")
+            .pathRegex("^/services/data/v51.0/composite/sobjects/Account[?][^/]*")
             .allowedQueryParams(getQueryParameters)
             .build();
 
     static final Endpoint GET_ACTIVITY_HISTORY = Endpoint.builder()
-            .pathRegex("^/services/data/v51.0/composite/sobjects/ActivityHistory?")
+            .pathRegex("^/services/data/v51.0/composite/sobjects/ActivityHistory[?][^/]*")
             .allowedQueryParams(getQueryParameters)
             .build();
 
     static final Endpoint QUERY = Endpoint.builder()
-            .pathRegex("^/services/data/v51.0/query?")
+            .pathRegex("^/services/data/v51.0/query[?][^/]*")
             .allowedQueryParams(soqlQueryParameters)
             .build();
 
