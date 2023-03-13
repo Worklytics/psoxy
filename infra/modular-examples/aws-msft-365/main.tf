@@ -14,7 +14,9 @@ terraform {
 }
 
 locals {
-  base_config_path = "${var.psoxy_base_dir}configs/"
+  # root of a checkout that has module source in it
+  base_dir         = coalesce(var.psoxy_base_dir, "${path.root}/.terraform/")
+  base_config_path = "${local.base_dir}configs/"
   host_platform_id = "AWS"
   ssm_key_ids      = var.aws_ssm_key_id == null ? {} : { 0 : var.aws_ssm_key_id }
 }
@@ -37,7 +39,7 @@ module "psoxy-aws" {
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws?ref=v0.4.13"
 
   aws_account_id                 = var.aws_account_id
-  psoxy_base_dir                 = var.psoxy_base_dir
+  psoxy_base_dir                 = local.base_dir
   caller_aws_arns                = var.caller_aws_arns
   caller_gcp_service_account_ids = var.caller_gcp_service_account_ids
   force_bundle                   = var.force_bundle
@@ -134,14 +136,14 @@ module "psoxy-msft-connector" {
 
   function_name                   = "psoxy-${each.key}"
   source_kind                     = each.value.source_kind
-  path_to_config                  = "${var.psoxy_base_dir}/configs/${each.value.source_kind}.yaml"
+  path_to_config                  = "${local.base_dir}/configs/${each.value.source_kind}.yaml"
   path_to_function_zip            = module.psoxy-aws.path_to_deployment_jar
   function_zip_hash               = module.psoxy-aws.deployment_package_hash
   api_caller_role_arn             = module.psoxy-aws.api_caller_role_arn
   aws_assume_role_arn             = var.aws_assume_role_arn
   example_api_calls               = each.value.example_api_calls
   aws_account_id                  = var.aws_account_id
-  path_to_repo_root               = var.psoxy_base_dir
+  path_to_repo_root               = local.base_dir
   todo_step                       = module.msft_365_grants[each.key].next_todo_step
   global_parameter_arns           = module.global_secrets.secret_arns
   path_to_instance_ssm_parameters = "${var.aws_ssm_param_root_path}PSOXY_${upper(replace(each.key, "-", "_"))}_"
@@ -252,7 +254,7 @@ module "aws-psoxy-long-auth-connectors" {
   aws_account_id                        = var.aws_account_id
   api_caller_role_arn                   = module.psoxy-aws.api_caller_role_arn
   source_kind                           = each.value.source_kind
-  path_to_repo_root                     = var.psoxy_base_dir
+  path_to_repo_root                     = local.base_dir
   example_api_calls                     = each.value.example_api_calls
   example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
   todo_step                             = module.source_token_external_todo[each.key].next_todo_step
@@ -313,7 +315,7 @@ module "psoxy-bulk" {
   api_caller_role_arn             = module.psoxy-aws.api_caller_role_arn
   api_caller_role_name            = module.psoxy-aws.api_caller_role_name
   memory_size_mb                  = 1024
-  psoxy_base_dir                  = var.psoxy_base_dir
+  psoxy_base_dir                  = local.base_dir
   rules                           = each.value.rules
   global_parameter_arns           = module.global_secrets.secret_arns
   path_to_instance_ssm_parameters = "${var.aws_ssm_param_root_path}PSOXY_${upper(replace(each.key, "-", "_"))}_"
@@ -364,7 +366,7 @@ module "psoxy_lookup_tables_builders" {
   aws_region                      = var.aws_region
   path_to_function_zip            = module.psoxy-aws.path_to_deployment_jar
   function_zip_hash               = module.psoxy-aws.deployment_package_hash
-  psoxy_base_dir                  = var.psoxy_base_dir
+  psoxy_base_dir                  = local.base_dir
   rules                           = each.value.rules
   global_parameter_arns           = module.global_secrets.secret_arns
   sanitized_accessor_role_names   = each.value.sanitized_accessor_role_names
@@ -373,7 +375,7 @@ module "psoxy_lookup_tables_builders" {
 
   environment_variables = merge(
     var.general_environment_variables,
-    try(each.value.environment_variables, {}),
+    try(each.value.environment_variables, {}),`
     {
       IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
     }

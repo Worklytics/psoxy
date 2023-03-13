@@ -65,6 +65,7 @@ variable "caller_aws_arns" {
 variable "psoxy_base_dir" {
   type        = string
   description = "the path where your psoxy repo resides. Preferably a full path, /home/user/repos/, avoid tilde (~) shortcut to $HOME"
+  default     = null # will use `"${path.root}/.terraform/"` if not provided
 
   validation {
     condition     = can(regex(".*\\/$", var.psoxy_base_dir))

@@ -18,6 +18,11 @@ variable "psoxy_base_dir" {
   type        = string
   description = "the path where your psoxy repo resides"
   default     = "../../.."
+
+  validation {
+    condition     = fileexists(var.psoxy_base_dir)
+    error_message = "The psoxy_base_dir value should be a path to a directory that exists."
+  }
 }
 
 variable "force_bundle" {
