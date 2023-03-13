@@ -38,7 +38,7 @@ import java.util.*;
  *   - https://datatracker.ietf.org/doc/html/rfc6749#section-4.4.2
  */
 @NoArgsConstructor(onConstructor_ = @Inject)
-public class ClientCredentialsWithCertificateGrantTokenRequestBuilder
+public class ClientCredentialsWithJWTAssertionGrantTokenRequestBuilder
         implements OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder, RequiresConfiguration {
 
     enum ConfigProperty implements ConfigService.ConfigProperty {

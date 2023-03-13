@@ -62,6 +62,6 @@ public class RefreshTokenTokenRequestBuilder
 
     @Override
     public Set<ConfigService.ConfigProperty> getAllConfigProperties() {
-        return Set.of(ClientCredentialsWithCertificateGrantTokenRequestBuilder.ConfigProperty.values());
+        return Set.of(ClientCredentialsWithJWTAssertionGrantTokenRequestBuilder.ConfigProperty.values());
     }
 }
