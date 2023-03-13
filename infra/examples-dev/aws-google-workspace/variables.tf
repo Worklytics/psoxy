@@ -90,8 +90,8 @@ variable "general_environment_variables" {
 }
 
 variable "salesforce_domain" {
-  type = string
-  default = ""
+  type        = string
+  default     = ""
   description = "Domain of the Salesforce to connect to (only required if using Salesforce connector). To find your My Domain URL, from Setup, in the Quick Find box, enter My Domain, and then select My Domain"
 }
 

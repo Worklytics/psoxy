@@ -28,7 +28,7 @@ resource "google_storage_bucket" "state_bucket" {
 }
 
 locals {
-  todo_content =  <<EOT
+  todo_content = <<EOT
 Ensure the `terraform` block at the top of your Terraform configuration is something like following:
 ```terraform
 terraform {

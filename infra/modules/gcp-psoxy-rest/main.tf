@@ -27,11 +27,11 @@ locals {
   # these are 'standard' env vars, expected from most connectors
   # any 'non-standard' ones can just be passed through var.environment_variables
   required_env_vars = { for k, v in {
-      SOURCE                          = var.source_kind
-      TARGET_HOST                     = var.target_host
-      SOURCE_AUTH_STRATEGY_IDENTIFIER = var.source_auth_strategy
-      OAUTH_SCOPES                    = join(" ", var.oauth_scopes)
-      IDENTIFIER_SCOPE_ID             = var.identifier_scope_id
+    SOURCE                          = var.source_kind
+    TARGET_HOST                     = var.target_host
+    SOURCE_AUTH_STRATEGY_IDENTIFIER = var.source_auth_strategy
+    OAUTH_SCOPES                    = join(" ", var.oauth_scopes)
+    IDENTIFIER_SCOPE_ID             = var.identifier_scope_id
     }
     : k => v if v != null
   }

@@ -268,10 +268,10 @@ EOT
       identifier_scope_id : "salesforce"
       worklytics_connector_name : "Salesforce via Psoxy"
       target_host : var.salesforce_domain
-      source_auth_strategy: "oauth2_refresh_token"
+      source_auth_strategy : "oauth2_refresh_token"
       environment_variables : {
-        GRANT_TYPE: "client_credentials"
-        REFRESH_ENDPOINT: "https://${var.salesforce_domain}/services/oauth2/token"
+        GRANT_TYPE : "client_credentials"
+        REFRESH_ENDPOINT : "https://${var.salesforce_domain}/services/oauth2/token"
       }
       secured_variables : [
         { name : "CLIENT_SECRET", writable : false },
@@ -384,11 +384,11 @@ EOT
       display_name : "Zoom"
       worklytics_connector_name : "Zoom via Psoxy"
       identifier_scope_id : "zoom"
-      source_auth_strategy: "oauth2_refresh_token"
-      target_host: "api.zoom.us"
+      source_auth_strategy : "oauth2_refresh_token"
+      target_host : "api.zoom.us"
       environment_variables : {
-        GRANT_TYPE: "account_credentials"
-        REFRESH_ENDPOINT: "https://zoom.us/oauth/token"
+        GRANT_TYPE : "account_credentials"
+        REFRESH_ENDPOINT : "https://zoom.us/oauth/token"
       }
       secured_variables : [
         { name : "CLIENT_SECRET", writable : false },
@@ -433,8 +433,8 @@ EOT
     dropbox-business = {
       source_kind : "dropbox-business"
       worklytics_connector_id : "dropbox-business-log-psoxy"
-      target_host: "api.dropboxapi.com"
-      source_auth_strategy: "oauth2_refresh_token"
+      target_host : "api.dropboxapi.com"
+      source_auth_strategy : "oauth2_refresh_token"
       display_name : "Dropbox Business"
       identifier_scope_id : "dropbox-business"
       worklytics_connector_name : "Dropbox Business via Psoxy"
