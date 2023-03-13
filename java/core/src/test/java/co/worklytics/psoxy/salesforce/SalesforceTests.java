@@ -6,6 +6,8 @@ import co.worklytics.psoxy.rules.salesforce.PrebuiltSanitizerRules;
 import lombok.Getter;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.Collections;
 import java.util.stream.Stream;
@@ -129,33 +131,49 @@ public class SalesforceTests extends JavaRulesTestBaseCase {
         assertReversibleUrlTokenized(sanitized, Collections.singletonList("0055Y00000ExkfuQAB"));
     }
 
-    @Test
-    void query_account_ids() {
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "SELECT%20Id%20from%20Account%20ORDER%20BY%20Id%20ASC",
+            "SELECT%20Id%20FROM%20Account%20ORDER%20BY%20Id%20ASC",
+            "SELECT+Id+from+Account+ORDER+BY+Id+ASC",
+            "SELECT+Id+FROM+Account+ORDER+BY+Id+ASC"
+    })
+    void query_account_ids(String query) {
         String jsonString = asJson(exampleDirectoryPath, "account_id_query.json");
 
-        String endpoint = "https://test.salesforce.com/services/data/v51.0/query?q=SELECT%20Id%20from%20Account%20ORDER%20BY%20Id%20ASC";
+        String endpoint = "https://test.salesforce.com/services/data/v51.0/query?q=" + query;
 
         String sanitized = this.sanitize(endpoint, jsonString);
 
         assertNotSanitized(sanitized, "0015Y00002c7g92QAA");
     }
 
-    @Test
-    void query_user_ids() {
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "SELECT%20Id%20from%20User%20ORDER%20BY%20Id%20ASC",
+            "SELECT%20Id%20FROM%20User%20ORDER%20BY%20Id%20ASC",
+            "SELECT+Id+from+User+ORDER+BY+Id+ASC",
+            "SELECT+Id+FROM+User+ORDER+BY+Id+ASC"
+    })
+    void query_user_ids(String query) {
         String jsonString = asJson(exampleDirectoryPath, "user_id_query.json");
 
-        String endpoint = "https://test.salesforce.com/services/data/v51.0/query?q=SELECT%20Id%20from%20User%20ORDER%20BY%20Id%20ASC";
+        String endpoint = "https://test.salesforce.com/services/data/v51.0/query?q=" + query;
 
         String sanitized = this.sanitize(endpoint, jsonString);
 
         assertReversibleUrlTokenized(sanitized, Collections.singletonList("0055Y00000E16gwQAB"));
     }
 
-    @Test
-    void query_account_histories() {
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "SELECT%20%28SELECT%20AccountId%2CActivityDate%2CActivityDateTime%2CActivitySubtype%2CActivityType%2CCallDurationInSeconds%2CCallType%2CCreatedDate%2CCreatedById%2CDurationInMinutes%2CEndDateTime%2CId%2CIsAllDayEvent%2CIsDeleted%2CIsHighPriority%2CIsTask%2CLastModifiedDate%2CLastModifiedById%2COwnerId%2CPriority%2CStartDateTime%2CStatus%2CWhatId%2CWhoId%20FROM%20ActivityHistories%20ORDER%20BY%20LastModifiedDate%20DESC%20NULLS%20LAST%29%20FROM%20Account%20where%20id%3D%270015Y00002c7g95QAA%27",
+            "SELECT%20%28SELECT%20AccountId%2CActivityDate%2CActivityDateTime%2CActivitySubtype%2CActivityType%2CCallDurationInSeconds%2CCallType%2CCreatedDate%2CCreatedById%2CDurationInMinutes%2CEndDateTime%2CId%2CIsAllDayEvent%2CIsDeleted%2CIsHighPriority%2CIsTask%2CLastModifiedDate%2CLastModifiedById%2COwnerId%2CPriority%2CStartDateTime%2CStatus%2CWhatId%2CWhoId%20FROM%20ActivityHistories%20ORDER%20BY%20LastModifiedDate%20DESC%20NULLS%20LAST%29%20FROM%20Account%20where%20id%3D%270015Y00002c7g95QAA%27"
+    })
+    void query_account_histories(String query) {
         String jsonString = asJson(exampleDirectoryPath, "related_item_query.json");
 
-        String endpoint = "https://test.salesforce.com/services/data/v51.0/query?q=SELECT%20%28SELECT%20AccountId%2CActivityDate%2CActivityDateTime%2CActivitySubtype%2CActivityType%2CCallDurationInSeconds%2CCallType%2CCreatedDate%2CCreatedById%2CDurationInMinutes%2CEndDateTime%2CId%2CIsAllDayEvent%2CIsDeleted%2CIsHighPriority%2CIsTask%2CLastModifiedDate%2CLastModifiedById%2COwnerId%2CPriority%2CStartDateTime%2CStatus%2CWhatId%2CWhoId%20FROM%20ActivityHistories%20ORDER%20BY%20LastModifiedDate%20DESC%20NULLS%20LAST%29%20FROM%20Account%20where%20id%3D%270015Y00002c7g95QAA%27";
+        String endpoint = "https://test.salesforce.com/services/data/v51.0/query?q=" + query;
 
         String sanitized = this.sanitize(endpoint, jsonString);
 

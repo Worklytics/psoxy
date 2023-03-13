@@ -76,6 +76,16 @@ endpoints:
           - "$..records[*].Id"
         includeReversible: true
         encoding: "URL_SAFE_TOKEN"
+  - pathRegex: "^/services/data/v51.0/query[?]q=SELECT\\+Id\\+FROM\\+User.*$"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..records[*].attributes"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..records[*].Id"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
   - pathRegex: "^/services/data/v51.0/query[?]q=SELECT.*FROM%20ActivityHistories.*$"
     transforms:
       - !<pseudonymize>
@@ -85,7 +95,21 @@ endpoints:
           - "$..records[*].ActivityHistories.records[*].OwnerId"
           - "$..records[*].ActivityHistories.records[*].WhoId"
         encoding: "JSON"
+  - pathRegex: "^/services/data/v51.0/query[?]q=SELECT.*FROM+ActivityHistories.*$"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..records[*].ActivityHistories.records[*].CreatedById"
+          - "$..records[*].ActivityHistories.records[*].LastModifiedById"
+          - "$..records[*].ActivityHistories.records[*].OwnerId"
+          - "$..records[*].ActivityHistories.records[*].WhoId"
+        encoding: "JSON"
   - pathRegex: "^/services/data/v51.0/query[?]q=SELECT%20Id%20FROM%20Account.*$"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..attributes"
+  - pathRegex: "^/services/data/v51.0/query[?]q=SELECT\\+Id\\+FROM\\+Account.*$"
     transforms:
       - !<redact>
         jsonPaths:
