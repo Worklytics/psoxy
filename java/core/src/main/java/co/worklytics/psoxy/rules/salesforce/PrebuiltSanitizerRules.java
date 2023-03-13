@@ -59,16 +59,12 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..ContactId")
                     .jsonPath("$..CreatedById")
                     .jsonPath("$..ManagerId")
+                    .jsonPath("$..Id")
                     .build()
             )
-            .transform(Transform.Pseudonymize.builder()
-                    .includeReversible(true)
-                    .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
-                    .jsonPath("$..Id")
-                    .build())
             .build();
 
-    static final Endpoint USERS_NO_IDS = Endpoint.builder()
+    static final Endpoint GET_USERS_WITH_PSEODONYMIZED_ID_PARAMETER = Endpoint.builder()
             .pathRegex("^/services/data/v51.0/composite/sobjects/User[?]id=(/p~[a-zA-Z0-9_-])[^/]*")
             .transform(Transform.Redact.builder()
                     .jsonPath("$..attributes")
@@ -84,13 +80,9 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..ContactId")
                     .jsonPath("$..CreatedById")
                     .jsonPath("$..ManagerId")
+                    .jsonPath("$..Id")
                     .build()
             )
-            .transform(Transform.Pseudonymize.builder()
-                    .includeReversible(true)
-                    .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
-                    .jsonPath("$..Id")
-                    .build())
             .build();
 
     static final Rules2 QUERY_ID_FOR_ACCOUNTS_RULES = Rules2.builder()
@@ -173,7 +165,7 @@ public class PrebuiltSanitizerRules {
             //}
             .endpoint(GET_ACCOUNTS)
             .endpoint(GET_USERS)
-            .endpoint(USERS_NO_IDS)
+            .endpoint(GET_USERS_WITH_PSEODONYMIZED_ID_PARAMETER)
             .endpoints(QUERY_ID_FOR_USERS_RULES.getEndpoints())
             .endpoints(QUERY_FOR_ACTIVITY_HISTORIES_RULES.getEndpoints())
             .endpoints(QUERY_ID_FOR_ACCOUNTS_RULES.getEndpoints())

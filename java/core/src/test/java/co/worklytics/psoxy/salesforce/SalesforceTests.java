@@ -107,9 +107,8 @@ public class SalesforceTests extends JavaRulesTestBaseCase {
         assertRedacted(sanitized, "chatty.00d5y000001cou0uam.nhmnjcjxsuxl@chatter.salesforce.com");
 
         assertPseudonymized(sanitized, "0055Y00000E16gwQAB");
-        assertPseudonymized(sanitized, "0055Y00000E16gwQAB");
+        assertPseudonymized(sanitized, "0055Y00000ExkfuQAB");
 
-        assertReversibleUrlTokenized(sanitized, Collections.singletonList("0055Y00000ExkfuQAB"));
     }
 
     @Test
@@ -127,8 +126,7 @@ public class SalesforceTests extends JavaRulesTestBaseCase {
 
         assertPseudonymized(sanitized, "0055Y00000E16gwQAB");
         assertPseudonymized(sanitized, "0055Y00000E16gwQAB");
-
-        assertReversibleUrlTokenized(sanitized, Collections.singletonList("0055Y00000ExkfuQAB"));
+        assertPseudonymized(sanitized, "0055Y00000ExkfuQAB");
     }
 
     @ParameterizedTest

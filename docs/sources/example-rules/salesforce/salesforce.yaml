@@ -38,12 +38,8 @@ endpoints:
           - "$..ContactId"
           - "$..CreatedById"
           - "$..ManagerId"
-        encoding: "JSON"
-      - !<pseudonymize>
-        jsonPaths:
           - "$..Id"
-        includeReversible: true
-        encoding: "URL_SAFE_TOKEN"
+        encoding: "JSON"
   - pathRegex: "^/services/data/v51.0/composite/sobjects/User[?]id=(/p~[a-zA-Z0-9_-])[^/]*"
     transforms:
       - !<redact>
@@ -60,12 +56,8 @@ endpoints:
           - "$..ContactId"
           - "$..CreatedById"
           - "$..ManagerId"
-        encoding: "JSON"
-      - !<pseudonymize>
-        jsonPaths:
           - "$..Id"
-        includeReversible: true
-        encoding: "URL_SAFE_TOKEN"
+        encoding: "JSON"
   - pathRegex: "^/services/data/v51.0/query[?]q=SELECT%20Id%20FROM%20User.*$"
     transforms:
       - !<redact>
