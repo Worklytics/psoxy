@@ -162,6 +162,12 @@ public class CommonRequestHandler {
             //something like "Error getting access token for service account: 401 Unauthorized POST https://oauth2.googleapis.com/token,"
             log.log(Level.WARNING, "Confirm oauth scopes set in config.yaml match those granted in data source");
             return builder.build();
+        } catch (java.util.NoSuchElementException e) {
+            // missing config, such as ACCESS_TOKEN
+            builder.statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+            builder.header(ResponseHeader.ERROR.getHttpHeader(), ErrorCauses.CONNECTION_SETUP.name());
+            log.log(Level.WARNING, e.getMessage(), e);
+            return builder.build();
         }
 
         //TODO: what headers to forward???
