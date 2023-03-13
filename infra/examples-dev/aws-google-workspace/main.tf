@@ -80,6 +80,7 @@ module "psoxy-aws-google-workspace" {
   google_workspace_example_user  = var.google_workspace_example_user
   google_workspace_example_admin = var.google_workspace_example_admin
   general_environment_variables  = var.general_environment_variables
+  salesforce_domain = var.salesforce_domain
   # Uncomment the following line if you want to apply KMS encryption on your SSM parameters
   #  aws_ssm_key_id                 = aws_kms_key.key.key_id
 }

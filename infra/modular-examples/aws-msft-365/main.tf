@@ -30,6 +30,7 @@ module "worklytics_connector_specs" {
   # this IS the correct ID for the user terraform is running as, which we assume is a user who's OK
   # to use the subject of examples. You can change it to any string you want.
   example_msft_user_guid = data.azuread_client_config.current.object_id
+  salesforce_domain = var.salesforce_domain
 }
 
 module "psoxy-aws" {
