@@ -95,7 +95,7 @@ endpoints:
           - "$..records[*].ActivityHistories.records[*].OwnerId"
           - "$..records[*].ActivityHistories.records[*].WhoId"
         encoding: "JSON"
-  - pathRegex: "^/services/data/v51.0/query[?]q=SELECT.*FROM+ActivityHistories.*$"
+  - pathRegex: "^/services/data/v51.0/query[?]q=SELECT.*FROM\\+ActivityHistories.*$"
     transforms:
       - !<pseudonymize>
         jsonPaths:

@@ -119,7 +119,7 @@ public class PrebuiltSanitizerRules {
                     .build())
             .build())
             .endpoint(Endpoint.builder()
-                    .pathRegex("^/services/data/v51.0/query[?]q=SELECT.*FROM+ActivityHistories.*$")
+                    .pathRegex("^/services/data/v51.0/query[?]q=SELECT.*FROM\\+ActivityHistories.*$")
                     .transform(Transform.Pseudonymize.builder()
                             .jsonPath("$..records[*].ActivityHistories.records[*].CreatedById")
                             .jsonPath("$..records[*].ActivityHistories.records[*].LastModifiedById")
