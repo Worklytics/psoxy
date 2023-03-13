@@ -7,9 +7,7 @@ terraform {
 }
 
 locals {
-  # root of a checkout that has module source in it
-  base_dir         = coalesce(var.psoxy_base_dir, "${path.root}/.terraform/")
-  base_config_path = "${local.base_dir}/configs/"
+  base_config_path = "${var.psoxy_base_dir}/configs/"
   host_platform_id = "GCP"
 }
 
@@ -28,7 +26,7 @@ module "psoxy-gcp" {
 
   project_id        = var.gcp_project_id
   invoker_sa_emails = var.worklytics_sa_emails
-  psoxy_base_dir    = local.base_dir
+  psoxy_base_dir    = var.psoxy_base_dir
   bucket_location   = var.gcp_region
   force_bundle      = var.force_bundle
 }
@@ -114,7 +112,7 @@ module "psoxy-google-workspace-connector" {
   artifacts_bucket_name                 = module.psoxy-gcp.artifacts_bucket_name
   deployment_bundle_object_name         = module.psoxy-gcp.deployment_bundle_object_name
   path_to_config                        = null
-  path_to_repo_root                     = local.base_dir
+  path_to_repo_root                     = var.psoxy_base_dir
   example_api_calls                     = each.value.example_api_calls
   example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
   todo_step                             = module.google-workspace-connection[each.key].next_todo_step
@@ -216,7 +214,7 @@ module "connector-long-auth-function" {
   artifacts_bucket_name         = module.psoxy-gcp.artifacts_bucket_name
   deployment_bundle_object_name = module.psoxy-gcp.deployment_bundle_object_name
   path_to_config                = null
-  path_to_repo_root             = local.base_dir
+  path_to_repo_root             = var.psoxy_base_dir
   example_api_calls             = each.value.example_api_calls
   todo_step                     = module.source_token_external_todo[each.key].next_todo_step
   secret_bindings               = module.psoxy-gcp.secrets
@@ -272,7 +270,7 @@ module "psoxy-gcp-bulk" {
   source_kind                   = each.value.source_kind
   artifacts_bucket_name         = module.psoxy-gcp.artifacts_bucket_name
   deployment_bundle_object_name = module.psoxy-gcp.deployment_bundle_object_name
-  psoxy_base_dir                = local.base_dir
+  psoxy_base_dir                = var.psoxy_base_dir
   bucket_write_role_id          = module.psoxy-gcp.bucket_write_role_id
   secret_bindings               = module.psoxy-gcp.secrets
 

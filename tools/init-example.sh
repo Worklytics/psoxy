@@ -16,7 +16,7 @@ if [ ! -f terraform.tfvars ]; then
   cp ${TF_CONFIG_ROOT}/terraform.tfvars.example $TFVARS_FILE
 
   # append root of checkout automatically
-  echo "psoxy_base_dir                = \"${PSOXY_BASE_DIR}/\"" >> $TFVARS_FILE
+  echo "psoxy_base_dir                = \"${PSOXY_BASE_DIR}/.terraform/modules/psoxy/" >> $TFVARS_FILE
 
   # give user some feedback
   printf "Init'd example terraform config. Please open ${BLUE}terraform.tfvars${NC} and customize it to your needs.\n"

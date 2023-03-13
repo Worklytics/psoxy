@@ -49,7 +49,7 @@ provider "azuread" {
   tenant_id = var.msft_tenant_id
 }
 
-module "psoxy-aws-msft-365" {
+module "psoxy" {
   # source = "../../modular-examples/aws-msft-365"
   source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-msft-365?ref=v0.4.13"
 
@@ -75,20 +75,20 @@ module "psoxy-aws-msft-365" {
 
 # if you generated these, you may want them to import back into your data warehouse
 output "lookup_tables" {
-  value = module.psoxy-aws-msft-365.lookup_tables
+  value = module.psoxy.lookup_tables
 }
 
 output "todos_1" {
   description = "List of todo steps to complete 1st, in markdown format."
-  value       = join("\n", module.psoxy-aws-msft-365.todos_1)
+  value       = join("\n", module.psoxy.todos_1)
 }
 
 output "todos_2" {
   description = "List of todo steps to complete 2nd, in markdown format."
-  value       = join("\n", module.psoxy-aws-msft-365.todos_2)
+  value       = join("\n", module.psoxy.todos_2)
 }
 
 output "todos_3" {
   description = "List of todo steps to complete 3rd, in markdown format."
-  value       = join("\n", module.psoxy-aws-msft-365.todos_3)
+  value       = join("\n", module.psoxy.todos_3)
 }
