@@ -373,7 +373,7 @@ module "psoxy_lookup_tables_builders" {
 
   environment_variables = merge(
     var.general_environment_variables,
-    try(each.value.environment_variables, {}),`
+    try(each.value.environment_variables, {}),
     {
       IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
     }
