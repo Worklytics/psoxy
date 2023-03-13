@@ -13,11 +13,12 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * build payload for canonical OAuth access token request authenticated by a long-lived refresh
- * token + client id + client secret
+ * implementation of an Access Token Request (per RFC6749 4.4.2) authenticated by an assertion (RFC 7521) based
+ * on client id + client secret
  *
- * @see OAuthAccessTokenSourceAuthStrategy
- *
+ * see
+ *   - https://datatracker.ietf.org/doc/html/rfc7521
+ *   - https://datatracker.ietf.org/doc/html/rfc6749#section-4.4.2
  */
 @NoArgsConstructor(onConstructor_ = @Inject)
 public class ClientCredentialsTokenRequestBuilder
