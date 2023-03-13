@@ -5,16 +5,6 @@ endpoints:
     allowedQueryParams:
       - "start"
       - "end"
-  - pathRegex: "^/services/data/v51.0/sobjects/User/updated[?][^/]*"
-    allowedQueryParams:
-      - "start"
-      - "end"
-    transforms:
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..ids"
-        includeReversible: true
-        encoding: "URL_SAFE_TOKEN"
   - pathRegex: "^/services/data/v51.0/composite/sobjects/Account[?][^/]*"
     allowedQueryParams:
       - "ids"
@@ -33,6 +23,28 @@ endpoints:
     allowedQueryParams:
       - "ids"
       - "fields"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..attributes"
+      - !<redact>
+        jsonPaths:
+          - "$..Alias"
+          - "$..Email"
+          - "$..Name"
+          - "$..Username"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..ContactId"
+          - "$..CreatedById"
+          - "$..ManagerId"
+        encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..Id"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
+  - pathRegex: "^/services/data/v51.0/composite/sobjects/User[?]id=(/p~[a-zA-Z0-9_-])[^/]*"
     transforms:
       - !<redact>
         jsonPaths:

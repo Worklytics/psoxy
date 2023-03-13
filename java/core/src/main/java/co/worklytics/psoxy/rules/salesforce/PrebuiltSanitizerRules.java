@@ -7,7 +7,6 @@ import com.avaulta.gateway.rules.Endpoint;
 import com.avaulta.gateway.rules.transforms.Transform;
 import com.google.common.collect.Lists;
 
-import java.util.Collections;
 import java.util.List;
 
 public class PrebuiltSanitizerRules {
@@ -27,16 +26,6 @@ public class PrebuiltSanitizerRules {
     static final Endpoint UPDATED_ACCOUNTS_AND_ACTIVITY_HISTORY = Endpoint.builder()
             .pathRegex("^/services/data/v51.0/sobjects/(Account|ActivityHistory)/updated[?][^/]*")
             .allowedQueryParams(intervalQueryParameters)
-            .build();
-
-    static final Endpoint UPDATED_USERS = Endpoint.builder()
-            .pathRegex("^/services/data/v51.0/sobjects/User/updated[?][^/]*")
-            .allowedQueryParams(intervalQueryParameters)
-            .transform(Transform.Pseudonymize.builder()
-                    .includeReversible(true)
-                    .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
-                    .jsonPath("$..ids")
-                    .build())
             .build();
 
     static final Endpoint GET_ACCOUNTS = Endpoint.builder()
@@ -136,10 +125,23 @@ public class PrebuiltSanitizerRules {
     public static final RuleSet SALESFORCE = Rules2.builder()
             .endpoint(DESCRIBE)
             .endpoint(UPDATED_ACCOUNTS_AND_ACTIVITY_HISTORY)
-            .endpoint(UPDATED_USERS)
+            // Note: Update users is not used, as it will return an array
+            // of ids which needs to be pseudonymized but is not compatible with
+            // how pseudonymization works. See example below.
+            //
+            // For this, that endpoint is not being supported
+            //
+            // Example:
+            // {
+            //  "ids": [
+            //    "0015Y00002ZbgP3QAJ",
+            //    "0015Y00002c7g8uQAA"
+            //  ],
+            //  "latestDateCovered": "2023-03-09T18:44:00.000+0000"
+            //}
             .endpoint(GET_ACCOUNTS)
             .endpoint(GET_USERS)
-            //.endpoint(USERS_NO_IDS)
+            .endpoint(USERS_NO_IDS)
             .endpoint(QUERY_ID_FOR_USERS)
             .endpoint(QUERY_FOR_ACTIVITY_HISTORIES)
             .endpoint(QUERY_ID_FOR_ACCOUNTS)

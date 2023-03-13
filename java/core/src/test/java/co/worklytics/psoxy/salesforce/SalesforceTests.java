@@ -10,6 +10,8 @@ import org.junit.jupiter.api.Test;
 import java.util.Collections;
 import java.util.stream.Stream;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 public class SalesforceTests extends JavaRulesTestBaseCase {
 
     @Getter
@@ -86,9 +88,7 @@ public class SalesforceTests extends JavaRulesTestBaseCase {
 
         String endpoint = "https://test.salesforce.com/services/data/v51.0/sobjects/User/updated?start=2023-02-10T18%3A44%3A00%2B00%3A00&end=2023-03-09T18%3A44%3A00%2B00%3A00";
 
-        String sanitized = this.sanitize(endpoint, jsonString);
-
-        assertReversibleUrlTokenized(sanitized, Collections.singletonList("0015Y00002ZbgP3QAJ"));
+        assertThrows(IllegalStateException.class, () -> this.sanitize(endpoint, jsonString));
     }
 
     @Test
@@ -104,8 +104,8 @@ public class SalesforceTests extends JavaRulesTestBaseCase {
         assertRedacted(sanitized, "Chatter Expert");
         assertRedacted(sanitized, "chatty.00d5y000001cou0uam.nhmnjcjxsuxl@chatter.salesforce.com");
 
-        assertPseudonymized(sanitized,"0055Y00000E16gwQAB");
-        assertPseudonymized(sanitized,"0055Y00000E16gwQAB");
+        assertPseudonymized(sanitized, "0055Y00000E16gwQAB");
+        assertPseudonymized(sanitized, "0055Y00000E16gwQAB");
 
         assertReversibleUrlTokenized(sanitized, Collections.singletonList("0055Y00000ExkfuQAB"));
     }
@@ -123,8 +123,8 @@ public class SalesforceTests extends JavaRulesTestBaseCase {
         assertRedacted(sanitized, "Chatter Expert");
         assertRedacted(sanitized, "chatty.00d5y000001cou0uam.nhmnjcjxsuxl@chatter.salesforce.com");
 
-        assertPseudonymized(sanitized,"0055Y00000E16gwQAB");
-        assertPseudonymized(sanitized,"0055Y00000E16gwQAB");
+        assertPseudonymized(sanitized, "0055Y00000E16gwQAB");
+        assertPseudonymized(sanitized, "0055Y00000E16gwQAB");
 
         assertReversibleUrlTokenized(sanitized, Collections.singletonList("0055Y00000ExkfuQAB"));
     }
@@ -159,8 +159,8 @@ public class SalesforceTests extends JavaRulesTestBaseCase {
 
         String sanitized = this.sanitize(endpoint, jsonString);
 
-        assertPseudonymized(sanitized,"0055Y00000E18EHQAZ");
-        assertPseudonymized(sanitized,"0055Y00000E18EHQAZ");
+        assertPseudonymized(sanitized, "0055Y00000E18EHQAZ");
+        assertPseudonymized(sanitized, "0055Y00000E18EHQAZ");
     }
 
     @Override
