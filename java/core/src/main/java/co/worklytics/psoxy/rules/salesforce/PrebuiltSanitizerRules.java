@@ -25,12 +25,12 @@ public class PrebuiltSanitizerRules {
             .build();
 
     static final Endpoint UPDATED_ACCOUNTS_AND_ACTIVITY_HISTORY = Endpoint.builder()
-            .pathRegex("^/services/data/v51.0/(Account|ActivityHistory)/updated[?][^/]*")
+            .pathRegex("^/services/data/v51.0/sobjects/(Account|ActivityHistory)/updated[?][^/]*")
             .allowedQueryParams(intervalQueryParameters)
             .build();
 
     static final Endpoint UPDATED_USERS = Endpoint.builder()
-            .pathRegex("^/services/data/v51.0/User/updated[?][^/]*")
+            .pathRegex("^/services/data/v51.0/sobjects/User/updated[?][^/]*")
             .allowedQueryParams(intervalQueryParameters)
             .transform(Transform.Pseudonymize.builder()
                     .includeReversible(true)
@@ -63,7 +63,7 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..Alias")
                     .jsonPath("$..Email")
                     .jsonPath("$..Name")
-                    .jsonPath("$..Username.name")
+                    .jsonPath("$..Username")
                     .build()
             )
             .transform(Transform.Pseudonymize.builder()
@@ -88,7 +88,7 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..Alias")
                     .jsonPath("$..Email")
                     .jsonPath("$..Name")
-                    .jsonPath("$..Username.name")
+                    .jsonPath("$..Username")
                     .build()
             )
             .transform(Transform.Pseudonymize.builder()
@@ -105,34 +105,31 @@ public class PrebuiltSanitizerRules {
             .build();
 
     static final Endpoint QUERY_ID_FOR_ACCOUNTS = Endpoint.builder()
-            .pathRegex("^/services/data/v51.0/query[?]q=SELECT.*[FROM|from]%20[Account|account].*$")
+            .pathRegex("^/services/data/v51.0/query[?]q=SELECT%20Id%20FROM%20Account.*$")
             .transform(Transform.Redact.builder()
                     .jsonPath("$..attributes")
                     .build())
             .build();
 
     static final Endpoint QUERY_FOR_ACTIVITY_HISTORIES = Endpoint.builder()
-            .pathRegex("^/services/data/v51.0/query[?]q=SELECT.*[FROM|from]%20[ActivityHistories|activityhistories].*$")
-            .transform(Transform.Redact.builder()
-                    .jsonPath("$..attributes")
-                    .build())
+            .pathRegex("^/services/data/v51.0/query[?]q=SELECT.*FROM%20ActivityHistories.*$")
             .transform(Transform.Pseudonymize.builder()
-                    .jsonPath("$..CreatedById")
-                    .jsonPath("$..LastModifiedById")
-                    .jsonPath("$..OwnerId")
-                    .jsonPath("$..WhoId")
+                    .jsonPath("$..records[*].ActivityHistories.records[*].CreatedById")
+                    .jsonPath("$..records[*].ActivityHistories.records[*].LastModifiedById")
+                    .jsonPath("$..records[*].ActivityHistories.records[*].OwnerId")
+                    .jsonPath("$..records[*].ActivityHistories.records[*].WhoId")
                     .build())
             .build();
 
     static final Endpoint QUERY_ID_FOR_USERS = Endpoint.builder()
-            .pathRegex("^/services/data/v51.0/query[?]q=SELECT.*[FROM|from]%20[User|user].*$")
+            .pathRegex("^/services/data/v51.0/query[?]q=SELECT%20Id%20FROM%20User.*$")
             .transform(Transform.Redact.builder()
-                    .jsonPath("$..attributes")
+                    .jsonPath("$..records[*].attributes")
                     .build())
             .transform(Transform.Pseudonymize.builder()
                     .includeReversible(true)
                     .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
-                    .jsonPath("$..Id")
+                    .jsonPath("$..records[*].Id")
                     .build())
             .build();
 
@@ -143,9 +140,9 @@ public class PrebuiltSanitizerRules {
             .endpoint(GET_ACCOUNTS)
             .endpoint(GET_USERS)
             .endpoint(USERS_NO_IDS)
-            .endpoint(QUERY_ID_FOR_ACCOUNTS)
             .endpoint(QUERY_ID_FOR_USERS)
             .endpoint(QUERY_FOR_ACTIVITY_HISTORIES)
+            .endpoint(QUERY_ID_FOR_ACCOUNTS)
             .build();
 
 }
