@@ -1,19 +1,15 @@
 [
   {
-    "attributes":{
-      "type":"Account",
-      "url":"/services/data/v51.0/sobjects/Account/0015Y00002c7g95QAA"
-    },
     "Id":"0015Y00002c7g95QAA",
     "AnnualRevenue":1.23456789E9,
     "CreatedDate":"2021-03-02T16:31:04.000+0000",
-    "CreatedById":"0055Y00000E16gwQAB",
+    "CreatedById":"{\"scope\":\"salesforce\",\"hash\":\"m0410eDFbgwXYsI7rf1F1RMB6xgy2OWwiG3r0MzU5vk\"}",
     "IsDeleted":false,
     "LastActivityDate":"2021-03-27",
     "LastModifiedDate":"2021-03-24T10:11:08.000+0000",
-    "LastModifiedById":"0055Y00000E18EHQAZ",
+    "LastModifiedById":"{\"scope\":\"salesforce\",\"hash\":\"quLJF4uaVCzD5c_stmrnG6xhKT9QfBsBkCSSldBJs_o\"}",
     "NumberOfEmployees":null,
-    "OwnerId":"0055Y00000E16gwQAB",
+    "OwnerId":"{\"scope\":\"salesforce\",\"hash\":\"m0410eDFbgwXYsI7rf1F1RMB6xgy2OWwiG3r0MzU5vk\"}",
     "Ownership":"Public",
     "ParentId":null,
     "Rating":null,
@@ -21,20 +17,16 @@
     "Type":"Technology Partner"
   },
   {
-    "attributes":{
-      "type":"Account",
-      "url":"/services/data/v51.0/sobjects/Account/0015Y00002c7g8uQAA"
-    },
     "Id":"0015Y00002c7g8uQAA",
     "AnnualRevenue":1.39E8,
     "CreatedDate":"2021-03-02T16:31:04.000+0000",
-    "CreatedById":"0055Y00000E16gwQAB",
+    "CreatedById":"{\"scope\":\"salesforce\",\"hash\":\"m0410eDFbgwXYsI7rf1F1RMB6xgy2OWwiG3r0MzU5vk\"}",
     "IsDeleted":false,
     "LastActivityDate":null,
     "LastModifiedDate":"2021-03-02T16:31:04.000+0000",
-    "LastModifiedById":"0055Y00000E16gwQAB",
+    "LastModifiedById":"{\"scope\":\"salesforce\",\"hash\":\"m0410eDFbgwXYsI7rf1F1RMB6xgy2OWwiG3r0MzU5vk\"}",
     "NumberOfEmployees":1000,
-    "OwnerId":"0055Y00000E16gwQAB",
+    "OwnerId":"{\"scope\":\"salesforce\",\"hash\":\"m0410eDFbgwXYsI7rf1F1RMB6xgy2OWwiG3r0MzU5vk\"}",
     "Ownership":"Public",
     "ParentId":null,
     "Rating":"Hot",

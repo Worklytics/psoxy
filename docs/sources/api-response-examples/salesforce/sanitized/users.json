@@ -1,47 +1,31 @@
 [
   {
-    "attributes":{
-      "type":"User",
-      "url":"/services/data/v51.0/sobjects/User/0055Y00000ExkfuQAB"
-    },
-    "Alias":"Chatter",
     "AccountId":null,
-    "ContactId":null,
+    "ContactId":"null",
     "CreatedDate":"2021-03-02T16:31:04.000+0000",
-    "CreatedById":"0055Y00000E16gwQAB",
-    "Email":"noreply@chatter.salesforce.com",
+    "CreatedById":"{\"scope\":\"salesforce\",\"hash\":\"m0410eDFbgwXYsI7rf1F1RMB6xgy2OWwiG3r0MzU5vk\"}",
     "EmailEncodingKey":"UTF-8",
-    "Id":"0055Y00000ExkfuQAB",
+    "Id":"p~kQY8YvX3epA-POQrl7CEKuXauq4godtAeaooSbbrEV8YjLn8Jf3fxEV8WxxUWjO3otx75qClzJf5rGJdMT2uNQ",
     "IsActive":true,
     "LastLoginDate":null,
     "LastModifiedDate":"2021-03-02T16:31:04.000+0000",
-    "ManagerId":null,
-    "Name":"Chatter Expert",
+    "ManagerId":"null",
     "TimeZoneSidKey":"America/Los_Angeles",
-    "Username":"chatty.00d5y000001cou0uam.nhmnjcjxsuxl@chatter.salesforce.com",
     "UserRoleId":null,
     "UserType":"CsnOnly"
   },
   {
-    "attributes":{
-      "type":"User",
-      "url":"/services/data/v51.0/sobjects/User/0055Y00000ExkfpQAB"
-    },
-    "Alias":"integ",
     "AccountId":null,
-    "ContactId":null,
+    "ContactId":"null",
     "CreatedDate":"2021-03-02T16:31:04.000+0000",
-    "CreatedById":"0055Y00000E16gwQAB",
-    "Email":"integration@example.com",
+    "CreatedById":"{\"scope\":\"salesforce\",\"hash\":\"m0410eDFbgwXYsI7rf1F1RMB6xgy2OWwiG3r0MzU5vk\"}",
     "EmailEncodingKey":"UTF-8",
-    "Id":"0055Y00000ExkfpQAB",
+    "Id":"p~VHQj5a2FSR2YogZdBv94Tthgdcps003--2mMbJwjClXYNFS8-0cFkZo_V5-HxfshvRD9L2OpBWJ00cjhyT1BPg",
     "IsActive":true,
     "LastLoginDate":"2023-03-10T16:51:26.000+0000",
     "LastModifiedDate":"2021-03-02T16:31:04.000+0000",
-    "ManagerId":null,
-    "Name":"Integration User",
+    "ManagerId":"null",
     "TimeZoneSidKey":"America/Los_Angeles",
-    "Username":"integration@00d5y000001cou0uam.com",
     "UserRoleId":null,
     "UserType":"Standard"
   }

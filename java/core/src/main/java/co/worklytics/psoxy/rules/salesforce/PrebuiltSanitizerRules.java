@@ -139,7 +139,7 @@ public class PrebuiltSanitizerRules {
             .endpoint(UPDATED_USERS)
             .endpoint(GET_ACCOUNTS)
             .endpoint(GET_USERS)
-            .endpoint(USERS_NO_IDS)
+            //.endpoint(USERS_NO_IDS)
             .endpoint(QUERY_ID_FOR_USERS)
             .endpoint(QUERY_FOR_ACTIVITY_HISTORIES)
             .endpoint(QUERY_ID_FOR_ACCOUNTS)
