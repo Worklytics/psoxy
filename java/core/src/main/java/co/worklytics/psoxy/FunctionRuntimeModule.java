@@ -8,6 +8,7 @@ import co.worklytics.psoxy.utils.RandomNumberGenerator;
 import co.worklytics.psoxy.utils.RandomNumberGeneratorImpl;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.auth.http.HttpTransportFactory;
 import dagger.Module;
 import dagger.Provides;
 
@@ -15,7 +16,6 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import java.time.Clock;
 import java.time.Duration;
-import java.util.Random;
 import java.util.UUID;
 
 /**
@@ -44,10 +44,16 @@ public class FunctionRuntimeModule {
     }
 
     @Provides
-    static HttpRequestFactory providesHttpRequestFactory() {
-        //atm, all function runtimes expected to use generic java NetHttpTransport
-        return (new NetHttpTransport()).createRequestFactory();
+    static HttpRequestFactory providesHttpRequestFactory(HttpTransportFactory httpTransportFactory) {
+        return httpTransportFactory.create().createRequestFactory();
     }
+
+    @Provides @Singleton
+    HttpTransportFactory providesHttpTransportFactory() {
+        //atm, all function runtimes expected to use generic java NetHttpTransport
+        return () -> new NetHttpTransport();
+    }
+
     @Provides @Singleton
     static ConfigService configService(HostEnvironment hostEnvironment,
                                        EnvVarsConfigService envVarsConfigService,
@@ -100,6 +106,8 @@ public class FunctionRuntimeModule {
             .fallback(remoteConfigService)
             .build();
     }
+
+
 
 
 }

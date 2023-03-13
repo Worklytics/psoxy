@@ -2,7 +2,11 @@ package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
+import com.google.api.client.http.HttpRequestFactory;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.testing.http.MockHttpTransport;
 import com.google.auth.Credentials;
+import com.google.auth.http.HttpTransportFactory;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.auth.oauth2.ServiceAccountCredentials;
 import lombok.Getter;
@@ -35,19 +39,20 @@ public class GoogleCloudPlatformServiceAccountKeyAuthStrategy implements SourceA
     }
 
     @Inject ConfigService config;
+    @Inject HttpTransportFactory httpTransportFactory;
 
     @SneakyThrows
     @Override
     public Credentials getCredentials(Optional<String> userToImpersonate) {
 
-        Set<String> scopes = Arrays.stream(config.getConfigPropertyOrError(ConfigProperty.OAUTH_SCOPES).split(","))
+        Set<String> scopes = Arrays.stream(config.getConfigPropertyOrError(ConfigProperty.OAUTH_SCOPES).split(" "))
             .collect(Collectors.toSet());
         GoogleCredentials credentials;
 
         Optional<String> key = config.getConfigPropertyAsOptional(ConfigProperty.SERVICE_ACCOUNT_KEY);
 
         if (key.isPresent()) {
-            credentials = ServiceAccountCredentials.fromStream(new ByteArrayInputStream(Base64.getDecoder().decode(key.get())));
+            credentials = ServiceAccountCredentials.fromStream(new ByteArrayInputStream(Base64.getDecoder().decode(key.get())), httpTransportFactory);
         } else {
             credentials = GoogleCredentials.getApplicationDefault();
         }

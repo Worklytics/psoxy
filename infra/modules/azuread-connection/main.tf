@@ -5,7 +5,7 @@
 terraform {
   required_providers {
     azuread = {
-      version = "~> 2.33.0"
+      version = ">= 2.7.0"
     }
   }
 }
@@ -20,6 +20,8 @@ resource "azuread_service_principal" "msgraph" {
 resource "azuread_application" "connector" {
   display_name = var.display_name
 
+  # NOTE: introduced in 2.7.0
+  # see https://registry.terraform.io/providers/hashicorp/azuread/2.7.0/docs/resources/application
   feature_tags {
     hide       = true  # don't show as 'App' to users, as there is no user-facing experience for connector
     enterprise = false # default; just clarify this is intentional. see https://marileeturscak.medium.com/the-difference-between-app-registrations-enterprise-applications-and-service-principals-in-azure-4f70b9a80fe5

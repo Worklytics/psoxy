@@ -9,8 +9,8 @@ variable "aws_account_id" {
 
 variable "aws_assume_role_arn" {
   type        = string
-  description = "if provided, arn of role Terraform should assume when provisioning your infra"
-  default     = ""
+  description = "if provided, arn of role Terraform should assume for test commands"
+  default     = "" # does '' even work here??
 }
 
 variable "aws_region" {

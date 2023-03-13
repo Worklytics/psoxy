@@ -30,7 +30,7 @@ data "google_project" "psoxy-project" {
 
 module "psoxy-gcp-google-workspace" {
   source = "../../modular-examples/gcp-google-workspace"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-google-workspace?ref=v0.4.12"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-google-workspace?ref=v0.4.13"
 
   gcp_project_id                 = data.google_project.psoxy-project.project_id
   environment_name               = var.environment_name
@@ -47,6 +47,21 @@ module "psoxy-gcp-google-workspace" {
   google_workspace_example_admin = var.google_workspace_example_admin
   general_environment_variables  = var.general_environment_variables
   salesforce_domain              = var.salesforce_domain
+}
+
+output "todos_1" {
+  description = "List of todo steps to complete 1st, in markdown format."
+  value       = join("\n", module.psoxy-gcp-google-workspace.todos_1)
+}
+
+output "todos_2" {
+  description = "List of todo steps to complete 2nd, in markdown format."
+  value       = join("\n", module.psoxy-gcp-google-workspace.todos_2)
+}
+
+output "todos_3" {
+  description = "List of todo steps to complete 3rd, in markdown format."
+  value       = join("\n", module.psoxy-gcp-google-workspace.todos_3)
 }
 
 moved {
