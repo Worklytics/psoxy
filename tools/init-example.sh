@@ -30,7 +30,7 @@ fi
 if which node > /dev/null; then
   printf "Node available. Installing ${BLUE}psoxy-test${NC} tool ...\n"
   cd ${PSOXY_BASE_DIR}/tools/psoxy-test
-  npm --prefix ${PSOXY_BASE_DIR}/tools/psoxy-test install
+  npm --no-audit --no-fund --prefix ${PSOXY_BASE_DIR}/tools/psoxy-test install
 else
   printf "${RED}Node.JS not available; could not install test tool.${NC}\n"
 fi
