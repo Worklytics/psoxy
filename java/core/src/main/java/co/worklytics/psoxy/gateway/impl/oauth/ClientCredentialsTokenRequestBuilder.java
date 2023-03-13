@@ -14,10 +14,7 @@ import java.util.Set;
 
 /**
  * build payload for canonical OAuth access token request authenticated by a long-lived refresh
- * token + client secret
- *
- * (apologies for awkward name, but to be clear: this is using one kind of token to request another,
- *  so it's a token request, using a token)
+ * token + client id + client secret
  *
  * @see OAuthAccessTokenSourceAuthStrategy
  *
