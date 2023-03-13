@@ -304,8 +304,8 @@ EOT
   - "Callback URL" can be anything, not required in this flow but required by Salesforce.
   - Application is marked with "Enable Client Credentials Flow"
   - You have to assign an user for Client Credentials, be sure:
-      - The user is with
-      - The police associated to the user has the enabled next Administrative Permissions:
+      - A "run as" user marked with "API Only Permission" needs to be associated
+      - The police associated to the user have the enabled next Administrative Permissions:
         - API Enabled
         - APEX REST Services
       - And the police has the application created marked as enabled in "Connected App Access". Otherwise request will return 401 with INVALID_SESSION_ID
