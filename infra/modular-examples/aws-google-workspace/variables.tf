@@ -88,6 +88,7 @@ variable "psoxy_base_dir" {
     condition     = var.psoxy_base_dir == null || can(regex(".*\\/$", var.psoxy_base_dir))
     error_message = "The psoxy_base_dir value should end with a slash."
   }
+
   validation {
     condition     = var.psoxy_base_dir == null || can(regex("^[^~].*$", var.psoxy_base_dir))
     error_message = "The psoxy_base_dir value should be absolute path (not start with ~)."
