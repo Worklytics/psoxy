@@ -340,3 +340,15 @@ output "todos_3" {
     values(module.worklytics-psoxy-connection)[*].todo
   )
 }
+
+
+# use case: let someone consume this deploy another psoxy instance, reusing artifacts
+output "artifacts_bucket_name" {
+  description = "Name of GCS bucket with deployment artifacts."
+  value       = module.psoxy-gcp.artifacts_bucket_name
+}
+
+output "deployment_bundle_object_name" {
+  description = "Object name of deplyment bundle within artifacts bucket."
+  value       = module.psoxy-gcp.deployment_bundle_object_name
+}
