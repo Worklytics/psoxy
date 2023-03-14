@@ -40,7 +40,7 @@ if [ ! -f terraform.tfvars ]; then
   printf "Init'd example terraform config. Please open ${BLUE}terraform.tfvars${NC} and customize it to your needs.\n"
   printf "Review ${BLUE}variables.tf${NC} for descriptions of each variable.\n\n"
 else
-  printf "${RED}Nothing to initialize. File terraform.tfvars already exists!${NC}\n\n"
+  printf "${RED}Nothing to initialize. File terraform.tfvars already exists.${NC}\n\n"
 fi
 
 TEST_TOOL_ROOT=${PSOXY_BASE_DIR}/tools/psoxy-test
@@ -55,6 +55,6 @@ if npm -v &> /dev/null ; then
   cd ${PSOXY_BASE_DIR}/tools/psoxy-test
   npm --no-audit --no-fund --prefix ${PSOXY_BASE_DIR}/tools/psoxy-test install
 else
-  printf "${RED}NPM/Node.JS not available; could not install test tool. We recommend installing Node.JS, then re-running this init script.${NC}\n"
+  printf "${RED}NPM / Node.JS not available; could not install test tool. We recommend installing Node.JS ( https://nodejs.org/ ), then re-running this init script.${NC}\n"
 fi
 
