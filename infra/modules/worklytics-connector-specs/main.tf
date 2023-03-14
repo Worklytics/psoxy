@@ -271,7 +271,7 @@ EOT
       source_auth_strategy : "oauth2_refresh_token"
       environment_variables : {
         GRANT_TYPE : "client_credentials"
-        CREDENTIALS_FLOW: "client_secret"
+        CREDENTIALS_FLOW : "client_secret"
         REFRESH_ENDPOINT : "https://${var.salesforce_domain}/services/oauth2/token"
       }
       secured_variables : [
