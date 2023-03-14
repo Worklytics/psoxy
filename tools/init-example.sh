@@ -1,10 +1,15 @@
 #!/bin/bash
 
-# colors - see http://stackoverflow.com/questions/5947742/how-to-change-the-output-color-of-echo-in-linux
-RED='\033[0;31m'
-BLUE='\33[0;34m'
-NC='\033[0m' # No Color
+# Psoxy init script
+#
+# this is meant to be run from within a Terraform configuration for Psoxy, modeled on one of our
+# examples
+# see: https://github.com/Worklytics/psoxy/tree/main/infra/examples
 
+# colors
+RED='\e[0;31m'
+BLUE='\e[0;34m'
+NC='\e[0m' # No Color
 
 TF_CONFIG_ROOT=`pwd`
 
@@ -14,10 +19,12 @@ if ! terraform -v &> /dev/null ; then
 fi
 
 # initialize terraform, which downloads dependencies into `.terraform` directory
+printf "Initializing ${BLUE}psoxy${NC} Terraform configuration ...\n"
 terraform init
 
 PSOXY_BASE_DIR=${TF_CONFIG_ROOT}/.terraform/modules/psoxy/
 
+printf "Initializing ${BLUE}terraform.tfvars${NC} file for your configuration ...\n"
 if [ ! -f terraform.tfvars ]; then
   TFVARS_FILE="${TF_CONFIG_ROOT}/terraform.tfvars"
 
@@ -36,8 +43,15 @@ else
   printf "${RED}Nothing to initialize. File terraform.tfvars already exists!${NC}\n\n"
 fi
 
+TEST_TOOL_ROOT=${PSOXY_BASE_DIR}/tools/psoxy-test
+
+if [ ! -d ${TEST_TOOL_ROOT} ]; then
+  printf "${RED}No test tool source found at ${TEST_TOOL_ROOT}. Failed to install test tool.${NC}\n"
+  exit
+fi
+
 if npm -v &> /dev/null ; then
-  printf "Node available. Installing ${BLUE}psoxy-test${NC} tool ...\n"
+  printf "Installing ${BLUE}psoxy-test${NC} tool ...\n"
   cd ${PSOXY_BASE_DIR}/tools/psoxy-test
   npm --no-audit --no-fund --prefix ${PSOXY_BASE_DIR}/tools/psoxy-test install
 else
