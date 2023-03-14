@@ -437,3 +437,13 @@ output "caller_role_arn" {
   description = "ARN of the AWS IAM role that can be assumed to invoke the Lambdas."
   value       = module.psoxy-aws.api_caller_role_arn
 }
+
+output "path_to_deployment_jar" {
+  description = "Path to the package to deploy (JAR) as lambda."
+  value       = module.psoxy-aws.path_to_deployment_jar
+}
+
+output "deployment_package_hash" {
+  description = "Hash of deployment package."
+  value       = module.psoxy-aws.deployment_package_hash
+}

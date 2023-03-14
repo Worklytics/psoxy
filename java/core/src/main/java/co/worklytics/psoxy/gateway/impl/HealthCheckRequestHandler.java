@@ -2,7 +2,6 @@ package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.ControlHeader;
 import co.worklytics.psoxy.HealthCheckResult;
-import co.worklytics.psoxy.ResponseHeader;
 import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,12 +16,10 @@ import org.apache.http.entity.ContentType;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
 import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Request handler that performs health check duties
@@ -70,14 +67,22 @@ public class HealthCheckRequestHandler {
                     p -> p.getValue()
                         .map(metadata -> metadata.getLastModifiedDate().orElse(null))
                         .orElse(null))));
+        } catch (Throwable e) {
+            log.log(Level.WARNING, "Failed to add config debug info to health check");
+        }
 
+        try {
             config.getConfigPropertyAsOptional(ProxyConfigProperty.SOURCE_AUTH_STRATEGY_IDENTIFIER)
                 .ifPresent(healthCheckResult::sourceAuthStrategy);
+        } catch (Throwable e) {
+            log.log(Level.WARNING, "Failed to add sourceAuthStrategy to health check");
+        }
 
+        try {
             config.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.GRANT_TYPE)
                 .ifPresent(healthCheckResult::sourceAuthGrantType);
         } catch (Throwable e) {
-            log.log(Level.WARNING, "Failed to add config debug info to health check");
+            log.log(Level.WARNING, "Failed to add sourceAuthGrantType to health check");
         }
 
         HttpEventResponse.HttpEventResponseBuilder responseBuilder = HttpEventResponse.builder();
