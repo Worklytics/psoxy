@@ -62,7 +62,7 @@ class ClientCredentialsGrantTokenRequestBuilderTest {
     ConfigService configService;
 
     @Inject
-    ClientCredentialsWithJWTAssertionGrantTokenRequestBuilder payloadBuilder;
+    ClientCredentialsGrantTokenRequestBuilder payloadBuilder;
 
     @Inject
     ObjectMapper objectMapper;
@@ -89,7 +89,7 @@ class ClientCredentialsGrantTokenRequestBuilderTest {
             .thenReturn(clientId);
         when(configService.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.REFRESH_ENDPOINT))
             .thenReturn(tokenEndpoint);
-        when(configService.getConfigPropertyAsOptional(ClientCredentialsWithJWTAssertionGrantTokenRequestBuilder.ConfigProperty.TOKEN_SCOPE))
+        when(configService.getConfigPropertyAsOptional(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.TOKEN_SCOPE))
             .thenReturn(Optional.of("https://graph.microsoft.com/.default"));
     }
 
@@ -98,9 +98,9 @@ class ClientCredentialsGrantTokenRequestBuilderTest {
     @SneakyThrows
     @Test
     public void tokenRequestPayload() {
-        when(configService.getConfigPropertyOrError(ClientCredentialsWithJWTAssertionGrantTokenRequestBuilder.ConfigProperty.PRIVATE_KEY))
+        when(configService.getConfigPropertyOrError(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.PRIVATE_KEY))
             .thenReturn(EXAMPLE_PRIVATE_KEY);
-        when(configService.getConfigPropertyOrError(ClientCredentialsWithJWTAssertionGrantTokenRequestBuilder.ConfigProperty.PRIVATE_KEY_ID))
+        when(configService.getConfigPropertyOrError(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.PRIVATE_KEY_ID))
             .thenReturn("F4194D924E8471C804F65E77BCF90418CEEB0DA2");
 
         final String EXPECTED_ASSERTION = "client_assertion=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsIng1dCI6IjlCbE5razZFY2NnRTlsNTN2UGtFR003ckRhST0ifQ.eyJhdWQiOiJodHRwczovL2xvZ2luLm1pY3Jvc29mdG9ubGluZS5jb20vNmU0YzhlOWYtNzZjZi00MWQxLTgwNmUtNjE4MzhiODgwYjg3L29hdXRoMi92Mi4wL3Rva2VuIiwiZXhwIjoxNjM5NTI2NzAwLCJpYXQiOjE2Mzk1MjY0MDAsImlzcyI6IjYwYjYxMmUzLWEzYjAtNDVkMS1hNTgyLTQ4NzZmMjg2NDkwYSIsImp0aSI6Ijg4NmNkMmQxLTJhMWQtNDNlOS05MWQ0LTZhMmIxNjZkZmY5ZSIsInN1YiI6IjYwYjYxMmUzLWEzYjAtNDVkMS1hNTgyLTQ4NzZmMjg2NDkwYSJ9.tkGyEKoTPkkn7CXR8w45himxXzlnva0JY9DH_fIfr7uu5zC5BsZmF5HuBdCgU4_rWVPHDUGQmyVyUcRkNZsO9CnHDeHzCoPvWD1FSx8hV3oTwREgjXWQka08PC5ps2wEydSZfPTemP-7AXeIayLl5cWYzS7L_KRylQjNMlrXgMhv5SvUL1lJD76JolX0ksskfBmLldmu99UrMIizREPFkWQUvLE_cX8P9C6mZGl5PB7Ku5kovZAEOrOVQbESUtTUaSdmCEdpGCJz9osvWyksoC1Drp-isKw4FAGwGG6t1BTThL45R2kx-0fQH_jCYiKwLYtedREID9GZourmF8BNdw&client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_id=60b612e3-a3b0-45d1-a582-4876f286490a&grant_type=client_credentials&scope=https%3A%2F%2Fgraph.microsoft.com%2F.default";
@@ -161,9 +161,9 @@ class ClientCredentialsGrantTokenRequestBuilderTest {
             "m8lD1czHbMIsv1EHZj/GcCIa\n" +
             "-----END PRIVATE KEY-----";
 
-        when(configService.getConfigPropertyOrError(ClientCredentialsWithJWTAssertionGrantTokenRequestBuilder.ConfigProperty.PRIVATE_KEY))
+        when(configService.getConfigPropertyOrError(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.PRIVATE_KEY))
             .thenReturn(PRIVATE_KEY_FOR_INTEGRATION);
-        when(configService.getConfigPropertyOrError(ClientCredentialsWithJWTAssertionGrantTokenRequestBuilder.ConfigProperty.PRIVATE_KEY_ID))
+        when(configService.getConfigPropertyOrError(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.PRIVATE_KEY_ID))
             .thenReturn(PRIVATE_KEY_ID_FOR_INTEGRATION);
 
         HttpRequestFactory requestFactory = (new NetHttpTransport()).createRequestFactory();

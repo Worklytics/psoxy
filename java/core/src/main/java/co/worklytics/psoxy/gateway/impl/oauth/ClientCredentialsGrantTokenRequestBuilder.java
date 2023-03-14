@@ -39,7 +39,7 @@ import java.util.*;
  *   - https://datatracker.ietf.org/doc/html/rfc6749#section-4.4.2
  */
 @NoArgsConstructor(onConstructor_ = @Inject)
-public class ClientCredentialsWithJWTAssertionGrantTokenRequestBuilder
+public class ClientCredentialsGrantTokenRequestBuilder
         implements OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder, RequiresConfiguration {
 
     enum ConfigProperty implements ConfigService.ConfigProperty {
@@ -51,7 +51,7 @@ public class ClientCredentialsWithJWTAssertionGrantTokenRequestBuilder
     // 'client_credentials' is MSFT
     //for Google, this is "urn:ietf:params:oauth:grant-type:jwt-bearer"
     @Getter(onMethod_ = @Override)
-    private final String grantType = "client_credentials_jwt_assertion";
+    private final String grantType = "client_credentials";
 
     //for Google, this is "assertion"
     // see: https://datatracker.ietf.org/doc/html/rfc7521#section-4.2
