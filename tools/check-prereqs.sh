@@ -34,7 +34,7 @@ printf "\n"
 JAVA_VERSION=`mvn -v | grep Java`
 
 printf "Your Maven installation uses ${BLUE}${JAVA_VERSION}${NC}.\n"
-printf "\t- if that is a Java version < 11, we recommend you upgrade to 11 or 17.\n"
+printf "\t- if that is a Java version < 11, you must upgrade to 11 or higher. We recommend 17, as it is LTS and we have seen problems with 19.x.\n"
 printf "\t- if that is some version of Java 19.x, we recommend you *downgrade* to 17. See https://github.com/Worklytics/psoxy/blob/main/docs/troubleshooting.md#build-problems-with-java-19-specifically-openjdk-19\n"
 printf "\t- if you have a Java JDK of the right version installed on your machine *other* than the one referenced there, set your ${BLUE}JAVA_HOME${NC} to its location.\n"
 
@@ -52,7 +52,7 @@ if ! aws --version &> /dev/null ; then
 else
   printf "AWS CLI version ${BLUE}`aws --version`${NC} is installed.\n"
   printf ""
-  printf "\tmake sure ${BLUE}aws sts get-caller-identity${NC} returns the user/role/account you expect. $AWSCLI_REASON\n"
+  printf "\t- make sure ${BLUE}aws sts get-caller-identity${NC} returns the user/role/account you expect. $AWSCLI_REASON\n"
 fi
 
 printf "\n"
@@ -63,7 +63,7 @@ if ! gcloud --version &> /dev/null ; then
   if $HOMEBREW_AVAILABLE; then printf " or, as you have Homebrew available, run ${BLUE}brew install --cask google-cloud-sdk${NC}\n"; fi
 else
   printf "Google Cloud SDK version ${BLUE}`gcloud --version | head -n 1`${NC} is installed.\n"
-  printf "\tmake sure ${BLUE}gcloud auth list --filter=\"status:ACTIVE\"${NC} returns the account you expect. $GCLOUD_REASON\n"
+  printf "\t- make sure ${BLUE}gcloud auth list --filter=\"status:ACTIVE\"${NC} returns the account you expect. $GCLOUD_REASON\n"
 fi
 
 printf "\n"
@@ -75,7 +75,7 @@ if ! az --version &> /dev/null ; then
 else
   # how can pipe to sed or something to strip extra whitespace out?
   printf "Azure CLI version ${BLUE}`az --version --only-show-errors | head -n 1`${NC} is installed.\n"
-  printf "\tmake sure ${BLUE}az account show${NC} is the user/tenant you expect. $AZCLI_REASON\n"
+  printf "\t- make sure ${BLUE}az account show${NC} is the user/tenant you expect. $AZCLI_REASON\n"
 fi
 
 # TODO: check auth aws, gcp, azure ??
