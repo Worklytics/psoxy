@@ -18,6 +18,7 @@ module "worklytics_connector_specs" {
   enabled_connectors             = var.enabled_connectors
   google_workspace_example_user  = var.google_workspace_example_user
   google_workspace_example_admin = coalesce(var.google_workspace_example_admin, var.google_workspace_example_user)
+  salesforce_domain              = var.salesforce_domain
 }
 
 module "psoxy-gcp" {

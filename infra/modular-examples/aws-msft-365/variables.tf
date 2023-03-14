@@ -203,3 +203,9 @@ variable "pseudonymize_app_ids" {
   description = "if set, will set value of PSEUDONYMIZE_APP_IDS environment variable to this value for all sources"
   default     = false
 }
+
+variable "salesforce_domain" {
+  type        = string
+  default     = ""
+  description = "Domain of the Salesforce to connect to (only required if using Salesforce connector). To find your My Domain URL, from Setup, in the Quick Find box, enter My Domain, and then select My Domain"
+}

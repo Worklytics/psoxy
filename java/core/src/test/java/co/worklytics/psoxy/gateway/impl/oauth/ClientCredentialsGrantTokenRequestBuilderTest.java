@@ -97,7 +97,7 @@ class ClientCredentialsGrantTokenRequestBuilderTest {
 
     @SneakyThrows
     @Test
-    public void tokenRequestPayload() {
+    public void tokenRequestPayload_with_jwt() {
         when(configService.getConfigPropertyOrError(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.PRIVATE_KEY))
             .thenReturn(EXAMPLE_PRIVATE_KEY);
         when(configService.getConfigPropertyOrError(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.PRIVATE_KEY_ID))
@@ -109,6 +109,23 @@ class ClientCredentialsGrantTokenRequestBuilderTest {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         payload.writeTo(out);
         assertEquals(EXPECTED_ASSERTION, out.toString());
+    }
+
+    @SneakyThrows
+    @Test
+    public void tokenRequestPayload_with_client_secret() {
+        final String expected_payload = "grant_type=client_credentials&client_secret=fake&client_id=60b612e3-a3b0-45d1-a582-4876f286490a";
+
+        when(configService.getConfigPropertyAsOptional(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.CREDENTIALS_FLOW))
+                .thenReturn(Optional.of("client_secret"));
+        when(configService.getConfigPropertyOrError(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.CLIENT_SECRET))
+                .thenReturn("fake");
+
+        HttpContent payload = payloadBuilder.buildPayload();
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        payload.writeTo(out);
+        assertEquals(expected_payload, out.toString());
     }
 
     @SneakyThrows
