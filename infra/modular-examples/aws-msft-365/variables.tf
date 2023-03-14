@@ -64,15 +64,11 @@ variable "caller_aws_arns" {
 
 variable "psoxy_base_dir" {
   type        = string
-  description = "the path where your psoxy repo resides"
+  description = "the path where your psoxy repo resides. Preferably a full path, /home/user/repos/, avoid tilde (~) shortcut to $HOME"
 
   validation {
     condition     = can(regex(".*\\/$", var.psoxy_base_dir))
     error_message = "The psoxy_base_dir value should end with a slash."
-  }
-  validation {
-    condition     = can(regex("^[^~].*$", var.psoxy_base_dir))
-    error_message = "The psoxy_base_dir value should be absolute path (not start with ~)."
   }
 }
 

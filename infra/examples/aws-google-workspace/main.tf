@@ -54,9 +54,9 @@ data "google_project" "psoxy-google-connectors" {
   project_id = var.gcp_project_id
 }
 
-module "psoxy" {
+module "psoxy-aws-google-workspace" {
   # source = "../../modular-examples/aws-google-workspace"
-  source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-google-workspace?ref=rc-v0.4.14"
+  source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-google-workspace?ref=v0.4.13"
 
   aws_account_id                 = var.aws_account_id
   aws_assume_role_arn            = var.aws_assume_role_arn # role that can test the instances (lambdas)
@@ -80,20 +80,20 @@ module "psoxy" {
 
 # if you generated these, you may want them to import back into your data warehouse
 output "lookup_tables" {
-  value = module.psoxy.lookup_tables
+  value = module.psoxy-aws-google-workspace.lookup_tables
 }
 
 output "todos_1" {
   description = "List of todo steps to complete 1st, in markdown format."
-  value       = join("\n", module.psoxy.todos_1)
+  value       = join("\n", module.psoxy-aws-google-workspace.todos_1)
 }
 
 output "todos_2" {
   description = "List of todo steps to complete 2nd, in markdown format."
-  value       = join("\n", module.psoxy.todos_2)
+  value       = join("\n", module.psoxy-aws-google-workspace.todos_2)
 }
 
 output "todos_3" {
   description = "List of todo steps to complete 3rd, in markdown format."
-  value       = join("\n", module.psoxy.todos_3)
+  value       = join("\n", module.psoxy-aws-google-workspace.todos_3)
 }
