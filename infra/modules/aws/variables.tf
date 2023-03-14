@@ -17,6 +17,11 @@ variable "psoxy_base_dir" {
   type        = string
   description = "the path where your psoxy repo resides"
   default     = "../../.."
+
+  validation {
+    condition     = fileexists(format("%sjava/pom.xml", var.psoxy_base_dir))
+    error_message = "The psoxy_base_dir value should be a path to a directory containing java/pom.xml."
+  }
 }
 
 variable "force_bundle" {

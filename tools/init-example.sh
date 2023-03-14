@@ -6,8 +6,7 @@ BLUE='\33[0;34m'
 NC='\033[0m' # No Color
 
 TF_CONFIG_ROOT=`pwd`
-cd ../../..
-PSOXY_BASE_DIR=`pwd`
+PSOXY_BASE_DIR=${TF_CONFIG_ROOT}/.terraform/modules/psoxy/
 
 
 if [ ! -f terraform.tfvars ]; then
@@ -16,7 +15,10 @@ if [ ! -f terraform.tfvars ]; then
   cp ${TF_CONFIG_ROOT}/terraform.tfvars.example $TFVARS_FILE
 
   # append root of checkout automatically
-  echo "psoxy_base_dir                = \"${PSOXY_BASE_DIR}/\"" >> $TFVARS_FILE
+  echo "# this points to the directory where Java source to be compiled into deployment JAR is located" >> $TFVARS_FILE
+  echo "# by default, it points to .terraform, where terraform clones the main psxoy repo" >> $TFVARS_FILE
+  echo "# if you have a local clone of the psoxy repo you prefer to use, change this to point there" >> $TFVARS_FILE
+  echo "psoxy_base_dir                = \"${PSOXY_BASE_DIR}\"" >> $TFVARS_FILE
 
   # give user some feedback
   printf "Init'd example terraform config. Please open ${BLUE}terraform.tfvars${NC} and customize it to your needs.\n"
@@ -28,7 +30,7 @@ fi
 if which node > /dev/null; then
   printf "Node available. Installing ${BLUE}psoxy-test${NC} tool ...\n"
   cd ${PSOXY_BASE_DIR}/tools/psoxy-test
-  npm --prefix ${PSOXY_BASE_DIR}/tools/psoxy-test install
+  npm --no-audit --no-fund --prefix ${PSOXY_BASE_DIR}/tools/psoxy-test install
 else
   printf "${RED}Node.JS not available; could not install test tool.${NC}\n"
 fi
