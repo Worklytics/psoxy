@@ -289,6 +289,7 @@ module "psoxy-bulk" {
   global_parameter_arns           = module.global_secrets.secret_arns
   path_to_instance_ssm_parameters = "${var.aws_ssm_param_root_path}PSOXY_${upper(replace(each.key, "-", "_"))}_"
   ssm_kms_key_ids                 = local.ssm_key_ids
+  enable_input_trigger            = false
 
   environment_variables = merge(
     var.general_environment_variables,
@@ -305,8 +306,7 @@ module "psoxy-bulk" {
 }
 
 module "psoxy-bulk-to-worklytics" {
-  for_each = merge(module.worklytics_connector_specs.enabled_bulk_connectors,
-  var.custom_bulk_connectors)
+  for_each = merge(module.worklytics_connector_specs.enabled_bulk_connectors, var.custom_bulk_connectors)
 
   source = "../../modules/worklytics-psoxy-connection-generic"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-generic?ref=v0.4.13"
@@ -341,6 +341,7 @@ module "psoxy_lookup_tables_builders" {
   global_parameter_arns           = module.global_secrets.secret_arns
   path_to_instance_ssm_parameters = "${var.aws_ssm_param_root_path}PSOXY_${upper(replace(each.key, "-", "_"))}_"
   ssm_kms_key_ids                 = local.ssm_key_ids
+  enable_input_trigger            = false
 
   sanitized_accessor_role_names = each.value.sanitized_accessor_role_names
   environment_variables = merge(
@@ -351,6 +352,41 @@ module "psoxy_lookup_tables_builders" {
     }
   )
 }
+
+
+# create listeners (triggers on new objects) for all S3 input buckets to one or more lambdas
+locals {
+  bulk_functions_to_trigger_by_bucket = {
+    for k, instance in module.psoxy-bulk :
+    instance.input_bucket => [ instance.function_arn ]
+  }
+  lookup_functions_to_trigger_by_bucket = {
+    for k, instance in module.psoxy_lookup_tables_builders :
+      module.psoxy-bulk[var.lookup_table_builders[k].input_connector_id].input_bucket => [ instance.function_arn ]
+  }
+
+  # exploits that ALL buckets are in `bulk_functions_to_trigger_by_bucket`
+  functions_to_trigger_by_bucket = {
+    for bucket, functions in local.bulk_functions_to_trigger_by_bucket :
+      bucket => concat(functions, try(local.lookup_functions_to_trigger_by_bucket[bucket], []))
+  }
+}
+
+resource "aws_s3_bucket_notification" "bucket_notification" {
+  for_each = local.functions_to_trigger_by_bucket
+
+  bucket = each.key
+
+  dynamic "lambda_function" {
+    for_each = each.value
+
+    content {
+      lambda_function_arn = lambda_function.value
+      events              = ["s3:ObjectCreated:*"]
+    }
+  }
+}
+
 
 locals {
   all_instances = merge(
