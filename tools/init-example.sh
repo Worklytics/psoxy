@@ -5,9 +5,13 @@ RED='\033[0;31m'
 BLUE='\33[0;34m'
 NC='\033[0m' # No Color
 
-TF_CONFIG_ROOT=`pwd`
-PSOXY_BASE_DIR=${TF_CONFIG_ROOT}/.terraform/modules/psoxy/
 
+TF_CONFIG_ROOT=`pwd`
+
+# initialize terraform, which downloads dependencies into `.terraform` directory
+terraform init
+
+PSOXY_BASE_DIR=${TF_CONFIG_ROOT}/.terraform/modules/psoxy/
 
 if [ ! -f terraform.tfvars ]; then
   TFVARS_FILE="${TF_CONFIG_ROOT}/terraform.tfvars"
