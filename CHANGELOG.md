@@ -17,7 +17,27 @@ Working tracking of changes, updated as work done prior to release.  Please revi
         then wildcard policy to read shared also grants read of secrets across all connectors)
   - keys/salts per value kind (PII, item id, etc)
 
-## v0.4.11
+## [v0.4.14](https://github.com/Worklytics/psoxy/releases/tag/v0.4.14)
+
+Changes:
+  - you may see deletion and recreation of `aws_s3_bucket_notification` resources; this is expected
+    and will not alter behavior of deployment
+
+Fixes:
+  - the "Lookup" file use-case, supported in our examples through `lookup_table_builders` variable,
+    never worked as expected due to S3 limitation, where only 1 of the 2 "event notifications" our
+    modules set on a given S3 bucket actually work (race-case as to which). This should be fixed if
+    you re-apply your terraform configuration with this version.
+
+## [v0.4.13](https://github.com/Worklytics/psoxy/releases/tag/v0.4.13)
+
+see https://github.com/Worklytics/psoxy/releases/tag/v0.4.13
+
+## [v0.4.12](https://github.com/Worklytics/psoxy/releases/tag/v0.4.12)
+
+see https://github.com/Worklytics/psoxy/releases/tag/v0.4.12
+
+## [v0.4.11](https://github.com/Worklytics/psoxy/releases/tag/v0.4.11)
 Features:
  - avoid ENV vars for config paths if default values
  - troubleshooting docs
@@ -35,7 +55,7 @@ Fixes:
   - update NPM dependencies to avoid some vulnerabilities (npm packages are only used for testing;
     not exposed to any external clients)
 
-## v0.4.10
+## [v0.4.10](https://github.com/Worklytics/psoxy/releases/tag/v0.4.10)
 
 Features:
   - `PATH_TO_SHARED_CONFIG`/`PATH_TO_CONNECTOR_CONFIG` fully supported for AWS SSM Parameter Store

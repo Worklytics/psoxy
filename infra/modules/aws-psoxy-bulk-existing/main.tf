@@ -68,6 +68,7 @@ resource "aws_lambda_permission" "allow_input_bucket" {
 }
 
 resource "aws_s3_bucket_notification" "bucket_notification" {
+  count = var.enable_input_trigger ? 1 : 0
 
   bucket = var.input_bucket
 

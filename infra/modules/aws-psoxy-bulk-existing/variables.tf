@@ -102,6 +102,12 @@ variable "memory_size_mb" {
   default     = 512
 }
 
+variable "enable_input_trigger" {
+  type        = bool
+  description = "Whether to provision `aws_s3_bucket_notification` to trigger lambda on new objects in input bucket. Set to `false` if you plan to do this outside this module, which would support more sophisticated use cases."
+  default     = true # legacy behavior
+}
+
 variable "todo_step" {
   type        = number
   description = "of all todos, where does this one logically fall in sequence"

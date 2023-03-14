@@ -111,6 +111,8 @@ resource "aws_lambda_permission" "allow_input_bucket" {
 }
 
 resource "aws_s3_bucket_notification" "bucket_notification" {
+  count = var.enable_input_trigger ? 1 : 0
+
   bucket = aws_s3_bucket.input.id
 
   lambda_function {
@@ -120,7 +122,6 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
 
   depends_on = [aws_lambda_permission.allow_input_bucket]
 }
-
 
 # the lambda function needs to get single objects from the input bucket
 resource "aws_iam_policy" "input_bucket_getObject_policy" {
