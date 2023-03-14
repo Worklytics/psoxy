@@ -29,14 +29,15 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * implementation of an Access Token Request (per RFC6749 4.4.2) authenticated by an assertion (RFC 7521)
  * based on private key id + private key secret for building the JWT assertion to use
- *
+ * <p>
  * see
- *   - https://datatracker.ietf.org/doc/html/rfc7521
- *   - https://datatracker.ietf.org/doc/html/rfc6749#section-4.4.2
+ * - <a href="https://datatracker.ietf.org/doc/html/rfc7521">...</a>
+ * - <a href="https://datatracker.ietf.org/doc/html/rfc6749#section-4.4.2">...</a>
  */
 @NoArgsConstructor(onConstructor_ = @Inject)
 public class ClientCredentialsGrantTokenRequestBuilder
@@ -46,6 +47,17 @@ public class ClientCredentialsGrantTokenRequestBuilder
         PRIVATE_KEY_ID,
         PRIVATE_KEY,
         TOKEN_SCOPE,
+        //NOTE: you should configure this as a secret in Secret Manager
+        CLIENT_SECRET,
+        // Define how the client credentials are set; by default is based on certificate to ensure compatibility with previous versions
+        CREDENTIALS_FLOW
+    }
+
+    private enum CredentialFlowType {
+        // https://www.rfc-editor.org/rfc/rfc6749
+        CLIENT_SECRET,
+        // https://www.rfc-editor.org/rfc/rfc7523
+        JWT_ASSERTION
     }
 
     // 'client_credentials' is MSFT
@@ -79,12 +91,19 @@ public class ClientCredentialsGrantTokenRequestBuilder
 
     @Override
     public Set<ConfigService.ConfigProperty> getRequiredConfigProperties() {
-        return Set.of(
-            OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.REFRESH_ENDPOINT, //should be redundant with strategy, but nonetheless req'd here too
-            OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID,
-            ConfigProperty.PRIVATE_KEY_ID,
-            ConfigProperty.PRIVATE_KEY
-        );
+        if (getCredentialsType() == CredentialFlowType.CLIENT_SECRET) {
+            return Set.of(
+                    OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID,
+                    ConfigProperty.CLIENT_SECRET
+            );
+        } else {
+            return Set.of(
+                    OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.REFRESH_ENDPOINT, //should be redundant with strategy, but nonetheless req'd here too
+                    OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID,
+                    ConfigProperty.PRIVATE_KEY_ID,
+                    ConfigProperty.PRIVATE_KEY
+            );
+        }
     }
 
     @Override
@@ -95,35 +114,57 @@ public class ClientCredentialsGrantTokenRequestBuilder
     @SneakyThrows
     public HttpContent buildPayload() {
 
+        Map<String, String> data;
+        if (getCredentialsType().equals(CredentialFlowType.CLIENT_SECRET)) {
+            data = buildClientSecretPayload();
+        } else {
+            data = buildJWTPayload();
+        }
+
+        return new UrlEncodedContent(data);
+    }
+
+    private Map<String, String> buildClientSecretPayload() {
+        Map<String, String> data = new HashMap<>();
+
+        data.put("grant_type", getGrantType());
+        data.put("client_id", config.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID));
+        data.put("client_secret", config.getConfigPropertyOrError(ConfigProperty.CLIENT_SECRET));
+
+        return data;
+    }
+
+    private Map<String, String> buildJWTPayload() {
         //implementation of:
         // https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow#get-a-token
 
         String oauthClientId = config.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID);
         String tokenEndpoint =
-            config.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.REFRESH_ENDPOINT);
+                config.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.REFRESH_ENDPOINT);
 
         Map<String, String> data = new TreeMap<>();
         //https://datatracker.ietf.org/doc/html/rfc6749#section-4.4.2
         data.put(PARAM_GRANT_TYPE, "client_credentials");
         config.getConfigPropertyAsOptional(ConfigProperty.TOKEN_SCOPE)
-            .ifPresent(r -> data.put(PARAM_SCOPE, r)); // 'scope' param is optional, per RFC
+                .ifPresent(r -> data.put(PARAM_SCOPE, r)); // 'scope' param is optional, per RFC
 
         //https://datatracker.ietf.org/doc/html/rfc7521#section-4.2
         data.put(PARAM_CLIENT_ASSERTION_TYPE, CLIENT_ASSERTION_TYPE_JWT);
         data.put(PARAM_CLIENT_ASSERTION, buildJwtAssertion(oauthClientId, tokenEndpoint));
         data.put(PARAM_CLIENT_ID, oauthClientId);
 
-        return new UrlEncodedContent(data);
+        return data;
     }
 
     /**
      * build JWT assertion to authenticate client based on config
+     *
      * @param clientId both subject + issuer of token
      * @param audience for the token (the endpoint/service being called)
      * @return JWT assertion as a string
      */
     @SneakyThrows
-    String buildJwtAssertion(String clientId, String audience) {
+    private String buildJwtAssertion(String clientId, String audience) {
 
         //https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-certificate-credentials
         JsonWebSignature.Header header = new JsonWebSignature.Header();
@@ -145,9 +186,8 @@ public class ClientCredentialsGrantTokenRequestBuilder
         payload.setIssuedAtTimeSeconds(currentTime.getEpochSecond());
         payload.setExpirationTimeSeconds(currentTime.plus(DEFAULT_EXPIRATION_DURATION).getEpochSecond());
 
-        String assertion = JsonWebSignature.signUsingRsaSha256(
-            getServiceAccountPrivateKey(), jsonFactory, header, payload);
-        return assertion;
+        return JsonWebSignature.signUsingRsaSha256(
+                getServiceAccountPrivateKey(), jsonFactory, header, payload);
     }
 
     //implements encoding X.509 certificate hash (also known as the cert's SHA-1 thumbprint) as a
@@ -171,10 +211,24 @@ public class ClientCredentialsGrantTokenRequestBuilder
         PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(bytes);
         try {
             KeyFactory keyFactory = SecurityUtils.getRsaKeyFactory();
-            PrivateKey privateKey = keyFactory.generatePrivate(keySpec);
-            return privateKey;
+            return keyFactory.generatePrivate(keySpec);
         } catch (NoSuchAlgorithmException | InvalidKeySpecException exception) {
-           throw new IOException("Unexpected exception reading PKCS data", exception);
+            throw new IOException("Unexpected exception reading PKCS data", exception);
         }
+    }
+
+    private CredentialFlowType getCredentialsType() {
+        AtomicReference<CredentialFlowType> result = new AtomicReference<>(CredentialFlowType.JWT_ASSERTION);
+
+        config.getConfigPropertyAsOptional(ConfigProperty.CREDENTIALS_FLOW)
+                .ifPresent(i -> {
+                    if (i.equalsIgnoreCase("client_secret")) {
+                        result.set(CredentialFlowType.CLIENT_SECRET);
+                    } else {
+                        result.set(CredentialFlowType.JWT_ASSERTION);
+                    }
+                });
+
+        return result.get();
     }
 }
