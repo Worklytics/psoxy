@@ -8,6 +8,11 @@ NC='\033[0m' # No Color
 
 TF_CONFIG_ROOT=`pwd`
 
+if ! terraform -v &> /dev/null ; then
+  printf "${RED}Terraform not available; required for this Psoxy example. See https://github.com/Worklytics/psoxy#prerequisites ${NC}\n"
+  exit 1
+fi
+
 # initialize terraform, which downloads dependencies into `.terraform` directory
 terraform init
 
@@ -31,11 +36,11 @@ else
   printf "${RED}Nothing to initialize. File terraform.tfvars already exists!${NC}\n\n"
 fi
 
-if which node > /dev/null; then
+if npm -v &> /dev/null ; then
   printf "Node available. Installing ${BLUE}psoxy-test${NC} tool ...\n"
   cd ${PSOXY_BASE_DIR}/tools/psoxy-test
   npm --no-audit --no-fund --prefix ${PSOXY_BASE_DIR}/tools/psoxy-test install
 else
-  printf "${RED}Node.JS not available; could not install test tool.${NC}\n"
+  printf "${RED}NPM/Node.JS not available; could not install test tool. We recommend installing Node.JS, then re-running this init script.${NC}\n"
 fi
 
