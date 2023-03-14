@@ -159,6 +159,18 @@ For testing your psoxy instance, you will need:
 | [npm](https://www.npmjs.com/package/npm) (should come with `node`) | 8+      | `npm --version`   |
 
 
+We provide a script to check these prereqs, at [`tools/check-prereqs.sh`](tools/check-prereqs.sh).
+That script has no dependencies itself, so should be able to run on any plain POSIX-compliant shell
+(eg,`bash`, `zsh`, etc) that we'd expect you to find on most Linux, MacOS, or even Windows with
+Subsystem for Linux (WSL) platforms.
+
+```shell
+# from the root of a clone of this repository
+
+./tools/check-prereqs.sh
+```
+
+
 ### Setup
 
   1. Choose the cloud platform you'll deploy to, and follow its guide:
