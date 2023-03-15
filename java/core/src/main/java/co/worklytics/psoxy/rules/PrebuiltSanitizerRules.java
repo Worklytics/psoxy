@@ -6,7 +6,7 @@ import java.util.Map;
 
 public class PrebuiltSanitizerRules {
 
-    static public final Map<String, RuleSet> DEFAULTS = ImmutableMap.<String, RuleSet>builder()
+    static public final Map<String, RESTRules> DEFAULTS = ImmutableMap.<String, RESTRules>builder()
             .put("asana", co.worklytics.psoxy.rules.asana.PrebuiltSanitizerRules.ASANA)
             .putAll(co.worklytics.psoxy.rules.google.PrebuiltSanitizerRules.GOOGLE_DEFAULT_RULES_MAP)
             .putAll(co.worklytics.psoxy.rules.msft.PrebuiltSanitizerRules.MSFT_DEFAULT_RULES_MAP)

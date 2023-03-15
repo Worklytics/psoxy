@@ -1,7 +1,7 @@
 package co.worklytics.psoxy.rules;
 
 import co.worklytics.psoxy.*;
-import co.worklytics.psoxy.impl.SanitizerImpl;
+import co.worklytics.psoxy.impl.RESTApiSanitizerImpl;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestUtils;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
@@ -16,6 +16,7 @@ import lombok.*;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import scala.concurrent.impl.FutureConvertersImpl;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -35,14 +36,16 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 abstract public class RulesBaseTestCase {
 
-    protected SanitizerImpl sanitizer;
+    protected RESTApiSanitizerImpl sanitizer;
 
     @Inject
     protected ObjectMapper jsonMapper;
     @Inject @Named("ForYAML")
     protected ObjectMapper yamlMapper;
     @Inject
-    protected SanitizerFactory sanitizerFactory;
+    protected RESTApiSanitizerFactory sanitizerFactory;
+    @Inject
+    protected PseudonymizerImplFactory pseudonymizerFactory;
     @Inject
     protected RulesUtils rulesUtils;
 
@@ -97,12 +100,13 @@ abstract public class RulesBaseTestCase {
         Container container = DaggerRulesBaseTestCase_Container.create();
         container.inject(this);
 
-        sanitizer = sanitizerFactory.create(Sanitizer.ConfigurationOptions.builder()
-            .rules(getRulesUnderTest())
+        sanitizer = sanitizerFactory.create(getRulesUnderTest(),
+            pseudonymizerFactory.create(Pseudonymizer.ConfigurationOptions.builder()
+
             .defaultScopeId(getDefaultScopeId())
             //TODO: existing test cases presume this
             .pseudonymImplementation(PseudonymImplementation.LEGACY)
-            .build());
+            .build()));
 
         //q: good way to also batch test sanitizers from yaml/json formats of rules, to ensure
         // serialization doesn't materially change any behavior??
@@ -173,7 +177,7 @@ abstract public class RulesBaseTestCase {
 
     public abstract String getDefaultScopeId();
 
-    public abstract RuleSet getRulesUnderTest();
+    public abstract RESTRules getRulesUnderTest();
 
     /**
      * eg 'google-workspace/gdrive'
@@ -202,7 +206,7 @@ abstract public class RulesBaseTestCase {
 
     protected void assertSha(String expectedSha) {
         assertNotNull(expectedSha);
-        assertEquals(expectedSha, rulesUtils.sha(sanitizer.getConfigurationOptions().getRules()));
+        assertEquals(expectedSha, rulesUtils.sha(sanitizer.getRules()));
     }
 
     protected void assertNotSanitized(String content, Collection<String> shouldContain) {

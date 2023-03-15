@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.rules.asana;
 
 import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
+import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.rules.RuleSet;
 import lombok.Getter;
 import org.junit.jupiter.api.Disabled;
@@ -13,7 +14,7 @@ import java.util.stream.Stream;
 public class AsanaTests extends JavaRulesTestBaseCase {
 
     @Getter
-    final RuleSet rulesUnderTest = PrebuiltSanitizerRules.ASANA;
+    final RESTRules rulesUnderTest = PrebuiltSanitizerRules.ASANA;
 
     @Getter
     final String exampleDirectoryPath = "api-response-examples/asana";

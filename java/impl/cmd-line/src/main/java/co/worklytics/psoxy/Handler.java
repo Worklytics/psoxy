@@ -20,16 +20,21 @@ public class Handler {
 
     }
 
-    @Inject SanitizerFactory sanitizerFactory;
+    @Inject
+    RESTApiSanitizerFactory sanitizerFactory;
     @Inject
     FileHandlerFactory fileHandlerStrategy;
+    @Inject
+    PseudonymizerImplFactory pseudonymizerImplFactory;
 
     @SneakyThrows
     public void sanitize(@NonNull Config config,
                          @NonNull File inputFile,
                          @NonNull Appendable out) {
-        Sanitizer.ConfigurationOptions.ConfigurationOptionsBuilder options =
-            Sanitizer.ConfigurationOptions.builder()
+
+
+        Pseudonymizer.ConfigurationOptions.ConfigurationOptionsBuilder options =
+            Pseudonymizer.ConfigurationOptions.builder()
             .defaultScopeId(config.getDefaultScopeId());
 
         if (config.getPseudonymizationSaltSecret() != null) {
@@ -48,12 +53,11 @@ public class Handler {
                 .columnsToRedact(Lists.newArrayList(config.getColumnsToRedact()))
                 .build();
 
-        options.rules(rules);
 
-        Sanitizer sanitizer = sanitizerFactory.create(options.build());
+        Pseudonymizer pseudonymizer = pseudonymizerImplFactory.create(options.build());
 
         try (FileReader in = new FileReader(inputFile)) {
-            out.append(new String(fileHandlerStrategy.get(inputFile.getName()).handle(in, sanitizer)));
+            out.append(new String(fileHandlerStrategy.get(inputFile.getName()).handle(in, rules, pseudonymizer)));
         }
     }
 }

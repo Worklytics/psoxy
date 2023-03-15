@@ -1,12 +1,9 @@
 package co.worklytics.psoxy.storage.impl;
 
 import co.worklytics.psoxy.PseudonymizedIdentity;
-import com.avaulta.gateway.pseudonyms.Pseudonym;
+import co.worklytics.psoxy.Pseudonymizer;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
-import com.avaulta.gateway.pseudonyms.impl.JsonPseudonymEncoder;
-import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.ColumnarRules;
-import co.worklytics.psoxy.Sanitizer;
 import co.worklytics.psoxy.storage.FileHandler;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -45,11 +42,7 @@ public class CSVFileHandler implements FileHandler {
 
 
     @Override
-    public byte[] handle(@NonNull InputStreamReader reader, @NonNull Sanitizer sanitizer) throws IOException {
-
-        Sanitizer.ConfigurationOptions configurationOptions = sanitizer.getConfigurationOptions();
-
-        ColumnarRules rules = (ColumnarRules) configurationOptions.getRules();
+    public byte[] handle(@NonNull InputStreamReader reader, @NonNull ColumnarRules rules, @NonNull Pseudonymizer pseudonymizer) throws IOException {
 
         CSVParser records = CSVFormat
                 .DEFAULT
@@ -69,8 +62,7 @@ public class CSVFileHandler implements FileHandler {
             Optional.ofNullable(rules.getColumnsToInclude())
                 .map(this::asSetWithCaseInsensitiveComparator);
 
-        final Map<String, String> columnsToRename = ((ColumnarRules) configurationOptions.getRules())
-            .getColumnsToRename()
+        final Map<String, String> columnsToRename = rules.getColumnsToRename()
             .entrySet().stream()
             .collect(Collectors.toMap(
                 entry -> entry.getKey().trim(),
@@ -78,7 +70,7 @@ public class CSVFileHandler implements FileHandler {
                 (a, b) -> a,
                 () -> new TreeMap<>(String.CASE_INSENSITIVE_ORDER)));
 
-        final Map<String, String> columnsToDuplicate = ((ColumnarRules) configurationOptions.getRules())
+        final Map<String, String> columnsToDuplicate = rules
             .getColumnsToDuplicate()
             .entrySet().stream()
             .collect(Collectors.toMap(
@@ -129,7 +121,7 @@ public class CSVFileHandler implements FileHandler {
             if (columnsToPseudonymize.contains(outputColumnName)) {
                 if (StringUtils.isNotBlank(value)) {
                     try {
-                        PseudonymizedIdentity identity = sanitizer.pseudonymize(value);
+                        PseudonymizedIdentity identity = pseudonymizer.pseudonymize(value);
 
                         if (identity == null) {
                             return null;

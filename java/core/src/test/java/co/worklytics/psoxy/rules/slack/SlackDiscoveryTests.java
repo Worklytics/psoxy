@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.rules.slack;
 
 import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
+import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.rules.RuleSet;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -22,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class SlackDiscoveryTests extends JavaRulesTestBaseCase {
 
     @Getter
-    final RuleSet rulesUnderTest = PrebuiltSanitizerRules.SLACK;
+    final RESTRules rulesUnderTest = PrebuiltSanitizerRules.SLACK;
 
     @Getter
     final String exampleDirectoryPath = "api-response-examples/slack";

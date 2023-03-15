@@ -1,52 +1,56 @@
 package co.worklytics.psoxy.storage;
 
-import co.worklytics.psoxy.Sanitizer;
-import co.worklytics.psoxy.SanitizerFactory;
+import co.worklytics.psoxy.Pseudonymizer;
+import co.worklytics.psoxy.RESTApiSanitizer;
+import co.worklytics.psoxy.RESTApiSanitizerFactory;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.StorageEventRequest;
 import co.worklytics.psoxy.gateway.StorageEventResponse;
 import co.worklytics.psoxy.rules.RuleSet;
-import lombok.NoArgsConstructor;
-import lombok.SneakyThrows;
+import com.avaulta.gateway.rules.ColumnarRules;
+import dagger.assisted.Assisted;
+import dagger.assisted.AssistedInject;
+import lombok.*;
 
 import javax.inject.Inject;
+import java.io.Serializable;
 
+/**
+ * solves a DaggerMissingBinding exception in tests
+ */
 @NoArgsConstructor(onConstructor_ = @Inject)
 public class StorageHandler {
 
     @Inject
     ConfigService config;
-    @Inject
-    RuleSet rules;
+
     @Inject
     FileHandlerFactory fileHandlerStrategy;
+
     @Inject
-    SanitizerFactory sanitizerFactory;
-
-    private volatile Sanitizer sanitizer;
-    private final Object $writeLock = new Object[0];
-
-    private Sanitizer loadSanitizerRules() {
-        if (this.sanitizer == null) {
-            synchronized ($writeLock) {
-                if (this.sanitizer == null) {
-                    this.sanitizer = sanitizerFactory.create(sanitizerFactory.buildOptions(config, rules));
-                }
-            }
-        }
-        return this.sanitizer;
-    }
+    Pseudonymizer pseudonymizer;
 
     @SneakyThrows
-    public StorageEventResponse handle(StorageEventRequest request) {
+    public StorageEventResponse handle(StorageEventRequest request, ColumnarRules rules) {
 
         FileHandler fileHandler = fileHandlerStrategy.get(request.getSourceObjectPath());
-        this.sanitizer = loadSanitizerRules();
 
         return StorageEventResponse.builder()
                 .destinationBucketName(request.getDestinationBucketName())
-                .bytes(fileHandler.handle(request.getReaderStream(), sanitizer))
+                .bytes(fileHandler.handle(request.getReaderStream(), rules, pseudonymizer))
                 .destinationObjectPath(request.getSourceObjectPath())
                 .build();
+    }
+
+    @AllArgsConstructor(staticName = "of")
+    @NoArgsConstructor
+    @Data
+    public static class ObjectTransform implements Serializable {
+
+        @NonNull
+        String destinationBucketName;
+
+        @NonNull
+        ColumnarRules rules;
     }
 }

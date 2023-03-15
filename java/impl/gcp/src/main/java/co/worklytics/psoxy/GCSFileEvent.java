@@ -4,6 +4,7 @@ import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.StorageEventRequest;
 import co.worklytics.psoxy.gateway.StorageEventResponse;
 import co.worklytics.psoxy.storage.StorageHandler;
+import com.avaulta.gateway.rules.ColumnarRules;
 import com.google.cloud.functions.BackgroundFunction;
 import com.google.cloud.functions.Context;
 import com.google.cloud.storage.BlobId;
@@ -24,6 +25,8 @@ public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
     @Inject
     StorageHandler storageHandler;
 
+    @Inject
+    ColumnarRules defaultRuleSet;
     @Inject
     ConfigService configService;
 
@@ -53,7 +56,7 @@ public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
                         .readerStream(reader)
                         .build();
 
-                StorageEventResponse storageEventResponse = storageHandler.handle(request);
+                StorageEventResponse storageEventResponse = storageHandler.handle(request, defaultRuleSet);
 
                 try (InputStream processedStream = new ByteArrayInputStream(storageEventResponse.getBytes())) {
 

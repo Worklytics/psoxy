@@ -12,15 +12,24 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
+import com.avaulta.gateway.rules.ColumnarRules;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.CollectionType;
+import com.google.common.collect.Lists;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 import org.apache.commons.io.input.BOMInputStream;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Log
 public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestHandler<S3Event, String> {
@@ -29,10 +38,16 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
     StorageHandler storageHandler;
 
     @Inject
+    ColumnarRules defaultRules;
+
+    @Inject
     ConfigService configService;
 
     @Inject
     AmazonS3 s3Client;
+
+    @Inject @Named("ForYAML")
+    ObjectMapper yamlMapper;
 
     @SneakyThrows
     @Override
@@ -50,21 +65,37 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
 
         log.info(String.format("Received a request for processing %s from bucket %s.", sourceKey, importBucket));
 
-        S3Object s3Object = s3Client.getObject(new GetObjectRequest(importBucket, sourceKey));
-        StorageEventResponse storageEventResponse;
 
-        try(InputStream objectData = s3Object.getObjectContent();
-        BOMInputStream is = new BOMInputStream(objectData);
-        InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
+        List<StorageHandler.ObjectTransform> transforms = Lists.newArrayList(
+            StorageHandler.ObjectTransform.of(destinationBucket,  defaultRules));
+
+        parseAdditionalTransforms(configService)
+            .forEach(transforms::add);
+
+        for (StorageHandler.ObjectTransform transform : transforms) {
+            process(importBucket, sourceKey, transform.getDestinationBucketName(), transform.getRules());
+        }
+
+        return "Processed!";
+    }
+
+    @SneakyThrows
+    StorageEventResponse process(String importBucket, String sourceKey, String destination, ColumnarRules rules) {
+        StorageEventResponse storageEventResponse;
+        S3Object s3Object = s3Client.getObject(new GetObjectRequest(importBucket, sourceKey));
+
+        try (InputStream objectData = s3Object.getObjectContent();
+             BOMInputStream is = new BOMInputStream(objectData);
+             InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
 
             StorageEventRequest request = StorageEventRequest.builder()
-                    .sourceBucketName(importBucket)
-                    .sourceObjectPath(sourceKey)
-                    .destinationBucketName(destinationBucket)
-                    .readerStream(reader)
-                    .build();
+                .sourceBucketName(importBucket)
+                .sourceObjectPath(sourceKey)
+                .destinationBucketName(destination)
+                .readerStream(reader)
+                .build();
 
-           storageEventResponse = storageHandler.handle(request);
+            storageEventResponse = storageHandler.handle(request, rules);
         }
 
         log.info("Writing to: " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationObjectPath());
@@ -77,17 +108,32 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
             meta.setContentType(s3Object.getObjectMetadata().getContentType());
 
             s3Client.putObject(storageEventResponse.getDestinationBucketName(),
-                    storageEventResponse.getDestinationObjectPath(),
-                    is,
-                    meta);
+                storageEventResponse.getDestinationObjectPath(),
+                is,
+                meta);
         }
 
         log.info(String.format("Successfully pseudonymized %s/%s and uploaded to %s/%s",
-                importBucket,
-                sourceKey,
-                storageEventResponse.getDestinationBucketName(),
-                storageEventResponse.getDestinationObjectPath()));
+            importBucket,
+            sourceKey,
+            storageEventResponse.getDestinationBucketName(),
+            storageEventResponse.getDestinationObjectPath()));
 
-        return "Processed!";
+        return storageEventResponse;
+    }
+
+    List<StorageHandler.ObjectTransform> parseAdditionalTransforms(ConfigService config) {
+        Optional<String> additionalTransforms = config.getConfigPropertyAsOptional(AWSConfigProperty.ADDITIONAL_TRANSFORMS);
+        CollectionType type = yamlMapper.getTypeFactory().constructCollectionType(ArrayList.class, StorageHandler.ObjectTransform.class);
+
+        if (additionalTransforms.isPresent()) {
+            try {
+                return yamlMapper.readValue(additionalTransforms.get(), type);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException("Failed to parse ADDITIONAL_TRANSFORMS from config", e);
+            }
+        } else {
+            return new ArrayList<>();
+        }
     }
 }

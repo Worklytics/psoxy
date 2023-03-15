@@ -1,7 +1,7 @@
 package co.worklytics.psoxy.rules.dropbox;
 
 import com.avaulta.gateway.rules.Endpoint;
-import co.worklytics.psoxy.rules.RuleSet;
+import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.rules.Rules2;
 import com.avaulta.gateway.rules.transforms.Transform;
 import com.google.common.collect.ImmutableMap;
@@ -14,7 +14,6 @@ import java.util.Map;
 public class PrebuiltSanitizerRules {
 
     static private final String DROPBOX_BUSINESS = "dropbox-business";
-    static private final String DROPBOX = "dropbox";
 
     // https://www.dropbox.com/developers/documentation/http/teams#team_log-get_events
     // https://www.dropbox.com/developers/documentation/http/teams#team_log-get_events-continue
@@ -41,7 +40,7 @@ public class PrebuiltSanitizerRules {
             .withAdditionalEndpoints(GROUP_LIST_ENDPOINT.getEndpoints())
             .withAdditionalEndpoints(MEMBER_LIST_ENDPOINT.getEndpoints());
 
-    static public final Map<String, RuleSet> DROPBOX_PREBUILT_RULES_MAP = ImmutableMap.<String, RuleSet>builder()
+    static public final Map<String, RESTRules> DROPBOX_PREBUILT_RULES_MAP = ImmutableMap.<String, RESTRules>builder()
             .put(DROPBOX_BUSINESS, DROPBOX_ENDPOINTS)
             .build();
 

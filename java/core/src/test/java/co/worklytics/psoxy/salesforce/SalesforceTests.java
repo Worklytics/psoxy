@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.salesforce;
 
 import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
+import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.rules.RuleSet;
 import co.worklytics.psoxy.rules.salesforce.PrebuiltSanitizerRules;
 import lombok.Getter;
@@ -17,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class SalesforceTests extends JavaRulesTestBaseCase {
 
     @Getter
-    final RuleSet rulesUnderTest = PrebuiltSanitizerRules.SALESFORCE;
+    final RESTRules rulesUnderTest = PrebuiltSanitizerRules.SALESFORCE;
 
     @Getter
     final String exampleDirectoryPath = "api-response-examples/salesforce";

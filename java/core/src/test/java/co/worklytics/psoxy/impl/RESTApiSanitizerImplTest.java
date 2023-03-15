@@ -34,15 +34,13 @@ import java.util.Objects;
 import static co.worklytics.test.TestModules.withMockEncryptionKey;
 import static org.junit.jupiter.api.Assertions.*;
 
-class SanitizerImplTest {
+class RESTApiSanitizerImplTest {
 
-    static final String ALICE_CANONICAL = "alice@worklytics.co";
 
-    SanitizerImpl sanitizer;
-
+    RESTApiSanitizerImpl sanitizer;
 
     @Inject
-    protected SanitizerFactory sanitizerFactory;
+    protected RESTApiSanitizerFactory sanitizerFactory;
 
     @Inject
     protected ReversibleTokenizationStrategy reversibleTokenizationStrategy;
@@ -52,6 +50,9 @@ class SanitizerImplTest {
 
     @Inject
     protected SchemaRuleUtils schemaRuleUtils;
+
+    @Inject
+    protected PseudonymizerImplFactory pseudonymizerImplFactory;
 
 
     @Inject
@@ -64,20 +65,22 @@ class SanitizerImplTest {
         MockModules.ForConfigService.class,
     })
     public interface Container {
-        void inject(SanitizerImplTest test);
+        void inject(RESTApiSanitizerImplTest test);
     }
 
     @BeforeEach
     public void setup() {
-        Container container = DaggerSanitizerImplTest_Container.create();
+        Container container = DaggerRESTApiSanitizerImplTest_Container.create();
         container.inject(this);
 
-        sanitizer = sanitizerFactory.create(Sanitizer.ConfigurationOptions.builder()
-            .rules(PrebuiltSanitizerRules.DEFAULTS.get("gmail"))
+        Pseudonymizer pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
             .pseudonymizationSalt("an irrelevant per org secret")
             .defaultScopeId("scope")
             .pseudonymImplementation(PseudonymImplementation.LEGACY)
             .build());
+
+
+        sanitizer = sanitizerFactory.create(PrebuiltSanitizerRules.DEFAULTS.get("gmail"), pseudonymizer);
 
         withMockEncryptionKey(config);
     }
@@ -113,74 +116,6 @@ class SanitizerImplTest {
 
 
 
-    @ValueSource(strings = {
-        "alice@worklytics.co",
-        "Alice Example <alice@worklytics.co>",
-        "\"Alice Example\" <alice@worklytics.co>",
-        "Alice.Example@worklytics.co"
-    })
-    @ParameterizedTest
-    void emailDomains(String mailHeaderValue) {
-        assertEquals("worklytics.co", sanitizer.pseudonymize(mailHeaderValue).getDomain());
-    }
-
-    @ValueSource(strings = {
-        ALICE_CANONICAL,
-        "Alice Example <alice@worklytics.co>",
-        "\"Alice Different Last name\" <alice@worklytics.co>",
-        "Alice@worklytics.co",
-        "AlIcE@worklytics.co",
-    })
-    @ParameterizedTest
-    void emailCanonicalEquivalents(String mailHeaderValue) {
-        PseudonymizedIdentity canonicalExample = sanitizer.pseudonymize(ALICE_CANONICAL);
-
-        assertEquals(canonicalExample.getHash(),
-            sanitizer.pseudonymize(mailHeaderValue).getHash());
-    }
-
-    @ValueSource(strings = {
-        "bob@worklytics.co",
-        "Alice Example <alice2@worklytics.co>",
-        "\"Alice Example\" <alice-a@worklytics.co>",
-        "Alice@somewhere-else.co",
-        "AlIcE.Other@worklytics.co",
-    })
-    @ParameterizedTest
-    void emailCanonicalDistinct(String mailHeaderValue) {
-        PseudonymizedIdentity  canonicalExample = sanitizer.pseudonymize(ALICE_CANONICAL);
-
-        assertNotEquals(canonicalExample.getHash(),
-            sanitizer.pseudonymize(mailHeaderValue).getHash());
-    }
-
-    @ValueSource(strings = {
-        "alice@worklytics.co, bob@worklytics.co",
-        "\"Alice Example\" <alice@worklytics.co>, \"Bob Example\" <bob@worklytics.co>",
-        "Alice.Example@worklytics.co,Bob@worklytics.co",
-        // TODO: per RFC 2822, the following SHOULD work ... but indeed lib we're using fails on it
-        //"Alice.Example@worklytics.co, , Bob@worklytics.co"
-    })
-    @ParameterizedTest
-    void pseudonymize_multivalueEmailHeaders(String headerValue) {
-        List<PseudonymizedIdentity> pseudonyms = sanitizer.pseudonymizeEmailHeader(headerValue);
-        assertEquals(2, pseudonyms.size());
-        assertTrue(pseudonyms.stream().allMatch(p -> Objects.equals("worklytics.co", p.getDomain())));
-    }
-
-
-    @Test
-    void hashMatchesLegacy() {
-        //value taken from legacy app
-
-        final String CANONICAL = "original";
-
-        //value taken from legacy app
-        final String identityHash = "xqUOU_DGuUAw4ErZIFL4pGx3bZDrFfLU6jQC4ClhrJI";
-
-        assertEquals(identityHash,
-            sanitizer.pseudonymize(CANONICAL).getHash());
-    }
 
     @SneakyThrows
     @ValueSource(strings = {
@@ -368,14 +303,13 @@ class SanitizerImplTest {
     @ParameterizedTest
     void httpMethods_onlyGetAllowed(String notGet) {
         final URL EXAMPLE_URL = new URL("https://gmail.googleapis.com/gmail/v1/users/me/messages");
-        SanitizerImpl strictSanitizer = sanitizerFactory.create(Sanitizer.ConfigurationOptions.builder()
-            .rules(Rules2.builder()
+        RESTApiSanitizerImpl strictSanitizer = sanitizerFactory.create(Rules2.builder()
                 .endpoint(Endpoint.builder()
                     .allowedMethods(Collections.singleton("GET"))
                     .pathRegex("^/gmail/v1/users/[^/]*/messages[/]?.*?$")
                     .build())
-                .build())
-            .build()
+                .build(),
+            sanitizer.pseudonymizer
         );
 
         assertTrue(strictSanitizer.isAllowed("GET", EXAMPLE_URL));
@@ -440,20 +374,32 @@ class SanitizerImplTest {
                 ))
             .build();
 
-        SanitizerImpl strictSanitizer = sanitizerFactory.create(Sanitizer.ConfigurationOptions.builder()
-            .rules(Rules2.builder()
+        RESTApiSanitizerImpl strictSanitizer = sanitizerFactory.create(Rules2.builder()
                 .endpoint(Endpoint.builder()
                     .allowedMethods(Collections.singleton("GET"))
                     .pathRegex("^/gmail/v1/users/[^/]*/messages[/]?.*?$")
                     .responseSchema(jsonSchema)
                     .build())
-                .build())
-            .build()
-        );
+                .build(),
+                sanitizer.pseudonymizer);
 
         String strict = strictSanitizer.sanitize("GET", EXAMPLE_URL, jsonString);
 
         assertTrue(strict.contains("internalDate"));
         assertFalse(strict.contains("historyId"));
+    }
+
+    @ValueSource(strings = {
+        "alice@worklytics.co, bob@worklytics.co",
+        "\"Alice Example\" <alice@worklytics.co>, \"Bob Example\" <bob@worklytics.co>",
+        "Alice.Example@worklytics.co,Bob@worklytics.co",
+        // TODO: per RFC 2822, the following SHOULD work ... but indeed lib we're using fails on it
+        //"Alice.Example@worklytics.co, , Bob@worklytics.co"
+    })
+    @ParameterizedTest
+    void pseudonymize_multivalueEmailHeaders(String headerValue) {
+        List<PseudonymizedIdentity> pseudonyms = sanitizer.pseudonymizeEmailHeader(headerValue);
+        assertEquals(2, pseudonyms.size());
+        assertTrue(pseudonyms.stream().allMatch(p -> Objects.equals("worklytics.co", p.getDomain())));
     }
 }

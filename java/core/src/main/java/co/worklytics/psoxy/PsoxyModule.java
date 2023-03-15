@@ -20,7 +20,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.api.client.http.HttpContent;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
-import com.google.auth.http.HttpTransportFactory;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
@@ -168,6 +167,11 @@ public class PsoxyModule {
         JsonSchemaGenerator jsonSchemaGenerator = new JsonSchemaGenerator(objectMapper);
 
         return new SchemaRuleUtils(objectMapper, jsonSchemaGenerator);
+    }
+
+    @Provides
+    Pseudonymizer pseudonymizer(PseudonymizerImplFactory factory, ConfigService config, co.worklytics.psoxy.rules.RuleSet ruleSet) {
+        return factory.create(factory.buildOptions(config, ruleSet.getDefaultScopeIdForSource()));
     }
 
 

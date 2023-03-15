@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.rules.google;
 
 import co.worklytics.psoxy.ConfigRulesModule;
+import co.worklytics.psoxy.rules.RESTRules;
 import com.avaulta.gateway.rules.Endpoint;
 import co.worklytics.psoxy.rules.Rules2;
 import co.worklytics.psoxy.rules.RuleSet;
@@ -90,7 +91,7 @@ public class PrebuiltSanitizerRules {
             .build();
 
 
-    static final RuleSet GOOGLE_CHAT = Rules2.builder()
+    static final RESTRules GOOGLE_CHAT = Rules2.builder()
             .endpoint(Endpoint.builder()
                     .pathRegex("^/admin/reports/v1/activity/users/all/applications/chat.*$")
                     .transform(Transform.Pseudonymize.builder()
@@ -279,7 +280,7 @@ public class PrebuiltSanitizerRules {
             .build();
 
 
-    static final RuleSet GDRIVE = Rules2.builder()
+    static final RESTRules GDRIVE = Rules2.builder()
             // v2 endpoint: https://developers.google.com/drive/api/v2/reference/
             // v3 endpoint: https://developers.google.com/drive/api/v3/reference/
             .endpoint(GDRIVE_ENDPOINT_RULES.toBuilder()
@@ -312,7 +313,7 @@ public class PrebuiltSanitizerRules {
             .add("References")
             .build();
 
-    static final RuleSet GMAIL = Rules2.builder()
+    static final RESTRules GMAIL = Rules2.builder()
             .endpoint(Endpoint.builder()
                     .pathRegex("^/gmail/v1/users/[^/]*/messages[/]?.*?$")
                     .transform(Transform.PseudonymizeEmailHeader.builder()
@@ -345,7 +346,7 @@ public class PrebuiltSanitizerRules {
             .add("calendar_event_id", "endpoint_id", "meeting_code", "conference_id") //matching to calendar events
             .build();
 
-    static final RuleSet GOOGLE_MEET = Rules2.builder()
+    static final RESTRules GOOGLE_MEET = Rules2.builder()
             .endpoint(Endpoint.builder()
                     .pathRegex("^/admin/reports/v1/activity/users/all/applications/meet.*")
                     .transform(Transform.Pseudonymize.builder()
@@ -364,7 +365,7 @@ public class PrebuiltSanitizerRules {
                     .build())
             .build();
 
-    static public final Map<String, RuleSet> GOOGLE_DEFAULT_RULES_MAP = ImmutableMap.<String, RuleSet>builder()
+    static public final Map<String, RESTRules> GOOGLE_DEFAULT_RULES_MAP = ImmutableMap.<String, RESTRules>builder()
             .put("gcal", GCAL)
             .put("gdirectory", GDIRECTORY)
             .put("gdirectory" + ConfigRulesModule.NO_APP_IDS_SUFFIX, GDIRECTORY_WITHOUT_GOOGLE_IDS)
