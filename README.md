@@ -91,11 +91,12 @@ which you must provide as a configuration value in your proxy deployment.
 
 The API key/secret will be used to authenticate with the source's REST API and access the data.
 
-| Source | Details + Examples                                              | API Permissions / Scopes                                                                                       |
-|--------|-----------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------|
-| Asana  | [docs/sources/asana](docs/sources/asana.md)                     | a [Service Account](https://asana.com/guide/help/premium/service-accounts) (provides full access to Workspace) |
-| Slack  | [docs/sources/slack-discovery](docs/sources/slack-discovery.md) | `discovery:read`                                           |
-| Zoom   | [docs/sources/zoom](docs/sources/zoom.md)                       | `user:read:admin` `meeting:read:admin` `report:read:admin` |
+| Source     | Details + Examples                                              | API Permissions / Scopes                                                                                       |
+|------------|-----------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------|
+| Asana      | [docs/sources/asana](docs/sources/asana.md)                     | a [Service Account](https://asana.com/guide/help/premium/service-accounts) (provides full access to Workspace) |
+ | Salesforce | [docs/sources/salesforce](docs/sources/salesforce.md)           | `api` `chatter_api` `refresh_token` `offline_access` `openid` `lightning` `content` `cdp_query_api`            |                                                                                                       |
+| Slack      | [docs/sources/slack-discovery](docs/sources/slack-discovery.md) | `discovery:read`                                                                                               |
+| Zoom       | [docs/sources/zoom](docs/sources/zoom.md)                       | `user:read:admin` `meeting:read:admin` `report:read:admin`                                                     |
 
 NOTE: the above scopes are copied from [infra/modules/worklytics-connector-specs](infra/modules/worklytics-connector-specs).
 Please refer to that module for a definitive list.
