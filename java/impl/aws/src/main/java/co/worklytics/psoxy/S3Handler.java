@@ -16,6 +16,7 @@ import com.avaulta.gateway.rules.ColumnarRules;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
@@ -122,6 +123,7 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
         return storageEventResponse;
     }
 
+    @VisibleForTesting
     List<StorageHandler.ObjectTransform> parseAdditionalTransforms(ConfigService config) {
         Optional<String> additionalTransforms = config.getConfigPropertyAsOptional(AWSConfigProperty.ADDITIONAL_TRANSFORMS);
         CollectionType type = yamlMapper.getTypeFactory().constructCollectionType(ArrayList.class, StorageHandler.ObjectTransform.class);
