@@ -1,5 +1,6 @@
 package co.worklytics.psoxy;
 
+import co.worklytics.psoxy.gateway.BulkModeConfigProperty;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.rules.CsvRules;
 import co.worklytics.psoxy.storage.StorageHandler;
@@ -32,7 +33,7 @@ class S3HandlerTest {
         s3Handler.yamlMapper = (new PsoxyModule()).providesYAMLObjectMapper();
 
         ConfigService config = mock(ConfigService.class);
-        when(config.getConfigPropertyAsOptional(eq(AWSConfigProperty.ADDITIONAL_TRANSFORMS)))
+        when(config.getConfigPropertyAsOptional(eq(BulkModeConfigProperty.ADDITIONAL_TRANSFORMS)))
             .thenReturn(Optional.of(s3Handler.yamlMapper.writeValueAsString(transformList)));
 
         assertEquals("blah",

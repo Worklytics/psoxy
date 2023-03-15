@@ -1,5 +1,6 @@
 package co.worklytics.psoxy;
 
+import co.worklytics.psoxy.gateway.BulkModeConfigProperty;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.StorageEventRequest;
 import co.worklytics.psoxy.gateway.StorageEventResponse;
@@ -37,7 +38,7 @@ public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
         // See https://cloud.google.com/functions/docs/calling/storage#event_types
         if (context.eventType().equals("google.storage.object.finalize")) {
 
-            String destinationBucket = configService.getConfigPropertyAsOptional(GCPConfigProperty.OUTPUT_BUCKET)
+            String destinationBucket = configService.getConfigPropertyAsOptional(BulkModeConfigProperty.OUTPUT_BUCKET)
                     .orElseThrow(() -> new IllegalStateException("Output bucket not found as environment variable!"));
 
             String importBucket = gcsEvent.getBucket();

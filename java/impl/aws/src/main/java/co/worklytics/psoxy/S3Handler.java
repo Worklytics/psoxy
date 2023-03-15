@@ -1,6 +1,7 @@
 package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.aws.DaggerAwsContainer;
+import co.worklytics.psoxy.gateway.BulkModeConfigProperty;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.StorageEventRequest;
 import co.worklytics.psoxy.gateway.StorageEventResponse;
@@ -56,7 +57,7 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
 
         DaggerAwsContainer.create().injectS3Handler(this);
 
-        String destinationBucket = configService.getConfigPropertyAsOptional(AWSConfigProperty.OUTPUT_BUCKET)
+        String destinationBucket = configService.getConfigPropertyAsOptional(BulkModeConfigProperty.OUTPUT_BUCKET)
                 .orElseThrow(() -> new IllegalStateException("Output bucket not found as environment variable!"));
 
         S3EventNotification.S3EventNotificationRecord record = s3Event.getRecords().get(0);
@@ -125,7 +126,7 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
 
     @VisibleForTesting
     List<StorageHandler.ObjectTransform> parseAdditionalTransforms(ConfigService config) {
-        Optional<String> additionalTransforms = config.getConfigPropertyAsOptional(AWSConfigProperty.ADDITIONAL_TRANSFORMS);
+        Optional<String> additionalTransforms = config.getConfigPropertyAsOptional(BulkModeConfigProperty.ADDITIONAL_TRANSFORMS);
         CollectionType type = yamlMapper.getTypeFactory().constructCollectionType(ArrayList.class, StorageHandler.ObjectTransform.class);
 
         if (additionalTransforms.isPresent()) {
