@@ -17,7 +17,31 @@ Working tracking of changes, updated as work done prior to release.  Please revi
         then wildcard policy to read shared also grants read of secrets across all connectors)
   - keys/salts per value kind (PII, item id, etc)
 
-## v0.4.11
+## [v0.4.14](https://github.com/Worklytics/psoxy/releases/tag/v0.4.14)
+
+Changes:
+ - you will need a `terraform init`
+ - you may see various changes if you used `lookup_table_builders` feature; these are breaking
+   changes and your "lookup_table" buckets may be re-built; if this poses a problem for you, contact
+   support and we'll help with the `terraform state mv` commands to preserve your existing buckets
+
+Fixes:
+- the "Lookup" file use-case, supported in our examples through `lookup_table_builders` variable,
+  never worked as expected due to S3 limitation, where only 1 of the 2 "event notifications" our
+  modules set on a given S3 bucket actually work (race-case as to which). This should be fixed if
+  you re-apply your terraform configuration with this version (but bucket will likely be destroyed
+  and re-built).
+
+## [v0.4.13](https://github.com/Worklytics/psoxy/releases/tag/v0.4.13)
+
+see https://github.com/Worklytics/psoxy/releases/tag/v0.4.13
+
+## [v0.4.12](https://github.com/Worklytics/psoxy/releases/tag/v0.4.12)
+
+see https://github.com/Worklytics/psoxy/releases/tag/v0.4.12
+
+## [v0.4.11](https://github.com/Worklytics/psoxy/releases/tag/v0.4.11)
+
 Features:
  - avoid ENV vars for config paths if default values
  - troubleshooting docs

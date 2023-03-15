@@ -271,9 +271,10 @@ module "worklytics-psoxy-connection" {
 
 # END LONG ACCESS AUTH CONNECTORS
 
+# BEGIN BULK CONNECTORS
+
 module "psoxy-bulk" {
-  for_each = merge(module.worklytics_connector_specs.enabled_bulk_connectors,
-  var.custom_bulk_connectors)
+  for_each = merge(module.worklytics_connector_specs.enabled_bulk_connectors, var.custom_bulk_connectors)
 
   source = "../../modules/aws-psoxy-bulk"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-bulk?ref=v0.4.13"
@@ -290,19 +291,16 @@ module "psoxy-bulk" {
   global_parameter_arns           = module.global_secrets.secret_arns
   path_to_instance_ssm_parameters = "${var.aws_ssm_param_root_path}PSOXY_${upper(replace(each.key, "-", "_"))}_"
   ssm_kms_key_ids                 = local.ssm_key_ids
+  sanitized_accessor_role_names   = [ module.psoxy-aws.api_caller_role_name ]
+  memory_size_mb                  = 1024
 
   environment_variables = merge(
     var.general_environment_variables,
     try(each.value.environment_variables, {}),
     {
       IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
-    }
+    },
   )
-  sanitized_accessor_role_names = [
-    module.psoxy-aws.api_caller_role_name
-  ]
-
-  memory_size_mb = 1024
 }
 
 module "psoxy-bulk-to-worklytics" {
@@ -325,40 +323,38 @@ module "psoxy-bulk-to-worklytics" {
   }, try(each.value.settings_to_provide, {}))
 }
 
-module "psoxy_lookup_tables_builders" {
+# BEGIN lookup builders
+module "lookup_output" {
   for_each = var.lookup_table_builders
 
-  source = "../../modules/aws-psoxy-bulk-existing"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-bulk-existing?ref=v0.4.13"
+  source = "../../modules/aws-psoxy-output-bucket"
 
-  input_bucket                    = module.psoxy-bulk[each.value.input_connector_id].input_bucket
-  aws_account_id                  = var.aws_account_id
-  instance_id                     = each.key
-  aws_region                      = var.aws_region
-  path_to_function_zip            = module.psoxy-aws.path_to_deployment_jar
-  function_zip_hash               = module.psoxy-aws.deployment_package_hash
-  psoxy_base_dir                  = var.psoxy_base_dir
-  rules                           = each.value.rules
-  global_parameter_arns           = module.global_secrets.secret_arns
-  path_to_instance_ssm_parameters = "${var.aws_ssm_param_root_path}PSOXY_${upper(replace(each.key, "-", "_"))}_"
-  ssm_kms_key_ids                 = local.ssm_key_ids
-
+  instance_id                   = each.key
+  iam_role_for_lambda_name      = module.psoxy-bulk[each.value.input_connector_id].instance_role_name
   sanitized_accessor_role_names = each.value.sanitized_accessor_role_names
-  environment_variables = merge(
-    var.general_environment_variables,
-    try(each.value.environment_variables, {}),
-    {
-      IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
-    }
-  )
 }
+
+locals {
+  inputs_to_build_lookups_for = toset(distinct([ for k, v in var.lookup_table_builders : v.input_connector_id ]))
+}
+
+resource "aws_ssm_parameter" "additional_transforms" {
+  for_each = local.inputs_to_build_lookups_for
+
+  name  = "${var.aws_ssm_param_root_path}PSOXY_${upper(replace(each.key, "-", "_"))}_ADDITIONAL_TRANSFORMS"
+  type  = "String"
+  value = yamlencode([ for k, v in var.lookup_table_builders : {
+      destinationBucketName: module.lookup_output[k].output_bucket
+      rules: v.rules
+    } if v.input_connector_id == each.key ])
+}
+
 
 locals {
   all_instances = merge(
     { for instance in module.psoxy-google-workspace-connector : instance.instance_id => instance },
     { for instance in module.psoxy-bulk : instance.instance_id => instance },
-    { for instance in module.aws-psoxy-long-auth-connectors : instance.instance_id => instance },
-    { for instance in module.psoxy_lookup_tables_builders : instance.instance_id => instance }
+    { for instance in module.aws-psoxy-long-auth-connectors : instance.instance_id => instance }
   )
 }
 
@@ -367,7 +363,7 @@ output "instances" {
 }
 
 output "lookup_tables" {
-  value = { for k, v in var.lookup_table_builders : k => module.psoxy_lookup_tables_builders[k].output_bucket }
+  value = { for k, v in var.lookup_table_builders : k => module.lookup_output[k].output_bucket }
 }
 
 output "todos_1" {
