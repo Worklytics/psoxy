@@ -5,6 +5,7 @@ import co.worklytics.psoxy.gateway.BulkModeConfigProperty;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.StorageEventRequest;
 import co.worklytics.psoxy.gateway.StorageEventResponse;
+import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.psoxy.storage.StorageHandler;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.events.S3Event;
@@ -48,8 +49,8 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
     @Inject
     AmazonS3 s3Client;
 
-    @Inject @Named("ForYAML")
-    ObjectMapper yamlMapper;
+    @Inject
+    RulesUtils rulesUtils;
 
     @SneakyThrows
     @Override
@@ -71,7 +72,7 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
         List<StorageHandler.ObjectTransform> transforms = Lists.newArrayList(
             StorageHandler.ObjectTransform.of(destinationBucket,  defaultRules));
 
-        parseAdditionalTransforms(configService)
+        rulesUtils.parseAdditionalTransforms(configService)
             .forEach(transforms::add);
 
         for (StorageHandler.ObjectTransform transform : transforms) {
@@ -124,19 +125,5 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
         return storageEventResponse;
     }
 
-    @VisibleForTesting
-    List<StorageHandler.ObjectTransform> parseAdditionalTransforms(ConfigService config) {
-        Optional<String> additionalTransforms = config.getConfigPropertyAsOptional(BulkModeConfigProperty.ADDITIONAL_TRANSFORMS);
-        CollectionType type = yamlMapper.getTypeFactory().constructCollectionType(ArrayList.class, StorageHandler.ObjectTransform.class);
 
-        if (additionalTransforms.isPresent()) {
-            try {
-                return yamlMapper.readValue(additionalTransforms.get(), type);
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException("Failed to parse ADDITIONAL_TRANSFORMS from config", e);
-            }
-        } else {
-            return new ArrayList<>();
-        }
-    }
 }

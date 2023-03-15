@@ -1,9 +1,13 @@
 package co.worklytics.psoxy.rules;
 
+import co.worklytics.psoxy.gateway.BulkModeConfigProperty;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.storage.StorageHandler;
 import com.avaulta.gateway.rules.ColumnarRules;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.CollectionType;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -14,7 +18,9 @@ import org.apache.commons.codec.digest.DigestUtils;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 import java.util.Optional;
 
 @Log
@@ -69,6 +75,21 @@ public class RulesUtils {
             } catch (IOException ex) {
                 throw new IllegalStateException("Invalid rules configured", ex);
             }
+        }
+    }
+
+    public List<StorageHandler.ObjectTransform> parseAdditionalTransforms(ConfigService config) {
+        Optional<String> additionalTransforms = config.getConfigPropertyAsOptional(BulkModeConfigProperty.ADDITIONAL_TRANSFORMS);
+        CollectionType type = yamlMapper.getTypeFactory().constructCollectionType(ArrayList.class, StorageHandler.ObjectTransform.class);
+
+        if (additionalTransforms.isPresent()) {
+            try {
+                return yamlMapper.readValue(additionalTransforms.get(), type);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException("Failed to parse ADDITIONAL_TRANSFORMS from config", e);
+            }
+        } else {
+            return new ArrayList<>();
         }
     }
 
