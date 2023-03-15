@@ -4,6 +4,7 @@ import co.worklytics.psoxy.gateway.BulkModeConfigProperty;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.StorageEventRequest;
 import co.worklytics.psoxy.gateway.StorageEventResponse;
+import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.psoxy.storage.StorageHandler;
 import com.avaulta.gateway.rules.ColumnarRules;
 import com.google.cloud.functions.BackgroundFunction;
@@ -13,6 +14,7 @@ import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
 import lombok.Data;
+import lombok.SneakyThrows;
 import org.apache.commons.io.input.BOMInputStream;
 
 import javax.inject.Inject;
@@ -20,6 +22,8 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
 
@@ -30,6 +34,9 @@ public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
     ColumnarRules defaultRuleSet;
     @Inject
     ConfigService configService;
+
+    @Inject
+    RulesUtils rulesUtils;
 
     @Override
     public void accept(GcsEvent gcsEvent, Context context) throws Exception {
@@ -43,36 +50,54 @@ public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
 
             String importBucket = gcsEvent.getBucket();
             String sourceName = gcsEvent.getName();
-            Storage storage = StorageOptions.getDefaultInstance().getService();
-            BlobId sourceBlobId = BlobId.of(importBucket, sourceName);
-            BlobInfo blobInfo = storage.get(sourceBlobId);
-            try (InputStream objectData = new ByteArrayInputStream(storage.readAllBytes(sourceBlobId));
-                 BOMInputStream is = new BOMInputStream(objectData);
-                 InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
 
-                StorageEventRequest request = StorageEventRequest.builder()
-                        .sourceBucketName(importBucket)
-                        .sourceObjectPath(sourceName)
-                        .destinationBucketName(destinationBucket)
-                        .readerStream(reader)
-                        .build();
 
-                StorageEventResponse storageEventResponse = storageHandler.handle(request, defaultRuleSet);
+            List<StorageHandler.ObjectTransform> transforms = new ArrayList<>();
+            transforms.add(StorageHandler.ObjectTransform.of(destinationBucket, defaultRuleSet));
 
-                try (InputStream processedStream = new ByteArrayInputStream(storageEventResponse.getBytes())) {
+            rulesUtils.parseAdditionalTransforms(configService)
+                .forEach(transforms::add);
 
-                    System.out.println("Writing to: " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationObjectPath());
-
-                    storage.createFrom(BlobInfo.newBuilder(BlobId.of(storageEventResponse.getDestinationBucketName(), storageEventResponse.getDestinationObjectPath()))
-                            .setContentType(blobInfo.getContentType())
-                            .build(), processedStream);
-
-                    System.out.println("Successfully pseudonymized " + importBucket + "/"
-                            + sourceName + " and uploaded to " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationObjectPath());
-                }
+            for (StorageHandler.ObjectTransform transform : transforms) {
+                process(importBucket, sourceName, transform);
             }
         }
     }
+
+
+    @SneakyThrows
+    void process(String importBucket, String sourceName, StorageHandler.ObjectTransform objectTransform) {
+
+        Storage storage = StorageOptions.getDefaultInstance().getService();
+        BlobId sourceBlobId = BlobId.of(importBucket, sourceName);
+        BlobInfo blobInfo = storage.get(sourceBlobId);
+        try (InputStream objectData = new ByteArrayInputStream(storage.readAllBytes(sourceBlobId));
+             BOMInputStream is = new BOMInputStream(objectData);
+             InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
+
+            StorageEventRequest request = StorageEventRequest.builder()
+                .sourceBucketName(importBucket)
+                .sourceObjectPath(sourceName)
+                .destinationBucketName(objectTransform.getDestinationBucketName())
+                .readerStream(reader)
+                .build();
+
+            StorageEventResponse storageEventResponse = storageHandler.handle(request, objectTransform.getRules());
+
+            try (InputStream processedStream = new ByteArrayInputStream(storageEventResponse.getBytes())) {
+
+                System.out.println("Writing to: " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationObjectPath());
+
+                storage.createFrom(BlobInfo.newBuilder(BlobId.of(storageEventResponse.getDestinationBucketName(), storageEventResponse.getDestinationObjectPath()))
+                    .setContentType(blobInfo.getContentType())
+                    .build(), processedStream);
+
+                System.out.println("Successfully pseudonymized " + importBucket + "/"
+                    + sourceName + " and uploaded to " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationObjectPath());
+            }
+        }
+    }
+
 
     /**
      * See https://github.com/GoogleCloudPlatform/java-docs-samples/tree/460f5cffd9f8df09146947515458f336881e29d8/functions/helloworld/hello-gcs/src/main/java/functions
