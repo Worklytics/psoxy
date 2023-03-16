@@ -3,13 +3,11 @@ package co.worklytics.psoxy.impl;
 import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.rules.RESTRules;
 import com.avaulta.gateway.rules.Endpoint;
-import co.worklytics.psoxy.rules.Rules2;
 import com.avaulta.gateway.rules.transforms.Transform;
 import co.worklytics.psoxy.utils.URLUtils;
 import com.avaulta.gateway.pseudonyms.*;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.SchemaRuleUtils;
-import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
@@ -20,14 +18,12 @@ import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hazlewood.connor.bottema.emailaddress.EmailAddressCriteria;
 import org.hazlewood.connor.bottema.emailaddress.EmailAddressParser;
-import org.hazlewood.connor.bottema.emailaddress.EmailAddressValidator;
 
 import javax.inject.Inject;
 import javax.mail.internet.InternetAddress;
@@ -85,13 +81,9 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     Map<Endpoint, Pattern> getCompiledAllowedEndpoints() {
         if (compiledAllowedEndpoints == null) {
             synchronized ($writeLock) {
-                if (rules instanceof Rules2) {
-                    compiledAllowedEndpoints = rules.getEndpoints().stream()
-                        .collect(Collectors.toMap(Function.identity(),
-                            endpoint -> Pattern.compile(endpoint.getPathRegex(), CASE_INSENSITIVE)));
-                } else {
-                    throw new IllegalStateException("Rules must be of type Rules2");
-                }
+                compiledAllowedEndpoints = rules.getEndpoints().stream()
+                     .collect(Collectors.toMap(Function.identity(),
+                           endpoint -> Pattern.compile(endpoint.getPathRegex(), CASE_INSENSITIVE)));
             }
         }
         return compiledAllowedEndpoints;
