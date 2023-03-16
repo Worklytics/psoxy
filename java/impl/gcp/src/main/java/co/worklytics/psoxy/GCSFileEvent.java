@@ -4,6 +4,7 @@ import co.worklytics.psoxy.gateway.BulkModeConfigProperty;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.StorageEventRequest;
 import co.worklytics.psoxy.gateway.StorageEventResponse;
+import co.worklytics.psoxy.rules.CsvRules;
 import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.psoxy.storage.StorageHandler;
 import com.avaulta.gateway.rules.BulkDataRules;
@@ -53,7 +54,7 @@ public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
 
 
             List<StorageHandler.ObjectTransform> transforms = new ArrayList<>();
-            transforms.add(StorageHandler.ObjectTransform.of(destinationBucket, defaultRuleSet));
+            transforms.add(StorageHandler.ObjectTransform.of(destinationBucket, (CsvRules) defaultRuleSet));
 
             rulesUtils.parseAdditionalTransforms(configService)
                 .forEach(transforms::add);

@@ -9,4 +9,6 @@ package com.avaulta.gateway.rules;
  */
 public interface BulkDataRules extends RuleSet {
 
+    Integer getRecordShuffleChunkSize();
+
 }

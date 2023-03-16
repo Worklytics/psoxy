@@ -4,6 +4,7 @@ import co.worklytics.psoxy.Pseudonymizer;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.StorageEventRequest;
 import co.worklytics.psoxy.gateway.StorageEventResponse;
+import co.worklytics.psoxy.rules.CsvRules;
 import com.avaulta.gateway.rules.BulkDataRules;
 import lombok.*;
 
@@ -47,7 +48,9 @@ public class StorageHandler {
         @NonNull
         String destinationBucketName;
 
+        //NOTE: need a concrete type here to serialize to/from YAML
+        //TODO: support proper jackson polymorphism here, across potential BulkDataRules implementations
         @NonNull
-        BulkDataRules rules;
+        CsvRules rules;
     }
 }

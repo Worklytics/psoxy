@@ -5,6 +5,7 @@ import co.worklytics.psoxy.gateway.BulkModeConfigProperty;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.storage.StorageHandler;
+import com.avaulta.gateway.rules.ColumnarRules;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import dagger.Component;
@@ -100,7 +101,7 @@ class RulesUtilsTest {
         assertEquals("blah",
             utils.parseAdditionalTransforms(config).get(0).getDestinationBucketName());
         assertEquals("something",
-            utils.parseAdditionalTransforms(config).get(0).getRules().getColumnsToPseudonymize().get(0));
+            ((ColumnarRules) utils.parseAdditionalTransforms(config).get(0).getRules()).getColumnsToPseudonymize().get(0));
 
     }
 }

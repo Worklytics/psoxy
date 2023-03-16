@@ -10,23 +10,24 @@ import co.worklytics.psoxy.storage.BulkDataSanitizer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Streams;
+import com.google.common.collect.UnmodifiableIterator;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.java.Log;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Inject;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.*;
 import java.util.function.BiFunction;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -53,6 +54,9 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
         }
 
         ColumnarRules rules = (ColumnarRules) bulkDataRules;
+
+        Preconditions.checkArgument(rules.getRecordShuffleChunkSize() > 0, "Record shuffle chunk size must be greater than 0");
+
 
         CSVParser records = CSVFormat
                 .DEFAULT
@@ -151,36 +155,50 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
 
 
         try(ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
-            PrintWriter printWriter = new PrintWriter(baos);
+            Writer printWriter = new PrintWriter(baos);
             CSVPrinter printer = new CSVPrinter(printWriter, CSVFormat.DEFAULT
                 .withHeader(columnNamesForOutputFile.toArray(new String[0])))
             ) {
 
-            records.forEach(row -> {
-                Stream<Object> sanitized =
+            UnmodifiableIterator<List<CSVRecord>> chunks =
+                Iterators.partition(records.iterator(), rules.getRecordShuffleChunkSize());
+
+            for (UnmodifiableIterator<List<CSVRecord>> chunkIterator = chunks; chunkIterator.hasNext(); ) {
+                chunkIterator.next().stream().collect(SHUFFLER).forEach(row -> {
+                    Stream<Object> sanitized =
                         headers.stream() // only iterate on allowed headers
-                        .map(column ->
+                            .map(column ->
                                 applyPseudonymizationIfAny.apply(
                                     columnsToRename.getOrDefault(column, column),
                                     row.get(column))
-                        );
+                            );
 
-                sanitized = Streams.concat(sanitized, columnsToDuplicate.entrySet().stream()
-                    .map(entry ->
-                        applyPseudonymizationIfAny.apply(entry.getValue(), row.get(entry.getKey()))));
+                    sanitized = Streams.concat(sanitized, columnsToDuplicate.entrySet().stream()
+                        .map(entry ->
+                            applyPseudonymizationIfAny.apply(entry.getValue(), row.get(entry.getKey()))));
 
-                try {
-                    printer.printRecord(sanitized.collect(Collectors.toList()));
-                } catch (Throwable e) {
-                    throw new RuntimeException("Failed to write row", e);
-                }
-            });
+                    try {
+                        printer.printRecord(sanitized.collect(Collectors.toList()));
+                    } catch (Throwable e) {
+                        throw new RuntimeException("Failed to write row", e);
+                    }
+                });
+            }
 
             printWriter.flush();
 
             return baos.toByteArray();
         }
     }
+
+    //visible and mutable for tests
+    Collector<CSVRecord, ?, List<CSVRecord>> SHUFFLER = Collectors.collectingAndThen(
+        Collectors.toCollection(ArrayList::new),
+        list -> {
+            Collections.shuffle(list);
+            return list;
+        }
+    );
 
 
     List<String> applyReplacements(Collection<String> original, final Map<String, String> replacements) {
