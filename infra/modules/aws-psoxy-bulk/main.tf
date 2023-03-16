@@ -232,6 +232,7 @@ moved {
 locals {
   accessor_role_names = concat([var.api_caller_role_name], var.sanitized_accessor_role_names)
   command_npm_install = "npm --prefix ${var.psoxy_base_dir}tools/psoxy-test install"
+  example_file        = var.example_file == null ? "/path/to/example.csv" : "${var.psoxy_base_dir}${var.example_file}"
 }
 
 resource "aws_iam_role_policy_attachment" "reader_policy_to_accessor_role" {
@@ -253,6 +254,7 @@ resource "aws_ssm_parameter" "rules" {
     ]
   }
 }
+
 
 resource "local_file" "todo-aws-psoxy-bulk-test" {
   filename = "TODO ${var.todo_step} - test ${var.instance_id}.md"
@@ -277,7 +279,7 @@ bucket following the rules you have defined. Change the value of the `-f` option
 following command with the path of a CSV file (*) you would like to test:
 
 ```shell
-node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f /path/to/file -d AWS -i ${aws_s3_bucket.input.bucket} -o ${aws_s3_bucket.sanitized.bucket} -r ${var.aws_assume_role_arn} -re ${var.aws_region}
+node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f ${local.example_file} -d AWS -i ${aws_s3_bucket.input.bucket} -o ${aws_s3_bucket.sanitized.bucket} -r ${var.aws_assume_role_arn} -re ${var.aws_region}
 ```
 
 Notice that the rest of the options should match your Psoxy configuration.
