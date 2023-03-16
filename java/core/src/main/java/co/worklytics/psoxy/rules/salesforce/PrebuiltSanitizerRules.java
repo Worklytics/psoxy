@@ -4,10 +4,12 @@ import co.worklytics.psoxy.rules.RuleSet;
 import co.worklytics.psoxy.rules.Rules2;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.rules.Endpoint;
+import com.avaulta.gateway.rules.SchemaRuleUtils;
 import com.avaulta.gateway.rules.transforms.Transform;
 import com.google.common.collect.Lists;
 
 import java.util.List;
+import java.util.Map;
 
 public class PrebuiltSanitizerRules {
 
@@ -45,17 +47,25 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..records[*].Id")
                     .build());
 
-    static final Endpoint DESCRIBE = Endpoint.builder()
+    private static SchemaRuleUtils.JsonSchema ID_QUERY_RESULT_JSON_SCHEMA = SchemaRuleUtils.JsonSchema.builder()
+            .type("object")
+                .properties(Map.of(
+            "Id", SchemaRuleUtils.JsonSchema.builder()
+                                .type("string")
+                                .build()))
+            .build();
+
+    static final Endpoint DESCRIBE_ENDPOINT = Endpoint.builder()
             .pathRegex("^/services/data/" + VERSION_REGEX + "/sobjects/(Account|ActivityHistory|User)/describe$")
             // No redaction/pseudonymization, response is just metadata of the object
             .build();
 
-    static final Endpoint UPDATED_ACCOUNTS_AND_ACTIVITY_HISTORY = Endpoint.builder()
+    static final Endpoint UPDATED_ACCOUNTS_AND_ACTIVITY_HISTORY_ENDPOINT = Endpoint.builder()
             .pathRegex("^/services/data/" + VERSION_REGEX + "/sobjects/(Account|ActivityHistory)/updated[?][^/]*")
             .allowedQueryParams(intervalQueryParameters)
             .build();
 
-    static final Endpoint GET_ACCOUNTS = Endpoint.builder()
+    static final Endpoint GET_ACCOUNTS_ENDPOINT = Endpoint.builder()
             .pathRegex("^/services/data/" + VERSION_REGEX + "/composite/sobjects/Account[?][^/]*")
             .allowedQueryParams(getQueryParameters)
             .transform(ATTRIBUTES_REDACT)
@@ -67,14 +77,14 @@ public class PrebuiltSanitizerRules {
             )
             .build();
 
-    static final Endpoint GET_USERS = Endpoint.builder()
+    static final Endpoint GET_USERS_ENDPOINT = Endpoint.builder()
             .pathRegex("^/services/data/" + VERSION_REGEX + "/composite/sobjects/User[?][^/]*")
             .allowedQueryParams(getQueryParameters)
             .transform(ATTRIBUTES_REDACT)
             .transforms(USER_TRANSFORMATIONS)
             .build();
 
-    static final Endpoint GET_USERS_WITH_PSEODONYMIZED_ID_PARAMETER = Endpoint.builder()
+    static final Endpoint GET_USERS_WITH_PSEODONYMIZED_ID_PARAMETER_ENDPOINT = Endpoint.builder()
             .pathRegex("^/services/data/" + VERSION_REGEX + "/composite/sobjects/User[?]id=(/p~[a-zA-Z0-9_-])[^/]*")
             .transform(ATTRIBUTES_REDACT)
             .transforms(USER_TRANSFORMATIONS)
@@ -84,10 +94,12 @@ public class PrebuiltSanitizerRules {
             .endpoint(Endpoint.builder()
                     .pathRegex("^/services/data/" + VERSION_REGEX + "/query[?]q=SELECT%20Id%20FROM%20Account.*$")
                     .transform(ATTRIBUTES_REDACT)
+                    .responseSchema(jsonSchemaForQueryResult(ID_QUERY_RESULT_JSON_SCHEMA))
                     .build())
             .endpoint(Endpoint.builder()
                     .pathRegex("^/services/data/" + VERSION_REGEX + "/query[?]q=SELECT\\+Id\\+FROM\\+Account.*$")
                     .transform(ATTRIBUTES_REDACT)
+                    .responseSchema(jsonSchemaForQueryResult(ID_QUERY_RESULT_JSON_SCHEMA))
                     .build())
             .build();
 
@@ -116,16 +128,18 @@ public class PrebuiltSanitizerRules {
             .endpoint(Endpoint.builder()
                     .pathRegex("^/services/data/" + VERSION_REGEX + "/query[?]q=SELECT%20Id%20FROM%20User.*$")
                     .transforms(QUERY_ID_USER_TRANSFORMATION)
+                    .responseSchema(jsonSchemaForQueryResult(ID_QUERY_RESULT_JSON_SCHEMA))
                     .build())
             .endpoint(Endpoint.builder()
                     .pathRegex("^/services/data/" + VERSION_REGEX + "/query[?]q=SELECT\\+Id\\+FROM\\+User.*$")
                     .transforms(QUERY_ID_USER_TRANSFORMATION)
+                    .responseSchema(jsonSchemaForQueryResult(ID_QUERY_RESULT_JSON_SCHEMA))
                     .build())
             .build();
 
     public static final RuleSet SALESFORCE = Rules2.builder()
-            .endpoint(DESCRIBE)
-            .endpoint(UPDATED_ACCOUNTS_AND_ACTIVITY_HISTORY)
+            .endpoint(DESCRIBE_ENDPOINT)
+            .endpoint(UPDATED_ACCOUNTS_AND_ACTIVITY_HISTORY_ENDPOINT)
             // Note: Update users is not used, as it will return an array
             // of ids which needs to be pseudonymized but is not compatible with
             // how pseudonymization works. See example below.
@@ -140,12 +154,28 @@ public class PrebuiltSanitizerRules {
             //  ],
             //  "latestDateCovered": "2023-03-09T18:44:00.000+0000"
             //}
-            .endpoint(GET_ACCOUNTS)
-            .endpoint(GET_USERS)
-            .endpoint(GET_USERS_WITH_PSEODONYMIZED_ID_PARAMETER)
+            .endpoint(GET_ACCOUNTS_ENDPOINT)
+            .endpoint(GET_USERS_ENDPOINT)
+            .endpoint(GET_USERS_WITH_PSEODONYMIZED_ID_PARAMETER_ENDPOINT)
             .endpoints(QUERY_ID_FOR_USERS_RULES.getEndpoints())
             .endpoints(QUERY_FOR_ACTIVITY_HISTORIES_RULES.getEndpoints())
             .endpoints(QUERY_ID_FOR_ACCOUNTS_RULES.getEndpoints())
             .build();
 
+    private static SchemaRuleUtils.JsonSchema jsonSchemaForQueryResult(SchemaRuleUtils.JsonSchema recordSchema) {
+        return SchemaRuleUtils.JsonSchema.builder()
+                .type("object")
+                .properties(Map.of(
+                        "totalSize", SchemaRuleUtils.JsonSchema.builder()
+                                .type("integer")
+                                .build(),
+                        "done", SchemaRuleUtils.JsonSchema.builder()
+                                .type("boolean")
+                                .build(),
+                        "records", SchemaRuleUtils.JsonSchema.builder()
+                                .type("array")
+                                .items(recordSchema)
+                                .build()))
+                .build();
+    }
 }
