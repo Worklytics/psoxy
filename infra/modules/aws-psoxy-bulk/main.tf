@@ -266,17 +266,17 @@ Review the deployed function in AWS console:
 
 - https://console.aws.amazon.com/lambda/home?region=${var.aws_region}#/functions/${module.psoxy_lambda.function_name}?tab=monitoring
 
-We provide some Node.js scripts to easily validate the deployment. To be able
-to run the test commands below, you need Node.js (>=16) and npm (v >=8)
-installed. Ensure all dependencies are installed by running:
+We provide some Node.js scripts to easily validate the deployment. To be able to run the test
+commands below, you need Node.js (>=16) and npm (v >=8) installed. Ensure all dependencies are
+installed by running:
 
 ```shell
 ${local.command_npm_install}
 ```
 
-Then, check that the Psoxy works as expected and it transforms the files of your input
-bucket following the rules you have defined. Change the value of the `-f` option in the
-following command with the path of a CSV file (*) you would like to test:
+Then, check that the Psoxy works as expected and it transforms the files of your input bucket
+following the rules you have defined. Change the value of the `-f` option in the following command
+with the path of a CSV file (*) you would like to test:
 
 ```shell
 node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f ${local.example_file} -d AWS -i ${aws_s3_bucket.input.bucket} -o ${aws_s3_bucket.sanitized.bucket} -r ${var.aws_assume_role_arn} -re ${var.aws_region}
@@ -292,6 +292,22 @@ Please, check the documentation of our [Psoxy Testing tools](${var.psoxy_base_di
 for a detailed description of all the different options.
 
 EOT
+}
+
+resource "local_file" "test_script" {
+  filename        = "test-${var.instance_id}.sh"
+  file_permission = "0770"
+  content         = <<EOT
+#!/bin/bash
+FILE_PATH=$${1:-${try(local.example_file, "")}}
+BLUE='\e[0;34m'
+NC='\e[0m'
+
+printf "Quick test of $${BLUE}${var.instance_id}$${NC} ...\n"
+
+node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f $FILE_PATH -d AWS -i ${aws_s3_bucket.input.bucket} -o ${aws_s3_bucket.sanitized.bucket} -r ${var.aws_assume_role_arn} -re ${var.aws_region}
+EOT
+
 }
 
 # to facilitate composition of ingestion pipeline
