@@ -11,6 +11,7 @@ import java.util.List;
 
 public class PrebuiltSanitizerRules {
 
+    private static final String VERSION_REGEX = "v(\\d*.\\d{1})";
     private static final List<String> intervalQueryParameters = Lists.newArrayList(
             "start",
             "end"
@@ -45,17 +46,17 @@ public class PrebuiltSanitizerRules {
                     .build());
 
     static final Endpoint DESCRIBE = Endpoint.builder()
-            .pathRegex("^/services/data/v51.0/sobjects/(Account|ActivityHistory|User)/describe$")
+            .pathRegex("^/services/data/" + VERSION_REGEX + "/sobjects/(Account|ActivityHistory|User)/describe$")
             // No redaction/pseudonymization, response is just metadata of the object
             .build();
 
     static final Endpoint UPDATED_ACCOUNTS_AND_ACTIVITY_HISTORY = Endpoint.builder()
-            .pathRegex("^/services/data/v51.0/sobjects/(Account|ActivityHistory)/updated[?][^/]*")
+            .pathRegex("^/services/data/" + VERSION_REGEX + "/sobjects/(Account|ActivityHistory)/updated[?][^/]*")
             .allowedQueryParams(intervalQueryParameters)
             .build();
 
     static final Endpoint GET_ACCOUNTS = Endpoint.builder()
-            .pathRegex("^/services/data/v51.0/composite/sobjects/Account[?][^/]*")
+            .pathRegex("^/services/data/" + VERSION_REGEX + "/composite/sobjects/Account[?][^/]*")
             .allowedQueryParams(getQueryParameters)
             .transform(ATTRIBUTES_REDACT)
             .transform(Transform.Pseudonymize.builder()
@@ -67,32 +68,32 @@ public class PrebuiltSanitizerRules {
             .build();
 
     static final Endpoint GET_USERS = Endpoint.builder()
-            .pathRegex("^/services/data/v51.0/composite/sobjects/User[?][^/]*")
+            .pathRegex("^/services/data/" + VERSION_REGEX + "/composite/sobjects/User[?][^/]*")
             .allowedQueryParams(getQueryParameters)
             .transform(ATTRIBUTES_REDACT)
             .transforms(USER_TRANSFORMATIONS)
             .build();
 
     static final Endpoint GET_USERS_WITH_PSEODONYMIZED_ID_PARAMETER = Endpoint.builder()
-            .pathRegex("^/services/data/v51.0/composite/sobjects/User[?]id=(/p~[a-zA-Z0-9_-])[^/]*")
+            .pathRegex("^/services/data/" + VERSION_REGEX + "/composite/sobjects/User[?]id=(/p~[a-zA-Z0-9_-])[^/]*")
             .transform(ATTRIBUTES_REDACT)
             .transforms(USER_TRANSFORMATIONS)
             .build();
 
     static final Rules2 QUERY_ID_FOR_ACCOUNTS_RULES = Rules2.builder()
             .endpoint(Endpoint.builder()
-                    .pathRegex("^/services/data/v51.0/query[?]q=SELECT%20Id%20FROM%20Account.*$")
+                    .pathRegex("^/services/data/" + VERSION_REGEX + "/query[?]q=SELECT%20Id%20FROM%20Account.*$")
                     .transform(ATTRIBUTES_REDACT)
                     .build())
             .endpoint(Endpoint.builder()
-                    .pathRegex("^/services/data/v51.0/query[?]q=SELECT\\+Id\\+FROM\\+Account.*$")
+                    .pathRegex("^/services/data/" + VERSION_REGEX + "/query[?]q=SELECT\\+Id\\+FROM\\+Account.*$")
                     .transform(ATTRIBUTES_REDACT)
                     .build())
             .build();
 
     static final Rules2 QUERY_FOR_ACTIVITY_HISTORIES_RULES = Rules2.builder()
             .endpoint(Endpoint.builder()
-                    .pathRegex("^/services/data/v51.0/query[?]q=SELECT.*FROM%20ActivityHistories.*$")
+                    .pathRegex("^/services/data/" + VERSION_REGEX + "/query[?]q=SELECT.*FROM%20ActivityHistories.*$")
                     .transform(Transform.Pseudonymize.builder()
                             .jsonPath("$..records[*].ActivityHistories.records[*].CreatedById")
                             .jsonPath("$..records[*].ActivityHistories.records[*].LastModifiedById")
@@ -101,7 +102,7 @@ public class PrebuiltSanitizerRules {
                             .build())
                     .build())
             .endpoint(Endpoint.builder()
-                    .pathRegex("^/services/data/v51.0/query[?]q=SELECT.*FROM\\+ActivityHistories.*$")
+                    .pathRegex("^/services/data/" + VERSION_REGEX + "/query[?]q=SELECT.*FROM\\+ActivityHistories.*$")
                     .transform(Transform.Pseudonymize.builder()
                             .jsonPath("$..records[*].ActivityHistories.records[*].CreatedById")
                             .jsonPath("$..records[*].ActivityHistories.records[*].LastModifiedById")
@@ -113,11 +114,11 @@ public class PrebuiltSanitizerRules {
 
     static final Rules2 QUERY_ID_FOR_USERS_RULES = Rules2.builder()
             .endpoint(Endpoint.builder()
-                    .pathRegex("^/services/data/v51.0/query[?]q=SELECT%20Id%20FROM%20User.*$")
+                    .pathRegex("^/services/data/" + VERSION_REGEX + "/query[?]q=SELECT%20Id%20FROM%20User.*$")
                     .transforms(QUERY_ID_USER_TRANSFORMATION)
                     .build())
             .endpoint(Endpoint.builder()
-                    .pathRegex("^/services/data/v51.0/query[?]q=SELECT\\+Id\\+FROM\\+User.*$")
+                    .pathRegex("^/services/data/" + VERSION_REGEX + "/query[?]q=SELECT\\+Id\\+FROM\\+User.*$")
                     .transforms(QUERY_ID_USER_TRANSFORMATION)
                     .build())
             .build();
