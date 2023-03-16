@@ -5,6 +5,7 @@ import co.worklytics.psoxy.gateway.BulkModeConfigProperty;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.StorageEventRequest;
 import co.worklytics.psoxy.gateway.StorageEventResponse;
+import co.worklytics.psoxy.rules.CsvRules;
 import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.psoxy.storage.StorageHandler;
 import com.amazonaws.services.lambda.runtime.Context;
@@ -63,7 +64,7 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
 
 
         List<StorageHandler.ObjectTransform> transforms = Lists.newArrayList(
-            StorageHandler.ObjectTransform.of(destinationBucket,  defaultRules));
+            StorageHandler.ObjectTransform.of(destinationBucket,  (CsvRules) defaultRules));
 
         rulesUtils.parseAdditionalTransforms(configService)
             .forEach(transforms::add);
