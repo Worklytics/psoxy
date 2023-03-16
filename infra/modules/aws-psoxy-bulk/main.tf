@@ -255,12 +255,20 @@ resource "aws_ssm_parameter" "rules" {
   }
 }
 
+locals {
+  todo_brief = <<EOT
+## Test ${var.instance_id}
+Check that the Psoxy works as expected and it transforms the files of your input bucket following
+the rules you have defined:
 
-resource "local_file" "todo-aws-psoxy-bulk-test" {
-  filename = "TODO ${var.todo_step} - test ${var.instance_id}.md"
-  content  = <<EOT
+```shell
+node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f ${local.example_file} -d AWS -i ${aws_s3_bucket.input.bucket} -o ${aws_s3_bucket.sanitized.bucket} -r ${var.aws_assume_role_arn} -re ${var.aws_region}
+```
 
-## Testing Psoxy Bulk: ${var.instance_id}
+EOT
+
+  todo_content = <<EOT
+# Review Psoxy Bulk: ${var.instance_id}
 
 Review the deployed function in AWS console:
 
@@ -274,13 +282,10 @@ installed by running:
 ${local.command_npm_install}
 ```
 
-Then, check that the Psoxy works as expected and it transforms the files of your input bucket
-following the rules you have defined. Change the value of the `-f` option in the following command
-with the path of a CSV file (*) you would like to test:
+${local.todo_brief}
 
-```shell
-node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f ${local.example_file} -d AWS -i ${aws_s3_bucket.input.bucket} -o ${aws_s3_bucket.sanitized.bucket} -r ${var.aws_assume_role_arn} -re ${var.aws_region}
-```
+Check that the Psoxy works as expected and it transforms the files of your input bucket
+following the rules you have defined.
 
 Notice that the rest of the options should match your Psoxy configuration.
 
@@ -292,6 +297,12 @@ Please, check the documentation of our [Psoxy Testing tools](${var.psoxy_base_di
 for a detailed description of all the different options.
 
 EOT
+}
+
+
+resource "local_file" "todo-aws-psoxy-bulk-test" {
+  filename = "TODO_${var.todo_step}_test_${var.instance_id}.md"
+  content  = local.todo_content
 }
 
 resource "local_file" "test_script" {
@@ -343,6 +354,10 @@ output "instance_id" {
 output "proxy_kind" {
   value       = "bulk"
   description = "The kind of proxy instance this is."
+}
+
+output "todo" {
+  value = local.todo_brief
 }
 
 output "next_todo_step" {

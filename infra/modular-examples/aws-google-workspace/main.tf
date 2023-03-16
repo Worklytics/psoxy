@@ -382,8 +382,9 @@ output "todos_1" {
 output "todos_2" {
   description = "List of todo steps to complete 2nd, in markdown format."
   value = concat(
-    values(module.psoxy-google-workspace-connector)[*].todo,
+    values(module.worklytics-psoxy-connection-google-workspace)[*].todo,
     values(module.aws-psoxy-long-auth-connectors)[*].todo,
+    values(module.psoxy-bulk)[*].todo,
   )
 }
 
@@ -391,8 +392,8 @@ output "todos_3" {
   description = "List of todo steps to complete 3rd, in markdown format."
   value = concat(
     values(module.worklytics-psoxy-connection-google-workspace)[*].todo,
+    values(module.worklytics-psoxy-connection)[*].todo,
     values(module.psoxy-bulk-to-worklytics)[*].todo,
-    values(module.worklytics-psoxy-connection)[*].todo
   )
 }
 
