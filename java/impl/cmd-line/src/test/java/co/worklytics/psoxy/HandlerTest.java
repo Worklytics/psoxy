@@ -52,6 +52,7 @@ public class HandlerTest {
         File inputFile = new File(getClass().getResource("/hris-example.csv").getFile());
 
         StringWriter s = new StringWriter();
+        handler.defaultRules = handler.defaultRules.toBuilder().recordShuffleChunkSize(1).build();
         handler.sanitize(config, inputFile, s);
 
 
@@ -73,6 +74,8 @@ public class HandlerTest {
         config.columnsToPseudonymize = Collections.singleton("email");
 
         File inputFile = new File(getClass().getResource("/hris-example.csv").getFile());
+
+        handler.defaultRules = handler.defaultRules.toBuilder().recordShuffleChunkSize(1).build();
 
         StringWriter s = new StringWriter();
         handler.sanitize(config, inputFile, s);
