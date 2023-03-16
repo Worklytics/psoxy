@@ -290,6 +290,7 @@ module "psoxy-bulk" {
   global_parameter_arns           = module.global_secrets.secret_arns
   path_to_instance_ssm_parameters = "${var.aws_ssm_param_root_path}PSOXY_${upper(replace(each.key, "-", "_"))}_"
   ssm_kms_key_ids                 = local.ssm_key_ids
+  example_file                    = try(each.value.example_file, null)
 
   environment_variables = merge(
     var.general_environment_variables,
@@ -381,8 +382,9 @@ output "todos_1" {
 output "todos_2" {
   description = "List of todo steps to complete 2nd, in markdown format."
   value = concat(
-    values(module.psoxy-google-workspace-connector)[*].todo,
+    values(module.worklytics-psoxy-connection-google-workspace)[*].todo,
     values(module.aws-psoxy-long-auth-connectors)[*].todo,
+    values(module.psoxy-bulk)[*].todo,
   )
 }
 
@@ -390,8 +392,8 @@ output "todos_3" {
   description = "List of todo steps to complete 3rd, in markdown format."
   value = concat(
     values(module.worklytics-psoxy-connection-google-workspace)[*].todo,
+    values(module.worklytics-psoxy-connection)[*].todo,
     values(module.psoxy-bulk-to-worklytics)[*].todo,
-    values(module.worklytics-psoxy-connection)[*].todo
   )
 }
 

@@ -520,6 +520,7 @@ EOT
       settings_to_provide = {
         "Data Source Processing" = "badge"
       }
+      example_file = "docs/sources/bulk/badge-example.csv"
     }
     "hris" = {
       source_kind               = "hris"
@@ -537,6 +538,7 @@ EOT
       settings_to_provide = {
         "Parser" = "EMPLOYEE_SNAPSHOT"
       }
+      example_file = "docs/sources/bulk/hris-example.csv"
     }
     "survey" = {
       worklytics_connector_id   = "survey-import-psoxy"
@@ -549,6 +551,7 @@ EOT
           # "EMPLOYEE_EMAIL", # if exists
         ]
       }
+      example_file = "docs/sources/bulk/survey-example.csv"
     }
     "qualtrics" = {
       source_kind               = "qualtrics"
@@ -561,6 +564,7 @@ EOT
           # "employee_email", # if exists
         ]
       }
+      example_file = "docs/sources/bulk/survey-example.csv"
     }
   }
 }

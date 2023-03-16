@@ -319,6 +319,7 @@ module "psoxy-bulk" {
   global_parameter_arns           = module.global_secrets.secret_arns
   path_to_instance_ssm_parameters = "${var.aws_ssm_param_root_path}PSOXY_${upper(replace(each.key, "-", "_"))}_"
   ssm_kms_key_ids                 = local.ssm_key_ids
+  example_file                    = try(each.value.example_file, null)
 
   sanitized_accessor_role_names = [
     module.psoxy-aws.api_caller_role_name
@@ -421,6 +422,7 @@ output "todos_2" {
   value = concat(
     values(module.psoxy-msft-connector)[*].todo,
     values(module.aws-psoxy-long-auth-connectors)[*].todo,
+    values(module.psoxy-bulk)[*].todo,
   )
 }
 
@@ -428,8 +430,8 @@ output "todos_3" {
   description = "List of todo steps to complete 3rd, in markdown format."
   value = concat(
     values(module.worklytics-psoxy-connection-msft-365)[*].todo,
+    values(module.worklytics-psoxy-connection-oauth-long-access)[*].todo,
     values(module.psoxy-bulk-to-worklytics)[*].todo,
-    values(module.worklytics-psoxy-connection-oauth-long-access)[*].todo
   )
 }
 
