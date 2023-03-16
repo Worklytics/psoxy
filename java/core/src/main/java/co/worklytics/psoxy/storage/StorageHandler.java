@@ -1,15 +1,10 @@
 package co.worklytics.psoxy.storage;
 
 import co.worklytics.psoxy.Pseudonymizer;
-import co.worklytics.psoxy.RESTApiSanitizer;
-import co.worklytics.psoxy.RESTApiSanitizerFactory;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.StorageEventRequest;
 import co.worklytics.psoxy.gateway.StorageEventResponse;
-import co.worklytics.psoxy.rules.RuleSet;
-import com.avaulta.gateway.rules.ColumnarRules;
-import dagger.assisted.Assisted;
-import dagger.assisted.AssistedInject;
+import com.avaulta.gateway.rules.BulkDataRules;
 import lombok.*;
 
 import javax.inject.Inject;
@@ -25,19 +20,19 @@ public class StorageHandler {
     ConfigService config;
 
     @Inject
-    FileHandlerFactory fileHandlerStrategy;
+    BulkDataSanitizerFactory bulkDataSanitizerFactory;
 
     @Inject
     Pseudonymizer pseudonymizer;
 
     @SneakyThrows
-    public StorageEventResponse handle(StorageEventRequest request, ColumnarRules rules) {
+    public StorageEventResponse handle(StorageEventRequest request, BulkDataRules rules) {
 
-        FileHandler fileHandler = fileHandlerStrategy.get(request.getSourceObjectPath());
+        BulkDataSanitizer fileHandler = bulkDataSanitizerFactory.get(request.getSourceObjectPath());
 
         return StorageEventResponse.builder()
                 .destinationBucketName(request.getDestinationBucketName())
-                .bytes(fileHandler.handle(request.getReaderStream(), rules, pseudonymizer))
+                .bytes(fileHandler.sanitize(request.getReaderStream(), rules, pseudonymizer))
                 .destinationObjectPath(request.getSourceObjectPath())
                 .build();
     }
@@ -47,10 +42,12 @@ public class StorageHandler {
     @Data
     public static class ObjectTransform implements Serializable {
 
+        private static final long serialVersionUID = 1L;
+
         @NonNull
         String destinationBucketName;
 
         @NonNull
-        ColumnarRules rules;
+        BulkDataRules rules;
     }
 }

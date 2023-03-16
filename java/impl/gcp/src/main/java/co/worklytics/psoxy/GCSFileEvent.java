@@ -6,7 +6,7 @@ import co.worklytics.psoxy.gateway.StorageEventRequest;
 import co.worklytics.psoxy.gateway.StorageEventResponse;
 import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.psoxy.storage.StorageHandler;
-import com.avaulta.gateway.rules.ColumnarRules;
+import com.avaulta.gateway.rules.BulkDataRules;
 import com.google.cloud.functions.BackgroundFunction;
 import com.google.cloud.functions.Context;
 import com.google.cloud.storage.BlobId;
@@ -31,7 +31,7 @@ public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
     StorageHandler storageHandler;
 
     @Inject
-    ColumnarRules defaultRuleSet;
+    BulkDataRules defaultRuleSet;
     @Inject
     ConfigService configService;
 

@@ -14,25 +14,18 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
-import com.avaulta.gateway.rules.ColumnarRules;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.CollectionType;
-import com.google.common.annotations.VisibleForTesting;
+import com.avaulta.gateway.rules.BulkDataRules;
 import com.google.common.collect.Lists;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 import org.apache.commons.io.input.BOMInputStream;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Log
 public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestHandler<S3Event, String> {
@@ -41,7 +34,7 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
     StorageHandler storageHandler;
 
     @Inject
-    ColumnarRules defaultRules;
+    BulkDataRules defaultRules;
 
     @Inject
     ConfigService configService;
@@ -83,7 +76,7 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
     }
 
     @SneakyThrows
-    StorageEventResponse process(String importBucket, String sourceKey, String destination, ColumnarRules rules) {
+    StorageEventResponse process(String importBucket, String sourceKey, String destination, BulkDataRules rules) {
         StorageEventResponse storageEventResponse;
         S3Object s3Object = s3Client.getObject(new GetObjectRequest(importBucket, sourceKey));
 

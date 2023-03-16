@@ -2,10 +2,8 @@ package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
-import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
-import co.worklytics.psoxy.rules.RESTRules;
-import co.worklytics.psoxy.rules.RuleSet;
-import co.worklytics.psoxy.rules.RulesUtils;
+import co.worklytics.psoxy.rules.*;
+import com.avaulta.gateway.rules.BulkDataRules;
 import com.avaulta.gateway.rules.ColumnarRules;
 import dagger.Module;
 import dagger.Provides;
@@ -29,7 +27,7 @@ public class ConfigRulesModule {
     }
 
     @Provides
-    static ColumnarRules columnarRules(RuleSet ruleSet) {
+    static BulkDataRules bulkDataRules(RuleSet ruleSet) {
         if (! (ruleSet instanceof ColumnarRules)) {
             // will blow things up if something that depends on ColumnarRules is bound in REST-usecase
             throw new RuntimeException("Configured RuleSet are not ColumnarRules");

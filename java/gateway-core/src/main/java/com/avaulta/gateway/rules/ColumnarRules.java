@@ -11,6 +11,13 @@ import lombok.extern.java.Log;
 
 import java.util.*;
 
+/**
+ *
+ * so really this encodes two things that we could split:
+ *   1) how to deserialize the bulk data into records
+ *   2) how to sanitize the records
+ *
+ */
 @SuperBuilder(toBuilder = true)
 @Log
 @AllArgsConstructor //for builder
@@ -19,16 +26,20 @@ import java.util.*;
 @EqualsAndHashCode
 @JsonPropertyOrder(alphabetic = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ColumnarRules implements RuleSet {
+public class ColumnarRules implements BulkDataRules {
 
     private static final long serialVersionUID = 1L;
 
-    // in theory, `\t` should also work ...
+    /**
+     * delimiter of fields within serialized record
+     *
+     * in theory, `\t` should also work ...
+     */
     @Builder.Default
     protected Character delimiter = ',';
 
     /**
-     * columns to duplicate
+     * columns (fields) to duplicate
      */
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     @Builder.Default

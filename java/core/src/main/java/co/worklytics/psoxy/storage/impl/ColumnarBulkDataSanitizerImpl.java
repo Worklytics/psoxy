@@ -2,9 +2,11 @@ package co.worklytics.psoxy.storage.impl;
 
 import co.worklytics.psoxy.PseudonymizedIdentity;
 import co.worklytics.psoxy.Pseudonymizer;
+import co.worklytics.psoxy.rules.CsvRules;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
+import com.avaulta.gateway.rules.BulkDataRules;
 import com.avaulta.gateway.rules.ColumnarRules;
-import co.worklytics.psoxy.storage.FileHandler;
+import co.worklytics.psoxy.storage.BulkDataSanitizer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
@@ -35,14 +37,22 @@ import java.util.stream.Stream;
  */
 @Log
 @NoArgsConstructor(onConstructor_ = @Inject)
-public class CSVFileHandler implements FileHandler {
+public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
 
     @Inject
     ObjectMapper objectMapper;
 
 
     @Override
-    public byte[] handle(@NonNull InputStreamReader reader, @NonNull ColumnarRules rules, @NonNull Pseudonymizer pseudonymizer) throws IOException {
+    public byte[] sanitize(@NonNull InputStreamReader reader,
+                           @NonNull BulkDataRules bulkDataRules,
+                           @NonNull Pseudonymizer pseudonymizer) throws IOException {
+
+        if (!(bulkDataRules instanceof CsvRules)) {
+            throw new IllegalArgumentException("Rules must be of type CsvRules");
+        }
+
+        ColumnarRules rules = (ColumnarRules) bulkDataRules;
 
         CSVParser records = CSVFormat
                 .DEFAULT

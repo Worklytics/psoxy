@@ -4,8 +4,8 @@ import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
-import co.worklytics.psoxy.storage.FileHandlerFactory;
-import co.worklytics.psoxy.storage.impl.FileHandlerFactoryImpl;
+import co.worklytics.psoxy.storage.BulkDataSanitizerFactory;
+import co.worklytics.psoxy.storage.impl.BulkDataSanitizerFactoryImpl;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.SchemaRuleUtils;
 import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
@@ -124,7 +124,7 @@ public class PsoxyModule {
     }
 
     @Provides
-    static FileHandlerFactory fileHandler(FileHandlerFactoryImpl fileHandlerStrategy) {
+    static BulkDataSanitizerFactory fileHandler(BulkDataSanitizerFactoryImpl fileHandlerStrategy) {
         return fileHandlerStrategy;
     }
     @Provides @Singleton

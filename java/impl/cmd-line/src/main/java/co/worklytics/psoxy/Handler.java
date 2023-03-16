@@ -1,7 +1,7 @@
 package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.rules.CsvRules;
-import co.worklytics.psoxy.storage.FileHandlerFactory;
+import co.worklytics.psoxy.storage.BulkDataSanitizerFactory;
 import com.google.api.client.util.Lists;
 import com.google.cloud.secretmanager.v1.AccessSecretVersionResponse;
 import com.google.cloud.secretmanager.v1.SecretManagerServiceClient;
@@ -23,7 +23,7 @@ public class Handler {
     @Inject
     RESTApiSanitizerFactory sanitizerFactory;
     @Inject
-    FileHandlerFactory fileHandlerStrategy;
+    BulkDataSanitizerFactory fileHandlerStrategy;
     @Inject
     PseudonymizerImplFactory pseudonymizerImplFactory;
 
@@ -57,7 +57,7 @@ public class Handler {
         Pseudonymizer pseudonymizer = pseudonymizerImplFactory.create(options.build());
 
         try (FileReader in = new FileReader(inputFile)) {
-            out.append(new String(fileHandlerStrategy.get(inputFile.getName()).handle(in, rules, pseudonymizer)));
+            out.append(new String(fileHandlerStrategy.get(inputFile.getName()).sanitize(in, rules, pseudonymizer)));
         }
     }
 }

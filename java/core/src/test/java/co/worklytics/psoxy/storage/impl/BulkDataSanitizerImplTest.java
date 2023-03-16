@@ -9,8 +9,6 @@ import co.worklytics.test.TestModules;
 import co.worklytics.test.TestUtils;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
-import com.avaulta.gateway.rules.ColumnarRules;
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import dagger.Component;
@@ -31,10 +29,10 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class CSVFileHandlerTest {
+public class BulkDataSanitizerImplTest {
 
     @Inject
-    CSVFileHandler csvFileHandler;
+    ColumnarBulkDataSanitizerImpl columnarFileSanitizerImpl;
 
     @Inject
     RESTApiSanitizerFactory sanitizerFactory;
@@ -55,7 +53,7 @@ public class CSVFileHandlerTest {
             MockModules.ForConfigService.class,
     })
     public interface Container {
-        void inject(CSVFileHandlerTest test);
+        void inject(BulkDataSanitizerImplTest test);
     }
 
     @BeforeEach
@@ -86,7 +84,7 @@ public class CSVFileHandlerTest {
         File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
 
         try (FileReader in = new FileReader(inputFile)) {
-            byte[] result  = csvFileHandler.handle(in, rules, pseudonymizer);
+            byte[] result  = columnarFileSanitizerImpl.sanitize(in, rules, pseudonymizer);
 
             assertEquals(EXPECTED, new String(result));
         }
@@ -109,7 +107,7 @@ public class CSVFileHandlerTest {
         File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
 
         try (FileReader in = new FileReader(inputFile)) {
-            byte[] result  = csvFileHandler.handle(in, rules, pseudonymizer);
+            byte[] result  = columnarFileSanitizerImpl.sanitize(in, rules, pseudonymizer);
 
             assertEquals(EXPECTED, new String(result));
         }
@@ -129,7 +127,7 @@ public class CSVFileHandlerTest {
         File inputFile = new File(getClass().getResource("/csv/hris-example-headers-w-spaces.csv").getFile());
 
         try (FileReader in = new FileReader(inputFile)) {
-            byte[] result  = csvFileHandler.handle(in, rules, pseudonymizer);
+            byte[] result  = columnarFileSanitizerImpl.sanitize(in, rules, pseudonymizer);
 
             assertEquals(EXPECTED, new String(result));
         }
@@ -149,7 +147,7 @@ public class CSVFileHandlerTest {
         File inputFile = new File(getClass().getResource("/csv/hris-example-quotes.csv").getFile());
 
         try (FileReader in = new FileReader(inputFile)) {
-            byte[] result  = csvFileHandler.handle(in, rules, pseudonymizer);
+            byte[] result  = columnarFileSanitizerImpl.sanitize(in, rules, pseudonymizer);
 
             assertEquals(EXPECTED, new String(result));
         }
@@ -172,7 +170,7 @@ public class CSVFileHandlerTest {
         File inputFile = new File(getClass().getResource("/csv/hris-default-rules.csv").getFile());
 
         try (FileReader in = new FileReader(inputFile)) {
-            byte[] result  = csvFileHandler.handle(in, rules, pseudonymizer);
+            byte[] result  = columnarFileSanitizerImpl.sanitize(in, rules, pseudonymizer);
 
             assertEquals(EXPECTED, new String(result));
         }
@@ -193,7 +191,7 @@ public class CSVFileHandlerTest {
         File inputFile = new File(getClass().getResource("/csv/hris-example-headers-w-spaces.csv").getFile());
 
         try (FileReader in = new FileReader(inputFile)) {
-            byte[] result  = csvFileHandler.handle(in, rules, pseudonymizer);
+            byte[] result  = columnarFileSanitizerImpl.sanitize(in, rules, pseudonymizer);
 
             assertEquals(EXPECTED, new String(result));
         }
@@ -215,7 +213,7 @@ public class CSVFileHandlerTest {
         File inputFile = new File(getClass().getResource("/csv/hris-example-quotes.csv").getFile());
 
         try (FileReader in = new FileReader(inputFile)) {
-            byte[] result  = csvFileHandler.handle(in, rules, pseudonymizer);
+            byte[] result  = columnarFileSanitizerImpl.sanitize(in, rules, pseudonymizer);
 
             assertEquals(EXPECTED, new String(result));
         }
@@ -242,7 +240,7 @@ public class CSVFileHandlerTest {
         File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
 
         try (FileReader in = new FileReader(inputFile)) {
-            byte[] result  = csvFileHandler.handle(in, rules, pseudonymizer);
+            byte[] result  = columnarFileSanitizerImpl.sanitize(in, rules, pseudonymizer);
 
             assertEquals(EXPECTED, new String(result));
         }
@@ -278,7 +276,7 @@ public class CSVFileHandlerTest {
 
 
         try (FileReader in = new FileReader(inputFile)) {
-            byte[] result  = csvFileHandler.handle(in, rules, defaultPseudonymizer);
+            byte[] result  = columnarFileSanitizerImpl.sanitize(in, rules, defaultPseudonymizer);
             assertEquals(EXPECTED, new String(result));
         }
     }
@@ -298,7 +296,7 @@ public class CSVFileHandlerTest {
 
 
         try (FileReader in = new FileReader(inputFile)) {
-            byte[] result  = csvFileHandler.handle(in, rules, pseudonymizer);
+            byte[] result  = columnarFileSanitizerImpl.sanitize(in, rules, pseudonymizer);
 
             assertEquals(EXPECTED, new String(result));
         }
