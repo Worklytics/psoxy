@@ -274,6 +274,7 @@ module "psoxy-gcp-bulk" {
   psoxy_base_dir                = var.psoxy_base_dir
   bucket_write_role_id          = module.psoxy-gcp.bucket_write_role_id
   secret_bindings               = module.psoxy-gcp.secrets
+  example_file                  = try(each.value.example_file, null)
 
   environment_variables = merge(
     var.general_environment_variables,

@@ -141,6 +141,10 @@ resource "google_cloudfunctions_function" "function" {
   ]
 }
 
+locals {
+  example_file = var.example_file == null ? "/path/to/example/file.csv" : "${var.psoxy_base_dir}${var.example_file}"
+}
+
 resource "local_file" "todo-gcp-psoxy-bulk-test" {
   filename = "TODO ${var.todo_step} - test ${local.function_name}.md"
   content  = <<EOT
@@ -164,7 +168,7 @@ bucket following the rules you have defined. Change the value of the `-f` option
 following command with the path of a CSV file (*) you would like to test:
 
 ```shell
-node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f /path/to/file -d GCP -i ${google_storage_bucket.input-bucket.name} -o ${google_storage_bucket.output-bucket.name}
+node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f ${local.example_file} -d GCP -i ${google_storage_bucket.input-bucket.name} -o ${google_storage_bucket.output-bucket.name}
 ```
 
 Notice that the rest of the options should match your Psoxy configuration.
