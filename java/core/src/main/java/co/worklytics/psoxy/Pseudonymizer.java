@@ -36,21 +36,19 @@ public interface Pseudonymizer {
 
     }
 
+    /**
+     * @param identifier to pseudonymize
+     * @return identifier as a PseudonymizedIdentity
+     */
     PseudonymizedIdentity pseudonymize(Object identifier);
 
+    /**
+     * @param identifier to pseudonymize
+     * @return identifier as a PseudonymizedIdentity
+     */
     PseudonymizedIdentity pseudonymize(Object identifier, Transform.Pseudonymize transform);
 
-    /**
-     * @param identifier to pseudonymize
-     * @return identifier as a PseudonymizedIdentity
-     */
-    PseudonymizedIdentity pseudonymize(String identifier);
 
-    /**
-     * @param identifier to pseudonymize
-     * @return identifier as a PseudonymizedIdentity
-     */
-    PseudonymizedIdentity pseudonymize(Number identifier);
 
     ConfigurationOptions getOptions();
 }

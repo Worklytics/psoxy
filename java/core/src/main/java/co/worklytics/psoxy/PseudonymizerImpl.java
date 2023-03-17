@@ -44,16 +44,6 @@ public class PseudonymizerImpl implements Pseudonymizer {
     }
 
     @Override
-    public PseudonymizedIdentity pseudonymize(@NonNull String value) {
-        return pseudonymize((Object)  value);
-    }
-
-    @Override
-    public PseudonymizedIdentity pseudonymize(@NonNull Number value) {
-        return pseudonymize((Object) value);
-    }
-
-
     public PseudonymizedIdentity pseudonymize(Object value) {
         return pseudonymize(value, Transform.Pseudonymize.builder().build());
     }
