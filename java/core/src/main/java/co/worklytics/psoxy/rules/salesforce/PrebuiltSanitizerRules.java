@@ -201,7 +201,7 @@ public class PrebuiltSanitizerRules {
             .responseSchema(jsonSchemaForQueryResult(ID_QUERY_RESULT_JSON_SCHEMA))
             .build();
 
-    public static final RuleSet SALESFORCE = Rules2.builder()
+    public static final RESTRules SALESFORCE = Rules2.builder()
             .endpoint(DESCRIBE_ENDPOINT)
             .endpoint(UPDATED_ACCOUNTS_AND_ACTIVITY_HISTORY_ENDPOINT)
             // Note: Update users is not used, as it will return an array
