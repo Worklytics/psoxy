@@ -16,6 +16,7 @@ import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
 import lombok.Data;
 import lombok.SneakyThrows;
+import lombok.extern.java.Log;
 import org.apache.commons.io.input.BOMInputStream;
 
 import javax.inject.Inject;
@@ -26,6 +27,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+@Log
 public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
 
     @Inject
@@ -87,13 +89,13 @@ public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
 
             try (InputStream processedStream = new ByteArrayInputStream(storageEventResponse.getBytes())) {
 
-                System.out.println("Writing to: " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationObjectPath());
+                log.info("Writing to: " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationObjectPath());
 
                 storage.createFrom(BlobInfo.newBuilder(BlobId.of(storageEventResponse.getDestinationBucketName(), storageEventResponse.getDestinationObjectPath()))
                     .setContentType(blobInfo.getContentType())
                     .build(), processedStream);
 
-                System.out.println("Successfully pseudonymized " + importBucket + "/"
+                log.info("Successfully pseudonymized " + importBucket + "/"
                     + sourceName + " and uploaded to " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationObjectPath());
             }
         }
