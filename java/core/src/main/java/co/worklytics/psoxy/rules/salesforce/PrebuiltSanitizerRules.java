@@ -166,12 +166,6 @@ public class PrebuiltSanitizerRules {
             .transforms(USER_TRANSFORMATIONS)
             .build();
 
-    static final Endpoint GET_USERS_WITH_PSEODONYMIZED_ID_PARAMETER_ENDPOINT = Endpoint.builder()
-            .pathRegex("^/services/data/" + VERSION_REGEX + "/composite/sobjects/User[?]id=(/p~[a-zA-Z0-9_-])[^/]*")
-            .transform(ATTRIBUTES_REDACT)
-            .transforms(USER_TRANSFORMATIONS)
-            .build();
-
     static final Endpoint QUERY_ID_FOR_ACCOUNTS_ENDPOINT = Endpoint.builder()
             .pathRegex("^/services/data/" + VERSION_REGEX + "/query[?]q=SELECT(%20|\\+)Id(%20|\\+)FROM(%20|\\+)Account.*$")
             .responseSchema(jsonSchemaForQueryResult(ID_QUERY_RESULT_JSON_SCHEMA))
@@ -225,7 +219,6 @@ public class PrebuiltSanitizerRules {
             //}
             .endpoint(GET_ACCOUNTS_ENDPOINT)
             .endpoint(GET_USERS_ENDPOINT)
-            .endpoint(GET_USERS_WITH_PSEODONYMIZED_ID_PARAMETER_ENDPOINT)
             .endpoint(QUERY_ID_FOR_USERS_ENDPOINT)
             .endpoint(QUERY_ID_FOR_ACCOUNTS_ENDPOINT)
             .endpoint(QUERY_USERS_ENDPOINT)
