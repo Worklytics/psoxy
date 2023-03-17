@@ -1,0 +1,5 @@
+EMPLOYEE_ID,EMPLOYEE_EMAIL,DEPARTMENT,EFFECTIVE_ISOWEEK
+1,alice@worklytics.co,Engineering,2020-01-06
+2,bob@workltyics.co,Sales,2020-01-06
+3,charles@workltycis.co,Engineering,2020-01-06
+4,,Engineering,2020-01-06
