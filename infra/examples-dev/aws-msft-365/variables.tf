@@ -69,12 +69,6 @@ variable "msft_owners_email" {
   description = "(Only if config includes MSFT connectors). Optionally, set of emails to apply as owners on AAD apps apart from current logged user"
 }
 
-variable "salesforce_domain" {
-  type        = string
-  default     = ""
-  description = "Domain of the Salesforce to connect to (only required if using Salesforce connector). To find your My Domain URL, from Setup, in the Quick Find box, enter My Domain, and then select My Domain"
-}
-
 variable "connector_display_name_suffix" {
   type        = string
   description = "suffix to append to display_names of connector SAs; helpful to distinguish between various ones in testing/dev scenarios"
@@ -95,6 +89,10 @@ variable "psoxy_base_dir" {
   validation {
     condition     = can(regex(".*\\/$", var.psoxy_base_dir))
     error_message = "The psoxy_base_dir value should end with a slash."
+  }
+  validation {
+    condition     = can(regex("^[^~].*$", var.psoxy_base_dir))
+    error_message = "The psoxy_base_dir value should be absolute path (not start with ~)."
   }
 }
 
@@ -205,3 +203,11 @@ variable "lookup_table_builders" {
     #    }
   }
 }
+
+
+variable "salesforce_domain" {
+  type        = string
+  default     = ""
+  description = "Domain of the Salesforce to connect to (only required if using Salesforce connector). To find your My Domain URL, from Setup, in the Quick Find box, enter My Domain, and then select My Domain"
+}
+

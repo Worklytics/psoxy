@@ -51,7 +51,7 @@ provider "azuread" {
 
 module "psoxy" {
   # source = "../../modular-examples/aws-msft-365"
-  source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-msft-365?ref=rc-v0.4.14"
+  source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-msft-365?ref=rc-v0.4.15"
 
   aws_account_id                 = var.aws_account_id
   aws_assume_role_arn            = var.aws_assume_role_arn # role that can test the instances (lambdas)
@@ -70,7 +70,13 @@ module "psoxy" {
   msft_owners_email              = var.msft_owners_email
   pseudonymize_app_ids           = var.pseudonymize_app_ids
   general_environment_variables  = var.general_environment_variables
+  salesforce_domain              = var.salesforce_domain
   #  aws_ssm_key_id                 = aws_kms_key.key.key_id
+}
+
+moved {
+  from = module.psoxy-aws-msft-365
+  to   = module.psoxy
 }
 
 # if you generated these, you may want them to import back into your data warehouse

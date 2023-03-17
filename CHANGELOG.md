@@ -17,6 +17,14 @@ Working tracking of changes, updated as work done prior to release.  Please revi
         then wildcard policy to read shared also grants read of secrets across all connectors)
   - keys/salts per value kind (PII, item id, etc)
 
+## v0.4.14
+
+Changes:
+ - heavily refactored `examples`/`examples-dev`; if you're directly using these, rather than having
+   made your own copy (as we recommend/describe in 'Getting Started', you may see lots of changes;
+   it is NOT recommended you apply these, as some of them will be destructive)
+ - you may have to re-install the test tool (`npm install tools/psoxy-test`)
+
 ## v0.4.11
 Features:
  - avoid ENV vars for config paths if default values

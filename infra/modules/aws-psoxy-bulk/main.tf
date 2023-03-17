@@ -232,6 +232,7 @@ moved {
 locals {
   accessor_role_names = concat([var.api_caller_role_name], var.sanitized_accessor_role_names)
   command_npm_install = "npm --prefix ${var.psoxy_base_dir}tools/psoxy-test install"
+  example_file        = var.example_file == null ? "/path/to/example.csv" : "${var.psoxy_base_dir}${var.example_file}"
 }
 
 resource "aws_iam_role_policy_attachment" "reader_policy_to_accessor_role" {
@@ -254,31 +255,37 @@ resource "aws_ssm_parameter" "rules" {
   }
 }
 
-resource "local_file" "todo-aws-psoxy-bulk-test" {
-  filename = "TODO ${var.todo_step} - test ${var.instance_id}.md"
-  content  = <<EOT
+locals {
+  todo_brief = <<EOT
+## Test ${var.instance_id}
+Check that the Psoxy works as expected and it transforms the files of your input bucket following
+the rules you have defined:
 
-## Testing Psoxy Bulk: ${var.instance_id}
+```shell
+node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f ${local.example_file} -d AWS -i ${aws_s3_bucket.input.bucket} -o ${aws_s3_bucket.sanitized.bucket} -r ${var.aws_assume_role_arn} -re ${var.aws_region}
+```
+
+EOT
+
+  todo_content = <<EOT
+# Review Psoxy Bulk: ${var.instance_id}
 
 Review the deployed function in AWS console:
 
 - https://console.aws.amazon.com/lambda/home?region=${var.aws_region}#/functions/${module.psoxy_lambda.function_name}?tab=monitoring
 
-We provide some Node.js scripts to easily validate the deployment. To be able
-to run the test commands below, you need Node.js (>=16) and npm (v >=8)
-installed. Ensure all dependencies are installed by running:
+We provide some Node.js scripts to easily validate the deployment. To be able to run the test
+commands below, you need Node.js (>=16) and npm (v >=8) installed. Ensure all dependencies are
+installed by running:
 
 ```shell
 ${local.command_npm_install}
 ```
 
-Then, check that the Psoxy works as expected and it transforms the files of your input
-bucket following the rules you have defined. Change the value of the `-f` option in the
-following command with the path of a CSV file (*) you would like to test:
+${local.todo_brief}
 
-```shell
-node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f /path/to/file -d AWS -i ${aws_s3_bucket.input.bucket} -o ${aws_s3_bucket.sanitized.bucket} -r ${var.aws_assume_role_arn} -re ${var.aws_region}
-```
+Check that the Psoxy works as expected and it transforms the files of your input bucket
+following the rules you have defined.
 
 Notice that the rest of the options should match your Psoxy configuration.
 
@@ -290,6 +297,28 @@ Please, check the documentation of our [Psoxy Testing tools](${var.psoxy_base_di
 for a detailed description of all the different options.
 
 EOT
+}
+
+
+resource "local_file" "todo-aws-psoxy-bulk-test" {
+  filename = "TODO_${var.todo_step}_test_${var.instance_id}.md"
+  content  = local.todo_content
+}
+
+resource "local_file" "test_script" {
+  filename        = "test-${var.instance_id}.sh"
+  file_permission = "0770"
+  content         = <<EOT
+#!/bin/bash
+FILE_PATH=$${1:-${try(local.example_file, "")}}
+BLUE='\e[0;34m'
+NC='\e[0m'
+
+printf "Quick test of $${BLUE}${var.instance_id}$${NC} ...\n"
+
+node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f $FILE_PATH -d AWS -i ${aws_s3_bucket.input.bucket} -o ${aws_s3_bucket.sanitized.bucket} -r ${var.aws_assume_role_arn} -re ${var.aws_region}
+EOT
+
 }
 
 # to facilitate composition of ingestion pipeline
@@ -325,6 +354,10 @@ output "instance_id" {
 output "proxy_kind" {
   value       = "bulk"
   description = "The kind of proxy instance this is."
+}
+
+output "todo" {
+  value = local.todo_brief
 }
 
 output "next_todo_step" {

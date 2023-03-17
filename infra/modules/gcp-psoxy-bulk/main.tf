@@ -141,11 +141,23 @@ resource "google_cloudfunctions_function" "function" {
   ]
 }
 
+locals {
+  example_file = var.example_file == null ? "/path/to/example/file.csv" : "${var.psoxy_base_dir}${var.example_file}"
+  todo_brief   = <<EOT
+## Test ${local.function_name}
+Check that the Psoxy works as expected and it transforms the files of your input bucket following
+the rules you have defined:
+
+```shell
+node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f ${local.example_file} -d GCP -i ${google_storage_bucket.input-bucket.name} -o ${google_storage_bucket.output-bucket.name}
+```
+EOT
+}
+
 resource "local_file" "todo-gcp-psoxy-bulk-test" {
   filename = "TODO ${var.todo_step} - test ${local.function_name}.md"
   content  = <<EOT
-
-## Testing Psoxy Bulk: ${local.function_name}
+# Testing Psoxy Bulk: ${local.function_name}
 
 Review the deployed Cloud function in GCP console:
 
@@ -159,13 +171,7 @@ installed. Ensure all dependencies are installed by running:
 ${local.command_npm_install}
 ```
 
-Then, check that the Psoxy works as expected and it transforms the files of your input
-bucket following the rules you have defined. Change the value of the `-f` option in the
-following command with the path of a CSV file (*) you would like to test:
-
-```shell
-node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f /path/to/file -d GCP -i ${google_storage_bucket.input-bucket.name} -o ${google_storage_bucket.output-bucket.name}
-```
+${local.todo_brief}
 
 Notice that the rest of the options should match your Psoxy configuration.
 
@@ -194,6 +200,10 @@ output "sanitized_bucket" {
 output "proxy_kind" {
   value       = "bulk"
   description = "The kind of proxy instance this is."
+}
+
+output "todo" {
+  value = local.todo_brief
 }
 
 output "next_todo_step" {

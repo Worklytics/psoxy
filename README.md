@@ -245,17 +245,12 @@ terraform apply
 
 ## Latest Releases
 
-### Current:  [v0.4.13](https://github.com/Worklytics/psoxy/releases/tag/v0.4.13)
+### Current: [v0.4.14](https://github.com/Worklytics/psoxy/releases/tag/v0.4.14)
+
+### Previous:  [v0.4.13](https://github.com/Worklytics/psoxy/releases/tag/v0.4.13)
 
 Highlights:
  - documentation improvements
-
-### Previous: [v0.4.12](https://github.com/Worklytics/psoxy/releases/tag/v0.4.12)
-
-Highlights:
-- compatibility for using AWS API Gateway in front of AWS lambda deployments (*alpha*; our only
-  supported approach is exposing AWS lambdas via function URLs)
-- TODOs via `terraform` output, to improve compatibility with [Terraform Cloud](https://cloud.hashicorp.com/products/terraform)
 
 Review [earlier release notes in GitHub](https://github.com/Worklytics/psoxy/releases).
 
