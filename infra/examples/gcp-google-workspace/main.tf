@@ -46,7 +46,14 @@ module "psoxy" {
   google_workspace_example_user  = var.google_workspace_example_user
   google_workspace_example_admin = var.google_workspace_example_admin
   general_environment_variables  = var.general_environment_variables
+  salesforce_domain              = var.salesforce_domain
 }
+
+moved {
+  from = module.psoxy-gcp-google-workspace
+  to   = module.psoxy
+}
+
 
 output "todos_1" {
   description = "List of todo steps to complete 1st, in markdown format."

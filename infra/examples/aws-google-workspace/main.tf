@@ -54,6 +54,8 @@ data "google_project" "psoxy-google-connectors" {
   project_id = var.gcp_project_id
 }
 
+
+
 module "psoxy" {
   # source = "../../modular-examples/aws-google-workspace"
   source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-google-workspace?ref=v0.4.14"
@@ -76,6 +78,13 @@ module "psoxy" {
   google_workspace_example_user  = var.google_workspace_example_user
   google_workspace_example_admin = var.google_workspace_example_admin
   general_environment_variables  = var.general_environment_variables
+  salesforce_domain              = var.salesforce_domain
+}
+
+# rename done in v0.4.14
+moved {
+  from = module.psoxy-aws-google-workspace
+  to   = module.psoxy
 }
 
 # if you generated these, you may want them to import back into your data warehouse

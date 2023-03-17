@@ -143,7 +143,7 @@ resource "google_cloudfunctions_function" "function" {
 
 locals {
   example_file = var.example_file == null ? "/path/to/example/file.csv" : "${var.psoxy_base_dir}${var.example_file}"
-  todo_brief = <<EOT
+  todo_brief   = <<EOT
 ## Test ${local.function_name}
 Check that the Psoxy works as expected and it transforms the files of your input bucket following
 the rules you have defined:

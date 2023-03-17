@@ -31,11 +31,15 @@ variable "aws_ssm_param_root_path" {
 
 variable "psoxy_base_dir" {
   type        = string
-  description = "the path where your psoxy repo resides. Preferably a full path, /home/user/repos/, avoid tilde (~) shortcut to $HOME"
+  description = "the path where your psoxy repo resides"
 
   validation {
     condition     = can(regex(".*\\/$", var.psoxy_base_dir))
     error_message = "The psoxy_base_dir value should end with a slash."
+  }
+  validation {
+    condition     = can(regex("^[^~].*$", var.psoxy_base_dir))
+    error_message = "The psoxy_base_dir value should be absolute path (not start with ~)."
   }
 }
 
@@ -87,12 +91,6 @@ variable "general_environment_variables" {
   type        = map(string)
   description = "environment variables to add for all connectors"
   default     = {}
-}
-
-variable "salesforce_domain" {
-  type        = string
-  default     = ""
-  description = "Domain of the Salesforce to connect to (only required if using Salesforce connector). To find your My Domain URL, from Setup, in the Quick Find box, enter My Domain, and then select My Domain"
 }
 
 variable "enabled_connectors" {
@@ -220,6 +218,12 @@ variable "google_workspace_example_admin" {
   type        = string
   description = "user to impersonate for Google Workspace API calls (null for value of `google_workspace_example_user`)"
   default     = null # will failover to user
+}
+
+variable "salesforce_domain" {
+  type        = string
+  default     = ""
+  description = "Domain of the Salesforce to connect to (only required if using Salesforce connector). To find your My Domain URL, from Setup, in the Quick Find box, enter My Domain, and then select My Domain"
 }
 
 variable "vpc_ip_block" {
