@@ -19,7 +19,7 @@ public class HealthCheckResult {
 
     // TODO: get this from pom.xml or something
     @Builder.Default
-    String version = "v0.4.13";
+    String version = "v0.4.14";
 
     //q: terraform module version?? (eg, have terraform deployment set its version number as ENV
     // variable, and then psoxy can read it and report it here)
