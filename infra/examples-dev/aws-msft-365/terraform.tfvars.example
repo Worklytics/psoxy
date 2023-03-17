@@ -2,6 +2,7 @@ aws_account_id                = "123123123123" # your AWS account ID here
 aws_assume_role_arn           = "arn:aws:iam::123123123123:role/InfraAdmin" # role in that AWS account ID to assume
 msft_tenant_id                = "" # your Microsoft tenant ID here
 enabled_connectors = [
+  "azure-ad",
   "asana",
   "dropbox-business",
   "outlook-calendar",

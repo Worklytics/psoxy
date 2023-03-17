@@ -1,0 +1,44 @@
+#!/bin/bash
+
+if stat terraform.tfvars &> /dev/null; then
+  EXISTING_TERRAFORM_TFVARS=true
+else
+  EXISTING_TERRAFORM_TFVARS=false
+fi
+
+../../../tools/init-example.sh
+
+if [ "$EXISTING_TERRAFORM_TFVARS" == true ]; then
+  # nothing to initialize in it, don't want to put vars twice
+  exit 0
+fi
+
+# colors
+RED='\e[0;31m'
+BLUE='\e[0;34m'
+NC='\e[0m' # No Color
+
+printf "Adding some values to your ${BLUE}terraform.tfvars${NC} ...\n\n"
+
+if aws --version &> /dev/null ; then
+  AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+  AWS_REGION=$(aws configure get region)
+  echo "aws_account_id=\"${AWS_ACCOUNT_ID}\"" >> terraform.tfvars
+  printf "\taws_account_id=${BLUE}\"${AWS_ACCOUNT_ID}\"${NC}\n"
+  echo "aws_region=\"${AWS_REGION}\"" >> terraform.tfvars
+  printf "\taws_region=${BLUE}\"${AWS_REGION}\"${NC}\n"
+fi
+
+if gcloud --version &> /dev/null ; then
+  GCP_PROJECT_ID=$(gcloud config get project)
+  echo "gcp_project_id=\"${GCP_PROJECT_ID}\"" >> terraform.tfvars
+  printf "\tgcp_project_id=${BLUE}\"${GCP_PROJECT_ID}\"${NC}\n"
+fi
+
+if az --version &> /dev/null ; then
+  MSFT_TENANT_ID=$(az account show --query tenantId --output tsv)
+  echo "msft_tenant_id=\"${MSFT_TENANT_ID}\"" >> terraform.tfvars
+  printf "\tmsft_tenant_id=${BLUE}\"${MSFT_TENANT_ID}\"${NC}\n"
+fi
+
+printf "\nif any of that looks wrong to you, edit ${BLUE}terraform.tfvars${NC}\n"
