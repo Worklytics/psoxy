@@ -112,6 +112,32 @@ public class PrebuiltSanitizerRules {
                             .build())))
             .build();
 
+    private final static SchemaRuleUtils.JsonSchema ACCOUNT_QUERY_RESULT_SCHEMA = SchemaRuleUtils.JsonSchema.builder()
+            .type("object")
+            .properties(Map.ofEntries(
+                    Map.entry("Id", SchemaRuleUtils.JsonSchema.builder().type("string").build()),
+                    Map.entry("AnnualRevenue", SchemaRuleUtils.JsonSchema.builder().type("number").build()),
+                    Map.entry("CreatedDate", SchemaRuleUtils.JsonSchema.builder().type("string").build()),
+                    Map.entry("CreatedById", SchemaRuleUtils.JsonSchema.builder().type("string").build()),
+                    Map.entry("IsDeleted", SchemaRuleUtils.JsonSchema.builder().type("string").build()),
+                    Map.entry("LastActivityDate", SchemaRuleUtils.JsonSchema.builder().type("string").build()),
+                    Map.entry("LastModifiedDate", SchemaRuleUtils.JsonSchema.builder().type("string").build()),
+                    Map.entry("LastModifiedById", SchemaRuleUtils.JsonSchema.builder().type("string").build()),
+                    Map.entry("NumberOfEmployees", SchemaRuleUtils.JsonSchema.builder().type("integer").build()),
+                    Map.entry("OwnerId", SchemaRuleUtils.JsonSchema.builder().type("string").build()),
+                    Map.entry("Ownership", SchemaRuleUtils.JsonSchema.builder().type("string").build()),
+                    Map.entry("ParentId", SchemaRuleUtils.JsonSchema.builder().type("string").build()),
+                    Map.entry("Rating", SchemaRuleUtils.JsonSchema.builder().type("string").build()),
+                    Map.entry("Sic", SchemaRuleUtils.JsonSchema.builder().type("string").build()),
+                    Map.entry("Type", SchemaRuleUtils.JsonSchema.builder().type("string").build()))
+            )
+            .build();
+
+    private final static Transform ACCOUNT_TRANSFORMATIONS = Transform.Pseudonymize.builder()
+            .jsonPath("$..CreatedById")
+            .jsonPath("$..LastModifiedById")
+            .jsonPath("$..OwnerId")
+            .build();
     static final Endpoint DESCRIBE_ENDPOINT = Endpoint.builder()
             .pathRegex("^/services/data/" + VERSION_REGEX + "/sobjects/(Account|ActivityHistory|User)/describe$")
             // No redaction/pseudonymization, response is just metadata of the object
@@ -126,12 +152,7 @@ public class PrebuiltSanitizerRules {
             .pathRegex("^/services/data/" + VERSION_REGEX + "/composite/sobjects/Account[?][^/]*")
             .allowedQueryParams(getQueryParameters)
             .transform(ATTRIBUTES_REDACT)
-            .transform(Transform.Pseudonymize.builder()
-                    .jsonPath("$..CreatedById")
-                    .jsonPath("$..LastModifiedById")
-                    .jsonPath("$..OwnerId")
-                    .build()
-            )
+            .transform(ACCOUNT_TRANSFORMATIONS)
             .build();
 
     static final Endpoint GET_USERS_ENDPOINT = Endpoint.builder()
@@ -148,10 +169,10 @@ public class PrebuiltSanitizerRules {
             .build();
 
     static final Endpoint QUERY_ID_FOR_ACCOUNTS_ENDPOINT = Endpoint.builder()
-                    .pathRegex("^/services/data/" + VERSION_REGEX + "/query[?]q=SELECT(%20|\\+)Id(%20|\\+)FROM(%20|\\+)Account.*$")
-                    .transform(ATTRIBUTES_REDACT)
-                    .responseSchema(jsonSchemaForQueryResult(ID_QUERY_RESULT_JSON_SCHEMA))
-                    .build();
+            .pathRegex("^/services/data/" + VERSION_REGEX + "/query[?]q=SELECT(%20|\\+)Id(%20|\\+)FROM(%20|\\+)Account.*$")
+            .transform(ATTRIBUTES_REDACT)
+            .responseSchema(jsonSchemaForQueryResult(ID_QUERY_RESULT_JSON_SCHEMA))
+            .build();
 
     static final Endpoint QUERY_USERS_ENDPOINT = Endpoint.builder()
             .pathRegex("^/services/data/" + VERSION_REGEX + "/query[?]q=SELECT.*FROM(%20|\\+)User(%20|\\+)WHERE(%20|\\+)LastModifiedDate.*$")
@@ -159,22 +180,28 @@ public class PrebuiltSanitizerRules {
             .responseSchema(jsonSchemaForQueryResult(USER_BY_QUERY_RESULT_JSON_SCHEMA))
             .build();
 
+    static final Endpoint QUERY_ACCOUNTS_ENDPOINT = Endpoint.builder()
+            .pathRegex("^/services/data/" + VERSION_REGEX + "/query[?]q=SELECT.*FROM(%20|\\+)Account(%20|\\+)WHERE(%20|\\+)LastModifiedDate.*$")
+            .transform(ACCOUNT_TRANSFORMATIONS)
+            .responseSchema(jsonSchemaForQueryResult(ACCOUNT_QUERY_RESULT_SCHEMA))
+            .build();
+
     static final Endpoint QUERY_FOR_ACTIVITY_HISTORIES_ENDPOINT = Endpoint.builder()
-                    .pathRegex("^/services/data/" + VERSION_REGEX + "/query[?]q=SELECT.*FROM(%20|\\+)ActivityHistories.*$")
-                    .transform(Transform.Pseudonymize.builder()
-                            .jsonPath("$..records[*].ActivityHistories.records[*].CreatedById")
-                            .jsonPath("$..records[*].ActivityHistories.records[*].LastModifiedById")
-                            .jsonPath("$..records[*].ActivityHistories.records[*].OwnerId")
-                            .jsonPath("$..records[*].ActivityHistories.records[*].WhoId")
-                            .build())
-                    .responseSchema(jsonSchemaForQueryResult(ACTIVITY_HISTORIES_QUERY_RESULT_SCHEMA))
-                    .build();
+            .pathRegex("^/services/data/" + VERSION_REGEX + "/query[?]q=SELECT.*FROM(%20|\\+)ActivityHistories.*$")
+            .transform(Transform.Pseudonymize.builder()
+                    .jsonPath("$..records[*].ActivityHistories.records[*].CreatedById")
+                    .jsonPath("$..records[*].ActivityHistories.records[*].LastModifiedById")
+                    .jsonPath("$..records[*].ActivityHistories.records[*].OwnerId")
+                    .jsonPath("$..records[*].ActivityHistories.records[*].WhoId")
+                    .build())
+            .responseSchema(jsonSchemaForQueryResult(ACTIVITY_HISTORIES_QUERY_RESULT_SCHEMA))
+            .build();
 
     static final Endpoint QUERY_ID_FOR_USERS_ENDPOINT = Endpoint.builder()
-                    .pathRegex("^/services/data/" + VERSION_REGEX + "/query[?]q=SELECT(%20|\\+)Id(%20|\\+)FROM(%20|\\+)User.*$")
-                    .transforms(QUERY_ID_USER_TRANSFORMATION)
-                    .responseSchema(jsonSchemaForQueryResult(ID_QUERY_RESULT_JSON_SCHEMA))
-                    .build();
+            .pathRegex("^/services/data/" + VERSION_REGEX + "/query[?]q=SELECT(%20|\\+)Id(%20|\\+)FROM(%20|\\+)User.*$")
+            .transforms(QUERY_ID_USER_TRANSFORMATION)
+            .responseSchema(jsonSchemaForQueryResult(ID_QUERY_RESULT_JSON_SCHEMA))
+            .build();
 
     public static final RuleSet SALESFORCE = Rules2.builder()
             .endpoint(DESCRIBE_ENDPOINT)
@@ -199,6 +226,7 @@ public class PrebuiltSanitizerRules {
             .endpoint(QUERY_ID_FOR_USERS_ENDPOINT)
             .endpoint(QUERY_ID_FOR_ACCOUNTS_ENDPOINT)
             .endpoint(QUERY_USERS_ENDPOINT)
+            .endpoint(QUERY_ACCOUNTS_ENDPOINT)
             .endpoint(QUERY_FOR_ACTIVITY_HISTORIES_ENDPOINT)
             .build();
 
