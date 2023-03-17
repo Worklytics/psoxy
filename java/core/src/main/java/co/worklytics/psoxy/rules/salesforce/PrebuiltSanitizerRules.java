@@ -47,12 +47,46 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..records[*].Id")
                     .build());
 
-    private static SchemaRuleUtils.JsonSchema ID_QUERY_RESULT_JSON_SCHEMA = SchemaRuleUtils.JsonSchema.builder()
+    private final static SchemaRuleUtils.JsonSchema ID_QUERY_RESULT_JSON_SCHEMA = SchemaRuleUtils.JsonSchema.builder()
             .type("object")
-                .properties(Map.of(
-            "Id", SchemaRuleUtils.JsonSchema.builder()
-                                .type("string")
-                                .build()))
+            .properties(Map.of(
+                    "Id", SchemaRuleUtils.JsonSchema.builder()
+                            .type("string")
+                            .build()))
+            .build();
+
+    private final static SchemaRuleUtils.JsonSchema ACTIVITY_HISTORIES_QUERY_RESULT_SCHEMA = SchemaRuleUtils.JsonSchema.builder()
+            .type("object")
+            .properties(Map.of(
+                    "ActivityHistories", jsonSchemaForQueryResult(SchemaRuleUtils.JsonSchema.builder()
+                            .type("object")
+                            .properties(Map.ofEntries(
+                                    Map.entry("AccountId", SchemaRuleUtils.JsonSchema.builder().type("string").build()),
+                                    Map.entry("ActivityDate", SchemaRuleUtils.JsonSchema.builder().type("string").build()),
+                                    Map.entry("ActivityDateTime", SchemaRuleUtils.JsonSchema.builder().type("string").build()),
+                                    Map.entry("ActivitySubtype", SchemaRuleUtils.JsonSchema.builder().type("string").build()),
+                                    Map.entry("ActivityType", SchemaRuleUtils.JsonSchema.builder().type("string").build()),
+                                    Map.entry("CallDurationInSeconds", SchemaRuleUtils.JsonSchema.builder().type("integer").build()),
+                                    Map.entry("CallType", SchemaRuleUtils.JsonSchema.builder().type("string").build()),
+                                    Map.entry("CreatedDate", SchemaRuleUtils.JsonSchema.builder().type("string").build()),
+                                    Map.entry("CreatedById", SchemaRuleUtils.JsonSchema.builder().type("string").build()),
+                                    Map.entry("DurationInMinutes", SchemaRuleUtils.JsonSchema.builder().type("integer").build()),
+                                    Map.entry("EndDateTime", SchemaRuleUtils.JsonSchema.builder().type("string").build()),
+                                    Map.entry("Id", SchemaRuleUtils.JsonSchema.builder().type("string").build()),
+                                    Map.entry("IsAllDayEvent", SchemaRuleUtils.JsonSchema.builder().type("boolean").build()),
+                                    Map.entry("IsDeleted", SchemaRuleUtils.JsonSchema.builder().type("boolean").build()),
+                                    Map.entry("IsHighPriority", SchemaRuleUtils.JsonSchema.builder().type("boolean").build()),
+                                    Map.entry("IsTask", SchemaRuleUtils.JsonSchema.builder().type("boolean").build()),
+                                    Map.entry("LastModifiedDate", SchemaRuleUtils.JsonSchema.builder().type("string").build()),
+                                    Map.entry("LastModifiedById", SchemaRuleUtils.JsonSchema.builder().type("string").build()),
+                                    Map.entry("OwnerId", SchemaRuleUtils.JsonSchema.builder().type("string").build()),
+                                    Map.entry("Priority", SchemaRuleUtils.JsonSchema.builder().type("string").build()),
+                                    Map.entry("StartDateTime", SchemaRuleUtils.JsonSchema.builder().type("string").build()),
+                                    Map.entry("Status", SchemaRuleUtils.JsonSchema.builder().type("string").build()),
+                                    Map.entry("WhatId", SchemaRuleUtils.JsonSchema.builder().type("string").build()),
+                                    Map.entry("WhoId", SchemaRuleUtils.JsonSchema.builder().type("string").build()))
+                            )
+                            .build())))
             .build();
 
     static final Endpoint DESCRIBE_ENDPOINT = Endpoint.builder()
@@ -112,6 +146,7 @@ public class PrebuiltSanitizerRules {
                             .jsonPath("$..records[*].ActivityHistories.records[*].OwnerId")
                             .jsonPath("$..records[*].ActivityHistories.records[*].WhoId")
                             .build())
+                    .responseSchema(jsonSchemaForQueryResult(ACTIVITY_HISTORIES_QUERY_RESULT_SCHEMA))
                     .build())
             .endpoint(Endpoint.builder()
                     .pathRegex("^/services/data/" + VERSION_REGEX + "/query[?]q=SELECT.*FROM\\+ActivityHistories.*$")
@@ -121,6 +156,7 @@ public class PrebuiltSanitizerRules {
                             .jsonPath("$..records[*].ActivityHistories.records[*].OwnerId")
                             .jsonPath("$..records[*].ActivityHistories.records[*].WhoId")
                             .build())
+                    .responseSchema(jsonSchemaForQueryResult(ACTIVITY_HISTORIES_QUERY_RESULT_SCHEMA))
                     .build())
             .build();
 
