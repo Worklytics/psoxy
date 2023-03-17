@@ -69,6 +69,11 @@ variable "msft_owners_email" {
   description = "(Only if config includes MSFT connectors). Optionally, set of emails to apply as owners on AAD apps apart from current logged user"
 }
 
+variable "gcp_project_id" {
+  type        = string
+  description = "string ID of GCP project that will host psoxy instance; must exist"
+}
+
 variable "salesforce_domain" {
   type        = string
   default     = ""
@@ -79,13 +84,6 @@ variable "connector_display_name_suffix" {
   type        = string
   description = "suffix to append to display_names of connector SAs; helpful to distinguish between various ones in testing/dev scenarios"
   default     = ""
-}
-
-# this is no longer used; azure connectors auth'd via identity federation (OIDC)
-variable "certificate_subject" {
-  type        = string
-  description = "IGNORED; value for 'subject' passed to openssl when generation certificate (eg '/C=US/ST=New York/L=New York/CN=www.worklytics.co')"
-  default     = null
 }
 
 variable "psoxy_base_dir" {
@@ -166,6 +164,7 @@ variable "custom_bulk_connectors" {
   }
 }
 
+# TODO: rethink this schema before we publish this
 variable "lookup_table_builders" {
   type = map(object({
     input_connector_id            = string
@@ -205,3 +204,4 @@ variable "lookup_table_builders" {
     #    }
   }
 }
+

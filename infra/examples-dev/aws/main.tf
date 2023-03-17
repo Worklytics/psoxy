@@ -6,9 +6,14 @@ terraform {
       version = "~> 4.12"
     }
 
-    # for API connections to Microsoft 365
+    # for API connections to Microsoft 365 (comment this out if unused)
     azuread = {
       version = "~> 2.3"
+    }
+
+    # for the API connections to Google Workspace
+    google = {
+      version = ">= 3.74, <= 5.0"
     }
   }
 
@@ -24,9 +29,9 @@ terraform {
   # example remove backend (this S3 bucket must already be provisioned, and AWS role executing
   # terraform must be able to read/write to it - and use encryption key, if any)
   #  backend "s3" {
-  #    bucket = "mybucket"
-  #    key    = "path/to/my/key"
-  #    region = "us-east-1"
+  #    bucket = "terraform_state_bucket" # fill with S3 bucket where you want the statefile to be
+  #    key    = "prod_state" # fill with path where you want state file to be stored
+  #    region = "us-east-1" # cannot be a variable
   #  }
 }
 
@@ -40,6 +45,7 @@ provider "aws" {
   assume_role {
     role_arn = var.aws_assume_role_arn
   }
+
   allowed_account_ids = [
     var.aws_account_id
   ]
@@ -49,8 +55,15 @@ provider "azuread" {
   tenant_id = var.msft_tenant_id
 }
 
-module "psoxy-aws-msft-365" {
-  source = "../../modular-examples/aws-msft-365"
+# Google user or service account which Terraform is authenticated as must be authorized to
+# provision resources (Service Accounts + Keys; and activate APIs) in this project
+data "google_project" "psoxy-google-connectors" {
+  project_id = var.gcp_project_id
+}
+
+
+module "psoxy" {
+  source = "../../modular-examples/aws"
   # source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-msft-365?ref=v0.4.13"
 
   aws_account_id                 = var.aws_account_id
@@ -71,98 +84,24 @@ module "psoxy-aws-msft-365" {
   pseudonymize_app_ids           = var.pseudonymize_app_ids
   general_environment_variables  = var.general_environment_variables
   salesforce_domain              = var.salesforce_domain
-  #  aws_ssm_key_id                 = aws_kms_key.key.key_id
 }
-
-#resource "aws_kms_key" "key"  {
-#}
 
 # if you generated these, you may want them to import back into your data warehouse
 output "lookup_tables" {
-  value = module.psoxy-aws-msft-365.lookup_tables
+  value = module.psoxy.lookup_tables
 }
 
 output "todos_1" {
   description = "List of todo steps to complete 1st, in markdown format."
-  value       = join("\n", module.psoxy-aws-msft-365.todos_1)
+  value       = join("\n", module.psoxy.todos_1)
 }
 
 output "todos_2" {
   description = "List of todo steps to complete 2nd, in markdown format."
-  value       = join("\n", module.psoxy-aws-msft-365.todos_2)
+  value       = join("\n", module.psoxy.todos_2)
 }
 
 output "todos_3" {
   description = "List of todo steps to complete 3rd, in markdown format."
-  value       = join("\n", module.psoxy-aws-msft-365.todos_3)
-}
-
-moved {
-  from = module.worklytics_connector_specs
-  to   = module.psoxy-aws-msft-365.module.worklytics_connector_specs
-}
-
-moved {
-  from = module.psoxy-aws
-  to   = module.psoxy-aws-msft-365.module.psoxy-aws
-}
-
-moved {
-  from = module.global_secrets
-  to   = module.psoxy-aws-msft-365.module.global_secrets
-}
-
-moved {
-  from = module.msft-connection
-  to   = module.psoxy-aws-msft-365.module.msft-connection
-}
-
-moved {
-  from = module.msft-connection-auth
-  to   = module.psoxy-aws-msft-365.module.msft-connection-auth
-}
-
-moved {
-  from = module.private-key-aws-parameters
-  to   = module.psoxy-aws-msft-365.module.msft-365-connector-key-secrets
-}
-
-moved {
-  from = module.psoxy-msft-connector
-  to   = module.psoxy-aws-msft-365.module.psoxy-msft-connector
-}
-
-moved {
-  from = module.worklytics-psoxy-connection-msft-365
-  to   = module.psoxy-aws-msft-365.module.worklytics-psoxy-connection-msft-365
-}
-
-moved {
-  from = aws_ssm_parameter.long-access-secrets
-  to   = module.psoxy-aws-msft-365.aws_ssm_parameter.long-access-secrets
-}
-
-moved {
-  from = module.parameter-fill-instructions
-  to   = module.psoxy-aws-msft-365.module.parameter-fill-instructions
-}
-
-moved {
-  from = module.source_token_external_todo
-  to   = module.psoxy-aws-msft-365.module.source_token_external_todo
-}
-
-moved {
-  from = module.aws-psoxy-long-auth-connectors
-  to   = module.psoxy-aws-msft-365.module.aws-psoxy-long-auth-connectors
-}
-
-moved {
-  from = module.worklytics-psoxy-connection-oauth-long-access
-  to   = module.psoxy-aws-msft-365.module.worklytics-psoxy-connection-oauth-long-access
-}
-
-moved {
-  from = module.psoxy-bulk
-  to   = module.psoxy-aws-msft-365.module.psoxy-bulk
+  value       = join("\n", module.psoxy.todos_3)
 }
