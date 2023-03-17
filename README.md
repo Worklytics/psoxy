@@ -91,11 +91,12 @@ which you must provide as a configuration value in your proxy deployment.
 
 The API key/secret will be used to authenticate with the source's REST API and access the data.
 
-| Source | Details + Examples                                              | API Permissions / Scopes                                                                                       |
-|--------|-----------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------|
-| Asana  | [docs/sources/asana](docs/sources/asana.md)                     | a [Service Account](https://asana.com/guide/help/premium/service-accounts) (provides full access to Workspace) |
-| Slack  | [docs/sources/slack-discovery](docs/sources/slack-discovery.md) | `discovery:read`                                           |
-| Zoom   | [docs/sources/zoom](docs/sources/zoom.md)                       | `user:read:admin` `meeting:read:admin` `report:read:admin` |
+| Source     | Details + Examples                                              | API Permissions / Scopes                                                                                       |
+|------------|-----------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------|
+| Asana      | [docs/sources/asana](docs/sources/asana.md)                     | a [Service Account](https://asana.com/guide/help/premium/service-accounts) (provides full access to Workspace) |
+| Salesforce | [docs/sources/salesforce](docs/sources/salesforce.md)           | `api` `chatter_api` `refresh_token` `offline_access` `openid` `lightning` `content` `cdp_query_api`            |                                                                                                       |
+| Slack      | [docs/sources/slack-discovery](docs/sources/slack-discovery.md) | `discovery:read`                                                                                               |
+| Zoom       | [docs/sources/zoom](docs/sources/zoom.md)                       | `user:read:admin` `meeting:read:admin` `report:read:admin`                                                     |
 
 NOTE: the above scopes are copied from [infra/modules/worklytics-connector-specs](infra/modules/worklytics-connector-specs).
 Please refer to that module for a definitive list.
@@ -157,6 +158,18 @@ For testing your psoxy instance, you will need:
 |--------------------------------------------------------------------|---------|-------------------|
 | [Node.js](https://nodejs.org/en/)                                  | 16+     | `node --version`  |
 | [npm](https://www.npmjs.com/package/npm) (should come with `node`) | 8+      | `npm --version`   |
+
+
+We provide a script to check these prereqs, at [`tools/check-prereqs.sh`](tools/check-prereqs.sh).
+That script has no dependencies itself, so should be able to run on any plain POSIX-compliant shell
+(eg,`bash`, `zsh`, etc) that we'd expect you to find on most Linux, MacOS, or even Windows with
+Subsystem for Linux (WSL) platforms.
+
+```shell
+# from the root of a clone of this repository
+
+./tools/check-prereqs.sh
+```
 
 
 ### Setup

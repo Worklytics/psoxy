@@ -294,6 +294,8 @@ module "psoxy-bulk" {
   sanitized_accessor_role_names   = [ module.psoxy-aws.api_caller_role_name ]
   memory_size_mb                  = 1024
 
+  example_file                    = try(each.value.example_file, null)
+
   environment_variables = merge(
     var.general_environment_variables,
     try(each.value.environment_variables, {}),
@@ -377,8 +379,9 @@ output "todos_1" {
 output "todos_2" {
   description = "List of todo steps to complete 2nd, in markdown format."
   value = concat(
-    values(module.psoxy-google-workspace-connector)[*].todo,
+    values(module.worklytics-psoxy-connection-google-workspace)[*].todo,
     values(module.aws-psoxy-long-auth-connectors)[*].todo,
+    values(module.psoxy-bulk)[*].todo,
   )
 }
 
@@ -386,8 +389,8 @@ output "todos_3" {
   description = "List of todo steps to complete 3rd, in markdown format."
   value = concat(
     values(module.worklytics-psoxy-connection-google-workspace)[*].todo,
+    values(module.worklytics-psoxy-connection)[*].todo,
     values(module.psoxy-bulk-to-worklytics)[*].todo,
-    values(module.worklytics-psoxy-connection)[*].todo
   )
 }
 

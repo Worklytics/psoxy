@@ -125,7 +125,8 @@ public class GDriveTests extends JavaRulesTestBaseCase {
             InvocationExample.of("https://www.googleapis.com/drive/v2/files", "files.json"),
             InvocationExample.of("http://www.googleapis.com/drive/v2/files/some-file-id/permissions/234234", "permission.json"),
             InvocationExample.of("http://www.googleapis.com/drive/v2/files/some-file-id/permissions", "permissions.json"),
-            InvocationExample.of("http://www.googleapis.com/drive/v2/files/any-file-id/revisions", "revisions.json")
+            InvocationExample.of("http://www.googleapis.com/drive/v2/files/any-file-id/revisions", "revisions.json"),
+            InvocationExample.of("http://www.googleapis.com/drive/v2/files/any-file-id/revisions/123", "revision.json")
         );
     }
 }
