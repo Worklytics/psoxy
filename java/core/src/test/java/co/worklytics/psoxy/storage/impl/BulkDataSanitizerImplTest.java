@@ -58,7 +58,7 @@ public class BulkDataSanitizerImplTest {
 
     @BeforeEach
     public void setup() {
-        Container container = DaggerCSVFileHandlerTest_Container.create();
+        Container container = DaggerBulkDataSanitizerImplTest_Container.create();
         container.inject(this);
 
         pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()

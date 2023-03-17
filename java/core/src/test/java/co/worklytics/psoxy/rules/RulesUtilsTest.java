@@ -100,7 +100,7 @@ class RulesUtilsTest {
         assertEquals("blah",
             utils.parseAdditionalTransforms(config).get(0).getDestinationBucketName());
         assertEquals("something",
-            utils.parseAdditionalTransforms(config).get(0).getRules().getColumnsToPseudonymize().get(0));
+            ((CsvRules) utils.parseAdditionalTransforms(config).get(0).getRules()).getColumnsToPseudonymize().get(0));
 
     }
 }
