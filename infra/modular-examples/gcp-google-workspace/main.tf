@@ -18,6 +18,7 @@ module "worklytics_connector_specs" {
   enabled_connectors             = var.enabled_connectors
   google_workspace_example_user  = var.google_workspace_example_user
   google_workspace_example_admin = coalesce(var.google_workspace_example_admin, var.google_workspace_example_user)
+  salesforce_domain              = var.salesforce_domain
 }
 
 module "psoxy-gcp" {
@@ -273,6 +274,7 @@ module "psoxy-gcp-bulk" {
   psoxy_base_dir                = var.psoxy_base_dir
   bucket_write_role_id          = module.psoxy-gcp.bucket_write_role_id
   secret_bindings               = module.psoxy-gcp.secrets
+  example_file                  = try(each.value.example_file, null)
 
   environment_variables = merge(
     var.general_environment_variables,
@@ -329,6 +331,7 @@ output "todos_2" {
   value = concat(
     values(module.psoxy-google-workspace-connector)[*].todo,
     values(module.connector-long-auth-function)[*].todo,
+    values(module.psoxy-gcp-bulk)[*].todo,
   )
 }
 
@@ -336,7 +339,19 @@ output "todos_3" {
   description = "List of todo steps to complete 3rd, in markdown format."
   value = concat(
     values(module.worklytics-psoxy-connection)[*].todo,
+    values(module.worklytics-psoxy-connection)[*].todo,
     values(module.psoxy-bulk-to-worklytics)[*].todo,
-    values(module.worklytics-psoxy-connection)[*].todo
   )
+}
+
+
+# use case: let someone consume this deploy another psoxy instance, reusing artifacts
+output "artifacts_bucket_name" {
+  description = "Name of GCS bucket with deployment artifacts."
+  value       = module.psoxy-gcp.artifacts_bucket_name
+}
+
+output "deployment_bundle_object_name" {
+  description = "Object name of deplyment bundle within artifacts bucket."
+  value       = module.psoxy-gcp.deployment_bundle_object_name
 }

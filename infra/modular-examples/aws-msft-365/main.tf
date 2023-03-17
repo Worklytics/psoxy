@@ -30,6 +30,7 @@ module "worklytics_connector_specs" {
   # this IS the correct ID for the user terraform is running as, which we assume is a user who's OK
   # to use the subject of examples. You can change it to any string you want.
   example_msft_user_guid = data.azuread_client_config.current.object_id
+  salesforce_domain      = var.salesforce_domain
 }
 
 module "psoxy-aws" {
@@ -318,6 +319,7 @@ module "psoxy-bulk" {
   global_parameter_arns           = module.global_secrets.secret_arns
   path_to_instance_ssm_parameters = "${var.aws_ssm_param_root_path}PSOXY_${upper(replace(each.key, "-", "_"))}_"
   ssm_kms_key_ids                 = local.ssm_key_ids
+  example_file                    = try(each.value.example_file, null)
 
   sanitized_accessor_role_names = [
     module.psoxy-aws.api_caller_role_name
@@ -420,6 +422,7 @@ output "todos_2" {
   value = concat(
     values(module.psoxy-msft-connector)[*].todo,
     values(module.aws-psoxy-long-auth-connectors)[*].todo,
+    values(module.psoxy-bulk)[*].todo,
   )
 }
 
@@ -427,12 +430,22 @@ output "todos_3" {
   description = "List of todo steps to complete 3rd, in markdown format."
   value = concat(
     values(module.worklytics-psoxy-connection-msft-365)[*].todo,
+    values(module.worklytics-psoxy-connection-oauth-long-access)[*].todo,
     values(module.psoxy-bulk-to-worklytics)[*].todo,
-    values(module.worklytics-psoxy-connection-oauth-long-access)[*].todo
   )
 }
 
 output "caller_role_arn" {
   description = "ARN of the AWS IAM role that can be assumed to invoke the Lambdas."
   value       = module.psoxy-aws.api_caller_role_arn
+}
+
+output "path_to_deployment_jar" {
+  description = "Path to the package to deploy (JAR) as lambda."
+  value       = module.psoxy-aws.path_to_deployment_jar
+}
+
+output "deployment_package_hash" {
+  description = "Hash of deployment package."
+  value       = module.psoxy-aws.deployment_package_hash
 }

@@ -241,7 +241,7 @@ locals {
       environment_variables : {}
       secured_variables : [
         { name : "ACCESS_TOKEN", writable : false },
-      ],
+      ]
       reserved_concurrent_executions : null
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
@@ -252,16 +252,66 @@ locals {
         "/api/1.0/tasks?project={ANY_PROJECT_GID}",
         "/api/1.0/tasks/{ANY_TASK_GID}",
         "/api/1.0/tasks/{ANY_TASK_GID}/stories",
-      ],
-      secured_variables : [
-        { name : "ACCESS_TOKEN", writable : false },
-      ],
+      ]
       external_token_todo : <<EOT
   1. Create a [Service Account User + token](https://asana.com/guide/help/premium/service-accounts)
     or a sufficiently [Personal Access Token](https://developers.asana.com/docs/personal-access-token)
     for a sufficiently privileged user (who can see all the workspaces/teams/projects/tasks you wish to
     import to Worklytics via this connection).
   2. Update the content of PSOXY_ASANA_ACCESS_TOKEN variable with the previous token value obtained
+EOT
+    }
+    salesforce = {
+      source_kind : "salesforce",
+      worklytics_connector_id : "salesforce-psoxy"
+      display_name : "Salesforce"
+      identifier_scope_id : "salesforce"
+      worklytics_connector_name : "Salesforce via Psoxy"
+      target_host : var.salesforce_domain
+      source_auth_strategy : "oauth2_refresh_token"
+      environment_variables : {
+        GRANT_TYPE : "client_credentials"
+        CREDENTIALS_FLOW : "client_secret"
+        REFRESH_ENDPOINT : "https://${var.salesforce_domain}/services/oauth2/token"
+      }
+      secured_variables : [
+        { name : "CLIENT_SECRET", writable : false },
+        { name : "CLIENT_ID", writable : false },
+      ]
+      reserved_concurrent_executions : null
+      example_api_calls_user_to_impersonate : null
+      example_api_calls : [
+        "/services/data/v51.0/sobjects/Account/describe",
+        "/services/data/v51.0/sobjects/ActivityHistory/describe",
+        "/services/data/v51.0/sobjects/Account/updated?start=2016-03-09T18%3A44%3A00%2B00%3A00&end=2023-03-09T18%3A44%3A00%2B00%3A00",
+        "/services/data/v51.0/composite/sobjects/User?ids={ANY_USER_ID}&fields=Alias,AccountId,ContactId,CreatedDate,CreatedById,Email,EmailEncodingKey,Id,IsActive,LastLoginDate,LastModifiedDate,ManagerId,Name,TimeZoneSidKey,Username,UserRoleId,UserType",
+        "/services/data/v51.0/composite/sobjects/Account?ids={ANY_ACCOUNT_ID}&fields=Id,AnnualRevenue,CreatedDate,CreatedById,IsDeleted,LastActivityDate,LastModifiedDate,LastModifiedById,NumberOfEmployees,OwnerId,Ownership,ParentId,Rating,Sic,Type",
+        "/services/data/v51.0/query?q=SELECT%20%28SELECT%20AccountId%2CActivityDate%2CActivityDateTime%2CActivitySubtype%2CActivityType%2CCallDurationInSeconds%2CCallType%2CCreatedDate%2CCreatedById%2CDurationInMinutes%2CEndDateTime%2CId%2CIsAllDayEvent%2CIsDeleted%2CIsHighPriority%2CIsTask%2CLastModifiedDate%2CLastModifiedById%2COwnerId%2CPriority%2CStartDateTime%2CStatus%2CWhatId%2CWhoId%20FROM%20ActivityHistories%20ORDER%20BY%20LastModifiedDate%20DESC%20NULLS%20LAST%29%20FROM%20Account%20where%20id%3D%27{ANY_ACCOUNT_ID}%27",
+        "/services/data/v51.0/query?q=SELECT%20Id%20FROM%20Account%20ORDER%20BY%20Id%20ASC",
+        "/services/data/v51.0/query?q=SELECT%20Id%20FROM%20User%20ORDER%20BY%20Id%20ASC"
+      ]
+      external_token_todo : <<EOT
+  1. Create a [Salesforce application + client credentials flow](https://help.salesforce.com/s/articleView?language=en_US&id=sf.remoteaccess_oauth_client_credentials_flow.htm&type=5)
+    with following permissions:
+    - Manage user data via APIs (`api`)
+    - Access Connect REST API resources (`chatter_api`)
+    - Perform requests at any time (`refresh_token`, `offline_access`)
+    - Access unique user identifiers (`openid`)
+    - Access Lightning applications (`lightning`)
+    - Access content resources (`content`)
+    - Perform ANSI SQL queries on Customer Data Platform data (`cdp_query_api`)
+
+  Apart from Salesforce instructions please review the following:
+  - "Callback URL" can be anything, not required in this flow but required by Salesforce.
+  - Application is marked with "Enable Client Credentials Flow"
+  - You have to assign an user for Client Credentials, be sure:
+      - A "run as" user marked with "API Only Permission" needs to be associated
+      - The policy associated to the user have the enabled next Administrative Permissions:
+        - API Enabled
+        - APEX REST Services
+      - And the policy has the application created marked as enabled in "Connected App Access". Otherwise requests will return 401 with INVALID_SESSION_ID
+  2. Once created, open "Manage Consumer Details"
+  3. Update the content of `PSOXY_SALESFORCE_CLIENT_ID` from Consumer Key	and `PSOXY_SALESFORCE_CLIENT_SECRET` from Consumer Secret
 EOT
     }
     slack-discovery-api = {
@@ -470,6 +520,7 @@ EOT
       settings_to_provide = {
         "Data Source Processing" = "badge"
       }
+      example_file = "docs/sources/bulk/badge-example.csv"
     }
     "hris" = {
       source_kind               = "hris"
@@ -487,6 +538,7 @@ EOT
       settings_to_provide = {
         "Parser" = "EMPLOYEE_SNAPSHOT"
       }
+      example_file = "docs/sources/bulk/hris-example.csv"
     }
     "survey" = {
       worklytics_connector_id   = "survey-import-psoxy"
@@ -499,6 +551,7 @@ EOT
           # "EMPLOYEE_EMAIL", # if exists
         ]
       }
+      example_file = "docs/sources/bulk/survey-example.csv"
     }
     "qualtrics" = {
       source_kind               = "qualtrics"
@@ -511,6 +564,7 @@ EOT
           # "employee_email", # if exists
         ]
       }
+      example_file = "docs/sources/bulk/survey-example.csv"
     }
   }
 }

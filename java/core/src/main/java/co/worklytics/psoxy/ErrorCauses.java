@@ -10,6 +10,7 @@ public enum ErrorCauses {
      * Sanitization rules blocked the call
      */
     BLOCKED_BY_RULES,
+
     /**
      * Credentials construction failing
      */

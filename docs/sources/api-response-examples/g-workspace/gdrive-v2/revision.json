@@ -1,0 +1,29 @@
+{
+  "kind": "drive#revision",
+  "etag": "\"lKV9tCd1m5423452345x6DkEA\"",
+  "id": "65",
+  "selfLink": "https://www.googleapis.com/drive/v2/files/1234918234afa78sdf098214321/revisions/65",
+  "mimeType": "application/vnd.google-apps.spreadsheet",
+  "modifiedDate": "2023-01-03T20:04:21.287Z",
+  "published": false,
+  "exportLinks": {
+    "application/x-vnd.oasis.opendocument.spreadsheet": "https://docs.google.com/spreadsheets/export?id=1234918234afa78sdf098214321&revision=65&exportFormat=ods",
+    "text/tab-separated-values": "https://docs.google.com/spreadsheets/export?id=1234918234afa78sdf098214321&revision=65&exportFormat=tsv",
+    "application/pdf": "https://docs.google.com/spreadsheets/export?id=1234918234afa78sdf098214321&revision=65&exportFormat=pdf",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "https://docs.google.com/spreadsheets/export?id=1234918234afa78sdf098214321&revision=65&exportFormat=xlsx",
+    "text/csv": "https://docs.google.com/spreadsheets/export?id=1234918234afa78sdf098214321&revision=65&exportFormat=csv",
+    "application/zip": "https://docs.google.com/spreadsheets/export?id=1234918234afa78sdf098214321&revision=65&exportFormat=zip",
+    "application/vnd.oasis.opendocument.spreadsheet": "https://docs.google.com/spreadsheets/export?id=1234918234afa78sdf098214321&revision=65&exportFormat=ods"
+  },
+  "lastModifyingUserName": "Bob Boss",
+  "lastModifyingUser": {
+    "kind": "drive#user",
+    "displayName": "Bob Boss",
+    "picture": {
+      "url": "https://lh3.googleusercontent.com/a-/ACB123412341234Xm6_LFGpnLAhibXdyr2EWmzO_iGSRY0VRJp8gjVxpOTEeFZPfkU6kYAhD415234123412342RcjAkHwOt0IMfdKNoCVKs234523452asf342-CRb4MAcmW81Z123412355423asfdasdf134234asdasdfJ1=s64"
+    },
+    "isAuthenticatedUser": true,
+    "permissionId": "123421341512341234",
+    "emailAddress": "bob@worklytics.co"
+  }
+}

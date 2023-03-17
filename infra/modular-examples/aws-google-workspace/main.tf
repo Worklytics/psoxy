@@ -26,6 +26,7 @@ module "worklytics_connector_specs" {
   enabled_connectors             = var.enabled_connectors
   google_workspace_example_user  = var.google_workspace_example_user
   google_workspace_example_admin = coalesce(var.google_workspace_example_admin, var.google_workspace_example_user)
+  salesforce_domain              = var.salesforce_domain
 }
 
 module "psoxy-aws" {
@@ -289,6 +290,7 @@ module "psoxy-bulk" {
   global_parameter_arns           = module.global_secrets.secret_arns
   path_to_instance_ssm_parameters = "${var.aws_ssm_param_root_path}PSOXY_${upper(replace(each.key, "-", "_"))}_"
   ssm_kms_key_ids                 = local.ssm_key_ids
+  example_file                    = try(each.value.example_file, null)
 
   environment_variables = merge(
     var.general_environment_variables,
@@ -380,8 +382,9 @@ output "todos_1" {
 output "todos_2" {
   description = "List of todo steps to complete 2nd, in markdown format."
   value = concat(
-    values(module.psoxy-google-workspace-connector)[*].todo,
+    values(module.worklytics-psoxy-connection-google-workspace)[*].todo,
     values(module.aws-psoxy-long-auth-connectors)[*].todo,
+    values(module.psoxy-bulk)[*].todo,
   )
 }
 
@@ -389,12 +392,22 @@ output "todos_3" {
   description = "List of todo steps to complete 3rd, in markdown format."
   value = concat(
     values(module.worklytics-psoxy-connection-google-workspace)[*].todo,
+    values(module.worklytics-psoxy-connection)[*].todo,
     values(module.psoxy-bulk-to-worklytics)[*].todo,
-    values(module.worklytics-psoxy-connection)[*].todo
   )
 }
 
 output "caller_role_arn" {
   description = "ARN of the AWS IAM role that can be assumed to invoke the Lambdas."
   value       = module.psoxy-aws.api_caller_role_arn
+}
+
+output "path_to_deployment_jar" {
+  description = "Path to the package to deploy (JAR) as lambda."
+  value       = module.psoxy-aws.path_to_deployment_jar
+}
+
+output "deployment_package_hash" {
+  description = "Hash of deployment package."
+  value       = module.psoxy-aws.deployment_package_hash
 }

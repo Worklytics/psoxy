@@ -1,0 +1,32 @@
+[
+  {
+    "AccountId":null,
+    "ContactId":"null",
+    "CreatedDate":"2021-03-02T16:31:04.000+0000",
+    "CreatedById":"{\"scope\":\"salesforce\",\"hash\":\"m0410eDFbgwXYsI7rf1F1RMB6xgy2OWwiG3r0MzU5vk\"}",
+    "EmailEncodingKey":"UTF-8",
+    "Id":"{\"scope\":\"salesforce\",\"hash\":\"8._1LX35JC2Ff6t5On5yyhBdWu9r85osjTD45LQKK.M\"}",
+    "IsActive":true,
+    "LastLoginDate":null,
+    "LastModifiedDate":"2021-03-02T16:31:04.000+0000",
+    "ManagerId":"null",
+    "TimeZoneSidKey":"America/Los_Angeles",
+    "UserRoleId":null,
+    "UserType":"CsnOnly"
+  },
+  {
+    "AccountId":null,
+    "ContactId":"null",
+    "CreatedDate":"2021-03-02T16:31:04.000+0000",
+    "CreatedById":"{\"scope\":\"salesforce\",\"hash\":\"m0410eDFbgwXYsI7rf1F1RMB6xgy2OWwiG3r0MzU5vk\"}",
+    "EmailEncodingKey":"UTF-8",
+    "Id":"{\"scope\":\"salesforce\",\"hash\":\"b00ooIE160pWAbTy56ThNSdUIhZGffxDoZ331jCIbFw\"}",
+    "IsActive":true,
+    "LastLoginDate":"2023-03-10T16:51:26.000+0000",
+    "LastModifiedDate":"2021-03-02T16:31:04.000+0000",
+    "ManagerId":"null",
+    "TimeZoneSidKey":"America/Los_Angeles",
+    "UserRoleId":null,
+    "UserType":"Standard"
+  }
+]

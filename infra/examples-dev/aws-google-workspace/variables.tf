@@ -89,6 +89,12 @@ variable "general_environment_variables" {
   default     = {}
 }
 
+variable "salesforce_domain" {
+  type        = string
+  default     = ""
+  description = "Domain of the Salesforce to connect to (only required if using Salesforce connector). To find your My Domain URL, from Setup, in the Quick Find box, enter My Domain, and then select My Domain"
+}
+
 variable "enabled_connectors" {
   type        = list(string)
   description = "list of ids of connectors to enabled; see modules/worklytics-connector-specs"
