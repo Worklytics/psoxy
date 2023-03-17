@@ -23,7 +23,7 @@ Changes:
  - heavily refactored `examples`/`examples-dev`; if you're directly using these, rather than having
    made your own copy (as we recommend/describe in 'Getting Started', you may see lots of changes;
    it is NOT recommended you apply these, as some of them will be destructive)
-
+ - you may have to re-install the test tool (`npm install tools/psoxy-test`)
 
 ## v0.4.11
 Features:
