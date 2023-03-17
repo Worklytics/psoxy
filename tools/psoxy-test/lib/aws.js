@@ -265,6 +265,9 @@ async function listObjects(bucket, options) {
  * @param {string} bucket
  * @param {string} file - path to file
  * @param {object} options
+ * @param {string} options.filename - optional filename to use for S3 object
+ * @param {string} options.role - role to assume
+ * @param {string} options.region - region to use
  * @param {S3Client} client
  * @returns
  */
@@ -275,7 +278,7 @@ async function upload(bucket, file, options, client) {
 
   const uploadParams = {
     Bucket: bucket,
-    Key: path.basename(file),
+    Key: options.filename ?? path.basename(file),
     Body: fs.createReadStream(file),
   }
 
@@ -313,7 +316,9 @@ async function download(bucket, filename, options, client, logger) {
       Bucket: bucket,
       Key: filename,
     }));
-  const onErrorStop = (error) => error.code !== 'NoSuchKey';
+  const onErrorStop = (error) => {
+    return error.Code !== 'NoSuchKey'
+  };
 
   const downloadResponse = await executeWithRetry(downloadFunction, onErrorStop,
     logger, options.attempts, options.delay);
@@ -321,7 +326,6 @@ async function download(bucket, filename, options, client, logger) {
   if (downloadResponse === undefined) {
     throw new Error(`${filename} not found after multiple attempts`);
   }
-
   return downloadResponse.Body.transformToString();
 }
 
