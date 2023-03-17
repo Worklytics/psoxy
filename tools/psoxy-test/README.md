@@ -136,7 +136,7 @@ node cli-file-upload.js -d GCP -i input-bucket-name -o output-bucket-name -f /pa
 In this case, `-i` and `-o` options represent [Google Cloud Storage] buckets.
 
 The testing script will rename the files you upload by appending a timestamp value as suffix:
-`my-test-file.csv` will appear as `my-test-file-1679066869332.csv` in both the input and output
+`my-test-file.csv` will appear as `my-test-file-{timestamp}.csv` in both the input and output
 buckets. This is done to avoid conflicts with files that may already exist in the buckets.
 
 [AWS]: https://aws.amazon.com
