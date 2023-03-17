@@ -58,7 +58,7 @@ data "google_project" "psoxy-google-connectors" {
 
 module "psoxy" {
   # source = "../../modular-examples/aws-google-workspace"
-  source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-google-workspace?ref=v0.4.14"
+  source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-google-workspace?ref=rc-v0.4.15"
 
   aws_account_id                 = var.aws_account_id
   aws_assume_role_arn            = var.aws_assume_role_arn # role that can test the instances (lambdas)
@@ -81,7 +81,7 @@ module "psoxy" {
   salesforce_domain              = var.salesforce_domain
 }
 
-# rename done in v0.4.14
+# rename done in rc-v0.4.15
 moved {
   from = module.psoxy-aws-google-workspace
   to   = module.psoxy
