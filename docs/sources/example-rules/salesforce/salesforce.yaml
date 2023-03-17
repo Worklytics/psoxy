@@ -40,24 +40,6 @@ endpoints:
           - "$..ManagerId"
           - "$..Id"
         encoding: "JSON"
-  - pathRegex: "^/services/data/v(\\d*.\\d{1})/composite/sobjects/User[?]id=(/p~[a-zA-Z0-9_-])[^/]*"
-    transforms:
-      - !<redact>
-        jsonPaths:
-          - "$..attributes"
-      - !<redact>
-        jsonPaths:
-          - "$..Alias"
-          - "$..Email"
-          - "$..Name"
-          - "$..Username"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..ContactId"
-          - "$..CreatedById"
-          - "$..ManagerId"
-          - "$..Id"
-        encoding: "JSON"
   - pathRegex: "^/services/data/v(\\d*.\\d{1})/query[?]q=SELECT(%20|\\+)Id(%20|\\+)FROM(%20|\\\
     +)User.*$"
     transforms:
@@ -76,6 +58,8 @@ endpoints:
           type: "integer"
         done:
           type: "boolean"
+        nextRecordsUrl:
+          type: "string"
         records:
           type: "array"
           items:
@@ -92,6 +76,8 @@ endpoints:
           type: "integer"
         done:
           type: "boolean"
+        nextRecordsUrl:
+          type: "string"
         records:
           type: "array"
           items:
@@ -122,6 +108,8 @@ endpoints:
           type: "integer"
         done:
           type: "boolean"
+        nextRecordsUrl:
+          type: "string"
         records:
           type: "array"
           items:
@@ -177,6 +165,8 @@ endpoints:
           type: "integer"
         done:
           type: "boolean"
+        nextRecordsUrl:
+          type: "string"
         records:
           type: "array"
           items:
@@ -228,6 +218,8 @@ endpoints:
           type: "integer"
         done:
           type: "boolean"
+        nextRecordsUrl:
+          type: "string"
         records:
           type: "array"
           items:
@@ -240,6 +232,8 @@ endpoints:
                     type: "integer"
                   done:
                     type: "boolean"
+                  nextRecordsUrl:
+                    type: "string"
                   records:
                     type: "array"
                     items:
