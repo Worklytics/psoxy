@@ -17,8 +17,8 @@ const { version } = require('./package.json');
     .version(version)
     .description(`
       Psoxy Test: Bulk instance
-      Upload a CSV file containing some PII to the "input" bucket associated 
-      to a Psoxy Bulk instance (AWS or GCP) and get the processed file back 
+      Upload a CSV file containing some PII to the "input" bucket associated
+      to a Psoxy Bulk instance (AWS or GCP) and get the processed file back
       from the "output" bucket with all PII removed.
     `)
     .addOption(
@@ -30,9 +30,10 @@ const { version } = require('./package.json');
     .requiredOption('-f, --file <path/to/file>', 'Path of the file to be processed')
     .requiredOption('-o, --output <bucketName>', 'Output bucket\'s name')
     .option('-r, --role <arn>', 'AWS role to assume, use its ARN')
-    .option('-re, --region <region>', 'AWS region of the buckets (input/output)', 
+    .option('-re, --region <region>', 'AWS region of the buckets (input/output)',
       'us-east-1')
     .option('-v, --verbose', 'Verbose output', false)
+    .option('-s, --save-sanitized-file', 'Save sanitized file to disk', false)
     .configureOutput({
       outputError: (str, write) => write(chalk.bold.red(str)),
     });

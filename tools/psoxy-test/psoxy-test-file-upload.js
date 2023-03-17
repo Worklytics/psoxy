@@ -1,3 +1,4 @@
+import fs from 'fs';
 import aws from './lib/aws.js';
 import gcp from './lib/gcp.js';
 import { constants as httpCodes } from 'http2';
@@ -6,6 +7,7 @@ import { execSync } from 'child_process';
 import path from 'path';
 import getLogger from './lib/logger.js';
 
+const FILE_EXTENSION = '.csv';
 /**
  * AWS upload/download
  *
@@ -14,7 +16,10 @@ import getLogger from './lib/logger.js';
  * @returns {string} - downloaded file contents
  */
 async function testAWS(options, logger) {
-  const filename = path.basename(options.file);
+  const filename = path.basename(options.file, FILE_EXTENSION);
+  // Add timestamp to filename to make sure download process doesn't get
+  // the wrong file
+  const filenameWithTimestamp = `${filename}-${Date.now()}${FILE_EXTENSION}`;
 
   if (options.role) {
     logger.verbose(`Assuming role ${options.role}`);
@@ -24,7 +29,8 @@ async function testAWS(options, logger) {
   logger.info(`Uploading "${filename}" to input bucket: ${options.input}`);
   const uploadResult = await aws.upload(options.input, options.file, {
     role: options.role,
-    region: options.region
+    region: options.region,
+    filename: filenameWithTimestamp,
   }, client);
 
   if (uploadResult['$metadata'].httpStatusCode !== httpCodes.HTTP_STATUS_OK) {
@@ -35,10 +41,11 @@ async function testAWS(options, logger) {
   logger.verbose('Upload result: ', { additional: uploadResult });
 
   logger.info(`Downloading processed file from output bucket: ${options.output}`);
-  const downloadResult = await aws.download(options.output, filename, {
-    role: options.role,
-    region: options.region
-  }, client, logger);
+  const downloadResult = await aws.download(options.output,
+    filenameWithTimestamp, {
+      role: options.role,
+      region: options.region,
+    }, client, logger);
   logger.success('File downloaded');
 
   return downloadResult;
@@ -52,19 +59,20 @@ async function testAWS(options, logger) {
  * @returns {string} - downloaded file contents
  */
 async function testGCP(options, logger) {
-  const filename = path.basename(options.file);
+  const filename = path.basename(options.file, FILE_EXTENSION);
+  const filenameWithTimestamp = `${filename}-${Date.now()}${FILE_EXTENSION}`;
   const client = gcp.createStorageClient();
 
   logger.info(`Uploading "${filename}" to input bucket: ${options.input}`);
   const [, uploadResult] = await gcp.upload(options.input, options.file,
-    client);
+    client, filenameWithTimestamp);
 
   logger.success(`File uploaded -> ${uploadResult.mediaLink}`);
   logger.verbose('Upload result:', { additional: uploadResult });
 
   logger.info(`Downloading processed file from output bucket: ${options.output}`);
-  const [downloadResult] = await gcp.download(options.output, filename, client,
-    logger);
+  const [downloadResult] = await gcp.download(options.output,
+    filenameWithTimestamp, client, logger);
   logger.success('File downloaded');
 
   const fileContents = downloadResult.toString('utf8');
@@ -87,6 +95,7 @@ async function testGCP(options, logger) {
  * @param {string} options.output
  * @param {string} options.region - AWS: buckets region
  * @param {string} options.role - AWS: role to assume (ARN format)
+ * @param {boolean} options.saveSanitizedFile - Whether to save sanitized file or not
  * @returns {string}
  */
 export default async function (options = {}) {
@@ -100,16 +109,24 @@ export default async function (options = {}) {
   }
 
   const outputDir = path.parse(options.file).dir;
-  const outputFilename = `${path.parse(options.file).name}-proccessed${path.extname(options.file)}`;
-  logger.info(`Saving processed file to: ${outputDir}/${outputFilename}`);
+  const outputFilename = `${path.parse(options.file).name}-sanitized${path.extname(options.file)}`;
+  if (options.saveSanitizedFile) {
+    logger.info(`Saving sanitized file to: ${outputDir}/${outputFilename}`);
+  }
+  // Always saving it to be able to easily "diff" input and output/sanitized;
+  // delete the sanitized one later if "saving" option is not set
   await saveToFile(outputDir, outputFilename, downloadResult);
 
   try {
-    logger.info('Comparing files:\n');
+    logger.info('Comparing input and sanitized output:\n');
     logger.info(execSync(`diff ${options.file} ${outputDir}/${outputFilename}`));
   } catch(error) {
     // if files are different `diff` will end with exit code 1, so print results
     logger.info(error.stdout.toString());
+  }
+
+  if (!options.saveSanitizedFile) {
+    fs.unlinkSync(`${outputDir}/${outputFilename}`);
   }
 
   return downloadResult;

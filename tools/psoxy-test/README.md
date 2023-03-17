@@ -115,7 +115,11 @@ Cloud Function that represents the Psoxy instance itself.
 
 
 ## Psoxy Bulk Instances: AWS
-Assuming that you've successfully deployed the Psoxy "bulk instance" to AWS, you need to provide the script with a CSV example file containing some PII records, the name of the input bucket and the output one (these are expected to be [S3] buckets in the same AWS region). The script also needs the AWS region (default is `us-east-1`), and the ARN of the role that will be assumed to perform the upload and download operations.
+Assuming that you've successfully deployed the Psoxy "bulk instance" to AWS, you need to provide
+the script with a CSV example file containing some PII records, the name of the input bucket and
+the output one (these are expected to be [S3] buckets in the same AWS region). The script also
+needs the AWS region (default is `us-east-1`), and the ARN of the role that will be assumed to
+perform the upload and download operations.
 
 Example:
 ```shell
@@ -131,7 +135,9 @@ node cli-file-upload.js -d GCP -i input-bucket-name -o output-bucket-name -f /pa
 
 In this case, `-i` and `-o` options represent [Google Cloud Storage] buckets.
 
-
+The testing script will rename the files you upload by appending a timestamp value as suffix:
+`my-test-file.csv` will appear as `my-test-file-{timestamp}.csv` in both the input and output
+buckets. This is done to avoid conflicts with files that may already exist in the buckets.
 
 [AWS]: https://aws.amazon.com
 [GCP]: https://cloud.google.com/
