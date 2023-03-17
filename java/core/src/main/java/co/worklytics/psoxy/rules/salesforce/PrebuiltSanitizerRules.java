@@ -55,6 +55,29 @@ public class PrebuiltSanitizerRules {
                             .build()))
             .build();
 
+    private final static SchemaRuleUtils.JsonSchema USER_BY_QUERY_RESULT_JSON_SCHEMA = SchemaRuleUtils.JsonSchema.builder()
+            .type("object")
+            .properties(Map.ofEntries(
+                    Map.entry("Alias", SchemaRuleUtils.JsonSchema.builder().type("string").build()),
+                    Map.entry("AccountId", SchemaRuleUtils.JsonSchema.builder().type("string").build()),
+                    Map.entry("ContactId", SchemaRuleUtils.JsonSchema.builder().type("string").build()),
+                    Map.entry("CreatedDate", SchemaRuleUtils.JsonSchema.builder().type("string").build()),
+                    Map.entry("CreatedById", SchemaRuleUtils.JsonSchema.builder().type("string").build()),
+                    Map.entry("Email", SchemaRuleUtils.JsonSchema.builder().type("string").build()),
+                    Map.entry("EmailEncodingKey", SchemaRuleUtils.JsonSchema.builder().type("string").build()),
+                    Map.entry("Id", SchemaRuleUtils.JsonSchema.builder().type("string").build()),
+                    Map.entry("IsActive", SchemaRuleUtils.JsonSchema.builder().type("boolean").build()),
+                    Map.entry("LastLoginDate", SchemaRuleUtils.JsonSchema.builder().type("string").build()),
+                    Map.entry("LastModifiedDate", SchemaRuleUtils.JsonSchema.builder().type("string").build()),
+                    Map.entry("ManagerId", SchemaRuleUtils.JsonSchema.builder().type("string").build()),
+                    Map.entry("Name", SchemaRuleUtils.JsonSchema.builder().type("string").build()),
+                    Map.entry("TimeZoneSidKey", SchemaRuleUtils.JsonSchema.builder().type("string").build()),
+                    Map.entry("Username", SchemaRuleUtils.JsonSchema.builder().type("string").build()),
+                    Map.entry("UserRoleId", SchemaRuleUtils.JsonSchema.builder().type("string").build()),
+                    Map.entry("UserType", SchemaRuleUtils.JsonSchema.builder().type("string").build())
+            ))
+            .build();
+
     private final static SchemaRuleUtils.JsonSchema ACTIVITY_HISTORIES_QUERY_RESULT_SCHEMA = SchemaRuleUtils.JsonSchema.builder()
             .type("object")
             .properties(Map.of(
@@ -130,6 +153,12 @@ public class PrebuiltSanitizerRules {
                     .responseSchema(jsonSchemaForQueryResult(ID_QUERY_RESULT_JSON_SCHEMA))
                     .build();
 
+    static final Endpoint QUERY_USERS_ENDPOINT = Endpoint.builder()
+            .pathRegex("^/services/data/" + VERSION_REGEX + "/query[?]q=SELECT.*FROM(%20|\\+)User(%20|\\+)WHERE(%20|\\+)LastModifiedDate.*$")
+            .transforms(USER_TRANSFORMATIONS)
+            .responseSchema(jsonSchemaForQueryResult(USER_BY_QUERY_RESULT_JSON_SCHEMA))
+            .build();
+
     static final Endpoint QUERY_FOR_ACTIVITY_HISTORIES_ENDPOINT = Endpoint.builder()
                     .pathRegex("^/services/data/" + VERSION_REGEX + "/query[?]q=SELECT.*FROM(%20|\\+)ActivityHistories.*$")
                     .transform(Transform.Pseudonymize.builder()
@@ -169,6 +198,7 @@ public class PrebuiltSanitizerRules {
             .endpoint(GET_USERS_WITH_PSEODONYMIZED_ID_PARAMETER_ENDPOINT)
             .endpoint(QUERY_ID_FOR_USERS_ENDPOINT)
             .endpoint(QUERY_ID_FOR_ACCOUNTS_ENDPOINT)
+            .endpoint(QUERY_USERS_ENDPOINT)
             .endpoint(QUERY_FOR_ACTIVITY_HISTORIES_ENDPOINT)
             .build();
 

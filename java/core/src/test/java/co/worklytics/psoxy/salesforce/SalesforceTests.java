@@ -179,6 +179,24 @@ public class SalesforceTests extends JavaRulesTestBaseCase {
         assertPseudonymized(sanitized, "0055Y00000E18EHQAZ");
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "SELECT+Alias,AccountId,ContactId,CreatedDate,CreatedById,Email,EmailEncodingKey,Id,IsActive,LastLoginDate,LastModifiedDate,ManagerId,Name,TimeZoneSidKey,Username,UserRoleId,UserType+FROM+User+WHERE+LastModifiedDate+%3E%3D+2016-01-01T00%3A00%3A00Z+AND+LastModifiedDate+%3C+2023-03-01T00%3A00%3A00Z+ORDER+BY+LastModifiedDate+DESC+NULLS+LAST",
+    })
+    void query_users(String query) {
+        String jsonString = asJson(exampleDirectoryPath, "users_by_query.json");
+
+        String endpoint = "https://test.salesforce.com/services/data/v51.0/query?q=" + query;
+
+        String sanitized = this.sanitize(endpoint, jsonString);
+
+        assertPseudonymized(sanitized, "0055Y00000ExkfuQAB");
+        assertPseudonymized(sanitized, "0055Y00000E16gwQAB");
+        assertPseudonymized(sanitized, "0055Y00000E16gwQAB");
+        assertPseudonymized(sanitized, "0055Y00000ExkfpQAB");
+    }
+
+
     @Override
     public Stream<InvocationExample> getExamples() {
         return Stream.of(
