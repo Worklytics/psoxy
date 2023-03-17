@@ -222,7 +222,7 @@ function resolveHTTPMethod(path = '') {
  * @returns
  */
 async function executeWithRetry(fn, onErrorStop, logger, maxAttempts = 60,
-  delay = 5000, progressMessage = 'Downloading...') {
+  delay = 5000, progressMessage = 'Waiting for sanitized output...') {
 
   let result;
   let attempts = 0;

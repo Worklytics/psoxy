@@ -1,11 +1,15 @@
-import fs from 'fs';
-import aws from './lib/aws.js';
-import gcp from './lib/gcp.js';
 import { constants as httpCodes } from 'http2';
-import { saveToFile } from './lib/utils.js';
 import { execSync } from 'child_process';
-import path from 'path';
+import { fileURLToPath } from 'url';
+import { saveToFile } from './lib/utils.js';
+import aws from './lib/aws.js';
+import chalk from 'chalk';
+import fs from 'fs';
+import gcp from './lib/gcp.js';
 import getLogger from './lib/logger.js';
+import path from 'path';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const FILE_EXTENSION = '.csv';
 /**
@@ -40,7 +44,7 @@ async function testAWS(options, logger) {
   logger.success('File uploaded');
   logger.verbose('Upload result: ', { additional: uploadResult });
 
-  logger.info(`Downloading processed file from output bucket: ${options.output}`);
+  logger.info(`Downloading sanitized file from output bucket: ${options.output}`);
   const downloadResult = await aws.download(options.output,
     filenameWithTimestamp, {
       role: options.role,
@@ -70,7 +74,7 @@ async function testGCP(options, logger) {
   logger.success(`File uploaded -> ${uploadResult.mediaLink}`);
   logger.verbose('Upload result:', { additional: uploadResult });
 
-  logger.info(`Downloading processed file from output bucket: ${options.output}`);
+  logger.info(`Downloading sanitized file from output bucket: ${options.output}`);
   const [downloadResult] = await gcp.download(options.output,
     filenameWithTimestamp, client, logger);
   logger.success('File downloaded');
@@ -108,25 +112,26 @@ export default async function (options = {}) {
     downloadResult = await testGCP(options, logger);
   }
 
-  const outputDir = path.parse(options.file).dir;
   const outputFilename = `${path.parse(options.file).name}-sanitized${path.extname(options.file)}`;
-  if (options.saveSanitizedFile) {
-    logger.info(`Saving sanitized file to: ${outputDir}/${outputFilename}`);
-  }
   // Always saving it to be able to easily "diff" input and output/sanitized;
-  // delete the sanitized one later if "saving" option is not set
-  await saveToFile(outputDir, outputFilename, downloadResult);
+  // delete the sanitized one later
+  await saveToFile(__dirname, outputFilename, downloadResult);
 
   try {
     logger.info('Comparing input and sanitized output:\n');
-    logger.info(execSync(`diff ${options.file} ${outputDir}/${outputFilename}`));
+    logger.info(execSync(`diff ${options.file} ${__dirname}/${outputFilename}`));
   } catch(error) {
     // if files are different `diff` will end with exit code 1, so print results
     logger.info(error.stdout.toString());
   }
 
-  if (!options.saveSanitizedFile) {
-    fs.unlinkSync(`${outputDir}/${outputFilename}`);
+  fs.unlinkSync(`${__dirname}/${outputFilename}`);
+
+  if (options.saveSanitizedFile) {
+    // save file to same location as input
+    const outputDir = path.parse(options.file).dir;
+    logger.info(`Sanitized file written at ${chalk.yellow(new Date().toISOString())}: ${outputDir}/${outputFilename}`);
+    await saveToFile(outputDir, outputFilename, downloadResult);
   }
 
   return downloadResult;

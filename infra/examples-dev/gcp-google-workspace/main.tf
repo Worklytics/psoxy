@@ -30,7 +30,7 @@ data "google_project" "psoxy-project" {
 
 module "psoxy" {
   source = "../../modular-examples/gcp-google-workspace"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-google-workspace?ref=v0.4.14"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-google-workspace?ref=rc-v0.4.15"
 
   gcp_project_id                 = data.google_project.psoxy-project.project_id
   environment_name               = var.environment_name
