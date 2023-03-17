@@ -6,6 +6,7 @@ import { execSync } from 'child_process';
 import path from 'path';
 import getLogger from './lib/logger.js';
 
+const FILE_EXTENSION = '.csv';
 /**
  * AWS upload/download
  *
@@ -14,7 +15,10 @@ import getLogger from './lib/logger.js';
  * @returns {string} - downloaded file contents
  */
 async function testAWS(options, logger) {
-  const filename = path.basename(options.file);
+  const filename = path.basename(options.file, FILE_EXTENSION);
+  // Add timestamp to filename to make sure download process doesn't get
+  // the wrong file
+  const filenameWithTimestamp = `${filename}-${Date.now()}${FILE_EXTENSION}`;
 
   if (options.role) {
     logger.verbose(`Assuming role ${options.role}`);
@@ -24,7 +28,8 @@ async function testAWS(options, logger) {
   logger.info(`Uploading "${filename}" to input bucket: ${options.input}`);
   const uploadResult = await aws.upload(options.input, options.file, {
     role: options.role,
-    region: options.region
+    region: options.region,
+    filename: filenameWithTimestamp,
   }, client);
 
   if (uploadResult['$metadata'].httpStatusCode !== httpCodes.HTTP_STATUS_OK) {
@@ -35,10 +40,11 @@ async function testAWS(options, logger) {
   logger.verbose('Upload result: ', { additional: uploadResult });
 
   logger.info(`Downloading processed file from output bucket: ${options.output}`);
-  const downloadResult = await aws.download(options.output, filename, {
-    role: options.role,
-    region: options.region
-  }, client, logger);
+  const downloadResult = await aws.download(options.output, 
+    filenameWithTimestamp, {
+      role: options.role,
+      region: options.region,
+    }, client, logger);
   logger.success('File downloaded');
 
   return downloadResult;
@@ -52,19 +58,20 @@ async function testAWS(options, logger) {
  * @returns {string} - downloaded file contents
  */
 async function testGCP(options, logger) {
-  const filename = path.basename(options.file);
+  const filename = path.basename(options.file, FILE_EXTENSION);
+  const filenameWithTimestamp = `${filename}-${Date.now()}${FILE_EXTENSION}`;
   const client = gcp.createStorageClient();
 
   logger.info(`Uploading "${filename}" to input bucket: ${options.input}`);
   const [, uploadResult] = await gcp.upload(options.input, options.file,
-    client);
+    client, filenameWithTimestamp);
 
   logger.success(`File uploaded -> ${uploadResult.mediaLink}`);
   logger.verbose('Upload result:', { additional: uploadResult });
 
   logger.info(`Downloading processed file from output bucket: ${options.output}`);
-  const [downloadResult] = await gcp.download(options.output, filename, client,
-    logger);
+  const [downloadResult] = await gcp.download(options.output, 
+    filenameWithTimestamp, client, logger);
   logger.success('File downloaded');
 
   const fileContents = downloadResult.toString('utf8');
