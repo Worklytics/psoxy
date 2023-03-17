@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.rules.msft;
 
 import co.worklytics.psoxy.ConfigRulesModule;
+import co.worklytics.psoxy.rules.RESTRules;
 import com.avaulta.gateway.rules.Endpoint;
 import co.worklytics.psoxy.rules.Rules2;
 import co.worklytics.psoxy.rules.RuleSet;
@@ -269,8 +270,8 @@ public class PrebuiltSanitizerRules {
             REDACT_CALENDAR_ODATA_LINKS);
 
 
-    public static final Map<String, RuleSet> MSFT_DEFAULT_RULES_MAP =
-        ImmutableMap.<String, RuleSet>builder()
+    public static final Map<String, RESTRules> MSFT_DEFAULT_RULES_MAP =
+        ImmutableMap.<String, RESTRules>builder()
             .put("azure-ad", DIRECTORY)
             .put("azure-ad" + ConfigRulesModule.NO_APP_IDS_SUFFIX, DIRECTORY_NO_MSFT_IDS)
             .put("outlook-cal", OUTLOOK_CALENDAR)

@@ -2,6 +2,7 @@ package co.worklytics.test;
 
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
+import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.rules.RuleSet;
 import co.worklytics.psoxy.utils.RandomNumberGenerator;
 import com.google.api.client.http.*;
@@ -53,6 +54,11 @@ public class MockModules {
         @Provides @Singleton
         static RuleSet rules() {
             return mock(RuleSet.class);
+        }
+
+        @Provides @Singleton
+        static RESTRules restRules() {
+            return mock(RESTRules.class);
         }
     }
 

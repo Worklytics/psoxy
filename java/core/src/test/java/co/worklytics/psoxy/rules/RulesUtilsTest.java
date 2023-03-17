@@ -1,16 +1,23 @@
-package co.worklytics.psoxy;
+package co.worklytics.psoxy.rules;
 
+import co.worklytics.psoxy.PsoxyModule;
+import co.worklytics.psoxy.gateway.BulkModeConfigProperty;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
-import co.worklytics.psoxy.rules.RuleSet;
-import co.worklytics.psoxy.rules.RulesUtils;
+import co.worklytics.psoxy.storage.StorageHandler;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableList;
 import dagger.Component;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -21,6 +28,8 @@ import static org.mockito.Mockito.when;
 class RulesUtilsTest {
 
     @Inject RulesUtils utils;
+    @Inject @Named("ForYAML")
+    ObjectMapper yamlMapper;
 
     @Singleton
     @Component(modules = {
@@ -71,4 +80,27 @@ class RulesUtilsTest {
         assertNotNull(rules);
     }
 
+
+    List<StorageHandler.ObjectTransform> transformList =
+        ImmutableList.<StorageHandler.ObjectTransform>builder()
+            .add(StorageHandler.ObjectTransform.of("blah", CsvRules.builder()
+                .columnToPseudonymize("something")
+                .build()))
+            .build();
+
+
+    @SneakyThrows
+    @Test
+    public void parseYamlRulesFromConfig() {
+
+        ConfigService config = mock(ConfigService.class);
+        when(config.getConfigPropertyAsOptional(eq(BulkModeConfigProperty.ADDITIONAL_TRANSFORMS)))
+            .thenReturn(Optional.of(yamlMapper.writeValueAsString(transformList)));
+
+        assertEquals("blah",
+            utils.parseAdditionalTransforms(config).get(0).getDestinationBucketName());
+        assertEquals("something",
+            ((CsvRules) utils.parseAdditionalTransforms(config).get(0).getRules()).getColumnsToPseudonymize().get(0));
+
+    }
 }

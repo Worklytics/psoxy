@@ -1,5 +1,6 @@
 package co.worklytics.psoxy.rules.google;
 
+import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.rules.RuleSet;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -13,7 +14,7 @@ import java.util.Collection;
 public class Directory_NoAppIds_Tests extends DirectoryTests {
 
     @Getter
-    final RuleSet rulesUnderTest = PrebuiltSanitizerRules.GDIRECTORY_WITHOUT_GOOGLE_IDS;
+    final RESTRules rulesUnderTest = PrebuiltSanitizerRules.GDIRECTORY_WITHOUT_GOOGLE_IDS;
 
     @BeforeEach
     public void setTestSpec() {

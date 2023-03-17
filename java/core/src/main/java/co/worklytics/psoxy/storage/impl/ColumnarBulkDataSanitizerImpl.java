@@ -1,13 +1,12 @@
 package co.worklytics.psoxy.storage.impl;
 
 import co.worklytics.psoxy.PseudonymizedIdentity;
-import com.avaulta.gateway.pseudonyms.Pseudonym;
+import co.worklytics.psoxy.Pseudonymizer;
+import co.worklytics.psoxy.rules.CsvRules;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
-import com.avaulta.gateway.pseudonyms.impl.JsonPseudonymEncoder;
-import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
+import com.avaulta.gateway.rules.BulkDataRules;
 import com.avaulta.gateway.rules.ColumnarRules;
-import co.worklytics.psoxy.Sanitizer;
-import co.worklytics.psoxy.storage.FileHandler;
+import co.worklytics.psoxy.storage.BulkDataSanitizer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
@@ -38,18 +37,22 @@ import java.util.stream.Stream;
  */
 @Log
 @NoArgsConstructor(onConstructor_ = @Inject)
-public class CSVFileHandler implements FileHandler {
+public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
 
     @Inject
     ObjectMapper objectMapper;
 
 
     @Override
-    public byte[] handle(@NonNull InputStreamReader reader, @NonNull Sanitizer sanitizer) throws IOException {
+    public byte[] sanitize(@NonNull InputStreamReader reader,
+                           @NonNull BulkDataRules bulkDataRules,
+                           @NonNull Pseudonymizer pseudonymizer) throws IOException {
 
-        Sanitizer.ConfigurationOptions configurationOptions = sanitizer.getConfigurationOptions();
+        if (!(bulkDataRules instanceof CsvRules)) {
+            throw new IllegalArgumentException("Rules must be of type CsvRules");
+        }
 
-        ColumnarRules rules = (ColumnarRules) configurationOptions.getRules();
+        ColumnarRules rules = (ColumnarRules) bulkDataRules;
 
         CSVParser records = CSVFormat
                 .DEFAULT
@@ -69,8 +72,7 @@ public class CSVFileHandler implements FileHandler {
             Optional.ofNullable(rules.getColumnsToInclude())
                 .map(this::asSetWithCaseInsensitiveComparator);
 
-        final Map<String, String> columnsToRename = ((ColumnarRules) configurationOptions.getRules())
-            .getColumnsToRename()
+        final Map<String, String> columnsToRename = rules.getColumnsToRename()
             .entrySet().stream()
             .collect(Collectors.toMap(
                 entry -> entry.getKey().trim(),
@@ -78,7 +80,7 @@ public class CSVFileHandler implements FileHandler {
                 (a, b) -> a,
                 () -> new TreeMap<>(String.CASE_INSENSITIVE_ORDER)));
 
-        final Map<String, String> columnsToDuplicate = ((ColumnarRules) configurationOptions.getRules())
+        final Map<String, String> columnsToDuplicate = rules
             .getColumnsToDuplicate()
             .entrySet().stream()
             .collect(Collectors.toMap(
@@ -129,7 +131,7 @@ public class CSVFileHandler implements FileHandler {
             if (columnsToPseudonymize.contains(outputColumnName)) {
                 if (StringUtils.isNotBlank(value)) {
                     try {
-                        PseudonymizedIdentity identity = sanitizer.pseudonymize(value);
+                        PseudonymizedIdentity identity = pseudonymizer.pseudonymize(value);
 
                         if (identity == null) {
                             return null;

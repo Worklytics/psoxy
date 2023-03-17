@@ -1,5 +1,6 @@
 package co.worklytics.psoxy.rules.asana;
 
+import co.worklytics.psoxy.rules.RESTRules;
 import com.avaulta.gateway.rules.Endpoint;
 import co.worklytics.psoxy.rules.RuleSet;
 import co.worklytics.psoxy.rules.Rules2;
@@ -142,7 +143,7 @@ public class PrebuiltSanitizerRules {
             .transforms(getTaskTransforms(true))
             .build();
 
-    public static final RuleSet ASANA = Rules2.builder()
+    public static final RESTRules ASANA = Rules2.builder()
             .endpoint(WORKSPACES)
             .endpoint(USERS)
             .endpoint(TEAMS)

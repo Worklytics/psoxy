@@ -297,6 +297,34 @@ module "worklytics-psoxy-connection-oauth-long-access" {
 
 # END LONG ACCESS AUTH CONNECTORS
 
+# BEGIN BULK CONNECTORS
+
+locals {
+  # which bulk connector
+  bulk_connectors_to_build_lookups_for = toset(distinct([ for k, v in var.lookup_table_builders : v.input_connector_id ]))
+
+  # hash of additional transform rules for each bulk connector lambda, so can pass this as env
+  # variable to lambda to trigger restart if rules change (so updated SSM param loaded on restart)
+  # (can't do include lookup_table bucket in this, as would create cyclic dependency)
+  additional_transforms_rules_hash = {
+    for input_connector_id in local.bulk_connectors_to_build_lookups_for : input_connector_id => sha1(yamlencode([
+      for k, v in var.lookup_table_builders : {
+        rules : v.rules
+      } if v.input_connector_id == input_connector_id
+    ]))
+  }
+
+  # map from input connector id --> list of lookup tables to build
+  additional_transforms_map = {
+    for input_connector_id in local.bulk_connectors_to_build_lookups_for : input_connector_id => yamlencode([
+      for k, v in var.lookup_table_builders : {
+        destinationBucketName : module.lookup_output[k].output_bucket
+        rules : v.rules
+      } if v.input_connector_id == input_connector_id
+    ])
+  }
+}
+
 module "psoxy-bulk" {
   for_each = merge(module.worklytics_connector_specs.enabled_bulk_connectors,
   var.custom_bulk_connectors)
@@ -330,6 +358,7 @@ module "psoxy-bulk" {
     try(each.value.environment_variables, {}),
     {
       IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
+      ADDITIONAL_TRANSFORMS_HASH = try(local.additional_transforms_rules_hash[each.key], null)
     }
   )
 }
@@ -354,50 +383,43 @@ module "psoxy-bulk-to-worklytics" {
   }, try(each.value.settings_to_provide, {}))
 }
 
-module "psoxy_lookup_tables_builders" {
+# BEGIN lookup builders
+module "lookup_output" {
   for_each = var.lookup_table_builders
 
-  source = "../../modules/aws-psoxy-bulk-existing"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-bulk-existing?ref=rc-v0.4.15"
+  source = "../../modules/aws-psoxy-output-bucket"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-output-bucket?ref=rc-v0.4.15"
 
-  input_bucket                    = module.psoxy-bulk[each.value.input_connector_id].input_bucket
-  aws_account_id                  = var.aws_account_id
-  instance_id                     = each.key
-  aws_region                      = var.aws_region
-  path_to_function_zip            = module.psoxy-aws.path_to_deployment_jar
-  function_zip_hash               = module.psoxy-aws.deployment_package_hash
-  psoxy_base_dir                  = var.psoxy_base_dir
-  rules                           = each.value.rules
-  global_parameter_arns           = module.global_secrets.secret_arns
-  sanitized_accessor_role_names   = each.value.sanitized_accessor_role_names
-  path_to_instance_ssm_parameters = "${var.aws_ssm_param_root_path}PSOXY_${upper(replace(each.key, "-", "_"))}_"
-  ssm_kms_key_ids                 = local.ssm_key_ids
-
-  environment_variables = merge(
-    var.general_environment_variables,
-    try(each.value.environment_variables, {}),
-    {
-      IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
-    }
-  )
+  instance_id                   = each.key
+  iam_role_for_lambda_name      = module.psoxy-bulk[each.value.input_connector_id].instance_role_name
+  sanitized_accessor_role_names = each.value.sanitized_accessor_role_names
 }
 
-output "lookup_tables" {
-  value = { for k, v in var.lookup_table_builders : k => module.psoxy_lookup_tables_builders[k].output_bucket }
+
+
+resource "aws_ssm_parameter" "additional_transforms" {
+  for_each = local.bulk_connectors_to_build_lookups_for
+
+  name  = "${var.aws_ssm_param_root_path}PSOXY_${upper(replace(each.key, "-", "_"))}_ADDITIONAL_TRANSFORMS"
+  type  = "String"
+  value = local.additional_transforms_map[each.key]
 }
 
 locals {
   all_instances = merge(
     { for instance in module.psoxy-msft-connector : instance.instance_id => instance },
     { for instance in module.psoxy-bulk : instance.instance_id => instance },
-    { for instance in module.aws-psoxy-long-auth-connectors : instance.instance_id => instance },
-    { for instance in module.psoxy_lookup_tables_builders : instance.instance_id => instance }
+    { for instance in module.aws-psoxy-long-auth-connectors : instance.instance_id => instance }
 
   )
 }
 
 output "instances" {
   value = local.all_instances
+}
+
+output "lookup_tables" {
+  value = { for k, v in var.lookup_table_builders : k => module.lookup_output[k].output_bucket }
 }
 
 output "cognito_identities" {
