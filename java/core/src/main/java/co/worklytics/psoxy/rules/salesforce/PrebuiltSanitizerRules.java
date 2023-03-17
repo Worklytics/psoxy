@@ -245,6 +245,9 @@ public class PrebuiltSanitizerRules {
                     put("done", SchemaRuleUtils.JsonSchema.builder()
                             .type("boolean")
                             .build());
+                    put("nextRecordsUrl", SchemaRuleUtils.JsonSchema.builder()
+                            .type("string")
+                            .build());
                     put("records", SchemaRuleUtils.JsonSchema.builder()
                             .type("array")
                             .items(recordSchema)
