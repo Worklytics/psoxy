@@ -64,7 +64,8 @@ variable "caller_aws_arns" {
 
 variable "gcp_project_id" {
   type        = string
-  description = "id of GCP project that will host psoxy instance"
+  description = "id of GCP project that will host psoxy instance (required only if using Google Workspace connectors)"
+  default     = ""
 }
 
 variable "environment_name" {
@@ -110,8 +111,7 @@ variable "general_environment_variables" {
 variable "enabled_connectors" {
   type        = list(string)
   description = "list of ids of connectors to enabled; see modules/worklytics-connector-specs"
-
-  default = []
+  default     = []
 }
 
 variable "non_production_connectors" {
@@ -202,8 +202,8 @@ variable "google_workspace_example_admin" {
 
 variable "msft_tenant_id" {
   type        = string
-  default     = ""
   description = "ID of Microsoft tenant to connect to (req'd only if config includes MSFT connectors)"
+  default     = ""
 }
 
 variable "msft_owners_email" {
