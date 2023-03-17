@@ -68,6 +68,12 @@ variable "available_memory_mb" {
   default     = 1024
 }
 
+variable "example_file" {
+  type        = string
+  description = "path to example file to use for testing, from psoxy_base_dir"
+  default     = null
+}
+
 variable "todo_step" {
   type        = number
   description = "of all todos, where does this one logically fall in sequence"

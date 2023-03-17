@@ -28,9 +28,9 @@ data "google_project" "psoxy-project" {
   project_id = var.gcp_project_id
 }
 
-module "psoxy-gcp-google-workspace" {
+module "psoxy" {
   source = "../../modular-examples/gcp-google-workspace"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-google-workspace?ref=v0.4.13"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-google-workspace?ref=rc-v0.4.15"
 
   gcp_project_id                 = data.google_project.psoxy-project.project_id
   environment_name               = var.environment_name
@@ -49,87 +49,22 @@ module "psoxy-gcp-google-workspace" {
   salesforce_domain              = var.salesforce_domain
 }
 
+moved {
+  from = module.psoxy-gcp-google-workspace
+  to   = module.psoxy
+}
+
 output "todos_1" {
   description = "List of todo steps to complete 1st, in markdown format."
-  value       = join("\n", module.psoxy-gcp-google-workspace.todos_1)
+  value       = join("\n", module.psoxy.todos_1)
 }
 
 output "todos_2" {
   description = "List of todo steps to complete 2nd, in markdown format."
-  value       = join("\n", module.psoxy-gcp-google-workspace.todos_2)
+  value       = join("\n", module.psoxy.todos_2)
 }
 
 output "todos_3" {
   description = "List of todo steps to complete 3rd, in markdown format."
-  value       = join("\n", module.psoxy-gcp-google-workspace.todos_3)
-}
-
-moved {
-  from = module.worklytics_connector_specs
-  to   = module.psoxy-gcp-google-workspace.module.worklytics_connector_specs
-}
-
-moved {
-  from = module.psoxy-gcp
-  to   = module.psoxy-gcp-google-workspace.module.psoxy-gcp
-}
-
-moved {
-  from = module.global_secrets
-  to   = module.psoxy-gcp-google-workspace.module.global_secrets
-}
-
-moved {
-  from = module.google-workspace-connection
-  to   = module.psoxy-gcp-google-workspace.module.google-workspace-connection
-}
-
-moved {
-  from = module.google-workspace-connection-auth
-  to   = module.psoxy-gcp-google-workspace.module.google-workspace-connection-auth
-}
-
-moved {
-  from = module.google-workspace-key-secrets
-  to   = module.psoxy-gcp-google-workspace.module.google-workspace-key-secrets
-}
-
-moved {
-  from = module.psoxy-google-workspace-connector
-  to   = module.psoxy-gcp-google-workspace.module.psoxy-google-workspace-connector
-}
-
-moved {
-  from = module.worklytics-psoxy-connection-google-workspace
-  to   = module.psoxy-gcp-google-workspace.module.worklytics-psoxy-connection-google-workspace
-}
-
-moved {
-  from = google_service_account.long_auth_connector_sa
-  to   = module.psoxy-gcp-google-workspace.google_service_account.long_auth_connector_sa
-}
-
-moved {
-  from = module.connector-long-auth-block
-  to   = module.psoxy-gcp-google-workspace.module.connector-long-auth-block
-}
-
-moved {
-  from = module.long-auth-token-secret-fill-instructions
-  to   = module.psoxy-gcp-google-workspace.module.long-auth-token-secret-fill-instructions
-}
-
-moved {
-  from = module.connector-long-auth-create-function
-  to   = module.psoxy-gcp-google-workspace.module.connector-long-auth-function
-}
-
-moved {
-  from = module.worklytics-psoxy-connection-long-auth
-  to   = module.psoxy-gcp-google-workspace.module.worklytics-psoxy-connection-long-auth
-}
-
-moved {
-  from = module.psoxy-gcp-bulk
-  to   = module.psoxy-gcp-google-workspace.module.psoxy-gcp-bulk
+  value       = join("\n", module.psoxy.todos_3)
 }

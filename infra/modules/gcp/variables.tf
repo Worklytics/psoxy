@@ -34,5 +34,5 @@ variable "force_bundle" {
 variable "psoxy_version" {
   type        = string
   description = "version of psoxy to deploy"
-  default     = "0.4.14"
+  default     = "rc-v0.4.15"
 }

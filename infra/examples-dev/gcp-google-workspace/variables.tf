@@ -64,16 +64,7 @@ variable "general_environment_variables" {
   default     = {}
 }
 
-variable "google_workspace_example_user" {
-  type        = string
-  description = "User to impersonate for Google Workspace API calls (null for none)"
-}
 
-variable "google_workspace_example_admin" {
-  type        = string
-  description = "user to impersonate for Google Workspace API calls (null for value of `google_workspace_example_user`)"
-  default     = null # will failover to user
-}
 
 variable "gcp_region" {
   type        = string
@@ -141,6 +132,18 @@ variable "non_production_connectors" {
   type        = list(string)
   description = "connector ids in this list will be in development mode (not for production use"
   default     = []
+}
+
+variable "google_workspace_example_user" {
+  type        = string
+  description = "User to impersonate for Google Workspace API calls (null for none)"
+  default     = null
+}
+
+variable "google_workspace_example_admin" {
+  type        = string
+  description = "user to impersonate for Google Workspace API calls (null for value of `google_workspace_example_user`)"
+  default     = null # will failover to user
 }
 
 variable "salesforce_domain" {

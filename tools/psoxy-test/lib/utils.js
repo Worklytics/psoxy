@@ -8,7 +8,7 @@ import _ from 'lodash';
 import spec from '../data-sources/spec.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-// In case Psoxy is slow to respond (Lambda can take up to 20s+ to bootstrap), 
+// In case Psoxy is slow to respond (Lambda can take up to 20s+ to bootstrap),
 // Node.js request doesn't have a default since v13
 const REQUEST_TIMEOUT_MS = 25000;
 
@@ -222,7 +222,7 @@ function resolveHTTPMethod(path = '') {
  * @returns
  */
 async function executeWithRetry(fn, onErrorStop, logger, maxAttempts = 60,
-  delay = 1000, progressMessage = 'Downloading...') {
+  delay = 5000, progressMessage = 'Waiting for sanitized output...') {
 
   let result;
   let attempts = 0;

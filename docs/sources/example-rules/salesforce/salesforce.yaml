@@ -1,11 +1,11 @@
 ---
 endpoints:
-  - pathRegex: "^/services/data/v51.0/sobjects/(Account|ActivityHistory|User)/describe$"
-  - pathRegex: "^/services/data/v51.0/sobjects/(Account|ActivityHistory)/updated[?][^/]*"
+  - pathRegex: "^/services/data/v(\\d*.\\d{1})/sobjects/(Account|ActivityHistory|User)/describe$"
+  - pathRegex: "^/services/data/v(\\d*.\\d{1})/sobjects/(Account|ActivityHistory)/updated[?][^/]*"
     allowedQueryParams:
       - "start"
       - "end"
-  - pathRegex: "^/services/data/v51.0/composite/sobjects/Account[?][^/]*"
+  - pathRegex: "^/services/data/v(\\d*.\\d{1})/composite/sobjects/Account[?][^/]*"
     allowedQueryParams:
       - "ids"
       - "fields"
@@ -19,7 +19,7 @@ endpoints:
           - "$..LastModifiedById"
           - "$..OwnerId"
         encoding: "JSON"
-  - pathRegex: "^/services/data/v51.0/composite/sobjects/User[?][^/]*"
+  - pathRegex: "^/services/data/v(\\d*.\\d{1})/composite/sobjects/User[?][^/]*"
     allowedQueryParams:
       - "ids"
       - "fields"
@@ -40,11 +40,54 @@ endpoints:
           - "$..ManagerId"
           - "$..Id"
         encoding: "JSON"
-  - pathRegex: "^/services/data/v51.0/composite/sobjects/User[?]id=(/p~[a-zA-Z0-9_-])[^/]*"
+  - pathRegex: "^/services/data/v(\\d*.\\d{1})/query[?]q=SELECT(%20|\\+)Id(%20|\\+)FROM(%20|\\\
+    +)User.*$"
     transforms:
       - !<redact>
         jsonPaths:
-          - "$..attributes"
+          - "$..records[*].attributes"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..records[*].Id"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        totalSize:
+          type: "integer"
+        done:
+          type: "boolean"
+        nextRecordsUrl:
+          type: "string"
+        records:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              Id:
+                type: "string"
+  - pathRegex: "^/services/data/v(\\d*.\\d{1})/query[?]q=SELECT(%20|\\+)Id(%20|\\+)FROM(%20|\\\
+    +)Account.*$"
+    responseSchema:
+      type: "object"
+      properties:
+        totalSize:
+          type: "integer"
+        done:
+          type: "boolean"
+        nextRecordsUrl:
+          type: "string"
+        records:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              Id:
+                type: "string"
+  - pathRegex: "^/services/data/v(\\d*.\\d{1})/query[?]q=SELECT.*FROM(%20|\\+)User(%20|\\\
+    +)WHERE(%20|\\+)LastModifiedDate.*$"
+    transforms:
       - !<redact>
         jsonPaths:
           - "$..Alias"
@@ -58,27 +101,108 @@ endpoints:
           - "$..ManagerId"
           - "$..Id"
         encoding: "JSON"
-  - pathRegex: "^/services/data/v51.0/query[?]q=SELECT%20Id%20FROM%20User.*$"
+    responseSchema:
+      type: "object"
+      properties:
+        totalSize:
+          type: "integer"
+        done:
+          type: "boolean"
+        nextRecordsUrl:
+          type: "string"
+        records:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              Alias:
+                type: "string"
+              AccountId:
+                type: "string"
+              ContactId:
+                type: "string"
+              CreatedDate:
+                type: "string"
+              CreatedById:
+                type: "string"
+              Email:
+                type: "string"
+              EmailEncodingKey:
+                type: "string"
+              Id:
+                type: "string"
+              IsActive:
+                type: "boolean"
+              LastLoginDate:
+                type: "string"
+              LastModifiedDate:
+                type: "string"
+              ManagerId:
+                type: "string"
+              Name:
+                type: "string"
+              TimeZoneSidKey:
+                type: "string"
+              Username:
+                type: "string"
+              UserRoleId:
+                type: "string"
+              UserType:
+                type: "string"
+  - pathRegex: "^/services/data/v(\\d*.\\d{1})/query[?]q=SELECT.*FROM(%20|\\+)Account(%20|\\\
+    +)WHERE(%20|\\+)LastModifiedDate.*$"
     transforms:
-      - !<redact>
-        jsonPaths:
-          - "$..records[*].attributes"
       - !<pseudonymize>
         jsonPaths:
-          - "$..records[*].Id"
-        includeReversible: true
-        encoding: "URL_SAFE_TOKEN"
-  - pathRegex: "^/services/data/v51.0/query[?]q=SELECT\\+Id\\+FROM\\+User.*$"
-    transforms:
-      - !<redact>
-        jsonPaths:
-          - "$..records[*].attributes"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..records[*].Id"
-        includeReversible: true
-        encoding: "URL_SAFE_TOKEN"
-  - pathRegex: "^/services/data/v51.0/query[?]q=SELECT.*FROM%20ActivityHistories.*$"
+          - "$..CreatedById"
+          - "$..LastModifiedById"
+          - "$..OwnerId"
+        encoding: "JSON"
+    responseSchema:
+      type: "object"
+      properties:
+        totalSize:
+          type: "integer"
+        done:
+          type: "boolean"
+        nextRecordsUrl:
+          type: "string"
+        records:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              Id:
+                type: "string"
+              AnnualRevenue:
+                type: "number"
+              CreatedDate:
+                type: "string"
+              CreatedById:
+                type: "string"
+              IsDeleted:
+                type: "string"
+              LastActivityDate:
+                type: "string"
+              LastModifiedDate:
+                type: "string"
+              LastModifiedById:
+                type: "string"
+              NumberOfEmployees:
+                type: "integer"
+              OwnerId:
+                type: "string"
+              Ownership:
+                type: "string"
+              ParentId:
+                type: "string"
+              Rating:
+                type: "string"
+              Sic:
+                type: "string"
+              Type:
+                type: "string"
+  - pathRegex: "^/services/data/v(\\d*.\\d{1})/query[?]q=SELECT.*FROM(%20|\\+)ActivityHistories.*$"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -87,22 +211,79 @@ endpoints:
           - "$..records[*].ActivityHistories.records[*].OwnerId"
           - "$..records[*].ActivityHistories.records[*].WhoId"
         encoding: "JSON"
-  - pathRegex: "^/services/data/v51.0/query[?]q=SELECT.*FROM\\+ActivityHistories.*$"
-    transforms:
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..records[*].ActivityHistories.records[*].CreatedById"
-          - "$..records[*].ActivityHistories.records[*].LastModifiedById"
-          - "$..records[*].ActivityHistories.records[*].OwnerId"
-          - "$..records[*].ActivityHistories.records[*].WhoId"
-        encoding: "JSON"
-  - pathRegex: "^/services/data/v51.0/query[?]q=SELECT%20Id%20FROM%20Account.*$"
-    transforms:
-      - !<redact>
-        jsonPaths:
-          - "$..attributes"
-  - pathRegex: "^/services/data/v51.0/query[?]q=SELECT\\+Id\\+FROM\\+Account.*$"
-    transforms:
-      - !<redact>
-        jsonPaths:
-          - "$..attributes"
+    responseSchema:
+      type: "object"
+      properties:
+        totalSize:
+          type: "integer"
+        done:
+          type: "boolean"
+        nextRecordsUrl:
+          type: "string"
+        records:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              ActivityHistories:
+                type: "object"
+                properties:
+                  totalSize:
+                    type: "integer"
+                  done:
+                    type: "boolean"
+                  nextRecordsUrl:
+                    type: "string"
+                  records:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        AccountId:
+                          type: "string"
+                        ActivityDate:
+                          type: "string"
+                        ActivityDateTime:
+                          type: "string"
+                        ActivitySubtype:
+                          type: "string"
+                        ActivityType:
+                          type: "string"
+                        CallDurationInSeconds:
+                          type: "integer"
+                        CallType:
+                          type: "string"
+                        CreatedDate:
+                          type: "string"
+                        CreatedById:
+                          type: "string"
+                        DurationInMinutes:
+                          type: "integer"
+                        EndDateTime:
+                          type: "string"
+                        Id:
+                          type: "string"
+                        IsAllDayEvent:
+                          type: "boolean"
+                        IsDeleted:
+                          type: "boolean"
+                        IsHighPriority:
+                          type: "boolean"
+                        IsTask:
+                          type: "boolean"
+                        LastModifiedDate:
+                          type: "string"
+                        LastModifiedById:
+                          type: "string"
+                        OwnerId:
+                          type: "string"
+                        Priority:
+                          type: "string"
+                        StartDateTime:
+                          type: "string"
+                        Status:
+                          type: "string"
+                        WhatId:
+                          type: "string"
+                        WhoId:
+                          type: "string"

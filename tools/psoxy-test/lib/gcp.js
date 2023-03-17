@@ -166,13 +166,16 @@ async function listFilesMetadata(bucketName) {
  * @param {string} bucketName - destination GCS bucket
  * @param {string} filePath - local file path
  * @param {Storage} client
+ * @param {string} filename - optional, destination file name
  * @returns {UploadResponse} - https://googleapis.dev/nodejs/storage/latest/global.html#UploadResponse
  */
-async function upload(bucketName, filePath, client) {
+async function upload(bucketName, filePath, client, filename) {
   if (!client) {
     client = createStorageClient();
   }
-  return client.bucket(bucketName).upload(filePath);
+  return client.bucket(bucketName).upload(filePath, {
+    destination: filename ?? path.basename(filePath),
+  });
 }
 
 /**
