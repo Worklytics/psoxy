@@ -39,6 +39,9 @@ if az --version &> /dev/null ; then
   MSFT_TENANT_ID=$(az account show --query tenantId --output tsv)
   echo "msft_tenant_id=\"${MSFT_TENANT_ID}\"" >> terraform.tfvars
   printf "\tmsft_tenant_id=${BLUE}\"${MSFT_TENANT_ID}\"${NC}\n"
+  MSFT_USER_EMAIL=$(az account show --query user.name --output tsv)
+  echo "msft_owners_email=[\n  \"${MSFT_USER_EMAIL}\"\n]\n" >> terraform.tfvars
+  printf "\tmsft_owners_email=${BLUE}[ \"${MSFT_USER_EMAIL}\" ]${NC}\n"
 fi
 
 printf "\nif any of that looks wrong to you, edit ${BLUE}terraform.tfvars${NC}\n"
