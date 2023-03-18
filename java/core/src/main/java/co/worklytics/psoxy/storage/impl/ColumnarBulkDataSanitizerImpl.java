@@ -217,11 +217,9 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
             .collect(Collectors.toList());
     }
 
-
     Set<String> asSetWithCaseInsensitiveComparator(Collection<String> set) {
         return set.stream()
             .map(String::trim)
             .collect(Collectors.toCollection(() -> new TreeSet<>(String.CASE_INSENSITIVE_ORDER)));
     }
-
 }

@@ -328,13 +328,7 @@ public class BulkDataSanitizerImplTest {
         try (FileReader in = new FileReader(inputFile)) {
             // replace shuffler implementation with one that reverses the list, so deterministic
             columnarFileSanitizerImpl.setRecordShuffleChunkSize(2);
-            columnarFileSanitizerImpl.SHUFFLER = Collectors.collectingAndThen(
-                Collectors.toCollection(ArrayList::new),
-                list -> {
-                    Collections.reverse(list);
-                    return list;
-                }
-            );
+            columnarFileSanitizerImpl.makeShuffleDeterministic();
             byte[] result = columnarFileSanitizerImpl.sanitize(in, rules, pseudonymizer);
 
             assertEquals(EXPECTED, new String(result));
