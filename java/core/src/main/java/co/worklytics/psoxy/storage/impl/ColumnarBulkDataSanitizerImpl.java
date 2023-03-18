@@ -28,6 +28,8 @@ import javax.inject.Singleton;
 import java.io.*;
 import java.util.*;
 import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collector;
 import java.io.ByteArrayOutputStream;
 
@@ -47,11 +49,9 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
     @Inject
     ObjectMapper objectMapper;
 
-
     @Getter(AccessLevel.PRIVATE)
     @Setter(onMethod_ = @VisibleForTesting)
     private int recordShuffleChunkSize = 500;
-
 
     @Override
     public byte[] sanitize(@NonNull InputStreamReader reader,
@@ -170,7 +170,8 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
                 Iterators.partition(records.iterator(), this.getRecordShuffleChunkSize());
 
             for (UnmodifiableIterator<List<CSVRecord>> chunkIterator = chunks; chunkIterator.hasNext(); ) {
-                chunkIterator.next().stream().collect(SHUFFLER).forEach(row -> {
+                List<CSVRecord> chunk = new ArrayList<>(chunkIterator.next());
+                shuffleImplementation.apply(chunk).forEach(row -> {
                     Stream<Object> sanitized =
                         headers.stream() // only iterate on allowed headers
                             .map(column ->
@@ -197,14 +198,18 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
         }
     }
 
-    //visible and mutable for tests
-    Collector<CSVRecord, ?, List<CSVRecord>> SHUFFLER = Collectors.collectingAndThen(
-        Collectors.toCollection(ArrayList::new),
-        list -> {
-            Collections.shuffle(list);
-            return list;
-        }
-    );
+    private UnaryOperator<List<CSVRecord>> shuffleImplementation = (List<CSVRecord> l) -> {
+        Collections.shuffle(l);
+        return l;
+    };
+
+    @VisibleForTesting
+    void makeShuffleDeterministic() {
+        this.shuffleImplementation = (List<CSVRecord> l) -> {
+            Collections.reverse(l);
+            return l;
+        };
+    }
 
     List<String> applyReplacements(Collection<String> original, final Map<String, String> replacements) {
         return original.stream()
