@@ -27,6 +27,7 @@ public class Handler {
     @Inject
     PseudonymizerImplFactory pseudonymizerImplFactory;
 
+
     //visible for testing
     CsvRules defaultRules = CsvRules.builder().build();
 

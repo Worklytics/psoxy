@@ -25,6 +25,7 @@ import java.util.*;
 @Getter
 @EqualsAndHashCode
 @JsonPropertyOrder(alphabetic = true)
+
 public class ColumnarRules implements BulkDataRules {
 
     private static final long serialVersionUID = 1L;

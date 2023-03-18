@@ -28,6 +28,8 @@ import java.io.*;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.Collector;
+import java.io.ByteArrayOutputStream;
+
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -56,7 +58,6 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
         ColumnarRules rules = (ColumnarRules) bulkDataRules;
 
         Preconditions.checkArgument(rules.getRecordShuffleChunkSize() > 0, "Record shuffle chunk size must be greater than 0");
-
 
         CSVParser records = CSVFormat
                 .DEFAULT
@@ -199,7 +200,6 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
             return list;
         }
     );
-
 
     List<String> applyReplacements(Collection<String> original, final Map<String, String> replacements) {
         return original.stream()

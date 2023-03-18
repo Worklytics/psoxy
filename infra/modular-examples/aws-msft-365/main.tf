@@ -297,6 +297,34 @@ module "worklytics-psoxy-connection-oauth-long-access" {
 
 # END LONG ACCESS AUTH CONNECTORS
 
+# BEGIN BULK CONNECTORS
+
+locals {
+  # which bulk connector
+  bulk_connectors_to_build_lookups_for = toset(distinct([ for k, v in var.lookup_table_builders : v.input_connector_id ]))
+
+  # hash of additional transform rules for each bulk connector lambda, so can pass this as env
+  # variable to lambda to trigger restart if rules change (so updated SSM param loaded on restart)
+  # (can't do include lookup_table bucket in this, as would create cyclic dependency)
+  additional_transforms_rules_hash = {
+    for input_connector_id in local.bulk_connectors_to_build_lookups_for : input_connector_id => sha1(yamlencode([
+      for k, v in var.lookup_table_builders : {
+        rules : v.rules
+      } if v.input_connector_id == input_connector_id
+    ]))
+  }
+
+  # map from input connector id --> list of lookup tables to build
+  additional_transforms_map = {
+    for input_connector_id in local.bulk_connectors_to_build_lookups_for : input_connector_id => yamlencode([
+      for k, v in var.lookup_table_builders : {
+        destinationBucketName : module.lookup_output[k].output_bucket
+        rules : v.rules
+      } if v.input_connector_id == input_connector_id
+    ])
+  }
+}
+
 module "psoxy-bulk" {
   for_each = merge(module.worklytics_connector_specs.enabled_bulk_connectors,
   var.custom_bulk_connectors)
@@ -330,6 +358,7 @@ module "psoxy-bulk" {
     try(each.value.environment_variables, {}),
     {
       IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
+      ADDITIONAL_TRANSFORMS_HASH = try(local.additional_transforms_rules_hash[each.key], null)
     }
   )
 }
@@ -366,19 +395,14 @@ module "lookup_output" {
   sanitized_accessor_role_names = each.value.sanitized_accessor_role_names
 }
 
-locals {
-  inputs_to_build_lookups_for = toset(distinct([ for k, v in var.lookup_table_builders : v.input_connector_id ]))
-}
+
 
 resource "aws_ssm_parameter" "additional_transforms" {
-  for_each = local.inputs_to_build_lookups_for
+  for_each = local.bulk_connectors_to_build_lookups_for
 
   name  = "${var.aws_ssm_param_root_path}PSOXY_${upper(replace(each.key, "-", "_"))}_ADDITIONAL_TRANSFORMS"
   type  = "String"
-  value = yamlencode([ for k, v in var.lookup_table_builders : {
-    destinationBucketName: module.lookup_output[k].output_bucket
-    rules: v.rules
-  } if v.input_connector_id == each.key ])
+  value = local.additional_transforms_map[each.key]
 }
 
 locals {

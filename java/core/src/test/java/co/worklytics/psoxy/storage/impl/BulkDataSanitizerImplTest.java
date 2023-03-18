@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -75,6 +76,7 @@ public class BulkDataSanitizerImplTest {
     @SneakyThrows
     void handle_pseudonymize() {
         final String EXPECTED = "EMPLOYEE_ID,EMPLOYEE_EMAIL,DEPARTMENT,EFFECTIVE_ISOWEEK\r\n" +
+
             "1,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",Engineering,2020-01-06\r\n" +
             "2,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"workltyics.co\"\",\"\"hash\"\":\"\"al4JK5KlOIsneC2DM__P_HRYe28LWYTBSf3yWKGm5yQ\"\"}\",Sales,2020-01-06\r\n" +
             "3,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"workltycis.co\"\",\"\"hash\"\":\"\"BlQB8Vk0VwdbdWTGAzBF.ote1357Ajr0fFcgFf72kdk\"\"}\",Engineering,2020-01-06\r\n" +
@@ -89,7 +91,6 @@ public class BulkDataSanitizerImplTest {
 
         try (FileReader in = new FileReader(inputFile)) {
             byte[] result = columnarFileSanitizerImpl.sanitize(in, rules, pseudonymizer);
-
             assertEquals(EXPECTED, new String(result));
         }
     }
@@ -113,7 +114,6 @@ public class BulkDataSanitizerImplTest {
 
         try (FileReader in = new FileReader(inputFile)) {
             byte[] result = columnarFileSanitizerImpl.sanitize(in, rules, pseudonymizer);
-
             assertEquals(EXPECTED, new String(result));
         }
     }
@@ -133,7 +133,6 @@ public class BulkDataSanitizerImplTest {
 
         try (FileReader in = new FileReader(inputFile)) {
             byte[] result = columnarFileSanitizerImpl.sanitize(in, rules, pseudonymizer);
-
             assertEquals(EXPECTED, new String(result));
         }
     }
@@ -143,7 +142,6 @@ public class BulkDataSanitizerImplTest {
     void handle_quotes() {
         final String EXPECTED = "EMPLOYEE_ID,EMAIL,DEPARTMENT\r\n" +
             "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",\",,,\"\r\n";
-
 
         CsvRules rules = CsvRules.builder()
             .columnToPseudonymize("EMPLOYEE_ID")
@@ -240,6 +238,7 @@ public class BulkDataSanitizerImplTest {
             "\".fs1T64Micz8SkbILrABgEv4kSg.tFhvhP35HGSLdOo\",Engineering,4\r\n";
 
         CsvRules rules = CsvRules.builder()
+
             .recordShuffleChunkSize(1)
             .pseudonymFormat(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
             .columnToPseudonymize("EMPLOYEE_ID")
