@@ -48,9 +48,6 @@ public class PseudonymizerImpl implements Pseudonymizer {
         return pseudonymize(value, Transform.Pseudonymize.builder().build());
     }
 
-
-
-
     String emailCanonicalization(String original) {
         String domain = EmailAddressParser.getDomain(original, EmailAddressCriteria.DEFAULT, true);
 

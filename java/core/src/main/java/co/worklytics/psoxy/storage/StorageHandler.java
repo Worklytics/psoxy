@@ -48,6 +48,9 @@ public class StorageHandler {
         @NonNull
         String destinationBucketName;
 
+        //NOTE: need a concrete type here to serialize to/from YAML
+        //TODO: support proper jackson polymorphism here, across potential BulkDataRules implementations
+
         @NonNull
         CsvRules rules;
     }

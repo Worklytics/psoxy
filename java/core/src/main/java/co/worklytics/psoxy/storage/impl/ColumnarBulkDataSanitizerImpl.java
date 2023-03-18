@@ -9,24 +9,30 @@ import com.avaulta.gateway.rules.ColumnarRules;
 import co.worklytics.psoxy.storage.BulkDataSanitizer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Streams;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
+import com.google.common.collect.UnmodifiableIterator;
+import lombok.*;
 import lombok.extern.java.Log;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Inject;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import javax.inject.Singleton;
+import java.io.*;
 import java.util.*;
 import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.UnaryOperator;
+import java.util.stream.Collector;
+import java.io.ByteArrayOutputStream;
+
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -35,6 +41,7 @@ import java.util.stream.Stream;
  * CSV should have the first row with headers and being separated with commas; content should be quoted
  * if include commas or quotes inside.
  */
+@Singleton
 @Log
 @NoArgsConstructor(onConstructor_ = @Inject)
 public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
@@ -42,6 +49,9 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
     @Inject
     ObjectMapper objectMapper;
 
+    @Getter(AccessLevel.PRIVATE)
+    @Setter(onMethod_ = @VisibleForTesting)
+    private int recordShuffleChunkSize = 500;
 
     @Override
     public byte[] sanitize(@NonNull InputStreamReader reader,
@@ -151,30 +161,36 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
 
 
         try(ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
-            PrintWriter printWriter = new PrintWriter(baos);
+            Writer printWriter = new PrintWriter(baos);
             CSVPrinter printer = new CSVPrinter(printWriter, CSVFormat.DEFAULT
                 .withHeader(columnNamesForOutputFile.toArray(new String[0])))
             ) {
 
-            records.forEach(row -> {
-                Stream<Object> sanitized =
+            UnmodifiableIterator<List<CSVRecord>> chunks =
+                Iterators.partition(records.iterator(), this.getRecordShuffleChunkSize());
+
+            for (UnmodifiableIterator<List<CSVRecord>> chunkIterator = chunks; chunkIterator.hasNext(); ) {
+                List<CSVRecord> chunk = new ArrayList<>(chunkIterator.next());
+                shuffleImplementation.apply(chunk).forEach(row -> {
+                    Stream<Object> sanitized =
                         headers.stream() // only iterate on allowed headers
-                        .map(column ->
+                            .map(column ->
                                 applyPseudonymizationIfAny.apply(
                                     columnsToRename.getOrDefault(column, column),
                                     row.get(column))
-                        );
+                            );
 
-                sanitized = Streams.concat(sanitized, columnsToDuplicate.entrySet().stream()
-                    .map(entry ->
-                        applyPseudonymizationIfAny.apply(entry.getValue(), row.get(entry.getKey()))));
+                    sanitized = Streams.concat(sanitized, columnsToDuplicate.entrySet().stream()
+                        .map(entry ->
+                            applyPseudonymizationIfAny.apply(entry.getValue(), row.get(entry.getKey()))));
 
-                try {
-                    printer.printRecord(sanitized.collect(Collectors.toList()));
-                } catch (Throwable e) {
-                    throw new RuntimeException("Failed to write row", e);
-                }
-            });
+                    try {
+                        printer.printRecord(sanitized.collect(Collectors.toList()));
+                    } catch (Throwable e) {
+                        throw new RuntimeException("Failed to write row", e);
+                    }
+                });
+            }
 
             printWriter.flush();
 
@@ -182,6 +198,18 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
         }
     }
 
+    private UnaryOperator<List<CSVRecord>> shuffleImplementation = (List<CSVRecord> l) -> {
+        Collections.shuffle(l);
+        return l;
+    };
+
+    @VisibleForTesting
+    void makeShuffleDeterministic() {
+        this.shuffleImplementation = (List<CSVRecord> l) -> {
+            Collections.reverse(l);
+            return l;
+        };
+    }
 
     List<String> applyReplacements(Collection<String> original, final Map<String, String> replacements) {
         return original.stream()
@@ -189,11 +217,9 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
             .collect(Collectors.toList());
     }
 
-
     Set<String> asSetWithCaseInsensitiveComparator(Collection<String> set) {
         return set.stream()
             .map(String::trim)
             .collect(Collectors.toCollection(() -> new TreeSet<>(String.CASE_INSENSITIVE_ORDER)));
     }
-
 }

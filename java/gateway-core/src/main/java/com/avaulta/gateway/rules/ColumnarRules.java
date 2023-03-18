@@ -25,7 +25,6 @@ import java.util.*;
 @Getter
 @EqualsAndHashCode
 @JsonPropertyOrder(alphabetic = true)
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ColumnarRules implements BulkDataRules {
 
     private static final long serialVersionUID = 1L;
@@ -35,13 +34,15 @@ public class ColumnarRules implements BulkDataRules {
      *
      * in theory, `\t` should also work ...
      */
+    @JsonInclude(JsonInclude.Include.NON_EMPTY) // this doesn't work
+    @NonNull
     @Builder.Default
     protected Character delimiter = ',';
 
     /**
      * columns (fields) to duplicate
      */
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    @JsonInclude(JsonInclude.Include.NON_EMPTY) //this works ...
     @Builder.Default
     @NonNull
     protected Map<String, String> columnsToDuplicate = new HashMap<>();
@@ -52,10 +53,12 @@ public class ColumnarRules implements BulkDataRules {
     @Builder.Default
     protected PseudonymEncoder.Implementations pseudonymFormat = PseudonymEncoder.Implementations.JSON;
 
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     @NonNull
     @Singular(value = "columnToPseudonymize")
     protected List<String> columnsToPseudonymize = new ArrayList<>();
 
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     @NonNull
     @Singular(value = "columnToRedact")
     protected List<String> columnsToRedact = new ArrayList<>();
@@ -65,6 +68,7 @@ public class ColumnarRules implements BulkDataRules {
      *
      * NOTE: renames, if any, are applied BEFORE pseudonymization
      */
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     @Builder.Default
     @NonNull
     protected Map<String, String> columnsToRename = new HashMap<>();
@@ -76,5 +80,6 @@ public class ColumnarRules implements BulkDataRules {
      * use case: if you don't control source, and want to ensure that some unexpected column that
      * later appears in source doesn't get included in output.
      */
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     protected List<String> columnsToInclude;
 }

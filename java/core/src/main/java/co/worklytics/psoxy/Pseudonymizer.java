@@ -42,13 +42,7 @@ public interface Pseudonymizer {
      */
     PseudonymizedIdentity pseudonymize(Object identifier);
 
-    /**
-     * @param identifier to pseudonymize
-     * @return identifier as a PseudonymizedIdentity
-     */
     PseudonymizedIdentity pseudonymize(Object identifier, Transform.Pseudonymize transform);
-
-
 
     ConfigurationOptions getOptions();
 }

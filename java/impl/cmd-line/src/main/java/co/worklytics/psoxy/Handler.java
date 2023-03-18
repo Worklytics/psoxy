@@ -27,6 +27,10 @@ public class Handler {
     @Inject
     PseudonymizerImplFactory pseudonymizerImplFactory;
 
+
+    //visible for testing
+    CsvRules defaultRules = CsvRules.builder().build();
+
     @SneakyThrows
     public void sanitize(@NonNull Config config,
                          @NonNull File inputFile,
@@ -48,7 +52,7 @@ public class Handler {
             options.pseudonymizationSalt(config.getPseudonymizationSalt());
         }
 
-        CsvRules rules = CsvRules.builder()
+        CsvRules rules = defaultRules.toBuilder()
                 .columnsToPseudonymize(Lists.newArrayList(config.getColumnsToPseudonymize()))
                 .columnsToRedact(Lists.newArrayList(config.getColumnsToRedact()))
                 .build();
