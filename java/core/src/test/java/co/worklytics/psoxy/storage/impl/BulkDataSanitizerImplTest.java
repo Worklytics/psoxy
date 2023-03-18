@@ -70,6 +70,9 @@ public class BulkDataSanitizerImplTest {
             .defaultScopeId("hris")
             .pseudonymImplementation(PseudonymImplementation.LEGACY)
             .build());
+
+        //make it deterministic
+        columnarFileSanitizerImpl.setRecordShuffleChunkSize(1);
     }
 
     @Test
@@ -83,7 +86,6 @@ public class BulkDataSanitizerImplTest {
             "4,,Engineering,2020-01-06\r\n"; //blank ID
 
         CsvRules rules = CsvRules.builder()
-            .recordShuffleChunkSize(1)
             .columnToPseudonymize("EMPLOYEE_EMAIL")
             .build();
 
@@ -105,7 +107,6 @@ public class BulkDataSanitizerImplTest {
             "4,,2020-01-06\r\n"; //blank ID
 
         CsvRules rules = CsvRules.builder()
-            .recordShuffleChunkSize(1)
             .columnToPseudonymize("EMPLOYEE_EMAIL")
             .columnToRedact("DEPARTMENT")
             .build();
@@ -170,9 +171,6 @@ public class BulkDataSanitizerImplTest {
 
         CsvRules rules = (CsvRules) rulesUtils.getRulesFromConfig(config).orElseThrow();
 
-        //make deterministic
-        rules = (CsvRules) rules.toBuilder().recordShuffleChunkSize(1).build();
-
         File inputFile = new File(getClass().getResource("/csv/hris-default-rules.csv").getFile());
 
         try (FileReader in = new FileReader(inputFile)) {
@@ -190,7 +188,6 @@ public class BulkDataSanitizerImplTest {
             "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",Engineering\r\n";
 
         CsvRules rules = CsvRules.builder()
-            .recordShuffleChunkSize(1)
             .columnToPseudonymize("    employee_id     ")
             .columnToPseudonymize(" an EMAIL ")
             .build();
@@ -212,7 +209,6 @@ public class BulkDataSanitizerImplTest {
 
 
         CsvRules rules = CsvRules.builder()
-            .recordShuffleChunkSize(1)
             .columnToPseudonymize("EMPLOYEE_ID")
             .columnToPseudonymize("EMPLOYEE_EMAIL")
             .columnsToRename(ImmutableMap.of("EMAIL", "EMPLOYEE_EMAIL"))
@@ -238,8 +234,6 @@ public class BulkDataSanitizerImplTest {
             "\".fs1T64Micz8SkbILrABgEv4kSg.tFhvhP35HGSLdOo\",Engineering,4\r\n";
 
         CsvRules rules = CsvRules.builder()
-
-            .recordShuffleChunkSize(1)
             .pseudonymFormat(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
             .columnToPseudonymize("EMPLOYEE_ID")
             .columnToRedact("EMPLOYEE_EMAIL")
@@ -266,7 +260,6 @@ public class BulkDataSanitizerImplTest {
             "9/1/22 7:50,9/1/22 7:51,32,100,1,9/1/22 7:51,R_1ie8z2GwkwzKG3h,,,3,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"acme.COM\"\",\"\"hash\"\":\"\"PM3Oh15cS2rBp-kjSrOCpQvYFe8Wo3qLj1o5F3fuefI\"\"}\",\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"5NL5SaQBwE6c0L1BDjHW-BtBOXQVH8RYwY0tGGw3khk\"\"}\",,5\r\n";
 
         CsvRules rules = CsvRules.builder()
-            .recordShuffleChunkSize(1)
             .columnToPseudonymize("Participant Email")
             .columnToPseudonymize("Participant Unique Identifier")
             .columnToRedact("Participant Name")
@@ -299,7 +292,6 @@ public class BulkDataSanitizerImplTest {
             "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM\"\"}\"\r\n";
 
         CsvRules rules = CsvRules.builder()
-            .recordShuffleChunkSize(1)
             .columnToPseudonymize("EMPLOYEE_ID")
             .columnsToInclude(Lists.newArrayList("EMPLOYEE_ID"))
             .build();
@@ -326,14 +318,16 @@ public class BulkDataSanitizerImplTest {
         ; //blank ID
 
         CsvRules rules = CsvRules.builder()
-            .recordShuffleChunkSize(2)
             .columnToPseudonymize("EMPLOYEE_EMAIL")
             .build();
+
+
 
         File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
 
         try (FileReader in = new FileReader(inputFile)) {
             // replace shuffler implementation with one that reverses the list, so deterministic
+            columnarFileSanitizerImpl.setRecordShuffleChunkSize(2);
             columnarFileSanitizerImpl.SHUFFLER = Collectors.collectingAndThen(
                 Collectors.toCollection(ArrayList::new),
                 list -> {

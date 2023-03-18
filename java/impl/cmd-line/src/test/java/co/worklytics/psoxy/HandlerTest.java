@@ -1,5 +1,6 @@
 package co.worklytics.psoxy;
 
+import co.worklytics.psoxy.storage.impl.ColumnarBulkDataSanitizerImpl;
 import co.worklytics.test.TestModules;
 import dagger.Component;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,6 +35,11 @@ public class HandlerTest {
     public void setup() {
         Container container = DaggerHandlerTest_Container.create();
         container.inject(this);
+
+        //make this deterministic for testing
+        ColumnarBulkDataSanitizerImpl bulkDataSanitizer =
+            (ColumnarBulkDataSanitizerImpl) handler.fileHandlerStrategy.get(".csv");
+        bulkDataSanitizer.setRecordShuffleChunkSize(1);
     }
 
     @Test
@@ -52,7 +58,9 @@ public class HandlerTest {
         File inputFile = new File(getClass().getResource("/hris-example.csv").getFile());
 
         StringWriter s = new StringWriter();
-        handler.defaultRules = handler.defaultRules.toBuilder().recordShuffleChunkSize(1).build();
+
+
+
         handler.sanitize(config, inputFile, s);
 
 
@@ -74,8 +82,6 @@ public class HandlerTest {
         config.columnsToPseudonymize = Collections.singleton("email");
 
         File inputFile = new File(getClass().getResource("/hris-example.csv").getFile());
-
-        handler.defaultRules = handler.defaultRules.toBuilder().recordShuffleChunkSize(1).build();
 
         StringWriter s = new StringWriter();
         handler.sanitize(config, inputFile, s);

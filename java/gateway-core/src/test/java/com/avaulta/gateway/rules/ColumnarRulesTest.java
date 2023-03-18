@@ -24,8 +24,7 @@ class ColumnarRulesTest {
         "columnsToRename:\n" +
         "  a: \"b\"\n" +
         "delimiter: \",\"\n" +
-        "pseudonymFormat: \"JSON\"\n" +
-        "recordShuffleChunkSize: 500\n"
+        "pseudonymFormat: \"JSON\"\n"
         ;
 
     @SneakyThrows
@@ -58,8 +57,7 @@ class ColumnarRulesTest {
             "columnsToRename:\n" +
             "  a: \"b\"\n" +
             "delimiter: \",\"\n" +
-            "pseudonymFormat: \"URL_SAFE_TOKEN\"\n" +
-            "recordShuffleChunkSize: 500\n"
+            "pseudonymFormat: \"URL_SAFE_TOKEN\"\n"
             ;
 
         ColumnarRules example = ColumnarRules.builder()

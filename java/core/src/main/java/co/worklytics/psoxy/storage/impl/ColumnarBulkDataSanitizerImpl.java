@@ -9,13 +9,13 @@ import com.avaulta.gateway.rules.ColumnarRules;
 import co.worklytics.psoxy.storage.BulkDataSanitizer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Streams;
 import com.google.common.collect.UnmodifiableIterator;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
+import lombok.*;
 import lombok.extern.java.Log;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -24,6 +24,7 @@ import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.io.*;
 import java.util.*;
 import java.util.function.BiFunction;
@@ -38,12 +39,18 @@ import java.util.stream.Stream;
  * CSV should have the first row with headers and being separated with commas; content should be quoted
  * if include commas or quotes inside.
  */
+@Singleton
 @Log
 @NoArgsConstructor(onConstructor_ = @Inject)
 public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
 
     @Inject
     ObjectMapper objectMapper;
+
+
+    @Getter(AccessLevel.PRIVATE)
+    @Setter(onMethod_ = @VisibleForTesting)
+    private int recordShuffleChunkSize = 500;
 
 
     @Override
@@ -56,8 +63,6 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
         }
 
         ColumnarRules rules = (ColumnarRules) bulkDataRules;
-
-        Preconditions.checkArgument(rules.getRecordShuffleChunkSize() > 0, "Record shuffle chunk size must be greater than 0");
 
         CSVParser records = CSVFormat
                 .DEFAULT
@@ -162,7 +167,7 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
             ) {
 
             UnmodifiableIterator<List<CSVRecord>> chunks =
-                Iterators.partition(records.iterator(), rules.getRecordShuffleChunkSize());
+                Iterators.partition(records.iterator(), this.getRecordShuffleChunkSize());
 
             for (UnmodifiableIterator<List<CSVRecord>> chunkIterator = chunks; chunkIterator.hasNext(); ) {
                 chunkIterator.next().stream().collect(SHUFFLER).forEach(row -> {

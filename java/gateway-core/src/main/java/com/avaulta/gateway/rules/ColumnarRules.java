@@ -25,7 +25,6 @@ import java.util.*;
 @Getter
 @EqualsAndHashCode
 @JsonPropertyOrder(alphabetic = true)
-
 public class ColumnarRules implements BulkDataRules {
 
     private static final long serialVersionUID = 1L;
@@ -39,20 +38,6 @@ public class ColumnarRules implements BulkDataRules {
     @NonNull
     @Builder.Default
     protected Character delimiter = ',';
-
-
-    /**
-     * records will be shuffled randomly within chunks of this size, to avoid the original source
-     * file acting as a lookup table for the output file
-     *
-     * (protip: setting to 1 should yield deterministic output for tests)
-     *
-     * TODO: fix serialization of default value
-     */
-    @JsonInclude(JsonInclude.Include.NON_EMPTY) // this doesn't work
-    @NonNull
-    @Builder.Default
-    protected Integer recordShuffleChunkSize = 500;
 
     /**
      * columns (fields) to duplicate
