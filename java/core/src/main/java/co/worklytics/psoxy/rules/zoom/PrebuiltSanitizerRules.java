@@ -1,7 +1,7 @@
 package co.worklytics.psoxy.rules.zoom;
 
 import com.avaulta.gateway.rules.Endpoint;
-import co.worklytics.psoxy.rules.RuleSet;
+import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.rules.Rules2;
 import com.avaulta.gateway.rules.transforms.Transform;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
@@ -147,7 +147,7 @@ public class PrebuiltSanitizerRules {
         .withAdditionalEndpoints(REPORT_ENDPOINTS.getEndpoints());
 
 
-    static public final Map<String, RuleSet> ZOOM_PREBUILT_RULES_MAP = ImmutableMap.<String, RuleSet>builder()
+    static public final Map<String, RESTRules> ZOOM_PREBUILT_RULES_MAP = ImmutableMap.<String, RESTRules>builder()
         .put("zoom", ZOOM)
         .build();
 }

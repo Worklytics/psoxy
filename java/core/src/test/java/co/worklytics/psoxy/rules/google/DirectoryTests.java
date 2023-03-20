@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.rules.google;
 
 import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
+import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.rules.RuleSet;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -20,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class DirectoryTests extends JavaRulesTestBaseCase {
 
     @Getter
-    final RuleSet rulesUnderTest = PrebuiltSanitizerRules.GDIRECTORY;
+    final RESTRules rulesUnderTest = PrebuiltSanitizerRules.GDIRECTORY;
 
     @Getter
     final String exampleDirectoryPath = "api-response-examples/g-workspace/directory";

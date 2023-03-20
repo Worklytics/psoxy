@@ -2,7 +2,7 @@ package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.gateway.*;
-import co.worklytics.psoxy.rules.RuleSet;
+import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.psoxy.utils.ComposedHttpRequestInitializer;
 import co.worklytics.psoxy.utils.GzipedContentHttpRequestInitializer;
@@ -52,9 +52,12 @@ public class CommonRequestHandler {
     @Inject RulesUtils rulesUtils;
     @Inject SourceAuthStrategy sourceAuthStrategy;
     @Inject ObjectMapper objectMapper;
-    @Inject SanitizerFactory sanitizerFactory;
     @Inject
-    RuleSet rules;
+    RESTApiSanitizerFactory sanitizerFactory;
+    @Inject
+    PseudonymizerImplFactory pseudonymizerImplFactory;
+    @Inject
+    RESTRules rules;
     @Inject HealthCheckRequestHandler healthCheckRequestHandler;
     @Inject
     ReversibleTokenizationStrategy reversibleTokenizationStrategy;
@@ -95,14 +98,14 @@ public class CommonRequestHandler {
     private static final Joiner HEADER_JOINER = Joiner.on(",");
 
 
-    private volatile Sanitizer sanitizer;
+    private volatile RESTApiSanitizer sanitizer;
     private final Object $writeLock = new Object[0];
 
-    private Sanitizer loadSanitizerRules() {
+    private RESTApiSanitizer loadSanitizerRules() {
         if (this.sanitizer == null) {
             synchronized ($writeLock) {
                 if (this.sanitizer == null) {
-                    this.sanitizer = sanitizerFactory.create(sanitizerFactory.buildOptions(config, rules));
+                    this.sanitizer = sanitizerFactory.create(rules, pseudonymizerImplFactory.create(pseudonymizerImplFactory.buildOptions(config, rules.getDefaultScopeIdForSource())));
                 }
             }
         }
@@ -206,10 +209,10 @@ public class CommonRequestHandler {
                 if (skipSanitization) {
                     proxyResponseContent = responseContent;
                 } else {
-                    Sanitizer sanitizerForRequest = getSanitizerForRequest(request);
+                    RESTApiSanitizer sanitizerForRequest = getSanitizerForRequest(request);
 
                     proxyResponseContent = sanitizerForRequest.sanitize(request.getHttpMethod(), targetUrl, responseContent);
-                    String rulesSha = rulesUtils.sha(sanitizerForRequest.getConfigurationOptions().getRules());
+                    String rulesSha = rulesUtils.sha(sanitizerForRequest.getRules());
                     builder.header(ResponseHeader.RULES_SHA.getHttpHeader(), rulesSha);
                     log.info("response sanitized with rule set " + rulesSha);
                 }
@@ -235,14 +238,14 @@ public class CommonRequestHandler {
      *
      * @param request
      */
-    Sanitizer getSanitizerForRequest(HttpEventRequest request) {
+    RESTApiSanitizer getSanitizerForRequest(HttpEventRequest request) {
         Optional<PseudonymImplementation> pseudonymImplementation = parsePseudonymImplementation(request);
         if (pseudonymImplementation.isPresent()) {
             loadSanitizerRules(); // ensure sanitizer is loaded
             if (!Objects.equals(pseudonymImplementation.get(),
-                    sanitizer.getConfigurationOptions().getPseudonymImplementation())) {
-                return sanitizerFactory.create(sanitizerFactory.buildOptions(config, rules)
-                    .withPseudonymImplementation(pseudonymImplementation.get()));
+                    sanitizer.getPseudonymizer().getOptions().getPseudonymImplementation())) {
+                return sanitizerFactory.create(rules,
+                    pseudonymizerImplFactory.create(sanitizer.getPseudonymizer().getOptions().withPseudonymImplementation(pseudonymImplementation.get())));
             }
         }
 

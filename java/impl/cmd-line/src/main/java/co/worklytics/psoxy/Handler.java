@@ -1,7 +1,7 @@
 package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.rules.CsvRules;
-import co.worklytics.psoxy.storage.FileHandlerFactory;
+import co.worklytics.psoxy.storage.BulkDataSanitizerFactory;
 import com.google.api.client.util.Lists;
 import com.google.cloud.secretmanager.v1.AccessSecretVersionResponse;
 import com.google.cloud.secretmanager.v1.SecretManagerServiceClient;
@@ -20,16 +20,25 @@ public class Handler {
 
     }
 
-    @Inject SanitizerFactory sanitizerFactory;
     @Inject
-    FileHandlerFactory fileHandlerStrategy;
+    RESTApiSanitizerFactory sanitizerFactory;
+    @Inject
+    BulkDataSanitizerFactory fileHandlerStrategy;
+    @Inject
+    PseudonymizerImplFactory pseudonymizerImplFactory;
+
+
+    //visible for testing
+    CsvRules defaultRules = CsvRules.builder().build();
 
     @SneakyThrows
     public void sanitize(@NonNull Config config,
                          @NonNull File inputFile,
                          @NonNull Appendable out) {
-        Sanitizer.ConfigurationOptions.ConfigurationOptionsBuilder options =
-            Sanitizer.ConfigurationOptions.builder()
+
+
+        Pseudonymizer.ConfigurationOptions.ConfigurationOptionsBuilder options =
+            Pseudonymizer.ConfigurationOptions.builder()
             .defaultScopeId(config.getDefaultScopeId());
 
         if (config.getPseudonymizationSaltSecret() != null) {
@@ -43,17 +52,16 @@ public class Handler {
             options.pseudonymizationSalt(config.getPseudonymizationSalt());
         }
 
-        CsvRules rules = CsvRules.builder()
+        CsvRules rules = defaultRules.toBuilder()
                 .columnsToPseudonymize(Lists.newArrayList(config.getColumnsToPseudonymize()))
                 .columnsToRedact(Lists.newArrayList(config.getColumnsToRedact()))
                 .build();
 
-        options.rules(rules);
 
-        Sanitizer sanitizer = sanitizerFactory.create(options.build());
+        Pseudonymizer pseudonymizer = pseudonymizerImplFactory.create(options.build());
 
         try (FileReader in = new FileReader(inputFile)) {
-            out.append(new String(fileHandlerStrategy.get(inputFile.getName()).handle(in, sanitizer)));
+            out.append(new String(fileHandlerStrategy.get(inputFile.getName()).sanitize(in, rules, pseudonymizer)));
         }
     }
 }

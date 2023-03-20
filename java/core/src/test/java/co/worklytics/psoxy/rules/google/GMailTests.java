@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.rules.google;
 
 import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
+import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.rules.RuleSet;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -18,7 +19,7 @@ public class GMailTests extends JavaRulesTestBaseCase {
 
 
     @Getter
-    final RuleSet rulesUnderTest = PrebuiltSanitizerRules.GMAIL;
+    final RESTRules rulesUnderTest = PrebuiltSanitizerRules.GMAIL;
 
     @Getter
     final String exampleDirectoryPath = "api-response-examples/g-workspace/gmail";

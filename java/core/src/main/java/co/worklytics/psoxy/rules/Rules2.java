@@ -21,7 +21,7 @@ import java.util.stream.Stream;
 @EqualsAndHashCode
 @JsonPropertyOrder({"allowAllEndpoints", "endpoints", "defaultScopeIdForSource"})
 @JsonInclude(JsonInclude.Include.NON_NULL) //NOTE: despite name, also affects YAML encoding
-public class Rules2 implements RuleSet, Serializable {
+public class Rules2 implements RESTRules {
 
 
     private static final long serialVersionUID = 1L;

@@ -1,8 +1,9 @@
 package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.ControlHeader;
+import co.worklytics.psoxy.Pseudonymizer;
 import co.worklytics.psoxy.PsoxyModule;
-import co.worklytics.psoxy.Sanitizer;
+import co.worklytics.psoxy.RESTApiSanitizer;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
@@ -122,7 +123,7 @@ class CommonRequestHandlerTest {
         //verify precondition that defaults != LEGACY
         assertEquals(
             PseudonymImplementation.DEFAULT,
-            Sanitizer.ConfigurationOptions.builder().build().getPseudonymImplementation());
+            Pseudonymizer.ConfigurationOptions.builder().build().getPseudonymImplementation());
 
         //prep mock request
         HttpEventRequest request = mock(HttpEventRequest.class);
@@ -141,7 +142,7 @@ class CommonRequestHandlerTest {
         //verify precondition that defaults != LEGACY
         assertEquals(
             PseudonymImplementation.DEFAULT,
-            Sanitizer.ConfigurationOptions.builder().build().getPseudonymImplementation());
+            Pseudonymizer.ConfigurationOptions.builder().build().getPseudonymImplementation());
 
         //prep mock request
         HttpEventRequest request = mock(HttpEventRequest.class);
@@ -149,10 +150,10 @@ class CommonRequestHandlerTest {
             .thenReturn(Optional.of(PseudonymImplementation.LEGACY.getHttpHeaderValue()));
 
         assertEquals(PseudonymImplementation.LEGACY,
-            handler.getSanitizerForRequest(request).getConfigurationOptions().getPseudonymImplementation());
+            handler.getSanitizerForRequest(request).getPseudonymizer().getOptions().getPseudonymImplementation());
 
         assertEquals(PseudonymImplementation.DEFAULT,
-            handler.getSanitizerForRequest(mock(HttpEventRequest.class)).getConfigurationOptions().getPseudonymImplementation());
+            handler.getSanitizerForRequest(mock(HttpEventRequest.class)).getPseudonymizer().getOptions().getPseudonymImplementation());
     }
 
     @Test

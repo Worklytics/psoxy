@@ -4,8 +4,8 @@ import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
-import co.worklytics.psoxy.storage.FileHandlerFactory;
-import co.worklytics.psoxy.storage.impl.FileHandlerFactoryImpl;
+import co.worklytics.psoxy.storage.BulkDataSanitizerFactory;
+import co.worklytics.psoxy.storage.impl.BulkDataSanitizerFactoryImpl;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.SchemaRuleUtils;
 import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
@@ -20,7 +20,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.api.client.http.HttpContent;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
-import com.google.auth.http.HttpTransportFactory;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
@@ -125,7 +124,7 @@ public class PsoxyModule {
     }
 
     @Provides
-    static FileHandlerFactory fileHandler(FileHandlerFactoryImpl fileHandlerStrategy) {
+    static BulkDataSanitizerFactory fileHandler(BulkDataSanitizerFactoryImpl fileHandlerStrategy) {
         return fileHandlerStrategy;
     }
     @Provides @Singleton
@@ -168,6 +167,11 @@ public class PsoxyModule {
         JsonSchemaGenerator jsonSchemaGenerator = new JsonSchemaGenerator(objectMapper);
 
         return new SchemaRuleUtils(objectMapper, jsonSchemaGenerator);
+    }
+
+    @Provides
+    Pseudonymizer pseudonymizer(PseudonymizerImplFactory factory, ConfigService config, co.worklytics.psoxy.rules.RuleSet ruleSet) {
+        return factory.create(factory.buildOptions(config, ruleSet.getDefaultScopeIdForSource()));
     }
 
 

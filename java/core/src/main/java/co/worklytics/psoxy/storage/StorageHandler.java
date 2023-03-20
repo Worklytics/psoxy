@@ -1,52 +1,57 @@
 package co.worklytics.psoxy.storage;
 
-import co.worklytics.psoxy.Sanitizer;
-import co.worklytics.psoxy.SanitizerFactory;
+import co.worklytics.psoxy.Pseudonymizer;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.StorageEventRequest;
 import co.worklytics.psoxy.gateway.StorageEventResponse;
-import co.worklytics.psoxy.rules.RuleSet;
-import lombok.NoArgsConstructor;
-import lombok.SneakyThrows;
+import co.worklytics.psoxy.rules.CsvRules;
+import com.avaulta.gateway.rules.BulkDataRules;
+import lombok.*;
 
 import javax.inject.Inject;
+import java.io.Serializable;
 
+/**
+ * solves a DaggerMissingBinding exception in tests
+ */
 @NoArgsConstructor(onConstructor_ = @Inject)
 public class StorageHandler {
 
     @Inject
     ConfigService config;
-    @Inject
-    RuleSet rules;
-    @Inject
-    FileHandlerFactory fileHandlerStrategy;
-    @Inject
-    SanitizerFactory sanitizerFactory;
 
-    private volatile Sanitizer sanitizer;
-    private final Object $writeLock = new Object[0];
+    @Inject
+    BulkDataSanitizerFactory bulkDataSanitizerFactory;
 
-    private Sanitizer loadSanitizerRules() {
-        if (this.sanitizer == null) {
-            synchronized ($writeLock) {
-                if (this.sanitizer == null) {
-                    this.sanitizer = sanitizerFactory.create(sanitizerFactory.buildOptions(config, rules));
-                }
-            }
-        }
-        return this.sanitizer;
-    }
+    @Inject
+    Pseudonymizer pseudonymizer;
 
     @SneakyThrows
-    public StorageEventResponse handle(StorageEventRequest request) {
+    public StorageEventResponse handle(StorageEventRequest request, BulkDataRules rules) {
 
-        FileHandler fileHandler = fileHandlerStrategy.get(request.getSourceObjectPath());
-        this.sanitizer = loadSanitizerRules();
+        BulkDataSanitizer fileHandler = bulkDataSanitizerFactory.get(request.getSourceObjectPath());
 
         return StorageEventResponse.builder()
                 .destinationBucketName(request.getDestinationBucketName())
-                .bytes(fileHandler.handle(request.getReaderStream(), sanitizer))
+                .bytes(fileHandler.sanitize(request.getReaderStream(), rules, pseudonymizer))
                 .destinationObjectPath(request.getSourceObjectPath())
                 .build();
+    }
+
+    @AllArgsConstructor(staticName = "of")
+    @NoArgsConstructor
+    @Data
+    public static class ObjectTransform implements Serializable {
+
+        private static final long serialVersionUID = 1L;
+
+        @NonNull
+        String destinationBucketName;
+
+        //NOTE: need a concrete type here to serialize to/from YAML
+        //TODO: support proper jackson polymorphism here, across potential BulkDataRules implementations
+
+        @NonNull
+        CsvRules rules;
     }
 }

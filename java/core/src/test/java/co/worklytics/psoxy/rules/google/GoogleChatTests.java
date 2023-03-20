@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.rules.google;
 
 import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
+import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.rules.RuleSet;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -13,7 +14,7 @@ import java.util.Collection;
 class GoogleChatTests extends JavaRulesTestBaseCase {
 
     @Getter
-    final RuleSet rulesUnderTest = PrebuiltSanitizerRules.GOOGLE_CHAT;
+    final RESTRules rulesUnderTest = PrebuiltSanitizerRules.GOOGLE_CHAT;
 
     @Getter
     final String exampleDirectoryPath = "api-response-examples/g-workspace/google-chat";

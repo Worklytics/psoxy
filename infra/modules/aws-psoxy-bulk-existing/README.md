@@ -1,3 +1,5 @@
+**DEPRECATED - DOES NOT ACTUALLY WORK AS ADVERTISED**
+
 # aws-psoxy-bulk-existing
 
 This module provisions an AWS Lambda that sanitizes files uploaded into an *existing* bucket

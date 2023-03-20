@@ -1,33 +1,38 @@
 package co.worklytics.psoxy.storage.impl;
 
 import co.worklytics.psoxy.PseudonymizedIdentity;
-import com.avaulta.gateway.pseudonyms.Pseudonym;
+import co.worklytics.psoxy.Pseudonymizer;
+import co.worklytics.psoxy.rules.CsvRules;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
-import com.avaulta.gateway.pseudonyms.impl.JsonPseudonymEncoder;
-import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
+import com.avaulta.gateway.rules.BulkDataRules;
 import com.avaulta.gateway.rules.ColumnarRules;
-import co.worklytics.psoxy.Sanitizer;
-import co.worklytics.psoxy.storage.FileHandler;
+import co.worklytics.psoxy.storage.BulkDataSanitizer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Streams;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
+import com.google.common.collect.UnmodifiableIterator;
+import lombok.*;
 import lombok.extern.java.Log;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Inject;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import javax.inject.Singleton;
+import java.io.*;
 import java.util.*;
 import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.UnaryOperator;
+import java.util.stream.Collector;
+import java.io.ByteArrayOutputStream;
+
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -36,20 +41,28 @@ import java.util.stream.Stream;
  * CSV should have the first row with headers and being separated with commas; content should be quoted
  * if include commas or quotes inside.
  */
+@Singleton
 @Log
 @NoArgsConstructor(onConstructor_ = @Inject)
-public class CSVFileHandler implements FileHandler {
+public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
 
     @Inject
     ObjectMapper objectMapper;
 
+    @Getter(AccessLevel.PRIVATE)
+    @Setter(onMethod_ = @VisibleForTesting)
+    private int recordShuffleChunkSize = 500;
 
     @Override
-    public byte[] handle(@NonNull InputStreamReader reader, @NonNull Sanitizer sanitizer) throws IOException {
+    public byte[] sanitize(@NonNull InputStreamReader reader,
+                           @NonNull BulkDataRules bulkDataRules,
+                           @NonNull Pseudonymizer pseudonymizer) throws IOException {
 
-        Sanitizer.ConfigurationOptions configurationOptions = sanitizer.getConfigurationOptions();
+        if (!(bulkDataRules instanceof CsvRules)) {
+            throw new IllegalArgumentException("Rules must be of type CsvRules");
+        }
 
-        ColumnarRules rules = (ColumnarRules) configurationOptions.getRules();
+        ColumnarRules rules = (ColumnarRules) bulkDataRules;
 
         CSVParser records = CSVFormat
                 .DEFAULT
@@ -69,8 +82,7 @@ public class CSVFileHandler implements FileHandler {
             Optional.ofNullable(rules.getColumnsToInclude())
                 .map(this::asSetWithCaseInsensitiveComparator);
 
-        final Map<String, String> columnsToRename = ((ColumnarRules) configurationOptions.getRules())
-            .getColumnsToRename()
+        final Map<String, String> columnsToRename = rules.getColumnsToRename()
             .entrySet().stream()
             .collect(Collectors.toMap(
                 entry -> entry.getKey().trim(),
@@ -78,7 +90,7 @@ public class CSVFileHandler implements FileHandler {
                 (a, b) -> a,
                 () -> new TreeMap<>(String.CASE_INSENSITIVE_ORDER)));
 
-        final Map<String, String> columnsToDuplicate = ((ColumnarRules) configurationOptions.getRules())
+        final Map<String, String> columnsToDuplicate = rules
             .getColumnsToDuplicate()
             .entrySet().stream()
             .collect(Collectors.toMap(
@@ -129,7 +141,7 @@ public class CSVFileHandler implements FileHandler {
             if (columnsToPseudonymize.contains(outputColumnName)) {
                 if (StringUtils.isNotBlank(value)) {
                     try {
-                        PseudonymizedIdentity identity = sanitizer.pseudonymize(value);
+                        PseudonymizedIdentity identity = pseudonymizer.pseudonymize(value);
 
                         if (identity == null) {
                             return null;
@@ -149,30 +161,36 @@ public class CSVFileHandler implements FileHandler {
 
 
         try(ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
-            PrintWriter printWriter = new PrintWriter(baos);
+            Writer printWriter = new PrintWriter(baos);
             CSVPrinter printer = new CSVPrinter(printWriter, CSVFormat.DEFAULT
                 .withHeader(columnNamesForOutputFile.toArray(new String[0])))
             ) {
 
-            records.forEach(row -> {
-                Stream<Object> sanitized =
+            UnmodifiableIterator<List<CSVRecord>> chunks =
+                Iterators.partition(records.iterator(), this.getRecordShuffleChunkSize());
+
+            for (UnmodifiableIterator<List<CSVRecord>> chunkIterator = chunks; chunkIterator.hasNext(); ) {
+                List<CSVRecord> chunk = new ArrayList<>(chunkIterator.next());
+                shuffleImplementation.apply(chunk).forEach(row -> {
+                    Stream<Object> sanitized =
                         headers.stream() // only iterate on allowed headers
-                        .map(column ->
+                            .map(column ->
                                 applyPseudonymizationIfAny.apply(
                                     columnsToRename.getOrDefault(column, column),
                                     row.get(column))
-                        );
+                            );
 
-                sanitized = Streams.concat(sanitized, columnsToDuplicate.entrySet().stream()
-                    .map(entry ->
-                        applyPseudonymizationIfAny.apply(entry.getValue(), row.get(entry.getKey()))));
+                    sanitized = Streams.concat(sanitized, columnsToDuplicate.entrySet().stream()
+                        .map(entry ->
+                            applyPseudonymizationIfAny.apply(entry.getValue(), row.get(entry.getKey()))));
 
-                try {
-                    printer.printRecord(sanitized.collect(Collectors.toList()));
-                } catch (Throwable e) {
-                    throw new RuntimeException("Failed to write row", e);
-                }
-            });
+                    try {
+                        printer.printRecord(sanitized.collect(Collectors.toList()));
+                    } catch (Throwable e) {
+                        throw new RuntimeException("Failed to write row", e);
+                    }
+                });
+            }
 
             printWriter.flush();
 
@@ -180,6 +198,18 @@ public class CSVFileHandler implements FileHandler {
         }
     }
 
+    private UnaryOperator<List<CSVRecord>> shuffleImplementation = (List<CSVRecord> l) -> {
+        Collections.shuffle(l);
+        return l;
+    };
+
+    @VisibleForTesting
+    void makeShuffleDeterministic() {
+        this.shuffleImplementation = (List<CSVRecord> l) -> {
+            Collections.reverse(l);
+            return l;
+        };
+    }
 
     List<String> applyReplacements(Collection<String> original, final Map<String, String> replacements) {
         return original.stream()
@@ -187,11 +217,9 @@ public class CSVFileHandler implements FileHandler {
             .collect(Collectors.toList());
     }
 
-
     Set<String> asSetWithCaseInsensitiveComparator(Collection<String> set) {
         return set.stream()
             .map(String::trim)
             .collect(Collectors.toCollection(() -> new TreeSet<>(String.CASE_INSENSITIVE_ORDER)));
     }
-
 }
