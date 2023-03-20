@@ -44,16 +44,3 @@ psoxy_base_dir                = "../../../"
 In order to get the Service Account Unique ID value for `caller_gcp_service_account_ids`, log in to your Worklytics
 Account and visit the [Configuration Values](https://app.worklytics.co/analytics/integrations/configuration) page.
 
-## Security
-
-This example includes generation of certificates for your Azure AD application listings.
-   - anyone in possession of those certificates could access your data with whatever permissions you
-     grant to the Azure AD application.
-   - this example should be used with caution and only run from a location that, based on your
-     org's infosec rules, can be used to generate such a certificate.
-   - the terraform state produced by this module should be persisted to a secure location, such as
-     an encrypted disk of a VM dedicated for this purpose OR a cloud storage service (GCS, S3 etc).
-     It is generally NOT good practice to commit such state files to a source code repository such
-     as git/github.
-
-
