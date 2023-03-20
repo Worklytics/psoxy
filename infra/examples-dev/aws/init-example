@@ -33,9 +33,6 @@ if gcloud --version &> /dev/null ; then
   GCP_PROJECT_ID=$(gcloud config get project)
   echo "gcp_project_id=\"${GCP_PROJECT_ID}\"" >> terraform.tfvars
   printf "\tgcp_project_id=${BLUE}\"${GCP_PROJECT_ID}\"${NC}\n"
-fi
-
-if gcloud --version &> /dev/null ; then
   GOOGLE_WORKSPACE_EXAMPLE_USER=$(gcloud config get account)
   printf "google_workspace_example_user=\"${GOOGLE_WORKSPACE_EXAMPLE_USER}\"\n" >> terraform.tfvars
   printf "\tgoogle_workspace_example_user=${BLUE}\"${GOOGLE_WORKSPACE_EXAMPLE_USER}\"${NC}\n"
