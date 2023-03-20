@@ -55,13 +55,6 @@ provider "azuread" {
   tenant_id = var.msft_tenant_id
 }
 
-# Google user or service account which Terraform is authenticated as must be authorized to
-# provision resources (Service Accounts + Keys; and activate APIs) in this project
-data "google_project" "psoxy-google-connectors" {
-  project_id = var.gcp_project_id
-}
-
-
 module "psoxy" {
   source = "../../modular-examples/aws"
   # source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-msft-365?ref=v0.4.13"
@@ -83,6 +76,7 @@ module "psoxy" {
   msft_owners_email              = var.msft_owners_email
   general_environment_variables  = var.general_environment_variables
   salesforce_domain              = var.salesforce_domain
+  gcp_project_id                 = var.gcp_project_id
   google_workspace_example_admin = var.google_workspace_example_admin
   google_workspace_example_user  = var.google_workspace_example_user
 }
