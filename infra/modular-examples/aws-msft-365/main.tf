@@ -39,9 +39,10 @@ module "psoxy-aws" {
 
   aws_account_id                 = var.aws_account_id
   psoxy_base_dir                 = var.psoxy_base_dir
+  psoxy_version                  = var.bundle_version
+  force_bundle                   = var.force_bundle
   caller_aws_arns                = var.caller_aws_arns
   caller_gcp_service_account_ids = var.caller_gcp_service_account_ids
-  force_bundle                   = var.force_bundle
 }
 
 module "global_secrets" {

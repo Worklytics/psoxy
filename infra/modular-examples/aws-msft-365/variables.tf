@@ -76,6 +76,12 @@ variable "psoxy_base_dir" {
   }
 }
 
+variable "bundle_version" {
+  type        = string
+  description = "version of psoxy to deploy"
+  default     = "rc-v0.4.15"
+}
+
 variable "force_bundle" {
   type        = bool
   description = "whether to force build of deployment bundle, even if it already exists"
