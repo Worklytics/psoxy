@@ -154,7 +154,7 @@ module "worklytics-psoxy-connection-google-workspace" {
 # BEGIN MSFT-365 CONNECTORS
 
 module "cognito_identity_pool" {
-  count = msft_365_enabled ? 1 : 0 # only provision identity pool if MSFT-365 connectors are enabled
+  count = local.msft_365_enabled ? 1 : 0 # only provision identity pool if MSFT-365 connectors are enabled
 
   source = "../../modules/aws-cognito-pool"
 
@@ -163,7 +163,7 @@ module "cognito_identity_pool" {
 }
 
 module "cognito_identity" {
-  count = msft_365_enabled ? 1 : 0 # only provision identity pool if MSFT-365 connectors are enabled
+  count = local.msft_365_enabled ? 1 : 0 # only provision identity pool if MSFT-365 connectors are enabled
 
   source = "../../modules/aws-cognito-identity-cli"
 
@@ -173,8 +173,12 @@ module "cognito_identity" {
   aws_role         = var.aws_assume_role_arn
 }
 
+
+data "azuread_client_config" "current" {
+
+}
+
 data "azuread_users" "owners" {
-  count = msft_365_enabled ? 1 : 0
 
   user_principal_names = var.msft_owners_email
 }
@@ -202,8 +206,8 @@ module "msft-connection-auth-federation" {
   display_name          = "AccessFromAWS"
   description           = "AWS federation to be used for psoxy Connector - ${each.value.display_name}${var.connector_display_name_suffix}"
   issuer                = "https://cognito-identity.amazonaws.com"
-  audience              = module.cognito_identity_pool.pool_id
-  subject               = module.cognito_identity.identity_id[each.key]
+  audience              = module.cognito_identity_pool[0].pool_id
+  subject               = module.cognito_identity[0].identity_id[each.key]
 }
 
 # grant required permissions to connectors via Azure AD
@@ -253,9 +257,9 @@ module "psoxy-msft-connector" {
       IS_DEVELOPMENT_MODE  = contains(var.non_production_connectors, each.key)
       CLIENT_ID            = module.msft-connection[each.key].connector.application_id
       PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
-      IDENTITY_POOL_ID     = module.cognito_identity_pool.pool_id,
-      IDENTITY_ID          = module.cognito_identity.identity_id[each.key]
-      DEVELOPER_NAME_ID    = module.cognito_identity_pool.developer_provider_name
+      IDENTITY_POOL_ID     = module.cognito_identity_pool[0].pool_id,
+      IDENTITY_ID          = module.cognito_identity[0].identity_id[each.key]
+      DEVELOPER_NAME_ID    = module.cognito_identity_pool[0].developer_provider_name
     }
   )
 }
@@ -264,7 +268,7 @@ resource "aws_iam_role_policy_attachment" "cognito_lambda_policy" {
   for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
   role       = module.psoxy-msft-connector[each.key].instance_role_name
-  policy_arn = module.cognito_identity_pool.policy_arn
+  policy_arn = module.cognito_identity_pool[0].policy_arn
 }
 
 module "worklytics-psoxy-connection-msft-365" {

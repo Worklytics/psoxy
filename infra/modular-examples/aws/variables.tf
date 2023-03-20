@@ -102,6 +102,12 @@ variable "force_bundle" {
   default     = false
 }
 
+variable "pseudonymize_app_ids" {
+  type        = string
+  description = "if set, will set value of PSEUDONYMIZE_APP_IDS environment variable to this value for all sources"
+  default     = false
+}
+
 variable "general_environment_variables" {
   type        = map(string)
   description = "environment variables to add for all connectors"
@@ -192,6 +198,7 @@ variable "lookup_table_builders" {
 variable "google_workspace_example_user" {
   type        = string
   description = "user to impersonate for Google Workspace API calls (null for none)"
+  default     = null
 }
 
 variable "google_workspace_example_admin" {

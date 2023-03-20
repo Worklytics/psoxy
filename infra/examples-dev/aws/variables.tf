@@ -74,6 +74,17 @@ variable "gcp_project_id" {
   description = "string ID of GCP project that will host psoxy instance; must exist"
 }
 
+variable "google_workspace_example_user" {
+  type        = string
+  description = "user to impersonate for Google Workspace API calls (null for none)"
+}
+
+variable "google_workspace_example_admin" {
+  type        = string
+  description = "user to impersonate for Google Workspace API calls (null for value of `google_workspace_example_user`)"
+  default     = null # will failover to user
+}
+
 variable "salesforce_domain" {
   type        = string
   default     = ""

@@ -22,7 +22,17 @@ fi
 printf "Initializing ${BLUE}psoxy${NC} Terraform configuration ...\n"
 terraform init
 
-PSOXY_BASE_DIR=${TF_CONFIG_ROOT}/.terraform/modules/psoxy/
+if [ -d ${TF_CONFIG_ROOT}/.terraform/modules/psoxy/ ]; then
+  # use checkout of repo done by Terraform
+  PSOXY_BASE_DIR=${TF_CONFIG_ROOT}/.terraform/modules/psoxy/
+else
+  # use checkout of repo on your local machine
+  cd ../../..
+  PSOXY_BASE_DIR="`pwd`/"
+  cd ${TF_CONFIG_ROOT}
+fi
+
+
 
 printf "Initializing ${BLUE}terraform.tfvars${NC} file for your configuration ...\n"
 if [ ! -f terraform.tfvars ]; then
@@ -43,7 +53,7 @@ else
   printf "${RED}Nothing to initialize. File terraform.tfvars already exists.${NC}\n\n"
 fi
 
-TEST_TOOL_ROOT=${PSOXY_BASE_DIR}/tools/psoxy-test
+TEST_TOOL_ROOT=${PSOXY_BASE_DIR}tools/psoxy-test
 
 if [ ! -d ${TEST_TOOL_ROOT} ]; then
   printf "${RED}No test tool source found at ${TEST_TOOL_ROOT}. Failed to install test tool.${NC}\n"
@@ -52,8 +62,8 @@ fi
 
 if npm -v &> /dev/null ; then
   printf "Installing ${BLUE}psoxy-test${NC} tool ...\n"
-  cd ${PSOXY_BASE_DIR}/tools/psoxy-test
-  npm --no-audit --no-fund --prefix ${PSOXY_BASE_DIR}/tools/psoxy-test install
+  cd ${TEST_TOOL_ROOT}
+  npm --no-audit --no-fund --prefix ${TEST_TOOL_ROOT} install
 else
   printf "${RED}NPM / Node.JS not available; could not install test tool. We recommend installing Node.JS ( https://nodejs.org/ ), then re-running this init script.${NC}\n"
 fi

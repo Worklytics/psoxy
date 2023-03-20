@@ -81,9 +81,10 @@ module "psoxy" {
   lookup_table_builders          = var.lookup_table_builders
   msft_tenant_id                 = var.msft_tenant_id
   msft_owners_email              = var.msft_owners_email
-  pseudonymize_app_ids           = var.pseudonymize_app_ids
   general_environment_variables  = var.general_environment_variables
   salesforce_domain              = var.salesforce_domain
+  google_workspace_example_admin = var.google_workspace_example_admin
+  google_workspace_example_user  = var.google_workspace_example_user
 }
 
 # if you generated these, you may want them to import back into your data warehouse
