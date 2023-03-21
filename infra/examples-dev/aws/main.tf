@@ -79,6 +79,7 @@ module "psoxy" {
   gcp_project_id                 = var.gcp_project_id
   google_workspace_example_admin = var.google_workspace_example_admin
   google_workspace_example_user  = var.google_workspace_example_user
+  environment_name               = var.environment_name
 }
 
 # if you generated these, you may want them to import back into your data warehouse

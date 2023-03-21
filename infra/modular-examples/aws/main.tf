@@ -8,10 +8,22 @@ terraform {
   }
 }
 
+# deployment ID to avoid collisions if deploying host environment (AWS account, GCP project) that
+# is shared by multiple deployments
+resource "random_string" "deployment_id" {
+  length   = 5
+  lower   = true
+  upper   = false
+  numeric = true
+  special = false
+}
+
 locals {
   base_config_path = "${var.psoxy_base_dir}/configs/"
   host_platform_id = "AWS"
   ssm_key_ids      = var.aws_ssm_key_id == null ? {} : { 0 : var.aws_ssm_key_id }
+  deployment_id    = length(var.environment_name) > 0 ? replace(lower(var.environment_name), " ", "-") : random_string.deployment_id.result
+  proxy_brand      = "psoxy"
 }
 
 module "worklytics_connector_specs" {
@@ -49,6 +61,9 @@ module "global_secrets" {
   secrets    = module.psoxy-aws.secrets
 }
 
+locals {
+  deployment_id_sa_id_part = length(local.deployment_id) > 0 ? "${local.deployment_id}-" : ""
+}
 
 module "google-workspace-connection" {
   for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
@@ -57,7 +72,7 @@ module "google-workspace-connection" {
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/google-workspace-dwd-connection?ref=v0.4.13
 
   project_id                   = var.gcp_project_id
-  connector_service_account_id = "psoxy-${each.key}"
+  connector_service_account_id = "${local.proxy_brand}-${local.deployment_id_sa_id_part}${each.key}"
   display_name                 = "Psoxy Connector - ${each.value.display_name}${var.connector_display_name_suffix}"
   apis_consumed                = each.value.apis_consumed
   oauth_scopes_needed          = each.value.oauth_scopes_needed
@@ -131,7 +146,6 @@ module "psoxy-google-workspace-connector" {
   )
 }
 
-
 module "worklytics-psoxy-connection-google-workspace" {
   for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
 
@@ -150,6 +164,8 @@ module "worklytics-psoxy-connection-google-workspace" {
     "AWS Psoxy Role ARN" = module.psoxy-aws.api_caller_role_arn
   }
 }
+
+# END GOOGLE WORKSPACE CONNECTORS
 
 # BEGIN MSFT-365 CONNECTORS
 

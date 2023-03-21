@@ -1,3 +1,9 @@
+variable "environment_name" {
+  type        = string
+  description = "qualifier to distinguish resources created by this terraform configuration from other psoxy Terraform deployments, (eg, 'prod', 'dev', etc)"
+  default     = ""
+}
+
 variable "aws_account_id" {
   type        = string
   description = "id of aws account in which to provision your AWS infra"
