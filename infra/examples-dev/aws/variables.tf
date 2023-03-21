@@ -59,24 +59,26 @@ variable "caller_aws_arns" {
 
 variable "msft_tenant_id" {
   type        = string
-  default     = ""
   description = "ID of Microsoft tenant to connect to (req'd only if config includes MSFT connectors)"
+  default     = ""
 }
 
 variable "msft_owners_email" {
   type        = set(string)
-  default     = []
   description = "(Only if config includes MSFT connectors). Optionally, set of emails to apply as owners on AAD apps apart from current logged user"
+  default     = []
 }
 
 variable "gcp_project_id" {
   type        = string
-  description = "string ID of GCP project that will host psoxy instance; must exist"
+  description = "string ID of GCP project that will host psoxy instance; must exist. Can leave null if not using GCP/Google Workspace."
+  default     = null
 }
 
 variable "google_workspace_example_user" {
   type        = string
   description = "user to impersonate for Google Workspace API calls (null for none)"
+  default     = null
 }
 
 variable "google_workspace_example_admin" {

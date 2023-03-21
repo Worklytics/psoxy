@@ -20,7 +20,7 @@ module "worklytics_connector_specs" {
 
   enabled_connectors             = var.enabled_connectors
   google_workspace_example_user  = var.google_workspace_example_user
-  google_workspace_example_admin = coalesce(var.google_workspace_example_admin, var.google_workspace_example_user)
+  google_workspace_example_admin = try(coalesce(var.google_workspace_example_admin, var.google_workspace_example_user), null)
   salesforce_domain              = var.salesforce_domain
 }
 
@@ -366,7 +366,6 @@ module "aws-psoxy-long-auth-connectors" {
   source_auth_strategy            = each.value.source_auth_strategy
   oauth_scopes                    = try(each.value.oauth_scopes_needed, [])
 
-
   todo_step = module.source_token_external_todo[each.key].next_todo_step
 
   environment_variables = merge(
@@ -423,6 +422,7 @@ module "psoxy-bulk" {
   ssm_kms_key_ids                 = local.ssm_key_ids
   sanitized_accessor_role_names   = [ module.psoxy-aws.api_caller_role_name ]
   memory_size_mb                  = 1024
+  example_file                    = each.value.example_file
 
   environment_variables = merge(
     var.general_environment_variables,
