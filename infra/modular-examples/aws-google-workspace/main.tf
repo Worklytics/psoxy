@@ -130,6 +130,7 @@ module "psoxy-google-workspace-connector" {
   target_host                           = each.value.target_host
   source_auth_strategy                  = each.value.source_auth_strategy
   oauth_scopes                          = try(each.value.oauth_scopes_needed, [])
+  log_retention_days                    = var.log_retention_days
 
   todo_step = module.google-workspace-connection[each.key].next_todo_step
 
@@ -236,6 +237,7 @@ module "aws-psoxy-long-auth-connectors" {
   target_host                     = each.value.target_host
   source_auth_strategy            = each.value.source_auth_strategy
   oauth_scopes                    = try(each.value.oauth_scopes_needed, [])
+  log_retention_days              = var.log_retention_days
 
 
   todo_step = module.source_token_external_todo[each.key].next_todo_step
@@ -292,10 +294,11 @@ module "psoxy-bulk" {
   global_parameter_arns           = module.global_secrets.secret_arns
   path_to_instance_ssm_parameters = "${var.aws_ssm_param_root_path}PSOXY_${upper(replace(each.key, "-", "_"))}_"
   ssm_kms_key_ids                 = local.ssm_key_ids
-  sanitized_accessor_role_names   = [ module.psoxy-aws.api_caller_role_name ]
+  sanitized_accessor_role_names   = [module.psoxy-aws.api_caller_role_name]
   memory_size_mb                  = 1024
+  log_retention_days              = var.log_retention_days
 
-  example_file                    = try(each.value.example_file, null)
+  example_file = try(each.value.example_file, null)
 
   environment_variables = merge(
     var.general_environment_variables,
@@ -339,18 +342,18 @@ module "lookup_output" {
 }
 
 locals {
-  inputs_to_build_lookups_for = toset(distinct([ for k, v in var.lookup_table_builders : v.input_connector_id ]))
+  inputs_to_build_lookups_for = toset(distinct([for k, v in var.lookup_table_builders : v.input_connector_id]))
 }
 
 resource "aws_ssm_parameter" "additional_transforms" {
   for_each = local.inputs_to_build_lookups_for
 
-  name  = "${var.aws_ssm_param_root_path}PSOXY_${upper(replace(each.key, "-", "_"))}_ADDITIONAL_TRANSFORMS"
-  type  = "String"
-  value = yamlencode([ for k, v in var.lookup_table_builders : {
-      destinationBucketName: module.lookup_output[k].output_bucket
-      rules: v.rules
-    } if v.input_connector_id == each.key ])
+  name = "${var.aws_ssm_param_root_path}PSOXY_${upper(replace(each.key, "-", "_"))}_ADDITIONAL_TRANSFORMS"
+  type = "String"
+  value = yamlencode([for k, v in var.lookup_table_builders : {
+    destinationBucketName : module.lookup_output[k].output_bucket
+    rules : v.rules
+  } if v.input_connector_id == each.key])
 }
 
 

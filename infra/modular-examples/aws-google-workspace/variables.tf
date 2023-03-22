@@ -36,6 +36,12 @@ variable "aws_ssm_key_id" {
   default     = null
 }
 
+variable "log_retention_days" {
+  type        = number
+  description = "number of days to retain psoxy lambda logs in CloudWatch"
+  default     = 7
+}
+
 variable "caller_gcp_service_account_ids" {
   type        = list(string)
   description = "ids of GCP service accounts allowed to send requests to the proxy (eg, unique ID of the SA of your Worklytics instance)"

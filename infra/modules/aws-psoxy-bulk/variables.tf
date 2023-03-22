@@ -41,6 +41,12 @@ variable "ssm_kms_key_ids" {
   default     = {}
 }
 
+variable "log_retention_days" {
+  type        = number
+  description = "number of days to retain logs in CloudWatch for this psoxy instance"
+  default     = 7
+}
+
 # NOTE: currently unused; but perhaps we'll have default rules by source_kind in the future,
 # so leaving it in
 variable "source_kind" {

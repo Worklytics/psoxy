@@ -30,6 +30,12 @@ variable "ssm_kms_key_ids" {
   default     = {}
 }
 
+variable "log_retention_days" {
+  type        = number
+  description = "number of days to retain logs in CloudWatch for this psoxy instance"
+  default     = 7
+}
+
 variable "handler_class" {
   type        = string
   description = "Class to handle the request"
