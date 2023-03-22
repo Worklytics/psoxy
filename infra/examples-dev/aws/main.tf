@@ -6,6 +6,11 @@ terraform {
       version = "~> 4.12"
     }
 
+    # for API connections to Microsoft 365 (comment this out if unused)
+    azuread = {
+      version = "~> 2.3"
+    }
+
     # for the API connections to Google Workspace
     google = {
       version = ">= 3.74, <= 5.0"
@@ -44,6 +49,10 @@ provider "aws" {
   allowed_account_ids = [
     var.aws_account_id
   ]
+}
+
+provider "azuread" {
+  tenant_id = var.msft_tenant_id
 }
 
 module "psoxy" {
