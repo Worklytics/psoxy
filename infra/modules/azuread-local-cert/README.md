@@ -39,46 +39,11 @@ Example:
 
 Output will be something similar to this:
 ```shell
-Open TODO_OUTLOOK-CAL_CERTS.txt and follow the instructions to complete the setup.
+Open TODO_OUTLOOK-CAL_CERTS.md and follow the instructions to complete the setup.
 ```
 
-File will show instructions like:
-```shell
-Follow instructions and copy the contents between the === blocks
-IMPORTANT: After setup complete please remove this file.
+The bash script generates a markdown [file similar to this example](TODO_OUTLOOK-CAL_CERTS_SAMPLE.md).
 
-
-TODO 1: Upload the following cert to the outlook-cal app in your Azure Console
-Or give it to an admin with rights to do so.
-========================================================================
------BEGIN CERTIFICATE-----
-MIIDfzCCAmegAwIBAgIUPvjrREWDpCA+lGBgMlgXnAFFhv4wDQYJKoZIhvcNAQEL
-BQAwTzELMAkGA1UEBhMCVVMxETAPBgNVBAgMCE5ldyBZb3JrMREwDwYDVQQHDAhO
-....
-5iyo1IlTn58CEEhpRLE0PX41gk3JZQcYHnRKstm7mHjablhvFXIQYesyUkSxWW/4
-QqM5kxgLumxKsZ/uZ7WJDCRj797nTWhCniuyZY/seNA+GrF+I3zU6eLv0oKq1OOI
-zb7K1KKpaJbyijMF5/kxkPyUU0+D3DOIApBOowd0T1Rk0dc=
------END CERTIFICATE-----
-========================================================================
-
-TODO 2: Update the value of PSOXY_OUTLOOK-CAL_PRIVATE_KEY_ID with the content between the starred blocks
-========================================================================
-A61EE02A71D2FB50EA9B783A8C4F351DE577D802
-========================================================================
-
-TODO 3: Update the value of PSOXY_OUTLOOK-CAL_PRIVATE_KEY with the content between the starred blocks
-========================================================================
------BEGIN PRIVATE KEY-----
-MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDTY8emar/W75Pq
-R5xYn/zYviZHa8R1fmDSWdvAOvybfprb76jHfbK82J+uBXHBCtzRoqbOPljFj1n5
-......
-DLy7Z9eiKTRCkmzUYoBvZVueSKlknBWwKcf3p8pB+teXzdLXMP1xEtmLf9j06I4T
-Sr/anUFqP5UPW742GSX74g==
------END PRIVATE KEY-----
-========================================================================
-
-```
-
-see:
+For updating values in the secret manager see:
   - https://docs.aws.amazon.com/cli/latest/reference/ssm/put-parameter.html
   - https://cloud.google.com/sdk/gcloud/reference/secrets/versions/add
