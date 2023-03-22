@@ -4,8 +4,9 @@
 # package built by terraform, but terraform doesn't understand this dependency in its plan. we make
 # it work via explicit 'depends_on', but Terraform still gives 'error inconsistent plan' as its
 # original plan presumed the sha-256 of the package
+
+
 locals {
-  filename               = "psoxy-${var.implementation}-${var.psoxy_version}.jar"
   path_to_impl_module    = "${var.path_to_psoxy_java}/impl/${var.implementation}"
   path_to_deployment_jar = "${local.path_to_impl_module}/target/${local.filename}"
 }
@@ -24,7 +25,6 @@ data "external" "deployment_package" {
     "${path.module}/build.sh",
     var.path_to_psoxy_java,
     var.implementation,
-    local.path_to_deployment_jar,
     var.force_bundle ? "--force_bundle" : ""
   ]
 }
@@ -39,5 +39,9 @@ output "path_to_deployment_jar" {
 }
 
 output "filename" {
-  value = local.filename
+  value = data.external.deployment_package.result.filename
+}
+
+output "version" {
+  value = data.external.deployment_package.result.version
 }

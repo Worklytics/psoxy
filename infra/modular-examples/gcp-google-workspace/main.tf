@@ -28,7 +28,6 @@ module "psoxy-gcp" {
   project_id        = var.gcp_project_id
   psoxy_base_dir    = var.psoxy_base_dir
   force_bundle      = var.force_bundle
-  psoxy_version     = var.bundle_version
   bucket_location   = var.gcp_region
   invoker_sa_emails = var.worklytics_sa_emails
 

@@ -33,6 +33,6 @@ variable "force_bundle" {
 
 variable "psoxy_version" {
   type        = string
-  description = "version of psoxy to deploy"
-  default     = "rc-v0.4.15"
+  description = "IGNORED; version of psoxy to deploy"
+  default     = null
 }

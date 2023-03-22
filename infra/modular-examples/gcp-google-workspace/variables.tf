@@ -40,12 +40,6 @@ variable "force_bundle" {
   default     = false
 }
 
-variable "bundle_version" {
-  type        = string
-  description = "version of psoxy to deploy"
-  default     = "rc-v0.4.15"
-}
-
 variable "general_environment_variables" {
   type        = map(string)
   description = "environment variables to add for all connectors"
