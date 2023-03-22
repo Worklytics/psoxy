@@ -21,21 +21,33 @@ import {
 import fs from 'fs';
 import getLogger from './logger.js';
 import path from 'path';
+import _ from 'lodash';
 
 /**
  * Call AWS cli to get temporary security credentials.
  *
  * Refs:
  * - https://awscli.amazonaws.com/v2/documentation/api/latest/reference/sts/assume-role.html
+ * - https://docs.aws.amazon.com/STS/latest/APIReference/API_GetSessionToken.html
  * - https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html#identifiers-arns
  *
  * @param {String} role AWS IAM ARN format
  * @returns {Object} AWS credentials for role
  */
-function assumeRole(role) {
-  // one-liner for simplicity
-  const command = `aws sts assume-role --role-arn ${role} --duration 900 --role-session-name lambda_test`;
-  return JSON.parse(executeCommand(command)).Credentials;
+function getAWSCredentials(role) {
+  const command = _.isEmpty(role) ?
+    `aws sts get-session-token --duration 900`:
+    `aws sts assume-role --role-arn ${role} --duration 900 --role-session-name lambda_test`;
+  let credentials;
+  try {
+    credentials = JSON.parse(executeCommand(command)).Credentials;
+  } catch (error) {
+    const errorMessage = _.isEmpty(role) ?
+      'Unable to get AWS credentials' : `Unable to assume ${role}`
+    throw new Error(errorMessage, { cause: error });
+  }
+
+  return credentials;
 }
 
 /**
@@ -61,18 +73,10 @@ function isValidURL(url) {
 async function call(options = {}) {
   const logger = getLogger(options.verbose);
 
-  if (!options.role) {
-    throw new Error('Role is a required option for AWS');
+  if (!_.isEmpty(options.role)) {
+    logger.verbose(`Assuming role ${options.role}`);
   }
-
-  logger.verbose(`Assuming role ${options.role}`);
-  let credentials;
-  try {
-    credentials = assumeRole(options.role);
-  } catch (error) {
-    throw new Error(`Unable to assume ${options.role}`, { cause: error });
-  }
-
+  const credentials = getAWSCredentials(options.role);
   const url = new URL(options.url);
   const method = options.method || resolveHTTPMethod(url.pathname);
 
@@ -90,6 +94,24 @@ async function call(options = {}) {
   return await request(url, method, headers);
 }
 
+function getAWSClientOptions(role, region) {
+  const options = {
+    region: region,
+  }
+  const credentials = getAWSCredentials(role);
+
+  options.credentials = {
+    // AWS CLI command will return credentials with 1st letter upper-case.
+    // However, S3 and CloudWatch clients expects different capitalization
+    ...Object.keys(credentials).reduce((memo, key) => {
+      memo[key.charAt(0).toLowerCase() + key.slice(1)] = credentials[key];
+      return memo;
+    }, {}),
+  }
+
+  return options;
+}
+
 /**
  * Create S3 client with appropriate credentials
  *
@@ -98,27 +120,7 @@ async function call(options = {}) {
  * @returns {S3Client}
  */
 function createS3Client(role, region = 'us-east-1') {
-  const options = {
-    region: region,
-  }
-  if (role) {
-    let credentials;
-    try {
-      credentials = assumeRole(role);
-    } catch (error) {
-      throw new Error(`Unable to assume ${role}`, { cause: error });
-    }
-
-    options.credentials = {
-      // AWS CLI command will return credentials with 1st letter upper-case.
-      // However, S3 client expects different capitalization
-      ...Object.keys(credentials).reduce((memo, key) => {
-        memo[key.charAt(0).toLowerCase() + key.slice(1)] = credentials[key];
-        return memo;
-      }, {}),
-    }
-  }
-
+  const options = getAWSClientOptions(role, region);
   return new S3Client(options);
 }
 
@@ -130,28 +132,8 @@ function createS3Client(role, region = 'us-east-1') {
  * @returns {CloudWatchLogsClient}
  */
 function createCloudWatchClient(role, region = 'us-east-1') {
-  const options = {
-    region: region,
-  }
-  if (role) {
-    let credentials;
-    try {
-      credentials = assumeRole(role);
-    } catch (error) {
-      throw new Error(`Unable to assume ${role}`, { cause: error });
-    }
-
-    options.credentials = {
-      // AWS CLI command will return credentials with 1st letter upper-case.
-      // However, S3 client expects different capitalization
-      ...Object.keys(credentials).reduce((memo, key) => {
-        memo[key.charAt(0).toLowerCase() + key.slice(1)] = credentials[key];
-        return memo;
-      }, {}),
-    }
-  }
-
- return new CloudWatchLogsClient(options);
+  const options = getAWSClientOptions(role, region);
+  return new CloudWatchLogsClient(options);
 }
 
 /**
