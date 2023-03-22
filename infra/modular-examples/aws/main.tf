@@ -36,10 +36,6 @@ module "worklytics_connector_specs" {
   salesforce_domain              = var.salesforce_domain
 }
 
-locals {
-  msft_365_enabled = length(module.worklytics_connector_specs.enabled_msft_365_connectors) > 0
-}
-
 module "psoxy-aws" {
   source = "../../modules/aws"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws?ref=v0.4.13
@@ -64,6 +60,8 @@ module "global_secrets" {
 locals {
   deployment_id_sa_id_part = length(local.deployment_id) > 0 ? "${local.deployment_id}-" : ""
 }
+
+# BEGIN GOOGLE WORKSPACE CONNECTORS
 
 module "google-workspace-connection" {
   for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
@@ -168,6 +166,11 @@ module "worklytics-psoxy-connection-google-workspace" {
 # END GOOGLE WORKSPACE CONNECTORS
 
 # BEGIN MSFT-365 CONNECTORS
+
+locals {
+  msft_365_enabled = length(module.worklytics_connector_specs.enabled_msft_365_connectors) > 0
+}
+
 
 module "cognito_identity_pool" {
   count = local.msft_365_enabled ? 1 : 0 # only provision identity pool if MSFT-365 connectors are enabled
