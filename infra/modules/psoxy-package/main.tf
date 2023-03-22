@@ -5,13 +5,6 @@
 # it work via explicit 'depends_on', but Terraform still gives 'error inconsistent plan' as its
 # original plan presumed the sha-256 of the package
 
-
-locals {
-  path_to_impl_module    = "${var.path_to_psoxy_java}/impl/${var.implementation}"
-  path_to_deployment_jar = "${local.path_to_impl_module}/target/${local.filename}"
-}
-
-
 # build psoxy bundle with external build script, via a 'data' resource.
 # NOTE: since invoked via 'data', happens during plan, rather than 'apply'; this is incorrect
 # semantics if you view the package as a 'resource', but is reasonable if you view it as just a
@@ -28,7 +21,6 @@ data "external" "deployment_package" {
     var.force_bundle ? "--force_bundle" : ""
   ]
 }
-
 
 output "deployment_package_hash" {
   value = filebase64sha256(data.external.deployment_package.result.path_to_deployment_jar)
