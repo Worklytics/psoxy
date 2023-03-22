@@ -94,7 +94,7 @@ async function testGCP(options, logger) {
  * @param {string} options.input
  * @param {string} options.output
  * @param {string} options.region - AWS: buckets region
- * @param {string} options.role - AWS: role to assume (ARN format)
+ * @param {string} options.role - AWS: role to assume (ARN format; optional)
  * @param {boolean} options.saveSanitizedFile - Whether to save sanitized file or not
  * @returns {string}
  */

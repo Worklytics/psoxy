@@ -6,7 +6,7 @@ import _ from 'lodash';
 import { constants as httpCodes } from 'http2';
 
 /**
- * Get (and display using logger passed as param) the latest log events from a 
+ * Get (and display using logger passed as param) the latest log events from a
  * log group associated to a Psoxy instance; AWS - CloudWatch
  *
  * @param {Object} options
@@ -47,9 +47,9 @@ async function getAWSLogs(options = {}, logger) {
       },
       client
     );
-    
+
     if (logEventsResult['$metadata'].httpStatusCode !== httpCodes.HTTP_STATUS_OK) {
-      throw new Error(`Unable to get log events for stream ${logEventsResult}`, 
+      throw new Error(`Unable to get log events for stream ${logEventsResult}`,
         { additional: logEventsResult });
     }
 
@@ -76,17 +76,17 @@ async function getAWSLogs(options = {}, logger) {
 
 /**
  * Get GCP runtime logs
- * 
- * @param {Object} options 
+ *
+ * @param {Object} options
  * @param {string} options.functionName
  * @param {string} options.projectId
- * @param {Object} logger 
- * @returns 
+ * @param {Object} logger
+ * @returns
  */
 async function getGCPLogs(options = {}, logger) {
   logger.verbose(`Getting logs, function: ${options.functionName}`);
   let entries = await gcp.getLogs(options);
-  
+
   if (entries.length === 0) {
     logger.info('The logs don\'t contain any entries');
   } else {
@@ -97,12 +97,12 @@ async function getGCPLogs(options = {}, logger) {
       let messagePrefix = `${chalk.blue(entry.timestamp)}`;
       if (entry.level) {
         messagePrefix += ` ${chalk.bold.red(entry.level)}: `;
-      } 
-      
+      }
+
       logger.entry(`${messagePrefix}\n${entry.message}`);
-    });  
+    });
   }
-  
+
   return entries;
 }
 
@@ -113,7 +113,7 @@ async function getGCPLogs(options = {}, logger) {
  * @param {boolean} options.verbose
  * @param {string} options.logGroupName - AWS: Cloudwatch log group to display
  * @param {string} options.region - AWS: region
- * @param {string} options.role - AWS: role to assume (ARN format)
+ * @param {string} options.role - AWS: role to assume (ARN format; optional)
  * @param {string} options.functionName - GCP: Name of the cloud function from
  * which to list entries
  * @param {string} options.projectId - GCP: Name of the project that hosts the
@@ -122,10 +122,9 @@ async function getGCPLogs(options = {}, logger) {
  * @returns
  */
 export default async function (options = {}, logger) {
-  const isGCP = _.every([options.functionName, options.projectId], 
+  const isGCP = _.every([options.functionName, options.projectId],
     _.negate(_.isEmpty));
-  const isAWS = _.every([options.logGroupName, options.role], 
-    _.negate(_.isEmpty));
+  const isAWS = !_.isEmpty(options.logGroupName);
 
   if (!isGCP && !isAWS) {
     throw new Error('Invalid options: make sure either all GCP or AWS options are present');
@@ -134,6 +133,6 @@ export default async function (options = {}, logger) {
   if (!logger) {
     logger = getLogger(options.verbose);
   }
-  
+
   return isGCP ? getGCPLogs(options, logger) : getAWSLogs(options, logger);
 }

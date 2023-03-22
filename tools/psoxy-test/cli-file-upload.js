@@ -56,12 +56,6 @@ const { version } = require('./package.json');
     process.exit(1);
   });
 
-
-  if(options.deploy === 'AWS' && _.isEmpty(options.role)) {
-    logger.error('AWS: missing required option "role"');
-    return;
-  }
-
   let result;
   try {
     result = await psoxyTestFileUpload(options);
