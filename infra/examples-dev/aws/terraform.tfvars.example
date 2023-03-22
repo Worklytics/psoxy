@@ -1,5 +1,4 @@
 
-
 # review list below and comment in/out as needed
 enabled_connectors = [
   # "azure-ad",
@@ -17,12 +16,4 @@ enabled_connectors = [
   # "salesforce",
   "slack-discovery-api",
   "zoom",
-]
-
-caller_aws_arns = [
-  # include your own here if desired for testing
-]
-caller_gcp_service_account_ids = [
-  # put value here from Worklytics ( https://intl.worklytics.co/analytics/integrations/configuration )
-  # "123456712345671234567" # 21-digits, get this from Worklytics once prod-ready
 ]

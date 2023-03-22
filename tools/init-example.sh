@@ -32,23 +32,13 @@ else
   cd ${TF_CONFIG_ROOT}
 fi
 
-
-
 printf "Initializing ${BLUE}terraform.tfvars${NC} file for your configuration ...\n"
 if [ ! -f terraform.tfvars ]; then
   TFVARS_FILE="${TF_CONFIG_ROOT}/terraform.tfvars"
 
   cp ${TF_CONFIG_ROOT}/terraform.tfvars.example $TFVARS_FILE
 
-  # append root of checkout automatically
-  echo "# this points to the directory where Java source to be compiled into deployment JAR is located" >> $TFVARS_FILE
-  echo "# by default, it points to .terraform, where terraform clones the main psxoy repo" >> $TFVARS_FILE
-  echo "# if you have a local clone of the psoxy repo you prefer to use, change this to point there" >> $TFVARS_FILE
-  echo "psoxy_base_dir                = \"${PSOXY_BASE_DIR}\"" >> $TFVARS_FILE
-
-  # give user some feedback
-  printf "Init'd example terraform config. Please open ${BLUE}terraform.tfvars${NC} and customize it to your needs.\n"
-  printf "Review ${BLUE}variables.tf${NC} for descriptions of each variable.\n\n"
+  ${PSOXY_BASE_DIR}tools/init-tfvars.sh $TFVARS_FILE
 else
   printf "${RED}Nothing to initialize. File terraform.tfvars already exists.${NC}\n\n"
 fi
