@@ -21,72 +21,64 @@ NOTE:
 ## Non-Terraform Alternative
 
 
-If security risks of managing a certificate with Terraform are not acceptable, we suggest:
-  1. generate the certificate(s) outside of terraform by invoking `local-cert.sh` script directly
-  2. pass the `fingerprint` value(s) from the resulting JSON as a variable to your Terraform
-     configuration, so that the "private key id" SSM param can be correctly populated
-  3. take the `key` value(s) from the resulting JSON, and directly set the value of the SSM parameter
-     via AWS console or the cli.  This could be done by a user with write-only permission to the
-     parameter.
+If security risks of managing a certificate with Terraform are not acceptable, you can generate
+the certificate(s) manually using `local-cert-standalone.sh` script directly and following the
+instructions it generates.
 
 Prereqs:
   - `openssl` We have not documented exact version required, so YMMV.
-  - [`jq`](https://stedolan.github.io/jq/)
 
 Example:
 ```shell
+# USAGE: ./local-cert-standalone.sh subject ttl tool
+# tool is just used to generate distinct file instructions per tool
 
 # change the subject to something more appropriate for your organization; use TTL in days that you like
-./local-cert.sh "/C=US/ST=New York/L=New York/CN=www.worklytics.co" 180 > cert.json
+./local-cert-standalone.sh "/C=US/ST=New York/L=New York/CN=www.worklytics.co" 180 outlook-calendar
+```
 
-cat cert.json | jq -r .fingerprint
+Output will be something similar to this:
+```shell
+Open TODO_OUTLOOK-CAL_CERTS.txt and follow the instructions to complete the setup.
+```
 
-# take the hex value, without the ':' characters as the value to pass to your terraform config
-# (or directly fill relevant PRIVATE_KEY_ID value in secret manager of your target cloud)
-
-export KEY_PKCS8=`cat cert.json | jq -r .key_pkcs8 | base64 --decode`
-
-# gives you `KEY_PKCS8` env variable, which you could then use to fill secret in secret manager of your choice
-
-cat cert.json | jq -r .key | base64 --decode > cert.pem
-
-# gives you a certificate you can upload directly to Azure AD console
-# the value you see for 'Thumbprint' in the Azure AD console should MATCH the value you set for
-# Private Key ID in the secret manager of your target cloud
+File will show instructions like:
+```shell
+Follow instructions and copy the contents between the === blocks
+IMPORTANT: After setup complete please remove this file.
 
 
-# remember to clean up the files into which you just wrote your certificate/keys!!
-rm cert.pem
-rm cert.json
+TODO 1: Upload the following cert to the outlook-cal app in your Azure Console
+Or give it to an admin with rights to do so.
+========================================================================
+-----BEGIN CERTIFICATE-----
+MIIDfzCCAmegAwIBAgIUPvjrREWDpCA+lGBgMlgXnAFFhv4wDQYJKoZIhvcNAQEL
+BQAwTzELMAkGA1UEBhMCVVMxETAPBgNVBAgMCE5ldyBZb3JrMREwDwYDVQQHDAhO
+....
+5iyo1IlTn58CEEhpRLE0PX41gk3JZQcYHnRKstm7mHjablhvFXIQYesyUkSxWW/4
+QqM5kxgLumxKsZ/uZ7WJDCRj797nTWhCniuyZY/seNA+GrF+I3zU6eLv0oKq1OOI
+zb7K1KKpaJbyijMF5/kxkPyUU0+D3DOIApBOowd0T1Rk0dc=
+-----END CERTIFICATE-----
+========================================================================
+
+TODO 2: Update the value of PSOXY_OUTLOOK-CAL_PRIVATE_KEY_ID with the content between the starred blocks
+========================================================================
+A61EE02A71D2FB50EA9B783A8C4F351DE577D802
+========================================================================
+
+TODO 3: Update the value of PSOXY_OUTLOOK-CAL_PRIVATE_KEY with the content between the starred blocks
+========================================================================
+-----BEGIN PRIVATE KEY-----
+MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDTY8emar/W75Pq
+R5xYn/zYviZHa8R1fmDSWdvAOvybfprb76jHfbK82J+uBXHBCtzRoqbOPljFj1n5
+......
+DLy7Z9eiKTRCkmzUYoBvZVueSKlknBWwKcf3p8pB+teXzdLXMP1xEtmLf9j06I4T
+Sr/anUFqP5UPW742GSX74g==
+-----END PRIVATE KEY-----
+========================================================================
+
 ```
 
 see:
   - https://docs.aws.amazon.com/cli/latest/reference/ssm/put-parameter.html
   - https://cloud.google.com/sdk/gcloud/reference/secrets/versions/add
-
-## Non-Terraform Alternative, No Shell Script
-
-Don't want to clone our whole repo, just to use our `local-cert.sh` script? Then you can use all of
-the following commands directly from your shell.
-
-Prereqs:
-  - `openssl` We have not documented exact version required, so YMMV.
-  - [`jq`](https://stedolan.github.io/jq/)
-
-```shell
-SUBJECT="/C=US/ST=New York/L=New York/CN=www.worklytics.co"
-openssl req -x509 -newkey rsa:2048 -subj $SUBJECT -keyout key.pem -out cert.pem -days 180 -nodes
-openssl pkcs8 -nocrypt -in key.pem -inform PEM -topk8 -outform PEM -out key_pkcs8.pem
-
-openssl x509 -in cert.pem -noout -fingerprint
-# take the hex value, without the ':' characters as the value to pass to your terraform config
-# (or directly fill relevant PRIVATE_KEY_ID value in secret manager of your target cloud)
-
-# 1. upload the cert.pem to the app in your Azure AD console (the value it then shows for 'Thumbprint' should match the value you set for Private Key ID in the secret manager of your target cloud)
-# 2. set the *content* of key_pkcs8.pem as the value of the secret for your proxy's private key
-
-# clean everything up!!
-rm key.pem
-rm cert.pem
-rm key_pkcs8.pem
-```
