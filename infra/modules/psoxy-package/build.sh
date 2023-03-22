@@ -23,14 +23,11 @@ if [ ! -f $PATH_TO_DEPLOYMENT_JAR ] || [ ! -z "$FORCE_BUILD" ] ; then
 
   ln -sf ${LOG_FILE} ${TERRAFORM_CONFIG_PATH}/last-build.log
 
-  cd ${JAVA_SOURCE_ROOT}/gateway-core
-  mvn package install > ${LOG_FILE} 2>&1
+  mvn package install -f ${JAVA_SOURCE_ROOT}/gateway-core/pom.xml > ${LOG_FILE} 2>&1
 
-  cd ${JAVA_SOURCE_ROOT}/core
-  mvn package install > ${LOG_FILE} 2>&1
+  mvn package install -f ${JAVA_SOURCE_ROOT}/core/pom.xml >> ${LOG_FILE} 2>&1
 
-  cd ${JAVA_SOURCE_ROOT}/impl/${IMPLEMENTATION}
-  mvn package >> ${LOG_FILE} 2>&1
+  mvn package -f ${JAVA_SOURCE_ROOT}/impl/${IMPLEMENTATION}/pom.xml >> ${LOG_FILE} 2>&1
 fi
 
 # output back to Terraform (forces Terraform to be dependent on output)
