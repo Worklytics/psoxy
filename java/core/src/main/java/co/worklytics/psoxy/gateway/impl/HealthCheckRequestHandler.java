@@ -85,6 +85,13 @@ public class HealthCheckRequestHandler {
             log.log(Level.WARNING, "Failed to add sourceAuthGrantType to health check");
         }
 
+        try {
+            config.getConfigPropertyAsOptional(ProxyConfigProperty.BUNDLE_FILENAME)
+                .ifPresent(healthCheckResult::bundleFilename);
+        } catch (Throwable e) {
+            log.log(Level.WARNING, "Failed to add bundleFilename to health check");
+        }
+
         HttpEventResponse.HttpEventResponseBuilder responseBuilder = HttpEventResponse.builder();
 
         try {

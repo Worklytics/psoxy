@@ -9,6 +9,7 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 @JsonPropertyOrder(alphabetic = true) //for consistent json format across jdks
 @Data
@@ -17,12 +18,26 @@ import java.util.Set;
 @AllArgsConstructor
 public class HealthCheckResult {
 
-    // TODO: get this from pom.xml or something
     @Builder.Default
     String version = "rc-v0.4.15";
 
     //q: terraform module version?? (eg, have terraform deployment set its version number as ENV
     // variable, and then psoxy can read it and report it here)
+
+    public String getVersion() {
+        if (bundleFilename == null) {
+            return version;
+        } else {
+            return Pattern.compile("psoxy-[^-]*-(.*).jar").matcher(bundleFilename)
+                .replaceAll("$1");
+        }
+    }
+
+    public void setVersion(String version) {
+        //no-op, in case trying to parse JSON from old deployment version
+    }
+
+    String bundleFilename;
 
     String configuredSource;
 

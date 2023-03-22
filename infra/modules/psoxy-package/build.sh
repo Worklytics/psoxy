@@ -33,6 +33,6 @@ fi
 # output back to Terraform (forces Terraform to be dependent on output)
 printf "{\n"
 printf "\t\"path_to_deployment_jar\": \"${PATH_TO_DEPLOYMENT_JAR}\",\n"
-printf "\t\"filename\":\"${ARTIFACT_FILE_NAME},\n"
+printf "\t\"filename\":\"${ARTIFACT_FILE_NAME}\",\n"
 printf "\t\"version\": \"${VERSION}\"\n"
 printf "}\n"

@@ -16,6 +16,7 @@ class HealthCheckResultTest {
     @Test
     public void json() throws JsonProcessingException {
         final String JSON = "{\n" +
+            "  \"bundleFilename\" : null,\n" +
             "  \"configPropertiesLastModified\" : null,\n" +
             "  \"configuredSource\" : \"blah\",\n" +
             "  \"missingConfigProperties\" : [ \"SERVICE_ACCOUNT_KEY\" ],\n" +
@@ -39,6 +40,29 @@ class HealthCheckResultTest {
 
         HealthCheckResult fromJson = objectMapper.readerFor(HealthCheckResult.class).readValue(JSON);
         assertEquals("blah", fromJson.getConfiguredSource());
+    }
+
+    @Test
+    public void versionFromBundleFilename() {
+
+
+        HealthCheckResult healthCheckResult = HealthCheckResult.builder()
+            .bundleFilename("psoxy-aws-rc-v0.1.15.jar")
+            .build();
+
+        assertEquals("rc-v0.1.15", healthCheckResult.getVersion());
+
+        healthCheckResult = HealthCheckResult.builder()
+            .bundleFilename("psoxy-aws-v0.1.15.jar")
+            .build();
+
+        assertEquals("v0.1.15", healthCheckResult.getVersion());
+
+        healthCheckResult = HealthCheckResult.builder()
+            .bundleFilename("psoxy-gcp-v0.1.15.jar")
+            .build();
+
+        assertEquals("v0.1.15", healthCheckResult.getVersion());
     }
 
 }
