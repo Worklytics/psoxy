@@ -22,11 +22,11 @@ In the location where you plan to execute this terraform example:
 
 ## Customize your Configuration
   1. open `main.tf`
-  2. Remove any providers you don't need.
-     - if you don't need Google Workspace data sources, remove the `google` provider blocks
-     - if you don't need Microsoft 365 data sources, remove the `azuread` provider blocks
-  3. Set a secure Terraform backend (eg, not `local` if you intend this configuration for production
-     use) (see https://github.com/Worklytics/psoxy/blob/main/docs/aws/getting-started.md#terraform-state-backend)
+  2. Remove any required_provider/provider you don't need from your `main.tf` .
+     - if you don't need Microsoft 365 data sources, remove the `azuread` required_provider/provider blocks (~L10, ~L54)
+     - if you don't need Google Workspace data sources, remove the `google` provider blocks (~L15)
+  3. Set a secure Terraform backend, such as S3 or GCS (eg, not `local` if you intend this
+     configuration for production use) (see https://github.com/Worklytics/psoxy/blob/v0.4.14/docs/aws/getting-started.md#terraform-state-backend)
 
 ## Initialize your Configuration
   1. run `./init-example` to initialize your Terraform configuration and generate a `terraform.tfvars` file
