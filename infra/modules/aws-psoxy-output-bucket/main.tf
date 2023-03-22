@@ -47,7 +47,7 @@ resource "aws_iam_policy" "sanitized_bucket_write_policy" {
           "Resource" : "${aws_s3_bucket.output.arn}/*"
         }
       ]
-    })
+  })
 
   lifecycle {
     ignore_changes = [
@@ -83,7 +83,7 @@ resource "aws_iam_policy" "sanitized_bucket_read" {
           ]
         }
       ]
-    })
+  })
 
   lifecycle {
     ignore_changes = [
