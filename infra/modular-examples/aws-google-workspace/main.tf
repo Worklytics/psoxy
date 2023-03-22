@@ -137,6 +137,7 @@ module "psoxy-google-workspace-connector" {
     var.general_environment_variables,
     try(each.value.environment_variables, {}),
     {
+      BUNDLE_FILENAME     = module.psoxy-aws.filename
       IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
     }
   )
@@ -245,6 +246,7 @@ module "aws-psoxy-long-auth-connectors" {
     var.general_environment_variables,
     try(each.value.environment_variables, {}),
     {
+      BUNDLE_FILENAME     = module.psoxy-aws.filename
       IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
     }
   )
@@ -303,6 +305,7 @@ module "psoxy-bulk" {
     var.general_environment_variables,
     try(each.value.environment_variables, {}),
     {
+      BUNDLE_FILENAME     = module.psoxy-aws.filename
       IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
     },
   )

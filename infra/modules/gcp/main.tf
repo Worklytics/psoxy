@@ -194,3 +194,11 @@ output "secrets" {
     }
   }
 }
+
+output "version" {
+  value = module.psoxy-package.version
+}
+
+output "filename" {
+  value = module.psoxy-package.filename
+}

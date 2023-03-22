@@ -126,6 +126,7 @@ module "psoxy-google-workspace-connector" {
     var.general_environment_variables,
     try(each.value.environment_variables, {}),
     {
+      BUNDLE_FILENAME     = module.psoxy-gcp.filename
       IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
     }
   )
@@ -228,6 +229,7 @@ module "connector-long-auth-function" {
     var.general_environment_variables,
     try(each.value.environment_variables, {}),
     {
+      BUNDLE_FILENAME     = module.psoxy-gcp.filename
       IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
     }
   )
@@ -283,6 +285,7 @@ module "psoxy-gcp-bulk" {
     {
       SOURCE              = each.value.source_kind
       RULES               = yamlencode(each.value.rules)
+      BUNDLE_FILENAME     = module.psoxy-gcp.filename
       IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
     }
   )
@@ -353,6 +356,6 @@ output "artifacts_bucket_name" {
 }
 
 output "deployment_bundle_object_name" {
-  description = "Object name of deplyment bundle within artifacts bucket."
+  description = "Object name of deployment bundle within artifacts bucket."
   value       = module.psoxy-gcp.deployment_bundle_object_name
 }

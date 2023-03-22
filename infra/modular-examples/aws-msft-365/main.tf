@@ -155,6 +155,7 @@ module "psoxy-msft-connector" {
     var.general_environment_variables,
     try(each.value.environment_variables, {}),
     {
+      BUNDLE_FILENAME      = module.psoxy-aws.filename
       IS_DEVELOPMENT_MODE  = contains(var.non_production_connectors, each.key)
       CLIENT_ID            = module.msft-connection[each.key].connector.application_id
       PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
@@ -272,6 +273,7 @@ module "aws-psoxy-long-auth-connectors" {
     var.general_environment_variables,
     try(each.value.environment_variables, {}),
     {
+      BUNDLE_FILENAME      = module.psoxy-aws.filename
       PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
       IS_DEVELOPMENT_MODE  = contains(var.non_production_connectors, each.key)
     }
@@ -360,6 +362,7 @@ module "psoxy-bulk" {
     var.general_environment_variables,
     try(each.value.environment_variables, {}),
     {
+      BUNDLE_FILENAME            = module.psoxy-aws.filename
       IS_DEVELOPMENT_MODE        = contains(var.non_production_connectors, each.key)
       ADDITIONAL_TRANSFORMS_HASH = try(local.additional_transforms_rules_hash[each.key], null)
     }
