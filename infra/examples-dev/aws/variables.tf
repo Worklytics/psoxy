@@ -1,3 +1,9 @@
+variable "environment_name" {
+  type        = string
+  description = "qualifier to distinguish resources created by this terraform configuration from other psoxy Terraform deployments, (eg, 'prod', 'dev', etc)"
+  default     = ""
+}
+
 variable "aws_account_id" {
   type        = string
   description = "id of aws account in which to provision your AWS infra"
@@ -59,27 +65,44 @@ variable "caller_aws_arns" {
 
 variable "msft_tenant_id" {
   type        = string
-  default     = ""
   description = "ID of Microsoft tenant to connect to (req'd only if config includes MSFT connectors)"
+  default     = ""
 }
 
 variable "msft_owners_email" {
   type        = set(string)
-  default     = []
   description = "(Only if config includes MSFT connectors). Optionally, set of emails to apply as owners on AAD apps apart from current logged user"
+  default     = []
+}
+
+variable "gcp_project_id" {
+  type        = string
+  description = "string ID of GCP project that will host psoxy instance; must exist. Can leave null if not using GCP/Google Workspace."
+  default     = null
+}
+
+variable "google_workspace_example_user" {
+  type        = string
+  description = "user to impersonate for Google Workspace API calls (null for none)"
+  default     = null
+}
+
+variable "google_workspace_example_admin" {
+  type        = string
+  description = "user to impersonate for Google Workspace API calls (null for value of `google_workspace_example_user`)"
+  default     = null # will failover to user
+}
+
+variable "salesforce_domain" {
+  type        = string
+  default     = ""
+  description = "Domain of the Salesforce to connect to (only required if using Salesforce connector). To find your My Domain URL, from Setup, in the Quick Find box, enter My Domain, and then select My Domain"
 }
 
 variable "connector_display_name_suffix" {
   type        = string
   description = "suffix to append to display_names of connector SAs; helpful to distinguish between various ones in testing/dev scenarios"
   default     = ""
-}
-
-# this is no longer used; azure connectors auth'd via identity federation (OIDC)
-variable "certificate_subject" {
-  type        = string
-  description = "IGNORED; value for 'subject' passed to openssl when generation certificate (eg '/C=US/ST=New York/L=New York/CN=www.worklytics.co')"
-  default     = null
 }
 
 variable "psoxy_base_dir" {
@@ -89,10 +112,6 @@ variable "psoxy_base_dir" {
   validation {
     condition     = can(regex(".*\\/$", var.psoxy_base_dir))
     error_message = "The psoxy_base_dir value should end with a slash."
-  }
-  validation {
-    condition     = can(regex("^[^~].*$", var.psoxy_base_dir))
-    error_message = "The psoxy_base_dir value should be absolute path (not start with ~)."
   }
 }
 
@@ -164,6 +183,7 @@ variable "custom_bulk_connectors" {
   }
 }
 
+# TODO: rethink this schema before we publish this
 variable "lookup_table_builders" {
   type = map(object({
     input_connector_id            = string
@@ -202,12 +222,5 @@ variable "lookup_table_builders" {
     #
     #    }
   }
-}
-
-
-variable "salesforce_domain" {
-  type        = string
-  default     = ""
-  description = "Domain of the Salesforce to connect to (only required if using Salesforce connector). To find your My Domain URL, from Setup, in the Quick Find box, enter My Domain, and then select My Domain"
 }
 

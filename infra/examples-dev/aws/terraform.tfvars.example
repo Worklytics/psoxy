@@ -1,0 +1,19 @@
+
+# review list below and comment in/out as needed
+enabled_connectors = [
+  # "azure-ad",
+  # "asana",
+  # "dropbox-business",
+  "gcal",
+  "gdirectory",
+  "gdrive",
+  "gmail",
+  "google-meet",
+  "google-chat",
+  # "outlook-calendar",
+  # "outlook-mail",
+  "hris",
+  # "salesforce",
+  "slack-discovery-api",
+  "zoom",
+]

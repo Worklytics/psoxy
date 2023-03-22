@@ -32,7 +32,16 @@ You'll also need a secure backend location for your Terraform state (such as a G
 need not be in the same host platform/project/account to which you are deploying the proxy, as long
 as the Google/AWS user you are authenticated as when running Terraform has permissions to access it.
 
+Some options:
+  - GCS : https://developer.hashicorp.com/terraform/language/settings/backends/gcs
+  - S3 : https://developer.hashicorp.com/terraform/language/settings/backends/s3
+
 Alternatively, you may use a local file system, but this is not recommended for production use - as
 your Terraform state may contain secrets such as API keys, depending on the sources you connect.
 
-See also: [infra/modules/gcp-bootstrap/README.md](../../infra/modules/gcp-bootstrap/README.md)
+See: https://developer.hashicorp.com/terraform/language/settings/backends/local
+
+## Bootstrap
+
+For some help in bootstraping a GCP environment, see also: [infra/modules/gcp-bootstrap/README.md](../../infra/modules/gcp-bootstrap/README.md)
+
