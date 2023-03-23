@@ -23,7 +23,7 @@ locals {
     : k => v if v != null
   }
 
-  arn_for_test_calls                = coalesce(var.aws_assume_role_arn, data.aws_caller_identity.current.arn)
+  arn_for_test_calls = coalesce(var.aws_assume_role_arn, data.aws_caller_identity.current.arn)
 }
 
 module "psoxy_lambda" {
