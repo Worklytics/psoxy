@@ -1,3 +1,6 @@
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/Worklytics/psoxy)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Worklytics/psoxy)
+
 # psoxy
 A serverless, pseudonymizing proxy to sit between Worklytics and the REST API of a 3rd-party data
 source.
@@ -243,7 +246,15 @@ terraform apply
 
 
 
-## Latest Releases
+## Release Status
+
+| Component                | Status                                                                                                                  |
+|--------------------------|-------------------------------------------------------------------------------------------------------------------------|
+| Java                     | ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Worklytics/psoxy/ci-java.yaml)          |
+| Terraform Examples       | ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Worklytics/psoxy/ci-terraform.yaml)     |
+ | Terraform Examples - Dev | ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Worklytics/psoxy/ci-terraform-dev.yaml) | 
+| Tools                    | ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Worklytics/psoxy/ci-tools.yaml)         |
+
 
 ### Current: [v0.4.15](https://github.com/Worklytics/psoxy/releases/tag/v0.4.15)
 
