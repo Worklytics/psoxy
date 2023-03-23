@@ -6,7 +6,7 @@ on:
       - '**'
 
 jobs:
-  ci:
+  ci_tools:
     runs-on: ubuntu-latest
     strategy:
       matrix:

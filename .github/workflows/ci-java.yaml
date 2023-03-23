@@ -11,7 +11,7 @@ on:
       - '**' # all tags; actually, believe this is default behavior when you specify filter for branches but not tags
 
 jobs:
-  ci:
+  ci_java:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
