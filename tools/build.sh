@@ -6,20 +6,15 @@
 IMPLEMENTATION=$1 # 'aws' or 'gcp'
 JAVA_SOURCE_ROOT=$2
 
-# set to fail on erors
+# set to fail on errors
 set -e
 
-
 #TODO: validate prereqs?? (mvn??)
-cd ${JAVA_SOURCE_ROOT}
 
-mvn clean
+mvn -f ${JAVA_SOURCE_ROOT}/pom.xml clean
 
-cd gateway-core
-mvn package install
+mvn package install -f ${JAVA_SOURCE_ROOT}/gateway-core/pom.xml
 
-cd ../core
-mvn package install
+mvn package install -f ${JAVA_SOURCE_ROOT}/core/pom.xml
 
-cd ../impl/${IMPLEMENTATION}
-mvn package
+mvn package -f ${JAVA_SOURCE_ROOT}/impl/${IMPLEMENTATION}/pom.xml
