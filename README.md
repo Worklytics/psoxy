@@ -245,12 +245,7 @@ terraform apply
 
 ## Latest Releases
 
-### Current: [v0.4.14](https://github.com/Worklytics/psoxy/releases/tag/v0.4.14)
-
-### Previous:  [v0.4.13](https://github.com/Worklytics/psoxy/releases/tag/v0.4.13)
-
-Highlights:
- - documentation improvements
+### Current: [v0.4.15](https://github.com/Worklytics/psoxy/releases/tag/v0.4.15)
 
 Review [earlier release notes in GitHub](https://github.com/Worklytics/psoxy/releases).
 

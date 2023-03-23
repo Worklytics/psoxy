@@ -12,7 +12,7 @@ locals {
   trimmed_id = trim(var.connector_service_account_id, " ")
 
   # TODO: md5 here is 32 chars of hex, so some risk of collision by truncating, while could use
-  sa_account_id = local.trimmed_id < 31 ? lower(replace(local.trimmed_id, " ", "-")) : substr(md5(local.trimmed_id), 0, 30)
+  sa_account_id = length(local.trimmed_id) < 31 ? lower(replace(local.trimmed_id, " ", "-")) : substr(md5(local.trimmed_id), 0, 30)
 }
 
 # service account to personify connector
