@@ -1,11 +1,3 @@
-aws_account_id                 = "123123123123" # your AWS account ID here
-aws_assume_role_arn            = "arn:aws:iam::123123123123:role/InfraAdmin" # role in that AWS account ID to assume
-gcp_project_id                 = "psoxy-acme-example"
-google_workspace_example_user  = "example@acme.com"
-google_workspace_example_admin = "admin@acme.com"
-
-
-
 enabled_connectors = [
   "asana",
   "dropbox-business",
@@ -20,15 +12,6 @@ enabled_connectors = [
   "zoom",
 ]
 non_production_connectors = [] # use to mark any of the above as 'non-production' (NOTE: allows test calls that may expose PII)
-
-# ARNs of AWS roles that can assume the IAM role to invoke proxy (access sanitized data)
-caller_aws_arns = [
-]
-
-# IDs of GCP service accounts that can invoke proxy (access sanitized data)
-caller_gcp_service_account_ids = [
-  # "123456712345671234567" # 21-digits, get this from Worklytics (https://app.worlytics.co/analytics/integrations/configuration) once prod-ready
-]
 
 # where to force re-build (compilation) of Java code even if version number doesn't change
 # (if making changes to Java code w/o changing version number, set to true; otherwise, false will

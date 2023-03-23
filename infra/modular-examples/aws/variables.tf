@@ -1,7 +1,6 @@
 variable "aws_account_id" {
   type        = string
   description = "id of aws account in which to provision your AWS infra"
-
   validation {
     condition     = can(regex("^\\d{12}$", var.aws_account_id))
     error_message = "The aws_account_id value should be 12-digit numeric string."
@@ -10,25 +9,31 @@ variable "aws_account_id" {
 
 variable "aws_assume_role_arn" {
   type        = string
-  description = "ARN of role Terraform should assume when provisioning your infra. (can be `null` if your CLI is auth'd as the right user/role)"
-  default     = null
+  description = "if provided, arn of role Terraform should assume for test commands"
+  default     = ""
 }
 
 variable "aws_region" {
   type        = string
-  description = "default region in which to provision your AWS infra"
   default     = "us-east-1"
+  description = "default region in which to provision your AWS infra"
 }
 
 variable "aws_ssm_param_root_path" {
   type        = string
-  description = "root to path under which SSM parameters created by this module will be created; NOTE: shouldn't be necessary to use this is you're following recommended approach of using dedicated AWS account for deployment"
+  description = "root to path under which SSM parameters created by this module will be created"
   default     = ""
 
   validation {
     condition     = length(var.aws_ssm_param_root_path) == 0 || length(regexall("/", var.aws_ssm_param_root_path)) == 0 || startswith(var.aws_ssm_param_root_path, "/")
     error_message = "The aws_ssm_param_root_path value must be fully qualified (begin with `/`) if it contains any `/` characters."
   }
+}
+
+variable "aws_ssm_key_id" {
+  type        = string
+  description = "KMS key id to use for encrypting SSM SecureString parameters created by this module, in any. (by default, will encrypt with AWS-managed keys)"
+  default     = null
 }
 
 variable "caller_gcp_service_account_ids" {
@@ -57,16 +62,16 @@ variable "caller_aws_arns" {
   }
 }
 
-variable "msft_tenant_id" {
+variable "gcp_project_id" {
   type        = string
+  description = "id of GCP project that will host psoxy instance (required only if using Google Workspace connectors)"
   default     = ""
-  description = "ID of Microsoft tenant to connect to (req'd only if config includes MSFT connectors)"
 }
 
-variable "msft_owners_email" {
-  type        = set(string)
-  default     = []
-  description = "(Only if config includes MSFT connectors). Optionally, set of emails to apply as owners on AAD apps apart from current logged user"
+variable "environment_name" {
+  type        = string
+  description = "qualifier to distinguish resources created by this terraform configuration from other psoxy Terraform deployments, (eg, 'prod', 'dev', etc)"
+  default     = ""
 }
 
 variable "connector_display_name_suffix" {
@@ -75,30 +80,31 @@ variable "connector_display_name_suffix" {
   default     = ""
 }
 
-# this is no longer used; azure connectors auth'd via identity federation (OIDC)
-variable "certificate_subject" {
-  type        = string
-  description = "IGNORED; value for 'subject' passed to openssl when generation certificate (eg '/C=US/ST=New York/L=New York/CN=www.worklytics.co')"
-  default     = null
-}
-
 variable "psoxy_base_dir" {
   type        = string
-  description = "the path where your psoxy repo resides. Preferably a full path, /home/user/repos/, avoid tilde (~) shortcut to $HOME"
+  description = "the path where your psoxy repo resides"
+  default     = null # will use `"${path.root}/.terraform/"` if not provided
 
   validation {
-    condition     = can(regex(".*\\/$", var.psoxy_base_dir))
+    condition     = var.psoxy_base_dir == null || can(regex(".*\\/$", var.psoxy_base_dir))
     error_message = "The psoxy_base_dir value should end with a slash."
   }
+
   validation {
-    condition     = can(regex("^[^~].*$", var.psoxy_base_dir))
+    condition     = var.psoxy_base_dir == null || can(regex("^[^~].*$", var.psoxy_base_dir))
     error_message = "The psoxy_base_dir value should be absolute path (not start with ~)."
   }
 }
 
 variable "force_bundle" {
   type        = bool
-  description = "whether to force build of deployment bundle, even if it already exists for this proxy version"
+  description = "whether to force build of deployment bundle, even if it already exists"
+  default     = false
+}
+
+variable "pseudonymize_app_ids" {
+  type        = string
+  description = "if set, will set value of PSEUDONYMIZE_APP_IDS environment variable to this value for all sources"
   default     = false
 }
 
@@ -108,30 +114,15 @@ variable "general_environment_variables" {
   default     = {}
 }
 
-variable "pseudonymize_app_ids" {
-  type        = string
-  description = "if set, will set value of PSEUDONYMIZE_APP_IDS environment variable to this value for all sources"
-  default     = false
-}
-
 variable "enabled_connectors" {
   type        = list(string)
   description = "list of ids of connectors to enabled; see modules/worklytics-connector-specs"
-
-  default = [
-    "azure-ad",
-    "outlook-cal",
-    "outlook-mail",
-    "asana",
-    "hris",
-    "slack-discovery-api",
-    "zoom",
-  ]
+  default     = []
 }
 
 variable "non_production_connectors" {
   type        = list(string)
-  description = "connector ids in this list will be in development mode (not for production use)"
+  description = "connector ids in this list will be in development mode (not for production use"
   default     = []
 }
 
@@ -178,7 +169,7 @@ variable "lookup_table_builders" {
     })
   }))
   default = {
-    #    "hris-lookup" = {
+    #    "lookup-hris" = {
     #      input_connector_id = "hris",
     #      sanitized_accessor_role_names = [
     #        # ADD LIST OF NAMES OF YOUR AWS ROLES WHICH CAN READ LOOKUP TABLE
@@ -204,10 +195,32 @@ variable "lookup_table_builders" {
   }
 }
 
+variable "google_workspace_example_user" {
+  type        = string
+  description = "user to impersonate for Google Workspace API calls (null for none)"
+  default     = null
+}
+
+variable "google_workspace_example_admin" {
+  type        = string
+  description = "user to impersonate for Google Workspace API calls (null for value of `google_workspace_example_user`)"
+  default     = null # will failover to user
+}
+
+variable "msft_tenant_id" {
+  type        = string
+  description = "ID of Microsoft tenant to connect to (req'd only if config includes MSFT connectors)"
+  default     = ""
+}
+
+variable "msft_owners_email" {
+  type        = set(string)
+  default     = []
+  description = "(Only if config includes MSFT connectors). Optionally, set of emails to apply as owners on AAD apps apart from current logged user"
+}
 
 variable "salesforce_domain" {
   type        = string
   default     = ""
   description = "Domain of the Salesforce to connect to (only required if using Salesforce connector). To find your My Domain URL, from Setup, in the Quick Find box, enter My Domain, and then select My Domain"
 }
-

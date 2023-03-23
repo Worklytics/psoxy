@@ -4,6 +4,17 @@
 # TODO: extract this to its own repo or something, so can consume from our main infra repo. it's
 # similar to src/modules/google-workspace-dwd-connector/main.tf in the main infra repo
 
+locals {
+  # sa_account_ids must be 6-30 chars, and must start with a letter, use only lowercase letters,
+  # numbers and - (inside)
+  # see https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/google_service_account
+
+  trimmed_id = trim(var.connector_service_account_id, " ")
+
+  # TODO: md5 here is 32 chars of hex, so some risk of collision by truncating, while could use
+  sa_account_id = local.trimmed_id < 31 ? lower(replace(local.trimmed_id , " ", "-")) : substr(md5(local.trimmed_id), 0, 30)
+}
+
 # service account to personify connector
 resource "google_service_account" "connector-sa" {
   project      = var.project_id

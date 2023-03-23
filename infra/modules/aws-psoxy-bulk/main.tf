@@ -1,3 +1,12 @@
+
+data "aws_caller_identity" "current" {}
+
+
+locals {
+  arn_for_test_calls = coalesce(var.aws_assume_role_arn, data.aws_caller_identity.current.arn)
+}
+
+
 resource "random_string" "bucket_suffix" {
   length  = 8
   lower   = true
@@ -263,7 +272,7 @@ Check that the Psoxy works as expected and it transforms the files of your input
 the rules you have defined:
 
 ```shell
-node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f ${local.example_file} -d AWS -i ${aws_s3_bucket.input.bucket} -o ${aws_s3_bucket.sanitized.bucket} -r ${var.aws_assume_role_arn} -re ${var.aws_region}
+node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f ${local.example_file} -d AWS -i ${aws_s3_bucket.input.bucket} -o ${aws_s3_bucket.sanitized.bucket} -r ${local.arn_for_test_calls} -re ${var.aws_region}
 ```
 
 EOT
@@ -317,7 +326,7 @@ NC='\e[0m'
 
 printf "Quick test of $${BLUE}${var.instance_id}$${NC} ...\n"
 
-node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f $FILE_PATH -d AWS -i ${aws_s3_bucket.input.bucket} -o ${aws_s3_bucket.sanitized.bucket} -r ${var.aws_assume_role_arn} -re ${var.aws_region}
+node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f $FILE_PATH -d AWS -i ${aws_s3_bucket.input.bucket} -o ${aws_s3_bucket.sanitized.bucket} -r ${local.arn_for_test_calls} -re ${var.aws_region}
 EOT
 
 }

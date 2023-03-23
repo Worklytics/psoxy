@@ -98,9 +98,17 @@ when ready, continue with [README](../../README.md).
 
 ## Terraform State Backend
 
+### S3
+
 You'll also need a backend location for your Terraform state (such as an S3 bucket). It can be in
 any AWS account, as long as the AWS role that you'll use to run Terraform has read/write access to
 it.
 
+See https://developer.hashicorp.com/terraform/language/settings/backends/s3 for more details.
+
+### Local File System
+
 Alternatively, you may use a local file system, but this is not recommended for production use - as
 your Terraform state may contain secrets such as API keys, depending on the sources you connect.
+
+See https://developer.hashicorp.com/terraform/language/settings/backends/local

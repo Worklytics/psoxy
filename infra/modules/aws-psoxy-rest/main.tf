@@ -8,6 +8,9 @@ terraform {
   }
 }
 
+data "aws_caller_identity" "current" {}
+
+
 locals {
   # from v0.5, these will be required; for now, allow `null` but filter out so taken from config yaml
   required_env_vars = { for k, v in {
@@ -19,6 +22,8 @@ locals {
     }
     : k => v if v != null
   }
+
+  arn_for_test_calls                = coalesce(var.aws_assume_role_arn, data.aws_caller_identity.current.arn)
 }
 
 module "psoxy_lambda" {
@@ -68,11 +73,11 @@ locals {
   proxy_endpoint_url  = substr(aws_lambda_function_url.lambda_url.function_url, 0, length(aws_lambda_function_url.lambda_url.function_url) - 1)
   impersonation_param = var.example_api_calls_user_to_impersonate == null ? "" : " -i \"${var.example_api_calls_user_to_impersonate}\""
   command_npm_install = "npm --prefix ${var.path_to_repo_root}tools/psoxy-test install"
-  command_cli_call    = "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js -r \"${var.aws_assume_role_arn}\""
+  command_cli_call    = "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js -r \"${local.arn_for_test_calls}\""
   command_test_calls = [for path in var.example_api_calls :
     "${local.command_cli_call} -u \"${local.proxy_endpoint_url}${path}\"${local.impersonation_param}"
   ]
-  command_test_logs = "node ${var.path_to_repo_root}tools/psoxy-test/cli-logs.js -r \"${var.aws_assume_role_arn}\" -re \"${var.region}\" -l \"${module.psoxy_lambda.log_group}\""
+  command_test_logs = "node ${var.path_to_repo_root}tools/psoxy-test/cli-logs.js -r \"${local.arn_for_test_calls}\" -re \"${var.region}\" -l \"${module.psoxy_lambda.log_group}\""
 
   todo_content = <<EOT
 
