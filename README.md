@@ -21,8 +21,7 @@ data source APIs.
      party API and then perform minimal transformation on the response (pseudonymization, field
      redcation). to ease code review and auditing of its behavior.
 
-As of Dec 2021, psoxy instances may be hosted in [Google Cloud ](docs/gcp/development.md) or
-[AWS](docs/aws/getting-started.md).
+Psoxy may be hosted in [Google Cloud ](docs/gcp/development.md) or [AWS](docs/aws/getting-started.md).
 
 ## Data Flow
 
@@ -36,7 +35,7 @@ Orchestration continues to be performed on the Worklytics-side.
 ![proxy illustration](docs/proxy-illustration.jpg)
 
 ## Supported Data Sources
-As of September 2022, the following sources can be connected to Worklytics via psoxy.
+As of March 2023, the following sources can be connected to Worklytics via psoxy:
 
 ### Google Workspace (formerly GSuite)
 
