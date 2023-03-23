@@ -119,7 +119,6 @@ module "psoxy-package" {
 
   implementation     = "gcp"
   path_to_psoxy_java = "${var.psoxy_base_dir}java"
-  psoxy_version      = var.psoxy_version
   force_bundle       = var.force_bundle
 }
 
@@ -194,4 +193,12 @@ output "secrets" {
       version_number = trimprefix(google_secret_manager_secret_version.initial_version.name, "${google_secret_manager_secret.pseudonymization-salt.name}/versions/")
     }
   }
+}
+
+output "version" {
+  value = module.psoxy-package.version
+}
+
+output "filename" {
+  value = module.psoxy-package.filename
 }

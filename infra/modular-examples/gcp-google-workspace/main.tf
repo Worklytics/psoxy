@@ -26,10 +26,11 @@ module "psoxy-gcp" {
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp?ref=rc-v0.4.15"
 
   project_id        = var.gcp_project_id
-  invoker_sa_emails = var.worklytics_sa_emails
   psoxy_base_dir    = var.psoxy_base_dir
-  bucket_location   = var.gcp_region
   force_bundle      = var.force_bundle
+  bucket_location   = var.gcp_region
+  invoker_sa_emails = var.worklytics_sa_emails
+
 }
 
 module "google-workspace-connection" {
@@ -125,6 +126,7 @@ module "psoxy-google-workspace-connector" {
     var.general_environment_variables,
     try(each.value.environment_variables, {}),
     {
+      BUNDLE_FILENAME     = module.psoxy-gcp.filename
       IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
     }
   )
@@ -227,6 +229,7 @@ module "connector-long-auth-function" {
     var.general_environment_variables,
     try(each.value.environment_variables, {}),
     {
+      BUNDLE_FILENAME     = module.psoxy-gcp.filename
       IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
     }
   )
@@ -282,6 +285,7 @@ module "psoxy-gcp-bulk" {
     {
       SOURCE              = each.value.source_kind
       RULES               = yamlencode(each.value.rules)
+      BUNDLE_FILENAME     = module.psoxy-gcp.filename
       IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
     }
   )
@@ -352,6 +356,6 @@ output "artifacts_bucket_name" {
 }
 
 output "deployment_bundle_object_name" {
-  description = "Object name of deplyment bundle within artifacts bucket."
+  description = "Object name of deployment bundle within artifacts bucket."
   value       = module.psoxy-gcp.deployment_bundle_object_name
 }

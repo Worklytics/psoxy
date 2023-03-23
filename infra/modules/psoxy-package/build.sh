@@ -4,10 +4,14 @@
 set -e
 
 # psoxy build script to be invoked from Terraform 'external' data resource
+# usage ./build.sh /Users/erik/code/psoxy/java aws true
 JAVA_SOURCE_ROOT=$1
 IMPLEMENTATION=$2 # expected to be 'aws', 'gcp', etc ...
-PATH_TO_DEPLOYMENT_JAR=$3
-FORCE_BUILD=$4
+FORCE_BUILD=$3
+
+VERSION=$(mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:evaluate -Dexpression=project.version -q -DforceStdout -f ${JAVA_SOURCE_ROOT}/pom.xml)
+ARTIFACT_FILE_NAME="psoxy-${IMPLEMENTATION}-${VERSION}.jar"
+PATH_TO_DEPLOYMENT_JAR="${JAVA_SOURCE_ROOT}/impl/${IMPLEMENTATION}/target/${ARTIFACT_FILE_NAME}"
 
 # force creation of location where we
 # mkdir -p ${JAVA_SOURCE_ROOT}/target/impl/${IMPLEMENTATION}
@@ -19,16 +23,16 @@ if [ ! -f $PATH_TO_DEPLOYMENT_JAR ] || [ ! -z "$FORCE_BUILD" ] ; then
 
   ln -sf ${LOG_FILE} ${TERRAFORM_CONFIG_PATH}/last-build.log
 
-  cd ${JAVA_SOURCE_ROOT}/gateway-core
-  mvn package install > ${LOG_FILE} 2>&1
+  mvn package install -f ${JAVA_SOURCE_ROOT}/gateway-core/pom.xml > ${LOG_FILE} 2>&1
 
-  cd ${JAVA_SOURCE_ROOT}/core
-  mvn package install > ${LOG_FILE} 2>&1
+  mvn package install -f ${JAVA_SOURCE_ROOT}/core/pom.xml >> ${LOG_FILE} 2>&1
 
-  cd ${JAVA_SOURCE_ROOT}/impl/${IMPLEMENTATION}
-  mvn package >> ${LOG_FILE} 2>&1
+  mvn package -f ${JAVA_SOURCE_ROOT}/impl/${IMPLEMENTATION}/pom.xml >> ${LOG_FILE} 2>&1
 fi
 
 # output back to Terraform (forces Terraform to be dependent on output)
-OUTPUT_JSON="{\"path_to_deployment_jar\": \"${PATH_TO_DEPLOYMENT_JAR}\"}"
-echo "$OUTPUT_JSON"
+printf "{\n"
+printf "\t\"path_to_deployment_jar\": \"${PATH_TO_DEPLOYMENT_JAR}\",\n"
+printf "\t\"filename\":\"${ARTIFACT_FILE_NAME}\",\n"
+printf "\t\"version\": \"${VERSION}\"\n"
+printf "}\n"

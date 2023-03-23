@@ -39,9 +39,9 @@ module "psoxy-aws" {
 
   aws_account_id                 = var.aws_account_id
   psoxy_base_dir                 = var.psoxy_base_dir
+  force_bundle                   = var.force_bundle
   caller_aws_arns                = var.caller_aws_arns
   caller_gcp_service_account_ids = var.caller_gcp_service_account_ids
-  force_bundle                   = var.force_bundle
 }
 
 module "global_secrets" {
@@ -149,11 +149,13 @@ module "psoxy-msft-connector" {
   ssm_kms_key_ids                 = local.ssm_key_ids
   target_host                     = each.value.target_host
   source_auth_strategy            = each.value.source_auth_strategy
+  log_retention_days              = var.log_retention_days
 
   environment_variables = merge(
     var.general_environment_variables,
     try(each.value.environment_variables, {}),
     {
+      BUNDLE_FILENAME      = module.psoxy-aws.filename
       IS_DEVELOPMENT_MODE  = contains(var.non_production_connectors, each.key)
       CLIENT_ID            = module.msft-connection[each.key].connector.application_id
       PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
@@ -265,11 +267,13 @@ module "aws-psoxy-long-auth-connectors" {
   target_host                           = each.value.target_host
   source_auth_strategy                  = each.value.source_auth_strategy
   oauth_scopes                          = try(each.value.oauth_scopes_needed, [])
+  log_retention_days                    = var.log_retention_days
 
   environment_variables = merge(
     var.general_environment_variables,
     try(each.value.environment_variables, {}),
     {
+      BUNDLE_FILENAME      = module.psoxy-aws.filename
       PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
       IS_DEVELOPMENT_MODE  = contains(var.non_production_connectors, each.key)
     }
@@ -301,7 +305,7 @@ module "worklytics-psoxy-connection-oauth-long-access" {
 
 locals {
   # which bulk connector
-  bulk_connectors_to_build_lookups_for = toset(distinct([ for k, v in var.lookup_table_builders : v.input_connector_id ]))
+  bulk_connectors_to_build_lookups_for = toset(distinct([for k, v in var.lookup_table_builders : v.input_connector_id]))
 
   # hash of additional transform rules for each bulk connector lambda, so can pass this as env
   # variable to lambda to trigger restart if rules change (so updated SSM param loaded on restart)
@@ -348,6 +352,7 @@ module "psoxy-bulk" {
   path_to_instance_ssm_parameters = "${var.aws_ssm_param_root_path}PSOXY_${upper(replace(each.key, "-", "_"))}_"
   ssm_kms_key_ids                 = local.ssm_key_ids
   example_file                    = try(each.value.example_file, null)
+  log_retention_days              = var.log_retention_days
 
   sanitized_accessor_role_names = [
     module.psoxy-aws.api_caller_role_name
@@ -357,7 +362,8 @@ module "psoxy-bulk" {
     var.general_environment_variables,
     try(each.value.environment_variables, {}),
     {
-      IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
+      BUNDLE_FILENAME            = module.psoxy-aws.filename
+      IS_DEVELOPMENT_MODE        = contains(var.non_production_connectors, each.key)
       ADDITIONAL_TRANSFORMS_HASH = try(local.additional_transforms_rules_hash[each.key], null)
     }
   )
