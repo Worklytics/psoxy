@@ -2,6 +2,7 @@ package co.worklytics.psoxy.gateway;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NonNull;
 
 import java.io.InputStreamReader;
 
@@ -14,20 +15,35 @@ public class StorageEventRequest {
     /**
      * Stream where the object can be read
      */
+
+    @NonNull
     InputStreamReader readerStream;
 
     /**
      * Name of the bucket where the object is. Example: "mybucket"
      */
+
+    @NonNull
     String sourceBucketName;
 
     /**
      * Path without the bucket of the object. Example: "outputs/test/file.csv"
      */
+
+    @NonNull
     String sourceObjectPath;
 
     /**
-     * If provided, the name of the destination bucket that can be used
+     * Name of the bucket where the object will be written. Example: "mybucket"
      */
+    @NonNull
     String destinationBucketName;
+
+    /**
+     * Path tow the bucket of the object. Example: "outputs/test/file.csv"
+     */
+    @NonNull
+    String destinationObjectPath;
+
+
 }

@@ -2,9 +2,11 @@ package co.worklytics.test;
 
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
+import co.worklytics.psoxy.rules.CsvRules;
 import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.rules.RuleSet;
 import co.worklytics.psoxy.utils.RandomNumberGenerator;
+import com.avaulta.gateway.rules.BulkDataRules;
 import com.google.api.client.http.*;
 import com.google.api.client.testing.http.MockHttpTransport;
 import com.google.api.client.testing.http.MockLowLevelHttpResponse;
@@ -54,6 +56,11 @@ public class MockModules {
         @Provides @Singleton
         static RuleSet rules() {
             return mock(RuleSet.class);
+        }
+
+        @Provides @Singleton
+        static BulkDataRules bulkDataRules() {
+            return mock(CsvRules.class);
         }
 
         @Provides @Singleton

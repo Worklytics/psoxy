@@ -1,12 +1,8 @@
 package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.aws.DaggerAwsContainer;
-import co.worklytics.psoxy.gateway.BulkModeConfigProperty;
-import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.StorageEventRequest;
 import co.worklytics.psoxy.gateway.StorageEventResponse;
-import co.worklytics.psoxy.rules.CsvRules;
-import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.psoxy.storage.StorageHandler;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.events.S3Event;
@@ -15,8 +11,6 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
-import com.avaulta.gateway.rules.BulkDataRules;
-import com.google.common.collect.Lists;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 import org.apache.commons.io.input.BOMInputStream;
@@ -35,16 +29,8 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
     StorageHandler storageHandler;
 
     @Inject
-    BulkDataRules defaultRules;
-
-    @Inject
-    ConfigService configService;
-
-    @Inject
     AmazonS3 s3Client;
 
-    @Inject
-    RulesUtils rulesUtils;
 
     @SneakyThrows
     @Override
@@ -52,8 +38,6 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
 
         DaggerAwsContainer.create().injectS3Handler(this);
 
-        String destinationBucket = configService.getConfigPropertyAsOptional(BulkModeConfigProperty.OUTPUT_BUCKET)
-                .orElseThrow(() -> new IllegalStateException("Output bucket not found as environment variable!"));
 
         S3EventNotification.S3EventNotificationRecord record = s3Event.getRecords().get(0);
 
@@ -62,22 +46,17 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
 
         log.info(String.format("Received a request for processing %s from bucket %s.", sourceKey, importBucket));
 
-
-        List<StorageHandler.ObjectTransform> transforms = Lists.newArrayList(
-            StorageHandler.ObjectTransform.of(destinationBucket,  (CsvRules) defaultRules));
-
-        rulesUtils.parseAdditionalTransforms(configService)
-            .forEach(transforms::add);
+        List<StorageHandler.ObjectTransform> transforms = storageHandler.buildTransforms();
 
         for (StorageHandler.ObjectTransform transform : transforms) {
-            process(importBucket, sourceKey, transform.getDestinationBucketName(), transform.getRules());
+            process(importBucket, sourceKey, transform);
         }
 
         return "Processed!";
     }
 
     @SneakyThrows
-    StorageEventResponse process(String importBucket, String sourceKey, String destination, BulkDataRules rules) {
+    StorageEventResponse process(String importBucket, String sourceKey, StorageHandler.ObjectTransform transform) {
         StorageEventResponse storageEventResponse;
         S3Object s3Object = s3Client.getObject(new GetObjectRequest(importBucket, sourceKey));
 
@@ -85,17 +64,14 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
              BOMInputStream is = new BOMInputStream(objectData);
              InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
 
-            StorageEventRequest request = StorageEventRequest.builder()
-                .sourceBucketName(importBucket)
-                .sourceObjectPath(sourceKey)
-                .destinationBucketName(destination)
-                .readerStream(reader)
-                .build();
+            StorageEventRequest request = storageHandler.buildRequest(reader, importBucket, sourceKey, transform);
 
-            storageEventResponse = storageHandler.handle(request, rules);
+            storageEventResponse = storageHandler.handle(request, transform.getRules());
+
+            log.info("Writing to: " + request.getDestinationBucketName() + "/" + request.getDestinationObjectPath());
         }
 
-        log.info("Writing to: " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationObjectPath());
+
 
         try (InputStream is = new ByteArrayInputStream(storageEventResponse.getBytes())) {
 

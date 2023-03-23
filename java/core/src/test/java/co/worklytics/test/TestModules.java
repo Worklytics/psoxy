@@ -74,5 +74,7 @@ public class TestModules {
             .thenReturn(Optional.of("secret"));
         when(config.getConfigPropertyOrError(ProxyConfigProperty.PSOXY_SALT))
             .thenReturn("salt");
+        when(config.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT))
+            .thenReturn(Optional.of("salt"));
     }
 }
