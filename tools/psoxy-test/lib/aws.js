@@ -35,15 +35,17 @@ import _ from 'lodash';
  * @returns {Object} AWS credentials for role
  */
 function getAWSCredentials(role) {
-  const command = _.isEmpty(role) ?
-    `aws sts get-session-token --duration 900`:
-    `aws sts assume-role --role-arn ${role} --duration 900 --role-session-name lambda_test`;
+  const shouldAssumeRole = !_.isEmpty(role);
+  const command = shouldAssumeRole ?
+    `aws sts assume-role --role-arn ${role} --duration 900 --role-session-name lambda_test`:
+    `aws sts get-session-token --duration 900`;
   let credentials;
   try {
     credentials = JSON.parse(executeCommand(command)).Credentials;
   } catch (error) {
-    const errorMessage = _.isEmpty(role) ?
-      'Unable to get AWS credentials' : `Unable to assume ${role}`
+    const errorMessage = shouldAssumeRole ?
+      `Unable to assume ${role}` :
+      'Unable to get AWS credentials';
     throw new Error(errorMessage, { cause: error });
   }
 
