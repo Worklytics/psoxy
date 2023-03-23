@@ -23,6 +23,8 @@ if [ ! -f $PATH_TO_DEPLOYMENT_JAR ] || [ ! -z "$FORCE_BUILD" ] ; then
 
   ln -sf ${LOG_FILE} ${TERRAFORM_CONFIG_PATH}/last-build.log
 
+  mvn clean -f ${JAVA_SOURCE_ROOT}/pom.xml > ${LOG_FILE} 2>&1
+
   mvn package install -f ${JAVA_SOURCE_ROOT}/gateway-core/pom.xml > ${LOG_FILE} 2>&1
 
   mvn package install -f ${JAVA_SOURCE_ROOT}/core/pom.xml >> ${LOG_FILE} 2>&1
