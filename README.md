@@ -1,6 +1,8 @@
 # psoxy
 
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/Worklytics/psoxy)
+[![Latest Release](https://img.shields.io/github/v/release/Worklytics/psoxy)](https://github.com/Worklytics/psoxy/releases/latest)
+
+Components: ![Java](https://img.shields.io/github/actions/workflow/status/Worklytics/psoxy/ci-java.yaml) - ![Terraform](https://img.shields.io/github/actions/workflow/status/Worklytics/psoxy/ci-terraform.yaml)   
 
 A serverless, pseudonymizing proxy to sit between Worklytics and the REST API of a 3rd-party data
 source.
