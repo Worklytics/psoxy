@@ -102,7 +102,11 @@ class StorageHandlerTest {
 
     @Test
     public void metadata() {
-        handler.getObjectMeta("bucket", "directory/file.csv", handler.buildDefaultTransform());
+
+        //kinda pointless
+
+        assertTrue(handler.getObjectMeta("bucket", "directory/file.csv", handler.buildDefaultTransform())
+            .containsKey(StorageHandler.BulkMetaData.INSTANCE_ID.getMetaDataKey()));
 
     }
 }
