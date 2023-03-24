@@ -251,11 +251,36 @@ async function executeWithRetry(fn, onErrorStop, logger, maxAttempts = 60,
   return result;
 }
 
+/**
+ * For psoxy-test-file-upload;
+ * bucket option should support `/` being a delimiter to split a bucket name 
+ * from a path within the bucket
+ *  
+ * @param {string} bucketOption - bucket name or bucket name + path
+ * @returns {Object} - { bucket: string, path: string }
+ */
+function parseBucketOption(bucketOption) {
+  let bucket = bucketOption;
+  let path = '';
+
+  if (!_.isEmpty(bucketOption) && bucketOption.includes('/')) {
+    bucket = bucketOption.substring(0, bucketOption.indexOf('/'));
+    path = bucketOption.substring(bucketOption.indexOf('/') + 1);
+  }
+
+  return { 
+    bucket:  bucket,
+    path: path,
+  };
+}
+
+
 export {
   executeCommand,
   executeWithRetry,
   getCommonHTTPHeaders,
   getFileNameFromURL,
+  parseBucketOption,
   requestWrapper as request,
   saveToFile,
   signAWSRequestURL,
