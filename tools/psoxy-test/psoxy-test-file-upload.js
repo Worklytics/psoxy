@@ -1,7 +1,7 @@
 import { constants as httpCodes } from 'http2';
 import { execSync } from 'child_process';
 import { fileURLToPath } from 'url';
-import { saveToFile } from './lib/utils.js';
+import { saveToFile, parseBucketOption } from './lib/utils.js';
 import aws from './lib/aws.js';
 import chalk from 'chalk';
 import fs from 'fs';
@@ -30,12 +30,18 @@ async function testAWS(options, logger) {
   }
   let client = aws.createS3Client(options.role, options.region);
 
-  logger.info(`Uploading "${filename}" to input bucket: ${options.input}`);
-  const uploadResult = await aws.upload(options.input, options.file, {
-    role: options.role,
-    region: options.region,
-    filename: filenameWithTimestamp,
-  }, client);
+
+  const parsedBucketInputOption = parseBucketOption(options.input);
+  // not destructuring to avoid variable name collision with path module
+  const inputBucket = parsedBucketInputOption.bucket;
+  const inputPath = parsedBucketInputOption.path;
+  const inputKey = inputPath + filenameWithTimestamp;
+  logger.info(`Uploading "${inputPath + filename}" to input bucket: ${inputBucket}`);
+
+  const uploadResult = await aws.upload(inputBucket, inputKey, options.file, {
+      role: options.role,
+      region: options.region,
+    }, client);
 
   if (uploadResult['$metadata'].httpStatusCode !== httpCodes.HTTP_STATUS_OK) {
     throw new Error('Unable to upload file', { cause: uploadResult });
@@ -44,12 +50,17 @@ async function testAWS(options, logger) {
   logger.success('File uploaded');
   logger.verbose('Upload result: ', { additional: uploadResult });
 
-  logger.info(`Downloading sanitized file from output bucket: ${options.output}`);
-  const downloadResult = await aws.download(options.output,
-    filenameWithTimestamp, {
+  const parsedBucketOutputOption = parseBucketOption(options.output)
+  const outputBucket = parsedBucketOutputOption.bucket;
+  const outputPath = parsedBucketOutputOption.path;
+  const outputKey = outputPath + filenameWithTimestamp;
+  logger.info(`Downloading sanitized file from output bucket: ${outputBucket}`);
+
+  const downloadResult = await aws.download(outputBucket, outputKey, {
       role: options.role,
       region: options.region,
     }, client, logger);
+
   logger.success('File downloaded');
 
   return downloadResult;
@@ -67,16 +78,24 @@ async function testGCP(options, logger) {
   const filenameWithTimestamp = `${filename}-${Date.now()}${FILE_EXTENSION}`;
   const client = gcp.createStorageClient();
 
-  logger.info(`Uploading "${filename}" to input bucket: ${options.input}`);
-  const [, uploadResult] = await gcp.upload(options.input, options.file,
-    client, filenameWithTimestamp);
+  const parsedBucketInputOption = parseBucketOption(options.input);
+  const inputBucket = parsedBucketInputOption.bucket;
+  const inputPath = parsedBucketInputOption.path;
+  const inputKey = inputPath + filenameWithTimestamp;
+  logger.info(`Uploading "${filename}" to input bucket: ${inputBucket}`);
+  const [, uploadResult] = await gcp.upload(inputBucket, options.file,
+    client, inputKey);
 
   logger.success(`File uploaded -> ${uploadResult.mediaLink}`);
   logger.verbose('Upload result:', { additional: uploadResult });
 
-  logger.info(`Downloading sanitized file from output bucket: ${options.output}`);
-  const [downloadResult] = await gcp.download(options.output,
-    filenameWithTimestamp, client, logger);
+  const parsedBucketOutputOption = parseBucketOption(options.input);
+  const outputBucket = parsedBucketOutputOption.bucket;
+  const outputPath = parsedBucketOutputOption.path;
+  const outputKey = outputPath + filenameWithTimestamp;
+  logger.info(`Downloading sanitized file from output bucket: ${outputBucket}`);
+  const [downloadResult] = await gcp.download(outputBucket, outputKey, client, 
+    logger);
   logger.success('File downloaded');
 
   const fileContents = downloadResult.toString('utf8');
