@@ -14,7 +14,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * solves a DaggerMissingBinding exception in tests
@@ -56,7 +55,8 @@ public class StorageHandler {
         // map back to actual value for debugging
         ;
 
-        static final String META_DATA_KEY_PREFIX = "x-psoxy-meta-";
+        // aws prepends `x-amz-meta-`
+        static final String META_DATA_KEY_PREFIX = "psoxy-";
 
 
         public String getMetaDataKey() {
