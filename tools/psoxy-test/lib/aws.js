@@ -263,26 +263,24 @@ async function listObjects(bucket, options) {
  * Reqs: "s3:PutObject" permissions
  *
  * @param {string} bucket
- * @param {string} file - path to file
+ * @param {string} key - Object's key (filename in S3)
+ * @param {string} file - File to upload
  * @param {object} options
- * @param {string} options.filename - optional filename to use for S3 object
  * @param {string} options.role - role to assume
  * @param {string} options.region - region to use
- * @param {S3Client} client
+ * @param {S3Client} client - optional
  * @returns
  */
-async function upload(bucket, file, options, client) {
+async function upload(bucket, key, file, options, client) {
   if (!client) {
     client = createS3Client(options.role, options.region);
   }
 
-  const uploadParams = {
+  return await client.send(new PutObjectCommand({
     Bucket: bucket,
-    Key: options.filename ?? path.basename(file),
+    Key: key,
     Body: fs.createReadStream(file),
-  }
-
-  return await client.send(new PutObjectCommand(uploadParams));
+  }));
 }
 
 /**
@@ -297,7 +295,7 @@ async function upload(bucket, file, options, client) {
  * https://github.com/aws/aws-sdk-js-v3/issues/3611
  *
  * @param {string} bucket
- * @param {string} filename
+ * @param {string} key - Object's key (filename in S3)
  * @param {Object} options
  * @param {string} options.role
  * @param {string} options.region
@@ -307,14 +305,14 @@ async function upload(bucket, file, options, client) {
  * @param {Object} logger - winston instance
  * @returns {Promise} resolves with contents of file
  */
-async function download(bucket, filename, options, client, logger) {
+async function download(bucket, key, options, client, logger) {
   if (!client) {
     client = createS3Client(options.role, options.region);
   }
 
   const downloadFunction = async () => await client.send(new GetObjectCommand({
       Bucket: bucket,
-      Key: filename,
+      Key: key,
     }));
   const onErrorStop = (error) => {
     return error.Code !== 'NoSuchKey'
