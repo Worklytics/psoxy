@@ -130,6 +130,11 @@ public class StorageHandler {
         // such a scenario, if lambda 1 triggered from bucket A, writes to B, which triggers lambda
         // 2 to write back to A
 
+        if (objectMeta == null) {
+            //GCP seems to return null here, rather than an empty map
+            return false;
+        }
+
         return objectMeta.getOrDefault(BulkMetaData.INSTANCE_ID.getMetaDataKey(), "")
             .equals(hostEnvironment.getInstanceId());
     }
