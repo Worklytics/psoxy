@@ -40,11 +40,6 @@ public class StorageHandler {
     @Inject
     HostEnvironment hostEnvironment;
 
-
-
-    //TODO: double check keys/values work for all bulk file storage cases
-    // - GCS
-    // - S3
     @RequiredArgsConstructor
     public enum BulkMetaData {
         INSTANCE_ID,
@@ -55,7 +50,10 @@ public class StorageHandler {
         // map back to actual value for debugging
         ;
 
-        // aws prepends `x-amz-meta-`
+        // aws prepends `x-amz-meta-` to this; but per documentation, that's not visible via the
+        // java client (eg, they add/remove it automatically); it is visible through AWS console
+        //
+        // gcp doesn't prepend anything
         static final String META_DATA_KEY_PREFIX = "psoxy-";
 
 
