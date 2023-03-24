@@ -29,7 +29,8 @@ class StorageHandlerTest {
     @Component(modules = {
         PsoxyModule.class,
         MockModules.ForRules.class,
-        MockModules.ForConfigService.class
+        MockModules.ForConfigService.class,
+        MockModules.ForHostEnvironment.class,
     })
     public interface Container {
         void inject( StorageHandlerTest test);
@@ -97,5 +98,11 @@ class StorageHandlerTest {
         assertEquals("directory/file.csv", request.getSourceObjectPath());
         assertEquals("bucket", request.getDestinationBucketName());
         assertEquals(expectedOutputPath, request.getDestinationObjectPath());
+    }
+
+    @Test
+    public void metadata() {
+        handler.getObjectMeta("bucket", "directory/file.csv", handler.buildDefaultTransform());
+
     }
 }

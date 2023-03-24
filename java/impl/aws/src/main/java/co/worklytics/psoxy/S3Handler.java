@@ -1,8 +1,8 @@
 package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.aws.DaggerAwsContainer;
-import co.worklytics.psoxy.gateway.StorageEventRequest;
-import co.worklytics.psoxy.gateway.StorageEventResponse;
+
+import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.storage.StorageHandler;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.events.S3Event;
@@ -76,9 +76,10 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
         try (InputStream is = new ByteArrayInputStream(storageEventResponse.getBytes())) {
 
             ObjectMetadata meta = new ObjectMetadata();
-
             meta.setContentLength(storageEventResponse.getBytes().length);
             meta.setContentType(s3Object.getObjectMetadata().getContentType());
+
+            meta.setUserMetadata(storageHandler.getObjectMeta(importBucket, sourceKey, transform));
 
             s3Client.putObject(storageEventResponse.getDestinationBucketName(),
                 storageEventResponse.getDestinationObjectPath(),

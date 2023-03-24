@@ -1,10 +1,7 @@
 package co.worklytics.psoxy.storage;
 
 import co.worklytics.psoxy.Pseudonymizer;
-import co.worklytics.psoxy.gateway.BulkModeConfigProperty;
-import co.worklytics.psoxy.gateway.ConfigService;
-import co.worklytics.psoxy.gateway.StorageEventRequest;
-import co.worklytics.psoxy.gateway.StorageEventResponse;
+import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.rules.CsvRules;
 import co.worklytics.psoxy.rules.RulesUtils;
 import com.avaulta.gateway.rules.BulkDataRules;
@@ -16,6 +13,7 @@ import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * solves a DaggerMissingBinding exception in tests
@@ -38,6 +36,31 @@ public class StorageHandler {
 
     @Inject
     RulesUtils rulesUtils;
+
+    @Inject
+    HostEnvironment hostEnvironment;
+
+
+
+    //TODO: double check keys/values work for all bulk file storage cases
+    // - GCS
+    // - S3
+    @RequiredArgsConstructor
+    public enum BulkMetaData {
+        INSTANCE_ID,
+        VERSION,
+        ORIGINAL_OBJECT_KEY,
+        TRANSFORM_HASH,
+        ;
+
+        static final String META_DATA_KEY_PREFIX = "x-psoxy-meta-";
+
+
+        public String getMetaDataKey() {
+            return META_DATA_KEY_PREFIX + name().replace("_", "-").toLowerCase();
+        }
+
+    }
 
     @SneakyThrows
     public StorageEventResponse handle(StorageEventRequest request, BulkDataRules rules) {
@@ -84,6 +107,19 @@ public class StorageHandler {
             .rules((CsvRules) defaultRuleSet)
             .build();
     }
+
+    /**
+     * @return metadata to be written to the transformed object
+     */
+    public Map<String, String> getObjectMeta(String importBucket, String sourceKey, ObjectTransform transform) {
+        return Map.of(
+            BulkMetaData.INSTANCE_ID.getMetaDataKey(), hostEnvironment.getInstanceId(),
+            BulkMetaData.VERSION.getMetaDataKey(), config.getConfigPropertyAsOptional(ProxyConfigProperty.BUNDLE_FILENAME).orElse("unknown"),
+            BulkMetaData.ORIGINAL_OBJECT_KEY.getMetaDataKey(), importBucket + "/" + sourceKey,
+            BulkMetaData.TRANSFORM_HASH.getMetaDataKey(), rulesUtils.sha(transform.getRules())
+        );
+    }
+
 
     @Builder
     @AllArgsConstructor

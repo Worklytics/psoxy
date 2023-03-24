@@ -68,9 +68,12 @@ public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
                 log.info("Writing to: " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationObjectPath());
 
 
-                storage.createFrom(BlobInfo.newBuilder(BlobId.of(storageEventResponse.getDestinationBucketName(), storageEventResponse.getDestinationObjectPath()))
-                    .setContentType(blobInfo.getContentType())
-                    .build(), processedStream);
+                storage.createFrom(
+                    BlobInfo.newBuilder(BlobId.of(storageEventResponse.getDestinationBucketName(), storageEventResponse.getDestinationObjectPath()))
+                        .setContentType(blobInfo.getContentType())
+                        .setMetadata(storageHandler.getObjectMeta(importBucket, sourceName, transform))
+                        .build(),
+                    processedStream);
 
 
                 log.info("Successfully pseudonymized " + importBucket + "/"
