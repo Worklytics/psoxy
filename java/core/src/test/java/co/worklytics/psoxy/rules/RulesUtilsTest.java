@@ -85,9 +85,12 @@ class RulesUtilsTest {
 
     List<StorageHandler.ObjectTransform> transformList =
         ImmutableList.<StorageHandler.ObjectTransform>builder()
-            .add(StorageHandler.ObjectTransform.of("blah", CsvRules.builder()
+            .add(StorageHandler.ObjectTransform.builder()
+                .destinationBucketName("blah")
+                .rules(CsvRules.builder()
                 .columnToPseudonymize("something")
-                .build()))
+                .build())
+                .build())
             .build();
 
 

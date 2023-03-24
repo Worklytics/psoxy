@@ -1,13 +1,8 @@
 package co.worklytics.psoxy;
 
-import co.worklytics.psoxy.gateway.BulkModeConfigProperty;
-import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.StorageEventRequest;
 import co.worklytics.psoxy.gateway.StorageEventResponse;
-import co.worklytics.psoxy.rules.CsvRules;
-import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.psoxy.storage.StorageHandler;
-import com.avaulta.gateway.rules.BulkDataRules;
 import com.google.cloud.functions.BackgroundFunction;
 import com.google.cloud.functions.Context;
 import com.google.cloud.storage.BlobId;
@@ -21,26 +16,19 @@ import lombok.extern.java.Log;
 import org.apache.commons.io.input.BOMInputStream;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 
+@Singleton
 @Log
 public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
 
     @Inject
     StorageHandler storageHandler;
-
-    @Inject
-    BulkDataRules defaultRuleSet;
-    @Inject
-    ConfigService configService;
-
-    @Inject
-    RulesUtils rulesUtils;
 
     @Override
     public void accept(GcsEvent gcsEvent, Context context) throws Exception {
@@ -49,28 +37,18 @@ public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
         // See https://cloud.google.com/functions/docs/calling/storage#event_types
         if (context.eventType().equals("google.storage.object.finalize")) {
 
-            String destinationBucket = configService.getConfigPropertyAsOptional(BulkModeConfigProperty.OUTPUT_BUCKET)
-                    .orElseThrow(() -> new IllegalStateException("Output bucket not found as environment variable!"));
-
-            String importBucket = gcsEvent.getBucket();
-            String sourceName = gcsEvent.getName();
-
-
-            List<StorageHandler.ObjectTransform> transforms = new ArrayList<>();
-            transforms.add(StorageHandler.ObjectTransform.of(destinationBucket, (CsvRules) defaultRuleSet));
-
-            rulesUtils.parseAdditionalTransforms(configService)
-                .forEach(transforms::add);
+            List<StorageHandler.ObjectTransform> transforms =
+                storageHandler.buildTransforms();
 
             for (StorageHandler.ObjectTransform transform : transforms) {
-                process(importBucket, sourceName, transform);
+                process(gcsEvent.getBucket(), gcsEvent.getName(), transform);
             }
         }
     }
 
 
     @SneakyThrows
-    void process(String importBucket, String sourceName, StorageHandler.ObjectTransform objectTransform) {
+    void process(String importBucket, String sourceName, StorageHandler.ObjectTransform transform) {
 
         Storage storage = StorageOptions.getDefaultInstance().getService();
         BlobId sourceBlobId = BlobId.of(importBucket, sourceName);
@@ -79,14 +57,10 @@ public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
              BOMInputStream is = new BOMInputStream(objectData);
              InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
 
-            StorageEventRequest request = StorageEventRequest.builder()
-                .sourceBucketName(importBucket)
-                .sourceObjectPath(sourceName)
-                .destinationBucketName(objectTransform.getDestinationBucketName())
-                .readerStream(reader)
-                .build();
 
-            StorageEventResponse storageEventResponse = storageHandler.handle(request, objectTransform.getRules());
+            StorageEventRequest request = storageHandler.buildRequest(reader, importBucket, sourceName, transform);
+
+            StorageEventResponse storageEventResponse = storageHandler.handle(request, transform.getRules());
 
             try (InputStream processedStream = new ByteArrayInputStream(storageEventResponse.getBytes())) {
 
