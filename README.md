@@ -1,4 +1,9 @@
 # psoxy
+
+[![Latest Release](https://img.shields.io/github/v/release/Worklytics/psoxy)](https://github.com/Worklytics/psoxy/releases/latest)
+![java build](https://img.shields.io/github/actions/workflow/status/Worklytics/psoxy/ci-java.yaml?label=java)
+![terraform examples build](https://img.shields.io/github/actions/workflow/status/Worklytics/psoxy/ci-terraform-examples.yaml?label=terraform%20examples)
+
 A serverless, pseudonymizing proxy to sit between Worklytics and the REST API of a 3rd-party data
 source.
 
@@ -16,8 +21,7 @@ data source APIs.
      party API and then perform minimal transformation on the response (pseudonymization, field
      redcation). to ease code review and auditing of its behavior.
 
-As of Dec 2021, psoxy instances may be hosted in [Google Cloud ](docs/gcp/development.md) or
-[AWS](docs/aws/getting-started.md).
+Psoxy may be hosted in [Google Cloud ](docs/gcp/development.md) or [AWS](docs/aws/getting-started.md).
 
 ## Data Flow
 
@@ -31,7 +35,7 @@ Orchestration continues to be performed on the Worklytics-side.
 ![proxy illustration](docs/proxy-illustration.jpg)
 
 ## Supported Data Sources
-As of September 2022, the following sources can be connected to Worklytics via psoxy.
+As of March 2023, the following sources can be connected to Worklytics via psoxy:
 
 ### Google Workspace (formerly GSuite)
 
@@ -243,7 +247,15 @@ terraform apply
 
 
 
-## Latest Releases
+## Component Status
+
+| Component                | Status                                                                                                                  |
+|--------------------------|-------------------------------------------------------------------------------------------------------------------------|
+| Java                     | ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Worklytics/psoxy/ci-java.yaml)          |
+| Terraform Examples       | ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Worklytics/psoxy/ci-terraform.yaml)     |
+ | Terraform Examples - Dev | ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Worklytics/psoxy/ci-terraform-dev.yaml) |
+| Tools                    | ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Worklytics/psoxy/ci-tools.yaml)         |
+
 
 ### Current: [v0.4.15](https://github.com/Worklytics/psoxy/releases/tag/v0.4.15)
 
