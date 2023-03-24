@@ -60,6 +60,13 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
         StorageEventResponse storageEventResponse;
         S3Object s3Object = s3Client.getObject(new GetObjectRequest(importBucket, sourceKey));
 
+        if (storageHandler.hasBeenSanitized(s3Object.getObjectMetadata().getUserMetadata())) {
+            //possible if proxy directly (or indirectly via some other pipeline) is writing back
+            //to the same bucket it originally read from. to avoid perpetuating the loop, skip
+            log.warning("Skipping " + importBucket + "/" + sourceKey + " because it has already been sanitized; does your configuration result in a loop?");
+            return null;
+        }
+
         try (InputStream objectData = s3Object.getObjectContent();
              BOMInputStream is = new BOMInputStream(objectData);
              InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {

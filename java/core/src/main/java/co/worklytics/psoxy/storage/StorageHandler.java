@@ -14,6 +14,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * solves a DaggerMissingBinding exception in tests
@@ -50,7 +51,9 @@ public class StorageHandler {
         INSTANCE_ID,
         VERSION,
         ORIGINAL_OBJECT_KEY,
-        TRANSFORM_HASH,
+
+        //q: sha-1 of rules? discarded for now as don't really see utility; would be complicated to
+        // map back to actual value for debugging
         ;
 
         static final String META_DATA_KEY_PREFIX = "x-psoxy-meta-";
@@ -115,9 +118,20 @@ public class StorageHandler {
         return Map.of(
             BulkMetaData.INSTANCE_ID.getMetaDataKey(), hostEnvironment.getInstanceId(),
             BulkMetaData.VERSION.getMetaDataKey(), config.getConfigPropertyAsOptional(ProxyConfigProperty.BUNDLE_FILENAME).orElse("unknown"),
-            BulkMetaData.ORIGINAL_OBJECT_KEY.getMetaDataKey(), importBucket + "/" + sourceKey,
-            BulkMetaData.TRANSFORM_HASH.getMetaDataKey(), rulesUtils.sha(transform.getRules())
+            BulkMetaData.ORIGINAL_OBJECT_KEY.getMetaDataKey(), importBucket + "/" + sourceKey
         );
+    }
+
+    /**
+     * @return true if the object has already been sanitized by this proxy instance
+     */
+    public boolean hasBeenSanitized(Map<String, String> objectMeta) {
+        // the instanceId check here allows for chaining proxies, so a loop is still possible in
+        // such a scenario, if lambda 1 triggered from bucket A, writes to B, which triggers lambda
+        // 2 to write back to A
+
+        return objectMeta.getOrDefault(BulkMetaData.INSTANCE_ID.getMetaDataKey(), "")
+            .equals(hostEnvironment.getInstanceId());
     }
 
 

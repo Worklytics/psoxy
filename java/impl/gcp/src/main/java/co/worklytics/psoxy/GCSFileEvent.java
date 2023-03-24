@@ -53,6 +53,14 @@ public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
         Storage storage = StorageOptions.getDefaultInstance().getService();
         BlobId sourceBlobId = BlobId.of(importBucket, sourceName);
         BlobInfo blobInfo = storage.get(sourceBlobId);
+
+        if (storageHandler.hasBeenSanitized(blobInfo.getMetadata())) {
+            //possible if proxy directly (or indirectly via some other pipeline) is writing back
+            //to the same bucket it originally read from. to avoid perpetuating the loop, skip
+            log.warning("Skipping " + importBucket + "/" + sourceName + " because it has already been sanitized; does your configuration result in a loop?");
+            return;
+        }
+
         try (InputStream objectData = new ByteArrayInputStream(storage.readAllBytes(sourceBlobId));
              BOMInputStream is = new BOMInputStream(objectData);
              InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
