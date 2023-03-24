@@ -3,7 +3,8 @@ import * as td from 'testdouble';
 import { 
   executeWithRetry,
   resolveHTTPMethod, 
-  transformSpecWithResponse 
+  transformSpecWithResponse,
+  parseBucketOption,
 } from '../lib/utils.js';
 import spec from '../data-sources/spec.js';
 import { createRequire } from 'module';
@@ -82,4 +83,19 @@ test('Execute with retry: stops on error callback', async (t) => {
   await t.throwsAsync(async () => {
 		await executeWithRetry(work, onErrorStop);
 	}, {instanceOf: Error});
+});
+
+test('Parse bucket input option', (t) => {
+
+  const result = parseBucketOption('foo');
+  t.is(result.bucket, 'foo');
+  t.is(result.path, '');
+
+  const result2 = parseBucketOption('foo/bar');
+  t.is(result2.bucket, 'foo');
+  t.is(result2.path, 'bar');
+
+  const result3 = parseBucketOption('foo/bar/baz/');
+  t.is(result3.bucket, 'foo');
+  t.is(result3.path, 'bar/baz/');
 });
