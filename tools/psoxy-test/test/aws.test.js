@@ -64,20 +64,6 @@ test('Psoxy Logs: parse log events command result', (t) => {
   t.not(result[warningEventIndex].message.startsWith(warningPrefix));
 });
 
-test('Psoxy call: missing role throws error', async (t) => {
-  const aws = t.context.subject;
-  await t.throwsAsync(
-    async () =>
-      aws.call({
-        url: LAMBDA_URL,
-      }),
-    {
-      instanceOf: Error,
-      message: 'Role is a required option for AWS',
-    }
-  );
-});
-
 test('Psoxy call: works as expected', async (t) => {
   const aws = t.context.subject;
   const utils = t.context.utils;
@@ -109,7 +95,7 @@ test('Psoxy call: works as expected', async (t) => {
   };
 
   // notice that `executeCommand` will return credentials wrapped and as
-  // String; in contrast to `assumeRole` that will parse and unwrap
+  // String; in contrast to `getAWSCredentials` that will parse and unwrap
   td.when(utils.executeCommand(td.matchers.contains('aws sts assume-role')))
     .thenReturn(JSON.stringify(credentials));
 

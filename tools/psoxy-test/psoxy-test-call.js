@@ -27,7 +27,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
  * @param {string} options.force - Force URL as AWS or GCP deploy
  * @param {string} options.impersonate - User to impersonate (Google Workspace API)
  * @param {string} options.token - Authorization token for GCP deploys
- * @param {string} options.role - AWS role to assume when calling the Psoxy (ARN format)
+ * @param {string} options.role - AWS role to assume when calling the Psoxy (ARN format; optional)
  * @param {boolean} options.skip - Whether to skip or not sanitization rules (only in DEV mode)
  * @param {boolean} options.gzip - Add Gzip compression headers
  * @param {boolean} options.verbose - Verbose ouput

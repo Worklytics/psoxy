@@ -4,7 +4,7 @@ import { constants as httpCodes } from 'http2';
 
 let aws, gcp, psoxyTestLogs;
 test.beforeEach(async (t) => {
-  // double test dependencies 
+  // double test dependencies
   aws = (await td.replaceEsm('../lib/aws.js')).default;
   gcp = (await td.replaceEsm('../lib/gcp.js')).default;
   //  import subject under test
@@ -14,15 +14,12 @@ test.beforeEach(async (t) => {
 test.afterEach(() => td.reset());
 
 test('Psoxy Logs: invalid options', async (t) => {
-  await t.throwsAsync(async () => psoxyTestLogs({}), { instanceOf: Error });
+  await t.throwsAsync(async () => psoxyTestLogs({}),
+    { message: (err) => err.startsWith('Invalid options') });
   // GCP: missing functionName
   await t.throwsAsync(async () => psoxyTestLogs({
-    projectId: 'foo', 
-  }), { instanceOf: Error });
-  // AWS: missing role
-  await t.throwsAsync(async () => psoxyTestLogs({
-    logGroupName: 'foo', 
-  }), { instanceOf: Error });
+    projectId: 'foo',
+  }), { message: (err) => err.startsWith('Invalid options') });
 });
 
 test('Psoxy Logs: GCP valid options', async (t) => {
@@ -35,12 +32,12 @@ test('Psoxy Logs: GCP valid options', async (t) => {
 
 test('Psoxy Logs: AWS valid options', async (t) => {
   const awsOptions = {role: 'foo', logGroupName: 'bar', region: 'baz'}
-  
+
   td.when(aws.createCloudWatchClient(
     td.matchers.contains(awsOptions.role),
     td.matchers.contains(awsOptions.region)
   )).thenReturn({});
-  
+
   td.when(aws.getLogStreams(
     td.matchers.contains(awsOptions),
     td.matchers.isA(Object), // cloudwatch client
