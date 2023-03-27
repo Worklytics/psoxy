@@ -526,7 +526,7 @@ EOT
     }
     "hris" = {
       source_kind               = "hris"
-      worklytics_connector_id   = "bulk-import-psoxy"
+      worklytics_connector_id   = "hris-import-psoxy"
       worklytics_connector_name = "HRIS Data Import via Psoxy"
       rules = {
         columnsToRedact = []
