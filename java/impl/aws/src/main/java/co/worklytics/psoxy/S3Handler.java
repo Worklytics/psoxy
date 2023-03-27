@@ -1,8 +1,8 @@
 package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.aws.DaggerAwsContainer;
-import co.worklytics.psoxy.gateway.StorageEventRequest;
-import co.worklytics.psoxy.gateway.StorageEventResponse;
+
+import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.storage.StorageHandler;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.events.S3Event;
@@ -20,7 +20,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
+import java.util.*;
 
 @Log
 public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestHandler<S3Event, String> {
@@ -60,6 +60,17 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
         StorageEventResponse storageEventResponse;
         S3Object s3Object = s3Client.getObject(new GetObjectRequest(importBucket, sourceKey));
 
+        //avoid potential npe should objectMetadata be null (if that can even happen?)
+        Map<String, String> userMetadata = Optional.ofNullable(s3Object.getObjectMetadata())
+            .map(ObjectMetadata::getUserMetadata).orElse(Collections.emptyMap());
+
+        if (storageHandler.hasBeenSanitized(userMetadata)) {
+            //possible if proxy directly (or indirectly via some other pipeline) is writing back
+            //to the same bucket it originally read from. to avoid perpetuating the loop, skip
+            log.warning("Skipping " + importBucket + "/" + sourceKey + " because it has already been sanitized; does your configuration result in a loop?");
+            return null;
+        }
+
         try (InputStream objectData = s3Object.getObjectContent();
              BOMInputStream is = new BOMInputStream(objectData);
              InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
@@ -76,9 +87,10 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
         try (InputStream is = new ByteArrayInputStream(storageEventResponse.getBytes())) {
 
             ObjectMetadata meta = new ObjectMetadata();
-
             meta.setContentLength(storageEventResponse.getBytes().length);
             meta.setContentType(s3Object.getObjectMetadata().getContentType());
+
+            meta.setUserMetadata(storageHandler.buildObjectMetadata(importBucket, sourceKey, transform));
 
             s3Client.putObject(storageEventResponse.getDestinationBucketName(),
                 storageEventResponse.getDestinationObjectPath(),

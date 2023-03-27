@@ -5,6 +5,7 @@ import co.worklytics.psoxy.gateway.BulkModeConfigProperty;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.StorageEventRequest;
 import co.worklytics.test.MockModules;
+import com.google.common.collect.ImmutableMap;
 import dagger.Component;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,7 +30,8 @@ class StorageHandlerTest {
     @Component(modules = {
         PsoxyModule.class,
         MockModules.ForRules.class,
-        MockModules.ForConfigService.class
+        MockModules.ForConfigService.class,
+        MockModules.ForHostEnvironment.class,
     })
     public interface Container {
         void inject( StorageHandlerTest test);
@@ -97,5 +99,22 @@ class StorageHandlerTest {
         assertEquals("directory/file.csv", request.getSourceObjectPath());
         assertEquals("bucket", request.getDestinationBucketName());
         assertEquals(expectedOutputPath, request.getDestinationObjectPath());
+    }
+
+    @Test
+    public void getObjectMetadata() {
+
+        //kinda pointless
+
+        assertTrue(handler.buildObjectMetadata("bucket", "directory/file.csv", handler.buildDefaultTransform())
+            .containsKey(StorageHandler.BulkMetaData.INSTANCE_ID.getMetaDataKey()));
+
+    }
+
+    @Test
+    public void hasBeenSanitized() {
+        assertFalse(handler.hasBeenSanitized(null));
+        assertFalse(handler.hasBeenSanitized(ImmutableMap.of()));
+        assertTrue(handler.hasBeenSanitized(ImmutableMap.of(StorageHandler.BulkMetaData.INSTANCE_ID.getMetaDataKey(), "psoxy-test")));
     }
 }

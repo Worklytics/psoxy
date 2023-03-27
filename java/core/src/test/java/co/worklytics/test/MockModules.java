@@ -1,6 +1,7 @@
 package co.worklytics.test;
 
 import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.HostEnvironment;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
 import co.worklytics.psoxy.rules.CsvRules;
 import co.worklytics.psoxy.rules.RESTRules;
@@ -98,5 +99,16 @@ public class MockModules {
 
     }
 
+    @Module
+    public interface ForHostEnvironment {
+
+        @Provides
+        @Singleton
+        static HostEnvironment hostEnvironment() {
+            HostEnvironment hostEnvironment = mock(HostEnvironment.class);
+            when(hostEnvironment.getInstanceId()).thenReturn("psoxy-test");
+            return hostEnvironment;
+        }
+    }
 }
 

@@ -1,10 +1,7 @@
 package co.worklytics.psoxy.storage;
 
 import co.worklytics.psoxy.Pseudonymizer;
-import co.worklytics.psoxy.gateway.BulkModeConfigProperty;
-import co.worklytics.psoxy.gateway.ConfigService;
-import co.worklytics.psoxy.gateway.StorageEventRequest;
-import co.worklytics.psoxy.gateway.StorageEventResponse;
+import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.rules.CsvRules;
 import co.worklytics.psoxy.rules.RulesUtils;
 import com.avaulta.gateway.rules.BulkDataRules;
@@ -16,6 +13,7 @@ import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * solves a DaggerMissingBinding exception in tests
@@ -38,6 +36,32 @@ public class StorageHandler {
 
     @Inject
     RulesUtils rulesUtils;
+
+    @Inject
+    HostEnvironment hostEnvironment;
+
+    @RequiredArgsConstructor
+    public enum BulkMetaData {
+        INSTANCE_ID,
+        VERSION,
+        ORIGINAL_OBJECT_KEY,
+
+        //q: sha-1 of rules? discarded for now as don't really see utility; would be complicated to
+        // map back to actual value for debugging
+        ;
+
+        // aws prepends `x-amz-meta-` to this; but per documentation, that's not visible via the
+        // java client (eg, they add/remove it automatically); it is visible through AWS console
+        //
+        // gcp doesn't prepend anything
+        static final String META_DATA_KEY_PREFIX = "psoxy-";
+
+
+        public String getMetaDataKey() {
+            return META_DATA_KEY_PREFIX + name().replace("_", "-").toLowerCase();
+        }
+
+    }
 
     @SneakyThrows
     public StorageEventResponse handle(StorageEventRequest request, BulkDataRules rules) {
@@ -84,6 +108,41 @@ public class StorageHandler {
             .rules((CsvRules) defaultRuleSet)
             .build();
     }
+
+    /**
+     * @param sourceBucket the bucket from which the original object was read
+     * @param sourceKey the key of the original object within the source bucket
+     * @param transform the transform that was applied to the object
+     *
+     * @return metadata to be written to the transformed object
+     */
+    public Map<String, String> buildObjectMetadata(String sourceBucket, String sourceKey, ObjectTransform transform) {
+        //transform currently unused; in future we probably want to record what transform was
+        // applied, to aid traceability of pipelines
+        return Map.of(
+            BulkMetaData.INSTANCE_ID.getMetaDataKey(), hostEnvironment.getInstanceId(),
+            BulkMetaData.VERSION.getMetaDataKey(), config.getConfigPropertyAsOptional(ProxyConfigProperty.BUNDLE_FILENAME).orElse("unknown"),
+            BulkMetaData.ORIGINAL_OBJECT_KEY.getMetaDataKey(), sourceBucket + "/" + sourceKey
+        );
+    }
+
+    /**
+     * @return true if the object has already been sanitized by this proxy instance
+     */
+    public boolean hasBeenSanitized(Map<String, String> objectMeta) {
+        // the instanceId check here allows for chaining proxies, so a loop is still possible in
+        // such a scenario, if lambda 1 triggered from bucket A, writes to B, which triggers lambda
+        // 2 to write back to A
+
+        if (objectMeta == null) {
+            //GCP seems to return null here, rather than an empty map
+            return false;
+        }
+
+        return objectMeta.getOrDefault(BulkMetaData.INSTANCE_ID.getMetaDataKey(), "")
+            .equals(hostEnvironment.getInstanceId());
+    }
+
 
     @Builder
     @AllArgsConstructor
