@@ -1,4 +1,4 @@
-name: CI - java
+name: CI - java8
 
 # CI for our project as a GitHub action
 # see https://help.github.com/en/actions/language-and-framework-guides/building-and-testing-java-with-maven
@@ -9,7 +9,7 @@ on:
       - '**' # should match all branches
 
 jobs:
-  ci_java:
+  ci_java8:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
@@ -30,7 +30,7 @@ jobs:
       - name: Compile
         working-directory: java/
         run: |
-          mvn clean compile -T 2C -Dversions.logOutput=false -DprocessDependencies=false -DprocessDependencyManagement=false
+          mvn clean compile -P dev -T 2C -Dversions.logOutput=false -DprocessDependencies=false -DprocessDependencyManagement=false
       - name: Test
         working-directory: java/
         run: |
