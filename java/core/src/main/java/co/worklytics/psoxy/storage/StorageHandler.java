@@ -110,13 +110,19 @@ public class StorageHandler {
     }
 
     /**
+     * @param sourceBucket the bucket from which the original object was read
+     * @param sourceKey the key of the original object within the source bucket
+     * @param transform the transform that was applied to the object
+     *
      * @return metadata to be written to the transformed object
      */
-    public Map<String, String> getObjectMeta(String importBucket, String sourceKey, ObjectTransform transform) {
+    public Map<String, String> buildObjectMetadata(String sourceBucket, String sourceKey, ObjectTransform transform) {
+        //transform currently unused; in future we probably want to record what transform was
+        // applied, to aid traceability of pipelines
         return Map.of(
             BulkMetaData.INSTANCE_ID.getMetaDataKey(), hostEnvironment.getInstanceId(),
             BulkMetaData.VERSION.getMetaDataKey(), config.getConfigPropertyAsOptional(ProxyConfigProperty.BUNDLE_FILENAME).orElse("unknown"),
-            BulkMetaData.ORIGINAL_OBJECT_KEY.getMetaDataKey(), importBucket + "/" + sourceKey
+            BulkMetaData.ORIGINAL_OBJECT_KEY.getMetaDataKey(), sourceBucket + "/" + sourceKey
         );
     }
 

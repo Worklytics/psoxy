@@ -79,7 +79,7 @@ public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
                 storage.createFrom(
                     BlobInfo.newBuilder(BlobId.of(storageEventResponse.getDestinationBucketName(), storageEventResponse.getDestinationObjectPath()))
                         .setContentType(blobInfo.getContentType())
-                        .setMetadata(storageHandler.getObjectMeta(importBucket, sourceName, transform))
+                        .setMetadata(storageHandler.buildObjectMetadata(importBucket, sourceName, transform))
                         .build(),
                     processedStream);
 

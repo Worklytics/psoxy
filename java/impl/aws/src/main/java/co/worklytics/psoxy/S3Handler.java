@@ -20,7 +20,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
+import java.util.*;
 
 @Log
 public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestHandler<S3Event, String> {
@@ -60,7 +60,11 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
         StorageEventResponse storageEventResponse;
         S3Object s3Object = s3Client.getObject(new GetObjectRequest(importBucket, sourceKey));
 
-        if (storageHandler.hasBeenSanitized(s3Object.getObjectMetadata().getUserMetadata())) {
+        //avoid potential npe should objectMetadata be null (if that can even happen?)
+        Map<String, String> userMetadata = Optional.ofNullable(s3Object.getObjectMetadata())
+            .map(ObjectMetadata::getUserMetadata).orElse(Collections.emptyMap());
+
+        if (storageHandler.hasBeenSanitized(userMetadata)) {
             //possible if proxy directly (or indirectly via some other pipeline) is writing back
             //to the same bucket it originally read from. to avoid perpetuating the loop, skip
             log.warning("Skipping " + importBucket + "/" + sourceKey + " because it has already been sanitized; does your configuration result in a loop?");
@@ -86,7 +90,7 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
             meta.setContentLength(storageEventResponse.getBytes().length);
             meta.setContentType(s3Object.getObjectMetadata().getContentType());
 
-            meta.setUserMetadata(storageHandler.getObjectMeta(importBucket, sourceKey, transform));
+            meta.setUserMetadata(storageHandler.buildObjectMetadata(importBucket, sourceKey, transform));
 
             s3Client.putObject(storageEventResponse.getDestinationBucketName(),
                 storageEventResponse.getDestinationObjectPath(),
