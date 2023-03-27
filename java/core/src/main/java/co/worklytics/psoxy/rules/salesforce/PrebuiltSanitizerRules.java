@@ -59,7 +59,7 @@ public class PrebuiltSanitizerRules {
 
     private final static SchemaRuleUtils.JsonSchema USER_BY_QUERY_RESULT_JSON_SCHEMA = SchemaRuleUtils.JsonSchema.builder()
             .type("object")
-            .properties(new LinkedHashMap<>() {{
+            .properties(new LinkedHashMap<String, SchemaRuleUtils.JsonSchema>() {{ //req for java8-backwards compatibility
                             put("Alias", SchemaRuleUtils.JsonSchema.builder().type("string").build());
                             put("AccountId", SchemaRuleUtils.JsonSchema.builder().type("string").build());
                             put("ContactId", SchemaRuleUtils.JsonSchema.builder().type("string").build());
@@ -86,7 +86,7 @@ public class PrebuiltSanitizerRules {
             .properties(Map.of(
                     "ActivityHistories", jsonSchemaForQueryResult(SchemaRuleUtils.JsonSchema.builder()
                             .type("object")
-                            .properties(new LinkedHashMap<>() {
+                            .properties(new LinkedHashMap<String, SchemaRuleUtils.JsonSchema>() { //req for java8-backwards compatibility
                                 {
                                     put("AccountId", SchemaRuleUtils.JsonSchema.builder().type("string").build());
                                     put("ActivityDate", SchemaRuleUtils.JsonSchema.builder().type("string").build());
@@ -119,7 +119,8 @@ public class PrebuiltSanitizerRules {
 
     private final static SchemaRuleUtils.JsonSchema ACCOUNT_QUERY_RESULT_SCHEMA = SchemaRuleUtils.JsonSchema.builder()
             .type("object")
-            .properties(new LinkedHashMap<>() {{
+        .properties(new LinkedHashMap<String, SchemaRuleUtils.JsonSchema>() { //req for java8-backwards compatibility
+            {
                 put("Id", SchemaRuleUtils.JsonSchema.builder().type("string").build());
                 put("AnnualRevenue", SchemaRuleUtils.JsonSchema.builder().type("number").build());
                 put("CreatedDate", SchemaRuleUtils.JsonSchema.builder().type("string").build());
@@ -232,7 +233,7 @@ public class PrebuiltSanitizerRules {
                 .type("object")
                 // Using LinkedHashMap to keep the order to support same
                 // YAML serialization result
-                .properties(new LinkedHashMap<>() {{
+                .properties(new LinkedHashMap<String, SchemaRuleUtils.JsonSchema>() {{ //req for java8-backwards compatibility
                     put("totalSize", SchemaRuleUtils.JsonSchema.builder()
                             .type("integer")
                             .build());
