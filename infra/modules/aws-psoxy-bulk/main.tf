@@ -68,7 +68,7 @@ resource "aws_s3_bucket_public_access_block" "input-block-public-access" {
 }
 
 
-resource "aws_s3_bucket_lifecycle_configuration" "expiration" {
+resource "aws_s3_bucket_lifecycle_configuration" "expire_input_files" {
   bucket = aws_s3_bucket.input.bucket
 
   rule {
@@ -125,7 +125,7 @@ moved {
   to   = aws_s3_bucket_public_access_block.sanitized
 }
 
-resource "aws_s3_bucket_lifecycle_configuration" "expiration" {
+resource "aws_s3_bucket_lifecycle_configuration" "expire_sanitized_files" {
   bucket = aws_s3_bucket.sanitized.bucket
 
   rule {

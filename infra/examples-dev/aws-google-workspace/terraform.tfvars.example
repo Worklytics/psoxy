@@ -13,6 +13,8 @@ enabled_connectors = [
   "zoom",
 ]
 non_production_connectors = [] # use to mark any of the above as 'non-production' (NOTE: allows test calls that may expose PII)
+bulk_input_expiration_days     = 1
+bulk_sanitized_expiration_days = 1
 lookup_table_builders = {
     #    "lookup-hris" = {
     #      input_connector_id = "hris",
