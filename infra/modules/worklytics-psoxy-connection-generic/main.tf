@@ -13,6 +13,7 @@ locals {
     PROXY_AWS_REGION   = "AWS Psoxy Region"
     PROXY_ENDPOINT     = "Psoxy Base URL"
     PROXY_BUCKET_NAME  = "Bucket Name"
+    parserId           = "Parser"
   }
 
   query_params = [for k, v in local.autofilled_settings : "${k}=${urlencode(var.settings_to_provide[(v)])}"
