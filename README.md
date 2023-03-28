@@ -133,7 +133,7 @@ You will need all of the following:
 | [git](https://git-scm.com/)                  | 2.17+          | `git --version`           |
 | [Maven](https://maven.apache.org/)           | 3.6+           | `mvn -v`                  |
 | [Java 11+ JDK](https://openjdk.org/install/) | 11+, but < 19  | `mvn -v &#124; grep Java` |
-| [Terraform](https://www.terraform.io/)       | 1.3.x+         | `terraform version`       |
+| [Terraform](https://www.terraform.io/)       | 1.3.x, but < 1.4.x | `terraform version`       |
 
 
 NOTE: Java 19 is currently broken, see [docs/troubleshooting.md](docs/troubleshooting.md); we suggest
