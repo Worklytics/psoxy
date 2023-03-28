@@ -353,6 +353,8 @@ module "psoxy-bulk" {
   ssm_kms_key_ids                 = local.ssm_key_ids
   example_file                    = try(each.value.example_file, null)
   log_retention_days              = var.log_retention_days
+  sanitized_expiration_days       = var.bulk_sanitized_expiration_days
+  input_expiration_days           = var.bulk_input_expiration_days
 
   sanitized_accessor_role_names = [
     module.psoxy-aws.api_caller_role_name
