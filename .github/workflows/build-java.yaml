@@ -4,13 +4,15 @@ name: Build - java
 # see https://help.github.com/en/actions/language-and-framework-guides/building-and-testing-java-with-maven
 
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
       java-version:
+        required: false
         type: string
         description: Java version to use
-        default: '17'
+        default: 17
       compile-profile:
+        required: false
         type: string
         description: Name of the maven profile used during compilation
         default: ''
@@ -21,13 +23,11 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v2
-      - name: test
-        run: | 
-          echo ${{ github.event.inputs.java-version}}
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
-          java-version: ${{ github.event.inputs.java-version }}
+          java-version: ${{ inputs.java-version }}
+          # https://github.com/actions/setup-java#supported-distributions
           distribution: zulu
       - name: Cache Maven packages
         uses: actions/cache@v2
@@ -41,7 +41,7 @@ jobs:
       - name: Compile
         working-directory: java/
         run: |
-          mvn clean compile ${{ github.event.inputs.compile-profile }} -T 2C -Dversions.logOutput=false -DprocessDependencies=false -DprocessDependencyManagement=false
+          mvn clean compile ${{ inputs.compile-profile }} -T 2C -Dversions.logOutput=false -DprocessDependencies=false -DprocessDependencyManagement=false
       - name: Test
         working-directory: java/
         run: |
