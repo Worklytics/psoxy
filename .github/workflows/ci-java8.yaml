@@ -10,6 +10,6 @@ on:
 
 jobs:
   ci_java_8:
-    uses: ./.github/workflows/build-java.yml
+    uses: ./.github/workflows/build-java.yaml
     with:
-      - compile_profile: dev 
+      compile-profile: dev
