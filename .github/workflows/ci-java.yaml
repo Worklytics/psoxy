@@ -10,5 +10,4 @@ on:
 
 jobs:
   ci_java:
-    uses: ./.github/workflows/build-java.yml
-
+    uses: ./.github/workflows/build-java.yaml
