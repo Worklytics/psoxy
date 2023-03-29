@@ -278,6 +278,8 @@ module "psoxy-gcp-bulk" {
   bucket_write_role_id          = module.psoxy-gcp.bucket_write_role_id
   secret_bindings               = module.psoxy-gcp.secrets
   example_file                  = try(each.value.example_file, null)
+  input_expiration_days = var.bulk_input_expiration_days
+  sanitized_expiration_days = var.bulk_sanitized_expiration_days
 
   environment_variables = merge(
     var.general_environment_variables,
