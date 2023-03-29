@@ -156,13 +156,13 @@ variable "non_production_connectors" {
 
 variable "bulk_input_expiration_days" {
   type        = number
-  description = "**alpha** Number of days after which objects in the bucket will expire"
+  description = "**alpha** Number of days after which objects in the bucket will expire. This could be as low as 1 day; longer aids debugging of issues."
   default     = 30
 }
 
 variable "bulk_sanitized_expiration_days" {
   type        = number
-  description = "**alpha** Number of days after which objects in the bucket will expire"
+  description = "**alpha** Number of days after which objects in the bucket will expire. In practice, Worklytics syncs data ~weekly, so 30 day minimum for this value."
   default     = 720
 }
 
