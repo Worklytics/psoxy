@@ -10,29 +10,5 @@ on:
 
 jobs:
   ci_java:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v2
-      - name: Setup Java
-        uses: actions/setup-java@v1
-        with:
-          java-version: '17' # The JDK version to make available on the path.
-      - name: Cache Maven packages
-        uses: actions/cache@v2
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-v1-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2-v1-
-      - name: Clear our artifacts from Maven cache # q: does this work!?!?!
-        run: |
-          rm -rf ~/.m2/repository/co/worklytics/
-      - name: Compile
-        working-directory: java/
-        run: |
-          mvn clean compile -T 2C -Dversions.logOutput=false -DprocessDependencies=false -DprocessDependencyManagement=false
-      - name: Test
-        working-directory: java/
-        run: |
-          mvn post-clean test -T 2C -Dversions.logOutput=false -DprocessDependencies=false -DprocessDependencyManagement=false -Dsurefire.forkCount=2.5C -Dsurefire.reuseForks=true
+    uses: ./.github/workflows/build-java.yml
 
