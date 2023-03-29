@@ -3,12 +3,12 @@ package co.worklytics.psoxy.gateway.impl;
 import co.worklytics.psoxy.ControlHeader;
 import co.worklytics.psoxy.Pseudonymizer;
 import co.worklytics.psoxy.PsoxyModule;
-import co.worklytics.psoxy.RESTApiSanitizer;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.test.MockModules;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
+import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
 import com.google.api.client.http.*;
 import com.google.api.client.json.Json;
 import com.google.api.client.testing.http.HttpTesting;
@@ -64,6 +64,9 @@ class CommonRequestHandlerTest {
     @Inject
     CommonRequestHandler handler;
 
+    @Inject
+    ReversibleTokenizationStrategy reversibleTokenizationStrategy;
+
     private static Stream<Arguments> provideRequestToBuildTarget() {
         return Stream.of(
             Arguments.of("/some/path", null, "https://proxyhost.com/some/path"),
@@ -79,7 +82,7 @@ class CommonRequestHandlerTest {
     @SneakyThrows
     @ParameterizedTest
     @MethodSource("provideRequestToBuildTarget")
-    void buildTarget(String path, String queryString, String expectedProxyCallUrl) {
+    void parseTargetUrlAndDecrypt(String path, String queryString, String expectedProxyCallUrl) {
         HttpEventRequest request = new HttpEventRequest() {
             @Override
             public String getPath() {
@@ -113,7 +116,7 @@ class CommonRequestHandlerTest {
         };
         when(handler.config.getConfigPropertyOrError(eq(ProxyConfigProperty.TARGET_HOST))).thenReturn("proxyhost.com");
 
-        URL url = handler.buildTarget(request);
+        URL url = new URL(handler.reverseTokenizedUrlComponents(handler.parseRequestedTarget(request)));
 
         assertEquals(expectedProxyCallUrl, url.toString(), "URLs should match");
     }
