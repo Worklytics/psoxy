@@ -1,0 +1,47 @@
+name: Build - java
+
+# Build Java part of our project as a GitHub action
+# see https://help.github.com/en/actions/language-and-framework-guides/building-and-testing-java-with-maven
+
+on:
+  workflow_dispatch:
+    inputs:
+      java_version:
+        type: choice
+        description: Java version to use
+        default: 17
+        options: 
+        - 17
+        - 8
+      compile_profile:
+        descriptipn: Name of the maven profile used during compilation
+        default: ""
+
+jobs:
+  ci_java:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+      - name: Setup Java
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{ inputs.java_version }}
+      - name: Cache Maven packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-v1-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2-v1-
+      - name: Clear our artifacts from Maven cache # q: does this work!?!?!
+        run: |
+          rm -rf ~/.m2/repository/co/worklytics/
+      - name: Compile
+        working-directory: java/
+        run: |
+          mvn clean compile ${{ inputs.compile_profile }}-T 2C -Dversions.logOutput=false -DprocessDependencies=false -DprocessDependencyManagement=false
+      - name: Test
+        working-directory: java/
+        run: |
+          mvn post-clean test -T 2C -Dversions.logOutput=false -DprocessDependencies=false -DprocessDependencyManagement=false -Dsurefire.forkCount=2.5C -Dsurefire.reuseForks=true
+
