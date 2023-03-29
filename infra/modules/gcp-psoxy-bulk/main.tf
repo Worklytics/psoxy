@@ -31,6 +31,16 @@ resource "google_storage_bucket" "input-bucket" {
   force_destroy               = true
   uniform_bucket_level_access = true
 
+  lifecycle_rule {
+    condition {
+      age = var.input_expiration_days
+    }
+
+    action {
+      type = "Delete"
+    }
+  }
+
   lifecycle {
     ignore_changes = [
       labels
@@ -45,6 +55,16 @@ resource "google_storage_bucket" "output-bucket" {
   location                    = var.region
   force_destroy               = true
   uniform_bucket_level_access = true
+
+  lifecycle_rule {
+    condition {
+      age = var.sanitized_expiration_days
+    }
+
+    action {
+      type = "Delete"
+    }
+  }
 
   lifecycle {
     ignore_changes = [
