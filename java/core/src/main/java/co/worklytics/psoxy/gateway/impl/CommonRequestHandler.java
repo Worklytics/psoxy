@@ -132,12 +132,10 @@ public class CommonRequestHandler {
 
         boolean tokenizedURLReversed = Objects.equals(requestedTargetUrl, clearTargetUrl);
 
-        String reversalOutcome = tokenizedURLReversed ? "No reversible tokens detected in URL." : "Detected tokens reversed.";
-
         URL targetUrl = new URL(clearTargetUrl);
 
         // avoid logging clear URL outside of dev
-        URL toLog = envVarsConfigService.isDevelopment() ? new URL(requestedTargetUrl) : targetUrl;
+        URL toLog = envVarsConfigService.isDevelopment() ? targetUrl : new URL(requestedTargetUrl);
 
         boolean skipSanitization = skipSanitization(request);
 
@@ -145,7 +143,7 @@ public class CommonRequestHandler {
 
         this.sanitizer = loadSanitizerRules();
 
-        String callLog = String.format("%s %s %s", request.getHttpMethod(), URLUtils.relativeURL(toLog), reversalOutcome);
+        String callLog = String.format("%s %s %s TokensReversed=%b", request.getHttpMethod(), URLUtils.relativeURL(toLog), tokenizedURLReversed);
         if (skipSanitization) {
             log.info(String.format("%s. Skipping sanitization.", callLog));
         } else if (sanitizer.isAllowed(request.getHttpMethod(), targetUrl)) {
