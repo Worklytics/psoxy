@@ -1,14 +1,14 @@
 #!/bin/bash
 # Install test tool, if npm available
 
-PSOXY_BASE_DIR=${1:-$(pwd)}
+PATH_TO_TOOLS=${1:-$(pwd)/tools}
 
 RED='\e[0;31m'
 GREEN='\e[0;32m'
 BLUE='\e[0;34m'
 NC='\e[0m' # No Color
 
-TEST_TOOL_ROOT=${PSOXY_BASE_DIR}tools/psoxy-test
+TEST_TOOL_ROOT=${PATH_TO_TOOLS}/psoxy-test
 
 if [ ! -d ${TEST_TOOL_ROOT} ]; then
   printf "${RED}No test tool source found at ${TEST_TOOL_ROOT}. Failed to install test tool.${NC}\n"

@@ -45,4 +45,4 @@ else
 fi
 
 # Install test tool
-${PSOXY_BASE_DIR}tools/install-test-tool.sh $PSOXY_BASE_DIR
+${PSOXY_BASE_DIR}tools/install-test-tool.sh ${PSOXY_BASE_DIR}tools

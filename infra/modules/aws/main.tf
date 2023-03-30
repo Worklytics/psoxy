@@ -136,6 +136,13 @@ module "psoxy-package" {
   force_bundle       = var.force_bundle
 }
 
+module "test_tool" {
+  source = "../psoxy-test-tool"
+
+  path_to_tools = "${var.psoxy_base_dir}tools"
+  psoxy_version = module.psoxy-package.version
+}
+
 output "secrets" {
   value = {
     PSOXY_ENCRYPTION_KEY = {
