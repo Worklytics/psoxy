@@ -11,11 +11,13 @@ import com.google.auth.Credentials;
 import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.OAuth2CredentialsWithRefresh;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.util.concurrent.Uninterruptibles;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
+import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Inject;
@@ -25,6 +27,7 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -67,6 +70,8 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
      */
     public static final Duration MIN_DURATION_TO_KEEP_REFRESH_TOKEN = Duration.ofDays(7);
 
+    // lock to use to synchronize on token refreshes within same JVM
+    private static final Object $refreshLock = new Object();
 
     //q: should we put these as config properties? creates potential for inconsistent configs
     // eg, orphaned config properties for SourceAuthStrategy not in use; missing config properties
@@ -205,9 +210,11 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
             }
 
             if (shouldRefresh(this.currentToken, clock.instant())) {
+                // some jitter to minimize multiple instances refreshing at same time
+                Uninterruptibles.sleepUninterruptibly(50 + RandomUtils.nextLong(50, 200), TimeUnit.MILLISECONDS);
                 tokenResponse = exchangeRefreshTokenForAccessToken();
-                this.currentToken = asAccessToken(tokenResponse);
-                storeSharedAccessTokenIfSupported(this.currentToken);
+                AccessToken newToken = asAccessToken(tokenResponse);
+                this.currentToken = storeSharedAccessTokenIfSupported(newToken);
             }
 
             return this.currentToken;
@@ -348,17 +355,41 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         }
 
         @VisibleForTesting
-        void storeSharedAccessTokenIfSupported(@NonNull AccessToken accessToken) {
+        AccessToken storeSharedAccessTokenIfSupported(@NonNull AccessToken newToken) {
+            AccessToken result = newToken;
             if (payloadBuilder.useSharedToken()) {
-                try {
-                    config.putConfigProperty(ConfigProperty.ACCESS_TOKEN,
-                        objectMapper.writerFor(AccessTokenDto.class)
-                            .writeValueAsString(AccessTokenDto.toAccessTokenDto(accessToken)));
-                    log.log(Level.INFO, "New token stored in config");
-                } catch (JsonProcessingException e) {
-                    log.log(Level.SEVERE, "Could not serialize token into JSON", e);
+                // at least synchronize in the same JVM
+                synchronized ($refreshLock) {
+                    try {
+                        // wait slightly before checking for most recent token in config
+                        Uninterruptibles.sleepUninterruptibly(RandomUtils.nextLong(50, 200), TimeUnit.MILLISECONDS);
+                        Optional<AccessToken> sharedToken = getSharedAccessTokenIfSupported();
+                        boolean write = false;
+                        if (sharedToken.isPresent()) {
+                            // check that is not newer than the one we just got, race condition?
+                            if (newToken.getExpirationTime().toInstant().isAfter(sharedToken.get().getExpirationTime().toInstant())) {
+                                write = true;
+                            } else {
+                                // return the shared one
+                                result = sharedToken.get();
+                                log.log(Level.WARNING, "Found recent token in config");
+                            }
+                        } else {
+                            // no shared token, store it
+                            write = true;
+                        }
+                        if (write) {
+                            config.putConfigProperty(ConfigProperty.ACCESS_TOKEN,
+                                objectMapper.writerFor(AccessTokenDto.class)
+                                    .writeValueAsString(AccessTokenDto.toAccessTokenDto(newToken)));
+                            log.log(Level.INFO, "New token stored in config");
+                        }
+                    } catch (JsonProcessingException e) {
+                        log.log(Level.SEVERE, "Could not serialize token into JSON", e);
+                    }
                 }
             }
+            return result;
         }
     }
 
