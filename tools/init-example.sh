@@ -44,19 +44,5 @@ else
   printf "${RED}Nothing to initialize. File terraform.tfvars already exists.${NC}\n\n"
 fi
 
-# Install test tool, if npm available
-
-TEST_TOOL_ROOT=${PSOXY_BASE_DIR}tools/psoxy-test
-
-if [ ! -d ${TEST_TOOL_ROOT} ]; then
-  printf "${RED}No test tool source found at ${TEST_TOOL_ROOT}. Failed to install test tool.${NC}\n"
-  exit
-fi
-
-if npm -v &> /dev/null ; then
-  printf "Installing ${BLUE}psoxy-test${NC} tool ...\n"
-  npm --no-audit --no-fund --prefix ${TEST_TOOL_ROOT} install
-else
-  printf "${RED}NPM / Node.JS not available; could not install test tool. We recommend installing Node.JS ( https://nodejs.org/ ), then re-running this init script.${NC}\n"
-fi
-
+# Install test tool
+${PSOXY_BASE_DIR}tools/install-test-tool.sh $PSOXY_BASE_DIR
