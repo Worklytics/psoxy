@@ -32,6 +32,43 @@ public class JsonSchemaFilterUtils {
     }
 
     /**
+     *
+     * TODO: really doesn't need to be in proxy codebase; it's just for rule generation
+     *
+     * @param filter to compact
+     * @return a compact copy of the schema filter
+     */
+    @SneakyThrows
+    public JsonSchemaFilter compactCopy(JsonSchemaFilter filter) {
+        //quick, lame approach to have a deep copy of schema
+        JsonSchemaFilter copy = objectMapper.readerFor(JsonSchemaFilter.class)
+            .readValue(objectMapper.writeValueAsString(filter));
+
+        compact(copy);
+
+        return copy;
+    }
+
+    /**
+     * mutating compaction - removes all simple-type information from filter
+     * @param filter
+     */
+    void compact(JsonSchemaFilter filter) {
+        if (filter.isArray()) {
+            compact(filter.getItems());
+        } else if (filter.isObject()) {
+            filter.getProperties().forEach((k, v) -> compact(v));
+        } else if (filter.hasType()) { // as non-complex type
+            filter.setType(null);
+        }
+
+        // also compact any definitions
+        if (filter.getDefinitions() != null) {
+            filter.getDefinitions().forEach((k, v) -> compact(v));
+        }
+    }
+
+    /**
      * filter object by properties defined in schema, recursively filtering them by any schema
      * specified for them as well.
      *
@@ -298,6 +335,11 @@ public class JsonSchemaFilterUtils {
         @JsonIgnore
         public boolean hasType() {
             return this.type != null;
+        }
+
+        @JsonIgnore
+        public boolean isComplex() {
+            return isObject() || isArray();
         }
     }
 

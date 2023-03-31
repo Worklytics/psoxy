@@ -200,11 +200,57 @@ class JsonSchemaFilterUtilsTest {
 
     }
 
+    @SneakyThrows
+    @Test
+    public void compactCopy() {
+        JsonSchemaFilterUtils.JsonSchemaFilter schemaWithRefs =
+            jsonSchemaFilterUtils.generateJsonSchemaFilter(ComplexPojo.class);
+        JsonSchemaFilterUtils.JsonSchemaFilter compactCopy = jsonSchemaFilterUtils.compactCopy(schemaWithRefs);
+
+        assertEquals(ComplexPojo.EXPECTED_COMPACT_SCHEMA,
+            objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(compactCopy));
+    }
+
     @Builder
     @Data
     static class ComplexPojo {
 
         public static final String EXPECTED_SCHEMA = "{\n" +
+            "  \"$schema\" : \"http://json-schema.org/draft/2019-09/schema#\",\n" +
+            "  \"type\" : \"object\",\n" +
+            "  \"additionalProperties\" : false,\n" +
+            "  \"properties\" : {\n" +
+            "    \"simplePojo\" : {\n" +
+            "      \"$ref\" : \"#/definitions/SimplePojo\"\n" +
+            "    },\n" +
+            "    \"additionalSimplePojos\" : {\n" +
+            "      \"type\" : \"array\",\n" +
+            "      \"items\" : {\n" +
+            "        \"$ref\" : \"#/definitions/SimplePojo\"\n" +
+            "      }\n" +
+            "    }\n" +
+            "  },\n" +
+            "  \"definitions\" : {\n" +
+            "    \"SimplePojo\" : {\n" +
+            "      \"type\" : \"object\",\n" +
+            "      \"additionalProperties\" : false,\n" +
+            "      \"properties\" : {\n" +
+            "        \"someString\" : {\n" +
+            "          \"type\" : \"string\"\n" +
+            "        },\n" +
+            "        \"date\" : {\n" +
+            "          \"type\" : \"string\",\n" +
+            "          \"format\" : \"date\"\n" +
+            "        },\n" +
+            "        \"timestamp\" : {\n" +
+            "          \"type\" : \"string\",\n" +
+            "          \"format\" : \"date-time\"\n" +
+            "        }\n" +
+            "      }\n" +
+            "    }\n" +
+            "  }\n" +
+            "}";
+        public static final String EXPECTED_COMPACT_SCHEMA = "{\n" +
             "  \"$schema\" : \"http://json-schema.org/draft/2019-09/schema#\",\n" +
             "  \"type\" : \"object\",\n" +
             "  \"additionalProperties\" : false,\n" +
