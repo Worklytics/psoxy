@@ -95,7 +95,9 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     JsonSchemaFilterUtils.JsonSchemaFilter getRootDefinitions() {
         if (rootDefinitions == null) {
             synchronized ($writeLock) {
-                rootDefinitions = JsonSchemaFilterUtils.JsonSchemaFilter.builder().definitions(rules.getDefinitions()).build();
+  if (rootDefinitions == null) {
+          rootDefinitions = JsonSchemaFilterUtils.JsonSchemaFilter.builder().definitions(rules.getDefinitions()).build();
+  }
             }
         }
         return rootDefinitions;
