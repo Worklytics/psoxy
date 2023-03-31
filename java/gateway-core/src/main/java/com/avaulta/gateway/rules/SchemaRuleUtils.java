@@ -55,9 +55,9 @@ public class SchemaRuleUtils {
     }
 
     @SneakyThrows
-    public String filterJsonBySchema(String jsonString, JsonSchemaFilter schema) {
+    public String filterJsonBySchema(String jsonString, JsonSchemaFilter schema, JsonSchemaFilter root) {
         JsonNode provisionalOutput = objectMapper.readTree(jsonString);
-        return objectMapper.writeValueAsString(filterBySchema(provisionalOutput, schema, schema));
+        return objectMapper.writeValueAsString(filterBySchema(provisionalOutput, schema, root));
     }
 
 
