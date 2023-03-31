@@ -69,6 +69,9 @@ public class SchemaRuleUtils {
             } else if (schema.getRef().startsWith("#/definitions/")) {
                 String definitionName = schema.getRef().substring("#/definitions/".length());
                 JsonSchemaFilter definition = root.getDefinitions().get(definitionName);
+                if (definition == null) {
+                    throw new RuntimeException("definition not found: " + definitionName);
+                }
                 return filterBySchema(provisionalOutput, definition, root);
             } else {
                 //cases like URLs relative to schema URI are not supported
@@ -192,6 +195,8 @@ public class SchemaRuleUtils {
         // get java.lang.IllegalArgumentException: Unrecognized field "definitions" (class com.avaulta.gateway.rules.SchemaRuleUtils$JsonSchema)
         //        //  when calling objectMapper.convertValue(((JsonNode) schema), JsonSchema.class);??
         // perhaps it's a problem with the library we use to build the JsonNode schema??
+
+        //TODO: this is not used except from the 'root' schema; is that correct??
         Map<String, JsonSchemaFilter> definitions;
 
         // part of JSON schema standard, but how to support for filters?
