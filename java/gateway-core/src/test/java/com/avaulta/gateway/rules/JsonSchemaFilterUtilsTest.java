@@ -12,6 +12,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.Singular;
 import lombok.SneakyThrows;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -79,7 +80,7 @@ class JsonSchemaFilterUtilsTest {
             .someListItem("list-item-1")
             .build();
 
-        Object filteredToSimplePlus = jsonSchemaFilterUtils.filterObjectBySchema(simplePlus,
+        Pair<Object, List<String>> filteredToSimplePlus = jsonSchemaFilterUtils.filterObjectBySchema(simplePlus,
             jsonSchemaFilterUtils.generateJsonSchemaFilter(SimplePojoPlus.class));
 
 
@@ -89,10 +90,10 @@ class JsonSchemaFilterUtilsTest {
                 "  \"someListItems\" : [ \"list-item-1\" ],\n" +
                 "  \"timestamp\" : \"2023-01-16T05:12:34Z\"\n" +
                 "}",
-            objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(filteredToSimplePlus));
+            objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(filteredToSimplePlus.getLeft()));
 
 
-        Object filteredToSimple = jsonSchemaFilterUtils.filterObjectBySchema(simplePlus,
+        Pair<Object, List<String>> filteredToSimple = jsonSchemaFilterUtils.filterObjectBySchema(simplePlus,
             jsonSchemaFilterUtils.generateJsonSchemaFilter(SimplePojo.class));
 
         assertEquals("{\n" +
@@ -100,7 +101,10 @@ class JsonSchemaFilterUtilsTest {
                 "  \"someString\" : \"some-string\",\n" +
                 "  \"timestamp\" : \"2023-01-16T05:12:34Z\"\n" +
                 "}",
-            objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(filteredToSimple));
+            objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(filteredToSimple.getLeft()));
+
+        assertEquals(1, filteredToSimple.getRight().size());
+        assertEquals("$.someListItems", filteredToSimple.getRight().get(0));
 
     }
 
@@ -192,7 +196,7 @@ class JsonSchemaFilterUtilsTest {
             objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonSchemaFilterUtils.filterObjectBySchema(ComplexPojoPlus.builder()
                 .simplePojo(simplePlus)
                 .additionalSimplePojo(simplePlus)
-                .build(), schemaWithRefs)));
+                .build(), schemaWithRefs).getLeft()));
 
     }
 

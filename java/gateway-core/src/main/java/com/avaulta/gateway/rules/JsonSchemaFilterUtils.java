@@ -5,9 +5,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kjetland.jackson.jsonSchema.JsonSchemaGenerator;
 import lombok.*;
+import lombok.extern.java.Log;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.*;
 
+@Log
 @NoArgsConstructor(access = AccessLevel.PACKAGE) //for tests
 @AllArgsConstructor
 public class JsonSchemaFilterUtils {
@@ -95,30 +98,33 @@ public class JsonSchemaFilterUtils {
      * @param schema to filter object's properties by
      * @return object, if matches schema; or sub
      */
-    public Object filterObjectBySchema(Object object, JsonSchemaFilter schema) {
+    public Pair<Object, List<String>> filterObjectBySchema(Object object, JsonSchemaFilter schema) {
         JsonNode provisionalOutput = objectMapper.valueToTree(object);
-        return filterBySchema(provisionalOutput, schema, schema);
+        List<String> redactions = new LinkedList<>();
+        Object r = filterBySchema("$", provisionalOutput, schema, schema, redactions);
+        return Pair.of(r, redactions);
     }
 
     @SneakyThrows
     public String filterJsonBySchema(String jsonString, JsonSchemaFilter schema, JsonSchemaFilter root) {
         JsonNode provisionalOutput = objectMapper.readTree(jsonString);
-        return objectMapper.writeValueAsString(filterBySchema(provisionalOutput, schema, root));
+        List<String> redactions = new LinkedList<>();
+        return objectMapper.writeValueAsString(filterBySchema("$", provisionalOutput, schema, root, redactions));
     }
 
 
-    Object filterBySchema(JsonNode provisionalOutput, JsonSchemaFilter schema, JsonSchemaFilter root) {
+    private Object filterBySchema(String path, JsonNode provisionalOutput, JsonSchemaFilter schema, JsonSchemaFilter root, List<String> redactionsMade) {
         if (schema.isRef()) {
             if (schema.getRef().equals("#")) {
-                // recursive self-reference; see
-                return filterBySchema(provisionalOutput, root, root);
+                // recursive self-reference
+                return filterBySchema(path, provisionalOutput, root, root, redactionsMade);
             } else if (schema.getRef().startsWith("#/definitions/")) {
                 String definitionName = schema.getRef().substring("#/definitions/".length());
                 JsonSchemaFilter definition = root.getDefinitions().get(definitionName);
                 if (definition == null) {
                     throw new RuntimeException("definition not found: " + definitionName);
                 }
-                return filterBySchema(provisionalOutput, definition, root);
+                return filterBySchema(path, provisionalOutput, definition, root, redactionsMade);
             } else {
                 //cases like URLs relative to schema URI are not supported
                 throw new RuntimeException("unsupported ref: " + schema.getRef());
@@ -132,6 +138,8 @@ public class JsonSchemaFilterUtils {
                     //TODO: validate 'format'??
                     return provisionalOutput.asText();
                 } else {
+                    log.info("Redacted " + path + " because it was not a string");
+                    redactionsMade.add(path);
                     return null;
                 }
             } else if (schema.isInteger()) {
@@ -140,18 +148,22 @@ public class JsonSchemaFilterUtils {
                 } else if (provisionalOutput.canConvertToLong()) {
                     return provisionalOutput.longValue();
                 } else {
+                    log.info("Redacted " + path + " because it was not an integer");
+                    redactionsMade.add(path);
                     return null;
                 }
             } else if (schema.isNumber()) {
                 if (provisionalOutput.isNumber() || provisionalOutput.isNull()) {
                     return provisionalOutput.numberValue();
                 } else {
+                    log.info("Redacted " + path + " because it was not a number");
                     return null;
                 }
             } else if (schema.isBoolean()) {
                 if (provisionalOutput.isBoolean() || provisionalOutput.isNull()) {
                     return provisionalOutput.booleanValue();
                 } else {
+                    log.info("Redacted " + path + " because it was not a boolean");
                     return null;
                 }
             } else if (schema.isObject()) {
@@ -161,8 +173,11 @@ public class JsonSchemaFilterUtils {
                         String key = entry.getKey();
                         JsonNode value = entry.getValue();
                         JsonSchemaFilter propertySchema = schema.getProperties().get(key);
-                        if (propertySchema != null) {
-                            Object filteredValue = filterBySchema(value, propertySchema, root);
+                        if (propertySchema == null) {
+                            log.info("Redacted " + path + "." + key + " because it was not in schema");
+                            redactionsMade.add(path + "." + key);
+                        } else {
+                            Object filteredValue = filterBySchema(path + "." + key, value, propertySchema, root, redactionsMade);
                             filtered.put(key, filteredValue);
                         }
                     });
@@ -175,19 +190,23 @@ public class JsonSchemaFilterUtils {
                     // handler for additionalProperties??
                     return filtered;
                 } else {
+                    log.info("Redacted " + path + " because it was not an object");
+                    redactionsMade.add(path);
                     return null;
                 }
             } else if (schema.isArray()) {
                 if (provisionalOutput.isArray()) {
                     List<Object> filtered = new LinkedList<>();
                     provisionalOutput.elements().forEachRemaining(element -> {
-                        Object filteredElement = filterBySchema(element, schema.getItems(), root);
+                        Object filteredElement = filterBySchema(path + "[]", element, schema.getItems(), root, redactionsMade);
                         if (filteredElement != null) {
                             filtered.add(filteredElement);
                         }
                     });
                     return filtered;
                 } else {
+                    log.info("Redacted " + path + " because it was not an array");
+                    redactionsMade.add(path);
                     return null;
                 }
             } else if (schema.isNull()) {
@@ -195,6 +214,8 @@ public class JsonSchemaFilterUtils {
                 // omit the property --> don't get it
                 // include property with {type: null} --> get it, but it's always null?
                 // or do we want to FAIL if value from source is NON-NULL?
+                log.info("Redacted " + path + " because filter expects `null` here");
+                redactionsMade.add(path);
                 return null;
             } else {
                 throw new IllegalArgumentException("Unknown schema type: " + schema);
@@ -202,6 +223,8 @@ public class JsonSchemaFilterUtils {
         } else {
             if (provisionalOutput.isContainerNode()) {
                 // log? complex value where only simple leaf type permitted by filter
+                log.info("Redacted " + path + " because it was not a simple type");
+                redactionsMade.add(path);
                 return null;
             } else {
                 return asSimpleValue(provisionalOutput);
