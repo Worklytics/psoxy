@@ -231,22 +231,20 @@ public class JsonSchemaFilterUtils {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonIgnoreProperties({
         "title",
-        "required" // not relevant to 'filter' use case
+        "required", // not relevant to 'filter' use case
+        "additionalProperties", // not currently supported
+        "$schema", // not helpful in filter use-case, although maybe should include in future
     })
     public static class JsonSchemaFilter {
 
-        //q: should we drop this? only makes sense at root of schema
-        @JsonProperty("$schema")
-        String schema;
+        //dropped for now
+        //@JsonProperty("$schema")
+        //String schema;
 
         String type;
 
         @JsonProperty("$ref")
         String ref;
-
-        //only applicable if type==object
-        Boolean additionalProperties;
-
 
         //only applicable if type==String
         String format;

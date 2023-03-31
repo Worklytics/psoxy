@@ -129,9 +129,7 @@ class JsonSchemaFilterUtilsTest {
         Instant timestamp;
 
         static final String EXPECTED_SCHEMA = "{\n" +
-            "  \"$schema\" : \"http://json-schema.org/draft/2019-09/schema#\",\n" +
             "  \"type\" : \"object\",\n" +
-            "  \"additionalProperties\" : false,\n" +
             "  \"properties\" : {\n" +
             "    \"someString\" : {\n" +
             "      \"type\" : \"string\"\n" +
@@ -148,9 +146,7 @@ class JsonSchemaFilterUtilsTest {
             "}";
 
         static final String EXPECTED_SCHEMA_YAML = "---\n" +
-            "$schema: \"http://json-schema.org/draft/2019-09/schema#\"\n" +
             "type: \"object\"\n" +
-            "additionalProperties: false\n" +
             "properties:\n" +
             "  someString:\n" +
             "    type: \"string\"\n" +
@@ -216,9 +212,7 @@ class JsonSchemaFilterUtilsTest {
     static class ComplexPojo {
 
         public static final String EXPECTED_SCHEMA = "{\n" +
-            "  \"$schema\" : \"http://json-schema.org/draft/2019-09/schema#\",\n" +
             "  \"type\" : \"object\",\n" +
-            "  \"additionalProperties\" : false,\n" +
             "  \"properties\" : {\n" +
             "    \"simplePojo\" : {\n" +
             "      \"$ref\" : \"#/definitions/SimplePojo\"\n" +
@@ -233,7 +227,6 @@ class JsonSchemaFilterUtilsTest {
             "  \"definitions\" : {\n" +
             "    \"SimplePojo\" : {\n" +
             "      \"type\" : \"object\",\n" +
-            "      \"additionalProperties\" : false,\n" +
             "      \"properties\" : {\n" +
             "        \"someString\" : {\n" +
             "          \"type\" : \"string\"\n" +
@@ -251,9 +244,7 @@ class JsonSchemaFilterUtilsTest {
             "  }\n" +
             "}";
         public static final String EXPECTED_COMPACT_SCHEMA = "{\n" +
-            "  \"$schema\" : \"http://json-schema.org/draft/2019-09/schema#\",\n" +
             "  \"type\" : \"object\",\n" +
-            "  \"additionalProperties\" : false,\n" +
             "  \"properties\" : {\n" +
             "    \"simplePojo\" : {\n" +
             "      \"$ref\" : \"#/definitions/SimplePojo\"\n" +
@@ -268,17 +259,12 @@ class JsonSchemaFilterUtilsTest {
             "  \"definitions\" : {\n" +
             "    \"SimplePojo\" : {\n" +
             "      \"type\" : \"object\",\n" +
-            "      \"additionalProperties\" : false,\n" +
             "      \"properties\" : {\n" +
-            "        \"someString\" : {\n" +
-            "          \"type\" : \"string\"\n" +
-            "        },\n" +
+            "        \"someString\" : { },\n" +
             "        \"date\" : {\n" +
-            "          \"type\" : \"string\",\n" +
             "          \"format\" : \"date\"\n" +
             "        },\n" +
             "        \"timestamp\" : {\n" +
-            "          \"type\" : \"string\",\n" +
             "          \"format\" : \"date-time\"\n" +
             "        }\n" +
             "      }\n" +
