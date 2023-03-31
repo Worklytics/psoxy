@@ -55,12 +55,21 @@ public class JsonSchemaFilterUtils {
      */
     void compact(JsonSchemaFilter filter) {
         if (filter.isArray()) {
-            compact(filter.getItems());
+            if (filter.getItems() != null) {
+                compact(filter.getItems());
+                filter.setType(null); // existence of items implies type=array
+            }
         } else if (filter.isObject()) {
-            filter.getProperties().forEach((k, v) -> compact(v));
+            if (filter.getProperties() != null) {
+                filter.getProperties().forEach((k, v) -> compact(v));
+                filter.setType(null); // existence of properties implies type=object
+            }
         } else if (filter.hasType()) { // as non-complex type
             filter.setType(null);
         }
+
+        // TODO: we could omit type=array / type=object if there are properties/items defined, as
+        // existence of those properties implies the type
 
         // also compact any definitions
         if (filter.getDefinitions() != null) {
@@ -312,12 +321,12 @@ public class JsonSchemaFilterUtils {
 
         @JsonIgnore
         public boolean isObject() {
-            return Objects.equals(type, "object");
+            return Objects.equals(type, "object") || (type == null && properties != null);
         }
 
         @JsonIgnore
         public boolean isArray() {
-            return Objects.equals(type, "array");
+            return Objects.equals(type, "array") || (type == null && items != null);
         }
 
         @JsonIgnore

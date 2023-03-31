@@ -205,6 +205,15 @@ class JsonSchemaFilterUtilsTest {
 
         assertEquals(ComplexPojo.EXPECTED_COMPACT_SCHEMA,
             objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(compactCopy));
+
+        // just to illustrate - compaction gave us ~25% reduction in size (pretty-printed)
+        assertEquals(604, ComplexPojo.EXPECTED_SCHEMA.length());
+        assertEquals(440, ComplexPojo.EXPECTED_COMPACT_SCHEMA.length());
+
+        // and 30% reduction in yaml size
+        assertEquals(404, yamlMapper.writeValueAsString(schemaWithRefs).length());
+        assertEquals(286, yamlMapper.writeValueAsString(compactCopy).length());
+
     }
 
     @Builder
@@ -244,13 +253,11 @@ class JsonSchemaFilterUtilsTest {
             "  }\n" +
             "}";
         public static final String EXPECTED_COMPACT_SCHEMA = "{\n" +
-            "  \"type\" : \"object\",\n" +
             "  \"properties\" : {\n" +
             "    \"simplePojo\" : {\n" +
             "      \"$ref\" : \"#/definitions/SimplePojo\"\n" +
             "    },\n" +
             "    \"additionalSimplePojos\" : {\n" +
-            "      \"type\" : \"array\",\n" +
             "      \"items\" : {\n" +
             "        \"$ref\" : \"#/definitions/SimplePojo\"\n" +
             "      }\n" +
@@ -258,7 +265,6 @@ class JsonSchemaFilterUtilsTest {
             "  },\n" +
             "  \"definitions\" : {\n" +
             "    \"SimplePojo\" : {\n" +
-            "      \"type\" : \"object\",\n" +
             "      \"properties\" : {\n" +
             "        \"someString\" : { },\n" +
             "        \"date\" : {\n" +
