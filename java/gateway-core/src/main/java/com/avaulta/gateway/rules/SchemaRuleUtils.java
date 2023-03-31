@@ -26,9 +26,9 @@ public class SchemaRuleUtils {
      * @param clazz
      * @return
      */
-    public JsonSchema generateJsonSchema(Class<?> clazz) {
+    public JsonSchemaFilter generateJsonSchema(Class<?> clazz) {
         JsonNode schema = jsonSchemaGenerator.generateJsonSchema(clazz);
-        return objectMapper.convertValue(schema, JsonSchema.class);
+        return objectMapper.convertValue(schema, JsonSchemaFilter.class);
     }
 
     /**
@@ -49,26 +49,29 @@ public class SchemaRuleUtils {
      * @param schema to filter object's properties by
      * @return object, if matches schema; or sub
      */
-    public Object filterObjectBySchema(Object object, JsonSchema schema) {
+    public Object filterObjectBySchema(Object object, JsonSchemaFilter schema) {
         JsonNode provisionalOutput = objectMapper.valueToTree(object);
         return filterBySchema(provisionalOutput, schema, schema);
     }
 
     @SneakyThrows
-    public String filterJsonBySchema(String jsonString, JsonSchema schema) {
+    public String filterJsonBySchema(String jsonString, JsonSchemaFilter schema, JsonSchemaFilter root) {
         JsonNode provisionalOutput = objectMapper.readTree(jsonString);
-        return objectMapper.writeValueAsString(filterBySchema(provisionalOutput, schema, schema));
+        return objectMapper.writeValueAsString(filterBySchema(provisionalOutput, schema, root));
     }
 
 
-    Object filterBySchema(JsonNode provisionalOutput, JsonSchema schema, JsonSchema root) {
+    Object filterBySchema(JsonNode provisionalOutput, JsonSchemaFilter schema, JsonSchemaFilter root) {
         if (schema.isRef()) {
             if (schema.getRef().equals("#")) {
                 // recursive self-reference; see
                 return filterBySchema(provisionalOutput, root, root);
             } else if (schema.getRef().startsWith("#/definitions/")) {
                 String definitionName = schema.getRef().substring("#/definitions/".length());
-                JsonSchema definition = root.getDefinitions().get(definitionName);
+                JsonSchemaFilter definition = root.getDefinitions().get(definitionName);
+                if (definition == null) {
+                    throw new RuntimeException("definition not found: " + definitionName);
+                }
                 return filterBySchema(provisionalOutput, definition, root);
             } else {
                 //cases like URLs relative to schema URI are not supported
@@ -111,7 +114,7 @@ public class SchemaRuleUtils {
                     provisionalOutput.fields().forEachRemaining(entry -> {
                         String key = entry.getKey();
                         JsonNode value = entry.getValue();
-                        JsonSchema propertySchema = schema.getProperties().get(key);
+                        JsonSchemaFilter propertySchema = schema.getProperties().get(key);
                         if (propertySchema != null) {
                             Object filteredValue = filterBySchema(value, propertySchema, root);
                             filtered.put(key, filteredValue);
@@ -161,8 +164,11 @@ public class SchemaRuleUtils {
     @Data
     @JsonPropertyOrder({"$schema"})
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    @JsonIgnoreProperties({"title"})
-    public static class JsonSchema {
+    @JsonIgnoreProperties({
+        "title",
+        "required" // not relevant to 'filter' use case
+    })
+    public static class JsonSchemaFilter {
 
         //q: should we drop this? only makes sense at root of schema
         @JsonProperty("$schema")
@@ -180,16 +186,18 @@ public class SchemaRuleUtils {
         //only applicable if type==String
         String format;
 
-        Map<String, JsonSchema> properties;
+        Map<String, JsonSchemaFilter> properties;
 
         //only applicable if type==array
-        JsonSchema items;
+        JsonSchemaFilter items;
 
         // @JsonProperties("$defs") on property, lombok getter/setter don't seem to do the right thing
         // get java.lang.IllegalArgumentException: Unrecognized field "definitions" (class com.avaulta.gateway.rules.SchemaRuleUtils$JsonSchema)
         //        //  when calling objectMapper.convertValue(((JsonNode) schema), JsonSchema.class);??
         // perhaps it's a problem with the library we use to build the JsonNode schema??
-        Map<String, JsonSchema> definitions;
+
+        //TODO: this is not used except from the 'root' schema; is that correct??
+        Map<String, JsonSchemaFilter> definitions;
 
         // part of JSON schema standard, but how to support for filters?
         //  what if something validates against multiple of these, but filtering by the valid ones
