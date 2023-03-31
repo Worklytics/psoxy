@@ -5,12 +5,12 @@ import co.worklytics.psoxy.gateway.ConfigService;
 import com.avaulta.gateway.rules.Endpoint;
 import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
 import co.worklytics.psoxy.rules.Rules2;
+import com.avaulta.gateway.rules.JsonSchemaFilterUtils;
 import com.avaulta.gateway.rules.transforms.Transform;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestUtils;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
-import com.avaulta.gateway.rules.SchemaRuleUtils;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
@@ -49,7 +49,7 @@ class RESTApiSanitizerImplTest {
     protected UrlSafeTokenPseudonymEncoder pseudonymEncoder;
 
     @Inject
-    protected SchemaRuleUtils schemaRuleUtils;
+    protected JsonSchemaFilterUtils jsonSchemaFilterUtils;
 
     @Inject
     protected PseudonymizerImplFactory pseudonymizerImplFactory;
@@ -328,47 +328,47 @@ class RESTApiSanitizerImplTest {
 
         assertTrue(sanitized.contains("historyId"));
 
-        SchemaRuleUtils.JsonSchemaFilter jsonSchemaFilter = SchemaRuleUtils.JsonSchemaFilter.builder()
+        JsonSchemaFilterUtils.JsonSchemaFilter jsonSchemaFilter = JsonSchemaFilterUtils.JsonSchemaFilter.builder()
             .type("object")
-            .properties(Map.<String, SchemaRuleUtils.JsonSchemaFilter>of(
-                "id", SchemaRuleUtils.JsonSchemaFilter.builder()
+            .properties(Map.<String, JsonSchemaFilterUtils.JsonSchemaFilter>of(
+                "id", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                     .type("string")
                     .build(),
-                "threadId", SchemaRuleUtils.JsonSchemaFilter.builder()
+                "threadId", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                     .type("string")
                     .build(),
-                "labelIds", SchemaRuleUtils.JsonSchemaFilter.builder()
+                "labelIds", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                     .type("array")
-                    .items(SchemaRuleUtils.JsonSchemaFilter.builder()
+                    .items(JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                         .type("string")
                         .build())
                     .build(),
-                "payload", SchemaRuleUtils.JsonSchemaFilter.builder()
+                "payload", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                     .type("object")
-                    .properties(Map.<String, SchemaRuleUtils.JsonSchemaFilter>of(
-                        "headers", SchemaRuleUtils.JsonSchemaFilter.builder()
+                    .properties(Map.<String, JsonSchemaFilterUtils.JsonSchemaFilter>of(
+                        "headers", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                             .type("array")
-                            .items(SchemaRuleUtils.JsonSchemaFilter.builder()
+                            .items(JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                                 .type("object")
-                                .properties(Map.<String, SchemaRuleUtils.JsonSchemaFilter>of(
-                                    "name", SchemaRuleUtils.JsonSchemaFilter.builder()
+                                .properties(Map.<String, JsonSchemaFilterUtils.JsonSchemaFilter>of(
+                                    "name", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                                         .type("string")
                                         .build(),
-                                    "value", SchemaRuleUtils.JsonSchemaFilter.builder()
+                                    "value", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                                         .type("string")
                                         .build()
                                 ))
                                 .build())
                             .build(),
-                        "partId", SchemaRuleUtils.JsonSchemaFilter.builder()
+                        "partId", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                             .type("string")
                             .build()
                     ))
                     .build(),
-                "sizeEstimate", SchemaRuleUtils.JsonSchemaFilter.builder()
+                "sizeEstimate", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                     .type("integer")
                     .build(),
-                "internalDate", SchemaRuleUtils.JsonSchemaFilter.builder()
+                "internalDate", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                     .type("string")
                     .build()
                 ))

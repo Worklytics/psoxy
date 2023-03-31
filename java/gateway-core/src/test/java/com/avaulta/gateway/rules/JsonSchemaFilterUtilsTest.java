@@ -21,15 +21,15 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class SchemaRuleUtilsTest {
+class JsonSchemaFilterUtilsTest {
 
-    SchemaRuleUtils schemaRuleUtils;
+    JsonSchemaFilterUtils jsonSchemaFilterUtils;
     ObjectMapper objectMapper;
     ObjectMapper yamlMapper;
 
     @BeforeEach
     void setup() {
-        schemaRuleUtils = new SchemaRuleUtils();
+        jsonSchemaFilterUtils = new JsonSchemaFilterUtils();
 
         objectMapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
@@ -39,8 +39,8 @@ class SchemaRuleUtilsTest {
             .registerModule(new JavaTimeModule())
             .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
 
-        schemaRuleUtils.objectMapper = objectMapper;
-        schemaRuleUtils.jsonSchemaGenerator = new JsonSchemaGenerator(schemaRuleUtils.objectMapper,
+        jsonSchemaFilterUtils.objectMapper = objectMapper;
+        jsonSchemaFilterUtils.jsonSchemaGenerator = new JsonSchemaGenerator(jsonSchemaFilterUtils.objectMapper,
             JsonSchemaConfig
                 //.nullableJsonSchemaDraft4() // uses oneOf [ { type: null }, ... ] everywhere, which is verbose
                 .vanillaJsonSchemaDraft4()
@@ -52,7 +52,7 @@ class SchemaRuleUtilsTest {
     @SneakyThrows
     @Test
     void generateJsonSchema() {
-        SchemaRuleUtils.JsonSchemaFilter jsonSchemaFilter = schemaRuleUtils.generateJsonSchema(SimplePojo.class);
+        JsonSchemaFilterUtils.JsonSchemaFilter jsonSchemaFilter = jsonSchemaFilterUtils.generateJsonSchemaFilter(SimplePojo.class);
 
         String jsonSchemaAsString = objectMapper
             .writerWithDefaultPrettyPrinter()
@@ -79,8 +79,8 @@ class SchemaRuleUtilsTest {
             .someListItem("list-item-1")
             .build();
 
-        Object filteredToSimplePlus = schemaRuleUtils.filterObjectBySchema(simplePlus,
-            schemaRuleUtils.generateJsonSchema(SimplePojoPlus.class));
+        Object filteredToSimplePlus = jsonSchemaFilterUtils.filterObjectBySchema(simplePlus,
+            jsonSchemaFilterUtils.generateJsonSchemaFilter(SimplePojoPlus.class));
 
 
         assertEquals("{\n" +
@@ -92,8 +92,8 @@ class SchemaRuleUtilsTest {
             objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(filteredToSimplePlus));
 
 
-        Object filteredToSimple = schemaRuleUtils.filterObjectBySchema(simplePlus,
-            schemaRuleUtils.generateJsonSchema(SimplePojo.class));
+        Object filteredToSimple = jsonSchemaFilterUtils.filterObjectBySchema(simplePlus,
+            jsonSchemaFilterUtils.generateJsonSchemaFilter(SimplePojo.class));
 
         assertEquals("{\n" +
                 "  \"date\" : \"2023-01-16\",\n" +
@@ -167,8 +167,8 @@ class SchemaRuleUtilsTest {
     @Test
     void filterBySchema_refs() {
 
-        SchemaRuleUtils.JsonSchemaFilter schemaWithRefs =
-            schemaRuleUtils.generateJsonSchema(ComplexPojo.class);
+        JsonSchemaFilterUtils.JsonSchemaFilter schemaWithRefs =
+            jsonSchemaFilterUtils.generateJsonSchemaFilter(ComplexPojo.class);
 
         SimplePojoPlus simplePlus = SimplePojoPlus.builder()
             .someString("some-string")
@@ -193,7 +193,7 @@ class SchemaRuleUtilsTest {
                 "    \"timestamp\" : \"2023-01-16T05:12:34Z\"\n" +
                 "  }\n" +
                 "}",
-            objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(schemaRuleUtils.filterObjectBySchema(ComplexPojoPlus.builder()
+            objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonSchemaFilterUtils.filterObjectBySchema(ComplexPojoPlus.builder()
                 .simplePojo(simplePlus)
                 .additionalSimplePojo(simplePlus)
                 .build(), schemaWithRefs)));

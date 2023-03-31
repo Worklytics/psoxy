@@ -10,7 +10,7 @@ import java.util.*;
 
 @NoArgsConstructor(access = AccessLevel.PACKAGE) //for tests
 @AllArgsConstructor
-public class SchemaRuleUtils {
+public class JsonSchemaFilterUtils {
 
     ObjectMapper objectMapper;
     JsonSchemaGenerator jsonSchemaGenerator;
@@ -26,7 +26,7 @@ public class SchemaRuleUtils {
      * @param clazz
      * @return
      */
-    public JsonSchemaFilter generateJsonSchema(Class<?> clazz) {
+    public JsonSchemaFilter generateJsonSchemaFilter(Class<?> clazz) {
         JsonNode schema = jsonSchemaGenerator.generateJsonSchema(clazz);
         return objectMapper.convertValue(schema, JsonSchemaFilter.class);
     }
