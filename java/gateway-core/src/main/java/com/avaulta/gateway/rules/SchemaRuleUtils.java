@@ -88,17 +88,17 @@ public class SchemaRuleUtils {
                 } else {
                     return null;
                 }
-            } else if (schema.isNumber()) {
-                if (provisionalOutput.isNumber() || provisionalOutput.isNull()) {
-                    return provisionalOutput.numberValue();
-                } else {
-                    return null;
-                }
             } else if (schema.isInteger()) {
                 if (provisionalOutput.canConvertToInt() || provisionalOutput.isNull()) {
                     return provisionalOutput.intValue();
                 } else if (provisionalOutput.canConvertToLong()) {
                     return provisionalOutput.longValue();
+                } else {
+                    return null;
+                }
+            } else if (schema.isNumber()) {
+                if (provisionalOutput.isNumber() || provisionalOutput.isNull()) {
+                    return provisionalOutput.numberValue();
                 } else {
                     return null;
                 }
@@ -121,12 +121,12 @@ public class SchemaRuleUtils {
                         }
                     });
 
-                    //TODO: add support for `additionalProperties == true`? not expected use-case for
-                    // proxy ...
+                    //TODO: add support for `additionalProperties == true`? can't think of a real
+                    // life-use case, but in effect it would allow some kind of "sub filtering",
+                    // where you can specify a filter just for some known properties, while still
+                    // allowing other unexpected properties to be passed through in their entirety
 
                     // handler for additionalProperties??
-
-
                     return filtered;
                 } else {
                     return null;
@@ -154,7 +154,35 @@ public class SchemaRuleUtils {
                 throw new IllegalArgumentException("Unknown schema type: " + schema);
             }
         } else {
-            throw new IllegalArgumentException("Only schema with 'type' or '$ref' are supported: " + schema);
+            if (provisionalOutput.isContainerNode()) {
+                // log? complex value where only simple leaf type permitted by filter
+                return null;
+            } else {
+                return asSimpleValue(provisionalOutput);
+            }
+        }
+    }
+
+    /**
+     * convert JsonNode to simple value (not Object or Array), if possible
+     * @param node to convert
+     * @return Java equivalent of node's value, if its a simple type (not Object or Array)
+     */
+    Object asSimpleValue(JsonNode node) {
+        if (node.isTextual()) {
+            return node.asText();
+        } else if (node.isInt()) {
+            return node.intValue();
+        } else if (node.isLong()) {
+            return node.longValue();
+        } else if (node.isDouble()) {
+            return node.doubleValue();
+        } else if (node.isBoolean()) {
+            return node.booleanValue();
+        } else if (node.isNull()) {
+            return null;
+        } else {
+            throw new IllegalArgumentException("Not a simple type: " + node);
         }
     }
 
