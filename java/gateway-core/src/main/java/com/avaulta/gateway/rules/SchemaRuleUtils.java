@@ -161,7 +161,10 @@ public class SchemaRuleUtils {
     @Data
     @JsonPropertyOrder({"$schema"})
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    @JsonIgnoreProperties({"title"})
+    @JsonIgnoreProperties({
+        "title",
+        "required" // not relevant to 'filter' use case
+    })
     public static class JsonSchema {
 
         //q: should we drop this? only makes sense at root of schema
