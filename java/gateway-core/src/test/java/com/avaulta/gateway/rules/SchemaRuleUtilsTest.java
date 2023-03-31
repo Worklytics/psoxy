@@ -52,11 +52,11 @@ class SchemaRuleUtilsTest {
     @SneakyThrows
     @Test
     void generateJsonSchema() {
-        SchemaRuleUtils.JsonSchema jsonSchema = schemaRuleUtils.generateJsonSchema(SimplePojo.class);
+        SchemaRuleUtils.JsonSchemaFilter jsonSchemaFilter = schemaRuleUtils.generateJsonSchema(SimplePojo.class);
 
         String jsonSchemaAsString = objectMapper
             .writerWithDefaultPrettyPrinter()
-            .writeValueAsString(jsonSchema);
+            .writeValueAsString(jsonSchemaFilter);
 
         //we want these serialized as ISO strings, so shouldn't have definitions
         assertFalse(jsonSchemaAsString.contains("#/definitions/Instant"));
@@ -65,7 +65,7 @@ class SchemaRuleUtilsTest {
         assertEquals(SimplePojo.EXPECTED_SCHEMA, jsonSchemaAsString);
 
         assertEquals(SimplePojo.EXPECTED_SCHEMA_YAML,
-            yamlMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonSchema));
+            yamlMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonSchemaFilter));
     }
 
     @SneakyThrows
@@ -167,7 +167,7 @@ class SchemaRuleUtilsTest {
     @Test
     void filterBySchema_refs() {
 
-        SchemaRuleUtils.JsonSchema schemaWithRefs =
+        SchemaRuleUtils.JsonSchemaFilter schemaWithRefs =
             schemaRuleUtils.generateJsonSchema(ComplexPojo.class);
 
         SimplePojoPlus simplePlus = SimplePojoPlus.builder()

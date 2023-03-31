@@ -58,6 +58,8 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     List<Pair<Pattern, Endpoint>> compiledEndpointRules;
     Map<Transform, List<JsonPath>> compiledTransforms = new ConcurrentHashMap<>();
 
+    SchemaRuleUtils.JsonSchemaFilter rootDefinitions;
+
 
     @AssistedInject
     public RESTApiSanitizerImpl(@Assisted RESTRules rules,
@@ -75,6 +77,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     UrlSafeTokenPseudonymEncoder urlSafePseudonymEncoder;
 
 
+
     @Inject
     SchemaRuleUtils schemaRuleUtils;
 
@@ -87,6 +90,15 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
             }
         }
         return compiledAllowedEndpoints;
+    }
+
+    SchemaRuleUtils.JsonSchemaFilter getRootDefinitions() {
+        if (rootDefinitions == null) {
+            synchronized ($writeLock) {
+                rootDefinitions = SchemaRuleUtils.JsonSchemaFilter.builder().definitions(rules.getDefinitions()).build();
+            }
+        }
+        return rootDefinitions;
     }
 
 
@@ -151,7 +163,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
                 .map(schema -> {
                     //q: this read
                     try {
-                        return schemaRuleUtils.filterJsonBySchema(jsonResponse, schema);
+                        return schemaRuleUtils.filterJsonBySchema(jsonResponse, schema, getRootDefinitions());
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
