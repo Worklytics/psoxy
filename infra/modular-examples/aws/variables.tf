@@ -131,11 +131,11 @@ variable "custom_bulk_connectors" {
     source_kind = string
     rules = object({
       pseudonymFormat       = optional(string)
-      columnsToRedact       = optional(list(string), [])
-      columnsToInclude      = optional(list(string), [])
-      columnsToPseudonymize = optional(list(string), [])
-      columnsToDuplicate    = optional(map(string), {})
-      columnsToRename       = optional(map(string), {})
+      columnsToRedact       = optional(list(string))
+      columnsToInclude      = optional(list(string))
+      columnsToPseudonymize = optional(list(string))
+      columnsToDuplicate    = optional(map(string))
+      columnsToRename       = optional(map(string))
     })
     settings_to_provide = optional(map(string), {})
   }))
@@ -160,12 +160,12 @@ variable "lookup_table_builders" {
     input_connector_id            = string
     sanitized_accessor_role_names = list(string)
     rules = object({
-      pseudonymFormat       = string
-      columnsToRedact       = list(string)
-      columnsToInclude      = list(string)
-      columnsToPseudonymize = list(string)
-      columnsToDuplicate    = map(string)
-      columnsToRename       = map(string)
+      pseudonymFormat       = optional(string)
+      columnsToRedact       = optional(list(string))
+      columnsToInclude      = optional(list(string))
+      columnsToPseudonymize = optional(list(string))
+      columnsToDuplicate    = optional(map(string))
+      columnsToRename       = optional(map(string))
     })
   }))
   default = {

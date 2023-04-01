@@ -172,12 +172,12 @@ variable "lookup_table_builders" {
     input_connector_id            = string
     sanitized_accessor_role_names = list(string)
     rules = object({
-      pseudonymFormat       = string
-      columnsToRedact       = list(string)
-      columnsToInclude      = list(string)
-      columnsToPseudonymize = list(string)
-      columnsToDuplicate    = map(string)
-      columnsToRename       = map(string)
+      pseudonymFormat       = optional(string)
+      columnsToRedact       = optional(list(string))
+      columnsToInclude      = optional(list(string))
+      columnsToPseudonymize = optional(list(string))
+      columnsToDuplicate    = optional(map(string))
+      columnsToRename       = optional(map(string))
     })
   }))
   default = {
@@ -187,7 +187,7 @@ variable "lookup_table_builders" {
     #        # ADD LIST OF NAMES OF YOUR AWS ROLES WHICH CAN READ LOOKUP TABLE
     #      ],
     #      rules       = {
-    #        pseudonym_format = "URL_SAFE_TOKEN"
+    #        pseudonymFormat = "URL_SAFE_TOKEN"
     #        columnsToRedact       = [
     #          "employee_email",
     #          "manager_id",

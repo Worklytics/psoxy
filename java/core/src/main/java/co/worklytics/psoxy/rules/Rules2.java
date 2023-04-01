@@ -2,6 +2,7 @@ package co.worklytics.psoxy.rules;
 
 
 import com.avaulta.gateway.rules.Endpoint;
+import com.avaulta.gateway.rules.SchemaRuleUtils;
 import com.avaulta.gateway.rules.transforms.Transform;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -42,6 +43,10 @@ public class Rules2 implements RESTRules {
     @Deprecated //will be dropped in v0.5
     @Builder.Default
     Boolean allowAllEndpoints = false;
+
+
+
+    Map<String, SchemaRuleUtils.JsonSchemaFilter> definitions;
 
 
     /**
