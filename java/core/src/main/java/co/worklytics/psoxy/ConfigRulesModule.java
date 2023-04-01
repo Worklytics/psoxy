@@ -57,7 +57,10 @@ public class ConfigRulesModule {
             config.getConfigPropertyAsOptional(ProxyConfigProperty.PSEUDONYMIZE_APP_IDS)
                 .map(Boolean::parseBoolean).orElse(false);
 
-        String source = config.getConfigPropertyOrError(ProxyConfigProperty.SOURCE);
+        String source = config.getConfigPropertyAsOptional(ProxyConfigProperty.SOURCE)
+            .orElseThrow( () -> new RuntimeException(
+                String.format("No source specified, so can't determine default rules. Configure '%s' or '%s' to avoid this error.",
+                    ProxyConfigProperty.SOURCE.name(), ProxyConfigProperty.RULES.name())));
 
         String rulesIdSuffix = pseudonymizeAppIds ? NO_APP_IDS_SUFFIX : "";
 
