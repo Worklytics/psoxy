@@ -22,6 +22,12 @@ fi
 printf "Initializing ${BLUE}psoxy${NC} Terraform configuration ...\n"
 terraform init
 
+TF_INIT_EXIT_CODE=$?
+if [ $TF_INIT_EXIT_CODE -ne 0 ]; then
+  printf "${RED}Terraform init failed. See above for details. Cannot continue to initialize example configuration.${NC}\n"
+  exit 1
+fi
+
 if [ -d ${TF_CONFIG_ROOT}/.terraform/modules/psoxy/ ]; then
   # use checkout of repo done by Terraform
   PSOXY_BASE_DIR=${TF_CONFIG_ROOT}/.terraform/modules/psoxy/
