@@ -248,12 +248,29 @@ abstract public class RulesBaseTestCase {
 
         shouldBePseudonymized
             .forEach(s -> {
+                //JSON
                 String doubleJsonEncodedPseudonym =
                     sanitizer.getJsonConfiguration().jsonProvider().toJson(sanitizer.pseudonymizeToJson(s, sanitizer.getJsonConfiguration()));
 
+                //URLSafe
+                String urlSafe =
+                    (String) sanitizer.getPseudonymize(Transform.Pseudonymize.builder().encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN).build()).map(s, sanitizer.getJsonConfiguration());
+                //URLSafe with reversible
+                String urlSafeWithReversible =
+                    (String) sanitizer.getPseudonymize(Transform.Pseudonymize.builder().encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN).includeReversible(true).build()).map(s, sanitizer.getJsonConfiguration());
+
+
+                // sanity check these, so not testing with empty strings or 'null' or something
+                if (urlSafeWithReversible.length() < 40) {
+                    throw new Error("URLSafe with reversible is too short: " + urlSafeWithReversible);
+                }
+                if (urlSafe.length() < 40) {
+                    throw new Error("URLSafe is too short: " + urlSafe);
+                }
+
                 // remove wrapping
                 doubleJsonEncodedPseudonym = StringUtils.unwrap(doubleJsonEncodedPseudonym, "\"");
-                assertTrue(content.contains(doubleJsonEncodedPseudonym),
+                assertTrue(content.contains(doubleJsonEncodedPseudonym) || content.contains(urlSafe) || content.contains(urlSafeWithReversible),
                     String.format("Sanitized does not contain %s, pseudonymized equivalent of %s", doubleJsonEncodedPseudonym, s));
             });
     }
