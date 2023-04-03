@@ -250,17 +250,14 @@ terraform apply
 
 ## Component Status
 
-| Component                | Status                                                                                                                  |
-|--------------------------|-------------------------------------------------------------------------------------------------------------------------|
-| Java                     | ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Worklytics/psoxy/ci-java.yaml)          |
-| Terraform Examples       | ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Worklytics/psoxy/ci-terraform.yaml)     |
- | Terraform Examples - Dev | ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Worklytics/psoxy/ci-terraform-dev.yaml) |
-| Tools                    | ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Worklytics/psoxy/ci-tools.yaml)         |
+| Component                | Status                                                                                                                       |
+|--------------------------|------------------------------------------------------------------------------------------------------------------------------|
+| Java                     | ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Worklytics/psoxy/ci-java.yaml)               |
+| Terraform Examples       | ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Worklytics/psoxy/ci-terraform.yaml)          |
+| Tools                    | ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Worklytics/psoxy/ci-tools.yaml)              |
 
 
-### Current: [v0.4.15](https://github.com/Worklytics/psoxy/releases/tag/v0.4.15)
-
-Review [earlier release notes in GitHub](https://github.com/Worklytics/psoxy/releases).
+Review [release notes in GitHub](https://github.com/Worklytics/psoxy/releases).
 
 ## Support
 
