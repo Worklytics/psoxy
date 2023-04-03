@@ -151,7 +151,7 @@ variable "custom_bulk_connectors" {
   type = map(object({
     source_kind = string
     rules = object({
-      pseudonymFormat       = optional(string)
+      pseudonymFormat       = optional(string, "URL_SAFE_TOKEN")
       columnsToRedact       = optional(list(string))
       columnsToInclude      = optional(list(string))
       columnsToPseudonymize = optional(list(string))
@@ -181,7 +181,7 @@ variable "lookup_table_builders" {
     input_connector_id            = string
     sanitized_accessor_role_names = list(string)
     rules = object({
-      pseudonymFormat       = optional(string)
+      pseudonymFormat       = optional(string, "URL_SAFE_TOKEN")
       columnsToRedact       = optional(list(string))
       columnsToInclude      = optional(list(string))
       columnsToPseudonymize = optional(list(string))
