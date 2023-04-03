@@ -128,12 +128,12 @@ command line tools.
 
 You will need all of the following:
 
-| Tool                                         | Version        | Test Command        |
-|----------------------------------------------|----------------|---------------------|
-| [git](https://git-scm.com/)                  | 2.17+          | `git --version`     |
-| [Maven](https://maven.apache.org/)           | 3.6+           | `mvn -v`            |
-| [Java 11+ JDK](https://openjdk.org/install/) | 11+, but < 19  | `mvn -v \| grep Java` |
-| [Terraform](https://www.terraform.io/)       | 1.3.x+         | `terraform version` |
+| Tool                                         | Version        | Test Command              |
+|----------------------------------------------|----------------|---------------------------|
+| [git](https://git-scm.com/)                  | 2.17+          | `git --version`           |
+| [Maven](https://maven.apache.org/)           | 3.6+           | `mvn -v`                  |
+| [Java 11+ JDK](https://openjdk.org/install/) | 11+, but < 19  | `mvn -v &#124; grep Java` |
+| [Terraform](https://www.terraform.io/)       | 1.3.x, but < 1.4.x | `terraform version`       |
 
 
 NOTE: Java 19 is currently broken, see [docs/troubleshooting.md](docs/troubleshooting.md); we suggest
@@ -145,6 +145,7 @@ tool, but we don't offer documentation or support in doing so.  Adapting one of 
 [terraform examples](infra/examples) or writing your own config that re-uses our
 [modules](infra/modules) will simplify things greatly.
 
+NOTE: Refrain to use versions 1.4.x as contain a bug that breaks the infrastructure deployment and not yet officially supported. Bug will be solved apparently in v1.4.3+.
 
 Depending on your Cloud Host / Data Sources, you will need:
 

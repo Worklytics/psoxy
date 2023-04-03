@@ -3,11 +3,11 @@ package co.worklytics.psoxy.impl;
 import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.rules.RESTRules;
 import com.avaulta.gateway.rules.Endpoint;
+import com.avaulta.gateway.rules.JsonSchemaFilterUtils;
 import com.avaulta.gateway.rules.transforms.Transform;
 import co.worklytics.psoxy.utils.URLUtils;
 import com.avaulta.gateway.pseudonyms.*;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
-import com.avaulta.gateway.rules.SchemaRuleUtils;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
@@ -58,6 +58,8 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     List<Pair<Pattern, Endpoint>> compiledEndpointRules;
     Map<Transform, List<JsonPath>> compiledTransforms = new ConcurrentHashMap<>();
 
+    JsonSchemaFilterUtils.JsonSchemaFilter rootDefinitions;
+
 
     @AssistedInject
     public RESTApiSanitizerImpl(@Assisted RESTRules rules,
@@ -75,8 +77,9 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     UrlSafeTokenPseudonymEncoder urlSafePseudonymEncoder;
 
 
+
     @Inject
-    SchemaRuleUtils schemaRuleUtils;
+    JsonSchemaFilterUtils jsonSchemaFilterUtils;
 
     Map<Endpoint, Pattern> getCompiledAllowedEndpoints() {
         if (compiledAllowedEndpoints == null) {
@@ -87,6 +90,17 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
             }
         }
         return compiledAllowedEndpoints;
+    }
+
+    JsonSchemaFilterUtils.JsonSchemaFilter getRootDefinitions() {
+        if (rootDefinitions == null) {
+            synchronized ($writeLock) {
+  if (rootDefinitions == null) {
+          rootDefinitions = JsonSchemaFilterUtils.JsonSchemaFilter.builder().definitions(rules.getDefinitions()).build();
+  }
+            }
+        }
+        return rootDefinitions;
     }
 
 
@@ -151,7 +165,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
                 .map(schema -> {
                     //q: this read
                     try {
-                        return schemaRuleUtils.filterJsonBySchema(jsonResponse, schema);
+                        return jsonSchemaFilterUtils.filterJsonBySchema(jsonResponse, schema, getRootDefinitions());
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }

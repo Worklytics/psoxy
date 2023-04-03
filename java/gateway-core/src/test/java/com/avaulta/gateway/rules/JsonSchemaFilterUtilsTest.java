@@ -12,6 +12,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.Singular;
 import lombok.SneakyThrows;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -21,15 +22,15 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class SchemaRuleUtilsTest {
+class JsonSchemaFilterUtilsTest {
 
-    SchemaRuleUtils schemaRuleUtils;
+    JsonSchemaFilterUtils jsonSchemaFilterUtils;
     ObjectMapper objectMapper;
     ObjectMapper yamlMapper;
 
     @BeforeEach
     void setup() {
-        schemaRuleUtils = new SchemaRuleUtils();
+        jsonSchemaFilterUtils = new JsonSchemaFilterUtils();
 
         objectMapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
@@ -39,8 +40,8 @@ class SchemaRuleUtilsTest {
             .registerModule(new JavaTimeModule())
             .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
 
-        schemaRuleUtils.objectMapper = objectMapper;
-        schemaRuleUtils.jsonSchemaGenerator = new JsonSchemaGenerator(schemaRuleUtils.objectMapper,
+        jsonSchemaFilterUtils.objectMapper = objectMapper;
+        jsonSchemaFilterUtils.jsonSchemaGenerator = new JsonSchemaGenerator(jsonSchemaFilterUtils.objectMapper,
             JsonSchemaConfig
                 //.nullableJsonSchemaDraft4() // uses oneOf [ { type: null }, ... ] everywhere, which is verbose
                 .vanillaJsonSchemaDraft4()
@@ -52,11 +53,11 @@ class SchemaRuleUtilsTest {
     @SneakyThrows
     @Test
     void generateJsonSchema() {
-        SchemaRuleUtils.JsonSchema jsonSchema = schemaRuleUtils.generateJsonSchema(SimplePojo.class);
+        JsonSchemaFilterUtils.JsonSchemaFilter jsonSchemaFilter = jsonSchemaFilterUtils.generateJsonSchemaFilter(SimplePojo.class);
 
         String jsonSchemaAsString = objectMapper
             .writerWithDefaultPrettyPrinter()
-            .writeValueAsString(jsonSchema);
+            .writeValueAsString(jsonSchemaFilter);
 
         //we want these serialized as ISO strings, so shouldn't have definitions
         assertFalse(jsonSchemaAsString.contains("#/definitions/Instant"));
@@ -65,7 +66,7 @@ class SchemaRuleUtilsTest {
         assertEquals(SimplePojo.EXPECTED_SCHEMA, jsonSchemaAsString);
 
         assertEquals(SimplePojo.EXPECTED_SCHEMA_YAML,
-            yamlMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonSchema));
+            yamlMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonSchemaFilter));
     }
 
     @SneakyThrows
@@ -79,8 +80,8 @@ class SchemaRuleUtilsTest {
             .someListItem("list-item-1")
             .build();
 
-        Object filteredToSimplePlus = schemaRuleUtils.filterObjectBySchema(simplePlus,
-            schemaRuleUtils.generateJsonSchema(SimplePojoPlus.class));
+        Pair<Object, List<String>> filteredToSimplePlus = jsonSchemaFilterUtils.filterObjectBySchema(simplePlus,
+            jsonSchemaFilterUtils.generateJsonSchemaFilter(SimplePojoPlus.class));
 
 
         assertEquals("{\n" +
@@ -89,18 +90,21 @@ class SchemaRuleUtilsTest {
                 "  \"someListItems\" : [ \"list-item-1\" ],\n" +
                 "  \"timestamp\" : \"2023-01-16T05:12:34Z\"\n" +
                 "}",
-            objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(filteredToSimplePlus));
+            objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(filteredToSimplePlus.getLeft()));
 
 
-        Object filteredToSimple = schemaRuleUtils.filterObjectBySchema(simplePlus,
-            schemaRuleUtils.generateJsonSchema(SimplePojo.class));
+        Pair<Object, List<String>> filteredToSimple = jsonSchemaFilterUtils.filterObjectBySchema(simplePlus,
+            jsonSchemaFilterUtils.generateJsonSchemaFilter(SimplePojo.class));
 
         assertEquals("{\n" +
                 "  \"date\" : \"2023-01-16\",\n" +
                 "  \"someString\" : \"some-string\",\n" +
                 "  \"timestamp\" : \"2023-01-16T05:12:34Z\"\n" +
                 "}",
-            objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(filteredToSimple));
+            objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(filteredToSimple.getLeft()));
+
+        assertEquals(1, filteredToSimple.getRight().size());
+        assertEquals("$.someListItems", filteredToSimple.getRight().get(0));
 
     }
 
@@ -129,9 +133,7 @@ class SchemaRuleUtilsTest {
         Instant timestamp;
 
         static final String EXPECTED_SCHEMA = "{\n" +
-            "  \"$schema\" : \"http://json-schema.org/draft/2019-09/schema#\",\n" +
             "  \"type\" : \"object\",\n" +
-            "  \"additionalProperties\" : false,\n" +
             "  \"properties\" : {\n" +
             "    \"someString\" : {\n" +
             "      \"type\" : \"string\"\n" +
@@ -148,9 +150,7 @@ class SchemaRuleUtilsTest {
             "}";
 
         static final String EXPECTED_SCHEMA_YAML = "---\n" +
-            "$schema: \"http://json-schema.org/draft/2019-09/schema#\"\n" +
             "type: \"object\"\n" +
-            "additionalProperties: false\n" +
             "properties:\n" +
             "  someString:\n" +
             "    type: \"string\"\n" +
@@ -167,8 +167,8 @@ class SchemaRuleUtilsTest {
     @Test
     void filterBySchema_refs() {
 
-        SchemaRuleUtils.JsonSchema schemaWithRefs =
-            schemaRuleUtils.generateJsonSchema(ComplexPojo.class);
+        JsonSchemaFilterUtils.JsonSchemaFilter schemaWithRefs =
+            jsonSchemaFilterUtils.generateJsonSchemaFilter(ComplexPojo.class);
 
         SimplePojoPlus simplePlus = SimplePojoPlus.builder()
             .someString("some-string")
@@ -193,11 +193,33 @@ class SchemaRuleUtilsTest {
                 "    \"timestamp\" : \"2023-01-16T05:12:34Z\"\n" +
                 "  }\n" +
                 "}",
-            objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(schemaRuleUtils.filterObjectBySchema(ComplexPojoPlus.builder()
+            objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonSchemaFilterUtils.filterObjectBySchema(ComplexPojoPlus.builder()
                 .simplePojo(simplePlus)
                 .additionalSimplePojo(simplePlus)
-                .build(), schemaWithRefs)));
+                .build(), schemaWithRefs).getLeft()));
 
+    }
+
+    @SneakyThrows
+    @Test
+    public void compactCopy() {
+        JsonSchemaFilterUtils.JsonSchemaFilter schemaWithRefs =
+            jsonSchemaFilterUtils.generateJsonSchemaFilter(ComplexPojo.class);
+        JsonSchemaFilterUtils.JsonSchemaFilter compactCopy = jsonSchemaFilterUtils.compactCopy(schemaWithRefs);
+
+        assertEquals(ComplexPojo.EXPECTED_COMPACT_SCHEMA,
+            objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(compactCopy));
+
+        // 30% reduction in yaml size
+        assertEquals(404, yamlMapper.writeValueAsString(schemaWithRefs).length());
+        assertEquals(286, yamlMapper.writeValueAsString(compactCopy).length());
+
+        // non-pretty JSON is actually more compact than the yaml (pretty JSON is a lot less compact)
+        // (so if going to give up on human readability by base64gzip'ing the schema, might as well
+        //  do that with the JSON)
+        // eg, https://developer.hashicorp.com/terraform/language/functions/base64gzip
+        assertEquals(351, objectMapper.writeValueAsString(schemaWithRefs).length());
+        assertEquals(257, objectMapper.writeValueAsString(compactCopy).length());
     }
 
     @Builder
@@ -205,9 +227,7 @@ class SchemaRuleUtilsTest {
     static class ComplexPojo {
 
         public static final String EXPECTED_SCHEMA = "{\n" +
-            "  \"$schema\" : \"http://json-schema.org/draft/2019-09/schema#\",\n" +
             "  \"type\" : \"object\",\n" +
-            "  \"additionalProperties\" : false,\n" +
             "  \"properties\" : {\n" +
             "    \"simplePojo\" : {\n" +
             "      \"$ref\" : \"#/definitions/SimplePojo\"\n" +
@@ -222,7 +242,6 @@ class SchemaRuleUtilsTest {
             "  \"definitions\" : {\n" +
             "    \"SimplePojo\" : {\n" +
             "      \"type\" : \"object\",\n" +
-            "      \"additionalProperties\" : false,\n" +
             "      \"properties\" : {\n" +
             "        \"someString\" : {\n" +
             "          \"type\" : \"string\"\n" +
@@ -233,6 +252,31 @@ class SchemaRuleUtilsTest {
             "        },\n" +
             "        \"timestamp\" : {\n" +
             "          \"type\" : \"string\",\n" +
+            "          \"format\" : \"date-time\"\n" +
+            "        }\n" +
+            "      }\n" +
+            "    }\n" +
+            "  }\n" +
+            "}";
+        public static final String EXPECTED_COMPACT_SCHEMA = "{\n" +
+            "  \"properties\" : {\n" +
+            "    \"simplePojo\" : {\n" +
+            "      \"$ref\" : \"#/definitions/SimplePojo\"\n" +
+            "    },\n" +
+            "    \"additionalSimplePojos\" : {\n" +
+            "      \"items\" : {\n" +
+            "        \"$ref\" : \"#/definitions/SimplePojo\"\n" +
+            "      }\n" +
+            "    }\n" +
+            "  },\n" +
+            "  \"definitions\" : {\n" +
+            "    \"SimplePojo\" : {\n" +
+            "      \"properties\" : {\n" +
+            "        \"someString\" : { },\n" +
+            "        \"date\" : {\n" +
+            "          \"format\" : \"date\"\n" +
+            "        },\n" +
+            "        \"timestamp\" : {\n" +
             "          \"format\" : \"date-time\"\n" +
             "        }\n" +
             "      }\n" +
