@@ -5,12 +5,12 @@ import co.worklytics.psoxy.gateway.ConfigService;
 import com.avaulta.gateway.rules.Endpoint;
 import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
 import co.worklytics.psoxy.rules.Rules2;
+import com.avaulta.gateway.rules.JsonSchemaFilterUtils;
 import com.avaulta.gateway.rules.transforms.Transform;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestUtils;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
-import com.avaulta.gateway.rules.SchemaRuleUtils;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
@@ -49,7 +49,7 @@ class RESTApiSanitizerImplTest {
     protected UrlSafeTokenPseudonymEncoder pseudonymEncoder;
 
     @Inject
-    protected SchemaRuleUtils schemaRuleUtils;
+    protected JsonSchemaFilterUtils jsonSchemaFilterUtils;
 
     @Inject
     protected PseudonymizerImplFactory pseudonymizerImplFactory;
@@ -328,47 +328,47 @@ class RESTApiSanitizerImplTest {
 
         assertTrue(sanitized.contains("historyId"));
 
-        SchemaRuleUtils.JsonSchema jsonSchema = SchemaRuleUtils.JsonSchema.builder()
+        JsonSchemaFilterUtils.JsonSchemaFilter jsonSchemaFilter = JsonSchemaFilterUtils.JsonSchemaFilter.builder()
             .type("object")
-            .properties(Map.<String, SchemaRuleUtils.JsonSchema>of(
-                "id", SchemaRuleUtils.JsonSchema.builder()
+            .properties(Map.<String, JsonSchemaFilterUtils.JsonSchemaFilter>of(
+                "id", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                     .type("string")
                     .build(),
-                "threadId", SchemaRuleUtils.JsonSchema.builder()
+                "threadId", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                     .type("string")
                     .build(),
-                "labelIds", SchemaRuleUtils.JsonSchema.builder()
+                "labelIds", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                     .type("array")
-                    .items(SchemaRuleUtils.JsonSchema.builder()
+                    .items(JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                         .type("string")
                         .build())
                     .build(),
-                "payload", SchemaRuleUtils.JsonSchema.builder()
+                "payload", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                     .type("object")
-                    .properties(Map.<String, SchemaRuleUtils.JsonSchema>of(
-                        "headers", SchemaRuleUtils.JsonSchema.builder()
+                    .properties(Map.<String, JsonSchemaFilterUtils.JsonSchemaFilter>of(
+                        "headers", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                             .type("array")
-                            .items(SchemaRuleUtils.JsonSchema.builder()
+                            .items(JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                                 .type("object")
-                                .properties(Map.<String, SchemaRuleUtils.JsonSchema>of(
-                                    "name", SchemaRuleUtils.JsonSchema.builder()
+                                .properties(Map.<String, JsonSchemaFilterUtils.JsonSchemaFilter>of(
+                                    "name", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                                         .type("string")
                                         .build(),
-                                    "value", SchemaRuleUtils.JsonSchema.builder()
+                                    "value", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                                         .type("string")
                                         .build()
                                 ))
                                 .build())
                             .build(),
-                        "partId", SchemaRuleUtils.JsonSchema.builder()
+                        "partId", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                             .type("string")
                             .build()
                     ))
                     .build(),
-                "sizeEstimate", SchemaRuleUtils.JsonSchema.builder()
+                "sizeEstimate", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                     .type("integer")
                     .build(),
-                "internalDate", SchemaRuleUtils.JsonSchema.builder()
+                "internalDate", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                     .type("string")
                     .build()
                 ))
@@ -378,7 +378,7 @@ class RESTApiSanitizerImplTest {
                 .endpoint(Endpoint.builder()
                     .allowedMethods(Collections.singleton("GET"))
                     .pathRegex("^/gmail/v1/users/[^/]*/messages[/]?.*?$")
-                    .responseSchema(jsonSchema)
+                    .responseSchema(jsonSchemaFilter)
                     .build())
                 .build(),
                 sanitizer.pseudonymizer);
