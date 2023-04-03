@@ -2,6 +2,7 @@ package co.worklytics.psoxy.impl;
 
 import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.gateway.ConfigService;
+import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.rules.Endpoint;
 import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
 import co.worklytics.psoxy.rules.Rules2;
@@ -21,6 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import javax.inject.Inject;
@@ -401,5 +403,25 @@ class RESTApiSanitizerImplTest {
         List<PseudonymizedIdentity> pseudonyms = sanitizer.pseudonymizeEmailHeader(headerValue);
         assertEquals(2, pseudonyms.size());
         assertTrue(pseudonyms.stream().allMatch(p -> Objects.equals("worklytics.co", p.getDomain())));
+    }
+
+
+    @CsvSource(
+        value = {
+            "test,false,URL_SAFE_TOKEN,vja8bQGC4pq5kPnJR9D5JFG.WY2S0CX9y5bNT1KmutM",
+            "test,true,URL_SAFE_TOKEN,p~Tt8H7clbL9y8ryN4_RLYrCEsKqbjJsWcPmKb4wOdZDKAHyevsJLhRTypmrf-DpBZ",
+            "alice@acme.com,true,URL_SAFE_TOKEN,p~UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMnKYUk8FJevl3wvFyZY0eF-@acme.com",
+            "alice@acme.com,false,URL_SAFE_TOKEN,BlFx65qHrkRrhMsuq7lg4bCpwsbXgpLhVZnZ6VBMqoY"
+        }
+    )
+    @ParameterizedTest
+    public void getPseudonymize_URL_SAFE_TOKEN(String value, Boolean includeReversible, String encoding, String expected) {
+        String r = (String) sanitizer.getPseudonymize(Transform.Pseudonymize.builder()
+                //includeOriginal must be 'false' for URL_SAFE_TOKEN
+                .includeReversible(includeReversible)
+                .encoding(PseudonymEncoder.Implementations.valueOf(encoding))
+                .build()).map(value, sanitizer.getJsonConfiguration());
+
+        assertEquals(expected, r);
     }
 }
