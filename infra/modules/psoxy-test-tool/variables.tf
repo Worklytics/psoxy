@@ -4,6 +4,6 @@ variable "path_to_tools" {
 }
 
 variable "psoxy_version" {
-  type = string
+  type        = string
   description = "version of psoxy"
 }

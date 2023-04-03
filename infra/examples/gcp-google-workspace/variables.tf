@@ -113,7 +113,7 @@ variable "custom_bulk_connectors" {
   type = map(object({
     source_kind = string
     rules = object({
-      pseudonymFormat       = optional(string)
+      pseudonymFormat       = optional(string, "URL_SAFE_TOKEN")
       columnsToRedact       = optional(list(string))
       columnsToInclude      = optional(list(string))
       columnsToPseudonymize = optional(list(string))

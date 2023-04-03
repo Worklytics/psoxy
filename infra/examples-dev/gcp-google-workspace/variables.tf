@@ -115,12 +115,12 @@ variable "custom_bulk_connectors" {
   type = map(object({
     source_kind = string
     rules = object({
-      pseudonymFormat       = optional(string)
-      columnsToRedact       = optional(list(string), [])
-      columnsToInclude      = optional(list(string), [])
-      columnsToPseudonymize = optional(list(string), [])
-      columnsToDuplicate    = optional(map(string), {})
-      columnsToRename       = optional(map(string), {})
+      pseudonymFormat       = optional(string, "URL_SAFE_TOKEN")
+      columnsToRedact       = optional(list(string))
+      columnsToInclude      = optional(list(string))
+      columnsToPseudonymize = optional(list(string))
+      columnsToDuplicate    = optional(map(string))
+      columnsToRename       = optional(map(string))
     })
     settings_to_provide = optional(map(string), {})
   }))
