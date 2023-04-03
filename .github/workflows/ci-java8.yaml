@@ -12,4 +12,4 @@ jobs:
   ci_java_8:
     uses: ./.github/workflows/build-java.yaml
     with:
-      compile-profile: java8
+      compile-profile: '-P java8'
