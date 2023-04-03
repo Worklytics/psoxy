@@ -96,6 +96,7 @@ public class ZoomRulesTests extends JavaRulesTestBaseCase {
 
         assertPseudonymized(sanitized, PII);
         assertRedacted(sanitized, "Taylor", "Kim", "https://example.com/photo.jpg");
+        assertReversibleUrlTokenized(sanitized, Arrays.asList("111111111"));
     }
 
     @SneakyThrows
@@ -180,7 +181,8 @@ public class ZoomRulesTests extends JavaRulesTestBaseCase {
         Collection<String> PII = Arrays.asList(
             "8b29rgg4bb", "jjd93a2337", // user ids
             "bob@example.com",
-            "joe@example.com"
+            "joe@example.com",
+            "111111111"
         );
         assertNotSanitized(jsonString, PII);
 
@@ -230,7 +232,8 @@ public class ZoomRulesTests extends JavaRulesTestBaseCase {
     void report_meeting_participants() {
         String jsonString = asJson("report-meeting-participants.json");
         Collection<String> PII = Arrays.asList(
-            "jchill@example.com"
+            "jchill@example.com",
+            "111111111"
         );
         assertNotSanitized(jsonString, PII);
 
