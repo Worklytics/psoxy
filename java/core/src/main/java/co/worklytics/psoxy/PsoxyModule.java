@@ -7,7 +7,7 @@ import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrateg
 import co.worklytics.psoxy.storage.BulkDataSanitizerFactory;
 import co.worklytics.psoxy.storage.impl.BulkDataSanitizerFactoryImpl;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
-import com.avaulta.gateway.rules.SchemaRuleUtils;
+import com.avaulta.gateway.rules.JsonSchemaFilterUtils;
 import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
 import com.avaulta.gateway.tokens.impl.AESReversibleTokenizationStrategy;
@@ -160,13 +160,13 @@ public class PsoxyModule {
 
 
     @Provides @Singleton
-    SchemaRuleUtils schemaRuleUtils() {
+    JsonSchemaFilterUtils schemaRuleUtils() {
         ObjectMapper objectMapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
             .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
         JsonSchemaGenerator jsonSchemaGenerator = new JsonSchemaGenerator(objectMapper);
 
-        return new SchemaRuleUtils(objectMapper, jsonSchemaGenerator);
+        return new JsonSchemaFilterUtils(objectMapper, jsonSchemaGenerator);
     }
 
     @Provides

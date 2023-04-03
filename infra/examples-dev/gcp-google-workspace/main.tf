@@ -30,7 +30,7 @@ data "google_project" "psoxy-project" {
 
 module "psoxy" {
   source = "../../modular-examples/gcp-google-workspace"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-google-workspace?ref=rc-v0.4.17"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-google-workspace?ref=v0.4.17"
 
   gcp_project_id                 = data.google_project.psoxy-project.project_id
   environment_name               = var.environment_name
@@ -47,6 +47,8 @@ module "psoxy" {
   google_workspace_example_admin = var.google_workspace_example_admin
   general_environment_variables  = var.general_environment_variables
   salesforce_domain              = var.salesforce_domain
+  bulk_input_expiration_days     = var.bulk_input_expiration_days
+  bulk_sanitized_expiration_days = var.bulk_sanitized_expiration_days
 }
 
 moved {

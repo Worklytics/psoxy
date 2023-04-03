@@ -43,10 +43,10 @@ public class Endpoint {
     }
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    SchemaRuleUtils.JsonSchema responseSchema;
+    JsonSchemaFilterUtils.JsonSchemaFilter responseSchema;
 
     @JsonIgnore
-    public Optional<SchemaRuleUtils.JsonSchema> getResponseSchemaOptional() {
+    public Optional<JsonSchemaFilterUtils.JsonSchemaFilter> getResponseSchemaOptional() {
         return Optional.ofNullable(responseSchema);
     }
 

@@ -57,7 +57,7 @@ provider "azuread" {
 
 module "psoxy" {
   source = "../../modular-examples/aws"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-msft-365?ref=rc-v0.4.17"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-msft-365?ref=v0.4.17"
 
   aws_account_id                 = var.aws_account_id
   aws_assume_role_arn            = var.aws_assume_role_arn # role that can test the instances (lambdas)
@@ -80,6 +80,8 @@ module "psoxy" {
   google_workspace_example_admin = var.google_workspace_example_admin
   google_workspace_example_user  = var.google_workspace_example_user
   environment_name               = var.environment_name
+  bulk_sanitized_expiration_days = var.bulk_sanitized_expiration_days
+  bulk_input_expiration_days     = var.bulk_input_expiration_days
 }
 
 # if you generated these, you may want them to import back into your data warehouse

@@ -97,4 +97,16 @@ public class UrlSafeTokenPseudonymEncoderTest {
         assertArrayEquals(decoded.getHash(), pseudonym.getHash());
         assertArrayEquals(decoded.getReversible(), pseudonym.getReversible());
     }
+
+    @Test
+    void email() {
+        String original = "alice@acme.com";
+        Pseudonym pseudonym = Pseudonym.builder()
+            .hash(deterministicTokenizationStrategy.getToken(original, Function.identity()))
+            .domain("acme.com")
+            .build();
+
+        String encoded = pseudonymEncoder.encode(pseudonym);
+        assertEquals("UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMk@acme.com", encoded);
+    }
 }
