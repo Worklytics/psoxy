@@ -13,7 +13,7 @@ resource "null_resource" "install_test_tool" {
   # trigger if path or version has changed
   triggers = {
     path_to_psoxy_java = var.path_to_tools
-    version = var.psoxy_version
+    version            = var.psoxy_version
   }
 }
 

@@ -10,7 +10,8 @@
     },
     {
       "id":"{\"scope\":\"zoom\",\"hash\":\"NQ9GyKEmJB7AVaKEZBAe73QQwCO95gHJv4.8MKRXqLU\"}",
-      "user_email":"{\"scope\":\"email\",\"domain\":\"example.com\",\"hash\":\"rdo3eTO1k8MX9.RR3Fn6EHmH6O_ssfNssei.yO0lBCE\"}"
+      "user_email":"{\"scope\":\"email\",\"domain\":\"example.com\",\"hash\":\"rdo3eTO1k8MX9.RR3Fn6EHmH6O_ssfNssei.yO0lBCE\"}",
+      "pmi":"{\"scope\":\"zoom\",\"hash\":\"b4spdxpK7EOqmO86s79CDfEPeOvKSCq7aUndB5pE26Y\"}"
     }
   ]
 }

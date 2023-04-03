@@ -329,7 +329,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
                 return configuration.jsonProvider().toJson(pseudonymizedIdentity);
             } else if (transformOptions.getEncoding() == PseudonymEncoder.Implementations.URL_SAFE_TOKEN) {
                 //TODO: exploits that this was already encoded with UrlSafeTokenPseudonymEncoder
-                return pseudonymizedIdentity.getReversible();
+                return ObjectUtils.firstNonNull(pseudonymizedIdentity.getReversible(), pseudonymizedIdentity.getHash());
             } else {
                 throw new RuntimeException("Unsupported pseudonym implementation: " + transformOptions.getEncoding());
             }
