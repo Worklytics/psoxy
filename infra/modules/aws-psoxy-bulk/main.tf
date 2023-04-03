@@ -67,6 +67,19 @@ resource "aws_s3_bucket_public_access_block" "input-block-public-access" {
   ignore_public_acls      = true
 }
 
+
+resource "aws_s3_bucket_lifecycle_configuration" "expire_input_files" {
+  bucket = aws_s3_bucket.input.bucket
+
+  rule {
+    id     = "expire"
+    status = "Enabled"
+    expiration {
+      days = var.input_expiration_days
+    }
+  }
+}
+
 resource "aws_s3_bucket" "sanitized" {
   bucket = "psoxy-${var.instance_id}-${random_string.bucket_suffix.id}-sanitized"
 
@@ -111,6 +124,19 @@ moved {
   from = aws_s3_bucket_public_access_block.output-block-public-access
   to   = aws_s3_bucket_public_access_block.sanitized
 }
+
+resource "aws_s3_bucket_lifecycle_configuration" "expire_sanitized_files" {
+  bucket = aws_s3_bucket.sanitized.bucket
+
+  rule {
+    id     = "expire"
+    status = "Enabled"
+    expiration {
+      days = var.sanitized_expiration_days
+    }
+  }
+}
+
 
 resource "aws_lambda_permission" "allow_input_bucket" {
   statement_id  = "AllowExecutionFromS3Bucket"

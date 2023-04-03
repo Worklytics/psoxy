@@ -441,6 +441,8 @@ module "psoxy-bulk" {
   ssm_kms_key_ids                 = local.ssm_key_ids
   sanitized_accessor_role_names   = [module.psoxy-aws.api_caller_role_name]
   memory_size_mb                  = 1024
+  sanitized_expiration_days       = var.bulk_sanitized_expiration_days
+  input_expiration_days           = var.bulk_input_expiration_days
   example_file                    = each.value.example_file
 
   environment_variables = merge(

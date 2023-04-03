@@ -81,6 +81,8 @@ module "psoxy" {
   google_workspace_example_admin = var.google_workspace_example_admin
   general_environment_variables  = var.general_environment_variables
   salesforce_domain              = var.salesforce_domain
+  bulk_sanitized_expiration_days = var.bulk_sanitized_expiration_days
+  bulk_input_expiration_days     = var.bulk_input_expiration_days
   # Uncomment the following line if you want to apply KMS encryption on your SSM parameters
   #  aws_ssm_key_id                 = aws_kms_key.key.key_id
 }

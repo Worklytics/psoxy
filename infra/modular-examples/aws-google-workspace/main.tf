@@ -298,6 +298,8 @@ module "psoxy-bulk" {
   sanitized_accessor_role_names   = [module.psoxy-aws.api_caller_role_name]
   memory_size_mb                  = 1024
   log_retention_days              = var.log_retention_days
+  sanitized_expiration_days       = var.bulk_sanitized_expiration_days
+  input_expiration_days           = var.bulk_input_expiration_days
 
   example_file = try(each.value.example_file, null)
 

@@ -18,3 +18,9 @@ variable "iam_role_for_lambda_name" {
   type        = string
   description = "IAM Role name for the lambda function that will write to this bucket"
 }
+
+variable "expiration_days" {
+  type        = number
+  description = "**alpha** Number of days after which objects in the bucket will expire"
+  default     = 720
+}
