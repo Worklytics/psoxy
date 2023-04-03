@@ -63,7 +63,7 @@ public class PrebuiltSanitizerRules {
         .endpoint(Endpoint.builder()
             .pathRegex("^/v2/past_meetings/(?:.*)/participants(?:\\?.+)?")
             .transform(Transform.Pseudonymize.builder()
-                .jsonPath("$.participants[*].['id','user_email']")
+                .jsonPath("$.participants[*].['id','user_email','pmi']")
                 .build()
             )
             .transform(Transform.Redact.builder()
@@ -106,12 +106,12 @@ public class PrebuiltSanitizerRules {
         .endpoint(Endpoint.builder()
             .pathRegex("^/v2/report/meetings/(?:.*)/participants(?:\\?.+)?")
             .transform(Transform.Pseudonymize.builder()
-                .jsonPath("$.participants[*].['id','user_email','user_id']")
+                .jsonPath("$.participants[*].['id','user_email','user_id','pmi']")
                 .build()
             )
             .transform(Transform.Redact.builder()
     // we don't care about user's name
-                .jsonPath("$.participants[*].['name','registrant_id']")
+                .jsonPath("$.participants[*].['name','registrant_id','display_name']")
                 .build())
         .build())
         .build();

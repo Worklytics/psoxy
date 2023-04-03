@@ -4,8 +4,10 @@ import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.impl.RESTApiSanitizerImpl;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestUtils;
+import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
+import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.transforms.Transform;
 import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
@@ -22,6 +24,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -48,7 +51,6 @@ abstract public class RulesBaseTestCase {
     protected PseudonymizerImplFactory pseudonymizerFactory;
     @Inject
     protected RulesUtils rulesUtils;
-
     @Getter @Setter
     RulesTestSpec testSpec = RulesTestSpec.builder().build();
 
@@ -248,6 +250,7 @@ abstract public class RulesBaseTestCase {
             .forEach(s -> {
                 String doubleJsonEncodedPseudonym =
                     sanitizer.getJsonConfiguration().jsonProvider().toJson(sanitizer.pseudonymizeToJson(s, sanitizer.getJsonConfiguration()));
+
                 // remove wrapping
                 doubleJsonEncodedPseudonym = StringUtils.unwrap(doubleJsonEncodedPseudonym, "\"");
                 assertTrue(content.contains(doubleJsonEncodedPseudonym),

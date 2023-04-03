@@ -14,7 +14,6 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$.users[*]['display_name','first_name','last_name','pic_url','employee_unique_id']"
-    responseSchema: null
   - pathRegex: "^/v2/users/(?:[^/]*)/meetings(?:\\?.+)?"
     transforms:
       - !<pseudonymize>
@@ -24,7 +23,6 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$.meetings[*]['topic','join_url','start_url','agenda']"
-    responseSchema: null
   - pathRegex: "^/v2/meetings/(?:[^/]*)(?:\\?.+)?"
     transforms:
       - !<pseudonymize>
@@ -49,7 +47,7 @@ endpoints:
     transforms:
       - !<pseudonymize>
         jsonPaths:
-          - "$.participants[*].['id','user_email']"
+          - "$.participants[*].['id','user_email','pmi']"
         encoding: "JSON"
       - !<redact>
         jsonPaths:
@@ -76,8 +74,8 @@ endpoints:
     transforms:
       - !<pseudonymize>
         jsonPaths:
-          - "$.participants[*].['id','user_email','user_id']"
+          - "$.participants[*].['id','user_email','user_id','pmi']"
         encoding: "JSON"
       - !<redact>
         jsonPaths:
-          - "$.participants[*].['name','registrant_id']"
+          - "$.participants[*].['name','registrant_id','display_name']"
