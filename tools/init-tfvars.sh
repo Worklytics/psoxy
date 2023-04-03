@@ -3,6 +3,7 @@
 # fills a terraform vars file with values that are required for the Terraform configuration to work
 
 TFVARS_FILE=$1
+PSOXY_BASE_DIR=$2
 
 # colors
 RED='\e[0;31m'

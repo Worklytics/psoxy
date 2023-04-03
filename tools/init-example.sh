@@ -45,7 +45,7 @@ if [ ! -f terraform.tfvars ]; then
 
   cp ${TF_CONFIG_ROOT}/terraform.tfvars.example $TFVARS_FILE
 
-  ${PSOXY_BASE_DIR}tools/init-tfvars.sh $TFVARS_FILE
+  ${PSOXY_BASE_DIR}tools/init-tfvars.sh $TFVARS_FILE $PSOXY_BASE_DIR
 else
   printf "${RED}Nothing to initialize. File terraform.tfvars already exists.${NC}\n\n"
 fi
