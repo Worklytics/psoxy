@@ -143,7 +143,7 @@ public class CommonRequestHandler {
 
         this.sanitizer = loadSanitizerRules();
 
-        String callLog = String.format("%s %s %s TokensReversed=%b", request.getHttpMethod(), URLUtils.relativeURL(toLog), tokenizedURLReversed);
+        String callLog = String.format("%s %s TokensReversed=%b", request.getHttpMethod(), URLUtils.relativeURL(toLog), tokenizedURLReversed);
         if (skipSanitization) {
             log.info(String.format("%s. Skipping sanitization.", callLog));
         } else if (sanitizer.isAllowed(request.getHttpMethod(), targetUrl)) {
