@@ -74,6 +74,18 @@ variable "example_file" {
   default     = null
 }
 
+variable "input_expiration_days" {
+  type        = number
+  description = "**alpha** Number of days after which objects in the bucket will expire"
+  default     = 30
+}
+
+variable "sanitized_expiration_days" {
+  type        = number
+  description = "**alpha** Number of days after which objects in the bucket will expire"
+  default     = 720
+}
+
 variable "todo_step" {
   type        = number
   description = "of all todos, where does this one logically fall in sequence"

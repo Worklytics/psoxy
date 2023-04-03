@@ -130,6 +130,18 @@ variable "memory_size_mb" {
   default     = 512
 }
 
+variable "input_expiration_days" {
+  type        = number
+  description = "**alpha** Number of days after which objects in the bucket will expire"
+  default     = 30
+}
+
+variable "sanitized_expiration_days" {
+  type        = number
+  description = "**alpha** Number of days after which objects in the bucket will expire"
+  default     = 720
+}
+
 variable "example_file" {
   type        = string
   description = "path to example file to use for testing, from psoxy_base_dir"

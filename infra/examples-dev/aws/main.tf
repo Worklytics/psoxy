@@ -80,6 +80,8 @@ module "psoxy" {
   google_workspace_example_admin = var.google_workspace_example_admin
   google_workspace_example_user  = var.google_workspace_example_user
   environment_name               = var.environment_name
+  bulk_sanitized_expiration_days = var.bulk_sanitized_expiration_days
+  bulk_input_expiration_days     = var.bulk_input_expiration_days
 }
 
 # if you generated these, you may want them to import back into your data warehouse
