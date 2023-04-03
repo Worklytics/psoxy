@@ -75,5 +75,21 @@ The email address of the account you created will be used when creating the data
 Google Directory in the Worklytics portal. Provide it as the value of the 'Google
 Account to Use for Connection' setting when they create the connection.
 
+## General Authentication Overview
+
+Google Workspace APIs use OAuth 2.0 for authentication and authorization. You create an Oauth 2.0
+client in Google Cloud Platform and a credential (service account key), which you store in as a
+secret in your Proxy instance.
+
+When the proxy connects to Google, it first authenticates with Google API using this secret (a
+service account key) by signing a request for a short-lived access token. Google returns this access
+token, which the proxy then uses for subsequent requests to Google's APIS until the token expires.
+
+The service account key can be rotated at any time, and the terraform configuration examples we
+provide can be configured to do this for you if applied regularly.
+
+More information:
+https://developers.google.com/workspace/guides/auth-overview
+
 
 
