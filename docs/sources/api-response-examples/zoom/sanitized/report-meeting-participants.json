@@ -14,7 +14,8 @@
       "user_email":"{\"scope\":\"email\",\"domain\":\"example.com\",\"hash\":\"idCH.3vOxeKjENHWCO_9T0E7ZMeCDATsR7D3nEX6230\"}",
       "user_id":"{\"scope\":\"zoom\",\"hash\":\"K2uwWIMuISDzVc4TSskTEvVnCnGrNsTm_fnrfEfnDMs\"}",
       "status":"in_meeting",
-      "bo_mtg_id":"27423744"
+      "bo_mtg_id":"27423744",
+      "pmi":"{\"scope\":\"zoom\",\"hash\":\"b4spdxpK7EOqmO86s79CDfEPeOvKSCq7aUndB5pE26Y\"}"
     }
   ]
 }

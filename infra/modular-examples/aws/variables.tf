@@ -131,11 +131,11 @@ variable "custom_bulk_connectors" {
     source_kind = string
     rules = object({
       pseudonymFormat       = optional(string)
-      columnsToRedact       = optional(list(string), [])
-      columnsToInclude      = optional(list(string), [])
-      columnsToPseudonymize = optional(list(string), [])
-      columnsToDuplicate    = optional(map(string), {})
-      columnsToRename       = optional(map(string), {})
+      columnsToRedact       = optional(list(string))
+      columnsToInclude      = optional(list(string))
+      columnsToPseudonymize = optional(list(string))
+      columnsToDuplicate    = optional(map(string))
+      columnsToRename       = optional(map(string))
     })
     settings_to_provide = optional(map(string), {})
   }))
@@ -155,17 +155,29 @@ variable "custom_bulk_connectors" {
   }
 }
 
+variable "bulk_input_expiration_days" {
+  type        = number
+  description = "**alpha** Number of days after which objects in the bucket will expire"
+  default     = 30
+}
+
+variable "bulk_sanitized_expiration_days" {
+  type        = number
+  description = "**alpha** Number of days after which objects in the bucket will expire"
+  default     = 720
+}
+
 variable "lookup_table_builders" {
   type = map(object({
     input_connector_id            = string
     sanitized_accessor_role_names = list(string)
     rules = object({
-      pseudonymFormat       = string
-      columnsToRedact       = list(string)
-      columnsToInclude      = list(string)
-      columnsToPseudonymize = list(string)
-      columnsToDuplicate    = map(string)
-      columnsToRename       = map(string)
+      pseudonymFormat       = optional(string)
+      columnsToRedact       = optional(list(string))
+      columnsToInclude      = optional(list(string))
+      columnsToPseudonymize = optional(list(string))
+      columnsToDuplicate    = optional(map(string))
+      columnsToRename       = optional(map(string))
     })
   }))
   default = {

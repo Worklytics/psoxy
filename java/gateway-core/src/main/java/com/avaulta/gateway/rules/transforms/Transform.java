@@ -167,6 +167,8 @@ public abstract class Transform {
          * use case: group mailing lists; if they're attendees to an event, the email in that
          * context will be pseudonymized; so when we pull list of groups, we need pseudonyms to
          * match against those, but can also get the original for use in UX/reports, as it's not PII
+         *
+         * NOT compatible with URL_SAFE_TOKEN encoding (Validator checks for this)
          */
         @JsonInclude(JsonInclude.Include.NON_DEFAULT)
         @Builder.Default

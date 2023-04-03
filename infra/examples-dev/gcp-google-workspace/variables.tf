@@ -99,16 +99,28 @@ variable "enabled_connectors" {
   ]
 }
 
+variable "bulk_input_expiration_days" {
+  type        = number
+  description = "**alpha** Number of days after which objects in the bucket will expire"
+  default     = 30
+}
+
+variable "bulk_sanitized_expiration_days" {
+  type        = number
+  description = "**alpha** Number of days after which objects in the bucket will expire"
+  default     = 720
+}
+
 variable "custom_bulk_connectors" {
   type = map(object({
     source_kind = string
     rules = object({
-      pseudonymFormat       = optional(string)
-      columnsToRedact       = optional(list(string), [])
-      columnsToInclude      = optional(list(string), [])
-      columnsToPseudonymize = optional(list(string), [])
-      columnsToDuplicate    = optional(map(string), {})
-      columnsToRename       = optional(map(string), {})
+      pseudonymFormat       = optional(string, "URL_SAFE_TOKEN")
+      columnsToRedact       = optional(list(string))
+      columnsToInclude      = optional(list(string))
+      columnsToPseudonymize = optional(list(string))
+      columnsToDuplicate    = optional(map(string))
+      columnsToRename       = optional(map(string))
     })
     settings_to_provide = optional(map(string), {})
   }))

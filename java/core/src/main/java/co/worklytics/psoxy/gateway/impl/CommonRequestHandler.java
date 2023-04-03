@@ -48,6 +48,8 @@ public class CommonRequestHandler {
     private static final int SOURCE_API_REQUEST_CONNECT_TIMEOUT_MILLISECONDS = 30_000;
     private static final int SOURCE_API_REQUEST_READ_TIMEOUT = 300_000;
 
+    @Inject
+    EnvVarsConfigService envVarsConfigService;
     @Inject ConfigService config;
     @Inject RulesUtils rulesUtils;
     @Inject SourceAuthStrategy sourceAuthStrategy;
@@ -122,9 +124,18 @@ public class CommonRequestHandler {
             return healthCheckResponse.get();
         }
 
-        // re-write host
-        URL targetUrl = buildTarget(request);
-        String relativeURL = URLUtils.relativeURL(targetUrl);
+        // parse requested URL, re-writing host/etc
+        String requestedTargetUrl = parseRequestedTarget(request);
+
+        // if requested target URL has tokenized components, reverse
+        String clearTargetUrl = reverseTokenizedUrlComponents(requestedTargetUrl);
+
+        boolean tokenizedURLReversed = Objects.equals(requestedTargetUrl, clearTargetUrl);
+
+        URL targetUrl = new URL(clearTargetUrl);
+
+        // avoid logging clear URL outside of dev
+        URL toLog = envVarsConfigService.isDevelopment() ? targetUrl : new URL(requestedTargetUrl);
 
         boolean skipSanitization = skipSanitization(request);
 
@@ -132,7 +143,7 @@ public class CommonRequestHandler {
 
         this.sanitizer = loadSanitizerRules();
 
-        String callLog = String.format("%s %s", request.getHttpMethod(), relativeURL);
+        String callLog = String.format("%s %s TokensReversed=%b", request.getHttpMethod(), URLUtils.relativeURL(toLog), tokenizedURLReversed);
         if (skipSanitization) {
             log.info(String.format("%s. Skipping sanitization.", callLog));
         } else if (sanitizer.isAllowed(request.getHttpMethod(), targetUrl)) {
@@ -355,7 +366,7 @@ public class CommonRequestHandler {
     }
 
     @SneakyThrows
-    public URL buildTarget(HttpEventRequest request) {
+    String parseRequestedTarget(HttpEventRequest request) {
         // contents may come encoded. It should respect url as it comes.
         // Construct URL directly concatenating instead of URIBuilder as it may re-encode.
         URIBuilder uriBuilder = new URIBuilder();
@@ -364,16 +375,18 @@ public class CommonRequestHandler {
         URL hostURL = uriBuilder.build().toURL();
         String hostPlusPath =
             StringUtils.stripEnd(hostURL.toString(),"/") + "/" +
-            StringUtils.stripStart(request.getPath(),"/");
+                StringUtils.stripStart(request.getPath(),"/");
         String targetURLString = hostPlusPath;
         if (StringUtils.isNotBlank(request.getQuery().orElse(null))) {
             targetURLString = hostPlusPath + "?" + request.getQuery().get();
         }
+        return targetURLString;
+    }
 
-        //TODO: configurable behavior?
-        targetURLString = pseudonymEncoder.decodeAndReverseAllContainedKeyedPseudonyms(targetURLString, reversibleTokenizationStrategy);
 
-        return new URL(targetURLString);
+    // NOTE: not 'decrypt', as that is only one possible implementation of reversible tokenization
+    String reverseTokenizedUrlComponents(String encodedURL) {
+        return pseudonymEncoder.decodeAndReverseAllContainedKeyedPseudonyms(encodedURL, reversibleTokenizationStrategy);
     }
 
     private void logIfDevelopmentMode(Supplier<String> messageSupplier) {

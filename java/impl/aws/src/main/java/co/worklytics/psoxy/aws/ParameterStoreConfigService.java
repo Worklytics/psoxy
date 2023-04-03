@@ -56,6 +56,9 @@ public class ParameterStoreConfigService implements ConfigService {
         String key = parameterName(property);
         try {
             PutParameterRequest parameterRequest = PutParameterRequest.builder()
+                //TODO: determine proper 'type' here based on ConfigProperty attribute?
+                // (as of 2023-03, we don't update any params that *aren't* secrets, so not really issue)
+                .type(ParameterType.SECURE_STRING) // in case parameter doesn't exist yet, SSM rejects PUT w/o type
                 .name(key)
                 .value(value)
                 // if property exists, which should always be created first, this flags needs to be set

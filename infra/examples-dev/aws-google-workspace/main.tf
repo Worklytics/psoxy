@@ -60,7 +60,7 @@ data "google_project" "psoxy-google-connectors" {
 
 module "psoxy" {
   source = "../../modular-examples/aws-google-workspace"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-google-workspace?ref=v0.4.16"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-google-workspace?ref=v0.4.17"
 
   aws_account_id                 = var.aws_account_id
   aws_assume_role_arn            = var.aws_assume_role_arn # role that can test the instances (lambdas)
@@ -81,6 +81,8 @@ module "psoxy" {
   google_workspace_example_admin = var.google_workspace_example_admin
   general_environment_variables  = var.general_environment_variables
   salesforce_domain              = var.salesforce_domain
+  bulk_sanitized_expiration_days = var.bulk_sanitized_expiration_days
+  bulk_input_expiration_days     = var.bulk_input_expiration_days
   # Uncomment the following line if you want to apply KMS encryption on your SSM parameters
   #  aws_ssm_key_id                 = aws_kms_key.key.key_id
 }

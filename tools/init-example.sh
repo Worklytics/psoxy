@@ -32,8 +32,9 @@ else
   cd ${TF_CONFIG_ROOT}
 fi
 
-printf "Initializing ${BLUE}terraform.tfvars${NC} file for your configuration ...\n"
 if [ ! -f terraform.tfvars ]; then
+  printf "Initializing ${BLUE}terraform.tfvars${NC} file for your configuration ...\n"
+
   TFVARS_FILE="${TF_CONFIG_ROOT}/terraform.tfvars"
 
   cp ${TF_CONFIG_ROOT}/terraform.tfvars.example $TFVARS_FILE
@@ -43,18 +44,5 @@ else
   printf "${RED}Nothing to initialize. File terraform.tfvars already exists.${NC}\n\n"
 fi
 
-TEST_TOOL_ROOT=${PSOXY_BASE_DIR}tools/psoxy-test
-
-if [ ! -d ${TEST_TOOL_ROOT} ]; then
-  printf "${RED}No test tool source found at ${TEST_TOOL_ROOT}. Failed to install test tool.${NC}\n"
-  exit
-fi
-
-if npm -v &> /dev/null ; then
-  printf "Installing ${BLUE}psoxy-test${NC} tool ...\n"
-  cd ${TEST_TOOL_ROOT}
-  npm --no-audit --no-fund --prefix ${TEST_TOOL_ROOT} install
-else
-  printf "${RED}NPM / Node.JS not available; could not install test tool. We recommend installing Node.JS ( https://nodejs.org/ ), then re-running this init script.${NC}\n"
-fi
-
+# Install test tool
+${PSOXY_BASE_DIR}tools/install-test-tool.sh ${PSOXY_BASE_DIR}tools
