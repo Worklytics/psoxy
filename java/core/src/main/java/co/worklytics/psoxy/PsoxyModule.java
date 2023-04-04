@@ -23,7 +23,6 @@ import com.google.api.client.json.gson.GsonFactory;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
-import com.kjetland.jackson.jsonSchema.JsonSchemaGenerator;
 import dagger.Module;
 import dagger.Provides;
 import lombok.extern.java.Log;
@@ -164,9 +163,8 @@ public class PsoxyModule {
         ObjectMapper objectMapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
             .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-        JsonSchemaGenerator jsonSchemaGenerator = new JsonSchemaGenerator(objectMapper);
 
-        return new JsonSchemaFilterUtils(objectMapper, jsonSchemaGenerator);
+        return new JsonSchemaFilterUtils(objectMapper);
     }
 
     @Provides

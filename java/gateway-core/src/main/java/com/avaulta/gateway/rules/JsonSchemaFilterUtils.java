@@ -3,7 +3,6 @@ package com.avaulta.gateway.rules;
 import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kjetland.jackson.jsonSchema.JsonSchemaGenerator;
 import lombok.*;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.tuple.Pair;
@@ -16,26 +15,6 @@ import java.util.*;
 public class JsonSchemaFilterUtils {
 
     ObjectMapper objectMapper;
-    JsonSchemaGenerator jsonSchemaGenerator;
-
-    /**
-     * Generates a JSON schema for the given class.
-     * <p>
-     * use case: in client code bases, can generate rules for a given expected result class; perhaps
-     * eventually as a build step, eg maven plugin, that writes rules out somewhere
-     * <p>
-     * eg,  schemaRuleUtils.generateSchema(ExampleResult.class)
-     *
-     * TODO: this really doesn't need to be bundled into proxy; it's just used to generate rules
-     *
-     * @param clazz
-     * @return
-     */
-    public JsonSchemaFilter generateJsonSchemaFilter(Class<?> clazz) {
-        JsonNode schema = jsonSchemaGenerator.generateJsonSchema(clazz);
-        return objectMapper.convertValue(schema, JsonSchemaFilter.class);
-    }
-
 
     /**
      * filter object by properties defined in schema, recursively filtering them by any schema

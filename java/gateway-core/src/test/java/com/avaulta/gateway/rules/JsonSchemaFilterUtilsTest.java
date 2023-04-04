@@ -2,12 +2,10 @@ package com.avaulta.gateway.rules;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.kjetland.jackson.jsonSchema.JsonSchemaConfig;
-import com.kjetland.jackson.jsonSchema.JsonSchemaDraft;
-import com.kjetland.jackson.jsonSchema.JsonSchemaGenerator;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Singular;
@@ -28,6 +26,9 @@ class JsonSchemaFilterUtilsTest {
     ObjectMapper objectMapper;
     ObjectMapper yamlMapper;
 
+    ObjectReader schemaReader;
+
+
     @BeforeEach
     void setup() {
         jsonSchemaFilterUtils = new JsonSchemaFilterUtils();
@@ -41,32 +42,7 @@ class JsonSchemaFilterUtilsTest {
             .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
 
         jsonSchemaFilterUtils.objectMapper = objectMapper;
-        jsonSchemaFilterUtils.jsonSchemaGenerator = new JsonSchemaGenerator(jsonSchemaFilterUtils.objectMapper,
-            JsonSchemaConfig
-                //.nullableJsonSchemaDraft4() // uses oneOf [ { type: null }, ... ] everywhere, which is verbose
-                .vanillaJsonSchemaDraft4()
-
-                .withJsonSchemaDraft(JsonSchemaDraft.DRAFT_2019_09)
-        );
-    }
-
-    @SneakyThrows
-    @Test
-    void generateJsonSchema() {
-        JsonSchemaFilterUtils.JsonSchemaFilter jsonSchemaFilter = jsonSchemaFilterUtils.generateJsonSchemaFilter(SimplePojo.class);
-
-        String jsonSchemaAsString = objectMapper
-            .writerWithDefaultPrettyPrinter()
-            .writeValueAsString(jsonSchemaFilter);
-
-        //we want these serialized as ISO strings, so shouldn't have definitions
-        assertFalse(jsonSchemaAsString.contains("#/definitions/Instant"));
-        assertFalse(jsonSchemaAsString.contains("#/definitions/LocalDate"));
-
-        assertEquals(SimplePojo.EXPECTED_SCHEMA, jsonSchemaAsString);
-
-        assertEquals(SimplePojo.EXPECTED_SCHEMA_YAML,
-            yamlMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonSchemaFilter));
+        schemaReader = objectMapper.readerFor(JsonSchemaFilterUtils.JsonSchemaFilter.class);
     }
 
     @SneakyThrows
@@ -80,8 +56,10 @@ class JsonSchemaFilterUtilsTest {
             .someListItem("list-item-1")
             .build();
 
-        Pair<Object, List<String>> filteredToSimplePlus = jsonSchemaFilterUtils.filterObjectBySchema(simplePlus,
-            jsonSchemaFilterUtils.generateJsonSchemaFilter(SimplePojoPlus.class));
+        Pair<Object, List<String>> filteredToSimplePlus =
+            jsonSchemaFilterUtils.filterObjectBySchema(simplePlus,
+                schemaReader.readValue(SimplePojoPlus.EXPECTED_SCHEMA));
+
 
 
         assertEquals("{\n" +
@@ -93,8 +71,9 @@ class JsonSchemaFilterUtilsTest {
             objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(filteredToSimplePlus.getLeft()));
 
 
-        Pair<Object, List<String>> filteredToSimple = jsonSchemaFilterUtils.filterObjectBySchema(simplePlus,
-            jsonSchemaFilterUtils.generateJsonSchemaFilter(SimplePojo.class));
+        Pair<Object, List<String>> filteredToSimple =
+            jsonSchemaFilterUtils.filterObjectBySchema(simplePlus,
+                schemaReader.readValue(SimplePojo.EXPECTED_SCHEMA));
 
         assertEquals("{\n" +
                 "  \"date\" : \"2023-01-16\",\n" +
@@ -112,6 +91,28 @@ class JsonSchemaFilterUtilsTest {
     @Data
     static class SimplePojoPlus {
 
+        static final String EXPECTED_SCHEMA = "{\n" +
+            "  \"type\" : \"object\",\n" +
+            "  \"properties\" : {\n" +
+            "    \"someString\" : {\n" +
+            "      \"type\" : \"string\"\n" +
+            "    },\n" +
+            "    \"date\" : {\n" +
+            "      \"type\" : \"string\",\n" +
+            "      \"format\" : \"date\"\n" +
+            "    },\n" +
+            "    \"timestamp\" : {\n" +
+            "      \"type\" : \"string\",\n" +
+            "      \"format\" : \"date-time\"\n" +
+            "    },\n" +
+            "    \"someListItems\" : {\n" +
+            "      \"type\" : \"array\",\n" +
+            "      \"items\" : {\n" +
+            "        \"type\" : \"string\"\n" +
+            "      }\n" +
+            "    }\n" +
+            "  }\n" +
+            "}";
         String someString;
 
         LocalDate date;
@@ -168,7 +169,7 @@ class JsonSchemaFilterUtilsTest {
     void filterBySchema_refs() {
 
         JsonSchemaFilterUtils.JsonSchemaFilter schemaWithRefs =
-            jsonSchemaFilterUtils.generateJsonSchemaFilter(ComplexPojo.class);
+            schemaReader.readValue(ComplexPojo.EXPECTED_SCHEMA);
 
         SimplePojoPlus simplePlus = SimplePojoPlus.builder()
             .someString("some-string")
