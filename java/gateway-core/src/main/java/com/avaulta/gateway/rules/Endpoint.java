@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 @JsonPropertyOrder({"pathRegex", "allowedQueryParams", "transforms"})
 @Builder(toBuilder = true)
+@With
 @AllArgsConstructor //for builder
 @NoArgsConstructor //for Jackson
 @Getter

@@ -212,7 +212,8 @@ public class JsonSchemaFilterUtils {
         }
     }
 
-    @Builder
+    @With
+    @Builder(toBuilder = true)
     @NoArgsConstructor
     @AllArgsConstructor // for builder
     @Data
