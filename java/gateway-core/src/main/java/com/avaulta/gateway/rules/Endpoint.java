@@ -20,7 +20,19 @@ import java.util.stream.Collectors;
 @Getter
 public class Endpoint {
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     String pathRegex;
+
+    /**
+     * ALPHA FEATURE
+     * path template, eg, /api/v1/{id}/foo/{bar}
+     *
+     * @see "https://swagger.io/docs/specification/paths-and-operations/"
+     *
+     * if provided, has the effect of pathRegex = "^/api/v1/[^/]+/foo/[^/]+$"
+     */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    String pathTemplate;
 
     //if provided, only query params in this list will be allowed
     @JsonInclude(JsonInclude.Include.NON_NULL)

@@ -7,6 +7,7 @@ import com.google.common.base.Preconditions;
 import com.jayway.jsonpath.JsonPath;
 import lombok.NonNull;
 import org.apache.commons.lang3.NotImplementedException;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Collections;
 import java.util.regex.Pattern;
@@ -39,7 +40,13 @@ public class Validator {
         rules.getEndpoints().forEach(Validator::validate);
     }
     static void validate(@NonNull Endpoint endpoint) {
-        Pattern.compile(endpoint.getPathRegex());
+        if (StringUtils.isBlank(endpoint.getPathTemplate())) {
+            if (StringUtils.isBlank(endpoint.getPathRegex())) {
+                throw new Error("Endpoint must have either pathTemplate or pathRegex. pass `/` as pathTemplate if you want base path.");
+            }
+            Pattern.compile(endpoint.getPathRegex());
+        }
+
         endpoint.getTransforms().forEach(Validator::validate);
     }
 

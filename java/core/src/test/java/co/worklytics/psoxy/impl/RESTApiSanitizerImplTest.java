@@ -424,4 +424,18 @@ class RESTApiSanitizerImplTest {
 
         assertEquals(expected, r);
     }
+
+    @CsvSource(
+        value = {
+            "/,^/$",
+            "/api/v1/users,^/api/v1/users$",
+            "/api/v1/users/{id},^/api/v1/users/[^/]+$",
+            "/api/v1/mail/{accountId}/messages/{id},^/api/v1/mail/[^/]+/messages/[^/]+$",
+        }
+    )
+    @ParameterizedTest
+    void effectiveRegex_templates(String template, String expectedPattern) {
+        String effectiveRegex = sanitizer.effectiveRegex(Endpoint.builder().pathTemplate(template).build());
+        assertEquals(expectedPattern, effectiveRegex);
+    }
 }
