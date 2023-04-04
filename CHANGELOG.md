@@ -20,6 +20,12 @@ Working tracking of changes, updated as work done prior to release.  Please revi
 
 ## [v0.4.18](https://github.com/Worklytics/psoxy/releases/tag/v0.4.18)
 
+Changes:
+  * if you didn't copy/fork an example you found in `examples-dev` or `examples`, the default
+    variable values in those examples have changed and you may see `PSEUDONYMIZE_APP_IDS=true` in
+    changes at your Terraform apply. If you have begun production use of your proxy, please warn
+    `support@worklytics.co` if you apply this change.
+
 ## [v0.4.17](https://github.com/Worklytics/psoxy/releases/tag/v0.4.17)
 
 Changes:
