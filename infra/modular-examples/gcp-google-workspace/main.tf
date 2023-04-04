@@ -126,8 +126,9 @@ module "psoxy-google-workspace-connector" {
     var.general_environment_variables,
     try(each.value.environment_variables, {}),
     {
-      BUNDLE_FILENAME     = module.psoxy-gcp.filename
-      IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
+      BUNDLE_FILENAME      = module.psoxy-gcp.filename
+      IS_DEVELOPMENT_MODE  = contains(var.non_production_connectors, each.key)
+      PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
     }
   )
 
@@ -229,8 +230,9 @@ module "connector-long-auth-function" {
     var.general_environment_variables,
     try(each.value.environment_variables, {}),
     {
-      BUNDLE_FILENAME     = module.psoxy-gcp.filename
-      IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
+      BUNDLE_FILENAME      = module.psoxy-gcp.filename
+      PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
+      IS_DEVELOPMENT_MODE  = contains(var.non_production_connectors, each.key)
     }
   )
 }

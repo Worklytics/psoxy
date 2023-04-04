@@ -64,6 +64,12 @@ variable "general_environment_variables" {
   default     = {}
 }
 
+variable "pseudonymize_app_ids" {
+  type        = string
+  description = "if set, will set value of PSEUDONYMIZE_APP_IDS environment variable to this value for all sources"
+  default     = true
+}
+
 variable "gcp_region" {
   type        = string
   description = "Region in which to provision GCP resources, if applicable"
