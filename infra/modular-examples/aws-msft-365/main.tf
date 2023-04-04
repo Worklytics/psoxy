@@ -162,6 +162,8 @@ module "psoxy-msft-connector" {
       IDENTITY_POOL_ID     = module.cognito-identity-pool.pool_id,
       IDENTITY_ID          = module.cognito-identity.identity_id[each.key]
       DEVELOPER_NAME_ID    = module.cognito-identity-pool.developer_provider_name
+      # trickery to force lambda restart so new rules seen
+      CUSTOM_RULES_SHA = try(module.custom_rest_rules[each.key].rules_hash, null)
     }
   )
 }
@@ -276,6 +278,8 @@ module "aws-psoxy-long-auth-connectors" {
       BUNDLE_FILENAME      = module.psoxy-aws.filename
       PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
       IS_DEVELOPMENT_MODE  = contains(var.non_production_connectors, each.key)
+      # trickery to force lambda restart so new rules seen
+      CUSTOM_RULES_SHA = try(module.custom_rest_rules[each.key].rules_hash, null)
     }
   )
 }
@@ -300,6 +304,15 @@ module "worklytics-psoxy-connection-oauth-long-access" {
 }
 
 # END LONG ACCESS AUTH CONNECTORS
+
+module "custom_rest_rules" {
+  source = "../../modules/aws-ssm-rules"
+
+  for_each = var.custom_rest_rules
+
+  prefix    = "${var.aws_ssm_param_root_path}PSOXY_${upper(replace(each.key, "-", "_"))}_"
+  file_path = each.value
+}
 
 # BEGIN BULK CONNECTORS
 

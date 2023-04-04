@@ -15,3 +15,6 @@ terraform.tfstate**
 .terraform/**
 TODO*
 test*
+
+# example rules files
+*.yaml

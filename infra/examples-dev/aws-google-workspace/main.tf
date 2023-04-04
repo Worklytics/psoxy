@@ -74,6 +74,7 @@ module "psoxy" {
   connector_display_name_suffix  = var.connector_display_name_suffix
   enabled_connectors             = var.enabled_connectors
   non_production_connectors      = var.non_production_connectors
+  custom_rest_rules              = var.custom_rest_rules
   custom_bulk_connectors         = var.custom_bulk_connectors
   lookup_table_builders          = var.lookup_table_builders
   gcp_project_id                 = data.google_project.psoxy-google-connectors.project_id

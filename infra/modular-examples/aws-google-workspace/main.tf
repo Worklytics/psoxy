@@ -139,6 +139,8 @@ module "psoxy-google-workspace-connector" {
     {
       BUNDLE_FILENAME     = module.psoxy-aws.filename
       IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
+      # trickery to force lambda restart so new rules seen
+      CUSTOM_RULES_SHA = contains(var.custom_rest_rules, each.key) ? filesha1(var.custom_rest_rules[each.key]) : null
     }
   )
 }
@@ -248,6 +250,8 @@ module "aws-psoxy-long-auth-connectors" {
     {
       BUNDLE_FILENAME     = module.psoxy-aws.filename
       IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
+      # trickery to force lambda restart so new rules seen
+      CUSTOM_RULES_SHA = contains(var.custom_rest_rules, each.key) ? filesha1(var.custom_rest_rules[each.key]) : null
     }
   )
 }
@@ -274,6 +278,15 @@ module "worklytics-psoxy-connection" {
 
 
 # END LONG ACCESS AUTH CONNECTORS
+
+module "custom_rest_rules" {
+  source = "../../modules/aws-ssm-rules"
+
+  for_each = var.custom_rest_rules
+
+  prefix    = "${var.aws_ssm_param_root_path}PSOXY_${upper(replace(each.key, "-", "_"))}_"
+  file_path = each.value
+}
 
 # BEGIN BULK CONNECTORS
 
