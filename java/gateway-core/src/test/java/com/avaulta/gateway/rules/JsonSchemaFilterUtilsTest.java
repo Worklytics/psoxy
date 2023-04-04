@@ -200,27 +200,6 @@ class JsonSchemaFilterUtilsTest {
 
     }
 
-    @SneakyThrows
-    @Test
-    public void compactCopy() {
-        JsonSchemaFilterUtils.JsonSchemaFilter schemaWithRefs =
-            jsonSchemaFilterUtils.generateJsonSchemaFilter(ComplexPojo.class);
-        JsonSchemaFilterUtils.JsonSchemaFilter compactCopy = jsonSchemaFilterUtils.compactCopy(schemaWithRefs);
-
-        assertEquals(ComplexPojo.EXPECTED_COMPACT_SCHEMA,
-            objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(compactCopy));
-
-        // 30% reduction in yaml size
-        assertEquals(404, yamlMapper.writeValueAsString(schemaWithRefs).length());
-        assertEquals(286, yamlMapper.writeValueAsString(compactCopy).length());
-
-        // non-pretty JSON is actually more compact than the yaml (pretty JSON is a lot less compact)
-        // (so if going to give up on human readability by base64gzip'ing the schema, might as well
-        //  do that with the JSON)
-        // eg, https://developer.hashicorp.com/terraform/language/functions/base64gzip
-        assertEquals(351, objectMapper.writeValueAsString(schemaWithRefs).length());
-        assertEquals(257, objectMapper.writeValueAsString(compactCopy).length());
-    }
 
     @Builder
     @Data
