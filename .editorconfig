@@ -31,3 +31,14 @@ quote_type = single
 indent_style = space
 indent_size = tab
 tab_width = 2
+
+# https://developer.hashicorp.com/terraform/language/syntax/style
+[*.{tf,tfvars,hcl}]
+indent_style = space
+indent_size = tab
+tab_width = 2
+
+[*.yaml]
+indent_style = space
+indent_size = tab
+tab_width = 2
