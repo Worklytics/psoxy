@@ -59,6 +59,7 @@ public class PrebuiltSanitizerRules {
     private final static JsonSchemaFilterUtils.JsonSchemaFilter USER_BY_QUERY_RESULT_JSON_SCHEMA = JsonSchemaFilterUtils.JsonSchemaFilter.builder()
             .type("object")
             .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
+
                             put("Alias", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                             put("AccountId", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                             put("ContactId", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
@@ -118,8 +119,7 @@ public class PrebuiltSanitizerRules {
 
     private final static JsonSchemaFilterUtils.JsonSchemaFilter ACCOUNT_QUERY_RESULT_SCHEMA = JsonSchemaFilterUtils.JsonSchemaFilter.builder()
             .type("object")
-            .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() { //req for java8-backwards compatibility
-                {
+            .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
                 put("Id", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                 put("AnnualRevenue", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("number").build());
                 put("CreatedDate", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
@@ -233,6 +233,7 @@ public class PrebuiltSanitizerRules {
                 // Using LinkedHashMap to keep the order to support same
                 // YAML serialization result
                 .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
+
                     put("totalSize", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                             .type("integer")
                             .build());
