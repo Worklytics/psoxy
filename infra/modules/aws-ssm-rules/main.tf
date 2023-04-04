@@ -27,7 +27,7 @@ locals {
   param_value      = local.use_compressed ? local.rules_compressed : local.rules_plain
 }
 
-resource "aws_ssm_parameter" "custom_rest_rules" {
+resource "aws_ssm_parameter" "rules" {
   name           = "${var.prefix}RULES"
   type           = "String"
   tier           = length(local.param_value) < 4096 ? "Standard" : "Advanced"
