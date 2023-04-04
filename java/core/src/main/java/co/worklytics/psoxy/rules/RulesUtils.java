@@ -35,7 +35,12 @@ public class RulesUtils {
 
     @SneakyThrows
     public String sha(RuleSet rules) {
-        return DigestUtils.sha1Hex(yamlMapper.writeValueAsString(rules));
+        return DigestUtils.sha1Hex(asYaml(rules));
+    }
+
+    @SneakyThrows
+    public String asYaml(RuleSet rules) {
+        return yamlMapper.writeValueAsString(rules);
     }
 
     /**

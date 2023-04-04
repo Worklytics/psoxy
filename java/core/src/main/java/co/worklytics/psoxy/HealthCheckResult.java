@@ -56,6 +56,8 @@ public class HealthCheckResult {
 
     Map<String, Instant> configPropertiesLastModified;
 
+    String rules;
+
 
     public boolean passed() {
         return getConfiguredSource() != null
