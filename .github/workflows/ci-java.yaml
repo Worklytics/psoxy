@@ -1,3 +1,5 @@
+name: CI - Java
+
 # CI for our project as a GitHub action
 # see https://help.github.com/en/actions/language-and-framework-guides/building-and-testing-java-with-maven
 on:
