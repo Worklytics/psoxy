@@ -13,7 +13,7 @@ jobs:
         # 16 is min version recommended to users
         # 18 released 2022-04-19
         # 19 released 2022-10-18
-        node-version: [ 16, 18, 19 ]
+        node-version: [ 19 ]
     steps:
     - uses: actions/checkout@v3
     - name: Use Node.js ${{ matrix.node-version }}
