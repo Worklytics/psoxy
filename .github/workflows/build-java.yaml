@@ -1,0 +1,45 @@
+name: Build - java
+
+# Build Java part of our project as a GitHub action
+# see https://help.github.com/en/actions/language-and-framework-guides/building-and-testing-java-with-maven
+
+on:
+  workflow_call:
+    inputs:
+      java-version:
+        required: false
+        type: string
+        description: Java version to use
+        default: 17
+
+jobs:
+  ci_java:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: ${{ inputs.java-version }}
+          # https://github.com/actions/setup-java#supported-distributions
+          distribution: zulu
+      - name: Cache Maven packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-v1-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2-v1-
+      - name: Clear our artifacts from Maven cache # q: does this work!?!?!
+        run: |
+          rm -rf ~/.m2/repository/co/worklytics/
+          rm -rf ~/.m2/repository/com/avaulta/
+      - name: Compile
+        working-directory: java/
+        run: |
+          mvn clean compile -T 2C -Dversions.logOutput=false -DprocessDependencies=false -DprocessDependencyManagement=false
+      - name: Test
+        working-directory: java/
+        run: |
+          mvn post-clean test -T 2C -Dversions.logOutput=false -DprocessDependencies=false -DprocessDependencyManagement=false -Dsurefire.forkCount=2.5C -Dsurefire.reuseForks=true
+
