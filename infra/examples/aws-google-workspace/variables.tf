@@ -123,6 +123,12 @@ variable "non_production_connectors" {
   default     = []
 }
 
+variable "custom_rest_rules" {
+  type        = map(string)
+  description = "map of connector id --> YAML file with custom rules"
+  default     = {}
+}
+
 variable "bulk_input_expiration_days" {
   type        = number
   description = "**alpha** Number of days after which objects in the bucket will expire. This could be as low as 1 day; longer aids debugging of issues."
