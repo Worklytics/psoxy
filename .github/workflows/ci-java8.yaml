@@ -41,7 +41,7 @@ jobs:
       - name: Compile gateway-core
         working-directory: java/gateway-core
         run: |
-          mvn compile ${{ env.compile-profile }}-T 2C -Dversions.logOutput=false \
+          mvn package install ${{ env.compile-profile }}-T 2C -Dversions.logOutput=false \
             -DprocessDependencies=false -DprocessDependencyManagement=false
       - name: Test gateway-core
         working-directory: java/gateway-core
