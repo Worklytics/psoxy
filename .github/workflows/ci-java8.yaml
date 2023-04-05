@@ -35,7 +35,8 @@ jobs:
       - name: Clear our artifacts from Maven cache # q: does this work!?!?!
         run: |
           rm -rf ~/.m2/repository/co/worklytics/
-          mvn clean ${{ env.compile-profile }}
+          rm -rf ~/.m2/repository/com/avaulta/
+          mvn clean
       - name: Compile gateway-core
         working-directory: java/gateway-core
         run: |

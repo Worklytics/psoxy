@@ -33,6 +33,7 @@ jobs:
       - name: Clear our artifacts from Maven cache # q: does this work!?!?!
         run: |
           rm -rf ~/.m2/repository/co/worklytics/
+          rm -rf ~/.m2/repository/com/avaulta/
       - name: Compile
         working-directory: java/
         run: |
