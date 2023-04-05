@@ -3,6 +3,7 @@
 # fills a terraform vars file with values that are required for the Terraform configuration to work
 
 TFVARS_FILE=$1
+PSOXY_BASE_DIR=$2
 
 # colors
 RED='\e[0;31m'
@@ -29,9 +30,9 @@ if test $AWS_PROVIDER_COUNT -ne 0; then
     printf "\taws_account_id=${BLUE}\"${AWS_ACCOUNT_ID}\"${NC}\n"
     echo "aws_region=\"${AWS_REGION}\"" >> $TFVARS_FILE
     printf "\taws_region=${BLUE}\"${AWS_REGION}\"${NC}\n"
-    echo "aws_assume_role_arn=\"${AWS_ARN}\" #(double-check this; perhaps needs to be a role within target account) \n" >> terraform.tfvars
+    printf "aws_assume_role_arn=\"${AWS_ARN}\" #(double-check this; perhaps needs to be a role within target account) \n" >> $TFVARS_FILE
     printf "\taws_assume_role_arn=${BLUE}\"${AWS_ARN}\"${NC} (double-check this; perhaps needs to be a role within target account) \n"
-    printf "caller_aws_arns = [\n  # include your own here if desired for testing\n" >> $TFVARS_FILE
+    printf "caller_aws_arns = [\n  # include your own here if desired for testing\n]\n" >> $TFVARS_FILE
     printf "caller_gcp_service_account_ids = [\n " >> $TFVARS_FILE
     printf "  # put value here from Worklytics ( https://intl.worklytics.co/analytics/integrations/configuration )\n" >> $TFVARS_FILE
     printf "  # \"123456712345671234567\" # 21-digits, get this from Worklytics once prod-ready\n]\n" >> $TFVARS_FILE

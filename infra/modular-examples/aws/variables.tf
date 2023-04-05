@@ -105,7 +105,7 @@ variable "force_bundle" {
 variable "pseudonymize_app_ids" {
   type        = string
   description = "if set, will set value of PSEUDONYMIZE_APP_IDS environment variable to this value for all sources"
-  default     = false
+  default     = true
 }
 
 variable "general_environment_variables" {

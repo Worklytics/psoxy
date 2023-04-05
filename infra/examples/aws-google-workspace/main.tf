@@ -79,6 +79,7 @@ module "psoxy" {
   google_workspace_example_user  = var.google_workspace_example_user
   google_workspace_example_admin = var.google_workspace_example_admin
   general_environment_variables  = var.general_environment_variables
+  pseudonymize_app_ids           = var.pseudonymize_app_ids
   salesforce_domain              = var.salesforce_domain
   bulk_sanitized_expiration_days = var.bulk_sanitized_expiration_days
   bulk_input_expiration_days     = var.bulk_input_expiration_days
