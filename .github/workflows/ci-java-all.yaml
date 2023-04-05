@@ -24,8 +24,9 @@ jobs:
 
   # NOTE: java 19 support ended 21 Mar 2023; it's known to be incompatible with our code
 
-  # Java 20 - released 21 Mar 2023, supported until 19 Sept 2023
-  ci_java20:
-    uses: ./.github/workflows/build-java.yaml
-    with:
-      java-version: '20'
+  # Java 20 - released 21 Mar 2023, supported until 19 Sept 2023;
+  #  as of 5 Apr 2023, current version of java 20 provided by GitHub action is ALSO incompatible with our code
+#  ci_java20:
+#    uses: ./.github/workflows/build-java.yaml
+#    with:
+#      java-version: '20'
