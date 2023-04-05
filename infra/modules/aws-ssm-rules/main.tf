@@ -40,9 +40,12 @@ resource "aws_ssm_parameter" "rules" {
   tier           = length(local.param_value) < local.ssm_standard_size_limit ? "Standard" : "Advanced"
   insecure_value = local.param_value
 
-  precondition {
-    condition     = length(local.param_value) > local.ssm_advanced_size_limit
-    error_message = "Rules on file ${var.file_path} are too big to store"
+
+  lifecycle {
+    precondition {
+      condition     = length(local.param_value) > local.ssm_advanced_size_limit
+      error_message = "Rules on file ${var.file_path} are too big to store"
+    }
   }
 }
 
