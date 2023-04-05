@@ -10,7 +10,7 @@ on:
         default: 17
 
 jobs:
-  validate_tf_examples:
+  validate_tf_example:
     name: 'validate tf examples'
     runs-on: ubuntu-latest
     env:
