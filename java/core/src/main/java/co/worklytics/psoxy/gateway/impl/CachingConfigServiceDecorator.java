@@ -38,7 +38,7 @@ public class CachingConfigServiceDecorator implements ConfigService {
                         .maximumSize(100)
                         .expireAfterWrite(defaultTtl.getSeconds(), TimeUnit.SECONDS)
                         .recordStats()
-                        .build(new CacheLoader<>() {
+                        .build(new CacheLoader<ConfigProperty, String>() {  //req for java8-backwards compatibility
                             @Override
                             public String load(ConfigProperty key) {
                                 return delegate.getConfigPropertyAsOptional(key).orElse(NEGATIVE_VALUE);

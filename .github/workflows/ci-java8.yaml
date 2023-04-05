@@ -1,0 +1,62 @@
+name: CI - java8
+
+# CI to build and test project components for which we need java8 builds
+# NOTE: this is ONLY core/gateway-core libraries; we don't build the executable/deployment bundles
+#      (eg, this does not build, cmd-line,aws, gcp)
+#
+# see https://help.github.com/en/actions/language-and-framework-guides/building-and-testing-java-with-maven
+
+on:
+  push:
+    branches:
+      - '**' # should match all branches
+
+jobs:
+  ci_java_8:
+    env:
+      compile-profile: '-P java8 ' # NOTE: trailing space is important
+      java-version: '17'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: ${{ env.java-version }}
+          # https://github.com/actions/setup-java#supported-distributions
+          distribution: zulu
+      - name: Cache Maven packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-v1-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2-v1-
+      - name: Clear our artifacts from Maven cache # q: does this work!?!?!
+        working-directory: java/
+        run: |
+          rm -rf ~/.m2/repository/co/worklytics/
+          rm -rf ~/.m2/repository/com/avaulta/
+          mvn clean
+      - name: Compile gateway-core
+        working-directory: java/gateway-core
+        run: |
+          mvn package install ${{ env.compile-profile }}-T 2C -Dversions.logOutput=false \
+            -DprocessDependencies=false -DprocessDependencyManagement=false
+      - name: Test gateway-core
+        working-directory: java/gateway-core
+        run: |
+          mvn post-clean test ${{ env.compile-profile }}-T 2C -Dversions.logOutput=false \
+            -DprocessDependencies=false -DprocessDependencyManagement=false  \
+            -Dsurefire.forkCount=2.5C -Dsurefire.reuseForks=true
+      - name: Compile core
+        working-directory: java/core
+        run: |
+          mvn compile ${{ env.compile-profile }}-T 2C -Dversions.logOutput=false \
+            -DprocessDependencies=false -DprocessDependencyManagement=false
+      - name: Test core
+        working-directory: java/core
+        run: |
+          mvn post-clean test ${{ env.compile-profile }}-T 2C -Dversions.logOutput=false \
+            -DprocessDependencies=false -DprocessDependencyManagement=false  \
+            -Dsurefire.forkCount=2.5C -Dsurefire.reuseForks=true

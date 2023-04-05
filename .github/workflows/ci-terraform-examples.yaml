@@ -3,7 +3,7 @@ name: 'validate Terraform Examples'
 on:
   push:
     branches-ignore:
-      - '**' # only run these on mainline (so we know if stable for reslse)
+      - '**' # only run these on mainline (so we know if stable for release)
     tags:
       - '**' # all tags; ensure any explicit release is internally consistent
 

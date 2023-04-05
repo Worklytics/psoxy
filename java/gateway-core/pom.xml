@@ -21,10 +21,10 @@
     </properties>
 
     <!-- generates a jdk8 compatible jar -->
-    <!-- mvn clean install -P dev -->
+    <!-- mvn clean install -P java8 -->
     <profiles>
         <profile>
-            <id>dev</id>
+            <id>java8</id>
             <properties>
                 <artifactSuffix>-jdk8</artifactSuffix>
             </properties>
