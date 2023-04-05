@@ -12,7 +12,8 @@ on:
       - '**' # should match all branches
 
 jobs:
-  ci_java:
+  ci_java8:
+    id: ci_java8
     env:
       compile-profile: '-P java8 ' # NOTE: trailing space is important
       java-version: '17'
