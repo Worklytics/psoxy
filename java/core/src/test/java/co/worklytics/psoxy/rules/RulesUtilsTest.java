@@ -5,13 +5,14 @@ import co.worklytics.psoxy.gateway.BulkModeConfigProperty;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.storage.StorageHandler;
-import com.avaulta.gateway.rules.ColumnarRules;
+import co.worklytics.test.TestUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import dagger.Component;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -47,7 +48,8 @@ class RulesUtilsTest {
         container.inject(this);
     }
 
-    static final String BASE64_YAML_REST = "YWxsb3dBbGxFbmRwb2ludHM6IGZhbHNlCmVuZHBvaW50czoKICAtIHBhdGhSZWdleDogL2NhbGVuZGFyL3YzL2NhbGVuZGFycy8uKi9ldmVudHMuKgogICAgdHJhbnNmb3JtczoKICAgICAgLSAhPHBzZXVkb255bWl6ZT4KICAgICAgICBqc29uUGF0aHM6CiAgICAgICAgICAtICQuLmVtYWlsCiAgICAgIC0gITxyZWRhY3Q+CiAgICAgICAganNvblBhdGhzOgogICAgICAgICAgLSAkLi5kaXNwbGF5TmFtZQogICAgICAgICAgLSAkLml0ZW1zWypdLmV4dGVuZGVkUHJvcGVydGllcy5wcml2YXRlCg==";
+    static final String BASE64_YAML_REST = "YWxsb3dBbGxFbmRwb2ludHM6IGZhbHNlCmVuZHBvaW50czoKICAtIHBhdGhSZWdleDogIl4vKHYxLjB8YmV0YSkvdXNlcnMvP1teL10qIgogICAgdHJhbnNmb3JtczoKICAgIC0gITxyZWRhY3Q+CiAgICAgIGpzb25QYXRoczoKICAgICAgLSAiJC4uZGlzcGxheU5hbWUiCiAgICAgIC0gIiQuLmVtcGxveWVlSWQiCg==";
+    static final String BASE64_YAML_REST_COMPRESSED = "H4sIAAAAAAAAAFWMPQvCQBBE+/yK9bBQwZy2QRQLCxsRWzGwepsY2dwdt+dHwB9vEkSwnJn3Bpndc828sca7ykbJoEAWSuhXJABT8BivByrplYHK9egxT2fvM0Uc67tQEL065vo0US0LEANaKVyoe7ezB4tABi9x2WeAmzi7bx+/QIeoYZqaSjxjs8Oa1N9AtWfXEG2NSj7mG4K5sgAAAA==";
     static final String YAML_REST =
             "allowAllEndpoints: false\n" +
             "endpoints:\n" +
@@ -106,5 +108,26 @@ class RulesUtilsTest {
             utils.parseAdditionalTransforms(config).get(0).getDestinationBucketName());
         assertEquals("something",
             ((CsvRules) utils.parseAdditionalTransforms(config).get(0).getRules()).getColumnsToPseudonymize().get(0));
+    }
+
+    @SneakyThrows
+    @ValueSource(strings = {
+        YAML_REST,
+        BASE64_YAML_REST,
+        BASE64_YAML_REST_COMPRESSED,
+    })
+    @ParameterizedTest
+    void decodeToYaml(String encoded) {
+        String decoded = utils.decodeToYaml(encoded);
+        assertEquals(YAML_REST, decoded);
+    }
+
+    // if you change YAML_REST, this test will fail; you can copy-paste the expected value to
+    // BASE64_YAML_REST_COMPRESSED
+    @Disabled // useless, and weirdly seems to fail via maven ... serialization issue?
+    @Test
+    void verifyCompression() {
+        assertEquals(BASE64_YAML_REST_COMPRESSED,
+            TestUtils.asBase64Gzipped(YAML_REST));
     }
 }

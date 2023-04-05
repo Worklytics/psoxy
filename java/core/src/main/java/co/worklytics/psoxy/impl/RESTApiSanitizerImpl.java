@@ -86,18 +86,24 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
             synchronized ($writeLock) {
                 compiledAllowedEndpoints = rules.getEndpoints().stream()
                      .collect(Collectors.toMap(Function.identity(),
-                           endpoint -> Pattern.compile(endpoint.getPathRegex(), CASE_INSENSITIVE)));
+                           endpoint -> Pattern.compile(effectiveRegex(endpoint), CASE_INSENSITIVE)));
             }
         }
         return compiledAllowedEndpoints;
     }
 
+    @VisibleForTesting
+    String effectiveRegex(Endpoint endpoint) {
+        return Optional.ofNullable(endpoint.getPathRegex())
+            .orElseGet(() -> "^" + endpoint.getPathTemplate().replaceAll("\\{.*?\\}", "[^/]+") + "$");
+    }
+
     JsonSchemaFilterUtils.JsonSchemaFilter getRootDefinitions() {
         if (rootDefinitions == null) {
             synchronized ($writeLock) {
-  if (rootDefinitions == null) {
-          rootDefinitions = JsonSchemaFilterUtils.JsonSchemaFilter.builder().definitions(rules.getDefinitions()).build();
-  }
+              if (rootDefinitions == null) {
+                      rootDefinitions = JsonSchemaFilterUtils.JsonSchemaFilter.builder().definitions(rules.getDefinitions()).build();
+              }
             }
         }
         return rootDefinitions;

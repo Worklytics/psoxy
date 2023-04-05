@@ -64,6 +64,7 @@ module "psoxy" {
   enabled_connectors             = var.enabled_connectors
   non_production_connectors      = var.non_production_connectors
   connector_display_name_suffix  = var.connector_display_name_suffix
+  custom_rest_rules              = var.custom_rest_rules
   custom_bulk_connectors         = var.custom_bulk_connectors
   lookup_table_builders          = var.lookup_table_builders
   msft_tenant_id                 = var.msft_tenant_id

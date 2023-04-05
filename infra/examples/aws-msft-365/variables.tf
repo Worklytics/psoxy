@@ -147,6 +147,12 @@ variable "bulk_sanitized_expiration_days" {
   default     = 720
 }
 
+variable "custom_rest_rules" {
+  type        = map(string)
+  description = "map of connector id --> YAML file with custom rules"
+  default     = {}
+}
+
 variable "custom_bulk_connectors" {
   type = map(object({
     source_kind = string

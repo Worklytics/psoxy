@@ -4,6 +4,7 @@ import co.worklytics.psoxy.ControlHeader;
 import co.worklytics.psoxy.HealthCheckResult;
 import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
+import co.worklytics.psoxy.rules.RulesUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -34,6 +35,8 @@ public class HealthCheckRequestHandler {
     SourceAuthStrategy sourceAuthStrategy;
     @Inject
     ObjectMapper objectMapper;
+    @Inject
+    RulesUtils rulesUtils;
 
     public Optional<HttpEventResponse> handleIfHealthCheck(HttpEventRequest request) {
         if (isHealthCheckRequest(request)) {
@@ -90,6 +93,13 @@ public class HealthCheckRequestHandler {
                 .ifPresent(healthCheckResult::bundleFilename);
         } catch (Throwable e) {
             log.log(Level.WARNING, "Failed to add bundleFilename to health check");
+        }
+
+        try {
+            rulesUtils.getRulesFromConfig(config)
+                .ifPresent(rules -> healthCheckResult.rules(rulesUtils.asYaml(rules)));
+        } catch (Throwable e) {
+            log.log(Level.WARNING, "Failed to add rules to health check");
         }
 
         HttpEventResponse.HttpEventResponseBuilder responseBuilder = HttpEventResponse.builder();
