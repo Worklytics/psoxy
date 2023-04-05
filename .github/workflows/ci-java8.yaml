@@ -33,6 +33,7 @@ jobs:
           key: ${{ runner.os }}-m2-v1-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2-v1-
       - name: Clear our artifacts from Maven cache # q: does this work!?!?!
+        working-directory: java/
         run: |
           rm -rf ~/.m2/repository/co/worklytics/
           rm -rf ~/.m2/repository/com/avaulta/
