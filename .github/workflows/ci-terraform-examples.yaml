@@ -11,10 +11,11 @@ jobs:
   validate_tf_examples:
     strategy:
       matrix:
-        example_path: [ 
+        example_path: [
                         'examples-dev/aws',
                         'examples-dev/aws-google-workspace',
                         'examples-dev/aws-msft-365',
+                        'examples-dev/gcp-google-workspace',
         ]
     uses: ./.github/workflows/ci-terraform-example.yaml
     with:
