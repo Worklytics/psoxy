@@ -10,4 +10,7 @@ on:
 
 jobs:
   ci_java:
+    name: ci_java
     uses: ./.github/workflows/build-java.yaml
+    with:
+      java-version: '17'
