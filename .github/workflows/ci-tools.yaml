@@ -1,8 +1,8 @@
 name: CI - Tools
 
-on: 
-  push: 
-    branches: 
+on:
+  push:
+    branches:
       - '**'
 
 jobs:
@@ -10,7 +10,10 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [16.x] # min version recommended to users
+        # 16 is min version recommended to users
+        # 18 released 2022-04-19
+        # 19 released 2022-10-18
+        node-version: [ 16, 18, 19 ]
     steps:
     - uses: actions/checkout@v3
     - name: Use Node.js ${{ matrix.node-version }}
@@ -19,7 +22,7 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
         cache-dependency-path: ./tools/psoxy-test
-    - name: Install dependencies    
+    - name: Install dependencies
       working-directory: ./tools/psoxy-test
       run: npm i
     - name: Run test
