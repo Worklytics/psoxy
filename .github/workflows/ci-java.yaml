@@ -1,8 +1,5 @@
-name: CI - java
-
 # CI for our project as a GitHub action
 # see https://help.github.com/en/actions/language-and-framework-guides/building-and-testing-java-with-maven
-
 on:
   push:
     branches:
@@ -10,7 +7,6 @@ on:
 
 jobs:
   ci_java:
-    name: ci_java
     uses: ./.github/workflows/build-java.yaml
     with:
       java-version: '17'
