@@ -139,7 +139,8 @@ module "psoxy-google-workspace-connector" {
     var.general_environment_variables,
     try(each.value.environment_variables, {}),
     {
-      IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
+      PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
+      IS_DEVELOPMENT_MODE  = contains(var.non_production_connectors, each.key)
     }
   )
 }
@@ -279,6 +280,7 @@ module "psoxy-msft-connector" {
       IDENTITY_POOL_ID     = module.cognito_identity_pool[0].pool_id,
       IDENTITY_ID          = module.cognito_identity[0].identity_id[each.key]
       DEVELOPER_NAME_ID    = module.cognito_identity_pool[0].developer_provider_name
+      CUSTOM_RULES_SHA     = contains(var.custom_rest_rules, each.key) ? filesha1(var.custom_rest_rules[each.key]) : null
     }
   )
 }
@@ -391,7 +393,10 @@ module "aws-psoxy-long-auth-connectors" {
     var.general_environment_variables,
     try(each.value.environment_variables, {}),
     {
-      IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
+      IS_DEVELOPMENT_MODE  = contains(var.non_production_connectors, each.key)
+      CUSTOM_RULES_SHA     = contains(var.custom_rest_rules, each.key) ? filesha1(var.custom_rest_rules[each.key]) : null
+      PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
+
     }
   )
 }
@@ -415,9 +420,16 @@ module "worklytics-psoxy-connection" {
   }
 }
 
-
-
 # END LONG ACCESS AUTH CONNECTORS
+
+module "custom_rest_rules" {
+  source = "../../modules/aws-ssm-rules"
+
+  for_each = var.custom_rest_rules
+
+  prefix    = "${var.aws_ssm_param_root_path}PSOXY_${upper(replace(each.key, "-", "_"))}_"
+  file_path = each.value
+}
 
 # BEGIN BULK CONNECTORS
 

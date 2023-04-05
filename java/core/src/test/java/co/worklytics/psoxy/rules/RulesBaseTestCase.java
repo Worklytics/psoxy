@@ -4,10 +4,8 @@ import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.impl.RESTApiSanitizerImpl;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestUtils;
-import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
-import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.transforms.Transform;
 import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
@@ -18,13 +16,11 @@ import lombok.*;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import scala.concurrent.impl.FutureConvertersImpl;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -126,14 +122,22 @@ abstract public class RulesBaseTestCase {
     }
 
     // regular param --> 4096
-    // advanced param --> 8000
-    int CHAR_LIMIT = 8000;
+    int REGULAR_SSM_PARAM_LIMIT = 4096;
+    int ADVANCED_SSM_PARAM_LIMIT = 8192;
 
     @SneakyThrows
     @Test
     void yamlLength() {
         int rulesLengthInChars = yamlMapper.writeValueAsString(getRulesUnderTest()).length();
-        assertTrue(rulesLengthInChars < CHAR_LIMIT, "YAML rules " + rulesLengthInChars + " chars long; want < " + CHAR_LIMIT + " chars to fit as AWS SSM param");
+        assertTrue(rulesLengthInChars < ADVANCED_SSM_PARAM_LIMIT, "YAML rules " + rulesLengthInChars + " chars long; want < " + ADVANCED_SSM_PARAM_LIMIT + " chars to fit as AWS SSM param");
+    }
+
+    @SneakyThrows
+    @Test
+    void yamlLengthCompressed() {
+        int rulesLengthInChars = TestUtils.asBase64Gzipped(yamlMapper.writeValueAsString(getRulesUnderTest())).length();
+        assertTrue(rulesLengthInChars < REGULAR_SSM_PARAM_LIMIT,
+            "YAML rules " + rulesLengthInChars + " chars long; want < " + REGULAR_SSM_PARAM_LIMIT + " chars to fit as AWS SSM param");
     }
 
     @SneakyThrows

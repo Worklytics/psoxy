@@ -105,7 +105,7 @@ variable "force_bundle" {
 variable "pseudonymize_app_ids" {
   type        = string
   description = "if set, will set value of PSEUDONYMIZE_APP_IDS environment variable to this value for all sources"
-  default     = false
+  default     = true
 }
 
 variable "general_environment_variables" {
@@ -124,6 +124,12 @@ variable "non_production_connectors" {
   type        = list(string)
   description = "connector ids in this list will be in development mode (not for production use"
   default     = []
+}
+
+variable "custom_rest_rules" {
+  type        = map(string)
+  description = "map of connector id --> YAML file with custom rules"
+  default     = {}
 }
 
 variable "custom_bulk_connectors" {

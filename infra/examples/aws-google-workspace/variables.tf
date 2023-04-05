@@ -93,6 +93,12 @@ variable "general_environment_variables" {
   default     = {}
 }
 
+variable "pseudonymize_app_ids" {
+  type        = string
+  description = "if set, will set value of PSEUDONYMIZE_APP_IDS environment variable to this value for all sources"
+  default     = true
+}
+
 variable "enabled_connectors" {
   type        = list(string)
   description = "list of ids of connectors to enabled; see modules/worklytics-connector-specs"
@@ -115,6 +121,12 @@ variable "non_production_connectors" {
   type        = list(string)
   description = "connector ids in this list will be in development mode (not for production use"
   default     = []
+}
+
+variable "custom_rest_rules" {
+  type        = map(string)
+  description = "map of connector id --> YAML file with custom rules"
+  default     = {}
 }
 
 variable "bulk_input_expiration_days" {

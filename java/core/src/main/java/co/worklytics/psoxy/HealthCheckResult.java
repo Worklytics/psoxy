@@ -56,6 +56,9 @@ public class HealthCheckResult {
 
     Map<String, Instant> configPropertiesLastModified;
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    String rules;
+
 
     public boolean passed() {
         return getConfiguredSource() != null

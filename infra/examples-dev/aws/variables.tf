@@ -130,7 +130,7 @@ variable "general_environment_variables" {
 variable "pseudonymize_app_ids" {
   type        = string
   description = "if set, will set value of PSEUDONYMIZE_APP_IDS environment variable to this value for all sources"
-  default     = false
+  default     = true
 }
 
 variable "enabled_connectors" {
@@ -164,6 +164,12 @@ variable "bulk_sanitized_expiration_days" {
   type        = number
   description = "**alpha** Number of days after which objects in the bucket will expire. In practice, Worklytics syncs data ~weekly, so 30 day minimum for this value."
   default     = 720
+}
+
+variable "custom_rest_rules" {
+  type        = map(string)
+  description = "map of connector id --> YAML file with custom rules"
+  default     = {}
 }
 
 variable "custom_bulk_connectors" {

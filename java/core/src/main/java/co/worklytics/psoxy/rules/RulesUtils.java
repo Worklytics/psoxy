@@ -7,7 +7,9 @@ import co.worklytics.psoxy.storage.StorageHandler;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
+
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.io.ByteStreams;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.SneakyThrows;
@@ -16,11 +18,13 @@ import org.apache.commons.codec.digest.DigestUtils;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
+import java.util.zip.GZIPInputStream;
 
 @Log
 @NoArgsConstructor(onConstructor_ = @Inject)
@@ -31,7 +35,12 @@ public class RulesUtils {
 
     @SneakyThrows
     public String sha(RuleSet rules) {
-        return DigestUtils.sha1Hex(yamlMapper.writeValueAsString(rules));
+        return DigestUtils.sha1Hex(asYaml(rules));
+    }
+
+    @SneakyThrows
+    public String asYaml(RuleSet rules) {
+        return yamlMapper.writeValueAsString(rules);
     }
 
     /**
@@ -45,17 +54,33 @@ public class RulesUtils {
         Optional<String> configuredRules = config.getConfigPropertyAsOptional(ProxyConfigProperty.RULES);
 
         if (configuredRules.isPresent()) {
-            String yamlEncodedRules;
-            try {
-                yamlEncodedRules = new String(Base64.getDecoder().decode(configuredRules.get()));
-                log.info("RULES configured as base64-encoded YAML");
-            } catch (IllegalArgumentException e) {
-                yamlEncodedRules = configuredRules.get();
-            }
+            String yamlEncodedRules = decodeToYaml(configuredRules.get());
             return Optional.of(parse(yamlEncodedRules));
         } else {
             return Optional.empty();
         }
+    }
+
+    @VisibleForTesting
+    String decodeToYaml(String valueFromConfig) {
+        //possible encodings: 1) base64-encoded YAML, 2) plain YAML, 3) base64-encoded gzipped YAML
+        String yamlEncodedRules;
+        try {
+            byte[] raw = Base64.getDecoder().decode(valueFromConfig);
+
+            try {
+                raw = ByteStreams.toByteArray(new GZIPInputStream(new ByteArrayInputStream(raw)));
+                log.info("RULES configured as base64-encoded gzipped YAML");
+            } catch (IOException e) {
+                //not gzipped
+                log.info("RULES configured as base64-encoded YAML");
+            }
+            yamlEncodedRules = new String(raw);
+        } catch (IllegalArgumentException e) {
+            log.info("RULES configured as YAML");
+            yamlEncodedRules = valueFromConfig;
+        }
+        return yamlEncodedRules;
     }
 
     @VisibleForTesting
@@ -91,5 +116,7 @@ public class RulesUtils {
             return new ArrayList<>();
         }
     }
+
+
 
 }

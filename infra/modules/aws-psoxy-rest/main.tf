@@ -109,9 +109,7 @@ ${coalesce(join("\n", local.command_test_calls), "cd docs/example-api-calls/")}
 ```
 
 Feel free to try the above calls, and reference to the source's API docs for other parameters /
-endpoints to experiment with. If you spot any additional fields you believe should be
-redacted/pseudonymized, feel free to modify the rules in your local repo and re-deploy OR configure
-a RULES variable in the source.
+endpoints to experiment with.
 
 ### Check logs (AWS CloudWatch)
 

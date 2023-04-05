@@ -113,6 +113,12 @@ variable "general_environment_variables" {
   default     = {}
 }
 
+variable "pseudonymize_app_ids" {
+  type        = string
+  description = "if set, will set value of PSEUDONYMIZE_APP_IDS environment variable to this value for all sources"
+  default     = false # TODO: true in v0.5
+}
+
 
 variable "enabled_connectors" {
   type        = list(string)
@@ -148,6 +154,12 @@ variable "bulk_sanitized_expiration_days" {
   type        = number
   description = "**alpha** Number of days after which objects in the bucket will expire"
   default     = 720
+}
+
+variable "custom_rest_rules" {
+  type        = map(string)
+  description = "map of connector id --> YAML file with custom rules"
+  default     = {}
 }
 
 variable "custom_bulk_connectors" {
