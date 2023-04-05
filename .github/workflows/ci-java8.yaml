@@ -14,7 +14,7 @@ on:
 jobs:
   ci_java_8:
     env:
-      compile-profile: '-P java8'
+      compile-profile: '-P java8 ' # NOTE: trailing space is important
       java-version: '17'
     runs-on: ubuntu-latest
     steps:
@@ -39,7 +39,7 @@ jobs:
       - name: Compile gateway-core
         working-directory: java/gateway-core
         run: |
-          mvn compile ${{ env.compile-profile }} -T 2C -Dversions.logOutput=false \
+          mvn compile ${{ env.compile-profile }}-T 2C -Dversions.logOutput=false \
             -DprocessDependencies=false -DprocessDependencyManagement=false
       - name: Test gateway-core
         working-directory: java/gateway-core
@@ -50,7 +50,7 @@ jobs:
       - name: Compile core
         working-directory: java/core
         run: |
-          mvn compile ${{ env.compile-profile }} -T 2C -Dversions.logOutput=false \
+          mvn compile ${{ env.compile-profile }}-T 2C -Dversions.logOutput=false \
             -DprocessDependencies=false -DprocessDependencyManagement=false
       - name: Test core
         working-directory: java/core
