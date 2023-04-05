@@ -46,7 +46,7 @@ jobs:
       - name: Test gateway-core
         working-directory: java/gateway-core
         run: |
-          mvn post-clean test -T 2C -Dversions.logOutput=false \
+          mvn post-clean test ${{ env.compile-profile }}-T 2C -Dversions.logOutput=false \
             -DprocessDependencies=false -DprocessDependencyManagement=false  \
             -Dsurefire.forkCount=2.5C -Dsurefire.reuseForks=true
       - name: Compile core
@@ -57,6 +57,6 @@ jobs:
       - name: Test core
         working-directory: java/core
         run: |
-          mvn post-clean test -T 2C -Dversions.logOutput=false \
+          mvn post-clean test ${{ env.compile-profile }}-T 2C -Dversions.logOutput=false \
             -DprocessDependencies=false -DprocessDependencyManagement=false  \
             -Dsurefire.forkCount=2.5C -Dsurefire.reuseForks=true
