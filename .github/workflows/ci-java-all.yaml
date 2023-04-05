@@ -1,0 +1,31 @@
+name: CI - java
+
+# CI for our project as a GitHub action
+# see https://help.github.com/en/actions/language-and-framework-guides/building-and-testing-java-with-maven
+
+on:
+  push:
+    branches:
+      - 'main'
+      - 'rc-*' # should match all branches
+
+jobs:
+  # Java 11 - supported until 30 Sept 2023
+  ci_java11:
+    uses: ./.github/workflows/build-java.yaml
+    with:
+      java-version: '11'
+
+  # Java 17 - supported until 30 Sept 2026; same as our default build as of Apr 2023
+  ci_java17:
+    uses: ./.github/workflows/build-java.yaml
+    with:
+      java-version: '17'
+
+  # NOTE: java 19 support ended 21 Mar 2023; it's known to be incompatible with our code
+
+  # Java 20 - released 21 Mar 2023, supported until 19 Sept 2023
+  ci_java20:
+    uses: ./.github/workflows/build-java.yaml
+    with:
+      java-version: '20'
