@@ -19,19 +19,31 @@
 #  - need to worry about terraforms permissions to write the SSM param (if we're not otherwise
 #    writing SSMs, which as of Apr 2023 we are so not really concern)
 
-# compress if necessary; but otherwise leave plain so human readable
+
 locals {
+  # size limits, in bytes
+  ssm_advanced_size_limit = 8192
+  ssm_standard_size_limit = 4096
+
+  # read rules from file
   rules_plain      = file(var.file_path)
+
+  # compress if necessary; but otherwise leave plain so human readable
   rules_compressed = base64gzip(local.rules_plain)
-  use_compressed   = length(local.rules_plain) > 8192
+  use_compressed   = length(local.rules_plain) > local.ssm_advanced_size_limit
   param_value      = local.use_compressed ? local.rules_compressed : local.rules_plain
 }
 
 resource "aws_ssm_parameter" "rules" {
   name           = "${var.prefix}RULES"
   type           = "String"
-  tier           = length(local.param_value) < 4096 ? "Standard" : "Advanced"
+  tier           = length(local.param_value) < local.ssm_standard_size_limit ? "Standard" : "Advanced"
   insecure_value = local.param_value
+
+  precondition {
+    condition     = length(local.param_value) > local.ssm_advanced_size_limit
+    error_message = "Rules on file ${var.file_path} are too big to store"
+  }
 }
 
 output "rules_hash" {
