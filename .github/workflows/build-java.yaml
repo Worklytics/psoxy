@@ -41,9 +41,12 @@ jobs:
       - name: Compile
         working-directory: java/
         run: |
-          mvn clean compile ${{ inputs.compile-profile }} -T 2C -Dversions.logOutput=false -DprocessDependencies=false -DprocessDependencyManagement=false
+          mvn clean compile ${{ inputs.compile-profile }} -T 2C -Dversions.logOutput=false \
+            -DprocessDependencies=false -DprocessDependencyManagement=false
       - name: Test
         working-directory: java/
         run: |
-          mvn post-clean test -T 2C -Dversions.logOutput=false -DprocessDependencies=false -DprocessDependencyManagement=false -Dsurefire.forkCount=2.5C -Dsurefire.reuseForks=true
+          mvn post-clean test ${{ inputs.compile-profile }} -T 2C -Dversions.logOutput=false \ 
+            -DprocessDependencies=false -DprocessDependencyManagement=false  \ 
+            -Dsurefire.forkCount=2.5C -Dsurefire.reuseForks=true
 
