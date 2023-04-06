@@ -1,5 +1,8 @@
 # aws-google-workspace
 
+**DEPRECATED - will remove in v0.5**
+
+
 Module for deploying Worklytics Psoxy on AWS for Google Workspace-based organization.
 
 See [infra/examples/aws-google-workspace](../../examples/aws-google-workspace) for example usage.

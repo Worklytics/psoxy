@@ -1,5 +1,7 @@
 # aws-msft-365
 
+**DEPRECATED - will remove in v0.5**
+
 Module for deploying Worklytics Psoxy on AWS for Microsoft 365-based organization.
 
 See [infra/examples/aws-msft-365](../../examples/aws-msft-365) for example usage.
