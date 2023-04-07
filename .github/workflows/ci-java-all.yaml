@@ -3,11 +3,14 @@ name: CI - java
 # CI for our project as a GitHub action
 # see https://help.github.com/en/actions/language-and-framework-guides/building-and-testing-java-with-maven
 
+# refactor to use matrix?
+# see https://github.com/actions/setup-java#testing-against-different-java-versions
+
 on:
-  push:
+  push: # mainline + rc's only
     branches:
       - 'main'
-      - 'rc-*' # should match all branches
+      - 'rc-*'
 
 jobs:
   # Java 11 - supported until 30 Sept 2023
@@ -24,8 +27,11 @@ jobs:
 
   # NOTE: java 19 support ended 21 Mar 2023; it's known to be incompatible with our code
 
-  # Java 20 - released 21 Mar 2023, supported until 19 Sept 2023
-  ci_java20:
-    uses: ./.github/workflows/build-java.yaml
-    with:
-      java-version: '20'
+  # Java 20 - released 21 Mar 2023, supported until 19 Sept 2023;
+  #  as of 5 Apr 2023, current version of java 20 provided by GitHub action is ALSO incompatible
+  # with our code; have tested temurin, liberica, microsoft, corretto, oracle and zulu - all fail
+#  ci_java20:
+#    uses: ./.github/workflows/build-java.yaml
+#    with:
+#      java-version: '20'
+#
