@@ -38,12 +38,16 @@ else
   cd ${TF_CONFIG_ROOT}
 fi
 
-if [ ! -f terraform.tfvars ]; then
+TFVARS_FILE="${TF_CONFIG_ROOT}/terraform.tfvars"
+
+if [ ! -f $TFVARS_FILE ]; then
   printf "Initializing ${BLUE}terraform.tfvars${NC} file for your configuration ...\n"
 
-  TFVARS_FILE="${TF_CONFIG_ROOT}/terraform.tfvars"
-
-  cp ${TF_CONFIG_ROOT}/terraform.tfvars.example $TFVARS_FILE
+  if [ -f ${TF_CONFIG_ROOT}/terraform.tfvars.example.hcl ]; then
+    cp ${TF_CONFIG_ROOT}/terraform.tfvars.example.hcl $TFVARS_FILE
+  else
+    touch $TFVARS_FILE
+  fi
 
   ${PSOXY_BASE_DIR}tools/init-tfvars.sh $TFVARS_FILE $PSOXY_BASE_DIR
 else
