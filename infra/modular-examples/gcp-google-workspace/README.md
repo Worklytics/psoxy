@@ -1,5 +1,7 @@
 # example-google-workspace
 
+**DEPRECATED - will remove in v0.5**
+
 A Terraform root module to provision GCP project for Psoxy, configure it, and create necessary infra
 to for connections to all supported Google Workspace sources, with state stored to local filesystem.
 As such, it is not appropriate for scenario with multiple developers. As state will contain

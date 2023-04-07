@@ -1,11 +1,17 @@
 terraform {
   required_providers {
+    # for API connections to Microsoft 365 (comment this out if unused)
+    azuread = {
+      version = "~> 2.3"
+    }
+
+    # for the API connections to Google Workspace
     google = {
-      version = "~> 4.12"
+      version = ">= 3.74, <= 5.0"
     }
   }
 
-  # we recommend you use a secure location for your Terraform state (such as GCS bucket), as it
+  # we recommend you use a secure location for your Terraform state (such as S3 bucket), as it
   # may contain sensitive values (such as API keys) depending on which data sources you configure.
   #
   # local may be safe for production-use IFF you are executing Terraform from a secure location
@@ -22,9 +28,13 @@ terraform {
   #  }
 }
 
+provider "azuread" {
+  tenant_id = var.msft_tenant_id
+}
+
 module "psoxy" {
-  source = "../../modular-examples/gcp-google-workspace"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-google-workspace?ref=rc-v0.4.18"
+  source = "../../modular-examples/gcp"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/gcp?ref=rc-v0.4.18"
 
   gcp_project_id                 = var.gcp_project_id
   environment_name               = var.environment_name
@@ -44,11 +54,6 @@ module "psoxy" {
   salesforce_domain              = var.salesforce_domain
   bulk_input_expiration_days     = var.bulk_input_expiration_days
   bulk_sanitized_expiration_days = var.bulk_sanitized_expiration_days
-}
-
-moved {
-  from = module.psoxy-gcp-google-workspace
-  to   = module.psoxy
 }
 
 output "todos_1" {

@@ -38,17 +38,45 @@ else
   cd ${TF_CONFIG_ROOT}
 fi
 
-if [ ! -f terraform.tfvars ]; then
+TFVARS_FILE="${TF_CONFIG_ROOT}/terraform.tfvars"
+
+if [ ! -f $TFVARS_FILE ]; then
   printf "Initializing ${BLUE}terraform.tfvars${NC} file for your configuration ...\n"
 
-  TFVARS_FILE="${TF_CONFIG_ROOT}/terraform.tfvars"
-
-  cp ${TF_CONFIG_ROOT}/terraform.tfvars.example $TFVARS_FILE
+  if [ -f ${TF_CONFIG_ROOT}/terraform.tfvars.example.hcl ]; then
+    cp ${TF_CONFIG_ROOT}/terraform.tfvars.example.hcl $TFVARS_FILE
+  else
+    touch $TFVARS_FILE
+  fi
 
   ${PSOXY_BASE_DIR}tools/init-tfvars.sh $TFVARS_FILE $PSOXY_BASE_DIR
 else
   printf "${RED}Nothing to initialize. File terraform.tfvars already exists.${NC}\n\n"
 fi
+
+# create example build script, to support building deployment bundle (JAR) outside of Terraform
+# (useful for debugging)
+
+BUILD_DEPLOYMENT_BUNDLE_SCRIPT=${TF_CONFIG_ROOT}/build
+if [ -f $BUILD_DEPLOYMENT_BUNDLE_SCRIPT ]; then
+  rm "$BUILD_DEPLOYMENT_BUNDLE_SCRIPT"
+fi
+
+touch "$BUILD_DEPLOYMENT_BUNDLE_SCRIPT"
+echo "#!/bin/bash" >> $BUILD_DEPLOYMENT_BUNDLE_SCRIPT
+
+# pattern used to grep for provider at top-level of Terraform configuration
+TOP_LEVEL_PROVIDER_PATTERN="^├── provider\[registry.terraform.io/hashicorp"
+AWS_PROVIDER_COUNT=$(terraform providers | grep "${TOP_LEVEL_PROVIDER_PATTERN}/aws" | wc -l)
+AWS_HOSTED=$(test $AWS_PROVIDER_COUNT -ne 0)
+if [ $AWS_HOSTED ]; then
+  HOST_PLATFORM="aws"
+else
+  HOST_PLATFORM="gcp"
+fi
+echo "${PSOXY_BASE_DIR}tools/build.sh $HOST_PLATFORM ${PSOXY_BASE_DIR}java" >> $BUILD_DEPLOYMENT_BUNDLE_SCRIPT
+chmod +x "$BUILD_DEPLOYMENT_BUNDLE_SCRIPT"
+
 
 # Install test tool
 ${PSOXY_BASE_DIR}tools/install-test-tool.sh ${PSOXY_BASE_DIR}tools

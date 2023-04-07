@@ -22,17 +22,11 @@ terraform {
   #  }
 }
 
-# Google user or service account which Terraform is authenticated as must be authorized to
-# provision resources in this project
-data "google_project" "psoxy-project" {
-  project_id = var.gcp_project_id
-}
-
 module "psoxy" {
   # source = "../../modular-examples/gcp-google-workspace"
   source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/gcp-google-workspace?ref=rc-v0.4.18"
 
-  gcp_project_id                 = data.google_project.psoxy-project.project_id
+  gcp_project_id                 = var.gcp_project_id
   environment_name               = var.environment_name
   worklytics_sa_emails           = var.worklytics_sa_emails
   connector_display_name_suffix  = var.connector_display_name_suffix
