@@ -70,19 +70,6 @@ variable "replica_regions" {
 variable "enabled_connectors" {
   type        = list(string)
   description = "list of ids of connectors to enabled; see modules/worklytics-connector-specs"
-
-  default = [
-    "asana",
-    "gdirectory",
-    "gcal",
-    "gmail",
-    "gdrive",
-    "google-chat",
-    "google-meet",
-    "hris",
-    "slack-discovery-api",
-    "zoom",
-  ]
 }
 
 variable "non_production_connectors" {
@@ -93,14 +80,14 @@ variable "non_production_connectors" {
 
 variable "bulk_input_expiration_days" {
   type        = number
-  description = "**alpha** Number of days after which objects in the bucket will expire"
+  description = "Number of days after which objects in the bucket will expire"
   default     = 30
 }
 
 variable "bulk_sanitized_expiration_days" {
   type        = number
-  description = "**alpha** Number of days after which objects in the bucket will expire"
-  default     = 720
+  description = "Number of days after which objects in the bucket will expire"
+  default     = 1805 # 5 years; intent is 'forever', but some upperbound in case bucket is forgotten
 }
 
 variable "custom_bulk_connectors" {
