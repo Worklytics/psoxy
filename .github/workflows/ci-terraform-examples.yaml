@@ -1,84 +1,22 @@
-name: 'validate Terraform Examples'
+name: 'validate Terraform Examples - Dev'
+
+# run everywhere; should be internally consistent
 
 on:
   push:
-    branches-ignore:
-      - '**' # only run these on mainline (so we know if stable for release)
-    tags:
-      - '**' # all tags; ensure any explicit release is internally consistent
+    branches:
+      - '**'
 
 jobs:
   validate_tf_examples:
-    name: 'validate tf examples'
-    runs-on: ubuntu-latest
-    env:
-      TERRAFORM_VERSION: 1.3.2
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v1
-
-      - name: 'setup Terraform'
-        uses: hashicorp/setup-terraform@v1
-        with:
-          terraform_version: ${{ env.TERRAFORM_VERSION }}
-
-      - name: 'Terraform - validate examples/aws-google-workspace'
-        working-directory: infra/examples/aws-google-workspace
-        run: |
-          terraform init -reconfigure
-          terraform validate
-
-      - name: 'Terraform - validate examples/aws-msft-365'
-        working-directory: infra/examples/aws-msft-365
-        run: |
-          terraform init -reconfigure
-          terraform validate
-
-      - name: 'Terraform - validate examples/gcp-bootstrap-cft'
-        working-directory: infra/examples/gcp-bootstrap-cft
-        run: |
-          terraform init -reconfigure
-          terraform validate
-
-      - name: 'Terraform - validate examples/gcp-bootstrap-simple'
-        working-directory: infra/examples/gcp-bootstrap-simple
-        run: |
-          terraform init -reconfigure
-          terraform validate
-
-      - name: 'Terraform - validate examples/gcp-google-workspace'
-        working-directory: infra/examples/gcp-google-workspace
-        run: |
-          terraform init -reconfigure
-          terraform validate
-
-      - name: 'Terraform - validate examples/msft-365'
-        working-directory: infra/examples/msft-365
-        run: |
-          terraform init -reconfigure
-          terraform validate
-
-      - name: 'Terraform - validate examples-dev/aws'
-        working-directory: infra/examples-dev/aws
-        run: |
-          terraform init -reconfigure
-          terraform validate
-
-      - name: 'Terraform - validate examples-dev/aws-google-workspace'
-        working-directory: infra/examples-dev/aws-google-workspace
-        run: |
-          terraform init -reconfigure
-          terraform validate
-
-      - name: 'Terraform - validate examples-dev/aws-msft-365'
-        working-directory: infra/examples-dev/aws-msft-365
-        run: |
-          terraform init -reconfigure
-          terraform validate
-
-      - name: 'Terraform - validate examples-dev/gcp-google-workspace'
-        working-directory: infra/examples-dev/gcp-google-workspace
-        run: |
-          terraform init -reconfigure
-          terraform validate
-
+    strategy:
+      matrix:
+        example_path: [
+                        'examples-dev/aws',
+                        'examples-dev/aws-google-workspace',
+                        'examples-dev/aws-msft-365',
+                        'examples-dev/gcp-google-workspace',
+        ]
+    uses: ./.github/workflows/ci-terraform-example.yaml
+    with:
+      example_path: ${{ matrix.example_path }}
