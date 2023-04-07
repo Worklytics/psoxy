@@ -1,4 +1,4 @@
-name: CI - java8
+name: CI - java8 core
 
 # CI to build and test project components for which we need java8 builds
 # NOTE: this is ONLY core/gateway-core libraries; we don't build the executable/deployment bundles
@@ -13,7 +13,7 @@ on:
 
 jobs:
   ci_java8:
-    id: ci_java8
+    id: ci_core_java8
     env:
       compile-profile: '-P java8 ' # NOTE: trailing space is important
       java-version: '17'
