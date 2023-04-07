@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# NOTE: Terraform modules *should* build deployment bundle themselves, but in case that fails, this
+# script will do the equivalent with its output directly in your terminal
+
+
+TF_CONFIG_ROOT=`pwd`
+if [ -d ${TF_CONFIG_ROOT}/.terraform/modules/psoxy/ ]; then
+  # use checkout of repo done by Terraform
+  PSOXY_BASE_DIR=${TF_CONFIG_ROOT}/.terraform/modules/psoxy/
+else
+  # use checkout of repo on your local machine
+  cd ../../..
+  PSOXY_BASE_DIR="`pwd`/"
+  cd ${TF_CONFIG_ROOT}
+fi
+
+# NOTE: the lines above point `PSOXY_BASE_DIR` at the clone Terraform makes of the psoxy git repo
+# if you're building from a local copy, uncomment the line below and set it to your local clone
+# PSOXY_BASE_DIR=../../../ # if this example configuration is within your clone
+# PSOXY_BASE_DIR=/path/to/your/local/psoxy/clone/ # if this example configuration is outside your clone
+
+${PSOXY_BASE_DIR}tools/build.sh gcp ${PSOXY_BASE_DIR}java
