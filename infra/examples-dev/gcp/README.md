@@ -2,7 +2,7 @@
 ** alpha quality example atm **
 
 A Terraform root module to provision GCP project for Psoxy, configure it, and create necessary infra
-to for connections to all supported Google Workspace sources, with state stored to local filesystem.
+for connections to all supported Google Workspace sources, with state stored to local filesystem.
 As such, it is not appropriate for scenario with multiple developers. As state will contain
 sensitive information (eg, service account keys), care should be taken in production to ensure that
 the filesystem in question is secure or another Terraform backend should be used (eg, GCS bucket
