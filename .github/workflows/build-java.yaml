@@ -9,8 +9,13 @@ on:
       java-version:
         required: false
         type: string
-        description: Java version to use
+        description: Java version to use # see https://github.com/actions/setup-java#supported-version-syntax
         default: 17
+      java-distribution:
+        required: false
+        type: string
+        description: java distribution to use # see https://github.com/actions/setup-java#supported-distributions
+        default: zulu
 
 jobs:
   ci_java:
@@ -25,7 +30,7 @@ jobs:
           # https://github.com/actions/setup-java#supported-distributions
           distribution: zulu
       - name: Cache Maven packages
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-v1-${{ hashFiles('**/pom.xml') }}

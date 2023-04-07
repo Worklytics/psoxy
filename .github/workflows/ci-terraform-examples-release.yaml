@@ -1,0 +1,26 @@
+name: 'validate Terraform Examples against remotes'
+
+# as these examples point to remote Terraform modules, such as a release or rc-, we only want to
+# validate them on mainline/rc- branches, otherwise we'd they'd fail irregardless of the branches
+# code until the rc- / release on which they depend is fixed
+on:
+  push:
+    branches:
+      - 'rc-**'
+      - 'main'
+
+jobs:
+  validate_tf_examples_remotes:
+    strategy:
+      matrix:
+        example_path: [
+          'examples/aws-google-workspace',
+          'examples/aws-msft-365',
+          'examples/gcp-bootstrap-cft',
+          'examples/gcp-bootstrap-simple',
+          'examples/gcp-google-workspace',
+          'examples/msft-365'
+        ]
+    uses: ./.github/workflows/ci-terraform-example.yaml
+    with:
+      example_path: ${{ matrix.example_path }}

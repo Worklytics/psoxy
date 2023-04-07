@@ -11,10 +11,10 @@
 
 ## General Tips
 
-### Build problems with Java 19 (specifically, openjdk 19)
+### Build problems with Java 19 / 20 (specifically, openjdk 19 / 20)
 
-If you are using openjdk 19.0.1 or 19.0.2, you may run into problems with the build. We suggest you
-downgrade to some java 17 (which is Long-Term Support edition) and use that.
+If you are using openjdk 19.x or 20.x, you may run into problems with the build. We suggest you
+downgrade to some java 17, which is Long-Term Support (LTS) edition, and use that.
 
 On Mac, steps would be:
 

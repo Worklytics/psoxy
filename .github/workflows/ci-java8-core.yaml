@@ -1,4 +1,4 @@
-name: CI - java8
+name: CI - java8 core
 
 # CI to build and test project components for which we need java8 builds
 # NOTE: this is ONLY core/gateway-core libraries; we don't build the executable/deployment bundles
@@ -12,7 +12,8 @@ on:
       - '**' # should match all branches
 
 jobs:
-  ci_java_8:
+  ci_java8:
+    id: ci_core_java8
     env:
       compile-profile: '-P java8 ' # NOTE: trailing space is important
       java-version: '17'
@@ -27,7 +28,7 @@ jobs:
           # https://github.com/actions/setup-java#supported-distributions
           distribution: zulu
       - name: Cache Maven packages
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-v1-${{ hashFiles('**/pom.xml') }}
