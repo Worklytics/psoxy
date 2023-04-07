@@ -77,6 +77,8 @@ else
   printf "No Azure provider found in top-level of Terraform configuration. No Azure CLI initialization needed.\n"
 fi
 
+AVAILABLE_CONNECTORS=$(echo "local.available_connector_ids" | terraform -chdir=${PSOXY_BASE_DIR}infra/modules/worklytics-connector-specs console)
+printf "enable_connectors = ${AVAILABLE_CONNECTORS}\n" >> $TFVARS_FILE
 
 # give user some feedback
 printf "Initialized example terraform vars file. Please open ${BLUE}${TFVARS_FILE}${NC} and customize it to your needs.\n"

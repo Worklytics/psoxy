@@ -569,6 +569,15 @@ EOT
       example_file = "docs/sources/bulk/survey-example.csv"
     }
   }
+
+  # to expose via console
+  # eg, `echo "local.available_connector_ids" | terraform console` will print this
+  available_connector_ids = keys(merge(
+    local.google_workspace_sources,
+    local.msft_365_connectors,
+    local.oauth_long_access_connectors,
+    local.bulk_connectors,
+  ))
 }
 
 # computed values filtered by enabled connectors
