@@ -121,12 +121,38 @@ so these must be pseudonymized using an equivalent algorithm and secret). See [`
 
 ## Getting Started - Customers
 
+### Host Platform and Data Sources
+
+The prequisites and dependencies you will need for Psoxy are determined by:
+   1. Where you will host psoxy? eg, Amazon Web Services (AWS), or Google Cloud Platform (GCP)
+   2. Which data sources you will connect to? eg, Microsoft 365, Google Workspace, Zoom, etc, as
+      defined in previous sections.
+
+Once you've gathered that information, you can identify the required software and permissions in the
+next section, and the best environment from which to deploy Psoxy.
+
+
 ### Prerequisites
+
+At a high-level, you need 3 things:
+  1. a cloud host platform account to which you will deploy Psoxy (eg, AWS account or GCP project)
+  2. an environment on which you will run the deployment tools (usually your laptop)
+  3. some way to authenticate that environment with your host platform as an entity with sufficient
+     permissions to perform the deployment. (usually an AWS IAM Role or a GCP Service
+     Account, which your personal AWS or Google user can assume).
+
+You, or the IAM Role / GCP Service account you use to deploy Psoxy, usually does NOT need to be
+authorized to access or manage your data sources directly. Data access permissions and steps to
+grant those vary by data source and generally require action to be taken by the data source
+administrator AFTER you have deployed Psoxy.
+
+#### Required Software and Permissions
+
 As of Feb 2023, Psoxy is implemented with Java 11 and built via Maven. The proxy infrastructure is
 provisioned and the Psoxy code deployed using Terraform, relying on Azure, Google Cloud, and/or AWS
 command line tools.
 
-You will need all of the following:
+You will need all of the following in your deployment environment (eg, your laptop):
 
 | Tool                                         | Version            | Test Command              |
 |----------------------------------------------|--------------------|---------------------------|
@@ -183,18 +209,24 @@ Subsystem for Linux (WSL) platforms.
        - [AWS](docs/aws/getting-started.md)
        - [Google Cloud platform](docs/gcp/getting-started.md)
 
-  2. Pick the location from which you will deploy (provision) the psoxy instance. Some suggestions:
-
-     - [Google Cloud Shell](https://cloud.google.com/shell/) - if you're using GCP or connecting to
-       Google Workspace, this is a recommended option. It [includes the prereqs above](https://cloud.google.com/shell/docs/how-cloud-shell-works#tools) EXCEPT aws/azure CLIs.
-     - Ubuntu Linux VM/Container - we provide some setup instructions covering [prereq installation](docs/prereqs-ubuntu.md)
-       for Ubuntu variants of Linux, and specific authentication help for:
-            - [EC2](docs/aws/getting-started.md)
-
-  3. Pick from the example template repos below; use these as template to create a new repo, or if
-     you're not using GitHub Cloud, create local clone/fork of them:
+  2. Based on that choice, pick from the example template repos below. Use your choosen option as a
+     template to create a new GitHub repo, or if you're not using GitHub Cloud, create clone/fork of the choosen option in your source control
+     system:
         - AWS - https://github.com/Worklytics/psoxy-example-aws
         - GCP - https://github.com/Worklytics/psoxy-example-gcp
+
+     You will make changes to the files contained in this repo as appropriate for your use-case.
+     These changes should be committed to a repo that is accessible to other members of your team
+     who may need to support your Psoxy deployment in the future.
+
+  3. Pick the location from which you will deploy (provision) the psoxy instance. This location will
+     need the software prereqs defined in the previous section. Some suggestions:
+
+        - [Google Cloud Shell](https://cloud.google.com/shell/) - if you're using GCP or connecting to
+          Google Workspace, this is a recommended option. It [includes the prereqs above](https://cloud.google.com/shell/docs/how-cloud-shell-works#tools) EXCEPT aws/azure CLIs.
+        - Ubuntu Linux VM/Container - we provide some setup instructions covering [prereq installation](docs/prereqs-ubuntu.md)
+          for Ubuntu variants of Linux, and specific authentication help for:
+          - [EC2](docs/aws/getting-started.md)
 
   4. Follow the 'Setup' steps in the READMEs of those repos, ultimately running `terraform apply`
      to deploy your Psoxy instance(s).
@@ -203,6 +235,7 @@ Subsystem for Linux (WSL) platforms.
      - provision API keys / make OAuth grants needed by each Data Connection
      - create the Data Connection from Worklytics to your psoxy instance (Terraform can provide
        `TODO` file with detailed steps for each)
+
   6. Various test commands are provided in local files, as the output of the Terraform; you may use
      these examples to validate the performance of the proxy. Please review the proxy behavior and
      adapt the rules as needed. Customers needing assistance adapting the proxy behavior for their
