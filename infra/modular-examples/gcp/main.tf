@@ -104,6 +104,7 @@ module "psoxy-google-workspace-connector" {
       BUNDLE_FILENAME      = module.psoxy.filename
       IS_DEVELOPMENT_MODE  = contains(var.non_production_connectors, each.key)
       PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
+      CUSTOM_RULES_SHA     = contains(var.custom_rest_rules, each.key) ? filesha1(var.custom_rest_rules[each.key]) : null
     }
   )
 
@@ -208,6 +209,7 @@ module "connector-long-auth-function" {
       BUNDLE_FILENAME      = module.psoxy.filename
       PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
       IS_DEVELOPMENT_MODE  = contains(var.non_production_connectors, each.key)
+      CUSTOM_RULES_SHA     = contains(var.custom_rest_rules, each.key) ? filesha1(var.custom_rest_rules[each.key]) : null
     }
   )
 }
@@ -236,6 +238,17 @@ module "worklytics-psoxy-connection-long-auth" {
   todo_step              = module.connector-long-auth-function[each.key].next_todo_step
 }
 # END LONG ACCESS AUTH CONNECTORS
+
+
+module "custom_rest_rules" {
+  source = "../../modules/gcp-sm-rules"
+
+  for_each = var.custom_rest_rules
+
+  prefix    = "PSOXY_${upper(replace(each.key, "-", "_"))}_"
+  file_path = each.value
+}
+
 
 # BEGIN BULK CONNECTORS
 module "psoxy-bulk" {

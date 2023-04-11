@@ -46,6 +46,7 @@ module "psoxy" {
   replica_regions                = var.replica_regions
   enabled_connectors             = var.enabled_connectors
   non_production_connectors      = var.non_production_connectors
+  custom_rest_rules              = var.custom_rest_rules
   custom_bulk_connectors         = var.custom_bulk_connectors
   google_workspace_example_user  = var.google_workspace_example_user
   google_workspace_example_admin = var.google_workspace_example_admin
