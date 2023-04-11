@@ -7,7 +7,7 @@ terraform {
 }
 
 locals {
-  function_name       = "psoxy-${substr(var.source_kind, 0, 24)}"
+  function_name       = "${var.environment_id_prefix}${substr(var.source_kind, 0, 30 - length(var.environment_id_prefix))}"
   command_npm_install = "npm --prefix ${var.psoxy_base_dir}tools/psoxy-test install"
 }
 
@@ -128,7 +128,9 @@ resource "google_cloudfunctions_function" "function" {
     OUTPUT_BUCKET = google_storage_bucket.output-bucket.name
     }),
     var.path_to_config == null ? {} : yamldecode(file(var.path_to_config)),
-    var.environment_variables
+    var.environment_variables,
+    var.config_parameter_prefix == null ? {} : { PATH_TO_SHARED_CONFIG = var.config_parameter_prefix },
+    var.config_parameter_prefix == null ? {} : { PATH_TO_INSTANCE_CONFIG = "${var.config_parameter_prefix}${local.function_name}" },
   )
 
   dynamic "secret_environment_variables" {

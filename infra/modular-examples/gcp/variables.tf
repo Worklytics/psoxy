@@ -3,10 +3,28 @@ variable "gcp_project_id" {
   description = "id of GCP project that will host psoxy instance"
 }
 
-variable "environment_name" {
+variable "environment_id" {
   type        = string
-  description = "qualifier to append to name of project that will host your psoxy instance"
+  description = "Qualifier to append to names/ids of resources for psoxy. If not empty, A-Za-z0-9 or - characters only. Max length 10. Useful to distinguish between deployments into same GCP project."
   default     = ""
+
+  validation {
+    condition     = can(regex("^[A-z0-9\\-]{0,12}$", var.environment_id))
+    error_message = "The environment_name must be 0-12 chars of [A-z0-9\\-] only."
+  }
+}
+
+variable "config_parameter_prefix" {
+  type        = string
+  description = "A prefix to give to all config parameters (GCP Secret Manager Secrets) created/consumed by this module. If omitted, and `environment_id` provided, that will be used."
+  default     = ""
+
+  # taken from https://cloud.google.com/secret-manager/docs/reference/rpc/google.cloud.secrets.v1beta1
+  # secret IDs can be up to 255 chars, so limit prefix to 120 gives plenty of leeway
+  validation {
+    condition     = can(regex("^[A-z0-9\\-_]{0,120}$", var.config_parameter_prefix))
+    error_message = "The config_parameter_prefix must be 0-120 chars of [A-z0-9\\-_] only."
+  }
 }
 
 variable "worklytics_sa_emails" {
@@ -14,9 +32,10 @@ variable "worklytics_sa_emails" {
   description = "service accounts for your organization's Worklytics instances (list supported for test/dev scenarios)"
 }
 
+# TODO: remove in 0.5; use `environment_name` instead
 variable "connector_display_name_suffix" {
   type        = string
-  description = "suffix to append to display_names of connector SAs; helpful to distinguish between various ones in testing/dev scenarios"
+  description = "**DEPRECATED** suffix to append to display_names of connector SAs; helpful to distinguish between various ones in testing/dev scenarios"
   default     = ""
 }
 

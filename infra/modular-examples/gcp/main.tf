@@ -10,6 +10,10 @@ terraform {
 locals {
   base_config_path = "${var.psoxy_base_dir}/configs/"
   host_platform_id = "GCP"
+
+  config_parameter_prefix = var.config_parameter_prefix == "" ? "${var.environment_id}_" : var.config_parameter_prefix
+  environment_id_prefix   = "psoxy-${var.environment_id}${length(var.environment_id) > 0 ? "-" : ""}"
+  environment_id_display_name_qualifier = length(var.environment_id) > 0 ? " ${var.environment_id} " : ""
 }
 
 module "worklytics_connector_specs" {
@@ -26,11 +30,13 @@ module "psoxy" {
   source = "../../modules/gcp"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp?ref=v0.4.18"
 
-  project_id        = var.gcp_project_id
-  psoxy_base_dir    = var.psoxy_base_dir
-  force_bundle      = var.force_bundle
-  bucket_location   = var.gcp_region
-  invoker_sa_emails = var.worklytics_sa_emails
+  project_id              = var.gcp_project_id
+  environment_id_prefix   = local.environment_id_prefix
+  psoxy_base_dir          = var.psoxy_base_dir
+  force_bundle            = var.force_bundle
+  bucket_location         = var.gcp_region
+  invoker_sa_emails       = var.worklytics_sa_emails
+  config_parameter_prefix = local.config_parameter_prefix
 }
 
 module "google-workspace-connection" {
@@ -40,8 +46,8 @@ module "google-workspace-connection" {
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/google-workspace-dwd-connection?ref=v0.4.18"
 
   project_id                   = var.gcp_project_id
-  connector_service_account_id = "psoxy-${substr(each.key, 0, 24)}"
-  display_name                 = "Psoxy Connector - ${each.value.display_name}${var.connector_display_name_suffix}"
+  connector_service_account_id = "${local.environment_id_prefix}${substr(each.key, 0, 30 - length(local.environment_id_prefix))}"
+  display_name                 = "Psoxy Connector - ${local.environment_id_display_name_qualifier}${each.value.display_name}"
   apis_consumed                = each.value.apis_consumed
   oauth_scopes_needed          = each.value.oauth_scopes_needed
   todo_step                    = 1
@@ -68,6 +74,7 @@ module "google-workspace-key-secrets" {
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-secrets?ref=v0.4.18"
 
   secret_project = var.gcp_project_id
+  path_prefix    = local.config_parameter_prefix
   secrets = {
     "PSOXY_${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY" : {
       value       = module.google-workspace-connection-auth[each.key].key_value
@@ -84,7 +91,7 @@ module "psoxy-google-workspace-connector" {
 
   project_id                            = var.gcp_project_id
   source_kind                           = each.value.source_kind
-  instance_id                           = "psoxy-${each.key}"
+  instance_id                           = "${local.environment_id_prefix}${each.key}"
   service_account_email                 = module.google-workspace-connection[each.key].service_account_email
   artifacts_bucket_name                 = module.psoxy.artifacts_bucket_name
   deployment_bundle_object_name         = module.psoxy.deployment_bundle_object_name
@@ -96,6 +103,8 @@ module "psoxy-google-workspace-connector" {
   target_host                           = each.value.target_host
   source_auth_strategy                  = each.value.source_auth_strategy
   oauth_scopes                          = try(each.value.oauth_scopes_needed, [])
+  config_parameter_prefix               = local.config_parameter_prefix
+
 
   environment_variables = merge(
     var.general_environment_variables,
@@ -104,7 +113,7 @@ module "psoxy-google-workspace-connector" {
       BUNDLE_FILENAME      = module.psoxy.filename
       IS_DEVELOPMENT_MODE  = contains(var.non_production_connectors, each.key)
       PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
-      CUSTOM_RULES_SHA     = contains(var.custom_rest_rules, each.key) ? filesha1(var.custom_rest_rules[each.key]) : null
+      CUSTOM_RULES_SHA     = try(var.custom_rest_rules[each.key], null) != null ? filesha1(var.custom_rest_rules[each.key]) : null
     }
   )
 
@@ -143,8 +152,8 @@ resource "google_service_account" "long_auth_connector_sa" {
   for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
 
   project      = var.gcp_project_id
-  account_id   = "psoxy-${substr(each.key, 0, 24)}"
-  display_name = "${title(each.key)}${var.connector_display_name_suffix} via Psoxy"
+  account_id   = "${local.environment_id_prefix}${substr(each.key, 0, 30 - length(local.environment_id_prefix))}"
+  display_name = "${title(each.key)}${local.environment_id_display_name_qualifier} via Psoxy"
 }
 
 module "connector-oauth" {
@@ -153,8 +162,9 @@ module "connector-oauth" {
   source = "../../modules/gcp-oauth-secrets"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-oauth-secrets?ref=v0.4.18"
 
-  secret_name           = "PSOXY_${upper(replace(each.value.connector_name, "-", "_"))}_${upper(each.value.secret_name)}"
   project_id            = var.gcp_project_id
+  path_prefix           = local.config_parameter_prefix
+  secret_name           = "PSOXY_${upper(replace(each.value.connector_name, "-", "_"))}_${upper(each.value.secret_name)}"
   service_account_email = google_service_account.long_auth_connector_sa[each.value.connector_name].email
 }
 
@@ -164,8 +174,9 @@ module "long-auth-token-secret-fill-instructions" {
   source = "../../modules/gcp-secret-fill-md"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-secret-fill-md?ref=v0.4.18"
 
-  project_id = var.gcp_project_id
-  secret_id  = module.connector-oauth[each.key].secret_id
+  project_id  = var.gcp_project_id
+  path_prefix = local.config_parameter_prefix
+  secret_id   = module.connector-oauth[each.key].secret_id
 }
 
 module "source_token_external_todo" {
@@ -189,11 +200,10 @@ module "connector-long-auth-function" {
 
   project_id                    = var.gcp_project_id
   source_kind                   = each.value.source_kind
-  instance_id                   = "psoxy-${each.key}"
+  instance_id                   = "${local.environment_id_prefix}${each.key}"
   service_account_email         = google_service_account.long_auth_connector_sa[each.key].email
   artifacts_bucket_name         = module.psoxy.artifacts_bucket_name
   deployment_bundle_object_name = module.psoxy.deployment_bundle_object_name
-  path_to_config                = null
   path_to_repo_root             = var.psoxy_base_dir
   example_api_calls             = each.value.example_api_calls
   todo_step                     = module.source_token_external_todo[each.key].next_todo_step
@@ -201,6 +211,7 @@ module "connector-long-auth-function" {
   target_host                   = each.value.target_host
   source_auth_strategy          = each.value.source_auth_strategy
   oauth_scopes                  = try(each.value.oauth_scopes_needed, [])
+  config_parameter_prefix       = local.config_parameter_prefix
 
   environment_variables = merge(
     var.general_environment_variables,
@@ -209,7 +220,7 @@ module "connector-long-auth-function" {
       BUNDLE_FILENAME      = module.psoxy.filename
       PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
       IS_DEVELOPMENT_MODE  = contains(var.non_production_connectors, each.key)
-      CUSTOM_RULES_SHA     = contains(var.custom_rest_rules, each.key) ? filesha1(var.custom_rest_rules[each.key]) : null
+      CUSTOM_RULES_SHA     = try(var.custom_rest_rules[each.key], null) != null ? filesha1(var.custom_rest_rules[each.key]) : null
     }
   )
 }
@@ -245,7 +256,7 @@ module "custom_rest_rules" {
 
   for_each = var.custom_rest_rules
 
-  prefix    = "PSOXY_${upper(replace(each.key, "-", "_"))}_"
+  prefix    = "${local.config_parameter_prefix}PSOXY_${upper(replace(each.key, "-", "_"))}_"
   file_path = each.value
 }
 
@@ -259,7 +270,9 @@ module "psoxy-bulk" {
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-bulk?ref=v0.4.18"
 
   project_id                    = var.gcp_project_id
+  environment_id_prefix         = local.environment_id_prefix
   worklytics_sa_emails          = var.worklytics_sa_emails
+  config_parameter_prefix       = local.config_parameter_prefix
   region                        = var.gcp_region
   source_kind                   = each.value.source_kind
   artifacts_bucket_name         = module.psoxy.artifacts_bucket_name
@@ -270,6 +283,7 @@ module "psoxy-bulk" {
   example_file                  = try(each.value.example_file, null)
   input_expiration_days         = var.bulk_input_expiration_days
   sanitized_expiration_days     = var.bulk_sanitized_expiration_days
+
 
   environment_variables = merge(
     var.general_environment_variables,
