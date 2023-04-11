@@ -177,14 +177,13 @@ Subsystem for Linux (WSL) platforms.
 ./tools/check-prereqs.sh
 ```
 
-
 ### Setup
 
-  1. Choose the cloud platform you'll deploy to, and follow its guide:
+  1. Choose the cloud platform you'll deploy to, and follow its 'Getting Started' guide:
        - [AWS](docs/aws/getting-started.md)
        - [Google Cloud platform](docs/gcp/getting-started.md)
 
-  2. Pick the location from which you will provision the psoxy instance. Some suggestions:
+  2. Pick the location from which you will deploy (provision) the psoxy instance. Some suggestions:
 
      - [Google Cloud Shell](https://cloud.google.com/shell/) - if you're using GCP or connecting to
        Google Workspace, this is a recommended option. It [includes the prereqs above](https://cloud.google.com/shell/docs/how-cloud-shell-works#tools) EXCEPT aws/azure CLIs.
@@ -192,62 +191,22 @@ Subsystem for Linux (WSL) platforms.
        for Ubuntu variants of Linux, and specific authentication help for:
             - [EC2](docs/aws/getting-started.md)
 
-  3. clone the public repo (or, alternatively, [create a private fork](docs/private-fork.md) and
-     clone that; we recommend this if you're going to commit stuff you want to share privately with
-     other members of your team).
-```shell
-git clone https://github.com/Worklytics/psoxy.git
-```
+  3. Pick from the example template repos below; use these as template to create a new repo, or if
+     you're not using GitHub Cloud, create local clone/fork of them:
+        - AWS - https://github.com/Worklytics/psoxy-example-aws
+        - GCP - https://github.com/Worklytics/psoxy-example-gcp
 
-  4. Pick an example for `infra/examples/` and copy it.
-    - Eg `cp -r infra/examples/aws-msft-365 infra/examples/acme-com`.
-    - Create a branch in your local clone (eg `git checkout -b acme-com`).
-        - NOTE: do not push this branch back to the remote, unless you want your changes to be
-          publicly visible. If you want to use `git` to manage your changes outside your local
-          machine, create private fork (described above).
-    - modify the `.gitignore` file in the directory so that git will manage your terraform state/
-      variables, if you wish to commit these things to repo.
+  4. Follow the 'Setup' steps in the READMEs of those repos, ultimately running `terraform apply`
+     to deploy your Psoxy instance(s).
 
-  5. create a [terraform](https://www.terraform.io/) configuration, setting up your environment,
-     psoxy instances, and API keys/secrets for each connection
-     a. various examples are provided in [`infra/examples`](/infra/examples)
-     b. various modules are provided in [`infra/modules`](/infra/modules); these modules will either
-        perform all the necessary setup, or create TODO files explaining what you must do outside
-        Terraform
-
-  6. init Terraform configuration and generate an initial plan
-```shell
-terraform init
-terraform plan -out=tfplan.out
-```
-
-  7. review the plan and ensure it matches the infrastructure you expect:
-```shell
-terraform show tfplan.out
-```
-
-Edit your Terraform configuration to modify/remove resources as needed.
-
-Use `terraform import` where needed for Terraform to re-use existing resources, rather than
-recreate them (for example, to use GCP project that already exists).
-
-  9. apply your configuration
-```shell
-terraform apply
-```
-
-  10. follow any `TODO` instructions produced by Terraform, such as:
-     - build and deploy JAR (built from this repo) into your environment
+  5. follow any `TODO` instructions produced by Terraform, such as:
      - provision API keys / make OAuth grants needed by each Data Connection
      - create the Data Connection from Worklytics to your psoxy instance (Terraform can provide
        `TODO` file with detailed steps for each)
-
-  11. Various test commands are provided in local files, as the output of the Terraform; you may use
+  6. Various test commands are provided in local files, as the output of the Terraform; you may use
      these examples to validate the performance of the proxy. Please review the proxy behavior and
      adapt the rules as needed. Customers needing assistance adapting the proxy behavior for their
      needs can contact support@worklytics.co
-
-
 
 ## Component Status
 
