@@ -148,3 +148,33 @@ variable "salesforce_domain" {
   default     = ""
   description = "Domain of the Salesforce to connect to (only required if using Salesforce connector). To find your My Domain URL, from Setup, in the Quick Find box, enter My Domain, and then select My Domain"
 }
+
+
+# build lookup tables to JOIN data you receive back from Worklytics with your original data.
+#   - `join_key_column` should be the column you expect to JOIN on, usually 'employee_id'
+#   - `columns_to_include` is an optional a list of columns to include in the lookup table,
+#                       e.g. if the data you're exporting TO worklytics contains more columns than
+#                       you want to have in the lookup table, you can limit to an explicit list
+#   - `sanitized_accessor_names` is an optional list of GCP principals, by email with qualifier, eg:
+#                       `user:alice@worklytics`, `group:analysts@worklytics.co`, or
+#                        `serviceAccount:sa@worklytics.google-service-accounts.com`
+variable "lookup_tables" {
+  type = map(object({
+    source_connector_id           = string
+    join_key_column               = string
+    columns_to_include            = optional(list(string))
+    sanitized_accessor_principals = optional(list(string))
+  }))
+  description = "Lookup tables to build from same source input as another connector, output to a distinct bucket. The original `join_key_column` will be preserved, "
+
+  default = {
+    #  "lookup-hris" = {
+    #      source_connector_id = "hris",
+    #      join_key_column = "employee_id",
+    #      columns_to_include = null
+    #      sanitized_accessor_principals = [
+    #        # ADD LIST OF GCP PRINCIPALS HERE
+    #      ],
+    #  }
+  }
+}
