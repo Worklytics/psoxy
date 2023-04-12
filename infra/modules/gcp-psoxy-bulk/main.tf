@@ -49,29 +49,23 @@ resource "google_storage_bucket" "input-bucket" {
 }
 
 # data output from function
-resource "google_storage_bucket" "output-bucket" {
-  project                     = var.project_id
-  name                        = "${local.function_name}-${random_string.bucket_id_part.id}-output"
-  location                    = var.region
-  force_destroy               = true
-  uniform_bucket_level_access = true
+module "output_bucket" {
+  source = "../gcp-output-bucket"
 
-  lifecycle_rule {
-    condition {
-      age = var.sanitized_expiration_days
-    }
-
-    action {
-      type = "Delete"
-    }
-  }
-
-  lifecycle {
-    ignore_changes = [
-      labels
-    ]
-  }
+  project_id                     = var.project_id
+  bucket_write_role_id           = var.bucket_write_role_id
+  function_service_account_email = google_service_account.service-account.email
+  bucket_name_prefix             = "${local.function_name}-${random_string.bucket_id_part.id}"
+  region                         = var.region
+  expiration_days                = var.sanitized_expiration_days
 }
+
+# TODO: added in v0.4.19
+moved {
+  from = google_storage_bucket.output-bucket
+  to   = module.output_bucket.bucket
+}
+
 
 resource "google_service_account" "service-account" {
   project      = var.project_id
@@ -89,16 +83,9 @@ resource "google_storage_bucket_iam_member" "access_for_import_bucket" {
 resource "google_storage_bucket_iam_member" "grant_sa_read_on_processed_bucket" {
   count = length(var.worklytics_sa_emails)
 
-  bucket = google_storage_bucket.output-bucket.name
+  bucket = module.output_bucket.bucket_name
   member = "serviceAccount:${var.worklytics_sa_emails[count.index]}"
   role   = "roles/storage.objectViewer"
-}
-
-
-resource "google_storage_bucket_iam_member" "access_for_processed_bucket" {
-  bucket = google_storage_bucket.output-bucket.name
-  role   = var.bucket_write_role_id
-  member = "serviceAccount:${google_service_account.service-account.email}"
 }
 
 resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_secret" {
@@ -125,7 +112,7 @@ resource "google_cloudfunctions_function" "function" {
 
   environment_variables = merge(tomap({
     INPUT_BUCKET  = google_storage_bucket.input-bucket.name,
-    OUTPUT_BUCKET = google_storage_bucket.output-bucket.name
+    OUTPUT_BUCKET = module.output_bucket.bucket_name,
     }),
     var.path_to_config == null ? {} : yamldecode(file(var.path_to_config)),
     var.environment_variables
@@ -230,7 +217,7 @@ output "input_bucket" {
 }
 
 output "sanitized_bucket" {
-  value = google_storage_bucket.output-bucket.name
+  value = module.output_bucket.bucket_name
 }
 
 output "proxy_kind" {
