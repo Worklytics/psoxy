@@ -4,14 +4,14 @@
 
 Connecting to Microsoft 365 data requires:
 
-  1. creating for one *Azure Active Directory* (AAD) application per Microsoft 365 data source (eg, `azure-ad`, `outlook-mail`, `outlook-cal`, etc).
+  1. creating one *Azure Active Directory* (AAD) application per Microsoft 365 data source (eg, `azure-ad`, `outlook-mail`, `outlook-cal`, etc).
   2. configuring an authentication mechanism to permit each proxy instance to authenticate with
-     the Microsoft Graph API. (since Sept 2022, our supported approach is [federated identity credentials](https://learn.microsoft.com/en-us/graph/api/resources/federatedidentitycredentials-overview?view=graph-rest-1.0))
+     the Microsoft Graph API. (since Sept 2022, the supported approach is [federated identity credentials](https://learn.microsoft.com/en-us/graph/api/resources/federatedidentitycredentials-overview?view=graph-rest-1.0))
   3. granting [admin consent](https://learn.microsoft.com/en-us/azure/active-directory/manage-apps/grant-admin-consent?pivots=ms-graph#prerequisites) each AAD application access to specific scopes of Microsoft 365 data your connection requires.
 
 Steps (1) and (2) are handled by the `terraform` examples. To perform them, the machine running
-`terraform` must be authenticated with Azure CLI as a Microsoft 365 user with, at minimum, the
-following role in your Microsoft 365 tenant:
+`terraform` must be authenticated with [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/) as
+an Azure AD user with, at minimum, the following role in your Microsoft 365 tenant:
 
  - [Cloud Application Administrator](https://learn.microsoft.com/en-us/azure/active-directory/roles/permissions-reference#cloud-application-administrator). This is to create/update/delete AAD applications and its settings during Terraform apply command.
 
