@@ -23,10 +23,14 @@ resource "random_string" "bucket_id_part" {
   numeric = true
 }
 
+locals {
+  bucket_prefix = "${local.function_name}-${random_string.bucket_id_part.id}"
+}
+
 # data input to function
 resource "google_storage_bucket" "input-bucket" {
   project                     = var.project_id
-  name                        = "${local.function_name}-${random_string.bucket_id_part.id}-input"
+  name                        = "${local.bucket_prefix}-input"
   location                    = var.region
   force_destroy               = true
   uniform_bucket_level_access = true
@@ -55,7 +59,7 @@ module "output_bucket" {
   project_id                     = var.project_id
   bucket_write_role_id           = var.bucket_write_role_id
   function_service_account_email = google_service_account.service-account.email
-  bucket_name_prefix             = "${local.function_name}-${random_string.bucket_id_part.id}"
+  bucket_name_prefix             = local.bucket_prefix
   region                         = var.region
   expiration_days                = var.sanitized_expiration_days
 }
@@ -212,6 +216,14 @@ EOT
 
 output "instance_id" {
   value = local.function_name
+}
+
+output "instance_sa_email" {
+  value = google_service_account.service-account.email
+}
+
+output "bucket_prefix" {
+  value = local.bucket_prefix
 }
 
 output "input_bucket" {

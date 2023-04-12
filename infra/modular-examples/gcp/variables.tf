@@ -182,6 +182,7 @@ variable "lookup_tables" {
     join_key_column               = string
     columns_to_include            = optional(list(string))
     sanitized_accessor_principals = optional(list(string))
+    expiration_days               = optional(number)
   }))
   description = "Lookup tables to build from same source input as another connector, output to a distinct bucket. The original `join_key_column` will be preserved, "
 
