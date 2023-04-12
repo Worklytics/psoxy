@@ -1,6 +1,5 @@
 # Microsoft 365
 
-
 ## Setup
 
 Connecting to Microsoft 365 data requires:
@@ -26,6 +25,20 @@ Step (3) is performed by a Microsoft 365 administrator via the Azure AD web cons
 administrator. This administrator must have, at minimum, the following role in your Microsoft 365
 tenant:
   - [Privileged Role Administrator](https://learn.microsoft.com/en-us/azure/active-directory/roles/permissions-reference#privileged-role-administrator)
+
+## Security
+
+Psoxy uses [Federated Identity Credentials](https://docs.microsoft.com/en-us/graph/api/resources/federatedidentitycredential?view=graph-rest-1.0)
+to authenticate with the Microsoft Graph API. This approach avoids the need for any secrets to be
+exchanged between your Psoxy instances and your Microsoft 365 tenant. Rather, each API request from
+the proxy to Microsoft Graph API is signed by an identity credential generated in your host cloud
+platform. You configure your Azure AD application for each connection to trust this identity credential as identifying the
+application, and Microsoft trusts your host cloud platform (AWS/GCP) as an external identity
+provider of those credentials.
+
+Neither your proxy instances nor Worklytics ever hold any API key or certificate for your Microsoft
+365 tenant.
+
 
 ## Troubleshooting
 
