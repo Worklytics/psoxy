@@ -7,13 +7,14 @@ Connecting to Microsoft 365 data requires:
   1. creating one *Azure Active Directory* (AAD) enterprise application per Microsoft 365 data source (eg, `azure-ad`, `outlook-mail`, `outlook-cal`, etc).
   2. configuring an authentication mechanism to permit each proxy instance to authenticate with
      the Microsoft Graph API. (since Sept 2022, the supported approach is [federated identity credentials](https://learn.microsoft.com/en-us/graph/api/resources/federatedidentitycredentials-overview?view=graph-rest-1.0))
-  3. granting [admin consent](https://learn.microsoft.com/en-us/azure/active-directory/manage-apps/grant-admin-consent?pivots=ms-graph#prerequisites) each AAD application access to specific scopes of Microsoft 365 data your connection requires.
+  3. granting [admin consent](https://learn.microsoft.com/en-us/azure/active-directory/manage-apps/grant-admin-consent?pivots=ms-graph#prerequisites)
+     to each AAD enterprise application to specific scopes of Microsoft 365 data the connection requires.
 
 Steps (1) and (2) are handled by the `terraform` examples. To perform them, the machine running
 `terraform` must be authenticated with [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/) as
 an Azure AD user with, at minimum, the following role in your Microsoft 365 tenant:
 
- - [Cloud Application Administrator](https://learn.microsoft.com/en-us/azure/active-directory/roles/permissions-reference#cloud-application-administrator). This is to create/update/delete AAD applications and its settings during Terraform apply command.
+ - [Cloud Application Administrator](https://learn.microsoft.com/en-us/azure/active-directory/roles/permissions-reference#cloud-application-administrator) to create/update/delete AAD applications and its settings during Terraform apply command.
 
 Please note that this role is the least-privileged role sufficient for this task (creating an Azure
 AD Application), per Microsoft's documentation. See [Least privileged roles by task in Azure Active Directory](https://learn.microsoft.com/en-us/azure/active-directory/roles/delegate-by-task#enterprise-applications).
@@ -27,9 +28,9 @@ Step (3) is performed by a Microsoft 365 administrator via the Azure AD web cons
 administrator. This administrator must have, at minimum, the following role in your Microsoft 365
 tenant:
   - [Privileged Role Administrator](https://learn.microsoft.com/en-us/azure/active-directory/roles/permissions-reference#privileged-role-administrator)
+    to Consent to application permissions to Microsoft Graph
 
-Again, this is the least-privileged role sufficient for this task (Consent to application
-permissions to Microsoft Graph), per Microsoft's documentation. See [Least privileged roles by task in Azure Active Directory](https://learn.microsoft.com/en-us/azure/active-directory/roles/delegate-by-task#enterprise-applications).
+Again, this is the least-privileged role sufficient for this task, per Microsoft's documentation. See [Least privileged roles by task in Azure Active Directory](https://learn.microsoft.com/en-us/azure/active-directory/roles/delegate-by-task#enterprise-applications).
 
 ## Security
 
@@ -47,7 +48,7 @@ Neither your proxy instances nor Worklytics ever hold any API key or certificate
 
 ### Authorization and Scopes
 
-The following Scopes are required for each connector. Note that they are all READ-only scopes:
+The following Scopes are required for each connector. Note that they are all READ-only scopes.
 
 | Source&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Application Scopes                                                                                 |
 |--------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------|
@@ -60,6 +61,8 @@ They are accurate as of 2023-04-12. Please refer to that module for a definitive
 
 NOTE: that `Mail.ReadBasic` affords only access to email metadata, not content/attachments.
 
+NOTE: These are all 'Application' scopes, allowing the proxy itself data access as an application,
+rather than on behalf of a specific authenticated end-user ('Delegated' scopes).
 
 ## Troubleshooting
 
