@@ -32,13 +32,6 @@ variable "worklytics_sa_emails" {
   description = "service accounts for your organization's Worklytics instances (list supported for test/dev scenarios)"
 }
 
-# TODO: remove in 0.5; use `environment_name` instead
-variable "connector_display_name_suffix" {
-  type        = string
-  description = "**DEPRECATED** suffix to append to display_names of connector SAs; helpful to distinguish between various ones in testing/dev scenarios"
-  default     = ""
-}
-
 variable "psoxy_base_dir" {
   type        = string
   description = "the path where your psoxy repo resides"
