@@ -21,3 +21,9 @@ variable "secret_project" {
   type        = string
   description = "ID of project in which to store SA key as secret"
 }
+
+variable "path_prefix" {
+  type        = string
+  description = "A prefix to add to the secret path."
+  default     = ""
+}

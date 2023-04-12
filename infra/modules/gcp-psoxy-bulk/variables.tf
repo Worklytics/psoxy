@@ -3,6 +3,18 @@ variable "project_id" {
   description = "id of GCP project that will host psoxy instance"
 }
 
+variable "environment_id_prefix" {
+  type        = string
+  description = "A prefix to give to all resources created/consumed by this module."
+  default     = "psoxy-"
+}
+
+variable "config_parameter_prefix" {
+  type        = string
+  description = "Prefix for psoxy config parameters"
+  default     = null
+}
+
 variable "worklytics_sa_emails" {
   type        = list(string)
   description = "service accounts for your organization's Worklytics instances (list supported for test/dev scenarios)"

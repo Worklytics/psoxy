@@ -3,6 +3,17 @@ variable "gcp_project_id" {
   description = "id of GCP project that will host psoxy instance; must exist"
 }
 
+variable "gcp_terraform_sa_account_email" {
+  type        = string
+  description = "Email of GCP service account that will be used to provision GCP resources. Leave 'null' to use application default for you environment."
+  default     = null
+
+  validation {
+    condition     = var.gcp_terraform_sa_account_email == null || can(regex(".*@.*\\.iam\\.gserviceaccount\\.com$", var.gcp_terraform_sa_account_email))
+    error_message = "The gcp_terraform_sa_account_email value should be a valid GCP service account email address."
+  }
+}
+
 variable "environment_name" {
   type        = string
   description = "qualifier to append to name of project that will host your psoxy instance"

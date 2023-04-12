@@ -7,7 +7,7 @@ resource "google_secret_manager_secret" "secret" {
   for_each = var.secrets
 
   project   = var.secret_project
-  secret_id = each.key
+  secret_id = "${var.path_prefix}${each.key}"
 
   replication {
     user_managed {

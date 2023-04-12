@@ -1,4 +1,8 @@
 
+locals {
+  # a prefix legal for GCP Roles
+  environment_id_role_prefix = replace(var.environment_id_prefix, "-", "_")
+}
 
 
 # activate required GCP service APIs
@@ -21,7 +25,7 @@ resource "google_project_service" "gcp-infra-api" {
 # pseudo secret
 resource "google_secret_manager_secret" "pseudonymization-salt" {
   project   = var.project_id
-  secret_id = "PSOXY_SALT"
+  secret_id = "${var.config_parameter_prefix}PSOXY_SALT"
 
   replication {
     automatic = true
@@ -66,7 +70,7 @@ resource "google_secret_manager_secret_version" "initial_version" {
 
 resource "google_secret_manager_secret" "pseudonymization-key" {
   project   = var.project_id
-  secret_id = "PSOXY_ENCRYPTION_KEY"
+  secret_id = "${var.config_parameter_prefix}PSOXY_ENCRYPTION_KEY"
 
   replication {
     automatic = true
@@ -139,7 +143,7 @@ data "archive_file" "source" {
 # Create bucket that will host the source code
 resource "google_storage_bucket" "artifacts" {
   project       = var.project_id
-  name          = "${var.project_id}-psoxy-artifacts-bucket"
+  name          = "${var.project_id}-${var.environment_id_prefix}artifacts-bucket"
   location      = var.bucket_location
   force_destroy = true
 
@@ -153,19 +157,26 @@ resource "google_storage_bucket" "artifacts" {
 # Add source code zip to bucket
 resource "google_storage_bucket_object" "function" {
   # Append file MD5 to force bucket to be recreated
-  name         = format("${module.psoxy-package.filename}#%s", formatdate("mmss", timestamp()))
+  name         = format("${var.environment_id_prefix}${module.psoxy-package.filename}#%s", formatdate("mmss", timestamp()))
   content_type = "application/zip"
   bucket       = google_storage_bucket.artifacts.name
   source       = data.archive_file.source.output_path
 }
 
-# TODO: revisit if custom role is a good idea; this triggers security events for some orgs
-resource "google_project_iam_custom_role" "bucket-write" {
+resource "google_project_iam_custom_role" "bucket_write" {
   project     = var.project_id
-  role_id     = "writeAccess"
+  role_id     = "${local.environment_id_role_prefix}writeAccess"
   title       = "Access for writing and update objects in bucket"
   description = "Write and update support, because storage.objectCreator role only support creation - not update"
-  permissions = ["storage.objects.create", "storage.objects.delete"]
+
+  permissions = [
+    "storage.objects.create",
+    "storage.objects.delete"
+  ]
+}
+moved {
+  from = google_project_iam_custom_role.bucket-write
+  to   = google_project_iam_custom_role.bucket_write
 }
 
 output "artifacts_bucket_name" {
@@ -177,7 +188,7 @@ output "deployment_bundle_object_name" {
 }
 
 output "bucket_write_role_id" {
-  value = google_project_iam_custom_role.bucket-write.id
+  value = google_project_iam_custom_role.bucket_write.id
 }
 
 # Deprecated, it will be removed in v0.5.x

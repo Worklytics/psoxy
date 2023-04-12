@@ -26,6 +26,7 @@ import java.io.IOException;
 public interface GcpModule {
 
 
+    //NOTE: this is just convention; `-` is allowed in GCP Secret Manager Secret IDs
     static String asSecretManagerNamespace(String functionName) {
         return functionName.toUpperCase().replace("-", "_");
     }

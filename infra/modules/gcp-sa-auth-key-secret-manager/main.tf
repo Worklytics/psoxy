@@ -33,6 +33,7 @@ module "gcp-secrets" {
   source = "../gcp-secrets"
 
   secret_project  = var.secret_project
+  path_prefix     = var.path_prefix
   replica_regions = var.replica_regions
 
   secrets = {

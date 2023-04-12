@@ -53,7 +53,9 @@ resource "google_cloudfunctions_function" "function" {
   environment_variables = merge(
     local.required_env_vars,
     var.path_to_config == null ? {} : yamldecode(file(var.path_to_config)),
-    var.environment_variables
+    var.environment_variables,
+    var.config_parameter_prefix == null ? {} : { PATH_TO_SHARED_CONFIG = var.config_parameter_prefix },
+    var.config_parameter_prefix == null ? {} : { PATH_TO_INSTANCE_CONFIG = "${var.config_parameter_prefix}${var.source_kind}" },
   )
 
   dynamic "secret_environment_variables" {

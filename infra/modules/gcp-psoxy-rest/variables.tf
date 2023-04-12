@@ -14,6 +14,12 @@ variable "instance_id" {
   description = "kind of source (eg, 'gmail', 'google-chat', etc)"
 }
 
+variable "config_parameter_prefix" {
+  type        = string
+  description = "Prefix for psoxy config parameters"
+  default     = null
+}
+
 variable "service_account_email" {
   type        = string
   description = "email of the service account that the cloud function will run as"
