@@ -264,7 +264,7 @@ module "custom_rest_rules" {
 # BEGIN BULK CONNECTORS
 module "psoxy-bulk" {
   for_each = merge(module.worklytics_connector_specs.enabled_bulk_connectors,
-  var.custom_bulk_connectors)
+    var.custom_bulk_connectors)
 
   source = "../../modules/gcp-psoxy-bulk"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-bulk?ref=v0.4.18"
@@ -299,7 +299,7 @@ module "psoxy-bulk" {
 
 module "psoxy-bulk-to-worklytics" {
   for_each = merge(module.worklytics_connector_specs.enabled_bulk_connectors,
-  var.custom_bulk_connectors)
+    var.custom_bulk_connectors)
 
   source = "../../modules/worklytics-psoxy-connection-generic"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-generic?ref=v0.4.18"
@@ -314,6 +314,8 @@ module "psoxy-bulk-to-worklytics" {
     "Bucket Name" = module.psoxy-bulk[each.key].sanitized_bucket
   }, try(each.value.settings_to_provide, {}))
 }
+
+# END BULK CONNECTORS
 
 locals {
   all_instances = merge(
@@ -330,7 +332,7 @@ output "instances" {
 
 output "todos_1" {
   description = "List of todo steps to complete 1st, in markdown format."
-  value = concat(
+  value       = concat(
     values(module.google-workspace-connection)[*].todo,
     values(module.source_token_external_todo)[*].todo,
   )
@@ -338,7 +340,7 @@ output "todos_1" {
 
 output "todos_2" {
   description = "List of todo steps to complete 2nd, in markdown format."
-  value = concat(
+  value       = concat(
     values(module.psoxy-google-workspace-connector)[*].todo,
     values(module.connector-long-auth-function)[*].todo,
     values(module.psoxy-bulk)[*].todo,
@@ -347,7 +349,7 @@ output "todos_2" {
 
 output "todos_3" {
   description = "List of todo steps to complete 3rd, in markdown format."
-  value = concat(
+  value       = concat(
     values(module.worklytics-psoxy-connection)[*].todo,
     values(module.worklytics-psoxy-connection)[*].todo,
     values(module.psoxy-bulk-to-worklytics)[*].todo,
