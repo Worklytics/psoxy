@@ -36,3 +36,15 @@ variable "psoxy_version" {
   description = "IGNORED; version of psoxy to deploy"
   default     = null
 }
+
+variable "environment_id_prefix" {
+  type        = string
+  description = "A prefix to give to all resources created/consumed by this module."
+  default     = ""
+}
+
+variable "config_parameter_prefix" {
+  type        = string
+  description = "A prefix to give to all config parameters (GCP Secret Manager Secrets) created/consumed by this module."
+  default     = ""
+}

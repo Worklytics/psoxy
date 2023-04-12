@@ -1,6 +1,6 @@
 resource "google_secret_manager_secret" "secret" {
   project   = var.project_id
-  secret_id = var.secret_name
+  secret_id = "${var.path_prefix}${var.secret_name}"
 
   replication {
     automatic = true

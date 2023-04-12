@@ -32,20 +32,25 @@ provider "azuread" {
   tenant_id = var.msft_tenant_id
 }
 
+provider "google" {
+  impersonate_service_account = var.gcp_terraform_sa_account_email
+}
+
 module "psoxy" {
   source = "../../modular-examples/gcp"
   # source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/gcp?ref=v0.4.18"
 
   gcp_project_id                 = var.gcp_project_id
-  environment_name               = var.environment_name
+  environment_id                 = var.environment_id
+  config_parameter_prefix        = var.config_parameter_prefix
   worklytics_sa_emails           = var.worklytics_sa_emails
-  connector_display_name_suffix  = var.connector_display_name_suffix
   psoxy_base_dir                 = var.psoxy_base_dir
   force_bundle                   = var.force_bundle
   gcp_region                     = var.gcp_region
   replica_regions                = var.replica_regions
   enabled_connectors             = var.enabled_connectors
   non_production_connectors      = var.non_production_connectors
+  custom_rest_rules              = var.custom_rest_rules
   custom_bulk_connectors         = var.custom_bulk_connectors
   google_workspace_example_user  = var.google_workspace_example_user
   google_workspace_example_admin = var.google_workspace_example_admin

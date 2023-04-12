@@ -3,21 +3,37 @@ variable "gcp_project_id" {
   description = "id of GCP project that will host psoxy instance"
 }
 
-variable "environment_name" {
+variable "gcp_terraform_sa_account_email" {
   type        = string
-  description = "qualifier to append to name of project that will host your psoxy instance"
+  description = "Email of GCP service account that will be used to provision GCP resources. Leave 'null' to use application default for you environment."
+  default     = null
+
+  validation {
+    condition     = var.gcp_terraform_sa_account_email == null || can(regex(".*@.*\\.iam\\.gserviceaccount\\.com$", var.gcp_terraform_sa_account_email))
+    error_message = "The gcp_terraform_sa_account_email value should be a valid GCP service account email address."
+  }
+}
+
+variable "environment_id" {
+  type        = string
+  description = "Qualifier to append to names/ids of resources for psoxy. If not empty, A-Za-z0-9 or - characters only. Max length 10. Useful to distinguish between deployments into same GCP project."
+  default     = ""
+
+  validation {
+    condition     = can(regex("^[A-z0-9\\-]{0,12}$", var.environment_id))
+    error_message = "The environment_name must be 0-12 chars of [A-z0-9\\-] only."
+  }
+}
+
+variable "config_parameter_prefix" {
+  type        = string
+  description = "A prefix to give to all config parameters (GCP Secret Manager Secrets) created/consumed by this module. If omitted, and `environment_id` provided, that will be used."
   default     = ""
 }
 
 variable "worklytics_sa_emails" {
   type        = list(string)
   description = "service accounts for your organization's Worklytics instances (list supported for test/dev scenarios)"
-}
-
-variable "connector_display_name_suffix" {
-  type        = string
-  description = "suffix to append to display_names of connector SAs; helpful to distinguish between various ones in testing/dev scenarios"
-  default     = ""
 }
 
 variable "psoxy_base_dir" {
@@ -88,6 +104,12 @@ variable "bulk_sanitized_expiration_days" {
   type        = number
   description = "Number of days after which objects in the bucket will expire"
   default     = 1805 # 5 years; intent is 'forever', but some upperbound in case bucket is forgotten
+}
+
+variable "custom_rest_rules" {
+  type        = map(string)
+  description = "map of connector id --> YAML file with custom rules"
+  default     = {}
 }
 
 variable "custom_bulk_connectors" {
