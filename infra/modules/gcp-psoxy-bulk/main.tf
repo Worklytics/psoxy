@@ -63,7 +63,7 @@ module "output_bucket" {
 # TODO: added in v0.4.19
 moved {
   from = google_storage_bucket.output-bucket
-  to   = module.output_bucket.bucket
+  to   = module.output_bucket.google_storage_bucket.bucket
 }
 
 
@@ -158,7 +158,7 @@ Check that the Psoxy works as expected and it transforms the files of your input
 the rules you have defined:
 
 ```shell
-node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f ${local.example_file} -d GCP -i ${google_storage_bucket.input-bucket.name} -o ${google_storage_bucket.output-bucket.name}
+node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f ${local.example_file} -d GCP -i ${google_storage_bucket.input-bucket.name} -o ${module.output_bucket.bucket_name} -p ${var.project_id} -r ${var.region}
 ```
 EOT
 }
@@ -205,7 +205,7 @@ NC='\e[0m'
 
 printf "Quick test of $${BLUE}${local.function_name}$${NC} ...\n"
 
-node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f $FILE_PATH -d GCP -i ${google_storage_bucket.input-bucket.name} -o ${google_storage_bucket.output-bucket.name}
+node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f $FILE_PATH -d GCP -i ${google_storage_bucket.input-bucket.name} -o ${module.output_bucket.bucket_name}
 EOT
 
 }
