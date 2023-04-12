@@ -72,7 +72,7 @@ See details: [docs/sources/google-workspace/readme.md](docs/sources/google-works
 ### Microsoft 365
 
 For all of these, a Microsoft 365 Admin (at minimum, a [Privileged Role Administrator](https://learn.microsoft.com/en-us/azure/active-directory/roles/permissions-reference#privileged-role-administrator))
-must authorize the Azure Enterprise Application you provision (with [provided terraform modules](infra/examples)) to access your Microsoft 365 tenant's data with the scopes listed
+must authorize the Azure Application you provision (with [provided terraform modules](infra/examples)) to access your Microsoft 365 tenant's data with the scopes listed
 below. This is done via the Azure Portal (Active Directory).  If you use our provided Terraform
 modules, specific instructions that you can pass to the Microsoft 365 Admin will be output for you.
 

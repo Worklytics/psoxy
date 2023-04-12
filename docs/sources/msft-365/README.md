@@ -4,7 +4,7 @@
 
 Connecting to Microsoft 365 data requires:
 
-  1. creating one *Azure Active Directory* (AAD) application per Microsoft 365 data source (eg, `azure-ad`, `outlook-mail`, `outlook-cal`, etc).
+  1. creating one *Azure Active Directory* (AAD) enterprise application per Microsoft 365 data source (eg, `azure-ad`, `outlook-mail`, `outlook-cal`, etc).
   2. configuring an authentication mechanism to permit each proxy instance to authenticate with
      the Microsoft Graph API. (since Sept 2022, the supported approach is [federated identity credentials](https://learn.microsoft.com/en-us/graph/api/resources/federatedidentitycredentials-overview?view=graph-rest-1.0))
   3. granting [admin consent](https://learn.microsoft.com/en-us/azure/active-directory/manage-apps/grant-admin-consent?pivots=ms-graph#prerequisites) each AAD application access to specific scopes of Microsoft 365 data your connection requires.
@@ -15,10 +15,12 @@ an Azure AD user with, at minimum, the following role in your Microsoft 365 tena
 
  - [Cloud Application Administrator](https://learn.microsoft.com/en-us/azure/active-directory/roles/permissions-reference#cloud-application-administrator). This is to create/update/delete AAD applications and its settings during Terraform apply command.
 
-This role is needed *ONLY* for the initial `terraform apply` . After each Azure AD application is
-created, the user will be set as the `owner` of that application, providing ongoing access to read
-and update the application's settings.  At that point, the general 'Application Administrator' role
-can be removed.
+Please note that this role is the least-privileged role sufficient for this task (creating an Azure
+AD Application), per Microsoft's documentation. See [Least privileged roles by task in Azure Active Directory](https://learn.microsoft.com/en-us/azure/active-directory/roles/delegate-by-task#enterprise-applications).
+
+This role is needed *ONLY* for the initial `terraform apply` . After each Azure AD enterprise
+application is created, the user will be set as the `owner` of that application, providing ongoing
+access to read and update the application's settings.  At that point, the general role can be removed.
 
 Step (3) is performed by a Microsoft 365 administrator via the Azure AD web console. Running the
 `terraform` examples for steps (1)/(2) will generate a document with specific instructions for this
@@ -26,8 +28,12 @@ administrator. This administrator must have, at minimum, the following role in y
 tenant:
   - [Privileged Role Administrator](https://learn.microsoft.com/en-us/azure/active-directory/roles/permissions-reference#privileged-role-administrator)
 
+Again, this is the least-privileged role sufficient for this task (Consent to application
+permissions to Microsoft Graph), per Microsoft's documentation. See [Least privileged roles by task in Azure Active Directory](https://learn.microsoft.com/en-us/azure/active-directory/roles/delegate-by-task#enterprise-applications).
+
 ## Security
 
+### Authentication
 Psoxy uses [Federated Identity Credentials](https://docs.microsoft.com/en-us/graph/api/resources/federatedidentitycredential?view=graph-rest-1.0)
 to authenticate with the Microsoft Graph API. This approach avoids the need for any secrets to be
 exchanged between your Psoxy instances and your Microsoft 365 tenant. Rather, each API request from
@@ -38,6 +44,21 @@ provider of those credentials.
 
 Neither your proxy instances nor Worklytics ever hold any API key or certificate for your Microsoft
 365 tenant.
+
+### Authorization and Scopes
+
+The following Scopes are required for each connector. Note that they are all READ-only scopes:
+
+| Source&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Application Scopes                                                                                 |
+|--------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------|
+| Active Directory                                                                                 | `User.Read.All` `Group.Read.All`                                                                   |
+| Calendar                                                                                               | `User.Read.All` `Group.Read.All` `OnlineMeetings.Read.All` `Calendars.Read` `MailboxSettings.Read` |
+| Mail                                                                                                   | `User.Read.All` `Group.Read.All`  `Mail.ReadBasic.All` `MailboxSettings.Read`                      |
+
+NOTE: the above scopes are copied from [infra/modules/worklytics-connector-specs](../../../infra/modules/worklytics-connector-specs).
+They are accurate as of 2023-04-12. Please refer to that module for a definitive list.
+
+NOTE: that `Mail.ReadBasic` affords only access to email metadata, not content/attachments.
 
 
 ## Troubleshooting
