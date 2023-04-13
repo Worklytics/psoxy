@@ -157,10 +157,11 @@ resource "google_storage_bucket" "artifacts" {
 
 # Add source code zip to bucket
 resource "google_storage_bucket_object" "function" {
-  name         = format("${var.environment_id_prefix}${module.psoxy-package.filename}#%s", filesha1(data.archive_file.source.output_path))
-  content_type = "application/zip"
-  bucket       = google_storage_bucket.artifacts.name
-  source       = data.archive_file.source.output_path
+  name           = "${var.environment_id_prefix}${module.psoxy-package.filename}"
+  content_type   = "application/zip"
+  bucket         = google_storage_bucket.artifacts.name
+  source         = data.archive_file.source.output_path
+  detect_md5hash = true
 }
 
 resource "google_project_iam_custom_role" "bucket_write" {
