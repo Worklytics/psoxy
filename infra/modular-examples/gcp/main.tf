@@ -342,6 +342,7 @@ locals {
 resource "google_secret_manager_secret" "additional_transforms" {
   for_each = local.inputs_to_build_lookups_for
 
+  project   = var.gcp_project_id
   secret_id = "${local.config_parameter_prefix}${upper(replace(each.key, "-", "_"))}_ADDITIONAL_TRANSFORMS"
 
   replication {
