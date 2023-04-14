@@ -38,7 +38,7 @@ locals {
 }
 
 resource "google_cloudfunctions_function" "function" {
-  name        = var.instance_id
+  name        = "${var.environment_id_prefix}${var.instance_id}"
   description = "Psoxy Connector - ${var.source_kind}"
   runtime     = "java11"
   project     = var.project_id

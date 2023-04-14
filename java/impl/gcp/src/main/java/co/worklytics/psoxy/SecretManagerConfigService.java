@@ -97,7 +97,7 @@ public class SecretManagerConfigService implements ConfigService {
         if (StringUtils.isBlank(this.namespace)) {
             return property.name();
         } else {
-            return String.join("_", this.namespace, property.name());
+            return this.namespace + property.name();
         }
     }
 }

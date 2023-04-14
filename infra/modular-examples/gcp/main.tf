@@ -12,7 +12,7 @@ locals {
   host_platform_id = "GCP"
 
   config_parameter_prefix = var.config_parameter_prefix == "" ? "${var.environment_id}_" : var.config_parameter_prefix
-  environment_id_prefix   = "psoxy-${var.environment_id}${length(var.environment_id) > 0 ? "-" : ""}"
+  environment_id_prefix   = "${var.environment_id}${length(var.environment_id) > 0 ? "-" : ""}"
   environment_id_display_name_qualifier = length(var.environment_id) > 0 ? " ${var.environment_id} " : ""
 }
 
@@ -76,7 +76,7 @@ module "google-workspace-key-secrets" {
   secret_project = var.gcp_project_id
   path_prefix    = local.config_parameter_prefix
   secrets = {
-    "PSOXY_${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY" : {
+    "${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY" : {
       value       = module.google-workspace-connection-auth[each.key].key_value
       description = "Auth key for ${each.key} service account"
     }
@@ -91,7 +91,8 @@ module "psoxy-google-workspace-connector" {
 
   project_id                            = var.gcp_project_id
   source_kind                           = each.value.source_kind
-  instance_id                           = "${local.environment_id_prefix}${each.key}"
+  environment_id_prefix                 = local.environment_id_prefix
+  instance_id                           = each.key
   service_account_email                 = module.google-workspace-connection[each.key].service_account_email
   artifacts_bucket_name                 = module.psoxy.artifacts_bucket_name
   deployment_bundle_object_name         = module.psoxy.deployment_bundle_object_name
@@ -120,8 +121,8 @@ module "psoxy-google-workspace-connector" {
   secret_bindings = merge({
     # as SERVICE_ACCOUNT_KEY rotated by Terraform, reasonable to bind as env variable
     SERVICE_ACCOUNT_KEY = {
-      secret_id      = module.google-workspace-key-secrets[each.key].secret_ids_within_project["PSOXY_${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY"]
-      version_number = module.google-workspace-key-secrets[each.key].secret_version_numbers["PSOXY_${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY"]
+      secret_id      = module.google-workspace-key-secrets[each.key].secret_ids_within_project["${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY"]
+      version_number = module.google-workspace-key-secrets[each.key].secret_version_numbers["${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY"]
     }
   }, module.psoxy.secrets)
 }
@@ -164,7 +165,7 @@ module "connector-oauth" {
 
   project_id            = var.gcp_project_id
   path_prefix           = local.config_parameter_prefix
-  secret_name           = "PSOXY_${upper(replace(each.value.connector_name, "-", "_"))}_${upper(each.value.secret_name)}"
+  secret_name           = "${upper(replace(each.value.connector_name, "-", "_"))}_${upper(each.value.secret_name)}"
   service_account_email = google_service_account.long_auth_connector_sa[each.value.connector_name].email
 }
 
@@ -199,8 +200,9 @@ module "connector-long-auth-function" {
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-rest?ref=v0.4.18"
 
   project_id                    = var.gcp_project_id
+  environment_id_prefix         = local.environment_id_prefix
   source_kind                   = each.value.source_kind
-  instance_id                   = "${local.environment_id_prefix}${each.key}"
+  instance_id                   = each.key
   service_account_email         = google_service_account.long_auth_connector_sa[each.key].email
   artifacts_bucket_name         = module.psoxy.artifacts_bucket_name
   deployment_bundle_object_name = module.psoxy.deployment_bundle_object_name
@@ -256,7 +258,7 @@ module "custom_rest_rules" {
 
   for_each = var.custom_rest_rules
 
-  prefix    = "${local.config_parameter_prefix}PSOXY_${upper(replace(each.key, "-", "_"))}_"
+  prefix    = "${local.config_parameter_prefix}${upper(replace(each.key, "-", "_"))}_"
   file_path = each.value
 }
 
@@ -271,6 +273,7 @@ module "psoxy-bulk" {
 
   project_id                    = var.gcp_project_id
   environment_id_prefix         = local.environment_id_prefix
+  instance_id                   = each.key
   worklytics_sa_emails          = var.worklytics_sa_emails
   config_parameter_prefix       = local.config_parameter_prefix
   region                        = var.gcp_region
