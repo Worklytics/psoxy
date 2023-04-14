@@ -373,6 +373,14 @@ resource "google_secret_manager_secret_version" "additional_transforms" {
   ])
 }
 
+resource "google_secret_manager_secret_iam_member" "additional_transforms" {
+  for_each = local.inputs_to_build_lookups_for
+
+  secret_id = google_secret_manager_secret.additional_transforms[each.key].id
+  member    = "serviceAccount:${module.psoxy-bulk[each.key].instance_sa_email}"
+  role      = "roles/secretmanager.secretAccessor"
+}
+
 # END LOOKUP TABLES
 
 locals {
