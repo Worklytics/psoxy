@@ -23,7 +23,7 @@ This role is needed *ONLY* for the initial `terraform apply` . After each Azure 
 application is created, the user will be set as the `owner` of that application, providing ongoing
 access to read and update the application's settings.  At that point, the general role can be removed.
 
-Step (3) is performed by a Microsoft 365 administrator via the Azure AD web console. Running the
+Step (3) is performed via the Azure AD web console through an user with administrator permissions. Running the
 `terraform` examples for steps (1)/(2) will generate a document with specific instructions for this
 administrator. This administrator must have, at minimum, the following role in your Microsoft 365
 tenant:
