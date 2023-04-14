@@ -4,7 +4,7 @@
 
 Connecting to Microsoft 365 data requires:
 
-  1. creating one *Azure Active Directory* (AAD) enterprise application per Microsoft 365 data source (eg, `azure-ad`, `outlook-mail`, `outlook-cal`, etc).
+  1. creating one *Azure Active Directory* (AAD) application per Microsoft 365 data source (eg, `azure-ad`, `outlook-mail`, `outlook-cal`, etc).
   2. configuring an authentication mechanism to permit each proxy instance to authenticate with
      the Microsoft Graph API. (since Sept 2022, the supported approach is [federated identity credentials](https://learn.microsoft.com/en-us/graph/api/resources/federatedidentitycredentials-overview?view=graph-rest-1.0))
   3. granting [admin consent](https://learn.microsoft.com/en-us/azure/active-directory/manage-apps/grant-admin-consent?pivots=ms-graph#prerequisites)
