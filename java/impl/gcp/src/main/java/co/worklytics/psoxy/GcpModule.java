@@ -50,7 +50,8 @@ public interface GcpModule {
      */
     @Provides @Named("Native") @Singleton
     static ConfigService nativeConfigService(HostEnvironment hostEnvironment,
-                                             EnvVarsConfigService envVarsConfigService) {
+                                             EnvVarsConfigService envVarsConfigService,
+                                             SecretManagerConfigServiceFactory secretManagerConfigServiceFactory) {
         String pathToSharedConfig =
             envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_SHARED_CONFIG)
                 .orElse(null);
@@ -60,8 +61,8 @@ public interface GcpModule {
                 .orElseGet(() -> asSecretManagerNamespace(hostEnvironment.getInstanceId()));
 
         return CompositeConfigService.builder()
-                .preferred(new SecretManagerConfigService(pathToInstanceConfig, ServiceOptions.getDefaultProjectId()))
-                .fallback(new SecretManagerConfigService(pathToSharedConfig, ServiceOptions.getDefaultProjectId()))
+                .preferred(secretManagerConfigServiceFactory.create(ServiceOptions.getDefaultProjectId(), pathToInstanceConfig))
+                .fallback(secretManagerConfigServiceFactory.create(ServiceOptions.getDefaultProjectId(), pathToSharedConfig))
                 .build();
     }
 
