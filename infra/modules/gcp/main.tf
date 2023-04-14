@@ -155,9 +155,14 @@ resource "google_storage_bucket" "artifacts" {
   }
 }
 
+locals {
+  file_name_with_sha1 = replace(module.psoxy-package.filename, ".jar",
+    "_${filesha1(module.psoxy-package.path_to_deployment_jar)}.jar")
+}
+
 # Add source code zip to bucket
 resource "google_storage_bucket_object" "function" {
-  name           = "${var.environment_id_prefix}${module.psoxy-package.filename}"
+  name           = "${var.environment_id_prefix}${local.file_name_with_sha1}"
   content_type   = "application/zip"
   bucket         = google_storage_bucket.artifacts.name
   source         = data.archive_file.source.output_path
