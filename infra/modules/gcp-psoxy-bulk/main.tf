@@ -125,6 +125,28 @@ resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_secret"
   role      = "roles/secretmanager.secretAccessor"
 }
 
+
+data "google_client_openid_userinfo" "me" {
+
+}
+
+locals {
+  # hacky way to determine if Terraform running as a service account or not
+  tf_is_service_account = endswith(data.google_client_openid_userinfo.me.email, "iam.gserviceaccount.com")
+
+  tf_qualifier          = local.tf_is_service_account ? "serviceAccount:" : "user:"
+  tf_principal          = "${local.tf_qualifier}${data.google_client_openid_userinfo.me.email}"
+}
+
+
+# to provision Cloud Function, TF must be able to act as the service account that the function will
+# run as
+resource "google_service_account_iam_member" "act_as" {
+  member             = local.tf_principal
+  role               = "roles/iam.serviceAccountUser"
+  service_account_id = google_service_account.service-account.id
+}
+
 resource "google_cloudfunctions_function" "function" {
   name        = local.function_name
   description = "Psoxy instance to process ${var.source_kind} files"
@@ -173,8 +195,10 @@ resource "google_cloudfunctions_function" "function" {
     ]
   }
 
+  # can't provision function until grants that allow reading of secrets, acting as SA are complete
   depends_on = [
-    google_secret_manager_secret_iam_member.grant_sa_accessor_on_secret
+    google_secret_manager_secret_iam_member.grant_sa_accessor_on_secret,
+    google_service_account_iam_member.act_as
   ]
 }
 
