@@ -396,7 +396,6 @@ module "aws-psoxy-long-auth-connectors" {
       IS_DEVELOPMENT_MODE  = contains(var.non_production_connectors, each.key)
       CUSTOM_RULES_SHA     = try(var.custom_rest_rules[each.key], null) != null ? filesha1(var.custom_rest_rules[each.key]) : null
       PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
-
     }
   )
 }
@@ -486,7 +485,7 @@ module "psoxy-bulk-to-worklytics" {
   }, try(each.value.settings_to_provide, {}))
 }
 
-# BEGIN lookup builders
+# BEGIN lookup tables
 module "lookup_output" {
   for_each = var.lookup_table_builders
 
@@ -512,6 +511,8 @@ resource "aws_ssm_parameter" "additional_transforms" {
     rules : v.rules
   } if v.input_connector_id == each.key])
 }
+
+# END lookup tables
 
 
 locals {

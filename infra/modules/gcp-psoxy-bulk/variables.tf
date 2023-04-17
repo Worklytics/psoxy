@@ -11,7 +11,13 @@ variable "environment_id_prefix" {
 
 variable "config_parameter_prefix" {
   type        = string
-  description = "Prefix for psoxy config parameters"
+  description = "Prefix for psoxy config parameters, unique to environment"
+  default     = null
+}
+
+variable "instance_id" {
+  type        = string
+  description = "id of psoxy instance"
   default     = null
 }
 
@@ -50,6 +56,7 @@ variable "deployment_bundle_object_name" {
   type        = string
   description = "Name of the object containing the deployment bundle"
 }
+
 
 variable "path_to_config" {
   type        = string

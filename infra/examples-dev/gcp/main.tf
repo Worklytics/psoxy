@@ -59,7 +59,9 @@ module "psoxy" {
   salesforce_domain              = var.salesforce_domain
   bulk_input_expiration_days     = var.bulk_input_expiration_days
   bulk_sanitized_expiration_days = var.bulk_sanitized_expiration_days
+  lookup_tables                  = var.lookup_tables
 }
+
 
 output "todos_1" {
   description = "List of todo steps to complete 1st, in markdown format."

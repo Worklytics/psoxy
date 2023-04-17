@@ -38,7 +38,7 @@ locals {
 }
 
 resource "google_cloudfunctions_function" "function" {
-  name        = var.instance_id
+  name        = "${var.environment_id_prefix}${var.instance_id}"
   description = "Psoxy Connector - ${var.source_kind}"
   runtime     = "java11"
   project     = var.project_id
@@ -55,7 +55,7 @@ resource "google_cloudfunctions_function" "function" {
     var.path_to_config == null ? {} : yamldecode(file(var.path_to_config)),
     var.environment_variables,
     var.config_parameter_prefix == null ? {} : { PATH_TO_SHARED_CONFIG = var.config_parameter_prefix },
-    var.config_parameter_prefix == null ? {} : { PATH_TO_INSTANCE_CONFIG = "${var.config_parameter_prefix}${var.source_kind}" },
+    var.config_parameter_prefix == null ? {} : { PATH_TO_INSTANCE_CONFIG = "${var.config_parameter_prefix}${upper(var.instance_id)}_" },
   )
 
   dynamic "secret_environment_variables" {

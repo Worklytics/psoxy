@@ -12,7 +12,7 @@ locals {
   host_platform_id = "GCP"
 
   config_parameter_prefix = var.config_parameter_prefix == "" ? "${var.environment_id}_" : var.config_parameter_prefix
-  environment_id_prefix   = "psoxy-${var.environment_id}${length(var.environment_id) > 0 ? "-" : ""}"
+  environment_id_prefix   = "${var.environment_id}${length(var.environment_id) > 0 ? "-" : ""}"
   environment_id_display_name_qualifier = length(var.environment_id) > 0 ? " ${var.environment_id} " : ""
 }
 
@@ -76,7 +76,7 @@ module "google-workspace-key-secrets" {
   secret_project = var.gcp_project_id
   path_prefix    = local.config_parameter_prefix
   secrets = {
-    "PSOXY_${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY" : {
+    "${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY" : {
       value       = module.google-workspace-connection-auth[each.key].key_value
       description = "Auth key for ${each.key} service account"
     }
@@ -91,7 +91,8 @@ module "psoxy-google-workspace-connector" {
 
   project_id                            = var.gcp_project_id
   source_kind                           = each.value.source_kind
-  instance_id                           = "${local.environment_id_prefix}${each.key}"
+  environment_id_prefix                 = local.environment_id_prefix
+  instance_id                           = each.key
   service_account_email                 = module.google-workspace-connection[each.key].service_account_email
   artifacts_bucket_name                 = module.psoxy.artifacts_bucket_name
   deployment_bundle_object_name         = module.psoxy.deployment_bundle_object_name
@@ -120,8 +121,8 @@ module "psoxy-google-workspace-connector" {
   secret_bindings = merge({
     # as SERVICE_ACCOUNT_KEY rotated by Terraform, reasonable to bind as env variable
     SERVICE_ACCOUNT_KEY = {
-      secret_id      = module.google-workspace-key-secrets[each.key].secret_ids_within_project["PSOXY_${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY"]
-      version_number = module.google-workspace-key-secrets[each.key].secret_version_numbers["PSOXY_${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY"]
+      secret_id      = module.google-workspace-key-secrets[each.key].secret_ids_within_project["${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY"]
+      version_number = module.google-workspace-key-secrets[each.key].secret_version_numbers["${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY"]
     }
   }, module.psoxy.secrets)
 }
@@ -136,7 +137,7 @@ module "worklytics-psoxy-connection" {
   psoxy_instance_id      = each.key
   connector_id           = try(each.value.worklytics_connector_id, "")
   psoxy_endpoint_url     = module.psoxy-google-workspace-connector[each.key].cloud_function_url
-  display_name           = "${title(each.key)}${var.connector_display_name_suffix} via Psoxy"
+  display_name           = "${title(each.key)}${local.environment_id_display_name_qualifier} via Psoxy"
   todo_step              = module.psoxy-google-workspace-connector[each.key].next_todo_step
 }
 
@@ -164,7 +165,7 @@ module "connector-oauth" {
 
   project_id            = var.gcp_project_id
   path_prefix           = local.config_parameter_prefix
-  secret_name           = "PSOXY_${upper(replace(each.value.connector_name, "-", "_"))}_${upper(each.value.secret_name)}"
+  secret_name           = "${upper(replace(each.value.connector_name, "-", "_"))}_${upper(each.value.secret_name)}"
   service_account_email = google_service_account.long_auth_connector_sa[each.value.connector_name].email
 }
 
@@ -199,8 +200,9 @@ module "connector-long-auth-function" {
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-rest?ref=rc-v0.4.19"
 
   project_id                    = var.gcp_project_id
+  environment_id_prefix         = local.environment_id_prefix
   source_kind                   = each.value.source_kind
-  instance_id                   = "${local.environment_id_prefix}${each.key}"
+  instance_id                   = each.key
   service_account_email         = google_service_account.long_auth_connector_sa[each.key].email
   artifacts_bucket_name         = module.psoxy.artifacts_bucket_name
   deployment_bundle_object_name = module.psoxy.deployment_bundle_object_name
@@ -245,7 +247,7 @@ module "worklytics-psoxy-connection-long-auth" {
   psoxy_instance_id      = each.key
   connector_id           = try(each.value.worklytics_connector_id, "")
   psoxy_endpoint_url     = module.connector-long-auth-function[each.key].cloud_function_url
-  display_name           = "${each.value.display_name} via Psoxy${var.connector_display_name_suffix}"
+  display_name           = "${each.value.display_name} via Psoxy${local.environment_id_display_name_qualifier}"
   todo_step              = module.connector-long-auth-function[each.key].next_todo_step
 }
 # END LONG ACCESS AUTH CONNECTORS
@@ -256,7 +258,7 @@ module "custom_rest_rules" {
 
   for_each = var.custom_rest_rules
 
-  prefix    = "${local.config_parameter_prefix}PSOXY_${upper(replace(each.key, "-", "_"))}_"
+  prefix    = "${local.config_parameter_prefix}${upper(replace(each.key, "-", "_"))}_"
   file_path = each.value
 }
 
@@ -264,13 +266,14 @@ module "custom_rest_rules" {
 # BEGIN BULK CONNECTORS
 module "psoxy-bulk" {
   for_each = merge(module.worklytics_connector_specs.enabled_bulk_connectors,
-  var.custom_bulk_connectors)
+    var.custom_bulk_connectors)
 
   source = "../../modules/gcp-psoxy-bulk"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-bulk?ref=rc-v0.4.19"
 
   project_id                    = var.gcp_project_id
   environment_id_prefix         = local.environment_id_prefix
+  instance_id                   = each.key
   worklytics_sa_emails          = var.worklytics_sa_emails
   config_parameter_prefix       = local.config_parameter_prefix
   region                        = var.gcp_region
@@ -299,7 +302,7 @@ module "psoxy-bulk" {
 
 module "psoxy-bulk-to-worklytics" {
   for_each = merge(module.worklytics_connector_specs.enabled_bulk_connectors,
-  var.custom_bulk_connectors)
+    var.custom_bulk_connectors)
 
   source = "../../modules/worklytics-psoxy-connection-generic"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-generic?ref=rc-v0.4.19"
@@ -314,6 +317,71 @@ module "psoxy-bulk-to-worklytics" {
     "Bucket Name" = module.psoxy-bulk[each.key].sanitized_bucket
   }, try(each.value.settings_to_provide, {}))
 }
+
+# END BULK CONNECTORS
+
+# BEGIN LOOKUP TABLES
+module "lookup_output" {
+  for_each = var.lookup_tables
+
+  source = "../../modules/gcp-output-bucket"
+
+  bucket_write_role_id           = module.psoxy.bucket_write_role_id
+  function_service_account_email = module.psoxy-bulk[each.value.source_connector_id].instance_sa_email
+  project_id                     = var.gcp_project_id
+  region                         = var.gcp_region
+  bucket_name_prefix             = module.psoxy-bulk[each.value.source_connector_id].bucket_prefix
+  bucket_name_suffix             = "-lookup" # TODO: what if multiple lookups from same source??
+  expiration_days                = each.value.expiration_days
+  sanitizer_accessor_principals  = each.value.sanitized_accessor_principals
+}
+
+locals {
+  inputs_to_build_lookups_for = toset(distinct([for k, v in var.lookup_tables : v.source_connector_id]))
+}
+
+# TODO: this would be cleaner as env var, but creates a cycle:
+# Error: Cycle: module.psoxy.module.psoxy-bulk.local_file.todo-gcp-psoxy-bulk-test, module.psoxy.module.lookup_output.var.function_service_account_email (expand), module.psoxy.module.lookup_output.google_storage_bucket_iam_member.write_to_output_bucket, module.psoxy.module.lookup_output.output.bucket_name (expand), module.psoxy.module.lookup_output.var.bucket_name_prefix (expand), module.psoxy.module.lookup_output.google_storage_bucket.bucket, module.psoxy.module.lookup_output.google_storage_bucket_iam_member.accessors, module.psoxy.module.lookup_output (close), module.psoxy.module.psoxy-bulk.var.environment_variables (expand), module.psoxy.module.psoxy-bulk.google_cloudfunctions_function.function, module.psoxy.module.psoxy-bulk (close)
+resource "google_secret_manager_secret" "additional_transforms" {
+  for_each = local.inputs_to_build_lookups_for
+
+  project   = var.gcp_project_id
+  secret_id = "${local.config_parameter_prefix}${upper(replace(each.key, "-", "_"))}_ADDITIONAL_TRANSFORMS"
+
+  replication {
+    automatic = true
+  }
+}
+
+resource "google_secret_manager_secret_version" "additional_transforms" {
+  for_each = local.inputs_to_build_lookups_for
+
+  secret = google_secret_manager_secret.additional_transforms[each.key].name
+  secret_data = yamlencode([
+    for k, v in var.lookup_tables : {
+      destinationBucketName : module.lookup_output[k].bucket_name
+      rules : {
+        columnsToDuplicate : {
+          (v.join_key_column) : "${v.join_key_column}_pseudonym"
+        },
+        columnsToPseudonymize : ["${v.join_key_column}_pseudonym"]
+        columnsToInclude : try(concat(v.columns_to_include, [
+          v.join_key_column, "${v.join_key_column}_pseudonym"
+        ]), null)
+      }
+    } if v.source_connector_id == each.key
+  ])
+}
+
+resource "google_secret_manager_secret_iam_member" "additional_transforms" {
+  for_each = local.inputs_to_build_lookups_for
+
+  secret_id = google_secret_manager_secret.additional_transforms[each.key].id
+  member    = "serviceAccount:${module.psoxy-bulk[each.key].instance_sa_email}"
+  role      = "roles/secretmanager.secretAccessor"
+}
+
+# END LOOKUP TABLES
 
 locals {
   all_instances = merge(
@@ -330,7 +398,7 @@ output "instances" {
 
 output "todos_1" {
   description = "List of todo steps to complete 1st, in markdown format."
-  value = concat(
+  value       = concat(
     values(module.google-workspace-connection)[*].todo,
     values(module.source_token_external_todo)[*].todo,
   )
@@ -338,7 +406,7 @@ output "todos_1" {
 
 output "todos_2" {
   description = "List of todo steps to complete 2nd, in markdown format."
-  value = concat(
+  value       = concat(
     values(module.psoxy-google-workspace-connector)[*].todo,
     values(module.connector-long-auth-function)[*].todo,
     values(module.psoxy-bulk)[*].todo,
@@ -347,7 +415,7 @@ output "todos_2" {
 
 output "todos_3" {
   description = "List of todo steps to complete 3rd, in markdown format."
-  value = concat(
+  value       = concat(
     values(module.worklytics-psoxy-connection)[*].todo,
     values(module.worklytics-psoxy-connection)[*].todo,
     values(module.psoxy-bulk-to-worklytics)[*].todo,
