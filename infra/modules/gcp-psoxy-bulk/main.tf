@@ -17,6 +17,20 @@ data "google_project" "project" {
   project_id = var.project_id
 }
 
+# ensure Storage API is activated
+resource "google_project_service" "gcp-infra-api" {
+  for_each = toset([
+    "storage.googleapis.com",
+  ])
+
+  service                    = each.key
+  project                    = var.project_id
+  disable_dependent_services = false
+  disable_on_destroy         = false
+}
+
+
+
 resource "random_string" "bucket_id_part" {
   length  = 8
   special = false
@@ -52,6 +66,10 @@ resource "google_storage_bucket" "input-bucket" {
       labels
     ]
   }
+
+  depends_on = [
+    google_project_service.gcp-infra-api
+  ]
 }
 
 # data output from function
@@ -64,6 +82,10 @@ module "output_bucket" {
   bucket_name_prefix             = local.bucket_prefix
   region                         = var.region
   expiration_days                = var.sanitized_expiration_days
+
+  depends_on = [
+    google_project_service.gcp-infra-api
+  ]
 }
 
 # TODO: added in v0.4.19
