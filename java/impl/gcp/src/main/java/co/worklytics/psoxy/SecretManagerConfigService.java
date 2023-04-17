@@ -1,22 +1,27 @@
 package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import com.google.cloud.secretmanager.v1.*;
 import com.google.protobuf.ByteString;
+import dagger.assisted.Assisted;
+import dagger.assisted.AssistedInject;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.inject.Inject;
 import java.io.IOException;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.logging.Level;
 
 @Log
-@RequiredArgsConstructor
 public class SecretManagerConfigService implements ConfigService {
+
+    @Inject EnvVarsConfigService envVarsConfigService;
 
     /**
      * Namespace to use; it could be empty for accessing all the secrets or with some value will be used
@@ -29,6 +34,13 @@ public class SecretManagerConfigService implements ConfigService {
      */
     @NonNull
     final String projectId;
+
+    @AssistedInject
+    public SecretManagerConfigService(@Assisted("projectId") @NonNull String projectId,
+                                      @Assisted("namespace") @NonNull String namespace) {
+        this.projectId = projectId;
+        this.namespace = namespace;
+    }
 
     @Override
     public boolean supportsWriting() {
@@ -73,6 +85,9 @@ public class SecretManagerConfigService implements ConfigService {
 
             return Optional.of(response.getPayload().getData().toStringUtf8());
         } catch (Exception ignored) {
+            if (envVarsConfigService.isDevelopment()) {
+                log.log(Level.INFO, "Could not find secret " + paramName + " in Secret Manager", ignored);
+            }
             // If secret is not found, it will return an exception
             return Optional.empty();
         }
@@ -82,7 +97,7 @@ public class SecretManagerConfigService implements ConfigService {
         if (StringUtils.isBlank(this.namespace)) {
             return property.name();
         } else {
-            return String.join("_", this.namespace, property.name());
+            return this.namespace + property.name();
         }
     }
 }

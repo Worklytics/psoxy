@@ -6,11 +6,11 @@ variable "gcp_project_id" {
 variable "environment_id" {
   type        = string
   description = "Qualifier to append to names/ids of resources for psoxy. If not empty, A-Za-z0-9 or - characters only. Max length 10. Useful to distinguish between deployments into same GCP project."
-  default     = ""
+  default     = "psoxy"
 
   validation {
-    condition     = can(regex("^[A-z0-9\\-]{0,12}$", var.environment_id))
-    error_message = "The environment_name must be 0-12 chars of [A-z0-9\\-] only."
+    condition     = can(regex("^[A-z0-9\\-]{0,20}$", var.environment_id))
+    error_message = "The environment_name must be 0-20 chars of [A-z0-9\\-] only."
   }
 }
 
@@ -30,13 +30,6 @@ variable "config_parameter_prefix" {
 variable "worklytics_sa_emails" {
   type        = list(string)
   description = "service accounts for your organization's Worklytics instances (list supported for test/dev scenarios)"
-}
-
-# TODO: remove in 0.5; use `environment_name` instead
-variable "connector_display_name_suffix" {
-  type        = string
-  description = "**DEPRECATED** suffix to append to display_names of connector SAs; helpful to distinguish between various ones in testing/dev scenarios"
-  default     = ""
 }
 
 variable "psoxy_base_dir" {
@@ -68,7 +61,7 @@ variable "general_environment_variables" {
 variable "pseudonymize_app_ids" {
   type        = string
   description = "if set, will set value of PSEUDONYMIZE_APP_IDS environment variable to this value for all sources"
-  default     = false # TODO: true in v0.5
+  default     = true
 }
 
 variable "gcp_region" {
@@ -172,4 +165,35 @@ variable "salesforce_domain" {
   type        = string
   default     = ""
   description = "Domain of the Salesforce to connect to (only required if using Salesforce connector). To find your My Domain URL, from Setup, in the Quick Find box, enter My Domain, and then select My Domain"
+}
+
+
+# build lookup tables to JOIN data you receive back from Worklytics with your original data.
+#   - `join_key_column` should be the column you expect to JOIN on, usually 'employee_id'
+#   - `columns_to_include` is an optional a list of columns to include in the lookup table,
+#                       e.g. if the data you're exporting TO worklytics contains more columns than
+#                       you want to have in the lookup table, you can limit to an explicit list
+#   - `sanitized_accessor_names` is an optional list of GCP principals, by email with qualifier, eg:
+#                       `user:alice@worklytics`, `group:analysts@worklytics.co`, or
+#                        `serviceAccount:sa@worklytics.google-service-accounts.com`
+variable "lookup_tables" {
+  type = map(object({
+    source_connector_id           = string
+    join_key_column               = string
+    columns_to_include            = optional(list(string))
+    sanitized_accessor_principals = optional(list(string))
+    expiration_days               = optional(number)
+  }))
+  description = "Lookup tables to build from same source input as another connector, output to a distinct bucket. The original `join_key_column` will be preserved, "
+
+  default = {
+    #  "lookup-hris" = {
+    #      source_connector_id = "hris",
+    #      join_key_column = "employee_id",
+    #      columns_to_include = null
+    #      sanitized_accessor_principals = [
+    #        # ADD LIST OF GCP PRINCIPALS HERE
+    #      ],
+    #  }
+  }
 }

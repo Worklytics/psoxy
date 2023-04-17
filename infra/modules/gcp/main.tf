@@ -147,6 +147,7 @@ resource "google_storage_bucket" "artifacts" {
   location      = var.bucket_location
   force_destroy = true
 
+  # TODO: remove in v0.5
   lifecycle {
     ignore_changes = [
       labels
@@ -154,13 +155,18 @@ resource "google_storage_bucket" "artifacts" {
   }
 }
 
+locals {
+  file_name_with_sha1 = replace(module.psoxy-package.filename, ".jar",
+    "_${filesha1(module.psoxy-package.path_to_deployment_jar)}.jar")
+}
+
 # Add source code zip to bucket
 resource "google_storage_bucket_object" "function" {
-  # Append file MD5 to force bucket to be recreated
-  name         = format("${var.environment_id_prefix}${module.psoxy-package.filename}#%s", formatdate("mmss", timestamp()))
-  content_type = "application/zip"
-  bucket       = google_storage_bucket.artifacts.name
-  source       = data.archive_file.source.output_path
+  name           = "${var.environment_id_prefix}${local.file_name_with_sha1}"
+  content_type   = "application/zip"
+  bucket         = google_storage_bucket.artifacts.name
+  source         = data.archive_file.source.output_path
+  detect_md5hash = true
 }
 
 resource "google_project_iam_custom_role" "bucket_write" {
@@ -174,6 +180,7 @@ resource "google_project_iam_custom_role" "bucket_write" {
     "storage.objects.delete"
   ]
 }
+
 moved {
   from = google_project_iam_custom_role.bucket-write
   to   = google_project_iam_custom_role.bucket_write
