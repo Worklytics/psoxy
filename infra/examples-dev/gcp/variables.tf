@@ -169,3 +169,9 @@ variable "msft_owners_email" {
   description = "(Only if config includes MSFT connectors). Optionally, set of emails to apply as owners on AAD apps apart from current logged user"
   default     = []
 }
+
+variable "todos_as_outputs" {
+  type        = bool
+  description = "whether to render TODOs as outputs or flat files (former useful if you're using Terraform Cloud/Enterprise, or somewhere else where the filesystem is not readily accessible to you)"
+  default     = false
+}
