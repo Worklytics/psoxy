@@ -13,7 +13,7 @@ resource "google_project_service" "gcp-infra-api" {
     "iam.googleapis.com", # manage IAM via terraform (as of 2023-04-17, internal dev envs didn't have this; so really needed?)
     "secretmanager.googleapis.com",
     # "serviceusage.googleapis.com", # manage service APIs via terraform (prob already
- ])
+  ])
 
   service                    = each.key
   project                    = var.project_id
@@ -156,7 +156,7 @@ resource "google_storage_bucket" "artifacts" {
 
 locals {
   file_name_with_sha1 = replace(module.psoxy-package.filename, ".jar",
-    "_${filesha1(module.psoxy-package.path_to_deployment_jar)}.jar")
+  "_${filesha1(module.psoxy-package.path_to_deployment_jar)}.jar")
 }
 
 # Add source code zip to bucket

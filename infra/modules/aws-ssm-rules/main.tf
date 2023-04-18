@@ -26,7 +26,7 @@ locals {
   ssm_standard_size_limit = 4096
 
   # read rules from file
-  rules_plain      = file(var.file_path)
+  rules_plain = file(var.file_path)
 
   # compress if necessary; but otherwise leave plain so human readable
   rules_compressed = base64gzip(local.rules_plain)

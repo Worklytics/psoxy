@@ -11,8 +11,8 @@ locals {
   base_config_path = "${var.psoxy_base_dir}/configs/"
   host_platform_id = "GCP"
 
-  config_parameter_prefix = var.config_parameter_prefix == "" ? "${var.environment_id}_" : var.config_parameter_prefix
-  environment_id_prefix   = "${var.environment_id}${length(var.environment_id) > 0 ? "-" : ""}"
+  config_parameter_prefix               = var.config_parameter_prefix == "" ? "${var.environment_id}_" : var.config_parameter_prefix
+  environment_id_prefix                 = "${var.environment_id}${length(var.environment_id) > 0 ? "-" : ""}"
   environment_id_display_name_qualifier = length(var.environment_id) > 0 ? " ${var.environment_id} " : ""
 }
 
@@ -266,7 +266,7 @@ module "custom_rest_rules" {
 # BEGIN BULK CONNECTORS
 module "psoxy-bulk" {
   for_each = merge(module.worklytics_connector_specs.enabled_bulk_connectors,
-    var.custom_bulk_connectors)
+  var.custom_bulk_connectors)
 
   source = "../../modules/gcp-psoxy-bulk"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-bulk?ref=rc-v0.4.19"
@@ -302,7 +302,7 @@ module "psoxy-bulk" {
 
 module "psoxy-bulk-to-worklytics" {
   for_each = merge(module.worklytics_connector_specs.enabled_bulk_connectors,
-    var.custom_bulk_connectors)
+  var.custom_bulk_connectors)
 
   source = "../../modules/worklytics-psoxy-connection-generic"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-generic?ref=rc-v0.4.19"
@@ -398,7 +398,7 @@ output "instances" {
 
 output "todos_1" {
   description = "List of todo steps to complete 1st, in markdown format."
-  value       = concat(
+  value = concat(
     values(module.google-workspace-connection)[*].todo,
     values(module.source_token_external_todo)[*].todo,
   )
@@ -406,7 +406,7 @@ output "todos_1" {
 
 output "todos_2" {
   description = "List of todo steps to complete 2nd, in markdown format."
-  value       = concat(
+  value = concat(
     values(module.psoxy-google-workspace-connector)[*].todo,
     values(module.connector-long-auth-function)[*].todo,
     values(module.psoxy-bulk)[*].todo,
@@ -415,7 +415,7 @@ output "todos_2" {
 
 output "todos_3" {
   description = "List of todo steps to complete 3rd, in markdown format."
-  value       = concat(
+  value = concat(
     values(module.worklytics-psoxy-connection)[*].todo,
     values(module.worklytics-psoxy-connection)[*].todo,
     values(module.psoxy-bulk-to-worklytics)[*].todo,
