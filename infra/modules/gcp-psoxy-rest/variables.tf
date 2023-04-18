@@ -9,9 +9,21 @@ variable "region" {
   default     = "us-central1"
 }
 
+variable "environment_id_prefix" {
+  type        = string
+  description = "A prefix to give to all resources created/consumed by this module."
+  default     = "psoxy-"
+}
+
 variable "instance_id" {
   type        = string
   description = "kind of source (eg, 'gmail', 'google-chat', etc)"
+}
+
+variable "config_parameter_prefix" {
+  type        = string
+  description = "Prefix for psoxy config parameters"
+  default     = null
 }
 
 variable "service_account_email" {

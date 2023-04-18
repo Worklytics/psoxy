@@ -14,17 +14,17 @@ terraform {
   backend "local" {
   }
 
-  # example remove backend (this GCS bucket must already be provisioned, and GCP user executing
+  # example remote backend (this GCS bucket must already be provisioned, and GCP user executing
   # terraform must be able to read/write to it)
   #  backend "gcs" {
   #    bucket  = "tf-state-prod"
-  #    prefix  = "terraform/state"
+  #    prefix  = "proxy/terraform-state"
   #  }
 }
 
 module "psoxy" {
   # source = "../../modular-examples/gcp-google-workspace"
-  source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/gcp-google-workspace?ref=v0.4.18"
+  source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/gcp-google-workspace?ref=v0.4.19"
 
   gcp_project_id                 = var.gcp_project_id
   environment_name               = var.environment_name

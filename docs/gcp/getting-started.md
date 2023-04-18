@@ -17,10 +17,14 @@ Service Account Keys and activate Google Workspace APIs.
 
 ## Prerequisites
 
-  - a Google Project (or permissions to create one)
-  - permissions to create Service Accounts, Secret Manager Secrets, Cloud Storage Buckets, and Cloud
-    Functions within that project; eg:
-     * [Service Account Creator](https://cloud.google.com/iam/docs/understanding-roles#iam.serviceAccountCreator) - create Service Accounts to personify Cloud Functions
+  - a Google Project
+      - we recommend a *dedicated* GCP project for your deployment, to provide an implicit security
+        boundary around your infrastructure as well as simplify monitoring/cleanup
+  - the following APIs enabled in the project: (via [GCP Console](https://console.cloud.google.com/projectselector2/apis/dashboard))
+      - [Service Usage API](https://console.cloud.google.com/apis/library/serviceusage.googleapis.com) (`serviceusage.googleapis.com`)
+  - a GCP (Google) user or Service Account with permissions to create Service Accounts, Secrets,
+    Storage Buckets, Cloud Functions, and enable APIs within that project. eg:
+     * [Service Account Creator](https://cloud.google.com/iam/docs/understanding-roles#iam.serviceAccountCreator) - create Service Accounts to personify Cloud Functions (aka, 'Create Service Accounts' in GCP console UX)
      * [Cloud Functions Admin](https://cloud.google.com/iam/docs/understanding-roles#cloudfunctions.admin) - proxy instances are deployed as GCP cloud functions
      * [Cloud Storage Admin](https://cloud.google.com/iam/docs/understanding-roles#storage.admin) - processing of bulk data (such as HRIS exports) uses GCS buckets
      * [Secret Manager Admin](https://cloud.google.com/iam/docs/understanding-roles#secretmanager.admin) - your API keys and pseudonymization salt is stored in Secret Manager

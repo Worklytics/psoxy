@@ -20,11 +20,11 @@ terraform {
   backend "local" {
   }
 
-  # example remove backend (this GCS bucket must already be provisioned, and GCP user executing
+  # example remote backend (this GCS bucket must already be provisioned, and GCP user executing
   # terraform must be able to read/write to it)
   #  backend "gcs" {
   #    bucket  = "tf-state-prod"
-  #    prefix  = "terraform/state"
+  #    prefix  = "proxy/terraform-state"
   #  }
 }
 
@@ -32,20 +32,25 @@ provider "azuread" {
   tenant_id = var.msft_tenant_id
 }
 
+provider "google" {
+  impersonate_service_account = var.gcp_terraform_sa_account_email
+}
+
 module "psoxy" {
   source = "../../modular-examples/gcp"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/gcp?ref=v0.4.18"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/gcp?ref=v0.4.19"
 
   gcp_project_id                 = var.gcp_project_id
-  environment_name               = var.environment_name
+  environment_id                 = var.environment_id
+  config_parameter_prefix        = var.config_parameter_prefix
   worklytics_sa_emails           = var.worklytics_sa_emails
-  connector_display_name_suffix  = var.connector_display_name_suffix
   psoxy_base_dir                 = var.psoxy_base_dir
   force_bundle                   = var.force_bundle
   gcp_region                     = var.gcp_region
   replica_regions                = var.replica_regions
   enabled_connectors             = var.enabled_connectors
   non_production_connectors      = var.non_production_connectors
+  custom_rest_rules              = var.custom_rest_rules
   custom_bulk_connectors         = var.custom_bulk_connectors
   google_workspace_example_user  = var.google_workspace_example_user
   google_workspace_example_admin = var.google_workspace_example_admin
@@ -54,19 +59,21 @@ module "psoxy" {
   salesforce_domain              = var.salesforce_domain
   bulk_input_expiration_days     = var.bulk_input_expiration_days
   bulk_sanitized_expiration_days = var.bulk_sanitized_expiration_days
+  lookup_tables                  = var.lookup_tables
 }
+
 
 output "todos_1" {
   description = "List of todo steps to complete 1st, in markdown format."
-  value       = join("\n", module.psoxy.todos_1)
+  value       = var.todos_as_outputs ? join("\n", module.psoxy.todos_1) : null
 }
 
 output "todos_2" {
   description = "List of todo steps to complete 2nd, in markdown format."
-  value       = join("\n", module.psoxy.todos_2)
+  value       = var.todos_as_outputs ? join("\n", module.psoxy.todos_2) : null
 }
 
 output "todos_3" {
   description = "List of todo steps to complete 3rd, in markdown format."
-  value       = join("\n", module.psoxy.todos_3)
+  value       = var.todos_as_outputs ? join("\n", module.psoxy.todos_3) : null
 }

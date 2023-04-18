@@ -3,21 +3,37 @@ variable "gcp_project_id" {
   description = "id of GCP project that will host psoxy instance"
 }
 
-variable "environment_name" {
+variable "gcp_terraform_sa_account_email" {
   type        = string
-  description = "qualifier to append to name of project that will host your psoxy instance"
+  description = "Email of GCP service account that will be used to provision GCP resources. Leave 'null' to use application default for you environment."
+  default     = null
+
+  validation {
+    condition     = var.gcp_terraform_sa_account_email == null || can(regex(".*@.*\\.iam\\.gserviceaccount\\.com$", var.gcp_terraform_sa_account_email))
+    error_message = "The gcp_terraform_sa_account_email value should be a valid GCP service account email address."
+  }
+}
+
+variable "environment_id" {
+  type        = string
+  description = "Qualifier to append to names/ids of resources for psoxy. If not empty, A-Za-z0-9 or - characters only. Max length 10. Useful to distinguish between deployments into same GCP project."
+  default     = ""
+
+  validation {
+    condition     = can(regex("^[A-z0-9\\-]{0,20}$", var.environment_id))
+    error_message = "The environment_name must be 0-20 chars of [A-z0-9\\-] only."
+  }
+}
+
+variable "config_parameter_prefix" {
+  type        = string
+  description = "A prefix to give to all config parameters (GCP Secret Manager Secrets) created/consumed by this module. If omitted, and `environment_id` provided, that will be used."
   default     = ""
 }
 
 variable "worklytics_sa_emails" {
   type        = list(string)
   description = "service accounts for your organization's Worklytics instances (list supported for test/dev scenarios)"
-}
-
-variable "connector_display_name_suffix" {
-  type        = string
-  description = "suffix to append to display_names of connector SAs; helpful to distinguish between various ones in testing/dev scenarios"
-  default     = ""
 }
 
 variable "psoxy_base_dir" {
@@ -49,7 +65,7 @@ variable "general_environment_variables" {
 variable "pseudonymize_app_ids" {
   type        = string
   description = "if set, will set value of PSEUDONYMIZE_APP_IDS environment variable to this value for all sources"
-  default     = false # TODO: true in v0.5
+  default     = true
 }
 
 variable "gcp_region" {
@@ -88,6 +104,12 @@ variable "bulk_sanitized_expiration_days" {
   type        = number
   description = "Number of days after which objects in the bucket will expire"
   default     = 1805 # 5 years; intent is 'forever', but some upperbound in case bucket is forgotten
+}
+
+variable "custom_rest_rules" {
+  type        = map(string)
+  description = "map of connector id --> YAML file with custom rules"
+  default     = {}
 }
 
 variable "custom_bulk_connectors" {
@@ -146,4 +168,40 @@ variable "msft_owners_email" {
   type        = set(string)
   description = "(Only if config includes MSFT connectors). Optionally, set of emails to apply as owners on AAD apps apart from current logged user"
   default     = []
+}
+
+# build lookup tables to JOIN data you receive back from Worklytics with your original data.
+#   - `join_key_column` should be the column you expect to JOIN on, usually 'employee_id'
+#   - `columns_to_include` is an optional a list of columns to include in the lookup table,
+#                       e.g. if the data you're exporting TO worklytics contains more columns than
+#                       you want to have in the lookup table, you can limit to an explicit list
+#   - `sanitized_accessor_names` is an optional list of GCP principals, by email with qualifier, eg:
+#                       `user:alice@worklytics`, `group:analysts@worklytics.co`, or
+#                        `serviceAccount:sa@worklytics.google-service-accounts.com`
+variable "lookup_tables" {
+  type = map(object({
+    source_connector_id           = string
+    join_key_column               = string
+    columns_to_include            = optional(list(string))
+    sanitized_accessor_principals = optional(list(string))
+    expiration_days               = optional(number)
+  }))
+  description = "Lookup tables to build from same source input as another connector, output to a distinct bucket. The original `join_key_column` will be preserved, "
+
+  default = {
+    #  "lookup-hris" = {
+    #      source_connector_id = "hris",
+    #      join_key_column = "employee_id",
+    #      columns_to_include = null
+    #      sanitized_accessor_principals = [
+    #        # ADD LIST OF GCP PRINCIPALS HERE
+    #      ],
+    #  }
+  }
+}
+
+variable "todos_as_outputs" {
+  type        = bool
+  description = "whether to render TODOs as outputs or flat files (former useful if you're using Terraform Cloud/Enterprise, or somewhere else where the filesystem is not readily accessible to you)"
+  default     = false
 }

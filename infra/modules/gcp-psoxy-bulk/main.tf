@@ -7,13 +7,29 @@ terraform {
 }
 
 locals {
-  function_name       = "psoxy-${substr(var.source_kind, 0, 24)}"
+  # legacy; pre 0.5 may not pass instance_id
+  instance_id         = coalesce(var.instance_id, substr(var.source_kind, 0, 30 - length(var.environment_id_prefix)))
+  function_name       = "${var.environment_id_prefix}${local.instance_id}"
   command_npm_install = "npm --prefix ${var.psoxy_base_dir}tools/psoxy-test install"
 }
 
 data "google_project" "project" {
   project_id = var.project_id
 }
+
+# ensure Storage API is activated
+resource "google_project_service" "gcp-infra-api" {
+  for_each = toset([
+    "storage.googleapis.com",
+  ])
+
+  service                    = each.key
+  project                    = var.project_id
+  disable_dependent_services = false
+  disable_on_destroy         = false
+}
+
+
 
 resource "random_string" "bucket_id_part" {
   length  = 8
@@ -23,10 +39,14 @@ resource "random_string" "bucket_id_part" {
   numeric = true
 }
 
+locals {
+  bucket_prefix = "${local.function_name}-${random_string.bucket_id_part.id}"
+}
+
 # data input to function
 resource "google_storage_bucket" "input-bucket" {
   project                     = var.project_id
-  name                        = "${local.function_name}-${random_string.bucket_id_part.id}-input"
+  name                        = "${local.bucket_prefix}-input"
   location                    = var.region
   force_destroy               = true
   uniform_bucket_level_access = true
@@ -46,32 +66,34 @@ resource "google_storage_bucket" "input-bucket" {
       labels
     ]
   }
+
+  depends_on = [
+    google_project_service.gcp-infra-api
+  ]
 }
 
 # data output from function
-resource "google_storage_bucket" "output-bucket" {
-  project                     = var.project_id
-  name                        = "${local.function_name}-${random_string.bucket_id_part.id}-output"
-  location                    = var.region
-  force_destroy               = true
-  uniform_bucket_level_access = true
+module "output_bucket" {
+  source = "../gcp-output-bucket"
 
-  lifecycle_rule {
-    condition {
-      age = var.sanitized_expiration_days
-    }
+  project_id                     = var.project_id
+  bucket_write_role_id           = var.bucket_write_role_id
+  function_service_account_email = google_service_account.service-account.email
+  bucket_name_prefix             = local.bucket_prefix
+  region                         = var.region
+  expiration_days                = var.sanitized_expiration_days
 
-    action {
-      type = "Delete"
-    }
-  }
-
-  lifecycle {
-    ignore_changes = [
-      labels
-    ]
-  }
+  depends_on = [
+    google_project_service.gcp-infra-api
+  ]
 }
+
+# TODO: added in v0.4.19
+moved {
+  from = google_storage_bucket.output-bucket
+  to   = module.output_bucket.google_storage_bucket.bucket
+}
+
 
 resource "google_service_account" "service-account" {
   project      = var.project_id
@@ -89,16 +111,9 @@ resource "google_storage_bucket_iam_member" "access_for_import_bucket" {
 resource "google_storage_bucket_iam_member" "grant_sa_read_on_processed_bucket" {
   count = length(var.worklytics_sa_emails)
 
-  bucket = google_storage_bucket.output-bucket.name
+  bucket = module.output_bucket.bucket_name
   member = "serviceAccount:${var.worklytics_sa_emails[count.index]}"
   role   = "roles/storage.objectViewer"
-}
-
-
-resource "google_storage_bucket_iam_member" "access_for_processed_bucket" {
-  bucket = google_storage_bucket.output-bucket.name
-  role   = var.bucket_write_role_id
-  member = "serviceAccount:${google_service_account.service-account.email}"
 }
 
 resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_secret" {
@@ -108,6 +123,28 @@ resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_secret"
   secret_id = each.value.secret_id
   member    = "serviceAccount:${google_service_account.service-account.email}"
   role      = "roles/secretmanager.secretAccessor"
+}
+
+
+data "google_client_openid_userinfo" "me" {
+
+}
+
+locals {
+  # hacky way to determine if Terraform running as a service account or not
+  tf_is_service_account = endswith(data.google_client_openid_userinfo.me.email, "iam.gserviceaccount.com")
+
+  tf_qualifier = local.tf_is_service_account ? "serviceAccount:" : "user:"
+  tf_principal = "${local.tf_qualifier}${data.google_client_openid_userinfo.me.email}"
+}
+
+
+# to provision Cloud Function, TF must be able to act as the service account that the function will
+# run as
+resource "google_service_account_iam_member" "act_as" {
+  member             = local.tf_principal
+  role               = "roles/iam.serviceAccountUser"
+  service_account_id = google_service_account.service-account.id
 }
 
 resource "google_cloudfunctions_function" "function" {
@@ -125,10 +162,12 @@ resource "google_cloudfunctions_function" "function" {
 
   environment_variables = merge(tomap({
     INPUT_BUCKET  = google_storage_bucket.input-bucket.name,
-    OUTPUT_BUCKET = google_storage_bucket.output-bucket.name
+    OUTPUT_BUCKET = module.output_bucket.bucket_name,
     }),
     var.path_to_config == null ? {} : yamldecode(file(var.path_to_config)),
-    var.environment_variables
+    var.environment_variables,
+    var.config_parameter_prefix == null ? {} : { PATH_TO_SHARED_CONFIG = var.config_parameter_prefix },
+    var.config_parameter_prefix == null ? {} : { PATH_TO_INSTANCE_CONFIG = "${var.config_parameter_prefix}${upper(var.instance_id)}_" },
   )
 
   dynamic "secret_environment_variables" {
@@ -156,8 +195,10 @@ resource "google_cloudfunctions_function" "function" {
     ]
   }
 
+  # can't provision function until grants that allow reading of secrets, acting as SA are complete
   depends_on = [
-    google_secret_manager_secret_iam_member.grant_sa_accessor_on_secret
+    google_secret_manager_secret_iam_member.grant_sa_accessor_on_secret,
+    google_service_account_iam_member.act_as
   ]
 }
 
@@ -169,7 +210,7 @@ Check that the Psoxy works as expected and it transforms the files of your input
 the rules you have defined:
 
 ```shell
-node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f ${local.example_file} -d GCP -i ${google_storage_bucket.input-bucket.name} -o ${google_storage_bucket.output-bucket.name}
+node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f ${local.example_file} -d GCP -i ${google_storage_bucket.input-bucket.name} -o ${module.output_bucket.bucket_name} -p ${var.project_id} -r ${var.region}
 ```
 EOT
 }
@@ -216,7 +257,7 @@ NC='\e[0m'
 
 printf "Quick test of $${BLUE}${local.function_name}$${NC} ...\n"
 
-node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f $FILE_PATH -d GCP -i ${google_storage_bucket.input-bucket.name} -o ${google_storage_bucket.output-bucket.name}
+node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f $FILE_PATH -d GCP -i ${google_storage_bucket.input-bucket.name} -o ${module.output_bucket.bucket_name}
 EOT
 
 }
@@ -225,12 +266,20 @@ output "instance_id" {
   value = local.function_name
 }
 
+output "instance_sa_email" {
+  value = google_service_account.service-account.email
+}
+
+output "bucket_prefix" {
+  value = local.bucket_prefix
+}
+
 output "input_bucket" {
   value = google_storage_bucket.input-bucket.name
 }
 
 output "sanitized_bucket" {
-  value = google_storage_bucket.output-bucket.name
+  value = module.output_bucket.bucket_name
 }
 
 output "proxy_kind" {
