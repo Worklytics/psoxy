@@ -199,3 +199,9 @@ variable "lookup_tables" {
     #  }
   }
 }
+
+variable "todos_as_outputs" {
+  type        = bool
+  description = "whether to render TODOs as outputs or flat files (former useful if you're using Terraform Cloud/Enterprise, or somewhere else where the filesystem is not readily accessible to you)"
+  default     = false
+}

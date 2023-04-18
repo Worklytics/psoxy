@@ -65,15 +65,15 @@ module "psoxy" {
 
 output "todos_1" {
   description = "List of todo steps to complete 1st, in markdown format."
-  value       = join("\n", module.psoxy.todos_1)
+  value       = var.todos_as_outputs ? join("\n", module.psoxy.todos_1) : null
 }
 
 output "todos_2" {
   description = "List of todo steps to complete 2nd, in markdown format."
-  value       = join("\n", module.psoxy.todos_2)
+  value       = var.todos_as_outputs ? join("\n", module.psoxy.todos_2) : null
 }
 
 output "todos_3" {
   description = "List of todo steps to complete 3rd, in markdown format."
-  value       = join("\n", module.psoxy.todos_3)
+  value       = var.todos_as_outputs ? join("\n", module.psoxy.todos_3) : null
 }
