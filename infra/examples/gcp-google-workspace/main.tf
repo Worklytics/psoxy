@@ -14,11 +14,11 @@ terraform {
   backend "local" {
   }
 
-  # example remove backend (this GCS bucket must already be provisioned, and GCP user executing
+  # example remote backend (this GCS bucket must already be provisioned, and GCP user executing
   # terraform must be able to read/write to it)
   #  backend "gcs" {
   #    bucket  = "tf-state-prod"
-  #    prefix  = "terraform/state"
+  #    prefix  = "proxy/terraform-state"
   #  }
 }
 
