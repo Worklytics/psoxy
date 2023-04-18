@@ -89,7 +89,7 @@ async function testGCP(options, logger) {
   logger.success(`File uploaded -> ${uploadResult.mediaLink}`);
   logger.verbose('Upload result:', { additional: uploadResult });
 
-  const parsedBucketOutputOption = parseBucketOption(options.input);
+  const parsedBucketOutputOption = parseBucketOption(options.output);
   const outputBucket = parsedBucketOutputOption.bucket;
   const outputPath = parsedBucketOutputOption.path;
   const outputKey = outputPath + filenameWithTimestamp;
