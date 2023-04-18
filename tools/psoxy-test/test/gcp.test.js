@@ -19,9 +19,8 @@ test('isValidURL URL', (t) => {
   const gcp = t.context.subject;
 
   t.true(gcp.isValidURL(GCP_URL));
-  t.true(gcp.isValidURL(GCP_URL));
-
   t.false(gcp.isValidURL('http://foo.com'));
+
   t.throws(
     () => {
       gcp.isValidURL('foo');
