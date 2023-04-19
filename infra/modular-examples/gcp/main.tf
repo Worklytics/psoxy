@@ -37,6 +37,7 @@ module "psoxy" {
   bucket_location         = var.gcp_region
   invoker_sa_emails       = var.worklytics_sa_emails
   config_parameter_prefix = local.config_parameter_prefix
+  install_test_tool       = var.install_test_tool
 }
 
 module "google-workspace-connection" {

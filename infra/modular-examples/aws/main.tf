@@ -45,6 +45,7 @@ module "psoxy-aws" {
   caller_aws_arns                = var.caller_aws_arns
   caller_gcp_service_account_ids = var.caller_gcp_service_account_ids
   force_bundle                   = var.force_bundle
+  install_test_tool              = var.install_test_tool
 }
 
 # secrets shared across all instances
