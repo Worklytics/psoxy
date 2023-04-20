@@ -6,16 +6,20 @@ locals {
 
 
 # activate required GCP service APIs
+# NOTE: used in lieu of 'google_project_services' because that resouce is *authorative*, so will
+# disable other APIs that are enabled in the project - which may not be what we want if shared
+# project, or if other services used to support (eg, monitoring APIs or somthing)
 resource "google_project_service" "gcp-infra-api" {
   for_each = toset([
     "cloudbuild.googleapis.com", # some modes of Cloud Functions seem to need this, so TBD
     "cloudfunctions.googleapis.com",
+    "cloudresourcemanager.googleapis.com",
     "iam.googleapis.com", # manage IAM via terraform (as of 2023-04-17, internal dev envs didn't have this; so really needed?)
     "secretmanager.googleapis.com",
     # "serviceusage.googleapis.com", # manage service APIs via terraform (prob already
   ])
 
-  service                    = each.key
+  service                   = each.key
   project                    = var.project_id
   disable_dependent_services = false
   disable_on_destroy         = false # disabling on destroy has potential to conflict with other uses of the project

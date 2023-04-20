@@ -20,16 +20,30 @@ Service Account Keys and activate Google Workspace APIs.
   - a Google Project
       - we recommend a *dedicated* GCP project for your deployment, to provide an implicit security
         boundary around your infrastructure as well as simplify monitoring/cleanup
-  - the following APIs enabled in the project: (via [GCP Console](https://console.cloud.google.com/projectselector2/apis/dashboard))
-      - [Service Usage API](https://console.cloud.google.com/apis/library/serviceusage.googleapis.com) (`serviceusage.googleapis.com`)
-      - [IAM Service Account Credentials API](https://console.cloud.google.com/apis/library/iamcredentials.googleapis.com) (`iamcredentials.googleapis.com`) - generally needed to support authenticating Terraform. May not be needed if you're running `terraform` within a GCP environment.
+
   - a GCP (Google) user or Service Account with permissions to create Service Accounts, Secrets,
     Storage Buckets, Cloud Functions, and enable APIs within that project. eg:
-     * [Service Account Creator](https://cloud.google.com/iam/docs/understanding-roles#iam.serviceAccountCreator) - create Service Accounts to personify Cloud Functions (aka, 'Create Service Accounts' in GCP console UX)
-     * [Cloud Functions Admin](https://cloud.google.com/iam/docs/understanding-roles#cloudfunctions.admin) - proxy instances are deployed as GCP cloud functions
-     * [Cloud Storage Admin](https://cloud.google.com/iam/docs/understanding-roles#storage.admin) - processing of bulk data (such as HRIS exports) uses GCS buckets
-     * [Secret Manager Admin](https://cloud.google.com/iam/docs/understanding-roles#secretmanager.admin) - your API keys and pseudonymization salt is stored in Secret Manager
-     * [Service Usage Admin](https://cloud.google.com/iam/docs/understanding-roles#serviceusage.serviceUsageAdmin) - you will need to enable various GCP APIs
+      * [Cloud Functions Admin](https://cloud.google.com/iam/docs/understanding-roles#cloudfunctions.admin) - proxy instances are deployed as GCP cloud functions
+      * [Cloud Storage Admin](https://cloud.google.com/iam/docs/understanding-roles#storage.admin) - processing of bulk data (such as HRIS exports) uses GCS buckets
+      * [IAM Role Admin](https://cloud.google.com/iam/docs/understanding-roles#iam.roles.admin) - create custom roles for the proxy, to follow principle of least privilege
+      * [Secret Manager Admin](https://cloud.google.com/iam/docs/understanding-roles#secretmanager.admin) - your API keys and pseudonymization salt is stored in Secret Manager
+      * [Service Account Creator](https://cloud.google.com/iam/docs/understanding-roles#iam.serviceAccountCreator) - create Service Accounts to personify Cloud Functions (aka, 'Create Service Accounts' in GCP console UX)
+      * [Service Usage Admin](https://cloud.google.com/iam/docs/understanding-roles#serviceusage.serviceUsageAdmin) - you will need to enable various GCP APIs
+
+  - the following APIs enabled in the project: (via [GCP Console](https://console.cloud.google.com/projectselector2/apis/dashboard))
+      - [IAM Service Account Credentials API](https://console.cloud.google.com/apis/library/iamcredentials.googleapis.com) (`iamcredentials.googleapis.com`) - generally needed to support authenticating Terraform. May not be needed if you're running `terraform` within a GCP environment.
+      - [Service Usage API](https://console.cloud.google.com/apis/library/serviceusage.googleapis.com) (`serviceusage.googleapis.com`)
+
+  - additional APIs enabled in the project: (using the `Service Usage API` above, our Terraform will
+    *attempt* to enable these, but as there is sometimes a few minutes delay in activation and in
+    some cases they are required to read your existing infra prior to apply, you may experience
+    errors. To pre-empt those, we suggest ensuring the following are enabled:
+      - [Cloud Build API](https://console.cloud.google.com/apis/library/cloudbuild.googleapis.com) (`cloudbuild.googleapis.com`)
+      - [Cloud Functions API](https://console.cloud.google.com/apis/library/cloudfunctions.googleapis.com) (`cloudfunctions.googleapis.com`)
+      - [Cloud Resource Manager API](https://console.cloud.google.com/apis/library/cloudresourcemanager.googleapis.com) (`cloudresourcemanager.googleapis.com`)
+      - [IAM API](https://console.cloud.google.com/apis/library/iam.googleapis.com) (`iam.googleapis.com`)
+      - [Secret Manager API](https://console.cloud.google.com/apis/library/secretmanager.googleapis.com) (`secretmanager.googleapis.com`)
+      - [Storage API](https://console.cloud.google.com/apis/library/storage-api.googleapis.com) (`storage-api.googleapis.com`)
 
 ### Terraform State Backend
 
@@ -45,6 +59,20 @@ Alternatively, you may use a local file system, but this is not recommended for 
 your Terraform state may contain secrets such as API keys, depending on the sources you connect.
 
 See: https://developer.hashicorp.com/terraform/language/settings/backends/local
+
+## Security Considerations
+
+ * the 'Service Account' approach described in the prerequisites is preferable to giving a Google
+   user account IAM roles to administer your infrastructure directly. You can pass this Service
+   Account's email address to Terraform by setting the `gcp_terraform_sa_account_email`.  Your
+   machine/environments CLI must be authenticated as GCP entity which can impersonate this Service
+   Account, and likely create tokens as it (`Service Account Token Creator` role).
+ * using a *dedicated* GCP project is superior to using a shared project, as it provides an implicit
+   security boundary around your infrastructure as well as simplifying monitoring/cleanup.  The IAM
+   roles specified in the prerequisites must be granted at the project level, so any non-Proxy
+   infrastructure within the GCP project that hosts your proxy instances will be accessible to the
+   user / service account who's managing the proxy infrastructure.
+
 
 ## Bootstrap
 
