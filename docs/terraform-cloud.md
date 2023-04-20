@@ -53,3 +53,11 @@ terraform output -raw todos_3 > todos_3.md
 ```
 
 (This approach should also work with Terraform CLI running with `backend`, rather than `cloud`)
+
+## Testing Locally
+
+As Terraform Cloud runs remotely, the test tool we provide for testing your deployment will not be
+available by default on your local machine. You can install it locally and adapt the suggestions
+from the `todos_2` output variable of your terraform run to test your deployment from your local
+machien or another environment.  See [testing.md](../testing.md) for details.
+
