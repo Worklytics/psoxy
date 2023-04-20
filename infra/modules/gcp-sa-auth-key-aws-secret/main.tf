@@ -3,22 +3,14 @@
 
 # this is only one approach to authentication; others may be more appropriate to your use-case.
 
-data "google_client_openid_userinfo" "me" {
-
-}
-
-locals {
-  # hacky way to determine if Terraform running as a service account or not
-  tf_is_service_account = endswith(data.google_client_openid_userinfo.me.email, "iam.gserviceaccount.com")
-
-  tf_qualifier          = local.tf_is_service_account ? "serviceAccount:" : "user:"
-  tf_principal          = "${local.tf_qualifier}${data.google_client_openid_userinfo.me.email}"
+module "tf_runner" {
+  source = "../../modules/gcp-tf-runner"
 }
 
 # grant this directly on SA, jit for when we know it is needed to create keys
 # (SA keys are needed only for SAs that are used to connect to Google Workspace APIs)
 resource "google_service_account_iam_member" "key_admin" {
-  member             = local.tf_principal
+  member             = module.tf_runner.iam_principal
   role               = "roles/iam.serviceAccountKeyAdmin"
   service_account_id = var.service_account_id
 }

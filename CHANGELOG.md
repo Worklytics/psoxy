@@ -19,6 +19,8 @@ Working tracking of changes, updated as work done prior to release.  Please revi
 
 ## [0.4.20](https://github.com/Worklytics/psoxy/releases/tag/v0.4.20)
 
+Due to module refactoring, you will need a `terraform init`.
+
 Changes:
   * you may see grants of the role `iam.serviceAccountKeyAdmin` on individual GCP service accounts
     in your Terraform plan. These grants are required to allow terraform to create/manage service
