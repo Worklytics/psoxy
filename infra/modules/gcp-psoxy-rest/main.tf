@@ -83,6 +83,14 @@ resource "google_cloudfunctions_function" "function" {
   ]
 }
 
+resource "google_cloudfunctions_function_iam_member" "invokers" {
+  for_each = toset(var.invoker_sa_emails)
+
+  cloud_function = google_cloudfunctions_function.function.name
+  member         = "serviceAccount:${each.value}"
+  role           = "roles/cloudfunctions.invoker"
+}
+
 locals {
   proxy_endpoint_url  = "https://${var.region}-${var.project_id}.cloudfunctions.net/${google_cloudfunctions_function.function.name}"
   impersonation_param = var.example_api_calls_user_to_impersonate == null ? "" : " -i \"${var.example_api_calls_user_to_impersonate}\""

@@ -35,7 +35,6 @@ module "psoxy" {
   psoxy_base_dir          = var.psoxy_base_dir
   force_bundle            = var.force_bundle
   bucket_location         = var.gcp_region
-  invoker_sa_emails       = var.worklytics_sa_emails
   config_parameter_prefix = local.config_parameter_prefix
   install_test_tool       = var.install_test_tool
 }
@@ -106,6 +105,7 @@ module "psoxy-google-workspace-connector" {
   source_auth_strategy                  = each.value.source_auth_strategy
   oauth_scopes                          = try(each.value.oauth_scopes_needed, [])
   config_parameter_prefix               = local.config_parameter_prefix
+  invoker_sa_emails                     = var.worklytics_sa_emails
 
 
   environment_variables = merge(
@@ -215,6 +215,7 @@ module "connector-long-auth-function" {
   source_auth_strategy          = each.value.source_auth_strategy
   oauth_scopes                  = try(each.value.oauth_scopes_needed, [])
   config_parameter_prefix       = local.config_parameter_prefix
+  invoker_sa_emails             = var.worklytics_sa_emails
 
   environment_variables = merge(
     var.general_environment_variables,

@@ -122,6 +122,12 @@ variable "identifier_scope_id" {
   default     = null
 }
 
+variable "invoker_sa_emails" {
+  type        = list(string)
+  description = "emails of GCP service accounts to allow to invoke this proxy instance via HTTP"
+  default     = []
+}
+
 variable "available_memory_mb" {
   type        = number
   description = "Memory (in MB), available to the function. Default value is 1024. Possible values include 128, 256, 512, 1024, etc."

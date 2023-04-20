@@ -29,8 +29,6 @@ module "psoxy-gcp" {
   psoxy_base_dir    = var.psoxy_base_dir
   force_bundle      = var.force_bundle
   bucket_location   = var.gcp_region
-  invoker_sa_emails = var.worklytics_sa_emails
-
 }
 
 module "google-workspace-connection" {
@@ -121,6 +119,7 @@ module "psoxy-google-workspace-connector" {
   target_host                           = each.value.target_host
   source_auth_strategy                  = each.value.source_auth_strategy
   oauth_scopes                          = try(each.value.oauth_scopes_needed, [])
+  invoker_sa_emails                     = var.worklytics_sa_emails
 
   environment_variables = merge(
     var.general_environment_variables,
@@ -225,6 +224,7 @@ module "connector-long-auth-function" {
   target_host                   = each.value.target_host
   source_auth_strategy          = each.value.source_auth_strategy
   oauth_scopes                  = try(each.value.oauth_scopes_needed, [])
+  invoker_sa_emails             = var.worklytics_sa_emails
 
   environment_variables = merge(
     var.general_environment_variables,
