@@ -22,6 +22,7 @@ Service Account Keys and activate Google Workspace APIs.
         boundary around your infrastructure as well as simplify monitoring/cleanup
   - the following APIs enabled in the project: (via [GCP Console](https://console.cloud.google.com/projectselector2/apis/dashboard))
       - [Service Usage API](https://console.cloud.google.com/apis/library/serviceusage.googleapis.com) (`serviceusage.googleapis.com`)
+      - [IAM Service Account Credentials API](https://console.cloud.google.com/apis/library/iamcredentials.googleapis.com) (`iamcredentials.googleapis.com`) - generally needed to support authenticating Terraform. May not be needed if you're running `terraform` within a GCP environment.
   - a GCP (Google) user or Service Account with permissions to create Service Accounts, Secrets,
     Storage Buckets, Cloud Functions, and enable APIs within that project. eg:
      * [Service Account Creator](https://cloud.google.com/iam/docs/understanding-roles#iam.serviceAccountCreator) - create Service Accounts to personify Cloud Functions (aka, 'Create Service Accounts' in GCP console UX)
