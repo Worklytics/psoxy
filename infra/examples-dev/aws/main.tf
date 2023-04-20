@@ -64,6 +64,7 @@ module "psoxy" {
   aws_region                     = var.aws_region
   aws_ssm_param_root_path        = var.aws_ssm_param_root_path
   psoxy_base_dir                 = var.psoxy_base_dir
+  install_test_tool              = var.install_test_tool
   force_bundle                   = var.force_bundle
   caller_gcp_service_account_ids = var.caller_gcp_service_account_ids
   caller_aws_arns                = var.caller_aws_arns

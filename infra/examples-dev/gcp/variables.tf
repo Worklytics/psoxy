@@ -56,6 +56,12 @@ variable "force_bundle" {
   default     = false
 }
 
+variable "install_test_tool" {
+  type        = bool
+  description = "whether to install the test tool (can be 'false' if Terraform not running from a machine where you intend to run tests of your Psoxy deployment)"
+  default     = true
+}
+
 variable "general_environment_variables" {
   type        = map(string)
   description = "environment variables to add for all connectors"

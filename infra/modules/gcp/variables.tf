@@ -48,3 +48,9 @@ variable "config_parameter_prefix" {
   description = "A prefix to give to all config parameters (GCP Secret Manager Secrets) created/consumed by this module."
   default     = ""
 }
+
+variable "install_test_tool" {
+  type        = bool
+  description = "whether to install the test tool (can be 'false' if Terraform not running from a machine where you intend to run tests of your Psoxy deployment)"
+  default     = true
+}

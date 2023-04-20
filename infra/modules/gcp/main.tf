@@ -127,10 +127,17 @@ module "psoxy-package" {
 
 # install test tool, if it exists in expected location
 module "test_tool" {
+  count = var.install_test_tool ? 1 : 0
+
   source = "../psoxy-test-tool"
 
   path_to_tools = "${var.psoxy_base_dir}tools"
   psoxy_version = module.psoxy-package.version
+}
+
+moved {
+  from   = module.test_tool
+  to     = module.test_tool[0]
 }
 
 data "archive_file" "source" {

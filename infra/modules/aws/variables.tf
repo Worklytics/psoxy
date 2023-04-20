@@ -62,4 +62,10 @@ variable "psoxy_version" {
   default     = null
 }
 
+variable "install_test_tool" {
+  type        = bool
+  description = "whether to install the test tool (can be 'false' if Terraform not running from a machine where you intend to run tests of your Psoxy deployment)"
+  default     = true
+}
+
 
