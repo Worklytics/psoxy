@@ -5,9 +5,7 @@ your proxy deployments.
 
 Full documentation of the test tool is available [here](../tools/psoxy-test/README.md).
 
-### Testing Prerequisities
-
-The
+### Testing Pre-requisities
 
 Wherever you run this test tool from, your AWS or GCloud CLI *must* be authenticated as
 an entity with permissions to invoke the Lambda functions / Cloud functions that you deployed for
@@ -15,9 +13,6 @@ Psoxy.
 
 If you're testing the bulk cases, the entity must be able to read/write to the cloud storage
 buckets created for each of those bulk examples.
-
-
-
 
 
 ### Testing Locally when Terraform ran remotely (eg, Terraform Cloud, GitHub Actions, etc)
