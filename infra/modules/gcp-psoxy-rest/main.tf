@@ -37,6 +37,24 @@ locals {
   }
 }
 
+module "tf_runner" {
+  source = "../../modules/gcp-tf-runner"
+}
+
+data "google_service_account" "function" {
+  account_id = var.service_account_email
+}
+
+
+# to provision Cloud Function, TF must be able to act as the service account that the function will
+# run as
+resource "google_service_account_iam_member" "act_as" {
+  member             = module.tf_runner.iam_principal
+  role               = "roles/iam.serviceAccountUser"
+  service_account_id = data.google_service_account.function.id
+}
+
+
 resource "google_cloudfunctions_function" "function" {
   name        = "${var.environment_id_prefix}${var.instance_id}"
   description = "Psoxy Connector - ${var.source_kind}"
@@ -79,7 +97,8 @@ resource "google_cloudfunctions_function" "function" {
   }
 
   depends_on = [
-    google_secret_manager_secret_iam_member.grant_sa_accessor_on_secret
+    google_secret_manager_secret_iam_member.grant_sa_accessor_on_secret,
+    google_service_account_iam_member.act_as
   ]
 }
 
