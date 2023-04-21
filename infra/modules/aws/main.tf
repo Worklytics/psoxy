@@ -147,8 +147,8 @@ module "test_tool" {
 }
 
 moved {
-  from   = module.test_tool
-  to     = module.test_tool[0]
+  from = module.test_tool
+  to   = module.test_tool[0]
 }
 
 output "secrets" {
