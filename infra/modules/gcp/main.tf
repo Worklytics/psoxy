@@ -108,19 +108,6 @@ resource "google_secret_manager_secret_version" "pseudonymization-key_initial_ve
   }
 }
 
-
-
-# grants invoker to these SA for ALL functions in this project. this is the recommended setup, as
-# we expect this GCP project to only be used of psoxy instances to be consumed from your Worklytics
-# account; otherwise, you can grant this role on specific functions
-resource "google_project_iam_member" "grant_cloudFunctionInvoker_to_service_accounts" {
-  for_each = toset(var.invoker_sa_emails)
-
-  project = var.project_id
-  member  = "serviceAccount:${each.value}"
-  role    = "roles/cloudfunctions.invoker"
-}
-
 module "psoxy-package" {
   source = "../psoxy-package"
 
@@ -140,8 +127,8 @@ module "test_tool" {
 }
 
 moved {
-  from   = module.test_tool
-  to     = module.test_tool[0]
+  from = module.test_tool
+  to   = module.test_tool[0]
 }
 
 data "archive_file" "source" {
