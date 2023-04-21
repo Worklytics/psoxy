@@ -52,6 +52,10 @@ provider "aws" {
   ]
 }
 
+provider "google" {
+  impersonate_service_account = var.gcp_terraform_sa_account_email
+}
+
 # Google user or service account which Terraform is authenticated as must be authorized to
 # provision resources (Service Accounts + Keys; and activate APIs) in this project
 data "google_project" "psoxy-google-connectors" {

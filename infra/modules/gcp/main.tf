@@ -19,7 +19,7 @@ resource "google_project_service" "gcp-infra-api" {
     # "serviceusage.googleapis.com", # manage service APIs via terraform (prob already
   ])
 
-  service                   = each.key
+  service                    = each.key
   project                    = var.project_id
   disable_dependent_services = false
   disable_on_destroy         = false # disabling on destroy has potential to conflict with other uses of the project

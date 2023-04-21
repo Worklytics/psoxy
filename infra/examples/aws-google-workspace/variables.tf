@@ -123,12 +123,6 @@ variable "non_production_connectors" {
   default     = []
 }
 
-variable "custom_rest_rules" {
-  type        = map(string)
-  description = "map of connector id --> YAML file with custom rules"
-  default     = {}
-}
-
 variable "bulk_input_expiration_days" {
   type        = number
   description = "**alpha** Number of days after which objects in the bucket will expire. This could be as low as 1 day; longer aids debugging of issues."
@@ -139,6 +133,12 @@ variable "bulk_sanitized_expiration_days" {
   type        = number
   description = "**alpha** Number of days after which objects in the bucket will expire. In practice, Worklytics syncs data ~weekly, so 30 day minimum for this value."
   default     = 720
+}
+
+variable "custom_rest_rules" {
+  type        = map(string)
+  description = "map of connector id --> YAML file with custom rules"
+  default     = {}
 }
 
 variable "custom_bulk_connectors" {
@@ -213,6 +213,17 @@ variable "lookup_table_builders" {
 variable "gcp_project_id" {
   type        = string
   description = "id of GCP project that will host psoxy instance; must exist"
+}
+
+variable "gcp_terraform_sa_account_email" {
+  type        = string
+  description = "Email of GCP service account that will be used to provision GCP resources. Leave 'null' to use application default for you environment."
+  default     = null
+
+  validation {
+    condition     = var.gcp_terraform_sa_account_email == null || can(regex(".*@.*\\.iam\\.gserviceaccount\\.com$", var.gcp_terraform_sa_account_email))
+    error_message = "The gcp_terraform_sa_account_email value should be a valid GCP service account email address."
+  }
 }
 
 variable "gcp_org_id" {

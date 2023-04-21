@@ -4,9 +4,9 @@ name: 'validate Terraform Examples against remotes'
 # validate them on mainline/rc- branches, otherwise we'd they'd fail irregardless of the branches
 # code until the rc- / release on which they depend is fixed
 on:
+  workflow_dispatch: # to allow manual triggering
   push:
     branches:
-      - 'rc-**'
       - 'main'
 
 jobs:

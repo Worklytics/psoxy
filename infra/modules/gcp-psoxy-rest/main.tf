@@ -105,7 +105,7 @@ resource "google_cloudfunctions_function" "function" {
 resource "google_cloudfunctions_function_iam_member" "invokers" {
   for_each = toset(var.invoker_sa_emails)
 
-  cloud_function = google_cloudfunctions_function.function.name
+  cloud_function = google_cloudfunctions_function.function.id
   member         = "serviceAccount:${each.value}"
   role           = "roles/cloudfunctions.invoker"
 }
