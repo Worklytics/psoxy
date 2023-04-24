@@ -48,6 +48,10 @@ provider "aws" {
   ]
 }
 
+provider "google" {
+  impersonate_service_account = var.gcp_terraform_sa_account_email
+}
+
 # Google user or service account which Terraform is authenticated as must be authorized to
 # provision resources (Service Accounts + Keys; and activate APIs) in this project
 data "google_project" "psoxy-google-connectors" {
@@ -58,7 +62,7 @@ data "google_project" "psoxy-google-connectors" {
 
 module "psoxy" {
   # source = "../../modular-examples/aws-google-workspace"
-  source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-google-workspace?ref=v0.4.19"
+  source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-google-workspace?ref=v0.4.20"
 
   aws_account_id                 = var.aws_account_id
   aws_assume_role_arn            = var.aws_assume_role_arn # role that can test the instances (lambdas)

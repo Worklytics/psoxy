@@ -6,10 +6,14 @@ locals {
 
 
 # activate required GCP service APIs
+# NOTE: used in lieu of 'google_project_services' because that resouce is *authorative*, so will
+# disable other APIs that are enabled in the project - which may not be what we want if shared
+# project, or if other services used to support (eg, monitoring APIs or somthing)
 resource "google_project_service" "gcp-infra-api" {
   for_each = toset([
     "cloudbuild.googleapis.com", # some modes of Cloud Functions seem to need this, so TBD
     "cloudfunctions.googleapis.com",
+    "cloudresourcemanager.googleapis.com",
     "iam.googleapis.com", # manage IAM via terraform (as of 2023-04-17, internal dev envs didn't have this; so really needed?)
     "secretmanager.googleapis.com",
     # "serviceusage.googleapis.com", # manage service APIs via terraform (prob already
@@ -104,19 +108,6 @@ resource "google_secret_manager_secret_version" "pseudonymization-key_initial_ve
   }
 }
 
-
-
-# grants invoker to these SA for ALL functions in this project. this is the recommended setup, as
-# we expect this GCP project to only be used of psoxy instances to be consumed from your Worklytics
-# account; otherwise, you can grant this role on specific functions
-resource "google_project_iam_member" "grant_cloudFunctionInvoker_to_service_accounts" {
-  for_each = toset(var.invoker_sa_emails)
-
-  project = var.project_id
-  member  = "serviceAccount:${each.value}"
-  role    = "roles/cloudfunctions.invoker"
-}
-
 module "psoxy-package" {
   source = "../psoxy-package"
 
@@ -127,10 +118,17 @@ module "psoxy-package" {
 
 # install test tool, if it exists in expected location
 module "test_tool" {
+  count = var.install_test_tool ? 1 : 0
+
   source = "../psoxy-test-tool"
 
   path_to_tools = "${var.psoxy_base_dir}tools"
   psoxy_version = module.psoxy-package.version
+}
+
+moved {
+  from = module.test_tool
+  to   = module.test_tool[0]
 }
 
 data "archive_file" "source" {

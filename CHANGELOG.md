@@ -17,6 +17,18 @@ Working tracking of changes, updated as work done prior to release.  Please revi
         then wildcard policy to read shared also grants read of secrets across all connectors)
   - keys/salts per value kind (PII, item id, etc)
 
+## [0.4.20](https://github.com/Worklytics/psoxy/releases/tag/v0.4.20)
+
+Due to module refactoring, you will need a `terraform init`.
+
+Changes:
+  * you may see grants of the role `iam.serviceAccountKeyAdmin` on individual GCP service accounts
+    in your Terraform plan. These grants are required to allow terraform to create/manage service
+    account keys, which is only needed for service accounts connecting to Google Workspace APIs.
+    Previously, this role was a pre-req expected to be granted at the project-level; this more
+    granular approach improves security. If you previously granted `iam.serviceAccountKeyAdmin` at
+    a GCP Project Level, you can now remove this.
+
 
 ## [v0.4.18](https://github.com/Worklytics/psoxy/releases/tag/v0.4.18)
 

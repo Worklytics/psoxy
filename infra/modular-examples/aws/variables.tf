@@ -102,6 +102,12 @@ variable "force_bundle" {
   default     = false
 }
 
+variable "install_test_tool" {
+  type        = bool
+  description = "whether to install the test tool (can be 'false' if Terraform not running from a machine where you intend to run tests of your Psoxy deployment)"
+  default     = true
+}
+
 variable "pseudonymize_app_ids" {
   type        = string
   description = "if set, will set value of PSEUDONYMIZE_APP_IDS environment variable to this value for all sources"

@@ -22,9 +22,14 @@ terraform {
   #  }
 }
 
+provider "google" {
+  impersonate_service_account = var.gcp_terraform_sa_account_email
+}
+
+
 module "psoxy" {
   # source = "../../modular-examples/gcp-google-workspace"
-  source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/gcp-google-workspace?ref=v0.4.19"
+  source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/gcp-google-workspace?ref=v0.4.20"
 
   gcp_project_id                 = var.gcp_project_id
   environment_name               = var.environment_name

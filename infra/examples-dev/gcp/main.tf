@@ -38,7 +38,7 @@ provider "google" {
 
 module "psoxy" {
   source = "../../modular-examples/gcp"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/gcp?ref=v0.4.19"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/gcp?ref=v0.4.20"
 
   gcp_project_id                 = var.gcp_project_id
   environment_id                 = var.environment_id
@@ -46,6 +46,7 @@ module "psoxy" {
   worklytics_sa_emails           = var.worklytics_sa_emails
   psoxy_base_dir                 = var.psoxy_base_dir
   force_bundle                   = var.force_bundle
+  install_test_tool              = var.install_test_tool
   gcp_region                     = var.gcp_region
   replica_regions                = var.replica_regions
   enabled_connectors             = var.enabled_connectors

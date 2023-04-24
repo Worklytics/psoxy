@@ -3,9 +3,11 @@ variable "project_id" {
   description = "id of GCP project that will host psoxy instance"
 }
 
+# left for backwards compatibility to avoid errors; v0.4.20 modules for gcp-psoxy-rest
 variable "invoker_sa_emails" {
   type        = list(string)
-  description = "emails of GCP service accounts to allow to invoke ALL cloud functions in target project"
+  description = "DEPRECATED; emails of GCP service accounts to allow to invoke ALL cloud functions in target project"
+  default     = []
 }
 
 variable "bucket_location" {
@@ -47,4 +49,10 @@ variable "config_parameter_prefix" {
   type        = string
   description = "A prefix to give to all config parameters (GCP Secret Manager Secrets) created/consumed by this module."
   default     = ""
+}
+
+variable "install_test_tool" {
+  type        = bool
+  description = "whether to install the test tool (can be 'false' if Terraform not running from a machine where you intend to run tests of your Psoxy deployment)"
+  default     = true
 }

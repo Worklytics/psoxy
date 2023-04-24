@@ -8,7 +8,17 @@
 # TODO: extract this to its own repo or something, so can consume from our main infra repo. it's
 # similar to src/modules/google-workspace-dwd-connector/main.tf in the main infra repo
 
+module "tf_runner" {
+  source = "../../modules/gcp-tf-runner"
+}
 
+# grant this directly on SA, jit for when we know it is needed to create keys
+# (SA keys are needed only for SAs that are used to connect to Google Workspace APIs)
+resource "google_service_account_iam_member" "key_admin" {
+  member             = module.tf_runner.iam_principal
+  role               = "roles/iam.serviceAccountKeyAdmin"
+  service_account_id = var.service_account_id
+}
 
 # note this requires the terraform to be run regularly
 resource "time_rotating" "sa-key-rotation" {
@@ -27,6 +37,10 @@ resource "google_service_account_key" "key" {
   lifecycle {
     create_before_destroy = true
   }
+
+  depends_on = [
+    google_service_account_iam_member.key_admin
+  ]
 }
 
 module "gcp-secrets" {
