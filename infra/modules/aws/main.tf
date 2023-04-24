@@ -42,7 +42,7 @@ locals {
 
 # role that Worklytics user will use to call the API
 resource "aws_iam_role" "api-caller" {
-  name        = "PsoxyCaller"
+  name        = "${var.deployment_id}Caller"
   description = "role for AWS principals that may invoke the psoxy instance or read an instance's output"
 
   # who can assume this role
@@ -72,7 +72,7 @@ resource "aws_iam_role" "api-caller" {
 }
 
 resource "aws_iam_policy" "execution_lambda_to_caller" {
-  name        = "ExecutePsoxyLambdas"
+  name        = "${var.deployment_id}ExecuteLambdas"
   description = "Allow caller role to execute the lambda url directly"
 
   policy = jsonencode(
@@ -82,7 +82,7 @@ resource "aws_iam_policy" "execution_lambda_to_caller" {
         {
           "Action" : ["lambda:InvokeFunctionUrl"],
           "Effect" : "Allow",
-          "Resource" : "arn:aws:lambda:${var.region}:${var.aws_account_id}:function:psoxy-*"
+          "Resource" : "arn:aws:lambda:${var.region}:${var.aws_account_id}:function:${var.function_name_prefix}*"
         }
       ]
   })

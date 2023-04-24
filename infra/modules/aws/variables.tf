@@ -68,4 +68,14 @@ variable "install_test_tool" {
   default     = true
 }
 
+variable "deployment_id" {
+  type        = string
+  description = "unique identifier for this deployment (used to differentiate resource names)"
+  default     = "Psoxy"
+}
 
+variable "rest_function_name_prefix" {
+  type        = string
+  description = "prefix for REST function names"
+  default     = "psoxy-"
+}

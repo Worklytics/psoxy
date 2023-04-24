@@ -21,7 +21,7 @@ variable "environment_id" {
 
   validation {
     condition     = can(regex("^[A-z0-9\\-]{0,20}$", var.environment_id))
-    error_message = "The environment_name must be 0-20 chars of [A-z0-9\\-] only."
+    error_message = "The environment_id must be 0-20 chars of [A-z0-9\\-] only."
   }
 }
 
