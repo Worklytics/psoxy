@@ -24,7 +24,6 @@ public class Endpoint {
     String pathRegex;
 
     /**
-     * ALPHA FEATURE
      * path template, eg, /api/v1/{id}/foo/{bar}
      *
      * @see "https://swagger.io/docs/specification/paths-and-operations/"
@@ -33,6 +32,14 @@ public class Endpoint {
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     String pathTemplate;
+
+
+    /**
+     * if parameters appearing in pathTemplate appear in this, must validate against this to match
+     * the endpoint
+     */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    List<ParameterSpec> pathParameterConstraints;
 
     //if provided, only query params in this list will be allowed
     @JsonInclude(JsonInclude.Include.NON_NULL)
