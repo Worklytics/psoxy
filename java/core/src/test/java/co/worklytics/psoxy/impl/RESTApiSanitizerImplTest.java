@@ -51,9 +51,6 @@ class RESTApiSanitizerImplTest {
     protected UrlSafeTokenPseudonymEncoder pseudonymEncoder;
 
     @Inject
-    protected JsonSchemaFilterUtils jsonSchemaFilterUtils;
-
-    @Inject
     protected PseudonymizerImplFactory pseudonymizerImplFactory;
 
 
@@ -431,6 +428,12 @@ class RESTApiSanitizerImplTest {
             "/api/v1/users,^/api/v1/users$",
             "/api/v1/users/{id},^/api/v1/users/[^/]+$",
             "/api/v1/mail/{accountId}/messages/{id},^/api/v1/mail/[^/]+/messages/[^/]+$",
+            "/enterprise.info,^/enterprise\\.info$",
+            "/enterprise$something,^/enterprise\\$something$",
+            "/enterprise-info,^/enterprise\\-info$",
+            "/enterprise=info,^/enterprise\\=info$",
+            "/enterprise+info,^/enterprise\\+info$",
+            "/enterprise*info,^/enterprise\\*info$",
         }
     )
     @ParameterizedTest

@@ -353,10 +353,16 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
         return compiledAllowedEndpoints;
     }
 
+    //TODO: improve this; some special chars outside of {} are not accounted for
+    final String SPECIAL_CHAR_CLASS = "[\\.\\^\\$\\<\\>\\*\\+\\[\\]\\(\\)\\+\\-\\=\\?\\!]";
+
     @VisibleForTesting
     String effectiveRegex(Endpoint endpoint) {
         return Optional.ofNullable(endpoint.getPathRegex())
-            .orElseGet(() -> "^" + endpoint.getPathTemplate().replaceAll("\\{.*?\\}", "[^/]+") + "$");
+            .orElseGet(() -> "^" +
+                endpoint.getPathTemplate()
+                    .replaceAll(SPECIAL_CHAR_CLASS, "\\\\$0")
+                    .replaceAll("\\{.*?\\}", "[^/]+") + "$");
     }
 
     boolean allowedQueryParams(Endpoint endpoint, List<String> queryParams) {
