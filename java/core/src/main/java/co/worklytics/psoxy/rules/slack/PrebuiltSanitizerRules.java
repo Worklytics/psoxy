@@ -15,7 +15,7 @@ public class PrebuiltSanitizerRules {
 
     static final RESTRules SLACK = Rules2.builder()
         .endpoint(Endpoint.builder()
-            .pathRegex("^/api/discovery\\.enterprise\\.info(?:\\?.+)?")
+            .pathTemplate("/api/discovery.enterprise.info")
             .transform(Transform.Redact.builder()
                 // we don't care about names
                 .jsonPath("$.enterprise.teams[*]['name','description','icon','enterprise_name']")
@@ -23,7 +23,7 @@ public class PrebuiltSanitizerRules {
                 .build())
             .build())
         .endpoint(Endpoint.builder()
-            .pathRegex("^/api/discovery\\.users\\.list(?:\\?.+)?")
+            .pathTemplate("/api/discovery.users.list")
             .transform(Transform.Pseudonymize.builder()
                 .jsonPath("$.users[*].id")
                 .jsonPath("$.users[*].profile.email")
@@ -40,7 +40,7 @@ public class PrebuiltSanitizerRules {
                 .build())
             .build())
         .endpoint(Endpoint.builder()
-            .pathRegex("^/api/discovery\\.conversations\\.(list|recent)(?:\\?.+)?")
+            .pathTemplate("/api/discovery.conversations.list")
             // no PII
             // redact channel name, topic and purpose
             .transform(Transform.Redact.builder()
@@ -50,7 +50,17 @@ public class PrebuiltSanitizerRules {
                 .build())
             .build())
         .endpoint(Endpoint.builder()
-            .pathRegex("^/api/discovery\\.conversations\\.info(?:\\?.+)?")
+            .pathTemplate("/api/discovery.conversations.recent")
+            // no PII
+            // redact channel name, topic and purpose
+            .transform(Transform.Redact.builder()
+                // we don't care about names
+                // topic and purpose contains user ids, not used at all, so just get rid of the entire content
+                .jsonPath("$.channels[*]['name','topic','purpose']")
+                .build())
+            .build())
+        .endpoint(Endpoint.builder()
+            .pathTemplate("/api/discovery.conversations.info")
             .transform(Transform.Pseudonymize.builder()
                 .jsonPath("$.info[*].creator")
                 .build())
@@ -61,7 +71,7 @@ public class PrebuiltSanitizerRules {
                 .build())
             .build())
         .endpoint(Endpoint.builder()
-            .pathRegex("^/api/discovery\\.conversations\\.history(?:\\?.+)?")
+            .pathTemplate("/api/discovery.conversations.history")
             .transform(Transform.Pseudonymize.builder()
                 .jsonPath("$.messages[*].user")
                 .jsonPath("$.messages[*].files[*].user")
