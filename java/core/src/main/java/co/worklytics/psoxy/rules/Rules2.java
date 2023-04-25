@@ -65,10 +65,27 @@ public class Rules2 implements RESTRules {
         return builder.build();
     }
 
+    public Rules2 withTransformByEndpointTemplate(String pathTemplate, Transform... transforms) {
+        Rules2 clone = this.clone();
+        Optional<Endpoint> matchedEndpoint = clone.getEndpoints().stream()
+            .filter(endpoint -> Objects.equals(endpoint.getPathTemplate(), pathTemplate))
+            .findFirst();
+
+        Endpoint endpoint = matchedEndpoint
+            .orElseThrow(() -> new IllegalArgumentException("No endpoint found for pathTemplate: " + pathTemplate));
+
+        endpoint.setTransforms(
+            Stream.concat(endpoint.getTransforms().stream(), Arrays.stream(transforms))
+                .collect(Collectors.toList()));
+
+        return clone;
+    }
+
+    // deprecated; use withTransformByEndpointTemplate instead, as we want to move to pathTemplates in future
     public Rules2 withTransformByEndpoint(String pathRegex, Transform... transforms) {
         Rules2 clone = this.clone();
         Optional<Endpoint> matchedEndpoint = clone.getEndpoints().stream()
-            .filter(endpoint -> endpoint.getPathRegex().equals(pathRegex))
+            .filter(endpoint -> Objects.equals(endpoint.getPathRegex(), pathRegex))
             .findFirst();
 
         Endpoint endpoint = matchedEndpoint
