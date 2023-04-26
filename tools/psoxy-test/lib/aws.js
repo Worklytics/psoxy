@@ -1,10 +1,10 @@
 import {
-  request,
-  getCommonHTTPHeaders,
-  signAWSRequestURL,
-  executeCommand,
   executeWithRetry,
-  resolveHTTPMethod
+  getAWSCredentials,
+  getCommonHTTPHeaders,
+  request,
+  resolveHTTPMethod,
+  signAWSRequestURL
 } from './utils.js';
 import {
   S3Client,
@@ -20,37 +20,8 @@ import {
 } from '@aws-sdk/client-cloudwatch-logs';
 import fs from 'fs';
 import getLogger from './logger.js';
-import path from 'path';
 import _ from 'lodash';
 
-/**
- * Call AWS cli to get temporary security credentials.
- *
- * Refs:
- * - https://awscli.amazonaws.com/v2/documentation/api/latest/reference/sts/assume-role.html
- * - https://docs.aws.amazon.com/STS/latest/APIReference/API_GetSessionToken.html
- * - https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html#identifiers-arns
- *
- * @param {String} role AWS IAM ARN format
- * @returns {Object} AWS credentials for role
- */
-function getAWSCredentials(role) {
-  const shouldAssumeRole = !_.isEmpty(role);
-  const command = shouldAssumeRole ?
-    `aws sts assume-role --role-arn ${role} --duration 900 --role-session-name lambda_test`:
-    `aws sts get-session-token --duration 900`;
-  let credentials;
-  try {
-    credentials = JSON.parse(executeCommand(command)).Credentials;
-  } catch (error) {
-    const errorMessage = shouldAssumeRole ?
-      `Unable to assume ${role}` :
-      'Unable to get AWS credentials';
-    throw new Error(errorMessage, { cause: error });
-  }
-
-  return credentials;
-}
 
 /**
  * Helper: check url deploy type
@@ -78,7 +49,9 @@ async function call(options = {}) {
   if (!_.isEmpty(options.role)) {
     logger.verbose(`Assuming role ${options.role}`);
   }
-  const credentials = getAWSCredentials(options.role);
+  
+  const credentials = await getAWSCredentials(options.role);
+  
   const url = new URL(options.url);
   const method = options.method || resolveHTTPMethod(url.pathname);
 
@@ -96,24 +69,6 @@ async function call(options = {}) {
   return await request(url, method, headers);
 }
 
-function getAWSClientOptions(role, region) {
-  const options = {
-    region: region,
-  }
-  const credentials = getAWSCredentials(role);
-
-  options.credentials = {
-    // AWS CLI command will return credentials with 1st letter upper-case.
-    // However, S3 and CloudWatch clients expects different capitalization
-    ...Object.keys(credentials).reduce((memo, key) => {
-      memo[key.charAt(0).toLowerCase() + key.slice(1)] = credentials[key];
-      return memo;
-    }, {}),
-  }
-
-  return options;
-}
-
 /**
  * Create S3 client with appropriate credentials
  *
@@ -121,9 +76,12 @@ function getAWSClientOptions(role, region) {
  * @param {string} region
  * @returns {S3Client}
  */
-function createS3Client(role, region = 'us-east-1') {
-  const options = getAWSClientOptions(role, region);
-  return new S3Client(options);
+async function createS3Client(role, region = 'us-east-1') {
+  const credentials = await getAWSCredentials(role);
+  return new S3Client({
+    region: region,
+    credentials: credentials,
+  });
 }
 
 /**
@@ -133,9 +91,12 @@ function createS3Client(role, region = 'us-east-1') {
  * @param {string} region
  * @returns {CloudWatchLogsClient}
  */
-function createCloudWatchClient(role, region = 'us-east-1') {
-  const options = getAWSClientOptions(role, region);
-  return new CloudWatchLogsClient(options);
+async function createCloudWatchClient(role, region = 'us-east-1') {
+  const credentials = await getAWSCredentials(role);
+  return new CloudWatchLogsClient({
+    region: region,
+    credentials: credentials,
+  });
 }
 
 /**
@@ -225,7 +186,7 @@ function parseLogEvents(logEvents) {
  * @param {object} options
  */
 async function listBuckets(options) {
-  const client = createS3Client(options.role, options.region);
+  const client = await createS3Client(options.role, options.region);
   return await client.send(new ListBucketsCommand({}));
 }
 
@@ -235,7 +196,7 @@ async function listBuckets(options) {
  * Req: options.role requires "s3:ListBucket" permissions
  */
 async function listObjects(bucket, options) {
-  const client = createS3Client(options.role, options.region);
+  const client = await createS3Client(options.role, options.region);
   return await client.send(new ListObjectsV2Command({
     Bucket: bucket,
   }));
@@ -257,7 +218,7 @@ async function listObjects(bucket, options) {
  */
 async function upload(bucket, key, file, options, client) {
   if (!client) {
-    client = createS3Client(options.role, options.region);
+    client = await createS3Client(options.role, options.region);
   }
 
   return await client.send(new PutObjectCommand({
@@ -291,7 +252,7 @@ async function upload(bucket, key, file, options, client) {
  */
 async function download(bucket, key, options, client, logger) {
   if (!client) {
-    client = createS3Client(options.role, options.region);
+    client = await createS3Client(options.role, options.region);
   }
 
   const downloadFunction = async () => await client.send(new GetObjectCommand({
