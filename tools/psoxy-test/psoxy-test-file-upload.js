@@ -28,7 +28,7 @@ async function testAWS(options, logger) {
   if (options.role) {
     logger.verbose(`Assuming role ${options.role}`);
   }
-  const client = aws.createS3Client(options.role, options.region);
+  const client = await aws.createS3Client(options.role, options.region);
 
 
   const parsedBucketInputOption = parseBucketOption(options.input);

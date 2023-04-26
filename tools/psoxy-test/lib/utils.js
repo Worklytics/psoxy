@@ -1,16 +1,23 @@
 import { execSync } from 'child_process';
 import { fileURLToPath } from 'url';
 import { promises as fs } from 'fs';
+import {
+  fromNodeProviderChain,
+  fromTemporaryCredentials
+} from "@aws-sdk/credential-providers";
 import aws4 from 'aws4';
 import https from 'https';
 import path from 'path';
 import _ from 'lodash';
 import spec from '../data-sources/spec.js';
 
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // In case Psoxy is slow to respond (Lambda can take up to 20s+ to bootstrap),
 // Node.js request doesn't have a default since v13
 const REQUEST_TIMEOUT_MS = 25000;
+const DEFAULT_DURATION_TEMP_CREDENTIALS = 900; // 15 minutes
+const DEFAULT_ROLE_SESSION_NAME = 'lambda_test';
 
 /**
  * Save data to file.
@@ -147,11 +154,7 @@ function signAWSRequestURL(url, method = 'GET', credentials) {
     requestOptions.service = serviceHostPart;
   }
 
-  return aws4.sign(requestOptions, {
-    accessKeyId: credentials?.AccessKeyId,
-    secretAccessKey: credentials?.SecretAccessKey,
-    sessionToken: credentials?.SessionToken,
-  });
+  return aws4.sign(requestOptions, credentials);
 }
 
 /**
@@ -253,9 +256,9 @@ async function executeWithRetry(fn, onErrorStop, logger, maxAttempts = 60,
 
 /**
  * For psoxy-test-file-upload;
- * bucket option should support `/` being a delimiter to split a bucket name 
+ * bucket option should support `/` being a delimiter to split a bucket name
  * from a path within the bucket
- *  
+ *
  * @param {string} bucketOption - bucket name or bucket name + path
  * @returns {Object} - { bucket: string, path: string }
  */
@@ -268,16 +271,52 @@ function parseBucketOption(bucketOption) {
     path = bucketOption.substring(bucketOption.indexOf('/') + 1);
   }
 
-  return { 
+  return {
     bucket:  bucket,
     path: path,
   };
 }
 
+/**
+ * @typedef {Object} Credentials
+ * @property {string} accessKeyId
+ * @property {string} secretAccessKey
+ * @property {string} sessionToken
+ */
+
+/**
+ * Get AWS credentials for AWS SDK clients and Psoxy call signing
+ *
+ * Refs:
+ * - https://awscli.amazonaws.com/v2/documentation/api/latest/reference/sts/assume-role.html
+ * - https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html#identifiers-arns
+ * - https://www.npmjs.com/package/@aws-sdk/credential-providers
+ *
+ * @param {String} role AWS IAM ARN format
+ * @returns {Credentials}
+ */
+async function getAWSCredentials(role) {
+  let credentialsProvider;
+  if (!_.isEmpty(role)) {
+    credentialsProvider = fromTemporaryCredentials({
+      params: {
+        RoleArn: role,
+        RoleSessionName: DEFAULT_ROLE_SESSION_NAME,
+        DurationSeconds: DEFAULT_DURATION_TEMP_CREDENTIALS,
+      }
+    });
+
+  } else {
+    // Look up credentials in environment variables, shared credentials files, etc.
+    credentialsProvider = fromNodeProviderChain();
+  }
+  return credentialsProvider();
+}
 
 export {
   executeCommand,
   executeWithRetry,
+  getAWSCredentials,
   getCommonHTTPHeaders,
   getFileNameFromURL,
   parseBucketOption,
