@@ -65,7 +65,7 @@ module "psoxy" {
 
 output "path_to_deployment_jar" {
   description = "Path to the package to deploy (JAR)."
-  value       = module.psoxy.
+  value       = module.psoxy.path_to_deployment_jar
 }
 
 output "todos_1" {
