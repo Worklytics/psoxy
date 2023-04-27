@@ -435,3 +435,8 @@ output "deployment_bundle_object_name" {
   description = "Object name of deployment bundle within artifacts bucket."
   value       = module.psoxy.deployment_bundle_object_name
 }
+
+output "path_to_deployment_jar" {
+  description = "Path to the package to deploy (JAR) as lambda."
+  value       = module.psoxy.path_to_deployment_jar
+}
