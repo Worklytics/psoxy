@@ -171,8 +171,8 @@ public class ParameterStoreConfigService implements ConfigService, LockService {
 
                     //q: add random delay here, in case multiple instances have been waiting to
                     // acquire the lock?
-
                     release(lockId);
+
                     return acquire(lockId);
                 }
             } catch (SsmException ssmException) {
@@ -187,8 +187,16 @@ public class ParameterStoreConfigService implements ConfigService, LockService {
 
     @Override
     public void release(@NonNull String lockId) {
-        client.deleteParameter(DeleteParameterRequest.builder()
-            .name(this.namespace + lockId)
-            .build());
+        String lockParameterName = lockParameterName(lockId);
+        try {
+            client.deleteParameter(DeleteParameterRequest.builder()
+                .name(lockParameterName(lockId))
+                .build());
+        } catch (ParameterNotFoundException e) {
+            log.log(Level.WARNING, "Lock " + lockParameterName + " not found; OK, but may indicate a problem", e);
+        } catch (SsmException e) {
+            //should go stale in this case ...
+            log.log(Level.SEVERE, "Could not release lock " + lockParameterName, e);
+        }
     }
 }
