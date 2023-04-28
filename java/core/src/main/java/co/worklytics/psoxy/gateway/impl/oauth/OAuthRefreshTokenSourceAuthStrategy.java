@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.gateway.impl.oauth;
 
 import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.LockService;
 import co.worklytics.psoxy.gateway.RequiresConfiguration;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
 import co.worklytics.psoxy.utils.RandomNumberGenerator;
@@ -175,9 +176,13 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         Clock clock;
         @Inject //injected, so can be mocked for tests
         RandomNumberGenerator randomNumberGenerator;
+        @Inject
+        LockService lockService;
 
         @VisibleForTesting
         protected final Duration MAX_PROACTIVE_TOKEN_REFRESH = Duration.ofMinutes(5L);
+
+        private static final int MAX_TOKEN_REFRESH_ATTEMPTS = 5;
 
         private AccessToken currentToken = null;
 
@@ -190,6 +195,14 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
          */
         @Override
         public AccessToken refreshAccessToken() throws IOException {
+            return refreshAccessToken(0);
+        }
+
+        private AccessToken refreshAccessToken(int attempt) throws IOException {
+            if (attempt == MAX_TOKEN_REFRESH_ATTEMPTS) {
+                throw new RuntimeException("Failed to refresh token after " + attempt + " attempts");
+            }
+
             CanonicalOAuthAccessTokenResponseDto tokenResponse;
 
             Optional<AccessToken> sharedAccessToken = getSharedAccessTokenIfSupported();
@@ -205,9 +218,25 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
             }
 
             if (shouldRefresh(this.currentToken, clock.instant())) {
+                String lockId = "oauth_refresh_token";
+                boolean acquired = lockService.acquire(lockId);
+
+                if (!acquired) {
+                    try {
+                        Thread.sleep(attempt * 2_000L);
+                        //NOTE: check shared access token again, in case the instance which held the
+                        // lock refreshed the token
+                        refreshAccessToken(attempt + 1);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+
                 tokenResponse = exchangeRefreshTokenForAccessToken();
                 this.currentToken = asAccessToken(tokenResponse);
                 storeSharedAccessTokenIfSupported(this.currentToken);
+
+                lockService.release(lockId);
             }
 
             return this.currentToken;

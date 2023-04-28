@@ -146,6 +146,9 @@ public class ParameterStoreConfigService implements ConfigService, LockService {
         return this.namespace + "lock_" + lockId;
     }
 
+    // make configurable? YAGNI, 2m should be plenty
+    final int LOCK_TTL_SECONDS = 120;
+
     @Override
     public boolean acquire(@NonNull String lockId) {
         final String lockParameterName = lockParameterName(lockId);
@@ -163,8 +166,12 @@ public class ParameterStoreConfigService implements ConfigService, LockService {
                     .name(lockParameterName)
                     .build()).parameter().lastModifiedDate();
 
-                if (lockedAt.isBefore(clock.instant().minusSeconds(180))) {
+                if (lockedAt.isBefore(clock.instant().minusSeconds(LOCK_TTL_SECONDS))) {
                     log.warning("Lock " + lockParameterName + " is stale, removing");
+
+                    //q: add random delay here, in case multiple instances have been waiting to
+                    // acquire the lock?
+
                     release(lockId);
                     return acquire(lockId);
                 }
