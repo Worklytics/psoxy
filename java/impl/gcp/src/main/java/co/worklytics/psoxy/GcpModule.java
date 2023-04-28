@@ -3,7 +3,9 @@ package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.HostEnvironment;
+import co.worklytics.psoxy.gateway.LockService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.impl.BlindlyOptimisticLockService;
 import co.worklytics.psoxy.gateway.impl.CompositeConfigService;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.gateway.impl.VaultConfigService;
@@ -11,6 +13,7 @@ import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrateg
 import com.bettercloud.vault.Vault;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.ServiceOptions;
+import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoSet;
@@ -35,11 +38,16 @@ public interface GcpModule {
     static GcpEnvironment gcpEnvironment() {
         return new GcpEnvironment();
     }
+
+    // TODO: why can this be replaced with `@Binds @Singleton HostEnvironment hostEnvironment(GcpEnvironment gcpEnvironment)`?
     @Provides
     @Singleton
     static HostEnvironment hostEnvironment(GcpEnvironment gcpEnvironment) {
         return gcpEnvironment;
     }
+
+    @Binds @Singleton
+    LockService lockService(BlindlyOptimisticLockService impl);
 
     /**
      * in GCP cloud function, we should be able to configure everything via env vars; either

@@ -1,11 +1,13 @@
 package co.worklytics.psoxy.aws;
 
 import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.LockService;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import com.google.common.annotations.VisibleForTesting;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
@@ -13,6 +15,8 @@ import software.amazon.awssdk.services.ssm.SsmClient;
 import software.amazon.awssdk.services.ssm.model.*;
 
 import javax.inject.Inject;
+import java.time.Clock;
+import java.time.Instant;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.function.Function;
@@ -25,7 +29,7 @@ import java.util.logging.Level;
  *
  */
 @Log
-public class ParameterStoreConfigService implements ConfigService {
+public class ParameterStoreConfigService implements ConfigService, LockService {
 
     @Getter(onMethod_ = @VisibleForTesting)
     final String namespace;
@@ -35,6 +39,9 @@ public class ParameterStoreConfigService implements ConfigService {
 
     @Inject
     EnvVarsConfigService envVarsConfig;
+
+    @Inject
+    Clock clock;
 
     @AssistedInject
     ParameterStoreConfigService(@Assisted String namespace) {
@@ -133,5 +140,48 @@ public class ParameterStoreConfigService implements ConfigService {
         } else {
             return this.namespace + property.name();
         }
+    }
+
+    String lockParameterName(String lockId) {
+        return this.namespace + "lock_" + lockId;
+    }
+
+    @Override
+    public boolean acquire(@NonNull String lockId) {
+        final String lockParameterName = lockParameterName(lockId);
+        try {
+            client.putParameter(PutParameterRequest.builder()
+                .name(lockParameterName)
+                .type(ParameterType.STRING)
+                .value("locked")
+                .overwrite(false)
+                .build());
+            return true;
+        } catch (ParameterAlreadyExistsException e) {
+            try {
+                Instant lockedAt = client.getParameter(GetParameterRequest.builder()
+                    .name(lockParameterName)
+                    .build()).parameter().lastModifiedDate();
+
+                if (lockedAt.isBefore(clock.instant().minusSeconds(180))) {
+                    log.warning("Lock " + lockParameterName + " is stale, removing");
+                    release(lockId);
+                    return acquire(lockId);
+                }
+            } catch (SsmException ssmException) {
+                log.log(Level.SEVERE, "Could not read lock " + lockParameterName, ssmException);
+            }
+            return false;
+        } catch (SsmException e) {
+            log.log(Level.SEVERE, "Could not acquire lock " + lockParameterName, e);
+            return false;
+        }
+    }
+
+    @Override
+    public void release(@NonNull String lockId) {
+        client.deleteParameter(DeleteParameterRequest.builder()
+            .name(this.namespace + lockId)
+            .build());
     }
 }
