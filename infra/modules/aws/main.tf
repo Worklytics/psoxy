@@ -82,7 +82,7 @@ resource "aws_iam_policy" "execution_lambda_to_caller" {
         {
           "Action" : ["lambda:InvokeFunctionUrl"],
           "Effect" : "Allow",
-          "Resource" : "arn:aws:lambda:${var.region}:${var.aws_account_id}:function:${var.function_name_prefix}*"
+          "Resource" : "arn:aws:lambda:${var.region}:${var.aws_account_id}:function:${var.rest_function_name_prefix}*"
         }
       ]
   })
