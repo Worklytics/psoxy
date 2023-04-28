@@ -56,7 +56,6 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     Map<Endpoint, Pattern> compiledAllowedEndpoints;
 
     private final Object $writeLock = new Object[0];
-    List<Pair<Pattern, Endpoint>> compiledEndpointRules;
     Map<Transform, List<JsonPath>> compiledTransforms = new ConcurrentHashMap<>();
 
     JsonSchemaFilterUtils.JsonSchemaFilter rootDefinitions;
@@ -86,20 +85,46 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     public boolean isAllowed(@NonNull String httpMethod, @NonNull URL url) {
         String relativeUrl = URLUtils.relativeURL(url);
 
+        Predicate<Map.Entry<Endpoint, Pattern>> hasPathRegexMatchingUrl =
+            getHasPathRegexMatchingUrl(relativeUrl);
+
+        Predicate<Map.Entry<Endpoint, Pattern>> hasPathTemplateMatchingUrl =
+            getHasPathTemplateMatchingUrl(url);
+
+        Predicate<Endpoint> allowsHttpMethod = allowsHttpMethod(httpMethod);
+
 
         if (rules.getAllowAllEndpoints()) {
             return true;
         } else {
             return getCompiledAllowedEndpoints().entrySet().stream()
-                .filter(entry -> entry.getKey().getPathRegex() != null && entry.getValue().matcher(relativeUrl).matches()
-                    || (entry.getKey().getPathTemplate() != null && entry.getValue().matcher(url.getPath()).matches() && allowedQueryParams(entry.getKey(), URLUtils.queryParamNames(url))))
-                .filter(entry -> entry.getKey().getAllowedMethods()
-                    .map(methods -> methods.stream().map(String::toUpperCase).collect(Collectors.toList())
-                            .contains(httpMethod.toUpperCase()))
-                    .orElse(true))
+                .filter(entry -> hasPathRegexMatchingUrl.test(entry) || hasPathTemplateMatchingUrl.test(entry))
                 .filter(entry -> allowedQueryParams(entry.getKey(), URLUtils.queryParamNames(url))) // redundant in the pathTemplate case
+                .filter(entry -> allowsHttpMethod.test(entry.getKey()))
                 .findAny().isPresent();
         }
+    }
+
+    @VisibleForTesting
+    Predicate<Endpoint> allowsHttpMethod(@NonNull String httpMethod) {
+        return (endpoint) ->
+            endpoint.getAllowedMethods()
+                .map(methods -> methods.stream().map(String::toUpperCase).collect(Collectors.toList())
+                    .contains(httpMethod.toUpperCase()))
+                .orElse(true);
+    }
+
+    @VisibleForTesting
+    Predicate<Map.Entry<Endpoint, Pattern>> getHasPathRegexMatchingUrl(String relativeUrl) {
+        return (entry) ->
+            entry.getKey().getPathRegex() != null && entry.getValue().matcher(relativeUrl).matches();
+    }
+
+    @VisibleForTesting
+    Predicate<Map.Entry<Endpoint, Pattern>> getHasPathTemplateMatchingUrl(URL url) {
+        return (entry) ->
+            entry.getKey().getPathTemplate() != null && entry.getValue().matcher(url.getPath()).matches()
+                && allowedQueryParams(entry.getKey(), URLUtils.queryParamNames(url));
     }
 
 
