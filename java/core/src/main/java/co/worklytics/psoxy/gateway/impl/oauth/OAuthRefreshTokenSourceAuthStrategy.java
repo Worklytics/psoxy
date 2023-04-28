@@ -218,8 +218,12 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
             }
 
             if (shouldRefresh(this.currentToken, clock.instant())) {
+
+                // only lock if we're using a shared token across processes
+                boolean lockNeeded = payloadBuilder.useSharedToken();
+
                 String lockId = "oauth_refresh_token";
-                boolean acquired = lockService.acquire(lockId);
+                boolean acquired = !lockNeeded || lockService.acquire(lockId);
 
                 if (!acquired) {
                     try {
@@ -236,7 +240,9 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                 this.currentToken = asAccessToken(tokenResponse);
                 storeSharedAccessTokenIfSupported(this.currentToken);
 
-                lockService.release(lockId);
+                if (lockNeeded) {
+                    lockService.release(lockId);
+                }
             }
 
             return this.currentToken;
