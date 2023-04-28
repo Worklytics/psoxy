@@ -345,9 +345,11 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     Map<Endpoint, Pattern> getCompiledAllowedEndpoints() {
         if (compiledAllowedEndpoints == null) {
             synchronized ($writeLock) {
+            if (compiledAllowedEndpoints == null) {
                 compiledAllowedEndpoints = rules.getEndpoints().stream()
                     .collect(Collectors.toMap(Function.identity(),
                         endpoint -> Pattern.compile(effectiveRegex(endpoint), CASE_INSENSITIVE)));
+            }
             }
         }
         return compiledAllowedEndpoints;
