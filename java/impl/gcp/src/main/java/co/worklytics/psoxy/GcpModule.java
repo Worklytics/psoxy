@@ -46,8 +46,22 @@ public interface GcpModule {
         return gcpEnvironment;
     }
 
-    @Binds @Singleton
-    LockService lockService(BlindlyOptimisticLockService impl);
+
+    @Provides @Named("instance") @Singleton
+    static SecretManagerConfigService instanceConfigService(HostEnvironment hostEnvironment,
+                                               EnvVarsConfigService envVarsConfigService,
+                                               SecretManagerConfigServiceFactory secretManagerConfigServiceFactory) {
+        String pathToInstanceConfig =
+            envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_INSTANCE_CONFIG)
+                .orElseGet(() -> asSecretManagerNamespace(hostEnvironment.getInstanceId()));
+
+        return secretManagerConfigServiceFactory.create(ServiceOptions.getDefaultProjectId(), pathToInstanceConfig);
+    }
+
+    @Provides @Singleton
+    static LockService lockService(@Named("instance") SecretManagerConfigService instanceConfigService) {
+        return instanceConfigService;
+    }
 
     /**
      * in GCP cloud function, we should be able to configure everything via env vars; either
@@ -57,19 +71,15 @@ public interface GcpModule {
      * @see "https://cloud.google.com/functions/docs/configuring/secrets"
      */
     @Provides @Named("Native") @Singleton
-    static ConfigService nativeConfigService(HostEnvironment hostEnvironment,
-                                             EnvVarsConfigService envVarsConfigService,
-                                             SecretManagerConfigServiceFactory secretManagerConfigServiceFactory) {
+    static ConfigService nativeConfigService(EnvVarsConfigService envVarsConfigService,
+                                             SecretManagerConfigServiceFactory secretManagerConfigServiceFactory,
+                                             @Named("instance") SecretManagerConfigService instanceConfigService) {
         String pathToSharedConfig =
             envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_SHARED_CONFIG)
                 .orElse(null);
 
-        String pathToInstanceConfig =
-            envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_INSTANCE_CONFIG)
-                .orElseGet(() -> asSecretManagerNamespace(hostEnvironment.getInstanceId()));
-
         return CompositeConfigService.builder()
-                .preferred(secretManagerConfigServiceFactory.create(ServiceOptions.getDefaultProjectId(), pathToInstanceConfig))
+                .preferred(instanceConfigService)
                 .fallback(secretManagerConfigServiceFactory.create(ServiceOptions.getDefaultProjectId(), pathToSharedConfig))
                 .build();
     }
