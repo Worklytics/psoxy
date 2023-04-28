@@ -12,9 +12,8 @@ locals {
   rules_plain = file(var.file_path)
 
   # compress if necessary; but otherwise leave plain so human readable
-  rules_compressed = base64gzip(local.rules_plain)
   use_compressed   = length(local.rules_plain) > local.secret_manager_size_limit
-  param_value      = local.use_compressed ? local.rules_compressed : local.rules_plain
+  param_value      = local.use_compressed ? base64gzip(local.rules_plain) : local.rules_plain
 }
 
 resource "google_secret_manager_secret" "rules" {
@@ -31,7 +30,7 @@ resource "google_secret_manager_secret_version" "rules" {
 
   lifecycle {
     precondition {
-      condition     = length(local.param_value) > local.secret_manager_size_limit
+      condition     = length(local.param_value) < local.secret_manager_size_limit
       error_message = "Rules on file ${var.file_path} are too big to store"
     }
   }
