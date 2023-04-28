@@ -225,3 +225,8 @@ output "version" {
 output "filename" {
   value = module.psoxy-package.filename
 }
+
+output "path_to_deployment_jar" {
+  description = "Path to the package to deploy (JAR)."
+  value       = module.psoxy-package.path_to_deployment_jar
+}

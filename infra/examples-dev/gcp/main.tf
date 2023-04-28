@@ -63,6 +63,10 @@ module "psoxy" {
   lookup_tables                  = var.lookup_tables
 }
 
+output "path_to_deployment_jar" {
+  description = "Path to the package to deploy (JAR)."
+  value       = module.psoxy.path_to_deployment_jar
+}
 
 output "todos_1" {
   description = "List of todo steps to complete 1st, in markdown format."
