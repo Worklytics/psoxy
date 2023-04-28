@@ -91,6 +91,11 @@ output "lookup_tables" {
   value = module.psoxy.lookup_tables
 }
 
+output "path_to_deployment_jar" {
+  description = "Path to the package to deploy (JAR)."
+  value       = module.psoxy.path_to_deployment_jar
+}
+
 output "todos_1" {
   description = "List of todo steps to complete 1st, in markdown format."
   value       = var.todos_as_outputs ? join("\n", module.psoxy.todos_1) : null
