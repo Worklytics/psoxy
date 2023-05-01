@@ -32,3 +32,9 @@ variable "salesforce_domain" {
   default     = ""
   description = "Domain of the Salesforce to connect to (only required if using Salesforce connector). To find your My Domain URL, from Setup, in the Quick Find box, enter My Domain, and then select My Domain"
 }
+
+variable "jira_cloud_id" {
+  type        = string
+  default     = ""
+  description = "Cloud id of the Jira Cloud to connect to (only required if using Jira connector)."
+}

@@ -504,6 +504,80 @@ all the operations for the connector:
   - `PSOXY_DROPBOX_BUSINESS_CLIENT_SECRET` with `App secret` value.
 
 EOT
+    },
+    jira = {
+      source_kind : "jira"
+      worklytics_connector_id : "jira-oauth-psoxy"
+      target_host : "api.atlassian.com/ex/jira/${var.jira_cloud_id}"
+      source_auth_strategy : "oauth2_refresh_token"
+      display_name : "Jira OAuth 2.0 (3LO)"
+      identifier_scope_id : "jira"
+      worklytics_connector_name : "Jira OAuth 2.0 (3LO) via Psoxy"
+      secured_variables : [
+        { name : "REFRESH_TOKEN", writable : false },
+        { name : "CLIENT_ID", writable : false },
+        { name : "CLIENT_SECRET", writable : false },
+      ],
+      environment_variables : {
+        GRANT_TYPE : "refresh_token"
+        REFRESH_ENDPOINT : "https://auth.atlassian.com/oauth/token"
+      }
+      reserved_concurrent_executions : null
+      example_api_calls_user_to_impersonate : null
+      example_api_calls : [
+        "/rest/api/3/users/search",
+        "/rest/api/3/search?maxResults%3D25",
+      ],
+      external_token_todo : <<EOT
+Jira OAuth 2.0 (3LO) through Psoxy requires a Jira Cloud account with following scopes:
+
+- members.read: member listing
+- events.read: event listing
+- groups.read: group listing
+
+1. Go to https://developer.atlassian.com/console/myapps/ and click on "Create"
+2. Then go `Authorize` and `Add` it, adding `http://localhost` as callback URI. It can be any URL meanwhile it matches the settings.
+3. Now go on `Permissions` and click on `Add` for Jira. Once added, click on `Configure`. Add following scopes as part of `Classic Scopes`:
+- read:jira-user
+- read:jira-work
+4. Once Configured, go to `Settings` and prepare to copy the `Client Id` and `Secret`. As we will need to create a `REFRESH_TOKEN` we will need to exchange
+the authentication code to retrieve it. Please replace the *Client Id* field in this URL and paste it on the browser :
+
+   `https://auth.atlassian.com/authorize?audience=api.atlassian.com&client_id=<CLIENT ID>&scope=offline_access%20read:jira-user%20read:jira-work&redirect_uri=http://localhost&state=YOUR_USER_BOUND_VALUE&response_type=code&prompt=consent`
+
+Choose a site in your Jira workspace to allow access for this application and click on `Accept`.
+
+As the callback is not existing, you will see an error. But in the URL of your browser you will see something like this as URL:
+
+`http://localhost/?state=YOUR_USER_BOUND_VALUE&code=eyJhbGc...`
+
+The content of the `code` parameter is the `authentication code` required for next step.
+`eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiI3MGMxNjFjMi1jYjIyLTQ0N2EtOThlMy1mNzBiOTZmMDgxODkiLCJzdWIiOiI2MDhhOWI1NTU0MjYzMzAwNzJmOTg2N2QiLCJuYmYiOjE2ODI5NTU1MjAsImlzcyI6ImF1dGguYXRsYXNzaWFuLmNvbSIsImlhdCI6MTY4Mjk1NTUyMCwiZXhwIjoxNjgyOTU1ODIwLCJhdWQiOiIzYWlTTUhjTmZFeXlTa3k1aUlQWEd3WHg3WkhvdVJEbyIsImNsaWVudF9hdXRoX3R5cGUiOiJQT1NUIiwiaHR0cHM6Ly9pZC5hdGxhc3NpYW4uY29tL3ZlcmlmaWVkIjp0cnVlLCJodHRwczovL2lkLmF0bGFzc2lhbi5jb20vdWp0IjoiNzBjMTYxYzItY2IyMi00NDdhLTk4ZTMtZjcwYjk2ZjA4MTg5Iiwic2NvcGUiOlsicmVhZDpqaXJhLXdvcmsiLCJyZWFkOmppcmEtdXNlciIsIm9mZmxpbmVfYWNjZXNzIl0sImh0dHBzOi8vaWQuYXRsYXNzaWFuLmNvbS9hdGxfdG9rZW5fdHlwZSI6IkFVVEhfQ09ERSIsImh0dHBzOi8vaWQuYXRsYXNzaWFuLmNvbS9zZXNzaW9uX2lkIjoiNDJhMjU0ZmEtODIzMS00YjU3LWI3NzUtNzI0M2Y5NDk1MzY4IiwiaHR0cHM6Ly9pZC5hdGxhc3NpYW4uY29tL3Byb2Nlc3NSZWdpb24iOiJ1cy1lYXN0LTEifQ.TjfVYejRwnPIIDaCaRApbwHVzzbmUQdtQdojMwLdTrc
+   That will return an `Authorization Code` that you have to paste.
+   **NOTE** This `Authorization Code` if for a one single use; if expired or used you will need to get it again pasting
+   the
+   URL in the browser.
+5. Now, replace the values in following URL and run it from command line in your terminal. Replace `YOUR_AUTHENTICATION_CODE`, `YOUR_CLIENT_ID` and `YOUR_CLIENT_SECRET` in the placeholders:
+
+`curl --request POST --url 'https://auth.atlassian.com/oauth/token' --header 'Content-Type: application/json' --data '{"grant_type": "authorization_code","client_id": "YOUR_CLIENT_ID","client_secret": "YOUR_CLIENT_SECRET","code": "YOUR_AUTHENTICATION_CODE","redirect_uri": "http://localhost"}'`
+
+6. After running that command, if successful you will see a [JSON response](https://developer.atlassian.com/cloud/jira/platform/oauth-2-3lo-apps/#2--exchange-authorization-code-for-access-token) like this:
+
+```json
+{
+    "access_token": "some short live access token",
+    "expires_in": 3600,
+    "token_type": "Bearer",
+    "refresh_token": "some long live token we are going to use",
+    "scope": "read:jira-work offline_access read:jira-user"
+}
+```
+7. Finally set following variables in AWS System Manager parameters store / GCP Cloud Secrets (if default implementation):
+  - `PSOXY_JIRA_REFRESH_TOKEN` secret variable with value of `refresh_token` received in previous response
+  - `PSOXY_JIRA_CLIENT_ID` with `Client Id` value.
+  - `PSOXY_JIRA_CLIENT_SECRET` with `Client Secret` value.
+
+EOT
     }
   }
 
