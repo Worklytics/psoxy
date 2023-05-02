@@ -42,7 +42,7 @@ public class PrebuiltSanitizerRules {
             .build();
 
     static final Endpoint ISSUE_CHANGELOG = Endpoint.builder()
-            .pathRegex("^rest/api/3/issue/10709/changelog?[?]?[^/]*")
+            .pathRegex("^rest/api/3/issue/[^/]*/changelog?[?]?[^/]*")
             .allowedQueryParams(commonAllowedQueryParameters)
             .transform(Transform.Redact.builder()
                     .jsonPath("$.values[*].author.self")
@@ -56,6 +56,21 @@ public class PrebuiltSanitizerRules {
             .transform(Transform.Pseudonymize.builder()
                     .jsonPath("$.values[*].author.accountId")
                     .jsonPath("$.values[*].author.emailAddress")
+                    .build())
+            .build();
+
+    static final Endpoint ISSUE_COMMENT = Endpoint.builder()
+            .pathRegex("^rest/api/3/issue/[^/]*/comment?[?]?[^/]*")
+            .allowedQueryParams(commonAllowedQueryParameters)
+            .transform(Transform.Redact.builder()
+                    .jsonPath("$.comments[*].(author|updateAuthor).self")
+                    .jsonPath("$.comments[*].(author|updateAuthor).avatarUrls")
+                    .jsonPath("$.comments[*].(author|updateAuthor).displayName")
+                    .jsonPath("$.comments[*].body.content[*].text")
+                    .build())
+            .transform(Transform.Pseudonymize.builder()
+                    .jsonPath("$.comments[*].(author|updateAuthor).accountId")
+                    .jsonPath("$.comments[*].(author|updateAuthor).emailAddress")
                     .build())
             .build();
 
@@ -76,6 +91,7 @@ public class PrebuiltSanitizerRules {
     public static final RESTRules JIRA = Rules2.builder()
             .endpoint(ISSUES)
             .endpoint(ISSUE_CHANGELOG)
+            .endpoint(ISSUE_COMMENT)
             .endpoint(USERS)
             .build();
 }
