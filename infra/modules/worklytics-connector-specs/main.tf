@@ -531,9 +531,8 @@ EOT
       external_token_todo : <<EOT
 Jira OAuth 2.0 (3LO) through Psoxy requires a Jira Cloud account with following scopes:
 
-- members.read: member listing
-- events.read: event listing
-- groups.read: group listing
+- read:jira-user
+- read:jira-work
 
 1. Go to https://developer.atlassian.com/console/myapps/ and click on "Create"
 2. Then go `Authorize` and `Add` it, adding `http://localhost` as callback URI. It can be any URL meanwhile it matches the settings.
@@ -569,7 +568,27 @@ The content of the `code` parameter is the `authentication code` required for ne
     "scope": "read:jira-work offline_access read:jira-user"
 }
 ```
-7. Finally set following variables in AWS System Manager parameters store / GCP Cloud Secrets (if default implementation):
+7. You will need to provide `cloudId` parameter of your Jira instance. To retrieve it, please run the following command replacing adding the
+`ACCESS_TOKEN` obtained in the previous step:
+
+ `curl --header 'Authorization: Bearer <ACCESS_TOKEN>' --url 'https://api.atlassian.com/oauth/token/accessible-resources'`
+
+And its response will be something like:
+
+```json
+[
+  {
+  "id":"SOME UUID",
+  "url":"https://your-site.atlassian.net",
+  "name":"your-site-name",
+  "scopes":["read:jira-user","read:jira-work"],
+  "avatarUrl":"https://site-admin-avatar-cdn.prod.public.atl-paas.net/avatars/240/rocket.png"
+  }
+]
+```
+
+Use that id as `jira_cloud_id` parameter to include as part of Terraform deployment. That will target your instance for REST API requests.
+8. Finally set following variables in AWS System Manager parameters store / GCP Cloud Secrets (if default implementation):
   - `PSOXY_JIRA_REFRESH_TOKEN` secret variable with value of `refresh_token` received in previous response
   - `PSOXY_JIRA_CLIENT_ID` with `Client Id` value.
   - `PSOXY_JIRA_CLIENT_SECRET` with `Client Secret` value.
