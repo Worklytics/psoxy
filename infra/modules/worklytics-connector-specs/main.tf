@@ -552,11 +552,8 @@ As the callback is not existing, you will see an error. But in the URL of your b
 `http://localhost/?state=YOUR_USER_BOUND_VALUE&code=eyJhbGc...`
 
 The content of the `code` parameter is the `authentication code` required for next step.
-`eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiI3MGMxNjFjMi1jYjIyLTQ0N2EtOThlMy1mNzBiOTZmMDgxODkiLCJzdWIiOiI2MDhhOWI1NTU0MjYzMzAwNzJmOTg2N2QiLCJuYmYiOjE2ODI5NTU1MjAsImlzcyI6ImF1dGguYXRsYXNzaWFuLmNvbSIsImlhdCI6MTY4Mjk1NTUyMCwiZXhwIjoxNjgyOTU1ODIwLCJhdWQiOiIzYWlTTUhjTmZFeXlTa3k1aUlQWEd3WHg3WkhvdVJEbyIsImNsaWVudF9hdXRoX3R5cGUiOiJQT1NUIiwiaHR0cHM6Ly9pZC5hdGxhc3NpYW4uY29tL3ZlcmlmaWVkIjp0cnVlLCJodHRwczovL2lkLmF0bGFzc2lhbi5jb20vdWp0IjoiNzBjMTYxYzItY2IyMi00NDdhLTk4ZTMtZjcwYjk2ZjA4MTg5Iiwic2NvcGUiOlsicmVhZDpqaXJhLXdvcmsiLCJyZWFkOmppcmEtdXNlciIsIm9mZmxpbmVfYWNjZXNzIl0sImh0dHBzOi8vaWQuYXRsYXNzaWFuLmNvbS9hdGxfdG9rZW5fdHlwZSI6IkFVVEhfQ09ERSIsImh0dHBzOi8vaWQuYXRsYXNzaWFuLmNvbS9zZXNzaW9uX2lkIjoiNDJhMjU0ZmEtODIzMS00YjU3LWI3NzUtNzI0M2Y5NDk1MzY4IiwiaHR0cHM6Ly9pZC5hdGxhc3NpYW4uY29tL3Byb2Nlc3NSZWdpb24iOiJ1cy1lYXN0LTEifQ.TjfVYejRwnPIIDaCaRApbwHVzzbmUQdtQdojMwLdTrc
-   That will return an `Authorization Code` that you have to paste.
-   **NOTE** This `Authorization Code` if for a one single use; if expired or used you will need to get it again pasting
-   the
-   URL in the browser.
+
+**NOTE** This `Authorization Code` if for a one single use; if expired or used you will need to get it again pasting the URL in the browser.
 5. Now, replace the values in following URL and run it from command line in your terminal. Replace `YOUR_AUTHENTICATION_CODE`, `YOUR_CLIENT_ID` and `YOUR_CLIENT_SECRET` in the placeholders:
 
 `curl --request POST --url 'https://auth.atlassian.com/oauth/token' --header 'Content-Type: application/json' --data '{"grant_type": "authorization_code","client_id": "YOUR_CLIENT_ID","client_secret": "YOUR_CLIENT_SECRET","code": "YOUR_AUTHENTICATION_CODE","redirect_uri": "http://localhost"}'`
