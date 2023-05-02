@@ -531,14 +531,17 @@ EOT
       external_token_todo : <<EOT
 Jira OAuth 2.0 (3LO) through Psoxy requires a Jira Cloud account with following scopes:
 
-- read:jira-user
-- read:jira-work
+- read:account: for getting user information and emails
+- read:jira-user: for getting user information
+- read:jira-work:
 
 1. Go to https://developer.atlassian.com/console/myapps/ and click on "Create"
 2. Then go `Authorize` and `Add` it, adding `http://localhost` as callback URI. It can be any URL meanwhile it matches the settings.
 3. Now go on `Permissions` and click on `Add` for Jira. Once added, click on `Configure`. Add following scopes as part of `Classic Scopes`:
 - read:jira-user
 - read:jira-work
+Then repeat the same but for `User Identity API`, adding the following scope:
+- read:account
 4. Once Configured, go to `Settings` and prepare to copy the `Client Id` and `Secret`. As we will need to create a `REFRESH_TOKEN` we will need to exchange
 the authentication code to retrieve it. Please replace the *Client Id* field in this URL and paste it on the browser :
 
@@ -555,7 +558,7 @@ The content of the `code` parameter is the `authentication code` required for ne
 **NOTE** This `Authorization Code` if for a one single use; if expired or used you will need to get it again pasting the URL in the browser.
 5. Now, replace the values in following URL and run it from command line in your terminal. Replace `YOUR_AUTHENTICATION_CODE`, `YOUR_CLIENT_ID` and `YOUR_CLIENT_SECRET` in the placeholders:
 
-`curl --request POST --url 'https://auth.atlassian.com/oauth/token' --header 'Content-Type: application/json' --data '{"grant_type": "authorization_code","client_id": "YOUR_CLIENT_ID","client_secret": "YOUR_CLIENT_SECRET","code": "YOUR_AUTHENTICATION_CODE","redirect_uri": "http://localhost"}'`
+`curl --request POST --url 'https://auth.atlassian.com/oauth/token' --header 'Content-Type: application/json' --data '{"grant_type": "authorization_code","client_id": "YOUR_CLIENT_ID","client_secret": "YOUR_CLIENT_SECRET", "code": "YOUR_AUTHENTICATION_CODE", "redirect_uri": "http://localhost"}'`
 
 6. After running that command, if successful you will see a [JSON response](https://developer.atlassian.com/cloud/jira/platform/oauth-2-3lo-apps/#2--exchange-authorization-code-for-access-token) like this:
 
