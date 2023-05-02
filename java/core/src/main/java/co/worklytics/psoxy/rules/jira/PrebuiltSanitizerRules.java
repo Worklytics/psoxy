@@ -74,6 +74,20 @@ public class PrebuiltSanitizerRules {
                     .build())
             .build();
 
+    static final Endpoint ISSUE_WORKLOG = Endpoint.builder()
+            .pathRegex("^rest/api/3/issue/[^/]*/worklog?[?]?[^/]*")
+            .allowedQueryParams(commonAllowedQueryParameters)
+            .transform(Transform.Redact.builder()
+                    .jsonPath("$.worklogs[*].(author|updateAuthor).self")
+                    .jsonPath("$.worklogs[*].(author|updateAuthor).avatarUrls")
+                    .jsonPath("$.worklogs[*].(author|updateAuthor).displayName")
+                    .build())
+            .transform(Transform.Pseudonymize.builder()
+                    .jsonPath("$.worklogs[*].(author|updateAuthor).accountId")
+                    .jsonPath("$.worklogs[*].(author|updateAuthor).emailAddress")
+                    .build())
+            .build();
+
     static final Endpoint USERS = Endpoint.builder()
             .pathRegex("^rest/api/3/user?[?]?[^/]*")
             .allowedQueryParams(commonAllowedQueryParameters)
@@ -92,6 +106,7 @@ public class PrebuiltSanitizerRules {
             .endpoint(ISSUES)
             .endpoint(ISSUE_CHANGELOG)
             .endpoint(ISSUE_COMMENT)
+            .endpoint(ISSUE_WORKLOG)
             .endpoint(USERS)
             .build();
 }
