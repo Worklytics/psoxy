@@ -40,6 +40,25 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$.issues[*]..emailAddress")
                     .build())
             .build();
+
+    static final Endpoint ISSUE_CHANGELOG = Endpoint.builder()
+            .pathRegex("^rest/api/3/issue/10709/changelog?[?]?[^/]*")
+            .allowedQueryParams(commonAllowedQueryParameters)
+            .transform(Transform.Redact.builder()
+                    .jsonPath("$.values[*].author.self")
+                    .jsonPath("$.values[*].author.avatarUrls")
+                    .jsonPath("$.values[*].author.displayName")
+                    .jsonPath("$.values[*].items[*].from")
+                    .jsonPath("$.values[*].items[*].to")
+                    .jsonPath("$.values[*].items[*].fromString")
+                    .jsonPath("$.values[*].items[*].toString")
+                    .build())
+            .transform(Transform.Pseudonymize.builder()
+                    .jsonPath("$.values[*].author.accountId")
+                    .jsonPath("$.values[*].author.emailAddress")
+                    .build())
+            .build();
+
     static final Endpoint USERS = Endpoint.builder()
             .pathRegex("^rest/api/3/user?[?]?[^/]*")
             .allowedQueryParams(commonAllowedQueryParameters)
@@ -56,6 +75,7 @@ public class PrebuiltSanitizerRules {
 
     public static final RESTRules JIRA = Rules2.builder()
             .endpoint(ISSUES)
+            .endpoint(ISSUE_CHANGELOG)
             .endpoint(USERS)
             .build();
 }

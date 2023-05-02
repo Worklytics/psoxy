@@ -1,0 +1,105 @@
+{
+  "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/ETV-13/changelog?maxResults=100&startAt=0",
+  "maxResults": 100,
+  "startAt": 0,
+  "total": 3,
+  "isLast": true,
+  "values": [
+    {
+      "id": "10680",
+      "author": {
+        "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/user?accountId=5f3a92259a01310041a5ec7a",
+        "accountId": "5f3a92259a01310041a5ec7a",
+        "avatarUrls": {
+          "48x48": "https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/5f3a92259a01310041a5ec7a/f18dd897-e16b-45e7-8fbf-a8a6719f93d9/48",
+          "24x24": "https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/5f3a92259a01310041a5ec7a/f18dd897-e16b-45e7-8fbf-a8a6719f93d9/24",
+          "16x16": "https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/5f3a92259a01310041a5ec7a/f18dd897-e16b-45e7-8fbf-a8a6719f93d9/16",
+          "32x32": "https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/5f3a92259a01310041a5ec7a/f18dd897-e16b-45e7-8fbf-a8a6719f93d9/32"
+        },
+        "displayName": "Fake",
+        "active": false,
+        "timeZone": "America/New_York",
+        "accountType": "atlassian"
+      },
+      "created": "2020-11-03T09:35:40.018-0500",
+      "items": [
+        {
+          "field": "description",
+          "fieldtype": "jira",
+          "fieldId": "description",
+          "from": "{\"id\":\"ari:cloud:jira:f6eef702-e05d-43ba-bd5c-75fce47d560e:issuefieldvalue/10707/description\",\"version\":\"1\"}",
+          "fromString": "initial description",
+          "to": "{\"id\":\"ari:cloud:jira:f6eef702-e05d-43ba-bd5c-75fce47d560e:issuefieldvalue/10707/description\",\"version\":\"2\"}",
+          "toString": "modified description"
+        }
+      ]
+    },
+    {
+      "id": "10689",
+      "author": {
+        "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/user?accountId=5f3a92259a01310041a5ec7a",
+        "accountId": "5f3a92259a01310041a5ec7a",
+        "avatarUrls": {
+          "48x48": "https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/5f3a92259a01310041a5ec7a/f18dd897-e16b-45e7-8fbf-a8a6719f93d9/48",
+          "24x24": "https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/5f3a92259a01310041a5ec7a/f18dd897-e16b-45e7-8fbf-a8a6719f93d9/24",
+          "16x16": "https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/5f3a92259a01310041a5ec7a/f18dd897-e16b-45e7-8fbf-a8a6719f93d9/16",
+          "32x32": "https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/5f3a92259a01310041a5ec7a/f18dd897-e16b-45e7-8fbf-a8a6719f93d9/32"
+        },
+        "displayName": "Fake",
+        "active": false,
+        "timeZone": "America/New_York",
+        "accountType": "atlassian"
+      },
+      "created": "2020-11-03T09:35:42.289-0500",
+      "items": [
+        {
+          "field": "status",
+          "fieldtype": "jira",
+          "fieldId": "status",
+          "from": "10000",
+          "fromString": "To Do",
+          "to": "3",
+          "toString": "In Progress"
+        }
+      ]
+    },
+    {
+      "id": "10702",
+      "author": {
+        "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/user?accountId=5f3a92259a01310041a5ec7a",
+        "accountId": "5f3a92259a01310041a5ec7a",
+        "avatarUrls": {
+          "48x48": "https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/5f3a92259a01310041a5ec7a/f18dd897-e16b-45e7-8fbf-a8a6719f93d9/48",
+          "24x24": "https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/5f3a92259a01310041a5ec7a/f18dd897-e16b-45e7-8fbf-a8a6719f93d9/24",
+          "16x16": "https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/5f3a92259a01310041a5ec7a/f18dd897-e16b-45e7-8fbf-a8a6719f93d9/16",
+          "32x32": "https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/5f3a92259a01310041a5ec7a/f18dd897-e16b-45e7-8fbf-a8a6719f93d9/32"
+        },
+        "displayName": "Fake",
+        "active": false,
+        "timeZone": "America/New_York",
+        "accountType": "atlassian"
+      },
+      "created": "2020-11-03T09:35:46.199-0500",
+      "items": [
+        {
+          "field": "resolution",
+          "fieldtype": "jira",
+          "fieldId": "resolution",
+          "from": null,
+          "fromString": null,
+          "to": "10000",
+          "toString": "Done"
+        },
+        {
+          "field": "status",
+          "fieldtype": "jira",
+          "fieldId": "status",
+          "from": "3",
+          "fromString": "In Progress",
+          "to": "10001",
+          "toString": "Done"
+        }
+      ]
+    }
+  ]
+}
