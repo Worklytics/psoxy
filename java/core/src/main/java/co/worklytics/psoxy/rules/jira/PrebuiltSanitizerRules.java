@@ -22,6 +22,10 @@ public class PrebuiltSanitizerRules {
                             "fields").stream())
             .collect(Collectors.toList());
 
+    private static final List<String> groupMemberAllowedQueryParameters = Streams.concat(commonAllowedQueryParameters.stream(),
+                    Lists.newArrayList("groupId").stream())
+            .collect(Collectors.toList());
+
     static final Endpoint ISSUES = Endpoint.builder()
             .pathRegex("^rest/api/3/search?[?]?[^/]*")
             .allowedQueryParams(issuesAllowedQueryParameters)
@@ -102,7 +106,30 @@ public class PrebuiltSanitizerRules {
                     .build())
             .build();
 
+    static final Endpoint GROUP_BULK = Endpoint.builder()
+            .pathRegex("^rest/api/3/group/bulk?[?]?[^/]*")
+            .allowedQueryParams(commonAllowedQueryParameters)
+            .transform(Transform.Redact.builder()
+                    .jsonPath("$..name")
+                    .build())
+            .build();
+
+    static final Endpoint GROUP_MEMBER = Endpoint.builder()
+            .pathRegex("^rest/api/3/group/member?[?]?[^/]*")
+            .allowedQueryParams(groupMemberAllowedQueryParameters)
+            .transform(Transform.Redact.builder()
+                    .jsonPath("$.values[*].self")
+                    .jsonPath("$.values[*].avatarUrls")
+                    .jsonPath("$.values[*].displayName")
+                    .build())
+            .transform(Transform.Pseudonymize.builder()
+                    .jsonPath("$.values[*].accountId")
+                    .jsonPath("$.values[*].emailAddress")
+                    .build())
+            .build();
+
     public static final RESTRules JIRA = Rules2.builder()
+            .endpoint(GROUP_BULK)
             .endpoint(ISSUES)
             .endpoint(ISSUE_CHANGELOG)
             .endpoint(ISSUE_COMMENT)

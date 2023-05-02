@@ -529,11 +529,15 @@ EOT
         "/rest/api/3/search?maxResults%3D25",
       ],
       external_token_todo : <<EOT
-Jira OAuth 2.0 (3LO) through Psoxy requires a Jira Cloud account with following scopes:
+Jira OAuth 2.0 (3LO) through Psoxy requires a Jira Cloud account with following classical scopes:
 
-- read:account: for getting user information and emails
-- read:jira-user: for getting user information
-- read:jira-work:
+- read:jira-user: for getting generic user information
+- read:jira-work: for getting information about issues, comments, etc
+
+And following granular scopes:
+- read:account: for getting user emails
+- read:group:jira: for retrieving group members
+- read:avatar:jira: for retrieving group members
 
 1. Go to https://developer.atlassian.com/console/myapps/ and click on "Create"
 2. Then go `Authorize` and `Add` it, adding `http://localhost` as callback URI. It can be any URL meanwhile it matches the settings.
