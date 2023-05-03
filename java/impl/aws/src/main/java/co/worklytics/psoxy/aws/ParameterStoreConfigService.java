@@ -1,11 +1,14 @@
 package co.worklytics.psoxy.aws;
 
 import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.LockService;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
@@ -13,6 +16,9 @@ import software.amazon.awssdk.services.ssm.SsmClient;
 import software.amazon.awssdk.services.ssm.model.*;
 
 import javax.inject.Inject;
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.function.Function;
@@ -25,7 +31,7 @@ import java.util.logging.Level;
  *
  */
 @Log
-public class ParameterStoreConfigService implements ConfigService {
+public class ParameterStoreConfigService implements ConfigService, LockService {
 
     @Getter(onMethod_ = @VisibleForTesting)
     final String namespace;
@@ -35,6 +41,9 @@ public class ParameterStoreConfigService implements ConfigService {
 
     @Inject
     EnvVarsConfigService envVarsConfig;
+
+    @Inject
+    Clock clock;
 
     @AssistedInject
     ParameterStoreConfigService(@Assisted String namespace) {
@@ -132,6 +141,66 @@ public class ParameterStoreConfigService implements ConfigService {
             return property.name();
         } else {
             return this.namespace + property.name();
+        }
+    }
+
+    String lockParameterName(String lockId) {
+        return this.namespace + "lock_" + lockId;
+    }
+
+    @Override
+    public boolean acquire(@NonNull String lockId, @NonNull Duration expires) {
+        Preconditions.checkArgument(StringUtils.isNotBlank(lockId), "lockId must be non-blank");
+
+        final String lockParameterName = lockParameterName(lockId);
+        try {
+            client.putParameter(PutParameterRequest.builder()
+                .name(lockParameterName)
+                .type(ParameterType.STRING)
+                .value("locked")
+                .overwrite(false)
+                .build());
+            return true;
+        } catch (ParameterAlreadyExistsException e) {
+            try {
+                Instant lockedAt = client.getParameter(GetParameterRequest.builder()
+                    .name(lockParameterName)
+                    .build()).parameter().lastModifiedDate();
+
+
+                if (lockedAt.isBefore(clock.instant().minusSeconds(expires.getSeconds()))) {
+                    log.warning("Lock " + lockParameterName + " is stale, removing");
+
+                    //q: add random delay here, in case multiple instances have been waiting to
+                    // acquire the lock?
+                    release(lockId);
+
+                    return acquire(lockId);
+                }
+            } catch (SsmException ssmException) {
+                log.log(Level.SEVERE, "Could not read lock " + lockParameterName, ssmException);
+            }
+            return false;
+        } catch (SsmException e) {
+            log.log(Level.SEVERE, "Could not acquire lock " + lockParameterName, e);
+            return false;
+        }
+    }
+
+    @Override
+    public void release(@NonNull String lockId) {
+        Preconditions.checkArgument(StringUtils.isNotBlank(lockId), "lockId must be non-blank");
+
+        String lockParameterName = lockParameterName(lockId);
+        try {
+            client.deleteParameter(DeleteParameterRequest.builder()
+                .name(lockParameterName(lockId))
+                .build());
+        } catch (ParameterNotFoundException e) {
+            log.log(Level.WARNING, "Lock " + lockParameterName + " not found; OK, but may indicate a problem", e);
+        } catch (SsmException e) {
+            //should go stale in this case ...
+            log.log(Level.SEVERE, "Could not release lock " + lockParameterName, e);
         }
     }
 }

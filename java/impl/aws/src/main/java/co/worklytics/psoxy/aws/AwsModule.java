@@ -2,6 +2,7 @@ package co.worklytics.psoxy.aws;
 
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.HostEnvironment;
+import co.worklytics.psoxy.gateway.LockService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.impl.CachingConfigServiceDecorator;
 import co.worklytics.psoxy.gateway.impl.CompositeConfigService;
@@ -84,7 +85,8 @@ public interface AwsModule {
     @Singleton
     static ConfigService nativeConfigService(HostEnvironment hostEnvironment,
                                              EnvVarsConfigService envVarsConfigService,
-                                             ParameterStoreConfigServiceFactory parameterStoreConfigServiceFactory) {
+                                             ParameterStoreConfigServiceFactory parameterStoreConfigServiceFactory,
+                                             @Named("instance") ParameterStoreConfigService instanceScopedConfigService) {
 
         String pathToSharedConfig =
                 envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_SHARED_CONFIG)
@@ -93,13 +95,6 @@ public interface AwsModule {
         ParameterStoreConfigService sharedConfigService =
                 parameterStoreConfigServiceFactory.create(pathToSharedConfig);
 
-        String pathToInstanceConfig =
-                envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_INSTANCE_CONFIG)
-                        .orElseGet(() -> asParameterStoreNamespace(hostEnvironment.getInstanceId()) + "_");
-
-        ParameterStoreConfigService instanceScopedConfigService =
-                parameterStoreConfigServiceFactory.create(pathToInstanceConfig);
-
 
         Duration proxyInstanceConfigCacheTtl = Duration.ofMinutes(5);
         Duration sharedConfigCacheTtl = Duration.ofMinutes(20);
@@ -107,6 +102,24 @@ public interface AwsModule {
                 .preferred(new CachingConfigServiceDecorator(instanceScopedConfigService, proxyInstanceConfigCacheTtl))
                 .fallback(new CachingConfigServiceDecorator(sharedConfigService, sharedConfigCacheTtl))
                 .build();
+    }
+
+    @Provides
+    @Named("instance")
+    static ParameterStoreConfigService instanceConfigService(HostEnvironment hostEnvironment,
+                                                      EnvVarsConfigService envVarsConfigService,
+                                                      ParameterStoreConfigServiceFactory parameterStoreConfigServiceFactory) {
+
+        String pathToInstanceConfig =
+            envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_INSTANCE_CONFIG)
+                .orElseGet(() -> asParameterStoreNamespace(hostEnvironment.getInstanceId()) + "_");
+
+        return parameterStoreConfigServiceFactory.create(pathToInstanceConfig);
+    }
+
+    @Provides @Singleton
+    static LockService lockService(@Named("instance") ParameterStoreConfigService parameterStoreConfigService) {
+        return parameterStoreConfigService;
     }
 
     @Provides

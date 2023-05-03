@@ -3,7 +3,9 @@ package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.HostEnvironment;
+import co.worklytics.psoxy.gateway.LockService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.impl.BlindlyOptimisticLockService;
 import co.worklytics.psoxy.gateway.impl.CompositeConfigService;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.gateway.impl.VaultConfigService;
@@ -11,6 +13,7 @@ import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrateg
 import com.bettercloud.vault.Vault;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.ServiceOptions;
+import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoSet;
@@ -35,10 +38,29 @@ public interface GcpModule {
     static GcpEnvironment gcpEnvironment() {
         return new GcpEnvironment();
     }
+
+    // TODO: why can this be replaced with `@Binds @Singleton HostEnvironment hostEnvironment(GcpEnvironment gcpEnvironment)`?
     @Provides
     @Singleton
     static HostEnvironment hostEnvironment(GcpEnvironment gcpEnvironment) {
         return gcpEnvironment;
+    }
+
+
+    @Provides @Named("instance") @Singleton
+    static SecretManagerConfigService instanceConfigService(HostEnvironment hostEnvironment,
+                                               EnvVarsConfigService envVarsConfigService,
+                                               SecretManagerConfigServiceFactory secretManagerConfigServiceFactory) {
+        String pathToInstanceConfig =
+            envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_INSTANCE_CONFIG)
+                .orElseGet(() -> asSecretManagerNamespace(hostEnvironment.getInstanceId()));
+
+        return secretManagerConfigServiceFactory.create(ServiceOptions.getDefaultProjectId(), pathToInstanceConfig);
+    }
+
+    @Provides @Singleton
+    static LockService lockService(@Named("instance") SecretManagerConfigService instanceConfigService) {
+        return instanceConfigService;
     }
 
     /**
@@ -49,19 +71,15 @@ public interface GcpModule {
      * @see "https://cloud.google.com/functions/docs/configuring/secrets"
      */
     @Provides @Named("Native") @Singleton
-    static ConfigService nativeConfigService(HostEnvironment hostEnvironment,
-                                             EnvVarsConfigService envVarsConfigService,
-                                             SecretManagerConfigServiceFactory secretManagerConfigServiceFactory) {
+    static ConfigService nativeConfigService(EnvVarsConfigService envVarsConfigService,
+                                             SecretManagerConfigServiceFactory secretManagerConfigServiceFactory,
+                                             @Named("instance") SecretManagerConfigService instanceConfigService) {
         String pathToSharedConfig =
             envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_SHARED_CONFIG)
                 .orElse(null);
 
-        String pathToInstanceConfig =
-            envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_INSTANCE_CONFIG)
-                .orElseGet(() -> asSecretManagerNamespace(hostEnvironment.getInstanceId()));
-
         return CompositeConfigService.builder()
-                .preferred(secretManagerConfigServiceFactory.create(ServiceOptions.getDefaultProjectId(), pathToInstanceConfig))
+                .preferred(instanceConfigService)
                 .fallback(secretManagerConfigServiceFactory.create(ServiceOptions.getDefaultProjectId(), pathToSharedConfig))
                 .build();
     }

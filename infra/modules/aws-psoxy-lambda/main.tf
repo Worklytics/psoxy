@@ -124,7 +124,8 @@ locals {
 
   write_statements = [{
     Action = [
-      "ssm:PutParameter"
+      "ssm:PutParameter",
+      "ssm:DeleteParameter" # delete locks, bad access tokens, etc
     ]
     Effect   = "Allow"
     Resource = local.function_write_arns
