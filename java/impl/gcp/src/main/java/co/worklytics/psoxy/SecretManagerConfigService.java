@@ -5,13 +5,11 @@ import co.worklytics.psoxy.gateway.LockService;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import com.google.cloud.secretmanager.v1.*;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.Descriptors;
 import com.google.protobuf.Duration;
 import com.google.protobuf.FieldMask;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
@@ -114,12 +112,12 @@ public class SecretManagerConfigService implements ConfigService, LockService {
     }
 
     static final java.time.Duration SECRET_TTL = java.time.Duration.ofDays(7);
-    static final int LOCK_TIMEOUT_SECONDS = 120;
+
     static final String LOCK_LABEL = "locked";
 
 
     @Override
-    public boolean acquire(String lockId) {
+    public boolean acquire(String lockId, java.time.Duration expires) {
         final SecretName lockSecretName = SecretName.of(projectId, this.namespace + lockId);
 
         try (SecretManagerServiceClient client = SecretManagerServiceClient.create()) {
@@ -141,7 +139,7 @@ public class SecretManagerConfigService implements ConfigService, LockService {
                 .map(Instant::parse)
                 .orElse(Instant.MIN);
 
-            if (lockedAt.isBefore(clock.instant().minusSeconds(LOCK_TIMEOUT_SECONDS))) {
+            if (lockedAt.isBefore(clock.instant().minusSeconds(expires.getSeconds()))) {
                 log.warning("Lock " + lockId + " is stale or unset; will try to acquire it");
 
                 Secret updated = client.updateSecret(UpdateSecretRequest.newBuilder()

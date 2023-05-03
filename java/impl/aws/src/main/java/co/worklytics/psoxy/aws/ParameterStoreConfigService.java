@@ -4,6 +4,7 @@ import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.LockService;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
 import lombok.Getter;
@@ -16,6 +17,7 @@ import software.amazon.awssdk.services.ssm.model.*;
 
 import javax.inject.Inject;
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -146,11 +148,10 @@ public class ParameterStoreConfigService implements ConfigService, LockService {
         return this.namespace + "lock_" + lockId;
     }
 
-    // make configurable? YAGNI, 2m should be plenty
-    final int LOCK_TTL_SECONDS = 120;
-
     @Override
-    public boolean acquire(@NonNull String lockId) {
+    public boolean acquire(@NonNull String lockId, @NonNull Duration expires) {
+        Preconditions.checkArgument(StringUtils.isNotBlank(lockId), "lockId must be non-blank");
+
         final String lockParameterName = lockParameterName(lockId);
         try {
             client.putParameter(PutParameterRequest.builder()
@@ -166,7 +167,8 @@ public class ParameterStoreConfigService implements ConfigService, LockService {
                     .name(lockParameterName)
                     .build()).parameter().lastModifiedDate();
 
-                if (lockedAt.isBefore(clock.instant().minusSeconds(LOCK_TTL_SECONDS))) {
+
+                if (lockedAt.isBefore(clock.instant().minusSeconds(expires.getSeconds()))) {
                     log.warning("Lock " + lockParameterName + " is stale, removing");
 
                     //q: add random delay here, in case multiple instances have been waiting to
@@ -187,6 +189,8 @@ public class ParameterStoreConfigService implements ConfigService, LockService {
 
     @Override
     public void release(@NonNull String lockId) {
+        Preconditions.checkArgument(StringUtils.isNotBlank(lockId), "lockId must be non-blank");
+
         String lockParameterName = lockParameterName(lockId);
         try {
             client.deleteParameter(DeleteParameterRequest.builder()
