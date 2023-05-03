@@ -184,7 +184,13 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         @VisibleForTesting
         protected final Duration MAX_PROACTIVE_TOKEN_REFRESH = Duration.ofMinutes(5L);
 
-        private static final int MAX_TOKEN_REFRESH_ATTEMPTS = 5;
+        // not high; better to fail fast and leave it to the caller (Worklytics) to retry than hold
+        // open a lambda waiting for a lock
+        private static final String TOKEN_REFRESH_LOCK_ID = "oauth_refresh_token";
+        private static final int MAX_TOKEN_REFRESH_ATTEMPTS = 3;
+        private static final long WAIT_AFTER_FAILED_LOCK_ATTEMPTS = 2000L;
+
+
 
         private AccessToken currentToken = null;
 
@@ -224,14 +230,13 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                 // only lock if we're using a shared token across processes
                 boolean lockNeeded = payloadBuilder.useSharedToken();
 
-                String lockId = "oauth_refresh_token";
-                boolean acquired = !lockNeeded || lockService.acquire(lockId);
+                boolean acquired = !lockNeeded || lockService.acquire(TOKEN_REFRESH_LOCK_ID, Duration.ofMinutes(2));
 
                 if (!acquired) {
                     //NOTE: check shared access token again, in case the instance which held the
                     // lock refreshed the token
 
-                    Uninterruptibles.sleepUninterruptibly(attempt * 2_000L, TimeUnit.MILLISECONDS);
+                    Uninterruptibles.sleepUninterruptibly(attempt * WAIT_AFTER_FAILED_LOCK_ATTEMPTS, TimeUnit.MILLISECONDS);
                     refreshAccessToken(attempt + 1);
                 }
 
@@ -240,7 +245,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                 storeSharedAccessTokenIfSupported(this.currentToken);
 
                 if (lockNeeded) {
-                    lockService.release(lockId);
+                    lockService.release(TOKEN_REFRESH_LOCK_ID);
                 }
             }
 
