@@ -4,6 +4,7 @@ import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.LockService;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import com.google.cloud.secretmanager.v1.*;
+import com.google.common.base.Preconditions;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Duration;
 import com.google.protobuf.FieldMask;
@@ -24,6 +25,11 @@ import java.util.logging.Level;
 
 @Log
 public class SecretManagerConfigService implements ConfigService, LockService {
+
+    //how long secrets created for locking purposes should live
+    static final java.time.Duration LOCK_SECRETS_TTL = java.time.Duration.ofDays(7);
+
+    static final String LOCK_LABEL = "locked";
 
     @Inject EnvVarsConfigService envVarsConfigService;
     @Inject Clock clock;
@@ -111,14 +117,13 @@ public class SecretManagerConfigService implements ConfigService, LockService {
         }
     }
 
-    static final java.time.Duration SECRET_TTL = java.time.Duration.ofDays(7);
-
-    static final String LOCK_LABEL = "locked";
-
-
     @Override
-    public boolean acquire(String lockId, java.time.Duration expires) {
+    public boolean acquire(@NonNull String lockId, @NonNull java.time.Duration expires) {
+        Preconditions.checkArgument(StringUtils.isNotBlank(lockId), "lockId cannot be blank");
+
         final SecretName lockSecretName = SecretName.of(projectId, this.namespace + lockId);
+
+        long secretTtl = Math.max(expires.getSeconds(), LOCK_SECRETS_TTL.getSeconds());
 
         try (SecretManagerServiceClient client = SecretManagerServiceClient.create()) {
             Secret lockSecret;
@@ -129,13 +134,13 @@ public class SecretManagerConfigService implements ConfigService, LockService {
                 Secret initial = Secret.newBuilder()
                     //ttl here, bc this Secret not managed by Terraform; so want it to clean itself
                     // up after some time
-                    .setTtl(Duration.newBuilder().setSeconds(SECRET_TTL.getSeconds()).build())
+                    .setTtl(Duration.newBuilder().setSeconds(secretTtl).build())
                     .build();
                 lockSecret = client.createSecret(lockSecretName.getProject(), lockSecretName.getSecret(),
                     initial);
             }
 
-            Instant lockedAt = Optional.ofNullable(lockSecret.getLabelsMap().get("locked"))
+            Instant lockedAt = Optional.ofNullable(lockSecret.getLabelsMap().get(LOCK_LABEL))
                 .map(Instant::parse)
                 .orElse(Instant.MIN);
 
@@ -144,7 +149,7 @@ public class SecretManagerConfigService implements ConfigService, LockService {
 
                 Secret updated = client.updateSecret(UpdateSecretRequest.newBuilder()
                     .setSecret(Secret.newBuilder(lockSecret)
-                        .setTtl(Duration.newBuilder().setSeconds(SECRET_TTL.getSeconds()).build())
+                        .setTtl(Duration.newBuilder().setSeconds(LOCK_SECRETS_TTL.getSeconds()).build())
                         .putLabels(LOCK_LABEL, Instant.now(clock).toString())
                         .build())
                     .setUpdateMask(FieldMask.newBuilder()
@@ -172,7 +177,7 @@ public class SecretManagerConfigService implements ConfigService, LockService {
             Secret lockSecret = client.getSecret(lockSecretName);
             Secret updated = client.updateSecret(UpdateSecretRequest.newBuilder()
                 .setSecret(Secret.newBuilder(lockSecret)
-                    .setTtl(Duration.newBuilder().setSeconds(SECRET_TTL.getSeconds()).build())
+                    .setTtl(Duration.newBuilder().setSeconds(LOCK_SECRETS_TTL.getSeconds()).build())
                     .removeLabels(LOCK_LABEL)
                     .build())
                 .setUpdateMask(FieldMask.newBuilder()

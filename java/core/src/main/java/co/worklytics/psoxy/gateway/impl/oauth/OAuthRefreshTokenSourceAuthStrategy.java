@@ -12,6 +12,7 @@ import com.google.auth.Credentials;
 import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.OAuth2CredentialsWithRefresh;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.util.concurrent.Uninterruptibles;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -26,6 +27,7 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -226,14 +228,11 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                 boolean acquired = !lockNeeded || lockService.acquire(lockId);
 
                 if (!acquired) {
-                    try {
-                        Thread.sleep(attempt * 2_000L);
-                        //NOTE: check shared access token again, in case the instance which held the
-                        // lock refreshed the token
-                        refreshAccessToken(attempt + 1);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
+                    //NOTE: check shared access token again, in case the instance which held the
+                    // lock refreshed the token
+
+                    Uninterruptibles.sleepUninterruptibly(attempt * 2_000L, TimeUnit.MILLISECONDS);
+                    refreshAccessToken(attempt + 1);
                 }
 
                 tokenResponse = exchangeRefreshTokenForAccessToken();
