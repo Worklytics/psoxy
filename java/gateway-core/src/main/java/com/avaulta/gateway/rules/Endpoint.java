@@ -12,7 +12,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@JsonPropertyOrder({"pathRegex", "allowedQueryParams", "transforms"})
+@JsonPropertyOrder({"pathRegex", "pathTemplate", "allowedQueryParams", "transforms"})
 @Builder(toBuilder = true)
 @With
 @AllArgsConstructor //for builder

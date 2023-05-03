@@ -32,6 +32,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 import static co.worklytics.test.TestModules.withMockEncryptionKey;
 import static org.junit.jupiter.api.Assertions.*;
@@ -49,9 +50,6 @@ class RESTApiSanitizerImplTest {
 
     @Inject
     protected UrlSafeTokenPseudonymEncoder pseudonymEncoder;
-
-    @Inject
-    protected JsonSchemaFilterUtils jsonSchemaFilterUtils;
 
     @Inject
     protected PseudonymizerImplFactory pseudonymizerImplFactory;
@@ -431,11 +429,68 @@ class RESTApiSanitizerImplTest {
             "/api/v1/users,^/api/v1/users$",
             "/api/v1/users/{id},^/api/v1/users/[^/]+$",
             "/api/v1/mail/{accountId}/messages/{id},^/api/v1/mail/[^/]+/messages/[^/]+$",
+            "/enterprise.info,^/enterprise\\.info$",
+            "/enterprise$something,^/enterprise\\$something$",
+            "/enterprise-info,^/enterprise\\-info$",
+            "/enterprise=info,^/enterprise\\=info$",
+            "/enterprise+info,^/enterprise\\+info$",
+            "/enterprise*info,^/enterprise\\*info$",
         }
     )
     @ParameterizedTest
     void effectiveRegex_templates(String template, String expectedPattern) {
         String effectiveRegex = sanitizer.effectiveRegex(Endpoint.builder().pathTemplate(template).build());
         assertEquals(expectedPattern, effectiveRegex);
+    }
+
+    @CsvSource(value = {
+        "GET,true",
+        "POST,false",
+        "PUT,false",
+    })
+    @ParameterizedTest
+    void allowedHttpMethods(String method, Boolean allowed) {
+        Endpoint endpoint = Endpoint.builder()
+                .allowedMethods(Collections.singleton("GET"))
+                .build();
+
+        assertEquals(allowed, sanitizer.allowsHttpMethod(method).test(endpoint));
+    }
+
+    @SneakyThrows
+    @CsvSource(value = {
+        "https://api.example.com/api/v1/users/1,true",
+        "https://api.example.com/api/v1/users,false",
+        "https://api.example.com/api/v1/users/1?foo=bar,true",
+    })
+    @ParameterizedTest
+    void hasPathTemplateMatchingUrl(String url, Boolean expected) {
+        Endpoint endpoint = Endpoint.builder()
+            .pathTemplate("/api/v1/users/{id}")
+            .build();
+
+        Map.Entry<Endpoint, Pattern> entry = Map.entry(endpoint, Pattern.compile(sanitizer.effectiveRegex(endpoint)));
+
+        assertEquals(expected, sanitizer.getHasPathTemplateMatchingUrl(new URL(url)).test(entry));
+    }
+
+    @SneakyThrows
+    @CsvSource(value = {
+        "https://api.example.com/api/v1/users/1,true",
+        "https://api.example.com/api/v1/users,false",
+        "https://api.example.com/api/v1/users/1?foo=bar,true",
+        "https://api.example.com/api/v1/users/1?foo=bar&bar=foo,false",
+        "https://api.example.com/api/v1/users/1?bar=foo,false",
+    })
+    @ParameterizedTest
+    void hasPathTemplateMatchingUrl_queryParams(String url, Boolean expected) {
+        Endpoint endpoint = Endpoint.builder()
+            .pathTemplate("/api/v1/users/{id}")
+            .allowedQueryParams(List.of("foo"))
+            .build();
+
+        Map.Entry<Endpoint, Pattern> entry = Map.entry(endpoint, Pattern.compile(sanitizer.effectiveRegex(endpoint)));
+
+        assertEquals(expected, sanitizer.getHasPathTemplateMatchingUrl(new URL(url)).test(entry));
     }
 }
