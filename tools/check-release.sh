@@ -28,3 +28,5 @@ git grep -l "$CURRENT_RELEASE_PATTERN" java/
 
 git grep -l "$CURRENT_RELEASE_PATTERN" infra/
 
+git grep -l "$CURRENT_RELEASE_PATTERN" tools/
+
