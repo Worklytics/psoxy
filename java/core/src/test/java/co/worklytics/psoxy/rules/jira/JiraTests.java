@@ -110,6 +110,25 @@ public class JiraTests extends JavaRulesTestBaseCase {
         );
     }
 
+    @Test
+    void issue_changelog() {
+        String jsonString = asJson(exampleDirectoryPath, "issue_changelog.json");
+
+        String endpoint = "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/fake/changelog?&startAt=50";
+
+        Collection<String> PII = Arrays.asList("608a9b555426330072f9867d", "fake@contoso.com", "Fake");
+        assertNotSanitized(jsonString, PII);
+
+        String sanitized = this.sanitize(endpoint, jsonString);
+
+        assertPseudonymized(sanitized, "608a9b555426330072f9867d");
+        assertPseudonymized(sanitized, "fake@contoso.com");
+        assertRedacted(sanitized,
+                "Fake", // display name
+                "https://..." //photo url placeholders
+        );
+    }
+
     @Override
     public Stream<InvocationExample> getExamples() {
         return Stream.of(InvocationExample.of("https://app.asana.com/api/1.0/users", "users.json"),

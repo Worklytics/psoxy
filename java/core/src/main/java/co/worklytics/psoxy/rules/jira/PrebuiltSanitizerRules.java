@@ -49,7 +49,7 @@ public class PrebuiltSanitizerRules {
             .build();
 
     static final Endpoint ISSUE_CHANGELOG = Endpoint.builder()
-            .pathRegex("^rest/api/3/issue/[^/]*/changelog?[?]?[^/]*")
+            .pathTemplate("/ex/jira/{cloudId}/rest/api/3/issue/{issueId}/changelog")
             .allowedQueryParams(commonAllowedQueryParameters)
             .transform(Transform.Redact.builder()
                     .jsonPath("$.values[*].author.self")

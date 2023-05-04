@@ -38,3 +38,9 @@ variable "jira_cloud_id" {
   default     = ""
   description = "Cloud id of the Jira Cloud to connect to (only required if using Jira connector)."
 }
+
+variable "example_jira_issue_id" {
+  type        = string
+  default     = ""
+  description = "Id of an issue for only to be used as part of example calls for Jira (only required if using Jira connector)."
+}
