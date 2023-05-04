@@ -1,0 +1,30 @@
+{
+  "startAt":0,
+  "maxResults":5000,
+  "total":1,
+  "worklogs":[
+    {
+      "author":{
+        "accountId":"{\"scope\":\"jira\",\"hash\":\"MDNGN1oBtOCXoEyNLYQUwQwWf4CcUCI79qOnXJeAy1c\"}",
+        "emailAddress":"{\"scope\":\"email\",\"domain\":\"contoso.com\",\"hash\":\"PDCw4eu8sUHIMnuovkFwUN8yG8H0M3GWBdC7hw0AOh0\"}",
+        "active":true,
+        "timeZone":"America/New_York",
+        "accountType":"atlassian"
+      },
+      "updateAuthor":{
+        "accountId":"{\"scope\":\"jira\",\"hash\":\"MDNGN1oBtOCXoEyNLYQUwQwWf4CcUCI79qOnXJeAy1c\"}",
+        "emailAddress":"{\"scope\":\"email\",\"domain\":\"contoso.com\",\"hash\":\"PDCw4eu8sUHIMnuovkFwUN8yG8H0M3GWBdC7hw0AOh0\"}",
+        "active":true,
+        "timeZone":"America/New_York",
+        "accountType":"atlassian"
+      },
+      "created":"2023-05-02T11:04:36.332-0400",
+      "updated":"2023-05-02T11:04:36.332-0400",
+      "started":"2023-05-02T03:04:25.520-0400",
+      "timeSpent":"1d",
+      "timeSpentSeconds":28800,
+      "id":"10000",
+      "issueId":"10706"
+    }
+  ]
+}

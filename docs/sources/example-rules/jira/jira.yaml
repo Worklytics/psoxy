@@ -1,0 +1,493 @@
+---
+endpoints:
+  - pathTemplate: "/ex/jira/{cloudId}/rest/api/3/group/bulk"
+    allowedQueryParams:
+      - "startAt"
+      - "maxResults"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..name"
+  - pathTemplate: "/ex/jira/{cloudId}/rest/api/3/group/member"
+    allowedQueryParams:
+      - "startAt"
+      - "maxResults"
+      - "groupId"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$.values[*].self"
+          - "$.values[*].avatarUrls"
+          - "$.values[*].displayName"
+          - "$.values[*].name"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.values[*].accountId"
+          - "$.values[*].emailAddress"
+        encoding: "JSON"
+  - pathTemplate: "/ex/jira/{cloudId}/rest/api/3/search"
+    allowedQueryParams:
+      - "startAt"
+      - "maxResults"
+      - "jql"
+      - "fields"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$.issues[*].self"
+          - "$.issues[*]..self"
+          - "$.issues[*]..description"
+          - "$.issues[*]..iconUrl"
+          - "$.issues[*]..name"
+          - "$.issues[*]..avatarUrls"
+          - "$.issues[*]..displayName"
+          - "$..displayName"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.issues[*]..accountId"
+          - "$.issues[*]..emailAddress"
+        encoding: "JSON"
+    responseSchema:
+      type: "object"
+      properties:
+        startAt:
+          type: "integer"
+        maxResults:
+          type: "integer"
+        total:
+          type: "integer"
+        issues:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              id:
+                type: "string"
+              fields:
+                type: "object"
+                properties:
+                  statuscategorychangedate:
+                    type: "string"
+                  issuetype:
+                    type: "object"
+                    properties:
+                      id:
+                        type: "string"
+                      subtask:
+                        type: "boolean"
+                      hierarchyLevel:
+                        type: "integer"
+                  parent:
+                    type: "object"
+                    properties:
+                      id:
+                        type: "string"
+                      fields:
+                        type: "object"
+                        properties:
+                          status:
+                            type: "object"
+                            properties:
+                              id:
+                                type: "string"
+                              name:
+                                type: "string"
+                              statusCategory:
+                                type: "object"
+                                properties:
+                                  id:
+                                    type: "string"
+                                  key:
+                                    type: "string"
+                                  colorName:
+                                    type: "string"
+                                  name:
+                                    type: "string"
+                          priority:
+                            type: "object"
+                            properties:
+                              id:
+                                type: "string"
+                              name:
+                                type: "string"
+                          issuetype:
+                            type: "object"
+                            properties:
+                              id:
+                                type: "string"
+                              subtask:
+                                type: "boolean"
+                              hierarchyLevel:
+                                type: "integer"
+                  timespent:
+                    type: "string"
+                  watches:
+                    type: "object"
+                    properties:
+                      isWatching:
+                        type: "boolean"
+                      watchCount:
+                        type: "integer"
+                      watchers:
+                        type: "array"
+                        items:
+                          type: "object"
+                          properties:
+                            accountId:
+                              type: "string"
+                            accountType:
+                              type: "string"
+                            emailAddress:
+                              type: "string"
+                            active:
+                              type: "boolean"
+                  attachment:
+                    type: "array"
+                    properties:
+                      id:
+                        type: "integer"
+                      author:
+                        type: "object"
+                        items:
+                          type: "object"
+                          properties:
+                            accountId:
+                              type: "string"
+                            accountType:
+                              type: "string"
+                            emailAddress:
+                              type: "string"
+                            active:
+                              type: "boolean"
+                      created:
+                        type: "string"
+                      size:
+                        type: "integer"
+                  sub-tasks:
+                    type: "array"
+                    properties:
+                      id:
+                        type: "string"
+                      type:
+                        type: "object"
+                        properties:
+                          id:
+                            type: "string"
+                          inward:
+                            type: "string"
+                          outward:
+                            type: "string"
+                      outwardIssue:
+                        type: "object"
+                        items:
+                          type: "object"
+                          properties:
+                            id:
+                              type: "string"
+                      inwardIssue:
+                        type: "object"
+                        items:
+                          type: "object"
+                          properties:
+                            id:
+                              type: "string"
+                  project:
+                    type: "object"
+                    properties:
+                      id:
+                        type: "string"
+                      projectCategory:
+                        type: "object"
+                        properties:
+                          id:
+                            type: "string"
+                      projectTypeKey:
+                        type: "string"
+                      simplified:
+                        type: "boolean"
+                      style:
+                        type: "string"
+                      insight:
+                        type: "object"
+                        properties:
+                          totalIssueCount:
+                            type: "integer"
+                          lastIssueUpdateTime:
+                            type: "string"
+                  comment:
+                    type: "array"
+                    properties:
+                      id:
+                        type: "string"
+                      author:
+                        type: "object"
+                        properties:
+                          accountId:
+                            type: "string"
+                          accountType:
+                            type: "string"
+                          emailAddress:
+                            type: "string"
+                          active:
+                            type: "boolean"
+                      updateAuthor:
+                        type: "object"
+                        properties:
+                          accountId:
+                            type: "string"
+                          accountType:
+                            type: "string"
+                          emailAddress:
+                            type: "string"
+                          active:
+                            type: "boolean"
+                      created:
+                        type: "string"
+                      updated:
+                        type: "string"
+                      visibility:
+                        type: "object"
+                        properties:
+                          type:
+                            type: "string"
+                          value:
+                            type: "string"
+                          identifier:
+                            type: "string"
+                  issuelinks:
+                    type: "array"
+                    properties:
+                      id:
+                        type: "string"
+                      type:
+                        type: "object"
+                        properties:
+                          id:
+                            type: "string"
+                          inward:
+                            type: "string"
+                          outward:
+                            type: "string"
+                      outwardIssue:
+                        type: "object"
+                        items:
+                          type: "object"
+                          properties:
+                            id:
+                              type: "string"
+                      inwardIssue:
+                        type: "object"
+                        items:
+                          type: "object"
+                          properties:
+                            id:
+                              type: "string"
+                  worklog:
+                    type: "array"
+                    properties:
+                      issueId:
+                        type: "string"
+                      id:
+                        type: "string"
+                      author:
+                        type: "object"
+                        properties:
+                          accountId:
+                            type: "string"
+                          accountType:
+                            type: "string"
+                          emailAddress:
+                            type: "string"
+                          active:
+                            type: "boolean"
+                      updateAuthor:
+                        type: "object"
+                        properties:
+                          accountId:
+                            type: "string"
+                          accountType:
+                            type: "string"
+                          emailAddress:
+                            type: "string"
+                          active:
+                            type: "boolean"
+                      updated:
+                        type: "string"
+                      visibility:
+                        type: "object"
+                        properties:
+                          type:
+                            type: "string"
+                          value:
+                            type: "string"
+                          identifier:
+                            type: "string"
+                      started:
+                        type: "string"
+                      timeSpent:
+                        type: "string"
+                      timeSpentSeconds:
+                        type: "integer"
+                  updated:
+                    type: "integer"
+                  timetracking:
+                    type: "object"
+                    properties:
+                      originalEstimate:
+                        type: "string"
+                      remainingEstimate:
+                        type: "string"
+                      timeSpent:
+                        type: "string"
+                      originalEstimateSeconds:
+                        type: "integer"
+                      remainingEstimateSeconds:
+                        type: "integer"
+                      timeSpentSeconds:
+                        type: "integer"
+                  created:
+                    type: "string"
+                  resolutiondate:
+                    type: "string"
+                  lastViewed:
+                    type: "string"
+                  assignee:
+                    type: "object"
+                    properties:
+                      accountId:
+                        type: "string"
+                      accountType:
+                        type: "string"
+                      emailAddress:
+                        type: "string"
+                      active:
+                        type: "boolean"
+                  status:
+                    type: "object"
+                    properties:
+                      id:
+                        type: "string"
+                      name:
+                        type: "string"
+                      statusCategory:
+                        type: "object"
+                        properties:
+                          id:
+                            type: "string"
+                          key:
+                            type: "string"
+                          colorName:
+                            type: "string"
+                          name:
+                            type: "string"
+                  creator:
+                    type: "object"
+                    properties:
+                      accountId:
+                        type: "string"
+                      accountType:
+                        type: "string"
+                      emailAddress:
+                        type: "string"
+                      active:
+                        type: "boolean"
+                  reporter:
+                    type: "object"
+                    properties:
+                      accountId:
+                        type: "string"
+                      accountType:
+                        type: "string"
+                      emailAddress:
+                        type: "string"
+                      active:
+                        type: "boolean"
+                  aggregateprogress:
+                    type: "object"
+                    properties:
+                      progress:
+                        type: "integer"
+                      total:
+                        type: "integer"
+                  duedate:
+                    type: "string"
+                  progress:
+                    type: "object"
+                    properties:
+                      progress:
+                        type: "integer"
+                      total:
+                        type: "integer"
+                  votes:
+                    type: "object"
+                    properties:
+                      votes:
+                        type: "integer"
+                      hasVoted:
+                        type: "boolean"
+  - pathTemplate: "/ex/jira/{cloudId}/rest/api/3/issue/{issueId}/changelog"
+    allowedQueryParams:
+      - "startAt"
+      - "maxResults"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$.values[*]..self"
+          - "$.values[*]..avatarUrls"
+          - "$.values[*]..displayName"
+          - "$.values[*].items[*].from"
+          - "$.values[*].items[*].to"
+          - "$.values[*].items[*].fromString"
+          - "$.values[*].items[*].toString"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.values[*]..accountId"
+          - "$.values[*]..emailAddress"
+        encoding: "JSON"
+  - pathTemplate: "/ex/jira/{cloudId}/rest/api/3/issue/{issueId}/comment"
+    allowedQueryParams:
+      - "startAt"
+      - "maxResults"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$.comments[*]..self"
+          - "$.comments[*]..avatarUrls"
+          - "$.comments[*]..displayName"
+          - "$.comments[*]..text"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.comments[*]..accountId"
+          - "$.comments[*].body..id"
+          - "$.comments[*]..emailAddress"
+        encoding: "JSON"
+  - pathTemplate: "/ex/jira/{cloudId}/rest/api/3/issue/{issueId}/worklog"
+    allowedQueryParams:
+      - "startAt"
+      - "maxResults"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$.worklogs[*]..self"
+          - "$.worklogs[*]..avatarUrls"
+          - "$.worklogs[*]..displayName"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.worklogs[*]..accountId"
+          - "$.worklogs[*]..emailAddress"
+        encoding: "JSON"
+  - pathTemplate: "/ex/jira/{cloudId}/rest/api/3/users"
+    allowedQueryParams:
+      - "startAt"
+      - "maxResults"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..self"
+          - "$..avatarUrls"
+          - "$..displayName"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..accountId"
+          - "$..emailAddress"
+        encoding: "JSON"

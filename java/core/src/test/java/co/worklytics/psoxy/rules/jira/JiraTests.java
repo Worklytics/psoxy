@@ -62,7 +62,7 @@ public class JiraTests extends JavaRulesTestBaseCase {
         String jsonString = asJson(exampleDirectoryPath, "groups.json");
 
         //no single-user case
-        assertUrlBlocked("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/group/bulk?groupId=5b10ac8d82e05b22cc7d4ef5'");
+        assertUrlBlocked("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/group/bulk?groupId=5b10ac8d82e05b22cc7d4ef5");
 
         String endpoint = "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/group/bulk";
 
@@ -169,22 +169,15 @@ public class JiraTests extends JavaRulesTestBaseCase {
 
     @Override
     public Stream<InvocationExample> getExamples() {
-        return Stream.of(InvocationExample.of("https://app.asana.com/api/1.0/users", "users.json"),
+        return Stream.of(InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/users?startAt=0&maxResults=25", "users.json"),
 
-                InvocationExample.of("https://app.asana.com/api/1.0/workspaces/123/teams", "teams.json"),
+                InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/group/bulk", "groups.json"),
+                InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/group/member?groupId=5b10ac8d82e05b22cc7d4ef5", "group_member.json"),
 
-                InvocationExample.of("https://app.asana.com/api/1.0/teams/123123/projects", "projects.json"),
-
-                InvocationExample.of("https://app.asana.com/api/1.0/tasks?project=123123", "tasks.json"),
-                InvocationExample.of("https://app.asana.com/api/1.0/tasks/123123?opt_fields=fake", "task.json"),
-                InvocationExample.of("https://app.asana.com/api/1.0/tasks/123123", "task.json"),
-
-                InvocationExample.of("https://app.asana.com/api/1.0/tasks/123123/stories", "stories.json"),
-                InvocationExample.of("https://app.asana.com/api/1.0/tasks/123123/stories?opt_fields=fake", "stories.json"),
-
-                InvocationExample.of("https://app.asana.com/api/1.0/tasks/123123/subtasks", "tasks.json"),
-                InvocationExample.of("https://app.asana.com/api/1.0/tasks/123123/subtasks?opt_fields=fake", "tasks.json"),
-
-                InvocationExample.of("https://app.asana.com/api/1.0/workspaces/123/tasks/search?modified_at.after=fake", "tasks.json"));
+                InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/search?jql=something&startAt=50", "issues_by_jql.json"),
+                InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/fake/changelog?&startAt=50", "issue_changelog.json"),
+                InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/fake/comment?&startAt=50", "issue_comment.json"),
+                InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/fake/worklog?&startAt=50", "issue_worklog.json")
+                );
     }
 }
