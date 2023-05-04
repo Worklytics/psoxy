@@ -21,6 +21,7 @@
   "dependencies": {
     "@aws-sdk/client-cloudwatch-logs": "^3.199.0",
     "@aws-sdk/client-s3": "^3.199.0",
+    "@aws-sdk/credential-providers": "^3.316.0",
     "@google-cloud/logging": "^10.4.0",
     "@google-cloud/storage": "^6.9.2",
     "aws4": "^1.11.0",

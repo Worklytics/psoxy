@@ -1,7 +1,7 @@
 ---
 endpoints:
-  - pathRegex: "^/admin/directory/v1/customer/[^/]*/domains.*"
-  - pathRegex: "^/admin/directory/v1/users\\?.*$"
+  - pathTemplate: "/admin/directory/v1/customer/{customerId}/domains"
+  - pathTemplate: "/admin/directory/v1/users"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -32,7 +32,7 @@ endpoints:
           - "$.users[*].id"
         includeReversible: true
         encoding: "URL_SAFE_TOKEN"
-  - pathRegex: "^/admin/directory/v1/users/[^/]*$"
+  - pathTemplate: "/admin/directory/v1/users/{accountId}"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -63,7 +63,7 @@ endpoints:
           - "$.id"
         includeReversible: true
         encoding: "URL_SAFE_TOKEN"
-  - pathRegex: "^/admin/directory/v1/groups(\\?)?[^/]*$"
+  - pathTemplate: "/admin/directory/v1/groups"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -75,7 +75,7 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$..description"
-  - pathRegex: "^/admin/directory/v1/groups/[^/]*$"
+  - pathTemplate: "/admin/directory/v1/groups/{groupId}"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -87,7 +87,7 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$..description"
-  - pathRegex: "^/admin/directory/v1/groups/[^/]*/members[^/]*$"
+  - pathTemplate: "/admin/directory/v1/groups/{groupId}/members"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -99,22 +99,22 @@ endpoints:
         jsonPaths:
           - "$.members[*].id"
         encoding: "JSON"
-  - pathRegex: "^/admin/directory/v1/customer/[^/]*/orgunits\\?.*"
+  - pathTemplate: "/admin/directory/v1/customer/{customerId}/orgunits"
     transforms:
       - !<redact>
         jsonPaths:
           - "$..description"
-  - pathRegex: "^/admin/directory/v1/customer/[^/]*/orgunits/[^/]*"
+  - pathTemplate: "/admin/directory/v1/customer/{customerId}/orgunits/{orgUnitPath}"
     transforms:
       - !<redact>
         jsonPaths:
           - "$..description"
-  - pathRegex: "^/admin/directory/v1/customer/[^/]*/roles[^/]*"
+  - pathTemplate: "/admin/directory/v1/customer/{customerId}/roles"
     transforms:
       - !<redact>
         jsonPaths:
           - "$..roleDescription"
-  - pathRegex: "^/admin/directory/v1/customer/[^/]*/roles/[^/]*"
+  - pathTemplate: "/admin/directory/v1/customer/{customerId}/roles/{roleId}"
     transforms:
       - !<redact>
         jsonPaths:

@@ -7,10 +7,46 @@ const logsSample = require('./cloudwatch-log-events-sample.json').events;
 
 const LAMBDA_URL = 'https://foo.lambda-url.us-east-1.on.aws/';
 const API_GATEWAY_URL = 'https://foo.execute-api.us-east-1.amazonaws.com';
+ // Fake assume role and AWS request signing
+ const options = {
+  url: LAMBDA_URL,
+  role: 'arn:aws:iam::[accountId]:role/[roleName]',
+  method: 'GET',
+};
+const credentials = {
+  accessKeyId: 'foo',
+  secretAccessKey: 'bar',
+  sessionToken: 'baz',
+};
+const signedRequest = {
+  headers: {
+    Host: 'aws-host',
+    'X-Amz-Security-Token': 'token',
+    'X-Amz-Date': '20221014T172512Z',
+    Authorization: 'AWS4-HMAC-SHA256 ...',
+  },
+  host: 'aws-host',
+  path: '/foo',
+  region: 'us-east-1',
+  service: 'lambda',
+};
 
 test.beforeEach(async (t) => {
   t.context.utils = await td.replaceEsm('../lib/utils.js');
   t.context.subject = (await import('../lib/aws.js')).default;
+
+  // mock credentials
+  td.when(t.context.utils.getAWSCredentials(td.matchers.contains(options.role)))
+    .thenResolve(credentials);
+
+  // mock request signing using credentials
+  td.when(
+    t.context.utils.signAWSRequestURL(
+      td.matchers.isA(URL),
+      td.matchers.contains('GET'),
+      credentials
+    )
+  ).thenReturn(signedRequest);
 });
 
 test.afterEach(() => td.reset());
@@ -64,49 +100,28 @@ test('Psoxy Logs: parse log events command result', (t) => {
   t.not(result[warningEventIndex].message.startsWith(warningPrefix));
 });
 
-test('Psoxy call: works as expected', async (t) => {
+test.serial('Psoxy call: works as expected', async (t) => {
   const aws = t.context.subject;
   const utils = t.context.utils;
 
-  // Fake assume role and AWS request signing
-  const options = {
-    url: LAMBDA_URL,
-    role: 'arn:aws:iam::[accountId]:role/[roleName]',
-    method: 'GET',
-  };
-  const credentials = {
-    Credentials: {
-      AccessKeyId: 'foo',
-      SecretAccessKey: 'bar',
-      SessionToken: 'baz',
-    },
-  };
-  const signedRequest = {
-    headers: {
-      Host: 'aws-host',
-      'X-Amz-Security-Token': 'token',
-      'X-Amz-Date': '20221014T172512Z',
-      Authorization: 'AWS4-HMAC-SHA256 ...',
-    },
-    host: 'aws-host',
-    path: '/foo',
-    region: 'us-east-1',
-    service: 'lambda',
-  };
-
-  // notice that `executeCommand` will return credentials wrapped and as
-  // String; in contrast to `getAWSCredentials` that will parse and unwrap
-  td.when(utils.executeCommand(td.matchers.contains('aws sts assume-role')))
-    .thenReturn(JSON.stringify(credentials));
-
-  // sign request using credentials
+  // Valid URL
+  options.url += '/api/path';
   td.when(
-    utils.signAWSRequestURL(
+    utils.request(
       td.matchers.isA(URL),
       td.matchers.contains('GET'),
-      credentials.Credentials
+      td.matchers.contains(signedRequest.headers)
     )
-  ).thenReturn(signedRequest);
+  ).thenReturn({ status: httpCodes.HTTP_STATUS_OK });
+
+  const result = await aws.call(options);
+
+  t.is(result.status, httpCodes.HTTP_STATUS_OK);
+});
+
+test.serial('Psoxy call: pathless URL results 500', async (t) => {
+  const aws = t.context.subject;
+  const utils = t.context.utils;
 
   // Pathless URL: result should contain error
   td.when(
@@ -122,19 +137,6 @@ test('Psoxy call: works as expected', async (t) => {
     }
   });
 
-  let result = await aws.call(options);
+  const result = await aws.call(options);
   t.is(result.headers['x-psoxy-error'], 'BLOCKED_BY_RULES');
-
-  // Valid URL
-  options.url += '/api/path';
-  td.when(
-    utils.request(
-      td.matchers.isA(URL),
-      td.matchers.contains('GET'),
-      td.matchers.contains(signedRequest.headers)
-    )
-  ).thenReturn({ status: httpCodes.HTTP_STATUS_OK });
-
-  result = await aws.call(options);
-  t.is(result.status, httpCodes.HTTP_STATUS_OK);
 });

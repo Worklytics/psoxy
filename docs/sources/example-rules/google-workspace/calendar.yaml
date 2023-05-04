@@ -1,6 +1,6 @@
 ---
 endpoints:
-  - pathRegex: "^/calendar/v3/calendars/[^/]*?$"
+  - pathTemplate: "/calendar/v3/calendars/{accountId}"
     transforms:
       - !<redact>
         jsonPaths:
@@ -9,7 +9,7 @@ endpoints:
         jsonPaths:
           - "$.id"
         encoding: "JSON"
-  - pathRegex: "^/calendar/v3/calendars/[^/]*?/events[^/]*"
+  - pathTemplate: "/calendar/v3/calendars/{accountId}/events"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -37,7 +37,7 @@ endpoints:
           - "$.items[*].conferenceData.entryPoints[*].uri"
         redactions:
           - "(?i)pwd=[^&]*"
-  - pathRegex: "^/calendar/v3/calendars/[^/]*?/events/.*"
+  - pathTemplate: "/calendar/v3/calendars/{accountId}/events/{eventId}"
     transforms:
       - !<redact>
         jsonPaths:
@@ -64,8 +64,8 @@ endpoints:
         jsonPaths:
           - "$..email"
         encoding: "JSON"
-  - pathRegex: "^/calendar/v3/users/[^/]*?/settings.*"
-  - pathRegex: "^/calendar/v3/users/[^/]*?/calendarList[^/]*$"
+  - pathTemplate: "/calendar/v3/users/{accountId}/settings"
+  - pathTemplate: "/calendar/v3/users/{accountId}/calendarList"
     transforms:
       - !<filterTokenByRegex>
         jsonPaths:

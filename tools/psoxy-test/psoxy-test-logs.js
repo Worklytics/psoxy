@@ -21,7 +21,7 @@ async function getAWSLogs(options = {}, logger) {
   if (options.role) {
     logger.verbose(`Assuming role ${options.role}`);
   }
-  const client = aws.createCloudWatchClient(options.role, options.region);
+  const client = await aws.createCloudWatchClient(options.role, options.region);
 
   logger.verbose(`Getting logs for ${options.logGroupName}`);
 

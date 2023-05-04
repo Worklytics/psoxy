@@ -29,9 +29,8 @@ locals {
   rules_plain = file(var.file_path)
 
   # compress if necessary; but otherwise leave plain so human readable
-  rules_compressed = base64gzip(local.rules_plain)
-  use_compressed   = length(local.rules_plain) > local.ssm_advanced_size_limit
-  param_value      = local.use_compressed ? local.rules_compressed : local.rules_plain
+  use_compressed = length(local.rules_plain) > local.ssm_advanced_size_limit
+  param_value    = local.use_compressed ? base64gzip(local.rules_plain) : local.rules_plain
 }
 
 resource "aws_ssm_parameter" "rules" {
@@ -42,7 +41,7 @@ resource "aws_ssm_parameter" "rules" {
 
   lifecycle {
     precondition {
-      condition     = length(local.param_value) > local.ssm_advanced_size_limit
+      condition     = length(local.param_value) < local.ssm_advanced_size_limit
       error_message = "Rules on file ${var.file_path} are too big to store"
     }
   }

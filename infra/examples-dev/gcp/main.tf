@@ -1,10 +1,5 @@
 terraform {
   required_providers {
-    # for API connections to Microsoft 365 (comment this out if unused)
-    azuread = {
-      version = "~> 2.3"
-    }
-
     # for the API connections to Google Workspace
     google = {
       version = ">= 3.74, <= 5.0"
@@ -28,17 +23,13 @@ terraform {
   #  }
 }
 
-provider "azuread" {
-  tenant_id = var.msft_tenant_id
-}
-
 provider "google" {
   impersonate_service_account = var.gcp_terraform_sa_account_email
 }
 
 module "psoxy" {
   source = "../../modular-examples/gcp"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/gcp?ref=v0.4.20"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/gcp?ref=v0.4.21"
 
   gcp_project_id                 = var.gcp_project_id
   environment_id                 = var.environment_id
@@ -63,6 +54,10 @@ module "psoxy" {
   lookup_tables                  = var.lookup_tables
 }
 
+output "path_to_deployment_jar" {
+  description = "Path to the package to deploy (JAR)."
+  value       = module.psoxy.path_to_deployment_jar
+}
 
 output "todos_1" {
   description = "List of todo steps to complete 1st, in markdown format."

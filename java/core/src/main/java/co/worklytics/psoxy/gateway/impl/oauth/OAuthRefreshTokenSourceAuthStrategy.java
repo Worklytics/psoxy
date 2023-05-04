@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.gateway.impl.oauth;
 
 import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.LockService;
 import co.worklytics.psoxy.gateway.RequiresConfiguration;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
 import co.worklytics.psoxy.utils.RandomNumberGenerator;
@@ -11,6 +12,7 @@ import com.google.auth.Credentials;
 import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.OAuth2CredentialsWithRefresh;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.util.concurrent.Uninterruptibles;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -25,6 +27,7 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -175,9 +178,19 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         Clock clock;
         @Inject //injected, so can be mocked for tests
         RandomNumberGenerator randomNumberGenerator;
+        @Inject
+        LockService lockService;
 
         @VisibleForTesting
         protected final Duration MAX_PROACTIVE_TOKEN_REFRESH = Duration.ofMinutes(5L);
+
+        // not high; better to fail fast and leave it to the caller (Worklytics) to retry than hold
+        // open a lambda waiting for a lock
+        private static final String TOKEN_REFRESH_LOCK_ID = "oauth_refresh_token";
+        private static final int MAX_TOKEN_REFRESH_ATTEMPTS = 3;
+        private static final long WAIT_AFTER_FAILED_LOCK_ATTEMPTS = 2000L;
+
+
 
         private AccessToken currentToken = null;
 
@@ -190,6 +203,14 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
          */
         @Override
         public AccessToken refreshAccessToken() throws IOException {
+            return refreshAccessToken(0);
+        }
+
+        private AccessToken refreshAccessToken(int attempt) throws IOException {
+            if (attempt == MAX_TOKEN_REFRESH_ATTEMPTS) {
+                throw new RuntimeException("Failed to refresh token after " + attempt + " attempts");
+            }
+
             CanonicalOAuthAccessTokenResponseDto tokenResponse;
 
             Optional<AccessToken> sharedAccessToken = getSharedAccessTokenIfSupported();
@@ -205,9 +226,27 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
             }
 
             if (shouldRefresh(this.currentToken, clock.instant())) {
+
+                // only lock if we're using a shared token across processes
+                boolean lockNeeded = payloadBuilder.useSharedToken();
+
+                boolean acquired = !lockNeeded || lockService.acquire(TOKEN_REFRESH_LOCK_ID, Duration.ofMinutes(2));
+
+                if (!acquired) {
+                    //NOTE: check shared access token again, in case the instance which held the
+                    // lock refreshed the token
+
+                    Uninterruptibles.sleepUninterruptibly(attempt * WAIT_AFTER_FAILED_LOCK_ATTEMPTS, TimeUnit.MILLISECONDS);
+                    refreshAccessToken(attempt + 1);
+                }
+
                 tokenResponse = exchangeRefreshTokenForAccessToken();
                 this.currentToken = asAccessToken(tokenResponse);
                 storeSharedAccessTokenIfSupported(this.currentToken);
+
+                if (lockNeeded) {
+                    lockService.release(TOKEN_REFRESH_LOCK_ID);
+                }
             }
 
             return this.currentToken;

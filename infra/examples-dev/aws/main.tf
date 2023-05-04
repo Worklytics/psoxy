@@ -57,7 +57,7 @@ provider "azuread" {
 
 module "psoxy" {
   source = "../../modular-examples/aws"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-msft-365?ref=v0.4.20"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws?ref=v0.4.21"
 
   aws_account_id                 = var.aws_account_id
   aws_assume_role_arn            = var.aws_assume_role_arn # role that can test the instances (lambdas)
@@ -89,6 +89,11 @@ module "psoxy" {
 # if you generated these, you may want them to import back into your data warehouse
 output "lookup_tables" {
   value = module.psoxy.lookup_tables
+}
+
+output "path_to_deployment_jar" {
+  description = "Path to the package to deploy (JAR)."
+  value       = module.psoxy.path_to_deployment_jar
 }
 
 output "todos_1" {
