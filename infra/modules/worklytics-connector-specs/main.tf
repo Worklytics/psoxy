@@ -525,8 +525,9 @@ EOT
       reserved_concurrent_executions : null
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
-        "/rest/api/3/users/search",
-        "/rest/api/3/search?maxResults%3D25",
+        "/ex/jira/${jira_cloud_id}/rest/api/3/users",
+        "/ex/jira/${jira_cloud_id}/rest/api/3/group/bulk",
+        "/ex/jira/${jira_cloud_id}/rest/api/3/search?maxResults%3D25",
       ],
       external_token_todo : <<EOT
 Jira OAuth 2.0 (3LO) through Psoxy requires a Jira Cloud account with following classical scopes:

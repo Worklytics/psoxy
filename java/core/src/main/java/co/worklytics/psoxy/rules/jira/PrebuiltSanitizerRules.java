@@ -93,7 +93,7 @@ public class PrebuiltSanitizerRules {
             .build();
 
     static final Endpoint USERS = Endpoint.builder()
-            .pathRegex("^rest/api/3/user?[?]?[^/]*")
+            .pathTemplate("/ex/jira/{cloudId}/rest/api/3/users")
             .allowedQueryParams(commonAllowedQueryParameters)
             .transform(Transform.Redact.builder()
                     .jsonPath("$..self")
@@ -107,7 +107,7 @@ public class PrebuiltSanitizerRules {
             .build();
 
     static final Endpoint GROUP_BULK = Endpoint.builder()
-            .pathRegex("^rest/api/3/group/bulk?[?]?[^/]*")
+            .pathTemplate("/ex/jira/{cloudId}/rest/api/3/group/bulk")
             .allowedQueryParams(commonAllowedQueryParameters)
             .transform(Transform.Redact.builder()
                     .jsonPath("$..name")
@@ -115,12 +115,13 @@ public class PrebuiltSanitizerRules {
             .build();
 
     static final Endpoint GROUP_MEMBER = Endpoint.builder()
-            .pathRegex("^rest/api/3/group/member?[?]?[^/]*")
+            .pathTemplate("/ex/jira/{cloudId}/rest/api/3/group/member")
             .allowedQueryParams(groupMemberAllowedQueryParameters)
             .transform(Transform.Redact.builder()
                     .jsonPath("$.values[*].self")
                     .jsonPath("$.values[*].avatarUrls")
                     .jsonPath("$.values[*].displayName")
+                    .jsonPath("$.values[*].name")
                     .build())
             .transform(Transform.Pseudonymize.builder()
                     .jsonPath("$.values[*].accountId")
@@ -130,6 +131,7 @@ public class PrebuiltSanitizerRules {
 
     public static final RESTRules JIRA = Rules2.builder()
             .endpoint(GROUP_BULK)
+            .endpoint(GROUP_MEMBER)
             .endpoint(ISSUES)
             .endpoint(ISSUE_CHANGELOG)
             .endpoint(ISSUE_COMMENT)

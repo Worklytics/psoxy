@@ -20,7 +20,7 @@
     },
     {
       "self": "https://your-domain.atlassian.net/rest/api/3/user?accountId=5b10a0effa615349cb016cd8",
-      "name": "",
+      "name": "some name",
       "key": "",
       "accountId": "5b10a0effa615349cb016cd8",
       "emailAddress": "will@example.com",
