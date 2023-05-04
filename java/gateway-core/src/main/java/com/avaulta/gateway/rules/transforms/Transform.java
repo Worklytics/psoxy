@@ -99,6 +99,33 @@ public abstract class Transform {
         }
     }
 
+    @NoArgsConstructor //for jackson
+    @SuperBuilder(toBuilder = true)
+    @Getter
+    @ToString
+    @EqualsAndHashCode(callSuper = true)
+    public static class RedactExceptSubstringsMatchingRegexes extends Transform {
+
+        /**
+         * redact content unless matches at least one of these regexes
+         *
+         * if multiple match, content matched by the first exception regex is preserved
+         */
+        @Singular
+        List<String> exceptions;
+
+        public RedactExceptSubstringsMatchingRegexes clone() {
+            return this.toBuilder()
+                .clearJsonPaths()
+                .jsonPaths(new ArrayList<>(this.jsonPaths))
+                .clearFields()
+                .fields(new ArrayList<>(this.fields))
+                .clearExceptions()
+                .exceptions(new ArrayList<>(this.exceptions))
+                .build();
+        }
+    }
+
     /**
      * transform to tokenize String field by delimiter (if provided), then return any matches against
      * filter regex

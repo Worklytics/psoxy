@@ -222,6 +222,8 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
             f = this::pseudonymizeEmailHeaderToJson;
         } else if (transform instanceof Transform.RedactRegexMatches) {
             f = getRedactRegexMatches((Transform.RedactRegexMatches) transform);
+        } else if (transform instanceof Transform.RedactExceptSubstringsMatchingRegexes) {
+            f = getRedactExceptSubstringsMatchingRegexes((Transform.RedactExceptSubstringsMatchingRegexes) transform);
         } else if (transform instanceof Transform.FilterTokenByRegex) {
             f = getFilterTokenByRegex((Transform.FilterTokenByRegex) transform);
         } else if (transform instanceof Transform.Tokenize) {
@@ -251,6 +253,29 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
                return result;
            }
        };
+    }
+
+    MapFunction getRedactExceptSubstringsMatchingRegexes(Transform.RedactExceptSubstringsMatchingRegexes transform) {
+        List<Pattern> patterns = transform.getExceptions().stream()
+            .map(p -> ".*(" + p + ").*") //wrap in .* to match anywhere in the string
+            .map(Pattern::compile).collect(Collectors.toList());
+        return (s, jsonConfiguration) -> {
+            if (!(s instanceof String)) {
+                if (s != null) {
+                    log.warning("value matched by " + transform + " not of type String");
+                }
+                return null;
+            } else if (StringUtils.isBlank((String) s)) {
+                return s;
+            } else {
+                return patterns.stream()
+                    .map( p -> p.matcher((String) s))
+                    .filter(Matcher::matches)
+                    .findFirst()
+                    .map(m -> m.group(1))
+                    .orElse("");
+            }
+        };
     }
 
     MapFunction getFilterTokenByRegex(Transform.FilterTokenByRegex transform) {
