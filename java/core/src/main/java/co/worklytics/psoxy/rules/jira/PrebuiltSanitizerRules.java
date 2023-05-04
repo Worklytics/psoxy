@@ -83,16 +83,16 @@ public class PrebuiltSanitizerRules {
             .build();
 
     static final Endpoint ISSUE_WORKLOG = Endpoint.builder()
-            .pathRegex("^rest/api/3/issue/[^/]*/worklog?[?]?[^/]*")
+            .pathTemplate("/ex/jira/{cloudId}/rest/api/3/issue/{issueId}/worklog")
             .allowedQueryParams(commonAllowedQueryParameters)
             .transform(Transform.Redact.builder()
-                    .jsonPath("$.worklogs[*].(author|updateAuthor).self")
-                    .jsonPath("$.worklogs[*].(author|updateAuthor).avatarUrls")
-                    .jsonPath("$.worklogs[*].(author|updateAuthor).displayName")
+                    .jsonPath("$.worklogs[*]..self")
+                    .jsonPath("$.worklogs[*]..avatarUrls")
+                    .jsonPath("$.worklogs[*]..displayName")
                     .build())
             .transform(Transform.Pseudonymize.builder()
-                    .jsonPath("$.worklogs[*].(author|updateAuthor).accountId")
-                    .jsonPath("$.worklogs[*].(author|updateAuthor).emailAddress")
+                    .jsonPath("$.worklogs[*]..accountId")
+                    .jsonPath("$.worklogs[*]..emailAddress")
                     .build())
             .build();
 
