@@ -15,6 +15,7 @@ import java.util.List;
 @JsonSubTypes({
     @JsonSubTypes.Type(value = Transform.Redact.class, name = "redact"),
     @JsonSubTypes.Type(value = Transform.RedactRegexMatches.class, name = "redactRegexMatches"),
+    @JsonSubTypes.Type(value = Transform.RedactExceptSubstringsMatchingRegexes.class, name = "redactExceptSubstringsMatchingRegexes"),
     @JsonSubTypes.Type(value = Transform.Pseudonymize.class, name = "pseudonymize"),
     @JsonSubTypes.Type(value = Transform.PseudonymizeEmailHeader.class, name = "pseudonymizeEmailHeader"),
     @JsonSubTypes.Type(value = Transform.FilterTokenByRegex.class, name = "filterTokenByRegex"),
