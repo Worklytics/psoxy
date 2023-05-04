@@ -2,12 +2,9 @@ package co.worklytics.psoxy.rules.jira;
 
 import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
 import co.worklytics.psoxy.rules.RESTRules;
-import co.worklytics.psoxy.rules.jira.PrebuiltSanitizerRules;
 import lombok.Getter;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -94,6 +91,24 @@ public class JiraTests extends JavaRulesTestBaseCase {
         );
     }
 
+    @Test
+    void issues_by_jql() {
+        String jsonString = asJson(exampleDirectoryPath, "issues_by_jql.json");
+
+        String endpoint = "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/search?jql=something&startAt=50";
+
+        Collection<String> PII = Arrays.asList("608a9b555426330072f9867d", "fake@contoso.com", "Fake");
+        assertNotSanitized(jsonString, PII);
+
+        String sanitized = this.sanitize(endpoint, jsonString);
+
+        assertPseudonymized(sanitized, "608a9b555426330072f9867d");
+        assertPseudonymized(sanitized, "fake@contoso.com");
+        assertRedacted(sanitized,
+                "Fake", // display name
+                "https://..." //photo url placeholders
+        );
+    }
 
     @Override
     public Stream<InvocationExample> getExamples() {
