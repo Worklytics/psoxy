@@ -608,27 +608,3 @@ locals {
     for k, v in local.bulk_connectors : k => v if contains(var.enabled_connectors, k)
   }
 }
-
-output "enabled_google_workspace_connectors" {
-  value = local.enabled_google_workspace_connectors
-}
-
-output "enabled_msft_365_connectors" {
-  value = local.enabled_msft_365_connectors
-}
-
-output "enabled_oauth_long_access_connectors" {
-  value = local.enabled_oauth_long_access_connectors
-}
-
-output "enabled_oauth_long_access_connectors_todos" {
-  value = local.enabled_oauth_long_access_connectors_todos
-}
-
-output "enabled_oauth_secrets_to_create" {
-  value = local.enabled_oauth_secrets_to_create
-}
-
-output "enabled_bulk_connectors" {
-  value = local.enabled_bulk_connectors
-}
