@@ -508,7 +508,7 @@ EOT
     jira = {
       source_kind : "jira"
       worklytics_connector_id : "jira-oauth-psoxy"
-      target_host : "api.atlassian.com/ex/jira/${var.jira_cloud_id}"
+      target_host : "api.atlassian.com"
       source_auth_strategy : "oauth2_refresh_token"
       display_name : "Jira OAuth 2.0 (3LO)"
       identifier_scope_id : "jira"

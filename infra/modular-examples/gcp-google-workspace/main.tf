@@ -214,7 +214,7 @@ module "connector-long-auth-function" {
 
   project_id                    = var.gcp_project_id
   source_kind                   = each.value.source_kind
-  instance_id                   = "psoxy-${each.key}"
+  instance_id                   = each.key
   service_account_email         = google_service_account.long_auth_connector_sa[each.key].email
   artifacts_bucket_name         = module.psoxy-gcp.artifacts_bucket_name
   deployment_bundle_object_name = module.psoxy-gcp.deployment_bundle_object_name
