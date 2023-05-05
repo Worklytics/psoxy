@@ -76,7 +76,8 @@ public interface GcpModule {
                                              @Named("instance") SecretManagerConfigService instanceConfigService) {
         String pathToSharedConfig =
             envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_SHARED_CONFIG)
-                .orElse(null);
+                    // Default is considered as empty; otherwise it will fail due a NPE
+                .orElse("");
 
         return CompositeConfigService.builder()
                 .preferred(instanceConfigService)
