@@ -548,12 +548,17 @@ And following granular scopes:
 3. Now go on `Permissions` and click on `Add` for Jira. Once added, click on `Configure`. Add following scopes as part of `Classic Scopes`:
 - read:jira-user
 - read:jira-work
+And these ones from `Granular Scopes`:
+- read:group:jira
+- read:avatar:jira
+- read:user:jira
 Then repeat the same but for `User Identity API`, adding the following scope:
 - read:account
+
 4. Once Configured, go to `Settings` and prepare to copy the `Client Id` and `Secret`. As we will need to create a `REFRESH_TOKEN` we will need to exchange
 the authentication code to retrieve it. Please replace the *Client Id* field in this URL and paste it on the browser :
 
-   `https://auth.atlassian.com/authorize?audience=api.atlassian.com&client_id=<CLIENT ID>&scope=offline_access%20read:jira-user%20read:jira-work&redirect_uri=http://localhost&state=YOUR_USER_BOUND_VALUE&response_type=code&prompt=consent`
+   `https://auth.atlassian.com/authorize?audience=api.atlassian.com&client_id=<CLIENT ID>&scope=offline_access%20read:group:jira%20read:avatar:jira%20read:user:jira%20read:account%20read:jira-user%20read:jira-work&redirect_uri=http://localhost&state=YOUR_USER_BOUND_VALUE&response_type=code&prompt=consent`
 
 Choose a site in your Jira workspace to allow access for this application and click on `Accept`.
 
