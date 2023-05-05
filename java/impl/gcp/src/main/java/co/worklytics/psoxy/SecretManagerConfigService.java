@@ -61,6 +61,7 @@ public class SecretManagerConfigService implements ConfigService, LockService {
     @Override
     public void putConfigProperty(ConfigProperty property, String value) {
         String key = parameterName(property);
+        SecretName secretName = SecretName.of(projectId, key);
         try {
             try (SecretManagerServiceClient client = SecretManagerServiceClient.create()) {
                 SecretPayload payload =
@@ -69,12 +70,12 @@ public class SecretManagerConfigService implements ConfigService, LockService {
                                 .build();
 
                 // Add the secret version.
-                SecretVersion version = client.addSecretVersion(key, payload);
+                SecretVersion version = client.addSecretVersion(secretName, payload);
 
-                log.info(String.format("Property: %s, stored version %s", key, version.getName()));
+                log.info(String.format("Property: %s, stored version %s", secretName, version.getName()));
             }
         } catch (IOException e) {
-            log.log(Level.SEVERE, "Could not store property " + key, e);
+            log.log(Level.SEVERE, "Could not store property " + secretName, e);
         }
     }
 
