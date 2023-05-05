@@ -173,6 +173,17 @@ variable "salesforce_domain" {
   description = "Domain of the Salesforce to connect to (only required if using Salesforce connector). To find your My Domain URL, from Setup, in the Quick Find box, enter My Domain, and then select My Domain"
 }
 
+variable "jira_cloud_id" {
+  type        = string
+  default     = ""
+  description = "Cloud id of the Jira Cloud to connect to (only required if using Jira connector)."
+}
+
+variable "example_jira_issue_id" {
+  type        = string
+  default     = ""
+  description = "Id of an issue for only to be used as part of example calls for Jira (only required if using Jira connector)."
+}
 
 # build lookup tables to JOIN data you receive back from Worklytics with your original data.
 #   - `join_key_column` should be the column you expect to JOIN on, usually 'employee_id'

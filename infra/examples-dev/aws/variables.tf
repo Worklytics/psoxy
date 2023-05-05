@@ -99,6 +99,18 @@ variable "salesforce_domain" {
   description = "Domain of the Salesforce to connect to (only required if using Salesforce connector). To find your My Domain URL, from Setup, in the Quick Find box, enter My Domain, and then select My Domain"
 }
 
+variable "jira_cloud_id" {
+  type        = string
+  default     = ""
+  description = "Cloud id of the Jira Cloud to connect to (only required if using Jira connector)."
+}
+
+variable "example_jira_issue_id" {
+  type        = string
+  default     = ""
+  description = "Id of an issue for only to be used as part of example calls for Jira (only required if using Jira connector)."
+}
+
 variable "connector_display_name_suffix" {
   type        = string
   description = "suffix to append to display_names of connector SAs; helpful to distinguish between various ones in testing/dev scenarios"
@@ -243,5 +255,3 @@ variable "todos_as_outputs" {
   description = "whether to render TODOs as outputs or flat files (former useful if you're using Terraform Cloud/Enterprise, or somewhere else where the filesystem is not readily accessible to you)"
   default     = false
 }
-
-

@@ -31,6 +31,8 @@ module "worklytics_connector_specs" {
   # to use the subject of examples. You can change it to any string you want.
   example_msft_user_guid = data.azuread_client_config.current.object_id
   salesforce_domain      = var.salesforce_domain
+  jira_cloud_id          = var.jira_cloud_id
+  example_jira_issue_id  = var.example_jira_issue_id
 }
 
 module "psoxy-aws" {
