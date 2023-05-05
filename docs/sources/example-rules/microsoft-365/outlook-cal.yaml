@@ -109,9 +109,14 @@ endpoints:
           - "$..externalReplyMessage"
   - pathRegex: "^/(v1.0|beta)/users/[^/]*/(((calendars/[^/]*/)?events.*)|(calendar/calendarView(?)[^/]*))"
     transforms:
-      - !<redact>
+      - !<redactExceptSubstringsMatchingRegexes>
         jsonPaths:
           - "$..subject"
+        exceptions:
+          - "(?i)(\\QFocus Time Block\\E|\\QFocus Time\\E|\\QFocus:\\E|\\QNo Meeting Block\\\
+      E|\\QNo Meetings Block\\E|\\QNo Meetings\\E|\\QNo Meeting\\E)"
+      - !<redact>
+        jsonPaths:
           - "$..emailAddress.name"
           - "$..extensions"
           - "$..multiValueExtendedProperties"

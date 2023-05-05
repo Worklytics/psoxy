@@ -15,6 +15,7 @@
       "reminderMinutesBeforeStart":15,
       "isReminderOn":true,
       "hasAttachments":false,
+      "subject":"",
       "bodyPreview":null,
       "importance":"normal",
       "sensitivity":"normal",
