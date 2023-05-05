@@ -53,8 +53,8 @@ module "psoxy_aws" {
 
 # TODO: remove in v0.5
 moved {
-  from   = module.psoxy-aws
-  to     = module.psoxy_aws
+  from = module.psoxy-aws
+  to   = module.psoxy_aws
 }
 
 # secrets shared across all instances
@@ -93,8 +93,8 @@ module "google_workspace_connection" {
 
 # TODO: remove in v0.5
 moved {
-  from   = module.google-workspace-connection
-  to     = module.google_workspace_connection
+  from = module.google-workspace-connection
+  to   = module.google_workspace_connection
 }
 
 
@@ -109,8 +109,8 @@ module "google_workspace_connection_auth" {
 
 # TODO: remove in v0.5
 moved {
-  from   = module.google-workspace-connection-auth
-  to     = module.google_workspace_connection_auth
+  from = module.google-workspace-connection-auth
+  to   = module.google_workspace_connection_auth
 }
 
 
@@ -135,8 +135,8 @@ module "sa_key_secrets" {
 
 # TODO: remove in v0.5
 moved {
-  from   = module.sa-key-secrets
-  to     = module.sa_key_secrets
+  from = module.sa-key-secrets
+  to   = module.sa_key_secrets
 }
 
 
@@ -178,8 +178,8 @@ module "psoxy_google_workspace_connector" {
 
 # TODO: remove in v0.5
 moved {
-  from   = module.psoxy-google-workspace-connector
-  to     = module.psoxy_google_workspace_connector
+  from = module.psoxy-google-workspace-connector
+  to   = module.psoxy_google_workspace_connector
 }
 
 module "worklytics_psoxy_connection_google_workspace" {
@@ -203,8 +203,8 @@ module "worklytics_psoxy_connection_google_workspace" {
 
 # TODO: remove in v0.5
 moved {
-  from   = module.worklytics-psoxy-connection-google-workspace
-  to     = module.worklytics_psoxy_connection_google_workspace
+  from = module.worklytics-psoxy-connection-google-workspace
+  to   = module.worklytics_psoxy_connection_google_workspace
 }
 
 # END GOOGLE WORKSPACE CONNECTORS
@@ -261,8 +261,8 @@ module "msft_connection" {
 
 # TODO: remove in v0.5
 moved {
-  from   = module.msft-connection
-  to     = module.msft_connection
+  from = module.msft-connection
+  to   = module.msft_connection
 }
 
 module "msft_connection_auth_federation" {
@@ -281,8 +281,8 @@ module "msft_connection_auth_federation" {
 
 # TODO: remove in v0.5
 moved {
-  from   = module.msft-connection-auth-federation
-  to     = module.msft_connection_auth_federation
+  from = module.msft-connection-auth-federation
+  to   = module.msft_connection_auth_federation
 }
 
 
@@ -343,8 +343,8 @@ module "psoxy_msft_connector" {
 
 # TODO: remove in v0.5
 moved {
-  from   = module.psoxy-msft-connector
-  to     = module.psoxy_msft_connector
+  from = module.psoxy-msft-connector
+  to   = module.psoxy_msft_connector
 }
 
 resource "aws_iam_role_policy_attachment" "cognito_lambda_policy" {
@@ -375,8 +375,8 @@ module "worklytics_psoxy_connection_msft_365" {
 
 # TODO: remove in v0.5
 moved {
-  from   = module.worklytics-psoxy-connection-msft-365
-  to     = module.worklytics_psoxy_connection_msft_365
+  from = module.worklytics-psoxy-connection-msft-365
+  to   = module.worklytics_psoxy_connection_msft_365
 }
 
 # END MSFT-365 CONNECTORS
@@ -419,8 +419,8 @@ module "parameter_fill_instructions" {
 
 # TODO: remove in v0.5
 moved {
-  from   = module.parameter-fill-instructions
-  to     = module.parameter_fill_instructions
+  from = module.parameter-fill-instructions
+  to   = module.parameter_fill_instructions
 }
 
 module "source_token_external_todo" {
@@ -476,8 +476,8 @@ module "aws_psoxy_long_auth_connectors" {
 
 # TODO: remove in v0.5
 moved {
-  from   = module.aws-psoxy-long-auth-connectors
-  to     = module.aws_psoxy_long_auth_connectors
+  from = module.aws-psoxy-long-auth-connectors
+  to   = module.aws_psoxy_long_auth_connectors
 }
 
 
@@ -502,8 +502,8 @@ module "worklytics_psoxy_connection" {
 
 # TODO: remove in v0.5
 moved {
-  from   = module.worklytics-psoxy-connection
-  to     = module.worklytics_psoxy_connection
+  from = module.worklytics-psoxy-connection
+  to   = module.worklytics_psoxy_connection
 }
 
 
@@ -555,8 +555,8 @@ module "psoxy_bulk" {
 
 # TODO: remove in v0.5
 moved {
-  from   = module.psoxy-bulk
-  to     = module.psoxy_bulk
+  from = module.psoxy-bulk
+  to   = module.psoxy_bulk
 }
 
 
@@ -582,8 +582,8 @@ module "psoxy_bulk_to_worklytics" {
 
 # TODO: remove in v0.5
 moved {
-  from   = module.psoxy-bulk-to-worklytics
-  to     = module.psoxy_bulk_to_worklytics
+  from = module.psoxy-bulk-to-worklytics
+  to   = module.psoxy_bulk_to_worklytics
 }
 
 # BEGIN lookup tables

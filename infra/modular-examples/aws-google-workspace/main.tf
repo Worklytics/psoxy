@@ -142,7 +142,7 @@ module "psoxy-google-workspace-connector" {
       BUNDLE_FILENAME     = module.psoxy-aws.filename
       IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
       # trickery to force lambda restart so new rules seen
-      CUSTOM_RULES_SHA = contains(var.custom_rest_rules, each.key) ? filesha1(var.custom_rest_rules[each.key]) : null
+      CUSTOM_RULES_SHA = try(var.custom_rest_rules[each.key], null) != null ? filesha1(var.custom_rest_rules[each.key]) : null
     }
   )
 }
@@ -253,7 +253,7 @@ module "aws-psoxy-long-auth-connectors" {
       BUNDLE_FILENAME     = module.psoxy-aws.filename
       IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
       # trickery to force lambda restart so new rules seen
-      CUSTOM_RULES_SHA     = contains(var.custom_rest_rules, each.key) ? filesha1(var.custom_rest_rules[each.key]) : null
+      CUSTOM_RULES_SHA     = try(var.custom_rest_rules[each.key], null) != null ? filesha1(var.custom_rest_rules[each.key]) : null
       PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
     }
   )

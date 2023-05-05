@@ -12,8 +12,8 @@ locals {
   rules_plain = file(var.file_path)
 
   # compress if necessary; but otherwise leave plain so human readable
-  use_compressed   = length(local.rules_plain) > local.secret_manager_size_limit
-  param_value      = local.use_compressed ? base64gzip(local.rules_plain) : local.rules_plain
+  use_compressed = length(local.rules_plain) > local.secret_manager_size_limit
+  param_value    = local.use_compressed ? base64gzip(local.rules_plain) : local.rules_plain
 }
 
 resource "google_secret_manager_secret" "rules" {
