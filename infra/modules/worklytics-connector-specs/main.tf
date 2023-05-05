@@ -527,10 +527,10 @@ EOT
       example_api_calls : [
         "/ex/jira/${var.jira_cloud_id}/rest/api/3/users",
         "/ex/jira/${var.jira_cloud_id}/rest/api/3/group/bulk",
-        "/ex/jira/${var.jira_cloud_id}/rest/api/3/search?maxResults%3D25",
-        "/ex/jira/${var.jira_cloud_id}/rest/api/3/issue/${var.example_jira_issue_id}/changelog?maxResults%3D25",
-        "/ex/jira/${var.jira_cloud_id}/rest/api/3/issue/${var.example_jira_issue_id}/comment?maxResults%3D25",
-        "/ex/jira/${var.jira_cloud_id}/rest/api/3/issue/${var.example_jira_issue_id}/worklog?maxResults%3D25",
+        "/ex/jira/${var.jira_cloud_id}/rest/api/3/search?maxResults=25",
+        "/ex/jira/${var.jira_cloud_id}/rest/api/3/issue/${var.example_jira_issue_id}/changelog?maxResults=D25",
+        "/ex/jira/${var.jira_cloud_id}/rest/api/3/issue/${var.example_jira_issue_id}/comment?maxResults=25",
+        "/ex/jira/${var.jira_cloud_id}/rest/api/3/issue/${var.example_jira_issue_id}/worklog?maxResults=25",
       ],
       external_token_todo : <<EOT
 Jira OAuth 2.0 (3LO) through Psoxy requires a Jira Cloud account with following classical scopes:
