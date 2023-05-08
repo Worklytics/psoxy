@@ -47,7 +47,7 @@ class CalendarTest {
         assertFalse(pattern.matcher(input).matches());
     }
 
-    @CsvSource({
+    @CsvSource(value = {
         "Focus Time,Focus Time",
         "Secret Project Focus Time,Focus Time",
         "Focus Time Block,Focus Time Block",
@@ -56,7 +56,9 @@ class CalendarTest {
         " No Meetings,No Meetings",
         "Prep Time,Prep Time",
         "Prep Customer Meeting,Prep "
-    })
+    },
+        ignoreLeadingAndTrailingWhitespace = false
+    )
     @ParameterizedTest
     public void transformPreserves(String input, String expected) {
         assertEquals(expected,
