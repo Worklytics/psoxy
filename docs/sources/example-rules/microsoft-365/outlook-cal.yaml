@@ -115,6 +115,8 @@ endpoints:
         exceptions:
           - "(?i)(\\QFocus Time Block\\E|\\QFocus Time\\E|\\QFocus:\\E|\\QNo Meeting Block\\\
       E|\\QNo Meetings Block\\E|\\QNo Meetings\\E|\\QNo Meeting\\E)"
+          - "(?i)(\\QPrep Time Block\\E|\\QPrep Time\\E|\\QPrep:\\E|\\QPrep \\E|\\QPrepare\
+      \ \\E)"
       - !<redact>
         jsonPaths:
           - "$..emailAddress.name"

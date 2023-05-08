@@ -11,8 +11,6 @@ import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -39,7 +37,7 @@ public class PrebuiltSanitizerRules {
                 "$.items[*].conferenceData.entryPoints[*]['accessCode','password','passcode','pin']",
                 "$..meetingCreatedBy" // not documented; seen for one customer; would be better to pseudonymize, if has reliable schema
             ))
-            .transform(Calendar.PRESERVE_FOCUS_TIME_BLOCK_TITLE_SNIPPETS.toBuilder()
+            .transform(Calendar.PRESERVE_CONVENTIONAL_PHRASE_SNIPPETS.toBuilder()
                 .jsonPath("$.items[*].summary")
                 .build())
             .transform(ZoomTransforms.FILTER_CONTENT_EXCEPT_ZOOM_URL.toBuilder()
@@ -61,7 +59,7 @@ public class PrebuiltSanitizerRules {
                 "$.conferenceData.notes",
                 "$..meetingCreatedBy" //not documented, but seen for one customer; would be better to pseudonymize, if has reliable schema
             ))
-            .transform(Calendar.PRESERVE_FOCUS_TIME_BLOCK_TITLE_SNIPPETS.toBuilder()
+            .transform(Calendar.PRESERVE_CONVENTIONAL_PHRASE_SNIPPETS.toBuilder()
                 .jsonPath("$.items[*].summary")
                 .build())
             .transform(ZoomTransforms.FILTER_CONTENT_EXCEPT_ZOOM_URL.toBuilder()
