@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class CalendarTest {
 
-    Pattern pattern = Pattern.compile(Calendar.PRESERVE_FOCUS_TIME_BLOCK_TITLE_SNIPPETS_PATTERN);
+    Pattern pattern = Pattern.compile(Calendar.PRESERVE_FOCUS_TIME_BLOCK_SNIPPETS_PATTERN);
 
     RESTApiSanitizerImpl restApiSanitizer = new RESTApiSanitizerImpl(null, null);
 
@@ -47,18 +47,22 @@ class CalendarTest {
         assertFalse(pattern.matcher(input).matches());
     }
 
-    @CsvSource({
+    @CsvSource(value = {
         "Focus Time,Focus Time",
         "Secret Project Focus Time,Focus Time",
         "Focus Time Block,Focus Time Block",
         "Focus: Secret Project,Focus:",
         "No Meeting Wednesday,No Meeting",
         " No Meetings,No Meetings",
-    })
+        "Prep Time,Prep Time",
+        "Prep Customer Meeting,Prep "
+    },
+        ignoreLeadingAndTrailingWhitespace = false
+    )
     @ParameterizedTest
     public void transformPreserves(String input, String expected) {
         assertEquals(expected,
-            restApiSanitizer.getTransformImpl(Calendar.PRESERVE_FOCUS_TIME_BLOCK_TITLE_SNIPPETS)
+            restApiSanitizer.getTransformImpl(Calendar.PRESERVE_CONVENTIONAL_PHRASE_SNIPPETS)
                 .map(input, Configuration.defaultConfiguration()));
 
     }
