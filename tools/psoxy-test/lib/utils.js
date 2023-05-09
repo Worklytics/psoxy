@@ -10,7 +10,7 @@ import https from 'https';
 import path from 'path';
 import _ from 'lodash';
 import spec from '../data-sources/spec.js';
-
+import getLogger from './logger.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // In case Psoxy is slow to respond (Lambda can take up to 20s+ to bootstrap),
@@ -296,7 +296,10 @@ function parseBucketOption(bucketOption) {
  * @returns {Credentials}
  */
 async function getAWSCredentials(role) {
+  const logger = getLogger();
+  let credentials;
   let credentialsProvider;
+
   if (!_.isEmpty(role)) {
     credentialsProvider = fromTemporaryCredentials({
       params: {
@@ -306,11 +309,18 @@ async function getAWSCredentials(role) {
       }
     });
 
+    credentials = await credentialsProvider();
+    logger.info(`Using temporary credentials for role ${role}, access key ID: ${credentials.accessKeyId}`);
   } else {
-    // Look up credentials in environment variables, shared credentials files, etc.
+    // Look up credentials; expected sources depending on use case:
+    // - Environment variables
+    // - Shared credentials file `.aws/credentials`
+    // - EC2 Instance Metadata Service
     credentialsProvider = fromNodeProviderChain();
+    credentials = await credentialsProvider();
+    logger.info(`Credentials found, access key ID: ${credentials.accessKeyId}`);
   }
-  return credentialsProvider();
+  return credentials;
 }
 
 export {
