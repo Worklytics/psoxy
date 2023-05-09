@@ -3,6 +3,11 @@ variable "project_id" {
   description = "name of the gcp project"
 }
 
+variable "updater_role_id" {
+  type        = string
+  description = "id of the role to update the secret"
+}
+
 variable "secret_name" {
   type        = string
   description = "name of cloud function"

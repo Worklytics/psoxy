@@ -7,6 +7,14 @@ resource "google_secret_manager_secret" "secret" {
   }
 }
 
+# need to update the label of the secret
+resource "google_secret_manager_secret_iam_member" "grant_sa_updater_on_secret" {
+  member    = "serviceAccount:${var.service_account_email}"
+  role      = var.updater_role_id
+  project   = var.project_id
+  secret_id = google_secret_manager_secret.secret.secret_id
+}
+
 # need to be able to read secret and secret version content
 resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_secret" {
   member    = "serviceAccount:${var.service_account_email}"
