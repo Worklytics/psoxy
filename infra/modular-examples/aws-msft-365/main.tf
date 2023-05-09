@@ -351,7 +351,7 @@ module "psoxy-bulk" {
 
   aws_account_id                   = var.aws_account_id
   aws_assume_role_arn              = var.aws_assume_role_arn
-  aws_role_to_assume_when_testing  = module.psoxy-aws.api_caller_role_arn
+  aws_role_to_assume_when_testing  = var.enable_testing ? module.psoxy-aws.api_caller_role_arn : null
   provision_iam_policy_for_testing = var.enable_testing
   instance_id                      = each.key
   source_kind                      = each.value.source_kind

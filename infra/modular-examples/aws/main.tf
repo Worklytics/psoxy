@@ -446,7 +446,7 @@ module "aws_psoxy_long_auth_connectors" {
   path_to_config                  = null
   aws_account_id                  = var.aws_account_id
   aws_assume_role_arn             = var.aws_assume_role_arn
-  aws_role_to_assume_for_tests    = module.psoxy-aws.api_caller_role_arn
+  aws_role_to_assume_when_testing  = var.enable_testing ? module.psoxy-aws.api_caller_role_arn : null
   api_caller_role_arn             = module.psoxy_aws.api_caller_role_arn
   source_kind                     = each.value.source_kind
   path_to_repo_root               = var.psoxy_base_dir
