@@ -6,7 +6,6 @@ import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import com.google.cloud.secretmanager.v1.*;
 import com.google.common.base.Preconditions;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.Duration;
 import com.google.protobuf.FieldMask;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
@@ -73,6 +72,8 @@ public class SecretManagerConfigService implements ConfigService, LockService {
                 SecretVersion version = client.addSecretVersion(secretName, payload);
 
                 log.info(String.format("Property: %s, stored version %s", secretName, version.getName()));
+
+                // q: invalidate previous versions?
             }
         } catch (IOException e) {
             log.log(Level.SEVERE, "Could not store property " + secretName, e);
@@ -122,23 +123,17 @@ public class SecretManagerConfigService implements ConfigService, LockService {
     public boolean acquire(@NonNull String lockId, @NonNull java.time.Duration expires) {
         Preconditions.checkArgument(StringUtils.isNotBlank(lockId), "lockId cannot be blank");
 
-        final SecretName lockSecretName = SecretName.of(projectId, this.namespace + lockId);
-
-        long secretTtl = Math.max(expires.getSeconds(), LOCK_SECRETS_TTL.getSeconds());
+        final SecretName lockSecretName = SecretName.of(projectId, this.namespace + lockId.toUpperCase());
 
         try (SecretManagerServiceClient client = SecretManagerServiceClient.create()) {
             Secret lockSecret;
             try {
+                log.warning("Secret " + lockSecretName + ":" + lockId);
+
                 lockSecret = client.getSecret(lockSecretName);
             } catch (com.google.api.gax.rpc.NotFoundException e) {
-                //create it
-                Secret initial = Secret.newBuilder()
-                    //ttl here, bc this Secret not managed by Terraform; so want it to clean itself
-                    // up after some time
-                    .setTtl(Duration.newBuilder().setSeconds(secretTtl).build())
-                    .build();
-                lockSecret = client.createSecret(lockSecretName.getProject(), lockSecretName.getSecret(),
-                    initial);
+                // It should not happen, as the secret has been created by Terraform
+                throw new RuntimeException(e);
             }
 
             Instant lockedAt = Optional.ofNullable(lockSecret.getLabelsMap().get(LOCK_LABEL))
@@ -150,11 +145,9 @@ public class SecretManagerConfigService implements ConfigService, LockService {
 
                 Secret updated = client.updateSecret(UpdateSecretRequest.newBuilder()
                     .setSecret(Secret.newBuilder(lockSecret)
-                        .setTtl(Duration.newBuilder().setSeconds(LOCK_SECRETS_TTL.getSeconds()).build())
                         .putLabels(LOCK_LABEL, Instant.now(clock).toString())
                         .build())
                     .setUpdateMask(FieldMask.newBuilder()
-                        .addPaths("ttl")
                         .addPaths("labels")
                         .build())
                     .build());
@@ -178,7 +171,6 @@ public class SecretManagerConfigService implements ConfigService, LockService {
             Secret lockSecret = client.getSecret(lockSecretName);
             Secret updated = client.updateSecret(UpdateSecretRequest.newBuilder()
                 .setSecret(Secret.newBuilder(lockSecret)
-                    .setTtl(Duration.newBuilder().setSeconds(LOCK_SECRETS_TTL.getSeconds()).build())
                     .removeLabels(LOCK_LABEL)
                     .build())
                 .setUpdateMask(FieldMask.newBuilder()
