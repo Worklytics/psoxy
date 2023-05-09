@@ -514,13 +514,16 @@ EOT
       identifier_scope_id : "jira"
       worklytics_connector_name : "Jira OAuth 2.0 (3LO) via Psoxy"
       secured_variables : [
-        { name : "REFRESH_TOKEN", writable : false },
+        { name : "ACCESS_TOKEN", writable : true },
+        { name : "REFRESH_TOKEN", writable : true },
         { name : "CLIENT_ID", writable : false },
         { name : "CLIENT_SECRET", writable : false },
+        { name : "OAUTH_REFRESH_TOKEN", writable : true }, # Lock for sharing access token, handled by Psoxy
       ],
       environment_variables : {
         GRANT_TYPE : "refresh_token"
         REFRESH_ENDPOINT : "https://auth.atlassian.com/oauth/token"
+        USE_SHARED_TOKEN: "TRUE"
       }
       reserved_concurrent_executions : null
       example_api_calls_user_to_impersonate : null
@@ -605,6 +608,7 @@ And its response will be something like:
 
 Use that id as `jira_cloud_id` parameter to include as part of Terraform deployment. That will target your instance for REST API requests.
 8. Finally set following variables in AWS System Manager parameters store / GCP Cloud Secrets (if default implementation):
+  - `PSOXY_JIRA_ACCESS_TOKEN` secret variable with value of `access_token` received in previous response
   - `PSOXY_JIRA_REFRESH_TOKEN` secret variable with value of `refresh_token` received in previous response
   - `PSOXY_JIRA_CLIENT_ID` with `Client Id` value.
   - `PSOXY_JIRA_CLIENT_SECRET` with `Client Secret` value.
