@@ -8,9 +8,6 @@ terraform {
   }
 }
 
-data "aws_caller_identity" "current" {}
-
-
 locals {
   # from v0.5, these will be required; for now, allow `null` but filter out so taken from config yaml
   required_env_vars = { for k, v in {
@@ -23,7 +20,7 @@ locals {
     : k => v if v != null
   }
 
-  arn_for_test_calls = coalesce(var.aws_assume_role_arn, data.aws_caller_identity.current.arn)
+  arn_for_test_calls = var.api_caller_role_arn
 }
 
 module "psoxy_lambda" {
@@ -87,13 +84,19 @@ Review the deployed function in AWS console:
 
 - https://console.aws.amazon.com/lambda/home?region=${var.region}#/functions/${var.function_name}?tab=monitoring
 
-We provide some Node.js scripts to easily validate the deployment. To be able
-to run the test commands below, you need Node.js (>=16) and npm (v >=8)
-installed. Then, ensure all dependencies are installed by running:
+We provide some Node.js scripts to simplify testing your proxy deployment. To be able run test
+commands below, you will need
+   - Node.js (>=16) and npm (v >=8) installed.
+   - install the tool itself (in the location from which you plan to run the test commands, if it's
+     not the same location where you originally ran the Terraform apply)
 
 ```shell
 ${local.command_npm_install}
 ```
+   - ensure the location you're running from is authenticated as an AWS principal which can assume
+     the role `${var.api_caller_role_arn}` ( `aws sts get-caller-identity` to determine who you're
+     authenticated as; if necessary, as this ARN to the `caller_aws_arns` list in the
+     `terraform.tfvars` file of your configuration to allow it to assume that role)
 
 ### Make "test calls"
 First, run an initial "Health Check" call to make sure the Psoxy instance is up and running:
