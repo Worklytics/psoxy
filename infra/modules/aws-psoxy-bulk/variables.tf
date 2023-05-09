@@ -71,6 +71,23 @@ variable "path_to_config" {
   default     = null
 }
 
+variable "aws_role_to_assume_when_testing" {
+  type        = string
+  description = "ARN of role to assume when testing instance. Leave blank to use default credentials of location from which you'll run tests (which must be for a principal with sufficient privileges, or use `provision_iam_policy_for_testing`)."
+  default     = null
+
+  validation {
+    condition     = var.aws_role_to_assume_when_testing == null || can(regex("^arn:aws:iam::\\d{12}:role/.*$", var.aws_role_to_assume_when_testing))
+    error_message = "if provided, aws_role_to_assume_when_testing must be a valid ARN of an IAM Role"
+  }
+}
+
+variable "provision_iam_policy_for_testing" {
+  type        = bool
+  description = "Whether to provision IAM policy and attach it to `aws_role_to_assume_when_testing`."
+  default     = false
+}
+
 variable "api_caller_role_arn" {
   type        = string
   description = "DEPRECATED; arn of role which can be assumed to call API"

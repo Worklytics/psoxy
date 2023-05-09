@@ -1,11 +1,4 @@
 
-data "aws_caller_identity" "current" {}
-
-
-locals {
-  arn_for_test_calls = coalesce(var.aws_assume_role_arn, data.aws_caller_identity.current.arn)
-}
-
 
 resource "random_string" "bucket_suffix" {
   length  = 8
@@ -291,14 +284,60 @@ resource "aws_ssm_parameter" "rules" {
   }
 }
 
+resource "aws_iam_policy" "testing" {
+  count = var.provision_iam_policy_for_testing ? 1 : 0
+
+  name_prefix = "${var.instance_id}Testing"
+  description = "Allow to write to input bucket, read from sanitized bucket to test Lambda's behavior"
+  policy = jsonencode({
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Action" : [
+          "s3:PutObject",
+        ]
+        "Effect" : "Allow",
+        "Resource" : [
+          "${aws_s3_bucket.input.arn}",
+          "${aws_s3_bucket.input.arn}/*"
+        ]
+      },
+      {
+        "Action" : [
+          "s3:GetObject",
+          "s3:ListBucket"
+        ],
+        "Effect" : "Allow",
+        "Resource" : [
+          "${aws_s3_bucket.sanitized.arn}",
+          "${aws_s3_bucket.sanitized.arn}/*"
+        ]
+      }
+    ]
+  })
+}
+
+
+
+resource "aws_iam_policy_attachment" "testing_policy_to_testing_role" {
+  count = var.provision_iam_policy_for_testing ? 1 : 0
+
+  name       = "${aws_iam_policy.testing[count.index].name}_to_${var.instance_id}TestingRole"
+  policy_arn = aws_iam_policy.testing[count.index].arn
+  roles = [
+    element(split("role/", var.aws_role_to_assume_when_testing), 1)
+  ]
+}
+
 locals {
-  todo_brief = <<EOT
+  role_option_for_tests = var.aws_role_to_assume_when_testing == null ? "" : "-r ${var.aws_role_to_assume_when_testing}"
+  todo_brief            = <<EOT
 ## Test ${var.instance_id}
 Check that the Psoxy works as expected and it transforms the files of your input bucket following
 the rules you have defined:
 
 ```shell
-node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f ${local.example_file} -d AWS -i ${aws_s3_bucket.input.bucket} -o ${aws_s3_bucket.sanitized.bucket} -r ${local.arn_for_test_calls} -re ${var.aws_region}
+node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f ${local.example_file} ${local.role_option_for_tests} -d AWS -i ${aws_s3_bucket.input.bucket} -o ${aws_s3_bucket.sanitized.bucket} -re ${var.aws_region}
 ```
 
 EOT
@@ -352,7 +391,7 @@ NC='\e[0m'
 
 printf "Quick test of $${BLUE}${var.instance_id}$${NC} ...\n"
 
-node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f $FILE_PATH -d AWS -i ${aws_s3_bucket.input.bucket} -o ${aws_s3_bucket.sanitized.bucket} -r ${local.arn_for_test_calls} -re ${var.aws_region}
+node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f $FILE_PATH -d AWS -i ${aws_s3_bucket.input.bucket} -o ${aws_s3_bucket.sanitized.bucket} ${local.role_option_for_tests} -re ${var.aws_region}
 EOT
 
 }

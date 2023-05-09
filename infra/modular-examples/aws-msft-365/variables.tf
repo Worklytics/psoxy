@@ -88,6 +88,11 @@ variable "force_bundle" {
   default     = false
 }
 
+variable "enable_testing" {
+  type        = bool
+  description = "whether to provision infra needed to support testing of deployment"
+  default     = false
+}
 
 variable "connector_display_name_suffix" {
   type        = string

@@ -121,6 +121,12 @@ variable "force_bundle" {
   default     = false
 }
 
+variable "enable_testing" {
+  type        = bool
+  description = "whether to provision infra needed to support testing of deployment"
+  default     = false
+}
+
 variable "install_test_tool" {
   type        = bool
   description = "whether to install the test tool (can be 'false' if Terraform not running from a machine where you intend to run tests of your Psoxy deployment)"

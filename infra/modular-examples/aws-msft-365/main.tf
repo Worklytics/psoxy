@@ -349,25 +349,27 @@ module "psoxy-bulk" {
   source = "../../modules/aws-psoxy-bulk"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-bulk?ref=v0.4.22"
 
-  aws_account_id                  = var.aws_account_id
-  aws_assume_role_arn             = var.aws_assume_role_arn
-  instance_id                     = each.key
-  source_kind                     = each.value.source_kind
-  aws_region                      = var.aws_region
-  path_to_function_zip            = module.psoxy-aws.path_to_deployment_jar
-  function_zip_hash               = module.psoxy-aws.deployment_package_hash
-  api_caller_role_arn             = module.psoxy-aws.api_caller_role_arn
-  api_caller_role_name            = module.psoxy-aws.api_caller_role_name
-  memory_size_mb                  = 1024
-  psoxy_base_dir                  = var.psoxy_base_dir
-  rules                           = each.value.rules
-  global_parameter_arns           = module.global_secrets.secret_arns
-  path_to_instance_ssm_parameters = "${var.aws_ssm_param_root_path}PSOXY_${upper(replace(each.key, "-", "_"))}_"
-  ssm_kms_key_ids                 = local.ssm_key_ids
-  example_file                    = try(each.value.example_file, null)
-  log_retention_days              = var.log_retention_days
-  sanitized_expiration_days       = var.bulk_sanitized_expiration_days
-  input_expiration_days           = var.bulk_input_expiration_days
+  aws_account_id                   = var.aws_account_id
+  aws_assume_role_arn              = var.aws_assume_role_arn
+  aws_role_to_assume_when_testing  = module.psoxy-aws.api_caller_role_arn
+  provision_iam_policy_for_testing = var.enable_testing
+  instance_id                      = each.key
+  source_kind                      = each.value.source_kind
+  aws_region                       = var.aws_region
+  path_to_function_zip             = module.psoxy-aws.path_to_deployment_jar
+  function_zip_hash                = module.psoxy-aws.deployment_package_hash
+  api_caller_role_arn              = module.psoxy-aws.api_caller_role_arn
+  api_caller_role_name             = module.psoxy-aws.api_caller_role_name
+  memory_size_mb                   = 1024
+  psoxy_base_dir                   = var.psoxy_base_dir
+  rules                            = each.value.rules
+  global_parameter_arns            = module.global_secrets.secret_arns
+  path_to_instance_ssm_parameters  = "${var.aws_ssm_param_root_path}PSOXY_${upper(replace(each.key, "-", "_"))}_"
+  ssm_kms_key_ids                  = local.ssm_key_ids
+  example_file                     = try(each.value.example_file, null)
+  log_retention_days               = var.log_retention_days
+  sanitized_expiration_days        = var.bulk_sanitized_expiration_days
+  input_expiration_days            = var.bulk_input_expiration_days
 
   sanitized_accessor_role_names = [
     module.psoxy-aws.api_caller_role_name
