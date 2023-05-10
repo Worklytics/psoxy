@@ -15,6 +15,7 @@
       "reminderMinutesBeforeStart":15,
       "isReminderOn":true,
       "hasAttachments":false,
+      "subject":"",
       "bodyPreview":"https://acme.zoom.us/j/12354234234?&from=addon",
       "importance":"normal",
       "sensitivity":"normal",

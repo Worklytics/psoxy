@@ -2,9 +2,9 @@ package co.worklytics.psoxy.rules.msft;
 
 import co.worklytics.psoxy.ConfigRulesModule;
 import co.worklytics.psoxy.rules.RESTRules;
+import co.worklytics.psoxy.rules.generics.Calendar;
 import com.avaulta.gateway.rules.Endpoint;
 import co.worklytics.psoxy.rules.Rules2;
-import co.worklytics.psoxy.rules.RuleSet;
 import com.avaulta.gateway.rules.transforms.Transform;
 import co.worklytics.psoxy.rules.zoom.ZoomTransforms;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
@@ -199,8 +199,10 @@ public class PrebuiltSanitizerRules {
 
     //transforms to apply to endpoints that return Event or Event collection
     static final Endpoint EVENT_TRANSFORMS = Endpoint.builder()
-        .transform(Transform.Redact.builder()
+        .transform(Calendar.PRESERVE_CONVENTIONAL_PHRASE_SNIPPETS.toBuilder()
             .jsonPath("$..subject")
+            .build())
+        .transform(Transform.Redact.builder()
             .jsonPath("$..emailAddress.name")
             .jsonPath("$..extensions")
             .jsonPath("$..multiValueExtendedProperties")

@@ -18,7 +18,7 @@ locals {
 
 module "worklytics_connector_specs" {
   source = "../../modules/worklytics-connector-specs"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connector-specs?ref=v0.4.21"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connector-specs?ref=v0.4.22"
 
   enabled_connectors             = var.enabled_connectors
   google_workspace_example_user  = var.google_workspace_example_user
@@ -28,7 +28,7 @@ module "worklytics_connector_specs" {
 
 module "psoxy" {
   source = "../../modules/gcp"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp?ref=v0.4.21"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp?ref=v0.4.22"
 
   project_id              = var.gcp_project_id
   environment_id_prefix   = local.environment_id_prefix
@@ -43,7 +43,7 @@ module "google_workspace_connection" {
   for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
 
   source = "../../modules/google-workspace-dwd-connection"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/google-workspace-dwd-connection?ref=v0.4.21"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/google-workspace-dwd-connection?ref=v0.4.22"
 
   project_id                   = var.gcp_project_id
   connector_service_account_id = "${local.environment_id_prefix}${substr(each.key, 0, 30 - length(local.environment_id_prefix))}"
@@ -61,7 +61,7 @@ module "google_workspace_connection_auth" {
   for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
 
   source = "../../modules/gcp-sa-auth-key"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-sa-auth-key?ref=v0.4.21"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-sa-auth-key?ref=v0.4.22"
 
   service_account_id = module.google_workspace_connection[each.key].service_account_id
 }
@@ -71,7 +71,7 @@ module "google_workspace_key_secrets" {
   for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
 
   source = "../../modules/gcp-secrets"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-secrets?ref=v0.4.21"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-secrets?ref=v0.4.22"
 
   secret_project = var.gcp_project_id
   path_prefix    = local.config_parameter_prefix
@@ -87,7 +87,7 @@ module "psoxy_google_workspace_connector" {
   for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
 
   source = "../../modules/gcp-psoxy-rest"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-rest?ref=v0.4.21"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-rest?ref=v0.4.22"
 
   project_id                            = var.gcp_project_id
   source_kind                           = each.value.source_kind
@@ -132,7 +132,7 @@ module "worklytics_psoxy_connection" {
   for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
 
   source = "../../modules/worklytics-psoxy-connection"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection?ref=v0.4.21"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection?ref=v0.4.22"
 
   psoxy_host_platform_id = local.host_platform_id
   psoxy_instance_id      = each.key
@@ -162,7 +162,7 @@ module "connector_oauth" {
   for_each = local.long_access_parameters
 
   source = "../../modules/gcp-oauth-secrets"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-oauth-secrets?ref=v0.4.21"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-oauth-secrets?ref=v0.4.22"
 
   project_id            = var.gcp_project_id
   path_prefix           = local.config_parameter_prefix
@@ -174,7 +174,7 @@ module "long_auth_token_secret_fill_instructions" {
   for_each = local.long_access_parameters
 
   source = "../../modules/gcp-secret-fill-md"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-secret-fill-md?ref=v0.4.21"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-secret-fill-md?ref=v0.4.22"
 
   project_id  = var.gcp_project_id
   path_prefix = local.config_parameter_prefix
@@ -185,7 +185,7 @@ module "source_token_external_todo" {
   for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors_todos
 
   source = "../../modules/source-token-external-todo"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/source-token-external-todo?ref=v0.4.21"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/source-token-external-todo?ref=v0.4.22"
 
   source_id                         = each.key
   connector_specific_external_steps = each.value.external_token_todo
@@ -198,7 +198,7 @@ module "connector_long_auth_function" {
   for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
 
   source = "../../modules/gcp-psoxy-rest"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-rest?ref=v0.4.21"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-rest?ref=v0.4.22"
 
   project_id                    = var.gcp_project_id
   environment_id_prefix         = local.environment_id_prefix
@@ -243,7 +243,7 @@ module "worklytics_psoxy_connection_long_auth" {
   for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
 
   source = "../../modules/worklytics-psoxy-connection"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection?ref=v0.4.21"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection?ref=v0.4.22"
 
   psoxy_host_platform_id = "GCP"
   psoxy_instance_id      = each.key
@@ -271,7 +271,7 @@ module "psoxy_bulk" {
   var.custom_bulk_connectors)
 
   source = "../../modules/gcp-psoxy-bulk"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-bulk?ref=v0.4.21"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-bulk?ref=v0.4.22"
 
   project_id                    = var.gcp_project_id
   environment_id_prefix         = local.environment_id_prefix
@@ -307,7 +307,7 @@ module "psoxy_bulk_to_worklytics" {
   var.custom_bulk_connectors)
 
   source = "../../modules/worklytics-psoxy-connection-generic"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-generic?ref=v0.4.21"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-generic?ref=v0.4.22"
 
   psoxy_host_platform_id = local.host_platform_id
   psoxy_instance_id      = each.key
@@ -393,50 +393,3 @@ locals {
   )
 }
 
-output "instances" {
-  description = "Instances of Psoxy connectors deployments as Cloud Functions."
-  value       = local.all_instances
-}
-
-output "todos_1" {
-  description = "List of todo steps to complete 1st, in markdown format."
-  value = concat(
-    values(module.google_workspace_connection)[*].todo,
-    values(module.source_token_external_todo)[*].todo,
-  )
-}
-
-output "todos_2" {
-  description = "List of todo steps to complete 2nd, in markdown format."
-  value = concat(
-    values(module.psoxy_google_workspace_connector)[*].todo,
-    values(module.connector_long_auth_function)[*].todo,
-    values(module.psoxy_bulk)[*].todo,
-  )
-}
-
-output "todos_3" {
-  description = "List of todo steps to complete 3rd, in markdown format."
-  value = concat(
-    values(module.worklytics_psoxy_connection)[*].todo,
-    values(module.worklytics_psoxy_connection)[*].todo,
-    values(module.psoxy_bulk_to_worklytics)[*].todo,
-  )
-}
-
-
-# use case: let someone consume this deploy another psoxy instance, reusing artifacts
-output "artifacts_bucket_name" {
-  description = "Name of GCS bucket with deployment artifacts."
-  value       = module.psoxy.artifacts_bucket_name
-}
-
-output "deployment_bundle_object_name" {
-  description = "Object name of deployment bundle within artifacts bucket."
-  value       = module.psoxy.deployment_bundle_object_name
-}
-
-output "path_to_deployment_jar" {
-  description = "Path to the package to deploy (JAR) as lambda."
-  value       = module.psoxy.path_to_deployment_jar
-}

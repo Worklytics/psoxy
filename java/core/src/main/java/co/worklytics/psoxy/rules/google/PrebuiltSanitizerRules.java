@@ -2,6 +2,7 @@ package co.worklytics.psoxy.rules.google;
 
 import co.worklytics.psoxy.ConfigRulesModule;
 import co.worklytics.psoxy.rules.RESTRules;
+import co.worklytics.psoxy.rules.generics.Calendar;
 import com.avaulta.gateway.rules.Endpoint;
 import co.worklytics.psoxy.rules.Rules2;
 import com.avaulta.gateway.rules.transforms.Transform;
@@ -10,8 +11,6 @@ import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -31,14 +30,16 @@ public class PrebuiltSanitizerRules {
             .pathTemplate("/calendar/v3/calendars/{accountId}/events")
             .transform(Transform.Pseudonymize.ofPaths("$..email"))
             .transform(Transform.Redact.ofPaths(
-                "$..displayName",
                 "$.summary",
+                "$..displayName",
                 "$.items[*].extendedProperties", // overly conservative, but we just don't know what's here
-                "$.items[*].summary",
                 "$.items[*].conferenceData.notes",
                 "$.items[*].conferenceData.entryPoints[*]['accessCode','password','passcode','pin']",
                 "$..meetingCreatedBy" // not documented; seen for one customer; would be better to pseudonymize, if has reliable schema
             ))
+            .transform(Calendar.PRESERVE_CONVENTIONAL_PHRASE_SNIPPETS.toBuilder()
+                .jsonPath("$.items[*].summary")
+                .build())
             .transform(ZoomTransforms.FILTER_CONTENT_EXCEPT_ZOOM_URL.toBuilder()
                 .jsonPath("$.items[*].description")
                 .build())
@@ -51,13 +52,16 @@ public class PrebuiltSanitizerRules {
         .endpoint( Endpoint.builder()
             .pathTemplate("/calendar/v3/calendars/{accountId}/events/{eventId}")
             .transform(Transform.Redact.ofPaths(
-                "$..displayName",
                 "$.summary",
+                "$..displayName",
                 "$.extendedProperties", // overly conservative, but we just don't know what's here
                 "$.conferenceData.entryPoints[*]['accessCode','password','passcode','pin']",
                 "$.conferenceData.notes",
                 "$..meetingCreatedBy" //not documented, but seen for one customer; would be better to pseudonymize, if has reliable schema
             ))
+            .transform(Calendar.PRESERVE_CONVENTIONAL_PHRASE_SNIPPETS.toBuilder()
+                .jsonPath("$.items[*].summary")
+                .build())
             .transform(ZoomTransforms.FILTER_CONTENT_EXCEPT_ZOOM_URL.toBuilder()
                 .jsonPath("$.description")
                 .build())

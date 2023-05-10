@@ -15,6 +15,7 @@ import java.util.List;
 @JsonSubTypes({
     @JsonSubTypes.Type(value = Transform.Redact.class, name = "redact"),
     @JsonSubTypes.Type(value = Transform.RedactRegexMatches.class, name = "redactRegexMatches"),
+    @JsonSubTypes.Type(value = Transform.RedactExceptSubstringsMatchingRegexes.class, name = "redactExceptSubstringsMatchingRegexes"),
     @JsonSubTypes.Type(value = Transform.Pseudonymize.class, name = "pseudonymize"),
     @JsonSubTypes.Type(value = Transform.PseudonymizeEmailHeader.class, name = "pseudonymizeEmailHeader"),
     @JsonSubTypes.Type(value = Transform.FilterTokenByRegex.class, name = "filterTokenByRegex"),
@@ -95,6 +96,33 @@ public abstract class Transform {
                 .fields(new ArrayList<>(this.fields))
                 .clearRedactions()
                 .redactions(new ArrayList<>(this.redactions))
+                .build();
+        }
+    }
+
+    @NoArgsConstructor //for jackson
+    @SuperBuilder(toBuilder = true)
+    @Getter
+    @ToString
+    @EqualsAndHashCode(callSuper = true)
+    public static class RedactExceptSubstringsMatchingRegexes extends Transform {
+
+        /**
+         * redact content unless matches at least one of these regexes
+         *
+         * if multiple match, content matched by the first exception regex is preserved
+         */
+        @Singular
+        List<String> exceptions;
+
+        public RedactExceptSubstringsMatchingRegexes clone() {
+            return this.toBuilder()
+                .clearJsonPaths()
+                .jsonPaths(new ArrayList<>(this.jsonPaths))
+                .clearFields()
+                .fields(new ArrayList<>(this.fields))
+                .clearExceptions()
+                .exceptions(new ArrayList<>(this.exceptions))
                 .build();
         }
     }

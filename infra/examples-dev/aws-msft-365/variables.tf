@@ -51,7 +51,7 @@ variable "caller_aws_arns" {
 
   validation {
     condition = alltrue([
-      for i in var.caller_aws_arns : (length(regexall("^arn:aws:iam::\\d{12}:\\w+$", i)) > 0)
+      for i in var.caller_aws_arns : (length(regexall("^arn:aws:iam::\\d{12}:((role|user)\\/)?\\w+$", i)) > 0)
     ])
     error_message = "The values of caller_aws_arns should be AWS Resource Names, something like 'arn:aws:iam::914358739851:root'."
   }
@@ -99,6 +99,12 @@ variable "psoxy_base_dir" {
 variable "force_bundle" {
   type        = bool
   description = "whether to force build of deployment bundle, even if it already exists for this proxy version"
+  default     = false
+}
+
+variable "provision_testing_infra" {
+  type        = bool
+  description = "whether to provision infra needed to support testing of deployment"
   default     = false
 }
 
