@@ -70,7 +70,7 @@ module "psoxy" {
   aws_ssm_param_root_path        = var.aws_ssm_param_root_path
   psoxy_base_dir                 = var.psoxy_base_dir
   force_bundle                   = var.force_bundle
-  enable_deployment_testing      = var.enable_deployment_testing
+  provision_testing_infra        = var.provision_testing_infra
   caller_aws_arns                = var.caller_aws_arns
   caller_gcp_service_account_ids = var.caller_gcp_service_account_ids
   environment_name               = var.environment_name

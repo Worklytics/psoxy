@@ -107,7 +107,7 @@ variable "force_bundle" {
   default     = false
 }
 
-variable "enable_deployment_testing" {
+variable "provision_testing_infra" {
   type        = bool
   description = "Whether to provision infra needed to support testing of deployment. If false, it's left to you to ensure the AWS principal you use when running test scripts has the correct permissions."
   default     = false

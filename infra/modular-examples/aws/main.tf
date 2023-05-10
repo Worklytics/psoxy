@@ -526,8 +526,8 @@ module "psoxy_bulk" {
 
   aws_account_id                   = var.aws_account_id
   aws_assume_role_arn              = var.aws_assume_role_arn
-  provision_iam_policy_for_testing = var.enable_deployment_testing
-  aws_role_to_assume_when_testing  = var.enable_deployment_testing ? module.psoxy_aws.api_caller_role_arn : null
+  provision_iam_policy_for_testing = var.provision_testing_infra
+  aws_role_to_assume_when_testing  = var.provision_testing_infra ? module.psoxy_aws.api_caller_role_arn : null
   instance_id                      = each.key
   source_kind                      = each.value.source_kind
   aws_region                       = var.aws_region

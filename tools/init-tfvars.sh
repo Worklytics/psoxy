@@ -21,7 +21,7 @@ echo "# root directory of a clone of the psoxy repo " >> $TFVARS_FILE
 echo "#  - by default, it points to .terraform, where terraform clones the main psoxy repo" >> $TFVARS_FILE
 echo "#  - if you have a local clone of the psoxy repo you prefer to use, change this to point there" >> $TFVARS_FILE
 printf "psoxy_base_dir = \"${PSOXY_BASE_DIR}\"\n" >> $TFVARS_FILE
-printf "enable_testing = true\n" >> $TFVARS_FILE
+printf "provision_testing_infra = true\n" >> $TFVARS_FILE
 printf "\n" >> $TFVARS_FILE
 
 # pattern used to grep for provider at top-level of Terraform configuration

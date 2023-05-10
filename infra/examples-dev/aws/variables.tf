@@ -121,7 +121,7 @@ variable "force_bundle" {
   default     = false
 }
 
-variable "enable_deployment_testing" {
+variable "provision_testing_infra" {
   type        = bool
   description = "whether to provision infra needed to support testing of deployment"
   default     = false
