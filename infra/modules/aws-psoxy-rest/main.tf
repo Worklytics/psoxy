@@ -95,7 +95,7 @@ ${local.command_npm_install}
 ```
    - ensure the location you're running from is authenticated as an AWS principal which can assume
      the role `${var.api_caller_role_arn}` ( `aws sts get-caller-identity` to determine who you're
-     authenticated as; if necessary, as this ARN to the `caller_aws_arns` list in the
+     authenticated as; if necessary, add this ARN to the `caller_aws_arns` list in the
      `terraform.tfvars` file of your configuration to allow it to assume that role)
 
 ### Make "test calls"
