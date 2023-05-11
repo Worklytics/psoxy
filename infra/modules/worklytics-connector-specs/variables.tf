@@ -17,12 +17,8 @@ variable "google_workspace_example_admin" {
 
 variable "msft_tenant_id" {
   type        = string
-  default     = null
   description = "ID of Microsoft tenant to connect to (req'd only if config includes MSFT connectors)"
-  validation {
-    condition     = var.msft_tenant_id != null || length([for c in var.enabled_connectors : c if contains(["azure-ad", "outlook-cal", "outlook-mail"], c)]) == 0
-    error_message = "msft_tenant_id is required if any MSFT connectors are enabled"
-  }
+  default     = ""
 }
 
 variable "example_msft_user_guid" {
@@ -33,6 +29,6 @@ variable "example_msft_user_guid" {
 
 variable "salesforce_domain" {
   type        = string
-  default     = ""
   description = "Domain of the Salesforce to connect to (only required if using Salesforce connector). To find your My Domain URL, from Setup, in the Quick Find box, enter My Domain, and then select My Domain"
+  default     = ""
 }

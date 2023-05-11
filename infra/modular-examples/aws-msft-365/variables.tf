@@ -217,8 +217,8 @@ variable "lookup_table_builders" {
 
 variable "msft_tenant_id" {
   type        = string
-  default     = ""
   description = "ID of Microsoft tenant to connect to (req'd only if config includes MSFT connectors)"
+  default     = ""
 }
 
 variable "msft_owners_email" {
@@ -235,6 +235,6 @@ variable "pseudonymize_app_ids" {
 
 variable "salesforce_domain" {
   type        = string
-  default     = ""
   description = "Domain of the Salesforce to connect to (only required if using Salesforce connector). To find your My Domain URL, from Setup, in the Quick Find box, enter My Domain, and then select My Domain"
+  default     = ""
 }

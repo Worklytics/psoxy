@@ -216,7 +216,8 @@ locals {
         "User.Read.All"
       ],
       environment_variables : {
-        GRANT_TYPE : "workload_identity_federation" # by default, assumed to be of type 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
+        GRANT_TYPE : "workload_identity_federation"
+        # by default, assumed to be of type 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
         TOKEN_SCOPE : "https://graph.microsoft.com/.default"
         REFRESH_ENDPOINT : "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
       }

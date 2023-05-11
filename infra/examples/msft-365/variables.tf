@@ -43,10 +43,11 @@ variable "caller_aws_arns" {
     error_message = "The values of caller_aws_arns should be AWS Resource Names, something like 'arn:aws:iam::914358739851:root'."
   }
 }
+
 variable "msft_tenant_id" {
   type        = string
-  default     = ""
   description = "ID of Microsoft tenant to connect to (req'd only if config includes MSFT connectors)"
+  default     = ""
 }
 
 variable "connector_display_name_suffix" {
