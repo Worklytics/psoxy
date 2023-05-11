@@ -240,7 +240,7 @@ variable "google_workspace_example_admin" {
 variable "msft_tenant_id" {
   type        = string
   description = "ID of Microsoft tenant to connect to (req'd only if config includes MSFT connectors)"
-  default     = ""
+  default     = null
 }
 
 variable "msft_owners_email" {

@@ -248,6 +248,18 @@ variable "google_workspace_example_admin" {
   default     = null # will failover to user
 }
 
+variable "msft_tenant_id" {
+  type        = string
+  description = "ID of Microsoft tenant to connect to (req'd only if config includes MSFT connectors)"
+  default     = null
+}
+
+variable "msft_owners_email" {
+  type        = set(string)
+  default     = []
+  description = "(Only if config includes MSFT connectors). Optionally, set of emails to apply as owners on AAD apps apart from current logged user"
+}
+
 variable "salesforce_domain" {
   type        = string
   default     = ""

@@ -18,12 +18,13 @@ locals {
 
 module "worklytics_connector_specs" {
   source = "../../modules/worklytics-connector-specs"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connector-specs?ref=v0.4.22"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connector-specs?ref=v0.4.22
 
   enabled_connectors             = var.enabled_connectors
   google_workspace_example_user  = var.google_workspace_example_user
-  google_workspace_example_admin = coalesce(var.google_workspace_example_admin, var.google_workspace_example_user)
+  google_workspace_example_admin = try(coalesce(var.google_workspace_example_admin, var.google_workspace_example_user), null)
   salesforce_domain              = var.salesforce_domain
+  msft_tenant_id                 = var.msft_tenant_id
 }
 
 module "psoxy" {

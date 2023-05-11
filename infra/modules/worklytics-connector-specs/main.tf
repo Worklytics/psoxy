@@ -586,7 +586,7 @@ locals {
     for k, v in local.google_workspace_sources : k => v if contains(var.enabled_connectors, k)
   }
   enabled_msft_365_connectors = {
-    for k, v in local.msft_365_connectors : k => v if contains(var.enabled_connectors, k)
+    for k, v in local.msft_365_connectors : k => v if contains(var.enabled_connectors, k) && var.msft_tenant_id != null
   }
   enabled_oauth_long_access_connectors = { for k, v in local.oauth_long_access_connectors : k => v if contains(var.enabled_connectors, k) }
 
