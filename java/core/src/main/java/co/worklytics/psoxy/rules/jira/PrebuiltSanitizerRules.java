@@ -183,11 +183,11 @@ public class PrebuiltSanitizerRules {
         return JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                 .type("object")
                 .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
-                    put("statuscategorychangedate", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
+                    put("statusCategoryChangeDate", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
 
-                    put("issuetype", jsonSchemaForIssueType());
+                    put("issueType", jsonSchemaForIssueType());
                     put("parent", jsonSchemaForIssueParent());
-                    put("timespent", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
+                    put("timeSpent", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                     // In doc appears as "watchers", but in actual response is "watches"
                     put("watches", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                             .type("object")
@@ -236,7 +236,7 @@ public class PrebuiltSanitizerRules {
                                 put("updated", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                                 put("visibility", jsonSchemaForVisibility());
                             }}).build());
-                    put("issuelinks", jsonSchemaForLinks());
+                    put("issueLinks", jsonSchemaForLinks());
                     put("worklog", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                             .type("array")
                             .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{
@@ -251,7 +251,7 @@ public class PrebuiltSanitizerRules {
                                 put("timeSpentSeconds", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("integer").build());
                             }}).build());
                     put("updated", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("integer").build());
-                    put("timetracking", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                    put("timeTracking", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                             .type("object")
                             .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{
                                 put("originalEstimate", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
@@ -263,16 +263,16 @@ public class PrebuiltSanitizerRules {
                             }}).build());
 
                     put("created", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-                    put("resolutiondate", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
+                    put("resolutionDate", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                     put("lastViewed", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                     put("assignee", jsonSchemaForUser());
                     put("status", jsonSchemaForIssueStatus());
                     put("creator", jsonSchemaForUser());
                     put("reporter", jsonSchemaForUser());
 
-                    put("aggregateprogress", jsonSchemaForProgressInformation());
+                    put("aggregateProgress", jsonSchemaForProgressInformation());
 
-                    put("duedate", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
+                    put("dueDate", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
 
                     put("progress", jsonSchemaForProgressInformation());
 
@@ -326,7 +326,7 @@ public class PrebuiltSanitizerRules {
                                     .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
                                         put("status",jsonSchemaForIssueStatus());
                                         put("priority", jsonSchemaForIssuePriority());
-                                        put("issuetype", jsonSchemaForIssueType());
+                                        put("issueType", jsonSchemaForIssueType());
                                     }})
                                     .build()
                     );
