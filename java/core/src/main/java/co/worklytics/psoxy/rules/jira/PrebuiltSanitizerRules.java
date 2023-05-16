@@ -44,6 +44,7 @@ public class PrebuiltSanitizerRules {
             .transform(Transform.Pseudonymize.builder()
                     .jsonPath("$.issues[*]..accountId")
                     .jsonPath("$.issues[*]..emailAddress")
+                    .jsonPath("$.issues[*]..body..id")
                     .build())
             .responseSchema(jsonSchemaForQueryResult())
             .build();
