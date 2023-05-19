@@ -505,14 +505,41 @@ all the operations for the connector:
 
 EOT
     },
+    jira-server = {
+      source_kind : "jira"
+      worklytics_connector_id : "jira-server-oauth-psoxy"
+      target_host : var.jira_server_url
+      source_auth_strategy : "oauth2_access_token"
+      display_name : "Jira REST API"
+      identifier_scope_id : "jira"
+      worklytics_connector_name : "Jira Server REST API via Psoxy"
+      secured_variables : [
+        { name : "ACCESS_TOKEN", writable : false },
+      ],
+      reserved_concurrent_executions : null
+      example_api_calls_user_to_impersonate : null
+      example_api_calls : [
+        "/ex/rest/api/2/search?maxResults=25",
+        "/ex/rest/api/2/issue/${var.example_jira_issue_id}/comment?maxResults=25",
+        "/ex/rest/api/2/issue/${var.example_jira_issue_id}/worklog?maxResults=25",
+        "/ex/rest/api/3/search?maxResults=25",
+        "/ex/rest/api/3/issue/${var.example_jira_issue_id}/comment?maxResults=25",
+        "/ex/rest/api/3/issue/${var.example_jira_issue_id}/worklog?maxResults=25",
+      ],
+      external_token_todo : <<EOT
+Follow the instructions to create a [Personal Access Token](https://confluence.atlassian.com/enterprise/using-personal-access-tokens-1026032365.html) in your instance
+and then copy the value of the token in PSOXY_JIRA_SERVER_ACCESS_TOKEN variable as part of AWS System Manager parameters store / GCP Cloud Secrets (if default implementation)
+EOT
+    }
+  }
     jira = {
       source_kind : "jira"
       worklytics_connector_id : "jira-oauth-psoxy"
       target_host : "api.atlassian.com"
       source_auth_strategy : "oauth2_refresh_token"
-      display_name : "Jira OAuth 2.0 (3LO)"
+      display_name : "Jira REST API"
       identifier_scope_id : "jira"
-      worklytics_connector_name : "Jira OAuth 2.0 (3LO) via Psoxy"
+      worklytics_connector_name : "Jira REST API via Psoxy"
       secured_variables : [
         { name : "ACCESS_TOKEN", writable : true },
         { name : "REFRESH_TOKEN", writable : true },
