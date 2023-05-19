@@ -2,9 +2,10 @@
   "startAt": 0,
   "maxResults": 5000,
   "total": 1,
-  "worklogs": [
+  "comments": [
     {
-      "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/10706/worklog/10000",
+      "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/10709/comment/10024",
+      "id": "10024",
       "author": {
         "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/user?accountId=608a9b555426330072f9867d",
         "accountId": "608a9b555426330072f9867d",
@@ -20,6 +21,7 @@
         "timeZone": "America/New_York",
         "accountType": "atlassian"
       },
+      "body": "hello @aperez",
       "updateAuthor": {
         "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/user?accountId=608a9b555426330072f9867d",
         "accountId": "608a9b555426330072f9867d",
@@ -35,13 +37,9 @@
         "timeZone": "America/New_York",
         "accountType": "atlassian"
       },
-      "created": "2023-05-02T11:04:36.332-0400",
-      "updated": "2023-05-02T11:04:36.332-0400",
-      "started": "2023-05-02T03:04:25.520-0400",
-      "timeSpent": "1d",
-      "timeSpentSeconds": 28800,
-      "id": "10000",
-      "issueId": "10706"
+      "created": "2022-03-02T09:00:54.241-0500",
+      "updated": "2022-03-02T09:00:54.241-0500",
+      "jsdPublic": true
     }
   ]
 }

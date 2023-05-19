@@ -528,10 +528,16 @@ EOT
       reserved_concurrent_executions : null
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
+        "/ex/jira/${var.jira_cloud_id}/rest/api/2/users",
+        "/ex/jira/${var.jira_cloud_id}/rest/api/2/group/bulk",
+        "/ex/jira/${var.jira_cloud_id}/rest/api/2/search?maxResults=25",
+        "/ex/jira/${var.jira_cloud_id}/rest/api/2/issue/${var.example_jira_issue_id}/changelog?maxResults=25",
+        "/ex/jira/${var.jira_cloud_id}/rest/api/2/issue/${var.example_jira_issue_id}/comment?maxResults=25",
+        "/ex/jira/${var.jira_cloud_id}/rest/api/2/issue/${var.example_jira_issue_id}/worklog?maxResults=25",
         "/ex/jira/${var.jira_cloud_id}/rest/api/3/users",
         "/ex/jira/${var.jira_cloud_id}/rest/api/3/group/bulk",
         "/ex/jira/${var.jira_cloud_id}/rest/api/3/search?maxResults=25",
-        "/ex/jira/${var.jira_cloud_id}/rest/api/3/issue/${var.example_jira_issue_id}/changelog?maxResults=D25",
+        "/ex/jira/${var.jira_cloud_id}/rest/api/3/issue/${var.example_jira_issue_id}/changelog?maxResults=25",
         "/ex/jira/${var.jira_cloud_id}/rest/api/3/issue/${var.example_jira_issue_id}/comment?maxResults=25",
         "/ex/jira/${var.jira_cloud_id}/rest/api/3/issue/${var.example_jira_issue_id}/worklog?maxResults=25",
       ],

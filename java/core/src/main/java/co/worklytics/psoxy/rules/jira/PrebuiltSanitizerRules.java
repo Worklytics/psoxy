@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
  * The latest version of the Jira Cloud platform REST API is version 3, which is in beta.
  * Version 2 and 3 of the API offer the same collection of operations.
  * However, version 3 provides support for the Atlassian Document Format (ADF). The ADF features in version 3 are under development."
- * Main difference is in "Comments" between both versions. In v2, comments include the body as a plain text -which is redacted
+ * Main difference is in "Comments" between both versions, present in comments entity ifself, issues and worklogs. In v2, comments include the body as a plain text -which is redacted
  * as part of the rules-. In v3, apart from plain text it included the "Atlassian Document Format" which is an object where it includes
  * information about comment, such id of the users mentioned -in V3, these are pseudonymized-
  */
@@ -138,17 +138,35 @@ public class PrebuiltSanitizerRules {
             .build();
 
 
-    static final Endpoint ISSUE_WORKLOG = Endpoint.builder()
-            .pathTemplate("/ex/jira/{cloudId}/rest/api/{apiVersion}/issue/{issueId}/worklog")
+    static final Endpoint ISSUE_WORKLOG_V2 = Endpoint.builder()
+            .pathTemplate("/ex/jira/{cloudId}/rest/api/2/issue/{issueId}/worklog")
             .allowedQueryParams(commonAllowedQueryParameters)
             .transform(Transform.Redact.builder()
                     .jsonPath("$.worklogs[*]..self")
                     .jsonPath("$.worklogs[*]..avatarUrls")
                     .jsonPath("$.worklogs[*]..displayName")
+                    .jsonPath("$.worklogs[*]..comment")
                     .build())
             .transform(Transform.Pseudonymize.builder()
                     .jsonPath("$.worklogs[*]..accountId")
                     .jsonPath("$.worklogs[*]..emailAddress")
+                    .build())
+            .build();
+
+    static final Endpoint ISSUE_WORKLOG_V3 = Endpoint.builder()
+            .pathTemplate("/ex/jira/{cloudId}/rest/api/3/issue/{issueId}/worklog")
+            .allowedQueryParams(commonAllowedQueryParameters)
+            .transform(Transform.Redact.builder()
+                    .jsonPath("$.worklogs[*]..self")
+                    .jsonPath("$.worklogs[*]..avatarUrls")
+                    .jsonPath("$.worklogs[*]..displayName")
+                    .jsonPath("$.worklogs[*]..text")
+
+                    .build())
+            .transform(Transform.Pseudonymize.builder()
+                    .jsonPath("$.worklogs[*]..accountId")
+                    .jsonPath("$.worklogs[*]..emailAddress")
+                    .jsonPath("$.worklogs[*]..comment..id")
                     .build())
             .build();
 
@@ -197,7 +215,8 @@ public class PrebuiltSanitizerRules {
             .endpoint(ISSUE_CHANGELOG)
             .endpoint(ISSUE_COMMENT_V2)
             .endpoint(ISSUE_COMMENT_V3)
-            .endpoint(ISSUE_WORKLOG)
+            .endpoint(ISSUE_WORKLOG_V2)
+            .endpoint(ISSUE_WORKLOG_V3)
             .endpoint(USERS)
             .build();
 

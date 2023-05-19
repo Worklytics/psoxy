@@ -139,8 +139,28 @@ public class JiraTests extends JavaRulesTestBaseCase {
     }
 
     @Test
-    void issue_comments() {
-        String jsonString = asJson(exampleDirectoryPath, "issue_comment.json");
+    void issue_comments_v2() {
+        String jsonString = asJson(exampleDirectoryPath, "issue_comment_v2.json");
+
+        String endpoint = "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/2/issue/fake/comment?&startAt=50";
+
+        Collection<String> PII = Arrays.asList("608a9b555426330072f9867d", "fake@contoso.com", "Fake");
+        assertNotSanitized(jsonString, PII);
+
+        String sanitized = this.sanitize(endpoint, jsonString);
+
+        assertPseudonymized(sanitized, "608a9b555426330072f9867d");
+        assertPseudonymized(sanitized, "fake@contoso.com");
+        assertRedacted(sanitized,
+                "Fake", // display name
+                "https://...", //photo url placeholders
+                "aperez" // mention in body
+        );
+    }
+
+    @Test
+    void issue_comments_v3() {
+        String jsonString = asJson(exampleDirectoryPath, "issue_comment_v3.json");
 
         String endpoint = "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/fake/comment?&startAt=50";
 
@@ -158,8 +178,28 @@ public class JiraTests extends JavaRulesTestBaseCase {
     }
 
     @Test
-    void issue_worklog() {
-        String jsonString = asJson(exampleDirectoryPath, "issue_worklog.json");
+    void issue_worklog_v2() {
+        String jsonString = asJson(exampleDirectoryPath, "issue_worklog_v2.json");
+
+        String endpoint = "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/2/issue/fake/worklog?&startAt=50";
+
+        Collection<String> PII = Arrays.asList("608a9b555426330072f9867d", "fake@contoso.com", "Fake");
+        assertNotSanitized(jsonString, PII);
+
+        String sanitized = this.sanitize(endpoint, jsonString);
+
+        assertPseudonymized(sanitized, "608a9b555426330072f9867d");
+        assertPseudonymized(sanitized, "fake@contoso.com");
+        assertRedacted(sanitized,
+                "Fake", // display name
+                "https://...", //photo url placeholders
+                "aperez"
+        );
+    }
+
+    @Test
+    void issue_worklog_v3() {
+        String jsonString = asJson(exampleDirectoryPath, "issue_worklog_v3.json");
 
         String endpoint = "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/fake/worklog?&startAt=50";
 
@@ -185,8 +225,10 @@ public class JiraTests extends JavaRulesTestBaseCase {
 
                 InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/search?jql=something&startAt=50", "issues_by_jql.json"),
                 InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/fake/changelog?&startAt=50", "issue_changelog.json"),
-                InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/fake/comment?&startAt=50", "issue_comment.json"),
-                InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/fake/worklog?&startAt=50", "issue_worklog.json")
+                InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/2/issue/fake/comment?&startAt=50", "issue_comment_v2.json"),
+                InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/fake/comment?&startAt=50", "issue_comment_v3.json"),
+                InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/2/issue/fake/worklog?&startAt=50", "issue_worklog_v2.json"),
+                InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/fake/worklog?&startAt=50", "issue_worklog_v3.json")
                 );
     }
 }
