@@ -15,7 +15,7 @@ variable "aws_assume_role_arn" {
 variable "aws_region" {
   type        = string
   default     = "us-east-1"
-  description = "default region in which to provision your AWS infra"
+  description = "IGNORED; default region in which to provision your AWS infra"
 }
 
 variable "instance_id" {

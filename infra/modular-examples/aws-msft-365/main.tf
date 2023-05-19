@@ -11,7 +11,7 @@ terraform {
       version = ">= 2.3, < 3.0"
     }
   }
-}
+}a
 
 locals {
   base_config_path = "${var.psoxy_base_dir}configs/"
@@ -143,6 +143,7 @@ module "psoxy-msft-connector" {
   aws_assume_role_arn             = var.aws_assume_role_arn
   example_api_calls               = each.value.example_api_calls
   aws_account_id                  = var.aws_account_id
+  region                          = var.aws_region
   path_to_repo_root               = var.psoxy_base_dir
   todo_step                       = module.msft_365_grants[each.key].next_todo_step
   global_parameter_arns           = module.global_secrets.secret_arns
@@ -256,6 +257,7 @@ module "aws-psoxy-long-auth-connectors" {
   path_to_config                        = null
   aws_assume_role_arn                   = var.aws_assume_role_arn
   aws_account_id                        = var.aws_account_id
+  region                                = var.aws_region
   api_caller_role_arn                   = module.psoxy-aws.api_caller_role_arn
   source_kind                           = each.value.source_kind
   path_to_repo_root                     = var.psoxy_base_dir

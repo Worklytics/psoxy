@@ -8,6 +8,10 @@ terraform {
   }
 }
 
+# NOTE: region used to be passed in as a variable; put it MUST match the region in which the lambda
+# is provisioned, and that's implicit in the provider - so we should just infer from the provider
+data "aws_region" "current" {}
+
 locals {
   # from v0.5, these will be required; for now, allow `null` but filter out so taken from config yaml
   required_env_vars = { for k, v in {
@@ -74,7 +78,12 @@ locals {
   command_test_calls = [for path in var.example_api_calls :
     "${local.command_cli_call} -u \"${local.proxy_endpoint_url}${path}\"${local.impersonation_param}"
   ]
-  command_test_logs = "node ${var.path_to_repo_root}tools/psoxy-test/cli-logs.js -r \"${local.arn_for_test_calls}\" -re \"${var.region}\" -l \"${module.psoxy_lambda.log_group}\""
+  command_test_logs = "node ${var.path_to_repo_root}tools/psoxy-test/cli-logs.js -r \"${local.arn_for_test_calls}\" -re \"${data.aws_region.current.id}\" -l \"${module.psoxy_lambda.log_group}\""
+
+  awscurl_test_call = "${var.path_to_repo_root}tools/test-psoxy.sh -a -r \"${local.arn_for_test_calls}\" -e  \"${data.aws_region.current.id}\""
+  awscurl_test_calls = [ for path in var.example_api_calls :
+    "${local.awscurl_test_call} -u \"${local.proxy_endpoint_url}${path}\"${local.impersonation_param}"
+  ]
 
   todo_content = <<EOT
 
@@ -82,7 +91,7 @@ locals {
 
 Review the deployed function in AWS console:
 
-- https://console.aws.amazon.com/lambda/home?region=${var.region}#/functions/${var.function_name}?tab=monitoring
+- https://console.aws.amazon.com/lambda/home?region=${data.aws_region.current.id}#/functions/${var.function_name}?tab=monitoring
 
 We provide some Node.js scripts to simplify testing your proxy deployment. To be able run test
 commands below, you will need
@@ -113,6 +122,13 @@ ${coalesce(join("\n", local.command_test_calls), "cd docs/example-api-calls/")}
 
 Feel free to try the above calls, and reference to the source's API docs for other parameters /
 endpoints to experiment with.
+
+
+As an alternative, we offer a simpler bash script for testing that wraps `awscurl` + `jq`, if those
+are installed on your system:
+```shell
+${coalesce(join("\n", local.awscurl_test_calls), "cd docs/example-api-calls/")}
+```
 
 ### Check logs (AWS CloudWatch)
 
