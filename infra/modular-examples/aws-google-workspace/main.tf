@@ -34,6 +34,7 @@ module "psoxy-aws" {
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws?ref=v0.4.23
 
   aws_account_id                 = var.aws_account_id
+  region                         = var.aws_region
   psoxy_base_dir                 = var.psoxy_base_dir
   force_bundle                   = var.force_bundle
   caller_aws_arns                = var.caller_aws_arns
