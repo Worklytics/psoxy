@@ -39,6 +39,10 @@ locals {
   ]
 }
 
+# NOTE: region used to be passed in as a variable; put it MUST match the region in which the lambda
+# is provisioned, and that's implicit in the provider - so we should just infer from the provider
+data "aws_region" "current" {}
+
 
 # role that Worklytics user will use to call the API
 resource "aws_iam_role" "api-caller" {
@@ -82,7 +86,7 @@ resource "aws_iam_policy" "execution_lambda_to_caller" {
         {
           "Action" : ["lambda:InvokeFunctionUrl"],
           "Effect" : "Allow",
-          "Resource" : "arn:aws:lambda:${var.region}:${var.aws_account_id}:function:${var.rest_function_name_prefix}*"
+          "Resource" : "arn:aws:lambda:${data.aws_region.current.id}:${var.aws_account_id}:function:${var.rest_function_name_prefix}*"
         }
       ]
   })

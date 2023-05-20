@@ -35,6 +35,7 @@ module "psoxy-aws" {
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws?ref=v0.4.23
 
   aws_account_id                 = var.aws_account_id
+  region                         = var.aws_region
   psoxy_base_dir                 = var.psoxy_base_dir
   force_bundle                   = var.force_bundle
   caller_aws_arns                = var.caller_aws_arns
@@ -121,6 +122,7 @@ module "psoxy-google-workspace-connector" {
   api_caller_role_arn                   = module.psoxy-aws.api_caller_role_arn
   aws_assume_role_arn                   = var.aws_assume_role_arn
   aws_account_id                        = var.aws_account_id
+  region                                = var.aws_region
   path_to_repo_root                     = var.psoxy_base_dir
   example_api_calls                     = each.value.example_api_calls
   example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
@@ -228,6 +230,7 @@ module "aws-psoxy-long-auth-connectors" {
   path_to_config                  = null
   aws_assume_role_arn             = var.aws_assume_role_arn
   aws_account_id                  = var.aws_account_id
+  region                          = var.aws_region
   api_caller_role_arn             = module.psoxy-aws.api_caller_role_arn
   source_kind                     = each.value.source_kind
   path_to_repo_root               = var.psoxy_base_dir

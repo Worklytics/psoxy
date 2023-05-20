@@ -8,6 +8,10 @@ terraform {
   }
 }
 
+# NOTE: region used to be passed in as a variable; put it MUST match the region in which the lambda
+# is provisioned, and that's implicit in the provider - so we should just infer from the provider
+data "aws_region" "current" {}
+
 # deployment ID to avoid collisions if deploying host environment (AWS account, GCP project) that
 # is shared by multiple deployments
 resource "random_string" "deployment_id" {
@@ -42,6 +46,7 @@ module "psoxy_aws" {
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws?ref=v0.4.23
 
   aws_account_id                 = var.aws_account_id
+  region                         = data.aws_region.current.id
   psoxy_base_dir                 = var.psoxy_base_dir
   caller_aws_arns                = var.caller_aws_arns
   caller_gcp_service_account_ids = var.caller_gcp_service_account_ids
@@ -153,6 +158,7 @@ module "psoxy_google_workspace_connector" {
   api_caller_role_arn                   = module.psoxy_aws.api_caller_role_arn
   aws_assume_role_arn                   = var.aws_assume_role_arn
   aws_account_id                        = var.aws_account_id
+  region                                = data.aws_region.current.id
   path_to_repo_root                     = var.psoxy_base_dir
   example_api_calls                     = each.value.example_api_calls
   example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
@@ -195,7 +201,7 @@ module "worklytics_psoxy_connection_google_workspace" {
   todo_step              = module.psoxy_google_workspace_connector[each.key].next_todo_step
 
   settings_to_provide = {
-    "AWS Psoxy Region"   = var.aws_region,
+    "AWS Psoxy Region"   = data.aws_region.current.id,
     "AWS Psoxy Role ARN" = module.psoxy_aws.api_caller_role_arn
   }
 }
@@ -230,7 +236,7 @@ module "cognito_identity" {
   source = "../../modules/aws-cognito-identity-cli"
 
   identity_pool_id = module.cognito_identity_pool[0].pool_id
-  aws_region       = var.aws_region
+  aws_region       = data.aws_region.current.id
   login_ids        = { for k in keys(module.msft_connection) : k => "${module.cognito_identity_pool[0].developer_provider_name}=${module.msft_connection[k].connector.application_id}" }
   aws_role         = var.aws_assume_role_arn
 }
@@ -317,6 +323,7 @@ module "psoxy_msft_connector" {
   aws_assume_role_arn             = var.aws_assume_role_arn
   example_api_calls               = each.value.example_api_calls
   aws_account_id                  = var.aws_account_id
+  region                          = data.aws_region.current.id
   path_to_repo_root               = var.psoxy_base_dir
   todo_step                       = module.msft_365_grants[each.key].next_todo_step
   global_parameter_arns           = module.global_secrets.secret_arns
@@ -367,7 +374,7 @@ module "worklytics_psoxy_connection_msft_365" {
   todo_step              = module.psoxy_msft_connector[each.key].next_todo_step
 
   settings_to_provide = {
-    "AWS Psoxy Region"   = var.aws_region,
+    "AWS Psoxy Region"   = data.aws_region.current.id,
     "AWS Psoxy Role ARN" = module.psoxy_aws.api_caller_role_arn
   }
 }
@@ -412,7 +419,7 @@ module "parameter_fill_instructions" {
   source = "../../modules/aws-ssm-fill-md"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-ssm-fill-md?ref=v0.4.23"
 
-  region         = var.aws_region
+  region         = data.aws_region.current.id
   parameter_name = aws_ssm_parameter.long-access-secrets[each.key].name
 }
 
@@ -446,6 +453,7 @@ module "aws_psoxy_long_auth_connectors" {
   function_zip_hash               = module.psoxy_aws.deployment_package_hash
   path_to_config                  = null
   aws_account_id                  = var.aws_account_id
+  region                          = data.aws_region.current.id
   aws_assume_role_arn             = var.aws_assume_role_arn
   api_caller_role_arn             = module.psoxy_aws.api_caller_role_arn
   source_kind                     = each.value.source_kind
@@ -494,7 +502,7 @@ module "worklytics_psoxy_connection" {
   todo_step          = module.aws_psoxy_long_auth_connectors[each.key].next_todo_step
 
   settings_to_provide = {
-    "AWS Psoxy Region"   = var.aws_region,
+    "AWS Psoxy Region"   = data.aws_region.current.id,
     "AWS Psoxy Role ARN" = module.psoxy_aws.api_caller_role_arn
   }
 }
@@ -531,7 +539,7 @@ module "psoxy_bulk" {
   aws_role_to_assume_when_testing  = var.provision_testing_infra ? module.psoxy_aws.api_caller_role_arn : null
   instance_id                      = each.key
   source_kind                      = each.value.source_kind
-  aws_region                       = var.aws_region
+  aws_region                       = data.aws_region.current.id
   path_to_function_zip             = module.psoxy_aws.path_to_deployment_jar
   function_zip_hash                = module.psoxy_aws.deployment_package_hash
   psoxy_base_dir                   = var.psoxy_base_dir
@@ -575,7 +583,7 @@ module "psoxy_bulk_to_worklytics" {
   todo_step              = module.psoxy_bulk[each.key].next_todo_step
 
   settings_to_provide = merge({
-    "AWS Psoxy Region"   = var.aws_region,
+    "AWS Psoxy Region"   = data.aws_region.current.id,
     "AWS Psoxy Role ARN" = module.psoxy_aws.api_caller_role_arn
     "Bucket Name"        = module.psoxy_bulk[each.key].sanitized_bucket
   }, try(each.value.settings_to_provide, {}))
