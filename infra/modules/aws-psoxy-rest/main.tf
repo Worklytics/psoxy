@@ -81,7 +81,7 @@ locals {
   command_test_logs = "node ${var.path_to_repo_root}tools/psoxy-test/cli-logs.js -r \"${local.arn_for_test_calls}\" -re \"${data.aws_region.current.id}\" -l \"${module.psoxy_lambda.log_group}\""
 
   awscurl_test_call = "${var.path_to_repo_root}tools/test-psoxy.sh -a -r \"${local.arn_for_test_calls}\" -e  \"${data.aws_region.current.id}\""
-  awscurl_test_calls = [ for path in var.example_api_calls :
+  awscurl_test_calls = [for path in var.example_api_calls :
     "${local.awscurl_test_call} -u \"${local.proxy_endpoint_url}${path}\"${local.impersonation_param}"
   ]
 

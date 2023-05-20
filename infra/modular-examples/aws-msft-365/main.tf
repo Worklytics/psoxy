@@ -11,7 +11,7 @@ terraform {
       version = ">= 2.3, < 3.0"
     }
   }
-}a
+}
 
 locals {
   base_config_path = "${var.psoxy_base_dir}configs/"
