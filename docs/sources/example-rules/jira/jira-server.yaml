@@ -16,6 +16,7 @@ endpoints:
           - "$.issues[*]..name"
           - "$.issues[*]..avatarUrls"
           - "$.issues[*]..displayName"
+          - "$.issues[*]..name"
           - "$.issues[*]..body"
           - "$.issues[*]..comment"
           - "$..displayName"
@@ -412,6 +413,7 @@ endpoints:
           - "$.comments[*]..self"
           - "$.comments[*]..avatarUrls"
           - "$.comments[*]..displayName"
+          - "$.comments[*]..name"
           - "$.comments[*]..text"
           - "$.comments[*]..body"
           - "$.comments[*]..renderedBody"
@@ -430,6 +432,7 @@ endpoints:
           - "$.worklogs[*]..self"
           - "$.worklogs[*]..avatarUrls"
           - "$.worklogs[*]..displayName"
+          - "$.worklogs[*]..name"
           - "$.worklogs[*]..comment"
       - !<pseudonymize>
         jsonPaths:
