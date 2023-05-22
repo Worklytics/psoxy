@@ -87,6 +87,7 @@ module "psoxy" {
   general_environment_variables  = var.general_environment_variables
   pseudonymize_app_ids           = var.pseudonymize_app_ids
   salesforce_domain              = var.salesforce_domain
+  jira_server_url = var.jira_server_url
   jira_cloud_id                  = var.jira_cloud_id
   example_jira_issue_id          = var.example_jira_issue_id
   bulk_sanitized_expiration_days = var.bulk_sanitized_expiration_days

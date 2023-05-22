@@ -176,6 +176,12 @@ variable "msft_owners_email" {
   default     = []
 }
 
+variable "jira_server_url" {
+  type        = string
+  default     = ""
+  description = "URL of the Jira server (only required if using Jira Server connector)."
+}
+
 variable "jira_cloud_id" {
   type        = string
   default     = ""
