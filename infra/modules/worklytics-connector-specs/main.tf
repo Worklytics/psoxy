@@ -519,12 +519,12 @@ EOT
       reserved_concurrent_executions : null
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
-        "/ex/rest/api/2/search?maxResults=25",
-        "/ex/rest/api/2/issue/${var.example_jira_issue_id}/comment?maxResults=25",
-        "/ex/rest/api/2/issue/${var.example_jira_issue_id}/worklog?maxResults=25",
-        "/ex/rest/api/3/search?maxResults=25",
-        "/ex/rest/api/3/issue/${var.example_jira_issue_id}/comment?maxResults=25",
-        "/ex/rest/api/3/issue/${var.example_jira_issue_id}/worklog?maxResults=25",
+        "/rest/api/2/search?maxResults=25",
+        "/rest/api/2/issue/${var.example_jira_issue_id}/comment?maxResults=25",
+        "/rest/api/2/issue/${var.example_jira_issue_id}/worklog?maxResults=25",
+        "/rest/api/latest/search?maxResults=25",
+        "/rest/api/latest/issue/${var.example_jira_issue_id}/comment?maxResults=25",
+        "/rest/api/latest/issue/${var.example_jira_issue_id}/worklog?maxResults=25",
       ],
       external_token_todo : <<EOT
 Follow the instructions to create a [Personal Access Token](https://confluence.atlassian.com/enterprise/using-personal-access-tokens-1026032365.html) in your instance

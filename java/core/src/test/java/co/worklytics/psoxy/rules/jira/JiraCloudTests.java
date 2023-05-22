@@ -11,10 +11,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Stream;
 
-public class JiraTests extends JavaRulesTestBaseCase {
+public class JiraCloudTests extends JavaRulesTestBaseCase {
 
     @Getter
-    final RESTRules rulesUnderTest = PrebuiltSanitizerRules.JIRA;
+    final RESTRules rulesUnderTest = PrebuiltSanitizerRules.JIRA_CLOUD;
 
     @Getter
     final String exampleDirectoryPath = "api-response-examples/jira";
@@ -23,7 +23,7 @@ public class JiraTests extends JavaRulesTestBaseCase {
     final String defaultScopeId = "jira";
 
     @Getter
-    final String yamlSerializationFilepath = "jira/jira";
+    final String yamlSerializationFilepath = "jira/jira-cloud";
 
     @Disabled // not reliable; seems to have different value via IntelliJ/AWS deployment and my
     // laptop's maven, which doesn't make any sense, given that binary deployed to AWS was built via
@@ -228,7 +228,6 @@ public class JiraTests extends JavaRulesTestBaseCase {
                 InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/2/issue/fake/comment?&startAt=50", "issue_comment_v2.json"),
                 InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/fake/comment?&startAt=50", "issue_comment_v3.json"),
                 InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/2/issue/fake/worklog?&startAt=50", "issue_worklog_v2.json"),
-                InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/fake/worklog?&startAt=50", "issue_worklog_v3.json")
-                );
+                InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/fake/worklog?&startAt=50", "issue_worklog_v3.json"));
     }
 }

@@ -1,15 +1,19 @@
 package co.worklytics.psoxy.rules.jira;
 
+import co.worklytics.psoxy.ConfigRulesModule;
 import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.rules.Rules2;
 import com.avaulta.gateway.rules.Endpoint;
 import com.avaulta.gateway.rules.JsonSchemaFilterUtils;
 import com.avaulta.gateway.rules.transforms.Transform;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Streams;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -85,6 +89,28 @@ public class PrebuiltSanitizerRules {
             .responseSchema(jsonSchemaForQueryResult())
             .build();
 
+    static final Endpoint SERVER_ISSUE_SEARCH_V2 = Endpoint.builder()
+            .pathTemplate("/rest/api/{apiVersion}/search")
+            .allowedQueryParams(issuesAllowedQueryParameters)
+            .transform(Transform.Redact.builder()
+                    .jsonPath("$.issues[*].self")
+                    .jsonPath("$.issues[*]..self")
+                    .jsonPath("$.issues[*]..description")
+                    .jsonPath("$.issues[*]..iconUrl")
+                    .jsonPath("$.issues[*]..name")
+                    .jsonPath("$.issues[*]..avatarUrls")
+                    .jsonPath("$.issues[*]..displayName")
+                    .jsonPath("$.issues[*]..body")
+                    .jsonPath("$.issues[*]..comment")
+                    .jsonPath("$..displayName")
+                    .build())
+            .transform(Transform.Pseudonymize.builder()
+                    .jsonPath("$.issues[*]..key")
+                    .jsonPath("$.issues[*]..emailAddress")
+                    .build())
+            .responseSchema(jsonSchemaForQueryResult())
+            .build();
+
     static final Endpoint ISSUE_CHANGELOG = Endpoint.builder()
             .pathTemplate("/ex/jira/{cloudId}/rest/api/{apiVersion}/issue/{issueId}/changelog")
             .allowedQueryParams(commonAllowedQueryParameters)
@@ -137,6 +163,23 @@ public class PrebuiltSanitizerRules {
                     .build())
             .build();
 
+    static final Endpoint SERVER_ISSUE_COMMENT_V2 = Endpoint.builder()
+            .pathTemplate("/rest/api/{apiVersion}/issue/{issueId}/comment")
+            .allowedQueryParams(commonAllowedQueryParameters)
+            .transform(Transform.Redact.builder()
+                    .jsonPath("$.comments[*]..self")
+                    .jsonPath("$.comments[*]..avatarUrls")
+                    .jsonPath("$.comments[*]..displayName")
+                    .jsonPath("$.comments[*]..text")
+                    .jsonPath("$.comments[*]..body")
+                    .jsonPath("$.comments[*]..renderedBody")
+                    .build())
+            .transform(Transform.Pseudonymize.builder()
+                    .jsonPath("$.comments[*]..key")
+                    .jsonPath("$.comments[*]..emailAddress")
+                    .build())
+            .build();
+
 
     static final Endpoint ISSUE_WORKLOG_V2 = Endpoint.builder()
             .pathTemplate("/ex/jira/{cloudId}/rest/api/2/issue/{issueId}/worklog")
@@ -167,6 +210,21 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$.worklogs[*]..accountId")
                     .jsonPath("$.worklogs[*]..emailAddress")
                     .jsonPath("$.worklogs[*]..comment..id")
+                    .build())
+            .build();
+
+    static final Endpoint SERVER_ISSUE_WORKLOG_V2 = Endpoint.builder()
+            .pathTemplate("/rest/api/{apiVersion}/issue/{issueId}/worklog")
+            .allowedQueryParams(commonAllowedQueryParameters)
+            .transform(Transform.Redact.builder()
+                    .jsonPath("$.worklogs[*]..self")
+                    .jsonPath("$.worklogs[*]..avatarUrls")
+                    .jsonPath("$.worklogs[*]..displayName")
+                    .jsonPath("$.worklogs[*]..comment")
+                    .build())
+            .transform(Transform.Pseudonymize.builder()
+                    .jsonPath("$.worklogs[*]..key")
+                    .jsonPath("$.worklogs[*]..emailAddress")
                     .build())
             .build();
 
@@ -207,7 +265,8 @@ public class PrebuiltSanitizerRules {
                     .build())
             .build();
 
-    public static final RESTRules JIRA = Rules2.builder()
+    @VisibleForTesting
+    static final RESTRules JIRA_CLOUD = Rules2.builder()
             .endpoint(GROUP_BULK)
             .endpoint(GROUP_MEMBER)
             .endpoint(ISSUE_SEARCH_V2)
@@ -219,6 +278,19 @@ public class PrebuiltSanitizerRules {
             .endpoint(ISSUE_WORKLOG_V3)
             .endpoint(USERS)
             .build();
+
+    @VisibleForTesting
+    static final RESTRules JIRA_SERVER = Rules2.builder()
+            .endpoint(SERVER_ISSUE_SEARCH_V2)
+            .endpoint(SERVER_ISSUE_COMMENT_V2)
+            .endpoint(SERVER_ISSUE_WORKLOG_V2)
+            .build();
+
+    public static final Map<String, RESTRules> RULES_MAP =
+            ImmutableMap.<String, RESTRules>builder()
+                    .put("jira-server", JIRA_SERVER)
+                    .put("jira-cloud", JIRA_CLOUD)
+                    .build();
 
     private static JsonSchemaFilterUtils.JsonSchemaFilter jsonSchemaForQueryResult() {
         return JsonSchemaFilterUtils.JsonSchemaFilter.builder()
@@ -438,7 +510,10 @@ public class PrebuiltSanitizerRules {
                 // Using LinkedHashMap to keep the order to support same
                 // YAML serialization result
                 .properties(new LinkedHashMap<>() {{ //req for java8-backwards compatibility
+                    // AccountId is present on Cloud instances
                     put("accountId", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
+                    // Key is present on Server instances
+                    put("key", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                     put("accountType", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                     put("emailAddress", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                     put("active", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("boolean").build());
