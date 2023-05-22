@@ -527,8 +527,10 @@ EOT
         "/rest/api/latest/issue/${var.example_jira_issue_id}/worklog?maxResults=25",
       ],
       external_token_todo : <<EOT
-Follow the instructions to create a [Personal Access Token](https://confluence.atlassian.com/enterprise/using-personal-access-tokens-1026032365.html) in your instance
-and then copy the value of the token in PSOXY_JIRA_SERVER_ACCESS_TOKEN variable as part of AWS System Manager parameters store / GCP Cloud Secrets (if default implementation)
+1. Follow the instructions to create a [Personal Access Token](https://confluence.atlassian.com/enterprise/using-personal-access-tokens-1026032365.html) in your instance
+2. Disable or mark a proper expiration of the token.
+3. Copy the value of the token in PSOXY_JIRA_SERVER_ACCESS_TOKEN variable as part of AWS System Manager parameters store / GCP Cloud Secrets (if default implementation)
+NOTE: If your token has been created with expiration date, please remember to update it before that date to ensure connector is going to work.
 EOT
     }
     jira-cloud = {
@@ -640,10 +642,10 @@ And its response will be something like:
 
 Use that id as `jira_cloud_id` parameter to include as part of Terraform deployment. That will target your instance for REST API requests.
 8. Finally set following variables in AWS System Manager parameters store / GCP Cloud Secrets (if default implementation):
-  - `PSOXY_JIRA_ACCESS_TOKEN` secret variable with value of `access_token` received in previous response
-  - `PSOXY_JIRA_REFRESH_TOKEN` secret variable with value of `refresh_token` received in previous response
-  - `PSOXY_JIRA_CLIENT_ID` with `Client Id` value.
-  - `PSOXY_JIRA_CLIENT_SECRET` with `Client Secret` value.
+  - `PSOXY_JIRA_CLOUD_ACCESS_TOKEN` secret variable with value of `access_token` received in previous response
+  - `PSOXY_JIRA_CLOUD_REFRESH_TOKEN` secret variable with value of `refresh_token` received in previous response
+  - `PSOXY_JIRA_CLOUD_CLIENT_ID` with `Client Id` value.
+  - `PSOXY_JIRA_CLOUD_CLIENT_SECRET` with `Client Secret` value.
 
 EOT
     }
