@@ -506,7 +506,7 @@ all the operations for the connector:
 EOT
     },
     jira-server = {
-      source_kind : "jira"
+      source_kind : "jira-server"
       worklytics_connector_id : "jira-server-oauth-psoxy"
       target_host : var.jira_server_url
       source_auth_strategy : "oauth2_access_token"
@@ -532,7 +532,7 @@ and then copy the value of the token in PSOXY_JIRA_SERVER_ACCESS_TOKEN variable 
 EOT
     }
     jira-cloud = {
-      source_kind : "jira"
+      source_kind : "jira-cloud"
       worklytics_connector_id : "jira-oauth-psoxy"
       target_host : "api.atlassian.com"
       source_auth_strategy : "oauth2_refresh_token"
