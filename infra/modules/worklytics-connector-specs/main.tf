@@ -531,8 +531,7 @@ Follow the instructions to create a [Personal Access Token](https://confluence.a
 and then copy the value of the token in PSOXY_JIRA_SERVER_ACCESS_TOKEN variable as part of AWS System Manager parameters store / GCP Cloud Secrets (if default implementation)
 EOT
     }
-  }
-    jira = {
+    jira-cloud = {
       source_kind : "jira"
       worklytics_connector_id : "jira-oauth-psoxy"
       target_host : "api.atlassian.com"
@@ -550,7 +549,7 @@ EOT
       environment_variables : {
         GRANT_TYPE : "refresh_token"
         REFRESH_ENDPOINT : "https://auth.atlassian.com/oauth/token"
-        USE_SHARED_TOKEN: "TRUE"
+        USE_SHARED_TOKEN : "TRUE"
       }
       reserved_concurrent_executions : null
       example_api_calls_user_to_impersonate : null
