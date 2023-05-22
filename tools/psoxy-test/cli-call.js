@@ -8,6 +8,8 @@ import getLogger from './lib/logger.js';
 
 const require = createRequire(import.meta.url);
 const { version } = require('./package.json');
+// Basic regexp to capture ARNs in AWS error messages (colorize ARNs);
+const AWS_ACCESS_DENIED_EXCEPTION_REGEXP = new RegExp(/(?<arn>arn:aws:iam::\d+:\w+\/\S+)/g);
 
 (async function () {
   const program = new Command();
@@ -72,7 +74,16 @@ const { version } = require('./package.json');
       result = await psoxyTestCall(options);
     }
   } catch (error) {
-    logger.error(error.statusMessage || error.message);
+    if (error?.name === 'AccessDenied' && error.message && 
+      AWS_ACCESS_DENIED_EXCEPTION_REGEXP.test(error.message)) {
+      const errorMessage = error.message.replace(
+        AWS_ACCESS_DENIED_EXCEPTION_REGEXP, chalk.bold.red('$<arn>'));
+      const fixErrorHint = chalk.blue('Fix it by adding the ARN to `caller_aws_arns` list in "terraform.tfvars" and run `terraform apply` again.');
+      logger.error(`${errorMessage}\n${fixErrorHint}`);
+    } else {
+      logger.error(error.statusMessage || error.message);
+    }
+
     process.exitCode = 1;
   }
   return result;

@@ -331,7 +331,12 @@ async function getAWSCredentials(role, region) {
     credentialsProvider = fromTemporaryCredentials(temporaryCredentialsOptions);
 
     credentials = await credentialsProvider();
-    logger.info(`Using temporary credentials for role ${role}, access key ID: ${credentials.accessKeyId}`);
+
+    const callerIdentity = JSON.parse(
+      executeCommand('aws sts get-caller-identity').trim());
+
+    logger.info(`Using temporary credentials: ${callerIdentity.Arn},
+      access key ID -> ${credentials.accessKeyId}`);
   } else {
     // Look up credentials; expected sources depending on use case:
     // - Environment variables
