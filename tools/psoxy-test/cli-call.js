@@ -20,6 +20,7 @@ const { version } = require('./package.json');
     .option('-f, --force <type>', 'Force deploy type: AWS or GCP')
     .option('-i, --impersonate <user>', 'User to impersonate, needed for certain connectors')
     .option('-r, --role <arn>', 'ARN of AWS role to assume; if omitted, AWS CLI must be authenticated as a principal with perms to invoke the function directly')
+    .option('-re, --region <region>', 'AWS: region of your Psoxy instance')
     .option('-s, --save-to-file', 'Save test results to file', false)
     .option('--skip',
       'Skip sanitization rules, only works if function deployed in development mode',
