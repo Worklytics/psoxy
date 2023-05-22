@@ -4,6 +4,7 @@
   "total":2,
   "comments":[
     {
+      "self":"http://localhost:8080/rest/api/2/issue/10000/comment/10000",
       "id":"10000",
       "author":{
         "key":"{\"scope\":\"jira\",\"hash\":\"dTt6XU3azhfCv8SDSPUz94vdMTlhhBlbhRTPT262SLM\"}",

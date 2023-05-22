@@ -117,6 +117,8 @@ public class JiraCloudTests extends JavaRulesTestBaseCase {
                 "Fake", // display name
                 "https://..." //photo url placeholders
         );
+
+        assertNotSanitized(sanitized, "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/10709");
     }
 
     @Test

@@ -1,3 +1,4 @@
+---
 endpoints:
   - pathTemplate: "/ex/jira/{cloudId}/rest/api/{apiVersion}/group/bulk"
     allowedQueryParams:
@@ -35,12 +36,11 @@ endpoints:
     transforms:
       - !<redact>
         jsonPaths:
-          - "$.issues[*].self"
-          - "$.issues[*]..self"
           - "$.issues[*]..description"
           - "$.issues[*]..iconUrl"
           - "$.issues[*]..name"
           - "$.issues[*]..avatarUrls"
+          - "$.issues[*].fields..self"
           - "$.issues[*]..displayName"
           - "$.issues[*]..body"
           - "$.issues[*]..comment"
@@ -65,6 +65,8 @@ endpoints:
             type: "object"
             properties:
               id:
+                type: "string"
+              self:
                 type: "string"
               fields:
                 type: "object"
@@ -437,12 +439,11 @@ endpoints:
     transforms:
       - !<redact>
         jsonPaths:
-          - "$.issues[*].self"
-          - "$.issues[*]..self"
           - "$.issues[*]..description"
           - "$.issues[*]..iconUrl"
           - "$.issues[*]..name"
           - "$.issues[*]..avatarUrls"
+          - "$.issues[*].fields..self"
           - "$.issues[*]..displayName"
           - "$.issues[*]..comment"
           - "$..displayName"
@@ -467,6 +468,8 @@ endpoints:
             type: "object"
             properties:
               id:
+                type: "string"
+              self:
                 type: "string"
               fields:
                 type: "object"
@@ -837,8 +840,8 @@ endpoints:
     transforms:
       - !<redact>
         jsonPaths:
-          - "$.values[*]..self"
           - "$.values[*]..avatarUrls"
+          - "$.values[*]..self"
           - "$.values[*]..displayName"
           - "$.values[*].items[*].from"
           - "$.values[*].items[*].to"
@@ -856,8 +859,9 @@ endpoints:
     transforms:
       - !<redact>
         jsonPaths:
-          - "$.comments[*]..self"
           - "$.comments[*]..avatarUrls"
+          - "$.comments[*].author..self"
+          - "$.comments[*].updateAuthor..self"
           - "$.comments[*]..displayName"
           - "$.comments[*]..text"
           - "$.comments[*]..body"
@@ -874,8 +878,9 @@ endpoints:
     transforms:
       - !<redact>
         jsonPaths:
-          - "$.comments[*]..self"
           - "$.comments[*]..avatarUrls"
+          - "$.comments[*].author..self"
+          - "$.comments[*].updateAuthor..self"
           - "$.comments[*]..displayName"
           - "$.comments[*]..text"
           - "$.comments[*]..renderedBody"
@@ -892,8 +897,9 @@ endpoints:
     transforms:
       - !<redact>
         jsonPaths:
-          - "$.worklogs[*]..self"
           - "$.worklogs[*]..avatarUrls"
+          - "$.worklogs[*].author..self"
+          - "$.worklogs[*].updateAuthor..self"
           - "$.worklogs[*]..displayName"
           - "$.worklogs[*]..comment"
       - !<pseudonymize>
@@ -908,8 +914,9 @@ endpoints:
     transforms:
       - !<redact>
         jsonPaths:
-          - "$.worklogs[*]..self"
           - "$.worklogs[*]..avatarUrls"
+          - "$.worklogs[*].author..self"
+          - "$.worklogs[*].updateAuthor..self"
           - "$.worklogs[*]..displayName"
           - "$.worklogs[*]..text"
       - !<pseudonymize>

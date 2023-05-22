@@ -3,6 +3,7 @@
   "maxResults":50,
   "issues":[
     {
+      "self":"http://localhost:8080/rest/api/latest/issue/10000",
       "id":"10000",
       "fields":{
         "issuetype":{

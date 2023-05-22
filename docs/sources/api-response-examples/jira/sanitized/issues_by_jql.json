@@ -3,6 +3,7 @@
   "maxResults":50,
   "issues":[
     {
+      "self":"https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/10709",
       "id":"10709",
       "fields":{
         "statuscategorychangedate":"2022-03-02T09:00:35.928-0500",

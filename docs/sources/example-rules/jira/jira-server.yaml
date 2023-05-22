@@ -9,8 +9,6 @@ endpoints:
     transforms:
       - !<redact>
         jsonPaths:
-          - "$.issues[*].self"
-          - "$.issues[*]..self"
           - "$.issues[*]..description"
           - "$.issues[*]..iconUrl"
           - "$.issues[*]..name"
@@ -40,6 +38,8 @@ endpoints:
             type: "object"
             properties:
               id:
+                type: "string"
+              self:
                 type: "string"
               fields:
                 type: "object"
@@ -410,8 +410,9 @@ endpoints:
     transforms:
       - !<redact>
         jsonPaths:
-          - "$.comments[*]..self"
           - "$.comments[*]..avatarUrls"
+          - "$.comments[*].author..self"
+          - "$.comments[*].updateAuthor..self"
           - "$.comments[*]..displayName"
           - "$.comments[*]..name"
           - "$.comments[*]..text"
@@ -429,8 +430,9 @@ endpoints:
     transforms:
       - !<redact>
         jsonPaths:
-          - "$.worklogs[*]..self"
           - "$.worklogs[*]..avatarUrls"
+          - "$.worklogs[*].author..self"
+          - "$.worklogs[*].updateAuthor..self"
           - "$.worklogs[*]..displayName"
           - "$.worklogs[*]..name"
           - "$.worklogs[*]..comment"

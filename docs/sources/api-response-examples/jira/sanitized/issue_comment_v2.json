@@ -4,6 +4,7 @@
   "total":1,
   "comments":[
     {
+      "self":"https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/10709/comment/10024",
       "id":"10024",
       "author":{
         "accountId":"{\"scope\":\"jira\",\"hash\":\"MDNGN1oBtOCXoEyNLYQUwQwWf4CcUCI79qOnXJeAy1c\"}",
