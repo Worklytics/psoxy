@@ -110,8 +110,6 @@ endpoints:
                         items:
                           type: "object"
                           properties:
-                            accountId:
-                              type: "string"
                             key:
                               type: "string"
                             accountType:
@@ -130,8 +128,6 @@ endpoints:
                         items:
                           type: "object"
                           properties:
-                            accountId:
-                              type: "string"
                             key:
                               type: "string"
                             accountType:
@@ -203,8 +199,6 @@ endpoints:
                       author:
                         type: "object"
                         properties:
-                          accountId:
-                            type: "string"
                           key:
                             type: "string"
                           accountType:
@@ -216,8 +210,6 @@ endpoints:
                       updateAuthor:
                         type: "object"
                         properties:
-                          accountId:
-                            type: "string"
                           key:
                             type: "string"
                           accountType:
@@ -277,8 +269,6 @@ endpoints:
                       author:
                         type: "object"
                         properties:
-                          accountId:
-                            type: "string"
                           key:
                             type: "string"
                           accountType:
@@ -290,8 +280,6 @@ endpoints:
                       updateAuthor:
                         type: "object"
                         properties:
-                          accountId:
-                            type: "string"
                           key:
                             type: "string"
                           accountType:
@@ -343,8 +331,6 @@ endpoints:
                   assignee:
                     type: "object"
                     properties:
-                      accountId:
-                        type: "string"
                       key:
                         type: "string"
                       accountType:
@@ -374,8 +360,6 @@ endpoints:
                   creator:
                     type: "object"
                     properties:
-                      accountId:
-                        type: "string"
                       key:
                         type: "string"
                       accountType:
@@ -387,8 +371,6 @@ endpoints:
                   reporter:
                     type: "object"
                     properties:
-                      accountId:
-                        type: "string"
                       key:
                         type: "string"
                       accountType:
