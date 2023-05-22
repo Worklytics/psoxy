@@ -7,11 +7,12 @@ const logsSample = require('./cloudwatch-log-events-sample.json').events;
 
 const LAMBDA_URL = 'https://foo.lambda-url.us-east-1.on.aws/';
 const API_GATEWAY_URL = 'https://foo.execute-api.us-east-1.amazonaws.com';
- // Fake assume role and AWS request signing
- const options = {
+// Fake assume role and AWS request signing
+const options = {
   url: LAMBDA_URL,
   role: 'arn:aws:iam::[accountId]:role/[roleName]',
   method: 'GET',
+  region: 'us-east-1',
 };
 const credentials = {
   accessKeyId: 'foo',
@@ -36,7 +37,8 @@ test.beforeEach(async (t) => {
   t.context.subject = (await import('../lib/aws.js')).default;
 
   // mock credentials
-  td.when(t.context.utils.getAWSCredentials(td.matchers.contains(options.role)))
+  td.when(t.context.utils.getAWSCredentials(td.matchers.contains(options.role),
+    td.matchers.contains(options.region)))
     .thenResolve(credentials);
 
   // mock request signing using credentials
