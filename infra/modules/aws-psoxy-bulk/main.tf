@@ -1,4 +1,8 @@
 
+# NOTE: region used to be passed in as a variable; put it MUST match the region in which the lambda
+# is provisioned, and that's implicit in the provider - so we should just infer from the provider
+data "aws_region" "current" {}
+
 
 resource "random_string" "bucket_suffix" {
   length  = 8
@@ -337,7 +341,7 @@ Check that the Psoxy works as expected and it transforms the files of your input
 the rules you have defined:
 
 ```shell
-node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f ${local.example_file} ${local.role_option_for_tests} -d AWS -i ${aws_s3_bucket.input.bucket} -o ${aws_s3_bucket.sanitized.bucket} -re ${var.aws_region}
+node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f ${local.example_file} ${local.role_option_for_tests} -d AWS -i ${aws_s3_bucket.input.bucket} -o ${aws_s3_bucket.sanitized.bucket} -re ${data.aws_region.current.id}
 ```
 
 EOT
@@ -347,7 +351,7 @@ EOT
 
 Review the deployed function in AWS console:
 
-- https://console.aws.amazon.com/lambda/home?region=${var.aws_region}#/functions/${module.psoxy_lambda.function_name}?tab=monitoring
+- https://console.aws.amazon.com/lambda/home?region=${data.aws_region.current.id}#/functions/${module.psoxy_lambda.function_name}?tab=monitoring
 
 We provide some Node.js scripts to easily validate the deployment. To be able to run the test
 commands below, you need Node.js (>=16) and npm (v >=8) installed. Ensure all dependencies are

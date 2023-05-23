@@ -9,7 +9,7 @@ variable "aws_account_id" {
 
 variable "region" {
   type        = string
-  description = "region into which to deploy function"
+  description = "IGNORED - value taken from provider; region into which to deploy function"
   default     = "us-east-1"
 }
 
