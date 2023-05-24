@@ -9,7 +9,7 @@ JAVA_SOURCE_ROOT=$1
 IMPLEMENTATION=$2 # expected to be 'aws', 'gcp', etc ...
 FORCE_BUILD=$3
 
-VERSION=$(mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:evaluate -Dexpression=project.version -q -DforceStdout -f ${JAVA_SOURCE_ROOT}/pom.xml)
+VERSION=$(mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:evaluate -Dexpression=project.version -q -DforceStdout -f "${JAVA_SOURCE_ROOT}/pom.xml")
 ARTIFACT_FILE_NAME="psoxy-${IMPLEMENTATION}-${VERSION}.jar"
 PATH_TO_DEPLOYMENT_JAR="${JAVA_SOURCE_ROOT}/impl/${IMPLEMENTATION}/target/${ARTIFACT_FILE_NAME}"
 
@@ -21,15 +21,15 @@ if [ ! -f $PATH_TO_DEPLOYMENT_JAR ] || [ ! -z "$FORCE_BUILD" ] ; then
   TERRAFORM_CONFIG_PATH=`pwd`
   LOG_FILE=/tmp/psoxy-package.`date +%Y%m%d'T'%H%M%S`.log
 
-  ln -sf ${LOG_FILE} ${TERRAFORM_CONFIG_PATH}/last-build.log
+  ln -sf ${LOG_FILE} "${TERRAFORM_CONFIG_PATH}/last-build.log"
 
-  mvn clean -f ${JAVA_SOURCE_ROOT}/pom.xml > ${LOG_FILE} 2>&1
+  mvn clean -f "${JAVA_SOURCE_ROOT}/pom.xml" > ${LOG_FILE} 2>&1
 
-  mvn package install -f ${JAVA_SOURCE_ROOT}/gateway-core/pom.xml > ${LOG_FILE} 2>&1
+  mvn package install -f "${JAVA_SOURCE_ROOT}/gateway-core/pom.xml" > ${LOG_FILE} 2>&1
 
-  mvn package install -f ${JAVA_SOURCE_ROOT}/core/pom.xml >> ${LOG_FILE} 2>&1
+  mvn package install -f "${JAVA_SOURCE_ROOT}/core/pom.xml" >> ${LOG_FILE} 2>&1
 
-  mvn package -f ${JAVA_SOURCE_ROOT}/impl/${IMPLEMENTATION}/pom.xml >> ${LOG_FILE} 2>&1
+  mvn package -f "${JAVA_SOURCE_ROOT}/impl/${IMPLEMENTATION}/pom.xml" >> ${LOG_FILE} 2>&1
 fi
 
 # output back to Terraform (forces Terraform to be dependent on output)
