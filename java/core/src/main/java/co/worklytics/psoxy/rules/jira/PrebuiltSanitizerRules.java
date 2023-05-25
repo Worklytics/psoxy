@@ -321,9 +321,8 @@ public class PrebuiltSanitizerRules {
                 .type("object")
                 // Using LinkedHashMap to keep the order to support same
                 // YAML serialization result
-                .properties(new LinkedHashMap<>() {{ //req for java8-backwards compatibility
-
-                    put("startAt", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
+                    put("startAt", JsonSchemaFilterUtils.JsonSchemaFilter.<String, RESTRules>builder()
                             .type("integer")
                             .build());
                     put("maxResults", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
@@ -344,7 +343,7 @@ public class PrebuiltSanitizerRules {
     private static JsonSchemaFilterUtils.JsonSchemaFilter jsonSchemaForIssue(boolean isCloudVersion) {
         return JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                 .type("object")
-                .properties(new LinkedHashMap<>() {{ //req for java8-backwards compatibility
+                .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
                     put("id", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                     put("self", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                     put("fields", jsonSchemaForIssueFields(isCloudVersion));
@@ -355,7 +354,7 @@ public class PrebuiltSanitizerRules {
     private static JsonSchemaFilterUtils.JsonSchemaFilter jsonSchemaForIssueFields(boolean isCloudVersion) {
         return JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                 .type("object")
-                .properties(new LinkedHashMap<>() {{ //req for java8-backwards compatibility
+                .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
                     // NOTE: in response, fields appears "as-is" in format. Some of them in lowercase, others in camel case...
                     put("statuscategorychangedate", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                     put("issuetype", jsonSchemaForIssueType());
@@ -364,14 +363,14 @@ public class PrebuiltSanitizerRules {
                     // In doc appears as "watchers", but in actual response is "watches"
                     put("watches", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                             .type("object")
-                            .properties(new LinkedHashMap<>() {{ //req for java8-backwards compatibility
+                            .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
                                 put("isWatching", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("boolean").build());
                                 put("watchCount", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("integer").build());
                                 put("watchers", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("array").items(jsonSchemaForUser(isCloudVersion)).build());
                             }}).build());
                     put("attachment", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                             .type("array")
-                            .properties(new LinkedHashMap<>() {{ //req for java8-backwards compatibility
+                            .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
                                 put("id", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("integer").build());
                                 put("author", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("object").items(jsonSchemaForUser(isCloudVersion)).build());
                                 put("created", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
@@ -382,11 +381,11 @@ public class PrebuiltSanitizerRules {
                     put("sub-tasks", jsonSchemaForLinks());
                     put("project", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                             .type("object")
-                            .properties(new LinkedHashMap<>() {{
+                            .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{
                                 put("id", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                                 put("projectCategory", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                                         .type("object")
-                                        .properties(new LinkedHashMap<>() {{
+                                        .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{
                                             put("id", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                                         }}).build());
                                 put("projectTypeKey", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
@@ -394,14 +393,14 @@ public class PrebuiltSanitizerRules {
                                 put("style", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                                 put("insight", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                                         .type("object")
-                                        .properties(new LinkedHashMap<>() {{ //req for java8-backwards compatibility
+                                        .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
                                             put("totalIssueCount", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("integer").build());
                                             put("lastIssueUpdateTime", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                                         }}).build());
                             }}).build());
                     put("comment", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                             .type("array")
-                            .properties(new LinkedHashMap<>() {{
+                            .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{
                                 put("id", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                                 put("author", jsonSchemaForUser(isCloudVersion));
                                 put("updateAuthor", jsonSchemaForUser(isCloudVersion));
@@ -412,7 +411,7 @@ public class PrebuiltSanitizerRules {
                     put("issuelinks", jsonSchemaForLinks());
                     put("worklog", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                             .type("array")
-                            .properties(new LinkedHashMap<>() {{
+                            .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{
                                 put("issueId", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                                 put("id", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                                 put("author", jsonSchemaForUser(isCloudVersion));
@@ -426,7 +425,7 @@ public class PrebuiltSanitizerRules {
                     put("updated", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("integer").build());
                     put("timeTracking", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                             .type("object")
-                            .properties(new LinkedHashMap<>() {{
+                            .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{
                                 put("originalEstimate", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                                 put("remainingEstimate", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                                 put("timeSpent", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
@@ -451,7 +450,7 @@ public class PrebuiltSanitizerRules {
 
                     put("votes", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                             .type("object")
-                            .properties(new LinkedHashMap<>() {{
+                            .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{
                                 put("votes", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("integer").build());
                                 put("hasVoted", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("boolean").build());
                             }}).build());
@@ -465,7 +464,7 @@ public class PrebuiltSanitizerRules {
                 .type("object")
                 // Using LinkedHashMap to keep the order to support same
                 // YAML serialization result
-                .properties(new LinkedHashMap<>() {{ //req for java8-backwards compatibility
+                .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
                     put("id", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                     put("name", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                 }})
@@ -477,7 +476,7 @@ public class PrebuiltSanitizerRules {
                 .type("object")
                 // Using LinkedHashMap to keep the order to support same
                 // YAML serialization result
-                .properties(new LinkedHashMap<>() {{ //req for java8-backwards compatibility
+                .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
                     put("id", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                     put("subtask", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("boolean").build());
                     put("hierarchyLevel", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("integer").build());
@@ -490,13 +489,13 @@ public class PrebuiltSanitizerRules {
                 .type("object")
                 // Using LinkedHashMap to keep the order to support same
                 // YAML serialization result
-                .properties(new LinkedHashMap<>() {{ //req for java8-backwards compatibility
+                .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
 
                     put("id", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                     put("fields",
                             JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                                     .type("object")
-                                    .properties(new LinkedHashMap<>() {{ //req for java8-backwards compatibility
+                                    .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
                                         put("status", jsonSchemaForIssueStatus());
                                         put("priority", jsonSchemaForIssuePriority());
                                         put("issuetype", jsonSchemaForIssueType());
@@ -513,12 +512,12 @@ public class PrebuiltSanitizerRules {
                 .type("object")
                 // Using LinkedHashMap to keep the order to support same
                 // YAML serialization result
-                .properties(new LinkedHashMap<>() {{ //req for java8-backwards compatibility
+                .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
                     put("id", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                     put("name", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                     put("statusCategory", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                             .type("object")
-                            .properties(new LinkedHashMap<>() {{ //req for java8-backwards compatibility
+                            .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
                                 put("id", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                                 put("key", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                                 put("colorName", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
@@ -534,7 +533,7 @@ public class PrebuiltSanitizerRules {
                 .type("object")
                 // Using LinkedHashMap to keep the order to support same
                 // YAML serialization result
-                .properties(new LinkedHashMap<>() {{ //req for java8-backwards compatibility
+                .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
                     put(isCloudVersion ? "accountId" : "key", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                     put("accountType", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                     put("emailAddress", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
@@ -546,23 +545,23 @@ public class PrebuiltSanitizerRules {
     private static JsonSchemaFilterUtils.JsonSchemaFilter jsonSchemaForLinks() {
         return JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                 .type("array")
-                .properties(new LinkedHashMap<>() {{ //req for java8-backwards compatibility
+                .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
                     put("id", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                     put("type", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                             .type("object")
-                            .properties(new LinkedHashMap<>() {{ //req for java8-backwards compatibility
+                            .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
                                 put("id", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                                 put("inward", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                                 put("outward", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                             }}).build());
                     put("outwardIssue", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("object").items(JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                             .type("object")
-                            .properties(new LinkedHashMap<>() {{ //req for java8-backwards compatibility
+                            .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
                                 put("id", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                             }}).build()).build());
                     put("inwardIssue", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("object").items(JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                             .type("object")
-                            .properties(new LinkedHashMap<>() {{ //req for java8-backwards compatibility
+                            .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
                                 put("id", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                             }}).build()).build());
                 }}).build();
@@ -571,7 +570,7 @@ public class PrebuiltSanitizerRules {
     private static JsonSchemaFilterUtils.JsonSchemaFilter jsonSchemaForVisibility() {
         return JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                 .type("object")
-                .properties(new LinkedHashMap<>() {{
+                .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{
                     put("type", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                     put("value", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                     put("identifier", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
@@ -581,7 +580,7 @@ public class PrebuiltSanitizerRules {
     private static JsonSchemaFilterUtils.JsonSchemaFilter jsonSchemaForProgressInformation() {
         return JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                 .type("object")
-                .properties(new LinkedHashMap<>() {{
+                .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{
                     put("progress", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("integer").build());
                     put("total", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("integer").build());
                 }}).build();
