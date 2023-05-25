@@ -10,7 +10,7 @@ TF_CONFIG_ROOT=`pwd`
 if [ ! -f terraform.tfvars ]; then
   TFVARS_FILE="${TF_CONFIG_ROOT}/terraform.tfvars"
 
-  cp ${TF_CONFIG_ROOT}/terraform.tfvars.example $TFVARS_FILE
+  cp "${TF_CONFIG_ROOT}/terraform.tfvars.example" "${TFVARS_FILE}"
 
   # give user some feedback
   printf "Init'd example terraform config. Please open ${BLUE}terraform.tfvars${NC} and customize it to your needs.\n"
