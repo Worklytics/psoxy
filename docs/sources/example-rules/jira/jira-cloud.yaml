@@ -940,3 +940,22 @@ endpoints:
           - "$..accountId"
           - "$..emailAddress"
         encoding: "JSON"
+  - pathTemplate: "/ex/jira/{cloudId}/rest/api/{apiVersion}/project/search"
+    allowedQueryParams:
+      - "startAt"
+      - "maxResults"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$.values[*]..avatarUrls"
+          - "$.values[*]..self"
+          - "$.values[*]..displayName"
+          - "$.values[*]..leadUserName"
+          - "$.values[*]..description"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.values[*]..accountId"
+          - "$.values[*]..emailAddress"
+          - "$.values[*]..email"
+          - "$.values[*]..leadAccountId"
+        encoding: "JSON"

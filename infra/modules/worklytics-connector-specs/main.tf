@@ -507,7 +507,7 @@ EOT
     },
     jira-server = {
       source_kind : "jira-server"
-      worklytics_connector_id : "jira-server-oauth-psoxy"
+      worklytics_connector_id : "jira-server-psoxy"
       target_host : var.jira_server_url
       source_auth_strategy : "oauth2_access_token"
       display_name : "Jira REST API"
@@ -535,7 +535,7 @@ EOT
     }
     jira-cloud = {
       source_kind : "jira-cloud"
-      worklytics_connector_id : "jira-oauth-psoxy"
+      worklytics_connector_id : "jira-cloud-psoxy"
       target_host : "api.atlassian.com"
       source_auth_strategy : "oauth2_refresh_token"
       display_name : "Jira REST API"
@@ -568,6 +568,7 @@ EOT
         "/ex/jira/${var.jira_cloud_id}/rest/api/3/issue/${var.example_jira_issue_id}/changelog?maxResults=25",
         "/ex/jira/${var.jira_cloud_id}/rest/api/3/issue/${var.example_jira_issue_id}/comment?maxResults=25",
         "/ex/jira/${var.jira_cloud_id}/rest/api/3/issue/${var.example_jira_issue_id}/worklog?maxResults=25",
+        "/ex/jira/${var.jira_cloud_id}/rest/api/3/project/search?maxResults=25",
       ],
       external_token_todo : <<EOT
 Jira OAuth 2.0 (3LO) through Psoxy requires a Jira Cloud account with following classical scopes:

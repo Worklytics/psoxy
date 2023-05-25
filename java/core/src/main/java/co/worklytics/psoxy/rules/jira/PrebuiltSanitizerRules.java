@@ -269,6 +269,25 @@ public class PrebuiltSanitizerRules {
                     .build())
             .build();
 
+    static final Endpoint PROJECTS = Endpoint.builder()
+            .pathTemplate("/ex/jira/{cloudId}/rest/api/{apiVersion}/project/search")
+            .allowedQueryParams(commonAllowedQueryParameters)
+            .transform(Transform.Redact.builder()
+                    .jsonPath("$.values[*]..avatarUrls")
+                    .jsonPath("$.values[*]..self")
+                    .jsonPath("$.values[*]..displayName")
+                    .jsonPath("$.values[*]..leadUserName")
+                    .jsonPath("$.values[*]..description")
+                    .build())
+            .transform(Transform.Pseudonymize.builder()
+                    .jsonPath("$.values[*]..accountId")
+                    .jsonPath("$.values[*]..emailAddress")
+                    // An email associated with the project
+                    .jsonPath("$.values[*]..email")
+                    .jsonPath("$.values[*]..leadAccountId")
+                    .build())
+            .build();
+
     @VisibleForTesting
     static final RESTRules JIRA_CLOUD = Rules2.builder()
             .endpoint(GROUP_BULK)
@@ -281,6 +300,7 @@ public class PrebuiltSanitizerRules {
             .endpoint(ISSUE_WORKLOG_V2)
             .endpoint(ISSUE_WORKLOG_V3)
             .endpoint(USERS)
+            .endpoint(PROJECTS)
             .build();
 
     @VisibleForTesting

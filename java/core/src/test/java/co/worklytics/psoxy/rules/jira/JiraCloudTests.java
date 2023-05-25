@@ -218,6 +218,22 @@ public class JiraCloudTests extends JavaRulesTestBaseCase {
         );
     }
 
+    @Test
+    void projects() {
+        String jsonString = asJson(exampleDirectoryPath, "projects.json");
+
+        String endpoint = "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/project/search?startAt=0&maxResults=25";
+        String sanitized = this.sanitize(endpoint, jsonString);
+
+        assertRedacted(sanitized,
+                "Fake", // display name
+                "https://..." //photo url placeholders
+        );
+
+        //ensure we allow paging of users, and passing cloud id
+        assertUrlWithQueryParamsBlocked("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/project/search");
+    }
+
     @Override
     public Stream<InvocationExample> getExamples() {
         return Stream.of(InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/users?startAt=0&maxResults=25", "users.json"),
