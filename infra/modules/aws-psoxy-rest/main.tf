@@ -8,8 +8,9 @@ terraform {
   }
 }
 
-data "aws_caller_identity" "current" {}
-
+# NOTE: region used to be passed in as a variable; put it MUST match the region in which the lambda
+# is provisioned, and that's implicit in the provider - so we should just infer from the provider
+data "aws_region" "current" {}
 
 locals {
   # from v0.5, these will be required; for now, allow `null` but filter out so taken from config yaml
@@ -23,7 +24,7 @@ locals {
     : k => v if v != null
   }
 
-  arn_for_test_calls = coalesce(var.aws_assume_role_arn, data.aws_caller_identity.current.arn)
+  arn_for_test_calls = var.api_caller_role_arn
 }
 
 module "psoxy_lambda" {
@@ -73,11 +74,16 @@ locals {
   proxy_endpoint_url  = substr(aws_lambda_function_url.lambda_url.function_url, 0, length(aws_lambda_function_url.lambda_url.function_url) - 1)
   impersonation_param = var.example_api_calls_user_to_impersonate == null ? "" : " -i \"${var.example_api_calls_user_to_impersonate}\""
   command_npm_install = "npm --prefix ${var.path_to_repo_root}tools/psoxy-test install"
-  command_cli_call    = "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js -r \"${local.arn_for_test_calls}\""
+  command_cli_call    = "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js -r \"${local.arn_for_test_calls}\" -re \"${data.aws_region.current.id}\""
   command_test_calls = [for path in var.example_api_calls :
     "${local.command_cli_call} -u \"${local.proxy_endpoint_url}${path}\"${local.impersonation_param}"
   ]
-  command_test_logs = "node ${var.path_to_repo_root}tools/psoxy-test/cli-logs.js -r \"${local.arn_for_test_calls}\" -re \"${var.region}\" -l \"${module.psoxy_lambda.log_group}\""
+  command_test_logs = "node ${var.path_to_repo_root}tools/psoxy-test/cli-logs.js -r \"${local.arn_for_test_calls}\" -re \"${data.aws_region.current.id}\" -l \"${module.psoxy_lambda.log_group}\""
+
+  awscurl_test_call = "${var.path_to_repo_root}tools/test-psoxy.sh -a -r \"${local.arn_for_test_calls}\" -e  \"${data.aws_region.current.id}\""
+  awscurl_test_calls = [for path in var.example_api_calls :
+    "${local.awscurl_test_call} -u \"${local.proxy_endpoint_url}${path}\"${local.impersonation_param}"
+  ]
 
   todo_content = <<EOT
 
@@ -85,15 +91,21 @@ locals {
 
 Review the deployed function in AWS console:
 
-- https://console.aws.amazon.com/lambda/home?region=${var.region}#/functions/${var.function_name}?tab=monitoring
+- https://console.aws.amazon.com/lambda/home?region=${data.aws_region.current.id}#/functions/${var.function_name}?tab=monitoring
 
-We provide some Node.js scripts to easily validate the deployment. To be able
-to run the test commands below, you need Node.js (>=16) and npm (v >=8)
-installed. Then, ensure all dependencies are installed by running:
+We provide some Node.js scripts to simplify testing your proxy deployment. To be able run test
+commands below, you will need
+   - Node.js (>=16) and npm (v >=8) installed.
+   - install the tool itself (in the location from which you plan to run the test commands, if it's
+     not the same location where you originally ran the Terraform apply)
 
 ```shell
 ${local.command_npm_install}
 ```
+   - ensure the location you're running from is authenticated as an AWS principal which can assume
+     the role `${var.api_caller_role_arn}` ( `aws sts get-caller-identity` to determine who you're
+     authenticated as; if necessary, add this ARN to the `caller_aws_arns` list in the
+     `terraform.tfvars` file of your configuration to allow it to assume that role)
 
 ### Make "test calls"
 First, run an initial "Health Check" call to make sure the Psoxy instance is up and running:
@@ -110,6 +122,13 @@ ${coalesce(join("\n", local.command_test_calls), "cd docs/example-api-calls/")}
 
 Feel free to try the above calls, and reference to the source's API docs for other parameters /
 endpoints to experiment with.
+
+
+As an alternative, we offer a simpler bash script for testing that wraps `awscurl` + `jq`, if those
+are installed on your system:
+```shell
+${coalesce(join("\n", local.awscurl_test_calls), "cd docs/example-api-calls/")}
+```
 
 ### Check logs (AWS CloudWatch)
 

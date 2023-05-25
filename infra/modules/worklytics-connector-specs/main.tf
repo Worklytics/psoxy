@@ -216,7 +216,8 @@ locals {
         "User.Read.All"
       ],
       environment_variables : {
-        GRANT_TYPE : "workload_identity_federation" # by default, assumed to be of type 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
+        GRANT_TYPE : "workload_identity_federation"
+        # by default, assumed to be of type 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
         TOKEN_SCOPE : "https://graph.microsoft.com/.default"
         REFRESH_ENDPOINT : "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
       }
@@ -731,7 +732,7 @@ locals {
     for k, v in local.google_workspace_sources : k => v if contains(var.enabled_connectors, k)
   }
   enabled_msft_365_connectors = {
-    for k, v in local.msft_365_connectors : k => v if contains(var.enabled_connectors, k)
+    for k, v in local.msft_365_connectors : k => v if contains(var.enabled_connectors, k) && length(try(var.msft_tenant_id, "")) > 0
   }
   enabled_oauth_long_access_connectors = { for k, v in local.oauth_long_access_connectors : k => v if contains(var.enabled_connectors, k) }
 
@@ -752,28 +753,4 @@ locals {
   enabled_bulk_connectors = {
     for k, v in local.bulk_connectors : k => v if contains(var.enabled_connectors, k)
   }
-}
-
-output "enabled_google_workspace_connectors" {
-  value = local.enabled_google_workspace_connectors
-}
-
-output "enabled_msft_365_connectors" {
-  value = local.enabled_msft_365_connectors
-}
-
-output "enabled_oauth_long_access_connectors" {
-  value = local.enabled_oauth_long_access_connectors
-}
-
-output "enabled_oauth_long_access_connectors_todos" {
-  value = local.enabled_oauth_long_access_connectors_todos
-}
-
-output "enabled_oauth_secrets_to_create" {
-  value = local.enabled_oauth_secrets_to_create
-}
-
-output "enabled_bulk_connectors" {
-  value = local.enabled_bulk_connectors
 }

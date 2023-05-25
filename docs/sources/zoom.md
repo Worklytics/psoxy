@@ -11,22 +11,26 @@ mode, no need to publish).
 
 1. Go to https://marketplace.zoom.us/develop/create and create an app of type "Server to Server OAuth"
 2. After creation, it will show the App Credentials. Share them with the AWS/GCP administrator, the
-   following secret values must be filled in the Secret Manager for the Proxy with the appropriate values:
+   following values must be filled in the AWS Systems Manager Parameter Store / GCP Secret Manager
+   for use by the proxy when authenticating with the Zoom API::
 
     - `PSOXY_ZOOM_CLIENT_ID`
     - `PSOXY_ZOOM_ACCOUNT_ID`
     - `PSOXY_ZOOM_CLIENT_SECRET`
-    - Note: Anytime the *client secret* is regenerated it needs to be updated in the Proxy too.
+
+    - NOTE: Anytime the *client secret* is regenerated it needs to be updated in the Proxy too.
+    - NOTE: *client secret* should be handled according to your organization's security policies for
+      API keys/secrets as, in combination with the above, allows access to your organization's data.
 
 3. Fill the information section
 
 4. Fill the scopes section, enabling the following:
 
     - Users / View all user information / `user:read:admin`
-        - To be able to gather information about the zoom users
+        - List information about the zoom user acounts, for enumeration / linking
     - Meetings / View all user meetings / `meeting:read:admin`
-        - Allows us to list all user meeting
+        - Listing all user meetings (work events / items)
     - Report / View report data / `report:read:admin`
-        - Last 6 months view for user meetings
+        - List historical (previous 6 months) user meetings (work events / items)
 
 5. Activate the app

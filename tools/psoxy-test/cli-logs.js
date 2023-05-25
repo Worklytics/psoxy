@@ -21,7 +21,7 @@ const { version } = require('./package.json');
     .option('-p --project-id <projectId>', 'GCP: Name of the project that hosts the cloud function (Psoxy instance)')
     .option('-f --function-name <functionName>', 'GCP: Name of the cloud function from which to list entries')
     .option('-l, --log-group-name <logGroupName>', 'AWS: Log group to display')
-    .option('-r, --role <arn>', 'AWS: role to assume, use its ARN')
+    .option('-r, --role <arn>', 'AWS: ARN of IAM role to assume; if omitted, AWS CLI must be authenticated as a principal with perms to read from log group')
     .option('-re, --region <region>', 'AWS: region of your Psoxy instance',
       'us-east-1')
     .option('-v, --verbose', 'Verbose output', false)

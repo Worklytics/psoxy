@@ -10,7 +10,7 @@ import https from 'https';
 import path from 'path';
 import _ from 'lodash';
 import spec from '../data-sources/spec.js';
-
+import getLogger from './logger.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // In case Psoxy is slow to respond (Lambda can take up to 20s+ to bootstrap),
@@ -214,6 +214,22 @@ function resolveHTTPMethod(path = '') {
 }
 
 /**
+ * Resolve region from URL (3rd part of hostname, defaults to `us-east-1`)
+ * @param {URL} url
+ * @returns {string}
+ */
+function resolveAWSRegion(url) {
+  let region = 'us-east-1';
+  // for regional endpoints
+  // {id}.{service}.{region}.(amazonaws.com|on.aws)
+  const hostParts = url.hostname?.split('.');
+  if (!_.isEmpty(hostParts) && hostParts.length > 2) {
+    region = hostParts[2];
+  }
+  return region;
+}
+
+/**
  * "retry" helper function, execute "fn" until returning value is not undefined
  *
  * @param {Function} fn
@@ -293,24 +309,44 @@ function parseBucketOption(bucketOption) {
  * - https://www.npmjs.com/package/@aws-sdk/credential-providers
  *
  * @param {String} role AWS IAM ARN format
+ * @param {String} region
  * @returns {Credentials}
  */
-async function getAWSCredentials(role) {
+async function getAWSCredentials(role, region) {
+  const logger = getLogger();
+  let credentials;
   let credentialsProvider;
+
   if (!_.isEmpty(role)) {
-    credentialsProvider = fromTemporaryCredentials({
+    const temporaryCredentialsOptions = {
       params: {
         RoleArn: role,
         RoleSessionName: DEFAULT_ROLE_SESSION_NAME,
         DurationSeconds: DEFAULT_DURATION_TEMP_CREDENTIALS,
       }
-    });
+    };
+    if (!_.isEmpty(region)) {
+      temporaryCredentialsOptions.clientConfig = { region: region };
+    }
+    credentialsProvider = fromTemporaryCredentials(temporaryCredentialsOptions);
 
+    credentials = await credentialsProvider();
+
+    const callerIdentity = JSON.parse(
+      executeCommand('aws sts get-caller-identity').trim());
+
+    logger.info(`Using temporary credentials: ${callerIdentity.Arn},
+      access key ID -> ${credentials.accessKeyId}`);
   } else {
-    // Look up credentials in environment variables, shared credentials files, etc.
+    // Look up credentials; expected sources depending on use case:
+    // - Environment variables
+    // - Shared credentials file `.aws/credentials`
+    // - EC2 Instance Metadata Service
     credentialsProvider = fromNodeProviderChain();
+    credentials = await credentialsProvider();
+    logger.info(`Credentials found, access key ID: ${credentials.accessKeyId}`);
   }
-  return credentialsProvider();
+  return credentials;
 }
 
 export {
@@ -324,5 +360,6 @@ export {
   saveToFile,
   signAWSRequestURL,
   resolveHTTPMethod,
+  resolveAWSRegion,
   transformSpecWithResponse,
 };

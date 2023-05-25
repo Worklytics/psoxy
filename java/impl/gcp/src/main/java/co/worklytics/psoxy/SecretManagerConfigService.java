@@ -71,8 +71,6 @@ public class SecretManagerConfigService implements ConfigService, LockService {
                 SecretVersion version = client.addSecretVersion(secretName, payload);
 
                 log.info(String.format("Property: %s, stored version %s", secretName, version.getName()));
-
-                // q: invalidate previous versions?
             }
         } catch (IOException e) {
             log.log(Level.SEVERE, "Could not store property " + secretName, e);

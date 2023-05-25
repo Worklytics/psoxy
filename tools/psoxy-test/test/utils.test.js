@@ -1,8 +1,9 @@
 import test from 'ava';
 import * as td from 'testdouble';
-import { 
+import {
   executeWithRetry,
-  resolveHTTPMethod, 
+  resolveHTTPMethod,
+  resolveAWSRegion,
   transformSpecWithResponse,
   parseBucketOption,
 } from '../lib/utils.js';
@@ -60,7 +61,7 @@ test('Execute with retry: make "n" attempts if conditions met', async (t) => {
   td.when(work()).thenThrow(new Error());
   td.when(onErrorStop(td.matchers.isA(Error))).thenReturn(false);
 
-  t.falsy(await executeWithRetry(work, onErrorStop, logger, attempts, delay), 
+  t.falsy(await executeWithRetry(work, onErrorStop, logger, attempts, delay),
     'Undefined result after retries');
 
   td.verify(work, { times: attempts });
@@ -99,3 +100,9 @@ test('Parse bucket input option', (t) => {
   t.is(result3.bucket, 'foo');
   t.is(result3.path, 'bar/baz/');
 });
+
+test('Resolve AWS region', (t) => {
+  t.is('ap-southeast-4', resolveAWSRegion(new URL('https://49eo5h5k99.execute-api.ap-southeast-4.amazonaws.com')));
+  t.is('us-east-1', resolveAWSRegion(new URL('https://foo.com')));
+  t.is('us-east-1', resolveAWSRegion(''));
+})

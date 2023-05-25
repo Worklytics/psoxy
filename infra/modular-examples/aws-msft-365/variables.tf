@@ -62,7 +62,7 @@ variable "caller_aws_arns" {
 
   validation {
     condition = alltrue([
-      for i in var.caller_aws_arns : (length(regexall("^arn:aws:iam::\\d{12}:\\w+$", i)) > 0)
+      for i in var.caller_aws_arns : (length(regexall("^arn:aws:iam::\\d{12}:((role|user)\\/)?\\w+$", i)) > 0)
     ])
     error_message = "The values of caller_aws_arns should be AWS Resource Names, something like 'arn:aws:iam::914358739851:root'."
   }
@@ -88,6 +88,11 @@ variable "force_bundle" {
   default     = false
 }
 
+variable "provision_testing_infra" {
+  type        = bool
+  description = "Whether to provision infra needed to support testing of deployment. If false, it's left to you to ensure the AWS principal you use when running test scripts has the correct permissions."
+  default     = false
+}
 
 variable "connector_display_name_suffix" {
   type        = string
@@ -212,8 +217,8 @@ variable "lookup_table_builders" {
 
 variable "msft_tenant_id" {
   type        = string
-  default     = ""
   description = "ID of Microsoft tenant to connect to (req'd only if config includes MSFT connectors)"
+  default     = ""
 }
 
 variable "msft_owners_email" {
@@ -230,8 +235,8 @@ variable "pseudonymize_app_ids" {
 
 variable "salesforce_domain" {
   type        = string
-  default     = ""
   description = "Domain of the Salesforce to connect to (only required if using Salesforce connector). To find your My Domain URL, from Setup, in the Quick Find box, enter My Domain, and then select My Domain"
+  default     = ""
 }
 
 variable "jira_server_url" {

@@ -28,25 +28,25 @@ if [ $TF_INIT_EXIT_CODE -ne 0 ]; then
   exit 1
 fi
 
-if [ -d ${TF_CONFIG_ROOT}/.terraform/modules/psoxy/ ]; then
+if [ -d "${TF_CONFIG_ROOT}/.terraform/modules/psoxy/" ]; then
   # use checkout of repo done by Terraform
-  PSOXY_BASE_DIR=${TF_CONFIG_ROOT}/.terraform/modules/psoxy/
+  PSOXY_BASE_DIR="${TF_CONFIG_ROOT}/.terraform/modules/psoxy/"
 else
   # use checkout of repo on your local machine
   cd ../../..
   PSOXY_BASE_DIR="`pwd`/"
-  cd ${TF_CONFIG_ROOT}
+  cd "${TF_CONFIG_ROOT}"
 fi
 
 TFVARS_FILE="${TF_CONFIG_ROOT}/terraform.tfvars"
 
-if [ ! -f $TFVARS_FILE ]; then
+if [ ! -f "${TFVARS_FILE}" ]; then
   printf "Initializing ${BLUE}terraform.tfvars${NC} file for your configuration ...\n"
 
-  if [ -f ${TF_CONFIG_ROOT}/terraform.tfvars.example.hcl ]; then
-    cp ${TF_CONFIG_ROOT}/terraform.tfvars.example.hcl $TFVARS_FILE
+  if [ -f "${TF_CONFIG_ROOT}/terraform.tfvars.example.hcl" ]; then
+    cp "${TF_CONFIG_ROOT}/terraform.tfvars.example.hcl" "${TFVARS_FILE}"
   else
-    touch $TFVARS_FILE
+    touch "${TFVARS_FILE}"
   fi
 
   ${PSOXY_BASE_DIR}tools/init-tfvars.sh $TFVARS_FILE $PSOXY_BASE_DIR
@@ -74,9 +74,9 @@ if [ $AWS_HOSTED ]; then
 else
   HOST_PLATFORM="gcp"
 fi
-echo "${PSOXY_BASE_DIR}tools/build.sh $HOST_PLATFORM ${PSOXY_BASE_DIR}java" >> $BUILD_DEPLOYMENT_BUNDLE_SCRIPT
+echo "\"${PSOXY_BASE_DIR}tools/build.sh\" $HOST_PLATFORM \"${PSOXY_BASE_DIR}java\"" >> $BUILD_DEPLOYMENT_BUNDLE_SCRIPT
 chmod +x "$BUILD_DEPLOYMENT_BUNDLE_SCRIPT"
 
 
 # Install test tool
-${PSOXY_BASE_DIR}tools/install-test-tool.sh ${PSOXY_BASE_DIR}tools
+${PSOXY_BASE_DIR}tools/install-test-tool.sh "${PSOXY_BASE_DIR}tools"

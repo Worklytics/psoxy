@@ -15,7 +15,7 @@ variable "aws_assume_role_arn" {
 variable "aws_region" {
   type        = string
   default     = "us-east-1"
-  description = "default region in which to provision your AWS infra"
+  description = "IGNORED; default region in which to provision your AWS infra"
 }
 
 variable "instance_id" {
@@ -69,6 +69,23 @@ variable "path_to_config" {
   type        = string
   description = "path to config file (usually something in ../../configs/, eg configs/gdirectory.yaml"
   default     = null
+}
+
+variable "aws_role_to_assume_when_testing" {
+  type        = string
+  description = "ARN of role to assume when testing instance. Leave blank to use default credentials of location from which you'll run tests (which must be for a principal with sufficient privileges, or use `provision_iam_policy_for_testing`)."
+  default     = null
+
+  validation {
+    condition     = var.aws_role_to_assume_when_testing == null || can(regex("^arn:aws:iam::\\d{12}:role/.*$", var.aws_role_to_assume_when_testing))
+    error_message = "if provided, aws_role_to_assume_when_testing must be a valid ARN of an IAM Role"
+  }
+}
+
+variable "provision_iam_policy_for_testing" {
+  type        = bool
+  description = "Whether to provision IAM policy and attach it to `aws_role_to_assume_when_testing`."
+  default     = false
 }
 
 variable "api_caller_role_arn" {

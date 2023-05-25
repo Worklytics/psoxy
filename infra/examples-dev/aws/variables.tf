@@ -95,8 +95,8 @@ variable "google_workspace_example_admin" {
 
 variable "salesforce_domain" {
   type        = string
-  default     = ""
   description = "Domain of the Salesforce to connect to (only required if using Salesforce connector). To find your My Domain URL, from Setup, in the Quick Find box, enter My Domain, and then select My Domain"
+  default     = ""
 }
 
 variable "jira_server_url" {
@@ -136,6 +136,12 @@ variable "psoxy_base_dir" {
 variable "force_bundle" {
   type        = bool
   description = "whether to force build of deployment bundle, even if it already exists for this proxy version"
+  default     = false
+}
+
+variable "provision_testing_infra" {
+  type        = bool
+  description = "whether to provision infra needed to support testing of deployment"
   default     = false
 }
 

@@ -8,6 +8,8 @@ import getLogger from './lib/logger.js';
 
 const require = createRequire(import.meta.url);
 const { version } = require('./package.json');
+// Basic regexp to capture ARNs in AWS error messages (colorize ARNs);
+const AWS_ACCESS_DENIED_EXCEPTION_REGEXP = new RegExp(/(?<arn>arn:aws:iam::\d+:\w+\/\S+)/g);
 
 (async function () {
   const program = new Command();
@@ -19,7 +21,8 @@ const { version } = require('./package.json');
     .requiredOption('-u, --url <url>', 'URL to call')
     .option('-f, --force <type>', 'Force deploy type: AWS or GCP')
     .option('-i, --impersonate <user>', 'User to impersonate, needed for certain connectors')
-    .option('-r, --role <arn>', 'AWS role to assume, use its ARN')
+    .option('-r, --role <arn>', 'ARN of AWS role to assume; if omitted, AWS CLI must be authenticated as a principal with perms to invoke the function directly')
+    .option('-re, --region <region>', 'AWS: region of your Psoxy instance')
     .option('-s, --save-to-file', 'Save test results to file', false)
     .option('--skip',
       'Skip sanitization rules, only works if function deployed in development mode',
@@ -71,7 +74,16 @@ const { version } = require('./package.json');
       result = await psoxyTestCall(options);
     }
   } catch (error) {
-    logger.error(error.statusMessage || error.message);
+    if (error?.name === 'AccessDenied' && error.message && 
+      AWS_ACCESS_DENIED_EXCEPTION_REGEXP.test(error.message)) {
+      const errorMessage = error.message.replace(
+        AWS_ACCESS_DENIED_EXCEPTION_REGEXP, chalk.bold.red('$<arn>'));
+      const fixErrorHint = chalk.blue('Fix it by adding the ARN to `caller_aws_arns` list in "terraform.tfvars" and run `terraform apply` again.');
+      logger.error(`${errorMessage}\n${fixErrorHint}`);
+    } else {
+      logger.error(error.statusMessage || error.message);
+    }
+
     process.exitCode = 1;
   }
   return result;

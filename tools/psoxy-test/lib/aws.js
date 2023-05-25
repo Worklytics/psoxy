@@ -4,6 +4,7 @@ import {
   getCommonHTTPHeaders,
   request,
   resolveHTTPMethod,
+  resolveAWSRegion,
   signAWSRequestURL
 } from './utils.js';
 import {
@@ -45,15 +46,18 @@ function isValidURL(url) {
  */
 async function call(options = {}) {
   const logger = getLogger(options.verbose);
+  const url = new URL(options.url);
+  const method = options.method || resolveHTTPMethod(url.pathname);
 
   if (!_.isEmpty(options.role)) {
     logger.verbose(`Assuming role ${options.role}`);
   }
-  
-  const credentials = await getAWSCredentials(options.role);
-  
-  const url = new URL(options.url);
-  const method = options.method || resolveHTTPMethod(url.pathname);
+
+  if (_.isEmpty(options.region)) {
+    options.region = resolveAWSRegion(url);
+  }
+
+  const credentials = await getAWSCredentials(options.role, options.region);
 
   logger.verbose('Signing request');
   const signed = signAWSRequestURL(url, method, credentials);
@@ -77,7 +81,7 @@ async function call(options = {}) {
  * @returns {S3Client}
  */
 async function createS3Client(role, region = 'us-east-1') {
-  const credentials = await getAWSCredentials(role);
+  const credentials = await getAWSCredentials(role, region);
   return new S3Client({
     region: region,
     credentials: credentials,
@@ -92,7 +96,7 @@ async function createS3Client(role, region = 'us-east-1') {
  * @returns {CloudWatchLogsClient}
  */
 async function createCloudWatchClient(role, region = 'us-east-1') {
-  const credentials = await getAWSCredentials(role);
+  const credentials = await getAWSCredentials(role, region);
   return new CloudWatchLogsClient({
     region: region,
     credentials: credentials,

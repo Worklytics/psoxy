@@ -9,7 +9,7 @@ variable "aws_account_id" {
 
 variable "region" {
   type        = string
-  description = "region into which to deploy function"
+  description = "IGNORED - value taken from provider; region into which to deploy function"
   default     = "us-east-1"
 }
 
@@ -50,7 +50,7 @@ variable "caller_aws_arns" {
 
   validation {
     condition = alltrue([
-      for i in var.caller_aws_arns : (length(regexall("^arn:aws:iam::\\d{12}:\\w+$", i)) > 0)
+      for i in var.caller_aws_arns : (length(regexall("^arn:aws:iam::\\d{12}:((role|user)\\/)?\\w+$", i)) > 0)
     ])
     error_message = "The values of caller_aws_arns should be AWS Resource Names, something like 'arn:aws:iam::123123123123:root'."
   }
@@ -67,6 +67,7 @@ variable "install_test_tool" {
   description = "whether to install the test tool (can be 'false' if Terraform not running from a machine where you intend to run tests of your Psoxy deployment)"
   default     = true
 }
+
 
 variable "deployment_id" {
   type        = string

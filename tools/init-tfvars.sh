@@ -5,7 +5,7 @@
 TFVARS_FILE=$1
 PSOXY_BASE_DIR=$2
 
-RELEASE_VERSION="v0.4.22"
+RELEASE_VERSION="v0.4.24"
 
 # colors
 RED='\e[0;31m'
@@ -20,7 +20,9 @@ printf "# -- initialized with ${RELEASE_VERSION} of tools/init-tfvars.sh -- \n\n
 echo "# root directory of a clone of the psoxy repo " >> $TFVARS_FILE
 echo "#  - by default, it points to .terraform, where terraform clones the main psoxy repo" >> $TFVARS_FILE
 echo "#  - if you have a local clone of the psoxy repo you prefer to use, change this to point there" >> $TFVARS_FILE
-printf "psoxy_base_dir = \"${PSOXY_BASE_DIR}\"\n\n" >> $TFVARS_FILE
+printf "psoxy_base_dir = \"${PSOXY_BASE_DIR}\"\n" >> $TFVARS_FILE
+printf "provision_testing_infra = true\n" >> $TFVARS_FILE
+printf "\n" >> $TFVARS_FILE
 
 # pattern used to grep for provider at top-level of Terraform configuration
 TOP_LEVEL_PROVIDER_PATTERN="^├── provider\[registry.terraform.io/hashicorp"
@@ -41,16 +43,17 @@ if test $AWS_PROVIDER_COUNT -ne 0; then
     printf "\taws_region=${BLUE}\"${AWS_REGION}\"${NC}\n"
 
     AWS_ARN=$(aws sts get-caller-identity --query Arn --output text)
-    printf "# AWS IAM role to assume when deploying your Psoxy infrastructure via Terraform\n" >> $TFVARS_FILE
-    printf "# - in most cases, this will be an AWS IAM role within the AWS account listed above\n" >> $TFVARS_FILE
-    printf "# - if your machine is already authenticated as an AWS principal with sufficient permissions, this can be omitted (or set to null)\n" >> $TFVARS_FILE
+    printf "# AWS IAM role to assume when deploying your Psoxy infrastructure via Terraform, if needed\n" >> $TFVARS_FILE
+    printf "# - this variable is used when you are authenticated as an AWS user which can assume the AWS role which actually has the requisite permissions to provision your infrastructure\n" >> $TFVARS_FILE
+    printf "#   (this is approach is good practice, as minimizes the privileges of the AWS user you habitually use and easily supports multi-account scenarios) \n" >> $TFVARS_FILE
+    printf "# - if you are already authenticated as a sufficiently privileged AWS Principal, you can omit this variable\n" >> $TFVARS_FILE
+    printf "# - often, this will be the default 'super-admin' role in the target AWS account, eg something like 'arn:aws:iam::123456789012:role/Admin'\n" >> $TFVARS_FILE
     printf "# - see https://github.com/Worklytics/psoxy/blob/${RELEASE_VERSION}/docs/aws/getting-started.md for details on required permissions\n" >> $TFVARS_FILE
-    printf "aws_assume_role_arn=\"${AWS_ARN}\" #(double-check this; perhaps needs to be a role within target account) \n\n" >> $TFVARS_FILE
-    printf "\taws_assume_role_arn=${BLUE}\"${AWS_ARN}\"${NC} (double-check this; perhaps needs to be a role within target account) \n\n"
+    printf "# aws_assume_role_arn=\"${AWS_ARN}\" #(double-check this; perhaps needs to be a role within target account) \n\n" >> $TFVARS_FILE
 
     printf "# AWS principals in the following list will be explicitly authorized to invoke your proxy instances\n" >> $TFVARS_FILE
     printf "#  - this is for initial testing/development; it can (and should) be empty for production-use\n" >> $TFVARS_FILE
-    printf "caller_aws_arns = [\n  # include your own here if desired for testing\n]\n\n" >> $TFVARS_FILE
+    printf "caller_aws_arns = [\n  \"${AWS_ARN}\" # for testing; can remove once prod-ready\n]\n\n" >> $TFVARS_FILE
 
     printf "# GCP service accounts with ids in the list below will be allowed to invoke your proxy instances\n" >> $TFVARS_FILE
     printf "#  - for initial testing/deployment, it can be empty list; it needs to be filled only once you're ready to authorize Worklytics to access your data\n" >> $TFVARS_FILE
@@ -128,7 +131,7 @@ fi
 # NOTE: could be conditional based on google workspace, azure, etc - but as we expect future
 # examples to cover ALL connectors, and just vary by host platform, we'll just initialize all for
 # now and expect customers to remove them as needed
-AVAILABLE_CONNECTORS=$(echo "local.available_connector_ids" | terraform -chdir=${PSOXY_BASE_DIR}infra/modules/worklytics-connector-specs console)
+AVAILABLE_CONNECTORS=$(echo "local.available_connector_ids" | terraform -chdir="${PSOXY_BASE_DIR}infra/modules/worklytics-connector-specs" console)
 printf "# review following list of connectors to enable, and comment out what you don't want\n" >> $TFVARS_FILE
 printf "enabled_connectors = ${AVAILABLE_CONNECTORS}\n\n" >> $TFVARS_FILE
 

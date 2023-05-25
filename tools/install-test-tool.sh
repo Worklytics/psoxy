@@ -8,7 +8,7 @@ GREEN='\e[0;32m'
 BLUE='\e[0;34m'
 NC='\e[0m' # No Color
 
-TEST_TOOL_ROOT=${PATH_TO_TOOLS}/psoxy-test
+TEST_TOOL_ROOT="${PATH_TO_TOOLS}/psoxy-test"
 
 if [ ! -d ${TEST_TOOL_ROOT} ]; then
   printf "${RED}No test tool source found at ${TEST_TOOL_ROOT}. Failed to install test tool.${NC}\n"
@@ -17,7 +17,7 @@ fi
 
 if npm -v &> /dev/null ; then
   printf "Installing ${BLUE}psoxy-test${NC} tool ...\n"
-  npm --no-audit --no-fund --prefix ${TEST_TOOL_ROOT} install
+  npm --no-audit --no-fund --prefix "${TEST_TOOL_ROOT}" install
 else
   printf "${RED}NPM / Node.JS not available; could not install test tool. We recommend installing Node.JS ( https://nodejs.org/ ), then re-running this init script.${NC}\n"
 fi
