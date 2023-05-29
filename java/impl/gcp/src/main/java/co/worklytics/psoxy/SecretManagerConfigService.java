@@ -120,7 +120,7 @@ public class SecretManagerConfigService implements ConfigService, LockService {
                 lockSecret = client.getSecret(lockSecretName);
             } catch (com.google.api.gax.rpc.NotFoundException e) {
                 // It should not happen, as the secret has been created by Terraform
-                throw new RuntimeException(e);
+                throw new RuntimeException(String.format("Secret %s must exist as it should be created by Terraform", lockSecretName));
             }
 
             Instant lockedAt = Optional.ofNullable(lockSecret.getLabelsMap().get(LOCK_LABEL))
