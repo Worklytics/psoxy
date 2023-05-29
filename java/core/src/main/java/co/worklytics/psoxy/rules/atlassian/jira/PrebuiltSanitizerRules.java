@@ -1,4 +1,4 @@
-package co.worklytics.psoxy.rules.jira;
+package co.worklytics.psoxy.rules.atlassian.jira;
 
 import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.rules.Rules2;

@@ -1,7 +1,8 @@
-package co.worklytics.psoxy.rules.jira;
+package co.worklytics.psoxy.rules.atlassian.jira;
 
 import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
 import co.worklytics.psoxy.rules.RESTRules;
+import co.worklytics.psoxy.rules.atlassian.jira.PrebuiltSanitizerRules;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Disabled;
@@ -17,13 +18,13 @@ public class JiraCloudTests extends JavaRulesTestBaseCase {
     final RESTRules rulesUnderTest = PrebuiltSanitizerRules.JIRA_CLOUD;
 
     @Getter
-    final String exampleDirectoryPath = "api-response-examples/jira";
+    final String exampleDirectoryPath = "api-response-examples/atlassian/jira";
 
     @Getter
     final String defaultScopeId = "jira";
 
     @Getter
-    final String yamlSerializationFilepath = "jira/jira-cloud";
+    final String yamlSerializationFilepath = "atlassian/jira/jira-cloud";
 
     @Disabled // not reliable; seems to have different value via IntelliJ/AWS deployment and my
     // laptop's maven, which doesn't make any sense, given that binary deployed to AWS was built via
