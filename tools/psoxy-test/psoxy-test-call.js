@@ -124,6 +124,13 @@ export default async function (options = {}) {
         }
       } else if (result.headers['x-amzn-errortype']) {
         errorMessage += `: AWS ${result.headers['x-amzn-errortype']}`;
+        if (!_.isUndefined(result.data)) {
+          let extendedErrorMessage = '';
+          try {
+            extendedErrorMessage = JSON.parse(result.data).message;
+            errorMessage += ` ${extendedErrorMessage}`;
+          } catch(e) {logger.verbose(e.message);}
+        }
       } else if (result.headers['www-authenticate']) {
         errorMessage += `: GCP ${result.headers['www-authenticate']}`
       }
