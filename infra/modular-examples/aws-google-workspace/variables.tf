@@ -269,17 +269,17 @@ variable "salesforce_domain" {
 variable "jira_server_url" {
   type        = string
   default     = null
-  description = "URL of the Jira server (only required if using Jira Server connector)."
+  description = "(Only required if using Jira Server connector) URL of the Jira server (ex: myjiraserver.mycompany.com)"
 }
 
 variable "jira_cloud_id" {
   type        = string
   default     = null
-  description = "Cloud id of the Jira Cloud to connect to (only required if using Jira connector)."
+  description = "(Only required if using Jira Cloud connector) Cloud id of the Jira Cloud to connect to (ex: 1324a887-45db-1bf4-1e99-ef0ff456d421)."
 }
 
 variable "example_jira_issue_id" {
   type        = string
   default     = null
-  description = "Id of an issue for only to be used as part of example calls for Jira (only required if using Jira connector)."
+  description = "(Only required if using Jira Server/Cloud connector) Id of an issue for only to be used as part of example calls for Jira (ex: ETV-12)"
 }
