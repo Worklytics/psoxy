@@ -1,11 +1,6 @@
 variable "project_id" {
   type        = string
-  description = "name of the gcp project"
-}
-
-variable "secret_name" {
-  type        = string
-  description = "name of cloud function"
+  description = "alphanumeric ID of gcp project"
 }
 
 variable "service_account_email" {
@@ -17,4 +12,15 @@ variable "path_prefix" {
   type        = string
   description = "A prefix to add to the secret path."
   default     = ""
+}
+
+variable "secret_name" {
+  type        = string
+  description = "name of cloud function"
+  default = "OAUTH_REFRESH_TOKEN"
+}
+
+variable "updater_role_id" {
+  type        = string
+  description = "id of the role to update the secret"
 }

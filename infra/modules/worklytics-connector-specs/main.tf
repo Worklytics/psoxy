@@ -546,8 +546,7 @@ EOT
         { name : "ACCESS_TOKEN", writable : true },
         { name : "REFRESH_TOKEN", writable : true },
         { name : "CLIENT_ID", writable : false },
-        { name : "CLIENT_SECRET", writable : false },
-        { name : "OAUTH_REFRESH_TOKEN", writable : true }, # Lock for sharing access token, handled by Psoxy
+        { name : "CLIENT_SECRET", writable : false }
       ],
       environment_variables : {
         GRANT_TYPE : "refresh_token"

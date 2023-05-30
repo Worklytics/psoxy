@@ -162,6 +162,15 @@ module "worklytics-psoxy-connection" {
 # BEGIN LONG ACCESS AUTH CONNECTORS
 locals {
   long_access_parameters = { for entry in module.worklytics_connector_specs.enabled_oauth_secrets_to_create : "${entry.connector_name}.${entry.secret_name}" => entry }
+  env_vars_for_locker = distinct(flatten([
+  for k, v in module.worklytics_connector_specs.enabled_oauth_long_access_connectors : [
+  for env_var in v.environment_variables : {
+    connector_name = k
+    env_var_name    = "OAUTH_REFRESH_TOKEN"
+  } if try(v.environment_variables.USE_SHARED_TOKEN, null) != null
+  ] if try(v.environment_variables, null) != null
+  ]))
+  env_vars_for_locker_for_locker_parameters = { for entry in local.env_vars_for_locker : "${entry.connector_name}.${entry.env_var_name}" => entry }
   long_access_parameters_by_connector = { for k, spec in module.worklytics_connector_specs.enabled_oauth_long_access_connectors :
     k => [for secret in spec.secured_variables : "${k}.${secret.name}"]
   }
@@ -175,13 +184,6 @@ resource "google_service_account" "long_auth_connector_sa" {
   display_name = "${title(each.key)}${var.connector_display_name_suffix} via Psoxy"
 }
 
-module "connector-oauth-secret-role" {
-  source = "../../modules/gcp-oauth-secrets-role"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-oauth-secrets?ref=v0.4.23"
-
-  project_id = var.gcp_project_id
-}
-
 module "connector-oauth" {
   for_each = local.long_access_parameters
 
@@ -191,7 +193,18 @@ module "connector-oauth" {
   secret_name           = "PSOXY_${upper(replace(each.value.connector_name, "-", "_"))}_${upper(each.value.secret_name)}"
   project_id            = var.gcp_project_id
   service_account_email = google_service_account.long_auth_connector_sa[each.value.connector_name].email
-  updater_role_id       = module.connector-oauth-secret-role.role_id
+}
+
+module "psoxy-instance-secrer-locker" {
+  for_each = local.env_vars_for_locker_for_locker_parameters
+
+  source = "../../modules/gcp-instance-secret-locker"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-instance-secret-locker?ref=v0.4.24"
+
+  secret_name           = "PSOXY_${upper(replace(each.value.connector_name, "-", "_"))}_${upper(each.value.env_var_name)}"
+  project_id            = var.gcp_project_id
+  service_account_email = google_service_account.long_auth_connector_sa[each.value.connector_name].email
+  updater_role_id       = module.psoxy-gcp.psoxy_instance_secret_locker_role_id
 }
 
 module "long-auth-token-secret-fill-instructions" {

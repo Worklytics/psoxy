@@ -162,13 +162,6 @@ resource "google_service_account" "long_auth_connector_sa" {
   display_name = "${title(each.key)}${local.environment_id_display_name_qualifier} via Psoxy"
 }
 
-module "connector-oauth-secret-role" {
-  source = "../../modules/gcp-oauth-secrets-role"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-oauth-secrets?ref=v0.4.23"
-
-  project_id = var.gcp_project_id
-}
-
 module "connector_oauth" {
   for_each = local.long_access_parameters
 
@@ -179,7 +172,7 @@ module "connector_oauth" {
   path_prefix           = local.config_parameter_prefix
   secret_name           = "${upper(replace(each.value.connector_name, "-", "_"))}_${upper(each.value.secret_name)}"
   service_account_email = google_service_account.long_auth_connector_sa[each.value.connector_name].email
-  updater_role_id       = module.connector-oauth-secret-role.role_id
+  updater_role_id       = module.psoxy.psoxy_instance_secret_locker_role_id
 }
 
 module "long_auth_token_secret_fill_instructions" {
