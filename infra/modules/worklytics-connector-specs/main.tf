@@ -400,6 +400,9 @@ EOT
         { name : "ACCOUNT_ID", writable : false },
         { name : "ACCESS_TOKEN", writable : true },
       ],
+      environment_variables : {
+        USE_SHARED_TOKEN : "TRUE"
+      }
       reserved_concurrent_executions : null # 1
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
