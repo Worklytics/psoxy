@@ -46,7 +46,8 @@ test.beforeEach(async (t) => {
     t.context.utils.signAWSRequestURL(
       td.matchers.isA(URL),
       td.matchers.contains('GET'),
-      credentials
+      credentials,
+      options.region,
     )
   ).thenReturn(signedRequest);
 });
