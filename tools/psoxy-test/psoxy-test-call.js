@@ -127,7 +127,7 @@ export default async function (options = {}) {
         if (!_.isUndefined(result.data)) {
           let extendedErrorMessage = '';
           try {
-            extendedErrorMessage = JSON.parse(result.data).message;
+            extendedErrorMessage = JSON.parse(result.data)?.message ?? '';
             errorMessage += ` ${extendedErrorMessage}`;
           } catch(e) {logger.verbose(e.message);}
         }
