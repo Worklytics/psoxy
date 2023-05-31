@@ -44,22 +44,22 @@ And following granular scopes:
    `https://auth.atlassian.com/authorize?audience=api.atlassian.com&client_id=<CLIENT ID>&scope=offline_access%20read:group:jira%20read:avatar:jira%20read:user:jira%20read:account%20read:jira-user%20read:jira-work&redirect_uri=http://localhost&state=YOUR_USER_BOUND_VALUE&response_type=code&prompt=consent`
 
   6. Choose a site in your Jira workspace to allow access for this application and click "Accept".
-
-    As the callback does not exist, you will see an error. But in the URL of your browser you will see
-    something like this as tURL:
+     As the callback does not exist, you will see an error. But in the URL of your browser you will see
+     something like this as tURL:
 
     `http://localhost/?state=YOUR_USER_BOUND_VALUE&code=eyJhbGc...`
 
-    Copy the value of the `code` parameter from that URI. It is the "authorization code" required for next step.
+     Copy the value of the `code` parameter from that URI. It is the "authorization code" required
+     for next step.
 
-    **NOTE** This "Authorization Code" is single-use; if it expires or is used, you will need to obtain
-    a new code by  again pasting the authorization URL in the browser.
+     **NOTE** This "Authorization Code" is single-use; if it expires or is used, you will need to obtain
+     a new code by  again pasting the authorization URL in the browser.
 
-    7. Now, replace the values in following URL and run it from command line in your terminal. Replace `YOUR_AUTHENTICATION_CODE`, `YOUR_CLIENT_ID` and `YOUR_CLIENT_SECRET` in the placeholders:
+  7. Now, replace the values in following URL and run it from command line in your terminal. Replace `YOUR_AUTHENTICATION_CODE`, `YOUR_CLIENT_ID` and `YOUR_CLIENT_SECRET` in the placeholders:
 
     `curl --request POST --url 'https://auth.atlassian.com/oauth/token' --header 'Content-Type: application/json' --data '{"grant_type": "authorization_code","client_id": "YOUR_CLIENT_ID","client_secret": "YOUR_CLIENT_SECRET", "code": "YOUR_AUTHENTICATION_CODE", "redirect_uri": "http://localhost"}'`
 
-    8. After running that command, if successful you will see a [JSON response](https://developer.atlassian.com/cloud/jira/platform/oauth-2-3lo-apps/#2--exchange-authorization-code-for-access-token) like this:
+  8. After running that command, if successful you will see a [JSON response](https://developer.atlassian.com/cloud/jira/platform/oauth-2-3lo-apps/#2--exchange-authorization-code-for-access-token) like this:
 
 ```json
 {
@@ -71,13 +71,18 @@ And following granular scopes:
 }
 ```
 
- 9. You will need to provide `cloudId` parameter of your Jira instance. To retrieve it, please run the
-     following command, using the `access_token` obtained in the previous step in place of
-     `<ACCESS_TOKEN>` below:
+9. Set the following variables in AWS System Manager parameters store / GCP Cloud Secrets (if default implementation):
+     - `PSOXY_JIRA_CLOUD_ACCESS_TOKEN` secret variable with value of `access_token` received in previous response
+     - `PSOXY_JIRA_CLOUD_REFRESH_TOKEN` secret variable with value of `refresh_token` received in previous response
+     - `PSOXY_JIRA_CLOUD_CLIENT_ID` with `Client Id` value.
+     - `PSOXY_JIRA_CLOUD_CLIENT_SECRET` with `Client Secret` value.
 
-    `curl --header 'Authorization: Bearer <ACCESS_TOKEN>' --url 'https://api.atlassian.com/oauth/token/accessible-resources'`
+ 10. Optional, obtain the "Cloud ID" of your Jira instance. Use the following command, with the
+    `access_token` obtained in the previous step in place of `<ACCESS_TOKEN>` below:
 
-    And its response will be something like:
+   `curl --header 'Authorization: Bearer <ACCESS_TOKEN>' --url 'https://api.atlassian.com/oauth/token/accessible-resources'`
+
+   And its response will be something like:
 
 ```json
 [
@@ -91,11 +96,6 @@ And following granular scopes:
 ]
 ```
 
-  Use that id as `jira_cloud_id` parameter to include as part of Terraform deployment. That will
-  target your instance for REST API requests.
-
- 10. Set the following variables in AWS System Manager parameters store / GCP Cloud Secrets (if default implementation):
-     - `PSOXY_JIRA_CLOUD_ACCESS_TOKEN` secret variable with value of `access_token` received in previous response
-     - `PSOXY_JIRA_CLOUD_REFRESH_TOKEN` secret variable with value of `refresh_token` received in previous response
-     - `PSOXY_JIRA_CLOUD_CLIENT_ID` with `Client Id` value.
-     - `PSOXY_JIRA_CLOUD_CLIENT_SECRET` with `Client Secret` value.
+  Add the `id` value from that JSON response as the value of the `jira_cloud_id` variable in the
+  `terraform.tfvars` file of your Terraform configuration. This will generate all the test URLs with
+  a proper value.
