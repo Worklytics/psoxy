@@ -28,6 +28,9 @@ module "worklytics_connector_specs" {
   google_workspace_example_admin = try(coalesce(var.google_workspace_example_admin, var.google_workspace_example_user), null)
   salesforce_domain              = var.salesforce_domain
   msft_tenant_id                 = var.msft_tenant_id
+  jira_server_url                = var.jira_server_url
+  jira_cloud_id                  = var.jira_cloud_id
+  example_jira_issue_id          = var.example_jira_issue_id
 }
 
 module "psoxy-aws" {

@@ -400,6 +400,9 @@ EOT
         { name : "ACCOUNT_ID", writable : false },
         { name : "ACCESS_TOKEN", writable : true },
       ],
+      environment_variables : {
+        USE_SHARED_TOKEN : "TRUE"
+      }
       reserved_concurrent_executions : null # 1
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
@@ -503,6 +506,150 @@ all the operations for the connector:
   - `PSOXY_DROPBOX_BUSINESS_REFRESH_TOKEN` secret variable with value of `refresh_token` received in previous response
   - `PSOXY_DROPBOX_BUSINESS_CLIENT_ID` with `App key` value.
   - `PSOXY_DROPBOX_BUSINESS_CLIENT_SECRET` with `App secret` value.
+
+EOT
+    },
+    jira-server = {
+      source_kind : "jira-server"
+      worklytics_connector_id : "jira-server-psoxy"
+      target_host : var.jira_server_url
+      source_auth_strategy : "oauth2_access_token"
+      display_name : "Jira REST API"
+      identifier_scope_id : "jira"
+      worklytics_connector_name : "Jira Server REST API via Psoxy"
+      secured_variables : [
+        { name : "ACCESS_TOKEN", writable : false },
+      ],
+      reserved_concurrent_executions : null
+      example_api_calls_user_to_impersonate : null
+      example_api_calls : [
+        "/rest/api/2/search?maxResults=25",
+        "/rest/api/2/issue/${var.example_jira_issue_id}/comment?maxResults=25",
+        "/rest/api/2/issue/${var.example_jira_issue_id}/worklog?maxResults=25",
+        "/rest/api/latest/search?maxResults=25",
+        "/rest/api/latest/issue/${var.example_jira_issue_id}/comment?maxResults=25",
+        "/rest/api/latest/issue/${var.example_jira_issue_id}/worklog?maxResults=25",
+      ],
+      external_token_todo : <<EOT
+1. Follow the instructions to create a [Personal Access Token](https://confluence.atlassian.com/enterprise/using-personal-access-tokens-1026032365.html) in your instance
+2. Disable or mark a proper expiration of the token.
+3. Copy the value of the token in PSOXY_JIRA_SERVER_ACCESS_TOKEN variable as part of AWS System Manager parameters store / GCP Cloud Secrets (if default implementation)
+NOTE: If your token has been created with expiration date, please remember to update it before that date to ensure connector is going to work.
+EOT
+    }
+    jira-cloud = {
+      source_kind : "jira-cloud"
+      worklytics_connector_id : "jira-cloud-psoxy"
+      target_host : "api.atlassian.com"
+      source_auth_strategy : "oauth2_refresh_token"
+      display_name : "Jira REST API"
+      identifier_scope_id : "jira"
+      worklytics_connector_name : "Jira REST API via Psoxy"
+      secured_variables : [
+        { name : "ACCESS_TOKEN", writable : true },
+        { name : "REFRESH_TOKEN", writable : true },
+        { name : "CLIENT_ID", writable : false },
+        { name : "CLIENT_SECRET", writable : false }
+      ],
+      environment_variables : {
+        GRANT_TYPE : "refresh_token"
+        REFRESH_ENDPOINT : "https://auth.atlassian.com/oauth/token"
+        USE_SHARED_TOKEN : "TRUE"
+      }
+      reserved_concurrent_executions : null
+      example_api_calls_user_to_impersonate : null
+      example_api_calls : [
+        "/ex/jira/${var.jira_cloud_id}/rest/api/2/users",
+        "/ex/jira/${var.jira_cloud_id}/rest/api/2/group/bulk",
+        "/ex/jira/${var.jira_cloud_id}/rest/api/2/search?maxResults=25",
+        "/ex/jira/${var.jira_cloud_id}/rest/api/2/issue/${var.example_jira_issue_id}/changelog?maxResults=25",
+        "/ex/jira/${var.jira_cloud_id}/rest/api/2/issue/${var.example_jira_issue_id}/comment?maxResults=25",
+        "/ex/jira/${var.jira_cloud_id}/rest/api/2/issue/${var.example_jira_issue_id}/worklog?maxResults=25",
+        "/ex/jira/${var.jira_cloud_id}/rest/api/3/users",
+        "/ex/jira/${var.jira_cloud_id}/rest/api/3/group/bulk",
+        "/ex/jira/${var.jira_cloud_id}/rest/api/3/search?maxResults=25",
+        "/ex/jira/${var.jira_cloud_id}/rest/api/3/issue/${var.example_jira_issue_id}/changelog?maxResults=25",
+        "/ex/jira/${var.jira_cloud_id}/rest/api/3/issue/${var.example_jira_issue_id}/comment?maxResults=25",
+        "/ex/jira/${var.jira_cloud_id}/rest/api/3/issue/${var.example_jira_issue_id}/worklog?maxResults=25",
+        "/ex/jira/${var.jira_cloud_id}/rest/api/3/project/search?maxResults=25",
+      ],
+      external_token_todo : <<EOT
+Jira OAuth 2.0 (3LO) through Psoxy requires a Jira Cloud account with following classical scopes:
+
+- read:jira-user: for getting generic user information
+- read:jira-work: for getting information about issues, comments, etc
+
+And following granular scopes:
+- read:account: for getting user emails
+- read:group:jira: for retrieving group members
+- read:avatar:jira: for retrieving group members
+
+1. Go to https://developer.atlassian.com/console/myapps/ and click on "Create"
+2. Then go `Authorize` and `Add` it, adding `http://localhost` as callback URI. It can be any URL meanwhile it matches the settings.
+3. Now go on `Permissions` and click on `Add` for Jira. Once added, click on `Configure`. Add following scopes as part of `Classic Scopes`:
+- read:jira-user
+- read:jira-work
+And these ones from `Granular Scopes`:
+- read:group:jira
+- read:avatar:jira
+- read:user:jira
+Then repeat the same but for `User Identity API`, adding the following scope:
+- read:account
+
+4. Once Configured, go to `Settings` and prepare to copy the `Client Id` and `Secret`. As we will need to create a `REFRESH_TOKEN` we will need to exchange
+the authentication code to retrieve it. Please replace the *Client Id* field in this URL and paste it on the browser :
+
+   `https://auth.atlassian.com/authorize?audience=api.atlassian.com&client_id=<CLIENT ID>&scope=offline_access%20read:group:jira%20read:avatar:jira%20read:user:jira%20read:account%20read:jira-user%20read:jira-work&redirect_uri=http://localhost&state=YOUR_USER_BOUND_VALUE&response_type=code&prompt=consent`
+
+Choose a site in your Jira workspace to allow access for this application and click on `Accept`.
+
+As the callback is not existing, you will see an error. But in the URL of your browser you will see something like this as URL:
+
+`http://localhost/?state=YOUR_USER_BOUND_VALUE&code=eyJhbGc...`
+
+The content of the `code` parameter is the `authentication code` required for next step.
+
+**NOTE** This `Authorization Code` if for a one single use; if expired or used you will need to get it again pasting the URL in the browser.
+5. Now, replace the values in following URL and run it from command line in your terminal. Replace `YOUR_AUTHENTICATION_CODE`, `YOUR_CLIENT_ID` and `YOUR_CLIENT_SECRET` in the placeholders:
+
+`curl --request POST --url 'https://auth.atlassian.com/oauth/token' --header 'Content-Type: application/json' --data '{"grant_type": "authorization_code","client_id": "YOUR_CLIENT_ID","client_secret": "YOUR_CLIENT_SECRET", "code": "YOUR_AUTHENTICATION_CODE", "redirect_uri": "http://localhost"}'`
+
+6. After running that command, if successful you will see a [JSON response](https://developer.atlassian.com/cloud/jira/platform/oauth-2-3lo-apps/#2--exchange-authorization-code-for-access-token) like this:
+
+```json
+{
+    "access_token": "some short live access token",
+    "expires_in": 3600,
+    "token_type": "Bearer",
+    "refresh_token": "some long live token we are going to use",
+    "scope": "read:jira-work offline_access read:jira-user"
+}
+```
+7. You will need to provide `cloudId` parameter of your Jira instance. To retrieve it, please run the following command replacing adding the
+`ACCESS_TOKEN` obtained in the previous step:
+
+ `curl --header 'Authorization: Bearer <ACCESS_TOKEN>' --url 'https://api.atlassian.com/oauth/token/accessible-resources'`
+
+And its response will be something like:
+
+```json
+[
+  {
+  "id":"SOME UUID",
+  "url":"https://your-site.atlassian.net",
+  "name":"your-site-name",
+  "scopes":["read:jira-user","read:jira-work"],
+  "avatarUrl":"https://site-admin-avatar-cdn.prod.public.atl-paas.net/avatars/240/rocket.png"
+  }
+]
+```
+
+Use that id as `jira_cloud_id` parameter to include as part of Terraform deployment. That will target your instance for REST API requests.
+8. Finally set following variables in AWS System Manager parameters store / GCP Cloud Secrets (if default implementation):
+  - `PSOXY_JIRA_CLOUD_ACCESS_TOKEN` secret variable with value of `access_token` received in previous response
+  - `PSOXY_JIRA_CLOUD_REFRESH_TOKEN` secret variable with value of `refresh_token` received in previous response
+  - `PSOXY_JIRA_CLOUD_CLIENT_ID` with `Client Id` value.
+  - `PSOXY_JIRA_CLOUD_CLIENT_SECRET` with `Client Secret` value.
 
 EOT
     }

@@ -183,6 +183,21 @@ moved {
   to   = google_project_iam_custom_role.bucket_write
 }
 
+resource "google_project_iam_custom_role" "psoxy_instance_secret_locker_role" {
+  project     = var.project_id
+  role_id     = "${local.environment_id_role_prefix}PsoxyInstanceSecretLocker"
+  title       = "Access for updating and reading secrets"
+  description = "Role to grant on secret that is to be managed by a Psoxy instance (cloud function); subset of roles/secretmanager.admin, to support reading/updating the secret"
+
+  permissions = [
+    "resourcemanager.projects.get",
+    "secretmanager.secrets.get",
+    "secretmanager.secrets.getIamPolicy",
+    "secretmanager.secrets.list",
+    "secretmanager.secrets.update"
+  ]
+}
+
 output "artifacts_bucket_name" {
   value = google_storage_bucket.artifacts.name
 }
@@ -229,4 +244,8 @@ output "filename" {
 output "path_to_deployment_jar" {
   description = "Path to the package to deploy (JAR)."
   value       = module.psoxy-package.path_to_deployment_jar
+}
+
+output "psoxy_instance_secret_locker_role_id" {
+  value = google_project_iam_custom_role.psoxy_instance_secret_locker_role.id
 }

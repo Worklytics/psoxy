@@ -35,21 +35,19 @@
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.22/lombok-1.18.22.jar" />
         </processorPath>
         <module name="core" />
-        <module name="psoxy-aws" />
-        <module name="psoxy-gcp" />
-        <module name="gcp" />
         <module name="cmd-line" />
-        <module name="gateway-core" />
         <module name="aws" />
-        <module name="psoxy-cmd-line" />
-        <module name="psoxy-core" />
+        <module name="gcp" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="aws" target="11" />
       <module name="cmd-line" target="11" />
       <module name="core" target="11" />
+      <module name="gateway-core" target="11" />
       <module name="gcp" target="11" />
+      <module name="impl" target="11" />
+      <module name="java" target="11" />
     </bytecodeTargetLevel>
   </component>
 </project>

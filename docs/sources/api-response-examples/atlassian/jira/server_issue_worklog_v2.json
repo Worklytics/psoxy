@@ -1,0 +1,48 @@
+{
+  "startAt": 0,
+  "maxResults": 1,
+  "total": 1,
+  "worklogs": [
+    {
+      "self": "http://localhost:8080/rest/api/2/issue/10000/worklog/10000",
+      "author": {
+        "self": "http://localhost:8080/rest/api/2/user?username=fake",
+        "name": "fake",
+        "key": "JIRAUSER10000",
+        "emailAddress": "fake@contoso.com",
+        "avatarUrls": {
+          "48x48": "https://www.gravatar.com/avatar/ac6ffe47a35e01c2ae94a5672d52cfc7?d=mm&s=48",
+          "24x24": "https://www.gravatar.com/avatar/ac6ffe47a35e01c2ae94a5672d52cfc7?d=mm&s=24",
+          "16x16": "https://www.gravatar.com/avatar/ac6ffe47a35e01c2ae94a5672d52cfc7?d=mm&s=16",
+          "32x32": "https://www.gravatar.com/avatar/ac6ffe47a35e01c2ae94a5672d52cfc7?d=mm&s=32"
+        },
+        "displayName": "fake@contoso.com",
+        "active": true,
+        "timeZone": "GMT"
+      },
+      "updateAuthor": {
+        "self": "http://localhost:8080/rest/api/2/user?username=fake",
+        "name": "fake",
+        "key": "JIRAUSER10000",
+        "emailAddress": "fake@contoso.com",
+        "avatarUrls": {
+          "48x48": "https://www.gravatar.com/avatar/ac6ffe47a35e01c2ae94a5672d52cfc7?d=mm&s=48",
+          "24x24": "https://www.gravatar.com/avatar/ac6ffe47a35e01c2ae94a5672d52cfc7?d=mm&s=24",
+          "16x16": "https://www.gravatar.com/avatar/ac6ffe47a35e01c2ae94a5672d52cfc7?d=mm&s=16",
+          "32x32": "https://www.gravatar.com/avatar/ac6ffe47a35e01c2ae94a5672d52cfc7?d=mm&s=32"
+        },
+        "displayName": "fake@contoso.com",
+        "active": true,
+        "timeZone": "GMT"
+      },
+      "comment": "some mention [~fake]",
+      "created": "2023-05-22T10:44:57.203+0000",
+      "updated": "2023-05-22T10:44:57.203+0000",
+      "started": "2023-05-22T10:44:00.000+0000",
+      "timeSpent": "4d",
+      "timeSpentSeconds": 115200,
+      "id": "10000",
+      "issueId": "10000"
+    }
+  ]
+}

@@ -10,17 +10,17 @@ import lombok.NoArgsConstructor;
 import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
  * build payload for canonical OAuth access token request authenticated by a long-lived refresh
  * token + client secret
- *
+ * <p>
  * (apologies for awkward name, but to be clear: this is using one kind of token to request another,
- *  so it's a token request, using a token)
+ * so it's a token request, using a token)
  *
  * @see OAuthAccessTokenSourceAuthStrategy
- *
  */
 @NoArgsConstructor(onConstructor_ = @Inject)
 public class RefreshTokenTokenRequestBuilder
@@ -35,8 +35,21 @@ public class RefreshTokenTokenRequestBuilder
     public enum ConfigProperty implements ConfigService.ConfigProperty {
         REFRESH_TOKEN, //NOTE: you should configure this as a secret in Secret Manager
         CLIENT_SECRET, //NOTE: you should configure this as a secret in Secret Manager
+        USE_SHARED_TOKEN,
     }
 
+    @Override
+    public boolean useSharedToken() {
+        Optional<String> useSharedTokenConfig = config.getConfigPropertyAsOptional(ConfigProperty.USE_SHARED_TOKEN);
+
+        boolean useSharedToken = false;
+
+        if (useSharedTokenConfig.isPresent()) {
+            useSharedToken = Boolean.parseBoolean(useSharedTokenConfig.get());
+        }
+
+        return useSharedToken;
+    }
 
     public HttpContent buildPayload() {
 
@@ -54,10 +67,10 @@ public class RefreshTokenTokenRequestBuilder
     @Override
     public Set<ConfigService.ConfigProperty> getRequiredConfigProperties() {
         return Set.of(
-            OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID,
-            ConfigProperty.CLIENT_SECRET,
-            ConfigProperty.REFRESH_TOKEN
-            );
+                OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID,
+                ConfigProperty.CLIENT_SECRET,
+                ConfigProperty.REFRESH_TOKEN
+        );
     }
 
     @Override

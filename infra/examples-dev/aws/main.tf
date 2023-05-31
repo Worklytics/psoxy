@@ -79,6 +79,9 @@ module "psoxy" {
   msft_owners_email              = var.msft_owners_email
   general_environment_variables  = var.general_environment_variables
   salesforce_domain              = var.salesforce_domain
+  jira_server_url                = var.jira_server_url
+  jira_cloud_id                  = var.jira_cloud_id
+  example_jira_issue_id          = var.example_jira_issue_id
   gcp_project_id                 = var.gcp_project_id
   google_workspace_example_admin = var.google_workspace_example_admin
   google_workspace_example_user  = var.google_workspace_example_user

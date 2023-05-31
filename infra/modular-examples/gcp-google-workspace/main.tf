@@ -21,6 +21,9 @@ module "worklytics_connector_specs" {
   google_workspace_example_admin = try(coalesce(var.google_workspace_example_admin, var.google_workspace_example_user), null)
   salesforce_domain              = var.salesforce_domain
   msft_tenant_id                 = var.msft_tenant_id
+  jira_server_url                = var.jira_server_url
+  jira_cloud_id                  = var.jira_cloud_id
+  example_jira_issue_id          = var.example_jira_issue_id
 }
 
 module "psoxy-gcp" {
@@ -159,6 +162,15 @@ module "worklytics-psoxy-connection" {
 # BEGIN LONG ACCESS AUTH CONNECTORS
 locals {
   long_access_parameters = { for entry in module.worklytics_connector_specs.enabled_oauth_secrets_to_create : "${entry.connector_name}.${entry.secret_name}" => entry }
+  env_vars_for_locker = distinct(flatten([
+  for k, v in module.worklytics_connector_specs.enabled_oauth_long_access_connectors : [
+  for env_var in v.environment_variables : {
+    connector_name = k
+    env_var_name    = "OAUTH_REFRESH_TOKEN"
+  } if try(v.environment_variables.USE_SHARED_TOKEN, null) != null
+  ] if try(v.environment_variables, null) != null
+  ]))
+  env_vars_for_locker_parameters = { for entry in local.env_vars_for_locker : "${entry.connector_name}.${entry.env_var_name}" => entry }
   long_access_parameters_by_connector = { for k, spec in module.worklytics_connector_specs.enabled_oauth_long_access_connectors :
     k => [for secret in spec.secured_variables : "${k}.${secret.name}"]
   }
@@ -181,6 +193,18 @@ module "connector-oauth" {
   secret_name           = "PSOXY_${upper(replace(each.value.connector_name, "-", "_"))}_${upper(each.value.secret_name)}"
   project_id            = var.gcp_project_id
   service_account_email = google_service_account.long_auth_connector_sa[each.value.connector_name].email
+}
+
+module "psoxy-instance-secret-locker" {
+  for_each = local.env_vars_for_locker_parameters
+
+  source = "../../modules/gcp-instance-secret-locker"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-instance-secret-locker?ref=v0.4.24"
+
+  secret_name           = "PSOXY_${upper(replace(each.value.connector_name, "-", "_"))}_${upper(each.value.env_var_name)}"
+  project_id            = var.gcp_project_id
+  service_account_email = google_service_account.long_auth_connector_sa[each.value.connector_name].email
+  updater_role_id       = module.psoxy-gcp.psoxy_instance_secret_locker_role_id
 }
 
 module "long-auth-token-secret-fill-instructions" {
@@ -214,7 +238,7 @@ module "connector-long-auth-function" {
 
   project_id                    = var.gcp_project_id
   source_kind                   = each.value.source_kind
-  instance_id                   = "psoxy-${each.key}"
+  instance_id                   = each.key
   service_account_email         = google_service_account.long_auth_connector_sa[each.key].email
   artifacts_bucket_name         = module.psoxy-gcp.artifacts_bucket_name
   deployment_bundle_object_name = module.psoxy-gcp.deployment_bundle_object_name
