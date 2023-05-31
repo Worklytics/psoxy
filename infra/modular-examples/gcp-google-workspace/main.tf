@@ -195,7 +195,7 @@ module "connector-oauth" {
   service_account_email = google_service_account.long_auth_connector_sa[each.value.connector_name].email
 }
 
-module "psoxy-instance-secrer-locker" {
+module "psoxy-instance-secret-locker" {
   for_each = local.env_vars_for_locker_for_locker_parameters
 
   source = "../../modules/gcp-instance-secret-locker"

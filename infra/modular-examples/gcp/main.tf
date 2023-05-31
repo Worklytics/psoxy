@@ -185,7 +185,7 @@ module "connector_oauth" {
   updater_role_id       = module.psoxy.psoxy_instance_secret_locker_role_id
 }
 
-module "psoxy-instance-secrer-locker" {
+module "psoxy-instance-secret-locker" {
   for_each = local.env_vars_for_locker_for_locker_parameters
 
   source = "../../modules/gcp-instance-secret-locker"
