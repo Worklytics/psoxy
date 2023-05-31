@@ -170,7 +170,7 @@ locals {
   } if try(v.environment_variables.USE_SHARED_TOKEN, null) != null
   ] if try(v.environment_variables, null) != null
   ]))
-  env_vars_for_locker_for_locker_parameters = { for entry in local.env_vars_for_locker : "${entry.connector_name}.${entry.env_var_name}" => entry }
+  env_vars_for_locker_parameters = { for entry in local.env_vars_for_locker : "${entry.connector_name}.${entry.env_var_name}" => entry }
   long_access_parameters_by_connector = { for k, spec in module.worklytics_connector_specs.enabled_oauth_long_access_connectors :
     k => [for secret in spec.secured_variables : "${k}.${secret.name}"]
   }
@@ -196,7 +196,7 @@ module "connector-oauth" {
 }
 
 module "psoxy-instance-secret-locker" {
-  for_each = local.env_vars_for_locker_for_locker_parameters
+  for_each = local.env_vars_for_locker_parameters
 
   source = "../../modules/gcp-instance-secret-locker"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-instance-secret-locker?ref=v0.4.24"
