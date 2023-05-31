@@ -126,15 +126,20 @@ function requestWrapper(url, method = 'GET', headers) {
 
 /**
  * Simple wrapper around `aws4` to ease testing.
+ * 
+ * TODO aws4 is not able to resolve region nor service (see how we try to 
+ *  resolve the "service" here)from the URL for our use cases, so we need to 
+ *  improve the resolution of those values
  *
  * Ref: https://github.com/mhart/aws4#api
  *
  * @param {URL} url
  * @param {String} method
  * @param {Object} credentials
+ * @param {String} region
  * @return {Object}
  */
-function signAWSRequestURL(url, method = 'GET', credentials) {
+function signAWSRequestURL(url, method = 'GET', credentials, region) {
   // According to aws4 docs, search params should be part of the "path"
   const params = url.searchParams.toString();
 
@@ -142,6 +147,7 @@ function signAWSRequestURL(url, method = 'GET', credentials) {
     host: url.host,
     path: url.pathname + (params !== '' ? `?${params}` : ''),
     method: method,
+    region: region,
   };
 
   // Closer look at aws4 source code: region and service are calculated from

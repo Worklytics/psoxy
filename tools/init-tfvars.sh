@@ -5,7 +5,7 @@
 TFVARS_FILE=$1
 PSOXY_BASE_DIR=$2
 
-RELEASE_VERSION="v0.4.23"
+RELEASE_VERSION="v0.4.24"
 
 # colors
 RED='\e[0;31m'
@@ -131,7 +131,7 @@ fi
 # NOTE: could be conditional based on google workspace, azure, etc - but as we expect future
 # examples to cover ALL connectors, and just vary by host platform, we'll just initialize all for
 # now and expect customers to remove them as needed
-AVAILABLE_CONNECTORS=$(echo "local.available_connector_ids" | terraform -chdir=${PSOXY_BASE_DIR}infra/modules/worklytics-connector-specs console)
+AVAILABLE_CONNECTORS=$(echo "local.available_connector_ids" | terraform -chdir="${PSOXY_BASE_DIR}infra/modules/worklytics-connector-specs" console)
 printf "# review following list of connectors to enable, and comment out what you don't want\n" >> $TFVARS_FILE
 printf "enabled_connectors = ${AVAILABLE_CONNECTORS}\n\n" >> $TFVARS_FILE
 
