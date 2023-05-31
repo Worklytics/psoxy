@@ -559,6 +559,8 @@ EOT
       reserved_concurrent_executions : null
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
+        "/oauth/token/accessible-resources", # obtain Jira Cloud ID from here
+        "/ex/jira/${var.jira_cloud_id}/rest/api/2/users",
         "/ex/jira/${var.jira_cloud_id}/rest/api/2/users",
         "/ex/jira/${var.jira_cloud_id}/rest/api/2/group/bulk",
         "/ex/jira/${var.jira_cloud_id}/rest/api/2/search?maxResults=25",
