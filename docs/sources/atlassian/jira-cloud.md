@@ -1,28 +1,33 @@
 # Jira Cloud
 
+NOTE: This is for the Cloud-hosted version of Jira; for the self-hosted version, see [Jira Server](jira-server.md).
+
 NOTE: derived from [worklytics-connector-specs](../../infra/modules/worklytics-connector-specs/main.tf); refer to that for definitive information.
 
 Jira OAuth 2.0 (3LO) through Psoxy requires a Jira Cloud account with following classical scopes:
 
-- read:jira-user: for getting generic user information
-- read:jira-work: for getting information about issues, comments, etc
+  - `read:jira-user`: for getting generic user information
+  - `read:jira-work`: for getting information about issues, comments, etc
 
 And following granular scopes:
-- read:account: for getting user emails
-- read:group:jira: for retrieving group members
-- read:avatar:jira: for retrieving group members
+  - `read:account`: for getting user emails
+  - `read:group:jira`: for retrieving group members
+  - `read:avatar:jira`: for retrieving group members
+
+Setup:
 
 1. Go to https://developer.atlassian.com/console/myapps/ and click on "Create"
 2. Then go `Authorize` and `Add` it, adding `http://localhost` as callback URI. It can be any URL meanwhile it matches the settings.
-3. Now go on `Permissions` and click on `Add` for Jira. Once added, click on `Configure`. Add following scopes as part of `Classic Scopes`:
-- read:jira-user
-- read:jira-work
-  And these ones from `Granular Scopes`:
-- read:group:jira
-- read:avatar:jira
-- read:user:jira
-  Then repeat the same but for `User Identity API`, adding the following scope:
-- read:account
+3. Now go on `Permissions` and click on `Add` for Jira. Once added, click on `Configure`.
+   Add following scopes as part of `Classic Scopes`:
+     - `read:jira-user`
+     - `read:jira-work`
+   And these from `Granular Scopes`:
+     - `read:group:jira`
+     - `read:avatar:jira`
+     - `read:user:jira`
+   Then repeat the same but for `User Identity API`, adding the following scope:
+     - `read:account`
 
 4. Once Configured, go to `Settings` and prepare to copy the `Client Id` and `Secret`. As we will need to create a `REFRESH_TOKEN` we will need to exchange
    the authentication code to retrieve it. Please replace the *Client Id* field in this URL and paste it on the browser :
