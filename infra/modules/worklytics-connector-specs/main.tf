@@ -140,6 +140,9 @@ locals {
     }
   }
 
+  jira_cloud_id = coalesce(var.jira_cloud_id, "YOUR_JIRA_CLOUD_ID")
+  example_jira_issue_id = coalesce(var.example_jira_issue_id, "YOUR_JIRA_EXAMPLE_ISSUE_ID")
+
   # Microsoft 365 sources; add/remove as you wish
   # See https://docs.microsoft.com/en-us/graph/permissions-reference for all the permissions available in AAD Graph API
   msft_365_connectors = {
@@ -524,11 +527,11 @@ EOT
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
         "/rest/api/2/search?maxResults=25",
-        "/rest/api/2/issue/${var.example_jira_issue_id}/comment?maxResults=25",
-        "/rest/api/2/issue/${var.example_jira_issue_id}/worklog?maxResults=25",
+        "/rest/api/2/issue/${local.example_jira_issue_id}/comment?maxResults=25",
+        "/rest/api/2/issue/${local.example_jira_issue_id}/worklog?maxResults=25",
         "/rest/api/latest/search?maxResults=25",
-        "/rest/api/latest/issue/${var.example_jira_issue_id}/comment?maxResults=25",
-        "/rest/api/latest/issue/${var.example_jira_issue_id}/worklog?maxResults=25",
+        "/rest/api/latest/issue/${local.example_jira_issue_id}/comment?maxResults=25",
+        "/rest/api/latest/issue/${local.example_jira_issue_id}/worklog?maxResults=25",
       ],
       external_token_todo : <<EOT
 1. Follow the instructions to create a [Personal Access Token](https://confluence.atlassian.com/enterprise/using-personal-access-tokens-1026032365.html) in your instance
@@ -560,20 +563,20 @@ EOT
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
         "/oauth/token/accessible-resources", # obtain Jira Cloud ID from here
-        "/ex/jira/${var.jira_cloud_id}/rest/api/2/users",
-        "/ex/jira/${var.jira_cloud_id}/rest/api/2/users",
-        "/ex/jira/${var.jira_cloud_id}/rest/api/2/group/bulk",
-        "/ex/jira/${var.jira_cloud_id}/rest/api/2/search?maxResults=25",
-        "/ex/jira/${var.jira_cloud_id}/rest/api/2/issue/${var.example_jira_issue_id}/changelog?maxResults=25",
-        "/ex/jira/${var.jira_cloud_id}/rest/api/2/issue/${var.example_jira_issue_id}/comment?maxResults=25",
-        "/ex/jira/${var.jira_cloud_id}/rest/api/2/issue/${var.example_jira_issue_id}/worklog?maxResults=25",
-        "/ex/jira/${var.jira_cloud_id}/rest/api/3/users",
-        "/ex/jira/${var.jira_cloud_id}/rest/api/3/group/bulk",
-        "/ex/jira/${var.jira_cloud_id}/rest/api/3/search?maxResults=25",
-        "/ex/jira/${var.jira_cloud_id}/rest/api/3/issue/${var.example_jira_issue_id}/changelog?maxResults=25",
-        "/ex/jira/${var.jira_cloud_id}/rest/api/3/issue/${var.example_jira_issue_id}/comment?maxResults=25",
-        "/ex/jira/${var.jira_cloud_id}/rest/api/3/issue/${var.example_jira_issue_id}/worklog?maxResults=25",
-        "/ex/jira/${var.jira_cloud_id}/rest/api/3/project/search?maxResults=25",
+        "/ex/jira/${local.jira_cloud_id}/rest/api/2/users",
+        "/ex/jira/${local.jira_cloud_id}/rest/api/2/users",
+        "/ex/jira/${local.jira_cloud_id}/rest/api/2/group/bulk",
+        "/ex/jira/${local.jira_cloud_id}/rest/api/2/search?maxResults=25",
+        "/ex/jira/${local.jira_cloud_id}/rest/api/2/issue/${local.example_jira_issue_id}/changelog?maxResults=25",
+        "/ex/jira/${local.jira_cloud_id}/rest/api/2/issue/${local.example_jira_issue_id}/comment?maxResults=25",
+        "/ex/jira/${local.jira_cloud_id}/rest/api/2/issue/${local.example_jira_issue_id}/worklog?maxResults=25",
+        "/ex/jira/${local.jira_cloud_id}/rest/api/3/users",
+        "/ex/jira/${local.jira_cloud_id}/rest/api/3/group/bulk",
+        "/ex/jira/${local.jira_cloud_id}/rest/api/3/search?maxResults=25",
+        "/ex/jira/${local.jira_cloud_id}/rest/api/3/issue/${local.example_jira_issue_id}/changelog?maxResults=25",
+        "/ex/jira/${local.jira_cloud_id}/rest/api/3/issue/${local.example_jira_issue_id}/comment?maxResults=25",
+        "/ex/jira/${local.jira_cloud_id}/rest/api/3/issue/${local.example_jira_issue_id}/worklog?maxResults=25",
+        "/ex/jira/${local.jira_cloud_id}/rest/api/3/project/search?maxResults=25",
       ],
       external_token_todo : <<EOT
 ## Prerequisites
