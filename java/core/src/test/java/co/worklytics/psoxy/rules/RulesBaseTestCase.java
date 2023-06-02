@@ -127,7 +127,7 @@ abstract public class RulesBaseTestCase {
 
     @SneakyThrows
     @Test
-    void yamlLength() {
+    public void yamlLength() {
         int rulesLengthInChars = yamlMapper.writeValueAsString(getRulesUnderTest()).length();
         assertTrue(rulesLengthInChars < ADVANCED_SSM_PARAM_LIMIT, "YAML rules " + rulesLengthInChars + " chars long; want < " + ADVANCED_SSM_PARAM_LIMIT + " chars to fit as AWS SSM param");
     }

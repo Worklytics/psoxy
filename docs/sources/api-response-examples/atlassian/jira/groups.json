@@ -1,0 +1,76 @@
+{
+  "maxResults": 50,
+  "startAt": 0,
+  "total": 17,
+  "isLast": true,
+  "values": [
+    {
+      "name": "jira-software-users",
+      "groupId": "37fcfa53-b3a2-431d-b941-419f73f51dbc"
+    },
+    {
+      "name": "_licensed-confluence",
+      "groupId": "43cd55b6-0175-4078-b780-19292794bd2d"
+    },
+    {
+      "name": "jira-servicedesk-users",
+      "groupId": "597055bd-65e3-4352-bc44-fff0831202e8"
+    },
+    {
+      "name": "site-admins",
+      "groupId": "6eaa3937-3a91-476b-be6b-dda16f6804a5"
+    },
+    {
+      "name": "confluence-guests-worklytics",
+      "groupId": "7cf4d731-e7a7-4aab-bbba-11be101aa3a4"
+    },
+    {
+      "name": "confluence-users",
+      "groupId": "7cfef7ea-249b-4ca3-8260-53aaf018df97"
+    },
+    {
+      "name": "balsamiq-mockups-editors",
+      "groupId": "9b1faadf-53fb-4759-a5a4-ef1f9ab07984"
+    },
+    {
+      "name": "_licensed-bamboo",
+      "groupId": "a4db53ac-2328-469f-a1c3-1d3d0c871664"
+    },
+    {
+      "name": "atlassian-addons-admin",
+      "groupId": "a62a3c35-a1f8-4264-93c4-f85dc5ebcc1a"
+    },
+    {
+      "name": "_licensed-jira",
+      "groupId": "b099d388-885c-4451-a611-9b3e04d1ab0b"
+    },
+    {
+      "name": "_licensed-fecru",
+      "groupId": "b3c85916-10a9-441a-a5e5-16e671ac8686"
+    },
+    {
+      "name": "atlassian-addons",
+      "groupId": "bd32137f-1118-4ca7-923a-ebd6e6879bc5"
+    },
+    {
+      "name": "administrators",
+      "groupId": "be84da58-9ed7-4f7b-8b93-cf23f3dc87d4"
+    },
+    {
+      "name": "system-administrators",
+      "groupId": "d0477725-1fa6-4036-904d-d40a9e98e441"
+    },
+    {
+      "name": "_no-one-at-all",
+      "groupId": "f33003b3-edf2-4aa2-bdb3-7ed689b674bc"
+    },
+    {
+      "name": "trusted-users-f6eef702-e05d-43ba-bd5c-75fce47d560e",
+      "groupId": "f373b66e-c975-4004-a380-1f52caa1f629"
+    },
+    {
+      "name": "jira-administrators",
+      "groupId": "ff1e15a3-df68-4bf2-a615-40c8abcd12e2"
+    }
+  ]
+}

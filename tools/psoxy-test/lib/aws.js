@@ -60,7 +60,8 @@ async function call(options = {}) {
   const credentials = await getAWSCredentials(options.role, options.region);
 
   logger.verbose('Signing request');
-  const signed = signAWSRequestURL(url, method, credentials);
+
+  const signed = signAWSRequestURL(url, method, credentials, options.region);
   const headers = {
     ...getCommonHTTPHeaders(options),
     ...signed.headers,

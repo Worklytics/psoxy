@@ -64,7 +64,7 @@ data "google_project" "psoxy-google-connectors" {
 
 module "psoxy" {
   source = "../../modular-examples/aws-google-workspace"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-google-workspace?ref=v0.4.23"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-google-workspace?ref=v0.4.25"
 
   aws_account_id                 = var.aws_account_id
   aws_assume_role_arn            = var.aws_assume_role_arn # role that can test the instances (lambdas)
@@ -88,6 +88,9 @@ module "psoxy" {
   general_environment_variables  = var.general_environment_variables
   pseudonymize_app_ids           = var.pseudonymize_app_ids
   salesforce_domain              = var.salesforce_domain
+  jira_server_url                = var.jira_server_url
+  jira_cloud_id                  = var.jira_cloud_id
+  example_jira_issue_id          = var.example_jira_issue_id
   bulk_sanitized_expiration_days = var.bulk_sanitized_expiration_days
   bulk_input_expiration_days     = var.bulk_input_expiration_days
   # Uncomment the following line if you want to apply KMS encryption on your SSM parameters
