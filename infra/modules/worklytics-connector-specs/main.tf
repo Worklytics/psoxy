@@ -517,7 +517,7 @@ EOT
       worklytics_connector_id : "jira-server-psoxy"
       target_host : var.jira_server_url
       source_auth_strategy : "oauth2_access_token"
-      display_name : "Jira REST API"
+      display_name : "Jira Server REST API"
       identifier_scope_id : "jira"
       worklytics_connector_name : "Jira Server REST API via Psoxy"
       secured_variables : [
@@ -534,10 +534,16 @@ EOT
         "/rest/api/latest/issue/${local.example_jira_issue_id}/worklog?maxResults=25",
       ],
       external_token_todo : <<EOT
-1. Follow the instructions to create a [Personal Access Token](https://confluence.atlassian.com/enterprise/using-personal-access-tokens-1026032365.html) in your instance
-2. Disable or mark a proper expiration of the token.
-3. Copy the value of the token in PSOXY_JIRA_SERVER_ACCESS_TOKEN variable as part of AWS System Manager parameters store / GCP Cloud Secrets (if default implementation)
-NOTE: If your token has been created with expiration date, please remember to update it before that date to ensure connector is going to work.
+  1. Follow the instructions to create a [Personal Access Token](https://confluence.atlassian.com/enterprise/using-personal-access-tokens-1026032365.html) in your instance.
+     As this is coupled to a specific User in Jira, we recommend first creating a dedicated Jira user
+     to be a "Service Account" in effect for the connection (name it `svc-worklytics` or something).
+     This will give you better visibility into activity of the data connector as well as avoid
+     connection inadvertently breaking if the Jira user who owns the token is disabled or deleted.
+  2. Disable or mark a proper expiration of the token.
+  3. Copy the value of the token in `PSOXY_JIRA_SERVER_ACCESS_TOKEN` variable as part of AWS System
+     Manager parameters store / GCP Cloud Secrets (if default implementation)
+     NOTE: If your token has been created with expiration date, please remember to update it before
+     that date to ensure connector is going to work.
 EOT
     }
     jira-cloud = {
