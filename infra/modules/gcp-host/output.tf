@@ -12,7 +12,7 @@ output "bulk_connector_instances" {
   value = local.bulk_instances
 }
 
-output "todo" {
+output "todos" {
   description = "List of todo steps to complete, in markdown format."
   value       = values(module.rest_connector[*]).todo
 }

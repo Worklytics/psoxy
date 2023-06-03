@@ -48,6 +48,10 @@
       <module name="gcp" target="11" />
       <module name="impl" target="11" />
       <module name="java" target="11" />
+      <module name="psoxy-aws" target="11" />
+      <module name="psoxy-cmd-line" target="11" />
+      <module name="psoxy-core" target="11" />
+      <module name="psoxy-gcp" target="11" />
     </bytecodeTargetLevel>
   </component>
 </project>

@@ -27,7 +27,11 @@ provider "google" {
   impersonate_service_account = var.gcp_terraform_sa_account_email
 }
 
-module "worklytics-connectors" {
+locals {
+  host_platform_id = "GCP"
+}
+
+module "worklytics_connectors" {
   source = "../../modules/worklytics-connectors"
 
   enabled_connectors    = var.enabled_connectors
@@ -37,7 +41,7 @@ module "worklytics-connectors" {
   salesforce_domain     = var.salesforce_domain
 }
 
-module "worklytics-connectors-google-workspace" {
+module "worklytics_connectors_google_workspace" {
   source = "../../modules/worklytics-connectors-google-workspace"
 
   enabled_connectors             = var.enabled_connectors
@@ -46,15 +50,25 @@ module "worklytics-connectors-google-workspace" {
   google_workspace_example_admin = var.google_workspace_example_admin
 }
 
+module "worklytics_connectors_msft_365" {
+  source = "../../modules/worklytics-connectors-msft-365"
+
+  enabled_connectors     = var.enabled_connectors
+  msft_tenant_id         = var.msft_tenant_id
+  msft_owners_email      = var.msft_owners_email
+  example_msft_user_guid = var.example_msft_user_guid
+}
+
+
 locals {
-  host_platform_id = "GCP"
   rest_connectors = merge(
-    module.worklytics-connectors.enabled_rest_connectors,
-    module.worklytics-connectors-google-workspace.enabled_rest_connectors
+    module.worklytics_connectors.enabled_rest_connectors,
+    module.worklytics_connectors_google_workspace.enabled_rest_connectors,
+    module.worklytics_connectors_msft_365.enabled_rest_connectors
   )
 
   bulk_connectors = merge(
-    module.worklytics-connectors.enabled_bulk_connectors,
+    module.worklytics_connectors.enabled_bulk_connectors,
     var.custom_bulk_connectors
   )
 }
@@ -83,7 +97,7 @@ module "psoxy" {
   lookup_tables                  = var.lookup_tables
 }
 
-module "worklytics_psoxy_connection" {
+module "rest_to_worklytics" {
   for_each = module.psoxy.rest_connector_instances
 
   source = "../../modules/worklytics-psoxy-connection"
@@ -97,8 +111,8 @@ module "worklytics_psoxy_connection" {
   todo_step              = module.psoxy.next_todo_step
 }
 
-module "psoxy_bulk_to_worklytics" {
-  for_each = module.psoxy.bulk_connectors
+module "bulk_to_worklytics" {
+  for_each = module.psoxy.bulk_connector_instances
 
   source = "../../modules/worklytics-psoxy-connection-generic"
 
@@ -120,15 +134,23 @@ output "path_to_deployment_jar" {
 
 output "todos_1" {
   description = "List of todo steps to complete 1st, in markdown format."
-  value       = var.todos_as_outputs ? join("\n", module.psoxy.todos_1) : null
+  value = var.todos_as_outputs ? join("\n",
+    concat(
+      module.worklytics_connectors.todos,
+      module.worklytics_connectors_google_workspace.todos,
+      module.worklytics_connectors_msft_365.todos
+  )) : null
 }
 
 output "todos_2" {
   description = "List of todo steps to complete 2nd, in markdown format."
-  value       = var.todos_as_outputs ? join("\n", module.psoxy.todos_2) : null
+  value       = var.todos_as_outputs ? join("\n", module.psoxy.todos) : null
 }
 
 output "todos_3" {
   description = "List of todo steps to complete 3rd, in markdown format."
-  value       = var.todos_as_outputs ? join("\n", module.psoxy.todos_3) : null
+  value = var.todos_as_outputs ? join("\n", concat(
+    module.bulk_to_worklytics.todos,
+    module.rest_to_worklytics.todos
+  )) : null
 }

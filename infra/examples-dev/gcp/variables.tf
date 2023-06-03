@@ -176,6 +176,12 @@ variable "msft_owners_email" {
   default     = []
 }
 
+variable "example_msft_user_guid" {
+  type        = string
+  description = "(Only if config includes MSFT connectors). example MSFT user guid (uuid) for test API calls (OPTIONAL)"
+  default     = "{EXAMPLE_MSFT_USER_GUID}"
+}
+
 variable "jira_server_url" {
   type        = string
   default     = null

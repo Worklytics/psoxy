@@ -3,7 +3,7 @@ output "enabled_rest_connectors" {
   value       = local.enabled_rest_connectors
 }
 
-output "enabled_rest_connectors_todos" {
+output "todos" {
   description = "List of TODOS for enabled REST connectors"
   value       = values(module.msft_365_grants[*]).todo
 }
