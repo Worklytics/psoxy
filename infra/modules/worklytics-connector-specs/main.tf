@@ -144,7 +144,6 @@ locals {
   # See https://docs.microsoft.com/en-us/graph/permissions-reference for all the permissions available in AAD Graph API
   msft_365_connectors = {
     "azure-ad" : {
-      enabled : true,
       worklytics_connector_id : "azure-ad-psoxy",
       source_kind : "azure-ad",
       display_name : "Azure Directory"
@@ -171,7 +170,6 @@ locals {
       ]
     },
     "outlook-cal" : {
-      enabled : true,
       source_kind : "outlook-cal",
       worklytics_connector_id : "outlook-cal-psoxy",
       display_name : "Outlook Calendar"
@@ -201,7 +199,6 @@ locals {
       ]
     },
     "outlook-mail" : {
-      enabled : true,
       source_kind : "outlook-mail"
       worklytics_connector_id : "outlook-mail-psoxy",
       display_name : "Outlook Mail"

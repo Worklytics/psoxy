@@ -43,33 +43,6 @@ module "psoxy" {
   install_test_tool       = var.install_test_tool
 }
 
-module "google_workspace_connection" {
-  for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
-
-  source = "../../modules/google-workspace-dwd-connection"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/google-workspace-dwd-connection?ref=v0.4.25"
-
-  project_id                   = var.gcp_project_id
-  connector_service_account_id = "${local.environment_id_prefix}${substr(each.key, 0, 30 - length(local.environment_id_prefix))}"
-  display_name                 = "Psoxy Connector - ${local.environment_id_display_name_qualifier}${each.value.display_name}"
-  apis_consumed                = each.value.apis_consumed
-  oauth_scopes_needed          = each.value.oauth_scopes_needed
-  todo_step                    = 1
-
-  depends_on = [
-    module.psoxy
-  ]
-}
-
-module "google_workspace_connection_auth" {
-  for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
-
-  source = "../../modules/gcp-sa-auth-key"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-sa-auth-key?ref=v0.4.25"
-
-  service_account_id = module.google_workspace_connection[each.key].service_account_id
-}
-
 module "google_workspace_key_secrets" {
 
   for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
@@ -150,16 +123,16 @@ module "worklytics_psoxy_connection" {
 locals {
   long_access_parameters = { for entry in module.worklytics_connector_specs.enabled_oauth_secrets_to_create : "${entry.connector_name}.${entry.secret_name}" => entry }
   env_vars_for_locker = distinct(flatten([
-  for k, v in module.worklytics_connector_specs.enabled_oauth_long_access_connectors : [
-  for env_var in v.environment_variables : {
-    connector_name = k
-    env_var_name    = "OAUTH_REFRESH_TOKEN"
-  } if try(v.environment_variables.USE_SHARED_TOKEN, null) != null
-  ] if try(v.environment_variables, null) != null
+    for k, v in module.worklytics_connector_specs.enabled_oauth_long_access_connectors : [
+      for env_var in v.environment_variables : {
+        connector_name = k
+        env_var_name   = "OAUTH_REFRESH_TOKEN"
+      } if try(v.environment_variables.USE_SHARED_TOKEN, null) != null
+    ] if try(v.environment_variables, null) != null
   ]))
   env_vars_for_locker_parameters = { for entry in local.env_vars_for_locker : "${entry.connector_name}.${entry.env_var_name}" => entry }
   long_access_parameters_by_connector = { for k, spec in module.worklytics_connector_specs.enabled_oauth_long_access_connectors :
-  k => [for secret in spec.secured_variables : "${k}.${secret.name}"]
+    k => [for secret in spec.secured_variables : "${k}.${secret.name}"]
   }
 }
 
@@ -315,7 +288,6 @@ module "psoxy_bulk" {
   example_file                  = try(each.value.example_file, null)
   input_expiration_days         = var.bulk_input_expiration_days
   sanitized_expiration_days     = var.bulk_sanitized_expiration_days
-
 
   environment_variables = merge(
     var.general_environment_variables,

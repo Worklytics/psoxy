@@ -27,8 +27,40 @@ provider "google" {
   impersonate_service_account = var.gcp_terraform_sa_account_email
 }
 
+module "worklytics-connectors" {
+  source = "../../modules/worklytics-connectors"
+
+  enabled_connectors    = var.enabled_connectors
+  example_jira_issue_id = var.example_jira_issue_id
+  jira_cloud_id         = var.jira_cloud_id
+  jira_server_url       = var.jira_server_url
+  salesforce_domain     = var.salesforce_domain
+}
+
+module "worklytics-connectors-google-workspace" {
+  source = "../../modules/worklytics-connectors-google-workspace"
+
+  enabled_connectors             = var.enabled_connectors
+  gcp_project_id                 = var.gcp_project_id
+  google_workspace_example_user  = var.google_workspace_example_user
+  google_workspace_example_admin = var.google_workspace_example_admin
+}
+
+locals {
+  host_platform_id = "GCP"
+  rest_connectors = merge(
+    module.worklytics-connectors.enabled_rest_connectors,
+    module.worklytics-connectors-google-workspace.enabled_rest_connectors
+  )
+
+  bulk_connectors = merge(
+    module.worklytics-connectors.enabled_bulk_connectors,
+    var.custom_bulk_connectors
+  )
+}
+
 module "psoxy" {
-  source = "../../modular-examples/gcp"
+  source = "../../modules/gcp-host"
   # source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/gcp?ref=v0.4.25"
 
   gcp_project_id                 = var.gcp_project_id
@@ -40,21 +72,45 @@ module "psoxy" {
   install_test_tool              = var.install_test_tool
   gcp_region                     = var.gcp_region
   replica_regions                = var.replica_regions
-  enabled_connectors             = var.enabled_connectors
+  rest_connectors                = local.rest_connectors
+  bulk_connectors                = local.bulk_connectors
   non_production_connectors      = var.non_production_connectors
   custom_rest_rules              = var.custom_rest_rules
-  custom_bulk_connectors         = var.custom_bulk_connectors
-  google_workspace_example_user  = var.google_workspace_example_user
-  google_workspace_example_admin = var.google_workspace_example_admin
   general_environment_variables  = var.general_environment_variables
   pseudonymize_app_ids           = var.pseudonymize_app_ids
-  salesforce_domain              = var.salesforce_domain
-  jira_server_url                = var.jira_server_url
-  jira_cloud_id                  = var.jira_cloud_id
-  example_jira_issue_id          = var.example_jira_issue_id
   bulk_input_expiration_days     = var.bulk_input_expiration_days
   bulk_sanitized_expiration_days = var.bulk_sanitized_expiration_days
   lookup_tables                  = var.lookup_tables
+}
+
+module "worklytics_psoxy_connection" {
+  for_each = module.psoxy.rest_connector_instances
+
+  source = "../../modules/worklytics-psoxy-connection"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection?ref=v0.4.25"
+
+  psoxy_host_platform_id = local.host_platform_id
+  psoxy_instance_id      = each.key
+  connector_id           = try(local.rest_connectors[each.key].worklytics_connector_id, "")
+  psoxy_endpoint_url     = each.value.endpoint_url
+  display_name           = "${title(each.key)} via Psoxy"
+  todo_step              = module.psoxy.next_todo_step
+}
+
+module "psoxy_bulk_to_worklytics" {
+  for_each = module.psoxy.bulk_connectors
+
+  source = "../../modules/worklytics-psoxy-connection-generic"
+
+  psoxy_host_platform_id = local.host_platform_id
+  psoxy_instance_id      = each.key
+  connector_id           = try(local.bulk_connectors[each.key].worklytics_connector_id, "")
+  display_name           = try(local.bulk_connectors[each.key].worklytics_connector_name, "${each.value.display_name} via Psoxy")
+  todo_step              = module.psoxy.next_todo_step
+
+  settings_to_provide = merge({
+    "Bucket Name" = each.value.sanitized_bucket
+  }, try(each.value.settings_to_provide, {}))
 }
 
 output "path_to_deployment_jar" {
