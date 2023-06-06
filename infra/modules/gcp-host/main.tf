@@ -16,6 +16,8 @@ module "psoxy" {
   install_test_tool       = var.install_test_tool
 }
 
+# BEGIN API CONNECTORS
+
 locals {
   secrets_to_provision = {
     for k, v in var.api_connectors :
@@ -39,17 +41,12 @@ module "secrets" {
   secrets        = local.secrets_to_provision[each.key]
 }
 
-resource "google_service_account" "rest_connectors" {
+resource "google_service_account" "api_connectors" {
   for_each = var.api_connectors
 
   project      = var.gcp_project_id
   account_id   = "${local.environment_id_prefix}${replace(each.key, "_", "-")}"
   display_name = "${local.environment_id_display_name_qualifier} ${each.key} REST Connector"
-}
-
-moved {
-  from = module.rest_connector
-  to   = module.api_connector
 }
 
 module "api_connector" {
@@ -62,7 +59,7 @@ module "api_connector" {
   source_kind                           = each.value.source_kind
   environment_id_prefix                 = local.environment_id_prefix
   instance_id                           = each.key
-  service_account_email                 = google_service_account.rest_connectors[each.key].email
+  service_account_email                 = google_service_account.api_connectors[each.key].email
   artifacts_bucket_name                 = module.psoxy.artifacts_bucket_name
   deployment_bundle_object_name         = module.psoxy.deployment_bundle_object_name
   path_to_config                        = null
@@ -92,11 +89,6 @@ module "api_connector" {
     { for k, v in module.secrets[each.key].secret_bindings : k => merge(v, { version_number: "latest" }) },
     module.psoxy.secrets
   )
-}
-
-moved {
-  from   = module.custom_rest_rules
-  to     = module.custom_api_connector_rules
 }
 
 module "custom_api_connector_rules" {
