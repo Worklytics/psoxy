@@ -37,6 +37,6 @@ module "source_token_external_todo" {
 
 locals {
   # TODO: deal w/ adding the OAUTH_REFRESH_TOKEN_STUFF from above
-  enabled_rest_connectors = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
+  enabled_api_connectors  = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
   enabled_bulk_connectors = module.worklytics_connector_specs.enabled_bulk_connectors
 }

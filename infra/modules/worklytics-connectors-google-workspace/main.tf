@@ -35,7 +35,7 @@ module "google_workspace_connection_auth" {
 
 
 locals {
-  enabled_rest_connectors = {
+  enabled_api_connectors = {
     for k, v in module.worklytics_connector_specs.enabled_google_workspace_connectors :
     k => merge(v, {
       # rather than this merge thing, should we this as a distinct output?

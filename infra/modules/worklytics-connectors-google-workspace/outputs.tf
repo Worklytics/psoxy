@@ -1,10 +1,10 @@
-output "enabled_rest_connectors" {
-  description = "List of enabled Google Workspace connectors"
-  value       = local.enabled_rest_connectors
+output "enabled_api_connectors" {
+  description = "List of enabled api connectors"
+  value       = local.enabled_api_connectors
 }
 
 output "todos" {
-  description = "List of TODOS for enabled REST connectors"
+  description = "List of TODOS for enabled api connectors"
   value       = values(module.google_workspace_connection)[*].todo
 }
 

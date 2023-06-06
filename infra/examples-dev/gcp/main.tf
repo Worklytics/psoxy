@@ -58,9 +58,9 @@ module "worklytics_connectors_google_workspace" {
 }
 
 locals {
-  rest_connectors = merge(
-    module.worklytics_connectors.enabled_rest_connectors,
-    module.worklytics_connectors_google_workspace.enabled_rest_connectors,
+  api_connectors = merge(
+    module.worklytics_connectors.enabled_api_connectors,
+    module.worklytics_connectors_google_workspace.enabled_api_connectors,
   )
 
   bulk_connectors = merge(
@@ -81,10 +81,10 @@ module "psoxy" {
   install_test_tool              = var.install_test_tool
   gcp_region                     = var.gcp_region
   replica_regions                = var.replica_regions
-  rest_connectors                = local.rest_connectors
+  api_connectors                = local.api_connectors
   bulk_connectors                = local.bulk_connectors
   non_production_connectors      = var.non_production_connectors
-  custom_rest_rules              = var.custom_rest_rules
+  custom_api_connector_rules              = var.custom_api_connector_rules
   general_environment_variables  = var.general_environment_variables
   pseudonymize_app_ids           = var.pseudonymize_app_ids
   bulk_input_expiration_days     = var.bulk_input_expiration_days
@@ -93,8 +93,8 @@ module "psoxy" {
 }
 
 locals {
-  all_connectors = merge(local.rest_connectors, local.bulk_connectors)
-  all_instances  = merge(module.psoxy.bulk_connector_instances, module.psoxy.rest_connector_instances)
+  all_connectors = merge(local.api_connectors, local.bulk_connectors)
+  all_instances  = merge(module.psoxy.bulk_connector_instances, module.psoxy.api_connector_instances)
 }
 
 module "connection_in_worklytics" {

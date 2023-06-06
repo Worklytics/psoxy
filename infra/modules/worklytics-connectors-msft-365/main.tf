@@ -79,6 +79,8 @@ module "cognito_identity" {
   aws_role         = var.aws_assume_role_arn # is this Terraform role, or the AWS PsoxyCaller role?
 }
 
+
+
 locals {
   enabled_rest_connectors = {
     for k, v in module.worklytics_connector_specs.enabled_msft_365_connectors :

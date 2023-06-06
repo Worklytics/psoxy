@@ -112,7 +112,7 @@ variable "bulk_sanitized_expiration_days" {
   default     = 1805 # 5 years; intent is 'forever', but some upperbound in case bucket is forgotten
 }
 
-variable "custom_rest_rules" {
+variable "custom_api_connector_rules" {
   type        = map(string)
   description = "map of connector id --> YAML file with custom rules"
   default     = {}

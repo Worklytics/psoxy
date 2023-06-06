@@ -86,7 +86,7 @@ variable "replica_regions" {
 }
 
 # q: better name? not necessarily REST. maybe 'source_http_api_connectors'?
-variable "rest_connectors" {
+variable "api_connectors" {
   type = map(object({
     source_kind                           = string
     source_auth_strategy                  = string
@@ -144,7 +144,7 @@ variable "bulk_sanitized_expiration_days" {
 }
 
 # q: better to flatten this into connectors themselves?
-variable "custom_rest_rules" {
+variable "custom_api_connector_rules" {
   type        = map(string)
   description = "map of connector id --> YAML file with custom rules"
   default     = {}

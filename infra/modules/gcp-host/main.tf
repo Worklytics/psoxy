@@ -18,7 +18,7 @@ module "psoxy" {
 
 locals {
   secrets_to_provision = {
-    for k, v in var.rest_connectors :
+    for k, v in var.api_connectors :
     k => {
       for var_key, var_def in v.secured_variables :
       "${replace(upper(k), "-", "_")}_${replace(upper(var_def.name), "-", "_")}" => {
@@ -30,7 +30,7 @@ locals {
 }
 
 module "secrets" {
-  for_each = var.rest_connectors
+  for_each = var.api_connectors
 
   source = "../../modules/gcp-secrets"
 
@@ -40,15 +40,20 @@ module "secrets" {
 }
 
 resource "google_service_account" "rest_connectors" {
-  for_each = var.rest_connectors
+  for_each = var.api_connectors
 
   project      = var.gcp_project_id
   account_id   = "${local.environment_id_prefix}${replace(each.key, "_", "-")}"
   display_name = "${local.environment_id_display_name_qualifier} ${each.key} REST Connector"
 }
 
-module "rest_connector" {
-  for_each = var.rest_connectors
+moved {
+  from = module.rest_connector
+  to   = module.api_connector
+}
+
+module "api_connector" {
+  for_each = var.api_connectors
 
   source = "../../modules/gcp-psoxy-rest"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-rest?ref=v0.4.25"
@@ -78,7 +83,7 @@ module "rest_connector" {
       BUNDLE_FILENAME      = module.psoxy.filename
       IS_DEVELOPMENT_MODE  = contains(var.non_production_connectors, each.key)
       PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
-      CUSTOM_RULES_SHA     = try(var.custom_rest_rules[each.key], null) != null ? filesha1(var.custom_rest_rules[each.key]) : null
+      CUSTOM_RULES_SHA     = try(var.custom_api_connector_rules[each.key], null) != null ? filesha1(var.custom_api_connector_rules[each.key]) : null
     }
   )
 
@@ -89,15 +94,20 @@ module "rest_connector" {
   )
 }
 
-module "custom_rest_rules" {
+moved {
+  from   = module.custom_rest_rules
+  to     = module.custom_api_connector_rules
+}
+
+module "custom_api_connector_rules" {
   source = "../../modules/gcp-sm-rules"
 
-  for_each = var.custom_rest_rules
+  for_each = var.custom_api_connector_rules
 
   prefix    = "${local.config_parameter_prefix}${upper(replace(each.key, "-", "_"))}_"
   file_path = each.value
 }
-# END REST CONNECTORS
+# END API CONNECTORS
 
 # BEGIN BULK CONNECTORS
 module "bulk_connector" {
@@ -199,13 +209,13 @@ resource "google_secret_manager_secret_iam_member" "additional_transforms" {
 # END LOOKUP TABLES
 
 locals {
-  rest_instances = { for instance in module.rest_connector :
+  api_instances = { for instance in module.api_connector :
     instance.instance_id => merge(
       {
         endpoint_url : instance.cloud_function_url
       },
       instance,
-      var.rest_connectors[instance.instance_id]
+      var.api_connectors[instance.instance_id]
     )
   }
 
@@ -219,7 +229,7 @@ locals {
     )
   }
 
-  all_instances = merge(local.rest_instances, local.bulk_instances)
+  all_instances = merge(local.api_instances, local.bulk_instances)
 }
 
 
