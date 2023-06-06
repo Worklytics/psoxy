@@ -5,6 +5,8 @@
 
 locals {
 
+  google_workspace_example_admin = try(coalesce(var.google_workspace_example_admin, var.google_workspace_example_user), null)
+
   google_workspace_sources = {
     # GDirectory connections are a PRE-REQ for gmail, gdrive, and gcal connections. remove only
     # if you plan to directly connect Directory to worklytics (without proxy). such a scenario is
@@ -38,7 +40,7 @@ locals {
         "/admin/directory/v1/customer/my_customer/roles?maxResults=10",
         "/admin/directory/v1/customer/my_customer/roleassignments?maxResults=10"
       ]
-      example_api_calls_user_to_impersonate : var.google_workspace_example_admin
+      example_api_calls_user_to_impersonate : local.google_workspace_example_admin
     },
     "gcal" : {
       source_kind : "gcal",
@@ -97,7 +99,7 @@ locals {
       example_api_calls : [
         "/admin/reports/v1/activity/users/all/applications/chat?maxResults=10"
       ]
-      example_api_calls_user_to_impersonate : var.google_workspace_example_user
+      example_api_calls_user_to_impersonate : local.google_workspace_example_admin
     },
     "google-meet" : {
       source_kind : "google-meet"
@@ -116,7 +118,7 @@ locals {
       example_api_calls : [
         "/admin/reports/v1/activity/users/all/applications/meet?maxResults=10"
       ]
-      example_api_calls_user_to_impersonate : var.google_workspace_example_user
+      example_api_calls_user_to_impersonate : local.google_workspace_example_admin
     },
     "gdrive" : {
       source_kind : "gdrive",
