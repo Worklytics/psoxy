@@ -89,8 +89,8 @@ EOT
 
   todo_content = <<EOT
 Complete the following steps via the Google Workspace Admin console:
-   1. Visit https://admin.google.com/ and navigate to "Security" --> "API Controls", then find
-      "Manage Domain Wide Delegation". Click "Add new".
+   1. Visit https://admin.google.com/ and navigate to "Security" --> "Access and Data Control" -->
+      "API Controls", then find "Manage Domain Wide Delegation". Click "Add new".
 
    2. Copy and paste client ID `${google_service_account.connector-sa.unique_id}` into the
       "Client ID" input in the popup. (this is the unique ID of the GCP service account with
