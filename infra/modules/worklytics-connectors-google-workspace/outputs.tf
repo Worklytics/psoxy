@@ -5,9 +5,9 @@ output "enabled_rest_connectors" {
 
 output "todos" {
   description = "List of TODOS for enabled REST connectors"
-  value       = values(module.google_workspace_connection[*]).todo
+  value       = values(module.google_workspace_connection)[*].todo
 }
 
 output "next_todo_step" {
-  value = max(values(module.google_workspace_connection[*]).next_todo_step) + 1
+  value = max(values(module.google_workspace_connection)[*].next_todo_step...) + 1
 }

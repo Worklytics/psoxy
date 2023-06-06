@@ -56,7 +56,8 @@ module "msft_365_grants" {
   todo_step                = var.todo_step
 }
 
-# TODO: coupled to identity pool; make this optional!?!? or two variants of module, with conditional??
+# TODO: coupled to AWS / identity pool; needs more refactoring!!!
+# make this optional!?!? or two variants of module, with conditional??
 
 module "cognito_identity_pool" {
   count = local.msft_365_enabled ? 1 : 0 # only provision identity pool if MSFT-365 connectors are enabled

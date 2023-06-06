@@ -17,12 +17,12 @@ module "psoxy" {
 }
 
 locals {
-  secrets_to_provisions = {
+  secrets_to_provision = {
     for k, v in var.rest_connectors :
     k => {
       for var_key, var_def in v.secured_variables :
       "${replace(upper(k), "-", "_")}_${replace(upper(var_key), "-", "_")}" => {
-        value       = try(var_def.value, "TODO: fill me")
+        value       = coalesce(try(var_def.value, "TODO: fill me"), "TODO: fill me")
         description = try(var_def.description, "")
       }
     }
@@ -36,13 +36,14 @@ module "secrets" {
 
   secret_project = var.gcp_project_id
   path_prefix    = local.config_parameter_prefix
-  secrets        = local.secrets_to_provisions[each.key]
+  secrets        = local.secrets_to_provision[each.key]
 }
 
 resource "google_service_account" "rest_connectors" {
   for_each = var.rest_connectors
 
-  account_id   = "${local.environment_id_prefix}${replace(each.key, "-", "_")}"
+  project      = var.gcp_project_id
+  account_id   = "${local.environment_id_prefix}${replace(each.key, "_", "-")}"
   display_name = "${local.environment_id_display_name_qualifier} ${each.key} REST Connector"
 }
 

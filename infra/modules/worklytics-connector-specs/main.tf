@@ -140,7 +140,7 @@ locals {
     }
   }
 
-  jira_cloud_id = coalesce(var.jira_cloud_id, "YOUR_JIRA_CLOUD_ID")
+  jira_cloud_id         = coalesce(var.jira_cloud_id, "YOUR_JIRA_CLOUD_ID")
   example_jira_issue_id = coalesce(var.example_jira_issue_id, "YOUR_JIRA_EXAMPLE_ISSUE_ID")
 
   # Microsoft 365 sources; add/remove as you wish

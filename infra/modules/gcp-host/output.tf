@@ -14,12 +14,12 @@ output "bulk_connector_instances" {
 
 output "todos" {
   description = "List of todo steps to complete, in markdown format."
-  value       = values(module.rest_connector[*]).todo
+  value       = values(module.rest_connector)[*].todo
 }
 
 output "next_todo_step" {
   value = max(concat(
-    values(module.rest_connector[*]).next_todo_step,
-    values(module.bulk_connector[*]).next_todo_step
-  ))
+    values(module.rest_connector)[*].next_todo_step,
+    values(module.bulk_connector)[*].next_todo_step
+  )...)
 }

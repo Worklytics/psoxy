@@ -40,11 +40,16 @@ locals {
     k => merge(v, {
       # rather than this merge thing, should we this as a distinct output?
       # problem with that is that it's something of an implementation detail, right?
-      secured_variables = concat(v.secured_variables, {
-        name     = "SERVICE_ACCOUNT_KEY"
-        value    = module.google_workspace_connection_auth[k].private_key
-        writable = false
-      })
+      secured_variables = concat(
+        try([v.secured_variables], []),
+        [
+          {
+            name     = "SERVICE_ACCOUNT_KEY"
+            value    = module.google_workspace_connection_auth[k].key_value
+            writable = false
+          }
+        ]
+      )
     })
   }
 }

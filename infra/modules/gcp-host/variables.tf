@@ -91,15 +91,17 @@ variable "rest_connectors" {
     source_kind                           = string
     source_auth_strategy                  = string
     target_host                           = string
-    oauth_scopes_needed                   = optional(list(string))
-    environment_variables                 = map(string)
-    example_api_calls                     = list(string)
+    oauth_scopes_needed                   = optional(list(string), [])
+    environment_variables                 = optional(map(string), {})
+    example_api_calls                     = optional(list(string), [])
     example_api_calls_user_to_impersonate = optional(string)
-    secured_variables = list(object({
+    secured_variables = optional(list(object({
       name     = string
-      value    = string
-      writable = bool
-    }))
+      value    = optional(string)
+      writable = optional(bool, false)
+      })),
+    [])
+
   }))
 
   description = "map of rest connectors to provision"
@@ -110,17 +112,17 @@ variable "bulk_connectors" {
     source_kind = string
     rules = object({
       pseudonymFormat       = optional(string)
-      columnsToRedact       = optional(list(string))
-      columnsToInclude      = optional(list(string))
-      columnsToPseudonymize = optional(list(string))
-      columnsToDuplicate    = optional(map(string))
-      columnsToRename       = optional(map(string))
+      columnsToRedact       = optional(list(string), [])
+      columnsToInclude      = optional(list(string), null)
+      columnsToPseudonymize = optional(list(string), [])
+      columnsToDuplicate    = optional(map(string), {})
+      columnsToRename       = optional(map(string), {})
     })
     example_file        = optional(string)
     settings_to_provide = optional(map(string), {})
   }))
 
-  description = "map of bulk connectors to provision"
+  description = "map of connector id  => bulk connectors to provision"
 }
 
 variable "non_production_connectors" {

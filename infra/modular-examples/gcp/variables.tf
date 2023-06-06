@@ -129,7 +129,9 @@ variable "custom_rest_rules" {
 
 variable "custom_bulk_connectors" {
   type = map(object({
-    source_kind = string
+    source_kind               = string
+    worklytics_connector_id   = optional(string, "bulk-import-psoxy")
+    worklytics_connector_name = optional(string, "Bulk Data Import via Psoxy"),
     rules = object({
       pseudonymFormat       = optional(string)
       columnsToRedact       = optional(list(string))

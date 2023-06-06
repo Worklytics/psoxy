@@ -57,26 +57,15 @@ module "worklytics_connectors_google_workspace" {
   google_workspace_example_admin = var.google_workspace_example_admin
 }
 
-module "worklytics_connectors_msft_365" {
-  source = "../../modules/worklytics-connectors-msft-365"
-
-  enabled_connectors     = var.enabled_connectors
-  msft_tenant_id         = var.msft_tenant_id
-  msft_owners_email      = var.msft_owners_email
-  example_msft_user_guid = var.example_msft_user_guid
-}
-
-
 locals {
   rest_connectors = merge(
     module.worklytics_connectors.enabled_rest_connectors,
     module.worklytics_connectors_google_workspace.enabled_rest_connectors,
-    module.worklytics_connectors_msft_365.enabled_rest_connectors
   )
 
   bulk_connectors = merge(
     module.worklytics_connectors.enabled_bulk_connectors,
-    var.custom_bulk_connectors
+    var.custom_bulk_connectors,
   )
 }
 
@@ -116,7 +105,7 @@ module "connection_in_worklytics" {
   psoxy_host_platform_id = local.host_platform_id
   psoxy_instance_id      = each.key
   connector_id           = try(local.all_connectors[each.key].worklytics_connector_id, "")
-  display_name           = try(local.all_connectors[each.key].worklytics_connector_name, "${each.value.display_name} via Psoxy")
+  display_name           = try(local.all_connectors[each.key].worklytics_connector_name, "${local.all_connectors[each.key].display_name} via Psoxy")
   todo_step              = module.psoxy.next_todo_step
 
   settings_to_provide = merge(
@@ -128,7 +117,7 @@ module "connection_in_worklytics" {
     try({
       "Bucket Name" = each.value.sanitized_bucket
     }, {}),
-    try(each.value.settings_to_provide, {}))
+  try(each.value.settings_to_provide, {}))
 }
 
 output "path_to_deployment_jar" {
@@ -141,8 +130,7 @@ output "todos_1" {
   value = var.todos_as_outputs ? join("\n",
     concat(
       module.worklytics_connectors.todos,
-      module.worklytics_connectors_google_workspace.todos,
-      module.worklytics_connectors_msft_365.todos
+      module.worklytics_connectors_google_workspace.todos
   )) : null
 }
 
@@ -153,5 +141,5 @@ output "todos_2" {
 
 output "todos_3" {
   description = "List of todo steps to complete 3rd, in markdown format."
-  value = var.todos_as_outputs ? join("\n", values(module.connection_in_worklytics[*]).todo) : null
+  value       = var.todos_as_outputs ? join("\n", values(module.connection_in_worklytics)[*].todo) : null
 }

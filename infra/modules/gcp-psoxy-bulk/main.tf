@@ -253,6 +253,10 @@ EOT
 }
 
 output "instance_id" {
+  value = var.instance_id
+}
+
+output "function_name" {
   value = local.function_name
 }
 
