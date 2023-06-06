@@ -21,7 +21,7 @@ locals {
     for k, v in var.rest_connectors :
     k => {
       for var_key, var_def in v.secured_variables :
-      "${replace(upper(k), "-", "_")}_${replace(upper(var_key), "-", "_")}" => {
+      "${replace(upper(k), "-", "_")}_${replace(upper(var_def.name), "-", "_")}" => {
         value       = coalesce(try(var_def.value, "TODO: fill me"), "TODO: fill me")
         description = try(var_def.description, "")
       }
@@ -82,8 +82,10 @@ module "rest_connector" {
     }
   )
 
-  # q: also bind values from module.secrets[each.key] here??
-  secret_bindings = module.psoxy.secrets
+  secret_bindings = merge(
+    module.secrets[each.key].secret_bindings,
+    module.psoxy.secrets
+  )
 }
 
 module "custom_rest_rules" {
