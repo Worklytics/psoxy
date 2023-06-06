@@ -83,9 +83,9 @@ locals {
     for k, v in module.worklytics_connector_specs.enabled_msft_365_connectors :
     k => merge(v, {
       environment_variables = merge(v.environment_variables, {
-        CLIENT_ID         = module.msft_connection[each.key].connector.application_id
+        CLIENT_ID         = module.msft_connection[k].connector.application_id
         IDENTITY_POOL_ID  = module.cognito_identity_pool[0].pool_id,
-        IDENTITY_ID       = module.cognito_identity[0].identity_id[each.key]
+        IDENTITY_ID       = module.cognito_identity[0].identity_id[k]
         DEVELOPER_NAME_ID = module.cognito_identity_pool[0].developer_provider_name
       })
     })

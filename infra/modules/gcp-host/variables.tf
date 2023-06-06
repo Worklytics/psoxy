@@ -85,6 +85,7 @@ variable "replica_regions" {
   ]
 }
 
+# q: better name? not necessarily REST. maybe 'source_http_api_connectors'?
 variable "rest_connectors" {
   type = map(object({
     source_kind                           = string
@@ -97,7 +98,7 @@ variable "rest_connectors" {
     secured_variables = list(object({
       name     = string
       value    = string
-      writable = boolean
+      writable = bool
     }))
   }))
 

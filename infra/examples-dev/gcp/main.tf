@@ -31,6 +31,13 @@ locals {
   host_platform_id = "GCP"
 }
 
+# TODO: this has 5 remote modules; combine some?
+#  eg, worklytics-connectors + gcp-host + worklytics-psoxy-connection-generic into a single
+#     gcp-host-for-worklytics? poor TF style, but simplifies root module?
+
+# in effect, these are for sources for which authentication/authorization cannot (or need not)
+# be provisioned via Terraform, so doesn't add any dependencies
+# call this 'generic_source_connectors'?
 module "worklytics_connectors" {
   source = "../../modules/worklytics-connectors"
 
@@ -75,7 +82,6 @@ locals {
 
 module "psoxy" {
   source = "../../modules/gcp-host"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/gcp?ref=v0.4.25"
 
   gcp_project_id                 = var.gcp_project_id
   environment_id                 = var.environment_id
@@ -97,34 +103,32 @@ module "psoxy" {
   lookup_tables                  = var.lookup_tables
 }
 
-module "rest_to_worklytics" {
-  for_each = module.psoxy.rest_connector_instances
-
-  source = "../../modules/worklytics-psoxy-connection"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection?ref=v0.4.25"
-
-  psoxy_host_platform_id = local.host_platform_id
-  psoxy_instance_id      = each.key
-  connector_id           = try(local.rest_connectors[each.key].worklytics_connector_id, "")
-  psoxy_endpoint_url     = each.value.endpoint_url
-  display_name           = "${title(each.key)} via Psoxy"
-  todo_step              = module.psoxy.next_todo_step
+locals {
+  all_connectors = merge(local.rest_connectors, local.bulk_connectors)
+  all_instances  = merge(module.psoxy.bulk_connector_instances, module.psoxy.rest_connector_instances)
 }
 
-module "bulk_to_worklytics" {
-  for_each = module.psoxy.bulk_connector_instances
+module "connection_in_worklytics" {
+  for_each = local.all_instances
 
   source = "../../modules/worklytics-psoxy-connection-generic"
 
   psoxy_host_platform_id = local.host_platform_id
   psoxy_instance_id      = each.key
-  connector_id           = try(local.bulk_connectors[each.key].worklytics_connector_id, "")
-  display_name           = try(local.bulk_connectors[each.key].worklytics_connector_name, "${each.value.display_name} via Psoxy")
+  connector_id           = try(local.all_connectors[each.key].worklytics_connector_id, "")
+  display_name           = try(local.all_connectors[each.key].worklytics_connector_name, "${each.value.display_name} via Psoxy")
   todo_step              = module.psoxy.next_todo_step
 
-  settings_to_provide = merge({
-    "Bucket Name" = each.value.sanitized_bucket
-  }, try(each.value.settings_to_provide, {}))
+  settings_to_provide = merge(
+    # Source API case
+    try({
+      "Psoxy Base URL" = each.value.endpoint_url
+    }, {}),
+    # Source Bucket (file) case
+    try({
+      "Bucket Name" = each.value.sanitized_bucket
+    }, {}),
+    try(each.value.settings_to_provide, {}))
 }
 
 output "path_to_deployment_jar" {
@@ -149,8 +153,5 @@ output "todos_2" {
 
 output "todos_3" {
   description = "List of todo steps to complete 3rd, in markdown format."
-  value = var.todos_as_outputs ? join("\n", concat(
-    module.bulk_to_worklytics.todos,
-    module.rest_to_worklytics.todos
-  )) : null
+  value = var.todos_as_outputs ? join("\n", values(module.connection_in_worklytics[*]).todo) : null
 }

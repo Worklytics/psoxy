@@ -1,12 +1,8 @@
 locals {
-  base_config_path = "${var.psoxy_base_dir}/configs/"
-  host_platform_id = "GCP"
-
   config_parameter_prefix               = var.config_parameter_prefix == "" ? "${var.environment_id}_" : var.config_parameter_prefix
   environment_id_prefix                 = "${var.environment_id}${length(var.environment_id) > 0 ? "-" : ""}"
   environment_id_display_name_qualifier = length(var.environment_id) > 0 ? " ${var.environment_id} " : ""
 }
-
 
 module "psoxy" {
   source = "../../modules/gcp"
@@ -97,8 +93,6 @@ module "custom_rest_rules" {
   prefix    = "${local.config_parameter_prefix}${upper(replace(each.key, "-", "_"))}_"
   file_path = each.value
 }
-
-
 # END REST CONNECTORS
 
 # BEGIN BULK CONNECTORS
@@ -135,9 +129,6 @@ module "bulk_connector" {
     }
   )
 }
-
-
-
 # END BULK CONNECTORS
 
 # BEGIN LOOKUP TABLES
