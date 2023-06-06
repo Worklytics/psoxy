@@ -623,7 +623,7 @@ And following granular scopes:
 
   6. Choose a site in your Jira workspace to allow access for this application and click "Accept".
      As the callback does not exist, you will see an error. But in the URL of your browser you will see
-     something like this as tURL:
+     something like this as URL:
 
     `http://localhost/?state=YOUR_USER_BOUND_VALUE&code=eyJhbGc...`
 
