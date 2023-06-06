@@ -28,11 +28,15 @@ resource "google_secret_manager_secret" "secret" {
   }
 }
 
+# TODO: avoid creating version here at all if value == null
+# (problem is that Terraform complains if trying to use any derivative of var.secrets in a for_each,
+#  bc it's sensitive - not sure why it doesn't complain about the for_each over var.secrets directly)
 resource "google_secret_manager_secret_version" "version" {
   for_each = var.secrets
 
   secret      = google_secret_manager_secret.secret[each.key].id
-  secret_data = each.value.value
+  secret_data = coalesce(each.value.value, "placeholder value - fill me")
+  enabled     = each.value.value != null
 
   lifecycle {
     create_before_destroy = true

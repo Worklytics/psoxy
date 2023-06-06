@@ -83,7 +83,8 @@ module "rest_connector" {
   )
 
   secret_bindings = merge(
-    module.secrets[each.key].secret_bindings,
+    # bc some of these are later filled directly, bind to 'latest'
+    { for k, v in module.secrets[each.key].secret_bindings : k => merge(v, { version_number: "latest" }) },
     module.psoxy.secrets
   )
 }
