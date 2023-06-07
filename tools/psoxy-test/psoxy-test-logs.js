@@ -25,7 +25,20 @@ async function getAWSLogs(options = {}, logger) {
 
   logger.verbose(`Getting logs for ${options.logGroupName}`);
 
-  const logStreamsResult = await aws.getLogStreams(options, client);
+  let logStreamsResult = {};
+  try {
+    logStreamsResult = await aws.getLogStreams(options, client);
+  } catch (error) {
+    if (error.name === 'AccessDeniedException') {
+      logger.error(error.message);
+      logger.info(`To be able to read CloudWatch logs you need at least: ${chalk.blue('logs:DescribeLogStreams')} and ${chalk.blue('logs:GetLogEvents')} permissions`.trim().replace(/\s+/g, ' '));
+      logger.info(`Example of an AWS managed policy that grants such permissions: ${chalk.blue('CloudWatchLogsReadOnlyAccess')} -> https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/iam-identity-based-access-control-cwl.html#managed-policies-cwl-CloudWatchLogsReadOnlyAccess`);
+      return;
+    } else {
+      throw error;
+    }
+  }
+
   if (logStreamsResult['$metadata'].httpStatusCode !== httpCodes.HTTP_STATUS_OK) {
     throw new Error(`Unable to get logs for ${options.logGroupName}`, {
       additional: logStreamsResult,
