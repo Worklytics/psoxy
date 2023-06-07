@@ -2,6 +2,11 @@ variable "environment_name" {
   type        = string
   description = "qualifier to distinguish resources created by this terraform configuration from other psoxy Terraform deployments, (eg, 'prod', 'dev', etc)"
   default     = ""
+
+  validation {
+    condition     = !can(regex("^(?i)(aws|ssm)", var.environment_name))
+    error_message = "The `environment_name` cannot start with 'aws' or 'ssm', as this will name your AWS resources with prefixes that displease the AMZN overlords."
+  }
 }
 
 variable "aws_account_id" {
@@ -63,23 +68,6 @@ variable "caller_aws_arns" {
   }
 }
 
-variable "msft_tenant_id" {
-  type        = string
-  description = "ID of Microsoft tenant to connect to (req'd only if config includes MSFT connectors)"
-  default     = ""
-}
-
-variable "msft_owners_email" {
-  type        = set(string)
-  description = "(Only if config includes MSFT connectors). Optionally, set of emails to apply as owners on AAD apps apart from current logged user"
-  default     = []
-}
-
-variable "example_msft_user_guid" {
-  type        = string
-  description = "example MSFT user guid (uuid) for test API calls (OPTIONAL)"
-  default     = "{EXAMPLE_MSFT_USER_GUID}"
-}
 
 variable "gcp_project_id" {
   type        = string
