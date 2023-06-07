@@ -61,7 +61,12 @@ module "instance_secrets" {
 
   path       = "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_"
   kms_key_id = var.aws_ssm_key_id
-  secrets    = each.value.secured_variables
+  secrets    = { for v in each.value.secured_variables :
+    v.name => {
+      value = v.value,
+      description = try(v.description, null)
+    }
+  }
 }
 
 module "api_connector" {
@@ -118,7 +123,7 @@ module "bulk_connector" {
   aws_assume_role_arn              = var.aws_assume_role_arn
   provision_iam_policy_for_testing = var.provision_testing_infra
   aws_role_to_assume_when_testing  = var.provision_testing_infra ? module.psoxy.api_caller_role_arn : null
-  instance_id                      = each.key
+  instance_id                      = "${local.deployment_id}-${each.key}"
   source_kind                      = each.value.source_kind
   aws_region                       = data.aws_region.current.id
   path_to_function_zip             = module.psoxy.path_to_deployment_jar
@@ -174,20 +179,20 @@ resource "aws_ssm_parameter" "additional_transforms" {
 # END lookup tables
 
 locals {
-  api_instances = { for instance in module.api_connector :
-    instance.instance_id => merge(
+  api_instances = { for k, instance in module.api_connector :
+    k => merge(
       instance,
-      var.api_connectors[instance.instance_id]
+      var.api_connectors[k]
     )
   }
 
-  bulk_instances = { for instance in module.bulk_connector :
-    instance.instance_id => merge(
+  bulk_instances = { for k, instance in module.bulk_connector :
+    k => merge(
       {
         sanitized_bucket_name : instance.sanitized_bucket
       },
       instance,
-      var.bulk_connectors[instance.instance_id]
+      var.bulk_connectors[k]
     )
   }
 

@@ -426,6 +426,9 @@ output "function_name" {
   value = module.psoxy_lambda.function_name
 }
 
+# DEPRECATED; remove in v0.5
+# this ends up being qualified by environment/deployment id, to avoid collisions - so not useful
+# for identifying 'instance' of connector
 output "instance_id" {
   value = module.psoxy_lambda.function_name
 }

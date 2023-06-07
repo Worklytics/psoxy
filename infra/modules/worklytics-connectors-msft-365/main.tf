@@ -16,10 +16,6 @@ module "worklytics_connector_specs" {
   example_msft_user_guid = var.example_msft_user_guid
 }
 
-locals {
-  msft_365_enabled = length(module.worklytics_connector_specs.enabled_msft_365_connectors) > 0
-}
-
 data "azuread_client_config" "current" {
 
 }
@@ -57,7 +53,7 @@ module "msft_365_grants" {
 }
 
 locals {
-  enabled_rest_connectors = {
+  enabled_api_connectors = {
     for k, v in module.worklytics_connector_specs.enabled_msft_365_connectors :
     k => merge(v, {
       connector = module.msft_connection.connector

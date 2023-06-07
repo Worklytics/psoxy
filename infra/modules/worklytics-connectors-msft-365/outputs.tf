@@ -1,6 +1,6 @@
-output "enabled_rest_connectors" {
+output "enabled_api_connectors" {
   description = "List of enabled Microsoft 365 connectors"
-  value       = module.worklytics_connector_specs.enabled_msft_365_connectors
+  value       = local.enabled_api_connectors
 }
 
 output "todos" {
@@ -8,8 +8,19 @@ output "todos" {
   value       = values(module.msft_365_grants)[*].todo
 }
 
+
+locals {
+  next_todo_steps = tolist([ for k, v in module.msft_365_grants: tonumber(v.next_todo_step)])
+}
+
+
 output "next_todo_step" {
-  value = max(values(module.msft_365_grants)[*].next_todo_step...) + 1
+  # TODO: fix this. tf complain is:
+  # │     │ while calling max(numbers...)
+  # │     │ local.next_todo_steps is empty list of dynamic
+  #  │     │ var.todo_step is 1
+
+  value = try(max(concat([ var.todo_step], local.next_todo_steps )), var.todo_step + 1)
 }
 
 output "application_ids" {

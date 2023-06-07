@@ -51,9 +51,7 @@ provider "aws" {
   ]
 }
 
-provider "azuread" {
-  tenant_id = var.msft_tenant_id
-}
+
 
 locals {
   host_platform_id = "AWS"
@@ -78,6 +76,8 @@ module "worklytics_connectors_google_workspace" {
   google_workspace_example_admin = var.google_workspace_example_admin
 }
 
+# BEGIN MSFT
+
 module "worklytics_connectors_msft_365" {
   source = "../../modules/worklytics-connectors-msft-365"
 
@@ -89,13 +89,26 @@ module "worklytics_connectors_msft_365" {
   todo_step              = 1
 }
 
+provider "azuread" {
+  tenant_id = var.msft_tenant_id
+}
+
 locals {
-  msft_365_enabled = length(module.worklytics_connectors_msft_365.enabled_rest_connectors) > 0
+  source_authorization_todos = concat(
+    module.worklytics_connectors.todos,
+    module.worklytics_connectors_google_workspace.todos,
+    module.worklytics_connectors_msft_365.todos
+  )
+
+
+  msft_365_enabled = length(module.worklytics_connectors_msft_365.enabled_api_connectors) > 0
   developer_provider_name = "azure-access"
 }
 
 # BEGIN MSFT AUTH
 # q: better to extract this into module?
+#   - as this is a 'root' Terraform configuration, it will be 1 rather than 3 clones of git repos,
+#     and 1 rather than 3 places to change version numbers
 #   - raises level of abstraction, but not very "flat" Terraform style
 #   - but given that may be swapped out for certificate-based auth, raising level of abstraction
 #  seems like a good idea; this module shouldn't know *details* of aws-msft-auth-identity-federation
@@ -124,13 +137,13 @@ module "cognito_identity" {
   aws_role         = var.aws_assume_role_arn
   identity_pool_id = module.cognito_identity_pool[0].pool_id
   login_ids        = {
-    for k, v in module.worklytics_connectors_msft_365.enabled_rest_connectors :
+    for k, v in module.worklytics_connectors_msft_365.enabled_api_connectors :
       k => "${local.developer_provider_name}=${v.connector.application_id}"
   }
 }
 
 module "msft_connection_auth_federation" {
-  for_each = module.worklytics_connectors_msft_365.enabled_rest_connectors
+  for_each = module.worklytics_connectors_msft_365.enabled_api_connectors
 
   source = "../../modules/azuread-federated-credentials"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-federated-credentials?ref=v0.4.25"
@@ -144,7 +157,7 @@ module "msft_connection_auth_federation" {
 }
 
 locals {
-  msft_api_connectors_with_auth = { for k, msft_connector in module.worklytics_connectors_msft_365.enabled_rest_connectors :
+  msft_api_connectors_with_auth = { for k, msft_connector in module.worklytics_connectors_msft_365.enabled_api_connectors :
     k => merge(msft_connector, {
       environment_variables = merge(try(msft_connector.environment_variables, {}),
         {
@@ -231,12 +244,7 @@ output "path_to_deployment_jar" {
 
 output "todos_1" {
   description = "List of todo steps to complete 1st, in markdown format."
-  value = var.todos_as_outputs ? join("\n",
-    concat(
-      module.worklytics_connectors.todos,
-      module.worklytics_connectors_google_workspace.todos,
-      module.worklytics_connectors_msft_365.todos
-    )) : null
+  value = var.todos_as_outputs ? join("\n", local.source_authorization_todos) : null
 }
 
 output "todos_2" {
