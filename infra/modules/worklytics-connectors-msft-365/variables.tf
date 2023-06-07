@@ -32,12 +32,6 @@ variable "msft_owners_email" {
   default     = []
 }
 
-variable "aws_assume_role_arn" {
-  type        = string
-  description = "ARN of role Terraform should assume when provisioning your infra. (can be `null` if your CLI is auth'd as the right user/role)"
-  default     = null
-}
-
 variable "todo_step" {
   type        = number
   description = "of all todos, where does this one logically fall in sequence"

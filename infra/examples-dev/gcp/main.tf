@@ -90,6 +90,7 @@ module "psoxy" {
   bulk_input_expiration_days     = var.bulk_input_expiration_days
   bulk_sanitized_expiration_days = var.bulk_sanitized_expiration_days
   lookup_tables                  = var.lookup_tables
+  todo_step = max(module.worklytics_connectors.next_todo_step, module.worklytics_connectors_google_workspace.next_todo_step)
 }
 
 locals {

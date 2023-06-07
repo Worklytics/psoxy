@@ -339,13 +339,14 @@ module "psoxy_msft_connector" {
     var.general_environment_variables,
     try(each.value.environment_variables, {}),
     {
-      IS_DEVELOPMENT_MODE  = contains(var.non_production_connectors, each.key)
-      CLIENT_ID            = module.msft_connection[each.key].connector.application_id
       PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
+      CUSTOM_RULES_SHA     = try(var.custom_rest_rules[each.key], null) != null ? filesha1(var.custom_rest_rules[each.key]) : null
+      IS_DEVELOPMENT_MODE  = contains(var.non_production_connectors, each.key)
+
+      CLIENT_ID            = module.msft_connection[each.key].connector.application_id
       IDENTITY_POOL_ID     = module.cognito_identity_pool[0].pool_id,
       IDENTITY_ID          = module.cognito_identity[0].identity_id[each.key]
       DEVELOPER_NAME_ID    = module.cognito_identity_pool[0].developer_provider_name
-      CUSTOM_RULES_SHA     = try(var.custom_rest_rules[each.key], null) != null ? filesha1(var.custom_rest_rules[each.key]) : null
     }
   )
 }

@@ -56,40 +56,13 @@ module "msft_365_grants" {
   todo_step                = var.todo_step
 }
 
-# TODO: coupled to AWS / identity pool; needs more refactoring!!!
-# make this optional!?!? or two variants of module, with conditional??
-
-module "cognito_identity_pool" {
-  count = local.msft_365_enabled ? 1 : 0 # only provision identity pool if MSFT-365 connectors are enabled
-
-  source = "../../modules/aws-cognito-pool"
-
-  developer_provider_name = "azure-access"
-  name                    = "azure-ad-federation"
-}
-
-module "cognito_identity" {
-  count = local.msft_365_enabled ? 1 : 0 # only provision identity pool if MSFT-365 connectors are enabled
-
-  source = "../../modules/aws-cognito-identity-cli"
-
-  identity_pool_id = module.cognito_identity_pool[0].pool_id
-  aws_region       = data.aws_region.current.id
-  login_ids        = { for k in keys(module.msft_connection) : k => "${module.cognito_identity_pool[0].developer_provider_name}=${module.msft_connection[k].connector.application_id}" }
-  aws_role         = var.aws_assume_role_arn # is this Terraform role, or the AWS PsoxyCaller role?
-}
-
-
-
 locals {
   enabled_rest_connectors = {
     for k, v in module.worklytics_connector_specs.enabled_msft_365_connectors :
     k => merge(v, {
+      connector = module.msft_connection.connector
       environment_variables = merge(v.environment_variables, {
         CLIENT_ID         = module.msft_connection[k].connector.application_id
-        IDENTITY_POOL_ID  = module.cognito_identity_pool[0].pool_id,
-        IDENTITY_ID       = module.cognito_identity[0].identity_id[k]
-        DEVELOPER_NAME_ID = module.cognito_identity_pool[0].developer_provider_name
       })
     })
   }

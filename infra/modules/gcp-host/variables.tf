@@ -85,7 +85,6 @@ variable "replica_regions" {
   ]
 }
 
-# q: better name? not necessarily REST. maybe 'source_http_api_connectors'?
 variable "api_connectors" {
   type = map(object({
     source_kind                           = string
@@ -104,7 +103,7 @@ variable "api_connectors" {
 
   }))
 
-  description = "map of rest connectors to provision"
+  description = "map of API connectors to provision"
 }
 
 variable "bulk_connectors" {
