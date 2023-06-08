@@ -122,6 +122,8 @@ public class PrebuiltSanitizerRules {
             .transform(Transform.Pseudonymize.builder()
                     .jsonPath("$.values[*]..accountId")
                     .jsonPath("$.values[*]..emailAddress")
+                    .jsonPath("$.values[*]..tmpFromAccountId")
+                    .jsonPath("$.values[*]..tmpToAccountId")
                     .build())
             .build();
 

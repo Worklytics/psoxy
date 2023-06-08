@@ -851,6 +851,8 @@ endpoints:
         jsonPaths:
           - "$.values[*]..accountId"
           - "$.values[*]..emailAddress"
+          - "$.values[*]..tmpFromAccountId"
+          - "$.values[*]..tmpToAccountId"
         encoding: "JSON"
   - pathTemplate: "/ex/jira/{cloudId}/rest/api/2/issue/{issueId}/comment"
     allowedQueryParams:
