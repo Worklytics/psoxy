@@ -22,9 +22,9 @@ locals {
     module.worklytics_connectors_msft_365.todos
   )
 
-
-  msft_365_enabled = length(module.worklytics_connectors_msft_365.enabled_api_connectors) > 0
-  developer_provider_name = "azure-access"
+  env_qualifier           = coalesce(var.environment_name, "psoxy")
+  msft_365_enabled        = length(module.worklytics_connectors_msft_365.enabled_api_connectors) > 0
+  developer_provider_name = "${local.env_qualifier}-azure-access"
 }
 
 # BEGIN MSFT AUTH
@@ -47,7 +47,7 @@ module "cognito_identity_pool" {
   source = "../../modules/aws-cognito-pool"
 
   developer_provider_name = local.developer_provider_name
-  name                    = "azure-ad-federation"
+  name                    = "${local.env_qualifier}-azure-ad-federation"
 }
 
 module "cognito_identity" {
@@ -58,7 +58,7 @@ module "cognito_identity" {
   aws_region       = data.aws_region.current.id
   aws_role         = var.aws_assume_role_arn
   identity_pool_id = module.cognito_identity_pool[0].pool_id
-  login_ids        = {
+  login_ids = {
     for k, v in module.worklytics_connectors_msft_365.enabled_api_connectors :
     k => "${local.developer_provider_name}=${v.connector.application_id}"
   }
@@ -71,8 +71,8 @@ module "msft_connection_auth_federation" {
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-federated-credentials?ref=v0.4.25"
 
   application_object_id = each.value.connector.id
-  display_name          = "AccessFromAWS"
-  description           = "AWS federation to be used for psoxy Connector - ${each.value.display_name}${var.connector_display_name_suffix}"
+  display_name          = "${local.env_qualifier}AccessFromAWS"
+  description           = "AWS federation to be used for ${local.env_qualifier} Connectors - ${each.value.display_name}${var.connector_display_name_suffix}"
   issuer                = "https://cognito-identity.amazonaws.com"
   audience              = module.cognito_identity_pool[0].pool_id
   subject               = module.cognito_identity[0].identity_id[each.key]

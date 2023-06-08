@@ -134,7 +134,7 @@ module "connection_in_worklytics" {
     try({
       "Bucket Name" = each.value.sanitized_bucket_name
     }, {}),
-    try(each.value.settings_to_provide, {}))
+  try(each.value.settings_to_provide, {}))
 }
 
 output "path_to_deployment_jar" {
@@ -144,7 +144,7 @@ output "path_to_deployment_jar" {
 
 output "todos_1" {
   description = "List of todo steps to complete 1st, in markdown format."
-  value = var.todos_as_outputs ? join("\n", local.source_authorization_todos) : null
+  value       = var.todos_as_outputs ? join("\n", local.source_authorization_todos) : null
 }
 
 output "todos_2" {

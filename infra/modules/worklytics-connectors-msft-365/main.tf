@@ -56,7 +56,7 @@ locals {
   enabled_api_connectors = {
     for k, v in module.worklytics_connector_specs.enabled_msft_365_connectors :
     k => merge(v, {
-      connector = module.msft_connection.connector
+      connector = module.msft_connection[k].connector
       environment_variables = merge(v.environment_variables, {
         CLIENT_ID         = module.msft_connection[k].connector.application_id
       })

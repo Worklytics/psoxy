@@ -25,6 +25,6 @@ output "next_todo_step" {
 
 output "application_ids" {
   value = {
-    for id, connector in module.msft_connection: id => connector.application_id
+    for id, connection in module.msft_connection: id => connection.connector.application_id
   }
 }
