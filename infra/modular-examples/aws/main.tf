@@ -28,6 +28,7 @@ locals {
   ssm_key_ids      = var.aws_ssm_key_id == null ? {} : { 0 : var.aws_ssm_key_id }
   deployment_id    = length(var.environment_name) > 0 ? replace(lower(var.environment_name), " ", "-") : random_string.deployment_id.result
   proxy_brand      = "psoxy"
+  function_name_prefix = "${local.proxy_brand}-"
 }
 
 module "worklytics_connector_specs" {
@@ -56,6 +57,7 @@ module "psoxy_aws" {
   force_bundle                   = var.force_bundle
   install_test_tool              = var.install_test_tool
   deployment_id                  = length(var.environment_name) > 0 ? var.environment_name : "Psoxy"
+  api_function_name_prefix       = local.function_name_prefix
 }
 
 # TODO: remove in v0.5
@@ -87,7 +89,7 @@ module "google_workspace_connection" {
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/google-workspace-dwd-connection?ref=v0.4.25
 
   project_id                   = var.gcp_project_id
-  connector_service_account_id = "${local.proxy_brand}-${local.deployment_id_sa_id_part}${each.key}"
+  connector_service_account_id = "${local.function_name_prefix}${local.deployment_id_sa_id_part}${each.key}"
   display_name                 = "Psoxy Connector - ${each.value.display_name}${var.connector_display_name_suffix}"
   apis_consumed                = each.value.apis_consumed
   oauth_scopes_needed          = each.value.oauth_scopes_needed
@@ -153,7 +155,7 @@ module "psoxy_google_workspace_connector" {
   source = "../../modules/aws-psoxy-rest"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-rest?ref=v0.4.25"
 
-  function_name                         = "psoxy-${each.key}"
+  function_name                         = "${local.function_name_prefix}${each.key}"
   source_kind                           = each.key
   path_to_function_zip                  = module.psoxy_aws.path_to_deployment_jar
   function_zip_hash                     = module.psoxy_aws.deployment_package_hash
@@ -317,7 +319,7 @@ module "psoxy_msft_connector" {
   source = "../../modules/aws-psoxy-rest"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-rest?ref=v0.4.25"
 
-  function_name                   = "psoxy-${each.key}"
+  function_name                   = "${local.function_name_prefix}${each.key}"
   source_kind                     = each.value.source_kind
   path_to_config                  = "${var.psoxy_base_dir}/configs/${each.value.source_kind}.yaml"
   path_to_function_zip            = module.psoxy_aws.path_to_deployment_jar
@@ -452,7 +454,7 @@ module "aws_psoxy_long_auth_connectors" {
   source = "../../modules/aws-psoxy-rest"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-rest?ref=v0.4.25"
 
-  function_name                   = "psoxy-${each.key}"
+  function_name                   = "${local.function_name_prefix}${each.key}"
   path_to_function_zip            = module.psoxy_aws.path_to_deployment_jar
   function_zip_hash               = module.psoxy_aws.deployment_package_hash
   path_to_config                  = null

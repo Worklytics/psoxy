@@ -17,6 +17,7 @@ locals {
   base_config_path = "${var.psoxy_base_dir}configs/"
   host_platform_id = "AWS"
   ssm_key_ids      = var.aws_ssm_key_id == null ? {} : { 0 : var.aws_ssm_key_id }
+  function_name_prefix = "psoxy-"
 }
 
 data "azuread_client_config" "current" {}
@@ -46,6 +47,7 @@ module "psoxy-aws" {
   force_bundle                   = var.force_bundle
   caller_aws_arns                = var.caller_aws_arns
   caller_gcp_service_account_ids = var.caller_gcp_service_account_ids
+  api_function_name_prefix       = local.function_name_prefix
 }
 
 module "global_secrets" {
@@ -137,7 +139,7 @@ module "psoxy-msft-connector" {
   source = "../../modules/aws-psoxy-rest"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-rest?ref=v0.4.25"
 
-  function_name                   = "psoxy-${each.key}"
+  function_name                   = "${local.function_name_prefix}${each.key}"
   source_kind                     = each.value.source_kind
   path_to_config                  = "${var.psoxy_base_dir}/configs/${each.value.source_kind}.yaml"
   path_to_function_zip            = module.psoxy-aws.path_to_deployment_jar
@@ -254,7 +256,7 @@ module "aws-psoxy-long-auth-connectors" {
   source = "../../modules/aws-psoxy-rest"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-rest?ref=v0.4.25"
 
-  function_name                         = "psoxy-${each.key}"
+  function_name                         = "${local.function_name_prefix}${each.key}"
   path_to_function_zip                  = module.psoxy-aws.path_to_deployment_jar
   function_zip_hash                     = module.psoxy-aws.deployment_package_hash
   path_to_config                        = null

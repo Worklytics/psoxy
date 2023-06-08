@@ -34,6 +34,7 @@ module "psoxy" {
   force_bundle                   = var.force_bundle
   install_test_tool              = var.install_test_tool
   deployment_id                  = local.deployment_id
+  api_function_name_prefix       = "${lower(local.deployment_id)}-"
 }
 
 
