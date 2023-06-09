@@ -81,16 +81,16 @@ module "psoxy" {
   install_test_tool              = var.install_test_tool
   gcp_region                     = var.gcp_region
   replica_regions                = var.replica_regions
-  api_connectors                = local.api_connectors
+  api_connectors                 = local.api_connectors
   bulk_connectors                = local.bulk_connectors
   non_production_connectors      = var.non_production_connectors
-  custom_api_connector_rules              = var.custom_api_connector_rules
+  custom_api_connector_rules     = var.custom_api_connector_rules
   general_environment_variables  = var.general_environment_variables
   pseudonymize_app_ids           = var.pseudonymize_app_ids
   bulk_input_expiration_days     = var.bulk_input_expiration_days
   bulk_sanitized_expiration_days = var.bulk_sanitized_expiration_days
   lookup_tables                  = var.lookup_tables
-  todo_step = max(module.worklytics_connectors.next_todo_step, module.worklytics_connectors_google_workspace.next_todo_step)
+  todo_step                      = max(module.worklytics_connectors.next_todo_step, module.worklytics_connectors_google_workspace.next_todo_step)
 }
 
 locals {

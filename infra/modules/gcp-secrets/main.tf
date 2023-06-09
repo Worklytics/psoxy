@@ -65,7 +65,7 @@ output "secret_version_names" {
 
 output "secret_version_numbers" {
   value = { for k, v in var.secrets :
-    k => trimprefix(google_secret_manager_secret_version.version[k].name, "${google_secret_manager_secret.secret[k].name}/versions/") }
+  k => trimprefix(google_secret_manager_secret_version.version[k].name, "${google_secret_manager_secret.secret[k].name}/versions/") }
 }
 
 # map from secret's identifier in var.secrets --> object(secret_id, version_number)

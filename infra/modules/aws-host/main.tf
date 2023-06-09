@@ -2,25 +2,18 @@
 # is provisioned, and that's implicit in the provider - so we should just infer from the provider
 data "aws_region" "current" {}
 
-# deployment ID to avoid collisions if deploying host environment (AWS account, GCP project) that
-# is shared by multiple deployments
-resource "random_string" "deployment_id" {
-  length  = 5
-  lower   = true
-  upper   = false
-  numeric = true
-  special = false
+module "env_id" {
+  source = "../../modules/env-id"
+
+  environment_name = var.environment_name
 }
 
 locals {
-  base_config_path = "${var.psoxy_base_dir}/configs/"
-  host_platform_id = "AWS"
-  ssm_key_ids      = var.aws_ssm_key_id == null ? {} : { 0 : var.aws_ssm_key_id }
-  deployment_id    = length(var.environment_name) > 0 ? replace(lower(var.environment_name), " ", "-") : random_string.deployment_id.result
-  proxy_brand      = "psoxy"
-  instance_ssm_prefix = "${var.aws_ssm_param_root_path}${upper(local.deployment_id)}_"
+  base_config_path    = "${var.psoxy_base_dir}/configs/"
+  host_platform_id    = "AWS"
+  ssm_key_ids         = var.aws_ssm_key_id == null ? {} : { 0 : var.aws_ssm_key_id }
+  instance_ssm_prefix = "${var.aws_ssm_param_root_path}${upper(module.env_id.id)}_"
 }
-
 
 module "psoxy" {
   source = "../../modules/aws"
@@ -33,8 +26,8 @@ module "psoxy" {
   caller_gcp_service_account_ids = var.caller_gcp_service_account_ids
   force_bundle                   = var.force_bundle
   install_test_tool              = var.install_test_tool
-  deployment_id                  = local.deployment_id
-  api_function_name_prefix       = "${lower(local.deployment_id)}-"
+  deployment_id                  = module.env_id.id
+  api_function_name_prefix       = "${lower(module.env_id.id)}-"
 }
 
 
@@ -48,10 +41,6 @@ module "global_secrets" {
   secrets    = module.psoxy.secrets
 }
 
-locals {
-  deployment_id_sa_id_part = length(local.deployment_id) > 0 ? "${local.deployment_id}-" : ""
-}
-
 module "instance_secrets" {
   for_each = var.api_connectors
 
@@ -62,9 +51,9 @@ module "instance_secrets" {
 
   path       = "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_"
   kms_key_id = var.aws_ssm_key_id
-  secrets    = { for v in each.value.secured_variables :
+  secrets = { for v in each.value.secured_variables :
     v.name => {
-      value = v.value,
+      value       = v.value,
       description = try(v.description, null)
     }
   }
@@ -76,7 +65,8 @@ module "api_connector" {
   source = "../../modules/aws-psoxy-rest"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-rest?ref=v0.4.25"
 
-  function_name                   = "${local.deployment_id}-${each.key}"
+  environment_name                = var.environment_name
+  instance_id                     = each.key
   source_kind                     = each.value.source_kind
   path_to_config                  = "${var.psoxy_base_dir}/configs/${each.value.source_kind}.yaml"
   path_to_function_zip            = module.psoxy.path_to_deployment_jar
@@ -124,7 +114,8 @@ module "bulk_connector" {
   aws_assume_role_arn              = var.aws_assume_role_arn
   provision_iam_policy_for_testing = var.provision_testing_infra
   aws_role_to_assume_when_testing  = var.provision_testing_infra ? module.psoxy.api_caller_role_arn : null
-  instance_id                      = "${local.deployment_id}-${each.key}"
+  environment_name                 = var.environment_name
+  instance_id                      = each.key
   source_kind                      = each.value.source_kind
   aws_region                       = data.aws_region.current.id
   path_to_function_zip             = module.psoxy.path_to_deployment_jar

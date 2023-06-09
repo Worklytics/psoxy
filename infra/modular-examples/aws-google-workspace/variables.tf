@@ -75,8 +75,8 @@ variable "gcp_project_id" {
 
 variable "environment_name" {
   type        = string
-  description = "qualifier to append to name of project that will host your psoxy instance"
-  default     = ""
+  description = "qualifier to distinguish resources created by this terraform configuration from other psoxy Terraform deployments, (eg, 'prod', 'dev', etc)"
+  default     = "psoxy"
 
   validation {
     condition     = !can(regex("^(?i)(aws|ssm)", var.environment_name))

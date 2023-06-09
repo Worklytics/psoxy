@@ -58,7 +58,7 @@ locals {
     k => merge(v, {
       connector = module.msft_connection[k].connector
       environment_variables = merge(v.environment_variables, {
-        CLIENT_ID         = module.msft_connection[k].connector.application_id
+        CLIENT_ID = module.msft_connection[k].connector.application_id
       })
     })
   }

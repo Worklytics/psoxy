@@ -10,7 +10,7 @@ output "todos" {
 
 
 locals {
-  next_todo_steps = tolist([ for k, v in module.msft_365_grants: tonumber(v.next_todo_step)])
+  next_todo_steps = tolist([for k, v in module.msft_365_grants : tonumber(v.next_todo_step)])
 }
 
 
@@ -20,11 +20,11 @@ output "next_todo_step" {
   # │     │ local.next_todo_steps is empty list of dynamic
   #  │     │ var.todo_step is 1
 
-  value = try(max(concat([ var.todo_step], local.next_todo_steps )), var.todo_step + 1)
+  value = try(max(concat([var.todo_step], local.next_todo_steps)), var.todo_step + 1)
 }
 
 output "application_ids" {
   value = {
-    for id, connection in module.msft_connection: id => connection.connector.application_id
+    for id, connection in module.msft_connection : id => connection.connector.application_id
   }
 }

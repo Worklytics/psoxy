@@ -23,11 +23,11 @@ resource "random_string" "deployment_id" {
 }
 
 locals {
-  base_config_path = "${var.psoxy_base_dir}/configs/"
-  host_platform_id = "AWS"
-  ssm_key_ids      = var.aws_ssm_key_id == null ? {} : { 0 : var.aws_ssm_key_id }
-  deployment_id    = length(var.environment_name) > 0 ? replace(lower(var.environment_name), " ", "-") : random_string.deployment_id.result
-  proxy_brand      = "psoxy"
+  base_config_path     = "${var.psoxy_base_dir}/configs/"
+  host_platform_id     = "AWS"
+  ssm_key_ids          = var.aws_ssm_key_id == null ? {} : { 0 : var.aws_ssm_key_id }
+  deployment_id        = length(var.environment_name) > 0 ? replace(lower(var.environment_name), " ", "-") : random_string.deployment_id.result
+  proxy_brand          = "psoxy"
   function_name_prefix = "${local.proxy_brand}-"
 }
 
@@ -155,8 +155,9 @@ module "psoxy_google_workspace_connector" {
   source = "../../modules/aws-psoxy-rest"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-rest?ref=v0.4.25"
 
-  function_name                         = "${local.function_name_prefix}${each.key}"
-  source_kind                           = each.key
+  environment_name                      = var.environment_name
+  instance_id                           = each.key
+  source_kind                           = each.value.source_kind
   path_to_function_zip                  = module.psoxy_aws.path_to_deployment_jar
   function_zip_hash                     = module.psoxy_aws.deployment_package_hash
   path_to_config                        = null
@@ -319,7 +320,8 @@ module "psoxy_msft_connector" {
   source = "../../modules/aws-psoxy-rest"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-rest?ref=v0.4.25"
 
-  function_name                   = "${local.function_name_prefix}${each.key}"
+  environment_name                = var.environment_name
+  instance_id                     = each.key
   source_kind                     = each.value.source_kind
   path_to_config                  = "${var.psoxy_base_dir}/configs/${each.value.source_kind}.yaml"
   path_to_function_zip            = module.psoxy_aws.path_to_deployment_jar
@@ -345,10 +347,10 @@ module "psoxy_msft_connector" {
       CUSTOM_RULES_SHA     = try(var.custom_rest_rules[each.key], null) != null ? filesha1(var.custom_rest_rules[each.key]) : null
       IS_DEVELOPMENT_MODE  = contains(var.non_production_connectors, each.key)
 
-      CLIENT_ID            = module.msft_connection[each.key].connector.application_id
-      IDENTITY_POOL_ID     = module.cognito_identity_pool[0].pool_id,
-      IDENTITY_ID          = module.cognito_identity[0].identity_id[each.key]
-      DEVELOPER_NAME_ID    = module.cognito_identity_pool[0].developer_provider_name
+      CLIENT_ID         = module.msft_connection[each.key].connector.application_id
+      IDENTITY_POOL_ID  = module.cognito_identity_pool[0].pool_id,
+      IDENTITY_ID       = module.cognito_identity[0].identity_id[each.key]
+      DEVELOPER_NAME_ID = module.cognito_identity_pool[0].developer_provider_name
     }
   )
 }
@@ -454,7 +456,8 @@ module "aws_psoxy_long_auth_connectors" {
   source = "../../modules/aws-psoxy-rest"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-rest?ref=v0.4.25"
 
-  function_name                   = "${local.function_name_prefix}${each.key}"
+  environment_name                = var.environment_name
+  instance_id                     = each.key
   path_to_function_zip            = module.psoxy_aws.path_to_deployment_jar
   function_zip_hash               = module.psoxy_aws.deployment_package_hash
   path_to_config                  = null
@@ -539,11 +542,12 @@ module "psoxy_bulk" {
   source = "../../modules/aws-psoxy-bulk"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-bulk?ref=v0.4.25"
 
+  environment_name                 = var.environment_name
+  instance_id                      = each.key
   aws_account_id                   = var.aws_account_id
   aws_assume_role_arn              = var.aws_assume_role_arn
   provision_iam_policy_for_testing = var.provision_testing_infra
   aws_role_to_assume_when_testing  = var.provision_testing_infra ? module.psoxy_aws.api_caller_role_arn : null
-  instance_id                      = each.key
   source_kind                      = each.value.source_kind
   aws_region                       = data.aws_region.current.id
   path_to_function_zip             = module.psoxy_aws.path_to_deployment_jar
@@ -608,6 +612,7 @@ module "lookup_output" {
   source = "../../modules/aws-psoxy-output-bucket"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-output-bucket?ref=v0.4.25"
 
+  environment_name              = var.environment_name
   instance_id                   = each.key
   iam_role_for_lambda_name      = module.psoxy_bulk[each.value.input_connector_id].instance_role_name
   sanitized_accessor_role_names = each.value.sanitized_accessor_role_names

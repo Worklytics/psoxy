@@ -15,4 +15,6 @@ can potentially be decoupled.
      the resources/variables/outputs for a given component. If you don't need the component, then
      `rm {component-identifier}*.tf`
 
-
+As of June 2023, this applies to two sources:
+  - `msft-365`
+  - `google-workspace`

@@ -91,6 +91,7 @@ locals {
 module "psoxy" {
   source = "../../modules/aws-host"
 
+  environment_name               = var.environment_name
   aws_account_id                 = var.aws_account_id
   aws_assume_role_arn            = var.aws_assume_role_arn # role that can test the instances (lambdas)
   aws_region                     = var.aws_region
@@ -105,7 +106,6 @@ module "psoxy" {
   custom_api_connector_rules     = var.custom_api_connector_rules
   lookup_table_builders          = var.lookup_table_builders
   general_environment_variables  = var.general_environment_variables
-  environment_name               = var.environment_name
   bulk_sanitized_expiration_days = var.bulk_sanitized_expiration_days
   bulk_input_expiration_days     = var.bulk_input_expiration_days
   api_connectors                 = local.api_connectors

@@ -17,6 +17,18 @@ Working tracking of changes, updated as work done prior to release.  Please revi
         then wildcard policy to read shared also grants read of secrets across all connectors)
   - keys/salts per value kind (PII, item id, etc)
 
+## [0.4.25](https://github.com/Worklytics/psoxy/releases/tag/v0.4.25)
+
+
+Changes:
+  * `environment_name`/`instance_id` REQUIRED for all of `aws-psoxy-*` modules, taking the place of `function_name`; this is only breaking change
+    if your Terraform configuration is directly invoking one of these; `modular-examples` have
+    been updated to expect it
+  * due to refactoring of IAM policy/role names, you may see MANY replacements of these resources in
+    AWS; these are just name changes to better group your infrastructure, so should be no-ops
+  * 
+
+
 ## [0.4.20](https://github.com/Worklytics/psoxy/releases/tag/v0.4.20)
 
 Due to module refactoring, you will need a `terraform init`.
