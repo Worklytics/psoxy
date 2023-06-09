@@ -64,6 +64,13 @@ module "cognito_identity" {
   }
 }
 
+resource "aws_iam_role_policy_attachment" "cognito_lambda_policy" {
+  for_each = module.worklytics_connectors_msft_365.enabled_api_connectors
+
+  role       = module.psoxy.api_connector_instances[each.key].instance_role_name
+  policy_arn = module.cognito_identity_pool[0].policy_arn
+}
+
 module "msft_connection_auth_federation" {
   for_each = module.worklytics_connectors_msft_365.enabled_api_connectors
 

@@ -148,6 +148,7 @@ module "lookup_output" {
   source = "../../modules/aws-psoxy-output-bucket"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-output-bucket?ref=v0.4.25"
 
+  environment_name              = var.environment_name
   instance_id                   = each.key
   iam_role_for_lambda_name      = module.bulk_connector[each.value.input_connector_id].instance_role_name
   sanitized_accessor_role_names = each.value.sanitized_accessor_role_names
