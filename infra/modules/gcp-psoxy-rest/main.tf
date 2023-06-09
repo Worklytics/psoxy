@@ -198,6 +198,10 @@ output "instance_id" {
   value = var.instance_id
 }
 
+output "service_account_email" {
+  value = google_cloudfunctions_function.function.service_account_email
+}
+
 output "cloud_function_name" {
   value = google_cloudfunctions_function.function.name
 }

@@ -402,6 +402,7 @@ EOT
         { name : "CLIENT_ID", writable : false },
         { name : "ACCOUNT_ID", writable : false },
         { name : "ACCESS_TOKEN", writable : true },
+        { name : "OAUTH_REFRESH_TOKEN", writable : true, lockable : true }, # q: needed? per logic as of 9 June 2023, would be created
       ],
       environment_variables : {
         USE_SHARED_TOKEN : "TRUE"
@@ -557,6 +558,7 @@ EOT
       secured_variables : [
         { name : "ACCESS_TOKEN", writable : true },
         { name : "REFRESH_TOKEN", writable : true },
+        { name : "OAUTH_REFRESH_TOKEN", writable : true, lockable : true },
         { name : "CLIENT_ID", writable : false },
         { name : "CLIENT_SECRET", writable : false }
       ],

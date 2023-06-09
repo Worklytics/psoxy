@@ -23,10 +23,14 @@ locals {
     for k, v in var.api_connectors :
     k => {
       for var_key, var_def in v.secured_variables :
-      "${replace(upper(k), "-", "_")}_${replace(upper(var_def.name), "-", "_")}" => {
-        value       = coalesce(try(var_def.value, "TODO: fill me"), "TODO: fill me")
-        description = try(var_def.description, "")
-      }
+      "${replace(upper(k), "-", "_")}_${replace(upper(var_def.name), "-", "_")}" =>
+      merge({
+        instance_id        = k
+        instance_secret_id = "${replace(upper(k), "-", "_")}_${replace(upper(var_def.name), "-", "_")}"
+        value              = "TODO: fill me"
+        description        = ""
+        },
+      var_def)
     }
   }
 }
@@ -39,6 +43,15 @@ module "secrets" {
   secret_project = var.gcp_project_id
   path_prefix    = local.config_parameter_prefix
   secrets        = local.secrets_to_provision[each.key]
+}
+
+resource "google_secret_manager_secret_iam_member" "grant_sa_updater_on_lockable_secrets" {
+  for_each = { for k, secret in flatten(values(local.secrets_to_provision)) : k => secret if secret.lockable }
+
+  member    = "serviceAccount:${google_service_account.api_connectors[each.value.instance_id].email}"
+  role      = module.psoxy.psoxy_instance_secret_locker_role_id
+  project   = var.gcp_project_id
+  secret_id = "${local.config_parameter_prefix}${each.value.instance_secret_id}"
 }
 
 resource "google_service_account" "api_connectors" {

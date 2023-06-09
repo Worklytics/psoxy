@@ -98,6 +98,7 @@ variable "api_connectors" {
       name     = string
       value    = optional(string)
       writable = optional(bool, false)
+      lockable = optional(bool, false)
       })),
     [])
 
