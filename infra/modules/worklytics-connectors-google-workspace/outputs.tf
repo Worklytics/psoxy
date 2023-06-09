@@ -9,5 +9,5 @@ output "todos" {
 }
 
 output "next_todo_step" {
-  value = max(values(module.google_workspace_connection)[*].next_todo_step...) + 1
+  value = max(values(module.google_workspace_connection)[*].next_todo_step...)
 }

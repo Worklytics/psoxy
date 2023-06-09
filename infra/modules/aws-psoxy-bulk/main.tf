@@ -395,7 +395,7 @@ EOT
 
 
 resource "local_file" "todo-aws-psoxy-bulk-test" {
-  filename = "TODO_${var.todo_step}_test_${var.instance_id}.md"
+  filename = "TODO ${var.todo_step} - test ${var.instance_id}.md"
   content  = local.todo_content
 }
 

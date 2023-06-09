@@ -18,6 +18,7 @@ module "google_workspace_connection" {
   source = "../../modules/google-workspace-dwd-connection"
 
   project_id                   = var.gcp_project_id
+  instance_id                  = each.key
   connector_service_account_id = "${local.environment_id_prefix}${substr(each.key, 0, 30 - length(local.environment_id_prefix))}"
   display_name                 = "Psoxy Connector - ${local.environment_id_display_name_qualifier}${each.value.display_name}"
   apis_consumed                = each.value.apis_consumed

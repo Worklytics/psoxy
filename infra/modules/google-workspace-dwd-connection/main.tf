@@ -13,6 +13,8 @@ locals {
 
   # TODO: md5 here is 32 chars of hex, so some risk of collision by truncating, while could use
   sa_account_id = length(local.trimmed_id) < 31 ? lower(replace(local.trimmed_id, " ", "-")) : substr(md5(local.trimmed_id), 0, 30)
+
+  instance_id = coalesce(var.instance_id, var.display_name)
 }
 
 # service account to personify connector
@@ -111,7 +113,7 @@ EOT
 
 # enable domain-wide-delegation via Google Workspace Admin console
 resource "local_file" "todo-google-workspace-admin-console" {
-  filename = "TODO ${var.todo_step} - setup ${var.display_name}.md"
+  filename = "TODO ${var.todo_step} - setup ${local.instance_id}.md"
   content  = local.todo_content
 }
 
