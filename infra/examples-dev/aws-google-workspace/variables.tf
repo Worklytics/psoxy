@@ -289,22 +289,3 @@ variable "example_jira_issue_id" {
   default     = null
   description = "(Only required if using Jira Server/Cloud connector) Id of an issue for only to be used as part of example calls for Jira (ex: ETV-12)"
 }
-
-variable "vpc_ip_block" {
-  type        = string
-  description = "IP block for VPC to create for psoxy instances, in CIDR notation"
-  default     = "10.0.0.0/18"
-}
-
-variable "vault_addr" {
-  type        = string
-  description = "address of your Vault instance"
-  default     = null # leave null if not using Vault
-}
-
-variable "aws_vault_role_arn" {
-  type        = string
-  description = "ARN of vault role; see https://developer.hashicorp.com/vault/docs/auth/aws"
-  default     = null # leave null if not using Vault
-}
-
