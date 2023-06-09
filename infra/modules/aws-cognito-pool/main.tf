@@ -1,13 +1,13 @@
 resource "aws_cognito_identity_pool" "main" {
   identity_pool_name               = var.name
+  developer_provider_name          = var.developer_provider_name
   allow_unauthenticated_identities = false
   allow_classic_flow               = false
 
-  developer_provider_name = var.developer_provider_name
 }
 
 resource "aws_iam_policy" "cognito_developer_identities" {
-  name        = "CognitoDeveloperIdentity_${aws_cognito_identity_pool.main.identity_pool_name}"
+  name        = "${aws_cognito_identity_pool.main.identity_pool_name}_CognitoDeveloperIdentity"
   description = "Allow principal to read and lookup developer identities from Cognito Identity: ${aws_cognito_identity_pool.main.id}"
 
   policy = jsonencode(
