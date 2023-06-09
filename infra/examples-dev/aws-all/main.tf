@@ -30,6 +30,44 @@ terraform {
   #  }
 }
 
+
+## Data Sources configuration
+## (eg, sources you want to connect to Worklytics)
+
+# general cases
+module "worklytics_connectors" {
+  source = "../../modules/worklytics-connectors"
+
+  enabled_connectors    = var.enabled_connectors
+  example_jira_issue_id = var.example_jira_issue_id
+  jira_cloud_id         = var.jira_cloud_id
+  jira_server_url       = var.jira_server_url
+  salesforce_domain     = var.salesforce_domain
+}
+
+# sources which require additional dependencies are split into distinct Terraform files, following
+# the naming convention of `{source-identifier}.tf`, eg `msft-365.tf`
+# lines below merge results of those files back into single maps of sources
+
+locals {
+  api_connectors = merge(
+    module.worklytics_connectors.enabled_api_connectors,
+    module.worklytics_connectors_google_workspace.enabled_api_connectors,
+    local.msft_api_connectors_with_auth
+  )
+}
+
+
+locals {
+  bulk_connectors = merge(
+    module.worklytics_connectors.enabled_bulk_connectors,
+    var.custom_bulk_connectors,
+  )
+}
+
+
+## Host platform (AWS) configuration
+
 # NOTE: you need to provide credentials. usual way to do this is to set env vars:
 #        AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
 # see https://registry.terraform.io/providers/hashicorp/aws/latest/docs#authentication for more
@@ -48,39 +86,6 @@ provider "aws" {
 
 locals {
   host_platform_id = "AWS"
-}
-
-module "worklytics_connectors" {
-  source = "../../modules/worklytics-connectors"
-
-  enabled_connectors    = var.enabled_connectors
-  example_jira_issue_id = var.example_jira_issue_id
-  jira_cloud_id         = var.jira_cloud_id
-  jira_server_url       = var.jira_server_url
-  salesforce_domain     = var.salesforce_domain
-}
-
-module "worklytics_connectors_google_workspace" {
-  source = "../../modules/worklytics-connectors-google-workspace"
-
-  environment_id                 = var.environment_name
-  enabled_connectors             = var.enabled_connectors
-  gcp_project_id                 = var.gcp_project_id
-  google_workspace_example_user  = var.google_workspace_example_user
-  google_workspace_example_admin = var.google_workspace_example_admin
-}
-
-locals {
-  api_connectors = merge(
-    module.worklytics_connectors.enabled_api_connectors,
-    module.worklytics_connectors_google_workspace.enabled_api_connectors,
-    local.msft_api_connectors_with_auth
-  )
-
-  bulk_connectors = merge(
-    module.worklytics_connectors.enabled_bulk_connectors,
-    var.custom_bulk_connectors,
-  )
 }
 
 module "psoxy" {
@@ -108,11 +113,14 @@ module "psoxy" {
   todo_step                      = max(module.worklytics_connectors.next_todo_step, module.worklytics_connectors_google_workspace.next_todo_step, module.worklytics_connectors_msft_365.next_todo_step)
 }
 
+## Worklytics connection configuration
+#  as of June 2023, this just outputs TODO files, but would provision connections via future
+#  Worklytics API / Terraform provider
+
 locals {
   all_connectors = merge(local.api_connectors, local.bulk_connectors)
   all_instances  = merge(module.psoxy.bulk_connector_instances, module.psoxy.api_connector_instances)
 }
-
 
 module "connection_in_worklytics" {
   for_each = local.all_instances
