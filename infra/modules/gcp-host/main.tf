@@ -22,7 +22,7 @@ locals {
   secrets_to_provision = {
     for k, v in var.api_connectors :
     k => {
-      for var_key, var_def in v.secured_variables :
+      for var_def in v.secured_variables :
       "${replace(upper(k), "-", "_")}_${replace(upper(var_def.name), "-", "_")}" =>
       merge({
         instance_id        = k
@@ -33,6 +33,14 @@ locals {
       var_def)
     }
   }
+  lockable_secrets = flatten([
+    for instance_id, secrets in local.secrets_to_provision :
+      [ for secret_id, secret in values(secrets) : secret if secret.lockable ]
+  ])
+}
+
+output "secrets_to_provision" {
+  value = local.lockable_secrets
 }
 
 module "secrets" {
@@ -46,7 +54,7 @@ module "secrets" {
 }
 
 resource "google_secret_manager_secret_iam_member" "grant_sa_updater_on_lockable_secrets" {
-  for_each = { for k, secret in flatten(values(local.secrets_to_provision)) : k => secret if secret.lockable }
+  for_each = { for secret in local.lockable_secrets : secret.instance_secret_id => secret }
 
   member    = "serviceAccount:${google_service_account.api_connectors[each.value.instance_id].email}"
   role      = module.psoxy.psoxy_instance_secret_locker_role_id
