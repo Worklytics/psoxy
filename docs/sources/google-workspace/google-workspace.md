@@ -27,21 +27,20 @@ requires [Super Admin](https://support.google.com/a/answer/2405986?hl=en&fl=1) r
 organization may have a Custom Role with sufficient privileges.
 
 
-## Without Terraform
+## Provisioning API clients Without Terraform
 
-Instructions for how to setup Google Workspace without terraform:
+Instructions for how to set up Google Workspace without Terraform:
 
   1. Create or choose the GCP project in which to create the OAuth Clients.
   2. Activate relevant API(s) in the project.
   3. Create a Service Account and a JSON key for the service account.
   4. Base64-encode the key and store it as a Systems Manager Parameter in AWS (same region as your
-     lambda function deployed).  The parameter name should be something like PSOXY_GDIRECTORY_SERVICE_ACCOUNT_KEY.
+     lambda function deployed).  The parameter name should be something like `PSOXY_GDIRECTORY_SERVICE_ACCOUNT_KEY`.
   5. Get the numeric ID of the service account. Use this plus the oauth scopes to make domain-wide
      delegation grants via the Google Workspace admin console.
 
-NOTE: you could also use a single Service Account for everything, but you will need to store it
-repeatedly in AWS for each parameter name.
-
+NOTE: you could also use a single Service Account for everything, but you will need to store it's
+key repeatedly in AWS/GCP for each parameter name.
 
 ## Google Workspace User for Connection
 
@@ -62,14 +61,21 @@ If you have already created a sufficiently privileged service account user for a
 Workspace connection, you can re-use that one.
 
 Assign the account a sufficiently privileged role. At minimum, the role must have the following
-permissions:
+privileges:
   * Admin API
   * Domain Settings
   * Groups
   * Organizational Units
   * Reports (required only if you are connecting to the Audit Logs, used for Google Chat, Meet, etc)
   * Users
-    You may use a predefined role, or define a [Custom Role](https://support.google.com/a/answer/2406043?fl=1).
+
+See [Google's documentation](https://support.google.com/a/answer/1219251?fl=1&sjid=8026519161455224599-NA)
+detailed explanations of each of those privileges.
+
+NOTE:
+  - you may use a predefined role, or define a [Custom Role](https://support.google.com/a/answer/2406043?fl=1).
+  - the proxy rules support restricting access by HTTP method; the Admin SDK API is REST-based, so
+    limiting access to `GET` is sufficient to enforce read-only access.
 
 The email address of the account you created will be used when creating the data connection to the
 Google Directory in the Worklytics portal. Provide it as the value of the 'Google
