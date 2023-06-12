@@ -237,7 +237,7 @@ EOT
 }
 
 resource "local_file" "test_script" {
-  filename        = "test-${local.function_name}.sh"
+  filename        = "test-${trimprefix(var.instance_id, var.environment_id_prefix)}.sh"
   file_permission = "0770"
   content         = <<EOT
 #!/bin/bash
@@ -245,7 +245,7 @@ FILE_PATH=$${1:-${try(local.example_file, "")}}
 BLUE='\e[0;34m'
 NC='\e[0m'
 
-printf "Quick test of $${BLUE}${local.function_name}$${NC} ...\n"
+printf "Quick test of $${BLUE}${local.function_name}$${NC} ...\n"tf
 
 node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f $FILE_PATH -d GCP -i ${google_storage_bucket.input-bucket.name} -o ${module.output_bucket.bucket_name}
 EOT
