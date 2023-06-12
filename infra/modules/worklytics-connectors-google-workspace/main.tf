@@ -1,3 +1,11 @@
+terraform {
+  required_providers {
+    # for the API connections to Google Workspace
+    google = {
+      version = ">= 3.74, <= 5.0"
+    }
+  }
+}
 
 locals {
   environment_id_prefix                 = "${var.environment_id}${length(var.environment_id) > 0 ? "-" : ""}"
