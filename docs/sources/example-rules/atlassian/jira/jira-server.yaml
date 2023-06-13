@@ -465,8 +465,8 @@ endpoints:
           - "$..toString"
       - !<pseudonymize>
         jsonPaths:
-          - "$..key"
-          - "$..emailAddress"
-          - "$..tmpFromAccountId"
-          - "$..tmpToAccountId"
+          - "$..author..key"
+          - "$..author..emailAddress"
+          - "$..updateAuthor..key"
+          - "$..updateAuthor..emailAddress"
         encoding: "JSON"

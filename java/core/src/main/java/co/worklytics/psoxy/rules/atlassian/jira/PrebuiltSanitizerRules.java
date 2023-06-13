@@ -110,10 +110,10 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..toString")
                     .build())
             .transform(Transform.Pseudonymize.builder()
-                    .jsonPath("$..key")
-                    .jsonPath("$..emailAddress")
-                    .jsonPath("$..tmpFromAccountId")
-                    .jsonPath("$..tmpToAccountId")
+                    .jsonPath("$..author..key")
+                    .jsonPath("$..author..emailAddress")
+                    .jsonPath("$..updateAuthor..key")
+                    .jsonPath("$..updateAuthor..emailAddress")
                     .build())
             .build();
 
