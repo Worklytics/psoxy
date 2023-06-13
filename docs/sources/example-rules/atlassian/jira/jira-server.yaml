@@ -441,3 +441,32 @@ endpoints:
           - "$.worklogs[*]..key"
           - "$.worklogs[*]..emailAddress"
         encoding: "JSON"
+  - pathTemplate: "/rest/api/{apiVersion}/issue/{issueId}"
+    allowedQueryParams:
+      - "startAt"
+      - "maxResults"
+      - "expand"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..self"
+          - "$..description"
+          - "$..iconUrl"
+          - "$..name"
+          - "$..avatarUrls"
+          - "$..displayName"
+          - "$..name"
+          - "$..body"
+          - "$..comment"
+          - "$..displayName"
+          - "$..from"
+          - "$..to"
+          - "$..fromString"
+          - "$..toString"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..key"
+          - "$..emailAddress"
+          - "$..tmpFromAccountId"
+          - "$..tmpToAccountId"
+        encoding: "JSON"

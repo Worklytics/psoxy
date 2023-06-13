@@ -38,6 +38,10 @@ public class PrebuiltSanitizerRules {
                             "fields").stream())
             .collect(Collectors.toList());
 
+    private static final List<String> issueAllowedQueryParameters = Streams.concat(commonAllowedQueryParameters.stream(),
+                    Lists.newArrayList("expand").stream())
+            .collect(Collectors.toList());
+
     private static final List<String> groupMemberAllowedQueryParameters = Streams.concat(commonAllowedQueryParameters.stream(),
                     Lists.newArrayList("groupId",
                             "groupName",
@@ -84,6 +88,33 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$.issues[*]..body..id")
                     .build())
             .responseSchema(jsonSchemaForQueryResult(true))
+            .build();
+
+    static final Endpoint SERVER_ISSUE_V2 = Endpoint.builder()
+            .pathTemplate("/rest/api/{apiVersion}/issue/{issueId}")
+            .allowedQueryParams(issueAllowedQueryParameters)
+            .transform(Transform.Redact.builder()
+                    .jsonPath("$..self")
+                    .jsonPath("$..description")
+                    .jsonPath("$..iconUrl")
+                    .jsonPath("$..name")
+                    .jsonPath("$..avatarUrls")
+                    .jsonPath("$..displayName")
+                    .jsonPath("$..name")
+                    .jsonPath("$..body")
+                    .jsonPath("$..comment")
+                    .jsonPath("$..displayName")
+                    .jsonPath("$..from")
+                    .jsonPath("$..to")
+                    .jsonPath("$..fromString")
+                    .jsonPath("$..toString")
+                    .build())
+            .transform(Transform.Pseudonymize.builder()
+                    .jsonPath("$..key")
+                    .jsonPath("$..emailAddress")
+                    .jsonPath("$..tmpFromAccountId")
+                    .jsonPath("$..tmpToAccountId")
+                    .build())
             .build();
 
     static final Endpoint SERVER_ISSUE_SEARCH_V2 = Endpoint.builder()
@@ -310,6 +341,7 @@ public class PrebuiltSanitizerRules {
             .endpoint(SERVER_ISSUE_SEARCH_V2)
             .endpoint(SERVER_ISSUE_COMMENT_V2)
             .endpoint(SERVER_ISSUE_WORKLOG_V2)
+            .endpoint(SERVER_ISSUE_V2)
             .build();
 
     public static final Map<String, RESTRules> RULES_MAP =
