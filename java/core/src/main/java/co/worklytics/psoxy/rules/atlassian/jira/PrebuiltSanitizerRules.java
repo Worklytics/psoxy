@@ -39,7 +39,7 @@ public class PrebuiltSanitizerRules {
             .collect(Collectors.toList());
 
     private static final List<String> issueAllowedQueryParameters = Streams.concat(commonAllowedQueryParameters.stream(),
-                    Lists.newArrayList("expand").stream())
+                    Lists.newArrayList("expand", "fields").stream())
             .collect(Collectors.toList());
 
     private static final List<String> groupMemberAllowedQueryParameters = Streams.concat(commonAllowedQueryParameters.stream(),
