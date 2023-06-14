@@ -1,0 +1,182 @@
+{
+  "expand": "renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations,customfield_10600.requestTypePractice",
+  "id": "10711",
+  "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/10711",
+  "key": "ETV-17",
+  "fields": {
+    "statuscategorychangedate": "2023-06-09T06:37:11.640-0400",
+    "issuetype": {
+      "id": "10001",
+      "subtask": false,
+      "hierarchyLevel": 0
+    },
+    "timespent": 28800,
+    "project": {
+      "id": "10000",
+      "key": "ETV",
+      "projectTypeKey": "software",
+      "simplified": false
+    },
+    "fixVersions": [],
+    "aggregatetimespent": 28800,
+    "resolution": null,
+    "customfield_10500": null,
+    "customfield_10700": null,
+    "customfield_10701": [],
+    "customfield_10702": null,
+    "customfield_10703": null,
+    "customfield_10704": null,
+    "resolutiondate": null,
+    "customfield_10705": null,
+    "customfield_10706": null,
+    "customfield_10707": null,
+    "workratio": -1,
+    "customfield_10708": null,
+    "customfield_10709": null,
+    "issuerestriction": {
+      "issuerestrictions": {},
+      "shouldDisplay": false
+    },
+    "lastViewed": "2023-06-14T06:18:52.375-0400",
+    "watches": {
+      "watchCount": 1,
+      "isWatching": true
+    },
+    "created": "2023-06-09T06:37:10.762-0400",
+    "priority": {
+      "id": "3"
+    },
+    "customfield_10100": null,
+    "labels": [],
+    "timeestimate": 489600,
+    "aggregatetimeoriginalestimate": null,
+    "versions": [],
+    "issuelinks": [],
+    "assignee": null,
+    "updated": "2023-06-14T06:19:04.368-0400",
+    "status": {
+      "id": "10000",
+      "statusCategory": {
+        "id": 2,
+        "key": "new",
+        "colorName": "blue-gray"
+      }
+    },
+    "components": [],
+    "timeoriginalestimate": null,
+    "timetracking": {
+      "remainingEstimate": "3w 2d",
+      "timeSpent": "1d",
+      "remainingEstimateSeconds": 489600,
+      "timeSpentSeconds": 28800
+    },
+    "customfield_10720": null,
+    "customfield_10600": null,
+    "security": null,
+    "customfield_10008": null,
+    "aggregatetimeestimate": 489600,
+    "attachment": [
+      {
+        "id": "10000",
+        "filename": "03 - getting into action.mp3",
+        "author": {
+          "accountId": "{\"hash\":\"ZSiF2ksLmucJypprVlOuvn9YZPtcViktBHNWFxvBjco\"}",
+          "emailAddress": "{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"GItqpD0PrNe1WX8MpyKYmCPjh99MGEBG30ziv65GIuw\"}",
+          "active": true,
+          "timeZone": "America/New_York",
+          "accountType": "atlassian"
+        },
+        "created": "2023-06-09T12:31:44.105-0400",
+        "size": 2829492,
+        "mimeType": "audio/mpeg",
+        "content": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/attachment/content/10000"
+      }
+    ],
+    "summary": "worklog test",
+    "creator": {
+      "accountId": "{\"hash\":\"ZSiF2ksLmucJypprVlOuvn9YZPtcViktBHNWFxvBjco\"}",
+      "emailAddress": "{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"GItqpD0PrNe1WX8MpyKYmCPjh99MGEBG30ziv65GIuw\"}",
+      "active": true,
+      "timeZone": "America/New_York",
+      "accountType": "atlassian"
+    },
+    "subtasks": [],
+    "reporter": {
+      "accountId": "{\"hash\":\"ZSiF2ksLmucJypprVlOuvn9YZPtcViktBHNWFxvBjco\"}",
+      "emailAddress": "{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"GItqpD0PrNe1WX8MpyKYmCPjh99MGEBG30ziv65GIuw\"}",
+      "active": true,
+      "timeZone": "America/New_York",
+      "accountType": "atlassian"
+    },
+    "aggregateprogress": {
+      "progress": 28800,
+      "total": 518400,
+      "percent": 5
+    },
+    "customfield_10000": null,
+    "customfield_10001": null,
+    "customfield_10200": {
+      "hasEpicLinkFieldDependency": false,
+      "showField": false,
+      "nonEditableReason": {
+        "reason": "PLUGIN_LICENSE_ERROR",
+        "message": "The Parent Link is only available to Jira Premium users."
+      }
+    },
+    "customfield_10002": "0|i0003j:",
+    "customfield_10003": null,
+    "customfield_10004": null,
+    "customfield_10400": null,
+    "customfield_10710": null,
+    "environment": null,
+    "customfield_10711": null,
+    "customfield_10712": null,
+    "customfield_10713": null,
+    "customfield_10714": null,
+    "customfield_10715": null,
+    "duedate": null,
+    "customfield_10716": null,
+    "customfield_10717": null,
+    "customfield_10718": null,
+    "progress": {
+      "progress": 28800,
+      "total": 518400,
+      "percent": 5
+    },
+    "votes": {
+      "votes": 0,
+      "hasVoted": false
+    },
+    "customfield_10719": null,
+    "worklog": {
+      "startAt": 0,
+      "maxResults": 20,
+      "total": 1,
+      "worklogs": [
+        {
+          "author": {
+            "accountId": "{\"hash\":\"ZSiF2ksLmucJypprVlOuvn9YZPtcViktBHNWFxvBjco\"}",
+            "emailAddress": "{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"GItqpD0PrNe1WX8MpyKYmCPjh99MGEBG30ziv65GIuw\"}",
+            "active": true,
+            "timeZone": "America/New_York",
+            "accountType": "atlassian"
+          },
+          "updateAuthor": {
+            "accountId": "{\"hash\":\"ZSiF2ksLmucJypprVlOuvn9YZPtcViktBHNWFxvBjco\"}",
+            "emailAddress": "{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"GItqpD0PrNe1WX8MpyKYmCPjh99MGEBG30ziv65GIuw\"}",
+            "active": true,
+            "timeZone": "America/New_York",
+            "accountType": "atlassian"
+          },
+          "created": "2023-06-09T06:37:49.599-0400",
+          "updated": "2023-06-09T06:40:15.279-0400",
+          "started": "2023-06-08T22:37:40.109-0400",
+          "timeSpent": "1d",
+          "timeSpentSeconds": 28800,
+          "id": "10002",
+          "issueId": "10711"
+        }
+      ]
+    }
+  }
+}

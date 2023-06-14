@@ -48,6 +48,12 @@ public class PrebuiltSanitizerRules {
                             "includeInactiveUsers").stream())
             .collect(Collectors.toList());
 
+    private static final List<String> projectServerAllowedQueryParameters = Streams.concat(commonAllowedQueryParameters.stream(),
+                    Lists.newArrayList("expand",
+                            "includeArchived")
+                            .stream())
+            .collect(Collectors.toList());
+
     static final Endpoint ISSUE_SEARCH_V2 = Endpoint.builder()
             .pathTemplate("/ex/jira/{cloudId}/rest/api/2/search")
             .allowedQueryParams(issuesAllowedQueryParameters)
@@ -88,6 +94,44 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$.issues[*]..body..id")
                     .build())
             .responseSchema(jsonSchemaForQueryResult(true))
+            .build();
+
+    static final Endpoint ISSUE_V2 = Endpoint.builder()
+            .pathTemplate("/ex/jira/{cloudId}/rest/api/2/issue/{issueId}")
+            .allowedQueryParams(issuesAllowedQueryParameters)
+            .transform(Transform.Redact.builder()
+                    .jsonPath("$..description")
+                    .jsonPath("$..iconUrl")
+                    .jsonPath("$..name")
+                    .jsonPath("$..avatarUrls")
+                    .jsonPath("$.fields..self")
+                    .jsonPath("$..displayName")
+                    .jsonPath("$..body")
+                    .jsonPath("$..comment")
+                    .build())
+            .transform(Transform.Pseudonymize.builder()
+                    .jsonPath("$..accountId")
+                    .jsonPath("$..emailAddress")
+                    .build())
+            .build();
+
+    static final Endpoint ISSUE_V3 = Endpoint.builder()
+            .pathTemplate("/ex/jira/{cloudId}/rest/api/3/issue/{issueId}")
+            .allowedQueryParams(issuesAllowedQueryParameters)
+            .transform(Transform.Redact.builder()
+                    .jsonPath("$..description")
+                    .jsonPath("$..iconUrl")
+                    .jsonPath("$..name")
+                    .jsonPath("$..avatarUrls")
+                    .jsonPath("$.fields..self")
+                    .jsonPath("$..displayName")
+                    .jsonPath("$..comment")
+                    .build())
+            .transform(Transform.Pseudonymize.builder()
+                    .jsonPath("$..accountId")
+                    .jsonPath("$..emailAddress")
+                    .jsonPath("$..body..id")
+                    .build())
             .build();
 
     static final Endpoint SERVER_ISSUE_V2 = Endpoint.builder()
@@ -321,6 +365,28 @@ public class PrebuiltSanitizerRules {
                     .build())
             .build();
 
+    static final Endpoint PROJECTS_SERVER = Endpoint.builder()
+            .pathTemplate("/rest/api/{apiVersion}/project")
+            .allowedQueryParams(projectServerAllowedQueryParameters)
+            .transform(Transform.Redact.builder()
+                    .jsonPath("$..avatarUrls")
+                    .jsonPath("$..self")
+                    .jsonPath("$..displayName")
+                    .jsonPath("$..leadUserName")
+                    .jsonPath("$..description")
+                    .build())
+            .transform(Transform.Pseudonymize.builder()
+                    .jsonPath("$..lead..key")
+                    .jsonPath("$..lead..emailAddress")
+                    .jsonPath("$..assignee..key")
+                    .jsonPath("$..assignee..emailAddress")
+                    .jsonPath("$..realAssignee..key")
+                    .jsonPath("$..realAssignee..emailAddress")
+                    .jsonPath("$..user..key")
+                    .jsonPath("$..user..emailAddress")
+                    .build())
+            .build();
+
     @VisibleForTesting
     static final RESTRules JIRA_CLOUD = Rules2.builder()
             .endpoint(GROUP_BULK)
@@ -332,6 +398,8 @@ public class PrebuiltSanitizerRules {
             .endpoint(ISSUE_COMMENT_V3)
             .endpoint(ISSUE_WORKLOG_V2)
             .endpoint(ISSUE_WORKLOG_V3)
+            .endpoint(ISSUE_V2)
+            .endpoint(ISSUE_V3)
             .endpoint(USERS)
             .endpoint(PROJECTS)
             .build();
@@ -342,6 +410,7 @@ public class PrebuiltSanitizerRules {
             .endpoint(SERVER_ISSUE_COMMENT_V2)
             .endpoint(SERVER_ISSUE_WORKLOG_V2)
             .endpoint(SERVER_ISSUE_V2)
+            .endpoint(PROJECTS_SERVER)
             .build();
 
     public static final Map<String, RESTRules> RULES_MAP =

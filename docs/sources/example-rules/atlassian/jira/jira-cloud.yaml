@@ -927,6 +927,50 @@ endpoints:
           - "$.worklogs[*]..emailAddress"
           - "$.worklogs[*]..comment..id"
         encoding: "JSON"
+  - pathTemplate: "/ex/jira/{cloudId}/rest/api/2/issue/{issueId}"
+    allowedQueryParams:
+      - "startAt"
+      - "maxResults"
+      - "jql"
+      - "fields"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..description"
+          - "$..iconUrl"
+          - "$..name"
+          - "$..avatarUrls"
+          - "$.fields..self"
+          - "$..displayName"
+          - "$..body"
+          - "$..comment"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..accountId"
+          - "$..emailAddress"
+        encoding: "JSON"
+  - pathTemplate: "/ex/jira/{cloudId}/rest/api/3/issue/{issueId}"
+    allowedQueryParams:
+      - "startAt"
+      - "maxResults"
+      - "jql"
+      - "fields"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..description"
+          - "$..iconUrl"
+          - "$..name"
+          - "$..avatarUrls"
+          - "$.fields..self"
+          - "$..displayName"
+          - "$..comment"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..accountId"
+          - "$..emailAddress"
+          - "$..body..id"
+        encoding: "JSON"
   - pathTemplate: "/ex/jira/{cloudId}/rest/api/{apiVersion}/users"
     allowedQueryParams:
       - "startAt"

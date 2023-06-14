@@ -471,3 +471,28 @@ endpoints:
           - "$..updateAuthor..key"
           - "$..updateAuthor..emailAddress"
         encoding: "JSON"
+  - pathTemplate: "/rest/api/{apiVersion}/project"
+    allowedQueryParams:
+      - "startAt"
+      - "maxResults"
+      - "expand"
+      - "includeArchived"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..avatarUrls"
+          - "$..self"
+          - "$..displayName"
+          - "$..leadUserName"
+          - "$..description"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..lead..key"
+          - "$..lead..emailAddress"
+          - "$..assignee..key"
+          - "$..assignee..emailAddress"
+          - "$..realAssignee..key"
+          - "$..realAssignee..emailAddress"
+          - "$..user..key"
+          - "$..user..emailAddress"
+        encoding: "JSON"
