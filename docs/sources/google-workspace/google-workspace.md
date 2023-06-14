@@ -27,7 +27,7 @@ requires [Super Admin](https://support.google.com/a/answer/2405986?hl=en&fl=1) r
 organization may have a Custom Role with sufficient privileges.
 
 
-## Provisioning API clients Without Terraform
+## Provisioning API clients without Terraform
 
 Instructions for how to set up Google Workspace without Terraform:
 
