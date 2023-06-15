@@ -54,6 +54,13 @@ public class PrebuiltSanitizerRules {
                             .stream())
             .collect(Collectors.toList());
 
+    private static final List<String> userServerAllowedQueryParameters = Streams.concat(commonAllowedQueryParameters.stream(),
+                    Lists.newArrayList("username",
+                                    "includeActive",
+                                    "includeInactive")
+                            .stream())
+            .collect(Collectors.toList());
+
     static final Endpoint ISSUE_SEARCH_V2 = Endpoint.builder()
             .pathTemplate("/ex/jira/{cloudId}/rest/api/2/search")
             .allowedQueryParams(issuesAllowedQueryParameters)
@@ -309,6 +316,21 @@ public class PrebuiltSanitizerRules {
                     .build())
             .build();
 
+    static final Endpoint SERVER_USERS = Endpoint.builder()
+            .pathTemplate("/rest/api/{apiVersion}/user/search")
+            .allowedQueryParams(userServerAllowedQueryParameters)
+            .transform(Transform.Redact.builder()
+                    .jsonPath("$..self")
+                    .jsonPath("$..avatarUrls")
+                    .jsonPath("$..displayName")
+                    .jsonPath("$..name")
+                    .build())
+            .transform(Transform.Pseudonymize.builder()
+                    .jsonPath("$..key")
+                    .jsonPath("$..emailAddress")
+                    .build())
+            .build();
+
     static final Endpoint USERS = Endpoint.builder()
             .pathTemplate("/ex/jira/{cloudId}/rest/api/{apiVersion}/users")
             .allowedQueryParams(commonAllowedQueryParameters)
@@ -365,7 +387,7 @@ public class PrebuiltSanitizerRules {
                     .build())
             .build();
 
-    static final Endpoint PROJECTS_SERVER = Endpoint.builder()
+    static final Endpoint SERVER_PROJECTS = Endpoint.builder()
             .pathTemplate("/rest/api/{apiVersion}/project")
             .allowedQueryParams(projectServerAllowedQueryParameters)
             .transform(Transform.Redact.builder()
@@ -410,7 +432,8 @@ public class PrebuiltSanitizerRules {
             .endpoint(SERVER_ISSUE_COMMENT_V2)
             .endpoint(SERVER_ISSUE_WORKLOG_V2)
             .endpoint(SERVER_ISSUE_V2)
-            .endpoint(PROJECTS_SERVER)
+            .endpoint(SERVER_PROJECTS)
+            .endpoint(SERVER_USERS)
             .build();
 
     public static final Map<String, RESTRules> RULES_MAP =

@@ -496,3 +496,22 @@ endpoints:
           - "$..user..key"
           - "$..user..emailAddress"
         encoding: "JSON"
+  - pathTemplate: "/rest/api/{apiVersion}/user/search"
+    allowedQueryParams:
+      - "startAt"
+      - "maxResults"
+      - "username"
+      - "includeActive"
+      - "includeInactive"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..self"
+          - "$..avatarUrls"
+          - "$..displayName"
+          - "$..name"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..key"
+          - "$..emailAddress"
+        encoding: "JSON"
