@@ -13,12 +13,6 @@ variable "aws_assume_role_arn" {
   default     = ""
 }
 
-variable "aws_region" {
-  type        = string
-  default     = "us-east-1"
-  description = "default region in which to provision your AWS infra"
-}
-
 variable "aws_ssm_param_root_path" {
   type        = string
   description = "root to path under which SSM parameters created by this module will be created"
