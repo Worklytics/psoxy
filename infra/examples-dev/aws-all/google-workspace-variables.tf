@@ -1,7 +1,6 @@
-variable "gcp_project_id" {
+variable "google_workspace_gcp_project_id" {
   type        = string
-  description = "string ID of GCP project that will host psoxy instance; must exist. Can leave null if not using GCP/Google Workspace."
-  default     = null
+  description = "string ID of GCP project that will host oauth clients for Google Workspace API connectors; must exist"
 }
 
 variable "google_workspace_example_user" {
