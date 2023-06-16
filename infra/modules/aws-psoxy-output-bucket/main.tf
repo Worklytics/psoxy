@@ -1,7 +1,15 @@
+module "env_id" {
+  source = "../env-id"
+
+  environment_name          = var.environment_name
+  supported_word_delimiters = ["-"]
+  preferred_word_delimiter  = "-"
+}
+
 
 resource "aws_s3_bucket" "output" {
   # note: this ends up with a long UTC time-stamp + random number appended to it to form the bucket name
-  bucket_prefix = "psoxy-${var.instance_id}-"
+  bucket_prefix = "${module.env_id.id}-${var.instance_id}-"
 
   lifecycle {
     ignore_changes = [
@@ -32,7 +40,7 @@ resource "aws_s3_bucket_public_access_block" "sanitized" {
 
 # proxy's lambda needs to WRITE to the output bucket
 resource "aws_iam_policy" "sanitized_bucket_write_policy" {
-  name        = "BucketWrite_${aws_s3_bucket.output.id}"
+  name        = "${module.env_id.id}_BucketWrite_${aws_s3_bucket.output.id}"
   description = "Allow principal to write to bucket: ${aws_s3_bucket.output.id}"
 
   policy = jsonencode(
@@ -64,7 +72,7 @@ resource "aws_iam_role_policy_attachment" "write_policy_for_sanitized_bucket" {
 
 # proxy caller (data consumer) needs to read (both get and list objects) from the output bucket
 resource "aws_iam_policy" "sanitized_bucket_read" {
-  name        = "BucketRead_${aws_s3_bucket.output.id}"
+  name        = "${module.env_id.id}_BucketRead_${aws_s3_bucket.output.id}"
   description = "Allow to read content from bucket: ${aws_s3_bucket.output.id}"
 
   policy = jsonencode(

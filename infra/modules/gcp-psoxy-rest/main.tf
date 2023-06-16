@@ -173,7 +173,7 @@ EOT
 }
 
 resource "local_file" "test_script" {
-  filename        = "test-${var.instance_id}.sh"
+  filename        = "test-${trimprefix(var.instance_id, var.environment_id_prefix)}.sh"
   file_permission = "0770"
   content         = <<EOT
 #!/bin/bash
@@ -196,6 +196,10 @@ resource "local_file" "review" {
 
 output "instance_id" {
   value = var.instance_id
+}
+
+output "service_account_email" {
+  value = google_cloudfunctions_function.function.service_account_email
 }
 
 output "cloud_function_name" {

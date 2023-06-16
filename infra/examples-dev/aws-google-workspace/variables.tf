@@ -85,6 +85,11 @@ variable "environment_name" {
   type        = string
   description = "qualifier to append to name of project that will host your psoxy instance"
   default     = ""
+
+  validation {
+    condition     = !can(regex("^(?i)(aws|ssm)", var.environment_name))
+    error_message = "The `environment_name` cannot start with 'aws' or 'ssm', as this will name your AWS resources with prefixes that displease the AMZN overlords."
+  }
 }
 
 variable "connector_display_name_suffix" {

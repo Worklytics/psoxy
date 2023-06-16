@@ -5,6 +5,8 @@
 
 locals {
 
+  google_workspace_example_admin = try(coalesce(var.google_workspace_example_admin, var.google_workspace_example_user), null)
+
   google_workspace_sources = {
     # GDirectory connections are a PRE-REQ for gmail, gdrive, and gcal connections. remove only
     # if you plan to directly connect Directory to worklytics (without proxy). such a scenario is
@@ -38,7 +40,7 @@ locals {
         "/admin/directory/v1/customer/my_customer/roles?maxResults=10",
         "/admin/directory/v1/customer/my_customer/roleassignments?maxResults=10"
       ]
-      example_api_calls_user_to_impersonate : var.google_workspace_example_admin
+      example_api_calls_user_to_impersonate : local.google_workspace_example_admin
     },
     "gcal" : {
       source_kind : "gcal",
@@ -97,7 +99,7 @@ locals {
       example_api_calls : [
         "/admin/reports/v1/activity/users/all/applications/chat?maxResults=10"
       ]
-      example_api_calls_user_to_impersonate : var.google_workspace_example_user
+      example_api_calls_user_to_impersonate : local.google_workspace_example_admin
     },
     "google-meet" : {
       source_kind : "google-meet"
@@ -116,7 +118,7 @@ locals {
       example_api_calls : [
         "/admin/reports/v1/activity/users/all/applications/meet?maxResults=10"
       ]
-      example_api_calls_user_to_impersonate : var.google_workspace_example_user
+      example_api_calls_user_to_impersonate : local.google_workspace_example_admin
     },
     "gdrive" : {
       source_kind : "gdrive",
@@ -140,14 +142,14 @@ locals {
     }
   }
 
-  jira_cloud_id = coalesce(var.jira_cloud_id, "YOUR_JIRA_CLOUD_ID")
+
+  jira_cloud_id         = coalesce(var.jira_cloud_id, "YOUR_JIRA_CLOUD_ID")
   example_jira_issue_id = coalesce(var.example_jira_issue_id, "YOUR_JIRA_EXAMPLE_ISSUE_ID")
 
   # Microsoft 365 sources; add/remove as you wish
   # See https://docs.microsoft.com/en-us/graph/permissions-reference for all the permissions available in AAD Graph API
   msft_365_connectors = {
     "azure-ad" : {
-      enabled : true,
       worklytics_connector_id : "azure-ad-psoxy",
       source_kind : "azure-ad",
       display_name : "Azure Directory"
@@ -174,7 +176,6 @@ locals {
       ]
     },
     "outlook-cal" : {
-      enabled : true,
       source_kind : "outlook-cal",
       worklytics_connector_id : "outlook-cal-psoxy",
       display_name : "Outlook Calendar"
@@ -204,7 +205,6 @@ locals {
       ]
     },
     "outlook-mail" : {
-      enabled : true,
       source_kind : "outlook-mail"
       worklytics_connector_id : "outlook-mail-psoxy",
       display_name : "Outlook Mail"
@@ -402,6 +402,7 @@ EOT
         { name : "CLIENT_ID", writable : false },
         { name : "ACCOUNT_ID", writable : false },
         { name : "ACCESS_TOKEN", writable : true },
+        { name : "OAUTH_REFRESH_TOKEN", writable : true, lockable : true }, # q: needed? per logic as of 9 June 2023, would be created
       ],
       environment_variables : {
         USE_SHARED_TOKEN : "TRUE"
@@ -557,6 +558,7 @@ EOT
       secured_variables : [
         { name : "ACCESS_TOKEN", writable : true },
         { name : "REFRESH_TOKEN", writable : true },
+        { name : "OAUTH_REFRESH_TOKEN", writable : true, lockable : true },
         { name : "CLIENT_ID", writable : false },
         { name : "CLIENT_SECRET", writable : false }
       ],

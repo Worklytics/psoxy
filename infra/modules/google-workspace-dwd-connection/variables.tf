@@ -3,6 +3,12 @@ variable "project_id" {
   description = "ID of the GCP project in which to provision the connector"
 }
 
+variable "instance_id" {
+  type        = string
+  description = "identifier that uniquely identifies this connector instance within environment"
+  default     = null
+}
+
 variable "connector_service_account_id" {
   type        = string
   description = "string id to give Service Account that personifies connector"
