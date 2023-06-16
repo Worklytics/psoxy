@@ -7,12 +7,6 @@ variable "aws_account_id" {
   }
 }
 
-variable "aws_assume_role_arn" {
-  type        = string
-  description = "if provided, arn of role Terraform should assume for test commands"
-  default     = ""
-}
-
 variable "aws_ssm_param_root_path" {
   type        = string
   description = "root to path under which SSM parameters created by this module will be created"

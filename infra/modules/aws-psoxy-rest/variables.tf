@@ -63,9 +63,11 @@ variable "reserved_concurrent_executions" {
   default     = null # meaning no reserved concurrency
 }
 
+# TODO: remove after 0.4.x
 variable "aws_assume_role_arn" {
   type        = string
-  description = "arn of role used to test the lambda"
+  description = "IGNORED; arn of role used to test the lambda"
+  default     = null
 }
 
 variable "source_kind" {

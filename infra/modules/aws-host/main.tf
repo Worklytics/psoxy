@@ -72,7 +72,6 @@ module "api_connector" {
   path_to_function_zip            = module.psoxy.path_to_deployment_jar
   function_zip_hash               = module.psoxy.deployment_package_hash
   api_caller_role_arn             = module.psoxy.api_caller_role_arn
-  aws_assume_role_arn             = var.aws_assume_role_arn
   example_api_calls               = each.value.example_api_calls
   aws_account_id                  = var.aws_account_id
   region                          = data.aws_region.current.id
@@ -111,7 +110,6 @@ module "bulk_connector" {
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-bulk?ref=v0.4.25"
 
   aws_account_id                   = var.aws_account_id
-  aws_assume_role_arn              = var.aws_assume_role_arn
   provision_iam_policy_for_testing = var.provision_testing_infra
   aws_role_to_assume_when_testing  = var.provision_testing_infra ? module.psoxy.api_caller_role_arn : null
   environment_name                 = var.environment_name

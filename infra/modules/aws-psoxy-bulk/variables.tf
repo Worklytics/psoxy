@@ -33,11 +33,14 @@ variable "aws_account_id" {
   }
 }
 
+# TODO: remove after 0.4.x
 variable "aws_assume_role_arn" {
   type        = string
-  description = "arn of role used to test the lambda"
+  description = "IGNORED; arn of role used to test the lambda"
+  default     = null
 }
 
+# TODO: remove after 0.4.x
 variable "aws_region" {
   type        = string
   default     = "us-east-1"
