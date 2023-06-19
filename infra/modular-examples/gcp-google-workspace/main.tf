@@ -162,17 +162,11 @@ module "worklytics-psoxy-connection" {
 # BEGIN LONG ACCESS AUTH CONNECTORS
 locals {
   long_access_parameters = { for entry in module.worklytics_connector_specs.enabled_oauth_secrets_to_create : "${entry.connector_name}.${entry.secret_name}" => entry }
-  env_vars_for_locker = distinct(flatten([
-    for k, v in module.worklytics_connector_specs.enabled_oauth_long_access_connectors : [
-      for env_var in v.environment_variables : {
-        connector_name = k
-        env_var_name   = "OAUTH_REFRESH_TOKEN"
-      } if try(v.environment_variables.USE_SHARED_TOKEN, null) != null
-    ] if try(v.environment_variables, null) != null
-  ]))
-  env_vars_for_locker_parameters = { for entry in local.env_vars_for_locker : "${entry.connector_name}.${entry.env_var_name}" => entry }
+  env_vars_for_locker_parameters = { for entry in module.worklytics_connector_specs.enabled_lockable_oauth_secrets_to_create :
+  "${entry.connector_name}.${entry.secret_name}" => entry
+  }
   long_access_parameters_by_connector = { for k, spec in module.worklytics_connector_specs.enabled_oauth_long_access_connectors :
-    k => [for secret in spec.secured_variables : "${k}.${secret.name}"]
+  k => [for secret in spec.secured_variables : "${k}.${secret.name}"]
   }
 }
 
@@ -201,7 +195,7 @@ module "psoxy-instance-secret-locker" {
   source = "../../modules/gcp-instance-secret-locker"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-instance-secret-locker?ref=v0.4.24"
 
-  secret_name           = "PSOXY_${upper(replace(each.value.connector_name, "-", "_"))}_${upper(each.value.env_var_name)}"
+  secret_id           =  module.connector-oauth[each.key].secret_id
   project_id            = var.gcp_project_id
   service_account_email = google_service_account.long_auth_connector_sa[each.value.connector_name].email
   updater_role_id       = module.psoxy-gcp.psoxy_instance_secret_locker_role_id
@@ -218,7 +212,7 @@ module "long-auth-token-secret-fill-instructions" {
 }
 
 module "source_token_external_todo" {
-  for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors_todos
+    for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors_todos
 
   source = "../../modules/source-token-external-todo"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/source-token-external-todo?ref=v0.4.25"

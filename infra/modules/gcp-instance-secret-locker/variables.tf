@@ -8,16 +8,9 @@ variable "service_account_email" {
   description = "email of the service account that the cloud function will run as"
 }
 
-variable "path_prefix" {
+variable "secret_id" {
   type        = string
-  description = "A prefix to add to the secret path."
-  default     = ""
-}
-
-variable "secret_name" {
-  type        = string
-  description = "name of cloud function"
-  default     = "OAUTH_REFRESH_TOKEN"
+  description = "id of the secret"
 }
 
 variable "updater_role_id" {
