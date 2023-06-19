@@ -125,7 +125,7 @@ endpoints:
                               hierarchyLevel:
                                 type: "integer"
                   timespent:
-                    type: "string"
+                    type: "integer"
                   watches:
                     type: "object"
                     properties:
@@ -528,7 +528,7 @@ endpoints:
                               hierarchyLevel:
                                 type: "integer"
                   timespent:
-                    type: "string"
+                    type: "integer"
                   watches:
                     type: "object"
                     properties:
@@ -948,6 +948,7 @@ endpoints:
           - "$..comment"
           - "$..attachment[*]..filename"
           - "$..attachment[*]..content"
+          - "$..summary"
       - !<pseudonymize>
         jsonPaths:
           - "$..accountId"
@@ -971,6 +972,7 @@ endpoints:
           - "$..comment"
           - "$..attachment[*]..filename"
           - "$..attachment[*]..content"
+          - "$..summary"
       - !<pseudonymize>
         jsonPaths:
           - "$..accountId"

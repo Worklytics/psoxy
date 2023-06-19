@@ -98,7 +98,7 @@ endpoints:
                               hierarchyLevel:
                                 type: "integer"
                   timespent:
-                    type: "string"
+                    type: "integer"
                   watches:
                     type: "object"
                     properties:
@@ -465,6 +465,9 @@ endpoints:
           - "$..to"
           - "$..fromString"
           - "$..toString"
+          - "$..attachment[*]..filename"
+          - "$..attachment[*]..content"
+          - "$..summary"
       - !<pseudonymize>
         jsonPaths:
           - "$..author..key"
