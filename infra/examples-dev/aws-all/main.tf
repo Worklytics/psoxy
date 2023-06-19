@@ -103,6 +103,7 @@ module "psoxy" {
   bulk_input_expiration_days     = var.bulk_input_expiration_days
   api_connectors                 = local.api_connectors
   bulk_connectors                = local.bulk_connectors
+  custom_bulk_connector_rules    = var.custom_bulk_connector_rules
   todo_step                      = max(module.worklytics_connectors.next_todo_step, module.worklytics_connectors_google_workspace.next_todo_step, module.worklytics_connectors_msft_365.next_todo_step)
 }
 

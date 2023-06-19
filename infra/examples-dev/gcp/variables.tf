@@ -153,6 +153,20 @@ variable "custom_bulk_connectors" {
   }
 }
 
+variable "custom_bulk_connector_rules" {
+  type        = map(object({
+    pseudonymFormat       = optional(string, "URL_SAFE_TOKEN")
+    columnsToRedact       = optional(list(string))
+    columnsToInclude      = optional(list(string))
+    columnsToPseudonymize = optional(list(string))
+    columnsToDuplicate    = optional(map(string))
+    columnsToRename       = optional(map(string))
+  }))
+
+  description = "map of connector id --> rules object"
+  default     = {}
+}
+
 variable "salesforce_domain" {
   type        = string
   description = "Domain of the Salesforce to connect to (only required if using Salesforce connector). To find your My Domain URL, from Setup, in the Quick Find box, enter My Domain, and then select My Domain"

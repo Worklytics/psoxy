@@ -107,6 +107,13 @@ variable "api_connectors" {
   description = "map of API connectors to provision"
 }
 
+# q: better to flatten this into connectors themselves?
+variable "custom_api_connector_rules" {
+  type        = map(string)
+  description = "map of connector id --> YAML file with custom rules"
+  default     = {}
+}
+
 variable "bulk_connectors" {
   type = map(object({
     source_kind = string
@@ -143,12 +150,20 @@ variable "bulk_sanitized_expiration_days" {
   default     = 720
 }
 
-# q: better to flatten this into connectors themselves?
-variable "custom_api_connector_rules" {
-  type        = map(string)
-  description = "map of connector id --> YAML file with custom rules"
+variable "custom_bulk_connector_rules" {
+  type        = map(object({
+    pseudonymFormat       = optional(string, "URL_SAFE_TOKEN")
+    columnsToRedact       = optional(list(string))
+    columnsToInclude      = optional(list(string))
+    columnsToPseudonymize = optional(list(string))
+    columnsToDuplicate    = optional(map(string))
+    columnsToRename       = optional(map(string))
+  }))
+
+  description = "map of connector id --> rules object"
   default     = {}
 }
+
 
 # build lookup tables to JOIN data you receive back from Worklytics with your original data.
 #   - `join_key_column` should be the column you expect to JOIN on, usually 'employee_id'
