@@ -103,9 +103,23 @@ public class JiraServerTests extends JavaRulesTestBaseCase {
         );
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"2", "latest"})
+    void issue(String version) {
+        String jsonString = asJson(exampleDirectoryPath, "server_issue.json");
+
+        String endpoint = String.format("https://myjiraserver.com/rest/api/%s/issue/ISSUE&startAt=50", version);
+
+        String sanitized = this.sanitize(endpoint, jsonString);
+
+        assertPseudonymized(sanitized, "JIRAUSER10000");
+        assertPseudonymized(sanitized, "fake@contoso.com");
+    }
+
     @Override
     public Stream<InvocationExample> getExamples() {
         return Stream.of(
+                InvocationExample.of("https://myjiraserver.com/rest/api/2/issue/ISSUE&startAt=50", "server_issue.json"),
                 InvocationExample.of("https://myjiraserver.com/rest/api/2/search?jql=something&startAt=50", "server_issues_by_jql_v2.json"),
                 InvocationExample.of("https://myjiraserver.com/rest/api/latest/search?jql=something&startAt=50", "server_issues_by_jql_v2.json"),
                 InvocationExample.of("https://myjiraserver.com/rest/api/2/issue/fake/comment?&startAt=50", "server_issue_comment_v2.json"),

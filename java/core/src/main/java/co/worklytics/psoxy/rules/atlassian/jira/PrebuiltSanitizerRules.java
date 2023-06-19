@@ -174,10 +174,14 @@ public class PrebuiltSanitizerRules {
             .transform(Transform.Pseudonymize.builder()
                     .jsonPath("$..author..key")
                     .jsonPath("$..author..emailAddress")
+                    .jsonPath("$..creator..key")
+                    .jsonPath("$..creator..emailAddress")
+                    .jsonPath("$..reporter..key")
+                    .jsonPath("$..reporter..emailAddress")
                     .jsonPath("$..updateAuthor..key")
                     .jsonPath("$..updateAuthor..emailAddress")
                     .build())
-            .responseSchema(jsonSchemaForQueryResult(false))
+            .responseSchema(jsonSchemaForIssue(false))
             .build();
 
     static final Endpoint SERVER_ISSUE_SEARCH_V2 = Endpoint.builder()
@@ -488,6 +492,12 @@ public class PrebuiltSanitizerRules {
                     put("id", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                     put("self", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                     put("fields", jsonSchemaForIssueFields(isCloudVersion));
+                    put("changelog",
+                            JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                                    .type("object")
+                                    .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{
+                                        put("histories", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("array").items(jsonSchemaForIssueChangelog(isCloudVersion)).build());
+                                    }}).build());
                 }})
                 .build();
     }
@@ -602,12 +612,36 @@ public class PrebuiltSanitizerRules {
                     put("issueId", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                     put("id", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                     put("author", jsonSchemaForUser(isCloudVersion));
+                    put("created", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                     put("updateAuthor", jsonSchemaForUser(isCloudVersion));
                     put("updated", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                     put("visibility", jsonSchemaForVisibility());
                     put("started", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                     put("timeSpent", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                     put("timeSpentSeconds", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("integer").build());
+                }})
+                .build();
+    }
+
+    private static JsonSchemaFilterUtils.JsonSchemaFilter jsonSchemaForIssueChangelog(boolean isCloudVersion) {
+        return JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                .type("object")
+                // Using LinkedHashMap to keep the order to support same
+                // YAML serialization result
+                .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{
+                    put("id", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
+                    put("author", jsonSchemaForUser(isCloudVersion));
+                    put("created", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
+                    put("items", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                            .type("array")
+                            .items(JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                                    .type("object")
+                                    .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{
+                                        put("field", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
+                                        put("fieldtype", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
+                                    }})
+                                    .build())
+                            .build());
                 }})
                 .build();
     }
