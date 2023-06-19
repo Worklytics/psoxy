@@ -123,6 +123,7 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..accountId")
                     .jsonPath("$..emailAddress")
                     .build())
+            .responseSchema(jsonSchemaForIssue(false))
             .build();
 
     static final Endpoint ISSUE_V3 = Endpoint.builder()
@@ -145,6 +146,7 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..emailAddress")
                     .jsonPath("$..body..id")
                     .build())
+            .responseSchema(jsonSchemaForIssue(false))
             .build();
 
     static final Endpoint SERVER_ISSUE_V2 = Endpoint.builder()
@@ -175,6 +177,7 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..updateAuthor..key")
                     .jsonPath("$..updateAuthor..emailAddress")
                     .build())
+            .responseSchema(jsonSchemaForQueryResult(false))
             .build();
 
     static final Endpoint SERVER_ISSUE_SEARCH_V2 = Endpoint.builder()
@@ -508,13 +511,14 @@ public class PrebuiltSanitizerRules {
                             }}).build());
                     put("attachment", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                             .type("array")
-                            .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
-                                put("id", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("integer").build());
-                                put("author", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("object").items(jsonSchemaForUser(isCloudVersion)).build());
-                                put("created", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-                                put("size", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("integer").build());
-
-                            }}).build());
+                            .items(JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                                    .type("object")
+                                    .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
+                                        put("id", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("integer").build());
+                                        put("author", jsonSchemaForUser(isCloudVersion));
+                                        put("created", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
+                                        put("size", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("integer").build());
+                                    }}).build()).build());
                     // In docs appears as "sub-tasks", but in actual response is "subtasks"
                     put("sub-tasks", jsonSchemaForLinks());
                     put("project", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
@@ -548,17 +552,9 @@ public class PrebuiltSanitizerRules {
                             }}).build());
                     put("issuelinks", jsonSchemaForLinks());
                     put("worklog", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
-                            .type("array")
+                            .type("object")
                             .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{
-                                put("issueId", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-                                put("id", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-                                put("author", jsonSchemaForUser(isCloudVersion));
-                                put("updateAuthor", jsonSchemaForUser(isCloudVersion));
-                                put("updated", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-                                put("visibility", jsonSchemaForVisibility());
-                                put("started", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-                                put("timeSpent", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-                                put("timeSpentSeconds", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("integer").build());
+                                put("worklogs", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("array").items(jsonSchemaForIssueWorklog(isCloudVersion)).build());
                             }}).build());
                     put("updated", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("integer").build());
                     put("timeTracking", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
@@ -593,6 +589,25 @@ public class PrebuiltSanitizerRules {
                                 put("hasVoted", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("boolean").build());
                             }}).build());
 
+                }})
+                .build();
+    }
+
+    private static JsonSchemaFilterUtils.JsonSchemaFilter jsonSchemaForIssueWorklog(boolean isCloudVersion) {
+        return JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                .type("object")
+                // Using LinkedHashMap to keep the order to support same
+                // YAML serialization result
+                .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{
+                    put("issueId", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
+                    put("id", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
+                    put("author", jsonSchemaForUser(isCloudVersion));
+                    put("updateAuthor", jsonSchemaForUser(isCloudVersion));
+                    put("updated", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
+                    put("visibility", jsonSchemaForVisibility());
+                    put("started", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
+                    put("timeSpent", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
+                    put("timeSpentSeconds", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("integer").build());
                 }})
                 .build();
     }
