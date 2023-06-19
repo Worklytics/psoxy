@@ -11,6 +11,8 @@ module "generic" {
   psoxy_endpoint_url     = var.psoxy_endpoint_url
   todo_step              = var.todo_step
   display_name           = var.display_name
+  worklytics_host        = var.worklytics_host
+
   settings_to_provide = {
     "AWS Psoxy Role ARN" = var.aws_role_arn,
     "AWS Psoxy Region"   = var.aws_region

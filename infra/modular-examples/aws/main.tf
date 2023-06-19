@@ -509,6 +509,7 @@ module "worklytics_psoxy_connection" {
   psoxy_endpoint_url = module.aws_psoxy_long_auth_connectors[each.key].endpoint_url
   display_name       = try(each.value.worklytics_connector_name, "${each.value.display_name} via Psoxy")
   todo_step          = module.aws_psoxy_long_auth_connectors[each.key].next_todo_step
+  worklytics_host    = var.worklytics_host
 
   settings_to_provide = {
     "AWS Psoxy Region"   = data.aws_region.current.id,
@@ -591,6 +592,7 @@ module "psoxy_bulk_to_worklytics" {
   connector_id           = try(each.value.worklytics_connector_id, "")
   display_name           = try(each.value.worklytics_connector_name, "${each.value.source_kind} via Psoxy")
   todo_step              = module.psoxy_bulk[each.key].next_todo_step
+  worklytics_host        = var.worklytics_host
 
   settings_to_provide = merge({
     "AWS Psoxy Region"   = data.aws_region.current.id,

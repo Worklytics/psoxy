@@ -67,6 +67,7 @@ module "psoxy" {
   install_test_tool              = var.install_test_tool
   provision_testing_infra        = var.provision_testing_infra
   force_bundle                   = var.force_bundle
+  worklytics_host                = var.worklytics_host
   caller_gcp_service_account_ids = var.caller_gcp_service_account_ids
   caller_aws_arns                = var.caller_aws_arns
   enabled_connectors             = var.enabled_connectors

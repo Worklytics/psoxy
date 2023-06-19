@@ -31,6 +31,12 @@ variable "config_parameter_prefix" {
   default     = ""
 }
 
+variable "worklytics_host" {
+  type        = string
+  description = "host of worklytics instance where tenant resides. (e.g. intl.worklytics.co for prod; but may differ for dev/staging)"
+  default     = "intl.worklytics.co"
+}
+
 variable "worklytics_sa_emails" {
   type        = list(string)
   description = "service accounts for your organization's Worklytics instances (list supported for test/dev scenarios)"

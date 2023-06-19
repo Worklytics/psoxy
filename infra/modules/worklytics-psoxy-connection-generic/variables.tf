@@ -23,6 +23,12 @@ variable "psoxy_host_platform_id" {
   }
 }
 
+variable "worklytics_host" {
+  type        = string
+  description = "host of worklytics instance where tenant resides. (e.g. intl.worklytics.co for prod; but may differ for dev/staging)"
+  default     = "intl.worklytics.co"
+}
+
 variable "display_name" {
   type        = string
   description = "display name of connector in Worklytics"

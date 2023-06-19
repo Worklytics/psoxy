@@ -5,7 +5,7 @@ locals {
 
   # build TODO
 
-  worklytics_add_connection_url = "https://intl.worklytics.co/analytics/connect/"
+  worklytics_add_connection_url = "https://${var.worklytics_host}/analytics/connect/"
 
   # map of Worklytics setting key --> display name (matches `settings_to_provide` keys)
   autofilled_settings = {
