@@ -436,6 +436,7 @@ endpoints:
           - "$.worklogs[*]..displayName"
           - "$.worklogs[*]..name"
           - "$.worklogs[*]..comment"
+          - "$.worklogs[*]..summary"
       - !<pseudonymize>
         jsonPaths:
           - "$.worklogs[*]..key"
@@ -510,6 +511,8 @@ endpoints:
           - "$..avatarUrls"
           - "$..displayName"
           - "$..name"
+          - "$..attachment[*]..filename"
+          - "$..attachment[*]..content"
       - !<pseudonymize>
         jsonPaths:
           - "$..key"

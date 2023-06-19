@@ -904,6 +904,7 @@ endpoints:
           - "$.worklogs[*].updateAuthor..self"
           - "$.worklogs[*]..displayName"
           - "$.worklogs[*]..comment"
+          - "$.worklogs[*]..summary"
       - !<pseudonymize>
         jsonPaths:
           - "$.worklogs[*]..accountId"
@@ -921,6 +922,7 @@ endpoints:
           - "$.worklogs[*].updateAuthor..self"
           - "$.worklogs[*]..displayName"
           - "$.worklogs[*]..text"
+          - "$.worklogs[*]..summary"
       - !<pseudonymize>
         jsonPaths:
           - "$.worklogs[*]..accountId"
@@ -944,6 +946,8 @@ endpoints:
           - "$..displayName"
           - "$..body"
           - "$..comment"
+          - "$..attachment[*]..filename"
+          - "$..attachment[*]..content"
       - !<pseudonymize>
         jsonPaths:
           - "$..accountId"
@@ -965,6 +969,8 @@ endpoints:
           - "$.fields..self"
           - "$..displayName"
           - "$..comment"
+          - "$..attachment[*]..filename"
+          - "$..attachment[*]..content"
       - !<pseudonymize>
         jsonPaths:
           - "$..accountId"
