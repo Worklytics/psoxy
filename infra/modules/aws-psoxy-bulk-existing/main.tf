@@ -5,7 +5,8 @@
 module "psoxy_lambda" {
   source = "../aws-psoxy-lambda"
 
-  function_name                   = "psoxy-${var.instance_id}"
+  environment_name                = var.environment_name
+  instance_id                     = var.instance_id
   handler_class                   = "co.worklytics.psoxy.S3Handler"
   timeout_seconds                 = 600 # 10 minutes
   memory_size_mb                  = var.memory_size_mb
@@ -66,7 +67,7 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
 
 # the lambda function needs to get single objects from the input bucket
 resource "aws_iam_policy" "input_bucket_getObject_policy" {
-  name        = "BucketGetObject_${data.aws_s3_bucket.input.id}_${module.psoxy_lambda.function_name}"
+  name        = "${data.aws_s3_bucket.input.id}_BucketGetObject_${module.psoxy_lambda.function_name}"
   description = "Allow principal to read from input bucket: ${data.aws_s3_bucket.input.id}"
 
   policy = jsonencode(
@@ -126,7 +127,7 @@ module "sanitized_output_bucket" {
 
 
 resource "aws_ssm_parameter" "rules" {
-  name           = "PSOXY_${upper(replace(var.instance_id, "-", "_"))}_RULES"
+  name           = "${var.path_to_instance_ssm_parameters}RULES"
   type           = "String"
   description    = "Rules for transformation of files. NOTE: any 'RULES' env var will override this value"
   insecure_value = yamlencode(var.rules) # NOTE: insecure_value just means shown in Terraform output

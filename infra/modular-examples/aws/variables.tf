@@ -74,6 +74,17 @@ variable "environment_name" {
   default     = ""
 }
 
+variable "aws_environment_name" {
+  type        = string
+  description = "qualifier to distinguish resources created by this terraform configuration from other psoxy Terraform deployments, (eg, 'prod', 'dev', etc)"
+  default     = "psoxy"
+
+  validation {
+    condition     = !can(regex("^(?i)(aws|ssm)", var.aws_environment_name))
+    error_message = "The `environment_name` cannot start with 'aws' or 'ssm', as this will name your AWS resources with prefixes that displease the AMZN overlords."
+  }
+}
+
 variable "connector_display_name_suffix" {
   type        = string
   description = "suffix to append to display_names of connector SAs; helpful to distinguish between various ones in testing/dev scenarios"

@@ -112,7 +112,7 @@ variable "bulk_sanitized_expiration_days" {
   default     = 1805 # 5 years; intent is 'forever', but some upperbound in case bucket is forgotten
 }
 
-variable "custom_rest_rules" {
+variable "custom_api_connector_rules" {
   type        = map(string)
   description = "map of connector id --> YAML file with custom rules"
   default     = {}
@@ -174,6 +174,12 @@ variable "msft_owners_email" {
   type        = set(string)
   description = "(Only if config includes MSFT connectors). Optionally, set of emails to apply as owners on AAD apps apart from current logged user"
   default     = []
+}
+
+variable "example_msft_user_guid" {
+  type        = string
+  description = "(Only if config includes MSFT connectors). example MSFT user guid (uuid) for test API calls (OPTIONAL)"
+  default     = "{EXAMPLE_MSFT_USER_GUID}"
 }
 
 variable "jira_server_url" {

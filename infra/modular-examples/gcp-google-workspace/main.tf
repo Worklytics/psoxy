@@ -163,12 +163,12 @@ module "worklytics-psoxy-connection" {
 locals {
   long_access_parameters = { for entry in module.worklytics_connector_specs.enabled_oauth_secrets_to_create : "${entry.connector_name}.${entry.secret_name}" => entry }
   env_vars_for_locker = distinct(flatten([
-  for k, v in module.worklytics_connector_specs.enabled_oauth_long_access_connectors : [
-  for env_var in v.environment_variables : {
-    connector_name = k
-    env_var_name    = "OAUTH_REFRESH_TOKEN"
-  } if try(v.environment_variables.USE_SHARED_TOKEN, null) != null
-  ] if try(v.environment_variables, null) != null
+    for k, v in module.worklytics_connector_specs.enabled_oauth_long_access_connectors : [
+      for env_var in v.environment_variables : {
+        connector_name = k
+        env_var_name   = "OAUTH_REFRESH_TOKEN"
+      } if try(v.environment_variables.USE_SHARED_TOKEN, null) != null
+    ] if try(v.environment_variables, null) != null
   ]))
   env_vars_for_locker_parameters = { for entry in local.env_vars_for_locker : "${entry.connector_name}.${entry.env_var_name}" => entry }
   long_access_parameters_by_connector = { for k, spec in module.worklytics_connector_specs.enabled_oauth_long_access_connectors :

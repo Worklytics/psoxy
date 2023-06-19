@@ -14,9 +14,10 @@ terraform {
 }
 
 locals {
-  base_config_path = "${var.psoxy_base_dir}configs/"
-  host_platform_id = "AWS"
-  ssm_key_ids      = var.aws_ssm_key_id == null ? {} : { 0 : var.aws_ssm_key_id }
+  base_config_path     = "${var.psoxy_base_dir}configs/"
+  host_platform_id     = "AWS"
+  ssm_key_ids          = var.aws_ssm_key_id == null ? {} : { 0 : var.aws_ssm_key_id }
+  function_name_prefix = "psoxy-"
 }
 
 data "azuread_client_config" "current" {}
@@ -46,6 +47,7 @@ module "psoxy-aws" {
   force_bundle                   = var.force_bundle
   caller_aws_arns                = var.caller_aws_arns
   caller_gcp_service_account_ids = var.caller_gcp_service_account_ids
+  api_function_name_prefix       = local.function_name_prefix
 }
 
 module "global_secrets" {
@@ -137,7 +139,8 @@ module "psoxy-msft-connector" {
   source = "../../modules/aws-psoxy-rest"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-rest?ref=v0.4.25"
 
-  function_name                   = "psoxy-${each.key}"
+  environment_name                = var.environment_name
+  instance_id                     = each.key
   source_kind                     = each.value.source_kind
   path_to_config                  = "${var.psoxy_base_dir}/configs/${each.value.source_kind}.yaml"
   path_to_function_zip            = module.psoxy-aws.path_to_deployment_jar
@@ -254,7 +257,8 @@ module "aws-psoxy-long-auth-connectors" {
   source = "../../modules/aws-psoxy-rest"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-rest?ref=v0.4.25"
 
-  function_name                         = "psoxy-${each.key}"
+  environment_name                      = var.environment_name
+  instance_id                           = each.key
   path_to_function_zip                  = module.psoxy-aws.path_to_deployment_jar
   function_zip_hash                     = module.psoxy-aws.deployment_package_hash
   path_to_config                        = null
@@ -355,6 +359,7 @@ module "psoxy-bulk" {
   source = "../../modules/aws-psoxy-bulk"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-bulk?ref=v0.4.25"
 
+  environment_name                 = var.environment_name
   aws_account_id                   = var.aws_account_id
   aws_assume_role_arn              = var.aws_assume_role_arn
   aws_role_to_assume_when_testing  = var.provision_testing_infra ? module.psoxy-aws.api_caller_role_arn : null
@@ -419,6 +424,7 @@ module "lookup_output" {
   source = "../../modules/aws-psoxy-output-bucket"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-output-bucket?ref=v0.4.25"
 
+  environment_name              = var.environment_name
   instance_id                   = each.key
   iam_role_for_lambda_name      = module.psoxy-bulk[each.value.input_connector_id].instance_role_name
   sanitized_accessor_role_names = each.value.sanitized_accessor_role_names

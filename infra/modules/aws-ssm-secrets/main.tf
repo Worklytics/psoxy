@@ -18,7 +18,7 @@ resource "aws_ssm_parameter" "secret" {
   name        = "${local.path_prefix}${each.key}"
   type        = "SecureString"
   description = each.value.description
-  value       = sensitive(each.value.value)
+  value       = sensitive(coalesce(each.value.value, "fill me"))
   key_id      = coalesce(var.kms_key_id, "alias/aws/ssm")
 
   lifecycle {

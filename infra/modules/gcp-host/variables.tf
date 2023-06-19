@@ -85,22 +85,44 @@ variable "replica_regions" {
   ]
 }
 
-variable "enabled_connectors" {
-  type        = list(string)
-  description = "list of ids of connectors to enabled; see modules/worklytics-connector-specs"
+variable "api_connectors" {
+  type = map(object({
+    source_kind                           = string
+    source_auth_strategy                  = string
+    target_host                           = string
+    oauth_scopes_needed                   = optional(list(string), [])
+    environment_variables                 = optional(map(string), {})
+    example_api_calls                     = optional(list(string), [])
+    example_api_calls_user_to_impersonate = optional(string)
+    secured_variables = optional(list(object({
+      name     = string
+      value    = optional(string)
+      writable = optional(bool, false)
+      lockable = optional(bool, false)
+      })),
+    [])
 
-  default = [
-    "asana",
-    "gdirectory",
-    "gcal",
-    "gmail",
-    "gdrive",
-    "google-chat",
-    "google-meet",
-    "hris",
-    "slack-discovery-api",
-    "zoom",
-  ]
+  }))
+
+  description = "map of API connectors to provision"
+}
+
+variable "bulk_connectors" {
+  type = map(object({
+    source_kind = string
+    rules = object({
+      pseudonymFormat       = optional(string)
+      columnsToRedact       = optional(list(string), [])
+      columnsToInclude      = optional(list(string), null)
+      columnsToPseudonymize = optional(list(string), [])
+      columnsToDuplicate    = optional(map(string), {})
+      columnsToRename       = optional(map(string), {})
+    })
+    example_file        = optional(string)
+    settings_to_provide = optional(map(string), {})
+  }))
+
+  description = "map of connector id  => bulk connectors to provision"
 }
 
 variable "non_production_connectors" {
@@ -121,80 +143,11 @@ variable "bulk_sanitized_expiration_days" {
   default     = 720
 }
 
-variable "custom_rest_rules" {
+# q: better to flatten this into connectors themselves?
+variable "custom_api_connector_rules" {
   type        = map(string)
   description = "map of connector id --> YAML file with custom rules"
   default     = {}
-}
-
-variable "custom_bulk_connectors" {
-  type = map(object({
-    source_kind = string
-    rules = object({
-      pseudonymFormat       = optional(string)
-      columnsToRedact       = optional(list(string))
-      columnsToInclude      = optional(list(string))
-      columnsToPseudonymize = optional(list(string))
-      columnsToDuplicate    = optional(map(string))
-      columnsToRename       = optional(map(string))
-    })
-    settings_to_provide = optional(map(string), {})
-  }))
-  description = "specs of custom bulk connectors to create"
-
-  default = {
-    #    "custom-survey" = {
-    #      source_kind = "survey"
-    #      rules       = {
-    #        columnsToRedact       = []
-    #        columnsToPseudonymize = [
-    #          "employee_id", # primary key
-    #          # "employee_email", # if exists
-    #        ]
-    #      }
-    #    }
-  }
-}
-
-variable "google_workspace_example_user" {
-  type        = string
-  description = "User to impersonate for Google Workspace API calls (null for none)"
-}
-
-variable "google_workspace_example_admin" {
-  type        = string
-  description = "user to impersonate for Google Workspace API calls (null for value of `google_workspace_example_user`)"
-  default     = null # will failover to user
-}
-
-variable "msft_tenant_id" {
-  type        = string
-  description = "ID of Microsoft tenant to connect to (req'd only if config includes MSFT connectors)"
-  default     = ""
-}
-
-variable "salesforce_domain" {
-  type        = string
-  description = "Domain of the Salesforce to connect to (only required if using Salesforce connector). To find your My Domain URL, from Setup, in the Quick Find box, enter My Domain, and then select My Domain"
-  default     = ""
-}
-
-variable "jira_server_url" {
-  type        = string
-  default     = null
-  description = "(Only required if using Jira Server connector) URL of the Jira server (ex: myjiraserver.mycompany.com)"
-}
-
-variable "jira_cloud_id" {
-  type        = string
-  default     = null
-  description = "(Only required if using Jira Cloud connector) Cloud id of the Jira Cloud to connect to (ex: 1324a887-45db-1bf4-1e99-ef0ff456d421)."
-}
-
-variable "example_jira_issue_id" {
-  type        = string
-  default     = null
-  description = "(Only required if using Jira Server/Cloud connector) Id of an issue for only to be used as part of example calls for Jira (ex: ETV-12)"
 }
 
 # build lookup tables to JOIN data you receive back from Worklytics with your original data.
@@ -225,4 +178,10 @@ variable "lookup_tables" {
     #      ],
     #  }
   }
+}
+
+variable "todo_step" {
+  type        = number
+  description = "of all todos, where does this one logically fall in sequence"
+  default     = 2
 }

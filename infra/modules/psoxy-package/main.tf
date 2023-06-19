@@ -23,7 +23,9 @@ data "external" "deployment_package" {
 }
 
 output "deployment_package_hash" {
-  value = filebase64sha256(data.external.deployment_package.result.path_to_deployment_jar)
+  # when `terraform console` used in directory, this output is evaluated before the build script has
+  # run so the file doesn't exist yet
+  value = try(filebase64sha256(data.external.deployment_package.result.path_to_deployment_jar), "unknown")
 }
 
 output "path_to_deployment_jar" {

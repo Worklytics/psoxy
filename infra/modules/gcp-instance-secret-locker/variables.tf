@@ -17,7 +17,7 @@ variable "path_prefix" {
 variable "secret_name" {
   type        = string
   description = "name of cloud function"
-  default = "OAUTH_REFRESH_TOKEN"
+  default     = "OAUTH_REFRESH_TOKEN"
 }
 
 variable "updater_role_id" {

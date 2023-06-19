@@ -95,6 +95,13 @@ if test $GOOGLE_PROVIDER_COUNT -ne 0; then
     GOOGLE_WORKSPACE_EXAMPLE_USER=$(gcloud config get account)
     printf "google_workspace_example_user=\"${GOOGLE_WORKSPACE_EXAMPLE_USER}\"\n\n" >> $TFVARS_FILE
     printf "\tgoogle_workspace_example_user=${BLUE}\"${GOOGLE_WORKSPACE_EXAMPLE_USER}\"${NC}\n"
+
+        # example admin for Google Workspace
+    printf "# Google Workspace example admin \n" >> $TFVARS_FILE
+    printf "#  - this is used to aid testing of Google Workspace connectors against a real account, in cases where an admin is explicitly required\n" >> $TFVARS_FILE
+    GOOGLE_WORKSPACE_EXAMPLE_USER=$(gcloud config get account)
+    printf "google_workspace_example_admin=\"${GOOGLE_WORKSPACE_EXAMPLE_USER}\"\n\n" >> $TFVARS_FILE
+    printf "\tgoogle_workspace_example_admin=${BLUE}\"${GOOGLE_WORKSPACE_EXAMPLE_USER}\"${NC}\n"
   else
     printf "${RED}gcloud not available${NC}\n"
   fi

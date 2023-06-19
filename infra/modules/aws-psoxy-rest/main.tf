@@ -30,7 +30,8 @@ locals {
 module "psoxy_lambda" {
   source = "../aws-psoxy-lambda"
 
-  function_name                   = var.function_name
+  environment_name                = var.environment_name
+  instance_id                     = var.instance_id
   handler_class                   = "co.worklytics.psoxy.Handler"
   path_to_function_zip            = var.path_to_function_zip
   function_zip_hash               = var.function_zip_hash
@@ -52,7 +53,7 @@ module "psoxy_lambda" {
 }
 
 resource "aws_lambda_function_url" "lambda_url" {
-  function_name      = var.function_name # woudld 'module.psoxy_lambda.function_name' avoid explicit dependency??
+  function_name      = module.psoxy_lambda.function_name
   authorization_type = "AWS_IAM"
 
   cors {
@@ -74,7 +75,7 @@ locals {
   proxy_endpoint_url  = substr(aws_lambda_function_url.lambda_url.function_url, 0, length(aws_lambda_function_url.lambda_url.function_url) - 1)
   impersonation_param = var.example_api_calls_user_to_impersonate == null ? "" : " -i \"${var.example_api_calls_user_to_impersonate}\""
   command_npm_install = "npm --prefix ${var.path_to_repo_root}tools/psoxy-test install"
-  command_cli_call    = "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js -r \"${local.arn_for_test_calls}\" -re \"${data.aws_region.current.id}\""
+  command_cli_call    = "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js -re \"${data.aws_region.current.id}\""
   command_test_calls = [for path in var.example_api_calls :
     "${local.command_cli_call} -u \"${local.proxy_endpoint_url}${path}\"${local.impersonation_param}"
   ]
@@ -87,11 +88,11 @@ locals {
 
   todo_content = <<EOT
 
-## Testing ${var.function_name}
+## Testing ${var.instance_id}
 
 Review the deployed function in AWS console:
 
-- https://console.aws.amazon.com/lambda/home?region=${data.aws_region.current.id}#/functions/${var.function_name}?tab=monitoring
+- https://console.aws.amazon.com/lambda/home?region=${data.aws_region.current.id}#/functions/${module.psoxy_lambda.function_name}?tab=monitoring
 
 We provide some Node.js scripts to simplify testing your proxy deployment. To be able run test
 commands below, you will need
@@ -150,17 +151,17 @@ EOT
 }
 
 resource "local_file" "todo" {
-  filename = "TODO ${var.todo_step} - test ${var.function_name}.md"
+  filename = "TODO ${var.todo_step} - test ${var.instance_id}.md"
   content  = local.todo_content
 }
 
 resource "local_file" "test_script" {
-  filename        = "test-${var.function_name}.sh"
+  filename        = "test-${var.instance_id}.sh"
   file_permission = "0770"
   content         = <<EOT
 #!/bin/bash
 API_PATH=$${1:-${try(var.example_api_calls[0], "")}}
-echo "Quick test of ${var.function_name} ..."
+echo "Quick test of ${module.psoxy_lambda.function_name} ..."
 
 ${local.command_cli_call} -u "${local.proxy_endpoint_url}" --health-check
 
