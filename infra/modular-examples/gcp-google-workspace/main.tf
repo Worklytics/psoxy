@@ -189,16 +189,13 @@ module "connector-oauth" {
   service_account_email = google_service_account.long_auth_connector_sa[each.value.connector_name].email
 }
 
-module "psoxy-instance-secret-locker" {
+resource "google_secret_manager_secret_iam_member" "grant_sa_updater_on_secret" {
   for_each = local.env_vars_for_locker_parameters
 
-  source = "../../modules/gcp-instance-secret-locker"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-instance-secret-locker?ref=v0.4.24"
-
-  secret_id           =  module.connector-oauth[each.key].secret_id
-  project_id            = var.gcp_project_id
-  service_account_email = google_service_account.long_auth_connector_sa[each.value.connector_name].email
-  updater_role_id       = module.psoxy-gcp.psoxy_instance_secret_locker_role_id
+  member    = "serviceAccount:${google_service_account.long_auth_connector_sa[each.value.connector_name].email}"
+  role      = module.psoxy-gcp.psoxy_instance_secret_locker_role_id
+  project   = var.gcp_project_id
+  secret_id = module.connector-oauth[each.key].secret_id
 }
 
 module "long-auth-token-secret-fill-instructions" {
