@@ -9,10 +9,15 @@ locals {
   # numbers and - (inside)
   # see https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/google_service_account
 
-  trimmed_id = trim(var.connector_service_account_id, " ")
+  # trim trailing replaces, replace enclosed spaces with dashes, and everything as lower case
+  trimmed_id = lower(replace(trim(var.connector_service_account_id, " "), " ", "-"))
 
-  # TODO: md5 here is 32 chars of hex, so some risk of collision by truncating, while could use
-  sa_account_id = length(local.trimmed_id) < 31 ? lower(replace(local.trimmed_id, " ", "-")) : substr(md5(local.trimmed_id), 0, 30)
+  # pad if too short
+  padded_id = length(local.trimmed_id) < 6 ? "psoxy-${local.trimmed_id}" : local.trimmed_id
+
+  # hash if too long
+  # TODO: md5 here is 32 chars of hex, so some risk of collision by truncating
+  sa_account_id = length(local.padded_id) < 31 ? local.padded_id : substr(md5(local.padded_id), 0, 30)
 
   instance_id = coalesce(var.instance_id, var.display_name)
 }
