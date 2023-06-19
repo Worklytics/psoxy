@@ -20,7 +20,7 @@
           "active":true,
           "key":"{\"scope\":\"jira\",\"hash\":\"dTt6XU3azhfCv8SDSPUz94vdMTlhhBlbhRTPT262SLM\"}"
         },
-        "timespent":null,
+        "timespent":0,
         "created":"2023-05-19T17:13:53.000+0000",
         "project":{
           "id":"10000",

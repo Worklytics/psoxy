@@ -44,7 +44,7 @@
           "accountType":"atlassian",
           "active":true
         },
-        "timespent":null,
+        "timespent":0,
         "created":"2022-03-02T09:00:35.261-0500",
         "project":{
           "simplified":false,

@@ -50,7 +50,7 @@ public class PrebuiltSanitizerRules {
 
     private static final List<String> projectServerAllowedQueryParameters = Streams.concat(commonAllowedQueryParameters.stream(),
                     Lists.newArrayList("expand",
-                            "includeArchived")
+                                    "includeArchived")
                             .stream())
             .collect(Collectors.toList());
 
@@ -117,6 +117,7 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..comment")
                     .jsonPath("$..attachment[*]..filename")
                     .jsonPath("$..attachment[*]..content")
+                    .jsonPath("$..summary")
                     .build())
             .transform(Transform.Pseudonymize.builder()
                     .jsonPath("$..accountId")
@@ -137,6 +138,7 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..comment")
                     .jsonPath("$..attachment[*]..filename")
                     .jsonPath("$..attachment[*]..content")
+                    .jsonPath("$..summary")
                     .build())
             .transform(Transform.Pseudonymize.builder()
                     .jsonPath("$..accountId")
@@ -163,6 +165,9 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..to")
                     .jsonPath("$..fromString")
                     .jsonPath("$..toString")
+                    .jsonPath("$..attachment[*]..filename")
+                    .jsonPath("$..attachment[*]..content")
+                    .jsonPath("$..summary")
                     .build())
             .transform(Transform.Pseudonymize.builder()
                     .jsonPath("$..author..key")
@@ -473,7 +478,6 @@ public class PrebuiltSanitizerRules {
                 .build();
     }
 
-
     private static JsonSchemaFilterUtils.JsonSchemaFilter jsonSchemaForIssue(boolean isCloudVersion) {
         return JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                 .type("object")
@@ -493,7 +497,7 @@ public class PrebuiltSanitizerRules {
                     put("statuscategorychangedate", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                     put("issuetype", jsonSchemaForIssueType());
                     put("parent", jsonSchemaForIssueParent());
-                    put("timespent", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
+                    put("timespent", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("integer").build());
                     // In doc appears as "watchers", but in actual response is "watches"
                     put("watches", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                             .type("object")
