@@ -1,7 +1,7 @@
 locals {
-  config_parameter_prefix               = var.config_parameter_prefix == "" ? "${var.environment_id}_" : var.config_parameter_prefix
-  environment_id_prefix                 = "${var.environment_id}${length(var.environment_id) > 0 ? "-" : ""}"
-  environment_id_display_name_qualifier = length(var.environment_id) > 0 ? " ${var.environment_id} " : ""
+  config_parameter_prefix               = var.config_parameter_prefix == "" ? "${var.environment_name}_" : var.config_parameter_prefix
+  environment_id_prefix                 = "${var.environment_name}${length(var.environment_name) > 0 ? "-" : ""}"
+  environment_id_display_name_qualifier = length(var.environment_name) > 0 ? " ${var.environment_name} " : ""
 }
 
 module "psoxy" {

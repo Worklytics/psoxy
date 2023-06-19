@@ -48,15 +48,6 @@ module "worklytics_connectors" {
   salesforce_domain     = var.salesforce_domain
 }
 
-module "worklytics_connectors_google_workspace" {
-  source = "../../modules/worklytics-connectors-google-workspace"
-
-  enabled_connectors             = var.enabled_connectors
-  gcp_project_id                 = var.gcp_project_id
-  google_workspace_example_user  = var.google_workspace_example_user
-  google_workspace_example_admin = var.google_workspace_example_admin
-}
-
 locals {
   api_connectors = merge(
     module.worklytics_connectors.enabled_api_connectors,
@@ -73,7 +64,7 @@ module "psoxy" {
   source = "../../modules/gcp-host"
 
   gcp_project_id                 = var.gcp_project_id
-  environment_id                 = var.environment_id
+  environment_name               = var.environment_name
   config_parameter_prefix        = var.config_parameter_prefix
   worklytics_sa_emails           = var.worklytics_sa_emails
   psoxy_base_dir                 = var.psoxy_base_dir

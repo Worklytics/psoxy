@@ -3,13 +3,13 @@ variable "gcp_project_id" {
   description = "id of GCP project that will host psoxy instance"
 }
 
-variable "environment_id" {
+variable "environment_name" {
   type        = string
   description = "Qualifier to append to names/ids of resources for psoxy. If not empty, A-Za-z0-9 or - characters only. Max length 10. Useful to distinguish between deployments into same GCP project."
   default     = "psoxy"
 
   validation {
-    condition     = can(regex("^[A-z0-9\\-]{0,20}$", var.environment_id))
+    condition     = can(regex("^[A-z0-9\\-]{0,20}$", var.environment_name))
     error_message = "The environment_name must be 0-20 chars of [A-z0-9\\-] only."
   }
 }

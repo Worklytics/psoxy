@@ -76,10 +76,15 @@ if test $GOOGLE_PROVIDER_COUNT -ne 0; then
 
     # project
     printf "# GCP project in which required infrastructure will be provisioned\n" >> $TFVARS_FILE
-    printf "#  - if you're deploying to AWS and not connecting to Google Workspace data sources, you can omit this value\n" >> $TFVARS_FILE
+    printf "#  - if you're deploying to AWS, you can omit this value\n" >> $TFVARS_FILE
     GCP_PROJECT_ID=$(gcloud config get project)
     printf "gcp_project_id=\"${GCP_PROJECT_ID}\"\n\n" >> $TFVARS_FILE
     printf "\tgcp_project_id=${BLUE}\"${GCP_PROJECT_ID}\"${NC}\n"
+
+    printf "# GCP project in which OAuth clients for Google Workspace connectors will be provisioned\n" >> $TFVARS_FILE
+    printf "#  - if you're not connecting to Google Workspace data sources, you can omit this value\n" >> $TFVARS_FILE
+    printf "google_workspace_gcp_project_id=\"${GCP_PROJECT_ID}\"\n\n" >> $TFVARS_FILE
+    printf "\tgoogle_workspace_gcp_project_id=${BLUE}\"${GCP_PROJECT_ID}\"${NC}\n"
 
     # tenant SA emails
     printf "# GCP service account emails in the list below will be allowed to invoke your proxy instances\n" >> $TFVARS_FILE
