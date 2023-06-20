@@ -123,7 +123,7 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..accountId")
                     .jsonPath("$..emailAddress")
                     .build())
-            .responseSchema(jsonSchemaForIssue(false))
+            .responseSchema(jsonSchemaForIssue(true))
             .build();
 
     static final Endpoint ISSUE_V3 = Endpoint.builder()
@@ -146,7 +146,7 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..emailAddress")
                     .jsonPath("$..body..id")
                     .build())
-            .responseSchema(jsonSchemaForIssue(false))
+            .responseSchema(jsonSchemaForIssue(true))
             .build();
 
     static final Endpoint SERVER_ISSUE_V2 = Endpoint.builder()
