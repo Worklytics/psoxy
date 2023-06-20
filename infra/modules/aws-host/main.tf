@@ -119,7 +119,7 @@ module "bulk_connector" {
   path_to_function_zip             = module.psoxy.path_to_deployment_jar
   function_zip_hash                = module.psoxy.deployment_package_hash
   psoxy_base_dir                   = var.psoxy_base_dir
-  rules                            = each.value.rules
+  rules                            = try(var.custom_bulk_connector_rules[each.key], each.value.rules)
   global_parameter_arns            = module.global_secrets.secret_arns
   path_to_instance_ssm_parameters  = "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_"
   ssm_kms_key_ids                  = local.ssm_key_ids

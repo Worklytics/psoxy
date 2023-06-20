@@ -175,6 +175,20 @@ variable "bulk_sanitized_expiration_days" {
   default     = 720
 }
 
+variable "custom_bulk_connector_rules" {
+  type        = map(object({
+    pseudonymFormat       = optional(string, "URL_SAFE_TOKEN")
+    columnsToRedact       = optional(list(string))
+    columnsToInclude      = optional(list(string))
+    columnsToPseudonymize = optional(list(string))
+    columnsToDuplicate    = optional(map(string))
+    columnsToRename       = optional(map(string))
+  }))
+
+  description = "map of connector id --> rules object"
+  default     = {}
+}
+
 variable "lookup_table_builders" {
   type = map(object({
     input_connector_id            = string
