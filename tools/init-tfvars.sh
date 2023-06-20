@@ -112,6 +112,10 @@ if test $GOOGLE_PROVIDER_COUNT -ne 0; then
   fi
 else
   printf "No Google provider found in top-level of Terraform configuration. No gcloud initialization required.\n"
+
+  if [ -f google-workspace.tf ]; then
+    printf "If you don't intend to use Google Workspace as a data source in future, you can ${BLUE}rm google-workspace.tf${NC} and ${BLUE}rm google-workspace-variables.tf${NC} \n"
+  fi
 fi
 
 # Microsoft 365
@@ -137,6 +141,10 @@ if test $AZUREAD_PROVIDER_COUNT -ne 0; then
   fi
 else
   printf "No Azure provider found in top-level of Terraform configuration. No Azure CLI initialization needed.\n"
+
+  if [ -f msft-365.tf ]; then
+    printf "If you don't intend to use Microsoft 365 as a data source in future, you can ${BLUE}rm msft-365.tf${NC} and ${BLUE}rm msft-365-variables.tf${NC} \n"
+  fi
 fi
 
 # initialize `enabled_connectors` variable
