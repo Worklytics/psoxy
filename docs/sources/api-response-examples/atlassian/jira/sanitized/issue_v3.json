@@ -14,6 +14,7 @@
       "watchCount": 1
     },
     "creator": {
+      "accountId": "{\"hash\":\"ZSiF2ksLmucJypprVlOuvn9YZPtcViktBHNWFxvBjco\"}",
       "emailAddress": "{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"GItqpD0PrNe1WX8MpyKYmCPjh99MGEBG30ziv65GIuw\"}",
       "accountType": "atlassian",
       "active": true,
@@ -27,6 +28,7 @@
       "projectTypeKey": "software"
     },
     "reporter": {
+      "accountId": "{\"hash\":\"ZSiF2ksLmucJypprVlOuvn9YZPtcViktBHNWFxvBjco\"}",
       "emailAddress": "{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"GItqpD0PrNe1WX8MpyKYmCPjh99MGEBG30ziv65GIuw\"}",
       "accountType": "atlassian",
       "active": true,
@@ -40,6 +42,7 @@
       {
         "size": 2829492,
         "author": {
+          "accountId": "{\"hash\":\"ZSiF2ksLmucJypprVlOuvn9YZPtcViktBHNWFxvBjco\"}",
           "emailAddress": "{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"GItqpD0PrNe1WX8MpyKYmCPjh99MGEBG30ziv65GIuw\"}",
           "accountType": "atlassian",
           "active": true,
@@ -68,6 +71,7 @@
           "timeSpentSeconds": 28800,
           "timeSpent": "1d",
           "author": {
+            "accountId": "{\"hash\":\"ZSiF2ksLmucJypprVlOuvn9YZPtcViktBHNWFxvBjco\"}",
             "emailAddress": "{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"GItqpD0PrNe1WX8MpyKYmCPjh99MGEBG30ziv65GIuw\"}",
             "accountType": "atlassian",
             "active": true,
@@ -75,6 +79,7 @@
           },
           "created": "2023-06-09T06:37:49.599-0400",
           "updateAuthor": {
+            "accountId": "{\"hash\":\"ZSiF2ksLmucJypprVlOuvn9YZPtcViktBHNWFxvBjco\"}",
             "emailAddress": "{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"GItqpD0PrNe1WX8MpyKYmCPjh99MGEBG30ziv65GIuw\"}",
             "accountType": "atlassian",
             "active": true,
