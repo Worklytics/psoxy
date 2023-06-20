@@ -1,7 +1,9 @@
 # AWS - Getting Started with Cloud Shell
 
-**YMMV; we've found people often hit AWS's 1GB limit for cloud shell disk size. In such a scenario,
-use your local machine, or a VM/container elsewhere in AWS**
+**YMMV; as of June 2023, AWS's 1GB limit on cloud shell persistent storage is too low for real world
+proxy deployments, which typically require install gcloud CLI / Azure CLI to connect to sources**
+
+**So use use your local machine, or a VM/container elsewhere in AWS (EC2, AWS CLoud9, etc**
 
 1. clone the repo
 ```shell
