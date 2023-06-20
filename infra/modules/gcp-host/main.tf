@@ -95,7 +95,6 @@ module "api_connector" {
   for_each = var.api_connectors
 
   source = "../../modules/gcp-psoxy-rest"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-rest?ref=v0.4.25"
 
   project_id                            = var.gcp_project_id
   source_kind                           = each.value.source_kind
@@ -148,7 +147,6 @@ module "bulk_connector" {
   for_each = var.bulk_connectors
 
   source = "../../modules/gcp-psoxy-bulk"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-bulk?ref=v0.4.25"
 
   project_id                    = var.gcp_project_id
   environment_id_prefix         = local.environment_id_prefix
