@@ -524,7 +524,7 @@ public class PrebuiltSanitizerRules {
                             .items(JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                                     .type("object")
                                     .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
-                                        put("id", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("integer").build());
+                                        put("id", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                                         put("author", jsonSchemaForUser(isCloudVersion));
                                         put("created", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                                         put("size", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("integer").build());

@@ -152,7 +152,7 @@ endpoints:
                       type: "object"
                       properties:
                         id:
-                          type: "integer"
+                          type: "string"
                         author:
                           type: "object"
                           properties:
@@ -594,7 +594,7 @@ endpoints:
                       type: "object"
                       properties:
                         id:
-                          type: "integer"
+                          type: "string"
                         author:
                           type: "object"
                           properties:
@@ -1123,7 +1123,7 @@ endpoints:
                 type: "object"
                 properties:
                   id:
-                    type: "integer"
+                    type: "string"
                   author:
                     type: "object"
                     properties:
@@ -1556,7 +1556,7 @@ endpoints:
                 type: "object"
                 properties:
                   id:
-                    type: "integer"
+                    type: "string"
                   author:
                     type: "object"
                     properties:
