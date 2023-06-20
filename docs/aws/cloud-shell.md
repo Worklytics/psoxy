@@ -15,11 +15,6 @@ git clone https://github.com/Worklytics/psoxy.git
 # install Maven (and, via dependency, java)
 sudo yum -y install maven
 
-# install AWS Curl (used for testing)
-sudo yum -y install pip
-pip install awscurl
-
-
 # GCloud SDK (if using Google Workspace data sources)
 # The next line updates PATH for the Google Cloud SDK.
 if [ -f '/home/cloudshell-user/google-cloud-sdk/path.bash.inc' ]; then . '/home/cloudshell-user/google-cloud-sdk/path.bash.inc'; fi
@@ -53,3 +48,17 @@ https://docs.microsoft.com/en-us/cli/azure/install-azure-cli
 
 
 You should now be ready for the general instructions in the [README.md](../../README.md).
+
+
+## Other stuff
+
+If default NodeJS tooling doesn't work for you, legacy testing tools use python/awscurl, installed
+via pip. See example below:
+
+```shell
+
+# install AWS Curl (used for testing)
+sudo yum -y install pip
+pip install awscurl
+
+```
