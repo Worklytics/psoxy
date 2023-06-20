@@ -167,28 +167,11 @@ variable "custom_bulk_connector_rules" {
   default     = {}
 }
 
+
 variable "salesforce_domain" {
   type        = string
   description = "Domain of the Salesforce to connect to (only required if using Salesforce connector). To find your My Domain URL, from Setup, in the Quick Find box, enter My Domain, and then select My Domain"
   default     = ""
-}
-
-variable "msft_tenant_id" {
-  type        = string
-  description = "ID of Microsoft tenant to connect to (req'd only if config includes MSFT connectors)"
-  default     = ""
-}
-
-variable "msft_owners_email" {
-  type        = set(string)
-  description = "(Only if config includes MSFT connectors). Optionally, set of emails to apply as owners on AAD apps apart from current logged user"
-  default     = []
-}
-
-variable "example_msft_user_guid" {
-  type        = string
-  description = "(Only if config includes MSFT connectors). example MSFT user guid (uuid) for test API calls (OPTIONAL)"
-  default     = "{EXAMPLE_MSFT_USER_GUID}"
 }
 
 variable "jira_server_url" {
