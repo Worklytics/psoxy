@@ -38,10 +38,27 @@ public class PrebuiltSanitizerRules {
                             "fields").stream())
             .collect(Collectors.toList());
 
+    private static final List<String> issueAllowedQueryParameters = Streams.concat(commonAllowedQueryParameters.stream(),
+                    Lists.newArrayList("expand", "fields").stream())
+            .collect(Collectors.toList());
+
     private static final List<String> groupMemberAllowedQueryParameters = Streams.concat(commonAllowedQueryParameters.stream(),
                     Lists.newArrayList("groupId",
                             "groupName",
                             "includeInactiveUsers").stream())
+            .collect(Collectors.toList());
+
+    private static final List<String> projectServerAllowedQueryParameters = Streams.concat(commonAllowedQueryParameters.stream(),
+                    Lists.newArrayList("expand",
+                                    "includeArchived")
+                            .stream())
+            .collect(Collectors.toList());
+
+    private static final List<String> userServerAllowedQueryParameters = Streams.concat(commonAllowedQueryParameters.stream(),
+                    Lists.newArrayList("username",
+                                    "includeActive",
+                                    "includeInactive")
+                            .stream())
             .collect(Collectors.toList());
 
     static final Endpoint ISSUE_SEARCH_V2 = Endpoint.builder()
@@ -86,6 +103,87 @@ public class PrebuiltSanitizerRules {
             .responseSchema(jsonSchemaForQueryResult(true))
             .build();
 
+    static final Endpoint ISSUE_V2 = Endpoint.builder()
+            .pathTemplate("/ex/jira/{cloudId}/rest/api/2/issue/{issueId}")
+            .allowedQueryParams(issuesAllowedQueryParameters)
+            .transform(Transform.Redact.builder()
+                    .jsonPath("$..description")
+                    .jsonPath("$..iconUrl")
+                    .jsonPath("$..name")
+                    .jsonPath("$..avatarUrls")
+                    .jsonPath("$.fields..self")
+                    .jsonPath("$..displayName")
+                    .jsonPath("$..body")
+                    .jsonPath("$..comment")
+                    .jsonPath("$..attachment[*]..filename")
+                    .jsonPath("$..attachment[*]..content")
+                    .jsonPath("$..summary")
+                    .build())
+            .transform(Transform.Pseudonymize.builder()
+                    .jsonPath("$..accountId")
+                    .jsonPath("$..emailAddress")
+                    .build())
+            .responseSchema(jsonSchemaForIssue(true))
+            .build();
+
+    static final Endpoint ISSUE_V3 = Endpoint.builder()
+            .pathTemplate("/ex/jira/{cloudId}/rest/api/3/issue/{issueId}")
+            .allowedQueryParams(issuesAllowedQueryParameters)
+            .transform(Transform.Redact.builder()
+                    .jsonPath("$..description")
+                    .jsonPath("$..iconUrl")
+                    .jsonPath("$..name")
+                    .jsonPath("$..avatarUrls")
+                    .jsonPath("$.fields..self")
+                    .jsonPath("$..displayName")
+                    .jsonPath("$..comment")
+                    .jsonPath("$..attachment[*]..filename")
+                    .jsonPath("$..attachment[*]..content")
+                    .jsonPath("$..summary")
+                    .build())
+            .transform(Transform.Pseudonymize.builder()
+                    .jsonPath("$..accountId")
+                    .jsonPath("$..emailAddress")
+                    .jsonPath("$..body..id")
+                    .build())
+            .responseSchema(jsonSchemaForIssue(true))
+            .build();
+
+    static final Endpoint SERVER_ISSUE_V2 = Endpoint.builder()
+            .pathTemplate("/rest/api/{apiVersion}/issue/{issueId}")
+            .allowedQueryParams(issueAllowedQueryParameters)
+            .transform(Transform.Redact.builder()
+                    .jsonPath("$..self")
+                    .jsonPath("$..description")
+                    .jsonPath("$..iconUrl")
+                    .jsonPath("$..name")
+                    .jsonPath("$..avatarUrls")
+                    .jsonPath("$..displayName")
+                    .jsonPath("$..name")
+                    .jsonPath("$..body")
+                    .jsonPath("$..comment")
+                    .jsonPath("$..displayName")
+                    .jsonPath("$..from")
+                    .jsonPath("$..to")
+                    .jsonPath("$..fromString")
+                    .jsonPath("$..toString")
+                    .jsonPath("$..attachment[*]..filename")
+                    .jsonPath("$..attachment[*]..content")
+                    .jsonPath("$..summary")
+                    .build())
+            .transform(Transform.Pseudonymize.builder()
+                    .jsonPath("$..author..key")
+                    .jsonPath("$..author..emailAddress")
+                    .jsonPath("$..creator..key")
+                    .jsonPath("$..creator..emailAddress")
+                    .jsonPath("$..reporter..key")
+                    .jsonPath("$..reporter..emailAddress")
+                    .jsonPath("$..updateAuthor..key")
+                    .jsonPath("$..updateAuthor..emailAddress")
+                    .build())
+            .responseSchema(jsonSchemaForIssue(false))
+            .build();
+
     static final Endpoint SERVER_ISSUE_SEARCH_V2 = Endpoint.builder()
             .pathTemplate("/rest/api/{apiVersion}/search")
             .allowedQueryParams(issuesAllowedQueryParameters)
@@ -122,6 +220,8 @@ public class PrebuiltSanitizerRules {
             .transform(Transform.Pseudonymize.builder()
                     .jsonPath("$.values[*]..accountId")
                     .jsonPath("$.values[*]..emailAddress")
+                    .jsonPath("$.values[*]..tmpFromAccountId")
+                    .jsonPath("$.values[*]..tmpToAccountId")
                     .build())
             .build();
 
@@ -190,6 +290,7 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$.worklogs[*].updateAuthor..self")
                     .jsonPath("$.worklogs[*]..displayName")
                     .jsonPath("$.worklogs[*]..comment")
+                    .jsonPath("$.worklogs[*]..summary")
                     .build())
             .transform(Transform.Pseudonymize.builder()
                     .jsonPath("$.worklogs[*]..accountId")
@@ -206,7 +307,7 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$.worklogs[*].updateAuthor..self")
                     .jsonPath("$.worklogs[*]..displayName")
                     .jsonPath("$.worklogs[*]..text")
-
+                    .jsonPath("$.worklogs[*]..summary")
                     .build())
             .transform(Transform.Pseudonymize.builder()
                     .jsonPath("$.worklogs[*]..accountId")
@@ -225,10 +326,28 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$.worklogs[*]..displayName")
                     .jsonPath("$.worklogs[*]..name")
                     .jsonPath("$.worklogs[*]..comment")
+                    .jsonPath("$.worklogs[*]..summary")
                     .build())
             .transform(Transform.Pseudonymize.builder()
                     .jsonPath("$.worklogs[*]..key")
                     .jsonPath("$.worklogs[*]..emailAddress")
+                    .build())
+            .build();
+
+    static final Endpoint SERVER_USERS = Endpoint.builder()
+            .pathTemplate("/rest/api/{apiVersion}/user/search")
+            .allowedQueryParams(userServerAllowedQueryParameters)
+            .transform(Transform.Redact.builder()
+                    .jsonPath("$..self")
+                    .jsonPath("$..avatarUrls")
+                    .jsonPath("$..displayName")
+                    .jsonPath("$..name")
+                    .jsonPath("$..attachment[*]..filename")
+                    .jsonPath("$..attachment[*]..content")
+                    .build())
+            .transform(Transform.Pseudonymize.builder()
+                    .jsonPath("$..key")
+                    .jsonPath("$..emailAddress")
                     .build())
             .build();
 
@@ -288,6 +407,28 @@ public class PrebuiltSanitizerRules {
                     .build())
             .build();
 
+    static final Endpoint SERVER_PROJECTS = Endpoint.builder()
+            .pathTemplate("/rest/api/{apiVersion}/project")
+            .allowedQueryParams(projectServerAllowedQueryParameters)
+            .transform(Transform.Redact.builder()
+                    .jsonPath("$..avatarUrls")
+                    .jsonPath("$..self")
+                    .jsonPath("$..displayName")
+                    .jsonPath("$..leadUserName")
+                    .jsonPath("$..description")
+                    .build())
+            .transform(Transform.Pseudonymize.builder()
+                    .jsonPath("$..lead..key")
+                    .jsonPath("$..lead..emailAddress")
+                    .jsonPath("$..assignee..key")
+                    .jsonPath("$..assignee..emailAddress")
+                    .jsonPath("$..realAssignee..key")
+                    .jsonPath("$..realAssignee..emailAddress")
+                    .jsonPath("$..user..key")
+                    .jsonPath("$..user..emailAddress")
+                    .build())
+            .build();
+
     @VisibleForTesting
     static final RESTRules JIRA_CLOUD = Rules2.builder()
             .endpoint(GROUP_BULK)
@@ -299,6 +440,8 @@ public class PrebuiltSanitizerRules {
             .endpoint(ISSUE_COMMENT_V3)
             .endpoint(ISSUE_WORKLOG_V2)
             .endpoint(ISSUE_WORKLOG_V3)
+            .endpoint(ISSUE_V2)
+            .endpoint(ISSUE_V3)
             .endpoint(USERS)
             .endpoint(PROJECTS)
             .build();
@@ -308,6 +451,9 @@ public class PrebuiltSanitizerRules {
             .endpoint(SERVER_ISSUE_SEARCH_V2)
             .endpoint(SERVER_ISSUE_COMMENT_V2)
             .endpoint(SERVER_ISSUE_WORKLOG_V2)
+            .endpoint(SERVER_ISSUE_V2)
+            .endpoint(SERVER_PROJECTS)
+            .endpoint(SERVER_USERS)
             .build();
 
     public static final Map<String, RESTRules> RULES_MAP =
@@ -339,7 +485,6 @@ public class PrebuiltSanitizerRules {
                 .build();
     }
 
-
     private static JsonSchemaFilterUtils.JsonSchemaFilter jsonSchemaForIssue(boolean isCloudVersion) {
         return JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                 .type("object")
@@ -347,6 +492,12 @@ public class PrebuiltSanitizerRules {
                     put("id", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                     put("self", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                     put("fields", jsonSchemaForIssueFields(isCloudVersion));
+                    put("changelog",
+                            JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                                    .type("object")
+                                    .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{
+                                        put("histories", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("array").items(jsonSchemaForIssueChangelog(isCloudVersion)).build());
+                                    }}).build());
                 }})
                 .build();
     }
@@ -359,7 +510,7 @@ public class PrebuiltSanitizerRules {
                     put("statuscategorychangedate", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                     put("issuetype", jsonSchemaForIssueType());
                     put("parent", jsonSchemaForIssueParent());
-                    put("timespent", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
+                    put("timespent", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("integer").build());
                     // In doc appears as "watchers", but in actual response is "watches"
                     put("watches", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                             .type("object")
@@ -370,13 +521,14 @@ public class PrebuiltSanitizerRules {
                             }}).build());
                     put("attachment", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                             .type("array")
-                            .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
-                                put("id", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("integer").build());
-                                put("author", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("object").items(jsonSchemaForUser(isCloudVersion)).build());
-                                put("created", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-                                put("size", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("integer").build());
-
-                            }}).build());
+                            .items(JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                                    .type("object")
+                                    .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
+                                        put("id", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
+                                        put("author", jsonSchemaForUser(isCloudVersion));
+                                        put("created", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
+                                        put("size", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("integer").build());
+                                    }}).build()).build());
                     // In docs appears as "sub-tasks", but in actual response is "subtasks"
                     put("sub-tasks", jsonSchemaForLinks());
                     put("project", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
@@ -410,17 +562,9 @@ public class PrebuiltSanitizerRules {
                             }}).build());
                     put("issuelinks", jsonSchemaForLinks());
                     put("worklog", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
-                            .type("array")
+                            .type("object")
                             .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{
-                                put("issueId", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-                                put("id", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-                                put("author", jsonSchemaForUser(isCloudVersion));
-                                put("updateAuthor", jsonSchemaForUser(isCloudVersion));
-                                put("updated", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-                                put("visibility", jsonSchemaForVisibility());
-                                put("started", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-                                put("timeSpent", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-                                put("timeSpentSeconds", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("integer").build());
+                                put("worklogs", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("array").items(jsonSchemaForIssueWorklog(isCloudVersion)).build());
                             }}).build());
                     put("updated", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("integer").build());
                     put("timeTracking", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
@@ -455,6 +599,49 @@ public class PrebuiltSanitizerRules {
                                 put("hasVoted", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("boolean").build());
                             }}).build());
 
+                }})
+                .build();
+    }
+
+    private static JsonSchemaFilterUtils.JsonSchemaFilter jsonSchemaForIssueWorklog(boolean isCloudVersion) {
+        return JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                .type("object")
+                // Using LinkedHashMap to keep the order to support same
+                // YAML serialization result
+                .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{
+                    put("issueId", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
+                    put("id", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
+                    put("author", jsonSchemaForUser(isCloudVersion));
+                    put("created", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
+                    put("updateAuthor", jsonSchemaForUser(isCloudVersion));
+                    put("updated", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
+                    put("visibility", jsonSchemaForVisibility());
+                    put("started", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
+                    put("timeSpent", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
+                    put("timeSpentSeconds", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("integer").build());
+                }})
+                .build();
+    }
+
+    private static JsonSchemaFilterUtils.JsonSchemaFilter jsonSchemaForIssueChangelog(boolean isCloudVersion) {
+        return JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                .type("object")
+                // Using LinkedHashMap to keep the order to support same
+                // YAML serialization result
+                .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{
+                    put("id", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
+                    put("author", jsonSchemaForUser(isCloudVersion));
+                    put("created", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
+                    put("items", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                            .type("array")
+                            .items(JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                                    .type("object")
+                                    .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{
+                                        put("field", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
+                                        put("fieldtype", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
+                                    }})
+                                    .build())
+                            .build());
                 }})
                 .build();
     }
@@ -518,7 +705,7 @@ public class PrebuiltSanitizerRules {
                     put("statusCategory", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                             .type("object")
                             .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
-                                put("id", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
+                                put("id", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("integer").build());
                                 put("key", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                                 put("colorName", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                                 put("name", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
@@ -538,6 +725,7 @@ public class PrebuiltSanitizerRules {
                     put("accountType", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                     put("emailAddress", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                     put("active", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("boolean").build());
+                    put("timeZone", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                 }})
                 .build();
     }

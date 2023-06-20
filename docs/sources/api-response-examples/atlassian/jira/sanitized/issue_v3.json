@@ -1,0 +1,104 @@
+{
+  "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/10711",
+  "id": "10711",
+  "fields": {
+    "statuscategorychangedate": "2023-06-09T06:37:11.640-0400",
+    "issuetype": {
+      "hierarchyLevel": 0,
+      "id": "10001",
+      "subtask": false
+    },
+    "lastViewed": "2023-06-14T06:18:52.375-0400",
+    "watches": {
+      "isWatching": true,
+      "watchCount": 1
+    },
+    "creator": {
+      "accountId": "{\"hash\":\"ZSiF2ksLmucJypprVlOuvn9YZPtcViktBHNWFxvBjco\"}",
+      "emailAddress": "{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"GItqpD0PrNe1WX8MpyKYmCPjh99MGEBG30ziv65GIuw\"}",
+      "accountType": "atlassian",
+      "active": true,
+      "timeZone": "America/New_York"
+    },
+    "timespent": 28800,
+    "created": "2023-06-09T06:37:10.762-0400",
+    "project": {
+      "simplified": false,
+      "id": "10000",
+      "projectTypeKey": "software"
+    },
+    "reporter": {
+      "accountId": "{\"hash\":\"ZSiF2ksLmucJypprVlOuvn9YZPtcViktBHNWFxvBjco\"}",
+      "emailAddress": "{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"GItqpD0PrNe1WX8MpyKYmCPjh99MGEBG30ziv65GIuw\"}",
+      "accountType": "atlassian",
+      "active": true,
+      "timeZone": "America/New_York"
+    },
+    "aggregateprogress": {
+      "total": 518400,
+      "progress": 28800
+    },
+    "attachment": [
+      {
+        "size": 2829492,
+        "author": {
+          "accountId": "{\"hash\":\"ZSiF2ksLmucJypprVlOuvn9YZPtcViktBHNWFxvBjco\"}",
+          "emailAddress": "{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"GItqpD0PrNe1WX8MpyKYmCPjh99MGEBG30ziv65GIuw\"}",
+          "accountType": "atlassian",
+          "active": true,
+          "timeZone": "America/New_York"
+        },
+        "created": "2023-06-09T12:31:44.105-0400",
+        "id": "10000"
+      }
+    ],
+    "resolutiondate": null,
+    "duedate": null,
+    "progress": {
+      "total": 518400,
+      "progress": 28800
+    },
+    "issuelinks": [],
+    "votes": {
+      "hasVoted": false,
+      "votes": 0
+    },
+    "assignee": null,
+    "worklog": {
+      "worklogs": [
+        {
+          "issueId": "10711",
+          "timeSpentSeconds": 28800,
+          "timeSpent": "1d",
+          "author": {
+            "accountId": "{\"hash\":\"ZSiF2ksLmucJypprVlOuvn9YZPtcViktBHNWFxvBjco\"}",
+            "emailAddress": "{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"GItqpD0PrNe1WX8MpyKYmCPjh99MGEBG30ziv65GIuw\"}",
+            "accountType": "atlassian",
+            "active": true,
+            "timeZone": "America/New_York"
+          },
+          "created": "2023-06-09T06:37:49.599-0400",
+          "updateAuthor": {
+            "accountId": "{\"hash\":\"ZSiF2ksLmucJypprVlOuvn9YZPtcViktBHNWFxvBjco\"}",
+            "emailAddress": "{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"GItqpD0PrNe1WX8MpyKYmCPjh99MGEBG30ziv65GIuw\"}",
+            "accountType": "atlassian",
+            "active": true,
+            "timeZone": "America/New_York"
+          },
+          "started": "2023-06-08T22:37:40.109-0400",
+          "id": "10002",
+          "updated": "2023-06-09T06:40:15.279-0400"
+        }
+      ]
+    },
+    "updated": null,
+    "status": {
+      "id": "10000",
+      "statusCategory": {
+        "colorName": "blue-gray",
+        "id": 2,
+        "key": "new"
+      }
+    }
+  }
+}

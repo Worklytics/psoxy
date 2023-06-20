@@ -123,6 +123,18 @@ public class JiraCloudTests extends JavaRulesTestBaseCase {
     }
 
     @Test
+    void issue() {
+        String jsonString = asJson(exampleDirectoryPath, "issue.json");
+
+        String endpoint = "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/ISSUE?startAt=50";
+
+        Collection<String> PII = Arrays.asList("608a9b555426330072f9867d", "fake@contoso.com", "Fake");
+        assertNotSanitized(jsonString, PII);
+
+        String sanitized = this.sanitize(endpoint, jsonString);
+    }
+
+    @Test
     void issue_changelog() {
         String jsonString = asJson(exampleDirectoryPath, "issue_changelog.json");
 

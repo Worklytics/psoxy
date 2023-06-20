@@ -36,6 +36,7 @@
         </processorPath>
         <module name="core" />
         <module name="cmd-line" />
+        <module name="gateway-core" />
         <module name="aws" />
         <module name="gcp" />
       </profile>

@@ -87,6 +87,26 @@
           "fieldtype":"jira"
         }
       ]
+    },
+    {
+      "id":"10724",
+      "author":{
+        "accountId":"{\"scope\":\"jira\",\"hash\":\"MDNGN1oBtOCXoEyNLYQUwQwWf4CcUCI79qOnXJeAy1c\"}",
+        "emailAddress":"{\"scope\":\"email\",\"domain\":\"contoso.com\",\"hash\":\"PDCw4eu8sUHIMnuovkFwUN8yG8H0M3GWBdC7hw0AOh0\"}",
+        "active":true,
+        "timeZone":"America/New_York",
+        "accountType":"atlassian"
+      },
+      "created":"2023-06-08T11:22:19.022-0400",
+      "items":[
+        {
+          "field":"assignee",
+          "fieldtype":"jira",
+          "fieldId":"assignee",
+          "tmpFromAccountId":"{\"scope\":\"jira\",\"hash\":\"MDNGN1oBtOCXoEyNLYQUwQwWf4CcUCI79qOnXJeAy1c\"}",
+          "tmpToAccountId":"null"
+        }
+      ]
     }
   ]
 }

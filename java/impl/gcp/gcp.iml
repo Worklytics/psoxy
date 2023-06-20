@@ -13,8 +13,9 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="gateway-core" />
     <orderEntry type="module" module-name="core" />
-    <orderEntry type="library" name="Maven: com.avaulta.gateway:gateway-core:0.4.24" level="project" />
+    <orderEntry type="module" module-name="gateway-core" />
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.5" level="project" />
     <orderEntry type="library" name="Maven: org.apache.commons:commons-csv:1.4" level="project" />
     <orderEntry type="library" name="Maven: com.google.guava:guava:31.1-jre" level="project" />

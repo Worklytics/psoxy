@@ -26,6 +26,11 @@ output "enabled_oauth_secrets_to_create" {
   value       = local.enabled_oauth_secrets_to_create
 }
 
+output "enabled_lockable_oauth_secrets_to_create" {
+  description = "List of secrets to create for enabled OAuth connectors that are lockable"
+  value       = local.enabled_lockable_oauth_secrets_to_create
+}
+
 output "enabled_bulk_connectors" {
   description = "List of enabled bulk connectors"
   value       = local.enabled_bulk_connectors
