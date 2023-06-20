@@ -14,13 +14,13 @@ variable "gcp_terraform_sa_account_email" {
   }
 }
 
-variable "environment_id" {
+variable "environment_name" {
   type        = string
   description = "Qualifier to append to names/ids of resources for psoxy. If not empty, A-Za-z0-9 or - characters only. Max length 10. Useful to distinguish between deployments into same GCP project."
   default     = ""
 
   validation {
-    condition     = can(regex("^[A-z0-9\\-]{0,20}$", var.environment_id))
+    condition     = can(regex("^[A-z0-9\\-]{0,20}$", var.environment_name))
     error_message = "The environment_id must be 0-20 chars of [A-z0-9\\-] only."
   }
 }
@@ -147,39 +147,10 @@ variable "custom_bulk_connectors" {
   }
 }
 
-variable "google_workspace_example_user" {
-  type        = string
-  description = "User to impersonate for Google Workspace API calls (null for none)"
-}
-
-variable "google_workspace_example_admin" {
-  type        = string
-  description = "user to impersonate for Google Workspace API calls (null for value of `google_workspace_example_user`)"
-  default     = null # will failover to user
-}
-
 variable "salesforce_domain" {
   type        = string
   description = "Domain of the Salesforce to connect to (only required if using Salesforce connector). To find your My Domain URL, from Setup, in the Quick Find box, enter My Domain, and then select My Domain"
   default     = ""
-}
-
-variable "msft_tenant_id" {
-  type        = string
-  description = "ID of Microsoft tenant to connect to (req'd only if config includes MSFT connectors)"
-  default     = ""
-}
-
-variable "msft_owners_email" {
-  type        = set(string)
-  description = "(Only if config includes MSFT connectors). Optionally, set of emails to apply as owners on AAD apps apart from current logged user"
-  default     = []
-}
-
-variable "example_msft_user_guid" {
-  type        = string
-  description = "(Only if config includes MSFT connectors). example MSFT user guid (uuid) for test API calls (OPTIONAL)"
-  default     = "{EXAMPLE_MSFT_USER_GUID}"
 }
 
 variable "jira_server_url" {

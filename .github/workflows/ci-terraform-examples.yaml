@@ -13,6 +13,7 @@ jobs:
       matrix:
         example_path: [
                         'examples-dev/aws',
+                        'examples-dev/aws-all',
                         'examples-dev/aws-google-workspace',
                         'examples-dev/aws-msft-365',
                         'examples-dev/gcp',

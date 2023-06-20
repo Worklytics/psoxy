@@ -1,7 +1,8 @@
 locals {
-  config_parameter_prefix               = var.config_parameter_prefix == "" ? "${var.environment_id}_" : var.config_parameter_prefix
-  environment_id_prefix                 = "${var.environment_id}${length(var.environment_id) > 0 ? "-" : ""}"
-  environment_id_display_name_qualifier = length(var.environment_id) > 0 ? " ${var.environment_id} " : ""
+  default_config_parameter_prefix       = length(var.environment_name) == 0 ? "psoxy_" : "${var.environment_name}_"
+  config_parameter_prefix               = var.config_parameter_prefix == "" ? local.default_config_parameter_prefix : var.config_parameter_prefix
+  environment_id_prefix                 = "${var.environment_name}${length(var.environment_name) > 0 ? "-" : ""}"
+  environment_id_display_name_qualifier = length(var.environment_name) > 0 ? " ${var.environment_name} " : ""
 }
 
 module "psoxy" {
@@ -62,11 +63,17 @@ resource "google_secret_manager_secret_iam_member" "grant_sa_updater_on_lockable
   secret_id = "${local.config_parameter_prefix}${each.value.instance_secret_id}"
 }
 
+locals {
+  # sa account_ids must be at least 6 chars long; if api_connector keys are short, and environment_name
+  # is also short (or empty), keys alone might not be long enough; so prepend in such cases
+  sa_prefix = length(local.environment_id_prefix) >= 6 ? local.environment_id_prefix : "psoxy-${local.environment_id_prefix}"
+}
+
 resource "google_service_account" "api_connectors" {
   for_each = var.api_connectors
 
   project      = var.gcp_project_id
-  account_id   = "${local.environment_id_prefix}${replace(each.key, "_", "-")}"
+  account_id   = "${local.sa_prefix}${replace(each.key, "_", "-")}"
   display_name = "${local.environment_id_display_name_qualifier} ${each.key} REST Connector"
 }
 

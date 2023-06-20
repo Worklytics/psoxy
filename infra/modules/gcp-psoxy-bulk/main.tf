@@ -97,7 +97,7 @@ moved {
 
 resource "google_service_account" "service-account" {
   project      = var.project_id
-  account_id   = local.function_name
+  account_id   = length(local.function_name) >= 6 ? local.function_name : "psoxy-${local.function_name}"
   display_name = "Psoxy Connector - ${var.source_kind}"
   description  = "${local.function_name} runs as this service account"
 }
