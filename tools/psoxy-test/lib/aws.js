@@ -272,7 +272,7 @@ async function download(bucket, key, options, client, logger) {
     logger, options.attempts, options.delay);
 
   if (downloadResponse === undefined) {
-    throw new Error(`${filename} not found after multiple attempts`);
+    throw new Error(`${key} not found after multiple attempts`);
   }
   return downloadResponse.Body.transformToString();
 }
