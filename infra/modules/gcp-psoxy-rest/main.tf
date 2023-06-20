@@ -210,13 +210,19 @@ output "cloud_function_url" {
   value = local.proxy_endpoint_url
 }
 
-output "todo" {
-  value = local.todo_content
-}
+
 
 output "proxy_kind" {
   value       = "rest"
   description = "The kind of proxy instance this is."
+}
+
+output "test_script" {
+  value = local_file.test_script.filename
+}
+
+output "todo" {
+  value = local.todo_content
 }
 
 output "next_todo_step" {

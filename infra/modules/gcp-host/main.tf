@@ -264,6 +264,25 @@ locals {
   all_instances = merge(local.api_instances, local.bulk_instances)
 }
 
+# script to test ALL connectors
+resource "local_file" "test_all_script" {
+  filename        = "test-all.sh"
+  file_permission = "0770"
+  content         = <<EOF
+#!/bin/bash
 
+echo "Testing API Connectors ..."
+
+%{ for test_script in values(module.api_connector)[*].test_script ~}
+./${test_script}
+%{ endfor }
+
+echo "Testing Bulk Connectors ..."
+
+%{ for test_script in values(module.bulk_connector)[*].test_script ~}
+./${test_script}
+%{ endfor }
+EOF
+}
 
 
