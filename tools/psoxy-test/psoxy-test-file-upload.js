@@ -8,6 +8,7 @@ import fs from 'fs';
 import gcp from './lib/gcp.js';
 import getLogger from './lib/logger.js';
 import path from 'path';
+import _ from 'lodash';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -94,7 +95,7 @@ async function testGCP(options, logger) {
   const outputPath = parsedBucketOutputOption.path;
   const outputKey = outputPath + filenameWithTimestamp;
   logger.info(`Downloading sanitized file from output bucket: ${outputBucket}`);
-  const [downloadResult] = await gcp.download(outputBucket, outputKey, client, 
+  const [downloadResult] = await gcp.download(outputBucket, outputKey, client,
     logger);
   logger.success('File downloaded');
 
@@ -148,7 +149,11 @@ export default async function (options = {}) {
 
   if (options.saveSanitizedFile) {
     // save file to same location as input
-    const outputDir = path.parse(options.file).dir;
+    let outputDir = path.parse(options.file).dir;
+    if (_.isEmpty(outputDir)) {
+      // fallback to current exe path
+      outputDir = process.cwd();
+    }
     logger.info(`Sanitized file written at ${chalk.yellow(new Date().toISOString())}: ${outputDir}/${outputFilename}`);
     await saveToFile(outputDir, outputFilename, downloadResult);
   }
