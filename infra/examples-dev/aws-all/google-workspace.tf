@@ -14,10 +14,6 @@ module "worklytics_connectors_google_workspace" {
     google = google.google_workspace
   }
 
-  providers = {
-    google = google.google_workspace
-  }
-
   environment_id                 = var.environment_name
   enabled_connectors             = var.enabled_connectors
   gcp_project_id                 = var.google_workspace_gcp_project_id
