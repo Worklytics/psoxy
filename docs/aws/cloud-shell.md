@@ -1,8 +1,7 @@
 # AWS - Getting Started with Cloud Shell
 
-**YMMV; we've found that as of Aug 2022, this is not a great option as people will often hit AWS's
-1GB limit for cloudshell. In such a scenario, use your local machine, or a VM/container elsewhere
- in AWS**
+**YMMV; we've found people often hit AWS's 1GB limit for cloud shell disk size. In such a scenario,
+use your local machine, or a VM/container elsewhere in AWS**
 
 1. clone the repo
 ```shell
@@ -36,10 +35,10 @@ tfenv use latest
 
 4. if using Google Workspace data sources, [install Google Cloud CLI](https://cloud.google.com/sdk/docs/install#linux) and authenticate.
 ```shell
-curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-384.0.0-linux-x86_64.tar.gz
-tar -xvf google-cloud-cli-384.0.0-linux-x86_64.tar.gz
+curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-435.0.1-linux-x86_64.tar.gz
+tar -xvf google-cloud-cli-435.0.1-linux-x86_64.tar.gz
 sudo ./google-cloud-sdk/install.sh
-rm google-cloud-cli-384.0.0-linux-x86_64.tar.gz
+rm google-cloud-cli-435.0.1-linux-x86_64.tar.gz
 ```
 
 6. if using Microsoft 365 data sources, install Azure CLI and authenticate.
