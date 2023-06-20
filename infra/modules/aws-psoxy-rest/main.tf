@@ -204,6 +204,10 @@ output "proxy_kind" {
   description = "The kind of proxy instance this is."
 }
 
+output "test_script" {
+  value = local_file.test_script.filename
+}
+
 output "todo" {
   value = local.todo_content
 }
