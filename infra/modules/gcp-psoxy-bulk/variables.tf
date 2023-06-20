@@ -18,7 +18,7 @@ variable "config_parameter_prefix" {
 variable "instance_id" {
   type        = string
   description = "id of psoxy instance"
-  default     = ""
+  default     = null
 }
 
 variable "worklytics_sa_emails" {

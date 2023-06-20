@@ -157,7 +157,7 @@ resource "google_cloudfunctions_function" "function" {
     var.path_to_config == null ? {} : yamldecode(file(var.path_to_config)),
     var.environment_variables,
     var.config_parameter_prefix == null ? {} : { PATH_TO_SHARED_CONFIG = var.config_parameter_prefix },
-    var.config_parameter_prefix == null ? {} : { PATH_TO_INSTANCE_CONFIG = "${var.config_parameter_prefix}${upper(var.instance_id)}_" },
+    var.config_parameter_prefix == null ? {} : { PATH_TO_INSTANCE_CONFIG = "${var.config_parameter_prefix}${upper(local.instance_id)}_" },
   )
 
   dynamic "secret_environment_variables" {
@@ -237,7 +237,7 @@ EOT
 }
 
 resource "local_file" "test_script" {
-  filename        = "test-${trimprefix(var.instance_id, var.environment_id_prefix)}.sh"
+  filename        = "test-${trimprefix(local.instance_id, var.environment_id_prefix)}.sh"
   file_permission = "0770"
   content         = <<EOT
 #!/bin/bash
@@ -253,7 +253,7 @@ EOT
 }
 
 output "instance_id" {
-  value = var.instance_id
+  value = local.instance_id
 }
 
 output "function_name" {
