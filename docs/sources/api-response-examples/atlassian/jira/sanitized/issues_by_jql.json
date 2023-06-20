@@ -27,7 +27,7 @@
               "id":"10000",
               "statusCategory":{
                 "colorName":"blue-gray",
-                "id":null,
+                "id":2,
                 "key":"new"
               }
             }
@@ -42,7 +42,8 @@
           "accountId":"{\"scope\":\"jira\",\"hash\":\"MDNGN1oBtOCXoEyNLYQUwQwWf4CcUCI79qOnXJeAy1c\"}",
           "emailAddress":"{\"scope\":\"email\",\"domain\":\"contoso.com\",\"hash\":\"PDCw4eu8sUHIMnuovkFwUN8yG8H0M3GWBdC7hw0AOh0\"}",
           "accountType":"atlassian",
-          "active":true
+          "active":true,
+          "timeZone":"America/New_York"
         },
         "timespent":0,
         "created":"2022-03-02T09:00:35.261-0500",
@@ -55,7 +56,8 @@
           "accountId":"{\"scope\":\"jira\",\"hash\":\"MDNGN1oBtOCXoEyNLYQUwQwWf4CcUCI79qOnXJeAy1c\"}",
           "emailAddress":"{\"scope\":\"email\",\"domain\":\"contoso.com\",\"hash\":\"PDCw4eu8sUHIMnuovkFwUN8yG8H0M3GWBdC7hw0AOh0\"}",
           "accountType":"atlassian",
-          "active":true
+          "active":true,
+          "timeZone":"America/New_York"
         },
         "aggregateprogress":{
           "total":0,
@@ -78,7 +80,7 @@
           "id":"10000",
           "statusCategory":{
             "colorName":"blue-gray",
-            "id":null,
+            "id":2,
             "key":"new"
           }
         }

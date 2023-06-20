@@ -74,7 +74,7 @@ endpoints:
                                 type: "object"
                                 properties:
                                   id:
-                                    type: "string"
+                                    type: "integer"
                                   key:
                                     type: "string"
                                   colorName:
@@ -119,6 +119,8 @@ endpoints:
                               type: "string"
                             active:
                               type: "boolean"
+                            timeZone:
+                              type: "string"
                   attachment:
                     type: "array"
                     items:
@@ -137,6 +139,8 @@ endpoints:
                               type: "string"
                             active:
                               type: "boolean"
+                            timeZone:
+                              type: "string"
                         created:
                           type: "string"
                         size:
@@ -208,6 +212,8 @@ endpoints:
                             type: "string"
                           active:
                             type: "boolean"
+                          timeZone:
+                            type: "string"
                       updateAuthor:
                         type: "object"
                         properties:
@@ -219,6 +225,8 @@ endpoints:
                             type: "string"
                           active:
                             type: "boolean"
+                          timeZone:
+                            type: "string"
                       created:
                         type: "string"
                       updated:
@@ -283,6 +291,8 @@ endpoints:
                                   type: "string"
                                 active:
                                   type: "boolean"
+                                timeZone:
+                                  type: "string"
                             created:
                               type: "string"
                             updateAuthor:
@@ -296,6 +306,8 @@ endpoints:
                                   type: "string"
                                 active:
                                   type: "boolean"
+                                timeZone:
+                                  type: "string"
                             updated:
                               type: "string"
                             visibility:
@@ -347,6 +359,8 @@ endpoints:
                         type: "string"
                       active:
                         type: "boolean"
+                      timeZone:
+                        type: "string"
                   status:
                     type: "object"
                     properties:
@@ -358,7 +372,7 @@ endpoints:
                         type: "object"
                         properties:
                           id:
-                            type: "string"
+                            type: "integer"
                           key:
                             type: "string"
                           colorName:
@@ -376,6 +390,8 @@ endpoints:
                         type: "string"
                       active:
                         type: "boolean"
+                      timeZone:
+                        type: "string"
                   reporter:
                     type: "object"
                     properties:
@@ -387,6 +403,8 @@ endpoints:
                         type: "string"
                       active:
                         type: "boolean"
+                      timeZone:
+                        type: "string"
                   aggregateprogress:
                     type: "object"
                     properties:
@@ -431,6 +449,8 @@ endpoints:
                               type: "string"
                             active:
                               type: "boolean"
+                            timeZone:
+                              type: "string"
                         created:
                           type: "string"
                         items:
@@ -558,7 +578,7 @@ endpoints:
                           type: "object"
                           properties:
                             id:
-                              type: "string"
+                              type: "integer"
                             key:
                               type: "string"
                             colorName:
@@ -603,6 +623,8 @@ endpoints:
                         type: "string"
                       active:
                         type: "boolean"
+                      timeZone:
+                        type: "string"
             attachment:
               type: "array"
               items:
@@ -621,6 +643,8 @@ endpoints:
                         type: "string"
                       active:
                         type: "boolean"
+                      timeZone:
+                        type: "string"
                   created:
                     type: "string"
                   size:
@@ -692,6 +716,8 @@ endpoints:
                       type: "string"
                     active:
                       type: "boolean"
+                    timeZone:
+                      type: "string"
                 updateAuthor:
                   type: "object"
                   properties:
@@ -703,6 +729,8 @@ endpoints:
                       type: "string"
                     active:
                       type: "boolean"
+                    timeZone:
+                      type: "string"
                 created:
                   type: "string"
                 updated:
@@ -767,6 +795,8 @@ endpoints:
                             type: "string"
                           active:
                             type: "boolean"
+                          timeZone:
+                            type: "string"
                       created:
                         type: "string"
                       updateAuthor:
@@ -780,6 +810,8 @@ endpoints:
                             type: "string"
                           active:
                             type: "boolean"
+                          timeZone:
+                            type: "string"
                       updated:
                         type: "string"
                       visibility:
@@ -831,6 +863,8 @@ endpoints:
                   type: "string"
                 active:
                   type: "boolean"
+                timeZone:
+                  type: "string"
             status:
               type: "object"
               properties:
@@ -842,7 +876,7 @@ endpoints:
                   type: "object"
                   properties:
                     id:
-                      type: "string"
+                      type: "integer"
                     key:
                       type: "string"
                     colorName:
@@ -860,6 +894,8 @@ endpoints:
                   type: "string"
                 active:
                   type: "boolean"
+                timeZone:
+                  type: "string"
             reporter:
               type: "object"
               properties:
@@ -871,6 +907,8 @@ endpoints:
                   type: "string"
                 active:
                   type: "boolean"
+                timeZone:
+                  type: "string"
             aggregateprogress:
               type: "object"
               properties:
@@ -915,6 +953,8 @@ endpoints:
                         type: "string"
                       active:
                         type: "boolean"
+                      timeZone:
+                        type: "string"
                   created:
                     type: "string"
                   items:

@@ -705,7 +705,7 @@ public class PrebuiltSanitizerRules {
                     put("statusCategory", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                             .type("object")
                             .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
-                                put("id", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
+                                put("id", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("integer").build());
                                 put("key", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                                 put("colorName", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                                 put("name", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
@@ -725,6 +725,7 @@ public class PrebuiltSanitizerRules {
                     put("accountType", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                     put("emailAddress", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                     put("active", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("boolean").build());
+                    put("timeZone", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                 }})
                 .build();
     }
