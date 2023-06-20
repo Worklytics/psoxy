@@ -17,7 +17,6 @@ locals {
 
 module "psoxy" {
   source = "../../modules/aws"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws?ref=v0.4.25
 
   aws_account_id                 = var.aws_account_id
   region                         = data.aws_region.current.id
@@ -34,7 +33,6 @@ module "psoxy" {
 # secrets shared across all instances
 module "global_secrets" {
   source = "../../modules/aws-ssm-secrets"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-ssm-secrets?ref=v0.4.25
 
   path       = var.aws_ssm_param_root_path
   kms_key_id = var.aws_ssm_key_id
@@ -45,7 +43,6 @@ module "instance_secrets" {
   for_each = var.api_connectors
 
   source = "../../modules/aws-ssm-secrets"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-ssm-secrets?ref=v0.4.25"
   # other possibly implementations:
   # source = "../hashicorp-vault-secrets"
 
@@ -63,7 +60,6 @@ module "api_connector" {
   for_each = var.api_connectors
 
   source = "../../modules/aws-psoxy-rest"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-rest?ref=v0.4.25"
 
   environment_name                = var.environment_name
   instance_id                     = each.key
@@ -107,7 +103,6 @@ module "bulk_connector" {
   for_each = var.bulk_connectors
 
   source = "../../modules/aws-psoxy-bulk"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-bulk?ref=v0.4.25"
 
   aws_account_id                   = var.aws_account_id
   provision_iam_policy_for_testing = var.provision_testing_infra
@@ -144,7 +139,6 @@ module "lookup_output" {
   for_each = var.lookup_table_builders
 
   source = "../../modules/aws-psoxy-output-bucket"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-output-bucket?ref=v0.4.25"
 
   environment_name              = var.environment_name
   instance_id                   = each.key

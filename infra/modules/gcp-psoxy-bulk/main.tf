@@ -6,9 +6,19 @@ terraform {
   }
 }
 
+# constants
 locals {
-  # legacy; pre 0.5 may not pass instance_id
-  instance_id         = coalesce(var.instance_id, substr(var.source_kind, 0, 30 - length(var.environment_id_prefix)))
+  SA_NAME_MIN_LENGTH             = 6
+  SA_NAME_MAX_LENGTH             = 30
+  CLOUD_FUNCTION_NAME_MAX_LENGTH = 63
+}
+
+# computed
+locals {
+  # legacy pre 0.5 may not pass instance_id
+  instance_id         = coalesce(var.instance_id, substr(var.source_kind, 0, local.CLOUD_FUNCTION_NAME_MAX_LENGTH - length(var.environment_id_prefix)))
+  default_sa_name     = coalesce(var.instance_id, substr("fn-${var.source_kind}", 0, local.SA_NAME_MAX_LENGTH - length(var.environment_id_prefix)))
+  sa_name             = length(local.default_sa_name) < local.SA_NAME_MIN_LENGTH ? "psoxy-${local.default_sa_name}" : local.default_sa_name
   function_name       = "${var.environment_id_prefix}${local.instance_id}"
   command_npm_install = "npm --prefix ${var.psoxy_base_dir}tools/psoxy-test install"
 }
@@ -78,7 +88,7 @@ module "output_bucket" {
 
   project_id                     = var.project_id
   bucket_write_role_id           = var.bucket_write_role_id
-  function_service_account_email = google_service_account.service-account.email
+  function_service_account_email = google_service_account.service_account.email
   bucket_name_prefix             = local.bucket_prefix
   region                         = var.region
   expiration_days                = var.sanitized_expiration_days
@@ -95,17 +105,23 @@ moved {
 }
 
 
-resource "google_service_account" "service-account" {
+resource "google_service_account" "service_account" {
   project      = var.project_id
-  account_id   = length(local.function_name) >= 6 ? local.function_name : "psoxy-${local.function_name}"
+  account_id   = local.sa_name
   display_name = "Psoxy Connector - ${var.source_kind}"
   description  = "${local.function_name} runs as this service account"
+}
+
+# TODO: moved in 0.4.25; remove in 0.5
+moved {
+  from = google_service_account.service-account
+  to   = google_service_account.service_account
 }
 
 resource "google_storage_bucket_iam_member" "access_for_import_bucket" {
   bucket = google_storage_bucket.input-bucket.name
   role   = "roles/storage.objectViewer"
-  member = "serviceAccount:${google_service_account.service-account.email}"
+  member = "serviceAccount:${google_service_account.service_account.email}"
 }
 
 resource "google_storage_bucket_iam_member" "grant_sa_read_on_processed_bucket" {
@@ -121,7 +137,7 @@ resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_secret"
 
   project   = var.project_id
   secret_id = each.value.secret_id
-  member    = "serviceAccount:${google_service_account.service-account.email}"
+  member    = "serviceAccount:${google_service_account.service_account.email}"
   role      = "roles/secretmanager.secretAccessor"
 }
 
@@ -134,7 +150,7 @@ module "tf_runner" {
 resource "google_service_account_iam_member" "act_as" {
   member             = module.tf_runner.iam_principal
   role               = "roles/iam.serviceAccountUser"
-  service_account_id = google_service_account.service-account.id
+  service_account_id = google_service_account.service_account.id
 }
 
 resource "google_cloudfunctions_function" "function" {
@@ -148,7 +164,7 @@ resource "google_cloudfunctions_function" "function" {
   source_archive_bucket = var.artifacts_bucket_name
   source_archive_object = var.deployment_bundle_object_name
   entry_point           = "co.worklytics.psoxy.GCSFileEvent"
-  service_account_email = google_service_account.service-account.email
+  service_account_email = google_service_account.service_account.email
 
   environment_variables = merge(tomap({
     INPUT_BUCKET  = google_storage_bucket.input-bucket.name,
@@ -261,7 +277,7 @@ output "function_name" {
 }
 
 output "instance_sa_email" {
-  value = google_service_account.service-account.email
+  value = google_service_account.service_account.email
 }
 
 output "bucket_prefix" {

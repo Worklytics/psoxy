@@ -25,7 +25,7 @@ locals {
 # service account to personify connector
 resource "google_service_account" "connector-sa" {
   project      = var.project_id
-  account_id   = var.connector_service_account_id
+  account_id   = local.sa_account_id
   display_name = var.display_name
   description  = var.description
 }

@@ -55,8 +55,10 @@ variable "sanitizer_accessor_principals" {
   default     = []
 }
 
+# NOTE: while this value *can* be 0, that's the same as setting no expiration, which is OK except
+# that GCP will not persist the lifecycle rule for the expiration, so Terraform will always show change
 variable "expiration_days" {
   type        = number
-  description = "Number of days after which objects in the bucket will expire"
+  description = "Number of days after which objects in the bucket will expire. If 0, no expiration is set but terraform will always show change in your plan."
   default     = 365 * 5 # 5 years
 }

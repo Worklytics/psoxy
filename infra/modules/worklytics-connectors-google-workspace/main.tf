@@ -29,6 +29,7 @@ module "google_workspace_connection" {
   instance_id                  = each.key
   connector_service_account_id = "${local.environment_id_prefix}${substr(each.key, 0, 30 - length(local.environment_id_prefix))}"
   display_name                 = "Psoxy Connector - ${local.environment_id_display_name_qualifier}${each.value.display_name}"
+  description                  = "Google API OAuth Client for ${each.value.display_name}"
   apis_consumed                = each.value.apis_consumed
   oauth_scopes_needed          = each.value.oauth_scopes_needed
   todo_step                    = var.todo_step
