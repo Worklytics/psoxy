@@ -8,15 +8,16 @@
       "id": "10001",
       "subtask": false
     },
-    "lastViewed": "2023-06-14T06:18:52.375-0400",
     "watches": {
       "isWatching": true,
       "watchCount": 1
     },
+    "lastViewed": "2023-06-14T06:18:52.375-0400",
     "creator": {
       "emailAddress": "{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"GItqpD0PrNe1WX8MpyKYmCPjh99MGEBG30ziv65GIuw\"}",
       "accountType": "atlassian",
-      "active": true
+      "active": true,
+      "timeZone": "America/New_York"
     },
     "timespent": 28800,
     "created": "2023-06-09T06:37:10.762-0400",
@@ -28,7 +29,8 @@
     "reporter": {
       "emailAddress": "{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"GItqpD0PrNe1WX8MpyKYmCPjh99MGEBG30ziv65GIuw\"}",
       "accountType": "atlassian",
-      "active": true
+      "active": true,
+      "timeZone": "America/New_York"
     },
     "aggregateprogress": {
       "total": 518400,
@@ -40,7 +42,8 @@
         "author": {
           "emailAddress": "{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"GItqpD0PrNe1WX8MpyKYmCPjh99MGEBG30ziv65GIuw\"}",
           "accountType": "atlassian",
-          "active": true
+          "active": true,
+          "timeZone": "America/New_York"
         },
         "created": "2023-06-09T12:31:44.105-0400",
         "id": "10000"
@@ -67,13 +70,15 @@
           "author": {
             "emailAddress": "{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"GItqpD0PrNe1WX8MpyKYmCPjh99MGEBG30ziv65GIuw\"}",
             "accountType": "atlassian",
-            "active": true
+            "active": true,
+            "timeZone": "America/New_York"
           },
           "created": "2023-06-09T06:37:49.599-0400",
           "updateAuthor": {
             "emailAddress": "{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"GItqpD0PrNe1WX8MpyKYmCPjh99MGEBG30ziv65GIuw\"}",
             "accountType": "atlassian",
-            "active": true
+            "active": true,
+            "timeZone": "America/New_York"
           },
           "started": "2023-06-08T22:37:40.109-0400",
           "id": "10002",
@@ -86,7 +91,7 @@
       "id": "10000",
       "statusCategory": {
         "colorName": "blue-gray",
-        "id": null,
+        "id": 2,
         "key": "new"
       }
     }
