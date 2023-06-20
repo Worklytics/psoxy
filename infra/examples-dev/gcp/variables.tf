@@ -167,7 +167,6 @@ variable "custom_bulk_connector_rules" {
   default     = {}
 }
 
-
 variable "salesforce_domain" {
   type        = string
   description = "Domain of the Salesforce to connect to (only required if using Salesforce connector). To find your My Domain URL, from Setup, in the Quick Find box, enter My Domain, and then select My Domain"
