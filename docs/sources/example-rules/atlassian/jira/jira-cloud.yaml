@@ -1149,7 +1149,7 @@ endpoints:
                   items:
                     type: "object"
                     properties:
-                      key:
+                      accountId:
                         type: "string"
                       accountType:
                         type: "string"
@@ -1169,7 +1169,7 @@ endpoints:
                   author:
                     type: "object"
                     properties:
-                      key:
+                      accountId:
                         type: "string"
                       accountType:
                         type: "string"
@@ -1242,7 +1242,7 @@ endpoints:
                 author:
                   type: "object"
                   properties:
-                    key:
+                    accountId:
                       type: "string"
                     accountType:
                       type: "string"
@@ -1255,7 +1255,7 @@ endpoints:
                 updateAuthor:
                   type: "object"
                   properties:
-                    key:
+                    accountId:
                       type: "string"
                     accountType:
                       type: "string"
@@ -1321,7 +1321,7 @@ endpoints:
                       author:
                         type: "object"
                         properties:
-                          key:
+                          accountId:
                             type: "string"
                           accountType:
                             type: "string"
@@ -1336,7 +1336,7 @@ endpoints:
                       updateAuthor:
                         type: "object"
                         properties:
-                          key:
+                          accountId:
                             type: "string"
                           accountType:
                             type: "string"
@@ -1389,7 +1389,7 @@ endpoints:
             assignee:
               type: "object"
               properties:
-                key:
+                accountId:
                   type: "string"
                 accountType:
                   type: "string"
@@ -1420,7 +1420,7 @@ endpoints:
             creator:
               type: "object"
               properties:
-                key:
+                accountId:
                   type: "string"
                 accountType:
                   type: "string"
@@ -1433,7 +1433,7 @@ endpoints:
             reporter:
               type: "object"
               properties:
-                key:
+                accountId:
                   type: "string"
                 accountType:
                   type: "string"
@@ -1479,7 +1479,7 @@ endpoints:
                   author:
                     type: "object"
                     properties:
-                      key:
+                      accountId:
                         type: "string"
                       accountType:
                         type: "string"
@@ -1602,7 +1602,7 @@ endpoints:
                   items:
                     type: "object"
                     properties:
-                      key:
+                      accountId:
                         type: "string"
                       accountType:
                         type: "string"
@@ -1622,7 +1622,7 @@ endpoints:
                   author:
                     type: "object"
                     properties:
-                      key:
+                      accountId:
                         type: "string"
                       accountType:
                         type: "string"
@@ -1695,7 +1695,7 @@ endpoints:
                 author:
                   type: "object"
                   properties:
-                    key:
+                    accountId:
                       type: "string"
                     accountType:
                       type: "string"
@@ -1708,7 +1708,7 @@ endpoints:
                 updateAuthor:
                   type: "object"
                   properties:
-                    key:
+                    accountId:
                       type: "string"
                     accountType:
                       type: "string"
@@ -1774,7 +1774,7 @@ endpoints:
                       author:
                         type: "object"
                         properties:
-                          key:
+                          accountId:
                             type: "string"
                           accountType:
                             type: "string"
@@ -1789,7 +1789,7 @@ endpoints:
                       updateAuthor:
                         type: "object"
                         properties:
-                          key:
+                          accountId:
                             type: "string"
                           accountType:
                             type: "string"
@@ -1842,7 +1842,7 @@ endpoints:
             assignee:
               type: "object"
               properties:
-                key:
+                accountId:
                   type: "string"
                 accountType:
                   type: "string"
@@ -1873,7 +1873,7 @@ endpoints:
             creator:
               type: "object"
               properties:
-                key:
+                accountId:
                   type: "string"
                 accountType:
                   type: "string"
@@ -1886,7 +1886,7 @@ endpoints:
             reporter:
               type: "object"
               properties:
-                key:
+                accountId:
                   type: "string"
                 accountType:
                   type: "string"
@@ -1932,7 +1932,7 @@ endpoints:
                   author:
                     type: "object"
                     properties:
-                      key:
+                      accountId:
                         type: "string"
                       accountType:
                         type: "string"
