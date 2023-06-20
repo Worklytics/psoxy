@@ -36,6 +36,7 @@ are used?
     terraform in multiple places. But `terraform validate`/etc wouldn't work on such an example,
     bc host stuff would conflict?? Or if didn't, what we'd be testing with that validate wouldn't be
     that comparable to real world use of the example
+
   - A script that builds example from `lib/` of terraform files that correspond to each component,
     rather than having prebuilt examples.  OK, but complicates testing as you need to run that
     script and THEN `terraform init/validate/etc` to test it.

@@ -11,6 +11,8 @@ module "generic" {
   psoxy_host_platform_id = var.psoxy_host_platform_id
   display_name           = var.display_name
   todo_step              = var.todo_step
+  worklytics_host        = var.worklytics_host
+
   settings_to_provide = merge(var.settings_to_provide,
     {
       "Psoxy Base URL" = var.psoxy_endpoint_url

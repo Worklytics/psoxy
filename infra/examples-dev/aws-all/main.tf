@@ -103,6 +103,7 @@ module "psoxy" {
   bulk_input_expiration_days     = var.bulk_input_expiration_days
   api_connectors                 = local.api_connectors
   bulk_connectors                = local.bulk_connectors
+  custom_bulk_connector_rules    = var.custom_bulk_connector_rules
   todo_step                      = max(module.worklytics_connectors.next_todo_step, module.worklytics_connectors_google_workspace.next_todo_step, module.worklytics_connectors_msft_365.next_todo_step)
 }
 
@@ -122,6 +123,7 @@ module "connection_in_worklytics" {
 
   psoxy_host_platform_id = local.host_platform_id
   psoxy_instance_id      = each.key
+  worklytics_host        = var.worklytics_host
   connector_id           = try(local.all_connectors[each.key].worklytics_connector_id, "")
   display_name           = try(local.all_connectors[each.key].worklytics_connector_name, "${local.all_connectors[each.key].display_name} via Psoxy")
   todo_step              = module.psoxy.next_todo_step

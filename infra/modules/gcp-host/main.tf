@@ -157,7 +157,7 @@ module "bulk_connector" {
     try(each.value.environment_variables, {}),
     {
       SOURCE              = each.value.source_kind
-      RULES               = yamlencode(each.value.rules)
+      RULES               = yamlencode(try(var.custom_bulk_connector_rules[each.key], each.value.rules))
       BUNDLE_FILENAME     = module.psoxy.filename
       IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
     }
