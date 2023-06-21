@@ -22,8 +22,12 @@ After authenticating your terraform CLI to Terraform Cloud/enterprise, you'll ne
   4. run `terraform init` to migrate the initial "local" state to the remote state in Terraform Cloud
   5. build the JAR for deployment:
 ```shell
-HOST=gcp # change to 'aws' if deploying to AWS
-VERSION=0.4.21 # should match what's in your `main.tf`
+
+# change to 'aws' if deploying to AWS
+HOST=gcp
+
+# should match what's in your `main.tf`
+VERSION=0.4.21
 
 .terraform/modules/psoxy/infra/modules/psoxy-package/build.sh .terraform/modules/psoxy/java/ $HOST
 
@@ -34,7 +38,7 @@ PATH_TO_DEPLOYMENT_JAR=.terraform/modules/psoxy/java/impl/gcp/target/psoxy-${HOS
 cp .terraform/modules/psoxy/java/impl/gcp/target/psoxy-${HOST}-${VERSION}.jar .
 git add psoxy-${HOST}-${VERSION}.jar
 git commit -m "JAR to deploy"
-echo "deployment_jar = \"psoxy-${HOST}-${VERSION}.jar\"" >> terraform.tfvars
+echo "deployment_bundle = \"psoxy-${HOST}-${VERSION}.jar\"" >> terraform.tfvars
 echo "install_test_tool = false" >> terraform.tfvars
 ```
   6. update the following variables in your `terraform.tfvars`, and review all other values:
