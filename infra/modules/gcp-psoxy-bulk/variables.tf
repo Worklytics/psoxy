@@ -105,6 +105,12 @@ variable "sanitized_expiration_days" {
   default     = 720
 }
 
+variable "default_labels" {
+  type        = map(string)
+  description = "*Alpha* in v0.4, only respected for new resources. Labels to apply to all resources created by this configuration. Intended to be analogous to AWS providers `default_tags`."
+  default     = {}
+}
+
 variable "todo_step" {
   type        = number
   description = "of all todos, where does this one logically fall in sequence"

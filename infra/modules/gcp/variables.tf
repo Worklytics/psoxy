@@ -56,3 +56,9 @@ variable "install_test_tool" {
   description = "whether to install the test tool (can be 'false' if Terraform not running from a machine where you intend to run tests of your Psoxy deployment)"
   default     = true
 }
+
+variable "default_labels" {
+  type        = map(string)
+  description = "*Alpha* in v0.4, only respected for new resources. Labels to apply to all resources created by this configuration. Intended to be analogous to AWS providers `default_tags`."
+  default     = {}
+}

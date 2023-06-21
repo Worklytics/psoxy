@@ -67,6 +67,7 @@ resource "google_cloudfunctions_function" "function" {
   source_archive_object = var.deployment_bundle_object_name
   entry_point           = "co.worklytics.psoxy.Route"
   service_account_email = var.service_account_email
+  labels                = var.default_labels
 
   environment_variables = merge(
     local.required_env_vars,

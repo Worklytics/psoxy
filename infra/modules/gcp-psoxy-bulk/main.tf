@@ -60,6 +60,7 @@ resource "google_storage_bucket" "input-bucket" {
   location                    = var.region
   force_destroy               = true
   uniform_bucket_level_access = true
+  labels                      = var.default_labels
 
   lifecycle_rule {
     condition {
@@ -92,6 +93,7 @@ module "output_bucket" {
   bucket_name_prefix             = local.bucket_prefix
   region                         = var.region
   expiration_days                = var.sanitized_expiration_days
+  bucket_labels                  = var.default_labels
 
   depends_on = [
     google_project_service.gcp-infra-api
@@ -165,6 +167,7 @@ resource "google_cloudfunctions_function" "function" {
   source_archive_object = var.deployment_bundle_object_name
   entry_point           = "co.worklytics.psoxy.GCSFileEvent"
   service_account_email = google_service_account.service_account.email
+  labels                = var.default_labels
 
   environment_variables = merge(tomap({
     INPUT_BUCKET  = google_storage_bucket.input-bucket.name,
@@ -193,6 +196,8 @@ resource "google_cloudfunctions_function" "function" {
     event_type = "google.storage.object.finalize"
     resource   = google_storage_bucket.input-bucket.name
   }
+
+
 
 
   lifecycle {
