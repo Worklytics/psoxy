@@ -10,6 +10,11 @@ output "enabled_bulk_connectors" {
   value       = local.enabled_bulk_connectors
 }
 
+output "available_connector_ids" {
+  description = "List of available connector ids"
+  value       = module.worklytics_connector_specs.available_connector_ids
+}
+
 output "todos" {
   value = values(module.source_token_external_todo)[*].todo
 }

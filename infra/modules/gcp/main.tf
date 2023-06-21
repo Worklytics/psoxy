@@ -110,12 +110,18 @@ resource "google_secret_manager_secret_version" "pseudonymization-key_initial_ve
   }
 }
 
-module "psoxy-package" {
+module "psoxy_package" {
   source = "../psoxy-package"
 
   implementation     = "gcp"
   path_to_psoxy_java = "${var.psoxy_base_dir}java"
+  deployment_bundle  = var.deployment_bundle
   force_bundle       = var.force_bundle
+}
+
+moved {
+  from = module.psoxy-package
+  to   = module.psoxy_package
 }
 
 # install test tool, if it exists in expected location
@@ -125,7 +131,7 @@ module "test_tool" {
   source = "../psoxy-test-tool"
 
   path_to_tools = "${var.psoxy_base_dir}tools"
-  psoxy_version = module.psoxy-package.version
+  psoxy_version = module.psoxy_package.version
 }
 
 moved {
@@ -133,10 +139,16 @@ moved {
   to   = module.test_tool[0]
 }
 
+# GCP wants a zip containing a JAR; can't handle JAR directly - so create that here if no bundle
+# was passed into module
+# in effect, this is equivalent to shell command:
+# zip /tmp/deployment_bundle.zip ${module.psoxy_package.path_to_deployment_jar}
 data "archive_file" "source" {
+  count = var.deployment_bundle == null ? 1 : 0
+
   type        = "zip"
-  source_file = module.psoxy-package.path_to_deployment_jar
-  output_path = "/tmp/function.zip"
+  source_file = module.psoxy_package.path_to_deployment_jar
+  output_path = "/tmp/deployment_bundle.zip" # NOTE: this is not writable location in Terraform cloud
 }
 
 # Create bucket that will host the source code
@@ -156,16 +168,19 @@ resource "google_storage_bucket" "artifacts" {
 }
 
 locals {
-  file_name_with_sha1 = replace(module.psoxy-package.filename, ".jar",
-  "_${filesha1(module.psoxy-package.path_to_deployment_jar)}.jar")
+  file_name_with_sha1 = replace(module.psoxy_package.filename, ".jar",
+    "_${filesha1(module.psoxy_package.path_to_deployment_jar)}.zip")
+
+  # NOTE: not a coalesce, bc Terraform evaluates all expressions within coalesce() even if first is non-null
+  bundle_path = var.deployment_bundle == null ? data.archive_file.source[0].output_path : var.deployment_bundle
 }
 
-# Add source code zip to bucket
+# add zipped JAR to bucket
 resource "google_storage_bucket_object" "function" {
   name           = "${var.environment_id_prefix}${local.file_name_with_sha1}"
   content_type   = "application/zip"
   bucket         = google_storage_bucket.artifacts.name
-  source         = data.archive_file.source.output_path
+  source         = local.bundle_path
   detect_md5hash = true
 }
 
@@ -237,16 +252,16 @@ output "secrets" {
 }
 
 output "version" {
-  value = module.psoxy-package.version
+  value = module.psoxy_package.version
 }
 
 output "filename" {
-  value = module.psoxy-package.filename
+  value = module.psoxy_package.filename
 }
 
 output "path_to_deployment_jar" {
   description = "Path to the package to deploy (JAR)."
-  value       = module.psoxy-package.path_to_deployment_jar
+  value       = module.psoxy_package.path_to_deployment_jar
 }
 
 output "psoxy_instance_secret_locker_role_id" {

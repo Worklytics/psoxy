@@ -18,8 +18,7 @@ if ! git --version &> /dev/null ; then
 fi
 
 if ! terraform -v &> /dev/null ; then
-  printf "${RED}Terraform CLI not available.${NC} Psoxy examples / deployment scripts require it. See https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli\n"
-  if $HOMEBREW_AVAILABLE; then printf " or, as you have Homebrew available, run ${BLUE}brew install terraform${NC}\n"; fi
+  printf "${RED}Terraform CLI not available.${NC} Psoxy examples / deployment scripts require it. See ${BLUE}https://developer.hashicorp.com/terraform/downloads${NC} for installation options\n"
   exit 1
 fi
 

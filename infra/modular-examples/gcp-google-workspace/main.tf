@@ -30,11 +30,12 @@ module "psoxy-gcp" {
   source = "../../modules/gcp"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp?ref=v0.4.25"
 
-  project_id      = var.gcp_project_id
-  psoxy_base_dir  = var.psoxy_base_dir
-  force_bundle    = var.force_bundle
-  bucket_location = var.gcp_region
-  default_labels  = var.default_labels
+  project_id        = var.gcp_project_id
+  psoxy_base_dir    = var.psoxy_base_dir
+  deployment_bundle = var.deployment_bundle
+  force_bundle      = var.force_bundle
+  bucket_location   = var.gcp_region
+  default_labels    = var.default_labels
 }
 
 module "google-workspace-connection" {

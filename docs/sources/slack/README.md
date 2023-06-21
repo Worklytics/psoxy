@@ -1,4 +1,11 @@
-### Slack Discovery Setup
+# Slack Discovery API
+
+## Examples
+
+* [Example Rules](example-rules/slack/discovery.yaml)
+* Example Data : [original](api-response-examples/slack) | [sanitized](api-response-examples/slack/sanitized)
+
+## Steps to Connect
 
 For enabling Slack Discovery with the Psoxy you must first set up an app on your Slack Enterprise
 instance.

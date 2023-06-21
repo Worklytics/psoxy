@@ -78,9 +78,6 @@ variable "caller_aws_arns" {
   }
 }
 
-
-
-
 variable "salesforce_domain" {
   type        = string
   description = "Domain of the Salesforce to connect to (only required if using Salesforce connector). To find your My Domain URL, from Setup, in the Quick Find box, enter My Domain, and then select My Domain"
@@ -119,6 +116,12 @@ variable "psoxy_base_dir" {
     condition     = can(regex(".*\\/$", var.psoxy_base_dir))
     error_message = "The psoxy_base_dir value should end with a slash."
   }
+}
+
+variable "deployment_bundle" {
+  type        = string
+  description = "path to deployment bundle to use (if not provided, will build one)"
+  default     = null
 }
 
 variable "force_bundle" {

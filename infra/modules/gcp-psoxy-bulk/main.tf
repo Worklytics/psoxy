@@ -17,7 +17,7 @@ locals {
 locals {
   # legacy pre 0.5 may not pass instance_id
   instance_id         = coalesce(var.instance_id, substr(var.source_kind, 0, local.CLOUD_FUNCTION_NAME_MAX_LENGTH - length(var.environment_id_prefix)))
-  default_sa_name     = coalesce(var.instance_id, substr("fn-${var.source_kind}", 0, local.SA_NAME_MAX_LENGTH - length(var.environment_id_prefix)))
+  default_sa_name     = coalesce("${var.environment_id_prefix}${local.instance_id}", substr("${var.environment_id_prefix}fn-${var.source_kind}", 0, local.SA_NAME_MAX_LENGTH - 3 - length(var.environment_id_prefix)))
   sa_name             = length(local.default_sa_name) < local.SA_NAME_MIN_LENGTH ? "psoxy-${local.default_sa_name}" : local.default_sa_name
   function_name       = "${var.environment_id_prefix}${local.instance_id}"
   command_npm_install = "npm --prefix ${var.psoxy_base_dir}tools/psoxy-test install"

@@ -11,6 +11,7 @@ module "psoxy" {
   project_id              = var.gcp_project_id
   environment_id_prefix   = local.environment_id_prefix
   psoxy_base_dir          = var.psoxy_base_dir
+  deployment_bundle       = var.deployment_bundle
   force_bundle            = var.force_bundle
   bucket_location         = var.gcp_region
   config_parameter_prefix = local.config_parameter_prefix
