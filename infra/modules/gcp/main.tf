@@ -137,10 +137,15 @@ moved {
   to   = module.test_tool[0]
 }
 
+# q: can we eliminate this?? leaves behind a file on local machine
+# historically, were writing it to `/tmp` but that doesn't work on Terraform Cloud
+# could have build script output zip perhaps, but 1) aws is happy with JAR, and 2) unclear
+# what shell command zips the JAR equivalently to archive_file; quick zip/gzip attempts seemed to
+# result in a format that GCP didn't like
 data "archive_file" "source" {
   type        = "zip"
   source_file = module.psoxy_package.path_to_deployment_jar
-  output_path = "/tmp/function.zip"
+  output_path = "deployment_bundle.zip"
 }
 
 # Create bucket that will host the source code
@@ -165,9 +170,12 @@ locals {
 
 # Add source code zip to bucket
 resource "google_storage_bucket_object" "function" {
+  # TODO: name ends in .jar, but it's actually a zipped JAR
+  # (gcp doesn't like straight JAR)
   name           = "${var.environment_id_prefix}${local.file_name_with_sha1}"
   content_type   = "application/zip"
   bucket         = google_storage_bucket.artifacts.name
+  # source         = module.psoxy_package.path_to_deployment_jar
   source         = data.archive_file.source.output_path
   detect_md5hash = true
 }
