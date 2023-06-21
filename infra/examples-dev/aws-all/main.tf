@@ -92,6 +92,7 @@ module "psoxy" {
   aws_account_id                 = var.aws_account_id
   aws_ssm_param_root_path        = var.aws_ssm_param_root_path
   psoxy_base_dir                 = var.psoxy_base_dir
+  deployment_bundle              = var.deployment_bundle
   install_test_tool              = var.install_test_tool
   provision_testing_infra        = var.provision_testing_infra
   force_bundle                   = var.force_bundle
