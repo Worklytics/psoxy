@@ -105,6 +105,18 @@ variable "sanitized_expiration_days" {
   default     = 720
 }
 
+variable "input_bucket_name" {
+  type        = string
+  description = "Name of the bucket to create for input files. If null, one will be generated for you."
+  default     = null
+}
+
+variable "sanitized_bucket_name" {
+  type        = string
+  description = "Name of the bucket to create for sanitized files. If null, one will be generated for you."
+  default     = null
+}
+
 variable "todo_step" {
   type        = number
   description = "of all todos, where does this one logically fall in sequence"

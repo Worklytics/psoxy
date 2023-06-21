@@ -62,3 +62,9 @@ variable "install_test_tool" {
   description = "whether to install the test tool (can be 'false' if Terraform not running from a machine where you intend to run tests of your Psoxy deployment)"
   default     = true
 }
+
+variable "custom_artifacts_bucket_name" {
+  type        = string
+  description = "name of bucket to use for custom artifacts, if you want something other than default"
+  default     = null
+}

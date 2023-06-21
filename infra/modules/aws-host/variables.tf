@@ -153,7 +153,9 @@ variable "custom_api_connector_rules" {
 
 variable "bulk_connectors" {
   type = map(object({
-    source_kind = string
+    source_kind           = string
+    input_bucket_name     = optional(string) # allow override of default bucket name
+    sanitized_bucket_name = optional(string) # allow override of default bucket name
     rules = object({
       pseudonymFormat       = optional(string)
       columnsToRedact       = optional(list(string), [])

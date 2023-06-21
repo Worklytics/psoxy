@@ -101,6 +101,12 @@ variable "replica_regions" {
   ]
 }
 
+variable "custom_artifacts_bucket_name" {
+  type        = string
+  description = "name of bucket to use for custom artifacts, if you want something other than default"
+  default     = null
+}
+
 variable "enabled_connectors" {
   type        = list(string)
   description = "list of ids of connectors to enabled; see modules/worklytics-connector-specs"
@@ -132,7 +138,9 @@ variable "custom_api_connector_rules" {
 
 variable "custom_bulk_connectors" {
   type = map(object({
-    source_kind = string
+    source_kind           =  string
+    input_bucket_name     = optional(string) # allow override of default bucket name
+    sanitized_bucket_name = optional(string) # allow override of default bucket name
     rules = object({
       pseudonymFormat       = optional(string)
       columnsToRedact       = optional(list(string))
@@ -141,7 +149,7 @@ variable "custom_bulk_connectors" {
       columnsToDuplicate    = optional(map(string))
       columnsToRename       = optional(map(string))
     })
-    settings_to_provide = optional(map(string), {})
+    settings_to_provide   = optional(map(string), {})
   }))
   description = "specs of custom bulk connectors to create"
 
@@ -212,6 +220,7 @@ variable "lookup_tables" {
     columns_to_include            = optional(list(string))
     sanitized_accessor_principals = optional(list(string))
     expiration_days               = optional(number)
+    output_bucket_name            = optional(string) # allow override of default bucket name
   }))
   description = "Lookup tables to build from same source input as another connector, output to a distinct bucket. The original `join_key_column` will be preserved, "
 

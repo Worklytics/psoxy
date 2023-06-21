@@ -56,7 +56,7 @@ locals {
 # data input to function
 resource "google_storage_bucket" "input-bucket" {
   project                     = var.project_id
-  name                        = "${local.bucket_prefix}-input"
+  name                        = coalesce(var.input_bucket_name, "${local.bucket_prefix}-input")
   location                    = var.region
   force_destroy               = true
   uniform_bucket_level_access = true
@@ -89,7 +89,8 @@ module "output_bucket" {
   project_id                     = var.project_id
   bucket_write_role_id           = var.bucket_write_role_id
   function_service_account_email = google_service_account.service_account.email
-  bucket_name_prefix             = local.bucket_prefix
+  bucket_name_prefix             = coalesce(var.sanitized_bucket_name, local.bucket_prefix)
+  bucket_name_suffix             = var.sanitized_bucket_name == null ? "-output" : ""
   region                         = var.region
   expiration_days                = var.sanitized_expiration_days
 

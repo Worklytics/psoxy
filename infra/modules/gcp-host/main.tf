@@ -164,6 +164,8 @@ module "bulk_connector" {
   example_file                  = try(each.value.example_file, null)
   input_expiration_days         = var.bulk_input_expiration_days
   sanitized_expiration_days     = var.bulk_sanitized_expiration_days
+  sanitized_bucket_name         = each.value.sanitized_bucket_name
+  output_bucket_name            = each.value.output_bucket_name
 
   environment_variables = merge(
     var.general_environment_variables,
