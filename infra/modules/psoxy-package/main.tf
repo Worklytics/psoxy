@@ -14,6 +14,8 @@
 # known prior to executing the build
 
 data "external" "deployment_package" {
+  count = var.deployment_bundle == null ? 1 : 0
+
   program = [
     "${path.module}/build.sh",
     var.path_to_psoxy_java,
@@ -22,20 +24,27 @@ data "external" "deployment_package" {
   ]
 }
 
+locals {
+  path_to_deployment_jar = coalesce(var.deployment_bundle, try(data.external.deployment_package[0].result.path_to_deployment_jar, "unknown"))
+  filename               = coalesce(var.deployment_bundle, try(data.external.deployment_package[0].result.filename, "unknown"))
+  version                = coalesce(var.deployment_bundle, try(data.external.deployment_package[0].result.version, "unknown"))
+}
+
+
 output "deployment_package_hash" {
   # when `terraform console` used in directory, this output is evaluated before the build script has
   # run so the file doesn't exist yet
-  value = try(filebase64sha256(data.external.deployment_package.result.path_to_deployment_jar), "unknown")
+  value = try(filebase64sha256(local.path_to_deployment_jar), "unknown")
 }
 
 output "path_to_deployment_jar" {
-  value = data.external.deployment_package.result.path_to_deployment_jar
+  value = local.path_to_deployment_jar
 }
 
 output "filename" {
-  value = data.external.deployment_package.result.filename
+  value = local.filename
 }
 
 output "version" {
-  value = data.external.deployment_package.result.version
+  value = local.version
 }

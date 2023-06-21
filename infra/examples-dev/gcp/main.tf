@@ -71,6 +71,7 @@ module "psoxy" {
   config_parameter_prefix        = var.config_parameter_prefix
   worklytics_sa_emails           = var.worklytics_sa_emails
   psoxy_base_dir                 = var.psoxy_base_dir
+  deployment_bundle              = var.deployment_bundle
   force_bundle                   = var.force_bundle
   install_test_tool              = var.install_test_tool
   gcp_region                     = var.gcp_region
