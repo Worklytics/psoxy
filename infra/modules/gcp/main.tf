@@ -137,15 +137,16 @@ moved {
   to   = module.test_tool[0]
 }
 
-# q: can we eliminate this?? leaves behind a file on local machine
-# historically, were writing it to `/tmp` but that doesn't work on Terraform Cloud
-# could have build script output zip perhaps, but 1) aws is happy with JAR, and 2) unclear
-# what shell command zips the JAR equivalently to archive_file; quick zip/gzip attempts seemed to
-# result in a format that GCP didn't like
+# GCP wants a zip containing a JAR; can't handle JAR directly - so create that here if no bundle
+# was passed into module
+# in effect, this is equivalent to shell command:
+# zip /tmp/deployment_bundle.zip ${module.psoxy_package.path_to_deployment_jar}
 data "archive_file" "source" {
+  count = var.deployment_bundle == null ? 1 : 0
+
   type        = "zip"
   source_file = module.psoxy_package.path_to_deployment_jar
-  output_path = "deployment_bundle.zip"
+  output_path = "/tmp/deployment_bundle.zip" # NOTE: this is not writable location in Terraform cloud
 }
 
 # Create bucket that will host the source code
@@ -165,18 +166,15 @@ resource "google_storage_bucket" "artifacts" {
 
 locals {
   file_name_with_sha1 = replace(module.psoxy_package.filename, ".jar",
-  "_${filesha1(module.psoxy_package.path_to_deployment_jar)}.jar")
+  "_${filesha1(module.psoxy_package.path_to_deployment_jar)}.zip")
 }
 
-# Add source code zip to bucket
+# add zipped JAR to bucket
 resource "google_storage_bucket_object" "function" {
-  # TODO: name ends in .jar, but it's actually a zipped JAR
-  # (gcp doesn't like straight JAR)
   name           = "${var.environment_id_prefix}${local.file_name_with_sha1}"
   content_type   = "application/zip"
   bucket         = google_storage_bucket.artifacts.name
-  # source         = module.psoxy_package.path_to_deployment_jar
-  source         = data.archive_file.source.output_path
+  source         = coalesce(var.deployment_bundle, data.archive_file.source[0].output_path)
   detect_md5hash = true
 }
 

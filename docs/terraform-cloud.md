@@ -36,21 +36,38 @@ VERSION=0.4.21
 PATH_TO_DEPLOYMENT_JAR=.terraform/modules/psoxy/java/impl/gcp/target/psoxy-${HOST}-${VERSION}.jar
 
 cp .terraform/modules/psoxy/java/impl/gcp/target/psoxy-${HOST}-${VERSION}.jar .
+
+```
+  6. prepare deployment bundle, based on your platform:
+```shell
+# gcp needs a zip, containing the JAR
+zip psoxy-${HOST}-${VERSION}.zip psoxy-${HOST}-${VERSION}.jar
+git add psoxy-${HOST}-${VERSION}.zip
+DEPLOYMENT_BUNDLE=psoxy-${HOST}-${VERSION}.zip
+
+or, for AWS:
+```shell
+# alternatively, aws just wants the JAR
 git add psoxy-${HOST}-${VERSION}.jar
-git commit -m "JAR to deploy"
-echo "deployment_bundle = \"psoxy-${HOST}-${VERSION}.jar\"" >> terraform.tfvars
+DEPLOYMENT_BUNDLE=psoxy-${HOST}-${VERSION}.j
+```
+
+  7. commit your deployment bundle to repo, and add it to you vars file:
+```shell
+git commit -m "bundle to deploy"
+echo "deployment_bundle = \"${DEPLOYMENT_BUNDLE}\"" >> terraform.tfvars
 echo "install_test_tool = false" >> terraform.tfvars
 ```
-  6. update the following variables in your `terraform.tfvars`, and review all other values:
+  8. update the following variables in your `terraform.tfvars`, and review all other values:
 
 ```hcl
 psoxy_base_dir = ".terraform/modules/psoxy/"
 ```
 
-  7. You'll have to authenticate your Terraform Cloud with Google / AWS / Azure, depending on the
+  9.You'll have to authenticate your Terraform Cloud with Google / AWS / Azure, depending on the
      cloud you're deploying to / data sources you're using.
 
-Repeat steps 5/6  if you ever want to update the version of psoxy that you're deploying.
+Repeat steps 5-7  if you ever want to update the version of psoxy that you're deploying.
 
 ## TODOs as Outputs
 If you're using Terraform Cloud or Enterprise, our convention of writing "TODOs" to the local file
