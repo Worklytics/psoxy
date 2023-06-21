@@ -8,14 +8,15 @@ locals {
 module "psoxy" {
   source = "../../modules/gcp"
 
-  project_id              = var.gcp_project_id
-  environment_id_prefix   = local.environment_id_prefix
-  psoxy_base_dir          = var.psoxy_base_dir
-  deployment_bundle       = var.deployment_bundle
-  force_bundle            = var.force_bundle
-  bucket_location         = var.gcp_region
-  config_parameter_prefix = local.config_parameter_prefix
-  install_test_tool       = var.install_test_tool
+  project_id                   = var.gcp_project_id
+  environment_id_prefix        = local.environment_id_prefix
+  psoxy_base_dir               = var.psoxy_base_dir
+  deployment_bundle            = var.deployment_bundle
+  force_bundle                 = var.force_bundle
+  bucket_location              = var.gcp_region
+  config_parameter_prefix      = local.config_parameter_prefix
+  install_test_tool            = var.install_test_tool
+  custom_artifacts_bucket_name = var.custom_artifacts_bucket_name
 }
 
 # constants
@@ -164,8 +165,8 @@ module "bulk_connector" {
   example_file                  = try(each.value.example_file, null)
   input_expiration_days         = var.bulk_input_expiration_days
   sanitized_expiration_days     = var.bulk_sanitized_expiration_days
-  sanitized_bucket_name         = each.value.sanitized_bucket_name
-  output_bucket_name            = each.value.output_bucket_name
+  sanitized_bucket_name         = try(each.value.sanitized_bucket_name, null)
+  output_bucket_name            = try(each.value.output_bucket_name, null)
 
   environment_variables = merge(
     var.general_environment_variables,
