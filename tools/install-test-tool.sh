@@ -18,6 +18,7 @@ fi
 if npm -v &> /dev/null ; then
   printf "Installing ${BLUE}psoxy-test${NC} tool ...\n"
   npm --no-audit --no-fund --prefix "${TEST_TOOL_ROOT}" install
+  printf "Test tool ${GREEN}successfully${NC} installed test tool at ${GREEN}${TEST_TOOL_ROOT}${NC}\n"
 else
   printf "${RED}NPM / Node.JS not available; could not install test tool. We recommend installing Node.JS ( https://nodejs.org/ ), then re-running this init script.${NC}\n"
 fi

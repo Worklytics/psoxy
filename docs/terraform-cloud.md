@@ -4,8 +4,10 @@ If you're using Terraform Cloud or Enterprise, here are a few things to keep in 
 
 ## Getting Started
 
+After authenticating your terraform CLI to Terraform Cloud/enterprise, you'll need to:
+
   1. Create a Project in Terraform Cloud; and a workspace within the project.
-  2. Clone our repo and run the `.init` script to initialize your `terraform.tfvars`.
+  2. Clone one of our example repos and run the `./init` script to initialize your `terraform.tfvars`. This will also put a bunch of useful tooling on your machine.
   3. Change the terraform backend `main.tf` to point to your Terraform Cloud rather than be local
       - remove `backend` block from `main.tf`
       - add a `cloud` block within the `terraform` block in `main.tf` (obtain content from your Terraform Cloud)
@@ -20,17 +22,13 @@ cp .terraform/modules/psoxy/java/impl/gcp/target/psoxy-gcp-0.4.21.jar .
 git add psoxy-gcp-0.4.21.jar
 git commit -m "JAR to deploy"
 ```
-  6. add the JAR as the value of the `deployment_jar` variable in `terraform.tfvars`:
-```hcl
-deployment_jar = "psoxy-gcp-0.4.21.jar"
-```
-### Variables
+  6. add/update the following variables in your `terraform.tfvars`:
 
 ```hcl
+deployment_jar = "psoxy-gcp-0.4.21.jar" # path to JAR you built above
 psoxy_base_dir = ".terraform/modules/psoxy/"
 install_test_tool = false # no point to install it in remote env like Terraform Cloud
 ```
-
 
 ## TODOs as Outputs
 If you're using Terraform Cloud or Enterprise, our convention of writing "TODOs" to the local file
@@ -88,5 +86,14 @@ terraform output -raw todos_3 > todos_3.md
 As Terraform Cloud runs remotely, the test tool we provide for testing your deployment will not be
 available by default on your local machine. You can install it locally and adapt the suggestions
 from the `todos_2` output variable of your terraform run to test your deployment from your local
-machien or another environment.  See [testing.md](../testing.md) for details.
+machine or another environment.  See [testing.md](../testing.md) for details.
 
+If you have run our `init` script locally (as suggested in 'Getting Started') then the test tool
+*should* have been installed (likely at `.terraform/modules/psoxy/tools/`). You will need to update
+everything in `todos_2.md` to point to this path for those test commands to work.
+
+If you need to directly install/re-install it, something like the following should work:
+
+```shell
+.terraform/modules/psoxy/tools/install-test-tool.sh .terraform/modules/psoxy/tools/
+```
