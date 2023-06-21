@@ -27,6 +27,12 @@ variable "config_parameter_prefix" {
   }
 }
 
+variable "default_labels" {
+  type        = map(string)
+  description = "*Alpha* in v0.4, only respected for new resources. Labels to apply to all resources created by this configuration. Intended to be analogous to AWS providers `default_tags`."
+  default     = {}
+}
+
 variable "worklytics_sa_emails" {
   type        = list(string)
   description = "service accounts for your organization's Worklytics instances (list supported for test/dev scenarios)"

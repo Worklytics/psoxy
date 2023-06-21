@@ -1,6 +1,7 @@
 resource "google_secret_manager_secret" "secret" {
   project   = var.project_id
   secret_id = "${var.path_prefix}${var.secret_name}"
+  labels    = var.default_labels
 
   replication {
     automatic = true

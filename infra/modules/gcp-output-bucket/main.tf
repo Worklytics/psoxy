@@ -5,6 +5,7 @@ resource "google_storage_bucket" "bucket" {
   location                    = var.region
   force_destroy               = true
   uniform_bucket_level_access = true
+  labels                      = var.bucket_labels
 
   lifecycle_rule {
     condition {
