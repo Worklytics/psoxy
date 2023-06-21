@@ -23,6 +23,12 @@ resource "google_secret_manager_secret" "rules" {
   replication {
     automatic = true # why not? nothing secret about it
   }
+
+  lifecycle {
+    ignore_changes = [
+      labels
+    ]
+  }
 }
 
 resource "google_secret_manager_secret_version" "rules" {

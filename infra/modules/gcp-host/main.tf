@@ -216,6 +216,12 @@ resource "google_secret_manager_secret" "additional_transforms" {
   replication {
     automatic = true
   }
+
+  lifecycle {
+    ignore_changes = [
+      labels
+    ]
+  }
 }
 
 resource "google_secret_manager_secret_version" "additional_transforms" {
