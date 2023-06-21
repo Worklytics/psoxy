@@ -17,7 +17,7 @@ variable "config_parameter_prefix" {
 
 variable "instance_id" {
   type        = string
-  description = "id of psoxy instance"
+  description = "id of psoxy instance, given environment"
   default     = null
 }
 
