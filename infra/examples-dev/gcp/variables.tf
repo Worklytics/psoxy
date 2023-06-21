@@ -31,6 +31,27 @@ variable "config_parameter_prefix" {
   default     = ""
 }
 
+variable "default_labels" {
+  type        = map(string)
+  description = "Labels to apply to all resources created by this configuration. Intended to be analogous to AWS providers `default_tags`."
+  default     = {}
+
+  validation {
+    condition     = alltrue([for k, v in var.default_labels : can(regex("^[a-z][a-z0-9-_]{0,62}$", k))])
+    error_message = "GCP label keys must start with a lowercase letter, can contain lowercase letters, numbers, underscores and dashes only and must be no longer than 63 characters."
+  }
+
+  validation {
+    condition     = alltrue([for k, v in var.default_labels : can(regex("^[a-z0-9-_]{0,63}$", v))])
+    error_message = "GCP label values must contain only lowercase letters, numbers, underscores and dashes only and be no longer than 63 characters."
+  }
+
+  validation {
+    condition     = length(var.default_labels) <= 64
+    error_message = "GCP resources cannot have more than 64 labels."
+  }
+}
+
 variable "worklytics_host" {
   type        = string
   description = "host of worklytics instance where tenant resides. (e.g. intl.worklytics.co for prod; but may differ for dev/staging)"
