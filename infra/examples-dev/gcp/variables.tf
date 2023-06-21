@@ -138,7 +138,7 @@ variable "custom_api_connector_rules" {
 
 variable "custom_bulk_connectors" {
   type = map(object({
-    source_kind           =  string
+    source_kind           = string
     input_bucket_name     = optional(string) # allow override of default bucket name
     sanitized_bucket_name = optional(string) # allow override of default bucket name
     rules = object({
@@ -149,7 +149,7 @@ variable "custom_bulk_connectors" {
       columnsToDuplicate    = optional(map(string))
       columnsToRename       = optional(map(string))
     })
-    settings_to_provide   = optional(map(string), {})
+    settings_to_provide = optional(map(string), {})
   }))
   description = "specs of custom bulk connectors to create"
 
@@ -168,7 +168,7 @@ variable "custom_bulk_connectors" {
 }
 
 variable "custom_bulk_connector_rules" {
-  type        = map(object({
+  type = map(object({
     pseudonymFormat       = optional(string, "URL_SAFE_TOKEN")
     columnsToRedact       = optional(list(string))
     columnsToInclude      = optional(list(string))

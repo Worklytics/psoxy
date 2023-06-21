@@ -194,14 +194,14 @@ resource "local_file" "test_all_script" {
 
 echo "Testing API Connectors ..."
 
-%{ for test_script in values(module.api_connector)[*].test_script ~}
+%{for test_script in values(module.api_connector)[*].test_script~}
 ./${test_script}
-%{ endfor }
+%{endfor}
 
 echo "Testing Bulk Connectors ..."
 
-%{ for test_script in values(module.bulk_connector)[*].test_script ~}
+%{for test_script in values(module.bulk_connector)[*].test_script~}
 ./${test_script}
-%{ endfor }
+%{endfor}
 EOF
 }

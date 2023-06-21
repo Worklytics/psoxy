@@ -164,10 +164,10 @@ module "worklytics-psoxy-connection" {
 locals {
   long_access_parameters = { for entry in module.worklytics_connector_specs.enabled_oauth_secrets_to_create : "${entry.connector_name}.${entry.secret_name}" => entry }
   env_vars_for_locker_parameters = { for entry in module.worklytics_connector_specs.enabled_lockable_oauth_secrets_to_create :
-  "${entry.connector_name}.${entry.secret_name}" => entry
+    "${entry.connector_name}.${entry.secret_name}" => entry
   }
   long_access_parameters_by_connector = { for k, spec in module.worklytics_connector_specs.enabled_oauth_long_access_connectors :
-  k => [for secret in spec.secured_variables : "${k}.${secret.name}"]
+    k => [for secret in spec.secured_variables : "${k}.${secret.name}"]
   }
 }
 
@@ -210,7 +210,7 @@ module "long-auth-token-secret-fill-instructions" {
 }
 
 module "source_token_external_todo" {
-    for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors_todos
+  for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors_todos
 
   source = "../../modules/source-token-external-todo"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/source-token-external-todo?ref=v0.4.25"

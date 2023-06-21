@@ -21,8 +21,8 @@ module "psoxy" {
 
 # constants
 locals {
-  SA_NAME_MIN_LENGTH             = 6
-  SA_NAME_MAX_LENGTH             = 30
+  SA_NAME_MIN_LENGTH = 6
+  SA_NAME_MAX_LENGTH = 30
 }
 
 # BEGIN API CONNECTORS
@@ -44,7 +44,7 @@ locals {
   }
   lockable_secrets = flatten([
     for instance_id, secrets in local.secrets_to_provision :
-      [ for secret_id, secret in values(secrets) : secret if secret.lockable ]
+    [for secret_id, secret in values(secrets) : secret if secret.lockable]
   ])
 }
 
@@ -277,15 +277,15 @@ resource "local_file" "test_all_script" {
 
 echo "Testing API Connectors ..."
 
-%{ for test_script in values(module.api_connector)[*].test_script ~}
+%{for test_script in values(module.api_connector)[*].test_script~}
 ./${test_script}
-%{ endfor }
+%{endfor}
 
 echo "Testing Bulk Connectors ..."
 
-%{ for test_script in values(module.bulk_connector)[*].test_script ~}
+%{for test_script in values(module.bulk_connector)[*].test_script~}
 ./${test_script}
-%{ endfor }
+%{endfor}
 EOF
 }
 

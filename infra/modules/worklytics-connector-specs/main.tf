@@ -785,11 +785,11 @@ locals {
   }
 
   enabled_lockable_oauth_secrets_to_create = distinct(flatten([
-  for k, v in local.enabled_oauth_long_access_connectors : [
-  for secret_var in v.secured_variables : {
-    connector_name = k
-    secret_name    = secret_var.name
-  } if try(secret_var.lockable, false) == true
-  ]
+    for k, v in local.enabled_oauth_long_access_connectors : [
+      for secret_var in v.secured_variables : {
+        connector_name = k
+        secret_name    = secret_var.name
+      } if try(secret_var.lockable, false) == true
+    ]
   ]))
 }
