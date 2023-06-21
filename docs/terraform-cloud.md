@@ -2,6 +2,35 @@
 
 If you're using Terraform Cloud or Enterprise, here are a few things to keep in mind.
 
+## Getting Started
+
+  1. Create a Project in Terraform Cloud; and a workspace within the project.
+  2. Clone our repo and run the `.init` script to initialize your `terraform.tfvars`.
+  3. Change the terraform backend `main.tf` to point to your Terraform Cloud rather than be local
+      - remove `backend` block from `main.tf`
+      - add a `cloud` block within the `terraform` block in `main.tf` (obtain content from your Terraform Cloud)
+  4. run `terraform init` to migrate the initial "local" state to the remote state in Terraform Cloud
+  5. build the JAR for deployment:
+```shell
+.terraform/modules/psoxy/infra/modules/psoxy-package/build.sh .terraform/modules/psoxy/java/ gcp
+# take value of `path_to_deployment_jar` from output of above command, copy it to the root of your repo
+cp .terraform/modules/psoxy/java/impl/gcp/target/psoxy-gcp-0.4.21.jar .
+
+# commit it
+git add psoxy-gcp-0.4.21.jar
+git commit -m "JAR to deploy"
+```
+  6. add the JAR as the value of the `deployment_jar` variable in `terraform.tfvars`:
+```hcl
+deployment_jar = "psoxy-gcp-0.4.21.jar"
+```
+### Variables
+
+```hcl
+psoxy_base_dir = ".terraform/modules/psoxy/"
+install_test_tool = false # no point to install it in remote env like Terraform Cloud
+```
+
 
 ## TODOs as Outputs
 If you're using Terraform Cloud or Enterprise, our convention of writing "TODOs" to the local file

@@ -108,12 +108,18 @@ resource "google_secret_manager_secret_version" "pseudonymization-key_initial_ve
   }
 }
 
-module "psoxy-package" {
+module "psoxy_package" {
   source = "../psoxy-package"
 
   implementation     = "gcp"
   path_to_psoxy_java = "${var.psoxy_base_dir}java"
+  deployment_bundle  = var.deployment_bundle
   force_bundle       = var.force_bundle
+}
+
+moved {
+  from = module.psoxy-package
+  to   = module.psoxy_package
 }
 
 # install test tool, if it exists in expected location
@@ -123,7 +129,7 @@ module "test_tool" {
   source = "../psoxy-test-tool"
 
   path_to_tools = "${var.psoxy_base_dir}tools"
-  psoxy_version = module.psoxy-package.version
+  psoxy_version = module.psoxy_package.version
 }
 
 moved {
@@ -133,7 +139,7 @@ moved {
 
 data "archive_file" "source" {
   type        = "zip"
-  source_file = module.psoxy-package.path_to_deployment_jar
+  source_file = module.psoxy_package.path_to_deployment_jar
   output_path = "/tmp/function.zip"
 }
 
@@ -153,8 +159,8 @@ resource "google_storage_bucket" "artifacts" {
 }
 
 locals {
-  file_name_with_sha1 = replace(module.psoxy-package.filename, ".jar",
-  "_${filesha1(module.psoxy-package.path_to_deployment_jar)}.jar")
+  file_name_with_sha1 = replace(module.psoxy_package.filename, ".jar",
+  "_${filesha1(module.psoxy_package.path_to_deployment_jar)}.jar")
 }
 
 # Add source code zip to bucket
@@ -234,16 +240,16 @@ output "secrets" {
 }
 
 output "version" {
-  value = module.psoxy-package.version
+  value = module.psoxy_package.version
 }
 
 output "filename" {
-  value = module.psoxy-package.filename
+  value = module.psoxy_package.filename
 }
 
 output "path_to_deployment_jar" {
   description = "Path to the package to deploy (JAR)."
-  value       = module.psoxy-package.path_to_deployment_jar
+  value       = module.psoxy_package.path_to_deployment_jar
 }
 
 output "psoxy_instance_secret_locker_role_id" {

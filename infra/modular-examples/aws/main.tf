@@ -52,6 +52,7 @@ module "psoxy_aws" {
   aws_account_id                 = var.aws_account_id
   region                         = data.aws_region.current.id
   psoxy_base_dir                 = var.psoxy_base_dir
+  deployment_bundle              = var.deployment_bundle
   caller_aws_arns                = var.caller_aws_arns
   caller_gcp_service_account_ids = var.caller_gcp_service_account_ids
   force_bundle                   = var.force_bundle
