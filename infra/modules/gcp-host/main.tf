@@ -15,6 +15,7 @@ module "psoxy" {
   bucket_location         = var.gcp_region
   config_parameter_prefix = local.config_parameter_prefix
   install_test_tool       = var.install_test_tool
+  default_labels          = var.default_labels
 }
 
 # constants
@@ -58,6 +59,7 @@ module "secrets" {
   secret_project = var.gcp_project_id
   path_prefix    = local.config_parameter_prefix
   secrets        = local.secrets_to_provision[each.key]
+  default_labels = var.default_labels
 }
 
 resource "google_secret_manager_secret_iam_member" "grant_sa_updater_on_lockable_secrets" {
@@ -113,6 +115,7 @@ module "api_connector" {
   oauth_scopes                          = try(each.value.oauth_scopes_needed, [])
   config_parameter_prefix               = local.config_parameter_prefix
   invoker_sa_emails                     = var.worklytics_sa_emails
+  default_labels                        = var.default_labels
 
   environment_variables = merge(
     var.general_environment_variables,
@@ -133,12 +136,13 @@ module "api_connector" {
 }
 
 module "custom_api_connector_rules" {
-  source = "../../modules/gcp-sm-rules"
-
   for_each = var.custom_api_connector_rules
 
-  prefix    = "${local.config_parameter_prefix}${upper(replace(each.key, "-", "_"))}_"
-  file_path = each.value
+  source = "../../modules/gcp-sm-rules"
+
+  prefix         = "${local.config_parameter_prefix}${upper(replace(each.key, "-", "_"))}_"
+  file_path      = each.value
+  default_labels = var.default_labels
 }
 # END API CONNECTORS
 
@@ -163,6 +167,7 @@ module "bulk_connector" {
   example_file                  = try(each.value.example_file, null)
   input_expiration_days         = var.bulk_input_expiration_days
   sanitized_expiration_days     = var.bulk_sanitized_expiration_days
+  default_labels                = var.default_labels
 
   environment_variables = merge(
     var.general_environment_variables,
@@ -191,6 +196,7 @@ module "lookup_output" {
   bucket_name_suffix             = "-lookup" # TODO: what if multiple lookups from same source??
   expiration_days                = each.value.expiration_days
   sanitizer_accessor_principals  = each.value.sanitized_accessor_principals
+  bucket_labels                  = var.default_labels
 }
 
 locals {
@@ -204,6 +210,7 @@ resource "google_secret_manager_secret" "additional_transforms" {
 
   project   = var.gcp_project_id
   secret_id = "${local.config_parameter_prefix}${upper(replace(each.key, "-", "_"))}_ADDITIONAL_TRANSFORMS"
+  labels    = var.default_labels
 
   replication {
     automatic = true

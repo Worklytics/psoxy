@@ -18,6 +18,7 @@ locals {
 
 resource "google_secret_manager_secret" "rules" {
   secret_id = "${var.prefix}RULES"
+  labels    = var.default_labels
 
   replication {
     automatic = true # why not? nothing secret about it
