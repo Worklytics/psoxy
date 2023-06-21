@@ -166,7 +166,10 @@ resource "google_storage_bucket" "artifacts" {
 
 locals {
   file_name_with_sha1 = replace(module.psoxy_package.filename, ".jar",
-  "_${filesha1(module.psoxy_package.path_to_deployment_jar)}.zip")
+    "_${filesha1(module.psoxy_package.path_to_deployment_jar)}.zip")
+
+  # NOTE: not a coalesce, bc Terraform evaluates all expressions within coalesce() even if first is non-null
+  bundle_path = var.deployment_bundle == null ? data.archive_file.source[0].output_path : var.deployment_bundle
 }
 
 # add zipped JAR to bucket
@@ -174,7 +177,7 @@ resource "google_storage_bucket_object" "function" {
   name           = "${var.environment_id_prefix}${local.file_name_with_sha1}"
   content_type   = "application/zip"
   bucket         = google_storage_bucket.artifacts.name
-  source         = coalesce(var.deployment_bundle, data.archive_file.source[0].output_path)
+  source         = local.bundle_path
   detect_md5hash = true
 }
 
