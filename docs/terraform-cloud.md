@@ -2,7 +2,15 @@
 
 If you're using Terraform Cloud or Enterprise, here are a few things to keep in mind.
 
+NOTE: this is tested only for gcp; for aws YMMV, and in particular we expect Microsoft 365 sources
+will not work properly, given how those are authenticated.
+
 ## Getting Started
+
+Prereqs:
+  - git/java/maven, as described here https://github.com/Worklytics/psoxy#required-software-and-permissions
+  - for testing, you'll need the CLI of your host environment (eg, AWS CLI, GCloud CLI, Azure CLI)
+    as well as npm/NodeJS installed on your local machine
 
 After authenticating your terraform CLI to Terraform Cloud/enterprise, you'll need to:
 
@@ -14,21 +22,31 @@ After authenticating your terraform CLI to Terraform Cloud/enterprise, you'll ne
   4. run `terraform init` to migrate the initial "local" state to the remote state in Terraform Cloud
   5. build the JAR for deployment:
 ```shell
-.terraform/modules/psoxy/infra/modules/psoxy-package/build.sh .terraform/modules/psoxy/java/ gcp
-# take value of `path_to_deployment_jar` from output of above command, copy it to the root of your repo
-cp .terraform/modules/psoxy/java/impl/gcp/target/psoxy-gcp-0.4.21.jar .
+HOST=gcp # change to 'aws' if deploying to AWS
+VERSION=0.4.21 # should match what's in your `main.tf`
 
-# commit it
-git add psoxy-gcp-0.4.21.jar
+.terraform/modules/psoxy/infra/modules/psoxy-package/build.sh .terraform/modules/psoxy/java/ $HOST
+
+# take value of `path_to_deployment_jar` from output of above command, copy it to the root of your
+# repo, and commit it
+PATH_TO_DEPLOYMENT_JAR=.terraform/modules/psoxy/java/impl/gcp/target/psoxy-${HOST}-${VERSION}.jar
+
+cp .terraform/modules/psoxy/java/impl/gcp/target/psoxy-${HOST}-${VERSION}.jar .
+git add psoxy-${HOST}-${VERSION}.jar
 git commit -m "JAR to deploy"
+echo "deployment_jar = \"psoxy-${HOST}-${VERSION}.jar\"" >> terraform.tfvars
+echo "install_test_tool = false" >> terraform.tfvars
 ```
-  6. add/update the following variables in your `terraform.tfvars`:
+  6. update the following variables in your `terraform.tfvars`, and review all other values:
 
 ```hcl
-deployment_jar = "psoxy-gcp-0.4.21.jar" # path to JAR you built above
 psoxy_base_dir = ".terraform/modules/psoxy/"
-install_test_tool = false # no point to install it in remote env like Terraform Cloud
 ```
+
+  7. You'll have to authenticate your Terraform Cloud with Google / AWS / Azure, depending on the
+     cloud you're deploying to / data sources you're using.
+
+Repeat steps 5/6  if you ever want to update the version of psoxy that you're deploying.
 
 ## TODOs as Outputs
 If you're using Terraform Cloud or Enterprise, our convention of writing "TODOs" to the local file
