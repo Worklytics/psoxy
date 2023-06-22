@@ -179,6 +179,7 @@ if [ "$DEPLOYMENT_ENV" == "terraform_cloud" ]; then
 
   if [ "$HOST_PLATFORM" == "gcp" ]; then
     zip psoxy-${HOST_PLATFORM}-${RELEASE_VERSION}.zip psoxy-${HOST_PLATFORM}-${RELEASE_VERSION}.jar
+    rm psoxy-${HOST_PLATFORM}-${RELEASE_VERSION}.jar
     DEPLOYMENT_BUNDLE="psoxy-${HOST_PLATFORM}-${RELEASE_VERSION}.zip"
   else
     DEPLOYMENT_BUNDLE="psoxy-${HOST_PLATFORM}-${RELEASE_VERSION}.jar"
