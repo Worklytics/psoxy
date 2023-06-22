@@ -8,6 +8,12 @@ DEPLOYMENT_ENV=${3:-"local"}
 
 SCRIPT_VERSION="v0.4.26"
 
+
+if [ -z "$PSOXY_BASE_DIR" ]; then
+  printf "Usage: init-tfvars.sh <path-to-terraform.tfvars> <path-to-psoxy-base-directory> [DEPLOYMENT_ENV]\n"
+  exit 1
+fi
+
 # colors
 RED='\e[0;31m'
 BLUE='\e[0;34m'
@@ -171,6 +177,12 @@ fi
 if [ "$DEPLOYMENT_ENV" == "terraform_cloud" ]; then
   # need to build the JAR now, to ship with the proxy
   ${PSOXY_BASE_DIR}tools/update-bundle.sh $PSOXY_BASE_DIR $TFVARS_FILE $HOST_PLATFORM
+fi
+
+[[ -f variables.tf ]] && grep -q '^variable "environment_name"' variables.tf
+if [[ $? -eq 0 ]]; then
+  printf "# environment_name is used to name resources provisioned by this Terraform configuration\n" >> $TFVARS_FILE
+  printf "environment_name =\"psoxy\"\"\n\n" >> $TFVARS_FILE
 fi
 
 printf "\n\n"
