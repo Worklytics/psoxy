@@ -7,7 +7,6 @@ PSOXY_BASE_DIR=$2
 DEPLOYMENT_ENV=${3:-"local"}
 
 SCRIPT_VERSION="v0.4.26"
-RELEASE_VERSION=$(sed -n -e 's/.*<revision>\(.*\)<\/revision>.*/\1/p' "${PSOXY_BASE_DIR}java/pom.xml")
 
 # colors
 RED='\e[0;31m'
@@ -171,7 +170,7 @@ fi
 
 if [ "$DEPLOYMENT_ENV" == "terraform_cloud" ]; then
   # need to build the JAR now, to ship with the proxy
-  ${PSOXY_BASE_DIR}tools/update-bundle.sh $PSOXY_BASE_DIR $TFVARS_FILE $HOST_PLATFORM $RELEASE_VERSION
+  ${PSOXY_BASE_DIR}tools/update-bundle.sh $PSOXY_BASE_DIR $TFVARS_FILE $HOST_PLATFORM
 fi
 
 printf "\n\n"
