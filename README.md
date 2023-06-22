@@ -223,8 +223,13 @@ Subsystem for Linux (WSL) platforms.
   3. Pick the location from which you will deploy (provision) the psoxy instance. This location will
      need the software prereqs defined in the previous section. Some suggestions:
 
-        - [Google Cloud Shell](https://cloud.google.com/shell/) - if you're using GCP or connecting to
-          Google Workspace, this is a recommended option. It [includes the prereqs above](https://cloud.google.com/shell/docs/how-cloud-shell-works#tools) EXCEPT aws/azure CLIs.
+        - your local machine; if you have the prereqs installed and can authenticate it with your
+          host platform (AWS/GCP) as a sufficiently privileged user/role, this is a simple option
+        - [Google Cloud Shell](https://cloud.google.com/shell/) - if you're using GCP and/or connecting to
+          Google Workspace, this is option simplifies authentication. It [includes the prereqs above](https://cloud.google.com/shell/docs/how-cloud-shell-works#tools)
+          EXCEPT aws/azure CLIs out-of-the-box.
+        - [Terraform Cloud](docs/terraform-cloud.md) - this works, but adds complexity of
+          authenticating it with you host platform (AWS/GCP)
         - Ubuntu Linux VM/Container - we provide some setup instructions covering [prereq installation](docs/prereqs-ubuntu.md)
           for Ubuntu variants of Linux, and specific authentication help for:
           - [EC2](docs/aws/getting-started.md)
