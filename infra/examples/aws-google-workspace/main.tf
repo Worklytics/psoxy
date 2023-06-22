@@ -88,6 +88,9 @@ module "psoxy" {
   salesforce_domain              = var.salesforce_domain
   bulk_sanitized_expiration_days = var.bulk_sanitized_expiration_days
   bulk_input_expiration_days     = var.bulk_input_expiration_days
+  jira_server_url                = var.jira_server_url
+  jira_cloud_id                  = var.jira_cloud_id
+  example_jira_issue_id          = var.example_jira_issue_id
 }
 
 # rename done in v0.4.15

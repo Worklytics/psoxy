@@ -73,11 +73,11 @@ module "psoxy" {
   pseudonymize_app_ids           = var.pseudonymize_app_ids
   general_environment_variables  = var.general_environment_variables
   salesforce_domain              = var.salesforce_domain
+  bulk_sanitized_expiration_days = var.bulk_sanitized_expiration_days
+  bulk_input_expiration_days     = var.bulk_input_expiration_days
   jira_server_url                = var.jira_server_url
   jira_cloud_id                  = var.jira_cloud_id
   example_jira_issue_id          = var.example_jira_issue_id
-  bulk_sanitized_expiration_days = var.bulk_sanitized_expiration_days
-  bulk_input_expiration_days     = var.bulk_input_expiration_days
   #  aws_ssm_key_id                 = aws_kms_key.key.key_id
 }
 

@@ -85,6 +85,11 @@ variable "environment_name" {
   type        = string
   description = "qualifier to append to name of project that will host your psoxy instance"
   default     = ""
+
+  validation {
+    condition     = !can(regex("^(?i)(aws|ssm)", var.environment_name))
+    error_message = "The `environment_name` cannot start with 'aws' or 'ssm', as this will name your AWS resources with prefixes that displease the AMZN overlords."
+  }
 }
 
 variable "connector_display_name_suffix" {
@@ -265,4 +270,22 @@ variable "salesforce_domain" {
   type        = string
   description = "Domain of the Salesforce to connect to (only required if using Salesforce connector). To find your My Domain URL, from Setup, in the Quick Find box, enter My Domain, and then select My Domain"
   default     = ""
+}
+
+variable "jira_server_url" {
+  type        = string
+  default     = null
+  description = "(Only required if using Jira Server connector) URL of the Jira server (ex: myjiraserver.mycompany.com)"
+}
+
+variable "jira_cloud_id" {
+  type        = string
+  default     = null
+  description = "(Only required if using Jira Cloud connector) Cloud id of the Jira Cloud to connect to (ex: 1324a887-45db-1bf4-1e99-ef0ff456d421)."
+}
+
+variable "example_jira_issue_id" {
+  type        = string
+  default     = null
+  description = "(Only required if using Jira Server/Cloud connector) Id of an issue for only to be used as part of example calls for Jira (ex: ETV-12)"
 }

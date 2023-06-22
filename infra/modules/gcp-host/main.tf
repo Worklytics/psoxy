@@ -17,7 +17,7 @@ module "psoxy" {
   config_parameter_prefix      = local.config_parameter_prefix
   install_test_tool            = var.install_test_tool
   custom_artifacts_bucket_name = var.custom_artifacts_bucket_name
-  default_labels          = var.default_labels
+  default_labels               = var.default_labels
 }
 
 # constants
