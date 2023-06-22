@@ -8,21 +8,22 @@ locals {
 module "psoxy" {
   source = "../../modules/gcp"
 
-  project_id              = var.gcp_project_id
-  environment_id_prefix   = local.environment_id_prefix
-  psoxy_base_dir          = var.psoxy_base_dir
-  deployment_bundle       = var.deployment_bundle
-  force_bundle            = var.force_bundle
-  bucket_location         = var.gcp_region
-  config_parameter_prefix = local.config_parameter_prefix
-  install_test_tool       = var.install_test_tool
+  project_id                   = var.gcp_project_id
+  environment_id_prefix        = local.environment_id_prefix
+  psoxy_base_dir               = var.psoxy_base_dir
+  deployment_bundle            = var.deployment_bundle
+  force_bundle                 = var.force_bundle
+  bucket_location              = var.gcp_region
+  config_parameter_prefix      = local.config_parameter_prefix
+  install_test_tool            = var.install_test_tool
+  custom_artifacts_bucket_name = var.custom_artifacts_bucket_name
   default_labels          = var.default_labels
 }
 
 # constants
 locals {
-  SA_NAME_MIN_LENGTH             = 6
-  SA_NAME_MAX_LENGTH             = 30
+  SA_NAME_MIN_LENGTH = 6
+  SA_NAME_MAX_LENGTH = 30
 }
 
 # BEGIN API CONNECTORS
@@ -44,7 +45,7 @@ locals {
   }
   lockable_secrets = flatten([
     for instance_id, secrets in local.secrets_to_provision :
-      [ for secret_id, secret in values(secrets) : secret if secret.lockable ]
+    [for secret_id, secret in values(secrets) : secret if secret.lockable]
   ])
 }
 
@@ -168,7 +169,10 @@ module "bulk_connector" {
   example_file                  = try(each.value.example_file, null)
   input_expiration_days         = var.bulk_input_expiration_days
   sanitized_expiration_days     = var.bulk_sanitized_expiration_days
+  input_bucket_name             = try(each.value.input_bucket_name, null)
+  sanitized_bucket_name         = try(each.value.sanitized_bucket_name, null)
   default_labels                = var.default_labels
+
 
   environment_variables = merge(
     var.general_environment_variables,
@@ -287,15 +291,15 @@ resource "local_file" "test_all_script" {
 
 echo "Testing API Connectors ..."
 
-%{ for test_script in values(module.api_connector)[*].test_script ~}
+%{for test_script in values(module.api_connector)[*].test_script~}
 ./${test_script}
-%{ endfor }
+%{endfor}
 
 echo "Testing Bulk Connectors ..."
 
-%{ for test_script in values(module.bulk_connector)[*].test_script ~}
+%{for test_script in values(module.bulk_connector)[*].test_script~}
 ./${test_script}
-%{ endfor }
+%{endfor}
 EOF
 }
 

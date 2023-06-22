@@ -97,6 +97,12 @@ variable "replica_regions" {
   ]
 }
 
+variable "custom_artifacts_bucket_name" {
+  type        = string
+  description = "name of bucket to use for custom artifacts, if you want something other than default"
+  default     = null
+}
+
 variable "api_connectors" {
   type = map(object({
     source_kind                           = string
@@ -128,7 +134,9 @@ variable "custom_api_connector_rules" {
 
 variable "bulk_connectors" {
   type = map(object({
-    source_kind = string
+    source_kind           = string
+    input_bucket_name     = optional(string) # allow override of default bucket name
+    sanitized_bucket_name = optional(string) # allow override of default bucket name
     rules = object({
       pseudonymFormat       = optional(string)
       columnsToRedact       = optional(list(string), [])
@@ -163,7 +171,7 @@ variable "bulk_sanitized_expiration_days" {
 }
 
 variable "custom_bulk_connector_rules" {
-  type        = map(object({
+  type = map(object({
     pseudonymFormat       = optional(string, "URL_SAFE_TOKEN")
     columnsToRedact       = optional(list(string))
     columnsToInclude      = optional(list(string))

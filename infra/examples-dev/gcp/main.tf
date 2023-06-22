@@ -87,6 +87,7 @@ module "psoxy" {
   bulk_sanitized_expiration_days = var.bulk_sanitized_expiration_days
   custom_bulk_connector_rules    = var.custom_bulk_connector_rules
   lookup_tables                  = var.lookup_tables
+  custom_artifacts_bucket_name   = var.custom_artifacts_bucket_name
   todo_step                      = max(module.worklytics_connectors.next_todo_step, module.worklytics_connectors_google_workspace.next_todo_step)
 }
 

@@ -154,7 +154,7 @@ data "archive_file" "source" {
 # Create bucket that will host the source code
 resource "google_storage_bucket" "artifacts" {
   project       = var.project_id
-  name          = "${var.project_id}-${var.environment_id_prefix}artifacts-bucket"
+  name          = coalesce(var.custom_artifacts_bucket_name, "${var.project_id}-${var.environment_id_prefix}artifacts-bucket")
   location      = var.bucket_location
   force_destroy = true
   labels        = var.default_labels
@@ -169,7 +169,7 @@ resource "google_storage_bucket" "artifacts" {
 
 locals {
   file_name_with_sha1 = replace(module.psoxy_package.filename, ".jar",
-    "_${filesha1(module.psoxy_package.path_to_deployment_jar)}.zip")
+  "_${filesha1(module.psoxy_package.path_to_deployment_jar)}.zip")
 
   # NOTE: not a coalesce, bc Terraform evaluates all expressions within coalesce() even if first is non-null
   bundle_path = var.deployment_bundle == null ? data.archive_file.source[0].output_path : var.deployment_bundle

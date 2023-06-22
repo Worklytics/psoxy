@@ -213,7 +213,7 @@ variable "custom_bulk_connectors" {
 }
 
 variable "custom_bulk_connector_rules" {
-  type        = map(object({
+  type = map(object({
     pseudonymFormat       = optional(string, "URL_SAFE_TOKEN")
     columnsToRedact       = optional(list(string))
     columnsToInclude      = optional(list(string))
