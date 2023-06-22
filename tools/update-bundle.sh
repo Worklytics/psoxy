@@ -37,6 +37,7 @@ fi
 printf "Deployment bundle built: ${BLUE}${DEPLOYMENT_BUNDLE}${NC}. You should commit this to your repo.\n"
 
 echo "#!/bin/bash" > ./update-bundle
+printf "\n# Use this script rebuild your deployment bundle and update your terraform.tfvars to use the new one\n" >> ./update-bundle
 echo "${0} ${@}" >> ./update-bundle
 chmod +x update-bundle
 
