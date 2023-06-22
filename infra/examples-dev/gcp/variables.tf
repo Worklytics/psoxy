@@ -81,6 +81,11 @@ variable "deployment_bundle" {
   type        = string
   description = "path to deployment bundle to use (if not provided, will build one)"
   default     = null
+
+  validation {
+    condition     = var.deployment_bundle == null || var.deployment_bundle != ""
+    error_message = "`deployment_bundle`, if non-null, must be non-empty string."
+  }
 }
 
 variable "force_bundle" {
