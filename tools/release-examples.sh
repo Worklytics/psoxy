@@ -14,3 +14,8 @@ for file in "${FILES_TO_COPY[@]}"
 do
   cp -f ${DEV_EXAMPLE_PATH}/${file} ${EXAMPLE_TEMPLATE_REPO}/${file}
 done
+
+cp -f ./init-example.sh ${EXAMPLE_TEMPLATE_REPO}/init
+cp -f ./check-prereqs.sh ${EXAMPLE_TEMPLATE_REPO}/check-prereqs
+chmod +x ${EXAMPLE_TEMPLATE_REPO}/init
+chmod +x ${EXAMPLE_TEMPLATE_REPO}/check-prereqs
