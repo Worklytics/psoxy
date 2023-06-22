@@ -4,6 +4,7 @@
 
 TFVARS_FILE=$1
 PSOXY_BASE_DIR=$2
+DEPLOYMENT_ENV=${3:-"local"}
 
 RELEASE_VERSION="v0.4.26"
 
@@ -154,6 +155,19 @@ fi
 AVAILABLE_CONNECTORS=$(echo "local.available_connector_ids" | terraform -chdir="${PSOXY_BASE_DIR}infra/modules/worklytics-connector-specs" console)
 printf "# review following list of connectors to enable, and comment out what you don't want\n" >> $TFVARS_FILE
 printf "enabled_connectors = ${AVAILABLE_CONNECTORS}\n\n" >> $TFVARS_FILE
+
+printf "\n"
+
+if [ "$DEPLOYMENT_ENV" != "local" ]; then
+  printf "Setting ${BLUE}install_test_tool=false${NC} and ${BLUE}todos_as_outputs=true${NC}, because your ${BLUE}terraform apply${NC} will run remotely.\n"
+
+  echo "install_test_tool = false" >> $TFVARS_FILE
+  echo "todos_as_outputs = true" >> $TFVARS_FILE
+fi
+
+printf "\n\n"
+
+
 
 # give user some feedback
 printf "Initialized example terraform vars file. Please open ${BLUE}${TFVARS_FILE}${NC} and customize it to your needs.\n"

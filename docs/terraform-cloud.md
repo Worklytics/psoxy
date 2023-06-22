@@ -16,6 +16,9 @@ After authenticating your terraform CLI to Terraform Cloud/enterprise, you'll ne
 
   1. Create a Project in Terraform Cloud; and a workspace within the project.
   2. Clone one of our example repos and run the `./init` script to initialize your `terraform.tfvars`. This will also put a bunch of useful tooling on your machine.
+```shell
+./init terraform_cloud
+```
   3. Change the terraform backend `main.tf` to point to your Terraform Cloud rather than be local
       - remove `backend` block from `main.tf`
       - add a `cloud` block within the `terraform` block in `main.tf` (obtain content from your Terraform Cloud)
@@ -56,15 +59,9 @@ DEPLOYMENT_BUNDLE=psoxy-${HOST}-${VERSION}.j
 ```shell
 git commit -m "bundle to deploy"
 echo "deployment_bundle = \"${DEPLOYMENT_BUNDLE}\"" >> terraform.tfvars
-echo "install_test_tool = false" >> terraform.tfvars
-```
-  8. update the following variables in your `terraform.tfvars`, and review all other values:
-
-```hcl
-psoxy_base_dir = ".terraform/modules/psoxy/"
 ```
 
-  9.You'll have to authenticate your Terraform Cloud with Google / AWS / Azure, depending on the
+  8. You'll have to authenticate your Terraform Cloud with Google / AWS / Azure, depending on the
      cloud you're deploying to / data sources you're using.
 
 Repeat steps 5-7  if you ever want to update the version of psoxy that you're deploying.
