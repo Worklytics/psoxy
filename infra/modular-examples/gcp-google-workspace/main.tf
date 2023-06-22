@@ -35,6 +35,7 @@ module "psoxy-gcp" {
   deployment_bundle = var.deployment_bundle
   force_bundle      = var.force_bundle
   bucket_location   = var.gcp_region
+  default_labels    = var.default_labels
 }
 
 module "google-workspace-connection" {
@@ -72,6 +73,7 @@ module "google-workspace-key-secrets" {
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-secrets?ref=v0.4.25"
 
   secret_project = var.gcp_project_id
+  default_labels = var.default_labels
   secrets = {
     "PSOXY_${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY" : {
       value       = module.google-workspace-connection-auth[each.key].key_value
@@ -126,6 +128,7 @@ module "psoxy-google-workspace-connector" {
   source_auth_strategy                  = each.value.source_auth_strategy
   oauth_scopes                          = try(each.value.oauth_scopes_needed, [])
   invoker_sa_emails                     = var.worklytics_sa_emails
+  default_labels                        = var.default_labels
 
   environment_variables = merge(
     var.general_environment_variables,
@@ -188,6 +191,7 @@ module "connector-oauth" {
   secret_name           = "PSOXY_${upper(replace(each.value.connector_name, "-", "_"))}_${upper(each.value.secret_name)}"
   project_id            = var.gcp_project_id
   service_account_email = google_service_account.long_auth_connector_sa[each.value.connector_name].email
+  default_labels        = var.default_labels
 }
 
 resource "google_secret_manager_secret_iam_member" "grant_sa_updater_on_secret" {
@@ -243,6 +247,7 @@ module "connector-long-auth-function" {
   source_auth_strategy          = each.value.source_auth_strategy
   oauth_scopes                  = try(each.value.oauth_scopes_needed, [])
   invoker_sa_emails             = var.worklytics_sa_emails
+  default_labels                = var.default_labels
 
   environment_variables = merge(
     var.general_environment_variables,
@@ -300,6 +305,7 @@ module "psoxy-gcp-bulk" {
   example_file                  = try(each.value.example_file, null)
   input_expiration_days         = var.bulk_input_expiration_days
   sanitized_expiration_days     = var.bulk_sanitized_expiration_days
+  default_labels                = var.default_labels
 
   environment_variables = merge(
     var.general_environment_variables,

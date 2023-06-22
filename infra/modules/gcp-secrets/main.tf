@@ -8,6 +8,7 @@ resource "google_secret_manager_secret" "secret" {
 
   project   = var.secret_project
   secret_id = "${var.path_prefix}${each.key}"
+  labels    = var.default_labels
 
   replication {
     user_managed {

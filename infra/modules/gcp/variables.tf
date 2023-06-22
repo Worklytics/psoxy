@@ -68,3 +68,9 @@ variable "custom_artifacts_bucket_name" {
   description = "name of bucket to use for custom artifacts, if you want something other than default"
   default     = null
 }
+
+variable "default_labels" {
+  type        = map(string)
+  description = "*Alpha* in v0.4, only respected for new resources. Labels to apply to all resources created by this configuration. Intended to be analogous to AWS providers `default_tags`."
+  default     = {}
+}

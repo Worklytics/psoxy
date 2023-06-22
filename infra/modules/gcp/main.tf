@@ -29,6 +29,7 @@ resource "google_project_service" "gcp-infra-api" {
 resource "google_secret_manager_secret" "pseudonymization-salt" {
   project   = var.project_id
   secret_id = "${var.config_parameter_prefix}PSOXY_SALT"
+  labels    = var.default_labels
 
   replication {
     automatic = true
@@ -74,6 +75,7 @@ resource "google_secret_manager_secret_version" "initial_version" {
 resource "google_secret_manager_secret" "pseudonymization-key" {
   project   = var.project_id
   secret_id = "${var.config_parameter_prefix}PSOXY_ENCRYPTION_KEY"
+  labels    = var.default_labels
 
   replication {
     automatic = true
@@ -155,6 +157,7 @@ resource "google_storage_bucket" "artifacts" {
   name          = coalesce(var.custom_artifacts_bucket_name, "${var.project_id}-${var.environment_id_prefix}artifacts-bucket")
   location      = var.bucket_location
   force_destroy = true
+  labels        = var.default_labels
 
   # TODO: remove in v0.5
   lifecycle {
