@@ -6,7 +6,7 @@ TFVARS_FILE=$1
 PSOXY_BASE_DIR=$2
 DEPLOYMENT_ENV=${3:-"local"}
 
-RELEASE_VERSION="v0.4.26"
+RELEASE_VERSION="0.4.26"
 
 # colors
 RED='\e[0;31m'
@@ -16,7 +16,7 @@ NC='\e[0m' # No Color
 printf "# terraform.tfvars\n" >> $TFVARS_FILE
 printf "# this file sets the values of variables for your Terraform configuration. You should manage it under \n" >> $TFVARS_FILE
 printf "# version control. anyone working with the infrastructure created by this Terraform configuration will need it\n" >> $TFVARS_FILE
-printf "# -- initialized with ${RELEASE_VERSION} of tools/init-tfvars.sh -- \n\n" >> $TFVARS_FILE
+printf "# -- initialized with v${RELEASE_VERSION} of tools/init-tfvars.sh -- \n\n" >> $TFVARS_FILE
 
 echo "# root directory of a clone of the psoxy repo " >> $TFVARS_FILE
 echo "#  - by default, it points to .terraform, where terraform clones the main psoxy repo" >> $TFVARS_FILE
@@ -29,8 +29,10 @@ printf "\n" >> $TFVARS_FILE
 TOP_LEVEL_PROVIDER_PATTERN="^├── provider\[registry.terraform.io/hashicorp"
 
 AWS_PROVIDER_COUNT=$(terraform providers | grep "${TOP_LEVEL_PROVIDER_PATTERN}/aws" | wc -l)
+
 if test $AWS_PROVIDER_COUNT -ne 0; then
   printf "AWS provider in Terraform configuration. Initializing variables it requires ...\n"
+  HOST_PLATFORM="aws"
   if aws --version &> /dev/null; then
 
     AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
@@ -49,7 +51,7 @@ if test $AWS_PROVIDER_COUNT -ne 0; then
     printf "#   (this is approach is good practice, as minimizes the privileges of the AWS user you habitually use and easily supports multi-account scenarios) \n" >> $TFVARS_FILE
     printf "# - if you are already authenticated as a sufficiently privileged AWS Principal, you can omit this variable\n" >> $TFVARS_FILE
     printf "# - often, this will be the default 'super-admin' role in the target AWS account, eg something like 'arn:aws:iam::123456789012:role/Admin'\n" >> $TFVARS_FILE
-    printf "# - see https://github.com/Worklytics/psoxy/blob/${RELEASE_VERSION}/docs/aws/getting-started.md for details on required permissions\n" >> $TFVARS_FILE
+    printf "# - see https://github.com/Worklytics/psoxy/blob/v${RELEASE_VERSION}/docs/aws/getting-started.md for details on required permissions\n" >> $TFVARS_FILE
     printf "# aws_assume_role_arn=\"${AWS_ARN}\" #(double-check this; perhaps needs to be a role within target account) \n\n" >> $TFVARS_FILE
 
     printf "# AWS principals in the following list will be explicitly authorized to invoke your proxy instances\n" >> $TFVARS_FILE
@@ -65,6 +67,7 @@ if test $AWS_PROVIDER_COUNT -ne 0; then
     printf "${RED}AWS CLI not available${NC}\n"
   fi
 else
+  HOST_PLATFORM="gcp"
   printf "No AWS provider found in top-level of Terraform configuration. AWS CLI not required.\n"
 fi
 
@@ -159,15 +162,35 @@ printf "enabled_connectors = ${AVAILABLE_CONNECTORS}\n\n" >> $TFVARS_FILE
 printf "\n"
 
 if [ "$DEPLOYMENT_ENV" != "local" ]; then
-  printf "Setting ${BLUE}install_test_tool=false${NC} and ${BLUE}todos_as_outputs=true${NC}, because your ${BLUE}terraform apply${NC} will run remotely.\n"
+  printf "Setting ${BLUE}install_test_tool=false${NC} and ${BLUE}todos_as_outputs=true${NC}, because your ${BLUE}terraform apply${NC} will run remotely.\n\n"
 
   echo "install_test_tool = false" >> $TFVARS_FILE
   echo "todos_as_outputs = true" >> $TFVARS_FILE
 fi
 
+if [ "$DEPLOYMENT_ENV" == "terraform_cloud" ]; then
+  # need to build the JAR now, to ship with the proxy
+
+  printf "Building psoxy JAR for ${BLUE}${HOST_PLATFORM}${NC}; this will take a few minutes ...\n"
+
+  ${PSOXY_BASE_DIR}tools/build.sh ${HOST_PLATFORM} ${PSOXY_BASE_DIR}java -q
+
+  cp ${PSOXY_BASE_DIR}java/impl/${HOST_PLATFORM}/target/psoxy-${HOST_PLATFORM}-${RELEASE_VERSION}.jar .
+
+  if [ "$HOST_PLATFORM" == "gcp" ]; then
+    zip psoxy-${HOST}-${VERSION}.zip psoxy-${HOST_PLATFORM}-${RELEASE_VERSION}.jar
+    DEPLOYMENT_BUNDLE="psoxy-${HOST_PLATFORM}-${RELEASE_VERSION}.zip"
+  else
+    DEPLOYMENT_BUNDLE="psoxy-${HOST_PLATFORM}-${RELEASE_VERSION}.jar"
+  fi
+
+  printf "Deployment bundle built: ${BLUE}${DEPLOYMENT_BUNDLE}${NC}. You should commit this to your repo.\n"
+  printf "If you update your proxy version in the future, you'll need to rebuild this bundle.\n"
+
+  echo "deployment_bundle = \"${DEPLOYMENT_BUNDLE}\"" >> $TFVARS_FILE
+fi
+
 printf "\n\n"
-
-
 
 # give user some feedback
 printf "Initialized example terraform vars file. Please open ${BLUE}${TFVARS_FILE}${NC} and customize it to your needs.\n"
