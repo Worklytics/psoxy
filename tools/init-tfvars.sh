@@ -6,7 +6,8 @@ TFVARS_FILE=$1
 PSOXY_BASE_DIR=$2
 DEPLOYMENT_ENV=${3:-"local"}
 
-RELEASE_VERSION="0.4.26"
+SCRIPT_VERSION="v0.4.26"
+RELEASE_VERSION=$(sed -n -e 's/.*<revision>\(.*\)<\/revision>.*/\1/p' "${PSOXY_BASE_DIR}java/pom.xml")
 
 # colors
 RED='\e[0;31m'
@@ -16,7 +17,7 @@ NC='\e[0m' # No Color
 printf "# terraform.tfvars\n" >> $TFVARS_FILE
 printf "# this file sets the values of variables for your Terraform configuration. You should manage it under \n" >> $TFVARS_FILE
 printf "# version control. anyone working with the infrastructure created by this Terraform configuration will need it\n" >> $TFVARS_FILE
-printf "# -- initialized with v${RELEASE_VERSION} of tools/init-tfvars.sh -- \n\n" >> $TFVARS_FILE
+printf "# -- initialized with ${SCRIPT_VERSION} of tools/init-tfvars.sh -- \n\n" >> $TFVARS_FILE
 
 echo "# root directory of a clone of the psoxy repo " >> $TFVARS_FILE
 echo "#  - by default, it points to .terraform, where terraform clones the main psoxy repo" >> $TFVARS_FILE
@@ -170,25 +171,7 @@ fi
 
 if [ "$DEPLOYMENT_ENV" == "terraform_cloud" ]; then
   # need to build the JAR now, to ship with the proxy
-
-  printf "Building psoxy JAR for ${BLUE}${HOST_PLATFORM}${NC}; this will take a few minutes ...\n"
-
-  ${PSOXY_BASE_DIR}tools/build.sh ${HOST_PLATFORM} ${PSOXY_BASE_DIR}java -q
-
-  cp ${PSOXY_BASE_DIR}java/impl/${HOST_PLATFORM}/target/psoxy-${HOST_PLATFORM}-${RELEASE_VERSION}.jar .
-
-  if [ "$HOST_PLATFORM" == "gcp" ]; then
-    zip psoxy-${HOST_PLATFORM}-${RELEASE_VERSION}.zip psoxy-${HOST_PLATFORM}-${RELEASE_VERSION}.jar
-    rm psoxy-${HOST_PLATFORM}-${RELEASE_VERSION}.jar
-    DEPLOYMENT_BUNDLE="psoxy-${HOST_PLATFORM}-${RELEASE_VERSION}.zip"
-  else
-    DEPLOYMENT_BUNDLE="psoxy-${HOST_PLATFORM}-${RELEASE_VERSION}.jar"
-  fi
-
-  printf "Deployment bundle built: ${BLUE}${DEPLOYMENT_BUNDLE}${NC}. You should commit this to your repo.\n"
-  printf "If you update your proxy version in the future, you'll need to rebuild this bundle.\n"
-
-  echo "deployment_bundle = \"${DEPLOYMENT_BUNDLE}\"" >> $TFVARS_FILE
+  ${PSOXY_BASE_DIR}tools/update-bundle.sh $PSOXY_BASE_DIR $TFVARS_FILE $HOST_PLATFORM $RELEASE_VERSION
 fi
 
 printf "\n\n"
