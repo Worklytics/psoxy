@@ -178,7 +178,7 @@ if [ "$DEPLOYMENT_ENV" == "terraform_cloud" ]; then
   cp ${PSOXY_BASE_DIR}java/impl/${HOST_PLATFORM}/target/psoxy-${HOST_PLATFORM}-${RELEASE_VERSION}.jar .
 
   if [ "$HOST_PLATFORM" == "gcp" ]; then
-    zip psoxy-${HOST}-${VERSION}.zip psoxy-${HOST_PLATFORM}-${RELEASE_VERSION}.jar
+    zip psoxy-${HOST_PLATFORM}-${RELEASE_VERSION}.zip psoxy-${HOST_PLATFORM}-${RELEASE_VERSION}.jar
     DEPLOYMENT_BUNDLE="psoxy-${HOST_PLATFORM}-${RELEASE_VERSION}.zip"
   else
     DEPLOYMENT_BUNDLE="psoxy-${HOST_PLATFORM}-${RELEASE_VERSION}.jar"
