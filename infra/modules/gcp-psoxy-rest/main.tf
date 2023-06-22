@@ -67,6 +67,7 @@ resource "google_cloudfunctions_function" "function" {
   source_archive_object = var.deployment_bundle_object_name
   entry_point           = "co.worklytics.psoxy.Route"
   service_account_email = var.service_account_email
+  labels                = var.default_labels
 
   environment_variables = merge(
     local.required_env_vars,
@@ -173,7 +174,7 @@ EOT
 }
 
 resource "local_file" "test_script" {
-  filename        = "test-${var.instance_id}.sh"
+  filename        = "test-${trimprefix(var.instance_id, var.environment_id_prefix)}.sh"
   file_permission = "0770"
   content         = <<EOT
 #!/bin/bash
@@ -198,6 +199,10 @@ output "instance_id" {
   value = var.instance_id
 }
 
+output "service_account_email" {
+  value = google_cloudfunctions_function.function.service_account_email
+}
+
 output "cloud_function_name" {
   value = google_cloudfunctions_function.function.name
 }
@@ -206,13 +211,19 @@ output "cloud_function_url" {
   value = local.proxy_endpoint_url
 }
 
-output "todo" {
-  value = local.todo_content
-}
+
 
 output "proxy_kind" {
   value       = "rest"
   description = "The kind of proxy instance this is."
+}
+
+output "test_script" {
+  value = local_file.test_script.filename
+}
+
+output "todo" {
+  value = local.todo_content
 }
 
 output "next_todo_step" {

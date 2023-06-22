@@ -8,8 +8,22 @@ terraform {
   }
 }
 
+module "env_id" {
+  source = "../env-id"
+
+  environment_name          = var.environment_name
+  supported_word_delimiters = ["-"]
+  preferred_word_delimiter  = "-"
+}
+
 locals {
-  instance_ssm_prefix_default    = "${upper(replace(var.function_name, "-", "_"))}_"
+  salt_parameter_name_suffix = "PSOXY_SALT"
+  function_name              = "${module.env_id.id}-${var.instance_id}"
+}
+
+
+locals {
+  instance_ssm_prefix_default    = "${upper(replace(local.function_name, "-", "_"))}_"
   instance_ssm_prefix            = coalesce(var.path_to_instance_ssm_parameters, local.instance_ssm_prefix_default)
   is_instance_ssm_prefix_default = local.instance_ssm_prefix == local.instance_ssm_prefix_default
   instance_ssm_prefix_with_slash = startswith(local.instance_ssm_prefix, "/") ? local.instance_ssm_prefix : "/${local.instance_ssm_prefix}"
@@ -18,12 +32,12 @@ locals {
   # parse PATH_TO_SHARED_CONFIG in super-hacky way
   # expect something like:
   # arn:aws:ssm:us-east-1:123123123123:parameter/PSOXY_SALT
-  salt_arn              = [for l in var.global_parameter_arns : l if endswith(l, "PSOXY_SALT")][0]
-  path_to_shared_config = regex("arn.+parameter(/.*)PSOXY_SALT", local.salt_arn)[0]
+  salt_arn              = [for l in var.global_parameter_arns : l if endswith(l, local.salt_parameter_name_suffix)][0]
+  path_to_shared_config = regex("arn.+parameter(/.*)${local.salt_parameter_name_suffix}", local.salt_arn)[0]
 }
 
 resource "aws_lambda_function" "psoxy-instance" {
-  function_name                  = var.function_name
+  function_name                  = local.function_name
   role                           = aws_iam_role.iam_for_lambda.arn
   architectures                  = ["arm64"] # 20% cheaper per ms exec time than x86_64
   runtime                        = "java11"
@@ -67,7 +81,7 @@ resource "aws_cloudwatch_log_group" "lambda-log" {
 }
 
 resource "aws_iam_role" "iam_for_lambda" {
-  name        = "PsoxyExec_${var.function_name}"
+  name        = "${local.function_name}_Exec"
   description = "execution role for psoxy instance"
 
   assume_role_policy = jsonencode({
@@ -155,8 +169,8 @@ locals {
 }
 
 resource "aws_iam_policy" "ssm_param_policy" {
-  name        = "${var.function_name}_ssmParameters"
-  description = "Allow SSM parameter access needed by ${var.function_name}"
+  name        = "${local.function_name}_ssmParameters"
+  description = "Allow SSM parameter access needed by ${local.function_name}"
 
   policy = jsonencode(
     {
@@ -172,7 +186,6 @@ resource "aws_iam_policy" "ssm_param_policy" {
   }
 }
 
-
 resource "aws_iam_role_policy_attachment" "attach_policy" {
   role       = aws_iam_role.iam_for_lambda.name
   policy_arn = aws_iam_policy.ssm_param_policy.arn
@@ -183,7 +196,7 @@ output "function_arn" {
 }
 
 output "function_name" {
-  value = aws_lambda_function.psoxy-instance.function_name
+  value = local.function_name
 }
 
 output "iam_role_for_lambda_arn" {

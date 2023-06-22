@@ -1,21 +1,16 @@
-variable "aws_account_id" {
+variable "environment_name" {
   type        = string
-  description = "id of aws account in which to provision your AWS infra"
+  description = "friendly qualifier to distinguish resources created by this terraform configuration other Terraform deployments, (eg, 'prod', 'dev', etc)"
+
   validation {
-    condition     = can(regex("^\\d{12}$", var.aws_account_id))
-    error_message = "The aws_account_id value should be 12-digit numeric string."
+    condition     = can(regex("^[a-zA-Z][a-zA-Z0-9-_ ]*[a-zA-Z0-9]$", var.environment_name))
+    error_message = "The `environment_name` must start with a letter, can contain alphanumeric characters, hyphens, underscores, and spaces, and must end with a letter or number."
   }
-}
 
-variable "aws_assume_role_arn" {
-  type        = string
-  description = "arn of role used to test the lambda"
-}
-
-variable "aws_region" {
-  type        = string
-  default     = "us-east-1"
-  description = "IGNORED; default region in which to provision your AWS infra"
+  validation {
+    condition     = !can(regex("^(?i)(aws|ssm)", var.environment_name))
+    error_message = "The `environment_name` cannot start with 'aws' or 'ssm', as this will name your AWS resources with prefixes that displease the AMZN overlords."
+  }
 }
 
 variable "instance_id" {
@@ -27,6 +22,29 @@ variable "instance_id" {
     condition     = length(var.instance_id) < 41
     error_message = "The instance_id must be at most 40 characters."
   }
+}
+
+variable "aws_account_id" {
+  type        = string
+  description = "id of aws account in which to provision your AWS infra"
+  validation {
+    condition     = can(regex("^\\d{12}$", var.aws_account_id))
+    error_message = "The aws_account_id value should be 12-digit numeric string."
+  }
+}
+
+# TODO: remove after 0.4.x
+variable "aws_assume_role_arn" {
+  type        = string
+  description = "IGNORED; arn of role used to test the lambda"
+  default     = null
+}
+
+# TODO: remove after 0.4.x
+variable "aws_region" {
+  type        = string
+  default     = "us-east-1"
+  description = "IGNORED; default region in which to provision your AWS infra"
 }
 
 variable "path_to_instance_ssm_parameters" {

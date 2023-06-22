@@ -29,6 +29,7 @@ resource "google_project_service" "gcp-infra-api" {
 resource "google_secret_manager_secret" "pseudonymization-salt" {
   project   = var.project_id
   secret_id = "${var.config_parameter_prefix}PSOXY_SALT"
+  labels    = var.default_labels
 
   replication {
     automatic = true
@@ -74,6 +75,7 @@ resource "google_secret_manager_secret_version" "initial_version" {
 resource "google_secret_manager_secret" "pseudonymization-key" {
   project   = var.project_id
   secret_id = "${var.config_parameter_prefix}PSOXY_ENCRYPTION_KEY"
+  labels    = var.default_labels
 
   replication {
     automatic = true
@@ -108,12 +110,18 @@ resource "google_secret_manager_secret_version" "pseudonymization-key_initial_ve
   }
 }
 
-module "psoxy-package" {
+module "psoxy_package" {
   source = "../psoxy-package"
 
   implementation     = "gcp"
   path_to_psoxy_java = "${var.psoxy_base_dir}java"
+  deployment_bundle  = var.deployment_bundle
   force_bundle       = var.force_bundle
+}
+
+moved {
+  from = module.psoxy-package
+  to   = module.psoxy_package
 }
 
 # install test tool, if it exists in expected location
@@ -123,7 +131,7 @@ module "test_tool" {
   source = "../psoxy-test-tool"
 
   path_to_tools = "${var.psoxy_base_dir}tools"
-  psoxy_version = module.psoxy-package.version
+  psoxy_version = module.psoxy_package.version
 }
 
 moved {
@@ -131,18 +139,25 @@ moved {
   to   = module.test_tool[0]
 }
 
+# GCP wants a zip containing a JAR; can't handle JAR directly - so create that here if no bundle
+# was passed into module
+# in effect, this is equivalent to shell command:
+# zip /tmp/deployment_bundle.zip ${module.psoxy_package.path_to_deployment_jar}
 data "archive_file" "source" {
+  count = var.deployment_bundle == null ? 1 : 0
+
   type        = "zip"
-  source_file = module.psoxy-package.path_to_deployment_jar
-  output_path = "/tmp/function.zip"
+  source_file = module.psoxy_package.path_to_deployment_jar
+  output_path = "/tmp/deployment_bundle.zip" # NOTE: this is not writable location in Terraform cloud
 }
 
 # Create bucket that will host the source code
 resource "google_storage_bucket" "artifacts" {
   project       = var.project_id
-  name          = "${var.project_id}-${var.environment_id_prefix}artifacts-bucket"
+  name          = coalesce(var.custom_artifacts_bucket_name, "${var.project_id}-${var.environment_id_prefix}artifacts-bucket")
   location      = var.bucket_location
   force_destroy = true
+  labels        = var.default_labels
 
   # TODO: remove in v0.5
   lifecycle {
@@ -153,16 +168,19 @@ resource "google_storage_bucket" "artifacts" {
 }
 
 locals {
-  file_name_with_sha1 = replace(module.psoxy-package.filename, ".jar",
-  "_${filesha1(module.psoxy-package.path_to_deployment_jar)}.jar")
+  file_name_with_sha1 = replace(module.psoxy_package.filename, ".jar",
+  "_${filesha1(module.psoxy_package.path_to_deployment_jar)}.zip")
+
+  # NOTE: not a coalesce, bc Terraform evaluates all expressions within coalesce() even if first is non-null
+  bundle_path = var.deployment_bundle == null ? data.archive_file.source[0].output_path : var.deployment_bundle
 }
 
-# Add source code zip to bucket
+# add zipped JAR to bucket
 resource "google_storage_bucket_object" "function" {
   name           = "${var.environment_id_prefix}${local.file_name_with_sha1}"
   content_type   = "application/zip"
   bucket         = google_storage_bucket.artifacts.name
-  source         = data.archive_file.source.output_path
+  source         = local.bundle_path
   detect_md5hash = true
 }
 
@@ -181,6 +199,21 @@ resource "google_project_iam_custom_role" "bucket_write" {
 moved {
   from = google_project_iam_custom_role.bucket-write
   to   = google_project_iam_custom_role.bucket_write
+}
+
+resource "google_project_iam_custom_role" "psoxy_instance_secret_locker_role" {
+  project     = var.project_id
+  role_id     = "${local.environment_id_role_prefix}PsoxyInstanceSecretLocker"
+  title       = "Access for updating and reading secrets"
+  description = "Role to grant on secret that is to be managed by a Psoxy instance (cloud function); subset of roles/secretmanager.admin, to support reading/updating the secret"
+
+  permissions = [
+    "resourcemanager.projects.get",
+    "secretmanager.secrets.get",
+    "secretmanager.secrets.getIamPolicy",
+    "secretmanager.secrets.list",
+    "secretmanager.secrets.update"
+  ]
 }
 
 output "artifacts_bucket_name" {
@@ -219,14 +252,18 @@ output "secrets" {
 }
 
 output "version" {
-  value = module.psoxy-package.version
+  value = module.psoxy_package.version
 }
 
 output "filename" {
-  value = module.psoxy-package.filename
+  value = module.psoxy_package.filename
 }
 
 output "path_to_deployment_jar" {
   description = "Path to the package to deploy (JAR)."
-  value       = module.psoxy-package.path_to_deployment_jar
+  value       = module.psoxy_package.path_to_deployment_jar
+}
+
+output "psoxy_instance_secret_locker_role_id" {
+  value = google_project_iam_custom_role.psoxy_instance_secret_locker_role.id
 }

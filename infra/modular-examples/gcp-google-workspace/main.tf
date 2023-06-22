@@ -13,7 +13,7 @@ locals {
 
 module "worklytics_connector_specs" {
   source = "../../modules/worklytics-connector-specs"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connector-specs?ref=v0.4.24"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connector-specs?ref=v0.4.25"
 
 
   enabled_connectors             = var.enabled_connectors
@@ -21,23 +21,28 @@ module "worklytics_connector_specs" {
   google_workspace_example_admin = try(coalesce(var.google_workspace_example_admin, var.google_workspace_example_user), null)
   salesforce_domain              = var.salesforce_domain
   msft_tenant_id                 = var.msft_tenant_id
+  jira_server_url                = var.jira_server_url
+  jira_cloud_id                  = var.jira_cloud_id
+  example_jira_issue_id          = var.example_jira_issue_id
 }
 
 module "psoxy-gcp" {
   source = "../../modules/gcp"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp?ref=v0.4.24"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp?ref=v0.4.25"
 
-  project_id      = var.gcp_project_id
-  psoxy_base_dir  = var.psoxy_base_dir
-  force_bundle    = var.force_bundle
-  bucket_location = var.gcp_region
+  project_id        = var.gcp_project_id
+  psoxy_base_dir    = var.psoxy_base_dir
+  deployment_bundle = var.deployment_bundle
+  force_bundle      = var.force_bundle
+  bucket_location   = var.gcp_region
+  default_labels    = var.default_labels
 }
 
 module "google-workspace-connection" {
   for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
 
   source = "../../modules/google-workspace-dwd-connection"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/google-workspace-dwd-connection?ref=v0.4.24"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/google-workspace-dwd-connection?ref=v0.4.25"
 
   project_id                   = var.gcp_project_id
   connector_service_account_id = "psoxy-${substr(each.key, 0, 24)}"
@@ -55,7 +60,7 @@ module "google-workspace-connection-auth" {
   for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
 
   source = "../../modules/gcp-sa-auth-key"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-sa-auth-key?ref=v0.4.24"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-sa-auth-key?ref=v0.4.25"
 
   service_account_id = module.google-workspace-connection[each.key].service_account_id
 }
@@ -65,9 +70,10 @@ module "google-workspace-key-secrets" {
   for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
 
   source = "../../modules/gcp-secrets"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-secrets?ref=v0.4.24"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-secrets?ref=v0.4.25"
 
   secret_project = var.gcp_project_id
+  default_labels = var.default_labels
   secrets = {
     "PSOXY_${replace(upper(each.key), "-", "_")}_SERVICE_ACCOUNT_KEY" : {
       value       = module.google-workspace-connection-auth[each.key].key_value
@@ -105,7 +111,7 @@ module "psoxy-google-workspace-connector" {
   for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
 
   source = "../../modules/gcp-psoxy-rest"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-rest?ref=v0.4.24"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-rest?ref=v0.4.25"
 
   project_id                            = var.gcp_project_id
   source_kind                           = each.value.source_kind
@@ -122,6 +128,7 @@ module "psoxy-google-workspace-connector" {
   source_auth_strategy                  = each.value.source_auth_strategy
   oauth_scopes                          = try(each.value.oauth_scopes_needed, [])
   invoker_sa_emails                     = var.worklytics_sa_emails
+  default_labels                        = var.default_labels
 
   environment_variables = merge(
     var.general_environment_variables,
@@ -146,7 +153,7 @@ module "worklytics-psoxy-connection" {
   for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
 
   source = "../../modules/worklytics-psoxy-connection"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection?ref=v0.4.24"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection?ref=v0.4.25"
 
   psoxy_host_platform_id = local.host_platform_id
   psoxy_instance_id      = each.key
@@ -159,6 +166,9 @@ module "worklytics-psoxy-connection" {
 # BEGIN LONG ACCESS AUTH CONNECTORS
 locals {
   long_access_parameters = { for entry in module.worklytics_connector_specs.enabled_oauth_secrets_to_create : "${entry.connector_name}.${entry.secret_name}" => entry }
+  env_vars_for_locker_parameters = { for entry in module.worklytics_connector_specs.enabled_lockable_oauth_secrets_to_create :
+    "${entry.connector_name}.${entry.secret_name}" => entry
+  }
   long_access_parameters_by_connector = { for k, spec in module.worklytics_connector_specs.enabled_oauth_long_access_connectors :
     k => [for secret in spec.secured_variables : "${k}.${secret.name}"]
   }
@@ -176,18 +186,28 @@ module "connector-oauth" {
   for_each = local.long_access_parameters
 
   source = "../../modules/gcp-oauth-secrets"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-oauth-secrets?ref=v0.4.24"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-oauth-secrets?ref=v0.4.25"
 
   secret_name           = "PSOXY_${upper(replace(each.value.connector_name, "-", "_"))}_${upper(each.value.secret_name)}"
   project_id            = var.gcp_project_id
   service_account_email = google_service_account.long_auth_connector_sa[each.value.connector_name].email
+  default_labels        = var.default_labels
+}
+
+resource "google_secret_manager_secret_iam_member" "grant_sa_updater_on_secret" {
+  for_each = local.env_vars_for_locker_parameters
+
+  member    = "serviceAccount:${google_service_account.long_auth_connector_sa[each.value.connector_name].email}"
+  role      = module.psoxy-gcp.psoxy_instance_secret_locker_role_id
+  project   = var.gcp_project_id
+  secret_id = module.connector-oauth[each.key].secret_id
 }
 
 module "long-auth-token-secret-fill-instructions" {
   for_each = local.long_access_parameters
 
   source = "../../modules/gcp-secret-fill-md"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-secret-fill-md?ref=v0.4.24"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-secret-fill-md?ref=v0.4.25"
 
   project_id = var.gcp_project_id
   secret_id  = module.connector-oauth[each.key].secret_id
@@ -197,7 +217,7 @@ module "source_token_external_todo" {
   for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors_todos
 
   source = "../../modules/source-token-external-todo"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/source-token-external-todo?ref=v0.4.24"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/source-token-external-todo?ref=v0.4.25"
 
   source_id                         = each.key
   connector_specific_external_steps = each.value.external_token_todo
@@ -210,11 +230,11 @@ module "connector-long-auth-function" {
   for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
 
   source = "../../modules/gcp-psoxy-rest"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-rest?ref=v0.4.24"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-rest?ref=v0.4.25"
 
   project_id                    = var.gcp_project_id
   source_kind                   = each.value.source_kind
-  instance_id                   = "psoxy-${each.key}"
+  instance_id                   = each.key
   service_account_email         = google_service_account.long_auth_connector_sa[each.key].email
   artifacts_bucket_name         = module.psoxy-gcp.artifacts_bucket_name
   deployment_bundle_object_name = module.psoxy-gcp.deployment_bundle_object_name
@@ -227,6 +247,7 @@ module "connector-long-auth-function" {
   source_auth_strategy          = each.value.source_auth_strategy
   oauth_scopes                  = try(each.value.oauth_scopes_needed, [])
   invoker_sa_emails             = var.worklytics_sa_emails
+  default_labels                = var.default_labels
 
   environment_variables = merge(
     var.general_environment_variables,
@@ -253,7 +274,7 @@ module "worklytics-psoxy-connection-long-auth" {
   for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
 
   source = "../../modules/worklytics-psoxy-connection"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection?ref=v0.4.24"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection?ref=v0.4.25"
 
   psoxy_host_platform_id = "GCP"
   psoxy_instance_id      = each.key
@@ -270,7 +291,7 @@ module "psoxy-gcp-bulk" {
   var.custom_bulk_connectors)
 
   source = "../../modules/gcp-psoxy-bulk"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-bulk?ref=v0.4.24"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-psoxy-bulk?ref=v0.4.25"
 
   project_id                    = var.gcp_project_id
   worklytics_sa_emails          = var.worklytics_sa_emails
@@ -284,6 +305,7 @@ module "psoxy-gcp-bulk" {
   example_file                  = try(each.value.example_file, null)
   input_expiration_days         = var.bulk_input_expiration_days
   sanitized_expiration_days     = var.bulk_sanitized_expiration_days
+  default_labels                = var.default_labels
 
   environment_variables = merge(
     var.general_environment_variables,
@@ -302,7 +324,7 @@ module "psoxy-bulk-to-worklytics" {
   var.custom_bulk_connectors)
 
   source = "../../modules/worklytics-psoxy-connection-generic"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-generic?ref=v0.4.24"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-generic?ref=v0.4.25"
 
   psoxy_host_platform_id = local.host_platform_id
   psoxy_instance_id      = each.key

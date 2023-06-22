@@ -14,13 +14,13 @@ variable "gcp_terraform_sa_account_email" {
   }
 }
 
-variable "environment_id" {
+variable "environment_name" {
   type        = string
   description = "Qualifier to append to names/ids of resources for psoxy. If not empty, A-Za-z0-9 or - characters only. Max length 10. Useful to distinguish between deployments into same GCP project."
   default     = ""
 
   validation {
-    condition     = can(regex("^[A-z0-9\\-]{0,20}$", var.environment_id))
+    condition     = can(regex("^[A-z0-9\\-]{0,20}$", var.environment_name))
     error_message = "The environment_id must be 0-20 chars of [A-z0-9\\-] only."
   }
 }
@@ -29,6 +29,33 @@ variable "config_parameter_prefix" {
   type        = string
   description = "A prefix to give to all config parameters (GCP Secret Manager Secrets) created/consumed by this module. If omitted, and `environment_id` provided, that will be used."
   default     = ""
+}
+
+variable "default_labels" {
+  type        = map(string)
+  description = "Labels to apply to all resources created by this configuration. Intended to be analogous to AWS providers `default_tags`."
+  default     = {}
+
+  validation {
+    condition     = alltrue([for k, v in var.default_labels : can(regex("^[a-z][a-z0-9-_]{0,62}$", k))])
+    error_message = "GCP label keys must start with a lowercase letter, can contain lowercase letters, numbers, underscores and dashes only and must be no longer than 63 characters."
+  }
+
+  validation {
+    condition     = alltrue([for k, v in var.default_labels : can(regex("^[a-z0-9-_]{0,63}$", v))])
+    error_message = "GCP label values must contain only lowercase letters, numbers, underscores and dashes only and be no longer than 63 characters."
+  }
+
+  validation {
+    condition     = length(var.default_labels) <= 64
+    error_message = "GCP resources cannot have more than 64 labels."
+  }
+}
+
+variable "worklytics_host" {
+  type        = string
+  description = "host of worklytics instance where tenant resides. (e.g. intl.worklytics.co for prod; but may differ for dev/staging)"
+  default     = "intl.worklytics.co"
 }
 
 variable "worklytics_sa_emails" {
@@ -47,6 +74,17 @@ variable "psoxy_base_dir" {
   validation {
     condition     = can(regex("^[^~].*$", var.psoxy_base_dir))
     error_message = "The psoxy_base_dir value should be absolute path (not start with ~)."
+  }
+}
+
+variable "deployment_bundle" {
+  type        = string
+  description = "path to deployment bundle to use (if not provided, will build one)"
+  default     = null
+
+  validation {
+    condition     = var.deployment_bundle == null || var.deployment_bundle != ""
+    error_message = "`deployment_bundle`, if non-null, must be non-empty string."
   }
 }
 
@@ -89,6 +127,12 @@ variable "replica_regions" {
   ]
 }
 
+variable "custom_artifacts_bucket_name" {
+  type        = string
+  description = "name of bucket to use for custom artifacts, if you want something other than default"
+  default     = null
+}
+
 variable "enabled_connectors" {
   type        = list(string)
   description = "list of ids of connectors to enabled; see modules/worklytics-connector-specs"
@@ -112,7 +156,7 @@ variable "bulk_sanitized_expiration_days" {
   default     = 1805 # 5 years; intent is 'forever', but some upperbound in case bucket is forgotten
 }
 
-variable "custom_rest_rules" {
+variable "custom_api_connector_rules" {
   type        = map(string)
   description = "map of connector id --> YAML file with custom rules"
   default     = {}
@@ -120,7 +164,9 @@ variable "custom_rest_rules" {
 
 variable "custom_bulk_connectors" {
   type = map(object({
-    source_kind = string
+    source_kind           = string
+    input_bucket_name     = optional(string) # allow override of default bucket name
+    sanitized_bucket_name = optional(string) # allow override of default bucket name
     rules = object({
       pseudonymFormat       = optional(string)
       columnsToRedact       = optional(list(string))
@@ -147,15 +193,18 @@ variable "custom_bulk_connectors" {
   }
 }
 
-variable "google_workspace_example_user" {
-  type        = string
-  description = "User to impersonate for Google Workspace API calls (null for none)"
-}
+variable "custom_bulk_connector_rules" {
+  type = map(object({
+    pseudonymFormat       = optional(string, "URL_SAFE_TOKEN")
+    columnsToRedact       = optional(list(string))
+    columnsToInclude      = optional(list(string))
+    columnsToPseudonymize = optional(list(string))
+    columnsToDuplicate    = optional(map(string))
+    columnsToRename       = optional(map(string))
+  }))
 
-variable "google_workspace_example_admin" {
-  type        = string
-  description = "user to impersonate for Google Workspace API calls (null for value of `google_workspace_example_user`)"
-  default     = null # will failover to user
+  description = "map of connector id --> rules object"
+  default     = {}
 }
 
 variable "salesforce_domain" {
@@ -164,16 +213,22 @@ variable "salesforce_domain" {
   default     = ""
 }
 
-variable "msft_tenant_id" {
+variable "jira_server_url" {
   type        = string
-  description = "ID of Microsoft tenant to connect to (req'd only if config includes MSFT connectors)"
-  default     = ""
+  default     = null
+  description = "(Only required if using Jira Server connector) URL of the Jira server (ex: myjiraserver.mycompany.com)"
 }
 
-variable "msft_owners_email" {
-  type        = set(string)
-  description = "(Only if config includes MSFT connectors). Optionally, set of emails to apply as owners on AAD apps apart from current logged user"
-  default     = []
+variable "jira_cloud_id" {
+  type        = string
+  default     = null
+  description = "(Only required if using Jira Cloud connector) Cloud id of the Jira Cloud to connect to (ex: 1324a887-45db-1bf4-1e99-ef0ff456d421)."
+}
+
+variable "example_jira_issue_id" {
+  type        = string
+  default     = null
+  description = "(Only required if using Jira Server/Cloud connector) Id of an issue for only to be used as part of example calls for Jira (ex: ETV-12)"
 }
 
 # build lookup tables to JOIN data you receive back from Worklytics with your original data.
@@ -191,6 +246,7 @@ variable "lookup_tables" {
     columns_to_include            = optional(list(string))
     sanitized_accessor_principals = optional(list(string))
     expiration_days               = optional(number)
+    output_bucket_name            = optional(string) # allow override of default bucket name
   }))
   description = "Lookup tables to build from same source input as another connector, output to a distinct bucket. The original `join_key_column` will be preserved, "
 

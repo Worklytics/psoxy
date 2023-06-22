@@ -75,6 +75,10 @@ resource "aws_iam_role" "api-caller" {
   }
 }
 
+locals {
+  function_name_prefix = coalesce(var.rest_function_name_prefix, var.api_function_name_prefix)
+}
+
 resource "aws_iam_policy" "execution_lambda_to_caller" {
   name        = "${var.deployment_id}ExecuteLambdas"
   description = "Allow caller role to execute the lambda url directly"
@@ -86,7 +90,7 @@ resource "aws_iam_policy" "execution_lambda_to_caller" {
         {
           "Action" : ["lambda:InvokeFunctionUrl"],
           "Effect" : "Allow",
-          "Resource" : "arn:aws:lambda:${data.aws_region.current.id}:${var.aws_account_id}:function:${var.rest_function_name_prefix}*"
+          "Resource" : "arn:aws:lambda:${data.aws_region.current.id}:${var.aws_account_id}:function:${local.function_name_prefix}*"
         }
       ]
   })
@@ -136,6 +140,7 @@ module "psoxy-package" {
 
   implementation     = "aws"
   path_to_psoxy_java = "${var.psoxy_base_dir}java"
+  deployment_bundle  = var.deployment_bundle
   psoxy_version      = var.psoxy_version
   force_bundle       = var.force_bundle
 }

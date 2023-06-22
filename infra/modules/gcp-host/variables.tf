@@ -3,13 +3,13 @@ variable "gcp_project_id" {
   description = "id of GCP project that will host psoxy instance"
 }
 
-variable "environment_id" {
+variable "environment_name" {
   type        = string
   description = "Qualifier to append to names/ids of resources for psoxy. If not empty, A-Za-z0-9 or - characters only. Max length 10. Useful to distinguish between deployments into same GCP project."
   default     = "psoxy"
 
   validation {
-    condition     = can(regex("^[A-z0-9\\-]{0,20}$", var.environment_id))
+    condition     = can(regex("^[A-z0-9\\-]{0,20}$", var.environment_name))
     error_message = "The environment_name must be 0-20 chars of [A-z0-9\\-] only."
   }
 }
@@ -25,6 +25,12 @@ variable "config_parameter_prefix" {
     condition     = can(regex("^[A-z0-9\\-_]{0,120}$", var.config_parameter_prefix))
     error_message = "The config_parameter_prefix must be 0-120 chars of [A-z0-9\\-_] only."
   }
+}
+
+variable "default_labels" {
+  type        = map(string)
+  description = "*Alpha* in v0.4, only respected for new resources. Labels to apply to all resources created by this configuration. Intended to be analogous to AWS providers `default_tags`."
+  default     = {}
 }
 
 variable "worklytics_sa_emails" {
@@ -44,6 +50,12 @@ variable "psoxy_base_dir" {
     condition     = can(regex("^[^~].*$", var.psoxy_base_dir))
     error_message = "The psoxy_base_dir value should be absolute path (not start with ~)."
   }
+}
+
+variable "deployment_bundle" {
+  type        = string
+  description = "path to deployment bundle to use (if not provided, will build one)"
+  default     = null
 }
 
 variable "force_bundle" {
@@ -85,22 +97,59 @@ variable "replica_regions" {
   ]
 }
 
-variable "enabled_connectors" {
-  type        = list(string)
-  description = "list of ids of connectors to enabled; see modules/worklytics-connector-specs"
+variable "custom_artifacts_bucket_name" {
+  type        = string
+  description = "name of bucket to use for custom artifacts, if you want something other than default"
+  default     = null
+}
 
-  default = [
-    "asana",
-    "gdirectory",
-    "gcal",
-    "gmail",
-    "gdrive",
-    "google-chat",
-    "google-meet",
-    "hris",
-    "slack-discovery-api",
-    "zoom",
-  ]
+variable "api_connectors" {
+  type = map(object({
+    source_kind                           = string
+    source_auth_strategy                  = string
+    target_host                           = string
+    oauth_scopes_needed                   = optional(list(string), [])
+    environment_variables                 = optional(map(string), {})
+    example_api_calls                     = optional(list(string), [])
+    example_api_calls_user_to_impersonate = optional(string)
+    secured_variables = optional(list(object({
+      name     = string
+      value    = optional(string)
+      writable = optional(bool, false)
+      lockable = optional(bool, false)
+      })),
+    [])
+
+  }))
+
+  description = "map of API connectors to provision"
+}
+
+# q: better to flatten this into connectors themselves?
+variable "custom_api_connector_rules" {
+  type        = map(string)
+  description = "map of connector id --> YAML file with custom rules"
+  default     = {}
+}
+
+variable "bulk_connectors" {
+  type = map(object({
+    source_kind           = string
+    input_bucket_name     = optional(string) # allow override of default bucket name
+    sanitized_bucket_name = optional(string) # allow override of default bucket name
+    rules = object({
+      pseudonymFormat       = optional(string)
+      columnsToRedact       = optional(list(string), [])
+      columnsToInclude      = optional(list(string), null)
+      columnsToPseudonymize = optional(list(string), [])
+      columnsToDuplicate    = optional(map(string), {})
+      columnsToRename       = optional(map(string), {})
+    })
+    example_file        = optional(string)
+    settings_to_provide = optional(map(string), {})
+  }))
+
+  description = "map of connector id  => bulk connectors to provision"
 }
 
 variable "non_production_connectors" {
@@ -121,62 +170,18 @@ variable "bulk_sanitized_expiration_days" {
   default     = 720
 }
 
-variable "custom_rest_rules" {
-  type        = map(string)
-  description = "map of connector id --> YAML file with custom rules"
-  default     = {}
-}
-
-variable "custom_bulk_connectors" {
+variable "custom_bulk_connector_rules" {
   type = map(object({
-    source_kind = string
-    rules = object({
-      pseudonymFormat       = optional(string)
-      columnsToRedact       = optional(list(string))
-      columnsToInclude      = optional(list(string))
-      columnsToPseudonymize = optional(list(string))
-      columnsToDuplicate    = optional(map(string))
-      columnsToRename       = optional(map(string))
-    })
-    settings_to_provide = optional(map(string), {})
+    pseudonymFormat       = optional(string, "URL_SAFE_TOKEN")
+    columnsToRedact       = optional(list(string))
+    columnsToInclude      = optional(list(string))
+    columnsToPseudonymize = optional(list(string))
+    columnsToDuplicate    = optional(map(string))
+    columnsToRename       = optional(map(string))
   }))
-  description = "specs of custom bulk connectors to create"
 
-  default = {
-    #    "custom-survey" = {
-    #      source_kind = "survey"
-    #      rules       = {
-    #        columnsToRedact       = []
-    #        columnsToPseudonymize = [
-    #          "employee_id", # primary key
-    #          # "employee_email", # if exists
-    #        ]
-    #      }
-    #    }
-  }
-}
-
-variable "google_workspace_example_user" {
-  type        = string
-  description = "User to impersonate for Google Workspace API calls (null for none)"
-}
-
-variable "google_workspace_example_admin" {
-  type        = string
-  description = "user to impersonate for Google Workspace API calls (null for value of `google_workspace_example_user`)"
-  default     = null # will failover to user
-}
-
-variable "msft_tenant_id" {
-  type        = string
-  description = "ID of Microsoft tenant to connect to (req'd only if config includes MSFT connectors)"
-  default     = ""
-}
-
-variable "salesforce_domain" {
-  type        = string
-  description = "Domain of the Salesforce to connect to (only required if using Salesforce connector). To find your My Domain URL, from Setup, in the Quick Find box, enter My Domain, and then select My Domain"
-  default     = ""
+  description = "map of connector id --> rules object"
+  default     = {}
 }
 
 
@@ -194,7 +199,7 @@ variable "lookup_tables" {
     join_key_column               = string
     columns_to_include            = optional(list(string))
     sanitized_accessor_principals = optional(list(string))
-    expiration_days               = optional(number)
+    expiration_days               = optional(number, 5 * 365)
   }))
   description = "Lookup tables to build from same source input as another connector, output to a distinct bucket. The original `join_key_column` will be preserved, "
 
@@ -208,4 +213,10 @@ variable "lookup_tables" {
     #      ],
     #  }
   }
+}
+
+variable "todo_step" {
+  type        = number
+  description = "of all todos, where does this one logically fall in sequence"
+  default     = 2
 }

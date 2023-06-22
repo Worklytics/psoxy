@@ -17,7 +17,7 @@ variable "config_parameter_prefix" {
 
 variable "instance_id" {
   type        = string
-  description = "id of psoxy instance"
+  description = "id of psoxy instance, given environment"
   default     = null
 }
 
@@ -103,6 +103,24 @@ variable "sanitized_expiration_days" {
   type        = number
   description = "**alpha** Number of days after which objects in the bucket will expire"
   default     = 720
+}
+
+variable "input_bucket_name" {
+  type        = string
+  description = "Name of the bucket to create for input files. If null, one will be generated for you."
+  default     = null
+}
+
+variable "sanitized_bucket_name" {
+  type        = string
+  description = "Name of the bucket to create for sanitized files. If null, one will be generated for you."
+  default     = null
+}
+
+variable "default_labels" {
+  type        = map(string)
+  description = "*Alpha* in v0.4, only respected for new resources. Labels to apply to all resources created by this configuration. Intended to be analogous to AWS providers `default_tags`."
+  default     = {}
 }
 
 variable "todo_step" {

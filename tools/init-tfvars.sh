@@ -5,7 +5,7 @@
 TFVARS_FILE=$1
 PSOXY_BASE_DIR=$2
 
-RELEASE_VERSION="v0.4.24"
+RELEASE_VERSION="v0.4.25"
 
 # colors
 RED='\e[0;31m'
@@ -76,10 +76,15 @@ if test $GOOGLE_PROVIDER_COUNT -ne 0; then
 
     # project
     printf "# GCP project in which required infrastructure will be provisioned\n" >> $TFVARS_FILE
-    printf "#  - if you're deploying to AWS and not connecting to Google Workspace data sources, you can omit this value\n" >> $TFVARS_FILE
+    printf "#  - if you're deploying to AWS, you can omit this value\n" >> $TFVARS_FILE
     GCP_PROJECT_ID=$(gcloud config get project)
     printf "gcp_project_id=\"${GCP_PROJECT_ID}\"\n\n" >> $TFVARS_FILE
     printf "\tgcp_project_id=${BLUE}\"${GCP_PROJECT_ID}\"${NC}\n"
+
+    printf "# GCP project in which OAuth clients for Google Workspace connectors will be provisioned\n" >> $TFVARS_FILE
+    printf "#  - if you're not connecting to Google Workspace data sources, you can omit this value\n" >> $TFVARS_FILE
+    printf "google_workspace_gcp_project_id=\"${GCP_PROJECT_ID}\"\n\n" >> $TFVARS_FILE
+    printf "\tgoogle_workspace_gcp_project_id=${BLUE}\"${GCP_PROJECT_ID}\"${NC}\n"
 
     # tenant SA emails
     printf "# GCP service account emails in the list below will be allowed to invoke your proxy instances\n" >> $TFVARS_FILE
@@ -95,11 +100,22 @@ if test $GOOGLE_PROVIDER_COUNT -ne 0; then
     GOOGLE_WORKSPACE_EXAMPLE_USER=$(gcloud config get account)
     printf "google_workspace_example_user=\"${GOOGLE_WORKSPACE_EXAMPLE_USER}\"\n\n" >> $TFVARS_FILE
     printf "\tgoogle_workspace_example_user=${BLUE}\"${GOOGLE_WORKSPACE_EXAMPLE_USER}\"${NC}\n"
+
+        # example admin for Google Workspace
+    printf "# Google Workspace example admin \n" >> $TFVARS_FILE
+    printf "#  - this is used to aid testing of Google Workspace connectors against a real account, in cases where an admin is explicitly required\n" >> $TFVARS_FILE
+    GOOGLE_WORKSPACE_EXAMPLE_USER=$(gcloud config get account)
+    printf "google_workspace_example_admin=\"${GOOGLE_WORKSPACE_EXAMPLE_USER}\"\n\n" >> $TFVARS_FILE
+    printf "\tgoogle_workspace_example_admin=${BLUE}\"${GOOGLE_WORKSPACE_EXAMPLE_USER}\"${NC}\n"
   else
     printf "${RED}gcloud not available${NC}\n"
   fi
 else
   printf "No Google provider found in top-level of Terraform configuration. No gcloud initialization required.\n"
+
+  if [ -f google-workspace.tf ]; then
+    printf "If you don't intend to use Google Workspace as a data source in future, you can ${BLUE}rm google-workspace.tf${NC} and ${BLUE}rm google-workspace-variables.tf${NC} \n"
+  fi
 fi
 
 # Microsoft 365
@@ -125,6 +141,10 @@ if test $AZUREAD_PROVIDER_COUNT -ne 0; then
   fi
 else
   printf "No Azure provider found in top-level of Terraform configuration. No Azure CLI initialization needed.\n"
+
+  if [ -f msft-365.tf ]; then
+    printf "If you don't intend to use Microsoft 365 as a data source in future, you can ${BLUE}rm msft-365.tf${NC} and ${BLUE}rm msft-365-variables.tf${NC} \n"
+  fi
 fi
 
 # initialize `enabled_connectors` variable

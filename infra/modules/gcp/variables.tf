@@ -27,6 +27,12 @@ variable "psoxy_base_dir" {
   }
 }
 
+variable "deployment_bundle" {
+  type        = string
+  description = "path to deployment bundle to use (if not provided, will build one)"
+  default     = null
+}
+
 variable "force_bundle" {
   type        = bool
   description = "whether to force build of deployment bundle, even if it already exists"
@@ -55,4 +61,16 @@ variable "install_test_tool" {
   type        = bool
   description = "whether to install the test tool (can be 'false' if Terraform not running from a machine where you intend to run tests of your Psoxy deployment)"
   default     = true
+}
+
+variable "custom_artifacts_bucket_name" {
+  type        = string
+  description = "name of bucket to use for custom artifacts, if you want something other than default"
+  default     = null
+}
+
+variable "default_labels" {
+  type        = map(string)
+  description = "*Alpha* in v0.4, only respected for new resources. Labels to apply to all resources created by this configuration. Intended to be analogous to AWS providers `default_tags`."
+  default     = {}
 }

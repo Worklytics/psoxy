@@ -11,10 +11,25 @@ resource "random_string" "bucket_suffix" {
   special = false
 }
 
+module "env_id" {
+  source = "../env-id"
+
+  environment_name          = var.environment_name
+  supported_word_delimiters = ["-"]
+  preferred_word_delimiter  = "-"
+}
+
+locals {
+  bucket_name_prefix = "${module.env_id.id}-${replace(var.instance_id, "_", "-")}"
+  iam_policy_prefix  = "${module.env_id.id}-${replace(var.instance_id, " ", "_")}"
+}
+
+
 module "psoxy_lambda" {
   source = "../aws-psoxy-lambda"
 
-  function_name                   = "psoxy-${var.instance_id}"
+  environment_name                = var.environment_name
+  instance_id                     = var.instance_id
   handler_class                   = "co.worklytics.psoxy.S3Handler"
   timeout_seconds                 = 600 # 10 minutes
   memory_size_mb                  = var.memory_size_mb
@@ -36,7 +51,7 @@ module "psoxy_lambda" {
 }
 
 resource "aws_s3_bucket" "input" {
-  bucket = "psoxy-${var.instance_id}-${random_string.bucket_suffix.id}-input"
+  bucket = "${local.bucket_name_prefix}-${random_string.bucket_suffix.id}-input"
 
   lifecycle {
     ignore_changes = [
@@ -78,7 +93,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "expire_input_files" {
 }
 
 resource "aws_s3_bucket" "sanitized" {
-  bucket = "psoxy-${var.instance_id}-${random_string.bucket_suffix.id}-sanitized"
+  bucket = "${local.bucket_name_prefix}-${random_string.bucket_suffix.id}-sanitized"
 
   lifecycle {
     ignore_changes = [
@@ -157,7 +172,7 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
 
 # the lambda function needs to get single objects from the input bucket
 resource "aws_iam_policy" "input_bucket_getObject_policy" {
-  name        = "BucketGetObject_${aws_s3_bucket.input.id}"
+  name        = "${module.env_id.id}_BucketGetObject_${aws_s3_bucket.input.id}"
   description = "Allow principal to read from input bucket: ${aws_s3_bucket.input.id}"
 
   policy = jsonencode(
@@ -188,7 +203,7 @@ resource "aws_iam_role_policy_attachment" "read_policy_for_import_bucket" {
 
 # proxy's lamba needs to WRITE to the output bucket
 resource "aws_iam_policy" "sanitized_bucket_write_policy" {
-  name        = "BucketWrite_${aws_s3_bucket.sanitized.id}"
+  name        = "${module.env_id.id}_BucketWrite_${aws_s3_bucket.sanitized.id}"
   description = "Allow principal to write to bucket: ${aws_s3_bucket.sanitized.id}"
 
   policy = jsonencode(
@@ -229,7 +244,7 @@ moved {
 
 # proxy caller (data consumer) needs to read (both get and list objects) from the output bucket
 resource "aws_iam_policy" "sanitized_bucket_read" {
-  name        = "BucketRead_${aws_s3_bucket.sanitized.id}"
+  name        = "${module.env_id.id}_BucketRead_${aws_s3_bucket.sanitized.id}"
   description = "Allow to read content from bucket: ${aws_s3_bucket.sanitized.id}"
 
   policy = jsonencode(
@@ -276,7 +291,7 @@ resource "aws_iam_role_policy_attachment" "reader_policy_to_accessor_role" {
 }
 
 resource "aws_ssm_parameter" "rules" {
-  name           = "PSOXY_${upper(replace(var.instance_id, "-", "_"))}_RULES"
+  name           = "${var.path_to_instance_ssm_parameters}RULES"
   type           = "String"
   description    = "Rules for transformation of files. NOTE: any 'RULES' env var will override this value"
   insecure_value = yamlencode(var.rules) # NOTE: insecure_value just means shown in Terraform output
@@ -291,7 +306,7 @@ resource "aws_ssm_parameter" "rules" {
 resource "aws_iam_policy" "testing" {
   count = var.provision_iam_policy_for_testing ? 1 : 0
 
-  name_prefix = "${var.instance_id}Testing"
+  name_prefix = "${local.iam_policy_prefix}Testing"
   description = "Allow to write to input bucket, read from sanitized bucket to test Lambda's behavior"
   policy = jsonencode({
     "Version" : "2012-10-17",
@@ -380,7 +395,7 @@ EOT
 
 
 resource "local_file" "todo-aws-psoxy-bulk-test" {
-  filename = "TODO_${var.todo_step}_test_${var.instance_id}.md"
+  filename = "TODO ${var.todo_step} - test ${var.instance_id}.md"
   content  = local.todo_content
 }
 
@@ -426,6 +441,9 @@ output "function_name" {
   value = module.psoxy_lambda.function_name
 }
 
+# DEPRECATED; remove in v0.5
+# this ends up being qualified by environment/deployment id, to avoid collisions - so not useful
+# for identifying 'instance' of connector
 output "instance_id" {
   value = module.psoxy_lambda.function_name
 }
@@ -433,6 +451,10 @@ output "instance_id" {
 output "proxy_kind" {
   value       = "bulk"
   description = "The kind of proxy instance this is."
+}
+
+output "test_script" {
+  value = local_file.test_script.filename
 }
 
 output "todo" {

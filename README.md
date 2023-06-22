@@ -95,12 +95,14 @@ which you must provide as a configuration value in your proxy deployment.
 
 The API key/secret will be used to authenticate with the source's REST API and access the data.
 
-| Source     | Details + Examples                                              | API Permissions / Scopes                                                                                       |
-|------------|-----------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------|
-| Asana      | [docs/sources/asana](docs/sources/asana.md)                     | a [Service Account](https://asana.com/guide/help/premium/service-accounts) (provides full access to Workspace) |
-| Salesforce | [docs/sources/salesforce](docs/sources/salesforce.md)           | `api` `chatter_api` `refresh_token` `offline_access` `openid` `lightning` `content` `cdp_query_api`            |                                                                                                       |
-| Slack      | [docs/sources/slack-discovery](docs/sources/slack-discovery.md) | `discovery:read`                                                                                               |
-| Zoom       | [docs/sources/zoom](docs/sources/zoom.md)                       | `user:read:admin` `meeting:read:admin` `report:read:admin`                                                     |
+| Source                    | Details + Examples                                                          | API Permissions / Scopes                                                                                       |
+|---------------------------|-----------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------|
+| Asana                     | [docs/sources/asana](docs/sources/asana.md)                                 | a [Service Account](https://asana.com/guide/help/premium/service-accounts) (provides full access to Workspace) |
+| Jira Cloud                | [docs/sources/atlassian/jira-cloud](docs/sources/atlassian/jira-cloud.md)   | "Classic Scopes": `read:jira-user` `read:jira-work` "Granular Scopes": `read:group:jira` `read:user:jira`  "User Identity API" `read:account` |
+| Jira Server / Data Center | [docs/sources/atlassian/jira-server](docs/sources/atlassian/jira-server.md) | Personal Acccess Token on behalf of user with access to equivalent of above scopes for entire instance         |
+| Salesforce                | [docs/sources/salesforce](docs/sources/salesforce.md)                       | `api` `chatter_api` `refresh_token` `offline_access` `openid` `lightning` `content` `cdp_query_api`            |                                                                                                       |
+| Slack                     | [docs/sources/slack](docs/sources/slack/README.md)                          | `discovery:read`                                                                                               |
+| Zoom                      | [docs/sources/zoom](docs/sources/zoom.md)                                   | `user:read:admin` `meeting:read:admin` `report:read:admin`                                                     |
 
 NOTE: the above scopes are copied from [infra/modules/worklytics-connector-specs](infra/modules/worklytics-connector-specs).
 Please refer to that module for a definitive list.
@@ -154,12 +156,12 @@ command line tools.
 
 You will need all of the following in your deployment environment (eg, your laptop):
 
-| Tool                                         | Version            | Test Command              |
-|----------------------------------------------|--------------------|---------------------------|
-| [git](https://git-scm.com/)                  | 2.17+              | `git --version`           |
-| [Maven](https://maven.apache.org/)           | 3.6+               | `mvn -v`                  |
-| [Java 11+ JDK](https://openjdk.org/install/) | 11+, but < 19      | `mvn -v &#124; grep Java` |
-| [Terraform](https://www.terraform.io/)       | 1.3.x, but < 1.4.x | `terraform version`       |
+| Tool                                         | Version       | Test Command              |
+|----------------------------------------------|---------------|---------------------------|
+| [git](https://git-scm.com/)                  | 2.17+         | `git --version`           |
+| [Maven](https://maven.apache.org/)           | 3.6+          | `mvn -v`                  |
+| [Java 11+ JDK](https://openjdk.org/install/) | 11+, but < 19 | `mvn -v &#124; grep Java` |
+| [Terraform](https://www.terraform.io/)       | 1.3+          | `terraform version`       |
 
 
 NOTE: Java 19/20 are currently broken, see [docs/troubleshooting.md](docs/troubleshooting.md); we
@@ -171,8 +173,7 @@ tool, but we don't offer documentation or support in doing so.  Adapting one of 
 [terraform examples](infra/examples) or writing your own config that re-uses our
 [modules](infra/modules) will simplify things greatly.
 
-NOTE: Refrain to use versions 1.4.x as contain a bug that breaks the infrastructure deployment and
-not yet officially supported. Bug will be solved apparently in v1.4.3+.
+NOTE: Refrain to use Terraform versions 1.4.x that are < v1.4.3. We've seen bugs.
 
 Depending on your Cloud Host / Data Sources, you will need:
 

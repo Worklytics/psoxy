@@ -24,6 +24,12 @@ variable "psoxy_base_dir" {
   }
 }
 
+variable "deployment_bundle" {
+  type        = string
+  description = "path to deployment bundle to use (if not provided, will build one)"
+  default     = null
+}
+
 variable "force_bundle" {
   type        = bool
   description = "whether to force build of deployment bundle, even if it already exists"
@@ -75,8 +81,16 @@ variable "deployment_id" {
   default     = "Psoxy"
 }
 
+# TODO: remove in v0.5
 variable "rest_function_name_prefix" {
   type        = string
-  description = "prefix for REST function names"
+  description = "DEPRECATED - use `api_function_name_prefix`; prefix for REST function names"
+  default     = null
+}
+
+# TODO : change default in v0.5, or remove; should be based on deployment_id
+variable "api_function_name_prefix" {
+  type        = string
+  description = "prefix for API function names"
   default     = "psoxy-"
 }

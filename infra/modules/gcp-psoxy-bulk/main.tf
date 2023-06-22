@@ -6,9 +6,19 @@ terraform {
   }
 }
 
+# constants
 locals {
-  # legacy; pre 0.5 may not pass instance_id
-  instance_id         = coalesce(var.instance_id, substr(var.source_kind, 0, 30 - length(var.environment_id_prefix)))
+  SA_NAME_MIN_LENGTH             = 6
+  SA_NAME_MAX_LENGTH             = 30
+  CLOUD_FUNCTION_NAME_MAX_LENGTH = 63
+}
+
+# computed
+locals {
+  # legacy pre 0.5 may not pass instance_id
+  instance_id         = coalesce(var.instance_id, substr(var.source_kind, 0, local.CLOUD_FUNCTION_NAME_MAX_LENGTH - length(var.environment_id_prefix)))
+  default_sa_name     = coalesce("${var.environment_id_prefix}${local.instance_id}", substr("${var.environment_id_prefix}fn-${var.source_kind}", 0, local.SA_NAME_MAX_LENGTH - 3 - length(var.environment_id_prefix)))
+  sa_name             = length(local.default_sa_name) < local.SA_NAME_MIN_LENGTH ? "psoxy-${local.default_sa_name}" : local.default_sa_name
   function_name       = "${var.environment_id_prefix}${local.instance_id}"
   command_npm_install = "npm --prefix ${var.psoxy_base_dir}tools/psoxy-test install"
 }
@@ -46,10 +56,11 @@ locals {
 # data input to function
 resource "google_storage_bucket" "input-bucket" {
   project                     = var.project_id
-  name                        = "${local.bucket_prefix}-input"
+  name                        = coalesce(var.input_bucket_name, "${local.bucket_prefix}-input")
   location                    = var.region
   force_destroy               = true
   uniform_bucket_level_access = true
+  labels                      = var.default_labels
 
   lifecycle_rule {
     condition {
@@ -78,10 +89,12 @@ module "output_bucket" {
 
   project_id                     = var.project_id
   bucket_write_role_id           = var.bucket_write_role_id
-  function_service_account_email = google_service_account.service-account.email
-  bucket_name_prefix             = local.bucket_prefix
+  function_service_account_email = google_service_account.service_account.email
+  bucket_name_prefix             = coalesce(var.sanitized_bucket_name, local.bucket_prefix)
+  bucket_name_suffix             = var.sanitized_bucket_name == null ? "-output" : ""
   region                         = var.region
   expiration_days                = var.sanitized_expiration_days
+  bucket_labels                  = var.default_labels
 
   depends_on = [
     google_project_service.gcp-infra-api
@@ -95,17 +108,23 @@ moved {
 }
 
 
-resource "google_service_account" "service-account" {
+resource "google_service_account" "service_account" {
   project      = var.project_id
-  account_id   = local.function_name
+  account_id   = local.sa_name
   display_name = "Psoxy Connector - ${var.source_kind}"
   description  = "${local.function_name} runs as this service account"
+}
+
+# TODO: moved in 0.4.25; remove in 0.5
+moved {
+  from = google_service_account.service-account
+  to   = google_service_account.service_account
 }
 
 resource "google_storage_bucket_iam_member" "access_for_import_bucket" {
   bucket = google_storage_bucket.input-bucket.name
   role   = "roles/storage.objectViewer"
-  member = "serviceAccount:${google_service_account.service-account.email}"
+  member = "serviceAccount:${google_service_account.service_account.email}"
 }
 
 resource "google_storage_bucket_iam_member" "grant_sa_read_on_processed_bucket" {
@@ -121,7 +140,7 @@ resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_secret"
 
   project   = var.project_id
   secret_id = each.value.secret_id
-  member    = "serviceAccount:${google_service_account.service-account.email}"
+  member    = "serviceAccount:${google_service_account.service_account.email}"
   role      = "roles/secretmanager.secretAccessor"
 }
 
@@ -134,7 +153,7 @@ module "tf_runner" {
 resource "google_service_account_iam_member" "act_as" {
   member             = module.tf_runner.iam_principal
   role               = "roles/iam.serviceAccountUser"
-  service_account_id = google_service_account.service-account.id
+  service_account_id = google_service_account.service_account.id
 }
 
 resource "google_cloudfunctions_function" "function" {
@@ -148,7 +167,8 @@ resource "google_cloudfunctions_function" "function" {
   source_archive_bucket = var.artifacts_bucket_name
   source_archive_object = var.deployment_bundle_object_name
   entry_point           = "co.worklytics.psoxy.GCSFileEvent"
-  service_account_email = google_service_account.service-account.email
+  service_account_email = google_service_account.service_account.email
+  labels                = var.default_labels
 
   environment_variables = merge(tomap({
     INPUT_BUCKET  = google_storage_bucket.input-bucket.name,
@@ -157,7 +177,7 @@ resource "google_cloudfunctions_function" "function" {
     var.path_to_config == null ? {} : yamldecode(file(var.path_to_config)),
     var.environment_variables,
     var.config_parameter_prefix == null ? {} : { PATH_TO_SHARED_CONFIG = var.config_parameter_prefix },
-    var.config_parameter_prefix == null ? {} : { PATH_TO_INSTANCE_CONFIG = "${var.config_parameter_prefix}${upper(var.instance_id)}_" },
+    var.config_parameter_prefix == null ? {} : { PATH_TO_INSTANCE_CONFIG = "${var.config_parameter_prefix}${upper(local.instance_id)}_" },
   )
 
   dynamic "secret_environment_variables" {
@@ -177,6 +197,8 @@ resource "google_cloudfunctions_function" "function" {
     event_type = "google.storage.object.finalize"
     resource   = google_storage_bucket.input-bucket.name
   }
+
+
 
 
   lifecycle {
@@ -237,7 +259,7 @@ EOT
 }
 
 resource "local_file" "test_script" {
-  filename        = "test-${local.function_name}.sh"
+  filename        = "test-${trimprefix(local.instance_id, var.environment_id_prefix)}.sh"
   file_permission = "0770"
   content         = <<EOT
 #!/bin/bash
@@ -245,7 +267,7 @@ FILE_PATH=$${1:-${try(local.example_file, "")}}
 BLUE='\e[0;34m'
 NC='\e[0m'
 
-printf "Quick test of $${BLUE}${local.function_name}$${NC} ...\n"
+printf "Quick test of $${BLUE}${local.function_name}$${NC} ...\n"tf
 
 node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f $FILE_PATH -d GCP -i ${google_storage_bucket.input-bucket.name} -o ${module.output_bucket.bucket_name}
 EOT
@@ -253,11 +275,15 @@ EOT
 }
 
 output "instance_id" {
+  value = local.instance_id
+}
+
+output "function_name" {
   value = local.function_name
 }
 
 output "instance_sa_email" {
-  value = google_service_account.service-account.email
+  value = google_service_account.service_account.email
 }
 
 output "bucket_prefix" {
@@ -275,6 +301,10 @@ output "sanitized_bucket" {
 output "proxy_kind" {
   value       = "bulk"
   description = "The kind of proxy instance this is."
+}
+
+output "test_script" {
+  value = local_file.test_script.filename
 }
 
 output "todo" {

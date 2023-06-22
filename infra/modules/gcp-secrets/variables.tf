@@ -27,3 +27,9 @@ variable "path_prefix" {
   description = "A prefix to add to the secret path."
   default     = ""
 }
+
+variable "default_labels" {
+  type        = map(string)
+  description = "*Alpha* in v0.4, only respected for new resources. Labels to apply to all resources created by this configuration. Intended to be analogous to AWS providers `default_tags`."
+  default     = {}
+}

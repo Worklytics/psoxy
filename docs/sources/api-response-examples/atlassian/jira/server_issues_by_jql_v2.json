@@ -1,0 +1,138 @@
+{
+  "expand": "names,schema",
+  "startAt": 0,
+  "maxResults": 50,
+  "total": 1,
+  "issues": [
+    {
+      "expand": "operations,versionedRepresentations,editmeta,changelog,renderedFields",
+      "id": "10000",
+      "self": "http://localhost:8080/rest/api/latest/issue/10000",
+      "key": "SFSDF-1",
+      "fields": {
+        "issuetype": {
+          "self": "http://localhost:8080/rest/api/2/issuetype/10002",
+          "id": "10002",
+          "description": "Created by Jira Software - do not edit or delete. Issue type for a user story.",
+          "iconUrl": "http://localhost:8080/images/icons/issuetypes/story.svg",
+          "name": "Story",
+          "subtask": false
+        },
+        "components": [],
+        "timespent": null,
+        "timeoriginalestimate": null,
+        "description": "asdfads",
+        "project": {
+          "self": "http://localhost:8080/rest/api/2/project/10000",
+          "id": "10000",
+          "key": "SFSDF",
+          "name": "sfsdf",
+          "projectTypeKey": "software",
+          "avatarUrls": {
+            "48x48": "http://localhost:8080/secure/projectavatar?avatarId=10324",
+            "24x24": "http://localhost:8080/secure/projectavatar?size=small&avatarId=10324",
+            "16x16": "http://localhost:8080/secure/projectavatar?size=xsmall&avatarId=10324",
+            "32x32": "http://localhost:8080/secure/projectavatar?size=medium&avatarId=10324"
+          }
+        },
+        "fixVersions": [],
+        "customfield_10110": null,
+        "customfield_10111": null,
+        "aggregatetimespent": null,
+        "resolution": null,
+        "customfield_10104": null,
+        "customfield_10108": "0|hzzzzz:",
+        "aggregatetimeestimate": null,
+        "customfield_10109": null,
+        "resolutiondate": null,
+        "workratio": -1,
+        "summary": "asdfads",
+        "lastViewed": "2023-05-22T10:14:39.242+0000",
+        "watches": {
+          "self": "http://localhost:8080/rest/api/2/issue/SFSDF-1/watchers",
+          "watchCount": 1,
+          "isWatching": true
+        },
+        "creator": {
+          "self": "http://localhost:8080/rest/api/2/user?username=fake",
+          "name": "fake",
+          "key": "JIRAUSER10000",
+          "emailAddress": "fake@contoso.com",
+          "avatarUrls": {
+            "48x48": "https://www.gravatar.com/avatar/ac6ffe47a35e01c2ae94a5672d52cfc7?d=mm&s=48",
+            "24x24": "https://www.gravatar.com/avatar/ac6ffe47a35e01c2ae94a5672d52cfc7?d=mm&s=24",
+            "16x16": "https://www.gravatar.com/avatar/ac6ffe47a35e01c2ae94a5672d52cfc7?d=mm&s=16",
+            "32x32": "https://www.gravatar.com/avatar/ac6ffe47a35e01c2ae94a5672d52cfc7?d=mm&s=32"
+          },
+          "displayName": "fake@contoso.com",
+          "active": true,
+          "timeZone": "GMT"
+        },
+        "subtasks": [],
+        "created": "2023-05-19T17:13:53.000+0000",
+        "reporter": {
+          "self": "http://localhost:8080/rest/api/2/user?username=fake",
+          "name": "fake",
+          "key": "JIRAUSER10000",
+          "emailAddress": "fake@contoso.com",
+          "avatarUrls": {
+            "48x48": "https://www.gravatar.com/avatar/ac6ffe47a35e01c2ae94a5672d52cfc7?d=mm&s=48",
+            "24x24": "https://www.gravatar.com/avatar/ac6ffe47a35e01c2ae94a5672d52cfc7?d=mm&s=24",
+            "16x16": "https://www.gravatar.com/avatar/ac6ffe47a35e01c2ae94a5672d52cfc7?d=mm&s=16",
+            "32x32": "https://www.gravatar.com/avatar/ac6ffe47a35e01c2ae94a5672d52cfc7?d=mm&s=32"
+          },
+          "displayName": "fake@contoso.com",
+          "active": true,
+          "timeZone": "GMT"
+        },
+        "customfield_10000": "{summaryBean=com.atlassian.jira.plugin.devstatus.rest.SummaryBean@65debb26[summary={pullrequest=com.atlassian.jira.plugin.devstatus.rest.SummaryItemBean@580fb1c9[overall=PullRequestOverallBean{stateCount=0, state='OPEN', details=PullRequestOverallDetails{openCount=0, mergedCount=0, declinedCount=0}},byInstanceType={}], build=com.atlassian.jira.plugin.devstatus.rest.SummaryItemBean@7f29936a[overall=com.atlassian.jira.plugin.devstatus.summary.beans.BuildOverallBean@5a0de4bf[failedBuildCount=0,successfulBuildCount=0,unknownBuildCount=0,count=0,lastUpdated=<null>,lastUpdatedTimestamp=<null>],byInstanceType={}], review=com.atlassian.jira.plugin.devstatus.rest.SummaryItemBean@f93b346[overall=com.atlassian.jira.plugin.devstatus.summary.beans.ReviewsOverallBean@10239f06[stateCount=0,state=<null>,dueDate=<null>,overDue=false,count=0,lastUpdated=<null>,lastUpdatedTimestamp=<null>],byInstanceType={}], deployment-environment=com.atlassian.jira.plugin.devstatus.rest.SummaryItemBean@23a2ecab[overall=com.atlassian.jira.plugin.devstatus.summary.beans.DeploymentOverallBean@163fdc7c[topEnvironments=[],showProjects=false,successfulCount=0,count=0,lastUpdated=<null>,lastUpdatedTimestamp=<null>],byInstanceType={}], repository=com.atlassian.jira.plugin.devstatus.rest.SummaryItemBean@4a4447e[overall=com.atlassian.jira.plugin.devstatus.summary.beans.CommitOverallBean@8733043[count=0,lastUpdated=<null>,lastUpdatedTimestamp=<null>],byInstanceType={}], branch=com.atlassian.jira.plugin.devstatus.rest.SummaryItemBean@3c804252[overall=com.atlassian.jira.plugin.devstatus.summary.beans.BranchOverallBean@5434a582[count=0,lastUpdated=<null>,lastUpdatedTimestamp=<null>],byInstanceType={}]},errors=[],configErrors=[]], devSummaryJson={\"cachedValue\":{\"errors\":[],\"configErrors\":[],\"summary\":{\"pullrequest\":{\"overall\":{\"count\":0,\"lastUpdated\":null,\"stateCount\":0,\"state\":\"OPEN\",\"details\":{\"openCount\":0,\"mergedCount\":0,\"declinedCount\":0,\"total\":0},\"open\":true},\"byInstanceType\":{}},\"build\":{\"overall\":{\"count\":0,\"lastUpdated\":null,\"failedBuildCount\":0,\"successfulBuildCount\":0,\"unknownBuildCount\":0},\"byInstanceType\":{}},\"review\":{\"overall\":{\"count\":0,\"lastUpdated\":null,\"stateCount\":0,\"state\":null,\"dueDate\":null,\"overDue\":false,\"completed\":false},\"byInstanceType\":{}},\"deployment-environment\":{\"overall\":{\"count\":0,\"lastUpdated\":null,\"topEnvironments\":[],\"showProjects\":false,\"successfulCount\":0},\"byInstanceType\":{}},\"repository\":{\"overall\":{\"count\":0,\"lastUpdated\":null},\"byInstanceType\":{}},\"branch\":{\"overall\":{\"count\":0,\"lastUpdated\":null},\"byInstanceType\":{}}}},\"isStale\":false}}",
+        "aggregateprogress": {
+          "progress": 0,
+          "total": 0
+        },
+        "priority": {
+          "self": "http://localhost:8080/rest/api/2/priority/3",
+          "iconUrl": "http://localhost:8080/images/icons/priorities/medium.svg",
+          "name": "Medium",
+          "id": "3"
+        },
+        "customfield_10100": null,
+        "customfield_10101": null,
+        "customfield_10102": null,
+        "labels": [],
+        "customfield_10103": null,
+        "environment": null,
+        "timeestimate": null,
+        "aggregatetimeoriginalestimate": null,
+        "versions": [],
+        "duedate": null,
+        "progress": {
+          "progress": 0,
+          "total": 0
+        },
+        "issuelinks": [],
+        "votes": {
+          "self": "http://localhost:8080/rest/api/2/issue/SFSDF-1/votes",
+          "votes": 0,
+          "hasVoted": false
+        },
+        "assignee": null,
+        "updated": "2023-05-19T17:13:53.000+0000",
+        "status": {
+          "self": "http://localhost:8080/rest/api/2/status/10000",
+          "description": "",
+          "iconUrl": "http://localhost:8080/",
+          "name": "To Do",
+          "id": "10000",
+          "statusCategory": {
+            "self": "http://localhost:8080/rest/api/2/statuscategory/2",
+            "id": 2,
+            "key": "new",
+            "colorName": "blue-gray",
+            "name": "To Do"
+          }
+        }
+      }
+    }
+  ]
+}

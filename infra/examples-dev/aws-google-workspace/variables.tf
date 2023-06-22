@@ -51,7 +51,7 @@ variable "force_bundle" {
 
 variable "provision_testing_infra" {
   type        = bool
-  description = "whether to provision infra needed to support testing of deployment"
+  description = "Whether to provision infra needed to support testing of deployment. If false, it's left to you to ensure the AWS principal you use when running test scripts has the correct permissions."
   default     = false
 }
 
@@ -75,9 +75,9 @@ variable "caller_aws_arns" {
 
   validation {
     condition = alltrue([
-      for arn in var.caller_aws_arns : (length(regexall("^arn:aws:iam::\\d{12}:((role|user)\\/)?\\w+$", arn)) > 0)
+      for i in var.caller_aws_arns : (length(regexall("^arn:aws:iam::\\d{12}:((role|user)\\/)?\\w+$", i)) > 0)
     ])
-    error_message = "The values of caller_aws_arns should be AWS Resource Names for principals; something like 'arn:aws:iam::914358739851:root'."
+    error_message = "The values of caller_aws_arns should be AWS Resource Names, something like 'arn:aws:iam::914358739851:root'."
   }
 }
 
@@ -85,6 +85,11 @@ variable "environment_name" {
   type        = string
   description = "qualifier to append to name of project that will host your psoxy instance"
   default     = ""
+
+  validation {
+    condition     = !can(regex("^(?i)(aws|ssm)", var.environment_name))
+    error_message = "The `environment_name` cannot start with 'aws' or 'ssm', as this will name your AWS resources with prefixes that displease the AMZN overlords."
+  }
 }
 
 variable "connector_display_name_suffix" {
@@ -267,20 +272,20 @@ variable "salesforce_domain" {
   default     = ""
 }
 
-variable "vpc_ip_block" {
+variable "jira_server_url" {
   type        = string
-  description = "IP block for VPC to create for psoxy instances, in CIDR notation"
-  default     = "10.0.0.0/18"
+  default     = null
+  description = "(Only required if using Jira Server connector) URL of the Jira server (ex: myjiraserver.mycompany.com)"
 }
 
-variable "vault_addr" {
+variable "jira_cloud_id" {
   type        = string
-  description = "address of your Vault instance"
-  default     = null # leave null if not using Vault
+  default     = null
+  description = "(Only required if using Jira Cloud connector) Cloud id of the Jira Cloud to connect to (ex: 1324a887-45db-1bf4-1e99-ef0ff456d421)."
 }
 
-variable "aws_vault_role_arn" {
+variable "example_jira_issue_id" {
   type        = string
-  description = "ARN of vault role; see https://developer.hashicorp.com/vault/docs/auth/aws"
-  default     = null # leave null if not using Vault
+  default     = null
+  description = "(Only required if using Jira Server/Cloud connector) Id of an issue for only to be used as part of example calls for Jira (ex: ETV-12)"
 }

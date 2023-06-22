@@ -6,7 +6,6 @@ import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import com.google.cloud.secretmanager.v1.*;
 import com.google.common.base.Preconditions;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.Duration;
 import com.google.protobuf.FieldMask;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
@@ -26,13 +25,12 @@ import java.util.logging.Level;
 @Log
 public class SecretManagerConfigService implements ConfigService, LockService {
 
-    //how long secrets created for locking purposes should live
-    static final java.time.Duration LOCK_SECRETS_TTL = java.time.Duration.ofDays(7);
-
     static final String LOCK_LABEL = "locked";
 
-    @Inject EnvVarsConfigService envVarsConfigService;
-    @Inject Clock clock;
+    @Inject
+    EnvVarsConfigService envVarsConfigService;
+    @Inject
+    Clock clock;
 
     /**
      * Namespace to use; it could be empty for accessing all the secrets or with some value will be used
@@ -110,54 +108,39 @@ public class SecretManagerConfigService implements ConfigService, LockService {
         }
     }
 
-    private String parameterName(ConfigProperty property) {
-        if (StringUtils.isBlank(this.namespace)) {
-            return property.name();
-        } else {
-            return this.namespace + property.name();
-        }
-    }
-
     @Override
     public boolean acquire(@NonNull String lockId, @NonNull java.time.Duration expires) {
         Preconditions.checkArgument(StringUtils.isNotBlank(lockId), "lockId cannot be blank");
 
-        final SecretName lockSecretName = SecretName.of(projectId, this.namespace + lockId);
-
-        long secretTtl = Math.max(expires.getSeconds(), LOCK_SECRETS_TTL.getSeconds());
+        final SecretName lockSecretName = getLockSecret(lockId);
 
         try (SecretManagerServiceClient client = SecretManagerServiceClient.create()) {
             Secret lockSecret;
             try {
                 lockSecret = client.getSecret(lockSecretName);
             } catch (com.google.api.gax.rpc.NotFoundException e) {
-                //create it
-                Secret initial = Secret.newBuilder()
-                    //ttl here, bc this Secret not managed by Terraform; so want it to clean itself
-                    // up after some time
-                    .setTtl(Duration.newBuilder().setSeconds(secretTtl).build())
-                    .build();
-                lockSecret = client.createSecret(lockSecretName.getProject(), lockSecretName.getSecret(),
-                    initial);
+                // It should not happen, as the secret has been created by Terraform
+                throw new RuntimeException(String.format("Secret %s must exist as it should be created by Terraform", lockSecretName));
             }
 
             Instant lockedAt = Optional.ofNullable(lockSecret.getLabelsMap().get(LOCK_LABEL))
-                .map(Instant::parse)
-                .orElse(Instant.MIN);
+                    .map(i -> Instant.ofEpochMilli(Long.parseLong(i)))
+                    .orElse(Instant.MIN);
 
             if (lockedAt.isBefore(clock.instant().minusSeconds(expires.getSeconds()))) {
                 log.warning("Lock " + lockId + " is stale or unset; will try to acquire it");
 
                 Secret updated = client.updateSecret(UpdateSecretRequest.newBuilder()
-                    .setSecret(Secret.newBuilder(lockSecret)
-                        .setTtl(Duration.newBuilder().setSeconds(LOCK_SECRETS_TTL.getSeconds()).build())
-                        .putLabels(LOCK_LABEL, Instant.now(clock).toString())
-                        .build())
-                    .setUpdateMask(FieldMask.newBuilder()
-                        .addPaths("ttl")
-                        .addPaths("labels")
-                        .build())
-                    .build());
+                        .setSecret(Secret.newBuilder(lockSecret)
+                                // Label format is https://cloud.google.com/compute/docs/labeling-resources#requirements
+                                // which an ISO-8601 cannot be added there (just like 2023-01-01T23:50:00Z)
+                                // Instead, just using epoch in millis
+                                .putLabels(LOCK_LABEL, Long.toString(Instant.now(clock).toEpochMilli()))
+                                .build())
+                        .setUpdateMask(FieldMask.newBuilder()
+                                .addPaths("labels")
+                                .build())
+                        .build());
                 //due to etag, update should have FAILED if was modified since our read
                 return true;
             } else {
@@ -172,24 +155,36 @@ public class SecretManagerConfigService implements ConfigService, LockService {
 
     @Override
     public void release(String lockId) {
-        final SecretName lockSecretName = SecretName.of(projectId, this.namespace + lockId);
+        final SecretName lockSecretName = getLockSecret(lockId);
 
         try (SecretManagerServiceClient client = SecretManagerServiceClient.create()) {
             Secret lockSecret = client.getSecret(lockSecretName);
             Secret updated = client.updateSecret(UpdateSecretRequest.newBuilder()
-                .setSecret(Secret.newBuilder(lockSecret)
-                    .setTtl(Duration.newBuilder().setSeconds(LOCK_SECRETS_TTL.getSeconds()).build())
-                    .removeLabels(LOCK_LABEL)
-                    .build())
-                .setUpdateMask(FieldMask.newBuilder()
-                    .addPaths("ttl")
-                    .addPaths("labels")
-                    .build())
-                .build());
+                    .setSecret(Secret.newBuilder(lockSecret)
+                            .removeLabels(LOCK_LABEL)
+                            .build())
+                    .setUpdateMask(FieldMask.newBuilder()
+                            .addPaths("labels")
+                            .build())
+                    .build());
             // again, due to etag this should FAIL if another processed locked in the meantime or
             // something
         } catch (Exception e) {
             log.log(Level.SEVERE, "Could not release lock " + lockId, e);
+        }
+    }
+
+    private SecretName getLockSecret(String lockName) {
+        // As lockName is handled by Terraform, variable should be converted to uppercase
+        // otherwise secret will not be found
+        return SecretName.of(projectId, this.namespace + lockName.toUpperCase());
+    }
+
+    private String parameterName(ConfigProperty property) {
+        if (StringUtils.isBlank(this.namespace)) {
+            return property.name();
+        } else {
+            return this.namespace + property.name();
         }
     }
 }

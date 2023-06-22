@@ -2,6 +2,11 @@ variable "environment_name" {
   type        = string
   description = "qualifier to distinguish resources created by this terraform configuration from other psoxy Terraform deployments, (eg, 'prod', 'dev', etc)"
   default     = ""
+
+  validation {
+    condition     = !can(regex("^(?i)(aws|ssm)", var.environment_name))
+    error_message = "The `environment_name` cannot start with 'aws' or 'ssm', as this will name your AWS resources with prefixes that displease the AMZN overlords."
+  }
 }
 
 variable "aws_account_id" {
@@ -37,6 +42,12 @@ variable "aws_ssm_param_root_path" {
   }
 }
 
+variable "worklytics_host" {
+  type        = string
+  description = "host of worklytics instance where tenant resides. (e.g. intl.worklytics.co for prod; but may differ for dev/staging)"
+  default     = "intl.worklytics.co"
+}
+
 variable "caller_gcp_service_account_ids" {
   type        = list(string)
   description = "ids of GCP service accounts allowed to send requests to the proxy (eg, unique ID of the SA of your Worklytics instance)"
@@ -57,9 +68,9 @@ variable "caller_aws_arns" {
 
   validation {
     condition = alltrue([
-      for i in var.caller_aws_arns : (length(regexall("^arn:aws:iam::\\d{12}:\\w+$", i)) > 0)
+      for i in var.caller_aws_arns : (length(regexall("^arn:aws:iam::\\d{12}:((role|user)\\/)?\\w+$", i)) > 0)
     ])
-    error_message = "The values of caller_aws_arns should be AWS Resource Names, something like 'arn:aws:iam::914358739851:root'."
+    error_message = "The values of caller_aws_arns should be AWS Resource Names, something like 'arn:aws:iam::123123123123:root'."
   }
 }
 
@@ -97,6 +108,24 @@ variable "salesforce_domain" {
   type        = string
   description = "Domain of the Salesforce to connect to (only required if using Salesforce connector). To find your My Domain URL, from Setup, in the Quick Find box, enter My Domain, and then select My Domain"
   default     = ""
+}
+
+variable "jira_server_url" {
+  type        = string
+  default     = null
+  description = "(Only required if using Jira Server connector) URL of the Jira server (ex: myjiraserver.mycompany.com)"
+}
+
+variable "jira_cloud_id" {
+  type        = string
+  default     = null
+  description = "(Only required if using Jira Cloud connector) Cloud id of the Jira Cloud to connect to (ex: 1324a887-45db-1bf4-1e99-ef0ff456d421)."
+}
+
+variable "example_jira_issue_id" {
+  type        = string
+  default     = null
+  description = "(Only required if using Jira Server/Cloud connector) Id of an issue for only to be used as part of example calls for Jira (ex: ETV-12)"
 }
 
 variable "connector_display_name_suffix" {
@@ -249,5 +278,3 @@ variable "todos_as_outputs" {
   description = "whether to render TODOs as outputs or flat files (former useful if you're using Terraform Cloud/Enterprise, or somewhere else where the filesystem is not readily accessible to you)"
   default     = false
 }
-
-

@@ -21,7 +21,7 @@ Visit the following page in the Azure AD console and grant the required applicat
 https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/CallAnAPI/appId/${var.application_id}/isMSAApp/
 
 If you are not a sufficiently privileged Azure AD Administrator (likely Application or Global
-Administrator), you made need assistance from an appropriately privileged member of your IT team.
+Administrator), you may need assistance from an appropriately privileged member of your IT team.
 
 The required grants are:
 ```

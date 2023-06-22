@@ -36,6 +36,12 @@ variable "aws_ssm_key_id" {
   default     = null
 }
 
+variable "worklytics_host" {
+  type        = string
+  description = "host of worklytics instance where tenant resides. (e.g. intl.worklytics.co for prod; but may differ for dev/staging)"
+  default     = "intl.worklytics.co"
+}
+
 variable "caller_gcp_service_account_ids" {
   type        = list(string)
   description = "ids of GCP service accounts allowed to send requests to the proxy (eg, unique ID of the SA of your Worklytics instance)"
@@ -74,6 +80,17 @@ variable "environment_name" {
   default     = ""
 }
 
+variable "aws_environment_name" {
+  type        = string
+  description = "qualifier to distinguish resources created by this terraform configuration from other psoxy Terraform deployments, (eg, 'prod', 'dev', etc)"
+  default     = "psoxy"
+
+  validation {
+    condition     = !can(regex("^(?i)(aws|ssm)", var.aws_environment_name))
+    error_message = "The `environment_name` cannot start with 'aws' or 'ssm', as this will name your AWS resources with prefixes that displease the AMZN overlords."
+  }
+}
+
 variable "connector_display_name_suffix" {
   type        = string
   description = "suffix to append to display_names of connector SAs; helpful to distinguish between various ones in testing/dev scenarios"
@@ -94,6 +111,12 @@ variable "psoxy_base_dir" {
     condition     = var.psoxy_base_dir == null || can(regex("^[^~].*$", var.psoxy_base_dir))
     error_message = "The psoxy_base_dir value should be absolute path (not start with ~)."
   }
+}
+
+variable "deployment_bundle" {
+  type        = string
+  description = "path to deployment bundle to use (if not provided, will build one)"
+  default     = null
 }
 
 variable "force_bundle" {
@@ -253,4 +276,22 @@ variable "salesforce_domain" {
   type        = string
   description = "Domain of the Salesforce to connect to (only required if using Salesforce connector). To find your My Domain URL, from Setup, in the Quick Find box, enter My Domain, and then select My Domain"
   default     = ""
+}
+
+variable "jira_server_url" {
+  type        = string
+  default     = null
+  description = "(Only required if using Jira Server connector) URL of the Jira server (ex: myjiraserver.mycompany.com)"
+}
+
+variable "jira_cloud_id" {
+  type        = string
+  default     = null
+  description = "(Only required if using Jira Cloud connector) Cloud id of the Jira Cloud to connect to (ex: 1324a887-45db-1bf4-1e99-ef0ff456d421)."
+}
+
+variable "example_jira_issue_id" {
+  type        = string
+  default     = null
+  description = "(Only required if using Jira Server/Cloud connector) Id of an issue for only to be used as part of example calls for Jira (ex: ETV-12)"
 }
