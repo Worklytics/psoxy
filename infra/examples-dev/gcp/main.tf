@@ -50,12 +50,33 @@ module "worklytics_connectors" {
   salesforce_domain     = var.salesforce_domain
 }
 
+# sources which require additional dependencies are split into distinct Terraform files, following
+# the naming convention of `{source-identifier}.tf`, eg `msft-365.tf`
+# lines below merge results of those files back into single maps of sources
 locals {
   api_connectors = merge(
     module.worklytics_connectors.enabled_api_connectors,
     module.worklytics_connectors_google_workspace.enabled_api_connectors,
+    # local.msft_api_connectors_with_auth,
+    {}
   )
 
+  source_authorization_todos = concat(
+    module.worklytics_connectors.todos,
+    module.worklytics_connectors_google_workspace.todos,
+    # module.worklytics_connectors_msft_365.todos,
+    []
+  )
+
+  max_auth_todo_step = max(
+    module.worklytics_connectors.next_todo_step,
+    module.worklytics_connectors_google_workspace.next_todo_step,
+    # module.worklytics_connectors_msft_365.next_todo_step,
+    0
+  )
+}
+
+locals {
   bulk_connectors = merge(
     module.worklytics_connectors.enabled_bulk_connectors,
     var.custom_bulk_connectors,
@@ -89,7 +110,7 @@ module "psoxy" {
   lookup_tables                  = var.lookup_tables
   custom_artifacts_bucket_name   = var.custom_artifacts_bucket_name
   todos_as_local_files           = var.todos_as_local_files
-  todo_step                      = max(module.worklytics_connectors.next_todo_step, module.worklytics_connectors_google_workspace.next_todo_step)
+  todo_step                      = local.max_auth_todo_step
 }
 
 locals {

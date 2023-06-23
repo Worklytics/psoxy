@@ -18,12 +18,6 @@ provider "azuread" {
 }
 
 locals {
-  source_authorization_todos = concat(
-    module.worklytics_connectors.todos,
-    module.worklytics_connectors_google_workspace.todos,
-    module.worklytics_connectors_msft_365.todos
-  )
-
   env_qualifier           = coalesce(var.environment_name, "psoxy")
   msft_365_enabled        = length(module.worklytics_connectors_msft_365.enabled_api_connectors) > 0
   developer_provider_name = "${local.env_qualifier}-azure-access"
