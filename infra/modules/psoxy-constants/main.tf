@@ -9,7 +9,7 @@ locals {
     "arn:aws:iam::aws:policy/AmazonSSMFullAccess"  = "AmazonSSMFullAccess"
     "arn:aws:iam::aws:policy/AWSLambda_FullAccess" = "AWSLambda_FullAccess"
   }
-  # TODO: create IAM policy document, which customer could use to create their own policy as
+  # TODO: create IAM policy document, which installer could use to create their own policy as
   # alternative to using AWS Managed policies
 
   required_gcp_roles_to_provision_host = {
