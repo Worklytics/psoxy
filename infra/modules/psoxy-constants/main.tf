@@ -13,17 +13,6 @@ locals {
   # alternative to using AWS Managed policies
 
   required_gcp_roles_to_provision_host = {
-    "roles/iam.serviceAccountAdmin" = {
-      display_name    = "Service Account Admin",
-      description_url = "https://cloud.google.com/iam/docs/understanding-roles#iam.serviceAccountAdmin"
-    },
-    "roles/serviceusage.serviceUsageAdmin" = {
-      display_name    = "Service Usage Admin",
-      description_url = "https://cloud.google.com/iam/docs/understanding-roles#serviceusage.serviceUsageAdmin"
-    },
-  }  # TODO: add list of permissions, which customer could use to create custom role as alternative
-
-  required_gcp_roles_to_provision_google_workspace_source = {
     "roles/storage.admin" = {
       display_name    = "Storage Admin",
       description_url = "https://cloud.google.com/iam/docs/understanding-roles#storage.admin"
@@ -48,6 +37,17 @@ locals {
       display_name    = "Cloud Functions Admin",
       description_url = "https://cloud.google.com/iam/docs/understanding-roles#cloudfunctions.admin"
     },
+  }  # TODO: add list of permissions, which customer could use to create custom role as alternative
+
+  required_gcp_roles_to_provision_google_workspace_source = {
+    "roles/iam.serviceAccountAdmin" = {
+      display_name    = "Service Account Admin",
+      description_url = "https://cloud.google.com/iam/docs/understanding-roles#iam.serviceAccountAdmin"
+    },
+    "roles/serviceusage.serviceUsageAdmin" = {
+      display_name    = "Service Usage Admin",
+      description_url = "https://cloud.google.com/iam/docs/understanding-roles#serviceusage.serviceUsageAdmin"
+    }
   }
   # TODO: add list of permissions, which customer could use to create custom role as alternative
 
