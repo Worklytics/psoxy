@@ -85,12 +85,12 @@ if test $GOOGLE_PROVIDER_COUNT -ne 0; then
   if gcloud --version &> /dev/null ; then
 
     # project
-    printf "# GCP project in which required infrastructure will be provisioned\n" >> $TFVARS_FILE
-    printf "#  - if you're deploying to AWS, you can omit this value\n" >> $TFVARS_FILE
+
     GCP_PROJECT_ID=$(gcloud config get project)
 
     [[ -f variables.tf ]] && grep -q '^variable "gcp_project_id"' variables.tf
     if [[ $? -eq 0 ]]; then
+      printf "# GCP project in which required infrastructure will be provisioned\n" >> $TFVARS_FILE
       printf "gcp_project_id=\"${GCP_PROJECT_ID}\"\n\n" >> $TFVARS_FILE
       printf "\tgcp_project_id=${BLUE}\"${GCP_PROJECT_ID}\"${NC}\n"
     fi
@@ -99,7 +99,7 @@ if test $GOOGLE_PROVIDER_COUNT -ne 0; then
     [[ -f variables.tf ]] && grep -q '^variable "worklytics_sa_emails"' variables.tf
     if [[ $? -eq 0 ]]; then
       printf "# GCP service account emails in the list below will be allowed to invoke your proxy instances\n" >> $TFVARS_FILE
-      printf "#  - if you're deploying to AWS rather than GCP, you can omit this value\n" >> $TFVARS_FILE
+      printf "#  - NOTE: this value only applies to GCP deployments\n" >> $TFVARS_FILE
       printf "#  - for initial testing/deployment, it can be empty list; it needs to be filled only once you're ready to authorize Worklytics to access your data\n" >> $TFVARS_FILE
       printf "worklytics_sa_emails=[\n" >> $TFVARS_FILE
       printf "  # put 'Service Account Email' value here, which you can obtain from Worklytics ( https://intl.worklytics.co/analytics/integrations/configuration )\n" >> $TFVARS_FILE
