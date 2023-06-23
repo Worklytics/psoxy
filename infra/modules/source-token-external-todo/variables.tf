@@ -20,3 +20,9 @@ variable "todo_step" {
   description = "of all todos, where does this one logically fall in sequence"
   default     = 1
 }
+
+variable "todos_as_local_files" {
+  type        = bool
+  description = "whether to render TODOs as flat files"
+  default     = true
+}
