@@ -88,6 +88,7 @@ module "psoxy" {
   custom_bulk_connector_rules    = var.custom_bulk_connector_rules
   lookup_tables                  = var.lookup_tables
   custom_artifacts_bucket_name   = var.custom_artifacts_bucket_name
+  todos_as_local_files           = var.todos_as_local_files
   todo_step                      = max(module.worklytics_connectors.next_todo_step, module.worklytics_connectors_google_workspace.next_todo_step)
 }
 

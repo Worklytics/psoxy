@@ -192,14 +192,10 @@ resource "google_cloudfunctions_function" "function" {
     }
   }
 
-
   event_trigger {
     event_type = "google.storage.object.finalize"
     resource   = google_storage_bucket.input-bucket.name
   }
-
-
-
 
   lifecycle {
     ignore_changes = [
@@ -227,7 +223,9 @@ node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f ${local.example
 EOT
 }
 
-resource "local_file" "todo-gcp-psoxy-bulk-test" {
+resource "local_file" "todo_test_gcp_psoxy_bulk" {
+  count = var.todos_as_local_files ? 1 : 0
+
   filename = "TODO ${var.todo_step} - test ${local.function_name}.md"
   content  = <<EOT
 # Testing Psoxy Bulk: ${local.function_name}
@@ -258,7 +256,16 @@ for a detailed description of all the different options.
 EOT
 }
 
+moved {
+  from = local_file.todo-gcp-psoxy-bulk-test
+  to   = local_file.todo_test_gcp_psoxy_bulk[0]
+}
+
+
+
 resource "local_file" "test_script" {
+  count = var.todos_as_local_files ? 1 : 0
+
   filename        = "test-${trimprefix(local.instance_id, var.environment_id_prefix)}.sh"
   file_permission = "0770"
   content         = <<EOT
@@ -272,6 +279,11 @@ printf "Quick test of $${BLUE}${local.function_name}$${NC} ...\n"tf
 node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f $FILE_PATH -d GCP -i ${google_storage_bucket.input-bucket.name} -o ${module.output_bucket.bucket_name}
 EOT
 
+}
+
+moved {
+  from = local_file.test_script
+  to   = local_file.test_script[0]
 }
 
 output "instance_id" {
@@ -304,7 +316,7 @@ output "proxy_kind" {
 }
 
 output "test_script" {
-  value = local_file.test_script.filename
+  value = local_file.test_script[0].filename
 }
 
 output "todo" {
