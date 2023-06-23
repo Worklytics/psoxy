@@ -14,8 +14,6 @@ while getopts ":q" opt; do
   esac
 done
 
-QUIET_OPTIONS="-q -Dmaven.test.skip=true"
-
 # set to fail on errors
 set -e
 
