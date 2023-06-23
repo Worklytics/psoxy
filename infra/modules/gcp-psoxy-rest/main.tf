@@ -233,7 +233,7 @@ output "proxy_kind" {
 }
 
 output "test_script" {
-  value = local_file.test_script[0].filename
+  value = try(local_file.test_script[0].filename, null)
 }
 
 output "todo" {
