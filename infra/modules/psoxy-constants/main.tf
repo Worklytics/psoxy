@@ -17,9 +17,9 @@ locals {
       display_name    = "Storage Admin",
       description_url = "https://cloud.google.com/iam/docs/understanding-roles#storage.admin"
     },
-    "roles/iam.role.admin" = {
+    "roles/iam.roleAdmin" = {
       display_name    = "IAM Role Admin",
-      description_url = "https://cloud.google.com/iam/docs/understanding-roles#iam.role.admin"
+      description_url = "https://cloud.google.com/iam/docs/understanding-roles#iam.roleAdmin"
     },
     "roles/secretmanager.admin" = {
       display_name    = "Secret Manager Admin",
