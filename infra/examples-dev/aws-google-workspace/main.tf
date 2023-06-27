@@ -12,11 +12,6 @@ terraform {
     google = {
       version = ">= 3.74, <= 5.0"
     }
-
-    vault = {
-      source  = "hashicorp/vault"
-      version = "~> 3.11.0"
-    }
   }
 
   # we recommend you use a secure location for your Terraform state (such as S3 bucket), as it
@@ -93,8 +88,6 @@ module "psoxy" {
   example_jira_issue_id          = var.example_jira_issue_id
   bulk_sanitized_expiration_days = var.bulk_sanitized_expiration_days
   bulk_input_expiration_days     = var.bulk_input_expiration_days
-  # Uncomment the following line if you want to apply KMS encryption on your SSM parameters
-  #  aws_ssm_key_id                 = aws_kms_key.key.key_id
 }
 
 # rename done in v0.4.15
@@ -103,14 +96,6 @@ moved {
   to   = module.psoxy
 }
 
-
-## TODO: requires targeted apply to create key first, bc value of key_id determines map content
-## in example
-#resource "aws_kms_key" "key" {
-#  description             = "KMS key for Psoxy"
-#  enable_key_rotation     = true
-#  is_enabled              = true
-#}
 
 # if you generated these, you may want them to import back into your data warehouse
 output "lookup_tables" {

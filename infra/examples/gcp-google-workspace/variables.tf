@@ -38,6 +38,7 @@ variable "gcp_billing_account_id" {
   default     = null
 }
 
+
 variable "worklytics_sa_emails" {
   type        = list(string)
   description = "service accounts for your organization's Worklytics instances (list supported for test/dev scenarios)"
