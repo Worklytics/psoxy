@@ -116,6 +116,8 @@ module "psoxy" {
   custom_api_connector_rules     = var.custom_api_connector_rules
   lookup_table_builders          = var.lookup_table_builders
   general_environment_variables  = var.general_environment_variables
+  function_env_kms_key_arn       = var.project_aws_kms_key_arn
+  aws_ssm_key_id                 = var.project_aws_kms_key_arn
   bulk_sanitized_expiration_days = var.bulk_sanitized_expiration_days
   bulk_input_expiration_days     = var.bulk_input_expiration_days
   api_connectors                 = local.api_connectors
