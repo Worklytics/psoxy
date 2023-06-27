@@ -19,6 +19,8 @@ module "env_id" {
 locals {
   salt_parameter_name_suffix = "PSOXY_SALT"
   function_name              = "${module.env_id.id}-${var.instance_id}"
+
+  kms_keys_to_allow_ids      = merge(var.ssm_kms_key_ids, var.kms_keys_to_allow)
 }
 
 
@@ -116,8 +118,10 @@ resource "aws_iam_role_policy_attachment" "basic" {
 data "aws_region" "current" {}
 data "aws_caller_identity" "current" {}
 
-data "aws_kms_key" "keys" {
-  for_each = var.ssm_kms_key_ids
+# bc 'key_id' may be ARN, id, or alias, we need to look up the ARN for each key - as IAM policy must
+# be specified with ARNs
+data "aws_kms_key" "keys_to_allow" {
+  for_each = local.kms_keys_to_allow_ids
 
   key_id = each.value
 }
@@ -125,45 +129,47 @@ data "aws_kms_key" "keys" {
 locals {
   param_arn_prefix = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter${local.instance_ssm_prefix_with_slash}"
 
-  function_write_arns = [
-    "${local.param_arn_prefix}*" # wildcard to match all params corresponding to this function
-  ]
-
-  function_read_arns = concat(
-    [
-      "${local.param_arn_prefix}*" # wildcard to match all params corresponding to this function
-    ],
-    var.global_parameter_arns
-  )
-
-  write_statements = [{
+  local_ssm_param_statements = [{
+    Sid    = "ReadInstanceSSMParameters"
     Action = [
+      "ssm:GetParameter",
+      "ssm:GetParameterVersion",
+      "ssm:GetParameters",
+      "ssm:GetParametersByPath",
       "ssm:PutParameter",
       "ssm:DeleteParameter" # delete locks, bad access tokens, etc
     ]
     Effect   = "Allow"
-    Resource = local.function_write_arns
+    Resource = [
+      "${local.param_arn_prefix}*" # wildcard to match all params corresponding to this function
+    ]
   }]
 
-  read_statements = [{
+  global_ssm_param_statements = [{
+    Sid    = "ReadSharedSSMParameters"
     Action = [
-      "ssm:GetParameter*"
+      "ssm:GetParameter",
+      "ssm:GetParameters",
+      "ssm:GetParameterVersion",
+      "ssm:GetParametersByPath",
     ]
     Effect   = "Allow"
-    Resource = local.function_read_arns
+    Resource = var.global_parameter_arns
   }]
 
   key_statements = length(var.ssm_kms_key_ids) > 0 ? [{
+    Sid    = "AllowKMSUse"
     Action = [
-      "kms:Decrypt"
+      "kms:Decrypt",
+      "kms:Encrypt", # needed, bc lambdas need to write some SSM parameters
     ]
     Effect   = "Allow"
-    Resource = [for k in data.aws_kms_key.keys : k.arn]
+    Resource = [for k in data.aws_kms_key.keys_to_allow : k.arn]
   }] : []
 
   policy_statements = concat(
-    local.read_statements,
-    local.write_statements,
+    local.global_ssm_param_statements,
+    local.local_ssm_param_statements,
     local.key_statements
   )
 }

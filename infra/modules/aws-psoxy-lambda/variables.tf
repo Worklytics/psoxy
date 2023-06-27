@@ -37,9 +37,16 @@ variable "aws_assume_role_arn" {
   default     = null
 }
 
+# TODO: remove after 0.4.x
 variable "ssm_kms_key_ids" {
   type        = map(string)
-  description = "KMS key IDs or ARNs that were used for encrypting SSM parameters needed by this lambda, if any."
+  description = "DEPRECATED; KMS key IDs or ARNs that were used for encrypting SSM parameters needed by this lambda, if any."
+  default     = {}
+}
+
+variable "kms_keys_to_allow" {
+  type        = map(string)
+  description = "KMS key IDs or ARNs for keys this lambda needs to use, if any."
   default     = {}
 }
 
