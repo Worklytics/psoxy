@@ -36,6 +36,7 @@ module "psoxy_lambda" {
   path_to_function_zip            = var.path_to_function_zip
   function_zip_hash               = var.function_zip_hash
   function_env_kms_key_arn        = var.function_env_kms_key_arn
+  logs_kms_key_arn                = var.logs_kms_key_arn
   memory_size_mb                  = var.memory_size_mb
   timeout_seconds                 = 55
   reserved_concurrent_executions  = var.reserved_concurrent_executions

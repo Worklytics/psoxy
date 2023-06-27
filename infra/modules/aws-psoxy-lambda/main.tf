@@ -76,15 +76,21 @@ resource "aws_lambda_function" "psoxy-instance" {
 }
 
 # cloudwatch group per lambda function
-resource "aws_cloudwatch_log_group" "lambda-log" {
+resource "aws_cloudwatch_log_group" "lambda_log" {
   name              = "/aws/lambda/${aws_lambda_function.psoxy-instance.function_name}"
   retention_in_days = var.log_retention_in_days
+  kms_key_id        = var.logs_kms_key_arn
 
   lifecycle {
     ignore_changes = [
       tags
     ]
   }
+}
+
+moved {
+  from = aws_cloudwatch_log_group.lambda-log
+  to   = aws_cloudwatch_log_group.lambda_log
 }
 
 resource "aws_iam_role" "iam_for_lambda" {
@@ -224,5 +230,5 @@ output "iam_role_for_lambda_name" {
 }
 
 output "log_group" {
-  value = aws_cloudwatch_log_group.lambda-log.name
+  value = aws_cloudwatch_log_group.lambda_log.name
 }

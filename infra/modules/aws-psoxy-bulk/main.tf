@@ -37,6 +37,7 @@ module "psoxy_lambda" {
   path_to_function_zip            = var.path_to_function_zip
   function_zip_hash               = var.function_zip_hash
   function_env_kms_key_arn        = var.function_env_kms_key_arn
+  logs_kms_key_arn                = var.logs_kms_key_arn
   global_parameter_arns           = var.global_parameter_arns
   path_to_instance_ssm_parameters = var.path_to_instance_ssm_parameters
   ssm_kms_key_ids                 = var.ssm_kms_key_ids
