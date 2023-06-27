@@ -20,7 +20,7 @@ locals {
   salt_parameter_name_suffix = "PSOXY_SALT"
   function_name              = "${module.env_id.id}-${var.instance_id}"
 
-  kms_keys_to_allow_ids      = merge(
+  kms_keys_to_allow_ids = merge(
     var.ssm_kms_key_ids,
     var.kms_keys_to_allow
   )
@@ -146,7 +146,7 @@ locals {
   ))
 
   local_ssm_param_statements = [{
-    Sid    = "ReadInstanceSSMParameters"
+    Sid = "ReadInstanceSSMParameters"
     Action = [
       "ssm:GetParameter",
       "ssm:GetParameterVersion",
@@ -155,14 +155,14 @@ locals {
       "ssm:PutParameter",
       "ssm:DeleteParameter" # delete locks, bad access tokens, etc
     ]
-    Effect   = "Allow"
+    Effect = "Allow"
     Resource = [
       "${local.param_arn_prefix}*" # wildcard to match all params corresponding to this function
     ]
   }]
 
   global_ssm_param_statements = [{
-    Sid    = "ReadSharedSSMParameters"
+    Sid = "ReadSharedSSMParameters"
     Action = [
       "ssm:GetParameter",
       "ssm:GetParameters",
@@ -174,7 +174,7 @@ locals {
   }]
 
   key_statements = length(local.kms_keys_to_allow_ids) > 0 ? [{
-    Sid    = "AllowKMSUse"
+    Sid = "AllowKMSUse"
     Action = [
       "kms:Decrypt",
       "kms:Encrypt", # needed, bc lambdas need to write some SSM parameters

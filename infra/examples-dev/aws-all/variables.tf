@@ -52,7 +52,7 @@ variable "project_aws_kms_key_arn" {
   default     = null
 
   validation {
-    condition = var.project_aws_kms_key_arn == null || can(regex("^arn:aws:kms:.*:\\d{12}:key\\/.*$", var.project_aws_kms_key_arn))
+    condition     = var.project_aws_kms_key_arn == null || can(regex("^arn:aws:kms:.*:\\d{12}:key\\/.*$", var.project_aws_kms_key_arn))
     error_message = "The project_aws_kms_key_arn value should be null or a valid an AWS KMS key ARN."
   }
 }

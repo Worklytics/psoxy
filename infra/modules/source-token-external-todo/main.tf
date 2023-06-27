@@ -17,7 +17,7 @@ EOT
 }
 
 resource "local_file" "source_connection_instructions" {
-  count    = var.todos_as_local_files ? 1 : 0
+  count = var.todos_as_local_files ? 1 : 0
 
   filename = "TODO ${var.todo_step} - setup ${var.source_id}.md"
   content  = local.todo_content

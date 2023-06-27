@@ -37,7 +37,7 @@ locals {
       display_name    = "Cloud Functions Admin",
       description_url = "https://cloud.google.com/iam/docs/understanding-roles#cloudfunctions.admin"
     },
-  }  # TODO: add list of permissions, which customer could use to create custom role as alternative
+  } # TODO: add list of permissions, which customer could use to create custom role as alternative
 
   required_gcp_roles_to_provision_google_workspace_source = {
     "roles/iam.serviceAccountAdmin" = {
