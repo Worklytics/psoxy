@@ -37,6 +37,12 @@ variable "aws_assume_role_arn" {
   default     = null
 }
 
+variable "function_env_kms_key_arn" {
+  type        = string
+  description = "AWS KMS key ARN to use to encrypt lambda's environment. NOTE: Terraform must be authenticated as an AWS principal authorized to encrypt/decrypt with this key."
+  default     = null
+}
+
 # TODO: remove after 0.4.x
 variable "ssm_kms_key_ids" {
   type        = map(string)

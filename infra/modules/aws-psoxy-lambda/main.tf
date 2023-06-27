@@ -20,7 +20,10 @@ locals {
   salt_parameter_name_suffix = "PSOXY_SALT"
   function_name              = "${module.env_id.id}-${var.instance_id}"
 
-  kms_keys_to_allow_ids      = merge(var.ssm_kms_key_ids, var.kms_keys_to_allow)
+  kms_keys_to_allow_ids      = merge(
+    var.ssm_kms_key_ids,
+    var.kms_keys_to_allow
+  )
 }
 
 
@@ -38,6 +41,7 @@ locals {
   path_to_shared_config = regex("arn.+parameter(/.*)${local.salt_parameter_name_suffix}", local.salt_arn)[0]
 }
 
+
 resource "aws_lambda_function" "psoxy-instance" {
   function_name                  = local.function_name
   role                           = aws_iam_role.iam_for_lambda.arn
@@ -49,6 +53,7 @@ resource "aws_lambda_function" "psoxy-instance" {
   timeout                        = var.timeout_seconds
   memory_size                    = var.memory_size_mb
   reserved_concurrent_executions = coalesce(var.reserved_concurrent_executions, -1)
+  kms_key_arn                    = var.function_env_kms_key_arn
 
   environment {
     variables = merge(
@@ -129,6 +134,11 @@ data "aws_kms_key" "keys_to_allow" {
 locals {
   param_arn_prefix = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter${local.instance_ssm_prefix_with_slash}"
 
+  kms_keys_to_allow_arns = distinct(concat(
+    [for k in data.aws_kms_key.keys_to_allow : k.arn],
+    var.function_env_kms_key_arn == null ? [] : [var.function_env_kms_key_arn]
+  ))
+
   local_ssm_param_statements = [{
     Sid    = "ReadInstanceSSMParameters"
     Action = [
@@ -157,14 +167,14 @@ locals {
     Resource = var.global_parameter_arns
   }]
 
-  key_statements = length(var.ssm_kms_key_ids) > 0 ? [{
+  key_statements = length(local.kms_keys_to_allow_ids) > 0 ? [{
     Sid    = "AllowKMSUse"
     Action = [
       "kms:Decrypt",
       "kms:Encrypt", # needed, bc lambdas need to write some SSM parameters
     ]
     Effect   = "Allow"
-    Resource = [for k in data.aws_kms_key.keys_to_allow : k.arn]
+    Resource = local.kms_keys_to_allow_arns
   }] : []
 
   policy_statements = concat(

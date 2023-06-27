@@ -24,6 +24,12 @@ variable "aws_ssm_key_id" {
   default     = null
 }
 
+variable "function_env_kms_key_arn" {
+  type        = string
+  description = "AWS KMS key ARN to use to encrypt lambdas' environments. NOTE: Terraform must be authenticated as an AWS principal authorized to encrypt/decrypt with this key."
+  default     = null
+}
+
 variable "caller_gcp_service_account_ids" {
   type        = list(string)
   description = "ids of GCP service accounts allowed to send requests to the proxy (eg, unique ID of the SA of your Worklytics instance)"
