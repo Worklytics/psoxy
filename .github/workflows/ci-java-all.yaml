@@ -11,6 +11,7 @@ on:
     branches:
       - 'main'
       - 'rc-*'
+      - 's152-java-20-test'
 
 jobs:
   # Java 11 - supported until 30 Sept 2023
@@ -30,8 +31,8 @@ jobs:
   # Java 20 - released 21 Mar 2023, supported until 19 Sept 2023;
   #  as of 5 Apr 2023, current version of java 20 provided by GitHub action is ALSO incompatible
   # with our code; have tested temurin, liberica, microsoft, corretto, oracle and zulu - all fail
-#  ci_java20:
-#    uses: ./.github/workflows/build-java.yaml
-#    with:
-#      java-version: '20'
-#
+  ci_java20:
+    uses: ./.github/workflows/build-java.yaml
+    with:
+      java-version: '20'
+
