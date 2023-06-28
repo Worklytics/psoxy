@@ -11,7 +11,7 @@
 
     <properties>
         <revision>0.4.26</revision>
-        <dependency.jackson.version>2.12.5</dependency.jackson.version>
+        <dependency.jackson.version>2.15.2</dependency.jackson.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <dependency.lombok.version>1.18.22</dependency.lombok.version>
         <dependency.dagger.version>2.40.5</dependency.dagger.version>
