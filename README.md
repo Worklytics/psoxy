@@ -159,13 +159,10 @@ You will need all of the following in your deployment environment (eg, your lapt
 | Tool                                         | Version       | Test Command              |
 |----------------------------------------------|---------------|---------------------------|
 | [git](https://git-scm.com/)                  | 2.17+         | `git --version`           |
-| [Maven](https://maven.apache.org/)           | 3.6+          | `mvn -v`                  |
-| [Java 11+ JDK](https://openjdk.org/install/) | 11+, but < 19 | `mvn -v &#124; grep Java` |
-| [Terraform](https://www.terraform.io/)       | 1.3+          | `terraform version`       |
+| [Maven](https://maven.apache.org/)           | 3.6+          | `mvn -v`                 |
+| [Java 11+ JDK](https://openjdk.org/install/) | 11+, <=20     | `mvn -v &#124; grep Java` |
+| [Terraform](https://www.terraform.io/)       | 1.3.x, <= 1.5 | `terraform version`       |
 
-
-NOTE: Java 19/20 are currently broken, see [docs/troubleshooting.md](docs/troubleshooting.md); we
-suggest Java 17, which is a LTS edition supported until Sept 2026.
 
 NOTE: Using `terraform` is not strictly necessary, but it is the only supported method. You may
 provision your infrastructure via your host's CLI, web console, or another infrastructure provisioning

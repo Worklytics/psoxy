@@ -68,6 +68,8 @@ module "api_connector" {
   path_to_config                  = "${var.psoxy_base_dir}/configs/${each.value.source_kind}.yaml"
   path_to_function_zip            = module.psoxy.path_to_deployment_jar
   function_zip_hash               = module.psoxy.deployment_package_hash
+  function_env_kms_key_arn        = var.function_env_kms_key_arn
+  logs_kms_key_arn                = var.logs_kms_key_arn
   api_caller_role_arn             = module.psoxy.api_caller_role_arn
   example_api_calls               = each.value.example_api_calls
   aws_account_id                  = var.aws_account_id
@@ -114,6 +116,8 @@ module "bulk_connector" {
   aws_region                       = data.aws_region.current.id
   path_to_function_zip             = module.psoxy.path_to_deployment_jar
   function_zip_hash                = module.psoxy.deployment_package_hash
+  function_env_kms_key_arn         = var.function_env_kms_key_arn
+  logs_kms_key_arn                 = var.logs_kms_key_arn
   psoxy_base_dir                   = var.psoxy_base_dir
   rules                            = try(var.custom_bulk_connector_rules[each.key], each.value.rules)
   global_parameter_arns            = module.global_secrets.secret_arns
