@@ -71,4 +71,10 @@ chmod +x ${EXAMPLE_TEMPLATE_REPO}/check-prereqs
 
 cd "$EXAMPLE_TEMPLATE_REPO"
 git commit -a -m "Update example to ${RELEASE_TAG}"
+git push origin
+
+if command -v gh &> /dev/null; then
+  gh pr create --title "update to ${RELEASE_TAG}" --body "update example to ${RELEASE_TAG}"
+fi
+
 cd -
