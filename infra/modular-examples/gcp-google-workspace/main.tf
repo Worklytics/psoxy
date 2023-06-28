@@ -282,6 +282,7 @@ module "worklytics-psoxy-connection-long-auth" {
   psoxy_endpoint_url     = module.connector-long-auth-function[each.key].cloud_function_url
   display_name           = "${each.value.display_name} via Psoxy${var.connector_display_name_suffix}"
   todo_step              = module.connector-long-auth-function[each.key].next_todo_step
+  settings_to_provide    = try(each.value.settings_to_provide, {})
 }
 # END LONG ACCESS AUTH CONNECTORS
 
@@ -371,7 +372,7 @@ output "todos_3" {
   description = "List of todo steps to complete 3rd, in markdown format."
   value = concat(
     values(module.worklytics-psoxy-connection)[*].todo,
-    values(module.worklytics-psoxy-connection)[*].todo,
+    values(module.worklytics-psoxy-connection-long-auth)[*].todo,
     values(module.psoxy-bulk-to-worklytics)[*].todo,
   )
 }
