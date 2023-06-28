@@ -55,19 +55,6 @@ public class PrebuiltSanitizerRules {
                             "direction").stream())
             .collect(Collectors.toList());
 
-    private static final List<String> projectServerAllowedQueryParameters = Streams.concat(commonAllowedQueryParameters.stream(),
-                    Lists.newArrayList("expand",
-                                    "includeArchived")
-                            .stream())
-            .collect(Collectors.toList());
-
-    private static final List<String> userServerAllowedQueryParameters = Streams.concat(commonAllowedQueryParameters.stream(),
-                    Lists.newArrayList("username",
-                                    "includeActive",
-                                    "includeInactive")
-                            .stream())
-            .collect(Collectors.toList());
-
     private static final List<Transform> USER_TRANSFORMATIONS =Arrays.asList(
             Transform.Redact.builder()
                     .jsonPath("$..avatar_url")
@@ -265,7 +252,7 @@ public class PrebuiltSanitizerRules {
 
     static final Endpoint ISSUE_COMMENTS = Endpoint.builder()
             .pathTemplate("/ex/jira/{cloudId}/rest/api/3/issue/{issueId}")
-            .allowedQueryParams(commonAllowedQueryParameters)
+            .allowedQueryParams(issueCommentsQueryParameters)
             .transform(Transform.Redact.builder()
                     .jsonPath("$..url")
                     .jsonPath("$..html_url")
@@ -472,7 +459,7 @@ public class PrebuiltSanitizerRules {
 
     static final Endpoint REPOSITORIES = Endpoint.builder()
             .pathTemplate("/orgs/{org}/repos")
-            .allowedQueryParams(commonAllowedQueryParameters)
+            .allowedQueryParams(repoListAllowedQueryParameters)
             .transform(Transform.Redact.builder()
                     .jsonPath("$..html_url")
                     .jsonPath("$..description")
