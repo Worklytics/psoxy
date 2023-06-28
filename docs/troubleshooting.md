@@ -11,45 +11,6 @@
 
 ## General Tips
 
-### Build problems with Java 19 / 20 (specifically, openjdk 19 / 20)
-
-If you are using openjdk 19.x or 20.x, you may run into problems with the build. We suggest you
-downgrade to some java 17, which is Long-Term Support (LTS) edition, and use that.
-
-On Mac, steps would be:
-
-1. check version
-```bash
-mvn -v
-```
-- java version says "17", you're good to go. if it is <=8, or >=19, you should upgrade/downgrade
-  respectively.
-
-2. install java 17
-```bash
-brew install openjdk@17
-```
-
-3. set `JAVA_HOME` env variable to point to java 17; for example:
-
-```bash
-export JAVA_HOME='/opt/homebrew/Cellar/openjdk@17/17.0.6/libexec/openjdk.jdk/Contents/Home'
-```
-
-or, possibly your Homebrew default installation is at `/usr/local/Cellar/`, in which case:
-
-```bash
-/usr/local/Cellar/openjdk@17/17.0.6/libexec/openjdk.jdk/Contents/Home
-```
-
-NOTE:
-  - you may need to edit some similar `export` command in your `.bashrc`/`.zshrc` file, or similar;
-    or add that `export` command to such a file. Otherwise, you'll need to repeat the command every
-    time you open a new terminal window.
-  - if you install/upgrade something via Homebrew that depends on Java, you may need to repeat step
-    3 again to reset your `JAVA_HOME`
-
-
 ### General Build / Packaging Failures
 Our example Terraform configurations should compile and package the Java code into a JAR file, which
 is then deployed by Terraform to your host environment.
