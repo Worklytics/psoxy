@@ -25,8 +25,6 @@ fi
 
 FILES_TO_COPY=("main.tf" "variables.tf" "google-workspace.tf" "google-workspace-variables.tf" "msft-365.tf" "msft-365-variables.tf")
 
-set -e  # exit on error
-
 cd "$EXAMPLE_TEMPLATE_REPO"
 CURRENT_BRANCH=$(git branch --show-current)
 if [ "$CURRENT_BRANCH" != "main" ]; then
@@ -42,6 +40,11 @@ fi
 
 git checkout -b "rc-${RELEASE_TAG}"
 
+if [ $? -ne 0 ]; then
+  printf "${RED}Failed to create branch rc-${RELEASE_TAG}. does it already exist?${NC}\n"
+  exit 1
+fi
+
 cd -
 for file in "${FILES_TO_COPY[@]}"
 do
@@ -52,6 +55,8 @@ do
 
   # remove references to local modules
   sed -i .bck '/source = "..\/..\/modules\/[^"]*"/d' "${EXAMPLE_TEMPLATE_REPO}/${file}"
+
+  rm ${EXAMPLE_TEMPLATE_REPO}/*.bck
 done
 
 
@@ -61,6 +66,5 @@ chmod +x ${EXAMPLE_TEMPLATE_REPO}/init
 chmod +x ${EXAMPLE_TEMPLATE_REPO}/check-prereqs
 
 cd "$EXAMPLE_TEMPLATE_REPO"
-rm *.bck
 git commit -a -m "Update example to ${RELEASE_TAG}"
 cd -
