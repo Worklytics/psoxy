@@ -37,9 +37,28 @@ variable "aws_assume_role_arn" {
   default     = null
 }
 
+variable "function_env_kms_key_arn" {
+  type        = string
+  description = "AWS KMS key ARN to use to encrypt lambda's environment. NOTE: Terraform must be authenticated as an AWS principal authorized to encrypt/decrypt with this key."
+  default     = null
+}
+
+variable "logs_kms_key_arn" {
+  type        = string
+  description = "AWS KMS key ARN to use to encrypt lambdas' logs. NOTE: ensure CloudWatch is setup to use this key (cloudwatch principal has perms, log group in same region as key, etc) - see https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/encrypt-log-data-kms.html ."
+  default     = null
+}
+
+# TODO: remove after 0.4.x
 variable "ssm_kms_key_ids" {
   type        = map(string)
-  description = "KMS key IDs or ARNs that were used for encrypting SSM parameters needed by this lambda, if any."
+  description = "DEPRECATED; KMS key IDs or ARNs that were used for encrypting SSM parameters needed by this lambda, if any."
+  default     = {}
+}
+
+variable "kms_keys_to_allow" {
+  type        = map(string)
+  description = "KMS key IDs or ARNs for keys this lambda needs to use, if any."
   default     = {}
 }
 
