@@ -7,8 +7,8 @@ NC='\e[0m' # No Color
 
 # Usage:
 # ./release-examples.sh <path-to-example> <path-to-aws-repo>
-# ./release-examples.sh v0.4.25 ~/code/psoxy/infra/examples-dev/aws-all ~/psoxy-example-aws
-# ./release-examples.sh v0.4.25 ~/code/psoxy/infra/examples-dev/gcp ~/psoxy-example-gcp
+# ./release-example.sh v0.4.25 ~/code/psoxy/infra/examples-dev/aws-all ~/psoxy-example-aws
+# ./release-example.sh v0.4.25 ~/code/psoxy/infra/examples-dev/gcp ~/psoxy-example-gcp
 
 RELEASE_TAG=$1
 DEV_EXAMPLE_PATH=$2
@@ -17,9 +17,9 @@ EXAMPLE_TEMPLATE_REPO=$3
 if [ -z "$RELEASE_TAG" ]; then
   printf "${RED}No arguments passed.${NC}\n"
   printf "Usage:\n"
-  printf "  ./release-examples.sh <release-tag> <path-to-example> <path-to-aws-repo>\n"
-  printf "  ./release-examples.sh v0.4.25 ~/code/psoxy/infra/examples-dev/aws-all ~/psoxy-example-aws\n"
-  printf "  ./release-examples.sh v0.4.25 ~/code/psoxy/infra/examples-dev/gcp ~/psoxy-example-gcp\n"
+  printf "  ./release-example.sh <release-tag> <path-to-example> <path-to-aws-repo>\n"
+  printf "  ./release-example.sh v0.4.25 ~/code/psoxy/infra/examples-dev/aws-all ~/psoxy-example-aws\n"
+  printf "  ./release-example.sh v0.4.25 ~/code/psoxy/infra/examples-dev/gcp ~/psoxy-example-gcp\n"
   exit 1
 fi
 
