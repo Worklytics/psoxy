@@ -45,6 +45,8 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
+set -e
+
 cd -
 for file in "${FILES_TO_COPY[@]}"
 do
@@ -56,9 +58,11 @@ do
   # remove references to local modules
   sed -i .bck '/source = "..\/..\/modules\/[^"]*"/d' "${EXAMPLE_TEMPLATE_REPO}/${file}"
 
-  rm ${EXAMPLE_TEMPLATE_REPO}/*.bck
 done
 
+rm ${EXAMPLE_TEMPLATE_REPO}/*.bck
+
+set -e
 
 cp -f ./init-example.sh ${EXAMPLE_TEMPLATE_REPO}/init
 cp -f ./check-prereqs.sh ${EXAMPLE_TEMPLATE_REPO}/check-prereqs
