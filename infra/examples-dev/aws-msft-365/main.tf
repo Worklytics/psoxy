@@ -78,16 +78,12 @@ module "psoxy" {
   jira_server_url                = var.jira_server_url
   jira_cloud_id                  = var.jira_cloud_id
   example_jira_issue_id          = var.example_jira_issue_id
-  #  aws_ssm_key_id                 = aws_kms_key.key.key_id
 }
 
 moved {
   from = module.psoxy-aws-msft-365
   to   = module.psoxy
 }
-
-#resource "aws_kms_key" "key"  {
-#}
 
 # if you generated these, you may want them to import back into your data warehouse
 output "lookup_tables" {

@@ -26,9 +26,8 @@ provider "google" {
   impersonate_service_account = var.gcp_terraform_sa_account_email
 }
 
-
 module "psoxy" {
-  # source = "../../modular-examples/gcp-google-workspace"
+#  source = "../../modular-examples/gcp-google-workspace"
   source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/gcp-google-workspace?ref=v0.4.26"
 
   gcp_project_id                 = var.gcp_project_id
@@ -58,7 +57,6 @@ moved {
   from = module.psoxy-gcp-google-workspace
   to   = module.psoxy
 }
-
 
 output "todos_1" {
   description = "List of todo steps to complete 1st, in markdown format."
