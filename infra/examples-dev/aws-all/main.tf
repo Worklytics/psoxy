@@ -32,7 +32,7 @@ terraform {
 # general cases
 module "worklytics_connectors" {
   source = "../../modules/worklytics-connectors"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.4.25"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.4.26"
 
   enabled_connectors    = var.enabled_connectors
   example_jira_issue_id = var.example_jira_issue_id
@@ -44,12 +44,26 @@ module "worklytics_connectors" {
 # sources which require additional dependencies are split into distinct Terraform files, following
 # the naming convention of `{source-identifier}.tf`, eg `msft-365.tf`
 # lines below merge results of those files back into single maps of sources
-
 locals {
   api_connectors = merge(
     module.worklytics_connectors.enabled_api_connectors,
     module.worklytics_connectors_google_workspace.enabled_api_connectors,
-    local.msft_api_connectors_with_auth
+    local.msft_api_connectors_with_auth,
+    {}
+  )
+
+  source_authorization_todos = concat(
+    module.worklytics_connectors.todos,
+    module.worklytics_connectors_google_workspace.todos,
+    module.worklytics_connectors_msft_365.todos,
+    []
+  )
+
+  max_auth_todo_step = max(
+    module.worklytics_connectors.next_todo_step,
+    module.worklytics_connectors_google_workspace.next_todo_step,
+    module.worklytics_connectors_msft_365.next_todo_step,
+    0
   )
 }
 
@@ -86,7 +100,7 @@ locals {
 
 module "psoxy" {
   source = "../../modules/aws-host"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-host?ref=v0.4.25"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-host?ref=v0.4.26"
 
   environment_name               = var.environment_name
   aws_account_id                 = var.aws_account_id
@@ -102,12 +116,15 @@ module "psoxy" {
   custom_api_connector_rules     = var.custom_api_connector_rules
   lookup_table_builders          = var.lookup_table_builders
   general_environment_variables  = var.general_environment_variables
+  function_env_kms_key_arn       = var.project_aws_kms_key_arn
+  logs_kms_key_arn               = var.project_aws_kms_key_arn
+  aws_ssm_key_id                 = var.project_aws_kms_key_arn
   bulk_sanitized_expiration_days = var.bulk_sanitized_expiration_days
   bulk_input_expiration_days     = var.bulk_input_expiration_days
   api_connectors                 = local.api_connectors
   bulk_connectors                = local.bulk_connectors
   custom_bulk_connector_rules    = var.custom_bulk_connector_rules
-  todo_step                      = max(module.worklytics_connectors.next_todo_step, module.worklytics_connectors_google_workspace.next_todo_step, module.worklytics_connectors_msft_365.next_todo_step)
+  todo_step                      = local.max_auth_todo_step
 }
 
 ## Worklytics connection configuration
@@ -123,7 +140,7 @@ module "connection_in_worklytics" {
   for_each = local.all_instances
 
   source = "../../modules/worklytics-psoxy-connection-generic"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-generic?ref=v0.4.25"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-generic?ref=v0.4.26"
 
   psoxy_host_platform_id = local.host_platform_id
   psoxy_instance_id      = each.key

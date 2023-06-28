@@ -46,6 +46,17 @@ variable "aws_ssm_param_root_path" {
   }
 }
 
+variable "project_aws_kms_key_arn" {
+  type        = string
+  description = "AWS KMS key ARN to use to encrypt all AWS components created by this Terraform configuration that support CMEKs. NOTE: Terraform must be authenticated as an AWS principal authorized to encrypt/decrypt with this key."
+  default     = null
+
+  validation {
+    condition     = var.project_aws_kms_key_arn == null || can(regex("^arn:aws:kms:.*:\\d{12}:key\\/.*$", var.project_aws_kms_key_arn))
+    error_message = "The project_aws_kms_key_arn value should be null or a valid an AWS KMS key ARN."
+  }
+}
+
 variable "worklytics_host" {
   type        = string
   description = "host of worklytics instance where tenant resides. (e.g. intl.worklytics.co for prod; but may differ for dev/staging)"
@@ -274,6 +285,12 @@ variable "lookup_table_builders" {
 
 variable "todos_as_outputs" {
   type        = bool
-  description = "whether to render TODOs as outputs or flat files (former useful if you're using Terraform Cloud/Enterprise, or somewhere else where the filesystem is not readily accessible to you)"
+  description = "whether to render TODOs as outputs (former useful if you're using Terraform Cloud/Enterprise, or somewhere else where the filesystem is not readily accessible to you)"
   default     = false
+}
+
+variable "todos_as_local_files" {
+  type        = bool
+  description = "whether to render TODOs as flat files"
+  default     = true
 }

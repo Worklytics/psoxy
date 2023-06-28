@@ -118,6 +118,7 @@ module "api_connector" {
   config_parameter_prefix               = local.config_parameter_prefix
   invoker_sa_emails                     = var.worklytics_sa_emails
   default_labels                        = var.default_labels
+  todos_as_local_files                  = var.todos_as_local_files
 
   environment_variables = merge(
     var.general_environment_variables,
@@ -172,6 +173,7 @@ module "bulk_connector" {
   input_bucket_name             = try(each.value.input_bucket_name, null)
   sanitized_bucket_name         = try(each.value.sanitized_bucket_name, null)
   default_labels                = var.default_labels
+  todos_as_local_files          = var.todos_as_local_files
 
 
   environment_variables = merge(
@@ -284,6 +286,8 @@ locals {
 
 # script to test ALL connectors
 resource "local_file" "test_all_script" {
+  count = var.todos_as_local_files ? 1 : 0
+
   filename        = "test-all.sh"
   file_permission = "0770"
   content         = <<EOF

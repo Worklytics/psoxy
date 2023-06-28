@@ -13,6 +13,19 @@ NC='\e[0m' # No Color
 
 TF_CONFIG_ROOT=`pwd`
 
+case "$1" in
+  terraform_cloud)
+    DEPLOYMENT_ENV="terraform_cloud"
+    ;;
+  github_action)
+    DEPLOYMENT_ENV="github_action"
+    ;;
+  *)
+    DEPLOYMENT_ENV="local"
+esac
+
+printf "Initializing configuration for deployment from ${BLUE}${DEPLOYMENT_ENV}${NC} ...\n"
+
 if ! terraform -v &> /dev/null ; then
   printf "${RED}Terraform not available; required for this Psoxy example. See https://github.com/Worklytics/psoxy#prerequisites ${NC}\n"
   exit 1
@@ -28,7 +41,9 @@ if [ $TF_INIT_EXIT_CODE -ne 0 ]; then
   exit 1
 fi
 
-if [ -d "${TF_CONFIG_ROOT}/.terraform/modules/psoxy/" ]; then
+if [ -d ".terraform/modules/psoxy/" ]; then
+  PSOXY_BASE_DIR=".terraform/modules/psoxy/"
+elif [ -d "${TF_CONFIG_ROOT}/.terraform/modules/psoxy/" ]; then
   # use checkout of repo done by Terraform
   PSOXY_BASE_DIR="${TF_CONFIG_ROOT}/.terraform/modules/psoxy/"
 else
@@ -49,7 +64,7 @@ if [ ! -f "${TFVARS_FILE}" ]; then
     touch "${TFVARS_FILE}"
   fi
 
-  ${PSOXY_BASE_DIR}tools/init-tfvars.sh $TFVARS_FILE $PSOXY_BASE_DIR
+  ${PSOXY_BASE_DIR}tools/init-tfvars.sh $TFVARS_FILE $PSOXY_BASE_DIR $DEPLOYMENT_ENV
 else
   printf "${RED}Nothing to initialize. File terraform.tfvars already exists.${NC}\n\n"
 fi

@@ -39,8 +39,7 @@ printf "\n"
 JAVA_VERSION=`mvn -v | grep Java`
 
 printf "Your Maven installation uses ${BLUE}${JAVA_VERSION}${NC}.\n"
-printf "\t- if that is a Java version < 11, you must upgrade to 11 or higher. We recommend 17, as it is LTS and we have seen problems with 19.x and 20.x.\n"
-printf "\t- if that is some version of Java 19.x / 20.x, we recommend you *downgrade* to 17. See https://github.com/Worklytics/psoxy/blob/main/docs/troubleshooting.md#build-problems-with-java-19-specifically-openjdk-19\n"
+printf "\t- if that is a Java version < 11, you must upgrade to 11. Java >= 11, <= 20 are supported.\n"
 printf "\t- if you have a Java JDK of the right version installed on your machine *other* than the one referenced there, set your ${BLUE}JAVA_HOME${NC} to its location.\n"
 
 printf "\n"

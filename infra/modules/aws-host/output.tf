@@ -4,6 +4,10 @@ output "path_to_deployment_jar" {
   value       = module.psoxy.path_to_deployment_jar
 }
 
+output "caller_role_name" {
+  value = module.psoxy.api_caller_role_name
+}
+
 output "api_connector_instances" {
   value = local.api_instances
 }

@@ -567,6 +567,9 @@ EOT
         REFRESH_ENDPOINT : "https://auth.atlassian.com/oauth/token"
         USE_SHARED_TOKEN : "TRUE"
       }
+      settings_to_provide = {
+        "Jira Cloud Id" = local.jira_cloud_id
+      }
       reserved_concurrent_executions : null
       example_api_calls_user_to_impersonate : null
       example_api_calls : [

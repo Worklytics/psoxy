@@ -19,6 +19,11 @@ module "env_id" {
 locals {
   salt_parameter_name_suffix = "PSOXY_SALT"
   function_name              = "${module.env_id.id}-${var.instance_id}"
+
+  kms_key_ids_to_allow = merge(
+    var.ssm_kms_key_ids,
+    var.kms_keys_to_allow
+  )
 }
 
 
@@ -36,6 +41,7 @@ locals {
   path_to_shared_config = regex("arn.+parameter(/.*)${local.salt_parameter_name_suffix}", local.salt_arn)[0]
 }
 
+
 resource "aws_lambda_function" "psoxy-instance" {
   function_name                  = local.function_name
   role                           = aws_iam_role.iam_for_lambda.arn
@@ -47,6 +53,7 @@ resource "aws_lambda_function" "psoxy-instance" {
   timeout                        = var.timeout_seconds
   memory_size                    = var.memory_size_mb
   reserved_concurrent_executions = coalesce(var.reserved_concurrent_executions, -1)
+  kms_key_arn                    = var.function_env_kms_key_arn
 
   environment {
     variables = merge(
@@ -69,15 +76,21 @@ resource "aws_lambda_function" "psoxy-instance" {
 }
 
 # cloudwatch group per lambda function
-resource "aws_cloudwatch_log_group" "lambda-log" {
+resource "aws_cloudwatch_log_group" "lambda_log" {
   name              = "/aws/lambda/${aws_lambda_function.psoxy-instance.function_name}"
   retention_in_days = var.log_retention_in_days
+  kms_key_id        = var.logs_kms_key_arn
 
   lifecycle {
     ignore_changes = [
       tags
     ]
   }
+}
+
+moved {
+  from = aws_cloudwatch_log_group.lambda-log
+  to   = aws_cloudwatch_log_group.lambda_log
 }
 
 resource "aws_iam_role" "iam_for_lambda" {
@@ -116,8 +129,10 @@ resource "aws_iam_role_policy_attachment" "basic" {
 data "aws_region" "current" {}
 data "aws_caller_identity" "current" {}
 
-data "aws_kms_key" "keys" {
-  for_each = var.ssm_kms_key_ids
+# bc 'key_id' may be ARN, id, or alias, we need to look up the ARN for each key - as IAM policy must
+# be specified with ARNs
+data "aws_kms_key" "keys_to_allow" {
+  for_each = local.kms_key_ids_to_allow
 
   key_id = each.value
 }
@@ -125,45 +140,52 @@ data "aws_kms_key" "keys" {
 locals {
   param_arn_prefix = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter${local.instance_ssm_prefix_with_slash}"
 
-  function_write_arns = [
-    "${local.param_arn_prefix}*" # wildcard to match all params corresponding to this function
-  ]
+  kms_keys_to_allow_arns = distinct(concat(
+    [for k in data.aws_kms_key.keys_to_allow : k.arn],
+    var.function_env_kms_key_arn == null ? [] : [var.function_env_kms_key_arn]
+  ))
 
-  function_read_arns = concat(
-    [
-      "${local.param_arn_prefix}*" # wildcard to match all params corresponding to this function
-    ],
-    var.global_parameter_arns
-  )
-
-  write_statements = [{
+  local_ssm_param_statements = [{
+    Sid = "ReadInstanceSSMParameters"
     Action = [
+      "ssm:GetParameter",
+      "ssm:GetParameterVersion",
+      "ssm:GetParameters",
+      "ssm:GetParametersByPath",
       "ssm:PutParameter",
       "ssm:DeleteParameter" # delete locks, bad access tokens, etc
     ]
-    Effect   = "Allow"
-    Resource = local.function_write_arns
+    Effect = "Allow"
+    Resource = [
+      "${local.param_arn_prefix}*" # wildcard to match all params corresponding to this function
+    ]
   }]
 
-  read_statements = [{
+  global_ssm_param_statements = [{
+    Sid = "ReadSharedSSMParameters"
     Action = [
-      "ssm:GetParameter*"
+      "ssm:GetParameter",
+      "ssm:GetParameters",
+      "ssm:GetParameterVersion",
+      "ssm:GetParametersByPath",
     ]
     Effect   = "Allow"
-    Resource = local.function_read_arns
+    Resource = var.global_parameter_arns
   }]
 
-  key_statements = length(var.ssm_kms_key_ids) > 0 ? [{
+  key_statements = length(local.kms_key_ids_to_allow) > 0 ? [{
+    Sid = "AllowKMSUse"
     Action = [
-      "kms:Decrypt"
+      "kms:Decrypt",
+      "kms:Encrypt", # needed, bc lambdas need to write some SSM parameters
     ]
     Effect   = "Allow"
-    Resource = [for k in data.aws_kms_key.keys : k.arn]
+    Resource = local.kms_keys_to_allow_arns
   }] : []
 
   policy_statements = concat(
-    local.read_statements,
-    local.write_statements,
+    local.global_ssm_param_statements,
+    local.local_ssm_param_statements,
     local.key_statements
   )
 }
@@ -208,5 +230,5 @@ output "iam_role_for_lambda_name" {
 }
 
 output "log_group" {
-  value = aws_cloudwatch_log_group.lambda-log.name
+  value = aws_cloudwatch_log_group.lambda_log.name
 }

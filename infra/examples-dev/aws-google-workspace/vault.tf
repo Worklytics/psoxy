@@ -1,5 +1,15 @@
 /** Vault dev config for local testing **/
 
+#terraform {
+#  required_providers {
+#    vault = {
+#      source  = "hashicorp/vault"
+#      version = "~> 3.11.0"
+#    }
+#  }
+#}
+
+
 # used for peering to Vault Cloud HVN
 resource "aws_vpc" "psoxy_vpc" {
   cidr_block = var.vpc_ip_block

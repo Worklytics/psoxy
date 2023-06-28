@@ -159,13 +159,10 @@ You will need all of the following in your deployment environment (eg, your lapt
 | Tool                                         | Version       | Test Command              |
 |----------------------------------------------|---------------|---------------------------|
 | [git](https://git-scm.com/)                  | 2.17+         | `git --version`           |
-| [Maven](https://maven.apache.org/)           | 3.6+          | `mvn -v`                  |
-| [Java 11+ JDK](https://openjdk.org/install/) | 11+, but < 19 | `mvn -v &#124; grep Java` |
-| [Terraform](https://www.terraform.io/)       | 1.3+          | `terraform version`       |
+| [Maven](https://maven.apache.org/)           | 3.6+          | `mvn -v`                 |
+| [Java 11+ JDK](https://openjdk.org/install/) | 11+, <=20     | `mvn -v &#124; grep Java` |
+| [Terraform](https://www.terraform.io/)       | 1.3.x, <= 1.5 | `terraform version`       |
 
-
-NOTE: Java 19/20 are currently broken, see [docs/troubleshooting.md](docs/troubleshooting.md); we
-suggest Java 17, which is a LTS edition supported until Sept 2026.
 
 NOTE: Using `terraform` is not strictly necessary, but it is the only supported method. You may
 provision your infrastructure via your host's CLI, web console, or another infrastructure provisioning
@@ -223,8 +220,13 @@ Subsystem for Linux (WSL) platforms.
   3. Pick the location from which you will deploy (provision) the psoxy instance. This location will
      need the software prereqs defined in the previous section. Some suggestions:
 
-        - [Google Cloud Shell](https://cloud.google.com/shell/) - if you're using GCP or connecting to
-          Google Workspace, this is a recommended option. It [includes the prereqs above](https://cloud.google.com/shell/docs/how-cloud-shell-works#tools) EXCEPT aws/azure CLIs.
+        - your local machine; if you have the prereqs installed and can authenticate it with your
+          host platform (AWS/GCP) as a sufficiently privileged user/role, this is a simple option
+        - [Google Cloud Shell](https://cloud.google.com/shell/) - if you're using GCP and/or connecting to
+          Google Workspace, this is option simplifies authentication. It [includes the prereqs above](https://cloud.google.com/shell/docs/how-cloud-shell-works#tools)
+          EXCEPT aws/azure CLIs out-of-the-box.
+        - [Terraform Cloud](docs/terraform-cloud.md) - this works, but adds complexity of
+          authenticating it with you host platform (AWS/GCP)
         - Ubuntu Linux VM/Container - we provide some setup instructions covering [prereq installation](docs/prereqs-ubuntu.md)
           for Ubuntu variants of Linux, and specific authentication help for:
           - [EC2](docs/aws/getting-started.md)

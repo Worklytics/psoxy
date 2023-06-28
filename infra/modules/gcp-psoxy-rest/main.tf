@@ -174,6 +174,8 @@ EOT
 }
 
 resource "local_file" "test_script" {
+  count = var.todos_as_local_files ? 1 : 0
+
   filename        = "test-${trimprefix(var.instance_id, var.environment_id_prefix)}.sh"
   file_permission = "0770"
   content         = <<EOT
@@ -189,10 +191,22 @@ echo "Invoke this script with any of the following as arguments to test other en
 EOT
 }
 
+moved {
+  from = local_file.test_script
+  to   = local_file.test_script[0]
+}
+
 
 resource "local_file" "review" {
+  count = var.todos_as_local_files ? 1 : 0
+
   filename = "TODO ${var.todo_step} - test ${google_cloudfunctions_function.function.name}.md"
   content  = local.todo_content
+}
+
+moved {
+  from = local_file.review
+  to   = local_file.review[0]
 }
 
 output "instance_id" {
@@ -219,7 +233,7 @@ output "proxy_kind" {
 }
 
 output "test_script" {
-  value = local_file.test_script.filename
+  value = try(local_file.test_script[0].filename, null)
 }
 
 output "todo" {

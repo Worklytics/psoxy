@@ -14,10 +14,11 @@ locals {
     PROXY_ENDPOINT     = "Psoxy Base URL"
     PROXY_BUCKET_NAME  = "Bucket Name"
     parserId           = "Parser"
+    CLOUD_ID           = "Jira Cloud Id"
   }
 
   query_params = [for param_name, ux_name in local.autofilled_settings : "${param_name}=${urlencode(var.settings_to_provide[ux_name])}"
-    if contains(keys(var.settings_to_provide), ux_name) && try(var.settings_to_provide[ux_name] != null, false)]
+  if contains(keys(var.settings_to_provide), ux_name) && try(var.settings_to_provide[ux_name] != null, false)]
   query_param_string = join("&", local.query_params)
 
   # TODO try to avoid repetition of "per_setting" instructions (manual vs. deep linking)

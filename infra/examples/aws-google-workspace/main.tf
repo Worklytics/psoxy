@@ -42,7 +42,6 @@ provider "aws" {
   assume_role {
     role_arn = var.aws_assume_role_arn
   }
-
   allowed_account_ids = [
     var.aws_account_id
   ]
@@ -58,11 +57,9 @@ data "google_project" "psoxy-google-connectors" {
   project_id = var.gcp_project_id
 }
 
-
-
 module "psoxy" {
-  # source = "../../modular-examples/aws-google-workspace"
-  source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-google-workspace?ref=v0.4.25"
+#  source = "../../modular-examples/aws-google-workspace"
+  source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-google-workspace?ref=v0.4.26"
 
   aws_account_id                 = var.aws_account_id
   aws_assume_role_arn            = var.aws_assume_role_arn # role that can test the instances (lambdas)
@@ -86,11 +83,11 @@ module "psoxy" {
   general_environment_variables  = var.general_environment_variables
   pseudonymize_app_ids           = var.pseudonymize_app_ids
   salesforce_domain              = var.salesforce_domain
-  bulk_sanitized_expiration_days = var.bulk_sanitized_expiration_days
-  bulk_input_expiration_days     = var.bulk_input_expiration_days
   jira_server_url                = var.jira_server_url
   jira_cloud_id                  = var.jira_cloud_id
   example_jira_issue_id          = var.example_jira_issue_id
+  bulk_sanitized_expiration_days = var.bulk_sanitized_expiration_days
+  bulk_input_expiration_days     = var.bulk_input_expiration_days
 }
 
 # rename done in v0.4.15
@@ -98,6 +95,7 @@ moved {
   from = module.psoxy-aws-google-workspace
   to   = module.psoxy
 }
+
 
 # if you generated these, you may want them to import back into your data warehouse
 output "lookup_tables" {
