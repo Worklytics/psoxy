@@ -20,7 +20,7 @@ locals {
   salt_parameter_name_suffix = "PSOXY_SALT"
   function_name              = "${module.env_id.id}-${var.instance_id}"
 
-  kms_keys_to_allow_ids = merge(
+  kms_key_ids_to_allow = merge(
     var.ssm_kms_key_ids,
     var.kms_keys_to_allow
   )
@@ -132,7 +132,7 @@ data "aws_caller_identity" "current" {}
 # bc 'key_id' may be ARN, id, or alias, we need to look up the ARN for each key - as IAM policy must
 # be specified with ARNs
 data "aws_kms_key" "keys_to_allow" {
-  for_each = local.kms_keys_to_allow_ids
+  for_each = local.kms_key_ids_to_allow
 
   key_id = each.value
 }
@@ -173,7 +173,7 @@ locals {
     Resource = var.global_parameter_arns
   }]
 
-  key_statements = length(local.kms_keys_to_allow_ids) > 0 ? [{
+  key_statements = length(local.kms_key_ids_to_allow) > 0 ? [{
     Sid = "AllowKMSUse"
     Action = [
       "kms:Decrypt",
