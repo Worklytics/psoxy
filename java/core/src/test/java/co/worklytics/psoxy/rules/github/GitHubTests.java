@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Stream;
 
 public class GitHubTests extends JavaRulesTestBaseCase {
@@ -41,7 +43,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
 
         Collection<String> PII = Arrays.asList(
                 "octocat",
-                "1"
+                "123456"
         );
 
         assertNotSanitized(jsonString, PII);
@@ -49,7 +51,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         String sanitized = this.sanitize(endpoint, jsonString);
 
         assertPseudonymized(sanitized, "octocat");
-        assertPseudonymized(sanitized, "1");
+        assertPseudonymized(sanitized, "123456");
         assertRedacted(sanitized,
                 "https://api.github.com/users/octocat",
                 "https://api.github.com/users/octocat/events{/privacy}"
@@ -65,16 +67,16 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         String endpoint = "https://api.github.com/graphql";
 
         Collection<String> PII = Arrays.asList(
-                "some_user_id",
-                "1"
+                "fake",
+                "user@contoso.com"
         );
 
         assertNotSanitized(jsonString, PII);
 
         String sanitized = this.sanitize(endpoint, jsonString);
 
-        assertPseudonymized(sanitized, "octocat");
-        assertPseudonymized(sanitized, "1");
+        assertPseudonymized(sanitized, "user@contoso.com");
+        assertPseudonymized(sanitized, "fake");
 
         assertUrlAllowed(endpoint);
     }
@@ -85,25 +87,21 @@ public class GitHubTests extends JavaRulesTestBaseCase {
 
         String endpoint = "https://api.github.com/orgs/FAKE/teams";
 
-        Collection<String> PII = Arrays.asList(
-                "octocat",
-                "1"
-        );
-
-        assertNotSanitized(jsonString, PII);
-
         String sanitized = this.sanitize(endpoint, jsonString);
 
         assertNotSanitized(sanitized, "justice-league");
-        assertPseudonymized(sanitized, "octocat");
-        assertPseudonymized(sanitized, "1");
+        assertNotSanitized(sanitized, "123456");
+
+        assertRedacted(sanitized, "Justice League",
+                "A great team."
+                );
 
         assertUrlAllowed(endpoint);
     }
 
     @Test
     void orgTeamMembers() {
-        String jsonString = asJson(exampleDirectoryPath, "org_teams.json");
+        String jsonString = asJson(exampleDirectoryPath, "team_members.json");
 
         String endpoint = "https://api.github.com/orgs/FAKE/teams/TEAM/members";
 
@@ -116,7 +114,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
 
         String sanitized = this.sanitize(endpoint, jsonString);
 
-        assertPseudonymized(sanitized, "octocat");
+        assertPseudonymized(sanitized, "some-user");
         assertPseudonymized(sanitized, "12345678");
         assertRedacted(sanitized,
                 "https://api.github.com/users/some-user",
@@ -127,15 +125,14 @@ public class GitHubTests extends JavaRulesTestBaseCase {
     }
 
     @Test
-    void repoCommits() {
-        String jsonString = asJson(exampleDirectoryPath, "repo_commits.json");
+    void repoCommit() {
+        String jsonString = asJson(exampleDirectoryPath, "commit.json");
 
-        String endpoint = "https://api.github.com/orgs/FAKE/repo/REPO/commits";
+        String endpoint = "https://api.github.com/repos/FAKE/REPO/commits/COMMIT_REF";
 
         Collection<String> PII = Arrays.asList(
                 "Monalisa Octocat",
-                "octocat",
-                "support@github.com"
+                "octocat"
         );
 
         assertNotSanitized(jsonString, PII);
@@ -143,8 +140,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         String sanitized = this.sanitize(endpoint, jsonString);
 
         assertPseudonymized(sanitized, "octocat");
-        assertPseudonymized(sanitized, "1");
-        assertPseudonymized(sanitized, "support@github.com");
+        assertPseudonymized(sanitized, "123456");
         assertRedacted(sanitized,
                 "Monalisa Octocat",
                 "https://api.github.com/users/some-user",
@@ -158,21 +154,11 @@ public class GitHubTests extends JavaRulesTestBaseCase {
     void comments_reactions() {
         String jsonString = asJson(exampleDirectoryPath, "comments_reactions.json");
 
-        String endpoint = "https://api.github.com/orgs/FAKE/repo/REPO/comments/COMMENT/reactions";
-
-        Collection<String> PII = Arrays.asList(
-                "Monalisa Octocat",
-                "octocat",
-                "support@github.com"
-        );
-
-        assertNotSanitized(jsonString, PII);
+        String endpoint = "https://api.github.com/repos/FAKE/REPO/comments/COMMENT/reactions";
 
         String sanitized = this.sanitize(endpoint, jsonString);
 
-        assertPseudonymized(sanitized, "octocat");
-        assertPseudonymized(sanitized, "1");
-        assertPseudonymized(sanitized, "support@github.com");
+        assertPseudonymized(sanitized, "98765432");
         assertRedacted(sanitized,
                 "Monalisa Octocat",
                 "https://api.github.com/users/some-user",
@@ -186,12 +172,10 @@ public class GitHubTests extends JavaRulesTestBaseCase {
     void issue() {
         String jsonString = asJson(exampleDirectoryPath, "issue.json");
 
-        String endpoint = "https://api.github.com/orgs/FAKE/repo/REPO/issues/ISSUE";
+        String endpoint = "https://api.github.com/repos/FAKE/REPO/issues/ISSUE_NUMBER";
 
-        Collection<String> PII = Arrays.asList(
-                "Monalisa Octocat",
-                "octocat",
-                "support@github.com"
+        Collection<String> PII = List.of(
+                "octocat"
         );
 
         assertNotSanitized(jsonString, PII);
@@ -199,8 +183,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         String sanitized = this.sanitize(endpoint, jsonString);
 
         assertPseudonymized(sanitized, "octocat");
-        assertPseudonymized(sanitized, "1");
-        assertPseudonymized(sanitized, "support@github.com");
+        assertPseudonymized(sanitized, "123456");
         assertRedacted(sanitized,
                 "I'm having a problem with this.",
                 "Found a bug",
@@ -216,21 +199,16 @@ public class GitHubTests extends JavaRulesTestBaseCase {
     void issues() {
         String jsonString = asJson(exampleDirectoryPath, "issues.json");
 
-        String endpoint = "https://api.github.com/orgs/FAKE/repo/REPO/issues?page=5";
+        String endpoint = "https://api.github.com/repos/FAKE/REPO/issues?page=5";
 
-        Collection<String> PII = Arrays.asList(
-                "Monalisa Octocat",
-                "octocat",
-                "support@github.com"
-        );
+        Collection<String> PII = Collections.singletonList("octocat");
 
         assertNotSanitized(jsonString, PII);
 
         String sanitized = this.sanitize(endpoint, jsonString);
 
         assertPseudonymized(sanitized, "octocat");
-        assertPseudonymized(sanitized, "1");
-        assertPseudonymized(sanitized, "support@github.com");
+        assertPseudonymized(sanitized, "123456");
         assertRedacted(sanitized,
                 "I'm having a problem with this.",
                 "Found a bug",
@@ -246,25 +224,18 @@ public class GitHubTests extends JavaRulesTestBaseCase {
     void issue_comments() {
         String jsonString = asJson(exampleDirectoryPath, "issues_comments.json");
 
-        String endpoint = "https://api.github.com/orgs/FAKE/repo/REPO/issues/ISSUE/comments";
+        String endpoint = "https://api.github.com/repos/FAKE/REPO/issues/ISSUE/comments";
 
-        Collection<String> PII = Arrays.asList(
-                "Monalisa Octocat",
-                "octocat",
-                "support@github.com"
-        );
+        Collection<String> PII = Collections.singletonList("octocat");
 
         assertNotSanitized(jsonString, PII);
 
         String sanitized = this.sanitize(endpoint, jsonString);
 
         assertPseudonymized(sanitized, "octocat");
-        assertPseudonymized(sanitized, "1");
-        assertPseudonymized(sanitized, "support@github.com");
+        assertPseudonymized(sanitized, "123456");
         assertRedacted(sanitized,
-                "I'm having a problem with this.",
-                "Found a bug",
-                "Tracking milestone for version 1.0",
+                "Me too",
                 "https://api.github.com/users/some-user",
                 "https://api.github.com/users/some-user/events{/privacy}"
         );
@@ -276,25 +247,17 @@ public class GitHubTests extends JavaRulesTestBaseCase {
     void issue_events() {
         String jsonString = asJson(exampleDirectoryPath, "issue_events.json");
 
-        String endpoint = "https://api.github.com/orgs/FAKE/repo/REPO/issues/events";
+        String endpoint = "https://api.github.com/repos/FAKE/REPO/issues/ISSUE_ID/events";
 
-        Collection<String> PII = Arrays.asList(
-                "Monalisa Octocat",
-                "octocat",
-                "support@github.com"
-        );
+        Collection<String> PII = Collections.singletonList("octocat");
 
         assertNotSanitized(jsonString, PII);
 
         String sanitized = this.sanitize(endpoint, jsonString);
 
         assertPseudonymized(sanitized, "octocat");
-        assertPseudonymized(sanitized, "1");
-        assertPseudonymized(sanitized, "support@github.com");
+        assertPseudonymized(sanitized, "123456");
         assertRedacted(sanitized,
-                "I'm having a problem with this.",
-                "Found a bug",
-                "Tracking milestone for version 1.0",
                 "https://api.github.com/users/some-user",
                 "https://api.github.com/users/some-user/events{/privacy}"
         );
@@ -306,12 +269,13 @@ public class GitHubTests extends JavaRulesTestBaseCase {
     void issue_timeline() {
         String jsonString = asJson(exampleDirectoryPath, "issue_timeline.json");
 
-        String endpoint = "https://api.github.com/orgs/FAKE/repo/REPO/issues/ISSUE/timeline";
+        String endpoint = "https://api.github.com/repos/FAKE/REPO/issues/ISSUE/timeline";
 
         Collection<String> PII = Arrays.asList(
-                "Monalisa Octocat",
+                "9919",
                 "octocat",
-                "support@github.com"
+                "67656570",
+                "94867353"
         );
 
         assertNotSanitized(jsonString, PII);
@@ -319,12 +283,12 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         String sanitized = this.sanitize(endpoint, jsonString);
 
         assertPseudonymized(sanitized, "octocat");
-        assertPseudonymized(sanitized, "1");
-        assertPseudonymized(sanitized, "support@github.com");
+        assertPseudonymized(sanitized, "9919");
+        assertPseudonymized(sanitized, "67656570");
+        assertPseudonymized(sanitized, "94867353");
         assertRedacted(sanitized,
-                "I'm having a problem with this.",
-                "Found a bug",
-                "Tracking milestone for version 1.0",
+                "Shipped to the cloud",
+                "Secret scanning",
                 "https://api.github.com/users/some-user",
                 "https://api.github.com/users/some-user/events{/privacy}"
         );
@@ -336,25 +300,14 @@ public class GitHubTests extends JavaRulesTestBaseCase {
     void issue_comment_reactions() {
         String jsonString = asJson(exampleDirectoryPath, "issues_comments_reactions.json");
 
-        String endpoint = "https://api.github.com/orgs/FAKE/repo/REPO/issues/ISSUE/comments/COMMENT/reactions";
-
-        Collection<String> PII = Arrays.asList(
-                "Monalisa Octocat",
-                "octocat",
-                "support@github.com"
-        );
-
-        assertNotSanitized(jsonString, PII);
+        String endpoint = "https://api.github.com/repos/FAKE/REPO/issues/comments/COMMENT/reactions";
 
         String sanitized = this.sanitize(endpoint, jsonString);
 
         assertPseudonymized(sanitized, "octocat");
-        assertPseudonymized(sanitized, "1");
-        assertPseudonymized(sanitized, "support@github.com");
+        assertPseudonymized(sanitized, "98765432");
         assertRedacted(sanitized,
-                "I'm having a problem with this.",
-                "Found a bug",
-                "Tracking milestone for version 1.0",
+                "Monalisa Octocat",
                 "https://api.github.com/users/some-user",
                 "https://api.github.com/users/some-user/events{/privacy}"
         );
@@ -366,25 +319,14 @@ public class GitHubTests extends JavaRulesTestBaseCase {
     void issue_reactions() {
         String jsonString = asJson(exampleDirectoryPath, "issues_reactions.json");
 
-        String endpoint = "https://api.github.com/orgs/FAKE/repo/REPO/issues/ISSUE/reactions/";
-
-        Collection<String> PII = Arrays.asList(
-                "Monalisa Octocat",
-                "octocat",
-                "support@github.com"
-        );
-
-        assertNotSanitized(jsonString, PII);
+        String endpoint = "https://api.github.com/repos/FAKE/REPO/issues/ISSUE/reactions";
 
         String sanitized = this.sanitize(endpoint, jsonString);
 
         assertPseudonymized(sanitized, "octocat");
-        assertPseudonymized(sanitized, "1");
-        assertPseudonymized(sanitized, "support@github.com");
+        assertPseudonymized(sanitized, "98765432");
         assertRedacted(sanitized,
-                "I'm having a problem with this.",
-                "Found a bug",
-                "Tracking milestone for version 1.0",
+                "Monalisa Octocat",
                 "https://api.github.com/users/some-user",
                 "https://api.github.com/users/some-user/events{/privacy}"
         );
@@ -396,12 +338,13 @@ public class GitHubTests extends JavaRulesTestBaseCase {
     void repo_events() {
         String jsonString = asJson(exampleDirectoryPath, "repo_events.json");
 
-        String endpoint = "https://api.github.com/orgs/FAKE/repo/REPO/events";
+        String endpoint = "https://api.github.com/repos/FAKE/REPO/events";
 
         Collection<String> PII = Arrays.asList(
                 "Monalisa Octocat",
                 "octocat",
-                "support@github.com"
+                "octocat@github.com",
+                "583231"
         );
 
         assertNotSanitized(jsonString, PII);
@@ -409,12 +352,9 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         String sanitized = this.sanitize(endpoint, jsonString);
 
         assertPseudonymized(sanitized, "octocat");
-        assertPseudonymized(sanitized, "1");
-        assertPseudonymized(sanitized, "support@github.com");
+        assertPseudonymized(sanitized, "583231");
+        assertPseudonymized(sanitized, "octocat@github.com");
         assertRedacted(sanitized,
-                "I'm having a problem with this.",
-                "Found a bug",
-                "Tracking milestone for version 1.0",
                 "https://api.github.com/users/some-user",
                 "https://api.github.com/users/some-user/events{/privacy}"
         );
@@ -426,12 +366,11 @@ public class GitHubTests extends JavaRulesTestBaseCase {
     void pull_reviews() {
         String jsonString = asJson(exampleDirectoryPath, "pull_reviews.json");
 
-        String endpoint = "https://api.github.com/orgs/FAKE/repo/REPO/events";
+        String endpoint = "https://api.github.com/repos/FAKE/REPO/pulls/PULL_NUMBER/reviews";
 
         Collection<String> PII = Arrays.asList(
-                "Monalisa Octocat",
-                "octocat",
-                "support@github.com"
+                "123456",
+                "octocat"
         );
 
         assertNotSanitized(jsonString, PII);
@@ -439,42 +378,9 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         String sanitized = this.sanitize(endpoint, jsonString);
 
         assertPseudonymized(sanitized, "octocat");
-        assertPseudonymized(sanitized, "1");
-        assertPseudonymized(sanitized, "support@github.com");
+        assertPseudonymized(sanitized, "123456");
         assertRedacted(sanitized,
-                "I'm having a problem with this.",
-                "Found a bug",
-                "Tracking milestone for version 1.0",
-                "https://api.github.com/users/some-user",
-                "https://api.github.com/users/some-user/events{/privacy}"
-        );
-
-        assertUrlAllowed(endpoint);
-    }
-
-    @Test
-    void pull_review_comments() {
-        String jsonString = asJson(exampleDirectoryPath, "pull_review_comments.json");
-
-        String endpoint = "https://api.github.com/orgs/FAKE/repo/REPO/events";
-
-        Collection<String> PII = Arrays.asList(
-                "Monalisa Octocat",
-                "octocat",
-                "support@github.com"
-        );
-
-        assertNotSanitized(jsonString, PII);
-
-        String sanitized = this.sanitize(endpoint, jsonString);
-
-        assertPseudonymized(sanitized, "octocat");
-        assertPseudonymized(sanitized, "1");
-        assertPseudonymized(sanitized, "support@github.com");
-        assertRedacted(sanitized,
-                "I'm having a problem with this.",
-                "Found a bug",
-                "Tracking milestone for version 1.0",
+                "Here is the body for the review.",
                 "https://api.github.com/users/some-user",
                 "https://api.github.com/users/some-user/events{/privacy}"
         );
@@ -486,55 +392,21 @@ public class GitHubTests extends JavaRulesTestBaseCase {
     void repositories() {
         String jsonString = asJson(exampleDirectoryPath, "repos.json");
 
-        String endpoint = "https://api.github.com/orgs/FAKE/repo/REPO";
+        String endpoint = "https://api.github.com/orgs/FAKE/repos";
 
         Collection<String> PII = Arrays.asList(
-                "Monalisa Octocat",
-                "octocat",
-                "support@github.com"
+                "Worklytics-user",
+                "23456789"
         );
 
         assertNotSanitized(jsonString, PII);
 
         String sanitized = this.sanitize(endpoint, jsonString);
 
-        assertPseudonymized(sanitized, "octocat");
-        assertPseudonymized(sanitized, "1");
-        assertPseudonymized(sanitized, "support@github.com");
+        assertPseudonymized(sanitized, "Worklytics-user");
+        assertPseudonymized(sanitized, "23456789");
         assertRedacted(sanitized,
-                "I'm having a problem with this.",
-                "Found a bug",
-                "Tracking milestone for version 1.0",
-                "https://api.github.com/users/some-user",
-                "https://api.github.com/users/some-user/events{/privacy}"
-        );
-
-        assertUrlAllowed(endpoint);
-    }
-
-    @Test
-    void repositories_commit_comments() {
-        String jsonString = asJson(exampleDirectoryPath, "repo_comments.json");
-
-        String endpoint = "https://api.github.com/orgs/FAKE/repo/REPO";
-
-        Collection<String> PII = Arrays.asList(
-                "Monalisa Octocat",
-                "octocat",
-                "support@github.com"
-        );
-
-        assertNotSanitized(jsonString, PII);
-
-        String sanitized = this.sanitize(endpoint, jsonString);
-
-        assertPseudonymized(sanitized, "octocat");
-        assertPseudonymized(sanitized, "1");
-        assertPseudonymized(sanitized, "support@github.com");
-        assertRedacted(sanitized,
-                "I'm having a problem with this.",
-                "Found a bug",
-                "Tracking milestone for version 1.0",
+                "serverless, pseudonymizing proxy between Worklytics and your SaaS workplace data sources' REST APIs",
                 "https://api.github.com/users/some-user",
                 "https://api.github.com/users/some-user/events{/privacy}"
         );
@@ -611,7 +483,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
                 InvocationExample.of("https://api.github.com/orgs/FAKE/teams/TEAM/members", "team_members.json"),
                 InvocationExample.of("https://api.github.com/orgs/FAKE/repos", "repos.json"),
                 InvocationExample.of("https://api.github.com/orgs/FAKE/repos/REPO/comments", "repo_comments.json"),
-                InvocationExample.of("https://api.github.com/orgs/FAKE/repos/REPO/commits", "repo_commits.json"),
+                InvocationExample.of("https://api.github.com/orgs/FAKE/repos/REPO/commits", "commit.json"),
                 InvocationExample.of("https://api.github.com/orgs/FAKE/repos/REPO/events", "repo_events.json"),
                 InvocationExample.of("https://api.github.com/orgs/FAKE/repos/REPO/comments/COMMENT_ID/reactions", "comment_reactions.json"),
                 InvocationExample.of("https://api.github.com/orgs/FAKE/repos/REPO/issues/ISSUE", "issue.json"),
@@ -621,7 +493,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
                 InvocationExample.of("https://api.github.com/orgs/FAKE/repos/REPO/issues/ISSUE/timeline", "issue_timeline.json"),
                 InvocationExample.of("https://api.github.com/orgs/FAKE/repos/REPO/issues/ISSUE/reactions", "issues_reactions.json"),
                 InvocationExample.of("https://api.github.com/orgs/FAKE/repos/REPO/issues/ISSUE/comments/COMMENT_ID/reactions", "issues_comments_reactions.json"),
-                InvocationExample.of("https://api.github.com/orgs/FAKE/repos/REPO/pulls", "pulls_reviews.json"),
+                InvocationExample.of("https://api.github.com/orgs/FAKE/repos/REPO/pulls", "pull_reviews.json"),
                 InvocationExample.of("https://api.github.com/orgs/FAKE/repos/REPO/pulls/PR_ID/comments", "pulls_comments.json"),
                 InvocationExample.of("https://api.github.com/orgs/FAKE/repos/REPO/pulls/PR_ID/comments/COMMENT_ID/reactions", "pulls_reviews_comments_reactions.json"),
                 InvocationExample.of("https://api.dropboxapi.com/2/team/members/list/continue_v2", "member_ist_continue.json")
