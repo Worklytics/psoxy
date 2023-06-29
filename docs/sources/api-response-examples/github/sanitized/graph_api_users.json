@@ -1,0 +1,19 @@
+{
+  "data": {
+    "organization": {
+      "samlIdentityProvider": null,
+      "membersWithRole": {
+        "nodes": [
+          {
+            "email": "",
+            "id": "some_user_id"
+          }
+        ],
+        "pageInfo": {
+          "hasNextPage": false,
+          "endCursor": "some_cursor"
+        }
+      }
+    }
+  }
+}
