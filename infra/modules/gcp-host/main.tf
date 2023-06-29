@@ -35,7 +35,8 @@ locals {
     for k, v in var.api_connectors :
     k => {
       for var_def in v.secured_variables :
-      "${replace(upper(k), "-", "_")}_${replace(upper(var_def.name), "-", "_")}" =>
+      # TODO: in v0.5, the prefix with the instance_id can be removed
+      "${replace(upper(var_def.name), "-", "_")}" =>
       merge({
         instance_id        = k
         instance_secret_id = "${replace(upper(k), "-", "_")}_${replace(upper(var_def.name), "-", "_")}"
@@ -61,7 +62,7 @@ module "secrets" {
   source = "../../modules/gcp-secrets"
 
   secret_project    = var.gcp_project_id
-  path_prefix       = local.config_parameter_prefix
+  path_prefix       = "${local.config_parameter_prefix}${replace(upper(each.key), "-", "_")}_"
   secrets           = local.secrets_to_provision[each.key]
   default_labels    = var.default_labels
   replica_locations = local.secret_replica_locations
@@ -317,5 +318,4 @@ echo "Testing Bulk Connectors ..."
 %{endfor}
 EOF
 }
-
 
