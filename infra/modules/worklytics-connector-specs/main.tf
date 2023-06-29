@@ -273,7 +273,7 @@ EOT
       display_name : "Github"
       identifier_scope_id : "github"
       worklytics_connector_name : "Github via Psoxy"
-      target_host : var.salesforce_domain
+      target_host : "api.github.com"
       source_auth_strategy : "oauth2_refresh_token"
       secured_variables : [
         { name : "ACCESS_TOKEN", writable : true },
