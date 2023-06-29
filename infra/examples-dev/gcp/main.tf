@@ -97,7 +97,7 @@ module "psoxy" {
   force_bundle                   = var.force_bundle
   install_test_tool              = var.install_test_tool
   gcp_region                     = var.gcp_region
-  replica_regions                = var.replica_regions
+  replica_regions                = coalesce(var.replica_regions, var.gcp_secret_replica_locations)
   api_connectors                 = local.api_connectors
   bulk_connectors                = local.bulk_connectors
   non_production_connectors      = var.non_production_connectors
