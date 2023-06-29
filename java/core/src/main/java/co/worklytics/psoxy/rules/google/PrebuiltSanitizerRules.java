@@ -11,6 +11,7 @@ import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -117,6 +118,8 @@ public class PrebuiltSanitizerRules {
     static final String GDIRECTORY_ENDPOINT_TEMPLATE_USERS = "/admin/directory/v1/users";
     static final String GDIRECTORY_ENDPOINT_TEMPLATE_USER = "/admin/directory/v1/users/{accountId}";
     static final String GDIRECTORY_ENDPOINT_TEMPLATE_MEMBERS = "/admin/directory/v1/groups/{groupId}/members";
+
+    static final String GDIRECTORY_ENDPOINT_TEMPLATE_ROLEASSIGNMENTS = "/admin/directory/v1/customer/my_customer/{customerId}/roleassignments";
 
 
     static final Rules2 GDIRECTORY = Rules2.builder()
@@ -243,10 +246,10 @@ public class PrebuiltSanitizerRules {
                             .jsonPath("$..roleDescription")
                             .build())
                     .build())
-            //TODO: roles/roleassignments/resources
-            //.endpoint(Rules2.Endpoint.builder()
-            //    .pathRegex("^/admin/directory/v1/customer/my_customer/(roles|roleassignments|resources).*")
-            //    .build())
+            .endpoint(Endpoint.builder()
+                .pathRegex(GDIRECTORY_ENDPOINT_TEMPLATE_ROLEASSIGNMENTS)
+                .allowedQueryParams(Arrays.asList("maxResults", "pageToken"))
+                .build())
             .build();
 
     public static final Rules2 GDIRECTORY_WITHOUT_GOOGLE_IDS = GDIRECTORY
@@ -265,6 +268,10 @@ public class PrebuiltSanitizerRules {
             .withTransformByEndpointTemplate(GDIRECTORY_ENDPOINT_TEMPLATE_MEMBERS,
                     Transform.Pseudonymize.builder()
                             .jsonPath("$.members[*].id")
+                            .build())
+            .withTransformByEndpointTemplate(GDIRECTORY_ENDPOINT_TEMPLATE_ROLEASSIGNMENTS,
+                    Transform.Pseudonymize.builder()
+                            .jsonPath("$.items[*].assignedTo")
                             .build());
 
     public static Endpoint GDRIVE_ENDPOINT_RULES = Endpoint.builder()

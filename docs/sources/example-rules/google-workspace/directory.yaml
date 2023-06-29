@@ -105,3 +105,7 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$..roleDescription"
+  - pathTemplate: "/admin/directory/v1/customer/{customerId}/roleassignments"
+    allowedQueryParameters:
+      - "maxResults"
+      - "pageToken"

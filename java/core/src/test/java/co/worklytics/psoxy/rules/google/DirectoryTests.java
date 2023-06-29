@@ -217,6 +217,8 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
         "https://admin.googleapis.com/admin/directory/v1/groups?a=b,c&b=c",
         "https://admin.googleapis.com/admin/directory/v1/customer/my_customer/orgunits",
         "https://admin.googleapis.com/admin/directory/v1/customer/my_customer/orgunits?a=b,c&b=c",
+        "https://admin.googleapis.com/admin/directory/v1/customer/my_customer/roleassignments",
+        "https://admin.googleapis.com/admin/directory/v1/customer/my_customer/roleassignments?pageToken=1231233&maxResults=300",
     })
     @ParameterizedTest
     @SneakyThrows
