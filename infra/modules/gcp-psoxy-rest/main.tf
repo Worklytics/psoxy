@@ -112,14 +112,14 @@ resource "google_cloudfunctions_function_iam_member" "invokers" {
 }
 
 locals {
-  proxy_endpoint_url  = "https://${var.region}-${var.project_id}.cloudfunctions.net/${google_cloudfunctions_function.function.name}"
+  proxy_endpoint_url  = "https://${google_cloudfunctions_function.function.region}-${google_cloudfunctions_function.function.project}.cloudfunctions.net/${google_cloudfunctions_function.function.name}"
   impersonation_param = var.example_api_calls_user_to_impersonate == null ? "" : " -i \"${var.example_api_calls_user_to_impersonate}\""
   command_npm_install = "npm --prefix ${var.path_to_repo_root}tools/psoxy-test install"
   command_cli_call    = "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js"
   command_test_calls = [for path in var.example_api_calls :
     "${local.command_cli_call} -u \"${local.proxy_endpoint_url}${path}\"${local.impersonation_param}"
   ]
-  command_test_logs = "node ${var.path_to_repo_root}tools/psoxy-test/cli-logs.js -p \"${var.project_id}\" -f \"${google_cloudfunctions_function.function.name}\""
+  command_test_logs = "node ${var.path_to_repo_root}tools/psoxy-test/cli-logs.js -p \"${google_cloudfunctions_function.function.project}\" -f \"${google_cloudfunctions_function.function.name}\""
 }
 
 locals {
@@ -128,7 +128,7 @@ locals {
 
 Review the deployed Cloud function in GCP console:
 
-[Function in GCP Console](https://console.cloud.google.com/functions/details/${var.region}/${google_cloudfunctions_function.function.name}?project=${var.project_id})
+[Function in GCP Console](https://console.cloud.google.com/functions/details/${google_cloudfunctions_function.function.region}/${google_cloudfunctions_function.function.name}?project=${google_cloudfunctions_function.function.project})
 
 We provide some Node.js scripts to easily validate the deployment. To be able
 to run the test commands below, you need Node.js (>=16) and npm (v >=8)
