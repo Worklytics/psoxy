@@ -5,7 +5,6 @@ import com.google.api.client.http.HttpRequestInitializer;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.Optional;
 
@@ -17,7 +16,6 @@ import java.util.Optional;
 @AllArgsConstructor
 public class GzipedContentHttpRequestInitializer implements HttpRequestInitializer {
 
-    @Nullable
     String defaultUserAgent;
 
     @Override

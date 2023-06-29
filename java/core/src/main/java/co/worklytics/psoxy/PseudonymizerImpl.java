@@ -49,10 +49,10 @@ public class PseudonymizerImpl implements Pseudonymizer {
     }
 
     String emailCanonicalization(String original) {
-        String domain = EmailAddressParser.getDomain(original, EmailAddressCriteria.DEFAULT, true);
+        String domain = EmailAddressParser.getDomain(original, EmailAddressCriteria.RECOMMENDED, true);
 
         //NOTE: lower-case here is NOT stipulated by RFC
-        return  EmailAddressParser.getLocalPart(original, EmailAddressCriteria.DEFAULT, true)
+        return  EmailAddressParser.getLocalPart(original, EmailAddressCriteria.RECOMMENDED, true)
             .toLowerCase()
             + "@"
             + domain.toLowerCase();
@@ -81,7 +81,7 @@ public class PseudonymizerImpl implements Pseudonymizer {
         String domain = null;
         if (duckTypesAsEmails(value)) {
             canonicalization = this::emailCanonicalization;
-            domain = EmailAddressParser.getDomain((String) value, EmailAddressCriteria.DEFAULT, true);
+            domain = EmailAddressParser.getDomain((String) value, EmailAddressCriteria.RECOMMENDED, true);
             builder.domain(domain);
             scope = PseudonymizedIdentity.EMAIL_SCOPE;
             //q: do something with the personal name??

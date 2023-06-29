@@ -378,9 +378,9 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
         } else {
             //NOTE: this does NOT seem to work for lists containing empty values (eg ",,"), which
             // per RFC should be allowed ....
-            if (EmailAddressParser.isValidAddressList((String) value, EmailAddressCriteria.DEFAULT)) {
+            if (EmailAddressParser.isValidAddressList((String) value, EmailAddressCriteria.RECOMMENDED)) {
                 InternetAddress[] addresses =
-                    EmailAddressParser.extractHeaderAddresses((String) value, EmailAddressCriteria.DEFAULT, true);
+                    EmailAddressParser.extractHeaderAddresses((String) value, EmailAddressCriteria.RECOMMENDED, true);
                 return Arrays.stream(addresses)
                     .map(InternetAddress::getAddress)
                     .map(pseudonymizer::pseudonymize)
