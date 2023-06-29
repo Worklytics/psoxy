@@ -32,7 +32,7 @@ terraform {
 # general cases
 module "worklytics_connectors" {
   source = "../../modules/worklytics-connectors"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.4.26"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=rc-v0.4.27"
 
   enabled_connectors    = var.enabled_connectors
   example_jira_issue_id = var.example_jira_issue_id
@@ -100,7 +100,7 @@ locals {
 
 module "psoxy" {
   source = "../../modules/aws-host"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-host?ref=v0.4.26"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-host?ref=rc-v0.4.27"
 
   environment_name               = var.environment_name
   aws_account_id                 = var.aws_account_id
@@ -116,6 +116,9 @@ module "psoxy" {
   custom_api_connector_rules     = var.custom_api_connector_rules
   lookup_table_builders          = var.lookup_table_builders
   general_environment_variables  = var.general_environment_variables
+  function_env_kms_key_arn       = var.project_aws_kms_key_arn
+  logs_kms_key_arn               = var.project_aws_kms_key_arn
+  aws_ssm_key_id                 = var.project_aws_kms_key_arn
   bulk_sanitized_expiration_days = var.bulk_sanitized_expiration_days
   bulk_input_expiration_days     = var.bulk_input_expiration_days
   api_connectors                 = local.api_connectors
@@ -137,7 +140,7 @@ module "connection_in_worklytics" {
   for_each = local.all_instances
 
   source = "../../modules/worklytics-psoxy-connection-generic"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-generic?ref=v0.4.26"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-generic?ref=rc-v0.4.27"
 
   psoxy_host_platform_id = local.host_platform_id
   psoxy_instance_id      = each.key
