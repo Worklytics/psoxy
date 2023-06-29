@@ -58,10 +58,11 @@ module "secrets" {
 
   source = "../../modules/gcp-secrets"
 
-  secret_project = var.gcp_project_id
-  path_prefix    = local.config_parameter_prefix
-  secrets        = local.secrets_to_provision[each.key]
-  default_labels = var.default_labels
+  secret_project  = var.gcp_project_id
+  path_prefix     = local.config_parameter_prefix
+  secrets         = local.secrets_to_provision[each.key]
+  default_labels  = var.default_labels
+  replica_regions = var.replica_regions
 }
 
 resource "google_secret_manager_secret_iam_member" "grant_sa_updater_on_lockable_secrets" {
