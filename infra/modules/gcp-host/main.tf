@@ -102,6 +102,7 @@ module "api_connector" {
   source = "../../modules/gcp-psoxy-rest"
 
   project_id                            = var.gcp_project_id
+  region                                = var.gcp_region
   source_kind                           = each.value.source_kind
   environment_id_prefix                 = local.environment_id_prefix
   instance_id                           = each.key
@@ -157,11 +158,11 @@ module "bulk_connector" {
   source = "../../modules/gcp-psoxy-bulk"
 
   project_id                    = var.gcp_project_id
+  region                        = var.gcp_region
   environment_id_prefix         = local.environment_id_prefix
   instance_id                   = each.key
   worklytics_sa_emails          = var.worklytics_sa_emails
   config_parameter_prefix       = local.config_parameter_prefix
-  region                        = var.gcp_region
   source_kind                   = each.value.source_kind
   artifacts_bucket_name         = module.psoxy.artifacts_bucket_name
   deployment_bundle_object_name = module.psoxy.deployment_bundle_object_name
@@ -221,7 +222,9 @@ resource "google_secret_manager_secret" "additional_transforms" {
   labels    = var.default_labels
 
   replication {
-    automatic = true
+    user_managed {
+      replicas = var.replica_regions
+    }
   }
 
   lifecycle {
