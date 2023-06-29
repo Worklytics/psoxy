@@ -3,6 +3,8 @@ locals {
   config_parameter_prefix               = var.config_parameter_prefix == "" ? local.default_config_parameter_prefix : var.config_parameter_prefix
   environment_id_prefix                 = "${var.environment_name}${length(var.environment_name) > 0 ? "-" : ""}"
   environment_id_display_name_qualifier = length(var.environment_name) > 0 ? " ${var.environment_name} " : ""
+
+  secret_replica_locations = coalesce(var.replica_regions, var.secret_replica_locations)
 }
 
 module "psoxy" {
@@ -58,11 +60,11 @@ module "secrets" {
 
   source = "../../modules/gcp-secrets"
 
-  secret_project  = var.gcp_project_id
-  path_prefix     = local.config_parameter_prefix
-  secrets         = local.secrets_to_provision[each.key]
-  default_labels  = var.default_labels
-  replica_regions = var.replica_regions
+  secret_project    = var.gcp_project_id
+  path_prefix       = local.config_parameter_prefix
+  secrets           = local.secrets_to_provision[each.key]
+  default_labels    = var.default_labels
+  replica_locations = local.secret_replica_locations
 }
 
 resource "google_secret_manager_secret_iam_member" "grant_sa_updater_on_lockable_secrets" {
@@ -224,7 +226,7 @@ resource "google_secret_manager_secret" "additional_transforms" {
   replication {
     user_managed {
       dynamic "replicas" {
-        for_each = var.replica_regions
+        for_each = local.secret_replica_locations
         content {
           location = replicas.value
         }

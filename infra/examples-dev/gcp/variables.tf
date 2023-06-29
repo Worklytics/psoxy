@@ -131,6 +131,11 @@ variable "gcp_secret_replica_locations" {
     "us-central1",
     "us-west1",
   ]
+
+  validation {
+    condition = length(var.gcp_secret_replica_locations) > 0
+    error_message = "`gcp_secret_replica_locations` must be non-empty list."
+  }
 }
 
 variable "custom_artifacts_bucket_name" {
