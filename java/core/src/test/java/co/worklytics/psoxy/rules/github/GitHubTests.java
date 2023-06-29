@@ -414,66 +414,6 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         assertUrlAllowed(endpoint);
     }
 
-    @Test
-    void releases() {
-        String jsonString = asJson(exampleDirectoryPath, "releases.json");
-
-        String endpoint = "https://api.github.com/orgs/FAKE/repo/REPO";
-
-        Collection<String> PII = Arrays.asList(
-                "Monalisa Octocat",
-                "octocat",
-                "support@github.com"
-        );
-
-        assertNotSanitized(jsonString, PII);
-
-        String sanitized = this.sanitize(endpoint, jsonString);
-
-        assertPseudonymized(sanitized, "octocat");
-        assertPseudonymized(sanitized, "1");
-        assertPseudonymized(sanitized, "support@github.com");
-        assertRedacted(sanitized,
-                "I'm having a problem with this.",
-                "Found a bug",
-                "Tracking milestone for version 1.0",
-                "https://api.github.com/users/some-user",
-                "https://api.github.com/users/some-user/events{/privacy}"
-        );
-
-        assertUrlAllowed(endpoint);
-    }
-
-    @Test
-    void deployments() {
-        String jsonString = asJson(exampleDirectoryPath, "deployments.json");
-
-        String endpoint = "https://api.github.com/orgs/FAKE/repo/REPO";
-
-        Collection<String> PII = Arrays.asList(
-                "Monalisa Octocat",
-                "octocat",
-                "support@github.com"
-        );
-
-        assertNotSanitized(jsonString, PII);
-
-        String sanitized = this.sanitize(endpoint, jsonString);
-
-        assertPseudonymized(sanitized, "octocat");
-        assertPseudonymized(sanitized, "1");
-        assertPseudonymized(sanitized, "support@github.com");
-        assertRedacted(sanitized,
-                "I'm having a problem with this.",
-                "Found a bug",
-                "Tracking milestone for version 1.0",
-                "https://api.github.com/users/some-user",
-                "https://api.github.com/users/some-user/events{/privacy}"
-        );
-
-        assertUrlAllowed(endpoint);
-    }
-
     @Override
     public Stream<InvocationExample> getExamples() {
         return Stream.of(
@@ -493,10 +433,9 @@ public class GitHubTests extends JavaRulesTestBaseCase {
                 InvocationExample.of("https://api.github.com/orgs/FAKE/repos/REPO/issues/ISSUE/timeline", "issue_timeline.json"),
                 InvocationExample.of("https://api.github.com/orgs/FAKE/repos/REPO/issues/ISSUE/reactions", "issues_reactions.json"),
                 InvocationExample.of("https://api.github.com/orgs/FAKE/repos/REPO/issues/ISSUE/comments/COMMENT_ID/reactions", "issues_comments_reactions.json"),
-                InvocationExample.of("https://api.github.com/orgs/FAKE/repos/REPO/pulls", "pull_reviews.json"),
+                InvocationExample.of("https://api.github.com/orgs/FAKE/repos/REPO/pulls", "pulls.json"),
                 InvocationExample.of("https://api.github.com/orgs/FAKE/repos/REPO/pulls/PR_ID/comments", "pulls_comments.json"),
-                InvocationExample.of("https://api.github.com/orgs/FAKE/repos/REPO/pulls/PR_ID/comments/COMMENT_ID/reactions", "pulls_reviews_comments_reactions.json"),
-                InvocationExample.of("https://api.dropboxapi.com/2/team/members/list/continue_v2", "member_ist_continue.json")
+                InvocationExample.of("https://api.github.com/orgs/FAKE/repos/REPO/pulls/PR_ID/comments/COMMENT_ID/reactions", "pulls_reviews_comments_reactions.json")
         );
     }
 }

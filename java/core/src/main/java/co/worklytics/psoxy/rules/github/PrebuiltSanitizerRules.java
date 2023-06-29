@@ -29,13 +29,6 @@ public class PrebuiltSanitizerRules {
                             "role").stream())
             .collect(Collectors.toList());
 
-    private static final List<String> repoCommitsAllowedQueryParameters = Streams.concat(commonAllowedQueryParameters.stream(),
-                    Lists.newArrayList("sha",
-                            "path",
-                            "since",
-                            "until").stream())
-            .collect(Collectors.toList());
-
     private static final List<String> issuesAllowedQueryParameters = Streams.concat(commonAllowedQueryParameters.stream(),
                     Lists.newArrayList("milestone",
                             "state",
@@ -108,20 +101,6 @@ public class PrebuiltSanitizerRules {
                     .build())
             .transforms(generateUserTransformations("..author"))
             .transforms(generateUserTransformations("..committer"))
-            .build();
-
-    static final Endpoint DEPLOYMENT = Endpoint.builder()
-            .pathTemplate("/repos/{owner}/{repo}/deployments")
-            .allowedQueryParams(commonAllowedQueryParameters)
-            .transform(Transform.Redact.builder()
-                    .jsonPath("$..html_url")
-                    .jsonPath("$..url")
-                    .jsonPath("$..id")
-                    .jsonPath("$..payload")
-                    .jsonPath("$..statuses_url")
-                    .jsonPath("$..repository_url")
-                    .build())
-            .transforms(generateUserTransformations(""))
             .build();
 
     static final Endpoint ISSUES = Endpoint.builder()
@@ -223,45 +202,6 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..pull_request_url")
                     .build())
             .transforms(generateUserTransformations("..user"))
-            .build();
-
-    static final Endpoint RELEASES = Endpoint.builder()
-            .pathTemplate("/repos/{owner}/{repo}/releases")
-            .allowedQueryParams(commonAllowedQueryParameters)
-            .transform(Transform.Redact.builder()
-                    .jsonPath("$..url")
-                    .jsonPath("$..html_url")
-                    .jsonPath("$..assets_url")
-                    .jsonPath("$..upload_url")
-                    .jsonPath("$..tarball_url")
-                    .jsonPath("$..zipball_url")
-                    .jsonPath("$..browser_download_url")
-                    .jsonPath("$..name")
-                    .jsonPath("$..label")
-                    .jsonPath("$..body")
-                    .jsonPath("$..avatar_url")
-                    .jsonPath("$..gravatar_id")
-                    .jsonPath("$..html_url")
-                    .jsonPath("$..followers_url")
-                    .jsonPath("$..following_url")
-                    .jsonPath("$..gists_url")
-                    .jsonPath("$..starred_url")
-                    .jsonPath("$..subscriptions_url")
-                    .jsonPath("$..organizations_url")
-                    .jsonPath("$..repos_url")
-                    .jsonPath("$..events_url")
-                    .jsonPath("$..received_events_url")
-                    .build())
-            .transform(Transform.Pseudonymize.builder()
-                    .jsonPath("$..author.login")
-                    .jsonPath("$..author.id")
-                    .jsonPath("$..author.node_id")
-                    .jsonPath("$..author.email")
-                    .jsonPath("$..assets[*].uploader.login")
-                    .jsonPath("$..assets[*].uploader.id")
-                    .jsonPath("$..assets[*].uploader.node_id")
-                    .jsonPath("$..assets[*].uploader.email")
-                    .build())
             .build();
 
     static final Endpoint REPOSITORIES = Endpoint.builder()
@@ -370,8 +310,6 @@ public class PrebuiltSanitizerRules {
             .endpoint(ISSUE_REACTIONS)
             .endpoint(ISSUE_COMMENT_REACTIONS)
             .endpoint(PULL_REVIEWS)
-            //.endpoint(RELEASES)
-            //.endpoint(DEPLOYMENT)
             .build();
 
     public static final Map<String, RESTRules> RULES_MAP =
