@@ -60,6 +60,21 @@ your Terraform state may contain secrets such as API keys, depending on the sour
 
 See: https://developer.hashicorp.com/terraform/language/settings/backends/local
 
+
+## Bootstrap
+
+For some help in bootstraping a GCP environment, see also: [infra/modules/gcp-bootstrap/README.md](../../infra/modules/gcp-bootstrap/README.md)
+
+The module [psoxy-constants](../../infra/modules/psoxy-constants) is a dependency-free module that
+provides lists of GCP roles, etc needed for bootstraping a GCP project in which your proxy instances
+will reside.
+
+## Example
+
+The https://github.com/Worklytics/psoxy-example-gcp repo provides an example configuration for
+hosting proxy instances in GCP. You use that template, following it's `Usage` docs to get started.
+
+
 ## Security Considerations
 
  * the 'Service Account' approach described in the prerequisites is preferable to giving a Google
@@ -72,9 +87,4 @@ See: https://developer.hashicorp.com/terraform/language/settings/backends/local
    roles specified in the prerequisites must be granted at the project level, so any non-Proxy
    infrastructure within the GCP project that hosts your proxy instances will be accessible to the
    user / service account who's managing the proxy infrastructure.
-
-
-## Bootstrap
-
-For some help in bootstraping a GCP environment, see also: [infra/modules/gcp-bootstrap/README.md](../../infra/modules/gcp-bootstrap/README.md)
 
