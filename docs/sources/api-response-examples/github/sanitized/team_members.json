@@ -1,22 +1,9 @@
 [
   {
-    "login": "some-user",
-    "id": 12345678,
-    "node_id": "MDQ6VXNlcjc1Mjc2MzY0",
-    "avatar_url": "https://avatars.githubusercontent.com/u/12345678?v=4",
-    "gravatar_id": "",
-    "url": "https://api.github.com/users/some-user",
-    "html_url": "https://github.com/some-user",
-    "followers_url": "https://api.github.com/users/some-user/followers",
-    "following_url": "https://api.github.com/users/some-user/following{/other_user}",
-    "gists_url": "https://api.github.com/users/some-user/gists{/gist_id}",
-    "starred_url": "https://api.github.com/users/some-user/starred{/owner}{/repo}",
-    "subscriptions_url": "https://api.github.com/users/some-user/subscriptions",
-    "organizations_url": "https://api.github.com/users/some-user/orgs",
-    "repos_url": "https://api.github.com/users/some-user/repos",
-    "events_url": "https://api.github.com/users/some-user/events{/privacy}",
-    "received_events_url": "https://api.github.com/users/some-user/received_events",
-    "type": "User",
-    "site_admin": false
+    "login":"{\"scope\":\"github\",\"hash\":\"cCTVTYvF.bsF8i4nmoeCsdrT0RxXbwLEP99CeFrVUSo\"}",
+    "id":"{\"scope\":\"github\",\"hash\":\"5G2MlfhB5K64Gb7VDn3Nd009zR7CvdpAZWYF3_R32bM\"}",
+    "node_id":"{\"scope\":\"github\",\"hash\":\"XxhKd8KztbzX8SGbch2L54Ljqv1U5l1HC_nYaP9.GGs\"}",
+    "type":"User",
+    "site_admin":false
   }
 ]

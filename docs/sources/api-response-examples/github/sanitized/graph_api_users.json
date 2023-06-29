@@ -1,17 +1,26 @@
 {
-  "data": {
-    "organization": {
-      "samlIdentityProvider": null,
-      "membersWithRole": {
-        "nodes": [
-          {
-            "email": "",
-            "id": "some_user_id"
-          }
-        ],
-        "pageInfo": {
-          "hasNextPage": false,
-          "endCursor": "some_cursor"
+  "data":{
+    "organization":{
+      "samlIdentityProvider":{
+        "externalIdentities":{
+          "pageInfo":{
+            "hasNextPage":false,
+            "endCursor":"some_cursor"
+          },
+          "edges":[
+            {
+              "node":{
+                "guid":"some-guid",
+                "samlIdentity":{
+                  "nameId":"{\"scope\":\"email\",\"domain\":\"contoso.com\",\"hash\":\"RNhARTFN9TOoD.iOWFt4PikCto_8qnCxWG0Eq57w2oU\"}"
+                },
+                "user":{
+                  "login":"{\"scope\":\"github\",\"hash\":\"zSTCyj.OBmVDq31tbp1Xr9LO3.DMWX5uAgCrk1WN1WY\"}",
+                  "email":"null"
+                }
+              }
+            }
+          ]
         }
       }
     }

@@ -152,7 +152,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
 
     @Test
     void comments_reactions() {
-        String jsonString = asJson(exampleDirectoryPath, "comments_reactions.json");
+        String jsonString = asJson(exampleDirectoryPath, "comment_reactions.json");
 
         String endpoint = "https://api.github.com/repos/FAKE/REPO/comments/COMMENT/reactions";
 
@@ -494,21 +494,18 @@ public class GitHubTests extends JavaRulesTestBaseCase {
                 InvocationExample.of("https://api.github.com/orgs/FAKE/teams", "org_teams.json"),
                 InvocationExample.of("https://api.github.com/orgs/FAKE/teams/TEAM/members", "team_members.json"),
                 InvocationExample.of("https://api.github.com/orgs/FAKE/repos", "repos.json"),
-                InvocationExample.of("https://api.github.com/orgs/FAKE/repos/REPO/comments", "repo_comments.json"),
-                InvocationExample.of("https://api.github.com/orgs/FAKE/repos/REPO/commits", "commit.json"),
-                InvocationExample.of("https://api.github.com/orgs/FAKE/repos/REPO/events", "repo_events.json"),
-                InvocationExample.of("https://api.github.com/orgs/FAKE/repos/REPO/comments/COMMENT_ID/reactions", "comment_reactions.json"),
-                InvocationExample.of("https://api.github.com/orgs/FAKE/repos/REPO/issues/ISSUE", "issue.json"),
-                InvocationExample.of("https://api.github.com/orgs/FAKE/repos/REPO/issues", "issues.json"),
-                InvocationExample.of("https://api.github.com/orgs/FAKE/repos/REPO/issues/ISSUE/comments", "issue_comments.json"),
-                InvocationExample.of("https://api.github.com/orgs/FAKE/repos/REPO/issues/ISSUE/events", "issue_events.json"),
-                InvocationExample.of("https://api.github.com/orgs/FAKE/repos/REPO/issues/ISSUE/timeline", "issue_timeline.json"),
-                InvocationExample.of("https://api.github.com/orgs/FAKE/repos/REPO/issues/ISSUE/reactions", "issues_reactions.json"),
-                InvocationExample.of("https://api.github.com/orgs/FAKE/repos/REPO/issues/ISSUE/comments/COMMENT_ID/reactions", "issues_comments_reactions.json"),
-                InvocationExample.of("https://api.github.com/orgs/FAKE/repos/REPO/pulls", "pulls.json"),
-                InvocationExample.of("https://api.github.com/orgs/FAKE/repos/REPO/pulls/PULL_ID", "pull.json"),
-                InvocationExample.of("https://api.github.com/orgs/FAKE/repos/REPO/pulls/PR_ID/comments", "pulls_comments.json"),
-                InvocationExample.of("https://api.github.com/orgs/FAKE/repos/REPO/pulls/PR_ID/comments/COMMENT_ID/reactions", "pulls_reviews_comments_reactions.json")
+                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/commits/COMMIT_REF", "commit.json"),
+                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/events", "repo_events.json"),
+                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/comments/COMMENT_ID/reactions", "comment_reactions.json"),
+                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/issues/ISSUE", "issue.json"),
+                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/issues", "issues.json"),
+                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/issues/ISSUE/comments", "issues_comments.json"),
+                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/issues/ISSUE/events", "issue_events.json"),
+                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/issues/ISSUE/timeline", "issue_timeline.json"),
+                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/issues/ISSUE/reactions", "issues_reactions.json"),
+                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/issues/comments/reactions", "issues_comments_reactions.json"),
+                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/pulls", "pulls.json"),
+                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/pulls/PULL_ID", "pull.json")
         );
     }
 }
