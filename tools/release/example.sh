@@ -64,8 +64,8 @@ rm ${EXAMPLE_TEMPLATE_REPO}/*.bck
 
 set -e
 
-cp -f ./init-example.sh ${EXAMPLE_TEMPLATE_REPO}/init
-cp -f ./check-prereqs.sh ${EXAMPLE_TEMPLATE_REPO}/check-prereqs
+cp -f ../init-example.sh ${EXAMPLE_TEMPLATE_REPO}/init
+cp -f ../check-prereqs.sh ${EXAMPLE_TEMPLATE_REPO}/check-prereqs
 chmod +x ${EXAMPLE_TEMPLATE_REPO}/init
 chmod +x ${EXAMPLE_TEMPLATE_REPO}/check-prereqs
 
