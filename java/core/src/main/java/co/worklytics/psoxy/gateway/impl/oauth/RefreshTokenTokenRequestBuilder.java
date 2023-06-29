@@ -3,6 +3,7 @@ package co.worklytics.psoxy.gateway.impl.oauth;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.RequiresConfiguration;
 import com.google.api.client.http.HttpContent;
+import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.UrlEncodedContent;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -76,5 +77,10 @@ public class RefreshTokenTokenRequestBuilder
     @Override
     public Set<ConfigService.ConfigProperty> getAllConfigProperties() {
         return Set.of(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.values());
+    }
+
+    @Override
+    public void addHeaders(HttpHeaders httpHeaders) {
+        httpHeaders.setAccept("application/json");
     }
 }
