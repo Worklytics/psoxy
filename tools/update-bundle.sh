@@ -32,10 +32,10 @@ fi
 
 if grep -q '^[[:space:]]*deployment_bundle' "$TFVARS_FILE" ; then
   sed -i .bck "/^[[:space:]]*deployment_bundle.*/c\\
-deployment_bundle = \"${DEPLOYMENT_BUNDLE}\"\\n" "$TFVARS_FILE"
+deployment_bundle = \"${DEPLOYMENT_BUNDLE}\"" "$TFVARS_FILE"
   rm ${TFVARS_FILE}.bck
 else
-  echo "deployment_bundle = \"${DEPLOYMENT_BUNDLE}\"" >> $TFVARS_FILE
+  printf "deployment_bundle = \"${DEPLOYMENT_BUNDLE}\"\n\n" >> $TFVARS_FILE
 fi
 
 printf "Deployment bundle built: ${BLUE}${DEPLOYMENT_BUNDLE}${NC}. You should commit this to your repo.\n"
