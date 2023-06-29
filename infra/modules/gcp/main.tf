@@ -32,11 +32,19 @@ resource "google_secret_manager_secret" "pseudonymization-salt" {
   labels    = var.default_labels
 
   replication {
-    automatic = true
+    user_managed {
+      dynamic "replicas" {
+        for_each = var.replica_regions
+        content {
+          location = replicas.value
+        }
+      }
+    }
   }
 
   lifecycle {
     ignore_changes = [
+      replication, # can't change replication after creation
       labels
     ]
   }
@@ -78,11 +86,19 @@ resource "google_secret_manager_secret" "pseudonymization-key" {
   labels    = var.default_labels
 
   replication {
-    automatic = true
+    user_managed {
+      dynamic "replicas" {
+        for_each = var.replica_regions
+        content {
+          location = replicas.value
+        }
+      }
+    }
   }
 
   lifecycle {
     ignore_changes = [
+      replication, # can't change replication after creation
       labels
     ]
   }

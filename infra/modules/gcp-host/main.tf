@@ -223,7 +223,12 @@ resource "google_secret_manager_secret" "additional_transforms" {
 
   replication {
     user_managed {
-      replicas = var.replica_regions
+      dynamic "replicas" {
+        for_each = var.replica_regions
+        content {
+          location = replicas.value
+        }
+      }
     }
   }
 
