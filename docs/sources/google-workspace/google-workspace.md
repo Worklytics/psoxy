@@ -27,21 +27,6 @@ requires [Super Admin](https://support.google.com/a/answer/2405986?hl=en&fl=1) r
 organization may have a Custom Role with sufficient privileges.
 
 
-## Provisioning API clients without Terraform
-
-Instructions for how to set up Google Workspace without Terraform:
-
-  1. Create or choose the GCP project in which to create the OAuth Clients.
-  2. Activate relevant API(s) in the project.
-  3. Create a Service Account and a JSON key for the service account.
-  4. Base64-encode the key and store it as a Systems Manager Parameter in AWS (same region as your
-     lambda function deployed).  The parameter name should be something like `PSOXY_GDIRECTORY_SERVICE_ACCOUNT_KEY`.
-  5. Get the numeric ID of the service account. Use this plus the oauth scopes to make domain-wide
-     delegation grants via the Google Workspace admin console.
-
-NOTE: you could also use a single Service Account for everything, but you will need to store it's
-key repeatedly in AWS/GCP for each parameter name.
-
 ## Google Workspace User for Connection
 
 We also recommend you create a dedicated Google Workspace user for Psoxy to use when connecting to
@@ -98,4 +83,18 @@ More information:
 https://developers.google.com/workspace/guides/auth-overview
 
 
+## Provisioning API clients without Terraform
 
+While not recommend, it is possibly to set up Google API clients without Terraform, via the GCP web
+console:
+
+1. Create or choose the GCP project in which to create the OAuth Clients.
+2. Activate relevant API(s) in the project.
+3. Create a Service Account and a JSON key for the service account.
+4. Base64-encode the key and store it as a Systems Manager Parameter in AWS (same region as your
+   lambda function deployed).  The parameter name should be something like `PSOXY_GDIRECTORY_SERVICE_ACCOUNT_KEY`.
+5. Get the numeric ID of the service account. Use this plus the oauth scopes to make domain-wide
+   delegation grants via the Google Workspace admin console.
+
+NOTE: you could also use a single Service Account for everything, but you will need to store it's
+key repeatedly in AWS/GCP as the `SERVICE_ACCOUNT_KEY` for each of your Google Workspace connections.
