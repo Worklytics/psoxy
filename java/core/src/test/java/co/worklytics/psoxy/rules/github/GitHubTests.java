@@ -414,6 +414,78 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         assertUrlAllowed(endpoint);
     }
 
+    @Test
+    void pulls() {
+        String jsonString = asJson(exampleDirectoryPath, "pulls.json");
+
+        String endpoint = "https://api.github.com/repos/{owner}/{repo}/pulls";
+
+        Collection<String> PII = Arrays.asList(
+                "octocat",
+                "123456",
+                "hubot",
+                "123457",
+                "other_user",
+                "123458"
+        );
+
+        assertNotSanitized(jsonString, PII);
+
+        String sanitized = this.sanitize(endpoint, jsonString);
+
+        assertPseudonymized(sanitized, "123456");
+        assertPseudonymized(sanitized, "hubot");
+        assertPseudonymized(sanitized, "123457");
+        assertPseudonymized(sanitized, "other_user");
+        assertPseudonymized(sanitized, "123458");
+
+        assertRedacted(sanitized,
+                "Amazing new feature",
+                "Please pull these awesome changes in!",
+                "Something isn't working",
+                "https://api.github.com/users/some-user",
+                "https://api.github.com/users/some-user/events{/privacy}"
+        );
+
+        assertUrlAllowed(endpoint);
+    }
+
+    @Test
+    void pull() {
+        String jsonString = asJson(exampleDirectoryPath, "pull.json");
+
+        String endpoint = "https://api.github.com/repos/{owner}/{repo}/pulls/PULL_NUMBER";
+
+        Collection<String> PII = Arrays.asList(
+                "octocat",
+                "123456",
+                "hubot",
+                "123457",
+                "other_user",
+                "123458"
+        );
+
+        assertNotSanitized(jsonString, PII);
+
+        String sanitized = this.sanitize(endpoint, jsonString);
+
+        assertPseudonymized(sanitized, "123456");
+        assertPseudonymized(sanitized, "hubot");
+        assertPseudonymized(sanitized, "123457");
+        assertPseudonymized(sanitized, "other_user");
+        assertPseudonymized(sanitized, "123458");
+
+        assertRedacted(sanitized,
+                "Amazing new feature",
+                "Please pull these awesome changes in!",
+                "Something isn't working",
+                "https://api.github.com/users/some-user",
+                "https://api.github.com/users/some-user/events{/privacy}"
+        );
+
+        assertUrlAllowed(endpoint);
+    }
+
     @Override
     public Stream<InvocationExample> getExamples() {
         return Stream.of(
@@ -434,6 +506,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
                 InvocationExample.of("https://api.github.com/orgs/FAKE/repos/REPO/issues/ISSUE/reactions", "issues_reactions.json"),
                 InvocationExample.of("https://api.github.com/orgs/FAKE/repos/REPO/issues/ISSUE/comments/COMMENT_ID/reactions", "issues_comments_reactions.json"),
                 InvocationExample.of("https://api.github.com/orgs/FAKE/repos/REPO/pulls", "pulls.json"),
+                InvocationExample.of("https://api.github.com/orgs/FAKE/repos/REPO/pulls/PULL_ID", "pull.json"),
                 InvocationExample.of("https://api.github.com/orgs/FAKE/repos/REPO/pulls/PR_ID/comments", "pulls_comments.json"),
                 InvocationExample.of("https://api.github.com/orgs/FAKE/repos/REPO/pulls/PR_ID/comments/COMMENT_ID/reactions", "pulls_reviews_comments_reactions.json")
         );
