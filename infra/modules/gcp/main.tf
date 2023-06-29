@@ -34,7 +34,7 @@ resource "google_secret_manager_secret" "pseudonymization-salt" {
   replication {
     user_managed {
       dynamic "replicas" {
-        for_each = var.replica_regions
+        for_each = var.secret_replica_locations
         content {
           location = replicas.value
         }
@@ -88,7 +88,7 @@ resource "google_secret_manager_secret" "pseudonymization-key" {
   replication {
     user_managed {
       dynamic "replicas" {
-        for_each = var.replica_regions
+        for_each = var.secret_replica_locations
         content {
           location = replicas.value
         }
