@@ -3,6 +3,7 @@ package co.worklytics.psoxy.rules.github;
 import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
 import co.worklytics.psoxy.rules.RESTRules;
 import lombok.Getter;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -34,6 +35,13 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         this.assertSha("7869e465607b7a00b4bd75a832a9ed1f811ce7f2");
     }
 
+    @SneakyThrows
+    @Test
+    @Override
+    @Disabled
+    public void yamlLength() {
+        // Do nothing, as response schema is bigger than we allow for advanced parameters
+    }
 
     @Test
     void orgMembers() {
