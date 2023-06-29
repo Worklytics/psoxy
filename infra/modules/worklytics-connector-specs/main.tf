@@ -145,6 +145,8 @@ locals {
 
   jira_cloud_id         = coalesce(var.jira_cloud_id, "YOUR_JIRA_CLOUD_ID")
   example_jira_issue_id = coalesce(var.example_jira_issue_id, "YOUR_JIRA_EXAMPLE_ISSUE_ID")
+  github_organization   = coalesce(var.github_organization, "YOUR_GITHUB_ORGANIZATION_NAME")
+  example_github_repository   = coalesce(var.example_github_repository, "YOUR_GITHUB_EXAMPLE_REPOSITORY_NAME")
 
   # Microsoft 365 sources; add/remove as you wish
   # See https://docs.microsoft.com/en-us/graph/permissions-reference for all the permissions available in AAD Graph API
@@ -263,6 +265,65 @@ locals {
     for a sufficiently privileged user (who can see all the workspaces/teams/projects/tasks you wish to
     import to Worklytics via this connection).
   2. Update the content of PSOXY_ASANA_ACCESS_TOKEN variable with the previous token value obtained
+EOT
+    }
+    github = {
+      source_kind : "github",
+      worklytics_connector_id : "github-psoxy"
+      display_name : "Github"
+      identifier_scope_id : "github"
+      worklytics_connector_name : "Github via Psoxy"
+      target_host : var.salesforce_domain
+      source_auth_strategy : "oauth2_refresh_token"
+      secured_variables : [
+        { name : "ACCESS_TOKEN", writable : true },
+        { name : "REFRESH_TOKEN", writable : true },
+        { name : "OAUTH_REFRESH_TOKEN", writable : true, lockable : true },
+        { name : "CLIENT_ID", writable : false },
+        { name : "CLIENT_SECRET", writable : false }
+      ],
+      environment_variables : {
+        GRANT_TYPE : "refresh_token"
+        REFRESH_ENDPOINT : "https://github.com/login/oauth/access_token"
+        USE_SHARED_TOKEN : "TRUE"
+      }
+      settings_to_provide = {
+        "GitHub Organization" = local.github_organization
+      }
+      reserved_concurrent_executions : null
+      example_api_calls_user_to_impersonate : null
+      example_api_calls : [
+        "/orgs/${local.github_organization}/repos",
+        "/orgs/${local.github_organization}/members",
+        "/orgs/${local.github_organization}/teams",
+        "/repos/${local.github_organization}/${local.example_github_repository}/events",
+        "/repos/${local.github_organization}/${local.example_github_repository}/issues",
+        "/repos/${local.github_organization}/${local.example_github_repository}/pulls",
+      ]
+      external_token_todo : <<EOT
+  1. Register a [GitHub App](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/registering-a-github-app#registering-a-github-app)
+    with following permissions with **Read Only**:
+    - Repository:
+      - Administration
+      - Contents
+      - Issues
+      - Metadata
+      - Pull requests
+    - Organization
+      - Members
+
+  Apart from Github instructions please review the following:
+  - "Homepage URL" can be anything, not required in this flow but required by Github.
+  - Callback URL is required for next step, it can be any URL (http://localhost, for example);
+  - Webhooks check can be disabled as this connector is not using them
+  - Keep `Expire user authorization tokens` enabled, as GitHub documentation recommends
+  2. Once is created please generate a new client secret. We will both (clientId and clientSecret) in next steps.
+  3. Now is required to prepare the token for authentication. Following steps [for generating a user access token](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-user-access-token-for-a-github-app#using-the-web-application-flow-to-generate-a-user-access-token)
+  4. Update the variables with values obtained in previous step:
+     - `PSOXY_GITHUB_CLOUD_ACCESS_TOKEN` secret variable with value of `access_token` received in previous response
+     - `PSOXY_GITHUB_CLOUD_REFRESH_TOKEN` secret variable with value of `refresh_token` received in previous response
+     - `PSOXY_GITHUB_CLOUD_CLIENT_ID` with `Client Id` value.
+     - `PSOXY_GITHUB_CLOUD_CLIENT_SECRET` with `Client Secret` value.
 EOT
     }
     salesforce = {
