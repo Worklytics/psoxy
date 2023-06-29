@@ -153,11 +153,12 @@ data "archive_file" "source" {
 
 # Create bucket that will host the source code
 resource "google_storage_bucket" "artifacts" {
-  project       = var.project_id
-  name          = coalesce(var.custom_artifacts_bucket_name, "${var.project_id}-${var.environment_id_prefix}artifacts-bucket")
-  location      = var.bucket_location
-  force_destroy = true
-  labels        = var.default_labels
+  project                     = var.project_id
+  name                        = coalesce(var.custom_artifacts_bucket_name, "${var.project_id}-${var.environment_id_prefix}artifacts-bucket")
+  location                    = var.bucket_location
+  uniform_bucket_level_access = true
+  force_destroy               = true
+  labels                      = var.default_labels
 
   # TODO: remove in v0.5
   lifecycle {
