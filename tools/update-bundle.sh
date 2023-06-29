@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Testing
+# from in example directory, such as `infra/examples/aws-msft-365`:
+#  ../../../tools/update-bundle.sh ~/code/psoxy/ terraform.tfvars aws
+
 PSOXY_BASE_DIR=$1
 TFVARS_FILE=$2
 HOST_PLATFORM=$3
@@ -35,6 +39,7 @@ else
 fi
 
 printf "Deployment bundle built: ${BLUE}${DEPLOYMENT_BUNDLE}${NC}. You should commit this to your repo.\n"
+
 
 echo "#!/bin/bash" > ./update-bundle
 printf "\n# Use this script rebuild your deployment bundle and update your terraform.tfvars to use the new one\n" >> ./update-bundle
