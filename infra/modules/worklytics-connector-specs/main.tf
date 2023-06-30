@@ -38,8 +38,7 @@ locals {
         "/admin/directory/v1/users?customer=my_customer&maxResults=10",
         "/admin/directory/v1/groups?customer=my_customer&maxResults=10",
         "/admin/directory/v1/customer/my_customer/domains",
-        "/admin/directory/v1/customer/my_customer/roles?maxResults=10",
-        "/admin/directory/v1/customer/my_customer/roleassignments?maxResults=10"
+        "/admin/directory/v1/customer/my_customer/roles?maxResults=10"
       ]
       example_api_calls_user_to_impersonate : local.google_workspace_example_admin
     },
@@ -397,6 +396,7 @@ EOT
       environment_variables : {
         GRANT_TYPE : "account_credentials"
         REFRESH_ENDPOINT : "https://zoom.us/oauth/token"
+        USE_SHARED_TOKEN : "TRUE"
       }
       secured_variables : [
         { name : "CLIENT_SECRET", writable : false },
@@ -405,9 +405,6 @@ EOT
         { name : "ACCESS_TOKEN", writable : true },
         { name : "OAUTH_REFRESH_TOKEN", writable : true, lockable : true }, # q: needed? per logic as of 9 June 2023, would be created
       ],
-      environment_variables : {
-        USE_SHARED_TOKEN : "TRUE"
-      }
       reserved_concurrent_executions : null # 1
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
