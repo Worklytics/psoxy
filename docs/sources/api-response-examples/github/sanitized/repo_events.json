@@ -22,7 +22,6 @@
           "author":{
             "email":"{\"scope\":\"email\",\"domain\":\"github.com\",\"hash\":\"P1LmVQUuEGG17A4gh5hXGPZUfft.u4qxh_9ityvkcH4\"}"
           },
-          "message":"commit",
           "distinct":true
         }
       ]

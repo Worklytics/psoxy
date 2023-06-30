@@ -431,11 +431,23 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..html_url")
                     .jsonPath("$..name")
                     .jsonPath("$..url")
+                    .jsonPath("$..message")
+                    .jsonPath("$..description")
+                    .jsonPath("$..body")
+                    .jsonPath("$..title")
                     .build())
             .transform(Transform.Pseudonymize.builder()
                     .jsonPath("$..author.email")
                     .build())
+            .transforms(generateUserTransformations("..owner"))
+            .transforms(generateUserTransformations("..user"))
             .transforms(generateUserTransformations("..actor"))
+            .transforms(generateUserTransformations("..assignee"))
+            .transforms(generateUserTransformations("..assignees[*]"))
+            .transforms(generateUserTransformations("..requested_reviewers[*]"))
+            .transforms(generateUserTransformations("..creator"))
+            .transforms(generateUserTransformations("..merged_by"))
+            .transforms(generateUserTransformations("..closed_by"))
             .build();
 
     @VisibleForTesting
