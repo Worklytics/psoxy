@@ -17,7 +17,7 @@
     <orderEntry type="module" module-name="gateway-core" />
     <orderEntry type="library" name="Maven: commons-codec:commons-codec:1.15" level="project" />
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.commons:commons-csv:1.4" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.commons:commons-csv:1.10.0" level="project" />
     <orderEntry type="library" name="Maven: com.google.guava:guava:32.0.1-jre" level="project" />
     <orderEntry type="library" name="Maven: com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava" level="project" />
     <orderEntry type="library" name="Maven: org.checkerframework:checker-qual:3.33.0" level="project" />
