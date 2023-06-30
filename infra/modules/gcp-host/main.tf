@@ -50,6 +50,11 @@ locals {
     for instance_id, secrets in local.secrets_to_provision :
     [for secret_id, secret in values(secrets) : secret if secret.lockable]
   ])
+
+  writable_secrets = flatten([
+    for instance_id, secrets in local.secrets_to_provision :
+    [for secret_id, secret in values(secrets) : secret if secret.writable]
+  ])
 }
 
 output "secrets_to_provision" {
@@ -71,10 +76,20 @@ module "secrets" {
 resource "google_secret_manager_secret_iam_member" "grant_sa_updater_on_lockable_secrets" {
   for_each = { for secret in local.lockable_secrets : secret.instance_secret_id => secret }
 
-  member    = "serviceAccount:${google_service_account.api_connectors[each.value.instance_id].email}"
-  role      = module.psoxy.psoxy_instance_secret_locker_role_id
   project   = var.gcp_project_id
   secret_id = "${local.config_parameter_prefix}${each.value.instance_secret_id}"
+  member    = "serviceAccount:${google_service_account.api_connectors[each.value.instance_id].email}"
+  role      = module.psoxy.psoxy_instance_secret_locker_role_id
+
+}
+
+resource "google_secret_manager_secret_iam_member" "grant_sa_secretVersionAdder_on_writable_secret" {
+  for_each = { for secret in local.writable_secrets : secret.instance_secret_id => secret }
+
+  project   = var.gcp_project_id
+  secret_id = "${local.config_parameter_prefix}${each.value.instance_secret_id}"
+  member    = "serviceAccount:${google_service_account.api_connectors[each.value.instance_id].email}"
+  role      = "roles/secretmanager.secretVersionAdder"
 }
 
 locals {
