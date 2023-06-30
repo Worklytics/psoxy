@@ -78,4 +78,13 @@ public class RefreshTokenTokenRequestBuilder
     public Set<ConfigService.ConfigProperty> getAllConfigProperties() {
         return Set.of(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.values());
     }
+
+    @Override
+    public void addHeaders(HttpHeaders httpHeaders) {
+        // For refresh token, format will always be in JSON
+        // In theory it should not be required to specify it
+        // as it is part of the standard (see https://datatracker.ietf.org/doc/html/rfc6749#section-5.1)
+        // But for some APIs (Github) is required to ensure that the response will be in JSON format
+        httpHeaders.setAccept("application/json");
+    }
 }
