@@ -5,8 +5,8 @@ RED='\e[0;31m'
 BLUE='\e[0;34m'
 NC='\e[0m' # No Color
 
-# Usage: ./tools/publish-legacy-example.sh <repo-root> <example> <release-tag>
-# ./tools/publish-legacy-example.sh ~/code/psoxy aws-msft-365 v0.4.26
+# Usage: ./tools/release/publish-legacy-example.sh <repo-root> <example> <release-tag>
+# ./tools/release/publish-legacy-example.sh ~/code/psoxy aws-msft-365 v0.4.26
 
 REPO_ROOT=$1
 EXAMPLE=$2

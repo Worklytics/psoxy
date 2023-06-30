@@ -10,9 +10,15 @@ variable "secrets" {
 
 variable "replica_regions" {
   type        = list(string)
-  description = "List of regions to replicate the secret to"
+  description = "DEPRECATED; use `replica_locations`. List of locations to which to replicate secrets. See https://cloud.google.com/secret-manager/docs/locations"
+  default = null
+}
+
+variable "replica_locations" {
+  type        = list(string)
+  description = "List of locations to which to replicate GCP Secret Manager secrets. See https://cloud.google.com/secret-manager/docs/locations"
   default = [
-    "us-east1",
+    "us-central1",
     "us-west1",
   ]
 }

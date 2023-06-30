@@ -5,7 +5,8 @@
 
 locals {
 
-  google_workspace_example_admin = try(coalesce(var.google_workspace_example_admin, var.google_workspace_example_user), null)
+  google_workspace_example_user  = coalesce(var.google_workspace_example_user, "REPLACE_WITH_EXAMPLE_USER@YOUR_COMPANY.COM")
+  google_workspace_example_admin = coalesce(var.google_workspace_example_admin, var.google_workspace_example_user, "REPLACE_WITH_EXAMPLE_ADMIN@YOUR_COMPANY.COM")
 
   google_workspace_sources = {
     # GDirectory connections are a PRE-REQ for gmail, gdrive, and gcal connections. remove only
@@ -37,8 +38,7 @@ locals {
         "/admin/directory/v1/users?customer=my_customer&maxResults=10",
         "/admin/directory/v1/groups?customer=my_customer&maxResults=10",
         "/admin/directory/v1/customer/my_customer/domains",
-        "/admin/directory/v1/customer/my_customer/roles?maxResults=10",
-        "/admin/directory/v1/customer/my_customer/roleassignments?maxResults=10"
+        "/admin/directory/v1/customer/my_customer/roles?maxResults=10"
       ]
       example_api_calls_user_to_impersonate : local.google_workspace_example_admin
     },
@@ -61,7 +61,7 @@ locals {
         "/calendar/v3/users/me/settings",
         "/calendar/v3/calendars/primary/events?maxResults=10"
       ]
-      example_api_calls_user_to_impersonate : var.google_workspace_example_user
+      example_api_calls_user_to_impersonate : local.google_workspace_example_user
     },
     "gmail" : {
       source_kind : "gmail",
@@ -80,7 +80,7 @@ locals {
       example_api_calls : [
         "/gmail/v1/users/me/messages?maxResults=10"
       ]
-      example_api_calls_user_to_impersonate : var.google_workspace_example_user
+      example_api_calls_user_to_impersonate : local.google_workspace_example_user
     },
     "google-chat" : {
       source_kind : "google-chat",
@@ -138,7 +138,7 @@ locals {
         "/drive/v2/files",
         "/drive/v3/files"
       ],
-      example_api_calls_user_to_impersonate : var.google_workspace_example_user
+      example_api_calls_user_to_impersonate : local.google_workspace_example_user
     }
   }
 
@@ -457,6 +457,7 @@ EOT
       environment_variables : {
         GRANT_TYPE : "account_credentials"
         REFRESH_ENDPOINT : "https://zoom.us/oauth/token"
+        USE_SHARED_TOKEN : "TRUE"
       }
       secured_variables : [
         { name : "CLIENT_SECRET", writable : false },
@@ -465,9 +466,6 @@ EOT
         { name : "ACCESS_TOKEN", writable : true },
         { name : "OAUTH_REFRESH_TOKEN", writable : true, lockable : true }, # q: needed? per logic as of 9 June 2023, would be created
       ],
-      environment_variables : {
-        USE_SHARED_TOKEN : "TRUE"
-      }
       reserved_concurrent_executions : null # 1
       example_api_calls_user_to_impersonate : null
       example_api_calls : [

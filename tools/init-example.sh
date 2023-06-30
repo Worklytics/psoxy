@@ -3,8 +3,17 @@
 # Psoxy init script
 #
 # this is meant to be run from within a Terraform configuration for Psoxy, modeled on one of our
-# examples
-# see: https://github.com/Worklytics/psoxy/tree/main/infra/examples
+#
+# Testing:
+#   - within example directory, such as `infra/examples/aws-msft-365`:
+#     ../../tools/release/init-example.sh
+#
+#  or
+#    ../../tools/release/init-example.sh terraform_cloud
+#
+#   to repeat:
+#     ../../tools/release/reset-example.sh
+
 
 # colors
 RED='\e[0;31m'
@@ -69,6 +78,17 @@ else
   printf "${RED}Nothing to initialize. File terraform.tfvars already exists.${NC}\n\n"
 fi
 
+# pattern used to grep for provider at top-level of Terraform configuration
+TOP_LEVEL_PROVIDER_PATTERN="^├── provider\[registry.terraform.io/hashicorp"
+AWS_PROVIDER_COUNT=$(terraform providers | grep "${TOP_LEVEL_PROVIDER_PATTERN}/aws" | wc -l)
+AWS_HOSTED=$(test $AWS_PROVIDER_COUNT -ne 0)
+if [ $AWS_HOSTED ]; then
+  HOST_PLATFORM="aws"
+else
+  HOST_PLATFORM="gcp"
+fi
+
+# START BUILD SCRIPT
 # create example build script, to support building deployment bundle (JAR) outside of Terraform
 # (useful for debugging)
 
@@ -80,18 +100,9 @@ fi
 touch "$BUILD_DEPLOYMENT_BUNDLE_SCRIPT"
 echo "#!/bin/bash" >> $BUILD_DEPLOYMENT_BUNDLE_SCRIPT
 
-# pattern used to grep for provider at top-level of Terraform configuration
-TOP_LEVEL_PROVIDER_PATTERN="^├── provider\[registry.terraform.io/hashicorp"
-AWS_PROVIDER_COUNT=$(terraform providers | grep "${TOP_LEVEL_PROVIDER_PATTERN}/aws" | wc -l)
-AWS_HOSTED=$(test $AWS_PROVIDER_COUNT -ne 0)
-if [ $AWS_HOSTED ]; then
-  HOST_PLATFORM="aws"
-else
-  HOST_PLATFORM="gcp"
-fi
 echo "\"${PSOXY_BASE_DIR}tools/build.sh\" $HOST_PLATFORM \"${PSOXY_BASE_DIR}java\"" >> $BUILD_DEPLOYMENT_BUNDLE_SCRIPT
 chmod +x "$BUILD_DEPLOYMENT_BUNDLE_SCRIPT"
-
+# END BUILD SCRIPT
 
 # Install test tool
 ${PSOXY_BASE_DIR}tools/install-test-tool.sh "${PSOXY_BASE_DIR}tools"

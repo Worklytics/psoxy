@@ -112,3 +112,19 @@ Alternatively, you may use a local file system, but this is not recommended for 
 your Terraform state may contain secrets such as API keys, depending on the sources you connect.
 
 See https://developer.hashicorp.com/terraform/language/settings/backends/local
+
+
+## Bootstrap
+
+The module [psoxy-constants](../../infra/modules/psoxy-constants) is a dependency-free module that
+provides lists of AWS managed policies, etc needed for bootstraping a AWS account in which your
+proxy instances will reside.
+
+## Getting Started
+
+Once you've fulfilled the prereqs, including having your terraform deployment environment, backend,
+and AWS account prepared, we suggest you use our AWS example template repo:
+
+  - https://github.com/Worklytics/psoxy-example-aws
+
+Follow the 'Usage' instructions there to continue.

@@ -3,6 +3,8 @@ locals {
   config_parameter_prefix               = var.config_parameter_prefix == "" ? local.default_config_parameter_prefix : var.config_parameter_prefix
   environment_id_prefix                 = "${var.environment_name}${length(var.environment_name) > 0 ? "-" : ""}"
   environment_id_display_name_qualifier = length(var.environment_name) > 0 ? " ${var.environment_name} " : ""
+
+  secret_replica_locations = coalesce(var.replica_regions, var.secret_replica_locations)
 }
 
 module "psoxy" {
@@ -33,7 +35,8 @@ locals {
     for k, v in var.api_connectors :
     k => {
       for var_def in v.secured_variables :
-      "${replace(upper(k), "-", "_")}_${replace(upper(var_def.name), "-", "_")}" =>
+      # TODO: in v0.5, the prefix with the instance_id can be removed
+      "${replace(upper(var_def.name), "-", "_")}" =>
       merge({
         instance_id        = k
         instance_secret_id = "${replace(upper(k), "-", "_")}_${replace(upper(var_def.name), "-", "_")}"
@@ -58,10 +61,11 @@ module "secrets" {
 
   source = "../../modules/gcp-secrets"
 
-  secret_project = var.gcp_project_id
-  path_prefix    = local.config_parameter_prefix
-  secrets        = local.secrets_to_provision[each.key]
-  default_labels = var.default_labels
+  secret_project    = var.gcp_project_id
+  path_prefix       = "${local.config_parameter_prefix}${replace(upper(each.key), "-", "_")}_"
+  secrets           = local.secrets_to_provision[each.key]
+  default_labels    = var.default_labels
+  replica_locations = local.secret_replica_locations
 }
 
 resource "google_secret_manager_secret_iam_member" "grant_sa_updater_on_lockable_secrets" {
@@ -101,6 +105,7 @@ module "api_connector" {
   source = "../../modules/gcp-psoxy-rest"
 
   project_id                            = var.gcp_project_id
+  region                                = var.gcp_region
   source_kind                           = each.value.source_kind
   environment_id_prefix                 = local.environment_id_prefix
   instance_id                           = each.key
@@ -156,11 +161,11 @@ module "bulk_connector" {
   source = "../../modules/gcp-psoxy-bulk"
 
   project_id                    = var.gcp_project_id
+  region                        = var.gcp_region
   environment_id_prefix         = local.environment_id_prefix
   instance_id                   = each.key
   worklytics_sa_emails          = var.worklytics_sa_emails
   config_parameter_prefix       = local.config_parameter_prefix
-  region                        = var.gcp_region
   source_kind                   = each.value.source_kind
   artifacts_bucket_name         = module.psoxy.artifacts_bucket_name
   deployment_bundle_object_name = module.psoxy.deployment_bundle_object_name
@@ -220,7 +225,14 @@ resource "google_secret_manager_secret" "additional_transforms" {
   labels    = var.default_labels
 
   replication {
-    automatic = true
+    user_managed {
+      dynamic "replicas" {
+        for_each = local.secret_replica_locations
+        content {
+          location = replicas.value
+        }
+      }
+    }
   }
 
   lifecycle {
@@ -306,5 +318,4 @@ echo "Testing Bulk Connectors ..."
 %{endfor}
 EOF
 }
-
 

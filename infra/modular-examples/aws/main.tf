@@ -33,7 +33,7 @@ locals {
 
 module "worklytics_connector_specs" {
   source = "../../modules/worklytics-connector-specs"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connector-specs?ref=rc-v0.4.27
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connector-specs?ref=v0.4.27
 
   enabled_connectors             = var.enabled_connectors
   google_workspace_example_user  = var.google_workspace_example_user
@@ -49,7 +49,7 @@ module "worklytics_connector_specs" {
 
 module "psoxy_aws" {
   source = "../../modules/aws"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws?ref=rc-v0.4.27
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws?ref=v0.4.27
 
   aws_account_id                 = var.aws_account_id
   region                         = data.aws_region.current.id
@@ -72,7 +72,7 @@ moved {
 # secrets shared across all instances
 module "global_secrets" {
   source = "../../modules/aws-ssm-secrets"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-ssm-secrets?ref=rc-v0.4.27
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-ssm-secrets?ref=v0.4.27
 
   path       = var.aws_ssm_param_root_path
   kms_key_id = var.aws_ssm_key_id
@@ -89,7 +89,7 @@ module "google_workspace_connection" {
   for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
 
   source = "../../modules/google-workspace-dwd-connection"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/google-workspace-dwd-connection?ref=rc-v0.4.27
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/google-workspace-dwd-connection?ref=v0.4.27
 
   project_id                   = var.gcp_project_id
   connector_service_account_id = "${local.function_name_prefix}${local.deployment_id_sa_id_part}${each.key}"
@@ -114,7 +114,7 @@ module "google_workspace_connection_auth" {
   for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
 
   source = "../../modules/gcp-sa-auth-key"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-sa-auth-key?ref=rc-v0.4.27"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-sa-auth-key?ref=v0.4.27"
 
   service_account_id = module.google_workspace_connection[each.key].service_account_id
 }
@@ -130,7 +130,7 @@ module "sa_key_secrets" {
   for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
 
   source = "../../modules/aws-ssm-secrets"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-ssm-secrets?ref=rc-v0.4.27"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-ssm-secrets?ref=v0.4.27"
   # other possibly implementations:
   # source = "../hashicorp-vault-secrets"
 
@@ -156,7 +156,7 @@ module "psoxy_google_workspace_connector" {
   for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
 
   source = "../../modules/aws-psoxy-rest"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-rest?ref=rc-v0.4.27"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-rest?ref=v0.4.27"
 
   environment_name                      = var.environment_name
   instance_id                           = each.key
@@ -200,7 +200,7 @@ module "worklytics_psoxy_connection_google_workspace" {
   for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
 
   source = "../../modules/worklytics-psoxy-connection"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection?ref=rc-v0.4.27"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection?ref=v0.4.27"
 
   psoxy_instance_id      = each.key
   psoxy_host_platform_id = local.host_platform_id
@@ -264,7 +264,7 @@ module "msft_connection" {
   for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
   source = "../../modules/azuread-connection"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-connection?ref=rc-v0.4.27"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-connection?ref=v0.4.27"
 
   display_name                      = "Psoxy Connector - ${each.value.display_name}${var.connector_display_name_suffix}"
   tenant_id                         = var.msft_tenant_id
@@ -283,7 +283,7 @@ module "msft_connection_auth_federation" {
   for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
   source = "../../modules/azuread-federated-credentials"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-federated-credentials?ref=rc-v0.4.27"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-federated-credentials?ref=v0.4.27"
 
   application_object_id = module.msft_connection[each.key].connector.id
   display_name          = "AccessFromAWS"
@@ -307,7 +307,7 @@ module "msft_365_grants" {
   for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
   source = "../../modules/azuread-grant-all-users"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-grant-all-users?ref=rc-v0.4.27"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-grant-all-users?ref=v0.4.27"
 
   psoxy_instance_id        = each.key
   application_id           = module.msft_connection[each.key].connector.application_id
@@ -321,7 +321,7 @@ module "psoxy_msft_connector" {
   for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
   source = "../../modules/aws-psoxy-rest"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-rest?ref=rc-v0.4.27"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-rest?ref=v0.4.27"
 
   environment_name                = var.environment_name
   instance_id                     = each.key
@@ -375,7 +375,7 @@ module "worklytics_psoxy_connection_msft_365" {
   for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
   source = "../../modules/worklytics-psoxy-connection"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection?ref=rc-v0.4.27"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection?ref=v0.4.27"
 
   psoxy_host_platform_id = local.host_platform_id
   psoxy_instance_id      = each.key
@@ -428,7 +428,7 @@ module "parameter_fill_instructions" {
   for_each = local.long_access_parameters
 
   source = "../../modules/aws-ssm-fill-md"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-ssm-fill-md?ref=rc-v0.4.27"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-ssm-fill-md?ref=v0.4.27"
 
   region         = data.aws_region.current.id
   parameter_name = aws_ssm_parameter.long-access-secrets[each.key].name
@@ -444,7 +444,7 @@ module "source_token_external_todo" {
   for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors_todos
 
   source = "../../modules/source-token-external-todo"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/source-token-external-todo?ref=rc-v0.4.27"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/source-token-external-todo?ref=v0.4.27"
 
   source_id                         = each.key
   connector_specific_external_steps = each.value.external_token_todo
@@ -457,7 +457,7 @@ module "aws_psoxy_long_auth_connectors" {
   for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
 
   source = "../../modules/aws-psoxy-rest"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-rest?ref=rc-v0.4.27"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-rest?ref=v0.4.27"
 
   environment_name                = var.environment_name
   instance_id                     = each.key
@@ -505,7 +505,7 @@ module "worklytics_psoxy_connection" {
   for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
 
   source = "../../modules/worklytics-psoxy-connection"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection?ref=rc-v0.4.27"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection?ref=v0.4.27"
 
   psoxy_instance_id  = each.key
   connector_id       = try(each.value.worklytics_connector_id, "")
@@ -544,7 +544,7 @@ module "psoxy_bulk" {
   for_each = merge(module.worklytics_connector_specs.enabled_bulk_connectors, var.custom_bulk_connectors)
 
   source = "../../modules/aws-psoxy-bulk"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-bulk?ref=rc-v0.4.27"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-bulk?ref=v0.4.27"
 
   environment_name                 = var.environment_name
   instance_id                      = each.key
@@ -588,7 +588,7 @@ module "psoxy_bulk_to_worklytics" {
   var.custom_bulk_connectors)
 
   source = "../../modules/worklytics-psoxy-connection-generic"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-generic?ref=rc-v0.4.27"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-generic?ref=v0.4.27"
 
   psoxy_host_platform_id = local.host_platform_id
   psoxy_instance_id      = each.key
@@ -615,7 +615,7 @@ module "lookup_output" {
   for_each = var.lookup_table_builders
 
   source = "../../modules/aws-psoxy-output-bucket"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-output-bucket?ref=rc-v0.4.27"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-psoxy-output-bucket?ref=v0.4.27"
 
   environment_name              = var.environment_name
   instance_id                   = each.key
