@@ -50,14 +50,15 @@ set -e
 cd -
 for file in "${FILES_TO_COPY[@]}"
 do
-  cp -f ${DEV_EXAMPLE_PATH}/${file} ${EXAMPLE_TEMPLATE_REPO}/${file}
+  if [ -f ${DEV_EXAMPLE_PATH}/${file} ]; then
+     cp -f ${DEV_EXAMPLE_PATH}/${file} ${EXAMPLE_TEMPLATE_REPO}/${file}
 
-  # uncomment Terraform module remotes
-  sed -i .bck 's/^\(.*\)# source = "git::\(.*\)"/\1source = "git::\2"/' "${EXAMPLE_TEMPLATE_REPO}/${file}"
+     # uncomment Terraform module remotes
+     sed -i .bck 's/^\(.*\)# source = "git::\(.*\)"/\1source = "git::\2"/' "${EXAMPLE_TEMPLATE_REPO}/${file}"
 
-  # remove references to local modules
-  sed -i .bck '/source = "..\/..\/modules\/[^"]*"/d' "${EXAMPLE_TEMPLATE_REPO}/${file}"
-
+     # remove references to local modules
+     sed -i .bck '/source = "..\/..\/modules\/[^"]*"/d' "${EXAMPLE_TEMPLATE_REPO}/${file}"
+  fi
 done
 
 rm ${EXAMPLE_TEMPLATE_REPO}/*.bck
