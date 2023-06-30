@@ -40,7 +40,7 @@ locals {
 # call this 'generic_source_connectors'?
 module "worklytics_connectors" {
   source = "../../modules/worklytics-connectors"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.4.26"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.4.27"
 
 
   enabled_connectors    = var.enabled_connectors
@@ -85,7 +85,7 @@ locals {
 
 module "psoxy" {
   source = "../../modules/gcp-host"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-host?ref=v0.4.26"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-host?ref=v0.4.27"
 
   gcp_project_id                 = var.gcp_project_id
   environment_name               = var.environment_name
@@ -97,7 +97,7 @@ module "psoxy" {
   force_bundle                   = var.force_bundle
   install_test_tool              = var.install_test_tool
   gcp_region                     = var.gcp_region
-  replica_regions                = var.replica_regions
+  replica_regions                = coalesce(var.replica_regions, var.gcp_secret_replica_locations)
   api_connectors                 = local.api_connectors
   bulk_connectors                = local.bulk_connectors
   non_production_connectors      = var.non_production_connectors
@@ -122,7 +122,7 @@ module "connection_in_worklytics" {
   for_each = local.all_instances
 
   source = "../../modules/worklytics-psoxy-connection-generic"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-generic?ref=v0.4.26"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-generic?ref=v0.4.27"
 
   psoxy_host_platform_id = local.host_platform_id
   psoxy_instance_id      = each.key

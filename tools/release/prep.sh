@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Usage ./tools/prep-release.sh <current-release> <next-release>
+# Usage ./tools/release/prep.sh <current-release> <next-release>
 
 RED='\e[0;31m'
 GREEN='\e[0;32m'
