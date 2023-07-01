@@ -30,6 +30,15 @@ locals {
 
 # BEGIN API CONNECTORS
 
+resource "google_service_account" "api_connectors" {
+  for_each = var.api_connectors
+
+  project      = var.gcp_project_id
+  account_id   = substr("${local.sa_prefix}${replace(each.key, "_", "-")}", 0, local.SA_NAME_MAX_LENGTH)
+  display_name = "${local.environment_id_display_name_qualifier} ${each.key} API Connector Cloud Function"
+  description  = "Service account that cloud function for ${each.key} API Connector will run as"
+}
+
 locals {
   secrets_to_provision = {
     for k, v in var.api_connectors :
@@ -49,6 +58,11 @@ locals {
   lockable_secrets = flatten([
     for instance_id, secrets in local.secrets_to_provision :
     [for secret_id, secret in values(secrets) : secret if secret.lockable]
+  ])
+
+  writable_secrets = flatten([
+    for instance_id, secrets in local.secrets_to_provision :
+    [for secret_id, secret in values(secrets) : secret if secret.writable]
   ])
 }
 
@@ -71,10 +85,20 @@ module "secrets" {
 resource "google_secret_manager_secret_iam_member" "grant_sa_updater_on_lockable_secrets" {
   for_each = { for secret in local.lockable_secrets : secret.instance_secret_id => secret }
 
-  member    = "serviceAccount:${google_service_account.api_connectors[each.value.instance_id].email}"
-  role      = module.psoxy.psoxy_instance_secret_locker_role_id
   project   = var.gcp_project_id
   secret_id = "${local.config_parameter_prefix}${each.value.instance_secret_id}"
+  member    = "serviceAccount:${google_service_account.api_connectors[each.value.instance_id].email}"
+  role      = module.psoxy.psoxy_instance_secret_locker_role_id
+
+}
+
+resource "google_secret_manager_secret_iam_member" "grant_sa_secretVersionAdder_on_writable_secret" {
+  for_each = { for secret in local.writable_secrets : secret.instance_secret_id => secret }
+
+  project   = var.gcp_project_id
+  secret_id = "${local.config_parameter_prefix}${each.value.instance_secret_id}"
+  member    = "serviceAccount:${google_service_account.api_connectors[each.value.instance_id].email}"
+  role      = "roles/secretmanager.secretVersionAdder"
 }
 
 locals {
@@ -88,15 +112,6 @@ locals {
   long_default_sa_prefix = "psoxy-${local.environment_id_prefix}${local.function_qualifier}"
 
   sa_prefix = length(local.default_sa_prefix) < local.SA_NAME_MIN_LENGTH ? local.long_default_sa_prefix : local.default_sa_prefix
-}
-
-resource "google_service_account" "api_connectors" {
-  for_each = var.api_connectors
-
-  project      = var.gcp_project_id
-  account_id   = substr("${local.sa_prefix}${replace(each.key, "_", "-")}", 0, local.SA_NAME_MAX_LENGTH)
-  display_name = "${local.environment_id_display_name_qualifier} ${each.key} API Connector Cloud Function"
-  description  = "Service account that cloud function for ${each.key} API Connector will run as"
 }
 
 module "api_connector" {

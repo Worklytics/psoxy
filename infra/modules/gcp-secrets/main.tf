@@ -41,10 +41,14 @@ resource "google_secret_manager_secret_version" "version" {
 
   secret      = google_secret_manager_secret.secret[each.key].id
   secret_data = coalesce(each.value.value, "placeholder value - fill me")
-  # NOTE: can't set `enabled = false` here, bc we bind secret to env var so CloudFunction update will fail
+  # NOTE: can't set `enabled = false` here in placeholder case, bc we bind secret to env var so
+  # CloudFunction update will fail as can't bind to ':latest'
 
   lifecycle {
     create_before_destroy = true
+    ignore_changes = [
+      enabled, # if secret version disabled after creation, let it be (placeholder case)
+    ]
   }
 }
 
