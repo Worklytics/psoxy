@@ -30,6 +30,15 @@ locals {
 
 # BEGIN API CONNECTORS
 
+resource "google_service_account" "api_connectors" {
+  for_each = var.api_connectors
+
+  project      = var.gcp_project_id
+  account_id   = substr("${local.sa_prefix}${replace(each.key, "_", "-")}", 0, local.SA_NAME_MAX_LENGTH)
+  display_name = "${local.environment_id_display_name_qualifier} ${each.key} API Connector Cloud Function"
+  description  = "Service account that cloud function for ${each.key} API Connector will run as"
+}
+
 locals {
   secrets_to_provision = {
     for k, v in var.api_connectors :
@@ -103,15 +112,6 @@ locals {
   long_default_sa_prefix = "psoxy-${local.environment_id_prefix}${local.function_qualifier}"
 
   sa_prefix = length(local.default_sa_prefix) < local.SA_NAME_MIN_LENGTH ? local.long_default_sa_prefix : local.default_sa_prefix
-}
-
-resource "google_service_account" "api_connectors" {
-  for_each = var.api_connectors
-
-  project      = var.gcp_project_id
-  account_id   = substr("${local.sa_prefix}${replace(each.key, "_", "-")}", 0, local.SA_NAME_MAX_LENGTH)
-  display_name = "${local.environment_id_display_name_qualifier} ${each.key} API Connector Cloud Function"
-  description  = "Service account that cloud function for ${each.key} API Connector will run as"
 }
 
 module "api_connector" {
