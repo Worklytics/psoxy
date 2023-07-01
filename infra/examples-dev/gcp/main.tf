@@ -166,3 +166,16 @@ output "todos_3" {
   description = "List of todo steps to complete 3rd, in markdown format."
   value       = var.todos_as_outputs ? join("\n", values(module.connection_in_worklytics)[*].todo) : null
 }
+
+moved {
+  from = module.psoxy.module.secrets["jira-cloud"].google_secret_manager_secret.secret["JIRA_CLOUD_REFRESH_TOKEN"]
+  to   = module.psoxy.module.secrets["jira-cloud"].google_secret_manager_secret.secret["REFRESH_TOKEN"]
+}
+moved {
+  from = module.psoxy.module.secrets["jira-cloud"].google_secret_manager_secret_version.version["JIRA_CLOUD_REFRESH_TOKEN"]
+  to   = module.psoxy.module.secrets["jira-cloud"].google_secret_manager_secret_version.version["REFRESH_TOKEN"]
+}
+moved {
+  from = module.psoxy.module.api_connector["jira-cloud"].google_secret_manager_secret_iam_member.grant_sa_accessor_on_secret["JIRA_CLOUD_REFRESH_TOKEN"]
+  to   = module.psoxy.module.api_connector["jira-cloud"].google_secret_manager_secret_iam_member.grant_sa_accessor_on_secret["REFRESH_TOKEN"]
+}
