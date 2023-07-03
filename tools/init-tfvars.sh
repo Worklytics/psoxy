@@ -8,7 +8,6 @@ DEPLOYMENT_ENV=${3:-"local"}
 
 SCRIPT_VERSION="rc-v0.4.28"
 
-
 if [ -z "$PSOXY_BASE_DIR" ]; then
   printf "Usage: init-tfvars.sh <path-to-terraform.tfvars> <path-to-psoxy-base-directory> [DEPLOYMENT_ENV]\n"
   exit 1
