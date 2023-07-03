@@ -3,6 +3,10 @@
 #   eg, GCP Secret Manager, AWS SSM Parameter Store, Hashicorp Vault, etc.
 #  but is this good Terraform style? clearly in AWS case, this module doesn't do much ...
 
+locals {
+  replica_locations = coalesce(var.replica_regions, var.replica_locations)
+}
+
 resource "google_secret_manager_secret" "secret" {
   for_each = var.secrets
 
@@ -13,7 +17,7 @@ resource "google_secret_manager_secret" "secret" {
   replication {
     user_managed {
       dynamic "replicas" {
-        for_each = var.replica_regions
+        for_each = local.replica_locations
         content {
           location = replicas.value
         }
@@ -37,10 +41,14 @@ resource "google_secret_manager_secret_version" "version" {
 
   secret      = google_secret_manager_secret.secret[each.key].id
   secret_data = coalesce(each.value.value, "placeholder value - fill me")
-  # NOTE: can't set `enabled = false` here, bc we bind secret to env var so CloudFunction update will fail
+  # NOTE: can't set `enabled = false` here in placeholder case, bc we bind secret to env var so
+  # CloudFunction update will fail as can't bind to ':latest'
 
   lifecycle {
     create_before_destroy = true
+    ignore_changes = [
+      enabled, # if secret version disabled after creation, let it be (placeholder case)
+    ]
   }
 }
 

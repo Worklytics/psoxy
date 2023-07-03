@@ -1987,3 +1987,10 @@ endpoints:
           - "$.values[*]..email"
           - "$.values[*]..leadAccountId"
         encoding: "JSON"
+  - pathTemplate: "/oauth/token/accessible-resources"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..name"
+          - "$..scopes"
+          - "$..avatarUrl"

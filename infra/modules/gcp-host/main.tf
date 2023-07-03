@@ -3,6 +3,8 @@ locals {
   config_parameter_prefix               = var.config_parameter_prefix == "" ? local.default_config_parameter_prefix : var.config_parameter_prefix
   environment_id_prefix                 = "${var.environment_name}${length(var.environment_name) > 0 ? "-" : ""}"
   environment_id_display_name_qualifier = length(var.environment_name) > 0 ? " ${var.environment_name} " : ""
+
+  secret_replica_locations = coalesce(var.replica_regions, var.secret_replica_locations)
 }
 
 module "psoxy" {
@@ -28,12 +30,22 @@ locals {
 
 # BEGIN API CONNECTORS
 
+resource "google_service_account" "api_connectors" {
+  for_each = var.api_connectors
+
+  project      = var.gcp_project_id
+  account_id   = substr("${local.sa_prefix}${replace(each.key, "_", "-")}", 0, local.SA_NAME_MAX_LENGTH)
+  display_name = "${local.environment_id_display_name_qualifier} ${each.key} API Connector Cloud Function"
+  description  = "Service account that cloud function for ${each.key} API Connector will run as"
+}
+
 locals {
   secrets_to_provision = {
     for k, v in var.api_connectors :
     k => {
       for var_def in v.secured_variables :
-      "${replace(upper(k), "-", "_")}_${replace(upper(var_def.name), "-", "_")}" =>
+      # TODO: in v0.5, the prefix with the instance_id can be removed
+      "${replace(upper(var_def.name), "-", "_")}" =>
       merge({
         instance_id        = k
         instance_secret_id = "${replace(upper(k), "-", "_")}_${replace(upper(var_def.name), "-", "_")}"
@@ -47,6 +59,11 @@ locals {
     for instance_id, secrets in local.secrets_to_provision :
     [for secret_id, secret in values(secrets) : secret if secret.lockable]
   ])
+
+  writable_secrets = flatten([
+    for instance_id, secrets in local.secrets_to_provision :
+    [for secret_id, secret in values(secrets) : secret if secret.writable]
+  ])
 }
 
 output "secrets_to_provision" {
@@ -58,19 +75,30 @@ module "secrets" {
 
   source = "../../modules/gcp-secrets"
 
-  secret_project = var.gcp_project_id
-  path_prefix    = local.config_parameter_prefix
-  secrets        = local.secrets_to_provision[each.key]
-  default_labels = var.default_labels
+  secret_project    = var.gcp_project_id
+  path_prefix       = "${local.config_parameter_prefix}${replace(upper(each.key), "-", "_")}_"
+  secrets           = local.secrets_to_provision[each.key]
+  default_labels    = var.default_labels
+  replica_locations = local.secret_replica_locations
 }
 
 resource "google_secret_manager_secret_iam_member" "grant_sa_updater_on_lockable_secrets" {
   for_each = { for secret in local.lockable_secrets : secret.instance_secret_id => secret }
 
-  member    = "serviceAccount:${google_service_account.api_connectors[each.value.instance_id].email}"
-  role      = module.psoxy.psoxy_instance_secret_locker_role_id
   project   = var.gcp_project_id
   secret_id = "${local.config_parameter_prefix}${each.value.instance_secret_id}"
+  member    = "serviceAccount:${google_service_account.api_connectors[each.value.instance_id].email}"
+  role      = module.psoxy.psoxy_instance_secret_locker_role_id
+
+}
+
+resource "google_secret_manager_secret_iam_member" "grant_sa_secretVersionAdder_on_writable_secret" {
+  for_each = { for secret in local.writable_secrets : secret.instance_secret_id => secret }
+
+  project   = var.gcp_project_id
+  secret_id = "${local.config_parameter_prefix}${each.value.instance_secret_id}"
+  member    = "serviceAccount:${google_service_account.api_connectors[each.value.instance_id].email}"
+  role      = "roles/secretmanager.secretVersionAdder"
 }
 
 locals {
@@ -86,21 +114,13 @@ locals {
   sa_prefix = length(local.default_sa_prefix) < local.SA_NAME_MIN_LENGTH ? local.long_default_sa_prefix : local.default_sa_prefix
 }
 
-resource "google_service_account" "api_connectors" {
-  for_each = var.api_connectors
-
-  project      = var.gcp_project_id
-  account_id   = substr("${local.sa_prefix}${replace(each.key, "_", "-")}", 0, local.SA_NAME_MAX_LENGTH)
-  display_name = "${local.environment_id_display_name_qualifier} ${each.key} API Connector Cloud Function"
-  description  = "Service account that cloud function for ${each.key} API Connector will run as"
-}
-
 module "api_connector" {
   for_each = var.api_connectors
 
   source = "../../modules/gcp-psoxy-rest"
 
   project_id                            = var.gcp_project_id
+  region                                = var.gcp_region
   source_kind                           = each.value.source_kind
   environment_id_prefix                 = local.environment_id_prefix
   instance_id                           = each.key
@@ -156,11 +176,11 @@ module "bulk_connector" {
   source = "../../modules/gcp-psoxy-bulk"
 
   project_id                    = var.gcp_project_id
+  region                        = var.gcp_region
   environment_id_prefix         = local.environment_id_prefix
   instance_id                   = each.key
   worklytics_sa_emails          = var.worklytics_sa_emails
   config_parameter_prefix       = local.config_parameter_prefix
-  region                        = var.gcp_region
   source_kind                   = each.value.source_kind
   artifacts_bucket_name         = module.psoxy.artifacts_bucket_name
   deployment_bundle_object_name = module.psoxy.deployment_bundle_object_name
@@ -220,7 +240,14 @@ resource "google_secret_manager_secret" "additional_transforms" {
   labels    = var.default_labels
 
   replication {
-    automatic = true
+    user_managed {
+      dynamic "replicas" {
+        for_each = local.secret_replica_locations
+        content {
+          location = replicas.value
+        }
+      }
+    }
   }
 
   lifecycle {
@@ -306,5 +333,4 @@ echo "Testing Bulk Connectors ..."
 %{endfor}
 EOF
 }
-
 

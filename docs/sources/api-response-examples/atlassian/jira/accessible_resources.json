@@ -1,0 +1,15 @@
+[
+  {
+    "id": "adcae078-765b-45bf-a38b-7cda232b9a94",
+    "url": "https://some-org.atlassian.net",
+    "name": "some-org",
+    "scopes": [
+      "read:avatar:jira",
+      "read:group:jira",
+      "read:jira-user",
+      "read:jira-work",
+      "read:user:jira"
+    ],
+    "avatarUrl": "https://site-admin-avatar-cdn.prod.public.atl-paas.net/avatars/240/rocket.png"
+  }
+]

@@ -16,6 +16,15 @@ variable "bucket_location" {
   default     = "us-central-1"
 }
 
+variable "secret_replica_locations" {
+  type        = list(string)
+  description = "List of locations to which to replicate secrets. See https://cloud.google.com/secret-manager/docs/locations"
+  default = [
+    "us-central1",
+    "us-west1",
+  ]
+}
+
 variable "psoxy_base_dir" {
   type        = string
   description = "the path where your psoxy repo resides"

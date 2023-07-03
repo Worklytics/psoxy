@@ -9,7 +9,7 @@ Use this to bootstrap roles that a service account needs to provision Psoxy in G
 
 ```hcl
 module "psoxy_constants" {
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/psoxy-constants?ref=v0.4.26"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/psoxy-constants?ref=v0.4.27"
 }
 
 resource "google_project_iam_member" "perms" {

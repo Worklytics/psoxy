@@ -43,7 +43,7 @@ find infra/ -type f -name "*.bck" -exec rm {} +
 CURRENT_RELEASE_NUMBER=$(echo $CURRENT_RELEASE | sed 's/[^0-9\.]//g')
 NEXT_RELEASE_NUMBER=$(echo $NEXT_RELEASE | sed 's/[^0-9\.]//g')
 printf "Next release number: ${BLUE}${NEXT_RELEASE_NUMBER}${NC}\n"
-RELEASE_NUMBER_PATTERN="s/<revision>$(echo $CURRENT_RELEASE_NUMBER | sed 's/\./\\\./g')<\/revision>/q:q:q<revision>$(echo $NEXT_RELEASE_NUMBER | sed 's/\./\\\./g')\<\/revision>/"
+RELEASE_NUMBER_PATTERN="s/<revision>$(echo $CURRENT_RELEASE_NUMBER | sed 's/\./\\\./g')<\/revision>/<revision>$(echo $NEXT_RELEASE_NUMBER | sed 's/\./\\\./g')\<\/revision>/"
 sed -i .bck $RELEASE_NUMBER_PATTERN java/pom.xml
 rm java/pom.xml.bck
 

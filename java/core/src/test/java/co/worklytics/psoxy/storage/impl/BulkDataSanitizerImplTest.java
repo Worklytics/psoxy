@@ -230,8 +230,8 @@ public class BulkDataSanitizerImplTest {
         final String EXPECTED = "EMPLOYEE_ID,DEPARTMENT,EMPLOYEE_ID_ORIG\r\n" +
             "SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM,Engineering,1\r\n" +
             "mfsaNYuCX__xvnRz4gJp_t0zrDTC5DkuCJvMkubugsI,Sales,2\r\n" +
-            "\".ZdDGUuOMK.Oy7_PJ3pf9SYX12.3tKPdLHfYbjVGcGk\",Engineering,3\r\n" +
-            "\".fs1T64Micz8SkbILrABgEv4kSg.tFhvhP35HGSLdOo\",Engineering,4\r\n";
+            ".ZdDGUuOMK.Oy7_PJ3pf9SYX12.3tKPdLHfYbjVGcGk,Engineering,3\r\n" +
+            ".fs1T64Micz8SkbILrABgEv4kSg.tFhvhP35HGSLdOo,Engineering,4\r\n";
 
         CsvRules rules = CsvRules.builder()
             .pseudonymFormat(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
