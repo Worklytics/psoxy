@@ -301,7 +301,7 @@ EOT
         "/repos/${local.github_organization}/${local.example_github_repository}/pulls",
       ]
       external_token_todo : <<EOT
-  1. Register a [GitHub App](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/registering-a-github-app#registering-a-github-app)
+  1. From your organization, register a [GitHub App](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/registering-a-github-app#registering-a-github-app)
     with following permissions with **Read Only**:
     - Repository:
       - Administration
@@ -318,8 +318,10 @@ EOT
   - Webhooks check can be disabled as this connector is not using them
   - Keep `Expire user authorization tokens` enabled, as GitHub documentation recommends
   2. Once is created please generate a new client secret. We will both (clientId and clientSecret) in next steps.
-  3. Now is required to prepare the token for authentication. Following steps [for generating a user access token](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-user-access-token-for-a-github-app#using-the-web-application-flow-to-generate-a-user-access-token)
-  4. Update the variables with values obtained in previous step:
+  3. Install the application in your organization.
+     Go to your organization settings and then in "Developer Settings". Then, click on "Edit" for your "Github App" and once you are in the app settings, click on "Install App" and click on the "Install" button. Accept the permissions to install it in your whole organization.
+  4. Now is required to prepare the token for authentication. Following steps [for generating a user access token](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-user-access-token-for-a-github-app#using-the-web-application-flow-to-generate-a-user-access-token)
+  5. Update the variables with values obtained in previous step:
      - `PSOXY_GITHUB_CLOUD_ACCESS_TOKEN` secret variable with value of `access_token` received in previous response
      - `PSOXY_GITHUB_CLOUD_REFRESH_TOKEN` secret variable with value of `refresh_token` received in previous response
      - `PSOXY_GITHUB_CLOUD_CLIENT_ID` with `Client Id` value.
