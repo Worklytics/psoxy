@@ -5,18 +5,28 @@
         "externalIdentities":{
           "pageInfo":{
             "hasNextPage":false,
-            "endCursor":"some_cursor"
+            "endCursor":"Y3Vyc29yOnYyOpHOAMl1tg=="
           },
           "edges":[
             {
               "node":{
-                "guid":"some-guid",
+                "guid":"abc3f758-1a88-11ee-85d2-07ac5bf201d6",
                 "samlIdentity":{
-                  "nameId":"{\"scope\":\"email\",\"domain\":\"contoso.com\",\"hash\":\"RNhARTFN9TOoD.iOWFt4PikCto_8qnCxWG0Eq57w2oU\"}"
+                  "nameId":"{\"scope\":\"email\",\"domain\":\"contoso.com\",\"hash\":\"ui7ZfyKC2nursXtsx_lyORcptfTrCuGf38xextkHyW8\"}"
                 },
                 "user":{
-                  "login":"{\"scope\":\"github\",\"hash\":\"zSTCyj.OBmVDq31tbp1Xr9LO3.DMWX5uAgCrk1WN1WY\"}",
-                  "email":"null"
+                  "login":"{\"scope\":\"github\",\"hash\":\"iK5cxa4JLZ9qQnICuYKRS8wJoRkdvXv6xrLAIg2.ETs\"}"
+                }
+              }
+            },
+            {
+              "node":{
+                "guid":"acbe9c8e-1a99-11ee-85b8-61109bf19007",
+                "samlIdentity":{
+                  "nameId":"{\"scope\":\"email\",\"domain\":\"contoso.com\",\"hash\":\"qyfnJEcnYW8yjJaykmCWONL176MJJardThqpzjVwkiM\"}"
+                },
+                "user":{
+                  "login":"{\"scope\":\"github\",\"hash\":\"lQ4V_0k_2c1BxTzcKpd8GIKaFKZCgpLK.0mK54kApFY\"}"
                 }
               }
             }

@@ -2,22 +2,31 @@
   "data": {
     "organization": {
       "samlIdentityProvider": {
-        "ssoUrl": "fake",
         "externalIdentities": {
           "pageInfo": {
             "hasNextPage": false,
-            "endCursor": "some_cursor"
+            "endCursor": "Y3Vyc29yOnYyOpHOAMl1tg=="
           },
           "edges": [
             {
               "node": {
-                "guid": "some-guid",
+                "guid": "abc3f758-1a88-11ee-85d2-07ac5bf201d6",
                 "samlIdentity": {
-                  "nameId": "user@contoso.com"
+                  "nameId": "fake1@contoso.com"
                 },
                 "user": {
-                  "login": "fake",
-                  "email": null
+                  "login": "fake1"
+                }
+              }
+            },
+            {
+              "node": {
+                "guid": "acbe9c8e-1a99-11ee-85b8-61109bf19007",
+                "samlIdentity": {
+                  "nameId": "fake2@contoso.com"
+                },
+                "user": {
+                  "login": "fake2"
                 }
               }
             }
@@ -26,5 +35,4 @@
       }
     }
   }
-}
 }

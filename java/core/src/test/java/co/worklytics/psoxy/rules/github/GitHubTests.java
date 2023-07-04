@@ -75,16 +75,18 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         String endpoint = "https://api.github.com/graphql";
 
         Collection<String> PII = Arrays.asList(
-                "fake",
-                "user@contoso.com"
+                "fake1",
+                "fake2",
+                "fake1@contoso.com",
+                "fake2@contoso.com"
         );
 
         assertNotSanitized(jsonString, PII);
 
         String sanitized = this.sanitize(endpoint, jsonString);
 
-        assertPseudonymized(sanitized, "user@contoso.com");
-        assertPseudonymized(sanitized, "fake");
+        assertPseudonymized(sanitized, "fake1", "fake1@contoso.com");
+        assertPseudonymized(sanitized, "fake2", "fake2@contoso.com");
 
         assertUrlAllowed(endpoint);
     }
