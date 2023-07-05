@@ -143,10 +143,10 @@ locals {
   }
 
 
-  jira_cloud_id         = coalesce(var.jira_cloud_id, "YOUR_JIRA_CLOUD_ID")
-  example_jira_issue_id = coalesce(var.example_jira_issue_id, "YOUR_JIRA_EXAMPLE_ISSUE_ID")
-  github_organization   = coalesce(var.github_organization, "YOUR_GITHUB_ORGANIZATION_NAME")
-  example_github_repository   = coalesce(var.example_github_repository, "YOUR_GITHUB_EXAMPLE_REPOSITORY_NAME")
+  jira_cloud_id             = coalesce(var.jira_cloud_id, "YOUR_JIRA_CLOUD_ID")
+  example_jira_issue_id     = coalesce(var.example_jira_issue_id, "YOUR_JIRA_EXAMPLE_ISSUE_ID")
+  github_organization       = coalesce(var.github_organization, "YOUR_GITHUB_ORGANIZATION_NAME")
+  example_github_repository = coalesce(var.example_github_repository, "YOUR_GITHUB_EXAMPLE_REPOSITORY_NAME")
 
   # Microsoft 365 sources; add/remove as you wish
   # See https://docs.microsoft.com/en-us/graph/permissions-reference for all the permissions available in AAD Graph API

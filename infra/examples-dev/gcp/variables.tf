@@ -121,7 +121,7 @@ variable "gcp_region" {
 variable "replica_regions" {
   type        = list(string)
   description = "DEPRECATED; use `gcp_secret_replica_locations`. List of locations to which to replicate secrets. See https://cloud.google.com/secret-manager/docs/locations"
-  default = null
+  default     = null
 }
 
 variable "gcp_secret_replica_locations" {
@@ -133,7 +133,7 @@ variable "gcp_secret_replica_locations" {
   ]
 
   validation {
-    condition = length(var.gcp_secret_replica_locations) > 0
+    condition     = length(var.gcp_secret_replica_locations) > 0
     error_message = "`gcp_secret_replica_locations` must be non-empty list."
   }
 }
