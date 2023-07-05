@@ -297,6 +297,7 @@ EOT
         "/orgs/${local.github_organization}/members",
         "/orgs/${local.github_organization}/teams",
         "/repos/${local.github_organization}/${local.example_github_repository}/events",
+        "/repos/${local.github_organization}/${local.example_github_repository}/commits",
         "/repos/${local.github_organization}/${local.example_github_repository}/issues",
         "/repos/${local.github_organization}/${local.example_github_repository}/pulls",
       ]
