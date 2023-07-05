@@ -56,6 +56,13 @@ public class PrebuiltSanitizerRules {
                             "direction").stream())
             .collect(Collectors.toList());
 
+    private static final List<String> commitsAllowedQueryParameters = Streams.concat(commonAllowedQueryParameters.stream(),
+                    Lists.newArrayList("sha",
+                            "path",
+                            "since",
+                            "until").stream())
+            .collect(Collectors.toList());
+
     static final Endpoint ORG_MEMBERS = Endpoint.builder()
             .pathTemplate("/orgs/{org}/members")
             .allowedQueryParams(orgMembersAllowedQueryParameters)
@@ -450,6 +457,24 @@ public class PrebuiltSanitizerRules {
             .transforms(generateUserTransformations("..closed_by"))
             .build();
 
+    static final Endpoint REPO_COMMITS = Endpoint.builder()
+            .pathTemplate("/repos/{owner}/{repo}/commits")
+            .allowedQueryParams(commitsAllowedQueryParameters)
+            .transform(Transform.Redact.builder()
+                    .jsonPath("$..name")
+                    .jsonPath("$..url")
+                    .jsonPath("$..html_url")
+                    .jsonPath("$..message")
+                    .jsonPath("$..comments_url")
+                    .jsonPath("$..files")
+                    .build())
+            .transform(Transform.Pseudonymize.builder()
+                    .jsonPath("$.commit..email")
+                    .build())
+            .transforms(generateUserTransformations("..author"))
+            .transforms(generateUserTransformations("..committer"))
+            .build();
+
     @VisibleForTesting
     static final RESTRules GITHUB = Rules2.builder()
             .endpoint(ORG_MEMBERS)
@@ -457,6 +482,7 @@ public class PrebuiltSanitizerRules {
             .endpoint(ORG_TEAMS)
             .endpoint(ORG_TEAM_MEMBERS)
             .endpoint(REPOSITORIES)
+            .endpoint(REPO_COMMITS)
             .endpoint(REPO_COMMIT)
             .endpoint(REPO_EVENTS)
             .endpoint(COMMIT_COMMENT_REACTIONS)
