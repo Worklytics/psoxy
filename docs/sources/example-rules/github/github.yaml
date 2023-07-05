@@ -40,6 +40,48 @@ endpoints:
           - "$..login"
           - "$..email"
         encoding: "JSON"
+    responseSchema:
+      type: "object"
+      properties:
+        data:
+          type: "object"
+          properties:
+            organization:
+              type: "object"
+              properties:
+                samlIdentityProvider:
+                  type: "object"
+                  properties:
+                    externalIdentities:
+                      type: "object"
+                      properties:
+                        pageInfo:
+                          type: "object"
+                          properties:
+                            hasNextPage:
+                              type: "boolean"
+                            endCursor:
+                              type: "string"
+                        edges:
+                          type: "array"
+                          items:
+                            type: "object"
+                            properties:
+                              node:
+                                type: "object"
+                                properties:
+                                  guid:
+                                    type: "string"
+                                  samlIdentity:
+                                    type: "object"
+                                    properties:
+                                      nameId:
+                                        type: "string"
+                                  user:
+                                    type: "object"
+                                    properties:
+                                      login:
+                                        type: "string"
   - pathTemplate: "/orgs/{org}/teams"
     allowedQueryParams:
       - "per_page"

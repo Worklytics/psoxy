@@ -3,6 +3,7 @@ package co.worklytics.psoxy.rules.github;
 import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.rules.Rules2;
 import com.avaulta.gateway.rules.Endpoint;
+import com.avaulta.gateway.rules.JsonSchemaFilterUtils;
 import com.avaulta.gateway.rules.transforms.Transform;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
@@ -10,6 +11,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Streams;
 
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -79,6 +81,7 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..login")
                     .jsonPath("$..email")
                     .build())
+            .responseSchema(jsonSchemaForUserQueryResult())
             .build();
 
     static final Endpoint ORG_TEAMS = Endpoint.builder()
@@ -502,30 +505,102 @@ public class PrebuiltSanitizerRules {
             ImmutableMap.<String, RESTRules>builder()
                     .put("github", GITHUB)
                     .build();
-    
+
     private static List<Transform> generateUserTransformations(String prefix) {
         return Arrays.asList(
                 Transform.Redact.builder()
-                        .jsonPath(String.format("$%s.avatar_url",prefix))
-                        .jsonPath(String.format("$%s.gravatar_id",prefix))
-                        .jsonPath(String.format("$%s.url",prefix))
-                        .jsonPath(String.format("$%s.html_url",prefix))
-                        .jsonPath(String.format("$%s.followers_url",prefix))
-                        .jsonPath(String.format("$%s.following_url",prefix))
-                        .jsonPath(String.format("$%s.gists_url",prefix))
-                        .jsonPath(String.format("$%s.starred_url",prefix))
-                        .jsonPath(String.format("$%s.subscriptions_url",prefix))
-                        .jsonPath(String.format("$%s.organizations_url",prefix))
-                        .jsonPath(String.format("$%s.repos_url",prefix))
-                        .jsonPath(String.format("$%s.events_url",prefix))
-                        .jsonPath(String.format("$%s.received_events_url",prefix))
+                        .jsonPath(String.format("$%s.avatar_url", prefix))
+                        .jsonPath(String.format("$%s.gravatar_id", prefix))
+                        .jsonPath(String.format("$%s.url", prefix))
+                        .jsonPath(String.format("$%s.html_url", prefix))
+                        .jsonPath(String.format("$%s.followers_url", prefix))
+                        .jsonPath(String.format("$%s.following_url", prefix))
+                        .jsonPath(String.format("$%s.gists_url", prefix))
+                        .jsonPath(String.format("$%s.starred_url", prefix))
+                        .jsonPath(String.format("$%s.subscriptions_url", prefix))
+                        .jsonPath(String.format("$%s.organizations_url", prefix))
+                        .jsonPath(String.format("$%s.repos_url", prefix))
+                        .jsonPath(String.format("$%s.events_url", prefix))
+                        .jsonPath(String.format("$%s.received_events_url", prefix))
                         .build(),
                 Transform.Pseudonymize.builder()
-                        .jsonPath(String.format("$%s.login",prefix))
-                        .jsonPath(String.format("$%s.id",prefix))
-                        .jsonPath(String.format("$%s.node_id",prefix))
-                        .jsonPath(String.format("$%s.email",prefix))
+                        .jsonPath(String.format("$%s.login", prefix))
+                        .jsonPath(String.format("$%s.id", prefix))
+                        .jsonPath(String.format("$%s.node_id", prefix))
+                        .jsonPath(String.format("$%s.email", prefix))
                         .build()
         );
+    }
+
+    private static JsonSchemaFilterUtils.JsonSchemaFilter jsonSchemaForUserQueryResult() {
+        return JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                .type("object")
+                // Using LinkedHashMap to keep the order to support same
+                // YAML serialization result
+                .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
+                    put("data", JsonSchemaFilterUtils.JsonSchemaFilter.<String, RESTRules>builder()
+                            .type("object")
+                            .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{
+                                put("organization", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                                        .type("object")
+                                        .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{
+                                            put("samlIdentityProvider", jsonSchemaForSamlIdentityProvider());
+                                        }}).build());
+                            }}).build());
+                }}).build();
+    }
+
+    private static JsonSchemaFilterUtils.JsonSchemaFilter jsonSchemaForSamlIdentityProvider() {
+        return JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                .type("object")
+                .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{
+                    put("externalIdentities", jsonSchemaForExternalIdentities());
+                }}).build();
+    }
+
+    private static JsonSchemaFilterUtils.JsonSchemaFilter jsonSchemaForExternalIdentities() {
+        return JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                .type("object")
+                .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{
+                    put("pageInfo", jsonSchemaForPageInfo());
+                    put("edges", jsonSchemaForEdge());
+                }}).build();
+    }
+
+    private static JsonSchemaFilterUtils.JsonSchemaFilter jsonSchemaForPageInfo() {
+        return JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                .type("object")
+                .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
+                    put("hasNextPage", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("boolean").build());
+                    put("endCursor", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
+                }})
+                .build();
+    }
+
+    private static JsonSchemaFilterUtils.JsonSchemaFilter jsonSchemaForEdge() {
+        return JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                .type("array")
+                .items(JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                        .type("object")
+                        .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
+                            put("node", jsonSchemaForNode());
+                        }})
+                        .build())
+                .build();
+    }
+
+    private static JsonSchemaFilterUtils.JsonSchemaFilter jsonSchemaForNode() {
+        return JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                .type("object")
+                .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
+                    put("guid", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
+                    put("samlIdentity", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("object").properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{
+                        put("nameId", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
+                    }}).build());
+                    put("user", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("object").properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{
+                        put("login", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
+                    }}).build());
+                }})
+                .build();
     }
 }
