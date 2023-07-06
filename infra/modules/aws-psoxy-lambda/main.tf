@@ -82,7 +82,7 @@ moved {
 
 # cloudwatch group per lambda function
 resource "aws_cloudwatch_log_group" "lambda_log" {
-  name              = "/aws/lambda/${aws_lambda_function.psoxy-instance.function_name}"
+  name              = "/aws/lambda/${aws_lambda_function.instance.function_name}"
   retention_in_days = var.log_retention_in_days
   kms_key_id        = var.logs_kms_key_arn
 
@@ -219,7 +219,7 @@ resource "aws_iam_role_policy_attachment" "attach_policy" {
 }
 
 output "function_arn" {
-  value = aws_lambda_function.psoxy-instance.arn
+  value = aws_lambda_function.instance.arn
 }
 
 output "function_name" {
