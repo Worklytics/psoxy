@@ -135,7 +135,7 @@ resource "random_password" "encryption_key" {
   special = true
 }
 
-module "psoxy-package" {
+module "psoxy_package" {
   source = "../psoxy-package"
 
   implementation     = "aws"
@@ -143,6 +143,11 @@ module "psoxy-package" {
   deployment_bundle  = var.deployment_bundle
   psoxy_version      = var.psoxy_version
   force_bundle       = var.force_bundle
+}
+
+moved {
+  from = module.psoxy-package
+  to   = module.psoxy_package
 }
 
 # install test tool, if it exists in expected location
