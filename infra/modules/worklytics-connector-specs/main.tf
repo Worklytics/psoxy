@@ -29,7 +29,6 @@ locals {
         "https://www.googleapis.com/auth/admin.directory.group.readonly",
         "https://www.googleapis.com/auth/admin.directory.group.member.readonly",
         "https://www.googleapis.com/auth/admin.directory.orgunit.readonly",
-        "https://www.googleapis.com/auth/admin.directory.rolemanagement.readonly"
       ]
       source_auth_strategy : "gcp_service_account_key"
       target_host : "admin.googleapis.com"
@@ -38,7 +37,6 @@ locals {
         "/admin/directory/v1/users?customer=my_customer&maxResults=10",
         "/admin/directory/v1/groups?customer=my_customer&maxResults=10",
         "/admin/directory/v1/customer/my_customer/domains",
-        "/admin/directory/v1/customer/my_customer/roles?maxResults=10"
       ]
       example_api_calls_user_to_impersonate : local.google_workspace_example_admin
     },
