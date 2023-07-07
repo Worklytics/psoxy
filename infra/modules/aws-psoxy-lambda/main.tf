@@ -39,6 +39,10 @@ locals {
   # arn:aws:ssm:us-east-1:123123123123:parameter/PSOXY_SALT
   salt_arn              = [for l in var.global_parameter_arns : l if endswith(l, local.salt_parameter_name_suffix)][0]
   path_to_shared_config = regex("arn.+parameter(/.*)${local.salt_parameter_name_suffix}", local.salt_arn)[0]
+
+  bundle_from_s3       = startswith(var.path_to_function_zip, "s3://")
+  s3_bucket            = local.bundle_from_s3 ? regex("s3://([^/]+)/.*", var.path_to_function_zip)[0] : null
+  s3_key               = local.bundle_from_s3 ? regex("s3://[^/]+/(.*)", var.path_to_function_zip)[0] : null
 }
 
 
@@ -47,7 +51,9 @@ resource "aws_lambda_function" "instance" {
   role                           = aws_iam_role.iam_for_lambda.arn
   architectures                  = ["arm64"] # 20% cheaper per ms exec time than x86_64
   runtime                        = "java11"
-  filename                       = var.path_to_function_zip
+  filename                       = local.bundle_from_s3 ? null : var.path_to_function_zip
+  s3_bucket                      = local.s3_bucket          # null if local file
+  s3_key                         = local.s3_key             # null if local file
   source_code_hash               = var.function_zip_hash
   handler                        = var.handler_class
   timeout                        = var.timeout_seconds

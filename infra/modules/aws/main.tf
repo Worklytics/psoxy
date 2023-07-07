@@ -157,6 +157,7 @@ module "test_tool" {
   source = "../psoxy-test-tool"
 
   path_to_tools = "${var.psoxy_base_dir}tools"
+  # TODO: take version from somewhere else here; this isn't *necessary* the version if local build or remote artifact
   psoxy_version = module.psoxy_package.version
 }
 
