@@ -9,22 +9,44 @@ locals {
   non_empty_path           = length(var.path) > 0
   non_fully_qualified_path = length(regexall("/", var.path)) > 0 && !startswith(var.path, "/")
   path_prefix              = local.non_empty_path && local.non_fully_qualified_path ? "/${var.path}" : var.path
+  PLACEHOLDER_VALUE        = "fill me"
 }
 
 # see: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter
 resource "aws_ssm_parameter" "secret" {
-  for_each = var.secrets
+  for_each = { for k, spec in var.secrets : k => spec if spec.value_managed_by_tf }
 
-  name        = "${local.path_prefix}${each.key}"
-  type        = "SecureString"
-  description = each.value.description
-  value       = sensitive(coalesce(each.value.value, "fill me"))
-  key_id      = coalesce(var.kms_key_id, "alias/aws/ssm")
+  name           = "${local.path_prefix}${each.key}"
+  type           = "SecureString"
+  description    = each.value.description
+  value          = each.value.sensitive ? sensitive(coalesce(each.value.value, local.PLACEHOLDER_VALUE)) : null
+  insecure_value = each.value.sensitive ? null : coalesce(each.value.value, local.PLACEHOLDER_VALUE)
+  key_id         = coalesce(var.kms_key_id, "alias/aws/ssm")
 
   lifecycle {
     ignore_changes = [
       # value, # previously, we ignored changes to value; but this doesn't actually prevent new
       # value from being in your state file - so little point.
+      tags
+    ]
+  }
+}
+
+resource "aws_ssm_parameter" "secret_with_externally_managed_value" {
+  for_each = { for k, spec in var.secrets : k => spec if !spec.value_managed_by_tf }
+
+  name           = "${local.path_prefix}${each.key}"
+  type           = "SecureString"
+  description    = each.value.description
+  value          = each.value.sensitive ? sensitive(coalesce(each.value.value, local.PLACEHOLDER_VALUE)) : null
+  insecure_value = each.value.sensitive ? null : coalesce(each.value.value, local.PLACEHOLDER_VALUE)
+  key_id         = coalesce(var.kms_key_id, "alias/aws/ssm")
+
+  lifecycle {
+    ignore_changes = [
+      value,          # key difference here; we don't want to overwrite values filled by the external process
+      insecure_value,
+
       tags
     ]
   }
