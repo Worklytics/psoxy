@@ -122,6 +122,30 @@ endpoints:
           - "$..node_id"
           - "$..email"
         encoding: "JSON"
+  - pathTemplate: "/orgs/{org}/audit-log"
+    allowedQueryParams:
+      - "per_page"
+      - "page"
+      - "phrase"
+      - "include"
+      - "after"
+      - "before"
+      - "order"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..hashed_token"
+          - "$..business"
+          - "$..business_id"
+          - "$..transport_protocol"
+          - "$..transport_protocol_name"
+          - "$..pull_request_title"
+          - "$..user_agent"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..actor"
+          - "$..user"
+        encoding: "JSON"
   - pathTemplate: "/orgs/{org}/repos"
     allowedQueryParams:
       - "per_page"

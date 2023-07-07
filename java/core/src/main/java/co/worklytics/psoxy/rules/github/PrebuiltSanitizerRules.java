@@ -31,6 +31,14 @@ public class PrebuiltSanitizerRules {
                             "role").stream())
             .collect(Collectors.toList());
 
+    private static final List<String> orgAuditLogAllowedQueryParameters = Streams.concat(commonAllowedQueryParameters.stream(),
+                    Lists.newArrayList("phrase",
+                            "include",
+                            "after",
+                            "before",
+                            "order").stream())
+            .collect(Collectors.toList());
+
     private static final List<String> issuesAllowedQueryParameters = Streams.concat(commonAllowedQueryParameters.stream(),
                     Lists.newArrayList("milestone",
                             "state",
@@ -94,6 +102,24 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..description")
                     .jsonPath("$..members_url")
                     .jsonPath("$..repositories_url")
+                    .build())
+            .build();
+
+    static final Endpoint ORG_AUDIT_LOG = Endpoint.builder()
+            .pathTemplate("/orgs/{org}/audit-log")
+            .allowedQueryParams(orgAuditLogAllowedQueryParameters)
+            .transform(Transform.Redact.builder()
+                    .jsonPath("$..hashed_token")
+                    .jsonPath("$..business")
+                    .jsonPath("$..business_id")
+                    .jsonPath("$..transport_protocol")
+                    .jsonPath("$..transport_protocol_name")
+                    .jsonPath("$..pull_request_title")
+                    .jsonPath("$..user_agent")
+                    .build())
+            .transform(Transform.Pseudonymize.builder()
+                    .jsonPath("$..actor")
+                    .jsonPath("$..user")
                     .build())
             .build();
 
@@ -484,6 +510,7 @@ public class PrebuiltSanitizerRules {
             .endpoint(GRAPHQL_FOR_USERS)
             .endpoint(ORG_TEAMS)
             .endpoint(ORG_TEAM_MEMBERS)
+            .endpoint(ORG_AUDIT_LOG)
             .endpoint(REPOSITORIES)
             .endpoint(REPO_COMMITS)
             .endpoint(REPO_COMMIT)
