@@ -50,8 +50,8 @@ provider "azuread" {
 }
 
 module "psoxy" {
-#  source = "../../modular-examples/aws-msft-365"
-  source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-msft-365?ref=v0.4.27"
+  #  source = "../../modular-examples/aws-msft-365"
+  source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-msft-365?ref=v0.4.28"
 
   aws_account_id                 = var.aws_account_id
   aws_assume_role_arn            = var.aws_assume_role_arn # role that can test the instances (lambdas)

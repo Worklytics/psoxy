@@ -247,13 +247,26 @@ public class JiraCloudTests extends JavaRulesTestBaseCase {
         assertUrlWithQueryParamsBlocked("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/project/search");
     }
 
+    @Test
+    void accessible_resources() {
+        String jsonString = asJson(exampleDirectoryPath, "accessible_resources.json");
+
+        String endpoint = "https://api.atlassian.com/oauth/token/accessible-resources";
+        String sanitized = this.sanitize(endpoint, jsonString);
+
+        assertRedacted(sanitized,
+                "scopes", // display name
+                ".png" //photo url placeholders
+        );
+    }
+
     @Override
     public Stream<InvocationExample> getExamples() {
-        return Stream.of(InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/users?startAt=0&maxResults=25", "users.json"),
-
+        return Stream.of(
+                InvocationExample.of("https://api.atlassian.com/oauth/token/accessible-resources", "accessible_resources.json"),
+                InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/users?startAt=0&maxResults=25", "users.json"),
                 InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/group/bulk", "groups.json"),
                 InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/group/member?groupId=5b10ac8d82e05b22cc7d4ef5", "group_member.json"),
-
                 InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/search?jql=something&startAt=50", "issues_by_jql.json"),
                 InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/fake/changelog?&startAt=50", "issue_changelog.json"),
                 InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/2/issue/fake/comment?&startAt=50", "issue_comment_v2.json"),
