@@ -135,7 +135,7 @@ resource "random_password" "encryption_key" {
   special = true
 }
 
-module "psoxy-package" {
+module "psoxy_package" {
   source = "../psoxy-package"
 
   implementation     = "aws"
@@ -145,6 +145,11 @@ module "psoxy-package" {
   force_bundle       = var.force_bundle
 }
 
+moved {
+  from = module.psoxy-package
+  to   = module.psoxy_package
+}
+
 # install test tool, if it exists in expected location
 module "test_tool" {
   count = var.install_test_tool ? 1 : 0
@@ -152,7 +157,8 @@ module "test_tool" {
   source = "../psoxy-test-tool"
 
   path_to_tools = "${var.psoxy_base_dir}tools"
-  psoxy_version = module.psoxy-package.version
+  # TODO: take version from somewhere else here; this isn't *necessary* the version if local build or remote artifact
+  psoxy_version = module.psoxy_package.version
 }
 
 moved {
@@ -182,13 +188,13 @@ output "api_caller_role_name" {
 }
 
 output "deployment_package_hash" {
-  value = module.psoxy-package.deployment_package_hash
+  value = module.psoxy_package.deployment_package_hash
 }
 
 output "path_to_deployment_jar" {
-  value = module.psoxy-package.path_to_deployment_jar
+  value = module.psoxy_package.path_to_deployment_jar
 }
 
 output "filename" {
-  value = module.psoxy-package.filename
+  value = module.psoxy_package.filename
 }
