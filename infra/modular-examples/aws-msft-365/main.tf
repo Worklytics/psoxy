@@ -142,7 +142,7 @@ module "psoxy-msft-connector" {
   environment_name                = var.environment_name
   instance_id                     = each.key
   source_kind                     = each.value.source_kind
-  path_to_config                  = "${var.psoxy_base_dir}/configs/${each.value.source_kind}.yaml"
+  path_to_config                  = "${var.psoxy_base_dir}configs/${each.value.source_kind}.yaml"
   path_to_function_zip            = module.psoxy-aws.path_to_deployment_jar
   function_zip_hash               = module.psoxy-aws.deployment_package_hash
   api_caller_role_arn             = module.psoxy-aws.api_caller_role_arn
