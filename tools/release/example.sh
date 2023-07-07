@@ -12,7 +12,7 @@ NC='\e[0m' # No Color
 RELEASE_TAG=$1
 PATH_TO_REPO=$2
 EXAMPLE=$3
-EXAMPLE_TEMPLATE_REPO=$3
+EXAMPLE_TEMPLATE_REPO=$4
 
 
 
@@ -40,13 +40,6 @@ if [ -n "$BRANCH_STATUS" ]; then
   exit 1
 fi
 
-git checkout -b "rc-${RELEASE_TAG}"
-
-if [ $? -ne 0 ]; then
-  printf "${RED}Failed to create branch rc-${RELEASE_TAG}. does it already exist?${NC}\n"
-  exit 1
-fi
-
 set -e
 
 dev_example_path="${PATH_TO_REPO}infra/examples-dev/${EXAMPLE}"
@@ -54,7 +47,9 @@ dev_example_path="${PATH_TO_REPO}infra/examples-dev/${EXAMPLE}"
 cd -
 for file in "${FILES_TO_COPY[@]}"
 do
+  echo "copying ${dev_example_path}/${file} to ${EXAMPLE_TEMPLATE_REPO}/${file}"
   if [ -f ${dev_example_path}/${file} ]; then
+     echo "copying ${dev_example_path}/${file} to ${EXAMPLE_TEMPLATE_REPO}/${file}"
      cp -f ${dev_example_path}/${file} ${EXAMPLE_TEMPLATE_REPO}/${file}
 
      # uncomment Terraform module remotes
@@ -75,6 +70,13 @@ chmod +x ${EXAMPLE_TEMPLATE_REPO}/init
 chmod +x ${EXAMPLE_TEMPLATE_REPO}/check-prereqs
 
 cd "$EXAMPLE_TEMPLATE_REPO"
+git checkout -b "rc-${RELEASE_TAG}"
+
+if [ $? -ne 0 ]; then
+  printf "${RED}Failed to create branch rc-${RELEASE_TAG}. does it already exist?${NC}\n"
+  exit 1
+fi
+
 git commit -a -m "Update example to ${RELEASE_TAG}"
 git push origin
 
