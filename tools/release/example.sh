@@ -6,20 +6,22 @@ BLUE='\e[0;34m'
 NC='\e[0m' # No Color
 
 # Usage:
-# ./release-examples.sh <path-to-example> <path-to-aws-repo>
-# ./release-example.sh v0.4.25 ~/code/psoxy/infra/examples-dev/aws-all ~/psoxy-example-aws
-# ./release-example.sh v0.4.25 ~/code/psoxy/infra/examples-dev/gcp ~/psoxy-example-gcp
+# ./tools/release.example.sh v0.4.25 ~/code/psoxy/ aws-all ~/psoxy-example-aws
+# ./tools/release/example.sh v0.4.25 ~/code/psoxy/ gcp ~/psoxy-example-gcp
 
 RELEASE_TAG=$1
-DEV_EXAMPLE_PATH=$2
+PATH_TO_REPO=$2
+EXAMPLE=$3
 EXAMPLE_TEMPLATE_REPO=$3
+
+
 
 if [ -z "$RELEASE_TAG" ]; then
   printf "${RED}No arguments passed.${NC}\n"
   printf "Usage:\n"
-  printf "  ./release-example.sh <release-tag> <path-to-example> <path-to-aws-repo>\n"
-  printf "  ./release-example.sh v0.4.25 ~/code/psoxy/infra/examples-dev/aws-all ~/psoxy-example-aws\n"
-  printf "  ./release-example.sh v0.4.25 ~/code/psoxy/infra/examples-dev/gcp ~/psoxy-example-gcp\n"
+  printf "  ./release-example.sh <release-tag> <path-to-repo> <example> <path-to-example-repo>\n"
+  printf "  ./release-example.sh v0.4.25 ~/code/psoxy/ aws-all ~/psoxy-example-aws\n"
+  printf "  ./release-example.sh v0.4.25 ~/code/psoxy/ gcp ~/psoxy-example-gcp\n"
   exit 1
 fi
 
@@ -47,17 +49,20 @@ fi
 
 set -e
 
+dev_example_path="${PATH_TO_REPO}infra/examples-dev/${EXAMPLE}"
+
 cd -
 for file in "${FILES_TO_COPY[@]}"
 do
-  cp -f ${DEV_EXAMPLE_PATH}/${file} ${EXAMPLE_TEMPLATE_REPO}/${file}
+  if [ -f ${dev_example_path}/${file} ]; then
+     cp -f ${dev_example_path}/${file} ${EXAMPLE_TEMPLATE_REPO}/${file}
 
-  # uncomment Terraform module remotes
-  sed -i .bck 's/^\(.*\)# source = "git::\(.*\)"/\1source = "git::\2"/' "${EXAMPLE_TEMPLATE_REPO}/${file}"
+     # uncomment Terraform module remotes
+     sed -i .bck 's/^\(.*\)# source = "git::\(.*\)"/\1source = "git::\2"/' "${EXAMPLE_TEMPLATE_REPO}/${file}"
 
-  # remove references to local modules
-  sed -i .bck '/source = "..\/..\/modules\/[^"]*"/d' "${EXAMPLE_TEMPLATE_REPO}/${file}"
-
+     # remove references to local modules
+     sed -i .bck '/source = "..\/..\/modules\/[^"]*"/d' "${EXAMPLE_TEMPLATE_REPO}/${file}"
+  fi
 done
 
 rm ${EXAMPLE_TEMPLATE_REPO}/*.bck

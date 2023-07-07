@@ -407,6 +407,15 @@ public class PrebuiltSanitizerRules {
                     .build())
             .build();
 
+    static final Endpoint ACCESSIBLE_RESOURCES = Endpoint.builder()
+            .pathTemplate("/oauth/token/accessible-resources")
+            .transform(Transform.Redact.builder()
+                    .jsonPath("$..name")
+                    .jsonPath("$..scopes")
+                    .jsonPath("$..avatarUrl")
+                    .build())
+            .build();
+
     static final Endpoint SERVER_PROJECTS = Endpoint.builder()
             .pathTemplate("/rest/api/{apiVersion}/project")
             .allowedQueryParams(projectServerAllowedQueryParameters)
@@ -444,6 +453,7 @@ public class PrebuiltSanitizerRules {
             .endpoint(ISSUE_V3)
             .endpoint(USERS)
             .endpoint(PROJECTS)
+            .endpoint(ACCESSIBLE_RESOURCES)
             .build();
 
     @VisibleForTesting
