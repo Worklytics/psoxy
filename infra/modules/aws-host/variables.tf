@@ -95,7 +95,7 @@ variable "psoxy_base_dir" {
 
 variable "deployment_bundle" {
   type        = string
-  description = "path to deployment bundle to use (if not provided, will build one)"
+  description = "path to deployment bundle to use (if not provided, will build one); can be S3 URI (eg, s3://my-bucket/my-key)."
   default     = null
 }
 
