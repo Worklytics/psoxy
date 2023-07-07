@@ -53,10 +53,8 @@ find java/ -type f -name "*.java" -exec sed -i .bck $RELEASE_REF_PATTERN {} +
 find java/ -type f -name "*.bck" -exec rm {} +
 
 # check for remaining references to current release
-printf "The following files still contain references to the current release; please review:\n"
+printf "The following files still contain references to the current release ${GREEN}${CURRENT_RELEASE}${NC}; please review:\n"
 git grep -l "$CURRENT_RELEASE_PATTERN" java/
 git grep -l "$CURRENT_RELEASE_PATTERN" infra/
 git grep -l "$CURRENT_RELEASE_PATTERN" tools/
-git grep -l "$(echo $CURRENT_RELEASE | sed 's/[^0-9\.]//g' | sed 's/\./\\\./g')" java/
-git grep -l "$(echo $CURRENT_RELEASE | sed 's/[^0-9\.]//g' | sed 's/\./\\\./g')" tools/
-git grep -l "$(echo $CURRENT_RELEASE | sed 's/[^0-9\.]//g' | sed 's/\./\\\./g')" infra/
+
