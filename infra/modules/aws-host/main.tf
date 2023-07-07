@@ -65,7 +65,6 @@ module "api_connector" {
   environment_name                = var.environment_name
   instance_id                     = each.key
   source_kind                     = each.value.source_kind
-  path_to_config                  = "${var.psoxy_base_dir}/configs/${each.value.source_kind}.yaml"
   path_to_function_zip            = module.psoxy.path_to_deployment_jar
   function_zip_hash               = module.psoxy.deployment_package_hash
   function_env_kms_key_arn        = var.function_env_kms_key_arn

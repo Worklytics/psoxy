@@ -201,7 +201,7 @@ fi
 [[ -f variables.tf ]] && grep -q '^variable "environment_name"' variables.tf
 if [[ $? -eq 0 ]]; then
   printf "# environment_name is used to name resources provisioned by this Terraform configuration\n" >> $TFVARS_FILE
-  printf "environment_name =\"psoxy\"\"\n\n" >> $TFVARS_FILE
+  printf "environment_name =\"psoxy\"\n\n" >> $TFVARS_FILE
 fi
 
 printf "\n\n"
