@@ -11,7 +11,7 @@ variable "secrets" {
 variable "replica_regions" {
   type        = list(string)
   description = "DEPRECATED; use `replica_locations`. List of locations to which to replicate secrets. See https://cloud.google.com/secret-manager/docs/locations"
-  default = null
+  default     = null
 }
 
 variable "replica_locations" {
