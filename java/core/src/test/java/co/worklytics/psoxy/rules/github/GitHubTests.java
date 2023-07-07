@@ -523,6 +523,32 @@ public class GitHubTests extends JavaRulesTestBaseCase {
     }
 
     @Test
+    void pullCommits() {
+        String jsonString = asJson(exampleDirectoryPath, "pull_commits.json");
+
+        String endpoint = "https://api.github.com/repos/FAKE/REPO/pulls/42/commits";
+
+        Collection<String> PII = Arrays.asList(
+                "Monalisa Octocat",
+                "octocat"
+        );
+
+        assertNotSanitized(jsonString, PII);
+
+        String sanitized = this.sanitize(endpoint, jsonString);
+
+        assertPseudonymized(sanitized, "octocat");
+        assertPseudonymized(sanitized, "123456");
+        assertRedacted(sanitized,
+                "Monalisa Octocat",
+                "https://api.github.com/users/some-user",
+                "https://api.github.com/users/some-user/events{/privacy}"
+        );
+
+        assertUrlAllowed(endpoint);
+    }
+
+    @Test
     void org_audit_log() {
         String jsonString = asJson(exampleDirectoryPath, "org_audit_log.json");
 
@@ -568,6 +594,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
                 InvocationExample.of("https://api.github.com/repos/FAKE/REPO/issues/ISSUE/reactions", "issues_reactions.json"),
                 InvocationExample.of("https://api.github.com/repos/FAKE/REPO/issues/comments/reactions", "issues_comments_reactions.json"),
                 InvocationExample.of("https://api.github.com/repos/FAKE/REPO/pulls", "pulls.json"),
+                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/pulls/42/commits", "pull_commits.json"),
                 InvocationExample.of("https://api.github.com/repos/FAKE/REPO/pulls/PULL_ID", "pull.json")
         );
     }

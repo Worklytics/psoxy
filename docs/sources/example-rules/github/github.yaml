@@ -1425,6 +1425,67 @@ endpoints:
           - "$..closed_by.node_id"
           - "$..closed_by.email"
         encoding: "JSON"
+  - pathTemplate: "/repos/{owner}/{repo}/pulls/{pull_number}/commits"
+    allowedQueryParams:
+      - "per_page"
+      - "page"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..name"
+          - "$..url"
+          - "$..html_url"
+          - "$..message"
+          - "$..comments_url"
+          - "$..files"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.commit..email"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$..author.avatar_url"
+          - "$..author.gravatar_id"
+          - "$..author.url"
+          - "$..author.html_url"
+          - "$..author.followers_url"
+          - "$..author.following_url"
+          - "$..author.gists_url"
+          - "$..author.starred_url"
+          - "$..author.subscriptions_url"
+          - "$..author.organizations_url"
+          - "$..author.repos_url"
+          - "$..author.events_url"
+          - "$..author.received_events_url"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..author.login"
+          - "$..author.id"
+          - "$..author.node_id"
+          - "$..author.email"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$..committer.avatar_url"
+          - "$..committer.gravatar_id"
+          - "$..committer.url"
+          - "$..committer.html_url"
+          - "$..committer.followers_url"
+          - "$..committer.following_url"
+          - "$..committer.gists_url"
+          - "$..committer.starred_url"
+          - "$..committer.subscriptions_url"
+          - "$..committer.organizations_url"
+          - "$..committer.repos_url"
+          - "$..committer.events_url"
+          - "$..committer.received_events_url"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..committer.login"
+          - "$..committer.id"
+          - "$..committer.node_id"
+          - "$..committer.email"
+        encoding: "JSON"
   - pathTemplate: "/repos/{owner}/{repo}/pulls/{pull_number}"
     allowedQueryParams:
       - "per_page"

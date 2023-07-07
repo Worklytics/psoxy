@@ -504,6 +504,24 @@ public class PrebuiltSanitizerRules {
             .transforms(generateUserTransformations("..committer"))
             .build();
 
+    static final Endpoint PULL_COMMITS = Endpoint.builder()
+            .pathTemplate("/repos/{owner}/{repo}/pulls/{pull_number}/commits")
+            .allowedQueryParams(commonAllowedQueryParameters)
+            .transform(Transform.Redact.builder()
+                    .jsonPath("$..name")
+                    .jsonPath("$..url")
+                    .jsonPath("$..html_url")
+                    .jsonPath("$..message")
+                    .jsonPath("$..comments_url")
+                    .jsonPath("$..files")
+                    .build())
+            .transform(Transform.Pseudonymize.builder()
+                    .jsonPath("$.commit..email")
+                    .build())
+            .transforms(generateUserTransformations("..author"))
+            .transforms(generateUserTransformations("..committer"))
+            .build();
+
     @VisibleForTesting
     static final RESTRules GITHUB = Rules2.builder()
             .endpoint(ORG_MEMBERS)
@@ -525,6 +543,7 @@ public class PrebuiltSanitizerRules {
             .endpoint(ISSUE_COMMENT_REACTIONS)
             .endpoint(PULL_REVIEWS)
             .endpoint(PULLS)
+            .endpoint(PULL_COMMITS)
             .endpoint(PULL)
             .build();
 
