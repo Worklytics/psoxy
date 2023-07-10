@@ -303,13 +303,13 @@ EOT
   1. From your organization, register a [GitHub App](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/registering-a-github-app#registering-a-github-app)
     with following permissions with **Read Only**:
     - Repository:
-      - Administration
-      - Contents
-      - Issues
-      - Metadata
-      - Pull requests
+      - Contents: for reading commits and comments
+      - Issues: for listing issues, comments, assignees, etc.
+      - Metadata: for listing repositories and branches
+      - Pull requests: for listing pull requests, reviews, comments and commits
     - Organization
-      - Members
+      - Administration: for listing events from audit log
+      - Members: for listing teams and their members
 
   Apart from Github instructions please review the following:
   - "Homepage URL" can be anything, not required in this flow but required by Github.
