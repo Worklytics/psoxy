@@ -232,6 +232,7 @@ module "cognito_identity_pool" {
   count = local.msft_365_enabled ? 1 : 0 # only provision identity pool if MSFT-365 connectors are enabled
 
   source = "../../modules/aws-cognito-pool"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-cognito-pool?ref=rc-v0.4.29"
 
   developer_provider_name = "azure-access"
   name                    = "azure-ad-federation"
@@ -241,6 +242,7 @@ module "cognito_identity" {
   count = local.msft_365_enabled ? 1 : 0 # only provision identity pool if MSFT-365 connectors are enabled
 
   source = "../../modules/aws-cognito-identity-cli"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-cognito-identity-cli?ref=rc-v0.4.29"
 
   identity_pool_id = module.cognito_identity_pool[0].pool_id
   aws_region       = data.aws_region.current.id

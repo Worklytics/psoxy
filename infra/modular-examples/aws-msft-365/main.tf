@@ -71,6 +71,8 @@ moved {
 
 module "cognito-identity-pool" {
   source = "../../modules/aws-cognito-pool"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-cognito-pool?ref=rc-v0.4.29"
+
 
   developer_provider_name = "azure-access"
   name                    = "azure-ad-federation"
