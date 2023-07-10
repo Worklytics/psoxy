@@ -6,7 +6,7 @@ TFVARS_FILE=$1
 PSOXY_BASE_DIR=$2
 DEPLOYMENT_ENV=${3:-"local"}
 
-SCRIPT_VERSION="rc-v0.4.28"
+SCRIPT_VERSION="rc-v0.4.29"
 
 if [ -z "$PSOXY_BASE_DIR" ]; then
   printf "Usage: init-tfvars.sh <path-to-terraform.tfvars> <path-to-psoxy-base-directory> [DEPLOYMENT_ENV]\n"
@@ -201,7 +201,7 @@ fi
 [[ -f variables.tf ]] && grep -q '^variable "environment_name"' variables.tf
 if [[ $? -eq 0 ]]; then
   printf "# environment_name is used to name resources provisioned by this Terraform configuration\n" >> $TFVARS_FILE
-  printf "environment_name =\"psoxy\"\"\n\n" >> $TFVARS_FILE
+  printf "environment_name =\"psoxy\"\n\n" >> $TFVARS_FILE
 fi
 
 printf "\n\n"
