@@ -70,6 +70,12 @@ public class PrebuiltSanitizerRules {
                             "direction").stream())
             .collect(Collectors.toList());
 
+    private static final List<String> pullsCommentsQueryParameters = Streams.concat(commonAllowedQueryParameters.stream(),
+                    Lists.newArrayList("sort",
+                            "direction",
+                            "since").stream())
+            .collect(Collectors.toList());
+
     private static final List<String> commitsAllowedQueryParameters = Streams.concat(commonAllowedQueryParameters.stream(),
                     Lists.newArrayList("sha",
                             "path",
@@ -531,6 +537,19 @@ public class PrebuiltSanitizerRules {
             .transforms(generateUserTransformations("..committer"))
             .build();
 
+    static final Endpoint PULL_COMMENTS = Endpoint.builder()
+            .pathTemplate("/repos/{owner}/{repo}/pulls/{pull_number}/comments")
+            .allowedQueryParams(pullsCommentsQueryParameters)
+            .transform(Transform.Redact.builder()
+                    .jsonPath("$..path")
+                    .jsonPath("$..diff_hunk")
+                    .jsonPath("$..html_url")
+                    .jsonPath("$..body")
+                    .jsonPath("$..comments_url")
+                    .build())
+            .transforms(generateUserTransformations("..user"))
+            .build();
+
     @VisibleForTesting
     static final RESTRules GITHUB = Rules2.builder()
             .endpoint(ORG_MEMBERS)
@@ -553,6 +572,7 @@ public class PrebuiltSanitizerRules {
             .endpoint(ISSUE_COMMENT_REACTIONS)
             .endpoint(PULL_REVIEWS)
             .endpoint(PULLS)
+            .endpoint(PULL_COMMENTS)
             .endpoint(PULL_COMMITS)
             .endpoint(PULL)
             .build();
