@@ -223,6 +223,11 @@ endpoints:
           - "$..owner.node_id"
           - "$..owner.email"
         encoding: "JSON"
+  - pathTemplate: "/repos/{owner}/{repo}/branches"
+    allowedQueryParams:
+      - "per_page"
+      - "page"
+      - "protected"
   - pathTemplate: "/repos/{owner}/{repo}/commits"
     allowedQueryParams:
       - "per_page"
@@ -1424,6 +1429,77 @@ endpoints:
           - "$..closed_by.id"
           - "$..closed_by.node_id"
           - "$..closed_by.email"
+        encoding: "JSON"
+  - pathTemplate: "/repos/{owner}/{repo}/pulls/{pull_number}/comments"
+    allowedQueryParams:
+      - "per_page"
+      - "page"
+      - "sort"
+      - "direction"
+      - "since"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..path"
+          - "$..diff_hunk"
+          - "$..html_url"
+          - "$..body"
+          - "$..comments_url"
+      - !<redact>
+        jsonPaths:
+          - "$..user.avatar_url"
+          - "$..user.gravatar_id"
+          - "$..user.url"
+          - "$..user.html_url"
+          - "$..user.followers_url"
+          - "$..user.following_url"
+          - "$..user.gists_url"
+          - "$..user.starred_url"
+          - "$..user.subscriptions_url"
+          - "$..user.organizations_url"
+          - "$..user.repos_url"
+          - "$..user.events_url"
+          - "$..user.received_events_url"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..user.login"
+          - "$..user.id"
+          - "$..user.node_id"
+          - "$..user.email"
+        encoding: "JSON"
+  - pathTemplate: "/repos/{owner}/{repo}/pulls/{pull_number}/reviews/{review_id}/comments"
+    allowedQueryParams:
+      - "per_page"
+      - "page"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..path"
+          - "$..diff_hunk"
+          - "$..html_url"
+          - "$..body"
+          - "$..comments_url"
+      - !<redact>
+        jsonPaths:
+          - "$..user.avatar_url"
+          - "$..user.gravatar_id"
+          - "$..user.url"
+          - "$..user.html_url"
+          - "$..user.followers_url"
+          - "$..user.following_url"
+          - "$..user.gists_url"
+          - "$..user.starred_url"
+          - "$..user.subscriptions_url"
+          - "$..user.organizations_url"
+          - "$..user.repos_url"
+          - "$..user.events_url"
+          - "$..user.received_events_url"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..user.login"
+          - "$..user.id"
+          - "$..user.node_id"
+          - "$..user.email"
         encoding: "JSON"
   - pathTemplate: "/repos/{owner}/{repo}/pulls/{pull_number}/commits"
     allowedQueryParams:
