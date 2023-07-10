@@ -51,6 +51,7 @@ module "cognito_identity" {
   count = local.msft_365_enabled ? 1 : 0 # only provision identity pool if MSFT-365 connectors are enabled
 
   source = "../../modules/aws-cognito-identity-cli"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-cognito-identity-cli?ref=rc-v0.4.29"
 
   aws_region       = data.aws_region.current.id
   aws_role         = var.aws_assume_role_arn
