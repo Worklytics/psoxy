@@ -583,6 +583,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
                 InvocationExample.of("https://api.github.com/orgs/FAKE/repos", "repos.json"),
                 InvocationExample.of("https://api.github.com/orgs/FAKE/audit-log", "org_audit_log.json"),
                 InvocationExample.of("https://api.github.com/repos/FAKE/REPO/commits/COMMIT_REF", "commit.json"),
+                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/branches", "repo_branches.json"),
                 InvocationExample.of("https://api.github.com/repos/FAKE/REPO/commits", "repo_commits.json"),
                 InvocationExample.of("https://api.github.com/repos/FAKE/REPO/events", "repo_events.json"),
                 InvocationExample.of("https://api.github.com/repos/FAKE/REPO/comments/COMMENT_ID/reactions", "comment_reactions.json"),

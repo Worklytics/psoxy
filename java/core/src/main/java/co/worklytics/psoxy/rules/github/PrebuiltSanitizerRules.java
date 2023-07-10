@@ -58,6 +58,10 @@ public class PrebuiltSanitizerRules {
                             "direction").stream())
             .collect(Collectors.toList());
 
+    private static final List<String> repoBranchesAllowedQueryParameters = Streams.concat(commonAllowedQueryParameters.stream(),
+                    Lists.newArrayList("protected").stream())
+            .collect(Collectors.toList());
+
     private static final List<String> pullsAllowedQueryParameters = Streams.concat(commonAllowedQueryParameters.stream(),
                     Lists.newArrayList("state",
                             "head",
@@ -504,6 +508,11 @@ public class PrebuiltSanitizerRules {
             .transforms(generateUserTransformations("..committer"))
             .build();
 
+    static final Endpoint REPO_BRANCHES = Endpoint.builder()
+            .pathTemplate("/repos/{owner}/{repo}/branches")
+            .allowedQueryParams(repoBranchesAllowedQueryParameters)
+            .build();
+
     static final Endpoint PULL_COMMITS = Endpoint.builder()
             .pathTemplate("/repos/{owner}/{repo}/pulls/{pull_number}/commits")
             .allowedQueryParams(commonAllowedQueryParameters)
@@ -530,6 +539,7 @@ public class PrebuiltSanitizerRules {
             .endpoint(ORG_TEAM_MEMBERS)
             .endpoint(ORG_AUDIT_LOG)
             .endpoint(REPOSITORIES)
+            .endpoint(REPO_BRANCHES)
             .endpoint(REPO_COMMITS)
             .endpoint(REPO_COMMIT)
             .endpoint(REPO_EVENTS)
