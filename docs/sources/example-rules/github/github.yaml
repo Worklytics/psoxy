@@ -39,6 +39,7 @@ endpoints:
           - "$..nameId"
           - "$..login"
           - "$..email"
+          - "$..guid"
         encoding: "JSON"
     responseSchema:
       type: "object"
@@ -90,11 +91,7 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$..name"
-          - "$..url"
-          - "$..html_url"
           - "$..description"
-          - "$..members_url"
-          - "$..repositories_url"
   - pathTemplate: "/orgs/{org}/teams/{team_slug}/members"
     allowedQueryParams:
       - "per_page"
@@ -145,6 +142,7 @@ endpoints:
         jsonPaths:
           - "$..actor"
           - "$..user"
+          - "$..userId"
         encoding: "JSON"
   - pathTemplate: "/orgs/{org}/repos"
     allowedQueryParams:
@@ -156,73 +154,8 @@ endpoints:
     transforms:
       - !<redact>
         jsonPaths:
-          - "$..html_url"
           - "$..description"
-          - "$..url"
-          - "$..archive_url"
-          - "$..assignees_url"
-          - "$..blobs_url"
-          - "$..branches_url"
-          - "$..collaborators_url"
-          - "$..comments_url"
-          - "$..commits_url"
-          - "$..compare_url"
-          - "$..contents_url"
-          - "$..contributors_url"
-          - "$..deployments_url"
-          - "$..downloads_url"
-          - "$..events_url"
-          - "$..forks_url"
-          - "$..git_commits_url"
-          - "$..git_refs_url"
-          - "$..git_tags_url"
-          - "$..git_url"
-          - "$..issue_comment_url"
-          - "$..issue_events_url"
-          - "$..issues_url"
-          - "$..keys_url"
-          - "$..labels_url"
-          - "$..languages_url"
-          - "$..merges_url"
-          - "$..milestones_url"
-          - "$..notifications_url"
-          - "$..pulls_url"
-          - "$..releases_url"
-          - "$..ssh_url"
-          - "$..stargazers_url"
-          - "$..statuses_url"
-          - "$..subscribers_url"
-          - "$..subscription_url"
-          - "$..tags_url"
-          - "$..teams_url"
-          - "$..trees_url"
-          - "$..clone_url"
-          - "$..mirror_url"
-          - "$..hooks_url"
-          - "$..svn_url"
           - "$..homepage"
-      - !<redact>
-        jsonPaths:
-          - "$..owner.avatar_url"
-          - "$..owner.gravatar_id"
-          - "$..owner.url"
-          - "$..owner.html_url"
-          - "$..owner.followers_url"
-          - "$..owner.following_url"
-          - "$..owner.gists_url"
-          - "$..owner.starred_url"
-          - "$..owner.subscriptions_url"
-          - "$..owner.organizations_url"
-          - "$..owner.repos_url"
-          - "$..owner.events_url"
-          - "$..owner.received_events_url"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..owner.login"
-          - "$..owner.id"
-          - "$..owner.node_id"
-          - "$..owner.email"
-        encoding: "JSON"
   - pathTemplate: "/repos/{owner}/{repo}/branches"
     allowedQueryParams:
       - "per_page"
@@ -240,10 +173,7 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$..name"
-          - "$..url"
-          - "$..html_url"
           - "$..message"
-          - "$..comments_url"
           - "$..files"
       - !<pseudonymize>
         jsonPaths:
@@ -301,10 +231,7 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$..name"
-          - "$..url"
-          - "$..html_url"
           - "$..message"
-          - "$..comments_url"
           - "$..files"
       - !<pseudonymize>
         jsonPaths:
@@ -613,18 +540,10 @@ endpoints:
     transforms:
       - !<redact>
         jsonPaths:
-          - "$..url"
-          - "$..repository_url"
-          - "$..labels_url"
-          - "$..comments_url"
-          - "$..events_url"
-          - "$..html_url"
           - "$..title"
           - "$..body"
           - "$..description"
           - "$..name"
-          - "$..diff_url"
-          - "$..patch_url"
       - !<redact>
         jsonPaths:
           - "$..user.avatar_url"
@@ -748,18 +667,10 @@ endpoints:
     transforms:
       - !<redact>
         jsonPaths:
-          - "$..url"
-          - "$..repository_url"
-          - "$..labels_url"
-          - "$..comments_url"
-          - "$..events_url"
-          - "$..html_url"
           - "$..title"
           - "$..body"
           - "$..description"
           - "$..name"
-          - "$..diff_url"
-          - "$..patch_url"
       - !<redact>
         jsonPaths:
           - "$..user.avatar_url"
@@ -879,10 +790,8 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$..url"
-          - "$..html_url"
           - "$..message"
           - "$..body"
-          - "$..issue_url"
       - !<redact>
         jsonPaths:
           - "$..user.avatar_url"
@@ -914,7 +823,6 @@ endpoints:
         jsonPaths:
           - "$..name"
           - "$..url"
-          - "$..commit_url"
       - !<redact>
         jsonPaths:
           - "$..actor.avatar_url"
@@ -947,7 +855,6 @@ endpoints:
           - "$..name"
           - "$..url"
           - "$..body"
-          - "$..commit_url"
           - "$..rename"
       - !<redact>
         jsonPaths:
@@ -1179,81 +1086,12 @@ endpoints:
     transforms:
       - !<redact>
         jsonPaths:
-          - "$..html_url"
           - "$..title"
           - "$..body"
           - "$..name"
           - "$..description"
           - "$..url"
-          - "$..archive_url"
-          - "$..assignees_url"
-          - "$..blobs_url"
-          - "$..branches_url"
-          - "$..collaborators_url"
-          - "$..comments_url"
-          - "$..commits_url"
-          - "$..compare_url"
-          - "$..contents_url"
-          - "$..contributors_url"
-          - "$..deployments_url"
-          - "$..diff_url"
-          - "$..downloads_url"
-          - "$..events_url"
-          - "$..forks_url"
-          - "$..git_commits_url"
-          - "$..git_refs_url"
-          - "$..git_tags_url"
-          - "$..git_url"
-          - "$..issue_comment_url"
-          - "$..issue_events_url"
-          - "$..issue_url"
-          - "$..keys_url"
-          - "$..labels_url"
-          - "$..languages_url"
-          - "$..merges_url"
-          - "$..milestones_url"
-          - "$..notifications_url"
-          - "$..patch_url"
-          - "$..pulls_url"
-          - "$..releases_url"
-          - "$..review_comments_url"
-          - "$..review_comment_url"
-          - "$..ssh_url"
-          - "$..stargazers_url"
-          - "$..statuses_url"
-          - "$..subscribers_url"
-          - "$..subscription_url"
-          - "$..tags_url"
-          - "$..teams_url"
-          - "$..trees_url"
-          - "$..clone_url"
-          - "$..mirror_url"
-          - "$..hooks_url"
-          - "$..svn_url"
           - "$..homepage"
-          - "$..homepage"
-      - !<redact>
-        jsonPaths:
-          - "$..owner.avatar_url"
-          - "$..owner.gravatar_id"
-          - "$..owner.url"
-          - "$..owner.html_url"
-          - "$..owner.followers_url"
-          - "$..owner.following_url"
-          - "$..owner.gists_url"
-          - "$..owner.starred_url"
-          - "$..owner.subscriptions_url"
-          - "$..owner.organizations_url"
-          - "$..owner.repos_url"
-          - "$..owner.events_url"
-          - "$..owner.received_events_url"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..owner.login"
-          - "$..owner.id"
-          - "$..owner.node_id"
-          - "$..owner.email"
-        encoding: "JSON"
       - !<redact>
         jsonPaths:
           - "$..user.avatar_url"
@@ -1442,9 +1280,7 @@ endpoints:
         jsonPaths:
           - "$..path"
           - "$..diff_hunk"
-          - "$..html_url"
           - "$..body"
-          - "$..comments_url"
       - !<redact>
         jsonPaths:
           - "$..user.avatar_url"
@@ -1476,9 +1312,7 @@ endpoints:
         jsonPaths:
           - "$..path"
           - "$..diff_hunk"
-          - "$..html_url"
           - "$..body"
-          - "$..comments_url"
       - !<redact>
         jsonPaths:
           - "$..user.avatar_url"
@@ -1509,10 +1343,7 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$..name"
-          - "$..url"
-          - "$..html_url"
           - "$..message"
-          - "$..comments_url"
           - "$..files"
       - !<pseudonymize>
         jsonPaths:
@@ -1574,81 +1405,11 @@ endpoints:
     transforms:
       - !<redact>
         jsonPaths:
-          - "$..html_url"
           - "$..title"
           - "$..body"
           - "$..name"
           - "$..description"
-          - "$..url"
-          - "$..archive_url"
-          - "$..assignees_url"
-          - "$..blobs_url"
-          - "$..branches_url"
-          - "$..collaborators_url"
-          - "$..comments_url"
-          - "$..commits_url"
-          - "$..compare_url"
-          - "$..contents_url"
-          - "$..contributors_url"
-          - "$..deployments_url"
-          - "$..diff_url"
-          - "$..downloads_url"
-          - "$..events_url"
-          - "$..forks_url"
-          - "$..git_commits_url"
-          - "$..git_refs_url"
-          - "$..git_tags_url"
-          - "$..git_url"
-          - "$..issue_comment_url"
-          - "$..issue_events_url"
-          - "$..issue_url"
-          - "$..keys_url"
-          - "$..labels_url"
-          - "$..languages_url"
-          - "$..merges_url"
-          - "$..milestones_url"
-          - "$..notifications_url"
-          - "$..patch_url"
-          - "$..pulls_url"
-          - "$..releases_url"
-          - "$..review_comments_url"
-          - "$..review_comment_url"
-          - "$..ssh_url"
-          - "$..stargazers_url"
-          - "$..statuses_url"
-          - "$..subscribers_url"
-          - "$..subscription_url"
-          - "$..tags_url"
-          - "$..teams_url"
-          - "$..trees_url"
-          - "$..clone_url"
-          - "$..mirror_url"
-          - "$..hooks_url"
-          - "$..svn_url"
           - "$..homepage"
-          - "$..homepage"
-      - !<redact>
-        jsonPaths:
-          - "$..owner.avatar_url"
-          - "$..owner.gravatar_id"
-          - "$..owner.url"
-          - "$..owner.html_url"
-          - "$..owner.followers_url"
-          - "$..owner.following_url"
-          - "$..owner.gists_url"
-          - "$..owner.starred_url"
-          - "$..owner.subscriptions_url"
-          - "$..owner.organizations_url"
-          - "$..owner.repos_url"
-          - "$..owner.events_url"
-          - "$..owner.received_events_url"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..owner.login"
-          - "$..owner.id"
-          - "$..owner.node_id"
-          - "$..owner.email"
-        encoding: "JSON"
       - !<redact>
         jsonPaths:
           - "$..user.avatar_url"
