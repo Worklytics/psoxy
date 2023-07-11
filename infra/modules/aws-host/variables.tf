@@ -139,10 +139,13 @@ variable "api_connectors" {
     example_api_calls                     = optional(list(string), [])
     example_api_calls_user_to_impersonate = optional(string)
     secured_variables = optional(list(object({
-      name     = string
-      value    = optional(string)
-      writable = optional(bool, false)
-      lockable = optional(bool, false)
+        name        = string
+        value       = optional(string)
+        writable    = optional(bool, false)
+        lockable    = optional(bool, false)
+        sensitive   = optional(bool, true)
+        description = optional(string)
+        value_managed_by_tf = optional(bool, true)
       })),
     [])
 

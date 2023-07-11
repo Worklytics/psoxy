@@ -51,11 +51,22 @@ module "instance_secrets" {
   kms_key_id = var.aws_ssm_key_id
   secrets = { for v in each.value.secured_variables :
     v.name => {
-      value       = v.value,
-      description = try(v.description, null)
+      value               = v.value,
+      description         = try(v.description, null)
+      sensitive           = try(v.sensitive, true)
+      value_managed_by_tf = try(v.value_managed_by_tf, true) # ideally, would be `value != null`, but bc value is sensitive, Terraform doesn't allow for_each over map derived from sensitive values
     }
   }
 }
+
+# TODO: if going to roll this out in v0.4.x, need moves like the following for:
+# asana, slack-discovery-api, salesforce, zoom, dropbox, github, jira-cloud, jira-server
+# if neglect these moves, customer's current values for parameters will be lost
+#moved {
+#  from = module.instance_secrets["zoom"].aws_ssm_parameter.secret["CLIENT_ID"]
+#  to   = module.instance_secrets["zoom"].aws_ssm_parameter.secret_with_externally_managed_value["CLIENT_ID"]
+#}
+
 
 module "api_connector" {
   for_each = var.api_connectors

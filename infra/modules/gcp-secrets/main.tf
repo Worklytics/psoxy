@@ -5,6 +5,9 @@
 
 locals {
   replica_locations = coalesce(var.replica_regions, var.replica_locations)
+
+  terraform_managed_secrets = { for k, v in var.secrets : k => v if v.value_managed_by_tf }
+  externally_managed_secrets = { for k, v in var.secrets : k => v if !v.value_managed_by_tf }
 }
 
 resource "google_secret_manager_secret" "secret" {
@@ -33,11 +36,10 @@ resource "google_secret_manager_secret" "secret" {
   }
 }
 
-# TODO: avoid creating version here at all if value == null
-# (problem is that Terraform complains if trying to use any derivative of var.secrets in a for_each,
-#  bc it's sensitive - not sure why it doesn't complain about the for_each over var.secrets directly)
+
+# secret versions are ONLY created for values managed by Terraform
 resource "google_secret_manager_secret_version" "version" {
-  for_each = var.secrets
+  for_each     = local.terraform_managed_secrets
 
   secret      = google_secret_manager_secret.secret[each.key].id
   secret_data = coalesce(each.value.value, "placeholder value - fill me")
@@ -46,6 +48,8 @@ resource "google_secret_manager_secret_version" "version" {
 
   lifecycle {
     create_before_destroy = true
+
+    # TODO: remove this in v0.5
     ignore_changes = [
       enabled, # if secret version disabled after creation, let it be (placeholder case)
     ]
@@ -68,13 +72,14 @@ output "secret_ids_within_project" {
   value = { for k, v in var.secrets : k => google_secret_manager_secret.secret[k].secret_id }
 }
 
+#DEPRECATED; don't believe any modules use this, as of v0.4.29
 output "secret_version_names" {
-  value = { for k, v in var.secrets : k => google_secret_manager_secret_version.version[k].name }
+  value = { for k, v in local.terraform_managed_secrets : k => google_secret_manager_secret_version.version[k].name }
 }
 
 output "secret_version_numbers" {
   value = { for k, v in var.secrets :
-  k => trimprefix(google_secret_manager_secret_version.version[k].name, "${google_secret_manager_secret.secret[k].name}/versions/") }
+  k => try(trimprefix(google_secret_manager_secret_version.version[k].name, "${google_secret_manager_secret.secret[k].name}/versions/"), "latest") }
 }
 
 # map from secret's identifier in var.secrets --> object(secret_id, version_number)
@@ -82,7 +87,7 @@ output "secret_bindings" {
   value = { for k, v in var.secrets :
     k => {
       secret_id      = google_secret_manager_secret.secret[k].secret_id
-      version_number = trimprefix(google_secret_manager_secret_version.version[k].name, "${google_secret_manager_secret.secret[k].name}/versions/")
+      version_number = try(trimprefix(google_secret_manager_secret_version.version[k].name, "${google_secret_manager_secret.secret[k].name}/versions/"), "latest")
     }
   }
 }

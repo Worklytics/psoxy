@@ -1,8 +1,9 @@
 variable "secrets" {
   type = map(
     object({
-      value       = string
-      description = string
+      value               = string
+      description         = string
+      value_managed_by_tf = optional(bool, true)
     })
   )
 }

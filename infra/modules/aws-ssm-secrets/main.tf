@@ -10,11 +10,14 @@ locals {
   non_fully_qualified_path = length(regexall("/", var.path)) > 0 && !startswith(var.path, "/")
   path_prefix              = local.non_empty_path && local.non_fully_qualified_path ? "/${var.path}" : var.path
   PLACEHOLDER_VALUE        = "fill me"
+
+  externally_managed_secrets = { for k, spec in var.secrets : k => spec if !(spec.value_managed_by_tf) }
+  terraform_managed_secrets = { for k, spec in var.secrets : k => spec if spec.value_managed_by_tf }
 }
 
 # see: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter
 resource "aws_ssm_parameter" "secret" {
-  for_each = { for k, spec in var.secrets : k => spec if spec.value_managed_by_tf }
+  for_each = local.terraform_managed_secrets
 
   name           = "${local.path_prefix}${each.key}"
   type           = "SecureString"
@@ -33,7 +36,7 @@ resource "aws_ssm_parameter" "secret" {
 }
 
 resource "aws_ssm_parameter" "secret_with_externally_managed_value" {
-  for_each = { for k, spec in var.secrets : k => spec if !spec.value_managed_by_tf }
+  for_each = local.externally_managed_secrets
 
   name           = "${local.path_prefix}${each.key}"
   type           = "SecureString"
@@ -57,9 +60,15 @@ resource "aws_ssm_parameter" "secret_with_externally_managed_value" {
 # secrets-store interface
 # q: is to ALSO pass in some notion of access? except very different per implementation
 output "secret_ids" {
-  value = { for k, v in var.secrets : k => aws_ssm_parameter.secret[k].id }
+  value = merge(
+    { for k, v in local.terraform_managed_secrets : k => aws_ssm_parameter.secret[k].id },
+    { for k, v in local.externally_managed_secrets : k => aws_ssm_parameter.secret_with_externally_managed_value[k].id }
+  )
 }
 
 output "secret_arns" {
-  value = [for k, v in var.secrets : aws_ssm_parameter.secret[k].arn]
+  value = concat(
+    [ for k, v in local.terraform_managed_secrets : aws_ssm_parameter.secret[k].arn ],
+    [ for k, v in local.externally_managed_secrets : aws_ssm_parameter.secret_with_externally_managed_value[k].arn ]
+  )
 }
