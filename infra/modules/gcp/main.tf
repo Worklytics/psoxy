@@ -146,7 +146,7 @@ locals {
   remote_bundle_artifact = local.is_remote_bundle ? split("/", var.deployment_bundle)[3] : null
 
   file_name_with_sha1 = local.is_remote_bundle ? sha1(var.deployment_bundle) : replace(module.psoxy_package.filename, ".jar",
-    "_${filesha1(module.psoxy_package.path_to_deployment_jar)}.zip")
+  "_${filesha1(module.psoxy_package.path_to_deployment_jar)}.zip")
 
   # NOTE: not a coalesce, bc Terraform evaluates all expressions within coalesce() even if first is non-null
   bundle_path = var.deployment_bundle == null ? data.archive_file.source[0].output_path : var.deployment_bundle

@@ -3,6 +3,9 @@ module "worklytics_connector_specs" {
   source = "../../modules/worklytics-connector-specs"
 
   enabled_connectors = var.enabled_connectors
+
+  github_organization       = var.github_organization
+  example_github_repository = var.example_github_repository
 }
 
 
