@@ -446,7 +446,6 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..svn_url")
                     .jsonPath("$..homepage")
                     .build())
-            .transforms(generateUserTransformations("..owner"))
             .build();
 
     static final Endpoint COMMIT_COMMENT_REACTIONS = Endpoint.builder()
