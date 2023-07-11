@@ -141,7 +141,8 @@ moved {
 }
 
 locals {
-  is_remote_bundle       = var.deployment_bundle != null && startswith(var.deployment_bundle, "gs://")
+  # as Terraform doesn't short-circuit boolean expressions, we need to use try() to avoid errors for deployment_bundle == null case
+  is_remote_bundle       = var.deployment_bundle != null && try(startswith(var.deployment_bundle, "gs://"), false)
   remote_bucket_name     = local.is_remote_bundle ? split("/", var.deployment_bundle)[2] : null
   remote_bundle_artifact = local.is_remote_bundle ? split("/", var.deployment_bundle)[3] : null
 
