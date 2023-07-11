@@ -244,7 +244,11 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..url")
                     .jsonPath("$..homepage")
                     .build())
-            .transforms(generateUserTransformations("..owner"))
+            // Owner can be a user or an organization user;
+            // we leave them without redact as we assume
+            // that most of the repos are going to be
+            // created as part of organization and not by an user
+            //.transforms(generateUserTransformations("..owner"))
             .transforms(generateUserTransformations("..user"))
             .transforms(generateUserTransformations("..actor"))
             .transforms(generateUserTransformations("..assignee"))
@@ -265,7 +269,11 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..description")
                     .jsonPath("$..homepage")
                     .build())
-            .transforms(generateUserTransformations("..owner"))
+            // Owner can be a user or an organization user;
+            // we leave them without redact as we assume
+            // that most of the repos are going to be
+            // created as part of organization and not by an user
+            //.transforms(generateUserTransformations("..owner"))
             .transforms(generateUserTransformations("..user"))
             .transforms(generateUserTransformations("..actor"))
             .transforms(generateUserTransformations("..assignee"))

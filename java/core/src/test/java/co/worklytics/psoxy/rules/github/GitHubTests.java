@@ -469,10 +469,9 @@ public class GitHubTests extends JavaRulesTestBaseCase {
 
         String sanitized = this.sanitize(endpoint, jsonString);
 
-        assertPseudonymized(sanitized, "123456");
+        assertNotSanitized(sanitized, "octocatorg");
         assertPseudonymized(sanitized, "hubot");
         assertPseudonymized(sanitized, "123457");
-        assertPseudonymized(sanitized, "other_user");
         assertPseudonymized(sanitized, "123458");
 
         assertRedacted(sanitized,
@@ -508,7 +507,6 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         assertPseudonymized(sanitized, "123456");
         assertPseudonymized(sanitized, "hubot");
         assertPseudonymized(sanitized, "123457");
-        assertPseudonymized(sanitized, "other_user");
         assertPseudonymized(sanitized, "123458");
 
         assertRedacted(sanitized,
