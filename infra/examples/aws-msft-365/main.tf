@@ -50,7 +50,7 @@ provider "azuread" {
 }
 
 module "psoxy" {
-  #  source = "../../modular-examples/aws-msft-365"
+  # source = "../../modular-examples/aws-msft-365"
   source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-msft-365?ref=v0.4.29"
 
   aws_account_id                 = var.aws_account_id

@@ -58,7 +58,7 @@ data "google_project" "psoxy-google-connectors" {
 }
 
 module "psoxy" {
-  #  source = "../../modular-examples/aws-google-workspace"
+  # source = "../../modular-examples/aws-google-workspace"
   source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-google-workspace?ref=v0.4.29"
 
   aws_account_id                 = var.aws_account_id
