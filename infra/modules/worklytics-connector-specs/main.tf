@@ -315,7 +315,7 @@ EOT
         - APEX REST Services
       - And the policy has the application created marked as enabled in "Connected App Access". Otherwise requests will return 401 with INVALID_SESSION_ID
   2. Once created, open "Manage Consumer Details"
-  3. Update the content of `PSOXY_SALESFORCE_CLIENT_ID` from Consumer Key	and `PSOXY_SALESFORCE_CLIENT_SECRET` from Consumer Secret
+  3. Update the content of `PSOXY_SALESFORCE_CLIENT_ID` from Consumer Key and `PSOXY_SALESFORCE_CLIENT_SECRET` from Consumer Secret
 EOT
     }
     slack-discovery-api = {

@@ -27,6 +27,30 @@ variable "example_jira_issue_id" {
   description = "(Only required if using Jira Server/Cloud connector) Id of an issue for only to be used as part of example calls for Jira (ex: ETV-12)"
 }
 
+variable "google_workspace_example_user" {
+  type        = string
+  description = "user to impersonate for Google Workspace API calls (null for none)"
+  default     = null
+}
+
+variable "google_workspace_example_admin" {
+  type        = string
+  description = "user to impersonate for Google Workspace API calls (null for value of `google_workspace_example_user`)"
+  default     = null # will failover to user
+}
+
+variable "msft_tenant_id" {
+  type        = string
+  description = "ID of Microsoft tenant to connect to (req'd only if config includes MSFT connectors)"
+  default     = ""
+}
+
+variable "example_msft_user_guid" {
+  type        = string
+  description = "example MSFT user guid (uuid) for test API calls (OPTIONAL)"
+  default     = "{EXAMPLE_MSFT_USER_GUID}"
+}
+
 variable "todo_step" {
   type        = number
   description = "of all todos, where does this one logically fall in sequence"

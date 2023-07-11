@@ -3,6 +3,15 @@ module "worklytics_connector_specs" {
   source = "../../modules/worklytics-connector-specs"
 
   enabled_connectors = var.enabled_connectors
+
+  example_jira_issue_id = var.example_jira_issue_id
+  example_msft_user_guid = var.example_msft_user_guid
+  google_workspace_example_admin = var.google_workspace_example_admin
+  google_workspace_example_user = var.google_workspace_example_user
+  jira_cloud_id = var.jira_cloud_id
+  jira_server_url = var.jira_server_url
+  msft_tenant_id = var.msft_tenant_id
+  salesforce_domain = var.salesforce_domain
 }
 
 
