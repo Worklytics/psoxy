@@ -79,7 +79,7 @@ variable "psoxy_base_dir" {
 
 variable "deployment_bundle" {
   type        = string
-  description = "path to deployment bundle to use (if not provided, will build one)"
+  description = "path to deployment bundle to use (if not provided, will build one). Can be GCS url, eg 'gs://artifacts-bucket/psoxy-0.4.28.zip'."
   default     = null
 
   validation {
@@ -140,7 +140,7 @@ variable "gcp_secret_replica_locations" {
 
 variable "custom_artifacts_bucket_name" {
   type        = string
-  description = "name of bucket to use for custom artifacts, if you want something other than default"
+  description = "name of bucket to use for custom artifacts, if you want something other than default. Ignored if you pass gcs url for `deployment_bundle`."
   default     = null
 }
 
