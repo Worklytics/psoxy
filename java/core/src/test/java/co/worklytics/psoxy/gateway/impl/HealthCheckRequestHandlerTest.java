@@ -9,6 +9,8 @@ import co.worklytics.test.MockModules;
 import dagger.Component;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -54,10 +56,47 @@ public class HealthCheckRequestHandlerTest {
         when(request.getHeader(ControlHeader.HEALTH_CHECK.getHttpHeader()))
                 .thenReturn(Optional.of(""));
 
+        when(handler.config.getConfigPropertyAsOptional(eq(ProxyConfigProperty.TARGET_HOST)))
+                .thenReturn(Optional.of("host"));
+
         Optional<HttpEventResponse> response = handler.handleIfHealthCheck(request);
 
         assertTrue(response.isPresent());
 
         assertEquals(200, response.get().getStatusCode());
+    }
+
+    @Test
+    void handleIfHealthCheck_should_return_invalid_response_when_target_host_is_not_configured() {
+        HttpEventRequest request = mock(HttpEventRequest.class);
+
+        when(request.getHeader(ControlHeader.HEALTH_CHECK.getHttpHeader()))
+                .thenReturn(Optional.of(""));
+
+        when(handler.config.getConfigPropertyAsOptional(eq(ProxyConfigProperty.TARGET_HOST)))
+                .thenReturn(Optional.empty());
+
+        Optional<HttpEventResponse> response = handler.handleIfHealthCheck(request);
+
+        assertTrue(response.isPresent());
+
+        assertEquals(512, response.get().getStatusCode());
+    }
+
+    @Test
+    void handleIfHealthCheck_should_return_invalid_response_when_target_host_is_empty() {
+        HttpEventRequest request = mock(HttpEventRequest.class);
+
+        when(request.getHeader(ControlHeader.HEALTH_CHECK.getHttpHeader()))
+                .thenReturn(Optional.of(""));
+
+        when(handler.config.getConfigPropertyAsOptional(eq(ProxyConfigProperty.TARGET_HOST)))
+                .thenReturn(Optional.of(""));
+
+        Optional<HttpEventResponse> response = handler.handleIfHealthCheck(request);
+
+        assertTrue(response.isPresent());
+
+        assertEquals(512, response.get().getStatusCode());
     }
 }
