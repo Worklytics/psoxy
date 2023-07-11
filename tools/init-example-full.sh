@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_VERSION="v0.4.28"
+SCRIPT_VERSION="v0.4.29"
 
 # colors
 RED='\e[0;31m'

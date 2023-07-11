@@ -15,6 +15,16 @@ RED='\e[0;31m'
 BLUE='\e[0;34m'
 NC='\e[0m' # No Color
 
+if [[ ! -d "$1" ]]; then
+  printf "${RED}Error: ${PSOXY_BASE_DIR} directory does not exist.${NC}\n"
+  exit 1
+fi
+
+if [[ ! -f "$TFVARS_FILE" ]]; then
+  printf "${RED}Error: ${TFVARS_FILE} does not exist.${NC}\n"
+  exit 1
+fi
+
 RELEASE_VERSION=$(sed -n -e 's/.*<revision>\(.*\)<\/revision>.*/\1/p' "${PSOXY_BASE_DIR}java/pom.xml")
 
 printf "Building psoxy bundle from code checkout at ${BLUE}${PSOXY_BASE_DIR}${NC} for ${BLUE}${HOST_PLATFORM}${NC}; this will take a few minutes ...\n"
@@ -28,8 +38,11 @@ if [ "$HOST_PLATFORM" == "gcp" ]; then
   zip psoxy-${HOST_PLATFORM}-${RELEASE_VERSION}.zip psoxy-${HOST_PLATFORM}-${RELEASE_VERSION}.jar
   rm psoxy-${HOST_PLATFORM}-${RELEASE_VERSION}.jar
   DEPLOYMENT_BUNDLE="psoxy-${HOST_PLATFORM}-${RELEASE_VERSION}.zip"
-else
+elif [ "$HOST_PLATFORM" == "aws" ]; then
   DEPLOYMENT_BUNDLE="psoxy-${HOST_PLATFORM}-${RELEASE_VERSION}.jar"
+else
+  printf "${RED}Unsupported host platform: ${HOST_PLATFORM}${NC}\n"
+  exit 1
 fi
 
 # support building bundle and uploading it into an artitfacts bucket
@@ -41,7 +54,7 @@ if [ ! -z "$BUCKET_PATH" ]; then
 
   if [ "$HOST_PLATFORM" == "gcp" ]; then
     prefix="gs://"
-    copy_cmd=("gsutil", "cp")
+    copy_cmd=("gsutil" "cp")
     gsutil_version=$(gsutil version 2>&1)
 
     # If the previous command was not successful (gsutil is not installed)
@@ -74,6 +87,11 @@ if [ ! -z "$BUCKET_PATH" ]; then
 
   printf "Copying deployment bundle from ${BLUE}${DEPLOYMENT_BUNDLE}${NC} to ${BLUE}${BUCKET_PATH}${NC} ...\n"
   "${copy_cmd[@]}" "${DEPLOYMENT_BUNDLE}" "${BUCKET_PATH}${DEPLOYMENT_BUNDLE}"
+
+  if [[ $? -ne 0 ]]; then
+    printf "${RED}Error: Failed to upload deployment bundle to ${BUCKET_PATH}${DEPLOYMENT_BUNDLE}${NC}\n"
+    exit 1
+  fi
 
   DEPLOYMENT_BUNDLE="${BUCKET_PATH}${DEPLOYMENT_BUNDLE}"
   printf "Deployment bundle uploaded to ${BLUE}${DEPLOYMENT_BUNDLE}${NC}.\n"

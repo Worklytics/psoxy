@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.java.Log;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
@@ -51,53 +52,62 @@ public class HealthCheckRequestHandler {
 
     private HttpEventResponse handle() {
         Set<String> missing =
-            sourceAuthStrategy.getRequiredConfigProperties().stream()
-                .filter(configProperty -> config.getConfigPropertyAsOptional(configProperty).isEmpty())
-                .map(ConfigService.ConfigProperty::name)
-                .collect(Collectors.toSet());
+                sourceAuthStrategy.getRequiredConfigProperties().stream()
+                        .filter(configProperty -> config.getConfigPropertyAsOptional(configProperty).isEmpty())
+                        .map(ConfigService.ConfigProperty::name)
+                        .collect(Collectors.toSet());
+
+        try {
+            Optional<String> targetHost = config.getConfigPropertyAsOptional(ProxyConfigProperty.TARGET_HOST);
+
+            if (targetHost.isEmpty() || StringUtils.isBlank(targetHost.get())) {
+                missing.add(ProxyConfigProperty.TARGET_HOST.name());
+            }
+        } catch (Throwable ignored) {
+            log.log(Level.WARNING, "Failed to add TARGET_HOST info to health check");
+        }
 
         HealthCheckResult.HealthCheckResultBuilder healthCheckResult = HealthCheckResult.builder()
-            .configuredSource(config.getConfigPropertyAsOptional(ProxyConfigProperty.SOURCE).orElse(null))
-            .nonDefaultSalt(config.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT).isPresent())
-            .pseudonymImplementation(config.getConfigPropertyAsOptional(ProxyConfigProperty.PSEUDONYM_IMPLEMENTATION).orElse(null))
-            .missingConfigProperties(missing);
-
+                .configuredSource(config.getConfigPropertyAsOptional(ProxyConfigProperty.SOURCE).orElse(null))
+                .nonDefaultSalt(config.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT).isPresent())
+                .pseudonymImplementation(config.getConfigPropertyAsOptional(ProxyConfigProperty.PSEUDONYM_IMPLEMENTATION).orElse(null))
+                .missingConfigProperties(missing);
 
         try {
             healthCheckResult.configPropertiesLastModified(sourceAuthStrategy.getAllConfigProperties().stream()
-                .map(param -> Pair.of(param, config.getConfigPropertyWithMetadata(param)))
-                .collect(Collectors.toMap(p -> p.getKey().name(),
-                    p -> p.getValue()
-                        .map(metadata -> metadata.getLastModifiedDate().orElse(null))
-                        .orElse(null))));
+                    .map(param -> Pair.of(param, config.getConfigPropertyWithMetadata(param)))
+                    .collect(Collectors.toMap(p -> p.getKey().name(),
+                            p -> p.getValue()
+                                    .map(metadata -> metadata.getLastModifiedDate().orElse(null))
+                                    .orElse(null))));
         } catch (Throwable e) {
             log.log(Level.WARNING, "Failed to add config debug info to health check");
         }
 
         try {
             config.getConfigPropertyAsOptional(ProxyConfigProperty.SOURCE_AUTH_STRATEGY_IDENTIFIER)
-                .ifPresent(healthCheckResult::sourceAuthStrategy);
+                    .ifPresent(healthCheckResult::sourceAuthStrategy);
         } catch (Throwable e) {
             log.log(Level.WARNING, "Failed to add sourceAuthStrategy to health check");
         }
 
         try {
             config.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.GRANT_TYPE)
-                .ifPresent(healthCheckResult::sourceAuthGrantType);
+                    .ifPresent(healthCheckResult::sourceAuthGrantType);
         } catch (Throwable e) {
             log.log(Level.WARNING, "Failed to add sourceAuthGrantType to health check");
         }
 
         try {
             config.getConfigPropertyAsOptional(ProxyConfigProperty.BUNDLE_FILENAME)
-                .ifPresent(healthCheckResult::bundleFilename);
+                    .ifPresent(healthCheckResult::bundleFilename);
         } catch (Throwable e) {
             log.log(Level.WARNING, "Failed to add bundleFilename to health check");
         }
 
         try {
             rulesUtils.getRulesFromConfig(config)
-                .ifPresent(rules -> healthCheckResult.rules(rulesUtils.asYaml(rules)));
+                    .ifPresent(rules -> healthCheckResult.rules(rulesUtils.asYaml(rules)));
         } catch (Throwable e) {
             log.log(Level.WARNING, "Failed to add rules to health check");
         }
