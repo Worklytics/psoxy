@@ -59,13 +59,7 @@ module "instance_secrets" {
   }
 }
 
-# TODO: if going to roll this out in v0.4.x, need moves like the following for:
-# asana, slack-discovery-api, salesforce, zoom, dropbox, github, jira-cloud, jira-server
-# if neglect these moves, customer's current values for parameters will be lost
-#moved {
-#  from = module.instance_secrets["zoom"].aws_ssm_parameter.secret["CLIENT_ID"]
-#  to   = module.instance_secrets["zoom"].aws_ssm_parameter.secret_with_externally_managed_value["CLIENT_ID"]
-#}
+
 
 
 module "api_connector" {
