@@ -148,9 +148,9 @@ endpoints:
     allowedQueryParams:
       - "per_page"
       - "page"
-      - "type"
       - "sort"
       - "direction"
+      - "type"
     transforms:
       - !<redact>
         jsonPaths:
@@ -531,11 +531,11 @@ endpoints:
     allowedQueryParams:
       - "per_page"
       - "page"
+      - "sort"
+      - "direction"
       - "milestone"
       - "state"
       - "labels"
-      - "sort"
-      - "direction"
       - "since"
     transforms:
       - !<redact>
@@ -658,11 +658,11 @@ endpoints:
     allowedQueryParams:
       - "per_page"
       - "page"
+      - "sort"
+      - "direction"
       - "milestone"
       - "state"
       - "labels"
-      - "sort"
-      - "direction"
       - "since"
     transforms:
       - !<redact>
@@ -1078,11 +1078,11 @@ endpoints:
     allowedQueryParams:
       - "per_page"
       - "page"
+      - "sort"
+      - "direction"
       - "state"
       - "head"
       - "base"
-      - "sort"
-      - "direction"
     transforms:
       - !<redact>
         jsonPaths:
@@ -1397,11 +1397,11 @@ endpoints:
     allowedQueryParams:
       - "per_page"
       - "page"
+      - "sort"
+      - "direction"
       - "state"
       - "head"
       - "base"
-      - "sort"
-      - "direction"
     transforms:
       - !<redact>
         jsonPaths:

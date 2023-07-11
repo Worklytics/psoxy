@@ -26,6 +26,11 @@ public class PrebuiltSanitizerRules {
             "page"
     );
 
+    private static final List<String> commonDirectionAllowedQueryParameters = Lists.newArrayList(
+            "sort",
+            "direction"
+    );
+
     private static final List<String> orgMembersAllowedQueryParameters = Streams.concat(commonAllowedQueryParameters.stream(),
                     Lists.newArrayList("filter",
                             "role").stream())
@@ -40,11 +45,10 @@ public class PrebuiltSanitizerRules {
             .collect(Collectors.toList());
 
     private static final List<String> issuesAllowedQueryParameters = Streams.concat(commonAllowedQueryParameters.stream(),
+                    commonDirectionAllowedQueryParameters.stream(),
                     Lists.newArrayList("milestone",
                             "state",
                             "labels",
-                            "sort",
-                            "direction",
                             "since").stream())
             .collect(Collectors.toList());
 
@@ -53,9 +57,8 @@ public class PrebuiltSanitizerRules {
             .collect(Collectors.toList());
 
     private static final List<String> repoListAllowedQueryParameters = Streams.concat(commonAllowedQueryParameters.stream(),
-                    Lists.newArrayList("type",
-                            "sort",
-                            "direction").stream())
+                    commonDirectionAllowedQueryParameters.stream(),
+                    Lists.newArrayList("type").stream())
             .collect(Collectors.toList());
 
     private static final List<String> repoBranchesAllowedQueryParameters = Streams.concat(commonAllowedQueryParameters.stream(),
@@ -63,17 +66,15 @@ public class PrebuiltSanitizerRules {
             .collect(Collectors.toList());
 
     private static final List<String> pullsAllowedQueryParameters = Streams.concat(commonAllowedQueryParameters.stream(),
+                    commonDirectionAllowedQueryParameters.stream(),
                     Lists.newArrayList("state",
                             "head",
-                            "base",
-                            "sort",
-                            "direction").stream())
+                            "base").stream())
             .collect(Collectors.toList());
 
     private static final List<String> pullsCommentsQueryParameters = Streams.concat(commonAllowedQueryParameters.stream(),
-                    Lists.newArrayList("sort",
-                            "direction",
-                            "since").stream())
+                    commonDirectionAllowedQueryParameters.stream(),
+                    Lists.newArrayList("since").stream())
             .collect(Collectors.toList());
 
     private static final List<String> commitsAllowedQueryParameters = Streams.concat(commonAllowedQueryParameters.stream(),
