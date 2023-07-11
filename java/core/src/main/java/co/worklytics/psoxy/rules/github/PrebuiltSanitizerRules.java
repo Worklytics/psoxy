@@ -98,6 +98,7 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..nameId")
                     .jsonPath("$..login")
                     .jsonPath("$..email")
+                    .jsonPath("$..guid")
                     .build())
             .responseSchema(jsonSchemaForUserQueryResult())
             .build();
@@ -130,6 +131,7 @@ public class PrebuiltSanitizerRules {
             .transform(Transform.Pseudonymize.builder()
                     .jsonPath("$..actor")
                     .jsonPath("$..user")
+                    .jsonPath("$..userId")
                     .build())
             .build();
 
