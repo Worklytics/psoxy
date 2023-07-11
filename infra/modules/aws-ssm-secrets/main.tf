@@ -44,7 +44,7 @@ resource "aws_ssm_parameter" "secret_with_externally_managed_value" {
 
   lifecycle {
     ignore_changes = [
-      value,          # key difference here; we don't want to overwrite values filled by the external process
+      value, # key difference here; we don't want to overwrite values filled by the external process
       insecure_value,
 
       tags
