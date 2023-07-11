@@ -140,20 +140,19 @@ moved {
   to   = module.psoxy_package
 }
 
-# install test tool, if it exists in expected location
-module "test_tool" {
-  count = var.install_test_tool ? 1 : 0
+locals {
+  is_remote_bundle       = var.deployment_bundle != null && startswith(var.deployment_bundle, "gs://")
+  remote_bucket_name     = local.is_remote_bundle ? split("/", var.deployment_bundle)[2] : null
+  remote_bundle_artifact = local.is_remote_bundle ? split("/", var.deployment_bundle)[3] : null
 
-  source = "../psoxy-test-tool"
+  file_name_with_sha1 = local.is_remote_bundle ? sha1(var.deployment_bundle) : replace(module.psoxy_package.filename, ".jar",
+    "_${filesha1(module.psoxy_package.path_to_deployment_jar)}.zip")
 
-  path_to_tools = "${var.psoxy_base_dir}tools"
-  psoxy_version = module.psoxy_package.version
+  # NOTE: not a coalesce, bc Terraform evaluates all expressions within coalesce() even if first is non-null
+  bundle_path = var.deployment_bundle == null ? data.archive_file.source[0].output_path : var.deployment_bundle
 }
 
-moved {
-  from = module.test_tool
-  to   = module.test_tool[0]
-}
+
 
 # GCP wants a zip containing a JAR; can't handle JAR directly - so create that here if no bundle
 # was passed into module
@@ -169,6 +168,8 @@ data "archive_file" "source" {
 
 # Create bucket that will host the source code
 resource "google_storage_bucket" "artifacts" {
+  count = local.is_remote_bundle ? 0 : 1
+
   project                     = var.project_id
   name                        = coalesce(var.custom_artifacts_bucket_name, "${var.project_id}-${var.environment_id_prefix}artifacts-bucket")
   location                    = var.bucket_location
@@ -184,23 +185,52 @@ resource "google_storage_bucket" "artifacts" {
   }
 }
 
-locals {
-  file_name_with_sha1 = replace(module.psoxy_package.filename, ".jar",
-  "_${filesha1(module.psoxy_package.path_to_deployment_jar)}.zip")
-
-  # NOTE: not a coalesce, bc Terraform evaluates all expressions within coalesce() even if first is non-null
-  bundle_path = var.deployment_bundle == null ? data.archive_file.source[0].output_path : var.deployment_bundle
+moved {
+  from = google_storage_bucket.artifacts
+  to   = google_storage_bucket.artifacts[0]
 }
+
+
 
 # add zipped JAR to bucket
 resource "google_storage_bucket_object" "function" {
+  count = local.is_remote_bundle ? 0 : 1
+
   name           = "${var.environment_id_prefix}${local.file_name_with_sha1}"
   content_type   = "application/zip"
-  bucket         = google_storage_bucket.artifacts.name
+  bucket         = google_storage_bucket.artifacts[0].name
   source         = local.bundle_path
   detect_md5hash = true
 }
 
+moved {
+  from = google_storage_bucket_object.function
+  to   = google_storage_bucket_object.function[0]
+}
+
+locals {
+  artifact_bucket_name          = local.is_remote_bundle ? local.remote_bucket_name : google_storage_bucket.artifacts[0].name
+  deployment_bundle_object_name = local.is_remote_bundle ? local.remote_bundle_artifact : google_storage_bucket_object.function[0].name
+}
+
+
+# install test tool, if it exists in expected location
+module "test_tool" {
+  count = var.install_test_tool ? 1 : 0
+
+  source = "../psoxy-test-tool"
+
+  path_to_tools = "${var.psoxy_base_dir}tools"
+  psoxy_version = module.psoxy_package.version
+}
+
+moved {
+  from = module.test_tool
+  to   = module.test_tool[0]
+}
+
+
+# create custom role needed for bulk psoxy use-cases
 resource "google_project_iam_custom_role" "bucket_write" {
   project     = var.project_id
   role_id     = "${local.environment_id_role_prefix}writeAccess"
@@ -234,11 +264,11 @@ resource "google_project_iam_custom_role" "psoxy_instance_secret_locker_role" {
 }
 
 output "artifacts_bucket_name" {
-  value = google_storage_bucket.artifacts.name
+  value = local.artifact_bucket_name
 }
 
 output "deployment_bundle_object_name" {
-  value = google_storage_bucket_object.function.name
+  value = local.deployment_bundle_object_name
 }
 
 output "bucket_write_role_id" {
