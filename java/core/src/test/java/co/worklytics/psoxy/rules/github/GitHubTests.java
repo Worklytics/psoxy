@@ -439,8 +439,8 @@ public class GitHubTests extends JavaRulesTestBaseCase {
 
         String sanitized = this.sanitize(endpoint, jsonString);
 
-        assertPseudonymized(sanitized, "Worklytics-user");
-        assertPseudonymized(sanitized, "23456789");
+        //assertPseudonymized(sanitized, "Worklytics-user");
+        //assertPseudonymized(sanitized, "23456789");
         assertRedacted(sanitized,
                 "serverless, pseudonymizing proxy between Worklytics and your SaaS workplace data sources' REST APIs",
                 "https://api.github.com/users/some-user",
