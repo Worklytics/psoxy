@@ -294,3 +294,14 @@ variable "todos_as_local_files" {
   description = "whether to render TODOs as flat files"
   default     = true
 }
+
+locals {
+  # tflint-ignore: terraform_unused_declarations
+  validate_salesforce_domain = (var.salesforce_domain == null || var.salesforce_domain == "") && contains(var.enabled_connectors, "salesforce")
+  validate_salesforce_domain_message = "The salesforce_domain var should be populated if enabled."
+  validate_salesforce_domain_check = regex(
+    "^${local.validate_salesforce_domain_message}$",
+    ( !local.validate_salesforce_domain
+    ? local.validate_salesforce_domain_message
+    : "" ) )
+}

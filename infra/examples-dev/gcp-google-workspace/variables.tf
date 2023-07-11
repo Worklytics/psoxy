@@ -178,6 +178,7 @@ variable "salesforce_domain" {
   type        = string
   description = "Domain of the Salesforce to connect to (only required if using Salesforce connector). To find your My Domain URL, from Setup, in the Quick Find box, enter My Domain, and then select My Domain"
   default     = ""
+
 }
 
 variable "jira_server_url" {
@@ -196,4 +197,27 @@ variable "example_jira_issue_id" {
   type        = string
   default     = null
   description = "(Only required if using Jira Server/Cloud connector) Id of an issue for only to be used as part of example calls for Jira (ex: ETV-12)"
+}
+
+variable "deployment_bundle" {
+  type        = string
+  description = "path to deployment bundle to use (if not provided, will build one). Can be GCS url, eg 'gs://artifacts-bucket/psoxy-0.4.28.zip'."
+  default     = null
+
+  validation {
+    condition     = var.deployment_bundle == null || var.deployment_bundle != ""
+    error_message = "`deployment_bundle`, if non-null, must be non-empty string."
+  }
+}
+
+
+locals {
+  # tflint-ignore: terraform_unused_declarations
+  validate_salesforce_domain = (var.salesforce_domain == null || var.salesforce_domain == "") && contains(var.enabled_connectors, "salesforce")
+  validate_salesforce_domain_message = "The salesforce_domain var should be populated if enabled."
+  validate_salesforce_domain_check = regex(
+    "^${local.validate_salesforce_domain_message}$",
+    ( !local.validate_salesforce_domain
+    ? local.validate_salesforce_domain_message
+    : "" ) )
 }
