@@ -51,7 +51,7 @@ module "psoxy" {
   jira_server_url                = var.jira_server_url
   jira_cloud_id                  = var.jira_cloud_id
   example_jira_issue_id          = var.example_jira_issue_id
-  deployment_bundle = var.deployment_bundle
+  deployment_bundle              = var.deployment_bundle
 }
 
 moved {
