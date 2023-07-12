@@ -83,6 +83,28 @@ endpoints:
                                     properties:
                                       login:
                                         type: "string"
+        errors:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              type:
+                type: "string"
+              path:
+                type: "array"
+                items:
+                  type: "string"
+              locations:
+                type: "array"
+                items:
+                  type: "object"
+                  properties:
+                    line:
+                      type: "integer"
+                    column:
+                      type: "integer"
+              message:
+                type: "string"
   - pathTemplate: "/orgs/{org}/teams"
     allowedQueryParams:
       - "per_page"
