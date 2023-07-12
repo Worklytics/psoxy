@@ -33,7 +33,9 @@ do
   # uncomment Terraform module remotes
   sed -i .bck 's/^\(.*\)# source = "git::\(.*\)"/\1source = "git::\2"/' "${EXAMPLE_PATH}/${file}"
 
-  sed -i .bck 's|^.*source = "../../mod.*"|#&|' "${EXAMPLE_PATH}/${file}"
+  sed -i .bck 's|^\([[:space:]]*\)\(.*source = "../../mod.*"\)|\1# \2|' "${EXAMPLE_PATH}/${file}"
+
+  #sed -i .bck 's|^.*source = "../../mod.*"|#&|' "${EXAMPLE_PATH}/${file}"
 
   rm -f ${EXAMPLE_PATH}/${file}.bck
 done

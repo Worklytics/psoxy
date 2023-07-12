@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 public class HealthCheckResult {
 
     @Builder.Default
-    String version = "rc-v0.4.29";
+    String version = "rc-v0.4.30";
 
     //q: terraform module version?? (eg, have terraform deployment set its version number as ENV
     // variable, and then psoxy can read it and report it here)
