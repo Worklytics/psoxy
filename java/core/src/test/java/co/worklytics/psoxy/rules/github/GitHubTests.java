@@ -624,6 +624,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         return Stream.of(
                 InvocationExample.of("https://api.github.com/orgs/FAKE/members", "org_members.json"),
                 InvocationExample.of("https://api.github.com/graphql", "graph_api_users.json"),
+                InvocationExample.of("https://api.github.com/graphql", "graph_api_error.json"),
                 InvocationExample.of("https://api.github.com/orgs/FAKE/teams", "org_teams.json"),
                 InvocationExample.of("https://api.github.com/orgs/FAKE/teams/TEAM/members", "team_members.json"),
                 InvocationExample.of("https://api.github.com/orgs/FAKE/repos", "repos.json"),

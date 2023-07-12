@@ -472,6 +472,7 @@ public class PrebuiltSanitizerRules {
                                             put("samlIdentityProvider", jsonSchemaForSamlIdentityProvider());
                                         }}).build());
                             }}).build());
+                    put("errors", jsonSchemaForErrors());
                 }}).build();
     }
 
@@ -527,5 +528,26 @@ public class PrebuiltSanitizerRules {
                     }}).build());
                 }})
                 .build();
+    }
+
+    private static JsonSchemaFilterUtils.JsonSchemaFilter jsonSchemaForErrors() {
+        return JsonSchemaFilterUtils.JsonSchemaFilter.<String, RESTRules>builder()
+                .type("array")
+                .items(JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                        .type("object")
+                        .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
+                            put("type", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
+                            put("path", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("array")
+                                    .items(JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build()).build());
+                            put("locations", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("array")
+                                    .items(JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("object")
+                                            .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {
+                                                {
+                                                    put("line", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("integer").build());
+                                                    put("column", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("integer").build());
+                                                }
+                                            }).build()).build());
+                            put("message", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
+                        }}).build()).build();
     }
 }
