@@ -2,8 +2,11 @@
 module "worklytics_connector_specs" {
   source = "../../modules/worklytics-connector-specs"
 
-  enabled_connectors = var.enabled_connectors
-
+  enabled_connectors    = var.enabled_connectors
+  jira_cloud_id         = var.jira_cloud_id
+  jira_server_url       = var.jira_server_url
+  salesforce_domain     = var.salesforce_domain
+  example_jira_issue_id = var.example_jira_issue_id
   github_organization       = var.github_organization
   example_github_repository = var.example_github_repository
 }
@@ -21,7 +24,6 @@ module "source_token_external_todo" {
 }
 
 locals {
-  # TODO: deal w/ adding the OAUTH_REFRESH_TOKEN_STUFF from above
   enabled_api_connectors  = module.worklytics_connector_specs.enabled_oauth_long_access_connectors
   enabled_bulk_connectors = module.worklytics_connector_specs.enabled_bulk_connectors
 }
