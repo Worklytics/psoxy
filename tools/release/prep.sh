@@ -52,6 +52,10 @@ RELEASE_REF_PATTERN="s/\"$(echo $CURRENT_RELEASE | sed 's/\./\\\./g')\"/\"$(echo
 find java/ -type f -name "*.java" -exec sed -i .bck $RELEASE_REF_PATTERN {} +
 find java/ -type f -name "*.bck" -exec rm {} +
 
+# tools
+find tools/ -type f -name "*.sh" -exec sed -i .bck $RELEASE_REF_PATTERN {} +
+find tools/ -type f -name "*.bck" -exec rm {} +
+
 # check for remaining references to current release
 printf "The following files still contain references to the current release ${GREEN}${CURRENT_RELEASE}${NC}; please review:\n"
 git grep -l "$CURRENT_RELEASE_PATTERN" java/
