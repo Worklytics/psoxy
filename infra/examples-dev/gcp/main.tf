@@ -49,7 +49,7 @@ module "worklytics_connectors" {
   jira_server_url           = var.jira_server_url
   salesforce_domain         = var.salesforce_domain
   github_organization       = var.github_organization
-  example_github_repository = var.example_github_repository
+  github_example_repository = var.github_example_repository
 }
 
 # sources which require additional dependencies are split into distinct Terraform files, following

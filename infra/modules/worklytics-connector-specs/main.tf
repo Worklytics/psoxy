@@ -144,7 +144,7 @@ locals {
   jira_cloud_id             = coalesce(var.jira_cloud_id, "YOUR_JIRA_CLOUD_ID")
   example_jira_issue_id     = coalesce(var.example_jira_issue_id, "YOUR_JIRA_EXAMPLE_ISSUE_ID")
   github_organization       = coalesce(var.github_organization, "YOUR_GITHUB_ORGANIZATION_NAME")
-  example_github_repository = coalesce(var.example_github_repository, "YOUR_GITHUB_EXAMPLE_REPOSITORY_NAME")
+  github_example_repository = coalesce(var.github_example_repository, "YOUR_GITHUB_EXAMPLE_REPOSITORY_NAME")
 
   # Microsoft 365 sources; add/remove as you wish
   # See https://docs.microsoft.com/en-us/graph/permissions-reference for all the permissions available in AAD Graph API
@@ -295,10 +295,10 @@ EOT
         "/orgs/${local.github_organization}/members",
         "/orgs/${local.github_organization}/teams",
         "/orgs/${local.github_organization}/audit-log",
-        "/repos/${local.github_organization}/${local.example_github_repository}/events",
-        "/repos/${local.github_organization}/${local.example_github_repository}/commits",
-        "/repos/${local.github_organization}/${local.example_github_repository}/issues",
-        "/repos/${local.github_organization}/${local.example_github_repository}/pulls",
+        "/repos/${local.github_organization}/${local.github_example_repository}/events",
+        "/repos/${local.github_organization}/${local.github_example_repository}/commits",
+        "/repos/${local.github_organization}/${local.github_example_repository}/issues",
+        "/repos/${local.github_organization}/${local.github_example_repository}/pulls",
       ]
       external_token_todo : <<EOT
   1. From your organization, register a [GitHub App](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/registering-a-github-app#registering-a-github-app)

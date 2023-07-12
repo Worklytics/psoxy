@@ -79,7 +79,7 @@ module "psoxy" {
   jira_cloud_id                  = var.jira_cloud_id
   example_jira_issue_id          = var.example_jira_issue_id
   github_organization            = var.github_organization
-  example_github_repository      = var.example_github_repository
+  github_example_repository      = var.github_example_repository
 }
 
 moved {
