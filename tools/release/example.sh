@@ -83,4 +83,7 @@ if command -v gh &> /dev/null; then
   gh pr create --title "update to ${RELEASE_TAG}" --body "update example to ${RELEASE_TAG}" --assignee "@me" --web
 fi
 
+# return us to main, so don't have to do this manually before next release
+git checkout main
+
 cd -
