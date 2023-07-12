@@ -47,7 +47,6 @@ dev_example_path="${PATH_TO_REPO}infra/examples-dev/${EXAMPLE}"
 cd -
 for file in "${FILES_TO_COPY[@]}"
 do
-  echo "copying ${dev_example_path}/${file} to ${EXAMPLE_TEMPLATE_REPO}/${file}"
   if [ -f ${dev_example_path}/${file} ]; then
      echo "copying ${dev_example_path}/${file} to ${EXAMPLE_TEMPLATE_REPO}/${file}"
      cp -f ${dev_example_path}/${file} ${EXAMPLE_TEMPLATE_REPO}/${file}
