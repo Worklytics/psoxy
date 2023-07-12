@@ -44,8 +44,6 @@ module "worklytics_connectors" {
 
 
   enabled_connectors             = var.enabled_connectors
-  google_workspace_example_admin = var.google_workspace_example_admin
-  google_workspace_example_user  = var.google_workspace_example_user
   example_jira_issue_id          = var.example_jira_issue_id
   jira_cloud_id                  = var.jira_cloud_id
   jira_server_url                = var.jira_server_url

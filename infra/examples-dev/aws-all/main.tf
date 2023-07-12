@@ -39,10 +39,6 @@ module "worklytics_connectors" {
   jira_cloud_id                  = var.jira_cloud_id
   jira_server_url                = var.jira_server_url
   salesforce_domain              = var.salesforce_domain
-  msft_tenant_id                 = var.msft_tenant_id
-  example_msft_user_guid         = var.example_msft_user_guid
-  google_workspace_example_admin = var.google_workspace_example_admin
-  google_workspace_example_user  = var.google_workspace_example_user
 }
 
 # sources which require additional dependencies are split into distinct Terraform files, following
