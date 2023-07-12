@@ -303,7 +303,7 @@ EOT
       external_token_todo : <<EOT
   1. From your organization, register a [GitHub App](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/registering-a-github-app#registering-a-github-app)
     with following permissions with **Read Only**:
-    - Repository:
+    - Repository*:
       - Contents: for reading commits and comments
       - Issues: for listing issues, comments, assignees, etc.
       - Metadata: for listing repositories and branches
@@ -311,6 +311,8 @@ EOT
     - Organization
       - Administration: for listing events from audit log
       - Members: for listing teams and their members
+
+  *NOTE: We assume that ALL the repositories are going to be list should be owned by the organization, not the users.
 
   Apart from Github instructions please review the following:
   - "Homepage URL" can be anything, not required in this flow but required by Github.
