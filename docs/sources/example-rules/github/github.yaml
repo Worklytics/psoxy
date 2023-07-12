@@ -197,6 +197,8 @@ endpoints:
           - "$..name"
           - "$..message"
           - "$..files"
+          - "$..signature"
+          - "$..payload"
       - !<pseudonymize>
         jsonPaths:
           - "$.commit..email"
@@ -255,6 +257,8 @@ endpoints:
           - "$..name"
           - "$..message"
           - "$..files"
+          - "$..signature"
+          - "$..payload"
       - !<pseudonymize>
         jsonPaths:
           - "$.commit..email"
@@ -1367,6 +1371,8 @@ endpoints:
           - "$..name"
           - "$..message"
           - "$..files"
+          - "$..signature"
+          - "$..payload"
       - !<pseudonymize>
         jsonPaths:
           - "$.commit..email"

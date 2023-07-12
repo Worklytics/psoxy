@@ -21,9 +21,7 @@
     "comment_count":0,
     "verification":{
       "verified":false,
-      "reason":"unsigned",
-      "signature":null,
-      "payload":null
+      "reason":"unsigned"
     }
   },
   "author":{
