@@ -95,6 +95,7 @@ if [ "$IS_RC" -eq 1 ]; then
   printf "\t${BLUE}git push origin ${NEXT_RELEASE}${NC}\n"
   printf "\t${BLUE}./tools/release/update-open-prs ${NEXT_RELEASE}${NC}\n"
 else
+  ./tools/release/sync-examples.sh ./
   printf "Next steps:\n"
   printf "\t${BLUE}git commit -m \"update release refs to ${NEXT_RELEASE}\"${NC}\n"
   printf "\t${BLUE}git push origin ${NEXT_RELEASE}${NC}\n"
