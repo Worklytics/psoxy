@@ -431,7 +431,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         String endpoint = "https://api.github.com/orgs/FAKE/repos";
 
         Collection<String> PII = Arrays.asList(
-                "Worklytics-user",
+                "Worklytics-org",
                 "23456789"
         );
 
