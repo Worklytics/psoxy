@@ -267,7 +267,7 @@ EOT
     }
     github = {
       source_kind : "github",
-      worklytics_connector_id : "github-psoxy"
+      worklytics_connector_id : "github-enterprise-psoxy"
       display_name : "Github"
       identifier_scope_id : "github"
       worklytics_connector_name : "Github via Psoxy"
@@ -303,7 +303,7 @@ EOT
       external_token_todo : <<EOT
   1. From your organization, register a [GitHub App](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/registering-a-github-app#registering-a-github-app)
     with following permissions with **Read Only**:
-    - Repository*:
+    - Repository:
       - Contents: for reading commits and comments
       - Issues: for listing issues, comments, assignees, etc.
       - Metadata: for listing repositories and branches
@@ -312,7 +312,9 @@ EOT
       - Administration: for listing events from audit log
       - Members: for listing teams and their members
 
-  *NOTE: We assume that ALL the repositories are going to be list should be owned by the organization, not the users.
+  NOTES:
+    - We assume that ALL the repositories are going to be list **should be owned by the organization, not the users**.
+    - Enterprise Cloud is required for this connector.
 
   Apart from Github instructions please review the following:
   - "Homepage URL" can be anything, not required in this flow but required by Github.
