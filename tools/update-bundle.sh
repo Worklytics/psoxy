@@ -5,7 +5,7 @@
 #  ../../../tools/update-bundle.sh ~/code/psoxy/ terraform.tfvars aws
 #  ../../../tools/update-bundle.sh ~/code/psoxy/ terraform.tfvars aws s3://my-artifact-bucket/psoxy-project
 
-PSOXY_BASE_DIR=$1
+CLONE_BASE_DIR=$1
 TFVARS_FILE=$2
 HOST_PLATFORM=$3
 BUCKET_PATH=$4
@@ -16,7 +16,7 @@ BLUE='\e[0;34m'
 NC='\e[0m' # No Color
 
 if [[ ! -d "$1" ]]; then
-  printf "${RED}Error: ${PSOXY_BASE_DIR} directory does not exist.${NC}\n"
+  printf "${RED}Error: ${CLONE_BASE_DIR} directory does not exist.${NC}\n"
   exit 1
 fi
 
@@ -25,13 +25,13 @@ if [[ ! -f "$TFVARS_FILE" ]]; then
   exit 1
 fi
 
-RELEASE_VERSION=$(sed -n -e 's/.*<revision>\(.*\)<\/revision>.*/\1/p' "${PSOXY_BASE_DIR}java/pom.xml")
+RELEASE_VERSION=$(sed -n -e 's/.*<revision>\(.*\)<\/revision>.*/\1/p' "${CLONE_BASE_DIR}java/pom.xml")
 
-printf "Building psoxy bundle from code checkout at ${BLUE}${PSOXY_BASE_DIR}${NC} for ${BLUE}${HOST_PLATFORM}${NC}; this will take a few minutes ...\n"
+printf "Building proxy deployment bundle from code checkout at ${BLUE}${CLONE_BASE_DIR}${NC} for ${BLUE}${HOST_PLATFORM}${NC}; this will take a few minutes ...\n"
 
-${PSOXY_BASE_DIR}tools/build.sh -q ${HOST_PLATFORM} ${PSOXY_BASE_DIR}java
+${CLONE_BASE_DIR}tools/build.sh -q ${HOST_PLATFORM} ${CLONE_BASE_DIR}java
 
-cp ${PSOXY_BASE_DIR}java/impl/${HOST_PLATFORM}/target/psoxy-${HOST_PLATFORM}-${RELEASE_VERSION}.jar .
+cp ${CLONE_BASE_DIR}java/impl/${HOST_PLATFORM}/target/psoxy-${HOST_PLATFORM}-${RELEASE_VERSION}.jar .
 
 
 if [ "$HOST_PLATFORM" == "gcp" ]; then
