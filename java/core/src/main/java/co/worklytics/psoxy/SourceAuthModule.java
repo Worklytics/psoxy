@@ -61,4 +61,9 @@ public class SourceAuthModule {
     OAuthRefreshTokenSourceAuthStrategy.TokenResponseParser tokenResponseParser(OAuthRefreshTokenSourceAuthStrategy.TokenResponseParserImpl instance) {
         return instance;
     }
+
+    @Provides @IntoSet
+    OAuthRefreshTokenSourceAuthStrategy.TokenResponseParser githubResponseParser(GithubAccessTokenResponseParserImpl instance) {
+        return instance;
+    }
 }
