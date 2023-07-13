@@ -33,6 +33,12 @@ variable "todo_step" {
   default     = 1
 }
 
+variable "github_installation_id" {
+  type        = string
+  default     = null
+  description = "(Only required if using Github connector) AppId of the application used for authentication with the proxy instance (ex: 123456)"
+}
+
 variable "github_organization" {
   type        = string
   default     = null

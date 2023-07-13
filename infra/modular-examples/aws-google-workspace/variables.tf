@@ -289,6 +289,12 @@ variable "example_jira_issue_id" {
   description = "(Only required if using Jira Server/Cloud connector) Id of an issue for only to be used as part of example calls for Jira (ex: ETV-12)"
 }
 
+variable "github_installation_id" {
+  type        = string
+  default     = null
+  description = "(Only required if using Github connector) AppId of the application used for authentication with the proxy instance (ex: 123456)"
+}
+
 variable "github_organization" {
   type        = string
   default     = null

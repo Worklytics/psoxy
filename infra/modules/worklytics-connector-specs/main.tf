@@ -143,6 +143,7 @@ locals {
 
   jira_cloud_id             = coalesce(var.jira_cloud_id, "YOUR_JIRA_CLOUD_ID")
   example_jira_issue_id     = coalesce(var.example_jira_issue_id, "YOUR_JIRA_EXAMPLE_ISSUE_ID")
+  github_installation_id       = coalesce(var.github_installation_id, "YOUR_GITHUB_INSTALLATION_ID")
   github_organization       = coalesce(var.github_organization, "YOUR_GITHUB_ORGANIZATION_NAME")
   github_example_repository = coalesce(var.github_example_repository, "YOUR_GITHUB_EXAMPLE_REPOSITORY_NAME")
 
@@ -274,15 +275,15 @@ EOT
       target_host : "api.github.com"
       source_auth_strategy : "oauth2_refresh_token"
       secured_variables : [
-        { name : "ACCESS_TOKEN", writable : true },
+        { name : "PRIVATE_KEY", writable : true },
         { name : "REFRESH_TOKEN", writable : true },
         { name : "OAUTH_REFRESH_TOKEN", writable : true, lockable : true },
-        { name : "CLIENT_ID", writable : false },
-        { name : "CLIENT_SECRET", writable : false }
+        { name : "CLIENT_ID", writable : false }
       ],
       environment_variables : {
-        GRANT_TYPE : "refresh_token"
-        REFRESH_ENDPOINT : "https://github.com/login/oauth/access_token"
+        GRANT_TYPE : "certificate_credentials"
+        TOKEN_RESPONSE_TYPE : "GITHUB_ACCESS_TOKEN"
+        REFRESH_ENDPOINT : "https://api.github.com/app/installations/${local.github_installation_id}/access_tokens"
         USE_SHARED_TOKEN : "TRUE"
       }
       settings_to_provide = {
