@@ -1,5 +1,6 @@
 package co.worklytics.psoxy.gateway.impl.oauth;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
@@ -34,20 +35,24 @@ public class GithubAccessTokenResponseParserImpl implements OAuthRefreshTokenSou
                 .readValue(response.getContent());
         CanonicalOAuthAccessTokenResponseDto dto = new CanonicalOAuthAccessTokenResponseDto();
         dto.accessToken = accessTokenResponseDto.getToken();
-        dto.expiresIn = (int) Duration.between(accessTokenResponseDto.getExpiresAt(), clock.instant()).getSeconds();
+        dto.expiresIn = (int) Duration.between(Instant.parse(accessTokenResponseDto.getExpiresAt()), clock.instant()).getSeconds();
+        dto.tokenType = "token";
 
         return dto;
     }
 
     @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+    @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonPropertyOrder(alphabetic = true) //for consistent tests
     @NoArgsConstructor //for jackson
     @Getter
     public static class AccessTokenResponseDto {
 
         String token;
-        List<String> scopes;
-        Instant expiresAt;
+        String expiresAt;
+        // Other properties not included in serialization:
+        // - permissions
+        // - repository_selection
     }
 
 }
