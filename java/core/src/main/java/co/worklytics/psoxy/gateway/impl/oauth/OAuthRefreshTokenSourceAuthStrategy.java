@@ -190,8 +190,6 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         private static final int MAX_TOKEN_REFRESH_ATTEMPTS = 3;
         private static final long WAIT_AFTER_FAILED_LOCK_ATTEMPTS = 2000L;
 
-
-
         private AccessToken currentToken = null;
 
         /**
@@ -204,6 +202,11 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         @Override
         public AccessToken refreshAccessToken() throws IOException {
             return refreshAccessToken(0);
+        }
+
+        protected CanonicalOAuthAccessTokenResponseDto parseTokenResponse(HttpResponse response) throws IOException {
+            return objectMapper.readerFor(CanonicalOAuthAccessTokenResponseDto.class)
+                    .readValue(response.getContent());
         }
 
         private AccessToken refreshAccessToken(int attempt) throws IOException {
@@ -265,8 +268,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
             HttpResponse response = tokenRequest.execute();
             CanonicalOAuthAccessTokenResponseDto tokenResponse =
-                objectMapper.readerFor(CanonicalOAuthAccessTokenResponseDto.class)
-                    .readValue(response.getContent());
+                    parseTokenResponse(response);
 
             storeRefreshTokenIfRotated(tokenResponse);
 
