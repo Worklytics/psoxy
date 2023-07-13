@@ -10,11 +10,9 @@ import com.google.api.client.json.webtoken.JsonWebSignature;
 import com.google.api.client.json.webtoken.JsonWebToken;
 import com.google.api.client.util.PemReader;
 import com.google.api.client.util.SecurityUtils;
-import com.google.common.annotations.VisibleForTesting;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
-import org.apache.commons.codec.binary.Hex;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -29,8 +27,9 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.Collections;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * implementation of an Access Token Request (per RFC6749 4.4.2) authenticated by an assertion (RFC 7521)
@@ -118,16 +117,6 @@ public class CertificateGrantTokenRequestBuilder
 
         return JsonWebSignature.signUsingRsaSha256(
                 getServiceAccountPrivateKey(), jsonFactory, header, payload);
-    }
-
-    //implements encoding X.509 certificate hash (also known as the cert's SHA-1 thumbprint) as a
-    // Base64url string value, which is how MSFT wants it in their JWT assertions
-    @SneakyThrows
-    @VisibleForTesting
-    String encodeKeyId(String hexKey) {
-        //TODO: replace with java.util.HexFormat.of().parseHex(s) ... but that's only from Java 17
-        byte[] fromHex = Hex.decodeHex(hexKey);
-        return Base64.getUrlEncoder().encodeToString(fromHex);
     }
 
     private PrivateKey getServiceAccountPrivateKey() throws IOException {

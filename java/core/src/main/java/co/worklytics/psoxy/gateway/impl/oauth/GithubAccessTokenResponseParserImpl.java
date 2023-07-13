@@ -25,7 +25,7 @@ public class GithubAccessTokenResponseParserImpl implements OAuthRefreshTokenSou
 
     @Override
     public String getName() {
-        return "GIT_HUB_ACCESS_TOKEN";
+        return "GITHUB_ACCESS_TOKEN";
     }
 
     @Override
