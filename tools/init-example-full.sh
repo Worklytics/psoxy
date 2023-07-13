@@ -1,10 +1,9 @@
 #!/bin/bash
 
-SCRIPT_VERSION="rc-v0.4.30"
-
 # colors
 RED='\e[0;31m'
 BLUE='\e[0;34m'
+GREEN='\e[0;32m'
 NC='\e[0m' # No Color
 
 REPO_CLONE_BASE_DIR=${1:-".terraform/modules/psoxy/"}
@@ -15,6 +14,27 @@ if [[ ! -d "$REPO_CLONE_BASE_DIR" ]]; then
   exit 1
 fi
 
+echo "Please choose your host platform:"
+echo "1) AWS"
+echo "2) GCP"
+
+read -p "Enter your choice [1-2]: " choice
+case $choice in
+  1)
+    HOST_PLATFORM="aws"
+    ;;
+  2)
+    HOST_PLATFORM="gcp"
+    ;;
+  *)
+    printf "${RED}Invalid choice! Please re-run initialization script.${NC}\n"
+    exit 1
+    ;;
+esac
+
+UC_HOST=$(echo "$HOST_PLATFORM" | tr '[:lower:]' '[:upper:]')
+printf "You have chosen ${GREEN}${UC_HOST}${NC} as your host platform.\n"
+
 
 TFVARS_FILE="${TF_CONFIG_ROOT}/terraform.tfvars"
 
@@ -22,63 +42,25 @@ if [ ! -f "${TFVARS_FILE}" ]; then
   printf "Initializing ${BLUE}terraform.tfvars${NC} file for your configuration ...\n"
 
 
+  printf "Please choose where you intend to for ${BLUE}terraform apply${NC} to be run:\n"
+  echo "1) locally (this machine)"
+  echo "2) Terraform Cloud"
 
-  # determine terraform apply location
-  read -p "Do you wish to run 'terraform apply' locally on this machine, rather than remotely (eg, Terraform Cloud, GitHub Actions, etc)? (Y/n) " -n 1 -r
-
-  REPLY=${REPLY:-Y}
-  case "$REPLY" in
-    [yY][eE][sS]|[yY])
-      echo "Deployment environment set to 'local'."
+  read -p "Enter your choice [1-2]: " choice
+  case $choice in
+    1)
       DEPLOYMENT_ENV="local"
       ;;
-    [nN]|[oO])
+    2)
+      DEPLOYMENT_ENV="terraform_cloud"
       ;;
     *)
-      printf "${RED}Invalid input${NC}\n"
+      printf "${RED}Invalid choice! Please re-run initialization script.${NC}\n"
       exit 1
       ;;
   esac
   echo "" # newline
 
-  if [[ -z "$DEPLOYMENT_ENV" ]]; then
-    read -p "Do you wish to run 'terraform apply' in Terraform Cloud? (Y/n) " -n 1 -r
-
-    REPLY=${REPLY:-Y}
-    case "$REPLY" in
-      [yY][eE][sS]|[yY])
-        echo "Deployment environment set to 'terraform_cloud'."
-        DEPLOYMENT_ENV="terraform_cloud"
-        ;;
-      [nN]|[oO])
-        ;;
-      *)
-        printf "${READ}Invalid input${NC}\n"
-        exit 1
-        ;;
-    esac
-    echo "" # newline
-  fi
-
-
-  if [[ -z "$DEPLOYMENT_ENV" ]]; then
-    read -p "Do you wish to run 'terraform apply' in GitHub Actions? (Y/n) " -n 1 -r
-
-    REPLY=${REPLY:-Y}
-    case "$REPLY" in
-      [yY][eE][sS]|[yY])
-        echo "Deployment environment set to 'github_action'."
-        DEPLOYMENT_ENV="github_action"
-        ;;
-      [nN]|[oO])
-        ;;
-      *)
-        printf "${RED}Invalid input${NC}\n"
-        exit 1
-        ;;
-    esac
-    echo "" # newline
-  fi
 
   if [[ -z "$DEPLOYMENT_ENV" ]]; then
     printf "${RED}No deployment environment selected.${NC} Exiting.\n"
@@ -92,18 +74,10 @@ if [ ! -f "${TFVARS_FILE}" ]; then
     touch "${TFVARS_FILE}"
   fi
 
-  ${REPO_CLONE_BASE_DIR}tools/init-tfvars.sh "${TFVARS_FILE}" "${REPO_CLONE_BASE_DIR}" "${DEPLOYMENT_ENV}"
+  ${REPO_CLONE_BASE_DIR}tools/init-tfvars.sh "${TFVARS_FILE}" "${REPO_CLONE_BASE_DIR}" "${DEPLOYMENT_ENV}" $HOST_PLATFORM
 fi
 
-# pattern used to grep for provider at top-level of Terraform configuration
-TOP_LEVEL_PROVIDER_PATTERN="^├── provider\[registry.terraform.io/hashicorp"
-AWS_PROVIDER_COUNT=$(terraform providers | grep "${TOP_LEVEL_PROVIDER_PATTERN}/aws" | wc -l)
-AWS_HOSTED=$(test $AWS_PROVIDER_COUNT -ne 0)
-if [ $AWS_HOSTED ]; then
-  HOST_PLATFORM="aws"
-else
-  HOST_PLATFORM="gcp"
-fi
+
 
 # START CREATION OF BUILD SCRIPT
 # create example build script, to support building deployment bundle (JAR) outside of Terraform
@@ -133,5 +107,7 @@ case "$REPLY" in
     echo "Installation of test tool skipped."
     ;;
 esac
+echo "" # newline
 
+printf "Initialization complete. If you wish to remove files created by this initalization, run ${BLUE}${REPO_CLONE_BASE_DIR}tools/reset-example.sh${NC}.\n"
 

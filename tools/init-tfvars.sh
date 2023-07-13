@@ -5,6 +5,7 @@
 TFVARS_FILE=$1
 PSOXY_BASE_DIR=$2
 DEPLOYMENT_ENV=${3:-"local"}
+HOST_PLATFORM=${4:-"aws"}
 
 SCRIPT_VERSION="rc-v0.4.30"
 
@@ -37,7 +38,6 @@ AWS_PROVIDER_COUNT=$(terraform providers | grep "${TOP_LEVEL_PROVIDER_PATTERN}/a
 
 if test $AWS_PROVIDER_COUNT -ne 0; then
   printf "AWS provider in Terraform configuration. Initializing variables it requires ...\n"
-  HOST_PLATFORM="aws"
   if aws --version &> /dev/null; then
 
     AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
@@ -72,8 +72,11 @@ if test $AWS_PROVIDER_COUNT -ne 0; then
     printf "${RED}AWS CLI not available${NC}\n"
   fi
 else
-  HOST_PLATFORM="gcp"
-  printf "No AWS provider found in top-level of Terraform configuration. AWS CLI not required.\n"
+  if [[ "$HOST_PLATFORM" == "aws" ]]; then
+    printf "${RED}HOST_PLATFORM set as 'aws', but no aws provider in Terraform configuration${NC}\n"
+  else
+    printf "No AWS provider found in top-level of Terraform configuration. AWS CLI not required.\n"
+  fi
 fi
 
 
