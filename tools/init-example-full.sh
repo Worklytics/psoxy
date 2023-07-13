@@ -24,7 +24,7 @@ if [ ! -f "${TFVARS_FILE}" ]; then
 
 
   # determine terraform apply location
-  read -p "Do you wish to run 'terraform apply' locally on this machine? (Y/n) " -n 1 -r
+  read -p "Do you wish to run 'terraform apply' locally on this machine, rather than remotely (eg, Terraform Cloud, GitHub Actions, etc)? (Y/n) " -n 1 -r
 
   REPLY=${REPLY:-Y}
   case "$REPLY" in
