@@ -53,8 +53,12 @@ public class SourceAuthModule {
     }
 
     @Provides @IntoSet
-    OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder accountCredentialsGrantTokenRequestPayloadBuilder(CertificateGrantTokenRequestBuilder certificateGrantTokenRequestBuilder) {
+    OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder certificateCredentialsGrantTokenRequestPayloadBuilder(CertificateGrantTokenRequestBuilder certificateGrantTokenRequestBuilder) {
         return certificateGrantTokenRequestBuilder;
     }
 
+    @Provides @IntoSet
+    OAuthRefreshTokenSourceAuthStrategy.TokenResponseParser tokenResponseParser(OAuthRefreshTokenSourceAuthStrategy.TokenResponseParserImpl instance) {
+        return instance;
+    }
 }

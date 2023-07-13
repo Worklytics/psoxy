@@ -37,14 +37,15 @@ import java.util.logging.Logger;
 
 /**
  * provides implementations for platform-independent dependencies of 'core' module
- *
  */
 @Log
 @Module
 public class PsoxyModule {
 
 
-    @Provides @Singleton //should be thread-safe
+    @Provides
+    @Singleton
+        //should be thread-safe
     ObjectMapper providesObjectMapper() {
         return new ObjectMapper();
     }
@@ -61,8 +62,8 @@ public class PsoxyModule {
         //jackson here because it's our common JSON stack, but adds dependency beyond the one pkg'd
         // with JsonPath.
         return Configuration.defaultConfiguration()
-            .jsonProvider(jacksonJsonProvider)
-            .mappingProvider(jacksonMappingProvider);
+                .jsonProvider(jacksonJsonProvider)
+                .mappingProvider(jacksonMappingProvider);
     }
 
     @Provides
@@ -89,10 +90,10 @@ public class PsoxyModule {
     static SourceAuthStrategy sourceAuthStrategy(ConfigService configService, Set<SourceAuthStrategy> sourceAuthStrategies) {
         String identifier = configService.getConfigPropertyOrError(ProxyConfigProperty.SOURCE_AUTH_STRATEGY_IDENTIFIER);
         return sourceAuthStrategies
-            .stream()
-            .filter(impl -> Objects.equals(identifier, impl.getConfigIdentifier()))
-            .findFirst()
-            .orElseThrow(() -> new Error("No SourceAuthStrategy impl matching configured identifier: " + identifier));
+                .stream()
+                .filter(impl -> Objects.equals(identifier, impl.getConfigIdentifier()))
+                .findFirst()
+                .orElseThrow(() -> new Error("No SourceAuthStrategy impl matching configured identifier: " + identifier));
     }
 
     @Provides
@@ -103,22 +104,40 @@ public class PsoxyModule {
         // If it is mis-configured will throw NPE at some point
         Optional<String> grantTypeOptional = configService.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.GRANT_TYPE);
         return grantTypeOptional.map(grantType -> payloadBuilders
-                .stream()
-                .filter(impl -> Objects.equals(grantType, impl.getGrantType()))
-                .findFirst()
-                .orElseThrow(() -> new Error("No TokenRequestPayloadBuilder impl supporting oauth grant type: " + grantType)))
-            // return no-op payload builder as Provides can't return null
-            .orElse(new OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder() {
-                @Override
-                public String getGrantType() {
-                    return null;
-                }
+                        .stream()
+                        .filter(impl -> Objects.equals(grantType, impl.getGrantType()))
+                        .findFirst()
+                        .orElseThrow(() -> new Error("No TokenRequestPayloadBuilder impl supporting oauth grant type: " + grantType)))
+                // return no-op payload builder as Provides can't return null
+                .orElse(new OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder() {
+                    @Override
+                    public String getGrantType() {
+                        return null;
+                    }
 
-                @Override
-                public HttpContent buildPayload() {
-                    return null;
-                }
-            });
+                    @Override
+                    public HttpContent buildPayload() {
+                        return null;
+                    }
+                });
+
+    }
+
+    @Provides
+    static OAuthRefreshTokenSourceAuthStrategy.TokenResponseParser tokenResponseParser(ConfigService configService,
+                                                                                       Set<OAuthRefreshTokenSourceAuthStrategy.TokenResponseParser> tokenParser,
+                                                                                       OAuthRefreshTokenSourceAuthStrategy.TokenResponseParserImpl defaultParser){
+        // Final instantiation of configs are per-function. TOKEN_RESPONSE_TYPE is dependent of type of auth
+        // strategy so might not exist for certain functions.
+        // If it is mis-configured will throw NPE at some point
+        Optional<String> parserNameOptional = configService.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.TOKEN_RESPONSE_TYPE);
+        return parserNameOptional.map(parseName -> tokenParser
+                        .stream()
+                        .filter(impl -> Objects.equals(parseName, impl.getName()))
+                        .findFirst()
+                        .orElseThrow(() -> new Error("No TokenResponseParser impl with name: " + parserNameOptional)))
+                // return no-op payload builder as Provides can't return null
+                .orElse(defaultParser);
 
     }
 
@@ -126,19 +145,22 @@ public class PsoxyModule {
     static BulkDataSanitizerFactory fileHandler(BulkDataSanitizerFactoryImpl fileHandlerStrategy) {
         return fileHandlerStrategy;
     }
-    @Provides @Singleton
-    DeterministicTokenizationStrategy deterministicPseudonymStrategy(ConfigService config)  {
+
+    @Provides
+    @Singleton
+    DeterministicTokenizationStrategy deterministicPseudonymStrategy(ConfigService config) {
         String salt = config.getConfigPropertyOrError(ProxyConfigProperty.PSOXY_SALT);
         return new Sha256DeterministicTokenizationStrategy(salt);
     }
 
-    @Provides @Singleton
+    @Provides
+    @Singleton
     ReversibleTokenizationStrategy pseudonymizationStrategy(ConfigService config,
                                                             DeterministicTokenizationStrategy deterministicTokenizationStrategy) {
 
         String salt = config.getConfigPropertyOrError(ProxyConfigProperty.PSOXY_SALT);
         Optional<SecretKeySpec> keyFromConfig = config.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_ENCRYPTION_KEY)
-            .map(passkey -> AESReversibleTokenizationStrategy.aesKeyFromPassword(passkey, salt));
+                .map(passkey -> AESReversibleTokenizationStrategy.aesKeyFromPassword(passkey, salt));
         //q: do we need to support actual fully AES keys?
 
         if (keyFromConfig.isEmpty()) {
@@ -146,23 +168,25 @@ public class PsoxyModule {
         }
 
         return AESReversibleTokenizationStrategy.builder()
-            .cipherSuite(AESReversibleTokenizationStrategy.CBC)
-            .key(keyFromConfig.orElse(null)) //null disables it, which is OK if transforms depending on this aren't used
-            .deterministicTokenizationStrategy(deterministicTokenizationStrategy)
-            .build();
+                .cipherSuite(AESReversibleTokenizationStrategy.CBC)
+                .key(keyFromConfig.orElse(null)) //null disables it, which is OK if transforms depending on this aren't used
+                .deterministicTokenizationStrategy(deterministicTokenizationStrategy)
+                .build();
     }
 
-    @Provides @Singleton
+    @Provides
+    @Singleton
     UrlSafeTokenPseudonymEncoder urlSafeTokenPseudonymEncoder() {
         return new UrlSafeTokenPseudonymEncoder();
     }
 
 
-    @Provides @Singleton
+    @Provides
+    @Singleton
     JsonSchemaFilterUtils schemaRuleUtils() {
         ObjectMapper objectMapper = new ObjectMapper()
-            .registerModule(new JavaTimeModule())
-            .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+                .registerModule(new JavaTimeModule())
+                .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
 
         return new JsonSchemaFilterUtils(objectMapper);
     }
@@ -171,7 +195,6 @@ public class PsoxyModule {
     Pseudonymizer pseudonymizer(PseudonymizerImplFactory factory, ConfigService config, co.worklytics.psoxy.rules.RuleSet ruleSet) {
         return factory.create(factory.buildOptions(config, ruleSet.getDefaultScopeIdForSource()));
     }
-
 
 
 }
