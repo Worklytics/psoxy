@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.List;
 
 @NoArgsConstructor(onConstructor_ = @Inject)
 public class GithubAccessTokenResponseParserImpl implements OAuthRefreshTokenSourceAuthStrategy.TokenResponseParser {
@@ -36,7 +35,9 @@ public class GithubAccessTokenResponseParserImpl implements OAuthRefreshTokenSou
         CanonicalOAuthAccessTokenResponseDto dto = new CanonicalOAuthAccessTokenResponseDto();
         dto.accessToken = accessTokenResponseDto.getToken();
         dto.expiresIn = (int) Duration.between(Instant.parse(accessTokenResponseDto.getExpiresAt()), clock.instant()).getSeconds();
-        dto.tokenType = "token";
+        // From https://docs.github.com/en/enterprise-server@3.8/apps/creating-github-apps/authenticating-with-a-github-app/generating-an-installation-access-token-for-a-github-app#generating-an-installation-access-token
+        // "Note: In most cases, you can use Authorization: Bearer or Authorization: token to pass a token. However, if you are passing a JSON web token (JWT), you must use Authorization: Bearer."
+        dto.tokenType = "Bearer";
 
         return dto;
     }
