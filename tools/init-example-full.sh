@@ -44,7 +44,7 @@ if [ ! -f "${TFVARS_FILE}" ]; then
 
   printf "Please choose where you intend to for ${BLUE}terraform apply${NC} to be run:\n"
   echo "1) locally (this machine)"
-  echo "2) Terraform Cloud"
+  echo "2) Terraform Cloud (or similar remote CD pipeline)"
 
   read -p "Enter your choice [1-2]: " choice
   case $choice in
