@@ -245,7 +245,7 @@ variable "example_jira_issue_id" {
 variable "github_installation_id" {
   type        = string
   default     = null
-  description = "(Only required if using Github connector) AppId of the application used for authentication with the proxy instance (ex: 123456)"
+  description = "(Only required if using Github connector) InstallationId of the application in your org for authentication with the proxy instance (ex: 123456)"
 }
 
 variable "github_organization" {
