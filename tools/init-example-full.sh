@@ -121,6 +121,19 @@ echo "\"${REPO_CLONE_BASE_DIR}tools/build.sh\" $HOST_PLATFORM \"${REPO_CLONE_BAS
 chmod +x "$BUILD_DEPLOYMENT_BUNDLE_SCRIPT"
 # END BUILD SCRIPT
 
+# tf module upgrade script
+
+UPGRADE_TF_MODULE_SCRIPT=${TF_CONFIG_ROOT}/upgrade-terraform-modules
+if [ -f $UPGRADE_TF_MODULE_SCRIPT ]; then
+  rm "$UPGRADE_TF_MODULE_SCRIPT"
+fi
+
+touch "$UPGRADE_TF_MODULE_SCRIPT"
+echo "#!/bin/bash" >> $UPGRADE_TF_MODULE_SCRIPT
+echo "\"${REPO_CLONE_BASE_DIR}tools/upgrade-terraform-modules.sh\" \$1" >> $UPGRADE_TF_MODULE_SCRIPT
+chmod +x "$UPGRADE_TF_MODULE_SCRIPT"
+
+
 # Install test tool (if user agrees)
 read -p "Do you want to install the NodeJS-based tooling to test your psoxy instance from this machine? (requires NodeJS/npm) (Y/n) " -n 1 -r
 REPLY=${REPLY:-Y}

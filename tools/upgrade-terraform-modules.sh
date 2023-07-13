@@ -3,6 +3,10 @@
 # usage:
 # ./tools/upgrade-tf-modules.sh <next-release> <path-to-clone>
 # ./tools/upgrade-tf-modules.sh v0.4.30 ~/code/psoxy/
+#
+# NOTE: this is called 'upgrade', but in principal it can be used to downgrade as well. But in
+# general proxy terraform modules aren't built to support downgrading, so YMMV
+
 NEXT_RELEASE=$1
 
 # colors
@@ -43,3 +47,4 @@ rm *.bck
 terraform init
 
 printf "Terraform module versions upgraded to ${GREEN}${NEXT_RELEASE}${NC}.\n"
+printf "To revert: ${BLUE}$0 ${CURRENT_RELEASE}${NC}\n"
