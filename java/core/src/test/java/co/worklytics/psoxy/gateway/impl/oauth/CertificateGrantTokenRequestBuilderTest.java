@@ -16,9 +16,7 @@ import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.io.ByteArrayOutputStream;
 import java.time.Clock;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
@@ -66,6 +64,9 @@ class CertificateGrantTokenRequestBuilderTest {
     @Inject
     ObjectMapper objectMapper;
 
+    @Inject
+    GithubAccessTokenResponseParserImpl responseParser;
+
     @Singleton
     @Component(modules = {
             PsoxyModule.class,
@@ -76,6 +77,8 @@ class CertificateGrantTokenRequestBuilderTest {
     })
     public interface Container {
         void inject(CertificateGrantTokenRequestBuilderTest test);
+
+        void inject(GithubAccessTokenResponseParserImpl test);
     }
 
     @BeforeEach
@@ -144,19 +147,21 @@ class CertificateGrantTokenRequestBuilderTest {
         HttpRequestFactory requestFactory = (new NetHttpTransport()).createRequestFactory();
 
         payloadBuilder.clock = Clock.systemUTC();
+        responseParser.clock = Clock.systemUTC();
+
         HttpRequest request = requestFactory.buildPostRequest(new GenericUrl(tokenEndpoint), payloadBuilder.buildPayload());
         payloadBuilder.addHeaders(request.getHeaders());
 
         HttpResponse response = request.execute();
         assertEquals(201, response.getStatusCode());
 
-        String content = new String(response.getContent().readAllBytes());
-        GithubAccessTokenResponseParserImpl.AccessTokenResponseDto tokenResponse =
-                objectMapper.readerFor(GithubAccessTokenResponseParserImpl.AccessTokenResponseDto.class)
-                        .readValue(content);
+        CanonicalOAuthAccessTokenResponseDto dto = responseParser.parseTokenResponse(response);
 
-        assertNotNull(tokenResponse.getToken());
-        assertNotNull(tokenResponse.getExpiresAt());
+        assertNotNull(dto.getAccessToken());
+        assertNotNull(dto.getExpiresIn());
+        // 1 hour of expiration after requesting the token, but leaving a bit less for testing purposes
+        assertTrue(dto.getExpiresIn() > 3000);
+        assertEquals("Bearer", dto.getTokenType());
     }
 
 
