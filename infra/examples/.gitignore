@@ -6,8 +6,24 @@
 # macOs generated files
 .DS_Store
 
+# ignore example files that should not be under git
+# (if make copy of example for use on fork or something, then these should be - hence enumerating the examples)
+aws-google-workspace/.terraform.lock.hcl
+aws-google-workspace/build
+aws-google-workspace/*.jar
+aws-google-workspace/terraform.tfvars
+aws-google-workspace/update-bundle
 
+aws-msft-365/.terraform.lock.hcl
+aws-msft-365/build
+aws-msft-365/*.jar
+aws-msft-365/terraform.tfvars
+aws-msft-365/update-bundle
 
-
+gcp-google-workspace/.terraform.lock.hcl
+gcp-google-workspace/build
+gcp-google-workspace/*.jar
+gcp-google-workspace/terraform.tfvars
+gcp-google-workspace/update-bundle
 
 

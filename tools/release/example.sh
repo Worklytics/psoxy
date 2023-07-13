@@ -47,7 +47,6 @@ dev_example_path="${PATH_TO_REPO}infra/examples-dev/${EXAMPLE}"
 cd -
 for file in "${FILES_TO_COPY[@]}"
 do
-  echo "copying ${dev_example_path}/${file} to ${EXAMPLE_TEMPLATE_REPO}/${file}"
   if [ -f ${dev_example_path}/${file} ]; then
      echo "copying ${dev_example_path}/${file} to ${EXAMPLE_TEMPLATE_REPO}/${file}"
      cp -f ${dev_example_path}/${file} ${EXAMPLE_TEMPLATE_REPO}/${file}
@@ -64,8 +63,8 @@ rm ${EXAMPLE_TEMPLATE_REPO}/*.bck
 
 set -e
 
-cp -f ../init-example.sh ${EXAMPLE_TEMPLATE_REPO}/init
-cp -f ../check-prereqs.sh ${EXAMPLE_TEMPLATE_REPO}/check-prereqs
+cp -f ${PATH_TO_REPO}tools/init-example.sh ${EXAMPLE_TEMPLATE_REPO}/init
+cp -f ${PATH_TO_REPO}tools/check-prereqs.sh ${EXAMPLE_TEMPLATE_REPO}/check-prereqs
 chmod +x ${EXAMPLE_TEMPLATE_REPO}/init
 chmod +x ${EXAMPLE_TEMPLATE_REPO}/check-prereqs
 
@@ -81,7 +80,10 @@ git commit -a -m "Update example to ${RELEASE_TAG}"
 git push origin
 
 if command -v gh &> /dev/null; then
-  gh pr create --title "update to ${RELEASE_TAG}" --body "update example to ${RELEASE_TAG}"
+  gh pr create --title "update to ${RELEASE_TAG}" --body "update example to ${RELEASE_TAG}" --assignee "@me" --web
 fi
+
+# return us to main, so don't have to do this manually before next release
+git checkout main
 
 cd -
