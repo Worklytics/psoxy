@@ -319,18 +319,25 @@ EOT
 
   Apart from Github instructions please review the following:
   - "Homepage URL" can be anything, not required in this flow but required by Github.
-  - Callback URL is required for next step, it can be any URL (http://localhost, for example);
   - Webhooks check can be disabled as this connector is not using them
   - Keep `Expire user authorization tokens` enabled, as GitHub documentation recommends
-  2. Once is created please generate a new client secret. We will both (clientId and clientSecret) in next steps.
-  3. Install the application in your organization.
+  2. Once is created please generate a new `Private Key`.
+  3. It is required to convert the format of the certificate downloaded in previous step. Please run following command:
+```shell
+openssl pkcs8 -topk8 -inform PEM -outform PEM -in {YOUR DOWNLOADED CERTIFICATE FILE} -out priv8.pem -nocrypt
+```
+  4. Install the application in your organization.
      Go to your organization settings and then in "Developer Settings". Then, click on "Edit" for your "Github App" and once you are in the app settings, click on "Install App" and click on the "Install" button. Accept the permissions to install it in your whole organization.
-  4. Now is required to prepare the token for authentication. Following steps [for generating a user access token](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-user-access-token-for-a-github-app#using-the-web-application-flow-to-generate-a-user-access-token)
-  5. Update the variables with values obtained in previous step:
-     - `PSOXY_GITHUB_CLOUD_ACCESS_TOKEN` secret variable with value of `access_token` received in previous response
-     - `PSOXY_GITHUB_CLOUD_REFRESH_TOKEN` secret variable with value of `refresh_token` received in previous response
-     - `PSOXY_GITHUB_CLOUD_CLIENT_ID` with `Client Id` value.
-     - `PSOXY_GITHUB_CLOUD_CLIENT_SECRET` with `Client Secret` value.
+  5. Once installed, the `installationId` is required as it needs to be provided in the proxy as parameter for the connector in your Terraform module. You can go to your organization settings and
+click on `Third Party Access`. Click on `Configure` the application you have installed in previous step and you will find the `installationId` at the URL of the browser:
+```
+https://github.com/organizations/{YOUR ORG}/settings/installations/{INSTALLATION_ID}
+```
+  Copy the value of `installationId` and assign it to the `github_installation_id` variable in Terraform. You will need to redeploy the proxy again if that value was not populated before.
+
+  6. Update the variables with values obtained in previous step:
+     - `PSOXY_GITHUB_CLIENT_ID` with `App ID` value.
+     - `PSOXY_GITHUB_PRIVATE_KEY` with content of the `priv8.pem` from previous step. You could open the certificate with VS Code or any other editor and copy all the content into this variable
 EOT
     }
     salesforce = {
