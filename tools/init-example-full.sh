@@ -42,7 +42,7 @@ if [ ! -f "${TFVARS_FILE}" ]; then
   printf "Initializing ${BLUE}terraform.tfvars${NC} file for your configuration ...\n"
 
 
-  printf "Please choose where you intend to for ${BLUE}terraform apply${NC} to be run:\n"
+  printf "Please choose where you intend to run ${BLUE}terraform apply${NC}:\n"
   echo "1) locally (this machine)"
   echo "2) Terraform Cloud (or similar remote CD pipeline)"
 
