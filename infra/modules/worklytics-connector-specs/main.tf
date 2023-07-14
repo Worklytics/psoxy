@@ -319,6 +319,7 @@ EOT
 
   Apart from Github instructions please review the following:
   - "Homepage URL" can be anything, not required in this flow but required by Github.
+<<<<<<< HEAD
   - Webhooks check can be disabled as this connector is not using them
   - Keep `Expire user authorization tokens` enabled, as GitHub documentation recommends
   2. Once is created please generate a new `Private Key`.
@@ -341,6 +342,20 @@ https://github.com/organizations/{YOUR ORG}/settings/installations/{INSTALLATION
   6. Update the variables with values obtained in previous step:
      - `PSOXY_GITHUB_CLIENT_ID` with `App ID` value. **NOTE**: It should be `App Id` value as we are going to use authentication through the App and **not** *client_id*.
      - `PSOXY_GITHUB_PRIVATE_KEY` with content of the `priv8.pem` from previous step. You could open the certificate with VS Code or any other editor and copy all the content *as-is* into this variable.
+=======
+  - Callback URL is required for next step, it can be any URL (http://localhost, for example);
+  - Webhooks check can be disabled as this connector is not using them
+  - Keep `Expire user authorization tokens` enabled, as GitHub documentation recommends
+  2. Once is created please generate a new client secret. We will both (clientId and clientSecret) in next steps.
+  3. Install the application in your organization.
+     Go to your organization settings and then in "Developer Settings". Then, click on "Edit" for your "Github App" and once you are in the app settings, click on "Install App" and click on the "Install" button. Accept the permissions to install it in your whole organization.
+  4. Now is required to prepare the token for authentication. Following steps [for generating a user access token](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-user-access-token-for-a-github-app#using-the-web-application-flow-to-generate-a-user-access-token)
+  5. Update the variables with values obtained in previous step:
+     - `PSOXY_GITHUB_CLOUD_ACCESS_TOKEN` secret variable with value of `access_token` received in previous response
+     - `PSOXY_GITHUB_CLOUD_REFRESH_TOKEN` secret variable with value of `refresh_token` received in previous response
+     - `PSOXY_GITHUB_CLOUD_CLIENT_ID` with `Client Id` value.
+     - `PSOXY_GITHUB_CLOUD_CLIENT_SECRET` with `Client Secret` value.
+>>>>>>> rc-v0.4.30
 EOT
     }
     salesforce = {

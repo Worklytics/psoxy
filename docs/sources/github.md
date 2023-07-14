@@ -25,10 +25,12 @@ NOTES:
 - Enterprise Cloud is required for this connector.
 
 Apart from Github instructions please review the following:
-- "Homepage URL" can be anything, not required in this flow but required by Github.
-- Webhooks check can be disabled as this connector is not using them
-- Keep `Expire user authorization tokens` enabled, as GitHub documentation recommends
+  - "Homepage URL" can be anything, not required in this flow but required by Github.
+  - Webhooks check can be disabled as this connector is not using them
+  - Keep `Expire user authorization tokens` enabled, as GitHub documentation recommends
+
 2. Once is created please generate a new `Private Key`.
+
 3. It is required to convert the format of the certificate downloaded from PKCS#1 in previous step to PKCS#8. Please run following command:
 ```shell
 openssl pkcs8 -topk8 -inform PEM -outform PEM -in {YOUR DOWNLOADED CERTIFICATE FILE} -out priv8.pem -nocrypt
@@ -48,6 +50,7 @@ Copy the value of `installationId` and assign it to the `github_installation_id`
 6. Update the variables with values obtained in previous step:
    - `PSOXY_GITHUB_CLIENT_ID` with `App ID` value. **NOTE**: It should be `App Id` value as we are going to use authentication through the App and **not** *client_id*.
    - `PSOXY_GITHUB_PRIVATE_KEY` with content of the `priv8.pem` from previous step. You could open the certificate with VS Code or any other editor and copy all the content *as-is* into this variable.
+
 
 ## Reference
 These instructions have been derived from [worklytics-connector-specs](../../infra/modules/worklytics-connector-specs/main.tf); refer to that for definitive information.
