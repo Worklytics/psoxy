@@ -1,6 +1,7 @@
 variable "google_workspace_gcp_project_id" {
   type        = string
   description = "string ID of GCP project that will host oauth clients for Google Workspace API connectors; must exist"
+  default = null
 }
 
 variable "google_workspace_terraform_sa_account_email" {
