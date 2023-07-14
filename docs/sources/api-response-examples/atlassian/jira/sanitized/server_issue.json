@@ -1,15 +1,96 @@
 {
+  "id":"10000",
+  "fields":{
+    "issuetype":{
+      "id":"10002",
+      "subtask":false
+    },
+    "timespent":115200,
+    "project":{
+      "id":"10000",
+      "projectTypeKey":"software"
+    },
+    "resolutiondate":null,
+    "lastViewed":"2023-06-13T17:54:42.910+0000",
+    "watches":{
+      "watchCount":1,
+      "isWatching":true
+    },
+    "created":"2023-05-19T17:13:53.569+0000",
+    "issuelinks":[ ],
+    "assignee":null,
+    "updated":null,
+    "status":{
+      "id":"10000",
+      "statusCategory":{
+        "id":2,
+        "key":"something",
+        "colorName":"blue-gray"
+      }
+    },
+    "attachment":[ ],
+    "creator":{
+      "key":"{\"scope\":\"jira\",\"hash\":\"dTt6XU3azhfCv8SDSPUz94vdMTlhhBlbhRTPT262SLM\"}",
+      "emailAddress":"{\"scope\":\"email\",\"domain\":\"contoso.com\",\"hash\":\"PDCw4eu8sUHIMnuovkFwUN8yG8H0M3GWBdC7hw0AOh0\"}",
+      "active":true,
+      "timeZone":"GMT"
+    },
+    "reporter":{
+      "key":"{\"scope\":\"jira\",\"hash\":\"dTt6XU3azhfCv8SDSPUz94vdMTlhhBlbhRTPT262SLM\"}",
+      "emailAddress":"{\"scope\":\"email\",\"domain\":\"contoso.com\",\"hash\":\"PDCw4eu8sUHIMnuovkFwUN8yG8H0M3GWBdC7hw0AOh0\"}",
+      "active":true,
+      "timeZone":"GMT"
+    },
+    "aggregateprogress":{
+      "progress":115200,
+      "total":115200
+    },
+    "duedate":null,
+    "progress":{
+      "progress":115200,
+      "total":115200
+    },
+    "votes":{
+      "votes":0,
+      "hasVoted":false
+    },
+    "worklog":{
+      "worklogs":[
+        {
+          "author":{
+            "key":"{\"scope\":\"jira\",\"hash\":\"dTt6XU3azhfCv8SDSPUz94vdMTlhhBlbhRTPT262SLM\"}",
+            "emailAddress":"{\"scope\":\"email\",\"domain\":\"contoso.com\",\"hash\":\"PDCw4eu8sUHIMnuovkFwUN8yG8H0M3GWBdC7hw0AOh0\"}",
+            "active":true,
+            "timeZone":"GMT"
+          },
+          "updateAuthor":{
+            "key":"{\"scope\":\"jira\",\"hash\":\"dTt6XU3azhfCv8SDSPUz94vdMTlhhBlbhRTPT262SLM\"}",
+            "emailAddress":"{\"scope\":\"email\",\"domain\":\"contoso.com\",\"hash\":\"PDCw4eu8sUHIMnuovkFwUN8yG8H0M3GWBdC7hw0AOh0\"}",
+            "active":true,
+            "timeZone":"GMT"
+          },
+          "created":"2023-05-22T10:44:57.203+0000",
+          "updated":"2023-05-22T10:44:57.203+0000",
+          "started":"2023-05-22T10:44:00.000+0000",
+          "timeSpent":"4d",
+          "timeSpentSeconds":115200,
+          "id":"10000",
+          "issueId":"10000"
+        }
+      ]
+    }
+  },
   "changelog":{
     "histories":[
       {
+        "id":"10000",
         "author":{
+          "key":"{\"scope\":\"jira\",\"hash\":\"dTt6XU3azhfCv8SDSPUz94vdMTlhhBlbhRTPT262SLM\"}",
           "emailAddress":"{\"scope\":\"email\",\"domain\":\"contoso.com\",\"hash\":\"PDCw4eu8sUHIMnuovkFwUN8yG8H0M3GWBdC7hw0AOh0\"}",
           "active":true,
-          "timeZone":"GMT",
-          "key":"{\"scope\":\"jira\",\"hash\":\"dTt6XU3azhfCv8SDSPUz94vdMTlhhBlbhRTPT262SLM\"}"
+          "timeZone":"GMT"
         },
         "created":"2023-05-22T10:44:57.208+0000",
-        "id":"10000",
         "items":[
           {
             "field":"WorklogId",
@@ -26,86 +107,5 @@
         ]
       }
     ]
-  },
-  "id":"10000",
-  "fields":{
-    "issuetype":{
-      "id":"10002",
-      "subtask":false
-    },
-    "lastViewed":"2023-06-13T17:54:42.910+0000",
-    "watches":{
-      "isWatching":true,
-      "watchCount":1
-    },
-    "creator":{
-      "emailAddress":"{\"scope\":\"email\",\"domain\":\"contoso.com\",\"hash\":\"PDCw4eu8sUHIMnuovkFwUN8yG8H0M3GWBdC7hw0AOh0\"}",
-      "active":true,
-      "timeZone":"GMT",
-      "key":"{\"scope\":\"jira\",\"hash\":\"dTt6XU3azhfCv8SDSPUz94vdMTlhhBlbhRTPT262SLM\"}"
-    },
-    "timespent":115200,
-    "created":"2023-05-19T17:13:53.569+0000",
-    "project":{
-      "id":"10000",
-      "projectTypeKey":"software"
-    },
-    "reporter":{
-      "emailAddress":"{\"scope\":\"email\",\"domain\":\"contoso.com\",\"hash\":\"PDCw4eu8sUHIMnuovkFwUN8yG8H0M3GWBdC7hw0AOh0\"}",
-      "active":true,
-      "timeZone":"GMT",
-      "key":"{\"scope\":\"jira\",\"hash\":\"dTt6XU3azhfCv8SDSPUz94vdMTlhhBlbhRTPT262SLM\"}"
-    },
-    "aggregateprogress":{
-      "total":115200,
-      "progress":115200
-    },
-    "attachment":[ ],
-    "resolutiondate":null,
-    "duedate":null,
-    "progress":{
-      "total":115200,
-      "progress":115200
-    },
-    "issuelinks":[ ],
-    "votes":{
-      "hasVoted":false,
-      "votes":0
-    },
-    "assignee":null,
-    "worklog":{
-      "worklogs":[
-        {
-          "issueId":"10000",
-          "timeSpentSeconds":115200,
-          "timeSpent":"4d",
-          "author":{
-            "emailAddress":"{\"scope\":\"email\",\"domain\":\"contoso.com\",\"hash\":\"PDCw4eu8sUHIMnuovkFwUN8yG8H0M3GWBdC7hw0AOh0\"}",
-            "active":true,
-            "timeZone":"GMT",
-            "key":"{\"scope\":\"jira\",\"hash\":\"dTt6XU3azhfCv8SDSPUz94vdMTlhhBlbhRTPT262SLM\"}"
-          },
-          "created":"2023-05-22T10:44:57.203+0000",
-          "updateAuthor":{
-            "emailAddress":"{\"scope\":\"email\",\"domain\":\"contoso.com\",\"hash\":\"PDCw4eu8sUHIMnuovkFwUN8yG8H0M3GWBdC7hw0AOh0\"}",
-            "active":true,
-            "timeZone":"GMT",
-            "key":"{\"scope\":\"jira\",\"hash\":\"dTt6XU3azhfCv8SDSPUz94vdMTlhhBlbhRTPT262SLM\"}"
-          },
-          "started":"2023-05-22T10:44:00.000+0000",
-          "id":"10000",
-          "updated":"2023-05-22T10:44:57.203+0000"
-        }
-      ]
-    },
-    "updated":null,
-    "status":{
-      "id":"10000",
-      "statusCategory":{
-        "colorName":"blue-gray",
-        "id":2,
-        "key":"something"
-      }
-    }
   }
 }

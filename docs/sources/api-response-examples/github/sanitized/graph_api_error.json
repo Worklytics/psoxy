@@ -6,6 +6,7 @@
   },
   "errors":[
     {
+      "type":"INVALID_CURSOR_ARGUMENTS",
       "path":[
         "organization",
         "samlIdentityProvider",
@@ -18,7 +19,6 @@
           "column":9
         }
       ],
-      "type":"INVALID_CURSOR_ARGUMENTS",
       "message":"`asdfasd==` does not appear to be a valid cursor."
     }
   ]
