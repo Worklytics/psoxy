@@ -275,9 +275,9 @@ EOT
       target_host : "api.github.com"
       source_auth_strategy : "oauth2_refresh_token"
       secured_variables : [
-        { name : "PRIVATE_KEY", writable : true },
-        { name : "REFRESH_TOKEN", writable : true },
-        { name : "OAUTH_REFRESH_TOKEN", writable : true, lockable : true },
+        { name : "ACCESS_TOKEN", writable : true }, # writable, as needs to be shared
+        { name : "PRIVATE_KEY", writable : false },
+        { name : "OAUTH_REFRESH_TOKEN", writable : true, lockable : true }, # I believe this is not needed anymore
         { name : "CLIENT_ID", writable : false }
       ],
       environment_variables : {
