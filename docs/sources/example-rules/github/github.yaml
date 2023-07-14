@@ -554,15 +554,6 @@ endpoints:
           - "$..user.email"
         encoding: "JSON"
   - pathTemplate: "/repos/{owner}/{repo}/issues/{issue_number}"
-    allowedQueryParams:
-      - "per_page"
-      - "page"
-      - "sort"
-      - "direction"
-      - "milestone"
-      - "state"
-      - "labels"
-      - "since"
     transforms:
       - !<redact>
         jsonPaths:
@@ -1422,14 +1413,6 @@ endpoints:
           - "$..committer.email"
         encoding: "JSON"
   - pathTemplate: "/repos/{owner}/{repo}/pulls/{pull_number}"
-    allowedQueryParams:
-      - "per_page"
-      - "page"
-      - "sort"
-      - "direction"
-      - "state"
-      - "head"
-      - "base"
     transforms:
       - !<redact>
         jsonPaths:
