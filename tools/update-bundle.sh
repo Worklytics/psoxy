@@ -38,14 +38,24 @@ if [ "$HOST_PLATFORM" == "gcp" ]; then
   zip psoxy-${HOST_PLATFORM}-${RELEASE_VERSION}.zip psoxy-${HOST_PLATFORM}-${RELEASE_VERSION}.jar
   rm psoxy-${HOST_PLATFORM}-${RELEASE_VERSION}.jar
   DEPLOYMENT_BUNDLE="psoxy-${HOST_PLATFORM}-${RELEASE_VERSION}.zip"
+  BUCKET_PATH_EXAMPLE="gs://my-artifact-bucket/"
 elif [ "$HOST_PLATFORM" == "aws" ]; then
   DEPLOYMENT_BUNDLE="psoxy-${HOST_PLATFORM}-${RELEASE_VERSION}.jar"
+  BUCKET_PATH_EXAMPLE="s3://my-artifact-bucket/"
 else
   printf "${RED}Unsupported host platform: ${HOST_PLATFORM}${NC}\n"
   exit 1
 fi
 
-# support building bundle and uploading it into an artitfacts bucket
+# support building bundle and uploading it into an artifacts bucket
+
+if [ -z "$BUCKET_PATH" ]; then
+  echo "If you want to upload deployment bundle to a remote storage location, enter the desired bucket url:"
+  printf "  example: ${BLUE}${BUCKET_PATH_EXAMPLE}${NC}\n"
+  echo "  leave blank to skip uploading bundle"
+  read -p "Enter the bucket url: (or leave blank for none) " BUCKET_PATH
+fi
+
 if [ ! -z "$BUCKET_PATH" ]; then
   # if BUCKET_PATH doesn't end with slash, append it
   if [[ ! "$BUCKET_PATH" == */ ]]; then
