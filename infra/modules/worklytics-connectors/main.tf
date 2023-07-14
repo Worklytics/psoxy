@@ -7,6 +7,8 @@ module "worklytics_connector_specs" {
   jira_server_url       = var.jira_server_url
   salesforce_domain     = var.salesforce_domain
   example_jira_issue_id = var.example_jira_issue_id
+  github_organization       = var.github_organization
+  github_example_repository = var.github_example_repository
 }
 
 

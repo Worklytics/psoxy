@@ -85,6 +85,8 @@ module "psoxy" {
   salesforce_domain              = var.salesforce_domain
   jira_server_url                = var.jira_server_url
   jira_cloud_id                  = var.jira_cloud_id
+  github_organization            = var.github_organization
+  github_example_repository      = var.github_example_repository
   example_jira_issue_id          = var.example_jira_issue_id
   bulk_sanitized_expiration_days = var.bulk_sanitized_expiration_days
   bulk_input_expiration_days     = var.bulk_input_expiration_days
