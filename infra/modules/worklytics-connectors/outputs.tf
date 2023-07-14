@@ -20,5 +20,5 @@ output "todos" {
 }
 
 output "next_todo_step" {
-  value = try(max(values(module.source_token_external_todo)[*].next_todo_step...), var.todo_step)
+  value = max(values(module.source_token_external_todo)[*].next_todo_step...)
 }
