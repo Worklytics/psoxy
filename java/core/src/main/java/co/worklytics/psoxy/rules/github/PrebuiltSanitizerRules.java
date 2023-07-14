@@ -173,7 +173,6 @@ public class PrebuiltSanitizerRules {
 
     static final Endpoint ISSUE = Endpoint.builder()
             .pathTemplate("/repos/{owner}/{repo}/issues/{issue_number}")
-            .allowedQueryParams(issuesAllowedQueryParameters)
             .transform(Transform.Redact.builder()
                     .jsonPath("$..title")
                     .jsonPath("$..body")
@@ -264,7 +263,6 @@ public class PrebuiltSanitizerRules {
 
     static final Endpoint PULL = Endpoint.builder()
             .pathTemplate("/repos/{owner}/{repo}/pulls/{pull_number}")
-            .allowedQueryParams(pullsAllowedQueryParameters)
             .transform(Transform.Redact.builder()
                     .jsonPath("$..title")
                     .jsonPath("$..body")
