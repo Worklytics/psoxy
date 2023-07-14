@@ -5,6 +5,7 @@
 TFVARS_FILE=$1
 PSOXY_BASE_DIR=$2
 DEPLOYMENT_ENV=${3:-"local"}
+HOST_PLATFORM=${4:-"aws"}
 
 SCRIPT_VERSION="rc-v0.4.30"
 
@@ -37,20 +38,33 @@ AWS_PROVIDER_COUNT=$(terraform providers | grep "${TOP_LEVEL_PROVIDER_PATTERN}/a
 
 if test $AWS_PROVIDER_COUNT -ne 0; then
   printf "AWS provider in Terraform configuration. Initializing variables it requires ...\n"
-  HOST_PLATFORM="aws"
   if aws --version &> /dev/null; then
 
     AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-    printf "# AWS account in which your Psoxy instances will be deployed\n" >> $TFVARS_FILE
-    printf "aws_account_id=\"${AWS_ACCOUNT_ID}\"\n\n" >> $TFVARS_FILE
-    printf "\taws_account_id=${BLUE}\"${AWS_ACCOUNT_ID}\"${NC}\n"
+    if [ $? -eq 0 ] && [ -n "$AWS_ACCOUNT_ID" ]; then
+      printf "# AWS account in which your Psoxy instances will be deployed\n" >> $TFVARS_FILE
+      printf "aws_account_id=\"${AWS_ACCOUNT_ID}\"\n\n" >> $TFVARS_FILE
+      printf "\taws_account_id=${BLUE}\"${AWS_ACCOUNT_ID}\"${NC}\n"
+    else
+      printf "${RED}Failed to determine AWS account ID from your aws CLI configuration. You MUST fill ${BLUE}aws_account_id${NC} in your terraform.tfvars file yourself.${NC}\n"
+      exit 1
+    fi
 
     AWS_REGION=$(aws configure get region)
-    printf "# AWS region in which your Psoxy infrastructure will be deployed\n" >> $TFVARS_FILE
-    printf "aws_region=\"${AWS_REGION}\"\n\n" >> $TFVARS_FILE
-    printf "\taws_region=${BLUE}\"${AWS_REGION}\"${NC}\n"
+    if [ $? -eq 0 ] && [ -n "$AWS_REGION" ]; then
+      printf "# AWS region in which your Psoxy infrastructure will be deployed\n" >> $TFVARS_FILE
+      printf "aws_region=\"${AWS_REGION}\"\n\n" >> $TFVARS_FILE
+      printf "\taws_region=${BLUE}\"${AWS_REGION}\"${NC}\n"
+    fi
+
 
     AWS_ARN=$(aws sts get-caller-identity --query Arn --output text)
+    if [ -z "$AWS_ARN" ]; then
+      AWS_ARN="{{ARN_OF_AWS_ROLE_TERRAFORM_SHOULD_ASSUME}}"
+      TEST_AWS_ARN=" # add ARN of AWS principals you want to be able to invoke your proxy instances for testing purposes\n"
+    else
+      TEST_AWS_ARN="\"${AWS_ARN}\" # for testing; can remove once ready for production\n"
+    fi
     printf "# AWS IAM role to assume when deploying your Psoxy infrastructure via Terraform, if needed\n" >> $TFVARS_FILE
     printf "# - this variable is used when you are authenticated as an AWS user which can assume the AWS role which actually has the requisite permissions to provision your infrastructure\n" >> $TFVARS_FILE
     printf "#   (this is approach is good practice, as minimizes the privileges of the AWS user you habitually use and easily supports multi-account scenarios) \n" >> $TFVARS_FILE
@@ -61,7 +75,7 @@ if test $AWS_PROVIDER_COUNT -ne 0; then
 
     printf "# AWS principals in the following list will be explicitly authorized to invoke your proxy instances\n" >> $TFVARS_FILE
     printf "#  - this is for initial testing/development; it can (and should) be empty for production-use\n" >> $TFVARS_FILE
-    printf "caller_aws_arns = [\n  \"${AWS_ARN}\" # for testing; can remove once prod-ready\n]\n\n" >> $TFVARS_FILE
+    printf "caller_aws_arns = [\n  ${TEST_AWS_ARN}]\n\n" >> $TFVARS_FILE
 
     printf "# GCP service accounts with ids in the list below will be allowed to invoke your proxy instances\n" >> $TFVARS_FILE
     printf "#  - for initial testing/deployment, it can be empty list; it needs to be filled only once you're ready to authorize Worklytics to access your data\n" >> $TFVARS_FILE
@@ -72,8 +86,11 @@ if test $AWS_PROVIDER_COUNT -ne 0; then
     printf "${RED}AWS CLI not available${NC}\n"
   fi
 else
-  HOST_PLATFORM="gcp"
-  printf "No AWS provider found in top-level of Terraform configuration. AWS CLI not required.\n"
+  if [[ "$HOST_PLATFORM" == "aws" ]]; then
+    printf "${RED}HOST_PLATFORM set as 'aws', but no aws provider in Terraform configuration${NC}\n"
+  else
+    printf "No AWS provider found in top-level of Terraform configuration. AWS CLI not required.\n"
+  fi
 fi
 
 

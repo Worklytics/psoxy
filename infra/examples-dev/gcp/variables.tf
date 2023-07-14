@@ -257,6 +257,18 @@ variable "example_jira_issue_id" {
   description = "(Only required if using Jira Server/Cloud connector) Id of an issue for only to be used as part of example calls for Jira (ex: ETV-12)"
 }
 
+variable "github_organization" {
+  type        = string
+  default     = null
+  description = "(Only required if using Github connector) Name of the organization to be used as part of example calls for Github (ex: Worklytics)"
+}
+
+variable "github_example_repository" {
+  type        = string
+  default     = null
+  description = "(Only required if using Github connector) Name for the repository to be used as part of example calls for Github (ex: psoxy)"
+}
+
 # build lookup tables to JOIN data you receive back from Worklytics with your original data.
 #   - `join_key_column` should be the column you expect to JOIN on, usually 'employee_id'
 #   - `columns_to_include` is an optional a list of columns to include in the lookup table,
@@ -299,4 +311,3 @@ variable "todos_as_local_files" {
   description = "whether to render TODOs as flat files"
   default     = true
 }
-
