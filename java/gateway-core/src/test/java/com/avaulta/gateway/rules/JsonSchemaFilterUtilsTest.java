@@ -34,12 +34,12 @@ class JsonSchemaFilterUtilsTest {
         jsonSchemaFilterUtils = new JsonSchemaFilterUtils();
 
         objectMapper = new ObjectMapper()
-            .registerModule(new JavaTimeModule())
-            .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false); //want ISO-strings
+                .registerModule(new JavaTimeModule())
+                .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false); //want ISO-strings
 
         yamlMapper = new YAMLMapper()
-            .registerModule(new JavaTimeModule())
-            .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+                .registerModule(new JavaTimeModule())
+                .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
 
         jsonSchemaFilterUtils.objectMapper = objectMapper;
         schemaReader = objectMapper.readerFor(JsonSchemaFilterUtils.JsonSchemaFilter.class);
@@ -50,37 +50,36 @@ class JsonSchemaFilterUtilsTest {
     void filterBySchema() {
 
         SimplePojoPlus simplePlus = SimplePojoPlus.builder()
-            .someString("some-string")
-            .date(LocalDate.parse("2023-01-16"))
-            .timestamp(Instant.parse("2023-01-16T05:12:34Z"))
-            .someListItem("list-item-1")
-            .build();
+                .someString("some-string")
+                .date(LocalDate.parse("2023-01-16"))
+                .timestamp(Instant.parse("2023-01-16T05:12:34Z"))
+                .someListItem("list-item-1")
+                .build();
 
         Pair<Object, List<String>> filteredToSimplePlus =
-            jsonSchemaFilterUtils.filterObjectBySchema(simplePlus,
-                schemaReader.readValue(SimplePojoPlus.EXPECTED_SCHEMA));
-
+                jsonSchemaFilterUtils.filterObjectBySchema(simplePlus,
+                        schemaReader.readValue(SimplePojoPlus.EXPECTED_SCHEMA));
 
 
         assertEquals("{\n" +
-                "  \"date\" : \"2023-01-16\",\n" +
-                "  \"someString\" : \"some-string\",\n" +
-                "  \"someListItems\" : [ \"list-item-1\" ],\n" +
-                "  \"timestamp\" : \"2023-01-16T05:12:34Z\"\n" +
-                "}",
-            objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(filteredToSimplePlus.getLeft()));
+                        "  \"someString\" : \"some-string\",\n" +
+                        "  \"date\" : \"2023-01-16\",\n" +
+                        "  \"timestamp\" : \"2023-01-16T05:12:34Z\",\n" +
+                        "  \"someListItems\" : [ \"list-item-1\" ]\n" +
+                        "}",
+                objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(filteredToSimplePlus.getLeft()));
 
 
         Pair<Object, List<String>> filteredToSimple =
-            jsonSchemaFilterUtils.filterObjectBySchema(simplePlus,
-                schemaReader.readValue(SimplePojo.EXPECTED_SCHEMA));
+                jsonSchemaFilterUtils.filterObjectBySchema(simplePlus,
+                        schemaReader.readValue(SimplePojo.EXPECTED_SCHEMA));
 
         assertEquals("{\n" +
-                "  \"date\" : \"2023-01-16\",\n" +
-                "  \"someString\" : \"some-string\",\n" +
-                "  \"timestamp\" : \"2023-01-16T05:12:34Z\"\n" +
-                "}",
-            objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(filteredToSimple.getLeft()));
+                        "  \"someString\" : \"some-string\",\n" +
+                        "  \"date\" : \"2023-01-16\",\n" +
+                        "  \"timestamp\" : \"2023-01-16T05:12:34Z\"\n" +
+                        "}",
+                objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(filteredToSimple.getLeft()));
 
         assertEquals(1, filteredToSimple.getRight().size());
         assertEquals("$.someListItems", filteredToSimple.getRight().get(0));
@@ -92,27 +91,27 @@ class JsonSchemaFilterUtilsTest {
     static class SimplePojoPlus {
 
         static final String EXPECTED_SCHEMA = "{\n" +
-            "  \"type\" : \"object\",\n" +
-            "  \"properties\" : {\n" +
-            "    \"someString\" : {\n" +
-            "      \"type\" : \"string\"\n" +
-            "    },\n" +
-            "    \"date\" : {\n" +
-            "      \"type\" : \"string\",\n" +
-            "      \"format\" : \"date\"\n" +
-            "    },\n" +
-            "    \"timestamp\" : {\n" +
-            "      \"type\" : \"string\",\n" +
-            "      \"format\" : \"date-time\"\n" +
-            "    },\n" +
-            "    \"someListItems\" : {\n" +
-            "      \"type\" : \"array\",\n" +
-            "      \"items\" : {\n" +
-            "        \"type\" : \"string\"\n" +
-            "      }\n" +
-            "    }\n" +
-            "  }\n" +
-            "}";
+                "  \"type\" : \"object\",\n" +
+                "  \"properties\" : {\n" +
+                "    \"someString\" : {\n" +
+                "      \"type\" : \"string\"\n" +
+                "    },\n" +
+                "    \"date\" : {\n" +
+                "      \"type\" : \"string\",\n" +
+                "      \"format\" : \"date\"\n" +
+                "    },\n" +
+                "    \"timestamp\" : {\n" +
+                "      \"type\" : \"string\",\n" +
+                "      \"format\" : \"date-time\"\n" +
+                "    },\n" +
+                "    \"someListItems\" : {\n" +
+                "      \"type\" : \"array\",\n" +
+                "      \"items\" : {\n" +
+                "        \"type\" : \"string\"\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
         String someString;
 
         LocalDate date;
@@ -134,33 +133,33 @@ class JsonSchemaFilterUtilsTest {
         Instant timestamp;
 
         static final String EXPECTED_SCHEMA = "{\n" +
-            "  \"type\" : \"object\",\n" +
-            "  \"properties\" : {\n" +
-            "    \"someString\" : {\n" +
-            "      \"type\" : \"string\"\n" +
-            "    },\n" +
-            "    \"date\" : {\n" +
-            "      \"type\" : \"string\",\n" +
-            "      \"format\" : \"date\"\n" +
-            "    },\n" +
-            "    \"timestamp\" : {\n" +
-            "      \"type\" : \"string\",\n" +
-            "      \"format\" : \"date-time\"\n" +
-            "    }\n" +
-            "  }\n" +
-            "}";
+                "  \"type\" : \"object\",\n" +
+                "  \"properties\" : {\n" +
+                "    \"someString\" : {\n" +
+                "      \"type\" : \"string\"\n" +
+                "    },\n" +
+                "    \"date\" : {\n" +
+                "      \"type\" : \"string\",\n" +
+                "      \"format\" : \"date\"\n" +
+                "    },\n" +
+                "    \"timestamp\" : {\n" +
+                "      \"type\" : \"string\",\n" +
+                "      \"format\" : \"date-time\"\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
 
         static final String EXPECTED_SCHEMA_YAML = "---\n" +
-            "type: \"object\"\n" +
-            "properties:\n" +
-            "  someString:\n" +
-            "    type: \"string\"\n" +
-            "  date:\n" +
-            "    type: \"string\"\n" +
-            "    format: \"date\"\n" +
-            "  timestamp:\n" +
-            "    type: \"string\"\n" +
-            "    format: \"date-time\"\n";
+                "type: \"object\"\n" +
+                "properties:\n" +
+                "  someString:\n" +
+                "    type: \"string\"\n" +
+                "  date:\n" +
+                "    type: \"string\"\n" +
+                "    format: \"date\"\n" +
+                "  timestamp:\n" +
+                "    type: \"string\"\n" +
+                "    format: \"date-time\"\n";
 
     }
 
@@ -169,35 +168,35 @@ class JsonSchemaFilterUtilsTest {
     void filterBySchema_refs() {
 
         JsonSchemaFilterUtils.JsonSchemaFilter schemaWithRefs =
-            schemaReader.readValue(ComplexPojo.EXPECTED_SCHEMA);
+                schemaReader.readValue(ComplexPojo.EXPECTED_SCHEMA);
 
         SimplePojoPlus simplePlus = SimplePojoPlus.builder()
-            .someString("some-string")
-            .date(LocalDate.parse("2023-01-16"))
-            .timestamp(Instant.parse("2023-01-16T05:12:34Z"))
-            .someListItem("list-item-1")
-            .build();
+                .someString("some-string")
+                .date(LocalDate.parse("2023-01-16"))
+                .timestamp(Instant.parse("2023-01-16T05:12:34Z"))
+                .someListItem("list-item-1")
+                .build();
 
 
         assertEquals(ComplexPojo.EXPECTED_SCHEMA,
-            objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(schemaWithRefs));
+                objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(schemaWithRefs));
 
         assertEquals("{\n" +
-                "  \"additionalSimplePojos\" : [ {\n" +
-                "    \"date\" : \"2023-01-16\",\n" +
-                "    \"someString\" : \"some-string\",\n" +
-                "    \"timestamp\" : \"2023-01-16T05:12:34Z\"\n" +
-                "  } ],\n" +
-                "  \"simplePojo\" : {\n" +
-                "    \"date\" : \"2023-01-16\",\n" +
-                "    \"someString\" : \"some-string\",\n" +
-                "    \"timestamp\" : \"2023-01-16T05:12:34Z\"\n" +
-                "  }\n" +
-                "}",
-            objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonSchemaFilterUtils.filterObjectBySchema(ComplexPojoPlus.builder()
-                .simplePojo(simplePlus)
-                .additionalSimplePojo(simplePlus)
-                .build(), schemaWithRefs).getLeft()));
+                        "  \"simplePojo\" : {\n" +
+                        "    \"someString\" : \"some-string\",\n" +
+                        "    \"date\" : \"2023-01-16\",\n" +
+                        "    \"timestamp\" : \"2023-01-16T05:12:34Z\"\n" +
+                        "  },\n" +
+                        "  \"additionalSimplePojos\" : [ {\n" +
+                        "    \"someString\" : \"some-string\",\n" +
+                        "    \"date\" : \"2023-01-16\",\n" +
+                        "    \"timestamp\" : \"2023-01-16T05:12:34Z\"\n" +
+                        "  } ]\n" +
+                        "}",
+                objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonSchemaFilterUtils.filterObjectBySchema(ComplexPojoPlus.builder()
+                        .simplePojo(simplePlus)
+                        .additionalSimplePojo(simplePlus)
+                        .build(), schemaWithRefs).getLeft()));
 
     }
 
@@ -207,62 +206,62 @@ class JsonSchemaFilterUtilsTest {
     static class ComplexPojo {
 
         public static final String EXPECTED_SCHEMA = "{\n" +
-            "  \"type\" : \"object\",\n" +
-            "  \"properties\" : {\n" +
-            "    \"simplePojo\" : {\n" +
-            "      \"$ref\" : \"#/definitions/SimplePojo\"\n" +
-            "    },\n" +
-            "    \"additionalSimplePojos\" : {\n" +
-            "      \"type\" : \"array\",\n" +
-            "      \"items\" : {\n" +
-            "        \"$ref\" : \"#/definitions/SimplePojo\"\n" +
-            "      }\n" +
-            "    }\n" +
-            "  },\n" +
-            "  \"definitions\" : {\n" +
-            "    \"SimplePojo\" : {\n" +
-            "      \"type\" : \"object\",\n" +
-            "      \"properties\" : {\n" +
-            "        \"someString\" : {\n" +
-            "          \"type\" : \"string\"\n" +
-            "        },\n" +
-            "        \"date\" : {\n" +
-            "          \"type\" : \"string\",\n" +
-            "          \"format\" : \"date\"\n" +
-            "        },\n" +
-            "        \"timestamp\" : {\n" +
-            "          \"type\" : \"string\",\n" +
-            "          \"format\" : \"date-time\"\n" +
-            "        }\n" +
-            "      }\n" +
-            "    }\n" +
-            "  }\n" +
-            "}";
+                "  \"type\" : \"object\",\n" +
+                "  \"properties\" : {\n" +
+                "    \"simplePojo\" : {\n" +
+                "      \"$ref\" : \"#/definitions/SimplePojo\"\n" +
+                "    },\n" +
+                "    \"additionalSimplePojos\" : {\n" +
+                "      \"type\" : \"array\",\n" +
+                "      \"items\" : {\n" +
+                "        \"$ref\" : \"#/definitions/SimplePojo\"\n" +
+                "      }\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"definitions\" : {\n" +
+                "    \"SimplePojo\" : {\n" +
+                "      \"type\" : \"object\",\n" +
+                "      \"properties\" : {\n" +
+                "        \"someString\" : {\n" +
+                "          \"type\" : \"string\"\n" +
+                "        },\n" +
+                "        \"date\" : {\n" +
+                "          \"type\" : \"string\",\n" +
+                "          \"format\" : \"date\"\n" +
+                "        },\n" +
+                "        \"timestamp\" : {\n" +
+                "          \"type\" : \"string\",\n" +
+                "          \"format\" : \"date-time\"\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
         public static final String EXPECTED_COMPACT_SCHEMA = "{\n" +
-            "  \"properties\" : {\n" +
-            "    \"simplePojo\" : {\n" +
-            "      \"$ref\" : \"#/definitions/SimplePojo\"\n" +
-            "    },\n" +
-            "    \"additionalSimplePojos\" : {\n" +
-            "      \"items\" : {\n" +
-            "        \"$ref\" : \"#/definitions/SimplePojo\"\n" +
-            "      }\n" +
-            "    }\n" +
-            "  },\n" +
-            "  \"definitions\" : {\n" +
-            "    \"SimplePojo\" : {\n" +
-            "      \"properties\" : {\n" +
-            "        \"someString\" : { },\n" +
-            "        \"date\" : {\n" +
-            "          \"format\" : \"date\"\n" +
-            "        },\n" +
-            "        \"timestamp\" : {\n" +
-            "          \"format\" : \"date-time\"\n" +
-            "        }\n" +
-            "      }\n" +
-            "    }\n" +
-            "  }\n" +
-            "}";
+                "  \"properties\" : {\n" +
+                "    \"simplePojo\" : {\n" +
+                "      \"$ref\" : \"#/definitions/SimplePojo\"\n" +
+                "    },\n" +
+                "    \"additionalSimplePojos\" : {\n" +
+                "      \"items\" : {\n" +
+                "        \"$ref\" : \"#/definitions/SimplePojo\"\n" +
+                "      }\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"definitions\" : {\n" +
+                "    \"SimplePojo\" : {\n" +
+                "      \"properties\" : {\n" +
+                "        \"someString\" : { },\n" +
+                "        \"date\" : {\n" +
+                "          \"format\" : \"date\"\n" +
+                "        },\n" +
+                "        \"timestamp\" : {\n" +
+                "          \"format\" : \"date-time\"\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
 
 
         SimplePojo simplePojo;
