@@ -277,7 +277,7 @@ EOT
       secured_variables : [
         { name : "ACCESS_TOKEN", writable : true }, # writable, as needs to be shared
         { name : "PRIVATE_KEY", writable : false },
-        { name : "OAUTH_REFRESH_TOKEN", writable : true, lockable : true }, # I believe this is not needed anymore
+        { name : "OAUTH_REFRESH_TOKEN", writable : true, lockable : true },
         { name : "CLIENT_ID", writable : false }
       ],
       environment_variables : {
@@ -324,7 +324,7 @@ EOT
   2. Once is created please generate a new `Private Key`.
   3. It is required to convert the format of the certificate downloaded from PKCS#1 in previous step to PKCS#8. Please run following command:
 ```shell
-openssl pkcs8 -topk8 -inform PEM -outform PEM -in {YOUR DOWNLOADED CERTIFICATE FILE} -out priv8.pem -nocrypt
+openssl pkcs8 -topk8 -inform PEM -outform PEM -in {YOUR DOWNLOADED CERTIFICATE FILE} -out gh_pk_pkcs8.pem -nocrypt
 ```
 
 **NOTE**: If the certificate is not converted to PKCS#8 connector will NOT work.
@@ -340,7 +340,9 @@ https://github.com/organizations/{YOUR ORG}/settings/installations/{INSTALLATION
 
   6. Update the variables with values obtained in previous step:
      - `PSOXY_GITHUB_CLIENT_ID` with `App ID` value. **NOTE**: It should be `App Id` value as we are going to use authentication through the App and **not** *client_id*.
-     - `PSOXY_GITHUB_PRIVATE_KEY` with content of the `priv8.pem` from previous step. You could open the certificate with VS Code or any other editor and copy all the content *as-is* into this variable.
+     - `PSOXY_GITHUB_PRIVATE_KEY` with content of the `gh_pk_pkcs8.pem` from previous step. You could open the certificate with VS Code or any other editor and copy all the content *as-is* into this variable.
+  7. Once the certificate has been uploaded, please remove {YOUR DOWNLOADED CERTIFICATE FILE} and `gh_pk_pkcs8.pem` from your computer or store it in a safe place.
+
 EOT
     }
     salesforce = {

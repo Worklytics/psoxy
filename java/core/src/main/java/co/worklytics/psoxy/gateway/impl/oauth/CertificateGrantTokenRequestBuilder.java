@@ -11,6 +11,7 @@ import lombok.SneakyThrows;
 
 import javax.inject.Inject;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -27,6 +28,13 @@ public class CertificateGrantTokenRequestBuilder
 
     enum ConfigProperty implements ConfigService.ConfigProperty {
         PRIVATE_KEY
+    }
+
+    @Override
+    public boolean useSharedToken() {
+        Optional<String> useSharedTokenConfig = config.getConfigPropertyAsOptional(RefreshTokenTokenRequestBuilder.ConfigProperty.USE_SHARED_TOKEN);
+
+        return useSharedTokenConfig.map(i -> Boolean.parseBoolean(useSharedTokenConfig.get())).orElse(false);
     }
 
     @Getter(onMethod_ = @Override)
