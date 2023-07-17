@@ -103,7 +103,9 @@ resource "google_secret_manager_secret_iam_member" "grant_sa_secretVersionAdder_
   member    = "serviceAccount:${google_service_account.api_connectors[each.value.instance_id].email}"
   role      = "roles/secretmanager.secretVersionAdder"
 
-  depends_on = [module.secrets]
+  depends_on = [
+    module.secrets
+  ]
 }
 
 locals {
