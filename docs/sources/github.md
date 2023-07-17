@@ -33,7 +33,7 @@ Apart from Github instructions please review the following:
 
 3. It is required to convert the format of the certificate downloaded from PKCS#1 in previous step to PKCS#8. Please run following command:
 ```shell
-openssl pkcs8 -topk8 -inform PEM -outform PEM -in {YOUR DOWNLOADED CERTIFICATE FILE} -out priv8.pem -nocrypt
+openssl pkcs8 -topk8 -inform PEM -outform PEM -in {YOUR DOWNLOADED CERTIFICATE FILE} -out gh_pk_pkcs8.pem -nocrypt
 ```
 
 **NOTE**: If the certificate is not converted to PKCS#8 connector will NOT work.
@@ -49,8 +49,8 @@ Copy the value of `installationId` and assign it to the `github_installation_id`
 
 6. Update the variables with values obtained in previous step:
    - `PSOXY_GITHUB_CLIENT_ID` with `App ID` value. **NOTE**: It should be `App Id` value as we are going to use authentication through the App and **not** *client_id*.
-   - `PSOXY_GITHUB_PRIVATE_KEY` with content of the `priv8.pem` from previous step. You could open the certificate with VS Code or any other editor and copy all the content *as-is* into this variable.
-
+   - `PSOXY_GITHUB_PRIVATE_KEY` with content of the `gh_pk_pkcs8.pem` from previous step. You could open the certificate with VS Code or any other editor and copy all the content *as-is* into this variable.
+7. Once the certificate has been uploaded, please remove {YOUR DOWNLOADED CERTIFICATE FILE} and `gh_pk_pkcs8.pem` from your computer or store it in a safe place.
 
 ## Reference
 These instructions have been derived from [worklytics-connector-specs](../../infra/modules/worklytics-connector-specs/main.tf); refer to that for definitive information.
