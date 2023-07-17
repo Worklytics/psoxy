@@ -160,8 +160,8 @@ variable "custom_bulk_connectors" {
       columnsToRedact       = optional(list(string)) # columns to remove from CSV
       columnsToInclude      = optional(list(string)) # if you prefer to include only an explicit list of columns, rather than redacting those you don't want
       columnsToPseudonymize = optional(list(string)) # columns to pseudonymize
-      columnsToDuplicate    = optional(map(string)) # columns to create copy of; name --> new name
-      columnsToRename       = optional(map(string)) # columns to rename: original name --> new name; renames applied BEFORE pseudonymization
+      columnsToDuplicate    = optional(map(string))  # columns to create copy of; name --> new name
+      columnsToRename       = optional(map(string))  # columns to rename: original name --> new name; renames applied BEFORE pseudonymization
     })
     settings_to_provide = optional(map(string), {})
   }))
@@ -190,8 +190,8 @@ variable "lookup_table_builders" {
       columnsToRedact       = optional(list(string)) # columns to remove from CSV
       columnsToInclude      = optional(list(string)) # if you prefer to include only an explicit list of columns, rather than redacting those you don't want
       columnsToPseudonymize = optional(list(string)) # columns to pseudonymize
-      columnsToDuplicate    = optional(map(string)) # columns to create copy of; name --> new name
-      columnsToRename       = optional(map(string)) # columns to rename: original name --> new name; renames applied BEFORE pseudonymization
+      columnsToDuplicate    = optional(map(string))  # columns to create copy of; name --> new name
+      columnsToRename       = optional(map(string))  # columns to rename: original name --> new name; renames applied BEFORE pseudonymization
     })
   }))
   default = {

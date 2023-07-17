@@ -88,6 +88,8 @@ git add infra/examples/**/main.tf
 git add infra/examples-dev/**/main.tf
 git add infra/examples-dev/**/msft-365.tf
 git add infra/examples-dev/**/google-workspace.tf
+git add infra/modular-examples/**/main.tf
+git add tools/init-tfvars.sh
 
 if [ "$IS_RC" -eq 1 ]; then
   printf "Next steps:\n"
@@ -99,5 +101,5 @@ else
   printf "Next steps:\n"
   printf "\t${BLUE}git commit -m \"update release refs to ${NEXT_RELEASE}\"${NC}\n"
   printf "\t${BLUE}git push origin ${NEXT_RELEASE}${NC}\n"
-  printf "\t${BLUE}gh pr create --title \"${NEXT_RELEASE}\" --body \"${NEXT_RELEASE} to main\"${NC} --web\n"
+  printf "\t${BLUE}gh pr create --title \"${NEXT_RELEASE}\" --body \"${NEXT_RELEASE} to main\" --web${NC}\n"
 fi
