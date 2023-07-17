@@ -28,7 +28,28 @@ if [ ! -f "java/pom.xml" ]; then
 fi
 
 
-printf "Preparing release ${GREEN}${NEXT_RELEASE}${NC} ...\n"
+
+IS_RC=$(echo $NEXT_RELEASE | grep -c "rc")
+if [ "$IS_RC" -eq 1 ]; then
+  printf "Preparing release candidate ${GREEN}${NEXT_RELEASE}${NC} ...\n"
+  CURRENT_BRANCH=$(git branch --show-current)
+
+  # check if current branch is clean
+  if [ -n "$(git status --porcelain)" ]; then
+    printf "${RED}Current branch is not clean. Please commit or stash your changes and try again to prepare release candidate.${NC}\n"
+    exit 1
+  fi
+
+  if [ "$CURRENT_BRANCH" != "main" ]; then
+
+    printf "${RED}Current branch is not main. Please checkout main branch and try again to prepare release candidate.${NC}\n"
+    exit 1
+  fi
+
+  git checkout -b "$NEXT_RELEASE"
+else
+  printf "Preparing release ${GREEN}${NEXT_RELEASE}${NC} ...\n"
+fi
 
 
 CURRENT_RELEASE_PATTERN=$(echo $CURRENT_RELEASE | sed 's/\./\\\./g')
@@ -52,6 +73,10 @@ RELEASE_REF_PATTERN="s/\"$(echo $CURRENT_RELEASE | sed 's/\./\\\./g')\"/\"$(echo
 find java/ -type f -name "*.java" -exec sed -i .bck $RELEASE_REF_PATTERN {} +
 find java/ -type f -name "*.bck" -exec rm {} +
 
+# tools
+find tools/ -type f -name "*.sh" -exec sed -i .bck $RELEASE_REF_PATTERN {} +
+find tools/ -type f -name "*.bck" -exec rm {} +
+
 # check for remaining references to current release
 printf "The following files still contain references to the current release ${GREEN}${CURRENT_RELEASE}${NC}; please review:\n"
 git grep -l "$CURRENT_RELEASE_PATTERN" java/
@@ -63,3 +88,18 @@ git add infra/examples/**/main.tf
 git add infra/examples-dev/**/main.tf
 git add infra/examples-dev/**/msft-365.tf
 git add infra/examples-dev/**/google-workspace.tf
+git add infra/modular-examples/**/main.tf
+git add tools/init-tfvars.sh
+
+if [ "$IS_RC" -eq 1 ]; then
+  printf "Next steps:\n"
+  printf "\t${BLUE}git commit -m \"update release refs to ${NEXT_RELEASE}\"${NC}\n"
+  printf "\t${BLUE}git push origin ${NEXT_RELEASE}${NC}\n"
+  printf "\t${BLUE}./tools/release/update-open-prs ${NEXT_RELEASE}${NC}\n"
+else
+  ./tools/release/sync-examples.sh ./
+  printf "Next steps:\n"
+  printf "\t${BLUE}git commit -m \"update release refs to ${NEXT_RELEASE}\"${NC}\n"
+  printf "\t${BLUE}git push origin ${NEXT_RELEASE}${NC}\n"
+  printf "\t${BLUE}gh pr create --title \"${NEXT_RELEASE}\" --body \"${NEXT_RELEASE} to main\" --web${NC}\n"
+fi

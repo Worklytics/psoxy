@@ -1,65 +1,65 @@
 {
-  "total":1,
+  "startAt":0,
   "maxResults":50,
+  "total":1,
   "issues":[
     {
-      "self":"http://localhost:8080/rest/api/latest/issue/10000",
       "id":"10000",
+      "self":"http://localhost:8080/rest/api/latest/issue/10000",
       "fields":{
         "issuetype":{
           "id":"10002",
           "subtask":false
         },
-        "lastViewed":"2023-05-22T10:14:39.242+0000",
-        "watches":{
-          "isWatching":true,
-          "watchCount":1
-        },
-        "creator":{
-          "emailAddress":"{\"scope\":\"email\",\"domain\":\"contoso.com\",\"hash\":\"PDCw4eu8sUHIMnuovkFwUN8yG8H0M3GWBdC7hw0AOh0\"}",
-          "active":true,
-          "timeZone":"GMT",
-          "key":"{\"scope\":\"jira\",\"hash\":\"dTt6XU3azhfCv8SDSPUz94vdMTlhhBlbhRTPT262SLM\"}"
-        },
         "timespent":0,
-        "created":"2023-05-19T17:13:53.000+0000",
         "project":{
           "id":"10000",
           "projectTypeKey":"software"
         },
-        "reporter":{
+        "resolutiondate":null,
+        "lastViewed":"2023-05-22T10:14:39.242+0000",
+        "watches":{
+          "watchCount":1,
+          "isWatching":true
+        },
+        "creator":{
+          "key":"{\"scope\":\"jira\",\"hash\":\"dTt6XU3azhfCv8SDSPUz94vdMTlhhBlbhRTPT262SLM\"}",
           "emailAddress":"{\"scope\":\"email\",\"domain\":\"contoso.com\",\"hash\":\"PDCw4eu8sUHIMnuovkFwUN8yG8H0M3GWBdC7hw0AOh0\"}",
           "active":true,
-          "timeZone":"GMT",
-          "key":"{\"scope\":\"jira\",\"hash\":\"dTt6XU3azhfCv8SDSPUz94vdMTlhhBlbhRTPT262SLM\"}"
+          "timeZone":"GMT"
+        },
+        "created":"2023-05-19T17:13:53.000+0000",
+        "reporter":{
+          "key":"{\"scope\":\"jira\",\"hash\":\"dTt6XU3azhfCv8SDSPUz94vdMTlhhBlbhRTPT262SLM\"}",
+          "emailAddress":"{\"scope\":\"email\",\"domain\":\"contoso.com\",\"hash\":\"PDCw4eu8sUHIMnuovkFwUN8yG8H0M3GWBdC7hw0AOh0\"}",
+          "active":true,
+          "timeZone":"GMT"
         },
         "aggregateprogress":{
-          "total":0,
-          "progress":0
+          "progress":0,
+          "total":0
         },
-        "resolutiondate":null,
         "duedate":null,
         "progress":{
-          "total":0,
-          "progress":0
+          "progress":0,
+          "total":0
         },
         "issuelinks":[ ],
         "votes":{
-          "hasVoted":false,
-          "votes":0
+          "votes":0,
+          "hasVoted":false
         },
         "assignee":null,
         "updated":null,
         "status":{
           "id":"10000",
           "statusCategory":{
-            "colorName":"blue-gray",
             "id":2,
-            "key":"{\"scope\":\"jira\",\"hash\":\"5X.hwVfjeXJikwU6eQquVj.93FtDsSY18eX1K5pT8aI\"}"
+            "key":"{\"scope\":\"jira\",\"hash\":\"5X.hwVfjeXJikwU6eQquVj.93FtDsSY18eX1K5pT8aI\"}",
+            "colorName":"blue-gray"
           }
         }
       }
     }
-  ],
-  "startAt":0
+  ]
 }

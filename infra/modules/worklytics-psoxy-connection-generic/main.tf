@@ -9,12 +9,13 @@ locals {
 
   # map of Worklytics setting key --> display name (matches `settings_to_provide` keys)
   autofilled_settings = {
-    PROXY_AWS_ROLE_ARN = "AWS Psoxy Role ARN",
-    PROXY_AWS_REGION   = "AWS Psoxy Region"
-    PROXY_ENDPOINT     = "Psoxy Base URL"
-    PROXY_BUCKET_NAME  = "Bucket Name"
-    parserId           = "Parser"
-    CLOUD_ID           = "Jira Cloud Id"
+    PROXY_AWS_ROLE_ARN  = "AWS Psoxy Role ARN",
+    PROXY_AWS_REGION    = "AWS Psoxy Region"
+    PROXY_ENDPOINT      = "Psoxy Base URL"
+    PROXY_BUCKET_NAME   = "Bucket Name"
+    parserId            = "Parser"
+    CLOUD_ID            = "Jira Cloud Id"
+    GITHUB_ORGANIZATION = "GitHub Organization"
   }
 
   query_params = [for param_name, ux_name in local.autofilled_settings : "${param_name}=${urlencode(var.settings_to_provide[ux_name])}"

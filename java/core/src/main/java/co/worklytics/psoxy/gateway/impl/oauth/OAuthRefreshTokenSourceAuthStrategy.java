@@ -80,6 +80,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         CLIENT_ID(false),
         GRANT_TYPE(false),
         ACCESS_TOKEN(true),
+        TOKEN_RESPONSE_TYPE(false)
         ;
 
         private final Boolean noCache;
@@ -161,6 +162,12 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         default void addHeaders(HttpHeaders httpHeaders) {}
     }
 
+    public interface TokenResponseParser {
+        String getName();
+
+        CanonicalOAuthAccessTokenResponseDto parseTokenResponse(HttpResponse response) throws IOException;
+    }
+
     @NoArgsConstructor(onConstructor_ = @Inject)
     @Log
     public static class TokenRefreshHandlerImpl implements OAuth2CredentialsWithRefresh.OAuth2RefreshHandler,
@@ -180,6 +187,8 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         RandomNumberGenerator randomNumberGenerator;
         @Inject
         LockService lockService;
+        @Inject
+        TokenResponseParser tokenResponseParser;
 
         @VisibleForTesting
         protected final Duration MAX_PROACTIVE_TOKEN_REFRESH = Duration.ofMinutes(5L);
@@ -189,8 +198,6 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         private static final String TOKEN_REFRESH_LOCK_ID = "oauth_refresh_token";
         private static final int MAX_TOKEN_REFRESH_ATTEMPTS = 3;
         private static final long WAIT_AFTER_FAILED_LOCK_ATTEMPTS = 2000L;
-
-
 
         private AccessToken currentToken = null;
 
@@ -265,8 +272,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
             HttpResponse response = tokenRequest.execute();
             CanonicalOAuthAccessTokenResponseDto tokenResponse =
-                objectMapper.readerFor(CanonicalOAuthAccessTokenResponseDto.class)
-                    .readValue(response.getContent());
+                    tokenResponseParser.parseTokenResponse(response);
 
             storeRefreshTokenIfRotated(tokenResponse);
 
@@ -398,6 +404,23 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                     log.log(Level.SEVERE, "Could not serialize token into JSON", e);
                 }
             }
+        }
+    }
+
+    @NoArgsConstructor(onConstructor_ = @Inject)
+    public static class TokenResponseParserImpl implements TokenResponseParser {
+        @Inject
+        ObjectMapper objectMapper;
+
+        @Override
+        public String getName() {
+            return "DEFAULT";
+        }
+
+        @Override
+        public CanonicalOAuthAccessTokenResponseDto parseTokenResponse(HttpResponse response) throws IOException {
+            return objectMapper.readerFor(CanonicalOAuthAccessTokenResponseDto.class)
+                    .readValue(response.getContent());
         }
     }
 
