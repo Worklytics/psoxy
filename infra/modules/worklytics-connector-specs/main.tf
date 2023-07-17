@@ -277,7 +277,7 @@ EOT
       secured_variables : [
         { name : "ACCESS_TOKEN", writable : true }, # writable, as needs to be shared
         { name : "PRIVATE_KEY", writable : false },
-        { name : "OAUTH_REFRESH_TOKEN", writable : true, lockable : true }, # I believe this is not needed anymore
+        { name : "OAUTH_REFRESH_TOKEN", writable : true, lockable : true },
         { name : "CLIENT_ID", writable : false }
       ],
       environment_variables : {
