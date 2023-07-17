@@ -34,13 +34,7 @@ public class CertificateGrantTokenRequestBuilder
     public boolean useSharedToken() {
         Optional<String> useSharedTokenConfig = config.getConfigPropertyAsOptional(RefreshTokenTokenRequestBuilder.ConfigProperty.USE_SHARED_TOKEN);
 
-        boolean useSharedToken = false;
-
-        if (useSharedTokenConfig.isPresent()) {
-            useSharedToken = Boolean.parseBoolean(useSharedTokenConfig.get());
-        }
-
-        return useSharedToken;
+        return useSharedTokenConfig.map(i -> Boolean.parseBoolean(useSharedTokenConfig.get())).orElse(false);
     }
 
     @Getter(onMethod_ = @Override)
