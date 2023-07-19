@@ -141,8 +141,11 @@ locals {
   }
 
 
-  jira_cloud_id         = coalesce(var.jira_cloud_id, "YOUR_JIRA_CLOUD_ID")
-  example_jira_issue_id = coalesce(var.example_jira_issue_id, "YOUR_JIRA_EXAMPLE_ISSUE_ID")
+  jira_cloud_id             = coalesce(var.jira_cloud_id, "YOUR_JIRA_CLOUD_ID")
+  example_jira_issue_id     = coalesce(var.example_jira_issue_id, "YOUR_JIRA_EXAMPLE_ISSUE_ID")
+  github_installation_id    = coalesce(var.github_installation_id, "YOUR_GITHUB_INSTALLATION_ID")
+  github_organization       = coalesce(var.github_organization, "YOUR_GITHUB_ORGANIZATION_NAME")
+  github_example_repository = coalesce(var.github_example_repository, "YOUR_GITHUB_EXAMPLE_REPOSITORY_NAME")
 
   # Microsoft 365 sources; add/remove as you wish
   # See https://docs.microsoft.com/en-us/graph/permissions-reference for all the permissions available in AAD Graph API
@@ -261,6 +264,85 @@ locals {
     for a sufficiently privileged user (who can see all the workspaces/teams/projects/tasks you wish to
     import to Worklytics via this connection).
   2. Update the content of PSOXY_ASANA_ACCESS_TOKEN variable with the previous token value obtained
+EOT
+    }
+    github = {
+      source_kind : "github",
+      worklytics_connector_id : "github-enterprise-psoxy"
+      display_name : "Github"
+      identifier_scope_id : "github"
+      worklytics_connector_name : "Github via Psoxy"
+      target_host : "api.github.com"
+      source_auth_strategy : "oauth2_refresh_token"
+      secured_variables : [
+        { name : "ACCESS_TOKEN", writable : true }, # writable, as needs to be shared
+        { name : "PRIVATE_KEY", writable : false },
+        { name : "OAUTH_REFRESH_TOKEN", writable : true, lockable : true },
+        { name : "CLIENT_ID", writable : false }
+      ],
+      environment_variables : {
+        GRANT_TYPE : "certificate_credentials"
+        TOKEN_RESPONSE_TYPE : "GITHUB_ACCESS_TOKEN"
+        REFRESH_ENDPOINT : "https://api.github.com/app/installations/${local.github_installation_id}/access_tokens"
+        USE_SHARED_TOKEN : "TRUE"
+      }
+      settings_to_provide = {
+        "GitHub Organization" = local.github_organization
+      }
+      reserved_concurrent_executions : null
+      example_api_calls_user_to_impersonate : null
+      example_api_calls : [
+        "/orgs/${local.github_organization}/repos",
+        "/orgs/${local.github_organization}/members",
+        "/orgs/${local.github_organization}/teams",
+        "/orgs/${local.github_organization}/audit-log",
+        "/repos/${local.github_organization}/${local.github_example_repository}/events",
+        "/repos/${local.github_organization}/${local.github_example_repository}/commits",
+        "/repos/${local.github_organization}/${local.github_example_repository}/issues",
+        "/repos/${local.github_organization}/${local.github_example_repository}/pulls",
+      ]
+      external_token_todo : <<EOT
+  1. From your organization, register a [GitHub App](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/registering-a-github-app#registering-a-github-app)
+    with following permissions with **Read Only**:
+    - Repository:
+      - Contents: for reading commits and comments
+      - Issues: for listing issues, comments, assignees, etc.
+      - Metadata: for listing repositories and branches
+      - Pull requests: for listing pull requests, reviews, comments and commits
+    - Organization
+      - Administration: for listing events from audit log
+      - Members: for listing teams and their members
+
+  NOTES:
+    - We assume that ALL the repositories are going to be list **should be owned by the organization, not the users**.
+    - Enterprise Cloud is required for this connector.
+
+  Apart from Github instructions please review the following:
+  - "Homepage URL" can be anything, not required in this flow but required by Github.
+  - Webhooks check can be disabled as this connector is not using them
+  - Keep `Expire user authorization tokens` enabled, as GitHub documentation recommends
+  2. Once is created please generate a new `Private Key`.
+  3. It is required to convert the format of the certificate downloaded from PKCS#1 in previous step to PKCS#8. Please run following command:
+```shell
+openssl pkcs8 -topk8 -inform PEM -outform PEM -in {YOUR DOWNLOADED CERTIFICATE FILE} -out gh_pk_pkcs8.pem -nocrypt
+```
+
+**NOTE**: If the certificate is not converted to PKCS#8 connector will NOT work.
+
+  4. Install the application in your organization.
+     Go to your organization settings and then in "Developer Settings". Then, click on "Edit" for your "Github App" and once you are in the app settings, click on "Install App" and click on the "Install" button. Accept the permissions to install it in your whole organization.
+  5. Once installed, the `installationId` is required as it needs to be provided in the proxy as parameter for the connector in your Terraform module. You can go to your organization settings and
+click on `Third Party Access`. Click on `Configure` the application you have installed in previous step and you will find the `installationId` at the URL of the browser:
+```
+https://github.com/organizations/{YOUR ORG}/settings/installations/{INSTALLATION_ID}
+```
+  Copy the value of `installationId` and assign it to the `github_installation_id` variable in Terraform. You will need to redeploy the proxy again if that value was not populated before.
+
+  6. Update the variables with values obtained in previous step:
+     - `PSOXY_GITHUB_CLIENT_ID` with `App ID` value. **NOTE**: It should be `App Id` value as we are going to use authentication through the App and **not** *client_id*.
+     - `PSOXY_GITHUB_PRIVATE_KEY` with content of the `gh_pk_pkcs8.pem` from previous step. You could open the certificate with VS Code or any other editor and copy all the content *as-is* into this variable.
+  7. Once the certificate has been uploaded, please remove {YOUR DOWNLOADED CERTIFICATE FILE} and `gh_pk_pkcs8.pem` from your computer or store it in a safe place.
+
 EOT
     }
     salesforce = {

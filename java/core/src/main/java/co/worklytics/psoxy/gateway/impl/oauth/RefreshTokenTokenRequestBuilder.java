@@ -3,6 +3,7 @@ package co.worklytics.psoxy.gateway.impl.oauth;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.RequiresConfiguration;
 import com.google.api.client.http.HttpContent;
+import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.UrlEncodedContent;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -76,5 +77,14 @@ public class RefreshTokenTokenRequestBuilder
     @Override
     public Set<ConfigService.ConfigProperty> getAllConfigProperties() {
         return Set.of(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.values());
+    }
+
+    @Override
+    public void addHeaders(HttpHeaders httpHeaders) {
+        // For refresh token, format will always be in JSON
+        // In theory it should not be required to specify it
+        // as it is part of the standard (see https://datatracker.ietf.org/doc/html/rfc6749#section-5.1)
+        // But for some APIs (Github) is required to ensure that the response will be in JSON format
+        httpHeaders.setAccept("application/json");
     }
 }

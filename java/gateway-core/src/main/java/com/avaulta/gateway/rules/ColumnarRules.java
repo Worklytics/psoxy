@@ -12,6 +12,9 @@ import lombok.extern.java.Log;
 import java.util.*;
 
 /**
+ * NOTE: user-facing documentation about these rules
+ * @link "https://github.com/Worklytics/psoxy/tree/main/docs/bulk-file-sanitization.md"
+ *
  *
  * so really this encodes two things that we could split:
  *   1) how to deserialize the bulk data into records
@@ -43,6 +46,10 @@ public class ColumnarRules implements BulkDataRules {
      * columns (fields) to duplicate
      *
      * NOTE: duplicates, if any, are applied BEFORE pseudonymization
+     *
+     * USE CASE: building lookup tables, where you want to duplicate column and then pseudonymize
+     * one copy of it.Not really expected for typical 'bulk' file case.
+     *
      */
     @JsonInclude(JsonInclude.Include.NON_EMPTY) //this works ...
     @Builder.Default
@@ -50,7 +57,7 @@ public class ColumnarRules implements BulkDataRules {
     protected Map<String, String> columnsToDuplicate = new HashMap<>();
 
 
-    //if we encode these as URL_SAFE_TOKEN, but not reversible then encoder won'd prefix with 'p~'
+    //if we encode these as URL_SAFE_TOKEN, but not reversible then encoder won't prefix with 'p~'
     // and then not easy to tell difference bw pseudonym and the original employee_id value (but maybe we don't care ...)
     @Builder.Default
     protected PseudonymEncoder.Implementations pseudonymFormat =
@@ -69,6 +76,10 @@ public class ColumnarRules implements BulkDataRules {
     /**
      * columns to rename
      *
+     * USE CASE: source data doesn't match specification; rather than fixing data pipeline upstream,
+     * or creating additional pipeline if you're repurposing existing data - just rename columns
+     * as required.
+     *
      * NOTE: renames, if any, are applied BEFORE pseudonymization
      */
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -80,8 +91,8 @@ public class ColumnarRules implements BulkDataRules {
      * if provided, only columns explicitly listed here will be included in output
      *  (inverse of columnsToRedact)
      *
-     * use case: if you don't control source, and want to ensure that some unexpected column that
-     * later appears in source doesn't get included in output.
+     * USE CASE: if you don't control source data, and want to ensure that some unexpected column
+     * that later appears in source doesn't get included in output.
      */
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     protected List<String> columnsToInclude;

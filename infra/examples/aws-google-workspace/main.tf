@@ -59,7 +59,7 @@ data "google_project" "psoxy-google-connectors" {
 
 module "psoxy" {
   # source = "../../modular-examples/aws-google-workspace"
-  source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-google-workspace?ref=rc-v0.4.30"
+  source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-google-workspace?ref=rc-v0.4.31"
 
   aws_account_id                 = var.aws_account_id
   aws_assume_role_arn            = var.aws_assume_role_arn # role that can test the instances (lambdas)
@@ -85,6 +85,9 @@ module "psoxy" {
   salesforce_domain              = var.salesforce_domain
   jira_server_url                = var.jira_server_url
   jira_cloud_id                  = var.jira_cloud_id
+  github_installation_id         = var.github_installation_id
+  github_organization            = var.github_organization
+  github_example_repository      = var.github_example_repository
   example_jira_issue_id          = var.example_jira_issue_id
   bulk_sanitized_expiration_days = var.bulk_sanitized_expiration_days
   bulk_input_expiration_days     = var.bulk_input_expiration_days

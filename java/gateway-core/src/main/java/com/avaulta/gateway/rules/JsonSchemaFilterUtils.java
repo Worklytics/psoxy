@@ -104,7 +104,10 @@ public class JsonSchemaFilterUtils {
                 }
             } else if (schema.isObject()) {
                 if (provisionalOutput.isObject()) {
-                    Map<String, Object> filtered = new HashMap<>();
+                    // NOTE: Using a LinkedHashMap to keep the fields in the same order
+                    // they appear defined; otherwise even the final order it seems to be deterministic
+                    // is might not be the same
+                    Map<String, Object> filtered = new LinkedHashMap<>();
                     provisionalOutput.fields().forEachRemaining(entry -> {
                         String key = entry.getKey();
                         JsonNode value = entry.getValue();

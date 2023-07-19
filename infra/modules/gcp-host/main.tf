@@ -90,6 +90,9 @@ resource "google_secret_manager_secret_iam_member" "grant_sa_updater_on_lockable
   member    = "serviceAccount:${google_service_account.api_connectors[each.value.instance_id].email}"
   role      = module.psoxy.psoxy_instance_secret_locker_role_id
 
+  depends_on = [
+    module.secrets
+  ]
 }
 
 resource "google_secret_manager_secret_iam_member" "grant_sa_secretVersionAdder_on_writable_secret" {
@@ -99,6 +102,10 @@ resource "google_secret_manager_secret_iam_member" "grant_sa_secretVersionAdder_
   secret_id = "${local.config_parameter_prefix}${each.value.instance_secret_id}"
   member    = "serviceAccount:${google_service_account.api_connectors[each.value.instance_id].email}"
   role      = "roles/secretmanager.secretVersionAdder"
+
+  depends_on = [
+    module.secrets
+  ]
 }
 
 locals {
@@ -333,4 +340,3 @@ echo "Testing Bulk Connectors ..."
 %{endfor}
 EOF
 }
-
