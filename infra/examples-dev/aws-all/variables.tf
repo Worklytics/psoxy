@@ -113,6 +113,24 @@ variable "example_jira_issue_id" {
   description = "(Only required if using Jira Server/Cloud connector) Id of an issue for only to be used as part of example calls for Jira (ex: ETV-12)"
 }
 
+variable "github_installation_id" {
+  type        = string
+  default     = null
+  description = "(Only required if using Github connector) InstallationId of the application in your org for authentication with the proxy instance (ex: 123456)"
+}
+
+variable "github_organization" {
+  type        = string
+  default     = null
+  description = "(Only required if using Github connector) Name of the organization to be used as part of example calls for Github (ex: Worklytics)"
+}
+
+variable "github_example_repository" {
+  type        = string
+  default     = null
+  description = "(Only required if using Github connector) Name for the repository to be used as part of example calls for Github (ex: psoxy)"
+}
+
 variable "connector_display_name_suffix" {
   type        = string
   description = "suffix to append to display_names of connector SAs; helpful to distinguish between various ones in testing/dev scenarios"
@@ -204,11 +222,11 @@ variable "custom_bulk_connectors" {
     source_kind = string
     rules = object({
       pseudonymFormat       = optional(string, "URL_SAFE_TOKEN")
-      columnsToRedact       = optional(list(string))
-      columnsToInclude      = optional(list(string))
-      columnsToPseudonymize = optional(list(string))
-      columnsToDuplicate    = optional(map(string))
-      columnsToRename       = optional(map(string))
+      columnsToRedact       = optional(list(string)) # columns to remove from CSV
+      columnsToInclude      = optional(list(string)) # if you prefer to include only an explicit list of columns, rather than redacting those you don't want
+      columnsToPseudonymize = optional(list(string)) # columns to pseudonymize
+      columnsToDuplicate    = optional(map(string))  # columns to create copy of; name --> new name
+      columnsToRename       = optional(map(string))  # columns to rename: original name --> new name; renames applied BEFORE pseudonymization
     })
     settings_to_provide = optional(map(string), {})
   }))
@@ -231,15 +249,30 @@ variable "custom_bulk_connectors" {
 variable "custom_bulk_connector_rules" {
   type = map(object({
     pseudonymFormat       = optional(string, "URL_SAFE_TOKEN")
-    columnsToRedact       = optional(list(string))
-    columnsToInclude      = optional(list(string))
-    columnsToPseudonymize = optional(list(string))
-    columnsToDuplicate    = optional(map(string))
-    columnsToRename       = optional(map(string))
+    columnsToRedact       = optional(list(string)) # columns to remove from CSV
+    columnsToInclude      = optional(list(string)) # if you prefer to include only an explicit list of columns, rather than redacting those you don't want
+    columnsToPseudonymize = optional(list(string)) # columns to pseudonymize
+    columnsToDuplicate    = optional(map(string))  # columns to create copy of; name --> new name
+    columnsToRename       = optional(map(string))  # columns to rename: original name --> new name; renames applied BEFORE pseudonymization
   }))
 
   description = "map of connector id --> rules object"
-  default     = {}
+  default = {
+    # hris = {
+    #   columnsToRedact       = []
+    #   columnsToPseudonymize = [
+    #     "EMPLOYEE_ID",
+    #     "EMPLOYEE_EMAIL",
+    #     "MANAGER_ID",
+    #     "MANAGER_EMAIL"
+    #  ]
+    # columnsToRename = {
+    #   # original --> new
+    #   "workday_id" = "employee_id"
+    # }
+    # columnsToInclude = [
+    # ]
+  }
 }
 
 # TODO: rethink this schema before we publish this

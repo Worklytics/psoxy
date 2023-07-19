@@ -9,6 +9,13 @@ NC='\e[0m' # No Color
 
 set -e
 
+if [ -z "$RELEASE" ]; then
+  printf "${RED}Please provide a release tag name.${NC}\n"
+  printf "Usage: after merged to main, before tagging:\n"
+  printf "  ./tools/release/publish.sh <release-tag>\n"
+  exit 1
+fi
+
 if git rev-parse "$RELEASE" >/dev/null 2>&1; then
   printf "Tag ${GREEN}$RELEASE${NC} already exists.\n"
 else

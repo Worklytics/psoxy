@@ -67,24 +67,27 @@ module "api_connector" {
 
   source = "../../modules/aws-psoxy-rest"
 
-  environment_name                = var.environment_name
-  instance_id                     = each.key
-  source_kind                     = each.value.source_kind
-  path_to_function_zip            = module.psoxy.path_to_deployment_jar
-  function_zip_hash               = module.psoxy.deployment_package_hash
-  function_env_kms_key_arn        = var.function_env_kms_key_arn
-  logs_kms_key_arn                = var.logs_kms_key_arn
-  api_caller_role_arn             = module.psoxy.api_caller_role_arn
-  example_api_calls               = each.value.example_api_calls
-  aws_account_id                  = var.aws_account_id
-  region                          = data.aws_region.current.id
-  path_to_repo_root               = var.psoxy_base_dir
-  todo_step                       = var.todo_step
-  global_parameter_arns           = module.global_secrets.secret_arns
-  path_to_instance_ssm_parameters = "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_"
-  ssm_kms_key_ids                 = local.ssm_key_ids
-  target_host                     = each.value.target_host
-  source_auth_strategy            = each.value.source_auth_strategy
+  environment_name                      = var.environment_name
+  instance_id                           = each.key
+  source_kind                           = each.value.source_kind
+  path_to_function_zip                  = module.psoxy.path_to_deployment_jar
+  function_zip_hash                     = module.psoxy.deployment_package_hash
+  function_env_kms_key_arn              = var.function_env_kms_key_arn
+  logs_kms_key_arn                      = var.logs_kms_key_arn
+  api_caller_role_arn                   = module.psoxy.api_caller_role_arn
+  example_api_calls                     = each.value.example_api_calls
+  aws_account_id                        = var.aws_account_id
+  region                                = data.aws_region.current.id
+  path_to_repo_root                     = var.psoxy_base_dir
+  todo_step                             = var.todo_step
+  global_parameter_arns                 = module.global_secrets.secret_arns
+  path_to_instance_ssm_parameters       = "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_"
+  ssm_kms_key_ids                       = local.ssm_key_ids
+  target_host                           = each.value.target_host
+  source_auth_strategy                  = each.value.source_auth_strategy
+  oauth_scopes                          = each.value.oauth_scopes_needed
+  example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
+
 
   environment_variables = merge(
     var.general_environment_variables,

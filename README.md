@@ -95,14 +95,15 @@ which you must provide as a configuration value in your proxy deployment.
 
 The API key/secret will be used to authenticate with the source's REST API and access the data.
 
-| Source                    | Details + Examples                                                          | API Permissions / Scopes                                                                                       |
-|---------------------------|-----------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------|
-| Asana                     | [docs/sources/asana](docs/sources/asana.md)                                 | a [Service Account](https://asana.com/guide/help/premium/service-accounts) (provides full access to Workspace) |
-| Jira Cloud                | [docs/sources/atlassian/jira-cloud](docs/sources/atlassian/jira-cloud.md)   | "Classic Scopes": `read:jira-user` `read:jira-work` "Granular Scopes": `read:group:jira` `read:user:jira`  "User Identity API" `read:account` |
-| Jira Server / Data Center | [docs/sources/atlassian/jira-server](docs/sources/atlassian/jira-server.md) | Personal Acccess Token on behalf of user with access to equivalent of above scopes for entire instance         |
-| Salesforce                | [docs/sources/salesforce](docs/sources/salesforce.md)                       | `api` `chatter_api` `refresh_token` `offline_access` `openid` `lightning` `content` `cdp_query_api`            |                                                                                                       |
-| Slack                     | [docs/sources/slack](docs/sources/slack/README.md)                          | `discovery:read`                                                                                               |
-| Zoom                      | [docs/sources/zoom](docs/sources/zoom.md)                                   | `user:read:admin` `meeting:read:admin` `report:read:admin`                                                     |
+| Source                            | Details + Examples                                                          | API Permissions / Scopes                                                                                                                      |
+|-----------------------------------|-----------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
+| Asana                             | [docs/sources/asana](docs/sources/asana.md)                                 | a [Service Account](https://asana.com/guide/help/premium/service-accounts) (provides full access to Workspace)                                |
+| Github _alpha_                    | [docs/sources/github](docs/sources/github.md)                               | **Read Only** permissions for: <br/>Repository: Contents, Issues, Metadata, Pull requests<br/>Organization: Administration, Members           |
+| Jira Cloud _alpha_                | [docs/sources/atlassian/jira-cloud](docs/sources/atlassian/jira-cloud.md)   | "Classic Scopes": `read:jira-user` `read:jira-work` "Granular Scopes": `read:group:jira` `read:user:jira`  "User Identity API" `read:account` |
+| Jira Server / Data Center _alpha_ | [docs/sources/atlassian/jira-server](docs/sources/atlassian/jira-server.md) | Personal Acccess Token on behalf of user with access to equivalent of above scopes for entire instance                                        |
+| Salesforce _alpha_                | [docs/sources/salesforce](docs/sources/salesforce.md)                       | `api` `chatter_api` `refresh_token` `offline_access` `openid` `lightning` `content` `cdp_query_api`                                           |                                                                                                       |
+| Slack                             | [docs/sources/slack](docs/sources/slack/README.md)                          | `discovery:read`                                                                                                                              |
+| Zoom                              | [docs/sources/zoom](docs/sources/zoom.md)                                   | `user:read:admin` `meeting:read:admin` `report:read:admin`                                                                                    |
 
 NOTE: the above scopes are copied from [infra/modules/worklytics-connector-specs](infra/modules/worklytics-connector-specs).
 Please refer to that module for a definitive list.
