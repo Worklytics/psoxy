@@ -251,10 +251,10 @@ variable "jira_cloud_id" {
   description = "(Only required if using Jira Cloud connector) Cloud id of the Jira Cloud to connect to (ex: 1324a887-45db-1bf4-1e99-ef0ff456d421)."
 }
 
-variable "example_jira_issue_id" {
+variable "jira_example_issue_id" {
   type        = string
   default     = null
-  description = "(Only required if using Jira Server/Cloud connector) Id of an issue for only to be used as part of example calls for Jira (ex: ETV-12)"
+  description = "If using Jira Server/Cloud connector, provide id of an issue for only to be used as part of example calls for Jira (ex: ETV-12)"
 }
 
 variable "github_installation_id" {
