@@ -9,6 +9,12 @@ locals {
     "arn:aws:iam::aws:policy/AmazonSSMFullAccess"  = "AmazonSSMFullAccess"
     "arn:aws:iam::aws:policy/AWSLambda_FullAccess" = "AWSLambda_FullAccess"
   }
+  # AWS managed policy required to consume Microsoft 365 data
+  # (in addition to above)
+  required_aws_managed_policies_to_consume_msft_365_source = {
+    "arn:aws:iam::aws:policy/AmazonCognitoPowerUser" = "AmazonCognitoPowerUser"
+  }
+
   # TODO: create IAM policy document, which installer could use to create their own policy as
   # alternative to using AWS Managed policies
 
