@@ -618,11 +618,13 @@ EOT
      to be a "Service Account" in effect for the connection (name it `svc-worklytics` or something).
      This will give you better visibility into activity of the data connector as well as avoid
      connection inadvertently breaking if the Jira user who owns the token is disabled or deleted.
-  2. Disable or mark a proper expiration of the token.
+
+     That service account must have *READ* permissions over your Jira instance, to be able to read issues, worklogs and comments, including their changelog where possible.
+     If you're required to specify a classical scope, you can add:
+     - `read:jira-work`
+  2. Disable or set a reasonable expiration time for the token. If you set an expiration time, it is your responsibility to re-generate the token and reset it in your host environment to maintain your connection.
   3. Copy the value of the token in `PSOXY_JIRA_SERVER_ACCESS_TOKEN` variable as part of AWS System
-     Manager parameters store / GCP Cloud Secrets (if default implementation)
-     NOTE: If your token has been created with expiration date, please remember to update it before
-     that date to ensure connector is going to work.
+     Manager Parameter Store / GCP Cloud Secrets.
 EOT
     }
     jira-cloud = {
