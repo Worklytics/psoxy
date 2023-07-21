@@ -23,7 +23,7 @@ import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpHeaders;
+import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ContentType;
@@ -83,9 +83,7 @@ public class CommonRequestHandler {
             HttpHeaders.CONTENT_TYPE,
             HttpHeaders.CACHE_CONTROL,
             HttpHeaders.ETAG,
-            // Used to express a typed relationship with another resource, where the relation type is defined by RFC 5988
-            // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Link
-            "Link",
+            HttpHeaders.LINK,
             HttpHeaders.EXPIRES,
             HttpHeaders.LAST_MODIFIED,
             HttpHeaders.RETRY_AFTER
