@@ -14,7 +14,7 @@ NOTE: derived from [worklytics-connector-specs](../../infra/modules/worklytics-c
    That service account must have *READ* permissions over your Jira instance, to be able to read issues, worklogs and comments,
    including their changelog where possible.
 
-   In terms of classical scopes if there is a need to specify someone:
+   If you're required to specify a classical scope, you can add:
      - `read:jira-work`
 2. Disable or mark a proper expiration of the token.
 3. Copy the value of the token in `PSOXY_JIRA_SERVER_ACCESS_TOKEN` variable as part of AWS System
