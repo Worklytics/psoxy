@@ -11,7 +11,7 @@ NOTE: derived from [worklytics-connector-specs](../../infra/modules/worklytics-c
    This will give you better visibility into activity of the data connector as well as avoid
    connection inadvertently breaking if the Jira user who owns the token is disabled or deleted.
 
-   That service account will require to have *READ* permissions over Jira, to cover following "Issues" and their worklogs and comments,
+   That service account must have *READ* permissions over your Jira instance, to be able to read issues, worklogs and comments,
    including their changelog where possible.
 
    In terms of classical scopes if there is a need to specify someone:
