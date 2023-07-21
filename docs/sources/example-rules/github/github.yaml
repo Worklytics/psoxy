@@ -561,6 +561,7 @@ endpoints:
           - "$..body"
           - "$..description"
           - "$..name"
+          - "$..pem"
       - !<redact>
         jsonPaths:
           - "$..user.avatar_url"
@@ -1109,6 +1110,8 @@ endpoints:
           - "$..description"
           - "$..url"
           - "$..homepage"
+          - "$..commit_title"
+          - "$..commit_message"
       - !<redact>
         jsonPaths:
           - "$..user.avatar_url"
@@ -1284,6 +1287,28 @@ endpoints:
           - "$..closed_by.id"
           - "$..closed_by.node_id"
           - "$..closed_by.email"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$..enabled_by.avatar_url"
+          - "$..enabled_by.gravatar_id"
+          - "$..enabled_by.url"
+          - "$..enabled_by.html_url"
+          - "$..enabled_by.followers_url"
+          - "$..enabled_by.following_url"
+          - "$..enabled_by.gists_url"
+          - "$..enabled_by.starred_url"
+          - "$..enabled_by.subscriptions_url"
+          - "$..enabled_by.organizations_url"
+          - "$..enabled_by.repos_url"
+          - "$..enabled_by.events_url"
+          - "$..enabled_by.received_events_url"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..enabled_by.login"
+          - "$..enabled_by.id"
+          - "$..enabled_by.node_id"
+          - "$..enabled_by.email"
         encoding: "JSON"
   - pathTemplate: "/repos/{owner}/{repo}/pulls/{pull_number}/comments"
     allowedQueryParams:
@@ -1421,6 +1446,8 @@ endpoints:
           - "$..name"
           - "$..description"
           - "$..homepage"
+          - "$..commit_title"
+          - "$..commit_message"
       - !<redact>
         jsonPaths:
           - "$..user.avatar_url"
@@ -1596,4 +1623,26 @@ endpoints:
           - "$..closed_by.id"
           - "$..closed_by.node_id"
           - "$..closed_by.email"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$..enabled_by.avatar_url"
+          - "$..enabled_by.gravatar_id"
+          - "$..enabled_by.url"
+          - "$..enabled_by.html_url"
+          - "$..enabled_by.followers_url"
+          - "$..enabled_by.following_url"
+          - "$..enabled_by.gists_url"
+          - "$..enabled_by.starred_url"
+          - "$..enabled_by.subscriptions_url"
+          - "$..enabled_by.organizations_url"
+          - "$..enabled_by.repos_url"
+          - "$..enabled_by.events_url"
+          - "$..enabled_by.received_events_url"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..enabled_by.login"
+          - "$..enabled_by.id"
+          - "$..enabled_by.node_id"
+          - "$..enabled_by.email"
         encoding: "JSON"
