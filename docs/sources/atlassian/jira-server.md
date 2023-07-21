@@ -16,7 +16,7 @@ NOTE: derived from [worklytics-connector-specs](../../infra/modules/worklytics-c
 
    If you're required to specify a classical scope, you can add:
      - `read:jira-work`
-2. Disable or mark a proper expiration of the token.
+2. Disable or set a reasonable expiration time for the token. If you set an expiration time, it is your responsibility to re-generate the token and reset it in your host environment to maintain your connection
 3. Copy the value of the token in `PSOXY_JIRA_SERVER_ACCESS_TOKEN` variable as part of AWS System
    Manager parameters store / GCP Cloud Secrets (if default implementation)
    NOTE: If your token has been created with expiration date, please remember to update it before
