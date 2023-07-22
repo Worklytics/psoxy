@@ -78,7 +78,27 @@ public class JsonSchemaFilterUtils {
 
             // As it is conditional, a NOT NULL value means that the condition matched; other value is that the condition mismatch
             return filteredValue != null ? Collections.singletonMap(key, filteredValue) : null;
-        } else if (schema.hasType()) {
+        } else if (schema instanceof ThenJsonSchema) {
+            // NOTE: Using a LinkedHashMap to keep the fields in the same order
+            // they appear defined; otherwise even the final order it seems to be deterministic
+            // is might not be the same
+            Map<String, Object> filtered = new LinkedHashMap<>();
+            provisionalOutput.fields().forEachRemaining(entry -> {
+                String key = entry.getKey();
+                JsonNode value = entry.getValue();
+                JsonSchemaFilter propertySchema = schema.getProperties().get(key);
+
+                if (propertySchema == null) {
+                    log.info("Redacted " + path + "." + key + " because it was not in schema");
+                    redactionsMade.add(path + "." + key);
+                } else {
+                    Object filteredValue = filterBySchema(path + "." + key, value, propertySchema, root, redactionsMade);
+                    filtered.put(key, filteredValue);
+                }
+            });
+
+            return filtered;
+        }else if (schema.hasType()) {
 
             if (schema.hasIf()) {
                 Object conditionResult = filterBySchema(path, provisionalOutput,
@@ -307,7 +327,7 @@ public class JsonSchemaFilterUtils {
         ConditionJsonSchema _else;
 
         @JsonAlias("if")
-        ConditionJsonSchema _then;
+        ThenJsonSchema _then;
 
         @JsonAlias("const")
         private String constant;
@@ -383,4 +403,7 @@ public class JsonSchemaFilterUtils {
      */
     @SuperBuilder(toBuilder = true)
     public static class ConditionJsonSchema extends JsonSchemaFilter { }
+
+    @SuperBuilder(toBuilder = true)
+    public static class ThenJsonSchema extends JsonSchemaFilter { }
 }
