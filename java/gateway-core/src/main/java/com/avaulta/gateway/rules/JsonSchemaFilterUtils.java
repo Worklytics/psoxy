@@ -20,16 +20,15 @@ public class JsonSchemaFilterUtils {
     /**
      * filter object by properties defined in schema, recursively filtering them by any schema
      * specified for them as well.
-     *
+     * <p>
      * NOTE: `null` values will be returned for property specified in schema IF value is null in
      * object OR value is of type that doesn't match schema.
-     *  (eg, `null` is considered to fulfill any type-constraint)
-     *
+     * (eg, `null` is considered to fulfill any type-constraint)
+     * <p>
      *   TODO support format
-     *
+     * <p>
      * q: do we want to support filtering by full JsonSchema here?? complex, and not always
      * well-defined.
-     *
      *
      * @param object to filter
      * @param schema to filter object's properties by
@@ -66,7 +65,19 @@ public class JsonSchemaFilterUtils {
                 //cases like URLs relative to schema URI are not supported
                 throw new RuntimeException("unsupported ref: " + schema.getRef());
             }
-        } else if (schema instanceof ConditionJsonSchema){
+        } else if (schema.getOneOf() != null) {
+            // Get first not null occurrence
+            for (JsonSchemaFilter oneOfCandidate : schema.getOneOf()) {
+                Object result = filterBySchema(path, provisionalOutput, oneOfCandidate, root, redactionsMade);
+
+                if (!(result instanceof NotMatchedConstant)) {
+                    return result;
+                }
+            }
+
+            return null;
+
+        } else if (schema instanceof ConditionJsonSchema) {
             // Conditions are schemas without no type definition
             // Only one property are supported by conditions. See https://json-schema.org/understanding-json-schema/reference/conditionals.html#if-then-else for futher details;
             // in case of more than one property needs to be used to match a condition they should be included inside on allOf/anyOf properties
@@ -74,10 +85,9 @@ public class JsonSchemaFilterUtils {
                     .orElseThrow(() -> new IllegalArgumentException("Invalid schema, a single property is expected"));
 
             String key = property.getKey();
-            Object filteredValue =  filterBySchema(path + "." +  key, provisionalOutput.get(property.getKey()), schema.getProperties().get(property.getKey()), root, redactionsMade);
+            Object filteredValue = filterBySchema(path + "." + key, provisionalOutput.get(property.getKey()), schema.getProperties().get(property.getKey()), root, redactionsMade);
 
-            // As it is conditional, a NOT NULL value means that the condition matched; other value is that the condition mismatch
-            return filteredValue != null ? Collections.singletonMap(key, filteredValue) : null;
+            return filteredValue;
         } else if (schema instanceof ThenJsonSchema) {
             // NOTE: Using a LinkedHashMap to keep the fields in the same order
             // they appear defined; otherwise even the final order it seems to be deterministic
@@ -98,7 +108,7 @@ public class JsonSchemaFilterUtils {
             });
 
             return filtered;
-        }else if (schema.hasType()) {
+        } else if (schema.hasType()) {
 
             if (schema.hasIf()) {
                 Object conditionResult = filterBySchema(path, provisionalOutput,
@@ -106,23 +116,23 @@ public class JsonSchemaFilterUtils {
                         root,
                         redactionsMade);
 
-                if (schema.hasElse() && conditionResult == null) {
-                    conditionResult = filterBySchema(path, provisionalOutput, schema.get_else(),
-                            root,
-                            redactionsMade);
-                }
+                    if (schema.hasElse() && conditionResult instanceof NotMatchedConstant) {
+                        conditionResult = filterBySchema(path, provisionalOutput, schema.get_else(),
+                                root,
+                                redactionsMade);
+                    }
 
-                if (conditionResult != null) {
-                    conditionResult = filterBySchema(path, provisionalOutput, schema.get_then(),
-                            root,
-                            redactionsMade);
-                }
+                    if (!(conditionResult instanceof NotMatchedConstant)) {
+                        conditionResult = filterBySchema(path, provisionalOutput, schema.get_then(),
+                                root,
+                                redactionsMade);
+                    }
 
                 return conditionResult;
             }
 
             if (schema.getConstant() != null) {
-                return schema.getConstant().equals(provisionalOutput.asText()) ? "" : null;
+                return schema.getConstant().equals(provisionalOutput.asText()) ? "" : NotMatchedConstant.getInstance();
             }
 
             //must have explicit type
@@ -166,7 +176,11 @@ public class JsonSchemaFilterUtils {
                     // they appear defined; otherwise even the final order it seems to be deterministic
                     // is might not be the same
                     Map<String, Object> filtered = new LinkedHashMap<>();
-                    provisionalOutput.fields().forEachRemaining(entry -> {
+
+                    Iterator<Map.Entry<String, JsonNode>> iterator = provisionalOutput.fields();
+                    while(iterator.hasNext()) {
+                        Map.Entry<String, JsonNode> entry = iterator.next();
+
                         String key = entry.getKey();
                         JsonNode value = entry.getValue();
                         JsonSchemaFilter propertySchema = schema.getProperties().get(key);
@@ -176,9 +190,13 @@ public class JsonSchemaFilterUtils {
                             redactionsMade.add(path + "." + key);
                         } else {
                             Object filteredValue = filterBySchema(path + "." + key, value, propertySchema, root, redactionsMade);
+
+                            if (filteredValue instanceof NotMatchedConstant) {
+                                return filteredValue;
+                            }
                             filtered.put(key, filteredValue);
                         }
-                    });
+                    }
 
                     //TODO: add support for `additionalProperties == true`? can't think of a real
                     // life-use case, but in effect it would allow some kind of "sub filtering",
@@ -232,6 +250,7 @@ public class JsonSchemaFilterUtils {
 
     /**
      * convert JsonNode to simple value (not Object or Array), if possible
+     *
      * @param node to convert
      * @return Java equivalent of node's value, if its a simple type (not Object or Array)
      */
@@ -261,10 +280,10 @@ public class JsonSchemaFilterUtils {
     @JsonPropertyOrder({"$schema"})
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonIgnoreProperties({
-        "title",
-        "required", // not relevant to 'filter' use case
-        "additionalProperties", // not currently supported
-        "$schema", // not helpful in filter use-case, although maybe should include in future
+            "title",
+            "required", // not relevant to 'filter' use case
+            "additionalProperties", // not currently supported
+            "$schema", // not helpful in filter use-case, although maybe should include in future
     })
     public static class JsonSchemaFilter {
 
@@ -305,7 +324,7 @@ public class JsonSchemaFilterUtils {
         //  what if something validates against multiple of these, but filtering by the valid ones
         //  yields different result??
         // ultimately, don't see a use case anyways
-        //List<CompoundJsonSchema> oneOf;
+        List<JsonSchemaFilter> oneOf;
 
         // part of JSON schema standard
         // it's clear how we would implement this as a filter (chain them), but not why
@@ -384,7 +403,7 @@ public class JsonSchemaFilterUtils {
 
         @JsonIgnore
         public boolean hasIf() {
-         return this._if != null;
+            return this._if != null;
         }
 
         @JsonIgnore
@@ -398,12 +417,21 @@ public class JsonSchemaFilterUtils {
         }
     }
 
-    /** For building if-else-then conditions in json schema
+    /**
+     * For building if-else-then conditions in json schema
      * See <a href="https://json-schema.org/understanding-json-schema/reference/conditionals.html#if-then-else">...</a>
      */
     @SuperBuilder(toBuilder = true)
-    public static class ConditionJsonSchema extends JsonSchemaFilter { }
+    public static class ConditionJsonSchema extends JsonSchemaFilter {
+    }
 
     @SuperBuilder(toBuilder = true)
-    public static class ThenJsonSchema extends JsonSchemaFilter { }
+    public static class ThenJsonSchema extends JsonSchemaFilter {
+    }
+
+    private static class NotMatchedConstant {
+        public static NotMatchedConstant getInstance() {
+            return new NotMatchedConstant();
+        }
+    }
 }
