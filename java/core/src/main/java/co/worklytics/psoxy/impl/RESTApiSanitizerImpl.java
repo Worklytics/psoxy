@@ -9,6 +9,7 @@ import co.worklytics.psoxy.utils.URLUtils;
 import com.avaulta.gateway.pseudonyms.*;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.jayway.jsonpath.Configuration;
@@ -190,6 +191,15 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
             t -> t.getJsonPaths().stream()
                 .map(JsonPath::compile)
                 .collect(Collectors.toList()));
+
+        if (transform.getApplyOnlyWhen() != null) {
+            Object filterResult = JsonPath.compile(transform.getApplyOnlyWhen()).read(document);
+
+            ArrayList<?> results = (ArrayList<?>) filterResult;
+            if (results != null && results.size() == 0) {
+                return document;
+            }
+        }
 
         if (transform instanceof Transform.Redact) {
             for (JsonPath path : paths) {
