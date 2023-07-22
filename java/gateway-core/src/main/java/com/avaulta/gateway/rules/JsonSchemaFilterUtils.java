@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -65,9 +66,46 @@ public class JsonSchemaFilterUtils {
                 //cases like URLs relative to schema URI are not supported
                 throw new RuntimeException("unsupported ref: " + schema.getRef());
             }
-        } else if (schema.hasType()) {
-            //must have explicit type
+        } else if (schema instanceof ConditionJsonSchema){
+            // Conditions are schemas without no type definition
+            // Only one property are supported by conditions. See https://json-schema.org/understanding-json-schema/reference/conditionals.html#if-then-else for futher details;
+            // in case of more than one property needs to be used to match a condition they should be included inside on allOf/anyOf properties
+            Map.Entry<String, JsonSchemaFilter> property = schema.getProperties().entrySet().stream().findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid schema, a single property is expected"));
 
+            String key = property.getKey();
+            Object filteredValue =  filterBySchema(path + "." +  key, provisionalOutput.get(property.getKey()), schema.getProperties().get(property.getKey()), root, redactionsMade);
+
+            // As it is conditional, a NOT NULL value means that the condition matched; other value is that the condition mismatch
+            return filteredValue != null ? Collections.singletonMap(key, filteredValue) : null;
+        } else if (schema.hasType()) {
+
+            if (schema.hasIf()) {
+                Object conditionResult = filterBySchema(path, provisionalOutput,
+                        schema.get_if(),
+                        root,
+                        redactionsMade);
+
+                if (schema.hasElse() && conditionResult == null) {
+                    conditionResult = filterBySchema(path, provisionalOutput, schema.get_else(),
+                            root,
+                            redactionsMade);
+                }
+
+                if (conditionResult != null) {
+                    conditionResult = filterBySchema(path, provisionalOutput, schema.get_then(),
+                            root,
+                            redactionsMade);
+                }
+
+                return conditionResult;
+            }
+
+            if (schema.getConstant() != null) {
+                return schema.getConstant().equals(provisionalOutput.asText()) ? "" : null;
+            }
+
+            //must have explicit type
             // https://json-schema.org/understanding-json-schema/reference/type.html
             if (schema.isString()) {
                 if (provisionalOutput.isTextual()) {
@@ -112,6 +150,7 @@ public class JsonSchemaFilterUtils {
                         String key = entry.getKey();
                         JsonNode value = entry.getValue();
                         JsonSchemaFilter propertySchema = schema.getProperties().get(key);
+
                         if (propertySchema == null) {
                             log.info("Redacted " + path + "." + key + " because it was not in schema");
                             redactionsMade.add(path + "." + key);
@@ -195,7 +234,7 @@ public class JsonSchemaFilterUtils {
     }
 
     @With
-    @Builder(toBuilder = true)
+    @SuperBuilder(toBuilder = true)
     @NoArgsConstructor
     @AllArgsConstructor // for builder
     @Data
@@ -261,6 +300,17 @@ public class JsonSchemaFilterUtils {
         //   omission)
         //CompoundJsonSchema not;
 
+        @JsonAlias("if")
+        ConditionJsonSchema _if;
+
+        @JsonAlias("else")
+        ConditionJsonSchema _else;
+
+        @JsonAlias("if")
+        ConditionJsonSchema _then;
+
+        @JsonAlias("const")
+        private String constant;
 
         @JsonIgnore
         public boolean isRef() {
@@ -311,6 +361,26 @@ public class JsonSchemaFilterUtils {
         public boolean isComplex() {
             return isObject() || isArray();
         }
+
+        @JsonIgnore
+        public boolean hasIf() {
+         return this._if != null;
+        }
+
+        @JsonIgnore
+        public boolean hasElse() {
+            return this._else != null;
+        }
+
+        @JsonIgnore
+        public boolean hasThen() {
+            return this._then != null;
+        }
     }
 
+    /** For building if-else-then conditions in json schema
+     * See <a href="https://json-schema.org/understanding-json-schema/reference/conditionals.html#if-then-else">...</a>
+     */
+    @SuperBuilder(toBuilder = true)
+    public static class ConditionJsonSchema extends JsonSchemaFilter { }
 }
