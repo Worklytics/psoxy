@@ -422,16 +422,20 @@ public class JsonSchemaFilterUtils {
      * See <a href="https://json-schema.org/understanding-json-schema/reference/conditionals.html#if-then-else">...</a>
      */
     @SuperBuilder(toBuilder = true)
+    @NoArgsConstructor
     public static class ConditionJsonSchema extends JsonSchemaFilter {
     }
 
     @SuperBuilder(toBuilder = true)
+    @NoArgsConstructor
     public static class ThenJsonSchema extends JsonSchemaFilter {
     }
 
     private static class NotMatchedConstant {
+        private final static NotMatchedConstant instance = new NotMatchedConstant();
+
         public static NotMatchedConstant getInstance() {
-            return new NotMatchedConstant();
+            return instance;
         }
     }
 }

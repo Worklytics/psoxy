@@ -132,40 +132,6 @@ public class SalesforceTests extends JavaRulesTestBaseCase {
 
     @ParameterizedTest
     @ValueSource(strings = {
-            "SELECT%20Id%20from%20Account%20ORDER%20BY%20Id%20ASC",
-            "SELECT%20Id%20FROM%20Account%20ORDER%20BY%20Id%20ASC",
-            "SELECT+Id+from+Account+ORDER+BY+Id+ASC",
-            "SELECT+Id+FROM+Account+ORDER+BY+Id+ASC"
-    })
-    void query_account_ids(String query) {
-        String jsonString = asJson(exampleDirectoryPath, "account_id_query.json");
-
-        String endpoint = "https://test.salesforce.com/services/data/v51.0/query?q=" + query;
-
-        String sanitized = this.sanitize(endpoint, jsonString);
-
-        assertNotSanitized(sanitized, "0015Y00002c7g92QAA");
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {
-            "SELECT%20Id%20from%20User%20ORDER%20BY%20Id%20ASC",
-            "SELECT%20Id%20FROM%20User%20ORDER%20BY%20Id%20ASC",
-            "SELECT+Id+from+User+ORDER+BY+Id+ASC",
-            "SELECT+Id+FROM+User+ORDER+BY+Id+ASC"
-    })
-    void query_user_ids(String query) {
-        String jsonString = asJson(exampleDirectoryPath, "user_id_query.json");
-
-        String endpoint = "https://test.salesforce.com/services/data/v51.0/query?q=" + query;
-
-        String sanitized = this.sanitize(endpoint, jsonString);
-
-        assertReversibleUrlTokenized(sanitized, Collections.singletonList("0055Y00000E16gwQAB"));
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {
             "SELECT%20%28SELECT%20AccountId%2CActivityDate%2CActivityDateTime%2CActivitySubtype%2CActivityType%2CCallDurationInSeconds%2CCallType%2CCreatedDate%2CCreatedById%2CDurationInMinutes%2CEndDateTime%2CId%2CIsAllDayEvent%2CIsDeleted%2CIsHighPriority%2CIsTask%2CLastModifiedDate%2CLastModifiedById%2COwnerId%2CPriority%2CStartDateTime%2CStatus%2CWhatId%2CWhoId%20FROM%20ActivityHistories%20ORDER%20BY%20LastModifiedDate%20DESC%20NULLS%20LAST%29%20FROM%20Account%20WHERE%20id%3D%270015Y00002c7g95QAA%27",
             "SELECT+(SELECT+AccountId,ActivityDate,ActivityDateTime,ActivitySubtype,ActivityType,CallDurationInSeconds,CallType,CreatedDate,CreatedById,DurationInMinutes,EndDateTime,Id,IsAllDayEvent,IsDeleted,IsHighPriority,IsTask,LastModifiedDate,LastModifiedById,OwnerId,Priority,StartDateTime,Status,WhatId,WhoId+FROM+ActivityHistories+ORDER+BY+LastModifiedDate+DESC+NULLS+LAST)+FROM+Account+WHERE+id%3D'0015Y00002c7g95QAA'"
     })
@@ -214,15 +180,16 @@ public class SalesforceTests extends JavaRulesTestBaseCase {
     @Override
     public Stream<InvocationExample> getExamples() {
         return Stream.of(
-                InvocationExample.of("https://test.salesforce.com/services/data/v51.0/composite/sobjects/User?ids=0055Y00000ExkfuQAB,0055Y00000ExkfpQAB&fields=Alias,AccountId,ContactId,CreatedDate,CreatedById,Email,EmailEncodingKey,Id,IsActive,LastLoginDate,LastModifiedDate,ManagerId,Name,TimeZoneSidKey,Username,UserRoleId,UserType", "users.json"),
+               InvocationExample.of("https://test.salesforce.com/services/data/v51.0/composite/sobjects/User?ids=0055Y00000ExkfuQAB,0055Y00000ExkfpQAB&fields=Alias,AccountId,ContactId,CreatedDate,CreatedById,Email,EmailEncodingKey,Id,IsActive,LastLoginDate,LastModifiedDate,ManagerId,Name,TimeZoneSidKey,Username,UserRoleId,UserType", "users.json"),
                 InvocationExample.of("https://test.salesforce.com/services/data/v51.0/composite/sobjects/User?ids=p~WREVnRtj0N9dGhZfwAgC8Gw-IBQIGk-7JpUbxVSyEy8hNsxMJ2KeLWRWYlAGu-vZx3miVX4hLJF5VY6o_Q9HCg,p~FvgRGSB_DRy-y2zUpN35_Josv6-No-nx2M2VGfOx5z45qYpKJecHuRg57qVIXjbxXyqjTEJF93qBODZjoxvEUw=Alias,AccountId,ContactId,CreatedDate,CreatedById,Email,EmailEncodingKey,Id,IsActive,LastLoginDate,LastModifiedDate,ManagerId,Name,TimeZoneSidKey,Username,UserRoleId,UserType", "users.json"),
                 InvocationExample.of("https://test.salesforce.com/services/data/v51.0/composite/sobjects/Account?ids=0015Y00002c7g95QAA,0015Y00002c7g8uQAA&fields=Id,AnnualRevenue,CreatedDate,CreatedById,IsDeleted,LastActivityDate,LastModifiedDate,LastModifiedById,NumberOfEmployees,OwnerId,Ownership,ParentId,Rating,Sic,Type", "accounts.json"),
-                InvocationExample.of("https://test.salesforce.com/services/data/v51.0/query?q=SELECT%20Id%20FROM%20Account%20ORDER%20BY%20Id%20ASC", "account_id_query.json"),
-                InvocationExample.of("https://test.salesforce.com/services/data/v51.0/query?q=SELECT%20Id%20FROM%20User%20ORDER%20BY%20Id%20ASC", "user_id_query.json"),
                 InvocationExample.of("https://test.salesforce.com/services/data/v51.0/query?q=SELECT+Alias,AccountId,ContactId,CreatedDate,CreatedById,Email,EmailEncodingKey,Id,IsActive,LastLoginDate,LastModifiedDate,ManagerId,Name,TimeZoneSidKey,Username,UserRoleId,UserType+FROM+User+WHERE+LastModifiedDate+%3E%3D+2016-01-01T00%3A00%3A00Z+AND+LastModifiedDate+%3C+2023-03-01T00%3A00%3A00Z+ORDER+BY+LastModifiedDate+DESC+NULLS+LAST", "users_by_query.json"),
+                InvocationExample.of("https://test.salesforce.com/services/data/v51.0/query/SOME_TOKEN", "users_by_query.json"),
                 InvocationExample.of("https://test.salesforce.com/services/data/v51.0/query?q=SELECT+Id,AnnualRevenue,CreatedDate,CreatedById,IsDeleted,LastActivityDate,LastModifiedDate,LastModifiedById,NumberOfEmployees,OwnerId,Ownership,ParentId,Rating,Sic,Type+FROM+Account+WHERE+LastModifiedDate+%3E%3D+2016-01-01T00%3A00%3A00Z+AND+LastModifiedDate+%3C+2023-03-01T00%3A00%3A00Z+ORDER+BY+LastModifiedDate+DESC+NULLS+LAST", "accounts_by_query.json"),
+                InvocationExample.of("https://test.salesforce.com/services/data/v51.0/query/SOME_TOKEN", "accounts_by_query.json"),
                 InvocationExample.of("https://test.salesforce.com/services/data/v51.0/query?q=SELECT+Id,AnnualRevenue,CreatedDate,CreatedById,IsDeleted,LastActivityDate,LastModifiedDate,LastModifiedById,NumberOfEmployees,OwnerId,Ownership,ParentId,Rating,Sic,Type+FROM+Account+WHERE+LastModifiedDate+%3E%3D+2016-01-01T00%3A00%3A00Z+AND+LastModifiedDate+%3C+2023-03-01T00%3A00%3A00Z+ORDER+BY+LastModifiedDate+DESC+NULLS+LAST", "query_result_pagination.json"),
-                InvocationExample.of("https://test.salesforce.com/services/data/v51.0/query?q=SELECT%20%28SELECT%20AccountId%2CActivityDate%2CActivityDateTime%2CActivitySubtype%2CActivityType%2CCallDurationInSeconds%2CCallType%2CCreatedDate%2CCreatedById%2CDurationInMinutes%2CEndDateTime%2CId%2CIsAllDayEvent%2CIsDeleted%2CIsHighPriority%2CIsTask%2CLastModifiedDate%2CLastModifiedById%2COwnerId%2CPriority%2CStartDateTime%2CStatus%2CWhatId%2CWhoId%20FROM%20ActivityHistories%20ORDER%20BY%20LastModifiedDate%20DESC%20NULLS%20LAST%29%20FROM%20Account%20where%20id%3D%270015Y00002c7g95QAA%27", "related_item_query.json")
+                InvocationExample.of("https://test.salesforce.com/services/data/v51.0/query?q=SELECT%20%28SELECT%20AccountId%2CActivityDate%2CActivityDateTime%2CActivitySubtype%2CActivityType%2CCallDurationInSeconds%2CCallType%2CCreatedDate%2CCreatedById%2CDurationInMinutes%2CEndDateTime%2CId%2CIsAllDayEvent%2CIsDeleted%2CIsHighPriority%2CIsTask%2CLastModifiedDate%2CLastModifiedById%2COwnerId%2CPriority%2CStartDateTime%2CStatus%2CWhatId%2CWhoId%20FROM%20ActivityHistories%20ORDER%20BY%20LastModifiedDate%20DESC%20NULLS%20LAST%29%20FROM%20Account%20where%20id%3D%270015Y00002c7g95QAA%27", "related_item_query.json"),
+                InvocationExample.of("https://test.salesforce.com/services/data/v51.0/query/SOME_TOKEN", "related_item_query.json")
         );
     }
 }
