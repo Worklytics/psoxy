@@ -65,8 +65,12 @@ public class JsonSchemaFilterUtils {
                 //cases like URLs relative to schema URI are not supported
                 throw new RuntimeException("unsupported ref: " + schema.getRef());
             }
-        } else if (schema.getOneOf() != null) {
-            // Get first not null occurrence
+        } else if (schema.hashOneOf()) {
+            // Get first schema with matches its inner condition.
+            // See https://json-schema.org/understanding-json-schema/reference/combining.html#oneof
+            // NOTE: If is expected that the "oneOf" candidate should hava an if-else-then or if-then nodes
+            // inside, otherwise the condition will not be evaluated and only the first occurrence appearing in the list
+            // will be chosen
             for (JsonSchemaFilter oneOfCandidate : schema.getOneOf()) {
                 Object result = filterBySchema(path, provisionalOutput, oneOfCandidate, root, redactionsMade);
 
@@ -76,7 +80,6 @@ public class JsonSchemaFilterUtils {
             }
 
             return null;
-
         } else if (schema instanceof ConditionJsonSchema) {
             // Conditions are schemas without no type definition
             // Only one property are supported by conditions. See https://json-schema.org/understanding-json-schema/reference/conditionals.html#if-then-else for futher details;
@@ -85,9 +88,8 @@ public class JsonSchemaFilterUtils {
                     .orElseThrow(() -> new IllegalArgumentException("Invalid schema, a single property is expected"));
 
             String key = property.getKey();
-            Object filteredValue = filterBySchema(path + "." + key, provisionalOutput.get(property.getKey()), schema.getProperties().get(property.getKey()), root, redactionsMade);
 
-            return filteredValue;
+            return filterBySchema(path + "." + key, provisionalOutput.get(property.getKey()), schema.getProperties().get(property.getKey()), root, redactionsMade);
         } else if (schema instanceof ThenJsonSchema) {
             // NOTE: Using a LinkedHashMap to keep the fields in the same order
             // they appear defined; otherwise even the final order it seems to be deterministic
@@ -116,22 +118,22 @@ public class JsonSchemaFilterUtils {
                         root,
                         redactionsMade);
 
-                    if (schema.hasElse() && conditionResult instanceof NotMatchedConstant) {
-                        conditionResult = filterBySchema(path, provisionalOutput, schema.get_else(),
-                                root,
-                                redactionsMade);
-                    }
+                if (schema.hasElse() && conditionResult instanceof NotMatchedConstant) {
+                    conditionResult = filterBySchema(path, provisionalOutput, schema.get_else(),
+                            root,
+                            redactionsMade);
+                }
 
-                    if (!(conditionResult instanceof NotMatchedConstant)) {
-                        conditionResult = filterBySchema(path, provisionalOutput, schema.get_then(),
-                                root,
-                                redactionsMade);
-                    }
+                if (!(conditionResult instanceof NotMatchedConstant)) {
+                    conditionResult = filterBySchema(path, provisionalOutput, schema.get_then(),
+                            root,
+                            redactionsMade);
+                }
 
                 return conditionResult;
             }
 
-            if (schema.getConstant() != null) {
+            if (schema.hasConstant()) {
                 return schema.getConstant().equals(provisionalOutput.asText()) ? "" : NotMatchedConstant.getInstance();
             }
 
@@ -178,7 +180,7 @@ public class JsonSchemaFilterUtils {
                     Map<String, Object> filtered = new LinkedHashMap<>();
 
                     Iterator<Map.Entry<String, JsonNode>> iterator = provisionalOutput.fields();
-                    while(iterator.hasNext()) {
+                    while (iterator.hasNext()) {
                         Map.Entry<String, JsonNode> entry = iterator.next();
 
                         String key = entry.getKey();
@@ -415,6 +417,12 @@ public class JsonSchemaFilterUtils {
         public boolean hasThen() {
             return this._then != null;
         }
+
+        @JsonIgnore
+        public boolean hasConstant() {return this.constant != null; }
+
+        @JsonIgnore
+        public boolean hashOneOf() {return this.oneOf != null && !this.oneOf.isEmpty();}
     }
 
     /**
