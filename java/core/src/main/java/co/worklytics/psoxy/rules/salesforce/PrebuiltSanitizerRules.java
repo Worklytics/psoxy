@@ -2,7 +2,6 @@ package co.worklytics.psoxy.rules.salesforce;
 
 import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.rules.Rules2;
-import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.rules.Endpoint;
 import com.avaulta.gateway.rules.JsonSchemaFilterUtils;
 import com.avaulta.gateway.rules.transforms.Transform;
@@ -39,71 +38,8 @@ public class PrebuiltSanitizerRules {
             .jsonPath("$..attributes")
             .build();
 
-    private static final List<Transform> QUERY_ID_USER_TRANSFORMATION = Lists.newArrayList(Transform.Redact.builder()
-                    .jsonPath("$..records[*].attributes.url")
-                    .build(),
-            Transform.Pseudonymize.builder()
-                    .includeReversible(true)
-                    .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
-                    .applyOnlyWhen("$..records[?(@.attributes.type == \"User\")]")
-                    .jsonPath("$..records[*].Id")
-                    .build());
-
-    private final static JsonSchemaFilterUtils.JsonSchemaFilter OLD = JsonSchemaFilterUtils.JsonSchemaFilter.builder()
-            .type("object")
-            /* .properties(Map.of(
-                     "Id", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
-                             .type("string")
-                             .build()))*/
-            .properties(Collections.emptyMap())
-            ._if(JsonSchemaFilterUtils.ConditionJsonSchema.builder().properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
-
-                put("attributes", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
-                        .type("object")
-                        .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
-
-                            put("type", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
-                                    .type("string")
-                                    .constant("User")
-                                    .build());
-                        }})
-                        .build());
-            }}).build())
-            ._then(JsonSchemaFilterUtils.ThenJsonSchema.builder().properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
-
-                put("Id", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
-                        .type("string")
-                        .build());
-            }}).build())
-            .build();
-
-    //req for java8-backwards compatibility
-    private final static Map<String, JsonSchemaFilterUtils.JsonSchemaFilter> ID_QUERY_RESULT_JSON_SCHEMA = new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {
-        {
-            put("attributes", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
-                    .type("object")
-                    .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
-                        put("type", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
-                                .type("string")
-                                .build());
-                    }})
-                    .build());
-
-            put("Id", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
-                    .type("string")
-                    .build());
-        }
-    };
-
     private final static Map<String, JsonSchemaFilterUtils.JsonSchemaFilter> USER_BY_QUERY_RESULT_JSON_SCHEMA = new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
-        put("attributes", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
-                .type("object")
-                .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
-                    put("type", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
-                            .type("string")
-                            .build());
-                }})
-                .build());
+        put("attributes", buildAttributeWithType());
 
         put("Alias", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
         put("AccountId", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
@@ -126,14 +62,7 @@ public class PrebuiltSanitizerRules {
 
     private final static Map<String, JsonSchemaFilterUtils.JsonSchemaFilter> ACTIVITY_HISTORIES_RESULT_PROPERTY_SCHEMA = new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() { //req for java8-backwards compatibility
         {
-            put("attributes", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
-                    .type("object")
-                    .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
-                        put("type", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
-                                .type("string")
-                                .build());
-                    }})
-                    .build());
+            put("attributes", buildAttributeWithType());
 
             put("AccountId", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
             put("ActivityDate", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
@@ -162,15 +91,8 @@ public class PrebuiltSanitizerRules {
         }
     };
 
-    private final static Map<String, JsonSchemaFilterUtils.JsonSchemaFilter> ACCOUNT_QUERY_RESULT_SCHEMA_PROPERTIES = new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
-        put("attributes", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
-                .type("object")
-                .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
-                    put("type", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
-                            .type("string")
-                            .build());
-                }})
-                .build());
+    private final static Map<String, JsonSchemaFilterUtils.JsonSchemaFilter> ACCOUNT_WITH_ACTIVITY_HISTORIES_QUERY_RESULT_PROPERTY_SCHEMA = new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
+        put("attributes", buildAttributeWithType());
 
         put("Id", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
         put("AnnualRevenue", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("number").build());
@@ -225,16 +147,8 @@ public class PrebuiltSanitizerRules {
                 }}).build());
     }};
 
-
     private final static Map<String, JsonSchemaFilterUtils.JsonSchemaFilter> ACTIVITY_HISTORIES_SUB_QUERY_RESULT_PROPERTY_SCHEMA = new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
-        put("attributes", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
-                .type("object")
-                .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
-                    put("type", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
-                            .type("string")
-                            .build());
-                }})
-                .build());
+        put("attributes", buildAttributeWithType());
         put("ActivityHistories", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                 .type("object")
                 // Using LinkedHashMap to keep the order to support same
@@ -272,13 +186,6 @@ public class PrebuiltSanitizerRules {
                 }}).build());
     }};
 
-
-    private final static Transform ACCOUNT_TRANSFORMATIONS = Transform.Pseudonymize.builder()
-            .jsonPath("$..CreatedById")
-            .jsonPath("$..LastModifiedById")
-            .jsonPath("$..OwnerId")
-            .applyOnlyWhen("$..records[?(@.attributes.type == \"Account\")]")
-            .build();
     static final Endpoint DESCRIBE_ENDPOINT = Endpoint.builder()
             .pathRegex("^/services/data/" + VERSION_REGEX + "/sobjects/(Account|ActivityHistory|User)/describe$")
             // No redaction/pseudonymization, response is just metadata of the object
@@ -303,11 +210,6 @@ public class PrebuiltSanitizerRules {
             .transforms(getUserTransformations(".", false))
             .build();
 
-    static final Endpoint QUERY_ID_FOR_ACCOUNTS_ENDPOINT = Endpoint.builder()
-            .pathRegex("^/services/data/" + VERSION_REGEX + "/query[?]q=SELECT(%20|\\+)Id(%20|\\+)FROM(%20|\\+)Account.*$")
-            .responseSchema(jsonSchemaForQueryResult("Account", ID_QUERY_RESULT_JSON_SCHEMA))
-            .build();
-
     static final Endpoint QUERY_USERS_ENDPOINT = Endpoint.builder()
             .pathRegex("^/services/data/" + VERSION_REGEX + "/query[?]q=SELECT.*FROM(%20|\\+)User(%20|\\+)WHERE(%20|\\+)LastModifiedDate.*$")
             .transforms(getUserTransformations(".records[*]", true))
@@ -317,7 +219,7 @@ public class PrebuiltSanitizerRules {
     static final Endpoint QUERY_ACCOUNTS_ENDPOINT = Endpoint.builder()
             .pathRegex("^/services/data/" + VERSION_REGEX + "/query[?]q=SELECT.*FROM(%20|\\+)Account(%20|\\+)WHERE(%20|\\+)LastModifiedDate.*$")
             .transform(getAccountTransformations(".records[*]", true))
-            .responseSchema(jsonSchemaForQueryResult("Account", ACCOUNT_QUERY_RESULT_SCHEMA_PROPERTIES))
+            .responseSchema(jsonSchemaForQueryResult("Account", ACCOUNT_WITH_ACTIVITY_HISTORIES_QUERY_RESULT_PROPERTY_SCHEMA))
             .build();
 
     static final Endpoint QUERY_FOR_ACTIVITY_HISTORIES_ENDPOINT = Endpoint.builder()
@@ -326,16 +228,8 @@ public class PrebuiltSanitizerRules {
             .responseSchema(jsonSchemaForActivityHistoryQueryResult())
             .build();
 
-    static final Endpoint QUERY_ID_FOR_USERS_ENDPOINT = Endpoint.builder()
-            .pathRegex("^/services/data/" + VERSION_REGEX + "/query[?]q=SELECT(%20|\\+)Id(%20|\\+)FROM(%20|\\+)User.*$")
-            .transforms(QUERY_ID_USER_TRANSFORMATION)
-            .transform(ACCOUNT_TRANSFORMATIONS)
-            .responseSchema(jsonSchemaForQueryResult("User", ID_QUERY_RESULT_JSON_SCHEMA))
-            .build();
-
     static final Endpoint QUERY_PAGINATION_ENDPOINT = Endpoint.builder()
             .pathRegex("^/services/data/" + VERSION_REGEX + "/query/.*")
-            //.transforms(QUERY_ID_USER_TRANSFORMATION)
             .transforms(getUserTransformations(".records[*]", true))
             .transform(getAccountTransformations(".records[*]", true))
             .transform(getActivityHistoryTransformations(true))
@@ -361,8 +255,6 @@ public class PrebuiltSanitizerRules {
             //}
             .endpoint(GET_ACCOUNTS_ENDPOINT)
             .endpoint(GET_USERS_ENDPOINT)
-            //.endpoint(QUERY_ID_FOR_USERS_ENDPOINT)
-            //.endpoint(QUERY_ID_FOR_ACCOUNTS_ENDPOINT)
             .endpoint(QUERY_USERS_ENDPOINT)
             .endpoint(QUERY_ACCOUNTS_ENDPOINT)
             .endpoint(QUERY_FOR_ACTIVITY_HISTORIES_ENDPOINT)
@@ -391,15 +283,7 @@ public class PrebuiltSanitizerRules {
                                     .type("object")
                                     .properties(Collections.emptyMap())
                                     ._if(JsonSchemaFilterUtils.ConditionJsonSchema.builder().properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
-                                        put("attributes", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
-                                                .type("object")
-                                                .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
-                                                    put("type", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
-                                                            .type("string")
-                                                            .constant(recordType)
-                                                            .build());
-                                                }})
-                                                .build());
+                                        put("attributes", buildAttributeWithType(recordType));
                                     }}).build())
                                     ._then(JsonSchemaFilterUtils.ThenJsonSchema.builder().properties(responsePropertyMap).build())
                                     .build())
@@ -430,15 +314,7 @@ public class PrebuiltSanitizerRules {
                                     .type("object")
                                     .properties(Collections.emptyMap())
                                     ._if(JsonSchemaFilterUtils.ConditionJsonSchema.builder().properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
-                                        put("attributes", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
-                                                .type("object")
-                                                .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
-                                                    put("type", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
-                                                            .type("string")
-                                                            .constant("Account")
-                                                            .build());
-                                                }})
-                                                .build());
+                                        put("attributes", buildAttributeWithType("Account"));
                                     }}).build())
                                     ._then(JsonSchemaFilterUtils.ThenJsonSchema.builder().properties(ACTIVITY_HISTORIES_SUB_QUERY_RESULT_PROPERTY_SCHEMA).build())
                                     .build())
@@ -469,45 +345,15 @@ public class PrebuiltSanitizerRules {
                                     .oneOf(Arrays.asList(
                                                     JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("object")
                                                             .properties(Collections.emptyMap())._if(JsonSchemaFilterUtils.ConditionJsonSchema.builder().properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
-                                                                put("attributes", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
-                                                                        .type("object")
-                                                                        .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
-                                                                            put("type", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
-                                                                                    .type("string")
-                                                                                    .constant("User")
-                                                                                    .build());
-                                                                        }})
-                                                                        .build());
+                                                                put("attributes", buildAttributeWithType("User"));
                                                             }}).build())
                                                             ._then(JsonSchemaFilterUtils.ThenJsonSchema.builder().properties(USER_BY_QUERY_RESULT_JSON_SCHEMA).build())
                                                             .build(),
                                                     JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("object").properties(Collections.emptyMap())._if(JsonSchemaFilterUtils.ConditionJsonSchema.builder().properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
-                                                                put("attributes", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
-                                                                        .type("object")
-                                                                        .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
-                                                                            put("type", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
-                                                                                    .type("string")
-                                                                                    .constant("Account")
-                                                                                    .build());
-                                                                        }})
-                                                                        .build());
+                                                                put("attributes", buildAttributeWithType("Account"));
                                                             }}).build())
-                                                            ._then(JsonSchemaFilterUtils.ThenJsonSchema.builder().properties(ACCOUNT_QUERY_RESULT_SCHEMA_PROPERTIES).build())
+                                                            ._then(JsonSchemaFilterUtils.ThenJsonSchema.builder().properties(ACCOUNT_WITH_ACTIVITY_HISTORIES_QUERY_RESULT_PROPERTY_SCHEMA).build())
                                                             .build())
-/*
-                                            JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("object").properties(Collections.emptyMap())._if(JsonSchemaFilterUtils.ConditionJsonSchema.builder().properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
-                                                        put("attributes", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
-                                                                .type("object")
-                                                                .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
-                                                                    put("type", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
-                                                                            .type("string")
-                                                                            .constant("Account")
-                                                                            .build());
-                                                                }})
-                                                                .build());
-                                                    }}).build())
-                                                    ._then(JsonSchemaFilterUtils.ThenJsonSchema.builder().properties(ACTIVITY_HISTORIES_SUB_QUERY_RESULT_PROPERTY_SCHEMA).build())
-                                                    .build())*/
                                     ).build())
                             .build());
                 }})
@@ -523,7 +369,7 @@ public class PrebuiltSanitizerRules {
                 .build();
     }
 
-    private static final List<Transform> getUserTransformations(String pathPrefix, boolean applyOnlyWhen) {
+    private static List<Transform> getUserTransformations(String pathPrefix, boolean applyOnlyWhen) {
         return Lists.newArrayList(Transform.Redact.builder()
                         .jsonPath(String.format("$%s.Alias", pathPrefix))
                         .jsonPath(String.format("$%s.Email", pathPrefix))
@@ -547,6 +393,22 @@ public class PrebuiltSanitizerRules {
                 .jsonPath("$..records[*].ActivityHistories.records[*].OwnerId")
                 .jsonPath("$..records[*].ActivityHistories.records[*].WhoId")
                 .applyOnlyWhen(applyOnlyWhen ? "$..records[*].ActivityHistories.records[?(@.attributes.type == \"ActivityHistory\")]" : null)
+                .build();
+    }
+
+    private static JsonSchemaFilterUtils.JsonSchemaFilter buildAttributeWithType() {
+        return buildAttributeWithType(null);
+    }
+
+    private static JsonSchemaFilterUtils.JsonSchemaFilter buildAttributeWithType(String constant) {
+        return JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                .type("object")
+                .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
+                    put("type", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                            .type("string")
+                            .constant(constant)
+                            .build());
+                }})
                 .build();
     }
 }

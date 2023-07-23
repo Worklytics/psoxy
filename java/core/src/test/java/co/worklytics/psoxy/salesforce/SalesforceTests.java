@@ -2,7 +2,6 @@ package co.worklytics.psoxy.salesforce;
 
 import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
 import co.worklytics.psoxy.rules.RESTRules;
-import co.worklytics.psoxy.rules.RuleSet;
 import co.worklytics.psoxy.rules.salesforce.PrebuiltSanitizerRules;
 import lombok.Getter;
 import org.junit.jupiter.api.Disabled;
@@ -10,7 +9,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.util.Collections;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
