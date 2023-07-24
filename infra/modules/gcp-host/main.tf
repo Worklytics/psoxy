@@ -95,13 +95,13 @@ resource "google_secret_manager_secret_iam_member" "grant_sa_updater_on_lockable
   ]
 }
 
-resource "google_secret_manager_secret_iam_member" "grant_sa_secretVersionAdder_on_writable_secret" {
+resource "google_secret_manager_secret_iam_member" "grant_sa_secretVersionManager_on_writable_secret" {
   for_each = { for secret in local.writable_secrets : secret.instance_secret_id => secret }
 
   project   = var.gcp_project_id
   secret_id = "${local.config_parameter_prefix}${each.value.instance_secret_id}"
   member    = "serviceAccount:${google_service_account.api_connectors[each.value.instance_id].email}"
-  role      = "roles/secretmanager.secretVersionAdder"
+  role      = "roles/secretmanager.secretVersionManager"
 
   depends_on = [
     module.secrets
