@@ -3,11 +3,17 @@
   "done":true,
   "records":[
     {
+      "attributes":{
+        "type":"Account"
+      },
       "ActivityHistories":{
         "totalSize":5,
         "done":true,
         "records":[
           {
+            "attributes":{
+              "type":"ActivityHistory"
+            },
             "AccountId":"0015Y00002c7g95QAA",
             "ActivityDate":"2021-03-08",
             "ActivityDateTime":null,
@@ -34,6 +40,9 @@
             "WhoId":"null"
           },
           {
+            "attributes":{
+              "type":"ActivityHistory"
+            },
             "AccountId":"0015Y00002c7g95QAA",
             "ActivityDate":"2021-03-12",
             "ActivityDateTime":"2021-03-12T11:00:00.000+0000",
@@ -60,6 +69,9 @@
             "WhoId":"null"
           },
           {
+            "attributes":{
+              "type":"ActivityHistory"
+            },
             "AccountId":"0015Y00002c7g95QAA",
             "ActivityDate":"2021-03-26",
             "ActivityDateTime":null,
@@ -86,6 +98,9 @@
             "WhoId":"null"
           },
           {
+            "attributes":{
+              "type":"ActivityHistory"
+            },
             "AccountId":"0015Y00002c7g95QAA",
             "ActivityDate":"2021-03-27",
             "ActivityDateTime":null,
@@ -112,6 +127,9 @@
             "WhoId":"null"
           },
           {
+            "attributes":{
+              "type":"ActivityHistory"
+            },
             "AccountId":"0015Y00002c7g95QAA",
             "ActivityDate":"2021-03-12",
             "ActivityDateTime":null,
