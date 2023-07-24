@@ -365,7 +365,7 @@ public class PrebuiltSanitizerRules {
                 .jsonPath(String.format("$%s.CreatedById", pathPrefix))
                 .jsonPath(String.format("$%s.LastModifiedById", pathPrefix))
                 .jsonPath(String.format("$%s.OwnerId", pathPrefix))
-                .applyOnlyWhen(applyOnlyWhen ? "$..records[?(@.attributes.type == \"Account\")]" : null)
+                .applyOnlyWhen(applyOnlyWhen ? "$.records[?(@.attributes.type == \"Account\")]" : null)
                 .build();
     }
 
@@ -382,17 +382,17 @@ public class PrebuiltSanitizerRules {
                         .jsonPath(String.format("$%s.CreatedById", pathPrefix))
                         .jsonPath(String.format("$%s.ManagerId", pathPrefix))
                         .jsonPath(String.format("$%s.Id", pathPrefix))
-                        .applyOnlyWhen(applyOnlyWhen ? "$..records[?(@.attributes.type == \"User\")]" : null)
+                        .applyOnlyWhen(applyOnlyWhen ? "$.records[?(@.attributes.type == \"User\")]" : null)
                         .build());
     }
 
     private static Transform.Pseudonymize getActivityHistoryTransformations(boolean applyOnlyWhen) {
         return Transform.Pseudonymize.builder()
-                .jsonPath("$..records[*].ActivityHistories.records[*].CreatedById")
-                .jsonPath("$..records[*].ActivityHistories.records[*].LastModifiedById")
-                .jsonPath("$..records[*].ActivityHistories.records[*].OwnerId")
-                .jsonPath("$..records[*].ActivityHistories.records[*].WhoId")
-                .applyOnlyWhen(applyOnlyWhen ? "$..records[*].ActivityHistories.records[?(@.attributes.type == \"ActivityHistory\")]" : null)
+                .jsonPath("$.records[*].ActivityHistories.records[*].CreatedById")
+                .jsonPath("$.records[*].ActivityHistories.records[*].LastModifiedById")
+                .jsonPath("$.records[*].ActivityHistories.records[*].OwnerId")
+                .jsonPath("$.records[*].ActivityHistories.records[*].WhoId")
+                .applyOnlyWhen(applyOnlyWhen ? "$.records[*].ActivityHistories.records[?(@.attributes.type == \"ActivityHistory\")]" : null)
                 .build();
     }
 

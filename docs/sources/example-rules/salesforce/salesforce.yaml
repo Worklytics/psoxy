@@ -56,7 +56,7 @@ endpoints:
           - "$.records[*].CreatedById"
           - "$.records[*].ManagerId"
           - "$.records[*].Id"
-        applyOnlyWhen: "$..records[?(@.attributes.type == \"User\")]"
+        applyOnlyWhen: "$.records[?(@.attributes.type == \"User\")]"
         encoding: "JSON"
     responseSchema:
       type: "object"
@@ -129,7 +129,7 @@ endpoints:
           - "$.records[*].CreatedById"
           - "$.records[*].LastModifiedById"
           - "$.records[*].OwnerId"
-        applyOnlyWhen: "$..records[?(@.attributes.type == \"Account\")]"
+        applyOnlyWhen: "$.records[?(@.attributes.type == \"Account\")]"
         encoding: "JSON"
     responseSchema:
       type: "object"
@@ -271,10 +271,10 @@ endpoints:
     transforms:
       - !<pseudonymize>
         jsonPaths:
-          - "$..records[*].ActivityHistories.records[*].CreatedById"
-          - "$..records[*].ActivityHistories.records[*].LastModifiedById"
-          - "$..records[*].ActivityHistories.records[*].OwnerId"
-          - "$..records[*].ActivityHistories.records[*].WhoId"
+          - "$.records[*].ActivityHistories.records[*].CreatedById"
+          - "$.records[*].ActivityHistories.records[*].LastModifiedById"
+          - "$.records[*].ActivityHistories.records[*].OwnerId"
+          - "$.records[*].ActivityHistories.records[*].WhoId"
         encoding: "JSON"
     responseSchema:
       type: "object"
@@ -397,22 +397,22 @@ endpoints:
           - "$.records[*].CreatedById"
           - "$.records[*].ManagerId"
           - "$.records[*].Id"
-        applyOnlyWhen: "$..records[?(@.attributes.type == \"User\")]"
+        applyOnlyWhen: "$.records[?(@.attributes.type == \"User\")]"
         encoding: "JSON"
       - !<pseudonymize>
         jsonPaths:
           - "$.records[*].CreatedById"
           - "$.records[*].LastModifiedById"
           - "$.records[*].OwnerId"
-        applyOnlyWhen: "$..records[?(@.attributes.type == \"Account\")]"
+        applyOnlyWhen: "$.records[?(@.attributes.type == \"Account\")]"
         encoding: "JSON"
       - !<pseudonymize>
         jsonPaths:
-          - "$..records[*].ActivityHistories.records[*].CreatedById"
-          - "$..records[*].ActivityHistories.records[*].LastModifiedById"
-          - "$..records[*].ActivityHistories.records[*].OwnerId"
-          - "$..records[*].ActivityHistories.records[*].WhoId"
-        applyOnlyWhen: "$..records[*].ActivityHistories.records[?(@.attributes.type ==\
+          - "$.records[*].ActivityHistories.records[*].CreatedById"
+          - "$.records[*].ActivityHistories.records[*].LastModifiedById"
+          - "$.records[*].ActivityHistories.records[*].OwnerId"
+          - "$.records[*].ActivityHistories.records[*].WhoId"
+        applyOnlyWhen: "$.records[*].ActivityHistories.records[?(@.attributes.type ==\
       \ \"ActivityHistory\")]"
         encoding: "JSON"
     responseSchema:
