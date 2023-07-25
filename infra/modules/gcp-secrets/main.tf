@@ -6,8 +6,8 @@
 locals {
   replica_locations = coalesce(var.replica_regions, var.replica_locations)
 
-  terraform_managed_secrets  = { for k, v in var.secrets : k => v if v.value_managed_by_tf }
-  externally_managed_secrets = { for k, v in var.secrets : k => v if !v.value_managed_by_tf }
+  secrets_w_terraform_managed_values  = { for k, v in var.secrets : k => v if v.value_managed_by_tf }
+  secrets_w_externally_managed_values = { for k, v in var.secrets : k => v if !v.value_managed_by_tf }
 }
 
 resource "google_secret_manager_secret" "secret" {
@@ -39,7 +39,7 @@ resource "google_secret_manager_secret" "secret" {
 
 # secret versions are ONLY created for values managed by Terraform
 resource "google_secret_manager_secret_version" "version" {
-  for_each = local.terraform_managed_secrets
+  for_each = local.secrets_w_terraform_managed_values
 
   secret      = google_secret_manager_secret.secret[each.key].id
   secret_data = coalesce(each.value.value, "placeholder value - fill me")
@@ -74,7 +74,7 @@ output "secret_ids_within_project" {
 
 #DEPRECATED; don't believe any modules use this, as of v0.4.29
 output "secret_version_names" {
-  value = { for k, v in local.terraform_managed_secrets : k => google_secret_manager_secret_version.version[k].name }
+  value = { for k, v in local.secrets_w_terraform_managed_values : k => google_secret_manager_secret_version.version[k].name }
 }
 
 output "secret_version_numbers" {

@@ -280,10 +280,31 @@ EOT
       target_host : "api.github.com"
       source_auth_strategy : "oauth2_refresh_token"
       secured_variables : [
-        { name : "ACCESS_TOKEN", writable : true }, # writable, as needs to be shared
-        { name : "PRIVATE_KEY", writable : false },
-        { name : "OAUTH_REFRESH_TOKEN", writable : true, lockable : true },
-        { name : "CLIENT_ID", writable : false }
+        {
+          name : "ACCESS_TOKEN"
+          writable : true
+          sensitive : true
+          value_managed_by_tf : false
+        },
+        {
+          name : "PRIVATE_KEY"
+          writable : false
+          sensitive : true
+          value_managed_by_tf : false
+        },
+        {
+          name : "CLIENT_ID"
+          writable : false
+          sensitive : true
+          value_managed_by_tf : false
+        },
+        {
+          name : "OAUTH_REFRESH_TOKEN"
+          writable : true
+          lockable : true
+          sensitive : true
+          value_managed_by_tf : false
+        }
       ],
       environment_variables : {
         GRANT_TYPE : "certificate_credentials"

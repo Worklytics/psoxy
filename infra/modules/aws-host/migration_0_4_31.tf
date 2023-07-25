@@ -7,9 +7,7 @@ moved {
   to   = module.instance_secrets["asana"].aws_ssm_parameter.secret_with_externally_managed_value["ACCESS_TOKEN"]
 }
 
-# Dropbox
-# ignored as no one has deployed it
-
+# Dropbox and Github - ignored as no one has deployed these yet
 
 # Jira Cloud
 moved {
