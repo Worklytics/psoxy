@@ -148,6 +148,10 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
                         if (identity == null) {
                             return null;
                         } else if (rules.getPseudonymFormat() == PseudonymEncoder.Implementations.URL_SAFE_TOKEN) {
+                            if (identity.getOriginal() != null) {
+                                //this shouldn't happen, bc ColumnarRules don't support preserving original
+                                log.warning("Encoding pseudonym for column '" + outputColumnName + "' using format that will not include the 'original' value, althought transformation preserved it");
+                            }
                             return urlSafeTokenPseudonymEncoder.encode(identity.asPseudonym());
                         } else {
                             //JSON
