@@ -22,7 +22,9 @@ public class UrlSafeTokenPseudonymEncoder implements PseudonymEncoder {
      *   - prefix + suffix to make stronger
      *
      */
-    static final String PREFIX = "p~";
+    static final String REVERSIBLE_PREFIX = "p~";
+
+    static final String TOKEN_PREFIX = "t~";
 
     //length of base64-url-encoded IV + ciphertext
     static final int REVERSIBLE_PSEUDONYM_LENGTH_WITHOUT_PREFIX = 43;
@@ -35,19 +37,15 @@ public class UrlSafeTokenPseudonymEncoder implements PseudonymEncoder {
 
     public static final Pattern REVERSIBLE_PSEUDONYM_PATTERN =
         //Pattern.compile("p\\~[a-zA-Z0-9_-]{43,}"); //not clear to me why this doesn't work
-        Pattern.compile(Pattern.quote(PREFIX) + "[a-zA-Z0-9_-]{" + REVERSIBLE_PSEUDONYM_LENGTH_WITHOUT_PREFIX + ",}");
+        Pattern.compile(Pattern.quote(REVERSIBLE_PREFIX) + "[a-zA-Z0-9_-]{" + REVERSIBLE_PSEUDONYM_LENGTH_WITHOUT_PREFIX + ",}");
 
     @Override
     public String encode(Pseudonym pseudonym) {
         String encoded;
         if (pseudonym.getReversible() == null) {
-            //q : add a prefix here, that would let use distinguish between native IDs and tokenized
-            // ones?
-            // potential uses 1) migration, 2) worklytics-side assertion of pseudonymization,
-            // 3) avoid double-pseudonymization? (but does it matter?)
-            encoded = encoder.encodeToString(pseudonym.getHash());
+            encoded = TOKEN_PREFIX + encoder.encodeToString(pseudonym.getHash());
         } else {
-            encoded = PREFIX + encoder.encodeToString(pseudonym.getReversible());
+            encoded = REVERSIBLE_PREFIX + encoder.encodeToString(pseudonym.getReversible());
         }
         if (pseudonym.getDomain() != null) {
             //q: url-encode DOMAIN_SEPARATOR?
@@ -68,9 +66,11 @@ public class UrlSafeTokenPseudonymEncoder implements PseudonymEncoder {
             encodedPseudonym = pseudonym;
         }
 
-        if (encodedPseudonym.startsWith(PREFIX)) {
-            byte[] decoded = decoder.decode(encodedPseudonym.substring(PREFIX.length()));
+        if (encodedPseudonym.startsWith(REVERSIBLE_PREFIX)) {
+            byte[] decoded = decoder.decode(encodedPseudonym.substring(REVERSIBLE_PREFIX.length()));
             builder.reversible(decoded);
+        } else if (encodedPseudonym.startsWith(TOKEN_PREFIX)) {
+            builder.hash(decoder.decode(encodedPseudonym.substring(TOKEN_PREFIX.length())));
         } else {
             //legacy case - ever used/needed?
             builder.hash(decoder.decode(encodedPseudonym));
@@ -81,7 +81,8 @@ public class UrlSafeTokenPseudonymEncoder implements PseudonymEncoder {
 
     @Override
     public boolean canBeDecoded(String possiblePseudonym) {
-        return possiblePseudonym != null && possiblePseudonym.startsWith(PREFIX);
+        return possiblePseudonym != null &&
+            (possiblePseudonym.startsWith(REVERSIBLE_PREFIX) || possiblePseudonym.startsWith(TOKEN_PREFIX));
     }
 
     /**

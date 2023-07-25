@@ -4,6 +4,7 @@ import co.worklytics.psoxy.PseudonymizedIdentity;
 import co.worklytics.psoxy.Pseudonymizer;
 import co.worklytics.psoxy.rules.CsvRules;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
+import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.BulkDataRules;
 import com.avaulta.gateway.rules.ColumnarRules;
 import co.worklytics.psoxy.storage.BulkDataSanitizer;
@@ -28,9 +29,7 @@ import javax.inject.Singleton;
 import java.io.*;
 import java.util.*;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.function.UnaryOperator;
-import java.util.stream.Collector;
 import java.io.ByteArrayOutputStream;
 
 import java.util.stream.Collectors;
@@ -48,6 +47,9 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
 
     @Inject
     ObjectMapper objectMapper;
+
+    @Inject
+    UrlSafeTokenPseudonymEncoder urlSafeTokenPseudonymEncoder;
 
     @Getter(AccessLevel.PRIVATE)
     @Setter(onMethod_ = @VisibleForTesting)
@@ -146,7 +148,7 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
                         if (identity == null) {
                             return null;
                         } else if (rules.getPseudonymFormat() == PseudonymEncoder.Implementations.URL_SAFE_TOKEN) {
-                            return identity.getHash();
+                            return urlSafeTokenPseudonymEncoder.encode(identity.asPseudonym());
                         } else {
                             //JSON
                             return objectMapper.writeValueAsString(identity);
