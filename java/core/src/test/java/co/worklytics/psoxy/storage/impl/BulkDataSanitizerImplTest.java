@@ -228,10 +228,10 @@ public class BulkDataSanitizerImplTest {
     void handle_duplicates() {
         //this is a lookup-table use case (for customers to use in own data warehouse)
         final String EXPECTED = "EMPLOYEE_ID,DEPARTMENT,EMPLOYEE_ID_ORIG\r\n" +
-            "SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM,Engineering,1\r\n" +
-            "mfsaNYuCX__xvnRz4gJp_t0zrDTC5DkuCJvMkubugsI,Sales,2\r\n" +
-            ".ZdDGUuOMK.Oy7_PJ3pf9SYX12.3tKPdLHfYbjVGcGk,Engineering,3\r\n" +
-            ".fs1T64Micz8SkbILrABgEv4kSg.tFhvhP35HGSLdOo,Engineering,4\r\n";
+            "t~U2FwcHdPNEtaS0dwcnFxVU5ydU5yZUJEMkJWUjk4bkVNNk5SQ3UzUjJkTQ,Engineering,1\r\n" +
+            "t~bWZzYU5ZdUNYX194dm5SejRnSnBfdDB6ckRUQzVEa3VDSnZNa3VidWdzSQ,Sales,2\r\n" +
+            "t~LlpkREdVdU9NSy5PeTdfUEozcGY5U1lYMTIuM3RLUGRMSGZZYmpWR2NHaw,Engineering,3\r\n" +
+            "t~LmZzMVQ2NE1pY3o4U2tiSUxyQUJnRXY0a1NnLnRGaHZoUDM1SEdTTGRPbw,Engineering,4\r\n";
 
         CsvRules rules = CsvRules.builder()
             .pseudonymFormat(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)

@@ -81,7 +81,7 @@ public class UrlSafeTokenPseudonymEncoderTest {
 
     @Test
     void noReverse() {
-        String expected = "nVPSMYD7ZO_ptGIMJ65TAFo5_vVVQQ2af5Bfg7bW0Jo";
+        String expected = "t~nVPSMYD7ZO_ptGIMJ65TAFo5_vVVQQ2af5Bfg7bW0Jo";
         String original = "blah";
         Pseudonym pseudonym = Pseudonym.builder()
             .hash(deterministicTokenizationStrategy.getToken(original, Function.identity()))
@@ -107,6 +107,6 @@ public class UrlSafeTokenPseudonymEncoderTest {
             .build();
 
         String encoded = pseudonymEncoder.encode(pseudonym);
-        assertEquals("UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMk@acme.com", encoded);
+        assertEquals("t~UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMk@acme.com", encoded);
     }
 }
