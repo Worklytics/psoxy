@@ -11,7 +11,7 @@ output "required_aws_managed_policies_to_provision_host" {
 }
 
 output "required_aws_managed_policies_to_consume_msft_365_source" {
-  value = local.required_aws_managed_policies_to_consume_msft_365_source
+  value       = local.required_aws_managed_policies_to_consume_msft_365_source
   description = "The AWS managed policies required to provision infra needed to consume Microsoft 365 as a data source via Psoxy hosted in AWS"
 }
 

@@ -51,11 +51,16 @@ module "instance_secrets" {
   kms_key_id = var.aws_ssm_key_id
   secrets = { for v in each.value.secured_variables :
     v.name => {
-      value       = v.value,
-      description = try(v.description, null)
+      value               = v.value,
+      description         = try(v.description, null)
+      sensitive           = try(v.sensitive, true)
+      value_managed_by_tf = try(v.value_managed_by_tf, true) # ideally, would be `value != null`, but bc value is sensitive, Terraform doesn't allow for_each over map derived from sensitive values
     }
   }
 }
+
+
+
 
 module "api_connector" {
   for_each = var.api_connectors

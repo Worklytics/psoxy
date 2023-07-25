@@ -33,6 +33,6 @@ locals {
   validate_google_workspace_gcp_project_id_check = regex(
     "^${local.validate_google_workspace_gcp_project_id_message}$",
     (!local.validate_google_workspace_gcp_project_id
-    ? local.validate_google_workspace_gcp_project_id_message
-    : ""))
+      ? local.validate_google_workspace_gcp_project_id_message
+  : ""))
 }
