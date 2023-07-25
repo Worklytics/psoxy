@@ -126,7 +126,7 @@ variable "api_connectors" {
       sensitive           = optional(bool, true)
       value_managed_by_tf = optional(bool, true)
       description         = optional(string)
-    })),
+      })),
     [])
 
   }))

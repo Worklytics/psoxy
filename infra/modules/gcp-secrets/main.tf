@@ -6,7 +6,7 @@
 locals {
   replica_locations = coalesce(var.replica_regions, var.replica_locations)
 
-  terraform_managed_secrets = { for k, v in var.secrets : k => v if v.value_managed_by_tf }
+  terraform_managed_secrets  = { for k, v in var.secrets : k => v if v.value_managed_by_tf }
   externally_managed_secrets = { for k, v in var.secrets : k => v if !v.value_managed_by_tf }
 }
 
@@ -39,7 +39,7 @@ resource "google_secret_manager_secret" "secret" {
 
 # secret versions are ONLY created for values managed by Terraform
 resource "google_secret_manager_secret_version" "version" {
-  for_each     = local.terraform_managed_secrets
+  for_each = local.terraform_managed_secrets
 
   secret      = google_secret_manager_secret.secret[each.key].id
   secret_data = coalesce(each.value.value, "placeholder value - fill me")

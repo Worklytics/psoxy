@@ -12,7 +12,7 @@ locals {
   PLACEHOLDER_VALUE        = "fill me"
 
   externally_managed_secrets = { for k, spec in var.secrets : k => spec if !(spec.value_managed_by_tf) }
-  terraform_managed_secrets = { for k, spec in var.secrets : k => spec if spec.value_managed_by_tf }
+  terraform_managed_secrets  = { for k, spec in var.secrets : k => spec if spec.value_managed_by_tf }
 }
 
 # see: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter
@@ -68,7 +68,7 @@ output "secret_ids" {
 
 output "secret_arns" {
   value = concat(
-    [ for k, v in local.terraform_managed_secrets : aws_ssm_parameter.secret[k].arn ],
-    [ for k, v in local.externally_managed_secrets : aws_ssm_parameter.secret_with_externally_managed_value[k].arn ]
+    [for k, v in local.terraform_managed_secrets : aws_ssm_parameter.secret[k].arn],
+    [for k, v in local.externally_managed_secrets : aws_ssm_parameter.secret_with_externally_managed_value[k].arn]
   )
 }
