@@ -17,15 +17,19 @@ Working tracking of changes, updated as work done prior to release.  Please revi
         then wildcard policy to read shared also grants read of secrets across all connectors)
   - keys/salts per value kind (PII, item id, etc)
 
-## [0.4.30](https://github.com/Worklytics/psoxy/release/tag/v0.4.30)
+## [0.4.31](https://github.com/Worklytics/psoxy/release/tag/v0.4.31)
 
 Changes:
-  * due to split of Terraform vs externally-managed secret values, expect:
+  * due to split of Terraform vs externally-managed secret values. expect:
     - AWS hosted: many moves of AWS Systems Manager Parameter Store parameters. No parameters
       should be created or destroyed.
     - GCP hosted: destruction of GCP Secret versions for externally managed secrets;
       behavior is now that *no* version for such secret will be provisioned by Terraform,
       instead of one with a placeholder value
+    - see https://github.com/Worklytics/psoxy/pull/419
+  * changes to GCP secret permissions for "writable" secrets. Psoxy instances will need to disable
+    old versions of secrets as they rotate, so no require `secretVersionManager` role instead of
+    `secretVersionAdder` role granted previously. See https://github.com/Worklytics/psoxy/pull/447
 
 ## [0.4.25](https://github.com/Worklytics/psoxy/releases/tag/v0.4.25)
 
