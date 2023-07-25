@@ -33,7 +33,42 @@ Use cases:
   - move from a `dev` account to a `dev` account
   - move from a "shared" account to a "dedicated" account
 
-TBC
+First, make a list of everything you want to preserve (and migrate), rather than re-create.
+
+Then, pick a strategy from below and follow it. YMMV, and depending on you scenario you may need
+to do work beyond what's described here.
+
+### Terraform `moved`, Provider aliases
+
+Duplicate all the resources/modules in your current Terraform configuration again in that same file,
+but create alias providers that point to the new account (AWS case) or pass a different value for
+the `project` argument (GCP case).
+
+Then, use the `moved` directive to tell Terraform that the resources are being moved from the original
+resources/modules, to the new ones.
+
+
+
+### Terraform state rm / Terraform import
+
+While more tedious, this approach may offer more assurance of correctness.
+
+General steps:
+  1. create a new Terraform configuration from scratch; run `terraform init` there (if you begin
+     with one of our examples, our `init` script does this)
+  2. run a provisional `terraform plan` and review.
+  3. find the resources in the plan that correspond to the infrastructure you intend to preserve
+  4. for infrastructure that is not actually moving across accounts/projects (likely data source
+     API clients, use `terraform import` to import the existing infrastructure into your new
+     configuration
+     (for infrastructure that *is* moving across projects - eg configuration parameters, secrets
+     such as the SALT), it will be simplest to move the values via AWS / GCP console *after* your
+     first apply
+  5. run `terraform apply` to create the new infrastructure; re-confirm that the plan is not
+     re-creating any API clients/etc that you intended to preserve
+  6. Via AWS / GCP console, or CLIs, move the values of any secrets/parameters that you intended to
+     by directly reading the values from your old account/project, and copying them into the new
+     account/project
 
 ## Cross-Provider Migration
 
