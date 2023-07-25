@@ -178,6 +178,7 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..body")
                     .jsonPath("$..description")
                     .jsonPath("$..name")
+                    .jsonPath("$..pem")
                     .build())
             .transforms(generateUserTransformations("..user"))
             .transforms(generateUserTransformations("..assignee"))
@@ -245,6 +246,8 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..description")
                     .jsonPath("$..url")
                     .jsonPath("$..homepage")
+                    .jsonPath("$..commit_title")
+                    .jsonPath("$..commit_message")
                     .build())
             // Owner can be a user or an organization user;
             // we leave them without redact as we assume
@@ -259,6 +262,7 @@ public class PrebuiltSanitizerRules {
             .transforms(generateUserTransformations("..creator"))
             .transforms(generateUserTransformations("..merged_by"))
             .transforms(generateUserTransformations("..closed_by"))
+            .transforms(generateUserTransformations("..enabled_by"))
             .build();
 
     static final Endpoint PULL = Endpoint.builder()
@@ -269,6 +273,8 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..name")
                     .jsonPath("$..description")
                     .jsonPath("$..homepage")
+                    .jsonPath("$..commit_title")
+                    .jsonPath("$..commit_message")
                     .build())
             // Owner can be a user or an organization user;
             // we leave them without redact as we assume
@@ -283,6 +289,7 @@ public class PrebuiltSanitizerRules {
             .transforms(generateUserTransformations("..creator"))
             .transforms(generateUserTransformations("..merged_by"))
             .transforms(generateUserTransformations("..closed_by"))
+            .transforms(generateUserTransformations("..enabled_by"))
             .build();
 
     static final Endpoint REPOSITORIES = Endpoint.builder()
