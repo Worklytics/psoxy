@@ -26,7 +26,7 @@ fi
 
 SOURCE_OF_TRUTH="aws-all"
 REPLICAS=("gcp")
-FILES_TO_COPY=("google-workspace.tf" "google-workspace-variables.tf")
+FILES_TO_COPY=("google-workspace.tf" "google-workspace-variables.tf" "misc-data-source-variables.tf")
 
 for replica in "${REPLICAS[@]}"
 do

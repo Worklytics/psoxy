@@ -3,6 +3,9 @@
   "done":true,
   "records":[
     {
+      "attributes":{
+        "type":"Account"
+      },
       "Id":"0015Y00002c7g95QAA",
       "AnnualRevenue":1.23456789E9,
       "CreatedDate":"2021-03-02T16:31:04.000+0000",
@@ -20,6 +23,9 @@
       "Type":"Technology Partner"
     },
     {
+      "attributes":{
+        "type":"Account"
+      },
       "Id":"0015Y00002c7g8uQAA",
       "AnnualRevenue":1.39E8,
       "CreatedDate":"2021-03-02T16:31:04.000+0000",

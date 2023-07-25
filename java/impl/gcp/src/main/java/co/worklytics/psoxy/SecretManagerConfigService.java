@@ -18,6 +18,7 @@ import javax.inject.Inject;
 import java.io.IOException;
 import java.time.Clock;
 import java.time.Instant;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -71,6 +72,25 @@ public class SecretManagerConfigService implements ConfigService, LockService {
                 SecretVersion version = client.addSecretVersion(secretName, payload);
 
                 log.info(String.format("Property: %s, stored version %s", secretName, version.getName()));
+
+                SecretManagerServiceClient.ListSecretVersionsPage enabledVersions = client.listSecretVersions(ListSecretVersionsRequest.newBuilder()
+                                .setFilter("state:ENABLED")
+                                .setParent(secretName.toString())
+                                // Reduce the page, as each version will be disabled one by one
+                                .setPageSize(20)
+                                .build())
+                        .getPage();
+
+                // Disable secret version, just the first page
+                enabledVersions.getValues().forEach(i -> {
+                    if (!i.getName().equals(version.getName())) {
+                        client.disableSecretVersion(DisableSecretVersionRequest.newBuilder()
+                                .setName(i.getName())
+                                .build());
+
+                        log.info(String.format("Property: %s, disabled version %s", secretName, i.getName()));
+                    }
+                });
             }
         } catch (IOException e) {
             log.log(Level.SEVERE, "Could not store property " + secretName, e);

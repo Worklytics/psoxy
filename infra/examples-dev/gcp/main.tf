@@ -44,9 +44,9 @@ module "worklytics_connectors" {
 
 
   enabled_connectors        = var.enabled_connectors
-  example_jira_issue_id     = var.example_jira_issue_id
   jira_cloud_id             = var.jira_cloud_id
   jira_server_url           = var.jira_server_url
+  jira_example_issue_id     = var.jira_example_issue_id
   salesforce_domain         = var.salesforce_domain
   github_installation_id    = var.github_installation_id
   github_organization       = var.github_organization

@@ -1,13 +1,16 @@
 package co.worklytics.psoxy.impl;
 
-import co.worklytics.psoxy.*;
+import co.worklytics.psoxy.PseudonymizedIdentity;
+import co.worklytics.psoxy.Pseudonymizer;
+import co.worklytics.psoxy.RESTApiSanitizer;
 import co.worklytics.psoxy.rules.RESTRules;
+import co.worklytics.psoxy.utils.URLUtils;
+import com.avaulta.gateway.pseudonyms.Pseudonym;
+import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
+import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.Endpoint;
 import com.avaulta.gateway.rules.JsonSchemaFilterUtils;
 import com.avaulta.gateway.rules.transforms.Transform;
-import co.worklytics.psoxy.utils.URLUtils;
-import com.avaulta.gateway.pseudonyms.*;
-import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
@@ -69,7 +72,8 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     }
 
     @Getter(onMethod_ = {@VisibleForTesting})
-    @Inject Configuration jsonConfiguration;
+    @Inject
+    Configuration jsonConfiguration;
 
     @Inject
     ReversibleTokenizationStrategy reversibleTokenizationStrategy;
@@ -79,17 +83,15 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     JsonSchemaFilterUtils jsonSchemaFilterUtils;
 
 
-
-
     @Override
     public boolean isAllowed(@NonNull String httpMethod, @NonNull URL url) {
         String relativeUrl = URLUtils.relativeURL(url);
 
         Predicate<Map.Entry<Endpoint, Pattern>> hasPathRegexMatchingUrl =
-            getHasPathRegexMatchingUrl(relativeUrl);
+                getHasPathRegexMatchingUrl(relativeUrl);
 
         Predicate<Map.Entry<Endpoint, Pattern>> hasPathTemplateMatchingUrl =
-            getHasPathTemplateMatchingUrl(url);
+                getHasPathTemplateMatchingUrl(url);
 
         Predicate<Endpoint> allowsHttpMethod = allowsHttpMethod(httpMethod);
 
@@ -98,33 +100,33 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
             return true;
         } else {
             return getCompiledAllowedEndpoints().entrySet().stream()
-                .filter(entry -> hasPathRegexMatchingUrl.test(entry) || hasPathTemplateMatchingUrl.test(entry))
-                .filter(entry -> allowedQueryParams(entry.getKey(), URLUtils.queryParamNames(url))) // redundant in the pathTemplate case
-                .filter(entry -> allowsHttpMethod.test(entry.getKey()))
-                .findAny().isPresent();
+                    .filter(entry -> hasPathRegexMatchingUrl.test(entry) || hasPathTemplateMatchingUrl.test(entry))
+                    .filter(entry -> allowedQueryParams(entry.getKey(), URLUtils.queryParamNames(url))) // redundant in the pathTemplate case
+                    .filter(entry -> allowsHttpMethod.test(entry.getKey()))
+                    .findAny().isPresent();
         }
     }
 
     @VisibleForTesting
     Predicate<Endpoint> allowsHttpMethod(@NonNull String httpMethod) {
         return (endpoint) ->
-            endpoint.getAllowedMethods()
-                .map(methods -> methods.stream().map(String::toUpperCase).collect(Collectors.toList())
-                    .contains(httpMethod.toUpperCase()))
-                .orElse(true);
+                endpoint.getAllowedMethods()
+                        .map(methods -> methods.stream().map(String::toUpperCase).collect(Collectors.toList())
+                                .contains(httpMethod.toUpperCase()))
+                        .orElse(true);
     }
 
     @VisibleForTesting
     Predicate<Map.Entry<Endpoint, Pattern>> getHasPathRegexMatchingUrl(String relativeUrl) {
         return (entry) ->
-            entry.getKey().getPathRegex() != null && entry.getValue().matcher(relativeUrl).matches();
+                entry.getKey().getPathRegex() != null && entry.getValue().matcher(relativeUrl).matches();
     }
 
     @VisibleForTesting
     Predicate<Map.Entry<Endpoint, Pattern>> getHasPathTemplateMatchingUrl(URL url) {
         return (entry) ->
-            entry.getKey().getPathTemplate() != null && entry.getValue().matcher(url.getPath()).matches()
-                && allowedQueryParams(entry.getKey(), URLUtils.queryParamNames(url));
+                entry.getKey().getPathTemplate() != null && entry.getValue().matcher(url.getPath()).matches()
+                        && allowedQueryParams(entry.getKey(), URLUtils.queryParamNames(url));
     }
 
 
@@ -145,23 +147,23 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     String transform(@NonNull URL url, @NonNull String jsonResponse) {
         String relativeUrl = URLUtils.relativeURL(url);
         Optional<Pair<Pattern, Endpoint>> matchingEndpoint =
-            getCompiledAllowedEndpoints().entrySet().stream()
-            .filter(entry -> entry.getKey().getPathRegex() != null && entry.getValue().matcher(relativeUrl).matches()
-                || (entry.getKey().getPathTemplate() != null && entry.getValue().matcher(url.getPath()).matches() && allowedQueryParams(entry.getKey(), URLUtils.queryParamNames(url))))
-            .findFirst()
-                .map(entry -> Pair.of(entry.getValue(), entry.getKey()));
+                getCompiledAllowedEndpoints().entrySet().stream()
+                        .filter(entry -> entry.getKey().getPathRegex() != null && entry.getValue().matcher(relativeUrl).matches()
+                                || (entry.getKey().getPathTemplate() != null && entry.getValue().matcher(url.getPath()).matches() && allowedQueryParams(entry.getKey(), URLUtils.queryParamNames(url))))
+                        .findFirst()
+                        .map(entry -> Pair.of(entry.getValue(), entry.getKey()));
 
         return matchingEndpoint.map(match -> {
             String filteredJson = match.getValue().getResponseSchemaOptional()
-                .map(schema -> {
-                    //q: this read
-                    try {
-                        return jsonSchemaFilterUtils.filterJsonBySchema(jsonResponse, schema, getRootDefinitions());
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                })
-                .orElse(jsonResponse);
+                    .map(schema -> {
+                        //q: this read
+                        try {
+                            return jsonSchemaFilterUtils.filterJsonBySchema(jsonResponse, schema, getRootDefinitions());
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    })
+                    .orElse(jsonResponse);
 
             //q: more efficient to filter on `document` directly? problem is that our json path
             // library contract only specifies 'Object' for it's parsed document type; but in
@@ -185,31 +187,45 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     }
 
 
-    Object applyTransform(Transform transform, Object document ) {
+    Object applyTransform(Transform transform, Object document) {
         List<JsonPath> paths = compiledTransforms.computeIfAbsent(transform,
-            t -> t.getJsonPaths().stream()
-                .map(JsonPath::compile)
-                .collect(Collectors.toList()));
+                t -> t.getJsonPaths().stream()
+                        .map(JsonPath::compile)
+                        .collect(Collectors.toList()));
 
-        if (transform instanceof Transform.Redact) {
-            for (JsonPath path : paths) {
-                try {
-                    path.delete(document, jsonConfiguration);
-                } catch (com.jayway.jsonpath.PathNotFoundException e) {
-                    //expected if rule doesn't apply
+        if (transformApplies(transform, document)) {
+            if (transform instanceof Transform.Redact) {
+                for (JsonPath path : paths) {
+                    try {
+                        path.delete(document, jsonConfiguration);
+                    } catch (com.jayway.jsonpath.PathNotFoundException e) {
+                        //expected if rule doesn't apply
+                    }
                 }
-            }
-        } else {
-            MapFunction f = getTransformImpl(transform);
-            for (JsonPath path : paths) {
-                try {
-                    path.map(document, f, jsonConfiguration);
-                } catch (com.jayway.jsonpath.PathNotFoundException e) {
-                    //expected if rule doesn't apply
+            } else {
+                MapFunction f = getTransformImpl(transform);
+                for (JsonPath path : paths) {
+                    try {
+                        path.map(document, f, jsonConfiguration);
+                    } catch (com.jayway.jsonpath.PathNotFoundException e) {
+                        //expected if rule doesn't apply
+                    }
                 }
             }
         }
         return document;
+    }
+
+    private static boolean transformApplies(Transform transform, Object document) {
+        if (transform.getApplyOnlyWhen() != null) {
+            Object filterResult = JsonPath.compile(transform.getApplyOnlyWhen()).read(document);
+
+            ArrayList<?> results = (ArrayList<?>) filterResult;
+
+            return results != null && results.size() != 0;
+        }
+
+        return true;
     }
 
     @VisibleForTesting
@@ -236,29 +252,29 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
 
 
     MapFunction getRedactRegexMatches(Transform.RedactRegexMatches transform) {
-       List<Pattern> patterns = transform.getRedactions().stream().map(Pattern::compile).collect(Collectors.toList());
-       return (s, jsonConfiguration) -> {
-           if (!(s instanceof String)) {
-               if (s != null) {
-                   log.warning("value matched by " + transform + " not of type String");
-               }
-               return null;
-           } else if (StringUtils.isBlank((String) s)) {
-               return s;
-           } else {
-               String result = (String) s;
-               for (Pattern p : patterns) {
-                   result = p.matcher(result).replaceAll("");
-               }
-               return result;
-           }
-       };
+        List<Pattern> patterns = transform.getRedactions().stream().map(Pattern::compile).collect(Collectors.toList());
+        return (s, jsonConfiguration) -> {
+            if (!(s instanceof String)) {
+                if (s != null) {
+                    log.warning("value matched by " + transform + " not of type String");
+                }
+                return null;
+            } else if (StringUtils.isBlank((String) s)) {
+                return s;
+            } else {
+                String result = (String) s;
+                for (Pattern p : patterns) {
+                    result = p.matcher(result).replaceAll("");
+                }
+                return result;
+            }
+        };
     }
 
     MapFunction getRedactExceptSubstringsMatchingRegexes(Transform.RedactExceptSubstringsMatchingRegexes transform) {
         List<Pattern> patterns = transform.getExceptions().stream()
-            .map(p -> ".*(" + p + ").*") //wrap in .* to match anywhere in the string
-            .map(Pattern::compile).collect(Collectors.toList());
+                .map(p -> ".*(" + p + ").*") //wrap in .* to match anywhere in the string
+                .map(Pattern::compile).collect(Collectors.toList());
         return (s, jsonConfiguration) -> {
             if (!(s instanceof String)) {
                 if (s != null) {
@@ -269,20 +285,20 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
                 return s;
             } else {
                 return patterns.stream()
-                    .map( p -> p.matcher((String) s))
-                    .filter(Matcher::matches)
-                    .findFirst()
-                    .map(m -> m.group(1))
-                    .orElse("");
+                        .map(p -> p.matcher((String) s))
+                        .filter(Matcher::matches)
+                        .findFirst()
+                        .map(m -> m.group(1))
+                        .orElse("");
             }
         };
     }
 
     MapFunction getFilterTokenByRegex(Transform.FilterTokenByRegex transform) {
         List<java.util.function.Predicate<String>> patterns =
-            transform.getFilters().stream().map(Pattern::compile)
-            .map(Pattern::asMatchPredicate)
-            .collect(Collectors.toList());
+                transform.getFilters().stream().map(Pattern::compile)
+                        .map(Pattern::asMatchPredicate)
+                        .collect(Collectors.toList());
 
         return (s, jsonConfiguration) -> {
             if (!(s instanceof String)) {
@@ -295,12 +311,12 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
             } else {
                 String result = (String) s;
                 Stream<String> stream = Optional.ofNullable(transform.getDelimiter())
-                    .map(delimiter -> Arrays.stream(result.split(delimiter)))
-                    .orElse(Stream.of(result));
+                        .map(delimiter -> Arrays.stream(result.split(delimiter)))
+                        .orElse(Stream.of(result));
 
                 return StringUtils.trimToNull(stream
-                    .filter(token -> patterns.stream().anyMatch(p -> p.test(token)))
-                    .collect(Collectors.joining(" ")));
+                        .filter(token -> patterns.stream().anyMatch(p -> p.test(token)))
+                        .collect(Collectors.joining(" ")));
             }
         };
     }
@@ -318,20 +334,20 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
             } else {
                 String toTokenize = (String) s;
                 Optional<Matcher> matcher = pattern
-                    .map(p -> p.matcher(toTokenize));
+                        .map(p -> p.matcher(toTokenize));
                 if (matcher.isPresent()) {
                     if (matcher.get().matches()) {
                         String token = urlSafePseudonymEncoder.encode(Pseudonym.builder()
-                            .reversible(reversibleTokenizationStrategy.getReversibleToken(matcher.get().group(1)))
-                            .build());
+                                .reversible(reversibleTokenizationStrategy.getReversibleToken(matcher.get().group(1)))
+                                .build());
                         return toTokenize.replace(matcher.get().group(1), token);
                     } else {
                         return s;
                     }
                 } else {
                     String token = urlSafePseudonymEncoder.encode(Pseudonym.builder()
-                        .reversible(reversibleTokenizationStrategy.getReversibleToken(toTokenize))
-                        .build());
+                            .reversible(reversibleTokenizationStrategy.getReversibleToken(toTokenize))
+                            .build());
                     return token;
                 }
             }
@@ -366,6 +382,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     String pseudonymizeEmailHeaderToJson(@NonNull Object value, @NonNull Configuration configuration) {
         return configuration.jsonProvider().toJson(pseudonymizeEmailHeader(value));
     }
+
     List<PseudonymizedIdentity> pseudonymizeEmailHeader(Object value) {
         if (value == null) {
             return null;
@@ -380,11 +397,11 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
             // per RFC should be allowed ....
             if (EmailAddressParser.isValidAddressList((String) value, EmailAddressCriteria.RECOMMENDED)) {
                 InternetAddress[] addresses =
-                    EmailAddressParser.extractHeaderAddresses((String) value, EmailAddressCriteria.RECOMMENDED, true);
+                        EmailAddressParser.extractHeaderAddresses((String) value, EmailAddressCriteria.RECOMMENDED, true);
                 return Arrays.stream(addresses)
-                    .map(InternetAddress::getAddress)
-                    .map(pseudonymizer::pseudonymize)
-                    .collect(Collectors.toList());
+                        .map(InternetAddress::getAddress)
+                        .map(pseudonymizer::pseudonymize)
+                        .collect(Collectors.toList());
             } else {
                 log.log(Level.WARNING, "Valued matched by emailHeader rule is not valid address list, but not blank");
                 return null;
@@ -395,11 +412,11 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     Map<Endpoint, Pattern> getCompiledAllowedEndpoints() {
         if (compiledAllowedEndpoints == null) {
             synchronized ($writeLock) {
-            if (compiledAllowedEndpoints == null) {
-                compiledAllowedEndpoints = rules.getEndpoints().stream()
-                    .collect(Collectors.toMap(Function.identity(),
-                        endpoint -> Pattern.compile(effectiveRegex(endpoint), CASE_INSENSITIVE)));
-            }
+                if (compiledAllowedEndpoints == null) {
+                    compiledAllowedEndpoints = rules.getEndpoints().stream()
+                            .collect(Collectors.toMap(Function.identity(),
+                                    endpoint -> Pattern.compile(effectiveRegex(endpoint), CASE_INSENSITIVE)));
+                }
             }
         }
         return compiledAllowedEndpoints;
@@ -411,16 +428,16 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     @VisibleForTesting
     String effectiveRegex(Endpoint endpoint) {
         return Optional.ofNullable(endpoint.getPathRegex())
-            .orElseGet(() -> "^" +
-                endpoint.getPathTemplate()
-                    .replaceAll(SPECIAL_CHAR_CLASS, "\\\\$0")
-                    .replaceAll("\\{.*?\\}", "[^/]+") + "$");
+                .orElseGet(() -> "^" +
+                        endpoint.getPathTemplate()
+                                .replaceAll(SPECIAL_CHAR_CLASS, "\\\\$0")
+                                .replaceAll("\\{.*?\\}", "[^/]+") + "$");
     }
 
     boolean allowedQueryParams(Endpoint endpoint, List<String> queryParams) {
         return endpoint.getAllowedQueryParamsOptional()
-            .map(allowedParams -> allowedParams.containsAll(queryParams))
-            .orElse(true);
+                .map(allowedParams -> allowedParams.containsAll(queryParams))
+                .orElse(true);
     }
 
     JsonSchemaFilterUtils.JsonSchemaFilter getRootDefinitions() {

@@ -142,7 +142,7 @@ locals {
 
 
   jira_cloud_id             = coalesce(var.jira_cloud_id, "YOUR_JIRA_CLOUD_ID")
-  example_jira_issue_id     = coalesce(var.example_jira_issue_id, "YOUR_JIRA_EXAMPLE_ISSUE_ID")
+  jira_example_issue_id     = coalesce(var.jira_example_issue_id, var.example_jira_issue_id, "YOUR_JIRA_EXAMPLE_ISSUE_ID")
   github_installation_id    = coalesce(var.github_installation_id, "YOUR_GITHUB_INSTALLATION_ID")
   github_organization       = coalesce(var.github_organization, "YOUR_GITHUB_ORGANIZATION_NAME")
   github_example_repository = coalesce(var.github_example_repository, "YOUR_GITHUB_EXAMPLE_REPOSITORY_NAME")
@@ -386,8 +386,6 @@ EOT
         "/services/data/v57.0/composite/sobjects/User?ids={ANY_USER_ID}&fields=Alias,AccountId,ContactId,CreatedDate,CreatedById,Email,EmailEncodingKey,Id,IsActive,LastLoginDate,LastModifiedDate,ManagerId,Name,TimeZoneSidKey,Username,UserRoleId,UserType",
         "/services/data/v57.0/composite/sobjects/Account?ids={ANY_ACCOUNT_ID}&fields=Id,AnnualRevenue,CreatedDate,CreatedById,IsDeleted,LastActivityDate,LastModifiedDate,LastModifiedById,NumberOfEmployees,OwnerId,Ownership,ParentId,Rating,Sic,Type",
         "/services/data/v57.0/query?q=SELECT%20%28SELECT%20AccountId%2CActivityDate%2CActivityDateTime%2CActivitySubtype%2CActivityType%2CCallDurationInSeconds%2CCallType%2CCreatedDate%2CCreatedById%2CDurationInMinutes%2CEndDateTime%2CId%2CIsAllDayEvent%2CIsDeleted%2CIsHighPriority%2CIsTask%2CLastModifiedDate%2CLastModifiedById%2COwnerId%2CPriority%2CStartDateTime%2CStatus%2CWhatId%2CWhoId%20FROM%20ActivityHistories%20ORDER%20BY%20LastModifiedDate%20DESC%20NULLS%20LAST%29%20FROM%20Account%20where%20id%3D%27{ANY_ACCOUNT_ID}%27",
-        "/services/data/v57.0/query?q=SELECT%20Id%20FROM%20Account%20ORDER%20BY%20Id%20ASC",
-        "/services/data/v57.0/query?q=SELECT%20Id%20FROM%20User%20ORDER%20BY%20Id%20ASC",
         "/services/data/v57.0/query?q=SELECT+Alias,AccountId,ContactId,CreatedDate,CreatedById,Email,EmailEncodingKey,Id,IsActive,LastLoginDate,LastModifiedDate,ManagerId,Name,TimeZoneSidKey,Username,UserRoleId,UserType+FROM+User+WHERE+LastModifiedDate+%3E%3D+2016-01-01T00%3A00%3A00Z+AND+LastModifiedDate+%3C+2023-03-01T00%3A00%3A00Z+ORDER+BY+LastModifiedDate+DESC+NULLS+LAST",
         "/services/data/v57.0/query?q=SELECT+Id,AnnualRevenue,CreatedDate,CreatedById,IsDeleted,LastActivityDate,LastModifiedDate,LastModifiedById,NumberOfEmployees,OwnerId,Ownership,ParentId,Rating,Sic,Type+FROM+Account+WHERE+LastModifiedDate+%3E%3D+2016-01-01T00%3A00%3A00Z+AND+LastModifiedDate+%3C+2023-03-01T00%3A00%3A00Z+ORDER+BY+LastModifiedDate+DESC+NULLS+LAST"
       ]
@@ -672,11 +670,11 @@ EOT
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
         "/rest/api/2/search?maxResults=25",
-        "/rest/api/2/issue/${local.example_jira_issue_id}/comment?maxResults=25",
-        "/rest/api/2/issue/${local.example_jira_issue_id}/worklog?maxResults=25",
+        "/rest/api/2/issue/${local.jira_example_issue_id}/comment?maxResults=25",
+        "/rest/api/2/issue/${local.jira_example_issue_id}/worklog?maxResults=25",
         "/rest/api/latest/search?maxResults=25",
-        "/rest/api/latest/issue/${local.example_jira_issue_id}/comment?maxResults=25",
-        "/rest/api/latest/issue/${local.example_jira_issue_id}/worklog?maxResults=25",
+        "/rest/api/latest/issue/${local.jira_example_issue_id}/comment?maxResults=25",
+        "/rest/api/latest/issue/${local.jira_example_issue_id}/worklog?maxResults=25",
       ],
       external_token_todo : <<EOT
   1. Follow the instructions to create a [Personal Access Token](https://confluence.atlassian.com/enterprise/using-personal-access-tokens-1026032365.html) in your instance.
@@ -684,11 +682,13 @@ EOT
      to be a "Service Account" in effect for the connection (name it `svc-worklytics` or something).
      This will give you better visibility into activity of the data connector as well as avoid
      connection inadvertently breaking if the Jira user who owns the token is disabled or deleted.
-  2. Disable or mark a proper expiration of the token.
+
+     That service account must have *READ* permissions over your Jira instance, to be able to read issues, worklogs and comments, including their changelog where possible.
+     If you're required to specify a classical scope, you can add:
+     - `read:jira-work`
+  2. Disable or set a reasonable expiration time for the token. If you set an expiration time, it is your responsibility to re-generate the token and reset it in your host environment to maintain your connection.
   3. Copy the value of the token in `PSOXY_JIRA_SERVER_ACCESS_TOKEN` variable as part of AWS System
-     Manager parameters store / GCP Cloud Secrets (if default implementation)
-     NOTE: If your token has been created with expiration date, please remember to update it before
-     that date to ensure connector is going to work.
+     Manager Parameter Store / GCP Cloud Secrets.
 EOT
     }
     jira-cloud = {
@@ -748,15 +748,15 @@ EOT
         "/ex/jira/${local.jira_cloud_id}/rest/api/2/users",
         "/ex/jira/${local.jira_cloud_id}/rest/api/2/group/bulk",
         "/ex/jira/${local.jira_cloud_id}/rest/api/2/search?maxResults=25",
-        "/ex/jira/${local.jira_cloud_id}/rest/api/2/issue/${local.example_jira_issue_id}/changelog?maxResults=25",
-        "/ex/jira/${local.jira_cloud_id}/rest/api/2/issue/${local.example_jira_issue_id}/comment?maxResults=25",
-        "/ex/jira/${local.jira_cloud_id}/rest/api/2/issue/${local.example_jira_issue_id}/worklog?maxResults=25",
+        "/ex/jira/${local.jira_cloud_id}/rest/api/2/issue/${local.jira_example_issue_id}/changelog?maxResults=25",
+        "/ex/jira/${local.jira_cloud_id}/rest/api/2/issue/${local.jira_example_issue_id}/comment?maxResults=25",
+        "/ex/jira/${local.jira_cloud_id}/rest/api/2/issue/${local.jira_example_issue_id}/worklog?maxResults=25",
         "/ex/jira/${local.jira_cloud_id}/rest/api/3/users",
         "/ex/jira/${local.jira_cloud_id}/rest/api/3/group/bulk",
         "/ex/jira/${local.jira_cloud_id}/rest/api/3/search?maxResults=25",
-        "/ex/jira/${local.jira_cloud_id}/rest/api/3/issue/${local.example_jira_issue_id}/changelog?maxResults=25",
-        "/ex/jira/${local.jira_cloud_id}/rest/api/3/issue/${local.example_jira_issue_id}/comment?maxResults=25",
-        "/ex/jira/${local.jira_cloud_id}/rest/api/3/issue/${local.example_jira_issue_id}/worklog?maxResults=25",
+        "/ex/jira/${local.jira_cloud_id}/rest/api/3/issue/${local.jira_example_issue_id}/changelog?maxResults=25",
+        "/ex/jira/${local.jira_cloud_id}/rest/api/3/issue/${local.jira_example_issue_id}/comment?maxResults=25",
+        "/ex/jira/${local.jira_cloud_id}/rest/api/3/issue/${local.jira_example_issue_id}/worklog?maxResults=25",
         "/ex/jira/${local.jira_cloud_id}/rest/api/3/project/search?maxResults=25",
       ],
       external_token_todo : <<EOT
