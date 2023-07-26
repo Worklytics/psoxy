@@ -262,6 +262,7 @@ resource "google_project_iam_custom_role" "psoxy_instance_secret_role" {
     "secretmanager.secrets.list",
     "secretmanager.secrets.update",
     "secretmanager.versions.add",
+    "secretmanager.versions.access",
     "secretmanager.versions.destroy",
     "secretmanager.versions.disable",
     "secretmanager.versions.enable",
