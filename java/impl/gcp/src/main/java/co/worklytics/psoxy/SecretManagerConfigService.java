@@ -74,23 +74,9 @@ public class SecretManagerConfigService implements ConfigService, LockService {
                 SecretVersionName secretVersionName = SecretVersionName.parse(version.getName());
                 log.info(String.format("Property: %s, stored version %s", secretName, version.getName()));
 
-                try {
-                    client.updateSecret(UpdateSecretRequest.newBuilder()
-                            .setSecret(Secret.newBuilder()
-                                    .setName(secretName.toString())
-                                    // Label format is https://cloud.google.com/compute/docs/labeling-resources#requirements
-                                    .putLabels(VERSION_LABEL, secretVersionName.getSecretVersion())
-                                    .build())
-                            .setUpdateMask(FieldMask.newBuilder()
-                                    .addPaths("labels")
-                                    .build())
-                            .build());
-                } catch (Exception e) {
-                    log.severe(String.format("Cannot put the label of the version on the secret %s due exception: %s", secretName.toString(), e));
-                }
+                updateLabelFromSecret(client, secretName, VERSION_LABEL, secretVersionName.getSecretVersion());
 
                 disableOldSecretVersions(client, secretName, version);
-
             }
         } catch (IOException e) {
             log.log(Level.SEVERE, "Could not store property " + secretName, e);
@@ -162,17 +148,7 @@ public class SecretManagerConfigService implements ConfigService, LockService {
             if (lockedAt.isBefore(clock.instant().minusSeconds(expires.getSeconds()))) {
                 log.warning("Lock " + lockId + " is stale or unset; will try to acquire it");
 
-                Secret updated = client.updateSecret(UpdateSecretRequest.newBuilder()
-                        .setSecret(Secret.newBuilder(lockSecret)
-                                // Label format is https://cloud.google.com/compute/docs/labeling-resources#requirements
-                                // which an ISO-8601 cannot be added there (just like 2023-01-01T23:50:00Z)
-                                // Instead, just using epoch in millis
-                                .putLabels(LOCK_LABEL, Long.toString(Instant.now(clock).toEpochMilli()))
-                                .build())
-                        .setUpdateMask(FieldMask.newBuilder()
-                                .addPaths("labels")
-                                .build())
-                        .build());
+                updateLabelFromSecret(client, lockSecretName, LOCK_LABEL, Long.toString(Instant.now(clock).toEpochMilli()));
                 //due to etag, update should have FAILED if was modified since our read
                 return true;
             } else {
@@ -206,21 +182,24 @@ public class SecretManagerConfigService implements ConfigService, LockService {
         }
     }
 
-    private SecretName getLockSecret(String lockName) {
-        // As lockName is handled by Terraform, variable should be converted to uppercase
-        // otherwise secret will not be found
-        return SecretName.of(projectId, this.namespace + lockName.toUpperCase());
-    }
-
-    private String parameterName(ConfigProperty property) {
-        if (StringUtils.isBlank(this.namespace)) {
-            return property.name();
-        } else {
-            return this.namespace + property.name();
+    private static void updateLabelFromSecret(SecretManagerServiceClient client, SecretName secretName, String label, String labelValue) {
+        try {
+            client.updateSecret(UpdateSecretRequest.newBuilder()
+                    .setSecret(Secret.newBuilder()
+                            .setName(secretName.toString())
+                            // Label format is https://cloud.google.com/compute/docs/labeling-resources#requirements
+                            .putLabels(label, labelValue)
+                            .build())
+                    .setUpdateMask(FieldMask.newBuilder()
+                            .addPaths("labels")
+                            .build())
+                    .build());
+        } catch (Exception e) {
+            log.severe(String.format("Cannot put the label of the version on the secret %s due exception: %s", secretName.toString(), e));
         }
     }
 
-    private void disableOldSecretVersions(SecretManagerServiceClient client, SecretName secretName, SecretVersion exceptVersion) {
+    private static void disableOldSecretVersions(SecretManagerServiceClient client, SecretName secretName, SecretVersion exceptVersion) {
         try {
             SecretManagerServiceClient.ListSecretVersionsPage enabledVersions = client.listSecretVersions(ListSecretVersionsRequest.newBuilder()
                             .setFilter("state:ENABLED")
@@ -242,6 +221,20 @@ public class SecretManagerConfigService implements ConfigService, LockService {
             });
         } catch (Exception e) {
             log.severe(String.format("Cannot disable old versions from secret %s due exception: %s", secretName.toString(), e));
+        }
+    }
+
+    private SecretName getLockSecret(String lockName) {
+        // As lockName is handled by Terraform, variable should be converted to uppercase
+        // otherwise secret will not be found
+        return SecretName.of(projectId, this.namespace + lockName.toUpperCase());
+    }
+
+    private String parameterName(ConfigProperty property) {
+        if (StringUtils.isBlank(this.namespace)) {
+            return property.name();
+        } else {
+            return this.namespace + property.name();
         }
     }
 }
