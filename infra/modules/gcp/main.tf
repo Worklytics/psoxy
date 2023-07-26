@@ -250,21 +250,6 @@ moved {
 }
 
 # Deprecated; only keep to support old installations
-resource "google_project_iam_custom_role" "psoxy_instance_secret_locker_role" {
-  project     = var.project_id
-  role_id     = "${local.environment_id_role_prefix}PsoxyInstanceSecretLocker"
-  title       = "Access for updating and reading secrets"
-  description = "Role to grant on secret that is to be managed by a Psoxy instance (cloud function); subset of roles/secretmanager.admin, to support reading/updating the secret"
-
-  permissions = [
-    "resourcemanager.projects.get",
-    "secretmanager.secrets.get",
-    "secretmanager.secrets.getIamPolicy",
-    "secretmanager.secrets.list",
-    "secretmanager.secrets.update"
-  ]
-}
-
 resource "google_project_iam_custom_role" "psoxy_instance_secret_role" {
   project     = var.project_id
   role_id     = "${local.environment_id_role_prefix}PsoxyInstanceSecretHandler"
@@ -341,7 +326,7 @@ output "path_to_deployment_jar" {
 }
 
 output "psoxy_instance_secret_locker_role_id" {
-  value = google_project_iam_custom_role.psoxy_instance_secret_locker_role.id
+  value = google_project_iam_custom_role.psoxy_instance_secret_role.id
 }
 
 output "psoxy_instance_secret_role_id" {
