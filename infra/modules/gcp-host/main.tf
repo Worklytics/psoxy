@@ -55,7 +55,7 @@ locals {
       var_def)
     }
   }
-  lockable_secrets = flatten([
+  /*lockable_secrets = flatten([
     for instance_id, secrets in local.secrets_to_provision :
     [for secret_id, secret in values(secrets) : secret if secret.lockable]
   ])
@@ -63,11 +63,16 @@ locals {
   writable_secrets = flatten([
     for instance_id, secrets in local.secrets_to_provision :
     [for secret_id, secret in values(secrets) : secret if secret.writable]
+  ])*/
+
+  updateable_secrets = flatten([
+  for instance_id, secrets in local.secrets_to_provision :
+  [for secret_id, secret in values(secrets) : secret if secret.lockable || secret.writable]
   ])
 }
 
 output "secrets_to_provision" {
-  value = local.lockable_secrets
+  value = local.updateable_secrets
 }
 
 module "secrets" {
@@ -81,27 +86,27 @@ module "secrets" {
   default_labels    = var.default_labels
   replica_locations = local.secret_replica_locations
 }
-
+/*
 resource "google_secret_manager_secret_iam_member" "grant_sa_updater_on_lockable_secrets" {
   for_each = { for secret in local.lockable_secrets : secret.instance_secret_id => secret }
 
   project   = var.gcp_project_id
   secret_id = "${local.config_parameter_prefix}${each.value.instance_secret_id}"
   member    = "serviceAccount:${google_service_account.api_connectors[each.value.instance_id].email}"
-  role      = module.psoxy.psoxy_instance_secret_locker_role_id
+  role      = module.psoxy.psoxy_instance_secret_role_id
 
   depends_on = [
     module.secrets
   ]
-}
+}*/
 
 resource "google_secret_manager_secret_iam_member" "grant_sa_secretVersionManager_on_writable_secret" {
-  for_each = { for secret in local.writable_secrets : secret.instance_secret_id => secret }
+  for_each = { for secret in local.updateable_secrets : secret.instance_secret_id => secret }
 
   project   = var.gcp_project_id
   secret_id = "${local.config_parameter_prefix}${each.value.instance_secret_id}"
   member    = "serviceAccount:${google_service_account.api_connectors[each.value.instance_id].email}"
-  role      = "roles/secretmanager.secretVersionManager"
+  role      = module.psoxy.psoxy_instance_secret_role_id
 
   depends_on = [
     module.secrets

@@ -201,7 +201,7 @@ resource "google_secret_manager_secret_iam_member" "grant_sa_updater_on_secret" 
   for_each = local.env_vars_for_locker_parameters
 
   member    = "serviceAccount:${google_service_account.long_auth_connector_sa[each.value.connector_name].email}"
-  role      = module.psoxy-gcp.psoxy_instance_secret_locker_role_id
+  role      = module.psoxy-gcp.psoxy_instance_secret_role_id
   project   = var.gcp_project_id
   secret_id = module.connector-oauth[each.key].secret_id
 }
