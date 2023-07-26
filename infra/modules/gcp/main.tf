@@ -251,7 +251,7 @@ moved {
 
 resource "google_project_iam_custom_role" "psoxy_instance_secret_role" {
   project     = var.project_id
-  role_id     = "${local.environment_id_role_prefix}PsoxyInstanceSecretLocker"
+  role_id     = "${local.environment_id_role_prefix}PsoxyInstanceSecretHandler"
   title       = "Access for updating and reading secrets"
   description = "Role to grant on secret that is to be managed by a Psoxy instance (cloud function); subset of roles/secretmanager.admin, to support reading/updating the secret and managing their versions"
 
