@@ -143,6 +143,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
          *
          * q: maybe this should just *always* be true? or should be env var?
          *
+         *
          * @return whether resulting `access_token` should be shared across all instances of
          * connections to this source.
          */
@@ -197,9 +198,27 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         // open a lambda waiting for a lock
         private static final String TOKEN_REFRESH_LOCK_ID = "oauth_refresh_token";
         private static final int MAX_TOKEN_REFRESH_ATTEMPTS = 3;
-        private static final long WAIT_AFTER_FAILED_LOCK_ATTEMPTS = 2000L;
 
-        private AccessToken currentToken = null;
+        /**
+         * how long to wait after a failed lock attempt before trying again; multiplier on the
+         * attempt.
+         *
+         * goal is that this value should be big enough to allow the process that holds the lock to
+         *  1) refresh the token it
+         *  2) write it
+         *  3) release the lock
+         *  4) have that write be visible to other processes, given eventual consistency in GCP
+         *     Secret Manager case
+         *
+         * this includes the allowance for eventual consistency, so wait should be >= that value
+         * in practice.
+         */
+        private static final long WAIT_AFTER_FAILED_LOCK_ATTEMPTS = 4000L;
+
+        /**
+         * how long to allow for eventual consistency after write to config
+         */
+        private static final long ALLOWANCE_FOR_EVENTUAL_CONSISTENCY_SECONDS = 2L;
 
         /**
          * implements canonical oauth flow to exchange refreshToken for accessToken
@@ -220,43 +239,34 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
             CanonicalOAuthAccessTokenResponseDto tokenResponse;
 
-            Optional<AccessToken> sharedAccessToken = getSharedAccessTokenIfSupported();
-            if (this.currentToken == null) {
-                this.currentToken = sharedAccessToken.orElse(null);
-            }
+            AccessToken token = getSharedAccessTokenIfSupported().orElse(null);
 
-            if (sharedAccessToken.isPresent()) {
-                // we have a token, but shared token is newer. Other instance refreshed, so use it
-                if (sharedAccessToken.get().getExpirationTime().after(this.currentToken.getExpirationTime())) {
-                    this.currentToken = sharedAccessToken.get();
-                }
-            }
-
-            if (shouldRefresh(this.currentToken, clock.instant())) {
+            if (shouldRefresh(token, clock.instant())) {
 
                 // only lock if we're using a shared token across processes
                 boolean lockNeeded = payloadBuilder.useSharedToken();
 
                 boolean acquired = !lockNeeded || lockService.acquire(TOKEN_REFRESH_LOCK_ID, Duration.ofMinutes(2));
 
-                if (!acquired) {
-                    //NOTE: check shared access token again, in case the instance which held the
-                    // lock refreshed the token
+                if (acquired) {
+                    tokenResponse = exchangeRefreshTokenForAccessToken();
+                    token = asAccessToken(tokenResponse);
 
+                    storeSharedAccessTokenIfSupported(token);
+
+                    if (lockNeeded) {
+                        // hold lock extra, to try to maximize the time between token refreshes
+                        Uninterruptibles.sleepUninterruptibly(ALLOWANCE_FOR_EVENTUAL_CONSISTENCY_SECONDS, TimeUnit.SECONDS);
+                        lockService.release(TOKEN_REFRESH_LOCK_ID);
+                    }
+                } else {
+                    //re-try recursively, w/ linear backoff
                     Uninterruptibles.sleepUninterruptibly(attempt * WAIT_AFTER_FAILED_LOCK_ATTEMPTS, TimeUnit.MILLISECONDS);
-                    refreshAccessToken(attempt + 1);
-                }
-
-                tokenResponse = exchangeRefreshTokenForAccessToken();
-                this.currentToken = asAccessToken(tokenResponse);
-                storeSharedAccessTokenIfSupported(this.currentToken);
-
-                if (lockNeeded) {
-                    lockService.release(TOKEN_REFRESH_LOCK_ID);
+                    token = refreshAccessToken(attempt + 1);
                 }
             }
 
-            return this.currentToken;
+            return token;
         }
 
 
