@@ -28,7 +28,7 @@ public class Sha256PseudonymEncoder implements PseudonymEncoder {
     @Override
     public boolean canBeDecoded(String possiblePseudonym) {
         return possiblePseudonym != null &&
-            possiblePseudonym.getBytes(StandardCharsets.UTF_8).length == 43; //43 rather than 32, bc of base64 encoding
+            possiblePseudonym.getBytes(StandardCharsets.UTF_8).length == 43; //43 rather than 32, bc of base64 encoding without padding
     }
 
     //base64 encoding, to match implementation in HashUtils.java from psoxy-core v0.4.30
