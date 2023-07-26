@@ -194,6 +194,7 @@ public class SecretManagerConfigService implements ConfigService, LockService {
                     .build());
         } catch (Exception e) {
             log.log(Level.SEVERE, String.format("Cannot put the label of the version on the secret %s", secretName.toString()), e);
+            throw e;
         }
     }
 
