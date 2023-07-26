@@ -10,6 +10,7 @@ import lombok.experimental.SuperBuilder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "method")
 @JsonSubTypes({
@@ -54,6 +55,14 @@ public abstract class Transform {
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     @Singular
     List<String> fields;
+
+
+    /**
+     * A JsonPath whether apply the transformation if matches the expected value
+     */
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+    @Builder.Default
+    String applyOnlyWhen = null;
 
     @NoArgsConstructor //for jackson
     @SuperBuilder(toBuilder = true)

@@ -12,7 +12,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="Maven: co.worklytics.psoxy:psoxy-core:0.4.30" level="project" />
+    <orderEntry type="module" module-name="psoxy-core" />
     <orderEntry type="module" module-name="gateway-core" />
     <orderEntry type="library" name="Maven: commons-codec:commons-codec:1.15" level="project" />
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2" level="project" />
@@ -35,6 +35,7 @@
     <orderEntry type="library" name="Maven: org.yaml:snakeyaml:2.0" level="project" />
     <orderEntry type="library" name="Maven: com.google.http-client:google-http-client:1.43.3" level="project" />
     <orderEntry type="library" name="Maven: org.apache.httpcomponents:httpclient:4.5.14" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.httpcomponents:httpcore:4.4.16" level="project" />
     <orderEntry type="library" name="Maven: io.opencensus:opencensus-api:0.31.1" level="project" />
     <orderEntry type="library" name="Maven: io.grpc:grpc-context:1.27.2" level="project" />
     <orderEntry type="library" name="Maven: io.opencensus:opencensus-contrib-http-util:0.31.1" level="project" />
@@ -46,7 +47,7 @@
     <orderEntry type="library" name="Maven: com.github.bbottema:emailaddress-rfc2822:2.3.1" level="project" />
     <orderEntry type="library" name="Maven: com.sun.mail:jakarta.mail:1.6.7" level="project" />
     <orderEntry type="library" name="Maven: com.sun.activation:jakarta.activation:1.2.1" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.httpcomponents:httpcore:4.4.16" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.httpcomponents.core5:httpcore5:5.2.2" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.projectlombok:lombok:1.18.28" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.google.dagger:dagger-compiler:2.40.5" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.google.dagger:dagger-producers:2.40.5" level="project" />

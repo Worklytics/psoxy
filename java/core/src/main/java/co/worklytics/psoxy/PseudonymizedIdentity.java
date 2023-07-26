@@ -1,5 +1,6 @@
 package co.worklytics.psoxy;
 
+import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
@@ -66,4 +67,15 @@ public class PseudonymizedIdentity {
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     String reversible;
+
+    public Pseudonym asPseudonym() {
+
+        //q: what to do w original, if anything?
+
+        return Pseudonym.builder()
+            .hash(hash == null ? null : hash.getBytes())
+            .domain(domain)
+            .reversible(reversible == null ? null : reversible.getBytes())
+            .build();
+    }
 }

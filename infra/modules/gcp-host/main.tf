@@ -55,19 +55,15 @@ locals {
       var_def)
     }
   }
-  lockable_secrets = flatten([
-    for instance_id, secrets in local.secrets_to_provision :
-    [for secret_id, secret in values(secrets) : secret if secret.lockable]
-  ])
 
   writable_secrets = flatten([
-    for instance_id, secrets in local.secrets_to_provision :
-    [for secret_id, secret in values(secrets) : secret if secret.writable]
+  for instance_id, secrets in local.secrets_to_provision :
+  [for secret_id, secret in values(secrets) : secret if secret.lockable || secret.writable]
   ])
 }
 
 output "secrets_to_provision" {
-  value = local.lockable_secrets
+  value = local.writable_secrets
 }
 
 module "secrets" {
@@ -82,26 +78,13 @@ module "secrets" {
   replica_locations = local.secret_replica_locations
 }
 
-resource "google_secret_manager_secret_iam_member" "grant_sa_updater_on_lockable_secrets" {
-  for_each = { for secret in local.lockable_secrets : secret.instance_secret_id => secret }
-
-  project   = var.gcp_project_id
-  secret_id = "${local.config_parameter_prefix}${each.value.instance_secret_id}"
-  member    = "serviceAccount:${google_service_account.api_connectors[each.value.instance_id].email}"
-  role      = module.psoxy.psoxy_instance_secret_locker_role_id
-
-  depends_on = [
-    module.secrets
-  ]
-}
-
-resource "google_secret_manager_secret_iam_member" "grant_sa_secretVersionAdder_on_writable_secret" {
+resource "google_secret_manager_secret_iam_member" "grant_sa_secretVersionManager_on_writable_secret" {
   for_each = { for secret in local.writable_secrets : secret.instance_secret_id => secret }
 
   project   = var.gcp_project_id
   secret_id = "${local.config_parameter_prefix}${each.value.instance_secret_id}"
   member    = "serviceAccount:${google_service_account.api_connectors[each.value.instance_id].email}"
-  role      = "roles/secretmanager.secretVersionAdder"
+  role      = module.psoxy.psoxy_instance_secret_role_id
 
   depends_on = [
     module.secrets
@@ -160,7 +143,7 @@ module "api_connector" {
 
   secret_bindings = merge(
     # bc some of these are later filled directly, bind to 'latest'
-    { for k, v in module.secrets[each.key].secret_bindings : k => merge(v, { version_number : "latest" }) },
+   {for k, secrets in local.secrets_to_provision[each.key] : k => merge({ secret_id : module.secrets[each.key].secret_ids_within_project[k], version_number : "latest" }) if (try(!secrets.lockable, true) && try(!secrets.writable, true))},
     module.psoxy.secrets
   )
 }

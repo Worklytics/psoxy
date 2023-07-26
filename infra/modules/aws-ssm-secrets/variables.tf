@@ -1,8 +1,10 @@
 variable "secrets" {
   type = map(
     object({
-      value       = string
-      description = optional(string, "")
+      value               = string
+      description         = optional(string, "")
+      value_managed_by_tf = optional(bool, true) # if value will be managed by Terraform, or some outside process
+      sensitive           = optional(bool, true) # if value is to be handled as sensitive
     })
   )
 }

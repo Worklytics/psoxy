@@ -18,6 +18,7 @@ import org.hazlewood.connor.bottema.emailaddress.EmailAddressParser;
 import org.hazlewood.connor.bottema.emailaddress.EmailAddressValidator;
 
 import javax.inject.Inject;
+import java.util.Base64;
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -34,6 +35,8 @@ public class PseudonymizerImpl implements Pseudonymizer {
     DeterministicTokenizationStrategy deterministicTokenizationStrategy;
     @Inject
     UrlSafeTokenPseudonymEncoder urlSafePseudonymEncoder;
+
+    Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
 
     @Getter
     ConfigurationOptions options;
@@ -98,12 +101,7 @@ public class PseudonymizerImpl implements Pseudonymizer {
             builder.hash(hashUtils.hash(canonicalization.apply(value.toString()),
                 getOptions().getPseudonymizationSalt(), asLegacyScope(scope)));
         } else if (getOptions().getPseudonymImplementation() == PseudonymImplementation.DEFAULT) {
-
-            builder.hash(urlSafePseudonymEncoder.encode(
-                Pseudonym.builder()
-                    .hash(deterministicTokenizationStrategy.getToken(value.toString(), canonicalization))
-                    .build()));
-
+            builder.hash(encoder.encodeToString(deterministicTokenizationStrategy.getToken(value.toString(), canonicalization)));
         } else {
             throw new RuntimeException("Unsupported pseudonym implementation: " + getOptions().getPseudonymImplementation());
         }
