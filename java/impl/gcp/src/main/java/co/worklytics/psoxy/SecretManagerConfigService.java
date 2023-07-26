@@ -104,8 +104,6 @@ public class SecretManagerConfigService implements ConfigService, LockService {
                 versionName = "latest";
             }
 
-            log.severe("Reading secret version: " + versionName);
-
             SecretVersionName secretVersionName = SecretVersionName.of(projectId, secretName.getSecret(), versionName);
 
             // Access the secret version.
@@ -195,7 +193,7 @@ public class SecretManagerConfigService implements ConfigService, LockService {
                             .build())
                     .build());
         } catch (Exception e) {
-            log.severe(String.format("Cannot put the label of the version on the secret %s due exception: %s", secretName.toString(), e));
+            log.log(Level.SEVERE, String.format("Cannot put the label of the version on the secret %s", secretName.toString()), e);
         }
     }
 
@@ -220,7 +218,7 @@ public class SecretManagerConfigService implements ConfigService, LockService {
                 }
             });
         } catch (Exception e) {
-            log.severe(String.format("Cannot disable old versions from secret %s due exception: %s", secretName.toString(), e));
+            log.log(Level.SEVERE, String.format("Cannot disable old versions from secret %s", secretName.toString()), e);
         }
     }
 
