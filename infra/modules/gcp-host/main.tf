@@ -56,14 +56,14 @@ locals {
     }
   }
 
-  updateable_secrets = flatten([
+  writable_secrets = flatten([
   for instance_id, secrets in local.secrets_to_provision :
   [for secret_id, secret in values(secrets) : secret if secret.lockable || secret.writable]
   ])
 }
 
 output "secrets_to_provision" {
-  value = local.updateable_secrets
+  value = local.writable_secrets
 }
 
 module "secrets" {
@@ -79,7 +79,7 @@ module "secrets" {
 }
 
 resource "google_secret_manager_secret_iam_member" "grant_sa_secretVersionManager_on_writable_secret" {
-  for_each = { for secret in local.updateable_secrets : secret.instance_secret_id => secret }
+  for_each = { for secret in local.writable_secrets : secret.instance_secret_id => secret }
 
   project   = var.gcp_project_id
   secret_id = "${local.config_parameter_prefix}${each.value.instance_secret_id}"
