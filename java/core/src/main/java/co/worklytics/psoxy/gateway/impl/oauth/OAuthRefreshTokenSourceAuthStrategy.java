@@ -221,30 +221,27 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
             AccessToken token = getSharedAccessTokenIfSupported().orElse(null);
 
-
-            if (token == null || shouldRefresh(token, clock.instant())) {
+            if (shouldRefresh(token, clock.instant())) {
 
                 // only lock if we're using a shared token across processes
                 boolean lockNeeded = payloadBuilder.useSharedToken();
 
                 boolean acquired = !lockNeeded || lockService.acquire(TOKEN_REFRESH_LOCK_ID, Duration.ofMinutes(2));
 
-                if (!acquired) {
-                    //NOTE: check shared access token again, in case the instance which held the
-                    // lock refreshed the token
+                if (acquired) {
+                    tokenResponse = exchangeRefreshTokenForAccessToken();
+                    token = asAccessToken(tokenResponse);
 
+                    storeSharedAccessTokenIfSupported(token);
+
+                    if (lockNeeded) {
+                        //q: hold lock extra long, to wait for consistency??
+                        lockService.release(TOKEN_REFRESH_LOCK_ID);
+                    }
+                } else {
+                    //re-try recursively, w/ linear backoff
                     Uninterruptibles.sleepUninterruptibly(attempt * WAIT_AFTER_FAILED_LOCK_ATTEMPTS, TimeUnit.MILLISECONDS);
-                    refreshAccessToken(attempt + 1);
-                }
-
-                tokenResponse = exchangeRefreshTokenForAccessToken();
-                token = asAccessToken(tokenResponse);
-
-                storeSharedAccessTokenIfSupported(token);
-
-                if (lockNeeded) {
-                    //q: hold lock extra long, to wait for consistency??
-                    lockService.release(TOKEN_REFRESH_LOCK_ID);
+                    token = refreshAccessToken(attempt + 1);
                 }
             }
 
