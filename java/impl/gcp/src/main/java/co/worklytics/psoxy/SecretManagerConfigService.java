@@ -108,15 +108,19 @@ public class SecretManagerConfigService implements ConfigService, LockService {
     public Optional<String> getConfigPropertyAsOptional(ConfigProperty property) {
         String paramName = parameterName(property);
         try (SecretManagerServiceClient client = SecretManagerServiceClient.create()) {
+            SecretName secretName = SecretName.of(projectId, paramName);
 
-            Secret secret = client.getSecret(paramName);
+            Secret secret = client.getSecret(secretName);
 
-            String versionName = Optional.ofNullable(secret.getLabelsMap().get(VERSION_LABEL))
-                    .orElse("latest");
+            String versionName = secret.getLabelsMap() != null ? secret.getLabelsMap().get(VERSION_LABEL) : null;
+
+            if (StringUtils.isBlank(versionName)) {
+                versionName = "latest";
+            }
 
             log.severe("Reading secret version: " + versionName);
 
-            SecretVersionName secretVersionName = SecretVersionName.of(projectId, paramName, versionName);
+            SecretVersionName secretVersionName = SecretVersionName.of(projectId, secretName.getSecret(), versionName);
 
             // Access the secret version.
             AccessSecretVersionResponse response = client.accessSecretVersion(secretVersionName);
