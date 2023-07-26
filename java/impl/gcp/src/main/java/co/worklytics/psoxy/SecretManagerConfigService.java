@@ -219,6 +219,7 @@ public class SecretManagerConfigService implements ConfigService, LockService {
             });
         } catch (Exception e) {
             log.log(Level.SEVERE, String.format("Cannot disable old versions from secret %s", secretName.toString()), e);
+            throw e;
         }
     }
 
