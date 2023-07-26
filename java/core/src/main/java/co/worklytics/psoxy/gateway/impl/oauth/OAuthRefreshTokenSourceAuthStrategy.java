@@ -143,6 +143,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
          *
          * q: maybe this should just *always* be true? or should be env var?
          *
+         *
          * @return whether resulting `access_token` should be shared across all instances of
          * connections to this source.
          */
@@ -199,8 +200,6 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         private static final int MAX_TOKEN_REFRESH_ATTEMPTS = 3;
         private static final long WAIT_AFTER_FAILED_LOCK_ATTEMPTS = 2000L;
 
-        private AccessToken currentToken = null;
-
         /**
          * implements canonical oauth flow to exchange refreshToken for accessToken
          *
@@ -220,19 +219,10 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
             CanonicalOAuthAccessTokenResponseDto tokenResponse;
 
-            Optional<AccessToken> sharedAccessToken = getSharedAccessTokenIfSupported();
-            if (this.currentToken == null) {
-                this.currentToken = sharedAccessToken.orElse(null);
-            }
+            AccessToken token = getSharedAccessTokenIfSupported().orElse(null);
 
-            if (sharedAccessToken.isPresent()) {
-                // we have a token, but shared token is newer. Other instance refreshed, so use it
-                if (sharedAccessToken.get().getExpirationTime().after(this.currentToken.getExpirationTime())) {
-                    this.currentToken = sharedAccessToken.get();
-                }
-            }
 
-            if (shouldRefresh(this.currentToken, clock.instant())) {
+            if (token == null || shouldRefresh(token, clock.instant())) {
 
                 // only lock if we're using a shared token across processes
                 boolean lockNeeded = payloadBuilder.useSharedToken();
@@ -248,15 +238,17 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                 }
 
                 tokenResponse = exchangeRefreshTokenForAccessToken();
-                this.currentToken = asAccessToken(tokenResponse);
-                storeSharedAccessTokenIfSupported(this.currentToken);
+                token = asAccessToken(tokenResponse);
+
+                storeSharedAccessTokenIfSupported(token);
 
                 if (lockNeeded) {
+                    //q: hold lock extra long, to wait for consistency??
                     lockService.release(TOKEN_REFRESH_LOCK_ID);
                 }
             }
 
-            return this.currentToken;
+            return token;
         }
 
 

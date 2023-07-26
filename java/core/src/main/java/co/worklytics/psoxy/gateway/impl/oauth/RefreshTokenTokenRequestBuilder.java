@@ -43,13 +43,7 @@ public class RefreshTokenTokenRequestBuilder
     public boolean useSharedToken() {
         Optional<String> useSharedTokenConfig = config.getConfigPropertyAsOptional(ConfigProperty.USE_SHARED_TOKEN);
 
-        boolean useSharedToken = false;
-
-        if (useSharedTokenConfig.isPresent()) {
-            useSharedToken = Boolean.parseBoolean(useSharedTokenConfig.get());
-        }
-
-        return useSharedToken;
+        return useSharedTokenConfig.map(Boolean::parseBoolean).orElse(false);
     }
 
     public HttpContent buildPayload() {

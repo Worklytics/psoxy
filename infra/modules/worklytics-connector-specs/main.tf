@@ -245,7 +245,12 @@ locals {
       source_auth_strategy : "oauth2_access_token"
       environment_variables : {}
       secured_variables : [
-        { name : "ACCESS_TOKEN", writable : false },
+        {
+          name : "ACCESS_TOKEN"
+          writable : false
+          sensitive : true
+          value_managed_by_tf : false
+        },
       ]
       reserved_concurrent_executions : null
       example_api_calls_user_to_impersonate : null
@@ -275,10 +280,31 @@ EOT
       target_host : "api.github.com"
       source_auth_strategy : "oauth2_refresh_token"
       secured_variables : [
-        { name : "ACCESS_TOKEN", writable : true }, # writable, as needs to be shared
-        { name : "PRIVATE_KEY", writable : false },
-        { name : "OAUTH_REFRESH_TOKEN", writable : true, lockable : true },
-        { name : "CLIENT_ID", writable : false }
+        {
+          name : "ACCESS_TOKEN"
+          writable : true
+          sensitive : true
+          value_managed_by_tf : false
+        },
+        {
+          name : "PRIVATE_KEY"
+          writable : false
+          sensitive : true
+          value_managed_by_tf : false
+        },
+        {
+          name : "CLIENT_ID"
+          writable : false
+          sensitive : true
+          value_managed_by_tf : false
+        },
+        {
+          name : "OAUTH_REFRESH_TOKEN"
+          writable : true
+          lockable : true
+          sensitive : true
+          value_managed_by_tf : false
+        }
       ],
       environment_variables : {
         GRANT_TYPE : "certificate_credentials"
@@ -359,8 +385,18 @@ EOT
         REFRESH_ENDPOINT : "https://${var.salesforce_domain}/services/oauth2/token"
       }
       secured_variables : [
-        { name : "CLIENT_SECRET", writable : false },
-        { name : "CLIENT_ID", writable : false },
+        {
+          name : "CLIENT_SECRET"
+          writable : false
+          sensitive : true
+          value_managed_by_tf : false
+        },
+        {
+          name : "CLIENT_ID"
+          writable : false
+          sensitive : false
+          value_managed_by_tf : false
+        },
       ]
       reserved_concurrent_executions : null
       example_api_calls_user_to_impersonate : null
@@ -411,7 +447,12 @@ EOT
       ]
       environment_variables : {}
       secured_variables : [
-        { name : "ACCESS_TOKEN", writable : false },
+        {
+          name : "ACCESS_TOKEN"
+          writable : false
+          sensitive : true
+          value_managed_by_tf : false
+        },
       ]
       reserved_concurrent_executions : null
       example_api_calls_user_to_impersonate : null
@@ -477,11 +518,37 @@ EOT
         USE_SHARED_TOKEN : "TRUE"
       }
       secured_variables : [
-        { name : "CLIENT_SECRET", writable : false },
-        { name : "CLIENT_ID", writable : false },
-        { name : "ACCOUNT_ID", writable : false },
-        { name : "ACCESS_TOKEN", writable : true },
-        { name : "OAUTH_REFRESH_TOKEN", writable : true, lockable : true }, # q: needed? per logic as of 9 June 2023, would be created
+        {
+          name : "CLIENT_SECRET"
+          writable : false
+          sensitive : true
+          value_managed_by_tf : false
+        },
+        {
+          name : "CLIENT_ID"
+          writable : false
+          sensitive : false
+          value_managed_by_tf : false
+        },
+        {
+          name : "ACCOUNT_ID"
+          writable : false
+          sensitive : true
+          value_managed_by_tf : false
+        },
+        {
+          name : "ACCESS_TOKEN"
+          writable : true
+          sensitive : true
+          value_managed_by_tf : false
+        },
+        {
+          name : "OAUTH_REFRESH_TOKEN"
+          writable : true
+          lockable : true
+          sensitive : true
+          value_managed_by_tf : false
+        }, # q: needed? per logic as of 9 June 2023, would be created
       ],
       reserved_concurrent_executions : null # 1
       example_api_calls_user_to_impersonate : null
@@ -526,9 +593,24 @@ EOT
       identifier_scope_id : "dropbox-business"
       worklytics_connector_name : "Dropbox Business via Psoxy"
       secured_variables : [
-        { name : "REFRESH_TOKEN", writable : false },
-        { name : "CLIENT_ID", writable : false },
-        { name : "CLIENT_SECRET", writable : false },
+        {
+          name : "REFRESH_TOKEN"
+          writable : false
+          sensitive : true
+          value_managed_by_tf : false
+        },
+        {
+          name : "CLIENT_ID"
+          writable : false
+          sensitive : false
+          value_managed_by_tf : false
+        },
+        {
+          name : "CLIENT_SECRET"
+          writable : false
+          sensitive : true
+          value_managed_by_tf : false
+        },
       ],
       environment_variables : {
         GRANT_TYPE : "refresh_token"
@@ -598,7 +680,12 @@ EOT
       identifier_scope_id : "jira"
       worklytics_connector_name : "Jira Server REST API via Psoxy"
       secured_variables : [
-        { name : "ACCESS_TOKEN", writable : false },
+        {
+          name : "ACCESS_TOKEN"
+          writable : false
+          sensitive : true
+          value_managed_by_tf : false
+        },
       ],
       reserved_concurrent_executions : null
       example_api_calls_user_to_impersonate : null
@@ -634,11 +721,37 @@ EOT
       identifier_scope_id : "jira"
       worklytics_connector_name : "Jira REST API via Psoxy"
       secured_variables : [
-        { name : "ACCESS_TOKEN", writable : true },
-        { name : "REFRESH_TOKEN", writable : true },
-        { name : "OAUTH_REFRESH_TOKEN", writable : true, lockable : true },
-        { name : "CLIENT_ID", writable : false },
-        { name : "CLIENT_SECRET", writable : false }
+        {
+          name : "ACCESS_TOKEN"
+          writable : true
+          sensitive : true
+          value_managed_by_tf : false
+        },
+        {
+          name : "REFRESH_TOKEN"
+          writable : true
+          sensitive : true
+          value_managed_by_tf : false
+        },
+        {
+          name : "OAUTH_REFRESH_TOKEN"
+          writable : true
+          lockable : true
+          sensitive : true
+          value_managed_by_tf : false
+        },
+        {
+          name : "CLIENT_ID"
+          writable : false
+          sensitive : false
+          value_managed_by_tf : false
+        },
+        {
+          name : "CLIENT_SECRET"
+          writable : false
+          sensitive : true
+          value_managed_by_tf : false
+        }
       ],
       environment_variables : {
         GRANT_TYPE : "refresh_token"

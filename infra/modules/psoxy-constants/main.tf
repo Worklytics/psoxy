@@ -24,7 +24,7 @@ locals {
     # https://console.cloud.google.com/apis/library/iamcredentials.googleapis.com
     "iamcredentials.googleapis.com" = "IAM Service Account Credentials API",
     # https://console.cloud.google.com/apis/library/serviceusage.googleapis.com
-    "serviceusage.googleapis.com"   = "Service Usage API",
+    "serviceusage.googleapis.com" = "Service Usage API",
   }
 
   required_gcp_roles_to_provision_host = {
