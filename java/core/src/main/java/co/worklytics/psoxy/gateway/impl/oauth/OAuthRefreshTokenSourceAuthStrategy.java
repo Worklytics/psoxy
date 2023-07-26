@@ -199,6 +199,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         private static final String TOKEN_REFRESH_LOCK_ID = "oauth_refresh_token";
         private static final int MAX_TOKEN_REFRESH_ATTEMPTS = 3;
 
+
         /**
          * how long to wait after a failed lock attempt before trying again; multiplier on the
          * attempt.
@@ -241,7 +242,9 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
             AccessToken token = getSharedAccessTokenIfSupported().orElse(null);
 
+
             if (shouldRefresh(token, clock.instant())) {
+
 
                 // only lock if we're using a shared token across processes
                 boolean lockNeeded = payloadBuilder.useSharedToken();
