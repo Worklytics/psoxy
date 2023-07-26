@@ -20,9 +20,11 @@ public class Sha256PseudonymEncoder implements PseudonymEncoder {
 
     @Override
     public Pseudonym decode(String input) {
-        return Pseudonym.builder()
-            .hash(input.getBytes(StandardCharsets.UTF_8))
-            .build();
+        if (!canBeDecoded(input)) {
+            throw new IllegalArgumentException("input cannot be decoded");
+        }
+
+        return Pseudonym.builder().hash(base64decode(input)).build();
     }
 
     @Override
@@ -39,5 +41,10 @@ public class Sha256PseudonymEncoder implements PseudonymEncoder {
                 .encode(bytes),
             StandardCharsets.UTF_8);
         return StringUtils.replaceChars(encoded, "/+", "_.");
+    }
+
+    byte[] base64decode(String input) {
+        return Base64.getDecoder()
+                .decode(StringUtils.replaceChars(input, "_.", "/+"));
     }
 }

@@ -58,7 +58,7 @@ class Sha256PseudonymEncoderTest {
         String encoded = encoder.encode(pseudonym);
 
         assertTrue(encoder.canBeDecoded(encoded));
-        assertEquals(encoder.base64Encode(pseudonym.getHash()), // arguably too much of a tautology
+        assertEquals(new String(pseudonym.getHash()),
             new String(encoder.decode(encoded).getHash()));
 
     }
