@@ -198,7 +198,27 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         // open a lambda waiting for a lock
         private static final String TOKEN_REFRESH_LOCK_ID = "oauth_refresh_token";
         private static final int MAX_TOKEN_REFRESH_ATTEMPTS = 3;
-        private static final long WAIT_AFTER_FAILED_LOCK_ATTEMPTS = 2000L;
+
+        /**
+         * how long to wait after a failed lock attempt before trying again; multiplier on the
+         * attempt.
+         *
+         * goal is that this value should be big enough to allow the process that holds the lock to
+         *  1) refresh the token it
+         *  2) write it
+         *  3) release the lock
+         *  4) have that write be visible to other processes, given eventual consistency in GCP
+         *     Secret Manager case
+         *
+         * this includes the allowance for eventual consistency, so wait should be >= that value
+         * in practice.
+         */
+        private static final long WAIT_AFTER_FAILED_LOCK_ATTEMPTS = 4000L;
+
+        /**
+         * how long to allow for eventual consistency after write to config
+         */
+        private static final long ALLOWANCE_FOR_EVENTUAL_CONSISTENCY_SECONDS = 2L;
 
         /**
          * implements canonical oauth flow to exchange refreshToken for accessToken
@@ -235,7 +255,8 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                     storeSharedAccessTokenIfSupported(token);
 
                     if (lockNeeded) {
-                        //q: hold lock extra long, to wait for consistency??
+                        // hold lock extra, to try to maximize the time between token refreshes
+                        Uninterruptibles.sleepUninterruptibly(ALLOWANCE_FOR_EVENTUAL_CONSISTENCY_SECONDS, TimeUnit.SECONDS);
                         lockService.release(TOKEN_REFRESH_LOCK_ID);
                     }
                 } else {
