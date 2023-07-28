@@ -11,6 +11,7 @@ import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.Base64Sha256HashPseudonymEncoder;
+import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
 import com.avaulta.gateway.tokens.impl.Sha256DeterministicTokenizationStrategy;
 import com.google.common.collect.ImmutableMap;
@@ -367,5 +368,10 @@ public class BulkDataSanitizerImplTest {
         byte[] token = deterministicTokenizationStrategy.getToken(identifier, Function.identity());
         assertEquals(legacyEncoded,
             encoder.encode(Pseudonym.builder().hash(token).build()));
+
+        // check that the none legacy encoding is just the legacy encoding with a "t~" prefix
+        UrlSafeTokenPseudonymEncoder urlSafeTokenPseudonymEncoder = new UrlSafeTokenPseudonymEncoder();
+        assertEquals("t~" + legacyEncoded + (pseudonymizedIdentity.getDomain() == null ? "" : ("@" + pseudonymizedIdentity.getDomain())),
+            urlSafeTokenPseudonymEncoder.encode(pseudonymizedIdentity.asPseudonym()));
     }
 }

@@ -4,6 +4,8 @@ import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
+import java.util.Base64;
+
 /**
  * pseudonymized form of an account identifier
  *
@@ -72,10 +74,12 @@ public class PseudonymizedIdentity {
 
         //q: what to do w original, if anything?
 
+        Base64.Decoder decoder = Base64.getUrlDecoder();
+
         return Pseudonym.builder()
-            .hash(hash == null ? null : hash.getBytes())
+            .hash(hash == null ? null : decoder.decode(hash.getBytes()))
             .domain(domain)
-            .reversible(reversible == null ? null : reversible.getBytes())
+            .reversible(reversible == null ? null : decoder.decode(reversible.getBytes()))
             .build();
     }
 }
