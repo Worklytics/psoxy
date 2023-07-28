@@ -12,7 +12,7 @@ import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class Sha256PseudonymEncoderTest {
+class Base64UrlSha256HashPseudonymEncoderTest {
 
     Base64UrlSha256HashPseudonymEncoder encoder = new Base64UrlSha256HashPseudonymEncoder();
 
