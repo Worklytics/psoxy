@@ -231,13 +231,21 @@ public class BulkDataSanitizerImplTest {
 
     @Test
     @SneakyThrows
-    void handle_duplicates() {
+    void handle_duplicates_legacy() {
+        Pseudonymizer defaultPseudonymizer =
+            pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
+                .pseudonymizationSalt("salt")
+                .defaultScopeId("hris")
+                .pseudonymImplementation(PseudonymImplementation.LEGACY)
+                .build());
+
+
         //this is a lookup-table use case (for customers to use in own data warehouse)
         final String EXPECTED = "EMPLOYEE_ID,DEPARTMENT,EMPLOYEE_ID_ORIG\r\n" +
-            "t~U2FwcHdPNEtaS0dwcnFxVU5ydU5yZUJEMkJWUjk4bkVNNk5SQ3UzUjJkTQ,Engineering,1\r\n" +
-            "t~bWZzYU5ZdUNYX194dm5SejRnSnBfdDB6ckRUQzVEa3VDSnZNa3VidWdzSQ,Sales,2\r\n" +
-            "t~LlpkREdVdU9NSy5PeTdfUEozcGY5U1lYMTIuM3RLUGRMSGZZYmpWR2NHaw,Engineering,3\r\n" +
-            "t~LmZzMVQ2NE1pY3o4U2tiSUxyQUJnRXY0a1NnLnRGaHZoUDM1SEdTTGRPbw,Engineering,4\r\n";
+            "t~SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM,Engineering,1\r\n" +
+            "t~mfsaNYuCX__xvnRz4gJp_t0zrDTC5DkuCJvMkubugsI,Sales,2\r\n" +
+            "t~-ZdDGUuOMK-Oy7_PJ3pf9SYX12-3tKPdLHfYbjVGcGk,Engineering,3\r\n" +
+            "t~-fs1T64Micz8SkbILrABgEv4kSg-tFhvhP35HGSLdOo,Engineering,4\r\n";
 
         CsvRules rules = CsvRules.builder()
             .pseudonymFormat(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
@@ -250,7 +258,42 @@ public class BulkDataSanitizerImplTest {
         File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
 
         try (FileReader in = new FileReader(inputFile)) {
-            byte[] result = columnarFileSanitizerImpl.sanitize(in, rules, pseudonymizer);
+            byte[] result = columnarFileSanitizerImpl.sanitize(in, rules, defaultPseudonymizer);
+
+            assertEquals(EXPECTED, new String(result));
+        }
+    }
+
+
+    @Test
+    @SneakyThrows
+    void handle_duplicates() {
+        Pseudonymizer defaultPseudonymizer =
+            pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
+                .pseudonymizationSalt("salt")
+                .defaultScopeId("hris")
+                .build());
+
+
+        //this is a lookup-table use case (for customers to use in own data warehouse)
+        final String EXPECTED = "EMPLOYEE_ID,DEPARTMENT,EMPLOYEE_ID_ORIG\r\n" +
+            "t~0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc,Engineering,1\r\n" +
+            "t~-hN_i1M1DeMAicDVp6LhFgW9lH7r3_LbOpTlXYWpXVI,Sales,2\r\n" +
+            "t~4W7Sl-LI6iMzNNngivs5dLMiVw-7ob3Cyr3jn8NureY,Engineering,3\r\n" +
+            "t~BOg00PLoiEEKyGzije3FJlKBzM6_Vjk87VJI9lTIA2o,Engineering,4\r\n";
+
+        CsvRules rules = CsvRules.builder()
+            .pseudonymFormat(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
+            .columnToPseudonymize("EMPLOYEE_ID")
+            .columnToRedact("EMPLOYEE_EMAIL")
+            .columnToRedact("EFFECTIVE_ISOWEEK")
+            .columnsToDuplicate(Map.of("EMPLOYEE_ID", "EMPLOYEE_ID_ORIG"))
+            .build();
+
+        File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
+
+        try (FileReader in = new FileReader(inputFile)) {
+            byte[] result = columnarFileSanitizerImpl.sanitize(in, rules, defaultPseudonymizer);
 
             assertEquals(EXPECTED, new String(result));
         }
