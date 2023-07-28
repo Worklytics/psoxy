@@ -1,5 +1,6 @@
 package co.worklytics.psoxy;
 
+import com.google.common.annotations.VisibleForTesting;
 import lombok.NoArgsConstructor;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -8,14 +9,20 @@ import javax.inject.Inject;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
+/**
+ * NOTE: this class is used for LEGACY pseudonymization implementation, not DEFAULT since v0.4
+ *
+ *
+ */
 @NoArgsConstructor(onConstructor_ = @Inject) // in lieu of provider
 public class HashUtils {
 
     public String hash(String... fragments) {
-        return encode(DigestUtils.sha256(String.join("", fragments))));
+        return encode(DigestUtils.sha256(String.join("", fragments)));
     }
 
-    String encode(byte[] bytes) {
+    @VisibleForTesting
+    public String encode(byte[] bytes) {
         // No padding saves us the '=' character
         // https://www.baeldung.com/java-base64-encode-and-decode#2-java-8-base64-encoding-without-padding
         String encoded = new String(

@@ -7,8 +7,12 @@ import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestModules;
 import co.worklytics.test.TestUtils;
+import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
+import com.avaulta.gateway.pseudonyms.impl.Base64Sha256HashPseudonymEncoder;
+import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
+import com.avaulta.gateway.tokens.impl.Sha256DeterministicTokenizationStrategy;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import dagger.Component;
@@ -16,19 +20,20 @@ import lombok.SneakyThrows;
 import org.apache.commons.codec.binary.Base64;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.File;
 import java.io.FileReader;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.function.Function;
 
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -333,5 +338,34 @@ public class BulkDataSanitizerImplTest {
 
             assertEquals(EXPECTED, new String(result));
         }
+    }
+
+    @ValueSource(strings = {
+        "blah",
+        "blah@acme.com"
+    })
+    @ParameterizedTest
+    void pre_v0_4_30_bulk_pseudonym_URL_SAFE_TOKEN_ENCODING(String identifier) {
+        pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
+            .pseudonymizationSalt("salt")
+            .defaultScopeId("hris")
+            .pseudonymImplementation(PseudonymImplementation.DEFAULT)
+            .build());
+
+        Base64Sha256HashPseudonymEncoder encoder = new Base64Sha256HashPseudonymEncoder();
+        DeterministicTokenizationStrategy deterministicTokenizationStrategy =
+            new Sha256DeterministicTokenizationStrategy("salt");
+
+        // this is how ColumnarBulkDataSanitizerImpl.java encoded pseudonyms if pseudonym
+        // format == URL_SAFE_TOKEN, and pseudonym implementation == DEFAULT
+        // prior to v0.4.31:
+        // see: https://github.com/Worklytics/psoxy/blob/ec0d324e0c45a6b97167b0907aa50bfdb8a45189/java/core/src/main/java/co/worklytics/psoxy/storage/impl/ColumnarBulkDataSanitizerImpl.java#L149C17-L149C17
+        PseudonymizedIdentity pseudonymizedIdentity  = pseudonymizer.pseudonymize(identifier);
+        String legacyEncoded = pseudonymizedIdentity.getHash();
+
+
+        byte[] token = deterministicTokenizationStrategy.getToken(identifier, Function.identity());
+        assertEquals(legacyEncoded,
+            encoder.encode(Pseudonym.builder().hash(token).build()));
     }
 }
