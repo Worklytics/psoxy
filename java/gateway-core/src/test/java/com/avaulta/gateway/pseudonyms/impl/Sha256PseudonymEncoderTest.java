@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class Sha256PseudonymEncoderTest {
 
-    Base64Sha256HashPseudonymEncoder encoder = new Base64Sha256HashPseudonymEncoder();
+    Base64UrlSha256HashPseudonymEncoder encoder = new Base64UrlSha256HashPseudonymEncoder();
 
 
 

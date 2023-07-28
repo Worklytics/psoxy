@@ -10,7 +10,7 @@ import co.worklytics.test.TestUtils;
 import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
-import com.avaulta.gateway.pseudonyms.impl.Base64Sha256HashPseudonymEncoder;
+import com.avaulta.gateway.pseudonyms.impl.Base64UrlSha256HashPseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
 import com.avaulta.gateway.tokens.impl.Sha256DeterministicTokenizationStrategy;
@@ -353,7 +353,7 @@ public class BulkDataSanitizerImplTest {
             .pseudonymImplementation(PseudonymImplementation.DEFAULT)
             .build());
 
-        Base64Sha256HashPseudonymEncoder encoder = new Base64Sha256HashPseudonymEncoder();
+        Base64UrlSha256HashPseudonymEncoder encoder = new Base64UrlSha256HashPseudonymEncoder();
         DeterministicTokenizationStrategy deterministicTokenizationStrategy =
             new Sha256DeterministicTokenizationStrategy("salt");
 

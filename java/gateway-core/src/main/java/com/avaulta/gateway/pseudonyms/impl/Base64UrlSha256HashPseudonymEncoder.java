@@ -13,7 +13,7 @@ import java.util.Base64;
  * eg, `Pseudonym` encoded as the base64-url-safe encoding of its SHA-256 hash, with no prefix
  *
  */
-public class Base64Sha256HashPseudonymEncoder implements PseudonymEncoder {
+public class Base64UrlSha256HashPseudonymEncoder implements PseudonymEncoder {
 
 
     @Override
