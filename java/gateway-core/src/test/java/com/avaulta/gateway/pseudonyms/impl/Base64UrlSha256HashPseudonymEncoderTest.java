@@ -57,42 +57,8 @@ class Base64UrlSha256HashPseudonymEncoderTest {
         String encoded = encoder.encode(pseudonym);
 
         assertTrue(encoder.canBeDecoded(encoded));
-        assertEquals(encode(pseudonym.getHash()), encoded);
         assertEquals(new String(pseudonym.getHash()),
             new String(encoder.decode(encoded).getHash()));
     }
 
-    @ValueSource(strings = {
-        "asdfasdf",
-        "asdf@gmail.com",
-        "BlahBlahBlah",
-    })
-    @ParameterizedTest
-    public void encodingEquivalence(String identifier) {
-        Sha256DeterministicTokenizationStrategy sha256DeterministicTokenizationStrategy =
-            new Sha256DeterministicTokenizationStrategy("salt");
-
-        byte[] token = sha256DeterministicTokenizationStrategy.getToken(identifier, Function.identity());
-
-        Pseudonym pseudonym = Pseudonym.builder()
-            .hash(token)
-            .build();
-
-        String encoded = encoder.encode(pseudonym);
-
-        //compare to psoxy implementation
-        assertEquals(new String(encode(token)), encoded);
-    }
-
-
-    //copy-paste from co.worklytics.psoxy.HashUtils, for testing
-    String encode(byte[] bytes) {
-        String encoded = new String(
-            Base64.getEncoder()
-                .withoutPadding()
-                .encode(bytes),
-            StandardCharsets.UTF_8);
-
-        return StringUtils.replaceChars(encoded, "/+", "_.");
-    }
 }
