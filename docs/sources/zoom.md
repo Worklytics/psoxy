@@ -38,7 +38,7 @@ be left in development mode; it does not need to be published.
 4. Fill the scopes section, enabling the following:
 
     - Users / View all user information / `user:read:admin`
-        - List information about the zoom user acounts, for enumeration / linking
+        - List information about the Zoom user accounts, for enumeration / linking across sources
     - Meetings / View all user meetings / `meeting:read:admin`
         - Listing all user meetings (work events / items)
     - Report / View report data / `report:read:admin`
