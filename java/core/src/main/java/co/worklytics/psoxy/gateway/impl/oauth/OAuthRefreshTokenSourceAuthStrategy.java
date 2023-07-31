@@ -221,6 +221,9 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
          */
         private static final long ALLOWANCE_FOR_EVENTUAL_CONSISTENCY_SECONDS = 2L;
 
+
+        private AccessToken cachedToken = null;
+
         /**
          * implements canonical oauth flow to exchange refreshToken for accessToken
          *
@@ -240,7 +243,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
             CanonicalOAuthAccessTokenResponseDto tokenResponse;
 
-            AccessToken token = getSharedAccessTokenIfSupported().orElse(null);
+            AccessToken token = getSharedAccessTokenIfSupported().orElse(this.cachedToken);
 
 
             if (shouldRefresh(token, clock.instant())) {
@@ -256,6 +259,9 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                     token = asAccessToken(tokenResponse);
 
                     storeSharedAccessTokenIfSupported(token);
+                    if (!payloadBuilder.useSharedToken()) {
+                        this.cachedToken = token;
+                    }
 
                     if (lockNeeded) {
                         // hold lock extra, to try to maximize the time between token refreshes
