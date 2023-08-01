@@ -2,7 +2,7 @@
 
 ## Overview
 This document describes how to migrate your deployment from one cloud provider to another, or
-one project/account to another. It does not cover migrating between proxy versions.
+one project/account to another. It does **not** cover migrating between proxy versions.
 
 ### Preserving Existing Infrastructure
 
