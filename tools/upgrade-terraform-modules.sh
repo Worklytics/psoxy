@@ -15,7 +15,7 @@ BLUE='\e[0;34m'
 GREEN='\e[0;32m'
 NC='\e[0m' # No Color
 
-CURRENT_RELEASE=$(sed -n '/git::https:\/\/github\.com\/worklytics\/psoxy\//s/.*ref=\([^"&]*\).*/\1/p' main.tf)
+CURRENT_RELEASE=$(sed -n '/git::https:\/\/github\.com\/worklytics\/psoxy\//{s/.*ref=\([^"&]*\).*/\1/p;q;}' main.tf)
 
 printf "Parsed your current terraform module version as ${BLUE}${CURRENT_RELEASE}${NC}; this script will upgrade it to ${GREEN}${NEXT_RELEASE}${NC}?\n"
 
@@ -39,9 +39,9 @@ esac
 
 
 CURRENT_RELEASE_PATTERN=$(echo $CURRENT_RELEASE | sed 's/\./\\\./g')
-PATTERN="s/ref=${CURRENT_RELEASE_PATTERN}/ref=${NEXT_RELEASE}/"
+PATTERN="s|ref=${CURRENT_RELEASE_PATTERN}|ref=${NEXT_RELEASE}|"
 
-find . -type f -name "*.tf" -exec sed -i .bck $PATTERN {} +
+find . -type f -name "*.tf" -exec sed -i .bck "${PATTERN}" {} +
 rm *.bck
 
 terraform init
