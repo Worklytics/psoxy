@@ -4,6 +4,13 @@
 This document describes how to migrate your deployment from one cloud provider to another, or
 one project/account to another. It does **not** cover migrating between proxy versions.
 
+Use cases:
+  - move from a `dev` account to a `prod` account (Account / Project Migration)
+  - move from a "shared" account to a "dedicated" account (Account / Project Migration
+  - move from AWS --> GCP, and vice versa (Provider Migration)
+
+## Preparation
+
 ### Preserving Existing Infrastructure
 
 Some data/infrastructure MUST, or at least SHOULD be preserved during your migration. Below is
@@ -27,19 +34,15 @@ What you SHOULD preserve:
   - **API Client Secrets**, if generated outside of Terraform. If you destroy/lose these values,
     you'll need to contact the data source administrator to obtain new versions.
 
-## Account/Project/Host Provider Migration
+Prior to beginning your migration, you should make a list of what existing infrastructure and/or
+configuration values you intend to preserve.
 
-Use cases:
-  - move from a `dev` account to a `prod` account
-  - move from a "shared" account to a "dedicated" account
-  - move from AWS --> GCP, and vice versa
-
-First, make a list of everything you want to preserve (and migrate), rather than re-create.
-
+## Migration Plan
 
 ### Phase 1 : Create New Environment
   1. Create a new Terraform configuration from scratch; run `terraform init` there (if you begin
-     with one of our examples, our `init` script does this)
+     with one of our examples, our `init` script does this). Use the `terraform.tfvars` of your
+     existing configuration as a guide for what variables to set.
   2. Run a provisional `terraform plan` and review.
   3. Find the resources in the plan that correspond to the infrastructure you intend to preserve
   4. For infrastructure that is not actually moving across accounts/projects/providers (likely data
@@ -52,15 +55,12 @@ First, make a list of everything you want to preserve (and migrate), rather than
      by directly reading the values from your old account/project, and copying them into the new
      account/project
 
-
 ### Phase 2: Migrate
    1. Look at the `TODO 3` files/output variables for all your connectors.  Make a mapping between
       the old values and the new values. Send this to Worklytics. It should include for each the
       proxy URLs, AWS Role to use, and any other values that are changing.
    2. Wait for confirmation that Worklytics has migrated all your connections to the new values.
       This may take 1-2 days.
-
-
 
 ### Phase 3: Destroy Old Environment
   1. run `terraform destroy` in the old configuration. Carefully review the plan before
