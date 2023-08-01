@@ -48,3 +48,16 @@ terraform init
 
 printf "Terraform module versions upgraded to ${GREEN}${NEXT_RELEASE}${NC}.\n"
 printf "To revert: ${BLUE}$0 ${CURRENT_RELEASE}${NC}\n"
+
+if sed -n -e '/^deployment_bundle\s*=/p' terraform.tfvars > /dev/null; then
+    # Prompt user
+    printf "Your ${BLUE}terraform.tfvars${NC} file references a pre-built 'deployment_bundle' bundle."
+    read -p "Do you want to run './update-bundle' to re-build it with a version matching the terraform modules you just updated? [Y/n] " response
+
+    # If user presses Enter without input, default to 'Y'
+    if [[ -z "$response" || "$response" =~ ^[Yy]$ ]]; then
+        ./update-bundle
+    else
+        echo "Bundle not updated."
+    fi
+fi
