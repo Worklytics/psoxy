@@ -27,54 +27,46 @@ What you SHOULD preserve:
   - **API Client Secrets**, if generated outside of Terraform. If you destroy/lose these values,
     you'll need to contact the data source administrator to obtain new versions.
 
-## Account/Project Migration
+## Account/Project/Host Provider Migration
 
 Use cases:
-  - move from a `dev` account to a `dev` account
+  - move from a `dev` account to a `prod` account
   - move from a "shared" account to a "dedicated" account
+  - move from AWS --> GCP, and vice versa
 
 First, make a list of everything you want to preserve (and migrate), rather than re-create.
 
-Then, pick a strategy from below and follow it. YMMV, and depending on you scenario you may need
-to do work beyond what's described here.
 
-### Terraform `moved`, Provider aliases
-
-Duplicate all the resources/modules in your current Terraform configuration again in that same file,
-but create alias providers that point to the new account (AWS case) or pass a different value for
-the `project` argument (GCP case).
-
-Then, use the `moved` directive to tell Terraform that the resources are being moved from the original
-resources/modules, to the new ones.
-
-
-
-### Terraform state rm / Terraform import
-
-While more tedious, this approach may offer more assurance of correctness.
-
-General steps:
-  1. create a new Terraform configuration from scratch; run `terraform init` there (if you begin
+### Phase 1 : Create New Environment
+  1. Create a new Terraform configuration from scratch; run `terraform init` there (if you begin
      with one of our examples, our `init` script does this)
-  2. run a provisional `terraform plan` and review.
-  3. find the resources in the plan that correspond to the infrastructure you intend to preserve
-  4. for infrastructure that is not actually moving across accounts/projects (likely data source
-     API clients, use `terraform import` to import the existing infrastructure into your new
-     configuration
-     (for infrastructure that *is* moving across projects - eg configuration parameters, secrets
-     such as the SALT), it will be simplest to move the values via AWS / GCP console *after* your
-     first apply
-  5. run `terraform apply` to create the new infrastructure; re-confirm that the plan is not
+  2. Run a provisional `terraform plan` and review.
+  3. Find the resources in the plan that correspond to the infrastructure you intend to preserve
+  4. For infrastructure that is not actually moving across accounts/projects/providers (likely data
+     source API Clients), do the following:
+       - use `terraform import` to import the existing infrastructure into your new configuration
+       - use `terraform state rm` to remove the resource from the old configuration
+  5. Run `terraform apply` to create the new infrastructure; re-confirm that the plan is not
      re-creating any API clients/etc that you intended to preserve
-  6. Via AWS / GCP console, or CLIs, move the values of any secrets/parameters that you intended to
+  6. Via AWS / GCP console, or CLIs, move the values of any secrets/parameters that you intend to
      by directly reading the values from your old account/project, and copying them into the new
      account/project
 
-## Cross-Provider Migration
 
-eg, GCP --> AWS or vice-versa
+### Phase 2: Migrate
+   1. Look at the `TODO 3` files/output variables for all your connectors.  Make a mapping between
+      the old values and the new values. Send this to Worklytics. It should include for each the
+      proxy URLs, AWS Role to use, and any other values that are changing.
+   2. Wait for confirmation that Worklytics has migrated all your connections to the new values.
+      This may take 1-2 days.
 
-Use cases:
-  - change host provider from GCP to AWS or vice-versa
 
-TBC
+
+### Phase 3: Destroy Old Environment
+  1. run `terraform destroy` in the old configuration. Carefully review the plan before
+     confirming.
+  2. You may also destroy any API clients/etc that are managed outside of Terraform and which you
+     did not migrate to the new environment.
+  3. You may cleanup any configuration values, such as SSM Parameters / GCP Secrets to customize
+     the proxy rules sets, that you may have created in your old host environment.
+
