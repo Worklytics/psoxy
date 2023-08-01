@@ -141,7 +141,7 @@ moved {
 }
 
 locals {
-  # as Terraform doesn't short-circuit boolean expressions, we need to use try() to avoid errors for deployment_bundle == null case
+  # NOTE: `try` needed here bc Terraform doesn't short-circuit boolean evaluation
   is_remote_bundle       = var.deployment_bundle != null && try(startswith(var.deployment_bundle, "gs://"), false)
   remote_bucket_name     = local.is_remote_bundle ? split("/", var.deployment_bundle)[2] : null
   remote_bundle_artifact = local.is_remote_bundle ? split("/", var.deployment_bundle)[3] : null
@@ -249,19 +249,32 @@ moved {
   to   = google_project_iam_custom_role.bucket_write
 }
 
-resource "google_project_iam_custom_role" "psoxy_instance_secret_locker_role" {
+# Deprecated; only keep to support old installations
+resource "google_project_iam_custom_role" "psoxy_instance_secret_role" {
   project     = var.project_id
-  role_id     = "${local.environment_id_role_prefix}PsoxyInstanceSecretLocker"
+  role_id     = "${local.environment_id_role_prefix}PsoxyInstanceSecretHandler"
   title       = "Access for updating and reading secrets"
-  description = "Role to grant on secret that is to be managed by a Psoxy instance (cloud function); subset of roles/secretmanager.admin, to support reading/updating the secret"
+  description = "Role to grant on secret that is to be managed by a Psoxy instance (cloud function); subset of roles/secretmanager.admin, to support reading/updating the secret and managing their versions"
 
   permissions = [
     "resourcemanager.projects.get",
     "secretmanager.secrets.get",
     "secretmanager.secrets.getIamPolicy",
     "secretmanager.secrets.list",
-    "secretmanager.secrets.update"
+    "secretmanager.secrets.update",
+    "secretmanager.versions.add",
+    "secretmanager.versions.access",
+    "secretmanager.versions.destroy",
+    "secretmanager.versions.disable",
+    "secretmanager.versions.enable",
+    "secretmanager.versions.get",
+    "secretmanager.versions.list"
   ]
+}
+
+moved {
+  from = google_project_iam_custom_role.psoxy_instance_secret_locker_role
+  to   = google_project_iam_custom_role.psoxy_instance_secret_role
 }
 
 output "artifacts_bucket_name" {
@@ -313,5 +326,9 @@ output "path_to_deployment_jar" {
 }
 
 output "psoxy_instance_secret_locker_role_id" {
-  value = google_project_iam_custom_role.psoxy_instance_secret_locker_role.id
+  value = google_project_iam_custom_role.psoxy_instance_secret_role.id
+}
+
+output "psoxy_instance_secret_role_id" {
+  value = google_project_iam_custom_role.psoxy_instance_secret_role.id
 }

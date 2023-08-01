@@ -1,7 +1,11 @@
 package co.worklytics.psoxy;
 
+import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.Base64;
 
 /**
  * pseudonymized form of an account identifier
@@ -66,4 +70,45 @@ public class PseudonymizedIdentity {
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     String reversible;
+
+    public Pseudonym asPseudonym() {
+
+        //q: what to do w original, if anything?
+
+        Base64.Decoder decoder = Base64.getUrlDecoder();
+
+        byte[] decodedHash, decodedReversible;
+        if (hash != null) {
+            decoder = Base64.getUrlDecoder();
+            try {
+                decodedHash = decoder.decode(hash.getBytes());
+            } catch (IllegalArgumentException e) {
+                decoder = Base64.getDecoder();
+                //q: should we log this?
+                decodedHash = decoder.decode(StringUtils.replaceChars(hash, "_.", "/+").getBytes());
+            }
+        } else {
+            decodedHash = null;
+        }
+
+        if (reversible != null) {
+            try {
+                decodedReversible = decoder.decode(reversible.getBytes());
+            } catch (IllegalArgumentException e) {
+                decoder = Base64.getDecoder();
+                //q: should we log this?
+                decodedReversible = decoder.decode(StringUtils.replaceChars(reversible, "_.", "/+").getBytes());
+            }
+        } else {
+            decodedReversible = null;
+        }
+
+
+
+        return Pseudonym.builder()
+            .hash(decodedHash)
+            .domain(domain)
+            .reversible(decodedReversible)
+            .build();
+    }
 }

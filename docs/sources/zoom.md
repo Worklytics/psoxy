@@ -1,5 +1,13 @@
 # Zoom
 
+## Prerequisites
+To be able to pull historical data (last 6 months) and all scheduled and instant meetings a Zoom paid account on Pro or higher plan (Business, Business Plus) is required. Otherwise, Zoom data will be incomplete.
+
+Non paid accounts do not have access to some methods Worklytics use like:
+- [Zoom Reports API](https://developers.zoom.us/docs/api/rest/reference/zoom-api/methods/#tag/Reports) needed for historical data
+- certain [Zoom Meeting API](https://developers.zoom.us/docs/api/rest/reference/zoom-api/methods/#tag/Meetings) methods like retrieving [past meeting participants](https://developers.zoom.us/docs/api/rest/reference/zoom-api/methods/#operation/pastMeetingParticipants)
+
+
 ## Examples
 
   * [Example Rules](example-rules/zoom/zoom.yaml)

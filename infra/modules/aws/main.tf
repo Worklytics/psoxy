@@ -169,12 +169,16 @@ moved {
 output "secrets" {
   value = {
     PSOXY_ENCRYPTION_KEY = {
-      value       = sensitive(random_password.encryption_key.result),
-      description = "secret used to generate reversible pseudonyms, if any; rotate to render all existing ones irreversible"
+      value               = sensitive(random_password.encryption_key.result),
+      description         = "secret used to generate reversible pseudonyms, if any; rotate to render all existing ones irreversible"
+      sensitive           = true
+      value_managed_by_tf = true
     },
     PSOXY_SALT = {
-      value       = sensitive(random_password.random.result),
-      description = "Salt used to build pseudonyms."
+      value               = sensitive(random_password.random.result),
+      description         = "Salt used to build pseudonyms."
+      sensitive           = true
+      value_managed_by_tf = true
     }
   }
 }

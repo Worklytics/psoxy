@@ -7,8 +7,13 @@ import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestModules;
 import co.worklytics.test.TestUtils;
+import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
+import com.avaulta.gateway.pseudonyms.impl.Base64UrlSha256HashPseudonymEncoder;
+import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
+import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
+import com.avaulta.gateway.tokens.impl.Sha256DeterministicTokenizationStrategy;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import dagger.Component;
@@ -16,19 +21,20 @@ import lombok.SneakyThrows;
 import org.apache.commons.codec.binary.Base64;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.File;
 import java.io.FileReader;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.function.Function;
 
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -225,13 +231,21 @@ public class BulkDataSanitizerImplTest {
 
     @Test
     @SneakyThrows
-    void handle_duplicates() {
+    void handle_duplicates_legacy() {
+        Pseudonymizer defaultPseudonymizer =
+            pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
+                .pseudonymizationSalt("salt")
+                .defaultScopeId("hris")
+                .pseudonymImplementation(PseudonymImplementation.LEGACY)
+                .build());
+
+
         //this is a lookup-table use case (for customers to use in own data warehouse)
         final String EXPECTED = "EMPLOYEE_ID,DEPARTMENT,EMPLOYEE_ID_ORIG\r\n" +
-            "SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM,Engineering,1\r\n" +
-            "mfsaNYuCX__xvnRz4gJp_t0zrDTC5DkuCJvMkubugsI,Sales,2\r\n" +
-            ".ZdDGUuOMK.Oy7_PJ3pf9SYX12.3tKPdLHfYbjVGcGk,Engineering,3\r\n" +
-            ".fs1T64Micz8SkbILrABgEv4kSg.tFhvhP35HGSLdOo,Engineering,4\r\n";
+            "t~SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM,Engineering,1\r\n" +
+            "t~mfsaNYuCX__xvnRz4gJp_t0zrDTC5DkuCJvMkubugsI,Sales,2\r\n" +
+            "t~-ZdDGUuOMK-Oy7_PJ3pf9SYX12-3tKPdLHfYbjVGcGk,Engineering,3\r\n" +
+            "t~-fs1T64Micz8SkbILrABgEv4kSg-tFhvhP35HGSLdOo,Engineering,4\r\n";
 
         CsvRules rules = CsvRules.builder()
             .pseudonymFormat(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
@@ -244,7 +258,42 @@ public class BulkDataSanitizerImplTest {
         File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
 
         try (FileReader in = new FileReader(inputFile)) {
-            byte[] result = columnarFileSanitizerImpl.sanitize(in, rules, pseudonymizer);
+            byte[] result = columnarFileSanitizerImpl.sanitize(in, rules, defaultPseudonymizer);
+
+            assertEquals(EXPECTED, new String(result));
+        }
+    }
+
+
+    @Test
+    @SneakyThrows
+    void handle_duplicates() {
+        Pseudonymizer defaultPseudonymizer =
+            pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
+                .pseudonymizationSalt("salt")
+                .defaultScopeId("hris")
+                .build());
+
+
+        //this is a lookup-table use case (for customers to use in own data warehouse)
+        final String EXPECTED = "EMPLOYEE_ID,DEPARTMENT,EMPLOYEE_ID_ORIG\r\n" +
+            "t~0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc,Engineering,1\r\n" +
+            "t~-hN_i1M1DeMAicDVp6LhFgW9lH7r3_LbOpTlXYWpXVI,Sales,2\r\n" +
+            "t~4W7Sl-LI6iMzNNngivs5dLMiVw-7ob3Cyr3jn8NureY,Engineering,3\r\n" +
+            "t~BOg00PLoiEEKyGzije3FJlKBzM6_Vjk87VJI9lTIA2o,Engineering,4\r\n";
+
+        CsvRules rules = CsvRules.builder()
+            .pseudonymFormat(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
+            .columnToPseudonymize("EMPLOYEE_ID")
+            .columnToRedact("EMPLOYEE_EMAIL")
+            .columnToRedact("EFFECTIVE_ISOWEEK")
+            .columnsToDuplicate(Map.of("EMPLOYEE_ID", "EMPLOYEE_ID_ORIG"))
+            .build();
+
+        File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
+
+        try (FileReader in = new FileReader(inputFile)) {
+            byte[] result = columnarFileSanitizerImpl.sanitize(in, rules, defaultPseudonymizer);
 
             assertEquals(EXPECTED, new String(result));
         }
@@ -333,5 +382,39 @@ public class BulkDataSanitizerImplTest {
 
             assertEquals(EXPECTED, new String(result));
         }
+    }
+
+    @ValueSource(strings = {
+        "blah",
+        "blah@acme.com"
+    })
+    @ParameterizedTest
+    void pre_v0_4_30_bulk_pseudonym_URL_SAFE_TOKEN_ENCODING(String identifier) {
+        pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
+            .pseudonymizationSalt("salt")
+            .defaultScopeId("hris")
+            .pseudonymImplementation(PseudonymImplementation.DEFAULT)
+            .build());
+
+        Base64UrlSha256HashPseudonymEncoder encoder = new Base64UrlSha256HashPseudonymEncoder();
+        DeterministicTokenizationStrategy deterministicTokenizationStrategy =
+            new Sha256DeterministicTokenizationStrategy("salt");
+
+        // this is how ColumnarBulkDataSanitizerImpl.java encoded pseudonyms if pseudonym
+        // format == URL_SAFE_TOKEN, and pseudonym implementation == DEFAULT
+        // prior to v0.4.31:
+        // see: https://github.com/Worklytics/psoxy/blob/ec0d324e0c45a6b97167b0907aa50bfdb8a45189/java/core/src/main/java/co/worklytics/psoxy/storage/impl/ColumnarBulkDataSanitizerImpl.java#L149C17-L149C17
+        PseudonymizedIdentity pseudonymizedIdentity  = pseudonymizer.pseudonymize(identifier);
+        String legacyEncoded = pseudonymizedIdentity.getHash();
+
+
+        byte[] token = deterministicTokenizationStrategy.getToken(identifier, Function.identity());
+        assertEquals(legacyEncoded,
+            encoder.encode(Pseudonym.builder().hash(token).build()));
+
+        // check that the none legacy encoding is just the legacy encoding with a "t~" prefix
+        UrlSafeTokenPseudonymEncoder urlSafeTokenPseudonymEncoder = new UrlSafeTokenPseudonymEncoder();
+        assertEquals("t~" + legacyEncoded + (pseudonymizedIdentity.getDomain() == null ? "" : ("@" + pseudonymizedIdentity.getDomain())),
+            urlSafeTokenPseudonymEncoder.encode(pseudonymizedIdentity.asPseudonym()));
     }
 }
