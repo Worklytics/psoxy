@@ -35,7 +35,7 @@ Orchestration continues to be performed on the Worklytics-side.
 ![proxy illustration](docs/proxy-illustration.jpg)
 
 ## Supported Data Sources
-As of March 2023, the following sources can be connected to Worklytics via psoxy. Some may require
+As of March 2023, the following sources can be connected to Worklytics via psoxy. 
 
 Note: Some sources require specific licenses to transfer data via the APIs/endpoints used by
 Worklytics, or impose some per API request costs for such transfers.
