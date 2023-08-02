@@ -21,6 +21,7 @@ import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
@@ -91,11 +92,16 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
          *
          * q: maybe this should just *always* be true? or should be env var?
          *
+         * TODO: rename to ACCESS_TOKEN_SINGULAR or "single active access token" or "strict token rotation"
          *
          * @return whether resulting `access_token` should be shared across all instances of
          * connections to this source.
          */
         USE_SHARED_TOKEN(false),
+
+        //TODO: whether safe to cache access token or not
+        ACCESS_TOKEN_CACHEABLE(false),
+
 
         TOKEN_RESPONSE_TYPE(false)
         ;
@@ -168,6 +174,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         CanonicalOAuthAccessTokenResponseDto parseTokenResponse(HttpResponse response) throws IOException;
     }
 
+    @Singleton
     @NoArgsConstructor(onConstructor_ = @Inject)
     @Log
     public static class TokenRefreshHandlerImpl implements OAuth2CredentialsWithRefresh.OAuth2RefreshHandler,
@@ -231,7 +238,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
          * @throws Error       if config values missing
          */
         @Override
-        public AccessToken refreshAccessToken() throws IOException {
+        public synchronized AccessToken refreshAccessToken() throws IOException {
             return refreshAccessToken(0);
         }
 
@@ -250,6 +257,13 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
             return useSharedTokenConfig.map(Boolean::parseBoolean).orElse(isClientCredentialsGrantType);
         }
 
+        private boolean isAccessTokenCacheable() {
+            Optional<String> accessTokenCacheableConfig =
+                config.getConfigPropertyAsOptional(ConfigProperty.ACCESS_TOKEN_CACHEABLE);
+            return accessTokenCacheableConfig.map(Boolean::parseBoolean)
+                .orElse(!useSharedToken());
+        }
+
         private AccessToken refreshAccessToken(int attempt) throws IOException {
             if (attempt == MAX_TOKEN_REFRESH_ATTEMPTS) {
                 throw new RuntimeException("Failed to refresh token after " + attempt + " attempts");
@@ -259,9 +273,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
             AccessToken token = getSharedAccessTokenIfSupported().orElse(this.cachedToken);
 
-
             if (shouldRefresh(token, clock.instant())) {
-
 
                 // only lock if we're using a shared token across processes
                 boolean lockNeeded = useSharedToken();
@@ -273,7 +285,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                     token = asAccessToken(tokenResponse);
 
                     storeSharedAccessTokenIfSupported(token);
-                    if (!useSharedToken()) {
+                    if (isAccessTokenCacheable()) {
                         this.cachedToken = token;
                     }
 
