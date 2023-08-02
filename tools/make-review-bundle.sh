@@ -48,9 +48,9 @@ printf "Your Terraform state file, if any, will not be included.\n"
 prompt_continue "Continue?"
 
 DATE_QUALIFIER=$(date +'%Y-%m-%d_%H-%M-%S')
-TERRAFORM_REVIEW_BUNDLE="terraform_review_bundle${DATE_QUALIFIER}.tar.tz"
-ERROR_LOG="./error_${DATE_QUALIFIER}.log"
-PLAN_FILE="./plan_for_review_${DATE_QUALIFIER}.out"
+TERRAFORM_REVIEW_BUNDLE="psoxy_tf_config_bundle_${DATE_QUALIFIER}.tar.tz"
+ERROR_LOG="error_${DATE_QUALIFIER}.log"
+PLAN_FILE="plan_for_review_${DATE_QUALIFIER}.out"
 
 FILES_TO_INCLUDE=""
 terraform -chdir="$TERRAFORM_CONFIG_PATH" plan -out="$PLAN_FILE" 2>"$ERROR_LOG"
@@ -58,13 +58,20 @@ if [ $? -eq 0 ]; then
   FILES_TO_INCLUDE="$FILES_TO_INCLUDE $PLAN_FILE"
   rm "$ERROR_LOG"
 else
+  mv "$ERROR_LOG" "$TERRAFORM_CONFIG_PATH$ERROR_LOG"
+
   FILES_TO_INCLUDE="$FILES_TO_INCLUDE $ERROR_LOG"
   printf "${RED}Terraform plan failed.${NC} A log file ${BLUE}${ERROR_LOG}${NC} has been created "
   printf "and added to the review bundle. You can send as-is or review that log "
   printf "file to attempt a fix.${NC}\n"
 fi
 
-tar -czvf "$TERRAFORM_REVIEW_BUNDLE" "$TERRAFORM_CONFIG_PATH"*.tf "$TERRAFORM_CONFIG_PATH"*.tfvars "$FILES_TO_INCLUDE"
+
+cd "$TERRAFORM_CONFIG_PATH" || exit 1
+tar -czvf "$TERRAFORM_REVIEW_BUNDLE" *.tf *.tfvars $FILES_TO_INCLUDE
+cd - || exit 1
+mv "${TERRAFORM_CONFIG_PATH}${TERRAFORM_REVIEW_BUNDLE}" .
+mv "${TERRAFORM_CONFIG_PATH}${ERROR_LOG}" .
 
 printf "Review bundle created: ${BLUE}${TERRAFORM_REVIEW_BUNDLE}${NC}\n"
 
