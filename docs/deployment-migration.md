@@ -61,9 +61,12 @@ The following is a rough guide on the steps you need to take to migrate your dep
             eg `terraform import 'module.psoxy.module.msft-connection["azure-ad"].azuread_application.connector' <ID>`
        - keep the resource ID you found above; later use `terraform state rm` to remove the resource
          from your old configuration
-  4. Run `terraform apply` to create the new infrastructure; re-confirm that the plan is not
+  5. Optionally, run `terraform plan -out=plan.out` to create a plan file; if you send this, along
+     with all the `*.tf`/`*.tfvars` files to Worklytics, we can review it and confirm that it is
+     correct.
+  5. Run `terraform apply` to create the new infrastructure; re-confirm that the plan is not
      re-creating any API clients/etc that you intended to preserve
-  5. Via AWS / GCP console, or CLIs, move the values of any secrets/parameters that you intend to
+  6. Via AWS / GCP console, or CLIs, move the values of any secrets/parameters that you intend to
      by directly reading the values from your old account/project, and copying them into the new
      account/project
 
