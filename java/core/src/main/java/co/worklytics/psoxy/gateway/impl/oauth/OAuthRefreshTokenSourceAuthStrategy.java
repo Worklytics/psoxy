@@ -239,10 +239,12 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
             Optional<String> useSharedTokenConfig =
                 config.getConfigPropertyAsOptional(ConfigProperty.USE_SHARED_TOKEN);
 
-            //legacy behavior was that tokens shared in client_credentials grant type
+            //legacy behavior was that tokens shared in account_credentials grant type
+            // see: https://github.com/Worklytics/psoxy/blob/v0.4.31/java/core/src/main/java/co/worklytics/psoxy/gateway/impl/oauth/AccountCredentialsGrantTokenRequestBuilder.java#L55-L57
+            // and Zoom was the only source that used account_credentials grant type at the time
             boolean isClientCredentialsGrantType =
                 config.getConfigPropertyAsOptional(ConfigProperty.GRANT_TYPE)
-                    .map("client_credentials"::equals)
+                    .map("account_credentials"::equals)
                     .orElse(false);
 
             return useSharedTokenConfig.map(Boolean::parseBoolean).orElse(isClientCredentialsGrantType);
