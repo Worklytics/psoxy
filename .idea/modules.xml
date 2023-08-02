@@ -3,7 +3,14 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/docs/docs.iml" filepath="$PROJECT_DIR$/docs/docs.iml" />
+      <module fileurl="file://$PROJECT_DIR$/java/gateway-core/gateway-core.iml" filepath="$PROJECT_DIR$/java/gateway-core/gateway-core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/java/impl/impl.iml" filepath="$PROJECT_DIR$/java/impl/impl.iml" />
       <module fileurl="file://$PROJECT_DIR$/infra/infra.iml" filepath="$PROJECT_DIR$/infra/infra.iml" />
+      <module fileurl="file://$PROJECT_DIR$/java/java.iml" filepath="$PROJECT_DIR$/java/java.iml" />
+      <module fileurl="file://$PROJECT_DIR$/java/impl/aws/psoxy-aws.iml" filepath="$PROJECT_DIR$/java/impl/aws/psoxy-aws.iml" />
+      <module fileurl="file://$PROJECT_DIR$/java/impl/cmd-line/psoxy-cmd-line.iml" filepath="$PROJECT_DIR$/java/impl/cmd-line/psoxy-cmd-line.iml" />
+      <module fileurl="file://$PROJECT_DIR$/java/core/psoxy-core.iml" filepath="$PROJECT_DIR$/java/core/psoxy-core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/java/impl/gcp/psoxy-gcp.iml" filepath="$PROJECT_DIR$/java/impl/gcp/psoxy-gcp.iml" />
       <module fileurl="file://$PROJECT_DIR$/tools/psoxy-test/tools.iml" filepath="$PROJECT_DIR$/tools/psoxy-test/tools.iml" />
     </modules>
   </component>

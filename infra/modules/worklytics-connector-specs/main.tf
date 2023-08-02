@@ -406,6 +406,13 @@ EOT
           sensitive : true
           value_managed_by_tf : false
         },
+        {
+          name : "ACCESS_TOKEN"
+          writable : true
+          lockable : true
+          sensitive : true
+          value_managed_by_tf : false
+        },
       ]
       reserved_concurrent_executions : null
       example_api_calls_user_to_impersonate : null
