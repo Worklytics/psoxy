@@ -4,6 +4,13 @@
 This document describes how to migrate your deployment from one cloud provider to another, or
 one project/account to another. It does **not** cover migrating between proxy versions.
 
+Use cases:
+  - move from a `dev` account to a `prod` account (Account / Project Migration)
+  - move from a "shared" account to a "dedicated" account (Account / Project Migration)
+  - move from AWS --> GCP, and vice versa (Provider Migration)
+
+## Preparation
+
 ### Preserving Existing Infrastructure
 
 Some data/infrastructure MUST, or at least SHOULD be preserved during your migration. Below is
@@ -27,31 +34,41 @@ What you SHOULD preserve:
   - **API Client Secrets**, if generated outside of Terraform. If you destroy/lose these values,
     you'll need to contact the data source administrator to obtain new versions.
 
-## Account/Project/Host Provider Migration
+Prior to beginning your migration, you should make a list of what existing infrastructure and/or
+configuration values you intend to preserve.
 
-Use cases:
-  - move from a `dev` account to a `prod` account
-  - move from a "shared" account to a "dedicated" account
-  - move from AWS --> GCP, and vice versa
+## Migration Plan
 
-First, make a list of everything you want to preserve (and migrate), rather than re-create.
-
+The following is a rough guide on the steps you need to take to migrate your deployment.
 
 ### Phase 1 : Create New Environment
   1. Create a new Terraform configuration from scratch; run `terraform init` there (if you begin
-     with one of our examples, our `init` script does this)
+     with one of our examples, our `init` script does this). Use the `terraform.tfvars` of your
+     existing configuration as a guide for what variables to set, copying over any needed values.
   2. Run a provisional `terraform plan` and review.
-  3. Find the resources in the plan that correspond to the infrastructure you intend to preserve
-  4. For infrastructure that is not actually moving across accounts/projects/providers (likely data
-     source API Clients), do the following:
-       - use `terraform import` to import the existing infrastructure into your new configuration
-       - use `terraform state rm` to remove the resource from the old configuration
+  3. Find the resources in the plan that correspond to the infrastructure you intend to preserve.
+     For infrastructure that is not actually moving across accounts/projects/providers (likely data
+     source API Clients), you must import the existing ones to your new configuration. Do the
+     following:
+       - use `terraform state list` + `grep` to find the resource ID of what you want to preserve,
+         eg `terraform state list | grep "\.azuread_application\."` to find your Microsoft 365 API client
+       - use `terraform state show` to obtain resource ID,
+         eg `terraform state show 'module.psoxy.module.msft-connection["azure-ad"].azuread_application.connector'`
+       - use `terraform import` to import the existing infrastructure into your new configuration,
+         using the ID from the provider. NOTE: the resource ID for the resource in your new configuration
+         may differ from your old configuration, if they are based on different examples or versions
+         of the Terraform modules we provide.
+            eg `terraform import 'module.psoxy.module.msft-connection["azure-ad"].azuread_application.connector' <ID>`
+       - keep the resource ID you found above; later use `terraform state rm` to remove the resource
+         from your old configuration
+  5. Optionally, run `terraform plan -out=plan.out` to create a plan file; if you send this, along
+     with all the `*.tf`/`*.tfvars` files to Worklytics, we can review it and confirm that it is
+     correct.
   5. Run `terraform apply` to create the new infrastructure; re-confirm that the plan is not
      re-creating any API clients/etc that you intended to preserve
   6. Via AWS / GCP console, or CLIs, move the values of any secrets/parameters that you intend to
      by directly reading the values from your old account/project, and copying them into the new
      account/project
-
 
 ### Phase 2: Migrate
    1. Look at the `TODO 3` files/output variables for all your connectors.  Make a mapping between
@@ -60,13 +77,14 @@ First, make a list of everything you want to preserve (and migrate), rather than
    2. Wait for confirmation that Worklytics has migrated all your connections to the new values.
       This may take 1-2 days.
 
-
-
 ### Phase 3: Destroy Old Environment
-  1. run `terraform destroy` in the old configuration. Carefully review the plan before
+  1. for anything you imported in Phase 1, run `terraform state rm` to remove it from your old
+     configuration.
+       - eg, `terraform state rm 'module.psoxy.module.msft-connection["azure-ad"].azuread_application.connector'`
+  2. run `terraform destroy` in the old configuration. Carefully review the plan before
      confirming.
-  2. You may also destroy any API clients/etc that are managed outside of Terraform and which you
+  3. You may also destroy any API clients/etc that are managed outside of Terraform and which you
      did not migrate to the new environment.
-  3. You may cleanup any configuration values, such as SSM Parameters / GCP Secrets to customize
+  4. You may cleanup any configuration values, such as SSM Parameters / GCP Secrets to customize
      the proxy rules sets, that you may have created in your old host environment.
 

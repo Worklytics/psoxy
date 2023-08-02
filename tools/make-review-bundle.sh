@@ -59,11 +59,13 @@ if [ $? -eq 0 ]; then
   rm "$ERROR_LOG"
 else
   mv "$ERROR_LOG" "$TERRAFORM_CONFIG_PATH$ERROR_LOG"
+
   FILES_TO_INCLUDE="$FILES_TO_INCLUDE $ERROR_LOG"
   printf "${RED}Terraform plan failed.${NC} A log file ${BLUE}${ERROR_LOG}${NC} has been created "
   printf "and added to the review bundle. You can send as-is or review that log "
   printf "file to attempt a fix.${NC}\n"
 fi
+
 
 cd "$TERRAFORM_CONFIG_PATH" || exit 1
 tar -czvf "$TERRAFORM_REVIEW_BUNDLE" *.tf *.tfvars $FILES_TO_INCLUDE

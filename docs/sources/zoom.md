@@ -1,11 +1,14 @@
 # Zoom
 
 ## Prerequisites
-To be able to pull historical data (last 6 months) and all scheduled and instant meetings a Zoom paid account on Pro or higher plan (Business, Business Plus) is required. Otherwise, Zoom data will be incomplete.
 
-Non paid accounts do not have access to some methods Worklytics use like:
-- [Zoom Reports API](https://developers.zoom.us/docs/api/rest/reference/zoom-api/methods/#tag/Reports) needed for historical data
-- certain [Zoom Meeting API](https://developers.zoom.us/docs/api/rest/reference/zoom-api/methods/#tag/Meetings) methods like retrieving [past meeting participants](https://developers.zoom.us/docs/api/rest/reference/zoom-api/methods/#operation/pastMeetingParticipants)
+As of July 2023, pulling historical data (last 6 months) and all scheduled and instant meetings
+requires a Zoom paid account on Pro or higher plan (Business, Business Plus). On other plans Zoom
+data may be incomplete.
+
+Accounts on unpaid plans do not have access to some methods Worklytics use like:
+- [Zoom Reports API](https://developers.zoom.us/docs/api/rest/reference/zoom-api/methods/#tag/Reports)  -required for historical data
+- certain [Zoom Meeting API](https://developers.zoom.us/docs/api/rest/reference/zoom-api/methods/#tag/Meetings) methods such as retrieving [past meeting participants](https://developers.zoom.us/docs/api/rest/reference/zoom-api/methods/#operation/pastMeetingParticipants)
 
 
 ## Examples
@@ -14,13 +17,13 @@ Non paid accounts do not have access to some methods Worklytics use like:
   * Example Data : [original](api-response-examples/zoom) | [sanitized](api-response-examples/zoom/sanitized)
 
 ## Steps to Connect
-Zoom connector through Psoxy requires a custom managed app on the Zoom Marketplace (in development
-mode, no need to publish).
+The Zoom connector through Psoxy requires a Custom Managed App on the Zoom Marketplace. This app may
+be left in development mode; it does not need to be published.
 
 1. Go to https://marketplace.zoom.us/develop/create and create an app of type "Server to Server OAuth"
 2. After creation, it will show the App Credentials. Share them with the AWS/GCP administrator, the
    following values must be filled in the AWS Systems Manager Parameter Store / GCP Secret Manager
-   for use by the proxy when authenticating with the Zoom API::
+   for use by the proxy when authenticating with the Zoom API:
 
     - `PSOXY_ZOOM_CLIENT_ID`
     - `PSOXY_ZOOM_ACCOUNT_ID`
@@ -35,7 +38,7 @@ mode, no need to publish).
 4. Fill the scopes section, enabling the following:
 
     - Users / View all user information / `user:read:admin`
-        - List information about the zoom user acounts, for enumeration / linking
+        - List information about the Zoom user accounts, for enumeration / linking across sources
     - Meetings / View all user meetings / `meeting:read:admin`
         - Listing all user meetings (work events / items)
     - Report / View report data / `report:read:admin`
