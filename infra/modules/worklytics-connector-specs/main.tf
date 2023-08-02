@@ -399,6 +399,13 @@ EOT
           sensitive : false
           value_managed_by_tf : false
         },
+        {
+          name : "OAUTH_REFRESH_TOKEN"
+          writable : true
+          lockable : true
+          sensitive : true
+          value_managed_by_tf : false
+        },
       ]
       reserved_concurrent_executions : null
       example_api_calls_user_to_impersonate : null
@@ -759,7 +766,6 @@ EOT
         GRANT_TYPE : "refresh_token"
         REFRESH_ENDPOINT : "https://auth.atlassian.com/oauth/token"
         USE_SHARED_TOKEN : "TRUE"
-        ACCESS_TOKEN_CACHEABLE : "TRUE"
       }
       settings_to_provide = {
         "Jira Cloud Id" = local.jira_cloud_id

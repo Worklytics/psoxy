@@ -284,9 +284,11 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                     tokenResponse = exchangeRefreshTokenForAccessToken();
                     token = asAccessToken(tokenResponse);
 
-                    storeSharedAccessTokenIfSupported(token);
                     if (isAccessTokenCacheable()) {
                         this.cachedToken = token;
+                    } else {
+                        //q: assuming that if the token is cacheable, is not present as a SECRET to be stored
+                        storeSharedAccessTokenIfSupported(token);
                     }
 
                     if (lockNeeded) {
