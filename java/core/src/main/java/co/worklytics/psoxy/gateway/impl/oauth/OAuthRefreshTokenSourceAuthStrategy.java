@@ -258,10 +258,10 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         }
 
         private boolean isAccessTokenCacheable() {
-            Optional<String> accessTokenCacheableConfig =
-                config.getConfigPropertyAsOptional(ConfigProperty.ACCESS_TOKEN_CACHEABLE);
-            return accessTokenCacheableConfig.map(Boolean::parseBoolean)
-                .orElse(!useSharedToken());
+            return
+                config.getConfigPropertyAsOptional(ConfigProperty.ACCESS_TOKEN_CACHEABLE)
+                .map(Boolean::parseBoolean)
+                .orElse(!useSharedToken()); // by default, tokens cacheable unless shared
         }
 
         private AccessToken refreshAccessToken(int attempt) throws IOException {

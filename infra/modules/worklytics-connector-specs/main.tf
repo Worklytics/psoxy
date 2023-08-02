@@ -383,6 +383,8 @@ EOT
         GRANT_TYPE : "client_credentials"
         CREDENTIALS_FLOW : "client_secret"
         REFRESH_ENDPOINT : "https://${var.salesforce_domain}/services/oauth2/token"
+        ACCESS_TOKEN_CACHEABLE : "true",
+        USE_SHARED_TOKEN : "true"
       }
       secured_variables : [
         {
@@ -757,6 +759,7 @@ EOT
         GRANT_TYPE : "refresh_token"
         REFRESH_ENDPOINT : "https://auth.atlassian.com/oauth/token"
         USE_SHARED_TOKEN : "TRUE"
+        ACCESS_TOKEN_CACHEABLE : "TRUE"
       }
       settings_to_provide = {
         "Jira Cloud Id" = local.jira_cloud_id
