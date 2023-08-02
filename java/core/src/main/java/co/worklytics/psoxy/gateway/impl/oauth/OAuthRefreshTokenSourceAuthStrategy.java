@@ -251,7 +251,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
             // and Zoom was the only source that used account_credentials grant type at the time
             boolean isClientCredentialsGrantType =
                 config.getConfigPropertyAsOptional(ConfigProperty.GRANT_TYPE)
-                    .map("account_credentials"::equals)
+                    .map(AccountCredentialsGrantTokenRequestBuilder.GRANT_TYPE::equals)
                     .orElse(false);
 
             return useSharedTokenConfig.map(Boolean::parseBoolean).orElse(isClientCredentialsGrantType);

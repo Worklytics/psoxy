@@ -5,6 +5,7 @@ import co.worklytics.psoxy.gateway.RequiresConfiguration;
 import com.google.api.client.http.HttpContent;
 import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.UrlEncodedContent;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.inject.Inject;
@@ -22,6 +23,8 @@ import java.util.TreeMap;
  */
 @NoArgsConstructor(onConstructor_ = @Inject)
 public class AccountCredentialsGrantTokenRequestBuilder implements OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder, RequiresConfiguration {
+
+    public static final String GRANT_TYPE = "account_credentials";
 
     @Inject
     ConfigService config;
@@ -46,10 +49,8 @@ public class AccountCredentialsGrantTokenRequestBuilder implements OAuthRefreshT
         CLIENT_SECRET, //NOTE: you should configure this as a secret in Secret Manager
     }
 
-    @Override
-    public String getGrantType() {
-        return "account_credentials";
-    }
+    @Getter(onMethod_ = @Override)
+    private final String grantType = GRANT_TYPE;
 
     @Override
     public HttpContent buildPayload() {

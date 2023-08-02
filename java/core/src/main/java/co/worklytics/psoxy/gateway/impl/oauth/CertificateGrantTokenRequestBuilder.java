@@ -26,13 +26,15 @@ import java.util.Set;
 public class CertificateGrantTokenRequestBuilder
         extends ClientCredentialsGrantTokenRequestBuilder {
 
+    public static final String GRANT_TYPE = "certificate_credentials";
+
     enum ConfigProperty implements ConfigService.ConfigProperty {
         PRIVATE_KEY
     }
 
 
     @Getter(onMethod_ = @Override)
-    private final String grantType = "certificate_credentials";
+    private final String grantType = GRANT_TYPE;
 
     @Inject
     ConfigService config;
