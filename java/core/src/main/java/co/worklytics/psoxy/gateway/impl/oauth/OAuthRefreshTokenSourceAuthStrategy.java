@@ -80,6 +80,23 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         CLIENT_ID(false),
         GRANT_TYPE(false),
         ACCESS_TOKEN(true),
+
+        /**
+         * whether resulting `access_token` should be shared across all instances of connections
+         * to this source.
+         *
+         * q: what does this have to do with a token request payload?? it's semantics of tokens
+         * according to Source, right? (eg, whether they allow multiple valid token instances to
+         * be used concurrently for the same grant)
+         *
+         * q: maybe this should just *always* be true? or should be env var?
+         *
+         *
+         * @return whether resulting `access_token` should be shared across all instances of
+         * connections to this source.
+         */
+        USE_SHARED_TOKEN(false),
+
         TOKEN_RESPONSE_TYPE(false)
         ;
 
@@ -132,24 +149,6 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
          * @return identifier of type of OAuth grant that this payload builder should be used for
          */
         String getGrantType();
-
-        /**
-         * whether resulting `access_token` should be shared across all instances of connections
-         * to this source.
-         *
-         * q: what does this have to do with a token request payload?? it's semantics of tokens
-         * according to Source, right? (eg, whether they allow multiple valid token instances to
-         * be used concurrently for the same grant)
-         *
-         * q: maybe this should just *always* be true? or should be env var?
-         *
-         *
-         * @return whether resulting `access_token` should be shared across all instances of
-         * connections to this source.
-         */
-        default boolean useSharedToken() {
-            return false;
-        }
 
         /**
          * @return request paylaod for token request
@@ -236,6 +235,19 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
             return refreshAccessToken(0);
         }
 
+        private boolean useSharedToken() {
+            Optional<String> useSharedTokenConfig =
+                config.getConfigPropertyAsOptional(ConfigProperty.USE_SHARED_TOKEN);
+
+            //legacy behavior was that tokens shared in client_credentials grant type
+            boolean isClientCredentialsGrantType =
+                config.getConfigPropertyAsOptional(ConfigProperty.GRANT_TYPE)
+                    .map("client_credentials"::equals)
+                    .orElse(false);
+
+            return useSharedTokenConfig.map(Boolean::parseBoolean).orElse(isClientCredentialsGrantType);
+        }
+
         private AccessToken refreshAccessToken(int attempt) throws IOException {
             if (attempt == MAX_TOKEN_REFRESH_ATTEMPTS) {
                 throw new RuntimeException("Failed to refresh token after " + attempt + " attempts");
@@ -250,7 +262,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
 
                 // only lock if we're using a shared token across processes
-                boolean lockNeeded = payloadBuilder.useSharedToken();
+                boolean lockNeeded = useSharedToken();
 
                 boolean acquired = !lockNeeded || lockService.acquire(TOKEN_REFRESH_LOCK_ID, Duration.ofMinutes(2));
 
@@ -259,7 +271,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                     token = asAccessToken(tokenResponse);
 
                     storeSharedAccessTokenIfSupported(token);
-                    if (!payloadBuilder.useSharedToken()) {
+                    if (!useSharedToken()) {
                         this.cachedToken = token;
                     }
 
@@ -393,7 +405,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
         @VisibleForTesting
         Optional<AccessToken> getSharedAccessTokenIfSupported() {
-            if (payloadBuilder.useSharedToken()) {
+            if (useSharedToken()) {
                 Optional<String> jsonToken = config.getConfigPropertyAsOptional(ConfigProperty.ACCESS_TOKEN);
                 if (jsonToken.isEmpty()) {
                     return Optional.empty();
@@ -413,7 +425,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
         @VisibleForTesting
         void storeSharedAccessTokenIfSupported(@NonNull AccessToken accessToken) {
-            if (payloadBuilder.useSharedToken()) {
+            if (useSharedToken()) {
                 try {
                     config.putConfigProperty(ConfigProperty.ACCESS_TOKEN,
                         objectMapper.writerFor(AccessTokenDto.class)

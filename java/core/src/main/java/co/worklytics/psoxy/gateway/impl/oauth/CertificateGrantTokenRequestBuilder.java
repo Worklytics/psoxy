@@ -30,12 +30,6 @@ public class CertificateGrantTokenRequestBuilder
         PRIVATE_KEY
     }
 
-    @Override
-    public boolean useSharedToken() {
-        Optional<String> useSharedTokenConfig = config.getConfigPropertyAsOptional(RefreshTokenTokenRequestBuilder.ConfigProperty.USE_SHARED_TOKEN);
-
-        return useSharedTokenConfig.map(i -> Boolean.parseBoolean(useSharedTokenConfig.get())).orElse(false);
-    }
 
     @Getter(onMethod_ = @Override)
     private final String grantType = "certificate_credentials";

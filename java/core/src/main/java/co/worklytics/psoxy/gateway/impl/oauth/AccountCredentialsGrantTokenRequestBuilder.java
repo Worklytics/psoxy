@@ -52,11 +52,6 @@ public class AccountCredentialsGrantTokenRequestBuilder implements OAuthRefreshT
     }
 
     @Override
-    public boolean useSharedToken() {
-        return true;
-    }
-
-    @Override
     public HttpContent buildPayload() {
         // The documentation doesn't say anything to use POST data, but passes everything in the URL
         // Tested manually and, for the moment, it is accepted as POST data
