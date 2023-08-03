@@ -1,0 +1,6 @@
+pseudonymizations:
+  - csvColumns:
+      - "employee_id"
+redactions:
+  - csvColumns:
+      - "employee_email"
