@@ -285,7 +285,10 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                     token = asAccessToken(tokenResponse);
 
                     storeSharedAccessTokenIfSupported(token);
-                    this.cachedToken = token;
+
+                    if (isAccessTokenCacheable()) {
+                        this.cachedToken = token;
+                    }
 
                     if (lockNeeded) {
                         // hold lock extra, to try to maximize the time between token refreshes
