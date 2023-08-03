@@ -36,15 +36,9 @@ public class RefreshTokenTokenRequestBuilder
     public enum ConfigProperty implements ConfigService.ConfigProperty {
         REFRESH_TOKEN, //NOTE: you should configure this as a secret in Secret Manager
         CLIENT_SECRET, //NOTE: you should configure this as a secret in Secret Manager
-        USE_SHARED_TOKEN,
+
     }
 
-    @Override
-    public boolean useSharedToken() {
-        Optional<String> useSharedTokenConfig = config.getConfigPropertyAsOptional(ConfigProperty.USE_SHARED_TOKEN);
-
-        return useSharedTokenConfig.map(Boolean::parseBoolean).orElse(false);
-    }
 
     public HttpContent buildPayload() {
 

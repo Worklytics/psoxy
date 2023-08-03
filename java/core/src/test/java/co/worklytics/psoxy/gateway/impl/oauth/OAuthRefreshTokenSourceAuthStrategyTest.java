@@ -138,7 +138,9 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
         tokenRefreshHandler.objectMapper = objectMapper;
         tokenRefreshHandler.config = mock(ConfigService.class);
         tokenRefreshHandler.payloadBuilder = mock(OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder.class);
-        when(tokenRefreshHandler.payloadBuilder.useSharedToken()).thenReturn(true);
+        when(tokenRefreshHandler.config.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.USE_SHARED_TOKEN))
+            .thenReturn(Optional.of("true"));
+
         Instant anyTime = Instant.parse("2021-12-15T00:00:00Z");
         tokenRefreshHandler.clock = Clock.fixed(anyTime, ZoneOffset.UTC);
 
@@ -159,7 +161,8 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
         when(tokenRefreshHandler.config.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.ACCESS_TOKEN)).thenReturn(Optional.of("{\"token\":\"my-token\",\"expirationDate\":1639526410000}"));
 
         tokenRefreshHandler.payloadBuilder = mock(OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder.class);
-        when(tokenRefreshHandler.payloadBuilder.useSharedToken()).thenReturn(true);
+        when(tokenRefreshHandler.config.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.USE_SHARED_TOKEN))
+            .thenReturn(Optional.of("true"));
 
         Optional<AccessToken> accessToken = tokenRefreshHandler.getSharedAccessTokenIfSupported();
         assertTrue(accessToken.isPresent());
