@@ -409,7 +409,6 @@ EOT
         {
           name : "ACCESS_TOKEN"
           writable : true
-          lockable : true
           sensitive : true
           value_managed_by_tf : false
         },
