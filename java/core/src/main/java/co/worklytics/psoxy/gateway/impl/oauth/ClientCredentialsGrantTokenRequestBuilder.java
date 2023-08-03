@@ -43,6 +43,8 @@ import java.util.concurrent.atomic.AtomicReference;
 public class ClientCredentialsGrantTokenRequestBuilder
         implements OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder, RequiresConfiguration {
 
+    public static final String GRANT_TYPE = "client_credentials";
+
     enum ConfigProperty implements ConfigService.ConfigProperty {
         PRIVATE_KEY_ID,
         PRIVATE_KEY,
@@ -63,7 +65,7 @@ public class ClientCredentialsGrantTokenRequestBuilder
     // 'client_credentials' is MSFT
     //for Google, this is "urn:ietf:params:oauth:grant-type:jwt-bearer"
     @Getter(onMethod_ = @Override)
-    private final String grantType = "client_credentials";
+    private final String grantType = GRANT_TYPE;
 
     //for Google, this is "assertion"
     // see: https://datatracker.ietf.org/doc/html/rfc7521#section-4.2

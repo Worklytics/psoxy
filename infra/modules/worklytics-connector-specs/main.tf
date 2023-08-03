@@ -383,6 +383,8 @@ EOT
         GRANT_TYPE : "client_credentials"
         CREDENTIALS_FLOW : "client_secret"
         REFRESH_ENDPOINT : "https://${var.salesforce_domain}/services/oauth2/token"
+        ACCESS_TOKEN_CACHEABLE : "true",
+        USE_SHARED_TOKEN : "true"
       }
       secured_variables : [
         {
@@ -395,6 +397,19 @@ EOT
           name : "CLIENT_ID"
           writable : false
           sensitive : false
+          value_managed_by_tf : false
+        },
+        {
+          name : "OAUTH_REFRESH_TOKEN"
+          writable : true
+          lockable : true
+          sensitive : true
+          value_managed_by_tf : false
+        },
+        {
+          name : "ACCESS_TOKEN"
+          writable : true
+          sensitive : true
           value_managed_by_tf : false
         },
       ]

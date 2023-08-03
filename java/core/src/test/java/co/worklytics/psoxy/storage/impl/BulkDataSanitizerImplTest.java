@@ -7,8 +7,13 @@ import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestModules;
 import co.worklytics.test.TestUtils;
+import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
+import com.avaulta.gateway.pseudonyms.impl.Base64UrlSha256HashPseudonymEncoder;
+import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
+import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
+import com.avaulta.gateway.tokens.impl.Sha256DeterministicTokenizationStrategy;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import dagger.Component;
@@ -16,19 +21,20 @@ import lombok.SneakyThrows;
 import org.apache.commons.codec.binary.Base64;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.File;
 import java.io.FileReader;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.function.Function;
 
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -78,12 +84,11 @@ public class BulkDataSanitizerImplTest {
     @Test
     @SneakyThrows
     void handle_pseudonymize() {
-        final String EXPECTED = "EMPLOYEE_ID,EMPLOYEE_EMAIL,DEPARTMENT,EFFECTIVE_ISOWEEK\r\n" +
-
-            "1,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",Engineering,2020-01-06\r\n" +
-            "2,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"workltyics.co\"\",\"\"hash\"\":\"\"al4JK5KlOIsneC2DM__P_HRYe28LWYTBSf3yWKGm5yQ\"\"}\",Sales,2020-01-06\r\n" +
-            "3,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"workltycis.co\"\",\"\"hash\"\":\"\"BlQB8Vk0VwdbdWTGAzBF.ote1357Ajr0fFcgFf72kdk\"\"}\",Engineering,2020-01-06\r\n" +
-            "4,,Engineering,2020-01-06\r\n"; //blank ID
+        final String EXPECTED = "EMPLOYEE_ID,EMPLOYEE_EMAIL,DEPARTMENT,SNAPSHOT,MANAGER_ID,JOIN_DATE,LEAVE_DATE\r\n" +
+            "1,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",Engineering,2023-01-06,,2019-11-11,\r\n" +
+            "2,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"workltyics.co\"\",\"\"hash\"\":\"\"al4JK5KlOIsneC2DM__P_HRYe28LWYTBSf3yWKGm5yQ\"\"}\",Sales,2023-01-06,1,2020-01-01,\r\n" +
+            "3,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"workltycis.co\"\",\"\"hash\"\":\"\"BlQB8Vk0VwdbdWTGAzBF.ote1357Ajr0fFcgFf72kdk\"\"}\",Engineering,2023-01-06,1,2019-10-06,2022-12-08\r\n" +
+            "4,,Engineering,2023-01-06,1,2018-06-03,\r\n"; //blank ID
 
         CsvRules rules = CsvRules.builder()
             .columnToPseudonymize("EMPLOYEE_EMAIL")
@@ -100,11 +105,11 @@ public class BulkDataSanitizerImplTest {
     @Test
     @SneakyThrows
     void handle_redaction() {
-        final String EXPECTED = "EMPLOYEE_ID,EMPLOYEE_EMAIL,EFFECTIVE_ISOWEEK\r\n" +
-            "1,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",2020-01-06\r\n" +
-            "2,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"workltyics.co\"\",\"\"hash\"\":\"\"al4JK5KlOIsneC2DM__P_HRYe28LWYTBSf3yWKGm5yQ\"\"}\",2020-01-06\r\n" +
-            "3,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"workltycis.co\"\",\"\"hash\"\":\"\"BlQB8Vk0VwdbdWTGAzBF.ote1357Ajr0fFcgFf72kdk\"\"}\",2020-01-06\r\n" +
-            "4,,2020-01-06\r\n"; //blank ID
+        final String EXPECTED = "EMPLOYEE_ID,EMPLOYEE_EMAIL,SNAPSHOT,MANAGER_ID,JOIN_DATE,LEAVE_DATE\r\n" +
+            "1,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",2023-01-06,,2019-11-11,\r\n" +
+            "2,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"workltyics.co\"\",\"\"hash\"\":\"\"al4JK5KlOIsneC2DM__P_HRYe28LWYTBSf3yWKGm5yQ\"\"}\",2023-01-06,1,2020-01-01,\r\n" +
+            "3,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"workltycis.co\"\",\"\"hash\"\":\"\"BlQB8Vk0VwdbdWTGAzBF.ote1357Ajr0fFcgFf72kdk\"\"}\",2023-01-06,1,2019-10-06,2022-12-08\r\n" +
+            "4,,2023-01-06,1,2018-06-03,\r\n"; //blank ID
 
         CsvRules rules = CsvRules.builder()
             .columnToPseudonymize("EMPLOYEE_EMAIL")
@@ -225,17 +230,61 @@ public class BulkDataSanitizerImplTest {
 
     @Test
     @SneakyThrows
-    void handle_duplicates() {
+    void handle_duplicates_legacy() {
+        Pseudonymizer defaultPseudonymizer =
+            pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
+                .pseudonymizationSalt("salt")
+                .defaultScopeId("hris")
+                .pseudonymImplementation(PseudonymImplementation.LEGACY)
+                .build());
+
+
         //this is a lookup-table use case (for customers to use in own data warehouse)
-        final String EXPECTED = "EMPLOYEE_ID,DEPARTMENT,EMPLOYEE_ID_ORIG\r\n" +
-            "t~U2FwcHdPNEtaS0dwcnFxVU5ydU5yZUJEMkJWUjk4bkVNNk5SQ3UzUjJkTQ,Engineering,1\r\n" +
-            "t~bWZzYU5ZdUNYX194dm5SejRnSnBfdDB6ckRUQzVEa3VDSnZNa3VidWdzSQ,Sales,2\r\n" +
-            "t~LlpkREdVdU9NSy5PeTdfUEozcGY5U1lYMTIuM3RLUGRMSGZZYmpWR2NHaw,Engineering,3\r\n" +
-            "t~LmZzMVQ2NE1pY3o4U2tiSUxyQUJnRXY0a1NnLnRGaHZoUDM1SEdTTGRPbw,Engineering,4\r\n";
+        final String EXPECTED = "EMPLOYEE_ID,DEPARTMENT,SNAPSHOT,MANAGER_ID,JOIN_DATE,LEAVE_DATE,EMPLOYEE_ID_ORIG\r\n" +
+            "t~SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM,Engineering,2023-01-06,,2019-11-11,,1\r\n" +
+            "t~mfsaNYuCX__xvnRz4gJp_t0zrDTC5DkuCJvMkubugsI,Sales,2023-01-06,t~SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM,2020-01-01,,2\r\n" +
+            "t~-ZdDGUuOMK-Oy7_PJ3pf9SYX12-3tKPdLHfYbjVGcGk,Engineering,2023-01-06,t~SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM,2019-10-06,2022-12-08,3\r\n" +
+            "t~-fs1T64Micz8SkbILrABgEv4kSg-tFhvhP35HGSLdOo,Engineering,2023-01-06,t~SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM,2018-06-03,,4\r\n";
 
         CsvRules rules = CsvRules.builder()
             .pseudonymFormat(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
             .columnToPseudonymize("EMPLOYEE_ID")
+            .columnToRedact("EMPLOYEE_EMAIL")
+            .columnToPseudonymize("MANAGER_ID")
+            .columnsToDuplicate(Map.of("EMPLOYEE_ID", "EMPLOYEE_ID_ORIG"))
+            .build();
+
+        File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
+
+        try (FileReader in = new FileReader(inputFile)) {
+            byte[] result = columnarFileSanitizerImpl.sanitize(in, rules, defaultPseudonymizer);
+
+            assertEquals(EXPECTED, new String(result));
+        }
+    }
+
+
+    @Test
+    @SneakyThrows
+    void handle_duplicates() {
+        Pseudonymizer defaultPseudonymizer =
+            pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
+                .pseudonymizationSalt("salt")
+                .defaultScopeId("hris")
+                .build());
+
+
+        //this is a lookup-table use case (for customers to use in own data warehouse)
+        final String EXPECTED = "EMPLOYEE_ID,DEPARTMENT,SNAPSHOT,MANAGER_ID,JOIN_DATE,LEAVE_DATE,EMPLOYEE_ID_ORIG\r\n" +
+            "t~0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc,Engineering,2023-01-06,,2019-11-11,,1\r\n" +
+            "t~-hN_i1M1DeMAicDVp6LhFgW9lH7r3_LbOpTlXYWpXVI,Sales,2023-01-06,t~0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc,2020-01-01,,2\r\n" +
+            "t~4W7Sl-LI6iMzNNngivs5dLMiVw-7ob3Cyr3jn8NureY,Engineering,2023-01-06,t~0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc,2019-10-06,2022-12-08,3\r\n" +
+            "t~BOg00PLoiEEKyGzije3FJlKBzM6_Vjk87VJI9lTIA2o,Engineering,2023-01-06,t~0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc,2018-06-03,,4\r\n";
+
+        CsvRules rules = CsvRules.builder()
+            .pseudonymFormat(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
+            .columnToPseudonymize("EMPLOYEE_ID")
+            .columnToPseudonymize("MANAGER_ID")
             .columnToRedact("EMPLOYEE_EMAIL")
             .columnToRedact("EFFECTIVE_ISOWEEK")
             .columnsToDuplicate(Map.of("EMPLOYEE_ID", "EMPLOYEE_ID_ORIG"))
@@ -244,7 +293,7 @@ public class BulkDataSanitizerImplTest {
         File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
 
         try (FileReader in = new FileReader(inputFile)) {
-            byte[] result = columnarFileSanitizerImpl.sanitize(in, rules, pseudonymizer);
+            byte[] result = columnarFileSanitizerImpl.sanitize(in, rules, defaultPseudonymizer);
 
             assertEquals(EXPECTED, new String(result));
         }
@@ -310,12 +359,12 @@ public class BulkDataSanitizerImplTest {
     @SneakyThrows
     @Test
     void shuffle() {
-        final String EXPECTED = "EMPLOYEE_ID,EMPLOYEE_EMAIL,DEPARTMENT,EFFECTIVE_ISOWEEK\r\n" +
-            "2,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"workltyics.co\"\",\"\"hash\"\":\"\"al4JK5KlOIsneC2DM__P_HRYe28LWYTBSf3yWKGm5yQ\"\"}\",Sales,2020-01-06\r\n" +
-            "1,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",Engineering,2020-01-06\r\n" +
-            "4,,Engineering,2020-01-06\r\n" +
-            "3,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"workltycis.co\"\",\"\"hash\"\":\"\"BlQB8Vk0VwdbdWTGAzBF.ote1357Ajr0fFcgFf72kdk\"\"}\",Engineering,2020-01-06\r\n"
-        ; //blank ID
+        final String EXPECTED = "EMPLOYEE_ID,EMPLOYEE_EMAIL,DEPARTMENT,SNAPSHOT,MANAGER_ID,JOIN_DATE,LEAVE_DATE\r\n" +
+            "2,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"workltyics.co\"\",\"\"hash\"\":\"\"al4JK5KlOIsneC2DM__P_HRYe28LWYTBSf3yWKGm5yQ\"\"}\",Sales,2023-01-06,1,2020-01-01,\r\n" +
+            "1,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",Engineering,2023-01-06,,2019-11-11,\r\n" +
+            "4,,Engineering,2023-01-06,1,2018-06-03,\r\n" +
+            "3,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"workltycis.co\"\",\"\"hash\"\":\"\"BlQB8Vk0VwdbdWTGAzBF.ote1357Ajr0fFcgFf72kdk\"\"}\",Engineering,2023-01-06,1,2019-10-06,2022-12-08\r\n"
+            ; //blank ID
 
         CsvRules rules = CsvRules.builder()
             .columnToPseudonymize("EMPLOYEE_EMAIL")
@@ -333,5 +382,39 @@ public class BulkDataSanitizerImplTest {
 
             assertEquals(EXPECTED, new String(result));
         }
+    }
+
+    @ValueSource(strings = {
+        "blah",
+        "blah@acme.com"
+    })
+    @ParameterizedTest
+    void pre_v0_4_30_bulk_pseudonym_URL_SAFE_TOKEN_ENCODING(String identifier) {
+        pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
+            .pseudonymizationSalt("salt")
+            .defaultScopeId("hris")
+            .pseudonymImplementation(PseudonymImplementation.DEFAULT)
+            .build());
+
+        Base64UrlSha256HashPseudonymEncoder encoder = new Base64UrlSha256HashPseudonymEncoder();
+        DeterministicTokenizationStrategy deterministicTokenizationStrategy =
+            new Sha256DeterministicTokenizationStrategy("salt");
+
+        // this is how ColumnarBulkDataSanitizerImpl.java encoded pseudonyms if pseudonym
+        // format == URL_SAFE_TOKEN, and pseudonym implementation == DEFAULT
+        // prior to v0.4.31:
+        // see: https://github.com/Worklytics/psoxy/blob/ec0d324e0c45a6b97167b0907aa50bfdb8a45189/java/core/src/main/java/co/worklytics/psoxy/storage/impl/ColumnarBulkDataSanitizerImpl.java#L149C17-L149C17
+        PseudonymizedIdentity pseudonymizedIdentity  = pseudonymizer.pseudonymize(identifier);
+        String legacyEncoded = pseudonymizedIdentity.getHash();
+
+
+        byte[] token = deterministicTokenizationStrategy.getToken(identifier, Function.identity());
+        assertEquals(legacyEncoded,
+            encoder.encode(Pseudonym.builder().hash(token).build()));
+
+        // check that the none legacy encoding is just the legacy encoding with a "t~" prefix
+        UrlSafeTokenPseudonymEncoder urlSafeTokenPseudonymEncoder = new UrlSafeTokenPseudonymEncoder();
+        assertEquals("t~" + legacyEncoded + (pseudonymizedIdentity.getDomain() == null ? "" : ("@" + pseudonymizedIdentity.getDomain())),
+            urlSafeTokenPseudonymEncoder.encode(pseudonymizedIdentity.asPseudonym()));
     }
 }
