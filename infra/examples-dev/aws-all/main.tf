@@ -42,6 +42,7 @@ module "worklytics_connectors" {
   github_installation_id    = var.github_installation_id
   github_organization       = var.github_organization
   github_example_repository = var.github_example_repository
+  salesforce_example_account_id = var.salesforce_example_account_id
 }
 
 # sources which require additional dependencies are split into distinct Terraform files, following
