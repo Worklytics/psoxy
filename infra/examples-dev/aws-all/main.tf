@@ -34,14 +34,14 @@ module "worklytics_connectors" {
   source = "../../modules/worklytics-connectors"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.4.32"
 
-  enabled_connectors        = var.enabled_connectors
-  jira_cloud_id             = var.jira_cloud_id
-  jira_server_url           = var.jira_server_url
-  jira_example_issue_id     = var.jira_example_issue_id
-  salesforce_domain         = var.salesforce_domain
-  github_installation_id    = var.github_installation_id
-  github_organization       = var.github_organization
-  github_example_repository = var.github_example_repository
+  enabled_connectors            = var.enabled_connectors
+  jira_cloud_id                 = var.jira_cloud_id
+  jira_server_url               = var.jira_server_url
+  jira_example_issue_id         = var.jira_example_issue_id
+  salesforce_domain             = var.salesforce_domain
+  github_installation_id        = var.github_installation_id
+  github_organization           = var.github_organization
+  github_example_repository     = var.github_example_repository
   salesforce_example_account_id = var.salesforce_example_account_id
 }
 
