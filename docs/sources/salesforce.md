@@ -26,9 +26,13 @@
           - API Enabled
           - APEX REST Services
       - And the policy has the application created marked as enabled in "Connected App Access". Otherwise requests will return 401 with INVALID_SESSION_ID
-  2. Once created, open "Manage Consumer Details"
-  3. Update the content of `PSOXY_SALESFORCE_CLIENT_ID` from Consumer Key and `PSOXY_SALESFORCE_CLIENT_SECRET` from Consumer Secret
+
+    The user set up as "run as" on the connector should have between `Permission Sets` and `Profile` the permission of `View All Data`. This is due the kind of queries supported
+    for retrieving [Activity Histories](https://developer.salesforce.com/docs/atlas.en-us.object_reference.meta/object_reference/sforce_api_objects_activityhistory.htm) based on the
+    related *account id*.
+
+   2. Once created, open "Manage Consumer Details"
+   3. Update the content of `PSOXY_SALESFORCE_CLIENT_ID` from Consumer Key	and `PSOXY_SALESFORCE_CLIENT_SECRET` from Consumer Secret
+   4. Finally, we recommend to run `test-salesforce` script with all the queries in the example to ensure the expected information covered by rules can be obtained from Salesforce API.
 
 NOTE: derived from [worklytics-connector-specs](../../infra/modules/worklytics-connector-specs/main.tf); refer to that for definitive information.
-
-
