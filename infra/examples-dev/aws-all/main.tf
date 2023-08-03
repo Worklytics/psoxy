@@ -32,7 +32,7 @@ terraform {
 # general cases
 module "worklytics_connectors" {
   source = "../../modules/worklytics-connectors"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=rc-v0.4.32"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.4.32"
 
   enabled_connectors        = var.enabled_connectors
   jira_cloud_id             = var.jira_cloud_id
@@ -103,7 +103,7 @@ locals {
 
 module "psoxy" {
   source = "../../modules/aws-host"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-host?ref=rc-v0.4.32"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-host?ref=v0.4.32"
 
   environment_name               = var.environment_name
   aws_account_id                 = var.aws_account_id
@@ -143,7 +143,7 @@ module "connection_in_worklytics" {
   for_each = local.all_instances
 
   source = "../../modules/worklytics-psoxy-connection-generic"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-generic?ref=rc-v0.4.32"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-generic?ref=v0.4.32"
 
   psoxy_host_platform_id = local.host_platform_id
   psoxy_instance_id      = each.key
