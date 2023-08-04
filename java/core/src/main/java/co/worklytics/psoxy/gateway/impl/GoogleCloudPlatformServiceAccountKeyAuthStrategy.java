@@ -82,7 +82,10 @@ public class GoogleCloudPlatformServiceAccountKeyAuthStrategy implements SourceA
     @VisibleForTesting
     ByteArrayInputStream toStream(String base64encodedKey) {
         return new ByteArrayInputStream(Base64.getDecoder().decode(
-            StringUtils.strip(base64encodedKey)));
+            //strip whitespace around base64-encoded string; have seen these with artifacts from
+            // copy-paste of the SA key into cloud consoles
+            StringUtils.strip(base64encodedKey))
+        );
     }
 
     @Override

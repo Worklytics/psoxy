@@ -97,6 +97,8 @@ class GoogleCloudPlatformServiceAccountKeyAuthStrategyTest {
     }
 
     @ValueSource(strings = {
+        //various cases of extra whitepsace added around base64-encoded value
+        // seen in cases where customers copy-paste encoded keys into console
         " c29tZXRoaW5n",
         "c29tZXRoaW5n\n",
         "  c29tZXRoaW5n\n",
@@ -104,15 +106,14 @@ class GoogleCloudPlatformServiceAccountKeyAuthStrategyTest {
     })
     @ParameterizedTest
     void toStream_extraWhitespace(String validBase64) {
-        ByteArrayInputStream s = authStrategy.toStream(validBase64);
 
-        //legacy implementation failed; seen for customer who was filling SA keys in directly to
-        // console via copy-paste
+        //confirm that test case would indeed fail legacy implementation
         assertThrows(IllegalArgumentException.class,
             () -> new ByteArrayInputStream(Base64.getDecoder().decode(validBase64)));
 
+        //current implementation works as expected, even w the whitespace
         assertEquals("something",
-            new String(s.readAllBytes()));
+            new String(authStrategy.toStream(validBase64).readAllBytes()));
     }
 
 }
