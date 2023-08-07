@@ -131,7 +131,7 @@ module "bulk_connector" {
   path_to_instance_ssm_parameters  = "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_"
   ssm_kms_key_ids                  = local.ssm_key_ids
   sanitized_accessor_role_names    = [module.psoxy.api_caller_role_name]
-  memory_size_mb                   = 1024
+  memory_size_mb                   = coalesce(try(var.custom_bulk_connector_arguments[each.key], null), each.value.memory_size_mb, 1024)
   sanitized_expiration_days        = var.bulk_sanitized_expiration_days
   input_expiration_days            = var.bulk_input_expiration_days
   example_file                     = each.value.example_file
