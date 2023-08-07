@@ -184,7 +184,7 @@ module "bulk_connector" {
   sanitized_bucket_name         = try(each.value.sanitized_bucket_name, null)
   default_labels                = var.default_labels
   todos_as_local_files          = var.todos_as_local_files
-  available_memory_mb           = coalesce(var.custom_bulk_connector_arguments[each.key].available_memory_mb, null)
+  available_memory_mb           = coalesce(var.custom_bulk_connector_arguments[each.key].available_memory_mb, each.value.available_memory_mb, null)
 
 
   environment_variables = merge(
