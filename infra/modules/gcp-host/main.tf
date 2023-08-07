@@ -57,8 +57,8 @@ locals {
   }
 
   writable_secrets = flatten([
-  for instance_id, secrets in local.secrets_to_provision :
-  [for secret_id, secret in values(secrets) : secret if secret.lockable || secret.writable]
+    for instance_id, secrets in local.secrets_to_provision :
+    [for secret_id, secret in values(secrets) : secret if secret.lockable || secret.writable]
   ])
 }
 
@@ -143,7 +143,7 @@ module "api_connector" {
 
   secret_bindings = merge(
     # bc some of these are later filled directly, bind to 'latest'
-   {for k, secrets in local.secrets_to_provision[each.key] : k => merge({ secret_id : module.secrets[each.key].secret_ids_within_project[k], version_number : "latest" }) if (try(!secrets.lockable, true) && try(!secrets.writable, true))},
+    { for k, secrets in local.secrets_to_provision[each.key] : k => merge({ secret_id : module.secrets[each.key].secret_ids_within_project[k], version_number : "latest" }) if(try(!secrets.lockable, true) && try(!secrets.writable, true)) },
     module.psoxy.secrets
   )
 }

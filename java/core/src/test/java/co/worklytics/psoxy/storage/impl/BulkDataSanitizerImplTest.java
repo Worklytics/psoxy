@@ -84,12 +84,11 @@ public class BulkDataSanitizerImplTest {
     @Test
     @SneakyThrows
     void handle_pseudonymize() {
-        final String EXPECTED = "EMPLOYEE_ID,EMPLOYEE_EMAIL,DEPARTMENT,EFFECTIVE_ISOWEEK\r\n" +
-
-            "1,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",Engineering,2020-01-06\r\n" +
-            "2,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"workltyics.co\"\",\"\"hash\"\":\"\"al4JK5KlOIsneC2DM__P_HRYe28LWYTBSf3yWKGm5yQ\"\"}\",Sales,2020-01-06\r\n" +
-            "3,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"workltycis.co\"\",\"\"hash\"\":\"\"BlQB8Vk0VwdbdWTGAzBF.ote1357Ajr0fFcgFf72kdk\"\"}\",Engineering,2020-01-06\r\n" +
-            "4,,Engineering,2020-01-06\r\n"; //blank ID
+        final String EXPECTED = "EMPLOYEE_ID,EMPLOYEE_EMAIL,DEPARTMENT,SNAPSHOT,MANAGER_ID,JOIN_DATE,LEAVE_DATE\r\n" +
+            "1,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",Engineering,2023-01-06,,2019-11-11,\r\n" +
+            "2,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"workltyics.co\"\",\"\"hash\"\":\"\"al4JK5KlOIsneC2DM__P_HRYe28LWYTBSf3yWKGm5yQ\"\"}\",Sales,2023-01-06,1,2020-01-01,\r\n" +
+            "3,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"workltycis.co\"\",\"\"hash\"\":\"\"BlQB8Vk0VwdbdWTGAzBF.ote1357Ajr0fFcgFf72kdk\"\"}\",Engineering,2023-01-06,1,2019-10-06,2022-12-08\r\n" +
+            "4,,Engineering,2023-01-06,1,2018-06-03,\r\n"; //blank ID
 
         CsvRules rules = CsvRules.builder()
             .columnToPseudonymize("EMPLOYEE_EMAIL")
@@ -106,11 +105,11 @@ public class BulkDataSanitizerImplTest {
     @Test
     @SneakyThrows
     void handle_redaction() {
-        final String EXPECTED = "EMPLOYEE_ID,EMPLOYEE_EMAIL,EFFECTIVE_ISOWEEK\r\n" +
-            "1,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",2020-01-06\r\n" +
-            "2,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"workltyics.co\"\",\"\"hash\"\":\"\"al4JK5KlOIsneC2DM__P_HRYe28LWYTBSf3yWKGm5yQ\"\"}\",2020-01-06\r\n" +
-            "3,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"workltycis.co\"\",\"\"hash\"\":\"\"BlQB8Vk0VwdbdWTGAzBF.ote1357Ajr0fFcgFf72kdk\"\"}\",2020-01-06\r\n" +
-            "4,,2020-01-06\r\n"; //blank ID
+        final String EXPECTED = "EMPLOYEE_ID,EMPLOYEE_EMAIL,SNAPSHOT,MANAGER_ID,JOIN_DATE,LEAVE_DATE\r\n" +
+            "1,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",2023-01-06,,2019-11-11,\r\n" +
+            "2,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"workltyics.co\"\",\"\"hash\"\":\"\"al4JK5KlOIsneC2DM__P_HRYe28LWYTBSf3yWKGm5yQ\"\"}\",2023-01-06,1,2020-01-01,\r\n" +
+            "3,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"workltycis.co\"\",\"\"hash\"\":\"\"BlQB8Vk0VwdbdWTGAzBF.ote1357Ajr0fFcgFf72kdk\"\"}\",2023-01-06,1,2019-10-06,2022-12-08\r\n" +
+            "4,,2023-01-06,1,2018-06-03,\r\n"; //blank ID
 
         CsvRules rules = CsvRules.builder()
             .columnToPseudonymize("EMPLOYEE_EMAIL")
@@ -241,17 +240,17 @@ public class BulkDataSanitizerImplTest {
 
 
         //this is a lookup-table use case (for customers to use in own data warehouse)
-        final String EXPECTED = "EMPLOYEE_ID,DEPARTMENT,EMPLOYEE_ID_ORIG\r\n" +
-            "t~SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM,Engineering,1\r\n" +
-            "t~mfsaNYuCX__xvnRz4gJp_t0zrDTC5DkuCJvMkubugsI,Sales,2\r\n" +
-            "t~-ZdDGUuOMK-Oy7_PJ3pf9SYX12-3tKPdLHfYbjVGcGk,Engineering,3\r\n" +
-            "t~-fs1T64Micz8SkbILrABgEv4kSg-tFhvhP35HGSLdOo,Engineering,4\r\n";
+        final String EXPECTED = "EMPLOYEE_ID,DEPARTMENT,SNAPSHOT,MANAGER_ID,JOIN_DATE,LEAVE_DATE,EMPLOYEE_ID_ORIG\r\n" +
+            "t~SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM,Engineering,2023-01-06,,2019-11-11,,1\r\n" +
+            "t~mfsaNYuCX__xvnRz4gJp_t0zrDTC5DkuCJvMkubugsI,Sales,2023-01-06,t~SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM,2020-01-01,,2\r\n" +
+            "t~-ZdDGUuOMK-Oy7_PJ3pf9SYX12-3tKPdLHfYbjVGcGk,Engineering,2023-01-06,t~SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM,2019-10-06,2022-12-08,3\r\n" +
+            "t~-fs1T64Micz8SkbILrABgEv4kSg-tFhvhP35HGSLdOo,Engineering,2023-01-06,t~SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM,2018-06-03,,4\r\n";
 
         CsvRules rules = CsvRules.builder()
             .pseudonymFormat(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
             .columnToPseudonymize("EMPLOYEE_ID")
             .columnToRedact("EMPLOYEE_EMAIL")
-            .columnToRedact("EFFECTIVE_ISOWEEK")
+            .columnToPseudonymize("MANAGER_ID")
             .columnsToDuplicate(Map.of("EMPLOYEE_ID", "EMPLOYEE_ID_ORIG"))
             .build();
 
@@ -276,15 +275,16 @@ public class BulkDataSanitizerImplTest {
 
 
         //this is a lookup-table use case (for customers to use in own data warehouse)
-        final String EXPECTED = "EMPLOYEE_ID,DEPARTMENT,EMPLOYEE_ID_ORIG\r\n" +
-            "t~0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc,Engineering,1\r\n" +
-            "t~-hN_i1M1DeMAicDVp6LhFgW9lH7r3_LbOpTlXYWpXVI,Sales,2\r\n" +
-            "t~4W7Sl-LI6iMzNNngivs5dLMiVw-7ob3Cyr3jn8NureY,Engineering,3\r\n" +
-            "t~BOg00PLoiEEKyGzije3FJlKBzM6_Vjk87VJI9lTIA2o,Engineering,4\r\n";
+        final String EXPECTED = "EMPLOYEE_ID,DEPARTMENT,SNAPSHOT,MANAGER_ID,JOIN_DATE,LEAVE_DATE,EMPLOYEE_ID_ORIG\r\n" +
+            "t~0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc,Engineering,2023-01-06,,2019-11-11,,1\r\n" +
+            "t~-hN_i1M1DeMAicDVp6LhFgW9lH7r3_LbOpTlXYWpXVI,Sales,2023-01-06,t~0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc,2020-01-01,,2\r\n" +
+            "t~4W7Sl-LI6iMzNNngivs5dLMiVw-7ob3Cyr3jn8NureY,Engineering,2023-01-06,t~0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc,2019-10-06,2022-12-08,3\r\n" +
+            "t~BOg00PLoiEEKyGzije3FJlKBzM6_Vjk87VJI9lTIA2o,Engineering,2023-01-06,t~0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc,2018-06-03,,4\r\n";
 
         CsvRules rules = CsvRules.builder()
             .pseudonymFormat(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
             .columnToPseudonymize("EMPLOYEE_ID")
+            .columnToPseudonymize("MANAGER_ID")
             .columnToRedact("EMPLOYEE_EMAIL")
             .columnToRedact("EFFECTIVE_ISOWEEK")
             .columnsToDuplicate(Map.of("EMPLOYEE_ID", "EMPLOYEE_ID_ORIG"))
@@ -359,12 +359,12 @@ public class BulkDataSanitizerImplTest {
     @SneakyThrows
     @Test
     void shuffle() {
-        final String EXPECTED = "EMPLOYEE_ID,EMPLOYEE_EMAIL,DEPARTMENT,EFFECTIVE_ISOWEEK\r\n" +
-            "2,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"workltyics.co\"\",\"\"hash\"\":\"\"al4JK5KlOIsneC2DM__P_HRYe28LWYTBSf3yWKGm5yQ\"\"}\",Sales,2020-01-06\r\n" +
-            "1,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",Engineering,2020-01-06\r\n" +
-            "4,,Engineering,2020-01-06\r\n" +
-            "3,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"workltycis.co\"\",\"\"hash\"\":\"\"BlQB8Vk0VwdbdWTGAzBF.ote1357Ajr0fFcgFf72kdk\"\"}\",Engineering,2020-01-06\r\n"
-        ; //blank ID
+        final String EXPECTED = "EMPLOYEE_ID,EMPLOYEE_EMAIL,DEPARTMENT,SNAPSHOT,MANAGER_ID,JOIN_DATE,LEAVE_DATE\r\n" +
+            "2,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"workltyics.co\"\",\"\"hash\"\":\"\"al4JK5KlOIsneC2DM__P_HRYe28LWYTBSf3yWKGm5yQ\"\"}\",Sales,2023-01-06,1,2020-01-01,\r\n" +
+            "1,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",Engineering,2023-01-06,,2019-11-11,\r\n" +
+            "4,,Engineering,2023-01-06,1,2018-06-03,\r\n" +
+            "3,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"workltycis.co\"\",\"\"hash\"\":\"\"BlQB8Vk0VwdbdWTGAzBF.ote1357Ajr0fFcgFf72kdk\"\"}\",Engineering,2023-01-06,1,2019-10-06,2022-12-08\r\n"
+            ; //blank ID
 
         CsvRules rules = CsvRules.builder()
             .columnToPseudonymize("EMPLOYEE_EMAIL")

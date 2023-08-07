@@ -6,12 +6,14 @@ import com.google.auth.Credentials;
 import com.google.auth.oauth2.ServiceAccountCredentials;
 import dagger.Component;
 import lombok.SneakyThrows;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.io.ByteArrayInputStream;
 import java.util.Base64;
 import java.util.Objects;
 import java.util.Optional;
@@ -93,4 +95,25 @@ class GoogleCloudPlatformServiceAccountKeyAuthStrategyTest {
         assertEquals("{Authorization=[Bearer 1/fFAGRNJru1FTz70BzhT3Zg]}",
             credentials.getRequestMetadata().toString());
     }
+
+    @ValueSource(strings = {
+        //various cases of extra whitepsace added around base64-encoded value
+        // seen in cases where customers copy-paste encoded keys into console
+        " c29tZXRoaW5n",
+        "c29tZXRoaW5n\n",
+        "  c29tZXRoaW5n\n",
+        "  c29tZXRoaW5n  \r\n",
+    })
+    @ParameterizedTest
+    void toStream_extraWhitespace(String validBase64) {
+
+        //confirm that test case would indeed fail legacy implementation
+        assertThrows(IllegalArgumentException.class,
+            () -> new ByteArrayInputStream(Base64.getDecoder().decode(validBase64)));
+
+        //current implementation works as expected, even w the whitespace
+        assertEquals("something",
+            new String(authStrategy.toStream(validBase64).readAllBytes()));
+    }
+
 }

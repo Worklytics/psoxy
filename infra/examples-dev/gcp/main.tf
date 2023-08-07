@@ -40,17 +40,18 @@ locals {
 # call this 'generic_source_connectors'?
 module "worklytics_connectors" {
   source = "../../modules/worklytics-connectors"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=rc-v0.4.32"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=rc-v0.4.33"
 
 
-  enabled_connectors        = var.enabled_connectors
-  jira_cloud_id             = var.jira_cloud_id
-  jira_server_url           = var.jira_server_url
-  jira_example_issue_id     = var.jira_example_issue_id
-  salesforce_domain         = var.salesforce_domain
-  github_installation_id    = var.github_installation_id
-  github_organization       = var.github_organization
-  github_example_repository = var.github_example_repository
+  enabled_connectors            = var.enabled_connectors
+  jira_cloud_id                 = var.jira_cloud_id
+  jira_server_url               = var.jira_server_url
+  jira_example_issue_id         = var.jira_example_issue_id
+  salesforce_domain             = var.salesforce_domain
+  github_installation_id        = var.github_installation_id
+  github_organization           = var.github_organization
+  github_example_repository     = var.github_example_repository
+  salesforce_example_account_id = var.salesforce_example_account_id
 }
 
 # sources which require additional dependencies are split into distinct Terraform files, following
@@ -88,7 +89,7 @@ locals {
 
 module "psoxy" {
   source = "../../modules/gcp-host"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-host?ref=rc-v0.4.32"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-host?ref=rc-v0.4.33"
 
   gcp_project_id                 = var.gcp_project_id
   environment_name               = var.environment_name
@@ -125,7 +126,7 @@ module "connection_in_worklytics" {
   for_each = local.all_instances
 
   source = "../../modules/worklytics-psoxy-connection-generic"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-generic?ref=rc-v0.4.32"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-generic?ref=rc-v0.4.33"
 
   psoxy_host_platform_id = local.host_platform_id
   psoxy_instance_id      = each.key
