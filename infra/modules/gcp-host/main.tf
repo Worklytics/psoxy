@@ -129,6 +129,7 @@ module "api_connector" {
   invoker_sa_emails                     = var.worklytics_sa_emails
   default_labels                        = var.default_labels
   todos_as_local_files                  = var.todos_as_local_files
+  available_memory_mb                   = try(var.custom_bulk_connector_arguments[each.key].available_memory_mb, null)
 
   environment_variables = merge(
     var.general_environment_variables,
