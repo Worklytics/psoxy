@@ -54,6 +54,7 @@ module "psoxy" {
   github_installation_id         = var.github_installation_id
   github_organization            = var.github_organization
   github_example_repository      = var.github_example_repository
+  deployment_bundle              = var.deployment_bundle
 }
 
 moved {

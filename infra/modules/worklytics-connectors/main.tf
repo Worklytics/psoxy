@@ -15,7 +15,6 @@ module "worklytics_connector_specs" {
 }
 
 
-
 module "source_token_external_todo" {
   for_each = module.worklytics_connector_specs.enabled_oauth_long_access_connectors_todos
 
