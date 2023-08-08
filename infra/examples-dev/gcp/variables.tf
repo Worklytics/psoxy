@@ -239,7 +239,7 @@ variable "custom_bulk_connector_arguments" {
     # what else to add here?
   }))
 
-  description = "map of connector id --> settings object"
+  description = "map of connector id --> arguments object, to override defaults for bulk connector instances"
   default     = {}
 }
 

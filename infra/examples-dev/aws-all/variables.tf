@@ -239,6 +239,9 @@ variable "custom_bulk_connector_arguments" {
   type = map(object({
     memory_size_mb = optional(number)
   }))
+
+  description = "map of connector id --> arguments object, to override defaults for bulk connector instances"
+  default     = {}
 }
 
 # TODO: rethink this schema before we publish this
