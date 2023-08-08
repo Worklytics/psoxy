@@ -841,39 +841,18 @@ endpoints:
         jsonPaths:
           - "$..name"
           - "$..url"
-      - !<redact>
-        jsonPaths:
-          - "$..actor.avatar_url"
-          - "$..actor.gravatar_id"
-          - "$..actor.url"
-          - "$..actor.html_url"
-          - "$..actor.followers_url"
-          - "$..actor.following_url"
-          - "$..actor.gists_url"
-          - "$..actor.starred_url"
-          - "$..actor.subscriptions_url"
-          - "$..actor.organizations_url"
-          - "$..actor.repos_url"
-          - "$..actor.events_url"
-          - "$..actor.received_events_url"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..actor.login"
-          - "$..actor.id"
-          - "$..actor.node_id"
-          - "$..actor.email"
-        encoding: "JSON"
-  - pathTemplate: "/repos/{owner}/{repo}/issues/{issue_number}/timeline"
-    allowedQueryParams:
-      - "per_page"
-      - "page"
-    transforms:
-      - !<redact>
-        jsonPaths:
-          - "$..name"
-          - "$..url"
           - "$..body"
           - "$..rename"
+          - "$..name"
+          - "$..message"
+          - "$..files"
+          - "$..signature"
+          - "$..payload"
+          - "$..dismissalMessage"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..email"
+        encoding: "JSON"
       - !<redact>
         jsonPaths:
           - "$..user.avatar_url"
@@ -942,25 +921,25 @@ endpoints:
         encoding: "JSON"
       - !<redact>
         jsonPaths:
-          - "$..assignees[*].avatar_url"
-          - "$..assignees[*].gravatar_id"
-          - "$..assignees[*].url"
-          - "$..assignees[*].html_url"
-          - "$..assignees[*].followers_url"
-          - "$..assignees[*].following_url"
-          - "$..assignees[*].gists_url"
-          - "$..assignees[*].starred_url"
-          - "$..assignees[*].subscriptions_url"
-          - "$..assignees[*].organizations_url"
-          - "$..assignees[*].repos_url"
-          - "$..assignees[*].events_url"
-          - "$..assignees[*].received_events_url"
+          - "$..assigner.avatar_url"
+          - "$..assigner.gravatar_id"
+          - "$..assigner.url"
+          - "$..assigner.html_url"
+          - "$..assigner.followers_url"
+          - "$..assigner.following_url"
+          - "$..assigner.gists_url"
+          - "$..assigner.starred_url"
+          - "$..assigner.subscriptions_url"
+          - "$..assigner.organizations_url"
+          - "$..assigner.repos_url"
+          - "$..assigner.events_url"
+          - "$..assigner.received_events_url"
       - !<pseudonymize>
         jsonPaths:
-          - "$..assignees[*].login"
-          - "$..assignees[*].id"
-          - "$..assignees[*].node_id"
-          - "$..assignees[*].email"
+          - "$..assigner.login"
+          - "$..assigner.id"
+          - "$..assigner.node_id"
+          - "$..assigner.email"
         encoding: "JSON"
       - !<redact>
         jsonPaths:
@@ -1005,6 +984,247 @@ endpoints:
           - "$..closed_by.id"
           - "$..closed_by.node_id"
           - "$..closed_by.email"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$..author.avatar_url"
+          - "$..author.gravatar_id"
+          - "$..author.url"
+          - "$..author.html_url"
+          - "$..author.followers_url"
+          - "$..author.following_url"
+          - "$..author.gists_url"
+          - "$..author.starred_url"
+          - "$..author.subscriptions_url"
+          - "$..author.organizations_url"
+          - "$..author.repos_url"
+          - "$..author.events_url"
+          - "$..author.received_events_url"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..author.login"
+          - "$..author.id"
+          - "$..author.node_id"
+          - "$..author.email"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$..committer.avatar_url"
+          - "$..committer.gravatar_id"
+          - "$..committer.url"
+          - "$..committer.html_url"
+          - "$..committer.followers_url"
+          - "$..committer.following_url"
+          - "$..committer.gists_url"
+          - "$..committer.starred_url"
+          - "$..committer.subscriptions_url"
+          - "$..committer.organizations_url"
+          - "$..committer.repos_url"
+          - "$..committer.events_url"
+          - "$..committer.received_events_url"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..committer.login"
+          - "$..committer.id"
+          - "$..committer.node_id"
+          - "$..committer.email"
+        encoding: "JSON"
+  - pathTemplate: "/repos/{owner}/{repo}/issues/{issue_number}/timeline"
+    allowedQueryParams:
+      - "per_page"
+      - "page"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..name"
+          - "$..url"
+          - "$..body"
+          - "$..rename"
+          - "$..name"
+          - "$..message"
+          - "$..files"
+          - "$..signature"
+          - "$..payload"
+          - "$..dismissalMessage"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..email"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$..user.avatar_url"
+          - "$..user.gravatar_id"
+          - "$..user.url"
+          - "$..user.html_url"
+          - "$..user.followers_url"
+          - "$..user.following_url"
+          - "$..user.gists_url"
+          - "$..user.starred_url"
+          - "$..user.subscriptions_url"
+          - "$..user.organizations_url"
+          - "$..user.repos_url"
+          - "$..user.events_url"
+          - "$..user.received_events_url"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..user.login"
+          - "$..user.id"
+          - "$..user.node_id"
+          - "$..user.email"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$..actor.avatar_url"
+          - "$..actor.gravatar_id"
+          - "$..actor.url"
+          - "$..actor.html_url"
+          - "$..actor.followers_url"
+          - "$..actor.following_url"
+          - "$..actor.gists_url"
+          - "$..actor.starred_url"
+          - "$..actor.subscriptions_url"
+          - "$..actor.organizations_url"
+          - "$..actor.repos_url"
+          - "$..actor.events_url"
+          - "$..actor.received_events_url"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..actor.login"
+          - "$..actor.id"
+          - "$..actor.node_id"
+          - "$..actor.email"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$..assignee.avatar_url"
+          - "$..assignee.gravatar_id"
+          - "$..assignee.url"
+          - "$..assignee.html_url"
+          - "$..assignee.followers_url"
+          - "$..assignee.following_url"
+          - "$..assignee.gists_url"
+          - "$..assignee.starred_url"
+          - "$..assignee.subscriptions_url"
+          - "$..assignee.organizations_url"
+          - "$..assignee.repos_url"
+          - "$..assignee.events_url"
+          - "$..assignee.received_events_url"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..assignee.login"
+          - "$..assignee.id"
+          - "$..assignee.node_id"
+          - "$..assignee.email"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$..assigner.avatar_url"
+          - "$..assigner.gravatar_id"
+          - "$..assigner.url"
+          - "$..assigner.html_url"
+          - "$..assigner.followers_url"
+          - "$..assigner.following_url"
+          - "$..assigner.gists_url"
+          - "$..assigner.starred_url"
+          - "$..assigner.subscriptions_url"
+          - "$..assigner.organizations_url"
+          - "$..assigner.repos_url"
+          - "$..assigner.events_url"
+          - "$..assigner.received_events_url"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..assigner.login"
+          - "$..assigner.id"
+          - "$..assigner.node_id"
+          - "$..assigner.email"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$..creator.avatar_url"
+          - "$..creator.gravatar_id"
+          - "$..creator.url"
+          - "$..creator.html_url"
+          - "$..creator.followers_url"
+          - "$..creator.following_url"
+          - "$..creator.gists_url"
+          - "$..creator.starred_url"
+          - "$..creator.subscriptions_url"
+          - "$..creator.organizations_url"
+          - "$..creator.repos_url"
+          - "$..creator.events_url"
+          - "$..creator.received_events_url"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..creator.login"
+          - "$..creator.id"
+          - "$..creator.node_id"
+          - "$..creator.email"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$..closed_by.avatar_url"
+          - "$..closed_by.gravatar_id"
+          - "$..closed_by.url"
+          - "$..closed_by.html_url"
+          - "$..closed_by.followers_url"
+          - "$..closed_by.following_url"
+          - "$..closed_by.gists_url"
+          - "$..closed_by.starred_url"
+          - "$..closed_by.subscriptions_url"
+          - "$..closed_by.organizations_url"
+          - "$..closed_by.repos_url"
+          - "$..closed_by.events_url"
+          - "$..closed_by.received_events_url"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..closed_by.login"
+          - "$..closed_by.id"
+          - "$..closed_by.node_id"
+          - "$..closed_by.email"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$..author.avatar_url"
+          - "$..author.gravatar_id"
+          - "$..author.url"
+          - "$..author.html_url"
+          - "$..author.followers_url"
+          - "$..author.following_url"
+          - "$..author.gists_url"
+          - "$..author.starred_url"
+          - "$..author.subscriptions_url"
+          - "$..author.organizations_url"
+          - "$..author.repos_url"
+          - "$..author.events_url"
+          - "$..author.received_events_url"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..author.login"
+          - "$..author.id"
+          - "$..author.node_id"
+          - "$..author.email"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$..committer.avatar_url"
+          - "$..committer.gravatar_id"
+          - "$..committer.url"
+          - "$..committer.html_url"
+          - "$..committer.followers_url"
+          - "$..committer.following_url"
+          - "$..committer.gists_url"
+          - "$..committer.starred_url"
+          - "$..committer.subscriptions_url"
+          - "$..committer.organizations_url"
+          - "$..committer.repos_url"
+          - "$..committer.events_url"
+          - "$..committer.received_events_url"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..committer.login"
+          - "$..committer.id"
+          - "$..committer.node_id"
+          - "$..committer.email"
         encoding: "JSON"
   - pathTemplate: "/repos/{owner}/{repo}/issues/{issue_number}/reactions"
     allowedQueryParams:
