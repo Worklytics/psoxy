@@ -32,13 +32,17 @@ if [[ -z "$JAVA_SOURCE_ROOT" ]]; then
     exit 1
 fi
 
+if [[ "$JAVA_SOURCE_ROOT" != */ ]]; then
+    JAVA_SOURCE_ROOT="${JAVA_SOURCE_ROOT}/"
+fi
+
 # set to fail on errors
 set -e
 
-mvn $QUIET_OPTIONS -f "${JAVA_SOURCE_ROOT}/pom.xml" clean
+mvn $QUIET_OPTIONS -f "${JAVA_SOURCE_ROOT}pom.xml" clean
 
-mvn package install $QUIET_OPTIONS -f "${JAVA_SOURCE_ROOT}/gateway-core/pom.xml"
+mvn package install $QUIET_OPTIONS -f "${JAVA_SOURCE_ROOT}gateway-core/pom.xml"
 
-mvn package install $QUIET_OPTIONS -f "${JAVA_SOURCE_ROOT}/core/pom.xml"
+mvn package install $QUIET_OPTIONS -f "${JAVA_SOURCE_ROOT}core/pom.xml"
 
-mvn package $QUIET_OPTIONS -f "${JAVA_SOURCE_ROOT}/impl/${IMPLEMENTATION}/pom.xml"
+mvn package $QUIET_OPTIONS -f "${JAVA_SOURCE_ROOT}impl/${IMPLEMENTATION}/pom.xml"
