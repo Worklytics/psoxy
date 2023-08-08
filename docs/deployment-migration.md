@@ -83,8 +83,12 @@ The following is a rough guide on the steps you need to take to migrate your dep
        - eg, `terraform state rm 'module.psoxy.module.msft-connection["azure-ad"].azuread_application.connector'`
   2. run `terraform destroy` in the old configuration. Carefully review the plan before
      confirming.
+      - if you're using Google Workspace sources, you may see destruction of `google_project_service`
+        resources; if you allow these to be destroyed, these APIS will be disabled; if you are using
+        the same GCP project in your other configuration, you should run `terraform apply` there
+        again to re-enable them.
   3. You may also destroy any API clients/etc that are managed outside of Terraform and which you
-     did not migrate to the new environment.
-  4. You may cleanup any configuration values, such as SSM Parameters / GCP Secrets to customize
+     did not migrate to the new åenvironment.
+  4. You may clean up any configuration values, such as SSM Parameters / GCP Secrets to customize
      the proxy rules sets, that you may have created in your old host environment.
 
