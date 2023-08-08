@@ -187,7 +187,7 @@ variable "custom_bulk_connectors" {
       columnsToDuplicate    = optional(map(string))  # columns to create copy of; name --> new name
       columnsToRename       = optional(map(string))  # columns to rename: original name --> new name; renames applied BEFORE pseudonymization
     })
-    memory_size_mb = optional(number, null)
+    memory_size_mb      = optional(number, null)
     settings_to_provide = optional(map(string), {})
   }))
   description = "specs of custom bulk connectors to create"
