@@ -233,6 +233,16 @@ variable "custom_bulk_connector_rules" {
   }
 }
 
+variable "custom_bulk_connector_arguments" {
+  type = map(object({
+    available_memory_mb = optional(number)
+    # what else to add here?
+  }))
+
+  description = "map of connector id --> arguments object, to override defaults for bulk connector instances"
+  default     = {}
+}
+
 # build lookup tables to JOIN data you receive back from Worklytics with your original data.
 #   - `join_key_column` should be the column you expect to JOIN on, usually 'employee_id'
 #   - `columns_to_include` is an optional a list of columns to include in the lookup table,

@@ -180,6 +180,7 @@ variable "bulk_connectors" {
       columnsToRename       = optional(map(string), {})
     })
     example_file        = optional(string)
+    memory_size_mb      = optional(number)
     settings_to_provide = optional(map(string), {})
   }))
 
@@ -211,6 +212,14 @@ variable "custom_bulk_connector_rules" {
   description = "map of connector id --> rules object"
   default     = {}
 }
+
+variable "custom_bulk_connector_arguments" {
+  type = map(object({
+    memory_size_mb = optional(number)
+  }))
+}
+
+
 
 variable "lookup_table_builders" {
   type = map(object({

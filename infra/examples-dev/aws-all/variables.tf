@@ -187,6 +187,7 @@ variable "custom_bulk_connectors" {
       columnsToDuplicate    = optional(map(string))  # columns to create copy of; name --> new name
       columnsToRename       = optional(map(string))  # columns to rename: original name --> new name; renames applied BEFORE pseudonymization
     })
+    memory_size_mb      = optional(number, null)
     settings_to_provide = optional(map(string), {})
   }))
   description = "specs of custom bulk connectors to create"
@@ -232,6 +233,15 @@ variable "custom_bulk_connector_rules" {
     # columnsToInclude = [
     # ]
   }
+}
+
+variable "custom_bulk_connector_arguments" {
+  type = map(object({
+    memory_size_mb = optional(number)
+  }))
+
+  description = "map of connector id --> arguments object, to override defaults for bulk connector instances"
+  default     = {}
 }
 
 # TODO: rethink this schema before we publish this
