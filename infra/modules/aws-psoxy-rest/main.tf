@@ -58,15 +58,6 @@ resource "aws_lambda_function_url" "lambda_url" {
   function_name      = module.psoxy_lambda.function_name
   authorization_type = "AWS_IAM"
 
-  cors {
-    allow_credentials = true
-    allow_origins     = ["*"]
-    allow_methods     = ["POST", "GET", "HEAD"] # TODO: configurable? not all require POST
-    allow_headers     = ["date", "keep-alive"]
-    expose_headers    = ["keep-alive", "date"]
-    max_age           = 86400
-  }
-
   depends_on = [
     module.psoxy_lambda
   ]
