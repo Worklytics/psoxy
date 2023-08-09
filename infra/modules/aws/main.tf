@@ -91,11 +91,6 @@ resource "aws_iam_policy" "execution_lambda_to_caller" {
           "Action" : ["lambda:InvokeFunctionUrl"],
           "Effect" : "Allow",
           "Resource" : "arn:aws:lambda:${data.aws_region.current.id}:${var.aws_account_id}:function:${local.function_name_prefix}*"
-          "Condition": {
-            "StringEquals": {
-              "lambda:FunctionUrlAuthType": "AWS_IAM"
-            }
-          }
         }
       ]
   })
