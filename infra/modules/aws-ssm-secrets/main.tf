@@ -20,7 +20,7 @@ resource "aws_ssm_parameter" "secret" {
   for_each = local.terraform_managed_secrets
 
   name           = "${local.path_prefix}${each.key}"
-  type           = each.value.sensitive ? "SecureString"  : "String"
+  type           = each.value.sensitive ? "SecureString" : "String"
   description    = each.value.description
   value          = each.value.sensitive ? sensitive(coalesce(each.value.value, local.PLACEHOLDER_VALUE)) : null
   insecure_value = each.value.sensitive ? null : coalesce(each.value.value, local.PLACEHOLDER_VALUE)

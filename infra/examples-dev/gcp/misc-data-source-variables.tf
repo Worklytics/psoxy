@@ -57,6 +57,6 @@ locals {
   validate_salesforce_domain_check = regex(
     "^${local.validate_salesforce_domain_message}$",
     (!local.validate_salesforce_domain
-    ? local.validate_salesforce_domain_message
-    : ""))
+      ? local.validate_salesforce_domain_message
+  : ""))
 }

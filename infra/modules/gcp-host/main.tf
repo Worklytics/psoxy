@@ -65,8 +65,8 @@ locals {
     for instance_id, secrets in local.secrets_to_provision :
     instance_id => {
       for secret_name, secret in secrets :
-        secret_name => module.secrets[instance_id].secret_bindings[secret_name] if secret.value_managed_by_tf && !secret.lockable && !secret.writable
-      }
+      secret_name => module.secrets[instance_id].secret_bindings[secret_name] if secret.value_managed_by_tf && !secret.lockable && !secret.writable
+    }
   }
 
   # eg, neither writable, nor suitable to bind as env var (as GCP cloud function won't start if can't
