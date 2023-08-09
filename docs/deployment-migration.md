@@ -88,7 +88,7 @@ The following is a rough guide on the steps you need to take to migrate your dep
         the same GCP project in your other configuration, you should run `terraform apply` there
         again to re-enable them.
   3. You may also destroy any API clients/etc that are managed outside of Terraform and which you
-     did not migrate to the new åenvironment.
+     did not migrate to the new environment.
   4. You may clean up any configuration values, such as SSM Parameters / GCP Secrets to customize
      the proxy rules sets, that you may have created in your old host environment.
 
