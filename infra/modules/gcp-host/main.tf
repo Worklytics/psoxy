@@ -56,14 +56,28 @@ locals {
     }
   }
 
-  writable_secrets = flatten([
+  secrets_writable_by_instance = flatten([
     for instance_id, secrets in local.secrets_to_provision :
     [for secret_id, secret in values(secrets) : secret if secret.lockable || secret.writable]
   ])
-}
 
-output "secrets_to_provision" {
-  value = local.writable_secrets
+  secrets_bound_as_env_vars = {
+    for instance_id, secrets in local.secrets_to_provision :
+    instance_id => {
+      for secret_name, secret in secrets :
+        secret_name => module.secrets[instance_id].secret_bindings[secret_name] if secret.value_managed_by_tf && !secret.lockable && !secret.writable
+      }
+  }
+
+  # eg, neither writable, nor suitable to bind as env var (as GCP cloud function won't start if can't
+  # read a value for something that's bound as an env var)
+  secrets_access_only_but_not_managed_by_terraform = flatten([
+    for instance_id, secrets in local.secrets_to_provision :
+    [for secret_id, secret in values(secrets) : secret if !secret.value_managed_by_tf && !secret.lockable && !secret.writable]
+  ])
+
+
+
 }
 
 module "secrets" {
@@ -79,7 +93,7 @@ module "secrets" {
 }
 
 resource "google_secret_manager_secret_iam_member" "grant_sa_secretVersionManager_on_writable_secret" {
-  for_each = { for secret in local.writable_secrets : secret.instance_secret_id => secret }
+  for_each = { for secret in local.secrets_writable_by_instance : secret.instance_secret_id => secret }
 
   project   = var.gcp_project_id
   secret_id = "${local.config_parameter_prefix}${each.value.instance_secret_id}"
@@ -90,6 +104,21 @@ resource "google_secret_manager_secret_iam_member" "grant_sa_secretVersionManage
     module.secrets
   ]
 }
+
+resource "google_secret_manager_secret_iam_member" "grant_sa_secretAccessor_on_non_tf_secret" {
+  for_each = { for secret in local.secrets_access_only_but_not_managed_by_terraform : secret.instance_secret_id => secret }
+
+  project   = var.gcp_project_id
+  secret_id = "${local.config_parameter_prefix}${each.value.instance_secret_id}"
+  member    = "serviceAccount:${google_service_account.api_connectors[each.value.instance_id].email}"
+  role      = "roles/secretmanager.secretAccessor"
+
+  depends_on = [
+    module.secrets
+  ]
+}
+
+
 
 locals {
   # sa account_ids must be at least 6 chars long; if api_connector keys are short, and environment_name
@@ -142,8 +171,7 @@ module "api_connector" {
   )
 
   secret_bindings = merge(
-    # bc some of these are later filled directly, bind to 'latest'
-    { for k, secrets in local.secrets_to_provision[each.key] : k => merge({ secret_id : module.secrets[each.key].secret_ids_within_project[k], version_number : "latest" }) if(try(!secrets.lockable, true) && try(!secrets.writable, true)) },
+    local.secrets_bound_as_env_vars[each.key],
     module.psoxy.secrets
   )
 }
@@ -322,4 +350,8 @@ echo "Testing Bulk Connectors ..."
 ./${test_script}
 %{endfor}
 EOF
+}
+
+output "secrets_to_provision" {
+  value = local.secrets_writable_by_instance
 }
