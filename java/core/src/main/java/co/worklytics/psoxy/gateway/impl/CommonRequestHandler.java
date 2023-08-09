@@ -44,7 +44,7 @@ import java.util.stream.Collectors;
 @Log
 public class CommonRequestHandler {
 
-    //we have ~540 totalyes in Cloud Function connection, so can have generous values here
+    //we have ~540 total in Cloud Function connection, so can have generous values here
     private static final int SOURCE_API_REQUEST_CONNECT_TIMEOUT_MILLISECONDS = 30_000;
     private static final int SOURCE_API_REQUEST_READ_TIMEOUT = 300_000;
 
