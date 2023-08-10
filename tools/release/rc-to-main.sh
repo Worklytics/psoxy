@@ -45,6 +45,6 @@ printf "created PR ${GREEN}${PR_URL}${NC} and set to auto-merge to ${BLUE}main${
 printf "Next steps, after that's merged to ${BLUE}main${NC}:\n"
 printf "  Publish the release: ${BLUE}./tools/release/publish.sh $RELEASE${NC}\n"
 printf "  Update example templates to point to it:\n"
-printf "    ${BLUE}./tools/release/examples.sh $RELEASE . aws-all ~/psoxy-example-aws${NC}\n"
-printf "    ${BLUE}./tools/release/examples.sh $RELEASE . gcp ~/psoxy-example-gcp${NC}\n"
+printf "    ${BLUE}./tools/release/example.sh $RELEASE . aws-all ~/psoxy-example-aws${NC}\n"
+printf "    ${BLUE}./tools/release/example.sh $RELEASE . gcp ~/psoxy-example-gcp${NC}\n"
 
