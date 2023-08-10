@@ -28,8 +28,8 @@ if [ "$current_branch" != "$expected_branch" ]; then
   exit 1
 fi
 
-PR_URL=$(gh pr create --title "$RELEASE" --body "$RELEASE back to main" --base main)
-PR_NUMBER=$(echo $PR_URL | sed -n 's/.*\/pull\/\([0-9]*\).*/\1/p')
+PR_URL=$(gh pr create --title "$RELEASE" --body "$RELEASE back to main" --base main --assignee "@me")
+PR_NUMBER=$(echo $PR_URL | sed -n 's/.*\/pull\/\([0-9]*\).*/\1/p').
 
 gh pr merge $PR_NUMBER --merge --auto
 
