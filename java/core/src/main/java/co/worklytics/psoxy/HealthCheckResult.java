@@ -28,8 +28,6 @@ public class HealthCheckResult {
         if (bundleFilename == null) {
             return version;
         } else {
-            //parse from bundle filename, if that is known
-            // but
             return Pattern.compile("psoxy-[^-]*-(.*).jar").matcher(bundleFilename)
                 .replaceAll("$1");
         }
