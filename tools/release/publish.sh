@@ -16,6 +16,8 @@ if [ -z "$RELEASE" ]; then
   exit 1
 fi
 
+git fetch origin
+
 if git rev-parse "$RELEASE" >/dev/null 2>&1; then
   printf "Tag ${GREEN}$RELEASE${NC} already exists.\n"
 else
