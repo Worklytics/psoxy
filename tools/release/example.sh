@@ -14,15 +14,47 @@ PATH_TO_REPO=$2
 EXAMPLE=$3
 EXAMPLE_TEMPLATE_REPO=$4
 
+display_usage() {
+    printf "Usage:\n"
+    printf "  ./release-example.sh <release-tag> <path-to-repo> <example> <path-to-example-repo>\n"
+    printf "  ./release-example.sh v0.4.25 ~/code/psoxy/ aws-all ~/psoxy-example-aws\n"
+    printf "  ./release-example.sh v0.4.25 ~/code/psoxy/ gcp ~/psoxy-example-gcp\n"
+}
 
-
-if [ -z "$RELEASE_TAG" ]; then
-  printf "${RED}No arguments passed.${NC}\n"
-  printf "Usage:\n"
-  printf "  ./release-example.sh <release-tag> <path-to-repo> <example> <path-to-example-repo>\n"
-  printf "  ./release-example.sh v0.4.25 ~/code/psoxy/ aws-all ~/psoxy-example-aws\n"
-  printf "  ./release-example.sh v0.4.25 ~/code/psoxy/ gcp ~/psoxy-example-gcp\n"
+if [ "$#" -ne 4 ]; then
+  printf "${RED}Unexpected number of parameters.${NC}\n"
+  display_usage
   exit 1
+fi
+
+if [ ! -d "$PATH_TO_REPO" ]; then
+  printf "Directory provided for PATH_TO_REPO, ${RED}'${PATH_TO_REPO}'${NC}, does not exist.\n"
+  display_usage
+  exit 1
+fi
+
+# append / if needed
+if [[ "${PATH_TO_REPO: -1}" != "/" ]]; then
+    PATH_TO_REPO="$PATH_TO_REPO/"
+fi
+
+dev_example_path="${PATH_TO_REPO}infra/examples-dev/${EXAMPLE}"
+
+if [ ! -d "$dev_example_path" ]; then
+  printf "Directory provided for EXAMPLE, ${RED}'${EXAMPLE}'${NC} not found at ${dev_example_path}, where it's expected to be.\n"
+  display_usage
+  exit 1
+fi
+
+if [ ! -d "$EXAMPLE_TEMPLATE_REPO" ]; then
+  printf "Directory provided for EXAMPLE_TEMPLATE_REPO, ${RED}'${EXAMPLE_TEMPLATE_REPO}'${NC}, does not exist.\n"
+  display_usage
+  exit 1
+fi
+
+# append / if needed
+if [[ "${EXAMPLE_TEMPLATE_REPO: -1}" != "/" ]]; then
+    EXAMPLE_TEMPLATE_REPO="$EXAMPLE_TEMPLATE_REPO/"
 fi
 
 FILES_TO_COPY=("main.tf" "variables.tf" "google-workspace.tf" "google-workspace-variables.tf" "msft-365.tf" "msft-365-variables.tf")
@@ -42,20 +74,20 @@ fi
 
 set -e
 
-dev_example_path="${PATH_TO_REPO}infra/examples-dev/${EXAMPLE}"
+
 
 cd -
 for file in "${FILES_TO_COPY[@]}"
 do
   if [ -f ${dev_example_path}/${file} ]; then
-     echo "copying ${dev_example_path}/${file} to ${EXAMPLE_TEMPLATE_REPO}/${file}"
-     cp -f ${dev_example_path}/${file} ${EXAMPLE_TEMPLATE_REPO}/${file}
+     echo "copying ${dev_example_path}/${file} to ${EXAMPLE_TEMPLATE_REPO}${file}"
+     cp -f ${dev_example_path}/${file} ${EXAMPLE_TEMPLATE_REPO}${file}
 
      # uncomment Terraform module remotes
-     sed -i .bck 's/^\(.*\)# source = "git::\(.*\)"/\1source = "git::\2"/' "${EXAMPLE_TEMPLATE_REPO}/${file}"
+     sed -i .bck 's/^\(.*\)# source = "git::\(.*\)"/\1source = "git::\2"/' "${EXAMPLE_TEMPLATE_REPO}${file}"
 
      # remove references to local modules
-     sed -i .bck '/source = "..\/..\/modules\/[^"]*"/d' "${EXAMPLE_TEMPLATE_REPO}/${file}"
+     sed -i .bck '/source = "..\/..\/modules\/[^"]*"/d' "${EXAMPLE_TEMPLATE_REPO}${file}"
   fi
 done
 
@@ -63,10 +95,10 @@ rm ${EXAMPLE_TEMPLATE_REPO}/*.bck
 
 set -e
 
-cp -f ${PATH_TO_REPO}tools/init-example.sh ${EXAMPLE_TEMPLATE_REPO}/init
-cp -f ${PATH_TO_REPO}tools/check-prereqs.sh ${EXAMPLE_TEMPLATE_REPO}/check-prereqs
-chmod +x ${EXAMPLE_TEMPLATE_REPO}/init
-chmod +x ${EXAMPLE_TEMPLATE_REPO}/check-prereqs
+cp -f ${PATH_TO_REPO}tools/init-example.sh ${EXAMPLE_TEMPLATE_REPO}init
+cp -f ${PATH_TO_REPO}tools/check-prereqs.sh ${EXAMPLE_TEMPLATE_REPO}check-prereqs
+chmod +x ${EXAMPLE_TEMPLATE_REPO}init
+chmod +x ${EXAMPLE_TEMPLATE_REPO}check-prereqs
 
 cd "$EXAMPLE_TEMPLATE_REPO"
 git checkout -b "rc-${RELEASE_TAG}"
@@ -87,3 +119,4 @@ fi
 git checkout main
 
 cd -
+
