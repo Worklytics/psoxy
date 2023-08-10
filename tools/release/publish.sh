@@ -29,20 +29,22 @@ else
     printf "${RED}Current branch is not main. Please checkout main branch and try again.${NC}\n"
     exit 1
   fi
-
+  printf "Tagging ${GREEN}$RELEASE${NC} ...\n"
   git tag $RELEASE
 fi
 
+printf "Pushing tag ${GREEN}$RELEASE${NC} to origin ...\n"
 git push origin $RELEASE
 
 if gh release view $RELEASE >/dev/null 2>&1
 then
   printf "Release ${GREEN}$RELEASE${NC} already exists.\n"
 else
+  printf "Creating release ${GREEN}$RELEASE${NC} in GitHub ...\n"
   gh release create --draft --generate-notes $RELEASE
 fi
 
-
+printf "Updating release notes for ${GREEN}$RELEASE${NC} ...\n"
 # Fetch release notes
 release_notes=$(gh release view $RELEASE --json body -q '.body')
 
