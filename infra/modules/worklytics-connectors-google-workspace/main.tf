@@ -59,6 +59,7 @@ locals {
             writable            = false
             sensitive           = true
             value_managed_by_tf = true
+            description         = "The API key for the GCP Service Account that is the OAuth Client for accessing the Google Workspace APIs used by the ${k} connector."
           }
         ]
       )
