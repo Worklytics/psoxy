@@ -9,10 +9,12 @@ import com.google.auth.Credentials;
 import com.google.auth.http.HttpTransportFactory;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.auth.oauth2.ServiceAccountCredentials;
+import com.google.common.annotations.VisibleForTesting;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Inject;
 import java.io.ByteArrayInputStream;
@@ -52,7 +54,8 @@ public class GoogleCloudPlatformServiceAccountKeyAuthStrategy implements SourceA
         Optional<String> key = config.getConfigPropertyAsOptional(ConfigProperty.SERVICE_ACCOUNT_KEY);
 
         if (key.isPresent()) {
-            credentials = ServiceAccountCredentials.fromStream(new ByteArrayInputStream(Base64.getDecoder().decode(key.get())), httpTransportFactory);
+            ByteArrayInputStream boas = key.map(this::toStream).orElseThrow();
+            credentials = ServiceAccountCredentials.fromStream(boas, httpTransportFactory);
         } else {
             credentials = GoogleCredentials.getApplicationDefault();
         }
@@ -74,6 +77,15 @@ public class GoogleCloudPlatformServiceAccountKeyAuthStrategy implements SourceA
         credentials = credentials.createScoped(scopes);
 
         return credentials;
+    }
+
+    @VisibleForTesting
+    ByteArrayInputStream toStream(String base64encodedKey) {
+        return new ByteArrayInputStream(Base64.getDecoder().decode(
+            //strip whitespace around base64-encoded string; have seen these with artifacts from
+            // copy-paste of the SA key into cloud consoles
+            StringUtils.strip(base64encodedKey))
+        );
     }
 
     @Override

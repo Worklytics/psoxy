@@ -17,6 +17,14 @@ Working tracking of changes, updated as work done prior to release.  Please revi
         then wildcard policy to read shared also grants read of secrets across all connectors)
   - keys/salts per value kind (PII, item id, etc)
 
+## [0.4.33](https://github.com/Worklytics/psoxy/release/tag/v0.4.33)
+Changes that may appear in Terraform plans:
+ * GCP only: secrets that are managed outside of Terraform will no longer be bound as part of the
+   cloud function's environment variables. You will see env changes in some cases, as well as 'moves'
+   of the associated IAM grants to make those secrets accessible to the cloud function, as this moves
+   up one level in module hierarchy
+ * AWS only: removing CORS from lambda urls - not necessary
+
 ## [0.4.31](https://github.com/Worklytics/psoxy/release/tag/v0.4.31)
 
 Changes:

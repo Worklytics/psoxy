@@ -28,7 +28,7 @@ provider "google" {
 
 module "psoxy" {
   # source = "../../modular-examples/gcp-google-workspace"
-  source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/gcp-google-workspace?ref=v0.4.32"
+  source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/gcp-google-workspace?ref=v0.4.33"
 
   gcp_project_id                 = var.gcp_project_id
   environment_name               = var.environment_name
@@ -54,6 +54,7 @@ module "psoxy" {
   github_installation_id         = var.github_installation_id
   github_organization            = var.github_organization
   github_example_repository      = var.github_example_repository
+  deployment_bundle              = var.deployment_bundle
 }
 
 moved {

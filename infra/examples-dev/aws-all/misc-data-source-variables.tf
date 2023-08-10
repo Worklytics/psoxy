@@ -43,3 +43,20 @@ variable "github_example_repository" {
   default     = null
   description = "(Only required if using Github connector) Name for the repository to be used as part of example calls for Github (ex: psoxy)"
 }
+
+variable "salesforce_example_account_id" {
+  type        = string
+  default     = null
+  description = "(Only required if using Salesforce connector) Id of the account id for usign as an example calls for Salesforce (ex: 0015Y00002c7g95QAA)"
+}
+
+locals {
+  # tflint-ignore: terraform_unused_declarations
+  validate_salesforce_domain         = (var.salesforce_domain == null || var.salesforce_domain == "" || can(regex(":|\\/", try(var.salesforce_domain, "")))) && contains(var.enabled_connectors, "salesforce")
+  validate_salesforce_domain_message = "The salesforce_domain var should be populated and to be with only the domain without protocol or query paths if enabled."
+  validate_salesforce_domain_check = regex(
+    "^${local.validate_salesforce_domain_message}$",
+    (!local.validate_salesforce_domain
+      ? local.validate_salesforce_domain_message
+  : ""))
+}

@@ -1,8 +1,13 @@
 # Google Workspace
 
-Google Workspace sources can be setup via Terraform, using modules found in our GitHub repo.  These
-are included in the examples found in `[infra/examples/](../../infra/examples).
+Google Workspace sources can be setup via Terraform, using modules found in our GitHub repo.
 
+As of August 2023, we suggest you use one of our template repo, eg:
+  - [`aws`](https://github.com/Worklytics/psoxy-example-aws)
+  - [`gcp`](https://github.com/Worklytics/psoxy-example-gcp)
+
+Within those, the `google-workspace.tf` and `google-workspace-variables.tf` files in those repos
+specify the terraform configuration to use Google Workspace sources.
 
 ## Required Permissions
 

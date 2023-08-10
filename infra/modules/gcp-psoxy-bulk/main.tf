@@ -163,7 +163,7 @@ resource "google_cloudfunctions_function" "function" {
   project     = var.project_id
   region      = var.region
 
-  available_memory_mb   = var.available_memory_mb
+  available_memory_mb   = coalesce(var.available_memory_mb, 1024)
   source_archive_bucket = var.artifacts_bucket_name
   source_archive_object = var.deployment_bundle_object_name
   entry_point           = "co.worklytics.psoxy.GCSFileEvent"

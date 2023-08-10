@@ -15,14 +15,31 @@ RED='\e[0;31m'
 BLUE='\e[0;34m'
 NC='\e[0m' # No Color
 
-if [[ ! -d "$1" ]]; then
+if [[ -z "$CLONE_BASE_DIR" ]]; then
+  printf "${RED}Error: Missing required argument: CLONE_BASE_DIR${NC}\n"
+  printf "Usage: update-bundle.sh <CLONE_BASE_DIR> <TFVARS_FILE> <HOST_PLATFORM> [BUCKET_PATH]\n"
+  exit 1
+fi
+
+if [[ ! -d "$CLONE_BASE_DIR" ]]; then
   printf "${RED}Error: ${CLONE_BASE_DIR} directory does not exist.${NC}\n"
+  exit 1
+fi
+
+if [[ -z "$TFVARS_FILE" ]]; then
+  printf "${RED}Error: Missing required argument: TFVARS_FILE${NC}\n"
+  printf "Usage: update-bundle.sh <CLONE_BASE_DIR> <TFVARS_FILE> <HOST_PLATFORM> [BUCKET_PATH]\n"
   exit 1
 fi
 
 if [[ ! -f "$TFVARS_FILE" ]]; then
   printf "${RED}Error: ${TFVARS_FILE} does not exist.${NC}\n"
   exit 1
+fi
+
+if [[ "$HOST_PLATFORM" != "aws" && "$HOST_PLATFORM" != "gcp" ]]; then
+    echo "Error: HOST_PLATFORM value '${HOST_PLATFORM}' must be 'aws' or 'gcp'."
+    exit 1
 fi
 
 RELEASE_VERSION=$(sed -n -e 's/.*<revision>\(.*\)<\/revision>.*/\1/p' "${CLONE_BASE_DIR}java/pom.xml")

@@ -32,16 +32,17 @@ terraform {
 # general cases
 module "worklytics_connectors" {
   source = "../../modules/worklytics-connectors"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.4.32"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.4.33"
 
-  enabled_connectors        = var.enabled_connectors
-  jira_cloud_id             = var.jira_cloud_id
-  jira_server_url           = var.jira_server_url
-  jira_example_issue_id     = var.jira_example_issue_id
-  salesforce_domain         = var.salesforce_domain
-  github_installation_id    = var.github_installation_id
-  github_organization       = var.github_organization
-  github_example_repository = var.github_example_repository
+  enabled_connectors            = var.enabled_connectors
+  jira_cloud_id                 = var.jira_cloud_id
+  jira_server_url               = var.jira_server_url
+  jira_example_issue_id         = var.jira_example_issue_id
+  salesforce_domain             = var.salesforce_domain
+  github_installation_id        = var.github_installation_id
+  github_organization           = var.github_organization
+  github_example_repository     = var.github_example_repository
+  salesforce_example_account_id = var.salesforce_example_account_id
 }
 
 # sources which require additional dependencies are split into distinct Terraform files, following
@@ -103,31 +104,32 @@ locals {
 
 module "psoxy" {
   source = "../../modules/aws-host"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-host?ref=v0.4.32"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-host?ref=v0.4.33"
 
-  environment_name               = var.environment_name
-  aws_account_id                 = var.aws_account_id
-  aws_ssm_param_root_path        = var.aws_ssm_param_root_path
-  psoxy_base_dir                 = var.psoxy_base_dir
-  deployment_bundle              = var.deployment_bundle
-  install_test_tool              = var.install_test_tool
-  provision_testing_infra        = var.provision_testing_infra
-  force_bundle                   = var.force_bundle
-  caller_gcp_service_account_ids = var.caller_gcp_service_account_ids
-  caller_aws_arns                = var.caller_aws_arns
-  non_production_connectors      = var.non_production_connectors
-  custom_api_connector_rules     = var.custom_api_connector_rules
-  lookup_table_builders          = var.lookup_table_builders
-  general_environment_variables  = var.general_environment_variables
-  function_env_kms_key_arn       = var.project_aws_kms_key_arn
-  logs_kms_key_arn               = var.project_aws_kms_key_arn
-  aws_ssm_key_id                 = var.project_aws_kms_key_arn
-  bulk_sanitized_expiration_days = var.bulk_sanitized_expiration_days
-  bulk_input_expiration_days     = var.bulk_input_expiration_days
-  api_connectors                 = local.api_connectors
-  bulk_connectors                = local.bulk_connectors
-  custom_bulk_connector_rules    = var.custom_bulk_connector_rules
-  todo_step                      = local.max_auth_todo_step
+  environment_name                = var.environment_name
+  aws_account_id                  = var.aws_account_id
+  aws_ssm_param_root_path         = var.aws_ssm_param_root_path
+  psoxy_base_dir                  = var.psoxy_base_dir
+  deployment_bundle               = var.deployment_bundle
+  install_test_tool               = var.install_test_tool
+  provision_testing_infra         = var.provision_testing_infra
+  force_bundle                    = var.force_bundle
+  caller_gcp_service_account_ids  = var.caller_gcp_service_account_ids
+  caller_aws_arns                 = var.caller_aws_arns
+  non_production_connectors       = var.non_production_connectors
+  custom_api_connector_rules      = var.custom_api_connector_rules
+  lookup_table_builders           = var.lookup_table_builders
+  general_environment_variables   = var.general_environment_variables
+  function_env_kms_key_arn        = var.project_aws_kms_key_arn
+  logs_kms_key_arn                = var.project_aws_kms_key_arn
+  aws_ssm_key_id                  = var.project_aws_kms_key_arn
+  bulk_sanitized_expiration_days  = var.bulk_sanitized_expiration_days
+  bulk_input_expiration_days      = var.bulk_input_expiration_days
+  api_connectors                  = local.api_connectors
+  bulk_connectors                 = local.bulk_connectors
+  custom_bulk_connector_rules     = var.custom_bulk_connector_rules
+  custom_bulk_connector_arguments = var.custom_bulk_connector_arguments
+  todo_step                       = local.max_auth_todo_step
 }
 
 ## Worklytics connection configuration
@@ -143,7 +145,7 @@ module "connection_in_worklytics" {
   for_each = local.all_instances
 
   source = "../../modules/worklytics-psoxy-connection-generic"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-generic?ref=v0.4.32"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-generic?ref=v0.4.33"
 
   psoxy_host_platform_id = local.host_platform_id
   psoxy_instance_id      = each.key

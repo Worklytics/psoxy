@@ -3,6 +3,7 @@ package co.worklytics.psoxy;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.LockService;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
+import com.google.api.gax.rpc.PermissionDeniedException;
 import com.google.cloud.secretmanager.v1.*;
 import com.google.common.base.Preconditions;
 import com.google.protobuf.ByteString;
@@ -93,18 +94,30 @@ public class SecretManagerConfigService implements ConfigService, LockService {
     @Override
     public Optional<String> getConfigPropertyAsOptional(ConfigProperty property) {
         String paramName = parameterName(property);
+
+        SecretName secretName = SecretName.of(projectId, paramName);
+
         try (SecretManagerServiceClient client = SecretManagerServiceClient.create()) {
-            SecretName secretName = SecretName.of(projectId, paramName);
 
-            Secret secret = client.getSecret(secretName);
+            String versionName = "latest";
+            try {
+                Secret secret = client.getSecret(secretName);
 
-            String versionName = secret.getLabelsMap() != null ? secret.getLabelsMap().get(VERSION_LABEL) : null;
+                String versionLabelValue = secret.getLabelsMap() != null ? secret.getLabelsMap().get(VERSION_LABEL) : null;
 
-            if (StringUtils.isBlank(versionName)) {
-                versionName = "latest";
+                if (!StringUtils.isBlank(versionLabelValue)) {
+                    versionName = versionLabelValue;
+                }
+            } catch (PermissionDeniedException e) {
+                // can happen in read-only case, where Cloud Function's SA has only Secret Manager Secret Accessor role
+                // see: https://cloud.google.com/secret-manager/docs/access-control#secretmanager.secretAccessor
+                if (envVarsConfigService.isDevelopment()) {
+                    log.log(Level.INFO, "PermissionDeniedException getting secret " + paramName + "; will try to get 'latest' version directly");
+                }
             }
 
-            SecretVersionName secretVersionName = SecretVersionName.of(projectId, secretName.getSecret(), versionName);
+            SecretVersionName secretVersionName =
+                SecretVersionName.of(projectId, secretName.getSecret(), versionName);
 
             // Access the secret version.
             AccessSecretVersionResponse response = client.accessSecretVersion(secretVersionName);

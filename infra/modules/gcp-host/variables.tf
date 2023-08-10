@@ -156,6 +156,7 @@ variable "bulk_connectors" {
     })
     example_file        = optional(string)
     settings_to_provide = optional(map(string), {})
+    available_memory_mb = optional(number)
   }))
 
   description = "map of connector id  => bulk connectors to provision"
@@ -179,6 +180,7 @@ variable "bulk_sanitized_expiration_days" {
   default     = 720
 }
 
+# q: move this into custom_bulk_connector_arug
 variable "custom_bulk_connector_rules" {
   type = map(object({
     pseudonymFormat       = optional(string, "URL_SAFE_TOKEN")
@@ -190,6 +192,16 @@ variable "custom_bulk_connector_rules" {
   }))
 
   description = "map of connector id --> rules object"
+  default     = {}
+}
+
+variable "custom_bulk_connector_arguments" {
+  type = map(object({
+    available_memory_mb = optional(number)
+    # what else to add here?
+  }))
+
+  description = "map of connector id --> settings object"
   default     = {}
 }
 
