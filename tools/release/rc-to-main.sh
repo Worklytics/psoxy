@@ -28,6 +28,13 @@ if [ "$current_branch" != "$expected_branch" ]; then
   exit 1
 fi
 
+printf "Ensuring ${BLUE}${expected_branch}${NC} up to date with all changes from origin ...\n"
+git fetch origin
+if [[ $(git log "${expected_branch}..origin/${expected_branch}" --oneline) ]]; then
+    printf "${RED}Error: ${expected_branch} and origin/${expected_branch} are not in sync!${NC}\n"
+    exit 1
+fi
+
 PR_URL=$(gh pr create --title "$RELEASE" --body "$RELEASE back to main" --base main --assignee "@me")
 PR_NUMBER=$(echo $PR_URL | sed -n 's/.*\/pull\/\([0-9]*\).*/\1/p').
 
