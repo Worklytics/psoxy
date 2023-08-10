@@ -545,24 +545,28 @@ EOT
           writable : false
           sensitive : true
           value_managed_by_tf : false
+          description: "Client Secret of the Zoom 'Server-to-Server' OAuth App used by the Connector to retrieve Zoom data.  Value should be obtained from your Zoom admin."
         },
         {
           name : "CLIENT_ID"
           writable : false
           sensitive : false
           value_managed_by_tf : false
+          description: "Client ID of the Zoom 'Server-to-Server' OAuth App used by the Connector to retrieve Zoom data. Value should be obtained from your Zoom admin."
         },
         {
           name : "ACCOUNT_ID"
           writable : false
           sensitive : true
           value_managed_by_tf : false
+          description: "Account ID of the Zoom tenant from which the Connector will retrieve Zoom data. Value should be obtained from your Zoom admin."
         },
         {
           name : "ACCESS_TOKEN"
           writable : true
           sensitive : true
           value_managed_by_tf : false
+          description: "Short-lived Oauth access_token used by connector to retrieve Zoom data. Filled by Proxy instance."
         },
         {
           name : "OAUTH_REFRESH_TOKEN"
