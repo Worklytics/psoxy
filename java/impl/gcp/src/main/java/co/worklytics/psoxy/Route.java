@@ -25,8 +25,9 @@ public class Route implements HttpFunction {
 
         CloudFunctionRequest cloudFunctionRequest = CloudFunctionRequest.of(request);
 
-        //TODO: avoid rebuild graph everytime
-        DaggerGcpContainer.create().injectRoute(this);
+        if (requestHandler == null) {
+            DaggerGcpContainer.create().injectRoute(this);
+        }
 
         HttpEventResponse abstractResponse =
                 requestHandler.handle(cloudFunctionRequest);
