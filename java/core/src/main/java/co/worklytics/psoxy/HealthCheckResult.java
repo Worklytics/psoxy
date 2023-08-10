@@ -28,9 +28,24 @@ public class HealthCheckResult {
         if (bundleFilename == null) {
             return version;
         } else {
+            //parse from bundle filename, if that is known
+            // but
             return Pattern.compile("psoxy-[^-]*-(.*).jar").matcher(bundleFilename)
                 .replaceAll("$1");
         }
+    }
+
+    /**
+     * @return the value that's directly in the java source code; in practice, this should match
+     * the value parsed from the bundle filename; but some people build JAR themselves, and seem to
+     * use different file names OR keep setting `BUNDLE_FILENAME` arbitrarily to some example value
+     */
+    public String getJavaSourceVersion() {
+        return this.version;
+    }
+
+    public void setJavaSourceVersion(String version) {
+        //no-op, in case trying to parse JSON from old deployment version
     }
 
     public void setVersion(String version) {
