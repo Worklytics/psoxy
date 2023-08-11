@@ -147,32 +147,34 @@ endpoints:
                           type: "integer"
                   sub-tasks:
                     type: "array"
-                    properties:
-                      id:
-                        type: "string"
-                      type:
-                        type: "object"
-                        properties:
-                          id:
-                            type: "string"
-                          inward:
-                            type: "string"
-                          outward:
-                            type: "string"
-                      outwardIssue:
-                        type: "object"
-                        items:
+                    items:
+                      type: "object"
+                      properties:
+                        id:
+                          type: "string"
+                        type:
                           type: "object"
                           properties:
                             id:
                               type: "string"
-                      inwardIssue:
-                        type: "object"
-                        items:
-                          type: "object"
-                          properties:
-                            id:
+                            inward:
                               type: "string"
+                            outward:
+                              type: "string"
+                        outwardIssue:
+                          type: "object"
+                          items:
+                            type: "object"
+                            properties:
+                              id:
+                                type: "string"
+                        inwardIssue:
+                          type: "object"
+                          items:
+                            type: "object"
+                            properties:
+                              id:
+                                type: "string"
                   project:
                     type: "object"
                     properties:
@@ -198,76 +200,80 @@ endpoints:
                             type: "string"
                   comment:
                     type: "array"
-                    properties:
-                      id:
-                        type: "string"
-                      author:
-                        type: "object"
-                        properties:
-                          key:
-                            type: "string"
-                          accountType:
-                            type: "string"
-                          emailAddress:
-                            type: "string"
-                          active:
-                            type: "boolean"
-                          timeZone:
-                            type: "string"
-                      updateAuthor:
-                        type: "object"
-                        properties:
-                          key:
-                            type: "string"
-                          accountType:
-                            type: "string"
-                          emailAddress:
-                            type: "string"
-                          active:
-                            type: "boolean"
-                          timeZone:
-                            type: "string"
-                      created:
-                        type: "string"
-                      updated:
-                        type: "string"
-                      visibility:
-                        type: "object"
-                        properties:
-                          type:
-                            type: "string"
-                          value:
-                            type: "string"
-                          identifier:
-                            type: "string"
+                    items:
+                      type: "object"
+                      properties:
+                        id:
+                          type: "string"
+                        author:
+                          type: "object"
+                          properties:
+                            key:
+                              type: "string"
+                            accountType:
+                              type: "string"
+                            emailAddress:
+                              type: "string"
+                            active:
+                              type: "boolean"
+                            timeZone:
+                              type: "string"
+                        updateAuthor:
+                          type: "object"
+                          properties:
+                            key:
+                              type: "string"
+                            accountType:
+                              type: "string"
+                            emailAddress:
+                              type: "string"
+                            active:
+                              type: "boolean"
+                            timeZone:
+                              type: "string"
+                        created:
+                          type: "string"
+                        updated:
+                          type: "string"
+                        visibility:
+                          type: "object"
+                          properties:
+                            type:
+                              type: "string"
+                            value:
+                              type: "string"
+                            identifier:
+                              type: "string"
                   issuelinks:
                     type: "array"
-                    properties:
-                      id:
-                        type: "string"
-                      type:
-                        type: "object"
-                        properties:
-                          id:
-                            type: "string"
-                          inward:
-                            type: "string"
-                          outward:
-                            type: "string"
-                      outwardIssue:
-                        type: "object"
-                        items:
+                    items:
+                      type: "object"
+                      properties:
+                        id:
+                          type: "string"
+                        type:
                           type: "object"
                           properties:
                             id:
                               type: "string"
-                      inwardIssue:
-                        type: "object"
-                        items:
-                          type: "object"
-                          properties:
-                            id:
+                            inward:
                               type: "string"
+                            outward:
+                              type: "string"
+                        outwardIssue:
+                          type: "object"
+                          items:
+                            type: "object"
+                            properties:
+                              id:
+                                type: "string"
+                        inwardIssue:
+                          type: "object"
+                          items:
+                            type: "object"
+                            properties:
+                              id:
+                                type: "string"
                   worklog:
                     type: "object"
                     properties:
@@ -651,32 +657,34 @@ endpoints:
                     type: "integer"
             sub-tasks:
               type: "array"
-              properties:
-                id:
-                  type: "string"
-                type:
-                  type: "object"
-                  properties:
-                    id:
-                      type: "string"
-                    inward:
-                      type: "string"
-                    outward:
-                      type: "string"
-                outwardIssue:
-                  type: "object"
-                  items:
+              items:
+                type: "object"
+                properties:
+                  id:
+                    type: "string"
+                  type:
                     type: "object"
                     properties:
                       id:
                         type: "string"
-                inwardIssue:
-                  type: "object"
-                  items:
-                    type: "object"
-                    properties:
-                      id:
+                      inward:
                         type: "string"
+                      outward:
+                        type: "string"
+                  outwardIssue:
+                    type: "object"
+                    items:
+                      type: "object"
+                      properties:
+                        id:
+                          type: "string"
+                  inwardIssue:
+                    type: "object"
+                    items:
+                      type: "object"
+                      properties:
+                        id:
+                          type: "string"
             project:
               type: "object"
               properties:
@@ -702,76 +710,80 @@ endpoints:
                       type: "string"
             comment:
               type: "array"
-              properties:
-                id:
-                  type: "string"
-                author:
-                  type: "object"
-                  properties:
-                    key:
-                      type: "string"
-                    accountType:
-                      type: "string"
-                    emailAddress:
-                      type: "string"
-                    active:
-                      type: "boolean"
-                    timeZone:
-                      type: "string"
-                updateAuthor:
-                  type: "object"
-                  properties:
-                    key:
-                      type: "string"
-                    accountType:
-                      type: "string"
-                    emailAddress:
-                      type: "string"
-                    active:
-                      type: "boolean"
-                    timeZone:
-                      type: "string"
-                created:
-                  type: "string"
-                updated:
-                  type: "string"
-                visibility:
-                  type: "object"
-                  properties:
-                    type:
-                      type: "string"
-                    value:
-                      type: "string"
-                    identifier:
-                      type: "string"
+              items:
+                type: "object"
+                properties:
+                  id:
+                    type: "string"
+                  author:
+                    type: "object"
+                    properties:
+                      key:
+                        type: "string"
+                      accountType:
+                        type: "string"
+                      emailAddress:
+                        type: "string"
+                      active:
+                        type: "boolean"
+                      timeZone:
+                        type: "string"
+                  updateAuthor:
+                    type: "object"
+                    properties:
+                      key:
+                        type: "string"
+                      accountType:
+                        type: "string"
+                      emailAddress:
+                        type: "string"
+                      active:
+                        type: "boolean"
+                      timeZone:
+                        type: "string"
+                  created:
+                    type: "string"
+                  updated:
+                    type: "string"
+                  visibility:
+                    type: "object"
+                    properties:
+                      type:
+                        type: "string"
+                      value:
+                        type: "string"
+                      identifier:
+                        type: "string"
             issuelinks:
               type: "array"
-              properties:
-                id:
-                  type: "string"
-                type:
-                  type: "object"
-                  properties:
-                    id:
-                      type: "string"
-                    inward:
-                      type: "string"
-                    outward:
-                      type: "string"
-                outwardIssue:
-                  type: "object"
-                  items:
+              items:
+                type: "object"
+                properties:
+                  id:
+                    type: "string"
+                  type:
                     type: "object"
                     properties:
                       id:
                         type: "string"
-                inwardIssue:
-                  type: "object"
-                  items:
-                    type: "object"
-                    properties:
-                      id:
+                      inward:
                         type: "string"
+                      outward:
+                        type: "string"
+                  outwardIssue:
+                    type: "object"
+                    items:
+                      type: "object"
+                      properties:
+                        id:
+                          type: "string"
+                  inwardIssue:
+                    type: "object"
+                    items:
+                      type: "object"
+                      properties:
+                        id:
+                          type: "string"
             worklog:
               type: "object"
               properties:
