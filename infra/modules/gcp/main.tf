@@ -56,10 +56,12 @@ resource "google_secret_manager_secret" "pseudonymization-salt" {
 
 # not really a 'password', but 'random_string' isn't "sensitive" by terraform, so
 # is output to console
-resource "random_password" "random" {
+resource "random_password" "pseudonym_salt" {
   length  = 20
   special = true
 }
+
+
 
 # initial random salt to use; if you DON'T want this in your Terraform state, create a new version
 # via some other means (eg, directly in GCP console). this should be done BEFORE your psoxy
@@ -69,7 +71,7 @@ resource "random_password" "random" {
 # To be clear, possession of salt alone doesn't let someone reverse pseudonyms.
 resource "google_secret_manager_secret_version" "initial_version" {
   secret      = google_secret_manager_secret.pseudonymization-salt.id
-  secret_data = sensitive(random_password.random.result)
+  secret_data = sensitive(random_password.pseudonym_salt.result)
 
   # if customer changes value outside TF, don't overwrite
   lifecycle {
