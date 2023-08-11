@@ -17,6 +17,10 @@ Working tracking of changes, updated as work done prior to release.  Please revi
         then wildcard policy to read shared also grants read of secrets across all connectors)
   - keys/salts per value kind (PII, item id, etc)
 
+## [0.4.34](https://github.com/Worklytics/psoxy/release/tag/v0.4.34)
+  * AWS Only: you may see System Manager Parameter description changes; these have no functional
+    purpose, just helping provide guidance on function of different secrets.
+
 ## [0.4.33](https://github.com/Worklytics/psoxy/release/tag/v0.4.33)
 Changes that may appear in Terraform plans:
  * GCP only: secrets that are managed outside of Terraform will no longer be bound as part of the

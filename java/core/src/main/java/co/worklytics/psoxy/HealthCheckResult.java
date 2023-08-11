@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 public class HealthCheckResult {
 
     @Builder.Default
-    String version = "v0.4.33";
+    String version = "rc-v0.4.34";
 
     //q: terraform module version?? (eg, have terraform deployment set its version number as ENV
     // variable, and then psoxy can read it and report it here)
@@ -31,6 +31,19 @@ public class HealthCheckResult {
             return Pattern.compile("psoxy-[^-]*-(.*).jar").matcher(bundleFilename)
                 .replaceAll("$1");
         }
+    }
+
+    /**
+     * @return the value that's directly in the java source code; in practice, this should match
+     * the value parsed from the bundle filename; but some people build JAR themselves, and seem to
+     * use different file names OR keep setting `BUNDLE_FILENAME` arbitrarily to some example value
+     */
+    public String getJavaSourceVersion() {
+        return this.version;
+    }
+
+    public void setJavaSourceVersion(String version) {
+        //no-op, in case trying to parse JSON from old deployment version
     }
 
     public void setVersion(String version) {
