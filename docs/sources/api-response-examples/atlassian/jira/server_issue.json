@@ -60,7 +60,29 @@
       "timeSpentSeconds": 115200
     },
     "archiveddate": null,
-    "attachment": [],
+    "attachment": [
+      {
+        "id": "10000",
+        "author": {
+          "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/user?accountId=608a9b555426330072f9867d",
+          "accountId": "608a9b555426330072f9867d",
+          "emailAddress": "fake@contoso.com",
+          "avatarUrls": {
+            "48x48": "https://secure.gravatar.com/avatar/ac6ffe47a35e01c2ae94a5672d52cfc7?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FA-3.png",
+            "24x24": "https://secure.gravatar.com/avatar/ac6ffe47a35e01c2ae94a5672d52cfc7?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FA-3.png",
+            "16x16": "https://secure.gravatar.com/avatar/ac6ffe47a35e01c2ae94a5672d52cfc7?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FA-3.png",
+            "32x32": "https://secure.gravatar.com/avatar/ac6ffe47a35e01c2ae94a5672d52cfc7?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FA-3.png"
+          },
+          "displayName": "Fake",
+          "active": true,
+          "timeZone": "America/New_York",
+          "accountType": "atlassian"
+        },
+        "created": "2023-06-09T12:31:44.105-0400",
+        "size": 2829492,
+        "mimeType": "audio/mpeg"
+      }
+    ],
     "aggregatetimeestimate": 0,
     "summary": "asdfads",
     "creator": {
