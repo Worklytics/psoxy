@@ -115,7 +115,7 @@ resource "random_password" "pseudonym_encryption_key" {
   special = true
 }
 
-resource "google_secret_manager_secret_version" "pseudonymization-key_initial_version" {
+resource "google_secret_manager_secret_version" "pseudonym_encryption_key_initial_version" {
   secret      = google_secret_manager_secret.pseudonymization_key.id
   secret_data = sensitive(random_password.pseudonym_encryption_key.result)
 
@@ -305,7 +305,7 @@ output "secrets" {
   value = {
     PSOXY_ENCRYPTION_KEY = {
       secret_id      = google_secret_manager_secret.pseudonymization_key.secret_id,
-      version_number = trimprefix(google_secret_manager_secret_version.pseudonymization-key_initial_version.name, "${google_secret_manager_secret.pseudonymization_key.name}/versions/")
+      version_number = trimprefix(google_secret_manager_secret_version.pseudonym_encryption_key_initial_version.name, "${google_secret_manager_secret.pseudonymization_key.name}/versions/")
     },
     PSOXY_SALT = {
       secret_id      = google_secret_manager_secret.pseudonym_salt.secret_id,

@@ -48,3 +48,8 @@ moved {
   from = random_password.pseudonymization-key
   to   = random_password.pseudonym_encryption_key
 }
+
+moved {
+  from = google_secret_manager_secret_version.pseudonym_encryption_key_initial_version
+  to   = google_secret_manager_secret_version.pseudonym_encryption_key_initial_version
+}
