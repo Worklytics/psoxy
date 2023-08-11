@@ -122,6 +122,8 @@ public class JiraServerTests extends JavaRulesTestBaseCase {
                 InvocationExample.of("https://myjiraserver.com/rest/api/2/issue/ISSUE&startAt=50", "server_issue.json"),
                 InvocationExample.of("https://myjiraserver.com/rest/api/2/search?jql=something&startAt=50", "server_issues_by_jql_v2.json"),
                 InvocationExample.of("https://myjiraserver.com/rest/api/latest/search?jql=something&startAt=50", "server_issues_by_jql_v2.json"),
+                InvocationExample.of("https://myjiraserver.com/rest/api/2/search?startAt=0&maxResults=50&jql=updated%20%3E%3D%20'2021/12/27%2008:00'%20AND%20updated%20%3C%20'2023/08/09%2017:48'%20ORDER%20BY%20updated%20DESC&fields=*all,-comment,-worklog",
+                        "server_issues_by_jql_v2.json"),
                 InvocationExample.of("https://myjiraserver.com/rest/api/2/issue/fake/comment?&startAt=50", "server_issue_comment_v2.json"),
                 InvocationExample.of("https://myjiraserver.com/rest/api/latest/issue/fake/comment?&startAt=50", "server_issue_comment_v2.json"),
                 InvocationExample.of("https://myjiraserver.com/rest/api/2/issue/fake/worklog?&startAt=50", "server_issue_worklog_v2.json"),
