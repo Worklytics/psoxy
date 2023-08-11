@@ -397,7 +397,7 @@ EOT
         {
           name : "CLIENT_ID"
           writable : false
-          sensitive : false
+          sensitive : true
           value_managed_by_tf : false
         },
         {
@@ -624,7 +624,7 @@ EOT
         {
           name : "CLIENT_ID"
           writable : false
-          sensitive : false
+          sensitive : true
           value_managed_by_tf : false
         },
         {
