@@ -61,8 +61,6 @@ resource "random_password" "pseudonym_salt" {
   special = true
 }
 
-
-
 # initial random salt to use; if you DON'T want this in your Terraform state, create a new version
 # via some other means (eg, directly in GCP console). this should be done BEFORE your psoxy
 # instance pseudonymizes anything; if salt is changed later, pseudonymization output will differ so
@@ -80,7 +78,6 @@ resource "google_secret_manager_secret_version" "initial_version" {
     ]
   }
 }
-
 
 resource "google_secret_manager_secret" "pseudonymization_key" {
   project   = var.project_id
@@ -137,11 +134,6 @@ module "psoxy_package" {
   force_bundle       = var.force_bundle
 }
 
-moved {
-  from = module.psoxy-package
-  to   = module.psoxy_package
-}
-
 locals {
   # NOTE: `try` needed here bc Terraform doesn't short-circuit boolean evaluation
   is_remote_bundle       = var.deployment_bundle != null && try(startswith(var.deployment_bundle, "gs://"), false)
@@ -154,8 +146,6 @@ locals {
   # NOTE: not a coalesce, bc Terraform evaluates all expressions within coalesce() even if first is non-null
   bundle_path = var.deployment_bundle == null ? data.archive_file.source[0].output_path : var.deployment_bundle
 }
-
-
 
 # GCP wants a zip containing a JAR; can't handle JAR directly - so create that here if no bundle
 # was passed into module
@@ -188,13 +178,6 @@ resource "google_storage_bucket" "artifacts" {
   }
 }
 
-moved {
-  from = google_storage_bucket.artifacts
-  to   = google_storage_bucket.artifacts[0]
-}
-
-
-
 # add zipped JAR to bucket
 resource "google_storage_bucket_object" "function" {
   count = local.is_remote_bundle ? 0 : 1
@@ -206,16 +189,10 @@ resource "google_storage_bucket_object" "function" {
   detect_md5hash = true
 }
 
-moved {
-  from = google_storage_bucket_object.function
-  to   = google_storage_bucket_object.function[0]
-}
-
 locals {
   artifact_bucket_name          = local.is_remote_bundle ? local.remote_bucket_name : google_storage_bucket.artifacts[0].name
   deployment_bundle_object_name = local.is_remote_bundle ? local.remote_bundle_artifact : google_storage_bucket_object.function[0].name
 }
-
 
 # install test tool, if it exists in expected location
 module "test_tool" {
@@ -226,12 +203,6 @@ module "test_tool" {
   path_to_tools = "${var.psoxy_base_dir}tools"
   psoxy_version = module.psoxy_package.version
 }
-
-moved {
-  from = module.test_tool
-  to   = module.test_tool[0]
-}
-
 
 # create custom role needed for bulk psoxy use-cases
 resource "google_project_iam_custom_role" "bucket_write" {
@@ -244,11 +215,6 @@ resource "google_project_iam_custom_role" "bucket_write" {
     "storage.objects.create",
     "storage.objects.delete"
   ]
-}
-
-moved {
-  from = google_project_iam_custom_role.bucket-write
-  to   = google_project_iam_custom_role.bucket_write
 }
 
 # Deprecated; only keep to support old installations
@@ -272,11 +238,6 @@ resource "google_project_iam_custom_role" "psoxy_instance_secret_role" {
     "secretmanager.versions.get",
     "secretmanager.versions.list"
   ]
-}
-
-moved {
-  from = google_project_iam_custom_role.psoxy_instance_secret_locker_role
-  to   = google_project_iam_custom_role.psoxy_instance_secret_role
 }
 
 output "artifacts_bucket_name" {

@@ -1,4 +1,36 @@
 
+# legacy moves; actually pre-0.4.35, but had been in `main.tf`; cleaner to split out
+moved {
+  from = module.psoxy-package
+  to   = module.psoxy_package
+}
+
+moved {
+  from = google_storage_bucket.artifacts
+  to   = google_storage_bucket.artifacts[0]
+}
+
+moved {
+  from = google_storage_bucket_object.function
+  to   = google_storage_bucket_object.function[0]
+}
+
+moved {
+  from = module.test_tool
+  to   = module.test_tool[0]
+}
+
+moved {
+  from = google_project_iam_custom_role.psoxy_instance_secret_locker_role
+  to   = google_project_iam_custom_role.psoxy_instance_secret_role
+}
+
+moved {
+  from = google_project_iam_custom_role.bucket-write
+  to   = google_project_iam_custom_role.bucket_write
+}
+
+
 # give pseudonym salt a clearer terraform resource id
 moved {
   from = random_password.random
