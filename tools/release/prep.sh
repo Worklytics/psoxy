@@ -83,6 +83,8 @@ git grep -l "$CURRENT_RELEASE_PATTERN" java/
 git grep -l "$CURRENT_RELEASE_PATTERN" infra/
 git grep -l "$CURRENT_RELEASE_PATTERN" tools/
 
+./tools/release/sync-examples.sh ./
+
 git add java/
 git add infra/examples/**/main.tf
 git add infra/examples-dev/**/main.tf
@@ -91,15 +93,52 @@ git add infra/examples-dev/**/google-workspace.tf
 git add infra/modular-examples/**/main.tf
 git add tools/init-tfvars.sh
 
+git status
+
+COMMIT_MESSAGE="update release refs to ${NEXT_RELEASE}"
+
+printf "See above for status. Commit changes with message ${BLUE}${COMMIT_MESSAGE}${NC}?"
+
+read -p "(Y/n) " -n 1 -r
+REPLY=${REPLY:-Y}
+echo    # Move to a new line
+case "$REPLY" in
+  [yY][eE][sS]|[yY])
+    git commit -m "$COMMIT_MESSAGE"
+    git push origin "$NEXT_RELEASE"
+    ;;
+  *)
+    echo "Changes not committed. Exiting."
+    exit 0
+    ;;
+esac
+echo "" # newline
+
 if [ "$IS_RC" -eq 1 ]; then
-  printf "Next steps:\n"
-  printf "\t${BLUE}git commit -m \"update release refs to ${NEXT_RELEASE}\"${NC}\n"
-  printf "\t${BLUE}git push origin ${NEXT_RELEASE}${NC}\n"
-  printf "\t${BLUE}./tools/release/update-open-prs.sh ${NEXT_RELEASE}${NC}\n"
+  printf "Update open PRs to point to ${GREEN}${NEXT_RELEASE}${NC}?\n"
+  read -p "(Y/n) " -n 1 -r
+  REPLY=${REPLY:-Y}
+  echo    # Move to a new line
+  case "$REPLY" in
+    [yY][eE][sS]|[yY])
+      ./tools/release/update-open-prs.sh "$NEXT_RELEASE"
+      ;;
+    *)
+      echo "open PRs not updated."
+      ;;
+  esac
+  echo "" # newline
 else
-  ./tools/release/sync-examples.sh ./
-  printf "Next steps:\n"
-  printf "\t${BLUE}git commit -m \"update release refs to ${NEXT_RELEASE}\"${NC}\n"
-  printf "\t${BLUE}git push origin ${NEXT_RELEASE}${NC}\n"
-  printf "\t${BLUE}gh pr create --title \"${NEXT_RELEASE}\" --body \"${NEXT_RELEASE} to main\" --web${NC}\n"
+  printf "Open PR to merge rc back to main?\n"
+  read -p "(Y/n) " -n 1 -r
+  REPLY=${REPLY:-Y}
+  echo    # Move to a new line
+  case "$REPLY" in
+    [yY][eE][sS]|[yY])
+      ./tools/release/rc-to-main.sh "$NEXT_RELEASE"
+      ;;
+    *)
+      echo "No PR opened."
+      ;;
+  esac
 fi
