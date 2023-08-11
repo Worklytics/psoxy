@@ -54,9 +54,12 @@ locals {
         try([v.secured_variables], []),
         [
           {
-            name     = "SERVICE_ACCOUNT_KEY"
-            value    = module.google_workspace_connection_auth[k].key_value
-            writable = false
+            name                = "SERVICE_ACCOUNT_KEY"
+            value               = module.google_workspace_connection_auth[k].key_value
+            writable            = false
+            sensitive           = true
+            value_managed_by_tf = true
+            description         = "The API key for the GCP Service Account that is the OAuth Client for accessing the Google Workspace APIs used by the ${k} connector."
           }
         ]
       )
