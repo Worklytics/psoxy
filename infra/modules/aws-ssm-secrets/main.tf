@@ -13,6 +13,8 @@ locals {
 
   externally_managed_secrets = { for k, spec in var.secrets : k => spec if !(spec.value_managed_by_tf) }
   terraform_managed_secrets  = { for k, spec in var.secrets : k => spec if spec.value_managed_by_tf }
+
+  tf_management_description_appendix = "Value managed by a Terraform configuration; changes outside Terraform may be overwritten by subsequent 'terraform apply' runs"
 }
 
 # see: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter
@@ -20,10 +22,9 @@ resource "aws_ssm_parameter" "secret" {
   for_each = local.terraform_managed_secrets
 
   name           = "${local.path_prefix}${each.key}"
-  type           = each.value.sensitive ? "SecureString" : "String"
+  type           = "SecureString"
   description    = each.value.description
-  value          = each.value.sensitive ? sensitive(coalesce(each.value.value, local.PLACEHOLDER_VALUE)) : null
-  insecure_value = each.value.sensitive ? null : coalesce(each.value.value, local.PLACEHOLDER_VALUE)
+  value          = sensitive(coalesce(each.value.value, local.PLACEHOLDER_VALUE))
   key_id         = coalesce(var.kms_key_id, "alias/aws/ssm")
 
   lifecycle {
@@ -39,10 +40,9 @@ resource "aws_ssm_parameter" "secret_with_externally_managed_value" {
   for_each = local.externally_managed_secrets
 
   name           = "${local.path_prefix}${each.key}"
-  type           = "SecureString"
+  type           = each.value.sensitive ? "SecureString" : "String"
   description    = each.value.description
-  value          = each.value.sensitive ? sensitive(coalesce(each.value.value, local.PLACEHOLDER_VALUE)) : null
-  insecure_value = each.value.sensitive ? null : coalesce(each.value.value, local.PLACEHOLDER_VALUE)
+  value          = sensitive(coalesce(each.value.value, local.PLACEHOLDER_VALUE))
   key_id         = coalesce(var.kms_key_id, "alias/aws/ssm")
 
   lifecycle {

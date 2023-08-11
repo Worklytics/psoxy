@@ -354,7 +354,9 @@ EOT
 openssl pkcs8 -topk8 -inform PEM -outform PEM -in {YOUR DOWNLOADED CERTIFICATE FILE} -out gh_pk_pkcs8.pem -nocrypt
 ```
 
-**NOTE**: If the certificate is not converted to PKCS#8 connector will NOT work.
+**NOTES**:
+ - If the certificate is not converted to PKCS#8 connector will NOT work. You might see in logs a Java error `Invalid PKCS8 data.` if the format is not correct.
+ - Command proposed has been successfully tested on Ubuntu; it may differ for other operating systems.
 
   4. Install the application in your organization.
      Go to your organization settings and then in "Developer Settings". Then, click on "Edit" for your "Github App" and once you are in the app settings, click on "Install App" and click on the "Install" button. Accept the permissions to install it in your whole organization.
@@ -364,6 +366,9 @@ click on `Third Party Access`. Click on `Configure` the application you have ins
 https://github.com/organizations/{YOUR ORG}/settings/installations/{INSTALLATION_ID}
 ```
   Copy the value of `installationId` and assign it to the `github_installation_id` variable in Terraform. You will need to redeploy the proxy again if that value was not populated before.
+
+**NOTE**:
+ - If `github_installation_id` is not set, authentication URL will not be properly formatted and you will see *401: Unauthorized* when trying to get an access token.
 
   6. Update the variables with values obtained in previous step:
      - `PSOXY_GITHUB_CLIENT_ID` with `App ID` value. **NOTE**: It should be `App Id` value as we are going to use authentication through the App and **not** *client_id*.
@@ -397,7 +402,7 @@ EOT
         {
           name : "CLIENT_ID"
           writable : false
-          sensitive : false
+          sensitive : true
           value_managed_by_tf : false
         },
         {
@@ -545,24 +550,28 @@ EOT
           writable : false
           sensitive : true
           value_managed_by_tf : false
+          description: "Client Secret of the Zoom 'Server-to-Server' OAuth App used by the Connector to retrieve Zoom data.  Value should be obtained from your Zoom admin."
         },
         {
           name : "CLIENT_ID"
           writable : false
           sensitive : false
           value_managed_by_tf : false
+          description: "Client ID of the Zoom 'Server-to-Server' OAuth App used by the Connector to retrieve Zoom data. Value should be obtained from your Zoom admin."
         },
         {
           name : "ACCOUNT_ID"
           writable : false
           sensitive : true
           value_managed_by_tf : false
+          description: "Account ID of the Zoom tenant from which the Connector will retrieve Zoom data. Value should be obtained from your Zoom admin."
         },
         {
           name : "ACCESS_TOKEN"
           writable : true
           sensitive : true
           value_managed_by_tf : false
+          description: "Short-lived Oauth access_token used by connector to retrieve Zoom data. Filled by Proxy instance."
         },
         {
           name : "OAUTH_REFRESH_TOKEN"
@@ -624,7 +633,7 @@ EOT
         {
           name : "CLIENT_ID"
           writable : false
-          sensitive : false
+          sensitive : true
           value_managed_by_tf : false
         },
         {

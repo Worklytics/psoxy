@@ -19,6 +19,7 @@ class HealthCheckResultTest {
             "  \"bundleFilename\" : null,\n" +
             "  \"configPropertiesLastModified\" : null,\n" +
             "  \"configuredSource\" : \"blah\",\n" +
+            "  \"javaSourceVersion\" : \"v0.EXAMPLE\",\n" +
             "  \"missingConfigProperties\" : [ \"SERVICE_ACCOUNT_KEY\" ],\n" +
             "  \"nonDefaultSalt\" : true,\n" +
             "  \"pseudonymImplementation\" : null,\n" +

@@ -15,7 +15,15 @@ resource "google_secret_manager_secret" "secret" {
 
   project   = var.secret_project
   secret_id = "${var.path_prefix}${each.key}"
-  labels    = var.default_labels
+  labels    = merge(
+    var.default_labels,
+    {
+      terraform_managed_value = each.value.value_managed_by_tf
+    }
+  )
+
+  # TODO: put each.value.description somewhere; shouldn't be a 'label'; annotations not yet supprted
+  # by google terraform provider
 
   replication {
     user_managed {
