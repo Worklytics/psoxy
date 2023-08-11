@@ -39,7 +39,7 @@ resource "aws_ssm_parameter" "secret_with_externally_managed_value" {
   for_each = local.externally_managed_secrets
 
   name           = "${local.path_prefix}${each.key}"
-  type           = "SecureString"
+  type           = each.value.sensitive ? "SecureString" : "String"
   description    = each.value.description
   value          = each.value.sensitive ? sensitive(coalesce(each.value.value, local.PLACEHOLDER_VALUE)) : null
   insecure_value = each.value.sensitive ? null : coalesce(each.value.value, local.PLACEHOLDER_VALUE)
