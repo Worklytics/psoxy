@@ -22,10 +22,9 @@ resource "aws_ssm_parameter" "secret" {
   for_each = local.terraform_managed_secrets
 
   name           = "${local.path_prefix}${each.key}"
-  type           = each.value.sensitive ? "SecureString" : "String"
-  description    = each.value.description == null || length(each.value.description) == 0 ? local.tf_management_description_appendix : "${each.value.description}\n\nNOTE: ${local.tf_management_description_appendix}"
-  value          = each.value.sensitive ? sensitive(coalesce(each.value.value, local.PLACEHOLDER_VALUE)) : null
-  insecure_value = each.value.sensitive ? null : coalesce(each.value.value, local.PLACEHOLDER_VALUE)
+  type           = "SecureString"
+  description    = each.value.description
+  value          = sensitive(coalesce(each.value.value, local.PLACEHOLDER_VALUE))
   key_id         = coalesce(var.kms_key_id, "alias/aws/ssm")
 
   lifecycle {
@@ -43,8 +42,7 @@ resource "aws_ssm_parameter" "secret_with_externally_managed_value" {
   name           = "${local.path_prefix}${each.key}"
   type           = each.value.sensitive ? "SecureString" : "String"
   description    = each.value.description
-  value          = each.value.sensitive ? sensitive(coalesce(each.value.value, local.PLACEHOLDER_VALUE)) : null
-  insecure_value = each.value.sensitive ? null : coalesce(each.value.value, local.PLACEHOLDER_VALUE)
+  value          = sensitive(coalesce(each.value.value, local.PLACEHOLDER_VALUE))
   key_id         = coalesce(var.kms_key_id, "alias/aws/ssm")
 
   lifecycle {
