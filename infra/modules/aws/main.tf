@@ -115,7 +115,7 @@ resource "aws_iam_role_policy_attachment" "invoker_url_lambda_execution" {
 
 # not really a 'password', but 'random_string' isn't "sensitive" by terraform, so
 # is output to console
-resource "random_password" "random" {
+resource "random_password" "pseudonym_salt" {
   length  = 20
   special = true
 }
@@ -175,7 +175,7 @@ output "secrets" {
       value_managed_by_tf = true
     },
     PSOXY_SALT = {
-      value               = sensitive(random_password.random.result),
+      value               = sensitive(random_password.pseudonym_salt.result),
       description         = "Salt used to build pseudonyms."
       sensitive           = true
       value_managed_by_tf = true

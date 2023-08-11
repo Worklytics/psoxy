@@ -20,6 +20,9 @@ What you MUST preserve:
   - **`SALT` value**. This is a secret used to generate the pseudonyms. If this is lost/destroyed,
     you will be unable to link any data pseudonymized with the original salt to data you process in
     the future.
+      - as of v0.4.35 examples, the terraform resource ID for this value is expected to be
+        `module.psoxy.module.psoxy.random_password.pseudonym_salt`; if not, you can search for it
+         with `terraform state list | grep random_password`
   - **value for `PSEUDONYMIZE_APP_IDS`.** This value, if set to `true` will have the proxy use a rule
     set that pseudonymizes identifiers issued by source applications themselves in some cases where
     these identifiers aren't inherently PII - but the association could be considered discoverable.
@@ -33,6 +36,10 @@ What you SHOULD preserve:
     again to recreate it / obtain the configuration information.
   - **API Client Secrets**, if generated outside of Terraform. If you destroy/lose these values,
     you'll need to contact the data source administrator to obtain new versions.
+
+
+NOTE: you do NOT need to preserve the `ENCRYPTION_KEY` value; rotation of this value should be
+expected by clients.
 
 Prior to beginning your migration, you should make a list of what existing infrastructure and/or
 configuration values you intend to preserve.
