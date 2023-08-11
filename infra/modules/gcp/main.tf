@@ -9,7 +9,7 @@ locals {
 # NOTE: used in lieu of 'google_project_services' because that resouce is *authorative*, so will
 # disable other APIs that are enabled in the project - which may not be what we want if shared
 # project, or if other services used to support (eg, monitoring APIs or somthing)
-resource "google_project_service" "gcp-infra-api" {
+resource "google_project_service" "gcp_infra_api" {
   for_each = toset([
     "cloudbuild.googleapis.com", # some modes of Cloud Functions seem to need this, so TBD
     "cloudfunctions.googleapis.com",
@@ -26,7 +26,7 @@ resource "google_project_service" "gcp-infra-api" {
 }
 
 # pseudo secret
-resource "google_secret_manager_secret" "pseudonymization-salt" {
+resource "google_secret_manager_secret" "pseudonym_salt" {
   project   = var.project_id
   secret_id = "${var.config_parameter_prefix}PSOXY_SALT"
   labels    = var.default_labels
@@ -50,7 +50,7 @@ resource "google_secret_manager_secret" "pseudonymization-salt" {
   }
 
   depends_on = [
-    google_project_service.gcp-infra-api
+    google_project_service.gcp_infra_api
   ]
 }
 
@@ -70,7 +70,7 @@ resource "random_password" "pseudonym_salt" {
 #
 # To be clear, possession of salt alone doesn't let someone reverse pseudonyms.
 resource "google_secret_manager_secret_version" "initial_version" {
-  secret      = google_secret_manager_secret.pseudonymization-salt.id
+  secret      = google_secret_manager_secret.pseudonym_salt.id
   secret_data = sensitive(random_password.pseudonym_salt.result)
 
   # if customer changes value outside TF, don't overwrite
@@ -82,7 +82,7 @@ resource "google_secret_manager_secret_version" "initial_version" {
 }
 
 
-resource "google_secret_manager_secret" "pseudonymization-key" {
+resource "google_secret_manager_secret" "pseudonymization_key" {
   project   = var.project_id
   secret_id = "${var.config_parameter_prefix}PSOXY_ENCRYPTION_KEY"
   labels    = var.default_labels
@@ -106,18 +106,18 @@ resource "google_secret_manager_secret" "pseudonymization-key" {
   }
 
   depends_on = [
-    google_project_service.gcp-infra-api
+    google_project_service.gcp_infra_api
   ]
 }
 
-resource "random_password" "pseudonymization-key" {
+resource "random_password" "pseudonym_encryption_key" {
   length  = 32
   special = true
 }
 
 resource "google_secret_manager_secret_version" "pseudonymization-key_initial_version" {
-  secret      = google_secret_manager_secret.pseudonymization-key.id
-  secret_data = sensitive(random_password.pseudonymization-key.result)
+  secret      = google_secret_manager_secret.pseudonymization_key.id
+  secret_data = sensitive(random_password.pseudonym_encryption_key.result)
 
 
   # if customer changes value outside TF, don't overwrite
@@ -293,23 +293,23 @@ output "bucket_write_role_id" {
 
 # Deprecated, it will be removed in v0.5.x
 output "salt_secret_id" {
-  value = google_secret_manager_secret.pseudonymization-salt.secret_id
+  value = google_secret_manager_secret.pseudonym_salt.secret_id
 }
 
 # Deprecated, it will be removed in v0.5.x
 output "salt_secret_version_number" {
-  value = trimprefix(google_secret_manager_secret_version.initial_version.name, "${google_secret_manager_secret.pseudonymization-salt.name}/versions/")
+  value = trimprefix(google_secret_manager_secret_version.initial_version.name, "${google_secret_manager_secret.pseudonym_salt.name}/versions/")
 }
 
 output "secrets" {
   value = {
     PSOXY_ENCRYPTION_KEY = {
-      secret_id      = google_secret_manager_secret.pseudonymization-key.secret_id,
-      version_number = trimprefix(google_secret_manager_secret_version.pseudonymization-key_initial_version.name, "${google_secret_manager_secret.pseudonymization-key.name}/versions/")
+      secret_id      = google_secret_manager_secret.pseudonymization_key.secret_id,
+      version_number = trimprefix(google_secret_manager_secret_version.pseudonymization-key_initial_version.name, "${google_secret_manager_secret.pseudonymization_key.name}/versions/")
     },
     PSOXY_SALT = {
-      secret_id      = google_secret_manager_secret.pseudonymization-salt.secret_id,
-      version_number = trimprefix(google_secret_manager_secret_version.initial_version.name, "${google_secret_manager_secret.pseudonymization-salt.name}/versions/")
+      secret_id      = google_secret_manager_secret.pseudonym_salt.secret_id,
+      version_number = trimprefix(google_secret_manager_secret_version.initial_version.name, "${google_secret_manager_secret.pseudonym_salt.name}/versions/")
     }
   }
 }
