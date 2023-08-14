@@ -295,3 +295,8 @@ output "psoxy_instance_secret_locker_role_id" {
 output "psoxy_instance_secret_role_id" {
   value = google_project_iam_custom_role.psoxy_instance_secret_role.id
 }
+
+output "pseudonym_salt" {
+  description = "Value used to salt pseudonyms (SHA-256) hashes. If migrate to new deployment, you should copy this value."
+  value       = random_password.pseudonym_salt.result
+}

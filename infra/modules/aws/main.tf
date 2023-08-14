@@ -191,3 +191,8 @@ output "path_to_deployment_jar" {
 output "filename" {
   value = module.psoxy_package.filename
 }
+
+output "pseudonym_salt" {
+  description = "Value used to salt pseudonyms (SHA-256) hashes. If migrate to new deployment, you should copy this value."
+  value       = random_password.pseudonym_salt.result
+}

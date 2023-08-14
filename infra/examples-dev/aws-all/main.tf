@@ -185,3 +185,11 @@ output "todos_3" {
   description = "List of todo steps to complete 3rd, in markdown format."
   value       = var.todos_as_outputs ? join("\n", values(module.connection_in_worklytics)[*].todo) : null
 }
+
+# although should be sensitive such that Terraform won't echo it to command line or expose it, leave
+# commented out in example until needed
+# if you uncomment it, you will then be able to obtain the value through `terraform output --raw pseudonym_salt`
+#output "pseudonym_salt" {
+#  description = "Value used to salt pseudonyms (SHA-256) hashes. If migrate to new deployment, you should copy this value."
+#  value       = module.psoxy.pseudonym_salt
+#}
