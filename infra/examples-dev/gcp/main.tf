@@ -180,15 +180,3 @@ output "pseudonym_salt" {
   value       = module.psoxy.pseudonym_salt
 }
 
-moved {
-  from = module.psoxy.module.secrets["jira-cloud"].google_secret_manager_secret.secret["JIRA_CLOUD_REFRESH_TOKEN"]
-  to   = module.psoxy.module.secrets["jira-cloud"].google_secret_manager_secret.secret["REFRESH_TOKEN"]
-}
-moved {
-  from = module.psoxy.module.secrets["jira-cloud"].google_secret_manager_secret_version.version["JIRA_CLOUD_REFRESH_TOKEN"]
-  to   = module.psoxy.module.secrets["jira-cloud"].google_secret_manager_secret_version.version["REFRESH_TOKEN"]
-}
-moved {
-  from = module.psoxy.module.api_connector["jira-cloud"].google_secret_manager_secret_iam_member.grant_sa_accessor_on_secret["JIRA_CLOUD_REFRESH_TOKEN"]
-  to   = module.psoxy.module.api_connector["jira-cloud"].google_secret_manager_secret_iam_member.grant_sa_accessor_on_secret["REFRESH_TOKEN"]
-}
