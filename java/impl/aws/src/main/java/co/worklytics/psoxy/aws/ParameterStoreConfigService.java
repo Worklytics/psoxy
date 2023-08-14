@@ -20,6 +20,7 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.logging.Level;
@@ -32,6 +33,15 @@ import java.util.logging.Level;
  */
 @Log
 public class ParameterStoreConfigService implements ConfigService, LockService {
+
+
+    /**
+     * placeholder value, since SSM parameters can't have 'null' value or something
+     *
+     * @see infra/modules/aws-ssm-secrets/main.tf:12
+     */
+    @VisibleForTesting
+    static final String PLACEHOLDER_VALUE = "fill me";
 
     @Getter(onMethod_ = @VisibleForTesting)
     final String namespace;
@@ -101,10 +111,17 @@ public class ParameterStoreConfigService implements ConfigService, LockService {
                 .build();
             GetParameterResponse parameterResponse = client.getParameter(parameterRequest);
 
-            if (envVarsConfig.isDevelopment()) {
-                log.info("Found SSM parameter for " + paramName);
+            Optional<T> r;
+            if (Objects.equals(parameterResponse.parameter().value(), PLACEHOLDER_VALUE)) {
+                log.warning("Found placeholder value for " + paramName + "; this is either a misconfiguration, or a value that proxy itself should later fill.");
+                r = Optional.empty();
+            } else {
+                if (envVarsConfig.isDevelopment()) {
+                    log.info("Found SSM parameter for " + paramName);
+                }
+                r = Optional.of(mapping.apply(parameterResponse));
             }
-            return Optional.of(mapping.apply(parameterResponse));
+            return r;
         } catch (ParameterNotFoundException | ParameterVersionNotFoundException ignore) {
             // does not exist, that could be OK depending on case.
             if (envVarsConfig.isDevelopment()) {

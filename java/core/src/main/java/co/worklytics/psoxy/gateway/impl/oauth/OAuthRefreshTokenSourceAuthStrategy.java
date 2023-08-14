@@ -425,11 +425,14 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                 if (jsonToken.isEmpty()) {
                     return Optional.empty();
                 } else {
+                    byte[] value = jsonToken.get().getBytes(StandardCharsets.UTF_8);
                     try {
-                        AccessTokenDto accessTokenDto = objectMapper.readerFor(AccessTokenDto.class).readValue(jsonToken.get().getBytes(StandardCharsets.UTF_8));
+                        AccessTokenDto accessTokenDto = objectMapper.readerFor(AccessTokenDto.class).readValue(value);
                         return Optional.ofNullable(accessTokenDto).map(AccessTokenDto::asAccessToken);
                     } catch (IOException e) {
-                        log.log(Level.SEVERE, "Could not parse contents of token into an object", e);
+                        //NOTE: not logging 'e' itself, as sometimes includes value, so if value
+                        // really is a proper token then we don't want it in the logs
+                        log.log(Level.WARNING, "Could not parse contents of token into an AccessToken object; possibly expected initially, if config has a placeholder value for token");
                         return Optional.empty();
                     }
                 }
