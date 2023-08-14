@@ -195,4 +195,5 @@ output "filename" {
 output "pseudonym_salt" {
   description = "Value used to salt pseudonyms (SHA-256) hashes. If migrate to new deployment, you should copy this value."
   value       = random_password.pseudonym_salt.result
+  sensitive   = true
 }
