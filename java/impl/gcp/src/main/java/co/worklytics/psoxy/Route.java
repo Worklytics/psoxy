@@ -1,7 +1,9 @@
 package co.worklytics.psoxy;
 
+import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.impl.CommonRequestHandler;
+import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import com.google.cloud.functions.HttpFunction;
 import com.google.cloud.functions.HttpRequest;
 import com.google.cloud.functions.HttpResponse;
@@ -18,12 +20,18 @@ public class Route implements HttpFunction {
 
     @Inject
     CommonRequestHandler requestHandler;
+    @Inject
+    EnvVarsConfigService envVarsConfigService;
 
     @Override
     public void service(HttpRequest request, HttpResponse response)
             throws IOException {
 
         CloudFunctionRequest cloudFunctionRequest = CloudFunctionRequest.of(request);
+
+        if (envVarsConfigService.isDevelopment()) {
+            cloudFunctionRequest.getWarnings().forEach(log::warning);
+        }
 
         if (requestHandler == null) {
             DaggerGcpContainer.create().injectRoute(this);
