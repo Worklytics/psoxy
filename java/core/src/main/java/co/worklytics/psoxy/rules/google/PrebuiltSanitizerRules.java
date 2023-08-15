@@ -230,23 +230,6 @@ public class PrebuiltSanitizerRules {
                             .jsonPath("$..description")
                             .build())
                     .build())
-
-            .endpoint(Endpoint.builder()
-                .pathTemplate("/admin/directory/v1/customer/{customerId}/roles")
-                    .transform(Transform.Redact.builder()
-                            .jsonPath("$..roleDescription")
-                            .build())
-                    .build())
-            .endpoint(Endpoint.builder()
-                .pathTemplate("/admin/directory/v1/customer/{customerId}/roles/{roleId}")
-                    .transform(Transform.Redact.builder()
-                            .jsonPath("$..roleDescription")
-                            .build())
-                    .build())
-            //TODO: roles/roleassignments/resources
-            //.endpoint(Rules2.Endpoint.builder()
-            //    .pathRegex("^/admin/directory/v1/customer/my_customer/(roles|roleassignments|resources).*")
-            //    .build())
             .build();
 
     public static final Rules2 GDIRECTORY_WITHOUT_GOOGLE_IDS = GDIRECTORY
