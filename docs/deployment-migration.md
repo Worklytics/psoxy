@@ -23,7 +23,7 @@ Some infrastructure, such as API Clients, will be *moved*; eg, the same underlyi
 continue to exist, it will just be managed by the new Terraform configuration instead of the old
 one. This is the more tedious case, as you must both `import` this infrastructure to your new
 configuration and then `rm` (remove) it from your old configuration, rather than having it be
-`destroy`ed when you teardown the old configuration.  You should carefully review every `terraform
+`destroy`ed when you teardown the old configuration.  You **should** carefully review every `terraform
 apply`, including `terraform destroy` commands, to ensure that infrastructure you intend to move
 is not destroyed, or *replaced* (eg, terraform sees it as tainted, and does a `destroy` + `create`
 within a single `apply` operation).
