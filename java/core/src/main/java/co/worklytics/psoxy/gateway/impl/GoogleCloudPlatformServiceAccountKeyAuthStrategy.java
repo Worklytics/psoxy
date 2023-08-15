@@ -110,9 +110,11 @@ public class GoogleCloudPlatformServiceAccountKeyAuthStrategy implements SourceA
             Optional<String> key = config.getConfigPropertyAsOptional(ConfigProperty.SERVICE_ACCOUNT_KEY);
 
             GoogleCredentials provisional;
+
             if (key.isPresent()) {
-                ByteArrayInputStream boas = key.map(this::toStream).orElseThrow();
-                provisional = ServiceAccountCredentials.fromStream(boas, httpTransportFactory);
+                try (ByteArrayInputStream boas = key.map(this::toStream).orElseThrow()) {
+                    provisional = ServiceAccountCredentials.fromStream(boas, httpTransportFactory);
+                }
             } else {
                 provisional = GoogleCredentials.getApplicationDefault();
             }
