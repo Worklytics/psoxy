@@ -99,6 +99,7 @@ public class RulesTest {
     public void simple_survey() {
 
         String yamlSurvey =
+            "defaultScopeIdForSource: \"hris\"\n" +
             "pseudonymizations:\n" +
                 "  - csvColumns:\n" +
                 "      - \"employee_id\"\n" +
@@ -119,7 +120,7 @@ public class RulesTest {
 
         assertEquals(1, redactions.size());
 
-        assertEquals("cHNldWRvbnltaXphdGlvbnM6CiAgLSBjc3ZDb2x1bW5zOgogICAgICAtICJlbXBsb3llZV9pZCIKcmVkYWN0aW9uczoKICAtIGNzdkNvbHVtbnM6CiAgICAgIC0gImVtcGxveWVlX2VtYWlsIgo=",
+        assertEquals("ZGVmYXVsdFNjb3BlSWRGb3JTb3VyY2U6ICJocmlzIgpwc2V1ZG9ueW1pemF0aW9uczoKICAtIGNzdkNvbHVtbnM6CiAgICAgIC0gImVtcGxveWVlX2lkIgpyZWRhY3Rpb25zOgogIC0gY3N2Q29sdW1uczoKICAgICAgLSAiZW1wbG95ZWVfZW1haWwiCg==",
             Base64.getEncoder().encodeToString(yamlSurvey.getBytes()));
     }
 
