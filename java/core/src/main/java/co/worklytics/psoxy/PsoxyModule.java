@@ -50,7 +50,7 @@ public class PsoxyModule {
         return new ObjectMapper();
     }
 
-    @Provides
+    @Provides @Singleton
     @Named("ForYAML")
     ObjectMapper providesYAMLObjectMapper() {
         return new ObjectMapper(new YAMLFactory());
@@ -66,7 +66,7 @@ public class PsoxyModule {
                 .mappingProvider(jacksonMappingProvider);
     }
 
-    @Provides
+    @Provides @Singleton
     JacksonJsonProvider jacksonJsonProvider(ObjectMapper objectMapper) {
         return new JacksonJsonProvider(objectMapper);
     }
@@ -76,17 +76,17 @@ public class PsoxyModule {
         return new JacksonMappingProvider(objectMapper);
     }
 
-    @Provides
+    @Provides @Singleton
     JsonFactory jsonFactory() {
         return GsonFactory.getDefaultInstance();
     }
 
-    @Provides
+    @Provides @Singleton
     static Logger logger() {
         return Logger.getLogger(PsoxyModule.class.getCanonicalName());
     }
 
-    @Provides
+    @Provides @Singleton
     static SourceAuthStrategy sourceAuthStrategy(ConfigService configService, Set<SourceAuthStrategy> sourceAuthStrategies) {
         String identifier = configService.getConfigPropertyOrError(ProxyConfigProperty.SOURCE_AUTH_STRATEGY_IDENTIFIER);
         return sourceAuthStrategies
