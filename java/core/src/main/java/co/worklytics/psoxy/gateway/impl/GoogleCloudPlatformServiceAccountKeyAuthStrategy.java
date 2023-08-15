@@ -50,8 +50,18 @@ public class GoogleCloudPlatformServiceAccountKeyAuthStrategy implements SourceA
     @Inject HttpTransportFactory httpTransportFactory;
 
 
-    transient Set<String> scopes;
-    transient GoogleCredentials credentials;
+    /**
+     * parsed from {@link ConfigProperty#OAUTH_SCOPES}; kept in useful for just to avoid repeated
+     * split on ' ' and allocation of Set<>.
+     */
+    Set<String> scopes;
+
+    /**
+     * base credentials, without any impersonation; in practice, should always be
+     * ServiceAccountCredentials (created from a service account key)
+     */
+    transient GoogleCredentials baseCredentials;
+
     transient LoadingCache<String, GoogleCredentials> credentialsCache = CacheBuilder.newBuilder()
         .concurrencyLevel(1)
         .maximumSize(50) // as we usually shard per Google Workspace user account, this should be ~ number of active shards
@@ -73,24 +83,6 @@ public class GoogleCloudPlatformServiceAccountKeyAuthStrategy implements SourceA
         }
     }
 
-    @VisibleForTesting
-    GoogleCredentials buildImpersonatedCredentials(@NonNull String accountToImpersonate) {
-
-        if (!(getBaseCredentials() instanceof ServiceAccountCredentials)) {
-            // only ServiceAccountCredentials (created from an actual service account key) support
-            // domain-wide delegation
-            // see examples - even when access is 'global', still need to impersonate a user
-            // https://developers.google.com/admin-sdk/reports/v1/guides/delegation
-            log.warning("Trying to impersonate user with credentials that don't support it");
-        }
-
-        //even though GoogleCredentials implements `createDelegated`, it's a no-op if the
-        // credential type doesn't support it.
-        GoogleCredentials impersonated = getBaseCredentials().createDelegated(accountToImpersonate);
-        impersonated = impersonated.createScoped(getScopes());
-        return impersonated;
-    }
-
     @Override
     public Set<ConfigService.ConfigProperty> getRequiredConfigProperties() {
         return Set.of(
@@ -106,7 +98,7 @@ public class GoogleCloudPlatformServiceAccountKeyAuthStrategy implements SourceA
 
     @SneakyThrows
     synchronized GoogleCredentials getBaseCredentials() {
-        if (credentials == null) {
+        if (baseCredentials == null) {
             Optional<String> key = config.getConfigPropertyAsOptional(ConfigProperty.SERVICE_ACCOUNT_KEY);
 
             GoogleCredentials provisional;
@@ -118,12 +110,32 @@ public class GoogleCloudPlatformServiceAccountKeyAuthStrategy implements SourceA
             } else {
                 provisional = GoogleCredentials.getApplicationDefault();
             }
-            credentials = provisional.createScoped(getScopes());
+            baseCredentials = provisional.createScoped(getScopes());
         }
-        return credentials;
+        return baseCredentials;
     }
 
-   private  synchronized Set<String> getScopes() {
+
+    @VisibleForTesting
+    GoogleCredentials buildImpersonatedCredentials(@NonNull String accountToImpersonate) {
+
+        GoogleCredentials baseCredentials = getBaseCredentials();
+        if (!(baseCredentials instanceof ServiceAccountCredentials)) {
+            // only ServiceAccountCredentials (created from an actual service account key) support
+            // domain-wide delegation
+            // see examples - even when access is 'global', still need to impersonate a user
+            // https://developers.google.com/admin-sdk/reports/v1/guides/delegation
+            log.warning("Trying to impersonate user with credentials that don't support it");
+        }
+
+        //even though GoogleCredentials implements `createDelegated`, it's a no-op if the
+        // credential type doesn't support it.
+        return baseCredentials
+            .createDelegated(accountToImpersonate)
+            .createScoped(getScopes());
+    }
+
+    private synchronized Set<String> getScopes() {
         if (scopes == null) {
             scopes = Arrays.stream(config.getConfigPropertyOrError(ConfigProperty.OAUTH_SCOPES).split(" "))
                 .collect(Collectors.toSet());
