@@ -185,7 +185,8 @@ public class JsonSchemaFilterUtils {
 
                         String key = entry.getKey();
                         JsonNode value = entry.getValue();
-                        JsonSchemaFilter propertySchema = schema.getProperties().get(key);
+                        JsonSchemaFilter propertySchema =
+                            schema.getProperties() == null ? null : schema.getProperties().get(key);
 
                         if (propertySchema == null) {
                             log.info("Redacted " + path + "." + key + " because it was not in schema");
