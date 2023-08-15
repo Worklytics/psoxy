@@ -98,6 +98,12 @@ variable "oauth_scopes" {
   default     = []
 }
 
+variable "supported_request_headers" {
+  type        = list(string)
+  description = "An optional list of headers that can be allowed from source, for example for user options or pagination."
+  default     = []
+}
+
 variable "example_api_calls" {
   type        = list(string)
   description = "example endpoints that can be called via proxy"
@@ -151,4 +157,3 @@ variable "todo_step" {
   description = "of all todos, where does this one logically fall in sequence"
   default     = 1
 }
-
