@@ -31,10 +31,7 @@ import org.apache.http.entity.ContentType;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
@@ -193,10 +190,7 @@ public class CommonRequestHandler {
         }
 
         //TODO: what headers to forward???
-        sourceApiRequest.setHeaders(sourceApiRequest.getHeaders()
-                //seems like Google API HTTP client has a default 'Accept' header with 'text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2' ??
-                .setAccept(ContentType.APPLICATION_JSON.toString())  //MSFT gives weird "{"error":{"code":"InternalServerError","message":"The MIME type 'text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2' requires a '/' character between type and subtype, such as 'text/plain'."}}
-        );
+        sourceApiRequest.setHeaders(getHeadersFromSource(request));
 
         //setup request
         sourceApiRequest
@@ -403,6 +397,21 @@ public class CommonRequestHandler {
         if (config.isDevelopment()) {
             log.info(messageSupplier.get());
         }
+    }
+
+    private com.google.api.client.http.HttpHeaders getHeadersFromSource(HttpEventRequest request) {
+        com.google.api.client.http.HttpHeaders headers = new com.google.api.client.http.HttpHeaders();
+
+        //seems like Google API HTTP client has a default 'Accept' header with 'text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2' ??
+        headers.setAccept(ContentType.APPLICATION_JSON.toString());  //MSFT gives weird "{"error":{"code":"InternalServerError","message":"The MIME type 'text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2' requires a '/' character between type and subtype, such as 'text/plain'."}}
+
+        config.getConfigPropertyAsOptional(ProxyConfigProperty.SUPPORTED_REQUEST_HEADERS)
+                .ifPresent(i -> Arrays.stream(i.split(" "))
+                        .forEach(h -> {
+                            request.getHeader(h).ifPresent(headerValue -> headers.set(h, headerValue));
+                        }));
+
+        return headers;
     }
 
 }
