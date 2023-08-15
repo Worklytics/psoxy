@@ -121,7 +121,7 @@ public class GoogleCloudPlatformServiceAccountKeyAuthStrategy implements SourceA
         return credentials;
     }
 
-    synchronized Set<String> getScopes() {
+   private  synchronized Set<String> getScopes() {
         if (scopes == null) {
             scopes = Arrays.stream(config.getConfigPropertyOrError(ConfigProperty.OAUTH_SCOPES).split(" "))
                 .collect(Collectors.toSet());
