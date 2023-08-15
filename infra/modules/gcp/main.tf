@@ -9,7 +9,7 @@ locals {
 # NOTE: used in lieu of 'google_project_services' because that resouce is *authorative*, so will
 # disable other APIs that are enabled in the project - which may not be what we want if shared
 # project, or if other services used to support (eg, monitoring APIs or somthing)
-resource "google_project_service" "gcp-infra-api" {
+resource "google_project_service" "gcp_infra_api" {
   for_each = toset([
     "cloudbuild.googleapis.com", # some modes of Cloud Functions seem to need this, so TBD
     "cloudfunctions.googleapis.com",
@@ -26,7 +26,7 @@ resource "google_project_service" "gcp-infra-api" {
 }
 
 # pseudo secret
-resource "google_secret_manager_secret" "pseudonymization-salt" {
+resource "google_secret_manager_secret" "pseudonym_salt" {
   project   = var.project_id
   secret_id = "${var.config_parameter_prefix}PSOXY_SALT"
   labels    = var.default_labels
@@ -50,13 +50,13 @@ resource "google_secret_manager_secret" "pseudonymization-salt" {
   }
 
   depends_on = [
-    google_project_service.gcp-infra-api
+    google_project_service.gcp_infra_api
   ]
 }
 
 # not really a 'password', but 'random_string' isn't "sensitive" by terraform, so
 # is output to console
-resource "random_password" "random" {
+resource "random_password" "pseudonym_salt" {
   length  = 20
   special = true
 }
@@ -68,8 +68,8 @@ resource "random_password" "random" {
 #
 # To be clear, possession of salt alone doesn't let someone reverse pseudonyms.
 resource "google_secret_manager_secret_version" "initial_version" {
-  secret      = google_secret_manager_secret.pseudonymization-salt.id
-  secret_data = sensitive(random_password.random.result)
+  secret      = google_secret_manager_secret.pseudonym_salt.id
+  secret_data = sensitive(random_password.pseudonym_salt.result)
 
   # if customer changes value outside TF, don't overwrite
   lifecycle {
@@ -79,8 +79,7 @@ resource "google_secret_manager_secret_version" "initial_version" {
   }
 }
 
-
-resource "google_secret_manager_secret" "pseudonymization-key" {
+resource "google_secret_manager_secret" "pseudonymization_key" {
   project   = var.project_id
   secret_id = "${var.config_parameter_prefix}PSOXY_ENCRYPTION_KEY"
   labels    = var.default_labels
@@ -104,18 +103,18 @@ resource "google_secret_manager_secret" "pseudonymization-key" {
   }
 
   depends_on = [
-    google_project_service.gcp-infra-api
+    google_project_service.gcp_infra_api
   ]
 }
 
-resource "random_password" "pseudonymization-key" {
+resource "random_password" "pseudonym_encryption_key" {
   length  = 32
   special = true
 }
 
-resource "google_secret_manager_secret_version" "pseudonymization-key_initial_version" {
-  secret      = google_secret_manager_secret.pseudonymization-key.id
-  secret_data = sensitive(random_password.pseudonymization-key.result)
+resource "google_secret_manager_secret_version" "pseudonym_encryption_key_initial_version" {
+  secret      = google_secret_manager_secret.pseudonymization_key.id
+  secret_data = sensitive(random_password.pseudonym_encryption_key.result)
 
 
   # if customer changes value outside TF, don't overwrite
@@ -135,11 +134,6 @@ module "psoxy_package" {
   force_bundle       = var.force_bundle
 }
 
-moved {
-  from = module.psoxy-package
-  to   = module.psoxy_package
-}
-
 locals {
   # NOTE: `try` needed here bc Terraform doesn't short-circuit boolean evaluation
   is_remote_bundle       = var.deployment_bundle != null && try(startswith(var.deployment_bundle, "gs://"), false)
@@ -152,8 +146,6 @@ locals {
   # NOTE: not a coalesce, bc Terraform evaluates all expressions within coalesce() even if first is non-null
   bundle_path = var.deployment_bundle == null ? data.archive_file.source[0].output_path : var.deployment_bundle
 }
-
-
 
 # GCP wants a zip containing a JAR; can't handle JAR directly - so create that here if no bundle
 # was passed into module
@@ -186,13 +178,6 @@ resource "google_storage_bucket" "artifacts" {
   }
 }
 
-moved {
-  from = google_storage_bucket.artifacts
-  to   = google_storage_bucket.artifacts[0]
-}
-
-
-
 # add zipped JAR to bucket
 resource "google_storage_bucket_object" "function" {
   count = local.is_remote_bundle ? 0 : 1
@@ -204,16 +189,10 @@ resource "google_storage_bucket_object" "function" {
   detect_md5hash = true
 }
 
-moved {
-  from = google_storage_bucket_object.function
-  to   = google_storage_bucket_object.function[0]
-}
-
 locals {
   artifact_bucket_name          = local.is_remote_bundle ? local.remote_bucket_name : google_storage_bucket.artifacts[0].name
   deployment_bundle_object_name = local.is_remote_bundle ? local.remote_bundle_artifact : google_storage_bucket_object.function[0].name
 }
-
 
 # install test tool, if it exists in expected location
 module "test_tool" {
@@ -224,12 +203,6 @@ module "test_tool" {
   path_to_tools = "${var.psoxy_base_dir}tools"
   psoxy_version = module.psoxy_package.version
 }
-
-moved {
-  from = module.test_tool
-  to   = module.test_tool[0]
-}
-
 
 # create custom role needed for bulk psoxy use-cases
 resource "google_project_iam_custom_role" "bucket_write" {
@@ -242,11 +215,6 @@ resource "google_project_iam_custom_role" "bucket_write" {
     "storage.objects.create",
     "storage.objects.delete"
   ]
-}
-
-moved {
-  from = google_project_iam_custom_role.bucket-write
-  to   = google_project_iam_custom_role.bucket_write
 }
 
 # Deprecated; only keep to support old installations
@@ -272,11 +240,6 @@ resource "google_project_iam_custom_role" "psoxy_instance_secret_role" {
   ]
 }
 
-moved {
-  from = google_project_iam_custom_role.psoxy_instance_secret_locker_role
-  to   = google_project_iam_custom_role.psoxy_instance_secret_role
-}
-
 output "artifacts_bucket_name" {
   value = local.artifact_bucket_name
 }
@@ -291,23 +254,23 @@ output "bucket_write_role_id" {
 
 # Deprecated, it will be removed in v0.5.x
 output "salt_secret_id" {
-  value = google_secret_manager_secret.pseudonymization-salt.secret_id
+  value = google_secret_manager_secret.pseudonym_salt.secret_id
 }
 
 # Deprecated, it will be removed in v0.5.x
 output "salt_secret_version_number" {
-  value = trimprefix(google_secret_manager_secret_version.initial_version.name, "${google_secret_manager_secret.pseudonymization-salt.name}/versions/")
+  value = trimprefix(google_secret_manager_secret_version.initial_version.name, "${google_secret_manager_secret.pseudonym_salt.name}/versions/")
 }
 
 output "secrets" {
   value = {
     PSOXY_ENCRYPTION_KEY = {
-      secret_id      = google_secret_manager_secret.pseudonymization-key.secret_id,
-      version_number = trimprefix(google_secret_manager_secret_version.pseudonymization-key_initial_version.name, "${google_secret_manager_secret.pseudonymization-key.name}/versions/")
+      secret_id      = google_secret_manager_secret.pseudonymization_key.secret_id,
+      version_number = trimprefix(google_secret_manager_secret_version.pseudonym_encryption_key_initial_version.name, "${google_secret_manager_secret.pseudonymization_key.name}/versions/")
     },
     PSOXY_SALT = {
-      secret_id      = google_secret_manager_secret.pseudonymization-salt.secret_id,
-      version_number = trimprefix(google_secret_manager_secret_version.initial_version.name, "${google_secret_manager_secret.pseudonymization-salt.name}/versions/")
+      secret_id      = google_secret_manager_secret.pseudonym_salt.secret_id,
+      version_number = trimprefix(google_secret_manager_secret_version.initial_version.name, "${google_secret_manager_secret.pseudonym_salt.name}/versions/")
     }
   }
 }
@@ -331,4 +294,10 @@ output "psoxy_instance_secret_locker_role_id" {
 
 output "psoxy_instance_secret_role_id" {
   value = google_project_iam_custom_role.psoxy_instance_secret_role.id
+}
+
+output "pseudonym_salt" {
+  description = "Value used to salt pseudonyms (SHA-256) hashes. If migrate to new deployment, you should copy this value."
+  value       = random_password.pseudonym_salt.result
+  sensitive   = true
 }
