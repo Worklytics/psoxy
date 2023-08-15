@@ -69,18 +69,10 @@ public class GoogleCloudPlatformServiceAccountKeyAuthStrategy implements SourceA
         .build(CacheLoader.from(this::buildImpersonatedCredentials));
 
 
-    @SneakyThrows
     @Override
     public Credentials getCredentials(Optional<String> userToImpersonate) {
-        if (userToImpersonate.isEmpty()) {
-            return this.getBaseCredentials();
-        } else {
-            try {
-                return credentialsCache.get(userToImpersonate.get());
-            } catch (ExecutionException e) {  // can't do whole thing in one-line bc of checked exception
-                throw e.getCause();
-            }
-        }
+        return userToImpersonate.map(credentialsCache::getUnchecked)
+            .orElseGet(this::getBaseCredentials);
     }
 
     @Override
