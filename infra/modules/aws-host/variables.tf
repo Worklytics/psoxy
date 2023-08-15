@@ -135,6 +135,7 @@ variable "api_connectors" {
     source_auth_strategy                  = string
     target_host                           = string
     oauth_scopes_needed                   = optional(list(string), [])
+    supported_request_headers             = optional(list(string), [])
     environment_variables                 = optional(map(string), {})
     example_api_calls                     = optional(list(string), [])
     example_api_calls_user_to_impersonate = optional(string)

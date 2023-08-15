@@ -133,6 +133,12 @@ variable "oauth_scopes" {
   default     = []
 }
 
+variable "supported_request_headers" {
+  type        = list(string)
+  description = "An optional list of headers that can be allowed from source, for example for user options or pagination."
+  default     = []
+}
+
 variable "api_caller_role_arn" {
   type        = string
   description = "arn of role which can be assumed to call API"
