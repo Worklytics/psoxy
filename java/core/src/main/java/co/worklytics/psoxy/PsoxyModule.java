@@ -3,6 +3,7 @@ package co.worklytics.psoxy;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
+import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 import co.worklytics.psoxy.storage.BulkDataSanitizerFactory;
 import co.worklytics.psoxy.storage.impl.BulkDataSanitizerFactoryImpl;
@@ -183,12 +184,16 @@ public class PsoxyModule {
 
     @Provides
     @Singleton
-    JsonSchemaFilterUtils schemaRuleUtils() {
+    JsonSchemaFilterUtils schemaRuleUtils(EnvVarsConfigService configService) {
         ObjectMapper objectMapper = new ObjectMapper()
                 .registerModule(new JavaTimeModule())
                 .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
 
-        return new JsonSchemaFilterUtils(objectMapper);
+        //TODO: probably more proper to override with a 'development' module of some kind
+        JsonSchemaFilterUtils.Options.OptionsBuilder options = JsonSchemaFilterUtils.Options.builder();
+        options.logRedactions(configService.isDevelopment());
+
+        return new JsonSchemaFilterUtils(objectMapper, options.build());
     }
 
     @Provides

@@ -8,7 +8,9 @@ import lombok.experimental.SuperBuilder;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.io.Serializable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Log
 @NoArgsConstructor(access = AccessLevel.PACKAGE) //for tests
@@ -16,6 +18,30 @@ import java.util.*;
 public class JsonSchemaFilterUtils {
 
     ObjectMapper objectMapper;
+
+
+    Options options = Options.builder().build();
+
+    @Builder
+    @Value
+    public static class Options implements Serializable {
+
+        private static final long serialVersionUID = 1L;
+
+        /**
+         * whether to log each individual redaction made
+         */
+        @NonNull
+        @Builder.Default
+        Boolean logRedactions = false;
+
+        /**
+         * whether to log a summary of redactions made
+         */
+        @NonNull
+        @Builder.Default
+        Boolean logSummarizedRedactions = true;
+    }
 
     /**
      * filter object by properties defined in schema, recursively filtering them by any schema
@@ -45,7 +71,11 @@ public class JsonSchemaFilterUtils {
     public String filterJsonBySchema(String jsonString, JsonSchemaFilter schema, JsonSchemaFilter root) {
         JsonNode provisionalOutput = objectMapper.readTree(jsonString);
         List<String> redactions = new LinkedList<>();
-        return objectMapper.writeValueAsString(filterBySchema("$", provisionalOutput, schema, root, redactions));
+        String r = objectMapper.writeValueAsString(filterBySchema("$", provisionalOutput, schema, root, redactions));
+        if (options.getLogRedactions()) {
+        log.info("Redactions made: " + redactions.stream().collect(Collectors.joining(", ")));
+        }
+        return r;
     }
 
 
@@ -101,7 +131,9 @@ public class JsonSchemaFilterUtils {
                 JsonSchemaFilter propertySchema = schema.getProperties().get(key);
 
                 if (propertySchema == null) {
-                    log.info("Redacted " + path + "." + key + " because it was not in schema");
+                    if (options.getLogRedactions()) {
+                        log.info("Redacted " + path + "." + key + " because it was not in schema");
+                    }
                     redactionsMade.add(path + "." + key);
                 } else {
                     Object filteredValue = filterBySchema(path + "." + key, value, propertySchema, root, redactionsMade);
@@ -144,7 +176,9 @@ public class JsonSchemaFilterUtils {
                     //TODO: validate 'format'??
                     return provisionalOutput.asText();
                 } else {
-                    log.info("Redacted " + path + " because it was not a string");
+                    if (options.getLogRedactions()) {
+                        log.info("Redacted " + path + " because it was not a string");
+                    }
                     redactionsMade.add(path);
                     return null;
                 }
@@ -154,7 +188,9 @@ public class JsonSchemaFilterUtils {
                 } else if (provisionalOutput.canConvertToLong()) {
                     return provisionalOutput.longValue();
                 } else {
-                    log.info("Redacted " + path + " because it was not an integer");
+                    if (options.getLogRedactions()) {
+                        log.info("Redacted " + path + " because it was not an integer");
+                    }
                     redactionsMade.add(path);
                     return null;
                 }
@@ -162,14 +198,20 @@ public class JsonSchemaFilterUtils {
                 if (provisionalOutput.isNumber() || provisionalOutput.isNull()) {
                     return provisionalOutput.numberValue();
                 } else {
-                    log.info("Redacted " + path + " because it was not a number");
+                    if (options.getLogRedactions()) {
+                        log.info("Redacted " + path + " because it was not a number");
+                    }
+                    redactionsMade.add(path);
                     return null;
                 }
             } else if (schema.isBoolean()) {
                 if (provisionalOutput.isBoolean() || provisionalOutput.isNull()) {
                     return provisionalOutput.booleanValue();
                 } else {
-                    log.info("Redacted " + path + " because it was not a boolean");
+                    if (options.getLogRedactions()) {
+                        log.info("Redacted " + path + " because it was not a boolean");
+                    }
+                    redactionsMade.add(path);
                     return null;
                 }
             } else if (schema.isObject()) {
@@ -189,7 +231,9 @@ public class JsonSchemaFilterUtils {
                             schema.getProperties() == null ? null : schema.getProperties().get(key);
 
                         if (propertySchema == null) {
-                            log.info("Redacted " + path + "." + key + " because it was not in schema");
+                            if (options.getLogRedactions()) {
+                                log.info("Redacted " + path + "." + key + " because it was not in schema");
+                            }
                             redactionsMade.add(path + "." + key);
                         } else {
                             Object filteredValue = filterBySchema(path + "." + key, value, propertySchema, root, redactionsMade);
@@ -209,7 +253,9 @@ public class JsonSchemaFilterUtils {
                     // handler for additionalProperties??
                     return filtered;
                 } else {
-                    log.info("Redacted " + path + " because it was not an object");
+                    if (options.getLogRedactions()) {
+                        log.info("Redacted " + path + " because it was not an object");
+                    }
                     redactionsMade.add(path);
                     return null;
                 }
@@ -224,7 +270,9 @@ public class JsonSchemaFilterUtils {
                     });
                     return filtered;
                 } else {
-                    log.info("Redacted " + path + " because it was not an array");
+                    if (options.getLogRedactions()) {
+                        log.info("Redacted " + path + " because it was not an array");
+                    }
                     redactionsMade.add(path);
                     return null;
                 }
@@ -233,7 +281,9 @@ public class JsonSchemaFilterUtils {
                 // omit the property --> don't get it
                 // include property with {type: null} --> get it, but it's always null?
                 // or do we want to FAIL if value from source is NON-NULL?
-                log.info("Redacted " + path + " because filter expects `null` here");
+                if (options.getLogRedactions()) {
+                    log.info("Redacted " + path + " because filter expects `null` here");
+                }
                 redactionsMade.add(path);
                 return null;
             } else {
@@ -242,7 +292,9 @@ public class JsonSchemaFilterUtils {
         } else {
             if (provisionalOutput.isContainerNode()) {
                 // log? complex value where only simple leaf type permitted by filter
-                log.info("Redacted " + path + " because it was not a simple type");
+                if (options.getLogRedactions()) {
+                    log.info("Redacted " + path + " because it was not a simple type");
+                }
                 redactionsMade.add(path);
                 return null;
             } else {
