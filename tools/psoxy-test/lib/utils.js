@@ -64,8 +64,9 @@ function getFileNameFromURL(url, timestamp = true, extension = '.json') {
  */
 function getCommonHTTPHeaders(options = {}) {
   const headers = {
-    'Accept-Encoding': options.gzip ? 'gzip' : '*',
+    'Accept-Encoding': options.gzip ? 'gzip,deflate' : '*',
     'X-Psoxy-Skip-Sanitizer': options.skip?.toString() || 'false',
+    'User-Agent': 'psoxy-test (gzip)', // w/o (gzip) here, GCP Cloud functions don't compress response
   };
   if (options.impersonate) {
     headers['X-Psoxy-User-To-Impersonate'] = options.impersonate;
@@ -126,9 +127,9 @@ function requestWrapper(url, method = 'GET', headers) {
 
 /**
  * Simple wrapper around `aws4` to ease testing.
- * 
- * TODO aws4 is not able to resolve region nor service (see how we try to 
- *  resolve the "service" here)from the URL for our use cases, so we need to 
+ *
+ * TODO aws4 is not able to resolve region nor service (see how we try to
+ *  resolve the "service" here)from the URL for our use cases, so we need to
  *  improve the resolution of those values
  *
  * Ref: https://github.com/mhart/aws4#api
