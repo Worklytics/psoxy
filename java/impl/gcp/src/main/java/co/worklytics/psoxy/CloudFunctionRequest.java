@@ -5,7 +5,9 @@ import com.google.cloud.functions.HttpRequest;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.apache.http.HttpHeaders;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -92,4 +94,30 @@ public class CloudFunctionRequest implements HttpEventRequest {
     public String prettyPrint() {
         return request.toString();
     }
+
+
+    public List<String> getWarnings() {
+        List<String> warnings = new LinkedList<>();
+
+        //Compression-related
+        // clients should request compressed content to reduce running costs of proxy instances;
+        // warn if they aren't
+        // https://cloud.google.com/appengine/docs/legacy/standard/go111/how-requests-are-handled#:~:text=For%20responses%20that%20are%20returned,HTML%2C%20CSS%2C%20or%20JavaScript.
+        warnIfHeaderAbsentOrMissingGzip(HttpHeaders.ACCEPT_ENCODING).ifPresent(warnings::add);
+        warnIfHeaderAbsentOrMissingGzip(HttpHeaders.USER_AGENT).ifPresent(warnings::add);
+
+        return warnings;
+    }
+
+    private Optional<String> warnIfHeaderAbsentOrMissingGzip(String headerName) {
+        if (this.getHeader(headerName).isPresent()) {
+            if (!this.getHeader(headerName).get().contains("gzip")) {
+                return Optional.of(headerName + " header found, but does not include 'gzip'; this is recommended to enable compression");
+            }
+        } else {
+            return Optional.of("No " + headerName + " header found; should include 'gzip' to enable compression");
+        }
+        return Optional.empty();
+    }
+
 }
