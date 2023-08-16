@@ -1,5 +1,6 @@
 package co.worklytics.psoxy.aws;
 
+import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -10,6 +11,7 @@ import software.amazon.awssdk.services.ssm.model.*;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -88,6 +90,35 @@ class ParameterStoreConfigServiceTest {
                     .build())
                 .build());
         assertTrue(parameterStoreConfigService.acquire("test"));
+    }
+
+    @CsvSource({
+        "fill me,true",
+        "real value,false",
+    })
+    @ParameterizedTest
+    void placeholder(String value, Boolean isEmpty) {
+        ParameterStoreConfigService parameterStoreConfigService =
+            new ParameterStoreConfigService("");
+
+        //setup test
+        SsmClient client = mock(SsmClient.class);
+        parameterStoreConfigService.client = client;
+        parameterStoreConfigService.clock = Clock.systemUTC();
+        parameterStoreConfigService.envVarsConfig = new EnvVarsConfigService();
+
+        // returns value
+        when(client.getParameter(any(GetParameterRequest.class)))
+            .thenReturn(GetParameterResponse.builder()
+                .parameter(Parameter.builder()
+                    .value(value)
+                    .lastModifiedDate(Instant.now())
+                    .build())
+                .build());
+
+        // verify that even if there's a value, may be 'empty' in some cases
+        assertEquals(isEmpty,
+            parameterStoreConfigService.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.ACCESS_TOKEN).isEmpty());
     }
 
 }

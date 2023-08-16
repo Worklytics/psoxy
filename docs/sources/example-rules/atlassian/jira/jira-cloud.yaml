@@ -190,18 +190,14 @@ endpoints:
                               type: "string"
                         outwardIssue:
                           type: "object"
-                          items:
-                            type: "object"
-                            properties:
-                              id:
-                                type: "string"
+                          properties:
+                            id:
+                              type: "string"
                         inwardIssue:
                           type: "object"
-                          items:
-                            type: "object"
-                            properties:
-                              id:
-                                type: "string"
+                          properties:
+                            id:
+                              type: "string"
                   project:
                     type: "object"
                     properties:
@@ -289,18 +285,14 @@ endpoints:
                               type: "string"
                         outwardIssue:
                           type: "object"
-                          items:
-                            type: "object"
-                            properties:
-                              id:
-                                type: "string"
+                          properties:
+                            id:
+                              type: "string"
                         inwardIssue:
                           type: "object"
-                          items:
-                            type: "object"
-                            properties:
-                              id:
-                                type: "string"
+                          properties:
+                            id:
+                              type: "string"
                   worklog:
                     type: "object"
                     properties:
@@ -658,18 +650,14 @@ endpoints:
                               type: "string"
                         outwardIssue:
                           type: "object"
-                          items:
-                            type: "object"
-                            properties:
-                              id:
-                                type: "string"
+                          properties:
+                            id:
+                              type: "string"
                         inwardIssue:
                           type: "object"
-                          items:
-                            type: "object"
-                            properties:
-                              id:
-                                type: "string"
+                          properties:
+                            id:
+                              type: "string"
                   project:
                     type: "object"
                     properties:
@@ -757,18 +745,14 @@ endpoints:
                               type: "string"
                         outwardIssue:
                           type: "object"
-                          items:
-                            type: "object"
-                            properties:
-                              id:
-                                type: "string"
+                          properties:
+                            id:
+                              type: "string"
                         inwardIssue:
                           type: "object"
-                          items:
-                            type: "object"
-                            properties:
-                              id:
-                                type: "string"
+                          properties:
+                            id:
+                              type: "string"
                   worklog:
                     type: "object"
                     properties:
@@ -1213,18 +1197,14 @@ endpoints:
                         type: "string"
                   outwardIssue:
                     type: "object"
-                    items:
-                      type: "object"
-                      properties:
-                        id:
-                          type: "string"
+                    properties:
+                      id:
+                        type: "string"
                   inwardIssue:
                     type: "object"
-                    items:
-                      type: "object"
-                      properties:
-                        id:
-                          type: "string"
+                    properties:
+                      id:
+                        type: "string"
             project:
               type: "object"
               properties:
@@ -1312,18 +1292,14 @@ endpoints:
                         type: "string"
                   outwardIssue:
                     type: "object"
-                    items:
-                      type: "object"
-                      properties:
-                        id:
-                          type: "string"
+                    properties:
+                      id:
+                        type: "string"
                   inwardIssue:
                     type: "object"
-                    items:
-                      type: "object"
-                      properties:
-                        id:
-                          type: "string"
+                    properties:
+                      id:
+                        type: "string"
             worklog:
               type: "object"
               properties:
@@ -1672,18 +1648,14 @@ endpoints:
                         type: "string"
                   outwardIssue:
                     type: "object"
-                    items:
-                      type: "object"
-                      properties:
-                        id:
-                          type: "string"
+                    properties:
+                      id:
+                        type: "string"
                   inwardIssue:
                     type: "object"
-                    items:
-                      type: "object"
-                      properties:
-                        id:
-                          type: "string"
+                    properties:
+                      id:
+                        type: "string"
             project:
               type: "object"
               properties:
@@ -1771,18 +1743,14 @@ endpoints:
                         type: "string"
                   outwardIssue:
                     type: "object"
-                    items:
-                      type: "object"
-                      properties:
-                        id:
-                          type: "string"
+                    properties:
+                      id:
+                        type: "string"
                   inwardIssue:
                     type: "object"
-                    items:
-                      type: "object"
-                      properties:
-                        id:
-                          type: "string"
+                    properties:
+                      id:
+                        type: "string"
             worklog:
               type: "object"
               properties:

@@ -318,7 +318,7 @@ public class CommonRequestHandler {
 
     @SneakyThrows
     HttpRequestFactory getRequestFactory(HttpEventRequest request) {
-        // per connection request factory, abstracts auth ..
+        // per connection request factory, abstracts auth ...
         HttpTransport transport = new NetHttpTransport();
 
         //TODO: changing impl of credentials/initializer should support sources authenticated by

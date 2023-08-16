@@ -32,7 +32,7 @@ terraform {
 # general cases
 module "worklytics_connectors" {
   source = "../../modules/worklytics-connectors"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.4.34"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.4.35"
 
   enabled_connectors            = var.enabled_connectors
   jira_cloud_id                 = var.jira_cloud_id
@@ -104,7 +104,7 @@ locals {
 
 module "psoxy" {
   source = "../../modules/aws-host"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-host?ref=v0.4.34"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-host?ref=v0.4.35"
 
   environment_name                = var.environment_name
   aws_account_id                  = var.aws_account_id
@@ -145,7 +145,7 @@ module "connection_in_worklytics" {
   for_each = local.all_instances
 
   source = "../../modules/worklytics-psoxy-connection-generic"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-generic?ref=v0.4.34"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-generic?ref=v0.4.35"
 
   psoxy_host_platform_id = local.host_platform_id
   psoxy_instance_id      = each.key
@@ -185,3 +185,12 @@ output "todos_3" {
   description = "List of todo steps to complete 3rd, in markdown format."
   value       = var.todos_as_outputs ? join("\n", values(module.connection_in_worklytics)[*].todo) : null
 }
+
+# although should be sensitive such that Terraform won't echo it to command line or expose it, leave
+# commented out in example until needed
+# if you uncomment it, you will then be able to obtain the value through `terraform output --raw pseudonym_salt`
+#output "pseudonym_salt" {
+#  description = "Value used to salt pseudonyms (SHA-256) hashes. If migrate to new deployment, you should copy this value."
+#  value       = module.psoxy.pseudonym_salt
+#  sensitive   = true
+#}

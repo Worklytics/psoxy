@@ -12,6 +12,11 @@ output "bulk_connector_instances" {
   value = local.bulk_instances
 }
 
+output "pseudonym_salt" {
+  description = "Value used to salt pseudonyms (SHA-256) hashes. If migrate to new deployment, you should copy this value."
+  value       = module.psoxy.pseudonym_salt
+}
+
 output "todos" {
   description = "List of todo steps to complete, in markdown format."
   value       = values(module.api_connector)[*].todo
