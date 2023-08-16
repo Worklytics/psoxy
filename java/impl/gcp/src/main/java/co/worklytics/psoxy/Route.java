@@ -15,6 +15,7 @@ import javax.inject.Inject;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.logging.Level;
 
 @Log
 public class Route implements HttpFunction {
@@ -36,6 +37,7 @@ public class Route implements HttpFunction {
             }
         } catch (Throwable e) {
             //suppress anything that went wrong here
+            log.log(Level.WARNING, "Throwable while computing warnings that is suppressed", e);
         }
 
         if (requestHandler == null) {
