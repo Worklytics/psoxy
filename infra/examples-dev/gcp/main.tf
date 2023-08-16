@@ -180,8 +180,3 @@ output "todos_3" {
 #  value       = module.psoxy.pseudonym_salt
 #  sensitive   = true
 #}
-
-output "api_clients" {
-  description = "Map of API client identifiers for Google Workspace connectors. Useful for migrations."
-  value       = module.worklytics_connectors_google_workspace.api_clients
-}
