@@ -757,16 +757,16 @@ public class PrebuiltSanitizerRules {
                                         put("inward", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                                         put("outward", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                                     }}).build());
-                            put("outwardIssue", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("object").items(JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                            put("outwardIssue", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                                     .type("object")
                                     .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
                                         put("id", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-                                    }}).build()).build());
-                            put("inwardIssue", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("object").items(JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                                    }}).build());
+                            put("inwardIssue",JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                                     .type("object")
                                     .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
                                         put("id", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-                                    }}).build()).build());
+                                    }}).build());
                         }})
                         .build())
                 .build();
