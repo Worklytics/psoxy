@@ -195,20 +195,6 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
         // if no rules ALLOW thumbnails, by definition no rules will REDACT its content either
     }
 
-    @SneakyThrows
-    @Test
-    public void roles() {
-        String jsonString = asJson("roles.json");
-
-        String endpoint = "https://admin.googleapis.com/admin/directory/v1/customer/my_customer/roles";
-        assertNotSanitized(jsonString, "Google Apps Administrator Seed Role");
-
-        String sanitized = this.sanitize(endpoint, jsonString);
-
-        assertRedacted(sanitized, "Google Apps Administrator Seed Role");
-    }
-
-
     @ValueSource(strings = {
         "https://admin.googleapis.com/admin/directory/v1/customer/my_customer/domains",
         "https://admin.googleapis.com/admin/directory/v1/users?customer=my_customer&maxResults=1&pageToken=BASE64TOKEN-=%3D&viewType=admin_view",

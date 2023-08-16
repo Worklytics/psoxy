@@ -95,13 +95,3 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$..description"
-  - pathTemplate: "/admin/directory/v1/customer/{customerId}/roles"
-    transforms:
-      - !<redact>
-        jsonPaths:
-          - "$..roleDescription"
-  - pathTemplate: "/admin/directory/v1/customer/{customerId}/roles/{roleId}"
-    transforms:
-      - !<redact>
-        jsonPaths:
-          - "$..roleDescription"
