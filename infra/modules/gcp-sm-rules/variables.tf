@@ -1,4 +1,7 @@
-
+variable "project_id" {
+  type        = string
+  description = "The project ID in which to provision secret for rules"
+}
 
 variable "prefix" {
   type = string

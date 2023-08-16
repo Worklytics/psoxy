@@ -17,6 +17,7 @@ locals {
 }
 
 resource "google_secret_manager_secret" "rules" {
+  project   = var.project_id
   secret_id = "${var.prefix}RULES"
   labels    = var.default_labels
 
