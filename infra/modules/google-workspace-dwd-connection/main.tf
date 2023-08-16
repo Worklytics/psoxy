@@ -23,7 +23,7 @@ locals {
 }
 
 # service account to personify connector
-resource "google_service_account" "connector-sa" {
+resource "google_service_account" "connector_sa" {
   project      = var.project_id
   account_id   = local.sa_account_id
   display_name = var.display_name
@@ -122,11 +122,6 @@ resource "local_file" "todo_auth_google_workspace" {
 
   filename = "TODO ${var.todo_step} - setup ${local.instance_id}.md"
   content  = local.todo_content
-}
-
-moved {
-  from = local_file.todo-google-workspace-admin-console
-  to   = local_file.todo_auth_google_workspace[0]
 }
 
 
