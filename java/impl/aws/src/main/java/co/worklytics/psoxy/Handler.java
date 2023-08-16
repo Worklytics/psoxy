@@ -12,7 +12,6 @@ import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.http.HttpHeaders;
 
 /**
  * default AWS lambda handler
@@ -66,7 +65,9 @@ public class Handler implements com.amazonaws.services.lambda.runtime.RequestHan
                 base64Encoded = compressedResponse.getLeft();
                 response = compressedResponse.getRight();
             } else {
-                response.getHeaders().put(ResponseHeader.WARNING.getHttpHeader(), Warning.COMPRESSION_NOT_REQUESTED.asHttpHeaderCode());
+                response = response.toBuilder()
+                    .header(ResponseHeader.WARNING.getHttpHeader(), Warning.COMPRESSION_NOT_REQUESTED.asHttpHeaderCode())
+                    .build();
             }
 
         } catch (Throwable e) {
