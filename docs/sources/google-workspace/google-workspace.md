@@ -51,7 +51,7 @@ If you have already created a sufficiently privileged service account user for a
 Workspace connection, you can re-use that one.
 
 Assign the account a sufficiently privileged role. At minimum, the role must have the following
-privileges:
+privileges, *read-only*:
   * Admin API
   * Domain Settings
   * Groups
@@ -60,7 +60,7 @@ privileges:
   * Users
 
 See [Google's documentation](https://support.google.com/a/answer/1219251?fl=1&sjid=8026519161455224599-NA)
-detailed explanations of each of those privileges.
+for detailed explanations of each of those privileges.
 
 NOTE:
   - you may use a predefined role, or define a [Custom Role](https://support.google.com/a/answer/2406043?fl=1).
@@ -97,7 +97,9 @@ console:
 2. Activate relevant API(s) in the project.
 3. Create a Service Account and a JSON key for the service account.
 4. Base64-encode the key and store it as a Systems Manager Parameter in AWS (same region as your
-   lambda function deployed).  The parameter name should be something like `PSOXY_GDIRECTORY_SERVICE_ACCOUNT_KEY`.
+   lambda function deployed). The parameter name should be something like `PSOXY_GDIRECTORY_SERVICE_ACCOUNT_KEY`.
+   Ensure you do inadvertently add extra characters, including whitespace, when copying-pasting
+   the key value.
 5. Get the numeric ID of the service account. Use this plus the oauth scopes to make domain-wide
    delegation grants via the Google Workspace admin console.
 
