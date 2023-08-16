@@ -11,6 +11,7 @@ import path from 'path';
 import _ from 'lodash';
 import spec from '../data-sources/spec.js';
 import getLogger from './logger.js';
+import zlib from 'zlib';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // In case Psoxy is slow to respond (Lambda can take up to 20s+ to bootstrap),
@@ -91,7 +92,7 @@ function getCommonHTTPHeaders(options = {}) {
 function requestWrapper(url, method = 'GET', headers) {
   url = typeof url === 'string' ? new URL(url) : url;
   const params = url.searchParams.toString();
-  let responseData = '';
+  const responseBody = [];
   return new Promise((resolve, reject) => {
     const req = https.request(
       {
@@ -103,20 +104,38 @@ function requestWrapper(url, method = 'GET', headers) {
         timeout: REQUEST_TIMEOUT_MS,
       },
       (res) => {
-        res.on('data', (data) => (responseData += data));
+        res.on('data', (data) => {
+          responseBody.push(data);
+        });
         res.on('end', () => {
-          resolve({
-            status: res.statusCode,
-            statusMessage: res.statusMessage,
-            headers: res.headers,
-            data: responseData,
-          });
+          if (res.headers['content-encoding'] === 'gzip') {
+            const data = Buffer.concat(responseBody);
+            zlib.gunzip(data, (error, decompressed) => {
+              if (error) {
+                reject({ statusMessage: 'Unable to decompress Psoxy response' });
+              } else {
+                resolve({
+                  status: res.statusCode,
+                  statusMessage: res.statusMessage,
+                  headers: res.headers,
+                  data: decompressed.toString(),
+                });
+              }
+            });
+          } else {
+            resolve({
+              status: res.statusCode,
+              statusMessage: res.statusMessage,
+              headers: res.headers,
+              data: responseBody.join(''),
+            });
+          }
         });
       }
     );
     req.on('timeout', () => {
       req.destroy();
-      reject({ statusMessage: 'Psoxy is taking too long to respond'});
+      reject({ statusMessage: 'Psoxy is taking too long to respond' });
     });
     req.on('error', (error) => {
       reject({ status: error.code, statusMessage: error.message });
