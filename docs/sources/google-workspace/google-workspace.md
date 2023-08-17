@@ -59,21 +59,30 @@ privileges:
   * Reports (required only if you are connecting to the Audit Logs, used for Google Chat, Meet, etc)
   * Users
 
+NOTE: the proxy rules support restricting access by HTTP method; the Admin SDK API is REST-based, so
+limiting access to `GET` is sufficient to enforce read-only access.
+
 Those refer to [Google's documentation](https://support.google.com/a/answer/1219251?fl=1&sjid=8026519161455224599-NA),
 as shown below (as of Aug 2023); you can refer there for more details about these privileges.
 
 ![google-workspace-admin-privileges.png](google-workspace-admin-privileges.png)
 
-NOTE:
-  - you may use a predefined role, or define a [Custom Role](https://support.google.com/a/answer/2406043?fl=1).
-  - the proxy rules support restricting access by HTTP method; the Admin SDK API is REST-based, so
-    limiting access to `GET` is sufficient to enforce read-only access.
-
 The email address of the account you created will be used when creating the data connection to the
 Google Directory in the Worklytics portal. Provide it as the value of the 'Google Account to Use
 for Connection' setting when they create the connection.
 
+### Custom Role
 
+If you choose not to use a predefined role that covers the above, you can define a [Custom Role](https://support.google.com/a/answer/2406043?fl=1).
+
+In the Google Workspace Admin Console as of August 2023, creating a 'Custom Role' for this user
+will look something like the following:
+
+![custom-role.png](custom-role.png)
+
+**YMMV** - Google's UI changes frequently and varies by Google Workspace edition, so you may see
+more or fewer options than shown above.  Please scroll the list of privileges to ensure you grant
+READ access to API for all of the required data.
 
 
 ## General Authentication Overview
