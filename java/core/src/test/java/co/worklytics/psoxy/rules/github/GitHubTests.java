@@ -629,6 +629,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
                 InvocationExample.of("https://api.github.com/orgs/FAKE/teams/TEAM/members", "team_members.json"),
                 InvocationExample.of("https://api.github.com/orgs/FAKE/repos", "repos.json"),
                 InvocationExample.of("https://api.github.com/orgs/FAKE/audit-log", "org_audit_log.json"),
+                InvocationExample.of("https://api.github.com/organizations/123456789/audit-log?include=all&per_page=100&phrase=created:2023-02-16T12:00:00%2B0000..2023-04-17T00:00:00%2B0000&page=0&order=asc&after=MS42OEQyOTE2MjX1MqNlJzIyfANVOHoYbUVsZ1ZjUWN6TwlZLXl6EVE%3D&before", "org_audit_log.json"),
                 InvocationExample.of("https://api.github.com/repos/FAKE/REPO/commits/COMMIT_REF", "commit.json"),
                 InvocationExample.of("https://api.github.com/repos/FAKE/REPO/branches", "repo_branches.json"),
                 InvocationExample.of("https://api.github.com/repos/FAKE/REPO/commits", "repo_commits.json"),
