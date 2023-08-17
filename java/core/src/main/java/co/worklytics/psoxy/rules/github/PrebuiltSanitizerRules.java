@@ -132,6 +132,26 @@ public class PrebuiltSanitizerRules {
                     .build())
             .build();
 
+    static final Endpoint ORG_AUDIT_LOG_WITH_INSTALLATION_ID = Endpoint.builder()
+            .pathTemplate("/organizations/{installationId}/audit-log")
+            .allowedQueryParams(orgAuditLogAllowedQueryParameters)
+            .transform(Transform.Redact.builder()
+                    .jsonPath("$..hashed_token")
+                    .jsonPath("$..business")
+                    .jsonPath("$..business_id")
+                    .jsonPath("$..transport_protocol")
+                    .jsonPath("$..transport_protocol_name")
+                    .jsonPath("$..pull_request_title")
+                    .jsonPath("$..user_agent")
+                    .build())
+            .transform(Transform.Pseudonymize.builder()
+                    .jsonPath("$..actor")
+                    .jsonPath("$..user")
+                    .jsonPath("$..userId")
+                    .build())
+            .build();
+
+
     static final Endpoint ORG_TEAM_MEMBERS = Endpoint.builder()
             .pathTemplate("/orgs/{org}/teams/{team_slug}/members")
             .allowedQueryParams(commonAllowedQueryParameters)
@@ -445,6 +465,7 @@ public class PrebuiltSanitizerRules {
             .endpoint(ORG_TEAMS)
             .endpoint(ORG_TEAM_MEMBERS)
             .endpoint(ORG_AUDIT_LOG)
+            .endpoint(ORG_AUDIT_LOG_WITH_INSTALLATION_ID)
             .endpoint(REPOSITORIES)
             .endpoint(REPO_BRANCHES)
             .endpoint(REPO_COMMITS)
