@@ -59,8 +59,10 @@ privileges:
   * Reports (required only if you are connecting to the Audit Logs, used for Google Chat, Meet, etc)
   * Users
 
-See [Google's documentation](https://support.google.com/a/answer/1219251?fl=1&sjid=8026519161455224599-NA)
-detailed explanations of each of those privileges.
+Those refer to [Google's documentation](https://support.google.com/a/answer/1219251?fl=1&sjid=8026519161455224599-NA),
+as shown below (as of Aug 2023); you can refer there for more details about these privileges.
+
+![google-workspace-admin-privileges.png](google-workspace-admin-privileges.png)
 
 NOTE:
   - you may use a predefined role, or define a [Custom Role](https://support.google.com/a/answer/2406043?fl=1).
@@ -68,8 +70,11 @@ NOTE:
     limiting access to `GET` is sufficient to enforce read-only access.
 
 The email address of the account you created will be used when creating the data connection to the
-Google Directory in the Worklytics portal. Provide it as the value of the 'Google
-Account to Use for Connection' setting when they create the connection.
+Google Directory in the Worklytics portal. Provide it as the value of the 'Google Account to Use
+for Connection' setting when they create the connection.
+
+
+
 
 ## General Authentication Overview
 
