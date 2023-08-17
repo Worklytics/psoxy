@@ -4,7 +4,6 @@ import { Command, Option } from 'commander';
 import chalk from 'chalk';
 import psoxyTestFileUpload from './psoxy-test-file-upload.js';
 import getLogger from './lib/logger.js';
-import _ from 'lodash';
 
 const require = createRequire(import.meta.url);
 const { version } = require('./package.json');
