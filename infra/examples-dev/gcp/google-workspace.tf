@@ -20,3 +20,8 @@ module "worklytics_connectors_google_workspace" {
   google_workspace_example_user  = var.google_workspace_example_user
   google_workspace_example_admin = var.google_workspace_example_admin
 }
+
+output "google_workspace_api_clients" {
+  description = "Map of API client identifiers for Google Workspace connectors. Useful for migrations."
+  value       = module.worklytics_connectors_google_workspace.api_clients
+}

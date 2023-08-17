@@ -50,17 +50,15 @@ We recommend naming the account `svc-worklytics@{your-domain.com}`.
 If you have already created a sufficiently privileged service account user for a different Google
 Workspace connection, you can re-use that one.
 
+
 Assign the account a sufficiently privileged role. At minimum, the role must have the following
-privileges:
+privileges, *read-only*:
   * Admin API
   * Domain Settings
   * Groups
   * Organizational Units
   * Reports (required only if you are connecting to the Audit Logs, used for Google Chat, Meet, etc)
   * Users
-
-NOTE: the proxy rules support restricting access by HTTP method; the Admin SDK API is REST-based, so
-limiting access to `GET` is sufficient to enforce read-only access.
 
 Those refer to [Google's documentation](https://support.google.com/a/answer/1219251?fl=1&sjid=8026519161455224599-NA),
 as shown below (as of Aug 2023); you can refer there for more details about these privileges.
@@ -71,9 +69,21 @@ The email address of the account you created will be used when creating the data
 Google Directory in the Worklytics portal. Provide it as the value of the 'Google Account to Use
 for Connection' setting when they create the connection.
 
+
 ### Custom Role
 
 If you choose not to use a predefined role that covers the above, you can define a [Custom Role](https://support.google.com/a/answer/2406043?fl=1).
+
+Using a Custom Role, with 'Read' access to each of the required Admin API privileges is good practice,
+but least-privilege is also enforced in TWO additional ways:
+  - the Proxy API rules restrict the API endpoints that Worklytics can access, as well as the HTTP
+    methods that may be used. This enforces read-only access, limited to the required data types
+    (and actually even more granular that what Workspace Admin privileges and OAuth Scopes support).
+  - the Oauth Scopes granted to the API client via Domain-wide delegation. Each OAuth Client used
+    by Worklytics is granted only read-only scopes, least-permissive for the data types required. eg
+    `https://www.googleapis.com/auth/admin.directory.users.readonly`.
+
+So a least-privileged custom role is essentially a 3rd layer of enforcement.
 
 In the Google Workspace Admin Console as of August 2023, creating a 'Custom Role' for this user
 will look something like the following:
@@ -111,7 +121,9 @@ console:
 2. Activate relevant API(s) in the project.
 3. Create a Service Account and a JSON key for the service account.
 4. Base64-encode the key and store it as a Systems Manager Parameter in AWS (same region as your
-   lambda function deployed).  The parameter name should be something like `PSOXY_GDIRECTORY_SERVICE_ACCOUNT_KEY`.
+   lambda function deployed). The parameter name should be something like `PSOXY_GDIRECTORY_SERVICE_ACCOUNT_KEY`.
+   Ensure you do inadvertently add extra characters, including whitespace, when copying-pasting
+   the key value.
 5. Get the numeric ID of the service account. Use this plus the oauth scopes to make domain-wide
    delegation grants via the Google Workspace admin console.
 

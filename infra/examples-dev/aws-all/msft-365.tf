@@ -97,3 +97,8 @@ locals {
     })
   }
 }
+
+output "msft_365_api_clients" {
+  description = "Map of API client identifiers. Useful for configuration of clients, terraform migration."
+  value       = module.worklytics_connectors_msft_365.api_clients
+}
