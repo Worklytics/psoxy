@@ -34,6 +34,7 @@ const { version } = require('./package.json');
       'us-east-1')
     .option('-v, --verbose', 'Verbose output', false)
     .option('-s, --save-sanitized-file', 'Save sanitized file to disk', false)
+    .option('--delete-sanitized-file', 'Delete sanitized file from output bucket', false)
     .configureOutput({
       outputError: (str, write) => write(chalk.bold.red(str)),
     });
