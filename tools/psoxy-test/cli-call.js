@@ -82,7 +82,7 @@ const AWS_ACCESS_DENIED_EXCEPTION_REGEXP = new RegExp(/(?<arn>arn:aws:iam::\d+:\
       AWS_ACCESS_DENIED_EXCEPTION_REGEXP.test(error.message)) {
       const errorMessage = error.message.replace(
         AWS_ACCESS_DENIED_EXCEPTION_REGEXP, chalk.bold.red('$<arn>'));
-      const fixErrorHint = chalk.blue('Fix it by adding the ARN to `caller_aws_arns` list in "terraform.tfvars" and run `terraform apply` again.');
+      const fixErrorHint = chalk.blue('Make sure your AWS (MFA) session is not expired and that the ARN is included in the `caller_aws_arns` list of your "terraform.tfvars" (run `terraform apply` again if necessary).');
       logger.error(`${errorMessage}\n${fixErrorHint}`);
     } else {
       logger.error(error.statusMessage || error.message);
