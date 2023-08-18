@@ -31,7 +31,7 @@ const AWS_ACCESS_DENIED_EXCEPTION_REGEXP = new RegExp(/(?<arn>arn:aws:iam::\d+:\
     )
     .option('-t, --token <token>', 'Authorization token for GCP')
     .option('-v, --verbose', 'Verbose output', false)
-    .option('-z, --gzip [type]', 'Add gzip compression header ("--gzip false" to remove)', true)
+    .option('-z, --gzip [type]', 'Add gzip compression header (default: true, "-z false" to remove)', true)
     .option('--health-check', 'Health Check call: check Psoxy deploy is running')
     .addOption(new Option('-d, --data-source <name>',
       'Data source to test all available endpoints').choices([
@@ -66,8 +66,9 @@ const AWS_ACCESS_DENIED_EXCEPTION_REGEXP = new RegExp(/(?<arn>arn:aws:iam::\d+:\
   program.parse(process.argv);
   const options = program.opts();
   if (_.isString(options.gzip)) {
-    options.gzip = options.gzip === 'true';
+    options.gzip = !(options.gzip === 'false');
   }
+
   const logger = getLogger(options.verbose);
 
   let result;
