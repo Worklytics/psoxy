@@ -116,6 +116,15 @@ async function testGCP(options, logger) {
   const fileContents = downloadResult.toString('utf8');
   logger.verbose('Download result:', { additional: fileContents });
 
+  if (options.deleteSanitizedFile) {
+    logger.verbose(`Deleting sanitized file from output bucket: ${outputBucket}`);
+    try {
+      await gcp.deleteFile(outputBucket, outputKey, client);
+    } catch (error) {
+      logger.error(`Error deleting sanitized file: ${error.message}`);
+    }
+  }
+
   return fileContents;
 }
 
