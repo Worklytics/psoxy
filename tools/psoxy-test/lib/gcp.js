@@ -167,7 +167,7 @@ async function listFilesMetadata(bucketName) {
  * @param {string} filePath - local file path
  * @param {Storage} client
  * @param {string} filename - optional, destination file name
- * @returns {UploadResponse} - https://googleapis.dev/nodejs/storage/latest/global.html#UploadResponse
+ * @returns {Promise} - https://googleapis.dev/nodejs/storage/latest/global.html#UploadResponse
  */
 async function upload(bucketName, filePath, client, filename) {
   if (!client) {
@@ -179,13 +179,28 @@ async function upload(bucketName, filePath, client, filename) {
 }
 
 /**
+ * Delete file from GCS
+ * https://googleapis.dev/nodejs/storage/latest/File.html#delete
+ * @param {string} bucketName
+ * @param {string} filename - name of the file to delete (includes "path")
+ * @param {Storage} client
+ * @returns {Promise} - https://googleapis.dev/nodejs/storage/latest/global.html#DeleteFileResponse
+ */
+async function deleteFile(bucketName, filename, client) {
+  if (!client) {
+    client = createStorageClient();
+  }
+  return client.bucket(bucketName).file(filename).delete();
+}
+
+/**
  * Download file from GCS
  *
  * @param {string} bucketName
  * @param {string} fileName
  * @param {Storage} client
  * @param {Object} logger - winston instance
- * @returns {DownloadResponse} - https://googleapis.dev/nodejs/storage/latest/global.html#DownloadResponse
+ * @returns {Promise} - https://googleapis.dev/nodejs/storage/latest/global.html#DownloadResponse
  */
 async function download(bucketName, fileName, client, logger) {
   if (!client) {
@@ -209,6 +224,7 @@ async function download(bucketName, fileName, client, logger) {
 export default {
   call,
   createStorageClient,
+  deleteFile,
   download,
   getIdentityToken,
   getLogs,
