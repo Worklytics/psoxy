@@ -43,6 +43,7 @@ locals {
   bundle_from_s3 = startswith(var.path_to_function_zip, "s3://")
   s3_bucket      = local.bundle_from_s3 ? regex("s3://([^/]+)/.*", var.path_to_function_zip)[0] : null
   s3_key         = local.bundle_from_s3 ? regex("s3://[^/]+/(.*)", var.path_to_function_zip)[0] : null
+  bundle_filename = try(regex(".*/([^/]+)", var.path_to_function_zip)[0], var.path_to_function_zip)
 }
 
 
@@ -66,7 +67,8 @@ resource "aws_lambda_function" "instance" {
       var.path_to_config == null ? {} : yamldecode(file(var.path_to_config)),
       var.environment_variables,
       {
-        EXECUTION_ROLE = aws_iam_role.iam_for_lambda.arn
+        EXECUTION_ROLE  = aws_iam_role.iam_for_lambda.arn,
+        BUNDLE_FILENAME = local.bundle_filename
       },
       # only set env vars for config paths if non-default values
       length(local.path_to_shared_config) > 1 ? { PATH_TO_SHARED_CONFIG = local.path_to_shared_config } : {},
