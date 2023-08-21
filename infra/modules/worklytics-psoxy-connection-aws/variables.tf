@@ -4,11 +4,6 @@ variable "psoxy_instance_id" {
   default     = null
 }
 
-variable "psoxy_endpoint_url" {
-  type        = string
-  description = "url of endpoint which hosts Psoxy instance"
-}
-
 variable "worklytics_host" {
   type        = string
   description = "host of worklytics instance where tenant resides. (e.g. intl.worklytics.co for prod; but may differ for dev/staging)"
@@ -22,12 +17,36 @@ variable "display_name" {
 
 variable "aws_role_arn" {
   type        = string
-  description = "ARN of role to assume when connecting to proxy"
+  description = "ARN of role to that Worklytics should assume when connecting to proxy."
 }
 
 variable "aws_region" {
   type        = string
   description = "AWS region in which proxy lambda is deployed"
+}
+
+variable "psoxy_endpoint_url" {
+  type        = string
+  description = "URL of endpoint which hosts Psoxy instance, for API connectors."
+  default     = null
+}
+
+variable "bucket_name" {
+  type        = string
+  description = "Name of S3 bucket from which to retrieve sanitized data, for Bulk connectors."
+  default     = null
+}
+
+variable "connector_id" {
+  type        = string
+  description = "ID for connector implementation in Worklytics (to build deeplinks)"
+  default     = "" # will be REQUIRED for v0.5 onwards
+}
+
+variable "connector_settings_to_provide" {
+  type        = map(string)
+  description = "Map of additional, connector-specific settings to provide to Worklytics when creating connection."
+  default     = {}
 }
 
 variable "todo_step" {
