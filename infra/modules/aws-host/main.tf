@@ -86,7 +86,6 @@ module "api_connector" {
   target_host                           = each.value.target_host
   source_auth_strategy                  = each.value.source_auth_strategy
   oauth_scopes                          = each.value.oauth_scopes_needed
-  supported_request_headers             = try(each.value.supported_request_headers, [])
   example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
 
 

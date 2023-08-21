@@ -154,7 +154,6 @@ module "api_connector" {
   target_host                           = each.value.target_host
   source_auth_strategy                  = each.value.source_auth_strategy
   oauth_scopes                          = try(each.value.oauth_scopes_needed, [])
-  supported_request_headers             = try(each.value.supported_request_headers, [])
   config_parameter_prefix               = local.config_parameter_prefix
   invoker_sa_emails                     = var.worklytics_sa_emails
   default_labels                        = var.default_labels

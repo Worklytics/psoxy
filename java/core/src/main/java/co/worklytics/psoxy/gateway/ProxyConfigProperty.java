@@ -45,7 +45,5 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
     SOURCE_AUTH_STRATEGY_IDENTIFIER,
     //target API endpoint to forward request to
     TARGET_HOST,
-    BUNDLE_FILENAME,
-    SUPPORTED_REQUEST_HEADERS;
-
+    BUNDLE_FILENAME;
 }

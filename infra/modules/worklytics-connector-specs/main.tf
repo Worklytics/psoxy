@@ -393,9 +393,6 @@ EOT
         ACCESS_TOKEN_CACHEABLE : "true",
         USE_SHARED_TOKEN : "true"
       }
-      supported_request_headers : [
-        "Sforce-Query-Options",
-      ]
       secured_variables : [
         {
           name : "CLIENT_SECRET"
@@ -651,9 +648,6 @@ EOT
         GRANT_TYPE : "refresh_token"
         REFRESH_ENDPOINT : "https://api.dropboxapi.com/oauth2/token"
       }
-      supported_request_headers : [
-        "Dropbox-API-Select-User",
-      ]
       reserved_concurrent_executions : null
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
