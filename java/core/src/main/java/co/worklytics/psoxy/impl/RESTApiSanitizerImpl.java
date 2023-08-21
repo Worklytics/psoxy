@@ -85,25 +85,21 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
 
     @Override
     public boolean isAllowed(@NonNull String httpMethod, @NonNull URL url) {
-        String relativeUrl = URLUtils.relativeURL(url);
-
-        Predicate<Map.Entry<Endpoint, Pattern>> hasPathRegexMatchingUrl =
-                getHasPathRegexMatchingUrl(relativeUrl);
-
-        Predicate<Map.Entry<Endpoint, Pattern>> hasPathTemplateMatchingUrl =
-                getHasPathTemplateMatchingUrl(url);
-
-        Predicate<Endpoint> allowsHttpMethod = allowsHttpMethod(httpMethod);
-
-
         if (rules.getAllowAllEndpoints()) {
             return true;
         } else {
-            return getCompiledAllowedEndpoints().entrySet().stream()
-                    .filter(entry -> hasPathRegexMatchingUrl.test(entry) || hasPathTemplateMatchingUrl.test(entry))
-                    .filter(entry -> allowedQueryParams(entry.getKey(), URLUtils.queryParamNames(url))) // redundant in the pathTemplate case
-                    .filter(entry -> allowsHttpMethod.test(entry.getKey()))
-                    .findAny().isPresent();
+            return getEndpoint(httpMethod, url).isPresent();
+        }
+    }
+
+    @Override
+    public Optional<Set<String>> getSupportedHeaders(String httpMethod, URL url) {
+        Optional<Map.Entry<Endpoint, Pattern>> endpoint = getEndpoint(httpMethod, url);
+
+        if (endpoint.isPresent()) {
+            return endpoint.get().getKey().getSupportedHeaders();
+        } else {
+            return Optional.empty();
         }
     }
 
@@ -451,4 +447,21 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
         return rootDefinitions;
     }
 
+    private Optional<Map.Entry<Endpoint, Pattern>> getEndpoint(String httpMethod, URL url) {
+        String relativeUrl = URLUtils.relativeURL(url);
+
+        Predicate<Map.Entry<Endpoint, Pattern>> hasPathRegexMatchingUrl =
+                getHasPathRegexMatchingUrl(relativeUrl);
+
+        Predicate<Map.Entry<Endpoint, Pattern>> hasPathTemplateMatchingUrl =
+                getHasPathTemplateMatchingUrl(url);
+
+        Predicate<Endpoint> allowsHttpMethod = allowsHttpMethod(httpMethod);
+
+        return getCompiledAllowedEndpoints().entrySet().stream()
+                .filter(entry -> hasPathRegexMatchingUrl.test(entry) || hasPathTemplateMatchingUrl.test(entry))
+                .filter(entry -> allowedQueryParams(entry.getKey(), URLUtils.queryParamNames(url))) // redundant in the pathTemplate case
+                .filter(entry -> allowsHttpMethod.test(entry.getKey()))
+                .findAny();
+    }
 }
