@@ -83,11 +83,6 @@ resource "aws_lambda_function" "instance" {
   }
 }
 
-moved {
-  from = aws_lambda_function.psoxy-instance
-  to   = aws_lambda_function.instance
-}
-
 # cloudwatch group per lambda function
 resource "aws_cloudwatch_log_group" "lambda_log" {
   name              = "/aws/lambda/${aws_lambda_function.instance.function_name}"
@@ -99,11 +94,6 @@ resource "aws_cloudwatch_log_group" "lambda_log" {
       tags
     ]
   }
-}
-
-moved {
-  from = aws_cloudwatch_log_group.lambda-log
-  to   = aws_cloudwatch_log_group.lambda_log
 }
 
 resource "aws_iam_role" "iam_for_lambda" {
