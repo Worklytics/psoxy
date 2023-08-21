@@ -5,8 +5,10 @@ import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.rules.Rules2;
 import com.avaulta.gateway.rules.transforms.Transform;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Sets;
 
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Prebuilt sanitization rules for Dropbox API responses
@@ -40,6 +42,8 @@ public class PrebuiltSanitizerRules {
             .withAdditionalEndpoints(GROUP_LIST_ENDPOINT.getEndpoints())
             .withAdditionalEndpoints(MEMBER_LIST_ENDPOINT.getEndpoints());
 
+    static final Set<String> DEFAULT_QUERY_HEADERS = Sets.newHashSet( "Dropbox-API-Select-User");
+
     static public final Map<String, RESTRules> DROPBOX_PREBUILT_RULES_MAP = ImmutableMap.<String, RESTRules>builder()
             .put(DROPBOX_BUSINESS, DROPBOX_ENDPOINTS)
             .build();
@@ -48,6 +52,7 @@ public class PrebuiltSanitizerRules {
         return Rules2.builder()
                 .endpoint(Endpoint.builder()
                         .pathRegex(pathRegex)
+                        .supportedHeaders(DEFAULT_QUERY_HEADERS)
                         .transform(Transform.Pseudonymize.builder()
                                 .jsonPath("$.members[*].profile.email")
                                 .jsonPath("$.members[*].profile.secondary_emails[*].email")
@@ -72,6 +77,7 @@ public class PrebuiltSanitizerRules {
         return Rules2.builder()
                 .endpoint(Endpoint.builder()
                         .pathRegex(pathRegex)
+                        .supportedHeaders(DEFAULT_QUERY_HEADERS)
                         .transform(Transform.Pseudonymize.builder()
                                 .jsonPath("$.entries[*].details.shared_content_owner.email")
                                 .build()
@@ -95,6 +101,7 @@ public class PrebuiltSanitizerRules {
         return Rules2.builder()
                 .endpoint(Endpoint.builder()
                         .pathRegex(pathRegex)
+                        .supportedHeaders(DEFAULT_QUERY_HEADERS)
                         .transform(Transform.Pseudonymize.builder()
                                 .jsonPath("$.events[*].details.shared_content_owner.email")
                                 .jsonPath("$.events[*].actor.user.email")
