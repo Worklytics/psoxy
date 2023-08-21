@@ -193,10 +193,7 @@ public class CommonRequestHandler {
         }
 
         //TODO: what headers to forward???
-        sourceApiRequest.setHeaders(sourceApiRequest.getHeaders()
-                //seems like Google API HTTP client has a default 'Accept' header with 'text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2' ??
-                .setAccept(ContentType.APPLICATION_JSON.toString())  //MSFT gives weird "{"error":{"code":"InternalServerError","message":"The MIME type 'text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2' requires a '/' character between type and subtype, such as 'text/plain'."}}
-        );
+        sourceApiRequest.setHeaders(getHeadersFromSource(request, targetUrl));
 
         //setup request
         sourceApiRequest
@@ -405,4 +402,18 @@ public class CommonRequestHandler {
         }
     }
 
+    private com.google.api.client.http.HttpHeaders getHeadersFromSource(HttpEventRequest request, URL targetUrl) {
+        com.google.api.client.http.HttpHeaders headers = new com.google.api.client.http.HttpHeaders();
+
+        //seems like Google API HTTP client has a default 'Accept' header with 'text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2' ??
+        //MSFT gives weird "{"error":{"code":"InternalServerError","message":"The MIME type 'text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2' requires a '/' character between type and subtype, such as 'text/plain'."}}
+        headers.setAccept(ContentType.APPLICATION_JSON.toString());
+
+        sanitizer.getSupportedHeaders(request.getHttpMethod(), targetUrl)
+                .ifPresent(i -> i.forEach(h -> {
+                    request.getHeader(h).ifPresent(headerValue -> headers.set(h, headerValue));
+                }));
+
+        return headers;
+    }
 }
