@@ -28,7 +28,7 @@ public class Endpoint {
      * path template, eg, /api/v1/{id}/foo/{bar}
      *
      * @see "https://swagger.io/docs/specification/paths-and-operations/"
-     *
+     * <p>
      * if provided, has the effect of pathRegex = "^/api/v1/[^/]+/foo/[^/]+$"
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -55,6 +55,15 @@ public class Endpoint {
         return Optional.ofNullable(allowedMethods);
     }
 
+    //if provided, headers provided will be pass-through to the endpoint
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    Set<String> supportedHeaders;
+
+    @JsonIgnore
+    public Optional<Set<String>> getSupportedHeaders() {
+        return Optional.ofNullable(supportedHeaders);
+    }
+
     @JsonInclude(JsonInclude.Include.NON_NULL)
     JsonSchemaFilterUtils.JsonSchemaFilter responseSchema;
 
@@ -72,10 +81,13 @@ public class Endpoint {
     @Override
     public Endpoint clone() {
         return this.toBuilder()
-            .clearTransforms()
-            .transforms(this.transforms.stream().map(Transform::clone).collect(Collectors.toList()))
-            .allowedQueryParams(this.getAllowedQueryParamsOptional().map(ArrayList::new).orElse(null))
-            .build();
+                .clearTransforms()
+                .transforms(this.transforms.stream().map(Transform::clone).collect(Collectors.toList()))
+                .allowedQueryParams(this.getAllowedQueryParamsOptional().map(ArrayList::new).orElse(null))
+                .pathTemplate(this.pathTemplate)
+                .allowedMethods(this.allowedMethods)
+                .supportedHeaders(this.supportedHeaders)
+                .build();
     }
 
 
