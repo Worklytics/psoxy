@@ -411,7 +411,9 @@ public class CommonRequestHandler {
 
         sanitizer.getSupportedHeaders(request.getHttpMethod(), targetUrl)
                 .ifPresent(i -> i.forEach(h -> {
-                    request.getHeader(h).ifPresent(headerValue -> headers.set(h, headerValue));
+                    request.getHeader(h).ifPresent(headerValue -> {
+                        log.info(String.format("Header %s included", h));
+                        headers.set(h, headerValue);});
                 }));
 
         return headers;
