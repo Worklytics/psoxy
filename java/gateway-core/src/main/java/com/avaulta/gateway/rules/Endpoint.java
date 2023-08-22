@@ -56,6 +56,7 @@ public class Endpoint {
     }
 
     //if provided, headers provided will be pass-through to the endpoint
+    // NOTE: Using List, as Set is not being serializable in YAML
     @JsonInclude(JsonInclude.Include.NON_NULL)
     List<String> supportedHeaders;
 
