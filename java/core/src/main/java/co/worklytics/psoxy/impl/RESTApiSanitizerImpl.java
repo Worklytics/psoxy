@@ -85,11 +85,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
 
     @Override
     public boolean isAllowed(@NonNull String httpMethod, @NonNull URL url) {
-        if (rules.getAllowAllEndpoints()) {
-            return true;
-        } else {
-            return getEndpoint(httpMethod, url).isPresent();
-        }
+        return rules.getAllowAllEndpoints() || getEndpoint(httpMethod, url).isPresent();
     }
 
     @Override
