@@ -1,19 +1,21 @@
 package co.worklytics.psoxy.rules.dropbox;
 
-import com.avaulta.gateway.rules.Endpoint;
 import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.rules.Rules2;
+import com.avaulta.gateway.rules.Endpoint;
 import com.avaulta.gateway.rules.transforms.Transform;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Sets;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Prebuilt sanitization rules for Dropbox API responses
  */
 public class PrebuiltSanitizerRules {
+
+    static private final List<String> DEFAULT_QUERY_HEADERS = List.of("Dropbox-API-Select-User");
 
     static private final String DROPBOX_BUSINESS = "dropbox-business";
 
@@ -41,8 +43,6 @@ public class PrebuiltSanitizerRules {
             .withAdditionalEndpoints(FILE_REVISIONS.getEndpoints())
             .withAdditionalEndpoints(GROUP_LIST_ENDPOINT.getEndpoints())
             .withAdditionalEndpoints(MEMBER_LIST_ENDPOINT.getEndpoints());
-
-    static final Set<String> DEFAULT_QUERY_HEADERS = Sets.newHashSet( "Dropbox-API-Select-User");
 
     static public final Map<String, RESTRules> DROPBOX_PREBUILT_RULES_MAP = ImmutableMap.<String, RESTRules>builder()
             .put(DROPBOX_BUSINESS, DROPBOX_ENDPOINTS)

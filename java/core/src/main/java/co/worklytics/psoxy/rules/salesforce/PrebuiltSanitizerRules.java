@@ -187,7 +187,7 @@ public class PrebuiltSanitizerRules {
                 }}).build());
     }};
 
-    private static final Set<String> DEFAULT_QUERY_HEADERS = Sets.newHashSet( "Sforce-Query-Options");
+    private static final List<String> DEFAULT_QUERY_HEADERS = Arrays.asList( "Sforce-Query-Options");
 
     static final Endpoint DESCRIBE_ENDPOINT = Endpoint.builder()
             .pathRegex("^/services/data/" + VERSION_REGEX + "/sobjects/(Account|ActivityHistory|User)/describe$")
