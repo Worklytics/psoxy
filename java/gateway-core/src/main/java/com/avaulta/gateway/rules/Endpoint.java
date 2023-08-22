@@ -12,7 +12,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@JsonPropertyOrder({"pathRegex", "pathTemplate", "allowedQueryParams", "transforms"})
+@JsonPropertyOrder({"pathRegex", "pathTemplate", "allowedQueryParams", "transforms", "supportedHeaders"})
 @Builder(toBuilder = true)
 @With
 @AllArgsConstructor //for builder
@@ -57,10 +57,10 @@ public class Endpoint {
 
     //if provided, headers provided will be pass-through to the endpoint
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    Set<String> supportedHeaders;
+    List<String> supportedHeaders;
 
     @JsonIgnore
-    public Optional<Set<String>> getSupportedHeaders() {
+    public Optional<List<String>> getSupportedHeadersAsOptional() {
         return Optional.ofNullable(supportedHeaders);
     }
 
@@ -71,7 +71,6 @@ public class Endpoint {
     public Optional<JsonSchemaFilterUtils.JsonSchemaFilter> getResponseSchemaOptional() {
         return Optional.ofNullable(responseSchema);
     }
-
 
     @Setter
     @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
@@ -89,6 +88,4 @@ public class Endpoint {
                 .supportedHeaders(this.supportedHeaders)
                 .build();
     }
-
-
 }

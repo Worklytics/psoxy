@@ -3,8 +3,8 @@ package co.worklytics.psoxy;
 import co.worklytics.psoxy.rules.RESTRules;
 
 import java.net.URL;
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 public interface RESTApiSanitizer {
     /**
@@ -32,7 +32,7 @@ public interface RESTApiSanitizer {
      * @param url The url to test
      * @return
      */
-    Optional<Set<String>> getSupportedHeaders(String httpMethod, URL url);
+    Optional<List<String>> getSupportedHeaders(String httpMethod, URL url);
 
     /**
      * sanitize jsonResponse received from url, according any options set on Sanitizer

@@ -93,11 +93,11 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     }
 
     @Override
-    public Optional<Set<String>> getSupportedHeaders(String httpMethod, URL url) {
+    public Optional<List<String>> getSupportedHeaders(String httpMethod, URL url) {
         Optional<Map.Entry<Endpoint, Pattern>> endpoint = getEndpoint(httpMethod, url);
 
         if (endpoint.isPresent()) {
-            return endpoint.get().getKey().getSupportedHeaders();
+            return endpoint.get().getKey().getSupportedHeadersAsOptional();
         } else {
             return Optional.empty();
         }
