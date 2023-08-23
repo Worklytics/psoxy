@@ -412,7 +412,7 @@ public class CommonRequestHandler {
         sanitizer.getAllowedHeadersToForward(request.getHttpMethod(), targetUrl)
                 .ifPresent(i -> i.forEach(h -> {
                     request.getHeader(h).ifPresent(headerValue -> {
-                        log.info(String.format("Header %s included", h));
+                        logIfDevelopmentMode(() -> String.format("Header %s included", h));
                         headers.set(h, headerValue);});
                 }));
 
