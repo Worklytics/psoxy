@@ -58,7 +58,7 @@ endpoints:
           - "$.records[*].Id"
         applyOnlyWhen: "$.records[?(@.attributes.type == \"User\")]"
         encoding: "JSON"
-    supportedHeaders:
+    allowedRequestHeadersToForward:
       - "Sforce-Query-Options"
     responseSchema:
       type: "object"
@@ -133,7 +133,7 @@ endpoints:
           - "$.records[*].OwnerId"
         applyOnlyWhen: "$.records[?(@.attributes.type == \"Account\")]"
         encoding: "JSON"
-    supportedHeaders:
+    allowedRequestHeadersToForward:
       - "Sforce-Query-Options"
     responseSchema:
       type: "object"
@@ -280,7 +280,7 @@ endpoints:
           - "$.records[*].ActivityHistories.records[*].OwnerId"
           - "$.records[*].ActivityHistories.records[*].WhoId"
         encoding: "JSON"
-    supportedHeaders:
+    allowedRequestHeadersToForward:
       - "Sforce-Query-Options"
     responseSchema:
       type: "object"
@@ -421,7 +421,7 @@ endpoints:
         applyOnlyWhen: "$.records[*].ActivityHistories.records[?(@.attributes.type ==\
       \ \"ActivityHistory\")]"
         encoding: "JSON"
-    supportedHeaders:
+    allowedRequestHeadersToForward:
       - "Sforce-Query-Options"
     responseSchema:
       type: "object"

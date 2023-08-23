@@ -6,7 +6,6 @@ import com.avaulta.gateway.rules.Endpoint;
 import com.avaulta.gateway.rules.transforms.Transform;
 import com.google.common.collect.ImmutableMap;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -52,7 +51,7 @@ public class PrebuiltSanitizerRules {
         return Rules2.builder()
                 .endpoint(Endpoint.builder()
                         .pathRegex(pathRegex)
-                        .supportedHeaders(DEFAULT_QUERY_HEADERS)
+                        .allowedRequestHeadersToForward(DEFAULT_QUERY_HEADERS)
                         .transform(Transform.Pseudonymize.builder()
                                 .jsonPath("$.members[*].profile.email")
                                 .jsonPath("$.members[*].profile.secondary_emails[*].email")
@@ -77,7 +76,7 @@ public class PrebuiltSanitizerRules {
         return Rules2.builder()
                 .endpoint(Endpoint.builder()
                         .pathRegex(pathRegex)
-                        .supportedHeaders(DEFAULT_QUERY_HEADERS)
+                        .allowedRequestHeadersToForward(DEFAULT_QUERY_HEADERS)
                         .transform(Transform.Pseudonymize.builder()
                                 .jsonPath("$.entries[*].details.shared_content_owner.email")
                                 .build()
@@ -101,7 +100,7 @@ public class PrebuiltSanitizerRules {
         return Rules2.builder()
                 .endpoint(Endpoint.builder()
                         .pathRegex(pathRegex)
-                        .supportedHeaders(DEFAULT_QUERY_HEADERS)
+                        .allowedRequestHeadersToForward(DEFAULT_QUERY_HEADERS)
                         .transform(Transform.Pseudonymize.builder()
                                 .jsonPath("$.events[*].details.shared_content_owner.email")
                                 .jsonPath("$.events[*].actor.user.email")

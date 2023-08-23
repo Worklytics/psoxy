@@ -409,7 +409,7 @@ public class CommonRequestHandler {
         //MSFT gives weird "{"error":{"code":"InternalServerError","message":"The MIME type 'text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2' requires a '/' character between type and subtype, such as 'text/plain'."}}
         headers.setAccept(ContentType.APPLICATION_JSON.toString());
 
-        sanitizer.getSupportedHeaders(request.getHttpMethod(), targetUrl)
+        sanitizer.getAllowedHeadersToForward(request.getHttpMethod(), targetUrl)
                 .ifPresent(i -> i.forEach(h -> {
                     request.getHeader(h).ifPresent(headerValue -> {
                         log.info(String.format("Header %s included", h));

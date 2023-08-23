@@ -9,7 +9,7 @@ import lombok.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@JsonPropertyOrder({"pathRegex", "pathTemplate", "allowedQueryParams", "transforms", "supportedHeaders"})
+@JsonPropertyOrder({"pathRegex", "pathTemplate", "allowedQueryParams", "supportedHeaders", "transforms"})
 @Builder(toBuilder = true)
 @With
 @AllArgsConstructor //for builder
@@ -53,13 +53,15 @@ public class Endpoint {
     }
 
     //if provided, headers provided will be pass-through to the endpoint
+    // this can be used for passing a specific header (for example, pagination, limits, etc.)
+    // to the request in the source
     // NOTE: Using List, as Set is not being serializable in YAML
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    Collection<String> supportedHeaders;
+    Collection<String> allowedRequestHeadersToForward;
 
     @JsonIgnore
-    public Optional<Collection<String>> getSupportedHeadersAsOptional() {
-        return Optional.ofNullable(supportedHeaders);
+    public Optional<Collection<String>> getAllowedRequestHeaderesToForward() {
+        return Optional.ofNullable(allowedRequestHeadersToForward);
     }
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -83,7 +85,7 @@ public class Endpoint {
                 .allowedQueryParams(this.getAllowedQueryParamsOptional().map(ArrayList::new).orElse(null))
                 .pathTemplate(this.pathTemplate)
                 .allowedMethods(this.allowedMethods)
-                .supportedHeaders(this.supportedHeaders)
+                .allowedRequestHeadersToForward(this.allowedRequestHeadersToForward)
                 .build();
     }
 }

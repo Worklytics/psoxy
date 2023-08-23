@@ -6,7 +6,6 @@ import com.avaulta.gateway.rules.Endpoint;
 import com.avaulta.gateway.rules.JsonSchemaFilterUtils;
 import com.avaulta.gateway.rules.transforms.Transform;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 import java.util.*;
 
@@ -215,28 +214,28 @@ public class PrebuiltSanitizerRules {
 
     static final Endpoint QUERY_USERS_ENDPOINT = Endpoint.builder()
             .pathRegex("^/services/data/" + VERSION_REGEX + "/query[?]q=SELECT.*FROM(%20|\\+)User(%20|\\+)WHERE(%20|\\+)LastModifiedDate.*$")
-            .supportedHeaders(DEFAULT_QUERY_HEADERS)
+            .allowedRequestHeadersToForward(DEFAULT_QUERY_HEADERS)
             .transforms(getUserTransformations(".records[*]", true))
             .responseSchema(jsonSchemaForQueryResult("User", USER_BY_QUERY_RESULT_JSON_SCHEMA))
             .build();
 
     static final Endpoint QUERY_ACCOUNTS_ENDPOINT = Endpoint.builder()
             .pathRegex("^/services/data/" + VERSION_REGEX + "/query[?]q=SELECT.*FROM(%20|\\+)Account(%20|\\+)WHERE(%20|\\+)LastModifiedDate.*$")
-            .supportedHeaders(DEFAULT_QUERY_HEADERS)
+            .allowedRequestHeadersToForward(DEFAULT_QUERY_HEADERS)
             .transform(getAccountTransformations(".records[*]", true))
             .responseSchema(jsonSchemaForQueryResult("Account", ACCOUNT_WITH_ACTIVITY_HISTORIES_QUERY_RESULT_PROPERTY_SCHEMA))
             .build();
 
     static final Endpoint QUERY_FOR_ACTIVITY_HISTORIES_ENDPOINT = Endpoint.builder()
             .pathRegex("^/services/data/" + VERSION_REGEX + "/query[?]q=SELECT.*FROM(%20|\\+)ActivityHistories.*$")
-            .supportedHeaders(DEFAULT_QUERY_HEADERS)
+            .allowedRequestHeadersToForward(DEFAULT_QUERY_HEADERS)
             .transform(getActivityHistoryTransformations(false))
             .responseSchema(jsonSchemaForActivityHistoryQueryResult())
             .build();
 
     static final Endpoint QUERY_PAGINATION_ENDPOINT = Endpoint.builder()
             .pathRegex("^/services/data/" + VERSION_REGEX + "/query/.*")
-            .supportedHeaders(DEFAULT_QUERY_HEADERS)
+            .allowedRequestHeadersToForward(DEFAULT_QUERY_HEADERS)
             .transforms(getUserTransformations(".records[*]", true))
             .transform(getAccountTransformations(".records[*]", true))
             .transform(getActivityHistoryTransformations(true))
