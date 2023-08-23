@@ -6,10 +6,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @JsonPropertyOrder({"pathRegex", "pathTemplate", "allowedQueryParams", "transforms", "supportedHeaders"})
@@ -58,10 +55,10 @@ public class Endpoint {
     //if provided, headers provided will be pass-through to the endpoint
     // NOTE: Using List, as Set is not being serializable in YAML
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    List<String> supportedHeaders;
+    Collection<String> supportedHeaders;
 
     @JsonIgnore
-    public Optional<List<String>> getSupportedHeadersAsOptional() {
+    public Optional<Collection<String>> getSupportedHeadersAsOptional() {
         return Optional.ofNullable(supportedHeaders);
     }
 
