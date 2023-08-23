@@ -108,9 +108,10 @@ function requestWrapper(url, method = 'GET', headers) {
           responseBody.push(data);
         });
         res.on('end', () => {
-          if (res.headers['content-encoding'] === 'gzip') {
+          const contentEncoding = res.headers['content-encoding'];
+          if (['gzip', 'deflate'].includes(contentEncoding)) {
             const data = Buffer.concat(responseBody);
-            zlib.gunzip(data, (error, decompressed) => {
+            const callback = (error, decompressed) => {
               if (error) {
                 reject({ statusMessage: 'Unable to decompress Psoxy response' });
               } else {
@@ -121,7 +122,12 @@ function requestWrapper(url, method = 'GET', headers) {
                   data: decompressed.toString(),
                 });
               }
-            });
+            }
+            if (contentEncoding === 'gzip') {
+              zlib.gunzip(data, callback);
+            } else {
+              zlib.inflate(data, callback);
+            }
           } else {
             resolve({
               status: res.statusCode,
