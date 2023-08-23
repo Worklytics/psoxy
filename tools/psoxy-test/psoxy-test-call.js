@@ -102,7 +102,8 @@ export default async function (options = {}) {
       { additional: jsonCallResult });
 
   } else {
-    let errorMessage = result.statusMessage || 'Unknown';
+    let errorMessage = result.statusMessage ?? 'Unknown';
+    let extendedErrorMessage = '';
 
     if (result.headers) {
       const psoxyError = result.headers['x-psoxy-error'];
@@ -112,31 +113,28 @@ export default async function (options = {}) {
       if (psoxyError) {
         switch (psoxyError) {
           case 'BLOCKED_BY_RULES':
-            errorMessage = 'Blocked by rules error: make sure URL path is correct';
+            extendedErrorMessage = 'Blocked by rules error: make sure URL path is correct';
             break;
           case 'CONNECTION_SETUP':
-            errorMessage =
+            extendedErrorMessage =
               'Connection setup error: make sure the data source is properly configured';
             break;
           case 'API_ERROR':
-            errorMessage = 'API error: call to data source failed';
+            extendedErrorMessage = 'API error: call to data source failed';
             break;
         }
       } else if (result.headers['x-amzn-errortype']) {
-        errorMessage += `: AWS ${result.headers['x-amzn-errortype']}`;
-        if (!_.isUndefined(result.data)) {
-          let extendedErrorMessage = '';
-          try {
-            extendedErrorMessage = JSON.parse(result.data)?.message ?? '';
-            errorMessage += ` ${extendedErrorMessage}`;
-          } catch(e) {logger.verbose(e.message);}
-        }
+        extendedErrorMessage = `: AWS ${result.headers['x-amzn-errortype']}`;
       } else if (result.headers['www-authenticate']) {
-        errorMessage += `: GCP ${result.headers['www-authenticate']}`
+        extendedErrorMessage += `: GCP ${result.headers['www-authenticate']}`
       }
     }
 
-    logger.error(`${chalk.bold.red(result.status)}\n${chalk.bold.red(errorMessage)}`);
+    if (!_.isEmpty(result.data)) {
+      extendedErrorMessage += `\n${result.data}`;
+    }
+
+    logger.error(`${chalk.bold.red(result.status)}\n${chalk.bold.red(errorMessage)}${extendedErrorMessage}`);
     if ([httpCodes.HTTP_STATUS_INTERNAL_SERVER_ERROR,
       httpCodes.HTTP_STATUS_BAD_GATEWAY].includes(result.status)) {
       logger.info('This looks like an internal error in the Proxy; please review the logs.')
