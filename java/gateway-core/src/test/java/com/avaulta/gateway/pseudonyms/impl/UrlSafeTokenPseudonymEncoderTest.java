@@ -109,4 +109,12 @@ public class UrlSafeTokenPseudonymEncoderTest {
         String encoded = pseudonymEncoder.encode(pseudonym);
         assertEquals("t~UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMk@acme.com", encoded);
     }
+
+    @ParameterizedTest
+    void hashesMatch(String original) {
+        deterministicTokenizationStrategy.getToken(original, Function.identity());
+        pseudonymizationStrategy.getReversibleToken(original, Function.identity());
+
+
+    }
 }
