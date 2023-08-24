@@ -8,11 +8,10 @@ endpoints:
       - "$orderBy"
       - "$count"
     transforms:
-      - !<redactRegexMatches>
+      - !<pseudonymizeRegexMatches>
         jsonPaths:
           - "$..proxyAddresses[*]"
-        redactions:
-          - "(?i)^smtp:"
+        regex: "(?i)^smtp:(.*)$"
       - !<redact>
         jsonPaths:
           - "$..displayName"
@@ -37,7 +36,6 @@ endpoints:
           - "$..imAddresses[*]"
           - "$..mail"
           - "$..otherMails[*]"
-          - "$..proxyAddresses[*]"
           - "$..onPremisesSamAccountName"
           - "$..onPremisesUserPrincipalName"
           - "$..onPremisesDistinguishedName"
@@ -66,15 +64,9 @@ endpoints:
           - "$..onPremisesSecurityIdentifier"
           - "$..onPremisesProvisioningErrors"
           - "$..securityIdentifier"
-      - !<redactRegexMatches>
-        jsonPaths:
-          - "$..proxyAddresses[*]"
-        redactions:
-          - "(?i)^smtp:"
       - !<pseudonymize>
         jsonPaths:
           - "$..mail"
-          - "$..proxyAddresses[*]"
         includeOriginal: false
         encoding: "JSON"
   - pathRegex: "^/(v1.0|beta)/groups/[^/]*/members.*"
@@ -85,11 +77,10 @@ endpoints:
       - "$orderBy"
       - "$count"
     transforms:
-      - !<redactRegexMatches>
+      - !<pseudonymizeRegexMatches>
         jsonPaths:
           - "$..proxyAddresses[*]"
-        redactions:
-          - "(?i)^smtp:"
+        regex: "(?i)^smtp:(.*)$"
       - !<redact>
         jsonPaths:
           - "$..displayName"
@@ -114,7 +105,6 @@ endpoints:
           - "$..imAddresses[*]"
           - "$..mail"
           - "$..otherMails[*]"
-          - "$..proxyAddresses[*]"
           - "$..onPremisesSamAccountName"
           - "$..onPremisesUserPrincipalName"
           - "$..onPremisesDistinguishedName"

@@ -228,6 +228,8 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
             f = getPseudonymize((Transform.Pseudonymize) transform);
         } else if (transform instanceof Transform.PseudonymizeEmailHeader) {
             f = this::pseudonymizeEmailHeaderToJson;
+        } else if (transform instanceof Transform.PseudonymizeRegexMatches) {
+            f = getPseudonymizeRegexMatches((Transform.PseudonymizeRegexMatches) transform);
         } else if (transform instanceof Transform.RedactRegexMatches) {
             f = getRedactRegexMatches((Transform.RedactRegexMatches) transform);
         } else if (transform instanceof Transform.RedactExceptSubstringsMatchingRegexes) {
@@ -358,6 +360,37 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
                 throw new RuntimeException("Unsupported pseudonym implementation: " + transformOptions.getEncoding());
             }
 
+        };
+    }
+
+
+    public MapFunction getPseudonymizeRegexMatches(Transform.PseudonymizeRegexMatches transform) {
+        Pattern pattern = Pattern.compile(transform.getRegex());
+
+        return (Object s, Configuration configuration) -> {
+
+            String fullString = (String) s;
+            Matcher matcher = pattern.matcher(fullString);
+
+            if (matcher.matches()) {
+                String toPseudonymize;
+                if (matcher.groupCount() > 0) {
+                    toPseudonymize = matcher.group(1);
+                } else {
+                    toPseudonymize = matcher.group(0);
+                }
+                PseudonymizedIdentity pseudonymizedIdentity = pseudonymizer.pseudonymize(toPseudonymize, transform);
+
+                String pseudonymizedString = urlSafePseudonymEncoder.encode(pseudonymizedIdentity.asPseudonym());
+                if (matcher.groupCount() > 0) {
+                    // return original, replacing match with encoded pseudonym
+                    return fullString.replace(matcher.group(1), pseudonymizedString);
+                } else {
+                    return pseudonymizedString;
+                }
+            } else {
+                return s;
+            }
         };
     }
 

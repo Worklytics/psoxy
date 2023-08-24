@@ -1,6 +1,7 @@
 package co.worklytics.psoxy;
 
 import com.avaulta.gateway.pseudonyms.Pseudonym;
+import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import org.apache.commons.lang3.StringUtils;
@@ -92,18 +93,11 @@ public class PseudonymizedIdentity {
         }
 
         if (reversible != null) {
-            try {
-                decodedReversible = decoder.decode(reversible.getBytes());
-            } catch (IllegalArgumentException e) {
-                decoder = Base64.getDecoder();
-                //q: should we log this?
-                decodedReversible = decoder.decode(StringUtils.replaceChars(reversible, "_.", "/+").getBytes());
-            }
+            UrlSafeTokenPseudonymEncoder encoder = new UrlSafeTokenPseudonymEncoder();
+            return encoder.decode(reversible);
         } else {
             decodedReversible = null;
         }
-
-
 
         return Pseudonym.builder()
             .hash(decodedHash)

@@ -1,6 +1,7 @@
 package com.avaulta.gateway.rules.transforms;
 
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -10,7 +11,6 @@ import lombok.experimental.SuperBuilder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "method")
 @JsonSubTypes({
@@ -21,6 +21,7 @@ import java.util.Map;
     @JsonSubTypes.Type(value = Transform.PseudonymizeEmailHeader.class, name = "pseudonymizeEmailHeader"),
     @JsonSubTypes.Type(value = Transform.FilterTokenByRegex.class, name = "filterTokenByRegex"),
     @JsonSubTypes.Type(value = Transform.Tokenize.class, name = "tokenize"),
+    @JsonSubTypes.Type(value = Transform.PseudonymizeRegexMatches.class, name = "pseudonymizeRegexMatches")
 })
 @SuperBuilder(toBuilder = true)
 @AllArgsConstructor //for builder
@@ -191,11 +192,19 @@ public abstract class Transform {
         }
     }
 
+    public interface PseudonymizationTransform {
+
+        Boolean getIncludeOriginal();
+
+        Boolean getIncludeReversible();
+
+    }
+
     @SuperBuilder(toBuilder = true)
     @AllArgsConstructor //for builder
     @NoArgsConstructor //for Jackson
     @Getter
-    public static class Pseudonymize extends Transform {
+    public static class Pseudonymize extends Transform implements PseudonymizationTransform {
 
         /**
          * use if still need original, but also want its pseudonym to be able to match against
@@ -217,6 +226,26 @@ public abstract class Transform {
         @JsonInclude(JsonInclude.Include.NON_DEFAULT)
         @Builder.Default
         Boolean includeReversible = false;
+
+        /**
+         * if provided, only values at this json path(es) will be pseudonymized
+         * if has a capture group, only portion of value matched by regex captured by first group
+         *
+         *
+         * portion of content matching first capture group in regex will be
+         * pseudonymized; rest preserved;
+         *
+         * if regex does NOT match content, content is left as-is (not pseudonymized)
+         *   q: better to redact?
+         *
+         * Use case: format preserving pseudonymization, namely Microsoft Graph API encodes email
+         * aliases as smtp:mailbox@domain.com or SMTP:mailbox@domain.com, depending on secondary
+         * or primary; we want to pseudonymize only the actual mailbox portion
+         *
+         * @since 0.4.36
+         */
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        String onlyIfRegex;
 
         /**
          * how to encode to the resulting pseudonym
@@ -243,6 +272,55 @@ public abstract class Transform {
     @AllArgsConstructor //for builder
     @NoArgsConstructor //for Jackson
     @Getter
+    public static class PseudonymizeRegexMatches extends Transform implements PseudonymizationTransform  {
+        /**
+         * whether to include reversible form of pseudonymized value in output
+         */
+        @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+        @Builder.Default
+        Boolean includeReversible = false;
+
+        /**
+         * values at this json path(es) matching regex will be pseudonymized
+         *
+         * if regex has a capture group, only portion of value captured by first group will be
+         * pseudonymized and replaced in the content
+         *
+         * if regex does NOT match content, content is left as-is (NOT pseudonymized)
+         *
+         * q: safer to redact in such cases??
+         *
+         * Use case: format preserving pseudonymization, namely Microsoft Graph API encodes email
+         * aliases as smtp:mailbox@domain.com or SMTP:mailbox@domain.com, depending on secondary
+         * or primary; we want to pseudonymize only the actual mailbox portion
+         *
+         * @since 0.4.36
+         */
+        @NonNull
+        String regex;
+
+        @Override
+        public PseudonymizeRegexMatches clone() {
+            return this.toBuilder()
+                .clearJsonPaths()
+                .jsonPaths(new ArrayList<>(this.jsonPaths))
+                .clearFields()
+                .fields(new ArrayList<>(this.fields))
+                .build();
+        }
+
+        @JsonIgnore
+        @Override
+        public Boolean getIncludeOriginal() {
+            return false;
+        }
+    }
+
+
+    @SuperBuilder(toBuilder = true)
+    @AllArgsConstructor //for builder
+    @NoArgsConstructor //for Jackson
+    @Getter
     public static class Tokenize extends Transform {
 
         /**
@@ -255,6 +333,7 @@ public abstract class Transform {
          * HUGE CAVEAT: as of Aug 2022, reversing encapsulated tokens BACK to their original values
          * will work if and only if token is bounded by non-base64-urlencoded character
          */
+        @JsonInclude(JsonInclude.Include.NON_NULL)
         String regex;
 
         //NOTE: always format to URL-safe
