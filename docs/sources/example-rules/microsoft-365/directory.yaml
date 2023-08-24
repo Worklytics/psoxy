@@ -17,7 +17,6 @@ endpoints:
           - "$..givenName"
           - "$..surname"
           - "$..mailNickname"
-          - "$..proxyAddresses"
           - "$..responsibilities"
           - "$..skills"
           - "$..faxNumber"
@@ -37,6 +36,7 @@ endpoints:
           - "$..onPremisesUserPrincipalName"
           - "$..onPremisesDistinguishedName"
           - "$..onPremisesImmutableId"
+          - "$..proxyAddresses[*]"
           - "$..identities[*].issuerAssignedId"
         encoding: "JSON"
   - pathRegex: "^/(v1.0|beta)/groups/?[^/]*"
@@ -48,7 +48,6 @@ endpoints:
           - "$..acceptedSenders"
           - "$..members"
           - "$..membersWithLicenseErrors"
-          - "$..proxyAddresses"
           - "$..mailNickname"
           - "$..description"
           - "$..resourceBehaviorOptions"
@@ -60,6 +59,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..mail"
+          - "$..proxyAddresses"
         includeOriginal: true
         encoding: "JSON"
   - pathRegex: "^/(v1.0|beta)/groups/[^/]*/members.*"
@@ -79,7 +79,6 @@ endpoints:
           - "$..givenName"
           - "$..surname"
           - "$..mailNickname"
-          - "$..proxyAddresses"
           - "$..responsibilities"
           - "$..skills"
           - "$..faxNumber"
@@ -99,5 +98,6 @@ endpoints:
           - "$..onPremisesUserPrincipalName"
           - "$..onPremisesDistinguishedName"
           - "$..onPremisesImmutableId"
+          - "$..proxyAddresses"
           - "$..identities[*].issuerAssignedId"
         encoding: "JSON"

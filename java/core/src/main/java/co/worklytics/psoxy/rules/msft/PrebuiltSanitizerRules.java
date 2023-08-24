@@ -37,7 +37,6 @@ public class PrebuiltSanitizerRules {
             .jsonPath("$..givenName")
             .jsonPath("$..surname")
             .jsonPath("$..mailNickname") //get the actual mail
-            .jsonPath("$..proxyAddresses")
             .jsonPath("$..responsibilities")
             .jsonPath("$..skills")
             .jsonPath("$..faxNumber")
@@ -53,6 +52,7 @@ public class PrebuiltSanitizerRules {
             .jsonPath("$..imAddresses[*]")
             .jsonPath("$..mail")
             .jsonPath("$..otherMails[*]")
+            .jsonPath("$..proxyAddresses[*]")
             .jsonPath("$..onPremisesSamAccountName")
             .jsonPath("$..onPremisesUserPrincipalName")
             .jsonPath("$..onPremisesDistinguishedName")
@@ -81,7 +81,6 @@ public class PrebuiltSanitizerRules {
                 .jsonPath("$..acceptedSenders")
                 .jsonPath("$..members")
                 .jsonPath("$..membersWithLicenseErrors")
-                .jsonPath("$..proxyAddresses")
                 .jsonPath("$..mailNickname")
                 .jsonPath("$..description") // q: include for Project use case?
                 .jsonPath("$..resourceBehaviorOptions")
@@ -94,6 +93,7 @@ public class PrebuiltSanitizerRules {
         .transform(Transform.Pseudonymize.builder()
                 .includeOriginal(true)
                 .jsonPath("$..mail")
+                .jsonPath("$..proxyAddresses[*]")
                 .build())
         .build();
 

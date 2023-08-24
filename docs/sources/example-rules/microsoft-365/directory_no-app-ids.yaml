@@ -17,7 +17,6 @@ endpoints:
           - "$..givenName"
           - "$..surname"
           - "$..mailNickname"
-          - "$..proxyAddresses"
           - "$..responsibilities"
           - "$..skills"
           - "$..faxNumber"
@@ -53,7 +52,6 @@ endpoints:
           - "$..acceptedSenders"
           - "$..members"
           - "$..membersWithLicenseErrors"
-          - "$..proxyAddresses"
           - "$..mailNickname"
           - "$..description"
           - "$..resourceBehaviorOptions"
@@ -65,6 +63,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..mail"
+          - "$..proxyAddresses[*]"
         includeOriginal: true
         encoding: "JSON"
   - pathRegex: "^/(v1.0|beta)/groups/[^/]*/members.*"
@@ -84,7 +83,6 @@ endpoints:
           - "$..givenName"
           - "$..surname"
           - "$..mailNickname"
-          - "$..proxyAddresses"
           - "$..responsibilities"
           - "$..skills"
           - "$..faxNumber"
@@ -100,6 +98,7 @@ endpoints:
           - "$..imAddresses[*]"
           - "$..mail"
           - "$..otherMails[*]"
+          - "$..proxyAddresses[*]"
           - "$..onPremisesSamAccountName"
           - "$..onPremisesUserPrincipalName"
           - "$..onPremisesDistinguishedName"
