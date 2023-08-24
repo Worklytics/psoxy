@@ -31,6 +31,10 @@ public class Route implements HttpFunction {
 
         CloudFunctionRequest cloudFunctionRequest = CloudFunctionRequest.of(request);
 
+        if (requestHandler == null) {
+            DaggerGcpContainer.create().injectRoute(this);
+        }
+
         try {
             if (envVarsConfigService.isDevelopment()) {
                 cloudFunctionRequest.getWarnings().forEach(log::warning);
@@ -38,10 +42,6 @@ public class Route implements HttpFunction {
         } catch (Throwable e) {
             //suppress anything that went wrong here
             log.log(Level.WARNING, "Throwable while computing warnings that is suppressed", e);
-        }
-
-        if (requestHandler == null) {
-            DaggerGcpContainer.create().injectRoute(this);
         }
 
         HttpEventResponse abstractResponse =
