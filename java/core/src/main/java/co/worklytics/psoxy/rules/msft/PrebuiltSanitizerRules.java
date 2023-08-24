@@ -94,11 +94,16 @@ public class PrebuiltSanitizerRules {
                 .jsonPath("$..onPremisesProvisioningErrors")
                 .jsonPath("$..securityIdentifier")
                 .build())
-        .transform(Transform.Pseudonymize.builder()
-                .includeOriginal(true)
-                .jsonPath("$..mail")
+            // VERY hacky; there is nothing that guarantees order of evaluation of the transforms ...
+            .transform(Transform.RedactRegexMatches.builder()
                 .jsonPath("$..proxyAddresses[*]")
+                .redaction("(?i)^smtp:")
                 .build())
+            .transform(Transform.Pseudonymize.builder()
+                    .includeOriginal(true)
+                    .jsonPath("$..mail")
+                    .jsonPath("$..proxyAddresses[*]")
+                    .build())
         .build();
 
     static final Endpoint DIRECTORY_GROUP_MEMBERS = Endpoint.builder()

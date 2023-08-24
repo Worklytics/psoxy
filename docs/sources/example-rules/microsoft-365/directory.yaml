@@ -61,6 +61,11 @@ endpoints:
           - "$..onPremisesSecurityIdentifier"
           - "$..onPremisesProvisioningErrors"
           - "$..securityIdentifier"
+      - !<redactRegexMatches>
+        jsonPaths:
+          - "$..proxyAddresses[*]"
+        redactions:
+          - "(?i)^smtp:"
       - !<pseudonymize>
         jsonPaths:
           - "$..mail"
