@@ -44,6 +44,7 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
         String sanitized = this.sanitize(endpoint, jsonString);
 
         assertPseudonymized(sanitized, "MeganB@M365x214355.onmicrosoft.com");
+        assertPseudonymized(sanitized, "megan@M365x214355.onmicrosoft.com"); //her alias
         assertRedacted(sanitized,
             "Megan",
             "Bowen",

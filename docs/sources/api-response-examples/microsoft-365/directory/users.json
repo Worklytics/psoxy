@@ -14,7 +14,14 @@
       "officeLocation": null,
       "preferredLanguage": "en-US",
       "surname": "Warren",
-      "userPrincipalName": "Alice@worklytics.onmicrosoft.com"
+      "userPrincipalName": "Alice@worklytics.onmicrosoft.com",
+      "otherMails": [
+        "Alice@gmail.com"
+      ],
+      "proxyAddresses": [
+        "SMTP:Alice@worklytics.onmicrosoft.com",
+        "smtp:Alice.Warren@worklytics.onmicrosoft.com"
+      ]
     },
     {
       "id": "307ee26b-fe96-40a9-bc8a-9e49fba4de97",

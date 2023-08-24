@@ -8,7 +8,14 @@
       "mail":"{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"q13PonzfNpUWmyGUYmClKKmAFrkH_BjdABY74ccirMk\"}",
       "officeLocation":null,
       "preferredLanguage":"en-US",
-      "userPrincipalName":"{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"q13PonzfNpUWmyGUYmClKKmAFrkH_BjdABY74ccirMk\"}"
+      "userPrincipalName":"{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"q13PonzfNpUWmyGUYmClKKmAFrkH_BjdABY74ccirMk\"}",
+      "otherMails":[
+        "{\"scope\":\"email\",\"domain\":\"gmail.com\",\"hash\":\"qd9uR3XVt6EwqRqV2fe.e4r7f8NJfgupwPtE5lXSkyA\"}"
+      ],
+      "proxyAddresses":[
+        "{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"q13PonzfNpUWmyGUYmClKKmAFrkH_BjdABY74ccirMk\"}",
+        "{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"lvy8VyWgzHtEbGoV33ah8PG0kB.iObC5o61biWbEQQQ\"}"
+      ]
     },
     {
       "id":"p~olwC_FZa24BttFSG87T2U-fJybmzdHj6SMc7LxV4zOm0oLvgEDHxSVdAUvflsZfNPyGZt4MDy8hyxOZP9VHyJpfDnlVva0m1ElQ-WrRUjxM",

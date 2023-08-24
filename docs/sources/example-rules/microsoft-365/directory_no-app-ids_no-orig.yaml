@@ -8,6 +8,11 @@ endpoints:
       - "$orderBy"
       - "$count"
     transforms:
+      - !<redactRegexMatches>
+        jsonPaths:
+          - "$..proxyAddresses[*]"
+        redactions:
+          - "(?i)^smtp:"
       - !<redact>
         jsonPaths:
           - "$..displayName"
@@ -32,6 +37,7 @@ endpoints:
           - "$..imAddresses[*]"
           - "$..mail"
           - "$..otherMails[*]"
+          - "$..proxyAddresses[*]"
           - "$..onPremisesSamAccountName"
           - "$..onPremisesUserPrincipalName"
           - "$..onPremisesDistinguishedName"
@@ -74,6 +80,11 @@ endpoints:
       - "$orderBy"
       - "$count"
     transforms:
+      - !<redactRegexMatches>
+        jsonPaths:
+          - "$..proxyAddresses[*]"
+        redactions:
+          - "(?i)^smtp:"
       - !<redact>
         jsonPaths:
           - "$..displayName"

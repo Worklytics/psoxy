@@ -29,6 +29,11 @@ public class PrebuiltSanitizerRules {
     static final String DIRECTORY_REGEX_GROUP_MEMBERS = "^/(v1.0|beta)/groups/[^/]*/members.*";
 
     static final List<Transform> USER_TRANSFORMS = Arrays.asList(
+        // VERY hacky; there is nothing that guarantees order of evaluation of the transforms ...
+        Transform.RedactRegexMatches.builder()
+            .jsonPath("$..proxyAddresses[*]")
+            .redaction("(?i)^smtp:")
+            .build(),
         Transform.Redact.builder()
             .jsonPath("$..displayName")
             .jsonPath("$..aboutMe")
@@ -59,7 +64,6 @@ public class PrebuiltSanitizerRules {
             .jsonPath("$..onPremisesImmutableId")
             .jsonPath("$..identities[*].issuerAssignedId")
             .build()
-
     );
     static final Endpoint DIRECTORY_USERS = Endpoint.builder()
         .pathRegex(DIRECTORY_REGEX_USERS)
