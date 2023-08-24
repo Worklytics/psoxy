@@ -32,7 +32,6 @@ endpoints:
           - "$..imAddresses[*]"
           - "$..mail"
           - "$..otherMails[*]"
-          - "$..proxyAddresses[*]"
           - "$..onPremisesSamAccountName"
           - "$..onPremisesUserPrincipalName"
           - "$..onPremisesDistinguishedName"
@@ -64,6 +63,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..mail"
+          - "$..proxyAddresses[*]"
         includeOriginal: false
         encoding: "JSON"
   - pathRegex: "^/(v1.0|beta)/groups/[^/]*/members.*"
@@ -97,8 +97,8 @@ endpoints:
           - "$..userPrincipalName"
           - "$..imAddresses[*]"
           - "$..mail"
-          - "$..proxyAddresses[*]"
           - "$..otherMails[*]"
+          - "$..proxyAddresses[*]"
           - "$..onPremisesSamAccountName"
           - "$..onPremisesUserPrincipalName"
           - "$..onPremisesDistinguishedName"
