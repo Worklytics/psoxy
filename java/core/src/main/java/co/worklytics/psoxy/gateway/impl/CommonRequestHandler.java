@@ -170,7 +170,7 @@ public class CommonRequestHandler {
             HttpContent content = null;
 
             if (request.getBody() != null) {
-                String contentType = request.getHeader("content-type")
+                String contentType = request.getHeader(HttpHeaders.CONTENT_TYPE)
                         .orElse("application/json");
                 content = new ByteArrayContent(contentType, request.getBody());
             }
