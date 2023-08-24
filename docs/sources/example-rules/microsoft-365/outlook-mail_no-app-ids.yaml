@@ -8,6 +8,11 @@ endpoints:
       - "$orderBy"
       - "$count"
     transforms:
+      - !<redactRegexMatches>
+        jsonPaths:
+          - "$..proxyAddresses[*]"
+        redactions:
+          - "(?i)^smtp:"
       - !<redact>
         jsonPaths:
           - "$..displayName"
@@ -17,7 +22,6 @@ endpoints:
           - "$..givenName"
           - "$..surname"
           - "$..mailNickname"
-          - "$..proxyAddresses"
           - "$..responsibilities"
           - "$..skills"
           - "$..faxNumber"
@@ -33,6 +37,7 @@ endpoints:
           - "$..imAddresses[*]"
           - "$..mail"
           - "$..otherMails[*]"
+          - "$..proxyAddresses[*]"
           - "$..onPremisesSamAccountName"
           - "$..onPremisesUserPrincipalName"
           - "$..onPremisesDistinguishedName"
@@ -53,7 +58,6 @@ endpoints:
           - "$..acceptedSenders"
           - "$..members"
           - "$..membersWithLicenseErrors"
-          - "$..proxyAddresses"
           - "$..mailNickname"
           - "$..description"
           - "$..resourceBehaviorOptions"
@@ -62,9 +66,15 @@ endpoints:
           - "$..onPremisesSecurityIdentifier"
           - "$..onPremisesProvisioningErrors"
           - "$..securityIdentifier"
+      - !<redactRegexMatches>
+        jsonPaths:
+          - "$..proxyAddresses[*]"
+        redactions:
+          - "(?i)^smtp:"
       - !<pseudonymize>
         jsonPaths:
           - "$..mail"
+          - "$..proxyAddresses[*]"
         includeOriginal: true
         encoding: "JSON"
   - pathRegex: "^/(v1.0|beta)/groups/[^/]*/members.*"
@@ -75,6 +85,11 @@ endpoints:
       - "$orderBy"
       - "$count"
     transforms:
+      - !<redactRegexMatches>
+        jsonPaths:
+          - "$..proxyAddresses[*]"
+        redactions:
+          - "(?i)^smtp:"
       - !<redact>
         jsonPaths:
           - "$..displayName"
@@ -84,7 +99,6 @@ endpoints:
           - "$..givenName"
           - "$..surname"
           - "$..mailNickname"
-          - "$..proxyAddresses"
           - "$..responsibilities"
           - "$..skills"
           - "$..faxNumber"
@@ -100,6 +114,7 @@ endpoints:
           - "$..imAddresses[*]"
           - "$..mail"
           - "$..otherMails[*]"
+          - "$..proxyAddresses[*]"
           - "$..onPremisesSamAccountName"
           - "$..onPremisesUserPrincipalName"
           - "$..onPremisesDistinguishedName"
