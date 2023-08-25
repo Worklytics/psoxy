@@ -16,11 +16,8 @@ So this drives cost in several ways:
 Generally, proxy is transferring JSON data, which is highly compressible. Using `gzip` likely to
 reduce network volume by 50-80%. So we want to make sure we do this everywhere.
 
-<<<<<<< HEAD
-=======
 As of Aug 2023, we're not bothering with compressing requests, as expected to be small (eg, current
 proxy use-cases don't involve large `PUT` / `POST` operations).
->>>>>>> s155-compression-warnings
 
 ## Proxy-to-Client Response
 
@@ -49,16 +46,14 @@ behavior for App Engine applies:
 
 https://cloud.google.com/appengine/docs/legacy/standard/go111/how-requests-are-handled#:~:text=For%20responses%20that%20are%20returned,HTML%2C%20CSS%2C%20or%20JavaScript.
 
-<<<<<<< HEAD
-=======
-## Proxy-to-Source Response
+## Source-to-Proxy Response
 
 All requests should be built using `GzipedContentHttpRequestInitializer`, which should add:
   - `Accept-Encoding: gzip`
   -  append `(gzip)` to `User-Agent` header
 
-We believe this will trigger compression for most sources.
+We believe this will trigger compression for most sources (the User-Agent thing being practice that
+Google seems to want).
 
->>>>>>> s155-compression-warnings
 
 
