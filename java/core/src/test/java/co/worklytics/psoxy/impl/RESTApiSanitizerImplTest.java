@@ -2,6 +2,7 @@ package co.worklytics.psoxy.impl;
 
 import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.gateway.ConfigService;
+import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.rules.Endpoint;
 import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
@@ -28,11 +29,9 @@ import org.junit.jupiter.params.provider.ValueSource;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.net.URL;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static co.worklytics.test.TestModules.withMockEncryptionKey;
 import static org.junit.jupiter.api.Assertions.*;
@@ -493,4 +492,58 @@ class RESTApiSanitizerImplTest {
 
         assertEquals(expected, sanitizer.getHasPathTemplateMatchingUrl(new URL(url)).test(entry));
     }
+
+
+    @SneakyThrows
+    @CsvSource(value = {
+        "something",
+    })
+    @ParameterizedTest
+    void pseudonymizeWithRegexMatches(String input) {
+        List<MapFunction> transforms = Arrays.asList(
+            sanitizer.getPseudonymizeRegexMatches(Transform.PseudonymizeRegexMatches.builder()
+                .regex(".*")
+                .includeReversible(true)
+                .build()),
+            sanitizer.getPseudonymizeRegexMatches(Transform.PseudonymizeRegexMatches.builder()
+                .regex(".*")
+                .includeReversible(false)
+                .build()),
+            sanitizer.getPseudonymize(Transform.Pseudonymize.builder()
+                .includeReversible(true)
+                .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
+                .build()),
+            sanitizer.getPseudonymize(Transform.Pseudonymize.builder()
+                .includeReversible(false)
+                .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
+                .build())
+        );
+
+        List<String> pseudonymized = transforms.stream()
+            .map(f -> (String) f.map(input, sanitizer.getJsonConfiguration()))
+            .collect(Collectors.toList());
+
+        UrlSafeTokenPseudonymEncoder encoder = new UrlSafeTokenPseudonymEncoder();
+
+        List<Pseudonym> pseudonyms = pseudonymized.stream()
+            .map(s -> {
+                try {
+                    return encoder.decode(s);
+                } catch (Exception e) {
+                    return encoder.decode(StringUtils.replaceChars(s, ".+/", "--_"));
+                }
+            })
+            .collect(Collectors.toList());
+
+        List<String> hashes = pseudonyms.stream()
+            .map(Pseudonym::getHash)
+            .map(Base64.getEncoder()::encode)
+            .map(String::new)
+            .collect(Collectors.toList());
+
+        assertTrue(hashes.stream().allMatch(p -> Objects.equals(hashes.get(0), p)));
+
+    }
+
+
 }

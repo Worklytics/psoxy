@@ -381,7 +381,17 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
                 }
                 PseudonymizedIdentity pseudonymizedIdentity = pseudonymizer.pseudonymize(toPseudonymize, transform);
 
-                String pseudonymizedString = urlSafePseudonymEncoder.encode(pseudonymizedIdentity.asPseudonym());
+                String pseudonymizedString;
+                if (pseudonymizedIdentity.getReversible() != null) {
+                    //exploits that already reversibly encoded, including prefix
+                    pseudonymizedString = pseudonymizedIdentity.getReversible();
+                } else {
+                    pseudonymizedString = UrlSafeTokenPseudonymEncoder.TOKEN_PREFIX + pseudonymizedIdentity.getHash();
+                }
+                if (pseudonymizedIdentity.getDomain() != null) {
+                    pseudonymizedString += UrlSafeTokenPseudonymEncoder.DOMAIN_SEPARATOR + pseudonymizedIdentity.getDomain();
+                }
+
                 if (matcher.groupCount() > 0) {
                     // return original, replacing match with encoded pseudonym
                     return fullString.replace(matcher.group(1), pseudonymizedString);

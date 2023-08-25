@@ -28,7 +28,7 @@ public class UrlSafeTokenPseudonymEncoder implements PseudonymEncoder {
 
     //length of base64-url-encoded IV + ciphertext
     static final int REVERSIBLE_PSEUDONYM_LENGTH_WITHOUT_PREFIX = 43;
-    private static final String DOMAIN_SEPARATOR = "@";
+    public static final String DOMAIN_SEPARATOR = "@";
 
 
     //base64url-encoding without padding

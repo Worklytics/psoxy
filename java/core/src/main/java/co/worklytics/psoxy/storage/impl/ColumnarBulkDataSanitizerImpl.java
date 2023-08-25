@@ -3,7 +3,9 @@ package co.worklytics.psoxy.storage.impl;
 import co.worklytics.psoxy.PseudonymizedIdentity;
 import co.worklytics.psoxy.Pseudonymizer;
 import co.worklytics.psoxy.rules.CsvRules;
+import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
+import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.BulkDataRules;
 import com.avaulta.gateway.rules.ColumnarRules;
@@ -152,7 +154,14 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
                                 //this shouldn't happen, bc ColumnarRules don't support preserving original
                                 log.warning("Encoding pseudonym for column '" + outputColumnName + "' using format that will not include the 'original' value, althought transformation preserved it");
                             }
-                            return urlSafeTokenPseudonymEncoder.encode(identity.asPseudonym());
+                            if (pseudonymizer.getOptions().getPseudonymImplementation() == PseudonymImplementation.LEGACY) {
+                                if (identity.getReversible() != null) {
+                                    throw new Error("Cannot encode legacy PseudonymizedIdentity with reversibles as URL_SAFE_TOKEN");
+                                }
+                                return urlSafeTokenPseudonymEncoder.encode(identity.fromLegacy());
+                            } else {
+                                return urlSafeTokenPseudonymEncoder.encode(identity.asPseudonym());
+                            }
                         } else {
                             //JSON
                             return objectMapper.writeValueAsString(identity);

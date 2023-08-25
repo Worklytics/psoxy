@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import org.apache.commons.lang3.StringUtils;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 /**
@@ -72,29 +73,26 @@ public class PseudonymizedIdentity {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     String reversible;
 
+    /**
+     * convert this to Pseudonym; works ONLY if built with DEFAULT format
+     *
+     * @return
+     */
     public Pseudonym asPseudonym() {
 
         //q: what to do w original, if anything?
 
-        Base64.Decoder decoder = Base64.getUrlDecoder();
+        UrlSafeTokenPseudonymEncoder encoder = new UrlSafeTokenPseudonymEncoder();
 
         byte[] decodedHash, decodedReversible;
         if (hash != null) {
-            decoder = Base64.getUrlDecoder();
-            try {
-                decodedHash = decoder.decode(hash.getBytes());
-            } catch (IllegalArgumentException e) {
-                decoder = Base64.getDecoder();
-                //q: should we log this?
-                decodedHash = decoder.decode(StringUtils.replaceChars(hash, "_.", "/+").getBytes());
-            }
+            decodedHash = encoder.decode(hash).getHash();
         } else {
             decodedHash = null;
         }
 
         if (reversible != null) {
-            UrlSafeTokenPseudonymEncoder encoder = new UrlSafeTokenPseudonymEncoder();
-            return encoder.decode(reversible);
+            decodedReversible = encoder.decode(reversible).getReversible();
         } else {
             decodedReversible = null;
         }
@@ -104,5 +102,25 @@ public class PseudonymizedIdentity {
             .domain(domain)
             .reversible(decodedReversible)
             .build();
+    }
+
+    /**
+     * convert this to Pseudonym; works ONLY if built with LEGACY format
+     *
+     * @return
+     */
+    public Pseudonym fromLegacy() {
+        HashUtils hashUtils = new HashUtils();
+
+        Pseudonym.PseudonymBuilder<?, ?> builder = Pseudonym.builder()
+                .hash(hashUtils.decode(hash))
+                .domain(domain);
+
+        if (reversible != null) {
+            UrlSafeTokenPseudonymEncoder encoder = new UrlSafeTokenPseudonymEncoder();
+            builder.reversible(encoder.decode(reversible).getReversible());
+        }
+
+        return builder.build();
     }
 }

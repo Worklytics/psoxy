@@ -39,4 +39,8 @@ public class HashUtils {
         // https://en.wikipedia.org/wiki/Percent-encoding#Types_of_URI_characters
         return StringUtils.replaceChars(encoded, "/+", "_.");
     }
+
+    public byte[] decode(String encoded) {
+        return Base64.getDecoder().decode(StringUtils.replaceChars(encoded, "_.", "/+"));
+    }
 }
