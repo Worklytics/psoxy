@@ -1,7 +1,3 @@
-# NOTE: region used to be passed in as a variable; put it MUST match the region in which the lambda
-# is provisioned, and that's implicit in the provider - so we should just infer from the provider
-data "aws_region" "current" {}
-
 locals {
   environment_id_prefix                 = "${var.environment_id}${length(var.environment_id) > 0 ? "-" : ""}"
   environment_id_display_name_qualifier = length(var.environment_id) > 0 ? " ${var.environment_id} " : ""

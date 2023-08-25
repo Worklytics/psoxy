@@ -17,6 +17,10 @@ output "pseudonym_salt" {
   value       = module.psoxy.pseudonym_salt
 }
 
+output "service_accounts" {
+  value = google_service_account.api_connectors
+}
+
 output "todos" {
   description = "List of todo steps to complete, in markdown format."
   value       = values(module.api_connector)[*].todo
