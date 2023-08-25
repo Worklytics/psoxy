@@ -11,6 +11,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.net.URLEncoder;
+import java.util.Base64;
 import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -110,11 +112,27 @@ public class UrlSafeTokenPseudonymEncoderTest {
         assertEquals("t~UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMk@acme.com", encoded);
     }
 
-    @ParameterizedTest
-    void hashesMatch(String original) {
-        deterministicTokenizationStrategy.getToken(original, Function.identity());
-        pseudonymizationStrategy.getReversibleToken(original, Function.identity());
+    @Test
+    void hashesMatch() {
+        byte[] pseudonym = deterministicTokenizationStrategy.getToken("original", Function.identity());
+        byte[] reversible = pseudonymizationStrategy.getReversibleToken("original", Function.identity());
 
+        Pseudonym p = Pseudonym.builder()
+            .hash(pseudonym)
+            .build();
+
+        Pseudonym r = Pseudonym.builder()
+            .hash(pseudonym)
+            .reversible(reversible)
+            .build();
+
+        // don't confuse with encoder under test; this is to provide readable comparison
+        Base64.Encoder forComparison = Base64.getUrlEncoder().withoutPadding();
+
+        assertEquals(
+            forComparison.encodeToString(pseudonymEncoder.decode(pseudonymEncoder.encode(p)).getHash()),
+            forComparison.encodeToString(pseudonymEncoder.decode(pseudonymEncoder.encode(r)).getHash())
+        );
 
     }
 }
