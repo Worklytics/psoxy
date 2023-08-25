@@ -45,7 +45,7 @@ locals {
           # NOTE: hardcoded due a cycle (through api_connectors -> module.psoxy), ideally better if coming from
           # module.msft-connection-auth-federation[k].audience output variable
           # but for GCP is always "api://AzureADTokenExchange".
-          AUDIENCE            = "api://AzureADTokenExchange"
+          AUDIENCE          = "api://AzureADTokenExchange"
           DEVELOPER_NAME_ID = local.developer_provider_name
         }
       )
