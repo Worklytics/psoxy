@@ -573,4 +573,21 @@ class RESTApiSanitizerImplTest {
     }
 
 
+
+    @CsvSource(value = {
+        "something,.*,t~wUW4bkpTjD6c.BIQaE_oLQxN4nD5vbnf5HBVz7gxck8",
+        "something,blah:.*thing,", // no match, should redact
+        "blah:something,blah:.*thing,t~iWybsRb4SscO_Z6v2gpnMTjPujG2E4FtxgYkjWc5HXQ",
+        "blah:something,blah:(.*),blah:t~wUW4bkpTjD6c.BIQaE_oLQxN4nD5vbnf5HBVz7gxck8",
+    })
+    @ParameterizedTest
+    public void pseudonymizeWithRegexMatches_nonMatchingRedacted(String input, String regex, String expected) {
+        MapFunction transform = sanitizer.getPseudonymizeRegexMatches(Transform.PseudonymizeRegexMatches.builder()
+            .regex(regex)
+            .includeReversible(false)
+            .build());
+
+        assertEquals(StringUtils.trimToNull(expected),
+            transform.map(input, sanitizer.getJsonConfiguration()));
+    }
 }

@@ -410,7 +410,8 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
                     return pseudonymizedString;
                 }
             } else {
-                return s;
+                //if no match, redact it
+                return null;
             }
         };
     }

@@ -286,9 +286,7 @@ public abstract class Transform {
          * if regex has a capture group, only portion of value captured by first group will be
          * pseudonymized and replaced in the content
          *
-         * if regex does NOT match content, content is left as-is (NOT pseudonymized)
-         *
-         * q: safer to redact in such cases??
+         * if regex does NOT match content, content matching to JSON path is REDACTED.
          *
          * Use case: format preserving pseudonymization, namely Microsoft Graph API encodes email
          * aliases as smtp:mailbox@domain.com or SMTP:mailbox@domain.com, depending on secondary
