@@ -500,6 +500,16 @@ class RESTApiSanitizerImplTest {
     })
     @ParameterizedTest
     void pseudonymizeWithRegexMatches(String input) {
+
+        Pseudonymizer pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
+            .pseudonymizationSalt("an irrelevant per org secret")
+            .defaultScopeId("scope")
+            .pseudonymImplementation(PseudonymImplementation.LEGACY)
+            .build());
+
+
+        sanitizer = sanitizerFactory.create(PrebuiltSanitizerRules.DEFAULTS.get("gmail"), pseudonymizer);
+
         List<MapFunction> transforms = Arrays.asList(
             sanitizer.getPseudonymizeRegexMatches(Transform.PseudonymizeRegexMatches.builder()
                 .regex(".*")

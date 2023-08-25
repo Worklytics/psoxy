@@ -7,6 +7,7 @@ import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.utils.URLUtils;
 import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
+import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.Endpoint;
 import com.avaulta.gateway.rules.JsonSchemaFilterUtils;
@@ -354,7 +355,12 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
             if (transformOptions.getEncoding() == PseudonymEncoder.Implementations.JSON) {
                 return configuration.jsonProvider().toJson(pseudonymizedIdentity);
             } else if (transformOptions.getEncoding() == PseudonymEncoder.Implementations.URL_SAFE_TOKEN) {
-                //TODO: exploits that this was already encoded with UrlSafeTokenPseudonymEncoder
+                if (pseudonymizedIdentity.getReversible() != null
+                        && getPseudonymizer().getOptions().getPseudonymImplementation() == PseudonymImplementation.LEGACY) {
+                    // can't do reversible encoding with legacy pseudonym implementation, in URL_SAFE_TOKEN
+                    return configuration.jsonProvider().toJson(pseudonymizedIdentity);
+                }
+                //exploit that already reversibly encoded, including prefix
                 return ObjectUtils.firstNonNull(pseudonymizedIdentity.getReversible(), pseudonymizedIdentity.getHash());
             } else {
                 throw new RuntimeException("Unsupported pseudonym implementation: " + transformOptions.getEncoding());
@@ -383,8 +389,13 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
 
                 String pseudonymizedString;
                 if (pseudonymizedIdentity.getReversible() != null) {
-                    //exploits that already reversibly encoded, including prefix
-                    pseudonymizedString = pseudonymizedIdentity.getReversible();
+                    if (getPseudonymizer().getOptions().getPseudonymImplementation() == PseudonymImplementation.LEGACY) {
+                        //exploits that already reversibly encoded, including prefix
+                        log.warning("Using transform PseudonymizeRegexMatches, with reversible==true; this is NOT supported for LEGACY pseudonym implementation, so non-reversible pseudonym encoded");
+                        pseudonymizedString = UrlSafeTokenPseudonymEncoder.TOKEN_PREFIX + pseudonymizedIdentity.getHash();
+                    } else {
+                        pseudonymizedString = pseudonymizedIdentity.getReversible();
+                    }
                 } else {
                     pseudonymizedString = UrlSafeTokenPseudonymEncoder.TOKEN_PREFIX + pseudonymizedIdentity.getHash();
                 }
