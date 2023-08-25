@@ -11,7 +11,7 @@
     "{\"scope\":\"email\",\"domain\":\"gmail.com\",\"hash\":\"XRcSIwOXlgrxLZOIHxdtE3GCke5TsftXzOm5zmnm36g\"}"
   ],
   "proxyAddresses":[
-    "SMTP:t~-tbhph3DloGSd5l9e9TeFqmEboAqU8o6BdigmHZOmxI@M365x214355.onmicrosoft.com",
-    "smtp:t~L282PmjOP7xZpTtW7M1sKbWHzVvzLV4Yfp-7x1r3Yk0@M365x214355.onmicrosoft.com"
+    "SMTP:t~.tbhph3DloGSd5l9e9TeFqmEboAqU8o6BdigmHZOmxI@M365x214355.onmicrosoft.com",
+    "smtp:t~L282PmjOP7xZpTtW7M1sKbWHzVvzLV4Yfp.7x1r3Yk0@M365x214355.onmicrosoft.com"
   ]
 }
