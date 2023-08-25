@@ -24,16 +24,17 @@ public class PrebuiltSanitizerRules {
         .jsonPath("$.['@odata.context']")
         .build();
 
+    static final Transform.PseudonymizeRegexMatches PSEUDONYMIZE_PROXY_ADDRESSES = Transform.PseudonymizeRegexMatches.builder()
+        .jsonPath("$..proxyAddresses[*]")
+        .regex("(?i)^smtp:(.*)$")
+        .build();
+
     static final String DIRECTORY_REGEX_USERS = "^/(v1.0|beta)/users/?[^/]*";
     static final String DIRECTORY_REGEX_USERS_BY_PSEUDO = "^/(v1.0|beta)/users(/p~[a-zA-Z0-9_-]+?)?[^/]*";
     static final String DIRECTORY_REGEX_GROUP_MEMBERS = "^/(v1.0|beta)/groups/[^/]*/members.*";
 
     static final List<Transform> USER_TRANSFORMS = Arrays.asList(
-        // VERY hacky; there is nothing that guarantees order of evaluation of the transforms ...
-        Transform.RedactRegexMatches.builder()
-            .jsonPath("$..proxyAddresses[*]")
-            .redaction("(?i)^smtp:")
-            .build(),
+        PSEUDONYMIZE_PROXY_ADDRESSES,
         Transform.Redact.builder()
             .jsonPath("$..displayName")
             .jsonPath("$..aboutMe")
@@ -57,7 +58,6 @@ public class PrebuiltSanitizerRules {
             .jsonPath("$..imAddresses[*]")
             .jsonPath("$..mail")
             .jsonPath("$..otherMails[*]")
-            .jsonPath("$..proxyAddresses[*]")
             .jsonPath("$..onPremisesSamAccountName")
             .jsonPath("$..onPremisesUserPrincipalName")
             .jsonPath("$..onPremisesDistinguishedName")
@@ -94,15 +94,9 @@ public class PrebuiltSanitizerRules {
                 .jsonPath("$..onPremisesProvisioningErrors")
                 .jsonPath("$..securityIdentifier")
                 .build())
-            // VERY hacky; there is nothing that guarantees order of evaluation of the transforms ...
-            .transform(Transform.RedactRegexMatches.builder()
-                .jsonPath("$..proxyAddresses[*]")
-                .redaction("(?i)^smtp:")
-                .build())
             .transform(Transform.Pseudonymize.builder()
                     .includeOriginal(true)
                     .jsonPath("$..mail")
-                    .jsonPath("$..proxyAddresses[*]")
                     .build())
         .build();
 

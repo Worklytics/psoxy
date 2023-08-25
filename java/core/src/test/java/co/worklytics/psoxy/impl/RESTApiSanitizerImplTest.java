@@ -2,6 +2,7 @@ package co.worklytics.psoxy.impl;
 
 import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.gateway.ConfigService;
+import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.rules.Endpoint;
 import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
@@ -28,11 +29,9 @@ import org.junit.jupiter.params.provider.ValueSource;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.net.URL;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static co.worklytics.test.TestModules.withMockEncryptionKey;
 import static org.junit.jupiter.api.Assertions.*;
@@ -406,14 +405,31 @@ class RESTApiSanitizerImplTest {
 
     @CsvSource(
         value = {
-            "test,false,URL_SAFE_TOKEN,vja8bQGC4pq5kPnJR9D5JFG.WY2S0CX9y5bNT1KmutM",
-            "test,true,URL_SAFE_TOKEN,p~Tt8H7clbL9y8ryN4_RLYrCEsKqbjJsWcPmKb4wOdZDKAHyevsJLhRTypmrf-DpBZ",
-            "alice@acme.com,true,URL_SAFE_TOKEN,p~UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMnKYUk8FJevl3wvFyZY0eF-@acme.com",
-            "alice@acme.com,false,URL_SAFE_TOKEN,BlFx65qHrkRrhMsuq7lg4bCpwsbXgpLhVZnZ6VBMqoY"
+            "LEGACY,test,false,URL_SAFE_TOKEN,vja8bQGC4pq5kPnJR9D5JFG.WY2S0CX9y5bNT1KmutM",
+            "LEGACY,alice@acme.com,false,URL_SAFE_TOKEN,BlFx65qHrkRrhMsuq7lg4bCpwsbXgpLhVZnZ6VBMqoY",
+            //legacy w reversible fail to JSON format!!
+            "LEGACY,test,true,URL_SAFE_TOKEN,'{\"scope\":\"scope\",\"hash\":\"vja8bQGC4pq5kPnJR9D5JFG.WY2S0CX9y5bNT1KmutM\",\"reversible\":\"p~Tt8H7clbL9y8ryN4_RLYrCEsKqbjJsWcPmKb4wOdZDKAHyevsJLhRTypmrf-DpBZ\"}'",
+            "LEGACY,alice@acme.com,true,URL_SAFE_TOKEN,'{\"scope\":\"email\",\"domain\":\"acme.com\",\"hash\":\"BlFx65qHrkRrhMsuq7lg4bCpwsbXgpLhVZnZ6VBMqoY\",\"reversible\":\"p~UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMnKYUk8FJevl3wvFyZY0eF-@acme.com\"}'",
+
+            // pseudonyms build with DEFAULT implementation always support URL_SAFE_TOKEN encoding
+            "DEFAULT,test,false,URL_SAFE_TOKEN,Tt8H7clbL9y8ryN4_RLYrCEsKqbjJsWcPmKb4wOdZDI",
+            "DEFAULT,test,true,URL_SAFE_TOKEN,p~Tt8H7clbL9y8ryN4_RLYrCEsKqbjJsWcPmKb4wOdZDKAHyevsJLhRTypmrf-DpBZ",
+            "DEFAULT,alice@acme.com,true,URL_SAFE_TOKEN,p~UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMnKYUk8FJevl3wvFyZY0eF-@acme.com",
+            "DEFAULT,alice@acme.com,false,URL_SAFE_TOKEN,UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMk",
         }
     )
     @ParameterizedTest
-    public void getPseudonymize_URL_SAFE_TOKEN(String value, Boolean includeReversible, String encoding, String expected) {
+    public void getPseudonymize_URL_SAFE_TOKEN(PseudonymImplementation implementation, String value, Boolean includeReversible, String encoding, String expected) {
+
+        Pseudonymizer pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
+            .pseudonymizationSalt("an irrelevant per org secret")
+            .defaultScopeId("scope")
+            .pseudonymImplementation(implementation)
+            .build());
+
+
+        sanitizer = sanitizerFactory.create(PrebuiltSanitizerRules.DEFAULTS.get("gmail"), pseudonymizer);
+
         String r = (String) sanitizer.getPseudonymize(Transform.Pseudonymize.builder()
                 //includeOriginal must be 'false' for URL_SAFE_TOKEN
                 .includeReversible(includeReversible)
@@ -492,5 +508,86 @@ class RESTApiSanitizerImplTest {
         Map.Entry<Endpoint, Pattern> entry = Map.entry(endpoint, Pattern.compile(sanitizer.effectiveRegex(endpoint)));
 
         assertEquals(expected, sanitizer.getHasPathTemplateMatchingUrl(new URL(url)).test(entry));
+    }
+
+
+    @SneakyThrows
+    @CsvSource(value = {
+        "something",
+    })
+    @ParameterizedTest
+    void pseudonymizeWithRegexMatches(String input) {
+
+        Pseudonymizer pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
+            .pseudonymizationSalt("an irrelevant per org secret")
+            .defaultScopeId("scope")
+            .pseudonymImplementation(PseudonymImplementation.DEFAULT)
+            .build());
+
+
+        sanitizer = sanitizerFactory.create(PrebuiltSanitizerRules.DEFAULTS.get("gmail"), pseudonymizer);
+
+        List<MapFunction> transforms = Arrays.asList(
+            sanitizer.getPseudonymizeRegexMatches(Transform.PseudonymizeRegexMatches.builder()
+                .regex(".*")
+                .includeReversible(true)
+                .build()),
+            sanitizer.getPseudonymizeRegexMatches(Transform.PseudonymizeRegexMatches.builder()
+                .regex(".*")
+                .includeReversible(false)
+                .build()),
+            sanitizer.getPseudonymize(Transform.Pseudonymize.builder()
+                .includeReversible(true)
+                .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
+                .build()),
+            sanitizer.getPseudonymize(Transform.Pseudonymize.builder()
+                .includeReversible(false)
+                .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
+                .build())
+        );
+
+        List<String> pseudonymized = transforms.stream()
+            .map(f -> (String) f.map(input, sanitizer.getJsonConfiguration()))
+            .collect(Collectors.toList());
+
+        UrlSafeTokenPseudonymEncoder encoder = new UrlSafeTokenPseudonymEncoder();
+
+        List<Pseudonym> pseudonyms = pseudonymized.stream()
+            .map(s -> {
+                try {
+                    return encoder.decode(s);
+                } catch (Exception e) {
+                    return encoder.decode(StringUtils.replaceChars(s, ".+/", "--_"));
+                }
+            })
+            .collect(Collectors.toList());
+
+        List<String> hashes = pseudonyms.stream()
+            .map(Pseudonym::getHash)
+            .map(Base64.getEncoder()::encode)
+            .map(String::new)
+            .collect(Collectors.toList());
+
+        assertTrue(hashes.stream().allMatch(p -> Objects.equals(hashes.get(0), p)));
+
+    }
+
+
+
+    @CsvSource(value = {
+        "something,.*,t~wUW4bkpTjD6c.BIQaE_oLQxN4nD5vbnf5HBVz7gxck8",
+        "something,blah:.*thing,", // no match, should redact
+        "blah:something,blah:.*thing,t~iWybsRb4SscO_Z6v2gpnMTjPujG2E4FtxgYkjWc5HXQ",
+        "blah:something,blah:(.*),blah:t~wUW4bkpTjD6c.BIQaE_oLQxN4nD5vbnf5HBVz7gxck8",
+    })
+    @ParameterizedTest
+    public void pseudonymizeWithRegexMatches_nonMatchingRedacted(String input, String regex, String expected) {
+        MapFunction transform = sanitizer.getPseudonymizeRegexMatches(Transform.PseudonymizeRegexMatches.builder()
+            .regex(regex)
+            .includeReversible(false)
+            .build());
+
+        assertEquals(StringUtils.trimToNull(expected),
+            transform.map(input, sanitizer.getJsonConfiguration()));
     }
 }

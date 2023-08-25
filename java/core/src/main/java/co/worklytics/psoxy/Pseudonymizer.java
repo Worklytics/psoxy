@@ -42,7 +42,7 @@ public interface Pseudonymizer {
      */
     PseudonymizedIdentity pseudonymize(Object identifier);
 
-    PseudonymizedIdentity pseudonymize(Object identifier, Transform.Pseudonymize transform);
+    PseudonymizedIdentity pseudonymize(Object identifier, Transform.PseudonymizationTransform transform);
 
     ConfigurationOptions getOptions();
 }

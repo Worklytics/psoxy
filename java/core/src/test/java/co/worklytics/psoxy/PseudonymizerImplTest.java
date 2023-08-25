@@ -2,7 +2,10 @@ package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.test.MockModules;
+import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
+import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
+import com.avaulta.gateway.rules.transforms.Transform;
 import dagger.Component;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,6 +14,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import java.util.Base64;
 
 import static co.worklytics.test.TestModules.withMockEncryptionKey;
 import static org.junit.jupiter.api.Assertions.*;
@@ -47,7 +52,7 @@ class PseudonymizerImplTest {
         pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
             .pseudonymizationSalt("an irrelevant per org secret")
             .defaultScopeId("scope")
-            .pseudonymImplementation(PseudonymImplementation.LEGACY)
+            .pseudonymImplementation(PseudonymImplementation.DEFAULT)
             .build());
 
         withMockEncryptionKey(config);
@@ -97,8 +102,15 @@ class PseudonymizerImplTest {
 
     @Test
     void hashMatchesLegacy() {
-        //value taken from legacy app
+        // all this is really testing is that we aren't breaking the LEGACY hash implementation
 
+        pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
+            .pseudonymizationSalt("an irrelevant per org secret")
+            .defaultScopeId("scope")
+            .pseudonymImplementation(PseudonymImplementation.LEGACY)
+            .build());
+
+        //value taken from legacy app
         final String CANONICAL = "original";
 
         //value taken from legacy app
@@ -106,6 +118,38 @@ class PseudonymizerImplTest {
 
         assertEquals(identityHash,
             pseudonymizer.pseudonymize(CANONICAL).getHash());
+    }
+
+
+    @Test
+    void hashesMatchRegardlessOfReversible() {
+        final String CANONICAL = "original";
+
+        assertEquals(
+            pseudonymizer.pseudonymize(CANONICAL, Transform.Pseudonymize.builder().includeReversible(false).build()).getHash(),
+            pseudonymizer.pseudonymize(CANONICAL, Transform.Pseudonymize.builder().includeReversible(true).build()).getHash());
+    }
+
+    @Test
+    void encoderRoundtripForReversibles() {
+        final String CANONICAL = "original";
+
+        UrlSafeTokenPseudonymEncoder urlSafeTokenPseudonymEncoder = new UrlSafeTokenPseudonymEncoder();
+        PseudonymizedIdentity pseudonym = pseudonymizer.pseudonymize(CANONICAL, Transform.Pseudonymize.builder().includeReversible(false).build());
+        PseudonymizedIdentity reversiblePseudonym = pseudonymizer.pseudonymize(CANONICAL, Transform.Pseudonymize.builder().includeReversible(true).build());
+
+        Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
+
+
+        assertEquals(
+                pseudonym.getHash(),
+            encoder.encodeToString(reversiblePseudonym.asPseudonym().getHash()));
+
+        Pseudonym decoded = urlSafeTokenPseudonymEncoder.decode(reversiblePseudonym.getReversible());
+
+        assertEquals(
+                encoder.encodeToString(pseudonym.asPseudonym().getHash()),
+                encoder.encodeToString(decoded.getHash()));
     }
 
 }
