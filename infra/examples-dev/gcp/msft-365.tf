@@ -31,7 +31,7 @@ module "msft-connection-auth-federation" {
 
   application_object_id = each.value.connector.id
   display_name          = "GcpFederation"
-  description           = "Federation to be used for psoxy Connector - ${each.value.display_name}${var.connector_display_name_suffix}"
+  description           = "Federation to be used for psoxy Connector - ${each.value.display_name}${local.env_qualifier}"
   issuer                = "https://accounts.google.com"
   subject               = module.psoxy.service_accounts[each.key].unique_id
 }

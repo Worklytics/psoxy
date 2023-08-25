@@ -16,9 +16,3 @@ variable "example_msft_user_guid" {
   description = "example MSFT user guid (uuid) for test API calls (OPTIONAL)"
   default     = "{EXAMPLE_MSFT_USER_GUID}"
 }
-
-variable "connector_display_name_suffix" {
-  type        = string
-  description = "suffix to append to display_names of connector SAs; helpful to distinguish between various ones in testing/dev scenarios"
-  default     = ""
-}
