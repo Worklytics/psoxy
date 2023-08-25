@@ -102,8 +102,15 @@ class PseudonymizerImplTest {
 
     @Test
     void hashMatchesLegacy() {
-        //value taken from legacy app
+        // all this is really testing is that we aren't breaking the LEGACY hash implementation
 
+        pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
+            .pseudonymizationSalt("an irrelevant per org secret")
+            .defaultScopeId("scope")
+            .pseudonymImplementation(PseudonymImplementation.LEGACY)
+            .build());
+
+        //value taken from legacy app
         final String CANONICAL = "original";
 
         //value taken from legacy app

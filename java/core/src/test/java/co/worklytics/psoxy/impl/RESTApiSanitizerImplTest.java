@@ -405,14 +405,31 @@ class RESTApiSanitizerImplTest {
 
     @CsvSource(
         value = {
-            "test,false,URL_SAFE_TOKEN,vja8bQGC4pq5kPnJR9D5JFG.WY2S0CX9y5bNT1KmutM",
-            "test,true,URL_SAFE_TOKEN,p~Tt8H7clbL9y8ryN4_RLYrCEsKqbjJsWcPmKb4wOdZDKAHyevsJLhRTypmrf-DpBZ",
-            "alice@acme.com,true,URL_SAFE_TOKEN,p~UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMnKYUk8FJevl3wvFyZY0eF-@acme.com",
-            "alice@acme.com,false,URL_SAFE_TOKEN,BlFx65qHrkRrhMsuq7lg4bCpwsbXgpLhVZnZ6VBMqoY"
+            "LEGACY,test,false,URL_SAFE_TOKEN,vja8bQGC4pq5kPnJR9D5JFG.WY2S0CX9y5bNT1KmutM",
+            "LEGACY,alice@acme.com,false,URL_SAFE_TOKEN,BlFx65qHrkRrhMsuq7lg4bCpwsbXgpLhVZnZ6VBMqoY",
+            //legacy w reversible fail to JSON format!!
+            "LEGACY,test,true,URL_SAFE_TOKEN,'{\"scope\":\"scope\",\"hash\":\"vja8bQGC4pq5kPnJR9D5JFG.WY2S0CX9y5bNT1KmutM\",\"reversible\":\"p~Tt8H7clbL9y8ryN4_RLYrCEsKqbjJsWcPmKb4wOdZDKAHyevsJLhRTypmrf-DpBZ\"}'",
+            "LEGACY,alice@acme.com,true,URL_SAFE_TOKEN,'{\"scope\":\"email\",\"domain\":\"acme.com\",\"hash\":\"BlFx65qHrkRrhMsuq7lg4bCpwsbXgpLhVZnZ6VBMqoY\",\"reversible\":\"p~UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMnKYUk8FJevl3wvFyZY0eF-@acme.com\"}'",
+
+            // pseudonyms build with DEFAULT implementation always support URL_SAFE_TOKEN encoding
+            "DEFAULT,test,false,URL_SAFE_TOKEN,Tt8H7clbL9y8ryN4_RLYrCEsKqbjJsWcPmKb4wOdZDI",
+            "DEFAULT,test,true,URL_SAFE_TOKEN,p~Tt8H7clbL9y8ryN4_RLYrCEsKqbjJsWcPmKb4wOdZDKAHyevsJLhRTypmrf-DpBZ",
+            "DEFAULT,alice@acme.com,true,URL_SAFE_TOKEN,p~UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMnKYUk8FJevl3wvFyZY0eF-@acme.com",
+            "DEFAULT,alice@acme.com,false,URL_SAFE_TOKEN,UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMk",
         }
     )
     @ParameterizedTest
-    public void getPseudonymize_URL_SAFE_TOKEN(String value, Boolean includeReversible, String encoding, String expected) {
+    public void getPseudonymize_URL_SAFE_TOKEN(PseudonymImplementation implementation, String value, Boolean includeReversible, String encoding, String expected) {
+
+        Pseudonymizer pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
+            .pseudonymizationSalt("an irrelevant per org secret")
+            .defaultScopeId("scope")
+            .pseudonymImplementation(implementation)
+            .build());
+
+
+        sanitizer = sanitizerFactory.create(PrebuiltSanitizerRules.DEFAULTS.get("gmail"), pseudonymizer);
+
         String r = (String) sanitizer.getPseudonymize(Transform.Pseudonymize.builder()
                 //includeOriginal must be 'false' for URL_SAFE_TOKEN
                 .includeReversible(includeReversible)
@@ -504,7 +521,7 @@ class RESTApiSanitizerImplTest {
         Pseudonymizer pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
             .pseudonymizationSalt("an irrelevant per org secret")
             .defaultScopeId("scope")
-            .pseudonymImplementation(PseudonymImplementation.LEGACY)
+            .pseudonymImplementation(PseudonymImplementation.DEFAULT)
             .build());
 
 
