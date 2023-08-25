@@ -46,5 +46,4 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
     //target API endpoint to forward request to
     TARGET_HOST,
     BUNDLE_FILENAME;
-
 }
