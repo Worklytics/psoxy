@@ -61,21 +61,21 @@ locals {
   api_connectors = merge(
     module.worklytics_connectors.enabled_api_connectors,
     module.worklytics_connectors_google_workspace.enabled_api_connectors,
-    # local.msft_api_connectors_with_auth,
+    local.msft_api_connectors_with_auth,
     {}
   )
 
   source_authorization_todos = concat(
     module.worklytics_connectors.todos,
     module.worklytics_connectors_google_workspace.todos,
-    # module.worklytics_connectors_msft_365.todos,
+    module.worklytics_connectors_msft_365.todos,
     []
   )
 
   max_auth_todo_step = max(
     module.worklytics_connectors.next_todo_step,
     module.worklytics_connectors_google_workspace.next_todo_step,
-    # module.worklytics_connectors_msft_365.next_todo_step,
+    module.worklytics_connectors_msft_365.next_todo_step,
     0
   )
 }

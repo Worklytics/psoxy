@@ -16,8 +16,8 @@ output "api_clients" {
   description = "Map of API clients identifiers for Google Workspace connectors. Useful for migrations."
   value = { for k, v in module.google_workspace_connection :
     k => {
-      service_account_id         = v.service_account_id
-      oauth_client_id            = v.service_account_numeric_id
+      service_account_id = v.service_account_id
+      oauth_client_id    = v.service_account_numeric_id
     }
   }
 }
