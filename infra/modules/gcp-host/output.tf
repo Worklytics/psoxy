@@ -17,8 +17,9 @@ output "pseudonym_salt" {
   value       = module.psoxy.pseudonym_salt
 }
 
-output "service_accounts" {
-  value = google_service_account.api_connectors
+output "api_connector_gcp_execution_service_accounts" {
+  description = "Service accounts used on Cloud Functions for API Connectors"
+  value       = google_service_account.api_connectors
 }
 
 output "todos" {
