@@ -7,6 +7,7 @@ import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.utils.URLUtils;
 import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
+import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.Endpoint;
 import com.avaulta.gateway.rules.JsonSchemaFilterUtils;
@@ -228,6 +229,8 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
             f = getPseudonymize((Transform.Pseudonymize) transform);
         } else if (transform instanceof Transform.PseudonymizeEmailHeader) {
             f = this::pseudonymizeEmailHeaderToJson;
+        } else if (transform instanceof Transform.PseudonymizeRegexMatches) {
+            f = getPseudonymizeRegexMatches((Transform.PseudonymizeRegexMatches) transform);
         } else if (transform instanceof Transform.RedactRegexMatches) {
             f = getRedactRegexMatches((Transform.RedactRegexMatches) transform);
         } else if (transform instanceof Transform.RedactExceptSubstringsMatchingRegexes) {
@@ -352,12 +355,64 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
             if (transformOptions.getEncoding() == PseudonymEncoder.Implementations.JSON) {
                 return configuration.jsonProvider().toJson(pseudonymizedIdentity);
             } else if (transformOptions.getEncoding() == PseudonymEncoder.Implementations.URL_SAFE_TOKEN) {
-                //TODO: exploits that this was already encoded with UrlSafeTokenPseudonymEncoder
+                if (pseudonymizedIdentity.getReversible() != null
+                        && getPseudonymizer().getOptions().getPseudonymImplementation() == PseudonymImplementation.LEGACY) {
+                    // can't do reversible encoding with legacy pseudonym implementation, in URL_SAFE_TOKEN
+                    return configuration.jsonProvider().toJson(pseudonymizedIdentity);
+                }
+                //exploit that already reversibly encoded, including prefix
                 return ObjectUtils.firstNonNull(pseudonymizedIdentity.getReversible(), pseudonymizedIdentity.getHash());
             } else {
                 throw new RuntimeException("Unsupported pseudonym implementation: " + transformOptions.getEncoding());
             }
 
+        };
+    }
+
+
+    public MapFunction getPseudonymizeRegexMatches(Transform.PseudonymizeRegexMatches transform) {
+        Pattern pattern = Pattern.compile(transform.getRegex());
+
+        return (Object s, Configuration configuration) -> {
+
+            String fullString = (String) s;
+            Matcher matcher = pattern.matcher(fullString);
+
+            if (matcher.matches()) {
+                String toPseudonymize;
+                if (matcher.groupCount() > 0) {
+                    toPseudonymize = matcher.group(1);
+                } else {
+                    toPseudonymize = matcher.group(0);
+                }
+                PseudonymizedIdentity pseudonymizedIdentity = pseudonymizer.pseudonymize(toPseudonymize, transform);
+
+                String pseudonymizedString;
+                if (pseudonymizedIdentity.getReversible() != null) {
+                    if (getPseudonymizer().getOptions().getPseudonymImplementation() == PseudonymImplementation.LEGACY) {
+                        //exploits that already reversibly encoded, including prefix
+                        log.warning("Using transform PseudonymizeRegexMatches, with reversible==true; this is NOT supported for LEGACY pseudonym implementation, so non-reversible pseudonym encoded");
+                        pseudonymizedString = UrlSafeTokenPseudonymEncoder.TOKEN_PREFIX + pseudonymizedIdentity.getHash();
+                    } else {
+                        pseudonymizedString = pseudonymizedIdentity.getReversible();
+                    }
+                } else {
+                    pseudonymizedString = UrlSafeTokenPseudonymEncoder.TOKEN_PREFIX + pseudonymizedIdentity.getHash();
+                }
+                if (pseudonymizedIdentity.getDomain() != null) {
+                    pseudonymizedString += UrlSafeTokenPseudonymEncoder.DOMAIN_SEPARATOR + pseudonymizedIdentity.getDomain();
+                }
+
+                if (matcher.groupCount() > 0) {
+                    // return original, replacing match with encoded pseudonym
+                    return fullString.replace(matcher.group(1), pseudonymizedString);
+                } else {
+                    return pseudonymizedString;
+                }
+            } else {
+                //if no match, redact it
+                return null;
+            }
         };
     }
 

@@ -32,7 +32,7 @@ terraform {
 # general cases
 module "worklytics_connectors" {
   source = "../../modules/worklytics-connectors"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=rc-v0.4.36"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.4.36"
 
   enabled_connectors            = var.enabled_connectors
   jira_cloud_id                 = var.jira_cloud_id
@@ -104,7 +104,7 @@ locals {
 
 module "psoxy" {
   source = "../../modules/aws-host"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-host?ref=rc-v0.4.36"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-host?ref=v0.4.36"
 
   environment_name                = var.environment_name
   aws_account_id                  = var.aws_account_id
@@ -145,17 +145,17 @@ module "connection_in_worklytics" {
   for_each = local.all_instances
 
   source = "../../modules/worklytics-psoxy-connection-aws"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=rc-v0.4.36"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=v0.4.36"
 
-  psoxy_instance_id      = each.key
-  worklytics_host        = var.worklytics_host
-  aws_region             = var.aws_region
-  aws_role_arn           = module.psoxy.caller_role_arn
-  psoxy_endpoint_url     = try(each.value.endpoint_url, null)
-  bucket_name            = try(each.value.sanitized_bucket_name, null)
-  connector_id           = try(local.all_connectors[each.key].worklytics_connector_id, "")
-  display_name           = try(local.all_connectors[each.key].worklytics_connector_name, "${local.all_connectors[each.key].display_name} via Psoxy")
-  todo_step              = module.psoxy.next_todo_step
+  psoxy_instance_id  = each.key
+  worklytics_host    = var.worklytics_host
+  aws_region         = var.aws_region
+  aws_role_arn       = module.psoxy.caller_role_arn
+  psoxy_endpoint_url = try(each.value.endpoint_url, null)
+  bucket_name        = try(each.value.sanitized_bucket_name, null)
+  connector_id       = try(local.all_connectors[each.key].worklytics_connector_id, "")
+  display_name       = try(local.all_connectors[each.key].worklytics_connector_name, "${local.all_connectors[each.key].display_name} via Psoxy")
+  todo_step          = module.psoxy.next_todo_step
 
   connector_settings_to_provide = try(each.value.settings_to_provide, {})
 

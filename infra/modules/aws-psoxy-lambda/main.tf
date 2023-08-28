@@ -40,9 +40,9 @@ locals {
   salt_arn              = [for l in var.global_parameter_arns : l if endswith(l, local.salt_parameter_name_suffix)][0]
   path_to_shared_config = regex("arn.+parameter(/.*)${local.salt_parameter_name_suffix}", local.salt_arn)[0]
 
-  bundle_from_s3 = startswith(var.path_to_function_zip, "s3://")
-  s3_bucket      = local.bundle_from_s3 ? regex("s3://([^/]+)/.*", var.path_to_function_zip)[0] : null
-  s3_key         = local.bundle_from_s3 ? regex("s3://[^/]+/(.*)", var.path_to_function_zip)[0] : null
+  bundle_from_s3  = startswith(var.path_to_function_zip, "s3://")
+  s3_bucket       = local.bundle_from_s3 ? regex("s3://([^/]+)/.*", var.path_to_function_zip)[0] : null
+  s3_key          = local.bundle_from_s3 ? regex("s3://[^/]+/(.*)", var.path_to_function_zip)[0] : null
   bundle_filename = try(regex(".*/([^/]+)", var.path_to_function_zip)[0], var.path_to_function_zip)
 }
 
