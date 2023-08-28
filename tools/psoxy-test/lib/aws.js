@@ -10,6 +10,7 @@ import {
 import {
   S3Client,
   GetObjectCommand,
+  DeleteObjectCommand,
   PutObjectCommand,
   ListBucketsCommand,
   ListObjectsV2Command
@@ -277,10 +278,33 @@ async function download(bucket, key, options, client, logger) {
   return downloadResponse.Body.transformToString();
 }
 
+/**
+ * Delete object from S3;
+ * ref: https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/classes/deleteobjectcommand.html
+ * @param {string} bucket
+ * @param {string} key - Object's key (filename in S3)
+ * @param {object} options
+ * @param {string} options.role - role to assume
+ * @param {string} options.region - region to use
+ * @param {S3Client} client - optional
+ * @returns {Promise}
+ */
+async function deleteObject(bucket, key, options, client) {
+  if (!client) {
+    client = await createS3Client(options.role, options.region);
+  }
+  return await client.send(new DeleteObjectCommand({
+    Bucket: bucket,
+    Key: key,
+    // BypassGovernanceRetention: true, ??
+  }));
+}
+
 export default {
   call,
   createCloudWatchClient,
   createS3Client,
+  deleteObject,
   download,
   getLogEvents,
   getLogStreams,

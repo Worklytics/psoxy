@@ -64,6 +64,20 @@ async function testAWS(options, logger) {
 
   logger.success('File downloaded');
 
+  if (options.deleteSanitizedFile) {
+    logger.verbose(`Deleting sanitized file from output bucket: ${outputBucket}`);
+    try {
+      // Note:
+      // We don't use bucket versioning. The S3 client will attempt to delete
+      // the default "null" version of the object, but:
+      // > If there isn't a null version, Amazon S3 does not remove any objects
+      //   but will still respond that the command was successful.
+      await aws.deleteObject(outputBucket, outputKey, options, client);
+    } catch (error) {
+      logger.error(`Error deleting sanitized file: ${error.message}`);
+    }
+  }
+
   return downloadResult;
 }
 
@@ -102,6 +116,15 @@ async function testGCP(options, logger) {
   const fileContents = downloadResult.toString('utf8');
   logger.verbose('Download result:', { additional: fileContents });
 
+  if (options.deleteSanitizedFile) {
+    logger.verbose(`Deleting sanitized file from output bucket: ${outputBucket}`);
+    try {
+      await gcp.deleteFile(outputBucket, outputKey, client);
+    } catch (error) {
+      logger.error(`Error deleting sanitized file: ${error.message}`);
+    }
+  }
+
   return fileContents;
 }
 
@@ -120,6 +143,8 @@ async function testGCP(options, logger) {
  * @param {string} options.region - AWS: buckets region
  * @param {string} options.role - AWS: role to assume (ARN format; optional)
  * @param {boolean} options.saveSanitizedFile - Whether to save sanitized file or not
+ * @param {boolean} options.deleteSanitizedFile - Whether to delete sanitized file or not (from
+ *  output bucket, after test completion)
  * @returns {string}
  */
 export default async function (options = {}) {
