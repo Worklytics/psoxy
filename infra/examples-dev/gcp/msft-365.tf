@@ -1,5 +1,3 @@
-# BEGIN MSFT
-
 module "worklytics_connectors_msft_365" {
   source = "../../modules/worklytics-connectors-msft-365"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors-msft-365?ref=rc-v0.4.36"
@@ -34,6 +32,10 @@ module "msft-connection-auth-federation" {
   description           = "Federation to be used for psoxy Connector - ${each.value.display_name}${local.env_qualifier}"
   issuer                = "https://accounts.google.com"
   subject               = module.psoxy.api_connector_gcp_execution_service_accounts[each.key].unique_id
+
+  depends_on = [
+    module.psoxy
+  ]
 }
 
 locals {

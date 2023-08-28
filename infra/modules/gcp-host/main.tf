@@ -174,6 +174,10 @@ module "api_connector" {
     local.secrets_bound_as_env_vars[each.key],
     module.psoxy.secrets
   )
+
+  depends_on = [
+    google_service_account.api_connectors
+  ]
 }
 
 module "custom_api_connector_rules" {
