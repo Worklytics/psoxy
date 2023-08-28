@@ -57,7 +57,9 @@ locals {
       example_api_calls : [
         "/calendar/v3/calendars/primary",
         "/calendar/v3/users/me/settings",
-        "/calendar/v3/calendars/primary/events?maxResults=10"
+        "/calendar/v3/users/me/calendarList",
+        "/calendar/v3/calendars/primary/events?maxResults=10",
+        "/calendar/v3/calendars/primary/events/{EVENT_ID}"
       ]
       example_api_calls_user_to_impersonate : local.google_workspace_example_user
     },
