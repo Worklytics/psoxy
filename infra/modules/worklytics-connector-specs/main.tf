@@ -137,7 +137,10 @@ locals {
       environment_variables : {}
       example_api_calls : [
         "/drive/v2/files",
-        "/drive/v3/files"
+        "/drive/v3/files",
+        "/drive/v3/files/{FILE_ID}",
+        "/drive/v3/files/{FILE_ID}/permissions",
+        "/drive/v3/files/{FILE_ID}/revisions"
       ],
       example_api_calls_user_to_impersonate : local.google_workspace_example_user
     }
