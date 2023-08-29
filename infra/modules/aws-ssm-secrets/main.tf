@@ -62,13 +62,13 @@ resource "aws_ssm_parameter" "secret_with_externally_managed_value" {
 output "secret_ids" {
   value = merge(
     { for k, v in local.terraform_managed_secrets : k => aws_ssm_parameter.secret[k].id },
-   # { for k, v in local.externally_managed_secrets : k => aws_ssm_parameter.secret_with_externally_managed_value[k].id }
+    { for k, v in local.externally_managed_secrets : k => aws_ssm_parameter.secret_with_externally_managed_value[k].id }
   )
 }
 
 output "secret_arns" {
   value = concat(
     [for k, v in local.terraform_managed_secrets : aws_ssm_parameter.secret[k].arn],
-    #[for k, v in local.externally_managed_secrets : aws_ssm_parameter.secret_with_externally_managed_value[k].arn]
+    [for k, v in local.externally_managed_secrets : aws_ssm_parameter.secret_with_externally_managed_value[k].arn]
   )
 }
