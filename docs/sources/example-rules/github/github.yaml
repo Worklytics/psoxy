@@ -29,6 +29,33 @@ endpoints:
           - "$..node_id"
           - "$..email"
         encoding: "JSON"
+  - pathTemplate: "/users"
+    allowedQueryParams:
+      - "since"
+      - "per_page"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..avatar_url"
+          - "$..gravatar_id"
+          - "$..url"
+          - "$..html_url"
+          - "$..followers_url"
+          - "$..following_url"
+          - "$..gists_url"
+          - "$..starred_url"
+          - "$..subscriptions_url"
+          - "$..organizations_url"
+          - "$..repos_url"
+          - "$..events_url"
+          - "$..received_events_url"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..login"
+          - "$..id"
+          - "$..node_id"
+          - "$..email"
+        encoding: "JSON"
   - pathTemplate: "/graphql"
     transforms:
       - !<redact>

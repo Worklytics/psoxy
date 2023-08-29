@@ -26,6 +26,11 @@ public class PrebuiltSanitizerRules {
             "page"
     );
 
+    private static final List<String> userAllowedQueryParameters = Lists.newArrayList(
+            "since",
+            "per_page"
+    );
+
     private static final List<String> commonDirectionAllowedQueryParameters = Lists.newArrayList(
             "sort",
             "direction"
@@ -87,6 +92,13 @@ public class PrebuiltSanitizerRules {
     static final Endpoint ORG_MEMBERS = Endpoint.builder()
             .pathTemplate("/orgs/{org}/members")
             .allowedQueryParams(orgMembersAllowedQueryParameters)
+            .transforms(generateUserTransformations("."))
+            .build();
+
+    // https://docs.github.com/en/rest/users/users?apiVersion=2022-11-28#list-users
+    static final Endpoint USERS = Endpoint.builder()
+            .pathTemplate("/users")
+            .allowedQueryParams(userAllowedQueryParameters)
             .transforms(generateUserTransformations("."))
             .build();
 
@@ -461,6 +473,7 @@ public class PrebuiltSanitizerRules {
     @VisibleForTesting
     static final RESTRules GITHUB = Rules2.builder()
             .endpoint(ORG_MEMBERS)
+            .endpoint(USERS)
             .endpoint(GRAPHQL_FOR_USERS)
             .endpoint(ORG_TEAMS)
             .endpoint(ORG_TEAM_MEMBERS)
