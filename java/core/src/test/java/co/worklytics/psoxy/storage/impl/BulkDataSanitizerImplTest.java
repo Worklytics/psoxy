@@ -12,6 +12,7 @@ import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.Base64UrlSha256HashPseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
+import com.avaulta.gateway.rules.ColumnarRules;
 import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
 import com.avaulta.gateway.tokens.impl.Sha256DeterministicTokenizationStrategy;
 import com.google.common.collect.ImmutableMap;
@@ -33,8 +34,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -417,4 +417,54 @@ public class BulkDataSanitizerImplTest {
         assertEquals("t~" + legacyEncoded + (pseudonymizedIdentity.getDomain() == null ? "" : ("@" + pseudonymizedIdentity.getDomain())),
             urlSafeTokenPseudonymEncoder.encode(pseudonymizedIdentity.asPseudonym()));
     }
+
+
+    @SneakyThrows
+    @Test
+    void transform_ghusername() {
+
+        final String EXPECTED = "EMPLOYEE_ID,EMPLOYEE_EMAIL,DEPARTMENT,SNAPSHOT,MANAGER_ID,JOIN_DATE,LEAVE_DATE,GITHUB_USERNAME\r\n" +
+            "2,bob@workltyics.co,Sales,2023-01-06,1,2020-01-01,,\r\n" +
+            "1,alice@worklytics.co,Engineering,2023-01-06,,2019-11-11,,\"{\"\"scope\"\":\"\"github\"\",\"\"hash\"\":\"\"kwv9cWxo7TDgrt1qCegIJv7rA84s_895L_wG_y8hYjA\"\"}\"\r\n" +
+            "4,,Engineering,2023-01-06,1,2018-06-03,,\r\n" +
+            "3,charles@workltycis.co,Engineering,2023-01-06,1,2019-10-06,2022-12-08,\r\n";
+
+        CsvRules rules = CsvRules.builder()
+            .columnsToDuplicate(Map.of("EMPLOYEE_EMAIL", "GITHUB_USERNAME"))
+            .columnsToTransform(Map.of("GITHUB_USERNAME", ColumnarRules.FieldValueTransform.builder()
+                                                                        .filterRegex("(.*)@worklytics.co")
+                                                                        .prePseudonymizationTemplate("%s_enterprise")
+                                                                        .scope("github")
+                                                                        .build()))
+            .build();
+
+
+
+
+        File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
+
+        try (FileReader in = new FileReader(inputFile)) {
+            // replace shuffler implementation with one that reverses the list, so deterministic
+            columnarFileSanitizerImpl.setRecordShuffleChunkSize(2);
+            columnarFileSanitizerImpl.makeShuffleDeterministic();
+            byte[] result = columnarFileSanitizerImpl.sanitize(in, rules, pseudonymizer);
+            String resultString = new String(result);
+
+            assertEquals(EXPECTED, resultString);
+
+            PseudonymizerImpl githubPseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
+                .pseudonymImplementation(PseudonymImplementation.LEGACY)
+                .pseudonymizationSalt(pseudonymizer.getOptions().getPseudonymizationSalt())
+                .defaultScopeId("github")
+                .build());
+
+            //validate has _enterprise appended pre-pseudonymization
+            assertTrue(resultString.contains(githubPseudonymizer.pseudonymize("alice_enterprise").getHash()));
+            assertFalse(resultString.contains(githubPseudonymizer.pseudonymize("alice").getHash()));
+
+            //plain 'alice' hash shouldn't be there either
+            assertFalse(resultString.contains(pseudonymizer.pseudonymize("alice").getHash()));
+        }
+    }
+
 }

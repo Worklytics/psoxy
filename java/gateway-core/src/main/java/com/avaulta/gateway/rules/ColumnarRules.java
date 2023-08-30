@@ -1,8 +1,6 @@
 package com.avaulta.gateway.rules;
 
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.*;
@@ -45,7 +43,7 @@ public class ColumnarRules implements BulkDataRules {
     /**
      * columns (fields) to duplicate
      *
-     * NOTE: duplicates, if any, are applied BEFORE pseudonymization
+     * NOTE: duplicates, if any, are applied BEFORE pseudonymization and transforms
      *
      * USE CASE: building lookup tables, where you want to duplicate column and then pseudonymize
      * one copy of it.Not really expected for typical 'bulk' file case.
@@ -80,7 +78,7 @@ public class ColumnarRules implements BulkDataRules {
      * or creating additional pipeline if you're repurposing existing data - just rename columns
      * as required.
      *
-     * NOTE: renames, if any, are applied BEFORE pseudonymization
+     * NOTE: renames, if any, are applied BEFORE pseudonymization and transforms
      */
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     @Builder.Default
@@ -96,4 +94,54 @@ public class ColumnarRules implements BulkDataRules {
      */
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     protected List<String> columnsToInclude;
+
+    /**
+     * **ALPHA FUNCTIONALITY; subject to backwards incompatible changes or removal**
+     *
+     * if provided, each FieldValueTransform will be applied to value of corresponding columns
+     */
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    @Builder.Default
+    @NonNull
+    protected Map<String, FieldValueTransform> columnsToTransform = new HashMap<>();
+
+    @Builder
+    @Value
+    public static class FieldValueTransform {
+
+
+        /**
+         * if provided, filter regex will be applied and only values matching filter will be
+         * preserved; not matching values will be redacted.
+         *
+         * if regex includes a capturing group, then only portion of value matched by the first
+         * capturing group will be preserved.
+         *
+         * NOTE: use-case for omitting is to pseudonymize column with a specific scope
+         */
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        String filterRegex;
+
+        /**
+         * if provided, value will be transformed using provided template BEFORE pseudonymization
+         *
+         * expected to be a Java String format; will be applied as String.format(template, match);
+         *
+         */
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        String prePseudonymizationTemplate;
+
+
+        /**
+         * whether result, after transform, should be pseudonymized
+         */
+        Boolean pseudonymize = true;
+
+        /**
+         * scope to use when pseudonymizing value, if any. only affects behavior of LEGACY
+         * pseudonymization implementation.
+         */
+        @Deprecated
+        String scope;
+    }
 }
