@@ -64,7 +64,7 @@ public class HealthCheckRequestHandler {
                 missing.add(ProxyConfigProperty.TARGET_HOST.name());
             }
         } catch (Throwable ignored) {
-            log.log(Level.WARNING, "Failed to add TARGET_HOST info to health check");
+            log.log(Level.WARNING, "Failed to add TARGET_HOST info to health check", ignored);
         }
 
         HealthCheckResult.HealthCheckResultBuilder healthCheckResult = HealthCheckResult.builder()
@@ -81,35 +81,35 @@ public class HealthCheckRequestHandler {
                                     .map(metadata -> metadata.getLastModifiedDate().orElse(null))
                                     .orElse(null))));
         } catch (Throwable e) {
-            log.log(Level.WARNING, "Failed to add config debug info to health check");
+            log.log(Level.WARNING, "Failed to add config debug info to health check", e);
         }
 
         try {
             config.getConfigPropertyAsOptional(ProxyConfigProperty.SOURCE_AUTH_STRATEGY_IDENTIFIER)
                     .ifPresent(healthCheckResult::sourceAuthStrategy);
         } catch (Throwable e) {
-            log.log(Level.WARNING, "Failed to add sourceAuthStrategy to health check");
+            log.log(Level.WARNING, "Failed to add sourceAuthStrategy to health check", e);
         }
 
         try {
             config.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.GRANT_TYPE)
                     .ifPresent(healthCheckResult::sourceAuthGrantType);
         } catch (Throwable e) {
-            log.log(Level.WARNING, "Failed to add sourceAuthGrantType to health check");
+            log.log(Level.WARNING, "Failed to add sourceAuthGrantType to health check", e);
         }
 
         try {
             config.getConfigPropertyAsOptional(ProxyConfigProperty.BUNDLE_FILENAME)
                     .ifPresent(healthCheckResult::bundleFilename);
         } catch (Throwable e) {
-            log.log(Level.WARNING, "Failed to add bundleFilename to health check");
+            log.log(Level.WARNING, "Failed to add bundleFilename to health check", e);
         }
 
         try {
             rulesUtils.getRulesFromConfig(config)
                     .ifPresent(rules -> healthCheckResult.rules(rulesUtils.asYaml(rules)));
         } catch (Throwable e) {
-            log.log(Level.WARNING, "Failed to add rules to health check");
+            log.log(Level.WARNING, "Failed to add rules to health check", e);
         }
 
         HttpEventResponse.HttpEventResponseBuilder responseBuilder = HttpEventResponse.builder();
