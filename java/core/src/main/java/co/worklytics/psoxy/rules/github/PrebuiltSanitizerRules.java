@@ -90,7 +90,7 @@ public class PrebuiltSanitizerRules {
     static final Endpoint ORG_MEMBERS = Endpoint.builder()
             .pathTemplate("/orgs/{org}/members")
             .allowedQueryParams(orgMembersAllowedQueryParameters)
-            .transforms(generateUserTransformations("."))
+            .transforms(getTransformationsForUserEndpoint())
             .build();
 
     // https://docs.github.com/en/rest/users/users?apiVersion=2022-11-28#list-users

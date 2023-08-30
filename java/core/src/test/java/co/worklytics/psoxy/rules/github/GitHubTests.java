@@ -35,6 +35,8 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         this.assertSha("7869e465607b7a00b4bd75a832a9ed1f811ce7f2");
     }
 
+
+
     @SneakyThrows
     @Test
     @Override
@@ -647,6 +649,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         return Stream.of(
                 InvocationExample.of("https://api.github.com/orgs/FAKE/members", "org_members.json"),
                 InvocationExample.of("https://api.github.com/graphql", "graph_api_users_saml.json"),
+                InvocationExample.of("https://api.github.com/graphql", "graph_api_users_members.json"),
                 InvocationExample.of("https://api.github.com/graphql", "graph_api_error.json"),
                 InvocationExample.of("https://api.github.com/orgs/FAKE/teams", "org_teams.json"),
                 InvocationExample.of("https://api.github.com/orgs/FAKE/teams/TEAM/members", "team_members.json"),
