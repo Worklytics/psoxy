@@ -118,7 +118,11 @@ public class HealthCheckRequestHandler {
             HealthCheckResult result = healthCheckResult.build();
             responseBuilder.statusCode(responseStatusCode(result));
             responseBuilder.header(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.withCharset(StandardCharsets.UTF_8).getMimeType());
-            responseBuilder.body(objectMapper.writeValueAsString(result) + "\r\n");
+            String json = objectMapper.writeValueAsString(result);
+            responseBuilder.body(json + "\r\n");
+            if (!result.passed()) {
+                log.warning("Health check failed: " + json);
+            }
         } catch (IOException e) {
             log.log(Level.WARNING, "Failed to write health check details", e);
         }
@@ -130,7 +134,7 @@ public class HealthCheckRequestHandler {
         if (healthCheckResult.passed()) {
             return HttpStatus.SC_OK;
         } else {
-            return 512;
+            return HttpStatus.SC_PRECONDITION_FAILED;
         }
     }
 
