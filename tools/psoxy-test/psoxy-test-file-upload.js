@@ -1,5 +1,5 @@
 import { constants as httpCodes } from 'http2';
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import { fileURLToPath } from 'url';
 import { saveToFile, parseBucketOption } from './lib/utils.js';
 import aws from './lib/aws.js';
@@ -162,17 +162,17 @@ export default async function (options = {}) {
   // delete the sanitized one later
   await saveToFile(__dirname, outputFilename, downloadResult);
 
+  let outputFilePath = `${__dirname}/${outputFilename}`;
+
   try {
     logger.info('Comparing input and sanitized output:\n');
-    // quotes to try to limit https://github.com/Worklytics/psoxy/security/code-scanning/1, even
-    // though should be trusted input generally
-    logger.info(execSync(`diff \"${options.file}\" \"${__dirname}/${outputFilename}\"`));
+    logger.info(execFileSync('diff', [ options.file, outputFilePath ]));
   } catch(error) {
     // if files are different `diff` will end with exit code 1, so print results
     logger.info(error.stdout.toString());
   }
 
-  fs.unlinkSync(`${__dirname}/${outputFilename}`);
+  fs.unlinkSync(outputFilePath);
 
   if (options.saveSanitizedFile) {
     // save file to same location as input
