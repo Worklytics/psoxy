@@ -164,7 +164,9 @@ export default async function (options = {}) {
 
   try {
     logger.info('Comparing input and sanitized output:\n');
-    logger.info(execSync(`diff ${options.file} ${__dirname}/${outputFilename}`));
+    // quotes to try to limit https://github.com/Worklytics/psoxy/security/code-scanning/1, even
+    // though should be trusted input generally
+    logger.info(execSync(`diff \"${options.file}\" \"${__dirname}/${outputFilename}\"`));
   } catch(error) {
     // if files are different `diff` will end with exit code 1, so print results
     logger.info(error.stdout.toString());
