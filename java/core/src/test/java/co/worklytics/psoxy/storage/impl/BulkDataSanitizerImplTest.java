@@ -433,9 +433,9 @@ public class BulkDataSanitizerImplTest {
             .columnsToDuplicate(Map.of("EMPLOYEE_EMAIL", "GITHUB_USERNAME"))
             .columnsToTransform(Map.of("GITHUB_USERNAME", ColumnarRules.FieldValueTransform.builder()
                                                                         .filterRegex("(.*)@worklytics.co")
-                                                                        .prePseudonymizationTemplate("%s_enterprise")
-                                                                        .scope("github")
+                                                                        .outputTemplate("%s_enterprise")
                                                                         .build()))
+            .columnsToPseudonymizeWithScope(Map.of("GITHUB_USERNAME", "github"))
             .build();
 
 

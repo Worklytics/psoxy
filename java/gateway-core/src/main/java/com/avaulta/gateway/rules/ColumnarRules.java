@@ -105,6 +105,20 @@ public class ColumnarRules implements BulkDataRules {
     @NonNull
     protected Map<String, FieldValueTransform> columnsToTransform = new HashMap<>();
 
+
+    /**
+     * **ALPHA FUNCTIONALITY; subject to backwards incompatible changes or removal**
+     *
+     * map of columns to pseudonymize, with scope to use when pseudonymizing; only alters behavior
+     * in LEGACY cases
+     */
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    @Builder.Default
+    @NonNull
+    protected Map<String, String> columnsToPseudonymizeWithScope = new HashMap<>();
+
+    //do we care about supporting format-preserving pseudonymization??
+
     @Builder
     @Value
     public static class FieldValueTransform {
@@ -123,25 +137,12 @@ public class ColumnarRules implements BulkDataRules {
         String filterRegex;
 
         /**
-         * if provided, value will be transformed using provided template BEFORE pseudonymization
+         * if provided, value will be written using provided template
          *
-         * expected to be a Java String format; will be applied as String.format(template, match);
+         * expected to be a Java String format, with `%s` token; will be applied as String.format(template, match);
          *
          */
         @JsonInclude(JsonInclude.Include.NON_NULL)
-        String prePseudonymizationTemplate;
-
-
-        /**
-         * whether result, after transform, should be pseudonymized
-         */
-        Boolean pseudonymize = true;
-
-        /**
-         * scope to use when pseudonymizing value, if any. only affects behavior of LEGACY
-         * pseudonymization implementation.
-         */
-        @Deprecated
-        String scope;
+        String outputTemplate;
     }
 }
