@@ -90,14 +90,14 @@ public class PrebuiltSanitizerRules {
     static final Endpoint ORG_MEMBERS = Endpoint.builder()
             .pathTemplate("/orgs/{org}/members")
             .allowedQueryParams(orgMembersAllowedQueryParameters)
-            .transforms(getTransformationsForUserEndpoint())
+            .transforms(generateUserTransformations("."))
             .build();
 
     // https://docs.github.com/en/rest/users/users?apiVersion=2022-11-28#list-users
     static final Endpoint USERS = Endpoint.builder()
             .pathRegex("/users(/p~[a-zA-Z0-9_-]+?)?[^/]*")
             .allowedQueryParams(userAllowedQueryParameters)
-            .transforms(getTransformationsForUserEndpoint())
+            .transforms(generateUserTransformations("."))
             .build();
 
     static final Endpoint GRAPHQL_FOR_USERS = Endpoint.builder()
@@ -521,10 +521,14 @@ public class PrebuiltSanitizerRules {
                         .jsonPath(String.format("$%s.received_events_url", prefix))
                         .build(),
                 Transform.Pseudonymize.builder()
-                        .jsonPath(String.format("$%s.login", prefix))
                         .jsonPath(String.format("$%s.id", prefix))
                         .jsonPath(String.format("$%s.node_id", prefix))
                         .jsonPath(String.format("$%s.email", prefix))
+                        .build(),
+                Transform.Pseudonymize.builder()
+                        .includeReversible(true)
+                        .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
+                        .jsonPath(String.format("$%s.login", prefix))
                         .build()
         );
     }
@@ -638,16 +642,5 @@ public class PrebuiltSanitizerRules {
                                             }).build()).build());
                             put("message", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                         }}).build()).build();
-    }
-
-    private static List<Transform> getTransformationsForUserEndpoint() {
-        List<Transform> transforms = new ArrayList<>(generateUserTransformations("."));
-        transforms.add(Transform.Pseudonymize.builder()
-                .includeReversible(true)
-                .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
-                .jsonPath("$.login")
-                .build());
-
-        return transforms;
     }
 }
