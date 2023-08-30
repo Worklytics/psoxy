@@ -40,7 +40,9 @@ resource "aws_ssm_parameter" "secret_with_externally_managed_value" {
   for_each = local.externally_managed_secrets
 
   name        = "${local.path_prefix}${each.key}"
-  type        = each.value.sensitive ? "SecureString" : "String"
+  # Due https://github.com/hashicorp/terraform-provider-aws/issues/31267
+  # all are added as secureString
+  type        = "SecureString"
   description = each.value.description
   value       = sensitive(coalesce(each.value.value, local.PLACEHOLDER_VALUE))
   key_id      = coalesce(var.kms_key_id, "alias/aws/ssm")
@@ -48,8 +50,6 @@ resource "aws_ssm_parameter" "secret_with_externally_managed_value" {
   lifecycle {
     ignore_changes = [
       value, # key difference here; we don't want to overwrite values filled by the external process
-      insecure_value,
-
       tags
     ]
   }

@@ -35,8 +35,12 @@ locals {
       environment_variables : {}
       example_api_calls : [
         "/admin/directory/v1/users?customer=my_customer&maxResults=10",
+        "/admin/directory/v1/users/{USER_ID}",
         "/admin/directory/v1/groups?customer=my_customer&maxResults=10",
+        "/admin/directory/v1/groups/{GROUP_ID}",
+        "/admin/directory/v1/groups/{GROUP_ID}/members?maxResults=10",
         "/admin/directory/v1/customer/my_customer/domains",
+        "/admin/directory/v1/customer/my_customer/orgunits?maxResults=10",
       ]
       example_api_calls_user_to_impersonate : local.google_workspace_example_admin
     },
@@ -57,7 +61,9 @@ locals {
       example_api_calls : [
         "/calendar/v3/calendars/primary",
         "/calendar/v3/users/me/settings",
-        "/calendar/v3/calendars/primary/events?maxResults=10"
+        "/calendar/v3/users/me/calendarList",
+        "/calendar/v3/calendars/primary/events?maxResults=10",
+        "/calendar/v3/calendars/primary/events/{EVENT_ID}"
       ]
       example_api_calls_user_to_impersonate : local.google_workspace_example_user
     },
@@ -76,7 +82,8 @@ locals {
       ],
       environment_variables : {},
       example_api_calls : [
-        "/gmail/v1/users/me/messages?maxResults=10"
+        "/gmail/v1/users/me/messages?maxResults=10",
+        "/gmail/v1/users/me/messages/{MESSAGE_ID}?format=metadata"
       ]
       example_api_calls_user_to_impersonate : local.google_workspace_example_user
     },
@@ -134,7 +141,10 @@ locals {
       environment_variables : {}
       example_api_calls : [
         "/drive/v2/files",
-        "/drive/v3/files"
+        "/drive/v3/files",
+        "/drive/v3/files/{FILE_ID}",
+        "/drive/v3/files/{FILE_ID}/permissions",
+        "/drive/v3/files/{FILE_ID}/revisions"
       ],
       example_api_calls_user_to_impersonate : local.google_workspace_example_user
     }
