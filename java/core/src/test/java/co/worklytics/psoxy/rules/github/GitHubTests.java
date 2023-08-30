@@ -117,6 +117,29 @@ public class GitHubTests extends JavaRulesTestBaseCase {
     }
 
     @Test
+    void user() {
+        String jsonString = asJson(exampleDirectoryPath, "user.json");
+
+        String endpoint = "https://api.github.com/users/p~IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbN_fPDYrPH3aBnAoR5-ec6f";
+
+        Collection<String> PII = Arrays.asList(
+                "monalisa octocat",
+                "octocat",
+                "monatheoctocat"
+        );
+
+        assertNotSanitized(jsonString, PII);
+
+        String sanitized = this.sanitize(endpoint, jsonString);
+
+        assertPseudonymized(sanitized, "octocat");
+        assertPseudonymized(sanitized, "octocat@github.com");
+
+        assertUrlAllowed(endpoint);
+    }
+
+
+    @Test
     void orgTeams() {
         String jsonString = asJson(exampleDirectoryPath, "org_teams.json");
 
@@ -673,7 +696,8 @@ public class GitHubTests extends JavaRulesTestBaseCase {
                 InvocationExample.of("https://api.github.com/repos/FAKE/REPO/pulls/42/commits", "pull_commits.json"),
                 InvocationExample.of("https://api.github.com/repos/FAKE/REPO/pulls/42/reviews", "pull_reviews.json"),
                 InvocationExample.of("https://api.github.com/repos/FAKE/REPO/pulls/42/reviews/10/comments", "pull_review_comments.json"),
-                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/pulls/PULL_ID", "pull.json")
+                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/pulls/PULL_ID", "pull.json"),
+                InvocationExample.of("https://api.github.com/users/p~IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbN_fPDYrPH3aBnAoR5-ec6f", "user.json")
         );
     }
 }

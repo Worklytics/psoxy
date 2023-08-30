@@ -519,6 +519,11 @@ public class PrebuiltSanitizerRules {
                         .jsonPath(String.format("$%s.repos_url", prefix))
                         .jsonPath(String.format("$%s.events_url", prefix))
                         .jsonPath(String.format("$%s.received_events_url", prefix))
+                        .jsonPath(String.format("$%s.name", prefix))
+                        .jsonPath(String.format("$%s.company", prefix))
+                        .jsonPath(String.format("$%s.location", prefix))
+                        .jsonPath(String.format("$%s.bio", prefix))
+                        .jsonPath(String.format("$%s.twitter_username", prefix))
                         .build(),
                 Transform.Pseudonymize.builder()
                         .jsonPath(String.format("$%s.id", prefix))
