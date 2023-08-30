@@ -69,8 +69,31 @@ public class GitHubTests extends JavaRulesTestBaseCase {
     }
 
     @Test
-    void graphql_for_users() {
-        String jsonString = asJson(exampleDirectoryPath, "graph_api_users.json");
+    void graphql_for_users_with_saml() {
+        String jsonString = asJson(exampleDirectoryPath, "graph_api_users_saml.json");
+
+        String endpoint = "https://api.github.com/graphql";
+
+        Collection<String> PII = Arrays.asList(
+                "fake1",
+                "fake2",
+                "fake1@contoso.com",
+                "fake2@contoso.com"
+        );
+
+        assertNotSanitized(jsonString, PII);
+
+        String sanitized = this.sanitize(endpoint, jsonString);
+
+        assertPseudonymized(sanitized, "fake1", "fake1@contoso.com");
+        assertPseudonymized(sanitized, "fake2", "fake2@contoso.com");
+
+        assertUrlAllowed(endpoint);
+    }
+
+    @Test
+    void graphql_for_users_with_members() {
+        String jsonString = asJson(exampleDirectoryPath, "graph_api_users_members.json");
 
         String endpoint = "https://api.github.com/graphql";
 
@@ -623,7 +646,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
     public Stream<InvocationExample> getExamples() {
         return Stream.of(
                 InvocationExample.of("https://api.github.com/orgs/FAKE/members", "org_members.json"),
-                InvocationExample.of("https://api.github.com/graphql", "graph_api_users.json"),
+                InvocationExample.of("https://api.github.com/graphql", "graph_api_users_saml.json"),
                 InvocationExample.of("https://api.github.com/graphql", "graph_api_error.json"),
                 InvocationExample.of("https://api.github.com/orgs/FAKE/teams", "org_teams.json"),
                 InvocationExample.of("https://api.github.com/orgs/FAKE/teams/TEAM/members", "team_members.json"),

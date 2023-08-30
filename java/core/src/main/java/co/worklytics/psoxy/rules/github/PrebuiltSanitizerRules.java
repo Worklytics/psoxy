@@ -2,6 +2,7 @@ package co.worklytics.psoxy.rules.github;
 
 import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.rules.Rules2;
+import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.rules.Endpoint;
 import com.avaulta.gateway.rules.JsonSchemaFilterUtils;
 import com.avaulta.gateway.rules.transforms.Transform;
@@ -10,10 +11,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Streams;
 
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -97,9 +95,9 @@ public class PrebuiltSanitizerRules {
 
     // https://docs.github.com/en/rest/users/users?apiVersion=2022-11-28#list-users
     static final Endpoint USERS = Endpoint.builder()
-            .pathTemplate("/users")
+            .pathRegex("/users(/p~[a-zA-Z0-9_-]+?)?[^/]*")
             .allowedQueryParams(userAllowedQueryParameters)
-            .transforms(generateUserTransformations("."))
+            .transforms(getTransformationsForUserEndpoint())
             .build();
 
     static final Endpoint GRAPHQL_FOR_USERS = Endpoint.builder()
@@ -543,27 +541,28 @@ public class PrebuiltSanitizerRules {
                                 put("organization", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                                         .type("object")
                                         .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{
-                                            put("samlIdentityProvider", jsonSchemaForSamlIdentityProvider());
+                                            put("samlIdentityProvider", jsonSchemaForOrganizationProperty("externalIdentities", jsonSchemaForSamlNode()));
+                                            put("membersWithRole", jsonSchemaForQueryResult(jsonSchemaForMemberNode()));
                                         }}).build());
                             }}).build());
                     put("errors", jsonSchemaForErrors());
                 }}).build();
     }
 
-    private static JsonSchemaFilterUtils.JsonSchemaFilter jsonSchemaForSamlIdentityProvider() {
+    private static JsonSchemaFilterUtils.JsonSchemaFilter jsonSchemaForOrganizationProperty(String propertyName, JsonSchemaFilterUtils.JsonSchemaFilter node) {
         return JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                 .type("object")
                 .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{
-                    put("externalIdentities", jsonSchemaForExternalIdentities());
+                    put("externalIdentities", jsonSchemaForQueryResult(node));
                 }}).build();
     }
 
-    private static JsonSchemaFilterUtils.JsonSchemaFilter jsonSchemaForExternalIdentities() {
+    private static JsonSchemaFilterUtils.JsonSchemaFilter jsonSchemaForQueryResult(JsonSchemaFilterUtils.JsonSchemaFilter node) {
         return JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                 .type("object")
                 .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{
                     put("pageInfo", jsonSchemaForPageInfo());
-                    put("edges", jsonSchemaForEdge());
+                    put("edges", jsonSchemaForEdge(node));
                 }}).build();
     }
 
@@ -577,19 +576,19 @@ public class PrebuiltSanitizerRules {
                 .build();
     }
 
-    private static JsonSchemaFilterUtils.JsonSchemaFilter jsonSchemaForEdge() {
+    private static JsonSchemaFilterUtils.JsonSchemaFilter jsonSchemaForEdge(JsonSchemaFilterUtils.JsonSchemaFilter node) {
         return JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                 .type("array")
                 .items(JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                         .type("object")
                         .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
-                            put("node", jsonSchemaForNode());
+                            put("node", node);
                         }})
                         .build())
                 .build();
     }
 
-    private static JsonSchemaFilterUtils.JsonSchemaFilter jsonSchemaForNode() {
+    private static JsonSchemaFilterUtils.JsonSchemaFilter jsonSchemaForSamlNode() {
         return JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                 .type("object")
                 .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
@@ -600,6 +599,22 @@ public class PrebuiltSanitizerRules {
                     put("user", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("object").properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{
                         put("login", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                     }}).build());
+                }})
+                .build();
+    }
+
+    private static JsonSchemaFilterUtils.JsonSchemaFilter jsonSchemaForMemberNode() {
+        return JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                .type("object")
+                .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
+                    put("email", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
+                    put("login", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
+                    put("id", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
+                    put("isSiteAdmin", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("boolean").build());
+                    put("organizationVerifiedDomainEmails", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                            .type("array")
+                            .items(JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build())
+                            .build());
                 }})
                 .build();
     }
@@ -623,5 +638,16 @@ public class PrebuiltSanitizerRules {
                                             }).build()).build());
                             put("message", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                         }}).build()).build();
+    }
+
+    private static List<Transform> getTransformationsForUserEndpoint() {
+        List<Transform> transforms = new ArrayList<>(generateUserTransformations("."));
+        transforms.add(Transform.Pseudonymize.builder()
+                .includeReversible(true)
+                .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
+                .jsonPath("$.login")
+                .build());
+
+        return transforms;
     }
 }

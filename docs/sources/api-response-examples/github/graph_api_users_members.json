@@ -1,0 +1,28 @@
+{
+  "data": {
+    "organization": {
+      "membersWithRole": {
+        "edges": [
+          {
+            "node": {
+              "email": "fake1@contoso.com",
+              "login": "fake1",
+              "organizationVerifiedDomainEmails": []
+            }
+          },
+          {
+            "node": {
+              "email": "fake2@contoso.com",
+              "login": "fake2",
+              "organizationVerifiedDomainEmails": []
+            }
+          }
+        ],
+        "pageInfo": {
+          "hasNextPage": true,
+          "endCursor": "Y3Vyc29yOnYyOpHOANUliA=="
+        }
+      }
+    }
+  }
+}
