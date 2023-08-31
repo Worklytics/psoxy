@@ -29,6 +29,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.File;
 import java.io.FileReader;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -424,22 +425,20 @@ public class BulkDataSanitizerImplTest {
     void transform_ghusername() {
 
         final String EXPECTED = "EMPLOYEE_ID,EMPLOYEE_EMAIL,DEPARTMENT,SNAPSHOT,MANAGER_ID,JOIN_DATE,LEAVE_DATE,GITHUB_USERNAME\r\n" +
-            "2,bob@workltyics.co,Sales,2023-01-06,1,2020-01-01,,\r\n" +
-            "1,alice@worklytics.co,Engineering,2023-01-06,,2019-11-11,,\"{\"\"scope\"\":\"\"github\"\",\"\"hash\"\":\"\"kwv9cWxo7TDgrt1qCegIJv7rA84s_895L_wG_y8hYjA\"\"}\"\r\n" +
-            "4,,Engineering,2023-01-06,1,2018-06-03,,\r\n" +
-            "3,charles@workltycis.co,Engineering,2023-01-06,1,2019-10-06,2022-12-08,\r\n";
+                "2,bob@workltyics.co,Sales,2023-01-06,1,2020-01-01,,\"{\"\"scope\"\":\"\"github\"\",\"\"hash\"\":\"\"Y4s0esk6oY5kfgIH2Pvdgr0NVqpKyy7fU0IVbV01xTw\"\"}\"\r\n" +
+                "1,alice@worklytics.co,Engineering,2023-01-06,,2019-11-11,,\"{\"\"scope\"\":\"\"github\"\",\"\"hash\"\":\"\"kwv9cWxo7TDgrt1qCegIJv7rA84s_895L_wG_y8hYjA\"\"}\"\r\n" +
+                "4,,Engineering,2023-01-06,1,2018-06-03,,\r\n" +
+                "3,charles@workltycis.co,Engineering,2023-01-06,1,2019-10-06,2022-12-08,\"{\"\"scope\"\":\"\"github\"\",\"\"hash\"\":\"\"KqWJXpC.g25eQzR80kCS3RVj4L4JNngo7vFwructvNU\"\"}\"\r\n";
 
         CsvRules rules = CsvRules.builder()
-            .columnsToDuplicate(Map.of("EMPLOYEE_EMAIL", "GITHUB_USERNAME"))
-            .columnsToTransform(Map.of("GITHUB_USERNAME", ColumnarRules.FieldValueTransform.builder()
-                                                                        .filterRegex("(.*)@worklytics.co")
-                                                                        .outputTemplate("%s_enterprise")
-                                                                        .build()))
-            .columnsToPseudonymizeWithScope(Map.of("GITHUB_USERNAME", "github"))
-            .build();
-
-
-
+                .fieldsToTransform(Map.of("EMPLOYEE_EMAIL", ColumnarRules.FieldTransformPipeline.builder()
+                        .newName("GITHUB_USERNAME")
+                        .transforms(Arrays.asList(
+                                ColumnarRules.FieldValueTransform.filter("(.*)@.*"),
+                                ColumnarRules.FieldValueTransform.formatString("%s_enterprise"),
+                                ColumnarRules.FieldValueTransform.pseudonymizeWithScope("github")
+                        )).build()))
+                .build();
 
         File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
 
