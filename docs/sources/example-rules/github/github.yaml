@@ -85,6 +85,7 @@ endpoints:
           - "$..login"
           - "$..email"
           - "$..guid"
+          - "$..organizationVerifiedDomainEmails[*]"
         encoding: "JSON"
     responseSchema:
       type: "object"

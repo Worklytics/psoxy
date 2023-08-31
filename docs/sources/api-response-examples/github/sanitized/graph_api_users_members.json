@@ -7,7 +7,9 @@
             "node":{
               "email":"{\"scope\":\"email\",\"domain\":\"contoso.com\",\"hash\":\"ui7ZfyKC2nursXtsx_lyORcptfTrCuGf38xextkHyW8\"}",
               "login":"{\"scope\":\"github\",\"hash\":\"iK5cxa4JLZ9qQnICuYKRS8wJoRkdvXv6xrLAIg2.ETs\"}",
-              "organizationVerifiedDomainEmails":[ ]
+              "organizationVerifiedDomainEmails":[
+                "{\"scope\":\"email\",\"domain\":\"verified.contoso.com\",\"hash\":\"hc1yjghkAjAm4BMPcqT1drpsKA9CuzBFw_kMD.gsDyg\"}"
+              ]
             }
           },
           {

@@ -111,6 +111,7 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..login")
                     .jsonPath("$..email")
                     .jsonPath("$..guid")
+                    .jsonPath("$..organizationVerifiedDomainEmails[*]")
                     .build())
             .responseSchema(jsonSchemaForUserQueryResult())
             .build();

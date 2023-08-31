@@ -7,7 +7,9 @@
             "node": {
               "email": "fake1@contoso.com",
               "login": "fake1",
-              "organizationVerifiedDomainEmails": []
+              "organizationVerifiedDomainEmails": [
+                "fake1@verified.contoso.com"
+              ]
             }
           },
           {
