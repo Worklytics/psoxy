@@ -38,7 +38,7 @@ endpoints:
           - "$..login"
         includeReversible: true
         encoding: "URL_SAFE_TOKEN"
-  - pathRegex: "/users(/p~[a-zA-Z0-9_-]+?)?[^/]*"
+  - pathTemplate: "/users/{username}"
     allowedQueryParams:
       - "since"
       - "per_page"
@@ -471,6 +471,53 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..assignees[*].login"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
+  - pathTemplate: "/repos/{owner}/{repo}/commits/{commit_sha}/comments"
+    allowedQueryParams:
+      - "per_page"
+      - "page"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..name"
+          - "$..message"
+          - "$..files"
+          - "$..signature"
+          - "$..payload"
+          - "$..path"
+          - "$..body"
+          - "$..position"
+          - "$..line"
+      - !<redact>
+        jsonPaths:
+          - "$..['user'].avatar_url"
+          - "$..['user'].gravatar_id"
+          - "$..['user'].url"
+          - "$..['user'].html_url"
+          - "$..['user'].followers_url"
+          - "$..['user'].following_url"
+          - "$..['user'].gists_url"
+          - "$..['user'].starred_url"
+          - "$..['user'].subscriptions_url"
+          - "$..['user'].organizations_url"
+          - "$..['user'].repos_url"
+          - "$..['user'].events_url"
+          - "$..['user'].received_events_url"
+          - "$..['user'].name"
+          - "$..['user'].company"
+          - "$..['user'].location"
+          - "$..['user'].bio"
+          - "$..['user'].twitter_username"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..['user'].id"
+          - "$..['user'].node_id"
+          - "$..['user'].email"
+        encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..['user'].login"
         includeReversible: true
         encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/repos/{owner}/{repo}/comments/{comment_id}/reactions"

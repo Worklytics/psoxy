@@ -329,6 +329,24 @@ public class PrebuiltSanitizerRules {
                     .build())
             .build();
 
+    // https://docs.github.com/en/rest/commits/comments?apiVersion=2022-11-28#list-commit-comments
+    static final Endpoint COMMIT_COMMENTS = Endpoint.builder()
+            .pathTemplate("/repos/{owner}/{repo}/commits/{commit_sha}/comments")
+            .allowedQueryParams(commonAllowedQueryParameters)
+            .transform(Transform.Redact.builder()
+                    .jsonPath("$..name")
+                    .jsonPath("$..message")
+                    .jsonPath("$..files")
+                    .jsonPath("$..signature")
+                    .jsonPath("$..payload")
+                    .jsonPath("$..path")
+                    .jsonPath("$..body")
+                    .jsonPath("$..position")
+                    .jsonPath("$..line")
+                    .build())
+            .transforms(generateUserTransformations("..", Collections.singletonList("user")))
+            .build();
+
     static final Endpoint COMMIT_COMMENT_REACTIONS = Endpoint.builder()
             .pathTemplate("/repos/{owner}/{repo}/comments/{comment_id}/reactions")
             .allowedQueryParams(commonAllowedQueryParameters)
@@ -442,6 +460,7 @@ public class PrebuiltSanitizerRules {
             .endpoint(REPO_COMMITS)
             .endpoint(REPO_COMMIT)
             .endpoint(REPO_EVENTS)
+            .endpoint(COMMIT_COMMENTS)
             .endpoint(COMMIT_COMMENT_REACTIONS)
             .endpoint(ISSUE)
             .endpoint(ISSUES)

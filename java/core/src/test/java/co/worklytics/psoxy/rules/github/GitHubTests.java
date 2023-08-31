@@ -234,6 +234,23 @@ public class GitHubTests extends JavaRulesTestBaseCase {
     }
 
     @Test
+    void commit_comments() {
+        String jsonString = asJson(exampleDirectoryPath, "commit_comments.json");
+
+        String endpoint = "https://api.github.com/repos/{owner}/{repo}/commits/{commit_sha}/comments";
+
+        Collection<String> PII = Arrays.asList(
+                "octocat"
+        );
+
+        assertNotSanitized(jsonString, PII);
+
+        String sanitized = this.sanitize(endpoint, jsonString);
+
+        assertUrlAllowed(endpoint);
+    }
+
+    @Test
     void comments_reactions() {
         String jsonString = asJson(exampleDirectoryPath, "comment_reactions.json");
 
@@ -679,6 +696,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
                 InvocationExample.of("https://api.github.com/orgs/FAKE/audit-log", "org_audit_log.json"),
                 InvocationExample.of("https://api.github.com/organizations/123456789/audit-log?include=all&per_page=100&phrase=created:2023-02-16T12:00:00%2B0000..2023-04-17T00:00:00%2B0000&page=0&order=asc&after=MS42OEQyOTE2MjX1MqNlJzIyfANVOHoYbUVsZ1ZjUWN6TwlZLXl6EVE%3D&before", "org_audit_log.json"),
                 InvocationExample.of("https://api.github.com/repos/FAKE/REPO/commits/COMMIT_REF", "commit.json"),
+                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/commits/COMMIT_REF/comments", "commit_comments.json"),
                 InvocationExample.of("https://api.github.com/repos/FAKE/REPO/branches", "repo_branches.json"),
                 InvocationExample.of("https://api.github.com/repos/FAKE/REPO/commits", "repo_commits.json"),
                 InvocationExample.of("https://api.github.com/repos/FAKE/REPO/events", "repo_events.json"),
