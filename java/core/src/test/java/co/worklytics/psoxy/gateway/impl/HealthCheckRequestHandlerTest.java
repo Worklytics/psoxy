@@ -7,6 +7,7 @@ import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.test.MockModules;
 import dagger.Component;
+import org.apache.hc.core5.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -63,7 +64,7 @@ public class HealthCheckRequestHandlerTest {
 
         assertTrue(response.isPresent());
 
-        assertEquals(200, response.get().getStatusCode());
+        assertEquals(HttpStatus.SC_OK, response.get().getStatusCode());
     }
 
     @Test
@@ -80,7 +81,7 @@ public class HealthCheckRequestHandlerTest {
 
         assertTrue(response.isPresent());
 
-        assertEquals(512, response.get().getStatusCode());
+        assertEquals(HttpStatus.SC_PRECONDITION_FAILED, response.get().getStatusCode());
     }
 
     @Test
@@ -97,6 +98,6 @@ public class HealthCheckRequestHandlerTest {
 
         assertTrue(response.isPresent());
 
-        assertEquals(512, response.get().getStatusCode());
+        assertEquals(HttpStatus.SC_PRECONDITION_FAILED, response.get().getStatusCode());
     }
 }
