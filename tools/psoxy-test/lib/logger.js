@@ -1,4 +1,5 @@
 import { createLogger, format, transports, addColors } from 'winston';
+import _ from 'lodash';
 
 const config = {
   levels: {
@@ -7,7 +8,7 @@ const config = {
     info: 2,
     entry: 3,
     verbose: 4,
-  }, 
+  },
   colors: {
     error: 'bold red',
     success: 'bold green',
@@ -31,15 +32,17 @@ export default function getLogger(verbose = false) {
           format.errors({ stack: true }),
           format.printf((info) => {
             let message = `${info.level}: ${info.message}`;
-            if (info.additional) {
+            if (_.isObject(info.additional)) {
               message += `\n ${JSON.stringify(info.additional, undefined, 2)}`
+            } else if (!_.isEmpty(info.additional)) {
+              message += `\n ${info.additional}`;
             }
             return message;
           }),
         )
       }),
-      new transports.File({ 
-        filename: 'run.log', 
+      new transports.File({
+        filename: 'run.log',
         level: 'verbose', // log everything
         format: format.combine(
           format.timestamp(),
