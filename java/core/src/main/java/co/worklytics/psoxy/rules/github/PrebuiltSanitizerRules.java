@@ -497,7 +497,12 @@ public class PrebuiltSanitizerRules {
         }
 
         return Arrays.asList(
-                Transform.Redact.builder()
+                // Following expression works for subproperties:
+                // $..['user', 'owner', ... ]['avatar_url','gravatar_id',...]
+                // but one there is no property and it is on the root, it is not working:
+                // $..['avatar_url','gravatar_id',...]
+                // so to have that working, in root case they are expanded instead of put them as an array
+                prefix.equals(".") ? Transform.Redact.builder()
                         .jsonPath(String.format("$%s%s.avatar_url", prefix, objectNames))
                         .jsonPath(String.format("$%s%s.gravatar_id", prefix, objectNames))
                         .jsonPath(String.format("$%s%s.url", prefix, objectNames))
@@ -516,12 +521,38 @@ public class PrebuiltSanitizerRules {
                         .jsonPath(String.format("$%s%s.location", prefix, objectNames))
                         .jsonPath(String.format("$%s%s.bio", prefix, objectNames))
                         .jsonPath(String.format("$%s%s.twitter_username", prefix, objectNames))
-                        .build(),
-                Transform.Pseudonymize.builder()
-                        .jsonPath(String.format("$%s%s.id", prefix, objectNames))
-                        .jsonPath(String.format("$%s%s.node_id", prefix, objectNames))
-                        .jsonPath(String.format("$%s%s.email", prefix, objectNames))
-                        .build(),
+                        .build() :
+                        Transform.Redact.builder()
+                                .jsonPath(String.format("$%s%s.['avatar_url'," +
+                                        "'gravatar_id'," +
+                                        "'url'," +
+                                        "'html_url'," +
+                                        "'followers_url'," +
+                                        "'following_url'," +
+                                        "'gists_url'," +
+                                        "'starred_url'," +
+                                        "'subscriptions_url'," +
+                                        "'organizations_url'," +
+                                        "'repos_url'," +
+                                        "'events_url'," +
+                                        "'received_events_url'," +
+                                        "'name'," +
+                                        "'company'," +
+                                        "'location'," +
+                                        "'bio'," +
+                                        "'twitter_username']", prefix, objectNames))
+                                .build(),
+
+                prefix.equals(".") ?
+                        Transform.Pseudonymize.builder()
+                                .jsonPath(String.format("$%s%s.id", prefix, objectNames))
+                                .jsonPath(String.format("$%s%s.node_id", prefix, objectNames))
+                                .jsonPath(String.format("$%s%s.email", prefix, objectNames))
+                                .build() :
+                        Transform.Pseudonymize.builder()
+                                .jsonPath(String.format("$%s%s.['id','node_id','email']", prefix, objectNames))
+                                .build()
+                ,
                 Transform.Pseudonymize.builder()
                         .includeReversible(true)
                         .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
