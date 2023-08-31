@@ -117,6 +117,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
 
     @VisibleForTesting
     Predicate<Map.Entry<Endpoint, Pattern>> getHasPathTemplateMatchingUrl(URL url) {
+        //TODO: parse out path params, if any; match and valid them against schema
         return (entry) ->
                 entry.getKey().getPathTemplate() != null && entry.getValue().matcher(url.getPath()).matches()
                         && allowedQueryParams(entry.getKey(), URLUtils.queryParamNames(url));
@@ -474,11 +475,14 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
 
     @VisibleForTesting
     String effectiveRegex(Endpoint endpoint) {
+        //NOTE: java capturing groups names limited to A-Z, a-z and 0-9, and must start with a letter
+
+
         return Optional.ofNullable(endpoint.getPathRegex())
                 .orElseGet(() -> "^" +
                         endpoint.getPathTemplate()
                                 .replaceAll(SPECIAL_CHAR_CLASS, "\\\\$0")
-                                .replaceAll("\\{.*?\\}", "[^/]+") + "$");
+                                .replaceAll("\\{([A-Za-z][A-Za-z0-9]*)\\}", "(?<$1>[^/]+)") + "$");
     }
 
     boolean allowedQueryParams(Endpoint endpoint, List<String> queryParams) {

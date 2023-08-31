@@ -443,8 +443,8 @@ class RESTApiSanitizerImplTest {
         value = {
             "/,^/$",
             "/api/v1/users,^/api/v1/users$",
-            "/api/v1/users/{id},^/api/v1/users/[^/]+$",
-            "/api/v1/mail/{accountId}/messages/{id},^/api/v1/mail/[^/]+/messages/[^/]+$",
+            "/api/v1/users/{id},^/api/v1/users/(?<id>[^/]+)$",
+            "/api/v1/mail/{accountId}/messages/{id},^/api/v1/mail/(?<accountId>[^/]+)/messages/(?<id>[^/]+)$",
             "/enterprise.info,^/enterprise\\.info$",
             "/enterprise$something,^/enterprise\\$something$",
             "/enterprise-info,^/enterprise\\-info$",

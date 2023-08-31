@@ -165,7 +165,7 @@ public class PrebuiltSanitizerRules {
 
 
     static final Endpoint ORG_TEAM_MEMBERS = Endpoint.builder()
-            .pathTemplate("/orgs/{org}/teams/{team_slug}/members")
+            .pathTemplate("/orgs/{org}/teams/{teamSlug}/members")
             .allowedQueryParams(commonAllowedQueryParameters)
             .transforms(generateUserTransformations("."))
             .build();
