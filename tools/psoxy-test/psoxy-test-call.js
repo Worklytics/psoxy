@@ -77,14 +77,15 @@ export default async function (options = {}) {
 
   let resultMessagePrefix = options.healthCheck ? 'Health Check result:' :
   'Call result:'
-  let resultData = {};
+
+  let resultData = result.data;
   if (!_.isEmpty(result.data)) {
     try {
       resultData = JSON.parse(result.data);
     } catch(error) {
       logger.verbose(`Error parsing Psoxy response: ${error.message}`);
     }
-  } 
+  }
 
   if (result.status === httpCodes.HTTP_STATUS_OK) {
 
