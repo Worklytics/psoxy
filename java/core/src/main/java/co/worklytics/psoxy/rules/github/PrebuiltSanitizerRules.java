@@ -2,6 +2,7 @@ package co.worklytics.psoxy.rules.github;
 
 import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.rules.Rules2;
+import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.rules.Endpoint;
 import com.avaulta.gateway.rules.JsonSchemaFilterUtils;
 import com.avaulta.gateway.rules.transforms.Transform;
@@ -9,11 +10,9 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Streams;
+import org.apache.commons.lang3.StringUtils;
 
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -24,6 +23,11 @@ public class PrebuiltSanitizerRules {
     private static final List<String> commonAllowedQueryParameters = Lists.newArrayList(
             "per_page",
             "page"
+    );
+
+    private static final List<String> userAllowedQueryParameters = Lists.newArrayList(
+            "since",
+            "per_page"
     );
 
     private static final List<String> commonDirectionAllowedQueryParameters = Lists.newArrayList(
@@ -90,6 +94,13 @@ public class PrebuiltSanitizerRules {
             .transforms(generateUserTransformations("."))
             .build();
 
+    // https://docs.github.com/en/rest/users/users?apiVersion=2022-11-28#list-users
+    static final Endpoint USERS = Endpoint.builder()
+            .pathTemplate("/users/{username}")
+            .allowedQueryParams(userAllowedQueryParameters)
+            .transforms(generateUserTransformations("."))
+            .build();
+
     static final Endpoint GRAPHQL_FOR_USERS = Endpoint.builder()
             .pathTemplate("/graphql")
             .transform(Transform.Redact.builder()
@@ -100,6 +111,7 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..login")
                     .jsonPath("$..email")
                     .jsonPath("$..guid")
+                    .jsonPath("$..organizationVerifiedDomainEmails[*]")
                     .build())
             .responseSchema(jsonSchemaForUserQueryResult())
             .build();
@@ -171,8 +183,7 @@ public class PrebuiltSanitizerRules {
             .transform(Transform.Pseudonymize.builder()
                     .jsonPath("$.commit..email")
                     .build())
-            .transforms(generateUserTransformations("..author"))
-            .transforms(generateUserTransformations("..committer"))
+            .transforms(generateUserTransformations("..", Arrays.asList("author", "committer")))
             .build();
 
     static final Endpoint ISSUES = Endpoint.builder()
@@ -184,11 +195,9 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..description")
                     .jsonPath("$..name")
                     .build())
-            .transforms(generateUserTransformations("..user"))
-            .transforms(generateUserTransformations("..assignee"))
-            .transforms(generateUserTransformations("..assignees[*]"))
-            .transforms(generateUserTransformations("..creator"))
-            .transforms(generateUserTransformations("..closed_by"))
+            .transforms(generateUserTransformations("..", Arrays.asList("user", "assignee", "creator", "closed_by")))
+            // Seems array plus other object in filtering is not matching the json path, so a different rule for this
+            .transforms(generateUserTransformations("..assignees[*]", Collections.emptyList()))
             .build();
 
     static final Endpoint ISSUE = Endpoint.builder()
@@ -200,11 +209,8 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..name")
                     .jsonPath("$..pem")
                     .build())
-            .transforms(generateUserTransformations("..user"))
-            .transforms(generateUserTransformations("..assignee"))
-            .transforms(generateUserTransformations("..assignees[*]"))
-            .transforms(generateUserTransformations("..creator"))
-            .transforms(generateUserTransformations("..closed_by"))
+            .transforms(generateUserTransformations("..", Arrays.asList("user", "assignee", "creator", "closed_by")))
+            .transforms(generateUserTransformations("..assignees[*]", Collections.emptyList()))
             .build();
 
     static final Endpoint ISSUE_COMMENTS = Endpoint.builder()
@@ -215,7 +221,7 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..message")
                     .jsonPath("$..body")
                     .build())
-            .transforms(generateUserTransformations("..user"))
+            .transforms(generateUserTransformations("..", Collections.singletonList("user")))
             .build();
 
     static final Endpoint ISSUE_EVENTS = Endpoint.builder()
@@ -236,14 +242,7 @@ public class PrebuiltSanitizerRules {
             .transform(Transform.Pseudonymize.builder()
                     .jsonPath("$..email")
                     .build())
-            .transforms(generateUserTransformations("..user"))
-            .transforms(generateUserTransformations("..actor"))
-            .transforms(generateUserTransformations("..assignee"))
-            .transforms(generateUserTransformations("..assigner"))
-            .transforms(generateUserTransformations("..creator"))
-            .transforms(generateUserTransformations("..closed_by"))
-            .transforms(generateUserTransformations("..author"))
-            .transforms(generateUserTransformations("..committer"))
+            .transforms(generateUserTransformations("..", Arrays.asList("user", "actor", "assignee", "assigner", "creator", "closed_by", "author", "committer")))
             .build();
 
     static final Endpoint ISSUE_TIMELINE = Endpoint.builder()
@@ -264,14 +263,7 @@ public class PrebuiltSanitizerRules {
             .transform(Transform.Pseudonymize.builder()
                     .jsonPath("$..email")
                     .build())
-            .transforms(generateUserTransformations("..user"))
-            .transforms(generateUserTransformations("..actor"))
-            .transforms(generateUserTransformations("..assignee"))
-            .transforms(generateUserTransformations("..assigner"))
-            .transforms(generateUserTransformations("..creator"))
-            .transforms(generateUserTransformations("..closed_by"))
-            .transforms(generateUserTransformations("..author"))
-            .transforms(generateUserTransformations("..committer"))
+            .transforms(generateUserTransformations("..", Arrays.asList("user", "actor", "assignee", "assigner", "creator", "closed_by", "author", "committer")))
             .build();
 
     static final Endpoint PULL_REVIEWS = Endpoint.builder()
@@ -282,7 +274,7 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..html_url")
                     .jsonPath("$..pull_request_url")
                     .build())
-            .transforms(generateUserTransformations("..user"))
+            .transforms(generateUserTransformations("..", Collections.singletonList("user")))
             .build();
 
     static final Endpoint PULLS = Endpoint.builder()
@@ -303,15 +295,9 @@ public class PrebuiltSanitizerRules {
             // that most of the repos are going to be
             // created as part of organization and not by an user
             //.transforms(generateUserTransformations("..owner"))
-            .transforms(generateUserTransformations("..user"))
-            .transforms(generateUserTransformations("..actor"))
-            .transforms(generateUserTransformations("..assignee"))
-            .transforms(generateUserTransformations("..assignees[*]"))
-            .transforms(generateUserTransformations("..requested_reviewers[*]"))
-            .transforms(generateUserTransformations("..creator"))
-            .transforms(generateUserTransformations("..merged_by"))
-            .transforms(generateUserTransformations("..closed_by"))
-            .transforms(generateUserTransformations("..enabled_by"))
+            .transforms(generateUserTransformations("..", Arrays.asList("user", "actor", "assignee", "creator", "merged_by", "closed_by", "enabled_by")))
+            .transforms(generateUserTransformations("..requested_reviewers[*]", Collections.emptyList()))
+            .transforms(generateUserTransformations("..assignees[*]", Collections.emptyList()))
             .build();
 
     static final Endpoint PULL = Endpoint.builder()
@@ -330,15 +316,9 @@ public class PrebuiltSanitizerRules {
             // that most of the repos are going to be
             // created as part of organization and not by an user
             //.transforms(generateUserTransformations("..owner"))
-            .transforms(generateUserTransformations("..user"))
-            .transforms(generateUserTransformations("..actor"))
-            .transforms(generateUserTransformations("..assignee"))
-            .transforms(generateUserTransformations("..assignees[*]"))
-            .transforms(generateUserTransformations("..requested_reviewers[*]"))
-            .transforms(generateUserTransformations("..creator"))
-            .transforms(generateUserTransformations("..merged_by"))
-            .transforms(generateUserTransformations("..closed_by"))
-            .transforms(generateUserTransformations("..enabled_by"))
+            .transforms(generateUserTransformations("..", Arrays.asList("user", "actor", "assignee", "creator", "merged_by", "closed_by", "enabled_by")))
+            .transforms(generateUserTransformations("..requested_reviewers[*]", Collections.emptyList()))
+            .transforms(generateUserTransformations("..assignees[*]", Collections.emptyList()))
             .build();
 
     static final Endpoint REPOSITORIES = Endpoint.builder()
@@ -350,22 +330,40 @@ public class PrebuiltSanitizerRules {
                     .build())
             .build();
 
+    // https://docs.github.com/en/rest/commits/comments?apiVersion=2022-11-28#list-commit-comments
+    static final Endpoint COMMIT_COMMENTS = Endpoint.builder()
+            .pathTemplate("/repos/{owner}/{repo}/commits/{commit_sha}/comments")
+            .allowedQueryParams(commonAllowedQueryParameters)
+            .transform(Transform.Redact.builder()
+                    .jsonPath("$..name")
+                    .jsonPath("$..message")
+                    .jsonPath("$..files")
+                    .jsonPath("$..signature")
+                    .jsonPath("$..payload")
+                    .jsonPath("$..path")
+                    .jsonPath("$..body")
+                    .jsonPath("$..position")
+                    .jsonPath("$..line")
+                    .build())
+            .transforms(generateUserTransformations("..", Collections.singletonList("user")))
+            .build();
+
     static final Endpoint COMMIT_COMMENT_REACTIONS = Endpoint.builder()
             .pathTemplate("/repos/{owner}/{repo}/comments/{comment_id}/reactions")
             .allowedQueryParams(commonAllowedQueryParameters)
-            .transforms(generateUserTransformations("..user"))
+            .transforms(generateUserTransformations("..", Collections.singletonList("user")))
             .build();
 
     static final Endpoint ISSUE_REACTIONS = Endpoint.builder()
             .pathTemplate("/repos/{owner}/{repo}/issues/{issue_number}/reactions")
             .allowedQueryParams(commonAllowedQueryParameters)
-            .transforms(generateUserTransformations("..user"))
+            .transforms(generateUserTransformations("..", Collections.singletonList("user")))
             .build();
 
     static final Endpoint ISSUE_COMMENT_REACTIONS = Endpoint.builder()
             .pathTemplate("/repos/{owner}/{repo}/issues/comments/{comment_id}/reactions")
             .allowedQueryParams(commonAllowedQueryParameters)
-            .transforms(generateUserTransformations("..user"))
+            .transforms(generateUserTransformations("..", Collections.singletonList("user")))
             .build();
 
     static final Endpoint REPO_EVENTS = Endpoint.builder()
@@ -386,15 +384,8 @@ public class PrebuiltSanitizerRules {
             .transform(Transform.Pseudonymize.builder()
                     .jsonPath("$..author.email")
                     .build())
-            .transforms(generateUserTransformations("..owner"))
-            .transforms(generateUserTransformations("..user"))
-            .transforms(generateUserTransformations("..actor"))
-            .transforms(generateUserTransformations("..assignee"))
-            .transforms(generateUserTransformations("..assignees[*]"))
-            .transforms(generateUserTransformations("..requested_reviewers[*]"))
-            .transforms(generateUserTransformations("..creator"))
-            .transforms(generateUserTransformations("..merged_by"))
-            .transforms(generateUserTransformations("..closed_by"))
+            .transforms(generateUserTransformations("..", Arrays.asList("owner", "user", "actor", "assignee", "requested_reviewers[*]", "creator", "merged_by", "closed_by")))
+            .transforms(generateUserTransformations("..assignees[*]", Collections.emptyList()))
             .build();
 
     static final Endpoint REPO_COMMITS = Endpoint.builder()
@@ -410,8 +401,7 @@ public class PrebuiltSanitizerRules {
             .transform(Transform.Pseudonymize.builder()
                     .jsonPath("$.commit..email")
                     .build())
-            .transforms(generateUserTransformations("..author"))
-            .transforms(generateUserTransformations("..committer"))
+            .transforms(generateUserTransformations("..", Arrays.asList("author", "committer")))
             .build();
 
     static final Endpoint REPO_BRANCHES = Endpoint.builder()
@@ -432,8 +422,7 @@ public class PrebuiltSanitizerRules {
             .transform(Transform.Pseudonymize.builder()
                     .jsonPath("$.commit..email")
                     .build())
-            .transforms(generateUserTransformations("..author"))
-            .transforms(generateUserTransformations("..committer"))
+            .transforms(generateUserTransformations("..", Arrays.asList("author", "committer")))
             .build();
 
     static final Endpoint PULL_COMMENTS = Endpoint.builder()
@@ -444,7 +433,7 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..diff_hunk")
                     .jsonPath("$..body")
                     .build())
-            .transforms(generateUserTransformations("..user"))
+            .transforms(generateUserTransformations("..", Collections.singletonList("user")))
             .build();
 
     static final Endpoint PULL_REVIEW_COMMENTS = Endpoint.builder()
@@ -455,12 +444,13 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..diff_hunk")
                     .jsonPath("$..body")
                     .build())
-            .transforms(generateUserTransformations("..user"))
+            .transforms(generateUserTransformations("..", Collections.singletonList("user")))
             .build();
 
     @VisibleForTesting
     static final RESTRules GITHUB = Rules2.builder()
             .endpoint(ORG_MEMBERS)
+            .endpoint(USERS)
             .endpoint(GRAPHQL_FOR_USERS)
             .endpoint(ORG_TEAMS)
             .endpoint(ORG_TEAM_MEMBERS)
@@ -471,6 +461,7 @@ public class PrebuiltSanitizerRules {
             .endpoint(REPO_COMMITS)
             .endpoint(REPO_COMMIT)
             .endpoint(REPO_EVENTS)
+            .endpoint(COMMIT_COMMENTS)
             .endpoint(COMMIT_COMMENT_REACTIONS)
             .endpoint(ISSUE)
             .endpoint(ISSUES)
@@ -493,27 +484,79 @@ public class PrebuiltSanitizerRules {
                     .build();
 
     private static List<Transform> generateUserTransformations(String prefix) {
+        return generateUserTransformations(prefix, Collections.emptyList());
+    }
+
+    private static List<Transform> generateUserTransformations(String prefix, List<String> userObjectNames) {
+        String objectNames = "";
+
+        if (!userObjectNames.isEmpty()) {
+            objectNames = String.format("[%s]", StringUtils.join(userObjectNames.stream()
+                    .map(i -> String.format("'%s'", i))
+                    .collect(Collectors.toSet()), ","));
+        }
+
         return Arrays.asList(
-                Transform.Redact.builder()
-                        .jsonPath(String.format("$%s.avatar_url", prefix))
-                        .jsonPath(String.format("$%s.gravatar_id", prefix))
-                        .jsonPath(String.format("$%s.url", prefix))
-                        .jsonPath(String.format("$%s.html_url", prefix))
-                        .jsonPath(String.format("$%s.followers_url", prefix))
-                        .jsonPath(String.format("$%s.following_url", prefix))
-                        .jsonPath(String.format("$%s.gists_url", prefix))
-                        .jsonPath(String.format("$%s.starred_url", prefix))
-                        .jsonPath(String.format("$%s.subscriptions_url", prefix))
-                        .jsonPath(String.format("$%s.organizations_url", prefix))
-                        .jsonPath(String.format("$%s.repos_url", prefix))
-                        .jsonPath(String.format("$%s.events_url", prefix))
-                        .jsonPath(String.format("$%s.received_events_url", prefix))
-                        .build(),
+                // Following expression works for subproperties:
+                // $..['user', 'owner', ... ]['avatar_url','gravatar_id',...]
+                // but one there is no property and it is on the root, it is not working:
+                // $..['avatar_url','gravatar_id',...]
+                // so to have that working, in root case they are expanded instead of put them as an array
+                prefix.equals(".") ? Transform.Redact.builder()
+                        .jsonPath(String.format("$%s%s.avatar_url", prefix, objectNames))
+                        .jsonPath(String.format("$%s%s.gravatar_id", prefix, objectNames))
+                        .jsonPath(String.format("$%s%s.url", prefix, objectNames))
+                        .jsonPath(String.format("$%s%s.html_url", prefix, objectNames))
+                        .jsonPath(String.format("$%s%s.followers_url", prefix, objectNames))
+                        .jsonPath(String.format("$%s%s.following_url", prefix, objectNames))
+                        .jsonPath(String.format("$%s%s.gists_url", prefix, objectNames))
+                        .jsonPath(String.format("$%s%s.starred_url", prefix, objectNames))
+                        .jsonPath(String.format("$%s%s.subscriptions_url", prefix, objectNames))
+                        .jsonPath(String.format("$%s%s.organizations_url", prefix, objectNames))
+                        .jsonPath(String.format("$%s%s.repos_url", prefix, objectNames))
+                        .jsonPath(String.format("$%s%s.events_url", prefix, objectNames))
+                        .jsonPath(String.format("$%s%s.received_events_url", prefix, objectNames))
+                        .jsonPath(String.format("$%s%s.name", prefix, objectNames))
+                        .jsonPath(String.format("$%s%s.company", prefix, objectNames))
+                        .jsonPath(String.format("$%s%s.location", prefix, objectNames))
+                        .jsonPath(String.format("$%s%s.bio", prefix, objectNames))
+                        .jsonPath(String.format("$%s%s.twitter_username", prefix, objectNames))
+                        .build() :
+                        Transform.Redact.builder()
+                                .jsonPath(String.format("$%s%s.['avatar_url'," +
+                                        "'gravatar_id'," +
+                                        "'url'," +
+                                        "'html_url'," +
+                                        "'followers_url'," +
+                                        "'following_url'," +
+                                        "'gists_url'," +
+                                        "'starred_url'," +
+                                        "'subscriptions_url'," +
+                                        "'organizations_url'," +
+                                        "'repos_url'," +
+                                        "'events_url'," +
+                                        "'received_events_url'," +
+                                        "'name'," +
+                                        "'company'," +
+                                        "'location'," +
+                                        "'bio'," +
+                                        "'twitter_username']", prefix, objectNames))
+                                .build(),
+
+                prefix.equals(".") ?
+                        Transform.Pseudonymize.builder()
+                                .jsonPath(String.format("$%s%s.id", prefix, objectNames))
+                                .jsonPath(String.format("$%s%s.node_id", prefix, objectNames))
+                                .jsonPath(String.format("$%s%s.email", prefix, objectNames))
+                                .build() :
+                        Transform.Pseudonymize.builder()
+                                .jsonPath(String.format("$%s%s.['id','node_id','email']", prefix, objectNames))
+                                .build()
+                ,
                 Transform.Pseudonymize.builder()
-                        .jsonPath(String.format("$%s.login", prefix))
-                        .jsonPath(String.format("$%s.id", prefix))
-                        .jsonPath(String.format("$%s.node_id", prefix))
-                        .jsonPath(String.format("$%s.email", prefix))
+                        .includeReversible(true)
+                        .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
+                        .jsonPath(String.format("$%s%s.login", prefix, objectNames))
                         .build()
         );
     }
@@ -530,27 +573,28 @@ public class PrebuiltSanitizerRules {
                                 put("organization", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                                         .type("object")
                                         .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{
-                                            put("samlIdentityProvider", jsonSchemaForSamlIdentityProvider());
+                                            put("samlIdentityProvider", jsonSchemaForOrganizationProperty("externalIdentities", jsonSchemaForSamlNode()));
+                                            put("membersWithRole", jsonSchemaForQueryResult(jsonSchemaForMemberNode()));
                                         }}).build());
                             }}).build());
                     put("errors", jsonSchemaForErrors());
                 }}).build();
     }
 
-    private static JsonSchemaFilterUtils.JsonSchemaFilter jsonSchemaForSamlIdentityProvider() {
+    private static JsonSchemaFilterUtils.JsonSchemaFilter jsonSchemaForOrganizationProperty(String propertyName, JsonSchemaFilterUtils.JsonSchemaFilter node) {
         return JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                 .type("object")
                 .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{
-                    put("externalIdentities", jsonSchemaForExternalIdentities());
+                    put("externalIdentities", jsonSchemaForQueryResult(node));
                 }}).build();
     }
 
-    private static JsonSchemaFilterUtils.JsonSchemaFilter jsonSchemaForExternalIdentities() {
+    private static JsonSchemaFilterUtils.JsonSchemaFilter jsonSchemaForQueryResult(JsonSchemaFilterUtils.JsonSchemaFilter node) {
         return JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                 .type("object")
                 .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{
                     put("pageInfo", jsonSchemaForPageInfo());
-                    put("edges", jsonSchemaForEdge());
+                    put("edges", jsonSchemaForEdge(node));
                 }}).build();
     }
 
@@ -564,19 +608,19 @@ public class PrebuiltSanitizerRules {
                 .build();
     }
 
-    private static JsonSchemaFilterUtils.JsonSchemaFilter jsonSchemaForEdge() {
+    private static JsonSchemaFilterUtils.JsonSchemaFilter jsonSchemaForEdge(JsonSchemaFilterUtils.JsonSchemaFilter node) {
         return JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                 .type("array")
                 .items(JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                         .type("object")
                         .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
-                            put("node", jsonSchemaForNode());
+                            put("node", node);
                         }})
                         .build())
                 .build();
     }
 
-    private static JsonSchemaFilterUtils.JsonSchemaFilter jsonSchemaForNode() {
+    private static JsonSchemaFilterUtils.JsonSchemaFilter jsonSchemaForSamlNode() {
         return JsonSchemaFilterUtils.JsonSchemaFilter.builder()
                 .type("object")
                 .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
@@ -587,6 +631,22 @@ public class PrebuiltSanitizerRules {
                     put("user", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("object").properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{
                         put("login", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
                     }}).build());
+                }})
+                .build();
+    }
+
+    private static JsonSchemaFilterUtils.JsonSchemaFilter jsonSchemaForMemberNode() {
+        return JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                .type("object")
+                .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
+                    put("email", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
+                    put("login", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
+                    put("id", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
+                    put("isSiteAdmin", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("boolean").build());
+                    put("organizationVerifiedDomainEmails", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                            .type("array")
+                            .items(JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build())
+                            .build());
                 }})
                 .build();
     }

@@ -22,13 +22,58 @@ endpoints:
           - "$..repos_url"
           - "$..events_url"
           - "$..received_events_url"
+          - "$..name"
+          - "$..company"
+          - "$..location"
+          - "$..bio"
+          - "$..twitter_username"
       - !<pseudonymize>
         jsonPaths:
-          - "$..login"
           - "$..id"
           - "$..node_id"
           - "$..email"
         encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..login"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
+  - pathTemplate: "/users/{username}"
+    allowedQueryParams:
+      - "since"
+      - "per_page"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..avatar_url"
+          - "$..gravatar_id"
+          - "$..url"
+          - "$..html_url"
+          - "$..followers_url"
+          - "$..following_url"
+          - "$..gists_url"
+          - "$..starred_url"
+          - "$..subscriptions_url"
+          - "$..organizations_url"
+          - "$..repos_url"
+          - "$..events_url"
+          - "$..received_events_url"
+          - "$..name"
+          - "$..company"
+          - "$..location"
+          - "$..bio"
+          - "$..twitter_username"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..id"
+          - "$..node_id"
+          - "$..email"
+        encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..login"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/graphql"
     transforms:
       - !<redact>
@@ -40,6 +85,7 @@ endpoints:
           - "$..login"
           - "$..email"
           - "$..guid"
+          - "$..organizationVerifiedDomainEmails[*]"
         encoding: "JSON"
     responseSchema:
       type: "object"
@@ -83,6 +129,36 @@ endpoints:
                                     properties:
                                       login:
                                         type: "string"
+                membersWithRole:
+                  type: "object"
+                  properties:
+                    pageInfo:
+                      type: "object"
+                      properties:
+                        hasNextPage:
+                          type: "boolean"
+                        endCursor:
+                          type: "string"
+                    edges:
+                      type: "array"
+                      items:
+                        type: "object"
+                        properties:
+                          node:
+                            type: "object"
+                            properties:
+                              email:
+                                type: "string"
+                              login:
+                                type: "string"
+                              id:
+                                type: "string"
+                              isSiteAdmin:
+                                type: "boolean"
+                              organizationVerifiedDomainEmails:
+                                type: "array"
+                                items:
+                                  type: "string"
         errors:
           type: "array"
           items:
@@ -134,13 +210,22 @@ endpoints:
           - "$..repos_url"
           - "$..events_url"
           - "$..received_events_url"
+          - "$..name"
+          - "$..company"
+          - "$..location"
+          - "$..bio"
+          - "$..twitter_username"
       - !<pseudonymize>
         jsonPaths:
-          - "$..login"
           - "$..id"
           - "$..node_id"
           - "$..email"
         encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..login"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/orgs/{org}/audit-log"
     allowedQueryParams:
       - "per_page"
@@ -230,48 +315,16 @@ endpoints:
         encoding: "JSON"
       - !<redact>
         jsonPaths:
-          - "$..author.avatar_url"
-          - "$..author.gravatar_id"
-          - "$..author.url"
-          - "$..author.html_url"
-          - "$..author.followers_url"
-          - "$..author.following_url"
-          - "$..author.gists_url"
-          - "$..author.starred_url"
-          - "$..author.subscriptions_url"
-          - "$..author.organizations_url"
-          - "$..author.repos_url"
-          - "$..author.events_url"
-          - "$..author.received_events_url"
+          - "$..['author','committer'].['avatar_url','gravatar_id','url','html_url','followers_url','following_url','gists_url','starred_url','subscriptions_url','organizations_url','repos_url','events_url','received_events_url','name','company','location','bio','twitter_username']"
       - !<pseudonymize>
         jsonPaths:
-          - "$..author.login"
-          - "$..author.id"
-          - "$..author.node_id"
-          - "$..author.email"
+          - "$..['author','committer'].['id','node_id','email']"
         encoding: "JSON"
-      - !<redact>
-        jsonPaths:
-          - "$..committer.avatar_url"
-          - "$..committer.gravatar_id"
-          - "$..committer.url"
-          - "$..committer.html_url"
-          - "$..committer.followers_url"
-          - "$..committer.following_url"
-          - "$..committer.gists_url"
-          - "$..committer.starred_url"
-          - "$..committer.subscriptions_url"
-          - "$..committer.organizations_url"
-          - "$..committer.repos_url"
-          - "$..committer.events_url"
-          - "$..committer.received_events_url"
       - !<pseudonymize>
         jsonPaths:
-          - "$..committer.login"
-          - "$..committer.id"
-          - "$..committer.node_id"
-          - "$..committer.email"
-        encoding: "JSON"
+          - "$..['author','committer'].login"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/repos/{owner}/{repo}/commits/{ref}"
     allowedQueryParams:
       - "per_page"
@@ -290,48 +343,16 @@ endpoints:
         encoding: "JSON"
       - !<redact>
         jsonPaths:
-          - "$..author.avatar_url"
-          - "$..author.gravatar_id"
-          - "$..author.url"
-          - "$..author.html_url"
-          - "$..author.followers_url"
-          - "$..author.following_url"
-          - "$..author.gists_url"
-          - "$..author.starred_url"
-          - "$..author.subscriptions_url"
-          - "$..author.organizations_url"
-          - "$..author.repos_url"
-          - "$..author.events_url"
-          - "$..author.received_events_url"
+          - "$..['author','committer'].['avatar_url','gravatar_id','url','html_url','followers_url','following_url','gists_url','starred_url','subscriptions_url','organizations_url','repos_url','events_url','received_events_url','name','company','location','bio','twitter_username']"
       - !<pseudonymize>
         jsonPaths:
-          - "$..author.login"
-          - "$..author.id"
-          - "$..author.node_id"
-          - "$..author.email"
+          - "$..['author','committer'].['id','node_id','email']"
         encoding: "JSON"
-      - !<redact>
-        jsonPaths:
-          - "$..committer.avatar_url"
-          - "$..committer.gravatar_id"
-          - "$..committer.url"
-          - "$..committer.html_url"
-          - "$..committer.followers_url"
-          - "$..committer.following_url"
-          - "$..committer.gists_url"
-          - "$..committer.starred_url"
-          - "$..committer.subscriptions_url"
-          - "$..committer.organizations_url"
-          - "$..committer.repos_url"
-          - "$..committer.events_url"
-          - "$..committer.received_events_url"
       - !<pseudonymize>
         jsonPaths:
-          - "$..committer.login"
-          - "$..committer.id"
-          - "$..committer.node_id"
-          - "$..committer.email"
-        encoding: "JSON"
+          - "$..['author','committer'].login"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/repos/{owner}/{repo}/events"
     allowedQueryParams:
       - "per_page"
@@ -355,202 +376,56 @@ endpoints:
         encoding: "JSON"
       - !<redact>
         jsonPaths:
-          - "$..owner.avatar_url"
-          - "$..owner.gravatar_id"
-          - "$..owner.url"
-          - "$..owner.html_url"
-          - "$..owner.followers_url"
-          - "$..owner.following_url"
-          - "$..owner.gists_url"
-          - "$..owner.starred_url"
-          - "$..owner.subscriptions_url"
-          - "$..owner.organizations_url"
-          - "$..owner.repos_url"
-          - "$..owner.events_url"
-          - "$..owner.received_events_url"
+          - "$..['requested_reviewers[*]','owner','user','closed_by','actor','assignee','creator','merged_by'].['avatar_url','gravatar_id','url','html_url','followers_url','following_url','gists_url','starred_url','subscriptions_url','organizations_url','repos_url','events_url','received_events_url','name','company','location','bio','twitter_username']"
       - !<pseudonymize>
         jsonPaths:
-          - "$..owner.login"
-          - "$..owner.id"
-          - "$..owner.node_id"
-          - "$..owner.email"
+          - "$..['requested_reviewers[*]','owner','user','closed_by','actor','assignee','creator','merged_by'].['id','node_id','email']"
         encoding: "JSON"
-      - !<redact>
-        jsonPaths:
-          - "$..user.avatar_url"
-          - "$..user.gravatar_id"
-          - "$..user.url"
-          - "$..user.html_url"
-          - "$..user.followers_url"
-          - "$..user.following_url"
-          - "$..user.gists_url"
-          - "$..user.starred_url"
-          - "$..user.subscriptions_url"
-          - "$..user.organizations_url"
-          - "$..user.repos_url"
-          - "$..user.events_url"
-          - "$..user.received_events_url"
       - !<pseudonymize>
         jsonPaths:
-          - "$..user.login"
-          - "$..user.id"
-          - "$..user.node_id"
-          - "$..user.email"
-        encoding: "JSON"
+          - "$..['requested_reviewers[*]','owner','user','closed_by','actor','assignee','creator','merged_by'].login"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
-          - "$..actor.avatar_url"
-          - "$..actor.gravatar_id"
-          - "$..actor.url"
-          - "$..actor.html_url"
-          - "$..actor.followers_url"
-          - "$..actor.following_url"
-          - "$..actor.gists_url"
-          - "$..actor.starred_url"
-          - "$..actor.subscriptions_url"
-          - "$..actor.organizations_url"
-          - "$..actor.repos_url"
-          - "$..actor.events_url"
-          - "$..actor.received_events_url"
+          - "$..assignees[*].['avatar_url','gravatar_id','url','html_url','followers_url','following_url','gists_url','starred_url','subscriptions_url','organizations_url','repos_url','events_url','received_events_url','name','company','location','bio','twitter_username']"
       - !<pseudonymize>
         jsonPaths:
-          - "$..actor.login"
-          - "$..actor.id"
-          - "$..actor.node_id"
-          - "$..actor.email"
+          - "$..assignees[*].['id','node_id','email']"
         encoding: "JSON"
-      - !<redact>
-        jsonPaths:
-          - "$..assignee.avatar_url"
-          - "$..assignee.gravatar_id"
-          - "$..assignee.url"
-          - "$..assignee.html_url"
-          - "$..assignee.followers_url"
-          - "$..assignee.following_url"
-          - "$..assignee.gists_url"
-          - "$..assignee.starred_url"
-          - "$..assignee.subscriptions_url"
-          - "$..assignee.organizations_url"
-          - "$..assignee.repos_url"
-          - "$..assignee.events_url"
-          - "$..assignee.received_events_url"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..assignee.login"
-          - "$..assignee.id"
-          - "$..assignee.node_id"
-          - "$..assignee.email"
-        encoding: "JSON"
-      - !<redact>
-        jsonPaths:
-          - "$..assignees[*].avatar_url"
-          - "$..assignees[*].gravatar_id"
-          - "$..assignees[*].url"
-          - "$..assignees[*].html_url"
-          - "$..assignees[*].followers_url"
-          - "$..assignees[*].following_url"
-          - "$..assignees[*].gists_url"
-          - "$..assignees[*].starred_url"
-          - "$..assignees[*].subscriptions_url"
-          - "$..assignees[*].organizations_url"
-          - "$..assignees[*].repos_url"
-          - "$..assignees[*].events_url"
-          - "$..assignees[*].received_events_url"
       - !<pseudonymize>
         jsonPaths:
           - "$..assignees[*].login"
-          - "$..assignees[*].id"
-          - "$..assignees[*].node_id"
-          - "$..assignees[*].email"
-        encoding: "JSON"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
+  - pathTemplate: "/repos/{owner}/{repo}/commits/{commit_sha}/comments"
+    allowedQueryParams:
+      - "per_page"
+      - "page"
+    transforms:
       - !<redact>
         jsonPaths:
-          - "$..requested_reviewers[*].avatar_url"
-          - "$..requested_reviewers[*].gravatar_id"
-          - "$..requested_reviewers[*].url"
-          - "$..requested_reviewers[*].html_url"
-          - "$..requested_reviewers[*].followers_url"
-          - "$..requested_reviewers[*].following_url"
-          - "$..requested_reviewers[*].gists_url"
-          - "$..requested_reviewers[*].starred_url"
-          - "$..requested_reviewers[*].subscriptions_url"
-          - "$..requested_reviewers[*].organizations_url"
-          - "$..requested_reviewers[*].repos_url"
-          - "$..requested_reviewers[*].events_url"
-          - "$..requested_reviewers[*].received_events_url"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..requested_reviewers[*].login"
-          - "$..requested_reviewers[*].id"
-          - "$..requested_reviewers[*].node_id"
-          - "$..requested_reviewers[*].email"
-        encoding: "JSON"
+          - "$..name"
+          - "$..message"
+          - "$..files"
+          - "$..signature"
+          - "$..payload"
+          - "$..path"
+          - "$..body"
+          - "$..position"
+          - "$..line"
       - !<redact>
         jsonPaths:
-          - "$..creator.avatar_url"
-          - "$..creator.gravatar_id"
-          - "$..creator.url"
-          - "$..creator.html_url"
-          - "$..creator.followers_url"
-          - "$..creator.following_url"
-          - "$..creator.gists_url"
-          - "$..creator.starred_url"
-          - "$..creator.subscriptions_url"
-          - "$..creator.organizations_url"
-          - "$..creator.repos_url"
-          - "$..creator.events_url"
-          - "$..creator.received_events_url"
+          - "$..['user'].['avatar_url','gravatar_id','url','html_url','followers_url','following_url','gists_url','starred_url','subscriptions_url','organizations_url','repos_url','events_url','received_events_url','name','company','location','bio','twitter_username']"
       - !<pseudonymize>
         jsonPaths:
-          - "$..creator.login"
-          - "$..creator.id"
-          - "$..creator.node_id"
-          - "$..creator.email"
+          - "$..['user'].['id','node_id','email']"
         encoding: "JSON"
-      - !<redact>
-        jsonPaths:
-          - "$..merged_by.avatar_url"
-          - "$..merged_by.gravatar_id"
-          - "$..merged_by.url"
-          - "$..merged_by.html_url"
-          - "$..merged_by.followers_url"
-          - "$..merged_by.following_url"
-          - "$..merged_by.gists_url"
-          - "$..merged_by.starred_url"
-          - "$..merged_by.subscriptions_url"
-          - "$..merged_by.organizations_url"
-          - "$..merged_by.repos_url"
-          - "$..merged_by.events_url"
-          - "$..merged_by.received_events_url"
       - !<pseudonymize>
         jsonPaths:
-          - "$..merged_by.login"
-          - "$..merged_by.id"
-          - "$..merged_by.node_id"
-          - "$..merged_by.email"
-        encoding: "JSON"
-      - !<redact>
-        jsonPaths:
-          - "$..closed_by.avatar_url"
-          - "$..closed_by.gravatar_id"
-          - "$..closed_by.url"
-          - "$..closed_by.html_url"
-          - "$..closed_by.followers_url"
-          - "$..closed_by.following_url"
-          - "$..closed_by.gists_url"
-          - "$..closed_by.starred_url"
-          - "$..closed_by.subscriptions_url"
-          - "$..closed_by.organizations_url"
-          - "$..closed_by.repos_url"
-          - "$..closed_by.events_url"
-          - "$..closed_by.received_events_url"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..closed_by.login"
-          - "$..closed_by.id"
-          - "$..closed_by.node_id"
-          - "$..closed_by.email"
-        encoding: "JSON"
+          - "$..['user'].login"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/repos/{owner}/{repo}/comments/{comment_id}/reactions"
     allowedQueryParams:
       - "per_page"
@@ -558,26 +433,16 @@ endpoints:
     transforms:
       - !<redact>
         jsonPaths:
-          - "$..user.avatar_url"
-          - "$..user.gravatar_id"
-          - "$..user.url"
-          - "$..user.html_url"
-          - "$..user.followers_url"
-          - "$..user.following_url"
-          - "$..user.gists_url"
-          - "$..user.starred_url"
-          - "$..user.subscriptions_url"
-          - "$..user.organizations_url"
-          - "$..user.repos_url"
-          - "$..user.events_url"
-          - "$..user.received_events_url"
+          - "$..['user'].['avatar_url','gravatar_id','url','html_url','followers_url','following_url','gists_url','starred_url','subscriptions_url','organizations_url','repos_url','events_url','received_events_url','name','company','location','bio','twitter_username']"
       - !<pseudonymize>
         jsonPaths:
-          - "$..user.login"
-          - "$..user.id"
-          - "$..user.node_id"
-          - "$..user.email"
+          - "$..['user'].['id','node_id','email']"
         encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..['user'].login"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/repos/{owner}/{repo}/issues/{issue_number}"
     transforms:
       - !<redact>
@@ -589,114 +454,28 @@ endpoints:
           - "$..pem"
       - !<redact>
         jsonPaths:
-          - "$..user.avatar_url"
-          - "$..user.gravatar_id"
-          - "$..user.url"
-          - "$..user.html_url"
-          - "$..user.followers_url"
-          - "$..user.following_url"
-          - "$..user.gists_url"
-          - "$..user.starred_url"
-          - "$..user.subscriptions_url"
-          - "$..user.organizations_url"
-          - "$..user.repos_url"
-          - "$..user.events_url"
-          - "$..user.received_events_url"
+          - "$..['user','closed_by','assignee','creator'].['avatar_url','gravatar_id','url','html_url','followers_url','following_url','gists_url','starred_url','subscriptions_url','organizations_url','repos_url','events_url','received_events_url','name','company','location','bio','twitter_username']"
       - !<pseudonymize>
         jsonPaths:
-          - "$..user.login"
-          - "$..user.id"
-          - "$..user.node_id"
-          - "$..user.email"
+          - "$..['user','closed_by','assignee','creator'].['id','node_id','email']"
         encoding: "JSON"
-      - !<redact>
-        jsonPaths:
-          - "$..assignee.avatar_url"
-          - "$..assignee.gravatar_id"
-          - "$..assignee.url"
-          - "$..assignee.html_url"
-          - "$..assignee.followers_url"
-          - "$..assignee.following_url"
-          - "$..assignee.gists_url"
-          - "$..assignee.starred_url"
-          - "$..assignee.subscriptions_url"
-          - "$..assignee.organizations_url"
-          - "$..assignee.repos_url"
-          - "$..assignee.events_url"
-          - "$..assignee.received_events_url"
       - !<pseudonymize>
         jsonPaths:
-          - "$..assignee.login"
-          - "$..assignee.id"
-          - "$..assignee.node_id"
-          - "$..assignee.email"
-        encoding: "JSON"
+          - "$..['user','closed_by','assignee','creator'].login"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
-          - "$..assignees[*].avatar_url"
-          - "$..assignees[*].gravatar_id"
-          - "$..assignees[*].url"
-          - "$..assignees[*].html_url"
-          - "$..assignees[*].followers_url"
-          - "$..assignees[*].following_url"
-          - "$..assignees[*].gists_url"
-          - "$..assignees[*].starred_url"
-          - "$..assignees[*].subscriptions_url"
-          - "$..assignees[*].organizations_url"
-          - "$..assignees[*].repos_url"
-          - "$..assignees[*].events_url"
-          - "$..assignees[*].received_events_url"
+          - "$..assignees[*].['avatar_url','gravatar_id','url','html_url','followers_url','following_url','gists_url','starred_url','subscriptions_url','organizations_url','repos_url','events_url','received_events_url','name','company','location','bio','twitter_username']"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..assignees[*].['id','node_id','email']"
+        encoding: "JSON"
       - !<pseudonymize>
         jsonPaths:
           - "$..assignees[*].login"
-          - "$..assignees[*].id"
-          - "$..assignees[*].node_id"
-          - "$..assignees[*].email"
-        encoding: "JSON"
-      - !<redact>
-        jsonPaths:
-          - "$..creator.avatar_url"
-          - "$..creator.gravatar_id"
-          - "$..creator.url"
-          - "$..creator.html_url"
-          - "$..creator.followers_url"
-          - "$..creator.following_url"
-          - "$..creator.gists_url"
-          - "$..creator.starred_url"
-          - "$..creator.subscriptions_url"
-          - "$..creator.organizations_url"
-          - "$..creator.repos_url"
-          - "$..creator.events_url"
-          - "$..creator.received_events_url"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..creator.login"
-          - "$..creator.id"
-          - "$..creator.node_id"
-          - "$..creator.email"
-        encoding: "JSON"
-      - !<redact>
-        jsonPaths:
-          - "$..closed_by.avatar_url"
-          - "$..closed_by.gravatar_id"
-          - "$..closed_by.url"
-          - "$..closed_by.html_url"
-          - "$..closed_by.followers_url"
-          - "$..closed_by.following_url"
-          - "$..closed_by.gists_url"
-          - "$..closed_by.starred_url"
-          - "$..closed_by.subscriptions_url"
-          - "$..closed_by.organizations_url"
-          - "$..closed_by.repos_url"
-          - "$..closed_by.events_url"
-          - "$..closed_by.received_events_url"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..closed_by.login"
-          - "$..closed_by.id"
-          - "$..closed_by.node_id"
-          - "$..closed_by.email"
-        encoding: "JSON"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/repos/{owner}/{repo}/issues"
     allowedQueryParams:
       - "per_page"
@@ -716,114 +495,28 @@ endpoints:
           - "$..name"
       - !<redact>
         jsonPaths:
-          - "$..user.avatar_url"
-          - "$..user.gravatar_id"
-          - "$..user.url"
-          - "$..user.html_url"
-          - "$..user.followers_url"
-          - "$..user.following_url"
-          - "$..user.gists_url"
-          - "$..user.starred_url"
-          - "$..user.subscriptions_url"
-          - "$..user.organizations_url"
-          - "$..user.repos_url"
-          - "$..user.events_url"
-          - "$..user.received_events_url"
+          - "$..['user','closed_by','assignee','creator'].['avatar_url','gravatar_id','url','html_url','followers_url','following_url','gists_url','starred_url','subscriptions_url','organizations_url','repos_url','events_url','received_events_url','name','company','location','bio','twitter_username']"
       - !<pseudonymize>
         jsonPaths:
-          - "$..user.login"
-          - "$..user.id"
-          - "$..user.node_id"
-          - "$..user.email"
+          - "$..['user','closed_by','assignee','creator'].['id','node_id','email']"
         encoding: "JSON"
-      - !<redact>
-        jsonPaths:
-          - "$..assignee.avatar_url"
-          - "$..assignee.gravatar_id"
-          - "$..assignee.url"
-          - "$..assignee.html_url"
-          - "$..assignee.followers_url"
-          - "$..assignee.following_url"
-          - "$..assignee.gists_url"
-          - "$..assignee.starred_url"
-          - "$..assignee.subscriptions_url"
-          - "$..assignee.organizations_url"
-          - "$..assignee.repos_url"
-          - "$..assignee.events_url"
-          - "$..assignee.received_events_url"
       - !<pseudonymize>
         jsonPaths:
-          - "$..assignee.login"
-          - "$..assignee.id"
-          - "$..assignee.node_id"
-          - "$..assignee.email"
-        encoding: "JSON"
+          - "$..['user','closed_by','assignee','creator'].login"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
-          - "$..assignees[*].avatar_url"
-          - "$..assignees[*].gravatar_id"
-          - "$..assignees[*].url"
-          - "$..assignees[*].html_url"
-          - "$..assignees[*].followers_url"
-          - "$..assignees[*].following_url"
-          - "$..assignees[*].gists_url"
-          - "$..assignees[*].starred_url"
-          - "$..assignees[*].subscriptions_url"
-          - "$..assignees[*].organizations_url"
-          - "$..assignees[*].repos_url"
-          - "$..assignees[*].events_url"
-          - "$..assignees[*].received_events_url"
+          - "$..assignees[*].['avatar_url','gravatar_id','url','html_url','followers_url','following_url','gists_url','starred_url','subscriptions_url','organizations_url','repos_url','events_url','received_events_url','name','company','location','bio','twitter_username']"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..assignees[*].['id','node_id','email']"
+        encoding: "JSON"
       - !<pseudonymize>
         jsonPaths:
           - "$..assignees[*].login"
-          - "$..assignees[*].id"
-          - "$..assignees[*].node_id"
-          - "$..assignees[*].email"
-        encoding: "JSON"
-      - !<redact>
-        jsonPaths:
-          - "$..creator.avatar_url"
-          - "$..creator.gravatar_id"
-          - "$..creator.url"
-          - "$..creator.html_url"
-          - "$..creator.followers_url"
-          - "$..creator.following_url"
-          - "$..creator.gists_url"
-          - "$..creator.starred_url"
-          - "$..creator.subscriptions_url"
-          - "$..creator.organizations_url"
-          - "$..creator.repos_url"
-          - "$..creator.events_url"
-          - "$..creator.received_events_url"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..creator.login"
-          - "$..creator.id"
-          - "$..creator.node_id"
-          - "$..creator.email"
-        encoding: "JSON"
-      - !<redact>
-        jsonPaths:
-          - "$..closed_by.avatar_url"
-          - "$..closed_by.gravatar_id"
-          - "$..closed_by.url"
-          - "$..closed_by.html_url"
-          - "$..closed_by.followers_url"
-          - "$..closed_by.following_url"
-          - "$..closed_by.gists_url"
-          - "$..closed_by.starred_url"
-          - "$..closed_by.subscriptions_url"
-          - "$..closed_by.organizations_url"
-          - "$..closed_by.repos_url"
-          - "$..closed_by.events_url"
-          - "$..closed_by.received_events_url"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..closed_by.login"
-          - "$..closed_by.id"
-          - "$..closed_by.node_id"
-          - "$..closed_by.email"
-        encoding: "JSON"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/repos/{owner}/{repo}/issues/{issue_number}/comments"
     allowedQueryParams:
       - "per_page"
@@ -837,26 +530,16 @@ endpoints:
           - "$..body"
       - !<redact>
         jsonPaths:
-          - "$..user.avatar_url"
-          - "$..user.gravatar_id"
-          - "$..user.url"
-          - "$..user.html_url"
-          - "$..user.followers_url"
-          - "$..user.following_url"
-          - "$..user.gists_url"
-          - "$..user.starred_url"
-          - "$..user.subscriptions_url"
-          - "$..user.organizations_url"
-          - "$..user.repos_url"
-          - "$..user.events_url"
-          - "$..user.received_events_url"
+          - "$..['user'].['avatar_url','gravatar_id','url','html_url','followers_url','following_url','gists_url','starred_url','subscriptions_url','organizations_url','repos_url','events_url','received_events_url','name','company','location','bio','twitter_username']"
       - !<pseudonymize>
         jsonPaths:
-          - "$..user.login"
-          - "$..user.id"
-          - "$..user.node_id"
-          - "$..user.email"
+          - "$..['user'].['id','node_id','email']"
         encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..['user'].login"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/repos/{owner}/{repo}/issues/{issue_number}/events"
     allowedQueryParams:
       - "per_page"
@@ -880,180 +563,16 @@ endpoints:
         encoding: "JSON"
       - !<redact>
         jsonPaths:
-          - "$..user.avatar_url"
-          - "$..user.gravatar_id"
-          - "$..user.url"
-          - "$..user.html_url"
-          - "$..user.followers_url"
-          - "$..user.following_url"
-          - "$..user.gists_url"
-          - "$..user.starred_url"
-          - "$..user.subscriptions_url"
-          - "$..user.organizations_url"
-          - "$..user.repos_url"
-          - "$..user.events_url"
-          - "$..user.received_events_url"
+          - "$..['author','committer','user','closed_by','assigner','actor','assignee','creator'].['avatar_url','gravatar_id','url','html_url','followers_url','following_url','gists_url','starred_url','subscriptions_url','organizations_url','repos_url','events_url','received_events_url','name','company','location','bio','twitter_username']"
       - !<pseudonymize>
         jsonPaths:
-          - "$..user.login"
-          - "$..user.id"
-          - "$..user.node_id"
-          - "$..user.email"
+          - "$..['author','committer','user','closed_by','assigner','actor','assignee','creator'].['id','node_id','email']"
         encoding: "JSON"
-      - !<redact>
-        jsonPaths:
-          - "$..actor.avatar_url"
-          - "$..actor.gravatar_id"
-          - "$..actor.url"
-          - "$..actor.html_url"
-          - "$..actor.followers_url"
-          - "$..actor.following_url"
-          - "$..actor.gists_url"
-          - "$..actor.starred_url"
-          - "$..actor.subscriptions_url"
-          - "$..actor.organizations_url"
-          - "$..actor.repos_url"
-          - "$..actor.events_url"
-          - "$..actor.received_events_url"
       - !<pseudonymize>
         jsonPaths:
-          - "$..actor.login"
-          - "$..actor.id"
-          - "$..actor.node_id"
-          - "$..actor.email"
-        encoding: "JSON"
-      - !<redact>
-        jsonPaths:
-          - "$..assignee.avatar_url"
-          - "$..assignee.gravatar_id"
-          - "$..assignee.url"
-          - "$..assignee.html_url"
-          - "$..assignee.followers_url"
-          - "$..assignee.following_url"
-          - "$..assignee.gists_url"
-          - "$..assignee.starred_url"
-          - "$..assignee.subscriptions_url"
-          - "$..assignee.organizations_url"
-          - "$..assignee.repos_url"
-          - "$..assignee.events_url"
-          - "$..assignee.received_events_url"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..assignee.login"
-          - "$..assignee.id"
-          - "$..assignee.node_id"
-          - "$..assignee.email"
-        encoding: "JSON"
-      - !<redact>
-        jsonPaths:
-          - "$..assigner.avatar_url"
-          - "$..assigner.gravatar_id"
-          - "$..assigner.url"
-          - "$..assigner.html_url"
-          - "$..assigner.followers_url"
-          - "$..assigner.following_url"
-          - "$..assigner.gists_url"
-          - "$..assigner.starred_url"
-          - "$..assigner.subscriptions_url"
-          - "$..assigner.organizations_url"
-          - "$..assigner.repos_url"
-          - "$..assigner.events_url"
-          - "$..assigner.received_events_url"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..assigner.login"
-          - "$..assigner.id"
-          - "$..assigner.node_id"
-          - "$..assigner.email"
-        encoding: "JSON"
-      - !<redact>
-        jsonPaths:
-          - "$..creator.avatar_url"
-          - "$..creator.gravatar_id"
-          - "$..creator.url"
-          - "$..creator.html_url"
-          - "$..creator.followers_url"
-          - "$..creator.following_url"
-          - "$..creator.gists_url"
-          - "$..creator.starred_url"
-          - "$..creator.subscriptions_url"
-          - "$..creator.organizations_url"
-          - "$..creator.repos_url"
-          - "$..creator.events_url"
-          - "$..creator.received_events_url"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..creator.login"
-          - "$..creator.id"
-          - "$..creator.node_id"
-          - "$..creator.email"
-        encoding: "JSON"
-      - !<redact>
-        jsonPaths:
-          - "$..closed_by.avatar_url"
-          - "$..closed_by.gravatar_id"
-          - "$..closed_by.url"
-          - "$..closed_by.html_url"
-          - "$..closed_by.followers_url"
-          - "$..closed_by.following_url"
-          - "$..closed_by.gists_url"
-          - "$..closed_by.starred_url"
-          - "$..closed_by.subscriptions_url"
-          - "$..closed_by.organizations_url"
-          - "$..closed_by.repos_url"
-          - "$..closed_by.events_url"
-          - "$..closed_by.received_events_url"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..closed_by.login"
-          - "$..closed_by.id"
-          - "$..closed_by.node_id"
-          - "$..closed_by.email"
-        encoding: "JSON"
-      - !<redact>
-        jsonPaths:
-          - "$..author.avatar_url"
-          - "$..author.gravatar_id"
-          - "$..author.url"
-          - "$..author.html_url"
-          - "$..author.followers_url"
-          - "$..author.following_url"
-          - "$..author.gists_url"
-          - "$..author.starred_url"
-          - "$..author.subscriptions_url"
-          - "$..author.organizations_url"
-          - "$..author.repos_url"
-          - "$..author.events_url"
-          - "$..author.received_events_url"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..author.login"
-          - "$..author.id"
-          - "$..author.node_id"
-          - "$..author.email"
-        encoding: "JSON"
-      - !<redact>
-        jsonPaths:
-          - "$..committer.avatar_url"
-          - "$..committer.gravatar_id"
-          - "$..committer.url"
-          - "$..committer.html_url"
-          - "$..committer.followers_url"
-          - "$..committer.following_url"
-          - "$..committer.gists_url"
-          - "$..committer.starred_url"
-          - "$..committer.subscriptions_url"
-          - "$..committer.organizations_url"
-          - "$..committer.repos_url"
-          - "$..committer.events_url"
-          - "$..committer.received_events_url"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..committer.login"
-          - "$..committer.id"
-          - "$..committer.node_id"
-          - "$..committer.email"
-        encoding: "JSON"
+          - "$..['author','committer','user','closed_by','assigner','actor','assignee','creator'].login"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/repos/{owner}/{repo}/issues/{issue_number}/timeline"
     allowedQueryParams:
       - "per_page"
@@ -1077,180 +596,16 @@ endpoints:
         encoding: "JSON"
       - !<redact>
         jsonPaths:
-          - "$..user.avatar_url"
-          - "$..user.gravatar_id"
-          - "$..user.url"
-          - "$..user.html_url"
-          - "$..user.followers_url"
-          - "$..user.following_url"
-          - "$..user.gists_url"
-          - "$..user.starred_url"
-          - "$..user.subscriptions_url"
-          - "$..user.organizations_url"
-          - "$..user.repos_url"
-          - "$..user.events_url"
-          - "$..user.received_events_url"
+          - "$..['author','committer','user','closed_by','assigner','actor','assignee','creator'].['avatar_url','gravatar_id','url','html_url','followers_url','following_url','gists_url','starred_url','subscriptions_url','organizations_url','repos_url','events_url','received_events_url','name','company','location','bio','twitter_username']"
       - !<pseudonymize>
         jsonPaths:
-          - "$..user.login"
-          - "$..user.id"
-          - "$..user.node_id"
-          - "$..user.email"
+          - "$..['author','committer','user','closed_by','assigner','actor','assignee','creator'].['id','node_id','email']"
         encoding: "JSON"
-      - !<redact>
-        jsonPaths:
-          - "$..actor.avatar_url"
-          - "$..actor.gravatar_id"
-          - "$..actor.url"
-          - "$..actor.html_url"
-          - "$..actor.followers_url"
-          - "$..actor.following_url"
-          - "$..actor.gists_url"
-          - "$..actor.starred_url"
-          - "$..actor.subscriptions_url"
-          - "$..actor.organizations_url"
-          - "$..actor.repos_url"
-          - "$..actor.events_url"
-          - "$..actor.received_events_url"
       - !<pseudonymize>
         jsonPaths:
-          - "$..actor.login"
-          - "$..actor.id"
-          - "$..actor.node_id"
-          - "$..actor.email"
-        encoding: "JSON"
-      - !<redact>
-        jsonPaths:
-          - "$..assignee.avatar_url"
-          - "$..assignee.gravatar_id"
-          - "$..assignee.url"
-          - "$..assignee.html_url"
-          - "$..assignee.followers_url"
-          - "$..assignee.following_url"
-          - "$..assignee.gists_url"
-          - "$..assignee.starred_url"
-          - "$..assignee.subscriptions_url"
-          - "$..assignee.organizations_url"
-          - "$..assignee.repos_url"
-          - "$..assignee.events_url"
-          - "$..assignee.received_events_url"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..assignee.login"
-          - "$..assignee.id"
-          - "$..assignee.node_id"
-          - "$..assignee.email"
-        encoding: "JSON"
-      - !<redact>
-        jsonPaths:
-          - "$..assigner.avatar_url"
-          - "$..assigner.gravatar_id"
-          - "$..assigner.url"
-          - "$..assigner.html_url"
-          - "$..assigner.followers_url"
-          - "$..assigner.following_url"
-          - "$..assigner.gists_url"
-          - "$..assigner.starred_url"
-          - "$..assigner.subscriptions_url"
-          - "$..assigner.organizations_url"
-          - "$..assigner.repos_url"
-          - "$..assigner.events_url"
-          - "$..assigner.received_events_url"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..assigner.login"
-          - "$..assigner.id"
-          - "$..assigner.node_id"
-          - "$..assigner.email"
-        encoding: "JSON"
-      - !<redact>
-        jsonPaths:
-          - "$..creator.avatar_url"
-          - "$..creator.gravatar_id"
-          - "$..creator.url"
-          - "$..creator.html_url"
-          - "$..creator.followers_url"
-          - "$..creator.following_url"
-          - "$..creator.gists_url"
-          - "$..creator.starred_url"
-          - "$..creator.subscriptions_url"
-          - "$..creator.organizations_url"
-          - "$..creator.repos_url"
-          - "$..creator.events_url"
-          - "$..creator.received_events_url"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..creator.login"
-          - "$..creator.id"
-          - "$..creator.node_id"
-          - "$..creator.email"
-        encoding: "JSON"
-      - !<redact>
-        jsonPaths:
-          - "$..closed_by.avatar_url"
-          - "$..closed_by.gravatar_id"
-          - "$..closed_by.url"
-          - "$..closed_by.html_url"
-          - "$..closed_by.followers_url"
-          - "$..closed_by.following_url"
-          - "$..closed_by.gists_url"
-          - "$..closed_by.starred_url"
-          - "$..closed_by.subscriptions_url"
-          - "$..closed_by.organizations_url"
-          - "$..closed_by.repos_url"
-          - "$..closed_by.events_url"
-          - "$..closed_by.received_events_url"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..closed_by.login"
-          - "$..closed_by.id"
-          - "$..closed_by.node_id"
-          - "$..closed_by.email"
-        encoding: "JSON"
-      - !<redact>
-        jsonPaths:
-          - "$..author.avatar_url"
-          - "$..author.gravatar_id"
-          - "$..author.url"
-          - "$..author.html_url"
-          - "$..author.followers_url"
-          - "$..author.following_url"
-          - "$..author.gists_url"
-          - "$..author.starred_url"
-          - "$..author.subscriptions_url"
-          - "$..author.organizations_url"
-          - "$..author.repos_url"
-          - "$..author.events_url"
-          - "$..author.received_events_url"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..author.login"
-          - "$..author.id"
-          - "$..author.node_id"
-          - "$..author.email"
-        encoding: "JSON"
-      - !<redact>
-        jsonPaths:
-          - "$..committer.avatar_url"
-          - "$..committer.gravatar_id"
-          - "$..committer.url"
-          - "$..committer.html_url"
-          - "$..committer.followers_url"
-          - "$..committer.following_url"
-          - "$..committer.gists_url"
-          - "$..committer.starred_url"
-          - "$..committer.subscriptions_url"
-          - "$..committer.organizations_url"
-          - "$..committer.repos_url"
-          - "$..committer.events_url"
-          - "$..committer.received_events_url"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..committer.login"
-          - "$..committer.id"
-          - "$..committer.node_id"
-          - "$..committer.email"
-        encoding: "JSON"
+          - "$..['author','committer','user','closed_by','assigner','actor','assignee','creator'].login"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/repos/{owner}/{repo}/issues/{issue_number}/reactions"
     allowedQueryParams:
       - "per_page"
@@ -1258,26 +613,16 @@ endpoints:
     transforms:
       - !<redact>
         jsonPaths:
-          - "$..user.avatar_url"
-          - "$..user.gravatar_id"
-          - "$..user.url"
-          - "$..user.html_url"
-          - "$..user.followers_url"
-          - "$..user.following_url"
-          - "$..user.gists_url"
-          - "$..user.starred_url"
-          - "$..user.subscriptions_url"
-          - "$..user.organizations_url"
-          - "$..user.repos_url"
-          - "$..user.events_url"
-          - "$..user.received_events_url"
+          - "$..['user'].['avatar_url','gravatar_id','url','html_url','followers_url','following_url','gists_url','starred_url','subscriptions_url','organizations_url','repos_url','events_url','received_events_url','name','company','location','bio','twitter_username']"
       - !<pseudonymize>
         jsonPaths:
-          - "$..user.login"
-          - "$..user.id"
-          - "$..user.node_id"
-          - "$..user.email"
+          - "$..['user'].['id','node_id','email']"
         encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..['user'].login"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/repos/{owner}/{repo}/issues/comments/{comment_id}/reactions"
     allowedQueryParams:
       - "per_page"
@@ -1285,26 +630,16 @@ endpoints:
     transforms:
       - !<redact>
         jsonPaths:
-          - "$..user.avatar_url"
-          - "$..user.gravatar_id"
-          - "$..user.url"
-          - "$..user.html_url"
-          - "$..user.followers_url"
-          - "$..user.following_url"
-          - "$..user.gists_url"
-          - "$..user.starred_url"
-          - "$..user.subscriptions_url"
-          - "$..user.organizations_url"
-          - "$..user.repos_url"
-          - "$..user.events_url"
-          - "$..user.received_events_url"
+          - "$..['user'].['avatar_url','gravatar_id','url','html_url','followers_url','following_url','gists_url','starred_url','subscriptions_url','organizations_url','repos_url','events_url','received_events_url','name','company','location','bio','twitter_username']"
       - !<pseudonymize>
         jsonPaths:
-          - "$..user.login"
-          - "$..user.id"
-          - "$..user.node_id"
-          - "$..user.email"
+          - "$..['user'].['id','node_id','email']"
         encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..['user'].login"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/repos/{owner}/{repo}/pulls/{pull_number}/reviews"
     allowedQueryParams:
       - "per_page"
@@ -1317,26 +652,16 @@ endpoints:
           - "$..pull_request_url"
       - !<redact>
         jsonPaths:
-          - "$..user.avatar_url"
-          - "$..user.gravatar_id"
-          - "$..user.url"
-          - "$..user.html_url"
-          - "$..user.followers_url"
-          - "$..user.following_url"
-          - "$..user.gists_url"
-          - "$..user.starred_url"
-          - "$..user.subscriptions_url"
-          - "$..user.organizations_url"
-          - "$..user.repos_url"
-          - "$..user.events_url"
-          - "$..user.received_events_url"
+          - "$..['user'].['avatar_url','gravatar_id','url','html_url','followers_url','following_url','gists_url','starred_url','subscriptions_url','organizations_url','repos_url','events_url','received_events_url','name','company','location','bio','twitter_username']"
       - !<pseudonymize>
         jsonPaths:
-          - "$..user.login"
-          - "$..user.id"
-          - "$..user.node_id"
-          - "$..user.email"
+          - "$..['user'].['id','node_id','email']"
         encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..['user'].login"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/repos/{owner}/{repo}/pulls"
     allowedQueryParams:
       - "per_page"
@@ -1359,202 +684,40 @@ endpoints:
           - "$..commit_message"
       - !<redact>
         jsonPaths:
-          - "$..user.avatar_url"
-          - "$..user.gravatar_id"
-          - "$..user.url"
-          - "$..user.html_url"
-          - "$..user.followers_url"
-          - "$..user.following_url"
-          - "$..user.gists_url"
-          - "$..user.starred_url"
-          - "$..user.subscriptions_url"
-          - "$..user.organizations_url"
-          - "$..user.repos_url"
-          - "$..user.events_url"
-          - "$..user.received_events_url"
+          - "$..['user','closed_by','enabled_by','actor','assignee','creator','merged_by'].['avatar_url','gravatar_id','url','html_url','followers_url','following_url','gists_url','starred_url','subscriptions_url','organizations_url','repos_url','events_url','received_events_url','name','company','location','bio','twitter_username']"
       - !<pseudonymize>
         jsonPaths:
-          - "$..user.login"
-          - "$..user.id"
-          - "$..user.node_id"
-          - "$..user.email"
+          - "$..['user','closed_by','enabled_by','actor','assignee','creator','merged_by'].['id','node_id','email']"
         encoding: "JSON"
-      - !<redact>
-        jsonPaths:
-          - "$..actor.avatar_url"
-          - "$..actor.gravatar_id"
-          - "$..actor.url"
-          - "$..actor.html_url"
-          - "$..actor.followers_url"
-          - "$..actor.following_url"
-          - "$..actor.gists_url"
-          - "$..actor.starred_url"
-          - "$..actor.subscriptions_url"
-          - "$..actor.organizations_url"
-          - "$..actor.repos_url"
-          - "$..actor.events_url"
-          - "$..actor.received_events_url"
       - !<pseudonymize>
         jsonPaths:
-          - "$..actor.login"
-          - "$..actor.id"
-          - "$..actor.node_id"
-          - "$..actor.email"
-        encoding: "JSON"
+          - "$..['user','closed_by','enabled_by','actor','assignee','creator','merged_by'].login"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
-          - "$..assignee.avatar_url"
-          - "$..assignee.gravatar_id"
-          - "$..assignee.url"
-          - "$..assignee.html_url"
-          - "$..assignee.followers_url"
-          - "$..assignee.following_url"
-          - "$..assignee.gists_url"
-          - "$..assignee.starred_url"
-          - "$..assignee.subscriptions_url"
-          - "$..assignee.organizations_url"
-          - "$..assignee.repos_url"
-          - "$..assignee.events_url"
-          - "$..assignee.received_events_url"
+          - "$..requested_reviewers[*].['avatar_url','gravatar_id','url','html_url','followers_url','following_url','gists_url','starred_url','subscriptions_url','organizations_url','repos_url','events_url','received_events_url','name','company','location','bio','twitter_username']"
       - !<pseudonymize>
         jsonPaths:
-          - "$..assignee.login"
-          - "$..assignee.id"
-          - "$..assignee.node_id"
-          - "$..assignee.email"
+          - "$..requested_reviewers[*].['id','node_id','email']"
         encoding: "JSON"
-      - !<redact>
-        jsonPaths:
-          - "$..assignees[*].avatar_url"
-          - "$..assignees[*].gravatar_id"
-          - "$..assignees[*].url"
-          - "$..assignees[*].html_url"
-          - "$..assignees[*].followers_url"
-          - "$..assignees[*].following_url"
-          - "$..assignees[*].gists_url"
-          - "$..assignees[*].starred_url"
-          - "$..assignees[*].subscriptions_url"
-          - "$..assignees[*].organizations_url"
-          - "$..assignees[*].repos_url"
-          - "$..assignees[*].events_url"
-          - "$..assignees[*].received_events_url"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..assignees[*].login"
-          - "$..assignees[*].id"
-          - "$..assignees[*].node_id"
-          - "$..assignees[*].email"
-        encoding: "JSON"
-      - !<redact>
-        jsonPaths:
-          - "$..requested_reviewers[*].avatar_url"
-          - "$..requested_reviewers[*].gravatar_id"
-          - "$..requested_reviewers[*].url"
-          - "$..requested_reviewers[*].html_url"
-          - "$..requested_reviewers[*].followers_url"
-          - "$..requested_reviewers[*].following_url"
-          - "$..requested_reviewers[*].gists_url"
-          - "$..requested_reviewers[*].starred_url"
-          - "$..requested_reviewers[*].subscriptions_url"
-          - "$..requested_reviewers[*].organizations_url"
-          - "$..requested_reviewers[*].repos_url"
-          - "$..requested_reviewers[*].events_url"
-          - "$..requested_reviewers[*].received_events_url"
       - !<pseudonymize>
         jsonPaths:
           - "$..requested_reviewers[*].login"
-          - "$..requested_reviewers[*].id"
-          - "$..requested_reviewers[*].node_id"
-          - "$..requested_reviewers[*].email"
-        encoding: "JSON"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
-          - "$..creator.avatar_url"
-          - "$..creator.gravatar_id"
-          - "$..creator.url"
-          - "$..creator.html_url"
-          - "$..creator.followers_url"
-          - "$..creator.following_url"
-          - "$..creator.gists_url"
-          - "$..creator.starred_url"
-          - "$..creator.subscriptions_url"
-          - "$..creator.organizations_url"
-          - "$..creator.repos_url"
-          - "$..creator.events_url"
-          - "$..creator.received_events_url"
+          - "$..assignees[*].['avatar_url','gravatar_id','url','html_url','followers_url','following_url','gists_url','starred_url','subscriptions_url','organizations_url','repos_url','events_url','received_events_url','name','company','location','bio','twitter_username']"
       - !<pseudonymize>
         jsonPaths:
-          - "$..creator.login"
-          - "$..creator.id"
-          - "$..creator.node_id"
-          - "$..creator.email"
+          - "$..assignees[*].['id','node_id','email']"
         encoding: "JSON"
-      - !<redact>
-        jsonPaths:
-          - "$..merged_by.avatar_url"
-          - "$..merged_by.gravatar_id"
-          - "$..merged_by.url"
-          - "$..merged_by.html_url"
-          - "$..merged_by.followers_url"
-          - "$..merged_by.following_url"
-          - "$..merged_by.gists_url"
-          - "$..merged_by.starred_url"
-          - "$..merged_by.subscriptions_url"
-          - "$..merged_by.organizations_url"
-          - "$..merged_by.repos_url"
-          - "$..merged_by.events_url"
-          - "$..merged_by.received_events_url"
       - !<pseudonymize>
         jsonPaths:
-          - "$..merged_by.login"
-          - "$..merged_by.id"
-          - "$..merged_by.node_id"
-          - "$..merged_by.email"
-        encoding: "JSON"
-      - !<redact>
-        jsonPaths:
-          - "$..closed_by.avatar_url"
-          - "$..closed_by.gravatar_id"
-          - "$..closed_by.url"
-          - "$..closed_by.html_url"
-          - "$..closed_by.followers_url"
-          - "$..closed_by.following_url"
-          - "$..closed_by.gists_url"
-          - "$..closed_by.starred_url"
-          - "$..closed_by.subscriptions_url"
-          - "$..closed_by.organizations_url"
-          - "$..closed_by.repos_url"
-          - "$..closed_by.events_url"
-          - "$..closed_by.received_events_url"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..closed_by.login"
-          - "$..closed_by.id"
-          - "$..closed_by.node_id"
-          - "$..closed_by.email"
-        encoding: "JSON"
-      - !<redact>
-        jsonPaths:
-          - "$..enabled_by.avatar_url"
-          - "$..enabled_by.gravatar_id"
-          - "$..enabled_by.url"
-          - "$..enabled_by.html_url"
-          - "$..enabled_by.followers_url"
-          - "$..enabled_by.following_url"
-          - "$..enabled_by.gists_url"
-          - "$..enabled_by.starred_url"
-          - "$..enabled_by.subscriptions_url"
-          - "$..enabled_by.organizations_url"
-          - "$..enabled_by.repos_url"
-          - "$..enabled_by.events_url"
-          - "$..enabled_by.received_events_url"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..enabled_by.login"
-          - "$..enabled_by.id"
-          - "$..enabled_by.node_id"
-          - "$..enabled_by.email"
-        encoding: "JSON"
+          - "$..assignees[*].login"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/repos/{owner}/{repo}/pulls/{pull_number}/comments"
     allowedQueryParams:
       - "per_page"
@@ -1570,26 +733,16 @@ endpoints:
           - "$..body"
       - !<redact>
         jsonPaths:
-          - "$..user.avatar_url"
-          - "$..user.gravatar_id"
-          - "$..user.url"
-          - "$..user.html_url"
-          - "$..user.followers_url"
-          - "$..user.following_url"
-          - "$..user.gists_url"
-          - "$..user.starred_url"
-          - "$..user.subscriptions_url"
-          - "$..user.organizations_url"
-          - "$..user.repos_url"
-          - "$..user.events_url"
-          - "$..user.received_events_url"
+          - "$..['user'].['avatar_url','gravatar_id','url','html_url','followers_url','following_url','gists_url','starred_url','subscriptions_url','organizations_url','repos_url','events_url','received_events_url','name','company','location','bio','twitter_username']"
       - !<pseudonymize>
         jsonPaths:
-          - "$..user.login"
-          - "$..user.id"
-          - "$..user.node_id"
-          - "$..user.email"
+          - "$..['user'].['id','node_id','email']"
         encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..['user'].login"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/repos/{owner}/{repo}/pulls/{pull_number}/reviews/{review_id}/comments"
     allowedQueryParams:
       - "per_page"
@@ -1602,26 +755,16 @@ endpoints:
           - "$..body"
       - !<redact>
         jsonPaths:
-          - "$..user.avatar_url"
-          - "$..user.gravatar_id"
-          - "$..user.url"
-          - "$..user.html_url"
-          - "$..user.followers_url"
-          - "$..user.following_url"
-          - "$..user.gists_url"
-          - "$..user.starred_url"
-          - "$..user.subscriptions_url"
-          - "$..user.organizations_url"
-          - "$..user.repos_url"
-          - "$..user.events_url"
-          - "$..user.received_events_url"
+          - "$..['user'].['avatar_url','gravatar_id','url','html_url','followers_url','following_url','gists_url','starred_url','subscriptions_url','organizations_url','repos_url','events_url','received_events_url','name','company','location','bio','twitter_username']"
       - !<pseudonymize>
         jsonPaths:
-          - "$..user.login"
-          - "$..user.id"
-          - "$..user.node_id"
-          - "$..user.email"
+          - "$..['user'].['id','node_id','email']"
         encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..['user'].login"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/repos/{owner}/{repo}/pulls/{pull_number}/commits"
     allowedQueryParams:
       - "per_page"
@@ -1640,48 +783,16 @@ endpoints:
         encoding: "JSON"
       - !<redact>
         jsonPaths:
-          - "$..author.avatar_url"
-          - "$..author.gravatar_id"
-          - "$..author.url"
-          - "$..author.html_url"
-          - "$..author.followers_url"
-          - "$..author.following_url"
-          - "$..author.gists_url"
-          - "$..author.starred_url"
-          - "$..author.subscriptions_url"
-          - "$..author.organizations_url"
-          - "$..author.repos_url"
-          - "$..author.events_url"
-          - "$..author.received_events_url"
+          - "$..['author','committer'].['avatar_url','gravatar_id','url','html_url','followers_url','following_url','gists_url','starred_url','subscriptions_url','organizations_url','repos_url','events_url','received_events_url','name','company','location','bio','twitter_username']"
       - !<pseudonymize>
         jsonPaths:
-          - "$..author.login"
-          - "$..author.id"
-          - "$..author.node_id"
-          - "$..author.email"
+          - "$..['author','committer'].['id','node_id','email']"
         encoding: "JSON"
-      - !<redact>
-        jsonPaths:
-          - "$..committer.avatar_url"
-          - "$..committer.gravatar_id"
-          - "$..committer.url"
-          - "$..committer.html_url"
-          - "$..committer.followers_url"
-          - "$..committer.following_url"
-          - "$..committer.gists_url"
-          - "$..committer.starred_url"
-          - "$..committer.subscriptions_url"
-          - "$..committer.organizations_url"
-          - "$..committer.repos_url"
-          - "$..committer.events_url"
-          - "$..committer.received_events_url"
       - !<pseudonymize>
         jsonPaths:
-          - "$..committer.login"
-          - "$..committer.id"
-          - "$..committer.node_id"
-          - "$..committer.email"
-        encoding: "JSON"
+          - "$..['author','committer'].login"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/repos/{owner}/{repo}/pulls/{pull_number}"
     transforms:
       - !<redact>
@@ -1695,199 +806,37 @@ endpoints:
           - "$..commit_message"
       - !<redact>
         jsonPaths:
-          - "$..user.avatar_url"
-          - "$..user.gravatar_id"
-          - "$..user.url"
-          - "$..user.html_url"
-          - "$..user.followers_url"
-          - "$..user.following_url"
-          - "$..user.gists_url"
-          - "$..user.starred_url"
-          - "$..user.subscriptions_url"
-          - "$..user.organizations_url"
-          - "$..user.repos_url"
-          - "$..user.events_url"
-          - "$..user.received_events_url"
+          - "$..['user','closed_by','enabled_by','actor','assignee','creator','merged_by'].['avatar_url','gravatar_id','url','html_url','followers_url','following_url','gists_url','starred_url','subscriptions_url','organizations_url','repos_url','events_url','received_events_url','name','company','location','bio','twitter_username']"
       - !<pseudonymize>
         jsonPaths:
-          - "$..user.login"
-          - "$..user.id"
-          - "$..user.node_id"
-          - "$..user.email"
+          - "$..['user','closed_by','enabled_by','actor','assignee','creator','merged_by'].['id','node_id','email']"
         encoding: "JSON"
-      - !<redact>
-        jsonPaths:
-          - "$..actor.avatar_url"
-          - "$..actor.gravatar_id"
-          - "$..actor.url"
-          - "$..actor.html_url"
-          - "$..actor.followers_url"
-          - "$..actor.following_url"
-          - "$..actor.gists_url"
-          - "$..actor.starred_url"
-          - "$..actor.subscriptions_url"
-          - "$..actor.organizations_url"
-          - "$..actor.repos_url"
-          - "$..actor.events_url"
-          - "$..actor.received_events_url"
       - !<pseudonymize>
         jsonPaths:
-          - "$..actor.login"
-          - "$..actor.id"
-          - "$..actor.node_id"
-          - "$..actor.email"
-        encoding: "JSON"
+          - "$..['user','closed_by','enabled_by','actor','assignee','creator','merged_by'].login"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
-          - "$..assignee.avatar_url"
-          - "$..assignee.gravatar_id"
-          - "$..assignee.url"
-          - "$..assignee.html_url"
-          - "$..assignee.followers_url"
-          - "$..assignee.following_url"
-          - "$..assignee.gists_url"
-          - "$..assignee.starred_url"
-          - "$..assignee.subscriptions_url"
-          - "$..assignee.organizations_url"
-          - "$..assignee.repos_url"
-          - "$..assignee.events_url"
-          - "$..assignee.received_events_url"
+          - "$..requested_reviewers[*].['avatar_url','gravatar_id','url','html_url','followers_url','following_url','gists_url','starred_url','subscriptions_url','organizations_url','repos_url','events_url','received_events_url','name','company','location','bio','twitter_username']"
       - !<pseudonymize>
         jsonPaths:
-          - "$..assignee.login"
-          - "$..assignee.id"
-          - "$..assignee.node_id"
-          - "$..assignee.email"
+          - "$..requested_reviewers[*].['id','node_id','email']"
         encoding: "JSON"
-      - !<redact>
-        jsonPaths:
-          - "$..assignees[*].avatar_url"
-          - "$..assignees[*].gravatar_id"
-          - "$..assignees[*].url"
-          - "$..assignees[*].html_url"
-          - "$..assignees[*].followers_url"
-          - "$..assignees[*].following_url"
-          - "$..assignees[*].gists_url"
-          - "$..assignees[*].starred_url"
-          - "$..assignees[*].subscriptions_url"
-          - "$..assignees[*].organizations_url"
-          - "$..assignees[*].repos_url"
-          - "$..assignees[*].events_url"
-          - "$..assignees[*].received_events_url"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..assignees[*].login"
-          - "$..assignees[*].id"
-          - "$..assignees[*].node_id"
-          - "$..assignees[*].email"
-        encoding: "JSON"
-      - !<redact>
-        jsonPaths:
-          - "$..requested_reviewers[*].avatar_url"
-          - "$..requested_reviewers[*].gravatar_id"
-          - "$..requested_reviewers[*].url"
-          - "$..requested_reviewers[*].html_url"
-          - "$..requested_reviewers[*].followers_url"
-          - "$..requested_reviewers[*].following_url"
-          - "$..requested_reviewers[*].gists_url"
-          - "$..requested_reviewers[*].starred_url"
-          - "$..requested_reviewers[*].subscriptions_url"
-          - "$..requested_reviewers[*].organizations_url"
-          - "$..requested_reviewers[*].repos_url"
-          - "$..requested_reviewers[*].events_url"
-          - "$..requested_reviewers[*].received_events_url"
       - !<pseudonymize>
         jsonPaths:
           - "$..requested_reviewers[*].login"
-          - "$..requested_reviewers[*].id"
-          - "$..requested_reviewers[*].node_id"
-          - "$..requested_reviewers[*].email"
-        encoding: "JSON"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
-          - "$..creator.avatar_url"
-          - "$..creator.gravatar_id"
-          - "$..creator.url"
-          - "$..creator.html_url"
-          - "$..creator.followers_url"
-          - "$..creator.following_url"
-          - "$..creator.gists_url"
-          - "$..creator.starred_url"
-          - "$..creator.subscriptions_url"
-          - "$..creator.organizations_url"
-          - "$..creator.repos_url"
-          - "$..creator.events_url"
-          - "$..creator.received_events_url"
+          - "$..assignees[*].['avatar_url','gravatar_id','url','html_url','followers_url','following_url','gists_url','starred_url','subscriptions_url','organizations_url','repos_url','events_url','received_events_url','name','company','location','bio','twitter_username']"
       - !<pseudonymize>
         jsonPaths:
-          - "$..creator.login"
-          - "$..creator.id"
-          - "$..creator.node_id"
-          - "$..creator.email"
+          - "$..assignees[*].['id','node_id','email']"
         encoding: "JSON"
-      - !<redact>
-        jsonPaths:
-          - "$..merged_by.avatar_url"
-          - "$..merged_by.gravatar_id"
-          - "$..merged_by.url"
-          - "$..merged_by.html_url"
-          - "$..merged_by.followers_url"
-          - "$..merged_by.following_url"
-          - "$..merged_by.gists_url"
-          - "$..merged_by.starred_url"
-          - "$..merged_by.subscriptions_url"
-          - "$..merged_by.organizations_url"
-          - "$..merged_by.repos_url"
-          - "$..merged_by.events_url"
-          - "$..merged_by.received_events_url"
       - !<pseudonymize>
         jsonPaths:
-          - "$..merged_by.login"
-          - "$..merged_by.id"
-          - "$..merged_by.node_id"
-          - "$..merged_by.email"
-        encoding: "JSON"
-      - !<redact>
-        jsonPaths:
-          - "$..closed_by.avatar_url"
-          - "$..closed_by.gravatar_id"
-          - "$..closed_by.url"
-          - "$..closed_by.html_url"
-          - "$..closed_by.followers_url"
-          - "$..closed_by.following_url"
-          - "$..closed_by.gists_url"
-          - "$..closed_by.starred_url"
-          - "$..closed_by.subscriptions_url"
-          - "$..closed_by.organizations_url"
-          - "$..closed_by.repos_url"
-          - "$..closed_by.events_url"
-          - "$..closed_by.received_events_url"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..closed_by.login"
-          - "$..closed_by.id"
-          - "$..closed_by.node_id"
-          - "$..closed_by.email"
-        encoding: "JSON"
-      - !<redact>
-        jsonPaths:
-          - "$..enabled_by.avatar_url"
-          - "$..enabled_by.gravatar_id"
-          - "$..enabled_by.url"
-          - "$..enabled_by.html_url"
-          - "$..enabled_by.followers_url"
-          - "$..enabled_by.following_url"
-          - "$..enabled_by.gists_url"
-          - "$..enabled_by.starred_url"
-          - "$..enabled_by.subscriptions_url"
-          - "$..enabled_by.organizations_url"
-          - "$..enabled_by.repos_url"
-          - "$..enabled_by.events_url"
-          - "$..enabled_by.received_events_url"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..enabled_by.login"
-          - "$..enabled_by.id"
-          - "$..enabled_by.node_id"
-          - "$..enabled_by.email"
-        encoding: "JSON"
+          - "$..assignees[*].login"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
