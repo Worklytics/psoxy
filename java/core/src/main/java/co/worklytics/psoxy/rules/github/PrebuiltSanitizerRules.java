@@ -96,7 +96,7 @@ public class PrebuiltSanitizerRules {
 
     // https://docs.github.com/en/rest/users/users?apiVersion=2022-11-28#list-users
     static final Endpoint USERS = Endpoint.builder()
-            .pathRegex("/users(/p~[a-zA-Z0-9_-]+?)?[^/]*")
+            .pathTemplate("/users/{username}")
             .allowedQueryParams(userAllowedQueryParameters)
             .transforms(generateUserTransformations("."))
             .build();

@@ -40,7 +40,6 @@ public class GitHubTests extends JavaRulesTestBaseCase {
     @SneakyThrows
     @Test
     @Override
-    @Disabled
     public void yamlLength() {
         // Do nothing, as response schema is bigger than we allow for advanced parameters
     }
@@ -697,6 +696,8 @@ public class GitHubTests extends JavaRulesTestBaseCase {
                 InvocationExample.of("https://api.github.com/repos/FAKE/REPO/pulls/42/reviews", "pull_reviews.json"),
                 InvocationExample.of("https://api.github.com/repos/FAKE/REPO/pulls/42/reviews/10/comments", "pull_review_comments.json"),
                 InvocationExample.of("https://api.github.com/repos/FAKE/REPO/pulls/PULL_ID", "pull.json"),
+                InvocationExample.of("https://api.github.com/users/p~IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbN_fPDYrPH3aBnAoR5-ec6f?per_page=1", "user.json"),
+                InvocationExample.of("https://api.github.com/users/p~wD8RXfeJ5J-Po8ztEdwRQ-ae1xHBQKRMfNsFB5FFteZgtt4TBv84utnnumgFnjsR?per_page=1", "user.json"),
                 InvocationExample.of("https://api.github.com/users/p~IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbN_fPDYrPH3aBnAoR5-ec6f", "user.json")
         );
     }
