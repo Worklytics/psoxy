@@ -475,7 +475,16 @@ EOT
   4. Finally, we recommend to run `test-salesforce` script with all the queries in the example to ensure the expected information covered by rules can be obtained from Salesforce API.
      Some test calls may fail with a 400 (bad request) response. That is something expected if parameters requested on the query are not available (for example, running a SOQL query
      with fields that are NOT present in your model will force a 400 response from Salesforce API). If that is the case, a double check in the function logs can be done to ensure
-     that this is the actual error happening.
+     that this is the actual error happening, you should see an error like the following one:
+     ```json
+     WARNING: Source API Error [{
+    "message": "\nLastModifiedById,NumberOfEmployees,OwnerId,Ownership,ParentId,Rating,Sic,Type\n
+               ^\nERROR at Row:1:Column:136\nNo such column 'Ownership' on entity 'Account'. If you are attempting to use a custom field, be sure to append the '__c' after the custom field name. Please reference your WSDL or the describe call for the appropriate names.",
+    "errorCode": "INVALID_FIELD"
+     }]
+     ```
+     In that case, removing from the query the fields LastModifiedById,NumberOfEmployees,OwnerId,Ownership,ParentId,Rating,Sic,Type will fix the issues.
+
      However, if running any of the queries you receive a 401/403/500/512 it may be related to some misconfiguration in the Salesforce Application (a 401/403 might be related to lack of permissions)
      the function (missing value for `salesforce_domain` for 500/512 errors)
 EOT
