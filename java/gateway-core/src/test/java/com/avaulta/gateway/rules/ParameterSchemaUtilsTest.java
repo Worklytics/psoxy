@@ -1,8 +1,10 @@
 package com.avaulta.gateway.rules;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -51,6 +53,33 @@ class ParameterSchemaUtilsTest {
         assertTrue(parameterSchemaUtils.validate(parameterSchema, "0.423412343123"));
         assertFalse(parameterSchemaUtils.validate(parameterSchema, "not-a-number"));
         assertTrue(parameterSchemaUtils.validate(parameterSchema, null));
+    }
+
+    @Test
+    public void validate_all() {
+        Map<String, ParameterSchema> parameterSchemas =
+                Map.of("string", ParameterSchema.string(),
+                        "number", ParameterSchema.builder().type("number").build(),
+                        "reversible", ParameterSchema.reversiblePseudonym());
+
+        assertTrue(parameterSchemaUtils.validateAll(parameterSchemas, Arrays.asList(
+                Pair.of("string", "string"),
+                Pair.of("number", "1.0"),
+                Pair.of("reversible", EXAMPLE_REVERSIBLE)
+        )));
+
+        assertFalse(
+                parameterSchemaUtils.validateAll(parameterSchemas, Arrays.asList(
+                        Pair.of("string", "string"),
+                        Pair.of("number", "not-a-number"),
+                        Pair.of("reversible", EXAMPLE_REVERSIBLE)
+                )));
+        assertFalse(
+                parameterSchemaUtils.validateAll(parameterSchemas, Arrays.asList(
+
+                        Pair.of("number", "not-a-number"),
+                        Pair.of("reversible", "not-a-pseudonym")
+                )));
     }
 }
 
