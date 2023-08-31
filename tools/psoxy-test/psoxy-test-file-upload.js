@@ -74,7 +74,9 @@ async function testAWS(options, logger) {
       //   but will still respond that the command was successful.
       await aws.deleteObject(outputBucket, outputKey, options, client);
     } catch (error) {
-      logger.error(`Error deleting sanitized file: ${error.message}`);
+      logger.error(`Error deleting sanitized file: ${error.message}`, {
+        additional: error,
+      });
     }
   }
 

@@ -296,7 +296,7 @@ async function deleteObject(bucket, key, options, client) {
   return await client.send(new DeleteObjectCommand({
     Bucket: bucket,
     Key: key,
-    // BypassGovernanceRetention: true, ??
+    // BypassGovernanceRetention: true,
   }));
 }
 
