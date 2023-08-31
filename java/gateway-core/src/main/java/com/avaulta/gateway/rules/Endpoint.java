@@ -3,7 +3,6 @@ package com.avaulta.gateway.rules;
 import com.avaulta.gateway.rules.transforms.Transform;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.*;
 
@@ -56,29 +55,6 @@ public class Endpoint {
     @JsonIgnore
     public Optional<Map<String, ParameterSchema>> getQueryParamSchemasOptional() {
         return Optional.ofNullable(queryParamSchemas);
-    }
-
-    @JsonPropertyOrder({"type", "format", "pattern", "enum"})
-    @Builder(toBuilder = true)
-    @With
-    @AllArgsConstructor //for builder
-    @NoArgsConstructor //for Jackson
-    @Getter
-    static class ParameterSchema  {
-
-        @JsonInclude(JsonInclude.Include.NON_NULL)
-        String type;  // string, integer, number
-
-        @JsonInclude(JsonInclude.Include.NON_NULL)
-        String format;  // reversible-pseudonym,
-
-        @JsonInclude(JsonInclude.Include.NON_NULL)
-        String pattern;
-
-        @JsonInclude(JsonInclude.Include.NON_EMPTY)
-        @JsonProperty("enum") //align to JsonSchema
-        List<String> enumValues;
-
     }
 
     //if provided, only http methods in this list will be allowed

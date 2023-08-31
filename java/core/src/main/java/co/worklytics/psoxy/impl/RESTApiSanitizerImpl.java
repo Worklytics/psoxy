@@ -11,6 +11,7 @@ import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.Endpoint;
 import com.avaulta.gateway.rules.JsonSchemaFilterUtils;
+import com.avaulta.gateway.rules.ParameterSchemaUtils;
 import com.avaulta.gateway.rules.transforms.Transform;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
 import com.google.common.annotations.VisibleForTesting;
@@ -42,6 +43,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder.REVERSIBLE_PSEUDONYM_PATTERN;
 import static java.util.regex.Pattern.CASE_INSENSITIVE;
 
 @Log
@@ -82,6 +84,8 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     UrlSafeTokenPseudonymEncoder urlSafePseudonymEncoder;
     @Inject
     JsonSchemaFilterUtils jsonSchemaFilterUtils;
+    @Inject
+    ParameterSchemaUtils parameterSchemaUtils;
 
 
     @Override
@@ -117,12 +121,27 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
 
     @VisibleForTesting
     Predicate<Map.Entry<Endpoint, Pattern>> getHasPathTemplateMatchingUrl(URL url) {
-        //TODO: parse out path params, if any; match and valid them against schema
-        return (entry) ->
-                entry.getKey().getPathTemplate() != null && entry.getValue().matcher(url.getPath()).matches()
-                        && allowedQueryParams(entry.getKey(), URLUtils.queryParamNames(url));
-    }
+        return (entry) -> {
+            if (entry.getKey().getPathTemplate() != null) {
+                Matcher matcher = entry.getValue().matcher(url.getPath());
+                if (matcher.matches()) {
+                    boolean allParamsValid =
+                            entry.getKey().getPathParameterSchemasOptional()
+                                    .map(schemas -> schemas.entrySet().stream()
+                                        .map(paramSchema -> parameterSchemaUtils.validate(paramSchema.getValue(), matcher.group(paramSchema.getKey())))
+                                         .allMatch(b -> b))
+                                    .orElse(true);
 
+                    //q: need to catch possible IllegalArgumentException if path parameter defined in `pathParameterSchemas`
+                    // not in the path template??
+
+                    return allParamsValid &&
+                            allowedQueryParams(entry.getKey(), URLUtils.queryParamNames(url));
+                }
+            }
+            return false;
+        };
+    }
 
     @Override
     public String sanitize(String httpMethod, URL url, String jsonResponse) {        //extra check ...

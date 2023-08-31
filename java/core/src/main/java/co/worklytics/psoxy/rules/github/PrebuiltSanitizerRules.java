@@ -5,6 +5,7 @@ import co.worklytics.psoxy.rules.Rules2;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.rules.Endpoint;
 import com.avaulta.gateway.rules.JsonSchemaFilterUtils;
+import com.avaulta.gateway.rules.ParameterSchema;
 import com.avaulta.gateway.rules.transforms.Transform;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
@@ -97,6 +98,7 @@ public class PrebuiltSanitizerRules {
     // https://docs.github.com/en/rest/users/users?apiVersion=2022-11-28#list-users
     static final Endpoint USERS = Endpoint.builder()
             .pathTemplate("/users/{username}")
+            .pathParameterSchemas(ImmutableMap.of("username", ParameterSchema.reversiblePseudonym()))
             .allowedQueryParams(userAllowedQueryParameters)
             .transforms(generateUserTransformations("."))
             .build();
