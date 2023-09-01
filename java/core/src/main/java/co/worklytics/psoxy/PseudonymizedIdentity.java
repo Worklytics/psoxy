@@ -1,10 +1,12 @@
 package co.worklytics.psoxy;
 
 import com.avaulta.gateway.pseudonyms.Pseudonym;
+import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import org.apache.commons.lang3.StringUtils;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 /**
@@ -59,6 +61,19 @@ public class PseudonymizedIdentity {
      */
     String hash;
 
+    /**
+     * future-use. 0.4 hash for pseudonym, if `hash` is NOT 0.4.
+     *
+     * in the future, will be filled for LEGACY (0.3) cases; but for now, will be null (and always
+     * absent from JSON-serialized form)
+     *
+     * this will give both DEFAULT and LEGACY hashes for pseudonyms, allowing for eventual migration
+     * of LEGACY customers to DEFAULT (0.4)
+     *
+     */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    String h_4;
+
     @JsonInclude(JsonInclude.Include.NON_NULL)
     String original;
 
@@ -71,44 +86,54 @@ public class PseudonymizedIdentity {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     String reversible;
 
+    /**
+     * convert this to Pseudonym; works ONLY if built with DEFAULT format
+     *
+     * @return
+     */
     public Pseudonym asPseudonym() {
 
         //q: what to do w original, if anything?
 
-        Base64.Decoder decoder = Base64.getUrlDecoder();
+        UrlSafeTokenPseudonymEncoder encoder = new UrlSafeTokenPseudonymEncoder();
 
         byte[] decodedHash, decodedReversible;
         if (hash != null) {
-            decoder = Base64.getUrlDecoder();
-            try {
-                decodedHash = decoder.decode(hash.getBytes());
-            } catch (IllegalArgumentException e) {
-                decoder = Base64.getDecoder();
-                //q: should we log this?
-                decodedHash = decoder.decode(StringUtils.replaceChars(hash, "_.", "/+").getBytes());
-            }
+            decodedHash = encoder.decode(hash).getHash();
         } else {
             decodedHash = null;
         }
 
         if (reversible != null) {
-            try {
-                decodedReversible = decoder.decode(reversible.getBytes());
-            } catch (IllegalArgumentException e) {
-                decoder = Base64.getDecoder();
-                //q: should we log this?
-                decodedReversible = decoder.decode(StringUtils.replaceChars(reversible, "_.", "/+").getBytes());
-            }
+            decodedReversible = encoder.decode(reversible).getReversible();
         } else {
             decodedReversible = null;
         }
-
-
 
         return Pseudonym.builder()
             .hash(decodedHash)
             .domain(domain)
             .reversible(decodedReversible)
             .build();
+    }
+
+    /**
+     * convert this to Pseudonym; works ONLY if built with LEGACY format
+     *
+     * @return
+     */
+    public Pseudonym fromLegacy() {
+        HashUtils hashUtils = new HashUtils();
+
+        Pseudonym.PseudonymBuilder<?, ?> builder = Pseudonym.builder()
+                .hash(hashUtils.decode(hash))
+                .domain(domain);
+
+        if (reversible != null) {
+            UrlSafeTokenPseudonymEncoder encoder = new UrlSafeTokenPseudonymEncoder();
+            builder.reversible(encoder.decode(reversible).getReversible());
+        }
+
+        return builder.build();
     }
 }

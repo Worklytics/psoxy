@@ -3,13 +3,16 @@ package com.avaulta.gateway.tokens.impl;
 import com.avaulta.gateway.pseudonyms.impl.TestUtils;
 import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
+import com.avaulta.gateway.tokens.Token;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -68,5 +71,21 @@ class AESReversibleTokenizationStrategyTest {
 
         assertTrue(Arrays.equals(Arrays.copyOfRange(keyed, 0, pseudonym.length), pseudonym),
             "pseudonym is prefix of keyed");
+    }
+
+    @MethodSource("getStrategies")
+    @ParameterizedTest
+    void tokenHashesMatch(ReversibleTokenizationStrategy reversibleTokenizationStrategy) {
+        Token reversible = Token.builder()
+            .reversible(reversibleTokenizationStrategy.getReversibleToken("blahasdfasdf", Function.identity()))
+            .build();
+        Token deterministic = Token.builder()
+            .hash(deterministicTokenizationStrategy.getToken("blahasdfasdf", Function.identity()))
+            .build();
+
+        Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
+
+        assertEquals(new String(encoder.encode(reversible.getHash())),
+            new String(encoder.encode(deterministic.getHash())));
     }
 }

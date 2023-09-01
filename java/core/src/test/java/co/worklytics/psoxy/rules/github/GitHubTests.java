@@ -35,10 +35,11 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         this.assertSha("7869e465607b7a00b4bd75a832a9ed1f811ce7f2");
     }
 
+
+
     @SneakyThrows
     @Test
     @Override
-    @Disabled
     public void yamlLength() {
         // Do nothing, as response schema is bigger than we allow for advanced parameters
     }
@@ -69,8 +70,8 @@ public class GitHubTests extends JavaRulesTestBaseCase {
     }
 
     @Test
-    void graphql_for_users() {
-        String jsonString = asJson(exampleDirectoryPath, "graph_api_users.json");
+    void graphql_for_users_with_saml() {
+        String jsonString = asJson(exampleDirectoryPath, "graph_api_users_saml.json");
 
         String endpoint = "https://api.github.com/graphql";
 
@@ -90,6 +91,52 @@ public class GitHubTests extends JavaRulesTestBaseCase {
 
         assertUrlAllowed(endpoint);
     }
+
+    @Test
+    void graphql_for_users_with_members() {
+        String jsonString = asJson(exampleDirectoryPath, "graph_api_users_members.json");
+
+        String endpoint = "https://api.github.com/graphql";
+
+        Collection<String> PII = Arrays.asList(
+                "fake1",
+                "fake2",
+                "fake1@contoso.com",
+                "fake2@contoso.com"
+        );
+
+        assertNotSanitized(jsonString, PII);
+
+        String sanitized = this.sanitize(endpoint, jsonString);
+
+        assertPseudonymized(sanitized, "fake1", "fake1@contoso.com");
+        assertPseudonymized(sanitized, "fake2", "fake2@contoso.com");
+
+        assertUrlAllowed(endpoint);
+    }
+
+    @Test
+    void user() {
+        String jsonString = asJson(exampleDirectoryPath, "user.json");
+
+        String endpoint = "https://api.github.com/users/p~IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbN_fPDYrPH3aBnAoR5-ec6f";
+
+        Collection<String> PII = Arrays.asList(
+                "monalisa octocat",
+                "octocat",
+                "monatheoctocat"
+        );
+
+        assertNotSanitized(jsonString, PII);
+
+        String sanitized = this.sanitize(endpoint, jsonString);
+
+        assertPseudonymized(sanitized, "octocat");
+        assertPseudonymized(sanitized, "octocat@github.com");
+
+        assertUrlAllowed(endpoint);
+    }
+
 
     @Test
     void orgTeams() {
@@ -182,6 +229,23 @@ public class GitHubTests extends JavaRulesTestBaseCase {
                 "https://api.github.com/users/some-user",
                 "https://api.github.com/users/some-user/events{/privacy}"
         );
+
+        assertUrlAllowed(endpoint);
+    }
+
+    @Test
+    void commit_comments() {
+        String jsonString = asJson(exampleDirectoryPath, "commit_comments.json");
+
+        String endpoint = "https://api.github.com/repos/{owner}/{repo}/commits/{commit_sha}/comments";
+
+        Collection<String> PII = Arrays.asList(
+                "octocat"
+        );
+
+        assertNotSanitized(jsonString, PII);
+
+        String sanitized = this.sanitize(endpoint, jsonString);
 
         assertUrlAllowed(endpoint);
     }
@@ -623,13 +687,16 @@ public class GitHubTests extends JavaRulesTestBaseCase {
     public Stream<InvocationExample> getExamples() {
         return Stream.of(
                 InvocationExample.of("https://api.github.com/orgs/FAKE/members", "org_members.json"),
-                InvocationExample.of("https://api.github.com/graphql", "graph_api_users.json"),
+                InvocationExample.of("https://api.github.com/graphql", "graph_api_users_saml.json"),
+                InvocationExample.of("https://api.github.com/graphql", "graph_api_users_members.json"),
                 InvocationExample.of("https://api.github.com/graphql", "graph_api_error.json"),
                 InvocationExample.of("https://api.github.com/orgs/FAKE/teams", "org_teams.json"),
                 InvocationExample.of("https://api.github.com/orgs/FAKE/teams/TEAM/members", "team_members.json"),
                 InvocationExample.of("https://api.github.com/orgs/FAKE/repos", "repos.json"),
                 InvocationExample.of("https://api.github.com/orgs/FAKE/audit-log", "org_audit_log.json"),
+                InvocationExample.of("https://api.github.com/organizations/123456789/audit-log?include=all&per_page=100&phrase=created:2023-02-16T12:00:00%2B0000..2023-04-17T00:00:00%2B0000&page=0&order=asc&after=MS42OEQyOTE2MjX1MqNlJzIyfANVOHoYbUVsZ1ZjUWN6TwlZLXl6EVE%3D&before", "org_audit_log.json"),
                 InvocationExample.of("https://api.github.com/repos/FAKE/REPO/commits/COMMIT_REF", "commit.json"),
+                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/commits/COMMIT_REF/comments", "commit_comments.json"),
                 InvocationExample.of("https://api.github.com/repos/FAKE/REPO/branches", "repo_branches.json"),
                 InvocationExample.of("https://api.github.com/repos/FAKE/REPO/commits", "repo_commits.json"),
                 InvocationExample.of("https://api.github.com/repos/FAKE/REPO/events", "repo_events.json"),
@@ -646,7 +713,10 @@ public class GitHubTests extends JavaRulesTestBaseCase {
                 InvocationExample.of("https://api.github.com/repos/FAKE/REPO/pulls/42/commits", "pull_commits.json"),
                 InvocationExample.of("https://api.github.com/repos/FAKE/REPO/pulls/42/reviews", "pull_reviews.json"),
                 InvocationExample.of("https://api.github.com/repos/FAKE/REPO/pulls/42/reviews/10/comments", "pull_review_comments.json"),
-                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/pulls/PULL_ID", "pull.json")
+                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/pulls/PULL_ID", "pull.json"),
+                InvocationExample.of("https://api.github.com/users/p~IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbN_fPDYrPH3aBnAoR5-ec6f?per_page=1", "user.json"),
+                InvocationExample.of("https://api.github.com/users/p~wD8RXfeJ5J-Po8ztEdwRQ-ae1xHBQKRMfNsFB5FFteZgtt4TBv84utnnumgFnjsR?per_page=1", "user.json"),
+                InvocationExample.of("https://api.github.com/users/p~IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbN_fPDYrPH3aBnAoR5-ec6f", "user.json")
         );
     }
 }

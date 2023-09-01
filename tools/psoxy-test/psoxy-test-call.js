@@ -75,31 +75,31 @@ export default async function (options = {}) {
     logger.verbose(`Response headers:\n ${JSON.stringify(result.headers, null, 2)}`);
   }
 
+  let resultMessagePrefix = options.healthCheck ? 'Health Check result:' :
+  'Call result:'
+
+  let resultData = result.data;
+  if (!_.isEmpty(result.data)) {
+    try {
+      resultData = JSON.parse(result.data);
+    } catch(error) {
+      logger.verbose(`Error parsing Psoxy response: ${error.message}`);
+    }
+  }
+
   if (result.status === httpCodes.HTTP_STATUS_OK) {
-    let successMessagePrefix = options.healthCheck ? 'Health Check result:' :
-      'Call result:'
-    let jsonCallResult;
 
-    if (!_.isEmpty(result.data)) {
-
-      try {
-        jsonCallResult = JSON.parse(result.data)
-      } catch(error) {
-        logger.error(error.message);
-      }
-
-      if (options.saveToFile) {
-        const filename = getFileNameFromURL(url);
-        await saveToFile(__dirname, filename, JSON.stringify(jsonCallResult, undefined, 2));
-        logger.success(`Results saved to: ${__dirname}/${filename}`);
-      } else {
-        // Response potentially long, let's remind to check logs for complete results
-        logger.success(`Check out run log to see complete results: ${__dirname}/run.log`);
-      }
+    if (options.saveToFile) {
+      const filename = getFileNameFromURL(url);
+      await saveToFile(__dirname, filename, JSON.stringify(jsonCallResult, undefined, 2));
+      logger.success(`Results saved to: ${__dirname}/${filename}`);
+    } else {
+      // Response potentially long, let's remind to check logs for complete results
+      logger.success(`Check out run log to see complete results: ${__dirname}/run.log`);
     }
 
-    logger.success(`${successMessagePrefix} ${result.statusMessage} - ${result.status}`,
-      { additional: jsonCallResult });
+    logger.success(`${resultMessagePrefix} ${result.statusMessage} - ${result.status}`,
+      { additional: resultData });
 
   } else {
     let errorMessage = result.statusMessage || 'Unknown';
@@ -123,20 +123,16 @@ export default async function (options = {}) {
             break;
         }
       } else if (result.headers['x-amzn-errortype']) {
-        errorMessage += `: AWS ${result.headers['x-amzn-errortype']}`;
-        if (!_.isUndefined(result.data)) {
-          let extendedErrorMessage = '';
-          try {
-            extendedErrorMessage = JSON.parse(result.data)?.message ?? '';
-            errorMessage += ` ${extendedErrorMessage}`;
-          } catch(e) {logger.verbose(e.message);}
-        }
+        errorMessage += ` AWS ${result.headers['x-amzn-errortype']}`;
       } else if (result.headers['www-authenticate']) {
-        errorMessage += `: GCP ${result.headers['www-authenticate']}`
+        errorMessage += ` GCP ${result.headers['www-authenticate']}`
       }
     }
 
-    logger.error(`${chalk.bold.red(result.status)}\n${chalk.bold.red(errorMessage)}`);
+    logger.error(`${chalk.bold.red(resultMessagePrefix)} ${chalk.bold.red(errorMessage)}`, {
+      additional: resultData
+    });
+
     if ([httpCodes.HTTP_STATUS_INTERNAL_SERVER_ERROR,
       httpCodes.HTTP_STATUS_BAD_GATEWAY].includes(result.status)) {
       logger.info('This looks like an internal error in the Proxy; please review the logs.')

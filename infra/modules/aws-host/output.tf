@@ -8,6 +8,10 @@ output "caller_role_name" {
   value = module.psoxy.api_caller_role_name
 }
 
+output "caller_role_arn" {
+  value = module.psoxy.api_caller_role_arn
+}
+
 output "api_connector_instances" {
   value = local.api_instances
 }

@@ -1,13 +1,10 @@
 package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.rules.RESTRules;
-import co.worklytics.psoxy.rules.Rules2;
-import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
-import co.worklytics.psoxy.rules.RuleSet;
-import lombok.*;
 
-import java.io.Serializable;
 import java.net.URL;
+import java.util.Collection;
+import java.util.Optional;
 
 public interface RESTApiSanitizer {
     /**
@@ -29,6 +26,13 @@ public interface RESTApiSanitizer {
      */
     boolean isAllowed(String httpMethod, URL url);
 
+    /**
+     * Headers to include in the request
+     * @param httpMethod The method to test
+     * @param url The url to test
+     * @return
+     */
+    Optional<Collection<String>> getAllowedHeadersToForward(String httpMethod, URL url);
 
     /**
      * sanitize jsonResponse received from url, according any options set on Sanitizer

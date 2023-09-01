@@ -98,6 +98,7 @@ public class GoogleCloudPlatformServiceAccountKeyAuthStrategy implements SourceA
             if (key.isPresent()) {
                 try (ByteArrayInputStream boas = key.map(this::toStream).orElseThrow()) {
                     provisional = ServiceAccountCredentials.fromStream(boas, httpTransportFactory);
+                    log.info("Base credentials pulled from stream of SERVICE_ACCOUNT_KEY");
                 }
             } else {
                 provisional = GoogleCredentials.getApplicationDefault();
@@ -122,6 +123,10 @@ public class GoogleCloudPlatformServiceAccountKeyAuthStrategy implements SourceA
 
         //even though GoogleCredentials implements `createDelegated`, it's a no-op if the
         // credential type doesn't support it.
+        // similarly, createScoped() is no-op if not supported by GoogleCredentials implementation
+        // but if they are ops that would mutate underlying credential, they do invoke toBuilder()
+        // again and return a clone of the credential with the change - so safe; we're not mutating
+        // the same base credentials instance via multiple pointers or anything
         return baseCredentials
             .createDelegated(accountToImpersonate)
             .createScoped(getScopes());

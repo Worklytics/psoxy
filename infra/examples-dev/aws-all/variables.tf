@@ -1,9 +1,10 @@
 variable "environment_name" {
   type        = string
   description = "friendly qualifier to distinguish resources created by this terraform configuration other Terraform deployments, (eg, 'prod', 'dev', etc)"
+  default     = "psoxy"
 
   validation {
-    condition     = can(regex("^[a-zA-Z][a-zA-Z0-9-_ ]*[a-zA-Z0-9]$", var.environment_name))
+    condition     = can(regex("^[a-zA-Z][a-zA-Z0-9-_ ]*$", var.environment_name))
     error_message = "The `environment_name` must start with a letter, can contain alphanumeric characters, hyphens, underscores, and spaces, and must end with a letter or number."
   }
 
@@ -166,7 +167,7 @@ variable "bulk_input_expiration_days" {
 
 variable "bulk_sanitized_expiration_days" {
   type        = number
-  description = "Number of days after which objects in the bucket will expire. In practice, Worklytics syncs data ~weekly, so 30 day minimum for this value."
+  description = "Number of days after which objects in the bucket will expire. This should match the amount of historical data you wish for Worklytics to analyze (eg, typically multiple years)."
   default     = 1805 # 5 years; intent is 'forever', but some upperbound in case bucket is forgotten
 }
 

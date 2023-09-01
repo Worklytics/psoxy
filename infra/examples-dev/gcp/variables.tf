@@ -163,7 +163,7 @@ variable "bulk_input_expiration_days" {
 
 variable "bulk_sanitized_expiration_days" {
   type        = number
-  description = "Number of days after which objects in the bucket will expire"
+  description = "Number of days after which objects in the bucket will expire. This should match the amount of historical data you wish for Worklytics to analyze (eg, typically multiple years)."
   default     = 1805 # 5 years; intent is 'forever', but some upperbound in case bucket is forgotten
 }
 

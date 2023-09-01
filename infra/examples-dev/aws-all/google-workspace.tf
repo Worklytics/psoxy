@@ -8,7 +8,7 @@ provider "google" {
 
 module "worklytics_connectors_google_workspace" {
   source = "../../modules/worklytics-connectors-google-workspace"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors-google-workspace?ref=v0.4.35"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors-google-workspace?ref=v0.4.36"
 
   providers = {
     google = google.google_workspace
@@ -19,4 +19,9 @@ module "worklytics_connectors_google_workspace" {
   gcp_project_id                 = var.google_workspace_gcp_project_id
   google_workspace_example_user  = var.google_workspace_example_user
   google_workspace_example_admin = var.google_workspace_example_admin
+}
+
+output "google_workspace_api_clients" {
+  description = "Map of API client identifiers for Google Workspace connectors. Useful for migrations."
+  value       = module.worklytics_connectors_google_workspace.api_clients
 }
