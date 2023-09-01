@@ -181,7 +181,7 @@ variable "bulk_connectors" {
       fieldsToTransform     = optional(map(object({
         newName = string
         transforms = optional(list(map(string)), [])
-      })), {})
+      })))
     })
     example_file        = optional(string)
     memory_size_mb      = optional(number)
