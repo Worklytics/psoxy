@@ -315,7 +315,7 @@ resource "aws_iam_policy" "testing" {
     "Statement" : [
       {
         "Action" : [
-          "s3:PutObject",
+          "s3:PutObject"
         ]
         "Effect" : "Allow",
         "Resource" : [
@@ -326,7 +326,9 @@ resource "aws_iam_policy" "testing" {
       {
         "Action" : [
           "s3:GetObject",
-          "s3:ListBucket"
+          "s3:ListBucket",
+          "s3:DeleteObject",
+          "s3:DeleteObjectVersion"
         ],
         "Effect" : "Allow",
         "Resource" : [
