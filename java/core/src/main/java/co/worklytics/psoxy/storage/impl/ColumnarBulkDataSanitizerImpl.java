@@ -91,7 +91,8 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
         Set<String> columnsToPseudonymize = asSetWithCaseInsensitiveComparator(rules.getColumnsToPseudonymize());
 
 
-        Map<String, ColumnarRules.FieldTransformPipeline> columnsToTransform = rules.getFieldsToTransform()
+        Map<String, ColumnarRules.FieldTransformPipeline> columnsToTransform =
+            Optional.ofNullable(rules.getFieldsToTransform()).orElse(Collections.emptyMap())
             .entrySet().stream()
             .collect(Collectors.toMap(
                 entry -> entry.getKey().trim().toLowerCase(),
@@ -103,7 +104,8 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
             Optional.ofNullable(rules.getColumnsToInclude())
                 .map(this::asSetWithCaseInsensitiveComparator);
 
-        final Map<String, String> columnsToRename = rules.getColumnsToRename()
+        final Map<String, String> columnsToRename =
+            Optional.ofNullable(rules.getColumnsToRename()).orElse(Collections.emptyMap())
             .entrySet().stream()
             .collect(Collectors.toMap(
                 entry -> entry.getKey().trim(),
@@ -111,8 +113,8 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
                 (a, b) -> a,
                 () -> new TreeMap<>(String.CASE_INSENSITIVE_ORDER)));
 
-        final Map<String, String> columnsToDuplicate = rules
-            .getColumnsToDuplicate()
+        final Map<String, String> columnsToDuplicate =
+            Optional.ofNullable(rules.getColumnsToDuplicate()).orElse(Collections.emptyMap())
             .entrySet().stream()
             .collect(Collectors.toMap(
                 entry -> entry.getKey().trim(),
@@ -278,6 +280,9 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
     }
 
     Set<String> asSetWithCaseInsensitiveComparator(Collection<String> set) {
+        if (set == null) {
+            set = Collections.emptySet();
+        }
         return set.stream()
             .map(String::trim)
             .collect(Collectors.toCollection(() -> new TreeSet<>(String.CASE_INSENSITIVE_ORDER)));

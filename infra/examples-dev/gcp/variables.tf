@@ -185,6 +185,10 @@ variable "custom_bulk_connectors" {
       columnsToPseudonymize = optional(list(string)) # columns to pseudonymize
       columnsToDuplicate    = optional(map(string))  # columns to create copy of; name --> new name
       columnsToRename       = optional(map(string))  # columns to rename: original name --> new name; renames applied BEFORE pseudonymization
+      fieldsToTransform     = optional(map(object({
+        newName = string
+        transforms = optional(list(map(string)), [])
+      })))
     })
     settings_to_provide = optional(map(string), {})
   }))
@@ -207,11 +211,15 @@ variable "custom_bulk_connectors" {
 variable "custom_bulk_connector_rules" {
   type = map(object({
     pseudonymFormat       = optional(string, "URL_SAFE_TOKEN")
-    columnsToRedact       = optional(list(string)) # columns to remove from CSV
+    columnsToRedact       = optional(list(string), []) # columns to remove from CSV
     columnsToInclude      = optional(list(string)) # if you prefer to include only an explicit list of columns, rather than redacting those you don't want
-    columnsToPseudonymize = optional(list(string)) # columns to pseudonymize
+    columnsToPseudonymize = optional(list(string), []) # columns to pseudonymize
     columnsToDuplicate    = optional(map(string))  # columns to create copy of; name --> new name
     columnsToRename       = optional(map(string))  # columns to rename: original name --> new name; renames applied BEFORE pseudonymization
+    fieldsToTransform     = optional(map(object({
+      newName = string
+      transforms = optional(list(map(string)), [])
+    })))
   }))
 
   description = "map of connector id --> rules object"
