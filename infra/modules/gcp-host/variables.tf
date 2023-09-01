@@ -153,6 +153,10 @@ variable "bulk_connectors" {
       columnsToPseudonymize = optional(list(string), [])
       columnsToDuplicate    = optional(map(string), {})
       columnsToRename       = optional(map(string), {})
+      fieldsToTransform     = optional(map(object({
+        newName = string
+        transforms = optional(list(map(string)), [])
+      })), {})
     })
     example_file        = optional(string)
     settings_to_provide = optional(map(string), {})
@@ -180,7 +184,7 @@ variable "bulk_sanitized_expiration_days" {
   default     = 720
 }
 
-# q: move this into custom_bulk_connector_arug
+# q: move this into custom_bulk_connector_args
 variable "custom_bulk_connector_rules" {
   type = map(object({
     pseudonymFormat       = optional(string, "URL_SAFE_TOKEN")
@@ -189,6 +193,10 @@ variable "custom_bulk_connector_rules" {
     columnsToPseudonymize = optional(list(string))
     columnsToDuplicate    = optional(map(string))
     columnsToRename       = optional(map(string))
+    fieldsToTransform     = optional(map(object({
+      newName = string
+      transforms = optional(list(map(string)), [])
+    })), {})
   }))
 
   description = "map of connector id --> rules object"

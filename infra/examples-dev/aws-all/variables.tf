@@ -187,6 +187,10 @@ variable "custom_bulk_connectors" {
       columnsToPseudonymize = optional(list(string)) # columns to pseudonymize
       columnsToDuplicate    = optional(map(string))  # columns to create copy of; name --> new name
       columnsToRename       = optional(map(string))  # columns to rename: original name --> new name; renames applied BEFORE pseudonymization
+      fieldsToTransform     = optional(map(object({
+        newName = string
+        transforms = optional(list(map(string)), [])
+      })), {})
     })
     memory_size_mb      = optional(number, null)
     settings_to_provide = optional(map(string), {})
@@ -215,6 +219,10 @@ variable "custom_bulk_connector_rules" {
     columnsToPseudonymize = optional(list(string)) # columns to pseudonymize
     columnsToDuplicate    = optional(map(string))  # columns to create copy of; name --> new name
     columnsToRename       = optional(map(string))  # columns to rename: original name --> new name; renames applied BEFORE pseudonymization
+    fieldsToTransform     = optional(map(object({
+      newName = string
+      transforms = optional(list(map(string)), [])
+    })), {})
   }))
 
   description = "map of connector id --> rules object"
