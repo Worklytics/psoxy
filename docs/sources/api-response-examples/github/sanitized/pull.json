@@ -15,7 +15,7 @@
   "state":"open",
   "locked":true,
   "user":{
-    "login":"{\"scope\":\"github\",\"hash\":\"wzPpLnb2eF.USVQDBlxB2HBvVi1dsgdwIJdnEIUU8Pw\"}",
+    "login":"{\"scope\":\"github\",\"hash\":\"wzPpLnb2eF.USVQDBlxB2HBvVi1dsgdwIJdnEIUU8Pw\",\"reversible\":\"p~IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbN_fPDYrPH3aBnAoR5-ec6f\"}",
     "id":"{\"scope\":\"github\",\"hash\":\"BseJSIROsiyzSSFCxnQ.5y4E9I88VD7CUlcWNfEpoa0\"}",
     "node_id":"{\"scope\":\"github\",\"hash\":\"JqZbRTIEyrF7hfGuv.XZSsRytDGqIFn9TnnyPSukCZQ\"}",
     "type":"User",
@@ -39,7 +39,7 @@
     "number":1,
     "state":"open",
     "creator":{
-      "login":"{\"scope\":\"github\",\"hash\":\"wzPpLnb2eF.USVQDBlxB2HBvVi1dsgdwIJdnEIUU8Pw\"}",
+      "login":"{\"scope\":\"github\",\"hash\":\"wzPpLnb2eF.USVQDBlxB2HBvVi1dsgdwIJdnEIUU8Pw\",\"reversible\":\"p~IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbN_fPDYrPH3aBnAoR5-ec6f\"}",
       "id":"{\"scope\":\"github\",\"hash\":\"BseJSIROsiyzSSFCxnQ.5y4E9I88VD7CUlcWNfEpoa0\"}",
       "node_id":"{\"scope\":\"github\",\"hash\":\"JqZbRTIEyrF7hfGuv.XZSsRytDGqIFn9TnnyPSukCZQ\"}",
       "type":"User",
@@ -59,7 +59,7 @@
   "merged_at":"2011-01-26T19:01:12Z",
   "merge_commit_sha":"e5bd3914e2e596debea16f433f57875b5b90bcd6",
   "assignee":{
-    "login":"{\"scope\":\"github\",\"hash\":\"wzPpLnb2eF.USVQDBlxB2HBvVi1dsgdwIJdnEIUU8Pw\"}",
+    "login":"{\"scope\":\"github\",\"hash\":\"wzPpLnb2eF.USVQDBlxB2HBvVi1dsgdwIJdnEIUU8Pw\",\"reversible\":\"p~IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbN_fPDYrPH3aBnAoR5-ec6f\"}",
     "id":"{\"scope\":\"github\",\"hash\":\"BseJSIROsiyzSSFCxnQ.5y4E9I88VD7CUlcWNfEpoa0\"}",
     "node_id":"{\"scope\":\"github\",\"hash\":\"JqZbRTIEyrF7hfGuv.XZSsRytDGqIFn9TnnyPSukCZQ\"}",
     "type":"User",
@@ -67,14 +67,14 @@
   },
   "assignees":[
     {
-      "login":"{\"scope\":\"github\",\"hash\":\"wzPpLnb2eF.USVQDBlxB2HBvVi1dsgdwIJdnEIUU8Pw\"}",
+      "login":"{\"scope\":\"github\",\"hash\":\"wzPpLnb2eF.USVQDBlxB2HBvVi1dsgdwIJdnEIUU8Pw\",\"reversible\":\"p~IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbN_fPDYrPH3aBnAoR5-ec6f\"}",
       "id":"{\"scope\":\"github\",\"hash\":\"BseJSIROsiyzSSFCxnQ.5y4E9I88VD7CUlcWNfEpoa0\"}",
       "node_id":"{\"scope\":\"github\",\"hash\":\"JqZbRTIEyrF7hfGuv.XZSsRytDGqIFn9TnnyPSukCZQ\"}",
       "type":"User",
       "site_admin":false
     },
     {
-      "login":"{\"scope\":\"github\",\"hash\":\"jiHYIrfDBorpBhYkGiBz5H9Jz6vn4SIXymsx7WKTaGw\"}",
+      "login":"{\"scope\":\"github\",\"hash\":\"jiHYIrfDBorpBhYkGiBz5H9Jz6vn4SIXymsx7WKTaGw\",\"reversible\":\"p~sOof76KBpOsJ71ccq9bercUbYZTR7eTnQ0Smpi7tVygxKZcG8gPjG08P-BbzxpnM\"}",
       "id":"{\"scope\":\"github\",\"hash\":\"TzNqKUpoOfcJIc.rCpHPa_V4jK6F1sol15c18c6Vg1A\"}",
       "node_id":"{\"scope\":\"github\",\"hash\":\"JqZbRTIEyrF7hfGuv.XZSsRytDGqIFn9TnnyPSukCZQ\"}",
       "type":"User",
@@ -83,7 +83,7 @@
   ],
   "requested_reviewers":[
     {
-      "login":"{\"scope\":\"github\",\"hash\":\"jx5ZxlFuBle2ownyLof8Qybo6ZoDZmQxdWeg.wRQYik\"}",
+      "login":"{\"scope\":\"github\",\"hash\":\"jx5ZxlFuBle2ownyLof8Qybo6ZoDZmQxdWeg.wRQYik\",\"reversible\":\"p~8pySdSARC4G6QQVNf3K170KQuWS6OnRRNNbyKK4kGMjbgPbvTeWJ-AChe5PiOp4e\"}",
       "id":"{\"scope\":\"github\",\"hash\":\"4tGRNUOqo2_9cr.9cvDBLlSdpsQlIfvnhiDHXEz10sY\"}",
       "node_id":"{\"scope\":\"github\",\"hash\":\"JqZbRTIEyrF7hfGuv.XZSsRytDGqIFn9TnnyPSukCZQ\"}",
       "type":"User",
@@ -109,7 +109,7 @@
     "ref":"new-topic",
     "sha":"6dcb09b5b57875f334f61aebed695e2e4193db5e",
     "user":{
-      "login":"{\"scope\":\"github\",\"hash\":\"wzPpLnb2eF.USVQDBlxB2HBvVi1dsgdwIJdnEIUU8Pw\"}",
+      "login":"{\"scope\":\"github\",\"hash\":\"wzPpLnb2eF.USVQDBlxB2HBvVi1dsgdwIJdnEIUU8Pw\",\"reversible\":\"p~IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbN_fPDYrPH3aBnAoR5-ec6f\"}",
       "id":"{\"scope\":\"github\",\"hash\":\"BseJSIROsiyzSSFCxnQ.5y4E9I88VD7CUlcWNfEpoa0\"}",
       "node_id":"{\"scope\":\"github\",\"hash\":\"JqZbRTIEyrF7hfGuv.XZSsRytDGqIFn9TnnyPSukCZQ\"}",
       "type":"User",
@@ -234,7 +234,7 @@
     "ref":"master",
     "sha":"6dcb09b5b57875f334f61aebed695e2e4193db5e",
     "user":{
-      "login":"{\"scope\":\"github\",\"hash\":\"wzPpLnb2eF.USVQDBlxB2HBvVi1dsgdwIJdnEIUU8Pw\"}",
+      "login":"{\"scope\":\"github\",\"hash\":\"wzPpLnb2eF.USVQDBlxB2HBvVi1dsgdwIJdnEIUU8Pw\",\"reversible\":\"p~IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbN_fPDYrPH3aBnAoR5-ec6f\"}",
       "id":"{\"scope\":\"github\",\"hash\":\"BseJSIROsiyzSSFCxnQ.5y4E9I88VD7CUlcWNfEpoa0\"}",
       "node_id":"{\"scope\":\"github\",\"hash\":\"JqZbRTIEyrF7hfGuv.XZSsRytDGqIFn9TnnyPSukCZQ\"}",
       "type":"User",
@@ -387,7 +387,7 @@
   "rebaseable":true,
   "mergeable_state":"clean",
   "merged_by":{
-    "login":"{\"scope\":\"github\",\"hash\":\"wzPpLnb2eF.USVQDBlxB2HBvVi1dsgdwIJdnEIUU8Pw\"}",
+    "login":"{\"scope\":\"github\",\"hash\":\"wzPpLnb2eF.USVQDBlxB2HBvVi1dsgdwIJdnEIUU8Pw\",\"reversible\":\"p~IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbN_fPDYrPH3aBnAoR5-ec6f\"}",
     "id":"{\"scope\":\"github\",\"hash\":\"BseJSIROsiyzSSFCxnQ.5y4E9I88VD7CUlcWNfEpoa0\"}",
     "node_id":"{\"scope\":\"github\",\"hash\":\"JqZbRTIEyrF7hfGuv.XZSsRytDGqIFn9TnnyPSukCZQ\"}",
     "type":"User",
