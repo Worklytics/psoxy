@@ -116,6 +116,8 @@ public class ColumnarRules implements BulkDataRules {
     protected Map<String, FieldTransformPipeline> fieldsToTransform = new HashMap<>();
 
 
+    @NoArgsConstructor(force = true, access = AccessLevel.PRIVATE) //for jackson
+    @AllArgsConstructor(access = AccessLevel.PRIVATE) // for builder
     @Builder
     @Value
     public static class FieldTransformPipeline {
@@ -149,7 +151,8 @@ public class ColumnarRules implements BulkDataRules {
     @Builder
     @Getter
     @FieldDefaults(makeFinal=true, level=AccessLevel.PRIVATE)
-    @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    @NoArgsConstructor(force = true, access = AccessLevel.PRIVATE) //for jackson
+    @AllArgsConstructor(access = AccessLevel.PRIVATE) // for builder
     @ToString
     @EqualsAndHashCode
     public static class FieldValueTransform {

@@ -128,6 +128,10 @@ class ColumnarRulesTest {
         assertEquals(yaml,
                 yamlMapper.writeValueAsString(rules));
 
+        ColumnarRules fromYaml =
+            yamlMapper.readerFor(ColumnarRules.class).readValue(yaml);
+
+
     }
 
 }
