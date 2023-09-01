@@ -5,6 +5,7 @@ import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.rules.generics.Calendar;
 import com.avaulta.gateway.rules.Endpoint;
 import co.worklytics.psoxy.rules.Rules2;
+import com.avaulta.gateway.rules.ParameterSchema;
 import com.avaulta.gateway.rules.transforms.Transform;
 import co.worklytics.psoxy.rules.zoom.ZoomTransforms;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
@@ -15,6 +16,9 @@ import java.util.List;
 import java.util.Map;
 
 public class PrebuiltSanitizerRules {
+
+    static final ParameterSchema apiVersion = ParameterSchema.builder().enumValues(List.of("v1.0", "beta")).build();
+
 
     static final Transform.Tokenize TOKENIZE_ODATA_LINKS = Transform.Tokenize.builder()
         .jsonPath("$.['@odata.nextLink', '@odata.prevLink']")
@@ -28,10 +32,8 @@ public class PrebuiltSanitizerRules {
         .jsonPath("$..proxyAddresses[*]")
         .regex("(?i)^smtp:(.*)$")
         .build();
-
-    static final String DIRECTORY_REGEX_USERS = "^/(v1.0|beta)/users/?[^/]*";
-    static final String DIRECTORY_REGEX_USERS_BY_PSEUDO = "^/(v1.0|beta)/users(/p~[a-zA-Z0-9_-]+?)?[^/]*";
-    static final String DIRECTORY_REGEX_GROUP_MEMBERS = "^/(v1.0|beta)/groups/[^/]*/members.*";
+    static final String DIRECTORY_USERS_BY_PSEUDO_PATH_TEMPLATE = "/{apiVersion}/users/{userId}";
+    static final String DIRECTORY_GROUP_MEMBERS_PATH_TEMPLATE = "/{apiVersion}/groups/{groupId}/members";
 
     static final List<Transform> USER_TRANSFORMS = Arrays.asList(
         PSEUDONYMIZE_PROXY_ADDRESSES,
@@ -66,42 +68,56 @@ public class PrebuiltSanitizerRules {
             .build()
     );
     static final Endpoint DIRECTORY_USERS = Endpoint.builder()
-        .pathRegex(DIRECTORY_REGEX_USERS)
+        .pathTemplate("/{apiVersion}/users")
+        .pathParameterSchemas(Map.of("apiVersion", apiVersion))
         .allowedQueryParams(List.of("$top","$select","$skiptoken","$orderBy","$count"))
         .transforms(USER_TRANSFORMS)
         .build();
 
     static final Endpoint DIRECTORY_USERS_NO_APP_IDS = Endpoint.builder()
-        .pathRegex(DIRECTORY_REGEX_USERS_BY_PSEUDO)
+        .pathTemplate(DIRECTORY_USERS_BY_PSEUDO_PATH_TEMPLATE)
+        .pathParameterSchemas(Map.of("userId", ParameterSchema.reversiblePseudonym(),
+                "apiVersion", apiVersion))
         .allowedQueryParams(List.of("$top","$select","$skiptoken","$orderBy","$count"))
         .transforms(USER_TRANSFORMS)
         .build();
 
+    static final List<Transform> GROUPS_TRANSFORMS = Arrays.asList(
+        Transform.Redact.builder()
+            .jsonPath("$..owners")
+            .jsonPath("$..rejectedSenders")
+            .jsonPath("$..acceptedSenders")
+            .jsonPath("$..members")
+            .jsonPath("$..membersWithLicenseErrors")
+            .jsonPath("$..mailNickname")
+            .jsonPath("$..description") // q: include for Project use case?
+            .jsonPath("$..resourceBehaviorOptions")
+            .jsonPath("$..resourceProvisioningOptions")
+            .jsonPath("$..onPremisesSamAccountName")
+            .jsonPath("$..onPremisesSecurityIdentifier")
+            .jsonPath("$..onPremisesProvisioningErrors")
+            .jsonPath("$..securityIdentifier")
+            .build(),
+        Transform.Pseudonymize.builder()
+            .includeOriginal(true)
+            .jsonPath("$..mail")
+            .build());
+
     static final Endpoint DIRECTORY_GROUPS = Endpoint.builder()
-        .pathRegex("^/(v1.0|beta)/groups/?[^/]*")
-            .transform(Transform.Redact.builder()
-                .jsonPath("$..owners")
-                .jsonPath("$..rejectedSenders")
-                .jsonPath("$..acceptedSenders")
-                .jsonPath("$..members")
-                .jsonPath("$..membersWithLicenseErrors")
-                .jsonPath("$..mailNickname")
-                .jsonPath("$..description") // q: include for Project use case?
-                .jsonPath("$..resourceBehaviorOptions")
-                .jsonPath("$..resourceProvisioningOptions")
-                .jsonPath("$..onPremisesSamAccountName")
-                .jsonPath("$..onPremisesSecurityIdentifier")
-                .jsonPath("$..onPremisesProvisioningErrors")
-                .jsonPath("$..securityIdentifier")
-                .build())
-            .transform(Transform.Pseudonymize.builder()
-                    .includeOriginal(true)
-                    .jsonPath("$..mail")
-                    .build())
+        .pathTemplate("/{apiVersion}/groups")
+        .pathParameterSchemas(Map.of("apiVersion", apiVersion))
+        .transforms(GROUPS_TRANSFORMS)
+        .build();
+
+    static final Endpoint DIRECTORY_GROUP = Endpoint.builder()
+        .pathRegex("/{apiVersion}/groups/{groupId}")
+        .pathParameterSchemas(Map.of("apiVersion", apiVersion))
+        .transforms(GROUPS_TRANSFORMS)
         .build();
 
     static final Endpoint DIRECTORY_GROUP_MEMBERS = Endpoint.builder()
-        .pathRegex(DIRECTORY_REGEX_GROUP_MEMBERS)
+        .pathTemplate(DIRECTORY_GROUP_MEMBERS_PATH_TEMPLATE)
+        .pathParameterSchemas(Map.of("apiVersion", apiVersion))
         .allowedQueryParams(List.of("$top","$select","$skiptoken","$orderBy","$count"))
         .transforms(USER_TRANSFORMS)
         .build();
@@ -109,6 +125,7 @@ public class PrebuiltSanitizerRules {
     static final Rules2 DIRECTORY = Rules2.builder()
         .endpoint(DIRECTORY_USERS)
         .endpoint(DIRECTORY_GROUPS)
+        .endpoint(DIRECTORY_GROUP)
         .endpoint(DIRECTORY_GROUP_MEMBERS)
         .build();
 
@@ -119,19 +136,20 @@ public class PrebuiltSanitizerRules {
     static final Rules2 DIRECTORY_NO_MSFT_IDS = Rules2.builder()
         .endpoint(DIRECTORY_USERS_NO_APP_IDS)
         .endpoint(DIRECTORY_GROUPS)
+        .endpoint(DIRECTORY_GROUP)
         .endpoint(DIRECTORY_GROUP_MEMBERS)
         .build()
-        .withTransformByEndpoint(DIRECTORY_REGEX_USERS_BY_PSEUDO, Transform.Pseudonymize.builder()
+        .withTransformByEndpointPathTemplate(DIRECTORY_USERS_BY_PSEUDO_PATH_TEMPLATE, Transform.Pseudonymize.builder()
             .includeReversible(true)
             .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
             .jsonPath("$..id")
             .build())
-        .withTransformByEndpoint(DIRECTORY_REGEX_GROUP_MEMBERS, Transform.Pseudonymize.builder()
+        .withTransformByEndpointPathTemplate(DIRECTORY_GROUP_MEMBERS_PATH_TEMPLATE, Transform.Pseudonymize.builder()
             .jsonPath("$..id")
             .build());
 
     static final Rules2 DIRECTORY_NO_MSFT_IDS_NO_GROUPS = DIRECTORY_NO_GROUPS
-        .withTransformByEndpoint(DIRECTORY_REGEX_USERS_BY_PSEUDO, Transform.Pseudonymize.builder()
+         .withTransformByEndpointPathTemplate(DIRECTORY_USERS_BY_PSEUDO_PATH_TEMPLATE, Transform.Pseudonymize.builder()
             .includeReversible(true)
             .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
             .jsonPath("$..id")
@@ -237,6 +255,10 @@ public class PrebuiltSanitizerRules {
         .build();
 
 
+    //TODO: this is 4-6 distinct endpoints; will make rule set HUGE if we split out
+    // ideas:
+    //     1) endpoints under endpoints (avoid repeating apiVersion, userId a bunch of times)
+    //     2) multiple pathTemplates per endpoint
     static final String OUTLOOK_CALENDAR_PATH_REGEX_EVENTS = "^/(v1.0|beta)/users/[^/]*/(((calendars/[^/]*/)?events.*)|(calendar/calendarView(?)[^/]*))";
 
     static final List<Endpoint> OUTLOOK_CALENDAR_ENDPOINTS = Arrays.asList(

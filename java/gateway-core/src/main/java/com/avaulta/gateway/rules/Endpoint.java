@@ -21,7 +21,6 @@ public class Endpoint {
     String pathRegex;
 
     /**
-     * ALPHA FEATURE
      * path template, eg, /api/v1/{id}/foo/{bar}
      *
      * @see "https://swagger.io/docs/specification/paths-and-operations/"

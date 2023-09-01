@@ -98,6 +98,22 @@ public class Rules2 implements RESTRules {
         return clone;
     }
 
+    public Rules2 withTransformByEndpointPathTemplate(String pathTemplate, Transform... transforms) {
+        Rules2 clone = this.clone();
+        Optional<Endpoint> matchedEndpoint = clone.getEndpoints().stream()
+            .filter(endpoint -> Objects.equals(endpoint.getPathTemplate(), pathTemplate))
+            .findFirst();
+
+        Endpoint endpoint = matchedEndpoint
+            .orElseThrow(() -> new IllegalArgumentException("No endpoint found for pathTemplate: " + pathTemplate));
+
+        endpoint.setTransforms(
+            Stream.concat(endpoint.getTransforms().stream(), Arrays.stream(transforms))
+                .collect(Collectors.toList()));
+
+        return clone;
+    }
+
     public Rules2 clone() {
         Rules2 clone = this.toBuilder()
             .clearEndpoints()
