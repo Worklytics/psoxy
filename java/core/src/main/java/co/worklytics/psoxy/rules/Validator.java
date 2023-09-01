@@ -6,12 +6,17 @@ import com.avaulta.gateway.rules.transforms.Transform;
 import com.google.common.base.Preconditions;
 import com.jayway.jsonpath.JsonPath;
 import lombok.NonNull;
+import lombok.extern.java.Log;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Collections;
+import java.util.logging.Level;
 import java.util.regex.Pattern;
 
+import static org.apache.commons.lang3.ObjectUtils.isEmpty;
+
+@Log
 public class Validator {
 
     static public void validate(@NonNull RuleSet rules) {
@@ -29,11 +34,10 @@ public class Validator {
         Preconditions.checkNotNull(rules.getColumnsToRedact());
 
         //check for nonsensical rules
-        Preconditions.checkArgument(Collections.disjoint(rules.getColumnsToRedact(), rules.getColumnsToDuplicate().values()),
-            "Redacting column produced through duplication is non-sensical");
-
-
-        //columns to pseudonymize should NOT contain any value
+        if (!isEmpty(rules.getColumnsToRedact()) && !isEmpty(rules.getColumnsToPseudonymize()) &&
+            !Collections.disjoint(rules.getColumnsToRedact(), rules.getColumnsToDuplicate().values())) {
+            log.log(Level.WARNING, "Replacing columns produced via columnsToDuplicate is nonsensical");
+        }
     }
 
     static public void validate(@NonNull Rules2 rules) {
