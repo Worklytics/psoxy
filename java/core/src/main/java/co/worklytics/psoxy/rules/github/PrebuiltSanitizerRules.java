@@ -227,7 +227,7 @@ public class PrebuiltSanitizerRules {
             .build();
 
     static final Endpoint ISSUE_EVENTS = Endpoint.builder()
-            .pathTemplate("/repos/{owner}/{repo}/issues/{issue_number}/events")
+            .pathTemplate("/repos/{owner}/{repo}/issues/{issueNumber}/events")
             .allowedQueryParams(commonAllowedQueryParameters)
             .transform(Transform.Redact.builder()
                     .jsonPath("$..name")
