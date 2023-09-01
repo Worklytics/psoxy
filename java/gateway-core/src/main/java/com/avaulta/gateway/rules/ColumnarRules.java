@@ -1,9 +1,7 @@
 package com.avaulta.gateway.rules;
 
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
@@ -55,7 +53,8 @@ public class ColumnarRules implements BulkDataRules {
      * one copy of it.Not really expected for typical 'bulk' file case.
      *
      */
-    @JsonInclude(JsonInclude.Include.NON_EMPTY) //this works ...
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
     @Builder.Default
     @NonNull
     protected Map<String, String> columnsToDuplicate = new HashMap<>();
@@ -68,11 +67,13 @@ public class ColumnarRules implements BulkDataRules {
         PseudonymEncoder.Implementations.JSON;
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
     @NonNull
     @Singular(value = "columnToPseudonymize")
     protected List<String> columnsToPseudonymize = new ArrayList<>();
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
     @NonNull
     @Singular(value = "columnToRedact")
     protected List<String> columnsToRedact = new ArrayList<>();
@@ -87,6 +88,7 @@ public class ColumnarRules implements BulkDataRules {
      * NOTE: renames, if any, are applied BEFORE pseudonymization and transforms
      */
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
     @Builder.Default
     @NonNull
     protected Map<String, String> columnsToRename = new HashMap<>();
@@ -97,8 +99,11 @@ public class ColumnarRules implements BulkDataRules {
      *
      * USE CASE: if you don't control source data, and want to ensure that some unexpected column
      * that later appears in source doesn't get included in output.
+     *
+     * NOTE: due to semantics, this has a default value of 'null', rather than empty; thus its
+     * behavior differs from most of the other fields
      */
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     protected List<String> columnsToInclude;
 
     /**
@@ -111,6 +116,7 @@ public class ColumnarRules implements BulkDataRules {
      */
     @Getter
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
     @Builder.Default
     @NonNull
     protected Map<String, FieldTransformPipeline> fieldsToTransform = new HashMap<>();
