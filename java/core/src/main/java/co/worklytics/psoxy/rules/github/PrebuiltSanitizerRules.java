@@ -203,7 +203,7 @@ public class PrebuiltSanitizerRules {
             .build();
 
     static final Endpoint ISSUE = Endpoint.builder()
-            .pathTemplate("/repos/{owner}/{repo}/issues/{issue_number}")
+            .pathTemplate("/repos/{owner}/{repo}/issues/{issueNumber}")
             .transform(Transform.Redact.builder()
                     .jsonPath("$..title")
                     .jsonPath("$..body")
@@ -216,7 +216,7 @@ public class PrebuiltSanitizerRules {
             .build();
 
     static final Endpoint ISSUE_COMMENTS = Endpoint.builder()
-            .pathTemplate("/repos/{owner}/{repo}/issues/{issue_number}/comments")
+            .pathTemplate("/repos/{owner}/{repo}/issues/{issueNumber}/comments")
             .allowedQueryParams(issueCommentsQueryParameters)
             .transform(Transform.Redact.builder()
                     .jsonPath("$..url")
@@ -248,7 +248,7 @@ public class PrebuiltSanitizerRules {
             .build();
 
     static final Endpoint ISSUE_TIMELINE = Endpoint.builder()
-            .pathTemplate("/repos/{owner}/{repo}/issues/{issue_number}/timeline")
+            .pathTemplate("/repos/{owner}/{repo}/issues/{issueNumber}/timeline")
             .allowedQueryParams(commonAllowedQueryParameters)
             .transform(Transform.Redact.builder()
                     .jsonPath("$..name")
@@ -269,7 +269,7 @@ public class PrebuiltSanitizerRules {
             .build();
 
     static final Endpoint PULL_REVIEWS = Endpoint.builder()
-            .pathTemplate("/repos/{owner}/{repo}/pulls/{pull_number}/reviews")
+            .pathTemplate("/repos/{owner}/{repo}/pulls/{pullNumber}/reviews")
             .allowedQueryParams(commonAllowedQueryParameters)
             .transform(Transform.Redact.builder()
                     .jsonPath("$..body")
@@ -303,7 +303,7 @@ public class PrebuiltSanitizerRules {
             .build();
 
     static final Endpoint PULL = Endpoint.builder()
-            .pathTemplate("/repos/{owner}/{repo}/pulls/{pull_number}")
+            .pathTemplate("/repos/{owner}/{repo}/pulls/{pullNumber}")
             .transform(Transform.Redact.builder()
                     .jsonPath("$..title")
                     .jsonPath("$..body")
@@ -334,7 +334,7 @@ public class PrebuiltSanitizerRules {
 
     // https://docs.github.com/en/rest/commits/comments?apiVersion=2022-11-28#list-commit-comments
     static final Endpoint COMMIT_COMMENTS = Endpoint.builder()
-            .pathTemplate("/repos/{owner}/{repo}/commits/{commit_sha}/comments")
+            .pathTemplate("/repos/{owner}/{repo}/commits/{commitSha}/comments")
             .allowedQueryParams(commonAllowedQueryParameters)
             .transform(Transform.Redact.builder()
                     .jsonPath("$..name")
@@ -351,19 +351,19 @@ public class PrebuiltSanitizerRules {
             .build();
 
     static final Endpoint COMMIT_COMMENT_REACTIONS = Endpoint.builder()
-            .pathTemplate("/repos/{owner}/{repo}/comments/{comment_id}/reactions")
+            .pathTemplate("/repos/{owner}/{repo}/comments/{commentId}/reactions")
             .allowedQueryParams(commonAllowedQueryParameters)
             .transforms(generateUserTransformations("..", Collections.singletonList("user")))
             .build();
 
     static final Endpoint ISSUE_REACTIONS = Endpoint.builder()
-            .pathTemplate("/repos/{owner}/{repo}/issues/{issue_number}/reactions")
+            .pathTemplate("/repos/{owner}/{repo}/issues/{issueNumber}/reactions")
             .allowedQueryParams(commonAllowedQueryParameters)
             .transforms(generateUserTransformations("..", Collections.singletonList("user")))
             .build();
 
     static final Endpoint ISSUE_COMMENT_REACTIONS = Endpoint.builder()
-            .pathTemplate("/repos/{owner}/{repo}/issues/comments/{comment_id}/reactions")
+            .pathTemplate("/repos/{owner}/{repo}/issues/comments/{commentId}/reactions")
             .allowedQueryParams(commonAllowedQueryParameters)
             .transforms(generateUserTransformations("..", Collections.singletonList("user")))
             .build();
@@ -412,7 +412,7 @@ public class PrebuiltSanitizerRules {
             .build();
 
     static final Endpoint PULL_COMMITS = Endpoint.builder()
-            .pathTemplate("/repos/{owner}/{repo}/pulls/{pull_number}/commits")
+            .pathTemplate("/repos/{owner}/{repo}/pulls/{pullNumber}/commits")
             .allowedQueryParams(commonAllowedQueryParameters)
             .transform(Transform.Redact.builder()
                     .jsonPath("$..name")
@@ -428,7 +428,7 @@ public class PrebuiltSanitizerRules {
             .build();
 
     static final Endpoint PULL_COMMENTS = Endpoint.builder()
-            .pathTemplate("/repos/{owner}/{repo}/pulls/{pull_number}/comments")
+            .pathTemplate("/repos/{owner}/{repo}/pulls/{pullNumber}/comments")
             .allowedQueryParams(pullsCommentsQueryParameters)
             .transform(Transform.Redact.builder()
                     .jsonPath("$..path")
@@ -439,7 +439,7 @@ public class PrebuiltSanitizerRules {
             .build();
 
     static final Endpoint PULL_REVIEW_COMMENTS = Endpoint.builder()
-            .pathTemplate("/repos/{owner}/{repo}/pulls/{pull_number}/reviews/{review_id}/comments")
+            .pathTemplate("/repos/{owner}/{repo}/pulls/{pullNumber}/reviews/{reviewId}/comments")
             .allowedQueryParams(commonAllowedQueryParameters)
             .transform(Transform.Redact.builder()
                     .jsonPath("$..path")
