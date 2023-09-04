@@ -82,11 +82,15 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..nameId"
-          - "$..login"
           - "$..email"
           - "$..guid"
           - "$..organizationVerifiedDomainEmails[*]"
         encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..login"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
     responseSchema:
       type: "object"
       properties:

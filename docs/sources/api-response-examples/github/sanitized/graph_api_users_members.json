@@ -6,7 +6,7 @@
           {
             "node":{
               "email":"{\"scope\":\"email\",\"domain\":\"contoso.com\",\"hash\":\"ui7ZfyKC2nursXtsx_lyORcptfTrCuGf38xextkHyW8\"}",
-              "login":"{\"scope\":\"github\",\"hash\":\"iK5cxa4JLZ9qQnICuYKRS8wJoRkdvXv6xrLAIg2.ETs\"}",
+              "login":"{\"scope\":\"github\",\"hash\":\"iK5cxa4JLZ9qQnICuYKRS8wJoRkdvXv6xrLAIg2.ETs\",\"reversible\":\"p~MsZ4qsVoj0TU_io4Cz9mnMBWrZkfI89B-8qznWvl83mYA56fU9HQ_fR3fOvcTHkx\"}",
               "organizationVerifiedDomainEmails":[
                 "{\"scope\":\"email\",\"domain\":\"verified.contoso.com\",\"hash\":\"hc1yjghkAjAm4BMPcqT1drpsKA9CuzBFw_kMD.gsDyg\"}"
               ]
@@ -15,21 +15,21 @@
           {
             "node":{
               "email":"{\"scope\":\"email\",\"domain\":\"contoso.com\",\"hash\":\"qyfnJEcnYW8yjJaykmCWONL176MJJardThqpzjVwkiM\"}",
-              "login":"{\"scope\":\"github\",\"hash\":\"lQ4V_0k_2c1BxTzcKpd8GIKaFKZCgpLK.0mK54kApFY\"}",
+              "login":"{\"scope\":\"github\",\"hash\":\"lQ4V_0k_2c1BxTzcKpd8GIKaFKZCgpLK.0mK54kApFY\",\"reversible\":\"p~IfCQZlVaWKPjwpZn6GtislWJJ2ehfSnlyyONl2LdgTAaP2EggmLxGUnmFuzNnZlY\"}",
               "organizationVerifiedDomainEmails":[ ]
             }
           },
           {
             "node":{
               "email":"null",
-              "login":"{\"scope\":\"github\",\"hash\":\"7wspjfW58KGiNLXQFNdkwTTUCw8Uu2uuPT6to4WEB.g\"}",
+              "login":"{\"scope\":\"github\",\"hash\":\"7wspjfW58KGiNLXQFNdkwTTUCw8Uu2uuPT6to4WEB.g\",\"reversible\":\"p~YApDiI-sRY0bcFNlFUSSZfmkHIvlSIxBeU2yQopk2-opOAI0wX0s19aLmyjUAzBI\"}",
               "organizationVerifiedDomainEmails":[ ]
             }
           },
           {
             "node":{
               "email":"null",
-              "login":"{\"scope\":\"github\",\"hash\":\"ltnTuU5FUUR.gftLkVjg_Hf2PmWunloo5oVlkdP4xUI\"}",
+              "login":"{\"scope\":\"github\",\"hash\":\"ltnTuU5FUUR.gftLkVjg_Hf2PmWunloo5oVlkdP4xUI\",\"reversible\":\"p~-IiOodmZnOLV0ID_LxNJUG31hhAEOnCGGz5M0M4Rue3Lih--OSGn-5XAkalHEvk9\"}",
               "organizationVerifiedDomainEmails":[ ]
             }
           }
