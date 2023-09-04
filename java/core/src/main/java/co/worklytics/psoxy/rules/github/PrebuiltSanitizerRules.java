@@ -195,7 +195,13 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..description")
                     .jsonPath("$..name")
                     .build())
-            .transforms(generateUserTransformations("..", Arrays.asList("owner", "user", "assignee", "creator", "closed_by")))
+            .transforms(generateUserTransformations("..", Arrays.asList(
+                    // Owner can be a user or an organization user
+                    "owner",
+                    "user",
+                    "assignee",
+                    "creator",
+                    "closed_by")))
             // Seems array plus other object in filtering is not matching the json path, so a different rule for this
             .transforms(generateUserTransformations("..assignees[*]", Collections.emptyList()))
             .build();
@@ -242,7 +248,9 @@ public class PrebuiltSanitizerRules {
             .transform(Transform.Pseudonymize.builder()
                     .jsonPath("$..email")
                     .build())
-            .transforms(generateUserTransformations("..", Arrays.asList("owner",
+            .transforms(generateUserTransformations("..", Arrays.asList(
+                    // Owner can be a user or an organization user
+                    "owner",
                     "user",
                     "actor",
                     "assignee",
@@ -273,7 +281,9 @@ public class PrebuiltSanitizerRules {
             .transform(Transform.Pseudonymize.builder()
                     .jsonPath("$..email")
                     .build())
-            .transforms(generateUserTransformations("..", Arrays.asList("owner",
+            .transforms(generateUserTransformations("..", Arrays.asList(
+                    // Owner can be a user or an organization user
+                    "owner",
                     "user",
                     "actor",
                     "assignee",
@@ -310,7 +320,16 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..commit_title")
                     .jsonPath("$..commit_message")
                     .build())
-            .transforms(generateUserTransformations("..", Arrays.asList("owner", "user", "actor", "assignee", "creator", "merged_by", "closed_by", "enabled_by")))
+            .transforms(generateUserTransformations("..", Arrays.asList(
+                    // Owner can be a user or an organization user
+                    "owner",
+                    "user",
+                    "actor",
+                    "assignee",
+                    "creator",
+                    "merged_by",
+                    "closed_by",
+                    "enabled_by")))
             .transforms(generateUserTransformations("..requested_reviewers[*]", Collections.emptyList()))
             .transforms(generateUserTransformations("..assignees[*]", Collections.emptyList()))
             .build();
@@ -326,12 +345,16 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..commit_title")
                     .jsonPath("$..commit_message")
                     .build())
-            // Owner can be a user or an organization user;
-            // we leave them without redact as we assume
-            // that most of the repos are going to be
-            // created as part of organization and not by an user
-            //.transforms(generateUserTransformations("..owner"))
-            .transforms(generateUserTransformations("..", Arrays.asList("owner", "user", "actor", "assignee", "creator", "merged_by", "closed_by", "enabled_by")))
+            .transforms(generateUserTransformations("..", Arrays.asList(
+                    // Owner can be a user or an organization user
+                    "owner",
+                    "user",
+                    "actor",
+                    "assignee",
+                    "creator",
+                    "merged_by",
+                    "closed_by",
+                    "enabled_by")))
             .transforms(generateUserTransformations("..requested_reviewers[*]", Collections.emptyList()))
             .transforms(generateUserTransformations("..assignees[*]", Collections.emptyList()))
             .build();
@@ -343,6 +366,7 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..description")
                     .jsonPath("$..homepage")
                     .build())
+            // Owner can be a user or an organization user
             .transforms(generateUserTransformations("..", Collections.singletonList("owner")))
             .build();
 
@@ -400,7 +424,13 @@ public class PrebuiltSanitizerRules {
             .transform(Transform.Pseudonymize.builder()
                     .jsonPath("$..author.email")
                     .build())
-            .transforms(generateUserTransformations("..", Arrays.asList("owner", "user", "actor", "assignee", "requested_reviewers[*]", "creator", "merged_by", "closed_by")))
+            .transforms(generateUserTransformations("..", Arrays.asList(
+                    // Owner can be a user or an organization user
+                    "owner",
+                    "user",
+                    "actor",
+                    "assignee",
+                    "requested_reviewers[*]", "creator", "merged_by", "closed_by")))
             .transforms(generateUserTransformations("..assignees[*]", Collections.emptyList()))
             .build();
 
