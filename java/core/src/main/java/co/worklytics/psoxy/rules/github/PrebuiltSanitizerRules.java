@@ -242,7 +242,17 @@ public class PrebuiltSanitizerRules {
             .transform(Transform.Pseudonymize.builder()
                     .jsonPath("$..email")
                     .build())
-            .transforms(generateUserTransformations("..", Arrays.asList("owner", "user", "actor", "assignee", "assigner", "creator", "closed_by", "author", "committer")))
+            .transforms(generateUserTransformations("..", Arrays.asList("owner",
+                    "user",
+                    "actor",
+                    "assignee",
+                    "assigner",
+                    "creator",
+                    "closed_by",
+                    "author",
+                    "committer",
+                    "requested_reviewer",
+                    "review_requester")))
             .build();
 
     static final Endpoint ISSUE_TIMELINE = Endpoint.builder()
@@ -263,7 +273,17 @@ public class PrebuiltSanitizerRules {
             .transform(Transform.Pseudonymize.builder()
                     .jsonPath("$..email")
                     .build())
-            .transforms(generateUserTransformations("..", Arrays.asList("owner", "user", "actor", "assignee", "assigner", "creator", "closed_by", "author", "committer")))
+            .transforms(generateUserTransformations("..", Arrays.asList("owner",
+                    "user",
+                    "actor",
+                    "assignee",
+                    "assigner",
+                    "creator",
+                    "closed_by",
+                    "author",
+                    "committer",
+                    "requested_reviewer",
+                    "review_requester")))
             .build();
 
     static final Endpoint PULL_REVIEWS = Endpoint.builder()
