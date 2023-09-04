@@ -67,7 +67,7 @@ class PseudonymizedIdentityTest {
             "",
             "    "
     })
-    void asPseudonym_should_return_empty_if_null_or_empty(String identifier) {
+    void asPseudonym_should_return_null_if_null_or_empty(String identifier) {
         pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
                 .pseudonymizationSalt("an irrelevant per org secret")
                 .defaultScopeId("scope")
