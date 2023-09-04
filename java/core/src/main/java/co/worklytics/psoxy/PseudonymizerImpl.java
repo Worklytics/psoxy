@@ -73,7 +73,6 @@ public class PseudonymizerImpl implements Pseudonymizer {
             "Value must be some basic type (eg JSON leaf, not node)");
 
         // Base case; empty/blank string
-        // q: return it as null? or same value received as a pass-through?
         if (value instanceof String && StringUtils.isBlank((String)value)) {
             return null;
         }
