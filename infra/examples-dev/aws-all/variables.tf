@@ -1,9 +1,10 @@
 variable "environment_name" {
   type        = string
   description = "friendly qualifier to distinguish resources created by this terraform configuration other Terraform deployments, (eg, 'prod', 'dev', etc)"
+  default     = "psoxy"
 
   validation {
-    condition     = can(regex("^[a-zA-Z][a-zA-Z0-9-_ ]*[a-zA-Z0-9]$", var.environment_name))
+    condition     = can(regex("^[a-zA-Z][a-zA-Z0-9-_ ]*$", var.environment_name))
     error_message = "The `environment_name` must start with a letter, can contain alphanumeric characters, hyphens, underscores, and spaces, and must end with a letter or number."
   }
 
@@ -166,7 +167,7 @@ variable "bulk_input_expiration_days" {
 
 variable "bulk_sanitized_expiration_days" {
   type        = number
-  description = "Number of days after which objects in the bucket will expire. In practice, Worklytics syncs data ~weekly, so 30 day minimum for this value."
+  description = "Number of days after which objects in the bucket will expire. This should match the amount of historical data you wish for Worklytics to analyze (eg, typically multiple years)."
   default     = 1805 # 5 years; intent is 'forever', but some upperbound in case bucket is forgotten
 }
 
@@ -186,6 +187,10 @@ variable "custom_bulk_connectors" {
       columnsToPseudonymize = optional(list(string)) # columns to pseudonymize
       columnsToDuplicate    = optional(map(string))  # columns to create copy of; name --> new name
       columnsToRename       = optional(map(string))  # columns to rename: original name --> new name; renames applied BEFORE pseudonymization
+      fieldsToTransform     = optional(map(object({
+        newName = string
+        transforms = optional(list(map(string)), [])
+      })), {})
     })
     memory_size_mb      = optional(number, null)
     settings_to_provide = optional(map(string), {})
@@ -209,11 +214,15 @@ variable "custom_bulk_connectors" {
 variable "custom_bulk_connector_rules" {
   type = map(object({
     pseudonymFormat       = optional(string, "URL_SAFE_TOKEN")
-    columnsToRedact       = optional(list(string)) # columns to remove from CSV
+    columnsToRedact       = optional(list(string), []) # columns to remove from CSV
     columnsToInclude      = optional(list(string)) # if you prefer to include only an explicit list of columns, rather than redacting those you don't want
-    columnsToPseudonymize = optional(list(string)) # columns to pseudonymize
+    columnsToPseudonymize = optional(list(string), []) # columns to pseudonymize
     columnsToDuplicate    = optional(map(string))  # columns to create copy of; name --> new name
     columnsToRename       = optional(map(string))  # columns to rename: original name --> new name; renames applied BEFORE pseudonymization
+    fieldsToTransform     = optional(map(object({
+      newName = string
+      transforms = optional(list(map(string)), [])
+    })))
   }))
 
   description = "map of connector id --> rules object"
@@ -251,9 +260,9 @@ variable "lookup_table_builders" {
     sanitized_accessor_role_names = list(string)
     rules = object({
       pseudonymFormat       = optional(string, "URL_SAFE_TOKEN")
-      columnsToRedact       = optional(list(string))
+      columnsToRedact       = optional(list(string), [])
       columnsToInclude      = optional(list(string))
-      columnsToPseudonymize = optional(list(string))
+      columnsToPseudonymize = optional(list(string), [])
       columnsToDuplicate    = optional(map(string))
       columnsToRename       = optional(map(string))
     })

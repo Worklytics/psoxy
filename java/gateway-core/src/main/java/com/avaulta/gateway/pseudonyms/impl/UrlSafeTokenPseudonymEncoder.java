@@ -22,13 +22,13 @@ public class UrlSafeTokenPseudonymEncoder implements PseudonymEncoder {
      *   - prefix + suffix to make stronger
      *
      */
-    static final String REVERSIBLE_PREFIX = "p~";
+    public static final String REVERSIBLE_PREFIX = "p~";
 
-    static final String TOKEN_PREFIX = "t~";
+    public static final String TOKEN_PREFIX = "t~";
 
     //length of base64-url-encoded IV + ciphertext
     static final int REVERSIBLE_PSEUDONYM_LENGTH_WITHOUT_PREFIX = 43;
-    private static final String DOMAIN_SEPARATOR = "@";
+    public static final String DOMAIN_SEPARATOR = "@";
 
 
     //base64url-encoding without padding

@@ -35,8 +35,12 @@ locals {
       environment_variables : {}
       example_api_calls : [
         "/admin/directory/v1/users?customer=my_customer&maxResults=10",
+        "/admin/directory/v1/users/{USER_ID}",
         "/admin/directory/v1/groups?customer=my_customer&maxResults=10",
+        "/admin/directory/v1/groups/{GROUP_ID}",
+        "/admin/directory/v1/groups/{GROUP_ID}/members?maxResults=10",
         "/admin/directory/v1/customer/my_customer/domains",
+        "/admin/directory/v1/customer/my_customer/orgunits?maxResults=10",
       ]
       example_api_calls_user_to_impersonate : local.google_workspace_example_admin
     },
@@ -57,7 +61,9 @@ locals {
       example_api_calls : [
         "/calendar/v3/calendars/primary",
         "/calendar/v3/users/me/settings",
-        "/calendar/v3/calendars/primary/events?maxResults=10"
+        "/calendar/v3/users/me/calendarList",
+        "/calendar/v3/calendars/primary/events?maxResults=10",
+        "/calendar/v3/calendars/primary/events/{EVENT_ID}"
       ]
       example_api_calls_user_to_impersonate : local.google_workspace_example_user
     },
@@ -76,7 +82,8 @@ locals {
       ],
       environment_variables : {},
       example_api_calls : [
-        "/gmail/v1/users/me/messages?maxResults=10"
+        "/gmail/v1/users/me/messages?maxResults=10",
+        "/gmail/v1/users/me/messages/{MESSAGE_ID}?format=metadata"
       ]
       example_api_calls_user_to_impersonate : local.google_workspace_example_user
     },
@@ -134,7 +141,10 @@ locals {
       environment_variables : {}
       example_api_calls : [
         "/drive/v2/files",
-        "/drive/v3/files"
+        "/drive/v3/files",
+        "/drive/v3/files/{FILE_ID}",
+        "/drive/v3/files/{FILE_ID}/permissions",
+        "/drive/v3/files/{FILE_ID}/revisions"
       ],
       example_api_calls_user_to_impersonate : local.google_workspace_example_user
     }
@@ -258,9 +268,9 @@ locals {
       example_api_calls : [
         "/api/1.0/workspaces",
         "/api/1.0/users?workspace={ANY_WORKSPACE_GID}&limit=10",
-        "/api/1.0/workspaces/{ANY_WORKSPACE_GID}/teams&limit=10",
+        "/api/1.0/workspaces/{ANY_WORKSPACE_GID}/teams?limit=10",
         "/api/1.0/teams/{ANY_TEAM_GID}/projects?limit=20",
-        "/api/1.0/tasks?project={ANY_PROJECT_GID}",
+        "/api/1.0/tasks?project={ANY_PROJECT_GID}&limit=10",
         "/api/1.0/tasks/{ANY_TASK_GID}",
         "/api/1.0/tasks/{ANY_TASK_GID}/stories",
       ]
@@ -369,6 +379,7 @@ https://github.com/organizations/{YOUR ORG}/settings/installations/{INSTALLATION
 
 **NOTE**:
  - If `github_installation_id` is not set, authentication URL will not be properly formatted and you will see *401: Unauthorized* when trying to get an access token.
+ - If you see *404: Not found* in logs please review the *IP restriction policies* that your organization might have; that could cause connections from psoxy AWS Lambda/GCP Cloud Functions be rejected.
 
   6. Update the variables with values obtained in previous step:
      - `PSOXY_GITHUB_CLIENT_ID` with `App ID` value. **NOTE**: It should be `App Id` value as we are going to use authentication through the App and **not** *client_id*.
@@ -424,14 +435,18 @@ EOT
       example_api_calls : [
         "/services/data/v57.0/sobjects/Account/describe",
         "/services/data/v57.0/sobjects/ActivityHistory/describe",
-        "/services/data/v57.0/sobjects/Account/updated?start=2016-03-09T18%3A44%3A00%2B00%3A00&end=2023-03-09T18%3A44%3A00%2B00%3A00",
-        "/services/data/v57.0/composite/sobjects/User?ids={ANY_USER_ID}&fields=Alias,AccountId,ContactId,CreatedDate,CreatedById,Email,EmailEncodingKey,Id,IsActive,LastLoginDate,LastModifiedDate,ManagerId,Name,TimeZoneSidKey,Username,UserRoleId,UserType",
-        "/services/data/v57.0/composite/sobjects/Account?ids={ANY_ACCOUNT_ID}&fields=Id,AnnualRevenue,CreatedDate,CreatedById,IsDeleted,LastActivityDate,LastModifiedDate,LastModifiedById,NumberOfEmployees,OwnerId,Ownership,ParentId,Rating,Sic,Type",
+        "/services/data/v57.0/sobjects/Account/updated?start=${urlencode(timeadd(timestamp(), "-48h"))}&end=${urlencode(timestamp())}",
+        "/services/data/v57.0/composite/sobjects/User?ids=${local.salesforce_example_account_id}&fields=Alias,AccountId,ContactId,CreatedDate,CreatedById,Email,EmailEncodingKey,Id,IsActive,LastLoginDate,LastModifiedDate,ManagerId,Name,TimeZoneSidKey,Username,UserRoleId,UserType",
+        "/services/data/v57.0/composite/sobjects/Account?ids=${local.salesforce_example_account_id}&fields=Id,AnnualRevenue,CreatedDate,CreatedById,IsDeleted,LastActivityDate,LastModifiedDate,LastModifiedById,NumberOfEmployees,OwnerId,ParentId,Rating,Sic,Type",
         "/services/data/v57.0/query?q=SELECT%20%28SELECT%20AccountId%2CActivityDate%2CActivityDateTime%2CActivitySubtype%2CActivityType%2CCallDurationInSeconds%2CCallType%2CCreatedDate%2CCreatedById%2CDurationInMinutes%2CEndDateTime%2CId%2CIsAllDayEvent%2CIsDeleted%2CIsHighPriority%2CIsTask%2CLastModifiedDate%2CLastModifiedById%2COwnerId%2CPriority%2CStartDateTime%2CStatus%2CWhatId%2CWhoId%20FROM%20ActivityHistories%20ORDER%20BY%20LastModifiedDate%20DESC%20NULLS%20LAST%29%20FROM%20Account%20where%20id%3D%27${local.salesforce_example_account_id}%27",
-        "/services/data/v57.0/query?q=SELECT+Alias,AccountId,ContactId,CreatedDate,CreatedById,Email,EmailEncodingKey,Id,IsActive,LastLoginDate,LastModifiedDate,ManagerId,Name,TimeZoneSidKey,Username,UserRoleId,UserType+FROM+User+WHERE+LastModifiedDate+%3E%3D+2016-01-01T00%3A00%3A00Z+AND+LastModifiedDate+%3C+2023-03-01T00%3A00%3A00Z+ORDER+BY+LastModifiedDate+DESC+NULLS+LAST",
-        "/services/data/v57.0/query?q=SELECT+Id,AnnualRevenue,CreatedDate,CreatedById,IsDeleted,LastActivityDate,LastModifiedDate,LastModifiedById,NumberOfEmployees,OwnerId,Ownership,ParentId,Rating,Sic,Type+FROM+Account+WHERE+LastModifiedDate+%3E%3D+2016-01-01T00%3A00%3A00Z+AND+LastModifiedDate+%3C+2023-03-01T00%3A00%3A00Z+ORDER+BY+LastModifiedDate+DESC+NULLS+LAST"
+        "/services/data/v57.0/query?q=SELECT+Alias,AccountId,ContactId,CreatedDate,CreatedById,Email,EmailEncodingKey,Id,IsActive,LastLoginDate,LastModifiedDate,ManagerId,Name,TimeZoneSidKey,Username,UserRoleId,UserType+FROM+User+WHERE+LastModifiedDate+%3E%3D+${urlencode(timeadd(timestamp(), "-72h"))}+AND+LastModifiedDate+%3C+${urlencode(timestamp())}+ORDER+BY+LastModifiedDate+DESC+NULLS+LAST",
+        "/services/data/v57.0/query?q=SELECT+Id,AnnualRevenue,CreatedDate,CreatedById,IsDeleted,LastActivityDate,LastModifiedDate,LastModifiedById,NumberOfEmployees,OwnerId,ParentId,Rating,Sic,Type+FROM+Account+WHERE+LastModifiedDate+%3E%3D+${urlencode(timeadd(timestamp(), "-72h"))}+AND+LastModifiedDate+%3C+${urlencode(timestamp())}+ORDER+BY+LastModifiedDate+DESC+NULLS+LAST"
       ]
       external_token_todo : <<EOT
+  Before running the example, you have to populate the following variables in terraform:
+  - `salesforce_domain`. This is the [domain](https://help.salesforce.com/s/articleView?id=sf.faq_domain_name_what.htm&type=5) your instance is using.
+  - `salesforce_example_account_id`: An example of any account id; this is only applicable for example calls.
+
   1. Create a [Salesforce application + client credentials flow](https://help.salesforce.com/s/articleView?language=en_US&id=sf.remoteaccess_oauth_client_credentials_flow.htm&type=5)
     with following permissions:
     - Manage user data via APIs (`api`)
@@ -442,23 +457,36 @@ EOT
     - Access content resources (`content`)
     - Perform ANSI SQL queries on Customer Data Platform data (`cdp_query_api`)
 
-  Apart from Salesforce instructions please review the following:
-  - "Callback URL" can be anything, not required in this flow but required by Salesforce.
-  - Application is marked with "Enable Client Credentials Flow"
-  - You have to assign an user for Client Credentials, be sure:
-      - A "run as" user marked with "API Only Permission" needs to be associated
-      - The policy associated to the user have the enabled next Administrative Permissions:
-        - API Enabled
-        - APEX REST Services
-      - And the policy has the application created marked as enabled in "Connected App Access". Otherwise requests will return 401 with INVALID_SESSION_ID
+     Apart from Salesforce instructions above, please review the following:
+     - "Callback URL" MUST be filled; can be anything as not required in this flow, but required to be set by Salesforce.
+     - Application MUST be marked with "Enable Client Credentials Flow"
+     - You MUST assign a user for Client Credentials, be sure:
+        - you associate a "run as" user marked with "API Only Permission"
+        - The policy associated to the user MUST have the following Administrative Permissions enabled:
+          - API Enabled
+          - APEX REST Services
+      - The policy MUST have the application marked as "enabled" in "Connected App Access". Otherwise requests will return 401 with INVALID_SESSION_ID
 
-  The user set up as "run as" on the connector should have between `Permission Sets` and `Profile` the permission of `View All Data`. This is due the kind of queries supported
-  for retrieving [Activity Histories](https://developer.salesforce.com/docs/atlas.en-us.object_reference.meta/object_reference/sforce_api_objects_activityhistory.htm) based on the
-  related *account id*.
+     The user set for "run as" on the connector should have, between its `Permission Sets` and `Profile`, the permission of `View All Data`. This is required
+     to support the queries used to retrieve [Activity Histories](https://developer.salesforce.com/docs/atlas.en-us.object_reference.meta/object_reference/sforce_api_objects_activityhistory.htm) by *account id*.
 
   2. Once created, open "Manage Consumer Details"
   3. Update the content of `PSOXY_SALESFORCE_CLIENT_ID` from Consumer Key	and `PSOXY_SALESFORCE_CLIENT_SECRET` from Consumer Secret
   4. Finally, we recommend to run `test-salesforce` script with all the queries in the example to ensure the expected information covered by rules can be obtained from Salesforce API.
+     Some test calls may fail with a 400 (bad request) response. That is something expected if parameters requested on the query are not available (for example, running a SOQL query
+     with fields that are NOT present in your model will force a 400 response from Salesforce API). If that is the case, a double check in the function logs can be done to ensure
+     that this is the actual error happening, you should see an error like the following one:
+     ```json
+     WARNING: Source API Error [{
+    "message": "\nLastModifiedById,NumberOfEmployees,OwnerId,Ownership,ParentId,Rating,Sic,Type\n
+               ^\nERROR at Row:1:Column:136\nNo such column 'Ownership' on entity 'Account'. If you are attempting to use a custom field, be sure to append the '__c' after the custom field name. Please reference your WSDL or the describe call for the appropriate names.",
+    "errorCode": "INVALID_FIELD"
+     }]
+     ```
+     In that case, removing from the query the fields LastModifiedById,NumberOfEmployees,OwnerId,Ownership,ParentId,Rating,Sic,Type will fix the issues.
+
+     However, if running any of the queries you receive a 401/403/500/512. A 401/403 it might be related to some misconfiguration in the Salesforce Application due lack of permissions;
+     a 500/512 it could be related to missing parameter in the function configuration (for example, a missing value for `salesforce_domain` variable in your terraform vars)
 EOT
     }
     slack-discovery-api = {
@@ -550,28 +578,28 @@ EOT
           writable : false
           sensitive : true
           value_managed_by_tf : false
-          description: "Client Secret of the Zoom 'Server-to-Server' OAuth App used by the Connector to retrieve Zoom data.  Value should be obtained from your Zoom admin."
+          description : "Client Secret of the Zoom 'Server-to-Server' OAuth App used by the Connector to retrieve Zoom data.  Value should be obtained from your Zoom admin."
         },
         {
           name : "CLIENT_ID"
           writable : false
           sensitive : false
           value_managed_by_tf : false
-          description: "Client ID of the Zoom 'Server-to-Server' OAuth App used by the Connector to retrieve Zoom data. Value should be obtained from your Zoom admin."
+          description : "Client ID of the Zoom 'Server-to-Server' OAuth App used by the Connector to retrieve Zoom data. Value should be obtained from your Zoom admin."
         },
         {
           name : "ACCOUNT_ID"
           writable : false
           sensitive : true
           value_managed_by_tf : false
-          description: "Account ID of the Zoom tenant from which the Connector will retrieve Zoom data. Value should be obtained from your Zoom admin."
+          description : "Account ID of the Zoom tenant from which the Connector will retrieve Zoom data. Value should be obtained from your Zoom admin."
         },
         {
           name : "ACCESS_TOKEN"
           writable : true
           sensitive : true
           value_managed_by_tf : false
-          description: "Short-lived Oauth access_token used by connector to retrieve Zoom data. Filled by Proxy instance."
+          description : "Short-lived Oauth access_token used by connector to retrieve Zoom data. Filled by Proxy instance."
         },
         {
           name : "OAUTH_REFRESH_TOKEN"

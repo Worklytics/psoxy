@@ -17,6 +17,10 @@ Working tracking of changes, updated as work done prior to release.  Please revi
         then wildcard policy to read shared also grants read of secrets across all connectors)
   - keys/salts per value kind (PII, item id, etc)
 
+## [0.4.36](https://github.com/Worklytics/psoxy/release/tag/v0.4.36)
+  * Microsoft 365 - Azure AD Directory - default rules change to return `proxyAddresses` field for
+    users, pseudonymized; needed to match user's past email addresses against other data sources
+
 ## [0.4.34](https://github.com/Worklytics/psoxy/release/tag/v0.4.34)
   * AWS Only: you may see System Manager Parameter description changes; these have no functional
     purpose, just helping provide guidance on function of different secrets.

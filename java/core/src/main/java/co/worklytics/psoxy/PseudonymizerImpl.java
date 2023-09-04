@@ -63,7 +63,7 @@ public class PseudonymizerImpl implements Pseudonymizer {
     }
 
     @Override
-    public PseudonymizedIdentity pseudonymize(Object value, Transform.Pseudonymize transformOptions) {
+    public PseudonymizedIdentity pseudonymize(Object value, Transform.PseudonymizationTransform transformOptions) {
         if (value == null) {
             return null;
         }

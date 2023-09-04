@@ -170,7 +170,7 @@ public class CommonRequestHandler {
             HttpContent content = null;
 
             if (request.getBody() != null) {
-                String contentType = request.getHeader("content-type")
+                String contentType = request.getHeader(HttpHeaders.CONTENT_TYPE)
                         .orElse("application/json");
                 content = new ByteArrayContent(contentType, request.getBody());
             }
@@ -193,10 +193,7 @@ public class CommonRequestHandler {
         }
 
         //TODO: what headers to forward???
-        sourceApiRequest.setHeaders(sourceApiRequest.getHeaders()
-                //seems like Google API HTTP client has a default 'Accept' header with 'text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2' ??
-                .setAccept(ContentType.APPLICATION_JSON.toString())  //MSFT gives weird "{"error":{"code":"InternalServerError","message":"The MIME type 'text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2' requires a '/' character between type and subtype, such as 'text/plain'."}}
-        );
+        populateHeadersFromSource(sourceApiRequest, request, targetUrl);
 
         //setup request
         sourceApiRequest
@@ -318,7 +315,7 @@ public class CommonRequestHandler {
 
     @SneakyThrows
     HttpRequestFactory getRequestFactory(HttpEventRequest request) {
-        // per connection request factory, abstracts auth ..
+        // per connection request factory, abstracts auth ...
         HttpTransport transport = new NetHttpTransport();
 
         //TODO: changing impl of credentials/initializer should support sources authenticated by
@@ -405,4 +402,18 @@ public class CommonRequestHandler {
         }
     }
 
+    private void populateHeadersFromSource(HttpRequest sourceApiRequest, HttpEventRequest request, URL targetUrl) {
+        com.google.api.client.http.HttpHeaders headers = sourceApiRequest.getHeaders();
+
+        //seems like Google API HTTP client has a default 'Accept' header with 'text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2' ??
+        //MSFT gives weird "{"error":{"code":"InternalServerError","message":"The MIME type 'text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2' requires a '/' character between type and subtype, such as 'text/plain'."}}
+        headers.setAccept(ContentType.APPLICATION_JSON.toString());
+
+        sanitizer.getAllowedHeadersToForward(request.getHttpMethod(), targetUrl)
+                .ifPresent(i -> i.forEach(h -> {
+                    request.getHeader(h).ifPresent(headerValue -> {
+                        logIfDevelopmentMode(() -> String.format("Header %s included", h));
+                        headers.set(h, headerValue);});
+                }));
+    }
 }

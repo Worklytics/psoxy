@@ -40,9 +40,10 @@ locals {
   salt_arn              = [for l in var.global_parameter_arns : l if endswith(l, local.salt_parameter_name_suffix)][0]
   path_to_shared_config = regex("arn.+parameter(/.*)${local.salt_parameter_name_suffix}", local.salt_arn)[0]
 
-  bundle_from_s3 = startswith(var.path_to_function_zip, "s3://")
-  s3_bucket      = local.bundle_from_s3 ? regex("s3://([^/]+)/.*", var.path_to_function_zip)[0] : null
-  s3_key         = local.bundle_from_s3 ? regex("s3://[^/]+/(.*)", var.path_to_function_zip)[0] : null
+  bundle_from_s3  = startswith(var.path_to_function_zip, "s3://")
+  s3_bucket       = local.bundle_from_s3 ? regex("s3://([^/]+)/.*", var.path_to_function_zip)[0] : null
+  s3_key          = local.bundle_from_s3 ? regex("s3://[^/]+/(.*)", var.path_to_function_zip)[0] : null
+  bundle_filename = try(regex(".*/([^/]+)", var.path_to_function_zip)[0], var.path_to_function_zip)
 }
 
 
@@ -66,7 +67,8 @@ resource "aws_lambda_function" "instance" {
       var.path_to_config == null ? {} : yamldecode(file(var.path_to_config)),
       var.environment_variables,
       {
-        EXECUTION_ROLE = aws_iam_role.iam_for_lambda.arn
+        EXECUTION_ROLE  = aws_iam_role.iam_for_lambda.arn,
+        BUNDLE_FILENAME = local.bundle_filename
       },
       # only set env vars for config paths if non-default values
       length(local.path_to_shared_config) > 1 ? { PATH_TO_SHARED_CONFIG = local.path_to_shared_config } : {},
@@ -81,11 +83,6 @@ resource "aws_lambda_function" "instance" {
   }
 }
 
-moved {
-  from = aws_lambda_function.psoxy-instance
-  to   = aws_lambda_function.instance
-}
-
 # cloudwatch group per lambda function
 resource "aws_cloudwatch_log_group" "lambda_log" {
   name              = "/aws/lambda/${aws_lambda_function.instance.function_name}"
@@ -97,11 +94,6 @@ resource "aws_cloudwatch_log_group" "lambda_log" {
       tags
     ]
   }
-}
-
-moved {
-  from = aws_cloudwatch_log_group.lambda-log
-  to   = aws_cloudwatch_log_group.lambda_log
 }
 
 resource "aws_iam_role" "iam_for_lambda" {

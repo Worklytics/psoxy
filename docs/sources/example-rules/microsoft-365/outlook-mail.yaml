@@ -8,6 +8,10 @@ endpoints:
       - "$orderBy"
       - "$count"
     transforms:
+      - !<pseudonymizeRegexMatches>
+        jsonPaths:
+          - "$..proxyAddresses[*]"
+        regex: "(?i)^smtp:(.*)$"
       - !<redact>
         jsonPaths:
           - "$..displayName"
@@ -17,7 +21,6 @@ endpoints:
           - "$..givenName"
           - "$..surname"
           - "$..mailNickname"
-          - "$..proxyAddresses"
           - "$..responsibilities"
           - "$..skills"
           - "$..faxNumber"
@@ -48,7 +51,6 @@ endpoints:
           - "$..acceptedSenders"
           - "$..members"
           - "$..membersWithLicenseErrors"
-          - "$..proxyAddresses"
           - "$..mailNickname"
           - "$..description"
           - "$..resourceBehaviorOptions"
@@ -70,6 +72,10 @@ endpoints:
       - "$orderBy"
       - "$count"
     transforms:
+      - !<pseudonymizeRegexMatches>
+        jsonPaths:
+          - "$..proxyAddresses[*]"
+        regex: "(?i)^smtp:(.*)$"
       - !<redact>
         jsonPaths:
           - "$..displayName"
@@ -79,7 +85,6 @@ endpoints:
           - "$..givenName"
           - "$..surname"
           - "$..mailNickname"
-          - "$..proxyAddresses"
           - "$..responsibilities"
           - "$..skills"
           - "$..faxNumber"

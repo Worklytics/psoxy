@@ -1,15 +1,17 @@
 package com.avaulta.gateway.rules;
 
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.*;
 import lombok.*;
+import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.java.Log;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
+import java.util.stream.Stream;
 
 /**
  * NOTE: user-facing documentation about these rules
@@ -45,13 +47,14 @@ public class ColumnarRules implements BulkDataRules {
     /**
      * columns (fields) to duplicate
      *
-     * NOTE: duplicates, if any, are applied BEFORE pseudonymization
+     * NOTE: duplicates, if any, are applied BEFORE pseudonymization and transforms
      *
      * USE CASE: building lookup tables, where you want to duplicate column and then pseudonymize
      * one copy of it.Not really expected for typical 'bulk' file case.
      *
      */
-    @JsonInclude(JsonInclude.Include.NON_EMPTY) //this works ...
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
     @Builder.Default
     @NonNull
     protected Map<String, String> columnsToDuplicate = new HashMap<>();
@@ -64,11 +67,13 @@ public class ColumnarRules implements BulkDataRules {
         PseudonymEncoder.Implementations.JSON;
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
     @NonNull
     @Singular(value = "columnToPseudonymize")
     protected List<String> columnsToPseudonymize = new ArrayList<>();
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
     @NonNull
     @Singular(value = "columnToRedact")
     protected List<String> columnsToRedact = new ArrayList<>();
@@ -80,9 +85,10 @@ public class ColumnarRules implements BulkDataRules {
      * or creating additional pipeline if you're repurposing existing data - just rename columns
      * as required.
      *
-     * NOTE: renames, if any, are applied BEFORE pseudonymization
+     * NOTE: renames, if any, are applied BEFORE pseudonymization and transforms
      */
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
     @Builder.Default
     @NonNull
     protected Map<String, String> columnsToRename = new HashMap<>();
@@ -93,7 +99,144 @@ public class ColumnarRules implements BulkDataRules {
      *
      * USE CASE: if you don't control source data, and want to ensure that some unexpected column
      * that later appears in source doesn't get included in output.
+     *
+     * NOTE: due to semantics, this has a default value of 'null', rather than empty; thus its
+     * behavior differs from most of the other fields
      */
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     protected List<String> columnsToInclude;
+
+    /**
+     * **ALPHA FUNCTIONALITY; subject to backwards incompatible changes or removal**
+     * should NOT be mixed with other column processing
+     *
+     * if provided, each FieldTransformPipeline will be applied to value of corresponding columns
+     *
+     *
+     */
+    @Getter
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
+    @Builder.Default
+    @NonNull
+    protected Map<String, FieldTransformPipeline> fieldsToTransform = new HashMap<>();
+
+
+    @NoArgsConstructor(force = true, access = AccessLevel.PRIVATE) //for jackson
+    @AllArgsConstructor(access = AccessLevel.PRIVATE) // for builder
+    @Builder
+    @Value
+    public static class FieldTransformPipeline {
+
+        /**
+         * new field to write result as, if not being replaced
+         *
+         * q: ambiguous as to whether this is a 'rename' or creating a new field?
+         *
+         * currently, must be provided and transform pipelines are always creating a new column with this field name
+         * (eg, not replacing existing column)
+         */
+        @NonNull
+        String newName;
+
+        /**
+         * ordered list of transforms to apply to value
+         */
+        @JsonInclude(JsonInclude.Include.NON_EMPTY)
+        @NonNull
+        @Singular
+        List<FieldValueTransform> transforms;
+
+        @JsonIgnore
+        public boolean isValid() {
+            return StringUtils.isNotBlank(newName)
+                    && transforms != null && transforms.stream().allMatch(FieldValueTransform::isValid);
+        }
+    }
+
+    @Builder
+    @Getter
+    @FieldDefaults(makeFinal=true, level=AccessLevel.PRIVATE)
+    @NoArgsConstructor(force = true, access = AccessLevel.PRIVATE) //for jackson
+    @AllArgsConstructor(access = AccessLevel.PRIVATE) // for builder
+    @ToString
+    @EqualsAndHashCode
+    public static class FieldValueTransform {
+
+
+        /**
+         * if provided, filter regex will be applied and only values matching filter will be
+         * preserved; not matching values will be redacted.
+         *
+         * if regex includes a capturing group, then only portion of value matched by the first
+         * capturing group will be preserved.
+         *
+         * NOTE: use-case for omitting is to pseudonymize column with a specific scope
+         */
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        String filter;
+
+        /**
+         * if provided, value will be written using provided template
+         *
+         * expected to be a Java String format, with `%s` token; will be applied as String.format(template, match);
+         *
+         * TODO: expect this to change after 'alpha' version
+         */
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        String formatString;
+
+        /**
+         * if provided, value will be pseudonymized with provided scope
+         *
+         * @deprecated ; only relevant for legacy case
+         */
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        String pseudonymizeWithScope;
+
+        @JsonIgnore
+        public boolean isValid() {
+
+            boolean exactlyOneNonNull = Stream.of(filter, formatString, pseudonymizeWithScope)
+                .filter(Objects::nonNull)
+                .count() == 1;
+
+
+            if (filter != null) {
+                try {
+                    Pattern pattern = Pattern.compile(filter);
+                } catch (PatternSyntaxException e) {
+                    log.warning("invalid regex: " + filter);
+                    return false;
+                }
+            }
+
+            if (formatString != null) {
+                if (!formatString.contains("%s")) {
+                    log.warning("formatString must contain '%s' token: " + formatString);
+                    return false;
+                }
+                if (Pattern.compile("%s").matcher(formatString).results().count() > 1) {
+                    log.warning("formatString must contain exactly one '%s' token: " + formatString);
+                    return false;
+                }
+            }
+
+            return exactlyOneNonNull;
+        }
+
+        public static FieldValueTransform filter(String filter) {
+            return FieldValueTransform.builder().filter(filter).build();
+        }
+
+        public static FieldValueTransform pseudonymizeWithScope(String scope) {
+            return FieldValueTransform.builder().pseudonymizeWithScope(scope).build();
+        }
+
+        public static FieldValueTransform formatString(String template) {
+            return FieldValueTransform.builder().formatString(template).build();
+        }
+
+
+    }
 }

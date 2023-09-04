@@ -34,18 +34,12 @@
           <entry name="$MAVEN_REPOSITORY$/org/jetbrains/kotlinx/kotlinx-metadata-jvm/0.3.0/kotlinx-metadata-jvm-0.3.0.jar" />
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.28/lombok-1.18.28.jar" />
         </processorPath>
+        <module name="core" />
         <module name="psoxy-aws" />
         <module name="gateway-core" />
         <module name="psoxy-gcp" />
         <module name="psoxy-cmd-line" />
-        <module name="psoxy-core" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="aws" target="11" />
-      <module name="cmd-line" target="11" />
-      <module name="core" target="11" />
-      <module name="gcp" target="11" />
-    </bytecodeTargetLevel>
   </component>
 </project>

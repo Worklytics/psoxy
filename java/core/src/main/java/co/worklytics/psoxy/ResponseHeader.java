@@ -16,7 +16,9 @@ public enum ResponseHeader {
      *
      */
     RULES_SHA("Rules-SHA"),
-    ERROR("Error")
+    ERROR("Error"),
+
+    WARNING("Warning"),
     ;
 
     @NonNull

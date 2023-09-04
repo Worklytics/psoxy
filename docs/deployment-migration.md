@@ -45,6 +45,8 @@ What you MUST **copy**:
     these identifiers aren't inherently PII - but the association could be considered discoverable.
   - any **custom sanitization rules** that you've set, either in your Terraform configuration
     or directly as the value of a `RULES` environment variable, SSM Parameter, or GCP Secret.
+  - historical **sanitized files** for any bulk connectors, if you wish to continue to have this
+    data analyzed by Worklytics. (eg, everything from all your `-sanitized` buckets)
 
 NOTE: you do NOT need to copy the `ENCRYPTION_KEY` value; rotation of this value should be
 expected by clients.

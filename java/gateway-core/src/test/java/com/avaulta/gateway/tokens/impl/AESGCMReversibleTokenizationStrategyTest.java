@@ -4,6 +4,7 @@ import com.avaulta.gateway.pseudonyms.impl.TestUtils;
 import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
 import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
+import com.avaulta.gateway.tokens.Token;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -57,6 +58,19 @@ class AESGCMReversibleTokenizationStrategyTest {
                 pseudonym.length() < Pseudonym.HASH_SIZE_BYTES + 52 //hash + cipher
             );
         });
+    }
+
+    @Test
+    void deterministicIsPrefixOfReversible() {
+        Token reversible = Token.builder()
+            .reversible(pseudonymizationStrategy.getReversibleToken("blah", Function.identity()))
+            .build();
+        Token deterministic = Token.builder()
+            .hash(deterministicTokenizationStrategy.getToken("blah", Function.identity()))
+            .build();
+
+        assertEquals(new String(encoder.encode(reversible.getHash())),
+            new String(encoder.encode(deterministic.getHash())));
     }
 
 }

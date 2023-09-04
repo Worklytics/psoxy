@@ -24,11 +24,17 @@ public class PrebuiltSanitizerRules {
         .jsonPath("$.['@odata.context']")
         .build();
 
+    static final Transform.PseudonymizeRegexMatches PSEUDONYMIZE_PROXY_ADDRESSES = Transform.PseudonymizeRegexMatches.builder()
+        .jsonPath("$..proxyAddresses[*]")
+        .regex("(?i)^smtp:(.*)$")
+        .build();
+
     static final String DIRECTORY_REGEX_USERS = "^/(v1.0|beta)/users/?[^/]*";
     static final String DIRECTORY_REGEX_USERS_BY_PSEUDO = "^/(v1.0|beta)/users(/p~[a-zA-Z0-9_-]+?)?[^/]*";
     static final String DIRECTORY_REGEX_GROUP_MEMBERS = "^/(v1.0|beta)/groups/[^/]*/members.*";
 
     static final List<Transform> USER_TRANSFORMS = Arrays.asList(
+        PSEUDONYMIZE_PROXY_ADDRESSES,
         Transform.Redact.builder()
             .jsonPath("$..displayName")
             .jsonPath("$..aboutMe")
@@ -37,7 +43,6 @@ public class PrebuiltSanitizerRules {
             .jsonPath("$..givenName")
             .jsonPath("$..surname")
             .jsonPath("$..mailNickname") //get the actual mail
-            .jsonPath("$..proxyAddresses")
             .jsonPath("$..responsibilities")
             .jsonPath("$..skills")
             .jsonPath("$..faxNumber")
@@ -59,7 +64,6 @@ public class PrebuiltSanitizerRules {
             .jsonPath("$..onPremisesImmutableId")
             .jsonPath("$..identities[*].issuerAssignedId")
             .build()
-
     );
     static final Endpoint DIRECTORY_USERS = Endpoint.builder()
         .pathRegex(DIRECTORY_REGEX_USERS)
@@ -81,7 +85,6 @@ public class PrebuiltSanitizerRules {
                 .jsonPath("$..acceptedSenders")
                 .jsonPath("$..members")
                 .jsonPath("$..membersWithLicenseErrors")
-                .jsonPath("$..proxyAddresses")
                 .jsonPath("$..mailNickname")
                 .jsonPath("$..description") // q: include for Project use case?
                 .jsonPath("$..resourceBehaviorOptions")
@@ -91,10 +94,10 @@ public class PrebuiltSanitizerRules {
                 .jsonPath("$..onPremisesProvisioningErrors")
                 .jsonPath("$..securityIdentifier")
                 .build())
-        .transform(Transform.Pseudonymize.builder()
-                .includeOriginal(true)
-                .jsonPath("$..mail")
-                .build())
+            .transform(Transform.Pseudonymize.builder()
+                    .includeOriginal(true)
+                    .jsonPath("$..mail")
+                    .build())
         .build();
 
     static final Endpoint DIRECTORY_GROUP_MEMBERS = Endpoint.builder()
