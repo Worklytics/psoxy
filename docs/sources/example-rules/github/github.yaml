@@ -288,6 +288,18 @@ endpoints:
         jsonPaths:
           - "$..description"
           - "$..homepage"
+      - !<redact>
+        jsonPaths:
+          - "$..['owner'].['avatar_url','gravatar_id','url','html_url','followers_url','following_url','gists_url','starred_url','subscriptions_url','organizations_url','repos_url','events_url','received_events_url','name','company','location','bio','twitter_username']"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..['owner'].['id','node_id','email']"
+        encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..['owner'].login"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/repos/{owner}/{repo}/branches"
     allowedQueryParams:
       - "per_page"
@@ -495,14 +507,14 @@ endpoints:
           - "$..name"
       - !<redact>
         jsonPaths:
-          - "$..['user','closed_by','assignee','creator'].['avatar_url','gravatar_id','url','html_url','followers_url','following_url','gists_url','starred_url','subscriptions_url','organizations_url','repos_url','events_url','received_events_url','name','company','location','bio','twitter_username']"
+          - "$..['owner','user','closed_by','assignee','creator'].['avatar_url','gravatar_id','url','html_url','followers_url','following_url','gists_url','starred_url','subscriptions_url','organizations_url','repos_url','events_url','received_events_url','name','company','location','bio','twitter_username']"
       - !<pseudonymize>
         jsonPaths:
-          - "$..['user','closed_by','assignee','creator'].['id','node_id','email']"
+          - "$..['owner','user','closed_by','assignee','creator'].['id','node_id','email']"
         encoding: "JSON"
       - !<pseudonymize>
         jsonPaths:
-          - "$..['user','closed_by','assignee','creator'].login"
+          - "$..['owner','user','closed_by','assignee','creator'].login"
         includeReversible: true
         encoding: "URL_SAFE_TOKEN"
       - !<redact>
@@ -563,14 +575,14 @@ endpoints:
         encoding: "JSON"
       - !<redact>
         jsonPaths:
-          - "$..['author','committer','user','closed_by','assigner','actor','assignee','creator'].['avatar_url','gravatar_id','url','html_url','followers_url','following_url','gists_url','starred_url','subscriptions_url','organizations_url','repos_url','events_url','received_events_url','name','company','location','bio','twitter_username']"
+          - "$..['author','committer','owner','user','closed_by','assigner','actor','assignee','creator'].['avatar_url','gravatar_id','url','html_url','followers_url','following_url','gists_url','starred_url','subscriptions_url','organizations_url','repos_url','events_url','received_events_url','name','company','location','bio','twitter_username']"
       - !<pseudonymize>
         jsonPaths:
-          - "$..['author','committer','user','closed_by','assigner','actor','assignee','creator'].['id','node_id','email']"
+          - "$..['author','committer','owner','user','closed_by','assigner','actor','assignee','creator'].['id','node_id','email']"
         encoding: "JSON"
       - !<pseudonymize>
         jsonPaths:
-          - "$..['author','committer','user','closed_by','assigner','actor','assignee','creator'].login"
+          - "$..['author','committer','owner','user','closed_by','assigner','actor','assignee','creator'].login"
         includeReversible: true
         encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/repos/{owner}/{repo}/issues/{issue_number}/timeline"
@@ -596,14 +608,14 @@ endpoints:
         encoding: "JSON"
       - !<redact>
         jsonPaths:
-          - "$..['author','committer','user','closed_by','assigner','actor','assignee','creator'].['avatar_url','gravatar_id','url','html_url','followers_url','following_url','gists_url','starred_url','subscriptions_url','organizations_url','repos_url','events_url','received_events_url','name','company','location','bio','twitter_username']"
+          - "$..['author','committer','owner','user','closed_by','assigner','actor','assignee','creator'].['avatar_url','gravatar_id','url','html_url','followers_url','following_url','gists_url','starred_url','subscriptions_url','organizations_url','repos_url','events_url','received_events_url','name','company','location','bio','twitter_username']"
       - !<pseudonymize>
         jsonPaths:
-          - "$..['author','committer','user','closed_by','assigner','actor','assignee','creator'].['id','node_id','email']"
+          - "$..['author','committer','owner','user','closed_by','assigner','actor','assignee','creator'].['id','node_id','email']"
         encoding: "JSON"
       - !<pseudonymize>
         jsonPaths:
-          - "$..['author','committer','user','closed_by','assigner','actor','assignee','creator'].login"
+          - "$..['author','committer','owner','user','closed_by','assigner','actor','assignee','creator'].login"
         includeReversible: true
         encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/repos/{owner}/{repo}/issues/{issue_number}/reactions"
@@ -684,14 +696,14 @@ endpoints:
           - "$..commit_message"
       - !<redact>
         jsonPaths:
-          - "$..['user','closed_by','enabled_by','actor','assignee','creator','merged_by'].['avatar_url','gravatar_id','url','html_url','followers_url','following_url','gists_url','starred_url','subscriptions_url','organizations_url','repos_url','events_url','received_events_url','name','company','location','bio','twitter_username']"
+          - "$..['owner','user','closed_by','enabled_by','actor','assignee','creator','merged_by'].['avatar_url','gravatar_id','url','html_url','followers_url','following_url','gists_url','starred_url','subscriptions_url','organizations_url','repos_url','events_url','received_events_url','name','company','location','bio','twitter_username']"
       - !<pseudonymize>
         jsonPaths:
-          - "$..['user','closed_by','enabled_by','actor','assignee','creator','merged_by'].['id','node_id','email']"
+          - "$..['owner','user','closed_by','enabled_by','actor','assignee','creator','merged_by'].['id','node_id','email']"
         encoding: "JSON"
       - !<pseudonymize>
         jsonPaths:
-          - "$..['user','closed_by','enabled_by','actor','assignee','creator','merged_by'].login"
+          - "$..['owner','user','closed_by','enabled_by','actor','assignee','creator','merged_by'].login"
         includeReversible: true
         encoding: "URL_SAFE_TOKEN"
       - !<redact>
@@ -806,14 +818,14 @@ endpoints:
           - "$..commit_message"
       - !<redact>
         jsonPaths:
-          - "$..['user','closed_by','enabled_by','actor','assignee','creator','merged_by'].['avatar_url','gravatar_id','url','html_url','followers_url','following_url','gists_url','starred_url','subscriptions_url','organizations_url','repos_url','events_url','received_events_url','name','company','location','bio','twitter_username']"
+          - "$..['owner','user','closed_by','enabled_by','actor','assignee','creator','merged_by'].['avatar_url','gravatar_id','url','html_url','followers_url','following_url','gists_url','starred_url','subscriptions_url','organizations_url','repos_url','events_url','received_events_url','name','company','location','bio','twitter_username']"
       - !<pseudonymize>
         jsonPaths:
-          - "$..['user','closed_by','enabled_by','actor','assignee','creator','merged_by'].['id','node_id','email']"
+          - "$..['owner','user','closed_by','enabled_by','actor','assignee','creator','merged_by'].['id','node_id','email']"
         encoding: "JSON"
       - !<pseudonymize>
         jsonPaths:
-          - "$..['user','closed_by','enabled_by','actor','assignee','creator','merged_by'].login"
+          - "$..['owner','user','closed_by','enabled_by','actor','assignee','creator','merged_by'].login"
         includeReversible: true
         encoding: "URL_SAFE_TOKEN"
       - !<redact>

@@ -195,7 +195,7 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..description")
                     .jsonPath("$..name")
                     .build())
-            .transforms(generateUserTransformations("..", Arrays.asList("user", "assignee", "creator", "closed_by")))
+            .transforms(generateUserTransformations("..", Arrays.asList("owner", "user", "assignee", "creator", "closed_by")))
             // Seems array plus other object in filtering is not matching the json path, so a different rule for this
             .transforms(generateUserTransformations("..assignees[*]", Collections.emptyList()))
             .build();
@@ -242,7 +242,7 @@ public class PrebuiltSanitizerRules {
             .transform(Transform.Pseudonymize.builder()
                     .jsonPath("$..email")
                     .build())
-            .transforms(generateUserTransformations("..", Arrays.asList("user", "actor", "assignee", "assigner", "creator", "closed_by", "author", "committer")))
+            .transforms(generateUserTransformations("..", Arrays.asList("owner", "user", "actor", "assignee", "assigner", "creator", "closed_by", "author", "committer")))
             .build();
 
     static final Endpoint ISSUE_TIMELINE = Endpoint.builder()
@@ -263,7 +263,7 @@ public class PrebuiltSanitizerRules {
             .transform(Transform.Pseudonymize.builder()
                     .jsonPath("$..email")
                     .build())
-            .transforms(generateUserTransformations("..", Arrays.asList("user", "actor", "assignee", "assigner", "creator", "closed_by", "author", "committer")))
+            .transforms(generateUserTransformations("..", Arrays.asList("owner", "user", "actor", "assignee", "assigner", "creator", "closed_by", "author", "committer")))
             .build();
 
     static final Endpoint PULL_REVIEWS = Endpoint.builder()
@@ -290,12 +290,7 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..commit_title")
                     .jsonPath("$..commit_message")
                     .build())
-            // Owner can be a user or an organization user;
-            // we leave them without redact as we assume
-            // that most of the repos are going to be
-            // created as part of organization and not by an user
-            //.transforms(generateUserTransformations("..owner"))
-            .transforms(generateUserTransformations("..", Arrays.asList("user", "actor", "assignee", "creator", "merged_by", "closed_by", "enabled_by")))
+            .transforms(generateUserTransformations("..", Arrays.asList("owner", "user", "actor", "assignee", "creator", "merged_by", "closed_by", "enabled_by")))
             .transforms(generateUserTransformations("..requested_reviewers[*]", Collections.emptyList()))
             .transforms(generateUserTransformations("..assignees[*]", Collections.emptyList()))
             .build();
@@ -316,7 +311,7 @@ public class PrebuiltSanitizerRules {
             // that most of the repos are going to be
             // created as part of organization and not by an user
             //.transforms(generateUserTransformations("..owner"))
-            .transforms(generateUserTransformations("..", Arrays.asList("user", "actor", "assignee", "creator", "merged_by", "closed_by", "enabled_by")))
+            .transforms(generateUserTransformations("..", Arrays.asList("owner", "user", "actor", "assignee", "creator", "merged_by", "closed_by", "enabled_by")))
             .transforms(generateUserTransformations("..requested_reviewers[*]", Collections.emptyList()))
             .transforms(generateUserTransformations("..assignees[*]", Collections.emptyList()))
             .build();
@@ -328,6 +323,7 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..description")
                     .jsonPath("$..homepage")
                     .build())
+            .transforms(generateUserTransformations("..", Collections.singletonList("owner")))
             .build();
 
     // https://docs.github.com/en/rest/commits/comments?apiVersion=2022-11-28#list-commit-comments
