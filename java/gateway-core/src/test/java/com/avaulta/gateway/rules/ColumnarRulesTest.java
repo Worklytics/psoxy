@@ -125,8 +125,8 @@ class ColumnarRulesTest {
                 "    - pseudonymizeWithScope: \"github\"\n" +
                 "pseudonymFormat: \"JSON\"\n";
 
-        //assertEquals(yaml,
-        //        yamlMapper.writeValueAsString(rules));
+        assertEquals(yaml,
+                yamlMapper.writeValueAsString(rules));
 
         ColumnarRules fromYaml =
             yamlMapper.readerFor(ColumnarRules.class).readValue(yaml);
