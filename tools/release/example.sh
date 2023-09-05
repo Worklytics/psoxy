@@ -6,19 +6,18 @@ BLUE='\e[0;34m'
 NC='\e[0m' # No Color
 
 # Usage:
-# ./tools/release.example.sh v0.4.25 ~/code/psoxy/ aws-all ~/psoxy-example-aws
-# ./tools/release/example.sh v0.4.25 ~/code/psoxy/ gcp ~/psoxy-example-gcp
+# ./tools/release.example.sh ~/code/psoxy/ aws-all ~/psoxy-example-aws
+# ./tools/release/example.sh ~/code/psoxy/ gcp ~/psoxy-example-gcp
 
-RELEASE_TAG=$1
-PATH_TO_REPO=$2
-EXAMPLE=$3
-EXAMPLE_TEMPLATE_REPO=$4
+PATH_TO_REPO=$1
+EXAMPLE=$2
+EXAMPLE_TEMPLATE_REPO=$3
 
 display_usage() {
     printf "Usage:\n"
     printf "  ./release-example.sh <release-tag> <path-to-repo> <example> <path-to-example-repo>\n"
-    printf "  ./release-example.sh v0.4.25 ~/code/psoxy/ aws-all ~/psoxy-example-aws\n"
-    printf "  ./release-example.sh v0.4.25 ~/code/psoxy/ gcp ~/psoxy-example-gcp\n"
+    printf "  ./release-example.sh ~/code/psoxy/ aws-all ~/psoxy-example-aws\n"
+    printf "  ./release-example.sh ~/code/psoxy/ gcp ~/psoxy-example-gcp\n"
 }
 
 if [ "$#" -ne 4 ]; then
@@ -42,6 +41,10 @@ if [ ! -f "${PATH_TO_REPO}java/pom.xml" ]; then
   printf "${RED}${PATH_TO_REPO}java/pom.xml not found. set <path-to-repo> argument to point to the root of a psoxy checkout. Exiting.${NC}\n"
   exit 1
 fi
+
+CURRENT_RELEASE_NUMBER=$(sed -n 's|[[:space:]]*<revision>\(.*\)</revision>|\1|p' "${PATH_TO_REPO}java/pom.xml" )
+
+RELEASE_TAG="v${CURRENT_RELEASE_NUMBER}"
 
 dev_example_path="${PATH_TO_REPO}infra/examples-dev/${EXAMPLE}"
 
