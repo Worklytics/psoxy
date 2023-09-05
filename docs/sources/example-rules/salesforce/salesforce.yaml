@@ -30,7 +30,6 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$..Alias"
-          - "$..Email"
           - "$..Name"
           - "$..Username"
       - !<pseudonymize>
@@ -38,6 +37,7 @@ endpoints:
           - "$..ContactId"
           - "$..CreatedById"
           - "$..ManagerId"
+          - "$..Email"
           - "$..Id"
         encoding: "JSON"
   - pathRegex: "^/services/data/v(\\d*.\\d{1})/query[?]q=SELECT.*FROM(%20|\\+)User(%20|\\\
@@ -46,7 +46,6 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$.records[*].Alias"
-          - "$.records[*].Email"
           - "$.records[*].Name"
           - "$.records[*].Username"
         applyOnlyWhen: "records[?(@.attributes.type == \"User\")]"
@@ -55,6 +54,7 @@ endpoints:
           - "$.records[*].ContactId"
           - "$.records[*].CreatedById"
           - "$.records[*].ManagerId"
+          - "$.records[*].Email"
           - "$.records[*].Id"
         applyOnlyWhen: "$.records[?(@.attributes.type == \"User\")]"
         encoding: "JSON"
@@ -393,7 +393,6 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$.records[*].Alias"
-          - "$.records[*].Email"
           - "$.records[*].Name"
           - "$.records[*].Username"
         applyOnlyWhen: "records[?(@.attributes.type == \"User\")]"
@@ -402,6 +401,7 @@ endpoints:
           - "$.records[*].ContactId"
           - "$.records[*].CreatedById"
           - "$.records[*].ManagerId"
+          - "$.records[*].Email"
           - "$.records[*].Id"
         applyOnlyWhen: "$.records[?(@.attributes.type == \"User\")]"
         encoding: "JSON"
