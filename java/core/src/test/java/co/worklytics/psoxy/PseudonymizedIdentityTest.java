@@ -11,6 +11,7 @@ import dagger.Component;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import javax.inject.Inject;
@@ -58,6 +59,24 @@ class PseudonymizedIdentityTest {
 
         assertEquals(Base64.getUrlEncoder().withoutPadding().encodeToString(pseudonym.getHash()),
                 pseudonymizedIdentity.getHash());
+    }
+
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(strings = {
+            "",
+            "    "
+    })
+    void asPseudonym_should_return_null_if_null_or_empty(String identifier) {
+        pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
+                .pseudonymizationSalt("an irrelevant per org secret")
+                .defaultScopeId("scope")
+                .pseudonymImplementation(PseudonymImplementation.DEFAULT)
+                .build());
+
+        PseudonymizedIdentity pseudonymizedIdentity = pseudonymizer.pseudonymize(identifier);
+
+        assertNull(pseudonymizedIdentity);
     }
 
     @Test
