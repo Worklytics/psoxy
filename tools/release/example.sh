@@ -38,6 +38,11 @@ if [[ "${PATH_TO_REPO: -1}" != "/" ]]; then
     PATH_TO_REPO="$PATH_TO_REPO/"
 fi
 
+if [ ! -f "${PATH_TO_REPO}java/pom.xml" ]; then
+  printf "${RED}${PATH_TO_REPO}java/pom.xml not found. set <path-to-repo> argument to point to the root of a psoxy checkout. Exiting.${NC}\n"
+  exit 1
+fi
+
 dev_example_path="${PATH_TO_REPO}infra/examples-dev/${EXAMPLE}"
 
 if [ ! -d "$dev_example_path" ]; then
