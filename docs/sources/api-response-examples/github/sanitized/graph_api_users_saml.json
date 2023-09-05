@@ -15,7 +15,7 @@
                   "nameId":"{\"scope\":\"email\",\"domain\":\"contoso.com\",\"hash\":\"ui7ZfyKC2nursXtsx_lyORcptfTrCuGf38xextkHyW8\"}"
                 },
                 "user":{
-                  "login":"{\"scope\":\"github\",\"hash\":\"iK5cxa4JLZ9qQnICuYKRS8wJoRkdvXv6xrLAIg2.ETs\"}"
+                  "login":"{\"scope\":\"github\",\"hash\":\"iK5cxa4JLZ9qQnICuYKRS8wJoRkdvXv6xrLAIg2.ETs\",\"reversible\":\"p~MsZ4qsVoj0TU_io4Cz9mnMBWrZkfI89B-8qznWvl83mYA56fU9HQ_fR3fOvcTHkx\"}"
                 }
               }
             },
@@ -26,7 +26,7 @@
                   "nameId":"{\"scope\":\"email\",\"domain\":\"contoso.com\",\"hash\":\"qyfnJEcnYW8yjJaykmCWONL176MJJardThqpzjVwkiM\"}"
                 },
                 "user":{
-                  "login":"{\"scope\":\"github\",\"hash\":\"lQ4V_0k_2c1BxTzcKpd8GIKaFKZCgpLK.0mK54kApFY\"}"
+                  "login":"{\"scope\":\"github\",\"hash\":\"lQ4V_0k_2c1BxTzcKpd8GIKaFKZCgpLK.0mK54kApFY\",\"reversible\":\"p~IfCQZlVaWKPjwpZn6GtislWJJ2ehfSnlyyONl2LdgTAaP2EggmLxGUnmFuzNnZlY\"}"
                 }
               }
             }

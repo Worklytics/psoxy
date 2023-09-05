@@ -19,21 +19,6 @@ public class PrebuiltSanitizerRules {
 
     private static final List<String> getQueryParameters = Lists.newArrayList("ids", "fields");
 
-    private static final List<Transform> USER_TRANSFORMATIONS = Lists.newArrayList(Transform.Redact.builder()
-                    .jsonPath("$..Alias")
-                    .jsonPath("$..Email")
-                    .jsonPath("$..Name")
-                    .jsonPath("$..Username")
-                    .applyOnlyWhen("$..records[?(@.attributes.type == \"User\")]")
-                    .build(),
-            Transform.Pseudonymize.builder()
-                    .jsonPath("$..ContactId")
-                    .jsonPath("$..CreatedById")
-                    .jsonPath("$..ManagerId")
-                    .jsonPath("$..Id")
-                    .applyOnlyWhen("$..records[?(@.attributes.type == \"User\")]")
-                    .build());
-
     private static final Transform ATTRIBUTES_REDACT = Transform.Redact.builder()
             .jsonPath("$..attributes")
             .build();
@@ -378,7 +363,6 @@ public class PrebuiltSanitizerRules {
     private static List<Transform> getUserTransformations(String pathPrefix, boolean applyOnlyWhen) {
         return Lists.newArrayList(Transform.Redact.builder()
                         .jsonPath(String.format("$%s.Alias", pathPrefix))
-                        .jsonPath(String.format("$%s.Email", pathPrefix))
                         .jsonPath(String.format("$%s.Name", pathPrefix))
                         .jsonPath(String.format("$%s.Username", pathPrefix))
                         .applyOnlyWhen(applyOnlyWhen ? "records[?(@.attributes.type == \"User\")]" : null)
@@ -387,6 +371,7 @@ public class PrebuiltSanitizerRules {
                         .jsonPath(String.format("$%s.ContactId", pathPrefix))
                         .jsonPath(String.format("$%s.CreatedById", pathPrefix))
                         .jsonPath(String.format("$%s.ManagerId", pathPrefix))
+                        .jsonPath(String.format("$%s.Email", pathPrefix))
                         .jsonPath(String.format("$%s.Id", pathPrefix))
                         .applyOnlyWhen(applyOnlyWhen ? "$.records[?(@.attributes.type == \"User\")]" : null)
                         .build());
