@@ -62,7 +62,8 @@ FILES_TO_COPY=("main.tf" "variables.tf" "google-workspace.tf" "google-workspace-
 cd "$EXAMPLE_TEMPLATE_REPO"
 CURRENT_BRANCH=$(git branch --show-current)
 if [ "$CURRENT_BRANCH" != "main" ]; then
-  printf "${RED}Current branch is not main. Please checkout main branch and try again.${NC}\n"
+  printf "${RED}Current branch in checkout of $EXAMPLE_TEMPLATE_REPO is not main. Please checkout main branch and try again.${NC}\n"
+  printf "try ${BLUE}(cd $EXAMPLE_TEMPLATE_REPO && git checkout main)${NC}\n"
   exit 1
 fi
 
