@@ -949,7 +949,7 @@ EOT
         ]
       }
       settings_to_provide = {
-        "Data Source Processing" = "badge"
+        "Parser" = "badge"
       }
       example_file = "docs/sources/bulk/badge-example.csv"
     }
