@@ -128,8 +128,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
                     boolean allParamsValid =
                             entry.getKey().getPathParameterSchemasOptional()
                                     .map(schemas -> schemas.entrySet().stream()
-                                        .map(paramSchema -> parameterSchemaUtils.validate(paramSchema.getValue(), matcher.group(paramSchema.getKey())))
-                                         .allMatch(b -> b))
+                                        .allMatch(paramSchema -> parameterSchemaUtils.validate(paramSchema.getValue(), matcher.group(paramSchema.getKey()))))
                                     .orElse(true);
 
                     //q: need to catch possible IllegalArgumentException if path parameter defined in `pathParameterSchemas`
