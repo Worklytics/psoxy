@@ -53,3 +53,17 @@ modified_notes=$(echo -e "$release_notes" | sed -r 's/by @[a-zA-Z0-9_-]+ in//g')
 
 # Update release notes
 gh release edit $RELEASE -n "$modified_notes"
+
+
+printf "Delete ${BLUE}rc-${RELEASE}${NC} tag?\n"
+read -p "(Y/n) " -n 1 -r
+REPLY=${REPLY:-Y}
+echo    # Move to a new line
+case "$REPLY" in
+  [yY][eE][sS]|[yY])
+     git branch -d "rc-$RELEASE"
+    ;;
+  *)
+    printf "Skipped deletion of ${BLUE}rc-$RELEASE${NC}\n"
+    ;;
+esac
