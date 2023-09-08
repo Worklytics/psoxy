@@ -147,7 +147,8 @@ not of expected type, will be removed from the response.
       - `object` a JSON object
       - `array` a JSON array
       - `string` a JSON string
-      - `number` a JSON number, including integers or decimal.
+      - `number` a JSON number, either integer or decimal.
+      - `integer` a JSON integer (not a decimal)
       - `boolean` a JSON boolean
   - `properties` - for `type == object`, a map of field names to schema to filter field's value
      against (eg, another `JsonSchemaFilter` for the field itself)
