@@ -134,7 +134,10 @@ should be filtered. Our implementation attempts to align to the [JSON Schema](ht
 specification, with some variation as it is intended for *filtering* rather than *validation*. But
 generally speaking, you should be able to copy the JSON Schema for an API endpoint from its
 [OpenAPI specification](https://swagger.io/specification/) as a starting point for the
-`responseSchema` value in your rule set.
+`responseSchema` value in your rule set. Similarly, there are tools that can generate JSON Schema
+from example JSON content, as well as from data models in various languages, that may be useful.
+
+See: https://json-schema.org/implementations.html#schema-generators
 
 If a `responseSchema` attribute is specified for an `endpoint`, the response content will be
 *filtered* (rather than validated) against that schema. Eg, fields NOT specified in the schema, or
@@ -147,7 +150,7 @@ not of expected type, will be removed from the response.
       - `number` a JSON number, including integers or decimal.
       - `boolean` a JSON boolean
   - `properties` - for `type == object`, a map of field names to schema to filter field's value
-                   against (eg, another `JsonSchemaFilter` for the field itself)
+     against (eg, another `JsonSchemaFilter` for the field itself)
   - `items` - for `type == array`, a schema to filter each item in the array against (again, a `JsonSchemaFilter`)
   - `format` - for `type == string`, a format to expect for the string value. As of v0.4.38, this is
      not enforced by the proxy.
