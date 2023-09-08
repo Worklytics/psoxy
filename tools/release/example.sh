@@ -15,7 +15,7 @@ EXAMPLE_TEMPLATE_REPO=$3
 
 display_usage() {
     printf "Usage:\n"
-    printf "  ./release-example.sh <release-tag> <path-to-repo> <example> <path-to-example-repo>\n"
+    printf "  ./release-example.sh <path-to-repo> <example> <path-to-example-repo>\n"
     printf "  ./release-example.sh ~/code/psoxy/ aws-all ~/psoxy-example-aws\n"
     printf "  ./release-example.sh ~/code/psoxy/ gcp ~/psoxy-example-gcp\n"
 }
