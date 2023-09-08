@@ -27,13 +27,18 @@ A ruleset is a list of API endpoints that are permitted to be invoked through th
 endpoint in this list will be rejected with a `403` response.
 
 ### Endpoint Specification
-`<endpoint> ::= <path-template> <transforms>`
+`<endpoint> ::= <path-template> <response-schema> <transforms>`
 
 `<path-template> ::= "- pathTemplate: " <string>`
 Each endpoint is specified by a path template, based on OpenAPI Spec v3.0.0 Path Template syntax.  Variable path
 segments are enclosed in curly braces (`{}`) and are matched by any value that does not contain an `/` character.
 
 See: https://swagger.io/docs/specification/paths-and-operations/
+
+
+`<response-schema> ::= "responseSchema: " <json-schema-filter>`
+
+See: [Response Schema Specification](#response-schema-specification) below.
 
 `<transforms> ::= "transforms:" <transform-list>`
 `<transform-list> ::= <transform> | <transform> <transform-list>`
@@ -122,5 +127,132 @@ Options:
      value.
 
 
+### Response Schema Specification
 
+A "response schema" is a "JSON Schema Filter" structure, specifying how response (which must be JSON)
+should be filtered. Our implementation attempts to align to the [JSON Schema](https://json-schema.org/specification-links.html)
+specification, with some variation as it is intended for *filtering* rather than *validation*. But
+generally speaking, you should be able to copy the JSON Schema for an API endpoint from its
+[OpenAPI specification](https://swagger.io/specification/) as a starting point for the
+`responseSchema` value in your rule set.
 
+If a `responseSchema` attribute is specified for an `endpoint`, the response content will be
+*filtered* (rather than validated) against that schema. Eg, fields NOT specified in the schema, or
+not of expected type, will be removed from the response.
+
+  - `type` - one of :
+      - `object` a JSON object
+      - `array` a JSON array
+      - `string` a JSON string
+      - `number` a JSON number, including integers or decimal.
+      - `boolean` a JSON boolean
+  - `properties` - for `type == object`, a map of field names to schema to filter field's value
+                   against (eg, another `JsonSchemaFilter` for the field itself)
+  - `items` - for `type == array`, a schema to filter each item in the array against (again, a `JsonSchemaFilter`)
+  - `format` - for `type == string`, a format to expect for the string value. As of v0.4.38, this is
+     not enforced by the proxy.
+  - `$ref` - a reference to a schema specified in the `definitions` property of the root schema.
+  - `definitions` - a map of schema names to schemas of type `JsonSchemaFilter`; only supported at
+     root schema of endpoint.
+
+Example:
+
+The following is for a User from the GitHub API. See: https://docs.github.com/en/rest/users/users?apiVersion=2022-11-28#get-a-user
+
+```yaml
+  - pathTemplate: "/users/{username}"
+    responseSchema:
+      type: "object"
+      properties:
+        data:
+          type: "object"
+          properties:
+            organization:
+              type: "object"
+              properties:
+                samlIdentityProvider:
+                  type: "object"
+                  properties:
+                    externalIdentities:
+                      type: "object"
+                      properties:
+                        pageInfo:
+                          type: "object"
+                          properties:
+                            hasNextPage:
+                              type: "boolean"
+                            endCursor:
+                              type: "string"
+                        edges:
+                          type: "array"
+                          items:
+                            type: "object"
+                            properties:
+                              node:
+                                type: "object"
+                                properties:
+                                  guid:
+                                    type: "string"
+                                  samlIdentity:
+                                    type: "object"
+                                    properties:
+                                      nameId:
+                                        type: "string"
+                                  user:
+                                    type: "object"
+                                    properties:
+                                      login:
+                                        type: "string"
+                membersWithRole:
+                  type: "object"
+                  properties:
+                    pageInfo:
+                      type: "object"
+                      properties:
+                        hasNextPage:
+                          type: "boolean"
+                        endCursor:
+                          type: "string"
+                    edges:
+                      type: "array"
+                      items:
+                        type: "object"
+                        properties:
+                          node:
+                            type: "object"
+                            properties:
+                              email:
+                                type: "string"
+                              login:
+                                type: "string"
+                              id:
+                                type: "string"
+                              isSiteAdmin:
+                                type: "boolean"
+                              organizationVerifiedDomainEmails:
+                                type: "array"
+                                items:
+                                  type: "string"
+        errors:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              type:
+                type: "string"
+              path:
+                type: "array"
+                items:
+                  type: "string"
+              locations:
+                type: "array"
+                items:
+                  type: "object"
+                  properties:
+                    line:
+                      type: "integer"
+                    column:
+                      type: "integer"
+              message:
+                type: "string"
+```
