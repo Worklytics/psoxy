@@ -101,6 +101,20 @@ Some extensions of redaction are also supported:
       event titles if match variants of 'Focus Time', 'No Meetings', etc)
    - `!<redactRegexMatches>` - redact content IF it matches one of the `regex`s included as an option.
 
+By using a negation in the JSON Path for the transformation, `!<redact>` can be used to implement
+default-deny style rules, where all fields are redacted except those explicitly listed in the JSON
+Path expression. This can also redact object-valued fields, conditionally based on object properties
+as shown below.
+
+Eg, the following redacts all headers that have a name value other than those explicitly listed
+below:
+```yaml
+- !<redact>
+  jsonPaths:
+    - "$.messages.payload.headers[?(!(@.name =~ /^From|To|Cc|Bcc|X-Original-Sender|Delivered-To|Sender|Message-ID|Date|In-Reply-To|Original-Message-ID|References$/i))]"
+```
+
+
 #### Tokenize
 
 `!<tokenize>` - replaces matching values it with a reversible token, which proxy can reverse to the
@@ -130,7 +144,12 @@ Options:
 ### Response Schema Specification
 
 A "response schema" is a "JSON Schema Filter" structure, specifying how response (which must be JSON)
-should be filtered. Our implementation attempts to align to the [JSON Schema](https://json-schema.org/specification-links.html)
+should be filtered. Using this, you can implement a "default deny" approach to sanitizing API
+fields in a manner that may be more convenient than using JSON paths with conditional negations (a
+redact transform with a JSON path that matches all but an explicit list of named fields is the other
+approach to implementing 'default deny' style rules).
+
+Our "JSON Schema Filter" implementation attempts to align to the [JSON Schema](https://json-schema.org/specification-links.html)
 specification, with some variation as it is intended for *filtering* rather than *validation*. But
 generally speaking, you should be able to copy the JSON Schema for an API endpoint from its
 [OpenAPI specification](https://swagger.io/specification/) as a starting point for the
