@@ -5,6 +5,7 @@ import chalk from 'chalk';
 import psoxyTestCall from './psoxy-test-call.js';
 import { callDataSourceEndpoints } from './data-sources/runner.js';
 import getLogger from './lib/logger.js';
+import _ from 'lodash';
 
 const require = createRequire(import.meta.url);
 const { version } = require('./package.json');
@@ -30,7 +31,7 @@ const AWS_ACCESS_DENIED_EXCEPTION_REGEXP = new RegExp(/(?<arn>arn:aws:iam::\d+:\
     )
     .option('-t, --token <token>', 'Authorization token for GCP')
     .option('-v, --verbose', 'Verbose output', false)
-    .option('-z, --gzip', 'Add gzip compression header', false)
+    .option('-z, --gzip [type]', 'Add gzip compression header (default: true, "-z false" to remove)', true)
     .option('--health-check', 'Health Check call: check Psoxy deploy is running')
     .addOption(new Option('-d, --data-source <name>',
       'Data source to test all available endpoints').choices([
@@ -64,6 +65,10 @@ const AWS_ACCESS_DENIED_EXCEPTION_REGEXP = new RegExp(/(?<arn>arn:aws:iam::\d+:\
 
   program.parse(process.argv);
   const options = program.opts();
+  if (_.isString(options.gzip)) {
+    options.gzip = !(options.gzip === 'false');
+  }
+
   const logger = getLogger(options.verbose);
 
   let result;
@@ -74,11 +79,11 @@ const AWS_ACCESS_DENIED_EXCEPTION_REGEXP = new RegExp(/(?<arn>arn:aws:iam::\d+:\
       result = await psoxyTestCall(options);
     }
   } catch (error) {
-    if (error?.name === 'AccessDenied' && error.message && 
+    if (error?.name === 'AccessDenied' && error.message &&
       AWS_ACCESS_DENIED_EXCEPTION_REGEXP.test(error.message)) {
       const errorMessage = error.message.replace(
         AWS_ACCESS_DENIED_EXCEPTION_REGEXP, chalk.bold.red('$<arn>'));
-      const fixErrorHint = chalk.blue('Fix it by adding the ARN to `caller_aws_arns` list in "terraform.tfvars" and run `terraform apply` again.');
+      const fixErrorHint = chalk.blue('Make sure your AWS (MFA) session is not expired and that the ARN is included in the `caller_aws_arns` list of your "terraform.tfvars" (run `terraform apply` again if necessary).');
       logger.error(`${errorMessage}\n${fixErrorHint}`);
     } else {
       logger.error(error.statusMessage || error.message);
