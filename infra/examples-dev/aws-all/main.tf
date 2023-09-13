@@ -93,6 +93,10 @@ provider "aws" {
     role_arn = var.aws_assume_role_arn
   }
 
+  default_tags {
+    tags = var.default_tags
+  }
+
   allowed_account_ids = [
     var.aws_account_id
   ]
