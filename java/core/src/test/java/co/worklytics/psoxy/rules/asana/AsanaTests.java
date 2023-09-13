@@ -32,7 +32,7 @@ public class AsanaTests extends JavaRulesTestBaseCase {
 
     @Test
     void workspaces() {
-        //String jsonString = asJson(exampleDirectoryPath, "users.json");
+        //String jsonString = asJson("users.json");
 
 
         String endpoint = "https://app.asana.com/api/1.0/workspaces";
@@ -48,7 +48,7 @@ public class AsanaTests extends JavaRulesTestBaseCase {
 
     @Test
     void users() {
-        String jsonString = asJson(exampleDirectoryPath, "users.json");
+        String jsonString = asJson("users.json");
 
         //no single-user case
         assertUrlBlocked("https://app.asana.com/api/1.0/users/123123");
@@ -70,7 +70,7 @@ public class AsanaTests extends JavaRulesTestBaseCase {
 
     @Test
     void teams() {
-        String jsonString = asJson(exampleDirectoryPath, "teams.json");
+        String jsonString = asJson("teams.json");
 
         String endpoint = "https://app.asana.com/api/1.0/workspaces/123123/teams";
 
@@ -84,7 +84,7 @@ public class AsanaTests extends JavaRulesTestBaseCase {
 
     @Test
     void projects() {
-        String jsonString = asJson(exampleDirectoryPath, "projects.json");
+        String jsonString = asJson("projects.json");
 
         String endpoint = "https://app.asana.com/api/1.0/teams/123123/projects";
 
@@ -100,7 +100,7 @@ public class AsanaTests extends JavaRulesTestBaseCase {
 
     @Test
     void tasks() {
-        String jsonString = asJson(exampleDirectoryPath, "tasks.json");
+        String jsonString = asJson("tasks.json");
 
         String endpoint = "https://app.asana.com/api/1.0/tasks?project=fake";
 
@@ -114,7 +114,7 @@ public class AsanaTests extends JavaRulesTestBaseCase {
 
     @Test
     void stories() {
-        String jsonString = asJson(exampleDirectoryPath, "stories.json");
+        String jsonString = asJson("stories.json");
 
         String endpoint = "https://app.asana.com/api/1.0/tasks/123123/stories";
 
