@@ -73,7 +73,7 @@ abstract public class RulesBaseTestCase {
          * (null if no example responses)
          */
         @Builder.Default
-        String exampleApiResponsesDirectoryPath = "example-responses";
+        String exampleApiResponsesDirectoryPath = "example-api-responses/original";
 
 
         public String getExampleApiResponsesDirectoryPathFull() {
@@ -85,7 +85,7 @@ abstract public class RulesBaseTestCase {
          * case
          */
         @Builder.Default
-        String exampleSanitizedApiResponsesPath = "sanitized-responses";
+        String exampleSanitizedApiResponsesPath = "example-api-responses/sanitized";
 
         public String getExampleSanitizedApiResponsesPathFull() {
             return sourceDocsRoot() + exampleSanitizedApiResponsesPath;
