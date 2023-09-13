@@ -128,6 +128,14 @@ class ColumnarRulesTest {
         assertEquals(yaml,
                 yamlMapper.writeValueAsString(rules));
 
+        ColumnarRules fromYaml =
+            yamlMapper.readerFor(ColumnarRules.class).readValue(yaml);
+
+        assertNotNull(fromYaml.getFieldsToTransform());
+        assertNotNull(fromYaml.getColumnsToPseudonymize());
+        assertNotNull(fromYaml.getColumnsToRedact());
+        assertNotNull(fromYaml.getColumnsToRename());
+        assertNotNull(fromYaml.getColumnsToDuplicate());
     }
 
 }

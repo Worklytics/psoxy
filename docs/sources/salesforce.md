@@ -49,6 +49,6 @@ Before running the example, you have to populate the following variables in terr
      ```
    In that case, removing from the query the fields LastModifiedById,NumberOfEmployees,OwnerId,Ownership,ParentId,Rating,Sic,Type will fix the issues.
 
-   However, if running any of the queries you receive a 401/403/500/512 it may be related to some misconfiguration in the Salesforce Application (a 401/403 might be related to lack of permissions)
-   the function (missing value for `salesforce_domain` for 500/512 errors)
+   However, if running any of the queries you receive a 401/403/500/512. A 401/403 it might be related to some misconfiguration in the Salesforce Application due lack of permissions;
+   a 500/512 it could be related to missing parameter in the function configuration (for example, a missing value for `salesforce_domain` variable in your terraform vars)
 NOTE: derived from [worklytics-connector-specs](../../infra/modules/worklytics-connector-specs/main.tf); refer to that for definitive information.

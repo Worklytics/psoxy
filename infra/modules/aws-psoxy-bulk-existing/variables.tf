@@ -103,6 +103,10 @@ variable "rules" {
     columnsToPseudonymize = list(string)
     columnsToDuplicate    = map(string)
     columnsToRename       = map(string)
+    fieldsToTransform     = optional(map(object({
+      newName = string
+      transforms = optional(list(map(string)), [])
+    })), {})
   })
   description = "Rules to apply to a columnar flat file during transformation"
   default = {
@@ -112,6 +116,7 @@ variable "rules" {
     columnsToPseudonymize = []
     columnsToDuplicate    = {}
     columnsToRename       = {}
+    fieldsToTransform     = {}
   }
 }
 

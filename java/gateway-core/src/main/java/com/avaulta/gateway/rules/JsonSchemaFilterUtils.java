@@ -400,7 +400,7 @@ public class JsonSchemaFilterUtils {
         @JsonAlias("else")
         ConditionJsonSchema _else;
 
-        @JsonAlias("if")
+        @JsonAlias("then")
         ThenJsonSchema _then;
 
         @JsonAlias("const")

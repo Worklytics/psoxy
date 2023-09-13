@@ -133,7 +133,11 @@ public class AsanaTests extends JavaRulesTestBaseCase {
 
     @Override
     public Stream<InvocationExample> getExamples() {
-        return Stream.of(InvocationExample.of("https://app.asana.com/api/1.0/users", "users.json"),
+        return Stream.of(
+                InvocationExample.of("https://app.asana.com/api/1.0/workspaces?limit=75&opt_fields=gid", "workspaces.json"),
+                InvocationExample.of("https://app.asana.com/api/1.0/workspaces", "workspaces.json"),
+
+                InvocationExample.of("https://app.asana.com/api/1.0/users", "users.json"),
 
                 InvocationExample.of("https://app.asana.com/api/1.0/workspaces/123/teams", "teams.json"),
 

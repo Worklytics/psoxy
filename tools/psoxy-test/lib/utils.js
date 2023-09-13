@@ -11,6 +11,7 @@ import path from 'path';
 import _ from 'lodash';
 import spec from '../data-sources/spec.js';
 import getLogger from './logger.js';
+import zlib from 'zlib';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // In case Psoxy is slow to respond (Lambda can take up to 20s+ to bootstrap),
@@ -64,8 +65,9 @@ function getFileNameFromURL(url, timestamp = true, extension = '.json') {
  */
 function getCommonHTTPHeaders(options = {}) {
   const headers = {
-    'Accept-Encoding': options.gzip ? 'gzip' : '*',
+    'Accept-Encoding': options.gzip ? 'gzip,deflate' : '*',
     'X-Psoxy-Skip-Sanitizer': options.skip?.toString() || 'false',
+    'User-Agent': 'psoxy-test (gzip)', // w/o (gzip) here, GCP Cloud functions don't compress response
   };
   if (options.impersonate) {
     headers['X-Psoxy-User-To-Impersonate'] = options.impersonate;
@@ -90,7 +92,7 @@ function getCommonHTTPHeaders(options = {}) {
 function requestWrapper(url, method = 'GET', headers) {
   url = typeof url === 'string' ? new URL(url) : url;
   const params = url.searchParams.toString();
-  let responseData = '';
+  const responseBody = [];
   return new Promise((resolve, reject) => {
     const req = https.request(
       {
@@ -102,20 +104,44 @@ function requestWrapper(url, method = 'GET', headers) {
         timeout: REQUEST_TIMEOUT_MS,
       },
       (res) => {
-        res.on('data', (data) => (responseData += data));
+        res.on('data', (data) => {
+          responseBody.push(data);
+        });
         res.on('end', () => {
-          resolve({
-            status: res.statusCode,
-            statusMessage: res.statusMessage,
-            headers: res.headers,
-            data: responseData,
-          });
+          const contentEncoding = res.headers['content-encoding'];
+          if (['gzip', 'deflate'].includes(contentEncoding)) {
+            const data = Buffer.concat(responseBody);
+            const callback = (error, decompressed) => {
+              if (error) {
+                reject({ statusMessage: 'Unable to decompress Psoxy response' });
+              } else {
+                resolve({
+                  status: res.statusCode,
+                  statusMessage: res.statusMessage,
+                  headers: res.headers,
+                  data: decompressed.toString(),
+                });
+              }
+            }
+            if (contentEncoding === 'gzip') {
+              zlib.gunzip(data, callback);
+            } else {
+              zlib.inflate(data, callback);
+            }
+          } else {
+            resolve({
+              status: res.statusCode,
+              statusMessage: res.statusMessage,
+              headers: res.headers,
+              data: responseBody.join(''),
+            });
+          }
         });
       }
     );
     req.on('timeout', () => {
       req.destroy();
-      reject({ statusMessage: 'Psoxy is taking too long to respond'});
+      reject({ statusMessage: 'Psoxy is taking too long to respond' });
     });
     req.on('error', (error) => {
       reject({ status: error.code, statusMessage: error.message });
@@ -126,9 +152,9 @@ function requestWrapper(url, method = 'GET', headers) {
 
 /**
  * Simple wrapper around `aws4` to ease testing.
- * 
- * TODO aws4 is not able to resolve region nor service (see how we try to 
- *  resolve the "service" here)from the URL for our use cases, so we need to 
+ *
+ * TODO aws4 is not able to resolve region nor service (see how we try to
+ *  resolve the "service" here)from the URL for our use cases, so we need to
  *  improve the resolution of those values
  *
  * Ref: https://github.com/mhart/aws4#api
