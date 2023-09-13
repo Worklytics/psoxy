@@ -54,6 +54,7 @@ Currently, the supports JSON Schema features are:
   - `pattern` : a regex pattern to match against the value
   - `enum` : a list of values to match against the value
 
+`null`/empty is valid for all types; you can use a pattern to restrict this further.
 
 #### Response Schema
 
