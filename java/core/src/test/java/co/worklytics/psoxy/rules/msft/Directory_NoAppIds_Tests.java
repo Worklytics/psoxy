@@ -22,7 +22,7 @@ public class Directory_NoAppIds_Tests extends DirectoryTests {
         .defaultScopeId("azure-ad")
         .sourceKind("directory")
         .rulesFile("directory_no-app-ids")
-        .exampleSanitizedApiResponsesPath("example-responses-sanitized_wo-app-ids")
+        .exampleSanitizedApiResponsesPath("example-api-responses/sanitized_no-app-ids/")
         .build();
 
     @ValueSource(strings = {
@@ -38,7 +38,7 @@ public class Directory_NoAppIds_Tests extends DirectoryTests {
     @Override
     @Test
     void user() {
-        String jsonString = asJson("user.json");
+        String jsonString = asJson(DIRECTORY_API_EXAMPLES_PATH, "user.json");
 
         String endpoint = "https://graph.microsoft.com/v1.0/users/p~2343adsfasdfa";
 
@@ -66,7 +66,7 @@ public class Directory_NoAppIds_Tests extends DirectoryTests {
 
     @Test
     void user_noAppIds() {
-        String jsonString = asJson("user.json");
+        String jsonString = asJson(DIRECTORY_API_EXAMPLES_PATH, "user.json");
 
         String endpoint = "https://graph.microsoft.com/v1.0/users/p~2343adsfasdfa";
 
@@ -84,7 +84,7 @@ public class Directory_NoAppIds_Tests extends DirectoryTests {
 
     @Test
     void users_noAppIds() {
-        String jsonString = asJson("users.json");
+        String jsonString = asJson(DIRECTORY_API_EXAMPLES_PATH, "users.json");
 
         String endpoint = "https://graph.microsoft.com/v1.0/users";
 
@@ -108,7 +108,7 @@ public class Directory_NoAppIds_Tests extends DirectoryTests {
     void groupMembers_noAppIds() {
         String endpoint = "https://graph.microsoft.com/v1.0/groups/02bd9fd6-8f93-4758-87c3-1fb73740a315/members?$count=true";
 
-        String jsonString = asJson("group-members.json");
+        String jsonString = asJson(DIRECTORY_API_EXAMPLES_PATH, "group-members.json");
 
         Collection<String> PII = Arrays.asList(
             "87d349ed-44d7-43e1-9a83-5f2406dee5bd",

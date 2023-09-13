@@ -18,6 +18,6 @@ public class Calendar_NoAppIds_Tests extends CalendarTests {
         .defaultScopeId("azure-ad")
         .sourceKind("outlook-cal")
         .rulesFile("outlook-cal_no-app-ids")
-        .exampleSanitizedApiResponsesPath("example-responses-sanitized_wo-app-ids")
+        .exampleSanitizedApiResponsesPath("example-api-responses/sanitized_no-app-ids/")
         .build();
 }

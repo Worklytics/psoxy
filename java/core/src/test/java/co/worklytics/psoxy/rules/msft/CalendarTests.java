@@ -18,7 +18,7 @@ public class CalendarTests extends DirectoryTests {
     final Rules2 rulesUnderTest = PrebuiltSanitizerRules.OUTLOOK_CALENDAR;
 
     @Getter
-    final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
+    RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
         .sourceFamily("microsoft-365")
         .defaultScopeId("azure-ad")
         .sourceKind("outlook-cal")

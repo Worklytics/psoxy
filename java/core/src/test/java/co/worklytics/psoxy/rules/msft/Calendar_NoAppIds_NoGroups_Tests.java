@@ -13,12 +13,12 @@ public class Calendar_NoAppIds_NoGroups_Tests extends CalendarTests {
     final Rules2 rulesUnderTest = PrebuiltSanitizerRules.OUTLOOK_CALENDAR_NO_APP_IDS_NO_GROUPS;
 
     @Getter
-    final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
+    RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
         .sourceFamily("microsoft-365")
         .defaultScopeId("azure-ad")
         .sourceKind("outlook-cal")
-        .rulesFile("directory_no-app-ids_no-groups")
-        .exampleSanitizedApiResponsesPath("example-responses-sanitized_wo-app-ids_no-groups")
+        .rulesFile("outlook-cal_no-app-ids_no-groups")
+        .exampleSanitizedApiResponsesPath("example-api-responses/sanitized_no-app-ids_no-groups/")
         .build();
 
     @Override

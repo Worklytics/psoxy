@@ -26,7 +26,6 @@ public class GMailTests extends JavaRulesTestBaseCase {
         .sourceFamily("google-workspace")
         .defaultScopeId("gapps")
         .sourceKind("gmail")
-        .exampleSanitizedApiResponsesPath("example-responses-sanitized_v2")
         .build();
 
     @Test

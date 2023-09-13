@@ -59,6 +59,7 @@ abstract public class RulesBaseTestCase {
     public abstract RulesTestSpec getRulesTestSpec();
 
 
+    @With
     @Builder
     public static class RulesTestSpec {
 
@@ -75,9 +76,12 @@ abstract public class RulesBaseTestCase {
         @Builder.Default
         String exampleApiResponsesDirectoryPath = "example-api-responses/original/";
 
+        String exampleApiResponsesDirectoryPathFull;
+
 
         public String getExampleApiResponsesDirectoryPathFull() {
-            return sourceDocsRoot() + exampleApiResponsesDirectoryPath;
+            return Optional.ofNullable(exampleApiResponsesDirectoryPathFull)
+                .orElse(sourceDocsRoot() + exampleApiResponsesDirectoryPath);
         }
 
         /**
@@ -88,8 +92,11 @@ abstract public class RulesBaseTestCase {
         @Builder.Default
         String exampleSanitizedApiResponsesPath = "example-api-responses/sanitized/";
 
+        String exampleSanitizedApiResponsesPathFull;
+
         public String getExampleSanitizedApiResponsesPathFull() {
-            return sourceDocsRoot() + exampleSanitizedApiResponsesPath;
+            return Optional.ofNullable(exampleSanitizedApiResponsesPathFull)
+                .orElse(sourceDocsRoot() + exampleSanitizedApiResponsesPath);
         }
 
         String rulesFile;
@@ -213,6 +220,9 @@ abstract public class RulesBaseTestCase {
                 String sanitized = sanitize(example.getRequestUrl(), original);
 
                 String sanitizedFilepath = getRulesTestSpec().getExampleSanitizedApiResponsesPathFull() + example.getPlainExampleFile();
+                if (!sanitizedFilepath.endsWith("/")) {
+                    sanitizedFilepath = sanitizedFilepath + "/";
+                }
 
                 String expected = StringUtils.trim(new String(TestUtils.getData(sanitizedFilepath)));
 

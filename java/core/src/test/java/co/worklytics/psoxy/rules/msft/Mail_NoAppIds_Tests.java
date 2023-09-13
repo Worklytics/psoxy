@@ -18,7 +18,7 @@ public class Mail_NoAppIds_Tests extends MailTests {
         .defaultScopeId("azure-ad")
         .sourceKind("outlook-mail")
         .rulesFile("outlook-mail_no-app-ids")
-        .exampleSanitizedApiResponsesPath("example-responses-sanitized_wo-app-ids")
+        .exampleSanitizedApiResponsesPath("example-api-responses/sanitized_no-app-ids/")
         .build();
 
 }

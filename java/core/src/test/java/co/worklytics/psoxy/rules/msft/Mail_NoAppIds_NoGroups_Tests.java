@@ -18,6 +18,6 @@ public class Mail_NoAppIds_NoGroups_Tests extends MailTests {
         .defaultScopeId("azure-ad")
         .sourceKind("outlook-mail")
         .rulesFile("outlook-mail_no-app-ids_no-groups")
-        .exampleSanitizedApiResponsesPath("example-responses-sanitized_wo-app-ids_no-groups")
+        .exampleSanitizedApiResponsesPath("example-api-responses/sanitized_no-app-ids_no-groups/")
         .build();
 }

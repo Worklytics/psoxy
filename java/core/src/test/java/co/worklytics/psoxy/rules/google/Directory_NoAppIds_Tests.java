@@ -20,7 +20,7 @@ public class Directory_NoAppIds_Tests extends DirectoryTests {
         .defaultScopeId("gapps")
         .sourceKind("directory")
         .rulesFile("directory_no-app-ids")
-        .exampleSanitizedApiResponsesPath("example-responses-sanitized-wo-app-ids")
+        .exampleSanitizedApiResponsesPath("example-api-responses/sanitized_no-app-ids/")
         .build();
 
     @SneakyThrows

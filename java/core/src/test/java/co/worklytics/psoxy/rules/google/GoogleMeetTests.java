@@ -21,7 +21,7 @@ class GoogleMeetTests extends JavaRulesTestBaseCase {
     final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
         .sourceFamily("google-workspace")
         .defaultScopeId("gapps")
-        .sourceKind("google-meet")
+        .sourceKind("meet")
         .build();
 
     @SneakyThrows
