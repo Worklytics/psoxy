@@ -19,14 +19,13 @@ public class GDriveV3Tests extends JavaRulesTestBaseCase {
     final RESTRules rulesUnderTest = PrebuiltSanitizerRules.GDRIVE;
 
     @Getter
-    final String exampleDirectoryPath = "api-response-examples/g-workspace/gdrive-v3";
+    final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
+        .sourceFamily("google-workspace")
+        .defaultScopeId("gapps")
+        .sourceKind("gdrive")
+        .exampleSanitizedApiResponsesPath("example-responses-sanitized_v3")
+        .build();
 
-    @Getter
-    final String defaultScopeId = "gapps";
-
-
-    @Getter
-    final String yamlSerializationFilepath = "google-workspace/gdrive";
 
 
     @SneakyThrows

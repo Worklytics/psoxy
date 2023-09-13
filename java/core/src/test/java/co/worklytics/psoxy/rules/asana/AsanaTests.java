@@ -17,13 +17,9 @@ public class AsanaTests extends JavaRulesTestBaseCase {
     final RESTRules rulesUnderTest = PrebuiltSanitizerRules.ASANA;
 
     @Getter
-    final String exampleDirectoryPath = "api-response-examples/asana";
-
-    @Getter
-    final String defaultScopeId = "asana";
-
-    @Getter
-    final String yamlSerializationFilepath = "asana/asana";
+    final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
+        .sourceKind("asana")
+        .build();
 
     @Disabled // not reliable; seems to have different value via IntelliJ/AWS deployment and my
     // laptop's maven, which doesn't make any sense, given that binary deployed to AWS was built via

@@ -13,16 +13,11 @@ public class Mail_NoAppIds_NoGroups_Tests extends MailTests {
     final Rules2 rulesUnderTest = PrebuiltSanitizerRules.OUTLOOK_MAIL_NO_APP_IDS_NO_GROUPS;
 
     @Getter
-    final String exampleDirectoryPath = "api-response-examples/microsoft-365/outlook-mail";
-
-    @Getter
-    final String defaultScopeId = "azure-ad";
-
-    @BeforeEach
-    public void setTestSpec() {
-        this.setTestSpec(RulesTestSpec.builder()
-            .yamlSerializationFilePath("microsoft-365/outlook-mail_no-app-ids_no-groups")
-            .sanitizedExamplesDirectoryPath("api-response-examples/microsoft-365/outlook-mail/sanitized-no-app-ids_no-groups")
-            .build());
-    }
+    final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
+        .sourceFamily("microsoft-365")
+        .defaultScopeId("azure-ad")
+        .sourceKind("outlook-mail")
+        .rulesFile("outlook-mail_no-app-ids_no-groups")
+        .exampleSanitizedApiResponsesPath("example-responses-sanitized_wo-app-ids_no-groups")
+        .build();
 }

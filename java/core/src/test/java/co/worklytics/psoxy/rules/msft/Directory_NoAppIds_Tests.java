@@ -16,13 +16,14 @@ public class Directory_NoAppIds_Tests extends DirectoryTests {
     @Getter
     final Rules2 rulesUnderTest = PrebuiltSanitizerRules.DIRECTORY_NO_MSFT_IDS;
 
-    @BeforeEach
-    public void setTestSpec() {
-        this.setTestSpec(RulesTestSpec.builder()
-                .yamlSerializationFilePath("microsoft-365/directory_no-app-ids")
-                .sanitizedExamplesDirectoryPath("api-response-examples/microsoft-365/directory/sanitized-no-app-ids")
-                .build());
-    }
+    @Getter
+    final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
+        .sourceFamily("microsoft-365")
+        .defaultScopeId("azure-ad")
+        .sourceKind("directory")
+        .rulesFile("directory_no-app-ids")
+        .exampleSanitizedApiResponsesPath("example-responses-sanitized_wo-app-ids")
+        .build();
 
     @ValueSource(strings = {
         "alice@acme.com",

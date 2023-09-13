@@ -18,23 +18,11 @@ public class CalendarTests extends DirectoryTests {
     final Rules2 rulesUnderTest = PrebuiltSanitizerRules.OUTLOOK_CALENDAR;
 
     @Getter
-    final String exampleDirectoryPath = "api-response-examples/microsoft-365/outlook-cal";
-
-    @Getter
-    final String defaultScopeId = "azure-ad";
-
-    @Getter
-    final String yamlSerializationFilepath = "microsoft-365/outlook-cal";
-
-
-    @BeforeEach
-    public void setTestSpec() {
-        this.setTestSpec(RulesTestSpec.builder()
-            .yamlSerializationFilePath("microsoft-365/outlook-cal")
-            .sanitizedExamplesDirectoryPath("api-response-examples/microsoft-365/outlook-cal/sanitized")
-            .build());
-    }
-
+    final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
+        .sourceFamily("microsoft-365")
+        .defaultScopeId("azure-ad")
+        .sourceKind("outlook-cal")
+        .build();
 
     @ParameterizedTest
     @ValueSource(strings = {"v1.0", "beta"})

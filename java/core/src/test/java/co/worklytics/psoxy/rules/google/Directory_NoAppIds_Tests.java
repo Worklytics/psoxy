@@ -1,10 +1,8 @@
 package co.worklytics.psoxy.rules.google;
 
 import co.worklytics.psoxy.rules.RESTRules;
-import co.worklytics.psoxy.rules.RuleSet;
 import lombok.Getter;
 import lombok.SneakyThrows;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.net.URL;
@@ -16,14 +14,14 @@ public class Directory_NoAppIds_Tests extends DirectoryTests {
     @Getter
     final RESTRules rulesUnderTest = PrebuiltSanitizerRules.GDIRECTORY_WITHOUT_GOOGLE_IDS;
 
-    @BeforeEach
-    public void setTestSpec() {
-        this.setTestSpec(RulesTestSpec.builder()
-                .yamlSerializationFilePath("google-workspace/directory_no-app-ids")
-            .sanitizedExamplesDirectoryPath("api-response-examples/g-workspace/directory/no-app-ids")
-            .build());
-    }
-
+    @Getter
+    final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
+        .sourceFamily("google-workspace")
+        .defaultScopeId("gapps")
+        .sourceKind("directory")
+        .rulesFile("directory_no-app-ids")
+        .exampleSanitizedApiResponsesPath("example-responses-sanitized-wo-app-ids")
+        .build();
 
     @SneakyThrows
     @Test

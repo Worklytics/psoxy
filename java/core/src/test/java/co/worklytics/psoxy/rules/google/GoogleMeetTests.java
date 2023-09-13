@@ -18,14 +18,11 @@ class GoogleMeetTests extends JavaRulesTestBaseCase {
     final RESTRules rulesUnderTest = PrebuiltSanitizerRules.GOOGLE_MEET;
 
     @Getter
-    final String exampleDirectoryPath = "api-response-examples/g-workspace/meet";
-
-    @Getter
-    final String defaultScopeId = "gapps";
-
-
-    @Getter
-    final String yamlSerializationFilepath = "google-workspace/google-meet";
+    final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
+        .sourceFamily("google-workspace")
+        .defaultScopeId("gapps")
+        .sourceKind("google-meet")
+        .build();
 
     @SneakyThrows
     @Test

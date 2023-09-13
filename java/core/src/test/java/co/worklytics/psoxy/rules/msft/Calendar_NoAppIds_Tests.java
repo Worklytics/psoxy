@@ -11,17 +11,13 @@ public class Calendar_NoAppIds_Tests extends CalendarTests {
     @Getter
     final Rules2 rulesUnderTest = PrebuiltSanitizerRules.OUTLOOK_CALENDAR_NO_APP_IDS;
 
-    @Getter
-    final String exampleDirectoryPath = "api-response-examples/microsoft-365/outlook-cal";
 
     @Getter
-    final String defaultScopeId = "azure-ad";
-
-    @BeforeEach
-    public void setTestSpec() {
-        this.setTestSpec(RulesTestSpec.builder()
-            .yamlSerializationFilePath("microsoft-365/outlook-cal_no-app-ids")
-            .sanitizedExamplesDirectoryPath("api-response-examples/microsoft-365/outlook-cal/sanitized-no-app-ids")
-            .build());
-    }
+    final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
+        .sourceFamily("microsoft-365")
+        .defaultScopeId("azure-ad")
+        .sourceKind("outlook-cal")
+        .rulesFile("outlook-cal_no-app-ids")
+        .exampleSanitizedApiResponsesPath("example-responses-sanitized_wo-app-ids")
+        .build();
 }

@@ -18,17 +18,15 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
     final Rules2 rulesUnderTest = PrebuiltSanitizerRules.DIRECTORY;
 
     @Getter
-    final String exampleDirectoryPath = "api-response-examples/microsoft-365/directory";
-
-    @Getter
-    final String defaultScopeId = "azure-ad";
-
-    @Getter
-    final String yamlSerializationFilepath = "microsoft-365/directory";
+    final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
+        .sourceFamily("microsoft-365")
+        .defaultScopeId("azure-ad")
+        .sourceKind("directory")
+        .build();
 
     @Test
     void user() {
-        String jsonString = asJson(exampleDirectoryPath, "user.json");
+        String jsonString = asJson("user.json");
 
         String endpoint = "https://graph.microsoft.com/v1.0/users/p~2343adsfasdfa";
 
@@ -57,7 +55,7 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
 
     @Test
     void users() {
-        String jsonString = asJson(exampleDirectoryPath, "users.json");
+        String jsonString = asJson("users.json");
 
         String endpoint = "https://graph.microsoft.com/v1.0/users";
 
@@ -83,7 +81,7 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
     })
     @ParameterizedTest
     void users_select(String endpoint) {
-        String jsonString = asJson(exampleDirectoryPath, "users.json");
+        String jsonString = asJson("users.json");
 
         Collection<String> PII = Arrays.asList(
             "john@worklytics.onmicrosoft.com",
@@ -120,7 +118,7 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
     void groupMembers() {
         String endpoint = "https://graph.microsoft.com/v1.0/groups/02bd9fd6-8f93-4758-87c3-1fb73740a315/members?$count=true";
 
-        String jsonString = asJson(exampleDirectoryPath, "group-members.json");
+        String jsonString = asJson("group-members.json");
         assertNotSanitized(jsonString,
             "Adele Vance",
             "AdeleV@M365x214355.onmicrosoft.com",

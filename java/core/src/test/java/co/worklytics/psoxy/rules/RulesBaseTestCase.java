@@ -54,21 +54,67 @@ abstract public class RulesBaseTestCase {
     @Inject
     protected UrlSafeTokenPseudonymEncoder urlSafeTokenPseudonymEncoder;
 
-    @Getter @Setter
-    RulesTestSpec testSpec = RulesTestSpec.builder().build();
+    public abstract RESTRules getRulesUnderTest();
+
+    public abstract RulesTestSpec getRulesTestSpec();
+
 
     @Builder
     public static class RulesTestSpec {
 
-        String sanitizedExamplesDirectoryPath;
-        Optional<String> getSanitizedExamplesDirectoryPath() {
-            return Optional.ofNullable(this.sanitizedExamplesDirectoryPath);
+        String sourceFamily; //eg, google-workspace
+
+        @NonNull
+        String sourceKind; //eg, gdrive
+
+        /**
+         * path within sourceDocsRoot to directory containing example API response for this test
+         * case
+         * (null if no example responses)
+         */
+        @Builder.Default
+        String exampleApiResponsesDirectoryPath = "example-responses";
+
+
+        public String getExampleApiResponsesDirectoryPathFull() {
+            return sourceDocsRoot() + exampleApiResponsesDirectoryPath;
         }
 
-        String yamlSerializationFilePath;
+        /**
+         * path within sourceDocsRoot to directory containing example API response for this test
+         * case
+         */
+        @Builder.Default
+        String exampleSanitizedApiResponsesPath = "sanitized-responses";
 
-        Optional<String> getYamlSerializationFilePath() {
-            return Optional.ofNullable(this.yamlSerializationFilePath);
+        public String getExampleSanitizedApiResponsesPathFull() {
+            return sourceDocsRoot() + exampleSanitizedApiResponsesPath;
+        }
+
+        String rulesFile;
+
+        String getRulesFile() {
+            return Optional.ofNullable(rulesFile).orElse(sourceKind);
+        }
+        public String getRulesFilePathFull() {
+            return sourceDocsRoot() + getRulesFile() + ".yaml";
+        }
+
+        private String sourceDocsRoot() {
+            return "/sources/" +
+                Arrays.asList(
+                        sourceFamily,
+                        sourceKind
+                    ).stream()
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.joining("/"));
+        }
+
+
+        String defaultScopeId;
+
+        String getDefaultScopeId() {
+            return Optional.ofNullable(defaultScopeId).orElse(sourceKind);
         }
     }
 
@@ -107,8 +153,7 @@ abstract public class RulesBaseTestCase {
 
         sanitizer = sanitizerFactory.create(getRulesUnderTest(),
             pseudonymizerFactory.create(Pseudonymizer.ConfigurationOptions.builder()
-
-            .defaultScopeId(getDefaultScopeId())
+            .defaultScopeId(getRulesTestSpec().getDefaultScopeId())
             //TODO: existing test cases presume this
             .pseudonymImplementation(PseudonymImplementation.LEGACY)
             .build()));
@@ -159,11 +204,11 @@ abstract public class RulesBaseTestCase {
         getExamples()
             .forEach(example -> {
                 String original =
-                    new String(TestUtils.getData(getExampleDirectoryPath() + "/" + example.getPlainExampleFile()));
+                    new String(TestUtils.getData(getRulesTestSpec().getExampleApiResponsesDirectoryPathFull() + example.getPlainExampleFile()));
                 String sanitized = sanitize(example.getRequestUrl(), original);
 
-                String sanitizedFilepath = testSpec.getSanitizedExamplesDirectoryPath()
-                    .orElse(getExampleDirectoryPath() + "/sanitized") + "/" + example.getPlainExampleFile();
+                String sanitizedFilepath = getRulesTestSpec().getExampleSanitizedApiResponsesPathFull()
+                    + "/" + example.getPlainExampleFile();
 
                 String expected = StringUtils.trim(new String(TestUtils.getData(sanitizedFilepath )));
 
@@ -186,27 +231,12 @@ abstract public class RulesBaseTestCase {
         return jsonMapper.readerFor(rules.getClass()).readValue(json);
     }
 
-
-
-    public abstract String getDefaultScopeId();
-
-    public abstract RESTRules getRulesUnderTest();
-
-    /**
-     * eg 'google-workspace/gdrive'
-     */
-    public abstract String getYamlSerializationFilepath();
-
-    public abstract String getExampleDirectoryPath();
-
-
-
     public Stream<InvocationExample> getExamples() {
         return Stream.empty();
     }
 
     protected String asJson(String filePathWithinExampleDirectory) {
-        return asJson(getExampleDirectoryPath(), filePathWithinExampleDirectory);
+        return asJson(getRulesTestSpec().getExampleApiResponsesDirectoryPathFull(), filePathWithinExampleDirectory);
     }
     protected String asJson(String directoryPath, String filePathWithinExampleDirectory) {
         return new String(TestUtils.getData(directoryPath + "/" + filePathWithinExampleDirectory));
