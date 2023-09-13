@@ -31,17 +31,31 @@ public class Endpoint {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     String pathTemplate;
 
+
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    Map<String, ParameterSchema> pathParameterSchemas;
+
+    @JsonIgnore
+    public Optional<Map<String, ParameterSchema>> getPathParameterSchemasOptional() {
+        return Optional.ofNullable(pathParameterSchemas);
+    }
+
     //if provided, only query params in this list will be allowed
     @JsonInclude(JsonInclude.Include.NON_NULL)
     List<String> allowedQueryParams;
-
-    //TODO: add conditionally allowed query parameters? (eg, match value against a regex?)
 
     @JsonIgnore
     public Optional<List<String>> getAllowedQueryParamsOptional() {
         return Optional.ofNullable(allowedQueryParams);
     }
 
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    Map<String, ParameterSchema> queryParamSchemas;
+
+    @JsonIgnore
+    public Optional<Map<String, ParameterSchema>> getQueryParamSchemasOptional() {
+        return Optional.ofNullable(queryParamSchemas);
+    }
 
     //if provided, only http methods in this list will be allowed
     @JsonInclude(JsonInclude.Include.NON_NULL)
