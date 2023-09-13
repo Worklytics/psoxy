@@ -180,10 +180,10 @@ not of expected type, will be removed from the response.
 
 Example:
 
-The following is for a User from the GitHub API. See: https://docs.github.com/en/rest/users/users?apiVersion=2022-11-28#get-a-user
+The following is for a User from the GitHub API, via graphql. See: https://docs.github.com/en/graphql/guides/forming-calls-with-graphql#the-graphql-endpoint
 
 ```yaml
-  - pathTemplate: "/users/{username}"
+  - pathTemplate: "/graphql"
     responseSchema:
       type: "object"
       properties:
