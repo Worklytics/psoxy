@@ -12,8 +12,8 @@ import { createRequire } from 'module';
 
 const require = createRequire(import.meta.url);
 // Unorthodox approach: load actual JSON response examples used by Psoxy backend
-const slackResponse = require('../../../java/core/src/test/resources/api-response-examples/slack/discovery-enterprise-info.json');
-const calendarEventsResponse = require('../../../java/core/src/test/resources/api-response-examples/g-workspace/calendar/events.json');
+const slackResponse = require('../../../docs/sources/slack/example-api-responses/original/discovery-enterprise-info.json');
+const calendarEventsResponse = require('../../../docs/sources/google-workspace/calendar/example-api-responses/original/events.json');
 
 test('Transform data sources spec with API responses: param replacement', (t) => {
   const unknownSpec = spec['foo'];
