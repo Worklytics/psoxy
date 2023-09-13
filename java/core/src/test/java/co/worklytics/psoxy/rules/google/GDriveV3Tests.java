@@ -23,8 +23,8 @@ public class GDriveV3Tests extends JavaRulesTestBaseCase {
         .sourceFamily("google-workspace")
         .defaultScopeId("gapps")
         .sourceKind("gdrive")
-        .exampleApiResponsesDirectoryPath("example-api-responses/v3-original")
-        .exampleSanitizedApiResponsesPath("example-api-responses/v3-sanitized")
+        .exampleApiResponsesDirectoryPath("example-api-responses/v3-original/")
+        .exampleSanitizedApiResponsesPath("example-api-responses/v3-sanitized/")
         .build();
 
 

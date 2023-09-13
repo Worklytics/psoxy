@@ -69,11 +69,11 @@ abstract public class RulesBaseTestCase {
 
         /**
          * path within sourceDocsRoot to directory containing example API response for this test
-         * case
+         * case, including trailing '/'
          * (null if no example responses)
          */
         @Builder.Default
-        String exampleApiResponsesDirectoryPath = "example-api-responses/original";
+        String exampleApiResponsesDirectoryPath = "example-api-responses/original/";
 
 
         public String getExampleApiResponsesDirectoryPathFull() {
@@ -82,10 +82,11 @@ abstract public class RulesBaseTestCase {
 
         /**
          * path within sourceDocsRoot to directory containing example API response for this test
-         * case
+         * case, including trailing '/'
+         *
          */
         @Builder.Default
-        String exampleSanitizedApiResponsesPath = "example-api-responses/sanitized";
+        String exampleSanitizedApiResponsesPath = "example-api-responses/sanitized/";
 
         public String getExampleSanitizedApiResponsesPathFull() {
             return sourceDocsRoot() + exampleSanitizedApiResponsesPath;
@@ -100,14 +101,18 @@ abstract public class RulesBaseTestCase {
             return sourceDocsRoot() + getRulesFile() + ".yaml";
         }
 
+        /**
+         * @return path to root, with trailing '/'
+         */
         private String sourceDocsRoot() {
-            return "/sources/" +
+            return "sources/" +
                 Arrays.asList(
                         sourceFamily,
-                        sourceKind
+                        sourceKind // never null
                     ).stream()
                     .filter(Objects::nonNull)
-                    .collect(Collectors.joining("/"));
+                    .collect(Collectors.joining("/"))
+                + "/";
         }
 
 
@@ -207,8 +212,7 @@ abstract public class RulesBaseTestCase {
                     new String(TestUtils.getData(getRulesTestSpec().getExampleApiResponsesDirectoryPathFull() + example.getPlainExampleFile()));
                 String sanitized = sanitize(example.getRequestUrl(), original);
 
-                String sanitizedFilepath = getRulesTestSpec().getExampleSanitizedApiResponsesPathFull()
-                    + "/" + example.getPlainExampleFile();
+                String sanitizedFilepath = getRulesTestSpec().getExampleSanitizedApiResponsesPathFull() + example.getPlainExampleFile();
 
                 String expected = StringUtils.trim(new String(TestUtils.getData(sanitizedFilepath )));
 
@@ -239,7 +243,11 @@ abstract public class RulesBaseTestCase {
         return asJson(getRulesTestSpec().getExampleApiResponsesDirectoryPathFull(), filePathWithinExampleDirectory);
     }
     protected String asJson(String directoryPath, String filePathWithinExampleDirectory) {
-        return new String(TestUtils.getData(directoryPath + "/" + filePathWithinExampleDirectory));
+        if (!directoryPath.endsWith("/")) {
+            directoryPath = directoryPath + "/";
+        }
+
+        return new String(TestUtils.getData(directoryPath + filePathWithinExampleDirectory));
     }
 
     @SneakyThrows

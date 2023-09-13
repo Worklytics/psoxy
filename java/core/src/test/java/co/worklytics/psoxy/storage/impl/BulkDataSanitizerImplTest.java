@@ -179,7 +179,7 @@ public class BulkDataSanitizerImplTest {
 
         ConfigService config = mock(ConfigService.class);
         when(config.getConfigPropertyAsOptional(eq(ProxyConfigProperty.RULES)))
-            .thenReturn(Optional.of(Base64.encodeBase64String(TestUtils.getData("rules/hris/csv.yaml"))));
+            .thenReturn(Optional.of(Base64.encodeBase64String(TestUtils.getData("sources/hris/csv.yaml"))));
 
         CsvRules rules = (CsvRules) rulesUtils.getRulesFromConfig(config).orElseThrow();
 
