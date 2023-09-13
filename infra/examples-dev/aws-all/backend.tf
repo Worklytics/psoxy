@@ -9,8 +9,9 @@ terraform {
   backend "local" {
   }
 
-  # example remove backend (this S3 bucket must already be provisioned, and AWS role executing
-  # terraform must be able to read/write to it - and use encryption key, if any)
+  # example backend (this S3 bucket must already be provisioned, and, when you run 'terraform apply'
+  # Terraform must be authenticated as an AWS principal allowed to read/write to it - and use its
+  # encryption key, if any)
   #  backend "s3" {
   #    bucket = "terraform_state_bucket" # fill with S3 bucket where you want the statefile to be
   #    key    = "prod_state" # fill with path where you want state file to be stored
