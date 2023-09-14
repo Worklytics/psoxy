@@ -11,6 +11,7 @@ import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.Endpoint;
 import com.avaulta.gateway.rules.JsonSchemaFilterUtils;
+import com.avaulta.gateway.rules.ParameterSchemaUtils;
 import com.avaulta.gateway.rules.transforms.Transform;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
 import com.google.common.annotations.VisibleForTesting;
@@ -42,6 +43,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder.REVERSIBLE_PSEUDONYM_PATTERN;
 import static java.util.regex.Pattern.CASE_INSENSITIVE;
 
 @Log
@@ -82,6 +84,8 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     UrlSafeTokenPseudonymEncoder urlSafePseudonymEncoder;
     @Inject
     JsonSchemaFilterUtils jsonSchemaFilterUtils;
+    @Inject
+    ParameterSchemaUtils parameterSchemaUtils;
 
 
     @Override
@@ -117,11 +121,26 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
 
     @VisibleForTesting
     Predicate<Map.Entry<Endpoint, Pattern>> getHasPathTemplateMatchingUrl(URL url) {
-        return (entry) ->
-                entry.getKey().getPathTemplate() != null && entry.getValue().matcher(url.getPath()).matches()
-                        && allowedQueryParams(entry.getKey(), URLUtils.queryParamNames(url));
-    }
+        return (entry) -> {
+            if (entry.getKey().getPathTemplate() != null) {
+                Matcher matcher = entry.getValue().matcher(url.getPath());
+                if (matcher.matches()) {
+                    boolean allParamsValid =
+                            entry.getKey().getPathParameterSchemasOptional()
+                                    .map(schemas -> schemas.entrySet().stream()
+                                        .allMatch(paramSchema -> parameterSchemaUtils.validate(paramSchema.getValue(), matcher.group(paramSchema.getKey()))))
+                                    .orElse(true);
 
+                    //q: need to catch possible IllegalArgumentException if path parameter defined in `pathParameterSchemas`
+                    // not in the path template??
+
+                    return allParamsValid &&
+                            allowedQueryParams(entry.getKey(), URLUtils.parseQueryParams(url));
+                }
+            }
+            return false;
+        };
+    }
 
     @Override
     public String sanitize(String httpMethod, URL url, String jsonResponse) {        //extra check ...
@@ -142,7 +161,8 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
         Optional<Pair<Pattern, Endpoint>> matchingEndpoint =
                 getCompiledAllowedEndpoints().entrySet().stream()
                         .filter(entry -> entry.getKey().getPathRegex() != null && entry.getValue().matcher(relativeUrl).matches()
-                                || (entry.getKey().getPathTemplate() != null && entry.getValue().matcher(url.getPath()).matches() && allowedQueryParams(entry.getKey(), URLUtils.queryParamNames(url))))
+                                || (entry.getKey().getPathTemplate() != null && entry.getValue().matcher(url.getPath()).matches()
+                                        && allowedQueryParams(entry.getKey(), URLUtils.parseQueryParams(url))))
                         .findFirst()
                         .map(entry -> Pair.of(entry.getValue(), entry.getKey()));
 
@@ -474,17 +494,24 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
 
     @VisibleForTesting
     String effectiveRegex(Endpoint endpoint) {
+        //NOTE: java capturing groups names limited to A-Z, a-z and 0-9, and must start with a letter
+
+
         return Optional.ofNullable(endpoint.getPathRegex())
                 .orElseGet(() -> "^" +
                         endpoint.getPathTemplate()
                                 .replaceAll(SPECIAL_CHAR_CLASS, "\\\\$0")
-                                .replaceAll("\\{.*?\\}", "[^/]+") + "$");
+                                .replaceAll("\\{([A-Za-z][A-Za-z0-9]*)\\}", "(?<$1>[^/]+)") + "$");
     }
 
-    boolean allowedQueryParams(Endpoint endpoint, List<String> queryParams) {
-        return endpoint.getAllowedQueryParamsOptional()
-                .map(allowedParams -> allowedParams.containsAll(queryParams))
+    boolean allowedQueryParams(Endpoint endpoint, List<Pair<String, String>> queryParams) {
+        boolean matchesAllowed = endpoint.getAllowedQueryParamsOptional()
+                .map(allowedParams -> allowedParams.containsAll(queryParams.stream().map(Pair::getKey).collect(Collectors.toList())))
                 .orElse(true);
+        return matchesAllowed
+                && endpoint.getQueryParamSchemasOptional()
+                    .map(schemas -> parameterSchemaUtils.validateAll(schemas, queryParams))
+                    .orElse(true);
     }
 
     JsonSchemaFilterUtils.JsonSchemaFilter getRootDefinitions() {
@@ -511,7 +538,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
 
         return getCompiledAllowedEndpoints().entrySet().stream()
                 .filter(entry -> hasPathRegexMatchingUrl.test(entry) || hasPathTemplateMatchingUrl.test(entry))
-                .filter(entry -> allowedQueryParams(entry.getKey(), URLUtils.queryParamNames(url))) // redundant in the pathTemplate case
+                .filter(entry -> allowedQueryParams(entry.getKey(), URLUtils.parseQueryParams(url))) // redundant in the pathTemplate case
                 .filter(entry -> allowsHttpMethod.test(entry.getKey()))
                 .findAny();
     }

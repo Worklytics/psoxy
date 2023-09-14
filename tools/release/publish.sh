@@ -9,11 +9,21 @@ NC='\e[0m' # No Color
 
 set -e
 
-if [ -z "$RELEASE" ]; then
-  printf "${RED}Please provide a release tag name.${NC}\n"
-  printf "Usage: after merged to main, before tagging:\n"
-  printf "  ./tools/release/publish.sh <release-tag>\n"
+if [ ! -f "${PATH_TO_REPO}java/pom.xml" ]; then
+  printf "${RED}${PATH_TO_REPO}java/pom.xml not found. set <path-to-repo> argument to point to the root of a psoxy checkout. Exiting.${NC}\n"
   exit 1
+fi
+
+CURRENT_RELEASE_NUMBER=$(sed -n 's|[[:space:]]*<revision>\(.*\)</revision>|\1|p' "${PATH_TO_REPO}java/pom.xml" )
+
+if [ -z "$RELEASE" ]; then
+  RELEASE="v${CURRENT_RELEASE_NUMBER}"
+else
+  # maintain compatibility with current interface
+  if [ "$RELEASE" != "v${CURRENT_RELEASE_NUMBER}" ]; then
+    printf "${RED}Release version provided, ${RELEASE}, does not match current release version in pom.xml, ${CURRENT_RELEASE_NUMBER}. Exiting.${NC}\n"
+    exit 1
+  fi
 fi
 
 git fetch origin
@@ -53,3 +63,16 @@ modified_notes=$(echo -e "$release_notes" | sed -r 's/by @[a-zA-Z0-9_-]+ in//g')
 
 # Update release notes
 gh release edit $RELEASE -n "$modified_notes"
+
+printf "Delete ${BLUE}rc-${RELEASE}${NC} tag?\n"
+read -p "(Y/n) " -n 1 -r
+REPLY=${REPLY:-Y}
+echo    # Move to a new line
+case "$REPLY" in
+  [yY][eE][sS]|[yY])
+     git branch -d "rc-$RELEASE"
+    ;;
+  *)
+    printf "Skipped deletion of ${BLUE}rc-$RELEASE${NC}\n"
+    ;;
+esac

@@ -9,6 +9,7 @@ import co.worklytics.psoxy.storage.BulkDataSanitizerFactory;
 import co.worklytics.psoxy.storage.impl.BulkDataSanitizerFactoryImpl;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.JsonSchemaFilterUtils;
+import com.avaulta.gateway.rules.ParameterSchemaUtils;
 import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
 import com.avaulta.gateway.tokens.impl.AESReversibleTokenizationStrategy;
@@ -194,6 +195,12 @@ public class PsoxyModule {
         options.logRedactions(configService.isDevelopment());
 
         return new JsonSchemaFilterUtils(objectMapper, options.build());
+    }
+
+    @Provides
+    @Singleton
+    ParameterSchemaUtils parameterSchemaUtils() {
+        return new ParameterSchemaUtils();
     }
 
     @Provides

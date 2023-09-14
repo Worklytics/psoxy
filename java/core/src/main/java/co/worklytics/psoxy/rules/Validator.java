@@ -49,6 +49,9 @@ public class Validator {
                 throw new Error("Endpoint must have either pathTemplate or pathRegex. pass `/` as pathTemplate if you want base path.");
             }
             Pattern.compile(endpoint.getPathRegex());
+
+            //TODO: validate parameter names are ALL valid java capturing group identifiers
+            // eg start w letter, contain only alphanumeric
         }
 
         endpoint.getTransforms().forEach(Validator::validate);
