@@ -36,6 +36,12 @@ variable "aws_region" {
   default     = "us-east-1"
 }
 
+variable "default_tags" {
+  type        = map(string)
+  description = "Tags to apply to all resources created by this configuration. See https://registry.terraform.io/providers/hashicorp/aws/latest/docs#default_tags for more info."
+  default     = {}
+}
+
 variable "aws_ssm_param_root_path" {
   type        = string
   description = "root to path under which SSM parameters created by this module will be created; NOTE: shouldn't be necessary to use this is you're following recommended approach of using dedicated AWS account for deployment"

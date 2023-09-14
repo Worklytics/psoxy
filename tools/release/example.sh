@@ -65,7 +65,7 @@ if [[ "${EXAMPLE_TEMPLATE_REPO: -1}" != "/" ]]; then
     EXAMPLE_TEMPLATE_REPO="$EXAMPLE_TEMPLATE_REPO/"
 fi
 
-FILES_TO_COPY=("main.tf" "variables.tf" "google-workspace.tf" "google-workspace-variables.tf" "msft-365.tf" "msft-365-variables.tf" "misc-data-source-variables.tf")
+FILES_TO_COPY=("main.tf" "variables.tf" "backend.tf" "google-workspace.tf" "google-workspace-variables.tf" "msft-365.tf" "msft-365-variables.tf" "misc-data-source-variables.tf")
 
 cd "$EXAMPLE_TEMPLATE_REPO"
 CURRENT_BRANCH=$(git branch --show-current)

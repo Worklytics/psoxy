@@ -122,5 +122,21 @@ case "$REPLY" in
 esac
 echo "" # newline
 
+# warn customer to configure their backend
+if [ -f "${TF_CONFIG_ROOT}/backend.tf" ]; then
+  printf "Your Terraform backend is configured in ${BLUE}backend.tf${NC}. We recommend you review that file and customize it to your needs. "
+  printf "By default, your configuration will use a 'local' backend, which is not recommended for production-use.\n"
+
+  if [ "$HOST_PLATFORM" == "aws" ]; then
+    printf "As you're hosting proxy in AWS, consider the ${BLUE}s3${NC} backend: https://developer.hashicorp.com/terraform/language/settings/backends/s3\n"
+  elif [ "$HOST_PLATFORM" == "gcp" ]; then
+    printf "As you're hosting proxy in GCP, consider the ${BLUE}gcs${NC} backend: https://developer.hashicorp.com/terraform/language/settings/backends/gcs\n"
+  fi
+
+  printf "Alternatively, you could replace the 'backend' block with a 'cloud' block, and use Terraform Cloud / Enterprise. See https://developer.hashicorp.com/terraform/language/settings/terraform-cloud\n"
+fi
+
 printf "Initialization complete. If you wish to remove files created by this initalization, run ${BLUE}${REPO_CLONE_BASE_DIR}tools/reset-example.sh${NC}.\n"
+
+
 
