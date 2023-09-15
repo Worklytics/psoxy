@@ -121,7 +121,7 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
     void groupMembers() {
         String endpoint = "https://graph.microsoft.com/v1.0/groups/02bd9fd6-8f93-4758-87c3-1fb73740a315/members?$count=true";
 
-        String jsonString = asJson("sources/microsoft-365/directory/example-api-responses/original/", "group-members.json");
+        String jsonString = asJson(DIRECTORY_API_EXAMPLES_PATH, "group-members.json");
         assertNotSanitized(jsonString,
             "Adele Vance",
             "AdeleV@M365x214355.onmicrosoft.com",
