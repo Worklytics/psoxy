@@ -21,13 +21,9 @@ public class ZoomRulesTests extends JavaRulesTestBaseCase {
     final Rules2 rulesUnderTest = PrebuiltSanitizerRules.ZOOM;
 
     @Getter
-    final String exampleDirectoryPath = "api-response-examples/zoom";
-
-    @Getter
-    final String defaultScopeId = "zoom";
-
-    @Getter
-    final String yamlSerializationFilepath = "zoom/zoom";
+    final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
+        .sourceKind("zoom")
+        .build();
 
     @SneakyThrows
     @ValueSource(strings = {

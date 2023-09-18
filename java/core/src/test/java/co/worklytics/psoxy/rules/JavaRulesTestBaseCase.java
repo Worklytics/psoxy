@@ -1,8 +1,9 @@
 package co.worklytics.psoxy.rules;
 
-import co.worklytics.psoxy.rules.google.PrebuiltSanitizerRules;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
+
+import java.net.URL;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -20,11 +21,12 @@ public abstract class JavaRulesTestBaseCase extends RulesBaseTestCase {
     @SneakyThrows
     @Test
     void validateYamlExample() {
-        String path = "/rules/" + getTestSpec().getYamlSerializationFilePath()
-            .orElse(getYamlSerializationFilepath()) + ".yaml";
+        String path = getRulesTestSpec().getRulesFilePathFull();
+
+        URL url = this.getClass().getClassLoader().getResource(path);
 
         RuleSet rulesFromFilesystem = yamlMapper.readerFor(getRulesUnderTest().getClass())
-            .readValue(PrebuiltSanitizerRules.class.getResource(path));
+            .readValue(url);
 
         //NOTE: this is testing equivalence of file-system rules after round-trip; not necessarily
         // that current file-system rules are byte-wise equivalent

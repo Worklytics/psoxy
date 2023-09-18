@@ -22,13 +22,11 @@ public class GMailTests extends JavaRulesTestBaseCase {
     final RESTRules rulesUnderTest = PrebuiltSanitizerRules.GMAIL;
 
     @Getter
-    final String exampleDirectoryPath = "api-response-examples/g-workspace/gmail";
-
-    @Getter
-    final String defaultScopeId = "gapps";
-
-    @Getter
-    final String yamlSerializationFilepath = "google-workspace/gmail";
+    final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
+        .sourceFamily("google-workspace")
+        .defaultScopeId("gapps")
+        .sourceKind("gmail")
+        .build();
 
     @Test
     @SneakyThrows
