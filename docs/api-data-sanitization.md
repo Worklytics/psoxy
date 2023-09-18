@@ -35,12 +35,13 @@ segments are enclosed in curly braces (`{}`) and are matched by any value that d
 
 See: https://swagger.io/docs/specification/paths-and-operations/
 
-#### Path Parameter Schemas
-`<path-parameter-schemas> ::= "- pathParameterSchemas: " <json-schema>`
+#### Path / Query Parameter Schemas
+`<path-parameter-schemas> ::= "- pathParameterSchemas: " <parameter-schema>`
+`<query-parameter-schemas> ::= "- queryParameterSchemas: " <parameter-schema>`
 
-**alpha** - a JSON Schema to use to *validate* parameter values; if validation fails, proxy will
-return 403 forbidden response. Given the use-case of validating URL parameters, only a small subset
-of JSON Schema is supported.
+**alpha** - a **parameter schema** to use to *validate* path/query parameter values; if validation
+fails, proxy will return 403 forbidden response. Given the use-case of validating URL / query
+parameters, only a small subset of JSON Schema is supported.
 
 As of 0.4.38, this is considered an alpha feature which may change in backwards-incompatible ways.
 
