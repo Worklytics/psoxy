@@ -32,17 +32,12 @@ public class AsanaTests extends JavaRulesTestBaseCase {
 
     @Test
     void workspaces() {
-        //String jsonString = asJson("users.json");
-
-
         String endpoint = "https://app.asana.com/api/1.0/workspaces";
         assertUrlAllowed(endpoint);
         assertUrlAllowed(endpoint + "?limit=75&opt_fields=gid");
 
         //misleading - some query params are allowed
         assertUrlWithQueryParamsBlocked(endpoint);
-
-
         //nothing sanitized from this for now
     }
 
