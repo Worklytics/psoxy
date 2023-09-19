@@ -138,7 +138,7 @@ public class CommonRequestHandler {
         // if requested target URL has tokenized components, reverse
         String clearTargetUrl = reverseTokenizedUrlComponents(requestedTargetUrl);
 
-        boolean tokenizedURLReversed = !Objects.equals(requestedTargetUrl, clearTargetUrl);
+        boolean tokenizedURLReversed = ObjectUtils.notEquals(requestedTargetUrl, clearTargetUrl);
 
         URL targetUrl = new URL(clearTargetUrl);
 
