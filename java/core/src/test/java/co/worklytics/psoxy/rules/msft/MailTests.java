@@ -14,14 +14,11 @@ public class MailTests extends JavaRulesTestBaseCase {
     final Rules2 rulesUnderTest = PrebuiltSanitizerRules.OUTLOOK_MAIL;
 
     @Getter
-    final String exampleDirectoryPath = "api-response-examples/microsoft-365/outlook-mail";
-
-    @Getter
-    final String defaultScopeId = "azure-ad";
-
-    @Getter
-    final String yamlSerializationFilepath = "microsoft-365/outlook-mail";
-
+    final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
+        .sourceFamily("microsoft-365")
+        .defaultScopeId("azure-ad")
+        .sourceKind("outlook-mail")
+        .build();
 
     @ParameterizedTest
     @ValueSource(strings = {"v1.0", "beta"})

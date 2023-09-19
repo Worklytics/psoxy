@@ -19,13 +19,9 @@ public class GitHubTests extends JavaRulesTestBaseCase {
     final RESTRules rulesUnderTest = PrebuiltSanitizerRules.GITHUB;
 
     @Getter
-    final String exampleDirectoryPath = "api-response-examples/github";
-
-    @Getter
-    final String defaultScopeId = "github";
-
-    @Getter
-    final String yamlSerializationFilepath = "github/github";
+    final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
+        .sourceKind("github")
+        .build();
 
     @Disabled // not reliable; seems to have different value via IntelliJ/AWS deployment and my
     // laptop's maven, which doesn't make any sense, given that binary deployed to AWS was built via
@@ -46,7 +42,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
 
     @Test
     void orgMembers() {
-        String jsonString = asJson(exampleDirectoryPath, "org_members.json");
+        String jsonString = asJson("org_members.json");
 
         String endpoint = "https://api.github.com/orgs/FAKE/members";
 
@@ -71,7 +67,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
 
     @Test
     void graphql_for_users_with_saml() {
-        String jsonString = asJson(exampleDirectoryPath, "graph_api_users_saml.json");
+        String jsonString = asJson("graph_api_users_saml.json");
 
         String endpoint = "https://api.github.com/graphql";
 
@@ -94,7 +90,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
 
     @Test
     void graphql_for_users_with_members() {
-        String jsonString = asJson(exampleDirectoryPath, "graph_api_users_members.json");
+        String jsonString = asJson("graph_api_users_members.json");
 
         String endpoint = "https://api.github.com/graphql";
 
@@ -117,7 +113,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
 
     @Test
     void user() {
-        String jsonString = asJson(exampleDirectoryPath, "user.json");
+        String jsonString = asJson("user.json");
 
         String endpoint = "https://api.github.com/users/p~IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbN_fPDYrPH3aBnAoR5-ec6f";
 
@@ -140,7 +136,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
 
     @Test
     void orgTeams() {
-        String jsonString = asJson(exampleDirectoryPath, "org_teams.json");
+        String jsonString = asJson("org_teams.json");
 
         String endpoint = "https://api.github.com/orgs/FAKE/teams";
 
@@ -158,7 +154,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
 
     @Test
     void orgTeamMembers() {
-        String jsonString = asJson(exampleDirectoryPath, "team_members.json");
+        String jsonString = asJson("team_members.json");
 
         String endpoint = "https://api.github.com/orgs/FAKE/teams/TEAM/members";
 
@@ -183,7 +179,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
 
     @Test
     void repoCommit() {
-        String jsonString = asJson(exampleDirectoryPath, "commit.json");
+        String jsonString = asJson("commit.json");
 
         String endpoint = "https://api.github.com/repos/FAKE/REPO/commits/COMMIT_REF";
 
@@ -209,7 +205,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
 
     @Test
     void repositoryCommits() {
-        String jsonString = asJson(exampleDirectoryPath, "repo_commits.json");
+        String jsonString = asJson("repo_commits.json");
 
         String endpoint = "https://api.github.com/repos/FAKE/REPO/commits";
 
@@ -235,7 +231,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
 
     @Test
     void commit_comments() {
-        String jsonString = asJson(exampleDirectoryPath, "commit_comments.json");
+        String jsonString = asJson("commit_comments.json");
 
         String endpoint = "https://api.github.com/repos/{owner}/{repo}/commits/{commit_sha}/comments";
 
@@ -252,7 +248,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
 
     @Test
     void comments_reactions() {
-        String jsonString = asJson(exampleDirectoryPath, "comment_reactions.json");
+        String jsonString = asJson("comment_reactions.json");
 
         String endpoint = "https://api.github.com/repos/FAKE/REPO/comments/COMMENT/reactions";
 
@@ -270,7 +266,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
 
     @Test
     void issue() {
-        String jsonString = asJson(exampleDirectoryPath, "issue.json");
+        String jsonString = asJson("issue.json");
 
         String endpoint = "https://api.github.com/repos/FAKE/REPO/issues/ISSUE_NUMBER";
 
@@ -297,7 +293,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
 
     @Test
     void issues() {
-        String jsonString = asJson(exampleDirectoryPath, "issues.json");
+        String jsonString = asJson("issues.json");
 
         String endpoint = "https://api.github.com/repos/FAKE/REPO/issues?page=5";
 
@@ -322,7 +318,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
 
     @Test
     void issue_comments() {
-        String jsonString = asJson(exampleDirectoryPath, "issues_comments.json");
+        String jsonString = asJson("issues_comments.json");
 
         String endpoint = "https://api.github.com/repos/FAKE/REPO/issues/ISSUE/comments";
 
@@ -345,7 +341,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
 
     @Test
     void issue_events() {
-        String jsonString = asJson(exampleDirectoryPath, "issue_events.json");
+        String jsonString = asJson("issue_events.json");
 
         String endpoint = "https://api.github.com/repos/FAKE/REPO/issues/ISSUE_ID/events";
 
@@ -367,7 +363,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
 
     @Test
     void issue_timeline() {
-        String jsonString = asJson(exampleDirectoryPath, "issue_timeline.json");
+        String jsonString = asJson("issue_timeline.json");
 
         String endpoint = "https://api.github.com/repos/FAKE/REPO/issues/ISSUE/timeline";
 
@@ -398,7 +394,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
 
     @Test
     void issue_comment_reactions() {
-        String jsonString = asJson(exampleDirectoryPath, "issues_comments_reactions.json");
+        String jsonString = asJson("issues_comments_reactions.json");
 
         String endpoint = "https://api.github.com/repos/FAKE/REPO/issues/comments/COMMENT/reactions";
 
@@ -417,7 +413,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
 
     @Test
     void issue_reactions() {
-        String jsonString = asJson(exampleDirectoryPath, "issues_reactions.json");
+        String jsonString = asJson("issues_reactions.json");
 
         String endpoint = "https://api.github.com/repos/FAKE/REPO/issues/ISSUE/reactions";
 
@@ -436,7 +432,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
 
     @Test
     void repo_events() {
-        String jsonString = asJson(exampleDirectoryPath, "repo_events.json");
+        String jsonString = asJson("repo_events.json");
 
         String endpoint = "https://api.github.com/repos/FAKE/REPO/events";
 
@@ -464,7 +460,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
 
     @Test
     void pull_reviews() {
-        String jsonString = asJson(exampleDirectoryPath, "pull_reviews.json");
+        String jsonString = asJson("pull_reviews.json");
 
         String endpoint = "https://api.github.com/repos/FAKE/REPO/pulls/PULL_NUMBER/reviews";
 
@@ -490,7 +486,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
 
     @Test
     void repositories() {
-        String jsonString = asJson(exampleDirectoryPath, "repos.json");
+        String jsonString = asJson("repos.json");
 
         String endpoint = "https://api.github.com/orgs/FAKE/repos";
 
@@ -516,7 +512,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
 
     @Test
     void pulls() {
-        String jsonString = asJson(exampleDirectoryPath, "pulls.json");
+        String jsonString = asJson("pulls.json");
 
         String endpoint = "https://api.github.com/repos/{owner}/{repo}/pulls";
 
@@ -551,7 +547,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
 
     @Test
     void pull() {
-        String jsonString = asJson(exampleDirectoryPath, "pull.json");
+        String jsonString = asJson("pull.json");
 
         String endpoint = "https://api.github.com/repos/{owner}/{repo}/pulls/PULL_NUMBER";
 
@@ -586,7 +582,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
 
     @Test
     void pullCommits() {
-        String jsonString = asJson(exampleDirectoryPath, "pull_commits.json");
+        String jsonString = asJson("pull_commits.json");
 
         String endpoint = "https://api.github.com/repos/FAKE/REPO/pulls/42/commits";
 
@@ -612,7 +608,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
 
     @Test
     void pullComments() {
-        String jsonString = asJson(exampleDirectoryPath, "pull_comments.json");
+        String jsonString = asJson("pull_comments.json");
 
         String endpoint = "https://api.github.com/repos/FAKE/REPO/pulls/42/comments";
 
@@ -636,7 +632,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
 
     @Test
     void pullReviewComments() {
-        String jsonString = asJson(exampleDirectoryPath, "pull_review_comments.json");
+        String jsonString = asJson("pull_review_comments.json");
 
         String endpoint = "https://api.github.com/repos/FAKE/REPO/pulls/42/reviews/10/comments";
 
@@ -660,7 +656,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
 
     @Test
     void org_audit_log() {
-        String jsonString = asJson(exampleDirectoryPath, "org_audit_log.json");
+        String jsonString = asJson("org_audit_log.json");
 
         String endpoint = "https://api.github.com/orgs/{org}/audit-log";
 

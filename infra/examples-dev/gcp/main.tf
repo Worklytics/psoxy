@@ -6,21 +6,9 @@ terraform {
     }
   }
 
-  # we recommend you use a secure location for your Terraform state (such as S3 bucket), as it
-  # may contain sensitive values (such as API keys) depending on which data sources you configure.
-  #
-  # local may be safe for production-use IFF you are executing Terraform from a secure location
-  #
-  # Please review and seek guidance from your Security team if in doubt.
-  backend "local" {
-  }
-
-  # example remote backend (this GCS bucket must already be provisioned, and GCP user executing
-  # terraform must be able to read/write to it)
-  #  backend "gcs" {
-  #    bucket  = "tf-state-prod"
-  #    prefix  = "proxy/terraform-state"
-  #  }
+  # NOTE: Terraform backend block is configured in a separate 'backend.tf' file, as expect everyone
+  # to customize it for their own use; whereas `main.tf` should be largely consistent across
+  # deployments
 }
 
 provider "google" {
@@ -40,7 +28,7 @@ locals {
 # call this 'generic_source_connectors'?
 module "worklytics_connectors" {
   source = "../../modules/worklytics-connectors"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.4.37"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.4.38"
 
 
   enabled_connectors            = var.enabled_connectors
@@ -89,7 +77,7 @@ locals {
 
 module "psoxy" {
   source = "../../modules/gcp-host"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-host?ref=v0.4.37"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-host?ref=v0.4.38"
 
   gcp_project_id                  = var.gcp_project_id
   environment_name                = var.environment_name
@@ -127,7 +115,7 @@ module "connection_in_worklytics" {
   for_each = local.all_instances
 
   source = "../../modules/worklytics-psoxy-connection-generic"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-generic?ref=v0.4.37"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-generic?ref=v0.4.38"
 
   psoxy_host_platform_id = local.host_platform_id
   psoxy_instance_id      = each.key

@@ -56,7 +56,7 @@ locals {
       target_host : "www.googleapis.com"
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/calendar.readonly"
-      ],
+      ]
       environment_variables : {}
       example_api_calls : [
         "/calendar/v3/calendars/primary",
@@ -149,6 +149,10 @@ locals {
       example_api_calls_user_to_impersonate : local.google_workspace_example_user
     }
   }
+
+  # backwards-compatible for v0.4.x; remove in v0.5.x
+  google_workspace_sources_backwards = { for k,v in local.google_workspace_sources :
+      k => merge(v, { example_calls: v.example_api_calls }) }
 
 
   jira_cloud_id                 = coalesce(var.jira_cloud_id, "YOUR_JIRA_CLOUD_ID")
@@ -245,6 +249,12 @@ locals {
       ]
     }
   }
+
+  # backwards-compatible for v0.4.x; remove in v0.5.x
+  msft_365_connectors_backwards = { for k,v in local.msft_365_connectors :
+    k => merge(v, { example_calls: v.example_api_calls }) }
+
+
   oauth_long_access_connectors = {
     asana = {
       source_kind : "asana",
@@ -949,9 +959,9 @@ EOT
         ]
       }
       settings_to_provide = {
-        "Data Source Processing" = "badge"
+        "Parser" = "badge"
       }
-      example_file = "docs/sources/bulk/badge-example.csv"
+      example_file = "docs/sources/badge/badge-example.csv"
     }
     "hris" = {
       source_kind               = "hris"
@@ -969,7 +979,7 @@ EOT
       settings_to_provide = {
         "Parser" = "EMPLOYEE_SNAPSHOT"
       }
-      example_file = "docs/sources/bulk/hris-example.csv"
+      example_file = "docs/sources/hris/hris-example.csv"
     }
     "survey" = {
       worklytics_connector_id   = "survey-import-psoxy"
@@ -982,7 +992,7 @@ EOT
           # "EMPLOYEE_EMAIL", # if exists
         ]
       }
-      example_file = "docs/sources/bulk/survey-example.csv"
+      example_file = "docs/sources/survey/survey-example.csv"
     }
     "qualtrics" = {
       source_kind               = "qualtrics"
@@ -995,9 +1005,13 @@ EOT
           # "employee_email", # if exists
         ]
       }
-      example_file = "docs/sources/bulk/survey-example.csv"
+      example_file = "docs/sources/survey/survey-example.csv"
     }
   }
+
+  oauth_long_access_connectors_backwards = { for k,v in local.oauth_long_access_connectors :
+    k => merge(v, { example_calls: v.example_api_calls }) }
+
 
   # to expose via console
   # eg, `echo "local.available_connector_ids" | terraform console` will print this
@@ -1007,17 +1021,18 @@ EOT
     local.oauth_long_access_connectors,
     local.bulk_connectors,
   ))
+
 }
 
 # computed values filtered by enabled connectors
 locals {
   enabled_google_workspace_connectors = {
-    for k, v in local.google_workspace_sources : k => v if contains(var.enabled_connectors, k)
+    for k, v in local.google_workspace_sources_backwards : k => v if contains(var.enabled_connectors, k)
   }
   enabled_msft_365_connectors = {
-    for k, v in local.msft_365_connectors : k => v if contains(var.enabled_connectors, k) && length(try(var.msft_tenant_id, "")) > 0
+    for k, v in local.msft_365_connectors_backwards : k => v if contains(var.enabled_connectors, k) && length(try(var.msft_tenant_id, "")) > 0
   }
-  enabled_oauth_long_access_connectors = { for k, v in local.oauth_long_access_connectors : k => v if contains(var.enabled_connectors, k) }
+  enabled_oauth_long_access_connectors = { for k, v in local.oauth_long_access_connectors_backwards : k => v if contains(var.enabled_connectors, k) }
 
   enabled_oauth_long_access_connectors_todos = { for k, v in local.enabled_oauth_long_access_connectors : k => v if v.external_token_todo != null }
   # list of pair of [(conn1, secret1), (conn1, secret2), ... (connN, secretM)]

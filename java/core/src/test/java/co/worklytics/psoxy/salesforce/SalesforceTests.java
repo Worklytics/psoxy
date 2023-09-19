@@ -20,13 +20,9 @@ public class SalesforceTests extends JavaRulesTestBaseCase {
     final RESTRules rulesUnderTest = PrebuiltSanitizerRules.SALESFORCE;
 
     @Getter
-    final String exampleDirectoryPath = "api-response-examples/salesforce";
-
-    @Getter
-    final String defaultScopeId = "salesforce";
-
-    @Getter
-    final String yamlSerializationFilepath = "salesforce/salesforce";
+    final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
+        .sourceKind("salesforce")
+        .build();
 
     @Disabled // not reliable; seems to have different value via IntelliJ/AWS deployment and my
     // laptop's maven, which doesn't make any sense, given that binary deployed to AWS was built via
@@ -46,7 +42,7 @@ public class SalesforceTests extends JavaRulesTestBaseCase {
 
     @Test
     void account_describe() {
-        String jsonString = asJson(exampleDirectoryPath, "account_describe.json");
+        String jsonString = asJson("account_describe.json");
 
         String endpoint = "https://test.salesforce.com/services/data/v51.0/sobjects/Account/describe";
 
@@ -58,7 +54,7 @@ public class SalesforceTests extends JavaRulesTestBaseCase {
 
     @Test
     void activityHistory_describe() {
-        String jsonString = asJson(exampleDirectoryPath, "activityHistory_describe.json");
+        String jsonString = asJson("activityHistory_describe.json");
 
         String endpoint = "https://test.salesforce.com/services/data/v51.0/sobjects/ActivityHistory/describe";
 
@@ -70,7 +66,7 @@ public class SalesforceTests extends JavaRulesTestBaseCase {
 
     @Test
     void accounts_by_id() {
-        String jsonString = asJson(exampleDirectoryPath, "accounts.json");
+        String jsonString = asJson("accounts.json");
 
         String endpoint = "https://test.salesforce.com/services/data/v51.0/composite/sobjects/Account?ids=0015Y00002c7g95QAA,0015Y00002c7g8uQAA&fields=Id,AnnualRevenue,CreatedDate,CreatedById,IsDeleted,LastActivityDate,LastModifiedDate,LastModifiedById,NumberOfEmployees,OwnerId,Ownership,ParentId,Rating,Sic,Type";
 
@@ -83,7 +79,7 @@ public class SalesforceTests extends JavaRulesTestBaseCase {
 
     @Test
     void updated_accounts() {
-        String jsonString = asJson(exampleDirectoryPath, "updated.json");
+        String jsonString = asJson("updated.json");
 
         String endpoint = "https://test.salesforce.com/services/data/v51.0/sobjects/Account/updated?start=2023-02-10T18%3A44%3A00%2B00%3A00&end=2023-03-09T18%3A44%3A00%2B00%3A00";
 
@@ -94,7 +90,7 @@ public class SalesforceTests extends JavaRulesTestBaseCase {
 
     @Test
     void updated_users() {
-        String jsonString = asJson(exampleDirectoryPath, "updated.json");
+        String jsonString = asJson("updated.json");
 
         String endpoint = "https://test.salesforce.com/services/data/v51.0/sobjects/User/updated?start=2023-02-10T18%3A44%3A00%2B00%3A00&end=2023-03-09T18%3A44%3A00%2B00%3A00";
 
@@ -103,7 +99,7 @@ public class SalesforceTests extends JavaRulesTestBaseCase {
 
     @Test
     void users_by_id() {
-        String jsonString = asJson(exampleDirectoryPath, "users.json");
+        String jsonString = asJson("users.json");
 
         String endpoint = "https://test.salesforce.com/services/data/v51.0/composite/sobjects/User?ids=0055Y00000ExkfuQAB,0055Y00000ExkfpQAB&fields=Alias,AccountId,ContactId,CreatedDate,CreatedById,Email,EmailEncodingKey,Id,IsActive,LastLoginDate,LastModifiedDate,ManagerId,Name,TimeZoneSidKey,Username,UserRoleId,UserType";
 
@@ -121,7 +117,7 @@ public class SalesforceTests extends JavaRulesTestBaseCase {
 
     @Test
     void users_by_pseudonymized_id() {
-        String jsonString = asJson(exampleDirectoryPath, "users.json");
+        String jsonString = asJson("users.json");
 
         String endpoint = "https://test.salesforce.com/services/data/v51.0/composite/sobjects/User?ids=p~WREVnRtj0N9dGhZfwAgC8Gw-IBQIGk-7JpUbxVSyEy8hNsxMJ2KeLWRWYlAGu-vZx3miVX4hLJF5VY6o_Q9HCg,p~FvgRGSB_DRy-y2zUpN35_Josv6-No-nx2M2VGfOx5z45qYpKJecHuRg57qVIXjbxXyqjTEJF93qBODZjoxvEUw=Alias,AccountId,ContactId,CreatedDate,CreatedById,Email,EmailEncodingKey,Id,IsActive,LastLoginDate,LastModifiedDate,ManagerId,Name,TimeZoneSidKey,Username,UserRoleId,UserType";
 
@@ -143,7 +139,7 @@ public class SalesforceTests extends JavaRulesTestBaseCase {
             "SELECT+(SELECT+AccountId,ActivityDate,ActivityDateTime,ActivitySubtype,ActivityType,CallDurationInSeconds,CallType,CreatedDate,CreatedById,DurationInMinutes,EndDateTime,Id,IsAllDayEvent,IsDeleted,IsHighPriority,IsTask,LastModifiedDate,LastModifiedById,OwnerId,Priority,StartDateTime,Status,WhatId,WhoId+FROM+ActivityHistories+ORDER+BY+LastModifiedDate+DESC+NULLS+LAST)+FROM+Account+WHERE+id%3D'0015Y00002c7g95QAA'"
     })
     void query_activity_histories_by_account(String query) {
-        String jsonString = asJson(exampleDirectoryPath, "related_item_query.json");
+        String jsonString = asJson("related_item_query.json");
 
         String endpoint = "https://test.salesforce.com/services/data/v51.0/query?q=" + query;
 
@@ -158,7 +154,7 @@ public class SalesforceTests extends JavaRulesTestBaseCase {
             "SELECT+Alias,AccountId,ContactId,CreatedDate,CreatedById,Email,EmailEncodingKey,Id,IsActive,LastLoginDate,LastModifiedDate,ManagerId,Name,TimeZoneSidKey,Username,UserRoleId,UserType+FROM+User+WHERE+LastModifiedDate+%3E%3D+2016-01-01T00%3A00%3A00Z+AND+LastModifiedDate+%3C+2023-03-01T00%3A00%3A00Z+ORDER+BY+LastModifiedDate+DESC+NULLS+LAST",
     })
     void query_users(String query) {
-        String jsonString = asJson(exampleDirectoryPath, "users_by_query.json");
+        String jsonString = asJson("users_by_query.json");
 
         String endpoint = "https://test.salesforce.com/services/data/v51.0/query?q=" + query;
 
@@ -175,7 +171,7 @@ public class SalesforceTests extends JavaRulesTestBaseCase {
             "SELECT+Id,AnnualRevenue,CreatedDate,CreatedById,IsDeleted,LastActivityDate,LastModifiedDate,LastModifiedById,NumberOfEmployees,OwnerId,Ownership,ParentId,Rating,Sic,Type+FROM+Account+WHERE+LastModifiedDate+%3E%3D+2016-01-01T00%3A00%3A00Z+AND+LastModifiedDate+%3C+2023-03-01T00%3A00%3A00Z+ORDER+BY+LastModifiedDate+DESC+NULLS+LAST",
     })
     void query_accounts(String query) {
-        String jsonString = asJson(exampleDirectoryPath, "accounts_by_query.json");
+        String jsonString = asJson("accounts_by_query.json");
 
         String endpoint = "https://test.salesforce.com/services/data/v51.0/query?q=" + query;
 

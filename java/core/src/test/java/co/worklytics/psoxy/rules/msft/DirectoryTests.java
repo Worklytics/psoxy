@@ -18,17 +18,18 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
     final Rules2 rulesUnderTest = PrebuiltSanitizerRules.DIRECTORY;
 
     @Getter
-    final String exampleDirectoryPath = "api-response-examples/microsoft-365/directory";
+    final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
+        .sourceFamily("microsoft-365")
+        .defaultScopeId("azure-ad")
+        .sourceKind("directory")
+        .build();
 
-    @Getter
-    final String defaultScopeId = "azure-ad";
-
-    @Getter
-    final String yamlSerializationFilepath = "microsoft-365/directory";
+    // for cases where 'rulesTestSpec' will be overridden (Calendar)
+    public static final String DIRECTORY_API_EXAMPLES_PATH = "sources/microsoft-365/directory/example-api-responses/original/";
 
     @Test
     void user() {
-        String jsonString = asJson(exampleDirectoryPath, "user.json");
+        String jsonString = asJson(DIRECTORY_API_EXAMPLES_PATH, "user.json");
 
         String endpoint = "https://graph.microsoft.com/v1.0/users/p~2343adsfasdfa";
 
@@ -57,7 +58,7 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
 
     @Test
     void users() {
-        String jsonString = asJson(exampleDirectoryPath, "users.json");
+        String jsonString = asJson(DIRECTORY_API_EXAMPLES_PATH, "users.json");
 
         String endpoint = "https://graph.microsoft.com/v1.0/users";
 
@@ -83,7 +84,7 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
     })
     @ParameterizedTest
     void users_select(String endpoint) {
-        String jsonString = asJson(exampleDirectoryPath, "users.json");
+        String jsonString = asJson(DIRECTORY_API_EXAMPLES_PATH, "users.json");
 
         Collection<String> PII = Arrays.asList(
             "john@worklytics.onmicrosoft.com",
@@ -120,7 +121,7 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
     void groupMembers() {
         String endpoint = "https://graph.microsoft.com/v1.0/groups/02bd9fd6-8f93-4758-87c3-1fb73740a315/members?$count=true";
 
-        String jsonString = asJson(exampleDirectoryPath, "group-members.json");
+        String jsonString = asJson(DIRECTORY_API_EXAMPLES_PATH, "group-members.json");
         assertNotSanitized(jsonString,
             "Adele Vance",
             "AdeleV@M365x214355.onmicrosoft.com",

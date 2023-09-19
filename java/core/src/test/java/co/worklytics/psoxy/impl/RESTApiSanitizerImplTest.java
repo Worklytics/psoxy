@@ -93,7 +93,7 @@ class RESTApiSanitizerImplTest {
             "        \"value\": \"ops@worklytics.co\"\n" +
             "      }";
 
-        String jsonString = new String(TestUtils.getData("api-response-examples/g-workspace/gmail/message.json"));
+        String jsonString = new String(TestUtils.getData("sources/google-workspace/gmail/example-api-responses/original/message.json"));
 
         //verify precondition that example actually contains something we need to pseudonymize
         assertTrue(jsonString.contains(jsonPart));
@@ -318,7 +318,7 @@ class RESTApiSanitizerImplTest {
     @SneakyThrows
     @Test
     public void schema_poc() {
-        String jsonString = new String(TestUtils.getData("api-response-examples/g-workspace/gmail/message.json"));
+        String jsonString = new String(TestUtils.getData("sources/google-workspace/gmail/example-api-responses/original/message.json"));
 
 
         final URL EXAMPLE_URL = new URL("https://gmail.googleapis.com/gmail/v1/users/me/messages");
@@ -443,8 +443,8 @@ class RESTApiSanitizerImplTest {
         value = {
             "/,^/$",
             "/api/v1/users,^/api/v1/users$",
-            "/api/v1/users/{id},^/api/v1/users/[^/]+$",
-            "/api/v1/mail/{accountId}/messages/{id},^/api/v1/mail/[^/]+/messages/[^/]+$",
+            "/api/v1/users/{id},^/api/v1/users/(?<id>[^/]+)$",
+            "/api/v1/mail/{accountId}/messages/{id},^/api/v1/mail/(?<accountId>[^/]+)/messages/(?<id>[^/]+)$",
             "/enterprise.info,^/enterprise\\.info$",
             "/enterprise$something,^/enterprise\\$something$",
             "/enterprise-info,^/enterprise\\-info$",

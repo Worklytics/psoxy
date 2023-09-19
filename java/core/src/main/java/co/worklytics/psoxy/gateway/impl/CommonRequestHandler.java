@@ -22,6 +22,7 @@ import com.google.common.collect.Sets;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.http.HttpStatus;
@@ -138,7 +139,7 @@ public class CommonRequestHandler {
         // if requested target URL has tokenized components, reverse
         String clearTargetUrl = reverseTokenizedUrlComponents(requestedTargetUrl);
 
-        boolean tokenizedURLReversed = Objects.equals(requestedTargetUrl, clearTargetUrl);
+        boolean tokenizedURLReversed = ObjectUtils.notEqual(requestedTargetUrl, clearTargetUrl);
 
         URL targetUrl = new URL(clearTargetUrl);
 
@@ -151,7 +152,7 @@ public class CommonRequestHandler {
 
         this.sanitizer = loadSanitizerRules();
 
-        String callLog = String.format("%s %s TokensReversed=%b", request.getHttpMethod(), URLUtils.relativeURL(toLog), tokenizedURLReversed);
+        String callLog = String.format("%s %s TokenInUrlReversed=%b", request.getHttpMethod(), URLUtils.relativeURL(toLog), tokenizedURLReversed);
         if (skipSanitization) {
             log.info(String.format("%s. Skipping sanitization.", callLog));
         } else if (sanitizer.isAllowed(request.getHttpMethod(), targetUrl)) {
