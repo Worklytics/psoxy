@@ -143,7 +143,7 @@ module "connection_in_worklytics" {
   aws_region         = var.aws_region
   aws_role_arn       = module.psoxy.caller_role_arn
   psoxy_endpoint_url = try(each.value.endpoint_url, null)
-  bucket_name        = try(each.value.sanitized_bucket_name, null)
+  bucket_name        = try(each.value.sanitized_bucket, null)
   connector_id       = try(local.all_connectors[each.key].worklytics_connector_id, "")
   display_name       = try(local.all_connectors[each.key].worklytics_connector_name, "${local.all_connectors[each.key].display_name} via Psoxy")
   todo_step          = module.psoxy.next_todo_step
