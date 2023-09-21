@@ -6,12 +6,14 @@ SUBJECT=$1
 TTL=$2
 AZURE_TOOL=$3
 
+MD5_CMD='md5sum'
 if [[ $OSTYPE == 'darwin'* ]]; then
-  alias md5sum='md5 -r'
+  echo "is macos"
+  MD5_CMD='md5 -r'
 fi
 
 # avoid conflict if building multiple connectors concurrently
-RAND_ID=`echo $RANDOM | md5sum | head -c 20`
+RAND_ID=`echo $RANDOM | $MD5_CMD | head -c 20`
 KEY_FILE=$3_key_${RAND_ID}.pem
 KEY_FILE_PKCS8=$3_key_pkcs8_${RAND_ID}.pem
 CERT_FILE=$3_cert_${RAND_ID}.pem
@@ -23,7 +25,7 @@ openssl pkcs8 -nocrypt -in $KEY_FILE  -inform PEM -topk8 -outform PEM -out $KEY_
 FINGERPRINT_RESULT_RAW=`openssl x509 -in $CERT_FILE -noout -fingerprint -sha1`
 FINGERPRINT_RESULT=`echo $FINGERPRINT_RESULT_RAW | sed 's/://g' | sed 's/SHA1 Fingerprint=//g'`
 
-OUTPUT_FILE="TODO_${AZURE_TOOL^^}_CERTS.md"
+OUTPUT_FILE="TODO_${AZURE_TOOL}_CERTS.md"
 rm -f $OUTPUT_FILE
 
 function appendToFile() {
@@ -41,13 +43,13 @@ cat $CERT_FILE >> $OUTPUT_FILE
 appendToFile "${CODE_BLOCK}\n"
 
 appendToFile "## TODO 2. Secret Manager"
-appendToFile "Update the value of PSOXY_${AZURE_TOOL^^}_PRIVATE_KEY_ID in the secret manager of choice with the certificate fingerprint:"
+appendToFile "Update the value of PSOXY_${AZURE_TOOL}_PRIVATE_KEY_ID in the secret manager of choice with the certificate fingerprint:"
 appendToFile ${CODE_BLOCK}
 appendToFile "$FINGERPRINT_RESULT"
 appendToFile "${CODE_BLOCK}\n"
 
 appendToFile "## TODO 3. Secret Manager"
-appendToFile "Update the value of PSOXY_${AZURE_TOOL^^}_PRIVATE_KEY in the secret manager of choice with the following certificate:"
+appendToFile "Update the value of PSOXY_${AZURE_TOOL}_PRIVATE_KEY in the secret manager of choice with the following certificate:"
 appendToFile ${CODE_BLOCK}
 cat $KEY_FILE_PKCS8 >> $OUTPUT_FILE
 appendToFile "${CODE_BLOCK}\n"
