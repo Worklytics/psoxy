@@ -5,11 +5,14 @@
 # times throughout the code base, and includes some hard-coded convention stuff that imho is better
 # to have in one place.
 
+# in GCP Cloud Console, appears to come back as { "email":"", "id":"" }
 data "google_client_openid_userinfo" "me" {
 
 }
 
 locals {
+  runner_email = coalesce(data.google_client_openid_userinfo.me.email, var.tf_runner_email, "UNABLE_TO_DETERMINE")
+
   # hacky way to determine if Terraform running as a service account or not
   tf_is_service_account = endswith(data.google_client_openid_userinfo.me.email, "iam.gserviceaccount.com")
 

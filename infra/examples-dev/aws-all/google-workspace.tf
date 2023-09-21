@@ -17,6 +17,7 @@ module "worklytics_connectors_google_workspace" {
   environment_id                 = var.environment_name
   enabled_connectors             = var.enabled_connectors
   gcp_project_id                 = var.google_workspace_gcp_project_id
+  gcp_tf_runner_email            = try(coalesce(var.gcp_tf_runner_email, var.google_workspace_terraform_sa_account_email), null)
   google_workspace_example_user  = var.google_workspace_example_user
   google_workspace_example_admin = var.google_workspace_example_admin
 }

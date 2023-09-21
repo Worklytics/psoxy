@@ -102,6 +102,7 @@ module "psoxy" {
   custom_bulk_connector_arguments = var.custom_bulk_connector_arguments
   lookup_tables                   = var.lookup_tables
   custom_artifacts_bucket_name    = var.custom_artifacts_bucket_name
+  tf_runner_email                 = try(coalesce(var.gcp_tf_runner_email, var.gcp_terraform_sa_account_email), null)
   todos_as_local_files            = var.todos_as_local_files
   todo_step                       = local.max_auth_todo_step
 }

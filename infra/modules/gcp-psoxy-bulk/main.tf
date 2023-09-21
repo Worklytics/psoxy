@@ -146,6 +146,8 @@ resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_secret"
 
 module "tf_runner" {
   source = "../../modules/gcp-tf-runner"
+
+  tf_runner_email = var.tf_runner_email
 }
 
 # to provision Cloud Function, TF must be able to act as the service account that the function will

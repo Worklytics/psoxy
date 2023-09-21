@@ -157,6 +157,7 @@ module "api_connector" {
   config_parameter_prefix               = local.config_parameter_prefix
   invoker_sa_emails                     = var.worklytics_sa_emails
   default_labels                        = var.default_labels
+  tf_runner_email                       = var.tf_runner_email
   todos_as_local_files                  = var.todos_as_local_files
 
   environment_variables = merge(
@@ -212,6 +213,7 @@ module "bulk_connector" {
   input_bucket_name             = try(each.value.input_bucket_name, null)
   sanitized_bucket_name         = try(each.value.sanitized_bucket_name, null)
   default_labels                = var.default_labels
+  tf_runner_email               = var.tf_runner_email
   todos_as_local_files          = var.todos_as_local_files
   available_memory_mb           = coalesce(try(var.custom_bulk_connector_arguments[each.key].available_memory_mb, null), try(each.value.available_memory_mb, null), 512)
 

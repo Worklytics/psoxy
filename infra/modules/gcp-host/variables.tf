@@ -1,3 +1,9 @@
+variable "tf_runner_email" {
+  type        = string
+  description = "Email address of the Terraform Cloud runner (SA/user terraform is running as, if already known.  If omitted, will attempt to detect."
+  default     = null
+}
+
 variable "gcp_project_id" {
   type        = string
   description = "id of GCP project that will host psoxy instance"
