@@ -39,14 +39,14 @@ locals {
   authed_user_email = coalesce(data.google_client_openid_userinfo.me.email, local.email_from_jwt)
 
   # hacky way to determine if Terraform running as a service account or not
-  tf_is_service_account = endswith(data.google_client_openid_userinfo.me.email, "iam.gserviceaccount.com")
+  tf_is_service_account = endswith(local.authed_user_email, "iam.gserviceaccount.com")
 
   tf_qualifier = local.tf_is_service_account ? "serviceAccount:" : "user:"
-  tf_principal = "${local.tf_qualifier}${data.google_client_openid_userinfo.me.email}"
+  tf_principal = "${local.tf_qualifier}${local.authed_user_email}"
 }
 
 output "email" {
-  value       = data.google_client_openid_userinfo.me.email
+  value       = local.authed_user_email
   description = "The email address of the Terraform runner."
 }
 
