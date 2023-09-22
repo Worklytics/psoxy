@@ -22,7 +22,14 @@ resource "google_secret_manager_secret" "rules" {
   labels    = var.default_labels
 
   replication {
+    # as of 4.83.0, this is deprecated in favor of 'auto'; but as of v0.4.38 we allows google provider
+    # version as early as 3.74
     automatic = true # why not? nothing secret about it
+
+    # for future versions; only support for google provider >= 4.83.0
+    #auto {
+    #  # no need to encrypt with CMEK; it's actually configuration value, not "secret"
+    # }
   }
 
   lifecycle {
