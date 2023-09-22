@@ -13,7 +13,7 @@ data "google_client_openid_userinfo" "me" {
 
 }
 
-# data.google_client_config has an 'access_token', but that's opaque so can't parse email from it
+#
 
 # if no 'email' field from 'google_client_openid_userinfo', generate id token for the current user
 # and parse email from it.
@@ -29,6 +29,11 @@ data "google_service_account_id_token" "identity" {
 
   target_audience = "worklytics.co/gcp-tf-runner"
 }
+
+# alternative ideas
+#  - data.google_client_config has an 'access_token', but that's opaque so can't parse email from it
+#  - call outs to gcloud CLI via data.external --> still won't know about impersonation
+#  - is there some resource that has an attribute that's the service account used to create it?
 
 locals {
   jwt_payload         = try(split(".", data.google_service_account_id_token.identity[0].id_token)[1], "")
