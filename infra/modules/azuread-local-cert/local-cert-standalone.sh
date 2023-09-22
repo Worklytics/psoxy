@@ -1,7 +1,7 @@
 #!/bin/bash
 # generate keys for MSFT connectors; adapted from Worklytics node script to do this, with output
 # formatted to be consumed by Terraform via `data "external" {}`
-# example usage: ./local-cert.sh "/C=US/ST=New York/L=New York/CN=www.worklytics.co" 30
+# example usage: ./local-cert-standalone.sh "/C=US/ST=New York/L=New York/CN=www.worklytics.co" 30 OUTLOOK_MAIL
 SUBJECT=$1
 TTL=$2
 AZURE_TOOL=$3
@@ -37,10 +37,9 @@ CODE_BLOCK="\`\`\`"
 appendToFile "# MSFT Certificates ${AZURE_TOOL} update"
 appendToFile "## IMPORTANT: After setup complete please remove this file"
 appendToFile "## TODO 1. Azure Console"
-appendToFile "Upload the following cert to the ${AZURE_TOOL} app in your Azure Console or give it to an admin with rights to do so."
-appendToFile ${CODE_BLOCK}
-cat $CERT_FILE >> $OUTPUT_FILE
-appendToFile "${CODE_BLOCK}\n"
+appendToFile "Upload the contents of ``${CERT_FILE}`` to the ${AZURE_TOOL} app in your Azure Console or give it to an admin with rights to do so."
+appendToFile "When done, you should delete your local copy of ``${CERT_FILE}``"
+appendToFile "\n"
 
 appendToFile "## TODO 2. Secret Manager"
 appendToFile "Update the value of PSOXY_${AZURE_TOOL}_PRIVATE_KEY_ID in the secret manager of choice with the certificate fingerprint:"
@@ -55,8 +54,10 @@ cat $KEY_FILE_PKCS8 >> $OUTPUT_FILE
 appendToFile "${CODE_BLOCK}\n"
 
 # cleanup generated files
-rm $CERT_FILE
 rm $KEY_FILE
 rm $KEY_FILE_PKCS8
 
-printf "\nOpen ${OUTPUT_FILE} and follow the instructions to complete the setup.\n"
+BLUE='\e[0;34m'
+NC='\e[0m' # No Color
+
+printf "\nOpen $BLUE${OUTPUT_FILE}$NC and follow the instructions to complete the setup.\n"
