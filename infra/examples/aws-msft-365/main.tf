@@ -105,5 +105,5 @@ output "todos_2" {
 
 output "todos_3" {
   description = "List of todo steps to complete 3rd, in markdown format."
-  value       = join("\n", module.psoxy.todos_3)
+  value = join("\n", module.psoxy.todos_3)
 }

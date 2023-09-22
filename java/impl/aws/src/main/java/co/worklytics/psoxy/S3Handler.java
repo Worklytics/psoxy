@@ -15,6 +15,10 @@ import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 import org.apache.commons.io.input.BOMInputStream;
 
+import io.opentracing.util.GlobalTracer;
+import com.newrelic.opentracing.aws.LambdaTracing;
+import com.newrelic.opentracing.LambdaTracer;
+
 import javax.inject.Inject;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -24,6 +28,12 @@ import java.util.*;
 
 @Log
 public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestHandler<S3Event, String> {
+
+    //TODO: move into DI??
+    // Register the New Relic OpenTracing LambdaTracer as the Global Tracer
+    static {
+        GlobalTracer.registerIfAbsent(LambdaTracer.INSTANCE);
+    }
 
     @Inject
     StorageHandler storageHandler;
@@ -35,6 +45,12 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
     @SneakyThrows
     @Override
     public String handleRequest(S3Event s3Event, Context context) {
+        return LambdaTracing.instrument(s3Event, context, this::actualHandleRequest);
+    }
+
+
+    @SneakyThrows
+    public String actualHandleRequest(S3Event s3Event, Context context) {
 
         DaggerAwsContainer.create().injectS3Handler(this);
 
