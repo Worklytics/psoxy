@@ -1,10 +1,14 @@
 # New Relic Monitoring
 
+For customers wishing to using New Relic to monitor their proxy instances, we have **alpha**
+support for this in AWS. We provide no guarantee as to how it works, nor as to whether its behavior
+will be maintained in the future.
 
+To enable,
 
-Only supported for AWS.
+  1. Set your proxy release to `v0.4.39.alpha.new-relic.1`.
 
-To enable new relic monitoring, add the following to your `terraform.tfvars` to configure it:
+  2. Add the following to your `terraform.tfvars` to configure it:
 
 ```tf
 general_environment_variables = {
@@ -13,9 +17,8 @@ general_environment_variables = {
     NEW_RELIC_TRUSTED_ACCOUNT_ID     = "{YOUR_NEW_RELIC_ACCOUNT_ID}"
 }
 ```
-(if you already have a defined `general_environment_variables` variable, just add the `NEW_RELIC_`
-variables to it)
+  (if you already have a defined `general_environment_variables` variable, just add the `NEW_RELIC_`
+  variables to it)
 
-As of September 2023, this is an *alpha* feature; it is only available by setting your proxy release
-version to ` v0.4.39-alpha.new-relic.1`.
+
 
