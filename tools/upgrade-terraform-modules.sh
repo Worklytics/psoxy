@@ -41,7 +41,7 @@ esac
 CURRENT_RELEASE_PATTERN=$(echo $CURRENT_RELEASE | sed 's/\./\\\./g')
 PATTERN="s|ref=${CURRENT_RELEASE_PATTERN}|ref=${NEXT_RELEASE}|"
 
-find . -type f -name "*.tf" -exec sed -i .bck "${PATTERN}" {} +
+find . -type f -name "*.tf" -exec sed -i.bck "${PATTERN}" {} +
 rm *.bck
 
 terraform init
