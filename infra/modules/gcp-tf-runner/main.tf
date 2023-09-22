@@ -11,10 +11,12 @@ data "google_client_openid_userinfo" "me" {
 
 }
 
-
 # if no 'email' field from 'google_client_openid_userinfo', attempt to generate id token for the
 # current user, which *should* be the principal that Terraform is running - hopefully will correctly
 # be a user if directly authenticated; and the service account if using impersonation.
+# NO, does not seem to give the impersonated service account in such cases !!
+# but unlike data.google_client_openid_userinfo, it works in Google Cloud Shell; and is better than
+# relying on a data.external call out to gcloud (which also wouldn't be aware of impersonation)
 data "google_service_account_id_token" "identity" {
   count = data.google_client_openid_userinfo.me.email == "" ? 1 : 0
 
@@ -23,9 +25,15 @@ data "google_service_account_id_token" "identity" {
 
 
 locals {
-  email_from_jwt = try(
-    jsondecode(base64decode(split(".", data.google_service_account_id_token.identity[0].id_token)[1])).email,
-    "")
+  jwt_payload         = try(split(".", data.google_service_account_id_token.identity[0].id_token)[1], "")
+
+  # convert base64url encoding to base64 encoding
+  padding                   = join("", formatlist("%s", [for _ in range(4 - length(local.jwt_payload) % 4) : "="]))
+  jwt_payload_padded        = "${local.jwt_payload}${local.padding}"
+  jwt_payload_base64encoded = replace(replace(local.jwt_payload_padded, "-", "+"), "_", "/")
+
+  # decode to JSON, then extract email field
+  email_from_jwt = try(nonsensitive(jsondecode(base64decode(local.jwt_payload_base64encoded)).email), "")
 
   # coalesce failing here implies we failed to detect the auth'd gcp user
   authed_user_email = coalesce(data.google_client_openid_userinfo.me.email, local.email_from_jwt)
