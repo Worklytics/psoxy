@@ -7,22 +7,28 @@
 
 
 # in cloud shell, this seems to return {"email":"", "id":""}
+# in any env, this is NEVER the gcp service account configured via provider block
+# (eg, google.impersonate_service_account = "terraform@...")
 data "google_client_openid_userinfo" "me" {
 
 }
 
-# if no 'email' field from 'google_client_openid_userinfo', attempt to generate id token for the
-# current user, which *should* be the principal that Terraform is running - hopefully will correctly
-# be a user if directly authenticated; and the service account if using impersonation.
-# NO, does not seem to give the impersonated service account in such cases !!
-# but unlike data.google_client_openid_userinfo, it works in Google Cloud Shell; and is better than
-# relying on a data.external call out to gcloud (which also wouldn't be aware of impersonation)
+# data.google_client_config has an 'access_token', but that's opaque so can't parse email from it
+
+# if no 'email' field from 'google_client_openid_userinfo', generate id token for the current user
+# and parse email from it.
+# such parsing is explicitly allowed by Google; see https://cloud.google.com/docs/authentication/token-types#id
+#
+# however, this still appears to be the email of the authenticated user, not service account that
+# it's impersonating via the provider configuration
+#
+# we could pass in the service account email as a variable; but that pollutes a LOT of interfaces
+# and calls into question why we even use this module at all
 data "google_service_account_id_token" "identity" {
   count = data.google_client_openid_userinfo.me.email == "" ? 1 : 0
 
-  target_audience = "https://not-for-actual-use.app/"
+  target_audience = "worklytics.co/gcp-tf-runner"
 }
-
 
 locals {
   jwt_payload         = try(split(".", data.google_service_account_id_token.identity[0].id_token)[1], "")
