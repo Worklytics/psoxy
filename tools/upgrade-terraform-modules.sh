@@ -41,7 +41,7 @@ esac
 CURRENT_RELEASE_PATTERN=$(echo $CURRENT_RELEASE | sed 's/\./\\\./g')
 PATTERN="s|ref=${CURRENT_RELEASE_PATTERN}|ref=${NEXT_RELEASE}|"
 
-find . -type f -name "*.tf" -exec sed -i .bck "${PATTERN}" {} +
+find . -type f -name "*.tf" -exec sed -i.bck "${PATTERN}" {} +
 rm *.bck
 
 terraform init
@@ -49,7 +49,7 @@ terraform init
 printf "Terraform module versions upgraded to ${GREEN}${NEXT_RELEASE}${NC}.\n"
 printf "To revert: ${BLUE}$0 ${CURRENT_RELEASE}${NC}\n"
 
-if sed -n -e '/^deployment_bundle\s*=/p' terraform.tfvars > /dev/null; then
+if grep -q '^deployment_bundle\s*=' terraform.tfvars; then
     # Prompt user
     printf "Your ${BLUE}terraform.tfvars${NC} file references a pre-built 'deployment_bundle' bundle."
     read -p "Do you want to run './update-bundle' to re-build it with a version matching the terraform modules you just updated? [Y/n] " response
