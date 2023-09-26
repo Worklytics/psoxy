@@ -30,6 +30,11 @@ data "google_service_account_id_token" "identity" {
   target_audience = "worklytics.co/gcp-tf-runner"
 }
 
+# as this runs `terraform console` underneath, it is hacky and SLOW!!!
+data "external" "identity" {
+  program = ["./${path.module}/read-tfvars.sh", "gcp_terraform_sa_account_email"]
+}
+
 # alternative ideas
 #  - data.google_client_config has an 'access_token', but that's opaque so can't parse email from it
 #  - call outs to gcloud CLI via data.external --> still won't know about impersonation
@@ -47,7 +52,11 @@ locals {
   email_from_jwt = try(nonsensitive(jsondecode(base64decode(local.jwt_payload_base64encoded)).email), "")
 
   # coalesce failing here implies we failed to detect the auth'd gcp user
-  authed_user_email = coalesce(data.google_client_openid_userinfo.me.email, local.email_from_jwt)
+  authed_user_email = coalesce(
+    try(data.external.identity.result.gcp_terraform_sa_account_email, ""), # "" if no such value
+    data.google_client_openid_userinfo.me.email,
+    local.email_from_jwt
+  )
 
   # hacky way to determine if Terraform running as a service account or not
   tf_is_service_account = endswith(local.authed_user_email, "iam.gserviceaccount.com")
