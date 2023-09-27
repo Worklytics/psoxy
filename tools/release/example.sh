@@ -20,7 +20,7 @@ display_usage() {
     printf "  ./release-example.sh ~/code/psoxy/ gcp ~/psoxy-example-gcp\n"
 }
 
-if [ "$#" -ne 4 ]; then
+if [ "$#" -ne 3 ]; then
   printf "${RED}Unexpected number of parameters.${NC}\n"
   display_usage
   exit 1
