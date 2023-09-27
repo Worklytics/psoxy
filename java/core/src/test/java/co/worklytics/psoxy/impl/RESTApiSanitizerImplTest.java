@@ -8,12 +8,15 @@ import com.avaulta.gateway.rules.Endpoint;
 import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
 import co.worklytics.psoxy.rules.Rules2;
 import com.avaulta.gateway.rules.JsonSchemaFilterUtils;
+import com.avaulta.gateway.rules.transforms.EncryptIp;
+import com.avaulta.gateway.rules.transforms.HashIp;
 import com.avaulta.gateway.rules.transforms.Transform;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestUtils;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
+import com.avaulta.gateway.tokens.impl.Md5DeterministicTokenizationStrategy;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.MapFunction;
@@ -28,6 +31,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.net.Inet6Address;
 import java.net.URL;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -590,4 +594,69 @@ class RESTApiSanitizerImplTest {
         assertEquals(StringUtils.trimToNull(expected),
             transform.map(input, sanitizer.getJsonConfiguration()));
     }
+
+    @CsvSource(value = {
+        "123.234.252.12,c16e:9376:40a8:d00c:9681:6bf0:b8f:19f3",
+        "10.0.0.1,240d:2561:790d:b861:19d:a797:d452:e284",
+        ",",
+        "not an ip," // redact
+    })
+    @ParameterizedTest
+    public void hashIp(String input, String expected) {
+        MapFunction transform = sanitizer.getHashIp(HashIp.builder().build());
+
+        assertEquals(StringUtils.trimToNull(expected),
+            transform.map(input, sanitizer.getJsonConfiguration()));
+    }
+
+    @SneakyThrows
+    @CsvSource(value = {
+        "123.234.252.12,p~wW6TdkCo0AyWgWvwC48Z88ICwFaKIY3roGDJ2lIxURk",
+        "10.0.0.1,p~JA0lYXkNuGEBnaeX1FLihKXznxklfgEYWKWzFUcFLic",
+        ",",
+        "not an ip," // redact
+    })
+    @ParameterizedTest
+    public void encryptIp(String input, String expected) {
+        MapFunction transform = sanitizer.getEncryptIp(EncryptIp.builder().build());
+
+
+        String encrypted = (String) transform.map(input, sanitizer.getJsonConfiguration());
+
+
+        assertEquals(StringUtils.trimToNull(expected),
+            encrypted);
+
+
+        if (StringUtils.isNotBlank(expected)) {
+            MapFunction hashTransform = sanitizer.getHashIp(HashIp.builder().build());
+            String formattedHash = (String) hashTransform.map(input, sanitizer.getJsonConfiguration());
+
+            byte[] hash = Inet6Address.getByName(formattedHash).getAddress();
+
+            Base64.Encoder base64encoder = Base64.getUrlEncoder().withoutPadding();
+            String withoutPrefix = encrypted.substring(2);
+            byte[] decoded = Base64.getUrlDecoder().decode(withoutPrefix.getBytes());
+
+
+            assertEquals(
+                base64encoder.encodeToString(hash),
+                base64encoder.encodeToString(Arrays.copyOfRange(decoded, 0, Md5DeterministicTokenizationStrategy.HASH_LENGTH_BYTES))
+            );
+
+            // TODO: fix the following; UrlSafeTokenPseudonymEncoder can't decode the encrypted value
+            // because it produces a 32-byte hash, but the EncryptIP uses 16-byte hash
+            // options:
+            //  - a different prefix (m~) that indicates 16-byte hash?
+
+            //UrlSafeTokenPseudonymEncoder encoder = new UrlSafeTokenPseudonymEncoder();
+            //assertTrue(encoder.canBeDecoded(encrypted));
+            //Pseudonym decoded = encoder.decode(encrypted);
+
+            ////decoded.getHash() returns 32 bytes, but bc we're using md5 hash we only want 16 bytes
+            //assertEquals(Base64.getUrlEncoder().withoutPadding().encodeToString(decoded.getHash()),
+            //    Base64.getUrlEncoder().withoutPadding().encodeToString(hash));
+        }
+    }
+
 }

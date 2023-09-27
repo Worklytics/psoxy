@@ -21,7 +21,9 @@ import java.util.List;
     @JsonSubTypes.Type(value = Transform.PseudonymizeEmailHeader.class, name = "pseudonymizeEmailHeader"),
     @JsonSubTypes.Type(value = Transform.FilterTokenByRegex.class, name = "filterTokenByRegex"),
     @JsonSubTypes.Type(value = Transform.Tokenize.class, name = "tokenize"),
-    @JsonSubTypes.Type(value = Transform.PseudonymizeRegexMatches.class, name = "pseudonymizeRegexMatches")
+    @JsonSubTypes.Type(value = Transform.PseudonymizeRegexMatches.class, name = "pseudonymizeRegexMatches"),
+    @JsonSubTypes.Type(value = HashIp.class, name = "hashIp"),
+    @JsonSubTypes.Type(value = EncryptIp.class, name = "encryptIp")
 })
 @SuperBuilder(toBuilder = true)
 @AllArgsConstructor //for builder

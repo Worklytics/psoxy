@@ -21,6 +21,7 @@ public class Token {
     //NOTE: really a property of hash alg, which is SHA-256
     public static final int HASH_SIZE_BYTES = 32;
 
+
     /**
      * potentially reversible form of this token; if passed back to TokenizationStrategy
      * instance that created it, that instance may, based on its configuration(rules) be able to
@@ -38,7 +39,7 @@ public class Token {
     byte[] reversible;
 
     /**
-     * SHA-256 hash of canonicalized token
+     * hash of canonicalized token; usually SHA-256
      */
     @JsonProperty("h")
     byte[] hash;

@@ -4,6 +4,7 @@ import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
 
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -14,7 +15,7 @@ public class UrlSafeTokenPseudonymEncoder implements PseudonymEncoder {
 
 
     /**
-     * URL-safe prefix to put in front of reversible pseudonyms
+     * URL-safe prefix to put in front of reversible pseudonyms that use SHA-256 hash
      *
      * q: make configurable, to support compatibility with various REST-API clients??
      *
@@ -69,6 +70,7 @@ public class UrlSafeTokenPseudonymEncoder implements PseudonymEncoder {
         if (encodedPseudonym.startsWith(REVERSIBLE_PREFIX)) {
             byte[] decoded = decoder.decode(encodedPseudonym.substring(REVERSIBLE_PREFIX.length()));
             builder.reversible(decoded);
+            builder.hash(Arrays.copyOfRange(decoded, 0, 32));
         } else if (encodedPseudonym.startsWith(TOKEN_PREFIX)) {
             builder.hash(decoder.decode(encodedPseudonym.substring(TOKEN_PREFIX.length())));
         } else {

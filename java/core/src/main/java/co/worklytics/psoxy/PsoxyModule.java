@@ -13,6 +13,7 @@ import com.avaulta.gateway.rules.ParameterSchemaUtils;
 import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
 import com.avaulta.gateway.tokens.impl.AESReversibleTokenizationStrategy;
+import com.avaulta.gateway.tokens.impl.Md5DeterministicTokenizationStrategy;
 import com.avaulta.gateway.tokens.impl.Sha256DeterministicTokenizationStrategy;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,6 +24,7 @@ import com.google.api.client.http.HttpContent;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 import com.jayway.jsonpath.Configuration;
+import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import dagger.Module;
@@ -30,12 +32,14 @@ import dagger.Provides;
 import lombok.extern.java.Log;
 
 import javax.crypto.spec.SecretKeySpec;
+import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 /**
  * provides implementations for platform-independent dependencies of 'core' module
@@ -143,6 +147,8 @@ public class PsoxyModule {
 
     }
 
+
+
     @Provides
     static BulkDataSanitizerFactory fileHandler(BulkDataSanitizerFactoryImpl fileHandlerStrategy) {
         return fileHandlerStrategy;
@@ -177,6 +183,43 @@ public class PsoxyModule {
     }
 
     @Provides
+    @Named("ipEncryptionStrategy")
+    @Singleton
+    ReversibleTokenizationStrategy ipEncryptionStrategy(ConfigService config,
+                                                        @Named("ipHashStrategy") DeterministicTokenizationStrategy deterministicTokenizationStrategy) {
+        String salt = config.getConfigPropertyAsOptional(ProxyConfigProperty.SALT_IP)
+            .orElse(config.getConfigPropertyOrError(ProxyConfigProperty.PSOXY_SALT));
+
+        Optional<SecretKeySpec> keyFromConfig =
+            firstPresent(
+                config.getConfigPropertyAsOptional(ProxyConfigProperty.ENCRYPTION_KEY_IP),
+                config.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_ENCRYPTION_KEY)
+            )
+            .map(passkey -> AESReversibleTokenizationStrategy.aesKeyFromPassword(passkey, salt));
+        //q: do we need to support actual fully AES keys?
+
+        if (keyFromConfig.isEmpty()) {
+            log.warning("No value for PSOXY_ENCRYPTION_KEY; any transforms depending on it will fail!");
+        }
+
+        return AESReversibleTokenizationStrategy.builder()
+            .cipherSuite(AESReversibleTokenizationStrategy.CBC)
+            .key(keyFromConfig.orElse(null)) //null disables it, which is OK if transforms depending on this aren't used
+            .deterministicTokenizationStrategy(deterministicTokenizationStrategy)
+            .build();
+    }
+
+    @Provides
+    @Named("ipHashStrategy")
+    @Singleton
+    DeterministicTokenizationStrategy deterministicTokenizationStrategy(ConfigService config) {
+        String salt = config.getConfigPropertyAsOptional(ProxyConfigProperty.SALT_IP)
+            .orElse(config.getConfigPropertyOrError(ProxyConfigProperty.PSOXY_SALT));
+
+        return new Md5DeterministicTokenizationStrategy(salt);
+    }
+
+    @Provides
     @Singleton
     UrlSafeTokenPseudonymEncoder urlSafeTokenPseudonymEncoder() {
         return new UrlSafeTokenPseudonymEncoder();
@@ -208,5 +251,10 @@ public class PsoxyModule {
         return factory.create(factory.buildOptions(config, ruleSet.getDefaultScopeIdForSource()));
     }
 
+
+    //TODO: utils method for this somewhere??
+    <T> Optional<T> firstPresent(Optional<T>... optionals) {
+        return Stream.of(optionals).filter(Optional::isPresent).findFirst().orElse(Optional.empty());
+    }
 
 }
