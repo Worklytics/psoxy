@@ -67,14 +67,20 @@ locals {
   # lambda_url has trailing /, but our example_api_calls already have preceding /
   proxy_endpoint_url  = substr(aws_lambda_function_url.lambda_url.function_url, 0, length(aws_lambda_function_url.lambda_url.function_url) - 1)
   impersonation_param = var.example_api_calls_user_to_impersonate == null ? "" : " -i \"${var.example_api_calls_user_to_impersonate}\""
+
+  # don't want to *require* assumption of a role for testing; while we expect it in usual case
+  # (a provisioner must assume PsoxyCaller role for the test), customer could be using a single
+  # admin user for everything such that it's not required
+  role_param          = local.arn_for_test_calls == null ? "" : " -r \"${local.arn_for_test_calls}\""
+
   command_npm_install = "npm --prefix ${var.path_to_repo_root}tools/psoxy-test install"
-  command_cli_call    = "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js -r \"${local.arn_for_test_calls}\" -re \"${data.aws_region.current.id}\""
+  command_cli_call    = "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js ${local.role_param} -re \"${data.aws_region.current.id}\""
   command_test_calls = [for path in var.example_api_calls :
     "${local.command_cli_call} -u \"${local.proxy_endpoint_url}${path}\"${local.impersonation_param}"
   ]
-  command_test_logs = "node ${var.path_to_repo_root}tools/psoxy-test/cli-logs.js -r \"${local.arn_for_test_calls}\" -re \"${data.aws_region.current.id}\" -l \"${module.psoxy_lambda.log_group}\""
+  command_test_logs = "node ${var.path_to_repo_root}tools/psoxy-test/cli-logs.js ${local.role_param} -re \"${data.aws_region.current.id}\" -l \"${module.psoxy_lambda.log_group}\""
 
-  awscurl_test_call = "${var.path_to_repo_root}tools/test-psoxy.sh -a -r \"${local.arn_for_test_calls}\" -e \"${data.aws_region.current.id}\""
+  awscurl_test_call = "${var.path_to_repo_root}tools/test-psoxy.sh -a ${local.role_param} -e \"${data.aws_region.current.id}\""
   awscurl_test_calls = [for path in var.example_api_calls :
     "${local.awscurl_test_call} -u \"${local.proxy_endpoint_url}${path}\"${local.impersonation_param}"
   ]
