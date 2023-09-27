@@ -97,7 +97,7 @@ git status
 
 COMMIT_MESSAGE="update release refs to ${NEXT_RELEASE}"
 
-printf "See above for status. Commit changes with message ${BLUE}${COMMIT_MESSAGE}${NC}?"
+printf "See above for status. Commit changes with message ${BLUE}${COMMIT_MESSAGE}${NC}?\n"
 
 read -p "(Y/n) " -n 1 -r
 REPLY=${REPLY:-Y}
