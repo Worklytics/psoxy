@@ -30,9 +30,8 @@ data "google_service_account_id_token" "identity" {
   target_audience = "worklytics.co/gcp-tf-runner"
 }
 
-# as this runs `terraform console` underneath, it is hacky and SLOW!!!
 data "external" "identity" {
-  program = ["./${path.module}/read-tfvars.sh", "gcp_terraform_sa_account_email"]
+  program = [ "./${path.module}/read-tfvars.sh", "gcp_terraform_sa_account_email" ]
 }
 
 # alternative ideas
