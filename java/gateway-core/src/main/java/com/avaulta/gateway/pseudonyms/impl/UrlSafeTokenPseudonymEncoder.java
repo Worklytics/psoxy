@@ -25,6 +25,7 @@ public class UrlSafeTokenPseudonymEncoder implements PseudonymEncoder {
      */
     public static final String REVERSIBLE_PREFIX = "p~";
 
+    // q: could be more succinct, e~ or eP~
     public static final String ENCRYPTED_MD5_IV_PREFIX = "e16~";
 
     public static final String TOKEN_PREFIX = "t~";
