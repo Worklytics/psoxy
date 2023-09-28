@@ -73,6 +73,7 @@ public class UrlSafeTokenPseudonymEncoderTest {
         String original = "blah";
         String encodedPseudonym =
             pseudonymEncoder.encode(Pseudonym.builder()
+                    .hash(deterministicTokenizationStrategy.getToken(original, Function.identity()))
                 .reversible(pseudonymizationStrategy.getReversibleToken(original, Function.identity())).build());
 
         String r = pseudonymEncoder.decodeAndReverseAllContainedKeyedPseudonyms(String.format(template, encodedPseudonym, encodedPseudonym),

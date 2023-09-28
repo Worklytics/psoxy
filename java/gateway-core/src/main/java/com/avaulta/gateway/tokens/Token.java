@@ -1,5 +1,6 @@
 package com.avaulta.gateway.tokens;
 
+import com.avaulta.gateway.tokens.impl.Sha256DeterministicTokenizationStrategy;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.EqualsAndHashCode;
@@ -17,11 +18,6 @@ import java.util.Arrays;
 @EqualsAndHashCode(callSuper = false)
 @SuperBuilder(toBuilder = true)
 public class Token {
-
-    //NOTE: really a property of hash alg, which is SHA-256
-    public static final int HASH_SIZE_BYTES = 32;
-
-
     /**
      * potentially reversible form of this token; if passed back to TokenizationStrategy
      * instance that created it, that instance may, based on its configuration(rules) be able to
@@ -45,12 +41,11 @@ public class Token {
     byte[] hash;
 
     public byte[] getHash() {
-        if (reversible == null) {
-            return hash;
+        if (this.hash == null) {
+            //legacy case,
+            return Arrays.copyOfRange(this.getReversible(), 0, Sha256DeterministicTokenizationStrategy.HASH_SIZE_BYTES);
         } else {
-            //kinda hacky; puts restriction on implementations of TokenizationStrategy (reversibles
-            // MUST use SHA-256 as prefix of their results)
-            return Arrays.copyOfRange(reversible, 0, HASH_SIZE_BYTES);
+            return this.hash;
         }
     }
 }

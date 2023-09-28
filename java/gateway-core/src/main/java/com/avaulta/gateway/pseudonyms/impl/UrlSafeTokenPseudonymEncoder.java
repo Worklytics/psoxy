@@ -25,6 +25,8 @@ public class UrlSafeTokenPseudonymEncoder implements PseudonymEncoder {
      */
     public static final String REVERSIBLE_PREFIX = "p~";
 
+    public static final String ENCRYPTED_MD5_IV_PREFIX = "e16~";
+
     public static final String TOKEN_PREFIX = "t~";
 
     //length of base64-url-encoded IV + ciphertext
@@ -44,9 +46,14 @@ public class UrlSafeTokenPseudonymEncoder implements PseudonymEncoder {
     public String encode(Pseudonym pseudonym) {
         String encoded;
         if (pseudonym.getReversible() == null) {
-            encoded = TOKEN_PREFIX + encoder.encodeToString(pseudonym.getHash());
+            encoded = TOKEN_PREFIX + encoder.encodeToString(pseudonym.getHash());;
         } else {
-            encoded = REVERSIBLE_PREFIX + encoder.encodeToString(pseudonym.getReversible());
+            if (!Arrays.equals(pseudonym.getHash(), 0, pseudonym.getHash().length, pseudonym.getReversible(), 0, pseudonym.getHash().length)) {
+                throw new IllegalArgumentException("hash must be first part of reversible pseudonym");
+            }
+
+            String prefix = pseudonym.getHash().length == 16 ? ENCRYPTED_MD5_IV_PREFIX : REVERSIBLE_PREFIX;
+            encoded = prefix +  encoder.encodeToString(pseudonym.getReversible());
         }
         if (pseudonym.getDomain() != null) {
             //q: url-encode DOMAIN_SEPARATOR?
@@ -71,6 +78,10 @@ public class UrlSafeTokenPseudonymEncoder implements PseudonymEncoder {
             byte[] decoded = decoder.decode(encodedPseudonym.substring(REVERSIBLE_PREFIX.length()));
             builder.reversible(decoded);
             builder.hash(Arrays.copyOfRange(decoded, 0, 32));
+        } else if (encodedPseudonym.startsWith(ENCRYPTED_MD5_IV_PREFIX)) {
+            byte[] decoded = decoder.decode(encodedPseudonym.substring(ENCRYPTED_MD5_IV_PREFIX.length()));
+            builder.reversible(decoded);
+            builder.hash(Arrays.copyOfRange(decoded, 0, 16));
         } else if (encodedPseudonym.startsWith(TOKEN_PREFIX)) {
             builder.hash(decoder.decode(encodedPseudonym.substring(TOKEN_PREFIX.length())));
         } else {
@@ -84,7 +95,9 @@ public class UrlSafeTokenPseudonymEncoder implements PseudonymEncoder {
     @Override
     public boolean canBeDecoded(String possiblePseudonym) {
         return possiblePseudonym != null &&
-            (possiblePseudonym.startsWith(REVERSIBLE_PREFIX) || possiblePseudonym.startsWith(TOKEN_PREFIX));
+            (possiblePseudonym.startsWith(REVERSIBLE_PREFIX)
+                || possiblePseudonym.startsWith(TOKEN_PREFIX)
+                || possiblePseudonym.startsWith(ENCRYPTED_MD5_IV_PREFIX));
     }
 
     /**

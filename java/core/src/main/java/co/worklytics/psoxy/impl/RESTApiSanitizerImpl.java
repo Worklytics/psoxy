@@ -297,8 +297,9 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
                     InetAddress address = InetAddress.getByName((String) s);
                     // already canonicalized, so can pass identity
                     return urlSafePseudonymEncoder.encode(Pseudonym.builder()
-                        .reversible(ipEncryptStrategy.getReversibleToken(address.getHostAddress()))
-                        .build());
+                            .hash(ipHashStrategy.getToken(address.getHostAddress()))
+                            .reversible(ipEncryptStrategy.getReversibleToken(address.getHostAddress()))
+                            .build());
                 } catch (UnknownHostException e) {
                     //not a valid IP address
                     log.warning("value matched by HashIP transform not a valid IP address: " + s);

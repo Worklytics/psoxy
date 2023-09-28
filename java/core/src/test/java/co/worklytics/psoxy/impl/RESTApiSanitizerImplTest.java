@@ -611,8 +611,8 @@ class RESTApiSanitizerImplTest {
 
     @SneakyThrows
     @CsvSource(value = {
-        "123.234.252.12,p~wW6TdkCo0AyWgWvwC48Z88ICwFaKIY3roGDJ2lIxURk",
-        "10.0.0.1,p~JA0lYXkNuGEBnaeX1FLihKXznxklfgEYWKWzFUcFLic",
+        "123.234.252.12,e16~wW6TdkCo0AyWgWvwC48Z88ICwFaKIY3roGDJ2lIxURk",
+        "10.0.0.1,e16~JA0lYXkNuGEBnaeX1FLihKXznxklfgEYWKWzFUcFLic",
         ",",
         "not an ip," // redact
     })
@@ -635,7 +635,7 @@ class RESTApiSanitizerImplTest {
             byte[] hash = Inet6Address.getByName(formattedHash).getAddress();
 
             Base64.Encoder base64encoder = Base64.getUrlEncoder().withoutPadding();
-            String withoutPrefix = encrypted.substring(2);
+            String withoutPrefix = encrypted.substring(UrlSafeTokenPseudonymEncoder.ENCRYPTED_MD5_IV_PREFIX.length());
             byte[] decoded = Base64.getUrlDecoder().decode(withoutPrefix.getBytes());
 
 
@@ -644,18 +644,11 @@ class RESTApiSanitizerImplTest {
                 base64encoder.encodeToString(Arrays.copyOfRange(decoded, 0, Md5DeterministicTokenizationStrategy.HASH_LENGTH_BYTES))
             );
 
-            // TODO: fix the following; UrlSafeTokenPseudonymEncoder can't decode the encrypted value
-            // because it produces a 32-byte hash, but the EncryptIP uses 16-byte hash
-            // options:
-            //  - a different prefix (m~) that indicates 16-byte hash?
-
-            //UrlSafeTokenPseudonymEncoder encoder = new UrlSafeTokenPseudonymEncoder();
-            //assertTrue(encoder.canBeDecoded(encrypted));
-            //Pseudonym decoded = encoder.decode(encrypted);
-
-            ////decoded.getHash() returns 32 bytes, but bc we're using md5 hash we only want 16 bytes
-            //assertEquals(Base64.getUrlEncoder().withoutPadding().encodeToString(decoded.getHash()),
-            //    Base64.getUrlEncoder().withoutPadding().encodeToString(hash));
+            UrlSafeTokenPseudonymEncoder encoder = new UrlSafeTokenPseudonymEncoder();
+            assertTrue(encoder.canBeDecoded(encrypted));
+            Pseudonym decodedPseudonym = encoder.decode(encrypted);
+            assertEquals(Base64.getUrlEncoder().withoutPadding().encodeToString(decodedPseudonym.getHash()),
+            Base64.getUrlEncoder().withoutPadding().encodeToString(hash));
         }
     }
 
