@@ -325,7 +325,9 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
                     InetAddress address = InetAddress.getByName((String) s);
                     // already canonicalized, so just hash address itself
                     byte[] hashed = ipHashStrategy.getToken(address.getHostAddress());
-                    return Inet6Address.getByAddress(hashed).getHostAddress();
+                    return urlSafePseudonymEncoder.encode(Pseudonym.builder()
+                            .hash(hashed)
+                            .build());
                 } catch (UnknownHostException e) {
                     //not a valid IP address
                     log.warning("value matched by HashIP transform not a valid IP address: " + s);

@@ -3,6 +3,7 @@ package com.avaulta.gateway.pseudonyms.impl;
 import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
+import com.avaulta.gateway.tokens.impl.Sha256DeterministicTokenizationStrategy;
 
 import java.util.Arrays;
 import java.util.Base64;
@@ -24,10 +25,6 @@ public class UrlSafeTokenPseudonymEncoder implements PseudonymEncoder {
      *
      */
     public static final String REVERSIBLE_PREFIX = "p~";
-
-    // q: could be more succinct, e~ or eP~
-    public static final String ENCRYPTED_MD5_IV_PREFIX = "e16~";
-
     public static final String TOKEN_PREFIX = "t~";
 
     //length of base64-url-encoded IV + ciphertext
@@ -53,8 +50,7 @@ public class UrlSafeTokenPseudonymEncoder implements PseudonymEncoder {
                 throw new IllegalArgumentException("hash must be first part of reversible pseudonym");
             }
 
-            String prefix = pseudonym.getHash().length == 16 ? ENCRYPTED_MD5_IV_PREFIX : REVERSIBLE_PREFIX;
-            encoded = prefix +  encoder.encodeToString(pseudonym.getReversible());
+            encoded = REVERSIBLE_PREFIX +  encoder.encodeToString(pseudonym.getReversible());
         }
         if (pseudonym.getDomain() != null) {
             //q: url-encode DOMAIN_SEPARATOR?
@@ -78,11 +74,7 @@ public class UrlSafeTokenPseudonymEncoder implements PseudonymEncoder {
         if (encodedPseudonym.startsWith(REVERSIBLE_PREFIX)) {
             byte[] decoded = decoder.decode(encodedPseudonym.substring(REVERSIBLE_PREFIX.length()));
             builder.reversible(decoded);
-            builder.hash(Arrays.copyOfRange(decoded, 0, 32));
-        } else if (encodedPseudonym.startsWith(ENCRYPTED_MD5_IV_PREFIX)) {
-            byte[] decoded = decoder.decode(encodedPseudonym.substring(ENCRYPTED_MD5_IV_PREFIX.length()));
-            builder.reversible(decoded);
-            builder.hash(Arrays.copyOfRange(decoded, 0, 16));
+            builder.hash(Arrays.copyOfRange(decoded, 0, Sha256DeterministicTokenizationStrategy.HASH_SIZE_BYTES));
         } else if (encodedPseudonym.startsWith(TOKEN_PREFIX)) {
             builder.hash(decoder.decode(encodedPseudonym.substring(TOKEN_PREFIX.length())));
         } else {
@@ -97,8 +89,7 @@ public class UrlSafeTokenPseudonymEncoder implements PseudonymEncoder {
     public boolean canBeDecoded(String possiblePseudonym) {
         return possiblePseudonym != null &&
             (possiblePseudonym.startsWith(REVERSIBLE_PREFIX)
-                || possiblePseudonym.startsWith(TOKEN_PREFIX)
-                || possiblePseudonym.startsWith(ENCRYPTED_MD5_IV_PREFIX));
+                || possiblePseudonym.startsWith(TOKEN_PREFIX));
     }
 
     /**

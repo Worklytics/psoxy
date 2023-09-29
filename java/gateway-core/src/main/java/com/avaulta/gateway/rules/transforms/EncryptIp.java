@@ -1,6 +1,5 @@
 package com.avaulta.gateway.rules.transforms;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;

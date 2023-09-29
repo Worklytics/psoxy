@@ -103,18 +103,25 @@ public class PseudonymizerImpl implements Pseudonymizer {
         }
 
         builder.scope(scope);
+        String encodedHash;
+        byte[] hash;
         if (getOptions().getPseudonymImplementation() == PseudonymImplementation.LEGACY) {
-            builder.hash(hashUtils.hash(canonicalization.apply(value.toString()),
-                getOptions().getPseudonymizationSalt(), asLegacyScope(scope)));
+            encodedHash = hashUtils.hash(canonicalization.apply(value.toString()),
+                getOptions().getPseudonymizationSalt(), asLegacyScope(scope));
+            hash = null;
         } else if (getOptions().getPseudonymImplementation() == PseudonymImplementation.DEFAULT) {
-            builder.hash(encoder.encodeToString(deterministicTokenizationStrategy.getToken(value.toString(), canonicalization)));
+            hash = deterministicTokenizationStrategy.getToken(value.toString(), canonicalization);
+            encodedHash = encoder.encodeToString(hash);
         } else {
             throw new RuntimeException("Unsupported pseudonym implementation: " + getOptions().getPseudonymImplementation());
         }
 
+        builder.hash(encodedHash);
+
         if (transformOptions.getIncludeReversible()) {
             builder.reversible(urlSafePseudonymEncoder.encode(
                 Pseudonym.builder()
+                    .hash(hash)
                     .reversible(reversibleTokenizationStrategy.getReversibleToken(value.toString(), canonicalization))
                     .domain(domain)
                     .build()));

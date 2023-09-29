@@ -27,8 +27,7 @@ public class Token {
      * expected to be cryptographically secure encryption - we make no such claim, although in
      * practice strive to implement it as such)
      *
-     * prefix of this, of length HASH_SIZE_BYTES, MUST be equivalent to `hash` value for
-     * token.
+     * prefix of this MUST be equivalent to `hash` value for token.
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonProperty("r")
@@ -37,12 +36,14 @@ public class Token {
     /**
      * hash of canonicalized token; usually SHA-256
      */
+    //TODO: make this @NonNull??
     @JsonProperty("h")
     byte[] hash;
 
     public byte[] getHash() {
         if (this.hash == null) {
-            //legacy case,
+            //legacy case; in general, we should try to fill 'hash' explicitly not rely on this
+            // magic, which presumes hash is 256-bit
             return Arrays.copyOfRange(this.getReversible(), 0, Sha256DeterministicTokenizationStrategy.HASH_SIZE_BYTES);
         } else {
             return this.hash;

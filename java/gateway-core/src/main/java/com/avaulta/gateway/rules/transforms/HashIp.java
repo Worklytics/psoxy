@@ -1,6 +1,5 @@
 package com.avaulta.gateway.rules.transforms;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -8,7 +7,10 @@ import lombok.experimental.SuperBuilder;
 /**
  * canonicalize IP address and hash result.
  *
- * "format-preserving", although everything will end up IPv6 (128-bit) even if original was IPv4
+ * "format-preserving", although everything will end up IPv6 (128-bit) even if original was IPv4;
+ * this provides slightly wider range of possible values than preserving IPv4 format would, but
+ * biggest benefit is simplicity of implementation (using MD5 hash, which is available in many
+ * systems)
  *
  */
 @SuperBuilder(toBuilder = true)

@@ -16,7 +16,7 @@ import co.worklytics.test.TestUtils;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
-import com.avaulta.gateway.tokens.impl.Md5DeterministicTokenizationStrategy;
+import com.avaulta.gateway.tokens.impl.Sha256DeterministicTokenizationStrategy;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.MapFunction;
@@ -596,8 +596,8 @@ class RESTApiSanitizerImplTest {
     }
 
     @CsvSource(value = {
-        "123.234.252.12,c16e:9376:40a8:d00c:9681:6bf0:b8f:19f3",
-        "10.0.0.1,240d:2561:790d:b861:19d:a797:d452:e284",
+        "123.234.252.12,t~7USliSM4GiS0Xfk1DXIAH-4nK-UkLJlSAA_5ZqQh_CI",
+        "10.0.0.1,t~3BU4goNN07w3ofq8v5ig2enxSWj9xnAnPOThel4mHTk",
         ",",
         "not an ip," // redact
     })
@@ -611,8 +611,8 @@ class RESTApiSanitizerImplTest {
 
     @SneakyThrows
     @CsvSource(value = {
-        "123.234.252.12,e16~wW6TdkCo0AyWgWvwC48Z88ICwFaKIY3roGDJ2lIxURk",
-        "10.0.0.1,e16~JA0lYXkNuGEBnaeX1FLihKXznxklfgEYWKWzFUcFLic",
+        "123.234.252.12,p~7USliSM4GiS0Xfk1DXIAH-4nK-UkLJlSAA_5ZqQh_CJStJlrfaIPHLZUvx-dHHQp",
+        "10.0.0.1,p~3BU4goNN07w3ofq8v5ig2enxSWj9xnAnPOThel4mHTmrZBJVaY3CjxNEDJYfGEk_",
         ",",
         "not an ip," // redact
     })
@@ -632,16 +632,16 @@ class RESTApiSanitizerImplTest {
             MapFunction hashTransform = sanitizer.getHashIp(HashIp.builder().build());
             String formattedHash = (String) hashTransform.map(input, sanitizer.getJsonConfiguration());
 
-            byte[] hash = Inet6Address.getByName(formattedHash).getAddress();
+            byte[] hash = pseudonymEncoder.decode(formattedHash).getHash();
 
             Base64.Encoder base64encoder = Base64.getUrlEncoder().withoutPadding();
-            String withoutPrefix = encrypted.substring(UrlSafeTokenPseudonymEncoder.ENCRYPTED_MD5_IV_PREFIX.length());
+            String withoutPrefix = encrypted.substring(UrlSafeTokenPseudonymEncoder.REVERSIBLE_PREFIX.length());
             byte[] decoded = Base64.getUrlDecoder().decode(withoutPrefix.getBytes());
 
 
             assertEquals(
                 base64encoder.encodeToString(hash),
-                base64encoder.encodeToString(Arrays.copyOfRange(decoded, 0, Md5DeterministicTokenizationStrategy.HASH_LENGTH_BYTES))
+                base64encoder.encodeToString(Arrays.copyOfRange(decoded, 0, Sha256DeterministicTokenizationStrategy.HASH_SIZE_BYTES))
             );
 
             UrlSafeTokenPseudonymEncoder encoder = new UrlSafeTokenPseudonymEncoder();

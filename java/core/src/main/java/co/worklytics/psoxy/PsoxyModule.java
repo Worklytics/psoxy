@@ -13,7 +13,6 @@ import com.avaulta.gateway.rules.ParameterSchemaUtils;
 import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
 import com.avaulta.gateway.tokens.impl.AESReversibleTokenizationStrategy;
-import com.avaulta.gateway.tokens.impl.Md5DeterministicTokenizationStrategy;
 import com.avaulta.gateway.tokens.impl.Sha256DeterministicTokenizationStrategy;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,7 +23,6 @@ import com.google.api.client.http.HttpContent;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 import com.jayway.jsonpath.Configuration;
-import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import dagger.Module;
@@ -32,7 +30,6 @@ import dagger.Provides;
 import lombok.extern.java.Log;
 
 import javax.crypto.spec.SecretKeySpec;
-import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.util.Objects;
@@ -216,7 +213,7 @@ public class PsoxyModule {
         String salt = config.getConfigPropertyAsOptional(ProxyConfigProperty.SALT_IP)
             .orElse(config.getConfigPropertyOrError(ProxyConfigProperty.PSOXY_SALT));
 
-        return new Md5DeterministicTokenizationStrategy(salt);
+        return new Sha256DeterministicTokenizationStrategy(salt);
     }
 
     @Provides
