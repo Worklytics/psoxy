@@ -90,8 +90,14 @@ public class UrlSafeTokenPseudonymEncoderTest {
             .hash(deterministicTokenizationStrategy.getToken(original, Function.identity()))
             .build();
 
+        assertEquals(deterministicTokenizationStrategy.getTokenLength(),
+            pseudonym.getHash().length);
+
         String encoded = pseudonymEncoder.encode(pseudonym);
 
+        // 2 char prefix; plus each char of base64 is 6 bits of binary.
+        // so 32 byte hash needs 43 chars of base64 to encode it
+        assertEquals(45, encoded.length());
         assertEquals(expected, encoded);
         assertArrayEquals(deterministicTokenizationStrategy.getToken(original, Function.identity()), pseudonym.getHash());
 
