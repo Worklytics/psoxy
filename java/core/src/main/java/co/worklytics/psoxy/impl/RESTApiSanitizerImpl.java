@@ -36,7 +36,6 @@ import org.hazlewood.connor.bottema.emailaddress.EmailAddressParser;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.mail.internet.InternetAddress;
-import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.URL;
 import java.net.UnknownHostException;
@@ -50,7 +49,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder.REVERSIBLE_PSEUDONYM_PATTERN;
 import static java.util.regex.Pattern.CASE_INSENSITIVE;
 
 @Log
@@ -292,19 +290,11 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
             } else if (StringUtils.isBlank((String) s)) {
                 return s;
             } else {
-                try {
-                    // Parse the IP address string and convert back to string to get the canonical form.
-                    InetAddress address = InetAddress.getByName((String) s);
-                    // already canonicalized, so can pass identity
-                    return urlSafePseudonymEncoder.encode(Pseudonym.builder()
-                            .hash(ipHashStrategy.getToken(address.getHostAddress()))
-                            .reversible(ipEncryptStrategy.getReversibleToken(address.getHostAddress()))
+                String canonicalizedIp = canonicalizeIp((String) s);
+                return urlSafePseudonymEncoder.encode(Pseudonym.builder()
+                            .hash(ipHashStrategy.getToken(canonicalizedIp))
+                            .reversible(ipEncryptStrategy.getReversibleToken(canonicalizedIp))
                             .build());
-                } catch (UnknownHostException e) {
-                    //not a valid IP address
-                    log.warning("value matched by HashIP transform not a valid IP address: " + s);
-                    return null;
-                }
             }
         };
     }
@@ -320,21 +310,24 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
             } else if (StringUtils.isBlank((String) s)) {
                 return s;
             } else {
-                try {
-                    // Parse the IP address string and convert back to string to get the canonical form.
-                    InetAddress address = InetAddress.getByName((String) s);
-                    // already canonicalized, so just hash address itself
-                    byte[] hashed = ipHashStrategy.getToken(address.getHostAddress());
-                    return urlSafePseudonymEncoder.encode(Pseudonym.builder()
-                            .hash(hashed)
-                            .build());
-                } catch (UnknownHostException e) {
-                    //not a valid IP address
-                    log.warning("value matched by HashIP transform not a valid IP address: " + s);
-                    return null;
-                }
+                // Parse the IP address string and convert back to string to get the canonical form.
+                return urlSafePseudonymEncoder.encode(Pseudonym.builder()
+                          .hash(ipHashStrategy.getToken(canonicalizeIp((String) s)))
+                          .build());
             }
         };
+    }
+
+    String canonicalizeIp(String ip) {
+        try {
+            //TODO: force to textual IP address, and never permit hostnames?
+            InetAddress address = InetAddress.getByName(ip);
+            return address.getHostAddress();
+        } catch (UnknownHostException e) {
+            //not a valid IP address
+            log.warning("value matched by HashIP transform not a valid IP address: " + ip);
+            return null;
+        }
     }
 
 
