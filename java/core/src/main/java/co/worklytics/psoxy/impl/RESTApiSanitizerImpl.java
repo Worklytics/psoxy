@@ -291,6 +291,11 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
                 return s;
             } else {
                 String canonicalizedIp = canonicalizeIp((String) s);
+                if (canonicalizedIp == null) {
+                    //not a valid IP
+                    return null;
+                }
+
                 return urlSafePseudonymEncoder.encode(Pseudonym.builder()
                             .hash(ipHashStrategy.getToken(canonicalizedIp))
                             .reversible(ipEncryptStrategy.getReversibleToken(canonicalizedIp))
@@ -310,9 +315,15 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
             } else if (StringUtils.isBlank((String) s)) {
                 return s;
             } else {
+                String canonicalizedIp = canonicalizeIp((String) s);
+                if (canonicalizedIp == null) {
+                    //not a valid IP
+                    return null;
+                }
+
                 // Parse the IP address string and convert back to string to get the canonical form.
                 return urlSafePseudonymEncoder.encode(Pseudonym.builder()
-                          .hash(ipHashStrategy.getToken(canonicalizeIp((String) s)))
+                          .hash(ipHashStrategy.getToken(canonicalizedIp))
                           .build());
             }
         };
