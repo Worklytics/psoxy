@@ -34,6 +34,39 @@ Orchestration continues to be performed on the Worklytics-side.
 
 ![proxy illustration](docs/proxy-illustration.jpg)
 
+Source API data may include PII such as:
+
+```json
+{
+  "id": "1234567890",
+  "name": "John Doe",
+  "email": "john.doe@acme.com"
+}
+```
+
+But Psoxy ensures Worklytics only sees:
+```json
+{
+    "id": "t~A80SJXrbfawKpDRcddGnKI4QDKyjQI9KtjJZDb8FZ27UE_toS68FyWz7Y22fnQYLP91SHJ",
+    "email": "p~SIoJOpeSgYF7YUPQ28IWZexVuHyN9A80SJXrbfawKpDRcddGnKI4QDKyjQI9KtjJZDb8FZ27UE_toS68FyWz7Y22fnQYLP91SHJGVwQiN3E@acme.com"
+}
+```
+These pseudonyms leverage SHA-256 hashing / AES encryption, with salt/keys that are known only to
+your organization and never transferred to Worklytics.
+
+Psoxy enforces that Worklytics can only access API endpoints you've configured (principle of least
+privilege) using HTTP methods you allow (eg, limit to `GET` to enforce read-only for RESTful APIs).
+
+For data sources APIs which require keys/secrets for authentication, such values remain stored in
+your premises and are never accessible to Worklytics.
+
+You authorize your Worklytics tenant to access your proxy instance(s) via the IAM platform of your
+cloud host.
+
+Worklytics authenticates your tenant with your cloud host via [Workload Identity Federation](https://cloud.google.com/iam/docs/workload-identity-federation).
+This eliminates the need for any secrets to be exchanged between your organization and Worklytics,
+or the use any API keys/certificates for Worklytics which you would need to rotate.
+
 ## Supported Data Sources
 As of March 2023, the following sources can be connected to Worklytics via psoxy.
 
