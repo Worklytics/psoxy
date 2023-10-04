@@ -1,7 +1,18 @@
 package com.avaulta.gateway.rules;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.*;
+import lombok.extern.java.Log;
+
 import java.util.Map;
 
+@Builder(toBuilder = true)
+@Log
+@AllArgsConstructor //for builder
+@NoArgsConstructor //for Jackson
+@Getter
+@EqualsAndHashCode
+@JsonInclude(JsonInclude.Include.NON_NULL) //NOTE: despite name, also affects YAML encoding
 public class MultiTypeBulkDataRules implements RuleSet {
 
     /**
@@ -18,6 +29,7 @@ public class MultiTypeBulkDataRules implements RuleSet {
      *
      * q: what if file matches multiple path templates? pick lexicographically first?
      *
+     * q: flatten somehow, so no indentation at the top-level?
      */
     Map<String, BulkDataRules> fileRules;
 
