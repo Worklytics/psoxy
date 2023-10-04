@@ -11,8 +11,11 @@ import java.util.List;
 @Data
 public class RecordRules implements BulkDataRules {
 
-    enum Format {
-        NDJSON;
+    public enum Format {
+        NDJSON,
+        ;
+        //AVRO?
+
     }
 
 

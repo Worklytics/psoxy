@@ -10,6 +10,7 @@ import co.worklytics.psoxy.storage.impl.BulkDataSanitizerFactoryImpl;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.JsonSchemaFilterUtils;
 import com.avaulta.gateway.rules.ParameterSchemaUtils;
+import com.avaulta.gateway.rules.PathTemplateUtils;
 import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
 import com.avaulta.gateway.tokens.impl.AESReversibleTokenizationStrategy;
@@ -246,6 +247,12 @@ public class PsoxyModule {
     @Provides
     Pseudonymizer pseudonymizer(PseudonymizerImplFactory factory, ConfigService config, co.worklytics.psoxy.rules.RuleSet ruleSet) {
         return factory.create(factory.buildOptions(config, ruleSet.getDefaultScopeIdForSource()));
+    }
+
+    @Provides
+    @Singleton
+    PathTemplateUtils pathTemplateUtils() {
+        return new PathTemplateUtils();
     }
 
 

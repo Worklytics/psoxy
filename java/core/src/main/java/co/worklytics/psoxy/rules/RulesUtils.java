@@ -116,7 +116,4 @@ public class RulesUtils {
             return new ArrayList<>();
         }
     }
-
-
-
 }

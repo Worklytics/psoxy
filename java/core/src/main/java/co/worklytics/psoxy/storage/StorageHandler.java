@@ -5,7 +5,10 @@ import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.rules.CsvRules;
 import co.worklytics.psoxy.rules.RulesUtils;
 import com.avaulta.gateway.rules.BulkDataRules;
+import com.avaulta.gateway.rules.MultiTypeBulkDataRules;
+import com.avaulta.gateway.rules.PathTemplateUtils;
 import lombok.*;
+import org.apache.commons.lang3.tuple.Pair;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -14,6 +17,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
 
 /**
  * solves a DaggerMissingBinding exception in tests
@@ -39,6 +43,9 @@ public class StorageHandler {
 
     @Inject
     HostEnvironment hostEnvironment;
+
+    @Inject
+    PathTemplateUtils pathTemplateUtils;
 
     @RequiredArgsConstructor
     public enum BulkMetaData {
@@ -66,14 +73,18 @@ public class StorageHandler {
     @SneakyThrows
     public StorageEventResponse handle(StorageEventRequest request, BulkDataRules rules) {
 
-        BulkDataSanitizer fileHandler = bulkDataSanitizerFactory.get(request.getSourceObjectPath());
+        BulkDataRules applicableRules = getApplicableRules(rules, request.getSourceObjectPath());
+
+        BulkDataSanitizer fileHandler = bulkDataSanitizerFactory.get(applicableRules);
 
         return StorageEventResponse.builder()
-                .bytes(fileHandler.sanitize(request.getReaderStream(), rules, pseudonymizer))
+                .bytes(fileHandler.sanitize(request.getReaderStream(), pseudonymizer))
                 .destinationBucketName(request.getDestinationBucketName())
                 .destinationObjectPath(request.getDestinationObjectPath())
                 .build();
     }
+
+
 
     public StorageEventRequest buildRequest(InputStreamReader reader, String sourceBucketName, String sourceObjectPath, StorageHandler.ObjectTransform transform) {
 
@@ -141,6 +152,15 @@ public class StorageHandler {
 
         return objectMeta.getOrDefault(BulkMetaData.INSTANCE_ID.getMetaDataKey(), "")
             .equals(hostEnvironment.getInstanceId());
+    }
+
+    BulkDataRules getApplicableRules(BulkDataRules rules, String sourceObjectPath) {
+        if (rules instanceof MultiTypeBulkDataRules) {
+            return pathTemplateUtils.match(((MultiTypeBulkDataRules) rules).getFileRules(), sourceObjectPath)
+                .orElseThrow(() -> new IllegalArgumentException("No matching rules for path: " + sourceObjectPath));
+        } else {
+            return rules;
+        }
     }
 
 

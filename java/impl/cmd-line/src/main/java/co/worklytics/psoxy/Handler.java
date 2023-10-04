@@ -61,7 +61,7 @@ public class Handler {
         Pseudonymizer pseudonymizer = pseudonymizerImplFactory.create(options.build());
 
         try (FileReader in = new FileReader(inputFile)) {
-            out.append(new String(fileHandlerStrategy.get(inputFile.getName()).sanitize(in, rules, pseudonymizer)));
+            out.append(new String(fileHandlerStrategy.get(rules).sanitize(in, pseudonymizer)));
         }
     }
 }

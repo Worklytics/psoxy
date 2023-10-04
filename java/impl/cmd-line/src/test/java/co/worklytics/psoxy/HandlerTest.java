@@ -1,7 +1,9 @@
 package co.worklytics.psoxy;
 
+import co.worklytics.psoxy.rules.RuleSet;
 import co.worklytics.psoxy.storage.impl.ColumnarBulkDataSanitizerImpl;
 import co.worklytics.test.TestModules;
+import com.avaulta.gateway.rules.BulkDataRules;
 import dagger.Component;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,6 +32,8 @@ public class HandlerTest {
 
     @Inject
     Handler handler;
+    @Inject
+    RuleSet defaultRules;
 
     @BeforeEach
     public void setup() {
@@ -38,7 +42,7 @@ public class HandlerTest {
 
         //make this deterministic for testing
         ColumnarBulkDataSanitizerImpl bulkDataSanitizer =
-            (ColumnarBulkDataSanitizerImpl) handler.fileHandlerStrategy.get(".csv");
+            (ColumnarBulkDataSanitizerImpl) handler.fileHandlerStrategy.get((BulkDataRules) defaultRules);
         bulkDataSanitizer.setRecordShuffleChunkSize(1);
     }
 

@@ -102,9 +102,9 @@ public class BulkDataSanitizerImplTest {
             .build();
 
         File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
-
+        columnarFileSanitizerImpl.setBulkDataRules(rules);
         try (FileReader in = new FileReader(inputFile)) {
-            byte[] result = columnarFileSanitizerImpl.sanitize(in, rules, pseudonymizer);
+            byte[] result = columnarFileSanitizerImpl.sanitize(in pseudonymizer);
             assertEquals(EXPECTED, new String(result));
         }
     }
@@ -124,9 +124,10 @@ public class BulkDataSanitizerImplTest {
             .build();
 
         File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
+        columnarFileSanitizerImpl.setBulkDataRules(rules);
 
         try (FileReader in = new FileReader(inputFile)) {
-            byte[] result = columnarFileSanitizerImpl.sanitize(in, rules, pseudonymizer);
+            byte[] result = columnarFileSanitizerImpl.sanitize(in, pseudonymizer);
             assertEquals(EXPECTED, new String(result));
         }
     }
@@ -143,9 +144,10 @@ public class BulkDataSanitizerImplTest {
             .columnToPseudonymize("AN EMAIL").build();
 
         File inputFile = new File(getClass().getResource("/csv/hris-example-headers-w-spaces.csv").getFile());
+        columnarFileSanitizerImpl.setBulkDataRules(rules);
 
         try (FileReader in = new FileReader(inputFile)) {
-            byte[] result = columnarFileSanitizerImpl.sanitize(in, rules, pseudonymizer);
+            byte[] result = columnarFileSanitizerImpl.sanitize(in, pseudonymizer);
             assertEquals(EXPECTED, new String(result));
         }
     }
@@ -161,9 +163,10 @@ public class BulkDataSanitizerImplTest {
             .columnToPseudonymize("EMAIL")
             .build();
         File inputFile = new File(getClass().getResource("/csv/hris-example-quotes.csv").getFile());
+        columnarFileSanitizerImpl.setBulkDataRules(rules);
 
         try (FileReader in = new FileReader(inputFile)) {
-            byte[] result = columnarFileSanitizerImpl.sanitize(in, rules, pseudonymizer);
+            byte[] result = columnarFileSanitizerImpl.sanitize(in, pseudonymizer);
 
             assertEquals(EXPECTED, new String(result));
         }
@@ -184,9 +187,10 @@ public class BulkDataSanitizerImplTest {
         CsvRules rules = (CsvRules) rulesUtils.getRulesFromConfig(config).orElseThrow();
 
         File inputFile = new File(getClass().getResource("/csv/hris-default-rules.csv").getFile());
+        columnarFileSanitizerImpl.setBulkDataRules(rules);
 
         try (FileReader in = new FileReader(inputFile)) {
-            byte[] result = columnarFileSanitizerImpl.sanitize(in, rules, pseudonymizer);
+            byte[] result = columnarFileSanitizerImpl.sanitize(in, pseudonymizer);
 
             assertEquals(EXPECTED, new String(result));
         }
@@ -203,11 +207,12 @@ public class BulkDataSanitizerImplTest {
             .columnToPseudonymize("    employee_id     ")
             .columnToPseudonymize(" an EMAIL ")
             .build();
+        columnarFileSanitizerImpl.setBulkDataRules(rules);
 
         File inputFile = new File(getClass().getResource("/csv/hris-example-headers-w-spaces.csv").getFile());
 
         try (FileReader in = new FileReader(inputFile)) {
-            byte[] result = columnarFileSanitizerImpl.sanitize(in, rules, pseudonymizer);
+            byte[] result = columnarFileSanitizerImpl.sanitize(in, pseudonymizer);
 
             assertEquals(EXPECTED, new String(result));
         }
@@ -225,11 +230,12 @@ public class BulkDataSanitizerImplTest {
             .columnToPseudonymize("EMPLOYEE_EMAIL")
             .columnsToRename(ImmutableMap.of("EMAIL", "EMPLOYEE_EMAIL"))
             .build();
+        columnarFileSanitizerImpl.setBulkDataRules(rules);
 
         File inputFile = new File(getClass().getResource("/csv/hris-example-quotes.csv").getFile());
 
         try (FileReader in = new FileReader(inputFile)) {
-            byte[] result = columnarFileSanitizerImpl.sanitize(in, rules, pseudonymizer);
+            byte[] result = columnarFileSanitizerImpl.sanitize(in, pseudonymizer);
 
             assertEquals(EXPECTED, new String(result));
         }
@@ -260,11 +266,12 @@ public class BulkDataSanitizerImplTest {
             .columnToPseudonymize("MANAGER_ID")
             .columnsToDuplicate(Map.of("EMPLOYEE_ID", "EMPLOYEE_ID_ORIG"))
             .build();
+        columnarFileSanitizerImpl.setBulkDataRules(rules);
 
         File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
 
         try (FileReader in = new FileReader(inputFile)) {
-            byte[] result = columnarFileSanitizerImpl.sanitize(in, rules, defaultPseudonymizer);
+            byte[] result = columnarFileSanitizerImpl.sanitize(in, defaultPseudonymizer);
 
             assertEquals(EXPECTED, new String(result));
         }
@@ -296,11 +303,12 @@ public class BulkDataSanitizerImplTest {
             .columnToRedact("EFFECTIVE_ISOWEEK")
             .columnsToDuplicate(Map.of("EMPLOYEE_ID", "EMPLOYEE_ID_ORIG"))
             .build();
+        columnarFileSanitizerImpl.setBulkDataRules(rules);
 
         File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
 
         try (FileReader in = new FileReader(inputFile)) {
-            byte[] result = columnarFileSanitizerImpl.sanitize(in, rules, defaultPseudonymizer);
+            byte[] result = columnarFileSanitizerImpl.sanitize(in, defaultPseudonymizer);
 
             assertEquals(EXPECTED, new String(result));
         }
@@ -326,17 +334,20 @@ public class BulkDataSanitizerImplTest {
             .columnToRedact("Start Date")
             .build();
 
+        columnarFileSanitizerImpl.setBulkDataRules(rules);
+
         Pseudonymizer defaultPseudonymizer =
             pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
                 .pseudonymizationSalt("salt")
                 .defaultScopeId("hris")
                 .build());
 
+
         File inputFile = new File(getClass().getResource("/csv/example_acme_20220901.csv").getFile());
 
 
         try (FileReader in = new FileReader(inputFile)) {
-            byte[] result = columnarFileSanitizerImpl.sanitize(in, rules, defaultPseudonymizer);
+            byte[] result = columnarFileSanitizerImpl.sanitize(in, defaultPseudonymizer);
             assertEquals(EXPECTED, new String(result));
         }
     }
@@ -351,12 +362,12 @@ public class BulkDataSanitizerImplTest {
             .columnToPseudonymize("EMPLOYEE_ID")
             .columnsToInclude(Lists.newArrayList("EMPLOYEE_ID"))
             .build();
+        columnarFileSanitizerImpl.setBulkDataRules(rules);
 
         File inputFile = new File(getClass().getResource("/csv/hris-example-quotes.csv").getFile());
 
-
         try (FileReader in = new FileReader(inputFile)) {
-            byte[] result = columnarFileSanitizerImpl.sanitize(in, rules, pseudonymizer);
+            byte[] result = columnarFileSanitizerImpl.sanitize(in, pseudonymizer);
 
             assertEquals(EXPECTED, new String(result));
         }
@@ -376,8 +387,7 @@ public class BulkDataSanitizerImplTest {
         CsvRules rules = CsvRules.builder()
             .columnToPseudonymize("EMPLOYEE_EMAIL")
             .build();
-
-
+        columnarFileSanitizerImpl.setBulkDataRules(rules);
 
         File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
 
@@ -385,7 +395,7 @@ public class BulkDataSanitizerImplTest {
             // replace shuffler implementation with one that reverses the list, so deterministic
             columnarFileSanitizerImpl.setRecordShuffleChunkSize(2);
             columnarFileSanitizerImpl.makeShuffleDeterministic();
-            byte[] result = columnarFileSanitizerImpl.sanitize(in, rules, pseudonymizer);
+            byte[] result = columnarFileSanitizerImpl.sanitize(in, pseudonymizer);
 
             assertEquals(EXPECTED, new String(result));
         }
@@ -452,7 +462,7 @@ public class BulkDataSanitizerImplTest {
             // replace shuffler implementation with one that reverses the list, so deterministic
             columnarFileSanitizerImpl.setRecordShuffleChunkSize(2);
             columnarFileSanitizerImpl.makeShuffleDeterministic();
-            byte[] result = columnarFileSanitizerImpl.sanitize(in, rules, pseudonymizer);
+            byte[] result = columnarFileSanitizerImpl.sanitize(in,  pseudonymizer);
             String resultString = new String(result);
 
             assertEquals(EXPECTED, resultString);
@@ -478,6 +488,7 @@ public class BulkDataSanitizerImplTest {
     void transform_fromYaml() {
 
         CsvRules rules = yamlMapper.readValue(getClass().getResource("/rules/csv-pipeline.yaml"), CsvRules.class);
+        columnarFileSanitizerImpl.setBulkDataRules(rules);
 
         final String EXPECTED = "EMPLOYEE_ID,EMPLOYEE_EMAIL,DEPARTMENT,SNAPSHOT,MANAGER_ID,JOIN_DATE,LEAVE_DATE,GITHUB_USERNAME\r\n" +
             "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"mfsaNYuCX__xvnRz4gJp_t0zrDTC5DkuCJvMkubugsI\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"workltyics.co\"\",\"\"hash\"\":\"\"al4JK5KlOIsneC2DM__P_HRYe28LWYTBSf3yWKGm5yQ\"\"}\",Sales,2023-01-06,\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM\"\"}\",2020-01-01,,\"{\"\"scope\"\":\"\"github\"\",\"\"hash\"\":\"\"e_xmOtKElP3GOsE3lI1zpQWfkRPEwv1C4pKeEXsjLQk\"\"}\"\r\n" +
@@ -491,7 +502,7 @@ public class BulkDataSanitizerImplTest {
             // replace shuffler implementation with one that reverses the list, so deterministic
             columnarFileSanitizerImpl.setRecordShuffleChunkSize(2);
             columnarFileSanitizerImpl.makeShuffleDeterministic();
-            byte[] result = columnarFileSanitizerImpl.sanitize(in, rules, pseudonymizer);
+            byte[] result = columnarFileSanitizerImpl.sanitize(in, pseudonymizer);
             String resultString = new String(result);
 
             assertEquals(EXPECTED, resultString);

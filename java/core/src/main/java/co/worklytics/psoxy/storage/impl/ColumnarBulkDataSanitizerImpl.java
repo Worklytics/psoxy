@@ -4,6 +4,7 @@ import co.worklytics.psoxy.PseudonymizedIdentity;
 import co.worklytics.psoxy.Pseudonymizer;
 import co.worklytics.psoxy.PseudonymizerImplFactory;
 import co.worklytics.psoxy.rules.CsvRules;
+import co.worklytics.psoxy.rules.RuleSet;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
@@ -65,9 +66,12 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
     @Setter(onMethod_ = @VisibleForTesting)
     private int recordShuffleChunkSize = 500;
 
+    @Setter(onMethod_ = @VisibleForTesting)
+    @Inject
+    RuleSet bulkDataRules;
+
     @Override
     public byte[] sanitize(@NonNull InputStreamReader reader,
-                           @NonNull BulkDataRules bulkDataRules,
                            @NonNull Pseudonymizer pseudonymizer) throws IOException {
 
         if (!(bulkDataRules instanceof CsvRules)) {
