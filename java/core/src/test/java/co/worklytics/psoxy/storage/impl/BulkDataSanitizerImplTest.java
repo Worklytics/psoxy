@@ -12,14 +12,16 @@ import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.Base64UrlSha256HashPseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
+import com.avaulta.gateway.rules.BulkDataRules;
 import com.avaulta.gateway.rules.ColumnarRules;
 import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
 import com.avaulta.gateway.tokens.impl.Sha256DeterministicTokenizationStrategy;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import dagger.Component;
+import dagger.Module;
+import dagger.Provides;
 import lombok.SneakyThrows;
 import org.apache.commons.codec.binary.Base64;
 import org.junit.jupiter.api.BeforeEach;
@@ -68,9 +70,18 @@ public class BulkDataSanitizerImplTest {
         TestModules.ForFixedClock.class,
         TestModules.ForFixedUUID.class,
         MockModules.ForConfigService.class,
+        ForPlaceholderRules.class,
     })
     public interface Container {
         void inject(BulkDataSanitizerImplTest test);
+    }
+
+    @Module
+    public interface ForPlaceholderRules {
+        @Provides @Singleton
+        static RuleSet configService() {
+            return mock(CsvRules.class);
+        }
     }
 
     @BeforeEach
@@ -104,7 +115,7 @@ public class BulkDataSanitizerImplTest {
         File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
         columnarFileSanitizerImpl.setBulkDataRules(rules);
         try (FileReader in = new FileReader(inputFile)) {
-            byte[] result = columnarFileSanitizerImpl.sanitize(in pseudonymizer);
+            byte[] result = columnarFileSanitizerImpl.sanitize(in, pseudonymizer);
             assertEquals(EXPECTED, new String(result));
         }
     }
@@ -455,6 +466,7 @@ public class BulkDataSanitizerImplTest {
                                 ColumnarRules.FieldValueTransform.pseudonymizeWithScope("github")
                         )).build()))
                 .build();
+        columnarFileSanitizerImpl.setBulkDataRules(rules);
 
         File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
 
