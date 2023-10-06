@@ -10,6 +10,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.MapFunction;
+import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -34,7 +35,7 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
     RecordRules rules;
 
     @AssistedInject
-    public RecordBulkDataSanitizerImpl(RecordRules rules) {
+    public RecordBulkDataSanitizerImpl(@Assisted RecordRules rules) {
         this.rules = rules;
     }
 
