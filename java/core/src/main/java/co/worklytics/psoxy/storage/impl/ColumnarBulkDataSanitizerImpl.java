@@ -223,13 +223,6 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
             UnmodifiableIterator<List<CSVRecord>> chunks =
                 Iterators.partition(records.iterator(), this.getRecordShuffleChunkSize());
 
-            Function<Pair<String, String>, String> applyTransformsAndPseudonymization = (Pair<String, String> pair) -> {
-                String value = pair.getValue();
-                // important - transform FIRST, then pseudonymize resulting values
-                value = applyTransformIfAny.apply(pair.getKey(), value);
-                value = applyPseudonymizationIfAny.apply(pair.getKey(), value);
-                return value;
-            };
 
             for (UnmodifiableIterator<List<CSVRecord>> chunkIterator = chunks; chunkIterator.hasNext(); ) {
                 List<CSVRecord> chunk = new ArrayList<>(chunkIterator.next());
