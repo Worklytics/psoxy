@@ -23,13 +23,13 @@ public class Sha256DeterministicTokenizationStrategy implements DeterministicTok
     }
 
     @Override
-    public byte[] getToken(String identifier, Function<String, String> canonicalization) {
+    public byte[] getToken(String identifier) {
         //pass in a canonicalization function? if not, this won't match for the canonically-equivalent
         // identifier in different formats (eg, cased/etc)
 
         // if pseudonyms too long, could cut this to MD5 (save 16 bytes) or SHA1 (save 12 bytes)
         // for our implementation, that should still be good enough
-        return DigestUtils.sha256(canonicalization.apply(identifier) + getSalt());
+        return DigestUtils.sha256(identifier + getSalt());
     }
 
 }

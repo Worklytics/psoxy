@@ -8,12 +8,15 @@ import com.avaulta.gateway.rules.Endpoint;
 import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
 import co.worklytics.psoxy.rules.Rules2;
 import com.avaulta.gateway.rules.JsonSchemaFilterUtils;
+import com.avaulta.gateway.rules.transforms.EncryptIp;
+import com.avaulta.gateway.rules.transforms.HashIp;
 import com.avaulta.gateway.rules.transforms.Transform;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestUtils;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
+import com.avaulta.gateway.tokens.impl.Sha256DeterministicTokenizationStrategy;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.MapFunction;
@@ -28,6 +31,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.net.Inet6Address;
 import java.net.URL;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -590,4 +594,62 @@ class RESTApiSanitizerImplTest {
         assertEquals(StringUtils.trimToNull(expected),
             transform.map(input, sanitizer.getJsonConfiguration()));
     }
+
+    @CsvSource(value = {
+        "123.234.252.12,t~7USliSM4GiS0Xfk1DXIAH-4nK-UkLJlSAA_5ZqQh_CI",
+        "10.0.0.1,t~3BU4goNN07w3ofq8v5ig2enxSWj9xnAnPOThel4mHTk",
+        ",",
+        "not an ip," // redact
+    })
+    @ParameterizedTest
+    public void hashIp(String input, String expected) {
+        MapFunction transform = sanitizer.getHashIp(HashIp.builder().build());
+
+        assertEquals(StringUtils.trimToNull(expected),
+            transform.map(input, sanitizer.getJsonConfiguration()));
+    }
+
+    @SneakyThrows
+    @CsvSource(value = {
+        "123.234.252.12,p~7USliSM4GiS0Xfk1DXIAH-4nK-UkLJlSAA_5ZqQh_CJStJlrfaIPHLZUvx-dHHQp",
+        "10.0.0.1,p~3BU4goNN07w3ofq8v5ig2enxSWj9xnAnPOThel4mHTmrZBJVaY3CjxNEDJYfGEk_",
+        ",",
+        "not an ip," // redact
+    })
+    @ParameterizedTest
+    public void encryptIp(String input, String expected) {
+        MapFunction transform = sanitizer.getEncryptIp(EncryptIp.builder().build());
+
+
+        String encrypted = (String) transform.map(input, sanitizer.getJsonConfiguration());
+
+
+        assertEquals(StringUtils.trimToNull(expected),
+            encrypted);
+
+
+        if (StringUtils.isNotBlank(expected)) {
+            MapFunction hashTransform = sanitizer.getHashIp(HashIp.builder().build());
+            String formattedHash = (String) hashTransform.map(input, sanitizer.getJsonConfiguration());
+
+            byte[] hash = pseudonymEncoder.decode(formattedHash).getHash();
+
+            Base64.Encoder base64encoder = Base64.getUrlEncoder().withoutPadding();
+            String withoutPrefix = encrypted.substring(UrlSafeTokenPseudonymEncoder.REVERSIBLE_PREFIX.length());
+            byte[] decoded = Base64.getUrlDecoder().decode(withoutPrefix.getBytes());
+
+
+            assertEquals(
+                base64encoder.encodeToString(hash),
+                base64encoder.encodeToString(Arrays.copyOfRange(decoded, 0, Sha256DeterministicTokenizationStrategy.HASH_SIZE_BYTES))
+            );
+
+            UrlSafeTokenPseudonymEncoder encoder = new UrlSafeTokenPseudonymEncoder();
+            assertTrue(encoder.canBeDecoded(encrypted));
+            Pseudonym decodedPseudonym = encoder.decode(encrypted);
+            assertEquals(Base64.getUrlEncoder().withoutPadding().encodeToString(decodedPseudonym.getHash()),
+            Base64.getUrlEncoder().withoutPadding().encodeToString(hash));
+        }
+    }
+
 }

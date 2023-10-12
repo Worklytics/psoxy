@@ -11,7 +11,15 @@ public interface DeterministicTokenizationStrategy {
      * @param canonicalization
      * @return token (deterministic based on canonically-equivalent originals)
      */
-    byte[] getToken(String originalDatum, Function<String, String> canonicalization);
+    default byte[] getToken(String originalDatum, Function<String, String> canonicalization) {
+        return getToken(canonicalization.apply(originalDatum));
+    }
+
+    /**
+     * @param originalDatum       to tokenize
+     * @return token (deterministic based on canonically-equivalent originals)
+     */
+    byte[] getToken(String originalDatum);
 
 
     /**

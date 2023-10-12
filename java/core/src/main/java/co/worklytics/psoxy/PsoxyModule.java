@@ -36,6 +36,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 /**
  * provides implementations for platform-independent dependencies of 'core' module
@@ -143,6 +144,8 @@ public class PsoxyModule {
 
     }
 
+
+
     @Provides
     static BulkDataSanitizerFactory fileHandler(BulkDataSanitizerFactoryImpl fileHandlerStrategy) {
         return fileHandlerStrategy;
@@ -177,6 +180,43 @@ public class PsoxyModule {
     }
 
     @Provides
+    @Named("ipEncryptionStrategy")
+    @Singleton
+    ReversibleTokenizationStrategy ipEncryptionStrategy(ConfigService config,
+                                                        @Named("ipHashStrategy") DeterministicTokenizationStrategy deterministicTokenizationStrategy) {
+        String salt = config.getConfigPropertyAsOptional(ProxyConfigProperty.SALT_IP)
+            .orElse(config.getConfigPropertyOrError(ProxyConfigProperty.PSOXY_SALT));
+
+        Optional<SecretKeySpec> keyFromConfig =
+            firstPresent(
+                config.getConfigPropertyAsOptional(ProxyConfigProperty.ENCRYPTION_KEY_IP),
+                config.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_ENCRYPTION_KEY)
+            )
+            .map(passkey -> AESReversibleTokenizationStrategy.aesKeyFromPassword(passkey, salt));
+        //q: do we need to support actual fully AES keys?
+
+        if (keyFromConfig.isEmpty()) {
+            log.warning("No value for PSOXY_ENCRYPTION_KEY; any transforms depending on it will fail!");
+        }
+
+        return AESReversibleTokenizationStrategy.builder()
+            .cipherSuite(AESReversibleTokenizationStrategy.CBC)
+            .key(keyFromConfig.orElse(null)) //null disables it, which is OK if transforms depending on this aren't used
+            .deterministicTokenizationStrategy(deterministicTokenizationStrategy)
+            .build();
+    }
+
+    @Provides
+    @Named("ipHashStrategy")
+    @Singleton
+    DeterministicTokenizationStrategy deterministicTokenizationStrategy(ConfigService config) {
+        String salt = config.getConfigPropertyAsOptional(ProxyConfigProperty.SALT_IP)
+            .orElse(config.getConfigPropertyOrError(ProxyConfigProperty.PSOXY_SALT));
+
+        return new Sha256DeterministicTokenizationStrategy(salt);
+    }
+
+    @Provides
     @Singleton
     UrlSafeTokenPseudonymEncoder urlSafeTokenPseudonymEncoder() {
         return new UrlSafeTokenPseudonymEncoder();
@@ -208,5 +248,10 @@ public class PsoxyModule {
         return factory.create(factory.buildOptions(config, ruleSet.getDefaultScopeIdForSource()));
     }
 
+
+    //TODO: utils method for this somewhere??
+    <T> Optional<T> firstPresent(Optional<T>... optionals) {
+        return Stream.of(optionals).filter(Optional::isPresent).findFirst().orElse(Optional.empty());
+    }
 
 }

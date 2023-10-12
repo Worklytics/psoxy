@@ -12,7 +12,10 @@ import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.Endpoint;
 import com.avaulta.gateway.rules.JsonSchemaFilterUtils;
 import com.avaulta.gateway.rules.ParameterSchemaUtils;
+import com.avaulta.gateway.rules.transforms.EncryptIp;
+import com.avaulta.gateway.rules.transforms.HashIp;
 import com.avaulta.gateway.rules.transforms.Transform;
+import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
@@ -31,8 +34,11 @@ import org.hazlewood.connor.bottema.emailaddress.EmailAddressCriteria;
 import org.hazlewood.connor.bottema.emailaddress.EmailAddressParser;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.mail.internet.InternetAddress;
+import java.net.InetAddress;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -43,7 +49,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder.REVERSIBLE_PSEUDONYM_PATTERN;
 import static java.util.regex.Pattern.CASE_INSENSITIVE;
 
 @Log
@@ -86,6 +91,11 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     JsonSchemaFilterUtils jsonSchemaFilterUtils;
     @Inject
     ParameterSchemaUtils parameterSchemaUtils;
+
+    @Inject @Named("ipEncryptionStrategy")
+    ReversibleTokenizationStrategy ipEncryptStrategy;
+    @Inject @Named("ipHashStrategy")
+    DeterministicTokenizationStrategy ipHashStrategy;
 
 
     @Override
@@ -259,10 +269,76 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
             f = getFilterTokenByRegex((Transform.FilterTokenByRegex) transform);
         } else if (transform instanceof Transform.Tokenize) {
             f = getTokenize((Transform.Tokenize) transform);
+        } else if (transform instanceof HashIp) {
+            f = getHashIp((HashIp) transform);
+        } else if (transform instanceof EncryptIp) {
+            f = getEncryptIp((EncryptIp) transform);
         } else {
             throw new IllegalArgumentException("Unknown transform type: " + transform.getClass().getName());
         }
         return f;
+    }
+
+    @VisibleForTesting
+    MapFunction getEncryptIp(EncryptIp transform) {
+        return (s, jsonConfiguration) -> {
+            if (!(s instanceof String)) {
+                if (s != null) {
+                    log.warning("value matched by " + transform + " not of type String");
+                }
+                return null;
+            } else if (StringUtils.isBlank((String) s)) {
+                return s;
+            } else {
+                String canonicalizedIp = canonicalizeIp((String) s);
+                if (canonicalizedIp == null) {
+                    //not a valid IP
+                    return null;
+                }
+
+                return urlSafePseudonymEncoder.encode(Pseudonym.builder()
+                            .hash(ipHashStrategy.getToken(canonicalizedIp))
+                            .reversible(ipEncryptStrategy.getReversibleToken(canonicalizedIp))
+                            .build());
+            }
+        };
+    }
+
+    @VisibleForTesting
+    MapFunction getHashIp(HashIp transform) {
+        return (s, jsonConfiguration) -> {
+            if (!(s instanceof String)) {
+                if (s != null) {
+                    log.warning("value matched by " + transform + " not of type String");
+                }
+                return null;
+            } else if (StringUtils.isBlank((String) s)) {
+                return s;
+            } else {
+                String canonicalizedIp = canonicalizeIp((String) s);
+                if (canonicalizedIp == null) {
+                    //not a valid IP
+                    return null;
+                }
+
+                // Parse the IP address string and convert back to string to get the canonical form.
+                return urlSafePseudonymEncoder.encode(Pseudonym.builder()
+                          .hash(ipHashStrategy.getToken(canonicalizedIp))
+                          .build());
+            }
+        };
+    }
+
+    String canonicalizeIp(String ip) {
+        try {
+            //TODO: force to textual IP address, and never permit hostnames?
+            InetAddress address = InetAddress.getByName(ip);
+            return address.getHostAddress();
+        } catch (UnknownHostException e) {
+            //not a valid IP address
+            log.warning("value matched by HashIP transform not a valid IP address: " + ip);
+            return null;
+        }
     }
 
 

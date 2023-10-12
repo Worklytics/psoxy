@@ -3,7 +3,9 @@ package com.avaulta.gateway.pseudonyms.impl;
 import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
+import com.avaulta.gateway.tokens.impl.Sha256DeterministicTokenizationStrategy;
 
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -14,7 +16,7 @@ public class UrlSafeTokenPseudonymEncoder implements PseudonymEncoder {
 
 
     /**
-     * URL-safe prefix to put in front of reversible pseudonyms
+     * URL-safe prefix to put in front of reversible pseudonyms that use SHA-256 hash
      *
      * q: make configurable, to support compatibility with various REST-API clients??
      *
@@ -23,7 +25,6 @@ public class UrlSafeTokenPseudonymEncoder implements PseudonymEncoder {
      *
      */
     public static final String REVERSIBLE_PREFIX = "p~";
-
     public static final String TOKEN_PREFIX = "t~";
 
     //length of base64-url-encoded IV + ciphertext
@@ -43,9 +44,13 @@ public class UrlSafeTokenPseudonymEncoder implements PseudonymEncoder {
     public String encode(Pseudonym pseudonym) {
         String encoded;
         if (pseudonym.getReversible() == null) {
-            encoded = TOKEN_PREFIX + encoder.encodeToString(pseudonym.getHash());
+            encoded = TOKEN_PREFIX + encoder.encodeToString(pseudonym.getHash());;
         } else {
-            encoded = REVERSIBLE_PREFIX + encoder.encodeToString(pseudonym.getReversible());
+            if (!Arrays.equals(pseudonym.getHash(), 0, pseudonym.getHash().length, pseudonym.getReversible(), 0, pseudonym.getHash().length)) {
+                throw new IllegalArgumentException("hash must be first part of reversible pseudonym");
+            }
+
+            encoded = REVERSIBLE_PREFIX +  encoder.encodeToString(pseudonym.getReversible());
         }
         if (pseudonym.getDomain() != null) {
             //q: url-encode DOMAIN_SEPARATOR?
@@ -69,6 +74,7 @@ public class UrlSafeTokenPseudonymEncoder implements PseudonymEncoder {
         if (encodedPseudonym.startsWith(REVERSIBLE_PREFIX)) {
             byte[] decoded = decoder.decode(encodedPseudonym.substring(REVERSIBLE_PREFIX.length()));
             builder.reversible(decoded);
+            builder.hash(Arrays.copyOfRange(decoded, 0, Sha256DeterministicTokenizationStrategy.HASH_SIZE_BYTES));
         } else if (encodedPseudonym.startsWith(TOKEN_PREFIX)) {
             builder.hash(decoder.decode(encodedPseudonym.substring(TOKEN_PREFIX.length())));
         } else {
@@ -82,7 +88,8 @@ public class UrlSafeTokenPseudonymEncoder implements PseudonymEncoder {
     @Override
     public boolean canBeDecoded(String possiblePseudonym) {
         return possiblePseudonym != null &&
-            (possiblePseudonym.startsWith(REVERSIBLE_PREFIX) || possiblePseudonym.startsWith(TOKEN_PREFIX));
+            (possiblePseudonym.startsWith(REVERSIBLE_PREFIX)
+                || possiblePseudonym.startsWith(TOKEN_PREFIX));
     }
 
     /**

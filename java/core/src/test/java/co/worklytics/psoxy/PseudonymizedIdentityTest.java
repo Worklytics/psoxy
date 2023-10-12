@@ -4,9 +4,8 @@ import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.test.MockModules;
 import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
+import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.transforms.Transform;
-import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
-import com.avaulta.gateway.tokens.impl.AESReversibleTokenizationStrategy;
 import dagger.Component;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -103,6 +102,11 @@ class PseudonymizedIdentityTest {
 
         assertEquals(Base64.getUrlEncoder().withoutPadding().encodeToString(pseudonym.getHash()),
                 notReversible.getHash());
+
+        // hash on the reversible IS equal to the hash for the default pseudonyms
+        UrlSafeTokenPseudonymEncoder urlSafeTokenPseudonymEncoder = new UrlSafeTokenPseudonymEncoder();
+        assertNotEquals(pseudonymizedIdentity.getHash(),
+            urlSafeTokenPseudonymEncoder.decode(pseudonymizedIdentity.getReversible()).getHash());
     }
 
     @Test
@@ -134,17 +138,26 @@ class PseudonymizedIdentityTest {
                 .includeReversible(true)
                 .build());
 
-        PseudonymizedIdentity notReversible = pseudonymizer.pseudonymize("alice@acme.com", Transform.Pseudonymize.builder()
+        assertEquals("BlFx65qHrkRrhMsuq7lg4bCpwsbXgpLhVZnZ6VBMqoY",
+            pseudonymizedIdentity.getHash());
+
+        PseudonymizedIdentity notReversible =
+            pseudonymizer.pseudonymize("alice@acme.com", Transform.Pseudonymize.builder()
                 .includeReversible(false)
                 .build());
 
+        // round trip from legacy should now be working OK, even with reversible
         Pseudonym pseudonym = pseudonymizedIdentity.fromLegacy();
 
-        //pseudonym's hash is NOT equivalent to legacy pseudonymizedIdentity's hash
-        assertNotEquals(Base64.getUrlEncoder().withoutPadding().encodeToString(pseudonym.getHash()),
+        assertEquals(Base64.getUrlEncoder().withoutPadding().encodeToString(pseudonym.getHash()),
                 pseudonymizedIdentity.getHash());
 
-        assertNotEquals(Base64.getUrlEncoder().withoutPadding().encodeToString(pseudonym.getHash()),
+        assertEquals(Base64.getUrlEncoder().withoutPadding().encodeToString(pseudonym.getHash()),
                 notReversible.getHash());
+
+        // hash on the reversible is NOT equal to the hash for the legacy pseudonyms
+        UrlSafeTokenPseudonymEncoder urlSafeTokenPseudonymEncoder = new UrlSafeTokenPseudonymEncoder();
+        assertNotEquals(pseudonymizedIdentity.getHash(),
+            urlSafeTokenPseudonymEncoder.decode(pseudonymizedIdentity.getReversible()).getHash());
     }
 }

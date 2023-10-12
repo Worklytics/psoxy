@@ -55,7 +55,7 @@ class AESGCMReversibleTokenizationStrategyTest {
             assertTrue(
                 //q: why variable length for constant length input?
                 // seem to range from 79 --> 82 bytes
-                pseudonym.length() < Pseudonym.HASH_SIZE_BYTES + 52 //hash + cipher
+                pseudonym.length() < deterministicTokenizationStrategy.getTokenLength() + 52 //hash + cipher
             );
         });
     }

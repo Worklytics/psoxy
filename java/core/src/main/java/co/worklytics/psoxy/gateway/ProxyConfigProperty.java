@@ -17,12 +17,15 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
     PATH_TO_INSTANCE_CONFIG,
 
     PSOXY_ENCRYPTION_KEY,
+    ENCRYPTION_KEY_IP,
+
 
     @Deprecated //removed from v0.4
     IDENTIFIER_SCOPE_ID,
 
 
     PSOXY_SALT,
+    SALT_IP, // used to salt IP; distinct value so can independently rotate IP salt from primary salt
 
 
     //see PseudonymImplementation

@@ -103,18 +103,29 @@ public class PseudonymizerImpl implements Pseudonymizer {
         }
 
         builder.scope(scope);
+
+
+        byte[] hashWithDefaultImpl =
+            deterministicTokenizationStrategy.getToken(value.toString(), canonicalization);
+
+        // encoded hash will be filled based on customer's config; may NOT simply be encoding of
+        // hashWithDefaultImpl
+        String encodedHash;
         if (getOptions().getPseudonymImplementation() == PseudonymImplementation.LEGACY) {
-            builder.hash(hashUtils.hash(canonicalization.apply(value.toString()),
-                getOptions().getPseudonymizationSalt(), asLegacyScope(scope)));
+            encodedHash = hashUtils.hash(canonicalization.apply(value.toString()),
+                getOptions().getPseudonymizationSalt(), asLegacyScope(scope));
         } else if (getOptions().getPseudonymImplementation() == PseudonymImplementation.DEFAULT) {
-            builder.hash(encoder.encodeToString(deterministicTokenizationStrategy.getToken(value.toString(), canonicalization)));
+            encodedHash = encoder.encodeToString(hashWithDefaultImpl);
         } else {
             throw new RuntimeException("Unsupported pseudonym implementation: " + getOptions().getPseudonymImplementation());
         }
 
+        builder.hash(encodedHash);
+
         if (transformOptions.getIncludeReversible()) {
             builder.reversible(urlSafePseudonymEncoder.encode(
                 Pseudonym.builder()
+                    .hash(hashWithDefaultImpl) //reversibles have ALWAYS relied on the v4 default impl
                     .reversible(reversibleTokenizationStrategy.getReversibleToken(value.toString(), canonicalization))
                     .domain(domain)
                     .build()));

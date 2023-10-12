@@ -53,7 +53,7 @@ class AESCBCReversibleTokenizationStrategyTest {
         IntStream.generate(() -> random.nextInt(1000000000)).limit(100).forEach(i -> {
             String pseudonym = new String(encoder.encode(pseudonymizationStrategy.getReversibleToken("blah" + i, Function.identity())));
             assertEquals(
-                    Pseudonym.HASH_SIZE_BYTES + 32, //hash + ciphertext
+                deterministicTokenizationStrategy.getTokenLength() + 32, //hash + ciphertext
                 pseudonym.length());
         });
     }
