@@ -83,7 +83,7 @@ fi
 
 set -e
 
-
+git fetch origin
 
 cd -
 for file in "${FILES_TO_COPY[@]}"

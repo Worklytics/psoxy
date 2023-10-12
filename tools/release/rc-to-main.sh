@@ -35,9 +35,20 @@ if [[ $(git log "${expected_branch}..origin/${expected_branch}" --oneline) ]]; t
     exit 1
 fi
 
-PR_URL=$(gh pr create --title "$RELEASE" --body "$RELEASE back to main" --base main --assignee "@me")
+touch rc_to_main.md
+echo "$RELEASE back to main" >> rc_to_main.md
+echo "" >> rc_to_main.md
+echo "Next steps:" >> rc_to_main.md
+echo "  Publish the release: \`./tools/release/publish.sh $RELEASE\`" >> rc_to_main.md
+echo "  Update example templates to point to it:" >> rc_to_main.md
+echo "    \`./tools/release/example.sh . aws-all ~/psoxy-example-aws\`" >> rc_to_main.md
+echo "    \`./tools/release/example.sh . gcp ~/psoxy-example-gcp\`" >> rc_to_main.md
+
+PR_URL=$(gh pr create --title "$RELEASE" --body-file rc_to_main.d --base main --assignee "@me")
 PR_NUMBER=$(echo $PR_URL | sed -n 's/.*\/pull\/\([0-9]*\).*/\1/p').
 
+rm rc_to_main.md
+# TODO: setting merge like this never seems to work
 gh pr merge $PR_NUMBER --merge --auto
 
 printf "created PR ${GREEN}${PR_URL}${NC} and set to auto-merge to ${BLUE}main${NC}\n"
@@ -45,6 +56,6 @@ printf "created PR ${GREEN}${PR_URL}${NC} and set to auto-merge to ${BLUE}main${
 printf "Next steps, after that's merged to ${BLUE}main${NC}:\n"
 printf "  Publish the release: ${BLUE}./tools/release/publish.sh $RELEASE${NC}\n"
 printf "  Update example templates to point to it:\n"
-printf "    ${BLUE}./tools/release/example.sh $RELEASE . aws-all ~/psoxy-example-aws${NC}\n"
-printf "    ${BLUE}./tools/release/example.sh $RELEASE . gcp ~/psoxy-example-gcp${NC}\n"
+printf "    ${BLUE}./tools/release/example.sh . aws-all ~/psoxy-example-aws${NC}\n"
+printf "    ${BLUE}./tools/release/example.sh . gcp ~/psoxy-example-gcp${NC}\n"
 
