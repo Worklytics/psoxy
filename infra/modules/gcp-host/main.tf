@@ -296,6 +296,18 @@ resource "google_secret_manager_secret_version" "additional_transforms" {
   ])
 }
 
+
+
+# Needs to list versions, to find most recent
+resource "google_secret_manager_secret_iam_member" "additional_transforms_viewer" {
+  for_each = local.inputs_to_build_lookups_for
+
+  secret_id = google_secret_manager_secret.additional_transforms[each.key].id
+  member    = "serviceAccount:${module.bulk_connector[each.key].instance_sa_email}"
+  role      = "roles/secretmanager.secretViewer"
+}
+
+# needs to access payload of the versions
 resource "google_secret_manager_secret_iam_member" "additional_transforms" {
   for_each = local.inputs_to_build_lookups_for
 
@@ -303,6 +315,7 @@ resource "google_secret_manager_secret_iam_member" "additional_transforms" {
   member    = "serviceAccount:${module.bulk_connector[each.key].instance_sa_email}"
   role      = "roles/secretmanager.secretAccessor"
 }
+
 
 # END LOOKUP TABLES
 
