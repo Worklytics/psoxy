@@ -3,12 +3,10 @@ package co.worklytics.psoxy.storage.impl;
 import co.worklytics.psoxy.PseudonymizedIdentity;
 import co.worklytics.psoxy.Pseudonymizer;
 import co.worklytics.psoxy.PseudonymizerImplFactory;
-import co.worklytics.psoxy.rules.CsvRules;
 import co.worklytics.psoxy.rules.RuleSet;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
-import com.avaulta.gateway.rules.BulkDataRules;
 import com.avaulta.gateway.rules.ColumnarRules;
 import co.worklytics.psoxy.storage.BulkDataSanitizer;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -34,7 +32,6 @@ import javax.inject.Singleton;
 import java.io.*;
 import java.util.*;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import java.io.ByteArrayOutputStream;
 
@@ -74,8 +71,8 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
     public byte[] sanitize(@NonNull InputStreamReader reader,
                            @NonNull Pseudonymizer pseudonymizer) throws IOException {
 
-        if (!(bulkDataRules instanceof CsvRules)) {
-            throw new IllegalArgumentException("Rules must be of type CsvRules");
+        if (!(bulkDataRules instanceof ColumnarRules)) {
+            throw new IllegalArgumentException("Rules must be of type ColumnarRules");
         }
 
         ColumnarRules rules = (ColumnarRules) bulkDataRules;
