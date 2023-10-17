@@ -1,0 +1,14 @@
+---
+fileRules:
+  /export/{week}/index_{shard}.ndjson:
+    format: "NDJSON"
+    transforms:
+      - !<redact>
+        path: "foo"
+      - !<pseudonymize>
+        path: "bar"
+  /export/{week}/data_{shard}.csv:
+    columnsToPseudonymize:
+      - "email"
+    delimiter: ","
+    pseudonymFormat: "JSON"

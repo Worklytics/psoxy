@@ -54,4 +54,5 @@ public class RecordRulesTest {
 
         assertEquals(EXPECTED, yamlMapper.writeValueAsString(recordRules));
     }
+
 }
