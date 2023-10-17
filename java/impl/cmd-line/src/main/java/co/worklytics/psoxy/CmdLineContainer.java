@@ -10,6 +10,7 @@ import javax.inject.Singleton;
 @Component(modules = {
     PsoxyModule.class,
     CmdLineModule.class,
+    ConfigRulesModule.class,
 })
 public interface CmdLineContainer {
 
