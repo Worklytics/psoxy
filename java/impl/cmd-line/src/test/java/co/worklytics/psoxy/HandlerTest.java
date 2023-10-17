@@ -1,10 +1,13 @@
 package co.worklytics.psoxy;
 
+import co.worklytics.psoxy.rules.CsvRules;
 import co.worklytics.psoxy.rules.RuleSet;
 import co.worklytics.psoxy.storage.impl.ColumnarBulkDataSanitizerImpl;
 import co.worklytics.test.TestModules;
 import com.avaulta.gateway.rules.BulkDataRules;
 import dagger.Component;
+import dagger.Module;
+import dagger.Provides;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -16,6 +19,7 @@ import java.util.Collections;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 
 public class HandlerTest {
 
@@ -23,7 +27,7 @@ public class HandlerTest {
     @Singleton
     @Component(modules = {
         PsoxyModule.class,
-        ConfigRulesModule.class,
+        ForPlaceholderRules.class,
         TestModules.ForConfigService.class,
     })
     public interface Container {
@@ -33,17 +37,27 @@ public class HandlerTest {
 
     @Inject
     Handler handler;
-    @Inject
-    RuleSet defaultRules;
+
+    @Module
+    public interface ForPlaceholderRules {
+        @Provides
+        @Singleton
+        static RuleSet ruleSet() {
+            return mock(CsvRules.class);
+        }
+    }
 
     @BeforeEach
     public void setup() {
         Container container = DaggerHandlerTest_Container.create();
         container.inject(this);
 
+        CsvRules csvRules = CsvRules.builder()
+            .build();
+
         //make this deterministic for testing
         ColumnarBulkDataSanitizerImpl bulkDataSanitizer =
-            (ColumnarBulkDataSanitizerImpl) handler.fileHandlerStrategy.get((BulkDataRules) defaultRules);
+            (ColumnarBulkDataSanitizerImpl) handler.fileHandlerStrategy.get((BulkDataRules) csvRules);
         bulkDataSanitizer.setRecordShuffleChunkSize(1);
     }
 

@@ -78,7 +78,7 @@ public class BulkDataSanitizerImplTest {
     @Module
     public interface ForPlaceholderRules {
         @Provides @Singleton
-        static RuleSet configService() {
+        static RuleSet ruleSet() {
             return mock(CsvRules.class);
         }
     }
