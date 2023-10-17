@@ -23,6 +23,7 @@ public class HandlerTest {
     @Singleton
     @Component(modules = {
         PsoxyModule.class,
+        ConfigRulesModule.class,
         TestModules.ForConfigService.class,
     })
     public interface Container {
