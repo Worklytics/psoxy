@@ -24,7 +24,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.zip.GZIPInputStream;
 
@@ -36,12 +35,12 @@ public class RulesUtils {
     ObjectMapper yamlMapper;
 
     @SneakyThrows
-    public String sha(RuleSet rules) {
+    public String sha(com.avaulta.gateway.rules.RuleSet rules) {
         return DigestUtils.sha1Hex(asYaml(rules));
     }
 
     @SneakyThrows
-    public String asYaml(RuleSet rules) {
+    public String asYaml(com.avaulta.gateway.rules.RuleSet rules) {
         return yamlMapper.writeValueAsString(rules);
     }
 
@@ -52,7 +51,7 @@ public class RulesUtils {
      * @see com.fasterxml.jackson.core.JsonParseException sry for the misnomer, but we leverage Jackson for both YAML and JSON
      */
     @SneakyThrows
-    public Optional<RuleSet> getRulesFromConfig(ConfigService config) {
+    public Optional<com.avaulta.gateway.rules.RuleSet> getRulesFromConfig(ConfigService config) {
         Optional<String> configuredRules = config.getConfigPropertyAsOptional(ProxyConfigProperty.RULES);
 
         if (configuredRules.isPresent()) {
@@ -87,16 +86,16 @@ public class RulesUtils {
 
 
     @VisibleForTesting
-    RuleSet parse(@NonNull String yamlString) {
+    com.avaulta.gateway.rules.RuleSet parse(@NonNull String yamlString) {
 
 
-        List<Class<?>> rulesImplementations = Arrays.asList(
+        List<Class<? extends com.avaulta.gateway.rules.RuleSet>> rulesImplementations = Arrays.asList(
             CsvRules.class,
             Rules2.class,
             MultiTypeBulkDataRules.class,
             RecordRules.class
         );
-        RuleSet rules = null;
+        com.avaulta.gateway.rules.RuleSet rules = null;
 
         for (Class<?> impl : rulesImplementations) {
             try {

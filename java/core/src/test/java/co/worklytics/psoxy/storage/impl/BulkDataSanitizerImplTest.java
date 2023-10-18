@@ -1,9 +1,10 @@
 package co.worklytics.psoxy.storage.impl;
 
 import co.worklytics.psoxy.*;
-import co.worklytics.psoxy.rules.*;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.rules.CsvRules;
+import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestModules;
 import co.worklytics.test.TestUtils;
@@ -13,6 +14,7 @@ import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.Base64UrlSha256HashPseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.ColumnarRules;
+import com.avaulta.gateway.rules.RuleSet;
 import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
 import com.avaulta.gateway.tokens.impl.Sha256DeterministicTokenizationStrategy;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -79,7 +81,7 @@ public class BulkDataSanitizerImplTest {
     public interface ForPlaceholderRules {
         @Provides @Singleton
         static RuleSet ruleSet() {
-            return mock(CsvRules.class);
+            return mock(ColumnarRules.class);
         }
     }
 

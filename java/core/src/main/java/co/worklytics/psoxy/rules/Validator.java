@@ -19,7 +19,7 @@ import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 @Log
 public class Validator {
 
-    static public void validate(@NonNull RuleSet rules) {
+    static public void validate(@NonNull com.avaulta.gateway.rules.RuleSet rules) {
         if (rules instanceof CsvRules) {
             validate((CsvRules) rules);
         } else if (rules instanceof Rules2) {

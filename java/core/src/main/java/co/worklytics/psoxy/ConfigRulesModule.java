@@ -2,9 +2,12 @@ package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
-import co.worklytics.psoxy.rules.*;
+import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
+import co.worklytics.psoxy.rules.RESTRules;
+import co.worklytics.psoxy.rules.RulesUtils;
 import com.avaulta.gateway.rules.BulkDataRules;
 import com.avaulta.gateway.rules.ColumnarRules;
+import com.avaulta.gateway.rules.RuleSet;
 import dagger.Module;
 import dagger.Provides;
 

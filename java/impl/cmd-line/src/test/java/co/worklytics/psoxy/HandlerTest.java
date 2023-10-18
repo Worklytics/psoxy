@@ -1,10 +1,10 @@
 package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.rules.CsvRules;
-import co.worklytics.psoxy.rules.RuleSet;
 import co.worklytics.psoxy.storage.impl.ColumnarBulkDataSanitizerImpl;
 import co.worklytics.test.TestModules;
 import com.avaulta.gateway.rules.BulkDataRules;
+import com.avaulta.gateway.rules.RuleSet;
 import dagger.Component;
 import dagger.Module;
 import dagger.Provides;

@@ -80,7 +80,7 @@ class RulesUtilsTest {
         when(config.getConfigPropertyAsOptional(eq(ProxyConfigProperty.RULES)))
             .thenReturn(Optional.of(encoded));
 
-        RuleSet rules = utils.getRulesFromConfig(config).get();
+        com.avaulta.gateway.rules.RuleSet rules = utils.getRulesFromConfig(config).get();
         assertNotNull(rules);
     }
 

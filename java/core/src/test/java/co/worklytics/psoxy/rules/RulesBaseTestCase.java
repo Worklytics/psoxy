@@ -4,7 +4,6 @@ import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.impl.RESTApiSanitizerImpl;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestUtils;
-import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
@@ -234,13 +233,13 @@ abstract public class RulesBaseTestCase {
 
 
     @SneakyThrows
-    RuleSet yamlRoundtrip(RuleSet rules) {
+    com.avaulta.gateway.rules.RuleSet yamlRoundtrip(com.avaulta.gateway.rules.RuleSet rules) {
         String yaml = yamlMapper.writeValueAsString(rules).replace("---\n", "");
         return yamlMapper.readerFor(rules.getClass()).readValue(yaml);
     }
 
     @SneakyThrows
-    RuleSet jsonRoundtrip(RuleSet rules) {
+    com.avaulta.gateway.rules.RuleSet jsonRoundtrip(com.avaulta.gateway.rules.RuleSet rules) {
         String json = jsonMapper.writeValueAsString(rules);
         return jsonMapper.readerFor(rules.getClass()).readValue(json);
     }

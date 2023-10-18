@@ -246,7 +246,7 @@ public class PsoxyModule {
     }
 
     @Provides
-    Pseudonymizer pseudonymizer(PseudonymizerImplFactory factory, ConfigService config, RulesUtils rulesUtils, co.worklytics.psoxy.rules.RuleSet ruleSet) {
+    Pseudonymizer pseudonymizer(PseudonymizerImplFactory factory, ConfigService config, RulesUtils rulesUtils, com.avaulta.gateway.rules.RuleSet ruleSet) {
         return factory.create(factory.buildOptions(config,
             rulesUtils.getDefaultScopeIdFromRules(ruleSet)
                 .orElseGet(() -> rulesUtils.getDefaultScopeIdFromSource(config.getConfigPropertyOrError(ProxyConfigProperty.SOURCE)))));
