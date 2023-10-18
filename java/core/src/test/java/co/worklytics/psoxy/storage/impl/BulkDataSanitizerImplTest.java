@@ -79,7 +79,7 @@ public class BulkDataSanitizerImplTest {
     @Module
     public interface ForPlaceholderRules {
         @Provides @Singleton
-        static RuleSet ruleSet() {
+        static ColumnarRules ruleSet() {
             return mock(ColumnarRules.class);
         }
     }
@@ -115,7 +115,7 @@ public class BulkDataSanitizerImplTest {
             .build();
 
         File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
-        columnarFileSanitizerImpl.setBulkDataRules(rules);
+        columnarFileSanitizerImpl.setRules(rules);
         try (FileReader in = new FileReader(inputFile)) {
             byte[] result = columnarFileSanitizerImpl.sanitize(in, pseudonymizer);
             assertEquals(EXPECTED, new String(result));
@@ -137,7 +137,7 @@ public class BulkDataSanitizerImplTest {
             .build();
 
         File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
-        columnarFileSanitizerImpl.setBulkDataRules(rules);
+        columnarFileSanitizerImpl.setRules(rules);
 
         try (FileReader in = new FileReader(inputFile)) {
             byte[] result = columnarFileSanitizerImpl.sanitize(in, pseudonymizer);
@@ -157,7 +157,7 @@ public class BulkDataSanitizerImplTest {
             .columnToPseudonymize("AN EMAIL").build();
 
         File inputFile = new File(getClass().getResource("/csv/hris-example-headers-w-spaces.csv").getFile());
-        columnarFileSanitizerImpl.setBulkDataRules(rules);
+        columnarFileSanitizerImpl.setRules(rules);
 
         try (FileReader in = new FileReader(inputFile)) {
             byte[] result = columnarFileSanitizerImpl.sanitize(in, pseudonymizer);
@@ -176,7 +176,7 @@ public class BulkDataSanitizerImplTest {
             .columnToPseudonymize("EMAIL")
             .build();
         File inputFile = new File(getClass().getResource("/csv/hris-example-quotes.csv").getFile());
-        columnarFileSanitizerImpl.setBulkDataRules(rules);
+        columnarFileSanitizerImpl.setRules(rules);
 
         try (FileReader in = new FileReader(inputFile)) {
             byte[] result = columnarFileSanitizerImpl.sanitize(in, pseudonymizer);
@@ -200,7 +200,7 @@ public class BulkDataSanitizerImplTest {
         ColumnarRules rules = (ColumnarRules) rulesUtils.getRulesFromConfig(config).orElseThrow();
 
         File inputFile = new File(getClass().getResource("/csv/hris-default-rules.csv").getFile());
-        columnarFileSanitizerImpl.setBulkDataRules(rules);
+        columnarFileSanitizerImpl.setRules(rules);
 
         try (FileReader in = new FileReader(inputFile)) {
             byte[] result = columnarFileSanitizerImpl.sanitize(in, pseudonymizer);
@@ -220,7 +220,7 @@ public class BulkDataSanitizerImplTest {
             .columnToPseudonymize("    employee_id     ")
             .columnToPseudonymize(" an EMAIL ")
             .build();
-        columnarFileSanitizerImpl.setBulkDataRules(rules);
+        columnarFileSanitizerImpl.setRules(rules);
 
         File inputFile = new File(getClass().getResource("/csv/hris-example-headers-w-spaces.csv").getFile());
 
@@ -243,7 +243,7 @@ public class BulkDataSanitizerImplTest {
             .columnToPseudonymize("EMPLOYEE_EMAIL")
             .columnsToRename(ImmutableMap.of("EMAIL", "EMPLOYEE_EMAIL"))
             .build();
-        columnarFileSanitizerImpl.setBulkDataRules(rules);
+        columnarFileSanitizerImpl.setRules(rules);
 
         File inputFile = new File(getClass().getResource("/csv/hris-example-quotes.csv").getFile());
 
@@ -279,7 +279,7 @@ public class BulkDataSanitizerImplTest {
             .columnToPseudonymize("MANAGER_ID")
             .columnsToDuplicate(Map.of("EMPLOYEE_ID", "EMPLOYEE_ID_ORIG"))
             .build();
-        columnarFileSanitizerImpl.setBulkDataRules(rules);
+        columnarFileSanitizerImpl.setRules(rules);
 
         File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
 
@@ -316,7 +316,7 @@ public class BulkDataSanitizerImplTest {
             .columnToRedact("EFFECTIVE_ISOWEEK")
             .columnsToDuplicate(Map.of("EMPLOYEE_ID", "EMPLOYEE_ID_ORIG"))
             .build();
-        columnarFileSanitizerImpl.setBulkDataRules(rules);
+        columnarFileSanitizerImpl.setRules(rules);
 
         File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
 
@@ -347,7 +347,7 @@ public class BulkDataSanitizerImplTest {
             .columnToRedact("Start Date")
             .build();
 
-        columnarFileSanitizerImpl.setBulkDataRules(rules);
+        columnarFileSanitizerImpl.setRules(rules);
 
         Pseudonymizer defaultPseudonymizer =
             pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
@@ -375,7 +375,7 @@ public class BulkDataSanitizerImplTest {
             .columnToPseudonymize("EMPLOYEE_ID")
             .columnsToInclude(Lists.newArrayList("EMPLOYEE_ID"))
             .build();
-        columnarFileSanitizerImpl.setBulkDataRules(rules);
+        columnarFileSanitizerImpl.setRules(rules);
 
         File inputFile = new File(getClass().getResource("/csv/hris-example-quotes.csv").getFile());
 
@@ -400,7 +400,7 @@ public class BulkDataSanitizerImplTest {
         ColumnarRules rules = ColumnarRules.builder()
             .columnToPseudonymize("EMPLOYEE_EMAIL")
             .build();
-        columnarFileSanitizerImpl.setBulkDataRules(rules);
+        columnarFileSanitizerImpl.setRules(rules);
 
         File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
 
@@ -468,7 +468,7 @@ public class BulkDataSanitizerImplTest {
                                 ColumnarRules.FieldValueTransform.pseudonymizeWithScope("github")
                         )).build()))
                 .build();
-        columnarFileSanitizerImpl.setBulkDataRules(rules);
+        columnarFileSanitizerImpl.setRules(rules);
 
         File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
 
@@ -502,7 +502,7 @@ public class BulkDataSanitizerImplTest {
     void transform_fromYaml() {
 
         ColumnarRules rules = yamlMapper.readValue(getClass().getResource("/rules/csv-pipeline.yaml"), ColumnarRules.class);
-        columnarFileSanitizerImpl.setBulkDataRules(rules);
+        columnarFileSanitizerImpl.setRules(rules);
 
         final String EXPECTED = "EMPLOYEE_ID,EMPLOYEE_EMAIL,DEPARTMENT,SNAPSHOT,MANAGER_ID,JOIN_DATE,LEAVE_DATE,GITHUB_USERNAME\r\n" +
             "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"mfsaNYuCX__xvnRz4gJp_t0zrDTC5DkuCJvMkubugsI\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"workltyics.co\"\",\"\"hash\"\":\"\"al4JK5KlOIsneC2DM__P_HRYe28LWYTBSf3yWKGm5yQ\"\"}\",Sales,2023-01-06,\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM\"\"}\",2020-01-01,,\"{\"\"scope\"\":\"\"github\"\",\"\"hash\"\":\"\"e_xmOtKElP3GOsE3lI1zpQWfkRPEwv1C4pKeEXsjLQk\"\"}\"\r\n" +
