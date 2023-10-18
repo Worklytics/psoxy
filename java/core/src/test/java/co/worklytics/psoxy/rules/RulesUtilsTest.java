@@ -68,12 +68,41 @@ class RulesUtilsTest {
         "  - \"MANAGEREMAIL\"\n";
     static final String BASE64_YAML_CSV = "Y29sdW1uc1RvUHNldWRvbnltaXplOgogIC0gIkVNUExPWUVFX0VNQUlMIgpjb2x1bW5zVG9SZWRhY3Q6CiAgLSAiTUFOQUdFUkVNQUlMIgo=";
 
+
+    static final String YAML_MULTI = "fileRules:\n" +
+        "  /export/{week}/index_{shard}.ndjson:\n" +
+        "    format: \"NDJSON\"\n" +
+        "    transforms:\n" +
+        "      - !<redact>\n" +
+        "        path: \"foo\"\n" +
+        "      - !<pseudonymize>\n" +
+        "        path: \"bar\"\n" +
+        "  /export/{week}/data_{shard}.csv:\n" +
+        "    columnsToPseudonymize:\n" +
+        "      - \"email\"\n" +
+        "    delimiter: \",\"\n" +
+        "    pseudonymFormat: \"JSON\"\n";
+
+    static final String YAML_RECORD = "format: NDJSON\n" +
+        "transforms:\n" +
+        "  - !<redact>\n" +
+        "    path: \"$.summary\"\n" +
+        "  - !<redact>\n" +
+        "    path: \"$.summary\"\n" +
+        "  - !<pseudonymize>\n" +
+        "    path: \"$.email\"\n" +
+        "  - !<pseudonymize>\n" +
+        "    path: \"$.email\"\n";
+
+
     @ParameterizedTest
     @ValueSource(strings = {
         BASE64_YAML_REST,
         YAML_REST,
         YAML_CSV,
         BASE64_YAML_CSV,
+        YAML_MULTI,
+        YAML_RECORD,
     })
     void getRulesFromConfig(String encoded) {
 
