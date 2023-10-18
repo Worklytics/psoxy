@@ -1,7 +1,7 @@
 package co.worklytics.psoxy;
 
-import co.worklytics.psoxy.rules.CsvRules;
 import co.worklytics.psoxy.storage.BulkDataSanitizerFactory;
+import com.avaulta.gateway.rules.ColumnarRules;
 import com.google.api.client.util.Lists;
 import com.google.cloud.secretmanager.v1.AccessSecretVersionResponse;
 import com.google.cloud.secretmanager.v1.SecretManagerServiceClient;
@@ -29,7 +29,7 @@ public class Handler {
 
 
     //visible for testing
-    CsvRules defaultRules = CsvRules.builder().build();
+    ColumnarRules defaultRules = ColumnarRules.builder().build();
 
     @SneakyThrows
     public void sanitize(@NonNull Config config,
@@ -52,7 +52,7 @@ public class Handler {
             options.pseudonymizationSalt(config.getPseudonymizationSalt());
         }
 
-        CsvRules rules = defaultRules.toBuilder()
+        ColumnarRules rules = defaultRules.toBuilder()
                 .columnsToPseudonymize(Lists.newArrayList(config.getColumnsToPseudonymize()))
                 .columnsToRedact(Lists.newArrayList(config.getColumnsToRedact()))
                 .build();
