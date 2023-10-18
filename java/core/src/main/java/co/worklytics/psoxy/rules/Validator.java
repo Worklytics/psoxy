@@ -3,6 +3,8 @@ package co.worklytics.psoxy.rules;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.rules.ColumnarRules;
 import com.avaulta.gateway.rules.Endpoint;
+import com.avaulta.gateway.rules.MultiTypeBulkDataRules;
+import com.avaulta.gateway.rules.RecordRules;
 import com.avaulta.gateway.rules.transforms.Transform;
 import com.google.common.base.Preconditions;
 import com.jayway.jsonpath.JsonPath;
@@ -10,6 +12,7 @@ import lombok.NonNull;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.units.qual.N;
 
 import java.util.Collections;
 import java.util.logging.Level;
@@ -25,6 +28,10 @@ public class Validator {
             validate((ColumnarRules) rules);
         } else if (rules instanceof Rules2) {
             validate((Rules2) rules);
+        } else if (rules instanceof MultiTypeBulkDataRules) {
+            validate((MultiTypeBulkDataRules) rules);
+        } else if (rules instanceof RecordRules) {
+            validate((RecordRules) rules);
         } else {
           throw new NotImplementedException("Set not supported: " + rules.getClass().getSimpleName());
         }
@@ -39,6 +46,16 @@ public class Validator {
             !Collections.disjoint(rules.getColumnsToRedact(), rules.getColumnsToDuplicate().values())) {
             log.log(Level.WARNING, "Replacing columns produced via columnsToDuplicate is nonsensical");
         }
+    }
+
+    static public void validate(@NonNull RecordRules rules) {
+        Preconditions.checkNotNull(rules.getFormat());
+    }
+
+    static public void validate(@NonNull MultiTypeBulkDataRules rules) {
+        Preconditions.checkArgument(rules.getFileRules().size() > 0, "Must have at least one file rule");
+
+        rules.getFileRules().values().forEach(Validator::validate);
     }
 
     static public void validate(@NonNull Rules2 rules) {

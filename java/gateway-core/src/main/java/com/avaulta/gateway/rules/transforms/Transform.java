@@ -59,6 +59,7 @@ public abstract class Transform {
      */
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     @Singular
+    @Deprecated
     List<String> fields;
 
 
