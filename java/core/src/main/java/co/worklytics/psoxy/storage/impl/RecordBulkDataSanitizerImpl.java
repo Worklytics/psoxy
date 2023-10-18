@@ -43,12 +43,6 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
     @Override
     public byte[] sanitize(InputStreamReader reader, Pseudonymizer pseudonymizer) throws IOException {
 
-        if (!(rules instanceof RecordRules)) {
-
-            throw new IllegalArgumentException("Rules must be of type RecordRules");
-        }
-
-
         if (rules.getFormat() != RecordRules.Format.NDJSON) {
             throw new IllegalArgumentException("Only NDJSON format is supported");
         }

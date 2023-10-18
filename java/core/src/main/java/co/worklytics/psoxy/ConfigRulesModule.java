@@ -7,6 +7,7 @@ import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.rules.RulesUtils;
 import com.avaulta.gateway.rules.BulkDataRules;
 import com.avaulta.gateway.rules.ColumnarRules;
+import com.avaulta.gateway.rules.RecordRules;
 import com.avaulta.gateway.rules.RuleSet;
 import dagger.Module;
 import dagger.Provides;
@@ -34,11 +35,33 @@ public class ConfigRulesModule {
     static BulkDataRules bulkDataRules(RuleSet ruleSet) {
         if (!(ruleSet instanceof BulkDataRules)) {
             // will blow things up if something that depends on ColumnarRules is bound in REST-usecase
+            throw new RuntimeException("Configured RuleSet are not BulkDataRules");
+        }
+
+        return (BulkDataRules) ruleSet;
+    }
+
+    @Provides @Singleton
+    static RecordRules recordRules(RuleSet ruleSet) {
+        if (!(ruleSet instanceof RecordRules)) {
+            // will blow things up if something that depends on ColumnarRules is bound in REST-usecase
+            throw new RuntimeException("Configured RuleSet are not RecordRules");
+        }
+        return (RecordRules) ruleSet;
+    }
+
+
+    @Provides @Singleton
+    static ColumnarRules columnarRules(RuleSet ruleSet) {
+        if (!(ruleSet instanceof ColumnarRules)) {
+            // will blow things up if something that depends on ColumnarRules is bound in REST-usecase
             throw new RuntimeException("Configured RuleSet are not ColumnarRules");
         }
 
         return (ColumnarRules) ruleSet;
     }
+
+
 
     @Provides @Singleton
     static RuleSet rules(Logger log, RulesUtils rulesUtils, ConfigService config) {

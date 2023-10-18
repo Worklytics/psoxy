@@ -65,17 +65,11 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
 
     @Setter(onMethod_ = @VisibleForTesting)
     @Inject
-    RuleSet bulkDataRules;
+    ColumnarRules rules;
 
     @Override
     public byte[] sanitize(@NonNull InputStreamReader reader,
                            @NonNull Pseudonymizer pseudonymizer) throws IOException {
-
-        if (!(bulkDataRules instanceof ColumnarRules)) {
-            throw new IllegalArgumentException("Rules must be of type ColumnarRules");
-        }
-
-        ColumnarRules rules = (ColumnarRules) bulkDataRules;
 
         CSVParser records = CSVFormat
                 .DEFAULT
