@@ -8,6 +8,7 @@ import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrateg
 import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.psoxy.storage.BulkDataSanitizerFactory;
 import co.worklytics.psoxy.storage.impl.BulkDataSanitizerFactoryImpl;
+import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.JsonSchemaFilterUtils;
 import com.avaulta.gateway.rules.ParameterSchemaUtils;
@@ -249,7 +250,18 @@ public class PsoxyModule {
     Pseudonymizer pseudonymizer(PseudonymizerImplFactory factory, ConfigService config, RulesUtils rulesUtils, com.avaulta.gateway.rules.RuleSet ruleSet) {
         return factory.create(factory.buildOptions(config,
             rulesUtils.getDefaultScopeIdFromRules(ruleSet)
-                .orElseGet(() -> rulesUtils.getDefaultScopeIdFromSource(config.getConfigPropertyOrError(ProxyConfigProperty.SOURCE)))));
+                .orElseGet(() -> {
+                    boolean legacy =
+                    config.getConfigPropertyAsOptional(ProxyConfigProperty.PSEUDONYM_IMPLEMENTATION)
+                        .map(PseudonymImplementation::valueOf)
+                        .map(implementation -> Objects.equals(implementation, PseudonymImplementation.LEGACY))
+                        .orElse(false);
+                    if (legacy) {
+                        return rulesUtils.getDefaultScopeIdFromSource(config.getConfigPropertyOrError(ProxyConfigProperty.SOURCE));
+                    } else {
+                        return ""; //should only be used in legacy case
+                    }
+                })));
     }
 
     @Provides

@@ -2,6 +2,8 @@ package co.worklytics.psoxy.impl;
 
 import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.test.TestModules;
 import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.rules.Endpoint;
@@ -21,6 +23,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.MapFunction;
 import dagger.Component;
+import dagger.Module;
+import dagger.Provides;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,6 +43,9 @@ import java.util.stream.Collectors;
 
 import static co.worklytics.test.TestModules.withMockEncryptionKey;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class RESTApiSanitizerImplTest {
 
@@ -65,10 +72,23 @@ class RESTApiSanitizerImplTest {
     @Singleton
     @Component(modules = {
         PsoxyModule.class,
-        MockModules.ForConfigService.class,
+        ForConfigService.class,
     })
     public interface Container {
         void inject(RESTApiSanitizerImplTest test);
+    }
+
+    @Module
+    public interface ForConfigService {
+        @Provides
+        @Singleton
+        static ConfigService configService() {
+            ConfigService mock = mock(ConfigService.class);
+            TestModules.withMockEncryptionKey(mock);
+            when(mock.getConfigPropertyOrError(eq(ProxyConfigProperty.SOURCE)))
+                .thenReturn("gmail");
+            return mock;
+        }
     }
 
     @BeforeEach

@@ -80,6 +80,8 @@ class RulesUtilsTest {
         ConfigService config = mock(ConfigService.class);
         when(config.getConfigPropertyAsOptional(eq(ProxyConfigProperty.RULES)))
             .thenReturn(Optional.of(encoded));
+        when(config.getConfigPropertyOrError(eq(ProxyConfigProperty.SOURCE)))
+            .thenReturn("hris");
 
         com.avaulta.gateway.rules.RuleSet rules = utils.getRulesFromConfig(config).get();
         assertNotNull(rules);

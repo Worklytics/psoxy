@@ -37,6 +37,7 @@ class StorageHandlerTest {
         void inject( StorageHandlerTest test);
     }
 
+
     @Inject
     ConfigService config;
 
@@ -51,6 +52,7 @@ class StorageHandlerTest {
         when(config.getConfigPropertyOrError(eq(BulkModeConfigProperty.OUTPUT_BUCKET)))
             .thenReturn("bucket");
     }
+
 
     @ValueSource(strings = { "", "/", "/foo", "/foo/bar" })
     @ParameterizedTest

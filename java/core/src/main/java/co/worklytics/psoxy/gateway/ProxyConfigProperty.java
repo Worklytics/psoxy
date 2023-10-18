@@ -31,7 +31,8 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
     //see PseudonymImplementation
     //use case: use `v0.3` if your initially used a `v0.3.x` version of Proxy to collect data and
     // want data collected through a later Proxy version to be pseudonymized consistently with that
-    @Deprecated // now controlled dynamically via header, rather than config
+    //NOTE: only useful in bulk case, to force legacy pseudonyms there; in API case, should be
+    // controlled via header
     PSEUDONYM_IMPLEMENTATION,
 
     //if relying on default rules, whether to use version that pseudonymizes per-account source IDs

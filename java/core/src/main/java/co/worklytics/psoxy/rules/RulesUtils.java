@@ -131,7 +131,7 @@ public class RulesUtils {
 
     public Optional<String> getDefaultScopeIdFromRules(com.avaulta.gateway.rules.RuleSet ruleSet) {
         if (ruleSet instanceof RuleSet) {
-            return Optional.of(((RuleSet) ruleSet).getDefaultScopeIdForSource());
+            return Optional.ofNullable(((RuleSet) ruleSet).getDefaultScopeIdForSource());
         } else {
             return Optional.empty();
         }
@@ -160,7 +160,7 @@ public class RulesUtils {
         defaultScopeIdBySource.put("dropbox-business", "dropbox-business");
     }
 
-    public String getDefaultScopeIdFromSource(String source) {
+    public String getDefaultScopeIdFromSource(@NonNull String source) {
         String defaultScopeId = defaultScopeIdBySource.get(source);
 
         if (defaultScopeId == null) {

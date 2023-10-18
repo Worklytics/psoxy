@@ -3,7 +3,6 @@ package co.worklytics.psoxy.storage.impl;
 import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
-import co.worklytics.psoxy.rules.ColumnarRules;
 import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestModules;
@@ -84,6 +83,8 @@ public class BulkDataSanitizerImplTest {
             return mock(ColumnarRules.class);
         }
     }
+
+
 
     @BeforeEach
     public void setup() {

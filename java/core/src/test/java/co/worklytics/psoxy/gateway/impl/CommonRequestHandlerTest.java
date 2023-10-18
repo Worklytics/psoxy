@@ -59,6 +59,8 @@ class CommonRequestHandlerTest {
 
         when(handler.config.getConfigPropertyAsOptional(eq(ProxyConfigProperty.PSOXY_SALT)))
             .thenReturn(Optional.of("salt"));
+        when(handler.config.getConfigPropertyOrError(eq(ProxyConfigProperty.SOURCE)))
+            .thenReturn("gmail");
     }
 
     @Inject
