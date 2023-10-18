@@ -7,6 +7,7 @@ import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.utils.RandomNumberGenerator;
 import com.avaulta.gateway.rules.BulkDataRules;
 import com.avaulta.gateway.rules.ColumnarRules;
+import com.avaulta.gateway.rules.RecordRules;
 import com.avaulta.gateway.rules.RuleSet;
 import com.google.api.client.testing.http.MockHttpTransport;
 import com.google.api.client.testing.http.MockLowLevelHttpResponse;
@@ -61,6 +62,16 @@ public class MockModules {
         @Provides @Singleton
         static RESTRules restRules() {
             return mock(RESTRules.class);
+        }
+
+        @Provides @Singleton
+        static ColumnarRules columnarRules() {
+            return mock(ColumnarRules.class);
+        }
+
+        @Provides @Singleton
+        static RecordRules recordRules() {
+            return mock(RecordRules.class);
         }
     }
 
