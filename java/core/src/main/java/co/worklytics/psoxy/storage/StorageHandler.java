@@ -6,6 +6,7 @@ import co.worklytics.psoxy.rules.RulesUtils;
 import com.avaulta.gateway.rules.BulkDataRules;
 import com.avaulta.gateway.rules.MultiTypeBulkDataRules;
 import com.avaulta.gateway.rules.PathTemplateUtils;
+import com.google.common.annotations.VisibleForTesting;
 import lombok.*;
 
 import javax.inject.Inject;
@@ -109,13 +110,7 @@ public class StorageHandler {
         return transforms;
     }
 
-    ObjectTransform buildDefaultTransform() {
-        return ObjectTransform.builder()
-            .destinationBucketName(config.getConfigPropertyOrError(BulkModeConfigProperty.OUTPUT_BUCKET))
-            .pathWithinBucket(config.getConfigPropertyAsOptional(BulkModeConfigProperty.OUTPUT_BASE_PATH).orElse(""))
-            .rules((BulkDataRules) defaultRuleSet)
-            .build();
-    }
+
 
     /**
      * @param sourceBucket the bucket from which the original object was read
@@ -151,16 +146,6 @@ public class StorageHandler {
             .equals(hostEnvironment.getInstanceId());
     }
 
-    BulkDataRules getApplicableRules(BulkDataRules rules, String sourceObjectPath) {
-        if (rules instanceof MultiTypeBulkDataRules) {
-            return pathTemplateUtils.match(((MultiTypeBulkDataRules) rules).getFileRules(), sourceObjectPath)
-                .orElseThrow(() -> new IllegalArgumentException("No matching rules for path: " + sourceObjectPath));
-        } else {
-            return rules;
-        }
-    }
-
-
     @Builder
     @AllArgsConstructor
     @NoArgsConstructor
@@ -189,4 +174,26 @@ public class StorageHandler {
         @NonNull
         BulkDataRules rules;
     }
+
+
+    @VisibleForTesting
+    ObjectTransform buildDefaultTransform() {
+        return ObjectTransform.builder()
+            .destinationBucketName(config.getConfigPropertyOrError(BulkModeConfigProperty.OUTPUT_BUCKET))
+            .pathWithinBucket(config.getConfigPropertyAsOptional(BulkModeConfigProperty.OUTPUT_BASE_PATH).orElse(""))
+            .rules(defaultRuleSet)
+            .build();
+    }
+
+
+    private BulkDataRules getApplicableRules(BulkDataRules rules, String sourceObjectPath) {
+        if (rules instanceof MultiTypeBulkDataRules) {
+            return pathTemplateUtils.match(((MultiTypeBulkDataRules) rules).getFileRules(), sourceObjectPath)
+                .orElseThrow(() -> new IllegalArgumentException("No matching rules for path: " + sourceObjectPath));
+        } else {
+            return rules;
+        }
+    }
+
+
 }
