@@ -5,6 +5,7 @@ import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
+import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.psoxy.storage.BulkDataSanitizerFactory;
 import co.worklytics.psoxy.storage.impl.BulkDataSanitizerFactoryImpl;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
@@ -245,8 +246,10 @@ public class PsoxyModule {
     }
 
     @Provides
-    Pseudonymizer pseudonymizer(PseudonymizerImplFactory factory, ConfigService config, co.worklytics.psoxy.rules.RuleSet ruleSet) {
-        return factory.create(factory.buildOptions(config, ruleSet.getDefaultScopeIdForSource()));
+    Pseudonymizer pseudonymizer(PseudonymizerImplFactory factory, ConfigService config, RulesUtils rulesUtils, co.worklytics.psoxy.rules.RuleSet ruleSet) {
+        return factory.create(factory.buildOptions(config,
+            rulesUtils.getDefaultScopeIdFromRules(ruleSet)
+                .orElseGet(() -> rulesUtils.getDefaultScopeIdFromSource(config.getConfigPropertyOrError(ProxyConfigProperty.SOURCE)))));
     }
 
     @Provides

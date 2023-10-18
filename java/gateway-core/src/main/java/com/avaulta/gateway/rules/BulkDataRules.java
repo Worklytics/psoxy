@@ -13,8 +13,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.DEDUCTION)
 @JsonSubTypes({
-    @JsonSubTypes.Type(value = RecordRules.class, name = "record"),
-    @JsonSubTypes.Type(value = ColumnarRules.class, name = "columnar"),
+    @JsonSubTypes.Type(value = RecordRules.class),
+    @JsonSubTypes.Type(value = ColumnarRules.class),
 })
 public interface BulkDataRules extends RuleSet {
 

@@ -29,7 +29,7 @@ public class ConfigRulesModule {
 
     @Provides @Singleton
     static BulkDataRules bulkDataRules(RuleSet ruleSet) {
-        if (!(ruleSet instanceof ColumnarRules)) {
+        if (!(ruleSet instanceof BulkDataRules)) {
             // will blow things up if something that depends on ColumnarRules is bound in REST-usecase
             throw new RuntimeException("Configured RuleSet are not ColumnarRules");
         }
