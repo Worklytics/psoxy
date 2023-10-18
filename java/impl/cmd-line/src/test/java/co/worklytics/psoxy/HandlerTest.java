@@ -4,7 +4,6 @@ import co.worklytics.psoxy.storage.impl.ColumnarBulkDataSanitizerImpl;
 import co.worklytics.test.TestModules;
 import com.avaulta.gateway.rules.BulkDataRules;
 import com.avaulta.gateway.rules.ColumnarRules;
-import com.avaulta.gateway.rules.RuleSet;
 import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
@@ -42,8 +41,8 @@ public class HandlerTest {
     public interface ForPlaceholderRules {
         @Provides
         @Singleton
-        static RuleSet ruleSet() {
-            return mock(CsvRules.class);
+        static ColumnarRules ruleSet() {
+            return mock(ColumnarRules.class);
         }
     }
 
@@ -57,7 +56,7 @@ public class HandlerTest {
 
         //make this deterministic for testing
         ColumnarBulkDataSanitizerImpl bulkDataSanitizer =
-            (ColumnarBulkDataSanitizerImpl) handler.fileHandlerStrategy.get((BulkDataRules) csvRules);
+            (ColumnarBulkDataSanitizerImpl) handler.fileHandlerStrategy.get((ColumnarRules) csvRules);
         bulkDataSanitizer.setRecordShuffleChunkSize(1);
     }
 
