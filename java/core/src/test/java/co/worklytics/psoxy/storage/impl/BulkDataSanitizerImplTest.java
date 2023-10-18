@@ -3,7 +3,7 @@ package co.worklytics.psoxy.storage.impl;
 import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
-import co.worklytics.psoxy.rules.CsvRules;
+import co.worklytics.psoxy.rules.ColumnarRules;
 import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestModules;
@@ -109,7 +109,7 @@ public class BulkDataSanitizerImplTest {
             "3,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"workltycis.co\"\",\"\"hash\"\":\"\"BlQB8Vk0VwdbdWTGAzBF.ote1357Ajr0fFcgFf72kdk\"\"}\",Engineering,2023-01-06,1,2019-10-06,2022-12-08\r\n" +
             "4,,Engineering,2023-01-06,1,2018-06-03,\r\n"; //blank ID
 
-        CsvRules rules = CsvRules.builder()
+        ColumnarRules rules = ColumnarRules.builder()
             .columnToPseudonymize("EMPLOYEE_EMAIL")
             .build();
 
@@ -130,7 +130,7 @@ public class BulkDataSanitizerImplTest {
             "3,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"workltycis.co\"\",\"\"hash\"\":\"\"BlQB8Vk0VwdbdWTGAzBF.ote1357Ajr0fFcgFf72kdk\"\"}\",2023-01-06,1,2019-10-06,2022-12-08\r\n" +
             "4,,2023-01-06,1,2018-06-03,\r\n"; //blank ID
 
-        CsvRules rules = CsvRules.builder()
+        ColumnarRules rules = ColumnarRules.builder()
             .columnToPseudonymize("EMPLOYEE_EMAIL")
             .columnToRedact("DEPARTMENT")
             .build();
@@ -151,7 +151,7 @@ public class BulkDataSanitizerImplTest {
             "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",Engineering\r\n";
 
 
-        CsvRules rules = CsvRules.builder()
+        ColumnarRules rules = ColumnarRules.builder()
             .columnToPseudonymize("EMPLOYEE_ID")
             .columnToPseudonymize("AN EMAIL").build();
 
@@ -170,7 +170,7 @@ public class BulkDataSanitizerImplTest {
         final String EXPECTED = "EMPLOYEE_ID,EMAIL,DEPARTMENT\r\n" +
             "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",\",,,\"\r\n";
 
-        CsvRules rules = CsvRules.builder()
+        ColumnarRules rules = ColumnarRules.builder()
             .columnToPseudonymize("EMPLOYEE_ID")
             .columnToPseudonymize("EMAIL")
             .build();
@@ -196,7 +196,7 @@ public class BulkDataSanitizerImplTest {
         when(config.getConfigPropertyAsOptional(eq(ProxyConfigProperty.RULES)))
             .thenReturn(Optional.of(Base64.encodeBase64String(TestUtils.getData("sources/hris/csv.yaml"))));
 
-        CsvRules rules = (CsvRules) rulesUtils.getRulesFromConfig(config).orElseThrow();
+        ColumnarRules rules = (ColumnarRules) rulesUtils.getRulesFromConfig(config).orElseThrow();
 
         File inputFile = new File(getClass().getResource("/csv/hris-default-rules.csv").getFile());
         columnarFileSanitizerImpl.setBulkDataRules(rules);
@@ -215,7 +215,7 @@ public class BulkDataSanitizerImplTest {
         final String EXPECTED = "EMPLOYEE_ID,AN EMAIL,SOME DEPARTMENT\r\n" +
             "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",Engineering\r\n";
 
-        CsvRules rules = CsvRules.builder()
+        ColumnarRules rules = ColumnarRules.builder()
             .columnToPseudonymize("    employee_id     ")
             .columnToPseudonymize(" an EMAIL ")
             .build();
@@ -237,7 +237,7 @@ public class BulkDataSanitizerImplTest {
             "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",\",,,\"\r\n";
 
 
-        CsvRules rules = CsvRules.builder()
+        ColumnarRules rules = ColumnarRules.builder()
             .columnToPseudonymize("EMPLOYEE_ID")
             .columnToPseudonymize("EMPLOYEE_EMAIL")
             .columnsToRename(ImmutableMap.of("EMAIL", "EMPLOYEE_EMAIL"))
@@ -271,7 +271,7 @@ public class BulkDataSanitizerImplTest {
             "t~-ZdDGUuOMK-Oy7_PJ3pf9SYX12-3tKPdLHfYbjVGcGk,Engineering,2023-01-06,t~SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM,2019-10-06,2022-12-08,3\r\n" +
             "t~-fs1T64Micz8SkbILrABgEv4kSg-tFhvhP35HGSLdOo,Engineering,2023-01-06,t~SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM,2018-06-03,,4\r\n";
 
-        CsvRules rules = CsvRules.builder()
+        ColumnarRules rules = ColumnarRules.builder()
             .pseudonymFormat(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
             .columnToPseudonymize("EMPLOYEE_ID")
             .columnToRedact("EMPLOYEE_EMAIL")
@@ -307,7 +307,7 @@ public class BulkDataSanitizerImplTest {
             "t~4W7Sl-LI6iMzNNngivs5dLMiVw-7ob3Cyr3jn8NureY,Engineering,2023-01-06,t~0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc,2019-10-06,2022-12-08,3\r\n" +
             "t~BOg00PLoiEEKyGzije3FJlKBzM6_Vjk87VJI9lTIA2o,Engineering,2023-01-06,t~0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc,2018-06-03,,4\r\n";
 
-        CsvRules rules = CsvRules.builder()
+        ColumnarRules rules = ColumnarRules.builder()
             .pseudonymFormat(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
             .columnToPseudonymize("EMPLOYEE_ID")
             .columnToPseudonymize("MANAGER_ID")
@@ -335,7 +335,7 @@ public class BulkDataSanitizerImplTest {
             "\"{\"\"ImportId\"\":\"\"startDate\"\",\"\"timeZone\"\":\"\"America/Los_Angeles\"\"}\",\"{\"\"ImportId\"\":\"\"endDate\"\",\"\"timeZone\"\":\"\"America/Los_Angeles\"\"}\",\"{\"\"ImportId\"\":\"\"status\"\"}\",\"{\"\"ImportId\"\":\"\"progress\"\"}\",\"{\"\"ImportId\"\":\"\"finished\"\"}\",\"{\"\"ImportId\"\":\"\"recordedDate\"\",\"\"timeZone\"\":\"\"America/Los_Angeles\"\"}\",\"{\"\"ImportId\"\":\"\"_recordId\"\"}\",\"{\"\"ImportId\"\":\"\"locationLatitude\"\"}\",\"{\"\"ImportId\"\":\"\"locationLongitude\"\"}\",\"{\"\"ImportId\"\":\"\"QID1\"\"}\",\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"jw7v7rBpw41HFGKAH8Jp8yI2QlgO7ZYVerCJkco51Ic\"\"}\",\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"aM2l7o6Vm5Z1bRaYm_tjBfIolutVG-1k8s89UsME6LA\"\"}\",\"{\"\"ImportId\"\":\"\"Q_DataPolicyViolations\"\"}\",\"{\"\"ImportId\"\":\"\"Rating\"\"}\"\r\n" +
             "9/1/22 7:50,9/1/22 7:51,32,100,1,9/1/22 7:51,R_1ie8z2GwkwzKG3h,,,3,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"acme.COM\"\",\"\"hash\"\":\"\"PM3Oh15cS2rBp-kjSrOCpQvYFe8Wo3qLj1o5F3fuefI\"\"}\",\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"5NL5SaQBwE6c0L1BDjHW-BtBOXQVH8RYwY0tGGw3khk\"\"}\",,5\r\n";
 
-        CsvRules rules = CsvRules.builder()
+        ColumnarRules rules = ColumnarRules.builder()
             .columnToPseudonymize("Participant Email")
             .columnToPseudonymize("Participant Unique Identifier")
             .columnToRedact("Participant Name")
@@ -370,7 +370,7 @@ public class BulkDataSanitizerImplTest {
         final String EXPECTED = "EMPLOYEE_ID\r\n" +
             "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM\"\"}\"\r\n";
 
-        CsvRules rules = CsvRules.builder()
+        ColumnarRules rules = ColumnarRules.builder()
             .columnToPseudonymize("EMPLOYEE_ID")
             .columnsToInclude(Lists.newArrayList("EMPLOYEE_ID"))
             .build();
@@ -396,7 +396,7 @@ public class BulkDataSanitizerImplTest {
             "3,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"workltycis.co\"\",\"\"hash\"\":\"\"BlQB8Vk0VwdbdWTGAzBF.ote1357Ajr0fFcgFf72kdk\"\"}\",Engineering,2023-01-06,1,2019-10-06,2022-12-08\r\n"
             ; //blank ID
 
-        CsvRules rules = CsvRules.builder()
+        ColumnarRules rules = ColumnarRules.builder()
             .columnToPseudonymize("EMPLOYEE_EMAIL")
             .build();
         columnarFileSanitizerImpl.setBulkDataRules(rules);
@@ -458,7 +458,7 @@ public class BulkDataSanitizerImplTest {
                 "4,,Engineering,2023-01-06,1,2018-06-03,,\r\n" +
                 "3,charles@workltycis.co,Engineering,2023-01-06,1,2019-10-06,2022-12-08,\"{\"\"scope\"\":\"\"github\"\",\"\"hash\"\":\"\"KqWJXpC.g25eQzR80kCS3RVj4L4JNngo7vFwructvNU\"\"}\"\r\n";
 
-        CsvRules rules = CsvRules.builder()
+        ColumnarRules rules = ColumnarRules.builder()
                 .fieldsToTransform(Map.of("EMPLOYEE_EMAIL", ColumnarRules.FieldTransformPipeline.builder()
                         .newName("GITHUB_USERNAME")
                         .transforms(Arrays.asList(
@@ -500,7 +500,7 @@ public class BulkDataSanitizerImplTest {
     @Test
     void transform_fromYaml() {
 
-        CsvRules rules = yamlMapper.readValue(getClass().getResource("/rules/csv-pipeline.yaml"), CsvRules.class);
+        ColumnarRules rules = yamlMapper.readValue(getClass().getResource("/rules/csv-pipeline.yaml"), ColumnarRules.class);
         columnarFileSanitizerImpl.setBulkDataRules(rules);
 
         final String EXPECTED = "EMPLOYEE_ID,EMPLOYEE_EMAIL,DEPARTMENT,SNAPSHOT,MANAGER_ID,JOIN_DATE,LEAVE_DATE,GITHUB_USERNAME\r\n" +

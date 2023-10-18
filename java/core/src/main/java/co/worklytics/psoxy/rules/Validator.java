@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.rules;
 
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
+import com.avaulta.gateway.rules.ColumnarRules;
 import com.avaulta.gateway.rules.Endpoint;
 import com.avaulta.gateway.rules.transforms.Transform;
 import com.google.common.base.Preconditions;
@@ -20,8 +21,8 @@ import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 public class Validator {
 
     static public void validate(@NonNull com.avaulta.gateway.rules.RuleSet rules) {
-        if (rules instanceof CsvRules) {
-            validate((CsvRules) rules);
+        if (rules instanceof ColumnarRules) {
+            validate((ColumnarRules) rules);
         } else if (rules instanceof Rules2) {
             validate((Rules2) rules);
         } else {
@@ -29,7 +30,7 @@ public class Validator {
         }
     }
 
-    static public void validate(@NonNull CsvRules rules) {
+    static public void validate(@NonNull ColumnarRules rules) {
         Preconditions.checkNotNull(rules.getColumnsToPseudonymize());
         Preconditions.checkNotNull(rules.getColumnsToRedact());
 

@@ -2,13 +2,11 @@ package co.worklytics.psoxy.storage;
 
 import co.worklytics.psoxy.Pseudonymizer;
 import co.worklytics.psoxy.gateway.*;
-import co.worklytics.psoxy.rules.CsvRules;
 import co.worklytics.psoxy.rules.RulesUtils;
 import com.avaulta.gateway.rules.BulkDataRules;
 import com.avaulta.gateway.rules.MultiTypeBulkDataRules;
 import com.avaulta.gateway.rules.PathTemplateUtils;
 import lombok.*;
-import org.apache.commons.lang3.tuple.Pair;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -17,7 +15,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
 
 /**
  * solves a DaggerMissingBinding exception in tests
@@ -116,7 +113,7 @@ public class StorageHandler {
         return ObjectTransform.builder()
             .destinationBucketName(config.getConfigPropertyOrError(BulkModeConfigProperty.OUTPUT_BUCKET))
             .pathWithinBucket(config.getConfigPropertyAsOptional(BulkModeConfigProperty.OUTPUT_BASE_PATH).orElse(""))
-            .rules((CsvRules) defaultRuleSet)
+            .rules((BulkDataRules) defaultRuleSet)
             .build();
     }
 
@@ -170,7 +167,7 @@ public class StorageHandler {
     @Data
     public static class ObjectTransform implements Serializable {
 
-        private static final long serialVersionUID = 2L;
+        private static final long serialVersionUID = 3L;
 
         /**
          * destination bucket in which to write the transformed object
@@ -189,10 +186,7 @@ public class StorageHandler {
         @Builder.Default
         String pathWithinBucket = "";
 
-        //NOTE: need a concrete type here to serialize to/from YAML
-        //TODO: support proper jackson polymorphism here, across potential BulkDataRules implementations
-
         @NonNull
-        CsvRules rules;
+        BulkDataRules rules;
     }
 }

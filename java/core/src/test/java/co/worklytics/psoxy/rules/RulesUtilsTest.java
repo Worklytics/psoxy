@@ -7,6 +7,7 @@ import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.storage.StorageHandler;
 import co.worklytics.test.TestUtils;
 
+import com.avaulta.gateway.rules.ColumnarRules;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import dagger.Component;
@@ -89,7 +90,7 @@ class RulesUtilsTest {
         ImmutableList.<StorageHandler.ObjectTransform>builder()
             .add(StorageHandler.ObjectTransform.builder()
                 .destinationBucketName("blah")
-                .rules(CsvRules.builder()
+                .rules(ColumnarRules.builder()
                 .columnToPseudonymize("something")
                 .build())
                 .build())
@@ -107,7 +108,7 @@ class RulesUtilsTest {
         assertEquals("blah",
             utils.parseAdditionalTransforms(config).get(0).getDestinationBucketName());
         assertEquals("something",
-            ((CsvRules) utils.parseAdditionalTransforms(config).get(0).getRules()).getColumnsToPseudonymize().get(0));
+            ((ColumnarRules) utils.parseAdditionalTransforms(config).get(0).getRules()).getColumnsToPseudonymize().get(0));
     }
 
     @SneakyThrows

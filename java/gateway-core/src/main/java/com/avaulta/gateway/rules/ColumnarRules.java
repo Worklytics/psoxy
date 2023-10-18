@@ -30,6 +30,7 @@ import java.util.stream.Stream;
 @Getter
 @EqualsAndHashCode
 @JsonPropertyOrder(alphabetic = true)
+@JsonIgnoreProperties("defaultScopeIdForSource") // so compatiable with legacy CsvRules
 public class ColumnarRules implements BulkDataRules {
 
     private static final long serialVersionUID = 1L;

@@ -1,9 +1,9 @@
 package co.worklytics.psoxy;
 
-import co.worklytics.psoxy.rules.CsvRules;
 import co.worklytics.psoxy.storage.impl.ColumnarBulkDataSanitizerImpl;
 import co.worklytics.test.TestModules;
 import com.avaulta.gateway.rules.BulkDataRules;
+import com.avaulta.gateway.rules.ColumnarRules;
 import com.avaulta.gateway.rules.RuleSet;
 import dagger.Component;
 import dagger.Module;
@@ -52,7 +52,7 @@ public class HandlerTest {
         Container container = DaggerHandlerTest_Container.create();
         container.inject(this);
 
-        CsvRules csvRules = CsvRules.builder()
+        ColumnarRules csvRules = ColumnarRules.builder()
             .build();
 
         //make this deterministic for testing

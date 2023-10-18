@@ -4,6 +4,7 @@ import co.worklytics.psoxy.gateway.BulkModeConfigProperty;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.storage.StorageHandler;
+import com.avaulta.gateway.rules.ColumnarRules;
 import com.avaulta.gateway.rules.MultiTypeBulkDataRules;
 import com.avaulta.gateway.rules.RecordRules;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -90,7 +91,7 @@ public class RulesUtils {
 
 
         List<Class<? extends com.avaulta.gateway.rules.RuleSet>> rulesImplementations = Arrays.asList(
-            CsvRules.class,
+            ColumnarRules.class,
             Rules2.class,
             MultiTypeBulkDataRules.class,
             RecordRules.class
