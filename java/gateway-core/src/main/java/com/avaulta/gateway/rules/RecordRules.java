@@ -5,12 +5,30 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.util.List;
+
+/**
+ * **alpha**
+ *
+ * rules for sanitizing "record" data from a bulk file
+ *
+ * This is more general structure, allowing for possibly nested transforms on fields
+ *
+ * @see ColumnarRules, which can provide a subset of equivalent functionality and is better for
+ * simple cases
+ *
+ *
+ */
 @AllArgsConstructor //for builder
 @NoArgsConstructor //for Jackson
 @SuperBuilder(toBuilder = true)
 @Data
 public class RecordRules implements BulkDataRules {
 
+    /**
+     * format of bulk 'Record' data; represents both how to split file into records AND how to parse
+     * records.
+     *
+     */
     public enum Format {
         NDJSON,
         ;

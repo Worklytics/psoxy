@@ -14,6 +14,8 @@ import java.util.regex.PatternSyntaxException;
 import java.util.stream.Stream;
 
 /**
+ * rules for sanizitizing "columnar" bulk files
+ *
  * NOTE: user-facing documentation about these rules
  * @link "https://github.com/Worklytics/psoxy/tree/main/docs/bulk-file-sanitization.md"
  *
@@ -22,6 +24,7 @@ import java.util.stream.Stream;
  *   1) how to deserialize the bulk data into records
  *   2) how to sanitize the records
  *
+ * @see RecordRules - which are a more comprehensive but less readable alternative
  */
 @SuperBuilder(toBuilder = true)
 @Log
