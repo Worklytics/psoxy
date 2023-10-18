@@ -49,6 +49,8 @@ abstract public class RulesBaseTestCase {
     protected PseudonymizerImplFactory pseudonymizerFactory;
     @Inject
     protected RulesUtils rulesUtils;
+    @Inject
+    protected Validator validator;
 
     @Inject
     protected UrlSafeTokenPseudonymEncoder urlSafeTokenPseudonymEncoder;
@@ -175,13 +177,13 @@ abstract public class RulesBaseTestCase {
 
     @Test
     void validate() {
-        Validator.validate(getRulesUnderTest());
+        validator.validate(getRulesUnderTest());
     }
 
     @SneakyThrows
     @Test
     void validateYaml() {
-        Validator.validate(yamlRoundtrip(getRulesUnderTest()));
+        validator.validate(yamlRoundtrip(getRulesUnderTest()));
     }
 
     // regular param --> 4096
@@ -206,7 +208,7 @@ abstract public class RulesBaseTestCase {
     @SneakyThrows
     @Test
     void validateJSON() {
-        Validator.validate(jsonRoundtrip(getRulesUnderTest()));
+        validator.validate(jsonRoundtrip(getRulesUnderTest()));
     }
 
     @SneakyThrows

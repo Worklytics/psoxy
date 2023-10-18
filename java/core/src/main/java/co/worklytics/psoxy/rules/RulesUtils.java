@@ -35,6 +35,9 @@ public class RulesUtils {
     @Inject @Named("ForYAML")
     ObjectMapper yamlMapper;
 
+    @Inject
+    Validator validator;
+
     @SneakyThrows
     public String sha(com.avaulta.gateway.rules.RuleSet rules) {
         return DigestUtils.sha1Hex(asYaml(rules));
@@ -110,7 +113,7 @@ public class RulesUtils {
             throw new RuntimeException("Failed to parse RULES from config");
         }
 
-        Validator.validate(rules);
+        validator.validate(rules);
         return rules;
     }
 

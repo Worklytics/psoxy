@@ -6,6 +6,7 @@ import co.worklytics.psoxy.gateway.SourceAuthStrategy;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 import co.worklytics.psoxy.rules.RulesUtils;
+import co.worklytics.psoxy.rules.Validator;
 import co.worklytics.psoxy.storage.BulkDataSanitizerFactory;
 import co.worklytics.psoxy.storage.impl.BulkDataSanitizerFactoryImpl;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
