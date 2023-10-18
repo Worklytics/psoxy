@@ -8,6 +8,7 @@ import com.avaulta.gateway.rules.ColumnarRules;
 import dagger.Module;
 import dagger.Provides;
 
+import javax.inject.Singleton;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.logging.Logger;
@@ -17,7 +18,7 @@ public class ConfigRulesModule {
 
     public static final String NO_APP_IDS_SUFFIX = "_no-app-ids";
 
-    @Provides
+    @Provides @Singleton
     static RESTRules restRules(RuleSet ruleSet) {
         if (! (ruleSet instanceof RESTRules)) {
             // will blow things up if something that depends on RESTRules is bound in flat file use-case
@@ -26,16 +27,17 @@ public class ConfigRulesModule {
         return (RESTRules) ruleSet;
     }
 
-    @Provides
+    @Provides @Singleton
     static BulkDataRules bulkDataRules(RuleSet ruleSet) {
-        if (! (ruleSet instanceof ColumnarRules)) {
+        if (!(ruleSet instanceof ColumnarRules)) {
             // will blow things up if something that depends on ColumnarRules is bound in REST-usecase
             throw new RuntimeException("Configured RuleSet are not ColumnarRules");
         }
+
         return (ColumnarRules) ruleSet;
     }
 
-    @Provides
+    @Provides @Singleton
     static RuleSet rules(Logger log, RulesUtils rulesUtils, ConfigService config) {
 
         BiFunction<Optional<RuleSet>, String, Optional<RuleSet>> loadAndLog = (o, msg) -> {
