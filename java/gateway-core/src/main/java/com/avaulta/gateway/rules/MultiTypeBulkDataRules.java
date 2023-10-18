@@ -18,7 +18,7 @@ public class MultiTypeBulkDataRules implements RuleSet {
     /**
      * map of file path templates to rules for matching files
      *
-     * eg, /export/{week}/data_{shard}.csv -> CsvRules
+     * eg, /export/{week}/data_{shard}.csv -> ColumnarRules
      *
      * if provided, has the effect of pathRegex = "^/export/[^/]+/data_[^/]+\.csv$"
      *

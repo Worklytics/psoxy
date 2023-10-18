@@ -88,33 +88,28 @@ public class RulesUtils {
         return yamlEncodedRules;
     }
 
+    final static List<Class<? extends com.avaulta.gateway.rules.RuleSet>> rulesImplementations = Arrays.asList(
+        ColumnarRules.class,
+        Rules2.class,
+        MultiTypeBulkDataRules.class,
+        RecordRules.class
+    );
+
 
     @VisibleForTesting
     com.avaulta.gateway.rules.RuleSet parse(@NonNull String yamlString) {
-
-
-        List<Class<? extends com.avaulta.gateway.rules.RuleSet>> rulesImplementations = Arrays.asList(
-            ColumnarRules.class,
-            Rules2.class,
-            MultiTypeBulkDataRules.class,
-            RecordRules.class
-        );
-        com.avaulta.gateway.rules.RuleSet rules = null;
-
         for (Class<?> impl : rulesImplementations) {
             try {
-                rules = yamlMapper.readerFor(impl).readValue(yamlString);
+                com.avaulta.gateway.rules.RuleSet rules =
+                    yamlMapper.readerFor(impl).readValue(yamlString);
                 log.log(Level.INFO, "RULES parsed as {0}", impl.getSimpleName());
+                validator.validate(rules);
+                return rules;
             } catch (IOException e) {
                 //ignore
             }
         }
-        if (rules == null) {
-            throw new RuntimeException("Failed to parse RULES from config");
-        }
-
-        validator.validate(rules);
-        return rules;
+        throw new RuntimeException("Failed to parse RULES from config");
     }
 
     public List<StorageHandler.ObjectTransform> parseAdditionalTransforms(ConfigService config) {
