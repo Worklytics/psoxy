@@ -186,7 +186,7 @@ variable "custom_api_connector_rules" {
 variable "custom_bulk_connectors" {
   type = map(object({
     source_kind = string
-    rules = object({
+    rules = optional(object({
       pseudonymFormat       = optional(string, "URL_SAFE_TOKEN")
       columnsToRedact       = optional(list(string)) # columns to remove from CSV
       columnsToInclude      = optional(list(string)) # if you prefer to include only an explicit list of columns, rather than redacting those you don't want
@@ -197,7 +197,8 @@ variable "custom_bulk_connectors" {
         newName = string
         transforms = optional(list(map(string)), [])
       })), {})
-    })
+    }))
+    rules_file          = optional(string)
     memory_size_mb      = optional(number, null)
     settings_to_provide = optional(map(string), {})
   }))

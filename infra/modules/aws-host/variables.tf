@@ -171,7 +171,7 @@ variable "bulk_connectors" {
     source_kind           = string
     input_bucket_name     = optional(string) # allow override of default bucket name
     sanitized_bucket_name = optional(string) # allow override of default bucket name
-    rules = object({
+    rules = optional(object({
       pseudonymFormat       = optional(string)
       columnsToRedact       = optional(list(string), [])
       columnsToInclude      = optional(list(string), null)
@@ -182,7 +182,8 @@ variable "bulk_connectors" {
         newName = string
         transforms = optional(list(map(string)), [])
       })))
-    })
+    }))
+    rules_file          = optional(string)
     example_file        = optional(string)
     memory_size_mb      = optional(number)
     settings_to_provide = optional(map(string), {})
