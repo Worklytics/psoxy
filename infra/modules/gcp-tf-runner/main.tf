@@ -5,15 +5,12 @@
 # times throughout the code base, and includes some hard-coded convention stuff that imho is better
 # to have in one place.
 
-
 # in cloud shell, this seems to return {"email":"", "id":""}
 # in any env, this is NEVER the gcp service account configured via provider block
 # (eg, google.impersonate_service_account = "terraform@...")
 data "google_client_openid_userinfo" "me" {
 
 }
-
-#
 
 # if no 'email' field from 'google_client_openid_userinfo', generate id token for the current user
 # and parse email from it.
@@ -52,6 +49,7 @@ locals {
 
   # coalesce failing here implies we failed to detect the auth'd gcp user
   authed_user_email = coalesce(
+    var.tf_runner_email, 
     try(data.external.identity.result.gcp_terraform_sa_account_email, ""), # "" if no such value
     data.google_client_openid_userinfo.me.email,
     local.email_from_jwt

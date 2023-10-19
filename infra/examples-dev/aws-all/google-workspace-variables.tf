@@ -3,6 +3,12 @@ variable "google_workspace_gcp_project_id" {
   description = "string ID of GCP project that will host oauth clients for Google Workspace API connectors; must exist"
 }
 
+variable "google_workspace_gcp_tf_runner_email" {
+  type        = string
+  description = "Email address of the Terraform Cloud runner (GCP SA/user terraform is running as, if already known.  If omitted, will attempt to detect; detection is known to fail in GCP Cloud Shell."
+  default     = null
+}
+
 variable "google_workspace_terraform_sa_account_email" {
   type        = string
   description = "Email of GCP service account that will be used to provision GCP resources. Leave 'null' to use application default for you environment."

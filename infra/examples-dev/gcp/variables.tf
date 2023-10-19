@@ -14,6 +14,12 @@ variable "gcp_terraform_sa_account_email" {
   }
 }
 
+variable "gcp_tf_runner_email" {
+  type        = string
+  description = "Email address of the Terraform Cloud runner (GCP SA/user terraform is running as, if already known.  If omitted, will attempt to detect; detection is known to fail in GCP Cloud Shell."
+  default     = null
+}
+
 variable "environment_name" {
   type        = string
   description = "Qualifier to append to names/ids of resources for psoxy. If not empty, A-Za-z0-9 or - characters only. Max length 10. Useful to distinguish between deployments into same GCP project."

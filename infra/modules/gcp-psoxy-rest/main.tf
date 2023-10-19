@@ -39,6 +39,8 @@ locals {
 
 module "tf_runner" {
   source = "../../modules/gcp-tf-runner"
+
+  tf_runner_email = var.tf_runner_email
 }
 
 data "google_service_account" "function" {

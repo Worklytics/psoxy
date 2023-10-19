@@ -7,6 +7,8 @@
 
 module "tf_runner" {
   source = "../../modules/gcp-tf-runner"
+
+  tf_runner_email = var.tf_runner_email
 }
 
 # grant this directly on SA, jit for when we know it is needed to create keys

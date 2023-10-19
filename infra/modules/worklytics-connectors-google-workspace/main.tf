@@ -41,6 +41,7 @@ module "google_workspace_connection_auth" {
   source = "../../modules/gcp-sa-auth-key"
 
   service_account_id = module.google_workspace_connection[each.key].service_account_id
+  tf_runner_email    = var.gcp_tf_runner_email
 }
 
 
