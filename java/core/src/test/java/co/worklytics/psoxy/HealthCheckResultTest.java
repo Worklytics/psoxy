@@ -19,6 +19,7 @@ class HealthCheckResultTest {
             "  \"bundleFilename\" : null,\n" +
             "  \"configPropertiesLastModified\" : null,\n" +
             "  \"configuredSource\" : \"blah\",\n" +
+            "  \"configuredHost\": \"blah.com\",\n" +
             "  \"javaSourceVersion\" : \"v0.EXAMPLE\",\n" +
             "  \"missingConfigProperties\" : [ \"SERVICE_ACCOUNT_KEY\" ],\n" +
             "  \"nonDefaultSalt\" : true,\n" +
@@ -33,6 +34,7 @@ class HealthCheckResultTest {
         HealthCheckResult healthCheckResult = HealthCheckResult.builder()
             .version("v0.EXAMPLE") //avoid needing to change this test every version change
             .configuredSource("blah")
+            .configuredHost("blah.com")
             .nonDefaultSalt(true)
             .missingConfigProperties(Collections.singleton(GoogleCloudPlatformServiceAccountKeyAuthStrategy.ConfigProperty.SERVICE_ACCOUNT_KEY.name()))
             .build();
