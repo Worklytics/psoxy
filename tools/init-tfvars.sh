@@ -22,7 +22,8 @@ NC='\e[0m' # No Color
 prompt_user_Yn() {
     # $1 is used to access the first argument passed to the function
     local prompt_message="$1"
-    read -p "$prompt_message (Y/n): " yn
+    printf "$prompt_message"
+    read -p "(Y/n): " yn
 
     # Default to 'Yes' if the input is empty
     if [ -z "$yn" ]; then
@@ -139,7 +140,6 @@ remove_google_workspace() {
 
 GOOGLE_PROVIDER_COUNT=$(terraform providers | grep "${TOP_LEVEL_PROVIDER_PATTERN}/google" | wc -l)
 if test $GOOGLE_PROVIDER_COUNT -ne 0; then
-  printf "Google provider in Terraform configuration. Initializing variables it requires ...\n"
   if gcloud --version &> /dev/null ; then
 
     # project
@@ -166,7 +166,7 @@ if test $GOOGLE_PROVIDER_COUNT -ne 0; then
       fi
     fi
 
-    prompt_user_Yn "Do you want to use Google Workspace as a data source for your proxy instances?"
+    prompt_user_Yn "Do you want to use ${BLUE}Google Workspace${NC} as a data source for your proxy instances?"
 
     if [[ $? -eq 1 ]]; then
       # init google workspace variables if file exists OR the variables are in the main variables.tf file
@@ -200,7 +200,7 @@ if test $GOOGLE_PROVIDER_COUNT -ne 0; then
       remove_google_workspace
     fi
   else
-    printf "${RED}gcloud not available${NC}\n"
+    printf "${RED}gcloud not available. Your configuration will likely not run. ${NC}\n"
   fi
 else
   printf "No Google provider found in top-level of Terraform configuration. No gcloud initialization required.\n"
@@ -233,7 +233,7 @@ if test $AZUREAD_PROVIDER_COUNT -ne 0; then
   MSFT_VARIABLES_DEFINED=$( [[ -f msft-365-variables.tf ]] || grep -q '^variable "msft_tenant_id"' variables.tf)
 
   if $MSFT_VARIABLES_DEFINED; then
-    prompt_user_Yn "Do you want to use Microsoft 365 as a data source for your proxy instances?"
+    prompt_user_Yn "Do you want to use ${BLUE}Microsoft 365${NC} as a data source for your proxy instances?"
 
     if [[ $? -eq 1 ]]; then
       if az --version &> /dev/null ; then
