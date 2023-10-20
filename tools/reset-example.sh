@@ -28,13 +28,13 @@ check_and_restore_file() {
     # Check the git status to find out if the file was deleted
     if git status --short | grep -q "^ D $file"; then
         # The file is deleted, restore it from the HEAD
-        printf "Configuration file ${BLUE}$file${NC} was deleted, restoring..."
+        printf "Configuration file ${BLUE}$file${NC} was deleted, restoring...\n"
         git checkout HEAD -- "$file"
 
         if [ $? -eq 0 ]; then
             echo "$$file' has been successfully restored."
         else
-            printf "${RED}Error occurred while restoring '$file'${NC}"
+            printf "${RED}Error occurred while restoring '$file'${NC}\n"
             return 1
         fi
     fi
