@@ -73,10 +73,8 @@ class RulesUtilsTest {
         "  /export/{week}/index_{shard}.ndjson:\n" +
         "    format: \"NDJSON\"\n" +
         "    transforms:\n" +
-        "      - !<redact>\n" +
-        "        path: \"foo\"\n" +
-        "      - !<pseudonymize>\n" +
-        "        path: \"bar\"\n" +
+        "      - redact: \"foo\"\n" +
+        "      - pseudonymize: \"bar\"\n" +
         "  /export/{week}/data_{shard}.csv:\n" +
         "    columnsToPseudonymize:\n" +
         "      - \"email\"\n" +
@@ -85,14 +83,10 @@ class RulesUtilsTest {
 
     static final String YAML_RECORD = "format: NDJSON\n" +
         "transforms:\n" +
-        "  - !<redact>\n" +
-        "    path: \"$.summary\"\n" +
-        "  - !<redact>\n" +
-        "    path: \"$.summary\"\n" +
-        "  - !<pseudonymize>\n" +
-        "    path: \"$.email\"\n" +
-        "  - !<pseudonymize>\n" +
-        "    path: \"$.email\"\n";
+        "  - redact: \"$.summary\"\n" +
+        "  - redact: \"$.summary\"\n" +
+        "  - pseudonymize: \"$.email\"\n" +
+        "  - pseudonymize: \"$.email\"\n";
 
 
     @ParameterizedTest
