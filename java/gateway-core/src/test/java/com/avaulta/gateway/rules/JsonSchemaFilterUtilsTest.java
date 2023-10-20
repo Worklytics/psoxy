@@ -42,7 +42,7 @@ class JsonSchemaFilterUtilsTest {
                 .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
 
         jsonSchemaFilterUtils.objectMapper = objectMapper;
-        schemaReader = objectMapper.readerFor(JsonSchemaFilterUtils.JsonSchemaFilter.class);
+        schemaReader = objectMapper.readerFor(JsonSchemaFilter.class);
     }
 
     @SneakyThrows
@@ -167,7 +167,7 @@ class JsonSchemaFilterUtilsTest {
     @Test
     void filterBySchema_refs() {
 
-        JsonSchemaFilterUtils.JsonSchemaFilter schemaWithRefs =
+        JsonSchemaFilter schemaWithRefs =
                 schemaReader.readValue(ComplexPojo.EXPECTED_SCHEMA);
 
         SimplePojoPlus simplePlus = SimplePojoPlus.builder()

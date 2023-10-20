@@ -10,6 +10,7 @@ import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.Endpoint;
+import com.avaulta.gateway.rules.JsonSchemaFilter;
 import com.avaulta.gateway.rules.JsonSchemaFilterUtils;
 import com.avaulta.gateway.rules.ParameterSchemaUtils;
 import com.avaulta.gateway.rules.transforms.EncryptIp;
@@ -69,7 +70,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     private final Object $writeLock = new Object[0];
     Map<Transform, List<JsonPath>> compiledTransforms = new ConcurrentHashMap<>();
 
-    JsonSchemaFilterUtils.JsonSchemaFilter rootDefinitions;
+    JsonSchemaFilter rootDefinitions;
 
 
     @AssistedInject
@@ -590,11 +591,11 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
                     .orElse(true);
     }
 
-    JsonSchemaFilterUtils.JsonSchemaFilter getRootDefinitions() {
+    JsonSchemaFilter getRootDefinitions() {
         if (rootDefinitions == null) {
             synchronized ($writeLock) {
                 if (rootDefinitions == null) {
-                    rootDefinitions = JsonSchemaFilterUtils.JsonSchemaFilter.builder().definitions(rules.getDefinitions()).build();
+                    rootDefinitions = JsonSchemaFilter.builder().definitions(rules.getDefinitions()).build();
                 }
             }
         }
