@@ -1,6 +1,9 @@
 package co.worklytics.psoxy;
 
+import co.worklytics.psoxy.storage.BulkDataSanitizer;
+import co.worklytics.psoxy.storage.BulkDataSanitizerFactory;
 import co.worklytics.psoxy.storage.impl.ColumnarBulkDataSanitizerImpl;
+import co.worklytics.psoxy.storage.impl.ColumnarBulkDataSanitizerImplFactory;
 import co.worklytics.test.TestModules;
 import com.avaulta.gateway.rules.BulkDataRules;
 import com.avaulta.gateway.rules.ColumnarRules;
@@ -18,7 +21,9 @@ import java.util.Collections;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class HandlerTest {
 
@@ -55,9 +60,13 @@ public class HandlerTest {
             .build();
 
         //make this deterministic for testing
-        ColumnarBulkDataSanitizerImpl bulkDataSanitizer =
-            (ColumnarBulkDataSanitizerImpl) handler.fileHandlerStrategy.get((ColumnarRules) csvRules);
-        bulkDataSanitizer.setRecordShuffleChunkSize(1);
+        ColumnarBulkDataSanitizerImpl example = (ColumnarBulkDataSanitizerImpl) handler.fileHandlerStrategy.get(csvRules);
+        handler.fileHandlerStrategy = mock(BulkDataSanitizerFactory.class);
+        when(handler.fileHandlerStrategy.get(any())).then(invocation -> {
+            example.setRules(invocation.getArgument(0));
+            example.setRecordShuffleChunkSize(1);
+            return example;
+        });
     }
 
     @Test
