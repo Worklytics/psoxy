@@ -14,7 +14,7 @@ import javax.inject.Inject;
 public class BulkDataSanitizerFactoryImpl implements BulkDataSanitizerFactory {
 
     @Inject
-    ColumnarBulkDataSanitizerImpl columnarFileSanitizerImpl;
+    ColumnarBulkDataSanitizerImplFactory columnarBulkDataSanitizerImplFactory;
     @Inject
     RecordBulkDataSanitizerImplFactory recordBulkDataSanitizerImplFactory;
 
@@ -22,7 +22,7 @@ public class BulkDataSanitizerFactoryImpl implements BulkDataSanitizerFactory {
     @Override
     public BulkDataSanitizer get(@NonNull BulkDataRules rules) {
         if (rules instanceof ColumnarRules) {
-            return columnarFileSanitizerImpl;
+            return columnarBulkDataSanitizerImplFactory.create((ColumnarRules) rules);
         } else if (rules instanceof RecordRules) {
             return recordBulkDataSanitizerImplFactory.create((RecordRules) rules);
         } else {

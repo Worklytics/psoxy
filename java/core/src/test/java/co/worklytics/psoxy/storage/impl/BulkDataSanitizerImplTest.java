@@ -48,7 +48,7 @@ import static org.mockito.Mockito.when;
 public class BulkDataSanitizerImplTest {
 
     @Inject
-    ColumnarBulkDataSanitizerImpl columnarFileSanitizerImpl;
+    ColumnarBulkDataSanitizerImplFactory columnarFileSanitizerImplFactory;
 
     @Inject
     RESTApiSanitizerFactory sanitizerFactory;
@@ -85,6 +85,9 @@ public class BulkDataSanitizerImplTest {
     }
 
 
+    @Inject ColumnarRules defaultRules;
+
+    ColumnarBulkDataSanitizerImpl columnarFileSanitizerImpl;
 
     @BeforeEach
     public void setup() {
@@ -98,6 +101,7 @@ public class BulkDataSanitizerImplTest {
             .build());
 
         //make it deterministic
+        columnarFileSanitizerImpl = columnarFileSanitizerImplFactory.create(defaultRules);
         columnarFileSanitizerImpl.setRecordShuffleChunkSize(1);
     }
 

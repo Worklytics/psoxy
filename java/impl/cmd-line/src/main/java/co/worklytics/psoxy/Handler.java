@@ -1,5 +1,6 @@
 package co.worklytics.psoxy;
 
+import co.worklytics.psoxy.storage.BulkDataSanitizer;
 import co.worklytics.psoxy.storage.BulkDataSanitizerFactory;
 import com.avaulta.gateway.rules.ColumnarRules;
 import com.google.api.client.util.Lists;
@@ -20,8 +21,6 @@ public class Handler {
 
     }
 
-    @Inject
-    RESTApiSanitizerFactory sanitizerFactory;
     @Inject
     BulkDataSanitizerFactory fileHandlerStrategy;
     @Inject
@@ -59,9 +58,10 @@ public class Handler {
 
 
         Pseudonymizer pseudonymizer = pseudonymizerImplFactory.create(options.build());
+        BulkDataSanitizer sanitizer = fileHandlerStrategy.get(rules);
 
         try (FileReader in = new FileReader(inputFile)) {
-            out.append(new String(fileHandlerStrategy.get(rules).sanitize(in, pseudonymizer)));
+            out.append(new String(sanitizer.sanitize(in, pseudonymizer)));
         }
     }
 }

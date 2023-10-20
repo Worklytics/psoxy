@@ -8,6 +8,7 @@ import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.ColumnarRules;
 import co.worklytics.psoxy.storage.BulkDataSanitizer;
+import com.avaulta.gateway.rules.RecordRules;
 import com.avaulta.gateway.rules.RuleSet;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,6 +18,8 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Streams;
 import com.google.common.collect.UnmodifiableIterator;
+import dagger.assisted.Assisted;
+import dagger.assisted.AssistedInject;
 import lombok.*;
 import lombok.extern.java.Log;
 import org.apache.commons.csv.CSVFormat;
@@ -47,7 +50,6 @@ import java.util.stream.Stream;
  */
 @Singleton
 @Log
-@NoArgsConstructor(onConstructor_ = @Inject)
 public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
 
     @Inject
@@ -64,8 +66,12 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
     private int recordShuffleChunkSize = 500;
 
     @Setter(onMethod_ = @VisibleForTesting)
-    @Inject
     ColumnarRules rules;
+
+    @AssistedInject
+    public ColumnarBulkDataSanitizerImpl(@Assisted ColumnarRules rules) {
+        this.rules = rules;
+    }
 
     @Override
     public byte[] sanitize(@NonNull InputStreamReader reader,
