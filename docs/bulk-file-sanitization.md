@@ -111,6 +111,33 @@ root of the record object.
 - Rule structure is specified in [`RecordRules`](java/gateway-core/src/main/java/com/avaulta/gateway/rules/RecordRules.java).
 
 
+### Mixing File Formats **alpha**
+*As of Oct 2023, this feature is in alpha and may change in backwards incompatible ways*
+
+You can process multiple file formats through a single proxy instance using `MultiTypeBulkDataRules`.
+
+These rules are structured with a field `fileRules`, which is a map from parameterized path template
+within the "input" bucket to one of the above rule types (`RecordRules`,`ColumnarRules`) to be
+applied to files matching that path template.
+
+```yaml
+fileRules:
+  /export/{week}/index_{shard}.ndjson:
+    format: "NDJSON"
+    transforms:
+      - redact: "$.foo"
+      - pseudonymize: "$.bar"
+  /export/{week}/data_{shard}.csv:
+    columnsToPseudonymize:
+      - "email"
+    delimiter: ","
+    pseudonymFormat: "JSON"
+```
+
+Path templates are evaluated against the incoming file (object) path in order, and the first match
+is applied to the file. If no templates match the incoming file, it will not be processed.
+
+
 ## Configuration
 
 Worklytics' provided Terraform modules include default rules for expected formats for `hris`,
