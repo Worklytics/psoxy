@@ -38,17 +38,15 @@ public class RecordRulesTest {
         final String EXPECTED = "---\n" +
             "format: \"NDJSON\"\n" +
             "transforms:\n" +
-            "- !<redact>\n" +
-            "  path: \"foo\"\n" +
-            "- !<pseudonymize>\n" +
-            "  path: \"bar\"\n";
+            "- redact: \"foo\"\n" +
+            "- pseudonymize: \"bar\"\n";
 
         RecordRules recordRules = RecordRules.builder()
             .transform(RecordTransform.Redact.builder()
-                .path("foo")
+                .redact("foo")
                 .build())
             .transform(RecordTransform.Pseudonymize.builder()
-                .path("bar")
+                .pseudonymize("bar")
                 .build())
             .build();
 

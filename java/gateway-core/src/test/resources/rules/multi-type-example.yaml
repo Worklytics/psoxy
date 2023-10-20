@@ -3,10 +3,8 @@ fileRules:
   /export/{week}/index_{shard}.ndjson:
     format: "NDJSON"
     transforms:
-      - !<redact>
-        path: "foo"
-      - !<pseudonymize>
-        path: "bar"
+      - redact: "foo"
+      - pseudonymize: "bar"
   /export/{week}/data_{shard}.csv:
     columnsToPseudonymize:
       - "email"

@@ -12,27 +12,17 @@ import java.util.List;
  * a transform to apply within a record
  *
  * yaml representation
- *  - !<redact>
- *    path: "foo"
- *
- * would prefer that both
- *
  *  - redact: "foo"
- *
- * and
- *  - redact
- *    path: "foo"
  *
  * would be supported as equivalent ... but can't get that to work with Jackson YAML
  */
 @JsonTypeInfo(
-    use = JsonTypeInfo.Id.NAME,
-    include = JsonTypeInfo.As.WRAPPER_OBJECT,
+    use = JsonTypeInfo.Id.DEDUCTION,
     defaultImpl = RecordTransform.class
 )
 @JsonSubTypes({
-    @JsonSubTypes.Type(value = RecordTransform.Redact.class, name = "redact"),
-    @JsonSubTypes.Type(value = RecordTransform.Pseudonymize.class, name = "pseudonymize")
+    @JsonSubTypes.Type(value = RecordTransform.Redact.class),
+    @JsonSubTypes.Type(value = RecordTransform.Pseudonymize.class)
 })
 public interface RecordTransform {
 
@@ -42,23 +32,23 @@ public interface RecordTransform {
      */
     String getPath();
 
-    @NoArgsConstructor
-    @Data
-    @SuperBuilder(toBuilder = true)
-    abstract class BaseRecordTransform implements RecordTransform {
-
-        private String path;
-    }
-
-
 
     @JsonTypeName("redact")
     @NoArgsConstructor
     @SuperBuilder(toBuilder = true)
     @Data
-    @EqualsAndHashCode(callSuper = true)
-    class Redact extends BaseRecordTransform {
+    class Redact implements RecordTransform {
 
+        /**
+         * json path to field to redact
+         */
+        String redact;
+
+        @Override
+        @JsonIgnore
+        public String getPath() {
+            return redact;
+        }
     }
 
 
@@ -66,8 +56,17 @@ public interface RecordTransform {
     @NoArgsConstructor
     @SuperBuilder(toBuilder = true)
     @Data
-    @EqualsAndHashCode(callSuper = true)
-    class Pseudonymize extends BaseRecordTransform {
+    class Pseudonymize implements RecordTransform {
 
+        /**
+         * json path to field to pseudonymize
+         */
+        String pseudonymize;
+
+        @Override
+        @JsonIgnore
+        public String getPath() {
+            return pseudonymize;
+        }
     }
 }

@@ -1,10 +1,6 @@
 format: NDJSON
 transforms:
-  - !<redact>
-    path: "$.summary"
-  - !<redact>
-    path: "$.summary"
-  - !<pseudonymize>
-    path: "$.email"
-  - !<pseudonymize>
-    path: "$.email"
+  - redact: "$.summary"
+  - redact: "$.summary"
+  - pseudonymize: "$.email"
+  - pseudonymize: "$.email"

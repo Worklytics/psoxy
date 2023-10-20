@@ -57,10 +57,10 @@ public class MultiTypeBulkDataRulesTest {
 
         RecordRules recordRules = RecordRules.builder()
             .transform(RecordTransform.Redact.builder()
-                .path("foo")
+                .redact("foo")
                 .build())
             .transform(RecordTransform.Pseudonymize.builder()
-                .path("bar")
+                .pseudonymize("bar")
                 .build())
             .build();
 
