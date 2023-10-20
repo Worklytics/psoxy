@@ -367,6 +367,14 @@ public class JsonSchemaFilterUtils {
         //TODO: this is not used except from the 'root' schema; is that correct??
         Map<String, JsonSchemaFilter> definitions;
 
+        public Map<String, JsonSchemaFilter> getDefinitions() {
+            // sorted map, so serialization of definitions is deterministic
+            if (!(definitions instanceof TreeMap) && definitions != null) {
+                definitions = new TreeMap<>(definitions);
+            }
+            return definitions;
+        }
+
         // part of JSON schema standard, but how to support for filters?
         //  what if something validates against multiple of these, but filtering by the valid ones
         //  yields different result??
