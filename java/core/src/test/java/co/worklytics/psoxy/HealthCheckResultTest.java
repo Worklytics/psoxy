@@ -18,8 +18,8 @@ class HealthCheckResultTest {
         final String JSON = "{\n" +
             "  \"bundleFilename\" : null,\n" +
             "  \"configPropertiesLastModified\" : null,\n" +
-            "  \"configuredSource\" : \"blah\",\n" +
             "  \"configuredHost\": \"blah.com\",\n" +
+            "  \"configuredSource\" : \"blah\",\n" +
             "  \"javaSourceVersion\" : \"v0.EXAMPLE\",\n" +
             "  \"missingConfigProperties\" : [ \"SERVICE_ACCOUNT_KEY\" ],\n" +
             "  \"nonDefaultSalt\" : true,\n" +
