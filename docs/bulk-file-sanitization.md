@@ -11,9 +11,18 @@ result to a corresponding `-sanitized` bucket.
 
 ## Sanitization Rules
 
-The 'bulk' mode of Psoxy supports column-oriented sanitization rules.
+The 'bulk' mode of Psoxy supports either column-oriented or record-oriented file formats.
 
-### Pseudonymization
+### Column-Oriented Formats (ColumnarRules)
+
+To cater to column-oriented file formats (Eg .csv, .tsv), Psoxy supports a `ColumnarRules` format
+for encoding your sanitization rules. This rules format provides simple/concise configuration for
+these cases, where more complex processing of repeated values / complex field types is required.
+
+If your use-case is record oriented (eg, `NDJSON`, etc), with nested or repeated fields, then you
+will likely need `RecordRules` as an alternative.
+
+#### Pseudonymization
 The core function of the Proxy is to pseudonymize PII in your data. To pseudonymize a column, add it
 to `columnsToPseudonymize`.
 
@@ -28,13 +37,13 @@ To avoid inadvertent data leakage, if a column specified to be pseudonymized is 
 input data, the Proxy will fail with an error. This is to avoid simple column name typos resulting
 in data leakage.
 
-### Additional Transformations
+#### Additional Transformations
 
 To ease integration, the 'bulk' mode also supports a few additional common transformations that may
 be useful. These provide an alternative to using a separate ETL tool to transform your data, or
 modifying your existing data export pipelines.
 
-#### Redaction
+##### Redaction
 
 To redact a column, add it to `columnsToRedact`.  By default, all columns present in the input data
 will be included in the output data, unless explicitly redacted.
@@ -44,7 +53,7 @@ columnsToRedact:
   - salary
 ```
 
-#### Inclusion
+##### Inclusion
 Alternatively to redacting columns, you can specify `columnsToInclude`. If specified, only columns
 explicitly included will be included in the output data.
 
@@ -57,7 +66,7 @@ columnsToInclude:
   - department
 ```
 
-#### Renaming Columns
+##### Renaming Columns
 
 To rename a column, add it to `columnsToRename`, which is a map from original name --> desired name.
 Renames are applied before pseudonymization.
@@ -69,7 +78,40 @@ columnsToRename:
 
 This feature supports simple adaptation of existing data pipelines for use in Worklytics.
 
-### Configuration
+
+#### See Also
+ - Rule structure is specified in [`ColumnarRules`](java/gateway-core/src/main/java/com/avaulta/gateway/rules/ColumnarRules.java).
+
+### Record-Oriented Formats (RecordRules) **alpha**
+*As of Oct 2023, this is an alpha feature*
+
+`RecordRules` parses files as records, presuming the specified format. It performs transforms in
+order on each record to sanitize your data, and serializes the result back to the specified format.
+
+eg.
+
+```yaml
+format: NDJSON
+transforms:
+- redact: "$.summary"
+- pseudonymize: "$.email"
+```
+
+Each `transform` is a map from transform type --> to a JSONPath to which the transform should be
+applied.  The JSONPath is evaluated from the root of each record in the file.
+
+The above example rules applies two transforms. First, it redacts `$.summary` - the `summary` field
+at the root at of the record object.  Second, it pseudonymizes `$.email` - the `email` field at the
+root of the record object.
+
+`transforms` itself is an ordered-list of transforms. The transforms should be applied in order.
+
+
+#### See Also
+- Rule structure is specified in [`RecordRules`](java/gateway-core/src/main/java/com/avaulta/gateway/rules/RecordRules.java).
+
+
+## Configuration
 
 Worklytics' provided Terraform modules include default rules for expected formats for `hris`,
 `survey`, and `badge` data connectors.
@@ -110,6 +152,8 @@ custom_bulk_connector_rules = {
 }
 ```
 
+This approach ONLY supports `ColumnarRules`
+
 ### Custom Bulk Connector
 
 Rather than enabling one of the predefined bulk connectors providing in the `worklytics-connector-specs`
@@ -143,6 +187,9 @@ custom_bulk_connectors = {
 }
 ```
 
+The above example is for `ColumnarRules`.
+
+
 ### Direct Configuration of RULES
 
 You can directly modify the `RULES` environment variable on the Psoxy instance, by directly editing
@@ -170,7 +217,5 @@ changes you make to the environment variable may be overwritten by Terraform.
 
 
 
-## See Also
 
-  - Rule structure is specified in [`ColumnarRules`](java/gateway-core/src/main/java/com/avaulta/gateway/rules/ColumnarRules.java).
 
