@@ -19,6 +19,30 @@ RED='\e[0;31m'
 BLUE='\e[0;34m'
 NC='\e[0m' # No Color
 
+prompt_user_Yn() {
+    # $1 is used to access the first argument passed to the function
+    local prompt_message="$1"
+    read -p "$prompt_message (Y/n): " yn
+
+    # Default to 'Yes' if the input is empty
+    if [ -z "$yn" ]; then
+        yn="y"
+    fi
+
+    # Convert input to lowercase to be case insensitive
+    yn=$(echo "$yn" | tr '[:upper:]' '[:lower:]')
+
+    # Set result based on user input, defaulting to 'no' for any input other than 'y' or 'yes'
+    result=0
+    if [[ $yn == "y" || $yn == "yes" ]]; then
+        result=1
+    fi
+
+    # Return the result
+    return $result
+}
+
+
 printf "# terraform.tfvars\n" >> $TFVARS_FILE
 printf "# this file sets the values of variables for your Terraform configuration. You should manage it under \n" >> $TFVARS_FILE
 printf "# version control. anyone working with the infrastructure created by this Terraform configuration will need it\n" >> $TFVARS_FILE
@@ -160,37 +184,58 @@ else
   fi
 fi
 
+remove_msft() {
+  if [[ -f msft-365-variables.tf ]]; then
+    rm msft-365-variables.tf
+  fi
+
+  if [[ -f msft-365.tf ]]; then
+    rm msft-365.tf
+  fi
+
+  sed -i '' '/^[[:space:]]*local\.msft_api_connectors_with_auth,[[:space:]]*$/d' main.tf
+
+  sed -i '' '/^[[:space:]]*module\.worklytics_connectors_msft_365\.todos,[[:space:]]*$/d' main.tf
+
+  sed -i '' '/^[[:space:]]*module\.worklytics_connectors_msft_365\.next_todo_step,[[:space:]]*$/d' main.tf
+}
+
 # Microsoft 365
 AZUREAD_PROVIDER_COUNT=$(terraform providers | grep "${TOP_LEVEL_PROVIDER_PATTERN}/azuread" | wc -l)
 if test $AZUREAD_PROVIDER_COUNT -ne 0; then
-  printf "AzureAD provider in Terraform configuration. Initializing variables it requires ...\n"
-  if az --version &> /dev/null ; then
+  printf "AzureAD provider in Terraform configuration.\n"
+  MSFT_VARIABLES_DEFINED=$( [[ -f msft-365-variables.tf ]] || grep -q '^variable "msft_tenant_id"' variables.tf)
 
-    # init msft 365 variables if file exists OR the variables are in the main variables.tf file
-    [[ -f msft-365-variables.tf ]] || grep -q '^variable "msft_tenant_id"' variables.tf
-    if [[ $? -eq 0 ]]; then
-      printf "# Azure AD Apps (Microsoft API Clients) will be provisioned in the following tenant to access your Microsoft 365 data\n" >> $TFVARS_FILE
-      printf "#  - this should be the ID of your Microsoft 365 organization (tenant)\n" >> $TFVARS_FILE
-      printf "#  - if you're not connecting to Microsoft 365 data sources, you can omit this value\n" >> $TFVARS_FILE
-      MSFT_TENANT_ID=$(az account show --query tenantId --output tsv)
-      printf "msft_tenant_id=\"${MSFT_TENANT_ID}\"\n\n" >> $TFVARS_FILE
-      printf "\tmsft_tenant_id=${BLUE}\"${MSFT_TENANT_ID}\"${NC}\n"
+  if $MSFT_VARIABLES_DEFINED; then
+    prompt_user_Yn "Do you want to use Microsoft 365 as a data source for your proxy instances?"
 
-      MSFT_USER_EMAIL=$(az account show --query user.name --output tsv)
-      printf "# users in the following list will be set as the 'owners' of the Azure AD Apps (API clients) provisioned to access your Microsoft 365 data\n" >> $TFVARS_FILE
-      printf "#  - if you're not connecting to Microsoft 365 data sources, you can omit this value\n" >> $TFVARS_FILE
-      printf "msft_owners_email=[\n  \"${MSFT_USER_EMAIL}\"\n]\n\n" >> $TFVARS_FILE
-      printf "\tmsft_owners_email=${BLUE}[ \"${MSFT_USER_EMAIL}\" ]${NC}\n"
+    if [[ $? -eq 1 ]]; then
+      if az --version &> /dev/null ; then
+        printf "Azure CLI already installed.\n"
+
+        printf "# Azure AD Apps (Microsoft API Clients) will be provisioned in the following tenant to access your Microsoft 365 data\n" >> $TFVARS_FILE
+        printf "#  - this should be the ID of your Microsoft 365 organization (tenant)\n" >> $TFVARS_FILE
+        printf "#  - if you're not connecting to Microsoft 365 data sources, you can omit this value\n" >> $TFVARS_FILE
+        MSFT_TENANT_ID=$(az account show --query tenantId --output tsv)
+        printf "msft_tenant_id=\"${MSFT_TENANT_ID}\"\n\n" >> $TFVARS_FILE
+        printf "\tmsft_tenant_id=${BLUE}\"${MSFT_TENANT_ID}\"${NC}\n"
+
+        MSFT_USER_EMAIL=$(az account show --query user.name --output tsv)
+        printf "# users in the following list will be set as the 'owners' of the Azure AD Apps (API clients) provisioned to access your Microsoft 365 data\n" >> $TFVARS_FILE
+        printf "#  - if you're not connecting to Microsoft 365 data sources, you can omit this value\n" >> $TFVARS_FILE
+        printf "msft_owners_email=[\n  \"${MSFT_USER_EMAIL}\"\n]\n\n" >> $TFVARS_FILE
+        printf "\tmsft_owners_email=${BLUE}[ \"${MSFT_USER_EMAIL}\" ]${NC}\n"
+      else
+        printf "${RED}az not available${NC}. Microsoft 365 variables cannot be initialized.\n"
+      fi
+    else
+      remove_msft
     fi
   else
-    printf "${RED}az not available${NC}\n"
+    printf "No Microsft 365 variables defined in configuration.\n"
   fi
 else
   printf "No Azure provider found in top-level of Terraform configuration. No Azure CLI initialization needed.\n"
-
-  if [ -f msft-365.tf ]; then
-    printf "If you don't intend to use Microsoft 365 as a data source in future, you can ${BLUE}rm msft-365.tf${NC} and ${BLUE}rm msft-365-variables.tf${NC} \n"
-  fi
 fi
 
 # initialize `enabled_connectors` variable
