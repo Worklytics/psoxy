@@ -48,7 +48,6 @@ import java.util.stream.Stream;
  * CSV should have the first row with headers and being separated with commas; content should be quoted
  * if include commas or quotes inside.
  */
-@Singleton
 @Log
 public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
 
