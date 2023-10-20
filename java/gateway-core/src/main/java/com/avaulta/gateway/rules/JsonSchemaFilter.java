@@ -41,6 +41,15 @@ public class JsonSchemaFilter {
 
     Map<String, JsonSchemaFilter> properties;
 
+    public Map<String, JsonSchemaFilter> getProperties() {
+        // sorted map, so serialization of properties is deterministic
+        if (!(properties instanceof TreeMap) && properties != null) {
+            properties = new TreeMap<>(properties);
+        }
+        return properties;
+    }
+
+
     //only applicable if type==array
     JsonSchemaFilter items;
 

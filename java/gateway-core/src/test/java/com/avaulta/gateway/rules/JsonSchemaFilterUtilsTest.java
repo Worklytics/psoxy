@@ -182,17 +182,17 @@ class JsonSchemaFilterUtilsTest {
                 objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(schemaWithRefs));
 
         assertEquals("{\n" +
-                        "  \"simplePojo\" : {\n" +
-                        "    \"someString\" : \"some-string\",\n" +
-                        "    \"date\" : \"2023-01-16\",\n" +
-                        "    \"timestamp\" : \"2023-01-16T05:12:34Z\"\n" +
-                        "  },\n" +
-                        "  \"additionalSimplePojos\" : [ {\n" +
-                        "    \"someString\" : \"some-string\",\n" +
-                        "    \"date\" : \"2023-01-16\",\n" +
-                        "    \"timestamp\" : \"2023-01-16T05:12:34Z\"\n" +
-                        "  } ]\n" +
-                        "}",
+                    "  \"simplePojo\" : {\n" +
+                    "    \"someString\" : \"some-string\",\n" +
+                    "    \"date\" : \"2023-01-16\",\n" +
+                    "    \"timestamp\" : \"2023-01-16T05:12:34Z\"\n" +
+                    "  },\n" +
+                    "  \"additionalSimplePojos\" : [ {\n" +
+                    "    \"someString\" : \"some-string\",\n" +
+                    "    \"date\" : \"2023-01-16\",\n" +
+                    "    \"timestamp\" : \"2023-01-16T05:12:34Z\"\n" +
+                    "  } ]\n" +
+                    "}",
                 objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonSchemaFilterUtils.filterObjectBySchema(ComplexPojoPlus.builder()
                         .simplePojo(simplePlus)
                         .additionalSimplePojo(simplePlus)
@@ -206,37 +206,37 @@ class JsonSchemaFilterUtilsTest {
     static class ComplexPojo {
 
         public static final String EXPECTED_SCHEMA = "{\n" +
-                "  \"type\" : \"object\",\n" +
-                "  \"properties\" : {\n" +
-                "    \"simplePojo\" : {\n" +
-                "      \"$ref\" : \"#/definitions/SimplePojo\"\n" +
-                "    },\n" +
-                "    \"additionalSimplePojos\" : {\n" +
-                "      \"type\" : \"array\",\n" +
-                "      \"items\" : {\n" +
-                "        \"$ref\" : \"#/definitions/SimplePojo\"\n" +
-                "      }\n" +
-                "    }\n" +
-                "  },\n" +
-                "  \"definitions\" : {\n" +
-                "    \"SimplePojo\" : {\n" +
-                "      \"type\" : \"object\",\n" +
-                "      \"properties\" : {\n" +
-                "        \"someString\" : {\n" +
-                "          \"type\" : \"string\"\n" +
-                "        },\n" +
-                "        \"date\" : {\n" +
-                "          \"type\" : \"string\",\n" +
-                "          \"format\" : \"date\"\n" +
-                "        },\n" +
-                "        \"timestamp\" : {\n" +
-                "          \"type\" : \"string\",\n" +
-                "          \"format\" : \"date-time\"\n" +
-                "        }\n" +
-                "      }\n" +
-                "    }\n" +
-                "  }\n" +
-                "}";
+            "  \"type\" : \"object\",\n" +
+            "  \"properties\" : {\n" +
+            "    \"additionalSimplePojos\" : {\n" +
+            "      \"type\" : \"array\",\n" +
+            "      \"items\" : {\n" +
+            "        \"$ref\" : \"#/definitions/SimplePojo\"\n" +
+            "      }\n" +
+            "    },\n" +
+            "    \"simplePojo\" : {\n" +
+            "      \"$ref\" : \"#/definitions/SimplePojo\"\n" +
+            "    }\n" +
+            "  },\n" +
+            "  \"definitions\" : {\n" +
+            "    \"SimplePojo\" : {\n" +
+            "      \"type\" : \"object\",\n" +
+            "      \"properties\" : {\n" +
+            "        \"date\" : {\n" +
+            "          \"type\" : \"string\",\n" +
+            "          \"format\" : \"date\"\n" +
+            "        },\n" +
+            "        \"someString\" : {\n" +
+            "          \"type\" : \"string\"\n" +
+            "        },\n" +
+            "        \"timestamp\" : {\n" +
+            "          \"type\" : \"string\",\n" +
+            "          \"format\" : \"date-time\"\n" +
+            "        }\n" +
+            "      }\n" +
+            "    }\n" +
+            "  }\n" +
+            "}";
         public static final String EXPECTED_COMPACT_SCHEMA = "{\n" +
                 "  \"properties\" : {\n" +
                 "    \"simplePojo\" : {\n" +
