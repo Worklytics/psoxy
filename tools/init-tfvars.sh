@@ -119,6 +119,24 @@ fi
 
 
 # GCP / Google Workspace (google provider used for both)
+remove_google_workspace() {
+
+  if [[ -f google-workspace-variables.tf ]]; then
+    rm google-workspace-variables.tf
+  fi
+
+  if [[ -f google-workspace.tf ]]; then
+    rm google-workspace.tf
+  fi
+
+  sed -i '' '/^[[:space:]]*module\.worklytics_connectors_google_workspace\.enabled_api_connectors,[[:space:]]*$/d' main.tf
+
+  sed -i '' '/^[[:space:]]*module\.worklytics_connectors_google_workspace\.todos,[[:space:]]*$/d' main.tf
+
+  sed -i '' '/^[[:space:]]*module\.worklytics_connectors_google_workspace\.next_todo_step,[[:space:]]*$/d' main.tf
+}
+
+
 GOOGLE_PROVIDER_COUNT=$(terraform providers | grep "${TOP_LEVEL_PROVIDER_PATTERN}/google" | wc -l)
 if test $GOOGLE_PROVIDER_COUNT -ne 0; then
   printf "Google provider in Terraform configuration. Initializing variables it requires ...\n"
@@ -128,50 +146,58 @@ if test $GOOGLE_PROVIDER_COUNT -ne 0; then
 
     GCP_PROJECT_ID=$(gcloud config get project)
 
-    [[ -f variables.tf ]] && grep -q '^variable "gcp_project_id"' variables.tf
-    if [[ $? -eq 0 ]]; then
-      printf "# GCP project in which required infrastructure will be provisioned\n" >> $TFVARS_FILE
-      printf "gcp_project_id=\"${GCP_PROJECT_ID}\"\n\n" >> $TFVARS_FILE
-      printf "\tgcp_project_id=${BLUE}\"${GCP_PROJECT_ID}\"${NC}\n"
+    if [[ "$HOST_PLATFORM" == "gcp" ]]; then
+      [[ -f variables.tf ]] && grep -q '^variable "gcp_project_id"' variables.tf
+      if [[ $? -eq 0 ]]; then
+        printf "# GCP project in which required infrastructure will be provisioned\n" >> $TFVARS_FILE
+        printf "gcp_project_id=\"${GCP_PROJECT_ID}\"\n\n" >> $TFVARS_FILE
+        printf "\tgcp_project_id=${BLUE}\"${GCP_PROJECT_ID}\"${NC}\n"
+      fi
+
+      # tenant SA emails
+      [[ -f variables.tf ]] && grep -q '^variable "worklytics_sa_emails"' variables.tf
+      if [[ $? -eq 0 ]]; then
+        printf "# GCP service account emails in the list below will be allowed to invoke your proxy instances\n" >> $TFVARS_FILE
+        printf "#  - NOTE: this value only applies to GCP deployments\n" >> $TFVARS_FILE
+        printf "#  - for initial testing/deployment, it can be empty list; it needs to be filled only once you're ready to authorize Worklytics to access your data\n" >> $TFVARS_FILE
+        printf "worklytics_sa_emails=[\n" >> $TFVARS_FILE
+        printf "  # put 'Service Account Email' value here, which you can obtain from Worklytics ( https://intl.worklytics.co/analytics/integrations/configuration )\n" >> $TFVARS_FILE
+        printf "]\n\n" >> $TFVARS_FILE
+      fi
     fi
 
-    # tenant SA emails
-    [[ -f variables.tf ]] && grep -q '^variable "worklytics_sa_emails"' variables.tf
-    if [[ $? -eq 0 ]]; then
-      printf "# GCP service account emails in the list below will be allowed to invoke your proxy instances\n" >> $TFVARS_FILE
-      printf "#  - NOTE: this value only applies to GCP deployments\n" >> $TFVARS_FILE
-      printf "#  - for initial testing/deployment, it can be empty list; it needs to be filled only once you're ready to authorize Worklytics to access your data\n" >> $TFVARS_FILE
-      printf "worklytics_sa_emails=[\n" >> $TFVARS_FILE
-      printf "  # put 'Service Account Email' value here, which you can obtain from Worklytics ( https://intl.worklytics.co/analytics/integrations/configuration )\n" >> $TFVARS_FILE
-      printf "]\n\n" >> $TFVARS_FILE
-    fi
+    prompt_user_Yn "Do you want to use Google Workspace as a data source for your proxy instances?"
 
-    # init google workspace variables if file exists OR the variables are in the main variables.tf file
-    # (google_workspace_gcp_project_id not in all legacy examples)
-    [[ -f google-workspace-variables.tf ]] || grep -q '^variable "google_workspace_gcp_project_id"' variables.tf
-    if [[ $? -eq 0 ]]; then
-      printf "# GCP project in which OAuth clients for Google Workspace connectors will be provisioned\n" >> $TFVARS_FILE
-      printf "#  - if you're not connecting to Google Workspace data sources, you can omit this value\n" >> $TFVARS_FILE
-      printf "google_workspace_gcp_project_id=\"${GCP_PROJECT_ID}\"\n\n" >> $TFVARS_FILE
-      printf "\tgoogle_workspace_gcp_project_id=${BLUE}\"${GCP_PROJECT_ID}\"${NC}\n"
-    fi
+    if [[ $? -eq 1 ]]; then
+      # init google workspace variables if file exists OR the variables are in the main variables.tf file
+      # (google_workspace_gcp_project_id not in all legacy examples)
+      [[ -f google-workspace-variables.tf ]] || grep -q '^variable "google_workspace_gcp_project_id"' variables.tf
+      if [[ $? -eq 0 ]]; then
+        printf "# GCP project in which OAuth clients for Google Workspace connectors will be provisioned\n" >> $TFVARS_FILE
+        printf "#  - if you're not connecting to Google Workspace data sources, you can omit this value\n" >> $TFVARS_FILE
+        printf "google_workspace_gcp_project_id=\"${GCP_PROJECT_ID}\"\n\n" >> $TFVARS_FILE
+        printf "\tgoogle_workspace_gcp_project_id=${BLUE}\"${GCP_PROJECT_ID}\"${NC}\n"
+      fi
 
-    # init google workspace variables if file exists OR the variables are in the main variables.tf file
-    [[ -f google-workspace-variables.tf ]] || grep -q '^variable "google_workspace_example_user"' variables.tf
-    if [[ $? -eq 0 ]]; then
-      # example user for Google Workspace
-      printf "# Google Workspace example user \n" >> $TFVARS_FILE
-      printf "#  - this is used to aid testing of Google Workspace connectors against a real account (eg, your own); if you're not using those, it can be omitted\n" >> $TFVARS_FILE
-      GOOGLE_WORKSPACE_EXAMPLE_USER=$(gcloud config get account)
-      printf "google_workspace_example_user=\"${GOOGLE_WORKSPACE_EXAMPLE_USER}\"\n\n" >> $TFVARS_FILE
-      printf "\tgoogle_workspace_example_user=${BLUE}\"${GOOGLE_WORKSPACE_EXAMPLE_USER}\"${NC}\n"
+      # init google workspace variables if file exists OR the variables are in the main variables.tf file
+      [[ -f google-workspace-variables.tf ]] || grep -q '^variable "google_workspace_example_user"' variables.tf
+      if [[ $? -eq 0 ]]; then
+        # example user for Google Workspace
+        printf "# Google Workspace example user \n" >> $TFVARS_FILE
+        printf "#  - this is used to aid testing of Google Workspace connectors against a real account (eg, your own); if you're not using those, it can be omitted\n" >> $TFVARS_FILE
+        GOOGLE_WORKSPACE_EXAMPLE_USER=$(gcloud config get account)
+        printf "google_workspace_example_user=\"${GOOGLE_WORKSPACE_EXAMPLE_USER}\"\n\n" >> $TFVARS_FILE
+        printf "\tgoogle_workspace_example_user=${BLUE}\"${GOOGLE_WORKSPACE_EXAMPLE_USER}\"${NC}\n"
 
-      # example admin for Google Workspace
-      printf "# Google Workspace example admin \n" >> $TFVARS_FILE
-      printf "#  - this is used to aid testing of Google Workspace connectors against a real account, in cases where an admin is explicitly required\n" >> $TFVARS_FILE
-      GOOGLE_WORKSPACE_EXAMPLE_USER=$(gcloud config get account)
-      printf "google_workspace_example_admin=\"${GOOGLE_WORKSPACE_EXAMPLE_USER}\"\n\n" >> $TFVARS_FILE
-      printf "\tgoogle_workspace_example_admin=${BLUE}\"${GOOGLE_WORKSPACE_EXAMPLE_USER}\"${NC}\n"
+        # example admin for Google Workspace
+        printf "# Google Workspace example admin \n" >> $TFVARS_FILE
+        printf "#  - this is used to aid testing of Google Workspace connectors against a real account, in cases where an admin is explicitly required\n" >> $TFVARS_FILE
+        GOOGLE_WORKSPACE_EXAMPLE_USER=$(gcloud config get account)
+        printf "google_workspace_example_admin=\"${GOOGLE_WORKSPACE_EXAMPLE_USER}\"\n\n" >> $TFVARS_FILE
+        printf "\tgoogle_workspace_example_admin=${BLUE}\"${GOOGLE_WORKSPACE_EXAMPLE_USER}\"${NC}\n"
+      fi
+    else
+      remove_google_workspace
     fi
   else
     printf "${RED}gcloud not available${NC}\n"
