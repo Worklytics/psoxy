@@ -419,6 +419,10 @@ class RESTApiSanitizerImplTest {
             "DEFAULT,test,true,URL_SAFE_TOKEN,p~Tt8H7clbL9y8ryN4_RLYrCEsKqbjJsWcPmKb4wOdZDKAHyevsJLhRTypmrf-DpBZ",
             "DEFAULT,alice@acme.com,true,URL_SAFE_TOKEN,p~UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMnKYUk8FJevl3wvFyZY0eF-@acme.com",
             "DEFAULT,alice@acme.com,false,URL_SAFE_TOKEN,UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMk",
+            "DEFAULT,alice@acme.com,true,URL_SAFE_HASH_ONLY,UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMk",
+            "DEFAULT,alice@acme.com,false,URL_SAFE_HASH_ONLY,UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMk",
+            //TODO: add an interesting case where base64 and base64-url encodings differ
+            //"DEFAULT,blahBlahBlah,false,URL_SAFE_HASH_ONLY,UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMk",
         }
     )
     @ParameterizedTest
