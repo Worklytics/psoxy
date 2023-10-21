@@ -20,27 +20,56 @@ BLUE='\e[0;34m'
 NC='\e[0m' # No Color
 
 prompt_user_Yn() {
-    # $1 is used to access the first argument passed to the function
-    local prompt_message="$1"
-    printf "$prompt_message"
-    read -p "(Y/n): " yn
+  local prompt_message="$1"
+  printf "$prompt_message"
+  read -p "(Y/n): " yn
 
-    # Default to 'Yes' if the input is empty
-    if [ -z "$yn" ]; then
-        yn="y"
-    fi
+  # Default to 'Yes' if the input is empty
+  if [ -z "$yn" ]; then
+    yn="y"
+  fi
 
-    # Convert input to lowercase to be case insensitive
-    yn=$(echo "$yn" | tr '[:upper:]' '[:lower:]')
+  # Convert input to lowercase to be case insensitive
+  yn=$(echo "$yn" | tr '[:upper:]' '[:lower:]')
 
-    # Set result based on user input, defaulting to 'no' for any input other than 'y' or 'yes'
-    result=0
-    if [[ $yn == "y" || $yn == "yes" ]]; then
-        result=1
-    fi
+  # Set result based on user input, defaulting to 'no' for any input other than 'y' or 'yes'
+  result=0
+  if [[ $yn == "y" || $yn == "yes" ]]; then
+      result=1
+  fi
 
-    # Return the result
-    return $result
+  # Return the result
+  return $result
+}
+
+prompt_confirm_variable_setting() {
+  local setting_name="$1"
+  local default_value="$2"
+
+  # redirect output to stderr; let us capture stdout as a return value
+  >&2 printf "Do you want to set ${BLUE}${setting_name}${NC} to ${BLUE}${default_value}${NC}"
+  >&2 read -p "? (Y/n) " yn
+
+  # Default to 'Yes' if the input is empty
+  if [ -z "$yn" ]; then
+    yn="y"
+  fi
+
+
+
+  # Convert input to lowercase to be case insensitive
+  yn=$(echo "$yn" | tr '[:upper:]' '[:lower:]')
+
+  # Set result based on user input, defaulting to 'no' for any input other than 'y' or 'yes'
+  if [[ $yn == "y" || $yn == "yes" ]]; then
+    result="$default_value"
+  else
+    >&2 printf "Enter value for ${BLUE}${setting_name}${NC}: "
+    >&2 read -p " " user_provided_value
+    result="$user_provided_value"
+  fi
+
+  echo "$result"
 }
 
 
@@ -68,8 +97,10 @@ if test $AWS_PROVIDER_COUNT -ne 0; then
     AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
     if [ $? -eq 0 ] && [ -n "$AWS_ACCOUNT_ID" ]; then
       printf "# AWS account in which your Psoxy instances will be deployed\n" >> $TFVARS_FILE
-      printf "aws_account_id=\"${AWS_ACCOUNT_ID}\"\n\n" >> $TFVARS_FILE
-      printf "\taws_account_id=${BLUE}\"${AWS_ACCOUNT_ID}\"${NC}\n"
+
+      user_value=$(prompt_confirm_variable_setting "aws_account_id" "$AWS_ACCOUNT_ID")
+      printf "aws_account_id=\"${user_value}\"\n\n" >> $TFVARS_FILE
+      printf "\taws_account_id=${BLUE}\"${user_value}\"${NC}\n"
     else
       printf "${RED}Failed to determine AWS account ID from your aws CLI configuration. You MUST fill ${BLUE}aws_account_id${NC} in your terraform.tfvars file yourself.${NC}\n"
       exit 1
