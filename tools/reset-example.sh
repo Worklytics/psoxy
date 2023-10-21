@@ -32,7 +32,7 @@ check_and_restore_file() {
         git checkout HEAD -- "$file"
 
         if [ $? -eq 0 ]; then
-            printf "${BLUE}$file${NC} has been successfully restored."
+            printf "${BLUE}$file${NC} has been successfully restored.\n"
         else
             printf "${RED}Error occurred while restoring '$file'${NC}\n"
             return 1
