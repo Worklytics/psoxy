@@ -135,6 +135,24 @@ resource "google_storage_bucket_iam_member" "grant_sa_read_on_processed_bucket" 
   role   = "roles/storage.objectViewer"
 }
 
+resource "google_storage_bucket_iam_member" "grant_testers_admin_on_import_bucket" {
+  for_each = toset(var.gcp_principals_authorized_to_test)
+
+  bucket = google_storage_bucket.input-bucket.name
+  role   = "roles/storage.objectAdmin"
+  member = each.value
+}
+
+resource "google_storage_bucket_iam_member" "grant_testers_admin_on_processed_bucket" {
+  for_each = toset(var.gcp_principals_authorized_to_test)
+
+  bucket = module.output_bucket.bucket_name
+  role   = "roles/storage.objectAdmin"
+  member = each.value
+}
+
+
+
 resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_secret" {
   for_each = var.secret_bindings
 
