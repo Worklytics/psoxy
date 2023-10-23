@@ -13,7 +13,7 @@
         <revision>0.4.40</revision>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <dependency.lombok.version>1.18.28</dependency.lombok.version>
-        <dependency.dagger.version>2.48.1</dependency.dagger.version>
+        <dependency.dagger.version>2.40.5</dependency.dagger.version>
         <dependency.jackson.version>2.15.2</dependency.jackson.version>
         <dependency.apache-commons-lang3.version>3.12.0</dependency.apache-commons-lang3.version>
         <dependency.apache-commons-csv.version>1.10.0</dependency.apache-commons-csv.version>
