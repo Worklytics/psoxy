@@ -3,6 +3,7 @@ package co.worklytics.psoxy.gateway;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.With;
 
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -10,20 +11,18 @@ import java.io.OutputStreamWriter;
 /**
  * Request received when a change is done in some storage service, such as "new" object created or "updated" object
  */
+@With
 @Builder
 @Getter
 public class StorageEventRequest {
     /**
      * Stream where the object can be read
      */
-
-    @NonNull
     InputStreamReader readerStream;
 
     /**
      * Stream to write output to
      */
-    @NonNull
     OutputStreamWriter destinationStream;
 
     // REST OF THIS IS INFORMATION FOR SANITIZER TO INFORM SANITIZATION LOGIC BASED ON SOURCE/DESTINATION
