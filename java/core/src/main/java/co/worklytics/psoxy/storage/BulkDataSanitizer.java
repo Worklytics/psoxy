@@ -4,7 +4,7 @@ import co.worklytics.psoxy.Pseudonymizer;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.io.Writer;
 
 /**
  * sanitize bulk data content according to rules
@@ -23,6 +23,6 @@ public interface BulkDataSanitizer {
      * @throws IOException
      */
     void sanitize(InputStreamReader reader,
-                  OutputStreamWriter writer,
+                  Writer writer,
                   Pseudonymizer pseudonymizer) throws IOException;
 }

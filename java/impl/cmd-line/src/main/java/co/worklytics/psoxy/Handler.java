@@ -10,8 +10,7 @@ import lombok.NonNull;
 import lombok.SneakyThrows;
 
 import javax.inject.Inject;
-import java.io.File;
-import java.io.FileReader;
+import java.io.*;
 
 //@NoArgsConstructor(onConstructor_ = @Inject) //q: compile complaints - lombok annotation processing not reliable??
 public class Handler {
@@ -60,8 +59,32 @@ public class Handler {
         Pseudonymizer pseudonymizer = pseudonymizerImplFactory.create(options.build());
         BulkDataSanitizer sanitizer = fileHandlerStrategy.get(rules);
 
-        try (FileReader in = new FileReader(inputFile)) {
-            out.append(new String(sanitizer.sanitize(in, , pseudonymizer)));
+        try (FileReader in = new FileReader(inputFile);
+             Writer writer = new AppendableWriter(out)) {
+            sanitizer.sanitize(in, writer, pseudonymizer);
+        }
+    }
+
+    static class AppendableWriter extends java.io.Writer {
+        private final Appendable appendable;
+
+        public AppendableWriter(Appendable appendable) {
+            this.appendable = appendable;
+        }
+
+        @Override
+        public void write(char[] cbuf, int off, int len) throws IOException {
+            appendable.append(new String(cbuf, off, len));
+        }
+
+        @Override
+        public void flush() throws IOException {
+            // No need to flush for Appendable
+        }
+
+        @Override
+        public void close() throws IOException {
+            // No need to close for Appendable
         }
     }
 }

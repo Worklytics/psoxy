@@ -74,7 +74,7 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
 
     @Override
     public void sanitize(@NonNull InputStreamReader reader,
-                         @NonNull OutputStreamWriter writer,
+                         @NonNull Writer writer,
                          @NonNull Pseudonymizer pseudonymizer) throws IOException {
 
         CSVParser records = CSVFormat
