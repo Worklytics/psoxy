@@ -20,7 +20,7 @@ public interface BulkDataSanitizer {
      *                      implicit in records
      * @param writer        The stream writer to which sanitized content should be written.
      * @param pseudonymizer The pseudonymizer to use
-     * @throws IOException
+     * @throws IOException  IO problem reading or writing
      */
     void sanitize(InputStreamReader reader,
                   Writer writer,
