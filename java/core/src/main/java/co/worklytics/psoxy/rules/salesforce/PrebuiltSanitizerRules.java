@@ -3,6 +3,7 @@ package co.worklytics.psoxy.rules.salesforce;
 import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.rules.Rules2;
 import com.avaulta.gateway.rules.Endpoint;
+import com.avaulta.gateway.rules.JsonSchemaFilter;
 import com.avaulta.gateway.rules.JsonSchemaFilterUtils;
 import com.avaulta.gateway.rules.transforms.Transform;
 import com.google.common.collect.Lists;
@@ -23,103 +24,103 @@ public class PrebuiltSanitizerRules {
             .jsonPath("$..attributes")
             .build();
 
-    private final static Map<String, JsonSchemaFilterUtils.JsonSchemaFilter> USER_BY_QUERY_RESULT_JSON_SCHEMA = new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
+    private final static Map<String, JsonSchemaFilter> USER_BY_QUERY_RESULT_JSON_SCHEMA = new LinkedHashMap<String, JsonSchemaFilter>() {{ //req for java8-backwards compatibility
         put("attributes", buildAttributeWithType());
 
-        put("Alias", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-        put("AccountId", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-        put("ContactId", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-        put("CreatedDate", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-        put("CreatedById", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-        put("Email", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-        put("EmailEncodingKey", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-        put("Id", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-        put("IsActive", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("boolean").build());
-        put("LastLoginDate", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-        put("LastModifiedDate", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-        put("ManagerId", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-        put("Name", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-        put("TimeZoneSidKey", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-        put("Username", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-        put("UserRoleId", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-        put("UserType", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
+        put("Alias", JsonSchemaFilter.builder().type("string").build());
+        put("AccountId", JsonSchemaFilter.builder().type("string").build());
+        put("ContactId", JsonSchemaFilter.builder().type("string").build());
+        put("CreatedDate", JsonSchemaFilter.builder().type("string").build());
+        put("CreatedById", JsonSchemaFilter.builder().type("string").build());
+        put("Email", JsonSchemaFilter.builder().type("string").build());
+        put("EmailEncodingKey", JsonSchemaFilter.builder().type("string").build());
+        put("Id", JsonSchemaFilter.builder().type("string").build());
+        put("IsActive", JsonSchemaFilter.builder().type("boolean").build());
+        put("LastLoginDate", JsonSchemaFilter.builder().type("string").build());
+        put("LastModifiedDate", JsonSchemaFilter.builder().type("string").build());
+        put("ManagerId", JsonSchemaFilter.builder().type("string").build());
+        put("Name", JsonSchemaFilter.builder().type("string").build());
+        put("TimeZoneSidKey", JsonSchemaFilter.builder().type("string").build());
+        put("Username", JsonSchemaFilter.builder().type("string").build());
+        put("UserRoleId", JsonSchemaFilter.builder().type("string").build());
+        put("UserType", JsonSchemaFilter.builder().type("string").build());
     }};
 
-    private final static Map<String, JsonSchemaFilterUtils.JsonSchemaFilter> ACTIVITY_HISTORIES_RESULT_PROPERTY_SCHEMA = new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() { //req for java8-backwards compatibility
+    private final static Map<String, JsonSchemaFilter> ACTIVITY_HISTORIES_RESULT_PROPERTY_SCHEMA = new LinkedHashMap<String, JsonSchemaFilter>() { //req for java8-backwards compatibility
         {
             put("attributes", buildAttributeWithType());
 
-            put("AccountId", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-            put("ActivityDate", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-            put("ActivityDateTime", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-            put("ActivitySubtype", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-            put("ActivityType", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-            put("CallDurationInSeconds", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("integer").build());
-            put("CallType", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-            put("CreatedDate", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-            put("CreatedById", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-            put("DurationInMinutes", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("integer").build());
-            put("EndDateTime", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-            put("Id", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-            put("IsAllDayEvent", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("boolean").build());
-            put("IsDeleted", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("boolean").build());
-            put("IsHighPriority", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("boolean").build());
-            put("IsTask", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("boolean").build());
-            put("LastModifiedDate", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-            put("LastModifiedById", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-            put("OwnerId", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-            put("Priority", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-            put("StartDateTime", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-            put("Status", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-            put("WhatId", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-            put("WhoId", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
+            put("AccountId", JsonSchemaFilter.builder().type("string").build());
+            put("ActivityDate", JsonSchemaFilter.builder().type("string").build());
+            put("ActivityDateTime", JsonSchemaFilter.builder().type("string").build());
+            put("ActivitySubtype", JsonSchemaFilter.builder().type("string").build());
+            put("ActivityType", JsonSchemaFilter.builder().type("string").build());
+            put("CallDurationInSeconds", JsonSchemaFilter.builder().type("integer").build());
+            put("CallType", JsonSchemaFilter.builder().type("string").build());
+            put("CreatedDate", JsonSchemaFilter.builder().type("string").build());
+            put("CreatedById", JsonSchemaFilter.builder().type("string").build());
+            put("DurationInMinutes", JsonSchemaFilter.builder().type("integer").build());
+            put("EndDateTime", JsonSchemaFilter.builder().type("string").build());
+            put("Id", JsonSchemaFilter.builder().type("string").build());
+            put("IsAllDayEvent", JsonSchemaFilter.builder().type("boolean").build());
+            put("IsDeleted", JsonSchemaFilter.builder().type("boolean").build());
+            put("IsHighPriority", JsonSchemaFilter.builder().type("boolean").build());
+            put("IsTask", JsonSchemaFilter.builder().type("boolean").build());
+            put("LastModifiedDate", JsonSchemaFilter.builder().type("string").build());
+            put("LastModifiedById", JsonSchemaFilter.builder().type("string").build());
+            put("OwnerId", JsonSchemaFilter.builder().type("string").build());
+            put("Priority", JsonSchemaFilter.builder().type("string").build());
+            put("StartDateTime", JsonSchemaFilter.builder().type("string").build());
+            put("Status", JsonSchemaFilter.builder().type("string").build());
+            put("WhatId", JsonSchemaFilter.builder().type("string").build());
+            put("WhoId", JsonSchemaFilter.builder().type("string").build());
         }
     };
 
-    private final static Map<String, JsonSchemaFilterUtils.JsonSchemaFilter> ACCOUNT_WITH_ACTIVITY_HISTORIES_QUERY_RESULT_PROPERTY_SCHEMA = new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
+    private final static Map<String, JsonSchemaFilter> ACCOUNT_WITH_ACTIVITY_HISTORIES_QUERY_RESULT_PROPERTY_SCHEMA = new LinkedHashMap<String, JsonSchemaFilter>() {{ //req for java8-backwards compatibility
         put("attributes", buildAttributeWithType());
 
-        put("Id", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-        put("AnnualRevenue", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("number").build());
-        put("CreatedDate", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-        put("CreatedById", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-        put("IsDeleted", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-        put("LastActivityDate", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-        put("LastModifiedDate", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-        put("LastModifiedById", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-        put("NumberOfEmployees", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("integer").build());
-        put("OwnerId", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-        put("Ownership", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-        put("ParentId", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-        put("Rating", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-        put("Sic", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
-        put("Type", JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("string").build());
+        put("Id", JsonSchemaFilter.builder().type("string").build());
+        put("AnnualRevenue", JsonSchemaFilter.builder().type("number").build());
+        put("CreatedDate", JsonSchemaFilter.builder().type("string").build());
+        put("CreatedById", JsonSchemaFilter.builder().type("string").build());
+        put("IsDeleted", JsonSchemaFilter.builder().type("string").build());
+        put("LastActivityDate", JsonSchemaFilter.builder().type("string").build());
+        put("LastModifiedDate", JsonSchemaFilter.builder().type("string").build());
+        put("LastModifiedById", JsonSchemaFilter.builder().type("string").build());
+        put("NumberOfEmployees", JsonSchemaFilter.builder().type("integer").build());
+        put("OwnerId", JsonSchemaFilter.builder().type("string").build());
+        put("Ownership", JsonSchemaFilter.builder().type("string").build());
+        put("ParentId", JsonSchemaFilter.builder().type("string").build());
+        put("Rating", JsonSchemaFilter.builder().type("string").build());
+        put("Sic", JsonSchemaFilter.builder().type("string").build());
+        put("Type", JsonSchemaFilter.builder().type("string").build());
 
-        put("ActivityHistories", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+        put("ActivityHistories", JsonSchemaFilter.builder()
                 .type("object")
                 // Using LinkedHashMap to keep the order to support same
                 // YAML serialization result
-                .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
+                .properties(new LinkedHashMap<String, JsonSchemaFilter>() {{ //req for java8-backwards compatibility
 
-                    put("totalSize", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                    put("totalSize", JsonSchemaFilter.builder()
                             .type("integer")
                             .build());
-                    put("done", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                    put("done", JsonSchemaFilter.builder()
                             .type("boolean")
                             .build());
-                    put("nextRecordsUrl", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                    put("nextRecordsUrl", JsonSchemaFilter.builder()
                             .type("string")
                             .build());
-                    put("records", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                    put("records", JsonSchemaFilter.builder()
                             .type("array")
-                            .items(JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                            .items(JsonSchemaFilter.builder()
                                     .type("object")
                                     .properties(Collections.emptyMap())
-                                    ._if(JsonSchemaFilterUtils.ConditionJsonSchema.builder().properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
-                                        put("attributes", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                                    ._if(JsonSchemaFilterUtils.ConditionJsonSchema.builder().properties(new LinkedHashMap<String, JsonSchemaFilter>() {{ //req for java8-backwards compatibility
+                                        put("attributes", JsonSchemaFilter.builder()
                                                 .type("object")
-                                                .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
-                                                    put("type", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                                                .properties(new LinkedHashMap<String, JsonSchemaFilter>() {{ //req for java8-backwards compatibility
+                                                    put("type", JsonSchemaFilter.builder()
                                                             .type("string")
                                                             .constant("ActivityHistory")
                                                             .build());
@@ -132,33 +133,33 @@ public class PrebuiltSanitizerRules {
                 }}).build());
     }};
 
-    private final static Map<String, JsonSchemaFilterUtils.JsonSchemaFilter> ACTIVITY_HISTORIES_SUB_QUERY_RESULT_PROPERTY_SCHEMA = new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
+    private final static Map<String, JsonSchemaFilter> ACTIVITY_HISTORIES_SUB_QUERY_RESULT_PROPERTY_SCHEMA = new LinkedHashMap<String, JsonSchemaFilter>() {{ //req for java8-backwards compatibility
         put("attributes", buildAttributeWithType());
-        put("ActivityHistories", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+        put("ActivityHistories", JsonSchemaFilter.builder()
                 .type("object")
                 // Using LinkedHashMap to keep the order to support same
                 // YAML serialization result
-                .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
+                .properties(new LinkedHashMap<String, JsonSchemaFilter>() {{ //req for java8-backwards compatibility
 
-                    put("totalSize", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                    put("totalSize", JsonSchemaFilter.builder()
                             .type("integer")
                             .build());
-                    put("done", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                    put("done", JsonSchemaFilter.builder()
                             .type("boolean")
                             .build());
-                    put("nextRecordsUrl", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                    put("nextRecordsUrl", JsonSchemaFilter.builder()
                             .type("string")
                             .build());
-                    put("records", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                    put("records", JsonSchemaFilter.builder()
                             .type("array")
-                            .items(JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                            .items(JsonSchemaFilter.builder()
                                     .type("object")
                                     .properties(Collections.emptyMap())
-                                    ._if(JsonSchemaFilterUtils.ConditionJsonSchema.builder().properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
-                                        put("attributes", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                                    ._if(JsonSchemaFilterUtils.ConditionJsonSchema.builder().properties(new LinkedHashMap<String, JsonSchemaFilter>() {{ //req for java8-backwards compatibility
+                                        put("attributes", JsonSchemaFilter.builder()
                                                 .type("object")
-                                                .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
-                                                    put("type", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                                                .properties(new LinkedHashMap<String, JsonSchemaFilter>() {{ //req for java8-backwards compatibility
+                                                    put("type", JsonSchemaFilter.builder()
                                                             .type("string")
                                                             .constant("ActivityHistory")
                                                             .build());
@@ -252,28 +253,28 @@ public class PrebuiltSanitizerRules {
             .endpoint(QUERY_PAGINATION_ENDPOINT)
             .build();
 
-    private static JsonSchemaFilterUtils.JsonSchemaFilter jsonSchemaForQueryResult(String recordType, Map<String, JsonSchemaFilterUtils.JsonSchemaFilter> responsePropertyMap) {
-        return JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+    private static JsonSchemaFilter jsonSchemaForQueryResult(String recordType, Map<String, JsonSchemaFilter> responsePropertyMap) {
+        return JsonSchemaFilter.builder()
                 .type("object")
                 // Using LinkedHashMap to keep the order to support same
                 // YAML serialization result
-                .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
+                .properties(new LinkedHashMap<String, JsonSchemaFilter>() {{ //req for java8-backwards compatibility
 
-                    put("totalSize", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                    put("totalSize", JsonSchemaFilter.builder()
                             .type("integer")
                             .build());
-                    put("done", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                    put("done", JsonSchemaFilter.builder()
                             .type("boolean")
                             .build());
-                    put("nextRecordsUrl", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                    put("nextRecordsUrl", JsonSchemaFilter.builder()
                             .type("string")
                             .build());
-                    put("records", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                    put("records", JsonSchemaFilter.builder()
                             .type("array")
-                            .items(JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                            .items(JsonSchemaFilter.builder()
                                     .type("object")
                                     .properties(Collections.emptyMap())
-                                    ._if(JsonSchemaFilterUtils.ConditionJsonSchema.builder().properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
+                                    ._if(JsonSchemaFilterUtils.ConditionJsonSchema.builder().properties(new LinkedHashMap<String, JsonSchemaFilter>() {{ //req for java8-backwards compatibility
                                         put("attributes", buildAttributeWithType(recordType));
                                     }}).build())
                                     ._then(JsonSchemaFilterUtils.ThenJsonSchema.builder().properties(responsePropertyMap).build())
@@ -283,28 +284,28 @@ public class PrebuiltSanitizerRules {
                 .build();
     }
 
-    private static JsonSchemaFilterUtils.JsonSchemaFilter jsonSchemaForActivityHistoryQueryResult() {
-        return JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+    private static JsonSchemaFilter jsonSchemaForActivityHistoryQueryResult() {
+        return JsonSchemaFilter.builder()
                 .type("object")
                 // Using LinkedHashMap to keep the order to support same
                 // YAML serialization result
-                .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
+                .properties(new LinkedHashMap<String, JsonSchemaFilter>() {{ //req for java8-backwards compatibility
 
-                    put("totalSize", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                    put("totalSize", JsonSchemaFilter.builder()
                             .type("integer")
                             .build());
-                    put("done", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                    put("done", JsonSchemaFilter.builder()
                             .type("boolean")
                             .build());
-                    put("nextRecordsUrl", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                    put("nextRecordsUrl", JsonSchemaFilter.builder()
                             .type("string")
                             .build());
-                    put("records", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                    put("records", JsonSchemaFilter.builder()
                             .type("array")
-                            .items(JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                            .items(JsonSchemaFilter.builder()
                                     .type("object")
                                     .properties(Collections.emptyMap())
-                                    ._if(JsonSchemaFilterUtils.ConditionJsonSchema.builder().properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
+                                    ._if(JsonSchemaFilterUtils.ConditionJsonSchema.builder().properties(new LinkedHashMap<String, JsonSchemaFilter>() {{ //req for java8-backwards compatibility
                                         put("attributes", buildAttributeWithType("Account"));
                                     }}).build())
                                     ._then(JsonSchemaFilterUtils.ThenJsonSchema.builder().properties(ACTIVITY_HISTORIES_SUB_QUERY_RESULT_PROPERTY_SCHEMA).build())
@@ -314,33 +315,33 @@ public class PrebuiltSanitizerRules {
                 .build();
     }
 
-    private static JsonSchemaFilterUtils.JsonSchemaFilter jsonSchemaForQueryResult() {
-        return JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+    private static JsonSchemaFilter jsonSchemaForQueryResult() {
+        return JsonSchemaFilter.builder()
                 .type("object")
                 // Using LinkedHashMap to keep the order to support same
                 // YAML serialization result
-                .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
+                .properties(new LinkedHashMap<String, JsonSchemaFilter>() {{ //req for java8-backwards compatibility
 
-                    put("totalSize", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                    put("totalSize", JsonSchemaFilter.builder()
                             .type("integer")
                             .build());
-                    put("done", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                    put("done", JsonSchemaFilter.builder()
                             .type("boolean")
                             .build());
-                    put("nextRecordsUrl", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                    put("nextRecordsUrl", JsonSchemaFilter.builder()
                             .type("string")
                             .build());
-                    put("records", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                    put("records", JsonSchemaFilter.builder()
                             .type("array")
-                            .items(JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                            .items(JsonSchemaFilter.builder()
                                     .oneOf(Arrays.asList(
-                                                    JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("object")
-                                                            .properties(Collections.emptyMap())._if(JsonSchemaFilterUtils.ConditionJsonSchema.builder().properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
+                                                    JsonSchemaFilter.builder().type("object")
+                                                            .properties(Collections.emptyMap())._if(JsonSchemaFilterUtils.ConditionJsonSchema.builder().properties(new LinkedHashMap<String, JsonSchemaFilter>() {{ //req for java8-backwards compatibility
                                                                 put("attributes", buildAttributeWithType("User"));
                                                             }}).build())
                                                             ._then(JsonSchemaFilterUtils.ThenJsonSchema.builder().properties(USER_BY_QUERY_RESULT_JSON_SCHEMA).build())
                                                             .build(),
-                                                    JsonSchemaFilterUtils.JsonSchemaFilter.builder().type("object").properties(Collections.emptyMap())._if(JsonSchemaFilterUtils.ConditionJsonSchema.builder().properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
+                                                    JsonSchemaFilter.builder().type("object").properties(Collections.emptyMap())._if(JsonSchemaFilterUtils.ConditionJsonSchema.builder().properties(new LinkedHashMap<String, JsonSchemaFilter>() {{ //req for java8-backwards compatibility
                                                                 put("attributes", buildAttributeWithType("Account"));
                                                             }}).build())
                                                             ._then(JsonSchemaFilterUtils.ThenJsonSchema.builder().properties(ACCOUNT_WITH_ACTIVITY_HISTORIES_QUERY_RESULT_PROPERTY_SCHEMA).build())
@@ -387,15 +388,15 @@ public class PrebuiltSanitizerRules {
                 .build();
     }
 
-    private static JsonSchemaFilterUtils.JsonSchemaFilter buildAttributeWithType() {
+    private static JsonSchemaFilter buildAttributeWithType() {
         return buildAttributeWithType(null);
     }
 
-    private static JsonSchemaFilterUtils.JsonSchemaFilter buildAttributeWithType(String constant) {
-        return JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+    private static JsonSchemaFilter buildAttributeWithType(String constant) {
+        return JsonSchemaFilter.builder()
                 .type("object")
-                .properties(new LinkedHashMap<String, JsonSchemaFilterUtils.JsonSchemaFilter>() {{ //req for java8-backwards compatibility
-                    put("type", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                .properties(new LinkedHashMap<String, JsonSchemaFilter>() {{ //req for java8-backwards compatibility
+                    put("type", JsonSchemaFilter.builder()
                             .type("string")
                             .constant(constant)
                             .build());

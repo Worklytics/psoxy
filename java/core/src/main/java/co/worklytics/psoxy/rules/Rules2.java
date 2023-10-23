@@ -2,7 +2,7 @@ package co.worklytics.psoxy.rules;
 
 
 import com.avaulta.gateway.rules.Endpoint;
-import com.avaulta.gateway.rules.JsonSchemaFilterUtils;
+import com.avaulta.gateway.rules.JsonSchemaFilter;
 import com.avaulta.gateway.rules.transforms.Transform;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -45,7 +45,7 @@ public class Rules2 implements RESTRules {
 
 
 
-    Map<String, JsonSchemaFilterUtils.JsonSchemaFilter> definitions;
+    Map<String, JsonSchemaFilter> definitions;
 
 
     /**

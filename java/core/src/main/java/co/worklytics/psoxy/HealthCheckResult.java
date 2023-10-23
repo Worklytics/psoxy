@@ -54,6 +54,8 @@ public class HealthCheckResult {
 
     String configuredSource;
 
+    String configuredHost;
+
     /**
      * from config, if any. (if null, the computed logically)
      */
