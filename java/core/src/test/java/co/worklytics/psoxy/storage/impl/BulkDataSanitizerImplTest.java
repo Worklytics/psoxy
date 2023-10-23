@@ -1,9 +1,9 @@
 package co.worklytics.psoxy.storage.impl;
 
 import co.worklytics.psoxy.*;
-import co.worklytics.psoxy.rules.*;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestModules;
 import co.worklytics.test.TestUtils;
@@ -13,13 +13,15 @@ import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.Base64UrlSha256HashPseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.ColumnarRules;
+import com.avaulta.gateway.rules.RuleSet;
 import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
 import com.avaulta.gateway.tokens.impl.Sha256DeterministicTokenizationStrategy;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import dagger.Component;
+import dagger.Module;
+import dagger.Provides;
 import lombok.SneakyThrows;
 import org.apache.commons.codec.binary.Base64;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,7 +48,7 @@ import static org.mockito.Mockito.when;
 public class BulkDataSanitizerImplTest {
 
     @Inject
-    ColumnarBulkDataSanitizerImpl columnarFileSanitizerImpl;
+    ColumnarBulkDataSanitizerImplFactory columnarFileSanitizerImplFactory;
 
     @Inject
     RESTApiSanitizerFactory sanitizerFactory;
@@ -68,10 +70,24 @@ public class BulkDataSanitizerImplTest {
         TestModules.ForFixedClock.class,
         TestModules.ForFixedUUID.class,
         MockModules.ForConfigService.class,
+        ForPlaceholderRules.class,
     })
     public interface Container {
         void inject(BulkDataSanitizerImplTest test);
     }
+
+    @Module
+    public interface ForPlaceholderRules {
+        @Provides @Singleton
+        static ColumnarRules ruleSet() {
+            return mock(ColumnarRules.class);
+        }
+    }
+
+
+    @Inject ColumnarRules defaultRules;
+
+    ColumnarBulkDataSanitizerImpl columnarFileSanitizerImpl;
 
     @BeforeEach
     public void setup() {
@@ -85,6 +101,7 @@ public class BulkDataSanitizerImplTest {
             .build());
 
         //make it deterministic
+        columnarFileSanitizerImpl = columnarFileSanitizerImplFactory.create(defaultRules);
         columnarFileSanitizerImpl.setRecordShuffleChunkSize(1);
     }
 
@@ -97,14 +114,14 @@ public class BulkDataSanitizerImplTest {
             "3,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"workltycis.co\"\",\"\"hash\"\":\"\"BlQB8Vk0VwdbdWTGAzBF.ote1357Ajr0fFcgFf72kdk\"\"}\",Engineering,2023-01-06,1,2019-10-06,2022-12-08\r\n" +
             "4,,Engineering,2023-01-06,1,2018-06-03,\r\n"; //blank ID
 
-        CsvRules rules = CsvRules.builder()
+        ColumnarRules rules = ColumnarRules.builder()
             .columnToPseudonymize("EMPLOYEE_EMAIL")
             .build();
 
         File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
-
+        columnarFileSanitizerImpl.setRules(rules);
         try (FileReader in = new FileReader(inputFile)) {
-            byte[] result = columnarFileSanitizerImpl.sanitize(in, rules, pseudonymizer);
+            byte[] result = columnarFileSanitizerImpl.sanitize(in, pseudonymizer);
             assertEquals(EXPECTED, new String(result));
         }
     }
@@ -118,15 +135,16 @@ public class BulkDataSanitizerImplTest {
             "3,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"workltycis.co\"\",\"\"hash\"\":\"\"BlQB8Vk0VwdbdWTGAzBF.ote1357Ajr0fFcgFf72kdk\"\"}\",2023-01-06,1,2019-10-06,2022-12-08\r\n" +
             "4,,2023-01-06,1,2018-06-03,\r\n"; //blank ID
 
-        CsvRules rules = CsvRules.builder()
+        ColumnarRules rules = ColumnarRules.builder()
             .columnToPseudonymize("EMPLOYEE_EMAIL")
             .columnToRedact("DEPARTMENT")
             .build();
 
         File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
+        columnarFileSanitizerImpl.setRules(rules);
 
         try (FileReader in = new FileReader(inputFile)) {
-            byte[] result = columnarFileSanitizerImpl.sanitize(in, rules, pseudonymizer);
+            byte[] result = columnarFileSanitizerImpl.sanitize(in, pseudonymizer);
             assertEquals(EXPECTED, new String(result));
         }
     }
@@ -138,14 +156,15 @@ public class BulkDataSanitizerImplTest {
             "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",Engineering\r\n";
 
 
-        CsvRules rules = CsvRules.builder()
+        ColumnarRules rules = ColumnarRules.builder()
             .columnToPseudonymize("EMPLOYEE_ID")
             .columnToPseudonymize("AN EMAIL").build();
 
         File inputFile = new File(getClass().getResource("/csv/hris-example-headers-w-spaces.csv").getFile());
+        columnarFileSanitizerImpl.setRules(rules);
 
         try (FileReader in = new FileReader(inputFile)) {
-            byte[] result = columnarFileSanitizerImpl.sanitize(in, rules, pseudonymizer);
+            byte[] result = columnarFileSanitizerImpl.sanitize(in, pseudonymizer);
             assertEquals(EXPECTED, new String(result));
         }
     }
@@ -156,14 +175,15 @@ public class BulkDataSanitizerImplTest {
         final String EXPECTED = "EMPLOYEE_ID,EMAIL,DEPARTMENT\r\n" +
             "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",\",,,\"\r\n";
 
-        CsvRules rules = CsvRules.builder()
+        ColumnarRules rules = ColumnarRules.builder()
             .columnToPseudonymize("EMPLOYEE_ID")
             .columnToPseudonymize("EMAIL")
             .build();
         File inputFile = new File(getClass().getResource("/csv/hris-example-quotes.csv").getFile());
+        columnarFileSanitizerImpl.setRules(rules);
 
         try (FileReader in = new FileReader(inputFile)) {
-            byte[] result = columnarFileSanitizerImpl.sanitize(in, rules, pseudonymizer);
+            byte[] result = columnarFileSanitizerImpl.sanitize(in, pseudonymizer);
 
             assertEquals(EXPECTED, new String(result));
         }
@@ -181,12 +201,13 @@ public class BulkDataSanitizerImplTest {
         when(config.getConfigPropertyAsOptional(eq(ProxyConfigProperty.RULES)))
             .thenReturn(Optional.of(Base64.encodeBase64String(TestUtils.getData("sources/hris/csv.yaml"))));
 
-        CsvRules rules = (CsvRules) rulesUtils.getRulesFromConfig(config).orElseThrow();
+        ColumnarRules rules = (ColumnarRules) rulesUtils.getRulesFromConfig(config).orElseThrow();
 
         File inputFile = new File(getClass().getResource("/csv/hris-default-rules.csv").getFile());
+        columnarFileSanitizerImpl.setRules(rules);
 
         try (FileReader in = new FileReader(inputFile)) {
-            byte[] result = columnarFileSanitizerImpl.sanitize(in, rules, pseudonymizer);
+            byte[] result = columnarFileSanitizerImpl.sanitize(in, pseudonymizer);
 
             assertEquals(EXPECTED, new String(result));
         }
@@ -199,15 +220,16 @@ public class BulkDataSanitizerImplTest {
         final String EXPECTED = "EMPLOYEE_ID,AN EMAIL,SOME DEPARTMENT\r\n" +
             "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",Engineering\r\n";
 
-        CsvRules rules = CsvRules.builder()
+        ColumnarRules rules = ColumnarRules.builder()
             .columnToPseudonymize("    employee_id     ")
             .columnToPseudonymize(" an EMAIL ")
             .build();
+        columnarFileSanitizerImpl.setRules(rules);
 
         File inputFile = new File(getClass().getResource("/csv/hris-example-headers-w-spaces.csv").getFile());
 
         try (FileReader in = new FileReader(inputFile)) {
-            byte[] result = columnarFileSanitizerImpl.sanitize(in, rules, pseudonymizer);
+            byte[] result = columnarFileSanitizerImpl.sanitize(in, pseudonymizer);
 
             assertEquals(EXPECTED, new String(result));
         }
@@ -220,16 +242,17 @@ public class BulkDataSanitizerImplTest {
             "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",\",,,\"\r\n";
 
 
-        CsvRules rules = CsvRules.builder()
+        ColumnarRules rules = ColumnarRules.builder()
             .columnToPseudonymize("EMPLOYEE_ID")
             .columnToPseudonymize("EMPLOYEE_EMAIL")
             .columnsToRename(ImmutableMap.of("EMAIL", "EMPLOYEE_EMAIL"))
             .build();
+        columnarFileSanitizerImpl.setRules(rules);
 
         File inputFile = new File(getClass().getResource("/csv/hris-example-quotes.csv").getFile());
 
         try (FileReader in = new FileReader(inputFile)) {
-            byte[] result = columnarFileSanitizerImpl.sanitize(in, rules, pseudonymizer);
+            byte[] result = columnarFileSanitizerImpl.sanitize(in, pseudonymizer);
 
             assertEquals(EXPECTED, new String(result));
         }
@@ -253,18 +276,19 @@ public class BulkDataSanitizerImplTest {
             "t~-ZdDGUuOMK-Oy7_PJ3pf9SYX12-3tKPdLHfYbjVGcGk,Engineering,2023-01-06,t~SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM,2019-10-06,2022-12-08,3\r\n" +
             "t~-fs1T64Micz8SkbILrABgEv4kSg-tFhvhP35HGSLdOo,Engineering,2023-01-06,t~SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM,2018-06-03,,4\r\n";
 
-        CsvRules rules = CsvRules.builder()
+        ColumnarRules rules = ColumnarRules.builder()
             .pseudonymFormat(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
             .columnToPseudonymize("EMPLOYEE_ID")
             .columnToRedact("EMPLOYEE_EMAIL")
             .columnToPseudonymize("MANAGER_ID")
             .columnsToDuplicate(Map.of("EMPLOYEE_ID", "EMPLOYEE_ID_ORIG"))
             .build();
+        columnarFileSanitizerImpl.setRules(rules);
 
         File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
 
         try (FileReader in = new FileReader(inputFile)) {
-            byte[] result = columnarFileSanitizerImpl.sanitize(in, rules, defaultPseudonymizer);
+            byte[] result = columnarFileSanitizerImpl.sanitize(in, defaultPseudonymizer);
 
             assertEquals(EXPECTED, new String(result));
         }
@@ -288,7 +312,7 @@ public class BulkDataSanitizerImplTest {
             "t~4W7Sl-LI6iMzNNngivs5dLMiVw-7ob3Cyr3jn8NureY,Engineering,2023-01-06,t~0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc,2019-10-06,2022-12-08,3\r\n" +
             "t~BOg00PLoiEEKyGzije3FJlKBzM6_Vjk87VJI9lTIA2o,Engineering,2023-01-06,t~0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc,2018-06-03,,4\r\n";
 
-        CsvRules rules = CsvRules.builder()
+        ColumnarRules rules = ColumnarRules.builder()
             .pseudonymFormat(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
             .columnToPseudonymize("EMPLOYEE_ID")
             .columnToPseudonymize("MANAGER_ID")
@@ -296,11 +320,12 @@ public class BulkDataSanitizerImplTest {
             .columnToRedact("EFFECTIVE_ISOWEEK")
             .columnsToDuplicate(Map.of("EMPLOYEE_ID", "EMPLOYEE_ID_ORIG"))
             .build();
+        columnarFileSanitizerImpl.setRules(rules);
 
         File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
 
         try (FileReader in = new FileReader(inputFile)) {
-            byte[] result = columnarFileSanitizerImpl.sanitize(in, rules, defaultPseudonymizer);
+            byte[] result = columnarFileSanitizerImpl.sanitize(in, defaultPseudonymizer);
 
             assertEquals(EXPECTED, new String(result));
         }
@@ -315,7 +340,7 @@ public class BulkDataSanitizerImplTest {
             "\"{\"\"ImportId\"\":\"\"startDate\"\",\"\"timeZone\"\":\"\"America/Los_Angeles\"\"}\",\"{\"\"ImportId\"\":\"\"endDate\"\",\"\"timeZone\"\":\"\"America/Los_Angeles\"\"}\",\"{\"\"ImportId\"\":\"\"status\"\"}\",\"{\"\"ImportId\"\":\"\"progress\"\"}\",\"{\"\"ImportId\"\":\"\"finished\"\"}\",\"{\"\"ImportId\"\":\"\"recordedDate\"\",\"\"timeZone\"\":\"\"America/Los_Angeles\"\"}\",\"{\"\"ImportId\"\":\"\"_recordId\"\"}\",\"{\"\"ImportId\"\":\"\"locationLatitude\"\"}\",\"{\"\"ImportId\"\":\"\"locationLongitude\"\"}\",\"{\"\"ImportId\"\":\"\"QID1\"\"}\",\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"jw7v7rBpw41HFGKAH8Jp8yI2QlgO7ZYVerCJkco51Ic\"\"}\",\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"aM2l7o6Vm5Z1bRaYm_tjBfIolutVG-1k8s89UsME6LA\"\"}\",\"{\"\"ImportId\"\":\"\"Q_DataPolicyViolations\"\"}\",\"{\"\"ImportId\"\":\"\"Rating\"\"}\"\r\n" +
             "9/1/22 7:50,9/1/22 7:51,32,100,1,9/1/22 7:51,R_1ie8z2GwkwzKG3h,,,3,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"acme.COM\"\",\"\"hash\"\":\"\"PM3Oh15cS2rBp-kjSrOCpQvYFe8Wo3qLj1o5F3fuefI\"\"}\",\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"5NL5SaQBwE6c0L1BDjHW-BtBOXQVH8RYwY0tGGw3khk\"\"}\",,5\r\n";
 
-        CsvRules rules = CsvRules.builder()
+        ColumnarRules rules = ColumnarRules.builder()
             .columnToPseudonymize("Participant Email")
             .columnToPseudonymize("Participant Unique Identifier")
             .columnToRedact("Participant Name")
@@ -326,17 +351,20 @@ public class BulkDataSanitizerImplTest {
             .columnToRedact("Start Date")
             .build();
 
+        columnarFileSanitizerImpl.setRules(rules);
+
         Pseudonymizer defaultPseudonymizer =
             pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
                 .pseudonymizationSalt("salt")
                 .defaultScopeId("hris")
                 .build());
 
+
         File inputFile = new File(getClass().getResource("/csv/example_acme_20220901.csv").getFile());
 
 
         try (FileReader in = new FileReader(inputFile)) {
-            byte[] result = columnarFileSanitizerImpl.sanitize(in, rules, defaultPseudonymizer);
+            byte[] result = columnarFileSanitizerImpl.sanitize(in, defaultPseudonymizer);
             assertEquals(EXPECTED, new String(result));
         }
     }
@@ -347,16 +375,16 @@ public class BulkDataSanitizerImplTest {
         final String EXPECTED = "EMPLOYEE_ID\r\n" +
             "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM\"\"}\"\r\n";
 
-        CsvRules rules = CsvRules.builder()
+        ColumnarRules rules = ColumnarRules.builder()
             .columnToPseudonymize("EMPLOYEE_ID")
             .columnsToInclude(Lists.newArrayList("EMPLOYEE_ID"))
             .build();
+        columnarFileSanitizerImpl.setRules(rules);
 
         File inputFile = new File(getClass().getResource("/csv/hris-example-quotes.csv").getFile());
 
-
         try (FileReader in = new FileReader(inputFile)) {
-            byte[] result = columnarFileSanitizerImpl.sanitize(in, rules, pseudonymizer);
+            byte[] result = columnarFileSanitizerImpl.sanitize(in, pseudonymizer);
 
             assertEquals(EXPECTED, new String(result));
         }
@@ -373,11 +401,10 @@ public class BulkDataSanitizerImplTest {
             "3,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"workltycis.co\"\",\"\"hash\"\":\"\"BlQB8Vk0VwdbdWTGAzBF.ote1357Ajr0fFcgFf72kdk\"\"}\",Engineering,2023-01-06,1,2019-10-06,2022-12-08\r\n"
             ; //blank ID
 
-        CsvRules rules = CsvRules.builder()
+        ColumnarRules rules = ColumnarRules.builder()
             .columnToPseudonymize("EMPLOYEE_EMAIL")
             .build();
-
-
+        columnarFileSanitizerImpl.setRules(rules);
 
         File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
 
@@ -385,7 +412,7 @@ public class BulkDataSanitizerImplTest {
             // replace shuffler implementation with one that reverses the list, so deterministic
             columnarFileSanitizerImpl.setRecordShuffleChunkSize(2);
             columnarFileSanitizerImpl.makeShuffleDeterministic();
-            byte[] result = columnarFileSanitizerImpl.sanitize(in, rules, pseudonymizer);
+            byte[] result = columnarFileSanitizerImpl.sanitize(in, pseudonymizer);
 
             assertEquals(EXPECTED, new String(result));
         }
@@ -436,7 +463,7 @@ public class BulkDataSanitizerImplTest {
                 "4,,Engineering,2023-01-06,1,2018-06-03,,\r\n" +
                 "3,charles@workltycis.co,Engineering,2023-01-06,1,2019-10-06,2022-12-08,\"{\"\"scope\"\":\"\"github\"\",\"\"hash\"\":\"\"KqWJXpC.g25eQzR80kCS3RVj4L4JNngo7vFwructvNU\"\"}\"\r\n";
 
-        CsvRules rules = CsvRules.builder()
+        ColumnarRules rules = ColumnarRules.builder()
                 .fieldsToTransform(Map.of("EMPLOYEE_EMAIL", ColumnarRules.FieldTransformPipeline.builder()
                         .newName("GITHUB_USERNAME")
                         .transforms(Arrays.asList(
@@ -445,6 +472,7 @@ public class BulkDataSanitizerImplTest {
                                 ColumnarRules.FieldValueTransform.pseudonymizeWithScope("github")
                         )).build()))
                 .build();
+        columnarFileSanitizerImpl.setRules(rules);
 
         File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
 
@@ -452,7 +480,7 @@ public class BulkDataSanitizerImplTest {
             // replace shuffler implementation with one that reverses the list, so deterministic
             columnarFileSanitizerImpl.setRecordShuffleChunkSize(2);
             columnarFileSanitizerImpl.makeShuffleDeterministic();
-            byte[] result = columnarFileSanitizerImpl.sanitize(in, rules, pseudonymizer);
+            byte[] result = columnarFileSanitizerImpl.sanitize(in,  pseudonymizer);
             String resultString = new String(result);
 
             assertEquals(EXPECTED, resultString);
@@ -477,7 +505,8 @@ public class BulkDataSanitizerImplTest {
     @Test
     void transform_fromYaml() {
 
-        CsvRules rules = yamlMapper.readValue(getClass().getResource("/rules/csv-pipeline.yaml"), CsvRules.class);
+        ColumnarRules rules = yamlMapper.readValue(getClass().getResource("/rules/csv-pipeline.yaml"), ColumnarRules.class);
+        columnarFileSanitizerImpl.setRules(rules);
 
         final String EXPECTED = "EMPLOYEE_ID,EMPLOYEE_EMAIL,DEPARTMENT,SNAPSHOT,MANAGER_ID,JOIN_DATE,LEAVE_DATE,GITHUB_USERNAME\r\n" +
             "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"mfsaNYuCX__xvnRz4gJp_t0zrDTC5DkuCJvMkubugsI\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"workltyics.co\"\",\"\"hash\"\":\"\"al4JK5KlOIsneC2DM__P_HRYe28LWYTBSf3yWKGm5yQ\"\"}\",Sales,2023-01-06,\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM\"\"}\",2020-01-01,,\"{\"\"scope\"\":\"\"github\"\",\"\"hash\"\":\"\"e_xmOtKElP3GOsE3lI1zpQWfkRPEwv1C4pKeEXsjLQk\"\"}\"\r\n" +
@@ -491,7 +520,7 @@ public class BulkDataSanitizerImplTest {
             // replace shuffler implementation with one that reverses the list, so deterministic
             columnarFileSanitizerImpl.setRecordShuffleChunkSize(2);
             columnarFileSanitizerImpl.makeShuffleDeterministic();
-            byte[] result = columnarFileSanitizerImpl.sanitize(in, rules, pseudonymizer);
+            byte[] result = columnarFileSanitizerImpl.sanitize(in, pseudonymizer);
             String resultString = new String(result);
 
             assertEquals(EXPECTED, resultString);

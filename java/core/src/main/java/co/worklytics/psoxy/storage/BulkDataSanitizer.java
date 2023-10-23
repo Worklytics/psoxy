@@ -18,12 +18,10 @@ public interface BulkDataSanitizer {
      *
      * @param reader The stream reader with the source content, including header unless schema
      *               implicit in records
-     * @param bulkDataRules The rules to apply
      * @param pseudonymizer The pseudonymizer to use
      * @return A byte array with the processed content
      * @throws IOException
      */
     byte[] sanitize(InputStreamReader reader,
-                    BulkDataRules bulkDataRules,
                     Pseudonymizer pseudonymizer) throws IOException;
 }

@@ -9,7 +9,8 @@ public enum BulkModeConfigProperty implements ConfigService.ConfigProperty {
     OUTPUT_BUCKET,
 
     /**
-     * if provided, this path segment will be prepended to keys of output objects
+     * additional transforms to apply to each input file
+     * @see co.worklytics.psoxy.storage.StorageHandler.ObjectTransform
      */
     ADDITIONAL_TRANSFORMS,
 

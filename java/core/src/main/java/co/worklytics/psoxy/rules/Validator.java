@@ -1,35 +1,47 @@
 package co.worklytics.psoxy.rules;
 
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
+import com.avaulta.gateway.rules.ColumnarRules;
 import com.avaulta.gateway.rules.Endpoint;
+import com.avaulta.gateway.rules.MultiTypeBulkDataRules;
+import com.avaulta.gateway.rules.RecordRules;
 import com.avaulta.gateway.rules.transforms.Transform;
 import com.google.common.base.Preconditions;
 import com.jayway.jsonpath.JsonPath;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.Collections;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 
+@Singleton
+@NoArgsConstructor(onConstructor_ = @Inject)
 @Log
 public class Validator {
 
-    static public void validate(@NonNull RuleSet rules) {
-        if (rules instanceof CsvRules) {
-            validate((CsvRules) rules);
+    public void validate(@NonNull com.avaulta.gateway.rules.RuleSet rules) {
+        if (rules instanceof ColumnarRules) {
+            validate((ColumnarRules) rules);
         } else if (rules instanceof Rules2) {
             validate((Rules2) rules);
+        } else if (rules instanceof MultiTypeBulkDataRules) {
+            validate((MultiTypeBulkDataRules) rules);
+        } else if (rules instanceof RecordRules) {
+            validate((RecordRules) rules);
         } else {
           throw new NotImplementedException("Set not supported: " + rules.getClass().getSimpleName());
         }
     }
 
-    static public void validate(@NonNull CsvRules rules) {
+    public void validate(@NonNull ColumnarRules rules) {
         Preconditions.checkNotNull(rules.getColumnsToPseudonymize());
         Preconditions.checkNotNull(rules.getColumnsToRedact());
 
@@ -40,10 +52,21 @@ public class Validator {
         }
     }
 
-    static public void validate(@NonNull Rules2 rules) {
-        rules.getEndpoints().forEach(Validator::validate);
+    public void validate(@NonNull RecordRules rules) {
+        Preconditions.checkNotNull(rules.getFormat());
     }
-    static void validate(@NonNull Endpoint endpoint) {
+
+    public void validate(@NonNull MultiTypeBulkDataRules rules) {
+        Preconditions.checkArgument(rules.getFileRules().size() > 0, "Must have at least one file rule");
+
+        rules.getFileRules().values().forEach(this::validate);
+    }
+
+    public void validate(@NonNull Rules2 rules) {
+        rules.getEndpoints().forEach(this::validate);
+    }
+
+    void validate(@NonNull Endpoint endpoint) {
         if (StringUtils.isBlank(endpoint.getPathTemplate())) {
             if (StringUtils.isBlank(endpoint.getPathRegex())) {
                 throw new Error("Endpoint must have either pathTemplate or pathRegex. pass `/` as pathTemplate if you want base path.");
@@ -54,10 +77,10 @@ public class Validator {
             // eg start w letter, contain only alphanumeric
         }
 
-        endpoint.getTransforms().forEach(Validator::validate);
+        endpoint.getTransforms().forEach(this::validate);
     }
 
-    static void validate(@NonNull Transform transform) {
+    void validate(@NonNull Transform transform) {
         transform.getJsonPaths().forEach(p -> {
             try {
                 JsonPath.compile(p);

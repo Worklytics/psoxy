@@ -3,14 +3,14 @@ package co.worklytics.psoxy.storage.impl;
 import co.worklytics.psoxy.PseudonymizedIdentity;
 import co.worklytics.psoxy.Pseudonymizer;
 import co.worklytics.psoxy.PseudonymizerImplFactory;
-import co.worklytics.psoxy.rules.CsvRules;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.Base64UrlSha256HashPseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
-import com.avaulta.gateway.rules.BulkDataRules;
 import com.avaulta.gateway.rules.ColumnarRules;
 import co.worklytics.psoxy.storage.BulkDataSanitizer;
+import com.avaulta.gateway.rules.RecordRules;
+import com.avaulta.gateway.rules.RuleSet;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
@@ -19,6 +19,8 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Streams;
 import com.google.common.collect.UnmodifiableIterator;
+import dagger.assisted.Assisted;
+import dagger.assisted.AssistedInject;
 import lombok.*;
 import lombok.extern.java.Log;
 import org.apache.commons.csv.CSVFormat;
@@ -34,7 +36,6 @@ import javax.inject.Singleton;
 import java.io.*;
 import java.util.*;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import java.io.ByteArrayOutputStream;
 
@@ -48,9 +49,7 @@ import java.util.stream.Stream;
  * CSV should have the first row with headers and being separated with commas; content should be quoted
  * if include commas or quotes inside.
  */
-@Singleton
 @Log
-@NoArgsConstructor(onConstructor_ = @Inject)
 public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
 
     @Inject
@@ -68,16 +67,17 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
     @Setter(onMethod_ = @VisibleForTesting)
     private int recordShuffleChunkSize = 500;
 
+    @Setter(onMethod_ = @VisibleForTesting)
+    ColumnarRules rules;
+
+    @AssistedInject
+    public ColumnarBulkDataSanitizerImpl(@Assisted ColumnarRules rules) {
+        this.rules = rules;
+    }
+
     @Override
     public byte[] sanitize(@NonNull InputStreamReader reader,
-                           @NonNull BulkDataRules bulkDataRules,
                            @NonNull Pseudonymizer pseudonymizer) throws IOException {
-
-        if (!(bulkDataRules instanceof CsvRules)) {
-            throw new IllegalArgumentException("Rules must be of type CsvRules");
-        }
-
-        ColumnarRules rules = (ColumnarRules) bulkDataRules;
 
         CSVParser records = CSVFormat
                 .DEFAULT
@@ -222,13 +222,6 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
             UnmodifiableIterator<List<CSVRecord>> chunks =
                 Iterators.partition(records.iterator(), this.getRecordShuffleChunkSize());
 
-            Function<Pair<String, String>, String> applyTransformsAndPseudonymization = (Pair<String, String> pair) -> {
-                String value = pair.getValue();
-                // important - transform FIRST, then pseudonymize resulting values
-                value = applyTransformIfAny.apply(pair.getKey(), value);
-                value = applyPseudonymizationIfAny.apply(pair.getKey(), value);
-                return value;
-            };
 
             for (UnmodifiableIterator<List<CSVRecord>> chunkIterator = chunks; chunkIterator.hasNext(); ) {
                 List<CSVRecord> chunk = new ArrayList<>(chunkIterator.next());

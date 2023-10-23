@@ -54,9 +54,12 @@ public abstract class Transform {
      * specifies fields within content that identify value to be transformed
      * <p>
      * supported for CSV
+     *
+     * @Deprecated - CSV now uses columnar rules
      */
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     @Singular
+    @Deprecated
     List<String> fields;
 
 

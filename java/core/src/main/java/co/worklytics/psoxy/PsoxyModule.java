@@ -5,12 +5,15 @@ import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
+import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.psoxy.storage.BulkDataSanitizerFactory;
 import co.worklytics.psoxy.storage.impl.BulkDataSanitizerFactoryImpl;
+import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.Base64UrlSha256HashPseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.JsonSchemaFilterUtils;
 import com.avaulta.gateway.rules.ParameterSchemaUtils;
+import com.avaulta.gateway.rules.PathTemplateUtils;
 import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
 import com.avaulta.gateway.tokens.impl.AESReversibleTokenizationStrategy;
@@ -251,8 +254,27 @@ public class PsoxyModule {
     }
 
     @Provides
-    Pseudonymizer pseudonymizer(PseudonymizerImplFactory factory, ConfigService config, co.worklytics.psoxy.rules.RuleSet ruleSet) {
-        return factory.create(factory.buildOptions(config, ruleSet.getDefaultScopeIdForSource()));
+    Pseudonymizer pseudonymizer(PseudonymizerImplFactory factory, ConfigService config, RulesUtils rulesUtils, com.avaulta.gateway.rules.RuleSet ruleSet) {
+        return factory.create(factory.buildOptions(config,
+            rulesUtils.getDefaultScopeIdFromRules(ruleSet)
+                .orElseGet(() -> {
+                    boolean legacy =
+                    config.getConfigPropertyAsOptional(ProxyConfigProperty.PSEUDONYM_IMPLEMENTATION)
+                        .map(PseudonymImplementation::valueOf)
+                        .map(implementation -> Objects.equals(implementation, PseudonymImplementation.LEGACY))
+                        .orElse(false);
+                    if (legacy) {
+                        return rulesUtils.getDefaultScopeIdFromSource(config.getConfigPropertyOrError(ProxyConfigProperty.SOURCE));
+                    } else {
+                        return ""; //should only be used in legacy case
+                    }
+                })));
+    }
+
+    @Provides
+    @Singleton
+    PathTemplateUtils pathTemplateUtils() {
+        return new PathTemplateUtils();
     }
 
 

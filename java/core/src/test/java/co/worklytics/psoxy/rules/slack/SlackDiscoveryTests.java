@@ -2,7 +2,6 @@ package co.worklytics.psoxy.rules.slack;
 
 import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
 import co.worklytics.psoxy.rules.RESTRules;
-import co.worklytics.psoxy.rules.RuleSet;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;

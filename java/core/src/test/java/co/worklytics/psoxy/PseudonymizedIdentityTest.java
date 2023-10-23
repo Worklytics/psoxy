@@ -1,12 +1,17 @@
 package co.worklytics.psoxy;
 
+import co.worklytics.psoxy.gateway.BulkModeConfigProperty;
 import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.test.MockModules;
+import co.worklytics.test.TestModules;
 import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.transforms.Transform;
 import dagger.Component;
+import dagger.Module;
+import dagger.Provides;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -20,17 +25,34 @@ import java.util.Base64;
 
 import static co.worklytics.test.TestModules.withMockEncryptionKey;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class PseudonymizedIdentityTest {
 
     @Singleton
     @Component(modules = {
             PsoxyModule.class,
-            MockModules.ForConfigService.class,
+            MockedConfigService.class,
             MockModules.ForRules.class,
     })
     public interface Container {
         void inject(PseudonymizedIdentityTest test);
+    }
+
+
+    @Module
+    public interface MockedConfigService {
+        @Provides
+        @Singleton
+        static ConfigService configService() {
+            ConfigService mock = mock(ConfigService.class);
+            TestModules.withMockEncryptionKey(mock);
+            when(mock.getConfigPropertyOrError(eq(ProxyConfigProperty.SOURCE)))
+                .thenReturn("gmail");
+            return mock;
+        }
     }
     @BeforeEach
     public void setup() {
@@ -39,6 +61,7 @@ class PseudonymizedIdentityTest {
 
         withMockEncryptionKey(config);
     }
+
 
     @Inject ConfigService config;
     @Inject Pseudonymizer pseudonymizer;

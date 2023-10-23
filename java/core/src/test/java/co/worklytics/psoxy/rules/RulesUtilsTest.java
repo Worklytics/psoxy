@@ -7,6 +7,7 @@ import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.storage.StorageHandler;
 import co.worklytics.test.TestUtils;
 
+import com.avaulta.gateway.rules.ColumnarRules;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import dagger.Component;
@@ -67,20 +68,45 @@ class RulesUtilsTest {
         "  - \"MANAGEREMAIL\"\n";
     static final String BASE64_YAML_CSV = "Y29sdW1uc1RvUHNldWRvbnltaXplOgogIC0gIkVNUExPWUVFX0VNQUlMIgpjb2x1bW5zVG9SZWRhY3Q6CiAgLSAiTUFOQUdFUkVNQUlMIgo=";
 
+
+    static final String YAML_MULTI = "fileRules:\n" +
+        "  /export/{week}/index_{shard}.ndjson:\n" +
+        "    format: \"NDJSON\"\n" +
+        "    transforms:\n" +
+        "      - redact: \"foo\"\n" +
+        "      - pseudonymize: \"bar\"\n" +
+        "  /export/{week}/data_{shard}.csv:\n" +
+        "    columnsToPseudonymize:\n" +
+        "      - \"email\"\n" +
+        "    delimiter: \",\"\n" +
+        "    pseudonymFormat: \"JSON\"\n";
+
+    static final String YAML_RECORD = "format: NDJSON\n" +
+        "transforms:\n" +
+        "  - redact: \"$.summary\"\n" +
+        "  - redact: \"$.summary\"\n" +
+        "  - pseudonymize: \"$.email\"\n" +
+        "  - pseudonymize: \"$.email\"\n";
+
+
     @ParameterizedTest
     @ValueSource(strings = {
         BASE64_YAML_REST,
         YAML_REST,
         YAML_CSV,
         BASE64_YAML_CSV,
+        YAML_MULTI,
+        YAML_RECORD,
     })
     void getRulesFromConfig(String encoded) {
 
         ConfigService config = mock(ConfigService.class);
         when(config.getConfigPropertyAsOptional(eq(ProxyConfigProperty.RULES)))
             .thenReturn(Optional.of(encoded));
+        when(config.getConfigPropertyOrError(eq(ProxyConfigProperty.SOURCE)))
+            .thenReturn("hris");
 
-        RuleSet rules = utils.getRulesFromConfig(config).get();
+        com.avaulta.gateway.rules.RuleSet rules = utils.getRulesFromConfig(config).get();
         assertNotNull(rules);
     }
 
@@ -89,7 +115,7 @@ class RulesUtilsTest {
         ImmutableList.<StorageHandler.ObjectTransform>builder()
             .add(StorageHandler.ObjectTransform.builder()
                 .destinationBucketName("blah")
-                .rules(CsvRules.builder()
+                .rules(ColumnarRules.builder()
                 .columnToPseudonymize("something")
                 .build())
                 .build())
@@ -107,7 +133,7 @@ class RulesUtilsTest {
         assertEquals("blah",
             utils.parseAdditionalTransforms(config).get(0).getDestinationBucketName());
         assertEquals("something",
-            ((CsvRules) utils.parseAdditionalTransforms(config).get(0).getRules()).getColumnsToPseudonymize().get(0));
+            ((ColumnarRules) utils.parseAdditionalTransforms(config).get(0).getRules()).getColumnsToPseudonymize().get(0));
     }
 
     @SneakyThrows

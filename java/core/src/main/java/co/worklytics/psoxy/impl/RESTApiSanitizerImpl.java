@@ -15,6 +15,7 @@ import com.avaulta.gateway.rules.JsonSchemaFilterUtils;
 import com.avaulta.gateway.rules.ParameterSchemaUtils;
 import com.avaulta.gateway.rules.transforms.EncryptIp;
 import com.avaulta.gateway.rules.transforms.HashIp;
+import com.avaulta.gateway.rules.PathTemplateUtils;
 import com.avaulta.gateway.rules.transforms.Transform;
 import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
@@ -92,6 +93,8 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     JsonSchemaFilterUtils jsonSchemaFilterUtils;
     @Inject
     ParameterSchemaUtils parameterSchemaUtils;
+    @Inject
+    PathTemplateUtils pathTemplateUtils;
 
     @Inject @Named("ipEncryptionStrategy")
     ReversibleTokenizationStrategy ipEncryptStrategy;
@@ -568,19 +571,10 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
         return compiledAllowedEndpoints;
     }
 
-    //TODO: improve this; some special chars outside of {} are not accounted for
-    final String SPECIAL_CHAR_CLASS = "[\\.\\^\\$\\<\\>\\*\\+\\[\\]\\(\\)\\+\\-\\=\\?\\!]";
-
     @VisibleForTesting
     String effectiveRegex(Endpoint endpoint) {
-        //NOTE: java capturing groups names limited to A-Z, a-z and 0-9, and must start with a letter
-
-
         return Optional.ofNullable(endpoint.getPathRegex())
-                .orElseGet(() -> "^" +
-                        endpoint.getPathTemplate()
-                                .replaceAll(SPECIAL_CHAR_CLASS, "\\\\$0")
-                                .replaceAll("\\{([A-Za-z][A-Za-z0-9]*)\\}", "(?<$1>[^/]+)") + "$");
+                .orElseGet(() -> pathTemplateUtils.asRegex(endpoint.getPathTemplate()));
     }
 
     boolean allowedQueryParams(Endpoint endpoint, List<Pair<String, String>> queryParams) {

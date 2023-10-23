@@ -3,12 +3,12 @@ package co.worklytics.test;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.HostEnvironment;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
-import co.worklytics.psoxy.rules.CsvRules;
 import co.worklytics.psoxy.rules.RESTRules;
-import co.worklytics.psoxy.rules.RuleSet;
 import co.worklytics.psoxy.utils.RandomNumberGenerator;
 import com.avaulta.gateway.rules.BulkDataRules;
-import com.google.api.client.http.*;
+import com.avaulta.gateway.rules.ColumnarRules;
+import com.avaulta.gateway.rules.RecordRules;
+import com.avaulta.gateway.rules.RuleSet;
 import com.google.api.client.testing.http.MockHttpTransport;
 import com.google.api.client.testing.http.MockLowLevelHttpResponse;
 import com.google.auth.http.HttpTransportFactory;
@@ -19,11 +19,6 @@ import lombok.SneakyThrows;
 
 import javax.inject.Singleton;
 
-import java.io.ByteArrayInputStream;
-import java.util.Map;
-import java.util.Random;
-
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -61,12 +56,22 @@ public class MockModules {
 
         @Provides @Singleton
         static BulkDataRules bulkDataRules() {
-            return mock(CsvRules.class);
+            return mock(ColumnarRules.class);
         }
 
         @Provides @Singleton
         static RESTRules restRules() {
             return mock(RESTRules.class);
+        }
+
+        @Provides @Singleton
+        static ColumnarRules columnarRules() {
+            return mock(ColumnarRules.class);
+        }
+
+        @Provides @Singleton
+        static RecordRules recordRules() {
+            return mock(RecordRules.class);
         }
     }
 

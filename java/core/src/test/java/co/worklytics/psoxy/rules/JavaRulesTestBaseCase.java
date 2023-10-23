@@ -25,7 +25,7 @@ public abstract class JavaRulesTestBaseCase extends RulesBaseTestCase {
 
         URL url = this.getClass().getClassLoader().getResource(path);
 
-        RuleSet rulesFromFilesystem = yamlMapper.readerFor(getRulesUnderTest().getClass())
+        com.avaulta.gateway.rules.RuleSet rulesFromFilesystem = yamlMapper.readerFor(getRulesUnderTest().getClass())
             .readValue(url);
 
         //NOTE: this is testing equivalence of file-system rules after round-trip; not necessarily
