@@ -6,6 +6,7 @@ import co.worklytics.psoxy.PseudonymizerImplFactory;
 import co.worklytics.psoxy.rules.CsvRules;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
+import com.avaulta.gateway.pseudonyms.impl.Base64UrlSha256HashPseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.BulkDataRules;
 import com.avaulta.gateway.rules.ColumnarRules;
@@ -57,6 +58,8 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
 
     @Inject
     UrlSafeTokenPseudonymEncoder urlSafeTokenPseudonymEncoder;
+    @Inject
+    Base64UrlSha256HashPseudonymEncoder base64UrlSha256HashPseudonymEncoder;
 
     @Inject
     PseudonymizerImplFactory pseudonymizerImplFactory;
@@ -311,6 +314,8 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
                         } else {
                             return urlSafeTokenPseudonymEncoder.encode(identity.asPseudonym());
                         }
+                    } else if (rules.getPseudonymFormat() == PseudonymEncoder.Implementations.URL_SAFE_HASH_ONLY) {
+                        return base64UrlSha256HashPseudonymEncoder.encode(identity.asPseudonym());
                     } else {
                         //JSON
                         return objectMapper.writeValueAsString(identity);

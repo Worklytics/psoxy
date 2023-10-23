@@ -1,6 +1,7 @@
 package com.avaulta.gateway.pseudonyms;
 
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
+import com.avaulta.gateway.pseudonyms.impl.Base64UrlSha256HashPseudonymEncoder;
 
 public interface PseudonymEncoder {
 
@@ -9,7 +10,6 @@ public interface PseudonymEncoder {
         /**
          * encode Pseudonym as a JSON-object
          *
-         * @see UrlSafeTokenPseudonymEncoder
          */
         JSON,
 
@@ -19,6 +19,16 @@ public interface PseudonymEncoder {
          * @see UrlSafeTokenPseudonymEncoder
          */
         URL_SAFE_TOKEN,
+
+        /**
+         * encode Pseudonym's hash as base64-URL, without padding.
+         *
+         * (this is equivalent to the URL_SAFE_TOKEN format, but without prefix (`t~`/`p~`); and
+         * without any additional data, such as encrypted form of pseudonym OR any form of domain)
+         *
+         * @see Base64UrlSha256HashPseudonymEncoder
+         */
+        URL_SAFE_HASH_ONLY,
     }
 
     String encode(Pseudonym pseudonym);

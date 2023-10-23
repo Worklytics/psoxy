@@ -69,6 +69,7 @@ public class HealthCheckRequestHandler {
 
         HealthCheckResult.HealthCheckResultBuilder healthCheckResult = HealthCheckResult.builder()
                 .configuredSource(config.getConfigPropertyAsOptional(ProxyConfigProperty.SOURCE).orElse(null))
+                .configuredHost(config.getConfigPropertyAsOptional(ProxyConfigProperty.TARGET_HOST).orElse(null))
                 .nonDefaultSalt(config.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT).isPresent())
                 .pseudonymImplementation(config.getConfigPropertyAsOptional(ProxyConfigProperty.PSEUDONYM_IMPLEMENTATION).orElse(null))
                 .missingConfigProperties(missing);

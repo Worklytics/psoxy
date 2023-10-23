@@ -10,6 +10,7 @@ import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.Endpoint;
+import com.avaulta.gateway.rules.JsonSchemaFilter;
 import com.avaulta.gateway.rules.JsonSchemaFilterUtils;
 import com.avaulta.gateway.rules.ParameterSchemaUtils;
 import com.avaulta.gateway.rules.transforms.EncryptIp;
@@ -69,7 +70,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     private final Object $writeLock = new Object[0];
     Map<Transform, List<JsonPath>> compiledTransforms = new ConcurrentHashMap<>();
 
-    JsonSchemaFilterUtils.JsonSchemaFilter rootDefinitions;
+    JsonSchemaFilter rootDefinitions;
 
 
     @AssistedInject
@@ -452,12 +453,14 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
                 return configuration.jsonProvider().toJson(pseudonymizedIdentity);
             } else if (transformOptions.getEncoding() == PseudonymEncoder.Implementations.URL_SAFE_TOKEN) {
                 if (pseudonymizedIdentity.getReversible() != null
-                        && getPseudonymizer().getOptions().getPseudonymImplementation() == PseudonymImplementation.LEGACY) {
+                    && getPseudonymizer().getOptions().getPseudonymImplementation() == PseudonymImplementation.LEGACY) {
                     // can't do reversible encoding with legacy pseudonym implementation, in URL_SAFE_TOKEN
                     return configuration.jsonProvider().toJson(pseudonymizedIdentity);
                 }
                 //exploit that already reversibly encoded, including prefix
                 return ObjectUtils.firstNonNull(pseudonymizedIdentity.getReversible(), pseudonymizedIdentity.getHash());
+            } else if (transformOptions.getEncoding() == PseudonymEncoder.Implementations.URL_SAFE_HASH_ONLY) {
+                return pseudonymizedIdentity.getHash();
             } else {
                 throw new RuntimeException("Unsupported pseudonym implementation: " + transformOptions.getEncoding());
             }
@@ -590,11 +593,11 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
                     .orElse(true);
     }
 
-    JsonSchemaFilterUtils.JsonSchemaFilter getRootDefinitions() {
+    JsonSchemaFilter getRootDefinitions() {
         if (rootDefinitions == null) {
             synchronized ($writeLock) {
                 if (rootDefinitions == null) {
-                    rootDefinitions = JsonSchemaFilterUtils.JsonSchemaFilter.builder().definitions(rules.getDefinitions()).build();
+                    rootDefinitions = JsonSchemaFilter.builder().definitions(rules.getDefinitions()).build();
                 }
             }
         }

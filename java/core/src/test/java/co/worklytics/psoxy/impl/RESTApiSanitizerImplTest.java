@@ -7,7 +7,7 @@ import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.rules.Endpoint;
 import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
 import co.worklytics.psoxy.rules.Rules2;
-import com.avaulta.gateway.rules.JsonSchemaFilterUtils;
+import com.avaulta.gateway.rules.JsonSchemaFilter;
 import com.avaulta.gateway.rules.transforms.EncryptIp;
 import com.avaulta.gateway.rules.transforms.HashIp;
 import com.avaulta.gateway.rules.transforms.Transform;
@@ -31,7 +31,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.net.Inet6Address;
 import java.net.URL;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -331,47 +330,47 @@ class RESTApiSanitizerImplTest {
 
         assertTrue(sanitized.contains("historyId"));
 
-        JsonSchemaFilterUtils.JsonSchemaFilter jsonSchemaFilter = JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+        JsonSchemaFilter jsonSchemaFilter = JsonSchemaFilter.builder()
             .type("object")
-            .properties(Map.<String, JsonSchemaFilterUtils.JsonSchemaFilter>of(
-                "id", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+            .properties(Map.<String, JsonSchemaFilter>of(
+                "id", JsonSchemaFilter.builder()
                     .type("string")
                     .build(),
-                "threadId", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                "threadId", JsonSchemaFilter.builder()
                     .type("string")
                     .build(),
-                "labelIds", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                "labelIds", JsonSchemaFilter.builder()
                     .type("array")
-                    .items(JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                    .items(JsonSchemaFilter.builder()
                         .type("string")
                         .build())
                     .build(),
-                "payload", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                "payload", JsonSchemaFilter.builder()
                     .type("object")
-                    .properties(Map.<String, JsonSchemaFilterUtils.JsonSchemaFilter>of(
-                        "headers", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                    .properties(Map.<String, JsonSchemaFilter>of(
+                        "headers", JsonSchemaFilter.builder()
                             .type("array")
-                            .items(JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                            .items(JsonSchemaFilter.builder()
                                 .type("object")
-                                .properties(Map.<String, JsonSchemaFilterUtils.JsonSchemaFilter>of(
-                                    "name", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                                .properties(Map.<String, JsonSchemaFilter>of(
+                                    "name", JsonSchemaFilter.builder()
                                         .type("string")
                                         .build(),
-                                    "value", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                                    "value", JsonSchemaFilter.builder()
                                         .type("string")
                                         .build()
                                 ))
                                 .build())
                             .build(),
-                        "partId", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                        "partId", JsonSchemaFilter.builder()
                             .type("string")
                             .build()
                     ))
                     .build(),
-                "sizeEstimate", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                "sizeEstimate", JsonSchemaFilter.builder()
                     .type("integer")
                     .build(),
-                "internalDate", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                "internalDate", JsonSchemaFilter.builder()
                     .type("string")
                     .build()
                 ))
@@ -420,6 +419,10 @@ class RESTApiSanitizerImplTest {
             "DEFAULT,test,true,URL_SAFE_TOKEN,p~Tt8H7clbL9y8ryN4_RLYrCEsKqbjJsWcPmKb4wOdZDKAHyevsJLhRTypmrf-DpBZ",
             "DEFAULT,alice@acme.com,true,URL_SAFE_TOKEN,p~UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMnKYUk8FJevl3wvFyZY0eF-@acme.com",
             "DEFAULT,alice@acme.com,false,URL_SAFE_TOKEN,UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMk",
+            "DEFAULT,alice@acme.com,true,URL_SAFE_HASH_ONLY,UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMk",
+            "DEFAULT,alice@acme.com,false,URL_SAFE_HASH_ONLY,UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMk",
+            //TODO: add an interesting case where base64 and base64-url encodings differ
+            //"DEFAULT,blahBlahBlah,false,URL_SAFE_HASH_ONLY,UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMk",
         }
     )
     @ParameterizedTest
