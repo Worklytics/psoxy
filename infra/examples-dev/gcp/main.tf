@@ -79,31 +79,32 @@ module "psoxy" {
   source = "../../modules/gcp-host"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-host?ref=rc-v0.4.40"
 
-  gcp_project_id                  = var.gcp_project_id
-  environment_name                = var.environment_name
-  config_parameter_prefix         = var.config_parameter_prefix
-  default_labels                  = var.default_labels
-  worklytics_sa_emails            = var.worklytics_sa_emails
-  psoxy_base_dir                  = var.psoxy_base_dir
-  deployment_bundle               = var.deployment_bundle
-  force_bundle                    = var.force_bundle
-  install_test_tool               = var.install_test_tool
-  gcp_region                      = var.gcp_region
-  replica_regions                 = coalesce(var.replica_regions, var.gcp_secret_replica_locations)
-  api_connectors                  = local.api_connectors
-  bulk_connectors                 = local.bulk_connectors
-  non_production_connectors       = var.non_production_connectors
-  custom_api_connector_rules      = var.custom_api_connector_rules
-  general_environment_variables   = var.general_environment_variables
-  pseudonymize_app_ids            = var.pseudonymize_app_ids
-  bulk_input_expiration_days      = var.bulk_input_expiration_days
-  bulk_sanitized_expiration_days  = var.bulk_sanitized_expiration_days
-  custom_bulk_connector_rules     = var.custom_bulk_connector_rules
-  custom_bulk_connector_arguments = var.custom_bulk_connector_arguments
-  lookup_tables                   = var.lookup_tables
-  custom_artifacts_bucket_name    = var.custom_artifacts_bucket_name
-  todos_as_local_files            = var.todos_as_local_files
-  todo_step                       = local.max_auth_todo_step
+  gcp_project_id                    = var.gcp_project_id
+  environment_name                  = var.environment_name
+  config_parameter_prefix           = var.config_parameter_prefix
+  default_labels                    = var.default_labels
+  worklytics_sa_emails              = var.worklytics_sa_emails
+  psoxy_base_dir                    = var.psoxy_base_dir
+  deployment_bundle                 = var.deployment_bundle
+  force_bundle                      = var.force_bundle
+  install_test_tool                 = var.install_test_tool
+  gcp_principals_authorized_to_test = var.gcp_principals_authorized_to_test
+  gcp_region                        = var.gcp_region
+  replica_regions                   = coalesce(var.replica_regions, var.gcp_secret_replica_locations)
+  api_connectors                    = local.api_connectors
+  bulk_connectors                   = local.bulk_connectors
+  non_production_connectors         = var.non_production_connectors
+  custom_api_connector_rules        = var.custom_api_connector_rules
+  general_environment_variables     = var.general_environment_variables
+  pseudonymize_app_ids              = var.pseudonymize_app_ids
+  bulk_input_expiration_days        = var.bulk_input_expiration_days
+  bulk_sanitized_expiration_days    = var.bulk_sanitized_expiration_days
+  custom_bulk_connector_rules       = var.custom_bulk_connector_rules
+  custom_bulk_connector_arguments   = var.custom_bulk_connector_arguments
+  lookup_tables                     = var.lookup_tables
+  custom_artifacts_bucket_name      = var.custom_artifacts_bucket_name
+  todos_as_local_files              = var.todos_as_local_files
+  todo_step                         = local.max_auth_todo_step
 }
 
 locals {
