@@ -16,7 +16,9 @@ import org.junit.jupiter.params.provider.ValueSource;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import java.io.ByteArrayOutputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -72,7 +74,10 @@ class StorageHandlerTest {
         when(config.getConfigPropertyAsOptional(eq(BulkModeConfigProperty.OUTPUT_BASE_PATH)))
             .thenReturn(Optional.empty());
 
-        StorageEventRequest request = handler.buildRequest(mock(InputStreamReader.class), "bucket-in", "directory/file.csv", handler.buildDefaultTransform());
+
+
+        StorageEventRequest request = handler.buildRequest(mock(InputStreamReader.class),
+            mock(OutputStreamWriter.class), "bucket-in", "directory/file.csv", handler.buildDefaultTransform());
 
         assertEquals("directory/file.csv", request.getDestinationObjectPath());
     }
@@ -95,7 +100,7 @@ class StorageHandlerTest {
         when(config.getConfigPropertyAsOptional(eq(BulkModeConfigProperty.OUTPUT_BASE_PATH)))
             .thenReturn(Optional.ofNullable(outputBasePath));
 
-        StorageEventRequest request = handler.buildRequest(mock(InputStreamReader.class), "bucket-in", "directory/file.csv", handler.buildDefaultTransform());
+        StorageEventRequest request = handler.buildRequest(mock(InputStreamReader.class), mock(OutputStreamWriter.class), "bucket-in", "directory/file.csv", handler.buildDefaultTransform());
 
         assertEquals("bucket-in", request.getSourceBucketName());
         assertEquals("directory/file.csv", request.getSourceObjectPath());

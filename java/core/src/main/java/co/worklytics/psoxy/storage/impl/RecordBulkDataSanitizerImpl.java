@@ -14,6 +14,7 @@ import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Value;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.ObjectUtils;
@@ -41,7 +42,9 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
 
 
     @Override
-    public byte[] sanitize(InputStreamReader reader, Pseudonymizer pseudonymizer) throws IOException {
+    public void sanitize(@NonNull Reader reader,
+                         @NonNull Writer writer,
+                         @NonNull Pseudonymizer pseudonymizer) throws IOException {
 
         if (rules.getFormat() != RecordRules.Format.NDJSON) {
             throw new IllegalArgumentException("Only NDJSON format is supported");
@@ -56,8 +59,6 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
             ))
             .collect(Collectors.toList());
 
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
 
         try (BufferedReader bufferedReader = new BufferedReader(reader)) {
             String line;
@@ -77,18 +78,13 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
 
                         compiledTransform.getLeft().map(document, compiledTransform.getRight(), jsonConfiguration);
                     }
-                    outputStreamWriter.write(jsonConfiguration.jsonProvider().toJson(document));
-                    outputStreamWriter.write('\n'); // NDJSON uses newlines between records
+                    writer.write(jsonConfiguration.jsonProvider().toJson(document));
+                    writer.write('\n'); // NDJSON uses newlines between records
                 } catch (UnmatchedPseudonymization e) {
                     log.warning("Skipped record due to UnmatchedPseudonymizaiton: " + e.getPath());
                 }
             }
         }
-
-        outputStreamWriter.flush();
-        outputStreamWriter.close();
-
-        return outputStream.toByteArray();
     }
 
     private MapFunction getMapFunction(RecordTransform transform, Pseudonymizer pseudonymizer) {

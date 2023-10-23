@@ -3,6 +3,7 @@ package co.worklytics.psoxy;
 import co.worklytics.psoxy.gateway.StorageEventRequest;
 import co.worklytics.psoxy.gateway.StorageEventResponse;
 import co.worklytics.psoxy.storage.StorageHandler;
+import com.google.cloud.ReadChannel;
 import com.google.cloud.functions.BackgroundFunction;
 import com.google.cloud.functions.Context;
 import com.google.cloud.storage.BlobId;
@@ -17,9 +18,8 @@ import org.apache.commons.io.input.BOMInputStream;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.nio.channels.Channels;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
@@ -52,41 +52,42 @@ public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
 
         Storage storage = StorageOptions.getDefaultInstance().getService();
         BlobId sourceBlobId = BlobId.of(importBucket, sourceName);
-        BlobInfo blobInfo = storage.get(sourceBlobId);
 
-        if (storageHandler.hasBeenSanitized(blobInfo.getMetadata())) {
+        BlobInfo sourceBlobInfo = storage.get(sourceBlobId);
+
+
+        if (storageHandler.hasBeenSanitized(sourceBlobInfo.getMetadata())) {
             //possible if proxy directly (or indirectly via some other pipeline) is writing back
             //to the same bucket it originally read from. to avoid perpetuating the loop, skip
             log.warning("Skipping " + importBucket + "/" + sourceName + " because it has already been sanitized; does your configuration result in a loop?");
             return;
         }
 
-        try (InputStream objectData = new ByteArrayInputStream(storage.readAllBytes(sourceBlobId));
-             BOMInputStream is = new BOMInputStream(objectData);
-             InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
+        StorageEventRequest request = storageHandler.buildRequest(null, null, importBucket, sourceName, transform);
 
+        BlobInfo destBlobInfo = BlobInfo.newBuilder(BlobId.of(request.getDestinationBucketName(), request.getDestinationObjectPath()))
+            .setContentType(sourceBlobInfo.getContentType())
+            .setMetadata(storageHandler.buildObjectMetadata(importBucket, sourceName, transform))
+            .build();
 
-            StorageEventRequest request = storageHandler.buildRequest(reader, importBucket, sourceName, transform);
+        try (ReadChannel readChannel = storage.reader(sourceBlobId);
+             BOMInputStream is = new BOMInputStream(Channels.newInputStream(readChannel));
+             InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
+             Reader reader = new BufferedReader(isr);
+             OutputStream outputStream = Channels.newOutputStream(storage.writer(destBlobInfo));
+             OutputStreamWriter streamWriter = new OutputStreamWriter(outputStream);
+             Writer writer= new BufferedWriter(streamWriter)) {
+
+            request = request.withSourceReader(reader)
+                    .withDestinationWriter(writer);
 
             StorageEventResponse storageEventResponse = storageHandler.handle(request, transform.getRules());
 
-            try (InputStream processedStream = new ByteArrayInputStream(storageEventResponse.getBytes())) {
+            log.info("Writing to: " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationObjectPath());
 
-
-                log.info("Writing to: " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationObjectPath());
-
-
-                storage.createFrom(
-                    BlobInfo.newBuilder(BlobId.of(storageEventResponse.getDestinationBucketName(), storageEventResponse.getDestinationObjectPath()))
-                        .setContentType(blobInfo.getContentType())
-                        .setMetadata(storageHandler.buildObjectMetadata(importBucket, sourceName, transform))
-                        .build(),
-                    processedStream);
-
-
-                log.info("Successfully pseudonymized " + importBucket + "/"
-                    + sourceName + " and uploaded to " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationObjectPath());
-            }
+            writer.flush();
+            log.info("Successfully pseudonymized " + importBucket + "/"
+                  + sourceName + " and uploaded to " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationObjectPath());
         }
     }
 
