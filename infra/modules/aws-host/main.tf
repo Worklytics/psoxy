@@ -127,6 +127,7 @@ module "bulk_connector" {
   logs_kms_key_arn                 = var.logs_kms_key_arn
   psoxy_base_dir                   = var.psoxy_base_dir
   rules                            = try(var.custom_bulk_connector_rules[each.key], each.value.rules)
+  rules_file                       = each.value.rules_file
   global_parameter_arns            = module.global_secrets.secret_arns
   path_to_instance_ssm_parameters  = "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_"
   ssm_kms_key_ids                  = local.ssm_key_ids

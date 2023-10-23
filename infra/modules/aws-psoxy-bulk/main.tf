@@ -296,7 +296,7 @@ resource "aws_ssm_parameter" "rules" {
   name           = "${var.path_to_instance_ssm_parameters}RULES"
   type           = "String"
   description    = "Rules for transformation of files. NOTE: any 'RULES' env var will override this value"
-  insecure_value = yamlencode(var.rules) # NOTE: insecure_value just means shown in Terraform output
+  insecure_value = var.rules_file == null ? yamlencode(var.rules) : file(var.rules_file)  # NOTE: insecure_value just means shown in Terraform output
 
   lifecycle {
     ignore_changes = [

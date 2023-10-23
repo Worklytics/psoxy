@@ -178,7 +178,7 @@ variable "custom_bulk_connectors" {
     source_kind           = string
     input_bucket_name     = optional(string) # allow override of default bucket name
     sanitized_bucket_name = optional(string) # allow override of default bucket name
-    rules = object({
+    rules = optional(object({
       pseudonymFormat       = optional(string, "URL_SAFE_TOKEN")
       columnsToRedact       = optional(list(string)) # columns to remove from CSV
       columnsToInclude      = optional(list(string)) # if you prefer to include only an explicit list of columns, rather than redacting those you don't want
@@ -189,7 +189,8 @@ variable "custom_bulk_connectors" {
         newName = string
         transforms = optional(list(map(string)), [])
       })))
-    })
+    }))
+    rules_file          = optional(string)
     settings_to_provide = optional(map(string), {})
   }))
   description = "specs of custom bulk connectors to create"

@@ -167,6 +167,12 @@ variable "rules" {
   }
 }
 
+variable "rules_file" {
+  type        = string
+  description = "path to rules file"
+  default     = null
+}
+
 variable "global_parameter_arns" {
   # see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter#attributes-reference
   type        = list(string)
