@@ -486,12 +486,11 @@ public class BulkDataSanitizerImplTest {
 
 
         try (FileReader in = new FileReader(inputFile);
-             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
              StringWriter out = new StringWriter()) {
             columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
 
-            String resultString = new String(byteArrayOutputStream.toByteArray());
+            String resultString = out.toString();
 
             assertEquals(EXPECTED, resultString);
 
