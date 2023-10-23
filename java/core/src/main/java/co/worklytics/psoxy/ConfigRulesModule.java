@@ -9,6 +9,7 @@ import com.avaulta.gateway.rules.BulkDataRules;
 import com.avaulta.gateway.rules.ColumnarRules;
 import com.avaulta.gateway.rules.RecordRules;
 import com.avaulta.gateway.rules.RuleSet;
+import com.google.common.base.Preconditions;
 import dagger.Module;
 import dagger.Provides;
 
@@ -34,7 +35,7 @@ public class ConfigRulesModule {
     @Provides @Singleton
     static BulkDataRules bulkDataRules(RuleSet ruleSet) {
         // will blow things up if something that depends on ColumnarRules is bound in REST-usecase
-        Preconditions.checkArgument(ruleSet instanceof BulkDataRules, "Configured RuleSet are not BulkDataRules")
+        Preconditions.checkArgument(ruleSet instanceof BulkDataRules, "Configured RuleSet are not BulkDataRules");
 
         return (BulkDataRules) ruleSet;
     }
