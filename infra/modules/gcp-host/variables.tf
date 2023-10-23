@@ -70,6 +70,12 @@ variable "install_test_tool" {
   default     = true
 }
 
+variable "gcp_principals_authorized_to_test" {
+  type        = list(string)
+  description = "list of GCP principals authorized to test this deployment - eg 'user:alice@acme.com', 'group:devs@acme.com'; if omitted, up to you to configure necessary perms for people to test if desired."
+  default     = []
+}
+
 variable "general_environment_variables" {
   type        = map(string)
   description = "environment variables to add for all connectors"
@@ -153,8 +159,8 @@ variable "bulk_connectors" {
       columnsToPseudonymize = optional(list(string), [])
       columnsToDuplicate    = optional(map(string), {})
       columnsToRename       = optional(map(string), {})
-      fieldsToTransform     = optional(map(object({
-        newName = string
+      fieldsToTransform = optional(map(object({
+        newName    = string
         transforms = optional(list(map(string)), [])
       })))
     }))
@@ -194,8 +200,8 @@ variable "custom_bulk_connector_rules" {
     columnsToPseudonymize = optional(list(string), [])
     columnsToDuplicate    = optional(map(string))
     columnsToRename       = optional(map(string))
-    fieldsToTransform     = optional(map(object({
-      newName = string
+    fieldsToTransform = optional(map(object({
+      newName    = string
       transforms = optional(list(map(string)), [])
     })))
   }))

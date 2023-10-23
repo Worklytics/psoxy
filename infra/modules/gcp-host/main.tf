@@ -75,9 +75,6 @@ locals {
     for instance_id, secrets in local.secrets_to_provision :
     [for secret_id, secret in values(secrets) : secret if !secret.value_managed_by_tf && !secret.lockable && !secret.writable]
   ])
-
-
-
 }
 
 module "secrets" {
