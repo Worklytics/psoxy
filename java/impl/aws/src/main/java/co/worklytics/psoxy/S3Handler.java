@@ -16,9 +16,7 @@ import lombok.extern.java.Log;
 import org.apache.commons.io.input.BOMInputStream;
 
 import javax.inject.Inject;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -73,18 +71,14 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
 
         try (InputStream objectData = s3Object.getObjectContent();
              BOMInputStream is = new BOMInputStream(objectData);
-             InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
+             InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8);
+             PipedOutputStream outputStream = new PipedOutputStream();
+             OutputStreamWriter writer = new OutputStreamWriter(outputStream);
+             InputStream processedStream = new PipedInputStream(outputStream)) {
 
-            StorageEventRequest request = storageHandler.buildRequest(reader, importBucket, sourceKey, transform);
+            StorageEventRequest request = storageHandler.buildRequest(reader, writer, importBucket, sourceKey, transform);
 
             storageEventResponse = storageHandler.handle(request, transform.getRules());
-
-            log.info("Writing to: " + request.getDestinationBucketName() + "/" + request.getDestinationObjectPath());
-        }
-
-
-
-        try (InputStream is = new ByteArrayInputStream(storageEventResponse.getBytes())) {
 
             ObjectMetadata meta = new ObjectMetadata();
             meta.setContentLength(storageEventResponse.getBytes().length);
@@ -94,15 +88,16 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
 
             s3Client.putObject(storageEventResponse.getDestinationBucketName(),
                 storageEventResponse.getDestinationObjectPath(),
-                is,
+                processedStream,
                 meta);
-        }
 
-        log.info(String.format("Successfully pseudonymized %s/%s and uploaded to %s/%s",
-            importBucket,
-            sourceKey,
-            storageEventResponse.getDestinationBucketName(),
-            storageEventResponse.getDestinationObjectPath()));
+            writer.flush();
+            log.info(String.format("Successfully pseudonymized %s/%s and uploaded to %s/%s",
+                importBucket,
+                sourceKey,
+                storageEventResponse.getDestinationBucketName(),
+                storageEventResponse.getDestinationObjectPath()));
+        }
 
         return storageEventResponse;
     }

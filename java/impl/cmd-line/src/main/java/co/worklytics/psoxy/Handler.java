@@ -61,7 +61,7 @@ public class Handler {
         BulkDataSanitizer sanitizer = fileHandlerStrategy.get(rules);
 
         try (FileReader in = new FileReader(inputFile)) {
-            out.append(new String(sanitizer.sanitize(in, pseudonymizer)));
+            out.append(new String(sanitizer.sanitize(in, , pseudonymizer)));
         }
     }
 }

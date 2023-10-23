@@ -9,8 +9,6 @@ import com.avaulta.gateway.pseudonyms.impl.Base64UrlSha256HashPseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.ColumnarRules;
 import co.worklytics.psoxy.storage.BulkDataSanitizer;
-import com.avaulta.gateway.rules.RecordRules;
-import com.avaulta.gateway.rules.RuleSet;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
@@ -32,7 +30,6 @@ import org.apache.commons.lang3.function.TriFunction;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.io.*;
 import java.util.*;
 import java.util.function.BiFunction;
@@ -76,8 +73,9 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
     }
 
     @Override
-    public byte[] sanitize(@NonNull InputStreamReader reader,
-                           @NonNull Pseudonymizer pseudonymizer) throws IOException {
+    public void sanitize(@NonNull InputStreamReader reader,
+                         @NonNull OutputStreamWriter writer,
+                         @NonNull Pseudonymizer pseudonymizer) throws IOException {
 
         CSVParser records = CSVFormat
                 .DEFAULT
@@ -212,16 +210,13 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
           return value;
         };
 
+        CSVFormat csvFormat = CSVFormat.Builder.create()
+            .setHeader(columnNamesForOutputFile.toArray(new String[0]))
+            .build();
 
-        try(ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
-            Writer printWriter = new PrintWriter(baos);
-            CSVPrinter printer = new CSVPrinter(printWriter, CSVFormat.DEFAULT
-                .withHeader(columnNamesForOutputFile.toArray(new String[0])))
-            ) {
-
+        try (CSVPrinter printer = new CSVPrinter(writer, csvFormat)) {
             UnmodifiableIterator<List<CSVRecord>> chunks =
                 Iterators.partition(records.iterator(), this.getRecordShuffleChunkSize());
-
 
             for (UnmodifiableIterator<List<CSVRecord>> chunkIterator = chunks; chunkIterator.hasNext(); ) {
                 List<CSVRecord> chunk = new ArrayList<>(chunkIterator.next());
@@ -249,10 +244,7 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
                     }
                 });
             }
-
-            printWriter.flush();
-
-            return baos.toByteArray();
+            writer.flush();
         }
     }
 

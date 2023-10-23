@@ -12,6 +12,7 @@ import lombok.*;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -75,8 +76,9 @@ public class StorageHandler {
 
         BulkDataSanitizer fileHandler = bulkDataSanitizerFactory.get(applicableRules);
 
+        fileHandler.sanitize(request.getReaderStream(), request.getDestinationStream(), pseudonymizer);
+
         return StorageEventResponse.builder()
-                .bytes(fileHandler.sanitize(request.getReaderStream(), pseudonymizer))
                 .destinationBucketName(request.getDestinationBucketName())
                 .destinationObjectPath(request.getDestinationObjectPath())
                 .build();
@@ -84,7 +86,11 @@ public class StorageHandler {
 
 
 
-    public StorageEventRequest buildRequest(InputStreamReader reader, String sourceBucketName, String sourceObjectPath, StorageHandler.ObjectTransform transform) {
+    public StorageEventRequest buildRequest(InputStreamReader reader,
+                                            OutputStreamWriter writer,
+                                            String sourceBucketName,
+                                            String sourceObjectPath,
+                                            ObjectTransform transform) {
 
         String sourceObjectPathWithinBase =
             config.getConfigPropertyAsOptional(BulkModeConfigProperty.INPUT_BASE_PATH)
@@ -93,6 +99,7 @@ public class StorageHandler {
 
         return StorageEventRequest.builder()
             .readerStream(reader)
+            .destinationStream(writer)
             .sourceBucketName(sourceBucketName)
             .sourceObjectPath(sourceObjectPath)
             .destinationBucketName(transform.getDestinationBucketName())

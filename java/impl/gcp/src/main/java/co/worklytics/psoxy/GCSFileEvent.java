@@ -17,9 +17,7 @@ import org.apache.commons.io.input.BOMInputStream;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
@@ -63,30 +61,27 @@ public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
 
         try (InputStream objectData = new ByteArrayInputStream(storage.readAllBytes(sourceBlobId));
              BOMInputStream is = new BOMInputStream(objectData);
-             InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
+             InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8);
+             PipedOutputStream outputStream = new PipedOutputStream();
+             OutputStreamWriter writer = new OutputStreamWriter(outputStream);
+             InputStream processedStream = new PipedInputStream(outputStream)) {
 
 
-            StorageEventRequest request = storageHandler.buildRequest(reader, importBucket, sourceName, transform);
+            StorageEventRequest request = storageHandler.buildRequest(reader, writer, importBucket, sourceName, transform);
 
             StorageEventResponse storageEventResponse = storageHandler.handle(request, transform.getRules());
 
-            try (InputStream processedStream = new ByteArrayInputStream(storageEventResponse.getBytes())) {
+            log.info("Writing to: " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationObjectPath());
 
-
-                log.info("Writing to: " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationObjectPath());
-
-
-                storage.createFrom(
-                    BlobInfo.newBuilder(BlobId.of(storageEventResponse.getDestinationBucketName(), storageEventResponse.getDestinationObjectPath()))
+            storage.createFrom(
+                BlobInfo.newBuilder(BlobId.of(storageEventResponse.getDestinationBucketName(), storageEventResponse.getDestinationObjectPath()))
                         .setContentType(blobInfo.getContentType())
                         .setMetadata(storageHandler.buildObjectMetadata(importBucket, sourceName, transform))
                         .build(),
-                    processedStream);
-
-
-                log.info("Successfully pseudonymized " + importBucket + "/"
-                    + sourceName + " and uploaded to " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationObjectPath());
-            }
+                processedStream);
+            writer.flush();
+            log.info("Successfully pseudonymized " + importBucket + "/"
+                  + sourceName + " and uploaded to " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationObjectPath());
         }
     }
 

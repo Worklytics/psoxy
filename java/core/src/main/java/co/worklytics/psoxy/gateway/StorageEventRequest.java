@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NonNull;
 
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 
 /**
  * Request received when a change is done in some storage service, such as "new" object created or "updated" object
@@ -20,9 +21,16 @@ public class StorageEventRequest {
     InputStreamReader readerStream;
 
     /**
+     * Stream to write output to
+     */
+    @NonNull
+    OutputStreamWriter destinationStream;
+
+    // REST OF THIS IS INFORMATION FOR SANITIZER TO INFORM SANITIZATION LOGIC BASED ON SOURCE/DESTINATION
+
+    /**
      * Name of the bucket where the object is. Example: "mybucket"
      */
-
     @NonNull
     String sourceBucketName;
 
@@ -44,6 +52,4 @@ public class StorageEventRequest {
      */
     @NonNull
     String destinationObjectPath;
-
-
 }
