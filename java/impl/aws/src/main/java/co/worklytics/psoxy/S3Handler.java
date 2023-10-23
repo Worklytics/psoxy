@@ -75,9 +75,11 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
         S3Object s3Object = s3Client.getObject(new GetObjectRequest(importBucket, sourceKey));
         try (InputStream objectData = s3Object.getObjectContent();
              BOMInputStream is = new BOMInputStream(objectData);
-             InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8);
+             InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
+             Reader reader = new BufferedReader(isr);
              PipedOutputStream outputStream = new PipedOutputStream();
-             OutputStreamWriter writer = new OutputStreamWriter(outputStream);
+             OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
+             Writer writer = new BufferedWriter(outputStreamWriter);
              InputStream processedStream = new PipedInputStream(outputStream)) {
 
             StorageEventRequest request = storageHandler.buildRequest(reader, writer, importBucket, sourceKey, transform);
@@ -85,17 +87,18 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
             storageEventResponse = storageHandler.handle(request, transform.getRules());
 
             ObjectMetadata meta = new ObjectMetadata();
-            meta.setContentLength(storageEventResponse.getBytes().length);
+            //NOTE: not setting content length here causes S3 client to buffer the stream ... OK
+            //meta.setContentLength(storageEventResponse.getBytes().length);
             meta.setContentType(s3Object.getObjectMetadata().getContentType());
-
             meta.setUserMetadata(storageHandler.buildObjectMetadata(importBucket, sourceKey, transform));
+
+            writer.flush();
 
             s3Client.putObject(storageEventResponse.getDestinationBucketName(),
                 storageEventResponse.getDestinationObjectPath(),
                 processedStream,
                 meta);
 
-            writer.flush();
             log.info(String.format("Successfully pseudonymized %s/%s and uploaded to %s/%s",
                 importBucket,
                 sourceKey,

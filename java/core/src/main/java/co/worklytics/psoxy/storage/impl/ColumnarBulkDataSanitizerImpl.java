@@ -34,7 +34,6 @@ import java.io.*;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.UnaryOperator;
-import java.io.ByteArrayOutputStream;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -73,7 +72,7 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
     }
 
     @Override
-    public void sanitize(@NonNull InputStreamReader reader,
+    public void sanitize(@NonNull Reader reader,
                          @NonNull Writer writer,
                          @NonNull Pseudonymizer pseudonymizer) throws IOException {
 

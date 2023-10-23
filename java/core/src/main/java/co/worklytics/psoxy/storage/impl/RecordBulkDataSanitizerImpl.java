@@ -42,7 +42,7 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
 
 
     @Override
-    public void sanitize(@NonNull InputStreamReader reader,
+    public void sanitize(@NonNull Reader reader,
                          @NonNull Writer writer,
                          @NonNull Pseudonymizer pseudonymizer) throws IOException {
 

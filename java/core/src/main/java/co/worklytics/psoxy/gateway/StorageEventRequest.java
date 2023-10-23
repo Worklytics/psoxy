@@ -5,8 +5,8 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.With;
 
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.Writer;
 
 /**
  * Request received when a change is done in some storage service, such as "new" object created or "updated" object
@@ -16,14 +16,14 @@ import java.io.OutputStreamWriter;
 @Getter
 public class StorageEventRequest {
     /**
-     * Stream where the object can be read
+     * reader to read input from
      */
-    InputStreamReader readerStream;
+    Reader sourceReader;
 
     /**
-     * Stream to write output to
+     *  to write output to
      */
-    OutputStreamWriter destinationStream;
+    Writer destinationWriter;
 
     // REST OF THIS IS INFORMATION FOR SANITIZER TO INFORM SANITIZATION LOGIC BASED ON SOURCE/DESTINATION
 

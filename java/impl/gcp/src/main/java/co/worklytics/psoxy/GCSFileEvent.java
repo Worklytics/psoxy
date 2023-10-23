@@ -72,12 +72,14 @@ public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
 
         try (ReadChannel readChannel = storage.reader(sourceBlobId);
              BOMInputStream is = new BOMInputStream(Channels.newInputStream(readChannel));
-             InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8);
+             InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
+             Reader reader = new BufferedReader(isr);
              OutputStream outputStream = Channels.newOutputStream(storage.writer(destBlobInfo));
-             OutputStreamWriter writer = new OutputStreamWriter(outputStream)) {
+             OutputStreamWriter streamWriter = new OutputStreamWriter(outputStream);
+             Writer writer= new BufferedWriter(streamWriter)) {
 
-            request = request.withReaderStream(reader)
-                    .withDestinationStream(writer);
+            request = request.withSourceReader(reader)
+                    .withDestinationWriter(writer);
 
             StorageEventResponse storageEventResponse = storageHandler.handle(request, transform.getRules());
 

@@ -3,7 +3,7 @@ package co.worklytics.psoxy.storage;
 import co.worklytics.psoxy.Pseudonymizer;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.Reader;
 import java.io.Writer;
 
 /**
@@ -22,7 +22,7 @@ public interface BulkDataSanitizer {
      * @param pseudonymizer The pseudonymizer to use
      * @throws IOException  IO problem reading or writing
      */
-    void sanitize(InputStreamReader reader,
+    void sanitize(Reader reader,
                   Writer writer,
                   Pseudonymizer pseudonymizer) throws IOException;
 }
