@@ -8,6 +8,7 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.events.S3Event;
 import com.amazonaws.services.lambda.runtime.events.models.s3.S3EventNotification;
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.GetObjectMetadataRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
@@ -56,10 +57,12 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
     @SneakyThrows
     StorageEventResponse process(String importBucket, String sourceKey, StorageHandler.ObjectTransform transform) {
         StorageEventResponse storageEventResponse;
-        S3Object s3Object = s3Client.getObject(new GetObjectRequest(importBucket, sourceKey));
+
+        ObjectMetadata sourceMetadata = s3Client.getObjectMetadata(importBucket, sourceKey);
+
 
         //avoid potential npe should objectMetadata be null (if that can even happen?)
-        Map<String, String> userMetadata = Optional.ofNullable(s3Object.getObjectMetadata())
+        Map<String, String> userMetadata = Optional.ofNullable(sourceMetadata)
             .map(ObjectMetadata::getUserMetadata).orElse(Collections.emptyMap());
 
         if (storageHandler.hasBeenSanitized(userMetadata)) {
@@ -69,6 +72,7 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
             return null;
         }
 
+        S3Object s3Object = s3Client.getObject(new GetObjectRequest(importBucket, sourceKey));
         try (InputStream objectData = s3Object.getObjectContent();
              BOMInputStream is = new BOMInputStream(objectData);
              InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8);
@@ -101,6 +105,5 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
 
         return storageEventResponse;
     }
-
 
 }
