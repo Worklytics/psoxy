@@ -289,7 +289,7 @@ if test $AZUREAD_PROVIDER_COUNT -ne 0; then
       remove_msft
     fi
   else
-    printf "No Microsft 365 variables defined in configuration.\n"
+    printf "No Microsoft 365 variables defined in configuration.\n"
   fi
 else
   printf "No Azure provider found in top-level of Terraform configuration. No Azure CLI initialization needed.\n"
