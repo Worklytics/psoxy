@@ -103,8 +103,8 @@ variable "rules" {
     columnsToPseudonymize = list(string)
     columnsToDuplicate    = map(string)
     columnsToRename       = map(string)
-    fieldsToTransform     = optional(map(object({
-      newName = string
+    fieldsToTransform = optional(map(object({
+      newName    = string
       transforms = optional(list(map(string)), [])
     })), {})
   })

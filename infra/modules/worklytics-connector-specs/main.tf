@@ -151,8 +151,8 @@ locals {
   }
 
   # backwards-compatible for v0.4.x; remove in v0.5.x
-  google_workspace_sources_backwards = { for k,v in local.google_workspace_sources :
-      k => merge(v, { example_calls: v.example_api_calls }) }
+  google_workspace_sources_backwards = { for k, v in local.google_workspace_sources :
+  k => merge(v, { example_calls : v.example_api_calls }) }
 
 
   jira_cloud_id                 = coalesce(var.jira_cloud_id, "YOUR_JIRA_CLOUD_ID")
@@ -251,8 +251,8 @@ locals {
   }
 
   # backwards-compatible for v0.4.x; remove in v0.5.x
-  msft_365_connectors_backwards = { for k,v in local.msft_365_connectors :
-    k => merge(v, { example_calls: v.example_api_calls }) }
+  msft_365_connectors_backwards = { for k, v in local.msft_365_connectors :
+  k => merge(v, { example_calls : v.example_api_calls }) }
 
 
   oauth_long_access_connectors = {
@@ -1009,8 +1009,8 @@ EOT
     }
   }
 
-  oauth_long_access_connectors_backwards = { for k,v in local.oauth_long_access_connectors :
-    k => merge(v, { example_calls: v.example_api_calls }) }
+  oauth_long_access_connectors_backwards = { for k, v in local.oauth_long_access_connectors :
+  k => merge(v, { example_calls : v.example_api_calls }) }
 
 
   # to expose via console

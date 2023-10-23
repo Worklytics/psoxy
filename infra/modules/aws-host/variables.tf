@@ -178,8 +178,8 @@ variable "bulk_connectors" {
       columnsToPseudonymize = optional(list(string), [])
       columnsToDuplicate    = optional(map(string), {})
       columnsToRename       = optional(map(string), {})
-      fieldsToTransform     = optional(map(object({
-        newName = string
+      fieldsToTransform = optional(map(object({
+        newName    = string
         transforms = optional(list(map(string)), [])
       })))
     }))
@@ -212,8 +212,8 @@ variable "custom_bulk_connector_rules" {
     columnsToPseudonymize = optional(list(string))
     columnsToDuplicate    = optional(map(string))
     columnsToRename       = optional(map(string))
-    fieldsToTransform     = optional(map(object({
-      newName = string
+    fieldsToTransform = optional(map(object({
+      newName    = string
       transforms = optional(list(map(string)), [])
     })), {})
   }))
