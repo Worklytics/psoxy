@@ -101,24 +101,11 @@ module "output_bucket" {
   ]
 }
 
-# TODO: added in v0.4.19
-moved {
-  from = google_storage_bucket.output-bucket
-  to   = module.output_bucket.google_storage_bucket.bucket
-}
-
-
 resource "google_service_account" "service_account" {
   project      = var.project_id
   account_id   = local.sa_name
   display_name = "Psoxy Connector - ${var.source_kind}"
   description  = "${local.function_name} runs as this service account"
-}
-
-# TODO: moved in 0.4.25; remove in 0.5
-moved {
-  from = google_service_account.service-account
-  to   = google_service_account.service_account
 }
 
 resource "google_storage_bucket_iam_member" "access_for_import_bucket" {
@@ -278,8 +265,6 @@ moved {
   from = local_file.todo-gcp-psoxy-bulk-test
   to   = local_file.todo_test_gcp_psoxy_bulk[0]
 }
-
-
 
 resource "local_file" "test_script" {
   count = var.todos_as_local_files ? 1 : 0
