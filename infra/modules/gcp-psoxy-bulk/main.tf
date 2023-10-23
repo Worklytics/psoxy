@@ -28,7 +28,7 @@ data "google_project" "project" {
 }
 
 # ensure Storage API is activated
-resource "google_project_service" "gcp-infra-api" {
+resource "google_project_service" "gcp_infra_api" {
   for_each = toset([
     "storage.googleapis.com",
   ])
@@ -54,7 +54,7 @@ locals {
 }
 
 # data input to function
-resource "google_storage_bucket" "input-bucket" {
+resource "google_storage_bucket" "input_bucket" {
   project                     = var.project_id
   name                        = coalesce(var.input_bucket_name, "${local.bucket_prefix}-input")
   location                    = var.region
@@ -79,7 +79,7 @@ resource "google_storage_bucket" "input-bucket" {
   }
 
   depends_on = [
-    google_project_service.gcp-infra-api
+    google_project_service.gcp_infra_api
   ]
 }
 
@@ -97,7 +97,7 @@ module "output_bucket" {
   bucket_labels                  = var.default_labels
 
   depends_on = [
-    google_project_service.gcp-infra-api
+    google_project_service.gcp_infra_api
   ]
 }
 
@@ -109,7 +109,7 @@ resource "google_service_account" "service_account" {
 }
 
 resource "google_storage_bucket_iam_member" "access_for_import_bucket" {
-  bucket = google_storage_bucket.input-bucket.name
+  bucket = google_storage_bucket.input_bucket.name
   role   = "roles/storage.objectViewer"
   member = "serviceAccount:${google_service_account.service_account.email}"
 }
@@ -125,7 +125,7 @@ resource "google_storage_bucket_iam_member" "grant_sa_read_on_processed_bucket" 
 resource "google_storage_bucket_iam_member" "grant_testers_admin_on_import_bucket" {
   for_each = toset(var.gcp_principals_authorized_to_test)
 
-  bucket = google_storage_bucket.input-bucket.name
+  bucket = google_storage_bucket.input_bucket.name
   role   = "roles/storage.objectAdmin"
   member = each.value
 }
@@ -176,7 +176,7 @@ resource "google_cloudfunctions_function" "function" {
   labels                = var.default_labels
 
   environment_variables = merge(tomap({
-    INPUT_BUCKET  = google_storage_bucket.input-bucket.name,
+    INPUT_BUCKET  = google_storage_bucket.input_bucket.name,
     OUTPUT_BUCKET = module.output_bucket.bucket_name,
     }),
     var.path_to_config == null ? {} : yamldecode(file(var.path_to_config)),
@@ -199,7 +199,7 @@ resource "google_cloudfunctions_function" "function" {
 
   event_trigger {
     event_type = "google.storage.object.finalize"
-    resource   = google_storage_bucket.input-bucket.name
+    resource   = google_storage_bucket.input_bucket.name
   }
 
   lifecycle {
@@ -223,7 +223,7 @@ Check that the Psoxy works as expected and it transforms the files of your input
 the rules you have defined:
 
 ```shell
-node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f ${local.example_file} -d GCP -i ${google_storage_bucket.input-bucket.name} -o ${module.output_bucket.bucket_name}
+node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f ${local.example_file} -d GCP -i ${google_storage_bucket.input_bucket.name} -o ${module.output_bucket.bucket_name}
 ```
 EOT
 }
@@ -261,11 +261,6 @@ for a detailed description of all the different options.
 EOT
 }
 
-moved {
-  from = local_file.todo-gcp-psoxy-bulk-test
-  to   = local_file.todo_test_gcp_psoxy_bulk[0]
-}
-
 resource "local_file" "test_script" {
   count = var.todos_as_local_files ? 1 : 0
 
@@ -279,14 +274,9 @@ NC='\e[0m'
 
 printf "Quick test of $${BLUE}${local.function_name}$${NC} ...\n"tf
 
-node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f $FILE_PATH -d GCP -i ${google_storage_bucket.input-bucket.name} -o ${module.output_bucket.bucket_name}
+node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f $FILE_PATH -d GCP -i ${google_storage_bucket.input_bucket.name} -o ${module.output_bucket.bucket_name}
 EOT
 
-}
-
-moved {
-  from = local_file.test_script
-  to   = local_file.test_script[0]
 }
 
 output "instance_id" {
@@ -306,7 +296,7 @@ output "bucket_prefix" {
 }
 
 output "input_bucket" {
-  value = google_storage_bucket.input-bucket.name
+  value = google_storage_bucket.input_bucket.name
 }
 
 output "sanitized_bucket" {
