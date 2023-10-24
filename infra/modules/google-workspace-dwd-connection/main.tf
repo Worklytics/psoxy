@@ -96,15 +96,15 @@ EOT
 
   todo_content = <<EOT
 Complete the following steps via the Google Workspace Admin console:
-   1. Visit https://admin.google.com/ and navigate to "Security" --> "Access and Data Control" -->
-      "API Controls", then find "Manage Domain Wide Delegation". Click "Add new".
+  1. Visit https://admin.google.com/ and navigate to "Security" --> "Access and Data Control" -->
+     "API Controls", then find "Manage Domain Wide Delegation". Click "Add new".
 
-   2. Copy and paste client ID `${google_service_account.connector_sa.unique_id}` into the
-      "Client ID" input in the popup. (this is the unique ID of the GCP service account with
-       email `${google_service_account.connector_sa.email}`; you can verify it via the GCP console,
-       under "IAM & Admin" --> "Service Accounts")
+  2. Copy and paste client ID `${google_service_account.connector_sa.unique_id}` into the
+     "Client ID" input in the popup. (this is the unique ID of the GCP service account with
+      email `${google_service_account.connector_sa.email}`; you can verify it via the GCP console,
+      under "IAM & Admin" --> "Service Accounts")
 
-   3. Copy and paste the following OAuth 2.0 scope string into the "Scopes" input:
+  3. Copy and paste the following OAuth 2.0 scope string into the "Scopes" input:
 ```
 ${join(",", var.oauth_scopes_needed)}
 ```
