@@ -113,6 +113,14 @@ resource "google_cloudfunctions_function_iam_member" "invokers" {
   role           = "roles/cloudfunctions.invoker"
 }
 
+resource "google_cloudfunctions_function_iam_member" "testers" {
+  for_each = toset(var.gcp_principals_authorized_to_test)
+
+  cloud_function = google_cloudfunctions_function.function.id
+  member         = each.value
+  role           = "roles/cloudfunctions.invoker"
+}
+
 locals {
   proxy_endpoint_url  = "https://${google_cloudfunctions_function.function.region}-${google_cloudfunctions_function.function.project}.cloudfunctions.net/${google_cloudfunctions_function.function.name}"
   impersonation_param = var.example_api_calls_user_to_impersonate == null ? "" : " -i \"${var.example_api_calls_user_to_impersonate}\""
@@ -226,8 +234,6 @@ output "cloud_function_name" {
 output "cloud_function_url" {
   value = local.proxy_endpoint_url
 }
-
-
 
 output "proxy_kind" {
   value       = "rest"

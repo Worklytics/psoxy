@@ -75,9 +75,6 @@ locals {
     for instance_id, secrets in local.secrets_to_provision :
     [for secret_id, secret in values(secrets) : secret if !secret.value_managed_by_tf && !secret.lockable && !secret.writable]
   ])
-
-
-
 }
 
 module "secrets" {
@@ -157,6 +154,7 @@ module "api_connector" {
   config_parameter_prefix               = local.config_parameter_prefix
   invoker_sa_emails                     = var.worklytics_sa_emails
   default_labels                        = var.default_labels
+  gcp_principals_authorized_to_test     = var.gcp_principals_authorized_to_test
   todos_as_local_files                  = var.todos_as_local_files
 
   environment_variables = merge(
@@ -194,26 +192,27 @@ module "bulk_connector" {
 
   source = "../../modules/gcp-psoxy-bulk"
 
-  project_id                    = var.gcp_project_id
-  region                        = var.gcp_region
-  environment_id_prefix         = local.environment_id_prefix
-  instance_id                   = each.key
-  worklytics_sa_emails          = var.worklytics_sa_emails
-  config_parameter_prefix       = local.config_parameter_prefix
-  source_kind                   = each.value.source_kind
-  artifacts_bucket_name         = module.psoxy.artifacts_bucket_name
-  deployment_bundle_object_name = module.psoxy.deployment_bundle_object_name
-  psoxy_base_dir                = var.psoxy_base_dir
-  bucket_write_role_id          = module.psoxy.bucket_write_role_id
-  secret_bindings               = module.psoxy.secrets
-  example_file                  = try(each.value.example_file, null)
-  input_expiration_days         = var.bulk_input_expiration_days
-  sanitized_expiration_days     = var.bulk_sanitized_expiration_days
-  input_bucket_name             = try(each.value.input_bucket_name, null)
-  sanitized_bucket_name         = try(each.value.sanitized_bucket_name, null)
-  default_labels                = var.default_labels
-  todos_as_local_files          = var.todos_as_local_files
-  available_memory_mb           = coalesce(try(var.custom_bulk_connector_arguments[each.key].available_memory_mb, null), try(each.value.available_memory_mb, null), 512)
+  project_id                        = var.gcp_project_id
+  region                              = var.gcp_region
+  environment_id_prefix             = local.environment_id_prefix
+  instance_id                       = each.key
+  worklytics_sa_emails              = var.worklytics_sa_emails
+  config_parameter_prefix           = local.config_parameter_prefix
+  source_kind                       = each.value.source_kind
+  artifacts_bucket_name             = module.psoxy.artifacts_bucket_name
+  deployment_bundle_object_name     = module.psoxy.deployment_bundle_object_name
+  psoxy_base_dir                    = var.psoxy_base_dir
+  bucket_write_role_id              = module.psoxy.bucket_write_role_id
+  secret_bindings                   = module.psoxy.secrets
+  example_file                      = try(each.value.example_file, null)
+  input_expiration_days             = var.bulk_input_expiration_days
+  sanitized_expiration_days         = var.bulk_sanitized_expiration_days
+  input_bucket_name                 = try(each.value.input_bucket_name, null)
+  sanitized_bucket_name             = try(each.value.sanitized_bucket_name, null)
+  default_labels                    = var.default_labels
+  todos_as_local_files              = var.todos_as_local_files
+  available_memory_mb               = coalesce(try(var.custom_bulk_connector_arguments[each.key].available_memory_mb, null), try(each.value.available_memory_mb, null), 512)
+  gcp_principals_authorized_to_test = var.gcp_principals_authorized_to_test
 
   environment_variables = merge(
     var.general_environment_variables,

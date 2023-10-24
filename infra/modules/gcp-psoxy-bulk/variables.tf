@@ -123,6 +123,12 @@ variable "default_labels" {
   default     = {}
 }
 
+variable "gcp_principals_authorized_to_test" {
+  type        = list(string)
+  description = "list of GCP principals authorized to test this deployment - eg 'user:alice@acme.com', 'group:devs@acme.com'; if omitted, up to you to configure necessary perms for people to test if desired."
+  default     = []
+}
+
 variable "todos_as_local_files" {
   type        = bool
   description = "whether to render TODOs as flat files"

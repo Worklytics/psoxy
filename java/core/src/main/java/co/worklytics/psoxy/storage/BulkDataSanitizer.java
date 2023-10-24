@@ -1,10 +1,10 @@
 package co.worklytics.psoxy.storage;
 
 import co.worklytics.psoxy.Pseudonymizer;
-import com.avaulta.gateway.rules.BulkDataRules;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.Writer;
 
 /**
  * sanitize bulk data content according to rules
@@ -14,14 +14,15 @@ public interface BulkDataSanitizer {
 
     /**
      * Process a stream coming from a file and apply the rules through the sanitizer
-     * to sanitize the content. The result after that process is returned as a byte array
+     * to sanitize the content.
      *
-     * @param reader The stream reader with the source content, including header unless schema
-     *               implicit in records
+     * @param reader        The stream reader with the source content, including header unless schema
+     *                      implicit in records
+     * @param writer        The stream writer to which sanitized content should be written.
      * @param pseudonymizer The pseudonymizer to use
-     * @return A byte array with the processed content
-     * @throws IOException
+     * @throws IOException  IO problem reading or writing
      */
-    byte[] sanitize(InputStreamReader reader,
-                    Pseudonymizer pseudonymizer) throws IOException;
+    void sanitize(Reader reader,
+                  Writer writer,
+                  Pseudonymizer pseudonymizer) throws IOException;
 }
