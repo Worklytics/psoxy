@@ -1,6 +1,5 @@
 terraform {
   required_providers {
-    # for the API connections to Google Workspace
     google = {
       version = ">= 3.74, <= 5.0"
     }
