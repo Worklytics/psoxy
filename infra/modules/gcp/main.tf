@@ -29,7 +29,12 @@ resource "google_project_service" "gcp_infra_api" {
 resource "google_secret_manager_secret" "pseudonym_salt" {
   project   = var.project_id
   secret_id = "${var.config_parameter_prefix}PSOXY_SALT"
-  labels    = var.default_labels
+  labels    = merge(
+    var.default_labels,
+    {
+      terraform_managed_value = true
+    }
+  )
 
   replication {
     user_managed {
@@ -82,7 +87,12 @@ resource "google_secret_manager_secret_version" "initial_version" {
 resource "google_secret_manager_secret" "pseudonymization_key" {
   project   = var.project_id
   secret_id = "${var.config_parameter_prefix}PSOXY_ENCRYPTION_KEY"
-  labels    = var.default_labels
+  labels    = merge(
+    var.default_labels,
+    {
+      terraform_managed_value = true
+    }
+  )
 
   replication {
     user_managed {
