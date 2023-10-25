@@ -10,8 +10,14 @@ source.
 Psoxy replaces PII in your organization's data with hash tokens to enable Worklytics's analysis to
 be performed on anonymized data which we cannot map back to any identifiable individual.
 
-It is intended to be a simple, serverless, transparent solution to provide more granular access to
-data source APIs.
+Psoxy is a pseudonymization service that acts as a Security / Compliance layer, which you can deploy
+between your data sources (SaaS tool APIs, Cloud storage buckets, etc) and the tools that need to
+access those sources.
+
+Psoxy ensures more secure, granular data access than direct connections between your tools will
+offer - and enforces access rules to fulfill your Compliance requirements.
+
+Objectives:
   - **serverless** - we strive to minimize the moving pieces required to run psoxy at scale, keeping
      your attack surface small and operational complexity low. Furthermore, we define
      infrastructure-as-code to ease setup.
@@ -19,7 +25,7 @@ data source APIs.
      and white box penetration testing.
   - **simple** - psoxy's functionality will focus on performing secure authentication with the 3rd
      party API and then perform minimal transformation on the response (pseudonymization, field
-     redcation). to ease code review and auditing of its behavior.
+     redaction) to ease code review and auditing of its behavior.
 
 Psoxy may be hosted in [Google Cloud ](docs/gcp/development.md) or [AWS](docs/aws/getting-started.md).
 
@@ -30,7 +36,7 @@ Worklytics and the data source you wish to connect.  In this role, the proxy per
 authentication necessary to connect to the data source's API and then any required transformation
 (such as pseudonymization or redaction) on the response.
 
-Orchestration continues to be performed on the Worklytics-side.
+Orchestration continues to be performed on the Worklytics side.
 
 ![proxy illustration](docs/proxy-illustration.jpg)
 
