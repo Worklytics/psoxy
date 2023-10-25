@@ -1,4 +1,0 @@
-#!/bin/bash
-
-# Use this script rebuild your deployment bundle and update your terraform.tfvars to use the new one
-../../../tools/update-bundle.sh /Users/erik/code/psoxy/ terraform.tfvars aws s3://psoxy-dev-erik-all-artifacts20230707045612975300000001

@@ -85,7 +85,8 @@ git grep -l "$CURRENT_RELEASE_PATTERN" tools/
 
 ./tools/release/sync-examples.sh ./
 
-git add java/
+git add java/**.java
+git add java/pom.xml
 git add infra/examples/**/main.tf
 git add infra/examples-dev/**/main.tf
 git add infra/examples-dev/**/msft-365.tf

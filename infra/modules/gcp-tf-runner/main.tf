@@ -31,7 +31,7 @@ data "google_service_account_id_token" "identity" {
 }
 
 data "external" "identity" {
-  program = [ "./${path.module}/read-tfvars.sh", "gcp_terraform_sa_account_email" ]
+  program = ["./${path.module}/read-tfvars.sh", "gcp_terraform_sa_account_email"]
 }
 
 # alternative ideas
@@ -40,7 +40,7 @@ data "external" "identity" {
 #  - is there some resource that has an attribute that's the service account used to create it?
 
 locals {
-  jwt_payload         = try(split(".", data.google_service_account_id_token.identity[0].id_token)[1], "")
+  jwt_payload = try(split(".", data.google_service_account_id_token.identity[0].id_token)[1], "")
 
   # convert base64url encoding to base64 encoding
   padding                   = join("", formatlist("%s", [for _ in range(4 - length(local.jwt_payload) % 4) : "="]))
