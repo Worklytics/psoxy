@@ -18,7 +18,6 @@ import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
 import com.avaulta.gateway.tokens.impl.AESReversibleTokenizationStrategy;
 import com.avaulta.gateway.tokens.impl.Sha256DeterministicTokenizationStrategy;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -32,6 +31,7 @@ import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import dagger.Module;
 import dagger.Provides;
 import lombok.extern.java.Log;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.crypto.spec.SecretKeySpec;
 import javax.inject.Named;
@@ -263,11 +263,11 @@ public class PsoxyModule {
                         .map(PseudonymImplementation::valueOf)
                         .map(implementation -> Objects.equals(implementation, PseudonymImplementation.LEGACY))
                         .orElse(false);
-                    if (legacy) {
-                        return rulesUtils.getDefaultScopeIdFromSource(config.getConfigPropertyOrError(ProxyConfigProperty.SOURCE));
-                    } else {
-                        return ""; //should only be used in legacy case
+                    String defaultScopeIdFromSource = rulesUtils.getDefaultScopeIdFromSource(config.getConfigPropertyOrError(ProxyConfigProperty.SOURCE));
+                    if (legacy && StringUtils.isEmpty(defaultScopeIdFromSource)) {
+                        log.severe("Missing scope for legacy pseudonym implementation!");
                     }
+                    return defaultScopeIdFromSource;
                 })));
     }
 
