@@ -43,6 +43,8 @@ public class JsonSchemaFilter {
 
     public Map<String, JsonSchemaFilter> getProperties() {
         // sorted map, so serialization of properties is deterministic
+        // drawback of this is that it doesn't follow the original order of these properties as
+        // specified in code, which is usually the more 'natural'/logical ordering
         if (!(properties instanceof TreeMap) && properties != null) {
             properties = new TreeMap<>(properties);
         }
@@ -63,6 +65,8 @@ public class JsonSchemaFilter {
 
     public Map<String, JsonSchemaFilter> getDefinitions() {
         // sorted map, so serialization of definitions is deterministic
+        // how this is filled in practice depends on schema generation, rather than order in defined
+        // in source - so sorting for serialization is logical
         if (!(definitions instanceof TreeMap) && definitions != null) {
             definitions = new TreeMap<>(definitions);
         }
