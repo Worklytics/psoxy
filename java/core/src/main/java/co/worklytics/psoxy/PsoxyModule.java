@@ -40,7 +40,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
-import java.util.stream.Stream;
 
 /**
  * provides implementations for platform-independent dependencies of 'core' module
@@ -192,11 +191,9 @@ public class PsoxyModule {
             .orElse(config.getConfigPropertyOrError(ProxyConfigProperty.PSOXY_SALT));
 
         Optional<SecretKeySpec> keyFromConfig =
-            firstPresent(
-                config.getConfigPropertyAsOptional(ProxyConfigProperty.ENCRYPTION_KEY_IP),
-                config.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_ENCRYPTION_KEY)
-            )
-            .map(passkey -> AESReversibleTokenizationStrategy.aesKeyFromPassword(passkey, salt));
+            config.getConfigPropertyAsOptional(ProxyConfigProperty.ENCRYPTION_KEY_IP)
+                    .or( () -> config.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_ENCRYPTION_KEY))
+                    .map(passkey -> AESReversibleTokenizationStrategy.aesKeyFromPassword(passkey, salt));
         //q: do we need to support actual fully AES keys?
 
         if (keyFromConfig.isEmpty()) {
@@ -275,12 +272,6 @@ public class PsoxyModule {
     @Singleton
     PathTemplateUtils pathTemplateUtils() {
         return new PathTemplateUtils();
-    }
-
-
-    //TODO: utils method for this somewhere??
-    <T> Optional<T> firstPresent(Optional<T>... optionals) {
-        return Stream.of(optionals).filter(Optional::isPresent).findFirst().orElse(Optional.empty());
     }
 
 }
