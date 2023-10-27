@@ -55,10 +55,16 @@ And following granular scopes:
      **NOTE** This "Authorization Code" is single-use; if it expires or is used, you will need to obtain
      a new code by  again pasting the authorization URL in the browser.
 
-  7. Now, replace the values in following URL and run it from command line in your terminal. Replace `YOUR_AUTHENTICATION_CODE`, `YOUR_CLIENT_ID` and `YOUR_CLIENT_SECRET` in the placeholders:
+  7. Now, replace the values in following URL and run it from command line in your terminal. Replace
+      - `YOUR_AUTHORIZATION_CODE` with the value of `code` query parameter in the URL from step 6
+      - `YOUR_CLIENT_ID` with the client id value from Step 4
+      - `YOUR_CLIENT_SECRET` with the client secret value from Step 4
 
-    `curl --request POST --url 'https://auth.atlassian.com/oauth/token' --header 'Content-Type: application/json' --data '{"grant_type": "authorization_code","client_id": "YOUR_CLIENT_ID","client_secret": "YOUR_CLIENT_SECRET", "code": "YOUR_AUTHENTICATION_CODE", "redirect_uri": "http://localhost"}'`
-
+```shell
+curl --request POST --url 'https://auth.atlassian.com/oauth/token' \
+--header 'Content-Type: application/json' \
+--data '{"grant_type": "authorization_code","client_id": "YOUR_CLIENT_ID","client_secret": "YOUR_CLIENT_SECRET", "code": "YOUR_AUTHORIZATION_CODE", "redirect_uri": "http://localhost"}'
+```
   8. After running that command, if successful you will see a [JSON response](https://developer.atlassian.com/cloud/jira/platform/oauth-2-3lo-apps/#2--exchange-authorization-code-for-access-token) like this:
 
 ```json
@@ -80,7 +86,10 @@ And following granular scopes:
  10. Optional, obtain the "Cloud ID" of your Jira instance. Use the following command, with the
     `access_token` obtained in the previous step in place of `<ACCESS_TOKEN>` below:
 
-   `curl --header 'Authorization: Bearer <ACCESS_TOKEN>' --url 'https://api.atlassian.com/oauth/token/accessible-resources'`
+```shell
+curl --header 'Authorization: Bearer <ACCESS_TOKEN>' --url 'https://api.atlassian.com/oauth/token/accessible-resources'
+```
+
 
    And its response will be something like:
 
