@@ -22,7 +22,7 @@ Within your AWS account, you create an IAM role, with a role assumption policy t
 Worklytics tenant's GCP Service Account (identified by a numeric ID you obtain from the Worklytics
 portal) to assume the role.
 
-This assumption policy will have a statement similar to the following, where the valud of the `aud`
+This assumption policy will have a statement similar to the following, where the value of the `aud`
 claim is the numeric ID of your Worklytics tenant's GCP Service Account:
 ```json
         {
