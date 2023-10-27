@@ -51,5 +51,5 @@ Psoxy is stateless, so all requests must go to the source API.  Psoxy does not c
 data. There is no database to be vulnerable to SQL injections.
 
 A WAF could make sense if you are using Psoxy to expose an on-prem, in-house built tool to
-Workltyics that is otherwise not exposed to the internet.
+Worklytics that is otherwise not exposed to the internet.
 
