@@ -47,7 +47,7 @@ And following granular scopes:
      As the callback does not exist, you will see an error. But in the URL of your browser you will see
      something like this as URL:
 
-    `http://localhost/?state=YOUR_USER_BOUND_VALUE&code=eyJhbGc...`
+     `http://localhost/?state=YOUR_USER_BOUND_VALUE&code=eyJhbGc...`
 
      Copy the value of the `code` parameter from that URI. It is the "authorization code" required
      for next step.
