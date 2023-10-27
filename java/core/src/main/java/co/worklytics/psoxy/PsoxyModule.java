@@ -25,6 +25,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.api.client.http.HttpContent;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
+import com.google.common.base.Preconditions;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
@@ -263,6 +264,8 @@ public class PsoxyModule {
                         .map(PseudonymImplementation::valueOf)
                         .map(implementation -> Objects.equals(implementation, PseudonymImplementation.LEGACY))
                         .orElse(false);
+                    String source = config.getConfigPropertyOrError(ProxyConfigProperty.SOURCE);
+                    Preconditions.checkNotNull(source, "Missing source for pseudonym implementation!");
                     String defaultScopeIdFromSource = rulesUtils.getDefaultScopeIdFromSource(config.getConfigPropertyOrError(ProxyConfigProperty.SOURCE));
                     if (legacy && StringUtils.isEmpty(defaultScopeIdFromSource)) {
                         log.severe("Missing scope for legacy pseudonym implementation!");
