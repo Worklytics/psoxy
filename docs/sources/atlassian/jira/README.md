@@ -39,9 +39,9 @@ And following granular scopes:
      obtain an OAuth `refresh_token`.
 
   5. Build an OAuth authorization endpoint URL by copying the value for "Client Id" obtained in the
-    previous step into the URL below. Then open the result in a web browser:
+     previous step into the URL below. Then open the result in a web browser:
 
-   `https://auth.atlassian.com/authorize?audience=api.atlassian.com&client_id=<CLIENT ID>&scope=offline_access%20read:group:jira%20read:avatar:jira%20read:user:jira%20read:account%20read:jira-user%20read:jira-work&redirect_uri=http://localhost&state=YOUR_USER_BOUND_VALUE&response_type=code&prompt=consent`
+     `https://auth.atlassian.com/authorize?audience=api.atlassian.com&client_id=<CLIENT_ID>&scope=offline_access%20read:group:jira%20read:avatar:jira%20read:user:jira%20read:account%20read:jira-user%20read:jira-work&redirect_uri=http://localhost&state=YOUR_USER_BOUND_VALUE&response_type=code&prompt=consent`
 
   6. Choose a site in your Jira workspace to allow access for this application and click "Accept".
      As the callback does not exist, you will see an error. But in the URL of your browser you will see
