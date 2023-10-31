@@ -17,6 +17,9 @@ And following granular scopes:
   - `read:group:jira`: for retrieving group members
   - `read:avatar:jira`: for retrieving group members
 
+You will need a web browser and a terminal with `curl` available (such as macOS terminal,
+Linux, an AWS CLoud Shell, [Windows Subsystem for Linux](https://learn.microsoft.com/en-us/windows/wsl/install), etc)
+
 ## Setup Instructions
 
   1. Go to https://developer.atlassian.com/console/myapps/ and click on "Create"
