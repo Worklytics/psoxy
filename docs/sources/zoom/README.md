@@ -21,17 +21,26 @@ The Zoom connector through Psoxy requires a Custom Managed App on the Zoom Marke
 be left in development mode; it does not need to be published.
 
 1. Go to https://marketplace.zoom.us/develop/create and create an app of type "Server to Server OAuth"
-2. After creation, it will show the App Credentials. Share them with the AWS/GCP administrator, the
-   following values must be filled in the AWS Systems Manager Parameter Store / GCP Secret Manager
-   for use by the proxy when authenticating with the Zoom API:
+2. After creation, it will show the App Credentials.
 
-    - `PSOXY_ZOOM_CLIENT_ID`
-    - `PSOXY_ZOOM_ACCOUNT_ID`
-    - `PSOXY_ZOOM_CLIENT_SECRET`
+   Copy the following values:
+      - `Account ID`
+      - `Client ID`
+      - `Client Secret`
 
-    - NOTE: Anytime the *client secret* is regenerated it needs to be updated in the Proxy too.
-    - NOTE: *client secret* should be handled according to your organization's security policies for
-      API keys/secrets as, in combination with the above, allows access to your organization's data.
+    ![Server to Server OAuth App](server-to-server-oauth-app.png)
+
+    Share them with the AWS/GCP administrator, who should fill them in your host platform's
+    secret manager (AWS Systems Manager Parameter Store / GCP Secret Manager) for use by the proxy
+    when authenticating with the Zoom API:
+
+     - `Account ID` --> `PSOXY_ZOOM_ACCOUNT_ID`
+     - `Client ID` --> `PSOXY_ZOOM_CLIENT_ID`
+     - `Client Secret` --> `PSOXY_ZOOM_CLIENT_SECRET`
+
+     NOTE: Anytime the *Client Secret* is regenerated it needs to be updated in the Proxy too.
+     NOTE: *Client Secret* should be handled according to your organization's security policies for
+     API keys/secrets as, in combination with the above, allows access to your organization's data.
 
 3. Fill the information section
 
