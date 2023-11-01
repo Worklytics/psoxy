@@ -220,9 +220,7 @@ abstract public class RulesBaseTestCase {
                 String sanitized = sanitize(example.getRequestUrl(), original);
 
                 String sanitizedFilepath = getRulesTestSpec().getExampleSanitizedApiResponsesPathFull() + example.getPlainExampleFile();
-                if (!sanitizedFilepath.endsWith("/")) {
-                    sanitizedFilepath = sanitizedFilepath + "/";
-                }
+
 
                 String expected = StringUtils.trim(new String(TestUtils.getData(sanitizedFilepath)));
 
