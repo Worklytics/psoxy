@@ -167,8 +167,7 @@ abstract public class RulesBaseTestCase {
         sanitizer = sanitizerFactory.create(getRulesUnderTest(),
             pseudonymizerFactory.create(Pseudonymizer.ConfigurationOptions.builder()
             .defaultScopeId(getRulesTestSpec().getDefaultScopeId())
-            //TODO: existing test cases presume this
-            .pseudonymImplementation(PseudonymImplementation.LEGACY)
+            .pseudonymImplementation(PseudonymImplementation.DEFAULT)
             .build()));
 
         //q: good way to also batch test sanitizers from yaml/json formats of rules, to ensure

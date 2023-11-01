@@ -132,7 +132,7 @@ public class PseudonymizerImpl implements Pseudonymizer {
         }
 
         if (transformOptions.getIncludeOriginal()) {
-            builder.original(Objects.toString(value));git
+            builder.original(Objects.toString(value));
         }
 
         // for LEGACY case, fill DEFAULT pseudonym in h_4, to enable future migration by client
