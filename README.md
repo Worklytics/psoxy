@@ -205,7 +205,7 @@ You will need all of the following in your deployment environment (eg, your lapt
 |----------------------------------------------|---------------|---------------------------|
 | [git](https://git-scm.com/)                  | 2.17+         | `git --version`           |
 | [Maven](https://maven.apache.org/)           | 3.6+          | `mvn -v`                 |
-| [Java 11+ JDK](https://openjdk.org/install/) | 11+, <=20     | `mvn -v &#124; grep Java` |
+| [Java 11+ JDK](https://openjdk.org/install/) | 11+, <=21     | `mvn -v &#124; grep Java` |
 | [Terraform](https://www.terraform.io/)       | 1.3.x, <= 1.5 | `terraform version`       |
 
 

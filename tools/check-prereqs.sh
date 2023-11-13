@@ -39,7 +39,7 @@ printf "\n"
 JAVA_VERSION=`mvn -v | grep Java`
 
 printf "Your Maven installation uses ${BLUE}${JAVA_VERSION}${NC}.\n"
-printf "\t- if that is a Java version < 11, you must upgrade to 11. Java >= 11, <= 20 are supported.\n"
+printf "\t- if that is a Java version < 11, you must upgrade to 11. Java >= 11, <= 21 are supported.\n"
 printf "\t- if you have a Java JDK of the right version installed on your machine *other* than the one referenced there, set your ${BLUE}JAVA_HOME${NC} to its location.\n"
 
 printf "\n"
