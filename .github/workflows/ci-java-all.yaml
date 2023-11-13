@@ -11,7 +11,7 @@ on:
     branches:
       - 'main'
       - 'rc-*'
-      - 's152-java-20-test'
+      - 's162-fix-java21'
 
 jobs:
   # Java 11 - supported until 30 Sept 2023
@@ -34,3 +34,8 @@ jobs:
     with:
       java-version: '20'
 
+  # Java 21 - released 19 Sept 2023, supported until Sept 2028 (LTS)
+  ci_java21:
+    uses: ./.github/workflows/build-java.yaml
+    with:
+      java-version: '21'
