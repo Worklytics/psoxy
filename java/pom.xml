@@ -29,6 +29,19 @@
         <dependency.bettercloud-vault-java-driver>5.1.0</dependency.bettercloud-vault-java-driver>
     </properties>
 
+    <dependencyManagement>
+        <dependencies>
+            <!-- https://mvnrepository.com/artifact/org.junit/junit-bom -->
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>${dependency.junit-jupiter.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <modules>
         <module>gateway-core</module>
         <module>core</module>
@@ -87,12 +100,4 @@
         </plugins>
     </build>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>${dependency.junit-jupiter.version}</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
 </project>
