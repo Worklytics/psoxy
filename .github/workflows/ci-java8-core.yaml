@@ -15,7 +15,7 @@ jobs:
   ci_java8_core:
     env:
       compile-profile: '-P java8 ' # NOTE: trailing space is important
-      java-version: '17'
+      java-version: '17' # build w java 17, but pom configured to still build java 8 byte code
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
