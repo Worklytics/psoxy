@@ -41,7 +41,7 @@ jobs:
   # although beyond me why 17 and 21 both work, but 20 doesn't; best guess is Mockito 5 degrading
   # behavior in some way for 20 that isn't needed for 21 and doesn't matter for 17? 
   
-   ci_java20:
+  ci_java20:
     uses: ./.github/workflows/build-java.yaml
     with:
       java-version: '20'
