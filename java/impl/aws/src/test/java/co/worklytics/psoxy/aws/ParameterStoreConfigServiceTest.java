@@ -2,6 +2,7 @@ package co.worklytics.psoxy.aws;
 
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
+import org.apache.commons.lang3.JavaVersion;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -22,10 +23,18 @@ import static org.mockito.Mockito.*;
 class ParameterStoreConfigServiceTest {
 
 
+    public static boolean isAtLeastJava17() {
+        JavaVersion version = JavaVersion.valueOf(System.getProperty("java.version"));
+        return version.atLeast(JavaVersion.JAVA_17);
+    }
     SsmClient client;
     @BeforeEach
     public void setup() {
-       client = mock(SsmClient.class, withSettings().mockMaker(MockMakers.SUBCLASS));
+        if (isAtLeastJava17()) {
+            client = mock(SsmClient.class, withSettings().mockMaker(MockMakers.SUBCLASS));
+        } else {
+            client = mock(SsmClient.class);
+        }
     }
 
     @CsvSource({

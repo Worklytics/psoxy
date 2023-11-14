@@ -16,6 +16,7 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoSet;
 import lombok.SneakyThrows;
+import org.apache.commons.lang3.JavaVersion;
 import org.mockito.MockMakers;
 
 import javax.inject.Singleton;
@@ -24,11 +25,23 @@ import static org.mockito.Mockito.*;
 
 public class MockModules {
 
+
+    public static boolean isAtLeastJava17() {
+        JavaVersion version = JavaVersion.valueOf(System.getProperty("java.version"));
+        return version.atLeast(JavaVersion.JAVA_17);
+    }
+
     @Module
     public interface ForConfigService {
         @Provides @Singleton
         static ConfigService configService() {
-            ConfigService mock = mock(ConfigService.class, withSettings().mockMaker(MockMakers.SUBCLASS));
+            ConfigService mock;
+
+            if (isAtLeastJava17()) {
+                mock = mock(ConfigService.class, withSettings().mockMaker(MockMakers.SUBCLASS));
+            } else {
+                mock = mock(ConfigService.class);
+            }
             TestModules.withMockEncryptionKey(mock);
             return mock;
         }
@@ -57,12 +70,20 @@ public class MockModules {
         @Provides @Singleton
         static BulkDataRules bulkDataRules() {
             // why is INLINE mock maker a propblem ehre???
-            return mock(ColumnarRules.class, withSettings().mockMaker(MockMakers.SUBCLASS));
+            if (isAtLeastJava17()) {
+                return mock(ColumnarRules.class, withSettings().mockMaker(MockMakers.SUBCLASS));
+            } else {
+                return mock(ColumnarRules.class);
+            }
         }
 
         @Provides @Singleton
         static RESTRules restRules() {
-            return mock(RESTRules.class, withSettings().mockMaker(MockMakers.SUBCLASS));
+            if (isAtLeastJava17()) {
+                return mock(RESTRules.class, withSettings().mockMaker(MockMakers.SUBCLASS));
+            } else {
+                return mock(RESTRules.class);
+            }
         }
 
         @Provides @Singleton

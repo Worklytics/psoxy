@@ -5,6 +5,7 @@ import co.worklytics.psoxy.gateway.BulkModeConfigProperty;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.storage.StorageHandler;
+import co.worklytics.test.MockModules;
 import co.worklytics.test.TestUtils;
 
 import com.avaulta.gateway.rules.ColumnarRules;
@@ -34,10 +35,13 @@ class RulesUtilsTest {
     @Inject RulesUtils utils;
     @Inject @Named("ForYAML")
     ObjectMapper yamlMapper;
+    @Inject
+    ConfigService config;
 
     @Singleton
     @Component(modules = {
         PsoxyModule.class,
+        MockModules.ForConfigService.class
     })
     public interface Container {
         void inject( RulesUtilsTest test);
@@ -99,8 +103,6 @@ class RulesUtilsTest {
         YAML_RECORD,
     })
     void getRulesFromConfig(String encoded) {
-
-        ConfigService config = mock(ConfigService.class, withSettings().mockMaker(MockMakers.SUBCLASS));
         when(config.getConfigPropertyAsOptional(eq(ProxyConfigProperty.RULES)))
             .thenReturn(Optional.of(encoded));
         when(config.getConfigPropertyOrError(eq(ProxyConfigProperty.SOURCE)))
@@ -126,7 +128,6 @@ class RulesUtilsTest {
     @Test
     public void parseYamlRulesFromConfig() {
 
-        ConfigService config = mock(ConfigService.class, withSettings().mockMaker(MockMakers.SUBCLASS));
         when(config.getConfigPropertyAsOptional(eq(BulkModeConfigProperty.ADDITIONAL_TRANSFORMS)))
             .thenReturn(Optional.of(yamlMapper.writeValueAsString(transformList)));
 

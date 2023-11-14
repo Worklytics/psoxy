@@ -78,7 +78,11 @@ public class BulkDataSanitizerImplTest {
     public interface ForPlaceholderRules {
         @Provides @Singleton
         static ColumnarRules ruleSet() {
-            return mock(ColumnarRules.class, withSettings().mockMaker(MockMakers.SUBCLASS));
+            if (MockModules.isAtLeastJava17()) {
+                return mock(ColumnarRules.class, withSettings().mockMaker(MockMakers.SUBCLASS));
+            } else {
+                return mock(ColumnarRules.class);
+            }
         }
     }
 
