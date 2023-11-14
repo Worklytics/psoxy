@@ -1,5 +1,6 @@
 package co.worklytics.psoxy;
 
+import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -74,6 +75,11 @@ public class HealthCheckResult {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     String rules;
 
+    /**
+     * value of PSEUDONYMIZE_APP_IDS config property, if any
+     * @see ProxyConfigProperty#PSEUDONYMIZE_APP_IDS
+     */
+    Boolean pseudonymizeAppIds;
 
     public boolean passed() {
         return getConfiguredSource() != null

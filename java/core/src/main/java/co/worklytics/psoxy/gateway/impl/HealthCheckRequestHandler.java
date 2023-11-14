@@ -75,6 +75,14 @@ public class HealthCheckRequestHandler {
                 .missingConfigProperties(missing);
 
         try {
+            config.getConfigPropertyAsOptional(ProxyConfigProperty.PSEUDONYMIZE_APP_IDS)
+                .map(Boolean::parseBoolean)
+                .ifPresent(healthCheckResult::pseudonymizeAppIds);
+        } catch (Throwable e) {
+            log.log(Level.WARNING, "Failed to add pseudonymizeAppIds to health check", e);
+        }
+
+        try {
             healthCheckResult.configPropertiesLastModified(sourceAuthStrategy.getAllConfigProperties().stream()
                     .map(param -> Pair.of(param, config.getConfigPropertyWithMetadata(param)))
                     .collect(Collectors.toMap(p -> p.getKey().name(),
