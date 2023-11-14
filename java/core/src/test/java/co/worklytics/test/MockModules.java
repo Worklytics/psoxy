@@ -16,11 +16,11 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoSet;
 import lombok.SneakyThrows;
+import org.mockito.MockMakers;
 
 import javax.inject.Singleton;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class MockModules {
 
@@ -28,7 +28,7 @@ public class MockModules {
     public interface ForConfigService {
         @Provides @Singleton
         static ConfigService configService() {
-            ConfigService mock = mock(ConfigService.class);
+            ConfigService mock = mock(ConfigService.class, withSettings().mockMaker(MockMakers.SUBCLASS));
             TestModules.withMockEncryptionKey(mock);
             return mock;
         }
@@ -56,12 +56,13 @@ public class MockModules {
 
         @Provides @Singleton
         static BulkDataRules bulkDataRules() {
-            return mock(ColumnarRules.class);
+            // why is INLINE mock maker a propblem ehre???
+            return mock(ColumnarRules.class, withSettings().mockMaker(MockMakers.SUBCLASS));
         }
 
         @Provides @Singleton
         static RESTRules restRules() {
-            return mock(RESTRules.class);
+            return mock(RESTRules.class, withSettings().mockMaker(MockMakers.SUBCLASS));
         }
 
         @Provides @Singleton

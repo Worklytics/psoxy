@@ -27,6 +27,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.MockMakers;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -40,8 +41,7 @@ import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class BulkDataSanitizerImplTest {
 
@@ -78,7 +78,7 @@ public class BulkDataSanitizerImplTest {
     public interface ForPlaceholderRules {
         @Provides @Singleton
         static ColumnarRules ruleSet() {
-            return mock(ColumnarRules.class);
+            return mock(ColumnarRules.class, withSettings().mockMaker(MockMakers.SUBCLASS));
         }
     }
 

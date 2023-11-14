@@ -7,11 +7,14 @@ import co.worklytics.psoxy.gateway.StorageEventRequest;
 import co.worklytics.test.MockModules;
 import com.google.common.collect.ImmutableMap;
 import dagger.Component;
+import dagger.Module;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mock;
+import org.mockito.MockMakers;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -23,8 +26,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class StorageHandlerTest {
 
@@ -40,7 +42,17 @@ class StorageHandlerTest {
     }
 
 
+    @Mock(mockMaker = MockMakers.SUBCLASS)
+    InputStreamReader mockReader;
+
+    @Mock(mockMaker = MockMakers.SUBCLASS)
+    OutputStreamWriter mockWriter;
+
+    @Mock(mockMaker = MockMakers.SUBCLASS)
+
+
     @Inject
+
     ConfigService config;
 
     @Inject
@@ -76,8 +88,7 @@ class StorageHandlerTest {
 
 
 
-        StorageEventRequest request = handler.buildRequest(mock(InputStreamReader.class),
-            mock(OutputStreamWriter.class), "bucket-in", "directory/file.csv", handler.buildDefaultTransform());
+        StorageEventRequest request = handler.buildRequest(mockReader, mockWriter, "bucket-in", "directory/file.csv", handler.buildDefaultTransform());
 
         assertEquals("directory/file.csv", request.getDestinationObjectPath());
     }
@@ -100,7 +111,7 @@ class StorageHandlerTest {
         when(config.getConfigPropertyAsOptional(eq(BulkModeConfigProperty.OUTPUT_BASE_PATH)))
             .thenReturn(Optional.ofNullable(outputBasePath));
 
-        StorageEventRequest request = handler.buildRequest(mock(InputStreamReader.class), mock(OutputStreamWriter.class), "bucket-in", "directory/file.csv", handler.buildDefaultTransform());
+        StorageEventRequest request = handler.buildRequest(mockReader, mockWriter, "bucket-in", "directory/file.csv", handler.buildDefaultTransform());
 
         assertEquals("bucket-in", request.getSourceBucketName());
         assertEquals("directory/file.csv", request.getSourceObjectPath());
