@@ -74,10 +74,6 @@ class HealthCheckResultTest {
         assertEquals("v0.1.15", healthCheckResult.getVersion());
     }
 
-    String LEGACY_JSON = """
-
-    """;
-
     @SneakyThrows
     @ValueSource(strings={
         """
