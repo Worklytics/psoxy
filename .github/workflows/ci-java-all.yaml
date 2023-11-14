@@ -11,7 +11,6 @@ on:
     branches:
       - 'main'
       - 'rc-*'
-      - 's162-fix-java21'
 
 jobs:
   # Java 11 - Oracle support ended 30 Sept 2023
@@ -25,22 +24,12 @@ jobs:
     uses: ./.github/workflows/build-java.yaml
     with:
       java-version: '17'
-      
-#  ci_java18:
-#    uses: ./.github/workflows/build-java.yaml
-#    with:
-#      java-version: '18'
-#      
-#  ci_java19:
-#    uses: ./.github/workflows/build-java.yaml
-#    with:
-#      java-version: '19'
 
   # Java 20 - support ended 19 Sept 2023
-  # NOTE: psoxy versions 0.4.40 supported this; if you need it, option to downgrade to that. 
+  # NOTE: psoxy versions 0.4.40 supported this; if you need it, option to downgrade to that.
   # although beyond me why 17 and 21 both work, but 20 doesn't; best guess is Mockito 5 degrading
-  # behavior in some way for 20 that isn't needed for 21 and doesn't matter for 17? 
-  
+  # behavior in some way for 20 that isn't needed for 21 and doesn't matter for 17?
+
 #  ci_java20:
 #    uses: ./.github/workflows/build-java.yaml
 #    with:
