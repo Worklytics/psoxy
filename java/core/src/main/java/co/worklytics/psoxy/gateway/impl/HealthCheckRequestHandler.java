@@ -30,6 +30,8 @@ import java.util.stream.Collectors;
 @Log
 public class HealthCheckRequestHandler {
 
+    final String JAVA_SOURCE_CODE_VERSION = "rc-v0.4.41";
+
     @Inject
     ConfigService config;
     @Inject
@@ -68,6 +70,7 @@ public class HealthCheckRequestHandler {
         }
 
         HealthCheckResult.HealthCheckResultBuilder healthCheckResult = HealthCheckResult.builder()
+                .javaSourceCodeVersion(JAVA_SOURCE_CODE_VERSION)
                 .configuredSource(config.getConfigPropertyAsOptional(ProxyConfigProperty.SOURCE).orElse(null))
                 .configuredHost(config.getConfigPropertyAsOptional(ProxyConfigProperty.TARGET_HOST).orElse(null))
                 .nonDefaultSalt(config.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT).isPresent())

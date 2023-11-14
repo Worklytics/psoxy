@@ -3,7 +3,10 @@ package co.worklytics.psoxy;
 import co.worklytics.psoxy.gateway.impl.GoogleCloudPlatformServiceAccountKeyAuthStrategy;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.Collections;
 
@@ -11,28 +14,31 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class HealthCheckResultTest {
 
+    ObjectMapper objectMapper = new ObjectMapper();
 
 
     @Test
     public void json() throws JsonProcessingException {
-        final String JSON = "{\n" +
-            "  \"bundleFilename\" : null,\n" +
-            "  \"configPropertiesLastModified\" : null,\n" +
-            "  \"configuredHost\" : \"blah.com\",\n" +
-            "  \"configuredSource\" : \"blah\",\n" +
-            "  \"javaSourceVersion\" : \"v0.EXAMPLE\",\n" +
-            "  \"missingConfigProperties\" : [ \"SERVICE_ACCOUNT_KEY\" ],\n" +
-            "  \"nonDefaultSalt\" : true,\n" +
-            "  \"pseudonymImplementation\" : null,\n" +
-            "  \"sourceAuthGrantType\" : null,\n" +
-            "  \"sourceAuthStrategy\" : null,\n" +
-            "  \"version\" : \"v0.EXAMPLE\"\n" +
-            "}";
+        final String JSON = """
+               {
+                 "bundleFilename" : "psoxy-aws-rc-v0.1.15.jar",
+                 "configPropertiesLastModified" : null,
+                 "configuredHost" : "blah.com",
+                 "configuredSource" : "blah",
+                 "javaSourceCodeVersion" : "v0.EXAMPLE",
+                 "missingConfigProperties" : [ "SERVICE_ACCOUNT_KEY" ],
+                 "nonDefaultSalt" : true,
+                 "pseudonymImplementation" : null,
+                 "pseudonymizeAppIds" : null,
+                 "sourceAuthGrantType" : null,
+                 "sourceAuthStrategy" : null,
+                 "version" : "rc-v0.1.15"
+               }""";
 
-        ObjectMapper objectMapper = new ObjectMapper();
 
         HealthCheckResult healthCheckResult = HealthCheckResult.builder()
-            .version("v0.EXAMPLE") //avoid needing to change this test every version change
+            .javaSourceCodeVersion("v0.EXAMPLE") //avoid needing to change this test every version change
+            .bundleFilename("psoxy-aws-rc-v0.1.15.jar")
             .configuredSource("blah")
             .configuredHost("blah.com")
             .nonDefaultSalt(true)
@@ -66,6 +72,34 @@ class HealthCheckResultTest {
             .build();
 
         assertEquals("v0.1.15", healthCheckResult.getVersion());
+    }
+
+    String LEGACY_JSON = """
+
+    """;
+
+    @SneakyThrows
+    @ValueSource(strings={
+        """
+            {
+              "bundleFilename" : "psoxy-aws-rc-v0.1.15.jar",
+              "configPropertiesLastModified" : null,
+              "configuredHost" : "blah.com",
+              "configuredSource" : "blah",
+              "version" : "v0.EXAMPLE",
+              "missingConfigProperties" : [ "SERVICE_ACCOUNT_KEY" ],
+              "nonDefaultSalt" : true,
+              "pseudonymImplementation" : null,
+              "sourceAuthGrantType" : null,
+              "sourceAuthStrategy" : null,
+              "version" : "rc-v0.1.15"
+            }
+            """
+
+    })
+    @ParameterizedTest
+    public void legacyJson(String legacyJson) {
+        objectMapper.readerFor(HealthCheckResult.class).readValue(legacyJson);
     }
 
 }
