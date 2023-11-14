@@ -3,6 +3,7 @@ package co.worklytics.psoxy.aws;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 import org.apache.commons.lang3.JavaVersion;
+import org.apache.commons.lang3.SystemUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -24,8 +25,7 @@ class ParameterStoreConfigServiceTest {
 
 
     public static boolean isAtLeastJava17() {
-        JavaVersion version = JavaVersion.valueOf(System.getProperty("java.version"));
-        return version.atLeast(JavaVersion.JAVA_17);
+        return SystemUtils.isJavaVersionAtLeast(JavaVersion.JAVA_17);
     }
     SsmClient client;
     @BeforeEach

@@ -17,6 +17,7 @@ import dagger.Provides;
 import dagger.multibindings.IntoSet;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.JavaVersion;
+import org.apache.commons.lang3.SystemUtils;
 import org.mockito.MockMakers;
 
 import javax.inject.Singleton;
@@ -26,9 +27,11 @@ import static org.mockito.Mockito.*;
 public class MockModules {
 
 
-    public static boolean isAtLeastJava17() {
-        JavaVersion version = JavaVersion.valueOf(System.getProperty("java.version"));
-        return version.atLeast(JavaVersion.JAVA_17);
+    /**
+     * helper to downgrade behavior of mockito to pre-java17 behavior
+     */
+    public static boolean isAtLeastJava17(){
+        return SystemUtils.isJavaVersionAtLeast(JavaVersion.JAVA_17);
     }
 
     @Module
