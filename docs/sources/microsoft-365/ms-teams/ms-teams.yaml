@@ -1,0 +1,232 @@
+---
+endpoints:
+  - pathRegex: "^/(v1.0|beta)/users/?[^/]*"
+    allowedQueryParams:
+      - "$top"
+      - "$select"
+      - "$skiptoken"
+      - "$orderBy"
+      - "$count"
+    transforms:
+      - !<pseudonymizeRegexMatches>
+        jsonPaths:
+          - "$..proxyAddresses[*]"
+        regex: "(?i)^smtp:(.*)$"
+      - !<redact>
+        jsonPaths:
+          - "$..displayName"
+          - "$..aboutMe"
+          - "$..mySite"
+          - "$..preferredName"
+          - "$..givenName"
+          - "$..surname"
+          - "$..mailNickname"
+          - "$..responsibilities"
+          - "$..skills"
+          - "$..faxNumber"
+          - "$..mobilePhone"
+          - "$..businessPhones[*]"
+          - "$..onPremisesExtensionAttributes"
+          - "$..onPremisesSecurityIdentifier"
+          - "$..securityIdentifier"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..employeeId"
+          - "$..userPrincipalName"
+          - "$..imAddresses[*]"
+          - "$..mail"
+          - "$..otherMails[*]"
+          - "$..onPremisesSamAccountName"
+          - "$..onPremisesUserPrincipalName"
+          - "$..onPremisesDistinguishedName"
+          - "$..onPremisesImmutableId"
+          - "$..identities[*].issuerAssignedId"
+        encoding: "JSON"
+  - pathRegex: "^/(v1.0|beta)/groups/?[^/]*"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..owners"
+          - "$..rejectedSenders"
+          - "$..acceptedSenders"
+          - "$..members"
+          - "$..membersWithLicenseErrors"
+          - "$..mailNickname"
+          - "$..description"
+          - "$..resourceBehaviorOptions"
+          - "$..resourceProvisioningOptions"
+          - "$..onPremisesSamAccountName"
+          - "$..onPremisesSecurityIdentifier"
+          - "$..onPremisesProvisioningErrors"
+          - "$..securityIdentifier"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..mail"
+        includeOriginal: true
+        encoding: "JSON"
+  - pathRegex: "^/(v1.0|beta)/groups/[^/]*/members.*"
+    allowedQueryParams:
+      - "$top"
+      - "$select"
+      - "$skiptoken"
+      - "$orderBy"
+      - "$count"
+    transforms:
+      - !<pseudonymizeRegexMatches>
+        jsonPaths:
+          - "$..proxyAddresses[*]"
+        regex: "(?i)^smtp:(.*)$"
+      - !<redact>
+        jsonPaths:
+          - "$..displayName"
+          - "$..aboutMe"
+          - "$..mySite"
+          - "$..preferredName"
+          - "$..givenName"
+          - "$..surname"
+          - "$..mailNickname"
+          - "$..responsibilities"
+          - "$..skills"
+          - "$..faxNumber"
+          - "$..mobilePhone"
+          - "$..businessPhones[*]"
+          - "$..onPremisesExtensionAttributes"
+          - "$..onPremisesSecurityIdentifier"
+          - "$..securityIdentifier"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..employeeId"
+          - "$..userPrincipalName"
+          - "$..imAddresses[*]"
+          - "$..mail"
+          - "$..otherMails[*]"
+          - "$..onPremisesSamAccountName"
+          - "$..onPremisesUserPrincipalName"
+          - "$..onPremisesDistinguishedName"
+          - "$..onPremisesImmutableId"
+          - "$..identities[*].issuerAssignedId"
+        encoding: "JSON"
+  - pathRegex: "^/(v1.0|beta)/teams"
+    allowedQueryParams:
+      - "$select"
+      - "$top"
+      - "$skipToken"
+      - "$filter"
+      - "$count"
+    transforms:
+    - !<redact>
+      jsonPaths:
+        - "$..displayName"
+        - "$..description"
+  - pathRegex: "^/(v1.0|beta)/teams/[^/]*/allChannels"
+    allowedQueryParams:
+      - "$select"
+      - "$filter"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..displayName"
+          - "$..description"
+  - pathRegex: "^/(v1.0|beta)/users/[^/]*/chats"
+    allowedQueryParams:
+      - "$select"
+      - "$top"
+      - "$skipToken"
+      - "$filter"
+      - "$orderBy"
+      - "$expand"
+  - pathRegex: "^/(v1.0|beta)/teams/[^/]*/channels/[^/]*/messages"
+    allowedQueryParams:
+      - "$select"
+      - "$top"
+      - "$skipToken"
+      - "$expand"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..from.user.displayName"
+          - "$..body.content"
+          - "$..attachments"
+          - "$..mentions[*].mentionText"
+          - "$..mentions[*].mentioned.user.displayName"
+          - "$..eventDetail.teamDescription"
+          - "$..eventDetail.initiator.user.displayName"
+  - pathRegex: "^/(v1.0|beta)/teams/[^/]*/channels/[^/]*/messages/delta"
+    allowedQueryParams:
+      - "$select"
+      - "$top"
+      - "$skipToken"
+      - "$expand"
+      - "$deltaToken"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..from.user.displayName"
+          - "$..body.content"
+          - "$..attachments"
+          - "$..mentions[*].mentionText"
+          - "$..mentions[*].mentioned.user.displayName"
+          - "$..eventDetail.teamDescription"
+          - "$..eventDetail.initiator.user.displayName"
+  - pathRegex: "^/(v1.0|beta)/users/chats/[^/]*/messages"
+    allowedQueryParams:
+      - "$select"
+      - "$top"
+      - "$skipToken"
+      - "$filter"
+      - "$orderBy"
+      - "$count"
+      - "$expand"
+      - "$format"
+      - "$search"
+      - "$skip"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..from.user.displayName"
+          - "$..body.content"
+          - "$..attachments"
+          - "$..mentions[*].mentionText"
+          - "$..mentions[*].mentioned.user.displayName"
+          - "$..eventDetail.teamDescription"
+          - "$..eventDetail.initiator.user.displayName"
+  - pathRegex: "^/(v1.0|beta)/communications/calls/[^/]*"
+    allowedQueryParams:
+      - "$select"
+      - "$top"
+      - "$expand"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..displayName"
+  - pathRegex: "^/(v1.0|beta)/communications/callRecords/[^/]*"
+    allowedQueryParams:
+      - "$select"
+      - "$expand"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..organizer.user.displayName"
+          - "$..participants[*].user.displayName"
+          - "$..sessions[*].caller.identity.user.displayName"
+          - "$..sessions[*].callee.identity.user.displayName"
+          - "$..sessions[*].segments[*].caller.identity.user.displayName"
+          - "$..sessions[*].segments[*].callee.identity.user.displayName"
+  - pathRegex: "^/(v1.0|beta)/users/[^/]*/onlineMeetings"
+    allowedQueryParams:
+      - "$select"
+      - "$top"
+      - "$skipToken"
+      - "$filter"
+      - "$orderBy"
+      - "$count"
+      - "$expand"
+      - "$format"
+      - "$search"
+      - "$skip"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..participants.attendees[*].identity.user.displayName"
+          - "$..participants.organizer.identity.user.displayName"
+          - "$..subject"
