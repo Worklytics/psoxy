@@ -20,19 +20,19 @@ class HealthCheckResultTest {
     @Test
     public void json() throws JsonProcessingException {
         final String JSON = "{\n" +
-            "                 \"bundleFilename\" : \"psoxy-aws-rc-v0.1.15.jar\",\n" +
-            "                 \"configPropertiesLastModified\" : null,\n" +
-            "                 \"configuredHost\" : \"blah.com\",\n" +
-            "                 \"configuredSource\" : \"blah\",\n" +
-            "                 \"javaSourceCodeVersion\" : \"v0.EXAMPLE\",\n" +
-            "                 \"missingConfigProperties\" : [ \"SERVICE_ACCOUNT_KEY\" ],\n" +
-            "                 \"nonDefaultSalt\" : true,\n" +
-            "                 \"pseudonymImplementation\" : null,\n" +
-            "                 \"pseudonymizeAppIds\" : null,\n" +
-            "                 \"sourceAuthGrantType\" : null,\n" +
-            "                 \"sourceAuthStrategy\" : null,\n" +
-            "                 \"version\" : \"rc-v0.1.15\"\n" +
-            "               }";
+            "  \"bundleFilename\" : \"psoxy-aws-rc-v0.1.15.jar\",\n" +
+            "  \"configPropertiesLastModified\" : null,\n" +
+            "  \"configuredHost\" : \"blah.com\",\n" +
+            "  \"configuredSource\" : \"blah\",\n" +
+            "  \"javaSourceCodeVersion\" : \"v0.EXAMPLE\",\n" +
+            "  \"missingConfigProperties\" : [ \"SERVICE_ACCOUNT_KEY\" ],\n" +
+            "  \"nonDefaultSalt\" : true,\n" +
+            "  \"pseudonymImplementation\" : null,\n" +
+            "  \"pseudonymizeAppIds\" : null,\n" +
+            "  \"sourceAuthGrantType\" : null,\n" +
+            "  \"sourceAuthStrategy\" : null,\n" +
+            "  \"version\" : \"rc-v0.1.15\"\n" +
+            "}";
 
 
         HealthCheckResult healthCheckResult = HealthCheckResult.builder()
@@ -92,6 +92,7 @@ class HealthCheckResultTest {
     })
     @ParameterizedTest
     public void legacyJson(String legacyJson) {
+        // just make sure it doesn't blow up
         objectMapper.readerFor(HealthCheckResult.class).readValue(legacyJson);
     }
 
