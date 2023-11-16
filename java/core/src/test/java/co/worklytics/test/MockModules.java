@@ -16,19 +16,35 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoSet;
 import lombok.SneakyThrows;
+import org.apache.commons.lang3.JavaVersion;
+import org.apache.commons.lang3.SystemUtils;
+import org.mockito.MockMakers;
 
 import javax.inject.Singleton;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class MockModules {
+
+
+    /**
+     * helper to downgrade behavior of mockito to pre-java17 behavior
+     */
+    public static boolean isAtLeastJava17(){
+        return SystemUtils.isJavaVersionAtLeast(JavaVersion.JAVA_17);
+    }
 
     @Module
     public interface ForConfigService {
         @Provides @Singleton
         static ConfigService configService() {
-            ConfigService mock = mock(ConfigService.class);
+            ConfigService mock;
+
+            if (isAtLeastJava17()) {
+                mock = mock(ConfigService.class, withSettings().mockMaker(MockMakers.SUBCLASS));
+            } else {
+                mock = mock(ConfigService.class);
+            }
             TestModules.withMockEncryptionKey(mock);
             return mock;
         }
@@ -56,12 +72,21 @@ public class MockModules {
 
         @Provides @Singleton
         static BulkDataRules bulkDataRules() {
-            return mock(ColumnarRules.class);
+            // why is INLINE mock maker a propblem ehre???
+            if (isAtLeastJava17()) {
+                return mock(ColumnarRules.class, withSettings().mockMaker(MockMakers.SUBCLASS));
+            } else {
+                return mock(ColumnarRules.class);
+            }
         }
 
         @Provides @Singleton
         static RESTRules restRules() {
-            return mock(RESTRules.class);
+            if (isAtLeastJava17()) {
+                return mock(RESTRules.class, withSettings().mockMaker(MockMakers.SUBCLASS));
+            } else {
+                return mock(RESTRules.class);
+            }
         }
 
         @Provides @Singleton

@@ -201,13 +201,17 @@ command line tools.
 
 You will need all of the following in your deployment environment (eg, your laptop):
 
-| Tool                                         | Version       | Test Command              |
-|----------------------------------------------|---------------|---------------------------|
-| [git](https://git-scm.com/)                  | 2.17+         | `git --version`           |
-| [Maven](https://maven.apache.org/)           | 3.6+          | `mvn -v`                 |
-| [Java 11+ JDK](https://openjdk.org/install/) | 11+, <=20     | `mvn -v &#124; grep Java` |
-| [Terraform](https://www.terraform.io/)       | 1.3.x, <= 1.5 | `terraform version`       |
+| Tool                                             | Version                | Test Command              |
+|--------------------------------------------------|------------------------|---------------------------|
+| [git](https://git-scm.com/)                      | 2.17+                  | `git --version`           |
+| [Maven](https://maven.apache.org/)               | 3.6+                   | `mvn -v`                 |
+| [Java JDK 11+ LTS](https://openjdk.org/install/) | 11, 17, 21 (see notes) | `mvn -v &#124; grep Java` |
+| [Terraform](https://www.terraform.io/)           | 1.3.x, <= 1.5          | `terraform version`       |
 
+NOTE: we will support Java versions for duration of official support windows, in particular the
+LTS versions. As of Nov 2023, we  still support java 11 but may end this at any time. Minor
+versions, such as 12-16, and 18-20, which are out of official support, may work but are not
+routinely tested.
 
 NOTE: Using `terraform` is not strictly necessary, but it is the only supported method. You may
 provision your infrastructure via your host's CLI, web console, or another infrastructure provisioning
