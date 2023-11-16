@@ -1,16 +1,24 @@
 {
   "kind":"drive#revision",
-  "id":"0B5tH2y2v-mBWTklOa1VJeHJwNUQ2dy9uMDg1d0kzV0ZUeHRjPQ",
-  "mimeType":"application/pdf",
-  "modifiedTime":"2021-12-01T16:25:16.000Z",
-  "keepForever":true,
+  "etag":"\"lKV9tCd1m5423452345x6DkEA\"",
+  "id":"65",
+  "selfLink":"https://www.googleapis.com/drive/v2/files/1234918234afa78sdf098214321/revisions/65",
+  "mimeType":"application/vnd.google-apps.spreadsheet",
+  "modifiedDate":"2023-01-03T20:04:21.287Z",
   "published":false,
+  "exportLinks":{
+    "application/x-vnd.oasis.opendocument.spreadsheet":"https://docs.google.com/spreadsheets/export?id=1234918234afa78sdf098214321&revision=65&exportFormat=ods",
+    "text/tab-separated-values":"https://docs.google.com/spreadsheets/export?id=1234918234afa78sdf098214321&revision=65&exportFormat=tsv",
+    "application/pdf":"https://docs.google.com/spreadsheets/export?id=1234918234afa78sdf098214321&revision=65&exportFormat=pdf",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":"https://docs.google.com/spreadsheets/export?id=1234918234afa78sdf098214321&revision=65&exportFormat=xlsx",
+    "text/csv":"https://docs.google.com/spreadsheets/export?id=1234918234afa78sdf098214321&revision=65&exportFormat=csv",
+    "application/zip":"https://docs.google.com/spreadsheets/export?id=1234918234afa78sdf098214321&revision=65&exportFormat=zip",
+    "application/vnd.oasis.opendocument.spreadsheet":"https://docs.google.com/spreadsheets/export?id=1234918234afa78sdf098214321&revision=65&exportFormat=ods"
+  },
   "lastModifyingUser":{
     "kind":"drive#user",
-    "me":false,
-    "permissionId":"02185925293822571813",
-    "emailAddress":"{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"rVTRd0tTDzW6C2bnlwZ8h0afsRh_AYQheCeI9BRyjiI\"}"
-  },
-  "md5Checksum":"2c3f517e181dd49aa9f97580d3ec1431",
-  "size":"759602"
+    "isAuthenticatedUser":true,
+    "permissionId":"123421341512341234",
+    "emailAddress":"{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"ANg5l6XVBpn-KyO-ivYDGQwZViEvM2uhytCnKiB0qr4\"}"
+  }
 }
