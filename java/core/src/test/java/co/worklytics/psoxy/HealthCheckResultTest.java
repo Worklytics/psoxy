@@ -19,21 +19,20 @@ class HealthCheckResultTest {
 
     @Test
     public void json() throws JsonProcessingException {
-        final String JSON = """
-               {
-                 "bundleFilename" : "psoxy-aws-rc-v0.1.15.jar",
-                 "configPropertiesLastModified" : null,
-                 "configuredHost" : "blah.com",
-                 "configuredSource" : "blah",
-                 "javaSourceCodeVersion" : "v0.EXAMPLE",
-                 "missingConfigProperties" : [ "SERVICE_ACCOUNT_KEY" ],
-                 "nonDefaultSalt" : true,
-                 "pseudonymImplementation" : null,
-                 "pseudonymizeAppIds" : null,
-                 "sourceAuthGrantType" : null,
-                 "sourceAuthStrategy" : null,
-                 "version" : "rc-v0.1.15"
-               }""";
+        final String JSON = "{\n" +
+            "                 \"bundleFilename\" : \"psoxy-aws-rc-v0.1.15.jar\",\n" +
+            "                 \"configPropertiesLastModified\" : null,\n" +
+            "                 \"configuredHost\" : \"blah.com\",\n" +
+            "                 \"configuredSource\" : \"blah\",\n" +
+            "                 \"javaSourceCodeVersion\" : \"v0.EXAMPLE\",\n" +
+            "                 \"missingConfigProperties\" : [ \"SERVICE_ACCOUNT_KEY\" ],\n" +
+            "                 \"nonDefaultSalt\" : true,\n" +
+            "                 \"pseudonymImplementation\" : null,\n" +
+            "                 \"pseudonymizeAppIds\" : null,\n" +
+            "                 \"sourceAuthGrantType\" : null,\n" +
+            "                 \"sourceAuthStrategy\" : null,\n" +
+            "                 \"version\" : \"rc-v0.1.15\"\n" +
+            "               }";
 
 
         HealthCheckResult healthCheckResult = HealthCheckResult.builder()
@@ -76,21 +75,19 @@ class HealthCheckResultTest {
 
     @SneakyThrows
     @ValueSource(strings={
-        """
-            {
-              "bundleFilename" : "psoxy-aws-rc-v0.1.15.jar",
-              "configPropertiesLastModified" : null,
-              "configuredHost" : "blah.com",
-              "configuredSource" : "blah",
-              "version" : "v0.EXAMPLE",
-              "missingConfigProperties" : [ "SERVICE_ACCOUNT_KEY" ],
-              "nonDefaultSalt" : true,
-              "pseudonymImplementation" : null,
-              "sourceAuthGrantType" : null,
-              "sourceAuthStrategy" : null,
-              "version" : "rc-v0.1.15"
-            }
-            """
+        "{\n" +
+            "              \"bundleFilename\" : \"psoxy-aws-rc-v0.1.15.jar\",\n" +
+            "              \"configPropertiesLastModified\" : null,\n" +
+            "              \"configuredHost\" : \"blah.com\",\n" +
+            "              \"configuredSource\" : \"blah\",\n" +
+            "              \"version\" : \"v0.EXAMPLE\",\n" +
+            "              \"missingConfigProperties\" : [ \"SERVICE_ACCOUNT_KEY\" ],\n" +
+            "              \"nonDefaultSalt\" : true,\n" +
+            "              \"pseudonymImplementation\" : null,\n" +
+            "              \"sourceAuthGrantType\" : null,\n" +
+            "              \"sourceAuthStrategy\" : null,\n" +
+            "              \"version\" : \"rc-v0.1.15\"\n" +
+            "            }"
 
     })
     @ParameterizedTest
