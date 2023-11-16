@@ -24,6 +24,18 @@ public class PrebuiltSanitizerRules {
         .jsonPath("$.['@odata.context']")
         .build();
 
+    static final Transform REDACT_ODATA_COUNT= Transform.Redact.builder()
+        .jsonPath("$.['@odata.count']")
+        .build();
+
+    static final Transform REDACT_ODATA_TYPE= Transform.Redact.builder()
+        .jsonPath("$.['@odata.type']")
+        .build();
+
+    static final Transform REDACT_ODATA_ID= Transform.Redact.builder()
+        .jsonPath("$.['@odata.id']")
+        .build();
+
     static final Transform.PseudonymizeRegexMatches PSEUDONYMIZE_PROXY_ADDRESSES = Transform.PseudonymizeRegexMatches.builder()
         .jsonPath("$..proxyAddresses[*]")
         .regex("(?i)^smtp:(.*)$")
@@ -275,111 +287,127 @@ public class PrebuiltSanitizerRules {
             REDACT_CALENDAR_ODATA_LINKS);
 
 
-    static final String MS_TEAMS_PATH_REGEX_TEAMS = "^/(v1.0|beta)/teams";
-    static final String MS_TEAMS_PATH_REGEX_TEAMS_ALL_CHANNELS = "^/(v1.0|beta)/teams/[^/]*/allChannels";
-    static final String MS_TEAMS_PATH_REGEX_USERS_CHATS = "^/(v1.0|beta)/users/[^/]*/chats";
-    static final String MS_TEAMS_PATH_REGEX_TEAMS_CHANNELS_MESSAGES = "^/(v1.0|beta)/teams/[^/]*/channels/[^/]*/messages";
-    static final String MS_TEAMS_PATH_REGEX_TEAMS_CHANNELS_MESSAGES_DELTA = "^/(v1.0|beta)/teams/[^/]*/channels/[^/]*/messages/delta";
-    static final String MS_TEAMS_PATH_REGEX_USERS_CHATS_MESSAGES = "^/(v1.0|beta)/users/chats/[^/]*/messages";
-    static final String MS_TEAMS_PATH_REGEX_COMMUNICATIONS_CALLS = "^/(v1.0|beta)/communications/calls/[^/]*";
-    static final String MS_TEAMS_PATH_REGEX_COMMUNICATIONS_CALLRECORDS = "^/(v1.0|beta)/communications/callRecords/[^/]*";
-    static final String MS_TEAMS_PATH_REGEX_USERS_ONLINEMEETINGS = "^/(v1.0|beta)/users/[^/]*/onlineMeetings";
+    static final String MS_TEAMS_PATH_REGEX_TEAMS = "/{apiVersion}/teams"; // ^/(v1.0|beta)
+    static final String MS_TEAMS_PATH_REGEX_TEAMS_ALL_CHANNELS = "/{apiVersion}/teams/{teamId}/allChannels";
+    static final String MS_TEAMS_PATH_REGEX_USERS_CHATS = "/{apiVersion}/users/{userId}/chats";
+    static final String MS_TEAMS_PATH_REGEX_TEAMS_CHANNELS_MESSAGES = "/{apiVersion}/teams/{teamId}/channels/{channelId}/messages";
+    static final String MS_TEAMS_PATH_REGEX_TEAMS_CHANNELS_MESSAGES_DELTA = "/{apiVersion}/teams/{teamId}/channels/{channelId}/messages/delta";
+    static final String MS_TEAMS_PATH_REGEX_CHATS_MESSAGES = "/{apiVersion}/chats/{chatId}/messages";
+    static final String MS_TEAMS_PATH_REGEX_COMMUNICATIONS_CALLS = "/{apiVersion}/communications/calls/{callId}";
+    static final String MS_TEAMS_PATH_REGEX_COMMUNICATIONS_CALL_RECORDS = "/{apiVersion}/communications/callRecords/{callChainId}";
+    static final String MS_TEAMS_PATH_REGEX_USERS_ONLINE_MEETINGS = "/{apiVersion}/users/{userId}/onlineMeetings";
 
+    static final Endpoint MS_TEAMS_TEAMS =  Endpoint.builder()
+        .pathTemplate(MS_TEAMS_PATH_REGEX_TEAMS)
+        .transform(Transform.Redact.builder()
+            .jsonPath("$..displayName")
+            .jsonPath("$..description")
+            .build())
+        .allowedQueryParams(List.of("$select","$top","$skipToken","$filter", "$count"))
+        .build();
 
-    static final List<Endpoint>  MS_TEAMS_ENDPOINTS = Arrays.asList(
-        Endpoint.builder()
-            .pathRegex(MS_TEAMS_PATH_REGEX_TEAMS)
-            .transform(Transform.Redact.builder()
-                .jsonPath("$..displayName")
-                .jsonPath("$..description")
-                .build())
-            .allowedQueryParams(List.of("$select","$top","$skipToken","$filter", "$count"))
-            .build(),
-        Endpoint.builder()
-            .pathRegex(MS_TEAMS_PATH_REGEX_TEAMS_ALL_CHANNELS)
-            .allowedQueryParams(List.of("$select","$filter"))
-            .transform(Transform.Redact.builder()
-                .jsonPath("$..displayName")
-                .jsonPath("$..description")
-                .build())
-            .build(),
-        Endpoint.builder()
-            .pathRegex(MS_TEAMS_PATH_REGEX_USERS_CHATS)
-            .allowedQueryParams(List.of("$select","$top","$skipToken", "$filter",  "$orderBy", "$expand"))
-            .build(),
-        Endpoint.builder()
-            .pathRegex(MS_TEAMS_PATH_REGEX_TEAMS_CHANNELS_MESSAGES)
-            .allowedQueryParams(List.of("$select","$top","$skipToken","$expand"))
-            .transform(Transform.Redact.builder()
-                .jsonPath("$..from.user.displayName")
-                .jsonPath("$..body.content")
-                .jsonPath("$..attachments")
-                .jsonPath("$..mentions[*].mentionText")
-                .jsonPath("$..mentions[*].mentioned.user.displayName")
-                .jsonPath("$..eventDetail.teamDescription")
-                .jsonPath("$..eventDetail.initiator.user.displayName")
-                .build())
-            .build(),
-        Endpoint.builder()
-            .pathRegex(MS_TEAMS_PATH_REGEX_TEAMS_CHANNELS_MESSAGES_DELTA)
-            .allowedQueryParams(List.of("$select","$top","$skipToken","$expand", "$deltaToken"))
-            .transform(Transform.Redact.builder()
-                .jsonPath("$..from.user.displayName")
-                .jsonPath("$..body.content")
-                .jsonPath("$..attachments")
-                .jsonPath("$..mentions[*].mentionText")
-                .jsonPath("$..mentions[*].mentioned.user.displayName")
-                .jsonPath("$..eventDetail.teamDescription")
-                .jsonPath("$..eventDetail.initiator.user.displayName")
-                .build())
-            .build(),
-        Endpoint.builder()
-            .pathRegex(MS_TEAMS_PATH_REGEX_USERS_CHATS_MESSAGES)
-            .allowedQueryParams(List.of("$select","$top","$skipToken","$filter", "$orderBy", "$count", "$expand", "$format", "$search", "$skip"))
-            .transform(Transform.Redact.builder()
-                .jsonPath("$..from.user.displayName")
-                .jsonPath("$..body.content")
-                .jsonPath("$..attachments")
-                .jsonPath("$..mentions[*].mentionText")
-                .jsonPath("$..mentions[*].mentioned.user.displayName")
-                .jsonPath("$..eventDetail.teamDescription")
-                .jsonPath("$..eventDetail.initiator.user.displayName")
-                .build())
-            .build(),
-        Endpoint.builder()
-            .pathRegex(MS_TEAMS_PATH_REGEX_COMMUNICATIONS_CALLS)
-            .allowedQueryParams(List.of("$select","$top","$expand"))
-            .transform(Transform.Redact.builder()
-                .jsonPath("$..displayName")
-                .build())
-            .build(),
-        Endpoint.builder()
-            .pathRegex(MS_TEAMS_PATH_REGEX_COMMUNICATIONS_CALLRECORDS)
-            .allowedQueryParams(List.of("$select","$expand"))
-            .transform(Transform.Redact.builder()
-                .jsonPath("$..organizer.user.displayName")
-                .jsonPath("$..participants[*].user.displayName")
-                .jsonPath("$..sessions[*].caller.identity.user.displayName")
-                .jsonPath("$..sessions[*].callee.identity.user.displayName")
-                .jsonPath("$..sessions[*].segments[*].caller.identity.user.displayName")
-                .jsonPath("$..sessions[*].segments[*].callee.identity.user.displayName")
-                .build())
-            .build(),
-        Endpoint.builder()
-            .pathRegex(MS_TEAMS_PATH_REGEX_USERS_ONLINEMEETINGS)
-            .allowedQueryParams(List.of("$select","$top","$skipToken","$filter", "$orderBy", "$count", "$expand", "$format", "$search", "$skip"))
-            .transform(Transform.Redact.builder()
-                .jsonPath("$..participants.attendees[*].identity.user.displayName")
-                .jsonPath("$..participants.organizer.identity.user.displayName")
-                .jsonPath("$..subject")
-                .build())
-            .build()
-    );
+    static final Endpoint MS_TEAMS_TEAMS_ALL_CHANNELS =  Endpoint.builder()
+        .pathTemplate(MS_TEAMS_PATH_REGEX_TEAMS_ALL_CHANNELS)
+        .transform(Transform.Redact.builder()
+            .jsonPath("$..displayName")
+            .jsonPath("$..description")
+            .build())
+        .allowedQueryParams(List.of("$select","$filter"))
+        .build();
 
-    static final Rules2 MS_TEAMS = DIRECTORY.withAdditionalEndpoints(MS_TEAMS_ENDPOINTS);
+    static final Endpoint MS_TEAMS_USERS_CHATS =         Endpoint.builder()
+        .pathTemplate(MS_TEAMS_PATH_REGEX_USERS_CHATS)
+        .allowedQueryParams(List.of("$select","$top","$skipToken", "$filter",  "$orderBy", "$expand"))
+        .build();
 
-    static final Rules2 MS_TEAMS_NO_APP_IDS = DIRECTORY_NO_MSFT_IDS
-        .withAdditionalEndpoints(MS_TEAMS_ENDPOINTS);
+    static final Endpoint MS_TEAMS_TEAMS_CHANNELS_MESSAGES = Endpoint.builder()
+        .pathTemplate(MS_TEAMS_PATH_REGEX_TEAMS_CHANNELS_MESSAGES)
+        .transform(Transform.Redact.builder()
+            .jsonPath("$..user.displayName")
+            .jsonPath("$..body.content")
+            .jsonPath("$..attachments")
+            .jsonPath("$..mentions[*].mentionText")
+            .jsonPath("$..eventDetail.teamDescription")
+            .build())
+        .allowedQueryParams(List.of("$select","$top","$skipToken","$expand"))
+        .build();
+
+    static final Endpoint MS_TEAMS_TEAMS_CHANNELS_MESSAGES_DELTA =  Endpoint.builder()
+        .pathTemplate(MS_TEAMS_PATH_REGEX_TEAMS_CHANNELS_MESSAGES_DELTA)
+        .transform(Transform.Redact.builder()
+            .jsonPath("$..user.displayName")
+            .jsonPath("$..value[*].body.content")
+            .jsonPath("$..value[*].attachments")
+            .jsonPath("$..value[*].mentions[*].mentionText")
+            .jsonPath("$..value[*].eventDetail.teamDescription")
+            .build())
+        .allowedQueryParams(List.of("$select","$top","$skipToken","$expand", "$deltaToken"))
+        .build();
+
+    static final Endpoint MS_TEAMS_CHATS_MESSAGES =  Endpoint.builder()
+        .pathTemplate(MS_TEAMS_PATH_REGEX_CHATS_MESSAGES)
+        .transform(Transform.Redact.builder()
+            .jsonPath("$..user.displayName")
+            .jsonPath("$..value[*].body.content")
+            .jsonPath("$..value[*].attachments")
+            .jsonPath("$..value[*].mentions[*].mentionText")
+            .jsonPath("$..value[*].eventDetail.teamDescription")
+            .build())
+        .allowedQueryParams(List.of("$select","$top","$skipToken","$filter", "$orderBy", "$count", "$expand", "$format", "$search", "$skip"))
+        .build();
+
+    static final Endpoint MS_TEAMS_COMMUNICATIONS_CALLS = Endpoint.builder()
+        .pathTemplate(MS_TEAMS_PATH_REGEX_COMMUNICATIONS_CALLS)
+        .transform(Transform.Redact.builder()
+            .jsonPath("$..displayName")
+            .build())
+        .allowedQueryParams(List.of("$select","$top","$expand"))
+        .build();
+
+    static final Endpoint MS_TEAMS_COMMUNICATIONS_CALL_RECORDS = Endpoint.builder()
+        .pathTemplate(MS_TEAMS_PATH_REGEX_COMMUNICATIONS_CALL_RECORDS)
+        .transform(Transform.Redact.builder()
+            .jsonPath("$..user.displayName")
+            .build())
+        .allowedQueryParams(List.of("$select","$expand"))
+        .build();
+
+    static final Endpoint MS_TEAMS_USERS_ONLINE_MEETINGS =  Endpoint.builder()
+        .pathTemplate(MS_TEAMS_PATH_REGEX_USERS_ONLINE_MEETINGS)
+        .transform(Transform.Redact.builder()
+            .jsonPath("$..user.displayName")
+            .jsonPath("$..subject")
+            .build())
+        .allowedQueryParams(List.of("$select","$top","$skipToken","$filter", "$orderBy", "$count", "$expand", "$format", "$search", "$skip"))
+        .build();
+
+    static final Rules2 MS_TEAMS = Rules2.builder()
+        .endpoint(MS_TEAMS_TEAMS)
+        .endpoint(MS_TEAMS_TEAMS_ALL_CHANNELS)
+        .endpoint(MS_TEAMS_USERS_CHATS)
+        .endpoint(MS_TEAMS_TEAMS_CHANNELS_MESSAGES)
+        .endpoint(MS_TEAMS_TEAMS_CHANNELS_MESSAGES_DELTA)
+        .endpoint(MS_TEAMS_CHATS_MESSAGES)
+        .endpoint(MS_TEAMS_COMMUNICATIONS_CALLS)
+        .endpoint(MS_TEAMS_COMMUNICATIONS_CALL_RECORDS)
+        .endpoint(MS_TEAMS_USERS_ONLINE_MEETINGS)
+        .build();
+
+    static final Transform.PseudonymizeRegexMatches PSEUDONYMIZE_USER_ID = Transform.PseudonymizeRegexMatches.builder()
+        .jsonPath("$..user.id")
+        .regex(".*")
+        .build();
+
+    static final Rules2 MS_TEAMS_NO_USER_ID = MS_TEAMS;
+        //.withTransformByEndpoint(MS_TEAMS_PATH_REGEX_TEAMS) ; //,                        REDACT_ODATA_CONTEXT, REDACT_ODATA_ID, REDACT_ODATA_TYPE, REDACT_ODATA_COUNT);
+        //.withTransformByEndpoint(MS_TEAMS_PATH_REGEX_TEAMS_ALL_CHANNELS,            PSEUDONYMIZE_USER_ID,   REDACT_ODATA_CONTEXT, REDACT_ODATA_ID, REDACT_ODATA_TYPE, REDACT_ODATA_COUNT);
+//        .withTransformByEndpoint(MS_TEAMS_PATH_REGEX_USERS_CHATS,                   PSEUDONYMIZE_USER_ID,   REDACT_ODATA_CONTEXT)
+//        .withTransformByEndpoint(MS_TEAMS_PATH_REGEX_TEAMS_CHANNELS_MESSAGES,       PSEUDONYMIZE_USER_ID,   REDACT_ODATA_CONTEXT,   TOKENIZE_ODATA_LINKS)
+//        .withTransformByEndpoint(MS_TEAMS_PATH_REGEX_TEAMS_CHANNELS_MESSAGES_DELTA, PSEUDONYMIZE_USER_ID,   REDACT_ODATA_CONTEXT,   TOKENIZE_ODATA_LINKS)
+//        .withTransformByEndpoint(MS_TEAMS_PATH_REGEX_USERS_CHATS_MESSAGES,          PSEUDONYMIZE_USER_ID,   REDACT_ODATA_CONTEXT,   TOKENIZE_ODATA_LINKS)
+//        .withTransformByEndpoint(MS_TEAMS_PATH_REGEX_COMMUNICATIONS_CALLS,          PSEUDONYMIZE_USER_ID,   REDACT_ODATA_CONTEXT)
+//        .withTransformByEndpoint(MS_TEAMS_PATH_REGEX_COMMUNICATIONS_CALL_RECORDS,   PSEUDONYMIZE_USER_ID,   REDACT_ODATA_CONTEXT,   TOKENIZE_ODATA_LINKS)
+//        .withTransformByEndpoint(MS_TEAMS_PATH_REGEX_USERS_ONLINE_MEETINGS,         PSEUDONYMIZE_USER_ID,   REDACT_ODATA_CONTEXT);
 
     public static final Map<String, RESTRules> MSFT_DEFAULT_RULES_MAP =
         ImmutableMap.<String, RESTRules>builder()
@@ -391,7 +419,7 @@ public class PrebuiltSanitizerRules {
             .put("outlook-mail", OUTLOOK_MAIL)
             .put("outlook-mail" + ConfigRulesModule.NO_APP_IDS_SUFFIX, OUTLOOK_MAIL_NO_APP_IDS)
             .put("outlook-mail" + ConfigRulesModule.NO_APP_IDS_SUFFIX + "-no-groups", OUTLOOK_MAIL_NO_APP_IDS_NO_GROUPS)
-            .put("ms-teams", MS_TEAMS)
-            .put("ms-teams" + ConfigRulesModule.NO_APP_IDS_SUFFIX, MS_TEAMS_NO_APP_IDS)
+            .put("msft-teams", MS_TEAMS)
+            .put("msft-teams" + ConfigRulesModule.NO_APP_IDS_SUFFIX + "-no-userId", MS_TEAMS_NO_USER_ID)
             .build();
 }

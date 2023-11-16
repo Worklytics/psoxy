@@ -1,0 +1,114 @@
+---
+endpoints:
+  - pathTemplate: "/{apiVersion}/teams"
+    allowedQueryParams:
+      - "$select"
+      - "$top"
+      - "$skipToken"
+      - "$filter"
+      - "$count"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..displayName"
+          - "$..description"
+  - pathTemplate: "/{apiVersion}/teams/{teamId}/allChannels"
+    allowedQueryParams:
+      - "$select"
+      - "$filter"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..displayName"
+          - "$..description"
+  - pathTemplate: "/{apiVersion}/users/{userId}/chats"
+    allowedQueryParams:
+      - "$select"
+      - "$top"
+      - "$skipToken"
+      - "$filter"
+      - "$orderBy"
+      - "$expand"
+  - pathTemplate: "/{apiVersion}/teams/{teamId}/channels/{channelId}/messages"
+    allowedQueryParams:
+      - "$select"
+      - "$top"
+      - "$skipToken"
+      - "$expand"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..user.displayName"
+          - "$..body.content"
+          - "$..attachments"
+          - "$..mentions[*].mentionText"
+          - "$..eventDetail.teamDescription"
+  - pathTemplate: "/{apiVersion}/teams/{teamId}/channels/{channelId}/messages/delta"
+    allowedQueryParams:
+      - "$select"
+      - "$top"
+      - "$skipToken"
+      - "$expand"
+      - "$deltaToken"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..user.displayName"
+          - "$..value[*].body.content"
+          - "$..value[*].attachments"
+          - "$..value[*].mentions[*].mentionText"
+          - "$..value[*].eventDetail.teamDescription"
+  - pathTemplate: "/{apiVersion}/chats/{chatId}/messages"
+    allowedQueryParams:
+      - "$select"
+      - "$top"
+      - "$skipToken"
+      - "$filter"
+      - "$orderBy"
+      - "$count"
+      - "$expand"
+      - "$format"
+      - "$search"
+      - "$skip"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..user.displayName"
+          - "$..value[*].body.content"
+          - "$..value[*].attachments"
+          - "$..value[*].mentions[*].mentionText"
+          - "$..value[*].eventDetail.teamDescription"
+  - pathTemplate: "/{apiVersion}/communications/calls/{callId}"
+    allowedQueryParams:
+      - "$select"
+      - "$top"
+      - "$expand"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..displayName"
+  - pathTemplate: "/{apiVersion}/communications/callRecords/{callChainId}"
+    allowedQueryParams:
+      - "$select"
+      - "$expand"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..user.displayName"
+  - pathTemplate: "/{apiVersion}/users/{userId}/onlineMeetings"
+    allowedQueryParams:
+      - "$select"
+      - "$top"
+      - "$skipToken"
+      - "$filter"
+      - "$orderBy"
+      - "$count"
+      - "$expand"
+      - "$format"
+      - "$search"
+      - "$skip"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..user.displayName"
+          - "$..subject"
