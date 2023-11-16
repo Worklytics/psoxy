@@ -1,5 +1,6 @@
 package com.avaulta.gateway.rules.transforms;
 
+import com.fasterxml.jackson.annotation.JsonTypeName;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -13,6 +14,7 @@ import lombok.experimental.SuperBuilder;
  * systems)
  *
  */
+@JsonTypeName("hashIp")
 @SuperBuilder(toBuilder = true)
 @NoArgsConstructor //for Jackson
 @Getter

@@ -1,10 +1,7 @@
 package com.avaulta.gateway.rules.transforms;
 
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -12,18 +9,26 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/*
+TODO: get this working; problem is that some of our transforms are ambiguous, so jackson can't
+deduce them
+@JsonTypeInfo(
+    use = JsonTypeInfo.Id.DEDUCTION,
+    defaultImpl = Transform.class
+)
+ */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "method")
 @JsonSubTypes({
-    @JsonSubTypes.Type(value = Transform.Redact.class, name = "redact"),
-    @JsonSubTypes.Type(value = Transform.RedactRegexMatches.class, name = "redactRegexMatches"),
-    @JsonSubTypes.Type(value = Transform.RedactExceptSubstringsMatchingRegexes.class, name = "redactExceptSubstringsMatchingRegexes"),
-    @JsonSubTypes.Type(value = Transform.Pseudonymize.class, name = "pseudonymize"),
-    @JsonSubTypes.Type(value = Transform.PseudonymizeEmailHeader.class, name = "pseudonymizeEmailHeader"),
-    @JsonSubTypes.Type(value = Transform.FilterTokenByRegex.class, name = "filterTokenByRegex"),
-    @JsonSubTypes.Type(value = Transform.Tokenize.class, name = "tokenize"),
-    @JsonSubTypes.Type(value = Transform.PseudonymizeRegexMatches.class, name = "pseudonymizeRegexMatches"),
-    @JsonSubTypes.Type(value = HashIp.class, name = "hashIp"),
-    @JsonSubTypes.Type(value = EncryptIp.class, name = "encryptIp")
+    @JsonSubTypes.Type(value = Transform.Redact.class),
+    @JsonSubTypes.Type(value = Transform.RedactRegexMatches.class),
+    @JsonSubTypes.Type(value = Transform.RedactExceptSubstringsMatchingRegexes.class),
+    @JsonSubTypes.Type(value = Transform.Pseudonymize.class),
+    @JsonSubTypes.Type(value = Transform.PseudonymizeEmailHeader.class),
+    @JsonSubTypes.Type(value = Transform.FilterTokenByRegex.class),
+    @JsonSubTypes.Type(value = Transform.Tokenize.class),
+    @JsonSubTypes.Type(value = Transform.PseudonymizeRegexMatches.class),
+    @JsonSubTypes.Type(value = HashIp.class),
+    @JsonSubTypes.Type(value = EncryptIp.class)
 })
 @SuperBuilder(toBuilder = true)
 @AllArgsConstructor //for builder
@@ -70,6 +75,7 @@ public abstract class Transform {
     @Builder.Default
     String applyOnlyWhen = null;
 
+    @JsonTypeName("redact")
     @NoArgsConstructor //for jackson
     @SuperBuilder(toBuilder = true)
     @Getter
@@ -90,6 +96,7 @@ public abstract class Transform {
         }
     }
 
+    @JsonTypeName("redactRegexMatches")
     @NoArgsConstructor //for jackson
     @SuperBuilder(toBuilder = true)
     @Getter
@@ -115,6 +122,7 @@ public abstract class Transform {
         }
     }
 
+    @JsonTypeName("redactExceptSubstringsMatchingRegexes")
     @NoArgsConstructor //for jackson
     @SuperBuilder(toBuilder = true)
     @Getter
@@ -146,6 +154,7 @@ public abstract class Transform {
      * transform to tokenize String field by delimiter (if provided), then return any matches against
      * filter regex
      */
+    @JsonTypeName("filterTokenByRegex")
     @NoArgsConstructor //for jackson
     @SuperBuilder(toBuilder = true)
     @Getter
@@ -177,7 +186,7 @@ public abstract class Transform {
         }
     }
 
-
+    @JsonTypeName("pseudonymizeEmailHeader")
     @NoArgsConstructor //for jackson
     @SuperBuilder(toBuilder = true)
     @Getter
@@ -205,6 +214,7 @@ public abstract class Transform {
 
     }
 
+    @JsonTypeName("pseudonymize")
     @SuperBuilder(toBuilder = true)
     @AllArgsConstructor //for builder
     @NoArgsConstructor //for Jackson
@@ -273,6 +283,7 @@ public abstract class Transform {
         }
     }
 
+    @JsonTypeName("pseudonymizeRegexMatches")
     @SuperBuilder(toBuilder = true)
     @AllArgsConstructor //for builder
     @NoArgsConstructor //for Jackson
@@ -320,6 +331,7 @@ public abstract class Transform {
     }
 
 
+    @JsonTypeName("tokenize")
     @SuperBuilder(toBuilder = true)
     @AllArgsConstructor //for builder
     @NoArgsConstructor //for Jackson

@@ -16,10 +16,7 @@ import java.util.List;
  *
  * would be supported as equivalent ... but can't get that to work with Jackson YAML
  */
-@JsonTypeInfo(
-    use = JsonTypeInfo.Id.DEDUCTION,
-    defaultImpl = RecordTransform.class
-)
+
 @JsonSubTypes({
     @JsonSubTypes.Type(value = RecordTransform.Redact.class),
     @JsonSubTypes.Type(value = RecordTransform.Pseudonymize.class)
