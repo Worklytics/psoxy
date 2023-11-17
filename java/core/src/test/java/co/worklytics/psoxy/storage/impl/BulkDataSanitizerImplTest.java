@@ -199,9 +199,24 @@ public class BulkDataSanitizerImplTest {
             "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM\"\",\"\"h_4\"\":\"\"0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\",\"\"h_4\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"mfsaNYuCX__xvnRz4gJp_t0zrDTC5DkuCJvMkubugsI\"\",\"\"h_4\"\":\"\"-hN_i1M1DeMAicDVp6LhFgW9lH7r3_LbOpTlXYWpXVI\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"TtDWXFAQxNE8O2w7DuMtEKzTSZXERuUVLCjmd9r6KQ4\"\",\"\"h_4\"\":\"\"TtDWXFAQxNE8O2w7DuMtEKzTSZXERuUVLCjmd9r6KQ4\"\"}\",2021-01-01,Accounting Manager\r\n" +
             "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"mfsaNYuCX__xvnRz4gJp_t0zrDTC5DkuCJvMkubugsI\"\",\"\"h_4\"\":\"\"-hN_i1M1DeMAicDVp6LhFgW9lH7r3_LbOpTlXYWpXVI\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"TtDWXFAQxNE8O2w7DuMtEKzTSZXERuUVLCjmd9r6KQ4\"\",\"\"h_4\"\":\"\"TtDWXFAQxNE8O2w7DuMtEKzTSZXERuUVLCjmd9r6KQ4\"\"}\",,,2020-01-01,CEO\r\n";
 
-        ConfigService config = mock(ConfigService.class);
-        when(config.getConfigPropertyAsOptional(eq(ProxyConfigProperty.RULES)))
-            .thenReturn(Optional.of(Base64.encodeBase64String(TestUtils.getData("sources/hris/csv.yaml"))));
+        String encodeBase64String = Base64.encodeBase64String(TestUtils.getData("sources/hris/csv.yaml"));
+
+        ConfigService config = new ConfigService() {
+            @Override
+            public void putConfigProperty(ConfigProperty property, String value) {
+
+            }
+
+            @Override
+            public String getConfigPropertyOrError(ConfigProperty property) {
+                return null;
+            }
+
+            @Override
+            public Optional<String> getConfigPropertyAsOptional(ConfigProperty property) {
+                return Optional.of(encodeBase64String);
+            }
+        };
 
         ColumnarRules rules = (ColumnarRules) rulesUtils.getRulesFromConfig(config).orElseThrow();
 
