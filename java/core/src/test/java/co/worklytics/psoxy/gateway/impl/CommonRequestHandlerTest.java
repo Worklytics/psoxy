@@ -131,7 +131,7 @@ class CommonRequestHandlerTest {
             Pseudonymizer.ConfigurationOptions.builder().build().getPseudonymImplementation());
 
         //prep mock request
-        HttpEventRequest request = mock(HttpEventRequest.class);
+        HttpEventRequest request = MockModules.provideMock(HttpEventRequest.class);
         when(request.getHeader(ControlHeader.PSEUDONYM_IMPLEMENTATION.getHttpHeader()))
             .thenReturn(Optional.of(PseudonymImplementation.LEGACY.getHttpHeaderValue()));
 
@@ -150,7 +150,7 @@ class CommonRequestHandlerTest {
             Pseudonymizer.ConfigurationOptions.builder().build().getPseudonymImplementation());
 
         //prep mock request
-        HttpEventRequest request = mock(HttpEventRequest.class);
+        HttpEventRequest request = MockModules.provideMock(HttpEventRequest.class);
         when(request.getHeader(ControlHeader.PSEUDONYM_IMPLEMENTATION.getHttpHeader()))
             .thenReturn(Optional.of(PseudonymImplementation.LEGACY.getHttpHeaderValue()));
 
