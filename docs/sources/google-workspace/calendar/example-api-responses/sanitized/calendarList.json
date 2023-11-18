@@ -6,7 +6,7 @@
     {
       "kind":"calendar#calendarListEntry",
       "etag":"\"1541799526249000\"",
-      "id":"{\"scope\":\"email\",\"domain\":\"acme.com\",\"hash\":\"rzmdfZy7jFbdlUZGLlzb7c5E7bJ9naZRvtD5L9XKXU0\",\"reversible\":\"p~UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMnKYUk8FJevl3wvFyZY0eF-@acme.com\"}",
+      "id":"p~UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMnKYUk8FJevl3wvFyZY0eF-@acme.com",
       "summary":null,
       "timeZone":"America/Los_Angeles",
       "colorId":"8",
@@ -50,7 +50,7 @@
     {
       "kind":"calendar#calendarListEntry",
       "etag":"\"1541799526249000\"",
-      "id":"{\"scope\":\"email\",\"domain\":\"group.v.calendar.google.com\",\"hash\":\"EWB7Oj.8.xjF3fOK8ZFlHsnM1SyjU_moNk_mhQGzT9E\",\"reversible\":\"p~Faa3BanSBWkYR2EPtGafNXYuk0V4dwvFVMHYNozsObZ1l6GhwLnzHTroBinny4zMSHzLeKzvWDxRDEvPxET7tqdNNCpj9QWJqZHMsfJctLA@group.v.calendar.google.com\"}",
+      "id":"p~Faa3BanSBWkYR2EPtGafNXYuk0V4dwvFVMHYNozsObZ1l6GhwLnzHTroBinny4zMSHzLeKzvWDxRDEvPxET7tqdNNCpj9QWJqZHMsfJctLA@group.v.calendar.google.com",
       "summary":null,
       "description":"Holidays and Observances in United States",
       "timeZone":"America/Los_Angeles",
@@ -69,7 +69,7 @@
     {
       "kind":"calendar#calendarListEntry",
       "etag":"\"1639589485357000\"",
-      "id":"{\"scope\":\"email\",\"domain\":\"gmail.com\",\"hash\":\"qd9uR3XVt6EwqRqV2fe.e4r7f8NJfgupwPtE5lXSkyA\",\"reversible\":\"p~DE__fI7lKDU-e4_ZTA7yZpj7Vu5cQ7jQbQE9h8aU5zhJj5a-qFlQQN2CcRaIPs47@gmail.com\"}",
+      "id":"p~DE__fI7lKDU-e4_ZTA7yZpj7Vu5cQ7jQbQE9h8aU5zhJj5a-qFlQQN2CcRaIPs47@gmail.com",
       "summary":null,
       "timeZone":"America/Los_Angeles",
       "summaryOverride":null,
@@ -88,7 +88,7 @@
     {
       "kind":"calendar#calendarListEntry",
       "etag":"\"1639589486168000\"",
-      "id":"{\"scope\":\"email\",\"domain\":\"group.calendar.google.com\",\"hash\":\"u_HtUugB3Z.yQg72voJs3bPDrNinW1BXIRLftQNT7co\",\"reversible\":\"p~PFD1QVQwvuvZRY2tco2DwEsqKpZlDgOOMMQem6rik-tCXf06BdpTZY4rbexbkEuiwUH2qgd6A0bFe3lXRdHtBQMypznMn-d_kZ-IZV-qpEeTpncrcF7un65Qsv6kP90O@group.calendar.google.com\"}",
+      "id":"p~PFD1QVQwvuvZRY2tco2DwEsqKpZlDgOOMMQem6rik-tCXf06BdpTZY4rbexbkEuiwUH2qgd6A0bFe3lXRdHtBQMypznMn-d_kZ-IZV-qpEeTpncrcF7un65Qsv6kP90O@group.calendar.google.com",
       "summary":null,
       "timeZone":"America/New_York",
       "colorId":"23",
@@ -106,7 +106,7 @@
     {
       "kind":"calendar#calendarListEntry",
       "etag":"\"1639589488947000\"",
-      "id":"{\"scope\":\"email\",\"domain\":\"acme.com\",\"hash\":\"vwfqMJYMMMVaTvq2P3omz4MOc.4EtFEOsN.H9cNSyHA\",\"reversible\":\"p~cs917Yg9tfqGyvXJ9TekgMRS9PiX7DoIyrbKf3BPnMXRVZanwrlMfQ5aaVqCGwuX@acme.com\"}",
+      "id":"p~cs917Yg9tfqGyvXJ9TekgMRS9PiX7DoIyrbKf3BPnMXRVZanwrlMfQ5aaVqCGwuX@acme.com",
       "summary":null,
       "timeZone":"America/Los_Angeles",
       "colorId":"20",
@@ -124,7 +124,7 @@
     {
       "kind":"calendar#calendarListEntry",
       "etag":"\"1658269473142000\"",
-      "id":"{\"scope\":\"email\",\"domain\":\"acme.com\",\"hash\":\"BoMTKUFmri3UX9xRkmANkcVsxkc8Dc4kXCVNugGLdJg\",\"reversible\":\"p~nV9LNaGvxSTwebrX20e6Q8qSjkbafIPOXprC66qwbUfPgXI8KR5o4sIOxbekPC5l0ocS-YBBJERZwO0v4ncZJA@acme.com\"}",
+      "id":"p~nV9LNaGvxSTwebrX20e6Q8qSjkbafIPOXprC66qwbUfPgXI8KR5o4sIOxbekPC5l0ocS-YBBJERZwO0v4ncZJA@acme.com",
       "summary":null,
       "timeZone":"Europe/Madrid",
       "colorId":"19",
@@ -141,7 +141,7 @@
     {
       "kind":"calendar#calendarListEntry",
       "etag":"\"1660779857672000\"",
-      "id":"{\"scope\":\"email\",\"domain\":\"acme.com\",\"hash\":\"sH64NW4Q7.F4pd56Ts2QD_LRirrngazuWe_3f7rjq1Y\",\"reversible\":\"p~-U7WKf4bQgfCSqtg28kpp672BXIc8kZN6Gmtg2iKn15G7DFX6AwvFyZ9VqU3_dCJ@acme.com\"}",
+      "id":"p~-U7WKf4bQgfCSqtg28kpp672BXIc8kZN6Gmtg2iKn15G7DFX6AwvFyZ9VqU3_dCJ@acme.com",
       "summary":"Transferred",
       "timeZone":"America/Los_Angeles",
       "colorId":"12",

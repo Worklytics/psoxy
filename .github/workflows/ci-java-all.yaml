@@ -11,6 +11,7 @@ on:
     branches:
       - 'main'
       - 'rc-*'
+      - 's162-improve-health-check' # more fixes to java cross-version compatibility here, so test all here to
 
 jobs:
   # Java 11 - Oracle support ended 30 Sept 2023

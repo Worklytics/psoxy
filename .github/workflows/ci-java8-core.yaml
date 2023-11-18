@@ -6,10 +6,13 @@ name: CI - java8 core
 #
 # see https://help.github.com/en/actions/language-and-framework-guides/building-and-testing-java-with-maven
 
+# Disable for now - hope we can dispense with this soon
 on:
-  push:
-    branches:
-      - '**' # should match all branches
+  workflow_dispatch: # allow manual triggering
+
+#  push:
+#    branches:
+#      - '**' # should match all branches
 
 jobs:
   ci_java8_core:

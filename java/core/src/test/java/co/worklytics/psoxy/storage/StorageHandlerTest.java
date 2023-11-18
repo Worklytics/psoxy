@@ -41,18 +41,11 @@ class StorageHandlerTest {
         void inject( StorageHandlerTest test);
     }
 
-
-    @Mock(mockMaker = MockMakers.SUBCLASS)
     InputStreamReader mockReader;
 
-    @Mock(mockMaker = MockMakers.SUBCLASS)
     OutputStreamWriter mockWriter;
 
-    @Mock(mockMaker = MockMakers.SUBCLASS)
-
-
     @Inject
-
     ConfigService config;
 
     @Inject
@@ -65,6 +58,8 @@ class StorageHandlerTest {
 
         when(config.getConfigPropertyOrError(eq(BulkModeConfigProperty.OUTPUT_BUCKET)))
             .thenReturn("bucket");
+        mockReader = MockModules.provideMock(InputStreamReader.class);
+        mockWriter = MockModules.provideMock(OutputStreamWriter.class);
     }
 
 

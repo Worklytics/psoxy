@@ -27,6 +27,7 @@
             <id>java8</id>
             <properties>
                 <artifactSuffix>-jdk8</artifactSuffix>
+                <dependency.mockito-junit-jupiter.version>4.11.0</dependency.mockito-junit-jupiter.version>
             </properties>
             <build>
                 <plugins>

@@ -34,32 +34,21 @@ class PseudonymizedIdentityTest {
     @Singleton
     @Component(modules = {
             PsoxyModule.class,
-            MockedConfigService.class,
+            MockModules.ForConfigService.class,
             MockModules.ForRules.class,
     })
     public interface Container {
         void inject(PseudonymizedIdentityTest test);
     }
 
-
-    @Module
-    public interface MockedConfigService {
-        @Provides
-        @Singleton
-        static ConfigService configService() {
-            ConfigService mock = mock(ConfigService.class);
-            TestModules.withMockEncryptionKey(mock);
-            when(mock.getConfigPropertyOrError(eq(ProxyConfigProperty.SOURCE)))
-                .thenReturn("gmail");
-            return mock;
-        }
-    }
     @BeforeEach
     public void setup() {
         PseudonymizedIdentityTest.Container container = DaggerPseudonymizedIdentityTest_Container.create();
         container.inject(this);
 
         withMockEncryptionKey(config);
+        when(config.getConfigPropertyOrError(eq(ProxyConfigProperty.SOURCE)))
+            .thenReturn("gmail");
     }
 
 
