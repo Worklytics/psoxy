@@ -131,8 +131,7 @@ public class MockModules {
         @Provides
         @Singleton
         static HostEnvironment hostEnvironment() {
-            HostEnvironment hostEnvironment = MockModules.provideMock(HostEnvironment.class);
-            when(hostEnvironment.getInstanceId()).thenReturn("psoxy-test");
+            HostEnvironment hostEnvironment = () -> "psoxy-test";
             return hostEnvironment;
         }
     }
