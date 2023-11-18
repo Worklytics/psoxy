@@ -2,6 +2,7 @@ package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.test.MockModules;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,7 +22,7 @@ class PseudonymizerImplFactoryTest {
     PseudonymizerImplFactory factory;
     @BeforeEach
     public void setup() {
-        configService = mock(ConfigService.class);
+        configService = MockModules.provideMock(ConfigService.class);
         when(configService.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT)).thenReturn(Optional.of("salt"));
 
         //interested in API case, when this is not set (expect legacy pseudonyms requested w header)

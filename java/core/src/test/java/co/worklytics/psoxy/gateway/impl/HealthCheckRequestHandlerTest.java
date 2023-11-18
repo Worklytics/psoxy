@@ -45,15 +45,17 @@ public class HealthCheckRequestHandlerTest {
 
         when(handler.config.getConfigPropertyAsOptional(ProxyConfigProperty.SOURCE))
                 .thenReturn(Optional.of("something"));
+
+        request = MockModules.provideMock(HttpEventRequest.class);
     }
 
     @Inject
     HealthCheckRequestHandler handler;
 
+    HttpEventRequest request;
+
     @Test
     void handleIfHealthCheck_should_serialize_response() {
-        HttpEventRequest request = mock(HttpEventRequest.class);
-
         when(request.getHeader(ControlHeader.HEALTH_CHECK.getHttpHeader()))
                 .thenReturn(Optional.of(""));
 
@@ -69,7 +71,6 @@ public class HealthCheckRequestHandlerTest {
 
     @Test
     void handleIfHealthCheck_should_return_invalid_response_when_target_host_is_not_configured() {
-        HttpEventRequest request = mock(HttpEventRequest.class);
 
         when(request.getHeader(ControlHeader.HEALTH_CHECK.getHttpHeader()))
                 .thenReturn(Optional.of(""));
@@ -86,7 +87,6 @@ public class HealthCheckRequestHandlerTest {
 
     @Test
     void handleIfHealthCheck_should_return_invalid_response_when_target_host_is_empty() {
-        HttpEventRequest request = mock(HttpEventRequest.class);
 
         when(request.getHeader(ControlHeader.HEALTH_CHECK.getHttpHeader()))
                 .thenReturn(Optional.of(""));
