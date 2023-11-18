@@ -15,6 +15,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mockito;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -136,7 +137,7 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
     public void serializesAccessTokenDTO() {
         OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl tokenRefreshHandler = new OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl();
         tokenRefreshHandler.objectMapper = objectMapper;
-        tokenRefreshHandler.config = mock(ConfigService.class);
+        tokenRefreshHandler.config = MockModules.provideMock(ConfigService.class);
         tokenRefreshHandler.payloadBuilder = mock(OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder.class);
         when(tokenRefreshHandler.config.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.USE_SHARED_TOKEN))
             .thenReturn(Optional.of("true"));
@@ -157,7 +158,7 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
     public void deserializesAccessTokenDTO() {
         OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl tokenRefreshHandler = new OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl();
         tokenRefreshHandler.objectMapper = objectMapper;
-        tokenRefreshHandler.config = mock(ConfigService.class);
+        tokenRefreshHandler.config = MockModules.provideMock(ConfigService.class);
         when(tokenRefreshHandler.config.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.ACCESS_TOKEN)).thenReturn(Optional.of("{\"token\":\"my-token\",\"expirationDate\":1639526410000}"));
 
         tokenRefreshHandler.payloadBuilder = mock(OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder.class);
@@ -183,10 +184,12 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
     @MethodSource
     public void refreshTokenNotRotated(String originalToken, String newToken, boolean shouldRotate) {
         OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl tokenRefreshHandler = new OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl();
-        tokenRefreshHandler.config = spy(ConfigService.class);
+        tokenRefreshHandler.config = MockModules.provideMock(ConfigService.class);
         when(tokenRefreshHandler.config.supportsWriting()).thenReturn(true);
         when(tokenRefreshHandler.config.getConfigPropertyAsOptional(eq(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN)))
             .thenReturn(Optional.of(originalToken));
+        when(tokenRefreshHandler.config.getConfigPropertyWithMetadata(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN))
+            .thenReturn(Optional.of(ConfigService.ConfigValueWithMetadata.builder().value(originalToken).build()));
 
         CanonicalOAuthAccessTokenResponseDto exampleResponse = new CanonicalOAuthAccessTokenResponseDto();
         exampleResponse.refreshToken = newToken;

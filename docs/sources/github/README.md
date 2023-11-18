@@ -1,4 +1,4 @@
-# Github _alpha_
+# Github _beta_
 
 ## Examples
 
@@ -24,7 +24,7 @@ NOTES:
 - We assume that ALL the repositories are going to be list **should be owned by the organization, not the users**.
 - Enterprise Cloud is required for this connector.
 
-Apart from Github instructions please review the following:
+Apart from GitHub instructions please review the following:
   - "Homepage URL" can be anything, not required in this flow but required by Github.
   - Webhooks check can be disabled as this connector is not using them
   - Keep `Expire user authorization tokens` enabled, as GitHub documentation recommends
