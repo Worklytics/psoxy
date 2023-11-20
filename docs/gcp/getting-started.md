@@ -38,6 +38,7 @@ Service Account Keys and activate Google Workspace APIs.
     *attempt* to enable these, but as there is sometimes a few minutes delay in activation and in
     some cases they are required to read your existing infra prior to apply, you may experience
     errors. To pre-empt those, we suggest ensuring the following are enabled:
+      - [Compute Engine API](https://console.cloud.google.com/apis/library/compute.googleapis.com) (`compute.googleapis.com`)
       - [Cloud Build API](https://console.cloud.google.com/apis/library/cloudbuild.googleapis.com) (`cloudbuild.googleapis.com`)
       - [Cloud Functions API](https://console.cloud.google.com/apis/library/cloudfunctions.googleapis.com) (`cloudfunctions.googleapis.com`)
       - [Cloud Resource Manager API](https://console.cloud.google.com/apis/library/cloudresourcemanager.googleapis.com) (`cloudresourcemanager.googleapis.com`)
