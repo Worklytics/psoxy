@@ -35,17 +35,16 @@ else
   printf "Are you sure? (y/n): "
   read -r CONFIRM
   if [ "$CONFIRM" != "y" ]; then
-    printf "Exiting.\n"
-    exit 1
+    printf "Skipping.\n"
+  else
+    # Delete the secrets
+    for secret in $secrets; do
+        printf "Deleting secret: ${BLUE}%s${NC}\n" "$secret"
+        gcloud secrets delete "$secret" --quiet --project=$PROJECT_ID
+    done
+
+    printf "${GREEN}All secrets with prefix %s have been deleted.${NC}\n" "$ENV_PREFIX"
   fi
-
-  # Delete the secrets
-  for secret in $secrets; do
-      printf "Deleting secret: ${BLUE}%s${NC}\n" "$secret"
-      gcloud secrets delete "$secret" --quiet --project=$PROJECT_ID
-  done
-
-  printf "${GREEN}All secrets with prefix %s have been deleted.${NC}\n" "$ENV_PREFIX"
 fi
 
 ## service accounts
@@ -60,17 +59,16 @@ else
   printf "Are you sure? (y/n): "
   read -r CONFIRM
   if [ "$CONFIRM" != "y" ]; then
-    printf "Exiting.\n"
-    exit 1
+    printf "Skipping.\n"
+  else
+    # Delete the service accounts
+    for service_account in $service_accounts; do
+        printf "Deleting service account: ${BLUE}%s${NC}\n" "$service_account"
+        gcloud iam service-accounts delete "$service_account" --quiet --project=$PROJECT_ID
+    done
+
+    printf "${GREEN}All service accounts with prefix %s have been deleted.${NC}\n" "$ENV_PREFIX"
   fi
-
-  # Delete the service accounts
-  for service_account in $service_accounts; do
-      printf "Deleting service account: ${BLUE}%s${NC}\n" "$service_account"
-      gcloud iam service-accounts delete "$service_account" --quiet --project=$PROJECT_ID
-  done
-
-  printf "${GREEN}All service accounts with prefix %s have been deleted.${NC}\n" "$ENV_PREFIX"
 fi
 
 ## cloud functions
@@ -85,17 +83,16 @@ else
   printf "Are you sure? (y/n): "
   read -r CONFIRM
   if [ "$CONFIRM" != "y" ]; then
-    printf "Exiting.\n"
-    exit 1
+    printf "Skipping.\n"
+  else
+    # Delete the cloud functions
+    for cloud_function in $cloud_functions; do
+        printf "Deleting cloud function: ${BLUE}%s${NC}\n" "$cloud_function"
+        gcloud functions delete "$cloud_function" --quiet --project=$PROJECT_ID
+    done
+
+    printf "${GREEN}All cloud functions with prefix %s have been deleted.${NC}\n" "$ENV_PREFIX"
   fi
-
-  # Delete the cloud functions
-  for cloud_function in $cloud_functions; do
-      printf "Deleting cloud function: ${BLUE}%s${NC}\n" "$cloud_function"
-      gcloud functions delete "$cloud_function" --quiet --project=$PROJECT_ID
-  done
-
-  printf "${GREEN}All cloud functions with prefix %s have been deleted.${NC}\n" "$ENV_PREFIX"
 fi
 
 ## GCS buckets
@@ -110,18 +107,42 @@ else
   printf "Are you sure? (y/n): "
   read -r CONFIRM
   if [ "$CONFIRM" != "y" ]; then
-    printf "Exiting.\n"
-    exit 1
+    printf "Skipping.\n"
+  else
+    # Delete the buckets
+    for bucket in $buckets; do
+        printf "Deleting bucket: ${BLUE}%s${NC}\n" "$bucket"
+        gsutil rm -r "$bucket"
+    done
+
+    printf "${GREEN}All GCS buckets with prefix %s have been deleted.${NC}\n" "$ENV_PREFIX"
   fi
-
-  # Delete the buckets
-  for bucket in $buckets; do
-      printf "Deleting bucket: ${BLUE}%s${NC}\n" "$bucket"
-      gsutil rm -r "$bucket"
-  done
-
-  printf "${GREEN}All GCS buckets with prefix %s have been deleted.${NC}\n" "$ENV_PREFIX"
 fi
 
+# IAM roles
+ROLE_PREFIX="${ENV_PREFIX//-/_}"
+roles=$(gcloud iam roles list --project=$PROJECT_ID --format='value(name)' | grep "${ROLE_PREFIX}")
+
+if [ -z "$roles" ]; then
+  printf "No IAM roles found with the prefix ${BLUE}%s${NC}\n" "$ROLE_PREFIX"
+else
+  printf "You are about to delete the following IAM roles:\n"
+  printf "${BLUE}$roles${NC}\n"
+
+  printf "Are you sure? (y/n): "
+  read -r CONFIRM
+  if [ "$CONFIRM" != "y" ]; then
+    printf "Skipping.\n"
+  else
+    # Delete the roles
+    for role in $roles; do
+        printf "Deleting role: ${BLUE}%s${NC}\n" "$role"
+        role_id=$(echo "$role" | sed 's/.*\/\(.*\)/\1/')
+        gcloud iam roles delete "$role_id" --quiet --project=$PROJECT_ID
+    done
+
+    printf "${GREEN}All IAM roles with prefix %s have been deleted.${NC}\n" "$ROLE_PREFIX"
+  fi
+fi
 
 
