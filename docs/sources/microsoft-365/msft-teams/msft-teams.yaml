@@ -105,6 +105,10 @@ endpoints:
           - "$..ipAddress"
           - "$..subnet"
           - "$..macAddress"
+          - "$..caller.name"
+          - "$..callee.name"
+          - "$..captureDeviceName"
+          - "$..renderDeviceName"
   - pathTemplate: "/{apiVersion}/users/{userId}/onlineMeetings"
     allowedQueryParams:
       - "$select"

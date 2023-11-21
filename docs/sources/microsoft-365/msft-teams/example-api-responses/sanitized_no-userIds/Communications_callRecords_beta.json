@@ -38,7 +38,6 @@
       "id":"e523d2ed-2966-4b6b-925b-754a88034cc5",
       "isTest":false,
       "caller":{
-        "name":"machineName_2",
         "cpuName":"Intel(R) Xeon(R) Platinum 8272CL CPU @ 2.60GHz",
         "cpuCoresCount":2,
         "cpuProcessorSpeedInMhz":2594,
@@ -55,7 +54,6 @@
         }
       },
       "callee":{
-        "name":"machineName_4",
         "cpuName":"Intel(R) Xeon(R) CPU E5-2673 v4 @ 2.30GHz",
         "cpuCoresCount":8,
         "cpuProcessorSpeedInMhz":2295,
@@ -90,7 +88,6 @@
           "endDateTime":"2020-02-25T18:52:46.7640013Z",
           "id":"e523d2ed-2966-4b6b-925b-754a88034cc5",
           "caller":{
-            "name":"machineName_4",
             "cpuName":"Intel(R) Xeon(R) CPU E5-2673 v4 @ 2.30GHz",
             "cpuCoresCount":8,
             "cpuProcessorSpeedInMhz":2295,
@@ -107,7 +104,6 @@
             }
           },
           "callee":{
-            "name":"machineName_6",
             "cpuName":"Intel(R) Xeon(R) CPU E5-2673 v4 @ 2.30GHz",
             "cpuCoresCount":8,
             "cpuProcessorSpeedInMhz":2295,
@@ -149,8 +145,6 @@
                 "bandwidthLowEventRatio":0
               },
               "callerDevice":{
-                "captureDeviceName":"Default input device",
-                "renderDeviceName":"Default output device",
                 "receivedSignalLevel":-10,
                 "receivedNoiseLevel":-68,
                 "initialSignalLevelRootMeanSquare":60.25816,
@@ -160,9 +154,7 @@
                 "speakerGlitchRate":3830
               },
               "calleeDevice":{
-                "captureDeviceName":"Microphone (Microsoft Virtual Audio Device (Simple) (WDM))",
                 "captureDeviceDriver":"Microsoft: 5.0.8638.1100",
-                "renderDeviceName":"Speakers (Microsoft Virtual Audio Device (Simple) (WDM))",
                 "renderDeviceDriver":"Microsoft: 5.0.8638.1100",
                 "receivedSignalLevel":-14,
                 "receivedNoiseLevel":-86,

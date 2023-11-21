@@ -211,6 +211,10 @@ endpoints:
           - "$..ipAddress"
           - "$..subnet"
           - "$..macAddress"
+          - "$..caller.name"
+          - "$..callee.name"
+          - "$..captureDeviceName"
+          - "$..renderDeviceName"
       - !<pseudonymize>
         jsonPaths:
           - "$..user.id"

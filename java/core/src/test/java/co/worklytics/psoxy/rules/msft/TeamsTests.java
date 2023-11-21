@@ -299,7 +299,11 @@ public class TeamsTests extends JavaRulesTestBaseCase {
         String sanitized = sanitize(endpoint, jsonResponse);
         assertRedacted(sanitized,
             "Abbie Wilkins",
-            "Owen Franklin"
+            "Owen Franklin",
+
+            "machineName_",
+            "Default input device",
+            "Microphone (Microsoft Virtual Audio Device (Simple) (WDM))"
         );
         assertUrlWithSubResourcesBlocked(endpoint);
     }

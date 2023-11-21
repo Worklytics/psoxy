@@ -386,6 +386,10 @@ public class PrebuiltSanitizerRules {
             .jsonPath("$..ipAddress")
             .jsonPath("$..subnet")
             .jsonPath("$..macAddress")
+            .jsonPath("$..caller.name")
+            .jsonPath("$..callee.name")
+            .jsonPath("$..captureDeviceName")
+            .jsonPath("$..renderDeviceName")
             .build())
         .allowedQueryParams(List.of("$select","$expand"))
         .build();
