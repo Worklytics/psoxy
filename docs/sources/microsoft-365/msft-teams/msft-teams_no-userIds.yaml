@@ -12,6 +12,22 @@ endpoints:
         jsonPaths:
           - "$..displayName"
           - "$..description"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..user.id"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.context']"
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.id']"
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.type']"
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.count']"
   - pathTemplate: "/{apiVersion}/teams/{teamId}/allChannels"
     allowedQueryParams:
       - "$select"
@@ -21,6 +37,22 @@ endpoints:
         jsonPaths:
           - "$..displayName"
           - "$..description"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..user.id"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.context']"
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.id']"
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.type']"
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.count']"
   - pathTemplate: "/{apiVersion}/users/{userId}/chats"
     allowedQueryParams:
       - "$select"
@@ -33,6 +65,16 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$..topic"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..user.id"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.context']"
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.count']"
   - pathTemplate: "/{apiVersion}/teams/{teamId}/channels/{channelId}/messages"
     allowedQueryParams:
       - "$select"
@@ -47,6 +89,22 @@ endpoints:
           - "$..attachments"
           - "$..mentions[*].mentionText"
           - "$..eventDetail.teamDescription"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..user.id"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.context']"
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.count']"
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.type']"
+      - !<tokenize>
+        jsonPaths:
+          - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
   - pathTemplate: "/{apiVersion}/teams/{teamId}/channels/{channelId}/messages/delta"
     allowedQueryParams:
       - "$select"
@@ -62,6 +120,22 @@ endpoints:
           - "$..value[*].attachments"
           - "$..value[*].mentions[*].mentionText"
           - "$..value[*].eventDetail.teamDescription"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..user.id"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.context']"
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.count']"
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.type']"
+      - !<tokenize>
+        jsonPaths:
+          - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
   - pathTemplate: "/{apiVersion}/chats/{chatId}/messages"
     allowedQueryParams:
       - "$select"
@@ -82,6 +156,22 @@ endpoints:
           - "$..value[*].attachments"
           - "$..value[*].mentions[*].mentionText"
           - "$..value[*].eventDetail.teamDescription"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..user.id"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.context']"
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.count']"
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.type']"
+      - !<tokenize>
+        jsonPaths:
+          - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
   - pathTemplate: "/{apiVersion}/communications/calls/{callId}"
     allowedQueryParams:
       - "$select"
@@ -91,6 +181,19 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$..displayName"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..user.id"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.context']"
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.count']"
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.type']"
   - pathTemplate: "/{apiVersion}/communications/callRecords/{callChainId}"
     allowedQueryParams:
       - "$select"
@@ -104,6 +207,19 @@ endpoints:
           - "$..ipAddress"
           - "$..subnet"
           - "$..macAddress"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..user.id"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.context']"
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.type']"
+      - !<tokenize>
+        jsonPaths:
+          - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
   - pathTemplate: "/{apiVersion}/users/{userId}/onlineMeetings"
     allowedQueryParams:
       - "$select"
@@ -122,3 +238,13 @@ endpoints:
           - "$..user.displayName"
           - "$..subject"
           - "$..joinMeetingIdSettings"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..user.id"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.context']"
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.type']"

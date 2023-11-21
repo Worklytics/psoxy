@@ -1,0 +1,108 @@
+{
+  "@odata.nextLink":"p~0LAvSUD2aY1wyN_twcHARRwJ3LWxbjcauNcZgGvYPp1M8st-uVM2Igebh3sY1msdehsNWEzBYamRCuMD4VxMai-r5rcyJB7Dc2S50pierbNSFdX7IJtwwK2RKvzZznWRu4Knca_4vDkHn07oZzoxMqAaOGs73Gp4mBBByg3VRbVlwIWoOoWO3i_UAAEbBv8JsuHaW1IQ1ZIO5AXR6RShvO9_hSYunFGOcgkOGerxdNH1YK-deSI8FkM5oAVU9pr1LkOW7N8hcYvJW6_DwI-miQFpUiexEAkj1B_7iw5I9BvglBX_eChbhbDk_zTVnJTm70Cbuz967uXvGLx-jIgEMvNrl6mbQ94erkbybIdEahyzetEjb-oboRQdXCEAT19J14MB6b3Ph4vlWyZCyO2GAfDn9RKkFqv0JwMfB6LM8ww03L9ZSz4MoDA92NM_TJBDGTqI3rl0lMSyUaPXLRdEIA",
+  "value":[
+    {
+      "id":"1616964509832",
+      "replyToId":null,
+      "etag":"1616964509832",
+      "messageType":"message",
+      "createdDateTime":"2021-03-28T20:48:29.832Z",
+      "lastModifiedDateTime":"2021-03-28T20:48:29.832Z",
+      "lastEditedDateTime":null,
+      "deletedDateTime":null,
+      "subject":null,
+      "summary":null,
+      "chatId":"19:2da4c29f6d7041eca70b638b43d45437@thread.v2",
+      "importance":"normal",
+      "locale":"en-us",
+      "webUrl":null,
+      "channelIdentity":null,
+      "policyViolation":null,
+      "eventDetail":null,
+      "from":{
+        "application":null,
+        "device":null,
+        "user":{
+          "id":"{\"scope\":\"azure-ad\",\"hash\":\"B9mIayvpLlXmJS0UFmhvp06dDj9WoxgJ9Dc7zS9Dc90\"}",
+          "userIdentityType":"aadUser"
+        }
+      },
+      "body":{
+        "contentType":"text"
+      },
+      "mentions":[ ],
+      "reactions":[ ],
+      "messageHistory":[ ]
+    },
+    {
+      "id":"1615971548136",
+      "replyToId":null,
+      "etag":"1615971548136",
+      "messageType":"message",
+      "createdDateTime":"2021-03-17T08:59:08.136Z",
+      "lastModifiedDateTime":"2021-03-17T08:59:08.136Z",
+      "lastEditedDateTime":null,
+      "deletedDateTime":null,
+      "subject":null,
+      "summary":null,
+      "chatId":"19:2da4c29f6d7041eca70b638b43d45437@thread.v2",
+      "importance":"normal",
+      "locale":"en-us",
+      "webUrl":null,
+      "channelIdentity":null,
+      "policyViolation":null,
+      "eventDetail":null,
+      "from":{
+        "application":null,
+        "device":null,
+        "user":{
+          "id":"{\"scope\":\"azure-ad\",\"hash\":\"B9mIayvpLlXmJS0UFmhvp06dDj9WoxgJ9Dc7zS9Dc90\"}",
+          "userIdentityType":"aadUser"
+        }
+      },
+      "body":{
+        "contentType":"html"
+      },
+      "mentions":[ ],
+      "reactions":[ ],
+      "messageHistory":[ ]
+    },
+    {
+      "id":"1615943825123",
+      "replyToId":null,
+      "etag":"1615943825123",
+      "messageType":"unknownFutureValue",
+      "createdDateTime":"2021-03-1706:47:05.123Z",
+      "lastModifiedDateTime":"2021-03-1706:47:05.123Z",
+      "lastEditedDateTime":null,
+      "deletedDateTime":null,
+      "subject":null,
+      "summary":null,
+      "chatId":"19:2da4c29f6d7041eca70b638b43d45437@thread.v2",
+      "importance":"normal",
+      "locale":"en-us",
+      "webUrl":null,
+      "channelIdentity":null,
+      "policyViolation":null,
+      "from":null,
+      "body":{
+        "contentType":"html"
+      },
+      "mentions":[ ],
+      "reactions":[ ],
+      "messageHistory":[ ],
+      "eventDetail":{
+        "chatId":"19:2da4c29f6d7041eca70b638b43d45437@thread.v2",
+        "chatDisplayName":"Graph Members",
+        "initiator":{
+          "application":null,
+          "device":null,
+          "user":{
+            "id":"{\"scope\":\"azure-ad\",\"hash\":\"_f_lwH_zqYVtech_dnZSTmXzYq4pDo8vsGQ51YNjrY4\"}",
+            "userIdentityType":"aadUser"
+          }
+        }
+      }
+    }
+  ]
+}

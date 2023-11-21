@@ -1,5 +1,4 @@
 {
-  "@odata.context":"https://graph.microsoft.com/v1.0/$metadata#communications/callRecords(sessions(segments()))/$entity",
   "version":1,
   "type":"peerToPeer",
   "modalities":[
@@ -11,20 +10,20 @@
   "id":"e523d2ed-2966-4b6b-925b-754a88034cc5",
   "organizer":{
     "user":{
-      "id":"821809f5-0000-0000-0000-3b5136c0e777",
+      "id":"{\"scope\":\"azure-ad\",\"hash\":\"_NMipkQ9Oebtrm7A33WQtT_wp1HCdXFRkhibMxTZGpU\"}",
       "tenantId":"dc368399-474c-4d40-900c-6265431fd81f"
     }
   },
   "participants":[
     {
       "user":{
-        "id":"821809f5-0000-0000-0000-3b5136c0e777",
+        "id":"{\"scope\":\"azure-ad\",\"hash\":\"_NMipkQ9Oebtrm7A33WQtT_wp1HCdXFRkhibMxTZGpU\"}",
         "tenantId":"dc368399-474c-4d40-900c-6265431fd81f"
       }
     },
     {
       "user":{
-        "id":"f69e2c00-0000-0000-0000-185e5f5f5d8a",
+        "id":"{\"scope\":\"azure-ad\",\"hash\":\"ejSHHUaRnhvrRPBjmJAxSudeydUkOaOBffHT-nIS1s0\"}",
         "tenantId":"dc368399-474c-4d40-900c-6265431fd81f"
       }
     }
@@ -39,40 +38,35 @@
       "id":"e523d2ed-2966-4b6b-925b-754a88034cc5",
       "isTest":false,
       "caller":{
-        "@odata.type":"#microsoft.graph.callRecords.participantEndpoint",
         "name":"machineName_2",
         "cpuName":"Intel(R) Xeon(R) Platinum 8272CL CPU @ 2.60GHz",
         "cpuCoresCount":2,
         "cpuProcessorSpeedInMhz":2594,
         "userAgent":{
-          "@odata.type":"#microsoft.graph.callRecords.clientUserAgent",
           "headerValue":"RTCC/7.0.0.0 UCWA/7.0.0.0 AndroidLync/6.25.0.27 (SM-G930U Android 8.0.0)",
           "platform":"android",
           "productFamily":"skypeForBusiness"
         },
         "identity":{
-          "@odata.type":"#microsoft.graph.identitySet",
           "user":{
-            "id":"821809f5-0000-0000-0000-3b5136c0e777",
+            "id":"{\"scope\":\"azure-ad\",\"hash\":\"_NMipkQ9Oebtrm7A33WQtT_wp1HCdXFRkhibMxTZGpU\"}",
             "tenantId":"dc368399-474c-4d40-900c-6265431fd81f"
           }
         }
       },
       "callee":{
-        "@odata.type":"#microsoft.graph.callRecords.participantEndpoint",
         "name":"machineName_4",
         "cpuName":"Intel(R) Xeon(R) CPU E5-2673 v4 @ 2.30GHz",
         "cpuCoresCount":8,
         "cpuProcessorSpeedInMhz":2295,
         "userAgent":{
-          "@odata.type":"#microsoft.graph.callRecords.clientUserAgent",
           "headerValue":"UCCAPI/16.0.12527.20122 OC/16.0.12527.20194 (Skype for Business)",
           "platform":"windows",
           "productFamily":"skypeForBusiness"
         },
         "identity":{
           "user":{
-            "id":"f69e2c00-0000-0000-0000-185e5f5f5d8a",
+            "id":"{\"scope\":\"azure-ad\",\"hash\":\"ejSHHUaRnhvrRPBjmJAxSudeydUkOaOBffHT-nIS1s0\"}",
             "tenantId":"dc368399-474c-4d40-900c-6265431fd81f"
           }
         },
@@ -96,39 +90,35 @@
           "endDateTime":"2020-02-25T18:52:46.7640013Z",
           "id":"e523d2ed-2966-4b6b-925b-754a88034cc5",
           "caller":{
-            "@odata.type":"#microsoft.graph.callRecords.participantEndpoint",
             "name":"machineName_4",
             "cpuName":"Intel(R) Xeon(R) CPU E5-2673 v4 @ 2.30GHz",
             "cpuCoresCount":8,
             "cpuProcessorSpeedInMhz":2295,
             "userAgent":{
-              "@odata.type":"#microsoft.graph.callRecords.clientUserAgent",
               "headerValue":"RTCC/7.0.0.0 UCWA/7.0.0.0 AndroidLync/6.25.0.27 (SM-G930U Android 8.0.0)",
               "platform":"android",
               "productFamily":"skypeForBusiness"
             },
             "identity":{
               "user":{
-                "id":"821809f5-0000-0000-0000-3b5136c0e777",
+                "id":"{\"scope\":\"azure-ad\",\"hash\":\"_NMipkQ9Oebtrm7A33WQtT_wp1HCdXFRkhibMxTZGpU\"}",
                 "tenantId":"dc368399-474c-4d40-900c-6265431fd81f"
               }
             }
           },
           "callee":{
-            "@odata.type":"#microsoft.graph.callRecords.participantEndpoint",
             "name":"machineName_6",
             "cpuName":"Intel(R) Xeon(R) CPU E5-2673 v4 @ 2.30GHz",
             "cpuCoresCount":8,
             "cpuProcessorSpeedInMhz":2295,
             "userAgent":{
-              "@odata.type":"#microsoft.graph.callRecords.clientUserAgent",
               "headerValue":"UCCAPI/16.0.12527.20122 OC/16.0.12527.20194 (Skype for Business)",
               "platform":"windows",
               "productFamily":"skypeForBusiness"
             },
             "identity":{
               "user":{
-                "id":"f69e2c00-0000-0000-0000-185e5f5f5d8a",
+                "id":"{\"scope\":\"azure-ad\",\"hash\":\"ejSHHUaRnhvrRPBjmJAxSudeydUkOaOBffHT-nIS1s0\"}",
                 "tenantId":"dc368399-474c-4d40-900c-6265431fd81f"
               }
             }
@@ -230,5 +220,5 @@
       ]
     }
   ],
-  "sessions@odata.nextLink":"https://graph.microsoft.com/v1.0/$metadata#communications/callRecords('e523d2ed-2966-4b6b-925b-754a88034cc5')/sessions?$expand=segments&$skiptoken=abc"
+  "sessions@odata.nextLink":"p~KchfaB2h7bCt2PZt0VlJrdE0MLKmQoG02bUPt6-8pAFnzrerERc9Tg07n7iEybyey3lOFzn1nPeIRMgEeWwT_d0jR5mOJZzvWLNgsRLiifoEL7C81fLQQ_RHxGelelVxffLfhfVHJ1A0wg6WJq2fa2HMng9UCjNr1rcxgJXZOQCpg1k18Ox3hgpBBNgBRPRgkvzuTMVwhSPIF1kPKVZZUpfBBbxNEt68o0PEInkUijZeBhhO_mViNCxk2F2sNPdk"
 }

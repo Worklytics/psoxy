@@ -14,5 +14,3 @@ target
 
 # don't catch config.yaml, may contain secret salt
 impl/cmd-line/config.yaml
-
-.idea/

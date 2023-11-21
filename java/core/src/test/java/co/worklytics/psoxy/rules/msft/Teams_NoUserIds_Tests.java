@@ -1,0 +1,236 @@
+package co.worklytics.psoxy.rules.msft;
+
+import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
+import co.worklytics.psoxy.rules.Rules2;
+import jdk.jfr.Description;
+import lombok.Getter;
+import lombok.SneakyThrows;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.stream.Stream;
+
+public class Teams_NoUserIds_Tests extends JavaRulesTestBaseCase {
+
+    @Getter
+    final Rules2 rulesUnderTest = PrebuiltSanitizerRules.MS_TEAMS_NO_USER_ID;
+
+
+    @Getter
+    final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
+        .sourceFamily("microsoft-365")
+        .defaultScopeId("azure-ad")
+        .sourceKind("msft-teams")
+        .rulesFile("msft-teams_no-userIds")
+        .exampleSanitizedApiResponsesPath("example-api-responses/sanitized_no-userIds/")
+        .build();
+
+    @ParameterizedTest
+    @ValueSource(strings = {"v1.0", "beta"})
+    @Description("Test endpoint:" + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_TEAMS)
+    public void teams(String apiVersion) {
+        String endpoint = "https://graph.microsoft.com/" + apiVersion + "/teams";
+        String jsonResponse = asJson("Teams_"+ apiVersion + ".json");
+
+        String sanitized = sanitize(endpoint, jsonResponse);
+        assertRedacted(sanitized,
+            "@odata.type", "#microsoft.graph.associatedTeamInfo"
+        );
+        assertUrlWithSubResourcesBlocked(endpoint);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"v1.0", "beta"})
+    @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_TEAMS_ALL_CHANNELS)
+    public void teams_allChannels(String apiVersion) {
+        String teamId = "172b0cce-e65d-44ce-9a49-91d9f2e8493a";
+        String endpoint = "https://graph.microsoft.com/" + apiVersion + "/teams/" + teamId + "/allChannels";
+        String jsonResponse = asJson("Teams_allChannels_"+ apiVersion + ".json");
+
+        String sanitized = sanitize(endpoint, jsonResponse);
+        assertRedacted(sanitized,
+            "@odata.id","https://graph.microsoft.com/v1.0/tenants/b3246f44-b4gb-4627-96c6-25b18fa2c910/teams/893075dd-2487-4122-925f-022c42e20265/channels/19:561fbdbbfca848a484f0a6f00ce9dbbd@thread.tacv2"
+            );
+        assertUrlWithSubResourcesBlocked(endpoint);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"v1.0", "beta"})
+    @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_USERS_CHATS)
+    public void users_chats(String apiVersion) {
+        String userId = "8b081ef6-4792-4def-b2c9-c363a1bf41d5";
+        String endpoint = "https://graph.microsoft.com/" + apiVersion + "/users/" + userId + "/chats";
+        String jsonResponse = asJson("Users_chats_"+ apiVersion + ".json");
+
+        String sanitized = sanitize(endpoint, jsonResponse);
+        assertRedacted(sanitized,
+            "@odata.context", "https://graph.microsoft.com/v1.0/$metadata#chats",
+            "@odata.count"
+        );
+        assertUrlWithSubResourcesBlocked(endpoint);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"v1.0", "beta"})
+    @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_TEAMS_CHANNELS_MESSAGES)
+    public void teams_channels_messages(String apiVersion) {
+        String teamId = "172b0cce-e65d-44ce-9a49-91d9f2e8493a";
+        String userId = "8b081ef6-4792-4def-b2c9-c363a1bf41d5";
+        String endpoint = "https://graph.microsoft.com/" + apiVersion + "/teams/" + teamId + "/channels/" + userId + "/messages";
+        String jsonResponse = asJson("Teams_channels_messages_" + apiVersion + ".json");
+
+        String sanitized = sanitize(endpoint, jsonResponse);
+        assertPseudonymized(sanitized, "8ea0e38b-efb3-4757-924a-5f94061cf8c2",
+            "1fb8890f-423e-4154-8fbf-db6809bc8756");
+        assertRedacted(sanitized,
+            "@odata.context", "https://graph.microsoft.com/v1.0/$metadata#teams('fbe2bf47-16c8-47cf-b4a5-4b9b187c508b')/channels('19%3A4a95f7d8db4c4e7fae857bcebe0623e6%40thread.tacv2')/messages",
+            "@odata.count",
+            "@odata.type", "#microsoft.graph.teamDescriptionUpdatedEventMessageDetail"
+        );
+
+        // primaryEmail, emails, relations, aliases and nonEditableAliases
+        Collection<String> oDataUrl = Arrays.asList(
+            "https://graph.microsoft.com/v1.0/teams/fbe2bf47-16c8-47cf-b4a5-4b9b187c508b/channels/19:4a95f7d8db4c4e7fae857bcebe0623e6@thread.tacv2/messages?$skiptoken=%5b%7B%22token%22%3a%22%2bRID%3a~vpsQAJ9uAC047gwAAACcBQ%3d%3d%23RT%3a1%23TRC%3a20%23RTD%3aAyAER1ygxSHVHGAn2S99BTI6OzViOjZnOGU5ZWM1ZDVmOGdiZjk2OGNkZmNmMTczNGY3QXVpc2ZiZS91YmR3MzwyNzIyNDY2OTU0NTg6AA%3d%3d%23ISV%3a2%23IEO%3a65551%23QCF%3a3%23FPC%3aAggEAAAAcBYAABUFAADQKgAABAAAAHAWAAACALu4GwAAAHAWAAACAPSTMwAAAHAWAACaAFWa84BXgQKAEIAMgBaAE4AUgAuAAoAIwAIgACAAAiAACAABACCAAAEVgBSAI4AYgA%2bAGQAEEAAQAAEABACAAAIEEBBAACAYgB%2bAH4AbgBqACoAHwAICCBAEEIAAAgEQAACAIoAZgB2ADoAMgAKAPoAZgB2AJoAXgBIAgiAAQUqLF4AJgALACARAgBCACoAfgB6AIwABgYCQAAFXAAAAcBYAAAYA%2f50ZgGeEXwAAAHAWAAAEAPaBS4V7AAAAcBYAAAIA1aSJAAAAcBYAAAIAtLmbAAAAcBYAAAIAqKXdAAAAcBYAAAQAppUugOMAAABwFgAABADQoAWA6wAAAHAWAAAEABGl94M5AAAA0CoAAAYA6pF7iYOBaQIAANAqAAAcAEUPAMAAMAACAQCBAHQAADDAgCAAQgByAQAzUJDRBAAA0CoAAAQAETwKAA4FAADQKgAAAgBekRUFAADQKgAAHAB2pQCABYAMgJeAH4ATgAGAvIIIgASABIAFgCWA%22%2c%22range%22%3a%7B%22min%22%3a%2205C1D79B33ADE4%22%2c%22max%22%3a%2205C1D7A52F89EC%22%7D%7D%5d"
+        );
+
+        assertReversibleUrlTokenized(sanitized, oDataUrl);
+        assertUrlWithSubResourcesBlocked(endpoint);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"v1.0", "beta"})
+    @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_TEAMS_CHANNELS_MESSAGES_DELTA)
+    public void teams_channels_messages_delta(String apiVersion) {
+        String teamId = "172b0cce-e65d-44ce-9a49-91d9f2e8493a";
+        String userId = "8b081ef6-4792-4def-b2c9-c363a1bf41d5";
+        String endpoint = "https://graph.microsoft.com/" + apiVersion + "/teams/" + teamId + "/channels/" + userId + "/messages/delta";
+        String jsonResponse = asJson("Teams_channels_messages_delta_"+ apiVersion + ".json");
+
+        String sanitized = sanitize(endpoint, jsonResponse);
+        assertPseudonymized(sanitized, "8ea0e38b-efb3-4757-924a-5f94061cf8c2");
+        assertRedacted(sanitized,
+            "@odata.context", "https://graph.microsoft.com/v1.0/$metadata#Collection(chatMessage)",
+            "@odata.type",  "#microsoft.graph.chatMessage", "#microsoft.graph.teamworkUserIdentity"
+        );
+        // primaryEmail, emails, relations, aliases and nonEditableAliases
+        Collection<String> oDataUrl = Arrays.asList(
+            "https://graph.microsoft.com/v1.0/teams/fbe2bf47-16c8-47cf-b4a5-4b9b187c508b/channels/19:4a95f7d8db4c4e7fae857bcebe0623e6@thread.tacv2/messages/delta?$skiptoken=-FG3FPHv7HuyuazNLuy3eXlzQGbEjYLUsW9-pYkmXgn5KGsaOwrCoor2W23dGNNM1KtAX4AyvpFQNVsBgsEwUOX9lw8x9zDumgJy-C-UbjZLlZDQACyC9FyrVelZus9n.--rshdLwy_WBFJd8anPXJPbSUtUD7r3V4neB5tcrG58"
+        );
+
+        assertReversibleUrlTokenized(sanitized, oDataUrl);
+        assertUrlWithSubResourcesBlocked(endpoint);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"v1.0", "beta"})
+    @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_CHATS_MESSAGES)
+    public void chats_messages(String apiVersion) {
+        String chatId = "fbe2bf47-16c8-47cf-b4a5-4b9b187c508b";
+        String endpoint = "https://graph.microsoft.com/" + apiVersion + "/chats/" + chatId + "/messages";
+        String jsonResponse = asJson("Chats_messages_"+ apiVersion + ".json");
+
+        String sanitized = sanitize(endpoint, jsonResponse);
+        assertPseudonymized(sanitized, "8ea0e38b-efb3-4757-924a-5f94061cf8c2", "1fb8890f-423e-4154-8fbf-db6809bc8756");
+        assertRedacted(sanitized,
+            "@odata.context", "https://graph.microsoft.com/v1.0/$metadata#chats('19%3A2da4c29f6d7041eca70b638b43d45437%40thread.v2')/messages",
+            "@odata.count",
+            "@odata.type", "#microsoft.graph.chatRenamedEventMessageDetail"
+         );
+        // primaryEmail, emails, relations, aliases and nonEditableAliases
+        Collection<String> oDataUrl = Arrays.asList(
+            "https://graph.microsoft.com/v1.0/chats/19:2da4c29f6d7041eca70b638b43d45437@thread.v2/messages?$top=2&$skiptoken=M2UyZDAwMDAwMDMxMzkzYTMyNjQ2MTM0NjMzMjM5NjYzNjY0MzczMDM0MzE2NTYzNjEzNzMwNjIzNjMzMzg2MjM0MzM2NDM0MzUzNDMzMzc0MDc0Njg3MjY1NjE2NDJlNzYzMjAxZThmYjY4M2Y3ODAxMDAwMDg4NjA5ODdhNzgwMTAwMDB8MTYxNjk2NDUwOTgzMg%3d%3d"
+        );
+        assertReversibleUrlTokenized(sanitized, oDataUrl);
+        assertUrlWithSubResourcesBlocked(endpoint);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"v1.0", "beta"})
+    @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALLS)
+    public void communications_calls(String apiVersion) {
+        String callId = "2f1a1100-b174-40a0-aba7-0b405e01ed92";
+        String endpoint = "https://graph.microsoft.com/" + apiVersion + "/communications/calls/" + callId;
+        String jsonResponse = asJson("Communications_calls_"+ apiVersion + ".json");
+
+        String sanitized = sanitize(endpoint, jsonResponse);
+        assertPseudonymized(sanitized, "112f7296-5fa4-42ca-bae8-6a692b15d4b8");
+        assertRedacted(sanitized,
+            "@odata.type", "#microsoft.graph.call",
+                                            "#microsoft.graph.participantInfo",
+                                            "#microsoft.graph.identitySet",
+                                            "#microsoft.graph.identity",
+            "@odata.context", "https://graph.microsoft.com/v1.0/$metadata#communications/calls/$entity"
+        );
+        assertUrlWithSubResourcesBlocked(endpoint);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"v1.0", "beta"})
+    @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS)
+    public void communications_callRecords(String apiVersion) {
+        String callChainId = "2f1a1100-b174-40a0-aba7-0b405e01ed92";
+        String endpoint = "https://graph.microsoft.com/" + apiVersion + "/communications/callRecords/" + callChainId;
+        String jsonResponse = asJson("Communications_callRecords_"+ apiVersion + ".json");
+
+        String sanitized = sanitize(endpoint, jsonResponse);
+        assertPseudonymized(sanitized, "821809f5-0000-0000-0000-3b5136c0e777", "f69e2c00-0000-0000-0000-185e5f5f5d8a");
+        assertRedacted(sanitized,
+            "@odata.context", "https://graph.microsoft.com/v1.0/$metadata#communications/callRecords(sessions(segments()))/$entity",
+            "@odata.type", "#microsoft.graph.callRecords.participantEndpoint",
+                            "#microsoft.graph.callRecords.clientUserAgent",
+                            "#microsoft.graph.identitySet",
+                            "#microsoft.graph.callRecords.participantEndpoint",
+                            "#microsoft.graph.callRecords.clientUserAgent"
+                 );
+        // primaryEmail, emails, relations, aliases and nonEditableAliases
+        Collection<String> oDataUrl = Arrays.asList(
+            "https://graph.microsoft.com/v1.0/$metadata#communications/callRecords('e523d2ed-2966-4b6b-925b-754a88034cc5')/sessions?$expand=segments&$skiptoken=abc"
+        );
+        assertReversibleUrlTokenized(sanitized, oDataUrl);
+        assertUrlWithSubResourcesBlocked(endpoint);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"v1.0", "beta"})
+    @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS)
+    public void users_onlineMeetings(String apiVersion) {
+        String userId = "dc17674c-81d9-4adb-bfb2-8f6a442e4622";
+        String endpoint = "https://graph.microsoft.com/" + apiVersion + "/users/" + userId + "/onlineMeetings";
+        String jsonResponse = asJson("Users_onlineMeetings_"+ apiVersion + ".json");
+
+        String sanitized = sanitize(endpoint, jsonResponse);
+        assertPseudonymized(sanitized, "112f7296-5ca-bae8-6a692b15d4b8", "5810cedeb-b2c1-e9bd5d53ec96");
+        assertRedacted(sanitized,
+            "@odata.type",
+                            "#microsoft.graph.onlineMeeting",
+                            "#microsoft.graph.chatInfo",
+                            "#microsoft.graph.meetingParticipants",
+                            "#microsoft.graph.identitySet",
+                            "#microsoft.graph.identity"
+        );
+        assertUrlWithSubResourcesBlocked(endpoint); //paging
+    }
+
+    @Override
+    public Stream<InvocationExample> getExamples() {
+        String apiVersion = "v1.0";
+
+        return Stream.of(
+            InvocationExample.of("https://graph.microsoft.com/" + apiVersion + "/teams", "Teams_" + apiVersion + ".json"),
+            InvocationExample.of("https://graph.microsoft.com/" + apiVersion + "/teams/893075dd-2487-4122-925f-022c42e20265/allChannels", "Teams_allChannels_" + apiVersion + ".json"),
+            InvocationExample.of("https://graph.microsoft.com/" + apiVersion + "/users/8b081ef6-4792-4def-b2c9-c363a1bf41d5/chats", "Users_chats_" + apiVersion + ".json"),
+            InvocationExample.of("https://graph.microsoft.com/" + apiVersion + "/teams/fbe2bf47-16c8-47cf-b4a5-4b9b187c508b/channels/19:4a95f7d8db4c4e7fae857bcebe0623e6@thread.tacv2/messages", "Teams_channels_messages_" + apiVersion + ".json"),
+            InvocationExample.of("https://graph.microsoft.com/" + apiVersion + "/teams/fbe2bf47-16c8-47cf-b4a5-4b9b187c508b/channels/19:4a95f7d8db4c4e7fae857bcebe0623e6@thread.tacv2/messages/delta", "Teams_channels_messages_delta_" + apiVersion + ".json"),
+            InvocationExample.of("https://graph.microsoft.com/" + apiVersion + "/chats/19:2da4c29f6d7041eca70b638b43d45437@thread.v2/messages", "Chats_messages_" + apiVersion + ".json"),
+            InvocationExample.of("https://graph.microsoft.com/" + apiVersion + "/communications/calls/2f1a1100-b174-40a0-aba7-0b405e01ed92", "Communications_calls_" + apiVersion + ".json"),
+            InvocationExample.of("https://graph.microsoft.com/" + apiVersion + "/communications/callRecords/{id}", "Communications_callRecords_" + apiVersion + ".json"),
+            InvocationExample.of("https://graph.microsoft.com/" + apiVersion + "/users/dc17674c-81d9-4adb-bfb2-8f6a442e4622/onlineMeetings", "Users_onlineMeetings_" + apiVersion + ".json")
+        );
+    }
+}

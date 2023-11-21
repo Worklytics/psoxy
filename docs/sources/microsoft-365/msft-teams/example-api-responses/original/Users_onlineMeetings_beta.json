@@ -53,7 +53,7 @@
   "joinMeetingIdSettings": {
     "isPasscodeRequired": false,
     "joinMeetingId": "1234567890",
-    "passcode": null
+    "passcode": "passcode1234567890"
   },
   "isEntryExitAnnounced": true,
   "allowedPresenters": "everyone"

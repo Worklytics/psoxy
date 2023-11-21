@@ -1,6 +1,4 @@
 {
-  "@odata.context":"https://graph.microsoft.com/v1.0/$metadata#chats",
-  "@odata.count":3,
   "value":[
     {
       "id":"19:meeting_MjdhNjM4YzUtYzExZi00OTFkLTkzZTAtNTVlNmZmMDhkNGU2@thread.v2",

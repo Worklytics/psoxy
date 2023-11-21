@@ -23,7 +23,7 @@ public class TeamsTests extends JavaRulesTestBaseCase {
 
     @ParameterizedTest
     @ValueSource(strings = {"v1.0", "beta"})
-    @Description("Test endpoint:" + PrebuiltSanitizerRules.MS_TEAMS_PATH_REGEX_TEAMS)
+    @Description("Test endpoint:" + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_TEAMS)
     public void teams(String apiVersion) {
         String endpoint = "https://graph.microsoft.com/" + apiVersion + "/teams";
         String jsonResponse = asJson("Teams_"+ apiVersion + ".json");
@@ -45,12 +45,12 @@ public class TeamsTests extends JavaRulesTestBaseCase {
             "Contoso API Team",
             "This is Contoso API team"
         );
-        assertUrlWithSubResourcesBlocked(endpoint); //paging
+        assertUrlWithSubResourcesBlocked(endpoint);
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"v1.0", "beta"})
-    @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_REGEX_TEAMS_ALL_CHANNELS)
+    @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_TEAMS_ALL_CHANNELS)
     public void teams_allChannels(String apiVersion) {
         String teamId = "172b0cce-e65d-44ce-9a49-91d9f2e8493a";
         String endpoint = "https://graph.microsoft.com/" + apiVersion + "/teams/" + teamId + "/allChannels";
@@ -74,26 +74,24 @@ public class TeamsTests extends JavaRulesTestBaseCase {
 
             "Shared channel from Contoso"
         );
-        assertUrlWithSubResourcesBlocked(endpoint); //paging
+        assertUrlWithSubResourcesBlocked(endpoint);
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"v1.0", "beta"})
-    @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_REGEX_USERS_CHATS)
+    @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_USERS_CHATS)
     public void users_chats(String apiVersion) {
         String userId = "8b081ef6-4792-4def-b2c9-c363a1bf41d5";
         String endpoint = "https://graph.microsoft.com/" + apiVersion + "/users/" + userId + "/chats";
         String jsonResponse = asJson("Users_chats_"+ apiVersion + ".json");
         assertNotSanitized(jsonResponse,
             "19:meeting_MjdhNjM4YzUtYzExZi00OTFkLTkzZTAtNTVlNmZmMDhkNGU2@thread.v2",
-            "Meeting chat sample",
             "2020-12-08T23:53:05.801Z",
             "2020-12-08T23:58:32.511Z",
             "meeting",
             "https://teams.microsoft.com/l/chat/19%3Ameeting_MjdhNjM4YzUtYzExZi00OTFkLTkzZTAtNTVlNmZmMDhkNGU2@thread.v2/0?tenantId=b33cbe9f-8ebe-4f2a-912b-7e2a427f477f",
 
            "19:561082c0f3f847a58069deb8eb300807@thread.v2",
-            "Group chat sample",
             "2020-12-03T19:41:07.054Z",
             "2020-12-08T23:53:11.012Z",
             "group",
@@ -107,13 +105,17 @@ public class TeamsTests extends JavaRulesTestBaseCase {
         );
 
         String sanitized = sanitize(endpoint, jsonResponse);
-
-        assertUrlWithSubResourcesBlocked(endpoint); //paging
+        assertRedacted(sanitized,
+            "Meeting chat sample",
+            "Group chat sample",
+            "topic"
+        );
+        assertUrlWithSubResourcesBlocked(endpoint);
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"v1.0", "beta"})
-    @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_REGEX_TEAMS_CHANNELS_MESSAGES)
+    @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_TEAMS_CHANNELS_MESSAGES)
     public void teams_channels_messages(String apiVersion) {
         String teamId = "172b0cce-e65d-44ce-9a49-91d9f2e8493a";
         String userId = "8b081ef6-4792-4def-b2c9-c363a1bf41d5";
@@ -169,12 +171,12 @@ public class TeamsTests extends JavaRulesTestBaseCase {
             "<systemEventMessage/>",
             "Team for Microsoft Teams members"
         );
-        assertUrlWithSubResourcesBlocked(endpoint); //paging
+        assertUrlWithSubResourcesBlocked(endpoint);
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"v1.0", "beta"})
-    @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_REGEX_TEAMS_CHANNELS_MESSAGES_DELTA)
+    @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_TEAMS_CHANNELS_MESSAGES_DELTA)
     public void teams_channels_messages_delta(String apiVersion) {
         String teamId = "172b0cce-e65d-44ce-9a49-91d9f2e8493a";
         String userId = "8b081ef6-4792-4def-b2c9-c363a1bf41d5";
@@ -216,12 +218,12 @@ public class TeamsTests extends JavaRulesTestBaseCase {
             "Robin Kline",
             "HelloWorld 11/29/2020 3:16:31 PM -08:00"
         );
-        assertUrlWithSubResourcesBlocked(endpoint); //paging
+        assertUrlWithSubResourcesBlocked(endpoint);
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"v1.0", "beta"})
-    @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_REGEX_CHATS_MESSAGES)
+    @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_CHATS_MESSAGES)
     public void chats_messages(String apiVersion) {
         String chatId = "fbe2bf47-16c8-47cf-b4a5-4b9b187c508b";
         String endpoint = "https://graph.microsoft.com/" + apiVersion + "/chats/" + chatId + "/messages";
@@ -255,7 +257,7 @@ public class TeamsTests extends JavaRulesTestBaseCase {
 
     @ParameterizedTest
     @ValueSource(strings = {"v1.0", "beta"})
-    @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_REGEX_COMMUNICATIONS_CALLS)
+    @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALLS)
     public void communications_calls(String apiVersion) {
         String callId = "2f1a1100-b174-40a0-aba7-0b405e01ed92";
         String endpoint = "https://graph.microsoft.com/" + apiVersion + "/communications/calls/" + callId;
@@ -276,7 +278,7 @@ public class TeamsTests extends JavaRulesTestBaseCase {
 
     @ParameterizedTest
     @ValueSource(strings = {"v1.0", "beta"})
-    @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_REGEX_COMMUNICATIONS_CALL_RECORDS)
+    @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS)
     public void communications_callRecords(String apiVersion) {
         String callChainId = "2f1a1100-b174-40a0-aba7-0b405e01ed92";
         String endpoint = "https://graph.microsoft.com/" + apiVersion + "/communications/callRecords/" + callChainId;
@@ -304,7 +306,7 @@ public class TeamsTests extends JavaRulesTestBaseCase {
 
     @ParameterizedTest
     @ValueSource(strings = {"v1.0", "beta"})
-    @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_REGEX_USERS_ONLINE_MEETINGS)
+    @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS)
     public void users_onlineMeetings(String apiVersion) {
         String userId = "dc17674c-81d9-4adb-bfb2-8f6a442e4622";
         String endpoint = "https://graph.microsoft.com/" + apiVersion + "/users/" + userId + "/onlineMeetings";
@@ -328,7 +330,13 @@ public class TeamsTests extends JavaRulesTestBaseCase {
         assertRedacted(sanitized,
             "Tyler Stein",
             "Jasmine Miller",
-            "Test Meeting."
+            "Test Meeting.",
+            "passcode",
+            "127.0.0.1",
+            "macAddress",
+            "reflexiveIPAddress",
+            "relayIPAddress",
+            "subnet"
         );
         assertUrlWithSubResourcesBlocked(endpoint); //paging
     }
