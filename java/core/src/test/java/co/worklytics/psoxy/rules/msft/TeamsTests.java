@@ -237,7 +237,7 @@ public class TeamsTests extends JavaRulesTestBaseCase {
             "8ea0e38b-efb3-4757-924a-5f94061cf8c2",
             "aadUser",
             "text",
-
+            "Graph Members",
             "1615971548136",
             "2021-03-17T08:59:08.136Z",
             "html"

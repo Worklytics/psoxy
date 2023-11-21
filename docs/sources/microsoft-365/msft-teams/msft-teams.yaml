@@ -82,6 +82,7 @@ endpoints:
           - "$..value[*].attachments"
           - "$..value[*].mentions[*].mentionText"
           - "$..value[*].eventDetail.teamDescription"
+          - "$..value[*].eventDetail.chatDisplayName"
   - pathTemplate: "/{apiVersion}/communications/calls/{callId}"
     allowedQueryParams:
       - "$select"

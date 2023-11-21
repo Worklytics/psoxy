@@ -364,6 +364,7 @@ public class PrebuiltSanitizerRules {
             .jsonPath("$..value[*].attachments")
             .jsonPath("$..value[*].mentions[*].mentionText")
             .jsonPath("$..value[*].eventDetail.teamDescription")
+            .jsonPath("$..value[*].eventDetail.chatDisplayName")
             .build())
         .allowedQueryParams(List.of("$select","$top","$skipToken","$filter", "$orderBy", "$count", "$expand", "$format", "$search", "$skip"))
         .build();

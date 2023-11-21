@@ -158,6 +158,7 @@ endpoints:
           - "$..value[*].attachments"
           - "$..value[*].mentions[*].mentionText"
           - "$..value[*].eventDetail.teamDescription"
+          - "$..value[*].eventDetail.chatDisplayName"
       - !<pseudonymize>
         jsonPaths:
           - "$..user.id"
