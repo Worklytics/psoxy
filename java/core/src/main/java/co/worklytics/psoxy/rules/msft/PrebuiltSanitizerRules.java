@@ -18,7 +18,7 @@ public class PrebuiltSanitizerRules {
 
     static final Transform.Tokenize TOKENIZE_ODATA_LINKS = Transform.Tokenize.builder()
         .jsonPath("$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']")
-        //.regex("^https://graph.microsoft.com/(.*)$")
+        .regex("^https://graph.microsoft.com/(.*)$")
         .build();
     static final Transform REDACT_ODATA_CONTEXT = Transform.Redact.builder()
         .jsonPath("$..['@odata.context']")
@@ -389,7 +389,8 @@ public class PrebuiltSanitizerRules {
         .transform(Transform.Redact.builder()
             .jsonPath("$..user.displayName")
             .jsonPath("$..subject")
-            .jsonPath("$..joinMeetingIdSettings")
+            .jsonPath("$..joinMeetingIdSettings.isPasscodeRequired")
+            .jsonPath("$..joinMeetingIdSettings.passcode")
             .build())
         .allowedQueryParams(List.of("$select","$top","$skipToken","$filter", "$orderBy", "$count", "$expand", "$format", "$search", "$skip"))
         .build();

@@ -47,6 +47,9 @@
     "scope": "everyone",
     "isDialInBypassEnabled": true
   },
+  "joinMeetingIdSettings":{
+    "joinMeetingId":"1234567890"
+  },
   "isEntryExitAnnounced": true,
   "allowedPresenters": "everyone"
 }

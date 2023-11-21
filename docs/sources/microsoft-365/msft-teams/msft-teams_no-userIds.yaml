@@ -105,6 +105,7 @@ endpoints:
       - !<tokenize>
         jsonPaths:
           - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
+        regex: "^https://graph.microsoft.com/(.*)$"
   - pathTemplate: "/{apiVersion}/teams/{teamId}/channels/{channelId}/messages/delta"
     allowedQueryParams:
       - "$select"
@@ -136,6 +137,7 @@ endpoints:
       - !<tokenize>
         jsonPaths:
           - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
+        regex: "^https://graph.microsoft.com/(.*)$"
   - pathTemplate: "/{apiVersion}/chats/{chatId}/messages"
     allowedQueryParams:
       - "$select"
@@ -172,6 +174,7 @@ endpoints:
       - !<tokenize>
         jsonPaths:
           - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
+        regex: "^https://graph.microsoft.com/(.*)$"
   - pathTemplate: "/{apiVersion}/communications/calls/{callId}"
     allowedQueryParams:
       - "$select"
@@ -220,6 +223,7 @@ endpoints:
       - !<tokenize>
         jsonPaths:
           - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
+        regex: "^https://graph.microsoft.com/(.*)$"
   - pathTemplate: "/{apiVersion}/users/{userId}/onlineMeetings"
     allowedQueryParams:
       - "$select"
@@ -237,7 +241,8 @@ endpoints:
         jsonPaths:
           - "$..user.displayName"
           - "$..subject"
-          - "$..joinMeetingIdSettings"
+          - "$..joinMeetingIdSettings.isPasscodeRequired"
+          - "$..joinMeetingIdSettings.passcode"
       - !<pseudonymize>
         jsonPaths:
           - "$..user.id"

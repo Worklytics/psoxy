@@ -121,4 +121,5 @@ endpoints:
         jsonPaths:
           - "$..user.displayName"
           - "$..subject"
-          - "$..joinMeetingIdSettings"
+          - "$..joinMeetingIdSettings.isPasscodeRequired"
+          - "$..joinMeetingIdSettings.passcode"

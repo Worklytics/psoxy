@@ -94,12 +94,11 @@ public class Teams_NoUserIds_Tests extends JavaRulesTestBaseCase {
             "@odata.type", "#microsoft.graph.teamDescriptionUpdatedEventMessageDetail"
         );
 
-        // primaryEmail, emails, relations, aliases and nonEditableAliases
         Collection<String> oDataUrl = Arrays.asList(
             "https://graph.microsoft.com/v1.0/teams/fbe2bf47-16c8-47cf-b4a5-4b9b187c508b/channels/19:4a95f7d8db4c4e7fae857bcebe0623e6@thread.tacv2/messages?$skiptoken=%5b%7B%22token%22%3a%22%2bRID%3a~vpsQAJ9uAC047gwAAACcBQ%3d%3d%23RT%3a1%23TRC%3a20%23RTD%3aAyAER1ygxSHVHGAn2S99BTI6OzViOjZnOGU5ZWM1ZDVmOGdiZjk2OGNkZmNmMTczNGY3QXVpc2ZiZS91YmR3MzwyNzIyNDY2OTU0NTg6AA%3d%3d%23ISV%3a2%23IEO%3a65551%23QCF%3a3%23FPC%3aAggEAAAAcBYAABUFAADQKgAABAAAAHAWAAACALu4GwAAAHAWAAACAPSTMwAAAHAWAACaAFWa84BXgQKAEIAMgBaAE4AUgAuAAoAIwAIgACAAAiAACAABACCAAAEVgBSAI4AYgA%2bAGQAEEAAQAAEABACAAAIEEBBAACAYgB%2bAH4AbgBqACoAHwAICCBAEEIAAAgEQAACAIoAZgB2ADoAMgAKAPoAZgB2AJoAXgBIAgiAAQUqLF4AJgALACARAgBCACoAfgB6AIwABgYCQAAFXAAAAcBYAAAYA%2f50ZgGeEXwAAAHAWAAAEAPaBS4V7AAAAcBYAAAIA1aSJAAAAcBYAAAIAtLmbAAAAcBYAAAIAqKXdAAAAcBYAAAQAppUugOMAAABwFgAABADQoAWA6wAAAHAWAAAEABGl94M5AAAA0CoAAAYA6pF7iYOBaQIAANAqAAAcAEUPAMAAMAACAQCBAHQAADDAgCAAQgByAQAzUJDRBAAA0CoAAAQAETwKAA4FAADQKgAAAgBekRUFAADQKgAAHAB2pQCABYAMgJeAH4ATgAGAvIIIgASABIAFgCWA%22%2c%22range%22%3a%7B%22min%22%3a%2205C1D79B33ADE4%22%2c%22max%22%3a%2205C1D7A52F89EC%22%7D%7D%5d"
         );
 
-        assertReversibleUrlTokenized(sanitized, oDataUrl);
+        assertTransformed(sanitized, oDataUrl, PrebuiltSanitizerRules.TOKENIZE_ODATA_LINKS);
         assertUrlWithSubResourcesBlocked(endpoint);
     }
 
@@ -118,12 +117,12 @@ public class Teams_NoUserIds_Tests extends JavaRulesTestBaseCase {
             "@odata.context", "https://graph.microsoft.com/v1.0/$metadata#Collection(chatMessage)",
             "@odata.type",  "#microsoft.graph.chatMessage", "#microsoft.graph.teamworkUserIdentity"
         );
-        // primaryEmail, emails, relations, aliases and nonEditableAliases
+
         Collection<String> oDataUrl = Arrays.asList(
             "https://graph.microsoft.com/v1.0/teams/fbe2bf47-16c8-47cf-b4a5-4b9b187c508b/channels/19:4a95f7d8db4c4e7fae857bcebe0623e6@thread.tacv2/messages/delta?$skiptoken=-FG3FPHv7HuyuazNLuy3eXlzQGbEjYLUsW9-pYkmXgn5KGsaOwrCoor2W23dGNNM1KtAX4AyvpFQNVsBgsEwUOX9lw8x9zDumgJy-C-UbjZLlZDQACyC9FyrVelZus9n.--rshdLwy_WBFJd8anPXJPbSUtUD7r3V4neB5tcrG58"
         );
 
-        assertReversibleUrlTokenized(sanitized, oDataUrl);
+        assertTransformed(sanitized, oDataUrl, PrebuiltSanitizerRules.TOKENIZE_ODATA_LINKS);
         assertUrlWithSubResourcesBlocked(endpoint);
     }
 
@@ -142,11 +141,11 @@ public class Teams_NoUserIds_Tests extends JavaRulesTestBaseCase {
             "@odata.count",
             "@odata.type", "#microsoft.graph.chatRenamedEventMessageDetail"
          );
-        // primaryEmail, emails, relations, aliases and nonEditableAliases
+
         Collection<String> oDataUrl = Arrays.asList(
             "https://graph.microsoft.com/v1.0/chats/19:2da4c29f6d7041eca70b638b43d45437@thread.v2/messages?$top=2&$skiptoken=M2UyZDAwMDAwMDMxMzkzYTMyNjQ2MTM0NjMzMjM5NjYzNjY0MzczMDM0MzE2NTYzNjEzNzMwNjIzNjMzMzg2MjM0MzM2NDM0MzUzNDMzMzc0MDc0Njg3MjY1NjE2NDJlNzYzMjAxZThmYjY4M2Y3ODAxMDAwMDg4NjA5ODdhNzgwMTAwMDB8MTYxNjk2NDUwOTgzMg%3d%3d"
         );
-        assertReversibleUrlTokenized(sanitized, oDataUrl);
+        assertTransformed(sanitized, oDataUrl, PrebuiltSanitizerRules.TOKENIZE_ODATA_LINKS);
         assertUrlWithSubResourcesBlocked(endpoint);
     }
 
@@ -188,11 +187,11 @@ public class Teams_NoUserIds_Tests extends JavaRulesTestBaseCase {
                             "#microsoft.graph.callRecords.participantEndpoint",
                             "#microsoft.graph.callRecords.clientUserAgent"
                  );
-        // primaryEmail, emails, relations, aliases and nonEditableAliases
+
         Collection<String> oDataUrl = Arrays.asList(
             "https://graph.microsoft.com/v1.0/$metadata#communications/callRecords('e523d2ed-2966-4b6b-925b-754a88034cc5')/sessions?$expand=segments&$skiptoken=abc"
         );
-        assertReversibleUrlTokenized(sanitized, oDataUrl);
+        assertTransformed(sanitized, oDataUrl, PrebuiltSanitizerRules.TOKENIZE_ODATA_LINKS);
         assertUrlWithSubResourcesBlocked(endpoint);
     }
 
@@ -214,7 +213,7 @@ public class Teams_NoUserIds_Tests extends JavaRulesTestBaseCase {
                             "#microsoft.graph.identitySet",
                             "#microsoft.graph.identity"
         );
-        assertUrlWithSubResourcesBlocked(endpoint); //paging
+        assertUrlWithSubResourcesBlocked(endpoint);
     }
 
     @Override

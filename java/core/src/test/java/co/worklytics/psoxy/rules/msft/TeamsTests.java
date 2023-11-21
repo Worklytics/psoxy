@@ -252,7 +252,7 @@ public class TeamsTests extends JavaRulesTestBaseCase {
 
             "<systemEventMessage/>"
         );
-        assertUrlWithSubResourcesBlocked(endpoint); //paging
+        assertUrlWithSubResourcesBlocked(endpoint);
     }
 
     @ParameterizedTest
@@ -273,7 +273,7 @@ public class TeamsTests extends JavaRulesTestBaseCase {
         assertRedacted(sanitized,
             "Calling Bot"
         );
-        assertUrlWithSubResourcesBlocked(endpoint); //paging
+        assertUrlWithSubResourcesBlocked(endpoint);
     }
 
     @ParameterizedTest
@@ -301,7 +301,7 @@ public class TeamsTests extends JavaRulesTestBaseCase {
             "Abbie Wilkins",
             "Owen Franklin"
         );
-        assertUrlWithSubResourcesBlocked(endpoint); //paging
+        assertUrlWithSubResourcesBlocked(endpoint);
     }
 
     @ParameterizedTest
@@ -323,7 +323,8 @@ public class TeamsTests extends JavaRulesTestBaseCase {
             "112f7296-5fa4-42ca-bae8-6a692b15d4b8_19:cbee7c1c860e465f8258e3cebf7bee0d@thread.skype",
             "https://teams.microsoft.com/l/meetup-join/19%3a:meeting_NTg0NmQ3NTctZDVkZC00YzRhLThmNmEtOGQDdmZDZk@thread.v2/0?context=%7b%22Tid%22%3a%aa67bd4c-8475-432d-bd41-39f255720e0a%22%2c%22Oid%22%3a%22112f7296-5fa4-42ca-bb15d4b8%22%7d",
             "112f7296-5ca-bae8-6a692b15d4b8",
-            "5810cedeb-b2c1-e9bd5d53ec96"
+            "5810cedeb-b2c1-e9bd5d53ec96",
+            "joinMeetingId", "1234567890"
         );
 
         String sanitized = sanitize(endpoint, jsonResponse);
@@ -332,13 +333,14 @@ public class TeamsTests extends JavaRulesTestBaseCase {
             "Jasmine Miller",
             "Test Meeting.",
             "passcode",
+            "isPasscodeRequired",
             "127.0.0.1",
             "macAddress",
             "reflexiveIPAddress",
             "relayIPAddress",
             "subnet"
         );
-        assertUrlWithSubResourcesBlocked(endpoint); //paging
+        assertUrlWithSubResourcesBlocked(endpoint);
     }
 
     @Override
