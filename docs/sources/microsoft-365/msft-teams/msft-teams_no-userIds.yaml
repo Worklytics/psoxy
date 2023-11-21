@@ -18,7 +18,7 @@ endpoints:
         encoding: "JSON"
       - !<redact>
         jsonPaths:
-          - "$..['@odata.context']"
+          - "$.['@odata.context']"
       - !<redact>
         jsonPaths:
           - "$..['@odata.id']"
@@ -43,7 +43,7 @@ endpoints:
         encoding: "JSON"
       - !<redact>
         jsonPaths:
-          - "$..['@odata.context']"
+          - "$.['@odata.context']"
       - !<redact>
         jsonPaths:
           - "$..['@odata.id']"
@@ -71,7 +71,7 @@ endpoints:
         encoding: "JSON"
       - !<redact>
         jsonPaths:
-          - "$..['@odata.context']"
+          - "$.['@odata.context']"
       - !<redact>
         jsonPaths:
           - "$..['@odata.count']"
@@ -95,7 +95,7 @@ endpoints:
         encoding: "JSON"
       - !<redact>
         jsonPaths:
-          - "$..['@odata.context']"
+          - "$.['@odata.context']"
       - !<redact>
         jsonPaths:
           - "$..['@odata.count']"
@@ -104,7 +104,7 @@ endpoints:
           - "$..['@odata.type']"
       - !<tokenize>
         jsonPaths:
-          - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
+          - "$.['@odata.nextLink', '@odata.prevLink']"
         regex: "^https://graph.microsoft.com/(.*)$"
   - pathTemplate: "/{apiVersion}/teams/{teamId}/channels/{channelId}/messages/delta"
     allowedQueryParams:
@@ -127,7 +127,7 @@ endpoints:
         encoding: "JSON"
       - !<redact>
         jsonPaths:
-          - "$..['@odata.context']"
+          - "$.['@odata.context']"
       - !<redact>
         jsonPaths:
           - "$..['@odata.count']"
@@ -136,7 +136,7 @@ endpoints:
           - "$..['@odata.type']"
       - !<tokenize>
         jsonPaths:
-          - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
+          - "$.['@odata.nextLink', '@odata.prevLink']"
         regex: "^https://graph.microsoft.com/(.*)$"
   - pathTemplate: "/{apiVersion}/chats/{chatId}/messages"
     allowedQueryParams:
@@ -164,7 +164,7 @@ endpoints:
         encoding: "JSON"
       - !<redact>
         jsonPaths:
-          - "$..['@odata.context']"
+          - "$.['@odata.context']"
       - !<redact>
         jsonPaths:
           - "$..['@odata.count']"
@@ -173,7 +173,7 @@ endpoints:
           - "$..['@odata.type']"
       - !<tokenize>
         jsonPaths:
-          - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
+          - "$.['@odata.nextLink', '@odata.prevLink']"
         regex: "^https://graph.microsoft.com/(.*)$"
   - pathTemplate: "/{apiVersion}/communications/calls/{callId}"
     allowedQueryParams:
@@ -190,7 +190,7 @@ endpoints:
         encoding: "JSON"
       - !<redact>
         jsonPaths:
-          - "$..['@odata.context']"
+          - "$.['@odata.context']"
       - !<redact>
         jsonPaths:
           - "$..['@odata.count']"
@@ -216,13 +216,17 @@ endpoints:
         encoding: "JSON"
       - !<redact>
         jsonPaths:
-          - "$..['@odata.context']"
+          - "$.['@odata.context']"
       - !<redact>
         jsonPaths:
           - "$..['@odata.type']"
       - !<tokenize>
         jsonPaths:
-          - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
+          - "$.['@odata.nextLink', '@odata.prevLink']"
+        regex: "^https://graph.microsoft.com/(.*)$"
+      - !<tokenize>
+        jsonPaths:
+          - "$.['sessions@odata.nextLink']"
         regex: "^https://graph.microsoft.com/(.*)$"
   - pathTemplate: "/{apiVersion}/users/{userId}/onlineMeetings"
     allowedQueryParams:
@@ -249,7 +253,7 @@ endpoints:
         encoding: "JSON"
       - !<redact>
         jsonPaths:
-          - "$..['@odata.context']"
+          - "$.['@odata.context']"
       - !<redact>
         jsonPaths:
           - "$..['@odata.type']"

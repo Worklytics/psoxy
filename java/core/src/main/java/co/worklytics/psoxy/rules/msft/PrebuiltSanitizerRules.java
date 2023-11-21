@@ -17,11 +17,16 @@ import java.util.Map;
 public class PrebuiltSanitizerRules {
 
     static final Transform.Tokenize TOKENIZE_ODATA_LINKS = Transform.Tokenize.builder()
-        .jsonPath("$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']")
+        .jsonPath("$.['@odata.nextLink', '@odata.prevLink']")
+        .regex("^https://graph.microsoft.com/(.*)$")
+        .build();
+
+    static final Transform.Tokenize TOKENIZE_SESSIONS_ODATA_LINKS = Transform.Tokenize.builder()
+        .jsonPath("$.['sessions@odata.nextLink']")
         .regex("^https://graph.microsoft.com/(.*)$")
         .build();
     static final Transform REDACT_ODATA_CONTEXT = Transform.Redact.builder()
-        .jsonPath("$..['@odata.context']")
+        .jsonPath("$.['@odata.context']")
         .build();
 
     static final Transform REDACT_ODATA_COUNT= Transform.Redact.builder()
@@ -415,7 +420,7 @@ public class PrebuiltSanitizerRules {
         .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS_CHANNELS_MESSAGES_DELTA, PSEUDONYMIZE_USER_ID, REDACT_ODATA_CONTEXT, REDACT_ODATA_COUNT, REDACT_ODATA_TYPE, TOKENIZE_ODATA_LINKS)
         .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_CHATS_MESSAGES,                PSEUDONYMIZE_USER_ID, REDACT_ODATA_CONTEXT, REDACT_ODATA_COUNT, REDACT_ODATA_TYPE, TOKENIZE_ODATA_LINKS)
         .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALLS,          PSEUDONYMIZE_USER_ID, REDACT_ODATA_CONTEXT, REDACT_ODATA_COUNT, REDACT_ODATA_TYPE )
-        .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS,   PSEUDONYMIZE_USER_ID, REDACT_ODATA_CONTEXT, REDACT_ODATA_TYPE,  TOKENIZE_ODATA_LINKS)
+        .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS,   PSEUDONYMIZE_USER_ID, REDACT_ODATA_CONTEXT, REDACT_ODATA_TYPE,  TOKENIZE_ODATA_LINKS, TOKENIZE_SESSIONS_ODATA_LINKS)
         .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS,         PSEUDONYMIZE_USER_ID, REDACT_ODATA_CONTEXT, REDACT_ODATA_TYPE );
 
     public static final Map<String, RESTRules> MSFT_DEFAULT_RULES_MAP =
