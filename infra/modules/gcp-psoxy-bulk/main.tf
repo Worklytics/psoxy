@@ -265,7 +265,7 @@ resource "local_file" "test_script" {
   count = var.todos_as_local_files ? 1 : 0
 
   filename        = "test-${trimprefix(local.instance_id, var.environment_id_prefix)}.sh"
-  file_permission = "0770"
+  file_permission = "755"
   content         = <<EOT
 #!/bin/bash
 FILE_PATH=$${1:-${try(local.example_file, "")}}
