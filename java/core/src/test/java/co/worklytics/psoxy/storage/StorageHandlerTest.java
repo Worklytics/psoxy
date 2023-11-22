@@ -63,8 +63,8 @@ class StorageHandlerTest {
         when(config.getConfigPropertyOrError(eq(BulkModeConfigProperty.OUTPUT_BUCKET)))
             .thenReturn("bucket");
 
-        when(config.getConfigPropertyOrError(eq(ProxyConfigProperty.SOURCE)))
-            .thenReturn("hris");
+        when(config.getConfigPropertyAsOptional(eq(ProxyConfigProperty.SOURCE)))
+            .thenReturn(Optional.of("hris"));
 
         handler = handlerProvider.get();
 

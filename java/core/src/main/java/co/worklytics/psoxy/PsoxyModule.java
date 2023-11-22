@@ -264,9 +264,11 @@ public class PsoxyModule {
                         .map(PseudonymImplementation::valueOf)
                         .map(implementation -> Objects.equals(implementation, PseudonymImplementation.LEGACY))
                         .orElse(false);
-                    String source = config.getConfigPropertyOrError(ProxyConfigProperty.SOURCE);
-                    Preconditions.checkNotNull(source, "Missing source for pseudonym implementation!");
-                    String defaultScopeIdFromSource = rulesUtils.getDefaultScopeIdFromSource(config.getConfigPropertyOrError(ProxyConfigProperty.SOURCE));
+
+                    String defaultScopeIdFromSource  = config.getConfigPropertyAsOptional(ProxyConfigProperty.SOURCE)
+                        .map(rulesUtils::getDefaultScopeIdFromSource)
+                        .orElse(null);
+
                     if (legacy && StringUtils.isEmpty(defaultScopeIdFromSource)) {
                         log.severe("Missing scope for legacy pseudonym implementation!");
                     }
