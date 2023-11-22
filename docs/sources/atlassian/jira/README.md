@@ -1,4 +1,4 @@
-# Jira Cloud **alpha**
+# Jira Cloud **beta**
 
 NOTE: This is for the Cloud-hosted version of Jira; for the self-hosted version, see [Jira Server](jira-server.md).
 
@@ -16,6 +16,9 @@ And following granular scopes:
   - `read:account`: for getting user emails
   - `read:group:jira`: for retrieving group members
   - `read:avatar:jira`: for retrieving group members
+
+You will need a web browser and a terminal with `curl` available (such as macOS terminal,
+Linux, an AWS CLoud Shell, [Windows Subsystem for Linux](https://learn.microsoft.com/en-us/windows/wsl/install), etc)
 
 ## Setup Instructions
 
@@ -39,15 +42,15 @@ And following granular scopes:
      obtain an OAuth `refresh_token`.
 
   5. Build an OAuth authorization endpoint URL by copying the value for "Client Id" obtained in the
-    previous step into the URL below. Then open the result in a web browser:
+     previous step into the URL below. Then open the result in a web browser:
 
-   `https://auth.atlassian.com/authorize?audience=api.atlassian.com&client_id=<CLIENT ID>&scope=offline_access%20read:group:jira%20read:avatar:jira%20read:user:jira%20read:account%20read:jira-user%20read:jira-work&redirect_uri=http://localhost&state=YOUR_USER_BOUND_VALUE&response_type=code&prompt=consent`
+     `https://auth.atlassian.com/authorize?audience=api.atlassian.com&client_id=<CLIENT_ID>&scope=offline_access%20read:group:jira%20read:avatar:jira%20read:user:jira%20read:account%20read:jira-user%20read:jira-work&redirect_uri=http://localhost&state=YOUR_USER_BOUND_VALUE&response_type=code&prompt=consent`
 
   6. Choose a site in your Jira workspace to allow access for this application and click "Accept".
      As the callback does not exist, you will see an error. But in the URL of your browser you will see
      something like this as URL:
 
-    `http://localhost/?state=YOUR_USER_BOUND_VALUE&code=eyJhbGc...`
+     `http://localhost/?state=YOUR_USER_BOUND_VALUE&code=eyJhbGc...`
 
      Copy the value of the `code` parameter from that URI. It is the "authorization code" required
      for next step.
@@ -55,10 +58,16 @@ And following granular scopes:
      **NOTE** This "Authorization Code" is single-use; if it expires or is used, you will need to obtain
      a new code by  again pasting the authorization URL in the browser.
 
-  7. Now, replace the values in following URL and run it from command line in your terminal. Replace `YOUR_AUTHENTICATION_CODE`, `YOUR_CLIENT_ID` and `YOUR_CLIENT_SECRET` in the placeholders:
+  7. Now, replace the values in following URL and run it from command line in your terminal. Replace
+      - `YOUR_AUTHORIZATION_CODE` with the value of `code` query parameter in the URL from step 6
+      - `YOUR_CLIENT_ID` with the client id value from Step 4
+      - `YOUR_CLIENT_SECRET` with the client secret value from Step 4
 
-    `curl --request POST --url 'https://auth.atlassian.com/oauth/token' --header 'Content-Type: application/json' --data '{"grant_type": "authorization_code","client_id": "YOUR_CLIENT_ID","client_secret": "YOUR_CLIENT_SECRET", "code": "YOUR_AUTHENTICATION_CODE", "redirect_uri": "http://localhost"}'`
-
+```shell
+curl --request POST --url 'https://auth.atlassian.com/oauth/token' \
+--header 'Content-Type: application/json' \
+--data '{"grant_type": "authorization_code","client_id": "YOUR_CLIENT_ID","client_secret": "YOUR_CLIENT_SECRET", "code": "YOUR_AUTHORIZATION_CODE", "redirect_uri": "http://localhost"}'
+```
   8. After running that command, if successful you will see a [JSON response](https://developer.atlassian.com/cloud/jira/platform/oauth-2-3lo-apps/#2--exchange-authorization-code-for-access-token) like this:
 
 ```json
@@ -80,7 +89,10 @@ And following granular scopes:
  10. Optional, obtain the "Cloud ID" of your Jira instance. Use the following command, with the
     `access_token` obtained in the previous step in place of `<ACCESS_TOKEN>` below:
 
-   `curl --header 'Authorization: Bearer <ACCESS_TOKEN>' --url 'https://api.atlassian.com/oauth/token/accessible-resources'`
+```shell
+curl --header 'Authorization: Bearer <ACCESS_TOKEN>' --url 'https://api.atlassian.com/oauth/token/accessible-resources'
+```
+
 
    And its response will be something like:
 

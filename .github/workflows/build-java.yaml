@@ -29,12 +29,6 @@ jobs:
           java-version: ${{ inputs.java-version }}
           # https://github.com/actions/setup-java#supported-distributions
           distribution: zulu
-      - name: Cache Maven packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-v1-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2-v1-
       - name: Clear our artifacts from Maven cache # q: does this work!?!?!
         run: |
           rm -rf ~/.m2/repository/co/worklytics/
@@ -42,7 +36,7 @@ jobs:
       - name: Compile
         working-directory: java/
         run: |
-          mvn clean compile -T 2C -Dversions.logOutput=false -DprocessDependencies=false -DprocessDependencyManagement=false
+          mvn clean compile -T 2C -Dversions.logOutput=false
       - name: Test
         working-directory: java/
         run: |

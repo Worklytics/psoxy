@@ -14,18 +14,17 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 class CachingConfigServiceDecoratorTest {
 
 
-    LocalHashMapConfigService spy;
+    LocalHashMapConfigService localHashMapConfigService;
     ConfigService config;
 
     @BeforeEach
     public void setup() {
-        spy = spy(new LocalHashMapConfigService());
-        config = new CachingConfigServiceDecorator(spy, Duration.ofMinutes(1));
+        localHashMapConfigService = new LocalHashMapConfigService();
+        config = new CachingConfigServiceDecorator(localHashMapConfigService, Duration.ofMinutes(1));
     }
 
     @AllArgsConstructor
@@ -50,8 +49,7 @@ class CachingConfigServiceDecoratorTest {
             () -> config.getConfigPropertyOrError(TestConfigProperties.EXAMPLE_PROPERTY));
 
         //read from underlying cache
-        verify(spy, times(1))
-            .getConfigPropertyAsOptional(TestConfigProperties.EXAMPLE_PROPERTY);
+        assertEquals(1, localHashMapConfigService.getReads());
 
         //negatively cached
         assertEquals(CachingConfigServiceDecorator.NEGATIVE_VALUE,
@@ -63,37 +61,32 @@ class CachingConfigServiceDecoratorTest {
         assertEquals("value", config.getConfigPropertyOrError(TestConfigProperties.EXAMPLE_PROPERTY));
 
         // still only called that first time
-        verify(spy, times(1))
-            .getConfigPropertyAsOptional(TestConfigProperties.EXAMPLE_PROPERTY);
+        assertEquals(1, localHashMapConfigService.getReads());
 
         // written exactly once
-        verify(spy, times(1))
-            .putConfigProperty(eq(TestConfigProperties.EXAMPLE_PROPERTY), eq("value"));
+        assertEquals(1, localHashMapConfigService.getWrites());
 
         // value in underlying config
         assertEquals("value",
-            spy.getConfigPropertyOrError(TestConfigProperties.EXAMPLE_PROPERTY));
+            localHashMapConfigService.getConfigPropertyOrError(TestConfigProperties.EXAMPLE_PROPERTY));
     }
 
     @Test
     void getConfigProperty_noCache() {
         assertTrue(config.getConfigPropertyAsOptional(TestConfigProperties.NO_CACHE).isEmpty());
-        verify(spy, times(1))
-            .getConfigPropertyAsOptional(TestConfigProperties.NO_CACHE);
+        assertEquals(1, localHashMapConfigService.getReads());
 
 
         //after write, still goes to origin
         config.putConfigProperty(TestConfigProperties.NO_CACHE, "value");
         assertEquals("value",
             config.getConfigPropertyOrError(TestConfigProperties.NO_CACHE));
-        verify(spy, times(2))
-            .getConfigPropertyAsOptional(TestConfigProperties.NO_CACHE);
+        assertEquals(2, localHashMapConfigService.getReads());
 
         // after read, still goes to origin
         assertEquals("value",
             config.getConfigPropertyOrError(TestConfigProperties.NO_CACHE));
-        verify(spy, times(3))
-            .getConfigPropertyAsOptional(TestConfigProperties.NO_CACHE);
+        assertEquals(3, localHashMapConfigService.getReads());
     }
 
 
@@ -101,13 +94,21 @@ class CachingConfigServiceDecoratorTest {
 
         Map<ConfigProperty, String> map = new HashMap<>();
 
+        @Getter
+        int reads = 0;
+
+        @Getter
+        int writes = 0;
+
         @Override
         public void putConfigProperty(ConfigProperty property, String value) {
+            writes++;
             map.put(property, value);
         }
 
         @Override
         public String getConfigPropertyOrError(ConfigProperty property) {
+            reads++;
             if (map.containsKey(property)) {
                 return map.get(property);
             } else {
@@ -117,6 +118,7 @@ class CachingConfigServiceDecoratorTest {
 
         @Override
         public Optional<String> getConfigPropertyAsOptional(ConfigProperty property) {
+            reads++;
             return Optional.ofNullable(map.get(property));
         }
 

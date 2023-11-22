@@ -16,19 +16,41 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoSet;
 import lombok.SneakyThrows;
+import org.apache.commons.lang3.JavaVersion;
+import org.apache.commons.lang3.SystemUtils;
+import org.mockito.MockMakers;
 
 import javax.inject.Singleton;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.util.Random;
+
+import static org.mockito.Mockito.*;
 
 public class MockModules {
+
+
+    /**
+     * helper to downgrade behavior of mockito to pre-java17 behavior
+     */
+    public static boolean isAtLeastJava17(){
+        return SystemUtils.isJavaVersionAtLeast(JavaVersion.JAVA_17);
+    }
+
+    public static <C> C provideMock(Class<C> clazz) {
+        if (isAtLeastJava17()) {
+            return mock(clazz, withSettings().mockMaker(MockMakers.SUBCLASS));
+        } else {
+            return mock(clazz);
+        }
+    }
 
     @Module
     public interface ForConfigService {
         @Provides @Singleton
         static ConfigService configService() {
-            ConfigService mock = mock(ConfigService.class);
+            ConfigService mock = provideMock(ConfigService.class);
             TestModules.withMockEncryptionKey(mock);
             return mock;
         }
@@ -41,9 +63,8 @@ public class MockModules {
             //NOTE: only works for jdk17+ with Mockito versions that include fix for:
             // https://github.com/mockito/mockito/issues/2589
             // --> possibly not coming until Mockito 5????
-            //return mock(new Random());
-
-            return mock(RandomNumberGenerator.class);
+            //return mock(Random.class);
+            return provideMock(RandomNumberGenerator.class);
         }
     }
 
@@ -56,12 +77,12 @@ public class MockModules {
 
         @Provides @Singleton
         static BulkDataRules bulkDataRules() {
-            return mock(ColumnarRules.class);
+            return provideMock(ColumnarRules.class);
         }
 
         @Provides @Singleton
         static RESTRules restRules() {
-            return mock(RESTRules.class);
+            return provideMock(RESTRules.class);
         }
 
         @Provides @Singleton
@@ -87,7 +108,7 @@ public class MockModules {
     public interface ForHttpTransportFactory {
         @Provides @Singleton
         static HttpTransportFactory httpTransportFactory() {
-            return mock(HttpTransportFactory.class);
+            return MockModules.provideMock(HttpTransportFactory.class);
         }
 
         @SneakyThrows
@@ -110,8 +131,7 @@ public class MockModules {
         @Provides
         @Singleton
         static HostEnvironment hostEnvironment() {
-            HostEnvironment hostEnvironment = mock(HostEnvironment.class);
-            when(hostEnvironment.getInstanceId()).thenReturn("psoxy-test");
+            HostEnvironment hostEnvironment = () -> "psoxy-test";
             return hostEnvironment;
         }
     }
