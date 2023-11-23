@@ -1,7 +1,6 @@
 package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.gateway.ConfigService;
-import co.worklytics.test.MockModules;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -26,8 +25,8 @@ class CompositeConfigServiceTest {
 
     @BeforeEach
     void setup() {
-        ConfigService a = MockModules.provideMock(ConfigService.class);
-        ConfigService b = MockModules.provideMock(ConfigService.class);
+        ConfigService a = mock(ConfigService.class);
+        ConfigService b = mock(ConfigService.class);
         when(a.getConfigPropertyAsOptional(eq(Properties.DEFINED_IN_A)))
             .thenReturn(Optional.of("defined-in-a"));
 
@@ -87,9 +86,9 @@ class CompositeConfigServiceTest {
 
     @Test
     void putConfigProperty() {
-        ConfigService supportsWriting = MockModules.provideMock(ConfigService.class);
+        ConfigService supportsWriting = mock(ConfigService.class);
         when(supportsWriting.supportsWriting()).thenReturn(true);
-        ConfigService doesNotSupportWriting = MockModules.provideMock(ConfigService.class);
+        ConfigService doesNotSupportWriting = mock(ConfigService.class);
         when(doesNotSupportWriting.supportsWriting()).thenReturn(false);
 
         CompositeConfigService configService = CompositeConfigService.builder()

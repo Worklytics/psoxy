@@ -47,18 +47,6 @@ public class Rules2 implements RESTRules {
 
     Map<String, JsonSchemaFilter> definitions;
 
-    /**
-     * root definitions, to be in scope across all endpoints
-     *
-     * @return definitions, in a TreeMap so that serialization is deterministic
-     */
-    public Map<String, JsonSchemaFilter> getDefinitions() {
-        if (definitions != null && !(definitions instanceof TreeMap)) {
-            definitions = new TreeMap<>(definitions);
-        }
-        return definitions;
-    }
-
 
     /**
      * add endpoints from other ruleset to this one

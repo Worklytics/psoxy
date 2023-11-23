@@ -2,13 +2,9 @@ package co.worklytics.psoxy.aws;
 
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
-import org.apache.commons.lang3.JavaVersion;
-import org.apache.commons.lang3.SystemUtils;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.mockito.MockMakers;
 import org.mockito.stubbing.Answer;
 import software.amazon.awssdk.services.ssm.SsmClient;
 import software.amazon.awssdk.services.ssm.model.*;
@@ -19,23 +15,12 @@ import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class ParameterStoreConfigServiceTest {
 
 
-    public static boolean isAtLeastJava17() {
-        return SystemUtils.isJavaVersionAtLeast(JavaVersion.JAVA_17);
-    }
-    SsmClient client;
-    @BeforeEach
-    public void setup() {
-        if (isAtLeastJava17()) {
-            client = mock(SsmClient.class, withSettings().mockMaker(MockMakers.SUBCLASS));
-        } else {
-            client = mock(SsmClient.class);
-        }
-    }
 
     @CsvSource({
         ",ACCESS_TOKEN",
@@ -66,6 +51,7 @@ class ParameterStoreConfigServiceTest {
         // based on those assumptions, which is fairly simple
 
         //setup test
+        SsmClient client = mock(SsmClient.class);
         parameterStoreConfigService.client = client;
         parameterStoreConfigService.clock = Clock.systemUTC();
         when(client.putParameter(any(PutParameterRequest.class)))
@@ -116,6 +102,7 @@ class ParameterStoreConfigServiceTest {
             new ParameterStoreConfigService("");
 
         //setup test
+        SsmClient client = mock(SsmClient.class);
         parameterStoreConfigService.client = client;
         parameterStoreConfigService.clock = Clock.systemUTC();
         parameterStoreConfigService.envVarsConfig = new EnvVarsConfigService();

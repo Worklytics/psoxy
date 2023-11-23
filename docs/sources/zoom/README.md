@@ -20,37 +20,28 @@ Accounts on unpaid plans do not have access to some methods Worklytics use like:
 The Zoom connector through Psoxy requires a Custom Managed App on the Zoom Marketplace. This app may
 be left in development mode; it does not need to be published.
 
-  1. Go to https://marketplace.zoom.us/develop/create and create an app of type "Server to Server OAuth"
-  2. After creation, it will show the App Credentials.
+1. Go to https://marketplace.zoom.us/develop/create and create an app of type "Server to Server OAuth"
+2. After creation, it will show the App Credentials. Share them with the AWS/GCP administrator, the
+   following values must be filled in the AWS Systems Manager Parameter Store / GCP Secret Manager
+   for use by the proxy when authenticating with the Zoom API:
 
-     Copy the following values:
-       - `Account ID`
-       - `Client ID`
-       - `Client Secret`
+    - `PSOXY_ZOOM_CLIENT_ID`
+    - `PSOXY_ZOOM_ACCOUNT_ID`
+    - `PSOXY_ZOOM_CLIENT_SECRET`
 
-     ![Server to Server OAuth App](server-to-server-oauth-app.png)
+    - NOTE: Anytime the *client secret* is regenerated it needs to be updated in the Proxy too.
+    - NOTE: *client secret* should be handled according to your organization's security policies for
+      API keys/secrets as, in combination with the above, allows access to your organization's data.
 
-     Share them with the AWS/GCP administrator, who should fill them in your host platform's
-     secret manager (AWS Systems Manager Parameter Store / GCP Secret Manager) for use by the proxy
-     when authenticating with the Zoom API:
+3. Fill the information section
 
-       - `Account ID` --> `PSOXY_ZOOM_ACCOUNT_ID`
-       - `Client ID` --> `PSOXY_ZOOM_CLIENT_ID`
-       - `Client Secret` --> `PSOXY_ZOOM_CLIENT_SECRET`
+4. Fill the scopes section, enabling the following:
 
-     NOTE: Anytime the *Client Secret* is regenerated it needs to be updated in the Proxy too.
-     NOTE: *Client Secret* should be handled according to your organization's security policies for
-     API keys/secrets as, in combination with the above, allows access to your organization's data.
-
-  3. Fill the information section
-
-  4. Fill the scopes section, enabling the following:
-
-     - Users / View all user information / `user:read:admin`
+    - Users / View all user information / `user:read:admin`
         - List information about the Zoom user accounts, for enumeration / linking across sources
-     - Meetings / View all user meetings / `meeting:read:admin`
+    - Meetings / View all user meetings / `meeting:read:admin`
         - Listing all user meetings (work events / items)
-     - Report / View report data / `report:read:admin`
+    - Report / View report data / `report:read:admin`
         - List historical (previous 6 months) user meetings (work events / items)
 
-  5. Activate the app
+5. Activate the app
