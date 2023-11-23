@@ -2,8 +2,8 @@
 
 ## Examples
 
-* [Example Rules](example-rules/slack/discovery.yaml)
-* Example Data : [original](api-response-examples/slack) | [sanitized](api-response-examples/slack/sanitized)
+* [Example Rules](discovery.yaml)
+* Example Data : [original](example-api-responses/original) | [sanitized](example-api-responses/sanitized)
 
 ## Steps to Connect
 

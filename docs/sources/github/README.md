@@ -2,8 +2,8 @@
 
 ## Examples
 
-  * [Example Rules](example-rules/github/github.yaml)
-  * Example Data : [original](api-response-examples/github) | [sanitized](api-response-examples/github/sanitized)
+  * [Example Rules](github.yaml)
+  * Example Data : [original](example-api-responses/original) | [sanitized](example-api-responses/sanitized)
 
 ## Steps to Connect
 

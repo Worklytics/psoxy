@@ -8,7 +8,7 @@ alpha due to impending obsolescence of Jira Server.
 
 ## Setup Instructions
 
-NOTE: derived from [worklytics-connector-specs](../../infra/modules/worklytics-connector-specs/main.tf); refer to that for definitive information.
+NOTE: derived from [worklytics-connector-specs](../../../../infra/modules/worklytics-connector-specs/main.tf); refer to that for definitive information.
 
   1. Follow the instructions to create a [Personal Access Token](https://confluence.atlassian.com/enterprise/using-personal-access-tokens-1026032365.html) in your instance.
      As this is coupled to a specific User in Jira, we recommend first creating a dedicated Jira user
