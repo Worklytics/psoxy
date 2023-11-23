@@ -11,10 +11,10 @@ on:
     branches:
       - 'main'
       - 'rc-*'
-      - 's162-improve-health-check' # more fixes to java cross-version compatibility here, so test all here to
+      - 's162-prep-release'
 
 jobs:
-  # Java 11 - Oracle support ended 30 Sept 2023
+  # Java 11 - Oracle support ended 30 Sept 2023 ... but still what ships with GCP cloud shell!!!
   ci_java11:
     uses: ./.github/workflows/build-java.yaml
     with:
@@ -31,10 +31,10 @@ jobs:
   # although beyond me why 17 and 21 both work, but 20 doesn't; best guess is Mockito 5 degrading
   # behavior in some way for 20 that isn't needed for 21 and doesn't matter for 17?
 
-#  ci_java20:
-#    uses: ./.github/workflows/build-java.yaml
-#    with:
-#      java-version: '20'
+  ci_java20:
+    uses: ./.github/workflows/build-java.yaml
+    with:
+      java-version: '20'
 
   # Java 21 - released 19 Sept 2023, supported until Sept 2028 (LTS)
   ci_java21:

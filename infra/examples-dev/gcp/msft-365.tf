@@ -27,7 +27,7 @@ module "msft-connection-auth-federation" {
   for_each = module.worklytics_connectors_msft_365.enabled_api_connectors
 
   source = "../../modules/azuread-federated-credentials"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-federated-credentials?ref=rc-v0.4.41"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-federated-credentials?ref=v0.4.41"
 
   application_object_id = each.value.connector.id
   display_name          = "GcpFederation"

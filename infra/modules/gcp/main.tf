@@ -14,6 +14,7 @@ resource "google_project_service" "gcp_infra_api" {
     "cloudbuild.googleapis.com", # some modes of Cloud Functions seem to need this, so TBD
     "cloudfunctions.googleapis.com",
     "cloudresourcemanager.googleapis.com",
+    "compute.googleapis.com", # seems required w newer Google provider versions, for resources we use
     "iam.googleapis.com", # manage IAM via terraform (as of 2023-04-17, internal dev envs didn't have this; so really needed?)
     "secretmanager.googleapis.com",
     # "serviceusage.googleapis.com", # manage service APIs via terraform (prob already

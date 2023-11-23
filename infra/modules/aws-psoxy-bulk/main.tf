@@ -405,7 +405,7 @@ resource "local_file" "todo-aws-psoxy-bulk-test" {
 
 resource "local_file" "test_script" {
   filename        = "test-${var.instance_id}.sh"
-  file_permission = "0770"
+  file_permission = "755"
   content         = <<EOT
 #!/bin/bash
 FILE_PATH=$${1:-${try(local.example_file, "")}}
