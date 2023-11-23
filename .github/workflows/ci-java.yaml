@@ -11,4 +11,4 @@ jobs:
   ci_java:
     uses: ./.github/workflows/build-java.yaml
     with:
-      java-version: '17' # 21 is LTS, so fair that this should be our default
+      java-version: '17'

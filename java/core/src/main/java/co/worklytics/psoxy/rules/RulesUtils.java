@@ -10,6 +10,7 @@ import com.avaulta.gateway.rules.RecordRules;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.ByteStreams;
 import lombok.NoArgsConstructor;
@@ -155,12 +156,6 @@ public class RulesUtils {
         defaultScopeIdBySource.put("jira-server", "jira");
         defaultScopeIdBySource.put("jira-cloud", "jira");
         defaultScopeIdBySource.put("dropbox-business", "dropbox-business");
-
-        // we expect hris (employee_id) scope in all bulk data sources
-        defaultScopeIdBySource.put("hris", "hris");
-        defaultScopeIdBySource.put("badge", "hris");
-        defaultScopeIdBySource.put("survey", "hris");
-        defaultScopeIdBySource.put("qualtrics", "hris");
     }
 
     public String getDefaultScopeIdFromSource(@NonNull String source) {

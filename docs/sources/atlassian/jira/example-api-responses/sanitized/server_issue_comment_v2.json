@@ -7,14 +7,14 @@
       "self":"http://localhost:8080/rest/api/2/issue/10000/comment/10000",
       "id":"10000",
       "author":{
-        "key":"{\"scope\":\"jira\",\"hash\":\"XFMcGkt3HwABpThFffmg84wAjV_V-7EYXA2C4uBCDss\"}",
-        "emailAddress":"{\"scope\":\"email\",\"domain\":\"contoso.com\",\"hash\":\"7fwD-7Ki3YuYHHeJgtXUw098eDrnFaTVAxcjy3ZcxVI\"}",
+        "key":"{\"scope\":\"jira\",\"hash\":\"dTt6XU3azhfCv8SDSPUz94vdMTlhhBlbhRTPT262SLM\"}",
+        "emailAddress":"{\"scope\":\"email\",\"domain\":\"contoso.com\",\"hash\":\"PDCw4eu8sUHIMnuovkFwUN8yG8H0M3GWBdC7hw0AOh0\"}",
         "active":true,
         "timeZone":"GMT"
       },
       "updateAuthor":{
-        "key":"{\"scope\":\"jira\",\"hash\":\"XFMcGkt3HwABpThFffmg84wAjV_V-7EYXA2C4uBCDss\"}",
-        "emailAddress":"{\"scope\":\"email\",\"domain\":\"contoso.com\",\"hash\":\"7fwD-7Ki3YuYHHeJgtXUw098eDrnFaTVAxcjy3ZcxVI\"}",
+        "key":"{\"scope\":\"jira\",\"hash\":\"dTt6XU3azhfCv8SDSPUz94vdMTlhhBlbhRTPT262SLM\"}",
+        "emailAddress":"{\"scope\":\"email\",\"domain\":\"contoso.com\",\"hash\":\"PDCw4eu8sUHIMnuovkFwUN8yG8H0M3GWBdC7hw0AOh0\"}",
         "active":true,
         "timeZone":"GMT"
       },

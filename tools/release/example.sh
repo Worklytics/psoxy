@@ -78,40 +78,12 @@ fi
 BRANCH_STATUS=$(git status --porcelain)
 if [ -n "$BRANCH_STATUS" ]; then
   printf "${RED}Current status of 'main' branch is not clean. Please commit or stash your changes and try again.${NC}\n"
-
-  git status
-
-  printf "Do you want to ${BLUE}git reset --hard${NC}?"
-  read -p "(y/N) " -n 1 -r
-  REPLY=${REPLY:-N}
-  echo    # Move to a new line
-  case "$REPLY" in
-    [yY][eE][sS]|[yY])
-      git reset --hard
-      ;;
-    *)
-      echo "Aborted."
-      exit 1
-      ;;
-  esac
   exit 1
 fi
 
-# ensure `main` up-to-date with origin
-if git fetch origin main --dry-run | grep -q 'up to date'; then
-      echo "The local main branch is up to date with origin/main."
-  else
-    # Check if it can be fast-forwarded
-    if git merge-base --is-ancestor HEAD origin/main; then
-      echo "The local main branch can be fast-forwarded. Performing 'git pull origin main'..."
-      git pull origin main
-    else
-      printf "${RED}The local copy of main branch cannot be fast-forwarded. Please resolve any conflicts manually.${NC}"
-      exit 1
-    fi
-fi
-
 set -e
+
+git fetch origin
 
 cd -
 for file in "${FILES_TO_COPY[@]}"
@@ -129,6 +101,8 @@ do
 done
 
 rm ${EXAMPLE_TEMPLATE_REPO}/*.bck
+
+set -e
 
 cp -f ${PATH_TO_REPO}tools/init-example.sh ${EXAMPLE_TEMPLATE_REPO}init
 cp -f ${PATH_TO_REPO}tools/check-prereqs.sh ${EXAMPLE_TEMPLATE_REPO}check-prereqs
