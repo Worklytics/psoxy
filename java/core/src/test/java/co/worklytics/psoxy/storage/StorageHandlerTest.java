@@ -3,28 +3,30 @@ package co.worklytics.psoxy.storage;
 import co.worklytics.psoxy.PsoxyModule;
 import co.worklytics.psoxy.gateway.BulkModeConfigProperty;
 import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.StorageEventRequest;
 import co.worklytics.test.MockModules;
 import com.google.common.collect.ImmutableMap;
 import dagger.Component;
+import dagger.Module;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mock;
+import org.mockito.MockMakers;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.inject.Singleton;
-
-import java.io.ByteArrayOutputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class StorageHandlerTest {
 
@@ -39,11 +41,18 @@ class StorageHandlerTest {
         void inject( StorageHandlerTest test);
     }
 
+    InputStreamReader mockReader;
+
+    OutputStreamWriter mockWriter;
 
     @Inject
     ConfigService config;
 
+    // as provider to be able to setup config mock first
     @Inject
+    Provider<StorageHandler> handlerProvider;
+
+    // actual class under test
     StorageHandler handler;
 
     @BeforeEach
@@ -53,6 +62,15 @@ class StorageHandlerTest {
 
         when(config.getConfigPropertyOrError(eq(BulkModeConfigProperty.OUTPUT_BUCKET)))
             .thenReturn("bucket");
+
+        when(config.getConfigPropertyAsOptional(eq(ProxyConfigProperty.SOURCE)))
+            .thenReturn(Optional.of("hris"));
+
+        handler = handlerProvider.get();
+
+        mockReader = MockModules.provideMock(InputStreamReader.class);
+        mockWriter = MockModules.provideMock(OutputStreamWriter.class);
+
     }
 
 
@@ -76,8 +94,7 @@ class StorageHandlerTest {
 
 
 
-        StorageEventRequest request = handler.buildRequest(mock(InputStreamReader.class),
-            mock(OutputStreamWriter.class), "bucket-in", "directory/file.csv", handler.buildDefaultTransform());
+        StorageEventRequest request = handler.buildRequest(mockReader, mockWriter, "bucket-in", "directory/file.csv", handler.buildDefaultTransform());
 
         assertEquals("directory/file.csv", request.getDestinationObjectPath());
     }
@@ -100,7 +117,7 @@ class StorageHandlerTest {
         when(config.getConfigPropertyAsOptional(eq(BulkModeConfigProperty.OUTPUT_BASE_PATH)))
             .thenReturn(Optional.ofNullable(outputBasePath));
 
-        StorageEventRequest request = handler.buildRequest(mock(InputStreamReader.class), mock(OutputStreamWriter.class), "bucket-in", "directory/file.csv", handler.buildDefaultTransform());
+        StorageEventRequest request = handler.buildRequest(mockReader, mockWriter, "bucket-in", "directory/file.csv", handler.buildDefaultTransform());
 
         assertEquals("bucket-in", request.getSourceBucketName());
         assertEquals("directory/file.csv", request.getSourceObjectPath());

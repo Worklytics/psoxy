@@ -10,8 +10,14 @@ source.
 Psoxy replaces PII in your organization's data with hash tokens to enable Worklytics's analysis to
 be performed on anonymized data which we cannot map back to any identifiable individual.
 
-It is intended to be a simple, serverless, transparent solution to provide more granular access to
-data source APIs.
+Psoxy is a pseudonymization service that acts as a Security / Compliance layer, which you can deploy
+between your data sources (SaaS tool APIs, Cloud storage buckets, etc) and the tools that need to
+access those sources.
+
+Psoxy ensures more secure, granular data access than direct connections between your tools will
+offer - and enforces access rules to fulfill your Compliance requirements.
+
+Objectives:
   - **serverless** - we strive to minimize the moving pieces required to run psoxy at scale, keeping
      your attack surface small and operational complexity low. Furthermore, we define
      infrastructure-as-code to ease setup.
@@ -19,7 +25,7 @@ data source APIs.
      and white box penetration testing.
   - **simple** - psoxy's functionality will focus on performing secure authentication with the 3rd
      party API and then perform minimal transformation on the response (pseudonymization, field
-     redcation). to ease code review and auditing of its behavior.
+     redaction) to ease code review and auditing of its behavior.
 
 Psoxy may be hosted in [Google Cloud ](docs/gcp/development.md) or [AWS](docs/aws/getting-started.md).
 
@@ -30,7 +36,7 @@ Worklytics and the data source you wish to connect.  In this role, the proxy per
 authentication necessary to connect to the data source's API and then any required transformation
 (such as pseudonymization or redaction) on the response.
 
-Orchestration continues to be performed on the Worklytics-side.
+Orchestration continues to be performed on the Worklytics side.
 
 ![proxy illustration](docs/proxy-illustration.jpg)
 
@@ -135,7 +141,7 @@ The API key/secret will be used to authenticate with the source's REST API and a
 | Source                    | Details + Examples                                                               | API Permissions / Scopes                                                                                                                      |
 |---------------------------|----------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
 | Asana                     | [docs/sources/asana](docs/sources/asana/README.md)                               | a [Service Account](https://asana.com/guide/help/premium/service-accounts) (provides full access to Workspace)                                |
-| Github                    | [docs/sources/github](docs/sources/github/README.md)                             | **Read Only** permissions for: <br/>Repository: Contents, Issues, Metadata, Pull requests<br/>Organization: Administration, Members           |
+| GitHub                    | [docs/sources/github](docs/sources/github/README.md)                             | **Read Only** permissions for: <br/>Repository: Contents, Issues, Metadata, Pull requests<br/>Organization: Administration, Members           |
 | Jira Cloud                | [docs/sources/atlassian/jira-cloud](docs/sources/atlassian/jira/README.md)   | "Classic Scopes": `read:jira-user` `read:jira-work` "Granular Scopes": `read:group:jira` `read:user:jira`  "User Identity API" `read:account` |
 | Jira Server / Data Center | [docs/sources/atlassian/jira-server](docs/sources/atlassian/jira/jira-server.md) | Personal Acccess Token on behalf of user with access to equivalent of above scopes for entire instance                                        |
 | Salesforce                | [docs/sources/salesforce](docs/sources/salesforce/README.md)                     | `api` `chatter_api` `refresh_token` `offline_access` `openid` `lightning` `content` `cdp_query_api`                                           |                                                                                                       |
@@ -195,13 +201,17 @@ command line tools.
 
 You will need all of the following in your deployment environment (eg, your laptop):
 
-| Tool                                         | Version       | Test Command              |
-|----------------------------------------------|---------------|---------------------------|
-| [git](https://git-scm.com/)                  | 2.17+         | `git --version`           |
-| [Maven](https://maven.apache.org/)           | 3.6+          | `mvn -v`                 |
-| [Java 11+ JDK](https://openjdk.org/install/) | 11+, <=20     | `mvn -v &#124; grep Java` |
-| [Terraform](https://www.terraform.io/)       | 1.3.x, <= 1.5 | `terraform version`       |
+| Tool                                             | Version                | Test Command              |
+|--------------------------------------------------|------------------------|---------------------------|
+| [git](https://git-scm.com/)                      | 2.17+                  | `git --version`           |
+| [Maven](https://maven.apache.org/)               | 3.6+                   | `mvn -v`                 |
+| [Java JDK 11+ LTS](https://openjdk.org/install/) | 11, 17, 21 (see notes) | `mvn -v &#124; grep Java` |
+| [Terraform](https://www.terraform.io/)           | 1.3.x, <= 1.5          | `terraform version`       |
 
+NOTE: we will support Java versions for duration of official support windows, in particular the
+LTS versions. As of Nov 2023, we  still support java 11 but may end this at any time. Minor
+versions, such as 12-16, and 18-20, which are out of official support, may work but are not
+routinely tested.
 
 NOTE: Using `terraform` is not strictly necessary, but it is the only supported method. You may
 provision your infrastructure via your host's CLI, web console, or another infrastructure provisioning

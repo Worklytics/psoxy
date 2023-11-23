@@ -167,8 +167,7 @@ abstract public class RulesBaseTestCase {
         sanitizer = sanitizerFactory.create(getRulesUnderTest(),
             pseudonymizerFactory.create(Pseudonymizer.ConfigurationOptions.builder()
             .defaultScopeId(getRulesTestSpec().getDefaultScopeId())
-            //TODO: existing test cases presume this
-            .pseudonymImplementation(PseudonymImplementation.LEGACY)
+            .pseudonymImplementation(PseudonymImplementation.DEFAULT)
             .build()));
 
         //q: good way to also batch test sanitizers from yaml/json formats of rules, to ensure
@@ -221,9 +220,7 @@ abstract public class RulesBaseTestCase {
                 String sanitized = sanitize(example.getRequestUrl(), original);
 
                 String sanitizedFilepath = getRulesTestSpec().getExampleSanitizedApiResponsesPathFull() + example.getPlainExampleFile();
-                if (!sanitizedFilepath.endsWith("/")) {
-                    sanitizedFilepath = sanitizedFilepath + "/";
-                }
+
 
                 String expected = StringUtils.trim(new String(TestUtils.getData(sanitizedFilepath)));
 
