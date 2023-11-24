@@ -16,14 +16,31 @@ EXAMPLE_TEMPLATE_REPO=$3
 display_usage() {
     printf "Usage:\n"
     printf "  ./release-example.sh <path-to-repo> <example> <path-to-example-repo>\n"
-    printf "  ./release-example.sh ~/code/psoxy/ aws-all ~/psoxy-example-aws\n"
-    printf "  ./release-example.sh ~/code/psoxy/ gcp ~/psoxy-example-gcp\n"
+    printf "  ./release-example.sh ~/psoxy/ aws-all ~/psoxy-example-aws\n"
+    printf "  ./release-example.sh ~/psoxy/ gcp ~/psoxy-example-gcp\n"
 }
 
 if [ "$#" -ne 3 ]; then
   printf "${RED}Unexpected number of parameters.${NC}\n"
   display_usage
   exit 1
+fi
+
+CURRENT_BRANCH=$(git branch --show-current)
+
+if [ "$CURRENT_BRANCH" != "main" ]; then
+  printf "Current branch is not ${BLUE}main${NC}. Do you want to switch to main? "
+  read -p "(Y/n) " -n 1 -r
+  REPLY=${REPLY:-Y}
+  echo    # Move to a new line
+  case "$REPLY" in
+    [yY][eE][sS]|[yY])
+      git checkout main
+      ;;
+    *)
+      printf "Did not switch to main. Example will be published from ${BLUE}${CURRENT_BRANCH}${NC}.\n"
+      ;;
+  esac
 fi
 
 if [ ! -d "$PATH_TO_REPO" ]; then
