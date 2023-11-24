@@ -13,6 +13,10 @@ PATH_TO_REPO=$1
 EXAMPLE=$2
 EXAMPLE_TEMPLATE_REPO=$3
 
+# find where user is running this script from, so can return there at end
+WORKING_DIRECTORY=`pwd`
+
+
 display_usage() {
     printf "Usage:\n"
     printf "  ./release-example.sh <path-to-repo> <example> <path-to-example-repo>\n"
@@ -87,7 +91,7 @@ cd "$EXAMPLE_TEMPLATE_REPO"
 CURRENT_BRANCH=$(git branch --show-current)
 if [ "$CURRENT_BRANCH" != "main" ]; then
   printf "${RED}Current branch in checkout of $EXAMPLE_TEMPLATE_REPO is not main. Please checkout main branch and try again.${NC}\n"
-  printf "try ${BLUE}(cd $EXAMPLE_TEMPLATE_REPO && git checkout main)${NC}\n"
+  printf "try ${BLUE}(cd $EXAMPLE_TEMPLATE_REPO && git checkout main && cd $WORKING_DIRECTORY)${NC}\n"
   exit 1
 fi
 
@@ -169,5 +173,6 @@ fi
 # return us to main, so don't have to do this manually before next release
 git checkout main
 
+# should be equivalent to : cd $WORKING_DIRECTORY
 cd -
 
