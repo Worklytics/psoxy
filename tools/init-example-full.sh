@@ -83,7 +83,7 @@ fi
 # create example build script, to support building deployment bundle (JAR) outside of Terraform
 # (useful for debugging)
 
-BUILD_DEPLOYMENT_BUNDLE_SCRIPT=${TF_CONFIG_ROOT}/build
+BUILD_DEPLOYMENT_BUNDLE_SCRIPT=${TF_CONFIG_ROOT}/build.sh
 if [ -f $BUILD_DEPLOYMENT_BUNDLE_SCRIPT ]; then
   rm "$BUILD_DEPLOYMENT_BUNDLE_SCRIPT"
 fi
@@ -97,7 +97,7 @@ chmod +x "$BUILD_DEPLOYMENT_BUNDLE_SCRIPT"
 
 # tf module upgrade script
 
-UPGRADE_TF_MODULE_SCRIPT=${TF_CONFIG_ROOT}/upgrade-terraform-modules
+UPGRADE_TF_MODULE_SCRIPT=${TF_CONFIG_ROOT}/upgrade-terraform-modules.sh
 if [ -f $UPGRADE_TF_MODULE_SCRIPT ]; then
   rm "$UPGRADE_TF_MODULE_SCRIPT"
 fi

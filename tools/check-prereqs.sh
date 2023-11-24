@@ -22,33 +22,51 @@ if ! terraform -v &> /dev/null ; then
   exit 1
 fi
 
+# Check Maven installation
+
 if ! mvn -v &> /dev/null ; then
   printf "${RED}Maven not installed.${NC} See https://maven.apache.org/install.html\n"
   if $HOMEBREW_AVAILABLE; then printf " or, as you have Homebrew available, run ${BLUE}brew install maven${NC}\n"; fi
   exit 1
 fi
 
-MVN_VERSION=`mvn -v | grep "Apache Maven"`
 
+MVN_VERSION=`mvn -v | grep "Apache Maven"`
+MVN_VERSION_MAJOR_MINOR=$(echo $MVN_VERSION | sed -n 's/^Apache Maven \([0-9]*\.[0-9]*\).*$/\1/p')
 printf "Your Maven version is ${BLUE}${MVN_VERSION}${NC}.\n"
-printf "\t- if that is a version < 3.6, we recommend you upgrade. See https://maven.apache.org/install.html\n"
-printf "\t- Maven is used to build the package that will be deployed to your host platform as an AWS lambda or a GCP Cloud Function\n"
+
+if (( $(echo "$MVN_VERSION_MAJOR_MINOR < 3.6" | bc ) == 1 )); then
+  printf "${RED}This Maven version appears to be unsupported.${NC} Psoxy requires a supported version of Maven 3.6 or later.\n"
+  printf "We recommend you upgrade. See https://maven.apache.org/install.html\n"
+  printf "Maven is used to build the package that will be deployed to your host platform as an AWS lambda or a GCP Cloud Function\n"
+fi
 
 printf "\n"
+
+# Check Java installation
 
 JAVA_VERSION=`mvn -v | grep Java`
+JAVA_VERSION_MAJOR=$(echo $JAVA_VERSION | sed -n 's/^Java version: \([0-9]*\).*/\1/p')
 
 printf "Your Maven installation uses ${BLUE}${JAVA_VERSION}${NC}.\n"
-printf "\t- if that is a Java version < 11, you must upgrade to 11. Java >= 11, <= 20 are supported.\n"
-printf "\t- if you have a Java JDK of the right version installed on your machine *other* than the one referenced there, set your ${BLUE}JAVA_HOME${NC} to its location.\n"
+
+if [[ "$JAVA_VERSION_MAJOR" != 11 && "$JAVA_VERSION_MAJOR" != 17 && "$JAVA_VERSION_MAJOR" != 21 ]]; then
+  printf "${RED}This Java version appears to be unsupported. You should upgrade it, or may have compile errors.${NC} Psoxy requires a supported version of Java 11 or later; as of Nov 2023, this includes Java 11, 17, or 21. See https://maven.apache.org/install.html\n"
+  if $HOMEBREW_AVAILABLE; then printf "or as you have Homebrew available, run ${BLUE}brew install openjdk@17${NC}\n"; fi
+  printf "If you have an alternative JDK installed, then you must update your ${BLUE}JAVA_HOME${NC} environment variable to point to it.\n"
+fi
 
 printf "\n"
+
+# Check NPM installation
 
 if ! npm -v &> /dev/null ; then
   printf "${RED}Node Package Manager (npm) is not installed and is required for some testing to work.${NC} See https://nodejs.org/\n"
   if $HOMEBREW_AVAILABLE; then printf " or, as you have Homebrew available, run ${BLUE}brew install node${NC}\n"; fi
 fi
 
+
+# Check AWS installation
 AWSCLI_REASON="It is used if you're deploying to AWS."
 if ! aws --version &> /dev/null ; then
   printf "${RED}AWS CLI is not installed.${NC} ${AWSCLI_REASON} See https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html\n"
@@ -61,6 +79,7 @@ fi
 
 printf "\n"
 
+# Check GCloud CLI installation
 GCLOUD_REASON="It is used if you're deploying to GCP or using Google Workspace data sources."
 if ! gcloud --version &> /dev/null ; then
   printf "${RED}Google Cloud SDK is not installed.${NC} ${GCLOUD_REASON} See https://cloud.google.com/sdk/docs/install\n"
@@ -72,6 +91,7 @@ fi
 
 printf "\n"
 
+# Check Azure CLI installation
 AZCLI_REASON="It is used if you're deploying to Azure or using Microsoft 365 data sources."
 if ! az --version &> /dev/null ; then
   printf "${RED}Azure CLI is not installed.${NC} ${AZCLI_REASON} See https://docs.microsoft.com/en-us/cli/azure/install-azure-cli\n"
