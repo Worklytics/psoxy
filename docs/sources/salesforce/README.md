@@ -2,8 +2,8 @@
 
 ## Examples
 
-* [Example Rules](example-rules/salesforce/salesforce.yaml)
-* Example Data : [original](api-response-examples/salesforce) | [sanitized](api-response-examples/salesforce/sanitized)
+* [Example Rules](salesforce.yaml)
+* Example Data : [original](example-api-responses/original) | [sanitized](example-api-responses/sanitized)
 
 ## Steps to Connect
 
@@ -42,7 +42,7 @@ Before running the example, you have to populate the following variables in terr
    that this is the actual error happening, you should see an error like the following one:
      ```json
      WARNING: Source API Error [{
-    "message": "\nLastModifiedById,NumberOfEmployees,OwnerId,Ownership,ParentId,Rating,Sic,Type\n                                           
+    "message": "\nLastModifiedById,NumberOfEmployees,OwnerId,Ownership,ParentId,Rating,Sic,Type\n
                ^\nERROR at Row:1:Column:136\nNo such column 'Ownership' on entity 'Account'. If you are attempting to use a custom field, be sure to append the '__c' after the custom field name. Please reference your WSDL or the describe call for the appropriate names.",
     "errorCode": "INVALID_FIELD"
      }]
