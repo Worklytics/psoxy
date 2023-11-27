@@ -248,6 +248,51 @@ locals {
         "/v1.0/groups",
         "/v1.0/groups/{group-id}/members"
       ]
+    },
+    "msft-teams" : {
+      source_kind : "msft-teams"
+      worklytics_connector_id : "msft-teams-psoxy",
+      display_name : "Microsoft Teams"
+      identifier_scope_id : "azure-ad"
+      source_auth_strategy : "oauth2_refresh_token"
+      target_host : "graph.microsoft.com"
+      required_oauth2_permission_scopes : [],
+      required_app_roles : [
+        "Team.ReadBasic.All",
+        "Channel.ReadBasic.All",
+        "Chat.ReadBasic",
+        "Chat.Read",
+        "ChannelMessage.Read.All",
+        "CallRecords.Read.All",
+        "OnlineMeetings.Read"
+      ],
+      environment_variables : {
+        GRANT_TYPE : "workload_identity_federation"
+        # by default, assumed to be of type 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
+        TOKEN_SCOPE : "https://graph.microsoft.com/.default"
+        REFRESH_ENDPOINT : "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
+      }
+      example_api_calls : [
+        "/beta/{apiVersion}/teams",
+        "/beta/{apiVersion}/teams/{teamId}/allChannels",
+        "/beta/{apiVersion}/users/{userId}/chats",
+        "/beta/{apiVersion}/teams/{teamId}/channels/{channelId}/messages",
+        "/beta/{apiVersion}/teams/{teamId}/channels/{channelId}/messages/delta",
+        "/beta/{apiVersion}/chats/{chatId}/messages",
+        "/beta/{apiVersion}/communications/calls/{callId}",
+        "/beta/{apiVersion}/communications/callRecords/{callChainId}",
+        "/beta/{apiVersion}/users/{userId}/onlineMeetings",
+
+        "/v1.0/{apiVersion}/teams",
+        "/v1.0/{apiVersion}/teams/{teamId}/allChannels",
+        "/v1.0/{apiVersion}/users/{userId}/chats",
+        "/v1.0/{apiVersion}/teams/{teamId}/channels/{channelId}/messages",
+        "/v1.0/{apiVersion}/teams/{teamId}/channels/{channelId}/messages/delta",
+        "/v1.0/{apiVersion}/chats/{chatId}/messages",
+        "/v1.0/{apiVersion}/communications/calls/{callId}",
+        "/v1.0/{apiVersion}/communications/callRecords/{callChainId}",
+        "/v1.0/{apiVersion}/users/{userId}/onlineMeetings"
+      ]
     }
   }
 
