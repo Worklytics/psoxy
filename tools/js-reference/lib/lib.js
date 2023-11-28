@@ -25,6 +25,7 @@ function hashWithSalt(inputString, options) {
     const hash = crypto.createHash('sha256').update(combinedString).digest('base64');
 
     // encode as URL-safe without padding
+    // eg replace '+' with '-', '/' with '_', and remove trailing '=' characters
     return 't~' + hash.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
