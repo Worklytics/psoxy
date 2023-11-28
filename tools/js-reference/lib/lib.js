@@ -19,10 +19,10 @@ function hashWithSalt(inputString, options) {
 
 
     // Concatenate the salt and input string
-    const combinedString = inputString + options.salt;
+    const saltedInput = inputString + options.salt;
 
-    // Create a SHA-256 hash of the combined string, base64-encoded
-    const hash = crypto.createHash('sha256').update(combinedString).digest('base64');
+    // Create a SHA-256 hash of the salted input string, base64-encoded
+    const hash = crypto.createHash('sha256').update(saltedInput).digest('base64');
 
     // encode as URL-safe without padding
     // eg replace '+' with '-', '/' with '_', and remove trailing '=' characters
