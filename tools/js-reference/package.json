@@ -4,11 +4,19 @@
   "description": "reference implementation of psoxy transformations, in JavaScript",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "ava"
   },
   "author": "Worklytics, Co. <www.worklytics.co>",
   "license": "ISC",
   "dependencies": {
     "crypto": "^1.0.1"
+  },
+  "devDependencies": {
+    "ava": "^5.3.1"
+  },
+  "ava": {
+    "files": [
+      "test/**/*.test.js"
+    ]
   }
 }
