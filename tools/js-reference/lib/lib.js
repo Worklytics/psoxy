@@ -31,4 +31,3 @@ function hashWithSalt(inputString, options) {
 module.exports = {
   hashWithSalt
 }
-git stat
