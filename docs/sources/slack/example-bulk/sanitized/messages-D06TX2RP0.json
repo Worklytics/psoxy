@@ -1,1 +1,19 @@
-{"client_msg_id":"70299f8c-38ab-4911-835e-f2fe92fea6b6","type":"message","text":null,"user":"U06FG9AKF","ts":"1620665890.036300","team":"T06FG94SV","reactions":[{"name":"100","users":["USER_ID"],"count":1}],"channel_id":"D01VATQPMUG","channel_name":"general"}
+{
+  "client_msg_id":"70299f8c-38ab-4911-835e-f2fe92fea6b6",
+  "type":"message",
+  "text":null,
+  "user":"U06FG9AKF",
+  "ts":"1620665890.036300",
+  "team":"T06FG94SV",
+  "reactions":[
+    {
+      "name":"100",
+      "users":[
+        "USER_ID"
+      ],
+      "count":1
+    }
+  ],
+  "channel_id":"D01VATQPMUG",
+  "channel_name":null
+}

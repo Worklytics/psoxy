@@ -25,3 +25,4 @@ fileRules:
     format: "NDJSON"
     transforms:
       - redact: "$.text"
+      - redact: "$.channel_name"
