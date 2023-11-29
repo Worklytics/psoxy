@@ -148,7 +148,7 @@ variable "api_connectors" {
       value_managed_by_tf = optional(bool, true)
       })),
     [])
-
+    settings_to_provide = optional(map(string), {})
   }))
 
   description = "map of API connectors to provision"
