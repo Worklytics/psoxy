@@ -258,13 +258,26 @@ locals {
       target_host : "graph.microsoft.com"
       required_oauth2_permission_scopes : [],
       required_app_roles : [
-        "Team.ReadBasic.All",
-        "Channel.ReadBasic.All",
-        "Chat.ReadBasic",
-        "Chat.Read",
-        "ChannelMessage.Read.All",
-        "CallRecords.Read.All",
-        "OnlineMeetings.Read"
+      # Least privileged permissions
+      "Team.ReadBasic.All",
+      "Channel.ReadBasic.All",
+      "Chat.ReadBasic.All",
+      "Chat.Read.All",
+      #"ChannelMessage.Read.Group*",
+      "ChannelMessage.Read.All",
+      "CallRecords.Read.All",
+      "OnlineMeetings.Read.All"
+
+      # Higher privileged permissions
+#        "TeamSettings.Read.All",
+#        "TeamSettings.ReadWrite.All",
+#        "ChannelSettings.Read.All",
+#        "ChannelSettings.ReadWrite.All",
+#        "Chat.ReadWrite.All",
+#        "ChatMessage.Read.Chat",
+#        "Calls.AccessMedia.All",
+#        "OnlineMeetings.ReadWrite.All",
+#        "OnlineMeetingArtifact.Read.All"
       ],
       environment_variables : {
         GRANT_TYPE : "workload_identity_federation"
@@ -291,6 +304,8 @@ locals {
         "/v1.0/{apiVersion}/chats/{chatId}/messages",
         "/v1.0/{apiVersion}/communications/calls/{callId}",
         "/v1.0/{apiVersion}/communications/callRecords/{callChainId}",
+        "/v1.0/communications/callRecords/getDirectRoutingCalls(fromDateTime=2019-11-01,toDateTime=2019-12-01)",
+        "/v1.0/communications/callRecords/getPstnCalls(fromDateTime=2019-11-01,toDateTime=2019-12-01)",
         "/v1.0/{apiVersion}/users/{userId}/onlineMeetings"
       ]
     }
