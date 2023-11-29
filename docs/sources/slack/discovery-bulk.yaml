@@ -1,0 +1,27 @@
+fileRules:
+  /export-{week}/users.json.gz:
+    format: "NDJSON"
+    transforms:
+      - pseudonymize: "$.profile.email"
+      - redact: "$.name"
+      - redact: "$.real_name"
+  /export-{week}/channels.json.gz:
+    format: "NDJSON"
+    transforms:
+      - redact: "$.name"
+  /export-{week}/dms.json.gz:
+    format: "NDJSON"
+    transforms:
+      - redact: "$.text"
+  /export-{week}/groups.json.gz:
+    format: "NDJSON"
+    transforms:
+      - redact: "$.name"
+  /export-{week}/mpims.json.gz:
+    format: "NDJSON"
+    transforms:
+      - redact: "$.text"
+  /export-{week}/messages-{id}.json.gz:
+    format: "NDJSON"
+    transforms:
+      - redact: "$.text"

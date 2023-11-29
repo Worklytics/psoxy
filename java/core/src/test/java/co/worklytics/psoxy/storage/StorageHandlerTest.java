@@ -6,10 +6,12 @@ import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.StorageEventRequest;
 import co.worklytics.test.MockModules;
+import com.avaulta.gateway.rules.BulkDataRules;
 import com.google.common.collect.ImmutableMap;
 import dagger.Component;
 import dagger.Module;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -48,7 +50,7 @@ class StorageHandlerTest {
     @Inject
     ConfigService config;
 
-    // as provider to be able to setup config mock first
+    // as provider to be able to set up config mock first
     @Inject
     Provider<StorageHandler> handlerProvider;
 
@@ -117,7 +119,13 @@ class StorageHandlerTest {
         when(config.getConfigPropertyAsOptional(eq(BulkModeConfigProperty.OUTPUT_BASE_PATH)))
             .thenReturn(Optional.ofNullable(outputBasePath));
 
-        StorageEventRequest request = handler.buildRequest(mockReader, mockWriter, "bucket-in", "directory/file.csv", handler.buildDefaultTransform());
+        StorageHandler.ObjectTransform tranform = StorageHandler.ObjectTransform.builder()
+            .destinationBucketName(config.getConfigPropertyOrError(BulkModeConfigProperty.OUTPUT_BUCKET))
+            .pathWithinBucket(config.getConfigPropertyAsOptional(BulkModeConfigProperty.OUTPUT_BASE_PATH).orElse(""))
+            .rules(mock(BulkDataRules.class))
+            .build();
+
+        StorageEventRequest request = handler.buildRequest(mockReader, mockWriter, "bucket-in", "directory/file.csv", tranform);
 
         assertEquals("bucket-in", request.getSourceBucketName());
         assertEquals("directory/file.csv", request.getSourceObjectPath());

@@ -3,12 +3,15 @@ package co.worklytics.psoxy.storage.impl;
 import co.worklytics.psoxy.PseudonymizedIdentity;
 import co.worklytics.psoxy.Pseudonymizer;
 import co.worklytics.psoxy.storage.BulkDataSanitizer;
+import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
+import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.RecordRules;
 import com.avaulta.gateway.rules.transforms.RecordTransform;
 import com.google.common.annotations.VisibleForTesting;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.JsonPathException;
 import com.jayway.jsonpath.MapFunction;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
@@ -33,6 +36,9 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
     @Inject
     Configuration jsonConfiguration;
 
+    @Inject
+    UrlSafeTokenPseudonymEncoder encoder;
+
     RecordRules rules;
 
     @AssistedInject
@@ -55,7 +61,7 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
             .map(transform -> Triple.of(
                 JsonPath.compile(transform.getPath()),
                 transform,
-                getMapFunction(transform, pseudonymizer)
+                getMapFunction(transform, pseudonymizer, encoder)
             ))
             .collect(Collectors.toList());
 
@@ -76,7 +82,11 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
                             }
                         }
 
-                        compiledTransform.getLeft().map(document, compiledTransform.getRight(), jsonConfiguration);
+                        try {
+                            compiledTransform.getLeft().map(document, compiledTransform.getRight(), jsonConfiguration);
+                        } catch (JsonPathException e) {
+                            //rule for transform doesn't match anythign in document; suppress this
+                        }
                     }
                     writer.write(jsonConfiguration.jsonProvider().toJson(document));
                     writer.write('\n'); // NDJSON uses newlines between records
@@ -87,7 +97,9 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
         }
     }
 
-    private MapFunction getMapFunction(RecordTransform transform, Pseudonymizer pseudonymizer) {
+    private MapFunction getMapFunction(RecordTransform transform,
+                                       Pseudonymizer pseudonymizer,
+                                       PseudonymEncoder encoder) {
         if (transform instanceof RecordTransform.Redact) {
             return (currentValue, configuration) -> null;
         } else if (transform instanceof RecordTransform.Pseudonymize) {
@@ -101,7 +113,9 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
                         throw new IllegalArgumentException("Only DEFAULT (v0.4) pseudonymization is supported");
                     }
 
-                    return ObjectUtils.firstNonNull(pseudonymizedIdentity.getReversible(), pseudonymizedIdentity.getHash());
+
+                    return encoder.encode(pseudonymizedIdentity.asPseudonym());
+                    //.firstNonNull(pseudonymizedIdentity.getReversible(), pseudonymizedIdentity.getHash());
                 } else {
                     throw new IllegalArgumentException("Pseudonymize transform only supports String values");
                 }
