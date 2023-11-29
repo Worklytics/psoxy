@@ -134,7 +134,7 @@ variable "api_connectors" {
       description         = optional(string)
       })),
     [])
-
+    settings_to_provide = optional(map(string), {})
   }))
 
   description = "map of API connectors to provision"
