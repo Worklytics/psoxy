@@ -278,7 +278,7 @@ public class TeamsTests extends JavaRulesTestBaseCase {
 
     @ParameterizedTest
     @ValueSource(strings = {"v1.0", "beta"})
-    @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS)
+    @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_REGEX)
     public void communications_callRecords(String apiVersion) {
         String callChainId = "2f1a1100-b174-40a0-aba7-0b405e01ed92";
         String endpoint = "https://graph.microsoft.com/" + apiVersion + "/communications/callRecords/" + callChainId;
@@ -304,6 +304,84 @@ public class TeamsTests extends JavaRulesTestBaseCase {
             "machineName_",
             "Default input device",
             "Microphone (Microsoft Virtual Audio Device (Simple) (WDM))"
+        );
+        assertUrlWithSubResourcesBlocked(endpoint);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"v1.0", "beta"})
+    @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_GET_DIRECT_ROUTING_CALLS)
+    public void communications_callRecords_getDirectRoutingCalls(String apiVersion) {
+        String fromDateTime = "2019-11-01";
+        String toDateTime = "2019-12-01";
+        String endpoint = "https://graph.microsoft.com/" + apiVersion + "/communications/callRecords/getDirectRoutingCalls(fromDateTime=" + fromDateTime + ",toDateTime=" + toDateTime + ")";
+        String jsonResponse = asJson("Communications_callRecords_getDirectRoutingCalls_"+ apiVersion + ".json");
+        assertNotSanitized(jsonResponse,
+            "id", "9e8bba57-dc14-533a-a7dd-f0da6575eed1",
+            "correlationId", "c98e1515-a937-4b81-b8a8-3992afde64e0",
+            "userId", "db03c14b-06eb-4189-939b-7cbf3a20ba27",
+            "startDateTime", "2019-11-01T00:00:25.105Z",
+            "inviteDateTime", "2019-11-01T00:00:21.949Z",
+            "failureDateTime", "0001-01-01T00:00:00Z",
+            "endDateTime", "2019-11-01T00:00:30.105Z",
+            "duration",
+            "callType", "ByotIn",
+            "successfulCall",
+            "mediaPathLocation", "USWE",
+            "signalingLocation", "EUNO",
+            "finalSipCode",
+            "callEndSubReason",
+            "finalSipCodePhrase", "BYE",
+            "trunkFullyQualifiedDomainName", "tll-audiocodes01.adatum.biz",
+            "mediaBypassEnabled"
+        );
+
+        String sanitized = sanitize(endpoint, jsonResponse);
+        assertRedacted(sanitized,
+            "userPrincipalName", "richard.malk@contoso.com",
+            "userDisplayName", "Richard Malk",
+            "callerNumber", "+12345678***",
+            "calleeNumber", "+01234567***"
+        );
+        assertUrlWithSubResourcesBlocked(endpoint);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"v1.0", "beta"})
+    @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_GET_PSTN_CALLS)
+    public void communications_callRecords_getPstnCalls(String apiVersion) {
+        String fromDateTime = "2019-11-01";
+        String toDateTime= "2019-12-01";
+        String endpoint = "https://graph.microsoft.com/" + apiVersion + "/communications/callRecords/getPstnCalls(fromDateTime=" + fromDateTime + ",toDateTime=" + toDateTime + ")";
+        String jsonResponse = asJson("Communications_callRecords_getPstnCalls_"+ apiVersion + ".json");
+        assertNotSanitized(jsonResponse,
+            "id", "9c4984c7-6c3c-427d-a30c-bd0b2eacee90",
+            "callId", "1835317186_112562680@61.221.3.176",
+            "userId", "db03c14b-06eb-4189-939b-7cbf3a20ba27",
+            "startDateTime", "2019-11-01T00:00:08.2589935Z",
+            "endDateTime", "2019-11-01T00:03:47.2589935Z",
+            "duration",
+            "charge",
+            "callType", "user_in",
+            "currency", "USD",
+            "usageCountryCode", "US",
+            "tenantCountryCode", "US",
+            "connectionCharge",
+            "destinationContext",
+            "destinationName", "United States",
+            "conferenceId",
+            "licenseCapability", "MCOPSTNU",
+            "inventoryType", "Subscriber",
+            "operator", "Microsoft",
+            "callDurationSource", "microsoft"
+        );
+
+        String sanitized = sanitize(endpoint, jsonResponse);
+        assertRedacted(sanitized,
+            "userPrincipalName", "richard.malk@contoso.com",
+            "userDisplayName", "Richard Malk",
+            "calleeNumber", "+1234567890",
+            "callerNumber", "+0123456789"
         );
         assertUrlWithSubResourcesBlocked(endpoint);
     }
@@ -359,7 +437,9 @@ public class TeamsTests extends JavaRulesTestBaseCase {
             InvocationExample.of("https://graph.microsoft.com/" + apiVersion + "/teams/fbe2bf47-16c8-47cf-b4a5-4b9b187c508b/channels/19:4a95f7d8db4c4e7fae857bcebe0623e6@thread.tacv2/messages/delta", "Teams_channels_messages_delta_" + apiVersion + ".json"),
             InvocationExample.of("https://graph.microsoft.com/" + apiVersion + "/chats/19:2da4c29f6d7041eca70b638b43d45437@thread.v2/messages", "Chats_messages_" + apiVersion + ".json"),
             InvocationExample.of("https://graph.microsoft.com/" + apiVersion + "/communications/calls/2f1a1100-b174-40a0-aba7-0b405e01ed92", "Communications_calls_" + apiVersion + ".json"),
-            InvocationExample.of("https://graph.microsoft.com/" + apiVersion + "/communications/callRecords/{id}", "Communications_callRecords_" + apiVersion + ".json"),
+            InvocationExample.of("https://graph.microsoft.com/" + apiVersion + "/communications/callRecords/2f1a1100-b174-40a0-aba7-0b405e01ed92?$expand=sessions($expand=segments)", "Communications_callRecords_" + apiVersion + ".json"),
+            InvocationExample.of("https://graph.microsoft.com/" + apiVersion + "/communications/callRecords/getDirectRoutingCalls(fromDateTime=2019-11-01,toDateTime=2019-12-01)", "Communications_callRecords_getDirectRoutingCalls_" + apiVersion + ".json"),
+            InvocationExample.of("https://graph.microsoft.com/" + apiVersion + "/communications/callRecords/getPstnCalls(fromDateTime=2019-11-01,toDateTime=2019-12-01)", "Communications_callRecords_getPstnCalls_" + apiVersion + ".json"),
             InvocationExample.of("https://graph.microsoft.com/" + apiVersion + "/users/dc17674c-81d9-4adb-bfb2-8f6a442e4622/onlineMeetings", "Users_onlineMeetings_" + apiVersion + ".json")
         );
     }

@@ -15,6 +15,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..user.id"
+          - "$..userId"
         encoding: "JSON"
       - !<redact>
         jsonPaths:
@@ -40,6 +41,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..user.id"
+          - "$..userId"
         encoding: "JSON"
       - !<redact>
         jsonPaths:
@@ -68,6 +70,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..user.id"
+          - "$..userId"
         encoding: "JSON"
       - !<redact>
         jsonPaths:
@@ -92,6 +95,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..user.id"
+          - "$..userId"
         encoding: "JSON"
       - !<redact>
         jsonPaths:
@@ -124,6 +128,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..user.id"
+          - "$..userId"
         encoding: "JSON"
       - !<redact>
         jsonPaths:
@@ -162,6 +167,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..user.id"
+          - "$..userId"
         encoding: "JSON"
       - !<redact>
         jsonPaths:
@@ -188,6 +194,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..user.id"
+          - "$..userId"
         encoding: "JSON"
       - !<redact>
         jsonPaths:
@@ -198,7 +205,8 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$..['@odata.type']"
-  - pathTemplate: "/{apiVersion}/communications/callRecords/{callChainId}"
+  - pathRegex: "^/(v1.0|beta)/communications/callRecords/(?<callChainId>[({]?[a-fA-F0-9]{8}[-]?([a-fA-F0-9]{4}[-]?){3}[a-fA-F0-9]{12}[})]?)(?<queryParameters>[a-zA-z0-9\\\
+    s\\$\\=\\?\\(\\)]*)"
     allowedQueryParams:
       - "$select"
       - "$expand"
@@ -218,6 +226,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..user.id"
+          - "$..userId"
         encoding: "JSON"
       - !<redact>
         jsonPaths:
@@ -232,6 +241,70 @@ endpoints:
       - !<tokenize>
         jsonPaths:
           - "$.['sessions@odata.nextLink']"
+        regex: "^https://graph.microsoft.com/(.*)$"
+  - pathTemplate: "/{apiVersion}/communications/callRecords/getDirectRoutingCalls(fromDateTime={startDate},toDateTime={endDate})"
+    allowedQueryParams:
+      - "$skip"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..value[*].userPrincipalName"
+          - "$..value[*].userDisplayName"
+          - "$..value[*].callerNumber"
+          - "$..value[*].calleeNumber"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..user.id"
+          - "$..userId"
+        encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..callId"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$.['@odata.context']"
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.type']"
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.count']"
+      - !<tokenize>
+        jsonPaths:
+          - "$.['@odata.nextLink', '@odata.prevLink']"
+        regex: "^https://graph.microsoft.com/(.*)$"
+  - pathTemplate: "/{apiVersion}/communications/callRecords/getPstnCalls(fromDateTime={startDate},toDateTime={endDate})"
+    allowedQueryParams:
+      - "$skip"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..value[*].userPrincipalName"
+          - "$..value[*].userDisplayName"
+          - "$..value[*].callerNumber"
+          - "$..value[*].calleeNumber"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..user.id"
+          - "$..userId"
+        encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..callId"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$.['@odata.context']"
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.type']"
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.count']"
+      - !<tokenize>
+        jsonPaths:
+          - "$.['@odata.nextLink', '@odata.prevLink']"
         regex: "^https://graph.microsoft.com/(.*)$"
   - pathTemplate: "/{apiVersion}/users/{userId}/onlineMeetings"
     allowedQueryParams:
@@ -255,6 +328,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..user.id"
+          - "$..userId"
         encoding: "JSON"
       - !<redact>
         jsonPaths:

@@ -171,7 +171,7 @@ public class Teams_NoUserIds_Tests extends JavaRulesTestBaseCase {
 
     @ParameterizedTest
     @ValueSource(strings = {"v1.0", "beta"})
-    @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS)
+    @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_REGEX)
     public void communications_callRecords(String apiVersion) {
         String callChainId = "2f1a1100-b174-40a0-aba7-0b405e01ed92";
         String endpoint = "https://graph.microsoft.com/" + apiVersion + "/communications/callRecords/" + callChainId;
@@ -190,6 +190,52 @@ public class Teams_NoUserIds_Tests extends JavaRulesTestBaseCase {
 
         Collection<String> oDataUrl = Arrays.asList(
             "https://graph.microsoft.com/v1.0/$metadata#communications/callRecords('e523d2ed-2966-4b6b-925b-754a88034cc5')/sessions?$expand=segments&$skiptoken=abc"
+        );
+        assertTransformed(sanitized, oDataUrl, PrebuiltSanitizerRules.TOKENIZE_ODATA_LINKS);
+        assertUrlWithSubResourcesBlocked(endpoint);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"v1.0", "beta"})
+    @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_GET_DIRECT_ROUTING_CALLS)
+    public void communications_callRecords_getDirectRoutingCalls(String apiVersion) {
+        String fromDateTime = "2019-11-01";
+        String toDateTime = "2019-12-01";
+        String endpoint = "https://graph.microsoft.com/" + apiVersion + "/communications/callRecords/getDirectRoutingCalls(fromDateTime=" + fromDateTime + ",toDateTime=" + toDateTime + ")";
+        String jsonResponse = asJson("Communications_callRecords_getDirectRoutingCalls_"+ apiVersion + ".json");
+
+        String sanitized = sanitize(endpoint, jsonResponse);
+        assertPseudonymized(sanitized, "db03c14b-06eb-4189-939b-7cbf3a20ba27");
+        assertRedacted(sanitized,
+            "@odata.context", "https://graph.microsoft.com/v1.0/$metadata#Collection(microsoft.graph.callRecords.directRoutingLogRow)",
+            "@odata.count"
+        );
+
+        Collection<String> oDataUrl = Arrays.asList(
+            "https://graph.microsoft.com/v1.0/communications/callRecords/getDirectRoutingCalls(fromDateTime=2019-11-01,toDateTime=2019-12-01)?$skip=1000"
+        );
+        assertTransformed(sanitized, oDataUrl, PrebuiltSanitizerRules.TOKENIZE_ODATA_LINKS);
+        assertUrlWithSubResourcesBlocked(endpoint);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"v1.0", "beta"})
+    @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_GET_PSTN_CALLS)
+    public void communications_callRecords_getPstnCalls(String apiVersion) {
+        String fromDateTime = "2019-11-01";
+        String toDateTime= "2019-12-01";
+        String endpoint = "https://graph.microsoft.com/" + apiVersion + "/communications/callRecords/getPstnCalls(fromDateTime=" + fromDateTime + ",toDateTime=" + toDateTime + ")";
+        String jsonResponse = asJson("Communications_callRecords_getPstnCalls_"+ apiVersion + ".json");
+
+        String sanitized = sanitize(endpoint, jsonResponse);
+        assertPseudonymized(sanitized, "1835317186_112562680@61.221.3.176", "db03c14b-06eb-4189-939b-7cbf3a20ba27");
+        assertRedacted(sanitized,
+            "@odata.context", "https://graph.microsoft.com/v1.0/$metadata#Collection(microsoft.graph.callRecords.pstnCallLogRow)",
+            "@odata.count"
+        );
+
+        Collection<String> oDataUrl = Arrays.asList(
+            "https://graph.microsoft.com/v1.0/communications/callRecords/getPstnCalls(from=2019-11-01,to=2019-12-01)?$skip=1000"
         );
         assertTransformed(sanitized, oDataUrl, PrebuiltSanitizerRules.TOKENIZE_ODATA_LINKS);
         assertUrlWithSubResourcesBlocked(endpoint);
@@ -228,7 +274,9 @@ public class Teams_NoUserIds_Tests extends JavaRulesTestBaseCase {
             InvocationExample.of("https://graph.microsoft.com/" + apiVersion + "/teams/fbe2bf47-16c8-47cf-b4a5-4b9b187c508b/channels/19:4a95f7d8db4c4e7fae857bcebe0623e6@thread.tacv2/messages/delta", "Teams_channels_messages_delta_" + apiVersion + ".json"),
             InvocationExample.of("https://graph.microsoft.com/" + apiVersion + "/chats/19:2da4c29f6d7041eca70b638b43d45437@thread.v2/messages", "Chats_messages_" + apiVersion + ".json"),
             InvocationExample.of("https://graph.microsoft.com/" + apiVersion + "/communications/calls/2f1a1100-b174-40a0-aba7-0b405e01ed92", "Communications_calls_" + apiVersion + ".json"),
-            InvocationExample.of("https://graph.microsoft.com/" + apiVersion + "/communications/callRecords/{id}", "Communications_callRecords_" + apiVersion + ".json"),
+            InvocationExample.of("https://graph.microsoft.com/" + apiVersion + "/communications/callRecords/2f1a1100-b174-40a0-aba7-0b405e01ed92?$expand=sessions($expand=segments)", "Communications_callRecords_" + apiVersion + ".json"),
+            InvocationExample.of("https://graph.microsoft.com/" + apiVersion + "/communications/callRecords/getDirectRoutingCalls(fromDateTime=2019-11-01,toDateTime=2019-12-01)", "Communications_callRecords_getDirectRoutingCalls_" + apiVersion + ".json"),
+            InvocationExample.of("https://graph.microsoft.com/" + apiVersion + "/communications/callRecords/getPstnCalls(fromDateTime=2019-11-01,toDateTime=2019-12-01)", "Communications_callRecords_getPstnCalls_" + apiVersion + ".json"),
             InvocationExample.of("https://graph.microsoft.com/" + apiVersion + "/users/dc17674c-81d9-4adb-bfb2-8f6a442e4622/onlineMeetings", "Users_onlineMeetings_" + apiVersion + ".json")
         );
     }

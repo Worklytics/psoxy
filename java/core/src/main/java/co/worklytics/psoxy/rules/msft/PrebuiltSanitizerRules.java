@@ -299,11 +299,41 @@ public class PrebuiltSanitizerRules {
     static final String MS_TEAMS_PATH_TEMPLATES_TEAMS_CHANNELS_MESSAGES_DELTA = "/{apiVersion}/teams/{teamId}/channels/{channelId}/messages/delta";
     static final String MS_TEAMS_PATH_TEMPLATES_CHATS_MESSAGES = "/{apiVersion}/chats/{chatId}/messages";
     static final String MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALLS = "/{apiVersion}/communications/calls/{callId}";
-    static final String MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS = "/{apiVersion}/communications/callRecords/{callChainId}";
+    /*
+    Unfortunately, we have to use regex expression here.
+    If we use pathTemplate here: /{apiVersion}/communications/callRecords/{callChainId} - internally it would convert into
+        following regular expression: ^/(?<apiVersion>[^/]+)/communications/callRecords/(?<callChainId>[^/]+)$
+        and due to greedy nature of regular expression all endpoints below would match to regex above:
+
+        E.g.
+        /v1.0/communications/callRecords/e523d2ed-2966-4b6b-925b-754a88034cc5
+        /v1.0/communications/callRecords/e523d2ed-2966-4b6b-925b-754a88034cc5?$expand=sessions($expand=segments)
+        /v1.0/communications/callRecords/getDirectRoutingCalls(fromDateTime=2019-11-01,toDateTime=2019-12-01)
+        /v1.0/communications/callRecords/getPstnCalls(fromDateTime=2019-11-01,toDateTime=2019-12-01)
+        /v1.0/communications/callRecords/getDirectRoutingCalls(fromDateTime=2019-11-01,toDateTime=2019-12-01)$expand=sessions($expand=segments)
+        /v1.0/communications/callRecords/getPstnCalls(fromDateTime=2019-11-01,toDateTime=2019-12-01)$expand=sessions($expand=segments)
+        /v1.0/communications/callRecords/getDirectRoutingCalls(fromDateTime=2019-11-01,toDateTime=2019-12-01)$skip=100
+        /v1.0/communications/callRecords/getPstnCalls(fromDateTime=2019-11-01,toDateTime=2019-12-01)$skip=100
+
+        As you can see, first two are correct, but rest are completely different endpoints and should not match.
+
+        So, following regular expression can handle this case:
+        1. Match URL:                       ^/(v1.0|beta)/communications/callRecords/
+        2. Match ID:                        (?<callChainId>[({]?[a-fA-F0-9]{8}[-]?([a-fA-F0-9]{4}[-]?){3}[a-fA-F0-9]{12}[})]?)
+        2. Match GraphQL query parameters: (?<queryParameters>\?[a-zA-z0-9\s\$\=\(\)]*)
+    */
+    static final String MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_REGEX = "^/(v1.0|beta)/communications/callRecords/(?<callChainId>[({]?[a-fA-F0-9]{8}[-]?([a-fA-F0-9]{4}[-]?){3}[a-fA-F0-9]{12}[})]?)(?<queryParameters>[a-zA-z0-9\\s\\$\\=\\?\\(\\)]*)";
+    static final String MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_GET_DIRECT_ROUTING_CALLS = "/{apiVersion}/communications/callRecords/getDirectRoutingCalls(fromDateTime={startDate},toDateTime={endDate})";
+    static final String MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_GET_PSTN_CALLS = "/{apiVersion}/communications/callRecords/getPstnCalls(fromDateTime={startDate},toDateTime={endDate})";
     static final String MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS = "/{apiVersion}/users/{userId}/onlineMeetings";
 
     static final Transform.Pseudonymize PSEUDONYMIZE_USER_ID = Transform.Pseudonymize.builder()
         .jsonPath("$..user.id")
+        .jsonPath("$..userId")
+        .build();
+
+    static final Transform.Pseudonymize PSEUDONYMIZE_CALL_ID = Transform.Pseudonymize.builder()
+        .jsonPath("$..callId")
         .build();
 
     static final Endpoint MS_TEAMS_TEAMS =  Endpoint.builder()
@@ -378,7 +408,7 @@ public class PrebuiltSanitizerRules {
         .build();
 
     static final Endpoint MS_TEAMS_COMMUNICATIONS_CALL_RECORDS = Endpoint.builder()
-        .pathTemplate(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS)
+        .pathRegex(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_REGEX)
         .transform(Transform.Redact.builder()
             .jsonPath("$..user.displayName")
             .jsonPath("$..reflexiveIPAddress")
@@ -392,6 +422,28 @@ public class PrebuiltSanitizerRules {
             .jsonPath("$..renderDeviceName")
             .build())
         .allowedQueryParams(List.of("$select","$expand"))
+        .build();
+
+    static final Endpoint MS_TEAMS_COMMUNICATIONS_CALL_RECORDS_GET_DIRECT_ROUTING_CALLS = Endpoint.builder()
+        .pathTemplate(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_GET_DIRECT_ROUTING_CALLS)
+        .transform(Transform.Redact.builder()
+            .jsonPath("$..value[*].userPrincipalName")
+            .jsonPath("$..value[*].userDisplayName")
+            .jsonPath("$..value[*].callerNumber")
+            .jsonPath("$..value[*].calleeNumber")
+            .build())
+        .allowedQueryParams(List.of("$skip"))
+        .build();
+
+    static final Endpoint MS_TEAMS_COMMUNICATIONS_CALL_RECORDS_GET_PSTN_CALLS = Endpoint.builder()
+        .pathTemplate(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_GET_PSTN_CALLS)
+        .transform(Transform.Redact.builder()
+            .jsonPath("$..value[*].userPrincipalName")
+            .jsonPath("$..value[*].userDisplayName")
+            .jsonPath("$..value[*].callerNumber")
+            .jsonPath("$..value[*].calleeNumber")
+            .build())
+        .allowedQueryParams(List.of("$skip"))
         .build();
 
     static final Endpoint MS_TEAMS_USERS_ONLINE_MEETINGS =  Endpoint.builder()
@@ -414,6 +466,8 @@ public class PrebuiltSanitizerRules {
         .endpoint(MS_TEAMS_CHATS_MESSAGES)
         .endpoint(MS_TEAMS_COMMUNICATIONS_CALLS)
         .endpoint(MS_TEAMS_COMMUNICATIONS_CALL_RECORDS)
+        .endpoint(MS_TEAMS_COMMUNICATIONS_CALL_RECORDS_GET_DIRECT_ROUTING_CALLS)
+        .endpoint(MS_TEAMS_COMMUNICATIONS_CALL_RECORDS_GET_PSTN_CALLS)
         .endpoint(MS_TEAMS_USERS_ONLINE_MEETINGS)
         .build();
 
@@ -421,11 +475,15 @@ public class PrebuiltSanitizerRules {
         .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS,                         PSEUDONYMIZE_USER_ID, REDACT_ODATA_CONTEXT, REDACT_ODATA_ID, REDACT_ODATA_TYPE, REDACT_ODATA_COUNT)
         .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS_ALL_CHANNELS,            PSEUDONYMIZE_USER_ID, REDACT_ODATA_CONTEXT, REDACT_ODATA_ID, REDACT_ODATA_TYPE, REDACT_ODATA_COUNT)
         .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_CHATS,                   PSEUDONYMIZE_USER_ID, REDACT_ODATA_CONTEXT, REDACT_ODATA_COUNT)
-        .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS_CHANNELS_MESSAGES,       PSEUDONYMIZE_USER_ID, REDACT_ODATA_CONTEXT, REDACT_ODATA_COUNT, REDACT_ODATA_TYPE, TOKENIZE_ODATA_LINKS)
-        .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS_CHANNELS_MESSAGES_DELTA, PSEUDONYMIZE_USER_ID, REDACT_ODATA_CONTEXT, REDACT_ODATA_COUNT, REDACT_ODATA_TYPE, TOKENIZE_ODATA_LINKS)
-        .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_CHATS_MESSAGES,                PSEUDONYMIZE_USER_ID, REDACT_ODATA_CONTEXT, REDACT_ODATA_COUNT, REDACT_ODATA_TYPE, TOKENIZE_ODATA_LINKS)
+        .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS_CHANNELS_MESSAGES,       PSEUDONYMIZE_USER_ID, REDACT_ODATA_CONTEXT, REDACT_ODATA_COUNT, REDACT_ODATA_TYPE,  TOKENIZE_ODATA_LINKS)
+        .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS_CHANNELS_MESSAGES_DELTA, PSEUDONYMIZE_USER_ID, REDACT_ODATA_CONTEXT, REDACT_ODATA_COUNT, REDACT_ODATA_TYPE,  TOKENIZE_ODATA_LINKS)
+        .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_CHATS_MESSAGES,                PSEUDONYMIZE_USER_ID, REDACT_ODATA_CONTEXT, REDACT_ODATA_COUNT, REDACT_ODATA_TYPE,  TOKENIZE_ODATA_LINKS)
         .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALLS,          PSEUDONYMIZE_USER_ID, REDACT_ODATA_CONTEXT, REDACT_ODATA_COUNT, REDACT_ODATA_TYPE )
-        .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS,   PSEUDONYMIZE_USER_ID, REDACT_ODATA_CONTEXT, REDACT_ODATA_TYPE,  TOKENIZE_ODATA_LINKS, TOKENIZE_SESSIONS_ODATA_LINKS)
+        .withTransformByEndpoint(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_REGEX,     PSEUDONYMIZE_USER_ID, REDACT_ODATA_CONTEXT, REDACT_ODATA_TYPE,                      TOKENIZE_ODATA_LINKS, TOKENIZE_SESSIONS_ODATA_LINKS)
+        .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_GET_DIRECT_ROUTING_CALLS,
+                                                                                                PSEUDONYMIZE_USER_ID, PSEUDONYMIZE_CALL_ID, REDACT_ODATA_CONTEXT, REDACT_ODATA_TYPE, REDACT_ODATA_COUNT,  TOKENIZE_ODATA_LINKS)
+        .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_GET_PSTN_CALLS,
+                                                                                                PSEUDONYMIZE_USER_ID, PSEUDONYMIZE_CALL_ID, REDACT_ODATA_CONTEXT, REDACT_ODATA_TYPE, REDACT_ODATA_COUNT,  TOKENIZE_ODATA_LINKS)
         .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS,         PSEUDONYMIZE_USER_ID, REDACT_ODATA_CONTEXT, REDACT_ODATA_TYPE );
 
     public static final Map<String, RESTRules> MSFT_DEFAULT_RULES_MAP =
