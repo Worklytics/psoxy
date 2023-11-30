@@ -5,11 +5,16 @@ import co.worklytics.psoxy.gateway.BulkModeConfigProperty;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.StorageEventRequest;
+import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.test.MockModules;
 import com.avaulta.gateway.rules.BulkDataRules;
+import com.avaulta.gateway.rules.ColumnarRules;
+import com.avaulta.gateway.rules.RecordRules;
+import com.avaulta.gateway.rules.RuleSet;
 import com.google.common.collect.ImmutableMap;
 import dagger.Component;
 import dagger.Module;
+import dagger.Provides;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -35,12 +40,22 @@ class StorageHandlerTest {
     @Singleton
     @Component(modules = {
         PsoxyModule.class,
-        MockModules.ForRules.class,
+        ForRules.class,
         MockModules.ForConfigService.class,
         MockModules.ForHostEnvironment.class,
     })
     public interface Container {
         void inject( StorageHandlerTest test);
+    }
+
+    @Module
+    public interface ForRules {
+        @Provides
+        @Singleton
+        static RuleSet rules() {
+            return MockModules.provideMock(BulkDataRules.class);
+        }
+
     }
 
     InputStreamReader mockReader;

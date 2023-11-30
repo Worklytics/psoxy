@@ -109,6 +109,15 @@ public class StorageHandler {
     }
 
 
+    public List<ObjectTransform> buildTransforms() {
+        List<StorageHandler.ObjectTransform> transforms = new ArrayList<>();
+        transforms.add(buildDefaultTransform());
+
+        rulesUtils.parseAdditionalTransforms(config)
+            .forEach(transforms::add);
+
+        return transforms;
+    }
 
     /**
      * @param sourceBucket the bucket from which the original object was read
