@@ -1,5 +1,10 @@
 package com.avaulta.gateway.rules;
 
+import lombok.Builder;
+import lombok.Value;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -45,6 +50,41 @@ public class PathTemplateUtils {
             }
         }
         return Optional.empty();
+    }
+
+    public <T> Optional<Match<T>> matchVerbose(Map<String, T> pathMap, String path) {
+        for (Map.Entry<String, T> entry : pathMap.entrySet()) {
+            Pattern p = Pattern.compile(asRegex(entry.getKey()));
+            Matcher m = p.matcher(path);
+
+            if (m.matches()) {
+                List<String> capturedGroups = new ArrayList<>(m.groupCount());
+
+                //capturing groups are indexed from 1, not 0
+                for (int i = 1; i <= m.groupCount(); i++) {
+                    capturedGroups.add(m.group(i));
+                }
+
+                return Optional.of(Match.<T>builder()
+                    .template(entry.getKey())
+                    .capturedParams(capturedGroups)
+                    .match(entry.getValue())
+                    .build());
+            }
+        }
+        return Optional.empty();
+    }
+
+    @Builder
+    @Value
+    static class Match<T> {
+
+
+        String template;
+
+        List<String> capturedParams;
+
+        T match;
     }
 
 }

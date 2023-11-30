@@ -13,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Base64;
+import java.util.function.Function;
 import java.util.zip.GZIPOutputStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -108,5 +109,12 @@ public class TestUtils {
      */
     public static void assertJsonEquals(String expected, String actual) {
         assertEquals(prettyPrintJson(expected), prettyPrintJson(actual));
+    }
+
+    public static void assertNdjsonEquals(String expected, String actual) {
+        Function<String, String> ndjsonToJson = (String s) -> "[" + s.replaceAll("\n", ",") + "]";
+        String expectedJson = expected.replaceAll("\n", ",");
+
+        assertEquals(expected, actual);
     }
 }
