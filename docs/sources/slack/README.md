@@ -77,7 +77,8 @@ ingest the resulting sanitized data to Worklytics. Example data of this is givin
 This data can be processing using custom multi-file type rules in the proxy, of which
 [`discovery-bulk.yaml`](discovery-bulk.yaml) is an example.
 
-
+For clarity, example files are NOT compressed, so don't have `.gz` extension; but rules expect
+`.gz`.
 
 
 

@@ -110,9 +110,9 @@ public class SlackDiscoveryBulkTests {
 
     @SneakyThrows
     @ValueSource(strings ={
-        "channels.json",
-        "messages-D06TX2RP0.json",
-        "users.json",
+        "channels.ndjson",
+        "messages-D06TX2RP0.ndjson",
+        "users.ndjson",
     })
     @ParameterizedTest
     public void files(String file) {
@@ -125,6 +125,6 @@ public class SlackDiscoveryBulkTests {
         writer.close();
 
         String output = new String(outputStream.toByteArray());
-        TestUtils.assertJsonEquals(new String(TestUtils.getData(pathToSanitized)), output);
+        assertEquals(new String(TestUtils.getData(pathToSanitized)), output);
     }
 }
