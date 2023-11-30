@@ -41,7 +41,7 @@ Use this step if you want to install in the whole org, across multiple workspace
 ![](./img/slack-step-distribution.png)
 
 3. Generate the following URL replacing the placeholder for *YOUR_CLIENT_ID* and save it for
-   later:
+
 
    `https://api.slack.com/api/oauth.v2.access?client_id=YOUR_CLIENT_ID`
 
