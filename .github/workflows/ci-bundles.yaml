@@ -27,6 +27,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: 17
+          distribution: zulu
       - name: Package Deployment artifact
         working-directory: java/
         # see tools/build.sh; this should be equivalent to that, w/o re-routing errors to log file
