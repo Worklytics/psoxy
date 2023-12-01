@@ -41,7 +41,7 @@ Use this step if you want to install in the whole org, across multiple workspace
 ![](./img/slack-step-distribution.png)
 
 3. Generate the following URL replacing the placeholder for *YOUR_CLIENT_ID* and save it for
-   later:
+
 
    `https://api.slack.com/api/oauth.v2.access?client_id=YOUR_CLIENT_ID`
 
@@ -77,7 +77,8 @@ ingest the resulting sanitized data to Worklytics. Example data of this is givin
 This data can be processing using custom multi-file type rules in the proxy, of which
 [`discovery-bulk.yaml`](discovery-bulk.yaml) is an example.
 
-
+For clarity, example files are NOT compressed, so don't have `.gz` extension; but rules expect
+`.gz`.
 
 
 

@@ -6,6 +6,7 @@ import co.worklytics.psoxy.rules.RulesUtils;
 import com.avaulta.gateway.rules.BulkDataRules;
 import com.avaulta.gateway.rules.MultiTypeBulkDataRules;
 import com.avaulta.gateway.rules.PathTemplateUtils;
+import com.avaulta.gateway.rules.PathTemplateUtils.Match;
 import com.avaulta.gateway.rules.RuleSet;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.*;
@@ -36,7 +37,7 @@ public class StorageHandler {
     Pseudonymizer pseudonymizer;
 
     @Inject
-    RuleSet defaultRuleSet;
+    BulkDataRules defaultRuleSet;
 
     @Inject
     RulesUtils rulesUtils;
@@ -185,22 +186,29 @@ public class StorageHandler {
 
     @VisibleForTesting
     ObjectTransform buildDefaultTransform() {
-        if (defaultRuleSet instanceof BulkDataRules) {
-            return ObjectTransform.builder()
+        return ObjectTransform.builder()
                 .destinationBucketName(config.getConfigPropertyOrError(BulkModeConfigProperty.OUTPUT_BUCKET))
                 .pathWithinBucket(config.getConfigPropertyAsOptional(BulkModeConfigProperty.OUTPUT_BASE_PATH).orElse(""))
-                .rules((BulkDataRules) defaultRuleSet)
+                .rules(defaultRuleSet)
                 .build();
-        } else {
-            throw new RuntimeException("Default rules are not BulkDataRules");
-        }
     }
 
 
     private BulkDataRules getApplicableRules(RuleSet rules, String sourceObjectPath) {
         if (rules instanceof MultiTypeBulkDataRules) {
-            return pathTemplateUtils.match(((MultiTypeBulkDataRules) rules).getFileRules(), sourceObjectPath)
+            Match<BulkDataRules> match = pathTemplateUtils.matchVerbose(((MultiTypeBulkDataRules) rules).getFileRules(), sourceObjectPath)
                 .orElseThrow(() -> new IllegalArgumentException("No matching rules for path: " + sourceObjectPath));
+            if (match.getMatch() instanceof MultiTypeBulkDataRules) {
+                String subPath = match.getCapturedParams().get(match.getCapturedParams().size() - 1);
+                BulkDataRules nextMatch = pathTemplateUtils.match(((MultiTypeBulkDataRules) match.getMatch()).getFileRules(), subPath)
+                    .orElseThrow(() -> new IllegalArgumentException("No matching rules for path: " + sourceObjectPath));
+                if (nextMatch instanceof MultiTypeBulkDataRules) {
+                    throw new RuntimeException("MultiTypeBulkDataRules cannot be nested more than 1 level");
+                }
+                return nextMatch;
+            } else {
+                return match.getMatch();
+            }
         } else if (rules instanceof BulkDataRules) {
             return (BulkDataRules) rules;
         } else {

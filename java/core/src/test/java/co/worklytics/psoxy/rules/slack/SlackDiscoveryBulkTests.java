@@ -18,6 +18,7 @@ import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import javax.inject.Inject;
@@ -33,6 +34,8 @@ import static org.mockito.Mockito.when;
 
 public class SlackDiscoveryBulkTests {
 
+    static String rulesPath;
+
 
     @Inject
     RuleSet rules;
@@ -43,8 +46,10 @@ public class SlackDiscoveryBulkTests {
     Writer writer;
     ByteArrayOutputStream outputStream;
 
-    @BeforeEach
-    public void setUp() {
+    // to cover both rules versions, calling this inside of each test with different rules to set up
+    // with that rule set at run time
+    void setUp(String rulesPath) {
+        this.rulesPath = rulesPath;
 
         Container container = DaggerSlackDiscoveryBulkTests_Container.create();
         container.inject(this);
@@ -73,7 +78,7 @@ public class SlackDiscoveryBulkTests {
             static ConfigService configService() {
                 ConfigService mock = MockModules.provideMock(ConfigService.class);
                 when(mock.getConfigPropertyAsOptional(eq(ProxyConfigProperty.RULES)))
-                    .thenReturn(Optional.of(new String(TestUtils.getData("sources/slack/discovery-bulk.yaml"))));
+                    .thenReturn(Optional.of(new String(TestUtils.getData(rulesPath))));
                 when(mock.getConfigPropertyAsOptional(eq(ProxyConfigProperty.PSOXY_SALT)))
                     .thenReturn(Optional.of("salt"));
 
@@ -88,8 +93,16 @@ public class SlackDiscoveryBulkTests {
     }
 
 
-    @Test
-    public void rulesValid() {
+    @ValueSource(
+        strings = {
+            "sources/slack/discovery-bulk-hierarchical.yaml",
+            "sources/slack/discovery-bulk.yaml"
+        }
+
+    )
+    @ParameterizedTest
+    public void rulesValid(String rulesPath) {
+        setUp(rulesPath);
         assertTrue(rules instanceof MultiTypeBulkDataRules);
     }
 
@@ -109,13 +122,17 @@ public class SlackDiscoveryBulkTests {
     }
 
     @SneakyThrows
-    @ValueSource(strings ={
-        "channels.json",
-        "messages-D06TX2RP0.json",
-        "users.json",
+    @CsvSource({
+        "sources/slack/discovery-bulk-hierarchical.yaml,channels.ndjson",
+        "sources/slack/discovery-bulk-hierarchical.yaml,messages-D06TX2RP0.ndjson",
+        "sources/slack/discovery-bulk-hierarchical.yaml,users.ndjson",
+        "sources/slack/discovery-bulk.yaml,channels.ndjson",
+        "sources/slack/discovery-bulk.yaml,messages-D06TX2RP0.ndjson",
+        "sources/slack/discovery-bulk.yaml,users.ndjson",
     })
     @ParameterizedTest
-    public void files(String file) {
+    public void files(String rulesPath, String file) {
+        setUp(rulesPath);
         final String objectPath = "/export-20231128/" + file + ".gz";
         final String pathToOriginal = "sources/slack/example-bulk/original/" + file;
         final String pathToSanitized = "sources/slack/example-bulk/sanitized/" + file;
@@ -125,6 +142,6 @@ public class SlackDiscoveryBulkTests {
         writer.close();
 
         String output = new String(outputStream.toByteArray());
-        TestUtils.assertJsonEquals(new String(TestUtils.getData(pathToSanitized)), output);
+        assertEquals(new String(TestUtils.getData(pathToSanitized)), output);
     }
 }

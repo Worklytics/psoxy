@@ -52,8 +52,14 @@ class StorageHandlerTest {
     public interface ForRules {
         @Provides
         @Singleton
-        static RuleSet rules() {
+        static BulkDataRules bulkRules() {
             return MockModules.provideMock(BulkDataRules.class);
+        }
+
+        @Provides
+        @Singleton
+        static RuleSet rules(BulkDataRules rules) {
+            return rules;
         }
 
     }
