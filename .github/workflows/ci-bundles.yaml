@@ -25,6 +25,6 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v4
       - name: Build bundle
-        uses: .github/workflows/build-bundle.yaml
+        uses: ./.github/workflows/build-bundle.yaml
         with:
          implementation: ${{ matrix.implementation }}
