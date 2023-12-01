@@ -26,8 +26,6 @@ jobs:
   ci_java:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out code
-        uses: actions/checkout@v3
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
