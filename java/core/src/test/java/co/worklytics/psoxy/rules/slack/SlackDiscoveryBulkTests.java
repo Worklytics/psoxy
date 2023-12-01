@@ -34,7 +34,7 @@ import static org.mockito.Mockito.when;
 
 public class SlackDiscoveryBulkTests {
 
-    static String rulesPath = "sources/slack/discovery-bulk-hierarchical.yaml";
+    static String rulesPath;
 
 
     @Inject
@@ -46,7 +46,9 @@ public class SlackDiscoveryBulkTests {
     Writer writer;
     ByteArrayOutputStream outputStream;
 
-    public void setUp(String rulesPath) {
+    // to cover both rules versions, calling this inside of each test with different rules to set up
+    // with that rule set at run time
+    void setUp(String rulesPath) {
         this.rulesPath = rulesPath;
 
         Container container = DaggerSlackDiscoveryBulkTests_Container.create();

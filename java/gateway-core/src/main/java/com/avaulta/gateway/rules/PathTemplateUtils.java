@@ -77,7 +77,7 @@ public class PathTemplateUtils {
 
     @Builder
     @Value
-    static class Match<T> {
+    public static class Match<T> {
 
 
         String template;
