@@ -90,8 +90,9 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
                     }
                     writer.write(jsonConfiguration.jsonProvider().toJson(document));
                     writer.write('\n'); // NDJSON uses newlines between records
+                    writer.flush(); //after each line
                 } catch (UnmatchedPseudonymization e) {
-                    log.warning("Skipped record due to UnmatchedPseudonymizaiton: " + e.getPath());
+                    log.warning("Skipped record due to UnmatchedPseudonymization: " + e.getPath());
                 }
             }
         }
