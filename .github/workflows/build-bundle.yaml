@@ -1,4 +1,4 @@
-name: Build - java
+name: Build - bundle
 
 # Build Java part of our project as a GitHub action
 # see https://help.github.com/en/actions/language-and-framework-guides/building-and-testing-java-with-maven
@@ -6,6 +6,11 @@ name: Build - java
 on:
   workflow_call:
     inputs:
+      implementation:
+        required: true
+        type: string
+        description: Implementation to build (gcp, aws, etc)
+        default: 'gcp'
       java-version:
         required: false
         type: string
@@ -29,16 +34,13 @@ jobs:
           java-version: ${{ inputs.java-version }}
           # https://github.com/actions/setup-java#supported-distributions
           distribution: ${{ inputs.java-distribution }}
-      - name: Clear our artifacts from Maven cache # q: does this work!?!?!
-        run: |
-          rm -rf ~/.m2/repository/co/worklytics/
-          rm -rf ~/.m2/repository/com/avaulta/
-      - name: Compile
+      - name: Package Deployment artifact
         working-directory: java/
+        # see tools/build.sh; this should be equivalent to that, w/o re-routing errors to log file
+        # or logic to skip build if artifact already exists
         run: |
-          mvn clean compile -T 2C -Dversions.logOutput=false
-      - name: Test
-        working-directory: java/
-        run: |
-          mvn post-clean test -T 2C -Dversions.logOutput=false -DprocessDependencies=false -DprocessDependencyManagement=false -Dsurefire.forkCount=2.5C -Dsurefire.reuseForks=true
+          mvn clean -f pom.xml
+          mvn package install -f "gateway-core/pom.xml" -Dmaven.test.skip=true
+          mvn package install -f "core/pom.xml" -Dmaven.test.skip=true
+          mvn package -f "impl/${{ inputs.implementation }}/pom.xml"
 
