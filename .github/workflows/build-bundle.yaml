@@ -26,6 +26,9 @@ jobs:
   ci_java:
     runs-on: ubuntu-latest
     steps:
+      # checkout needed, even though calling action should have done it?
+      - name: Check out code
+        uses: actions/checkout@v4
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
