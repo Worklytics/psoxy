@@ -201,6 +201,7 @@ variable "custom_bulk_connectors" {
     }))
     rules_file          = optional(string)
     settings_to_provide = optional(map(string), {})
+    example_file        = optional(string)
   }))
   description = "specs of custom bulk connectors to create"
 
