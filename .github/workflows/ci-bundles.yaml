@@ -21,10 +21,18 @@ jobs:
         implementation: [ 'gcp', 'aws' ]
     name: bundle ${{ matrix.implementation }}
     steps:
-      # apparently need to checkout, even if action you call does it?
       - name: Check out code
         uses: actions/checkout@v4
-      - name: Build bundle
-        uses: ./.github/workflows/build-bundle.yaml
+      - name: Setup Java
+        uses: actions/setup-java@v3
         with:
-         implementation: ${{ matrix.implementation }}
+          java-version: 17
+      - name: Package Deployment artifact
+        working-directory: java/
+        # see tools/build.sh; this should be equivalent to that, w/o re-routing errors to log file
+        # or logic to skip build if artifact already exists
+        run: |
+          mvn clean -f pom.xml
+          mvn package install -f "gateway-core/pom.xml" -Dmaven.test.skip=true
+          mvn package install -f "core/pom.xml" -Dmaven.test.skip=true
+          mvn package -f "impl/${{ matrix.implementation }}/pom.xml"
