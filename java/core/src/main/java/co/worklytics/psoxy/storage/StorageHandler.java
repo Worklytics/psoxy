@@ -19,6 +19,7 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * solves a DaggerMissingBinding exception in tests
@@ -74,9 +75,13 @@ public class StorageHandler {
     @SneakyThrows
     public StorageEventResponse handle(StorageEventRequest request, RuleSet rules) {
 
-        BulkDataRules applicableRules = getApplicableRules(rules, request.getSourceObjectPath());
+        Optional<BulkDataRules> applicableRules = getApplicableRules(rules, request.getSourceObjectPath());
 
-        BulkDataSanitizer fileHandler = bulkDataSanitizerFactory.get(applicableRules);
+        if (applicableRules.isEmpty()) {
+            throw new IllegalArgumentException("No applicable rules found for " + request.getSourceObjectPath());
+        }
+
+        BulkDataSanitizer fileHandler = bulkDataSanitizerFactory.get(applicableRules.get());
 
         fileHandler.sanitize(request.getSourceReader(), request.getDestinationWriter(), pseudonymizer);
 
@@ -194,26 +199,38 @@ public class StorageHandler {
     }
 
 
-    private BulkDataRules getApplicableRules(RuleSet rules, String sourceObjectPath) {
+    /**
+     * get applicable rules, if any
+     *
+     * @param rules
+     * @param sourceObjectPath
+     * @return applicable rules from rules, given sourceObjectPath - if it should be processed
+     */
+    @SneakyThrows
+    public Optional<BulkDataRules> getApplicableRules(RuleSet rules, String sourceObjectPath) {
+        BulkDataRules applicableRules = null;
         if (rules instanceof MultiTypeBulkDataRules) {
-            Match<BulkDataRules> match = pathTemplateUtils.matchVerbose(((MultiTypeBulkDataRules) rules).getFileRules(), sourceObjectPath)
-                .orElseThrow(() -> new IllegalArgumentException("No matching rules for path: " + sourceObjectPath));
-            if (match.getMatch() instanceof MultiTypeBulkDataRules) {
-                String subPath = match.getCapturedParams().get(match.getCapturedParams().size() - 1);
-                BulkDataRules nextMatch = pathTemplateUtils.match(((MultiTypeBulkDataRules) match.getMatch()).getFileRules(), subPath)
-                    .orElseThrow(() -> new IllegalArgumentException("No matching rules for path: " + sourceObjectPath));
-                if (nextMatch instanceof MultiTypeBulkDataRules) {
-                    throw new RuntimeException("MultiTypeBulkDataRules cannot be nested more than 1 level");
-                }
-                return nextMatch;
+            Optional<Match<BulkDataRules>> match =
+                pathTemplateUtils.matchVerbose(((MultiTypeBulkDataRules) rules).getFileRules(), sourceObjectPath);
+
+            if (match.isPresent())
+                if (match.get().getMatch() instanceof MultiTypeBulkDataRules) {
+                    String subPath = match.get().getCapturedParams().get(match.get().getCapturedParams().size() - 1);
+                    BulkDataRules nextMatch = pathTemplateUtils.match(((MultiTypeBulkDataRules) match.get().getMatch()).getFileRules(), subPath)
+                        .orElse(null);
+                    if (nextMatch instanceof MultiTypeBulkDataRules) {
+                        throw new RuntimeException("MultiTypeBulkDataRules cannot be nested more than 1 level");
+                    }
+                    applicableRules = nextMatch;
             } else {
-                return match.getMatch();
+                applicableRules = null;
             }
         } else if (rules instanceof BulkDataRules) {
-            return (BulkDataRules) rules;
+            applicableRules = (BulkDataRules) rules;
         } else {
             throw new RuntimeException("Rules are not BulkDataRules or MultiTypeBulkDataRules");
         }
+        return Optional.ofNullable(applicableRules);
     }
 
 

@@ -138,7 +138,6 @@ public class SlackDiscoveryBulkTests {
         final String pathToSanitized = "sources/slack/example-bulk/sanitized/" + file;
         storageHandler.handle(request(objectPath, pathToOriginal), rules);
 
-        writer.flush();
         writer.close();
 
         String output = new String(outputStream.toByteArray());
