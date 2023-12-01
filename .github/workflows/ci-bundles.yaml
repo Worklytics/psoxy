@@ -14,9 +14,9 @@ on:
       - 's163-gcp-fix-bulk'
 
 jobs:
-  build: 
+  bundle:
     runs-on: ubuntu-latest
-    strategy: 
+    strategy:
       matrix:
         implementation: [ 'gcp', 'aws' ]
     name: bundle ${{ matrix.implementation }}
@@ -25,6 +25,6 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v4
       - name: Build bundle
-        uses: ./.github/workflows/build-bundle.yaml
+        uses: .github/workflows/build-bundle.yaml
         with:
          implementation: ${{ matrix.implementation }}
