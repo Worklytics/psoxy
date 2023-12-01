@@ -1,5 +1,8 @@
 package co.worklytics.test;
 
+import com.fasterxml.jackson.core.util.DefaultIndenter;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 
 import java.io.ByteArrayOutputStream;
@@ -12,7 +15,12 @@ import java.nio.file.Paths;
 import java.util.Base64;
 import java.util.zip.GZIPOutputStream;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 public class TestUtils {
+
+    static ObjectMapper jsonMapper = new ObjectMapper();
+
 
     /**
      * get byte[] data for use in tests
@@ -52,5 +60,53 @@ public class TestUtils {
         compressedStream.close();
 
         return new String(Base64.getEncoder().encode(s.toByteArray()));
+    }
+
+
+    /**
+     * Utility method to print out formatted JSON for debug easily
+     *
+     *
+     *
+     *
+     * @param json
+     * @return
+     */
+    @SneakyThrows
+    @SuppressWarnings("unused")
+    public static String prettyPrintJson(String json) {
+
+        DefaultPrettyPrinter printer = new DefaultPrettyPrinter()
+            .withoutSpacesInObjectEntries();
+        printer.indentArraysWith(DefaultIndenter.SYSTEM_LINEFEED_INSTANCE);
+
+
+        return jsonMapper
+            .writer()
+            .with(printer)
+            .writeValueAsString(jsonMapper.readerFor(Object.class).readValue(json));
+
+        //NOTE: Gson seems to URL-encode embedded strings!?!?!
+        //  eg "64123avdfsMVA==" --> "64123avdfsMVA\u0030\0030"
+        // Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        // return gson.toJson(JsonParser.parseString(json));
+    }
+    public static String prettyPrintJson(byte[] json) {
+        return prettyPrintJson(new String(json));
+    }
+
+
+
+    /**
+     * asserts equivalence of two strings after round-trips through Jackson, so any failure is more
+     * readable than comparing non-pretty JSON, and any differences in original formatting (rather
+     * than actual JSON structure/content) are ignored. eg, expected/actual can have different
+     * "pretty" formatting, or one may not have "pretty" formatting at all.
+     *
+     * @param expected output value of test
+     * @param actual output value of test
+     */
+    public static void assertJsonEquals(String expected, String actual) {
+        assertEquals(prettyPrintJson(expected), prettyPrintJson(actual));
     }
 }

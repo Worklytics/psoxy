@@ -66,3 +66,18 @@ Use this steps if you intend to install in just one workspace within your org.
 2. Copy the "User OAuth Token" (also listed under "OAuth & Permissions") and store as
    `PSOXY_SLACK_DISCOVERY_API_ACCESS_TOKEN` in the psoxy's Secret
    Manager. Otherwise, share the token with the AWS/GCP administrator completing the implementation.
+
+## Bulk Data Flow
+
+***beta*** As an alternative to connecting Worklytics to the Slack Discovery API via the proxy, it
+is possible to use the bulk-mode of the proxy to sanitize an export of Slack Discovery data and
+ingest the resulting sanitized data to Worklytics. Example data of this is giving in the
+[`example-bulk/`](example-bulk/) folder.
+
+This data can be processing using custom multi-file type rules in the proxy, of which
+[`discovery-bulk.yaml`](discovery-bulk.yaml) is an example.
+
+
+
+
+
