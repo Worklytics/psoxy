@@ -1,4 +1,4 @@
-const crypto = require('crypto');
+const crypto = require('node:crypto');
 
 /**
  * hashes a string with a salt and encodes it as a URL-safe base64 string, without padding, prefixed with 't~'
