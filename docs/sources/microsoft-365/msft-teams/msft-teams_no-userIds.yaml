@@ -84,7 +84,6 @@ endpoints:
       - "$top"
       - "$skiptoken"
       - "$expand"
-      - "$filter"
     transforms:
       - !<redact>
         jsonPaths:

@@ -371,7 +371,7 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..mentions[*].mentionText")
                     .jsonPath("$..eventDetail.teamDescription")
                     .build())
-            .allowedQueryParams(List.of("$select", "$top", "$skiptoken", "$expand", "$filter"))
+            .allowedQueryParams(List.of("$select", "$top", "$skiptoken", "$expand"))
             .build();
 
     static final Endpoint MS_TEAMS_TEAMS_CHANNELS_MESSAGES_DELTA = Endpoint.builder()
