@@ -19,7 +19,8 @@ import java.util.Base64;
 @Log
 public class LegacyPseudonymTokenEncoder implements PseudonymEncoder {
 
-    public static final String TOKEN_PREFIX = "l~";
+    // use
+    public static final String TOKEN_PREFIX = "t~";
     public static final String DOMAIN_SEPARATOR = "@";
 
     //just for clarity, not actually used
@@ -40,6 +41,8 @@ public class LegacyPseudonymTokenEncoder implements PseudonymEncoder {
         return encoded;
     }
 
+
+    // for completeness; UrlSafeTokenPseudonymEncoder can also decode these
     @Override
     public Pseudonym decode(String pseudonym) {
         Pseudonym.PseudonymBuilder builder = Pseudonym.builder();
