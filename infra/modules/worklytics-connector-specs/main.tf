@@ -325,7 +325,7 @@ Connect-MicrosoftTeams
 And use the user with the "Teams Administrator" for login it.
 
 4. Follow steps on [Configure application access to online meetings or virtual events](https://learn.microsoft.com/en-us/graph/cloud-communication-online-meeting-application-access-policy):
-  - Add a policy for the application created for the connector
+  - Add a policy for the application created for the connector, providing its `application id`
   - Grant the policy to the whole tenant (NOT to any specific application or user)
 
 **Issues**:
