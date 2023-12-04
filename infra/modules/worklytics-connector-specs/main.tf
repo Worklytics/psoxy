@@ -293,10 +293,8 @@ locals {
         "/v1.0/chats/19:2da4c29f6d7041eca70b638b43d45437@thread.v2/messages",
         "/v1.0/communications/calls/2f1a1100-b174-40a0-aba7-0b405e01ed92",
         "/v1.0/communications/callRecords/e523d2ed-2966-4b6b-925b-754a88034cc5",
-
-        "/v1.0/communications/callRecords/getDirectRoutingCalls(fromDateTime=${urlencode(timeadd(timestamp(), "-90d"))},toDateTime=${urlencode(timestamp())})"
-
-        "/v1.0/communications/callRecords/getDirectRoutingCalls(fromDateTime=2019-11-01,toDateTime=2019-12-01)",
+        "/v1.0/communications/callRecords/getDirectRoutingCalls(fromDateTime=${urlencode(timeadd(timestamp(), "-90d"))},toDateTime=${urlencode(timestamp())})",
+        "/v1.0/communications/callRecords/getDirectRoutingCalls(fromDateTime=${urlencode(timeadd(timestamp(), "-90d"))},toDateTime=${urlencode(timestamp())})",
         "/v1.0/communications/callRecords/getPstnCalls(fromDateTime=2019-11-01,toDateTime=2019-12-01)",
         "/v1.0/users/",
         "/v1.0/users/8b081ef6-4792-4def-b2c9-c363a1bf41d5/onlineMeetings"
