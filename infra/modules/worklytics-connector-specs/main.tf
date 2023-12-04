@@ -285,27 +285,31 @@ locals {
         REFRESH_ENDPOINT : "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
       }
       example_api_calls : [
-        "/beta/{apiVersion}/teams",
-        "/beta/{apiVersion}/teams/{teamId}/allChannels",
-        "/beta/{apiVersion}/users/{userId}/chats",
-        "/beta/{apiVersion}/teams/{teamId}/channels/{channelId}/messages",
-        "/beta/{apiVersion}/teams/{teamId}/channels/{channelId}/messages/delta",
-        "/beta/{apiVersion}/chats/{chatId}/messages",
-        "/beta/{apiVersion}/communications/calls/{callId}",
-        "/beta/{apiVersion}/communications/callRecords/{callChainId}",
-        "/beta/{apiVersion}/users/{userId}/onlineMeetings",
+        "/beta/teams",
+        "/beta/teams/{teamId}/allChannels",
+        "/beta/users/{userId}/chats",
+        "/beta/teams/{teamId}/channels/{channelId}/messages",
+        "/beta/teams/{teamId}/channels/{channelId}/messages/delta",
+        "/beta/chats/{chatId}/messages",
+        "/beta/communications/calls/{callId}",
+        "/beta/communications/callRecords/{callChainId}",
+        "/beta/communications/callRecords/getDirectRoutingCalls(fromDateTime=2019-11-01,toDateTime=2019-12-01)",
+        "/beta/communications/callRecords/getPstnCalls(fromDateTime=2019-11-01,toDateTime=2019-12-01)",
+        "/beta/users/",
+        "/beta/users/{userId}/onlineMeetings",
 
-        "/v1.0/{apiVersion}/teams",
-        "/v1.0/{apiVersion}/teams/{teamId}/allChannels",
-        "/v1.0/{apiVersion}/users/{userId}/chats",
-        "/v1.0/{apiVersion}/teams/{teamId}/channels/{channelId}/messages",
-        "/v1.0/{apiVersion}/teams/{teamId}/channels/{channelId}/messages/delta",
-        "/v1.0/{apiVersion}/chats/{chatId}/messages",
-        "/v1.0/{apiVersion}/communications/calls/{callId}",
-        "/v1.0/{apiVersion}/communications/callRecords/{callChainId}",
+        "/v1.0/teams",
+        "/v1.0/teams/{teamId}/allChannels",
+        "/v1.0/users/{userId}/chats",
+        "/v1.0/teams/{teamId}/channels/{channelId}/messages",
+        "/v1.0/teams/{teamId}/channels/{channelId}/messages/delta",
+        "/v1.0/chats/{chatId}/messages",
+        "/v1.0/communications/calls/{callId}",
+        "/v1.0/communications/callRecords/{callChainId}",
         "/v1.0/communications/callRecords/getDirectRoutingCalls(fromDateTime=2019-11-01,toDateTime=2019-12-01)",
         "/v1.0/communications/callRecords/getPstnCalls(fromDateTime=2019-11-01,toDateTime=2019-12-01)",
-        "/v1.0/{apiVersion}/users/{userId}/onlineMeetings"
+        "/v1.0/users/",
+        "/v1.0/users/{userId}/onlineMeetings"
       ]
     }
   }

@@ -389,6 +389,32 @@ public class TeamsTests extends JavaRulesTestBaseCase {
     @ParameterizedTest
     @ValueSource(strings = {"v1.0", "beta"})
     @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS)
+    public void users(String apiVersion) {
+        String endpoint = "https://graph.microsoft.com/" + apiVersion + "/users";
+        String jsonResponse = asJson("Users_"+ apiVersion + ".json");
+        assertNotSanitized(jsonResponse,
+            "jobTitle",
+            "officeLocation",
+            "preferredLanguage",
+            "id","6ea91a8d-e32e-41a1-b7bd-d2d185eed0e0",
+            "id","4562bcc8-c436-4f95-b7c0-4f8ce89dca5e"
+        );
+
+        String sanitized = sanitize(endpoint, jsonResponse);
+        assertRedacted(sanitized,
+            "businessPhones", "425-555-0100",
+            "displayName", "Conf Room Adams",
+            "givenName",
+            "mail", "Adams@contoso.com",
+            "mobilePhone", "234-567-0989",
+            "userPrincipalName", "Adams@contoso.com"
+        );
+        assertUrlWithSubResourcesBlocked(endpoint);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"v1.0", "beta"})
+    @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS)
     public void users_onlineMeetings(String apiVersion) {
         String userId = "dc17674c-81d9-4adb-bfb2-8f6a442e4622";
         String endpoint = "https://graph.microsoft.com/" + apiVersion + "/users/" + userId + "/onlineMeetings";

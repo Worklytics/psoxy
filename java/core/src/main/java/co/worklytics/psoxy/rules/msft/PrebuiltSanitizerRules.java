@@ -325,6 +325,7 @@ public class PrebuiltSanitizerRules {
     static final String MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_REGEX = "^/(v1.0|beta)/communications/callRecords/(?<callChainId>[({]?[a-fA-F0-9]{8}[-]?([a-fA-F0-9]{4}[-]?){3}[a-fA-F0-9]{12}[})]?)(?<queryParameters>[a-zA-z0-9\\s\\$\\=\\?\\(\\)]*)";
     static final String MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_GET_DIRECT_ROUTING_CALLS = "/{apiVersion}/communications/callRecords/getDirectRoutingCalls(fromDateTime={startDate},toDateTime={endDate})";
     static final String MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_GET_PSTN_CALLS = "/{apiVersion}/communications/callRecords/getPstnCalls(fromDateTime={startDate},toDateTime={endDate})";
+    static final String MS_TEAMS_PATH_TEMPLATES_USERS = "/{apiVersion}/users";
     static final String MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS = "/{apiVersion}/users/{userId}/onlineMeetings";
 
     static final Transform.Pseudonymize PSEUDONYMIZE_USER_ID = Transform.Pseudonymize.builder()
@@ -446,6 +447,21 @@ public class PrebuiltSanitizerRules {
         .allowedQueryParams(List.of("$skip"))
         .build();
 
+    static final Endpoint MS_TEAMS_USERS =  Endpoint.builder()
+        .pathTemplate(MS_TEAMS_PATH_TEMPLATES_USERS)
+        .transform(Transform.Redact.builder()
+            .jsonPath("$..businessPhones")
+            .jsonPath("$..displayName")
+            .jsonPath("$..givenName")
+            .jsonPath("$..mail")
+            .jsonPath("$..mobilePhone")
+            .jsonPath("$..surname")
+            .jsonPath("$..userPrincipalName")
+            .jsonPath("$..signInActivity")
+            .build())
+        .allowedQueryParams(List.of("$select","$top","$filter", "$orderBy", "$count", "$expand", "$search"))
+        .build();
+
     static final Endpoint MS_TEAMS_USERS_ONLINE_MEETINGS =  Endpoint.builder()
         .pathTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS)
         .transform(Transform.Redact.builder()
@@ -468,6 +484,7 @@ public class PrebuiltSanitizerRules {
         .endpoint(MS_TEAMS_COMMUNICATIONS_CALL_RECORDS)
         .endpoint(MS_TEAMS_COMMUNICATIONS_CALL_RECORDS_GET_DIRECT_ROUTING_CALLS)
         .endpoint(MS_TEAMS_COMMUNICATIONS_CALL_RECORDS_GET_PSTN_CALLS)
+        .endpoint(MS_TEAMS_USERS)
         .endpoint(MS_TEAMS_USERS_ONLINE_MEETINGS)
         .build();
 
@@ -484,6 +501,7 @@ public class PrebuiltSanitizerRules {
                                                                                                 PSEUDONYMIZE_USER_ID, PSEUDONYMIZE_CALL_ID, REDACT_ODATA_CONTEXT, REDACT_ODATA_TYPE, REDACT_ODATA_COUNT,  TOKENIZE_ODATA_LINKS)
         .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_GET_PSTN_CALLS,
                                                                                                 PSEUDONYMIZE_USER_ID, PSEUDONYMIZE_CALL_ID, REDACT_ODATA_CONTEXT, REDACT_ODATA_TYPE, REDACT_ODATA_COUNT,  TOKENIZE_ODATA_LINKS)
+        .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_USERS,                                                                     REDACT_ODATA_CONTEXT,                    REDACT_ODATA_COUNT)
         .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS,         PSEUDONYMIZE_USER_ID, REDACT_ODATA_CONTEXT, REDACT_ODATA_TYPE );
 
     public static final Map<String, RESTRules> MSFT_DEFAULT_RULES_MAP =
