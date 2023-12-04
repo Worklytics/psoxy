@@ -1,0 +1,39 @@
+name: CI - bundles
+
+# CI for our project as a GitHub action
+# see https://help.github.com/en/actions/language-and-framework-guides/building-and-testing-java-with-maven
+
+# refactor to use matrix?
+# see https://github.com/actions/setup-java#testing-against-different-java-versions
+
+on:
+  push: # mainline + rc's only
+    branches:
+      - 'main'
+      - 'rc-*'
+      - 's163-gcp-fix-bulk'
+
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        implementation: [ 'gcp', 'aws' ]
+    name: bundle ${{ matrix.implementation }}
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: zulu
+      - name: Package Deployment artifact
+        working-directory: java/
+        # see tools/build.sh; this should be equivalent to that, w/o re-routing errors to log file
+        # or logic to skip build if artifact already exists
+        run: |
+          mvn clean -f pom.xml
+          mvn package install -f "gateway-core/pom.xml" -Dmaven.test.skip=true
+          mvn package install -f "core/pom.xml" -Dmaven.test.skip=true
+          mvn package -f "impl/${{ matrix.implementation }}/pom.xml"

@@ -6,6 +6,8 @@ import co.worklytics.psoxy.rules.RulesUtils;
 import com.avaulta.gateway.rules.BulkDataRules;
 import com.avaulta.gateway.rules.MultiTypeBulkDataRules;
 import com.avaulta.gateway.rules.PathTemplateUtils;
+import com.avaulta.gateway.rules.PathTemplateUtils.Match;
+import com.avaulta.gateway.rules.RuleSet;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.*;
 
@@ -70,7 +72,7 @@ public class StorageHandler {
     }
 
     @SneakyThrows
-    public StorageEventResponse handle(StorageEventRequest request, BulkDataRules rules) {
+    public StorageEventResponse handle(StorageEventRequest request, RuleSet rules) {
 
         BulkDataRules applicableRules = getApplicableRules(rules, request.getSourceObjectPath());
 
@@ -107,6 +109,7 @@ public class StorageHandler {
             .build();
     }
 
+
     public List<ObjectTransform> buildTransforms() {
         List<StorageHandler.ObjectTransform> transforms = new ArrayList<>();
         transforms.add(buildDefaultTransform());
@@ -116,8 +119,6 @@ public class StorageHandler {
 
         return transforms;
     }
-
-
 
     /**
      * @param sourceBucket the bucket from which the original object was read
@@ -186,19 +187,32 @@ public class StorageHandler {
     @VisibleForTesting
     ObjectTransform buildDefaultTransform() {
         return ObjectTransform.builder()
-            .destinationBucketName(config.getConfigPropertyOrError(BulkModeConfigProperty.OUTPUT_BUCKET))
-            .pathWithinBucket(config.getConfigPropertyAsOptional(BulkModeConfigProperty.OUTPUT_BASE_PATH).orElse(""))
-            .rules(defaultRuleSet)
-            .build();
+                .destinationBucketName(config.getConfigPropertyOrError(BulkModeConfigProperty.OUTPUT_BUCKET))
+                .pathWithinBucket(config.getConfigPropertyAsOptional(BulkModeConfigProperty.OUTPUT_BASE_PATH).orElse(""))
+                .rules(defaultRuleSet)
+                .build();
     }
 
 
-    private BulkDataRules getApplicableRules(BulkDataRules rules, String sourceObjectPath) {
+    private BulkDataRules getApplicableRules(RuleSet rules, String sourceObjectPath) {
         if (rules instanceof MultiTypeBulkDataRules) {
-            return pathTemplateUtils.match(((MultiTypeBulkDataRules) rules).getFileRules(), sourceObjectPath)
+            Match<BulkDataRules> match = pathTemplateUtils.matchVerbose(((MultiTypeBulkDataRules) rules).getFileRules(), sourceObjectPath)
                 .orElseThrow(() -> new IllegalArgumentException("No matching rules for path: " + sourceObjectPath));
+            if (match.getMatch() instanceof MultiTypeBulkDataRules) {
+                String subPath = match.getCapturedParams().get(match.getCapturedParams().size() - 1);
+                BulkDataRules nextMatch = pathTemplateUtils.match(((MultiTypeBulkDataRules) match.getMatch()).getFileRules(), subPath)
+                    .orElseThrow(() -> new IllegalArgumentException("No matching rules for path: " + sourceObjectPath));
+                if (nextMatch instanceof MultiTypeBulkDataRules) {
+                    throw new RuntimeException("MultiTypeBulkDataRules cannot be nested more than 1 level");
+                }
+                return nextMatch;
+            } else {
+                return match.getMatch();
+            }
+        } else if (rules instanceof BulkDataRules) {
+            return (BulkDataRules) rules;
         } else {
-            return rules;
+            throw new RuntimeException("Rules are not BulkDataRules or MultiTypeBulkDataRules");
         }
     }
 

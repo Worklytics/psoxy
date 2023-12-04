@@ -3,12 +3,20 @@ package co.worklytics.psoxy.storage;
 import co.worklytics.psoxy.PsoxyModule;
 import co.worklytics.psoxy.gateway.BulkModeConfigProperty;
 import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.StorageEventRequest;
+import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.test.MockModules;
+import com.avaulta.gateway.rules.BulkDataRules;
+import com.avaulta.gateway.rules.ColumnarRules;
+import com.avaulta.gateway.rules.RecordRules;
+import com.avaulta.gateway.rules.RuleSet;
 import com.google.common.collect.ImmutableMap;
 import dagger.Component;
 import dagger.Module;
+import dagger.Provides;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -17,9 +25,8 @@ import org.mockito.Mock;
 import org.mockito.MockMakers;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.inject.Singleton;
-
-import java.io.ByteArrayOutputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.Optional;
@@ -33,12 +40,28 @@ class StorageHandlerTest {
     @Singleton
     @Component(modules = {
         PsoxyModule.class,
-        MockModules.ForRules.class,
+        ForRules.class,
         MockModules.ForConfigService.class,
         MockModules.ForHostEnvironment.class,
     })
     public interface Container {
         void inject( StorageHandlerTest test);
+    }
+
+    @Module
+    public interface ForRules {
+        @Provides
+        @Singleton
+        static BulkDataRules bulkRules() {
+            return MockModules.provideMock(BulkDataRules.class);
+        }
+
+        @Provides
+        @Singleton
+        static RuleSet rules(BulkDataRules rules) {
+            return rules;
+        }
+
     }
 
     InputStreamReader mockReader;
@@ -48,7 +71,11 @@ class StorageHandlerTest {
     @Inject
     ConfigService config;
 
+    // as provider to be able to set up config mock first
     @Inject
+    Provider<StorageHandler> handlerProvider;
+
+    // actual class under test
     StorageHandler handler;
 
     @BeforeEach
@@ -58,8 +85,15 @@ class StorageHandlerTest {
 
         when(config.getConfigPropertyOrError(eq(BulkModeConfigProperty.OUTPUT_BUCKET)))
             .thenReturn("bucket");
+
+        when(config.getConfigPropertyAsOptional(eq(ProxyConfigProperty.SOURCE)))
+            .thenReturn(Optional.of("hris"));
+
+        handler = handlerProvider.get();
+
         mockReader = MockModules.provideMock(InputStreamReader.class);
         mockWriter = MockModules.provideMock(OutputStreamWriter.class);
+
     }
 
 
@@ -106,7 +140,13 @@ class StorageHandlerTest {
         when(config.getConfigPropertyAsOptional(eq(BulkModeConfigProperty.OUTPUT_BASE_PATH)))
             .thenReturn(Optional.ofNullable(outputBasePath));
 
-        StorageEventRequest request = handler.buildRequest(mockReader, mockWriter, "bucket-in", "directory/file.csv", handler.buildDefaultTransform());
+        StorageHandler.ObjectTransform tranform = StorageHandler.ObjectTransform.builder()
+            .destinationBucketName(config.getConfigPropertyOrError(BulkModeConfigProperty.OUTPUT_BUCKET))
+            .pathWithinBucket(config.getConfigPropertyAsOptional(BulkModeConfigProperty.OUTPUT_BASE_PATH).orElse(""))
+            .rules(mock(BulkDataRules.class))
+            .build();
+
+        StorageEventRequest request = handler.buildRequest(mockReader, mockWriter, "bucket-in", "directory/file.csv", tranform);
 
         assertEquals("bucket-in", request.getSourceBucketName());
         assertEquals("directory/file.csv", request.getSourceObjectPath());

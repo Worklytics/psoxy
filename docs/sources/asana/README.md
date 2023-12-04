@@ -2,8 +2,8 @@
 
 ## Examples
 
-  * [Example Rules](example-rules/asana/asana.yaml)
-  * Example Data : [original](api-response-examples/asana) | [sanitized](api-response-examples/asana/sanitized)
+  * [Example Rules](asana.yaml)
+  * Example Data : [original](example-api-responses/original) | [sanitized](example-api-responses/sanitized)
 
 ## Steps to Connect
 
@@ -14,7 +14,7 @@
 2. Update the content of `PSOXY_ASANA_ACCESS_TOKEN` variable or `ACCESS_TOKEN` environment variable
    with the token value obtained in the previous step.
 
-NOTE: derived from [worklytics-connector-specs](../../infra/modules/worklytics-connector-specs/main.tf); refer to that for definitive information.
+NOTE: derived from [worklytics-connector-specs](../../../infra/modules/worklytics-connector-specs/main.tf); refer to that for definitive information.
 
 
 
