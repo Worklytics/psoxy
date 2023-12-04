@@ -458,6 +458,7 @@ public class PrebuiltSanitizerRules {
             .jsonPath("$..surname")
             .jsonPath("$..userPrincipalName")
             .jsonPath("$..signInActivity")
+            .jsonPath("$..identities")
             .build())
         .allowedQueryParams(List.of("$select","$top","$filter", "$orderBy", "$count", "$expand", "$search"))
         .build();

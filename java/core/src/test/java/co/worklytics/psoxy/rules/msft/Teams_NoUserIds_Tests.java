@@ -243,6 +243,21 @@ public class Teams_NoUserIds_Tests extends JavaRulesTestBaseCase {
 
     @ParameterizedTest
     @ValueSource(strings = {"v1.0", "beta"})
+    @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_USERS)
+    public void users(String apiVersion) {
+        String endpoint = "https://graph.microsoft.com/" + apiVersion + "/users";
+        String jsonResponse = asJson("Users_"+ apiVersion + ".json");
+
+        String sanitized = sanitize(endpoint, jsonResponse);
+        assertRedacted(sanitized,
+            "@odata.count",
+            "@odata.context", "https://graph.microsoft.com/v1.0/$metadata#users"
+        );
+        assertUrlWithSubResourcesBlocked(endpoint);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"v1.0", "beta"})
     @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS)
     public void users_onlineMeetings(String apiVersion) {
         String userId = "dc17674c-81d9-4adb-bfb2-8f6a442e4622";
@@ -277,6 +292,7 @@ public class Teams_NoUserIds_Tests extends JavaRulesTestBaseCase {
             InvocationExample.of("https://graph.microsoft.com/" + apiVersion + "/communications/callRecords/2f1a1100-b174-40a0-aba7-0b405e01ed92?$expand=sessions($expand=segments)", "Communications_callRecords_" + apiVersion + ".json"),
             InvocationExample.of("https://graph.microsoft.com/" + apiVersion + "/communications/callRecords/getDirectRoutingCalls(fromDateTime=2019-11-01,toDateTime=2019-12-01)", "Communications_callRecords_getDirectRoutingCalls_" + apiVersion + ".json"),
             InvocationExample.of("https://graph.microsoft.com/" + apiVersion + "/communications/callRecords/getPstnCalls(fromDateTime=2019-11-01,toDateTime=2019-12-01)", "Communications_callRecords_getPstnCalls_" + apiVersion + ".json"),
+            InvocationExample.of("https://graph.microsoft.com/" + apiVersion + "/users", "Users_" + apiVersion + ".json"),
             InvocationExample.of("https://graph.microsoft.com/" + apiVersion + "/users/dc17674c-81d9-4adb-bfb2-8f6a442e4622/onlineMeetings", "Users_onlineMeetings_" + apiVersion + ".json")
         );
     }
