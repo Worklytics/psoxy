@@ -342,7 +342,7 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..displayName")
                     .jsonPath("$..description")
                     .build())
-            .allowedQueryParams(List.of("$select", "$top", "$skipToken", "$filter", "$count"))
+            .allowedQueryParams(List.of("$select", "$top", "$skiptoken", "$filter", "$count"))
             .build();
 
     static final Endpoint MS_TEAMS_TEAMS_ALL_CHANNELS = Endpoint.builder()
@@ -359,7 +359,7 @@ public class PrebuiltSanitizerRules {
             .transform(Transform.Redact.builder()
                     .jsonPath("$..topic")
                     .build())
-            .allowedQueryParams(List.of("$select", "$top", "$skipToken", "$filter", "$orderBy", "$expand"))
+            .allowedQueryParams(List.of("$select", "$top", "$skiptoken", "$filter", "$orderby", "$expand"))
             .build();
 
     static final Endpoint MS_TEAMS_TEAMS_CHANNELS_MESSAGES = Endpoint.builder()
@@ -371,7 +371,7 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..mentions[*].mentionText")
                     .jsonPath("$..eventDetail.teamDescription")
                     .build())
-            .allowedQueryParams(List.of("$select", "$top", "$skipToken", "$expand"))
+            .allowedQueryParams(List.of("$select", "$top", "$skiptoken", "$expand"))
             .build();
 
     static final Endpoint MS_TEAMS_TEAMS_CHANNELS_MESSAGES_DELTA = Endpoint.builder()
@@ -383,7 +383,7 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..value[*].mentions[*].mentionText")
                     .jsonPath("$..value[*].eventDetail.teamDescription")
                     .build())
-            .allowedQueryParams(List.of("$select", "$top", "$skipToken", "$expand", "$deltaToken"))
+            .allowedQueryParams(List.of("$select", "$top", "$skiptoken", "$expand", "deltatoken"))
             .build();
 
     static final Endpoint MS_TEAMS_CHATS_MESSAGES = Endpoint.builder()
@@ -396,7 +396,7 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..value[*].eventDetail.teamDescription")
                     .jsonPath("$..value[*].eventDetail.chatDisplayName")
                     .build())
-            .allowedQueryParams(List.of("$select", "$top", "$skipToken", "$filter", "$orderBy", "$count", "$expand", "$format", "$search", "$skip"))
+            .allowedQueryParams(List.of("$select", "$top", "$skiptoken", "$filter", "$orderby", "$count", "$expand", "$format", "$search", "$skip"))
             .build();
 
     static final Endpoint MS_TEAMS_COMMUNICATIONS_CALLS = Endpoint.builder()
@@ -454,7 +454,7 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..joinMeetingIdSettings.isPasscodeRequired")
                     .jsonPath("$..joinMeetingIdSettings.passcode")
                     .build())
-            .allowedQueryParams(List.of("$select", "$top", "$skipToken", "$filter", "$orderBy", "$count", "$expand", "$format", "$search", "$skip"))
+            .allowedQueryParams(List.of("$select", "$top", "$skiptoken", "$filter", "$orderby", "$count", "$expand", "$format", "$search", "$skip"))
             .build();
 
     static final Rules2 MS_TEAMS = Rules2.builder()
