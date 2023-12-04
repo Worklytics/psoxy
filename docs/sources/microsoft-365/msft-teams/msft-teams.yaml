@@ -4,7 +4,7 @@ endpoints:
     allowedQueryParams:
       - "$select"
       - "$top"
-      - "$skipToken"
+      - "$skiptoken"
       - "$filter"
       - "$count"
     transforms:
@@ -25,9 +25,9 @@ endpoints:
     allowedQueryParams:
       - "$select"
       - "$top"
-      - "$skipToken"
+      - "$skiptoken"
       - "$filter"
-      - "$orderBy"
+      - "$orderby"
       - "$expand"
     transforms:
       - !<redact>
@@ -37,7 +37,7 @@ endpoints:
     allowedQueryParams:
       - "$select"
       - "$top"
-      - "$skipToken"
+      - "$skiptoken"
       - "$expand"
     transforms:
       - !<redact>
@@ -51,9 +51,9 @@ endpoints:
     allowedQueryParams:
       - "$select"
       - "$top"
-      - "$skipToken"
+      - "$skiptoken"
       - "$expand"
-      - "$deltaToken"
+      - "deltatoken"
     transforms:
       - !<redact>
         jsonPaths:
@@ -66,9 +66,9 @@ endpoints:
     allowedQueryParams:
       - "$select"
       - "$top"
-      - "$skipToken"
+      - "$skiptoken"
       - "$filter"
-      - "$orderBy"
+      - "$orderby"
       - "$count"
       - "$expand"
       - "$format"
@@ -134,9 +134,9 @@ endpoints:
     allowedQueryParams:
       - "$select"
       - "$top"
-      - "$skipToken"
+      - "$skiptoken"
       - "$filter"
-      - "$orderBy"
+      - "$orderby"
       - "$count"
       - "$expand"
       - "$format"
