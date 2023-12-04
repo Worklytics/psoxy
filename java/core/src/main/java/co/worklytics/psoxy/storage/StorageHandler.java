@@ -213,7 +213,7 @@ public class StorageHandler {
             Optional<Match<BulkDataRules>> match =
                 pathTemplateUtils.matchVerbose(((MultiTypeBulkDataRules) rules).getFileRules(), sourceObjectPath);
 
-            if (match.isPresent())
+            if (match.isPresent()) {
                 if (match.get().getMatch() instanceof MultiTypeBulkDataRules) {
                     String subPath = match.get().getCapturedParams().get(match.get().getCapturedParams().size() - 1);
                     BulkDataRules nextMatch = pathTemplateUtils.match(((MultiTypeBulkDataRules) match.get().getMatch()).getFileRules(), subPath)
@@ -222,6 +222,9 @@ public class StorageHandler {
                         throw new RuntimeException("MultiTypeBulkDataRules cannot be nested more than 1 level");
                     }
                     applicableRules = nextMatch;
+                } else {
+                    applicableRules = match.get().getMatch();
+                }
             } else {
                 applicableRules = null;
             }
