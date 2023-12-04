@@ -4,6 +4,7 @@ import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
 import com.avaulta.gateway.tokens.impl.Sha256DeterministicTokenizationStrategy;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
 import java.util.Base64;
@@ -12,8 +13,6 @@ import java.util.regex.Pattern;
 
 //NOTE: coupled to fixed-length hash function
 public class UrlSafeTokenPseudonymEncoder implements PseudonymEncoder {
-
-
 
     /**
      * URL-safe prefix to put in front of reversible pseudonyms that use SHA-256 hash
@@ -59,6 +58,14 @@ public class UrlSafeTokenPseudonymEncoder implements PseudonymEncoder {
         return encoded;
     }
 
+
+    /**
+     * supports decoding from anything encoded by this *AND* those encoded by legacy case using `.`
+     * instead of `-` for base64 url encoding
+     *
+     * @param pseudonym
+     * @return
+     */
     @Override
     public Pseudonym decode(String pseudonym) {
         Pseudonym.PseudonymBuilder builder = Pseudonym.builder();
@@ -71,15 +78,25 @@ public class UrlSafeTokenPseudonymEncoder implements PseudonymEncoder {
             encodedPseudonym = pseudonym;
         }
 
+
         if (encodedPseudonym.startsWith(REVERSIBLE_PREFIX)) {
             byte[] decoded = decoder.decode(encodedPseudonym.substring(REVERSIBLE_PREFIX.length()));
             builder.reversible(decoded);
             builder.hash(Arrays.copyOfRange(decoded, 0, Sha256DeterministicTokenizationStrategy.HASH_SIZE_BYTES));
-        } else if (encodedPseudonym.startsWith(TOKEN_PREFIX)) {
-            builder.hash(decoder.decode(encodedPseudonym.substring(TOKEN_PREFIX.length())));
         } else {
-            //legacy case - ever used/needed?
-            builder.hash(decoder.decode(encodedPseudonym));
+            String encodedHash = null;
+            if (encodedPseudonym.startsWith(TOKEN_PREFIX)) {
+                encodedHash = encodedPseudonym.substring(TOKEN_PREFIX.length());
+            } else {
+                //legacy case - ever used/needed?
+                encodedHash = encodedPseudonym;
+            }
+
+            // deal with legacy case, where we used base64 variant that is equivalent to base64url,
+            // except with '.' instead of '-'
+            encodedHash = StringUtils.replaceChars(encodedHash, ".", "-");
+
+            builder.hash(decoder.decode(encodedHash));
         }
 
         return builder.build();
