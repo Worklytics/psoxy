@@ -10,6 +10,7 @@ import co.worklytics.psoxy.storage.BulkDataSanitizerFactory;
 import co.worklytics.psoxy.storage.impl.BulkDataSanitizerFactoryImpl;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.Base64UrlSha256HashPseudonymEncoder;
+import com.avaulta.gateway.pseudonyms.impl.LegacyPseudonymTokenEncoder;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.JsonSchemaFilterUtils;
 import com.avaulta.gateway.rules.ParameterSchemaUtils;
@@ -231,6 +232,12 @@ public class PsoxyModule {
     @Singleton
     Base64UrlSha256HashPseudonymEncoder base64UrlSha256HashPseudonymEncoder() {
         return new Base64UrlSha256HashPseudonymEncoder();
+    }
+
+    @Provides
+    @Singleton
+    LegacyPseudonymTokenEncoder legacyPseudonymTokenEncoder() {
+        return new LegacyPseudonymTokenEncoder();
     }
 
 
