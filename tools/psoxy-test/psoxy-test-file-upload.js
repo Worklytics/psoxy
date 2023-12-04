@@ -38,7 +38,7 @@ async function testAWS(options, logger) {
   const inputBucket = parsedBucketInputOption.bucket;
   const inputPath = parsedBucketInputOption.path;
   const inputKey = inputPath + filenameWithTimestamp;
-  logger.info(`Uploading "${inputPath + parsedPath.base}" to input bucket: ${inputBucket}`);
+  logger.info(`Uploading "${inputPath + parsedPath.base}" as "${inputKey}" to input bucket: ${inputBucket}`);
 
   const uploadResult = await aws.upload(inputBucket, inputKey, options.file, {
       role: options.role,
@@ -101,7 +101,7 @@ async function testGCP(options, logger) {
   const inputBucket = parsedBucketInputOption.bucket;
   const inputPath = parsedBucketInputOption.path;
   const inputKey = inputPath + filenameWithTimestamp;
-  logger.info(`Uploading "${parsedPath.base}" to input bucket: ${inputBucket}`);
+  logger.info(`Uploading "${inputPath + parsedPath.base}" as "${inputKey}" to input bucket: ${inputBucket}`);
   const [, uploadResult] = await gcp.upload(inputBucket, options.file,
     client, inputKey);
 
