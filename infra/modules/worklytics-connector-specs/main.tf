@@ -394,8 +394,8 @@ https://github.com/organizations/{YOUR ORG}/settings/installations/{INSTALLATION
  - If you see *404: Not found* in logs please review the *IP restriction policies* that your organization might have; that could cause connections from the Psoxy AWS Lambda/GCP Cloud Functions be rejected.
 
   6. Update the variables with values obtained in previous step:
-     - `PSOXY_GITHUB_CLIENT_ID` with `App ID` value. **NOTE**: It should be `App Id` value as we are going to use authentication through the App and **not** *client_id*.
-     - `PSOXY_GITHUB_PRIVATE_KEY` with content of the `gh_pk_pkcs8.pem` from previous step. You could open the certificate with VS Code or any other editor and copy all the content *as-is* into this variable.
+     - `${var.config_parameter_prefix}GITHUB_CLIENT_ID` with `App ID` value. **NOTE**: It should be `App Id` value as we are going to use authentication through the App and **not** *client_id*.
+     - `${var.config_parameter_prefix}GITHUB_PRIVATE_KEY` with content of the `gh_pk_pkcs8.pem` from previous step. You could open the certificate with VS Code or any other editor and copy all the content *as-is* into this variable.
   7. Once the certificate has been uploaded, please remove {YOUR DOWNLOADED CERTIFICATE FILE} and `gh_pk_pkcs8.pem` from your computer or store it in a safe place.
 
 EOT
