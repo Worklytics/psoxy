@@ -11,6 +11,7 @@ module "worklytics_connectors_msft_365" {
   example_msft_user_guid = var.example_msft_user_guid
   msft_owners_email      = var.msft_owners_email
   todo_step              = 1
+  config_parameter_prefix = module.psoxy.config_parameter_prefix
 }
 
 provider "azuread" {

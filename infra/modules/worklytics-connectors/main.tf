@@ -3,6 +3,7 @@ module "worklytics_connector_specs" {
   source = "../../modules/worklytics-connector-specs"
 
   enabled_connectors            = var.enabled_connectors
+  config_parameter_prefix       = var.config_parameter_prefix
   jira_cloud_id                 = var.jira_cloud_id
   jira_server_url               = var.jira_server_url
   salesforce_domain             = var.salesforce_domain

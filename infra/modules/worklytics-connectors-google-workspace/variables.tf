@@ -14,6 +14,11 @@ variable "enabled_connectors" {
   description = "ids of connectors to enable"
 }
 
+variable "config_parameter_prefix" {
+  type        = string
+  description = "prefix used for configuration parameter names (such as secrets)"
+}
+
 variable "gcp_project_id" {
   type        = string
   description = "id of GCP project that will host OAuth Clients for Google Workspace API connectors"

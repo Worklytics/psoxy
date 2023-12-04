@@ -19,6 +19,8 @@ module "worklytics_connectors_google_workspace" {
   gcp_project_id                 = var.google_workspace_gcp_project_id
   google_workspace_example_user  = var.google_workspace_example_user
   google_workspace_example_admin = var.google_workspace_example_admin
+  config_parameter_prefix = module.psoxy.config_parameter_prefix
+
 }
 
 output "google_workspace_api_clients" {

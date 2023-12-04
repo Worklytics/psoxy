@@ -10,6 +10,7 @@ module "worklytics_connector_specs" {
   enabled_connectors     = var.enabled_connectors
   msft_tenant_id         = var.msft_tenant_id
   example_msft_user_guid = var.example_msft_user_guid
+  config_parameter_prefix = var.config_parameter_prefix
 }
 
 data "azuread_client_config" "current" {

@@ -31,6 +31,7 @@ module "worklytics_connectors" {
 
 
   enabled_connectors            = var.enabled_connectors
+  config_parameter_prefix       = module.psoxy.config_parameter_prefix
   jira_cloud_id                 = var.jira_cloud_id
   jira_server_url               = var.jira_server_url
   jira_example_issue_id         = var.jira_example_issue_id
@@ -81,7 +82,6 @@ module "psoxy" {
 
   gcp_project_id                    = var.gcp_project_id
   environment_name                  = var.environment_name
-  config_parameter_prefix           = var.config_parameter_prefix
   default_labels                    = var.default_labels
   worklytics_sa_emails              = var.worklytics_sa_emails
   psoxy_base_dir                    = var.psoxy_base_dir
