@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.net.URLEncoder;
 import java.util.Base64;
 import java.util.function.Function;
 
@@ -117,6 +116,10 @@ public class UrlSafeTokenPseudonymEncoderTest {
 
         String encoded = pseudonymEncoder.encode(pseudonym);
         assertEquals("t~UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMk@acme.com", encoded);
+
+        Pseudonym decoded = pseudonymEncoder.decode(encoded);
+        assertEquals(new String(pseudonym.getHash()), new String(decoded.getHash()));
+        assertEquals("acme.com", decoded.getDomain());
     }
 
     @Test
