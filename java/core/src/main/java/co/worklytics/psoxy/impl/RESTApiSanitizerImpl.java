@@ -8,6 +8,7 @@ import co.worklytics.psoxy.utils.URLUtils;
 import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
+import com.avaulta.gateway.pseudonyms.impl.LegacyPseudonymTokenEncoder;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.Endpoint;
 import com.avaulta.gateway.rules.JsonSchemaFilter;
@@ -89,6 +90,8 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     ReversibleTokenizationStrategy reversibleTokenizationStrategy;
     @Inject
     UrlSafeTokenPseudonymEncoder urlSafePseudonymEncoder;
+    @Inject
+    LegacyPseudonymTokenEncoder legacyTokenEncoder;
     @Inject
     JsonSchemaFilterUtils jsonSchemaFilterUtils;
     @Inject
@@ -490,19 +493,11 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
                 PseudonymizedIdentity pseudonymizedIdentity = pseudonymizer.pseudonymize(toPseudonymize, transform);
 
                 String pseudonymizedString;
-                if (pseudonymizedIdentity.getReversible() != null) {
-                    if (getPseudonymizer().getOptions().getPseudonymImplementation() == PseudonymImplementation.LEGACY) {
-                        //exploits that already reversibly encoded, including prefix
-                        log.warning("Using transform PseudonymizeRegexMatches, with reversible==true; this is NOT supported for LEGACY pseudonym implementation, so non-reversible pseudonym encoded");
-                        pseudonymizedString = UrlSafeTokenPseudonymEncoder.TOKEN_PREFIX + pseudonymizedIdentity.getHash();
-                    } else {
-                        pseudonymizedString = pseudonymizedIdentity.getReversible();
-                    }
+
+                if (getPseudonymizer().getOptions().getPseudonymImplementation() == PseudonymImplementation.LEGACY) {
+                    pseudonymizedString = legacyTokenEncoder.encode(pseudonymizedIdentity.fromLegacy());
                 } else {
-                    pseudonymizedString = UrlSafeTokenPseudonymEncoder.TOKEN_PREFIX + pseudonymizedIdentity.getHash();
-                }
-                if (pseudonymizedIdentity.getDomain() != null) {
-                    pseudonymizedString += UrlSafeTokenPseudonymEncoder.DOMAIN_SEPARATOR + pseudonymizedIdentity.getDomain();
+                    pseudonymizedString = urlSafePseudonymEncoder.encode(pseudonymizedIdentity.asPseudonym());
                 }
 
                 if (matcher.groupCount() > 0) {
