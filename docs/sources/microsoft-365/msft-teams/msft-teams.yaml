@@ -53,7 +53,7 @@ endpoints:
       - "$top"
       - "$skiptoken"
       - "$expand"
-      - "deltatoken"
+      - "$deltatoken"
     transforms:
       - !<redact>
         jsonPaths:

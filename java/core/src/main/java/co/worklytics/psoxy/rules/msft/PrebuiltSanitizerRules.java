@@ -383,7 +383,7 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..value[*].mentions[*].mentionText")
                     .jsonPath("$..value[*].eventDetail.teamDescription")
                     .build())
-            .allowedQueryParams(List.of("$select", "$top", "$skiptoken", "$expand", "deltatoken"))
+            .allowedQueryParams(List.of("$select", "$top", "$skiptoken", "$expand", "$deltatoken"))
             .build();
 
     static final Endpoint MS_TEAMS_CHATS_MESSAGES = Endpoint.builder()
