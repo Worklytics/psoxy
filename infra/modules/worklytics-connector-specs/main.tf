@@ -350,47 +350,48 @@ EOT
         "/repos/${local.github_organization}/${local.github_example_repository}/pulls",
       ]
       external_token_todo : <<EOT
-  1. From your organization, register a [GitHub App](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/registering-a-github-app#registering-a-github-app)
-    with following permissions with **Read Only**:
-    - Repository:
+  1. Register a [GitHub App](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/registering-a-github-app#registering-a-github-app)
+    from your organization with the  **Read-only** access level set to the following permissions:
+    - Repository permissions
       - Contents: for reading commits and comments
       - Issues: for listing issues, comments, assignees, etc.
       - Metadata: for listing repositories and branches
       - Pull requests: for listing pull requests, reviews, comments and commits
-    - Organization
+    - Organization permissions
       - Administration: for listing events from audit log
       - Members: for listing teams and their members
 
   NOTES:
-    - We assume that ALL the repositories are going to be list **should be owned by the organization, not the users**.
+    - We assume that ALL the repositories to be listed **should be owned by the organization, not the users**.
     - Enterprise Cloud is required for this connector.
 
-  Apart from Github instructions please review the following:
-  - "Homepage URL" can be anything, not required in this flow but required by Github.
+  Apart from GitHub instructions please review the following:
+  - "Homepage URL" can be anything, not required in this flow but required by GitHub.
   - Webhooks check can be disabled as this connector is not using them
   - Keep `Expire user authorization tokens` enabled, as GitHub documentation recommends
-  2. Once is created please generate a new `Private Key`.
-  3. It is required to convert the format of the certificate downloaded from PKCS#1 in previous step to PKCS#8. Please run following command:
+  2. Once the App is created, please generate a new `Private Key`.
+  3. It is required to convert the format of the certificate generated in the previous step from PKCS#1 to PKCS#8. Please, run following command:
 ```shell
 openssl pkcs8 -topk8 -inform PEM -outform PEM -in {YOUR DOWNLOADED CERTIFICATE FILE} -out gh_pk_pkcs8.pem -nocrypt
 ```
 
 **NOTES**:
- - If the certificate is not converted to PKCS#8 connector will NOT work. You might see in logs a Java error `Invalid PKCS8 data.` if the format is not correct.
+ - If the certificate is not converted to PKCS#8, the connector will NOT work. You might see in the logs a Java error `Invalid PKCS8 data.` if the format is not correct.
  - Command proposed has been successfully tested on Ubuntu; it may differ for other operating systems.
 
   4. Install the application in your organization.
-     Go to your organization settings and then in "Developer Settings". Then, click on "Edit" for your "Github App" and once you are in the app settings, click on "Install App" and click on the "Install" button. Accept the permissions to install it in your whole organization.
-  5. Once installed, the `installationId` is required as it needs to be provided in the proxy as parameter for the connector in your Terraform module. You can go to your organization settings and
-click on `Third Party Access`. Click on `Configure` the application you have installed in previous step and you will find the `installationId` at the URL of the browser:
+     Go to the "Developer Settings" section of your organization. Then, click on "Edit" for your "Github App" and once you are in the app settings, click on "Install App" and click on the "Install" button. Accept the permissions to install it to your whole organization.
+  5. Once installed, the `installationId` is required as it needs to be provided in the Psoxy as parameter for the connector in your Terraform module. You can go to your organization settings and
+click on `Third Party Access`. Click on `Configure` the application you have installed in the previous step and you will find the `installationId` at the URL of the browser:
 ```
 https://github.com/organizations/{YOUR ORG}/settings/installations/{INSTALLATION_ID}
 ```
-  Copy the value of `installationId` and assign it to the `github_installation_id` variable in Terraform. You will need to redeploy the proxy again if that value was not populated before.
+  Copy the value of `installationId` and assign it to the `github_installation_id` variable in Terraform. If the variable wasn't defined before, add the following to your `terraform.tfvars` file
+  `github_installation_id="{installationId}"` replacing "installationId" by the the actual value. You will need to redeploy the Psoxy again for the changes to take effect.
 
 **NOTE**:
  - If `github_installation_id` is not set, authentication URL will not be properly formatted and you will see *401: Unauthorized* when trying to get an access token.
- - If you see *404: Not found* in logs please review the *IP restriction policies* that your organization might have; that could cause connections from psoxy AWS Lambda/GCP Cloud Functions be rejected.
+ - If you see *404: Not found* in logs please review the *IP restriction policies* that your organization might have; that could cause connections from the Psoxy AWS Lambda/GCP Cloud Functions be rejected.
 
   6. Update the variables with values obtained in previous step:
      - `PSOXY_GITHUB_CLIENT_ID` with `App ID` value. **NOTE**: It should be `App Id` value as we are going to use authentication through the App and **not** *client_id*.
