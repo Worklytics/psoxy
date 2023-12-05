@@ -24,6 +24,7 @@ import java.io.*;
 import java.nio.channels.Channels;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Optional;
 import java.util.zip.GZIPOutputStream;
 
 @Singleton
@@ -66,7 +67,10 @@ public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
 
         StorageEventRequest request = storageHandler.buildRequest(null, null, importBucket, sourceName, transform);
 
-        request = request.withCompressOutput(sourceBlobInfo.getContentEncoding().contains("gzip"));
+        boolean inputIsCompressed = Optional.ofNullable(sourceBlobInfo.getContentEncoding())
+                                            .map(s -> s.contains("gzip"))
+                                            .orElse(false);
+        request = request.withCompressOutput(inputIsCompressed);
 
         if (storageHandler.getApplicableRules(transform.getRules(), request.getSourceObjectPath()).isPresent()) {
             BlobInfo destBlobInfo = BlobInfo.newBuilder(BlobId.of(request.getDestinationBucketName(), request.getDestinationObjectPath()))
