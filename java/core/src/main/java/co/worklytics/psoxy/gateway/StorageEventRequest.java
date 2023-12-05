@@ -51,4 +51,7 @@ public class StorageEventRequest {
      */
     @NonNull
     String destinationObjectPath;
+
+    @Builder.Default
+    Boolean compressOutput = false;
 }

@@ -49,13 +49,7 @@ public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
         }
     }
 
-    OutputStream wrapWithCompressedStreamForFileExtension(OutputStream os, String fileName) throws IOException {
-        if (fileName.endsWith(".gz")) {
-            return new GZIPOutputStream(os);
-        } else {
-            return os;
-        }
-    }
+
 
 
     @SneakyThrows
@@ -66,7 +60,6 @@ public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
 
         BlobInfo sourceBlobInfo = storage.get(sourceBlobId);
 
-
         if (storageHandler.hasBeenSanitized(sourceBlobInfo.getMetadata())) {
             //possible if proxy directly (or indirectly via some other pipeline) is writing back
             //to the same bucket it originally read from. to avoid perpetuating the loop, skip
@@ -76,42 +69,19 @@ public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
 
         StorageEventRequest request = storageHandler.buildRequest(null, null, importBucket, sourceName, transform);
 
+        request = request.withCompressOutput(sourceBlobInfo.getContentEncoding().contains("gzip"));
+
         BlobInfo destBlobInfo = BlobInfo.newBuilder(BlobId.of(request.getDestinationBucketName(), request.getDestinationObjectPath()))
             .setContentType(sourceBlobInfo.getContentType())
             .setMetadata(storageHandler.buildObjectMetadata(importBucket, sourceName, transform))
             .build();
 
         try (ReadChannel readChannel = storage.reader(sourceBlobId);
-             WriteChannel writeChannel = storage.writer(destBlobInfo)) {
-            process(request, transform, readChannel, writeChannel);
-        }
-    }
-
-    //helper, decoupled from GCP-specific stuff
-    @SneakyThrows
-    @VisibleForTesting
-    void process(StorageEventRequest request,
-                 StorageHandler.ObjectTransform transform,
-                 ReadChannel readChannel,
-                 WriteChannel writeChannel) {
-        try (BOMInputStream is = new BOMInputStream(Channels.newInputStream(readChannel));
+             BOMInputStream is = new BOMInputStream(Channels.newInputStream(readChannel));
              InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
-             Reader reader = new BufferedReader(isr);
-             OutputStream os = Channels.newOutputStream(writeChannel);
-             OutputStream outputStream = wrapWithCompressedStreamForFileExtension(os, request.getDestinationObjectPath());
-             OutputStreamWriter streamWriter = new OutputStreamWriter(outputStream);
-             Writer writer= new BufferedWriter(streamWriter)) {
-
-            request = request.withSourceReader(reader)
-                .withDestinationWriter(writer);
-
-            StorageEventResponse storageEventResponse = storageHandler.handle(request, transform.getRules());
-
-            log.info("Writing to: " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationObjectPath());
-
-            writer.flush();
-            log.info("Successfully pseudonymized " + request.getSourceBucketName() + "/"
-                + request.getSourceObjectPath() + " and uploaded to " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationObjectPath());
+             WriteChannel writeChannel = storage.writer(destBlobInfo);
+             OutputStream os = Channels.newOutputStream(writeChannel)) {
+            storageHandler.process(request, transform, isr, os);
         }
     }
 

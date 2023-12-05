@@ -10,19 +10,20 @@ import com.avaulta.gateway.rules.PathTemplateUtils.Match;
 import com.avaulta.gateway.rules.RuleSet;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.*;
+import lombok.extern.java.Log;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.io.Reader;
-import java.io.Serializable;
-import java.io.Writer;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * solves a DaggerMissingBinding exception in tests
  */
+@Log
 @Singleton
 @NoArgsConstructor(onConstructor_ = @Inject)
 public class StorageHandler {
@@ -70,6 +71,33 @@ public class StorageHandler {
         }
 
     }
+
+
+
+    @SneakyThrows
+    public StorageEventResponse process(StorageEventRequest request,
+                 StorageHandler.ObjectTransform transform,
+                 InputStreamReader reader,
+                 OutputStream os) {
+        try (OutputStream outputStream = request.getCompressOutput() ? new GZIPOutputStream(os) : os;
+             OutputStreamWriter streamWriter = new OutputStreamWriter(outputStream);
+             Writer writer= new BufferedWriter(streamWriter)) {
+
+            request = request.withSourceReader(reader)
+                .withDestinationWriter(writer);
+
+            StorageEventResponse storageEventResponse = this.handle(request, transform.getRules());
+
+            log.info("Writing to: " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationObjectPath());
+
+            writer.flush();
+            log.info("Successfully pseudonymized " + request.getSourceBucketName() + "/"
+                + request.getSourceObjectPath() + " and uploaded to " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationObjectPath());
+            return storageEventResponse;
+        }
+
+    }
+
 
     @SneakyThrows
     public StorageEventResponse handle(StorageEventRequest request, RuleSet rules) {

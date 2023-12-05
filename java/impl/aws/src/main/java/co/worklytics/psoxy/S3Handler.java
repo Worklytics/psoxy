@@ -78,13 +78,14 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
              BOMInputStream is = new BOMInputStream(objectData);
              InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
              Reader reader = new BufferedReader(isr);
-             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-             OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
-             Writer writer = new BufferedWriter(outputStreamWriter)) {
+             ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
 
-            StorageEventRequest request = storageHandler.buildRequest(reader, writer, importBucket, sourceKey, transform);
+            StorageEventRequest request = storageHandler.buildRequest(reader, null, importBucket, sourceKey, transform);
 
-            storageEventResponse = storageHandler.handle(request, transform.getRules());
+            request.withCompressOutput(s3Object.getObjectMetadata().getContentEncoding().contains("gzip"));
+
+            storageEventResponse = storageHandler.process(request, transform, isr, outputStream);
+
             processedData = outputStream.toByteArray();
             log.info(String.format("Successfully pseudonymized %s/%s to buffer", importBucket, sourceKey));
         }
@@ -94,6 +95,7 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
             //NOTE: not setting content length here causes S3 client to buffer the stream ... OK
             //meta.setContentLength(storageEventResponse.getBytes().length);
             meta.setContentType(s3Object.getObjectMetadata().getContentType());
+            meta.setContentEncoding(s3Object.getObjectMetadata().getContentEncoding());
             meta.setUserMetadata(storageHandler.buildObjectMetadata(importBucket, sourceKey, transform));
 
 
