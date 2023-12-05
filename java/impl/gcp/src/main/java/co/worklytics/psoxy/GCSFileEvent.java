@@ -78,7 +78,10 @@ public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
                 .setMetadata(storageHandler.buildObjectMetadata(importBucket, sourceName, transform))
                 .build();
 
-            try (ReadChannel readChannel = storage.reader(sourceBlobId);
+            // rawInputStream to false here, so GCS will automagically decompress the source object
+            // before returning it to us.
+            // TODO: likely more efficient to do this ourselves, but this should work
+            try (ReadChannel readChannel = storage.reader(sourceBlobId, Storage.BlobSourceOption.shouldReturnRawInputStream(false));
                  BOMInputStream is = new BOMInputStream(Channels.newInputStream(readChannel));
                  InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
                  WriteChannel writeChannel = storage.writer(destBlobInfo);
