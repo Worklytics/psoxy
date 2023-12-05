@@ -5,10 +5,7 @@ import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestUtils;
-import com.avaulta.gateway.rules.BulkDataRules;
-import com.avaulta.gateway.rules.ColumnarRules;
-import com.avaulta.gateway.rules.RecordRules;
-import com.avaulta.gateway.rules.RuleSet;
+import com.avaulta.gateway.rules.*;
 import com.google.common.collect.ImmutableMap;
 import dagger.Component;
 import dagger.Module;
@@ -27,8 +24,11 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Optional;
+import java.util.zip.GZIPOutputStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
@@ -168,7 +168,7 @@ class StorageHandlerTest {
 
         //kinda pointless
 
-        assertTrue(handler.buildObjectMetadata("bucket", "directory/file.csv", handler.buildDefaultTransform())
+        assertTrue(handler.buildObjectMetadata("bucket", "/directory/file.csv", handler.buildDefaultTransform())
             .containsKey(StorageHandler.BulkMetaData.INSTANCE_ID.getMetaDataKey()));
 
     }
@@ -180,12 +180,46 @@ class StorageHandlerTest {
         assertTrue(handler.hasBeenSanitized(ImmutableMap.of(StorageHandler.BulkMetaData.INSTANCE_ID.getMetaDataKey(), "psoxy-test")));
     }
 
-    @SneakyThrows
-    @Test
-    public void process() {
-        String data = "foo,bar\n1,2\n";
+    @CsvSource({
+        "/directory/file.csv,false", // path has a suffix parameter, so must have one
+        "/directory/file1.csv,true",
+        "directory/file.csv,false",
+        "directory/file1.csv,false",
+        "/directory/plain.csv,true",
+    })
+    @ParameterizedTest
+    public void applicableRules_multi(String path, boolean match) {
+        MultiTypeBulkDataRules multiTypeBulkDataRules = MultiTypeBulkDataRules.builder()
+            .fileRules(ImmutableMap.of(
+                "/directory/plain.csv",
+                ColumnarRules.builder()
+                    .columnsToPseudonymize(Arrays.asList("foo"))
+                    .build(),
+                "/directory/file{suffix}.csv",
+                ColumnarRules.builder()
+                    .columnsToPseudonymize(Arrays.asList("foo"))
+                    .build()
+            )).build();
 
-        Reader reader = new InputStreamReader(new ByteArrayInputStream(data.getBytes()));
+        assertEquals(match, handler.getApplicableRules(multiTypeBulkDataRules, path).isPresent());
+    }
+
+    @ValueSource(
+        booleans = {
+            true,
+            false
+        }
+    )
+    @SneakyThrows
+    @ParameterizedTest
+    public void process_compressed(boolean compress) {
+        String data = "foo,bar\r\n1,2\r\n1,2\n1,2\n";
+        String expected = "foo,bar\r\n" +
+            "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc\"\"}\",2\r\n" +
+            "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc\"\"}\",2\r\n" +
+            "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc\"\"}\",2\r\n";
+
+        InputStreamReader reader = new InputStreamReader(new ByteArrayInputStream(data.getBytes()));
 
         StorageEventRequest request = StorageEventRequest.builder()
             .sourceBucketName("bucket")
@@ -194,19 +228,38 @@ class StorageHandlerTest {
             .destinationBucketName("bucket")
             .destinationObjectPath("directory/file.csv")
             .destinationWriter(writer)
-            .compressOutput(true)
+            .compressOutput(compress)
             .build();
 
 
 
-        handler.process(request, handler.buildDefaultTransform(), mockReader, outputStream);
-
-        writer.flush();
+        handler.process(request, handler.buildDefaultTransform(), reader, outputStream);
         writer.close();
 
-        String output = new String(outputStream.toByteArray());
+        String output = compress ? Base64.getEncoder().encodeToString(outputStream.toByteArray()) : new String(outputStream.toByteArray());
+        String encodedExpected = compress ? base64gziped(expected) : expected;
+        assertEquals(encodedExpected, output);
 
-        assertEquals("foo,bar\n1,2\n", output);
+        assertEquals(compress,  outputStream.toByteArray().length < expected.length());
 
+    }
+
+    String base64gziped(String content) {
+        if (content == null || content.length() == 0) {
+            return "";
+        }
+
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+             GZIPOutputStream gzipOutputStream = new GZIPOutputStream(baos)) {
+
+            gzipOutputStream.write(content.getBytes(StandardCharsets.UTF_8));
+            gzipOutputStream.close();
+
+            return Base64.getEncoder().encodeToString(baos.toByteArray());
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

@@ -11,6 +11,7 @@ import com.avaulta.gateway.rules.RuleSet;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.*;
 import lombok.extern.java.Log;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -91,7 +92,6 @@ public class StorageHandler {
 
             log.info("Writing to: " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationObjectPath());
 
-            writer.flush();
             log.info("Successfully pseudonymized " + request.getSourceBucketName() + "/"
                 + request.getSourceObjectPath() + " and uploaded to " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationObjectPath());
             return storageEventResponse;
@@ -130,6 +130,7 @@ public class StorageHandler {
 
         String sourceObjectPathWithinBase =
             config.getConfigPropertyAsOptional(BulkModeConfigProperty.INPUT_BASE_PATH)
+                .filter(inputBasePath -> StringUtils.isNotBlank(inputBasePath))
                 .map(inputBasePath -> sourceObjectPath.replace(inputBasePath, ""))
                 .orElse(sourceObjectPath);
 
