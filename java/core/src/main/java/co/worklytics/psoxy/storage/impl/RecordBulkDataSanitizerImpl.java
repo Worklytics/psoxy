@@ -88,10 +88,11 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
                             //rule for transform doesn't match anythign in document; suppress this
                         }
                     }
-                    writer.write(jsonConfiguration.jsonProvider().toJson(document));
-                    writer.write('\n'); // NDJSON uses newlines between records
+                    writer.append(jsonConfiguration.jsonProvider().toJson(document));
+                    writer.append('\n'); // NDJSON uses newlines between records
+                    writer.flush(); //after each line
                 } catch (UnmatchedPseudonymization e) {
-                    log.warning("Skipped record due to UnmatchedPseudonymizaiton: " + e.getPath());
+                    log.warning("Skipped record due to UnmatchedPseudonymization: " + e.getPath());
                 }
             }
         }

@@ -49,9 +49,6 @@ public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
         }
     }
 
-
-
-
     @SneakyThrows
     void process(String importBucket, String sourceName, StorageHandler.ObjectTransform transform) {
 
@@ -71,17 +68,21 @@ public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
 
         request = request.withCompressOutput(sourceBlobInfo.getContentEncoding().contains("gzip"));
 
-        BlobInfo destBlobInfo = BlobInfo.newBuilder(BlobId.of(request.getDestinationBucketName(), request.getDestinationObjectPath()))
-            .setContentType(sourceBlobInfo.getContentType())
-            .setMetadata(storageHandler.buildObjectMetadata(importBucket, sourceName, transform))
-            .build();
+        if (storageHandler.getApplicableRules(transform.getRules(), request.getSourceObjectPath()).isPresent()) {
+            BlobInfo destBlobInfo = BlobInfo.newBuilder(BlobId.of(request.getDestinationBucketName(), request.getDestinationObjectPath()))
+                .setContentType(sourceBlobInfo.getContentType())
+                .setMetadata(storageHandler.buildObjectMetadata(importBucket, sourceName, transform))
+                .build();
 
-        try (ReadChannel readChannel = storage.reader(sourceBlobId);
-             BOMInputStream is = new BOMInputStream(Channels.newInputStream(readChannel));
-             InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
-             WriteChannel writeChannel = storage.writer(destBlobInfo);
-             OutputStream os = Channels.newOutputStream(writeChannel)) {
-            storageHandler.process(request, transform, isr, os);
+            try (ReadChannel readChannel = storage.reader(sourceBlobId);
+                 BOMInputStream is = new BOMInputStream(Channels.newInputStream(readChannel));
+                 InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
+                 WriteChannel writeChannel = storage.writer(destBlobInfo);
+                 OutputStream os = Channels.newOutputStream(writeChannel)) {
+                storageHandler.process(request, transform, isr, os);
+            }
+        } else {
+            log.info("Skipping " + importBucket + "/" + request.getSourceObjectPath() + " because no rules apply");
         }
     }
 

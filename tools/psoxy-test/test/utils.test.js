@@ -1,6 +1,7 @@
 import test from 'ava';
 import * as td from 'testdouble';
 import {
+  addFilenameSuffix,
   executeWithRetry,
   resolveHTTPMethod,
   resolveAWSRegion,
@@ -105,4 +106,14 @@ test('Resolve AWS region', (t) => {
   t.is('ap-southeast-4', resolveAWSRegion(new URL('https://49eo5h5k99.execute-api.ap-southeast-4.amazonaws.com')));
   t.is('us-east-1', resolveAWSRegion(new URL('https://foo.com')));
   t.is('us-east-1', resolveAWSRegion(''));
+})
+
+test('Add filename suffix', (t) => {
+  t.is(addFilenameSuffix('foo.csv', 'bar'), 'foo-bar.csv');
+  t.is(addFilenameSuffix('folder-test-example-001.csv', 1701711533220),
+    'folder-test-example-001-1701711533220.csv');
+  t.is(addFilenameSuffix('folder/test/example-001.csv', 1701711533220),
+    'example-001-1701711533220.csv');
+  t.is(addFilenameSuffix('', 1701711533220), '');
+  t.is(addFilenameSuffix(null, 'foo'), '');
 })
