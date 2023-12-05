@@ -82,7 +82,11 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
 
             StorageEventRequest request = storageHandler.buildRequest(reader, null, importBucket, sourceKey, transform);
 
-            request.withCompressOutput(s3Object.getObjectMetadata().getContentEncoding().contains("gzip"));
+            boolean isCompressed = Optional.ofNullable(s3Object.getObjectMetadata().getContentEncoding())
+                .map(s -> s.contains("gzip"))
+                .orElse(false);
+
+            request.withCompressOutput(isCompressed);
 
             storageEventResponse = storageHandler.process(request, transform, isr, outputStream);
 
