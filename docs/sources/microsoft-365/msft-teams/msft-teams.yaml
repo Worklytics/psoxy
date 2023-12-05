@@ -130,6 +130,27 @@ endpoints:
           - "$..value[*].userDisplayName"
           - "$..value[*].callerNumber"
           - "$..value[*].calleeNumber"
+  - pathTemplate: "/{apiVersion}/users"
+    allowedQueryParams:
+      - "$select"
+      - "$top"
+      - "$filter"
+      - "$orderBy"
+      - "$count"
+      - "$expand"
+      - "$search"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..businessPhones"
+          - "$..displayName"
+          - "$..givenName"
+          - "$..mail"
+          - "$..mobilePhone"
+          - "$..surname"
+          - "$..userPrincipalName"
+          - "$..signInActivity"
+          - "$..identities"
   - pathTemplate: "/{apiVersion}/users/{userId}/onlineMeetings"
     allowedQueryParams:
       - "$select"

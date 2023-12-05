@@ -258,26 +258,13 @@ locals {
       target_host : "graph.microsoft.com"
       required_oauth2_permission_scopes : [],
       required_app_roles : [
-      # Least privileged permissions
-      "Team.ReadBasic.All",
-      "Channel.ReadBasic.All",
-      "Chat.ReadBasic.All",
-      "Chat.Read.All",
-      #"ChannelMessage.Read.Group*",
-      "ChannelMessage.Read.All",
-      "CallRecords.Read.All",
-      "OnlineMeetings.Read.All"
-
-      # Higher privileged permissions
-#        "TeamSettings.Read.All",
-#        "TeamSettings.ReadWrite.All",
-#        "ChannelSettings.Read.All",
-#        "ChannelSettings.ReadWrite.All",
-#        "Chat.ReadWrite.All",
-#        "ChatMessage.Read.Chat",
-#        "Calls.AccessMedia.All",
-#        "OnlineMeetings.ReadWrite.All",
-#        "OnlineMeetingArtifact.Read.All"
+        "Team.ReadBasic.All",
+        "Channel.ReadBasic.All",
+        "Chat.ReadBasic.All",
+        "Chat.Read.All",
+        "ChannelMessage.Read.All",
+        "CallRecords.Read.All",
+        "OnlineMeetings.Read.All"
       ],
       environment_variables : {
         GRANT_TYPE : "workload_identity_federation"
@@ -286,27 +273,32 @@ locals {
         REFRESH_ENDPOINT : "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
       }
       example_api_calls : [
-        "/beta/{apiVersion}/teams",
-        "/beta/{apiVersion}/teams/{teamId}/allChannels",
-        "/beta/{apiVersion}/users/{userId}/chats",
-        "/beta/{apiVersion}/teams/{teamId}/channels/{channelId}/messages",
-        "/beta/{apiVersion}/teams/{teamId}/channels/{channelId}/messages/delta",
-        "/beta/{apiVersion}/chats/{chatId}/messages",
-        "/beta/{apiVersion}/communications/calls/{callId}",
-        "/beta/{apiVersion}/communications/callRecords/{callChainId}",
-        "/beta/{apiVersion}/users/{userId}/onlineMeetings",
+        "/beta/teams",
+        "/beta/teams/893075dd-2487-4122-925f-022c42e20265/allChannels",
+        "/beta/users/8b081ef6-4792-4def-b2c9-c363a1bf41d5/chats",
+        "/beta/teams/893075dd-2487-4122-925f-022c42e20265/channels/19:4a95f7d8db4c4e7fae857bcebe0623e6@thread.tacv2/messages",
+        "/beta/teams/893075dd-2487-4122-925f-022c42e20265/channels/19:4a95f7d8db4c4e7fae857bcebe0623e6@thread.tacv2/messages/delta",
+        "/beta/chats/19:2da4c29f6d7041eca70b638b43d45437@thread.v2/messages",
+        "/beta/communications/calls/2f1a1100-b174-40a0-aba7-0b405e01ed92",
+        "/beta/communications/callRecords/e523d2ed-2966-4b6b-925b-754a88034cc5",
+        "/beta/communications/callRecords/getDirectRoutingCalls(fromDateTime=2019-11-01,toDateTime=2019-12-01)",
+        "/beta/communications/callRecords/getPstnCalls(fromDateTime=2019-11-01,toDateTime=2019-12-01)",
+        "/beta/users/",
+        "/beta/users/8b081ef6-4792-4def-b2c9-c363a1bf41d5/onlineMeetings",
 
-        "/v1.0/{apiVersion}/teams",
-        "/v1.0/{apiVersion}/teams/{teamId}/allChannels",
-        "/v1.0/{apiVersion}/users/{userId}/chats",
-        "/v1.0/{apiVersion}/teams/{teamId}/channels/{channelId}/messages",
-        "/v1.0/{apiVersion}/teams/{teamId}/channels/{channelId}/messages/delta",
-        "/v1.0/{apiVersion}/chats/{chatId}/messages",
-        "/v1.0/{apiVersion}/communications/calls/{callId}",
-        "/v1.0/{apiVersion}/communications/callRecords/{callChainId}",
-        "/v1.0/communications/callRecords/getDirectRoutingCalls(fromDateTime=2019-11-01,toDateTime=2019-12-01)",
+        "/v1.0/teams",
+        "/v1.0/teams/893075dd-2487-4122-925f-022c42e20265/allChannels",
+        "/v1.0/users/8b081ef6-4792-4def-b2c9-c363a1bf41d5/chats",
+        "/v1.0/teams/893075dd-2487-4122-925f-022c42e20265/channels/19:4a95f7d8db4c4e7fae857bcebe0623e6@thread.tacv2/messages",
+        "/v1.0/teams/893075dd-2487-4122-925f-022c42e20265/channels/19:4a95f7d8db4c4e7fae857bcebe0623e6@thread.tacv2/messages/delta",
+        "/v1.0/chats/19:2da4c29f6d7041eca70b638b43d45437@thread.v2/messages",
+        "/v1.0/communications/calls/2f1a1100-b174-40a0-aba7-0b405e01ed92",
+        "/v1.0/communications/callRecords/e523d2ed-2966-4b6b-925b-754a88034cc5",
+        "/v1.0/communications/callRecords/getDirectRoutingCalls(fromDateTime=${urlencode(timeadd(timestamp(), "-90d"))},toDateTime=${urlencode(timestamp())})",
+        "/v1.0/communications/callRecords/getDirectRoutingCalls(fromDateTime=${urlencode(timeadd(timestamp(), "-90d"))},toDateTime=${urlencode(timestamp())})",
         "/v1.0/communications/callRecords/getPstnCalls(fromDateTime=2019-11-01,toDateTime=2019-12-01)",
-        "/v1.0/{apiVersion}/users/{userId}/onlineMeetings"
+        "/v1.0/users/",
+        "/v1.0/users/8b081ef6-4792-4def-b2c9-c363a1bf41d5/onlineMeetings"
       ]
       external_token_todo : <<EOT
 To enable the connector, you need to allow permissions on the application created for reading OnlineMeetings. You will need Powershell for this.
