@@ -28,28 +28,31 @@ import java.util.Map;
 public class MultiTypeBulkDataRules implements BulkDataRules {
 
     /**
-     * map of file path templates to rules for matching files, where "path template" has the same
-     * interpretation as in OpenAPI 3.0.0
+     * map of file path (really object key) templates to rules for matching files (object),
+     * where "path template" has the same interpretation as in OpenAPI 3.0.0, but matching
+     * against the object key (file path) rather than the URL path
      *
-     * in particular, leading `/` is not optional; so in practice, all will begin with `/`, to
-     * conform with OpenAPI 3.0.0 semantics, which always explicitly include it.
+     * as S3/GCS/etc implement file system abstraction only as a convention, object key for matching
+     * will not begin with `/`
      *
      * see: https://swagger.io/specification/ , section "Path Templating"
      *
      * @see PathTemplateUtils for more details on interpretation
      *
      *
-     * eg, /export/{week}/data_{shard}.csv -> ColumnarRules
+     * eg, export/{week}/data_{shard}.csv -> ColumnarRules
      *
-     * if provided, has the effect of pathRegex = "^/export/[^/]+/data_[^/]+\.csv$"
+     * if provided, has the effect of pathRegex = "^export/[^/]+/data_[^/]+\.csv$"
      *
      * files that trigger proxy instance but match NONE of the templates will not be processed
      *
-     * NOTE:
+     * NOTE: INPUT_BASE_PATH, if any, is trimmed from the beginning of the path before matching
+     * see {@link BulkModeConfigProperty#INPUT_BASE_PATH}
      *
      * q: what if file matches multiple path templates? pick lexicographically first?
      *
      * q: flatten somehow, so no indentation at the top-level?
+     *
      */
     Map<String, BulkDataRules> fileRules;
 

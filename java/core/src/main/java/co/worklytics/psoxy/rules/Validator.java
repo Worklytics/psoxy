@@ -61,16 +61,6 @@ public class Validator {
     public void validate(@NonNull MultiTypeBulkDataRules rules) {
         Preconditions.checkArgument(rules.getFileRules().size() > 0, "Must have at least one file rule");
 
-        List<String> templatesNotPrefixedWithSlash = rules.getFileRules().keySet().stream()
-            .filter(k -> !k.startsWith("/"))
-            .collect(Collectors.toList());
-
-        //not invalid per se, but likely to be a mistake
-        if (!templatesNotPrefixedWithSlash.isEmpty()) {
-            log.warning("The following path templates do not start with '/', so likely to be wrong:\n " + templatesNotPrefixedWithSlash.stream().collect(Collectors.joining("\n")));
-        }
-
-
         rules.getFileRules().values().forEach(this::validate);
     }
 

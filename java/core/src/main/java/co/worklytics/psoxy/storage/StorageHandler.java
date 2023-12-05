@@ -9,6 +9,7 @@ import com.avaulta.gateway.rules.PathTemplateUtils;
 import com.avaulta.gateway.rules.PathTemplateUtils.Match;
 import com.avaulta.gateway.rules.RuleSet;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import lombok.*;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
@@ -122,6 +123,15 @@ public class StorageHandler {
 
 
 
+    /**
+     *
+     * @param reader from source, may be null if not yet known
+     * @param writer to destination, may be null if not yet known
+     * @param sourceBucketName bucket name
+     * @param sourceObjectPath a path (object key) within the bucket; no leading `/` expected
+     * @param transform
+     * @return
+     */
     public StorageEventRequest buildRequest(Reader reader,
                                             Writer writer,
                                             String sourceBucketName,
@@ -129,8 +139,7 @@ public class StorageHandler {
                                             ObjectTransform transform) {
 
         String sourceObjectPathWithinBase =
-            config.getConfigPropertyAsOptional(BulkModeConfigProperty.INPUT_BASE_PATH)
-                .filter(inputBasePath -> StringUtils.isNotBlank(inputBasePath))
+            inputBasePath()
                 .map(inputBasePath -> sourceObjectPath.replace(inputBasePath, ""))
                 .orElse(sourceObjectPath);
 
@@ -168,7 +177,7 @@ public class StorageHandler {
         return Map.of(
             BulkMetaData.INSTANCE_ID.getMetaDataKey(), hostEnvironment.getInstanceId(),
             BulkMetaData.VERSION.getMetaDataKey(), config.getConfigPropertyAsOptional(ProxyConfigProperty.BUNDLE_FILENAME).orElse("unknown"),
-            BulkMetaData.ORIGINAL_OBJECT_KEY.getMetaDataKey(), sourceBucket + "/" + sourceKey
+            BulkMetaData.ORIGINAL_OBJECT_KEY.getMetaDataKey(), sourceBucket + sourceKey
         );
     }
 
@@ -223,7 +232,7 @@ public class StorageHandler {
     ObjectTransform buildDefaultTransform() {
         return ObjectTransform.builder()
                 .destinationBucketName(config.getConfigPropertyOrError(BulkModeConfigProperty.OUTPUT_BUCKET))
-                .pathWithinBucket(config.getConfigPropertyAsOptional(BulkModeConfigProperty.OUTPUT_BASE_PATH).orElse(""))
+                .pathWithinBucket(outputBasePath().orElse(""))
                 .rules(defaultRuleSet)
                 .build();
     }
@@ -266,5 +275,22 @@ public class StorageHandler {
         return Optional.ofNullable(applicableRules);
     }
 
+
+    /**
+     * helper to parse inputBasePath from config, if present;
+     * left here to support potential logic change around presumption of leading `/`
+     * @return
+     */
+    Optional<String> inputBasePath() {
+        return config.getConfigPropertyAsOptional(BulkModeConfigProperty.INPUT_BASE_PATH)
+            .filter(inputBasePath -> StringUtils.isNotBlank(inputBasePath));
+            //.map(inputBasePath -> inputBasePath.startsWith("/") ? inputBasePath : "/" + inputBasePath);
+    }
+
+    Optional<String> outputBasePath() {
+        return config.getConfigPropertyAsOptional(BulkModeConfigProperty.OUTPUT_BASE_PATH)
+            .filter(outputBasePath -> StringUtils.isNotBlank(outputBasePath));
+            //.map(outputBasePath -> outputBasePath.startsWith("/") ? outputBasePath : "/" + outputBasePath);
+    }
 
 }
