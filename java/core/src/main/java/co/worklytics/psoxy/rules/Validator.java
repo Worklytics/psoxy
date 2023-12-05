@@ -17,8 +17,10 @@ import org.apache.commons.lang3.StringUtils;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.Collections;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 
@@ -59,6 +61,16 @@ public class Validator {
     public void validate(@NonNull MultiTypeBulkDataRules rules) {
         Preconditions.checkArgument(rules.getFileRules().size() > 0, "Must have at least one file rule");
 
+        List<String> templatesNotPrefixedWithSlash = rules.getFileRules().keySet().stream()
+            .filter(k -> !k.startsWith("/"))
+            .collect(Collectors.toList());
+
+        //not invalid per se, but likely to be a mistake
+        if (!templatesNotPrefixedWithSlash.isEmpty()) {
+            log.warning("The following path templates do not start with '/', so likely to be wrong:\n " + templatesNotPrefixedWithSlash.stream().collect(Collectors.joining("\n")));
+        }
+
+
         rules.getFileRules().values().forEach(this::validate);
     }
 
@@ -75,6 +87,10 @@ public class Validator {
 
             //TODO: validate parameter names are ALL valid java capturing group identifiers
             // eg start w letter, contain only alphanumeric
+        } else {
+            if (!endpoint.getPathTemplate().startsWith("/")) {
+                log.warning("Path template " + endpoint.getPathTemplate() + " does not start with '/'; this is likely to be a mistake");
+            }
         }
 
         endpoint.getTransforms().forEach(this::validate);

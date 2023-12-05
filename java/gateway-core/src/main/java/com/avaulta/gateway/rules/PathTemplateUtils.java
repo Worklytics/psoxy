@@ -32,8 +32,8 @@ public class PathTemplateUtils {
     public String asRegex(String pathTemplate) {
         //NOTE: java capturing groups names limited to A-Z, a-z and 0-9, and must start with a letter
 
-        return "^" + pathTemplate
-                .replaceAll(SPECIAL_CHAR_CLASS, "\\\\$0")
+        return "^"
+            + pathTemplate.replaceAll(SPECIAL_CHAR_CLASS, "\\\\$0")
                 // turn `/{foo}/` into `/(?<foo>[^/]+)/`
                 .replaceAll(REGEX_ALPHANUMERIC_PATH_PARAM, PARAM_VALUE_CAPTURING_PATTERN)
             + "$";

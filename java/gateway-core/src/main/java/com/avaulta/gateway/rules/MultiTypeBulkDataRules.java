@@ -30,6 +30,10 @@ public class MultiTypeBulkDataRules implements BulkDataRules {
     /**
      * map of file path templates to rules for matching files, where "path template" has the same
      * interpretation as in OpenAPI 3.0.0
+     *
+     * in particular, leading `/` is not optional; so in practice, all will begin with `/`, to
+     * conform with OpenAPI 3.0.0 semantics, which always explicitly include it.
+     *
      * see: https://swagger.io/specification/ , section "Path Templating"
      *
      * @see PathTemplateUtils for more details on interpretation
@@ -41,8 +45,7 @@ public class MultiTypeBulkDataRules implements BulkDataRules {
      *
      * files that trigger proxy instance but match NONE of the templates will not be processed
      *
-     *
-     * q: support multiple jumps?
+     * NOTE:
      *
      * q: what if file matches multiple path templates? pick lexicographically first?
      *
