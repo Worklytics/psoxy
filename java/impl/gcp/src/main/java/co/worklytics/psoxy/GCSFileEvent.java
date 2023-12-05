@@ -65,29 +65,33 @@ public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
 
         StorageEventRequest request = storageHandler.buildRequest(null, null, importBucket, sourceName, transform);
 
-        BlobInfo destBlobInfo = BlobInfo.newBuilder(BlobId.of(request.getDestinationBucketName(), request.getDestinationObjectPath()))
-            .setContentType(sourceBlobInfo.getContentType())
-            .setMetadata(storageHandler.buildObjectMetadata(importBucket, sourceName, transform))
-            .build();
+        if (storageHandler.getApplicableRules(transform.getRules(), request.getSourceObjectPath()).isPresent()) {
+            BlobInfo destBlobInfo = BlobInfo.newBuilder(BlobId.of(request.getDestinationBucketName(), request.getDestinationObjectPath()))
+                .setContentType(sourceBlobInfo.getContentType())
+                .setMetadata(storageHandler.buildObjectMetadata(importBucket, sourceName, transform))
+                .build();
 
-        try (ReadChannel readChannel = storage.reader(sourceBlobId);
-             BOMInputStream is = new BOMInputStream(Channels.newInputStream(readChannel));
-             InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
-             Reader reader = new BufferedReader(isr);
-             OutputStream outputStream = Channels.newOutputStream(storage.writer(destBlobInfo));
-             OutputStreamWriter streamWriter = new OutputStreamWriter(outputStream);
-             Writer writer= new BufferedWriter(streamWriter)) {
+            try (ReadChannel readChannel = storage.reader(sourceBlobId);
+                 BOMInputStream is = new BOMInputStream(Channels.newInputStream(readChannel));
+                 InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
+                 Reader reader = new BufferedReader(isr);
+                 OutputStream outputStream = Channels.newOutputStream(storage.writer(destBlobInfo));
+                 OutputStreamWriter streamWriter = new OutputStreamWriter(outputStream);
+                 Writer writer = new BufferedWriter(streamWriter)) {
 
-            request = request.withSourceReader(reader)
+                request = request.withSourceReader(reader)
                     .withDestinationWriter(writer);
 
-            StorageEventResponse storageEventResponse = storageHandler.handle(request, transform.getRules());
+                StorageEventResponse storageEventResponse = storageHandler.handle(request, transform.getRules());
 
-            log.info("Writing to: " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationObjectPath());
+                log.info("Writing to: " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationObjectPath());
 
-            writer.flush();
-            log.info("Successfully pseudonymized " + importBucket + "/"
-                  + sourceName + " and uploaded to " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationObjectPath());
+                writer.flush();
+                log.info("Successfully pseudonymized " + importBucket + "/"
+                    + sourceName + " and uploaded to " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationObjectPath());
+            }
+        } else {
+            log.info("Skipping " + importBucket + "/" + request.getSourceObjectPath() + " because no rules apply");
         }
     }
 
