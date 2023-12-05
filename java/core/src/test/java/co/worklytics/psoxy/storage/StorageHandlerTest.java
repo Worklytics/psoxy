@@ -231,8 +231,6 @@ class StorageHandlerTest {
             .compressOutput(compress)
             .build();
 
-
-
         handler.process(request, handler.buildDefaultTransform(), reader, outputStream);
         writer.close();
 

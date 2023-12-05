@@ -9,7 +9,6 @@ import com.avaulta.gateway.rules.PathTemplateUtils;
 import com.avaulta.gateway.rules.PathTemplateUtils.Match;
 import com.avaulta.gateway.rules.RuleSet;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
 import lombok.*;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
@@ -30,6 +29,9 @@ import java.util.Optional;
 @Singleton
 @NoArgsConstructor(onConstructor_ = @Inject)
 public class StorageHandler {
+
+    // as writing to remote storage, err on size of larger buffer
+    public static final int BUFFER_SIZE = 65_536; //64 KB
 
     @Inject
     ConfigService config;
@@ -82,9 +84,11 @@ public class StorageHandler {
                  StorageHandler.ObjectTransform transform,
                  InputStreamReader reader,
                  OutputStream os) {
-        try (OutputStream outputStream = request.getCompressOutput() ? new GZIPOutputStream(os) : os;
+        //q: use a much larger buffer here?
+        try (OutputStream outputStream = request.getCompressOutput() ? new GZIPOutputStream(os, BUFFER_SIZE) : os;
              OutputStreamWriter streamWriter = new OutputStreamWriter(outputStream);
-             Writer writer= new BufferedWriter(streamWriter)) {
+             Writer writer= new BufferedWriter(streamWriter, BUFFER_SIZE) //q: BufferedWriter needed if we're already buffering in GZIPOutputStream?
+        ) {
 
             request = request.withSourceReader(reader)
                 .withDestinationWriter(writer);
