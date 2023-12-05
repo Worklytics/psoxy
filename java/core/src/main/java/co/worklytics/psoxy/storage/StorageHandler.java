@@ -19,6 +19,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.zip.GZIPOutputStream;
 import java.util.Optional;
 
@@ -254,13 +255,14 @@ public class StorageHandler {
         BulkDataRules applicableRules = null;
         if (rules instanceof MultiTypeBulkDataRules) {
             Optional<Match<BulkDataRules>> match =
-                pathTemplateUtils.matchVerbose(((MultiTypeBulkDataRules) rules).getFileRules(), sourceObjectPath);
+                pathTemplateUtils.matchVerbose(effectiveTemplates(((MultiTypeBulkDataRules) rules).getFileRules()), sourceObjectPath);
 
             if (match.isPresent()) {
                 if (match.get().getMatch() instanceof MultiTypeBulkDataRules) {
+                    log.warning("Nested MultiTypeBulkDataRules are very 'alpha', so may change in future versions!!");
                     String subPath = match.get().getCapturedParams().get(match.get().getCapturedParams().size() - 1);
-                    BulkDataRules nextMatch = pathTemplateUtils.match(((MultiTypeBulkDataRules) match.get().getMatch()).getFileRules(), subPath)
-                        .orElse(null);
+                    Map<String, BulkDataRules> nextLevel = ((MultiTypeBulkDataRules) match.get().getMatch()).getFileRules();
+                    BulkDataRules nextMatch = pathTemplateUtils.match(effectiveTemplates(nextLevel), subPath).orElse(null);
                     if (nextMatch instanceof MultiTypeBulkDataRules) {
                         throw new RuntimeException("MultiTypeBulkDataRules cannot be nested more than 1 level");
                     }
@@ -279,6 +281,13 @@ public class StorageHandler {
         return Optional.ofNullable(applicableRules);
     }
 
+    Map<String, BulkDataRules> effectiveTemplates(Map<String, BulkDataRules> original) {
+        return original.entrySet().stream()
+            .collect(Collectors.toMap(
+                entry -> entry.getKey().startsWith("/") ? entry.getKey().substring(1) : entry.getKey(),
+                entry -> entry.getValue()
+            ));
+    }
 
     /**
      * helper to parse inputBasePath from config, if present;

@@ -32,15 +32,20 @@ public class MultiTypeBulkDataRules implements BulkDataRules {
      * where "path template" has the same interpretation as in OpenAPI 3.0.0, but matching
      * against the object key (file path) rather than the URL path
      *
+     * for readability/consistency with OpenAPI spec path templates, leading `/` is allowed but
+     * will be trimmed off if present. eg, `/export/{week}/data_{shard}.csv` and
+     * `export/{week}/data_{shard}.csv` will be considered equivalent path templates, both interpreted
+     * as regex `^export/[^/]+/data_[^/]+\.csv$`
+
      * as S3/GCS/etc implement file system abstraction only as a convention, object key for matching
-     * will not begin with `/`
+     * will not begin with `/`; hence why we trim this off
      *
      * see: https://swagger.io/specification/ , section "Path Templating"
      *
      * @see PathTemplateUtils for more details on interpretation
      *
      *
-     * eg, export/{week}/data_{shard}.csv -> ColumnarRules
+     * eg, /export/{week}/data_{shard}.csv -> ColumnarRules
      *
      * if provided, has the effect of pathRegex = "^export/[^/]+/data_[^/]+\.csv$"
      *
