@@ -6,6 +6,7 @@ import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestUtils;
 import com.avaulta.gateway.rules.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import dagger.Component;
 import dagger.Module;
@@ -21,12 +22,14 @@ import org.mockito.Mock;
 import org.mockito.MockMakers;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.LinkedHashMap;
 import java.util.Optional;
 import java.util.zip.GZIPOutputStream;
 
@@ -35,6 +38,11 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 class StorageHandlerTest {
+
+
+    @Named("ForYAML")
+    @Inject
+    ObjectMapper yamlMapper;
 
     @Singleton
     @Component(modules = {
@@ -239,7 +247,27 @@ class StorageHandlerTest {
         assertEquals(encodedExpected, output);
 
         assertEquals(compress,  outputStream.toByteArray().length < expected.length());
+    }
 
+    @SneakyThrows
+    @Test
+    public void applicableRules_multipleMatches() {
+        String yaml = "fileRules:\n" +
+            "  /directory/{fileName}.csv:\n" +
+            "    columnsToPseudonymize:\n" +
+            "      - foo\n" +
+            "  /directory/file.{extension:\n" +
+            "    columnsToPseudonymize:\n" +
+            "      - bar\n";
+
+        MultiTypeBulkDataRules multiTypeBulkDataRules = yamlMapper.readValue(yaml, MultiTypeBulkDataRules.class);
+
+
+        assertEquals("foo",
+            ((ColumnarRules) handler.getApplicableRules(multiTypeBulkDataRules, "directory/file.csv").get()).getColumnsToPseudonymize().get(0));
+
+        assertEquals("bar",
+            ((ColumnarRules) handler.getApplicableRules(multiTypeBulkDataRules, "directory/file.ndjson").get()).getColumnsToPseudonymize().get(0));
     }
 
     String base64gziped(String content) {

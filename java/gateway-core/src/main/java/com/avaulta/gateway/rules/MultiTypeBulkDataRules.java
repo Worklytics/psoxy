@@ -1,9 +1,11 @@
 package com.avaulta.gateway.rules;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.*;
 import lombok.extern.java.Log;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -13,9 +15,13 @@ import java.util.Map;
  * **BETA** - may change in future versions, in particular:
  *   - solve how ambiguous matches are resolved (eg, file paths that match to MULTIPLE rules - which
  *     are applied)
+ *       - current solution is to try to deserialize to LinkedHashMap, preserving order; and then
+ *         first match wins
  *   - solve hierarchical rules (eg, nested MultiTypeBulkDataRules, so root directory can be spec'd
  *     once rather than for every file type); current solution in practice will only match ONE
  *     level of nesting
+ *       - but tbh, not sure we should support this at all; even a single level of nesting may lead
+ *         to matching problems that are hard to debug
  *
  */
 @Builder(toBuilder = true)
@@ -59,6 +65,7 @@ public class MultiTypeBulkDataRules implements BulkDataRules {
      * q: flatten somehow, so no indentation at the top-level?
      *
      */
+    @JsonDeserialize(as = LinkedHashMap.class)
     Map<String, BulkDataRules> fileRules;
 
 }
