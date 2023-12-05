@@ -189,11 +189,9 @@ class StorageHandlerTest {
     }
 
     @CsvSource({
-        "/directory/file.csv,false", // path has a suffix parameter, so must have one
-        "/directory/file1.csv,true",
-        "directory/file.csv,false",
-        "directory/file1.csv,false",
-        "/directory/plain.csv,true",
+        "directory/file.csv,false", // path has a suffix parameter, so must have one
+        "directory/file1.csv,true",
+        "directory/plain.csv,true",
     })
     @ParameterizedTest
     public void applicableRules_multi(String path, boolean match) {
@@ -252,22 +250,43 @@ class StorageHandlerTest {
     @SneakyThrows
     @Test
     public void applicableRules_multipleMatches() {
+
+        //ambiguous rules
         String yaml = "fileRules:\n" +
             "  /directory/{fileName}.csv:\n" +
             "    columnsToPseudonymize:\n" +
             "      - foo\n" +
-            "  /directory/file.{extension:\n" +
+            "  /directory/file.{extension}:\n" +
             "    columnsToPseudonymize:\n" +
             "      - bar\n";
 
         MultiTypeBulkDataRules multiTypeBulkDataRules = yamlMapper.readValue(yaml, MultiTypeBulkDataRules.class);
 
 
+
+        // this case can match either, so expect to match first
         assertEquals("foo",
             ((ColumnarRules) handler.getApplicableRules(multiTypeBulkDataRules, "directory/file.csv").get()).getColumnsToPseudonymize().get(0));
 
+        // this case can can only match the second
         assertEquals("bar",
             ((ColumnarRules) handler.getApplicableRules(multiTypeBulkDataRules, "directory/file.ndjson").get()).getColumnsToPseudonymize().get(0));
+
+        String reversed = "fileRules:\n" +
+            "  /directory/file.{extension}:\n" +
+            "    columnsToPseudonymize:\n" +
+            "      - bar\n" +
+            "  /directory/{fileName}.csv:\n" +
+            "    columnsToPseudonymize:\n" +
+            "      - foo\n";
+
+        MultiTypeBulkDataRules reversedRules = yamlMapper.readValue(reversed, MultiTypeBulkDataRules.class);
+
+        assertEquals("bar",
+            ((ColumnarRules) handler.getApplicableRules(reversedRules, "directory/file.csv").get()).getColumnsToPseudonymize().get(0));
+
+        assertEquals("bar",
+            ((ColumnarRules) handler.getApplicableRules(reversedRules, "directory/file.ndjson").get()).getColumnsToPseudonymize().get(0));
     }
 
     String base64gziped(String content) {

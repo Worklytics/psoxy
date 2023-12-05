@@ -16,12 +16,9 @@ import org.apache.commons.lang3.StringUtils;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPOutputStream;
-import java.util.Optional;
 
 /**
  * solves a DaggerMissingBinding exception in tests
@@ -254,6 +251,10 @@ public class StorageHandler {
     public Optional<BulkDataRules> getApplicableRules(RuleSet rules, String sourceObjectPath) {
         BulkDataRules applicableRules = null;
         if (rules instanceof MultiTypeBulkDataRules) {
+            if (!(((MultiTypeBulkDataRules) rules).getFileRules() instanceof LinkedHashMap)) {
+                log.warning("File rules are not ordered; this may lead to unexpected behavior if templates are ambiguous");
+            }
+
             Optional<Match<BulkDataRules>> match =
                 pathTemplateUtils.matchVerbose(effectiveTemplates(((MultiTypeBulkDataRules) rules).getFileRules()), sourceObjectPath);
 
@@ -285,7 +286,9 @@ public class StorageHandler {
         return original.entrySet().stream()
             .collect(Collectors.toMap(
                 entry -> entry.getKey().startsWith("/") ? entry.getKey().substring(1) : entry.getKey(),
-                entry -> entry.getValue()
+                entry -> entry.getValue(),
+                (a, b) -> a,
+                LinkedHashMap::new //preserve order
             ));
     }
 
