@@ -1,12 +1,10 @@
 package co.worklytics.psoxy.storage;
 
 import co.worklytics.psoxy.PsoxyModule;
-import co.worklytics.psoxy.gateway.BulkModeConfigProperty;
-import co.worklytics.psoxy.gateway.ConfigService;
-import co.worklytics.psoxy.gateway.ProxyConfigProperty;
-import co.worklytics.psoxy.gateway.StorageEventRequest;
+import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.test.MockModules;
+import co.worklytics.test.TestUtils;
 import com.avaulta.gateway.rules.BulkDataRules;
 import com.avaulta.gateway.rules.ColumnarRules;
 import com.avaulta.gateway.rules.RecordRules;
@@ -15,6 +13,7 @@ import com.google.common.collect.ImmutableMap;
 import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -27,8 +26,8 @@ import org.mockito.MockMakers;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.io.*;
+import java.util.Arrays;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -53,7 +52,9 @@ class StorageHandlerTest {
         @Provides
         @Singleton
         static BulkDataRules bulkRules() {
-            return MockModules.provideMock(BulkDataRules.class);
+            return ColumnarRules.builder()
+                .columnsToPseudonymize(Arrays.asList("foo"))
+                .build();
         }
 
         @Provides
@@ -66,7 +67,8 @@ class StorageHandlerTest {
 
     InputStreamReader mockReader;
 
-    OutputStreamWriter mockWriter;
+    Writer writer;
+    ByteArrayOutputStream outputStream;
 
     @Inject
     ConfigService config;
@@ -75,8 +77,13 @@ class StorageHandlerTest {
     @Inject
     Provider<StorageHandler> handlerProvider;
 
+    @Inject
+    BulkDataRules rules;
+
     // actual class under test
     StorageHandler handler;
+
+
 
     @BeforeEach
     public void setup() {
@@ -92,7 +99,9 @@ class StorageHandlerTest {
         handler = handlerProvider.get();
 
         mockReader = MockModules.provideMock(InputStreamReader.class);
-        mockWriter = MockModules.provideMock(OutputStreamWriter.class);
+
+        outputStream = new ByteArrayOutputStream();
+        writer = new BufferedWriter(new OutputStreamWriter(outputStream));
 
     }
 
@@ -117,7 +126,7 @@ class StorageHandlerTest {
 
 
 
-        StorageEventRequest request = handler.buildRequest(mockReader, mockWriter, "bucket-in", "directory/file.csv", handler.buildDefaultTransform());
+        StorageEventRequest request = handler.buildRequest(mockReader, writer, "bucket-in", "directory/file.csv", handler.buildDefaultTransform());
 
         assertEquals("directory/file.csv", request.getDestinationObjectPath());
     }
@@ -146,7 +155,7 @@ class StorageHandlerTest {
             .rules(mock(BulkDataRules.class))
             .build();
 
-        StorageEventRequest request = handler.buildRequest(mockReader, mockWriter, "bucket-in", "directory/file.csv", tranform);
+        StorageEventRequest request = handler.buildRequest(mockReader, writer, "bucket-in", "directory/file.csv", tranform);
 
         assertEquals("bucket-in", request.getSourceBucketName());
         assertEquals("directory/file.csv", request.getSourceObjectPath());
@@ -169,5 +178,35 @@ class StorageHandlerTest {
         assertFalse(handler.hasBeenSanitized(null));
         assertFalse(handler.hasBeenSanitized(ImmutableMap.of()));
         assertTrue(handler.hasBeenSanitized(ImmutableMap.of(StorageHandler.BulkMetaData.INSTANCE_ID.getMetaDataKey(), "psoxy-test")));
+    }
+
+    @SneakyThrows
+    @Test
+    public void process() {
+        String data = "foo,bar\n1,2\n";
+
+        Reader reader = new InputStreamReader(new ByteArrayInputStream(data.getBytes()));
+
+        StorageEventRequest request = StorageEventRequest.builder()
+            .sourceBucketName("bucket")
+            .sourceObjectPath("directory/file.csv")
+            .sourceReader(reader)
+            .destinationBucketName("bucket")
+            .destinationObjectPath("directory/file.csv")
+            .destinationWriter(writer)
+            .compressOutput(true)
+            .build();
+
+
+
+        handler.process(request, handler.buildDefaultTransform(), mockReader, outputStream);
+
+        writer.flush();
+        writer.close();
+
+        String output = new String(outputStream.toByteArray());
+
+        assertEquals("foo,bar\n1,2\n", output);
+
     }
 }
