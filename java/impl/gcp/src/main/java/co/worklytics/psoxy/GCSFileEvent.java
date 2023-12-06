@@ -71,6 +71,8 @@ public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
         boolean inputIsCompressed = Optional.ofNullable(sourceBlobInfo.getContentEncoding())
                                             .map(s -> s.contains("gzip"))
                                             .orElse(false);
+
+        // for now, just do the same for both
         request = request.withCompressOutput(inputIsCompressed).withDecompressInput(inputIsCompressed);
 
         if (storageHandler.getApplicableRules(transform.getRules(), request.getSourceObjectPath()).isPresent()) {
