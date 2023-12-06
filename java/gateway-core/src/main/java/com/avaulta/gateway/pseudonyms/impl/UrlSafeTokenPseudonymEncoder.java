@@ -4,6 +4,8 @@ import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
 import com.avaulta.gateway.tokens.impl.Sha256DeterministicTokenizationStrategy;
+import lombok.Builder;
+import lombok.Value;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
@@ -104,6 +106,8 @@ public class UrlSafeTokenPseudonymEncoder implements PseudonymEncoder {
 
     @Override
     public boolean canBeDecoded(String possiblePseudonym) {
+        //NOTE: due to fixe to replace any '.' by '-' in hash, this can also decode legacy encoded
+        // pseudonyms produced by `LegacyPseudonymTokenEncoder`
         return possiblePseudonym != null &&
             (possiblePseudonym.startsWith(REVERSIBLE_PREFIX)
                 || possiblePseudonym.startsWith(TOKEN_PREFIX));
@@ -133,5 +137,4 @@ public class UrlSafeTokenPseudonymEncoder implements PseudonymEncoder {
             return Matcher.quoteReplacement(original);
         });
     }
-
 }
