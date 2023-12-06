@@ -12,7 +12,6 @@ import com.google.auth.Credentials;
 import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.OAuth2CredentialsWithRefresh;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.Uninterruptibles;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -396,7 +395,6 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         protected int getProactiveGracePeriodSeconds() {
             int maxSeconds = (int) MAX_PROACTIVE_TOKEN_REFRESH.toSeconds();
             int minSeconds = (int) MIN_PROACTIVE_TOKEN_REFRESH.toSeconds();
-            Preconditions.checkArgument(maxSeconds > minSeconds);
             return randomNumberGenerator.nextInt(maxSeconds - minSeconds) + minSeconds;
         }
 
