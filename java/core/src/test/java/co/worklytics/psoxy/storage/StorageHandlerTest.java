@@ -218,33 +218,59 @@ class StorageHandlerTest {
     )
     @SneakyThrows
     @ParameterizedTest
-    public void process_compressed(boolean compress) {
+    public void process_compressOutput(boolean compress) {
         String data = "foo,bar\r\n1,2\r\n1,2\n1,2\n";
         String expected = "foo,bar\r\n" +
             "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc\"\"}\",2\r\n" +
             "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc\"\"}\",2\r\n" +
             "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc\"\"}\",2\r\n";
 
-        InputStreamReader reader = new InputStreamReader(new ByteArrayInputStream(data.getBytes()));
+        InputStream is = new ByteArrayInputStream(data.getBytes());
 
         StorageEventRequest request = StorageEventRequest.builder()
             .sourceBucketName("bucket")
             .sourceObjectPath("directory/file.csv")
-            .sourceReader(reader)
             .destinationBucketName("bucket")
             .destinationObjectPath("directory/file.csv")
             .destinationWriter(writer)
             .compressOutput(compress)
             .build();
 
-        handler.process(request, handler.buildDefaultTransform(), reader, outputStream);
+        handler.process(request, handler.buildDefaultTransform(), is, outputStream);
         writer.close();
 
         String output = compress ? Base64.getEncoder().encodeToString(outputStream.toByteArray()) : new String(outputStream.toByteArray());
-        String encodedExpected = compress ? base64gziped(expected) : expected;
+        String encodedExpected = compress ? base64gzipped(expected) : expected;
         assertEquals(encodedExpected, output);
 
         assertEquals(compress,  outputStream.toByteArray().length < expected.length());
+    }
+
+    @SneakyThrows
+    @Test
+    public void process_compressInput() {
+        String data = "foo,bar\r\n1,2\r\n1,2\n1,2\n";
+        String expected = "foo,bar\r\n" +
+            "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc\"\"}\",2\r\n" +
+            "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc\"\"}\",2\r\n" +
+            "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc\"\"}\",2\r\n";
+
+        InputStream is = new ByteArrayInputStream(compress(data.getBytes(StandardCharsets.UTF_8)));
+
+        StorageEventRequest request = StorageEventRequest.builder()
+            .sourceBucketName("bucket")
+            .sourceObjectPath("directory/file.csv")
+            .destinationBucketName("bucket")
+            .destinationObjectPath("directory/file.csv")
+            .destinationWriter(writer)
+            .decompressInput(true)
+            .build();
+
+        handler.process(request, handler.buildDefaultTransform(), is, outputStream);
+        writer.close();
+
+        String output = new String(outputStream.toByteArray());
+        assertEquals(expected, output);
     }
 
     @SneakyThrows
@@ -289,22 +315,28 @@ class StorageHandlerTest {
             ((ColumnarRules) handler.getApplicableRules(reversedRules, "directory/file.ndjson").get()).getColumnsToPseudonymize().get(0));
     }
 
-    String base64gziped(String content) {
-        if (content == null || content.length() == 0) {
-            return "";
+    @SneakyThrows
+    byte[] compress(byte[] content) {
+        if (content == null || content.length == 0) {
+            return new byte[0];
         }
 
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
              GZIPOutputStream gzipOutputStream = new GZIPOutputStream(baos)) {
 
-            gzipOutputStream.write(content.getBytes(StandardCharsets.UTF_8));
+            gzipOutputStream.write(content);
             gzipOutputStream.close();
 
-            return Base64.getEncoder().encodeToString(baos.toByteArray());
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
+            return baos.toByteArray();
         }
+
+    }
+
+    String base64gzipped(String content) {
+        if (content == null || content.length() == 0) {
+            return "";
+        }
+
+        return Base64.getEncoder().encodeToString(compress(content.getBytes(StandardCharsets.UTF_8)));
     }
 }

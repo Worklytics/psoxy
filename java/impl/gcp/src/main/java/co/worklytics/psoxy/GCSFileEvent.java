@@ -17,6 +17,7 @@ import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 
 import org.apache.commons.io.input.BOMInputStream;
+import org.checkerframework.checker.units.qual.C;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -70,7 +71,7 @@ public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
         boolean inputIsCompressed = Optional.ofNullable(sourceBlobInfo.getContentEncoding())
                                             .map(s -> s.contains("gzip"))
                                             .orElse(false);
-        request = request.withCompressOutput(inputIsCompressed);
+        request = request.withCompressOutput(inputIsCompressed).withDecompressInput(inputIsCompressed);
 
         if (storageHandler.getApplicableRules(transform.getRules(), request.getSourceObjectPath()).isPresent()) {
             BlobInfo destBlobInfo = BlobInfo.newBuilder(BlobId.of(request.getDestinationBucketName(), request.getDestinationObjectPath()))
@@ -78,15 +79,11 @@ public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
                 .setMetadata(storageHandler.buildObjectMetadata(importBucket, sourceName, transform))
                 .build();
 
-            // rawInputStream to false here, so GCS will automagically decompress the source object
-            // before returning it to us.
-            // TODO: likely more efficient to do this ourselves, but this should work
-            try (ReadChannel readChannel = storage.reader(sourceBlobId, Storage.BlobSourceOption.shouldReturnRawInputStream(false));
-                 BOMInputStream is = new BOMInputStream(Channels.newInputStream(readChannel));
-                 InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
+            try (ReadChannel readChannel = storage.reader(sourceBlobId, Storage.BlobSourceOption.shouldReturnRawInputStream(true));
+                 InputStream is = Channels.newInputStream(readChannel);
                  WriteChannel writeChannel = storage.writer(destBlobInfo);
                  OutputStream os = Channels.newOutputStream(writeChannel)) {
-                storageHandler.process(request, transform, isr, os);
+                storageHandler.process(request, transform, is, os);
             }
         } else {
             log.info("Skipping " + importBucket + "/" + request.getSourceObjectPath() + " because no rules apply");

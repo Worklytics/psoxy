@@ -75,20 +75,17 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
         S3Object s3Object = s3Client.getObject(new GetObjectRequest(importBucket, sourceKey));
         byte[] processedData = null;
         try (InputStream objectData = s3Object.getObjectContent();
-             BOMInputStream is = new BOMInputStream(objectData);
-             InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
-             Reader reader = new BufferedReader(isr);
              ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
 
-            StorageEventRequest request = storageHandler.buildRequest(reader, null, importBucket, sourceKey, transform);
+            StorageEventRequest request = storageHandler.buildRequest(null, null, importBucket, sourceKey, transform);
 
             boolean isCompressed = Optional.ofNullable(s3Object.getObjectMetadata().getContentEncoding())
                 .map(s -> s.contains("gzip"))
                 .orElse(false);
 
-            request.withCompressOutput(isCompressed);
+            request = request.withCompressOutput(isCompressed).withDecompressInput(isCompressed);
 
-            storageEventResponse = storageHandler.process(request, transform, isr, outputStream);
+            storageEventResponse = storageHandler.process(request, transform, objectData, outputStream);
 
             processedData = outputStream.toByteArray();
             log.info(String.format("Successfully pseudonymized %s/%s to buffer", importBucket, sourceKey));

@@ -16,8 +16,11 @@ import org.apache.commons.lang3.StringUtils;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.*;
+import java.nio.Buffer;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 /**
@@ -80,15 +83,19 @@ public class StorageHandler {
     @SneakyThrows
     public StorageEventResponse process(StorageEventRequest request,
                  StorageHandler.ObjectTransform transform,
-                 InputStreamReader reader,
+                 InputStream is,
                  OutputStream os) {
         //q: use a much larger buffer here?
-        try (OutputStream outputStream = request.getCompressOutput() ? new GZIPOutputStream(os, BUFFER_SIZE) : os;
-             OutputStreamWriter streamWriter = new OutputStreamWriter(outputStream);
-             Writer writer= new BufferedWriter(streamWriter, BUFFER_SIZE) //q: BufferedWriter needed if we're already buffering in GZIPOutputStream?
+        try (
+            InputStream decompressedStream = request.getDecompressInput() ? new GZIPInputStream(is, BUFFER_SIZE) : is;
+            Reader reader = new BufferedReader(new InputStreamReader(decompressedStream, StandardCharsets.UTF_8), BUFFER_SIZE);
+            OutputStream outputStream = request.getCompressOutput() ? new GZIPOutputStream(os, BUFFER_SIZE) : os;
+            OutputStreamWriter streamWriter = new OutputStreamWriter(outputStream);
+            Writer writer= new BufferedWriter(streamWriter, BUFFER_SIZE) //q: BufferedWriter needed if we're already buffering in GZIPOutputStream?
         ) {
 
-            request = request.withSourceReader(reader)
+            request = request
+                .withSourceReader(reader)
                 .withDestinationWriter(writer);
 
             StorageEventResponse storageEventResponse = this.handle(request, transform.getRules());
