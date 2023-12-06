@@ -201,6 +201,7 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
     public void refreshProactiveThresholdTimeIsBounded() {
         OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl tokenRefreshHandler = new OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl();
         IntStream.range(0, 500).forEach( i -> {
+            tokenRefreshHandler.randomNumberGenerator = this.randomNumberGenerator;
             assertTrue(tokenRefreshHandler.getProactiveGracePeriodSeconds() >= tokenRefreshHandler.MIN_PROACTIVE_TOKEN_REFRESH.getSeconds());
             assertTrue(tokenRefreshHandler.getProactiveGracePeriodSeconds() <= tokenRefreshHandler.MAX_PROACTIVE_TOKEN_REFRESH.getSeconds());
         });
