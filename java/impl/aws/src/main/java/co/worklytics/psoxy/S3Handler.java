@@ -75,16 +75,18 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
         S3Object s3Object = s3Client.getObject(new GetObjectRequest(importBucket, sourceKey));
         byte[] processedData = null;
         try (InputStream objectData = s3Object.getObjectContent();
-             BOMInputStream is = new BOMInputStream(objectData);
-             InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
-             Reader reader = new BufferedReader(isr);
-             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-             OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
-             Writer writer = new BufferedWriter(outputStreamWriter)) {
+             ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
 
-            StorageEventRequest request = storageHandler.buildRequest(reader, writer, importBucket, sourceKey, transform);
+            StorageEventRequest request = storageHandler.buildRequest(null, null, importBucket, sourceKey, transform);
 
-            storageEventResponse = storageHandler.handle(request, transform.getRules());
+            boolean isCompressed = Optional.ofNullable(s3Object.getObjectMetadata().getContentEncoding())
+                .map(s -> s.contains("gzip"))
+                .orElse(false);
+
+            request = request.withDecompressInput(isCompressed).withCompressOutput(isCompressed);
+
+            storageEventResponse = storageHandler.process(request, transform, objectData, outputStream);
+
             processedData = outputStream.toByteArray();
             log.info(String.format("Successfully pseudonymized %s/%s to buffer", importBucket, sourceKey));
         }
@@ -94,6 +96,7 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
             //NOTE: not setting content length here causes S3 client to buffer the stream ... OK
             //meta.setContentLength(storageEventResponse.getBytes().length);
             meta.setContentType(s3Object.getObjectMetadata().getContentType());
+            meta.setContentEncoding(s3Object.getObjectMetadata().getContentEncoding());
             meta.setUserMetadata(storageHandler.buildObjectMetadata(importBucket, sourceKey, transform));
 
 

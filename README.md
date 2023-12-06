@@ -73,6 +73,8 @@ Worklytics authenticates your tenant with your cloud host via [Workload Identity
 This eliminates the need for any secrets to be exchanged between your organization and Worklytics,
 or the use any API keys/certificates for Worklytics which you would need to rotate.
 
+See also: [API Data Sanitization](docs/api-data-sanitization.md)
+
 ## Supported Data Sources
 As of March 2023, the following sources can be connected to Worklytics via psoxy.
 
@@ -165,6 +167,8 @@ identifiers in a target REST API. This is REQUIRED if you want SaaS accounts to 
 data for analysis (eg, Worklytics will match email set in HRIS with email set in SaaS tool's account
 so these must be pseudonymized using an equivalent algorithm and secret). See [`java/impl/cmd-line/`](/java/impl/cmd-line)
  for details.
+
+See also: [Bulk File Sanitization](docs/bulk-file-sanitization.md)
 
 ## Getting Started - Customers
 
