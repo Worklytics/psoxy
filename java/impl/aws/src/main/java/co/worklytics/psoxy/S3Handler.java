@@ -83,7 +83,7 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
                 .map(s -> s.contains("gzip"))
                 .orElse(false);
 
-            request = request.withCompressOutput(isCompressed).withDecompressInput(isCompressed);
+            request = request.withDecompressInput(isCompressed).withCompressOutput(isCompressed);
 
             storageEventResponse = storageHandler.process(request, transform, objectData, outputStream);
 
