@@ -173,6 +173,7 @@ resource "google_cloudfunctions_function" "function" {
   source_archive_object = var.deployment_bundle_object_name
   entry_point           = "co.worklytics.psoxy.GCSFileEvent"
   service_account_email = google_service_account.service_account.email
+  timeout               = 540 # 9 minutes, which is gen1 max allowed
   labels                = var.default_labels
 
   environment_variables = merge(tomap({
