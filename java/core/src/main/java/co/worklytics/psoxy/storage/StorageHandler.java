@@ -188,7 +188,7 @@ public class StorageHandler {
         return Map.of(
             BulkMetaData.INSTANCE_ID.getMetaDataKey(), hostEnvironment.getInstanceId(),
             BulkMetaData.VERSION.getMetaDataKey(), config.getConfigPropertyAsOptional(ProxyConfigProperty.BUNDLE_FILENAME).orElse("unknown"),
-            BulkMetaData.ORIGINAL_OBJECT_KEY.getMetaDataKey(), sourceBucket + sourceKey
+            BulkMetaData.ORIGINAL_OBJECT_KEY.getMetaDataKey(), sourceBucket + "/" + sourceKey
         );
     }
 

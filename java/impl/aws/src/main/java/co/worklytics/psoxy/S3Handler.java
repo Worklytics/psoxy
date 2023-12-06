@@ -72,14 +72,14 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
             return null;
         }
 
-        S3Object s3Object = s3Client.getObject(new GetObjectRequest(importBucket, sourceKey));
+        S3Object sourceObject = s3Client.getObject(new GetObjectRequest(importBucket, sourceKey));
         byte[] processedData = null;
-        try (InputStream objectData = s3Object.getObjectContent();
+        try (InputStream objectData = sourceObject.getObjectContent();
              ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
 
             StorageEventRequest request = storageHandler.buildRequest(null, null, importBucket, sourceKey, transform);
 
-            boolean isCompressed = Optional.ofNullable(s3Object.getObjectMetadata().getContentEncoding())
+            boolean isCompressed = Optional.ofNullable(sourceObject.getObjectMetadata().getContentEncoding())
                 .map(s -> s.contains("gzip"))
                 .orElse(false);
 
@@ -95,8 +95,14 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
             ObjectMetadata meta = new ObjectMetadata();
             //NOTE: not setting content length here causes S3 client to buffer the stream ... OK
             //meta.setContentLength(storageEventResponse.getBytes().length);
-            meta.setContentType(s3Object.getObjectMetadata().getContentType());
-            meta.setContentEncoding(s3Object.getObjectMetadata().getContentEncoding());
+
+            // set headers iff they're non-null on source object
+            Optional.ofNullable(sourceObject.getObjectMetadata().getContentType())
+                .ifPresent(meta::setContentType);
+            Optional.ofNullable(sourceObject.getObjectMetadata().getContentEncoding())
+                .ifPresent(meta::setContentEncoding);
+
+
             meta.setUserMetadata(storageHandler.buildObjectMetadata(importBucket, sourceKey, transform));
 
 
