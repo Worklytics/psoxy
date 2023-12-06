@@ -107,7 +107,7 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
             return (currentValue, configuration) -> {
                 if (currentValue == null) {
                     return null;
-                } else if (currentValue instanceof String) {
+                } else if (currentValue instanceof String || currentValue instanceof Long || currentValue instanceof Integer) {
                     PseudonymizedIdentity pseudonymizedIdentity = pseudonymizer.pseudonymize(currentValue);
 
                     if (pseudonymizer.getOptions().getPseudonymImplementation() != PseudonymImplementation.DEFAULT) {
@@ -118,7 +118,7 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
                     return encoder.encode(pseudonymizedIdentity.asPseudonym());
                     //.firstNonNull(pseudonymizedIdentity.getReversible(), pseudonymizedIdentity.getHash());
                 } else {
-                    throw new IllegalArgumentException("Pseudonymize transform only supports String values");
+                    throw new IllegalArgumentException("Pseudonymize transform only supports string/integer values");
                 }
             };
         } else {
