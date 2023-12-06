@@ -16,7 +16,6 @@ import org.apache.commons.lang3.StringUtils;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.*;
-import java.nio.Buffer;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -32,7 +31,7 @@ import java.util.zip.GZIPOutputStream;
 public class StorageHandler {
 
     // as writing to remote storage, err on size of larger buffer
-    public static final int BUFFER_SIZE = 65_536; //64 KB
+    private static final int DEFAULT_BUFFER_SIZE = 65_536; //64 KB
 
     @Inject
     ConfigService config;
@@ -79,7 +78,7 @@ public class StorageHandler {
     }
 
     int getBufferSize() {
-        return config.getConfigPropertyAsOptional(BulkModeConfigProperty.BUFFER_SIZE).map(Integer::parseInt).orElse(BUFFER_SIZE);
+        return config.getConfigPropertyAsOptional(BulkModeConfigProperty.BUFFER_SIZE).map(Integer::parseInt).orElse(DEFAULT_BUFFER_SIZE);
     }
 
 
