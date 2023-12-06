@@ -28,6 +28,17 @@ public enum BulkModeConfigProperty implements ConfigService.ConfigProperty {
      * any {@link #INPUT_BASE_PATH} segment
      */
     OUTPUT_BASE_PATH,
+
+
+    /**
+     * **alpha feature** for testing if varying this improves performance at all; may be removed if
+     * impact is negligible
+     *
+     * size of buffer used to read/write data from/to cloud storage (GCS, S3)
+     *
+     * default: 65536 (64KB)
+     */
+    BUFFER_SIZE,
     ;
 
 }

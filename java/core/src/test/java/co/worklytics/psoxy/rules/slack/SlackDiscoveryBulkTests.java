@@ -115,9 +115,9 @@ public class SlackDiscoveryBulkTests {
             .sourceBucketName("bucket")
             .sourceObjectPath(sourceObjectPath)
             .sourceReader(reader)
+            .destinationWriter(writer)
             .destinationBucketName("bucket")
             .destinationObjectPath(sourceObjectPath)
-            .destinationWriter(writer)
             .build();
     }
 
@@ -133,12 +133,11 @@ public class SlackDiscoveryBulkTests {
     @ParameterizedTest
     public void files(String rulesPath, String file) {
         setUp(rulesPath);
-        final String objectPath = "/export-20231128/" + file + ".gz";
+        final String objectPath = "export-20231128/" + file + ".gz";
         final String pathToOriginal = "sources/slack/example-bulk/original/" + file;
         final String pathToSanitized = "sources/slack/example-bulk/sanitized/" + file;
         storageHandler.handle(request(objectPath, pathToOriginal), rules);
 
-        writer.flush();
         writer.close();
 
         String output = new String(outputStream.toByteArray());

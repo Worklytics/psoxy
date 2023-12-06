@@ -43,7 +43,7 @@ public class UrlSafeTokenPseudonymEncoder implements PseudonymEncoder {
     public String encode(Pseudonym pseudonym) {
         String encoded;
         if (pseudonym.getReversible() == null) {
-            encoded = TOKEN_PREFIX + encoder.encodeToString(pseudonym.getHash());;
+            encoded = TOKEN_PREFIX + encoder.encodeToString(pseudonym.getHash());
         } else {
             if (!Arrays.equals(pseudonym.getHash(), 0, pseudonym.getHash().length, pseudonym.getReversible(), 0, pseudonym.getHash().length)) {
                 throw new IllegalArgumentException("hash must be first part of reversible pseudonym");

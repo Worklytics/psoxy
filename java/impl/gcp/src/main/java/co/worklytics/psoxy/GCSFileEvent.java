@@ -4,17 +4,20 @@ import co.worklytics.psoxy.gateway.StorageEventRequest;
 import co.worklytics.psoxy.gateway.StorageEventResponse;
 import co.worklytics.psoxy.storage.StorageHandler;
 import com.google.cloud.ReadChannel;
+import com.google.cloud.WriteChannel;
 import com.google.cloud.functions.BackgroundFunction;
 import com.google.cloud.functions.Context;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
+import com.google.common.annotations.VisibleForTesting;
 import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 
 import org.apache.commons.io.input.BOMInputStream;
+import org.checkerframework.checker.units.qual.C;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -22,6 +25,8 @@ import java.io.*;
 import java.nio.channels.Channels;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Optional;
+import java.util.zip.GZIPOutputStream;
 
 @Singleton
 @Log
@@ -46,7 +51,6 @@ public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
         }
     }
 
-
     @SneakyThrows
     void process(String importBucket, String sourceName, StorageHandler.ObjectTransform transform) {
 
@@ -54,7 +58,6 @@ public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
         BlobId sourceBlobId = BlobId.of(importBucket, sourceName);
 
         BlobInfo sourceBlobInfo = storage.get(sourceBlobId);
-
 
         if (storageHandler.hasBeenSanitized(sourceBlobInfo.getMetadata())) {
             //possible if proxy directly (or indirectly via some other pipeline) is writing back
@@ -65,29 +68,27 @@ public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
 
         StorageEventRequest request = storageHandler.buildRequest(null, null, importBucket, sourceName, transform);
 
-        BlobInfo destBlobInfo = BlobInfo.newBuilder(BlobId.of(request.getDestinationBucketName(), request.getDestinationObjectPath()))
-            .setContentType(sourceBlobInfo.getContentType())
-            .setMetadata(storageHandler.buildObjectMetadata(importBucket, sourceName, transform))
-            .build();
+        boolean inputIsCompressed = Optional.ofNullable(sourceBlobInfo.getContentEncoding())
+                                            .map(s -> s.contains("gzip"))
+                                            .orElse(false);
 
-        try (ReadChannel readChannel = storage.reader(sourceBlobId);
-             BOMInputStream is = new BOMInputStream(Channels.newInputStream(readChannel));
-             InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
-             Reader reader = new BufferedReader(isr);
-             OutputStream outputStream = Channels.newOutputStream(storage.writer(destBlobInfo));
-             OutputStreamWriter streamWriter = new OutputStreamWriter(outputStream);
-             Writer writer= new BufferedWriter(streamWriter)) {
+        // for now, just do the same for both
+        request = request.withCompressOutput(inputIsCompressed).withDecompressInput(inputIsCompressed);
 
-            request = request.withSourceReader(reader)
-                    .withDestinationWriter(writer);
+        if (storageHandler.getApplicableRules(transform.getRules(), request.getSourceObjectPath()).isPresent()) {
+            BlobInfo destBlobInfo = BlobInfo.newBuilder(BlobId.of(request.getDestinationBucketName(), request.getDestinationObjectPath()))
+                .setContentType(sourceBlobInfo.getContentType())
+                .setMetadata(storageHandler.buildObjectMetadata(importBucket, sourceName, transform))
+                .build();
 
-            StorageEventResponse storageEventResponse = storageHandler.handle(request, transform.getRules());
-
-            log.info("Writing to: " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationObjectPath());
-
-            writer.flush();
-            log.info("Successfully pseudonymized " + importBucket + "/"
-                  + sourceName + " and uploaded to " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationObjectPath());
+            try (ReadChannel readChannel = storage.reader(sourceBlobId, Storage.BlobSourceOption.shouldReturnRawInputStream(true));
+                 InputStream is = Channels.newInputStream(readChannel);
+                 WriteChannel writeChannel = storage.writer(destBlobInfo);
+                 OutputStream os = Channels.newOutputStream(writeChannel)) {
+                storageHandler.process(request, transform, is, os);
+            }
+        } else {
+            log.info("Skipping " + importBucket + "/" + request.getSourceObjectPath() + " because no rules apply");
         }
     }
 

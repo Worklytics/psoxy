@@ -303,7 +303,7 @@ resource "google_secret_manager_secret_iam_member" "additional_transforms_viewer
 
   secret_id = google_secret_manager_secret.additional_transforms[each.key].id
   member    = "serviceAccount:${module.bulk_connector[each.key].instance_sa_email}"
-  role      = "roles/secretmanager.secretViewer"
+  role      = "roles/secretmanager.viewer"
 }
 
 # needs to access payload of the versions

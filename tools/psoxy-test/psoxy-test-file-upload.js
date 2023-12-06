@@ -1,7 +1,7 @@
 import { constants as httpCodes } from 'http2';
 import { execFileSync } from 'child_process';
 import { fileURLToPath } from 'url';
-import { saveToFile, parseBucketOption } from './lib/utils.js';
+import { saveToFile, parseBucketOption, addFilenameSuffix } from './lib/utils.js';
 import aws from './lib/aws.js';
 import chalk from 'chalk';
 import fs from 'fs';
@@ -12,7 +12,8 @@ import _ from 'lodash';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-const FILE_EXTENSION = '.csv';
+const TIMESTAMP = Date.now();
+
 /**
  * AWS upload/download
  *
@@ -21,10 +22,10 @@ const FILE_EXTENSION = '.csv';
  * @returns {string} - downloaded file contents
  */
 async function testAWS(options, logger) {
-  const filename = path.basename(options.file, FILE_EXTENSION);
-  // Add timestamp to filename to make sure download process doesn't get
-  // the wrong file
-  const filenameWithTimestamp = `${filename}-${Date.now()}${FILE_EXTENSION}`;
+  const parsedPath = path.parse(options.file);
+
+  // Add timestamp to filename to make sure download process doesn't get the wrong file
+  const filenameWithTimestamp = addFilenameSuffix(parsedPath.name, TIMESTAMP);
 
   if (options.role) {
     logger.verbose(`Assuming role ${options.role}`);
@@ -37,7 +38,7 @@ async function testAWS(options, logger) {
   const inputBucket = parsedBucketInputOption.bucket;
   const inputPath = parsedBucketInputOption.path;
   const inputKey = inputPath + filenameWithTimestamp;
-  logger.info(`Uploading "${inputPath + filename}" to input bucket: ${inputBucket}`);
+  logger.info(`Uploading "${inputPath + parsedPath.base}" as "${inputKey}" to input bucket: ${inputBucket}`);
 
   const uploadResult = await aws.upload(inputBucket, inputKey, options.file, {
       role: options.role,
@@ -91,15 +92,16 @@ async function testAWS(options, logger) {
  * @returns {string} - downloaded file contents
  */
 async function testGCP(options, logger) {
-  const filename = path.basename(options.file, FILE_EXTENSION);
-  const filenameWithTimestamp = `${filename}-${Date.now()}${FILE_EXTENSION}`;
+  const parsedPath = path.parse(options.file);
+  const filenameWithTimestamp = addFilenameSuffix(parsedPath.base, TIMESTAMP);
+
   const client = gcp.createStorageClient();
 
   const parsedBucketInputOption = parseBucketOption(options.input);
   const inputBucket = parsedBucketInputOption.bucket;
   const inputPath = parsedBucketInputOption.path;
   const inputKey = inputPath + filenameWithTimestamp;
-  logger.info(`Uploading "${filename}" to input bucket: ${inputBucket}`);
+  logger.info(`Uploading "${inputPath + parsedPath.base}" as "${inputKey}" to input bucket: ${inputBucket}`);
   const [, uploadResult] = await gcp.upload(inputBucket, options.file,
     client, inputKey);
 
@@ -159,7 +161,8 @@ export default async function (options = {}) {
     downloadResult = await testGCP(options, logger);
   }
 
-  const outputFilename = `${path.parse(options.file).name}-sanitized${path.extname(options.file)}`;
+  const parsedPath = path.parse(options.file);
+  const outputFilename = addFilenameSuffix(parsedPath.base, 'sanitized');
   // Always saving it to be able to easily "diff" input and output/sanitized;
   // delete the sanitized one later
   await saveToFile(__dirname, outputFilename, downloadResult);

@@ -10,22 +10,28 @@ import com.avaulta.gateway.rules.PathTemplateUtils.Match;
 import com.avaulta.gateway.rules.RuleSet;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.*;
+import lombok.extern.java.Log;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.io.Reader;
-import java.io.Serializable;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * solves a DaggerMissingBinding exception in tests
  */
+@Log
 @Singleton
 @NoArgsConstructor(onConstructor_ = @Inject)
 public class StorageHandler {
+
+    // as writing to remote storage, err on size of larger buffer
+    private static final int DEFAULT_BUFFER_SIZE = 65_536; //64 KB
 
     @Inject
     ConfigService config;
@@ -71,12 +77,51 @@ public class StorageHandler {
 
     }
 
+    int getBufferSize() {
+        return config.getConfigPropertyAsOptional(BulkModeConfigProperty.BUFFER_SIZE).map(Integer::parseInt).orElse(DEFAULT_BUFFER_SIZE);
+    }
+
+
+
+    @SneakyThrows
+    public StorageEventResponse process(StorageEventRequest request,
+                 StorageHandler.ObjectTransform transform,
+                 InputStream is,
+                 OutputStream os) {
+        int bufferSize = getBufferSize();
+        try (
+            InputStream decompressedStream = request.getDecompressInput() ? new GZIPInputStream(is, bufferSize) : is;
+            Reader reader = new BufferedReader(new InputStreamReader(decompressedStream, StandardCharsets.UTF_8), bufferSize);
+            OutputStream outputStream = request.getCompressOutput() ? new GZIPOutputStream(os, bufferSize) : os;
+            OutputStreamWriter writer = new OutputStreamWriter(outputStream)
+        ) {
+
+            request = request
+                .withSourceReader(reader)
+                .withDestinationWriter(writer);
+
+            StorageEventResponse storageEventResponse = this.handle(request, transform.getRules());
+
+            log.info("Writing to: " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationObjectPath());
+
+            log.info("Successfully pseudonymized " + request.getSourceBucketName() + "/"
+                + request.getSourceObjectPath() + " and uploaded to " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationObjectPath());
+            return storageEventResponse;
+        }
+
+    }
+
+
     @SneakyThrows
     public StorageEventResponse handle(StorageEventRequest request, RuleSet rules) {
 
-        BulkDataRules applicableRules = getApplicableRules(rules, request.getSourceObjectPath());
+        Optional<BulkDataRules> applicableRules = getApplicableRules(rules, request.getSourceObjectPath());
 
-        BulkDataSanitizer fileHandler = bulkDataSanitizerFactory.get(applicableRules);
+        if (applicableRules.isEmpty()) {
+            throw new IllegalArgumentException("No applicable rules found for " + request.getSourceObjectPath());
+        }
+
+        BulkDataSanitizer fileHandler = bulkDataSanitizerFactory.get(applicableRules.get());
 
         fileHandler.sanitize(request.getSourceReader(), request.getDestinationWriter(), pseudonymizer);
 
@@ -88,6 +133,16 @@ public class StorageHandler {
 
 
 
+
+    /**
+     *
+     * @param reader from source, may be null if not yet known
+     * @param writer to destination, may be null if not yet known
+     * @param sourceBucketName bucket name
+     * @param sourceObjectPath a path (object key) within the bucket; no leading `/` expected
+     * @param transform
+     * @return
+     */
     public StorageEventRequest buildRequest(Reader reader,
                                             Writer writer,
                                             String sourceBucketName,
@@ -95,7 +150,7 @@ public class StorageHandler {
                                             ObjectTransform transform) {
 
         String sourceObjectPathWithinBase =
-            config.getConfigPropertyAsOptional(BulkModeConfigProperty.INPUT_BASE_PATH)
+            inputBasePath()
                 .map(inputBasePath -> sourceObjectPath.replace(inputBasePath, ""))
                 .orElse(sourceObjectPath);
 
@@ -188,33 +243,79 @@ public class StorageHandler {
     ObjectTransform buildDefaultTransform() {
         return ObjectTransform.builder()
                 .destinationBucketName(config.getConfigPropertyOrError(BulkModeConfigProperty.OUTPUT_BUCKET))
-                .pathWithinBucket(config.getConfigPropertyAsOptional(BulkModeConfigProperty.OUTPUT_BASE_PATH).orElse(""))
+                .pathWithinBucket(outputBasePath().orElse(""))
                 .rules(defaultRuleSet)
                 .build();
     }
 
 
-    private BulkDataRules getApplicableRules(RuleSet rules, String sourceObjectPath) {
+    /**
+     * get applicable rules, if any
+     *
+     * @param rules
+     * @param sourceObjectPath
+     * @return applicable rules from rules, given sourceObjectPath - if it should be processed
+     */
+    @SneakyThrows
+    public Optional<BulkDataRules> getApplicableRules(RuleSet rules, String sourceObjectPath) {
+        BulkDataRules applicableRules = null;
         if (rules instanceof MultiTypeBulkDataRules) {
-            Match<BulkDataRules> match = pathTemplateUtils.matchVerbose(((MultiTypeBulkDataRules) rules).getFileRules(), sourceObjectPath)
-                .orElseThrow(() -> new IllegalArgumentException("No matching rules for path: " + sourceObjectPath));
-            if (match.getMatch() instanceof MultiTypeBulkDataRules) {
-                String subPath = match.getCapturedParams().get(match.getCapturedParams().size() - 1);
-                BulkDataRules nextMatch = pathTemplateUtils.match(((MultiTypeBulkDataRules) match.getMatch()).getFileRules(), subPath)
-                    .orElseThrow(() -> new IllegalArgumentException("No matching rules for path: " + sourceObjectPath));
-                if (nextMatch instanceof MultiTypeBulkDataRules) {
-                    throw new RuntimeException("MultiTypeBulkDataRules cannot be nested more than 1 level");
+            if (!(((MultiTypeBulkDataRules) rules).getFileRules() instanceof LinkedHashMap)) {
+                log.warning("File rules are not ordered; this may lead to unexpected behavior if templates are ambiguous");
+            }
+
+            Optional<Match<BulkDataRules>> match =
+                pathTemplateUtils.matchVerbose(effectiveTemplates(((MultiTypeBulkDataRules) rules).getFileRules()), sourceObjectPath);
+
+            if (match.isPresent()) {
+                if (match.get().getMatch() instanceof MultiTypeBulkDataRules) {
+                    log.warning("Nested MultiTypeBulkDataRules are very 'alpha', so may change in future versions!!");
+                    String subPath = match.get().getCapturedParams().get(match.get().getCapturedParams().size() - 1);
+                    Map<String, BulkDataRules> nextLevel = ((MultiTypeBulkDataRules) match.get().getMatch()).getFileRules();
+                    BulkDataRules nextMatch = pathTemplateUtils.match(effectiveTemplates(nextLevel), subPath).orElse(null);
+                    if (nextMatch instanceof MultiTypeBulkDataRules) {
+                        throw new RuntimeException("MultiTypeBulkDataRules cannot be nested more than 1 level");
+                    }
+                    applicableRules = nextMatch;
+                } else {
+                    applicableRules = match.get().getMatch();
                 }
-                return nextMatch;
             } else {
-                return match.getMatch();
+                applicableRules = null;
             }
         } else if (rules instanceof BulkDataRules) {
-            return (BulkDataRules) rules;
+            applicableRules = (BulkDataRules) rules;
         } else {
             throw new RuntimeException("Rules are not BulkDataRules or MultiTypeBulkDataRules");
         }
+        return Optional.ofNullable(applicableRules);
     }
 
+    Map<String, BulkDataRules> effectiveTemplates(Map<String, BulkDataRules> original) {
+        return original.entrySet().stream()
+            .collect(Collectors.toMap(
+                entry -> entry.getKey().startsWith("/") ? entry.getKey().substring(1) : entry.getKey(),
+                entry -> entry.getValue(),
+                (a, b) -> a,
+                LinkedHashMap::new //preserve order
+            ));
+    }
+
+    /**
+     * helper to parse inputBasePath from config, if present;
+     * left here to support potential logic change around presumption of leading `/`
+     * @return
+     */
+    Optional<String> inputBasePath() {
+        return config.getConfigPropertyAsOptional(BulkModeConfigProperty.INPUT_BASE_PATH)
+            .filter(inputBasePath -> StringUtils.isNotBlank(inputBasePath));
+            //.map(inputBasePath -> inputBasePath.startsWith("/") ? inputBasePath : "/" + inputBasePath);
+    }
+
+    Optional<String> outputBasePath() {
+        return config.getConfigPropertyAsOptional(BulkModeConfigProperty.OUTPUT_BASE_PATH)
+            .filter(outputBasePath -> StringUtils.isNotBlank(outputBasePath));
+            //.map(outputBasePath -> outputBasePath.startsWith("/") ? outputBasePath : "/" + outputBasePath);
+    }
 
 }
