@@ -53,7 +53,7 @@ public class RecordRules implements BulkDataRules {
     //setter to ensure we get a List, even when coming through jackson
     public void setTransforms(List<RecordTransform> transforms) {
         if (transforms == null) {
-            this.transforms = new LinkedList<>();
+            this.transforms = Collections.emptyList();
         } else {
             this.transforms = transforms;
         }
