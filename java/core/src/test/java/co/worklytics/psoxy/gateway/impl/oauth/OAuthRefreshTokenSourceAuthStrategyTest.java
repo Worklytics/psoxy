@@ -15,7 +15,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.Mockito;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -25,6 +24,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -47,7 +47,6 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
     })
     public interface Container {
         void inject(OAuthRefreshTokenSourceAuthStrategyTest test);
-
     }
 
     @BeforeEach
@@ -196,5 +195,14 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
         tokenRefreshHandler.storeRefreshTokenIfRotated(exampleResponse);
 
         verify(tokenRefreshHandler.config, times(shouldRotate ? 1 : 0)).putConfigProperty(eq(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN), eq(newToken));
+    }
+
+    @Test
+    public void refreshProactiveThresholdTimeIsBounded() {
+        OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl tokenRefreshHandler = new OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl();
+        IntStream.range(0, 500).forEach( i -> {
+            assertTrue(tokenRefreshHandler.getProactiveGracePeriodSeconds() >= tokenRefreshHandler.MIN_PROACTIVE_TOKEN_REFRESH.getSeconds());
+            assertTrue(tokenRefreshHandler.getProactiveGracePeriodSeconds() <= tokenRefreshHandler.MAX_PROACTIVE_TOKEN_REFRESH.getSeconds());
+        });
     }
 }

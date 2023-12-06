@@ -12,6 +12,7 @@ import com.google.auth.Credentials;
 import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.OAuth2CredentialsWithRefresh;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.Uninterruptibles;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -198,7 +199,9 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         TokenResponseParser tokenResponseParser;
 
         @VisibleForTesting
-        protected final Duration MAX_PROACTIVE_TOKEN_REFRESH = Duration.ofMinutes(5L);
+        protected final Duration MIN_PROACTIVE_TOKEN_REFRESH = Duration.ofMinutes(2L);
+        @VisibleForTesting
+        protected final Duration MAX_PROACTIVE_TOKEN_REFRESH = MIN_PROACTIVE_TOKEN_REFRESH.plusMinutes(5L);
 
         // not high; better to fail fast and leave it to the caller (Worklytics) to retry than hold
         // open a lambda waiting for a lock
@@ -384,9 +387,16 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                 return true;
             }
             Instant expiresAt = accessToken.getExpirationTime().toInstant();
-            Instant thresholdToProactiveRefresh = expiresAt
-                .minusSeconds(randomNumberGenerator.nextInt((int) MAX_PROACTIVE_TOKEN_REFRESH.toSeconds()));
+            Instant thresholdToProactiveRefresh = expiresAt.minusSeconds(getProactiveGracePeriodSeconds());
             return now.isAfter(thresholdToProactiveRefresh);
+        }
+
+        @VisibleForTesting
+        protected int getProactiveGracePeriodSeconds() {
+            int maxSeconds = (int) MAX_PROACTIVE_TOKEN_REFRESH.toSeconds();
+            int minSeconds = (int) MIN_PROACTIVE_TOKEN_REFRESH.toSeconds();
+            Preconditions.checkArgument(maxSeconds > minSeconds);
+            return randomNumberGenerator.nextInt(maxSeconds - minSeconds) + minSeconds;
         }
 
         @Override
