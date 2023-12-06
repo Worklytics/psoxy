@@ -68,8 +68,9 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
      * examples: Dropbox
      *
      * TODO: revisit whether this needs to be configured per data source
+     * Nov 23: lower this down to 1h
      */
-    public static final Duration MIN_DURATION_TO_KEEP_REFRESH_TOKEN = Duration.ofDays(7);
+    public static final Duration MIN_DURATION_TO_KEEP_REFRESH_TOKEN = Duration.ofHours(1);
 
 
     //q: should we put these as config properties? creates potential for inconsistent configs
@@ -198,7 +199,9 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         TokenResponseParser tokenResponseParser;
 
         @VisibleForTesting
-        protected final Duration MAX_PROACTIVE_TOKEN_REFRESH = Duration.ofMinutes(5L);
+        protected final Duration MIN_PROACTIVE_TOKEN_REFRESH = Duration.ofMinutes(2L);
+        @VisibleForTesting
+        protected final Duration MAX_PROACTIVE_TOKEN_REFRESH = MIN_PROACTIVE_TOKEN_REFRESH.plusMinutes(5L);
 
         // not high; better to fail fast and leave it to the caller (Worklytics) to retry than hold
         // open a lambda waiting for a lock
@@ -384,9 +387,15 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                 return true;
             }
             Instant expiresAt = accessToken.getExpirationTime().toInstant();
-            Instant thresholdToProactiveRefresh = expiresAt
-                .minusSeconds(randomNumberGenerator.nextInt((int) MAX_PROACTIVE_TOKEN_REFRESH.toSeconds()));
+            Instant thresholdToProactiveRefresh = expiresAt.minusSeconds(getProactiveGracePeriodSeconds());
             return now.isAfter(thresholdToProactiveRefresh);
+        }
+
+        @VisibleForTesting
+        protected int getProactiveGracePeriodSeconds() {
+            int maxSeconds = (int) MAX_PROACTIVE_TOKEN_REFRESH.toSeconds();
+            int minSeconds = (int) MIN_PROACTIVE_TOKEN_REFRESH.toSeconds();
+            return randomNumberGenerator.nextInt(maxSeconds - minSeconds) + minSeconds;
         }
 
         @Override
