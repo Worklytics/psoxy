@@ -50,12 +50,12 @@ Neither your proxy instances nor Worklytics ever hold any API key or certificate
 
 The following Scopes are required for each connector. Note that they are all READ-only scopes.
 
-| Source&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Application Scopes                                                                                                          |
-|--------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------|
-| Active Directory                                                                                       | `User.Read.All` `Group.Read.All`                                                                                            |
-| Calendar                                                                                               | `User.Read.All` `Group.Read.All` `OnlineMeetings.Read.All` `Calendars.Read` `MailboxSettings.Read`                          |
-| Mail                                                                                                   | `User.Read.All` `Group.Read.All`  `Mail.ReadBasic.All` `MailboxSettings.Read`                                               |
-| Teams                                                                                                  | `Team.ReadBasic.All` `Channel.ReadBasic.All` `Chat.ReadBasic.All` `Chat.Read.All` `ChannelMessage.Read.All` `CallRecords.Read.All` `OnlineMeetings.Read.All`|
+| Source&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Application Scopes                                                                                                                                                           |
+|--------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Active Directory                                                                                       | `User.Read.All` `Group.Read.All`                                                                                                                                             |
+| Calendar                                                                                               | `User.Read.All` `Group.Read.All` `OnlineMeetings.Read.All` `Calendars.Read` `MailboxSettings.Read`                                                                           |
+| Mail                                                                                                   | `User.Read.All` `Group.Read.All`  `Mail.ReadBasic.All` `MailboxSettings.Read`                                                                                                |
+| Teams                                                                                                  | `User.Read.All` `Team.ReadBasic.All` `Channel.ReadBasic.All` `Chat.ReadBasic.All` `Chat.Read.All` `ChannelMessage.Read.All` `CallRecords.Read.All` `OnlineMeetings.Read.All` |
 
 NOTE: the above scopes are copied from [infra/modules/worklytics-connector-specs](../../../infra/modules/worklytics-connector-specs).
 They are accurate as of 2023-04-12. Please refer to that module for a definitive list.
