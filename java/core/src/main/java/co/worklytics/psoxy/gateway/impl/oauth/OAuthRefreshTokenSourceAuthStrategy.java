@@ -69,8 +69,9 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
      * examples: Dropbox
      *
      * TODO: revisit whether this needs to be configured per data source
+     * Nov 23: lower this down to 1h
      */
-    public static final Duration MIN_DURATION_TO_KEEP_REFRESH_TOKEN = Duration.ofDays(7);
+    public static final Duration MIN_DURATION_TO_KEEP_REFRESH_TOKEN = Duration.ofHours(1);
 
 
     //q: should we put these as config properties? creates potential for inconsistent configs
