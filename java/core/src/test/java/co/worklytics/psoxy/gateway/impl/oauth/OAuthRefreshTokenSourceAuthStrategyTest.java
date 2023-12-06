@@ -4,6 +4,7 @@ import co.worklytics.psoxy.PsoxyModule;
 import co.worklytics.psoxy.SourceAuthModule;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.utils.RandomNumberGenerator;
+import co.worklytics.psoxy.utils.RandomNumberGeneratorImpl;
 import co.worklytics.test.MockModules;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.auth.oauth2.AccessToken;
@@ -200,12 +201,11 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
     @Test
     public void refreshProactiveThresholdTimeIsBounded() {
         OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl tokenRefreshHandler = new OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl();
-        tokenRefreshHandler.randomNumberGenerator = this.randomNumberGenerator;
-        IntStream.range(0, (int) (tokenRefreshHandler.MAX_PROACTIVE_TOKEN_REFRESH.getSeconds()+1)).forEach(i -> {
-            reset(randomNumberGenerator);
-            when(randomNumberGenerator.nextInt(anyInt())).thenReturn(i);
-            assertTrue(tokenRefreshHandler.getProactiveGracePeriodSeconds() >= tokenRefreshHandler.MIN_PROACTIVE_TOKEN_REFRESH.getSeconds());
-            assertTrue(tokenRefreshHandler.getProactiveGracePeriodSeconds() <= tokenRefreshHandler.MAX_PROACTIVE_TOKEN_REFRESH.getSeconds());
+        tokenRefreshHandler.randomNumberGenerator = new RandomNumberGeneratorImpl();
+        IntStream.range(0, 1_000).forEach(i -> {
+            int proactiveGracePeriodSeconds = tokenRefreshHandler.getProactiveGracePeriodSeconds();
+            assertTrue(proactiveGracePeriodSeconds >= tokenRefreshHandler.MIN_PROACTIVE_TOKEN_REFRESH.getSeconds());
+            assertTrue(proactiveGracePeriodSeconds <= tokenRefreshHandler.MAX_PROACTIVE_TOKEN_REFRESH.getSeconds());
         });
     }
 }
