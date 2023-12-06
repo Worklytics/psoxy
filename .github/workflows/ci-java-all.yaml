@@ -11,7 +11,6 @@ on:
     branches:
       - 'main'
       - 'rc-*'
-      - 's162-prep-release'
 
 jobs:
   # Java 11 - Oracle support ended 30 Sept 2023 ... but still what ships with GCP cloud shell!!!
