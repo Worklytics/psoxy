@@ -2,6 +2,8 @@ package com.avaulta.gateway.pseudonyms.impl;
 
 import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
+import lombok.Builder;
+import lombok.Value;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
 
@@ -46,21 +48,9 @@ public class LegacyPseudonymTokenEncoder implements PseudonymEncoder {
     @Override
     public Pseudonym decode(String pseudonym) {
         Pseudonym.PseudonymBuilder builder = Pseudonym.builder();
-
-        // trim and parse domain
-        String encodedPseudonym = null;
-        if (pseudonym.contains(DOMAIN_SEPARATOR)) {
-            encodedPseudonym = pseudonym.substring(0, pseudonym.indexOf(DOMAIN_SEPARATOR));
-            builder.domain(pseudonym.substring(pseudonym.indexOf(DOMAIN_SEPARATOR) + 1));
-        } else {
-            encodedPseudonym = pseudonym;
-        }
-
-        String encoded = encodedPseudonym.startsWith(TOKEN_PREFIX) ? encodedPseudonym.substring(TOKEN_PREFIX.length()) : encodedPseudonym;
-
-        // see HashUtils
-        builder.hash(decodeHash(encoded));
-
+        Parts parts = parse(pseudonym);
+        builder.domain(parts.getDomain());
+        builder.hash(decodeHash(parts.getHash()));
         return builder.build();
     }
 
@@ -71,6 +61,29 @@ public class LegacyPseudonymTokenEncoder implements PseudonymEncoder {
     @Override
     public boolean canBeDecoded(String possiblePseudonym) {
         return possiblePseudonym != null
-            && possiblePseudonym.startsWith(TOKEN_PREFIX);
+            && possiblePseudonym.startsWith(TOKEN_PREFIX)
+            && parse(possiblePseudonym).getHash().length() == 43;
+    }
+
+    private Parts parse(String encodedPseudonym) {
+        Parts.PartsBuilder builder = Parts.builder();
+        if (encodedPseudonym.contains(DOMAIN_SEPARATOR)) {
+            builder.domain(encodedPseudonym.substring(encodedPseudonym.indexOf(DOMAIN_SEPARATOR) + 1));
+            encodedPseudonym = encodedPseudonym.substring(0, encodedPseudonym.indexOf(DOMAIN_SEPARATOR));
+        }
+
+        String hash =  encodedPseudonym.startsWith(TOKEN_PREFIX) ? encodedPseudonym.substring(TOKEN_PREFIX.length()) : encodedPseudonym;
+        builder.hash(hash);
+
+        return builder.build();
+    }
+
+    @Builder
+    @Value
+    static class Parts {
+        String domain;
+
+        @Builder.Default
+        String hash = "";
     }
 }

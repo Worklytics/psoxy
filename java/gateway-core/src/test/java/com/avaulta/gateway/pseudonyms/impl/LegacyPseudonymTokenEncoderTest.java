@@ -14,9 +14,9 @@ class LegacyPseudonymTokenEncoderTest {
 
     // test a few cases, including some '.' in output so interesting
     @CsvSource({
-        "test@acme.com,l~dwNMQWOwpMUYHAXHO.xJer1tqMnpdYSAqMzw15OEfTU@acme.com",
-        "blah,l~i33xQ9kccW7PpfwXMAIva0IbBc7e6P1SsfxlqWAwrVI",
-        "blah2,l~QkKC.YJJeRDR_4K0tG0iX0gAQ.BY8h_Fq2BsPtBiH_I"
+        "test@acme.com,t~dwNMQWOwpMUYHAXHO.xJer1tqMnpdYSAqMzw15OEfTU@acme.com",
+        "blah,t~i33xQ9kccW7PpfwXMAIva0IbBc7e6P1SsfxlqWAwrVI",
+        "blah2,t~QkKC.YJJeRDR_4K0tG0iX0gAQ.BY8h_Fq2BsPtBiH_I"
     })
     @ParameterizedTest
     public void testEncode(String s, String encoded) {
@@ -36,8 +36,8 @@ class LegacyPseudonymTokenEncoderTest {
     }
 
     @ValueSource(strings = {
-        "l~blah@acme.com",
-        "l~blah"
+        "t~i33xQ9kccW7PpfwXMAIva0IbBc7e6P1SsfxlqWAwrVI@acme.com",
+        "t~i33xQ9kccW7PpfwXMAIva0IbBc7e6P1SsfxlqWAwrVI"
     })
     @ParameterizedTest
     public void canDecode(String s) {
@@ -45,10 +45,10 @@ class LegacyPseudonymTokenEncoderTest {
     }
 
     @ValueSource(strings = {
-        "t~blah@acme.com",
-        "p~blah@acme.com",
+        "t~asdf@acme.com",
+        "p~i33xQ9kccW7PpfwXMAIva0IbBc7e6P1SsfxlqWAwrVI@acme.com",
         "t~asdfas",
-        "p~asdfas"
+        "p~i33xQ9kccW7PpfwXMAIva0IbBc7e6P1SsfxlqWAwrVI"
     })
     @ParameterizedTest
     public void cantDecode(String s) {
