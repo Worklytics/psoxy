@@ -36,8 +36,10 @@ class LegacyPseudonymTokenEncoderTest {
     }
 
     @ValueSource(strings = {
-        "t~i33xQ9kccW7PpfwXMAIva0IbBc7e6P1SsfxlqWAwrVI@acme.com",
-        "t~i33xQ9kccW7PpfwXMAIva0IbBc7e6P1SsfxlqWAwrVI"
+        "t~i33xQ9kccW7PpfwXMAIva0IbBc7e6P1SsfxlqWAwrV_@acme.com",
+        "t~i33xQ9kccW7PpfwXMAIva0IbBc7e6P1SsfxlqWAwrV_",
+        "t~i33xQ9kccW7PpfwXMAIva0IbBc7e6P.SsfxlqWAwrV_@acme.com",
+        "t~i33xQ9kccW7PpfwXMAIva0IbBc7e6P.SsfxlqWAwrV_",
     })
     @ParameterizedTest
     public void canDecode(String s) {

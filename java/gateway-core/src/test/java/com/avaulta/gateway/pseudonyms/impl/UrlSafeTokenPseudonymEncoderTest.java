@@ -145,18 +145,13 @@ public class UrlSafeTokenPseudonymEncoderTest {
 
     }
 
-    /**
-     * test to reproduce exception we've seen in logs, just to establish what scenario leads to it
-     */
-    @Test
-    void decoder2eException() {
-        try {
-            pseudonymEncoder.decode("t~UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMkacme.com");
-            fail("expected exception");
-        } catch (IllegalArgumentException e) {
-            // 2e is the . in the domain, which wasn't stripped off bc missing '@'
-            assertEquals("Illegal base64 character 2e", e.getMessage());
-        }
-
+    //test that legacy cases, with '.' char, work OK
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "t~i33xQ9kccW7PpfwXMAIv.0IbBc7e6P1SsfxlqWAwrVI@acme.com",
+        "t~i33xQ9kccW7PpfwXMAIv.0IbBc7e6P1SsfxlqWAwrVI"
+    })
+    void decodeLegacy(String encoded) {
+        Pseudonym decoded = pseudonymEncoder.decode(encoded);
     }
 }
