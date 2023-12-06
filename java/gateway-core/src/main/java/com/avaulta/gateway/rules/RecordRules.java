@@ -4,7 +4,7 @@ import com.avaulta.gateway.rules.transforms.RecordTransform;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-import java.util.LinkedList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -48,7 +48,7 @@ public class RecordRules implements BulkDataRules {
      *
      */
     @Singular
-    List<RecordTransform> transforms = new LinkedList<>();
+    List<RecordTransform> transforms = Collections.emptyList();
 
     //setter to ensure we get a List, even when coming through jackson
     public void setTransforms(List<RecordTransform> transforms) {
