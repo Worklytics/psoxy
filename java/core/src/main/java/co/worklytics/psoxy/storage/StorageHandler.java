@@ -93,8 +93,7 @@ public class StorageHandler {
             InputStream decompressedStream = request.getDecompressInput() ? new GZIPInputStream(is, bufferSize) : is;
             Reader reader = new BufferedReader(new InputStreamReader(decompressedStream, StandardCharsets.UTF_8), bufferSize);
             OutputStream outputStream = request.getCompressOutput() ? new GZIPOutputStream(os, bufferSize) : os;
-            OutputStreamWriter streamWriter = new OutputStreamWriter(outputStream);
-            Writer writer= new BufferedWriter(streamWriter, bufferSize) //q: BufferedWriter needed if we're already buffering in GZIPOutputStream?
+            OutputStreamWriter writer = new OutputStreamWriter(outputStream)
         ) {
 
             request = request
