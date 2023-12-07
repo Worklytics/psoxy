@@ -1,43 +1,66 @@
 {
   "@odata.context":"https://graph.microsoft.com/v1.0/$metadata#users",
-  "@odata.count":7,
   "value":[
     {
+      "id":"cdfb873d-61f9-4656-bbbb-9e49fba4de97",
       "businessPhones":[ ],
       "jobTitle":null,
-      "mail":"{\"scope\":\"email\",\"domain\":\"contoso.com\",\"hash\":\"A4wObl8OeNcYXg4Ww5rrtVJjWN1OjBU77PNWeME7Ehw\"}",
-      "identities":[
-        {
-          "signInType":"userPrincipalName",
-          "issuer":"contoso.com",
-          "issuerAssignedId":"{\"scope\":\"email\",\"domain\":\"cntoso.com\",\"hash\":\"LLfl2GAD_v_HyZFiQ4Ooq4_J6uEGYFk3EFGyErJ2K3w\"}"
-        }
+      "mail":"{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"80OuLKaSEacbENaFngf3v1Ul1rcs-6BmJRZsfb9scss\"}",
+      "officeLocation":null,
+      "preferredLanguage":"en-US",
+      "userPrincipalName":"{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"80OuLKaSEacbENaFngf3v1Ul1rcs-6BmJRZsfb9scss\"}",
+      "otherMails":[
+        "{\"scope\":\"email\",\"domain\":\"gmail.com\",\"hash\":\"DE__fI7lKDU-e4_ZTA7yZpj7Vu5cQ7jQbQE9h8aU5zg\"}"
       ],
+      "proxyAddresses":[
+        "SMTP:t~80OuLKaSEacbENaFngf3v1Ul1rcs-6BmJRZsfb9scss@worklytics.onmicrosoft.com",
+        "smtp:t~EkwwRg8vVk-IkHkgeBVG2gILwkBgVGjJTAYcD5RDpho@worklytics.onmicrosoft.com"
+      ]
+    },
+    {
+      "id":"307ee26b-fe96-40a9-bc8a-9e49fba4de97",
+      "businessPhones":[ ],
+      "jobTitle":null,
+      "mail":"{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"8ooPMu_uHiLVL-w_T7gTwJDA4S_ttDhB93_NhIXfkkE\"}",
       "officeLocation":null,
       "preferredLanguage":null,
-      "userPrincipalName":"{\"scope\":\"email\",\"domain\":\"contoso.com\",\"hash\":\"A4wObl8OeNcYXg4Ww5rrtVJjWN1OjBU77PNWeME7Ehw\"}",
-      "id":"6ea91a8d-e32e-41a1-b7bd-d2d185eed0e0",
-      "signInActivity":{
-        "lastSignInDateTime":"2021-06-17T16:41:33Z",
-        "lastSignInRequestId":"d4d31c40-4c36-4775-ad59-7d1e6a171f00",
-        "lastNonInteractiveSignInDateTime":"0001-01-01T00:00:00Z",
-        "lastNonInteractiveSignInRequestId":""
-      }
+      "userPrincipalName":"{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"8ooPMu_uHiLVL-w_T7gTwJDA4S_ttDhB93_NhIXfkkE\"}"
+    },
+    {
+      "id":"4ea7fc01-0264-4e84-b85e-9e49fba4de97",
+      "businessPhones":[ ],
+      "jobTitle":null,
+      "mail":"{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"QKF0JFDeWizMmaAamuk9jwtDKUqh_xFG4etyOOHcrEA\"}",
+      "officeLocation":null,
+      "preferredLanguage":"en-US",
+      "userPrincipalName":"{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"QKF0JFDeWizMmaAamuk9jwtDKUqh_xFG4etyOOHcrEA\"}"
+    },
+    {
+      "id":"219435cc-746e-48d6-8ccd-242345234f6e",
+      "businessPhones":[ ],
+      "jobTitle":null,
+      "mail":"{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"_oJw-9fORXMFfHtwNXQ5xyTsva2CebpVGKae78dHEeQ\"}",
+      "officeLocation":null,
+      "preferredLanguage":"es-ES",
+      "userPrincipalName":"{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"_oJw-9fORXMFfHtwNXQ5xyTsva2CebpVGKae78dHEeQ\"}"
+    },
+    {
+      "id":"f8f2864c-c353-4471-bd75-9e49fba4de97",
+      "businessPhones":[ ],
+      "jobTitle":null,
+      "mail":"{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"98Qqjyepls36L4F39whrqv_YskOZCB71RNm8gO43sis\"}",
+      "officeLocation":null,
+      "preferredLanguage":"en-US",
+      "userPrincipalName":"{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"98Qqjyepls36L4F39whrqv_YskOZCB71RNm8gO43sis\"}"
     },
     {
       "businessPhones":[ ],
       "jobTitle":null,
       "mail":"null",
       "officeLocation":null,
-      "preferredLanguage":"en-US",
-      "userPrincipalName":"{\"scope\":\"email\",\"domain\":\"contoso.com\",\"hash\":\"PqDIBxA7vmSJWfXhgDm49-Uunfr9BVeMPxpISYQs_mI\"}",
-      "id":"4562bcc8-c436-4f95-b7c0-4f8ce89dca5e",
-      "signInActivity":{
-        "lastSignInDateTime":"2021-07-29T15:53:27Z",
-        "lastSignInRequestId":"f3149ee1-e347-4181-b45b-99a1f82b1c00",
-        "lastNonInteractiveSignInDateTime":"2021-07-29T17:53:42Z",
-        "lastNonInteractiveSignInRequestId":"868efa6a-b2e9-40e9-9b1c-0aaea5b50200"
-      }
+      "preferredLanguage":null,
+      "userPrincipalName":"{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"hLkozOrxrM9tHy-V5lXCNwhujad46BtuFl2uP-J7Dwk\"}",
+      "id":"232442306-9942-4750-a708-4a1e4fe8a879"
     }
   ]
 }
