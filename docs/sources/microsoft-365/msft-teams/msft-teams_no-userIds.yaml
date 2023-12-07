@@ -250,9 +250,9 @@ endpoints:
     allowedQueryParams:
       - "$select"
       - "$top"
-      - "$skipToken"
+      - "$skiptoken"
       - "$filter"
-      - "$orderBy"
+      - "$orderby"
       - "$count"
       - "$expand"
       - "$format"

@@ -413,7 +413,7 @@ public class PrebuiltSanitizerRules {
         .build();
     static final Endpoint MS_TEAMS_TEAMS =  Endpoint.builder()
         .pathTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS)
-        .allowedQueryParams(List.of("$select","$top","$skipToken","$filter", "$count"))
+        .allowedQueryParams(List.of("$select","$top","$skiptoken","$filter", "$count"))
         .build();
 
     static final Endpoint MS_TEAMS_TEAMS_ALL_CHANNELS =  Endpoint.builder()
@@ -423,22 +423,22 @@ public class PrebuiltSanitizerRules {
 
     static final Endpoint MS_TEAMS_USERS_CHATS =         Endpoint.builder()
         .pathTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_CHATS)
-        .allowedQueryParams(List.of("$select","$top","$skipToken", "$filter",  "$orderBy", "$expand"))
+        .allowedQueryParams(List.of("$select","$top","$skiptoken", "$filter",  "$orderby", "$expand"))
         .build();
 
     static final Endpoint MS_TEAMS_TEAMS_CHANNELS_MESSAGES = Endpoint.builder()
         .pathTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS_CHANNELS_MESSAGES)
-        .allowedQueryParams(List.of("$select","$top","$skipToken","$expand"))
+        .allowedQueryParams(List.of("$select","$top","$skiptoken","$expand"))
         .build();
 
     static final Endpoint MS_TEAMS_TEAMS_CHANNELS_MESSAGES_DELTA =  Endpoint.builder()
         .pathTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS_CHANNELS_MESSAGES_DELTA)
-        .allowedQueryParams(List.of("$select","$top","$skipToken","$expand", "$deltaToken"))
+        .allowedQueryParams(List.of("$select","$top","$skiptoken","$expand", "$deltatoken"))
         .build();
 
     static final Endpoint MS_TEAMS_CHATS_MESSAGES =  Endpoint.builder()
         .pathTemplate(MS_TEAMS_PATH_TEMPLATES_CHATS_MESSAGES)
-        .allowedQueryParams(List.of("$select","$top","$skipToken","$filter", "$orderBy", "$count", "$expand", "$format", "$search", "$skip"))
+        .allowedQueryParams(List.of("$select","$top","$skiptoken","$filter", "$orderby", "$count", "$expand", "$format", "$search", "$skip"))
         .build();
 
     static final Endpoint MS_TEAMS_COMMUNICATIONS_CALLS = Endpoint.builder()
@@ -463,7 +463,7 @@ public class PrebuiltSanitizerRules {
 
     static final Endpoint MS_TEAMS_USERS_ONLINE_MEETINGS =  Endpoint.builder()
         .pathTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS)
-        .allowedQueryParams(List.of("$select","$top","$skipToken","$filter", "$orderBy", "$count", "$expand", "$format", "$search", "$skip"))
+        .allowedQueryParams(List.of("$select","$top","$skiptoken","$filter", "$orderby", "$count", "$expand", "$format", "$search", "$skip"))
         .build();
 
     static final Rules2 MS_TEAMS_BASE = Rules2.builder()
