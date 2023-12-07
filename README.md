@@ -120,16 +120,19 @@ must authorize the Azure Application you provision (with [provided terraform mod
 below. This is done via the Azure Portal (Active Directory).  If you use our provided Terraform
 modules, specific instructions that you can pass to the Microsoft 365 Admin will be output for you.
 
-| Source&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Examples &nbsp;&nbsp;                                                                                                        | Application Scopes                                                                                 |
-|--------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------|
-| Active Directory                                                                                 | [data](docs/sources/microsoft-365/directory/example-api-responses) - [rules](docs/sources/microsoft-365/directory/directory.yaml)          | `User.Read.All` `Group.Read.All`                                                                   |
-| Calendar                                                                                               | [data](docs/sources/microsoft-365/outlook-cal/example-api-responses) - [rules](docs/sources/microsoft-365/outlook-cal/outlook-cal.yaml)    | `User.Read.All` `Group.Read.All` `OnlineMeetings.Read.All` `Calendars.Read` `MailboxSettings.Read` |
-| Mail                                                                                                   | [data](docs/sources/microsoft-365/outlook-mail/example-api-responses) - [rules](docs/sources/microsoft-365/outlook-mail/outlook-mail.yaml) | `User.Read.All` `Group.Read.All`  `Mail.ReadBasic.All` `MailboxSettings.Read`                      |
+| Source&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Examples &nbsp;&nbsp;                                                                                                        | Application Scopes                                                                                                                                |
+|--------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------|
+| Active Directory                                                                                       | [data](docs/sources/microsoft-365/directory/example-api-responses) - [rules](docs/sources/microsoft-365/directory/directory.yaml)          | `User.Read.All` `Group.Read.All`                                                                                                                  |
+| Calendar                                                                                               | [data](docs/sources/microsoft-365/outlook-cal/example-api-responses) - [rules](docs/sources/microsoft-365/outlook-cal/outlook-cal.yaml)    | `User.Read.All` `Group.Read.All` `OnlineMeetings.Read.All` `Calendars.Read` `MailboxSettings.Read`                                                |
+| Mail                                                                                                   | [data](docs/sources/microsoft-365/outlook-mail/example-api-responses) - [rules](docs/sources/microsoft-365/outlook-mail/outlook-mail.yaml) | `User.Read.All` `Group.Read.All`  `Mail.ReadBasic.All` `MailboxSettings.Read`                                                                     |
+| Teams*                                                                                                 | [data](docs/sources/microsoft-365/msft-teams/example-api-responses) - [rules](docs/sources/microsoft-365/msft-teams/msft-teams.yaml)| `User.Read.All` `Team.ReadBasic.All` `Channel.ReadBasic.All` `Chat.ReadBasic.All` `Chat.Read.All` `ChannelMessage.Read.All` `CallRecords.Read.All` `OnlineMeetings.Read.All`  |
 
 NOTE: the above scopes are copied from [infra/modules/worklytics-connector-specs](infra/modules/worklytics-connector-specs)./
 Please refer to that module for a definitive list.
 
-See details: [docs/sources/msft-365/readme.md](docs/sources/msft-365/readme.md)
+NOTE: usage of the Microsoft Teams APIs may be billable, depending on your Microsoft 365 licenses and level of Teams usage. Please review: [Payment models and licensing requirements for Microsoft Teams APIs](https://learn.microsoft.com/en-us/graph/teams-licenses)
+
+See details: [docs/sources/microsoft-365/readme.md](docs/sources/microsoft-365/README.md)
 
 ### Other Data Sources via REST APIs
 

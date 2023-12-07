@@ -248,6 +248,80 @@ locals {
         "/v1.0/groups",
         "/v1.0/groups/{group-id}/members"
       ]
+    },
+    "msft-teams" : {
+      source_kind : "msft-teams"
+      worklytics_connector_id : "msft-teams-psoxy",
+      display_name : "Microsoft Teams"
+      identifier_scope_id : "azure-ad"
+      source_auth_strategy : "oauth2_refresh_token"
+      target_host : "graph.microsoft.com"
+      required_oauth2_permission_scopes : [],
+      required_app_roles : [
+        "User.Read.All",
+        "Team.ReadBasic.All",
+        "Channel.ReadBasic.All",
+        "Chat.ReadBasic.All",
+        "Chat.Read.All",
+        "ChannelMessage.Read.All",
+        "CallRecords.Read.All",
+        "OnlineMeetings.Read.All"
+      ],
+      environment_variables : {
+        GRANT_TYPE : "workload_identity_federation"
+        # by default, assumed to be of type 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
+        TOKEN_SCOPE : "https://graph.microsoft.com/.default"
+        REFRESH_ENDPOINT : "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
+      }
+      example_api_calls : [
+        "/beta/teams",
+        "/beta/teams/${var.msft_teams_example_team_guid}/allChannels",
+        "/beta/users/${var.example_msft_user_guid}/chats",
+        "/beta/teams/${var.msft_teams_example_team_guid}/channels/${var.msft_teams_example_channel_guid}/messages",
+        "/beta/teams/${var.msft_teams_example_team_guid}/channels/${var.msft_teams_example_channel_guid}/messages/delta",
+        "/beta/chats/${var.msft_teams_example_chat_guid}/messages",
+        "/beta/communications/calls/${var.msft_teams_example_call_guid}",
+        "/beta/communications/callRecords/${var.msft_teams_example_call_record_guid}",
+        "/beta/communications/callRecords/getDirectRoutingCalls(fromDateTime=${urlencode(timeadd(timestamp(), "-2160h"))},toDateTime=${urlencode(timestamp())})",
+        "/beta/communications/callRecords/getPstnCalls(fromDateTime=${urlencode(timeadd(timestamp(), "-2160h"))},toDateTime=${urlencode(timestamp())})",
+        "/beta/users/${var.example_msft_user_guid}/onlineMeetings",
+
+        "/v1.0/teams",
+        "/v1.0/teams/${var.msft_teams_example_team_guid}/allChannels",
+        "/v1.0/users/${var.example_msft_user_guid}/chats",
+        "/v1.0/teams/${var.msft_teams_example_team_guid}/channels/${var.msft_teams_example_channel_guid}/messages",
+        "/v1.0/teams/${var.msft_teams_example_team_guid}/channels/${var.msft_teams_example_channel_guid}/messages/delta",
+        "/v1.0/chats/${var.msft_teams_example_chat_guid}/messages",
+        "/v1.0/communications/calls/${var.msft_teams_example_call_guid}",
+        "/v1.0/communications/callRecords/${var.msft_teams_example_call_record_guid}",
+        "/v1.0/communications/callRecords/getDirectRoutingCalls(fromDateTime=${urlencode(timeadd(timestamp(), "-2160h"))},toDateTime=${urlencode(timestamp())})",
+        "/v1.0/communications/callRecords/getPstnCalls(fromDateTime=${urlencode(timeadd(timestamp(), "-2160h"))},toDateTime=${urlencode(timestamp())})",
+        "/v1.0/users/${var.example_msft_user_guid}/onlineMeetings"
+      ]
+      external_token_todo : <<EOT
+To enable the connector, you need to allow permissions on the application created for reading OnlineMeetings. You will need Powershell for this.
+
+Please follow the steps below:
+1. Ensure the user you are going to use for running the commands has the "Teams Administrator" role. You can add the role in the
+[Microsoft 365 Admin Center](https://learn.microsoft.com/en-us/microsoft-365/admin/add-users/assign-admin-roles?view=o365-worldwide#assign-a-user-to-an-admin-role-from-active-users)
+
+**NOTE**: About the role, can be assigned through Entra Id portal in Azure portal OR in Entra Admin center https://admin.microsoft.com/AdminPortal/Home. It is possible that even login with an admin account in Entra Admin Center the Teams role is not available to assign to any user; if so, please do it through Azure Portal (Entra Id -> Users -> Assign roles)
+
+2. Install [PowerShell Teams](https://learn.microsoft.com/en-us/microsoftteams/teams-powershell-install) module.
+3. Run the following commands in Powershell terminal:
+```shell
+Connect-MicrosoftTeams
+```
+And use the user with the "Teams Administrator" for login it.
+
+4. Follow steps on [Configure application access to online meetings or virtual events](https://learn.microsoft.com/en-us/graph/cloud-communication-online-meeting-application-access-policy):
+  - Add a policy for the application created for the connector, providing its `application id`
+  - Grant the policy to the whole tenant (NOT to any specific application or user)
+
+**Issues**:
+- If you receive "access denied" is because no admin role for Teams has been detected. Please close and reopen the Powershell terminal after assigning the role.
+- Commands have been tested over a Powershell (7.4.0) terminal in Windows, installed from Microsoft Store and with Teams Module (5.8.0). It might not work on a different environment
+EOT
     }
   }
 
