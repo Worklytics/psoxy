@@ -17,15 +17,16 @@ const calendarEventsResponse = require('../../../docs/sources/google-workspace/c
 
 test('Transform data sources spec with API responses: param replacement', (t) => {
   const unknownSpec = spec['foo'];
-  let result = transformSpecWithResponse(unknownSpec, slackResponse);
+  let result = transformSpecWithResponse('', slackResponse, unknownSpec);
   t.deepEqual(result, {});
 
   const slackSpec = spec['slack-discovery-api'];
 
-  result = transformSpecWithResponse(slackSpec, {});
+  result = transformSpecWithResponse('Workspaces', {}, slackSpec);
   t.deepEqual(result, slackSpec);
 
-  result = transformSpecWithResponse(slackSpec, slackResponse);
+  result = transformSpecWithResponse('Workspaces', slackResponse,
+    slackSpec);
   const workspaceConversationsEndpoint = result.endpoints.find(
     (endpoint) => endpoint.name === 'Workspace Conversations'
   );
@@ -36,7 +37,8 @@ test('Transform data sources spec with API responses: param replacement', (t) =>
 
 test('Transform data sources spec with API responses: path replacement', (t) => {
   const gcalSpec = spec['gcal'];
-  const result = transformSpecWithResponse(gcalSpec, calendarEventsResponse);
+  const result = transformSpecWithResponse('Events',
+    calendarEventsResponse, gcalSpec);
 
   // [event_id] path replacement
   const eventEndpoint = result.endpoints.find((endpoint) => endpoint.name === 'Event');
