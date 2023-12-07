@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# script to create PR to merge rc- branch to main
+
 # Usage ./tools/release/rc-to-main.sh <release>
 
 RED='\e[0;31m'
@@ -39,16 +41,17 @@ touch rc_to_main.md
 echo "$RELEASE back to main" >> rc_to_main.md
 echo "" >> rc_to_main.md
 echo "Next steps:" >> rc_to_main.md
-echo "  Publish the release: \`./tools/release/publish.sh $RELEASE\`" >> rc_to_main.md
-echo "  Update example templates to point to it:" >> rc_to_main.md
-echo "    \`./tools/release/example.sh . aws-all ~/psoxy-example-aws\`" >> rc_to_main.md
-echo "    \`./tools/release/example.sh . gcp ~/psoxy-example-gcp\`" >> rc_to_main.md
+echo "  - Publish the release: \`./tools/release/publish.sh $RELEASE\`" >> rc_to_main.md
+echo "  - Update example templates to point to it:" >> rc_to_main.md
+echo "    - \`./tools/release/example.sh . aws-all ~/psoxy-example-aws\`" >> rc_to_main.md
+echo "    - \`./tools/release/example.sh . gcp ~/psoxy-example-gcp\`" >> rc_to_main.md
 
 PR_URL=$(gh pr create --title "$RELEASE" --body-file rc_to_main.md --base main --assignee "@me")
 PR_NUMBER=$(echo $PR_URL | sed -n 's/.*\/pull\/\([0-9]*\).*/\1/p')
 
 rm rc_to_main.md
 
+# this still doesn't seem to work ...
 gh pr merge $PR_NUMBER --auto --merge --subject "release $RELEASE from PR #${PR_NUMBER}" --body "release $RELEASE from PR #${PR_NUMBER}"
 
 printf "created PR ${GREEN}${PR_URL}${NC} and set to auto-merge to ${BLUE}main${NC}\n"
