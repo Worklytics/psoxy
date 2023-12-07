@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     google = {
-      version = "~> 4.12"
+      version = ">= 3.74, <= 5.0"
     }
   }
 }
@@ -173,6 +173,7 @@ resource "google_cloudfunctions_function" "function" {
   source_archive_object = var.deployment_bundle_object_name
   entry_point           = "co.worklytics.psoxy.GCSFileEvent"
   service_account_email = google_service_account.service_account.email
+  timeout               = 540 # 9 minutes, which is gen1 max allowed
   labels                = var.default_labels
 
   environment_variables = merge(tomap({
@@ -265,7 +266,7 @@ resource "local_file" "test_script" {
   count = var.todos_as_local_files ? 1 : 0
 
   filename        = "test-${trimprefix(local.instance_id, var.environment_id_prefix)}.sh"
-  file_permission = "0770"
+  file_permission = "755"
   content         = <<EOT
 #!/bin/bash
 FILE_PATH=$${1:-${try(local.example_file, "")}}

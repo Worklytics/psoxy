@@ -2,12 +2,20 @@
 
 ## Overview
 
-Psoxy can be used to sanitize bulk files (eg, CSV, etc), writing the result to another bucket.
+Psoxy can be used to sanitize bulk files (eg, CSV, NDSJON, etc), writing the result to another
+bucket.
 
 You can automate a data pipeline to push files to an `-input` bucket, which will trigger a Psoxy
 instance (GCP Cloud Function or AWS Lambda), which will read the file, sanitize it, and write the
 result to a corresponding `-sanitized` bucket.
 
+You should limit the size of files processed by proxy to 200k rows or less, to ensure processing of
+any single file finishes within the run time limitations of the host platform (AWS, GCP).
+
+Additionally, you should compress (gzip) the files in your `-input` bucket to reduce storage cost and
+improve performance. Psoxy will decompress gzip files before processing and then compress the result
+before writing to the `-sanitized` bucket. Ensure that you set `Content-Encoding: gzip` on all files
+in your `-input` bucket to enable this behavior.
 
 ## Sanitization Rules
 

@@ -200,7 +200,7 @@ locals {
 # script to test ALL connectors
 resource "local_file" "test_all_script" {
   filename        = "test-all.sh"
-  file_permission = "0770"
+  file_permission = "755"
   content         = <<EOF
 #!/bin/bash
 

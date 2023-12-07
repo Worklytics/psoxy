@@ -13,11 +13,15 @@ PATH_TO_REPO=$1
 EXAMPLE=$2
 EXAMPLE_TEMPLATE_REPO=$3
 
+# find where user is running this script from, so can return there at end
+WORKING_DIRECTORY=`pwd`
+
+
 display_usage() {
     printf "Usage:\n"
     printf "  ./release-example.sh <path-to-repo> <example> <path-to-example-repo>\n"
-    printf "  ./release-example.sh ~/code/psoxy/ aws-all ~/psoxy-example-aws\n"
-    printf "  ./release-example.sh ~/code/psoxy/ gcp ~/psoxy-example-gcp\n"
+    printf "  ./release-example.sh ~/psoxy/ aws-all ~/psoxy-example-aws\n"
+    printf "  ./release-example.sh ~/psoxy/ gcp ~/psoxy-example-gcp\n"
 }
 
 if [ "$#" -ne 3 ]; then
@@ -25,7 +29,6 @@ if [ "$#" -ne 3 ]; then
   display_usage
   exit 1
 fi
-
 if [ ! -d "$PATH_TO_REPO" ]; then
   printf "Directory provided for PATH_TO_REPO, ${RED}'${PATH_TO_REPO}'${NC}, does not exist.\n"
   display_usage
@@ -40,6 +43,23 @@ fi
 if [ ! -f "${PATH_TO_REPO}java/pom.xml" ]; then
   printf "${RED}${PATH_TO_REPO}java/pom.xml not found. set <path-to-repo> argument to point to the root of a psoxy checkout. Exiting.${NC}\n"
   exit 1
+fi
+
+cd $PATH_TO_REPO
+CURRENT_SOURCE_BRANCH=$(git branch --show-current)
+if [ "$CURRENT_SOURCE_BRANCH" != "main" ]; then
+  printf "Current branch for ${BLUE}$PATH_TO_REPO${NC} is not ${BLUE}main${NC}. Do you want to switch to main? "
+  read -p "(Y/n) " -n 1 -r
+  REPLY=${REPLY:-Y}
+  echo    # Move to a new line
+  case "$REPLY" in
+    [yY][eE][sS]|[yY])
+      git checkout main
+      ;;
+    *)
+      printf "Did not switch to main. Example will be published from ${BLUE}${CURRENT_BRANCH}${NC}.\n"
+      ;;
+  esac
 fi
 
 CURRENT_RELEASE_NUMBER=$(sed -n 's|[[:space:]]*<revision>\(.*\)</revision>|\1|p' "${PATH_TO_REPO}java/pom.xml" )
@@ -71,7 +91,7 @@ cd "$EXAMPLE_TEMPLATE_REPO"
 CURRENT_BRANCH=$(git branch --show-current)
 if [ "$CURRENT_BRANCH" != "main" ]; then
   printf "${RED}Current branch in checkout of $EXAMPLE_TEMPLATE_REPO is not main. Please checkout main branch and try again.${NC}\n"
-  printf "try ${BLUE}(cd $EXAMPLE_TEMPLATE_REPO && git checkout main)${NC}\n"
+  printf "try ${BLUE}(cd $EXAMPLE_TEMPLATE_REPO && git checkout main && cd $WORKING_DIRECTORY)${NC}\n"
   exit 1
 fi
 
@@ -153,5 +173,6 @@ fi
 # return us to main, so don't have to do this manually before next release
 git checkout main
 
+# should be equivalent to : cd $WORKING_DIRECTORY
 cd -
 

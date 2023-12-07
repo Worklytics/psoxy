@@ -13,8 +13,8 @@ Accounts on unpaid plans do not have access to some methods Worklytics use like:
 
 ## Examples
 
-  * [Example Rules](example-rules/zoom/zoom.yaml)
-  * Example Data : [original](api-response-examples/zoom) | [sanitized](api-response-examples/zoom/sanitized)
+  * [Example Rules](zoom.yaml)
+  * Example Data : [original](example-api-responses/original) | [sanitized](example-api-responses/sanitized)
 
 ## Steps to Connect
 The Zoom connector through Psoxy requires a Custom Managed App on the Zoom Marketplace. This app may

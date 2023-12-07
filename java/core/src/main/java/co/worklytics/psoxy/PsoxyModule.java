@@ -18,7 +18,6 @@ import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
 import com.avaulta.gateway.tokens.impl.AESReversibleTokenizationStrategy;
 import com.avaulta.gateway.tokens.impl.Sha256DeterministicTokenizationStrategy;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -26,12 +25,14 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.api.client.http.HttpContent;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
+import com.google.common.base.Preconditions;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import dagger.Module;
 import dagger.Provides;
 import lombok.extern.java.Log;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.crypto.spec.SecretKeySpec;
 import javax.inject.Named;
@@ -263,11 +264,15 @@ public class PsoxyModule {
                         .map(PseudonymImplementation::valueOf)
                         .map(implementation -> Objects.equals(implementation, PseudonymImplementation.LEGACY))
                         .orElse(false);
-                    if (legacy) {
-                        return rulesUtils.getDefaultScopeIdFromSource(config.getConfigPropertyOrError(ProxyConfigProperty.SOURCE));
-                    } else {
-                        return ""; //should only be used in legacy case
+
+                    String defaultScopeIdFromSource  = config.getConfigPropertyAsOptional(ProxyConfigProperty.SOURCE)
+                        .map(rulesUtils::getDefaultScopeIdFromSource)
+                        .orElse(null);
+
+                    if (legacy && StringUtils.isEmpty(defaultScopeIdFromSource)) {
+                        log.severe("Missing scope for legacy pseudonym implementation!");
                     }
+                    return defaultScopeIdFromSource;
                 })));
     }
 
@@ -279,7 +284,8 @@ public class PsoxyModule {
 
 
     //TODO: utils method for this somewhere??
-    <T> Optional<T> firstPresent(Optional<T>... optionals) {
+    @SafeVarargs
+    final <T> Optional<T> firstPresent(Optional<T>... optionals) {
         return Stream.of(optionals).filter(Optional::isPresent).findFirst().orElse(Optional.empty());
     }
 
