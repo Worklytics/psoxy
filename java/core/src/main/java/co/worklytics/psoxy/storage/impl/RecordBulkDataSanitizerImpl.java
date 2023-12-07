@@ -88,10 +88,11 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
                             //rule for transform doesn't match anythign in document; suppress this
                         }
                     }
-                    writer.write(jsonConfiguration.jsonProvider().toJson(document));
-                    writer.write('\n'); // NDJSON uses newlines between records
+                    writer.append(jsonConfiguration.jsonProvider().toJson(document));
+                    writer.append('\n'); // NDJSON uses newlines between records
+                    writer.flush(); //after each line
                 } catch (UnmatchedPseudonymization e) {
-                    log.warning("Skipped record due to UnmatchedPseudonymizaiton: " + e.getPath());
+                    log.warning("Skipped record due to UnmatchedPseudonymization: " + e.getPath());
                 }
             }
         }
@@ -106,7 +107,7 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
             return (currentValue, configuration) -> {
                 if (currentValue == null) {
                     return null;
-                } else if (currentValue instanceof String) {
+                } else if (currentValue instanceof String || currentValue instanceof Long || currentValue instanceof Integer) {
                     PseudonymizedIdentity pseudonymizedIdentity = pseudonymizer.pseudonymize(currentValue);
 
                     if (pseudonymizer.getOptions().getPseudonymImplementation() != PseudonymImplementation.DEFAULT) {
@@ -117,7 +118,7 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
                     return encoder.encode(pseudonymizedIdentity.asPseudonym());
                     //.firstNonNull(pseudonymizedIdentity.getReversible(), pseudonymizedIdentity.getHash());
                 } else {
-                    throw new IllegalArgumentException("Pseudonymize transform only supports String values");
+                    throw new IllegalArgumentException("Pseudonymize transform only supports string/integer values");
                 }
             };
         } else {

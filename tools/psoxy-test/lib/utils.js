@@ -381,7 +381,17 @@ async function getAWSCredentials(role, region) {
   return credentials;
 }
 
+function addFilenameSuffix(filename, suffix) {
+  let result = '';
+  if (!_.isEmpty(filename)) {
+    const { name, ext } = path.parse(filename);
+    result = `${name}-${suffix}${ext}`;
+  }
+  return result;
+}
+
 export {
+  addFilenameSuffix,
   executeCommand,
   executeWithRetry,
   getAWSCredentials,

@@ -1,10 +1,7 @@
 package co.worklytics.psoxy.rules;
 
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
-import com.avaulta.gateway.rules.ColumnarRules;
-import com.avaulta.gateway.rules.Endpoint;
-import com.avaulta.gateway.rules.MultiTypeBulkDataRules;
-import com.avaulta.gateway.rules.RecordRules;
+import com.avaulta.gateway.rules.*;
 import com.avaulta.gateway.rules.transforms.Transform;
 import com.google.common.base.Preconditions;
 import com.jayway.jsonpath.JsonPath;
@@ -17,8 +14,11 @@ import org.apache.commons.lang3.StringUtils;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 
@@ -59,6 +59,26 @@ public class Validator {
     public void validate(@NonNull MultiTypeBulkDataRules rules) {
         Preconditions.checkArgument(rules.getFileRules().size() > 0, "Must have at least one file rule");
 
+        List<String> templatesNotPrefixedWithSlash = rules.getFileRules().keySet().stream()
+            .filter(k -> !k.startsWith("/"))
+            .collect(Collectors.toList());
+
+        //not invalid per se, but likely to be a mistake
+        if (!templatesNotPrefixedWithSlash.isEmpty()) {
+            log.warning("The following path templates do not start with '/'; for readability, we recommend that they do:\n " + templatesNotPrefixedWithSlash.stream().collect(Collectors.joining("\n")));
+        }
+
+        List<Map.Entry<String, BulkDataRules>> nested =
+            rules.getFileRules().entrySet().stream()
+                .filter(firstLevel -> firstLevel instanceof MultiTypeBulkDataRules
+                        && ((MultiTypeBulkDataRules) firstLevel).getFileRules().values().stream().anyMatch(secondLevel -> secondLevel instanceof MultiTypeBulkDataRules))
+                .collect(Collectors.toList());
+
+        if (!nested.isEmpty()) {
+            throw new IllegalArgumentException("More than 1 level of nested MultiTypeBulkDataRules are not supported. Found: " + nested.stream().map(Map.Entry::getKey).collect(Collectors.joining(", ")));
+        }
+
+
         rules.getFileRules().values().forEach(this::validate);
     }
 
@@ -75,6 +95,10 @@ public class Validator {
 
             //TODO: validate parameter names are ALL valid java capturing group identifiers
             // eg start w letter, contain only alphanumeric
+        } else {
+            if (!endpoint.getPathTemplate().startsWith("/")) {
+                log.warning("Path template " + endpoint.getPathTemplate() + " does not start with '/'; this is likely to be a mistake");
+            }
         }
 
         endpoint.getTransforms().forEach(this::validate);

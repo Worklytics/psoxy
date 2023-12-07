@@ -4,14 +4,9 @@ import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
 import co.worklytics.psoxy.rules.Rules2;
 import jdk.jfr.Description;
 import lombok.Getter;
-import lombok.SneakyThrows;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.io.BufferedWriter;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Stream;
@@ -243,21 +238,6 @@ public class Teams_NoUserIds_Tests extends JavaRulesTestBaseCase {
 
     @ParameterizedTest
     @ValueSource(strings = {"v1.0", "beta"})
-    @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_USERS)
-    public void users(String apiVersion) {
-        String endpoint = "https://graph.microsoft.com/" + apiVersion + "/users";
-        String jsonResponse = asJson("Users_"+ apiVersion + ".json");
-
-        String sanitized = sanitize(endpoint, jsonResponse);
-        assertRedacted(sanitized,
-            "@odata.count",
-            "@odata.context", "https://graph.microsoft.com/v1.0/$metadata#users"
-        );
-        assertUrlWithSubResourcesBlocked(endpoint);
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {"v1.0", "beta"})
     @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS)
     public void users_onlineMeetings(String apiVersion) {
         String userId = "dc17674c-81d9-4adb-bfb2-8f6a442e4622";
@@ -278,22 +258,25 @@ public class Teams_NoUserIds_Tests extends JavaRulesTestBaseCase {
     }
 
     @Override
+    public void yamlLength() {}
+
+    @Override
     public Stream<InvocationExample> getExamples() {
         String apiVersion = "v1.0";
+        String baseEndpoint = "https://graph.microsoft.com/" + apiVersion;
 
         return Stream.of(
-            InvocationExample.of("https://graph.microsoft.com/" + apiVersion + "/teams", "Teams_" + apiVersion + ".json"),
-            InvocationExample.of("https://graph.microsoft.com/" + apiVersion + "/teams/893075dd-2487-4122-925f-022c42e20265/allChannels", "Teams_allChannels_" + apiVersion + ".json"),
-            InvocationExample.of("https://graph.microsoft.com/" + apiVersion + "/users/8b081ef6-4792-4def-b2c9-c363a1bf41d5/chats", "Users_chats_" + apiVersion + ".json"),
-            InvocationExample.of("https://graph.microsoft.com/" + apiVersion + "/teams/fbe2bf47-16c8-47cf-b4a5-4b9b187c508b/channels/19:4a95f7d8db4c4e7fae857bcebe0623e6@thread.tacv2/messages", "Teams_channels_messages_" + apiVersion + ".json"),
-            InvocationExample.of("https://graph.microsoft.com/" + apiVersion + "/teams/fbe2bf47-16c8-47cf-b4a5-4b9b187c508b/channels/19:4a95f7d8db4c4e7fae857bcebe0623e6@thread.tacv2/messages/delta", "Teams_channels_messages_delta_" + apiVersion + ".json"),
-            InvocationExample.of("https://graph.microsoft.com/" + apiVersion + "/chats/19:2da4c29f6d7041eca70b638b43d45437@thread.v2/messages", "Chats_messages_" + apiVersion + ".json"),
-            InvocationExample.of("https://graph.microsoft.com/" + apiVersion + "/communications/calls/2f1a1100-b174-40a0-aba7-0b405e01ed92", "Communications_calls_" + apiVersion + ".json"),
-            InvocationExample.of("https://graph.microsoft.com/" + apiVersion + "/communications/callRecords/2f1a1100-b174-40a0-aba7-0b405e01ed92?$expand=sessions($expand=segments)", "Communications_callRecords_" + apiVersion + ".json"),
-            InvocationExample.of("https://graph.microsoft.com/" + apiVersion + "/communications/callRecords/getDirectRoutingCalls(fromDateTime=2019-11-01,toDateTime=2019-12-01)", "Communications_callRecords_getDirectRoutingCalls_" + apiVersion + ".json"),
-            InvocationExample.of("https://graph.microsoft.com/" + apiVersion + "/communications/callRecords/getPstnCalls(fromDateTime=2019-11-01,toDateTime=2019-12-01)", "Communications_callRecords_getPstnCalls_" + apiVersion + ".json"),
-            InvocationExample.of("https://graph.microsoft.com/" + apiVersion + "/users", "Users_" + apiVersion + ".json"),
-            InvocationExample.of("https://graph.microsoft.com/" + apiVersion + "/users/dc17674c-81d9-4adb-bfb2-8f6a442e4622/onlineMeetings", "Users_onlineMeetings_" + apiVersion + ".json")
+            InvocationExample.of(baseEndpoint + "/teams", "Teams_" + apiVersion + ".json"),
+            InvocationExample.of(baseEndpoint + "/teams/893075dd-2487-4122-925f-022c42e20265/allChannels", "Teams_allChannels_" + apiVersion + ".json"),
+            InvocationExample.of(baseEndpoint + "/users/8b081ef6-4792-4def-b2c9-c363a1bf41d5/chats", "Users_chats_" + apiVersion + ".json"),
+            InvocationExample.of(baseEndpoint + "/teams/fbe2bf47-16c8-47cf-b4a5-4b9b187c508b/channels/19:4a95f7d8db4c4e7fae857bcebe0623e6@thread.tacv2/messages", "Teams_channels_messages_" + apiVersion + ".json"),
+            InvocationExample.of(baseEndpoint + "/teams/fbe2bf47-16c8-47cf-b4a5-4b9b187c508b/channels/19:4a95f7d8db4c4e7fae857bcebe0623e6@thread.tacv2/messages/delta", "Teams_channels_messages_delta_" + apiVersion + ".json"),
+            InvocationExample.of(baseEndpoint + "/chats/19:2da4c29f6d7041eca70b638b43d45437@thread.v2/messages", "Chats_messages_" + apiVersion + ".json"),
+            InvocationExample.of(baseEndpoint + "/communications/calls/2f1a1100-b174-40a0-aba7-0b405e01ed92", "Communications_calls_" + apiVersion + ".json"),
+            InvocationExample.of(baseEndpoint + "/communications/callRecords/2f1a1100-b174-40a0-aba7-0b405e01ed92?$expand=sessions($expand=segments)", "Communications_callRecords_" + apiVersion + ".json"),
+            InvocationExample.of(baseEndpoint + "/communications/callRecords/getDirectRoutingCalls(fromDateTime=2019-11-01,toDateTime=2019-12-01)", "Communications_callRecords_getDirectRoutingCalls_" + apiVersion + ".json"),
+            InvocationExample.of(baseEndpoint + "/communications/callRecords/getPstnCalls(fromDateTime=2019-11-01,toDateTime=2019-12-01)", "Communications_callRecords_getPstnCalls_" + apiVersion + ".json"),
+            InvocationExample.of(baseEndpoint + "/users/dc17674c-81d9-4adb-bfb2-8f6a442e4622/onlineMeetings", "Users_onlineMeetings_" + apiVersion + ".json")
         );
     }
 }

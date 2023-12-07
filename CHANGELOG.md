@@ -1,6 +1,9 @@
 # CHANGELOG
 
-Working tracking of changes, updated as work done prior to release.  Please review [releases](https://github.com/Worklytics/psoxy/releases) for ultimate versions.
+Please review [releases](https://github.com/Worklytics/psoxy/releases) for full details of changes
+in each release's notes.
+
+Changes to be including in future/planned release notes will be added here.
 
 ## Next
 

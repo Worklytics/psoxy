@@ -1,5 +1,5 @@
 fileRules:
-  /export-{week}/{file}:
+  export-{week}/{file}:
     fileRules:
       users.ndjson.gz:
         format: "NDJSON"
@@ -24,7 +24,7 @@ fileRules:
         transforms:
           - redact: "$.text"
       messages-{id}.ndjson.gz:
-        format: "NDJSON"
-        transforms:
+       format: "NDJSON"
+       transforms:
           - redact: "$.text"
           - redact: "$.channel_name"
