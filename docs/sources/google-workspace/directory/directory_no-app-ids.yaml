@@ -21,11 +21,12 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$.users[*].name"
-          - "$.users[*].thumbnailPhotoUrl"
+          - "$.users[*].organizations[*].title"
+          - "$.users[*].posixAccounts[*].homeDirectory"
           - "$.users[*].recoveryEmail"
           - "$.users[*].recoveryPhone"
-          - "$.users[*].posixAccounts[*].homeDirectory"
           - "$.users[*].sshPublicKeys[*]"
+          - "$.users[*].thumbnailPhotoUrl"
           - "$.users[*].websites[*]"
       - !<pseudonymize>
         jsonPaths:
@@ -52,11 +53,12 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$.name"
-          - "$.thumbnailPhotoUrl"
+          - "$.organizations[*].title"
+          - "$.posixAccounts[*].homeDirectory"
           - "$.recoveryEmail"
           - "$.recoveryPhone"
-          - "$.posixAccounts[*].homeDirectory"
           - "$.sshPublicKeys[*]"
+          - "$.thumbnailPhotoUrl"
           - "$.websites[*]"
       - !<pseudonymize>
         jsonPaths:

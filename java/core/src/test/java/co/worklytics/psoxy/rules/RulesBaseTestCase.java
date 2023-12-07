@@ -8,8 +8,6 @@ import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.transforms.Transform;
-import com.fasterxml.jackson.core.util.DefaultIndenter;
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.MapFunction;
 import dagger.Component;
@@ -26,6 +24,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static co.worklytics.test.TestUtils.prettyPrintJson;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -421,46 +420,8 @@ abstract public class RulesBaseTestCase {
         assertFalse(sanitizer.isAllowed("GET", new URL(url)), "rules allowed url that should be blocked: " + url);
     }
 
-    /**
-     * Utility method to print out formatted JSON for debug easily
-     *
-     *
-     *
-     *
-     * @param json
-     * @return
-     */
-    @SneakyThrows
-    @SuppressWarnings("unused")
-    protected String prettyPrintJson(String json) {
-
-        DefaultPrettyPrinter printer = new DefaultPrettyPrinter()
-            .withoutSpacesInObjectEntries();
-        printer.indentArraysWith(DefaultIndenter.SYSTEM_LINEFEED_INSTANCE);
-
-
-        return jsonMapper
-            .writer()
-            .with(printer)
-            .writeValueAsString(jsonMapper.readerFor(Object.class).readValue(json));
-
-        //NOTE: Gson seems to URL-encode embedded strings!?!?!
-        //  eg "64123avdfsMVA==" --> "64123avdfsMVA\u0030\0030"
-        // Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        // return gson.toJson(JsonParser.parseString(json));
-    }
-
-    /**
-     * asserts equivalence of two strings after round-trips through Jackson, so any failure is more
-     * readable than comparing non-pretty JSON, and any differences in original formatting (rather
-     * than actual JSON structure/content) are ignored. eg, expected/actual can have different
-     * "pretty" formatting, or one may not have "pretty" formatting at all.
-     *
-     * @param expected output value of test
-     * @param actual output value of test
-     */
+    @Deprecated // used TestUtils::assertJsonEquals directly
     protected void assertJsonEquals(String expected, String actual) {
-        assertEquals(prettyPrintJson(expected), prettyPrintJson(actual));
+        TestUtils.assertJsonEquals(expected, actual);
     }
-
 }

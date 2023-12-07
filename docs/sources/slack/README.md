@@ -2,8 +2,8 @@
 
 ## Examples
 
-* [Example Rules](example-rules/slack/discovery.yaml)
-* Example Data : [original](api-response-examples/slack) | [sanitized](api-response-examples/slack/sanitized)
+* [Example Rules](discovery.yaml)
+* Example Data : [original](example-api-responses/original) | [sanitized](example-api-responses/sanitized)
 
 ## Steps to Connect
 
@@ -41,7 +41,7 @@ Use this step if you want to install in the whole org, across multiple workspace
 ![](./img/slack-step-distribution.png)
 
 3. Generate the following URL replacing the placeholder for *YOUR_CLIENT_ID* and save it for
-   later:
+
 
    `https://api.slack.com/api/oauth.v2.access?client_id=YOUR_CLIENT_ID`
 
@@ -66,3 +66,19 @@ Use this steps if you intend to install in just one workspace within your org.
 2. Copy the "User OAuth Token" (also listed under "OAuth & Permissions") and store as
    `PSOXY_SLACK_DISCOVERY_API_ACCESS_TOKEN` in the psoxy's Secret
    Manager. Otherwise, share the token with the AWS/GCP administrator completing the implementation.
+
+## Bulk Data Flow
+
+***beta*** As an alternative to connecting Worklytics to the Slack Discovery API via the proxy, it
+is possible to use the bulk-mode of the proxy to sanitize an export of Slack Discovery data and
+ingest the resulting sanitized data to Worklytics. Example data of this is giving in the
+[`example-bulk/`](example-bulk/) folder.
+
+This data can be processing using custom multi-file type rules in the proxy, of which
+[`discovery-bulk.yaml`](discovery-bulk.yaml) is an example.
+
+For clarity, example files are NOT compressed, so don't have `.gz` extension; but rules expect
+`.gz`.
+
+
+

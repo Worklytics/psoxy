@@ -157,6 +157,7 @@ locals {
 
   jira_cloud_id                 = coalesce(var.jira_cloud_id, "YOUR_JIRA_CLOUD_ID")
   jira_example_issue_id         = coalesce(var.jira_example_issue_id, var.example_jira_issue_id, "YOUR_JIRA_EXAMPLE_ISSUE_ID")
+  github_api_host               = coalesce(var.github_api_host, "api.github.com")
   github_installation_id        = coalesce(var.github_installation_id, "YOUR_GITHUB_INSTALLATION_ID")
   github_organization           = coalesce(var.github_organization, "YOUR_GITHUB_ORGANIZATION_NAME")
   github_example_repository     = coalesce(var.github_example_repository, "YOUR_GITHUB_EXAMPLE_REPOSITORY_NAME")
@@ -274,33 +275,53 @@ locals {
       }
       example_api_calls : [
         "/beta/teams",
-        "/beta/teams/893075dd-2487-4122-925f-022c42e20265/allChannels",
-        "/beta/users/8b081ef6-4792-4def-b2c9-c363a1bf41d5/chats",
-        "/beta/teams/893075dd-2487-4122-925f-022c42e20265/channels/19:4a95f7d8db4c4e7fae857bcebe0623e6@thread.tacv2/messages",
-        "/beta/teams/893075dd-2487-4122-925f-022c42e20265/channels/19:4a95f7d8db4c4e7fae857bcebe0623e6@thread.tacv2/messages/delta",
-        "/beta/chats/19:2da4c29f6d7041eca70b638b43d45437@thread.v2/messages",
-        "/beta/communications/calls/2f1a1100-b174-40a0-aba7-0b405e01ed92",
-        "/beta/communications/callRecords/e523d2ed-2966-4b6b-925b-754a88034cc5",
+        "/beta/teams/${var.msft_teams_example_team_guid}/allChannels",
+        "/beta/users/${var.example_msft_user_guid}/chats",
+        "/beta/teams/${var.msft_teams_example_team_guid}/channels/${var.msft_teams_example_channel_guid}/messages",
+        "/beta/teams/${var.msft_teams_example_team_guid}/channels/${var.msft_teams_example_channel_guid}/messages/delta",
+        "/beta/chats/${var.msft_teams_example_chat_guid}/messages",
+        "/beta/communications/calls/${var.msft_teams_example_call_guid}",
+        "/beta/communications/callRecords/${var.msft_teams_example_call_record_guid}",
         "/beta/communications/callRecords/getDirectRoutingCalls(fromDateTime=${urlencode(timeadd(timestamp(), "-2160h"))},toDateTime=${urlencode(timestamp())})",
         "/beta/communications/callRecords/getPstnCalls(fromDateTime=${urlencode(timeadd(timestamp(), "-2160h"))},toDateTime=${urlencode(timestamp())})",
-        "/beta/users/8b081ef6-4792-4def-b2c9-c363a1bf41d5/onlineMeetings",
+        "/beta/users/${var.example_msft_user_guid}/onlineMeetings",
 
         "/v1.0/teams",
-        "/v1.0/teams/893075dd-2487-4122-925f-022c42e20265/allChannels",
-        "/v1.0/users/8b081ef6-4792-4def-b2c9-c363a1bf41d5/chats",
-        "/v1.0/teams/893075dd-2487-4122-925f-022c42e20265/channels/19:4a95f7d8db4c4e7fae857bcebe0623e6@thread.tacv2/messages",
-        "/v1.0/teams/893075dd-2487-4122-925f-022c42e20265/channels/19:4a95f7d8db4c4e7fae857bcebe0623e6@thread.tacv2/messages/delta",
-        "/v1.0/chats/19:2da4c29f6d7041eca70b638b43d45437@thread.v2/messages",
-        "/v1.0/communications/calls/2f1a1100-b174-40a0-aba7-0b405e01ed92",
-        "/v1.0/communications/callRecords/e523d2ed-2966-4b6b-925b-754a88034cc5",
+        "/v1.0/teams/${var.msft_teams_example_team_guid}/allChannels",
+        "/v1.0/users/${var.example_msft_user_guid}/chats",
+        "/v1.0/teams/${var.msft_teams_example_team_guid}/channels/${var.msft_teams_example_channel_guid}/messages",
+        "/v1.0/teams/${var.msft_teams_example_team_guid}/channels/${var.msft_teams_example_channel_guid}/messages/delta",
+        "/v1.0/chats/${var.msft_teams_example_chat_guid}/messages",
+        "/v1.0/communications/calls/${var.msft_teams_example_call_guid}",
+        "/v1.0/communications/callRecords/${var.msft_teams_example_call_record_guid}",
         "/v1.0/communications/callRecords/getDirectRoutingCalls(fromDateTime=${urlencode(timeadd(timestamp(), "-2160h"))},toDateTime=${urlencode(timestamp())})",
         "/v1.0/communications/callRecords/getPstnCalls(fromDateTime=${urlencode(timeadd(timestamp(), "-2160h"))},toDateTime=${urlencode(timestamp())})",
-        "/v1.0/users/8b081ef6-4792-4def-b2c9-c363a1bf41d5/onlineMeetings"
+        "/v1.0/users/${var.example_msft_user_guid}/onlineMeetings"
       ]
       external_token_todo : <<EOT
-         In case of getting error: "Forbidden"/"No application access policy found for this app", you need configure application access to online meetings
-         or virtual events: https://learn.microsoft.com/en-us/graph/cloud-communication-online-meeting-application-access-policy
-      EOT
+To enable the connector, you need to allow permissions on the application created for reading OnlineMeetings. You will need Powershell for this.
+
+Please follow the steps below:
+1. Ensure the user you are going to use for running the commands has the "Teams Administrator" role. You can add the role in the
+[Microsoft 365 Admin Center](https://learn.microsoft.com/en-us/microsoft-365/admin/add-users/assign-admin-roles?view=o365-worldwide#assign-a-user-to-an-admin-role-from-active-users)
+
+**NOTE**: About the role, can be assigned through Entra Id portal in Azure portal OR in Entra Admin center https://admin.microsoft.com/AdminPortal/Home. It is possible that even login with an admin account in Entra Admin Center the Teams role is not available to assign to any user; if so, please do it through Azure Portal (Entra Id -> Users -> Assign roles)
+
+2. Install [PowerShell Teams](https://learn.microsoft.com/en-us/microsoftteams/teams-powershell-install) module.
+3. Run the following commands in Powershell terminal:
+```shell
+Connect-MicrosoftTeams
+```
+And use the user with the "Teams Administrator" for login it.
+
+4. Follow steps on [Configure application access to online meetings or virtual events](https://learn.microsoft.com/en-us/graph/cloud-communication-online-meeting-application-access-policy):
+  - Add a policy for the application created for the connector, providing its `application id`
+  - Grant the policy to the whole tenant (NOT to any specific application or user)
+
+**Issues**:
+- If you receive "access denied" is because no admin role for Teams has been detected. Please close and reopen the Powershell terminal after assigning the role.
+- Commands have been tested over a Powershell (7.4.0) terminal in Windows, installed from Microsoft Store and with Teams Module (5.8.0). It might not work on a different environment
+EOT
     }
   }
 
@@ -349,10 +370,10 @@ EOT
     github = {
       source_kind : "github",
       worklytics_connector_id : "github-enterprise-psoxy"
-      display_name : "Github"
+      display_name : "Github Enterprise"
       identifier_scope_id : "github"
-      worklytics_connector_name : "Github via Psoxy"
-      target_host : "api.github.com"
+      worklytics_connector_name : "Github Enterprise via Psoxy"
+      target_host : local.github_api_host
       source_auth_strategy : "oauth2_refresh_token"
       secured_variables : [
         {
@@ -384,7 +405,7 @@ EOT
       environment_variables : {
         GRANT_TYPE : "certificate_credentials"
         TOKEN_RESPONSE_TYPE : "GITHUB_ACCESS_TOKEN"
-        REFRESH_ENDPOINT : "https://api.github.com/app/installations/${local.github_installation_id}/access_tokens"
+        REFRESH_ENDPOINT : "https://${local.github_api_host}/app/installations/${local.github_installation_id}/access_tokens"
         USE_SHARED_TOKEN : "TRUE"
       }
       settings_to_provide = {
@@ -415,8 +436,111 @@ EOT
       - Members: for listing teams and their members
 
   NOTES:
-    - We assume that ALL the repositories are going to be list **should be owned by the organization, not the users**.
+    - We assume that ALL the repositories are going to be listed **should be owned by the organization, not the users**.
     - Enterprise Cloud is required for this connector.
+
+  Apart from Github instructions please review the following:
+  - "Homepage URL" can be anything, not required in this flow but required by Github.
+  - Webhooks check can be disabled as this connector is not using them
+  - Keep `Expire user authorization tokens` enabled, as GitHub documentation recommends
+  2. Once is created please generate a new `Private Key`.
+  3. It is required to convert the format of the certificate downloaded from PKCS#1 in previous step to PKCS#8. Please run following command:
+```shell
+openssl pkcs8 -topk8 -inform PEM -outform PEM -in {YOUR DOWNLOADED CERTIFICATE FILE} -out gh_pk_pkcs8.pem -nocrypt
+```
+
+**NOTES**:
+ - If the certificate is not converted to PKCS#8 connector will NOT work. You might see in logs a Java error `Invalid PKCS8 data.` if the format is not correct.
+ - Command proposed has been successfully tested on Ubuntu; it may differ for other operating systems.
+
+  4. Install the application in your organization.
+     Go to your organization settings and then in "Developer Settings". Then, click on "Edit" for your "Github App" and once you are in the app settings, click on "Install App" and click on the "Install" button. Accept the permissions to install it in your whole organization.
+  5. Once installed, the `installationId` is required as it needs to be provided in the proxy as parameter for the connector in your Terraform module. You can go to your organization settings and
+click on `Third Party Access`. Click on `Configure` the application you have installed in previous step and you will find the `installationId` at the URL of the browser:
+```
+https://github.com/organizations/{YOUR ORG}/settings/installations/{INSTALLATION_ID}
+```
+  Copy the value of `installationId` and assign it to the `github_installation_id` variable in Terraform. You will need to redeploy the proxy again if that value was not populated before.
+
+**NOTE**:
+ - If `github_installation_id` is not set, authentication URL will not be properly formatted and you will see *401: Unauthorized* when trying to get an access token.
+ - If you see *404: Not found* in logs please review the *IP restriction policies* that your organization might have; that could cause connections from psoxy AWS Lambda/GCP Cloud Functions be rejected.
+
+  6. Update the variables with values obtained in previous step:
+     - `PSOXY_GITHUB_CLIENT_ID` with `App ID` value. **NOTE**: It should be `App Id` value as we are going to use authentication through the App and **not** *client_id*.
+     - `PSOXY_GITHUB_PRIVATE_KEY` with content of the `gh_pk_pkcs8.pem` from previous step. You could open the certificate with VS Code or any other editor and copy all the content *as-is* into this variable.
+  7. Once the certificate has been uploaded, please remove {YOUR DOWNLOADED CERTIFICATE FILE} and `gh_pk_pkcs8.pem` from your computer or store it in a safe place.
+
+EOT
+    }
+    github-non-enterprise = {
+      source_kind : "github",
+      worklytics_connector_id : "github-free-team-psoxy"
+      display_name : "Github"
+      identifier_scope_id : "github"
+      worklytics_connector_name : "Github Free/Professional via Psoxy"
+      target_host : local.github_api_host
+      source_auth_strategy : "oauth2_refresh_token"
+      secured_variables : [
+        {
+          name : "ACCESS_TOKEN"
+          writable : true
+          sensitive : true
+          value_managed_by_tf : false
+        },
+        {
+          name : "PRIVATE_KEY"
+          writable : false
+          sensitive : true
+          value_managed_by_tf : false
+        },
+        {
+          name : "CLIENT_ID"
+          writable : false
+          sensitive : true
+          value_managed_by_tf : false
+        },
+        {
+          name : "OAUTH_REFRESH_TOKEN"
+          writable : true
+          lockable : true
+          sensitive : true
+          value_managed_by_tf : false
+        }
+      ],
+      environment_variables : {
+        GRANT_TYPE : "certificate_credentials"
+        TOKEN_RESPONSE_TYPE : "GITHUB_ACCESS_TOKEN"
+        REFRESH_ENDPOINT : "https://${local.github_api_host}/app/installations/${local.github_installation_id}/access_tokens"
+        USE_SHARED_TOKEN : "TRUE"
+      }
+      settings_to_provide = {
+        "GitHub Organization" = local.github_organization
+      }
+      reserved_concurrent_executions : null
+      example_api_calls_user_to_impersonate : null
+      example_api_calls : [
+        "/orgs/${local.github_organization}/repos",
+        "/orgs/${local.github_organization}/members",
+        "/orgs/${local.github_organization}/teams",
+        "/repos/${local.github_organization}/${local.github_example_repository}/events",
+        "/repos/${local.github_organization}/${local.github_example_repository}/commits",
+        "/repos/${local.github_organization}/${local.github_example_repository}/issues",
+        "/repos/${local.github_organization}/${local.github_example_repository}/pulls",
+      ]
+      external_token_todo : <<EOT
+  1. From your organization, register a [GitHub App](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/registering-a-github-app#registering-a-github-app)
+    with following permissions with **Read Only**:
+    - Repository:
+      - Contents: for reading commits and comments
+      - Issues: for listing issues, comments, assignees, etc.
+      - Metadata: for listing repositories and branches
+      - Pull requests: for listing pull requests, reviews, comments and commits
+    - Organization
+      - Members: for listing teams and their members
+
+  NOTES:
+    - We assume that ALL the repositories are going to be listed **should be owned by the organization, not the users**.
 
   Apart from Github instructions please review the following:
   - "Homepage URL" can be anything, not required in this flow but required by Github.

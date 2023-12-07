@@ -102,7 +102,7 @@ public class PseudonymizerImpl implements Pseudonymizer {
             scope = getOptions().getDefaultScopeId();
         }
 
-        builder.scope(scope);
+        builder.scope(StringUtils.trimToNull(scope));
 
 
         byte[] hashWithDefaultImpl =

@@ -27,6 +27,36 @@ variable "example_msft_user_guid" {
   default     = "{EXAMPLE_MSFT_USER_GUID}"
 }
 
+variable "msft_teams_example_team_guid" {
+  type        = string
+  description = "example of MSFT Id (GUID) of a Teams Team for test API calls (OPTIONAL)"
+  default     = "{EXAMPLE_MSFT_TEAMS_TEAM_GUID}"
+}
+
+variable "msft_teams_example_channel_guid" {
+  type        = string
+  description = "example of MSFT Id (GUID) of a Teams Channel for test API calls (OPTIONAL)"
+  default     = "{EXAMPLE_MSFT_TEAMS_CHANNEL_GUID}"
+}
+
+variable "msft_teams_example_chat_guid" {
+  type        = string
+  description = "example of MSFT Id (GUID) of a Teams Chat for test API calls (OPTIONAL)"
+  default     = "{EXAMPLE_MSFT_TEAMS_CHAT_GUID}"
+}
+
+variable "msft_teams_example_call_guid" {
+  type        = string
+  description = "example of MSFT Id (GUID) of a Teams Call for test API calls (OPTIONAL)"
+  default     = "{EXAMPLE_MSFT_TEAMS_CALL_GUID}"
+}
+
+variable "msft_teams_example_call_record_guid" {
+  type        = string
+  description = "example of MSFT Id (GUID) of a Teams Call Record for test API calls (OPTIONAL)"
+  default     = "{EXAMPLE_MSFT_TEAMS_CALL_RECORD_GUID}"
+}
+
 variable "salesforce_domain" {
   type        = string
   description = "Domain of the Salesforce to connect to (only required if using Salesforce connector). To find your My Domain URL, from Setup, in the Quick Find box, enter My Domain, and then select My Domain"
@@ -58,6 +88,11 @@ variable "jira_example_issue_id" {
   description = "If using Jira Server/Cloud connector, provide id of an issue for only to be used as part of example calls for Jira (ex: ETV-12)"
 }
 
+variable "github_api_host" {
+  type        = string
+  default     = null
+  description = "(Only required if using Github connector for on premises) Host of the Github instance (ex: github.mycompany.com). If not provided, it will use 'api.github.com' as default value"
+}
 
 variable "github_installation_id" {
   type        = string

@@ -2,10 +2,16 @@
 
 ## Examples
 
-  * [Example Rules](example-rules/github/github.yaml)
-  * Example Data : [original](api-response-examples/github) | [sanitized](api-response-examples/github/sanitized)
+  * [Example Rules](github.yaml)
+  * Example Data : [original](example-api-responses/original) | [sanitized](example-api-responses/sanitized)
 
 ## Steps to Connect
+
+There are two connectors available for Github:
+  - [Github Free/Professional]
+  - [Github Enterprise]
+
+Both share the same configuration and setup instructions except Administration permission for Audit Log events.
 
 Follow the following steps:
 
@@ -17,12 +23,12 @@ Follow the following steps:
         - Metadata: for listing repositories and branches
         - Pull requests: for listing pull requests, reviews, comments and commits
     - Organization
-        - Administration: for listing events from audit log
+        - Administration: (Only for GitHub Enterprise) for listing events from audit log
         - Members: for listing teams and their members
 
 NOTES:
 - We assume that ALL the repositories are going to be list **should be owned by the organization, not the users**.
-- Enterprise Cloud is required for this connector.
+- In case of using GitHub Server, you need to populate `github_api_host` variable in Terraform with the URL of the API for your GitHub Server instance. For example, `https://api.github.your-company.com`.
 
 Apart from GitHub instructions please review the following:
   - "Homepage URL" can be anything, not required in this flow but required by Github.
@@ -53,10 +59,12 @@ Copy the value of `installationId` and assign it to the `github_installation_id`
 - If `github_installation_id` is not set, authentication URL will not be properly formatted and you will see *401: Unauthorized* when trying to get an access token.
 - If you see *404: Not found* in logs please review the *IP restriction policies* that your organization might have; that could cause connections from psoxy AWS Lambda/GCP Cloud Functions be rejected.
 
-6. Update the variables with values obtained in previous step:
+6. (Only for GitHub Server) If you are using GitHub Server, you will need to set the `github_api_host` variable in Terraform to the URL of your GitHub Server instance. You will need to redeploy the proxy again if that value was not populated before.
+
+7. Update the variables with values obtained in previous step:
    - `PSOXY_GITHUB_CLIENT_ID` with `App ID` value. **NOTE**: It should be `App Id` value as we are going to use authentication through the App and **not** *client_id*.
    - `PSOXY_GITHUB_PRIVATE_KEY` with content of the `gh_pk_pkcs8.pem` from previous step. You could open the certificate with VS Code or any other editor and copy all the content *as-is* into this variable.
-7. Once the certificate has been uploaded, please remove {YOUR DOWNLOADED CERTIFICATE FILE} and `gh_pk_pkcs8.pem` from your computer or store it in a safe place.
+8. Once the certificate has been uploaded, please remove {YOUR DOWNLOADED CERTIFICATE FILE} and `gh_pk_pkcs8.pem` from your computer or store it in a safe place.
 
 ## Reference
-These instructions have been derived from [worklytics-connector-specs](../../infra/modules/worklytics-connector-specs/main.tf); refer to that for definitive information.
+These instructions have been derived from [worklytics-connector-specs](../../../infra/modules/worklytics-connector-specs/main.tf); refer to that for definitive information.

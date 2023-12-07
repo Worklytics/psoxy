@@ -183,9 +183,14 @@ variable "custom_api_connector_rules" {
   default     = {}
 }
 
+
 variable "custom_bulk_connectors" {
   type = map(object({
-    source_kind = string
+    source_kind               = string
+    display_name              = optional(string, "Custom Bulk Connector")
+    worklytics_connector_id   = optional(string, "bulk-import-psoxy")
+    worklytics_connector_name = optional(string, "Custom Bulk Data via Psoxy")
+    rules_file                = optional(string)
     rules = optional(object({
       pseudonymFormat       = optional(string, "URL_SAFE_TOKEN")
       columnsToRedact       = optional(list(string)) # columns to remove from CSV
@@ -198,9 +203,9 @@ variable "custom_bulk_connectors" {
         transforms = optional(list(map(string)), [])
       })), {})
     }))
-    rules_file          = optional(string)
     memory_size_mb      = optional(number, null)
     settings_to_provide = optional(map(string), {})
+    example_file        = optional(string)
   }))
   description = "specs of custom bulk connectors to create"
 

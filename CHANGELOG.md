@@ -1,6 +1,9 @@
 # CHANGELOG
 
-Working tracking of changes, updated as work done prior to release.  Please review [releases](https://github.com/Worklytics/psoxy/releases) for ultimate versions.
+Please review [releases](https://github.com/Worklytics/psoxy/releases) for full details of changes
+in each release's notes.
+
+Changes to be including in future/planned release notes will be added here.
 
 ## Next
 
@@ -16,6 +19,11 @@ Working tracking of changes, updated as work done prior to release.  Please revi
         "read+write `PSOXY_GCAL*`" (if shared secrets have common prefix with connector secrets,
         then wildcard policy to read shared also grants read of secrets across all connectors)
   - keys/salts per value kind (PII, item id, etc)
+
+## [0.4.41](https://github.com/Worklytics/psoxy/release/tag/v0.4.41)
+  * GCP only : Compute Engine API will be enabled in the project. Newer versions of GCP terraform
+    provider seem to require this. You may see this in your next `terraform plan`, although it may
+    also be a no-op if you already have the API enabled.
 
 ## [0.4.36](https://github.com/Worklytics/psoxy/release/tag/v0.4.36)
   * Microsoft 365 - Azure AD Directory - default rules change to return `proxyAddresses` field for

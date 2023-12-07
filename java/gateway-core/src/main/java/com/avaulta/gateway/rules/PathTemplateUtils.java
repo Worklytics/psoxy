@@ -1,7 +1,9 @@
 package com.avaulta.gateway.rules;
 
-import java.util.Map;
-import java.util.Optional;
+import lombok.Builder;
+import lombok.Value;
+
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,8 +29,8 @@ public class PathTemplateUtils {
     public String asRegex(String pathTemplate) {
         //NOTE: java capturing groups names limited to A-Z, a-z and 0-9, and must start with a letter
 
-        return "^" + pathTemplate
-                .replaceAll(SPECIAL_CHAR_CLASS, "\\\\$0")
+        return "^"
+            + pathTemplate.replaceAll(SPECIAL_CHAR_CLASS, "\\\\$0")
                 // turn `/{foo}/` into `/(?<foo>[^/]+)/`
                 .replaceAll(REGEX_ALPHANUMERIC_PATH_PARAM, PARAM_VALUE_CAPTURING_PATTERN)
             + "$";
@@ -45,6 +47,41 @@ public class PathTemplateUtils {
             }
         }
         return Optional.empty();
+    }
+
+    public <T> Optional<Match<T>> matchVerbose(Map<String, T> pathMap, String path) {
+        for (Map.Entry<String, T> entry : pathMap.entrySet()) {
+            Pattern p = Pattern.compile(asRegex(entry.getKey()));
+            Matcher m = p.matcher(path);
+
+            if (m.matches()) {
+                List<String> capturedGroups = new ArrayList<>(m.groupCount());
+
+                //capturing groups are indexed from 1, not 0
+                for (int i = 1; i <= m.groupCount(); i++) {
+                    capturedGroups.add(m.group(i));
+                }
+
+                return Optional.of(Match.<T>builder()
+                    .template(entry.getKey())
+                    .capturedParams(capturedGroups)
+                    .match(entry.getValue())
+                    .build());
+            }
+        }
+        return Optional.empty();
+    }
+
+    @Builder
+    @Value
+    public static class Match<T> {
+
+
+        String template;
+
+        List<String> capturedParams;
+
+        T match;
     }
 
 }

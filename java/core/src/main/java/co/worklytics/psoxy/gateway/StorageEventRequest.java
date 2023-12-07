@@ -51,4 +51,18 @@ public class StorageEventRequest {
      */
     @NonNull
     String destinationObjectPath;
+
+    /**
+     * whether to decompress (gunzip) input
+     */
+    @Builder.Default
+    Boolean decompressInput = false;
+
+    /**
+     * whether to compress (gzip) output
+     */
+    @Builder.Default
+    Boolean compressOutput = false;
+
+
 }
