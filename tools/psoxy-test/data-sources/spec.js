@@ -12,9 +12,9 @@ export default {
             paramReplacement: 'workspace',
           },
           {
-            name: 'Workspace Projects',
+            name: 'Workspace Teams',
             accessor: 'data[0].gid',
-            pathReplacement: 'workspace_id',
+            pathReplacement: '[workspace_id]',
           },
         ],
       },
@@ -24,33 +24,54 @@ export default {
         params: { workspace: null, limit: 10 },
       },
       {
-        name: 'Workspace Projects',
-        path: '/api/1.0/workspaces/[workspace_id]/projects',
+        name: 'Workspace Teams',
+        path: '/api/1.0/workspaces/[workspace_id]/teams',
         param: { limit: 10 },
         refs: [
           {
-            name: 'Project Tasks',
+            name: 'Team Projects',
             accessor: 'data[0].gid',
-            pathReplacement: '[project_id]',
+            pathReplacement: '[team_id]',
           },
         ],
       },
       {
-        name: 'Project Tasks',
-        path: '/api/1.0/projects/[project_id]/tasks',
+        name: 'Team Projects',
+        path: '/api/1.0/teams/[team_id]/projects',
         param: { limit: 10 },
         refs: [
+          {
+            name: 'Tasks',
+            accessor: 'data[0].gid',
+            paramReplacement: 'project',
+          },
+        ],
+      },
+      {
+        name: 'Tasks',
+        path: '/api/1.0/tasks',
+        params: { limit: 10, project: null },
+        refs: [
+          {
+            name: 'Task',
+            accessor: 'data[0].gid',
+            pathReplacement: '[task_id]',
+          },
           {
             name: 'Task Stories',
             accessor: 'data[0].gid',
             pathReplacement: '[task_id]',
           },
-        ],
+        ]
+      },
+      {
+        name: 'Task',
+        path: '/api/1.0/tasks/[task_id]',
       },
       {
         name: 'Task Stories',
         path: '/api/1.0/tasks/[task_id]/stories',
-      },
+      }
     ],
   },
   'azure-ad': {
