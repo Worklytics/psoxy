@@ -7,9 +7,14 @@ locals {
 module "worklytics_connector_specs" {
   source = "../../modules/worklytics-connector-specs"
 
-  enabled_connectors     = var.enabled_connectors
-  msft_tenant_id         = var.msft_tenant_id
-  example_msft_user_guid = var.example_msft_user_guid
+  enabled_connectors                  = var.enabled_connectors
+  msft_tenant_id                      = var.msft_tenant_id
+  example_msft_user_guid              = var.example_msft_user_guid
+  msft_teams_example_team_guid        = var.msft_teams_example_team_guid
+  msft_teams_example_channel_guid     = var.msft_teams_example_channel_guid
+  msft_teams_example_chat_guid        = var.msft_teams_example_chat_guid
+  msft_teams_example_call_guid        = var.msft_teams_example_call_guid
+  msft_teams_example_call_record_guid = var.msft_teams_example_call_record_guid
 }
 
 data "azuread_client_config" "current" {
@@ -29,7 +34,9 @@ module "msft_connection" {
   tenant_id                         = var.msft_tenant_id
   required_app_roles                = each.value.required_app_roles
   required_oauth2_permission_scopes = each.value.required_oauth2_permission_scopes
-  owners                            = toset(concat(data.azuread_users.owners.object_ids, [data.azuread_client_config.current.object_id]))
+  owners                            = toset(concat(data.azuread_users.owners.object_ids, [
+    data.azuread_client_config.current.object_id
+  ]))
 }
 
 # grant required permissions to connectors via Azure AD
@@ -52,7 +59,7 @@ locals {
   enabled_api_connectors = {
     for k, v in module.worklytics_connector_specs.enabled_msft_365_connectors :
     k => merge(v, {
-      connector = module.msft_connection[k].connector
+      connector             = module.msft_connection[k].connector
       environment_variables = merge(v.environment_variables, {
         CLIENT_ID = module.msft_connection[k].connector.application_id
       })

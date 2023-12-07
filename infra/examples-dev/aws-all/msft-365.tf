@@ -10,6 +10,11 @@ module "worklytics_connectors_msft_365" {
   msft_tenant_id         = var.msft_tenant_id
   example_msft_user_guid = var.example_msft_user_guid
   msft_owners_email      = var.msft_owners_email
+  msft_teams_example_team_guid        = var.msft_teams_example_team_guid
+  msft_teams_example_channel_guid     = var.msft_teams_example_channel_guid
+  msft_teams_example_chat_guid        = var.msft_teams_example_chat_guid
+  msft_teams_example_call_guid        = var.msft_teams_example_call_guid
+  msft_teams_example_call_record_guid = var.msft_teams_example_call_record_guid
   todo_step              = 1
 }
 
