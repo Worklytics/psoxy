@@ -323,7 +323,6 @@ And use the user with the "Teams Administrator" for login it.
 - Commands have been tested over a Powershell (7.4.0) terminal in Windows, installed from Microsoft Store and with Teams Module (5.8.0). It might not work on a different environment
 EOT
     }
-    }
   }
 
   # backwards-compatible for v0.4.x; remove in v0.5.x
