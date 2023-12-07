@@ -6,6 +6,7 @@ import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.HostEnvironment;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.StorageEventRequest;
+import co.worklytics.psoxy.storage.BulkDataTestUtils;
 import co.worklytics.psoxy.storage.StorageHandler;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestUtils;
@@ -106,20 +107,6 @@ public class SlackDiscoveryBulkTests {
         assertTrue(rules instanceof MultiTypeBulkDataRules);
     }
 
-    StorageEventRequest request(
-            String sourceObjectPath,
-            String filePath) {
-         Reader reader = new InputStreamReader(new ByteArrayInputStream(TestUtils.getData(filePath)));
-
-        return StorageEventRequest.builder()
-            .sourceBucketName("bucket")
-            .sourceObjectPath(sourceObjectPath)
-            .sourceReader(reader)
-            .destinationBucketName("bucket")
-            .destinationObjectPath(sourceObjectPath)
-            .destinationWriter(writer)
-            .build();
-    }
 
     @SneakyThrows
     @CsvSource({
@@ -133,10 +120,10 @@ public class SlackDiscoveryBulkTests {
     @ParameterizedTest
     public void files(String rulesPath, String file) {
         setUp(rulesPath);
-        final String objectPath = "/export-20231128/" + file + ".gz";
+        final String objectPath = "export-20231128/" + file + ".gz";
         final String pathToOriginal = "sources/slack/example-bulk/original/" + file;
         final String pathToSanitized = "sources/slack/example-bulk/sanitized/" + file;
-        storageHandler.handle(request(objectPath, pathToOriginal), rules);
+        storageHandler.handle(BulkDataTestUtils.request(objectPath, pathToOriginal, writer), rules);
 
         writer.close();
 

@@ -4,6 +4,7 @@ import co.worklytics.psoxy.PsoxyModule;
 import co.worklytics.psoxy.SourceAuthModule;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.utils.RandomNumberGenerator;
+import co.worklytics.psoxy.utils.RandomNumberGeneratorImpl;
 import co.worklytics.test.MockModules;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.auth.oauth2.AccessToken;
@@ -15,7 +16,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.Mockito;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -25,6 +25,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -47,7 +48,6 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
     })
     public interface Container {
         void inject(OAuthRefreshTokenSourceAuthStrategyTest test);
-
     }
 
     @BeforeEach
@@ -196,5 +196,16 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
         tokenRefreshHandler.storeRefreshTokenIfRotated(exampleResponse);
 
         verify(tokenRefreshHandler.config, times(shouldRotate ? 1 : 0)).putConfigProperty(eq(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN), eq(newToken));
+    }
+
+    @Test
+    public void refreshProactiveThresholdTimeIsBounded() {
+        OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl tokenRefreshHandler = new OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl();
+        tokenRefreshHandler.randomNumberGenerator = new RandomNumberGeneratorImpl();
+        IntStream.range(0, 1_000).forEach(i -> {
+            int proactiveGracePeriodSeconds = tokenRefreshHandler.getProactiveGracePeriodSeconds();
+            assertTrue(proactiveGracePeriodSeconds >= tokenRefreshHandler.MIN_PROACTIVE_TOKEN_REFRESH.getSeconds());
+            assertTrue(proactiveGracePeriodSeconds <= tokenRefreshHandler.MAX_PROACTIVE_TOKEN_REFRESH.getSeconds());
+        });
     }
 }
