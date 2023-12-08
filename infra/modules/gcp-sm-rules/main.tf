@@ -51,6 +51,20 @@ resource "google_secret_manager_secret_version" "rules" {
   }
 }
 
+# so can list versions, get latest
+resource "google_secret_manager_secret_iam_member" "view" {
+  member    = "serviceAccount:${var.instance_sa_email}"
+  role      = "roles/secretmanager.viewer"
+  secret_id = google_secret_manager_secret.rules.id
+}
+
+# access versions
+resource "google_secret_manager_secret_iam_member" "access" {
+  member    = "serviceAccount:${var.instance_sa_email}"
+  role      = "roles/secretmanager.secretAccessor"
+  secret_id = google_secret_manager_secret.rules.id
+}
+
 output "rules_hash" {
   value = sha1(local.rules_plain)
 }
