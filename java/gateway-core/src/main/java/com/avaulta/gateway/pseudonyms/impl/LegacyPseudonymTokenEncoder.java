@@ -10,13 +10,14 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.Base64;
 
 /*
- * encodes legacy pseudonyms as tokens, starting with "l~" followed by hash value (presumed to be
+ * encodes legacy pseudonyms as tokens, starting with "t~" followed by hash value (presumed to be
  * already base64 encoded in legacy case; eg v0.3)
  *
- * NOTE: v0.4.38 to v0.4.41 may have pseudonyms encoded in this format, but with `t~` prefix, for
- * PseudonymizeRegexMatches cases
- *
- *
+ * considered using a distinct prefix ("l~") for legacy, but instead have made
+ * UrlSafeTokenPseudonymEncoder able to decode these as well; and the difference between this legacy
+ * encoding and url safe is implicit - only legacy can contain a `.`; anything NOT containing a '.'
+ * is either urlsafetoken, or a case where legacy is equivalent to urlsafetoken. in all cases,
+ * the UrlSafeTokenPseudonymEncoder can decode them.
  */
 @Log
 public class LegacyPseudonymTokenEncoder implements PseudonymEncoder {
