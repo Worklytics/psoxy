@@ -62,6 +62,12 @@ public class RulesUtils {
 
         if (configuredRules.isPresent()) {
             String yamlEncodedRules = decodeToYaml(configuredRules.get());
+
+            //NOTE: could check CUSTOM_RULES_SHA here, but that's only filled when customers fill
+            // the custom rules via Terraform; and may drift if customer later alters rules via
+            // some other mechanism (eg, directly from the SSM Parameter Store UX in AWS Console),
+            // which is fairly legitimate
+
             return Optional.of(parse(yamlEncodedRules));
         } else {
             if (envVarsConfigService != null // legacy case
