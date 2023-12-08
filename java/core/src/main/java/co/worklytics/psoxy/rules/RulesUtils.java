@@ -3,6 +3,7 @@ package co.worklytics.psoxy.rules;
 import co.worklytics.psoxy.gateway.BulkModeConfigProperty;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.storage.StorageHandler;
 import com.avaulta.gateway.rules.ColumnarRules;
 import com.avaulta.gateway.rules.MultiTypeBulkDataRules;
@@ -17,6 +18,7 @@ import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -54,13 +56,23 @@ public class RulesUtils {
      * @see com.fasterxml.jackson.core.JsonParseException sry for the misnomer, but we leverage Jackson for both YAML and JSON
      */
     @SneakyThrows
-    public Optional<com.avaulta.gateway.rules.RuleSet> getRulesFromConfig(ConfigService config) {
+    public Optional<com.avaulta.gateway.rules.RuleSet> getRulesFromConfig(ConfigService config,
+                                                                          EnvVarsConfigService envVarsConfigService) {
         Optional<String> configuredRules = config.getConfigPropertyAsOptional(ProxyConfigProperty.RULES);
 
         if (configuredRules.isPresent()) {
             String yamlEncodedRules = decodeToYaml(configuredRules.get());
             return Optional.of(parse(yamlEncodedRules));
         } else {
+            if (envVarsConfigService != null // legacy case
+                && envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.CUSTOM_RULES_SHA).map(StringUtils::isNotBlank).orElse(false)) {
+                //possible cases
+                //  - Terraform bug where SHA filled in env vars,
+                //  - RULES set in GCP Secret Manager/ AWS Parameter Store / etc but
+
+                log.warning("CUSTOM_RULES_SHA is set, but no RULES are configured; ensure that RULES configuration value is populated and accessible to the Proxy instance");
+            }
+
             return Optional.empty();
         }
     }
