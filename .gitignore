@@ -5,8 +5,14 @@
 */.idea/usage.statistics.xml
 # libraries isn't in above doc, but simply doesn't seem like what we want ...
 .idea/libraries/
-#NOTE: am NOT excluding .iml files; even for Maven-based modules; Intellij's base import of the
-# Maven modules --> IntelliJ modules doesn't result in nice hierarchy (only shows leaves)
+
+
+# exclude .iml, modules.xml due bc including them doesn't cause repo to behave well w Intellij
+# and seems we don't *need* to commit them
+# https://intellij-support.jetbrains.com/hc/en-us/articles/206544839-How-to-manage-projects-under-Version-Control-Systems
+.idea/modules.xml
+*.iml
+
 
 # macOs generated files
 .DS_Store

@@ -96,7 +96,7 @@ public class RulesUtils {
 
 
     @VisibleForTesting
-    com.avaulta.gateway.rules.RuleSet parse(@NonNull String yamlString) {
+    public com.avaulta.gateway.rules.RuleSet parse(@NonNull String yamlString) {
         for (Class<?> impl : rulesImplementations) {
             try {
                 com.avaulta.gateway.rules.RuleSet rules =

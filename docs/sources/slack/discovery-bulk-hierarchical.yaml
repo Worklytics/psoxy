@@ -1,0 +1,30 @@
+fileRules:
+  export-{week}/{file}:
+    fileRules:
+      users.ndjson.gz:
+        format: "NDJSON"
+        transforms:
+          - pseudonymize: "$.profile.email"
+          - redact: "$.name"
+          - redact: "$.real_name"
+      channels.ndjson.gz:
+        format: "NDJSON"
+        transforms:
+          - redact: "$.name"
+      dms.ndjson.gz:
+        format: "NDJSON"
+        transforms:
+          - redact: "$.text"
+      groups.ndjson.gz:
+        format: "NDJSON"
+        transforms:
+          - redact: "$.name"
+      mpims.ndjson.gz:
+        format: "NDJSON"
+        transforms:
+          - redact: "$.text"
+      messages-{id}.ndjson.gz:
+       format: "NDJSON"
+       transforms:
+          - redact: "$.text"
+          - redact: "$.channel_name"

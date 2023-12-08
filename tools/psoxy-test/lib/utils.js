@@ -202,33 +202,35 @@ function executeCommand(command) {
 /**
  * Transform endpoint's path and params based on previous calls responses
  *
- * @param {Object} spec - see `../data-sources/spec.js`
- * @param {Object} res - data source API response
+ * @param {string} endpointName - name of the endpoint
+ * @param {object} sourceData - endpoint's data source API response
+ * @param {object} spec - see `../data-sources/spec.js` (filtered by source)
  * @returns
  */
-function transformSpecWithResponse(spec = {}, res = {}) {
-  (spec?.endpoints || [])
-    .filter((endpoint) => endpoint.refs !== undefined)
-    .forEach((endpoint) => {
-      endpoint.refs.forEach((ref) => {
-        const target = spec.endpoints.find((endpoint) => endpoint.name === ref.name);
+function transformSpecWithResponse(endpointName = '', sourceData = {}, spec = {}) {
 
-        if (target && ref.accessor) {
-          const valueReplacement = _.get(res, ref.accessor);
+  const refs = (spec?.endpoints ?? [])
+    .find(endpoint => endpoint.name === endpointName)?.refs ?? [];
 
-          if (valueReplacement) {
-            // 2 possible replacements: path or param
-            if (ref.pathReplacement) {
-              target.path = target.path.replace(ref.pathReplacement, valueReplacement);
-            }
+  refs.forEach((ref) => {
+    const target = spec.endpoints.find((endpoint) => endpoint.name === ref.name);
 
-            if (ref.paramReplacement) {
-              target.params[ref.paramReplacement] = valueReplacement;
-            }
-          }
+    if (target && ref.accessor) {
+      const valueReplacement = _.get(sourceData, ref.accessor);
+
+      if (valueReplacement) {
+        // 2 possible replacements: path or param
+        if (ref.pathReplacement) {
+          target.path = target.path.replace(ref.pathReplacement, valueReplacement);
         }
-      });
-    });
+
+        if (ref.paramReplacement) {
+          target.params[ref.paramReplacement] = valueReplacement;
+        }
+      }
+    }
+  })
+
   return spec;
 }
 
@@ -381,7 +383,17 @@ async function getAWSCredentials(role, region) {
   return credentials;
 }
 
+function addFilenameSuffix(filename, suffix) {
+  let result = '';
+  if (!_.isEmpty(filename)) {
+    const { name, ext } = path.parse(filename);
+    result = `${name}-${suffix}${ext}`;
+  }
+  return result;
+}
+
 export {
+  addFilenameSuffix,
   executeCommand,
   executeWithRetry,
   getAWSCredentials,
