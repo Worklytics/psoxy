@@ -260,7 +260,6 @@ locals {
         "User.Read.All",
         "Team.ReadBasic.All",
         "Channel.ReadBasic.All",
-        "Chat.ReadBasic.All",
         "Chat.Read.All",
         "ChannelMessage.Read.All",
         "CallRecords.Read.All",
