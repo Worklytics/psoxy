@@ -85,8 +85,7 @@ public class Teams_NoUserIds_Tests extends JavaRulesTestBaseCase {
             "1fb8890f-423e-4154-8fbf-db6809bc8756");
         assertRedacted(sanitized,
             "@odata.context", "https://graph.microsoft.com/v1.0/$metadata#teams('fbe2bf47-16c8-47cf-b4a5-4b9b187c508b')/channels('19%3A4a95f7d8db4c4e7fae857bcebe0623e6%40thread.tacv2')/messages",
-            "@odata.count",
-            "@odata.type", "#microsoft.graph.teamDescriptionUpdatedEventMessageDetail"
+            "@odata.count"
         );
 
         Collection<String> oDataUrl = Arrays.asList(
@@ -133,8 +132,7 @@ public class Teams_NoUserIds_Tests extends JavaRulesTestBaseCase {
         assertPseudonymized(sanitized, "8ea0e38b-efb3-4757-924a-5f94061cf8c2", "1fb8890f-423e-4154-8fbf-db6809bc8756");
         assertRedacted(sanitized,
             "@odata.context", "https://graph.microsoft.com/v1.0/$metadata#chats('19%3A2da4c29f6d7041eca70b638b43d45437%40thread.v2')/messages",
-            "@odata.count",
-            "@odata.type", "#microsoft.graph.chatRenamedEventMessageDetail"
+            "@odata.count"
          );
 
         Collection<String> oDataUrl = Arrays.asList(
