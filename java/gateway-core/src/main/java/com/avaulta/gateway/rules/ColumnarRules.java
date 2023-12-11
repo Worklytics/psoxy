@@ -79,6 +79,13 @@ public class ColumnarRules implements BulkDataRules {
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     @JsonSetter(nulls = Nulls.AS_EMPTY)
     @NonNull
+    @Singular(value = "columnToPseudonymizeIfPresent")
+    protected List<String> columnsToPseudonymizeIfPresent = new ArrayList<>();
+
+
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
+    @NonNull
     @Singular(value = "columnToRedact")
     protected List<String> columnsToRedact = new ArrayList<>();
 

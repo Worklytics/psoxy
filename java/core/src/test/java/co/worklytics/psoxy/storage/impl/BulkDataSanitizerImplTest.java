@@ -127,6 +127,29 @@ public class BulkDataSanitizerImplTest {
 
     @Test
     @SneakyThrows
+    void handle_pseudonymizeIfPresent() {
+        final String EXPECTED = "EMPLOYEE_ID,EMPLOYEE_EMAIL,DEPARTMENT,SNAPSHOT,MANAGER_ID,JOIN_DATE,LEAVE_DATE\r\n" +
+            "1,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\",\"\"h_4\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",Engineering,2023-01-06,,2019-11-11,\r\n" +
+            "2,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"workltyics.co\"\",\"\"hash\"\":\"\"al4JK5KlOIsneC2DM__P_HRYe28LWYTBSf3yWKGm5yQ\"\",\"\"h_4\"\":\"\"al4JK5KlOIsneC2DM__P_HRYe28LWYTBSf3yWKGm5yQ\"\"}\",Sales,2023-01-06,1,2020-01-01,\r\n" +
+            "3,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"workltycis.co\"\",\"\"hash\"\":\"\"BlQB8Vk0VwdbdWTGAzBF.ote1357Ajr0fFcgFf72kdk\"\",\"\"h_4\"\":\"\"BlQB8Vk0VwdbdWTGAzBF-ote1357Ajr0fFcgFf72kdk\"\"}\",Engineering,2023-01-06,1,2019-10-06,2022-12-08\r\n" +
+            "4,,Engineering,2023-01-06,1,2018-06-03,\r\n"; //blank ID
+
+        ColumnarRules rules = ColumnarRules.builder()
+            .columnToPseudonymizeIfPresent("EMPLOYEE_EMAIL")
+            .columnToPseudonymizeIfPresent("EXTRA_EMAIL") //unlike 'columnToPseudonymize', this doesn't throw error
+            .build();
+
+        File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
+        columnarFileSanitizerImpl.setRules(rules);
+        try (FileReader in = new FileReader(inputFile);
+             StringWriter out = new StringWriter()) {
+            columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
+            assertEquals(EXPECTED, out.toString());
+        }
+    }
+
+    @Test
+    @SneakyThrows
     void handle_redaction() {
         final String EXPECTED = "EMPLOYEE_ID,EMPLOYEE_EMAIL,SNAPSHOT,MANAGER_ID,JOIN_DATE,LEAVE_DATE\r\n" +
             "1,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\",\"\"h_4\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",2023-01-06,,2019-11-11,\r\n" +

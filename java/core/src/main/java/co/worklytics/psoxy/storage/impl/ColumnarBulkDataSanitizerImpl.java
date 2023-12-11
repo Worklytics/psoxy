@@ -88,7 +88,11 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
 
         Set<String> columnsToRedact = asSetWithCaseInsensitiveComparator(rules.getColumnsToRedact());
 
-        Set<String> columnsToPseudonymize = asSetWithCaseInsensitiveComparator(rules.getColumnsToPseudonymize());
+        Set<String> columnsToPseudonymize =
+            asSetWithCaseInsensitiveComparator(rules.getColumnsToPseudonymize());
+
+        Set<String> columnsToPseudonymizeIfPresent =
+            asSetWithCaseInsensitiveComparator(rules.getColumnsToPseudonymizeIfPresent());
 
 
         Map<String, ColumnarRules.FieldTransformPipeline> columnsToTransform =
@@ -166,7 +170,8 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
         TriFunction<String, String, Pseudonymizer, String> pseudonymizationFunction = buildPseudonymizationFunction(rules);
 
         BiFunction<String, String, String> applyPseudonymizationIfAny = (outputColumnName, value) -> {
-            if (columnsToPseudonymize.contains(outputColumnName.toLowerCase())) {
+            if (columnsToPseudonymize.contains(outputColumnName.toLowerCase())
+                || columnsToPseudonymizeIfPresent.contains(outputColumnName.toLowerCase())) {
                 return pseudonymizationFunction.apply(value, outputColumnName, pseudonymizer);
             }
             return value;
