@@ -20,6 +20,7 @@ import javax.inject.Singleton;
 import java.io.*;
 import java.nio.channels.Channels;
 import java.util.List;
+import java.util.function.Supplier;
 
 @Singleton
 @Log
@@ -59,34 +60,27 @@ public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
             return;
         }
 
-        StorageEventRequest request = storageHandler.buildRequest(null, null, importBucket, sourceName, transform);
-
-        boolean inputIsCompressed =
-            StorageHandler.isCompressed(sourceBlobInfo.getContentEncoding());
-
-        StorageHandler.warnIfEncodingDoesNotMatchFilename(request, sourceBlobInfo.getContentEncoding());
-
-        // for now, just do the same for both
-        request = request.withCompressOutput(inputIsCompressed).withDecompressInput(inputIsCompressed);
+        StorageEventRequest request =
+            storageHandler.buildRequest(importBucket, sourceName, transform, sourceBlobInfo.getContentEncoding());
 
         if (storageHandler.getApplicableRules(transform.getRules(), request.getSourceObjectPath()).isPresent()) {
-            //validate
-            try (ReadChannel readChannel = storage.reader(sourceBlobId, Storage.BlobSourceOption.shouldReturnRawInputStream(true));
-                 InputStream is = Channels.newInputStream(readChannel)) {
-                storageHandler.validate(request, transform, is);
-            }
 
-            //process
-            BlobInfo destBlobInfo = BlobInfo.newBuilder(BlobId.of(request.getDestinationBucketName(), request.getDestinationObjectPath()))
-                .setContentType(sourceBlobInfo.getContentType())
-                .setMetadata(storageHandler.buildObjectMetadata(importBucket, sourceName, transform))
-                .build();
-            try (ReadChannel readChannel = storage.reader(sourceBlobId, Storage.BlobSourceOption.shouldReturnRawInputStream(true));
-                 InputStream is = Channels.newInputStream(readChannel);
-                 WriteChannel writeChannel = storage.writer(destBlobInfo);
-                 OutputStream os = Channels.newOutputStream(writeChannel)) {
-                storageHandler.process(request, transform, is, os);
-            }
+            Supplier<InputStream> inputStreamSupplier = () -> {
+                ReadChannel readChannel = storage.reader(sourceBlobId, Storage.BlobSourceOption.shouldReturnRawInputStream(true));
+                return Channels.newInputStream(readChannel);
+            };
+
+            Supplier<OutputStream> outputStreamSupplier = () -> {
+                BlobInfo destBlobInfo = BlobInfo.newBuilder(BlobId.of(request.getDestinationBucketName(), request.getDestinationObjectPath()))
+                    .setContentType(sourceBlobInfo.getContentType())
+                    .setMetadata(storageHandler.buildObjectMetadata(importBucket, sourceName, transform))
+                    .build();
+                WriteChannel writeChannel = storage.writer(destBlobInfo);
+                //NOTE: when close() called on the stream, close is called on channel, so should be OK
+                return Channels.newOutputStream(writeChannel);
+            };
+
+            storageHandler.handle(request, transform, inputStreamSupplier, outputStreamSupplier);
         } else {
             log.info("Skipping " + importBucket + "/" + request.getSourceObjectPath() + " because no rules apply");
         }

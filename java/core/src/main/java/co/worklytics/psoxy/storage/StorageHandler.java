@@ -19,6 +19,7 @@ import javax.inject.Singleton;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -34,7 +35,7 @@ public class StorageHandler {
     // as writing to remote storage, err on size of larger buffer
     private static final int DEFAULT_BUFFER_SIZE = 65_536; //64 KB
 
-    public static final String CONTENT_ENCODING_GZIP = "gzip";
+    private static final String CONTENT_ENCODING_GZIP = "gzip";
 
     @Inject
     ConfigService config;
@@ -57,12 +58,7 @@ public class StorageHandler {
     @Inject
     PathTemplateUtils pathTemplateUtils;
 
-
-    public static boolean isCompressed(@Nullable String contentEncoding) {
-        return StringUtils.equals(contentEncoding, CONTENT_ENCODING_GZIP);
-    }
-
-    public static void warnIfEncodingDoesNotMatchFilename(@NonNull StorageEventRequest request, @Nullable String contentEncoding) {
+    static void warnIfEncodingDoesNotMatchFilename(@NonNull StorageEventRequest request, @Nullable String contentEncoding) {
         if (request.getSourceObjectPath().endsWith(".gz")
             && !StringUtils.equals(contentEncoding, CONTENT_ENCODING_GZIP)) {
             log.warning("Input filename ends with .gz, but 'Content-Encoding' metadata is not 'gzip'; is this correct? Decompression is based on object's 'Content-Encoding'");
@@ -92,137 +88,62 @@ public class StorageHandler {
 
     }
 
-    int getBufferSize() {
-        return config.getConfigPropertyAsOptional(BulkModeConfigProperty.BUFFER_SIZE).map(Integer::parseInt).orElse(DEFAULT_BUFFER_SIZE);
-    }
-
-
-    /**
-     * attempt to validate that the input stream can be processed per request/transform
-     *
-     * use-case: avoid opening output writer if file isn't valid
-     *
-     * @param request
-     * @param transform
-     * @param is
-     * @return
-     */
-    @SneakyThrows
-    public boolean validate(StorageEventRequest request,
-                            StorageHandler.ObjectTransform transform,
-                            InputStream is) {
-        int bufferSize = getBufferSize();
-        try (
-            InputStream decompressedStream = request.getDecompressInput() ? new GZIPInputStream(is, bufferSize) : is;
-            BufferedReader reader = new BufferedReader(new InputStreamReader(decompressedStream, StandardCharsets.UTF_8), bufferSize);
-            StringWriter out = new StringWriter()
-        ) {
-            Optional<BulkDataRules> applicableRules = getApplicableRules(transform.getRules(), request.getSourceObjectPath());
-
-            if (applicableRules.isEmpty()) {
-                throw new IllegalArgumentException("No applicable rules found for " + request.getSourceObjectPath());
-            }
-
-            StringBuffer firstLines = new StringBuffer();
-            while (firstLines.length() < 5) {
-                String line = reader.readLine();
-                if (line == null) {
-                    break;
-                }
-                firstLines.append(line);
-            }
-
-            StorageEventRequest testRequest = request
-                .withSourceReader(new StringReader(firstLines.toString()))
-                .withDestinationWriter(out);
-
-            this.handle(testRequest, applicableRules.get());
-
-            return true;
-        }
-    }
-
-
 
     @SneakyThrows
-    public StorageEventResponse process(StorageEventRequest request,
-                 StorageHandler.ObjectTransform transform,
-                 InputStream is,
-                 OutputStream os) {
-        int bufferSize = getBufferSize();
-        try (
-            InputStream decompressedStream = request.getDecompressInput() ? new GZIPInputStream(is, bufferSize) : is;
-            Reader reader = new BufferedReader(new InputStreamReader(decompressedStream, StandardCharsets.UTF_8), bufferSize);
-            OutputStream outputStream = request.getCompressOutput() ? new GZIPOutputStream(os, bufferSize) : os;
-            OutputStreamWriter writer = new OutputStreamWriter(outputStream)
-        ) {
-
-            request = request
-                .withSourceReader(reader)
-                .withDestinationWriter(writer);
-
-            StorageEventResponse storageEventResponse = this.handle(request, transform.getRules());
-
-            log.info("Writing to: " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationObjectPath());
-
-            log.info("Successfully pseudonymized " + request.getSourceBucketName() + "/"
-                + request.getSourceObjectPath() + " and uploaded to " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationObjectPath());
-            return storageEventResponse;
-        }
-
-    }
+    public StorageEventResponse handle(StorageEventRequest request,
+                                       StorageHandler.ObjectTransform transform,
+                                       Supplier<InputStream> inputStreamSupplier,
+                                       Supplier<OutputStream> outputStreamSupplier) {
 
 
-    @SneakyThrows
-    public StorageEventResponse handle(StorageEventRequest request, RuleSet rules) {
+        this.validate(request, transform, inputStreamSupplier);
 
-        Optional<BulkDataRules> applicableRules = getApplicableRules(rules, request.getSourceObjectPath());
+        this.process(request, transform, inputStreamSupplier, outputStreamSupplier);
 
-        if (applicableRules.isEmpty()) {
-            throw new IllegalArgumentException("No applicable rules found for " + request.getSourceObjectPath());
-        }
+        StorageEventResponse response = StorageEventResponse.builder()
+            .destinationBucketName(request.getDestinationBucketName())
+            .destinationObjectPath(request.getDestinationObjectPath())
+            .build();
 
-        BulkDataSanitizer fileHandler = bulkDataSanitizerFactory.get(applicableRules.get());
+        log.info("Writing to: " + response.getDestinationBucketName() + "/" + response.getDestinationObjectPath());
 
-        fileHandler.sanitize(request.getSourceReader(), request.getDestinationWriter(), pseudonymizer);
+        log.info("Successfully pseudonymized " + request.getSourceBucketName() + "/"
+            + request.getSourceObjectPath() + " and uploaded to " + response.getDestinationBucketName() + "/" + response.getDestinationObjectPath());
 
-        return StorageEventResponse.builder()
-                .destinationBucketName(request.getDestinationBucketName())
-                .destinationObjectPath(request.getDestinationObjectPath())
-                .build();
+        return response;
     }
 
 
 
 
     /**
-     *
-     * @param reader from source, may be null if not yet known
-     * @param writer to destination, may be null if not yet known
-     * @param sourceBucketName bucket name
-     * @param sourceObjectPath a path (object key) within the bucket; no leading `/` expected
+     * @param sourceBucketName      bucket name
+     * @param sourceObjectPath      a path (object key) within the bucket; no leading `/` expected
      * @param transform
+     * @param sourceContentEncoding
      * @return
      */
-    public StorageEventRequest buildRequest(Reader reader,
-                                            Writer writer,
-                                            String sourceBucketName,
+    public StorageEventRequest buildRequest(String sourceBucketName,
                                             String sourceObjectPath,
-                                            ObjectTransform transform) {
+                                            ObjectTransform transform,
+                                            String sourceContentEncoding) {
 
         String sourceObjectPathWithinBase =
             inputBasePath()
                 .map(inputBasePath -> sourceObjectPath.replace(inputBasePath, ""))
                 .orElse(sourceObjectPath);
 
-        return StorageEventRequest.builder()
-            .sourceReader(reader)
-            .destinationWriter(writer)
+
+        StorageEventRequest request = StorageEventRequest.builder()
             .sourceBucketName(sourceBucketName)
             .sourceObjectPath(sourceObjectPath)
             .destinationBucketName(transform.getDestinationBucketName())
             .destinationObjectPath(transform.getPathWithinBucket() + sourceObjectPathWithinBase)
             .build();
+
+        warnIfEncodingDoesNotMatchFilename(request, sourceContentEncoding);
+
+        return request;
     }
 
 
@@ -269,6 +190,8 @@ public class StorageHandler {
         return objectMeta.getOrDefault(BulkMetaData.INSTANCE_ID.getMetaDataKey(), "")
             .equals(hostEnvironment.getInstanceId());
     }
+
+
 
     @Builder
     @AllArgsConstructor
@@ -351,6 +274,88 @@ public class StorageHandler {
         }
         return Optional.ofNullable(applicableRules);
     }
+
+
+    /**
+     * validate that the input stream can be processed per request/transform
+     *
+     * use-case: avoid opening output writer if file isn't valid
+     *
+     * @param request
+     * @param transform
+     * @param inputStreamSupplier
+     *
+     * @return
+     */
+    @SneakyThrows
+    boolean validate(StorageEventRequest request,
+                     StorageHandler.ObjectTransform transform,
+                     Supplier<InputStream> inputStreamSupplier) {
+        int bufferSize = getBufferSize();
+        try (
+            InputStream decompressedStream = request.getDecompressInput() ? new GZIPInputStream(inputStreamSupplier.get(), bufferSize) : inputStreamSupplier.get();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(decompressedStream, StandardCharsets.UTF_8), bufferSize);
+            OutputStream out = new ByteArrayOutputStream()
+        ) {
+
+            StringBuffer firstLines = new StringBuffer();
+            while (firstLines.length() < 5) {
+                String line = reader.readLine();
+                if (line == null) {
+                    break;
+                }
+                firstLines.append(line);
+            }
+
+            Supplier<InputStream> firstLinesSupplier = () -> new ByteArrayInputStream(firstLines.toString().getBytes());
+
+            this.process(request, transform, firstLinesSupplier, () -> out);
+
+            return true;
+        }
+    }
+
+
+    int getBufferSize() {
+        return config.getConfigPropertyAsOptional(BulkModeConfigProperty.BUFFER_SIZE).map(Integer::parseInt).orElse(DEFAULT_BUFFER_SIZE);
+    }
+
+    /**
+     * actually process the full input, getting inputStream and writing to outputStream
+     *
+     * @param request
+     * @param transform
+     * @param inputStreamSupplier
+     * @param outputStreamSupplier
+     */
+    @SneakyThrows
+    void process(StorageEventRequest request,
+                 StorageHandler.ObjectTransform transform,
+                 Supplier<InputStream> inputStreamSupplier,
+                 Supplier<OutputStream> outputStreamSupplier) {
+        int bufferSize = getBufferSize();
+
+        try (
+            InputStream decompressedStream = request.getDecompressInput() ? new GZIPInputStream(inputStreamSupplier.get(), bufferSize) : inputStreamSupplier.get();
+            Reader reader = new BufferedReader(new InputStreamReader(decompressedStream, StandardCharsets.UTF_8), bufferSize);
+            OutputStream outputStream = request.getCompressOutput() ? new GZIPOutputStream(outputStreamSupplier.get(), bufferSize) : outputStreamSupplier.get();
+            OutputStreamWriter writer = new OutputStreamWriter(outputStream)
+        ) {
+
+            Optional<BulkDataRules> applicableRules =
+                getApplicableRules(transform.getRules(), request.getSourceObjectPath());
+
+            if (applicableRules.isEmpty()) {
+                throw new IllegalArgumentException("No applicable rules found for " + request.getSourceObjectPath());
+            }
+
+            BulkDataSanitizer fileHandler = bulkDataSanitizerFactory.get(applicableRules.get());
+
+            fileHandler.sanitize(reader, writer, pseudonymizer);
+        }
+
+    }
+
 
     Map<String, BulkDataRules> effectiveTemplates(Map<String, BulkDataRules> original) {
         return original.entrySet().stream()

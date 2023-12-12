@@ -2,9 +2,7 @@ package co.worklytics.psoxy.storage;
 
 import co.worklytics.psoxy.PsoxyModule;
 import co.worklytics.psoxy.gateway.*;
-import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.test.MockModules;
-import co.worklytics.test.TestUtils;
 import com.avaulta.gateway.rules.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
@@ -13,13 +11,10 @@ import dagger.Module;
 import dagger.Provides;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.Mock;
-import org.mockito.MockMakers;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -29,7 +24,6 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Base64;
-import java.util.LinkedHashMap;
 import java.util.Optional;
 import java.util.zip.GZIPOutputStream;
 
@@ -134,7 +128,8 @@ class StorageHandlerTest {
 
 
 
-        StorageEventRequest request = handler.buildRequest(mockReader, writer, "bucket-in", "directory/file.csv", handler.buildDefaultTransform());
+        StorageEventRequest request =
+            handler.buildRequest("bucket-in", "directory/file.csv", handler.buildDefaultTransform(), null);
 
         assertEquals("directory/file.csv", request.getDestinationObjectPath());
     }
@@ -163,7 +158,7 @@ class StorageHandlerTest {
             .rules(mock(BulkDataRules.class))
             .build();
 
-        StorageEventRequest request = handler.buildRequest(mockReader, writer, "bucket-in", "directory/file.csv", tranform);
+        StorageEventRequest request = handler.buildRequest("bucket-in", "directory/file.csv", tranform, null);
 
         assertEquals("bucket-in", request.getSourceBucketName());
         assertEquals("directory/file.csv", request.getSourceObjectPath());
@@ -232,11 +227,10 @@ class StorageHandlerTest {
             .sourceObjectPath("directory/file.csv")
             .destinationBucketName("bucket")
             .destinationObjectPath("directory/file.csv")
-            .destinationWriter(writer)
             .compressOutput(compress)
             .build();
 
-        handler.process(request, handler.buildDefaultTransform(), is, outputStream);
+        handler.process(request, handler.buildDefaultTransform(), () -> is, () -> outputStream);
         writer.close();
 
         String output = compress ? Base64.getEncoder().encodeToString(outputStream.toByteArray()) : new String(outputStream.toByteArray());
@@ -262,11 +256,10 @@ class StorageHandlerTest {
             .sourceObjectPath("directory/file.csv")
             .destinationBucketName("bucket")
             .destinationObjectPath("directory/file.csv")
-            .destinationWriter(writer)
             .decompressInput(true)
             .build();
 
-        handler.process(request, handler.buildDefaultTransform(), is, outputStream);
+        handler.process(request, handler.buildDefaultTransform(), () -> is, () -> outputStream);
         writer.close();
 
         String output = new String(outputStream.toByteArray());

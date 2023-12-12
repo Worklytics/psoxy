@@ -34,7 +34,6 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
 
         DaggerAwsContainer.create().injectS3Handler(this);
 
-
         S3EventNotification.S3EventNotificationRecord record = s3Event.getRecords().get(0);
 
         String importBucket = record.getS3().getBucket().getName();
@@ -69,55 +68,40 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
             return null;
         }
 
-        S3Object sourceObject = s3Client.getObject(new GetObjectRequest(importBucket, sourceKey));
         byte[] processedData = null;
-        try (InputStream objectData = sourceObject.getObjectContent();
-             ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
 
-            StorageEventRequest request = storageHandler.buildRequest(null, null, importBucket, sourceKey, transform);
+            StorageEventRequest request =
+                storageHandler.buildRequest(importBucket, sourceKey, transform, sourceMetadata.getContentEncoding());
 
-            boolean isCompressed =
-                StorageHandler.isCompressed(sourceObject.getObjectMetadata().getContentEncoding());
-
-            StorageHandler.warnIfEncodingDoesNotMatchFilename(request, sourceObject.getObjectMetadata().getContentEncoding());
-
-            request = request.withDecompressInput(isCompressed).withCompressOutput(isCompressed);
-
-            //TODO: validate to avoid writing malformed output data if file going to fail in first few lines
-            // (not relevant atm, bc not streaming output in AWS case so has equivalent behavior;
-            //   but if introduce that behavior, should implement validation behavior too)
-            // //validate
-            // try (ReadChannel readChannel = storage.reader(sourceBlobId, Storage.BlobSourceOption.shouldReturnRawInputStream(true));
-            //     InputStream is = Channels.newInputStream(readChannel)) {
-            //     storageHandler.validate(request, transform, is);
-            // }
-
-            //process
-            storageEventResponse = storageHandler.process(request, transform, objectData, outputStream);
+            storageEventResponse = storageHandler.handle(request, transform, () -> {
+                S3Object sourceObject = s3Client.getObject(new GetObjectRequest(importBucket, sourceKey));
+                return sourceObject.getObjectContent();
+            }, () -> outputStream);
 
             processedData = outputStream.toByteArray();
             log.info(String.format("Successfully pseudonymized %s/%s to buffer", importBucket, sourceKey));
         }
 
         try (InputStream processedStream = new ByteArrayInputStream(processedData)) {
-            ObjectMetadata meta = new ObjectMetadata();
-            //NOTE: not setting content length here causes S3 client to buffer the stream ... OK
+            ObjectMetadata destinationMetadata = new ObjectMetadata();
+            //NOTE: not setting content length here causes S3 client to buffer the output stream ...
+            //   --> OK, bc we have no way to know output length apriori
             //meta.setContentLength(storageEventResponse.getBytes().length);
 
             // set headers iff they're non-null on source object
-            Optional.ofNullable(sourceObject.getObjectMetadata().getContentType())
-                .ifPresent(meta::setContentType);
-            Optional.ofNullable(sourceObject.getObjectMetadata().getContentEncoding())
-                .ifPresent(meta::setContentEncoding);
+            Optional.ofNullable(sourceMetadata.getContentType())
+                .ifPresent(destinationMetadata::setContentType);
+            Optional.ofNullable(sourceMetadata.getContentEncoding())
+                .ifPresent(destinationMetadata::setContentEncoding);
 
-
-            meta.setUserMetadata(storageHandler.buildObjectMetadata(importBucket, sourceKey, transform));
+            destinationMetadata.setUserMetadata(storageHandler.buildObjectMetadata(importBucket, sourceKey, transform));
 
 
             s3Client.putObject(storageEventResponse.getDestinationBucketName(),
                 storageEventResponse.getDestinationObjectPath(),
                 processedStream,
-                meta);
+                destinationMetadata);
 
             log.info(String.format("Successfully uploaded to %s/%s",
                 importBucket,
