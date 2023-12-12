@@ -82,7 +82,7 @@ class RESTApiSanitizerImplTest {
         @Provides
         @Singleton
         static ConfigService configService() {
-            ConfigService mock = mock(ConfigService.class);
+            ConfigService mock = MockModules.provideMock(ConfigService.class);
             TestModules.withMockEncryptionKey(mock);
             when(mock.getConfigPropertyOrError(eq(ProxyConfigProperty.SOURCE)))
                 .thenReturn("gmail");
