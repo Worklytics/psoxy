@@ -7,6 +7,12 @@
 
 ## Steps to Connect
 
+There are two connectors available for Github:
+  - [Github Free/Professional]
+  - [Github Enterprise]
+
+Both share the same configuration and setup instructions except Administration permission for Audit Log events.
+
 Follow the following steps:
 
 1. From your organization, register a [GitHub App](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/registering-a-github-app#registering-a-github-app)
@@ -17,12 +23,12 @@ Follow the following steps:
         - Metadata: for listing repositories and branches
         - Pull requests: for listing pull requests, reviews, comments and commits
     - Organization
-        - Administration: for listing events from audit log
+        - Administration: (Only for GitHub Enterprise) for listing events from audit log
         - Members: for listing teams and their members
 
 NOTES:
 - We assume that ALL the repositories are going to be list **should be owned by the organization, not the users**.
-- Enterprise Cloud is required for this connector.
+- In case of using GitHub Server, you need to populate `github_api_host` variable in Terraform with the URL of the API for your GitHub Server instance. For example, `https://api.github.your-company.com`.
 
 Apart from GitHub instructions please review the following:
   - "Homepage URL" can be anything, not required in this flow but required by Github.
