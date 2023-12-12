@@ -1,7 +1,6 @@
 package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.gateway.StorageEventRequest;
-import co.worklytics.psoxy.gateway.StorageEventResponse;
 import co.worklytics.psoxy.storage.StorageHandler;
 import com.google.cloud.ReadChannel;
 import com.google.cloud.WriteChannel;
@@ -11,22 +10,16 @@ import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
-import com.google.common.annotations.VisibleForTesting;
 import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 
-import org.apache.commons.io.input.BOMInputStream;
-import org.checkerframework.checker.units.qual.C;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.*;
 import java.nio.channels.Channels;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Optional;
-import java.util.zip.GZIPOutputStream;
 
 @Singleton
 @Log
@@ -68,9 +61,10 @@ public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
 
         StorageEventRequest request = storageHandler.buildRequest(null, null, importBucket, sourceName, transform);
 
-        boolean inputIsCompressed = Optional.ofNullable(sourceBlobInfo.getContentEncoding())
-                                            .map(s -> s.contains("gzip"))
-                                            .orElse(false);
+        boolean inputIsCompressed =
+            StorageHandler.isCompressed(sourceBlobInfo.getContentEncoding());
+
+        StorageHandler.warnIfEncodingDoesNotMatchFilename(request, sourceBlobInfo.getContentEncoding());
 
         // for now, just do the same for both
         request = request.withCompressOutput(inputIsCompressed).withDecompressInput(inputIsCompressed);

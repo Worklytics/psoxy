@@ -8,17 +8,14 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.events.S3Event;
 import com.amazonaws.services.lambda.runtime.events.models.s3.S3EventNotification;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.GetObjectMetadataRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
-import org.apache.commons.io.input.BOMInputStream;
 
 import javax.inject.Inject;
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @Log
@@ -79,9 +76,10 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
 
             StorageEventRequest request = storageHandler.buildRequest(null, null, importBucket, sourceKey, transform);
 
-            boolean isCompressed = Optional.ofNullable(sourceObject.getObjectMetadata().getContentEncoding())
-                .map(s -> s.contains("gzip"))
-                .orElse(false);
+            boolean isCompressed =
+                StorageHandler.isCompressed(sourceObject.getObjectMetadata().getContentEncoding());
+
+            StorageHandler.warnIfEncodingDoesNotMatchFilename(request, sourceObject.getObjectMetadata().getContentEncoding());
 
             request = request.withDecompressInput(isCompressed).withCompressOutput(isCompressed);
 

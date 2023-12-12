@@ -13,6 +13,7 @@ import lombok.*;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.*;
@@ -32,6 +33,8 @@ public class StorageHandler {
 
     // as writing to remote storage, err on size of larger buffer
     private static final int DEFAULT_BUFFER_SIZE = 65_536; //64 KB
+
+    public static final String CONTENT_ENCODING_GZIP = "gzip";
 
     @Inject
     ConfigService config;
@@ -53,6 +56,18 @@ public class StorageHandler {
 
     @Inject
     PathTemplateUtils pathTemplateUtils;
+
+
+    public static boolean isCompressed(@Nullable String contentEncoding) {
+        return StringUtils.equals(contentEncoding, CONTENT_ENCODING_GZIP);
+    }
+
+    public static void warnIfEncodingDoesNotMatchFilename(@NonNull StorageEventRequest request, @Nullable String contentEncoding) {
+        if (request.getSourceObjectPath().endsWith(".gz")
+            && !StringUtils.equals(contentEncoding, CONTENT_ENCODING_GZIP)) {
+            log.warning("Input filename ends with .gz, but 'Content-Encoding' metadata is not 'gzip'; is this correct? Decompression is based on object's 'Content-Encoding'");
+        }
+    }
 
     @RequiredArgsConstructor
     public enum BulkMetaData {
