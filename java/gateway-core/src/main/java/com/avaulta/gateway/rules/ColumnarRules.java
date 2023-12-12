@@ -124,6 +124,7 @@ public class ColumnarRules implements BulkDataRules {
      *
      * if provided, each FieldTransformPipeline will be applied to value of corresponding columns
      *
+     * map of fieldName --> pipeline of transforms to apply to that field
      *
      */
     @Getter
@@ -133,7 +134,9 @@ public class ColumnarRules implements BulkDataRules {
     @NonNull
     protected Map<String, FieldTransformPipeline> fieldsToTransform = new HashMap<>();
 
-
+    /**
+     * defines a pipeline for transforming a single field
+     */
     @NoArgsConstructor(force = true, access = AccessLevel.PRIVATE) //for jackson
     @AllArgsConstructor(access = AccessLevel.PRIVATE) // for builder
     @Builder
@@ -148,8 +151,12 @@ public class ColumnarRules implements BulkDataRules {
          * currently, must be provided and transform pipelines are always creating a new column with this field name
          * (eg, not replacing existing column)
          */
-        @NonNull
+        @Deprecated //split into renameTo, copyTo cases for clarity
         String newName;
+
+        // TODO: renameTo:
+
+        // TODO: copyTo:
 
         /**
          * ordered list of transforms to apply to value
@@ -166,6 +173,10 @@ public class ColumnarRules implements BulkDataRules {
         }
     }
 
+    /**
+     * a transform to operate on a single field value
+     *
+     */
     @JsonTypeInfo(
         use = JsonTypeInfo.Id.DEDUCTION,
         defaultImpl = RecordTransform.class
@@ -271,13 +282,19 @@ public class ColumnarRules implements BulkDataRules {
         }
 
 
-        class Encrypt {
-            String encrypt;
+        class Pseudonymize {
+            String pseudonymize = "auto";
         }
 
-        class Decrypt {
+        class EncryptWithKey {
 
-            String decrypt;
+
+            String encryptWithKey;
+        }
+
+        class DecryptWithKey {
+
+            String decryptWithKey;
         }
     }
 }

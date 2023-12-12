@@ -9,7 +9,8 @@ import java.util.List;
 
 /**
  *
- * a transform to apply within a record
+ * a transform to apply within a record, with a mandatory JSON path that specifies the field(s) to
+ * be transformed
  *
  * yaml representation
  *  - redact: "foo"
