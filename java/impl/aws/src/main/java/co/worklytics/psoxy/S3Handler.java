@@ -83,6 +83,16 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
 
             request = request.withDecompressInput(isCompressed).withCompressOutput(isCompressed);
 
+            //TODO: validate to avoid writing malformed output data if file going to fail in first few lines
+            // (not relevant atm, bc not streaming output in AWS case so has equivalent behavior;
+            //   but if introduce that behavior, should implement validation behavior too)
+            // //validate
+            // try (ReadChannel readChannel = storage.reader(sourceBlobId, Storage.BlobSourceOption.shouldReturnRawInputStream(true));
+            //     InputStream is = Channels.newInputStream(readChannel)) {
+            //     storageHandler.validate(request, transform, is);
+            // }
+
+            //process
             storageEventResponse = storageHandler.process(request, transform, objectData, outputStream);
 
             processedData = outputStream.toByteArray();

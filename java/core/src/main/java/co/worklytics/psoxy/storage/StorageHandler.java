@@ -97,6 +97,52 @@ public class StorageHandler {
     }
 
 
+    /**
+     * attempt to validate that the input stream can be processed per request/transform
+     *
+     * use-case: avoid opening output writer if file isn't valid
+     *
+     * @param request
+     * @param transform
+     * @param is
+     * @return
+     */
+    @SneakyThrows
+    public boolean validate(StorageEventRequest request,
+                            StorageHandler.ObjectTransform transform,
+                            InputStream is) {
+        int bufferSize = getBufferSize();
+        try (
+            InputStream decompressedStream = request.getDecompressInput() ? new GZIPInputStream(is, bufferSize) : is;
+            BufferedReader reader = new BufferedReader(new InputStreamReader(decompressedStream, StandardCharsets.UTF_8), bufferSize);
+            StringWriter out = new StringWriter()
+        ) {
+            Optional<BulkDataRules> applicableRules = getApplicableRules(transform.getRules(), request.getSourceObjectPath());
+
+            if (applicableRules.isEmpty()) {
+                throw new IllegalArgumentException("No applicable rules found for " + request.getSourceObjectPath());
+            }
+
+            StringBuffer firstLines = new StringBuffer();
+            while (firstLines.length() < 5) {
+                String line = reader.readLine();
+                if (line == null) {
+                    break;
+                }
+                firstLines.append(line);
+            }
+
+            StorageEventRequest testRequest = request
+                .withSourceReader(new StringReader(firstLines.toString()))
+                .withDestinationWriter(out);
+
+            this.handle(testRequest, applicableRules.get());
+
+            return true;
+        }
+    }
+
+
 
     @SneakyThrows
     public StorageEventResponse process(StorageEventRequest request,

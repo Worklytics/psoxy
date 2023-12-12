@@ -70,11 +70,17 @@ public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
         request = request.withCompressOutput(inputIsCompressed).withDecompressInput(inputIsCompressed);
 
         if (storageHandler.getApplicableRules(transform.getRules(), request.getSourceObjectPath()).isPresent()) {
+            //validate
+            try (ReadChannel readChannel = storage.reader(sourceBlobId, Storage.BlobSourceOption.shouldReturnRawInputStream(true));
+                 InputStream is = Channels.newInputStream(readChannel)) {
+                storageHandler.validate(request, transform, is);
+            }
+
+            //process
             BlobInfo destBlobInfo = BlobInfo.newBuilder(BlobId.of(request.getDestinationBucketName(), request.getDestinationObjectPath()))
                 .setContentType(sourceBlobInfo.getContentType())
                 .setMetadata(storageHandler.buildObjectMetadata(importBucket, sourceName, transform))
                 .build();
-
             try (ReadChannel readChannel = storage.reader(sourceBlobId, Storage.BlobSourceOption.shouldReturnRawInputStream(true));
                  InputStream is = Channels.newInputStream(readChannel);
                  WriteChannel writeChannel = storage.writer(destBlobInfo);
