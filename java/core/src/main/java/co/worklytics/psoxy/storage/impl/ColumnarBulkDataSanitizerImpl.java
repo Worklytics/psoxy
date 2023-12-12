@@ -184,8 +184,8 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
 
               for ( ColumnarRules.FieldValueTransform transform : pipeline.getTransforms()) {
                   if (value != null) {
-                      if (transform.getFilter() != null) {
-                          Pattern pattern = Pattern.compile(transform.getFilter());
+                      if (transform instanceof ColumnarRules.FieldValueTransform.Filter) {
+                          Pattern pattern = Pattern.compile(((ColumnarRules.FieldValueTransform.Filter) transform).getFilter());
                           Matcher matcher = pattern.matcher(value);
                           if (matcher.matches()) {
                               if (matcher.groupCount() > 0) {
@@ -196,14 +196,15 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
                           }
                       }
 
-                      if (transform.getFormatString() != null) {
-                          value = String.format(transform.getFormatString(), value);
+                      if (transform instanceof ColumnarRules.FieldValueTransform.FormatString) {
+                          value = String.format(((ColumnarRules.FieldValueTransform.FormatString) transform).getFormatString(), value);
                       }
 
-                      if (transform.getPseudonymizeWithScope() != null) {
+                      if (transform instanceof ColumnarRules.FieldValueTransform.PseudonymizeWithScope) {
                           Pseudonymizer scopedPseudonymizer = pseudonymizer;
                           if (pseudonymizer.getOptions().getPseudonymImplementation() == PseudonymImplementation.LEGACY) {
-                              scopedPseudonymizer = pseudonymizers.computeIfAbsent(transform.getPseudonymizeWithScope(),
+                              scopedPseudonymizer = pseudonymizers.computeIfAbsent(
+                                  ((ColumnarRules.FieldValueTransform.PseudonymizeWithScope) transform).getPseudonymizeWithScope(),
                                   scope -> pseudonymizerImplFactory.create(pseudonymizer.getOptions().withDefaultScopeId(scope)));
                           }
                           value = pseudonymizationFunction.apply(value, pipeline.getNewName(), scopedPseudonymizer);

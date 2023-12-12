@@ -1,6 +1,7 @@
 package com.avaulta.gateway.rules;
 
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
+import com.avaulta.gateway.rules.transforms.RecordTransform;
 import com.fasterxml.jackson.annotation.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -14,7 +15,7 @@ import java.util.regex.PatternSyntaxException;
 import java.util.stream.Stream;
 
 /**
- * rules for sanizitizing "columnar" bulk files
+ * rules for sanitizing "columnar" bulk files
  *
  * NOTE: user-facing documentation about these rules
  * @link "https://github.com/Worklytics/psoxy/tree/main/docs/bulk-file-sanitization.md"
@@ -165,15 +166,59 @@ public class ColumnarRules implements BulkDataRules {
         }
     }
 
-    @Builder
-    @Getter
-    @FieldDefaults(makeFinal=true, level=AccessLevel.PRIVATE)
-    @NoArgsConstructor(force = true, access = AccessLevel.PRIVATE) //for jackson
-    @AllArgsConstructor(access = AccessLevel.PRIVATE) // for builder
-    @ToString
-    @EqualsAndHashCode
-    public static class FieldValueTransform {
+    @JsonTypeInfo(
+        use = JsonTypeInfo.Id.DEDUCTION,
+        defaultImpl = RecordTransform.class
+    )
+    @JsonSubTypes({
+        @JsonSubTypes.Type(value = FieldValueTransform.Filter.class),
+        @JsonSubTypes.Type(value = FieldValueTransform.FormatString.class),
+        @JsonSubTypes.Type(value = FieldValueTransform.PseudonymizeWithScope.class),
+    })
+    public interface FieldValueTransform {
 
+        @JsonIgnore
+        boolean isValid();
+
+        static FieldValueTransform filter(String filter) {
+            return Filter.builder().filter(filter).build();
+        }
+
+        static FieldValueTransform pseudonymizeWithScope(String scope) {
+            return PseudonymizeWithScope.builder().pseudonymizeWithScope(scope).build();
+        }
+
+        static FieldValueTransform formatString(String template) {
+            return FormatString.builder().formatString(template).build();
+        }
+
+        /**
+         * if provided, value will be written using provided template
+         *
+         * expected to be a Java String format, with `%s` token; will be applied as String.format(template, match);
+         *
+         * TODO: expect this to change after 'alpha' version
+         */
+        @JsonTypeName("formatString")
+        @NoArgsConstructor
+        @SuperBuilder(toBuilder = true)
+        @Data
+        class FormatString implements FieldValueTransform {
+            String formatString;
+
+            @Override
+            public boolean isValid() {
+                    if (!formatString.contains("%s")) {
+                        log.warning("formatString must contain '%s' token: " + formatString);
+                        return false;
+                    }
+                    if (Pattern.compile("%s").matcher(formatString).results().count() > 1) {
+                        log.warning("formatString must contain exactly one '%s' token: " + formatString);
+                        return false;
+                    }
+                return true;
+            }
+        }
 
         /**
          * if provided, filter regex will be applied and only values matching filter will be
@@ -184,70 +229,55 @@ public class ColumnarRules implements BulkDataRules {
          *
          * NOTE: use-case for omitting is to pseudonymize column with a specific scope
          */
-        @JsonInclude(JsonInclude.Include.NON_NULL)
-        String filter;
+        @JsonTypeName("filter")
+        @NoArgsConstructor
+        @SuperBuilder(toBuilder = true)
+        @Data
+        class Filter implements FieldValueTransform {
+            @NonNull
+            String filter;
 
-        /**
-         * if provided, value will be written using provided template
-         *
-         * expected to be a Java String format, with `%s` token; will be applied as String.format(template, match);
-         *
-         * TODO: expect this to change after 'alpha' version
-         */
-        @JsonInclude(JsonInclude.Include.NON_NULL)
-        String formatString;
+            @Override
+            public boolean isValid() {
+                try {
+                    Pattern pattern = Pattern.compile(filter);
+                } catch (PatternSyntaxException e) {
+                   log.warning("invalid regex: " + filter);
+                    return false;
+                }
+
+                return true;
+            }
+        }
 
         /**
          * if provided, value will be pseudonymized with provided scope
          *
          * @deprecated ; only relevant for legacy case
          */
-        @JsonInclude(JsonInclude.Include.NON_NULL)
-        String pseudonymizeWithScope;
+        @JsonTypeName("pseudonymizeWithScope")
+        @NoArgsConstructor
+        @SuperBuilder(toBuilder = true)
+        @Data
+        class PseudonymizeWithScope implements FieldValueTransform {
 
-        @JsonIgnore
-        public boolean isValid() {
+            @NonNull
+            String pseudonymizeWithScope;
 
-            boolean exactlyOneNonNull = Stream.of(filter, formatString, pseudonymizeWithScope)
-                .filter(Objects::nonNull)
-                .count() == 1;
-
-
-            if (filter != null) {
-                try {
-                    Pattern pattern = Pattern.compile(filter);
-                } catch (PatternSyntaxException e) {
-                    log.warning("invalid regex: " + filter);
-                    return false;
-                }
+            @Override
+            public boolean isValid() {
+                return pseudonymizeWithScope != null;
             }
-
-            if (formatString != null) {
-                if (!formatString.contains("%s")) {
-                    log.warning("formatString must contain '%s' token: " + formatString);
-                    return false;
-                }
-                if (Pattern.compile("%s").matcher(formatString).results().count() > 1) {
-                    log.warning("formatString must contain exactly one '%s' token: " + formatString);
-                    return false;
-                }
-            }
-
-            return exactlyOneNonNull;
-        }
-
-        public static FieldValueTransform filter(String filter) {
-            return FieldValueTransform.builder().filter(filter).build();
-        }
-
-        public static FieldValueTransform pseudonymizeWithScope(String scope) {
-            return FieldValueTransform.builder().pseudonymizeWithScope(scope).build();
-        }
-
-        public static FieldValueTransform formatString(String template) {
-            return FieldValueTransform.builder().formatString(template).build();
         }
 
 
+        class Encrypt {
+            String encrypt;
+        }
+
+        class Decrypt {
+
+            String decrypt;
+        }
     }
 }
