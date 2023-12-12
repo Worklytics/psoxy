@@ -13,6 +13,8 @@ import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.Base64UrlSha256HashPseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.ColumnarRules;
+import com.avaulta.gateway.rules.transforms.FieldTransformPipeline;
+import com.avaulta.gateway.rules.transforms.FieldTransform;
 import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
 import com.avaulta.gateway.tokens.impl.Sha256DeterministicTokenizationStrategy;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,7 +29,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.MockMakers;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -484,12 +485,12 @@ public class BulkDataSanitizerImplTest {
             "4,,Engineering,2023-01-06,1,2018-06-03,,\r\n" +
             "3,charles@workltycis.co,Engineering,2023-01-06,1,2019-10-06,2022-12-08,\"{\"\"scope\"\":\"\"github\"\",\"\"hash\"\":\"\"KqWJXpC.g25eQzR80kCS3RVj4L4JNngo7vFwructvNU\"\",\"\"h_4\"\":\"\"1RaWPpeCqO4wTAc849d9KY41PEXdkHcxJ32ifrLzsjQ\"\"}\"\r\n";
         ColumnarRules rules = ColumnarRules.builder()
-                .fieldsToTransform(Map.of("EMPLOYEE_EMAIL", ColumnarRules.FieldTransformPipeline.builder()
+                .fieldsToTransform(Map.of("EMPLOYEE_EMAIL", FieldTransformPipeline.builder()
                         .newName("GITHUB_USERNAME")
                         .transforms(Arrays.asList(
-                                ColumnarRules.FieldValueTransform.filter("(.*)@.*"),
-                                ColumnarRules.FieldValueTransform.formatString("%s_enterprise"),
-                                ColumnarRules.FieldValueTransform.pseudonymizeWithScope("github")
+                                FieldTransform.filter("(.*)@.*"),
+                                FieldTransform.formatString("%s_enterprise"),
+                                FieldTransform.pseudonymizeWithScope("github")
                         )).build()))
                 .build();
         columnarFileSanitizerImpl.setRules(rules);

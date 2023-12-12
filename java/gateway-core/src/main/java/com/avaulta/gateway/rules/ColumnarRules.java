@@ -1,18 +1,13 @@
 package com.avaulta.gateway.rules;
 
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
-import com.avaulta.gateway.rules.transforms.RecordTransform;
+import com.avaulta.gateway.rules.transforms.FieldTransformPipeline;
 import com.fasterxml.jackson.annotation.*;
 import lombok.*;
-import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.java.Log;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
-import java.util.stream.Stream;
 
 /**
  * rules for sanitizing "columnar" bulk files
@@ -134,167 +129,4 @@ public class ColumnarRules implements BulkDataRules {
     @NonNull
     protected Map<String, FieldTransformPipeline> fieldsToTransform = new HashMap<>();
 
-    /**
-     * defines a pipeline for transforming a single field
-     */
-    @NoArgsConstructor(force = true, access = AccessLevel.PRIVATE) //for jackson
-    @AllArgsConstructor(access = AccessLevel.PRIVATE) // for builder
-    @Builder
-    @Value
-    public static class FieldTransformPipeline {
-
-        /**
-         * new field to write result as, if not being replaced
-         *
-         * q: ambiguous as to whether this is a 'rename' or creating a new field?
-         *
-         * currently, must be provided and transform pipelines are always creating a new column with this field name
-         * (eg, not replacing existing column)
-         */
-        @Deprecated //split into renameTo, copyTo cases for clarity
-        String newName;
-
-        // TODO: renameTo:
-
-        // TODO: copyTo:
-
-        /**
-         * ordered list of transforms to apply to value
-         */
-        @JsonInclude(JsonInclude.Include.NON_EMPTY)
-        @NonNull
-        @Singular
-        List<FieldValueTransform> transforms;
-
-        @JsonIgnore
-        public boolean isValid() {
-            return StringUtils.isNotBlank(newName)
-                    && transforms != null && transforms.stream().allMatch(FieldValueTransform::isValid);
-        }
-    }
-
-    /**
-     * a transform to operate on a single field value
-     *
-     */
-    @JsonTypeInfo(
-        use = JsonTypeInfo.Id.DEDUCTION,
-        defaultImpl = RecordTransform.class
-    )
-    @JsonSubTypes({
-        @JsonSubTypes.Type(value = FieldValueTransform.Filter.class),
-        @JsonSubTypes.Type(value = FieldValueTransform.FormatString.class),
-        @JsonSubTypes.Type(value = FieldValueTransform.PseudonymizeWithScope.class),
-    })
-    public interface FieldValueTransform {
-
-        @JsonIgnore
-        boolean isValid();
-
-        static FieldValueTransform filter(String filter) {
-            return Filter.builder().filter(filter).build();
-        }
-
-        static FieldValueTransform pseudonymizeWithScope(String scope) {
-            return PseudonymizeWithScope.builder().pseudonymizeWithScope(scope).build();
-        }
-
-        static FieldValueTransform formatString(String template) {
-            return FormatString.builder().formatString(template).build();
-        }
-
-        /**
-         * if provided, value will be written using provided template
-         *
-         * expected to be a Java String format, with `%s` token; will be applied as String.format(template, match);
-         *
-         * TODO: expect this to change after 'alpha' version
-         */
-        @JsonTypeName("formatString")
-        @NoArgsConstructor
-        @SuperBuilder(toBuilder = true)
-        @Data
-        class FormatString implements FieldValueTransform {
-            String formatString;
-
-            @Override
-            public boolean isValid() {
-                    if (!formatString.contains("%s")) {
-                        log.warning("formatString must contain '%s' token: " + formatString);
-                        return false;
-                    }
-                    if (Pattern.compile("%s").matcher(formatString).results().count() > 1) {
-                        log.warning("formatString must contain exactly one '%s' token: " + formatString);
-                        return false;
-                    }
-                return true;
-            }
-        }
-
-        /**
-         * if provided, filter regex will be applied and only values matching filter will be
-         * preserved; not matching values will be redacted.
-         *
-         * if regex includes a capturing group, then only portion of value matched by the first
-         * capturing group will be preserved.
-         *
-         * NOTE: use-case for omitting is to pseudonymize column with a specific scope
-         */
-        @JsonTypeName("filter")
-        @NoArgsConstructor
-        @SuperBuilder(toBuilder = true)
-        @Data
-        class Filter implements FieldValueTransform {
-            @NonNull
-            String filter;
-
-            @Override
-            public boolean isValid() {
-                try {
-                    Pattern pattern = Pattern.compile(filter);
-                } catch (PatternSyntaxException e) {
-                   log.warning("invalid regex: " + filter);
-                    return false;
-                }
-
-                return true;
-            }
-        }
-
-        /**
-         * if provided, value will be pseudonymized with provided scope
-         *
-         * @deprecated ; only relevant for legacy case
-         */
-        @JsonTypeName("pseudonymizeWithScope")
-        @NoArgsConstructor
-        @SuperBuilder(toBuilder = true)
-        @Data
-        class PseudonymizeWithScope implements FieldValueTransform {
-
-            @NonNull
-            String pseudonymizeWithScope;
-
-            @Override
-            public boolean isValid() {
-                return pseudonymizeWithScope != null;
-            }
-        }
-
-
-        class Pseudonymize {
-            String pseudonymize = "auto";
-        }
-
-        class EncryptWithKey {
-
-
-            String encryptWithKey;
-        }
-
-        class DecryptWithKey {
-
-            String decryptWithKey;
-        }
-    }
 }
