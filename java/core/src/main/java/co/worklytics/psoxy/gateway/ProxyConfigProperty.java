@@ -5,6 +5,17 @@ package co.worklytics.psoxy.gateway;
  */
 public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
 
+
+    /**
+     * CUSTOM_RULES_SHA - sha of custom rules file, if custom rules configured via some method
+     * *other* than environment vars; this is used to force re-deploy/restart of Cloud Functions
+     * / Lambdas, so that new rules are seen by the proxy.
+     *
+     * It's exposed here to application code, to allow us to confirm that custom rules are indeed
+     * being used.
+     */
+    CUSTOM_RULES_SHA,
+
     /**
      * where to find configuration parameters that are shared across connectors
      * OPTIONAL; default to ""
