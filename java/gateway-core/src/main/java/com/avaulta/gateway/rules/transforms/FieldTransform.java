@@ -55,6 +55,8 @@ public interface FieldTransform {
     @Data
     @Log
     class FormatString implements FieldTransform {
+
+        @NonNull
         String formatString;
 
         @Override
@@ -86,6 +88,7 @@ public interface FieldTransform {
     @Data
     @Log
     class Filter implements FieldTransform {
+
         @NonNull
         String filter;
 
@@ -120,21 +123,5 @@ public interface FieldTransform {
         public boolean isValid() {
             return pseudonymizeWithScope != null;
         }
-    }
-
-
-    class Pseudonymize {
-        String pseudonymize = "auto";
-    }
-
-    class EncryptWithKey {
-
-
-        String encryptWithKey;
-    }
-
-    class DecryptWithKey {
-
-        String decryptWithKey;
     }
 }
