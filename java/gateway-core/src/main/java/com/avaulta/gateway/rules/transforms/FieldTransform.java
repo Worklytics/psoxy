@@ -121,7 +121,7 @@ public interface FieldTransform {
 
         @Override
         public boolean isValid() {
-            return pseudonymizeWithScope != null;
+            return StringUtils.isNotBlank(pseudonymizeWithScope);
         }
     }
 }
