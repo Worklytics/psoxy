@@ -313,7 +313,7 @@ public class StorageHandler {
                 if (line == null) {
                     break;
                 }
-                firstLines.append(line);
+                firstLines.append(line + "\n");
             }
 
             Supplier<InputStream> firstLinesSupplier = () -> new ByteArrayInputStream(firstLines.toString().getBytes());
