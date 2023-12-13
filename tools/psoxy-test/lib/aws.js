@@ -210,7 +210,7 @@ async function listObjects(bucket, options) {
 
 /**
  * Upload file to S3
- * Ref: https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/classes/putobjectcommand.html
+ * Ref: https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/s3/command/PutObjectCommand/
  * Reqs: "s3:PutObject" permissions
  *
  * @param {string} bucket
