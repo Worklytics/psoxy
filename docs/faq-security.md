@@ -53,3 +53,23 @@ data. There is no database to be vulnerable to SQL injections.
 A WAF could make sense if you are using Psoxy to expose an on-prem, in-house built tool to
 Worklytics that is otherwise not exposed to the internet.
 
+## Can I deploy Psoxy instances in a VPC?
+
+As of November 2023, that is not directly supported by the Worklytics-provided Terraform modules.
+If you have a use-case that you believe requires a VPC, please let us know.
+
+The usual cases for deploying infra in a VPC is to isolate a complex, potentially insecure component,
+such as a VM with lots of packages/software/etc running on it. Proxy instances are small java bundles,
+compiled, packaged, and deployed by your team - into serverless infrastructure sandboxes
+(AWS Lambda, GCP CLoud Functions, etc). The code is source-available for your team to review; it
+undergoes full automated testing and continual vulnerability scanning.
+
+Access to proxy instances is based on Workload Identity Federation (OIDC) and IAM policies, which is
+equivalent to how internal access between your AWS/GCP cloud resources is currently secured.
+
+No workplace data is stored by proxy instances.  For the connectors that sanitize bulk file data,
+this data is only persisted into GCS/S3 buckets.  AWS/GCS do not support deploying such buckets
+"in a VPC".  You could write an IAM policy that grants access to such buckets *from* a VPC, but
+this is functionally equivalent to an IAM policy that grants access to such a buckets from a specific
+lambda/cloud function.
+
