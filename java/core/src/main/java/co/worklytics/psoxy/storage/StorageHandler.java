@@ -96,7 +96,11 @@ public class StorageHandler {
                                        Supplier<OutputStream> outputStreamSupplier) {
 
 
-        this.validate(request, transform, inputStreamSupplier);
+        boolean isValid = this.validate(request, transform, inputStreamSupplier);
+        if (!isValid) {
+            // generally, more specific exception should have been thrown by validate
+            throw new IllegalArgumentException("File is not valid");
+        }
 
         this.process(request, transform, inputStreamSupplier, outputStreamSupplier);
 
@@ -193,6 +197,8 @@ public class StorageHandler {
 
 
 
+    //TODO: better name for this?
+    // the rules are a 'transform', but the `destinationBucketName`/`pathWithinBucket' aren't
     @Builder
     @AllArgsConstructor
     @NoArgsConstructor
@@ -281,16 +287,16 @@ public class StorageHandler {
      *
      * use-case: avoid opening output writer if file isn't valid
      *
-     * @param request
-     * @param transform
-     * @param inputStreamSupplier
+     * @param request that triggered this processing
+     * @param transform to apply (rules + output target)
+     * @param inputStreamSupplier to get a stream of the input
      *
-     * @return
+     * @throws Exception if file is invalid/processing failed
      */
     @SneakyThrows
-    boolean validate(StorageEventRequest request,
-                     StorageHandler.ObjectTransform transform,
-                     Supplier<InputStream> inputStreamSupplier) {
+    void validate(StorageEventRequest request,
+                  StorageHandler.ObjectTransform transform,
+                  Supplier<InputStream> inputStreamSupplier) {
         int bufferSize = getBufferSize();
         try (
             InputStream decompressedStream = request.getDecompressInput() ? new GZIPInputStream(inputStreamSupplier.get(), bufferSize) : inputStreamSupplier.get();
@@ -299,7 +305,7 @@ public class StorageHandler {
         ) {
 
             StringBuffer firstLines = new StringBuffer();
-            while (firstLines.length() < 5) {
+            for (int lineCount = 0; lineCount < 5; lineCount++) {
                 String line = reader.readLine();
                 if (line == null) {
                     break;
@@ -310,13 +316,11 @@ public class StorageHandler {
             Supplier<InputStream> firstLinesSupplier = () -> new ByteArrayInputStream(firstLines.toString().getBytes());
 
             this.process(request, transform, firstLinesSupplier, () -> out);
-
-            return true;
         }
     }
 
 
-    int getBufferSize() {
+    private int getBufferSize() {
         return config.getConfigPropertyAsOptional(BulkModeConfigProperty.BUFFER_SIZE).map(Integer::parseInt).orElse(DEFAULT_BUFFER_SIZE);
     }
 
