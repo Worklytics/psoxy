@@ -157,7 +157,8 @@ public class TeamsTests extends JavaRulesTestBaseCase {
                 "fbe2bf47-16c8-47cf-b4a5-4b9b187c508b",
                 "19:4a95f7d8db4c4e7fae857bcebe0623e6@thread.tacv2",
                 "1fb8890f-423e-4154-8fbf-db6809bc8756",
-                "aadUser"
+                "aadUser",
+                "#microsoft.graph.teamDescriptionUpdatedEventMessageDetail"
         );
 
         String sanitized = sanitize(endpoint, jsonResponse);
@@ -207,7 +208,8 @@ public class TeamsTests extends JavaRulesTestBaseCase {
                 "e61ef81e-8bd8-476a-92e8-4a62f8426fca",
                 "text",
                 "fbe2bf47-16c8-47cf-b4a5-4b9b187c508b",
-                "19:4a95f7d8db4c4e7fae857bcebe0623e6@thread.tacv2"
+                "19:4a95f7d8db4c4e7fae857bcebe0623e6@thread.tacv2",
+                "#microsoft.graph.chatMessage"
         );
 
         String sanitized = sanitize(endpoint, jsonResponse);
@@ -240,7 +242,8 @@ public class TeamsTests extends JavaRulesTestBaseCase {
                 "Graph Members",
                 "1615971548136",
                 "2021-03-17T08:59:08.136Z",
-                "html"
+                "html",
+                "#microsoft.graph.chatRenamedEventMessageDetail"
         );
 
         String sanitized = sanitize(endpoint, jsonResponse);
