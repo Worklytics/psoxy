@@ -25,7 +25,7 @@ async function testAWS(options, logger) {
   const parsedPath = path.parse(options.file);
 
   // Add timestamp to filename to make sure download process doesn't get the wrong file
-  const filenameWithTimestamp = addFilenameSuffix(parsedPath.name, TIMESTAMP);
+  const filenameWithTimestamp = addFilenameSuffix(parsedPath.base, TIMESTAMP);
 
   if (options.role) {
     logger.verbose(`Assuming role ${options.role}`);
