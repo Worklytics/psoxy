@@ -236,7 +236,7 @@ async function upload(bucket, key, file, options, client) {
 
 /**
  * Only for standard S3 storage (others such as Glacier need to restore object first)
- * Ref: https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/classes/getobjectcommand.html
+ * Ref: https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/s3/command/GetObjectCommand/
  * Reqs: "s3:ListBucket" (404 if request object doesn't exit, 403 if no perms)
  *
  * This will retry the download if we get a 404; use-case: Psoxy hasn't
