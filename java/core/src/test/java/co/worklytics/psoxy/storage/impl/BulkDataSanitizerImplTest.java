@@ -49,9 +49,6 @@ public class BulkDataSanitizerImplTest {
     ColumnarBulkDataSanitizerImplFactory columnarFileSanitizerImplFactory;
 
     @Inject
-    RESTApiSanitizerFactory sanitizerFactory;
-
-    @Inject
     RulesUtils rulesUtils;
 
     @Inject
