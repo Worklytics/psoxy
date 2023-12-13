@@ -103,11 +103,7 @@ public class StorageHandler {
                                        Supplier<OutputStream> outputStreamSupplier) {
 
 
-        boolean isValid = this.validate(request, transform, inputStreamSupplier);
-        if (!isValid) {
-            // generally, more specific exception should have been thrown by validate
-            throw new IllegalArgumentException("File is not valid");
-        }
+        this.validate(request, transform, inputStreamSupplier);
 
         this.process(request, transform, inputStreamSupplier, outputStreamSupplier);
 
