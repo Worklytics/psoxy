@@ -25,7 +25,7 @@ public class FieldTransformPipeline {
      * (eg, not replacing existing column)
      */
     @Deprecated //split into renameTo, copyTo cases for clarity
-        String newName;
+      String newName;
 
     // TODO: renameTo:
 
