@@ -2,6 +2,7 @@ package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
 import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.rules.RulesUtils;
@@ -63,7 +64,10 @@ public class ConfigRulesModule {
 
 
     @Provides @Singleton
-    static RuleSet rules(Logger log, RulesUtils rulesUtils, ConfigService config) {
+    static RuleSet rules(Logger log,
+                         RulesUtils rulesUtils,
+                         ConfigService config,
+                         EnvVarsConfigService envVarsConfigService) {
 
         BiFunction<Optional<RuleSet>, String, Optional<RuleSet>> loadAndLog = (o, msg) -> {
             if (o.isPresent()) {
@@ -72,7 +76,7 @@ public class ConfigRulesModule {
             return o;
         };
 
-        return loadAndLog.apply(rulesUtils.getRulesFromConfig(config), "Rules: loaded from environment config (RULES variable parsed as base64-encoded YAML)")
+        return loadAndLog.apply(rulesUtils.getRulesFromConfig(config, envVarsConfigService), "Rules: loaded from environment config (RULES variable parsed as base64-encoded YAML)")
             .or( () -> loadAndLog.apply(getDefaults(log, config), "Rules: fallback to prebuilt rules"))
                 .orElseThrow( () -> new RuntimeException("No rules found"));
 

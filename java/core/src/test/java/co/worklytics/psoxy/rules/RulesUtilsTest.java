@@ -4,6 +4,7 @@ import co.worklytics.psoxy.PsoxyModule;
 import co.worklytics.psoxy.gateway.BulkModeConfigProperty;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.storage.StorageHandler;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestUtils;
@@ -18,7 +19,6 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.MockMakers;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -108,7 +108,7 @@ class RulesUtilsTest {
         when(config.getConfigPropertyOrError(eq(ProxyConfigProperty.SOURCE)))
             .thenReturn("hris");
 
-        com.avaulta.gateway.rules.RuleSet rules = utils.getRulesFromConfig(config).get();
+        com.avaulta.gateway.rules.RuleSet rules = utils.getRulesFromConfig(config, new EnvVarsConfigService()).get();
         assertNotNull(rules);
     }
 

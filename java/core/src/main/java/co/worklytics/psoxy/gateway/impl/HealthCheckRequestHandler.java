@@ -126,7 +126,7 @@ public class HealthCheckRequestHandler {
         }
 
         try {
-            rulesUtils.getRulesFromConfig(config)
+            rulesUtils.getRulesFromConfig(config, envVarsConfigService)
                     .ifPresent(rules -> healthCheckResult.rules(rulesUtils.asYaml(rules)));
         } catch (Throwable e) {
             logInDev("Failed to add rules to health check", e);
