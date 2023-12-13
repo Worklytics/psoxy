@@ -433,7 +433,7 @@ public class PrebuiltSanitizerRules {
 
     static final Endpoint MS_TEAMS_TEAMS_CHANNELS_MESSAGES_DELTA =  Endpoint.builder()
         .pathTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS_CHANNELS_MESSAGES_DELTA)
-        .allowedQueryParams(List.of("$select","$top","$skiptoken","$expand", "$deltatoken"))
+        .allowedQueryParams(List.of("$select","$top","$skiptoken","$expand", "$deltatoken", "$filter"))
         .build();
 
     static final Endpoint MS_TEAMS_CHATS_MESSAGES =  Endpoint.builder()
