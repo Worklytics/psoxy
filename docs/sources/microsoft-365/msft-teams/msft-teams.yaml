@@ -54,6 +54,7 @@ endpoints:
       - "$skiptoken"
       - "$expand"
       - "$deltatoken"
+      - "$filter"
     transforms:
       - !<redact>
         jsonPaths:
@@ -190,3 +191,4 @@ endpoints:
           - "$..onPremisesDistinguishedName"
           - "$..onPremisesImmutableId"
           - "$..identities[*].issuerAssignedId"
+        encoding: "JSON"
