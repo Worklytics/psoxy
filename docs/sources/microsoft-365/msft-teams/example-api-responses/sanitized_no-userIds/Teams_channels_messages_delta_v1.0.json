@@ -2,6 +2,7 @@
   "@odata.nextLink":"https://graph.microsoft.com/p~eJVR6jt8acOfZg5aTGQp0HsCEswt5sNcHlbxrvlnmfDIqfg06PPwYEWf5N6KT8czB9Js3usyj4HGA0Af1NS7UbPf_cyOIPQtPty2Unh8afU7oTuZYum5ZftiBkVoWqP6F6Hez7YSGgeh7tGKHvHyLFgtqqJboEWw_9o9GnjqlNwDToG69zW6ViU0U-vGP98gdLLcEsgH3yKT0l2QZsEWa5OHqS09FA6p8Bv5F83RAJHLv-NBi2fm600ZDYLFwLHSrEeKy7vAEoqu6N__aoelsKhOsBAlKGCzYlZptzXvnhn00n1ScpMmKXm_GUDWLICPkwOg68G_yVH6EJsiwOipQMvw9z04Kgp0ozB2r0872v6lHeAGitqz40AAV810NICTlKlTIQHLsgj5vn6aY53MUDNjTRIJ8QcLTeH2ZKdrePm6c_j_hIzZz4jBSAdV7Y3yyJj55zK22O_2ueZvIEaH_w",
   "value":[
     {
+      "@odata.type":"#microsoft.graph.chatMessage",
       "replyToId":null,
       "etag":"1606515483514",
       "messageType":"message",
@@ -23,6 +24,7 @@
         "device":null,
         "conversation":null,
         "user":{
+          "@odata.type":"#microsoft.graph.teamworkUserIdentity",
           "id":"{\"scope\":\"azure-ad\",\"hash\":\"B9mIayvpLlXmJS0UFmhvp06dDj9WoxgJ9Dc7zS9Dc90\"}",
           "userIdentityType":"aadUser",
           "tenantId":"e61ef81e-8bd8-476a-92e8-4a62f8426fca"
@@ -40,6 +42,7 @@
       "messageHistory":[ ]
     },
     {
+      "@odata.type":"#microsoft.graph.chatMessage",
       "replyToId":null,
       "etag":"1606691795113",
       "messageType":"message",
@@ -61,6 +64,7 @@
         "device":null,
         "conversation":null,
         "user":{
+          "@odata.type":"#microsoft.graph.teamworkUserIdentity",
           "id":"{\"scope\":\"azure-ad\",\"hash\":\"B9mIayvpLlXmJS0UFmhvp06dDj9WoxgJ9Dc7zS9Dc90\"}",
           "userIdentityType":"aadUser",
           "tenantId":"e61ef81e-8bd8-476a-92e8-4a62f8426fca"
