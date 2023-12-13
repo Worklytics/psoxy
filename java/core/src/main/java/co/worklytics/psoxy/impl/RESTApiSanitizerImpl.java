@@ -560,6 +560,9 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
                     targetHostPath = configService.getConfigPropertyAsOptional(ProxyConfigProperty.TARGET_HOST)
                         .map(s -> {
                             try {
+                                if (!s.startsWith("https://")) {
+                                    s = "https://" + s;
+                                }
                                 return new URL(s).getPath();
                             } catch (MalformedURLException e) {
                                 log.log(Level.WARNING, "Invalid API_HOST: " + s, e);

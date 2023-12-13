@@ -678,4 +678,15 @@ class RESTApiSanitizerImplTest {
         }
     }
 
+    @Test
+    public void stripTargetHostPath() {
+       assertEquals("/path", sanitizer.stripTargetHostPath("/path"));
+       sanitizer.targetHostPath = "/api/v1";
+       assertEquals("/path", sanitizer.stripTargetHostPath("/api/v1/path"));
+
+       //only at beginning of path
+       assertEquals("/path/api/v1", sanitizer.stripTargetHostPath("/api/v1/path/api/v1"));
+       assertEquals("/path/api/v1", sanitizer.stripTargetHostPath("/path/api/v1"));
+    }
+
 }
