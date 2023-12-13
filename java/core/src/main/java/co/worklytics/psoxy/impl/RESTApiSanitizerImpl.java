@@ -457,7 +457,9 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
             } else if (transformOptions.getEncoding() == PseudonymEncoder.Implementations.URL_SAFE_TOKEN) {
                 if (pseudonymizedIdentity.getReversible() != null
                     && getPseudonymizer().getOptions().getPseudonymImplementation() == PseudonymImplementation.LEGACY) {
-                    // can't do reversible encoding with legacy pseudonym implementation, in URL_SAFE_TOKEN
+                    // can't URL_SAFE_TOKEN encode reversible portion of pseudonym if LEGACY mode, bc
+                    // URL_SAFE_TOKEN depends on 'hash' being encoded as prefix of the reversible;
+                    // and reverisbles need the non-legacy
                     return configuration.jsonProvider().toJson(pseudonymizedIdentity);
                 }
                 //exploit that already reversibly encoded, including prefix
