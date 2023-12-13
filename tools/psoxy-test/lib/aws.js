@@ -2,6 +2,7 @@ import {
   executeWithRetry,
   getAWSCredentials,
   getCommonHTTPHeaders,
+  isGzip,
   request,
   resolveHTTPMethod,
   resolveAWSRegion,
@@ -227,11 +228,17 @@ async function upload(bucket, key, file, options, client) {
     client = await createS3Client(options.role, options.region);
   }
 
-  return await client.send(new PutObjectCommand({
+  const commandOptions = {
     Bucket: bucket,
     Key: key,
     Body: fs.createReadStream(file),
-  }));
+  }
+
+  if (await isGzip(file)) {
+    commandOptions.ContentEncoding = 'gzip';
+  }
+
+  return await client.send(new PutObjectCommand(commandOptions));
 }
 
 /**

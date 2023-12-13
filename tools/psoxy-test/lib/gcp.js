@@ -1,6 +1,7 @@
 import {
   executeWithRetry,
   getCommonHTTPHeaders,
+  isGzip,
   request,
   executeCommand,
   resolveHTTPMethod,
@@ -173,9 +174,16 @@ async function upload(bucketName, filePath, client, filename) {
   if (!client) {
     client = createStorageClient();
   }
-  return client.bucket(bucketName).upload(filePath, {
+
+  const uploadOptions = {
     destination: filename ?? path.basename(filePath),
-  });
+  }
+
+  if (await isGzip(filePath)) {
+    uploadOptions.metadata = { contentEncoding: 'gzip' };
+  }
+
+  return client.bucket(bucketName).upload(filePath, uploadOptions);
 }
 
 /**
