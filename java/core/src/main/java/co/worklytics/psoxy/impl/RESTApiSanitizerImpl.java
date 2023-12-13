@@ -3,6 +3,8 @@ package co.worklytics.psoxy.impl;
 import co.worklytics.psoxy.PseudonymizedIdentity;
 import co.worklytics.psoxy.Pseudonymizer;
 import co.worklytics.psoxy.RESTApiSanitizer;
+import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.utils.URLUtils;
 import com.avaulta.gateway.pseudonyms.Pseudonym;
@@ -39,6 +41,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.mail.internet.InternetAddress;
 import java.net.InetAddress;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.*;
@@ -73,6 +76,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
 
     JsonSchemaFilter rootDefinitions;
 
+    String targetHostPath;
 
     @AssistedInject
     public RESTApiSanitizerImpl(@Assisted RESTRules rules,
@@ -95,6 +99,8 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     ParameterSchemaUtils parameterSchemaUtils;
     @Inject
     PathTemplateUtils pathTemplateUtils;
+    @Inject
+    ConfigService configService;
 
     @Inject @Named("ipEncryptionStrategy")
     ReversibleTokenizationStrategy ipEncryptStrategy;
@@ -109,52 +115,16 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
 
     @Override
     public Optional<Collection<String>> getAllowedHeadersToForward(String httpMethod, URL url) {
-        Optional<Map.Entry<Endpoint, Pattern>> endpoint = getEndpoint(httpMethod, url);
+        Optional<Pair<Pattern, Endpoint>> endpoint = getEndpoint(httpMethod, url);
 
         if (endpoint.isPresent()) {
-            return endpoint.get().getKey().getAllowedRequestHeaderesToForward();
+            return endpoint.get().getValue().getAllowedRequestHeaderesToForward();
         } else {
             return Optional.empty();
         }
     }
 
-    @VisibleForTesting
-    Predicate<Endpoint> allowsHttpMethod(@NonNull String httpMethod) {
-        return (endpoint) ->
-                endpoint.getAllowedMethods()
-                        .map(methods -> methods.stream().map(String::toUpperCase).collect(Collectors.toList())
-                                .contains(httpMethod.toUpperCase()))
-                        .orElse(true);
-    }
 
-    @VisibleForTesting
-    Predicate<Map.Entry<Endpoint, Pattern>> getHasPathRegexMatchingUrl(String relativeUrl) {
-        return (entry) ->
-                entry.getKey().getPathRegex() != null && entry.getValue().matcher(relativeUrl).matches();
-    }
-
-    @VisibleForTesting
-    Predicate<Map.Entry<Endpoint, Pattern>> getHasPathTemplateMatchingUrl(URL url) {
-        return (entry) -> {
-            if (entry.getKey().getPathTemplate() != null) {
-                Matcher matcher = entry.getValue().matcher(url.getPath());
-                if (matcher.matches()) {
-                    boolean allParamsValid =
-                            entry.getKey().getPathParameterSchemasOptional()
-                                    .map(schemas -> schemas.entrySet().stream()
-                                        .allMatch(paramSchema -> parameterSchemaUtils.validate(paramSchema.getValue(), matcher.group(paramSchema.getKey()))))
-                                    .orElse(true);
-
-                    //q: need to catch possible IllegalArgumentException if path parameter defined in `pathParameterSchemas`
-                    // not in the path template??
-
-                    return allParamsValid &&
-                            allowedQueryParams(entry.getKey(), URLUtils.parseQueryParams(url));
-                }
-            }
-            return false;
-        };
-    }
 
     @Override
     public String sanitize(String httpMethod, URL url, String jsonResponse) {        //extra check ...
@@ -166,21 +136,11 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
             return jsonResponse;
         }
 
-        return transform(url, jsonResponse);
-
+        return transform(httpMethod, url, jsonResponse);
     }
 
-    String transform(@NonNull URL url, @NonNull String jsonResponse) {
-        String relativeUrl = URLUtils.relativeURL(url);
-        Optional<Pair<Pattern, Endpoint>> matchingEndpoint =
-                getCompiledAllowedEndpoints().entrySet().stream()
-                        .filter(entry -> entry.getKey().getPathRegex() != null && entry.getValue().matcher(relativeUrl).matches()
-                                || (entry.getKey().getPathTemplate() != null && entry.getValue().matcher(url.getPath()).matches()
-                                        && allowedQueryParams(entry.getKey(), URLUtils.parseQueryParams(url))))
-                        .findFirst()
-                        .map(entry -> Pair.of(entry.getValue(), entry.getKey()));
-
-        return matchingEndpoint.map(match -> {
+    String transform(@NonNull String httpMethod, @NonNull URL url, @NonNull String jsonResponse) {
+        return getEndpoint(httpMethod, url).map(match -> {
             String filteredJson = match.getValue().getResponseSchemaOptional()
                     .map(schema -> {
                         //q: this read
@@ -598,8 +558,78 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
         return rootDefinitions;
     }
 
-    private Optional<Map.Entry<Endpoint, Pattern>> getEndpoint(String httpMethod, URL url) {
-        String relativeUrl = URLUtils.relativeURL(url);
+
+    private String getTargetHostPath() {
+        if (targetHostPath == null) {
+            synchronized ($writeLock) {
+                if (targetHostPath == null) {
+                    targetHostPath = configService.getConfigPropertyAsOptional(ProxyConfigProperty.TARGET_HOST)
+                        .map(s -> {
+                            try {
+                                return new URL(s).getPath();
+                            } catch (MalformedURLException e) {
+                                log.log(Level.WARNING, "Invalid API_HOST: " + s, e);
+                                //shouldn't happen
+                                return "";
+                            }
+                        })
+                        .orElse("");
+                }
+            }
+        }
+        return targetHostPath;
+    }
+
+    @VisibleForTesting
+    String stripTargetHostPath(String path) {
+        if (StringUtils.isBlank(getTargetHostPath())) {
+            return path;
+        } else {
+            return path.replaceFirst("^" + getTargetHostPath(), "");
+        }
+    }
+
+    @VisibleForTesting
+    Predicate<Map.Entry<Endpoint, Pattern>> getHasPathTemplateMatchingUrl(URL url) {
+        return (entry) -> {
+            if (entry.getKey().getPathTemplate() != null) {
+                Matcher matcher = entry.getValue().matcher(stripTargetHostPath(url.getPath()));
+                if (matcher.matches()) {
+                    boolean allParamsValid =
+                        entry.getKey().getPathParameterSchemasOptional()
+                            .map(schemas -> schemas.entrySet().stream()
+                                .allMatch(paramSchema -> parameterSchemaUtils.validate(paramSchema.getValue(), matcher.group(paramSchema.getKey()))))
+                            .orElse(true);
+
+                    //q: need to catch possible IllegalArgumentException if path parameter defined in `pathParameterSchemas`
+                    // not in the path template??
+
+                    return allParamsValid &&
+                        allowedQueryParams(entry.getKey(), URLUtils.parseQueryParams(url));
+                }
+            }
+            return false;
+        };
+    }
+
+    @VisibleForTesting
+    Predicate<Endpoint> allowsHttpMethod(@NonNull String httpMethod) {
+        return (endpoint) ->
+            endpoint.getAllowedMethods()
+                .map(methods -> methods.stream().map(String::toUpperCase).collect(Collectors.toList())
+                    .contains(httpMethod.toUpperCase()))
+                .orElse(true);
+    }
+
+    @VisibleForTesting
+    Predicate<Map.Entry<Endpoint, Pattern>> getHasPathRegexMatchingUrl(String relativeUrl) {
+        return (entry) ->
+            entry.getKey().getPathRegex() != null && entry.getValue().matcher(relativeUrl).matches();
+    }
+
+
+    private Optional<Pair<Pattern, Endpoint>> getEndpoint(String httpMethod, URL url) {
+        String relativeUrl = stripTargetHostPath(URLUtils.relativeURL(url));
 
         Predicate<Map.Entry<Endpoint, Pattern>> hasPathRegexMatchingUrl =
                 getHasPathRegexMatchingUrl(relativeUrl);
@@ -613,6 +643,9 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
                 .filter(entry -> hasPathRegexMatchingUrl.test(entry) || hasPathTemplateMatchingUrl.test(entry))
                 .filter(entry -> allowedQueryParams(entry.getKey(), URLUtils.parseQueryParams(url))) // redundant in the pathTemplate case
                 .filter(entry -> allowsHttpMethod.test(entry.getKey()))
-                .findAny();
+                .findAny()
+                .map(entry -> Pair.of(entry.getValue(), entry.getKey()));
+
     }
+
 }

@@ -86,6 +86,9 @@ class RESTApiSanitizerImplTest {
             TestModules.withMockEncryptionKey(mock);
             when(mock.getConfigPropertyOrError(eq(ProxyConfigProperty.SOURCE)))
                 .thenReturn("gmail");
+            when(mock.getConfigPropertyAsOptional(eq(ProxyConfigProperty.TARGET_HOST)))
+                .thenReturn(Optional.of("gmail.googleapis.com"));
+
             return mock;
         }
     }
