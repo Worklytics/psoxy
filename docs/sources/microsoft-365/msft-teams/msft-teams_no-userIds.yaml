@@ -79,7 +79,6 @@ endpoints:
           - "$..eventDetail.teamDescription"
           - "$.['@odata.context']"
           - "$..['@odata.count']"
-          - "$..['@odata.type']"
       - !<tokenize>
         jsonPaths:
           - "$.['@odata.nextLink', '@odata.prevLink']"
@@ -139,7 +138,6 @@ endpoints:
           - "$..value[*].eventDetail.chatDisplayName"
           - "$.['@odata.context']"
           - "$..['@odata.count']"
-          - "$..['@odata.type']"
       - !<tokenize>
         jsonPaths:
           - "$.['@odata.nextLink', '@odata.prevLink']"
