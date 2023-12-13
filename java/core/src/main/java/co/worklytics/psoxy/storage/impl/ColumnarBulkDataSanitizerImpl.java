@@ -6,6 +6,7 @@ import co.worklytics.psoxy.PseudonymizerImplFactory;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.Base64UrlSha256HashPseudonymEncoder;
+import com.avaulta.gateway.pseudonyms.impl.LegacyPseudonymTokenEncoder;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.ColumnarRules;
 import co.worklytics.psoxy.storage.BulkDataSanitizer;
@@ -55,6 +56,8 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
     UrlSafeTokenPseudonymEncoder urlSafeTokenPseudonymEncoder;
     @Inject
     Base64UrlSha256HashPseudonymEncoder base64UrlSha256HashPseudonymEncoder;
+    @Inject
+    LegacyPseudonymTokenEncoder legacyTokenEncoder;
 
     @Inject
     PseudonymizerImplFactory pseudonymizerImplFactory;
@@ -292,9 +295,11 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
                         }
                         if (localPseudonymizer.getOptions().getPseudonymImplementation() == PseudonymImplementation.LEGACY) {
                             if (identity.getReversible() != null) {
-                                throw new Error("Cannot encode legacy PseudonymizedIdentity with reversibles as URL_SAFE_TOKEN");
+                                log.warning("Cannot encode legacy PseudonymizedIdentity with reversibles as URL_SAFE_TOKEN");
+                                //fail to JSON, rather than throw exception and break everything
+                                return objectMapper.writeValueAsString(identity);
                             }
-                            return urlSafeTokenPseudonymEncoder.encode(identity.fromLegacy());
+                            return legacyTokenEncoder.encode(identity.fromLegacy());
                         } else {
                             return urlSafeTokenPseudonymEncoder.encode(identity.asPseudonym());
                         }

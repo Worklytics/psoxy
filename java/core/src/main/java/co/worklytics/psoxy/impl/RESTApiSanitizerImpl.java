@@ -495,6 +495,10 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
                 String pseudonymizedString;
 
                 if (getPseudonymizer().getOptions().getPseudonymImplementation() == PseudonymImplementation.LEGACY) {
+                    //NOTE: can't fail to JSON here, bc going to be interpolated back into to string,
+                    // replacing capture group - so reversible, if any, will just be lost in LEGACY
+                    // case (and current use-case, MSFT proxyAddresses, shouldn't use reversibles
+                    // anyways)
                     pseudonymizedString = legacyTokenEncoder.encode(pseudonymizedIdentity.fromLegacy());
                 } else {
                     pseudonymizedString = urlSafePseudonymEncoder.encode(pseudonymizedIdentity.asPseudonym());
