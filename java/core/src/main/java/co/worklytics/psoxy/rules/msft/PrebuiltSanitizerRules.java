@@ -531,7 +531,6 @@ public class PrebuiltSanitizerRules {
                                                                                                     .toBuilder()
                                                                                                     .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
                                                                                                     .jsonPaths(REDACT_ODATA_COUNT.getJsonPaths())
-                                                                                                    .jsonPaths(REDACT_ODATA_TYPE.getJsonPaths())
                                                                                                     .build(),
                                                                                                 TOKENIZE_ODATA_LINKS)
         .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_CHATS_MESSAGES,                PSEUDONYMIZE_USER_ID,
