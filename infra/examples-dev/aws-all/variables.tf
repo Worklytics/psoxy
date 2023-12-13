@@ -306,6 +306,16 @@ variable "lookup_table_builders" {
   }
 }
 
+variable "vpc_config" {
+  type = object({
+    ipv6_allowed_for_dual_stack = bool
+    subnet_ids                  = list(string)
+    security_group_ids          = list(string)
+  })
+  description = "**alpha** VPC configuration for lambda; if not provided, lambda will not be deployed in a VPC. see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function#vpc_config"
+  default     = null
+}
+
 variable "todos_as_outputs" {
   type        = bool
   description = "whether to render TODOs as outputs (former useful if you're using Terraform Cloud/Enterprise, or somewhere else where the filesystem is not readily accessible to you)"

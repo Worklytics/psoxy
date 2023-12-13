@@ -87,6 +87,7 @@ module "api_connector" {
   source_auth_strategy                  = each.value.source_auth_strategy
   oauth_scopes                          = each.value.oauth_scopes_needed
   example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
+  vpc_config                            = var.vpc_config
 
 
   environment_variables = merge(
@@ -136,6 +137,7 @@ module "bulk_connector" {
   sanitized_expiration_days        = var.bulk_sanitized_expiration_days
   input_expiration_days            = var.bulk_input_expiration_days
   example_file                     = each.value.example_file
+  vpc_config                       = var.vpc_config
 
   environment_variables = merge(
     var.general_environment_variables,

@@ -62,6 +62,8 @@ resource "aws_lambda_function" "instance" {
   reserved_concurrent_executions = coalesce(var.reserved_concurrent_executions, -1)
   kms_key_arn                    = var.function_env_kms_key_arn
 
+  vpc_config                     = var.vpc_config
+
   environment {
     variables = merge(
       var.path_to_config == null ? {} : yamldecode(file(var.path_to_config)),
