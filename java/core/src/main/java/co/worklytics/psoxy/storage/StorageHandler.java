@@ -37,6 +37,13 @@ public class StorageHandler {
 
     private static final String CONTENT_ENCODING_GZIP = "gzip";
 
+    /**
+     * how many lines to process as a 'validation' of the file/transform/etc; if fails, then we abort
+     * whole attempt w/o processing file at all. errors after this number could result in partial
+     * output being written
+     */
+    private static final int LINES_TO_VALIDATE = 5;
+
     @Inject
     ConfigService config;
 
@@ -305,7 +312,7 @@ public class StorageHandler {
         ) {
 
             StringBuffer firstLines = new StringBuffer();
-            for (int lineCount = 0; lineCount < 5; lineCount++) {
+            for (int lineCount = 0; lineCount < LINES_TO_VALIDATE ; lineCount++) {
                 String line = reader.readLine();
                 if (line == null) {
                     break;
