@@ -117,7 +117,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     public Optional<Collection<String>> getAllowedHeadersToForward(String httpMethod, URL url) {
         return getEndpoint(httpMethod, url)
             .map(Pair::getRight)
-            .map(Endpoint::getAllowedRequestHeadersToForward);
+            .map(endpoint -> endpoint.getAllowedRequestHeadersToForward().get());
     }
 
     @Override
