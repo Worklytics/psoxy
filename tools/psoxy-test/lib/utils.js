@@ -5,12 +5,13 @@ import {
   fromNodeProviderChain,
   fromTemporaryCredentials
 } from "@aws-sdk/credential-providers";
-import aws4 from 'aws4';
-import https from 'https';
-import path from 'path';
 import _ from 'lodash';
-import spec from '../data-sources/spec.js';
+import aws4 from 'aws4';
 import getLogger from './logger.js';
+import https from 'https';
+import isgzipBuffer from '@stdlib/assert-is-gzip-buffer';
+import path from 'path';
+import spec from '../data-sources/spec.js';
 import zlib from 'zlib';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -390,6 +391,10 @@ function addFilenameSuffix(filename, suffix) {
   return result;
 }
 
+async function isGzip(filePath) {
+  return isgzipBuffer(await fs.readFile(filePath));
+}
+
 export {
   addFilenameSuffix,
   executeCommand,
@@ -397,11 +402,12 @@ export {
   getAWSCredentials,
   getCommonHTTPHeaders,
   getFileNameFromURL,
+  isGzip,
   parseBucketOption,
   requestWrapper as request,
+  resolveAWSRegion,
+  resolveHTTPMethod,
   saveToFile,
   signAWSRequestURL,
-  resolveHTTPMethod,
-  resolveAWSRegion,
   transformSpecWithResponse,
 };
