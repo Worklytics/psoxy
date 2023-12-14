@@ -179,11 +179,13 @@ module "custom_api_connector_rules" {
 
   source = "../../modules/gcp-sm-rules"
 
-  project_id     = var.gcp_project_id
-  prefix         = "${local.config_parameter_prefix}${upper(replace(each.key, "-", "_"))}_"
-  file_path      = each.value
-  default_labels = var.default_labels
+  project_id        = var.gcp_project_id
+  prefix            = "${local.config_parameter_prefix}${upper(replace(each.key, "-", "_"))}_"
+  file_path         = each.value
+  default_labels    = var.default_labels
+  instance_sa_email = module.api_connector[each.key].service_account_email
 }
+
 # END API CONNECTORS
 
 # BEGIN BULK CONNECTORS

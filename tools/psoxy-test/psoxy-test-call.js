@@ -78,10 +78,9 @@ export default async function (options = {}) {
   let resultMessagePrefix = options.healthCheck ? 'Health Check result:' :
   'Call result:'
 
-  let resultData = result.data;
   if (!_.isEmpty(result.data)) {
     try {
-      resultData = JSON.parse(result.data);
+      result.data = JSON.parse(result.data);
     } catch(error) {
       logger.verbose(`Error parsing Psoxy response: ${error.message}`);
     }
@@ -99,7 +98,7 @@ export default async function (options = {}) {
     }
 
     logger.success(`${resultMessagePrefix} ${result.statusMessage} - ${result.status}`,
-      { additional: resultData });
+      { additional: result.data });
 
   } else {
     let errorMessage = result.statusMessage || 'Unknown';
@@ -130,7 +129,7 @@ export default async function (options = {}) {
     }
 
     logger.error(`${chalk.bold.red(resultMessagePrefix)} ${chalk.bold.red(errorMessage)}`, {
-      additional: resultData
+      additional: result.data
     });
 
     if ([httpCodes.HTTP_STATUS_INTERNAL_SERVER_ERROR,

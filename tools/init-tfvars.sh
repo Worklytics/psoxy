@@ -7,7 +7,7 @@ PSOXY_BASE_DIR=$2
 DEPLOYMENT_ENV=${3:-"local"}
 HOST_PLATFORM=${4:-"aws"}
 
-SCRIPT_VERSION="v0.4.42"
+SCRIPT_VERSION="rc-v0.4.43"
 
 if [ -z "$PSOXY_BASE_DIR" ]; then
   printf "Usage: init-tfvars.sh <path-to-terraform.tfvars> <path-to-psoxy-base-directory> [DEPLOYMENT_ENV]\n"
@@ -82,7 +82,7 @@ echo "# root directory of a clone of the psoxy repo " >> $TFVARS_FILE
 echo "#  - by default, it points to .terraform, where terraform clones the main psoxy repo" >> $TFVARS_FILE
 echo "#  - if you have a local clone of the psoxy repo you prefer to use, change this to point there" >> $TFVARS_FILE
 printf "psoxy_base_dir = \"${PSOXY_BASE_DIR}\"\n" >> $TFVARS_FILE
-printf "provision_testing_infra = true\n" >> $TFVARS_FILE
+
 printf "\n" >> $TFVARS_FILE
 
 # pattern used to grep for provider at top-level of Terraform configuration
@@ -304,6 +304,13 @@ printf "# review following list of connectors to enable, and comment out what yo
 printf "enabled_connectors = ${AVAILABLE_CONNECTORS}\n\n" >> $TFVARS_FILE
 
 printf "\n"
+
+if [ "$HOST_PLATFORM" == "aws" ]; then
+  # AWS testing requires provisioning to IAM perms, for which GCP case doesn't support equivalent
+  # atm
+  printf "provision_testing_infra = true\n" >> $TFVARS_FILE
+fi
+
 
 if [ "$DEPLOYMENT_ENV" != "local" ]; then
   printf "Setting ${BLUE}install_test_tool=false${NC} and ${BLUE}todos_as_outputs=true${NC}, because your ${BLUE}terraform apply${NC} will run remotely.\n\n"
