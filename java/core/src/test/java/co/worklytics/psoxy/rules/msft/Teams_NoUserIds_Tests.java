@@ -108,8 +108,7 @@ public class Teams_NoUserIds_Tests extends JavaRulesTestBaseCase {
         String sanitized = sanitize(endpoint, jsonResponse);
         assertPseudonymized(sanitized, "8ea0e38b-efb3-4757-924a-5f94061cf8c2");
         assertRedacted(sanitized,
-            "@odata.context", "https://graph.microsoft.com/v1.0/$metadata#Collection(chatMessage)",
-            "@odata.type",  "#microsoft.graph.chatMessage", "#microsoft.graph.teamworkUserIdentity"
+            "@odata.context", "https://graph.microsoft.com/v1.0/$metadata#Collection(chatMessage)"
         );
 
         Collection<String> oDataUrl = Arrays.asList(

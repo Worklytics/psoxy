@@ -433,7 +433,7 @@ public class PrebuiltSanitizerRules {
 
     static final Endpoint MS_TEAMS_TEAMS_CHANNELS_MESSAGES_DELTA =  Endpoint.builder()
         .pathTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS_CHANNELS_MESSAGES_DELTA)
-        .allowedQueryParams(List.of("$select","$top","$skiptoken","$expand", "$deltatoken"))
+        .allowedQueryParams(List.of("$select","$top","$skiptoken","$expand", "$deltatoken", "$filter"))
         .build();
 
     static final Endpoint MS_TEAMS_CHATS_MESSAGES =  Endpoint.builder()
@@ -531,7 +531,6 @@ public class PrebuiltSanitizerRules {
                                                                                                     .toBuilder()
                                                                                                     .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
                                                                                                     .jsonPaths(REDACT_ODATA_COUNT.getJsonPaths())
-                                                                                                    .jsonPaths(REDACT_ODATA_TYPE.getJsonPaths())
                                                                                                     .build(),
                                                                                                 TOKENIZE_ODATA_LINKS)
         .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_CHATS_MESSAGES,                PSEUDONYMIZE_USER_ID,
