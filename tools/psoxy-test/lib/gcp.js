@@ -216,7 +216,7 @@ async function download(bucketName, fileName, destination, client, logger) {
     client = createStorageClient();
   }
 
-  const downloadFunction = async () => client.bucket(bucketName).file(fileName + 'x')
+  const downloadFunction = async () => client.bucket(bucketName).file(fileName)
     .download({ destination: destination });
   const onErrorStop = (error) => error.code !== 404;
 
