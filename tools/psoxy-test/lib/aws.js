@@ -2,7 +2,7 @@ import {
   executeWithRetry,
   getAWSCredentials,
   getCommonHTTPHeaders,
-  isGzip,
+  isGzipped,
   request,
   resolveHTTPMethod,
   resolveAWSRegion,
@@ -234,7 +234,7 @@ async function upload(bucket, key, file, options, client) {
     Body: fs.createReadStream(file),
   }
 
-  if (await isGzip(file)) {
+  if (await isGzipped(file)) {
     commandOptions.ContentEncoding = 'gzip';
   }
 
@@ -254,6 +254,7 @@ async function upload(bucket, key, file, options, client) {
  *
  * @param {string} bucket
  * @param {string} key - Object's key (filename in S3)
+ * @param {string} destination - local path and filename
  * @param {Object} options
  * @param {string} options.role
  * @param {string} options.region
@@ -261,9 +262,8 @@ async function upload(bucket, key, file, options, client) {
  * @param {number} options.attempts - max number of download attempts
  * @param {S3Client} client
  * @param {Object} logger - winston instance
- * @returns {Promise} resolves with contents of file
  */
-async function download(bucket, key, options, client, logger) {
+async function download(bucket, key, destination, options, client, logger) {
   if (!client) {
     client = await createS3Client(options.role, options.region);
   }
@@ -282,7 +282,13 @@ async function download(bucket, key, options, client, logger) {
   if (downloadResponse === undefined) {
     throw new Error(`${key} not found after multiple attempts`);
   }
-  return downloadResponse.Body.transformToString();
+
+  // save file locally
+  await new Promise((resolve, reject) => {
+    downloadResponse.Body.pipe(fs.createWriteStream(destination))
+      .on('error', err => reject(err))
+      .on('close', () => resolve())
+  })
 }
 
 /**

@@ -1,7 +1,7 @@
 import {
   executeWithRetry,
   getCommonHTTPHeaders,
-  isGzip,
+  isGzipped,
   request,
   executeCommand,
   resolveHTTPMethod,
@@ -179,7 +179,7 @@ async function upload(bucketName, filePath, client, filename) {
     destination: filename ?? path.basename(filePath),
   }
 
-  if (await isGzip(filePath)) {
+  if (await isGzipped(filePath)) {
     uploadOptions.metadata = { contentEncoding: 'gzip' };
   }
 
@@ -202,21 +202,22 @@ async function deleteFile(bucketName, filename, client) {
 }
 
 /**
- * Download file from GCS
+ * Download file from GCS and saves it to `destination`
+ * Ref: https://googleapis.dev/nodejs/storage/latest/global.html#DownloadResponse
  *
  * @param {string} bucketName
  * @param {string} fileName
+ * @param {string} destination - local path and filename
  * @param {Storage} client
  * @param {Object} logger - winston instance
- * @returns {Promise} - https://googleapis.dev/nodejs/storage/latest/global.html#DownloadResponse
  */
-async function download(bucketName, fileName, client, logger) {
+async function download(bucketName, fileName, destination, client, logger) {
   if (!client) {
     client = createStorageClient();
   }
 
-  const downloadFunction = async () => client.bucket(bucketName).file(fileName)
-    .download();
+  const downloadFunction = async () => client.bucket(bucketName).file(fileName + 'x')
+    .download({ destination: destination });
   const onErrorStop = (error) => error.code !== 404;
 
   const downloadResponse = await executeWithRetry(downloadFunction, onErrorStop,
@@ -225,8 +226,6 @@ async function download(bucketName, fileName, client, logger) {
   if (downloadResponse === undefined) {
     throw new Error(`${fileName} not found after multiple attempts`);
   }
-
-  return downloadResponse;
 }
 
 export default {
