@@ -111,8 +111,28 @@ provide can be configured to do this for you if applied regularly.
 More information:
 https://developers.google.com/workspace/guides/auth-overview
 
+To initially authorize each connector, a sufficiently privileged Google Workspace Admin must make a
+Domain-wide Delegation grant to the Oauth Client you create, by pasting its numeric ID and a CSV of
+of the required OAuth Scopes into the Google Workspace Admin console. This is a one-time setup step.
 
-## Provisioning API clients without Terraform
+If you use the provided Terraform modules (namely, `google-workspace-dwd-connection`), a TODO file
+with detailed instructions will be created for you, including the actual numeric ID and scopes
+required.
+
+Note that while Domain-wide Delegation is a broad grant of data access, the implementation of it
+in proxy is mitigated in several ways because the GCP Service Account resides in your own GCP
+project, and remains under your organizes control - unlike the most common Domain-wide Delegation
+scenarios which have been the subject of criticism by security researchers. In particular:
+  - you may directly verify the numeric ID of the service account in the GCP web console, or via the
+    GCP CLI; you don't need to take our word for it.
+  - you may monitor and log the use of each service account and its key as you see fit.
+  - you can ensure there is never more than one active key for each service account, and rotate
+    keys at any time.
+  - the key is only used from infrastructure (GCP CLoud Function or Lambda) in your environment; you
+    should be able to reconcile logs and usage between your GCP and AWS environments should you
+    desire to ensure there has been no malicious use of the key.
+
+### Provisioning API clients without Terraform
 
 While not recommend, it is possibly to set up Google API clients without Terraform, via the GCP web
 console:
@@ -129,3 +149,30 @@ console:
 
 NOTE: you could also use a single Service Account for everything, but you will need to store it's
 key repeatedly in AWS/GCP as the `SERVICE_ACCOUNT_KEY` for each of your Google Workspace connections.
+
+## Domain-wide Delegation Alternative
+If you remain uncomfortable with Domain-wide Delegation, a private Google Marketplace App is a
+possible, if tedious and harder to maintain, alternative. Here are some trade-offs:
+
+Pros:
+  - Google Workspace Admins may perform a single Marketplace installation, instead of multiple DWD
+    grants via the admin console
+  - "install" from the Google Workspace Marketplace is less error-prone/exploitable than copy-paste
+    a numeric service account ID
+  - visual confirmation of the oauth scopes being granted by the install
+  - ability to "install" for a Org Unit, rather than the entire domain
+
+Cons:
+  - you must use a dedicated GCP project for the Marketplace App; "installation" of a Google
+    Marketplace App grants all the service accounts in the project access to the listed oauth scopes.
+    You must undeterstand the the OAuth grant is to the project, not a specific service account.
+  - you must enable additional APIs in the GCP project (marketplace SDK).
+  - as of Dec 2023, Marketplace Apps cannot be completely managed by Terraform resources; so there
+    are more out-of-band steps that someone must complete by hand to create the App; and a simple
+    `terraform destroy` will not remove the associated infrastructure. In contrast,
+    `terraform destroy` in the DWD approach will result in revocation of the access grants when the
+    service account is deleted.
+  - You must monitor how many service accounts exist in the project and ensure only the expected
+    ons are created.  Note that all Google Workspace API access, as of Dec 2023, requires the
+    service account to authenticate with a key; so any SA without a key provisioned cannot access
+    your data.
