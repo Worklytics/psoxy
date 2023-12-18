@@ -29,6 +29,14 @@ test('isValidURL URL', (t) => {
   );
 });
 
+test('Get logs link based on cloud function URL', (t) => {
+  const gcp = t.context.subject;
+
+  t.is(undefined, gcp.getLogsURL('foo'));
+  t.is('https://console.cloud.google.com/functions/details/us-central1/psoxy-function?project=psoxy-project&tab=logs',
+    gcp.getLogsURL('https://us-central1-psoxy-project.cloudfunctions.net/psoxy-function'))
+})
+
 test('Psoxy Logs: parse log entries', (t) => {
   const gcp = t.context.subject;
 
@@ -38,7 +46,7 @@ test('Psoxy Logs: parse log entries', (t) => {
 
   t.truthy(result[0].timestamp, 'Contains timestamp');
   t.truthy(result[0].message, 'Contains message');
-  
+
   const errorSeverity = 'ERROR';
   const errorEntryIndex = logsSample
     .findIndex(entry => entry.severity === 'ERROR');
