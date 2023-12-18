@@ -136,6 +136,10 @@ export default async function (options = {}) {
     if ([httpCodes.HTTP_STATUS_INTERNAL_SERVER_ERROR,
       httpCodes.HTTP_STATUS_BAD_GATEWAY].includes(result.status)) {
       const logsURL = isAWS ? aws.getLogsURL(options) : gcp.getLogsURL(url);
+      // In general, we could add more "trobleshooting" tips here:
+      // - Check out script logs `run.log` which store verbose output
+      // - Directly show logs from the cloud provider (GCP is feasible, AWS 
+      //  require more parameters i.e. cloudwatch log group name)
       logger.info(`This looks like an internal error in the Proxy. Check out the logs for more details: ${logsURL}`);
     }
   }
