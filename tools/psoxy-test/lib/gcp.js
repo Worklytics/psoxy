@@ -91,6 +91,36 @@ async function getLogs(options = {}) {
 }
 
 /**
+ * Example:
+ * https://console.cloud.google.com/functions/details/us-central1/my-cloud-function?project=my-projectd&tab=logs
+ * Tries to parse region without zone
+ * ref: https://cloud.google.com/compute/docs/regions-zones
+ *
+ * @param {string} cloudFunctionURL
+ * @returns {string} - URL to logs
+ */
+function getLogsURL(cloudFunctionURL = '') {
+  try {
+    if (!isValidURL(cloudFunctionURL)) {
+      return;
+    }
+  } catch (error) {
+    return;
+  }
+
+  const url = new URL(cloudFunctionURL);
+  const [regionAndProjectId] = url.hostname.split('.');
+  const match = regionAndProjectId.match(/([a-z]+-[a-z0-9]+)-([a-z0-9-]+)/)
+  let region, projectId;
+  if (match && match.length >= 3) {
+    region = match[1];
+    projectId = match[2];
+  }
+  const [initial, functionName] = url.pathname.split('/');
+  return `https://console.cloud.google.com/functions/details/${region}/${functionName}?project=${projectId}&tab=logs`;
+}
+
+/**
  * Parse GCP log entries and return a simplre format for our use-case:
  * display: timestamp, message, and severity
  *
@@ -235,6 +265,7 @@ export default {
   download,
   getIdentityToken,
   getLogs,
+  getLogsURL,
   isValidURL,
   parseLogEntries,
   listFilesMetadata,

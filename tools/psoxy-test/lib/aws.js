@@ -152,6 +152,16 @@ async function getLogEvents(options, client) {
 }
 
 /**
+ * Get CloudWatch logs Home URL
+ * (lamdba name, nor log group name are available)
+ * @param {object} options
+ * @returns {string} URL
+ */
+function getLogsURL(options) {
+  return `https://${options.region}.console.aws.amazon.com/cloudwatch/home`
+}
+
+/**
  * Parse CloudWatch log events and return a simpler format focused on
  * our use-case: display results via shell
  *
@@ -321,6 +331,7 @@ export default {
   download,
   getLogEvents,
   getLogStreams,
+  getLogsURL,
   isValidURL,
   listBuckets,
   listObjects,
