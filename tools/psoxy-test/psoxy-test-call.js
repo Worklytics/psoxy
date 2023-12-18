@@ -112,7 +112,7 @@ export default async function (options = {}) {
       if (psoxyError) {
         switch (psoxyError) {
           case 'BLOCKED_BY_RULES':
-            errorMessage = 'Blocked by rules error: make sure URL path is correct';
+            errorMessage = 'Blocked by rules error: make sure the URL path of the data source is correct';
             break;
           case 'CONNECTION_SETUP':
             errorMessage =
@@ -135,7 +135,8 @@ export default async function (options = {}) {
 
     if ([httpCodes.HTTP_STATUS_INTERNAL_SERVER_ERROR,
       httpCodes.HTTP_STATUS_BAD_GATEWAY].includes(result.status)) {
-      logger.info('This looks like an internal error in the Proxy; please review the logs.')
+      const logsURL = isAWS ? aws.getLogsURL(options) : gcp.getLogsURL(url);
+      logger.info(`This looks like an internal error in the Proxy. Check out the logs for more details: ${logsURL}`);
     }
   }
 
