@@ -9,12 +9,20 @@ import java.util.List;
 
 /**
  *
- * a transform to apply within a record
+ * a transform to apply within a record, with a mandatory JSON path that specifies the field(s) to
+ * be transformed
  *
  * yaml representation
  *  - redact: "foo"
  *
- * would be supported as equivalent ... but can't get that to work with Jackson YAML
+ * can we make this polymorphic, so the following also works?
+ *   - redact:
+ *       - "foo"
+ *       - "bar"
+ *   - redact: "foo"
+ * --> probably with a custom deserializer
+ *
+ *
  */
 @JsonTypeInfo(
     use = JsonTypeInfo.Id.DEDUCTION,

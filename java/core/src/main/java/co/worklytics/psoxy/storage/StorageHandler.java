@@ -13,11 +13,13 @@ import lombok.*;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -32,6 +34,15 @@ public class StorageHandler {
 
     // as writing to remote storage, err on size of larger buffer
     private static final int DEFAULT_BUFFER_SIZE = 65_536; //64 KB
+
+    private static final String CONTENT_ENCODING_GZIP = "gzip";
+
+    /**
+     * how many lines to process as a 'validation' of the file/transform/etc; if fails, then we abort
+     * whole attempt w/o processing file at all. errors after this number could result in partial
+     * output being written
+     */
+    private static final int LINES_TO_VALIDATE = 5;
 
     @Inject
     ConfigService config;
@@ -53,6 +64,13 @@ public class StorageHandler {
 
     @Inject
     PathTemplateUtils pathTemplateUtils;
+
+    static void warnIfEncodingDoesNotMatchFilename(@NonNull StorageEventRequest request, @Nullable String contentEncoding) {
+        if (request.getSourceObjectPath().endsWith(".gz")
+            && !StringUtils.equals(contentEncoding, CONTENT_ENCODING_GZIP)) {
+            log.warning("Input filename ends with .gz, but 'Content-Encoding' metadata is not 'gzip'; is this correct? Decompression is based on object's 'Content-Encoding'");
+        }
+    }
 
     @RequiredArgsConstructor
     public enum BulkMetaData {
@@ -77,91 +95,62 @@ public class StorageHandler {
 
     }
 
-    int getBufferSize() {
-        return config.getConfigPropertyAsOptional(BulkModeConfigProperty.BUFFER_SIZE).map(Integer::parseInt).orElse(DEFAULT_BUFFER_SIZE);
-    }
-
-
 
     @SneakyThrows
-    public StorageEventResponse process(StorageEventRequest request,
-                 StorageHandler.ObjectTransform transform,
-                 InputStream is,
-                 OutputStream os) {
-        int bufferSize = getBufferSize();
-        try (
-            InputStream decompressedStream = request.getDecompressInput() ? new GZIPInputStream(is, bufferSize) : is;
-            Reader reader = new BufferedReader(new InputStreamReader(decompressedStream, StandardCharsets.UTF_8), bufferSize);
-            OutputStream outputStream = request.getCompressOutput() ? new GZIPOutputStream(os, bufferSize) : os;
-            OutputStreamWriter writer = new OutputStreamWriter(outputStream)
-        ) {
-
-            request = request
-                .withSourceReader(reader)
-                .withDestinationWriter(writer);
-
-            StorageEventResponse storageEventResponse = this.handle(request, transform.getRules());
-
-            log.info("Writing to: " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationObjectPath());
-
-            log.info("Successfully pseudonymized " + request.getSourceBucketName() + "/"
-                + request.getSourceObjectPath() + " and uploaded to " + storageEventResponse.getDestinationBucketName() + "/" + storageEventResponse.getDestinationObjectPath());
-            return storageEventResponse;
-        }
-
-    }
+    public StorageEventResponse handle(StorageEventRequest request,
+                                       StorageHandler.ObjectTransform transform,
+                                       Supplier<InputStream> inputStreamSupplier,
+                                       Supplier<OutputStream> outputStreamSupplier) {
 
 
-    @SneakyThrows
-    public StorageEventResponse handle(StorageEventRequest request, RuleSet rules) {
+        this.validate(request, transform, inputStreamSupplier);
 
-        Optional<BulkDataRules> applicableRules = getApplicableRules(rules, request.getSourceObjectPath());
+        this.process(request, transform, inputStreamSupplier, outputStreamSupplier);
 
-        if (applicableRules.isEmpty()) {
-            throw new IllegalArgumentException("No applicable rules found for " + request.getSourceObjectPath());
-        }
+        StorageEventResponse response = StorageEventResponse.builder()
+            .destinationBucketName(request.getDestinationBucketName())
+            .destinationObjectPath(request.getDestinationObjectPath())
+            .build();
 
-        BulkDataSanitizer fileHandler = bulkDataSanitizerFactory.get(applicableRules.get());
+        log.info("Writing to: " + response.getDestinationBucketName() + "/" + response.getDestinationObjectPath());
 
-        fileHandler.sanitize(request.getSourceReader(), request.getDestinationWriter(), pseudonymizer);
+        log.info("Successfully pseudonymized " + request.getSourceBucketName() + "/"
+            + request.getSourceObjectPath() + " and uploaded to " + response.getDestinationBucketName() + "/" + response.getDestinationObjectPath());
 
-        return StorageEventResponse.builder()
-                .destinationBucketName(request.getDestinationBucketName())
-                .destinationObjectPath(request.getDestinationObjectPath())
-                .build();
+        return response;
     }
 
 
 
 
     /**
-     *
-     * @param reader from source, may be null if not yet known
-     * @param writer to destination, may be null if not yet known
-     * @param sourceBucketName bucket name
-     * @param sourceObjectPath a path (object key) within the bucket; no leading `/` expected
+     * @param sourceBucketName      bucket name
+     * @param sourceObjectPath      a path (object key) within the bucket; no leading `/` expected
      * @param transform
+     * @param sourceContentEncoding
      * @return
      */
-    public StorageEventRequest buildRequest(Reader reader,
-                                            Writer writer,
-                                            String sourceBucketName,
+    public StorageEventRequest buildRequest(String sourceBucketName,
                                             String sourceObjectPath,
-                                            ObjectTransform transform) {
+                                            ObjectTransform transform,
+                                            String sourceContentEncoding) {
 
         String sourceObjectPathWithinBase =
             inputBasePath()
                 .map(inputBasePath -> sourceObjectPath.replace(inputBasePath, ""))
                 .orElse(sourceObjectPath);
 
-        return StorageEventRequest.builder()
-            .sourceReader(reader)
-            .destinationWriter(writer)
+
+        StorageEventRequest request = StorageEventRequest.builder()
             .sourceBucketName(sourceBucketName)
             .sourceObjectPath(sourceObjectPath)
             .destinationBucketName(transform.getDestinationBucketName())
             .destinationObjectPath(transform.getPathWithinBucket() + sourceObjectPathWithinBase)
             .build();
+
+        warnIfEncodingDoesNotMatchFilename(request, sourceContentEncoding);
+
+        return request;
     }
 
 
@@ -209,6 +198,10 @@ public class StorageHandler {
             .equals(hostEnvironment.getInstanceId());
     }
 
+
+
+    //TODO: better name for this?
+    // the rules are a 'transform', but the `destinationBucketName`/`pathWithinBucket' aren't
     @Builder
     @AllArgsConstructor
     @NoArgsConstructor
@@ -290,6 +283,86 @@ public class StorageHandler {
         }
         return Optional.ofNullable(applicableRules);
     }
+
+
+    /**
+     * validate that the input stream can be processed per request/transform
+     *
+     * use-case: avoid opening output writer if file isn't valid
+     *
+     * @param request that triggered this processing
+     * @param transform to apply (rules + output target)
+     * @param inputStreamSupplier to get a stream of the input
+     *
+     * @throws Exception if file is invalid/processing failed
+     */
+    @SneakyThrows
+    void validate(StorageEventRequest request,
+                  StorageHandler.ObjectTransform transform,
+                  Supplier<InputStream> inputStreamSupplier) {
+        int bufferSize = getBufferSize();
+        try (
+            InputStream decompressedStream = request.getDecompressInput() ? new GZIPInputStream(inputStreamSupplier.get(), bufferSize) : inputStreamSupplier.get();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(decompressedStream, StandardCharsets.UTF_8), bufferSize);
+            OutputStream out = new ByteArrayOutputStream()
+        ) {
+
+            StringBuffer firstLines = new StringBuffer();
+            for (int lineCount = 0; lineCount < LINES_TO_VALIDATE ; lineCount++) {
+                String line = reader.readLine();
+                if (line == null) {
+                    break;
+                }
+                firstLines.append(line + "\n");
+            }
+
+            Supplier<InputStream> firstLinesSupplier = () -> new ByteArrayInputStream(firstLines.toString().getBytes());
+
+            this.process(request, transform, firstLinesSupplier, () -> out);
+        }
+    }
+
+
+    private int getBufferSize() {
+        return config.getConfigPropertyAsOptional(BulkModeConfigProperty.BUFFER_SIZE).map(Integer::parseInt).orElse(DEFAULT_BUFFER_SIZE);
+    }
+
+    /**
+     * actually process the full input, getting inputStream and writing to outputStream
+     *
+     * @param request
+     * @param transform
+     * @param inputStreamSupplier
+     * @param outputStreamSupplier
+     */
+    @SneakyThrows
+    void process(StorageEventRequest request,
+                 StorageHandler.ObjectTransform transform,
+                 Supplier<InputStream> inputStreamSupplier,
+                 Supplier<OutputStream> outputStreamSupplier) {
+        int bufferSize = getBufferSize();
+
+        try (
+            InputStream decompressedStream = request.getDecompressInput() ? new GZIPInputStream(inputStreamSupplier.get(), bufferSize) : inputStreamSupplier.get();
+            Reader reader = new BufferedReader(new InputStreamReader(decompressedStream, StandardCharsets.UTF_8), bufferSize);
+            OutputStream outputStream = request.getCompressOutput() ? new GZIPOutputStream(outputStreamSupplier.get(), bufferSize) : outputStreamSupplier.get();
+            OutputStreamWriter writer = new OutputStreamWriter(outputStream)
+        ) {
+
+            Optional<BulkDataRules> applicableRules =
+                getApplicableRules(transform.getRules(), request.getSourceObjectPath());
+
+            if (applicableRules.isEmpty()) {
+                throw new IllegalArgumentException("No applicable rules found for " + request.getSourceObjectPath());
+            }
+
+            BulkDataSanitizer fileHandler = bulkDataSanitizerFactory.get(applicableRules.get());
+
+            fileHandler.sanitize(reader, writer, pseudonymizer);
+        }
+
+    }
+
 
     Map<String, BulkDataRules> effectiveTemplates(Map<String, BulkDataRules> original) {
         return original.entrySet().stream()

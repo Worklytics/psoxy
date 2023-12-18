@@ -107,7 +107,7 @@ public class Endpoint {
     Collection<String> allowedRequestHeadersToForward;
 
     @JsonIgnore
-    public Optional<Collection<String>> getAllowedRequestHeaderesToForward() {
+    public Optional<Collection<String>> getAllowedRequestHeadersToForward() {
         return Optional.ofNullable(allowedRequestHeadersToForward);
     }
 

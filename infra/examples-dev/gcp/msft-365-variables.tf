@@ -16,3 +16,33 @@ variable "example_msft_user_guid" {
   description = "example MSFT user guid (uuid) for test API calls (OPTIONAL)"
   default     = "{EXAMPLE_MSFT_USER_GUID}"
 }
+
+variable "msft_teams_example_team_guid" {
+  type        = string
+  description = "example of MSFT Id (GUID) of a Teams Team for test API calls (OPTIONAL)"
+  default     = "{EXAMPLE_MSFT_TEAMS_TEAM_GUID}"
+}
+
+variable "msft_teams_example_channel_guid" {
+  type        = string
+  description = "example of MSFT Id (GUID) of a Teams Channel for test API calls (OPTIONAL)"
+  default     = "{EXAMPLE_MSFT_TEAMS_CHANNEL_GUID}"
+}
+
+variable "msft_teams_example_chat_guid" {
+  type        = string
+  description = "example of MSFT Id (GUID) of a Teams Chat for test API calls (OPTIONAL)"
+  default     = "{EXAMPLE_MSFT_TEAMS_CHAT_GUID}"
+}
+
+variable "msft_teams_example_call_guid" {
+  type        = string
+  description = "example of MSFT Id (GUID) of a Teams Call for test API calls (OPTIONAL)"
+  default     = "{EXAMPLE_MSFT_TEAMS_CALL_GUID}"
+}
+
+variable "msft_teams_example_call_record_guid" {
+  type        = string
+  description = "example of MSFT Id (GUID) of a Teams Call Record for test API calls (OPTIONAL)"
+  default     = "{EXAMPLE_MSFT_TEAMS_CALL_RECORD_GUID}"
+}

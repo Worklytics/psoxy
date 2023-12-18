@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 @Log
 public class HealthCheckRequestHandler {
 
-    static final String JAVA_SOURCE_CODE_VERSION = "v0.4.42";
+    static final String JAVA_SOURCE_CODE_VERSION = "rc-v0.4.43";
 
     @Inject
     EnvVarsConfigService envVarsConfigService;
@@ -126,7 +126,7 @@ public class HealthCheckRequestHandler {
         }
 
         try {
-            rulesUtils.getRulesFromConfig(config)
+            rulesUtils.getRulesFromConfig(config, envVarsConfigService)
                     .ifPresent(rules -> healthCheckResult.rules(rulesUtils.asYaml(rules)));
         } catch (Throwable e) {
             logInDev("Failed to add rules to health check", e);
