@@ -303,7 +303,9 @@ async function executeWithRetry(fn, onErrorStop, logger, maxAttempts = 60,
         const elapsedMs = Date.now() - start;
         const elapsedSeconds = Math.floor(elapsedMs / 1000);
         const elapsedMinutes = Math.floor(elapsedSeconds / 60);
-        const elapsed = `${elapsedMinutes}m ${elapsedSeconds % 60}s`;
+        const elapsed = elapsedMinutes > 0 ?
+          `${elapsedMinutes}m${elapsedSeconds % 60}s` :
+          `${elapsedSeconds}s`;
         logger.info(`${progressMessage} [${elapsed} elapsed]`);
       }
     }
@@ -393,8 +395,8 @@ async function getAWSCredentials(role, region) {
 
 /**
  * Append suffix to filename (before extension)
- * @param {string} filename 
- * @param {string} suffix 
+ * @param {string} filename
+ * @param {string} suffix
  * @returns {string} {filename}-{suffix}{extension}
  */
 function addFilenameSuffix(filename, suffix) {
@@ -408,7 +410,7 @@ function addFilenameSuffix(filename, suffix) {
 
 /**
  * Unzip file
- * @param {string} filePath 
+ * @param {string} filePath
  * @returns {string} unzipped file path
  */
 async function unzip(filePath) {
@@ -423,7 +425,7 @@ async function unzip(filePath) {
 
 /**
  * Check if file is gzipped
- * @param {string} filePath 
+ * @param {string} filePath
  * @returns {boolean}
  */
 async function isGzipped(filePath) {
