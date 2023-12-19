@@ -123,7 +123,7 @@ async function testGCP(options, logger) {
 
   // where to save the sanitized file; the file in the output bucket will have
   // {original filename}-{timestamp} as filename, so we save it locally as
-  // {original filename}-{timestamp}-{sanitized} to minize the change of
+  // {original filename}-{timestamp}-{sanitized} to minimize the chance of
   // modifying files in the system
   const sanitizedFilename = addFilenameSuffix(outputKey, SANITIZED_FILE_SUFFIX);
   const destination = `${parsedPath.dir}/${sanitizedFilename}`;
