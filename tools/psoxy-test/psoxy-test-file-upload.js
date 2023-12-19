@@ -56,7 +56,7 @@ async function testAWS(options, logger) {
   const outputKey = outputPath + filenameWithTimestamp;
   logger.info(`Downloading sanitized file from output bucket: ${outputBucket}`);
 
-  const sanitizedFilename = addFilenameSuffix(parsedPath.base, SANITIZED_FILE_SUFFIX);
+  const sanitizedFilename = addFilenameSuffix(outputKey, SANITIZED_FILE_SUFFIX);
   const destination = `${parsedPath.dir}/${sanitizedFilename}`;
 
   await aws.download(outputBucket, outputKey, destination, {
@@ -122,9 +122,10 @@ async function testGCP(options, logger) {
   logger.info(`Downloading sanitized file from output bucket: ${outputBucket}`);
 
   // where to save the sanitized file; the file in the output bucket will have
-  // the same name as the input file (original filename + timestamp suffix)
-  // so, we save it locally as (original filename + sanitized suffix)
-  const sanitizedFilename = addFilenameSuffix(parsedPath.base, SANITIZED_FILE_SUFFIX);
+  // {original filename}-{timestamp} as filename, so we save it locally as
+  // {original filename}-{timestamp}-{sanitized} to minimize the chance of
+  // modifying files in the system
+  const sanitizedFilename = addFilenameSuffix(outputKey, SANITIZED_FILE_SUFFIX);
   const destination = `${parsedPath.dir}/${sanitizedFilename}`;
 
   await gcp.download(outputBucket, outputKey, destination, client, logger);
