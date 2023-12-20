@@ -10,12 +10,18 @@ instance (GCP Cloud Function or AWS Lambda), which will read the file, sanitize 
 result to a corresponding `-sanitized` bucket.
 
 You should limit the size of files processed by proxy to 200k rows or less, to ensure processing of
-any single file finishes within the run time limitations of the host platform (AWS, GCP).
+any single file finishes within the run time limitations of the host platform (AWS, GCP). There is
+some flexibility here based on the complexity of your rules and file schema, but we've found 200k
+to be a conservative target.
 
-Additionally, you should compress (gzip) the files in your `-input` bucket to reduce storage cost and
-improve performance. Psoxy will decompress gzip files before processing and then compress the result
-before writing to the `-sanitized` bucket. Ensure that you set `Content-Encoding: gzip` on all files
-in your `-input` bucket to enable this behavior.
+### Compression
+
+To improve performance and reduce storage costs, you should compress (gzip) the files you write to
+the `-input` bucket. Psoxy will decompress gzip files before processing and then compress the
+result before writing to the `-sanitized` bucket. Ensure that you set `Content-Encoding: gzip` on
+all files in your `-input` bucket to enable this behavior. Note that if you are uploading files via
+the web UI in GCP/AWS, it is not possible to set this metadata in the initial upload - so you cannot
+use compression in such a scenario.
 
 ## Sanitization Rules
 
