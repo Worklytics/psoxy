@@ -1,17 +1,20 @@
+import { createReadStream, createWriteStream } from 'fs';
 import { execSync } from 'child_process';
 import { fileURLToPath } from 'url';
-import { promises as fs } from 'fs';
+import { pipeline } from 'node:stream/promises';
 import {
   fromNodeProviderChain,
   fromTemporaryCredentials
 } from "@aws-sdk/credential-providers";
-import aws4 from 'aws4';
-import https from 'https';
-import path from 'path';
 import _ from 'lodash';
-import spec from '../data-sources/spec.js';
+import aws4 from 'aws4';
+import fs from 'node:fs/promises';
 import getLogger from './logger.js';
-import zlib from 'zlib';
+import https from 'https';
+import isgzipBuffer from '@stdlib/assert-is-gzip-buffer';
+import path from 'path';
+import spec from '../data-sources/spec.js';
+import zlib from 'node:zlib';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // In case Psoxy is slow to respond (Lambda can take up to 20s+ to bootstrap),
@@ -202,33 +205,35 @@ function executeCommand(command) {
 /**
  * Transform endpoint's path and params based on previous calls responses
  *
- * @param {Object} spec - see `../data-sources/spec.js`
- * @param {Object} res - data source API response
+ * @param {string} endpointName - name of the endpoint
+ * @param {object} sourceData - endpoint's data source API response
+ * @param {object} spec - see `../data-sources/spec.js` (filtered by source)
  * @returns
  */
-function transformSpecWithResponse(spec = {}, res = {}) {
-  (spec?.endpoints || [])
-    .filter((endpoint) => endpoint.refs !== undefined)
-    .forEach((endpoint) => {
-      endpoint.refs.forEach((ref) => {
-        const target = spec.endpoints.find((endpoint) => endpoint.name === ref.name);
+function transformSpecWithResponse(endpointName = '', sourceData = {}, spec = {}) {
 
-        if (target && ref.accessor) {
-          const valueReplacement = _.get(res, ref.accessor);
+  const refs = (spec?.endpoints ?? [])
+    .find(endpoint => endpoint.name === endpointName)?.refs ?? [];
 
-          if (valueReplacement) {
-            // 2 possible replacements: path or param
-            if (ref.pathReplacement) {
-              target.path = target.path.replace(ref.pathReplacement, valueReplacement);
-            }
+  refs.forEach((ref) => {
+    const target = spec.endpoints.find((endpoint) => endpoint.name === ref.name);
 
-            if (ref.paramReplacement) {
-              target.params[ref.paramReplacement] = valueReplacement;
-            }
-          }
+    if (target && ref.accessor) {
+      const valueReplacement = _.get(sourceData, ref.accessor);
+
+      if (valueReplacement) {
+        // 2 possible replacements: path or param
+        if (ref.pathReplacement) {
+          target.path = target.path.replace(ref.pathReplacement, valueReplacement);
         }
-      });
-    });
+
+        if (ref.paramReplacement) {
+          target.params[ref.paramReplacement] = valueReplacement;
+        }
+      }
+    }
+  })
+
   return spec;
 }
 
@@ -275,6 +280,7 @@ function resolveAWSRegion(url) {
 async function executeWithRetry(fn, onErrorStop, logger, maxAttempts = 60,
   delay = 5000, progressMessage = 'Waiting for sanitized output...') {
 
+  const start = Date.now();
   let result;
   let attempts = 0;
   while(_.isUndefined(result) && attempts <= maxAttempts) {
@@ -294,7 +300,13 @@ async function executeWithRetry(fn, onErrorStop, logger, maxAttempts = 60,
       clearTimeout(await new Promise(resolve => setTimeout(resolve, delay)));
 
       if (logger) {
-        logger.info(progressMessage);
+        const elapsedMs = Date.now() - start;
+        const elapsedSeconds = Math.floor(elapsedMs / 1000);
+        const elapsedMinutes = Math.floor(elapsedSeconds / 60);
+        const elapsed = elapsedMinutes > 0 ?
+          `${elapsedMinutes}m${elapsedSeconds % 60}s` :
+          `${elapsedSeconds}s`;
+        logger.info(`${progressMessage} [${elapsed} elapsed]`);
       }
     }
   }
@@ -381,6 +393,12 @@ async function getAWSCredentials(role, region) {
   return credentials;
 }
 
+/**
+ * Append suffix to filename (before extension)
+ * @param {string} filename
+ * @param {string} suffix
+ * @returns {string} {filename}-{suffix}{extension}
+ */
 function addFilenameSuffix(filename, suffix) {
   let result = '';
   if (!_.isEmpty(filename)) {
@@ -390,18 +408,44 @@ function addFilenameSuffix(filename, suffix) {
   return result;
 }
 
+/**
+ * Unzip file
+ * @param {string} filePath
+ * @returns {string} unzipped file path
+ */
+async function unzip(filePath) {
+  const unzip = zlib.createUnzip();
+  const input = createReadStream(filePath);
+  const outputPath = `${filePath}.${Date.now()}.raw`
+  const output = createWriteStream(outputPath);
+
+  await pipeline(input, unzip, output);
+  return outputPath
+}
+
+/**
+ * Check if file is gzipped
+ * @param {string} filePath
+ * @returns {boolean}
+ */
+async function isGzipped(filePath) {
+  return isgzipBuffer(await fs.readFile(filePath));
+}
+
 export {
   addFilenameSuffix,
+  unzip,
   executeCommand,
   executeWithRetry,
   getAWSCredentials,
   getCommonHTTPHeaders,
   getFileNameFromURL,
+  isGzipped,
   parseBucketOption,
   requestWrapper as request,
+  resolveAWSRegion,
+  resolveHTTPMethod,
   saveToFile,
   signAWSRequestURL,
-  resolveHTTPMethod,
-  resolveAWSRegion,
   transformSpecWithResponse,
 };

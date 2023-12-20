@@ -1,6 +1,7 @@
 import {
   executeWithRetry,
   getCommonHTTPHeaders,
+  isGzipped,
   request,
   executeCommand,
   resolveHTTPMethod,
@@ -90,6 +91,36 @@ async function getLogs(options = {}) {
 }
 
 /**
+ * Example:
+ * https://console.cloud.google.com/functions/details/us-central1/my-cloud-function?project=my-projectd&tab=logs
+ * Tries to parse region without zone
+ * ref: https://cloud.google.com/compute/docs/regions-zones
+ *
+ * @param {string} cloudFunctionURL
+ * @returns {string} - URL to logs
+ */
+function getLogsURL(cloudFunctionURL = '') {
+  try {
+    if (!isValidURL(cloudFunctionURL)) {
+      return;
+    }
+  } catch (error) {
+    return;
+  }
+
+  const url = new URL(cloudFunctionURL);
+  const [regionAndProjectId] = url.hostname.split('.');
+  const match = regionAndProjectId.match(/([a-z]+-[a-z0-9]+)-([a-z0-9-]+)/)
+  let region, projectId;
+  if (match && match.length >= 3) {
+    region = match[1];
+    projectId = match[2];
+  }
+  const [initial, functionName] = url.pathname.split('/');
+  return `https://console.cloud.google.com/functions/details/${region}/${functionName}?project=${projectId}&tab=logs`;
+}
+
+/**
  * Parse GCP log entries and return a simplre format for our use-case:
  * display: timestamp, message, and severity
  *
@@ -173,9 +204,16 @@ async function upload(bucketName, filePath, client, filename) {
   if (!client) {
     client = createStorageClient();
   }
-  return client.bucket(bucketName).upload(filePath, {
+
+  const uploadOptions = {
     destination: filename ?? path.basename(filePath),
-  });
+  }
+
+  if (await isGzipped(filePath)) {
+    uploadOptions.metadata = { contentEncoding: 'gzip' };
+  }
+
+  return client.bucket(bucketName).upload(filePath, uploadOptions);
 }
 
 /**
@@ -194,21 +232,22 @@ async function deleteFile(bucketName, filename, client) {
 }
 
 /**
- * Download file from GCS
+ * Download file from GCS and saves it to `destination`
+ * Ref: https://googleapis.dev/nodejs/storage/latest/global.html#DownloadResponse
  *
  * @param {string} bucketName
  * @param {string} fileName
+ * @param {string} destination - local path and filename
  * @param {Storage} client
  * @param {Object} logger - winston instance
- * @returns {Promise} - https://googleapis.dev/nodejs/storage/latest/global.html#DownloadResponse
  */
-async function download(bucketName, fileName, client, logger) {
+async function download(bucketName, fileName, destination, client, logger) {
   if (!client) {
     client = createStorageClient();
   }
 
   const downloadFunction = async () => client.bucket(bucketName).file(fileName)
-    .download();
+    .download({ destination: destination });
   const onErrorStop = (error) => error.code !== 404;
 
   const downloadResponse = await executeWithRetry(downloadFunction, onErrorStop,
@@ -217,8 +256,6 @@ async function download(bucketName, fileName, client, logger) {
   if (downloadResponse === undefined) {
     throw new Error(`${fileName} not found after multiple attempts`);
   }
-
-  return downloadResponse;
 }
 
 export default {
@@ -228,6 +265,7 @@ export default {
   download,
   getIdentityToken,
   getLogs,
+  getLogsURL,
   isValidURL,
   parseLogEntries,
   listFilesMetadata,

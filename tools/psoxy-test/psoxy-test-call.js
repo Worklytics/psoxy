@@ -78,10 +78,9 @@ export default async function (options = {}) {
   let resultMessagePrefix = options.healthCheck ? 'Health Check result:' :
   'Call result:'
 
-  let resultData = result.data;
   if (!_.isEmpty(result.data)) {
     try {
-      resultData = JSON.parse(result.data);
+      result.data = JSON.parse(result.data);
     } catch(error) {
       logger.verbose(`Error parsing Psoxy response: ${error.message}`);
     }
@@ -99,7 +98,7 @@ export default async function (options = {}) {
     }
 
     logger.success(`${resultMessagePrefix} ${result.statusMessage} - ${result.status}`,
-      { additional: resultData });
+      { additional: result.data });
 
   } else {
     let errorMessage = result.statusMessage || 'Unknown';
@@ -112,7 +111,7 @@ export default async function (options = {}) {
       if (psoxyError) {
         switch (psoxyError) {
           case 'BLOCKED_BY_RULES':
-            errorMessage = 'Blocked by rules error: make sure URL path is correct';
+            errorMessage = 'Blocked by rules error: make sure the URL path of the data source is correct';
             break;
           case 'CONNECTION_SETUP':
             errorMessage =
@@ -130,12 +129,17 @@ export default async function (options = {}) {
     }
 
     logger.error(`${chalk.bold.red(resultMessagePrefix)} ${chalk.bold.red(errorMessage)}`, {
-      additional: resultData
+      additional: result.data
     });
 
     if ([httpCodes.HTTP_STATUS_INTERNAL_SERVER_ERROR,
       httpCodes.HTTP_STATUS_BAD_GATEWAY].includes(result.status)) {
-      logger.info('This looks like an internal error in the Proxy; please review the logs.')
+      const logsURL = isAWS ? aws.getLogsURL(options) : gcp.getLogsURL(url);
+      // In general, we could add more "trobleshooting" tips here:
+      // - Check out script logs `run.log` which store verbose output
+      // - Directly show logs from the cloud provider (GCP is feasible, AWS 
+      //  require more parameters i.e. cloudwatch log group name)
+      logger.info(`This looks like an internal error in the Proxy. Check out the logs for more details: ${logsURL}`);
     }
   }
 

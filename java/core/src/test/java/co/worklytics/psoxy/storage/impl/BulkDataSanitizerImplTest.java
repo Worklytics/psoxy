@@ -3,6 +3,7 @@ package co.worklytics.psoxy.storage.impl;
 import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestModules;
@@ -13,6 +14,8 @@ import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.Base64UrlSha256HashPseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.ColumnarRules;
+import com.avaulta.gateway.rules.transforms.FieldTransformPipeline;
+import com.avaulta.gateway.rules.transforms.FieldTransform;
 import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
 import com.avaulta.gateway.tokens.impl.Sha256DeterministicTokenizationStrategy;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,7 +30,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.MockMakers;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -127,6 +129,29 @@ public class BulkDataSanitizerImplTest {
 
     @Test
     @SneakyThrows
+    void handle_pseudonymizeIfPresent() {
+        final String EXPECTED = "EMPLOYEE_ID,EMPLOYEE_EMAIL,DEPARTMENT,SNAPSHOT,MANAGER_ID,JOIN_DATE,LEAVE_DATE\r\n" +
+            "1,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\",\"\"h_4\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",Engineering,2023-01-06,,2019-11-11,\r\n" +
+            "2,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"workltyics.co\"\",\"\"hash\"\":\"\"al4JK5KlOIsneC2DM__P_HRYe28LWYTBSf3yWKGm5yQ\"\",\"\"h_4\"\":\"\"al4JK5KlOIsneC2DM__P_HRYe28LWYTBSf3yWKGm5yQ\"\"}\",Sales,2023-01-06,1,2020-01-01,\r\n" +
+            "3,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"workltycis.co\"\",\"\"hash\"\":\"\"BlQB8Vk0VwdbdWTGAzBF.ote1357Ajr0fFcgFf72kdk\"\",\"\"h_4\"\":\"\"BlQB8Vk0VwdbdWTGAzBF-ote1357Ajr0fFcgFf72kdk\"\"}\",Engineering,2023-01-06,1,2019-10-06,2022-12-08\r\n" +
+            "4,,Engineering,2023-01-06,1,2018-06-03,\r\n"; //blank ID
+
+        ColumnarRules rules = ColumnarRules.builder()
+            .columnToPseudonymizeIfPresent("EMPLOYEE_EMAIL")
+            .columnToPseudonymizeIfPresent("EXTRA_EMAIL") //unlike 'columnToPseudonymize', this doesn't throw error
+            .build();
+
+        File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
+        columnarFileSanitizerImpl.setRules(rules);
+        try (FileReader in = new FileReader(inputFile);
+             StringWriter out = new StringWriter()) {
+            columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
+            assertEquals(EXPECTED, out.toString());
+        }
+    }
+
+    @Test
+    @SneakyThrows
     void handle_redaction() {
         final String EXPECTED = "EMPLOYEE_ID,EMPLOYEE_EMAIL,SNAPSHOT,MANAGER_ID,JOIN_DATE,LEAVE_DATE\r\n" +
             "1,\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\",\"\"h_4\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",2023-01-06,,2019-11-11,\r\n" +
@@ -200,7 +225,7 @@ public class BulkDataSanitizerImplTest {
         when(config.getConfigPropertyAsOptional(eq(ProxyConfigProperty.RULES)))
             .thenReturn(Optional.of(Base64.encodeBase64String(TestUtils.getData("sources/hris/csv.yaml"))));
 
-        ColumnarRules rules = (ColumnarRules) rulesUtils.getRulesFromConfig(config).orElseThrow();
+        ColumnarRules rules = (ColumnarRules) rulesUtils.getRulesFromConfig(config, new EnvVarsConfigService()).orElseThrow();
 
         File inputFile = new File(getClass().getResource("/csv/hris-default-rules.csv").getFile());
         columnarFileSanitizerImpl.setRules(rules);
@@ -461,12 +486,12 @@ public class BulkDataSanitizerImplTest {
             "4,,Engineering,2023-01-06,1,2018-06-03,,\r\n" +
             "3,charles@workltycis.co,Engineering,2023-01-06,1,2019-10-06,2022-12-08,\"{\"\"scope\"\":\"\"github\"\",\"\"hash\"\":\"\"KqWJXpC.g25eQzR80kCS3RVj4L4JNngo7vFwructvNU\"\",\"\"h_4\"\":\"\"1RaWPpeCqO4wTAc849d9KY41PEXdkHcxJ32ifrLzsjQ\"\"}\"\r\n";
         ColumnarRules rules = ColumnarRules.builder()
-                .fieldsToTransform(Map.of("EMPLOYEE_EMAIL", ColumnarRules.FieldTransformPipeline.builder()
+                .fieldsToTransform(Map.of("EMPLOYEE_EMAIL", FieldTransformPipeline.builder()
                         .newName("GITHUB_USERNAME")
                         .transforms(Arrays.asList(
-                                ColumnarRules.FieldValueTransform.filter("(.*)@.*"),
-                                ColumnarRules.FieldValueTransform.formatString("%s_enterprise"),
-                                ColumnarRules.FieldValueTransform.pseudonymizeWithScope("github")
+                                FieldTransform.filter("(.*)@.*"),
+                                FieldTransform.formatString("%s_enterprise"),
+                                FieldTransform.pseudonymizeWithScope("github")
                         )).build()))
                 .build();
         columnarFileSanitizerImpl.setRules(rules);

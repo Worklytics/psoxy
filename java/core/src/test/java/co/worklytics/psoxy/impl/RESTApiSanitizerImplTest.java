@@ -82,10 +82,13 @@ class RESTApiSanitizerImplTest {
         @Provides
         @Singleton
         static ConfigService configService() {
-            ConfigService mock = mock(ConfigService.class);
+            ConfigService mock = MockModules.provideMock(ConfigService.class);
             TestModules.withMockEncryptionKey(mock);
             when(mock.getConfigPropertyOrError(eq(ProxyConfigProperty.SOURCE)))
                 .thenReturn("gmail");
+            when(mock.getConfigPropertyAsOptional(eq(ProxyConfigProperty.TARGET_HOST)))
+                .thenReturn(Optional.of("gmail.googleapis.com"));
+
             return mock;
         }
     }
@@ -673,6 +676,17 @@ class RESTApiSanitizerImplTest {
             assertEquals(Base64.getUrlEncoder().withoutPadding().encodeToString(decodedPseudonym.getHash()),
             Base64.getUrlEncoder().withoutPadding().encodeToString(hash));
         }
+    }
+
+    @Test
+    public void stripTargetHostPath() {
+       assertEquals("/path", sanitizer.stripTargetHostPath("/path"));
+       sanitizer.targetHostPath = "/api/v1";
+       assertEquals("/path", sanitizer.stripTargetHostPath("/api/v1/path"));
+
+       //only at beginning of path
+       assertEquals("/path/api/v1", sanitizer.stripTargetHostPath("/api/v1/path/api/v1"));
+       assertEquals("/path/api/v1", sanitizer.stripTargetHostPath("/path/api/v1"));
     }
 
 }

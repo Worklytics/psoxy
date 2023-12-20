@@ -38,7 +38,8 @@ class RecordBulkDataSanitizerImplTest {
     @Inject
     StorageHandler storageHandler;
 
-    Writer writer;
+    java.util.function.Supplier<OutputStream> outputStreamSupplier;
+
     ByteArrayOutputStream outputStream;
 
     // to cover both rules versions, calling this inside of each test with different rules to set up
@@ -50,7 +51,7 @@ class RecordBulkDataSanitizerImplTest {
         container.inject(this);
 
         outputStream = new ByteArrayOutputStream();
-        writer = new BufferedWriter(new OutputStreamWriter(outputStream));
+        outputStreamSupplier = () -> outputStream;
     }
 
     @Singleton
@@ -98,9 +99,10 @@ class RecordBulkDataSanitizerImplTest {
         final String objectPath = "export-20231128/file.ndjson";
         final String pathToOriginal = "bulk/example.ndjson";
         final String pathToSanitized = "bulk/example-sanitized.ndjson";
-        storageHandler.handle(BulkDataTestUtils.request(objectPath, pathToOriginal, writer), rules);
-
-        writer.close();
+        storageHandler.handle(BulkDataTestUtils.request(objectPath),
+            BulkDataTestUtils.transform(rules),
+            BulkDataTestUtils.inputStreamSupplier(pathToOriginal),
+            outputStreamSupplier);
 
         String output = new String(outputStream.toByteArray());
         assertEquals(new String(TestUtils.getData(pathToSanitized)), output);
@@ -115,10 +117,11 @@ class RecordBulkDataSanitizerImplTest {
 
         final String objectPath = "export-20231128/file.ndjson";
         final String pathToOriginal = "bulk/example.ndjson";
-        final String pathToSanitized = "bulk/example-sanitized.ndjson";
-        storageHandler.handle(BulkDataTestUtils.request(objectPath, pathToOriginal, writer), rules);
+        storageHandler.handle(BulkDataTestUtils.request(objectPath),
+            BulkDataTestUtils.transform(rules),
+            BulkDataTestUtils.inputStreamSupplier(pathToOriginal),
+            outputStreamSupplier);
 
-        writer.close();
 
         String output = new String(outputStream.toByteArray());
 

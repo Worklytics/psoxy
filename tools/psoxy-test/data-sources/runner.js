@@ -40,7 +40,7 @@ async function callDataSourceEndpoints(options) {
     results[endpoint] = result;
 
     if (endpoint.refs) {
-      transformSpecWithResponse(dataSourceSpec, result.data);
+      transformSpecWithResponse(endpoint.name, result.data, dataSourceSpec);
     }
   }
 

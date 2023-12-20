@@ -101,8 +101,20 @@ Complete the following steps via the Google Workspace Admin console:
 
   2. Copy and paste client ID `${google_service_account.connector_sa.unique_id}` into the
      "Client ID" input in the popup. (this is the unique ID of the GCP service account with
-      email `${google_service_account.connector_sa.email}`; you can verify it via the GCP console,
-      under "IAM & Admin" --> "Service Accounts")
+     email `${google_service_account.connector_sa.email}`; you can (and should) verify its identity
+     via the GCP console, with the project `${google_service_account.connector_sa.project}`, under:
+
+     ["IAM & Admin" --> "Service Accounts"](https://console.cloud.google.com/iam-admin/serviceaccounts?project=${google_service_account.connector_sa.project}&supportedpurview=project)
+
+     This ensures you are granting domain-wide delegation to the correct service account, and
+     mitigates the risk that these instructions were forged by a malicious actor.
+
+     Via the GCP console, you can also verify all extant keys for the service account, to ensure
+     that there is exactly one, which should be held by the proxy.  GCP provides log of key usage,
+     creation, revocation, etc, which you can monitor to ensure that the key is being used only by
+     the proxy, only for the data access you expect. If you ever suspect compromise, you may revoke
+     the key from the GCP console at any time (NOTE: that proxy connection will be broken until your
+     Terraform configuration is re-applied, to provision a new key).
 
   3. Copy and paste the following OAuth 2.0 scope string into the "Scopes" input:
 ```
@@ -120,7 +132,7 @@ EOT
 resource "local_file" "todo_auth_google_workspace" {
   count = var.todos_as_local_files ? 1 : 0
 
-  filename = "TODO ${var.todo_step} - setup ${local.instance_id}.md"
+  filename = "TODO ${var.todo_step} - set up ${local.instance_id}.md"
   content  = local.todo_content
 }
 
