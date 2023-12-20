@@ -161,6 +161,51 @@ Additionally, you'll need to set a different handler class to be invoked instead
 (`co.workltyics.psoxy.Handler`, should be `co.worklytics.psoxy.APIGatewayV1Handler`). This can be
 done in Terraform or by modifying configuration via AWS Console..
 
+## Extensibility
+
+To support extensibility, our Terraform examples/modules output the IDs/names of the major resources they create, so
+that you can compose them with other Terraform resources.
+
+### Buckets
+
+The `aws-host` module outputs `bulk_connector_instances`; a map of `id => instance` for each bulk connector. Each of
+these has two attributes that correspond to the names of its related buckets:
+  - `sanitized_bucket_name`
+  - `input_bucket_name`
+
+So in our AWS example, you can use these to enable logging, for example, you could do something like this: (YMMV, syntax
+etc should be tested)
+
+```hcl
+local {
+  id_of_bucket_to_store_logs = "{YOUR_BUCKET_ID_HERE}"
+}
+
+resource "aws_s3_bucket_logging" "logging" {
+  for_each = module.psoxy.bulk_connector_instances
+
+  bucket = each.value.sanitized_bucket_name
+
+  target_bucket = local.id_of_bucket_to_store_logs
+  target_prefix = "psoxy/${each.key}/"
+}
+
+resource "aws_s3_bucket_logging" "logging" {
+  for_each = module.psoxy.bulk_connector_instances
+
+  bucket = each.value.input_bucket_name
+
+  target_bucket = local.id_of_bucket_to_store_logs
+  target_prefix = "psoxy/${each.key}/"
+}
+```
+
+Analogous approaches can be used to configure versioning, replication, etc;
+  - [`aws_s3_bucket_versioning`](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_versioning)
+  - [`aws_s3_bucket_replication`](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_replication)
+
+Note that encryption, lifecycle, public_access_block are set by the Workltyics-provided modules, so you may have
+conflicts issues if you also try to set those outside.
 
 
 
