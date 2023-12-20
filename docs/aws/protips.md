@@ -9,8 +9,18 @@ see [encryption-keys.md](encryption-keys.md)
 
 ## Tagging ALL infra created by your Terraform Configuration
 
-In the `main.tf` of your configuration, add a `default_tags` block to your configuration. Example
-shown below.
+If you're using our AWS example, it should support a `default_tags` variable.
+
+You can add the following in your `terrform.tfvars` file to set tags on all resources created by the example configuration:
+
+```hcl
+default_tags = {
+  Vendor = "Worklytics"
+}
+```
+
+If you're not using our AWS example, you can add the following to your configuration, then you will need to modify
+the `aws` provider block in your configuration to add a `default_tags`. Example shown below:
 
 See: [https://registry.terraform.io/providers/hashicorp/aws/latest/docs#default_tags]
 
