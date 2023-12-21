@@ -50,12 +50,12 @@ Neither your proxy instances nor Worklytics ever hold any API key or certificate
 
 The following Scopes are required for each connector. Note that they are all READ-only scopes.
 
-| Source&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Application Scopes                                                                                                                                                          |
-|--------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Active Directory                                                                                       | `User.Read.All` `Group.Read.All`                                                                                                                                            |
-| Calendar                                                                                               | `User.Read.All` `Group.Read.All` `OnlineMeetings.Read.All` `Calendars.Read` `MailboxSettings.Read`                                                                          |
-| Mail                                                                                                   | `User.Read.All` `Group.Read.All`  `Mail.ReadBasic.All` `MailboxSettings.Read`                                                                                               |
-| Teams                                                                                                  | `User.Read.All` `Team.ReadBasic.All` `Channel.ReadBasic.All` `Chat.Read.All` `ChannelMessage.Read.All` `CallRecords.Read.All` `OnlineMeetings.Read.All` |
+| Source&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Application Scopes                                                                                                                                                                       |
+|--------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Active Directory                                                                                       | `User.Read.All` `Group.Read.All`                                                                                                                                                         |
+| Calendar                                                                                               | `User.Read.All` `Group.Read.All` `OnlineMeetings.Read.All` `OnlineMeetingArtifact.Read.All` `Calendars.Read` `MailboxSettings.Read`                                                                                      |
+| Mail                                                                                                   | `User.Read.All` `Group.Read.All`  `Mail.ReadBasic.All` `MailboxSettings.Read`                                                                                                            |
+| Teams                                                                                                  | `User.Read.All` `Team.ReadBasic.All` `Channel.ReadBasic.All` `Chat.Read.All` `ChannelMessage.Read.All` `CallRecords.Read.All` `OnlineMeetings.Read.All` `OnlineMeetingArtifact.Read.All` |
 
 NOTE: the above scopes are copied from [infra/modules/worklytics-connector-specs](../../../infra/modules/worklytics-connector-specs).
 They are accurate as of 2023-04-12. Please refer to that module for a definitive list.
@@ -66,7 +66,7 @@ NOTE: These are all 'Application' scopes, allowing the proxy itself data access 
 rather than on behalf of a specific authenticated end-user ('Delegated' scopes).
 
 ## Online Meetings support (Only for Teams connector)
-Besides of having `OnlineMeetings.Read.All` scope defined in the application, you need to allow a new role and a policy on the application created for reading OnlineMeetings. You will need Powershell for this.
+Besides of having `OnlineMeetings.Read.All` and `OnlineMeetingArtifact.Read.All` scope defined in the application, you need to allow a new role and a policy on the application created for reading OnlineMeetings. You will need Powershell for this.
 
 Please follow the steps below:
 1. Ensure the user you are going to use for running the commands has the "Teams Administrator" role. You can add the role in the
