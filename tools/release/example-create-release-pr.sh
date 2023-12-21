@@ -173,7 +173,11 @@ git commit -a -m "Update example to ${RELEASE_TAG}"
 git push origin
 
 if command -v gh &> /dev/null; then
-  gh pr create --title "update to ${RELEASE_TAG}" --body "update example to ${RELEASE_TAG}" --assignee "@me" --web
+  PR_URL=$(gh pr create --title "update to ${RELEASE_TAG}" --body "update example to ${RELEASE_TAG}" --assignee "@me")
+  printf "created PR ${BLUE}${PR_URL}${NC}\n"
+  PR_NUMBER=$(gh pr view $PR_URL --json number | jq -r ".number")
+  gh pr comment $PR_NUMBER --body "when ready, from your Psoxy checkout, run \`./tools/release-example-publish-release-pr.sh $EXAMPLE_TEMPLATE_REPO $PR_NUMBER\`"
+  gh pr view $PR_URL --web
 fi
 
 # return us to main, so don't have to do this manually before next release
