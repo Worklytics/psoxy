@@ -7,7 +7,7 @@ GREEN='\e[0;32m'
 RED='\e[0;31m'
 NC='\e[0m' # No Color
 
-set -e
+
 
 if [ ! -f "${PATH_TO_REPO}java/pom.xml" ]; then
   printf "${RED}${PATH_TO_REPO}java/pom.xml not found. set <path-to-repo> argument to point to the root of a psoxy checkout. Exiting.${NC}\n"
@@ -26,12 +26,17 @@ else
   fi
 fi
 
+# die on error
+set -e
+
 git fetch origin
 
 if git rev-parse "$RELEASE" >/dev/null 2>&1; then
   printf "Tag ${GREEN}$RELEASE${NC} already exists.\n"
 else
   git checkout main
+
+  git pull origin main
 
   # verify on main branch and clean status
   CURRENT_BRANCH=$(git branch --show-current)
