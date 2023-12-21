@@ -83,7 +83,7 @@ git grep -l "$CURRENT_RELEASE_PATTERN" java/
 git grep -l "$CURRENT_RELEASE_PATTERN" infra/
 git grep -l "$CURRENT_RELEASE_PATTERN" tools/
 
-./tools/release/sync-examples.sh ./
+./tools/release/lib/sync-examples.sh ./
 
 git add java/**.java
 git add java/pom.xml
@@ -122,7 +122,7 @@ if [ "$IS_RC" -eq 1 ]; then
   echo    # Move to a new line
   case "$REPLY" in
     [yY][eE][sS]|[yY])
-      ./tools/release/update-open-prs.sh "$NEXT_RELEASE"
+      ./tools/release/lib/update-open-prs.sh "$NEXT_RELEASE"
       ;;
     *)
       echo "open PRs not updated."
