@@ -1,14 +1,17 @@
 #!/bin/bash
 
+# Creates a PR to update an example repo to reference the latest release of the main Psoxy repo
+#
+# Usage:
+# ./tools/release/example-create-release-pr.sh ~/psoxy/ aws-all ~/psoxy-example-aws
+# ./tools/release/example-create-release-pr.sh ~/psoxy/ gcp ~/psoxy-example-gcp
+
 # colors
 RED='\e[0;31m'
 BLUE='\e[0;34m'
 NC='\e[0m' # No Color
 
-# Usage:
-# ./tools/release.example.sh ~/code/psoxy/ aws-all ~/psoxy-example-aws
-# ./tools/release/example.sh ~/code/psoxy/ gcp ~/psoxy-example-gcp
-
+SCRIPT_NAME=$0
 PATH_TO_REPO=$1
 EXAMPLE=$2
 EXAMPLE_TEMPLATE_REPO=$3
@@ -16,12 +19,13 @@ EXAMPLE_TEMPLATE_REPO=$3
 # find where user is running this script from, so can return there at end
 WORKING_DIRECTORY=`pwd`
 
-
 display_usage() {
+    printf "Creates a PR to update an example repo to reference the latest release of the main Psoxy repo\n"
+    printf "\n"
     printf "Usage:\n"
-    printf "  ./release-example.sh <path-to-repo> <example> <path-to-example-repo>\n"
-    printf "  ./release-example.sh ~/psoxy/ aws-all ~/psoxy-example-aws\n"
-    printf "  ./release-example.sh ~/psoxy/ gcp ~/psoxy-example-gcp\n"
+    printf "  %s <path-to-repo> <example> <path-to-example-repo>\n" $SCRIPT_NAME
+    printf "  %s ~/psoxy/ aws-all ~/psoxy-example-aws\n" $SCRIPT_NAME
+    printf "  %s ~/psoxy/ gcp ~/psoxy-example-gcp\n" $SCRIPT_NAME
 }
 
 if [ "$#" -ne 3 ]; then
@@ -34,6 +38,8 @@ if [ ! -d "$PATH_TO_REPO" ]; then
   display_usage
   exit 1
 fi
+
+printf "Creating PR to update example ${BLUE}${EXAMPLE}${NC} in ${BLUE}${EXAMPLE_TEMPLATE_REPO}${NC} to reference latest release of ${BLUE}${PATH_TO_REPO}${NC} ...\n"
 
 # append / if needed
 if [[ "${PATH_TO_REPO: -1}" != "/" ]]; then
