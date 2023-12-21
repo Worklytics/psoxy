@@ -1,7 +1,6 @@
 package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.gateway.StorageEventRequest;
-import co.worklytics.psoxy.gateway.StorageEventResponse;
 import co.worklytics.psoxy.storage.StorageHandler;
 import com.google.cloud.ReadChannel;
 import com.google.cloud.WriteChannel;
@@ -11,22 +10,17 @@ import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
-import com.google.common.annotations.VisibleForTesting;
 import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 
-import org.apache.commons.io.input.BOMInputStream;
-import org.checkerframework.checker.units.qual.C;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.*;
 import java.nio.channels.Channels;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Optional;
-import java.util.zip.GZIPOutputStream;
+import java.util.function.Supplier;
 
 @Singleton
 @Log
@@ -66,27 +60,27 @@ public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
             return;
         }
 
-        StorageEventRequest request = storageHandler.buildRequest(null, null, importBucket, sourceName, transform);
-
-        boolean inputIsCompressed = Optional.ofNullable(sourceBlobInfo.getContentEncoding())
-                                            .map(s -> s.contains("gzip"))
-                                            .orElse(false);
-
-        // for now, just do the same for both
-        request = request.withCompressOutput(inputIsCompressed).withDecompressInput(inputIsCompressed);
+        StorageEventRequest request =
+            storageHandler.buildRequest(importBucket, sourceName, transform, sourceBlobInfo.getContentEncoding());
 
         if (storageHandler.getApplicableRules(transform.getRules(), request.getSourceObjectPath()).isPresent()) {
-            BlobInfo destBlobInfo = BlobInfo.newBuilder(BlobId.of(request.getDestinationBucketName(), request.getDestinationObjectPath()))
-                .setContentType(sourceBlobInfo.getContentType())
-                .setMetadata(storageHandler.buildObjectMetadata(importBucket, sourceName, transform))
-                .build();
 
-            try (ReadChannel readChannel = storage.reader(sourceBlobId, Storage.BlobSourceOption.shouldReturnRawInputStream(true));
-                 InputStream is = Channels.newInputStream(readChannel);
-                 WriteChannel writeChannel = storage.writer(destBlobInfo);
-                 OutputStream os = Channels.newOutputStream(writeChannel)) {
-                storageHandler.process(request, transform, is, os);
-            }
+            Supplier<InputStream> inputStreamSupplier = () -> {
+                ReadChannel readChannel = storage.reader(sourceBlobId, Storage.BlobSourceOption.shouldReturnRawInputStream(true));
+                return Channels.newInputStream(readChannel);
+            };
+
+            Supplier<OutputStream> outputStreamSupplier = () -> {
+                BlobInfo destBlobInfo = BlobInfo.newBuilder(BlobId.of(request.getDestinationBucketName(), request.getDestinationObjectPath()))
+                    .setContentType(sourceBlobInfo.getContentType())
+                    .setMetadata(storageHandler.buildObjectMetadata(importBucket, sourceName, transform))
+                    .build();
+                WriteChannel writeChannel = storage.writer(destBlobInfo);
+                //NOTE: when close() called on the stream, close is called on channel, so should be OK
+                return Channels.newOutputStream(writeChannel);
+            };
+
+            storageHandler.handle(request, transform, inputStreamSupplier, outputStreamSupplier);
         } else {
             log.info("Skipping " + importBucket + "/" + request.getSourceObjectPath() + " because no rules apply");
         }

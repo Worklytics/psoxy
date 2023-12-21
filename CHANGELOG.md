@@ -20,6 +20,10 @@ Changes to be including in future/planned release notes will be added here.
         then wildcard policy to read shared also grants read of secrets across all connectors)
   - keys/salts per value kind (PII, item id, etc)
 
+## [0.4.43](https://github.com/Worklytics/psoxy/release/tag/v0.4.43)
+ * if you're using the NodeJS test tool, it will be re-installed on your next `terraform apply` due
+   to a dependency change.
+
 ## [0.4.41](https://github.com/Worklytics/psoxy/release/tag/v0.4.41)
   * GCP only : Compute Engine API will be enabled in the project. Newer versions of GCP terraform
     provider seem to require this. You may see this in your next `terraform plan`, although it may

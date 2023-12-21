@@ -53,3 +53,53 @@ data. There is no database to be vulnerable to SQL injections.
 A WAF could make sense if you are using Psoxy to expose an on-prem, in-house built tool to
 Worklytics that is otherwise not exposed to the internet.
 
+## Can I deploy Psoxy instances in a VPC?
+
+As of November 2023, that is not directly supported by the Worklytics-provided Terraform modules.
+If you have a use-case that you believe requires a VPC, please let us know.
+
+The usual cases for deploying infra in a VPC is to isolate a complex, potentially insecure component,
+such as a VM with lots of packages/software/etc running on it. Proxy instances are small java bundles,
+compiled, packaged, and deployed by your team - into serverless infrastructure sandboxes
+(AWS Lambda, GCP CLoud Functions, etc). The code is source-available for your team to review; it
+undergoes full automated testing and continual vulnerability scanning.
+
+Access to proxy instances is based on Workload Identity Federation (OIDC) and IAM policies, which is
+equivalent to how internal access between your AWS/GCP cloud resources is currently secured.
+
+No workplace data is stored by proxy instances.  For the connectors that sanitize bulk file data,
+this data is only persisted into GCS/S3 buckets.  AWS/GCS do not support deploying such buckets
+"in a VPC".  You could write an IAM policy that grants access to such buckets *from* a VPC, but
+this is functionally equivalent to an IAM policy that grants access to such a buckets from a specific
+lambda/cloud function.
+
+## Is Domain-wide Delegation (DWD) for Google Workspace secure?
+
+DWD deserves scrutiny. It is broad grant of data access, generally covering all Google accounts in
+your workspace domain. And the UX - pasting a numeric service account ID and a CSV of oauth scopes -
+creates potential for errors/exploitation by malicious actors.
+
+To use DWD securely, you must trust the numeric ID; in a typical scenario, where someone or some
+web app is asking you to paste this ID into a form, this is a risk.  It is NOT a 3-legged oauth
+flow, where the redirects between
+
+However, the Psoxy workflow mitigates this risk in several ways:
+  - DWD grants required for Psoxy connections are made to *your own service accounts, provisioned
+    by you and residing in your own GCP project*. They do not belong to a 3rd party. As such you
+    need not trust a number shown to you in a web app or email; you can use the GCP web console,
+    CLI, etc to confirm the validity of the service account ID independently.
+  - Your GCP logs can provide transparency into the usage of the service account, to validate what
+    data it is being used to access, and from where.
+  - You remain in control of the only key that can be used to authenticate as the service account -
+    you may revoke/rotate this key at any moment should you suspect malicious activity.
+
+Hence, using DWD via Psoxy is more secure than the typical DWD scenario that many security
+researchers complain about.
+
+If you remain uncomfortable with DWD, a private Google Marketplace App is a possible alternative,
+albeit more tedious to configure. It requires a dedicated GCP project, with additional APIs enabled
+in the project.
+
+
+
+

@@ -10,6 +10,8 @@ import com.avaulta.gateway.pseudonyms.impl.LegacyPseudonymTokenEncoder;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.ColumnarRules;
 import co.worklytics.psoxy.storage.BulkDataSanitizer;
+import com.avaulta.gateway.rules.transforms.FieldTransformPipeline;
+import com.avaulta.gateway.rules.transforms.FieldTransform;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
@@ -91,10 +93,14 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
 
         Set<String> columnsToRedact = asSetWithCaseInsensitiveComparator(rules.getColumnsToRedact());
 
-        Set<String> columnsToPseudonymize = asSetWithCaseInsensitiveComparator(rules.getColumnsToPseudonymize());
+        Set<String> columnsToPseudonymize =
+            asSetWithCaseInsensitiveComparator(rules.getColumnsToPseudonymize());
+
+        Set<String> columnsToPseudonymizeIfPresent =
+            asSetWithCaseInsensitiveComparator(rules.getColumnsToPseudonymizeIfPresent());
 
 
-        Map<String, ColumnarRules.FieldTransformPipeline> columnsToTransform =
+        Map<String, FieldTransformPipeline> columnsToTransform =
             Optional.ofNullable(rules.getFieldsToTransform()).orElse(Collections.emptyMap())
             .entrySet().stream()
             .collect(Collectors.toMap(
@@ -169,7 +175,8 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
         TriFunction<String, String, Pseudonymizer, String> pseudonymizationFunction = buildPseudonymizationFunction(rules);
 
         BiFunction<String, String, String> applyPseudonymizationIfAny = (outputColumnName, value) -> {
-            if (columnsToPseudonymize.contains(outputColumnName.toLowerCase())) {
+            if (columnsToPseudonymize.contains(outputColumnName.toLowerCase())
+                || columnsToPseudonymizeIfPresent.contains(outputColumnName.toLowerCase())) {
                 return pseudonymizationFunction.apply(value, outputColumnName, pseudonymizer);
             }
             return value;
@@ -178,12 +185,12 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
         Map<String, Pseudonymizer> pseudonymizers = new HashMap<>();
         BiFunction<String, String, String> applyTransformIfAny = (originalColumnName, value) -> {
           if (columnsToTransform.containsKey(originalColumnName.toLowerCase())) {
-              ColumnarRules.FieldTransformPipeline pipeline = columnsToTransform.get(originalColumnName.toLowerCase());
+              FieldTransformPipeline pipeline = columnsToTransform.get(originalColumnName.toLowerCase());
 
-              for ( ColumnarRules.FieldValueTransform transform : pipeline.getTransforms()) {
+              for ( FieldTransform transform : pipeline.getTransforms()) {
                   if (value != null) {
-                      if (transform.getFilter() != null) {
-                          Pattern pattern = Pattern.compile(transform.getFilter());
+                      if (transform instanceof FieldTransform.Filter) {
+                          Pattern pattern = Pattern.compile(((FieldTransform.Filter) transform).getFilter());
                           Matcher matcher = pattern.matcher(value);
                           if (matcher.matches()) {
                               if (matcher.groupCount() > 0) {
@@ -194,14 +201,15 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
                           }
                       }
 
-                      if (transform.getFormatString() != null) {
-                          value = String.format(transform.getFormatString(), value);
+                      if (transform instanceof FieldTransform.FormatString) {
+                          value = String.format(((FieldTransform.FormatString) transform).getFormatString(), value);
                       }
 
-                      if (transform.getPseudonymizeWithScope() != null) {
+                      if (transform instanceof FieldTransform.PseudonymizeWithScope) {
                           Pseudonymizer scopedPseudonymizer = pseudonymizer;
                           if (pseudonymizer.getOptions().getPseudonymImplementation() == PseudonymImplementation.LEGACY) {
-                              scopedPseudonymizer = pseudonymizers.computeIfAbsent(transform.getPseudonymizeWithScope(),
+                              scopedPseudonymizer = pseudonymizers.computeIfAbsent(
+                                  ((FieldTransform.PseudonymizeWithScope) transform).getPseudonymizeWithScope(),
                                   scope -> pseudonymizerImplFactory.create(pseudonymizer.getOptions().withDefaultScopeId(scope)));
                           }
                           value = pseudonymizationFunction.apply(value, pipeline.getNewName(), scopedPseudonymizer);
