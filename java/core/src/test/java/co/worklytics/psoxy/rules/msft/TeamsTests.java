@@ -4,6 +4,7 @@ import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
 import co.worklytics.psoxy.rules.Rules2;
 import jdk.jfr.Description;
 import lombok.Getter;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -428,6 +429,31 @@ public class TeamsTests extends JavaRulesTestBaseCase {
         assertUrlWithSubResourcesBlocked(endpoint);
     }
 
+    @Test
+    public void users_onlineMeetings_attendanceReports() {
+        String userId = "dc17674c-81d9-4adb-bfb2-8f6a442e4622";
+        String endpoint = "https://graph.microsoft.com/v1.0" + "/users/" + userId + "/onlineMeetings";
+        String jsonResponse = asJson("Users_onlineMeetings_attendanceReports_v1.0.json");
+        assertUrlWithSubResourcesBlocked(endpoint);
+    }
+
+    @Test
+    public void users_onlineMeetings_attendanceReport() {
+        String userId = "dc17674c-81d9-4adb-bfb2-8f6a442e4622";
+        String endpoint = "https://graph.microsoft.com/v1.0" + "/users/" + userId + "/onlineMeetings";
+        String jsonResponse = asJson("Users_onlineMeetings_attendanceReport_v1.0.json");
+        assertNotSanitized(jsonResponse,
+                "dc17674c-81d9-4adb-bfb2-8f6a442e4623"
+        );
+
+        String sanitized = sanitize(endpoint, jsonResponse);
+        assertRedacted(sanitized,
+                "Frederick Cormier",
+                "frederick.cormier@contoso.com"
+        );
+        assertUrlWithSubResourcesBlocked(endpoint);
+    }
+
     @Override
     public Stream<InvocationExample> getExamples() {
         String apiVersion = "v1.0";
@@ -449,7 +475,9 @@ public class TeamsTests extends JavaRulesTestBaseCase {
                 InvocationExample.of(baseEndpoint + "/communications/callRecords/getDirectRoutingCalls(fromDateTime=2019-11-01,toDateTime=2019-12-01)", "Communications_callRecords_getDirectRoutingCalls_" + apiVersion + ".json"),
                 InvocationExample.of(baseEndpoint + "/communications/callRecords/getPstnCalls(fromDateTime=2019-11-01,toDateTime=2019-12-01)", "Communications_callRecords_getPstnCalls_" + apiVersion + ".json"),
                 InvocationExample.of(baseEndpoint + "/users", "Users_" + apiVersion + ".json"),
-                InvocationExample.of(baseEndpoint + "/users/dc17674c-81d9-4adb-bfb2-8f6a442e4622/onlineMeetings", "Users_onlineMeetings_" + apiVersion + ".json")
+                InvocationExample.of(baseEndpoint + "/users/dc17674c-81d9-4adb-bfb2-8f6a442e4622/onlineMeetings", "Users_onlineMeetings_" + apiVersion + ".json"),
+                InvocationExample.of(baseEndpoint + "/users/dc17674c-81d9-4adb-bfb2-8f6a442e4622/onlineMeetings/MSpkYzE3Njc0Yy04MWQ5LTRhZGItYmZ/attendanceReports", "Users_onlineMeetings_attendanceReports" + apiVersion + ".json"),
+                InvocationExample.of(baseEndpoint + "/users/dc17674c-81d9-4adb-bfb2-8f6a442e4622/onlineMeetings/MSpkYzE3Njc0Yy04MWQ5LTRhZGItYmZ/attendanceReports/c9b6db1c-d5eb-427d-a5c0-20088d9b22d7?$expand=attendanceRecords", "Users_onlineMeetings_attendanceReport" + apiVersion + ".json")
         );
     }
 }
