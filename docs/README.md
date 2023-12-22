@@ -14,6 +14,8 @@
 Psoxy can be *hosted* in GCP or AWS, but it can be *deployed* to those host platforms from a variety
 of locations.
 
+  - local machine (macOS or a Linux such as Ubuntu likely to be most straightforward options)
+  - remote VM/container (eg, EC2 instance)
   - CI/CD, such as GitHub Actions, Atlassian Bamboo, etc.
   - [Terraform Cloud / Terraform Enterprise](terraform-cloud.md)
   - Cloud Shell: [aws](aws/cloud-shell.md) (not recommended) / [gcp](gcp/cloud-shell.md)
