@@ -257,6 +257,9 @@ endpoints:
       - "$search"
       - "$skip"
     transforms:
+      - !<redact>
+        jsonPaths:
+          - "$.['@odata.context']"
       - !<pseudonymize>
         jsonPaths:
           - "$..user.id"
@@ -264,7 +267,68 @@ endpoints:
         encoding: "JSON"
       - !<redact>
         jsonPaths:
-          - "$..user.displayName"
+          - "$..emailAddress"
+          - "$..displayName"
+          - "$..subject"
+          - "$..joinMeetingIdSettings.isPasscodeRequired"
+          - "$..joinMeetingIdSettings.passcode"
+          - "$.['@odata.context']"
+          - "$..['@odata.type']"
+  - pathTemplate: "/{apiVersion}/users/{userId}/onlineMeetings/{meetingId}/attendanceReports"
+    allowedQueryParams:
+      - "$select"
+      - "$top"
+      - "$skiptoken"
+      - "$filter"
+      - "$orderby"
+      - "$count"
+      - "$expand"
+      - "$format"
+      - "$search"
+      - "$skip"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$.['@odata.context']"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..user.id"
+          - "$..userId"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$..emailAddress"
+          - "$..displayName"
+          - "$..subject"
+          - "$..joinMeetingIdSettings.isPasscodeRequired"
+          - "$..joinMeetingIdSettings.passcode"
+          - "$.['@odata.context']"
+          - "$..['@odata.type']"
+  - pathTemplate: "/{apiVersion}/users/{userId}/onlineMeetings/{meetingId}/attendanceReports/{reportId}"
+    allowedQueryParams:
+      - "$select"
+      - "$top"
+      - "$skiptoken"
+      - "$filter"
+      - "$orderby"
+      - "$count"
+      - "$expand"
+      - "$format"
+      - "$search"
+      - "$skip"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$.['@odata.context']"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..user.id"
+          - "$..userId"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$..emailAddress"
+          - "$..displayName"
           - "$..subject"
           - "$..joinMeetingIdSettings.isPasscodeRequired"
           - "$..joinMeetingIdSettings.passcode"
