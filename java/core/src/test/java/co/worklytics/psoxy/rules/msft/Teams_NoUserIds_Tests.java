@@ -273,7 +273,9 @@ public class Teams_NoUserIds_Tests extends JavaRulesTestBaseCase {
             InvocationExample.of(baseEndpoint + "/communications/callRecords/2f1a1100-b174-40a0-aba7-0b405e01ed92?$expand=sessions($expand=segments)", "Communications_callRecords_" + apiVersion + ".json"),
             InvocationExample.of(baseEndpoint + "/communications/callRecords/getDirectRoutingCalls(fromDateTime=2019-11-01,toDateTime=2019-12-01)", "Communications_callRecords_getDirectRoutingCalls_" + apiVersion + ".json"),
             InvocationExample.of(baseEndpoint + "/communications/callRecords/getPstnCalls(fromDateTime=2019-11-01,toDateTime=2019-12-01)", "Communications_callRecords_getPstnCalls_" + apiVersion + ".json"),
-            InvocationExample.of(baseEndpoint + "/users/dc17674c-81d9-4adb-bfb2-8f6a442e4622/onlineMeetings", "Users_onlineMeetings_" + apiVersion + ".json")
+            InvocationExample.of(baseEndpoint + "/users/dc17674c-81d9-4adb-bfb2-8f6a442e4622/onlineMeetings", "Users_onlineMeetings_" + apiVersion + ".json"),
+                InvocationExample.of(baseEndpoint + "/users/dc17674c-81d9-4adb-bfb2-8f6a442e4622/onlineMeetings/MSpkYzE3Njc0Yy04MWQ5LTRhZGItYmZ/attendanceReports", "Users_onlineMeetings_attendanceReports_" + apiVersion + ".json"),
+                InvocationExample.of(baseEndpoint + "/users/dc17674c-81d9-4adb-bfb2-8f6a442e4622/onlineMeetings/MSpkYzE3Njc0Yy04MWQ5LTRhZGItYmZ/attendanceReports/c9b6db1c-d5eb-427d-a5c0-20088d9b22d7?$expand=attendanceRecords", "Users_onlineMeetings_attendanceReport_" + apiVersion + ".json")
         );
     }
 }

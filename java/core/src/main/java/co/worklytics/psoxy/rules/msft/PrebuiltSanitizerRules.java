@@ -408,15 +408,11 @@ public class PrebuiltSanitizerRules {
             .jsonPath("$..value[*].calleeNumber")
             .build();
     static final Transform.Redact MS_TEAMS_USERS_ONLINE_MEETINGS_REDACT = Transform.Redact.builder()
-            .jsonPath("$..user.displayName")
+            .jsonPath("$..emailAddress")
+            .jsonPath("$..displayName")
             .jsonPath("$..subject")
             .jsonPath("$..joinMeetingIdSettings.isPasscodeRequired")
             .jsonPath("$..joinMeetingIdSettings.passcode")
-            .build();
-
-    static final Transform.Redact MS_TEAMS_USERS_ONLINE_MEETINGS_REDACT_ATTENDANCE_REPORT = Transform.Redact.builder()
-            .jsonPath("$..emailAddress")
-            .jsonPath("$..displayName")
             .build();
     static final Endpoint MS_TEAMS_TEAMS = Endpoint.builder()
             .pathTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS)
@@ -471,16 +467,19 @@ public class PrebuiltSanitizerRules {
     static final Endpoint MS_TEAMS_USERS_ONLINE_MEETINGS = Endpoint.builder()
             .pathTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS)
             .allowedQueryParams(List.of("$select", "$top", "$skiptoken", "$filter", "$orderby", "$count", "$expand", "$format", "$search", "$skip"))
+            .transform(REDACT_ODATA_CONTEXT)
             .build();
 
     static final Endpoint MS_TEAMS_USERS_ONLINE_MEETINGS_ATTENDANCE_REPORTS = Endpoint.builder()
             .pathTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS_ATTENDANCE_REPORTS)
             .allowedQueryParams(List.of("$select", "$top", "$skiptoken", "$filter", "$orderby", "$count", "$expand", "$format", "$search", "$skip"))
+            .transform(REDACT_ODATA_CONTEXT)
             .build();
 
     static final Endpoint MS_TEAMS_USERS_ONLINE_MEETINGS_ATTENDANCE_REPORT = Endpoint.builder()
             .pathTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS_ATTENDANCE_REPORT)
             .allowedQueryParams(List.of("$select", "$top", "$skiptoken", "$filter", "$orderby", "$count", "$expand", "$format", "$search", "$skip"))
+            .transform(REDACT_ODATA_CONTEXT)
             .build();
 
     static final Rules2 MS_TEAMS_BASE = Rules2.builder()
@@ -511,9 +510,9 @@ public class PrebuiltSanitizerRules {
             .withTransformByEndpoint(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_REGEX, MS_TEAMS_COMMUNICATIONS_CALL_RECORDS_REDACT)
             .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_GET_DIRECT_ROUTING_CALLS, MS_TEAMS_COMMUNICATIONS_CALL_RECORDS_GET_DIRECT_ROUTING_CALLS_REDACT)
             .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_GET_PSTN_CALLS, MS_TEAMS_COMMUNICATIONS_CALL_RECORDS_GET_PSTN_CALLS_REDACT)
-            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS, MS_TEAMS_USERS_ONLINE_MEETINGS_REDACT)
-            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS_ATTENDANCE_REPORTS, MS_TEAMS_USERS_ONLINE_MEETINGS_REDACT_ATTENDANCE_REPORT)
-            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS_ATTENDANCE_REPORT, MS_TEAMS_USERS_ONLINE_MEETINGS_REDACT_ATTENDANCE_REPORT);
+            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS_ATTENDANCE_REPORT, MS_TEAMS_USERS_ONLINE_MEETINGS_REDACT)
+            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS_ATTENDANCE_REPORTS, MS_TEAMS_USERS_ONLINE_MEETINGS_REDACT)
+            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS, MS_TEAMS_USERS_ONLINE_MEETINGS_REDACT);
 
     static final Rules2 MS_TEAMS_NO_USER_ID = MS_TEAMS_BASE
             .withAdditionalEndpoints(DIRECTORY_USERS_NO_APP_IDS)
@@ -603,13 +602,13 @@ public class PrebuiltSanitizerRules {
                             .jsonPaths(REDACT_ODATA_TYPE.getJsonPaths())
                             .build())
             .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS_ATTENDANCE_REPORTS, PSEUDONYMIZE_USER_ID,
-                    MS_TEAMS_USERS_ONLINE_MEETINGS_REDACT_ATTENDANCE_REPORT
+                    MS_TEAMS_USERS_ONLINE_MEETINGS_REDACT
                             .toBuilder()
                             .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
                             .jsonPaths(REDACT_ODATA_TYPE.getJsonPaths())
                             .build())
             .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS_ATTENDANCE_REPORT, PSEUDONYMIZE_USER_ID,
-                    MS_TEAMS_USERS_ONLINE_MEETINGS_REDACT_ATTENDANCE_REPORT
+                    MS_TEAMS_USERS_ONLINE_MEETINGS_REDACT
                             .toBuilder()
                             .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
                             .jsonPaths(REDACT_ODATA_TYPE.getJsonPaths())
