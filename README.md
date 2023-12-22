@@ -17,6 +17,11 @@ access those sources.
 Psoxy ensures more secure, granular data access than direct connections between your tools will
 offer - and enforces access rules to fulfill your Compliance requirements.
 
+Psoxy functions as API-level Data Loss Prevention layer (DLP), by blocking sensitive fields / values
+/ endpoints that would otherwise be exposed when you connect a data sources API to a 3rd party
+service. It can ensure that data which would otherwise be exposed to a 3rd party service, due to
+granularity of source API models/permissions, is not accessed or transfered to the service.
+
 Objectives:
   - **serverless** - we strive to minimize the moving pieces required to run psoxy at scale, keeping
      your attack surface small and operational complexity low. Furthermore, we define
