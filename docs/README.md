@@ -54,5 +54,6 @@ Various topics relevant to anyone developing Psoxy (in Java, or the supporting T
 is kept in [`./development`](./development).
 
 
-
+## Alpha Features
+See [alpha-features](development/alpha-features/README.md) for details on alpha features.
 
