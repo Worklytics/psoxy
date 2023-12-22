@@ -26,6 +26,8 @@ of locations.
   - [Troubleshooting](troubleshooting.md) - some general troubleshooting tips for common issues.
       - [AWS-specific](aws/troubleshooting.md)
       - [GCP-specific](gcp/troubleshooting.md)
+  - [Cleaning Up](cleaning-up.md) - use Terraform to clean up (destroy) your deployment when you're
+    done with it.
 
 ### Data Sources
 
