@@ -146,7 +146,57 @@ endpoints:
     transforms:
       - !<redact>
         jsonPaths:
-          - "$..user.displayName"
+          - "$.['@odata.context']"
+      - !<redact>
+        jsonPaths:
+          - "$..emailAddress"
+          - "$..displayName"
+          - "$..subject"
+          - "$..joinMeetingIdSettings.isPasscodeRequired"
+          - "$..joinMeetingIdSettings.passcode"
+  - pathTemplate: "/{apiVersion}/users/{userId}/onlineMeetings/{meetingId}/attendanceReports"
+    allowedQueryParams:
+      - "$select"
+      - "$top"
+      - "$skiptoken"
+      - "$filter"
+      - "$orderby"
+      - "$count"
+      - "$expand"
+      - "$format"
+      - "$search"
+      - "$skip"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$.['@odata.context']"
+      - !<redact>
+        jsonPaths:
+          - "$..emailAddress"
+          - "$..displayName"
+          - "$..subject"
+          - "$..joinMeetingIdSettings.isPasscodeRequired"
+          - "$..joinMeetingIdSettings.passcode"
+  - pathTemplate: "/{apiVersion}/users/{userId}/onlineMeetings/{meetingId}/attendanceReports/{reportId}"
+    allowedQueryParams:
+      - "$select"
+      - "$top"
+      - "$skiptoken"
+      - "$filter"
+      - "$orderby"
+      - "$count"
+      - "$expand"
+      - "$format"
+      - "$search"
+      - "$skip"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$.['@odata.context']"
+      - !<redact>
+        jsonPaths:
+          - "$..emailAddress"
+          - "$..displayName"
           - "$..subject"
           - "$..joinMeetingIdSettings.isPasscodeRequired"
           - "$..joinMeetingIdSettings.passcode"
