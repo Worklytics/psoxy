@@ -1,6 +1,6 @@
 # Getting Started with Google Cloud Shell
 
-1. clone the repo (or a [private-fork](../private-fork.md) of it)
+1. clone the repo (or a [private-fork](../development/private-fork.md) of it)
 ```shell
 git clone https://github.com/Worklytics/psoxy.git
 ```
