@@ -51,7 +51,7 @@ Given the complexity and potential pitfalls, we highly recommend you reach out t
 ## Development
 
 Various topics relevant to anyone developing Psoxy (in Java, or the supporting Terraform modules/examples)
-is kepte in [`./development`](./development).
+is kept in [`./development`](./development).
 
 
 
