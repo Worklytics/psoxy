@@ -157,7 +157,7 @@ locals {
 
   jira_cloud_id                 = coalesce(var.jira_cloud_id, "YOUR_JIRA_CLOUD_ID")
   jira_example_issue_id         = coalesce(var.jira_example_issue_id, var.example_jira_issue_id, "YOUR_JIRA_EXAMPLE_ISSUE_ID")
-  github_api_host               = coalesce(var.github_api_host, "api.github.com")
+  github_enterprise_server_host               = coalesce(var.github_enterprise_server_host, "api.github.com")
   github_installation_id        = coalesce(var.github_installation_id, "YOUR_GITHUB_INSTALLATION_ID")
   github_organization           = coalesce(var.github_organization, "YOUR_GITHUB_ORGANIZATION_NAME")
   github_example_repository     = coalesce(var.github_example_repository, "YOUR_GITHUB_EXAMPLE_REPOSITORY_NAME")
@@ -478,7 +478,7 @@ EOT
       display_name : "Github Enterprise Servre"
       identifier_scope_id : "github"
       worklytics_connector_name : "Github Enterprise Server via Psoxy"
-      target_host : local.github_api_host
+      target_host : local.github_enterprise_server_host
       source_auth_strategy : "oauth2_refresh_token"
       secured_variables : [
         {
@@ -510,7 +510,7 @@ EOT
       environment_variables : {
         GRANT_TYPE : "certificate_credentials"
         TOKEN_RESPONSE_TYPE : "GITHUB_ACCESS_TOKEN"
-        REFRESH_ENDPOINT : "https://${local.github_api_host}/app/installations/${local.github_installation_id}/access_tokens"
+        REFRESH_ENDPOINT : "https://${local.github_enterprise_server_host}/app/installations/${local.github_installation_id}/access_tokens"
         USE_SHARED_TOKEN : "TRUE"
       }
       settings_to_provide = {
