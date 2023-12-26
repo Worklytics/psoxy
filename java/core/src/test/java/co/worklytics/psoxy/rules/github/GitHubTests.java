@@ -39,11 +39,15 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         // Do nothing, as response schema is bigger than we allow for advanced parameters
     }
 
-    @Test
-    void orgMembers() {
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "api.github.com",
+            "git.your-company.com/api/v3"
+    })
+    void orgMembers(String domainWithPath) {
         String jsonString = asJson("org_members.json");
 
-        String endpoint = "https://api.github.com/orgs/FAKE/members";
+        String endpoint = "https://" + domainWithPath  + "/orgs/FAKE/members";
 
         Collection<String> PII = Arrays.asList(
                 "octocat",
@@ -69,7 +73,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
             "https://git.your-company.com/api/graphql"})
     void graphql_for_users_with_saml(String endpoint) {
         String jsonString = asJson("graph_api_users_saml.json");
-        
+
         Collection<String> PII = Arrays.asList(
                 "fake1",
                 "fake2",
@@ -88,8 +92,10 @@ public class GitHubTests extends JavaRulesTestBaseCase {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"https://api.github.com/graphql",
-            "https://git.your-company.com/api/graphql"})
+    @ValueSource(strings = {
+            "https://api.github.com/graphql",
+            "https://git.your-company.com/api/graphql"
+    })
     void graphql_for_users_with_members(String endpoint) {
         String jsonString = asJson("graph_api_users_members.json");
 
@@ -110,11 +116,15 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         assertUrlAllowed(endpoint);
     }
 
-    @Test
-    void user() {
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "api.github.com",
+            "git.your-company.com/api/v3"
+    })
+    void user(String domainWithPath) {
         String jsonString = asJson("user.json");
 
-        String endpoint = "https://api.github.com/users/p~IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbN_fPDYrPH3aBnAoR5-ec6f";
+        String endpoint = "https://" + domainWithPath  + "/users/p~IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbN_fPDYrPH3aBnAoR5-ec6f";
 
         Collection<String> PII = Arrays.asList(
                 "monalisa octocat",
@@ -131,12 +141,16 @@ public class GitHubTests extends JavaRulesTestBaseCase {
 
         assertUrlAllowed(endpoint);
     }
-    
-    @Test
-    void orgTeams() {
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "api.github.com",
+            "git.your-company.com/api/v3"
+    })
+    void orgTeams(String domainWithPath) {
         String jsonString = asJson("org_teams.json");
 
-        String endpoint = "https://api.github.com/orgs/FAKE/teams";
+        String endpoint = "https://" + domainWithPath  + "/orgs/FAKE/teams";
 
         String sanitized = this.sanitize(endpoint, jsonString);
 
@@ -150,11 +164,15 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         assertUrlAllowed(endpoint);
     }
 
-    @Test
-    void orgTeamMembers() {
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "api.github.com",
+            "git.your-company.com/api/v3"
+    })
+    void orgTeamMembers(String domainWithPath) {
         String jsonString = asJson("team_members.json");
 
-        String endpoint = "https://api.github.com/orgs/FAKE/teams/TEAM/members";
+        String endpoint = "https://" + domainWithPath  + "/orgs/FAKE/teams/TEAM/members";
 
         Collection<String> PII = Arrays.asList(
                 "some-user",
@@ -175,11 +193,15 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         assertUrlAllowed(endpoint);
     }
 
-    @Test
-    void repoCommit() {
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "api.github.com",
+            "git.your-company.com/api/v3"
+    })
+    void repoCommit(String domainWithPath) {
         String jsonString = asJson("commit.json");
 
-        String endpoint = "https://api.github.com/repos/FAKE/REPO/commits/COMMIT_REF";
+        String endpoint = "https://" + domainWithPath  + "/repos/FAKE/REPO/commits/COMMIT_REF";
 
         Collection<String> PII = Arrays.asList(
                 "Monalisa Octocat",
@@ -201,11 +223,15 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         assertUrlAllowed(endpoint);
     }
 
-    @Test
-    void repositoryCommits() {
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "api.github.com",
+            "git.your-company.com/api/v3"
+    })
+    void repositoryCommits(String domainWithPath) {
         String jsonString = asJson("repo_commits.json");
 
-        String endpoint = "https://api.github.com/repos/FAKE/REPO/commits";
+        String endpoint = "https://" + domainWithPath  + "/repos/FAKE/REPO/commits";
 
         Collection<String> PII = Arrays.asList(
                 "Monalisa Octocat",
@@ -227,11 +253,15 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         assertUrlAllowed(endpoint);
     }
 
-    @Test
-    void commit_comments() {
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "api.github.com",
+            "git.your-company.com/api/v3"
+    })
+    void commit_comments(String domainWithPath) {
         String jsonString = asJson("commit_comments.json");
 
-        String endpoint = "https://api.github.com/repos/{owner}/{repo}/commits/{commit_sha}/comments";
+        String endpoint = "https://" + domainWithPath  + "/repos/{owner}/{repo}/commits/{commit_sha}/comments";
 
         Collection<String> PII = Arrays.asList(
                 "octocat"
@@ -244,11 +274,15 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         assertUrlAllowed(endpoint);
     }
 
-    @Test
-    void comments_reactions() {
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "api.github.com",
+            "git.your-company.com/api/v3"
+    })
+    void comments_reactions(String domainWithPath) {
         String jsonString = asJson("comment_reactions.json");
 
-        String endpoint = "https://api.github.com/repos/FAKE/REPO/comments/COMMENT/reactions";
+        String endpoint = "https://" + domainWithPath  + "/repos/FAKE/REPO/comments/COMMENT/reactions";
 
         String sanitized = this.sanitize(endpoint, jsonString);
 
@@ -262,11 +296,15 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         assertUrlAllowed(endpoint);
     }
 
-    @Test
-    void issue() {
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "api.github.com",
+            "git.your-company.com/api/v3"
+    })
+    void issue(String domainWithPath) {
         String jsonString = asJson("issue.json");
 
-        String endpoint = "https://api.github.com/repos/FAKE/REPO/issues/ISSUE_NUMBER";
+        String endpoint = "https://" + domainWithPath  + "/repos/FAKE/REPO/issues/ISSUE_NUMBER";
 
         Collection<String> PII = List.of(
                 "octocat"
@@ -289,11 +327,15 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         assertUrlAllowed(endpoint);
     }
 
-    @Test
-    void issues() {
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "api.github.com",
+            "git.your-company.com/api/v3"
+    })
+    void issues(String domainWithPath) {
         String jsonString = asJson("issues.json");
 
-        String endpoint = "https://api.github.com/repos/FAKE/REPO/issues?page=5";
+        String endpoint = "https://" + domainWithPath  + "/repos/FAKE/REPO/issues?page=5";
 
         Collection<String> PII = Collections.singletonList("octocat");
 
@@ -314,11 +356,15 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         assertUrlAllowed(endpoint);
     }
 
-    @Test
-    void issue_comments() {
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "api.github.com",
+            "git.your-company.com/api/v3"
+    })
+    void issue_comments(String domainWithPath) {
         String jsonString = asJson("issues_comments.json");
 
-        String endpoint = "https://api.github.com/repos/FAKE/REPO/issues/ISSUE/comments";
+        String endpoint = "https://" + domainWithPath  + "/repos/FAKE/REPO/issues/ISSUE/comments";
 
         Collection<String> PII = Collections.singletonList("octocat");
 
@@ -337,11 +383,15 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         assertUrlAllowed(endpoint);
     }
 
-    @Test
-    void issue_events() {
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "api.github.com",
+            "git.your-company.com/api/v3"
+    })
+    void issue_events(String domainWithPath) {
         String jsonString = asJson("issue_events.json");
 
-        String endpoint = "https://api.github.com/repos/FAKE/REPO/issues/ISSUE_ID/events";
+        String endpoint = "https://" + domainWithPath  + "/repos/FAKE/REPO/issues/ISSUE_ID/events";
 
         Collection<String> PII = Collections.singletonList("octocat");
 
@@ -359,11 +409,15 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         assertUrlAllowed(endpoint);
     }
 
-    @Test
-    void issue_timeline() {
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "api.github.com",
+            "git.your-company.com/api/v3"
+    })
+    void issue_timeline(String domainWithPath) {
         String jsonString = asJson("issue_timeline.json");
 
-        String endpoint = "https://api.github.com/repos/FAKE/REPO/issues/ISSUE/timeline";
+        String endpoint = "https://" + domainWithPath  + "/repos/FAKE/REPO/issues/ISSUE/timeline";
 
         Collection<String> PII = Arrays.asList(
                 "9919",
@@ -390,11 +444,15 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         assertUrlAllowed(endpoint);
     }
 
-    @Test
-    void issue_comment_reactions() {
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "api.github.com",
+            "git.your-company.com/api/v3"
+    })
+    void issue_comment_reactions(String domainWithPath) {
         String jsonString = asJson("issues_comments_reactions.json");
 
-        String endpoint = "https://api.github.com/repos/FAKE/REPO/issues/comments/COMMENT/reactions";
+        String endpoint = "https://" + domainWithPath  + "/repos/FAKE/REPO/issues/comments/COMMENT/reactions";
 
         String sanitized = this.sanitize(endpoint, jsonString);
 
@@ -409,11 +467,15 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         assertUrlAllowed(endpoint);
     }
 
-    @Test
-    void issue_reactions() {
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "api.github.com",
+            "git.your-company.com/api/v3"
+    })
+    void issue_reactions(String domainWithPath) {
         String jsonString = asJson("issues_reactions.json");
 
-        String endpoint = "https://api.github.com/repos/FAKE/REPO/issues/ISSUE/reactions";
+        String endpoint = "https://" + domainWithPath  + "/repos/FAKE/REPO/issues/ISSUE/reactions";
 
         String sanitized = this.sanitize(endpoint, jsonString);
 
@@ -428,11 +490,15 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         assertUrlAllowed(endpoint);
     }
 
-    @Test
-    void repo_events() {
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "api.github.com",
+            "git.your-company.com/api/v3"
+    })
+    void repo_events(String domainWithPath) {
         String jsonString = asJson("repo_events.json");
 
-        String endpoint = "https://api.github.com/repos/FAKE/REPO/events";
+        String endpoint = "https://" + domainWithPath  + "/repos/FAKE/REPO/events";
 
         Collection<String> PII = Arrays.asList(
                 "Monalisa Octocat",
@@ -456,11 +522,15 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         assertUrlAllowed(endpoint);
     }
 
-    @Test
-    void pull_reviews() {
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "api.github.com",
+            "git.your-company.com/api/v3"
+    })
+    void pull_reviews(String domainWithPath) {
         String jsonString = asJson("pull_reviews.json");
 
-        String endpoint = "https://api.github.com/repos/FAKE/REPO/pulls/PULL_NUMBER/reviews";
+        String endpoint = "https://" + domainWithPath  + "/repos/FAKE/REPO/pulls/PULL_NUMBER/reviews";
 
         Collection<String> PII = Arrays.asList(
                 "123456",
@@ -482,11 +552,15 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         assertUrlAllowed(endpoint);
     }
 
-    @Test
-    void repositories() {
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "api.github.com",
+            "git.your-company.com/api/v3"
+    })
+    void repositories(String domainWithPath) {
         String jsonString = asJson("repos.json");
 
-        String endpoint = "https://api.github.com/orgs/FAKE/repos";
+        String endpoint = "https://" + domainWithPath  + "/orgs/FAKE/repos";
 
         Collection<String> PII = Arrays.asList(
                 "Worklytics-org",
@@ -508,11 +582,15 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         assertUrlAllowed(endpoint);
     }
 
-    @Test
-    void pulls() {
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "api.github.com",
+            "git.your-company.com/api/v3"
+    })
+    void pulls(String domainWithPath) {
         String jsonString = asJson("pulls.json");
 
-        String endpoint = "https://api.github.com/repos/{owner}/{repo}/pulls";
+        String endpoint = "https://" + domainWithPath  + "/repos/{owner}/{repo}/pulls";
 
         Collection<String> PII = Arrays.asList(
                 "octocat",
@@ -543,11 +621,15 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         assertUrlAllowed(endpoint);
     }
 
-    @Test
-    void pull() {
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "api.github.com",
+            "git.your-company.com/api/v3"
+    })
+    void pull(String domainWithPath) {
         String jsonString = asJson("pull.json");
 
-        String endpoint = "https://api.github.com/repos/{owner}/{repo}/pulls/PULL_NUMBER";
+        String endpoint = "https://" + domainWithPath  + "/repos/{owner}/{repo}/pulls/PULL_NUMBER";
 
         Collection<String> PII = Arrays.asList(
                 "octocat",
@@ -578,11 +660,15 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         assertUrlAllowed(endpoint);
     }
 
-    @Test
-    void pullCommits() {
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "api.github.com",
+            "git.your-company.com/api/v3"
+    })
+    void pullCommits(String domainWithPath) {
         String jsonString = asJson("pull_commits.json");
 
-        String endpoint = "https://api.github.com/repos/FAKE/REPO/pulls/42/commits";
+        String endpoint = "https://" + domainWithPath  + "/repos/FAKE/REPO/pulls/42/commits";
 
         Collection<String> PII = Arrays.asList(
                 "Monalisa Octocat",
@@ -604,11 +690,15 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         assertUrlAllowed(endpoint);
     }
 
-    @Test
-    void pullComments() {
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "api.github.com",
+            "git.your-company.com/api/v3"
+    })
+    void pullComments(String domainWithPath) {
         String jsonString = asJson("pull_comments.json");
 
-        String endpoint = "https://api.github.com/repos/FAKE/REPO/pulls/42/comments";
+        String endpoint = "https://" + domainWithPath  + "/repos/FAKE/REPO/pulls/42/comments";
 
         Collection<String> PII = List.of(
                 "some-user"
@@ -628,11 +718,15 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         assertUrlAllowed(endpoint);
     }
 
-    @Test
-    void pullReviewComments() {
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "api.github.com",
+            "git.your-company.com/api/v3"
+    })
+    void pullReviewComments(String domainWithPath) {
         String jsonString = asJson("pull_review_comments.json");
 
-        String endpoint = "https://api.github.com/repos/FAKE/REPO/pulls/42/reviews/10/comments";
+        String endpoint = "https://" + domainWithPath  + "/repos/FAKE/REPO/pulls/42/reviews/10/comments";
 
         Collection<String> PII = List.of(
                 "some-user"
@@ -652,11 +746,15 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         assertUrlAllowed(endpoint);
     }
 
-    @Test
-    void org_audit_log() {
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "api.github.com",
+            "git.your-company.com/api/v3"
+    })
+    void org_audit_log(String domainWithPath) {
         String jsonString = asJson("org_audit_log.json");
 
-        String endpoint = "https://api.github.com/orgs/{org}/audit-log";
+        String endpoint = "https://" + domainWithPath  + "/orgs/{org}/audit-log";
 
         Collection<String> PII = Arrays.asList(
                 "octocat",
