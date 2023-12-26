@@ -474,7 +474,7 @@ EOT
     github-enterprise-server = {
       source_kind : "github",
       worklytics_connector_id : "github-enterprise-server-psoxy"
-      display_name : "Github Enterprise Servre"
+      display_name : "Github Enterprise Server"
       identifier_scope_id : "github"
       worklytics_connector_name : "Github Enterprise Server via Psoxy"
       target_host : var.github_enterprise_server_host

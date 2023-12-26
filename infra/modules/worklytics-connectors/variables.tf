@@ -36,7 +36,7 @@ variable "jira_example_issue_id" {
 
 variable "github_enterprise_server_host" {
   type        = string
-  default     = null
+  default     = ""
   description = "(Only required if using Github Enterprise Server connector) Host of the Github instance (ex: github.mycompany.com)."
 }
 
