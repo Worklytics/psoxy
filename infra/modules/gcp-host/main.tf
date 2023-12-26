@@ -195,7 +195,7 @@ module "bulk_connector" {
   source = "../../modules/gcp-psoxy-bulk"
 
   project_id                        = var.gcp_project_id
-  region                              = var.gcp_region
+  region                            = var.gcp_region
   environment_id_prefix             = local.environment_id_prefix
   instance_id                       = each.key
   worklytics_sa_emails              = var.worklytics_sa_emails

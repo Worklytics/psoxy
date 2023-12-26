@@ -71,6 +71,6 @@ locals {
   validate_github_enterprise_server_host_check = regex(
     "^${local.validate_github_enterprise_server_host_message}$",
     (!local.validate_github_enterprise_server_host
-    ? local.validate_github_enterprise_server_host_message
-    : ""))
+      ? local.validate_github_enterprise_server_host_message
+  : ""))
 }
