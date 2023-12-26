@@ -15,12 +15,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
+@Getter
 public class GitHubTests extends JavaRulesTestBaseCase {
 
-    @Getter
     final RESTRules rulesUnderTest = PrebuiltSanitizerRules.GITHUB;
 
-    @Getter
     final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
             .sourceKind("github")
             .build();
