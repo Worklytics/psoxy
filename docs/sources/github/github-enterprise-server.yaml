@@ -1,6 +1,6 @@
 ---
 endpoints:
-  - pathTemplate: "/orgs/{org}/members"
+  - pathTemplate: "/api/{enterpriseServerVersion}/orgs/{org}/members"
     allowedQueryParams:
       - "per_page"
       - "page"
@@ -38,7 +38,7 @@ endpoints:
           - "$..login"
         includeReversible: true
         encoding: "URL_SAFE_TOKEN"
-  - pathTemplate: "/users/{username}"
+  - pathTemplate: "/api/{enterpriseServerVersion}/users/{username}"
     allowedQueryParams:
       - "since"
       - "per_page"
@@ -78,7 +78,7 @@ endpoints:
       username:
         type: "string"
         format: "reversible-pseudonym"
-  - pathTemplate: "/graphql"
+  - pathTemplate: "/api/graphql"
     transforms:
       - !<redact>
         jsonPaths:
@@ -189,7 +189,7 @@ endpoints:
                   type: "string"
               type:
                 type: "string"
-  - pathTemplate: "/orgs/{org}/teams"
+  - pathTemplate: "/api/{enterpriseServerVersion}/orgs/{org}/teams"
     allowedQueryParams:
       - "per_page"
       - "page"
@@ -198,7 +198,7 @@ endpoints:
         jsonPaths:
           - "$..name"
           - "$..description"
-  - pathTemplate: "/orgs/{org}/teams/{teamSlug}/members"
+  - pathTemplate: "/api/{enterpriseServerVersion}/orgs/{org}/teams/{teamSlug}/members"
     allowedQueryParams:
       - "per_page"
       - "page"
@@ -234,7 +234,7 @@ endpoints:
           - "$..login"
         includeReversible: true
         encoding: "URL_SAFE_TOKEN"
-  - pathTemplate: "/orgs/{org}/audit-log"
+  - pathTemplate: "/api/{enterpriseServerVersion}/orgs/{org}/audit-log"
     allowedQueryParams:
       - "per_page"
       - "page"
@@ -259,7 +259,7 @@ endpoints:
           - "$..user"
           - "$..userId"
         encoding: "JSON"
-  - pathTemplate: "/organizations/{installationId}/audit-log"
+  - pathTemplate: "/api/{enterpriseServerVersion}/organizations/{installationId}/audit-log"
     allowedQueryParams:
       - "per_page"
       - "page"
@@ -284,7 +284,7 @@ endpoints:
           - "$..user"
           - "$..userId"
         encoding: "JSON"
-  - pathTemplate: "/orgs/{org}/repos"
+  - pathTemplate: "/api/{enterpriseServerVersion}/orgs/{org}/repos"
     allowedQueryParams:
       - "per_page"
       - "page"
@@ -308,12 +308,12 @@ endpoints:
           - "$..['owner'].login"
         includeReversible: true
         encoding: "URL_SAFE_TOKEN"
-  - pathTemplate: "/repos/{owner}/{repo}/branches"
+  - pathTemplate: "/api/{enterpriseServerVersion}/repos/{owner}/{repo}/branches"
     allowedQueryParams:
       - "per_page"
       - "page"
       - "protected"
-  - pathTemplate: "/repos/{owner}/{repo}/commits"
+  - pathTemplate: "/api/{enterpriseServerVersion}/repos/{owner}/{repo}/commits"
     allowedQueryParams:
       - "per_page"
       - "page"
@@ -345,7 +345,7 @@ endpoints:
           - "$..['author','committer'].login"
         includeReversible: true
         encoding: "URL_SAFE_TOKEN"
-  - pathTemplate: "/repos/{owner}/{repo}/commits/{ref}"
+  - pathTemplate: "/api/{enterpriseServerVersion}/repos/{owner}/{repo}/commits/{ref}"
     allowedQueryParams:
       - "per_page"
       - "page"
@@ -373,7 +373,7 @@ endpoints:
           - "$..['author','committer'].login"
         includeReversible: true
         encoding: "URL_SAFE_TOKEN"
-  - pathTemplate: "/repos/{owner}/{repo}/events"
+  - pathTemplate: "/api/{enterpriseServerVersion}/repos/{owner}/{repo}/events"
     allowedQueryParams:
       - "per_page"
       - "page"
@@ -418,7 +418,7 @@ endpoints:
           - "$..assignees[*].login"
         includeReversible: true
         encoding: "URL_SAFE_TOKEN"
-  - pathTemplate: "/repos/{owner}/{repo}/commits/{commitSha}/comments"
+  - pathTemplate: "/api/{enterpriseServerVersion}/repos/{owner}/{repo}/commits/{commitSha}/comments"
     allowedQueryParams:
       - "per_page"
       - "page"
@@ -446,7 +446,7 @@ endpoints:
           - "$..['user'].login"
         includeReversible: true
         encoding: "URL_SAFE_TOKEN"
-  - pathTemplate: "/repos/{owner}/{repo}/comments/{commentId}/reactions"
+  - pathTemplate: "/api/{enterpriseServerVersion}/repos/{owner}/{repo}/comments/{commentId}/reactions"
     allowedQueryParams:
       - "per_page"
       - "page"
@@ -463,7 +463,7 @@ endpoints:
           - "$..['user'].login"
         includeReversible: true
         encoding: "URL_SAFE_TOKEN"
-  - pathTemplate: "/repos/{owner}/{repo}/issues/{issueNumber}"
+  - pathTemplate: "/api/{enterpriseServerVersion}/repos/{owner}/{repo}/issues/{issueNumber}"
     transforms:
       - !<redact>
         jsonPaths:
@@ -496,7 +496,7 @@ endpoints:
           - "$..assignees[*].login"
         includeReversible: true
         encoding: "URL_SAFE_TOKEN"
-  - pathTemplate: "/repos/{owner}/{repo}/issues"
+  - pathTemplate: "/api/{enterpriseServerVersion}/repos/{owner}/{repo}/issues"
     allowedQueryParams:
       - "per_page"
       - "page"
@@ -537,7 +537,7 @@ endpoints:
           - "$..assignees[*].login"
         includeReversible: true
         encoding: "URL_SAFE_TOKEN"
-  - pathTemplate: "/repos/{owner}/{repo}/issues/{issueNumber}/comments"
+  - pathTemplate: "/api/{enterpriseServerVersion}/repos/{owner}/{repo}/issues/{issueNumber}/comments"
     allowedQueryParams:
       - "per_page"
       - "page"
@@ -560,7 +560,7 @@ endpoints:
           - "$..['user'].login"
         includeReversible: true
         encoding: "URL_SAFE_TOKEN"
-  - pathTemplate: "/repos/{owner}/{repo}/issues/{issueNumber}/events"
+  - pathTemplate: "/api/{enterpriseServerVersion}/repos/{owner}/{repo}/issues/{issueNumber}/events"
     allowedQueryParams:
       - "per_page"
       - "page"
@@ -593,7 +593,7 @@ endpoints:
           - "$..['author','committer','review_requester','owner','user','requested_reviewer','closed_by','assigner','actor','assignee','creator'].login"
         includeReversible: true
         encoding: "URL_SAFE_TOKEN"
-  - pathTemplate: "/repos/{owner}/{repo}/issues/{issueNumber}/timeline"
+  - pathTemplate: "/api/{enterpriseServerVersion}/repos/{owner}/{repo}/issues/{issueNumber}/timeline"
     allowedQueryParams:
       - "per_page"
       - "page"
@@ -626,7 +626,7 @@ endpoints:
           - "$..['author','committer','review_requester','owner','user','requested_reviewer','closed_by','assigner','actor','assignee','creator'].login"
         includeReversible: true
         encoding: "URL_SAFE_TOKEN"
-  - pathTemplate: "/repos/{owner}/{repo}/issues/{issueNumber}/reactions"
+  - pathTemplate: "/api/{enterpriseServerVersion}/repos/{owner}/{repo}/issues/{issueNumber}/reactions"
     allowedQueryParams:
       - "per_page"
       - "page"
@@ -643,7 +643,7 @@ endpoints:
           - "$..['user'].login"
         includeReversible: true
         encoding: "URL_SAFE_TOKEN"
-  - pathTemplate: "/repos/{owner}/{repo}/issues/comments/{commentId}/reactions"
+  - pathTemplate: "/api/{enterpriseServerVersion}/repos/{owner}/{repo}/issues/comments/{commentId}/reactions"
     allowedQueryParams:
       - "per_page"
       - "page"
@@ -660,7 +660,7 @@ endpoints:
           - "$..['user'].login"
         includeReversible: true
         encoding: "URL_SAFE_TOKEN"
-  - pathTemplate: "/repos/{owner}/{repo}/pulls/{pullNumber}/reviews"
+  - pathTemplate: "/api/{enterpriseServerVersion}/repos/{owner}/{repo}/pulls/{pullNumber}/reviews"
     allowedQueryParams:
       - "per_page"
       - "page"
@@ -682,7 +682,7 @@ endpoints:
           - "$..['user'].login"
         includeReversible: true
         encoding: "URL_SAFE_TOKEN"
-  - pathTemplate: "/repos/{owner}/{repo}/pulls"
+  - pathTemplate: "/api/{enterpriseServerVersion}/repos/{owner}/{repo}/pulls"
     allowedQueryParams:
       - "per_page"
       - "page"
@@ -738,7 +738,7 @@ endpoints:
           - "$..assignees[*].login"
         includeReversible: true
         encoding: "URL_SAFE_TOKEN"
-  - pathTemplate: "/repos/{owner}/{repo}/pulls/{pullNumber}/comments"
+  - pathTemplate: "/api/{enterpriseServerVersion}/repos/{owner}/{repo}/pulls/{pullNumber}/comments"
     allowedQueryParams:
       - "per_page"
       - "page"
@@ -763,7 +763,7 @@ endpoints:
           - "$..['user'].login"
         includeReversible: true
         encoding: "URL_SAFE_TOKEN"
-  - pathTemplate: "/repos/{owner}/{repo}/pulls/{pullNumber}/reviews/{reviewId}/comments"
+  - pathTemplate: "/api/{enterpriseServerVersion}/repos/{owner}/{repo}/pulls/{pullNumber}/reviews/{reviewId}/comments"
     allowedQueryParams:
       - "per_page"
       - "page"
@@ -785,7 +785,7 @@ endpoints:
           - "$..['user'].login"
         includeReversible: true
         encoding: "URL_SAFE_TOKEN"
-  - pathTemplate: "/repos/{owner}/{repo}/pulls/{pullNumber}/commits"
+  - pathTemplate: "/api/{enterpriseServerVersion}/repos/{owner}/{repo}/pulls/{pullNumber}/commits"
     allowedQueryParams:
       - "per_page"
       - "page"
@@ -813,7 +813,7 @@ endpoints:
           - "$..['author','committer'].login"
         includeReversible: true
         encoding: "URL_SAFE_TOKEN"
-  - pathTemplate: "/repos/{owner}/{repo}/pulls/{pullNumber}"
+  - pathTemplate: "/api/{enterpriseServerVersion}/repos/{owner}/{repo}/pulls/{pullNumber}"
     transforms:
       - !<redact>
         jsonPaths:

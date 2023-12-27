@@ -472,7 +472,7 @@ https://github.com/organizations/{YOUR ORG}/settings/installations/{INSTALLATION
 EOT
     }
     github-enterprise-server = {
-      source_kind : "github",
+      source_kind : "github-enterprise-server",
       worklytics_connector_id : "github-enterprise-server-psoxy"
       display_name : "Github Enterprise Server"
       identifier_scope_id : "github"

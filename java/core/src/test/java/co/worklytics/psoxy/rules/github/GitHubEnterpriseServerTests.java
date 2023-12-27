@@ -16,12 +16,14 @@ import java.util.List;
 import java.util.stream.Stream;
 
 @Getter
-public class GitHubTests extends JavaRulesTestBaseCase {
+public class GitHubEnterpriseServerTests extends JavaRulesTestBaseCase {
 
-    final RESTRules rulesUnderTest = PrebuiltSanitizerRules.GITHUB;
+    final RESTRules rulesUnderTest = PrebuiltSanitizerRules.GITHUB_ENTERPRISE_SERVER;
 
     final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
+            //.sourceFamily("github")
             .sourceKind("github")
+            .rulesFile("github-enterprise-server")
             .build();
 
     @Disabled // not reliable; seems to have different value via IntelliJ/AWS deployment and my
@@ -43,7 +45,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
     void orgMembers() {
         String jsonString = asJson("org_members.json");
 
-        String endpoint = "https://api.github.com/orgs/FAKE/members";
+        String endpoint = "https://git.your-company.com/api/v3/orgs/FAKE/members";
 
         Collection<String> PII = Arrays.asList(
                 "octocat",
@@ -77,12 +79,12 @@ public class GitHubTests extends JavaRulesTestBaseCase {
 
         assertNotSanitized(jsonString, PII);
 
-        String sanitized = this.sanitize("https://api.github.com/graphql", jsonString);
+        String sanitized = this.sanitize("https://git.your-company.com/api/graphql", jsonString);
 
         assertPseudonymized(sanitized, "fake1", "fake1@contoso.com");
         assertPseudonymized(sanitized, "fake2", "fake2@contoso.com");
 
-        assertUrlAllowed("https://api.github.com/graphql");
+        assertUrlAllowed("https://git.your-company.com/api/graphql");
     }
 
     @Test
@@ -98,19 +100,19 @@ public class GitHubTests extends JavaRulesTestBaseCase {
 
         assertNotSanitized(jsonString, PII);
 
-        String sanitized = this.sanitize("https://api.github.com/graphql", jsonString);
+        String sanitized = this.sanitize("https://git.your-company.com/api/graphql", jsonString);
 
         assertPseudonymized(sanitized, "fake1", "fake1@contoso.com");
         assertPseudonymized(sanitized, "fake2", "fake2@contoso.com");
 
-        assertUrlAllowed("https://api.github.com/graphql");
+        assertUrlAllowed("https://git.your-company.com/api/graphql");
     }
 
     @Test
     void user() {
         String jsonString = asJson("user.json");
 
-        String endpoint = "https://api.github.com/users/p~IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbN_fPDYrPH3aBnAoR5-ec6f";
+        String endpoint = "https://git.your-company.com/api/v3/users/p~IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbN_fPDYrPH3aBnAoR5-ec6f";
 
         Collection<String> PII = Arrays.asList(
                 "monalisa octocat",
@@ -132,7 +134,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
     void orgTeams() {
         String jsonString = asJson("org_teams.json");
 
-        String endpoint = "https://api.github.com/orgs/FAKE/teams";
+        String endpoint = "https://git.your-company.com/api/v3/orgs/FAKE/teams";
 
         String sanitized = this.sanitize(endpoint, jsonString);
 
@@ -150,7 +152,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
     void orgTeamMembers() {
         String jsonString = asJson("team_members.json");
 
-        String endpoint = "https://api.github.com/orgs/FAKE/teams/TEAM/members";
+        String endpoint = "https://git.your-company.com/api/v3/orgs/FAKE/teams/TEAM/members";
 
         Collection<String> PII = Arrays.asList(
                 "some-user",
@@ -175,7 +177,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
     void repoCommit() {
         String jsonString = asJson("commit.json");
 
-        String endpoint = "https://api.github.com/repos/FAKE/REPO/commits/COMMIT_REF";
+        String endpoint = "https://git.your-company.com/api/v3/repos/FAKE/REPO/commits/COMMIT_REF";
 
         Collection<String> PII = Arrays.asList(
                 "Monalisa Octocat",
@@ -201,7 +203,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
     void repositoryCommits() {
         String jsonString = asJson("repo_commits.json");
 
-        String endpoint = "https://api.github.com/repos/FAKE/REPO/commits";
+        String endpoint = "https://git.your-company.com/api/v3/repos/FAKE/REPO/commits";
 
         Collection<String> PII = Arrays.asList(
                 "Monalisa Octocat",
@@ -227,7 +229,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
     void commit_comments() {
         String jsonString = asJson("commit_comments.json");
 
-        String endpoint = "https://api.github.com/repos/{owner}/{repo}/commits/{commit_sha}/comments";
+        String endpoint = "https://git.your-company.com/api/v3/repos/{owner}/{repo}/commits/{commit_sha}/comments";
 
         Collection<String> PII = Arrays.asList(
                 "octocat"
@@ -244,7 +246,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
     void comments_reactions() {
         String jsonString = asJson("comment_reactions.json");
 
-        String endpoint = "https://api.github.com/repos/FAKE/REPO/comments/COMMENT/reactions";
+        String endpoint = "https://git.your-company.com/api/v3/repos/FAKE/REPO/comments/COMMENT/reactions";
 
         String sanitized = this.sanitize(endpoint, jsonString);
 
@@ -262,7 +264,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
     void issue() {
         String jsonString = asJson("issue.json");
 
-        String endpoint = "https://api.github.com/repos/FAKE/REPO/issues/ISSUE_NUMBER";
+        String endpoint = "https://git.your-company.com/api/v3/repos/FAKE/REPO/issues/ISSUE_NUMBER";
 
         Collection<String> PII = List.of(
                 "octocat"
@@ -289,7 +291,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
     void issues() {
         String jsonString = asJson("issues.json");
 
-        String endpoint = "https://api.github.com/repos/FAKE/REPO/issues?page=5";
+        String endpoint = "https://git.your-company.com/api/v3/repos/FAKE/REPO/issues?page=5";
 
         Collection<String> PII = Collections.singletonList("octocat");
 
@@ -314,7 +316,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
     void issue_comments() {
         String jsonString = asJson("issues_comments.json");
 
-        String endpoint = "https://api.github.com/repos/FAKE/REPO/issues/ISSUE/comments";
+        String endpoint = "https://git.your-company.com/api/v3/repos/FAKE/REPO/issues/ISSUE/comments";
 
         Collection<String> PII = Collections.singletonList("octocat");
 
@@ -337,7 +339,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
     void issue_events() {
         String jsonString = asJson("issue_events.json");
 
-        String endpoint = "https://api.github.com/repos/FAKE/REPO/issues/ISSUE_ID/events";
+        String endpoint = "https://git.your-company.com/api/v3/repos/FAKE/REPO/issues/ISSUE_ID/events";
 
         Collection<String> PII = Collections.singletonList("octocat");
 
@@ -359,7 +361,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
     void issue_timeline() {
         String jsonString = asJson("issue_timeline.json");
 
-        String endpoint = "https://api.github.com/repos/FAKE/REPO/issues/ISSUE/timeline";
+        String endpoint = "https://git.your-company.com/api/v3/repos/FAKE/REPO/issues/ISSUE/timeline";
 
         Collection<String> PII = Arrays.asList(
                 "9919",
@@ -390,7 +392,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
     void issue_comment_reactions() {
         String jsonString = asJson("issues_comments_reactions.json");
 
-        String endpoint = "https://api.github.com/repos/FAKE/REPO/issues/comments/COMMENT/reactions";
+        String endpoint = "https://git.your-company.com/api/v3/repos/FAKE/REPO/issues/comments/COMMENT/reactions";
 
         String sanitized = this.sanitize(endpoint, jsonString);
 
@@ -409,7 +411,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
     void issue_reactions() {
         String jsonString = asJson("issues_reactions.json");
 
-        String endpoint = "https://api.github.com/repos/FAKE/REPO/issues/ISSUE/reactions";
+        String endpoint = "https://git.your-company.com/api/v3/repos/FAKE/REPO/issues/ISSUE/reactions";
 
         String sanitized = this.sanitize(endpoint, jsonString);
 
@@ -428,7 +430,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
     void repo_events() {
         String jsonString = asJson("repo_events.json");
 
-        String endpoint = "https://api.github.com/repos/FAKE/REPO/events";
+        String endpoint = "https://git.your-company.com/api/v3/repos/FAKE/REPO/events";
 
         Collection<String> PII = Arrays.asList(
                 "Monalisa Octocat",
@@ -456,7 +458,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
     void pull_reviews() {
         String jsonString = asJson("pull_reviews.json");
 
-        String endpoint = "https://api.github.com/repos/FAKE/REPO/pulls/PULL_NUMBER/reviews";
+        String endpoint = "https://git.your-company.com/api/v3/repos/FAKE/REPO/pulls/PULL_NUMBER/reviews";
 
         Collection<String> PII = Arrays.asList(
                 "123456",
@@ -482,7 +484,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
     void repositories() {
         String jsonString = asJson("repos.json");
 
-        String endpoint = "https://api.github.com/orgs/FAKE/repos";
+        String endpoint = "https://git.your-company.com/api/v3/orgs/FAKE/repos";
 
         Collection<String> PII = Arrays.asList(
                 "Worklytics-org",
@@ -508,7 +510,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
     void pulls() {
         String jsonString = asJson("pulls.json");
 
-        String endpoint = "https://api.github.com/repos/{owner}/{repo}/pulls";
+        String endpoint = "https://git.your-company.com/api/v3/repos/{owner}/{repo}/pulls";
 
         Collection<String> PII = Arrays.asList(
                 "octocat",
@@ -543,7 +545,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
     void pull() {
         String jsonString = asJson("pull.json");
 
-        String endpoint = "https://api.github.com/repos/{owner}/{repo}/pulls/PULL_NUMBER";
+        String endpoint = "https://git.your-company.com/api/v3/repos/{owner}/{repo}/pulls/PULL_NUMBER";
 
         Collection<String> PII = Arrays.asList(
                 "octocat",
@@ -578,7 +580,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
     void pullCommits() {
         String jsonString = asJson("pull_commits.json");
 
-        String endpoint = "https://api.github.com/repos/FAKE/REPO/pulls/42/commits";
+        String endpoint = "https://git.your-company.com/api/v3/repos/FAKE/REPO/pulls/42/commits";
 
         Collection<String> PII = Arrays.asList(
                 "Monalisa Octocat",
@@ -604,7 +606,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
     void pullComments() {
         String jsonString = asJson("pull_comments.json");
 
-        String endpoint = "https://api.github.com/repos/FAKE/REPO/pulls/42/comments";
+        String endpoint = "https://git.your-company.com/api/v3/repos/FAKE/REPO/pulls/42/comments";
 
         Collection<String> PII = List.of(
                 "some-user"
@@ -628,7 +630,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
     void pullReviewComments() {
         String jsonString = asJson("pull_review_comments.json");
 
-        String endpoint = "https://api.github.com/repos/FAKE/REPO/pulls/42/reviews/10/comments";
+        String endpoint = "https://git.your-company.com/api/v3/repos/FAKE/REPO/pulls/42/reviews/10/comments";
 
         Collection<String> PII = List.of(
                 "some-user"
@@ -652,7 +654,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
     void org_audit_log() {
         String jsonString = asJson("org_audit_log.json");
 
-        String endpoint = "https://api.github.com/orgs/{org}/audit-log";
+        String endpoint = "https://git.your-company.com/api/v3/orgs/{org}/audit-log";
 
         Collection<String> PII = Arrays.asList(
                 "octocat",
@@ -676,37 +678,37 @@ public class GitHubTests extends JavaRulesTestBaseCase {
     @Override
     public Stream<InvocationExample> getExamples() {
         return Stream.of(
-                InvocationExample.of("https://api.github.com/orgs/FAKE/members", "org_members.json"),
-                InvocationExample.of("https://api.github.com/graphql", "graph_api_users_saml.json"),
-                InvocationExample.of("https://api.github.com/graphql", "graph_api_users_members.json"),
-                InvocationExample.of("https://api.github.com/graphql", "graph_api_error.json"),
-                InvocationExample.of("https://api.github.com/orgs/FAKE/teams", "org_teams.json"),
-                InvocationExample.of("https://api.github.com/orgs/FAKE/teams/TEAM/members", "team_members.json"),
-                InvocationExample.of("https://api.github.com/orgs/FAKE/repos", "repos.json"),
-                InvocationExample.of("https://api.github.com/orgs/FAKE/audit-log", "org_audit_log.json"),
-                InvocationExample.of("https://api.github.com/organizations/123456789/audit-log?include=all&per_page=100&phrase=created:2023-02-16T12:00:00%2B0000..2023-04-17T00:00:00%2B0000&page=0&order=asc&after=MS42OEQyOTE2MjX1MqNlJzIyfANVOHoYbUVsZ1ZjUWN6TwlZLXl6EVE%3D&before", "org_audit_log.json"),
-                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/commits/COMMIT_REF", "commit.json"),
-                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/commits/COMMIT_REF/comments", "commit_comments.json"),
-                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/branches", "repo_branches.json"),
-                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/commits", "repo_commits.json"),
-                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/events", "repo_events.json"),
-                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/comments/COMMENT_ID/reactions", "comment_reactions.json"),
-                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/issues/ISSUE", "issue.json"),
-                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/issues", "issues.json"),
-                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/issues/ISSUE/comments", "issues_comments.json"),
-                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/issues/ISSUE/events", "issue_events.json"),
-                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/issues/ISSUE/timeline", "issue_timeline.json"),
-                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/issues/ISSUE/reactions", "issues_reactions.json"),
-                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/issues/comments/reactions", "issues_comments_reactions.json"),
-                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/pulls", "pulls.json"),
-                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/pulls/42/comments", "pull_comments.json"),
-                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/pulls/42/commits", "pull_commits.json"),
-                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/pulls/42/reviews", "pull_reviews.json"),
-                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/pulls/42/reviews/10/comments", "pull_review_comments.json"),
-                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/pulls/PULL_ID", "pull.json"),
-                InvocationExample.of("https://api.github.com/users/p~IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbN_fPDYrPH3aBnAoR5-ec6f?per_page=1", "user.json"),
-                InvocationExample.of("https://api.github.com/users/p~wD8RXfeJ5J-Po8ztEdwRQ-ae1xHBQKRMfNsFB5FFteZgtt4TBv84utnnumgFnjsR?per_page=1", "user.json"),
-                InvocationExample.of("https://api.github.com/users/p~IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbN_fPDYrPH3aBnAoR5-ec6f", "user.json")
+                InvocationExample.of("https://git.your-company.com/api/v3/orgs/FAKE/members", "org_members.json"),
+                InvocationExample.of("https://git.your-company.com/api/graphql", "graph_api_users_saml.json"),
+                InvocationExample.of("https://git.your-company.com/api/graphql", "graph_api_users_members.json"),
+                InvocationExample.of("https://git.your-company.com/api/graphql", "graph_api_error.json"),
+                InvocationExample.of("https://git.your-company.com/api/v3/orgs/FAKE/teams", "org_teams.json"),
+                InvocationExample.of("https://git.your-company.com/api/v3/orgs/FAKE/teams/TEAM/members", "team_members.json"),
+                InvocationExample.of("https://git.your-company.com/api/v3/orgs/FAKE/repos", "repos.json"),
+                InvocationExample.of("https://git.your-company.com/api/v3/orgs/FAKE/audit-log", "org_audit_log.json"),
+                InvocationExample.of("https://git.your-company.com/api/v3/organizations/123456789/audit-log?include=all&per_page=100&phrase=created:2023-02-16T12:00:00%2B0000..2023-04-17T00:00:00%2B0000&page=0&order=asc&after=MS42OEQyOTE2MjX1MqNlJzIyfANVOHoYbUVsZ1ZjUWN6TwlZLXl6EVE%3D&before", "org_audit_log.json"),
+                InvocationExample.of("https://git.your-company.com/api/v3/repos/FAKE/REPO/commits/COMMIT_REF", "commit.json"),
+                InvocationExample.of("https://git.your-company.com/api/v3/repos/FAKE/REPO/commits/COMMIT_REF/comments", "commit_comments.json"),
+                InvocationExample.of("https://git.your-company.com/api/v3/repos/FAKE/REPO/branches", "repo_branches.json"),
+                InvocationExample.of("https://git.your-company.com/api/v3/repos/FAKE/REPO/commits", "repo_commits.json"),
+                InvocationExample.of("https://git.your-company.com/api/v3/repos/FAKE/REPO/events", "repo_events.json"),
+                InvocationExample.of("https://git.your-company.com/api/v3/repos/FAKE/REPO/comments/COMMENT_ID/reactions", "comment_reactions.json"),
+                InvocationExample.of("https://git.your-company.com/api/v3/repos/FAKE/REPO/issues/ISSUE", "issue.json"),
+                InvocationExample.of("https://git.your-company.com/api/v3/repos/FAKE/REPO/issues", "issues.json"),
+                InvocationExample.of("https://git.your-company.com/api/v3/repos/FAKE/REPO/issues/ISSUE/comments", "issues_comments.json"),
+                InvocationExample.of("https://git.your-company.com/api/v3/repos/FAKE/REPO/issues/ISSUE/events", "issue_events.json"),
+                InvocationExample.of("https://git.your-company.com/api/v3/repos/FAKE/REPO/issues/ISSUE/timeline", "issue_timeline.json"),
+                InvocationExample.of("https://git.your-company.com/api/v3/repos/FAKE/REPO/issues/ISSUE/reactions", "issues_reactions.json"),
+                InvocationExample.of("https://git.your-company.com/api/v3/repos/FAKE/REPO/issues/comments/reactions", "issues_comments_reactions.json"),
+                InvocationExample.of("https://git.your-company.com/api/v3/repos/FAKE/REPO/pulls", "pulls.json"),
+                InvocationExample.of("https://git.your-company.com/api/v3/repos/FAKE/REPO/pulls/42/comments", "pull_comments.json"),
+                InvocationExample.of("https://git.your-company.com/api/v3/repos/FAKE/REPO/pulls/42/commits", "pull_commits.json"),
+                InvocationExample.of("https://git.your-company.com/api/v3/repos/FAKE/REPO/pulls/42/reviews", "pull_reviews.json"),
+                InvocationExample.of("https://git.your-company.com/api/v3/repos/FAKE/REPO/pulls/42/reviews/10/comments", "pull_review_comments.json"),
+                InvocationExample.of("https://git.your-company.com/api/v3/repos/FAKE/REPO/pulls/PULL_ID", "pull.json"),
+                InvocationExample.of("https://git.your-company.com/api/v3/users/p~IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbN_fPDYrPH3aBnAoR5-ec6f?per_page=1", "user.json"),
+                InvocationExample.of("https://git.your-company.com/api/v3/users/p~wD8RXfeJ5J-Po8ztEdwRQ-ae1xHBQKRMfNsFB5FFteZgtt4TBv84utnnumgFnjsR?per_page=1", "user.json"),
+                InvocationExample.of("https://git.your-company.com/api/v3/users/p~IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbN_fPDYrPH3aBnAoR5-ec6f", "user.json")
         );
     }
 }
