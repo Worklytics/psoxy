@@ -186,7 +186,7 @@ endpoints:
     transforms:
       - !<redact>
         jsonPaths:
-          - "$.['@odata.context']"
+          - "$..['@odata.context']"
       - !<pseudonymize>
         jsonPaths:
           - "$..emailAddress"
@@ -212,7 +212,7 @@ endpoints:
     transforms:
       - !<redact>
         jsonPaths:
-          - "$.['@odata.context']"
+          - "$..['@odata.context']"
       - !<pseudonymize>
         jsonPaths:
           - "$..emailAddress"
@@ -238,7 +238,7 @@ endpoints:
     transforms:
       - !<redact>
         jsonPaths:
-          - "$.['@odata.context']"
+          - "$..['@odata.context']"
       - !<pseudonymize>
         jsonPaths:
           - "$..emailAddress"

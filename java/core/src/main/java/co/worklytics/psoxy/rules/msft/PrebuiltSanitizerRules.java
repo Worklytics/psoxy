@@ -26,7 +26,7 @@ public class PrebuiltSanitizerRules {
             .regex("^https://graph.microsoft.com/(.*)$")
             .build();
     static final Transform REDACT_ODATA_CONTEXT = Transform.Redact.builder()
-            .jsonPath("$.['@odata.context']")
+            .jsonPath("$..['@odata.context']")
             .build();
 
     static final Transform REDACT_ODATA_COUNT = Transform.Redact.builder()

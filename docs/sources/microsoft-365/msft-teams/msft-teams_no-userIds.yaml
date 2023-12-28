@@ -21,7 +21,7 @@ endpoints:
         jsonPaths:
           - "$..displayName"
           - "$..description"
-          - "$.['@odata.context']"
+          - "$..['@odata.context']"
           - "$..['@odata.id']"
           - "$..['@odata.type']"
           - "$..['@odata.count']"
@@ -43,7 +43,7 @@ endpoints:
         jsonPaths:
           - "$..displayName"
           - "$..description"
-          - "$.['@odata.context']"
+          - "$..['@odata.context']"
           - "$..['@odata.id']"
           - "$..['@odata.type']"
           - "$..['@odata.count']"
@@ -68,7 +68,7 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$..topic"
-          - "$.['@odata.context']"
+          - "$..['@odata.context']"
           - "$..['@odata.count']"
   - pathTemplate: "/{apiVersion}/teams/{teamId}/channels/{channelId}/messages"
     allowedQueryParams:
@@ -93,7 +93,7 @@ endpoints:
           - "$..attachments"
           - "$..mentions[*].mentionText"
           - "$..eventDetail.teamDescription"
-          - "$.['@odata.context']"
+          - "$..['@odata.context']"
           - "$..['@odata.count']"
       - !<tokenize>
         jsonPaths:
@@ -124,7 +124,7 @@ endpoints:
           - "$..value[*].attachments"
           - "$..value[*].mentions[*].mentionText"
           - "$..value[*].eventDetail.teamDescription"
-          - "$.['@odata.context']"
+          - "$..['@odata.context']"
           - "$..['@odata.count']"
       - !<tokenize>
         jsonPaths:
@@ -160,7 +160,7 @@ endpoints:
           - "$..value[*].mentions[*].mentionText"
           - "$..value[*].eventDetail.teamDescription"
           - "$..value[*].eventDetail.chatDisplayName"
-          - "$.['@odata.context']"
+          - "$..['@odata.context']"
           - "$..['@odata.count']"
       - !<tokenize>
         jsonPaths:
@@ -184,7 +184,7 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$..displayName"
-          - "$.['@odata.context']"
+          - "$..['@odata.context']"
           - "$..['@odata.count']"
           - "$..['@odata.type']"
   - pathRegex: "^/(v1.0|beta)/communications/callRecords/(?<callChainId>[({]?[a-fA-F0-9]{8}[-]?([a-fA-F0-9]{4}[-]?){3}[a-fA-F0-9]{12}[})]?)(?<queryParameters>[a-zA-z0-9\\\
@@ -214,7 +214,7 @@ endpoints:
           - "$..callee.name"
           - "$..captureDeviceName"
           - "$..renderDeviceName"
-          - "$.['@odata.context']"
+          - "$..['@odata.context']"
           - "$..['@odata.type']"
       - !<tokenize>
         jsonPaths:
@@ -247,7 +247,7 @@ endpoints:
           - "$..value[*].userDisplayName"
           - "$..value[*].callerNumber"
           - "$..value[*].calleeNumber"
-          - "$.['@odata.context']"
+          - "$..['@odata.context']"
           - "$..['@odata.type']"
           - "$..['@odata.count']"
       - !<tokenize>
@@ -277,7 +277,7 @@ endpoints:
           - "$..value[*].userDisplayName"
           - "$..value[*].callerNumber"
           - "$..value[*].calleeNumber"
-          - "$.['@odata.context']"
+          - "$..['@odata.context']"
           - "$..['@odata.type']"
           - "$..['@odata.count']"
       - !<tokenize>
@@ -299,7 +299,7 @@ endpoints:
     transforms:
       - !<redact>
         jsonPaths:
-          - "$.['@odata.context']"
+          - "$..['@odata.context']"
       - !<pseudonymize>
         jsonPaths:
           - "$..emailAddress"
@@ -315,7 +315,7 @@ endpoints:
           - "$..subject"
           - "$..joinMeetingIdSettings.isPasscodeRequired"
           - "$..joinMeetingIdSettings.passcode"
-          - "$.['@odata.context']"
+          - "$..['@odata.context']"
           - "$..['@odata.type']"
   - pathTemplate: "/{apiVersion}/users/{userId}/onlineMeetings/{meetingId}/attendanceReports"
     allowedQueryParams:
@@ -332,7 +332,7 @@ endpoints:
     transforms:
       - !<redact>
         jsonPaths:
-          - "$.['@odata.context']"
+          - "$..['@odata.context']"
       - !<pseudonymize>
         jsonPaths:
           - "$..emailAddress"
@@ -348,7 +348,7 @@ endpoints:
           - "$..subject"
           - "$..joinMeetingIdSettings.isPasscodeRequired"
           - "$..joinMeetingIdSettings.passcode"
-          - "$.['@odata.context']"
+          - "$..['@odata.context']"
           - "$..['@odata.type']"
   - pathTemplate: "/{apiVersion}/users/{userId}/onlineMeetings/{meetingId}/attendanceReports/{reportId}"
     allowedQueryParams:
@@ -365,7 +365,7 @@ endpoints:
     transforms:
       - !<redact>
         jsonPaths:
-          - "$.['@odata.context']"
+          - "$..['@odata.context']"
       - !<pseudonymize>
         jsonPaths:
           - "$..emailAddress"
@@ -381,7 +381,7 @@ endpoints:
           - "$..subject"
           - "$..joinMeetingIdSettings.isPasscodeRequired"
           - "$..joinMeetingIdSettings.passcode"
-          - "$.['@odata.context']"
+          - "$..['@odata.context']"
           - "$..['@odata.type']"
   - pathRegex: "^/(v1.0|beta)/users(/p~[a-zA-Z0-9_-]+?)?[^/]*"
     allowedQueryParams:
