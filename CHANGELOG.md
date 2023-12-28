@@ -20,6 +20,12 @@ Changes to be including in future/planned release notes will be added here.
         then wildcard policy to read shared also grants read of secrets across all connectors)
   - keys/salts per value kind (PII, item id, etc)
 
+## [0.4.44](https://github.com/Worklytics/psoxy/release/tag/v0.4.44)
+* Microsoft 365 - Outlook calendar: new scopes for fetching Online Meetings have been added to the Entra ID Application 
+  used for Microsoft 365 Outlook Calendar and the proxy connector.
+  A Microsoft 365 with admin rights for Entra ID will need to grant admin consent 
+  for `OnlineMeetings.Read.All` and `OnlineMeetingArtifact.Read.All` permissions.
+
 ## [0.4.43](https://github.com/Worklytics/psoxy/release/tag/v0.4.43)
  * if you're using the NodeJS test tool, it will be re-installed on your next `terraform apply` due
    to a dependency change.

@@ -202,6 +202,7 @@ locals {
       required_oauth2_permission_scopes : [],
       required_app_roles : [
         "OnlineMeetings.Read.All",
+        "OnlineMeetingArtifact.Read.All",
         "Calendars.Read",
         "MailboxSettings.Read",
         "Group.Read.All",
