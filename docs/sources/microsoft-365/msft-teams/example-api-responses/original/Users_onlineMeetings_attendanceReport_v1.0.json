@@ -7,6 +7,7 @@
   "meetingEndDateTime": "2021-10-05T04:43:49.77Z",
   "attendanceRecords": [
     {
+      "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#users('16664f75-11dc-4870-bec6-38c1aaa81431')/onlineMeetings('MSpkYzE3Njc0Yy04MWQ5LTRhZGItYmZ')/attendanceReports('c9b6db1c-d5eb-427d-a5c0-20088d9b22d7')/attendanceRecords",
       "emailAddress": "frederick.cormier@contoso.com",
       "totalAttendanceInSeconds": 1152,
       "role": "Presenter",
