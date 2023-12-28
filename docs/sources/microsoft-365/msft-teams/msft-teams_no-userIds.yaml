@@ -10,6 +10,10 @@ endpoints:
     transforms:
       - !<pseudonymize>
         jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
           - "$..user.id"
           - "$..userId"
         encoding: "JSON"
@@ -26,6 +30,10 @@ endpoints:
       - "$select"
       - "$filter"
     transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
       - !<pseudonymize>
         jsonPaths:
           - "$..user.id"
@@ -50,6 +58,10 @@ endpoints:
     transforms:
       - !<pseudonymize>
         jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
           - "$..user.id"
           - "$..userId"
         encoding: "JSON"
@@ -65,6 +77,10 @@ endpoints:
       - "$skiptoken"
       - "$expand"
     transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
       - !<pseudonymize>
         jsonPaths:
           - "$..user.id"
@@ -92,6 +108,10 @@ endpoints:
       - "$deltatoken"
       - "$filter"
     transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
       - !<pseudonymize>
         jsonPaths:
           - "$..user.id"
@@ -125,6 +145,10 @@ endpoints:
     transforms:
       - !<pseudonymize>
         jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
           - "$..user.id"
           - "$..userId"
         encoding: "JSON"
@@ -150,6 +174,10 @@ endpoints:
     transforms:
       - !<pseudonymize>
         jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
           - "$..user.id"
           - "$..userId"
         encoding: "JSON"
@@ -165,6 +193,10 @@ endpoints:
       - "$select"
       - "$expand"
     transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
       - !<pseudonymize>
         jsonPaths:
           - "$..user.id"
@@ -198,6 +230,10 @@ endpoints:
     transforms:
       - !<pseudonymize>
         jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
           - "$..user.id"
           - "$..userId"
         encoding: "JSON"
@@ -222,6 +258,10 @@ endpoints:
     allowedQueryParams:
       - "$skip"
     transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
       - !<pseudonymize>
         jsonPaths:
           - "$..user.id"
@@ -262,12 +302,15 @@ endpoints:
           - "$.['@odata.context']"
       - !<pseudonymize>
         jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
           - "$..user.id"
           - "$..userId"
         encoding: "JSON"
       - !<redact>
         jsonPaths:
-          - "$..emailAddress"
           - "$..displayName"
           - "$..subject"
           - "$..joinMeetingIdSettings.isPasscodeRequired"
@@ -292,12 +335,15 @@ endpoints:
           - "$.['@odata.context']"
       - !<pseudonymize>
         jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
           - "$..user.id"
           - "$..userId"
         encoding: "JSON"
       - !<redact>
         jsonPaths:
-          - "$..emailAddress"
           - "$..displayName"
           - "$..subject"
           - "$..joinMeetingIdSettings.isPasscodeRequired"
@@ -322,12 +368,15 @@ endpoints:
           - "$.['@odata.context']"
       - !<pseudonymize>
         jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
           - "$..user.id"
           - "$..userId"
         encoding: "JSON"
       - !<redact>
         jsonPaths:
-          - "$..emailAddress"
           - "$..displayName"
           - "$..subject"
           - "$..joinMeetingIdSettings.isPasscodeRequired"

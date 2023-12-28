@@ -8,6 +8,10 @@ endpoints:
       - "$filter"
       - "$count"
     transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
       - !<redact>
         jsonPaths:
           - "$..displayName"
@@ -17,6 +21,10 @@ endpoints:
       - "$select"
       - "$filter"
     transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
       - !<redact>
         jsonPaths:
           - "$..displayName"
@@ -30,6 +38,10 @@ endpoints:
       - "$orderby"
       - "$expand"
     transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
       - !<redact>
         jsonPaths:
           - "$..topic"
@@ -40,6 +52,10 @@ endpoints:
       - "$skiptoken"
       - "$expand"
     transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
       - !<redact>
         jsonPaths:
           - "$..user.displayName"
@@ -56,6 +72,10 @@ endpoints:
       - "$deltatoken"
       - "$filter"
     transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
       - !<redact>
         jsonPaths:
           - "$..user.displayName"
@@ -76,6 +96,10 @@ endpoints:
       - "$search"
       - "$skip"
     transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
       - !<redact>
         jsonPaths:
           - "$..user.displayName"
@@ -90,6 +114,10 @@ endpoints:
       - "$top"
       - "$expand"
     transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
       - !<redact>
         jsonPaths:
           - "$..displayName"
@@ -99,6 +127,10 @@ endpoints:
       - "$select"
       - "$expand"
     transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
       - !<redact>
         jsonPaths:
           - "$..user.displayName"
@@ -115,6 +147,10 @@ endpoints:
     allowedQueryParams:
       - "$skip"
     transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
       - !<redact>
         jsonPaths:
           - "$..value[*].userPrincipalName"
@@ -125,6 +161,10 @@ endpoints:
     allowedQueryParams:
       - "$skip"
     transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
       - !<redact>
         jsonPaths:
           - "$..value[*].userPrincipalName"
@@ -147,9 +187,12 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$.['@odata.context']"
-      - !<redact>
+      - !<pseudonymize>
         jsonPaths:
           - "$..emailAddress"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
           - "$..displayName"
           - "$..subject"
           - "$..joinMeetingIdSettings.isPasscodeRequired"
@@ -170,9 +213,12 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$.['@odata.context']"
-      - !<redact>
+      - !<pseudonymize>
         jsonPaths:
           - "$..emailAddress"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
           - "$..displayName"
           - "$..subject"
           - "$..joinMeetingIdSettings.isPasscodeRequired"
@@ -193,9 +239,12 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$.['@odata.context']"
-      - !<redact>
+      - !<pseudonymize>
         jsonPaths:
           - "$..emailAddress"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
           - "$..displayName"
           - "$..subject"
           - "$..joinMeetingIdSettings.isPasscodeRequired"

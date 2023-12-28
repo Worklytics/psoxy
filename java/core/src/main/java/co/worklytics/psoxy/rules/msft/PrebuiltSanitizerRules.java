@@ -344,6 +344,10 @@ public class PrebuiltSanitizerRules {
             .jsonPath("$..description")
             .build();
 
+    static final Transform.Pseudonymize MS_TEAMS_TEAMS_DEFAULT_PSEUDONYMIZE = Transform.Pseudonymize.builder()
+            .jsonPath("$..emailAddress")
+            .build();
+
     static final Transform.Redact MS_TEAMS_USERS_CHATS_REDACT = Transform.Redact.builder()
             .jsonPath("$..topic")
             .build();
@@ -408,7 +412,6 @@ public class PrebuiltSanitizerRules {
             .jsonPath("$..value[*].calleeNumber")
             .build();
     static final Transform.Redact MS_TEAMS_USERS_ONLINE_MEETINGS_REDACT = Transform.Redact.builder()
-            .jsonPath("$..emailAddress")
             .jsonPath("$..displayName")
             .jsonPath("$..subject")
             .jsonPath("$..joinMeetingIdSettings.isPasscodeRequired")
@@ -417,69 +420,82 @@ public class PrebuiltSanitizerRules {
     static final Endpoint MS_TEAMS_TEAMS = Endpoint.builder()
             .pathTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS)
             .allowedQueryParams(List.of("$select", "$top", "$skiptoken", "$filter", "$count"))
+            .transform(MS_TEAMS_TEAMS_DEFAULT_PSEUDONYMIZE)
             .build();
 
     static final Endpoint MS_TEAMS_TEAMS_ALL_CHANNELS = Endpoint.builder()
             .pathTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS_ALL_CHANNELS)
             .allowedQueryParams(List.of("$select", "$filter"))
+            .transform(MS_TEAMS_TEAMS_DEFAULT_PSEUDONYMIZE)
             .build();
 
     static final Endpoint MS_TEAMS_USERS_CHATS = Endpoint.builder()
             .pathTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_CHATS)
             .allowedQueryParams(List.of("$select", "$top", "$skiptoken", "$filter", "$orderby", "$expand"))
+            .transform(MS_TEAMS_TEAMS_DEFAULT_PSEUDONYMIZE)
             .build();
 
     static final Endpoint MS_TEAMS_TEAMS_CHANNELS_MESSAGES = Endpoint.builder()
             .pathTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS_CHANNELS_MESSAGES)
             .allowedQueryParams(List.of("$select", "$top", "$skiptoken", "$expand"))
+            .transform(MS_TEAMS_TEAMS_DEFAULT_PSEUDONYMIZE)
             .build();
 
     static final Endpoint MS_TEAMS_TEAMS_CHANNELS_MESSAGES_DELTA = Endpoint.builder()
             .pathTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS_CHANNELS_MESSAGES_DELTA)
             .allowedQueryParams(List.of("$select", "$top", "$skiptoken", "$expand", "$deltatoken", "$filter"))
+            .transform(MS_TEAMS_TEAMS_DEFAULT_PSEUDONYMIZE)
             .build();
 
     static final Endpoint MS_TEAMS_CHATS_MESSAGES = Endpoint.builder()
             .pathTemplate(MS_TEAMS_PATH_TEMPLATES_CHATS_MESSAGES)
             .allowedQueryParams(List.of("$select", "$top", "$skiptoken", "$filter", "$orderby", "$count", "$expand", "$format", "$search", "$skip"))
+            .transform(MS_TEAMS_TEAMS_DEFAULT_PSEUDONYMIZE)
             .build();
 
     static final Endpoint MS_TEAMS_COMMUNICATIONS_CALLS = Endpoint.builder()
             .pathTemplate(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALLS)
             .allowedQueryParams(List.of("$select", "$top", "$expand"))
+            .transform(MS_TEAMS_TEAMS_DEFAULT_PSEUDONYMIZE)
             .build();
 
     static final Endpoint MS_TEAMS_COMMUNICATIONS_CALL_RECORDS = Endpoint.builder()
             .pathRegex(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_REGEX)
             .allowedQueryParams(List.of("$select", "$expand"))
+            .transform(MS_TEAMS_TEAMS_DEFAULT_PSEUDONYMIZE)
             .build();
 
     static final Endpoint MS_TEAMS_COMMUNICATIONS_CALL_RECORDS_GET_DIRECT_ROUTING_CALLS = Endpoint.builder()
             .pathTemplate(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_GET_DIRECT_ROUTING_CALLS)
             .allowedQueryParams(List.of("$skip"))
+            .transform(MS_TEAMS_TEAMS_DEFAULT_PSEUDONYMIZE)
             .build();
 
     static final Endpoint MS_TEAMS_COMMUNICATIONS_CALL_RECORDS_GET_PSTN_CALLS = Endpoint.builder()
             .pathTemplate(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_GET_PSTN_CALLS)
             .allowedQueryParams(List.of("$skip"))
+            .transform(MS_TEAMS_TEAMS_DEFAULT_PSEUDONYMIZE)
             .build();
 
     static final Endpoint MS_TEAMS_USERS_ONLINE_MEETINGS = Endpoint.builder()
             .pathTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS)
             .allowedQueryParams(List.of("$select", "$top", "$skiptoken", "$filter", "$orderby", "$count", "$expand", "$format", "$search", "$skip"))
             .transform(REDACT_ODATA_CONTEXT)
+            .transform(MS_TEAMS_TEAMS_DEFAULT_PSEUDONYMIZE)
             .build();
 
     static final Endpoint MS_TEAMS_USERS_ONLINE_MEETINGS_ATTENDANCE_REPORTS = Endpoint.builder()
             .pathTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS_ATTENDANCE_REPORTS)
             .allowedQueryParams(List.of("$select", "$top", "$skiptoken", "$filter", "$orderby", "$count", "$expand", "$format", "$search", "$skip"))
             .transform(REDACT_ODATA_CONTEXT)
+            .transform(MS_TEAMS_TEAMS_DEFAULT_PSEUDONYMIZE)
             .build();
 
     static final Endpoint MS_TEAMS_USERS_ONLINE_MEETINGS_ATTENDANCE_REPORT = Endpoint.builder()
             .pathTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS_ATTENDANCE_REPORT)
             .allowedQueryParams(List.of("$select", "$top", "$skiptoken", "$filter", "$orderby", "$count", "$expand", "$format", "$search", "$skip"))
             .transform(REDACT_ODATA_CONTEXT)
+            .transform(MS_TEAMS_TEAMS_DEFAULT_PSEUDONYMIZE)
             .build();
 
     static final Rules2 MS_TEAMS_BASE = Rules2.builder()
