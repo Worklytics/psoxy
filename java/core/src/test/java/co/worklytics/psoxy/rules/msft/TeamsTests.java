@@ -434,6 +434,7 @@ public class TeamsTests extends JavaRulesTestBaseCase {
         String userId = "dc17674c-81d9-4adb-bfb2-8f6a442e4622";
         String endpoint = "https://graph.microsoft.com/v1.0" + "/users/" + userId + "/onlineMeetings";
         String jsonResponse = asJson("Users_onlineMeetings_attendanceReports_v1.0.json");
+
         assertUrlWithSubResourcesBlocked(endpoint);
     }
 
@@ -447,6 +448,8 @@ public class TeamsTests extends JavaRulesTestBaseCase {
         );
 
         String sanitized = sanitize(endpoint, jsonResponse);
+
+        assertPseudonymized(sanitized, "frederick.cormier@contoso.com");
         assertRedacted(sanitized,
                 "Frederick Cormier",
                 "frederick.cormier@contoso.com"
