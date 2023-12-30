@@ -48,10 +48,10 @@ secret manager for Vault.
 Generally, follow Vault's guide: [https://developer.hashicorp.com/vault/docs/auth/aws](https://developer.hashicorp.com/vault/docs/auth/aws)
 
 We also have a Terraform module you can try to set-up Vault for use from Psoxy:
-  - [infra/modules/aws-vault-auth](../infra/modules/aws-vault-auth)
+  - [infra/modules/aws-vault-auth](../../../infra/modules/aws-vault-auth)
 
 And another Terraform module to add Vault access for each psoxy instance:
-  - [infra/modules/aws-vault-access](../infra/modules/aws-vault-access)
+  - [infra/modules/aws-vault-access](../../../infra/modules/aws-vault-access)
 
 
 Manually, steps are roughly:
