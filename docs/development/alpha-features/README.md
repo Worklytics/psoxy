@@ -10,7 +10,7 @@ attempted to implement using it as an alternative to secret management solutions
 see [hashicorp-vault.md](hashicorp-vault.md)
 
 ## New Relic Monitoring *alpha*
-We've done a PoC for for logging from psoxy back to New Relic for monitoring. Explanation here:
+We've done a PoC for logging from psoxy back to New Relic for monitoring. Usage explanation below:
 
 see [new-relic-monitoring.md](new-relic-monitoring.md)
 
