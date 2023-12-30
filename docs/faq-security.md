@@ -1,5 +1,11 @@
 # FAQ - Security
 
+## Is Psoxy a DLP solution?
+
+Yes, Psoxy supports filtering bulk (flat) files or API responses to remove PII or other sensitive
+data prior to transfer to a 3rd party.  You configure it with a static set of rules, providing
+customizable sanitization behavior of fields. Psoxy supports complex JsonPath expressions if needed,
+to perform santization generally across many fields and endpoints.
 
 ## Can Psoxy invocation be locked to a set of known IP addresses?
 
