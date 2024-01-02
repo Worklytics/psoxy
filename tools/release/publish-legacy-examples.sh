@@ -20,5 +20,5 @@ fi
 EXAMPLES=("aws-msft-365" "aws-google-workspace" "gcp-google-workspace")
 
 for EXAMPLE in "${EXAMPLES[@]}"; do
-    ${1}/tools/release/publish-legacy-example.sh ${REPO_ROOT} ${EXAMPLE} ${RELEASE_TAG}
+    ${1}/tools/release/lib/publish-legacy-example.sh ${REPO_ROOT} ${EXAMPLE} ${RELEASE_TAG}
 done

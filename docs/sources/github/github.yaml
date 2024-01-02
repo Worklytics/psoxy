@@ -104,19 +104,42 @@ endpoints:
             organization:
               type: "object"
               properties:
+                membersWithRole:
+                  type: "object"
+                  properties:
+                    edges:
+                      type: "array"
+                      items:
+                        type: "object"
+                        properties:
+                          node:
+                            type: "object"
+                            properties:
+                              email:
+                                type: "string"
+                              id:
+                                type: "string"
+                              isSiteAdmin:
+                                type: "boolean"
+                              login:
+                                type: "string"
+                              organizationVerifiedDomainEmails:
+                                type: "array"
+                                items:
+                                  type: "string"
+                    pageInfo:
+                      type: "object"
+                      properties:
+                        endCursor:
+                          type: "string"
+                        hasNextPage:
+                          type: "boolean"
                 samlIdentityProvider:
                   type: "object"
                   properties:
                     externalIdentities:
                       type: "object"
                       properties:
-                        pageInfo:
-                          type: "object"
-                          properties:
-                            hasNextPage:
-                              type: "boolean"
-                            endCursor:
-                              type: "string"
                         edges:
                           type: "array"
                           items:
@@ -137,57 +160,34 @@ endpoints:
                                     properties:
                                       login:
                                         type: "string"
-                membersWithRole:
-                  type: "object"
-                  properties:
-                    pageInfo:
-                      type: "object"
-                      properties:
-                        hasNextPage:
-                          type: "boolean"
-                        endCursor:
-                          type: "string"
-                    edges:
-                      type: "array"
-                      items:
-                        type: "object"
-                        properties:
-                          node:
-                            type: "object"
-                            properties:
-                              email:
-                                type: "string"
-                              login:
-                                type: "string"
-                              id:
-                                type: "string"
-                              isSiteAdmin:
-                                type: "boolean"
-                              organizationVerifiedDomainEmails:
-                                type: "array"
-                                items:
-                                  type: "string"
+                        pageInfo:
+                          type: "object"
+                          properties:
+                            endCursor:
+                              type: "string"
+                            hasNextPage:
+                              type: "boolean"
         errors:
           type: "array"
           items:
             type: "object"
             properties:
-              type:
-                type: "string"
-              path:
-                type: "array"
-                items:
-                  type: "string"
               locations:
                 type: "array"
                 items:
                   type: "object"
                   properties:
-                    line:
-                      type: "integer"
                     column:
                       type: "integer"
+                    line:
+                      type: "integer"
               message:
+                type: "string"
+              path:
+                type: "array"
+                items:
+                  type: "string"
+              type:
                 type: "string"
   - pathTemplate: "/orgs/{org}/teams"
     allowedQueryParams:

@@ -1,7 +1,11 @@
-# Create a private fork 
+# Create a private fork
+
+If you want to make private (non-public) customization to Psoxy's source/terraform modules,  you may
+wish to create a private fork of the repo. (if you intend to commit your changes, a public fork in
+GitHub should suffice)
 
 See [Duplicating a Repo](https://docs.github.com/en/repositories/creating-and-managing-repositories/duplicating-a-repository),
-for guidance. 
+for guidance.
 
 Specific commands for Psoxy repo are below:
 ```shell

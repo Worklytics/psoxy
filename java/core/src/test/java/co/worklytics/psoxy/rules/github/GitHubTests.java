@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -13,15 +15,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
+@Getter
 public class GitHubTests extends JavaRulesTestBaseCase {
 
-    @Getter
     final RESTRules rulesUnderTest = PrebuiltSanitizerRules.GITHUB;
 
-    @Getter
     final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
-        .sourceKind("github")
-        .build();
+            .sourceKind("github")
+            .build();
 
     @Disabled // not reliable; seems to have different value via IntelliJ/AWS deployment and my
     // laptop's maven, which doesn't make any sense, given that binary deployed to AWS was built via
@@ -30,8 +31,6 @@ public class GitHubTests extends JavaRulesTestBaseCase {
     void sha() {
         this.assertSha("7869e465607b7a00b4bd75a832a9ed1f811ce7f2");
     }
-
-
 
     @SneakyThrows
     @Test
@@ -69,8 +68,6 @@ public class GitHubTests extends JavaRulesTestBaseCase {
     void graphql_for_users_with_saml() {
         String jsonString = asJson("graph_api_users_saml.json");
 
-        String endpoint = "https://api.github.com/graphql";
-
         Collection<String> PII = Arrays.asList(
                 "fake1",
                 "fake2",
@@ -80,20 +77,18 @@ public class GitHubTests extends JavaRulesTestBaseCase {
 
         assertNotSanitized(jsonString, PII);
 
-        String sanitized = this.sanitize(endpoint, jsonString);
+        String sanitized = this.sanitize("https://api.github.com/graphql", jsonString);
 
         assertPseudonymized(sanitized, "fake1", "fake1@contoso.com");
         assertPseudonymized(sanitized, "fake2", "fake2@contoso.com");
 
-        assertUrlAllowed(endpoint);
+        assertUrlAllowed("https://api.github.com/graphql");
     }
 
     @Test
     void graphql_for_users_with_members() {
         String jsonString = asJson("graph_api_users_members.json");
 
-        String endpoint = "https://api.github.com/graphql";
-
         Collection<String> PII = Arrays.asList(
                 "fake1",
                 "fake2",
@@ -103,12 +98,12 @@ public class GitHubTests extends JavaRulesTestBaseCase {
 
         assertNotSanitized(jsonString, PII);
 
-        String sanitized = this.sanitize(endpoint, jsonString);
+        String sanitized = this.sanitize("https://api.github.com/graphql", jsonString);
 
         assertPseudonymized(sanitized, "fake1", "fake1@contoso.com");
         assertPseudonymized(sanitized, "fake2", "fake2@contoso.com");
 
-        assertUrlAllowed(endpoint);
+        assertUrlAllowed("https://api.github.com/graphql");
     }
 
     @Test
@@ -133,7 +128,6 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         assertUrlAllowed(endpoint);
     }
 
-
     @Test
     void orgTeams() {
         String jsonString = asJson("org_teams.json");
@@ -147,7 +141,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
 
         assertRedacted(sanitized, "Justice League",
                 "A great team."
-                );
+        );
 
         assertUrlAllowed(endpoint);
     }

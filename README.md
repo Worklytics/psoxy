@@ -17,6 +17,11 @@ access those sources.
 Psoxy ensures more secure, granular data access than direct connections between your tools will
 offer - and enforces access rules to fulfill your Compliance requirements.
 
+Psoxy functions as API-level Data Loss Prevention layer (DLP), by blocking sensitive fields / values
+/ endpoints that would otherwise be exposed when you connect a data sources API to a 3rd party
+service. It can ensure that data which would otherwise be exposed to a 3rd party service, due to
+granularity of source API models/permissions, is not accessed or transfered to the service.
+
 Objectives:
   - **serverless** - we strive to minimize the moving pieces required to run psoxy at scale, keeping
      your attack surface small and operational complexity low. Furthermore, we define
@@ -125,7 +130,7 @@ modules, specific instructions that you can pass to the Microsoft 365 Admin will
 | Active Directory                                                                                       | [data](docs/sources/microsoft-365/directory/example-api-responses) - [rules](docs/sources/microsoft-365/directory/directory.yaml)          | `User.Read.All` `Group.Read.All`                                                                                                                  |
 | Calendar                                                                                               | [data](docs/sources/microsoft-365/outlook-cal/example-api-responses) - [rules](docs/sources/microsoft-365/outlook-cal/outlook-cal.yaml)    | `User.Read.All` `Group.Read.All` `OnlineMeetings.Read.All` `Calendars.Read` `MailboxSettings.Read`                                                |
 | Mail                                                                                                   | [data](docs/sources/microsoft-365/outlook-mail/example-api-responses) - [rules](docs/sources/microsoft-365/outlook-mail/outlook-mail.yaml) | `User.Read.All` `Group.Read.All`  `Mail.ReadBasic.All` `MailboxSettings.Read`                                                                     |
-| Teams **beta**                                                                                                 | [data](docs/sources/microsoft-365/msft-teams/example-api-responses) - [rules](docs/sources/microsoft-365/msft-teams/msft-teams.yaml)| `User.Read.All` `Team.ReadBasic.All` `Channel.ReadBasic.All` `Chat.Read.All` `ChannelMessage.Read.All` `CallRecords.Read.All` `OnlineMeetings.Read.All`  |
+| Teams (**__beta__**)                                                                                   | [data](docs/sources/microsoft-365/msft-teams/example-api-responses) - [rules](docs/sources/microsoft-365/msft-teams/msft-teams.yaml)| `User.Read.All` `Team.ReadBasic.All` `Channel.ReadBasic.All` `Chat.Read.All` `ChannelMessage.Read.All` `CallRecords.Read.All` `OnlineMeetings.Read.All`  |
 
 NOTE: the above scopes are copied from [infra/modules/worklytics-connector-specs](infra/modules/worklytics-connector-specs)./
 Please refer to that module for a definitive list.
@@ -159,10 +164,11 @@ Please refer to that module for a definitive list.
 
 ### Other Data Sources without REST APIs
 
-Other data sources, such as HRIS, Badge, or Survey data can be exported to a CSV file. The "bulk"
-mode of the proxy can be used to pseudonymize these files by copying/uploading the original to
-a cloud storage bucket (GCS, S3, etc), which will trigger the proxy to sanitize the file and write
-the result to a 2nd storage bucket, which you can grant Worklytics access to read.
+Other data sources, such as Human Resource Information System (HRIS), Badge, or Survey data can be
+exported to a CSV file. The "bulk" mode of the proxy can be used to pseudonymize these files by
+copying/uploading the original to a cloud storage bucket (GCS, S3, etc), which will trigger the
+proxy to sanitize the file and write  the result to a 2nd storage bucket, which you then grant
+Worklytics access to read.
 
 Alternatively, the proxy can be used as a command line tool to pseudonymize arbitrary CSV files
 (eg, exports from your  HRIS), in a manner consistent with how a psoxy instance will pseudonymize
@@ -208,12 +214,12 @@ command line tools.
 
 You will need all of the following in your deployment environment (eg, your laptop):
 
-| Tool                                             | Version                | Test Command              |
-|--------------------------------------------------|------------------------|---------------------------|
-| [git](https://git-scm.com/)                      | 2.17+                  | `git --version`           |
-| [Maven](https://maven.apache.org/)               | 3.6+                   | `mvn -v`                 |
-| [Java JDK 11+ LTS](https://openjdk.org/install/) | 11, 17, 21 (see notes) | `mvn -v &#124; grep Java` |
-| [Terraform](https://www.terraform.io/)           | 1.3.x, <= 1.5          | `terraform version`       |
+| Tool                                            | Version                | Test Command              |
+|-------------------------------------------------|------------------------|---------------------------|
+| [git](https://git-scm.com/)                     | 2.17+                  | `git --version`           |
+| [Maven](https://maven.apache.org/)              | 3.6+                   | `mvn -v`                 |
+| [Java JDK 11+](https://openjdk.org/install/) | 11, 17, 21 (see notes) | `mvn -v &#124; grep Java` |
+| [Terraform](https://www.terraform.io/)          | 1.3.x, <= 1.5          | `terraform version`       |
 
 NOTE: we will support Java versions for duration of official support windows, in particular the
 LTS versions. As of Nov 2023, we  still support java 11 but may end this at any time. Minor

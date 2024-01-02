@@ -26,10 +26,17 @@ variable "jira_example_issue_id" {
   description = "If using Jira Server/Cloud connector, provide id of an issue for only to be used as part of example calls for Jira (ex: ETV-12)"
 }
 
+# DEPRECATED
 variable "github_api_host" {
   type        = string
   default     = null
-  description = "(Only required if using Github connector for on premises) Host of the Github instance (ex: github.mycompany.com)."
+  description = "DEPRECATED; use `github_enterprise_server_host`. (Only required if using Github connector for on premises) Host of the Github instance (ex: github.mycompany.com)."
+}
+
+variable "github_enterprise_server_host" {
+  type        = string
+  default     = ""
+  description = "(Only required if using Github Enterprise Server connector) Host of the Github instance (ex: github.mycompany.com)."
 }
 
 variable "github_installation_id" {
@@ -64,5 +71,13 @@ locals {
     "^${local.validate_salesforce_domain_message}$",
     (!local.validate_salesforce_domain
       ? local.validate_salesforce_domain_message
+  : ""))
+
+  validate_github_enterprise_server_host         = (var.github_api_host == null && (var.github_enterprise_server_host == null || var.github_enterprise_server_host == "" || can(regex(":|\\/", try(var.github_enterprise_server_host, ""))))) && contains(var.enabled_connectors, "github-enterprise-server")
+  validate_github_enterprise_server_host_message = "The github_enterprise_server_host var should be populated and to be with only the domain without protocol or query paths if GitHub Enterprise Server is enabled."
+  validate_github_enterprise_server_host_check = regex(
+    "^${local.validate_github_enterprise_server_host_message}$",
+    (!local.validate_github_enterprise_server_host
+      ? local.validate_github_enterprise_server_host_message
   : ""))
 }
