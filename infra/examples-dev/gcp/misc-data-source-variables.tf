@@ -73,7 +73,7 @@ locals {
       ? local.validate_salesforce_domain_message
   : ""))
 
-  validate_github_enterprise_server_host         = (var.github_enterprise_server_host == null || var.github_enterprise_server_host == "" || can(regex(":|\\/", try(var.github_enterprise_server_host, "")))) && contains(var.enabled_connectors, "github-enterprise-server")
+  validate_github_enterprise_server_host         = (var.github_api_host == null && (var.github_enterprise_server_host == null || var.github_enterprise_server_host == "" || can(regex(":|\\/", try(var.github_enterprise_server_host, ""))))) && contains(var.enabled_connectors, "github-enterprise-server")
   validate_github_enterprise_server_host_message = "The github_enterprise_server_host var should be populated and to be with only the domain without protocol or query paths if GitHub Enterprise Server is enabled."
   validate_github_enterprise_server_host_check = regex(
     "^${local.validate_github_enterprise_server_host_message}$",
