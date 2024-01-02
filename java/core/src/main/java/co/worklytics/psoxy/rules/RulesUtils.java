@@ -167,6 +167,7 @@ public class RulesUtils {
         defaultScopeIdBySource.put("outlook-mail", "azure-ad");
 
         defaultScopeIdBySource.put("github", "github");
+        defaultScopeIdBySource.put("github-enterprise-server", "github");
         defaultScopeIdBySource.put("slack", "slack");
         defaultScopeIdBySource.put("zoom", "zoom");
         defaultScopeIdBySource.put("salesforce", "salesforce");

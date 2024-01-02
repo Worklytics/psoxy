@@ -22,6 +22,13 @@ The diagram below provides an architecture overview of the 'REST' and 'Bulk' use
 
    You will need the numeric AWS Account ID for this account, which you can find in the AWS Console.
 
+   If your AWS organization enforces Service Control Policies, ensure that these are allow the AWS components required
+   by Psoxy or exempt the AWS Account in which you will deploy Psoxy from these policies.
+
+   If your organization uses any sort of security control enforcement mechanism, you may have disable/provide exceptions
+   to those controls for you initial deployment. Then generally those controls can be implemented later by extending our
+   examples. Our [protips](protips.md) page provides some guidance on how to extend the base examples to meet more
+   extreme requirements.
 
 2. **A sufficiently privileged AWS Role** You must have a IAM Role within the AWS account with
    sufficient privileges to (AWS managed policy examples linked):

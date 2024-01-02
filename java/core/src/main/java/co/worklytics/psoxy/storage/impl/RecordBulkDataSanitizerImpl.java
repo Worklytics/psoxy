@@ -85,7 +85,7 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
                         try {
                             compiledTransform.getLeft().map(document, compiledTransform.getRight(), jsonConfiguration);
                         } catch (JsonPathException e) {
-                            //rule for transform doesn't match anythign in document; suppress this
+                            //rule for transform doesn't match anything in document; suppress this
                         }
                     }
                     writer.append(jsonConfiguration.jsonProvider().toJson(document));
@@ -114,9 +114,7 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
                         throw new IllegalArgumentException("Only DEFAULT (v0.4) pseudonymization is supported");
                     }
 
-
                     return encoder.encode(pseudonymizedIdentity.asPseudonym());
-                    //.firstNonNull(pseudonymizedIdentity.getReversible(), pseudonymizedIdentity.getHash());
                 } else {
                     throw new IllegalArgumentException("Pseudonymize transform only supports string/integer values");
                 }

@@ -1,4 +1,13 @@
-# Github _beta_
+# GitHub
+
+Availability: **BETA**
+
+There are several connectors available for GitHub:
+- [Github Free/Pro/Teams] - for non-Enterprise GitHub organization hosted in github.com.
+- [Github Enterprise Cloud] - GitHub Enterprise instances hosted by github.com on behalf of your
+  organization.
+- [Github Enterprise Server] - similar to 'Cloud', but you must customize rules and API host;
+  contact Worklytics for assistance.
 
 ## Examples
 
@@ -7,15 +16,12 @@
 
 ## Steps to Connect
 
-There are two connectors available for Github:
-  - [Github Free/Professional]
-  - [Github Enterprise]
-
 Both share the same configuration and setup instructions except Administration permission for Audit Log events.
 
 Follow the following steps:
 
-1. From your organization, register a [GitHub App](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/registering-a-github-app#registering-a-github-app)
+1. (Only if you are going to use GitHub Enterprise Server) You have to populate `github_enterprise_server_host` variable in Terraform with the hostname of your Github Enterprise Server (example: `github.your-company.com`).
+2. From your organization, register a [GitHub App](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/registering-a-github-app#registering-a-github-app)
    with following permissions with **Read Only**:
     - Repository:
         - Contents: for reading commits and comments
@@ -28,16 +34,16 @@ Follow the following steps:
 
 NOTES:
 - We assume that ALL the repositories are going to be list **should be owned by the organization, not the users**.
-- In case of using GitHub Server, you need to populate `github_api_host` variable in Terraform with the URL of the API for your GitHub Server instance. For example, `https://api.github.your-company.com`.
+- In case of using GitHub Server, you need to populate `github_enterprise_server_host` variable in Terraform with the URL of the API for your GitHub Enterprise Server instance. For example, `https://api.github.your-company.com`.
 
 Apart from GitHub instructions please review the following:
   - "Homepage URL" can be anything, not required in this flow but required by Github.
   - Webhooks check can be disabled as this connector is not using them
   - Keep `Expire user authorization tokens` enabled, as GitHub documentation recommends
 
-2. Once is created please generate a new `Private Key`.
+3. Once is created please generate a new `Private Key`.
 
-3. It is required to convert the format of the certificate downloaded from PKCS#1 in previous step to PKCS#8. Please run following command:
+4. It is required to convert the format of the certificate downloaded from PKCS#1 in previous step to PKCS#8. Please run following command:
 ```shell
 openssl pkcs8 -topk8 -inform PEM -outform PEM -in {YOUR DOWNLOADED CERTIFICATE FILE} -out gh_pk_pkcs8.pem -nocrypt
 ```
@@ -46,9 +52,9 @@ openssl pkcs8 -topk8 -inform PEM -outform PEM -in {YOUR DOWNLOADED CERTIFICATE F
 - If the certificate is not converted to PKCS#8 connector will NOT work. You might see in logs a Java error `Invalid PKCS8 data.` if the format is not correct.
 - Command proposed has been successfully tested on Ubuntu; it may differ for other operating systems.
 
-4. Install the application in your organization.
+5. Install the application in your organization.
    Go to your organization settings and then in "Developer Settings". Then, click on "Edit" for your "Github App" and once you are in the app settings, click on "Install App" and click on the "Install" button. Accept the permissions to install it in your whole organization.
-5. Once installed, the `installationId` is required as it needs to be provided in the proxy as parameter for the connector in your Terraform module. You can go to your organization settings and
+6. Once installed, the `installationId` is required as it needs to be provided in the proxy as parameter for the connector in your Terraform module. You can go to your organization settings and
    click on `Third Party Access`. Click on `Configure` the application you have installed in previous step and you will find the `installationId` at the URL of the browser:
 ```
 https://github.com/organizations/{YOUR ORG}/settings/installations/{INSTALLATION_ID}
@@ -58,8 +64,6 @@ Copy the value of `installationId` and assign it to the `github_installation_id`
 **NOTE**:
 - If `github_installation_id` is not set, authentication URL will not be properly formatted and you will see *401: Unauthorized* when trying to get an access token.
 - If you see *404: Not found* in logs please review the *IP restriction policies* that your organization might have; that could cause connections from psoxy AWS Lambda/GCP Cloud Functions be rejected.
-
-6. (Only for GitHub Server) If you are using GitHub Server, you will need to set the `github_api_host` variable in Terraform to the URL of your GitHub Server instance. You will need to redeploy the proxy again if that value was not populated before.
 
 7. Update the variables with values obtained in previous step:
    - `PSOXY_GITHUB_CLIENT_ID` with `App ID` value. **NOTE**: It should be `App Id` value as we are going to use authentication through the App and **not** *client_id*.

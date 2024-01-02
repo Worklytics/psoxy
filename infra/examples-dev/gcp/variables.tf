@@ -181,10 +181,10 @@ variable "custom_api_connector_rules" {
 
 variable "custom_bulk_connectors" {
   type = map(object({
-    source_kind           = string
-    display_name          = optional(string, "Custom Bulk Connector")
-    input_bucket_name     = optional(string) # allow override of default bucket name
-    sanitized_bucket_name = optional(string) # allow override of default bucket name
+    source_kind               = string
+    display_name              = optional(string, "Custom Bulk Connector")
+    input_bucket_name         = optional(string) # allow override of default bucket name
+    sanitized_bucket_name     = optional(string) # allow override of default bucket name
     worklytics_connector_id   = optional(string, "bulk-import-psoxy")
     worklytics_connector_name = optional(string, "Custom Bulk Data via Psoxy")
     rules = optional(object({

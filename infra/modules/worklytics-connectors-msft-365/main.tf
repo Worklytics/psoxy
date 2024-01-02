@@ -34,7 +34,7 @@ module "msft_connection" {
   tenant_id                         = var.msft_tenant_id
   required_app_roles                = each.value.required_app_roles
   required_oauth2_permission_scopes = each.value.required_oauth2_permission_scopes
-  owners                            = toset(concat(data.azuread_users.owners.object_ids, [
+  owners = toset(concat(data.azuread_users.owners.object_ids, [
     data.azuread_client_config.current.object_id
   ]))
 }
@@ -59,7 +59,7 @@ locals {
   enabled_api_connectors = {
     for k, v in module.worklytics_connector_specs.enabled_msft_365_connectors :
     k => merge(v, {
-      connector             = module.msft_connection[k].connector
+      connector = module.msft_connection[k].connector
       environment_variables = merge(v.environment_variables, {
         CLIENT_ID = module.msft_connection[k].connector.application_id
       })
