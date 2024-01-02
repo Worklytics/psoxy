@@ -1,4 +1,13 @@
-# Github _beta_
+# GitHub
+
+Availability: **BETA**
+
+There are several connectors available for GitHub:
+- [Github Free/Pro/Teams] - for non-Enterprise GitHub organization hosted in github.com.
+- [Github Enterprise Cloud] - GitHub Enterprise instances hosted by github.com on behalf of your
+  organization.
+- [Github Enterprise Server] - similar to 'Cloud', but you must customize rules and API host;
+  contact Worklytics for assistance.
 
 ## Examples
 
@@ -6,10 +15,6 @@
   * Example Data : [original](example-api-responses/original) | [sanitized](example-api-responses/sanitized)
 
 ## Steps to Connect
-
-There are two connectors available for Github:
-  - [Github Free/Professional]
-  - [Github Enterprise]
 
 Both share the same configuration and setup instructions except Administration permission for Audit Log events.
 
