@@ -202,6 +202,7 @@ locals {
       required_oauth2_permission_scopes : [],
       required_app_roles : [
         "OnlineMeetings.Read.All",
+        "OnlineMeetingArtifact.Read.All",
         "Calendars.Read",
         "MailboxSettings.Read",
         "Group.Read.All",
@@ -264,7 +265,8 @@ locals {
         "Chat.Read.All",
         "ChannelMessage.Read.All",
         "CallRecords.Read.All",
-        "OnlineMeetings.Read.All"
+        "OnlineMeetings.Read.All",
+        "OnlineMeetingArtifact.Read.All"
       ],
       environment_variables : {
         GRANT_TYPE : "workload_identity_federation"

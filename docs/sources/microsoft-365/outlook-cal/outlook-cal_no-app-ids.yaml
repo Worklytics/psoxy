@@ -123,7 +123,7 @@ endpoints:
           - "$..externalReplyMessage"
       - !<redact>
         jsonPaths:
-          - "$.['@odata.context']"
+          - "$..['@odata.context']"
   - pathRegex: "^/(v1.0|beta)/users/[^/]*/(((calendars/[^/]*/)?events.*)|(calendar/calendarView(?)[^/]*))"
     transforms:
       - !<redactExceptSubstringsMatchingRegexes>
@@ -175,7 +175,7 @@ endpoints:
         regex: "^https://graph.microsoft.com/(.*)$"
       - !<redact>
         jsonPaths:
-          - "$.['@odata.context']"
+          - "$..['@odata.context']"
       - !<redact>
         jsonPaths:
           - "$..['calendar@odata.associationLink', 'calendar@odata.navigationLink']"
