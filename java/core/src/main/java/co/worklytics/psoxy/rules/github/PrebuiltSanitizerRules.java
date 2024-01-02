@@ -130,7 +130,6 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..description")
                     .build())
             .build();
-
     static final Endpoint ORG_AUDIT_LOG = Endpoint.builder()
             .pathTemplate("/orgs/{org}/audit-log")
             .allowedQueryParams(orgAuditLogAllowedQueryParameters)
@@ -168,7 +167,6 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..userId")
                     .build())
             .build();
-
 
     static final Endpoint ORG_TEAM_MEMBERS = Endpoint.builder()
             .pathTemplate("/orgs/{org}/teams/{teamSlug}/members")
@@ -530,9 +528,44 @@ public class PrebuiltSanitizerRules {
             .endpoint(PULL)
             .build();
 
+    @VisibleForTesting
+    static final RESTRules GITHUB_ENTERPRISE_SERVER = Rules2.builder()
+            // NOTE: Enterprise Server endpoints are with /api/v3/ prefix for all requests,
+            // except for GraphQL which is just /api/
+            // Leaving {enterpriseServerVersion} in the path template open to support future versions without changing rules
+            .endpoint(ORG_MEMBERS.withPathTemplate("/api/{enterpriseServerVersion}/orgs/{org}/members"))
+            .endpoint(USERS.withPathTemplate("/api/{enterpriseServerVersion}/users/{username}"))
+            .endpoint(GRAPHQL_FOR_USERS.withPathTemplate("/api/graphql"))
+            .endpoint(ORG_TEAMS.withPathTemplate("/api/{enterpriseServerVersion}/orgs/{org}/teams"))
+            .endpoint(ORG_TEAM_MEMBERS.withPathTemplate("/api/{enterpriseServerVersion}/orgs/{org}/teams/{teamSlug}/members"))
+            .endpoint(ORG_AUDIT_LOG.withPathTemplate("/api/{enterpriseServerVersion}/orgs/{org}/audit-log"))
+            .endpoint(ORG_AUDIT_LOG_WITH_INSTALLATION_ID.withPathTemplate("/api/{enterpriseServerVersion}/organizations/{installationId}/audit-log"))
+            .endpoint(REPOSITORIES.withPathTemplate("/api/{enterpriseServerVersion}/orgs/{org}/repos"))
+            .endpoint(REPO_BRANCHES.withPathTemplate("/api/{enterpriseServerVersion}/repos/{owner}/{repo}/branches"))
+            .endpoint(REPO_COMMITS.withPathTemplate("/api/{enterpriseServerVersion}/repos/{owner}/{repo}/commits"))
+            .endpoint(REPO_COMMIT.withPathTemplate("/api/{enterpriseServerVersion}/repos/{owner}/{repo}/commits/{ref}"))
+            .endpoint(REPO_EVENTS.withPathTemplate("/api/{enterpriseServerVersion}/repos/{owner}/{repo}/events"))
+            .endpoint(COMMIT_COMMENTS.withPathTemplate("/api/{enterpriseServerVersion}/repos/{owner}/{repo}/commits/{commitSha}/comments"))
+            .endpoint(COMMIT_COMMENT_REACTIONS.withPathTemplate("/api/{enterpriseServerVersion}/repos/{owner}/{repo}/comments/{commentId}/reactions"))
+            .endpoint(ISSUE.withPathTemplate("/api/{enterpriseServerVersion}/repos/{owner}/{repo}/issues/{issueNumber}"))
+            .endpoint(ISSUES.withPathTemplate("/api/{enterpriseServerVersion}/repos/{owner}/{repo}/issues"))
+            .endpoint(ISSUE_COMMENTS.withPathTemplate("/api/{enterpriseServerVersion}/repos/{owner}/{repo}/issues/{issueNumber}/comments"))
+            .endpoint(ISSUE_EVENTS.withPathTemplate("/api/{enterpriseServerVersion}/repos/{owner}/{repo}/issues/{issueNumber}/events"))
+            .endpoint(ISSUE_TIMELINE.withPathTemplate("/api/{enterpriseServerVersion}/repos/{owner}/{repo}/issues/{issueNumber}/timeline"))
+            .endpoint(ISSUE_REACTIONS.withPathTemplate("/api/{enterpriseServerVersion}/repos/{owner}/{repo}/issues/{issueNumber}/reactions"))
+            .endpoint(ISSUE_COMMENT_REACTIONS.withPathTemplate("/api/{enterpriseServerVersion}/repos/{owner}/{repo}/issues/comments/{commentId}/reactions"))
+            .endpoint(PULL_REVIEWS.withPathTemplate("/api/{enterpriseServerVersion}/repos/{owner}/{repo}/pulls/{pullNumber}/reviews"))
+            .endpoint(PULLS.withPathTemplate("/api/{enterpriseServerVersion}/repos/{owner}/{repo}/pulls"))
+            .endpoint(PULL_COMMENTS.withPathTemplate("/api/{enterpriseServerVersion}/repos/{owner}/{repo}/pulls/{pullNumber}/comments"))
+            .endpoint(PULL_REVIEW_COMMENTS.withPathTemplate("/api/{enterpriseServerVersion}/repos/{owner}/{repo}/pulls/{pullNumber}/reviews/{reviewId}/comments"))
+            .endpoint(PULL_COMMITS.withPathTemplate("/api/{enterpriseServerVersion}/repos/{owner}/{repo}/pulls/{pullNumber}/commits"))
+            .endpoint(PULL.withPathTemplate("/api/{enterpriseServerVersion}/repos/{owner}/{repo}/pulls/{pullNumber}"))
+            .build();
+
     public static final Map<String, RESTRules> RULES_MAP =
             ImmutableMap.<String, RESTRules>builder()
                     .put("github", GITHUB)
+                    .put("github-enterprise-server", GITHUB_ENTERPRISE_SERVER)
                     .build();
 
     private static List<Transform> generateUserTransformations(String prefix) {

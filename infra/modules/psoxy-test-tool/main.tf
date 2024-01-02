@@ -20,7 +20,7 @@ resource "null_resource" "install_test_tool" {
     version            = var.psoxy_version
 
     # trigger if package.json has changed, suggesting dependencies have
-    sha_package        = filesha1("${local.test_tool_directory}/package.json")
+    sha_package = filesha1("${local.test_tool_directory}/package.json")
   }
 }
 

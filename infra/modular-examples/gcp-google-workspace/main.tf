@@ -25,6 +25,7 @@ module "worklytics_connector_specs" {
   jira_cloud_id                  = var.jira_cloud_id
   example_jira_issue_id          = var.example_jira_issue_id
   github_api_host                = var.github_api_host
+  github_enterprise_server_host  = var.github_enterprise_server_host
   github_installation_id         = var.github_installation_id
   github_organization            = var.github_organization
   github_example_repository      = var.github_example_repository
