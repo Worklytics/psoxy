@@ -34,6 +34,13 @@ variable "jira_example_issue_id" {
   description = "If using Jira Server/Cloud connector, provide id of an issue for only to be used as part of example calls for Jira (ex: ETV-12)"
 }
 
+# DEPRECATED
+variable "github_api_host" {
+  type        = string
+  default     = null
+  description = "DEPRECATED; use `github_enterprise_server_host`. (Only required if using Github connector for on premises) Host of the Github instance (ex: github.mycompany.com)."
+}
+
 variable "github_enterprise_server_host" {
   type        = string
   default     = ""
