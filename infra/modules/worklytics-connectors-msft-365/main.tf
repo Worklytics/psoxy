@@ -9,6 +9,7 @@ module "worklytics_connector_specs" {
 
   enabled_connectors                  = var.enabled_connectors
   msft_tenant_id                      = var.msft_tenant_id
+  config_parameter_prefix             = var.config_parameter_prefix
   example_msft_user_guid              = var.example_msft_user_guid
   msft_teams_example_team_guid        = var.msft_teams_example_team_guid
   msft_teams_example_channel_guid     = var.msft_teams_example_channel_guid

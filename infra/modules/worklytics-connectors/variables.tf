@@ -3,6 +3,11 @@ variable "enabled_connectors" {
   description = "ids of connectors to enable"
 }
 
+variable "config_parameter_prefix" {
+  type        = string
+  description = "prefix used for configuration parameter names (such as secrets)"
+}
+
 variable "salesforce_domain" {
   type        = string
   description = "Domain of the Salesforce to connect to (only required if using Salesforce connector). To find your My Domain URL, from Setup, in the Quick Find box, enter My Domain, and then select My Domain"

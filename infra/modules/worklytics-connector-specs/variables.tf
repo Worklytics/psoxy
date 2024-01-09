@@ -3,6 +3,11 @@ variable "enabled_connectors" {
   description = "ids of connectors to enable"
 }
 
+variable "config_parameter_prefix" {
+  type        = string
+  description = "prefix used for configuration parameter names (such as secrets)"
+}
+
 variable "google_workspace_example_user" {
   type        = string
   description = "user to impersonate for Google Workspace API calls (null for none)"
