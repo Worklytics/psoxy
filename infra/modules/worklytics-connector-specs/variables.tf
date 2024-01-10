@@ -101,6 +101,12 @@ variable "github_enterprise_server_host" {
   description = "(Only required if using Github Enterprise Server connector) Host of the Github instance (ex: github.mycompany.com)."
 }
 
+variable "github_enterprise_server_version" {
+  type        = string
+  default     = "v3"
+  description = "(Only required if using Github Enterprise Server connector) Version of the server to use (ex: v3). By default, v3"
+}
+
 variable "github_installation_id" {
   type        = string
   default     = null

@@ -159,6 +159,7 @@ locals {
   jira_example_issue_id         = coalesce(var.jira_example_issue_id, var.example_jira_issue_id, "YOUR_JIRA_EXAMPLE_ISSUE_ID")
   github_installation_id        = coalesce(var.github_installation_id, "YOUR_GITHUB_INSTALLATION_ID")
   github_enterprise_server_host = coalesce(var.github_api_host, var.github_enterprise_server_host, "YOUR_GITHUB_ENTERPRISE_SERVER_HOST")
+  github_enterprise_server_version = coalesce(var.github_enterprise_server_version, "v3")
   github_organization           = coalesce(var.github_organization, "YOUR_GITHUB_ORGANIZATION_NAME")
   github_example_repository     = coalesce(var.github_example_repository, "YOUR_GITHUB_EXAMPLE_REPOSITORY_NAME")
   salesforce_example_account_id = coalesce(var.salesforce_example_account_id, "{ANY ACCOUNT ID}")
@@ -512,7 +513,7 @@ EOT
       environment_variables : {
         GRANT_TYPE : "certificate_credentials"
         TOKEN_RESPONSE_TYPE : "GITHUB_ACCESS_TOKEN"
-        REFRESH_ENDPOINT : "https://${local.github_enterprise_server_host}/app/installations/${local.github_installation_id}/access_tokens"
+        REFRESH_ENDPOINT : "https://${local.github_enterprise_server_host}/api/${local.github_enterprise_server_version}/app/installations/${local.github_installation_id}/access_tokens"
         USE_SHARED_TOKEN : "TRUE"
       }
       settings_to_provide = {
@@ -521,14 +522,14 @@ EOT
       reserved_concurrent_executions : null
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
-        "/api/v3/orgs/${local.github_organization}/repos",
-        "/api/v3/orgs/${local.github_organization}/members",
-        "/api/v3/orgs/${local.github_organization}/teams",
-        "/api/v3/orgs/${local.github_organization}/audit-log",
-        "/api/v3/repos/${local.github_organization}/${local.github_example_repository}/events",
-        "/api/v3/repos/${local.github_organization}/${local.github_example_repository}/commits",
-        "/api/v3/repos/${local.github_organization}/${local.github_example_repository}/issues",
-        "/api/v3/repos/${local.github_organization}/${local.github_example_repository}/pulls",
+        "/api/${local.github_enterprise_server_version}/orgs/${local.github_organization}/repos",
+        "/api/${local.github_enterprise_server_version}/orgs/${local.github_organization}/members",
+        "/api/${local.github_enterprise_server_version}/orgs/${local.github_organization}/teams",
+        "/api/${local.github_enterprise_server_version}/orgs/${local.github_organization}/audit-log",
+        "/api/${local.github_enterprise_server_version}/repos/${local.github_organization}/${local.github_example_repository}/events",
+        "/api/${local.github_enterprise_server_version}/repos/${local.github_organization}/${local.github_example_repository}/commits",
+        "/api/${local.github_enterprise_server_version}/repos/${local.github_organization}/${local.github_example_repository}/issues",
+        "/api/${local.github_enterprise_server_version}/repos/${local.github_organization}/${local.github_example_repository}/pulls",
       ]
       external_token_todo : <<EOT
   1. You have to populate `github_enterprise_server_host` variable in Terraform with the hostname of your Github Enterprise Server (example: `github.your-company.com`).

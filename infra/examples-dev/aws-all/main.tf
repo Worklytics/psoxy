@@ -28,6 +28,7 @@ module "worklytics_connectors" {
   salesforce_domain             = var.salesforce_domain
   github_api_host               = var.github_api_host
   github_enterprise_server_host = var.github_enterprise_server_host
+  github_enterprise_server_version = var.github_enterprise_server_version
   github_installation_id        = var.github_installation_id
   github_organization           = var.github_organization
   github_example_repository     = var.github_example_repository
