@@ -30,18 +30,18 @@ module "worklytics_connectors" {
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=rc-v0.4.45"
 
 
-  enabled_connectors            = var.enabled_connectors
-  jira_cloud_id                 = var.jira_cloud_id
-  jira_server_url               = var.jira_server_url
-  jira_example_issue_id         = var.jira_example_issue_id
-  salesforce_domain             = var.salesforce_domain
-  github_api_host               = var.github_api_host
-  github_enterprise_server_host = var.github_enterprise_server_host
+  enabled_connectors               = var.enabled_connectors
+  jira_cloud_id                    = var.jira_cloud_id
+  jira_server_url                  = var.jira_server_url
+  jira_example_issue_id            = var.jira_example_issue_id
+  salesforce_domain                = var.salesforce_domain
+  github_api_host                  = var.github_api_host
+  github_enterprise_server_host    = var.github_enterprise_server_host
   github_enterprise_server_version = var.github_enterprise_server_version
-  github_installation_id        = var.github_installation_id
-  github_organization           = var.github_organization
-  github_example_repository     = var.github_example_repository
-  salesforce_example_account_id = var.salesforce_example_account_id
+  github_installation_id           = var.github_installation_id
+  github_organization              = var.github_organization
+  github_example_repository        = var.github_example_repository
+  salesforce_example_account_id    = var.salesforce_example_account_id
 }
 
 # sources which require additional dependencies are split into distinct Terraform files, following
