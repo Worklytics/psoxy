@@ -34,10 +34,12 @@ Follow the following steps:
 
 NOTES:
 - We assume that ALL the repositories are going to be list **should be owned by the organization, not the users**.
-- In case of using GitHub Server, you need to populate `github_enterprise_server_host` variable in Terraform with the URL of the API for your GitHub Enterprise Server instance. For example, `https://api.github.your-company.com`.
+- In case of using GitHub Server: 
+  - you need to populate `github_enterprise_server_host` variable in Terraform with the URL of the API for your GitHub Enterprise Server instance. For example, `https://api.github.your-company.com`.
+  - variable `github_organization` can be a list of organizations split by commas (ex: Worklytics,Worklytics2)
 
 Apart from GitHub instructions please review the following:
-  - "Homepage URL" can be anything, not required in this flow but required by Github.
+  - "Homepage URL" can be anything, not required in this flow but required by GitHub.
   - Webhooks check can be disabled as this connector is not using them
   - Keep `Expire user authorization tokens` enabled, as GitHub documentation recommends
 

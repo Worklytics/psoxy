@@ -443,7 +443,7 @@ EOT
     - Enterprise Cloud is required for this connector.
 
   Apart from Github instructions please review the following:
-  - "Homepage URL" can be anything, not required in this flow but required by Github.
+  - "Homepage URL" can be anything, not required in this flow but required by GitHub.
   - Webhooks check can be disabled as this connector is not using them
   - Keep `Expire user authorization tokens` enabled, as GitHub documentation recommends
   2. Once is created please generate a new `Private Key`.
@@ -550,7 +550,7 @@ EOT
     - Enterprise Cloud is required for this connector.
 
   Apart from Github instructions please review the following:
-  - "Homepage URL" can be anything, not required in this flow but required by Github.
+  - "Homepage URL" can be anything, not required in this flow but required by GitHub.
   - Webhooks check can be disabled as this connector is not using them
   - Keep `Expire user authorization tokens` enabled, as GitHub documentation recommends
   3. Once is created please generate a new `Private Key`.
@@ -653,7 +653,7 @@ EOT
     - We assume that ALL the repositories are going to be listed **should be owned by the organization, not the users**.
 
   Apart from Github instructions please review the following:
-  - "Homepage URL" can be anything, not required in this flow but required by Github.
+  - "Homepage URL" can be anything, not required in this flow but required by GitHub.
   - Webhooks check can be disabled as this connector is not using them
   - Keep `Expire user authorization tokens` enabled, as GitHub documentation recommends
   2. Once is created please generate a new `Private Key`.
