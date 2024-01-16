@@ -1,0 +1,34 @@
+{
+  "id":"c9b6db1c-d5eb-427d-a5c0-20088d9b22d7",
+  "totalParticipantCount":1,
+  "meetingStartDateTime":"2021-10-05T04:38:23.945Z",
+  "meetingEndDateTime":"2021-10-05T04:43:49.77Z",
+  "attendanceRecords":[
+    {
+      "emailAddress":"{\"scope\":\"email\",\"domain\":\"contoso.com\",\"hash\":\"vmFS5ryxySBiEUyJMW5ZaT6Om1EFFke7j1Srx0mZAxs\"}",
+      "totalAttendanceInSeconds":1152,
+      "role":"Presenter",
+      "identity":{
+        "id":"dc17674c-81d9-4adb-bfb2-8f6a442e4623",
+        "tenantId":null
+      },
+      "attendanceIntervals":[
+        {
+          "joinDateTime":"2021-03-16T18:59:52.2782182Z",
+          "leaveDateTime":"2021-03-16T19:06:47.7218491Z",
+          "durationInSeconds":415
+        },
+        {
+          "joinDateTime":"2021-03-16T19:09:23.9834702Z",
+          "leaveDateTime":"2021-03-16T19:16:31.1381195Z",
+          "durationInSeconds":427
+        },
+        {
+          "joinDateTime":"2021-03-16T19:20:27.7094382Z",
+          "leaveDateTime":"2021-03-16T19:25:37.7121956Z",
+          "durationInSeconds":310
+        }
+      ]
+    }
+  ]
+}

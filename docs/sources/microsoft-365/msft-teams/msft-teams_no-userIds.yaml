@@ -10,6 +10,10 @@ endpoints:
     transforms:
       - !<pseudonymize>
         jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
           - "$..user.id"
           - "$..userId"
         encoding: "JSON"
@@ -17,7 +21,7 @@ endpoints:
         jsonPaths:
           - "$..displayName"
           - "$..description"
-          - "$.['@odata.context']"
+          - "$..['@odata.context']"
           - "$..['@odata.id']"
           - "$..['@odata.type']"
           - "$..['@odata.count']"
@@ -28,6 +32,10 @@ endpoints:
     transforms:
       - !<pseudonymize>
         jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
           - "$..user.id"
           - "$..userId"
         encoding: "JSON"
@@ -35,7 +43,7 @@ endpoints:
         jsonPaths:
           - "$..displayName"
           - "$..description"
-          - "$.['@odata.context']"
+          - "$..['@odata.context']"
           - "$..['@odata.id']"
           - "$..['@odata.type']"
           - "$..['@odata.count']"
@@ -50,13 +58,17 @@ endpoints:
     transforms:
       - !<pseudonymize>
         jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
           - "$..user.id"
           - "$..userId"
         encoding: "JSON"
       - !<redact>
         jsonPaths:
           - "$..topic"
-          - "$.['@odata.context']"
+          - "$..['@odata.context']"
           - "$..['@odata.count']"
   - pathTemplate: "/{apiVersion}/teams/{teamId}/channels/{channelId}/messages"
     allowedQueryParams:
@@ -65,6 +77,10 @@ endpoints:
       - "$skiptoken"
       - "$expand"
     transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
       - !<pseudonymize>
         jsonPaths:
           - "$..user.id"
@@ -77,7 +93,7 @@ endpoints:
           - "$..attachments"
           - "$..mentions[*].mentionText"
           - "$..eventDetail.teamDescription"
-          - "$.['@odata.context']"
+          - "$..['@odata.context']"
           - "$..['@odata.count']"
       - !<tokenize>
         jsonPaths:
@@ -90,7 +106,12 @@ endpoints:
       - "$skiptoken"
       - "$expand"
       - "$deltatoken"
+      - "$filter"
     transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
       - !<pseudonymize>
         jsonPaths:
           - "$..user.id"
@@ -103,9 +124,8 @@ endpoints:
           - "$..value[*].attachments"
           - "$..value[*].mentions[*].mentionText"
           - "$..value[*].eventDetail.teamDescription"
-          - "$.['@odata.context']"
+          - "$..['@odata.context']"
           - "$..['@odata.count']"
-          - "$..['@odata.type']"
       - !<tokenize>
         jsonPaths:
           - "$.['@odata.nextLink', '@odata.prevLink']"
@@ -125,6 +145,10 @@ endpoints:
     transforms:
       - !<pseudonymize>
         jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
           - "$..user.id"
           - "$..userId"
         encoding: "JSON"
@@ -136,7 +160,7 @@ endpoints:
           - "$..value[*].mentions[*].mentionText"
           - "$..value[*].eventDetail.teamDescription"
           - "$..value[*].eventDetail.chatDisplayName"
-          - "$.['@odata.context']"
+          - "$..['@odata.context']"
           - "$..['@odata.count']"
       - !<tokenize>
         jsonPaths:
@@ -150,13 +174,17 @@ endpoints:
     transforms:
       - !<pseudonymize>
         jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
           - "$..user.id"
           - "$..userId"
         encoding: "JSON"
       - !<redact>
         jsonPaths:
           - "$..displayName"
-          - "$.['@odata.context']"
+          - "$..['@odata.context']"
           - "$..['@odata.count']"
           - "$..['@odata.type']"
   - pathRegex: "^/(v1.0|beta)/communications/callRecords/(?<callChainId>[({]?[a-fA-F0-9]{8}[-]?([a-fA-F0-9]{4}[-]?){3}[a-fA-F0-9]{12}[})]?)(?<queryParameters>[a-zA-z0-9\\\
@@ -165,6 +193,10 @@ endpoints:
       - "$select"
       - "$expand"
     transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
       - !<pseudonymize>
         jsonPaths:
           - "$..user.id"
@@ -182,7 +214,7 @@ endpoints:
           - "$..callee.name"
           - "$..captureDeviceName"
           - "$..renderDeviceName"
-          - "$.['@odata.context']"
+          - "$..['@odata.context']"
           - "$..['@odata.type']"
       - !<tokenize>
         jsonPaths:
@@ -198,6 +230,10 @@ endpoints:
     transforms:
       - !<pseudonymize>
         jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
           - "$..user.id"
           - "$..userId"
         encoding: "JSON"
@@ -211,7 +247,7 @@ endpoints:
           - "$..value[*].userDisplayName"
           - "$..value[*].callerNumber"
           - "$..value[*].calleeNumber"
-          - "$.['@odata.context']"
+          - "$..['@odata.context']"
           - "$..['@odata.type']"
           - "$..['@odata.count']"
       - !<tokenize>
@@ -224,6 +260,10 @@ endpoints:
     transforms:
       - !<pseudonymize>
         jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
           - "$..user.id"
           - "$..userId"
         encoding: "JSON"
@@ -237,7 +277,7 @@ endpoints:
           - "$..value[*].userDisplayName"
           - "$..value[*].callerNumber"
           - "$..value[*].calleeNumber"
-          - "$.['@odata.context']"
+          - "$..['@odata.context']"
           - "$..['@odata.type']"
           - "$..['@odata.count']"
       - !<tokenize>
@@ -257,6 +297,13 @@ endpoints:
       - "$search"
       - "$skip"
     transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.context']"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
       - !<pseudonymize>
         jsonPaths:
           - "$..user.id"
@@ -264,11 +311,77 @@ endpoints:
         encoding: "JSON"
       - !<redact>
         jsonPaths:
-          - "$..user.displayName"
+          - "$..displayName"
           - "$..subject"
           - "$..joinMeetingIdSettings.isPasscodeRequired"
           - "$..joinMeetingIdSettings.passcode"
-          - "$.['@odata.context']"
+          - "$..['@odata.context']"
+          - "$..['@odata.type']"
+  - pathTemplate: "/{apiVersion}/users/{userId}/onlineMeetings/{meetingId}/attendanceReports"
+    allowedQueryParams:
+      - "$select"
+      - "$top"
+      - "$skiptoken"
+      - "$filter"
+      - "$orderby"
+      - "$count"
+      - "$expand"
+      - "$format"
+      - "$search"
+      - "$skip"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.context']"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..user.id"
+          - "$..userId"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$..displayName"
+          - "$..subject"
+          - "$..joinMeetingIdSettings.isPasscodeRequired"
+          - "$..joinMeetingIdSettings.passcode"
+          - "$..['@odata.context']"
+          - "$..['@odata.type']"
+  - pathTemplate: "/{apiVersion}/users/{userId}/onlineMeetings/{meetingId}/attendanceReports/{reportId}"
+    allowedQueryParams:
+      - "$select"
+      - "$top"
+      - "$skiptoken"
+      - "$filter"
+      - "$orderby"
+      - "$count"
+      - "$expand"
+      - "$format"
+      - "$search"
+      - "$skip"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.context']"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..user.id"
+          - "$..userId"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$..displayName"
+          - "$..subject"
+          - "$..joinMeetingIdSettings.isPasscodeRequired"
+          - "$..joinMeetingIdSettings.passcode"
+          - "$..['@odata.context']"
           - "$..['@odata.type']"
   - pathRegex: "^/(v1.0|beta)/users(/p~[a-zA-Z0-9_-]+?)?[^/]*"
     allowedQueryParams:

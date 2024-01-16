@@ -10,6 +10,7 @@ import co.worklytics.psoxy.storage.BulkDataTestUtils;
 import co.worklytics.psoxy.storage.StorageHandler;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestUtils;
+import com.avaulta.gateway.rules.BulkDataRules;
 import com.avaulta.gateway.rules.MultiTypeBulkDataRules;
 import com.avaulta.gateway.rules.RuleSet;
 import dagger.Component;
@@ -44,7 +45,8 @@ public class SlackDiscoveryBulkTests {
     @Inject
     StorageHandler storageHandler;
 
-    Writer writer;
+    java.util.function.Supplier<OutputStream> outputStreamSupplier;
+
     ByteArrayOutputStream outputStream;
 
     // to cover both rules versions, calling this inside of each test with different rules to set up
@@ -56,7 +58,7 @@ public class SlackDiscoveryBulkTests {
         container.inject(this);
 
         outputStream = new ByteArrayOutputStream();
-        writer = new BufferedWriter(new OutputStreamWriter(outputStream));
+        outputStreamSupplier = () -> outputStream;
     }
 
 
@@ -123,9 +125,10 @@ public class SlackDiscoveryBulkTests {
         final String objectPath = "export-20231128/" + file + ".gz";
         final String pathToOriginal = "sources/slack/example-bulk/original/" + file;
         final String pathToSanitized = "sources/slack/example-bulk/sanitized/" + file;
-        storageHandler.handle(BulkDataTestUtils.request(objectPath, pathToOriginal, writer), rules);
-
-        writer.close();
+        storageHandler.handle(BulkDataTestUtils.request(objectPath),
+            BulkDataTestUtils.transform(rules),
+            BulkDataTestUtils.inputStreamSupplier(pathToOriginal),
+            outputStreamSupplier);
 
         String output = new String(outputStream.toByteArray());
         assertEquals(new String(TestUtils.getData(pathToSanitized)), output);

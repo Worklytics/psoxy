@@ -67,7 +67,7 @@ fi
 
 
 # Check AWS installation
-AWSCLI_REASON="It is used if you're deploying to AWS."
+AWSCLI_REASON="Required if deploying to AWS."
 if ! aws --version &> /dev/null ; then
   printf "${RED}AWS CLI is not installed.${NC} ${AWSCLI_REASON} See https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html\n"
   if $HOMEBREW_AVAILABLE; then printf " or, as you have Homebrew available, run ${BLUE}brew install awscli${NC}\n"; fi
@@ -80,7 +80,7 @@ fi
 printf "\n"
 
 # Check GCloud CLI installation
-GCLOUD_REASON="It is used if you're deploying to GCP or using Google Workspace data sources."
+GCLOUD_REASON="Required if deploying to GCP or using Google Workspace data sources."
 if ! gcloud --version &> /dev/null ; then
   printf "${RED}Google Cloud SDK is not installed.${NC} ${GCLOUD_REASON} See https://cloud.google.com/sdk/docs/install\n"
   if $HOMEBREW_AVAILABLE; then printf " or, as you have Homebrew available, run ${BLUE}brew install --cask google-cloud-sdk${NC}\n"; fi
@@ -92,7 +92,7 @@ fi
 printf "\n"
 
 # Check Azure CLI installation
-AZCLI_REASON="It is used if you're deploying to Azure or using Microsoft 365 data sources."
+AZCLI_REASON="Required if deploying to Azure or using Microsoft 365 data sources."
 if ! az --version &> /dev/null ; then
   printf "${RED}Azure CLI is not installed.${NC} ${AZCLI_REASON} See https://docs.microsoft.com/en-us/cli/azure/install-azure-cli\n"
   if $HOMEBREW_AVAILABLE; then printf " or, as you have Homebrew available, run ${BLUE}brew install azure-cli${NC}\n"; fi
@@ -101,3 +101,4 @@ else
   printf "Azure CLI version ${BLUE}`az --version --only-show-errors | head -n 1`${NC} is installed.\n"
   printf "\t- make sure ${BLUE}az account show${NC} is the user/tenant you expect. If not, ${BLUE}az login --allow-no-subscription${NC} to authenticate. $AZCLI_REASON\n"
 fi
+

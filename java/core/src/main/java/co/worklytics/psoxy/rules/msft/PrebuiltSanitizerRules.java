@@ -26,7 +26,7 @@ public class PrebuiltSanitizerRules {
             .regex("^https://graph.microsoft.com/(.*)$")
             .build();
     static final Transform REDACT_ODATA_CONTEXT = Transform.Redact.builder()
-            .jsonPath("$.['@odata.context']")
+            .jsonPath("$..['@odata.context']")
             .build();
 
     static final Transform REDACT_ODATA_COUNT = Transform.Redact.builder()
@@ -133,20 +133,20 @@ public class PrebuiltSanitizerRules {
             .endpoint(DIRECTORY_USERS_NO_APP_IDS)
             .build();
 
-    static final Transform DIRECTORY_USERS_NO_APP_IDS_TRANSFORM_RULE =  Transform.Pseudonymize.builder()
-        .includeReversible(true)
+    static final Transform DIRECTORY_USERS_NO_APP_IDS_TRANSFORM_RULE = Transform.Pseudonymize.builder()
+            .includeReversible(true)
             .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
             .jsonPath("$..id")
             .build();
     static final Rules2 DIRECTORY_NO_MSFT_IDS = Rules2.builder()
-        .endpoint(DIRECTORY_USERS_NO_APP_IDS)
-        .endpoint(DIRECTORY_GROUPS)
-        .endpoint(DIRECTORY_GROUP_MEMBERS)
-        .build()
-        .withTransformByEndpoint(DIRECTORY_REGEX_USERS_BY_PSEUDO,DIRECTORY_USERS_NO_APP_IDS_TRANSFORM_RULE)
-        .withTransformByEndpoint(DIRECTORY_REGEX_GROUP_MEMBERS, Transform.Pseudonymize.builder()
-            .jsonPath("$..id")
-            .build());
+            .endpoint(DIRECTORY_USERS_NO_APP_IDS)
+            .endpoint(DIRECTORY_GROUPS)
+            .endpoint(DIRECTORY_GROUP_MEMBERS)
+            .build()
+            .withTransformByEndpoint(DIRECTORY_REGEX_USERS_BY_PSEUDO, DIRECTORY_USERS_NO_APP_IDS_TRANSFORM_RULE)
+            .withTransformByEndpoint(DIRECTORY_REGEX_GROUP_MEMBERS, Transform.Pseudonymize.builder()
+                    .jsonPath("$..id")
+                    .build());
 
     static final Rules2 DIRECTORY_NO_MSFT_IDS_NO_GROUPS = DIRECTORY_NO_GROUPS
             .withTransformByEndpoint(DIRECTORY_REGEX_USERS_BY_PSEUDO, Transform.Pseudonymize.builder()
@@ -327,6 +327,8 @@ public class PrebuiltSanitizerRules {
     static final String MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_GET_DIRECT_ROUTING_CALLS = "/{apiVersion}/communications/callRecords/getDirectRoutingCalls(fromDateTime={startDate},toDateTime={endDate})";
     static final String MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_GET_PSTN_CALLS = "/{apiVersion}/communications/callRecords/getPstnCalls(fromDateTime={startDate},toDateTime={endDate})";
     static final String MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS = "/{apiVersion}/users/{userId}/onlineMeetings";
+    static final String MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS_ATTENDANCE_REPORTS = "/{apiVersion}/users/{userId}/onlineMeetings/{meetingId}/attendanceReports";
+    static final String MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS_ATTENDANCE_REPORT = "/{apiVersion}/users/{userId}/onlineMeetings/{meetingId}/attendanceReports/{reportId}";
 
     static final Transform.Pseudonymize PSEUDONYMIZE_USER_ID = Transform.Pseudonymize.builder()
             .jsonPath("$..user.id")
@@ -337,251 +339,296 @@ public class PrebuiltSanitizerRules {
             .jsonPath("$..callId")
             .build();
 
-    static final Transform.Redact  MS_TEAMS_TEAMS_REDACT = Transform.Redact.builder()
-        .jsonPath("$..displayName")
-        .jsonPath("$..description")
-        .build();
+    static final Transform.Redact MS_TEAMS_TEAMS_REDACT = Transform.Redact.builder()
+            .jsonPath("$..displayName")
+            .jsonPath("$..description")
+            .build();
+
+    static final Transform.Pseudonymize MS_TEAMS_TEAMS_DEFAULT_PSEUDONYMIZE = Transform.Pseudonymize.builder()
+            .jsonPath("$..emailAddress")
+            .build();
 
     static final Transform.Redact MS_TEAMS_USERS_CHATS_REDACT = Transform.Redact.builder()
-        .jsonPath("$..topic")
-        .build();
+            .jsonPath("$..topic")
+            .build();
     static final Transform.Redact MS_TEAMS_TEAMS_ALL_CHANNELS_REDACT = Transform.Redact.builder()
-        .jsonPath("$..displayName")
-        .jsonPath("$..description")
-        .build();
+            .jsonPath("$..displayName")
+            .jsonPath("$..description")
+            .build();
 
     static final Transform.Redact MS_TEAMS_TEAMS_CHANNELS_MESSAGES_REDACT = Transform.Redact.builder()
-        .jsonPath("$..user.displayName")
-        .jsonPath("$..body.content")
-        .jsonPath("$..attachments")
-        .jsonPath("$..mentions[*].mentionText")
-        .jsonPath("$..eventDetail.teamDescription")
-        .build();
+            .jsonPath("$..user.displayName")
+            .jsonPath("$..body.content")
+            .jsonPath("$..attachments")
+            .jsonPath("$..mentions[*].mentionText")
+            .jsonPath("$..eventDetail.teamDescription")
+            .build();
 
     static final Transform.Redact MS_TEAMS_TEAMS_CHANNELS_MESSAGES_DELTA_REDACT = Transform.Redact.builder()
-        .jsonPath("$..user.displayName")
-        .jsonPath("$..value[*].body.content")
-        .jsonPath("$..value[*].attachments")
-        .jsonPath("$..value[*].mentions[*].mentionText")
-        .jsonPath("$..value[*].eventDetail.teamDescription")
-        .build();
+            .jsonPath("$..user.displayName")
+            .jsonPath("$..value[*].body.content")
+            .jsonPath("$..value[*].attachments")
+            .jsonPath("$..value[*].mentions[*].mentionText")
+            .jsonPath("$..value[*].eventDetail.teamDescription")
+            .build();
 
     static final Transform.Redact MS_TEAMS_CHATS_MESSAGES_REDACT = Transform.Redact.builder()
-        .jsonPath("$..user.displayName")
-        .jsonPath("$..value[*].body.content")
-        .jsonPath("$..value[*].attachments")
-        .jsonPath("$..value[*].mentions[*].mentionText")
-        .jsonPath("$..value[*].eventDetail.teamDescription")
-        .jsonPath("$..value[*].eventDetail.chatDisplayName")
-        .build();
+            .jsonPath("$..user.displayName")
+            .jsonPath("$..value[*].body.content")
+            .jsonPath("$..value[*].attachments")
+            .jsonPath("$..value[*].mentions[*].mentionText")
+            .jsonPath("$..value[*].eventDetail.teamDescription")
+            .jsonPath("$..value[*].eventDetail.chatDisplayName")
+            .build();
 
     static final Transform.Redact MS_TEAMS_COMMUNICATIONS_CALL_RECORDS_REDACT = Transform.Redact.builder()
-        .jsonPath("$..user.displayName")
-        .jsonPath("$..reflexiveIPAddress")
-        .jsonPath("$..relayIPAddress")
-        .jsonPath("$..ipAddress")
-        .jsonPath("$..subnet")
-        .jsonPath("$..macAddress")
-        .jsonPath("$..caller.name")
-        .jsonPath("$..callee.name")
-        .jsonPath("$..captureDeviceName")
-        .jsonPath("$..renderDeviceName")
-        .build();
+            .jsonPath("$..user.displayName")
+            .jsonPath("$..reflexiveIPAddress")
+            .jsonPath("$..relayIPAddress")
+            .jsonPath("$..ipAddress")
+            .jsonPath("$..subnet")
+            .jsonPath("$..macAddress")
+            .jsonPath("$..caller.name")
+            .jsonPath("$..callee.name")
+            .jsonPath("$..captureDeviceName")
+            .jsonPath("$..renderDeviceName")
+            .build();
 
     static final Transform.Redact MS_TEAMS_COMMUNICATIONS_CALLS_REDACT = Transform.Redact.builder()
-        .jsonPath("$..displayName")
-        .build();
+            .jsonPath("$..displayName")
+            .build();
 
     static final Transform.Redact MS_TEAMS_COMMUNICATIONS_CALL_RECORDS_GET_DIRECT_ROUTING_CALLS_REDACT = Transform.Redact.builder()
-        .jsonPath("$..value[*].userPrincipalName")
-        .jsonPath("$..value[*].userDisplayName")
-        .jsonPath("$..value[*].callerNumber")
-        .jsonPath("$..value[*].calleeNumber")
-        .build();
+            .jsonPath("$..value[*].userPrincipalName")
+            .jsonPath("$..value[*].userDisplayName")
+            .jsonPath("$..value[*].callerNumber")
+            .jsonPath("$..value[*].calleeNumber")
+            .build();
 
     static final Transform.Redact MS_TEAMS_COMMUNICATIONS_CALL_RECORDS_GET_PSTN_CALLS_REDACT = Transform.Redact.builder()
-        .jsonPath("$..value[*].userPrincipalName")
-        .jsonPath("$..value[*].userDisplayName")
-        .jsonPath("$..value[*].callerNumber")
-        .jsonPath("$..value[*].calleeNumber")
-        .build();
+            .jsonPath("$..value[*].userPrincipalName")
+            .jsonPath("$..value[*].userDisplayName")
+            .jsonPath("$..value[*].callerNumber")
+            .jsonPath("$..value[*].calleeNumber")
+            .build();
     static final Transform.Redact MS_TEAMS_USERS_ONLINE_MEETINGS_REDACT = Transform.Redact.builder()
-        .jsonPath("$..user.displayName")
-        .jsonPath("$..subject")
-        .jsonPath("$..joinMeetingIdSettings.isPasscodeRequired")
-        .jsonPath("$..joinMeetingIdSettings.passcode")
-        .build();
-    static final Endpoint MS_TEAMS_TEAMS =  Endpoint.builder()
-        .pathTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS)
-        .allowedQueryParams(List.of("$select","$top","$skiptoken","$filter", "$count"))
-        .build();
+            .jsonPath("$..displayName")
+            .jsonPath("$..subject")
+            .jsonPath("$..joinMeetingIdSettings.isPasscodeRequired")
+            .jsonPath("$..joinMeetingIdSettings.passcode")
+            .build();
+    static final Endpoint MS_TEAMS_TEAMS = Endpoint.builder()
+            .pathTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS)
+            .allowedQueryParams(List.of("$select", "$top", "$skiptoken", "$filter", "$count"))
+            .transform(MS_TEAMS_TEAMS_DEFAULT_PSEUDONYMIZE)
+            .build();
 
-    static final Endpoint MS_TEAMS_TEAMS_ALL_CHANNELS =  Endpoint.builder()
-        .pathTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS_ALL_CHANNELS)
-        .allowedQueryParams(List.of("$select","$filter"))
-        .build();
+    static final Endpoint MS_TEAMS_TEAMS_ALL_CHANNELS = Endpoint.builder()
+            .pathTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS_ALL_CHANNELS)
+            .allowedQueryParams(List.of("$select", "$filter"))
+            .transform(MS_TEAMS_TEAMS_DEFAULT_PSEUDONYMIZE)
+            .build();
 
-    static final Endpoint MS_TEAMS_USERS_CHATS =         Endpoint.builder()
-        .pathTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_CHATS)
-        .allowedQueryParams(List.of("$select","$top","$skiptoken", "$filter",  "$orderby", "$expand"))
-        .build();
+    static final Endpoint MS_TEAMS_USERS_CHATS = Endpoint.builder()
+            .pathTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_CHATS)
+            .allowedQueryParams(List.of("$select", "$top", "$skiptoken", "$filter", "$orderby", "$expand"))
+            .transform(MS_TEAMS_TEAMS_DEFAULT_PSEUDONYMIZE)
+            .build();
 
     static final Endpoint MS_TEAMS_TEAMS_CHANNELS_MESSAGES = Endpoint.builder()
-        .pathTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS_CHANNELS_MESSAGES)
-        .allowedQueryParams(List.of("$select","$top","$skiptoken","$expand"))
-        .build();
+            .pathTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS_CHANNELS_MESSAGES)
+            .allowedQueryParams(List.of("$select", "$top", "$skiptoken", "$expand"))
+            .transform(MS_TEAMS_TEAMS_DEFAULT_PSEUDONYMIZE)
+            .build();
 
-    static final Endpoint MS_TEAMS_TEAMS_CHANNELS_MESSAGES_DELTA =  Endpoint.builder()
-        .pathTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS_CHANNELS_MESSAGES_DELTA)
-        .allowedQueryParams(List.of("$select","$top","$skiptoken","$expand", "$deltatoken"))
-        .build();
+    static final Endpoint MS_TEAMS_TEAMS_CHANNELS_MESSAGES_DELTA = Endpoint.builder()
+            .pathTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS_CHANNELS_MESSAGES_DELTA)
+            .allowedQueryParams(List.of("$select", "$top", "$skiptoken", "$expand", "$deltatoken", "$filter"))
+            .transform(MS_TEAMS_TEAMS_DEFAULT_PSEUDONYMIZE)
+            .build();
 
-    static final Endpoint MS_TEAMS_CHATS_MESSAGES =  Endpoint.builder()
-        .pathTemplate(MS_TEAMS_PATH_TEMPLATES_CHATS_MESSAGES)
-        .allowedQueryParams(List.of("$select","$top","$skiptoken","$filter", "$orderby", "$count", "$expand", "$format", "$search", "$skip"))
-        .build();
+    static final Endpoint MS_TEAMS_CHATS_MESSAGES = Endpoint.builder()
+            .pathTemplate(MS_TEAMS_PATH_TEMPLATES_CHATS_MESSAGES)
+            .allowedQueryParams(List.of("$select", "$top", "$skiptoken", "$filter", "$orderby", "$count", "$expand", "$format", "$search", "$skip"))
+            .transform(MS_TEAMS_TEAMS_DEFAULT_PSEUDONYMIZE)
+            .build();
 
     static final Endpoint MS_TEAMS_COMMUNICATIONS_CALLS = Endpoint.builder()
-        .pathTemplate(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALLS)
-        .allowedQueryParams(List.of("$select","$top","$expand"))
-        .build();
+            .pathTemplate(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALLS)
+            .allowedQueryParams(List.of("$select", "$top", "$expand"))
+            .transform(MS_TEAMS_TEAMS_DEFAULT_PSEUDONYMIZE)
+            .build();
 
     static final Endpoint MS_TEAMS_COMMUNICATIONS_CALL_RECORDS = Endpoint.builder()
-        .pathRegex(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_REGEX)
-        .allowedQueryParams(List.of("$select","$expand"))
-        .build();
+            .pathRegex(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_REGEX)
+            .allowedQueryParams(List.of("$select", "$expand"))
+            .transform(MS_TEAMS_TEAMS_DEFAULT_PSEUDONYMIZE)
+            .build();
 
     static final Endpoint MS_TEAMS_COMMUNICATIONS_CALL_RECORDS_GET_DIRECT_ROUTING_CALLS = Endpoint.builder()
-        .pathTemplate(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_GET_DIRECT_ROUTING_CALLS)
-        .allowedQueryParams(List.of("$skip"))
-        .build();
+            .pathTemplate(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_GET_DIRECT_ROUTING_CALLS)
+            .allowedQueryParams(List.of("$skip"))
+            .transform(MS_TEAMS_TEAMS_DEFAULT_PSEUDONYMIZE)
+            .build();
 
     static final Endpoint MS_TEAMS_COMMUNICATIONS_CALL_RECORDS_GET_PSTN_CALLS = Endpoint.builder()
-        .pathTemplate(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_GET_PSTN_CALLS)
-        .allowedQueryParams(List.of("$skip"))
-        .build();
+            .pathTemplate(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_GET_PSTN_CALLS)
+            .allowedQueryParams(List.of("$skip"))
+            .transform(MS_TEAMS_TEAMS_DEFAULT_PSEUDONYMIZE)
+            .build();
 
-    static final Endpoint MS_TEAMS_USERS_ONLINE_MEETINGS =  Endpoint.builder()
-        .pathTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS)
-        .allowedQueryParams(List.of("$select","$top","$skiptoken","$filter", "$orderby", "$count", "$expand", "$format", "$search", "$skip"))
-        .build();
+    static final Endpoint MS_TEAMS_USERS_ONLINE_MEETINGS = Endpoint.builder()
+            .pathTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS)
+            .allowedQueryParams(List.of("$select", "$top", "$skiptoken", "$filter", "$orderby", "$count", "$expand", "$format", "$search", "$skip"))
+            .transform(REDACT_ODATA_CONTEXT)
+            .transform(MS_TEAMS_TEAMS_DEFAULT_PSEUDONYMIZE)
+            .build();
+
+    static final Endpoint MS_TEAMS_USERS_ONLINE_MEETINGS_ATTENDANCE_REPORTS = Endpoint.builder()
+            .pathTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS_ATTENDANCE_REPORTS)
+            .allowedQueryParams(List.of("$select", "$top", "$skiptoken", "$filter", "$orderby", "$count", "$expand", "$format", "$search", "$skip"))
+            .transform(REDACT_ODATA_CONTEXT)
+            .transform(MS_TEAMS_TEAMS_DEFAULT_PSEUDONYMIZE)
+            .build();
+
+    static final Endpoint MS_TEAMS_USERS_ONLINE_MEETINGS_ATTENDANCE_REPORT = Endpoint.builder()
+            .pathTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS_ATTENDANCE_REPORT)
+            .allowedQueryParams(List.of("$select", "$top", "$skiptoken", "$filter", "$orderby", "$count", "$expand", "$format", "$search", "$skip"))
+            .transform(REDACT_ODATA_CONTEXT)
+            .transform(MS_TEAMS_TEAMS_DEFAULT_PSEUDONYMIZE)
+            .build();
 
     static final Rules2 MS_TEAMS_BASE = Rules2.builder()
-        .endpoint(MS_TEAMS_TEAMS)
-        .endpoint(MS_TEAMS_TEAMS_ALL_CHANNELS)
-        .endpoint(MS_TEAMS_USERS_CHATS)
-        .endpoint(MS_TEAMS_TEAMS_CHANNELS_MESSAGES)
-        .endpoint(MS_TEAMS_TEAMS_CHANNELS_MESSAGES_DELTA)
-        .endpoint(MS_TEAMS_CHATS_MESSAGES)
-        .endpoint(MS_TEAMS_COMMUNICATIONS_CALLS)
-        .endpoint(MS_TEAMS_COMMUNICATIONS_CALL_RECORDS)
-        .endpoint(MS_TEAMS_COMMUNICATIONS_CALL_RECORDS_GET_DIRECT_ROUTING_CALLS)
-        .endpoint(MS_TEAMS_COMMUNICATIONS_CALL_RECORDS_GET_PSTN_CALLS)
-        .endpoint(MS_TEAMS_USERS_ONLINE_MEETINGS)
-        .build();
+            .endpoint(MS_TEAMS_TEAMS)
+            .endpoint(MS_TEAMS_TEAMS_ALL_CHANNELS)
+            .endpoint(MS_TEAMS_USERS_CHATS)
+            .endpoint(MS_TEAMS_TEAMS_CHANNELS_MESSAGES)
+            .endpoint(MS_TEAMS_TEAMS_CHANNELS_MESSAGES_DELTA)
+            .endpoint(MS_TEAMS_CHATS_MESSAGES)
+            .endpoint(MS_TEAMS_COMMUNICATIONS_CALLS)
+            .endpoint(MS_TEAMS_COMMUNICATIONS_CALL_RECORDS)
+            .endpoint(MS_TEAMS_COMMUNICATIONS_CALL_RECORDS_GET_DIRECT_ROUTING_CALLS)
+            .endpoint(MS_TEAMS_COMMUNICATIONS_CALL_RECORDS_GET_PSTN_CALLS)
+            .endpoint(MS_TEAMS_USERS_ONLINE_MEETINGS)
+            .endpoint(MS_TEAMS_USERS_ONLINE_MEETINGS_ATTENDANCE_REPORTS)
+            .endpoint(MS_TEAMS_USERS_ONLINE_MEETINGS_ATTENDANCE_REPORT)
+            .build();
 
     static final Rules2 MS_TEAMS = MS_TEAMS_BASE
-        .withAdditionalEndpoints(DIRECTORY_USERS)
-        .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS,                         MS_TEAMS_TEAMS_REDACT)
-        .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS_ALL_CHANNELS,            MS_TEAMS_TEAMS_ALL_CHANNELS_REDACT)
-        .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_CHATS,                   MS_TEAMS_USERS_CHATS_REDACT)
-        .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS_CHANNELS_MESSAGES,       MS_TEAMS_TEAMS_CHANNELS_MESSAGES_REDACT)
-        .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS_CHANNELS_MESSAGES_DELTA, MS_TEAMS_TEAMS_CHANNELS_MESSAGES_DELTA_REDACT)
-        .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_CHATS_MESSAGES,                MS_TEAMS_CHATS_MESSAGES_REDACT)
-        .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALLS,          MS_TEAMS_COMMUNICATIONS_CALLS_REDACT)
-        .withTransformByEndpoint(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_REGEX,     MS_TEAMS_COMMUNICATIONS_CALL_RECORDS_REDACT)
-        .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_GET_DIRECT_ROUTING_CALLS, MS_TEAMS_COMMUNICATIONS_CALL_RECORDS_GET_DIRECT_ROUTING_CALLS_REDACT)
-        .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_GET_PSTN_CALLS, MS_TEAMS_COMMUNICATIONS_CALL_RECORDS_GET_PSTN_CALLS_REDACT)
-        .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS,         MS_TEAMS_USERS_ONLINE_MEETINGS_REDACT);
+            .withAdditionalEndpoints(DIRECTORY_USERS)
+            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS, MS_TEAMS_TEAMS_REDACT)
+            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS_ALL_CHANNELS, MS_TEAMS_TEAMS_ALL_CHANNELS_REDACT)
+            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_CHATS, MS_TEAMS_USERS_CHATS_REDACT)
+            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS_CHANNELS_MESSAGES, MS_TEAMS_TEAMS_CHANNELS_MESSAGES_REDACT)
+            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS_CHANNELS_MESSAGES_DELTA, MS_TEAMS_TEAMS_CHANNELS_MESSAGES_DELTA_REDACT)
+            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_CHATS_MESSAGES, MS_TEAMS_CHATS_MESSAGES_REDACT)
+            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALLS, MS_TEAMS_COMMUNICATIONS_CALLS_REDACT)
+            .withTransformByEndpoint(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_REGEX, MS_TEAMS_COMMUNICATIONS_CALL_RECORDS_REDACT)
+            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_GET_DIRECT_ROUTING_CALLS, MS_TEAMS_COMMUNICATIONS_CALL_RECORDS_GET_DIRECT_ROUTING_CALLS_REDACT)
+            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_GET_PSTN_CALLS, MS_TEAMS_COMMUNICATIONS_CALL_RECORDS_GET_PSTN_CALLS_REDACT)
+            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS_ATTENDANCE_REPORT, MS_TEAMS_USERS_ONLINE_MEETINGS_REDACT)
+            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS_ATTENDANCE_REPORTS, MS_TEAMS_USERS_ONLINE_MEETINGS_REDACT)
+            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS, MS_TEAMS_USERS_ONLINE_MEETINGS_REDACT);
 
     static final Rules2 MS_TEAMS_NO_USER_ID = MS_TEAMS_BASE
-        .withAdditionalEndpoints(DIRECTORY_USERS_NO_APP_IDS)
-        .withTransformByEndpoint(DIRECTORY_REGEX_USERS_BY_PSEUDO,DIRECTORY_USERS_NO_APP_IDS_TRANSFORM_RULE)
-        .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS,                         PSEUDONYMIZE_USER_ID,
-                                                                                                MS_TEAMS_TEAMS_REDACT
-                                                                                                    .toBuilder()
-                                                                                                    .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
-                                                                                                    .jsonPaths(REDACT_ODATA_ID.getJsonPaths())
-                                                                                                    .jsonPaths(REDACT_ODATA_TYPE.getJsonPaths())
-                                                                                                    .jsonPaths(REDACT_ODATA_COUNT.getJsonPaths())
-                                                                                                    .build())
-        .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS_ALL_CHANNELS,            PSEUDONYMIZE_USER_ID,
-                                                                                                MS_TEAMS_TEAMS_ALL_CHANNELS_REDACT
-                                                                                                    .toBuilder()
-                                                                                                    .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
-                                                                                                    .jsonPaths(REDACT_ODATA_ID.getJsonPaths())
-                                                                                                    .jsonPaths(REDACT_ODATA_TYPE.getJsonPaths())
-                                                                                                    .jsonPaths(REDACT_ODATA_COUNT.getJsonPaths())
-                                                                                                    .build())
-        .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_CHATS,       PSEUDONYMIZE_USER_ID,
-                                                                                                MS_TEAMS_USERS_CHATS_REDACT
-                                                                                                    .toBuilder()
-                                                                                                    .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
-                                                                                                    .jsonPaths(REDACT_ODATA_COUNT.getJsonPaths())
-                                                                                                    .build())
-        .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS_CHANNELS_MESSAGES,  PSEUDONYMIZE_USER_ID,
-                                                                                                MS_TEAMS_TEAMS_CHANNELS_MESSAGES_REDACT
-                                                                                                    .toBuilder()
-                                                                                                    .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
-                                                                                                    .jsonPaths(REDACT_ODATA_COUNT.getJsonPaths())
-                                                                                                    .build(),
-                                                                                                TOKENIZE_ODATA_LINKS)
-        .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS_CHANNELS_MESSAGES_DELTA, PSEUDONYMIZE_USER_ID,
-                                                                                                MS_TEAMS_TEAMS_CHANNELS_MESSAGES_DELTA_REDACT
-                                                                                                    .toBuilder()
-                                                                                                    .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
-                                                                                                    .jsonPaths(REDACT_ODATA_COUNT.getJsonPaths())
-                                                                                                    .jsonPaths(REDACT_ODATA_TYPE.getJsonPaths())
-                                                                                                    .build(),
-                                                                                                TOKENIZE_ODATA_LINKS)
-        .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_CHATS_MESSAGES,                PSEUDONYMIZE_USER_ID,
-                                                                                                MS_TEAMS_CHATS_MESSAGES_REDACT
-                                                                                                    .toBuilder()
-                                                                                                    .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
-                                                                                                    .jsonPaths(REDACT_ODATA_COUNT.getJsonPaths())
-                                                                                                    .build(),
-                                                                                                TOKENIZE_ODATA_LINKS)
-        .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALLS,          PSEUDONYMIZE_USER_ID,
-                                                                                                MS_TEAMS_COMMUNICATIONS_CALLS_REDACT
-                                                                                                    .toBuilder()
-                                                                                                    .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
-                                                                                                    .jsonPaths(REDACT_ODATA_COUNT.getJsonPaths())
-                                                                                                    .jsonPaths(REDACT_ODATA_TYPE.getJsonPaths())
-                                                                                                    .build())
-        .withTransformByEndpoint(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_REGEX,     PSEUDONYMIZE_USER_ID,
-                                                                                                MS_TEAMS_COMMUNICATIONS_CALL_RECORDS_REDACT
-                                                                                                    .toBuilder()
-                                                                                                    .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
-                                                                                                    .jsonPaths(REDACT_ODATA_TYPE.getJsonPaths())
-                                                                                                    .build(),
-                                                                                                TOKENIZE_ODATA_LINKS,
-                                                                                                TOKENIZE_SESSIONS_ODATA_LINKS)
-        .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_GET_DIRECT_ROUTING_CALLS,
-                                                                                                PSEUDONYMIZE_USER_ID,
-                                                                                                PSEUDONYMIZE_CALL_ID,
-                                                                                                MS_TEAMS_COMMUNICATIONS_CALL_RECORDS_GET_DIRECT_ROUTING_CALLS_REDACT
-                                                                                                    .toBuilder()
-                                                                                                    .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
-                                                                                                    .jsonPaths(REDACT_ODATA_TYPE.getJsonPaths())
-                                                                                                    .jsonPaths(REDACT_ODATA_COUNT.getJsonPaths())
-                                                                                                    .build(),
-                                                                                                TOKENIZE_ODATA_LINKS)
-        .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_GET_PSTN_CALLS,
-                                                                                                PSEUDONYMIZE_USER_ID,
-                                                                                                PSEUDONYMIZE_CALL_ID,
-                                                                                                MS_TEAMS_COMMUNICATIONS_CALL_RECORDS_GET_PSTN_CALLS_REDACT
-                                                                                                    .toBuilder()
-                                                                                                    .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
-                                                                                                    .jsonPaths(REDACT_ODATA_TYPE.getJsonPaths())
-                                                                                                    .jsonPaths(REDACT_ODATA_COUNT.getJsonPaths())
-                                                                                                    .build(),
-                                                                                                TOKENIZE_ODATA_LINKS)
-        .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS,         PSEUDONYMIZE_USER_ID,
-                                                                                                MS_TEAMS_USERS_ONLINE_MEETINGS_REDACT
-                                                                                                    .toBuilder()
-                                                                                                    .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
-                                                                                                    .jsonPaths(REDACT_ODATA_TYPE.getJsonPaths())
-                                                                                                    .build());
+            .withAdditionalEndpoints(DIRECTORY_USERS_NO_APP_IDS)
+            .withTransformByEndpoint(DIRECTORY_REGEX_USERS_BY_PSEUDO, DIRECTORY_USERS_NO_APP_IDS_TRANSFORM_RULE)
+            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS, PSEUDONYMIZE_USER_ID,
+                    MS_TEAMS_TEAMS_REDACT
+                            .toBuilder()
+                            .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
+                            .jsonPaths(REDACT_ODATA_ID.getJsonPaths())
+                            .jsonPaths(REDACT_ODATA_TYPE.getJsonPaths())
+                            .jsonPaths(REDACT_ODATA_COUNT.getJsonPaths())
+                            .build())
+            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS_ALL_CHANNELS, PSEUDONYMIZE_USER_ID,
+                    MS_TEAMS_TEAMS_ALL_CHANNELS_REDACT
+                            .toBuilder()
+                            .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
+                            .jsonPaths(REDACT_ODATA_ID.getJsonPaths())
+                            .jsonPaths(REDACT_ODATA_TYPE.getJsonPaths())
+                            .jsonPaths(REDACT_ODATA_COUNT.getJsonPaths())
+                            .build())
+            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_CHATS, PSEUDONYMIZE_USER_ID,
+                    MS_TEAMS_USERS_CHATS_REDACT
+                            .toBuilder()
+                            .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
+                            .jsonPaths(REDACT_ODATA_COUNT.getJsonPaths())
+                            .build())
+            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS_CHANNELS_MESSAGES, PSEUDONYMIZE_USER_ID,
+                    MS_TEAMS_TEAMS_CHANNELS_MESSAGES_REDACT
+                            .toBuilder()
+                            .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
+                            .jsonPaths(REDACT_ODATA_COUNT.getJsonPaths())
+                            .build(),
+                    TOKENIZE_ODATA_LINKS)
+            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS_CHANNELS_MESSAGES_DELTA, PSEUDONYMIZE_USER_ID,
+                    MS_TEAMS_TEAMS_CHANNELS_MESSAGES_DELTA_REDACT
+                            .toBuilder()
+                            .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
+                            .jsonPaths(REDACT_ODATA_COUNT.getJsonPaths())
+                            .build(),
+                    TOKENIZE_ODATA_LINKS)
+            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_CHATS_MESSAGES, PSEUDONYMIZE_USER_ID,
+                    MS_TEAMS_CHATS_MESSAGES_REDACT
+                            .toBuilder()
+                            .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
+                            .jsonPaths(REDACT_ODATA_COUNT.getJsonPaths())
+                            .build(),
+                    TOKENIZE_ODATA_LINKS)
+            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALLS, PSEUDONYMIZE_USER_ID,
+                    MS_TEAMS_COMMUNICATIONS_CALLS_REDACT
+                            .toBuilder()
+                            .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
+                            .jsonPaths(REDACT_ODATA_COUNT.getJsonPaths())
+                            .jsonPaths(REDACT_ODATA_TYPE.getJsonPaths())
+                            .build())
+            .withTransformByEndpoint(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_REGEX, PSEUDONYMIZE_USER_ID,
+                    MS_TEAMS_COMMUNICATIONS_CALL_RECORDS_REDACT
+                            .toBuilder()
+                            .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
+                            .jsonPaths(REDACT_ODATA_TYPE.getJsonPaths())
+                            .build(),
+                    TOKENIZE_ODATA_LINKS,
+                    TOKENIZE_SESSIONS_ODATA_LINKS)
+            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_GET_DIRECT_ROUTING_CALLS,
+                    PSEUDONYMIZE_USER_ID,
+                    PSEUDONYMIZE_CALL_ID,
+                    MS_TEAMS_COMMUNICATIONS_CALL_RECORDS_GET_DIRECT_ROUTING_CALLS_REDACT
+                            .toBuilder()
+                            .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
+                            .jsonPaths(REDACT_ODATA_TYPE.getJsonPaths())
+                            .jsonPaths(REDACT_ODATA_COUNT.getJsonPaths())
+                            .build(),
+                    TOKENIZE_ODATA_LINKS)
+            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_GET_PSTN_CALLS,
+                    PSEUDONYMIZE_USER_ID,
+                    PSEUDONYMIZE_CALL_ID,
+                    MS_TEAMS_COMMUNICATIONS_CALL_RECORDS_GET_PSTN_CALLS_REDACT
+                            .toBuilder()
+                            .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
+                            .jsonPaths(REDACT_ODATA_TYPE.getJsonPaths())
+                            .jsonPaths(REDACT_ODATA_COUNT.getJsonPaths())
+                            .build(),
+                    TOKENIZE_ODATA_LINKS)
+            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS, PSEUDONYMIZE_USER_ID,
+                    MS_TEAMS_USERS_ONLINE_MEETINGS_REDACT
+                            .toBuilder()
+                            .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
+                            .jsonPaths(REDACT_ODATA_TYPE.getJsonPaths())
+                            .build())
+            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS_ATTENDANCE_REPORTS, PSEUDONYMIZE_USER_ID,
+                    MS_TEAMS_USERS_ONLINE_MEETINGS_REDACT
+                            .toBuilder()
+                            .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
+                            .jsonPaths(REDACT_ODATA_TYPE.getJsonPaths())
+                            .build())
+            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS_ATTENDANCE_REPORT, PSEUDONYMIZE_USER_ID,
+                    MS_TEAMS_USERS_ONLINE_MEETINGS_REDACT
+                            .toBuilder()
+                            .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
+                            .jsonPaths(REDACT_ODATA_TYPE.getJsonPaths())
+                            .build());
 
     public static final Map<String, RESTRules> MSFT_DEFAULT_RULES_MAP =
             ImmutableMap.<String, RESTRules>builder()

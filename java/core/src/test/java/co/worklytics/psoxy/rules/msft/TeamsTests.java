@@ -4,6 +4,7 @@ import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
 import co.worklytics.psoxy.rules.Rules2;
 import jdk.jfr.Description;
 import lombok.Getter;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -157,7 +158,8 @@ public class TeamsTests extends JavaRulesTestBaseCase {
                 "fbe2bf47-16c8-47cf-b4a5-4b9b187c508b",
                 "19:4a95f7d8db4c4e7fae857bcebe0623e6@thread.tacv2",
                 "1fb8890f-423e-4154-8fbf-db6809bc8756",
-                "aadUser"
+                "aadUser",
+                "#microsoft.graph.teamDescriptionUpdatedEventMessageDetail"
         );
 
         String sanitized = sanitize(endpoint, jsonResponse);
@@ -207,7 +209,8 @@ public class TeamsTests extends JavaRulesTestBaseCase {
                 "e61ef81e-8bd8-476a-92e8-4a62f8426fca",
                 "text",
                 "fbe2bf47-16c8-47cf-b4a5-4b9b187c508b",
-                "19:4a95f7d8db4c4e7fae857bcebe0623e6@thread.tacv2"
+                "19:4a95f7d8db4c4e7fae857bcebe0623e6@thread.tacv2",
+                "#microsoft.graph.chatMessage"
         );
 
         String sanitized = sanitize(endpoint, jsonResponse);
@@ -240,7 +243,8 @@ public class TeamsTests extends JavaRulesTestBaseCase {
                 "Graph Members",
                 "1615971548136",
                 "2021-03-17T08:59:08.136Z",
-                "html"
+                "html",
+                "#microsoft.graph.chatRenamedEventMessageDetail"
         );
 
         String sanitized = sanitize(endpoint, jsonResponse);
@@ -425,6 +429,34 @@ public class TeamsTests extends JavaRulesTestBaseCase {
         assertUrlWithSubResourcesBlocked(endpoint);
     }
 
+    @Test
+    public void users_onlineMeetings_attendanceReports() {
+        String userId = "dc17674c-81d9-4adb-bfb2-8f6a442e4622";
+        String endpoint = "https://graph.microsoft.com/v1.0" + "/users/" + userId + "/onlineMeetings";
+        String jsonResponse = asJson("Users_onlineMeetings_attendanceReports_v1.0.json");
+
+        assertUrlWithSubResourcesBlocked(endpoint);
+    }
+
+    @Test
+    public void users_onlineMeetings_attendanceReport() {
+        String userId = "dc17674c-81d9-4adb-bfb2-8f6a442e4622";
+        String endpoint = "https://graph.microsoft.com/v1.0" + "/users/" + userId + "/onlineMeetings";
+        String jsonResponse = asJson("Users_onlineMeetings_attendanceReport_v1.0.json");
+        assertNotSanitized(jsonResponse,
+                "dc17674c-81d9-4adb-bfb2-8f6a442e4623"
+        );
+
+        String sanitized = sanitize(endpoint, jsonResponse);
+
+        assertPseudonymized(sanitized, "frederick.cormier@contoso.com");
+        assertRedacted(sanitized,
+                "Frederick Cormier",
+                "frederick.cormier@contoso.com"
+        );
+        assertUrlWithSubResourcesBlocked(endpoint);
+    }
+
     @Override
     public Stream<InvocationExample> getExamples() {
         String apiVersion = "v1.0";
@@ -438,6 +470,7 @@ public class TeamsTests extends JavaRulesTestBaseCase {
                 InvocationExample.of(baseEndpoint + "/teams/fbe2bf47-16c8-47cf-b4a5-4b9b187c508b/channels/19:4a95f7d8db4c4e7fae857bcebe0623e6@thread.tacv2/messages/delta", "Teams_channels_messages_delta_" + apiVersion + ".json"),
                 InvocationExample.of(baseEndpoint + "/teams/fbe2bf47-16c8-47cf-b4a5-4b9b187c508b/channels/19:4a95f7d8db4c4e7fae857bcebe0623e6@thread.tacv2/messages/delta?$deltatoken=someToken", "Teams_channels_messages_delta_" + apiVersion + ".json"),
                 InvocationExample.of(baseEndpoint + "/teams/fbe2bf47-16c8-47cf-b4a5-4b9b187c508b/channels/19:4a95f7d8db4c4e7fae857bcebe0623e6@thread.tacv2/messages/delta?$skiptoken=someToken", "Teams_channels_messages_delta_" + apiVersion + ".json"),
+                InvocationExample.of(baseEndpoint + "/teams/fbe2bf47-16c8-47cf-b4a5-4b9b187c508b/channels/19:3f545ef23b56445ea4ce75d4bae8a5e0@thread.tacv2/messages/delta?$filter=lastModifiedDateTime%20gt%202015-01-01T00:00:00Z&$expand=replies", "Teams_channels_messages_delta_" + apiVersion + ".json"),
                 InvocationExample.of(baseEndpoint + "/chats/19:2da4c29f6d7041eca70b638b43d45437@thread.v2/messages", "Chats_messages_" + apiVersion + ".json"),
                 InvocationExample.of(baseEndpoint + "/chats/19:2da4c29f6d7041eca70b638b43d45437@thread.v2/messages", "Chats_messages_" + apiVersion + ".json"),
                 InvocationExample.of(baseEndpoint + "/communications/calls/2f1a1100-b174-40a0-aba7-0b405e01ed92", "Communications_calls_" + apiVersion + ".json"),
@@ -445,7 +478,9 @@ public class TeamsTests extends JavaRulesTestBaseCase {
                 InvocationExample.of(baseEndpoint + "/communications/callRecords/getDirectRoutingCalls(fromDateTime=2019-11-01,toDateTime=2019-12-01)", "Communications_callRecords_getDirectRoutingCalls_" + apiVersion + ".json"),
                 InvocationExample.of(baseEndpoint + "/communications/callRecords/getPstnCalls(fromDateTime=2019-11-01,toDateTime=2019-12-01)", "Communications_callRecords_getPstnCalls_" + apiVersion + ".json"),
                 InvocationExample.of(baseEndpoint + "/users", "Users_" + apiVersion + ".json"),
-                InvocationExample.of(baseEndpoint + "/users/dc17674c-81d9-4adb-bfb2-8f6a442e4622/onlineMeetings", "Users_onlineMeetings_" + apiVersion + ".json")
+                InvocationExample.of(baseEndpoint + "/users/dc17674c-81d9-4adb-bfb2-8f6a442e4622/onlineMeetings", "Users_onlineMeetings_" + apiVersion + ".json"),
+                InvocationExample.of(baseEndpoint + "/users/dc17674c-81d9-4adb-bfb2-8f6a442e4622/onlineMeetings/MSpkYzE3Njc0Yy04MWQ5LTRhZGItYmZ/attendanceReports", "Users_onlineMeetings_attendanceReports_" + apiVersion + ".json"),
+                InvocationExample.of(baseEndpoint + "/users/dc17674c-81d9-4adb-bfb2-8f6a442e4622/onlineMeetings/MSpkYzE3Njc0Yy04MWQ5LTRhZGItYmZ/attendanceReports/c9b6db1c-d5eb-427d-a5c0-20088d9b22d7?$expand=attendanceRecords", "Users_onlineMeetings_attendanceReport_" + apiVersion + ".json")
         );
     }
 }

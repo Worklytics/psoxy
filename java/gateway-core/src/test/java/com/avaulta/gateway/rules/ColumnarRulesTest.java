@@ -1,6 +1,8 @@
 package com.avaulta.gateway.rules;
 
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
+import com.avaulta.gateway.rules.transforms.FieldTransformPipeline;
+import com.avaulta.gateway.rules.transforms.FieldTransform;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import lombok.SneakyThrows;
@@ -105,12 +107,12 @@ class ColumnarRulesTest {
     @Test
     public void yaml_pipeline() {
         ColumnarRules rules = ColumnarRules.builder()
-                .fieldsToTransform(Map.of("email", ColumnarRules.FieldTransformPipeline.builder()
+                .fieldsToTransform(Map.of("email", FieldTransformPipeline.builder()
                         .newName("github_username")
                         .transforms(Arrays.asList(
-                                ColumnarRules.FieldValueTransform.filter(".*@worklytics.co"),
-                                ColumnarRules.FieldValueTransform.formatString("%s_gh"),
-                                ColumnarRules.FieldValueTransform.pseudonymizeWithScope("github")
+                                FieldTransform.filter(".*@worklytics.co"),
+                                FieldTransform.formatString("%s_gh"),
+                                FieldTransform.pseudonymizeWithScope("github")
                         )).build()))
                 .build();
 

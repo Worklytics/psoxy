@@ -55,7 +55,7 @@ endpoints:
           - "$..externalReplyMessage"
       - !<redact>
         jsonPaths:
-          - "$.['@odata.context']"
+          - "$..['@odata.context']"
   - pathRegex: "^/(v1.0|beta)/users/[^/]*/messages/[^/]*"
     transforms:
       - !<redact>
@@ -78,7 +78,7 @@ endpoints:
         regex: "^https://graph.microsoft.com/(.*)$"
       - !<redact>
         jsonPaths:
-          - "$.['@odata.context']"
+          - "$..['@odata.context']"
   - pathRegex: "^/(v1.0|beta)/users/[^/]*/mailFolders(/SentItems|\\('SentItems'\\))/messages.*"
     transforms:
       - !<redact>
@@ -101,4 +101,4 @@ endpoints:
         regex: "^https://graph.microsoft.com/(.*)$"
       - !<redact>
         jsonPaths:
-          - "$.['@odata.context']"
+          - "$..['@odata.context']"
