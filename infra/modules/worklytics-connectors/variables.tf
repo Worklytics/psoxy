@@ -62,7 +62,7 @@ variable "github_installation_id" {
 variable "github_organization" {
   type        = string
   default     = null
-  description = "(Only required if using Github connector) Name of the organization to be used as part of example calls for Github (ex: Worklytics)"
+  description = "(Only required if using Github connector) Name of the organization to be used as part of example calls for Github (ex: Worklytics). NOTE: If using Enterprise Server, this can be a list of organizations split by commas (ex: Worklytics,Worklytics2)"
 }
 
 variable "github_example_repository" {
