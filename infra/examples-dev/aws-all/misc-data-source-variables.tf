@@ -39,6 +39,12 @@ variable "github_enterprise_server_host" {
   description = "(Only required if using Github Enterprise Server connector) Host of the Github instance (ex: github.mycompany.com)."
 }
 
+variable "github_enterprise_server_version" {
+  type        = string
+  default     = "v3"
+  description = "(Only required if using Github Enterprise Server connector) Version of the server to use (ex: v3). By default, v3"
+}
+
 variable "github_installation_id" {
   type        = string
   default     = null
@@ -48,7 +54,7 @@ variable "github_installation_id" {
 variable "github_organization" {
   type        = string
   default     = null
-  description = "(Only required if using Github connector) Name of the organization to be used as part of example calls for Github (ex: Worklytics)"
+  description = "(Only required if using Github connector) Name of the organization to be used as part of example calls for Github (ex: Worklytics). NOTE: If using Enterprise Server, this can be a list of organizations split by commas (ex: Worklytics,Worklytics2)"
 }
 
 variable "github_example_repository" {
