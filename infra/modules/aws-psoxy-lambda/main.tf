@@ -61,7 +61,6 @@ resource "aws_lambda_function" "instance" {
   memory_size                    = var.memory_size_mb
   reserved_concurrent_executions = coalesce(var.reserved_concurrent_executions, -1)
   kms_key_arn                    = var.function_env_kms_key_arn
-
   vpc_config                     = var.vpc_config
 
   environment {
