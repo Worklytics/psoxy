@@ -61,7 +61,17 @@ resource "aws_lambda_function" "instance" {
   memory_size                    = var.memory_size_mb
   reserved_concurrent_executions = coalesce(var.reserved_concurrent_executions, -1)
   kms_key_arn                    = var.function_env_kms_key_arn
-  vpc_config                     = var.vpc_config
+
+  dynamic "vpc_config" {
+    for_each = var.vpc_config[*]
+
+    content {
+      subnet_ids         = vpc_config.value.subnet_ids
+      security_group_ids = vpc_config.value.security_group_ids
+      # q: why does the following not validate??
+      #ipv6_allowed_for_dual_stack = vpc_config.value.ipv6_allowed_for_dual_stack
+    }
+  }
 
   environment {
     variables = merge(
@@ -122,9 +132,12 @@ resource "aws_iam_role" "iam_for_lambda" {
   }
 }
 
+# which policy we attach depends on lambda's need
+# - AWSLambdaBasicExecutionRole usually sufficient
+# - AWSLambdaVPCAccessExecutionRole if lambda is configured to be on a VPC (if lacks this, deploy fails bc exec role can't create network interface)
 resource "aws_iam_role_policy_attachment" "basic" {
   role       = aws_iam_role.iam_for_lambda.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+  policy_arn = var.vpc_config == null ? "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole" : "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
 }
 
 
