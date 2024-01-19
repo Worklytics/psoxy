@@ -151,18 +151,12 @@ module "psoxy_package" {
 resource "aws_apigatewayv2_api" "proxy_api" {
   count = var.use_api_gateway ? 1 : 0
 
-  name          = "psoxy-api"
+  name          = "${var.deployment_id}-api"
   protocol_type = "HTTP"
-  description   = "API to expose psoxy instances"
+  description   = "API to expose ${var.deployment_id} psoxy instances"
 }
 
-resource "aws_cloudwatch_log_group" "gateway_log" {
-  count = var.use_api_gateway ? 1 : 0
-
-  name              = aws_apigatewayv2_api.proxy_api[0].name
-  retention_in_days = 7
-}
-
+# must have a stage deployed
 resource "aws_apigatewayv2_stage" "live" {
   count = var.use_api_gateway ? 1 : 0
 
@@ -174,6 +168,44 @@ resource "aws_apigatewayv2_stage" "live" {
     format          = "$context.identity.sourceIp $context.identity.caller $context.identity.user [$context.requestTime] \"$context.httpMethod $context.path $context.protocol\" $context.status $context.responseLength $context.requestId $context.extendedRequestId $context.error.messageString $context.integrationErrorMessage"
   }
 }
+
+resource "aws_iam_policy" "invoke_api" {
+  count = var.use_api_gateway ? 1 : 0
+
+  name_prefix = "${var.deployment_id}InvokeAPI"
+
+  policy = jsonencode({
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Effect" : "Allow",
+        "Action" : "execute-api:Invoke",
+        "Resource" : "arn:aws:execute-api:*:${var.aws_account_id}:${aws_apigatewayv2_api.proxy_api[0].id}/*/GET/*",
+      },
+      {
+        "Effect" : "Allow",
+        "Action" : "execute-api:Invoke",
+        "Resource" : "arn:aws:execute-api:*:${var.aws_account_id}:${aws_apigatewayv2_api.proxy_api[0].id}/*/HEAD/*",
+      },
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "invoke_api_policy_to_role" {
+  count = var.use_api_gateway ? 1 : 0
+
+  role       = aws_iam_role.api-caller.name
+  policy_arn = aws_iam_policy.invoke_api[0].arn
+}
+
+resource "aws_cloudwatch_log_group" "gateway_log" {
+  count = var.use_api_gateway ? 1 : 0
+
+  name              = aws_apigatewayv2_api.proxy_api[0].name
+  retention_in_days = 7
+}
+
+
 
 
 
