@@ -28,6 +28,7 @@ module "psoxy" {
   install_test_tool              = var.install_test_tool
   deployment_id                  = module.env_id.id
   api_function_name_prefix       = "${lower(module.env_id.id)}-"
+  use_api_gateway                = var.use_api_gateway
 }
 
 
