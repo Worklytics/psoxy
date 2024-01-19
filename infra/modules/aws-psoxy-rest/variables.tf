@@ -190,9 +190,15 @@ variable "memory_size_mb" {
 }
 
 
-variable "apigatewayv2_id" {
-  type        = string
-  description = "ID of the API Gateway v2 instance via which to expose this instance"
+variable "apigateway" {
+  type        = object({
+    name             = string
+    id               = string
+    execution_arn    = string
+    api_endpoint     = string
+    stage_invoke_url = string # augmentation to apigatewayv2 resource; adding the invoke url from the stage
+  })
+  description = "the API Gateway v2 instance via which to expose this instance"
 }
 
 

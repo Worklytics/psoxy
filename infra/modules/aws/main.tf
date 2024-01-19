@@ -167,7 +167,7 @@ resource "aws_apigatewayv2_stage" "live" {
   count = var.use_api_gateway ? 1 : 0
 
   api_id      = aws_apigatewayv2_api.proxy_api[0].id
-  name        = "live" # q: what name??
+  name        = "live" # q: what name?
   auto_deploy = true
   access_log_settings {
     destination_arn = aws_cloudwatch_log_group.gateway_log[0].arn
@@ -231,6 +231,13 @@ output "pseudonym_salt" {
   sensitive   = true
 }
 
-output "apigatewayv2_id" {
-  value = try(aws_apigatewayv2_api.proxy_api[0].id, null)
+output "apigateway" {
+  # NOTE: filled based on `var.use_api_gateway`, which is sufficient for Terraform to understand
+  # pre-apply that it's going to have a non-null value
+  value = var.use_api_gateway ? merge(
+        {
+         stage_invoke_url = aws_apigatewayv2_stage.live[0].invoke_url
+        },
+        aws_apigatewayv2_api.proxy_api[0]
+      ) : null
 }

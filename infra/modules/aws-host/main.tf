@@ -89,7 +89,7 @@ module "api_connector" {
   oauth_scopes                          = each.value.oauth_scopes_needed
   example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
   vpc_config                            = var.vpc_config
-  apigatewayv2_id                       = module.psoxy.apigatewayv2_id
+  apigateway                            = module.psoxy.apigateway
 
 
   environment_variables = merge(
