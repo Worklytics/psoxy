@@ -182,15 +182,23 @@ variable "vpc_config" {
   default     = null
 }
 
-variable "todo_step" {
-  type        = number
-  description = "of all todos, where does this one logically fall in sequence"
-  default     = 2
-}
-
 variable "memory_size_mb" {
   # See https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function#memory_size
   type        = number
   description = "Amount of memory in MB your Lambda Function can use at runtime. Defaults to 512"
   default     = 512
 }
+
+
+variable "apigatewayv2_id" {
+  type        = string
+  description = "ID of the API Gateway v2 instance via which to expose this instance"
+}
+
+
+variable "todo_step" {
+  type        = number
+  description = "of all todos, where does this one logically fall in sequence"
+  default     = 2
+}
+

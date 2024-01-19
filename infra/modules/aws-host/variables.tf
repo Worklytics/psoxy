@@ -275,6 +275,12 @@ variable "lookup_table_builders" {
   }
 }
 
+variable "use_api_gateway" {
+  type        = bool
+  description = "whether to use API Gateway, or not. Only v2 supported atm."
+  default     = false
+}
+
 variable "vpc_config" {
   type = object({
     # ipv6_allowed_for_dual_stack = optional(bool, false)

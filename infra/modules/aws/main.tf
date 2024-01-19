@@ -79,6 +79,8 @@ locals {
 }
 
 resource "aws_iam_policy" "execution_lambda_to_caller" {
+  count = var.use_api_gateway ? 0 : 1
+
   name        = "${var.deployment_id}ExecuteLambdas"
   description = "Allow caller role to execute the lambda url directly"
 
@@ -107,8 +109,10 @@ resource "aws_iam_role_policy_attachment" "invoker_lambda_execution" {
 }
 
 resource "aws_iam_role_policy_attachment" "invoker_url_lambda_execution" {
+  count = var.use_api_gateway ? 0 : 1
+
   role       = aws_iam_role.api-caller.name
-  policy_arn = aws_iam_policy.execution_lambda_to_caller.arn
+  policy_arn = aws_iam_policy.execution_lambda_to_caller[0].arn
 }
 
 
@@ -143,6 +147,35 @@ module "psoxy_package" {
   psoxy_version      = var.psoxy_version
   force_bundle       = var.force_bundle
 }
+
+resource "aws_apigatewayv2_api" "proxy_api" {
+  count = var.use_api_gateway ? 1 : 0
+
+  name          = "psoxy-api"
+  protocol_type = "HTTP"
+  description   = "API to expose psoxy instances"
+}
+
+resource "aws_cloudwatch_log_group" "gateway_log" {
+  count = var.use_api_gateway ? 1 : 0
+
+  name              = aws_apigatewayv2_api.proxy_api[0].name
+  retention_in_days = 7
+}
+
+resource "aws_apigatewayv2_stage" "live" {
+  count = var.use_api_gateway ? 1 : 0
+
+  api_id      = aws_apigatewayv2_api.proxy_api[0].id
+  name        = "live" # q: what name??
+  auto_deploy = true
+  access_log_settings {
+    destination_arn = aws_cloudwatch_log_group.gateway_log[0].arn
+    format          = "$context.identity.sourceIp $context.identity.caller $context.identity.user [$context.requestTime] \"$context.httpMethod $context.path $context.protocol\" $context.status $context.responseLength $context.requestId $context.extendedRequestId $context.error.messageString $context.integrationErrorMessage"
+  }
+}
+
+
 
 # install test tool, if it exists in expected location
 module "test_tool" {
@@ -196,4 +229,8 @@ output "pseudonym_salt" {
   description = "Value used to salt pseudonyms (SHA-256) hashes. If migrate to new deployment, you should copy this value."
   value       = random_password.pseudonym_salt.result
   sensitive   = true
+}
+
+output "apigatewayv2_id" {
+  value = try(aws_apigatewayv2_api.proxy_api[0].id, null)
 }
