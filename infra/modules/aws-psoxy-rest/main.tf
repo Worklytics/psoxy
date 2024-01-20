@@ -74,15 +74,16 @@ resource "aws_lambda_function_url" "lambda_url" {
 resource "aws_apigatewayv2_integration" "map" {
   count = local.use_api_gateway ? 1 : 0
 
-  api_id                    = var.apigateway.id
-  integration_type          = "AWS_PROXY"
-  connection_type           = "INTERNET"
+  api_id                 = var.apigateway.id
+  integration_type       = "AWS_PROXY"
+  connection_type        = "INTERNET"
+  integration_method     = "POST"
+  integration_uri        = module.psoxy_lambda.function_arn
+  payload_format_version = "2.0"
 
-  integration_method        = "POST"
-  integration_uri           = module.psoxy_lambda.function_arn
-  request_parameters        = {}
-  request_templates         = {}
-  payload_format_version    = "2.0"
+  # q: do we need to specify this?? what's the default?
+  # docs saw it can be 30000 max, but ideally we'd get ~55 or longer
+  # timeout_milliseconds   = 30000
 }
 
 resource "aws_apigatewayv2_route" "methods" {
