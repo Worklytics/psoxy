@@ -267,9 +267,9 @@ output "apigateway" {
   # NOTE: filled based on `var.use_api_gateway`, which is sufficient for Terraform to understand
   # pre-apply that it's going to have a non-null value
   value = var.use_api_gateway ? merge(
-        {
-         stage_invoke_url = aws_apigatewayv2_stage.live[0].invoke_url
-        },
-        aws_apigatewayv2_api.proxy_api[0]
-      ) : null
+    {
+      stage_invoke_url = aws_apigatewayv2_stage.live[0].invoke_url
+    },
+    aws_apigatewayv2_api.proxy_api[0]
+  ) : null
 }

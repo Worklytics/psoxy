@@ -1,6 +1,6 @@
 moved {
-  from   = aws_iam_policy.execution_lambda_to_caller
-  to     = aws_iam_policy.execution_lambda_to_caller[0]
+  from = aws_iam_policy.execution_lambda_to_caller
+  to   = aws_iam_policy.execution_lambda_to_caller[0]
 }
 
 moved {

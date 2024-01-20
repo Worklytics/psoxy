@@ -191,7 +191,7 @@ variable "memory_size_mb" {
 
 
 variable "apigateway" {
-  type        = object({
+  type = object({
     name             = string
     id               = string
     execution_arn    = string

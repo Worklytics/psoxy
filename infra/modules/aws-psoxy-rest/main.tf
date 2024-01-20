@@ -88,7 +88,7 @@ resource "aws_apigatewayv2_integration" "map" {
 
 resource "aws_apigatewayv2_route" "methods" {
   # TODO: allow configuration of methods
-  for_each = toset( local.use_api_gateway ? ["GET", "HEAD"] : [])
+  for_each = toset(local.use_api_gateway ? ["GET", "HEAD"] : [])
 
   api_id             = var.apigateway.id
   route_key          = "${each.key} /${module.psoxy_lambda.function_name}/{proxy+}"
@@ -97,7 +97,7 @@ resource "aws_apigatewayv2_route" "methods" {
 }
 
 resource "aws_lambda_permission" "api_gateway" {
-  count         = local.use_api_gateway ? 1 : 0
+  count = local.use_api_gateway ? 1 : 0
 
   statement_id  = "Allow${module.psoxy_lambda.function_name}Invoke"
   action        = "lambda:InvokeFunction"
