@@ -198,7 +198,8 @@ variable "apigateway" {
     api_endpoint     = string
     stage_invoke_url = string # augmentation to apigatewayv2 resource; adding the invoke url from the stage
   })
-  description = "the API Gateway v2 instance via which to expose this instance"
+  description = "the API Gateway v2 instance via which to expose this instance, if any (leave `null` for none)"
+  default     = null
 }
 
 
