@@ -122,7 +122,7 @@ provision the OAuth Clients. If you use our provided terraform modules, this is 
 
 NOTE: the above OAuth scopes omit the `https://www.googleapis.com/auth/` prefix. See [OAuth 2.0 Scopes for Google APIs](https://developers.google.com/identity/protocols/oauth2/scopes) for details of scopes.
 
-See details: [docs/sources/google-workspace/readme.md](docs/sources/google-workspace/google-workspace.md)
+See details: [docs/sources/google-workspace/readme.md](docs/sources/google-workspace/readme.md)
 
 ### Microsoft 365
 
