@@ -51,10 +51,6 @@ async function call(options = {}) {
   const url = new URL(options.url);
   const method = options.method || resolveHTTPMethod(url.pathname);
 
-  if (!_.isEmpty(options.role)) {
-    logger.verbose(`Assuming role ${options.role}`);
-  }
-
   if (_.isEmpty(options.region)) {
     options.region = resolveAWSRegion(url);
   }
