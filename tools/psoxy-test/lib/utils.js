@@ -360,8 +360,10 @@ async function getAWSCredentials(role, region) {
   const logger = getLogger();
   let credentials;
   let credentialsProvider;
+  let callerIdentity;
 
   if (!_.isEmpty(role)) {
+    logger.verbose(`Assuming role ${role}`);
     const temporaryCredentialsOptions = {
       params: {
         RoleArn: role,
@@ -374,10 +376,19 @@ async function getAWSCredentials(role, region) {
     }
     credentialsProvider = fromTemporaryCredentials(temporaryCredentialsOptions);
 
-    credentials = await credentialsProvider();
+    try {
+      credentials = await credentialsProvider();
+    } catch (e) {
+      throw new Error(`Unable to get AWS credentials: ${e.message}\nMake sure your AWS CLI is configured correctly: https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-authentication.html`);
+    }
 
-    const callerIdentity = JSON.parse(
-      executeCommand('aws sts get-caller-identity').trim());
+    try {
+      callerIdentity = JSON.parse(
+        executeCommand('aws sts get-caller-identity').trim());
+    } catch (e) {
+      // It shouldn't happen if credentials are valid
+      logger.verbose(`Unable to get caller identity: ${e.message}`);
+    }
 
     logger.info(`Using temporary credentials: ${callerIdentity.Arn},
       access key ID -> ${credentials.accessKeyId}`);
