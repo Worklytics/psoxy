@@ -270,6 +270,7 @@ public class JiraCloudTests extends JavaRulesTestBaseCase {
                 InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/2/issue/fake/comment?&startAt=50", "issue_comment_v2.json"),
                 InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/fake/comment?&startAt=50", "issue_comment_v3.json"),
                 InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/2/issue/fake/worklog?&startAt=50", "issue_worklog_v2.json"),
-                InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/fake/worklog?&startAt=50", "issue_worklog_v3.json"));
+                InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/fake/worklog?&startAt=50", "issue_worklog_v3.json"),
+                InvocationExample.of("https://api.atlassian.com/ex/jira/e9224a3c-0479-4ebc-9e5f-340c81d142c1/rest/api/3/issue/247393/worklog?startAt=0&maxResults=50", "issue_worklog_v3.json"));
     }
 }
