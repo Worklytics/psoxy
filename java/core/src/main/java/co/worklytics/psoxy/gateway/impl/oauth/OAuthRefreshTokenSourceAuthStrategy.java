@@ -177,7 +177,8 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
     public static class TokenRefreshHandlerImpl implements OAuth2CredentialsWithRefresh.OAuth2RefreshHandler,
             RequiresConfiguration {
 
-        private static final int WRITE_RETRIES = 3;
+        @VisibleForTesting
+        static final int WRITE_RETRIES = 3;
 
         @Inject
         ConfigService config;
