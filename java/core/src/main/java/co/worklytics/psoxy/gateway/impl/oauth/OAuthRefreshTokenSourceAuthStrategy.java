@@ -287,7 +287,8 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                     tokenResponse = exchangeRefreshTokenForAccessToken();
                     token = asAccessToken(tokenResponse);
 
-                    storeSharedAccessTokenIfSupported(token);
+                    storeSharedAccessTokenIfSupported(token, lockNeeded);
+                    storeRefreshTokenIfRotated(tokenResponse);
 
                     if (isAccessTokenCacheable()) {
                         this.cachedToken = token;
@@ -320,12 +321,8 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
             payloadBuilder.addHeaders(tokenRequest.getHeaders());
 
             HttpResponse response = tokenRequest.execute();
-            CanonicalOAuthAccessTokenResponseDto tokenResponse =
-                    tokenResponseParser.parseTokenResponse(response);
 
-            storeRefreshTokenIfRotated(tokenResponse);
-
-            return tokenResponse;
+            return tokenResponseParser.parseTokenResponse(response);
         }
 
         /**
@@ -451,8 +448,8 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         }
 
         @VisibleForTesting
-        void storeSharedAccessTokenIfSupported(@NonNull AccessToken accessToken) {
-            if (useSharedToken()) {
+        void storeSharedAccessTokenIfSupported(@NonNull AccessToken accessToken, boolean useSharedToken) {
+            if (useSharedToken) {
                 try {
                     config.putConfigProperty(ConfigProperty.ACCESS_TOKEN,
                         objectMapper.writerFor(AccessTokenDto.class)
