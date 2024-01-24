@@ -1178,7 +1178,7 @@ And following granular scopes:
   5. Build an OAuth authorization endpoint URL by copying the value for "Client Id" obtained in the
     previous step into the URL below. Then open the result in a web browser:
 
-   `https://auth.atlassian.com/authorize?audience=api.atlassian.com&client_id={CLIENT ID}&scope=offline_access%20read:group:jira%20read:avatar:jira%20read:user:jira%20read:account%20read:jira-user%20read:jira-work&redirect_uri=http://localhost&state=YOUR_USER_BOUND_VALUE&response_type=code&prompt=consent`
+   `https://auth.atlassian.com/authorize?audience=api.atlassian.com&client_id=<CLIENT ID>&scope=offline_access%20read:group:jira%20read:avatar:jira%20read:user:jira%20read:account%20read:jira-user%20read:jira-work&redirect_uri=http://localhost&state=YOUR_USER_BOUND_VALUE&response_type=code&prompt=consent`
 
      NOTES:
      - That URL can be obtained from "Authorization" and clicking on `Configure` for  "OAuth 2.0 (3LO)" page.
