@@ -1,5 +1,6 @@
 package co.worklytics.psoxy.gateway;
 
+import com.google.common.util.concurrent.Uninterruptibles;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -7,6 +8,7 @@ import lombok.Value;
 import lombok.extern.java.Log;
 
 import java.io.Serializable;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
 
@@ -68,7 +70,8 @@ public interface ConfigService {
                 putConfigProperty(property, value);
                 return;
             } catch (Exception ignore) {
-                // retry
+                // retry - wait slightly
+                Uninterruptibles.sleepUninterruptibly(Duration.ofMillis(150));
             }
         } while (--retries > 0);
         throw new WritePropertyRetriesExhaustedException("Failed to write config property " + property);
