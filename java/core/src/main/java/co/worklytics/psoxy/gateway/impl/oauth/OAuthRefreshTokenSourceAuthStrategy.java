@@ -25,7 +25,6 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -207,6 +206,10 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         private static final String TOKEN_REFRESH_LOCK_ID = "oauth_refresh_token";
         private static final int MAX_TOKEN_REFRESH_ATTEMPTS = 3;
 
+        /**
+         * how long to allow for eventual consistency after write to config
+         */
+        private static final Duration ALLOWANCE_FOR_EVENTUAL_CONSISTENCY = Duration.ofSeconds(2);
 
         /**
          * how long to wait after a failed lock attempt before trying again; multiplier on the
@@ -222,13 +225,12 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
          * this includes the allowance for eventual consistency, so wait should be >= that value
          * in practice.
          */
-        private static final long WAIT_AFTER_FAILED_LOCK_ATTEMPTS = 4000L;
+        private static final Duration WAIT_AFTER_FAILED_LOCK_ATTEMPTS = ALLOWANCE_FOR_EVENTUAL_CONSISTENCY.plusSeconds(2);
 
         /**
-         * how long to allow for eventual consistency after write to config
+         * token lock duration; should be long enough to allow for token refresh + write to config
          */
-        private static final long ALLOWANCE_FOR_EVENTUAL_CONSISTENCY_SECONDS = 2L;
-
+        private static final Duration TOKEN_LOCK_DURATION = Duration.ofMinutes(2);
 
         private AccessToken cachedToken = null;
 
@@ -280,7 +282,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                 // only lock if we're using a shared token across processes
                 boolean lockNeeded = useSharedToken();
 
-                boolean acquired = !lockNeeded || lockService.acquire(TOKEN_REFRESH_LOCK_ID, Duration.ofMinutes(2));
+                boolean acquired = !lockNeeded || lockService.acquire(TOKEN_REFRESH_LOCK_ID, TOKEN_LOCK_DURATION);
 
                 if (acquired) {
                     tokenResponse = exchangeRefreshTokenForAccessToken();
@@ -295,12 +297,12 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
                     if (lockNeeded) {
                         // hold lock extra, to try to maximize the time between token refreshes
-                        Uninterruptibles.sleepUninterruptibly(ALLOWANCE_FOR_EVENTUAL_CONSISTENCY_SECONDS, TimeUnit.SECONDS);
+                        Uninterruptibles.sleepUninterruptibly(ALLOWANCE_FOR_EVENTUAL_CONSISTENCY);
                         lockService.release(TOKEN_REFRESH_LOCK_ID);
                     }
                 } else {
                     //re-try recursively, w/ linear backoff
-                    Uninterruptibles.sleepUninterruptibly(attempt * WAIT_AFTER_FAILED_LOCK_ATTEMPTS, TimeUnit.MILLISECONDS);
+                    Uninterruptibles.sleepUninterruptibly(WAIT_AFTER_FAILED_LOCK_ATTEMPTS.multipliedBy(attempt + 1));
                     token = refreshAccessToken(attempt + 1);
                 }
             }
