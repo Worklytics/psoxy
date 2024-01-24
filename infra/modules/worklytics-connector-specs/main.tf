@@ -844,6 +844,11 @@ Use this step if you want to install in the whole org, across multiple workspace
    on your organization, to be clear it has nothing to do with public distribution or Slack app directory.
 3. Generate the following URL replacing the placeholder for *YOUR_CLIENT_ID* and save it for
    later:
+
+```
+https://api.slack.com/api/oauth.v2.access?client_id=YOUR_CLIENT_ID
+```
+
 4. Go to "OAuth & Permissions" and add the previous URL as "Redirect URLs"
 5. Go to "Settings > Install App", and choose "Install to Organization". A Slack admin should grant
    the app the permissions and the app will be installed.
