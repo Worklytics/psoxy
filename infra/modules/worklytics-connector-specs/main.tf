@@ -1143,7 +1143,7 @@ EOT
       ],
       external_token_todo : <<EOT
 ## Prerequisites
-Jira OAuth 2.0 (3LO) through Psoxy requires a Jira Cloud account with following classical scopes:
+[Jira OAuth 2.0 (3LO)](https://developer.atlassian.com/cloud/jira/platform/oauth-2-3lo-apps/) through Psoxy requires a Jira Cloud account with following classical scopes:
 
 - read:jira-user: for getting generic user information
 - read:jira-work: for getting information about issues, comments, etc
@@ -1154,21 +1154,23 @@ And following granular scopes:
 - read:avatar:jira: for retrieving group members
 
 ## Setup Instructions
-  1. Go to https://developer.atlassian.com/console/myapps/ and click on "Create"
+  1. Go to https://developer.atlassian.com/console/myapps/ and click on "Create" and choose "OAuth 2.0 Integration"
 
-  2. Then click "Authorize" and "Add", adding `http://localhost` as callback URI. It can be any URL
-     that matches the settings.
+  2. Then click "Authorization" and "Add" on `OAuth 2.0 (3L0)`, adding `http://localhost` as callback URI. It can be any URL
+     that matches the URL format and it is required to be populated, but the proxy instance workflow will not use it.
 
-  3. Now navigate to "Permissions" and click on "Add" for Jira. Once added, click on "Configure".
-     Add following scopes as part of "Classic Scopes":
+  3. Now navigate to "Permissions" and click on "Add" for `Jira API`. Once added, click on "Configure".
+     Add following scopes as part of "Classic Scopes", first clicking on `Edit Scopes` and then selecting them:
        - `read:jira-user`
        - `read:jira-work`
      And these from "Granular Scopes":
        - `read:group:jira`
        - `read:avatar:jira`
        - `read:user:jira`
-     Then repeat the same but for "User Identity API", adding the following scope:
+     Then go back to "Permissions" and click on "Add" for `User Identity API`, only selecting following scopes:
        - `read:account`
+
+     After adding all the scopes, you should have 1 permission for `User Identity API` and 5 for `Jira API`.
 
   4. Once Configured, go to "Settings" and copy the "Client Id" and "Secret". You will use these to
      obtain an OAuth `refresh_token`.
@@ -1176,8 +1178,13 @@ And following granular scopes:
   5. Build an OAuth authorization endpoint URL by copying the value for "Client Id" obtained in the
     previous step into the URL below. Then open the result in a web browser:
 
-   `https://auth.atlassian.com/authorize?audience=api.atlassian.com&client_id=<CLIENT ID>&scope=offline_access%20read:group:jira%20read:avatar:jira%20read:user:jira%20read:account%20read:jira-user%20read:jira-work&redirect_uri=http://localhost&state=YOUR_USER_BOUND_VALUE&response_type=code&prompt=consent`
+   `https://auth.atlassian.com/authorize?audience=api.atlassian.com&client_id={CLIENT ID}&scope=offline_access%20read:group:jira%20read:avatar:jira%20read:user:jira%20read:account%20read:jira-user%20read:jira-work&redirect_uri=http://localhost&state=YOUR_USER_BOUND_VALUE&response_type=code&prompt=consent`
 
+     NOTES:
+     - That URL can be obtained from "Authorization" and clicking on `Configure` for  "OAuth 2.0 (3LO)" page.
+     - If after pasting the URL you see an error page (like an issue with identity provider) please check:
+       1 - The `clientId` is correct
+       2 - The `redirect_uri` is the same as the one configured in the "OAuth 2.0 (3LO)" page
   6. Choose a site in your Jira workspace to allow access for this application and click "Accept".
      As the callback does not exist, you will see an error. But in the URL of your browser you will see
      something like this as URL:
@@ -1212,7 +1219,7 @@ And following granular scopes:
      - `PSOXY_JIRA_CLOUD_CLIENT_ID` with `Client Id` value.
      - `PSOXY_JIRA_CLOUD_CLIENT_SECRET` with `Client Secret` value.
 
- 10. Optional, obtain the "Cloud ID" of your Jira instance. Use the following command, with the
+ 10. Obtain the "Cloud ID" of your Jira instance. Use the following command, with the
     `access_token` obtained in the previous step in place of `<ACCESS_TOKEN>` below:
 
    `curl --header 'Authorization: Bearer <ACCESS_TOKEN>' --url 'https://api.atlassian.com/oauth/token/accessible-resources'`
@@ -1233,7 +1240,7 @@ And following granular scopes:
 
   Add the `id` value from that JSON response as the value of the `jira_cloud_id` variable in the
   `terraform.tfvars` file of your Terraform configuration. This will generate all the test URLs with
-  a proper value.
+  a proper value and it will populate the right value for setting up the configuration.
 EOT
     }
   }
