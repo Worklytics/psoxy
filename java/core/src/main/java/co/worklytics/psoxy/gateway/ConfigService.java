@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Value;
+import lombok.extern.java.Log;
 
 import java.io.Serializable;
 import java.time.Instant;
@@ -49,6 +50,29 @@ public interface ConfigService {
      * @param value to write
      */
     void putConfigProperty(ConfigProperty property, String value);
+
+    /**
+     * write value of property in config, if supports it
+     *
+     * @param property to write value for
+     * @param value to write
+     * @throws WritePropertyRetriesExhaustedException if write fails after designated retries
+     */
+    default void putConfigProperty(ConfigProperty property, String value, int retries) throws WritePropertyRetriesExhaustedException {
+        if (retries <= 0) {
+            // use the non-retry version
+            throw new IllegalArgumentException("retries must be > 0");
+        }
+        do {
+            try {
+                putConfigProperty(property, value);
+                return;
+            } catch (Exception ignore) {
+                // retry
+            }
+        } while (--retries > 0);
+        throw new WritePropertyRetriesExhaustedException("Failed to write config property " + property);
+    }
 
     /**
      * get property as defined in this ConfigService

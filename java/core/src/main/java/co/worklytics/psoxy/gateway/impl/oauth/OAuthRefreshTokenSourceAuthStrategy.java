@@ -1,9 +1,6 @@
 package co.worklytics.psoxy.gateway.impl.oauth;
 
-import co.worklytics.psoxy.gateway.ConfigService;
-import co.worklytics.psoxy.gateway.LockService;
-import co.worklytics.psoxy.gateway.RequiresConfiguration;
-import co.worklytics.psoxy.gateway.SourceAuthStrategy;
+import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.utils.RandomNumberGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -181,6 +178,8 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
     public static class TokenRefreshHandlerImpl implements OAuth2CredentialsWithRefresh.OAuth2RefreshHandler,
             RequiresConfiguration {
 
+        private static final int WRITE_RETRIES = 3;
+
         @Inject
         ConfigService config;
         @Inject
@@ -345,7 +344,9 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                         if (config.supportsWriting()) {
                             try {
                                 config.putConfigProperty(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN,
-                                    tokenResponse.getRefreshToken());
+                                    tokenResponse.getRefreshToken(), WRITE_RETRIES);
+                            } catch (WritePropertyRetriesExhaustedException e) {
+                                log.log(Level.SEVERE, "refresh_token rotated, but failed to write updated value after " + WRITE_RETRIES + " attempts; while this access_token may work, future token exchanges may fail", e);
                             } catch (Throwable e) {
                                 log.log(Level.SEVERE, "refresh_token rotated, but failed to write updated value; while this access_token may work, future token exchanges may fail", e);
                             }
@@ -453,10 +454,12 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                 try {
                     config.putConfigProperty(ConfigProperty.ACCESS_TOKEN,
                         objectMapper.writerFor(AccessTokenDto.class)
-                            .writeValueAsString(AccessTokenDto.toAccessTokenDto(accessToken)));
+                            .writeValueAsString(AccessTokenDto.toAccessTokenDto(accessToken)), WRITE_RETRIES);
                     log.log(Level.INFO, "New token stored in config");
                 } catch (JsonProcessingException e) {
                     log.log(Level.SEVERE, "Could not serialize token into JSON", e);
+                } catch (WritePropertyRetriesExhaustedException e) {
+                    log.log(Level.SEVERE, "Could not write access token to config after " + WRITE_RETRIES + " attempts", e);
                 }
             }
         }
