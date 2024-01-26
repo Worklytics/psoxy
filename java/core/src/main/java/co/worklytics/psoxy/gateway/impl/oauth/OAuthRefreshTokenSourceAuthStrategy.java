@@ -1,9 +1,6 @@
 package co.worklytics.psoxy.gateway.impl.oauth;
 
-import co.worklytics.psoxy.gateway.ConfigService;
-import co.worklytics.psoxy.gateway.LockService;
-import co.worklytics.psoxy.gateway.RequiresConfiguration;
-import co.worklytics.psoxy.gateway.SourceAuthStrategy;
+import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.utils.RandomNumberGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,7 +25,6 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -181,6 +177,9 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
     public static class TokenRefreshHandlerImpl implements OAuth2CredentialsWithRefresh.OAuth2RefreshHandler,
             RequiresConfiguration {
 
+        @VisibleForTesting
+        static final int WRITE_RETRIES = 3;
+
         @Inject
         ConfigService config;
         @Inject
@@ -208,6 +207,10 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         private static final String TOKEN_REFRESH_LOCK_ID = "oauth_refresh_token";
         private static final int MAX_TOKEN_REFRESH_ATTEMPTS = 3;
 
+        /**
+         * how long to allow for eventual consistency after write to config
+         */
+        private static final Duration ALLOWANCE_FOR_EVENTUAL_CONSISTENCY = Duration.ofSeconds(2);
 
         /**
          * how long to wait after a failed lock attempt before trying again; multiplier on the
@@ -223,13 +226,12 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
          * this includes the allowance for eventual consistency, so wait should be >= that value
          * in practice.
          */
-        private static final long WAIT_AFTER_FAILED_LOCK_ATTEMPTS = 4000L;
+        private static final Duration WAIT_AFTER_FAILED_LOCK_ATTEMPTS = ALLOWANCE_FOR_EVENTUAL_CONSISTENCY.plusSeconds(2);
 
         /**
-         * how long to allow for eventual consistency after write to config
+         * token lock duration; should be long enough to allow for token refresh + write to config
          */
-        private static final long ALLOWANCE_FOR_EVENTUAL_CONSISTENCY_SECONDS = 2L;
-
+        private static final Duration TOKEN_LOCK_DURATION = Duration.ofMinutes(2);
 
         private AccessToken cachedToken = null;
 
@@ -281,13 +283,14 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                 // only lock if we're using a shared token across processes
                 boolean lockNeeded = useSharedToken();
 
-                boolean acquired = !lockNeeded || lockService.acquire(TOKEN_REFRESH_LOCK_ID, Duration.ofMinutes(2));
+                boolean acquired = !lockNeeded || lockService.acquire(TOKEN_REFRESH_LOCK_ID, TOKEN_LOCK_DURATION);
 
                 if (acquired) {
                     tokenResponse = exchangeRefreshTokenForAccessToken();
                     token = asAccessToken(tokenResponse);
 
-                    storeSharedAccessTokenIfSupported(token);
+                    storeSharedAccessTokenIfSupported(token, lockNeeded);
+                    storeRefreshTokenIfRotated(tokenResponse);
 
                     if (isAccessTokenCacheable()) {
                         this.cachedToken = token;
@@ -295,12 +298,15 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
                     if (lockNeeded) {
                         // hold lock extra, to try to maximize the time between token refreshes
-                        Uninterruptibles.sleepUninterruptibly(ALLOWANCE_FOR_EVENTUAL_CONSISTENCY_SECONDS, TimeUnit.SECONDS);
+                        Uninterruptibles.sleepUninterruptibly(ALLOWANCE_FOR_EVENTUAL_CONSISTENCY);
                         lockService.release(TOKEN_REFRESH_LOCK_ID);
                     }
                 } else {
                     //re-try recursively, w/ linear backoff
-                    Uninterruptibles.sleepUninterruptibly(attempt * WAIT_AFTER_FAILED_LOCK_ATTEMPTS, TimeUnit.MILLISECONDS);
+                    Uninterruptibles.sleepUninterruptibly(WAIT_AFTER_FAILED_LOCK_ATTEMPTS
+                        .plusMillis(randomNumberGenerator.nextInt(250))
+                        .multipliedBy(attempt + 1));
+
                     token = refreshAccessToken(attempt + 1);
                 }
             }
@@ -320,12 +326,8 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
             payloadBuilder.addHeaders(tokenRequest.getHeaders());
 
             HttpResponse response = tokenRequest.execute();
-            CanonicalOAuthAccessTokenResponseDto tokenResponse =
-                    tokenResponseParser.parseTokenResponse(response);
 
-            storeRefreshTokenIfRotated(tokenResponse);
-
-            return tokenResponse;
+            return tokenResponseParser.parseTokenResponse(response);
         }
 
         /**
@@ -348,7 +350,9 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                         if (config.supportsWriting()) {
                             try {
                                 config.putConfigProperty(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN,
-                                    tokenResponse.getRefreshToken());
+                                    tokenResponse.getRefreshToken(), WRITE_RETRIES);
+                            } catch (WritePropertyRetriesExhaustedException e) {
+                                log.log(Level.SEVERE, "refresh_token rotated, but failed to write updated value after " + WRITE_RETRIES + " attempts; while this access_token may work, future token exchanges may fail", e);
                             } catch (Throwable e) {
                                 log.log(Level.SEVERE, "refresh_token rotated, but failed to write updated value; while this access_token may work, future token exchanges may fail", e);
                             }
@@ -451,15 +455,17 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         }
 
         @VisibleForTesting
-        void storeSharedAccessTokenIfSupported(@NonNull AccessToken accessToken) {
-            if (useSharedToken()) {
+        void storeSharedAccessTokenIfSupported(@NonNull AccessToken accessToken, boolean useSharedToken) {
+            if (useSharedToken) {
                 try {
                     config.putConfigProperty(ConfigProperty.ACCESS_TOKEN,
                         objectMapper.writerFor(AccessTokenDto.class)
-                            .writeValueAsString(AccessTokenDto.toAccessTokenDto(accessToken)));
+                            .writeValueAsString(AccessTokenDto.toAccessTokenDto(accessToken)), WRITE_RETRIES);
                     log.log(Level.INFO, "New token stored in config");
                 } catch (JsonProcessingException e) {
                     log.log(Level.SEVERE, "Could not serialize token into JSON", e);
+                } catch (WritePropertyRetriesExhaustedException e) {
+                    log.log(Level.SEVERE, "Could not write access token to config after " + WRITE_RETRIES + " attempts", e);
                 }
             }
         }

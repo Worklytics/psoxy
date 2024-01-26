@@ -133,6 +133,7 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
         assertTrue(tokenRefreshHandler.shouldRefresh(token, fixed));
     }
 
+    @SneakyThrows
     @Test
     public void serializesAccessTokenDTO() {
         OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl tokenRefreshHandler = new OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl();
@@ -148,10 +149,11 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
 
         AccessToken token = new AccessToken("my-token", Date.from(anyTime.plus(10_000L, ChronoUnit.MILLIS)));
 
-        tokenRefreshHandler.storeSharedAccessTokenIfSupported(token);
+        tokenRefreshHandler.storeSharedAccessTokenIfSupported(token, true);
 
         verify(tokenRefreshHandler.config, times(1)).putConfigProperty(eq(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.ACCESS_TOKEN),
-            eq("{\"token\":\"my-token\",\"expirationDate\":1639526410000}"));
+            eq("{\"token\":\"my-token\",\"expirationDate\":1639526410000}"),
+            eq(OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl.WRITE_RETRIES));
     }
 
     @Test
@@ -180,6 +182,7 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
         );
     }
 
+    @SneakyThrows
     @ParameterizedTest
     @MethodSource
     public void refreshTokenNotRotated(String originalToken, String newToken, boolean shouldRotate) {
@@ -195,7 +198,7 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
         exampleResponse.refreshToken = newToken;
         tokenRefreshHandler.storeRefreshTokenIfRotated(exampleResponse);
 
-        verify(tokenRefreshHandler.config, times(shouldRotate ? 1 : 0)).putConfigProperty(eq(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN), eq(newToken));
+        verify(tokenRefreshHandler.config, times(shouldRotate ? 1 : 0)).putConfigProperty(eq(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN), eq(newToken), eq(OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl.WRITE_RETRIES));
     }
 
     @Test
