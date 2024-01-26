@@ -7,6 +7,10 @@ Our `aws-host` module provides a `vpc_config` variable to specify the VPC config
 lambdas that our Terraform modules will create, analogous to the [`vpc_config`](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function#vpc_config)
 block supported by the AWS lambda terraform resource.
 
+Some caveats:
+  - API connectors on a VPC must be exposed via [API Gateway](https://aws.amazon.com/api-gateway/)
+    rather than [Function URLs](https://docs.aws.amazon.com/lambda/latest/dg/lambda-urls.html)
+
 
 
 ## Usage - with `vpc.tf`
@@ -14,8 +18,9 @@ block supported by the AWS lambda terraform resource.
 Prequisites:
  - the AWS principal (user or role) you're using to run Terraform must have permissions to manage
    VPCs, subnets, and security groups. The AWS managed policy `AmazonVPCFullAccess` provides this.
+ - all pre-requisites for the api-gateways (see [api-gateway.md](./api-gateway.md))
 
-Add the following to "psoxy" module in your `main.tf`:
+Add the following to "psoxy" module in your `main.tf` (or uncomment if already present):
 
 ```hcl
 module "psoxy" {
@@ -29,5 +34,7 @@ module "psoxy" {
 }
 ```
 
-See `vpc.tf` in our example, which includes some example VPC infra for the vpc, subnet, security
-group. Uncomment the resources in that file, and modify as you wish.
+Uncomment the relevant lines in `vpc.tf` in the same directory, and modify as you wish. This file
+provisions a VPC, subnet, and security group for use by the lambdas.
+
+
