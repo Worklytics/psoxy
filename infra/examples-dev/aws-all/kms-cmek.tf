@@ -73,29 +73,20 @@
 #      )
 #    })
 #}
+
+## concisely set S3 encryption for all buckets
+#resource "aws_s3_bucket_server_side_encryption_configuration" "bulk_buckets" {
+#  for_each = merge(
+#    { for k, v in module.psoxy.bulk_connector_instances: k => v.input_bucket } ,
+#    { for k, v in module.psoxy.bulk_connector_instances: k => v.sanitized_bucket } ,
+#  )
 #
-#resource "aws_s3_bucket_server_side_encryption_configuration" "input_bucket_encryption" {
-#  for_each = module.psoxy.bulk_connector_instances
-#
-#  bucket = each.value.input_bucket
-#
-#  rule {
-#    apply_server_side_encryption_by_default {
-#      sse_algorithm = "aws:kms"
-#      kms_master_key_id = var.project_aws_kms_key_arn
-#    }
-#  }
-#}
-#
-#resource "aws_s3_bucket_server_side_encryption_configuration" "sanitized_bucket_encryption" {
-#  for_each = module.psoxy.bulk_connector_instances
-#
-#  bucket = each.value.sanitized_bucket
+#  bucket = each.value
 #
 #  rule {
 #    apply_server_side_encryption_by_default {
-#      sse_algorithm = "aws:kms"
 #      kms_master_key_id = var.project_aws_kms_key_arn
+#      sse_algorithm     = "aws:kms"
 #    }
 #  }
 #}
