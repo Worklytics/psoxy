@@ -65,16 +65,18 @@ public interface ConfigService {
             // use the non-retry version
             throw new IllegalArgumentException("retries must be > 0");
         }
+        Exception lastException;
         do {
             try {
                 putConfigProperty(property, value);
                 return;
-            } catch (Exception ignore) {
+            } catch (Exception e) {
                 // retry - wait slightly
+                lastException = e;
                 Uninterruptibles.sleepUninterruptibly(Duration.ofMillis(150));
             }
         } while (--retries > 0);
-        throw new WritePropertyRetriesExhaustedException("Failed to write config property " + property);
+        throw new WritePropertyRetriesExhaustedException("Failed to write config property " + property, lastException);
     }
 
     /**
