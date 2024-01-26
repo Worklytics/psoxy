@@ -1,10 +1,14 @@
 package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.WritePropertyRetriesExhaustedException;
 import co.worklytics.test.MockModules;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
+import java.io.IOException;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -102,5 +106,82 @@ class CompositeConfigServiceTest {
         configService.putConfigProperty(anyProperty, anyValue);
         verify(doesNotSupportWriting, never()).putConfigProperty(eq(anyProperty), anyString());
         verify(supportsWriting, atMostOnce()).putConfigProperty(eq(anyProperty), eq(anyValue));
+    }
+
+    /**
+     * These tests mostly cover ConfigService.putConfigProperty(ConfigProperty, String, int), defined in
+     * the ConfigService interface. But tested along with the composite to check proper behavior
+     * as is the usual case.
+     */
+    @ParameterizedTest
+    @ValueSource(ints = {1, 2, 3})
+    void putConfigPropertyWithRetriesFails(int retries) {
+        ConfigService supportsWriting = MockModules.provideMock(ConfigService.class);
+        when(supportsWriting.supportsWriting()).thenReturn(true);
+        doAnswer(invocation -> {
+            throw new IOException("write failed");
+        }).when(supportsWriting).putConfigProperty(any(), anyString());
+
+        ConfigService doesNotSupportWriting = MockModules.provideMock(ConfigService.class);
+        when(doesNotSupportWriting.supportsWriting()).thenReturn(false);
+
+        CompositeConfigService configService = CompositeConfigService.builder()
+            .preferred(doesNotSupportWriting)
+            .fallback(supportsWriting)
+            .build();
+
+        ConfigService.ConfigProperty anyProperty = Properties.DEFINED_IN_NEITHER;
+        String anyValue = "any-value";
+
+        assertThrows(WritePropertyRetriesExhaustedException.class, () -> configService.putConfigProperty(anyProperty, anyValue, retries));
+        verify(doesNotSupportWriting, never()).putConfigProperty(eq(anyProperty), anyString());
+        verify(supportsWriting, times(retries)).putConfigProperty(eq(anyProperty), eq(anyValue));
+    }
+
+    @Test
+    void putConfigPropertyWithNoRetriesFails() {
+        ConfigService supportsWriting = MockModules.provideMock(ConfigService.class);
+        when(supportsWriting.supportsWriting()).thenReturn(true);
+
+        ConfigService doesNotSupportWriting = MockModules.provideMock(ConfigService.class);
+        when(doesNotSupportWriting.supportsWriting()).thenReturn(false);
+
+        CompositeConfigService configService = CompositeConfigService.builder()
+            .preferred(doesNotSupportWriting)
+            .fallback(supportsWriting)
+            .build();
+
+        ConfigService.ConfigProperty anyProperty = Properties.DEFINED_IN_NEITHER;
+        String anyValue = "any-value";
+
+        assertThrows(IllegalArgumentException.class, () -> configService.putConfigProperty(anyProperty, anyValue, 0));
+        verify(doesNotSupportWriting, never()).putConfigProperty(eq(anyProperty), anyString());
+        verify(supportsWriting, never()).putConfigProperty(eq(anyProperty), eq(anyValue));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {1, 2, 3})
+    void putConfigPropertyWithRetriesWorks(int retries) {
+        ConfigService supportsWriting = MockModules.provideMock(ConfigService.class);
+        when(supportsWriting.supportsWriting()).thenReturn(true);
+
+        ConfigService doesNotSupportWriting = MockModules.provideMock(ConfigService.class);
+        when(doesNotSupportWriting.supportsWriting()).thenReturn(false);
+
+        CompositeConfigService configService = CompositeConfigService.builder()
+            .preferred(doesNotSupportWriting)
+            .fallback(supportsWriting)
+            .build();
+
+        ConfigService.ConfigProperty anyProperty = Properties.DEFINED_IN_NEITHER;
+        String anyValue = "any-value";
+
+        try {
+            configService.putConfigProperty(anyProperty, anyValue, retries);
+            verify(doesNotSupportWriting, never()).putConfigProperty(eq(anyProperty), anyString());
+            verify(supportsWriting).putConfigProperty(eq(anyProperty), eq(anyValue));
+        } catch (WritePropertyRetriesExhaustedException e) {
+           fail("shouldn't throw exception");
+        }
     }
 }
