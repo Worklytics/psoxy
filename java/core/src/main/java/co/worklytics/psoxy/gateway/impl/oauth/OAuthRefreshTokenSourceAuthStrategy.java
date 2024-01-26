@@ -304,8 +304,8 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                 } else {
                     //re-try recursively, w/ linear backoff
                     Uninterruptibles.sleepUninterruptibly(WAIT_AFTER_FAILED_LOCK_ATTEMPTS
-                        .multipliedBy(attempt + 1)
-                        .plusMillis(randomNumberGenerator.nextInt(200)));
+                        .plusMillis(randomNumberGenerator.nextInt(250))
+                        .multipliedBy(attempt + 1));
 
                     token = refreshAccessToken(attempt + 1);
                 }

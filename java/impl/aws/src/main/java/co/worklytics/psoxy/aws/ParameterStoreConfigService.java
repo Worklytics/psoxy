@@ -187,7 +187,7 @@ public class ParameterStoreConfigService implements ConfigService, LockService {
                 .build());
             // assuming two threads at the same time trying to write on a deleted parameter might
             // not get ParameterAlreadyExistsException and last one wins.
-            Uninterruptibles.sleepUninterruptibly(100 + randomNumberGenerator.nextInt(200), TimeUnit.MILLISECONDS);
+            Uninterruptibles.sleepUninterruptibly(Duration.ofMillis(100).plusMillis(randomNumberGenerator.nextInt(200)));
             // if value doesn't match what we wrote, someone else got it, race condition.
             Parameter parameter = readParameter(lockParameterName);
             return Objects.equals(lockValue, parameter.value());
