@@ -1,7 +1,6 @@
 
 # uncomment to use encryption for S3 buckets and have it work properly for Cloud Watch Logs
 
-
 #locals {
 #  # TODO: can eliminate this if test tool doesn't assume role when uploading to bucket
 #  testing_policy_statements = var.provision_testing_infra ? [
@@ -12,7 +11,7 @@
 #        "AWS": "arn:aws:iam::${var.aws_account_id}:role/${module.psoxy.caller_role_name}"
 #      },
 #      "Action": "kms:*",
-#      "Resource": "*"
+#      "Resource": var.project_aws_kms_key_arn
 #    }
 #  ] : []
 #
@@ -29,7 +28,7 @@
 #        "kms:Encrypt",
 #        "kms:GenerateDataKey",
 #      ],
-#      "Resource" : "*"
+#      "Resource" : var.project_aws_kms_key_arn
 #    }
 #  ]
 #}
@@ -50,7 +49,7 @@
 #              "AWS": "arn:aws:iam::${var.aws_account_id}:root"
 #            },
 #            "Action": "kms:*",
-#            "Resource": "*"
+#            "Resource": var.project_aws_kms_key_arn
 #          },
 #          # to use for Cloud Watch Logs
 #          {
@@ -65,7 +64,7 @@
 #              "kms:GenerateDataKey",
 #              "kms:Describe"
 #            ],
-#            "Resource" : "*"
+#            "Resource" : var.project_aws_kms_key_arn
 #          }
 #      ],
 #      local.bulk_writer_policy_statements,
