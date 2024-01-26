@@ -171,14 +171,19 @@ public class ParameterStoreConfigService implements ConfigService, LockService {
         return this.namespace + "lock_" + lockId;
     }
 
+    @VisibleForTesting
+    String lockParameterValue() {
+        Instant instant = clock.instant();
+        return String.format("locked_%d", instant.toEpochMilli());
+    }
+
     @Override
     public boolean acquire(@NonNull String lockId, @NonNull Duration expires) {
         Preconditions.checkArgument(StringUtils.isNotBlank(lockId), "lockId must be non-blank");
 
         final String lockParameterName = lockParameterName(lockId);
         try {
-            Instant instant = clock.instant();
-            String lockValue = String.format("locked_%d", instant.toEpochMilli());
+            String lockValue = lockParameterValue();
             PutParameterResponse locked = client.putParameter(PutParameterRequest.builder()
                 .name(lockParameterName)
                 .type(ParameterType.STRING)
