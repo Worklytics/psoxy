@@ -61,15 +61,6 @@ resource "aws_s3_bucket" "input" {
   }
 }
 
-resource "aws_s3_bucket_server_side_encryption_configuration" "input" {
-  bucket = aws_s3_bucket.input.bucket
-
-  rule {
-    apply_server_side_encryption_by_default {
-      sse_algorithm = "aws:kms"
-    }
-  }
-}
 
 resource "aws_s3_bucket_public_access_block" "input-block-public-access" {
   bucket = aws_s3_bucket.input.bucket
@@ -104,17 +95,6 @@ resource "aws_s3_bucket" "sanitized" {
   }
 }
 
-resource "aws_s3_bucket_server_side_encryption_configuration" "sanitized" {
-  bucket = aws_s3_bucket.sanitized.bucket
-
-  rule {
-    apply_server_side_encryption_by_default {
-      sse_algorithm = "aws:kms"
-    }
-  }
-}
-
-
 resource "aws_s3_bucket_public_access_block" "sanitized" {
   bucket = aws_s3_bucket.sanitized.bucket
 
@@ -123,7 +103,6 @@ resource "aws_s3_bucket_public_access_block" "sanitized" {
   restrict_public_buckets = true
   ignore_public_acls      = true
 }
-
 
 resource "aws_s3_bucket_lifecycle_configuration" "expire_sanitized_files" {
   bucket = aws_s3_bucket.sanitized.bucket
