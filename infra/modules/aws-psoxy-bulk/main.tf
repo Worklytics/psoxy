@@ -3,7 +3,6 @@
 # is provisioned, and that's implicit in the provider - so we should just infer from the provider
 data "aws_region" "current" {}
 
-
 resource "random_string" "bucket_suffix" {
   length  = 8
   lower   = true
@@ -105,11 +104,6 @@ resource "aws_s3_bucket" "sanitized" {
   }
 }
 
-moved {
-  from = aws_s3_bucket.output
-  to   = aws_s3_bucket.sanitized
-}
-
 resource "aws_s3_bucket_server_side_encryption_configuration" "sanitized" {
   bucket = aws_s3_bucket.sanitized.bucket
 
@@ -120,10 +114,6 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "sanitized" {
   }
 }
 
-moved {
-  from = aws_s3_bucket_server_side_encryption_configuration.output
-  to   = aws_s3_bucket_server_side_encryption_configuration.sanitized
-}
 
 resource "aws_s3_bucket_public_access_block" "sanitized" {
   bucket = aws_s3_bucket.sanitized.bucket
@@ -134,10 +124,6 @@ resource "aws_s3_bucket_public_access_block" "sanitized" {
   ignore_public_acls      = true
 }
 
-moved {
-  from = aws_s3_bucket_public_access_block.output-block-public-access
-  to   = aws_s3_bucket_public_access_block.sanitized
-}
 
 resource "aws_s3_bucket_lifecycle_configuration" "expire_sanitized_files" {
   bucket = aws_s3_bucket.sanitized.bucket
@@ -150,7 +136,6 @@ resource "aws_s3_bucket_lifecycle_configuration" "expire_sanitized_files" {
     }
   }
 }
-
 
 resource "aws_lambda_permission" "allow_input_bucket" {
   statement_id  = "AllowExecutionFromS3Bucket"
@@ -170,7 +155,6 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
 
   depends_on = [aws_lambda_permission.allow_input_bucket]
 }
-
 
 # the lambda function needs to get single objects from the input bucket
 resource "aws_iam_policy" "input_bucket_getObject_policy" {
@@ -229,19 +213,9 @@ resource "aws_iam_policy" "sanitized_bucket_write_policy" {
   }
 }
 
-moved {
-  from = aws_iam_policy.output_bucket_write_policy
-  to   = aws_iam_policy.sanitized_bucket_write_policy
-}
-
 resource "aws_iam_role_policy_attachment" "write_policy_for_sanitized_bucket" {
   role       = module.psoxy_lambda.iam_role_for_lambda_name
   policy_arn = aws_iam_policy.sanitized_bucket_write_policy.arn
-}
-
-moved {
-  from = aws_iam_role_policy_attachment.write_policy_for_output_bucket
-  to   = aws_iam_role_policy_attachment.write_policy_for_sanitized_bucket
 }
 
 # proxy caller (data consumer) needs to read (both get and list objects) from the output bucket
@@ -274,10 +248,7 @@ resource "aws_iam_policy" "sanitized_bucket_read" {
   }
 }
 
-moved {
-  from = aws_iam_policy.output_bucket_read
-  to   = aws_iam_policy.sanitized_bucket_read
-}
+
 
 locals {
   accessor_role_names = concat([var.api_caller_role_name], var.sanitized_accessor_role_names)
