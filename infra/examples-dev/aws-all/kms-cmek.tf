@@ -1,7 +1,18 @@
 
 # uncomment to use encryption for S3 buckets and have it work properly for Cloud Watch Logs
 
+# this file sets up necessary stuff for S3 custom encryption (as opposed to AWS default) with a
+# architecture style that is more 'proper' Terraform - eg, composition of resources.
+
+#resource "aws_kms_key" "example_key" {
+#  description = "key for encrypting S3 buckets"
+#}
+#
+#
+#
 #locals {
+#  key_arn = aws_kms_key.example_key.arn # alternatively, use ar.project_aws_kms_key_arn
+#
 #  # TODO: can eliminate this if test tool doesn't assume role when uploading to bucket
 #  testing_policy_statements = var.provision_testing_infra ? [
 #    {
@@ -11,7 +22,7 @@
 #        "AWS": "arn:aws:iam::${var.aws_account_id}:role/${module.psoxy.caller_role_name}"
 #      },
 #      "Action": "kms:*",
-#      "Resource": var.project_aws_kms_key_arn
+#      "Resource": local.key_arn
 #    }
 #  ] : []
 #
@@ -28,13 +39,27 @@
 #        "kms:Encrypt",
 #        "kms:GenerateDataKey",
 #      ],
-#      "Resource" : var.project_aws_kms_key_arn
+#      "Resource" : local.key_arn
+#    }
+#  ]
+#  # for bulk case, proxy caller role must be able to READ from the sanitized buckets, requiring
+#  # decrypt permission for the key
+#  proxy_caller_policy_statements = [
+#    for instance in module.psoxy.bulk_connector_instances : {
+#      "Effect" : "Allow",
+#      "Principal" : {
+#        "AWS" : module.psoxy.caller_role_arn
+#      },
+#      "Action" : [
+#        "kms:Decrypt",
+#      ],
+#      "Resource" : aws_kms_key.example_key.arn
 #    }
 #  ]
 #}
 #
 #resource "aws_kms_key_policy" "psoxy" {
-#  key_id = var.project_aws_kms_key_arn
+#  key_id = local.key_arn
 #  policy = jsonencode(
 #    {
 #      "Version" : "2012-10-17",
@@ -49,7 +74,7 @@
 #              "AWS": "arn:aws:iam::${var.aws_account_id}:root"
 #            },
 #            "Action": "kms:*",
-#            "Resource": var.project_aws_kms_key_arn
+#            "Resource": local.key_arn
 #          },
 #          # to use for Cloud Watch Logs
 #          {
@@ -64,15 +89,16 @@
 #              "kms:GenerateDataKey",
 #              "kms:Describe"
 #            ],
-#            "Resource" : var.project_aws_kms_key_arn
+#            "Resource" : local.key_arn
 #          }
 #      ],
 #      local.bulk_writer_policy_statements,
-#      local.testing_policy_statements
+#      local.testing_policy_statements,
+#      local.proxy_caller_policy_statements
 #      )
 #    })
 #}
-
+#
 ## concisely set S3 encryption for all buckets
 #resource "aws_s3_bucket_server_side_encryption_configuration" "bulk_buckets" {
 #  for_each = merge(
@@ -84,7 +110,7 @@
 #
 #  rule {
 #    apply_server_side_encryption_by_default {
-#      kms_master_key_id = var.project_aws_kms_key_arn
+#      kms_master_key_id = local.key_arn
 #      sse_algorithm     = "aws:kms"
 #    }
 #  }
