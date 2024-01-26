@@ -4,16 +4,25 @@ locals {
 
 resource "aws_vpc" "main" {
   cidr_block = local.cidr_block
+
+  tags = {
+    environment_name = var.environment_name
+  }
 }
 
 resource "aws_subnet" "main" {
   vpc_id     = aws_vpc.main.id
   cidr_block = local.cidr_block
+
+  tags = {
+    environment_name = var.environment_name
+  }
 }
 
+
 resource "aws_security_group" "main" {
-  name        = "psoxy"
-  description = "Security group for psoxy"
+  name        = "${var.environment_name}"
+  description = "Security group for ${var.environment_name} deployment of Psoxy"
   vpc_id      = aws_vpc.main.id
 
   # allow HTTPS inbound from any source
