@@ -58,12 +58,12 @@
 #  ]
 #}
 #
-#resource "aws_kms_key_policy" "psoxy" {
+#resource "aws_kms_key_policy" "proxy" {
 #  key_id = local.key_arn
 #  policy = jsonencode(
 #    {
 #      "Version" : "2012-10-17",
-#      "Id" : "psoxy-key-policy",
+#      "Id" : "proxy-key-policy",
 #      "Statement" : concat(
 #        [
 #          # to allow Terraform to manage the key
