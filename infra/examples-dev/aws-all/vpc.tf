@@ -1,7 +1,15 @@
+
+# locals that function like variables, but without tedium of declaring them in a separate file
 locals {
+
   cidr_block = "10.0.0.0/16"
+
+  # must pick one that supports arm64 lambdas (which apparently is not all of them)
+  availability_zone = "us-east-1a"
 }
 
+
+## actual logic
 resource "aws_vpc" "main" {
   cidr_block = local.cidr_block
 
@@ -11,8 +19,9 @@ resource "aws_vpc" "main" {
 }
 
 resource "aws_subnet" "main" {
-  vpc_id     = aws_vpc.main.id
-  cidr_block = local.cidr_block
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = local.cidr_block
+  availability_zone = local.availability_zone
 
   tags = {
     environment_name = var.environment_name

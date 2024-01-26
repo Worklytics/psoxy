@@ -38,3 +38,13 @@ Uncomment the relevant lines in `vpc.tf` in the same directory, and modify as yo
 provisions a VPC, subnet, and security group for use by the lambdas.
 
 
+
+## Switching back from using a VPC
+Terraform with aws provider doesn't seem to play nice with lambdas/subnets; the subnet can't be
+destroyed w/o destroying the lambda, but terraform seems unaware of this and will just wait forever.
+
+So:
+  1. destroy all your lambdas (`terraform state list | grep aws_lambda_function`; then `terraform destroy --target=` for each, remember '' as needed)
+  2. destroy the subnet `terraform destroy --target=aws_subnet.main`
+
+
