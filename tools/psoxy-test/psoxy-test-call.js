@@ -33,6 +33,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
  * @param {boolean} options.verbose - Verbose ouput
  * @param {boolean} options.saveToFile - Whether to save successful responses to a file (responses/[api-path]-[ISO8601 timestamp].json)
  * @param {string} options.method - HTTP request method
+ * @param {string} options.body - HTTP request body (JSON string, GitHub use-case)
  * @param {boolean} options.healthCheck - Run "Health Check" call against Psoxy deploy
  * @return {PsoxyResponse}
  */
@@ -45,6 +46,14 @@ export default async function (options = {}) {
     url = new URL(options.url);
   } catch (error) {
     throw new Error(`"${error.input}" is not a valid URL`, { cause: error });
+  }
+
+  if (!_.isEmpty(options.body)) {
+    try {
+      options.body = JSON.parse(options.body);
+    } catch(error) {
+      throw new Error(`Body option must be a JSON string: ${error.message}`);
+    }
   }
 
   const isAWS = aws.isValidURL(url);
