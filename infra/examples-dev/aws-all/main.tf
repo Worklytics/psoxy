@@ -61,7 +61,6 @@ locals {
   )
 }
 
-
 locals {
   bulk_connectors = merge(
     module.worklytics_connectors.enabled_bulk_connectors,
@@ -127,11 +126,11 @@ module "psoxy" {
   custom_bulk_connector_arguments = var.custom_bulk_connector_arguments
   todo_step                       = local.max_auth_todo_step
 
-  vpc_config = {
-    vpc_id             = aws_vpc.main.id
-    security_group_ids = [aws_security_group.main.id]
-    subnet_ids         = [aws_subnet.main.id]
-  }
+#  vpc_config = {
+#    vpc_id             = aws_vpc.main.id
+#    security_group_ids = [aws_security_group.main.id]
+#    subnet_ids         = [aws_subnet.main.id]
+#  }
 }
 
 ## Worklytics connection configuration
