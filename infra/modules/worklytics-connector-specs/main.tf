@@ -3,6 +3,17 @@
 # more interoperability than in a .tf file
 
 
+# initial deployment time; in effect, timestamp of first `terraform apply`; will persist into the
+# terraform state.
+# we derive various API example calls from this; if we used `timestamp()` method, the example TODOs
+# and scripts would show changes on every apply
+# see https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static
+# q: possibly better to declare this at root, and pass in as a variable? would reduce noise
+#    (one resource, instead of 3 because 'worklytics-connector-specs' is reference 3 times)
+resource "time_static" "deployment" {
+
+}
+
 locals {
 
   google_workspace_example_user  = coalesce(var.google_workspace_example_user, "REPLACE_WITH_EXAMPLE_USER@YOUR_COMPANY.COM")
@@ -218,7 +229,7 @@ locals {
       example_api_calls : [
         "/v1.0/users",
         "/v1.0/users/${var.example_msft_user_guid}/events",
-        "/v1.0/users/${var.example_msft_user_guid}/calendarView?startDateTime=2022-10-01T00:00:00Z&endDateTime=${timestamp()}",
+        "/v1.0/users/${var.example_msft_user_guid}/calendarView?startDateTime=2022-10-01T00:00:00Z&endDateTime=${time_static.deployment.id}",
         "/v1.0/users/${var.example_msft_user_guid}/mailboxSettings",
         "/v1.0/groups",
         "/v1.0/groups/{group-id}/members"
@@ -285,8 +296,8 @@ locals {
         "/beta/chats/${var.msft_teams_example_chat_guid}/messages",
         "/beta/communications/calls/${var.msft_teams_example_call_guid}",
         "/beta/communications/callRecords/${var.msft_teams_example_call_record_guid}",
-        "/beta/communications/callRecords/getDirectRoutingCalls(fromDateTime=${urlencode(timeadd(timestamp(), "-2160h"))},toDateTime=${urlencode(timestamp())})",
-        "/beta/communications/callRecords/getPstnCalls(fromDateTime=${urlencode(timeadd(timestamp(), "-2160h"))},toDateTime=${urlencode(timestamp())})",
+        "/beta/communications/callRecords/getDirectRoutingCalls(fromDateTime=${urlencode(timeadd(time_static.deployment.id, "-2160h"))},toDateTime=${urlencode(time_static.deployment.id)})",
+        "/beta/communications/callRecords/getPstnCalls(fromDateTime=${urlencode(timeadd(time_static.deployment.id, "-2160h"))},toDateTime=${urlencode(time_static.deployment.id)})",
         "/beta/users/${var.example_msft_user_guid}/onlineMeetings",
 
         "/v1.0/teams",
@@ -297,8 +308,8 @@ locals {
         "/v1.0/chats/${var.msft_teams_example_chat_guid}/messages",
         "/v1.0/communications/calls/${var.msft_teams_example_call_guid}",
         "/v1.0/communications/callRecords/${var.msft_teams_example_call_record_guid}",
-        "/v1.0/communications/callRecords/getDirectRoutingCalls(fromDateTime=${urlencode(timeadd(timestamp(), "-2160h"))},toDateTime=${urlencode(timestamp())})",
-        "/v1.0/communications/callRecords/getPstnCalls(fromDateTime=${urlencode(timeadd(timestamp(), "-2160h"))},toDateTime=${urlencode(timestamp())})",
+        "/v1.0/communications/callRecords/getDirectRoutingCalls(fromDateTime=${urlencode(timeadd(time_static.deployment.id, "-2160h"))},toDateTime=${urlencode(time_static.deployment.id)})",
+        "/v1.0/communications/callRecords/getPstnCalls(fromDateTime=${urlencode(timeadd(time_static.deployment.id, "-2160h"))},toDateTime=${urlencode(time_static.deployment.id)})",
         "/v1.0/users/${var.example_msft_user_guid}/onlineMeetings"
       ]
       external_token_todo : <<EOT
@@ -737,12 +748,12 @@ EOT
       example_api_calls : [
         "/services/data/v57.0/sobjects/Account/describe",
         "/services/data/v57.0/sobjects/ActivityHistory/describe",
-        "/services/data/v57.0/sobjects/Account/updated?start=${urlencode(timeadd(timestamp(), "-48h"))}&end=${urlencode(timestamp())}",
+        "/services/data/v57.0/sobjects/Account/updated?start=${urlencode(timeadd(time_static.deployment.id, "-48h"))}&end=${urlencode(time_static.deployment.id)}",
         "/services/data/v57.0/composite/sobjects/User?ids=${local.salesforce_example_account_id}&fields=Alias,AccountId,ContactId,CreatedDate,CreatedById,Email,EmailEncodingKey,Id,IsActive,LastLoginDate,LastModifiedDate,ManagerId,Name,TimeZoneSidKey,Username,UserRoleId,UserType",
         "/services/data/v57.0/composite/sobjects/Account?ids=${local.salesforce_example_account_id}&fields=Id,AnnualRevenue,CreatedDate,CreatedById,IsDeleted,LastActivityDate,LastModifiedDate,LastModifiedById,NumberOfEmployees,OwnerId,ParentId,Rating,Sic,Type",
         "/services/data/v57.0/query?q=SELECT%20%28SELECT%20AccountId%2CActivityDate%2CActivityDateTime%2CActivitySubtype%2CActivityType%2CCallDurationInSeconds%2CCallType%2CCreatedDate%2CCreatedById%2CDurationInMinutes%2CEndDateTime%2CId%2CIsAllDayEvent%2CIsDeleted%2CIsHighPriority%2CIsTask%2CLastModifiedDate%2CLastModifiedById%2COwnerId%2CPriority%2CStartDateTime%2CStatus%2CWhatId%2CWhoId%20FROM%20ActivityHistories%20ORDER%20BY%20LastModifiedDate%20DESC%20NULLS%20LAST%29%20FROM%20Account%20where%20id%3D%27${local.salesforce_example_account_id}%27",
-        "/services/data/v57.0/query?q=SELECT+Alias,AccountId,ContactId,CreatedDate,CreatedById,Email,EmailEncodingKey,Id,IsActive,LastLoginDate,LastModifiedDate,ManagerId,Name,TimeZoneSidKey,Username,UserRoleId,UserType+FROM+User+WHERE+LastModifiedDate+%3E%3D+${urlencode(timeadd(timestamp(), "-72h"))}+AND+LastModifiedDate+%3C+${urlencode(timestamp())}+ORDER+BY+LastModifiedDate+DESC+NULLS+LAST",
-        "/services/data/v57.0/query?q=SELECT+Id,AnnualRevenue,CreatedDate,CreatedById,IsDeleted,LastActivityDate,LastModifiedDate,LastModifiedById,NumberOfEmployees,OwnerId,ParentId,Rating,Sic,Type+FROM+Account+WHERE+LastModifiedDate+%3E%3D+${urlencode(timeadd(timestamp(), "-72h"))}+AND+LastModifiedDate+%3C+${urlencode(timestamp())}+ORDER+BY+LastModifiedDate+DESC+NULLS+LAST"
+        "/services/data/v57.0/query?q=SELECT+Alias,AccountId,ContactId,CreatedDate,CreatedById,Email,EmailEncodingKey,Id,IsActive,LastLoginDate,LastModifiedDate,ManagerId,Name,TimeZoneSidKey,Username,UserRoleId,UserType+FROM+User+WHERE+LastModifiedDate+%3E%3D+${urlencode(timeadd(time_static.deployment.id, "-72h"))}+AND+LastModifiedDate+%3C+${urlencode(time_static.deployment.id)}+ORDER+BY+LastModifiedDate+DESC+NULLS+LAST",
+        "/services/data/v57.0/query?q=SELECT+Id,AnnualRevenue,CreatedDate,CreatedById,IsDeleted,LastActivityDate,LastModifiedDate,LastModifiedById,NumberOfEmployees,OwnerId,ParentId,Rating,Sic,Type+FROM+Account+WHERE+LastModifiedDate+%3E%3D+${urlencode(timeadd(time_static.deployment.id, "-72h"))}+AND+LastModifiedDate+%3C+${urlencode(time_static.deployment.id)}+ORDER+BY+LastModifiedDate+DESC+NULLS+LAST"
       ]
       external_token_todo : <<EOT
   Before running the example, you have to populate the following variables in terraform:

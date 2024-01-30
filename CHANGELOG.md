@@ -21,6 +21,9 @@ Changes to be including in future/planned release notes will be added here.
   - keys/salts per value kind (PII, item id, etc)
 
 ## [0.4.46](https://github.com/Worklytics/psoxy/release/tag/v0.4.46)
+  - you'll see several `timestamp_static` resources provisioned by terraform; these are simply
+    timestamps persisted into state. various example API calls in TODOs/tests are derived from these.
+    using persistent value avoids showing changes on every plan/apply.
   - AWS:
     - you'll see encryption config for buckets created by the proxy DESTROYED in your plan. This is
       actually a no-op, as these were actually just setting default encryption; per Terraform docs,
