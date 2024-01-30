@@ -93,7 +93,7 @@ function getCommonHTTPHeaders(options = {}) {
  * @param {Object} body
  * @return {Promise}
  */
-function requestWrapper(url, method = 'GET', headers, body) {
+function requestWrapper(url, method = 'GET', headers, body = {}) {
   url = typeof url === 'string' ? new URL(url) : url;
   const params = url.searchParams.toString();
   const responseBody = [];
