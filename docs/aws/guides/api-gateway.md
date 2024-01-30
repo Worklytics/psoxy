@@ -1,4 +1,4 @@
-# Using API Gateway (V2)
+# Using API Gateway (V2) - alpha
 
 Some organizations require use of API Gateway. This is not the default approach for Psoxy since
 AWS added support for Lambda Function URLs (March 2022), which are a simpler and more direct way
@@ -6,6 +6,15 @@ to expose lambdas via HTTPS.
 
 Nonetheless, should you wish to use API Gateway we provide **alpha** support for this. It is needed
 if you wish to put your Lambda functions on a VPC (See `lambdas-on-vpc.md`).
+
+In particular:
+  - IAM policy that allows api gateway methods to be invoked by the proxy caller role is defined once, using wildcards,
+    and exposes GET/HEAD/POST methods for all resources.  While methods are further constrained by routes and the proxy
+    rules themselves, this could be another enforcement point at the infrastructure level - at expense of N policies +
+    attachments in your terraform plan instead of 1.
+  - proxy instances exposed as lambda function urls have 55s timeout, but API Gateway seems to support 30s as max - so
+    this may cause timeouts in certain APIs
+
 
 ## Usage
 Prequisites:

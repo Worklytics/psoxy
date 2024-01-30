@@ -80,10 +80,7 @@ resource "aws_apigatewayv2_integration" "map" {
   integration_method     = "POST"
   integration_uri        = module.psoxy_lambda.function_arn
   payload_format_version = "2.0"
-
-  # q: do we need to specify this?? what's the default?
-  # docs saw it can be 30000 max, but ideally we'd get ~55 or longer
-  timeout_milliseconds   = 30000
+  timeout_milliseconds   = 30000 # ideally would be 55 or 60, but docs say limit is 30s
 }
 
 resource "aws_apigatewayv2_route" "methods" {
