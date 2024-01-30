@@ -10,6 +10,11 @@ block supported by the AWS lambda terraform resource.
 Some caveats:
   - API connectors on a VPC must be exposed via [API Gateway](https://aws.amazon.com/api-gateway/)
     rather than [Function URLs](https://docs.aws.amazon.com/lambda/latest/dg/lambda-urls.html)
+  - as of v0.4.46, we've seen requests to lambdas on VPCs timing out for some time after initial
+    deployment; we've seen this apparently resolve on its own after a few minutes, but it's not
+    what's happening.
+
+
 
 
 
