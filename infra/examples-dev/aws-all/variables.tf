@@ -186,7 +186,7 @@ variable "custom_api_connector_rules" {
   default     = {}
 }
 
-variable "use_api_gateway" {
+variable "use_api_gateway_v2" {
   type        = bool
   description = "whether to use API Gateway (v2); if not lambdas exposed via function URLs."
   default     = false

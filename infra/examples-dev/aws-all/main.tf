@@ -116,7 +116,7 @@ module "psoxy" {
   function_env_kms_key_arn       = var.project_aws_kms_key_arn
   logs_kms_key_arn               = var.project_aws_kms_key_arn
   aws_ssm_key_id                 = var.project_aws_kms_key_arn
-  use_api_gateway                = var.use_api_gateway
+  use_api_gateway_v2             = var.use_api_gateway_v2
 
   bulk_sanitized_expiration_days  = var.bulk_sanitized_expiration_days
   bulk_input_expiration_days      = var.bulk_input_expiration_days

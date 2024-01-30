@@ -23,7 +23,7 @@ Prequisites:
 
 Add the following to your `terraform.tfvars` file:
 ```hcl
-use_api_gateway=true
+use_api_gateway_v2=true
 ```
 
 Then `terraform apply` should create of API gateway-related resources, including policies/etc; and
