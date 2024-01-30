@@ -269,7 +269,7 @@ output "pseudonym_salt" {
 }
 
 output "api_gateway_v2" {
-  # NOTE: filled based on `var.use_api_gateway`, which is sufficient for Terraform to understand
+  # NOTE: filled based on `var.use_api_gateway_v2`, which is sufficient for Terraform to understand
   # pre-apply that it's going to have a non-null value
   value = var.use_api_gateway_v2 ? merge(
     {
