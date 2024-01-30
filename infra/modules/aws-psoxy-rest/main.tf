@@ -83,12 +83,11 @@ resource "aws_apigatewayv2_integration" "map" {
 
   # q: do we need to specify this?? what's the default?
   # docs saw it can be 30000 max, but ideally we'd get ~55 or longer
-  # timeout_milliseconds   = 30000
+  timeout_milliseconds   = 30000
 }
 
 resource "aws_apigatewayv2_route" "methods" {
-  # TODO: allow configuration of methods
-  for_each = toset(local.use_api_gateway ? ["GET", "HEAD"] : [])
+  for_each = toset(local.use_api_gateway ? var.http_methods : [])
 
   api_id             = var.api_gateway.id
   route_key          = "${each.key} /${module.psoxy_lambda.function_name}/{proxy+}"

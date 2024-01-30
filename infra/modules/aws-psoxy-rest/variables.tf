@@ -202,6 +202,13 @@ variable "api_gateway" {
   default     = null
 }
 
+variable "http_methods" {
+  type        = list(string)
+  description = "HTTP methods to expose; has no effect unless api_gateway is also provided"
+  default     = ["HEAD", "GET", "POST"]
+}
+
+
 variable "todo_step" {
   type        = number
   description = "of all todos, where does this one logically fall in sequence"
