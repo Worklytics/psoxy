@@ -27,7 +27,7 @@ locals {
   arn_for_test_calls = var.api_caller_role_arn
 
   # helper to clarify conditionals throughout
-  use_api_gateway = var.apigateway != null
+  use_api_gateway = var.api_gateway != null
 }
 
 module "psoxy_lambda" {
@@ -74,7 +74,7 @@ resource "aws_lambda_function_url" "lambda_url" {
 resource "aws_apigatewayv2_integration" "map" {
   count = local.use_api_gateway ? 1 : 0
 
-  api_id                 = var.apigateway.id
+  api_id                 = var.api_gateway.id
   integration_type       = "AWS_PROXY"
   connection_type        = "INTERNET"
   integration_method     = "POST"
@@ -90,7 +90,7 @@ resource "aws_apigatewayv2_route" "methods" {
   # TODO: allow configuration of methods
   for_each = toset(local.use_api_gateway ? ["GET", "HEAD"] : [])
 
-  api_id             = var.apigateway.id
+  api_id             = var.api_gateway.id
   route_key          = "${each.key} /${module.psoxy_lambda.function_name}/{proxy+}"
   authorization_type = "AWS_IAM"
   target             = "integrations/${aws_apigatewayv2_integration.map[0].id}"
@@ -108,12 +108,12 @@ resource "aws_lambda_permission" "api_gateway" {
   # The /*/*/ part allows invocation from any stage, method and resource path
   # within API Gateway REST API.
   # TODO: limit by http method here too?
-  source_arn = "${var.apigateway.execution_arn}/*/*/${module.psoxy_lambda.function_name}/{proxy+}"
+  source_arn = "${var.api_gateway.execution_arn}/*/*/${module.psoxy_lambda.function_name}/{proxy+}"
 }
 
 
 locals {
-  api_gateway_url = local.use_api_gateway ? "${var.apigateway.stage_invoke_url}/${module.psoxy_lambda.function_name}" : null
+  api_gateway_url = local.use_api_gateway ? "${var.api_gateway.stage_invoke_url}/${module.psoxy_lambda.function_name}" : null
 
   # lambda_url has trailing /, but our example_api_calls already have preceding /
   function_url = local.use_api_gateway ? null : substr(aws_lambda_function_url.lambda_url[0].function_url, 0, length(aws_lambda_function_url.lambda_url[0].function_url) - 1)

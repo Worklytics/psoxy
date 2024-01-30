@@ -190,7 +190,7 @@ variable "memory_size_mb" {
 }
 
 
-variable "apigateway" {
+variable "api_gateway" {
   type = object({
     name             = string
     id               = string
@@ -201,7 +201,6 @@ variable "apigateway" {
   description = "the API Gateway v2 instance via which to expose this instance, if any (leave `null` for none)"
   default     = null
 }
-
 
 variable "todo_step" {
   type        = number
