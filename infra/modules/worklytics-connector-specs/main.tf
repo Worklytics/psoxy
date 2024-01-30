@@ -8,6 +8,8 @@
 # we derive various API example calls from this; if we used `timestamp()` method, the example TODOs
 # and scripts would show changes on every apply
 # see https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/static
+# q: possibly better to declare this at root, and pass in as a variable? would reduce noise
+#    (one resource, instead of 3 because 'worklytics-connector-specs' is reference 3 times)
 resource "time_static" "deployment" {
 
 }
