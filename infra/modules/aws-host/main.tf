@@ -13,6 +13,9 @@ locals {
   host_platform_id    = "AWS"
   ssm_key_ids         = var.aws_ssm_key_id == null ? {} : { 0 : var.aws_ssm_key_id }
   instance_ssm_prefix = "${var.aws_ssm_param_root_path}${upper(module.env_id.id)}_"
+
+  # VPC *requires* API Gateway v2, or calls just timeout
+  use_api_gateway_v2 = var.vpc_config != null || var.use_api_gateway_v2
 }
 
 module "psoxy" {
@@ -28,7 +31,7 @@ module "psoxy" {
   install_test_tool              = var.install_test_tool
   deployment_id                  = module.env_id.id
   api_function_name_prefix       = "${lower(module.env_id.id)}-"
-  use_api_gateway_v2             = var.use_api_gateway_v2
+  use_api_gateway_v2             = local.use_api_gateway_v2
   logs_kms_key_arn               = var.logs_kms_key_arn
 }
 

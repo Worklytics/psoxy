@@ -20,6 +20,9 @@ Prequisites:
    VPCs, subnets, and security groups. The AWS managed policy `AmazonVPCFullAccess` provides this.
  - all pre-requisites for the api-gateways (see [api-gateway.md](./api-gateway.md))
 
+NOTE: if you provide `vpc_config`, the value you pass for `use_api_gateway_v2` will be ignored;
+using a VPC **requires** API Gateway v2.
+
 Add the following to "psoxy" module in your `main.tf` (or uncomment if already present):
 
 ```hcl

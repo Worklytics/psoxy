@@ -277,7 +277,7 @@ variable "lookup_table_builders" {
 
 variable "use_api_gateway_v2" {
   type        = bool
-  description = "whether to use API Gateway, or not. Only v2 supported atm."
+  description = "**alpha**. whether to use API Gateway, or not. Only v2 supported atm. Ignored if `vpc_config` is provided, bc that's incompatible with function URLs."
   default     = false
 }
 
