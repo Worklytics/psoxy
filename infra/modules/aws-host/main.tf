@@ -28,7 +28,8 @@ module "psoxy" {
   install_test_tool              = var.install_test_tool
   deployment_id                  = module.env_id.id
   api_function_name_prefix       = "${lower(module.env_id.id)}-"
-  use_api_gateway                = var.use_api_gateway
+  use_api_gateway_v2             = var.use_api_gateway_v2
+  logs_kms_key_arn               = var.logs_kms_key_arn
 }
 
 
@@ -89,7 +90,7 @@ module "api_connector" {
   oauth_scopes                          = each.value.oauth_scopes_needed
   example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
   vpc_config                            = var.vpc_config
-  apigateway                            = module.psoxy.apigateway
+  api_gateway_v2                        = module.psoxy.api_gateway_v2
 
 
   environment_variables = merge(

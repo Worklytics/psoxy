@@ -190,7 +190,7 @@ variable "memory_size_mb" {
 }
 
 
-variable "api_gateway" {
+variable "api_gateway_v2" {
   type = object({
     name             = string
     id               = string
