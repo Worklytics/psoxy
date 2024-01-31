@@ -307,13 +307,12 @@ locals {
   role_option_for_tests = var.aws_role_to_assume_when_testing == null ? "" : "-r ${var.aws_role_to_assume_when_testing}"
   todo_brief            = <<EOT
 ## Test ${var.instance_id}
-Check that the Psoxy works as expected and it transforms the files of your input bucket following
+Check that the Psoxy works as expected, and it transforms the files of your input bucket following
 the rules you have defined:
 
 ```shell
 node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f ${local.example_file} ${local.role_option_for_tests} -d AWS -i ${aws_s3_bucket.input.bucket} -o ${aws_s3_bucket.sanitized.bucket} -re ${data.aws_region.current.id}
 ```
-
 EOT
 
   todo_content = <<EOT
@@ -333,10 +332,8 @@ ${local.command_npm_install}
 
 ${local.todo_brief}
 
-Check that the Psoxy works as expected and it transforms the files of your input bucket
-following the rules you have defined.
-
-Notice that the rest of the options should match your Psoxy configuration.
+Notice that the rest of the options passed as argument to the script should match your Psoxy
+configuration.
 
 (*) Check supported formats in [Bulk Data Imports Docs](https://app.worklytics.co/docs/hris-import)
 

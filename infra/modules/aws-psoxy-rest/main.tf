@@ -167,7 +167,7 @@ ${local.command_cli_call} -u ${local.proxy_endpoint_url} --health-check
 Then, based on your configuration, these are some example test calls you can try (YMMV):
 
 ```shell
-${coalesce(join("\n", local.command_test_calls), "cd docs/example-api-calls/")}
+${join("\n", local.command_test_calls)}
 ```
 
 Feel free to try the above calls, and reference to the source's API docs for other parameters /
@@ -177,7 +177,7 @@ endpoints to experiment with.
 As an alternative, we offer a simpler bash script for testing that wraps `awscurl` + `jq`, if those
 are installed on your system:
 ```shell
-${coalesce(join("\n", local.awscurl_test_calls), "cd docs/example-api-calls/")}
+${join("\n", local.awscurl_test_calls)}
 ```
 
 ### Check logs (AWS CloudWatch)
